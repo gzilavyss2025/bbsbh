@@ -1,6 +1,7 @@
-# src/screens/player/next — the new player page and its modules (#1884)
+# src/screens/player/next — the player page and its modules (#1884)
 
-`/player/{id}?look=new`, beside the live page. Plan: `docs/player-redesign.md`.
+`/player/{id}` since the swap (#1898); `/stats`, `/analytics` and `/history` scroll to
+their sections (`tab` prop). Plan: `docs/player-redesign.md`.
 `PlayerNextPage.jsx` draws the hero, the tiles, the jump bar, and maps over
 `sections.js`. `Slot.jsx` is the stamped Card around one module. **A module never edits
 `sections.js`, `Slot.jsx` or the page.**
@@ -23,9 +24,8 @@ suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul
 
 `top/` holds three page-level cards that are NOT slots: `StatusBanners` and `HeaderExtras` (nickname,
 prospect pills, school, OVR bars) wrap the hero, `OverviewExtras` (rank chips, postseason, other
-levels) sits under the tiles (#1884, TbdWire "top"). Each is a plain stamped Card with the live
-page's content and hides when it has none. The banner text is `../statusBanners.js`, shared with the
-live hub.
+levels) sits under the tiles (#1884, TbdWire "top"). Each is a plain stamped Card with the old
+page's content and hides when it has none. The banner text is `../statusBanners.js`.
 
 ## The module contract
 

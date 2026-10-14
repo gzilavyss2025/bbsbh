@@ -1,6 +1,7 @@
 # Player page redesign: the plan
 
-Status: **spec, waiting for Gary's review** (2026-10-13). Nothing here is built.
+Status: **phase 6 done** (2026-10-14, #1898): `/player/{id}` serves the new page and the
+old tab code is deleted. Phase 7 is next.
 
 This plan moves the batter and pitcher pages to a new look. Later, the rest of the
 site moves to the same look. The player page is the first page, and its shared parts
@@ -92,7 +93,7 @@ ADR-0057 addresses; the Money band decision from #928; the file and directory ca
 | 3 | Shared parts | The tokens and parts in section 3, shown in `/design-lab` at 390 and 1180 px. |
 | 4 | Hidden page | The new page at an unlisted address: hero, stat tiles, jump bar, for a batter and a pitcher. |
 | 5 | Modules | One issue per designed module (section 6), each blocked by its data issue. Then the TBD sections, ported with today's content. |
-| 6 | Swap | `/player/{id}` serves the new page. `/stats`, `/analytics` and `/history` scroll to their sections, so old links work. Then delete the old tab code. |
+| 6 | Swap (done, #1898) | `/player/{id}` serves the new page. `/stats`, `/analytics` and `/history` scroll to their sections, so old links work. Then delete the old tab code. |
 | 7 | Follow-ups | One redesign issue per TBD section. The team page (#1107) is rebuilt on the same parts. |
 
 Before the swap, Gary checks screenshots of four edge pages: a two-way player (Ohtani,

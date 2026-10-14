@@ -327,13 +327,6 @@ const SPLITS = [
   ['L', 'vs LHP'],
 ]
 
-// The scopes, in the order the control shows them.
-export const SCOPES = [
-  ['R', 'Regular'],
-  ['P', 'Postseason'],
-  ['A', 'All'],
-]
-
 // The scope a card can actually show for a view. The reader's pick lives in state
 // and outlasts a season change; the new season may carry no October balls (no
 // `scoped`), and the card is then the regular one. Report Regular for it too.

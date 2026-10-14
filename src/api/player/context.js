@@ -1,11 +1,11 @@
-// The player hub's shared fetch vocabulary — the pieces MORE THAN ONE tab
-// loader genuinely needs, and nothing else.
+// The player page's shared fetch vocabulary — the pieces MORE THAN ONE loader
+// genuinely needs, and nothing else.
 //
-// The player page is four real routes (`/player/{id}`, `/stats`, `/analytics`,
-// `/history`) and each one loads ONLY its own data, the same rule the team hub
-// keeps (ADR-0034, src/screens/team/data/). The loaders in this directory were
-// split out of the old single `loadPlayer`, so they read as that function's
-// sections rather than as new code; what changed is WHO fetches what.
+// The page was four tab routes, each loading only its own data (ADR-0034's
+// rule, applied one page over). Since the swap (#1898) it is one scroll, and
+// each slot's module loads its own data when it comes near
+// (src/screens/player/next/CLAUDE.md). Read "tab" below as "module": the rules
+// did not change.
 //
 // Three rules govern this directory:
 //

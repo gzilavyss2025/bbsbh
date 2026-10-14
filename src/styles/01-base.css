@@ -101,13 +101,6 @@
      - the research diary's body copy — `.researchdiary .caps-exempt` (the one
        long-form reading page in the app; headings, labels, table headers and
        badges all stay shouted, same split as the Team Score modal above)
-     - the Contract card's regime sentence and its prose foot line —
-       `.contractcard__sentence`, `.contractcard__foot` (the eyebrow, pill,
-       runway labels and ticker all stay uppercase, same shouted-heading/
-       natural-case-body split as the Team Score modal above)
-     - the Contract history ledger's sub-line — `.cthist__note` (the kind, the
-       year, the club, the value rail and the match badge all stay uppercase,
-       the same split one more time)
      - Express Lane's sentences — the entry step's lede, section notes and
        consent (`.xl-entry__note`, `.xl-entry__hint`, `.xl-entry__consent`, in
        77a); the film band's messages `.xl-film__msg` and the pre-roll's

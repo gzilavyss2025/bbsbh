@@ -35,28 +35,15 @@ function seasonSegment(base, { seasonYear, vs } = {}) {
   const compare = seasonYear !== 'all' && vs != null && vs !== seasonYear ? vs : null
   return { path, vs: compare }
 }
-// The pitch scope (#1503): `?scope=post|all`, on the player Analytics tab and
-// on /abs-challenges (#1514). Regular is the bare address, so it is never
-// written and a value we do not know is dropped.
+// The pitch scope (#1503): `?scope=post|all`, on /abs-challenges (#1514).
+// Regular is the bare address, so it is never written and a value we do not
+// know is dropped.
 const PITCH_SCOPES = new Set(['post', 'all'])
-export const pitchScopeOf = (v) => (PITCH_SCOPES.has(v) ? v : null)
+const pitchScopeOf = (v) => (PITCH_SCOPES.has(v) ? v : null)
 
-// The scope the COMPARE season's Pitches card loads under: the one the main card
-// landed on, so the two never differ. On the current season the control has
-// already collapsed a man with no October pitches to Regular (`shelfScope`). On a
-// picked past season the shelf serves Regular when that season has no postseason,
-// whatever was saved, so follow what it served; null while it is still loading.
-export function vsPitchScope({ picked, shelfScope, shelfLoading = false, shelfServed }) {
-  if (picked == null) return shelfScope
-  if (shelfLoading) return null
-  return shelfServed ?? 'reg'
-}
-
-// `query` is a query the address already carries ('?d=…&s=…', a player
-// page's cutoff hints); `vs` joins it.
-export function seasonPath(base, season, query = '') {
+export function seasonPath(base, season) {
   const { path, vs } = seasonSegment(base, season)
-  const q = new URLSearchParams(query.replace(/^\?/, ''))
+  const q = new URLSearchParams()
   if (vs != null) q.set('vs', String(vs))
   const scope = pitchScopeOf(season?.scope)
   if (scope) q.set('scope', scope)
@@ -67,10 +54,6 @@ export function seasonPath(base, season, query = '') {
 // The season views (#1202), or null for any other address. lib/route.js
 // calls this before its own branches. A bare address keeps the exact shape it
 // had before #1202; a season segment or `?vs=` only adds keys.
-//
-// The player hub's Analytics tab is the one season view on the hub: its
-// season cards read the season stores. Its route keeps the hub's id, cutoff
-// and level, as lib/route.js's PLAYER_TAB_ROUTES branch builds them.
 // `standings` and `postseason-race` take a season too ('/standings/2024') but no
 // `vs`: one year's table is not compared with another's here.
 const SEASON_PAGES = {
@@ -80,20 +63,11 @@ const SEASON_PAGES = {
   standings: 'standings',
   'postseason-race': 'postseason-race',
 }
-export function parseSeasonRoute(parts, q, { asOf, sportId, idFromSlug }) {
-  const [head, second, third, fourth] = parts
+export function parseSeasonRoute(parts, q, { idFromSlug }) {
+  const [head, second, third] = parts
   const scope = pitchScopeOf(q.get('scope'))
   if (parts.length <= 2 && SEASON_PAGES[head]) return { name: SEASON_PAGES[head], ...(scope && { scope }), ...seasonParams(second, q) }
   if ((parts.length === 2 || parts.length === 3) && head === 'umpire')
     return { name: 'umpire', id: idFromSlug(second), ...seasonParams(third, q) }
-  if ((parts.length === 3 || parts.length === 4) && head === 'player' && third === 'analytics')
-    return {
-      name: 'player-analytics',
-      id: idFromSlug(second),
-      asOf,
-      sportId,
-      ...(scope && { scope }),
-      ...seasonParams(fourth, q),
-    }
   return null
 }

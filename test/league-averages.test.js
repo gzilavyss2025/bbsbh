@@ -188,17 +188,3 @@ test('the shipped file has no clock, starts in 1901 and stays small', () => {
     prev = { year, k: row.k }
   }
 })
-
-// --- the table cell -------------------------------------------------------
-const { vsLeague } = await import('../src/api/player/leagueAverages.js')
-
-test('vsLeague prints a signed gap: .000 for AVG, 0.00 for ERA, a dash when either side is missing', () => {
-  assert.equal(vsLeague('.282', 0.248, 'hitting'), '+.034')
-  assert.equal(vsLeague('.236', 0.248, 'hitting'), '-.012')
-  assert.equal(vsLeague('3.48', 3.9, 'pitching'), '-0.42')
-  assert.equal(vsLeague('4.31', 3.9, 'pitching'), '+0.41')
-  assert.equal(vsLeague('.248', 0.248, 'hitting'), '.000')
-  assert.equal(vsLeague('—', 0.248, 'hitting'), '—')
-  assert.equal(vsLeague('.282', null, 'hitting'), '—')
-  assert.equal(vsLeague('-.--', 3.9, 'pitching'), '—')
-})

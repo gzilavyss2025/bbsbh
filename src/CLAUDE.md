@@ -52,7 +52,7 @@ game's slate card) / `preview` (the poster studio, `docs/preview-poster.md`) /
 section shows. `GameRoute` resolves a route to a game object — instantly from the
 slate-provided seed, else via `resolveGame` (scans the date's slate across levels
 and matches the abbreviation slug) for cold loads / shared links. `vercel.json`
-rewrites all non-asset paths to `index.html` so those links resolve on Vercel. The unlisted new player page is `/player/{id}?look=new` (route `player-next`, `src/screens/player/next/CLAUDE.md`, #1884; `docs/player-redesign.md`).
+rewrites all non-asset paths to `index.html` so those links resolve on Vercel. The player page is `/player/{id}` (`src/screens/player/next/CLAUDE.md`, `docs/player-hub.md`); the old tab addresses scroll to their sections (#1898).
 
 ## My Tally (`/profile`, `src/screens/profile/`, ADR-0039)
 

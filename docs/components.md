@@ -16,7 +16,7 @@ Pure logic is in `lib/postseason/` (`dayShape`, `seriesFlow`, `seriesTotals`, `k
 
 ## `ovr/`
 
-The OVR card (`docs/ovr-rating.md`, "The card"). `OvrTile` is the closed tile (a button: `aria-expanded`, `aria-controls`); it owns the open state and mounts `OvrMenu` on a tap, which is the gate for the card's motion. `OvrMenu` is a dialog built like `BallparkModal` (`.scrim` through `ModalPortal`, `useDialogFocus`), with a Pill switch for a two-way player. `OvrBars` draws the attribute rows and `OvrPath` the minor leaguer's meter. `useOvr` reads the ratings for the hero (`null` means no tile and no gap). Everything the card shows comes from `lib/ovr/card.js`'s `ovrView`; tiers are one constant in `lib/ovr/tiers.js`. CSS: `styles/ovr/card.css`, motion `styles/motion/ovr.css`
+The OVR bars (`docs/ovr-rating.md`). `OvrBars` draws the attribute rows in the player page's header extras card (`screens/player/next/top/HeaderExtras.jsx`); `useOvr` reads the ratings (`null` means no bars). The tile and menu that opened them left with the old tabs (#1898). Everything the bars show comes from `lib/ovr/card.js`'s `ovrView`; tiers are one constant in `lib/ovr/tiers.js`. CSS: `styles/ovr/card.css`
 
 ## `gamehud/`
 

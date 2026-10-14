@@ -91,7 +91,6 @@ const ContractIdentityReviewPage = lazyNamed(
 )
 const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
 const LogoSheet = lazyNamed(() => import('./screens/LogoSheet.jsx'), 'LogoSheet')
-const PlayerPage = lazyNamed(() => import('./screens/PlayerPage.jsx'), 'PlayerPage')
 const PlayerNextPage = lazyNamed(() => import('./screens/player/next/PlayerNextPage.jsx'), 'PlayerNextPage')
 const MorePage = lazyNamed(() => import('./screens/MorePage.jsx'), 'MorePage')
 const ProspectsPage = lazyNamed(() => import('./screens/ProspectsPage.jsx'), 'ProspectsPage')
@@ -140,23 +139,6 @@ const SalariesPage = lazyNamed(() => import('./screens/SalariesPage.jsx'), 'Sala
 const FoulTrackerPage = lazyNamed(
   () => import('./screens/FoulTrackerPage.jsx'),
   'FoulTrackerPage',
-)
-// The player hub's three other tabs. Each is its own route and its own loader —
-// a tab must not pull another tab's data, the same rule the team hub keeps
-// (ADR-0034). Its Overview is PlayerPage.jsx, the bare '/player/{id}', exactly
-// as TeamPage.jsx is the team hub's. Lazily loaded like every other screen, so a
-// visitor who opens one tab never downloads the other three.
-const PlayerStatsTab = lazyNamed(
-  () => import('./screens/player/PlayerStatsTab.jsx'),
-  'PlayerStatsTab',
-)
-const PlayerAnalyticsTab = lazyNamed(
-  () => import('./screens/player/PlayerAnalyticsTab.jsx'),
-  'PlayerAnalyticsTab',
-)
-const PlayerHistoryTab = lazyNamed(
-  () => import('./screens/player/PlayerHistoryTab.jsx'),
-  'PlayerHistoryTab',
 )
 const TeamPage = lazyNamed(() => import('./screens/TeamPage.jsx'), 'TeamPage')
 const TeamLeadersPage = lazyNamed(
@@ -346,11 +328,7 @@ const BARE_ROUTES = {
 // Routes whose screen takes the same three hand-offs: the id, the cutoff hint
 // and the league.
 const ID_ROUTES = {
-  player: PlayerPage,
-  'player-next': PlayerNextPage,
-  'player-stats': PlayerStatsTab,
-  'player-analytics': PlayerAnalyticsTab,
-  'player-history': PlayerHistoryTab,
+  player: PlayerNextPage,
   team: TeamPage,
   'team-leaders': TeamLeadersPage,
   'team-roster': RosterTab,
@@ -421,12 +399,12 @@ export default function App() {
   const IdPage = ID_ROUTES[route.name]
   // `seasonYear` and `vs` are a season view's season (#1202, lib/route.js's
   // seasonParams); `scope` is ?scope= (/abs-challenges reads it). Undefined on
-  // every other route, and ignored there.
+  // every other route, and ignored there. `tab` is an old player tab address (#1898).
   if (Bare) {
     content = <Bare seasonYear={route.seasonYear} vs={route.vs} scope={route.scope} />
   } else if (IdPage) {
     content = (
-      <IdPage id={route.id} asOf={route.asOf} sportId={route.sportId} seasonYear={route.seasonYear} vs={route.vs} scope={route.scope} />
+      <IdPage id={route.id} asOf={route.asOf} sportId={route.sportId} seasonYear={route.seasonYear} vs={route.vs} scope={route.scope} tab={route.tab} />
     )
   } else if (route.name === 'logos') {
     content = <LogoSheet onBack={() => go('/')} />

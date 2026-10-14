@@ -6,10 +6,10 @@ import { Pill } from '../../components/ui/control/Pill.jsx'
 // HALF TWO OF THE DESIGN LAB: every card block and pill block, drawn with its
 // REAL class name so the box on screen is the box the app ships.
 //
-// THE PER-ROUTE PARTIALS BELOW ARE WHY THIS PAGE TELLS THE TRUTH. Nine of the
+// THE PER-ROUTE PARTIALS BELOW ARE WHY THIS PAGE TELLS THE TRUTH. Seven of the
 // blocks own their base rule in a partial that src/index.css does NOT import —
 // it is loaded by the one screen that needs it (see the "Per-route partials"
-// list at the bottom of index.css). Without these imports those nine would
+// list at the bottom of index.css). Without these imports those seven would
 // render as unstyled <div>s on this page and read as "this block draws
 // nothing", which is a real verdict in the inventory for a DIFFERENT set of
 // blocks — so the page would be actively misleading about the most interesting
@@ -22,8 +22,6 @@ import { Pill } from '../../components/ui/control/Pill.jsx'
 // that the partial owning its BASE rule is imported here — the count above is
 // the thing to keep true.
 import '../../styles/26b-player-contract.css'
-import '../../styles/26c-mound-card.css'
-import '../../styles/31d-prospect-card.css'
 import '../../styles/34-postseason.css'
 import '../../styles/43-foul-tracker.css'
 import '../../styles/47-trade-deadline.css'

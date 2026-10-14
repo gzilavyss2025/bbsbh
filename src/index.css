@@ -222,7 +222,6 @@
 @import './styles/motion/playbyplay.css';
 @import './styles/motion/innings.css';
 @import './styles/motion/scorecard-lens.css';
-@import './styles/motion/ovr.css';
 @import './styles/motion/stamp-in.css';
 
 /* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
@@ -253,11 +252,8 @@
      17-identity-lab-workbench  screens/identity-lab/index.jsx (DEV-only)
      17a-identity-lab-mark-panels  screens/identity-lab/index.jsx (DEV-only)
      26a-percentile-strip     components/charts/PercentileStrip.jsx
-     26b-player-contract      components/playerstats/PlayerContractCard.jsx
-     26e-contract-history     components/player/ContractHistoryLedger.jsx
-     26f-glove-target         components/charts/GloveTarget.jsx (which also
-                              imports 26d-command-map.css directly, reusing its
-                              .cmdmap__chip pills rather than restating them)
+     26b-player-contract      screens/designlab/blocks.jsx (the .contractcard
+                              specimen; its card left with the old tabs, #1898)
      30-standings             screens/StandingsPage.jsx
      32-milestone-watch       screens/MilestoneWatchPage.jsx
      34-postseason            screens/PostseasonHistoryPage.jsx
@@ -286,7 +282,6 @@
                               components/passport/PassportBook.jsx,
                               components/passport/BookCoverPicker.jsx
      50-logbook-landing       components/account/LogbookLanding.jsx
-     51-similar-players       components/playercard/SimilarPlayerGrid.jsx
      53-umpire-tendencies     components/umpire/UmpireTendencies.jsx
      58-logbook-shelf         components/passport/LogbookShelf.jsx,
                               components/passport/BookManagementSheet.jsx,

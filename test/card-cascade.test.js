@@ -569,7 +569,6 @@ test('no band underline reads the seal', () => {
     ['system/section-head.css', '.sectionhead--band.sectionhead--house'],
     ['focus/console.css', '.gamehud--console'],
     ['69-pitch-arsenal.css', '.pitchslab__head'],
-    ['69-pitch-arsenal.css', '.pitchslab__heat'],
     ['17-identity-lab-workbench.css', '.idlab__barmock'],
     ['62-identity-admin.css', '.idlab__barmock'],
   ]
@@ -583,8 +582,8 @@ test('no band underline reads the seal', () => {
 
 // ---- 13. slice C2: the player page ----
 
-// The seventeen player-page blocks that drew their own copy of the card. Each
-// renders through Card now, one of two ways:
+// The player-page blocks that drew their own copy of the card (seventeen once;
+// the old tabs' blocks left with the swap, #1898). Each renders through Card now, one of two ways:
 //   card  the Card IS the block: it carries the block's class, and the
 //         namespace rule keeps the block's margin, padding and layout.
 //   wrap  the Card wraps the block's list or grid, which keeps its class, its
@@ -597,34 +596,18 @@ test('no band underline reads the seal', () => {
 // ball-flight popover's raised shadow. `.awards` and `.awardblk` swap the
 // frame at 740px, so they have a test of their own below.
 const C2 = [
-  { css: '26-player-page.css', sel: '.player__statgrid', jsx: ['screens/player/parts.jsx', 'components/playerstats/SplitsVsTeam.jsx'], ns: 'player__statgrid', mode: 'wrap', keep: ['background'] },
-  { css: '26-player-page.css', sel: '.player__splits', jsx: ['screens/player/PlayerHistoryTab.jsx'], ns: 'player__splits', mode: 'wrap', keep: ['background'] },
-  { css: '26-player-page.css', sel: '.vsteam__last', jsx: ['components/playerstats/SplitsVsTeam.jsx'], ns: 'vsteam__last', frame: 'ledger' },
-  { css: '26-player-page.css', sel: '.gamelog', jsx: ['components/player/GameLog.jsx'], ns: 'gamelog' },
   { css: '26-player-page.css', sel: '.milestonewatch', jsx: ['components/playerstats/MilestoneWatchCard.jsx'], ns: 'milestonewatch' },
-  { css: '26e-contract-history.css', sel: '.cthist__seasons', jsx: ['components/player/ContractHistoryLedger.jsx'], ns: 'cthist__seasons', mode: 'wrap' },
-  { css: '27-player-position-innings.css', sel: '.posinn__diamond', jsx: ['components/player/PositionInnings.jsx'], ns: 'posinn__diamond' },
-  { css: '31d-prospect-card.css', sel: '.levelprog', jsx: ['components/player/LevelProgressionCard.jsx'], ns: 'levelprog', frame: 'ledger', keep: ['border-top'] },
-  { css: '31d-prospect-card.css', sel: '.prospectcard', jsx: ['components/playerstats/ProspectCard.jsx'], ns: 'prospectcard', frame: 'ledger', keep: ['border-top'] },
-  { css: '51-similar-players.css', sel: '.simlike__link', jsx: ['components/playercard/SimilarPlayerGrid.jsx'], ns: 'simlike__link' },
   { css: '69-hit-chart.css', sel: '.hitchart', jsx: ['components/charts/HitChart.jsx'], ns: 'hitchart' },
   { css: '69-hit-chart.css', sel: '.bflight', jsx: ['components/charts/BallFlight.jsx'], ns: 'bflight', keep: ['box-shadow'] },
-  { css: '73-spray-map.css', sel: '.spray', jsx: ['components/charts/SprayMap.jsx'], ns: 'spray' },
-  // Four of these panels stack, so they are ledgers: no shadow (gamelines.css).
-  { css: 'boxlines/gamelines.css', sel: '.gamelines__rows', jsx: ['components/playerstats/GameLinesCard.jsx'], ns: 'gamelines__rows', mode: 'wrap', frame: 'ledger' },
   // .factgrid: the Card is the block and keeps its margin; the gap-rule grid
-  // is the inner .factgrid__grid. FactGrid draws both, once; eight files
-  // render a FactGrid (FACT_GRID_USERS below).
+  // is the inner .factgrid__grid. FactGrid draws both, once; the files that
+  // render a FactGrid are FACT_GRID_USERS below.
   { css: '09-team-info.css', sel: '.factgrid', jsx: ['components/ui/frame/FactGrid.jsx'], ns: 'factgrid' },
 ]
 const FACT_GRID_USERS = [
-  'components/charts/CommandMap.jsx',
-  'components/charts/SprayMap.jsx',
   'components/inning/focus/ExtrasFacts.jsx',
   'components/player/AdvancedStatsCard.jsx',
   'components/playerstats/FoulCard.jsx',
-  'components/playerstats/PitcherWorkloadCard.jsx',
-  'screens/PlayerPage.jsx',
   'screens/TeamInfo.jsx',
 ]
 
@@ -681,12 +664,8 @@ test('C2: every player-page block renders on Card, with its frame and a flush bo
 // --border-rule ground showing through 1px gaps. Card paints --surface-card,
 // so that ground moved to the grid inside the Card, and the grid draws no
 // edge, corner or shadow of its own.
-test('C2: the three gap-rule grids keep their rules inside the Card', () => {
-  const grids = [
-    ['09-team-info.css', '.factgrid__grid'],
-    ['26-player-page.css', '.player__statgrid'],
-    ['26-player-page.css', '.player__splits'],
-  ]
+test('C2: the gap-rule grid keeps its rules inside the Card', () => {
+  const grids = [['09-team-info.css', '.factgrid__grid']]
   for (const [css, sel] of grids) {
     const body = ruleBody(read(css), sel)
     assert.ok(body, `${css}: a ${sel} rule`)
@@ -700,7 +679,7 @@ test('C2: the three gap-rule grids keep their rules inside the Card', () => {
   assert.equal(decl(outer, 'display'), undefined, '.factgrid is the card now, not the grid')
 })
 
-// The Card and the grid inside it are drawn in one place, so the eight fact
+// The Card and the grid inside it are drawn in one place, so the fact
 // grids cannot drift apart: each file renders a FactGrid, never the pair.
 test('C2: every fact grid is a FactGrid: one .factgrid__grid inside one .factgrid Card', () => {
   const grid = src('components/ui/frame/FactGrid.jsx')
@@ -714,71 +693,13 @@ test('C2: every fact grid is a FactGrid: one .factgrid__grid inside one .factgri
     assert.equal(cardTags(code).filter((attrs) => namesClass(attrs, 'factgrid')).length, 0, `${rel}: no hand-built .factgrid Card`)
   }
   // The co-classes that sized the old grid now size its inner grid.
-  assert.equal(decl(ruleBody(read('73-spray-map.css'), '.spray__facts .factgrid__grid'), 'grid-template-columns'), 'repeat(4, 1fr)')
   assert.equal(decl(ruleBody(read('focus/reference.css'), '.refextras__grid .factgrid__grid'), 'grid-template-columns'), '1fr')
 })
 
-test('C2: the game log is a .gamelog Card holding a .gamelog__list', () => {
-  assert.match(src('components/player/GameLog.jsx'), /<ul className="gamelog__list">/)
-  const outer = ruleBody(read('26-player-page.css'), '.gamelog')
-  assert.equal(decl(outer, 'margin'), '8px 0 0')
-  assert.equal(decl(outer, 'list-style'), undefined)
-})
 
-// Issue #1113, comment 2: the contract ledger's "Show all" foot is a Door. It
-// keeps its one useState; the Door (a <button> with no href) draws the look.
-test('C2: the contract ledger toggle is a block Door', () => {
-  const code = src('components/player/ContractHistoryLedger.jsx')
-  assert.match(code, /import \{ Door \} from '\.\.\/ui\/control\/Door\.jsx'/)
-  assert.doesNotMatch(code, /<button[^>]*cthist__toggle/)
-  const doors = code.match(/<Door layout="block" className="cthist__toggle"/g) ?? []
-  assert.equal(doors.length, 2, 'Show all, and Show fewer')
-  const css = read('26e-contract-history.css')
-  const toggle = ruleBody(css, '.cthist__toggle')
-  for (const prop of ['border', 'border-radius', 'background', 'color', 'font-family', 'font-size', 'cursor', 'appearance']) {
-    assert.equal(decl(toggle, prop), undefined, `.cthist__toggle sets no ${prop}: the Door draws it`)
-  }
-  assert.equal(ruleBody(css, '.cthist__toggle:hover'), null)
-  assert.equal(ruleBody(css, '.cthist__toggle:focus-visible'), null)
-})
 
-test('C2: the two dossier cards are ledgers and keep their 3px accent rule', () => {
-  for (const sel of ['.levelprog', '.prospectcard']) {
-    assert.equal(decl(ruleBody(read('31d-prospect-card.css'), sel), 'border-top'), '3px solid var(--accent-primary)', sel)
-  }
-})
 
-// H2 (Gary, 2026-10-07): a prospect or level card's name is its head, a
-// SectionHead label. The old --fs-h3 title rules are gone.
-test('H2: the prospect and level cards name themselves with a label SectionHead', () => {
-  const css = read('31d-prospect-card.css')
-  assert.doesNotMatch(css, /__title/)
-  for (const rel of ['components/player/LevelProgressionCard.jsx', 'components/player/ProspectRankHistoryCard.jsx', 'components/player/family/FamilyBand.jsx', 'components/playerstats/ProspectCard.jsx']) {
-    const code = src(rel)
-    assert.match(code, /<SectionHead look="label">/, rel)
-    assert.doesNotMatch(code, /(levelprog|prospectcard)__title/, rel)
-  }
-})
 
-// The tile was a PlayerLink <button>; it is a Card link now (as="a"), a real
-// anchor, so a middle-click opens a tab. It keeps the desktop hover card that
-// PlayerLink gave it, and it takes its path and that card from the same hook
-// PlayerLink uses, so a player URL is built in one place. A row with no
-// personId is a name, not a link, as it was under PlayerLink.
-test('C2: a similar-player tile is a Card link that keeps the hover card', () => {
-  const code = src('components/playercard/SimilarPlayerGrid.jsx')
-  const tiles = cardTags(code).filter((attrs) => namesClass(attrs, 'simlike__link'))
-  assert.ok(tiles.some((attrs) => /as="a"/.test(attrs)), 'a Card link carries .simlike__link')
-  assert.ok(tiles.some((attrs) => /as="div"/.test(attrs)), 'with no id, the tile is a plain Card, not a link')
-  assert.match(code, /if \(!path\)/, 'the tile checks for a missing path before it renders a link')
-  assert.doesNotMatch(code, /<PlayerLink[^>]*simlike__link/)
-  assert.match(code, /import \{ usePlayerLink \} from '\.\.\/player\/PlayerLink\.jsx'/)
-  assert.match(code, /usePlayerLink\(/)
-  assert.doesNotMatch(code, /playerPath\(/, 'the tile builds no player URL of its own')
-  for (const body of bodiesOf(read('51-similar-players.css'), '.simlike__link:hover')) {
-    assert.equal(decl(body, 'background'), undefined, 'the interactive Card owns the hover tint')
-  }
-})
 
 // src/lib is pure data and pure functions, no React (src/lib/CLAUDE.md). The
 // hover store is the plain external store; the trigger's hook that writes to it
@@ -812,14 +733,6 @@ test('C2: the awards ledger frames the whole ledger narrow and each table wide',
   }
 })
 
-// The level card's stylesheet was loaded only by ProspectCard.jsx, so on a
-// player's History tab (where the level card renders and the prospect card
-// does not) a direct load drew the card with none of its own rules: no frame,
-// no head, no path. On Card it would have drawn the frame and still none of
-// the rest. The card now loads the partial it is drawn by.
-test('C2: the level card loads its own stylesheet', () => {
-  assert.match(src('components/player/LevelProgressionCard.jsx'), /^import '\.\.\/\.\.\/styles\/31d-prospect-card\.css'$/m)
-})
 
 // ---- 14. slice C4: the innings viewer and the game HUD ----
 
@@ -2238,16 +2151,13 @@ const H3_RENAMED = [
   // batch A: the four titles, the `__sub`, `__kicker`, `__eyebrow` and `__lede` rows
   ['awardord__hd', 'awardord__title'],
   ['coverpick__heading', 'coverpick__title'],
-  ['gamelines__heading', 'gamelines__title'],
   ['lookupdeck__heading', 'lookupdeck__title'],
-  ['cthist__sub', 'cthist__note'],
   ['leaders__sub', 'leaders__note'],
   ['mgrpage__sub', 'mgrpage__note'],
   ['psoddsmodal__sub', 'psoddsmodal__note'],
   ['rpt__sub', 'rpt__note'],
   ['searchbox__sub', 'searchbox__note'],
   ['searchoverlay__sub', 'searchoverlay__note'],
-  ['split__sub', 'split__note'],
   ['umptend__sub', 'umptend__note'],
   ['boxlines__kicker', 'boxlines__note'],
   ['scorebookstory__kicker', 'scorebookstory__note'],
@@ -2360,7 +2270,6 @@ test('H3: the held rows keep their names', () => {
   const trees = h3Trees()
   const held = [
     'wire__kicker', // not a second line (#1113)
-    'contractcard__eyebrow', // `.contractcard__note` is the optioned caption, a different line
     // two different second lines on one head: needs a decision on the grammar
     'abouthero__kicker', 'abouthero__lede', 'derbycard__eyebrow', 'derbycard__sub',
     'logbooklanding__eyebrow', 'logbooklanding__lede', 'researchdiary__eyebrow', 'researchdiary__lede',

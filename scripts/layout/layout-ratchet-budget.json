@@ -13,7 +13,7 @@
   },
   "src/styles/05-masthead-nav.css": {
     "wrap": 2,
-    "grid": 3
+    "grid": 2
   },
   "src/styles/05a-career-timeline.css": {
     "column": 1,
@@ -129,41 +129,19 @@
     "grid": 6
   },
   "src/styles/26-player-page.css": {
-    "column": 3,
-    "wrap": 4,
-    "grid": 7
+    "wrap": 2,
+    "grid": 3
   },
   "src/styles/26a-percentile-strip.css": {
     "column": 1,
     "grid": 3
   },
-  "src/styles/26b-player-contract.css": {
-    "column": 3,
-    "grid": 4
-  },
-  "src/styles/26b-recent-form.css": {
-    "wrap": 1
-  },
-  "src/styles/26c-mound-card.css": {
-    "column": 1,
-    "wrap": 2
-  },
-  "src/styles/26d-command-map.css": {
-    "wrap": 1
-  },
-  "src/styles/26e-contract-history.css": {
-    "grid": 2
-  },
-  "src/styles/26f-glove-target.css": {
-    "wrap": 1
-  },
   "src/styles/26g-command-received.css": {
     "grid": 2
   },
   "src/styles/27-player-position-innings.css": {
-    "column": 1,
     "wrap": 3,
-    "grid": 3
+    "grid": 2
   },
   "src/styles/28-team-hub.css": {
     "column": 3,
@@ -192,10 +170,6 @@
   },
   "src/styles/31c-prospect-filters.css": {
     "grid": 4
-  },
-  "src/styles/31d-prospect-card.css": {
-    "wrap": 1,
-    "grid": 6
   },
   "src/styles/31e-prospect-board.css": {
     "column": 2,
@@ -295,11 +269,6 @@
     "column": 1,
     "grid": 6
   },
-  "src/styles/51-similar-players.css": {
-    "column": 5,
-    "wrap": 1,
-    "grid": 2
-  },
   "src/styles/52-highlight-clip-card.css": {
     "column": 2
   },
@@ -375,9 +344,8 @@
     "grid": 1
   },
   "src/styles/69-pitch-arsenal.css": {
-    "column": 3,
-    "wrap": 1,
-    "grid": 5
+    "column": 1,
+    "grid": 1
   },
   "src/styles/70-contracts-grid.css": {
     "wrap": 1,
@@ -396,9 +364,6 @@
   "src/styles/72-player-hover-card.css": {
     "column": 1,
     "grid": 1
-  },
-  "src/styles/73-spray-map.css": {
-    "wrap": 2
   },
   "src/styles/74-contract-workbench.css": {
     "column": 1,
@@ -449,9 +414,6 @@
     "column": 1,
     "grid": 2
   },
-  "src/styles/boxlines/gamelines.css": {
-    "grid": 2
-  },
   "src/styles/boxlines/listdoor.css": {
     "grid": 2
   },
@@ -490,9 +452,7 @@
     "grid": 2
   },
   "src/styles/ovr/card.css": {
-    "column": 1,
-    "wrap": 2,
-    "grid": 6
+    "grid": 2
   },
   "src/styles/pitcher-card/card.css": {
     "column": 4,

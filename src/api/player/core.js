@@ -1,8 +1,7 @@
-// The player hub's shared header data — everything PlayerHubShell draws around
-// a tab's body (the hero, the four banners, the prospect pills), and NOTHING
-// else.
+// The player page's shared header data — the hero, the four banners, the
+// prospect pills (screens/player/next/), and NOTHING else.
 //
-// Every tab pays for this on top of its own loader, so it must stay cheap: the
+// Every module pays for this on top of its own loader, so it must stay cheap: the
 // two requests playerContext already makes, plus one All-Star roster, one
 // session-memoized prospect file, and — only for an unrostered player — his
 // year-by-year tables, which are the only way to say "last played in 2022".

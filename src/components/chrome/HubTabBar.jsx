@@ -4,10 +4,10 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 import { countLabel, currentSection, holdStep, scrollLeftToShow } from '../../lib/jumpbar/spy.js'
 import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
 
-// The tab bar under a hub's pinned identity header. ONE control, two callers —
-// the team hub (screens/team/TeamTabBar.jsx) and the player hub
-// (screens/player/PlayerTabBar.jsx) — so the two can never drift into two
-// different-looking tab strips. It owns the markup and the `.teamtabs` classes
+// The tab bar under a hub's pinned identity header. ONE control, two shapes —
+// the team hub's tabs (screens/team/TeamTabBar.jsx) and the player page's jump
+// bar (variant="anchor", below) — so the two can never drift into two
+// different-looking strips. It owns the markup and the `.teamtabs` classes
 // (styles/46-consent-modal.css) and nothing else; each caller supplies its own
 // tab list and its own path builder.
 //

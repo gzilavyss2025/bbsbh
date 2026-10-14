@@ -230,7 +230,6 @@
     background: var(--surface-inset);
   }
 
-
   /* The RAIL's row (MoveRow's `compact`). Same spine, same kicker, same cutline
      voice — the photo rail is what goes, because at 288px a 33px face column plus
      its gap leaves about 220px for a sentence that runs to 104 characters. The
@@ -548,43 +547,12 @@
   .photostrip__body {
     grid-template-rows: repeat(3, 163px);
   }
-
-  /* ---- player hero: a wide sheet has room to let the name lead, so the
-     headshot and both name lines scale up together instead of sitting at
-     phone size in the middle of an otherwise-roomy page. */
-  .player__hero {
-    grid-template-columns: 168px 1fr auto;
-    gap: var(--space-6);
-    padding-bottom: var(--space-4);
-  }
   .shot {
     width: 168px;
     height: 224px;
   }
   .shot--fallback {
     font-size: var(--fs-hero-2xl);
-  }
-  .player__name-first {
-    font-size: var(--fs-h1);
-  }
-  .player__name-last {
-    font-size: var(--fs-hero-xl);
-  }
-  .player__num {
-    font-size: var(--fs-hero-sm);
-    margin-left: 8px;
-  }
-  .player__herologo > .teamlogo {
-    width: 96px !important;
-    height: 96px !important;
-  }
-  .player__leaguemark {
-    width: 96px;
-    height: 96px;
-  }
-  .player__herologo-affiliate {
-    height: 32px !important;
-    width: 112px !important;
   }
 }
 

@@ -30,7 +30,6 @@ import {
   gamePath,
   linkQuery,
   playerPath,
-  playerTabPath,
   teamPath,
   teamTabPath,
   leadersPath,
@@ -254,14 +253,13 @@ test('player and team routes carry the id plus the optional cutoff hints', () =>
   })
 })
 
-test('?look=new opens the unlisted player page; any other look is the live page', () => {
+test('an old ?look=new link opens the player page, which is the new page since the swap (#1898)', () => {
   assert.deepEqual(parseRoute('/player/12345?look=new&d=2026-07-05&s=1'), {
-    name: 'player-next',
+    name: 'player',
     id: '12345',
     asOf: '2026-07-05',
     sportId: 1,
   })
-  assert.equal(parseRoute('/player/12345?look=x').name, 'player')
   // linkQuery carries only d and s, so `look` never leaks onto a link out.
   assert.equal(linkQuery({ d: '2026-07-05', s: 1 }), '?d=2026-07-05&s=1')
 })
@@ -372,41 +370,13 @@ test('a team tab segment is not mistaken for a date-first game route', () => {
 })
 
 // --------------------------------------------------------------------------
-// playerTabPath / parseRoute — the player hub's three tabs
+// parseRoute — the old player tab addresses (#1898)
 // --------------------------------------------------------------------------
-test('playerTabPath builds each tab path and carries the spoiler cutoff through', () => {
-  const CONTRERAS = '/player/661388'
-  assert.equal(playerTabPath(661388, 'overview'), CONTRERAS)
-  assert.equal(playerTabPath(661388, 'stats'), `${CONTRERAS}/stats`)
-  assert.equal(playerTabPath(661388, 'analytics'), `${CONTRERAS}/analytics`)
-  assert.equal(playerTabPath(661388, 'history'), `${CONTRERAS}/history`)
-  // A name only changes the SPELLING of the address, exactly as playerPath does.
-  assert.equal(
-    playerTabPath(661388, 'stats', { name: 'William Contreras' }),
-    '/player/william-contreras-661388/stats',
-  )
-  // The same rule teamTabPath keeps: a dated visit stays dated across a tab
-  // switch, or one visit answers "entering July 5" on one tab and "today" on
-  // the next.
-  assert.equal(
-    playerTabPath(661388, 'analytics', { d: '2026-07-05', s: 11 }),
-    `${CONTRERAS}/analytics?d=2026-07-05&s=11`,
-  )
-  assert.equal(
-    playerTabPath(661388, 'overview', { d: '2026-07-05', s: 11 }),
-    `${CONTRERAS}?d=2026-07-05&s=11`,
-  )
-})
-
-test('parseRoute resolves all three player-hub tab URLs, carrying the cutoff query', () => {
-  for (const [tab, name] of [
-    ['stats', 'player-stats'],
-    ['analytics', 'player-analytics'],
-    ['history', 'player-history'],
-  ]) {
+test('each old player tab address opens the player page with its tab, carrying the cutoff query', () => {
+  for (const tab of ['stats', 'analytics', 'history']) {
     assert.deepEqual(
       parseRoute(`/player/661388/${tab}`),
-      { name, id: '661388', asOf: null, sportId: null },
+      { name: 'player', id: '661388', asOf: null, sportId: null, tab },
       tab,
     )
   }
@@ -417,10 +387,19 @@ test('parseRoute resolves all three player-hub tab URLs, carrying the cutoff que
     sportId: null,
   })
   assert.deepEqual(parseRoute('/player/william-contreras-661388/stats?d=2026-07-05&s=11'), {
-    name: 'player-stats',
+    name: 'player',
     id: '661388',
     asOf: '2026-07-05',
     sportId: 11,
+    tab: 'stats',
+  })
+  // The old Analytics season view: the season and compare query are gone, the tab stays.
+  assert.deepEqual(parseRoute('/player/661388/analytics/2026?d=2026-07-05&s=11&vs=2025'), {
+    name: 'player',
+    id: '661388',
+    asOf: '2026-07-05',
+    sportId: 11,
+    tab: 'analytics',
   })
 })
 
@@ -446,7 +425,7 @@ test('an unknown player sub-segment falls back to the bare player page', () => {
 test('a player tab segment is not mistaken for a date-first game route', () => {
   // The same ordering trap the team tabs carry: '/player/{id}/stats' is 3
   // segments, the same shape as '/{date}/{matchup}/{section}'.
-  assert.equal(parseRoute('/player/661388/history').name, 'player-history')
+  assert.equal(parseRoute('/player/661388/history').name, 'player')
 })
 
 // --------------------------------------------------------------------------
@@ -1204,10 +1183,6 @@ const SEASON_PAGES = [
   ['/umpires', { name: 'umpire-rankings' }],
   ['/abs-challenges', { name: 'abs-challenges' }],
   ['/umpire/pat-hoberg-427044', { name: 'umpire', id: '427044' }],
-  [
-    '/player/william-contreras-661388/analytics',
-    { name: 'player-analytics', id: '661388', asOf: null, sportId: null },
-  ],
 ]
 
 test('a season-store page with no season segment is the current season', () => {
@@ -1247,19 +1222,6 @@ test('a bad year falls back to the current season, and a bad ?vs= is no compare'
   }
 })
 
-test('the player season segment rides the cutoff query, and only the Analytics tab takes one', () => {
-  assert.deepEqual(parseRoute('/player/661388/analytics/2026?d=2026-07-05&s=11&vs=2025'), {
-    name: 'player-analytics',
-    id: '661388',
-    asOf: '2026-07-05',
-    sportId: 11,
-    seasonYear: 2026,
-    vs: 2025,
-  })
-  // Another tab takes no season: a fourth segment there is not a season view.
-  assert.equal('seasonYear' in parseRoute('/player/661388/stats/2026'), false)
-})
-
 test('the season path builders write the segment and the compare query', () => {
   assert.equal(foulsPath(), '/fouls')
   assert.equal(foulsPath({ seasonYear: 2026 }), '/fouls/2026')
@@ -1273,13 +1235,6 @@ test('the season path builders write the segment and the compare query', () => {
   assert.equal(absChallengesPath({ seasonYear: 'all' }), '/abs-challenges/all')
   assert.equal(umpirePath(427044, 'Pat Hoberg', { seasonYear: 2024 }), '/umpire/pat-hoberg-427044/2024')
   assert.equal(umpirePath(427044, null, { seasonYear: 2026, vs: 2025 }), '/umpire/427044/2026?vs=2025')
-  assert.equal(
-    playerTabPath(661388, 'analytics', { name: 'William Contreras', seasonYear: 2026, vs: 2025, d: '2026-07-05' }),
-    '/player/william-contreras-661388/analytics/2026?d=2026-07-05&vs=2025',
-  )
-  assert.equal(playerTabPath(661388, 'analytics', { seasonYear: 'all' }), '/player/661388/analytics/all')
-  // Only the Analytics tab is a season view.
-  assert.equal(playerTabPath(661388, 'stats', { seasonYear: 2026 }), '/player/661388/stats')
 })
 
 test('every season path round-trips through parseRoute', () => {
@@ -1290,12 +1245,5 @@ test('every season path round-trips through parseRoute', () => {
     assert.deepEqual(parseRoute(umpireRankingsPath(o)), { name: 'umpire-rankings', ...want })
     assert.deepEqual(parseRoute(absChallengesPath(o)), { name: 'abs-challenges', ...want })
     assert.deepEqual(parseRoute(umpirePath(427044, 'Pat Hoberg', o)), { name: 'umpire', id: '427044', ...want })
-    assert.deepEqual(parseRoute(playerTabPath(661388, 'analytics', o)), {
-      name: 'player-analytics',
-      id: '661388',
-      asOf: null,
-      sportId: null,
-      ...want,
-    })
   }
 })

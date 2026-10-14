@@ -1631,8 +1631,3 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
-
-.stat__unit {
-  font-style: normal;
-  opacity: 0.7;
-}

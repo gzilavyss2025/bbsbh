@@ -32,7 +32,7 @@ export const PILL_RECIPE = [
 ]
 
 // ---------------------------------------------------------------------------
-// CARDS — 31 blocks.
+// CARDS — 29 blocks.
 export const CARDS = [
   {
     cls: 'card card--sheet',
@@ -177,14 +177,6 @@ export const CARDS = [
     verdict: 'Merged — ledger',
     note: 'Was the tstats card block: the tight sheet plus overflow:hidden. It is a ledger Card now (#1113, slice C1), and .tstats is its namespace.',
   },
-  {
-    cls: 'card card--ledger prospectcard',
-    partial: 'system/card.css',
-    consumers: 1,
-    group: 'dense',
-    verdict: 'Merged — ledger + accent',
-    note: 'Was the tight sheet with a 3px --accent-primary rule on top. It is a ledger Card now (#1113, slice C2), and .prospectcard keeps only the accent rule and its margin.',
-  },
 
   {
     cls: 'chal',
@@ -281,14 +273,6 @@ export const CARDS = [
     group: 'notcard',
     verdict: 'Leave',
     note: 'One declaration: margin-top. A section wrapper given a card name.',
-  },
-  {
-    cls: 'moundcard',
-    partial: '26c-mound-card.css',
-    consumers: 1,
-    group: 'notcard',
-    verdict: 'Leave',
-    note: 'One declaration: margin-block-start.',
   },
 ]
 
