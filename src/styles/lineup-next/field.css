@@ -38,8 +38,9 @@
   color: var(--text-heading);
   text-decoration: none;
 }
+/* An empty spot: the hairline border and the caption ink, solid (dashed is for pencilled marks). */
 .lfld__name--tbd {
-  border-style: dashed;
+  border-color: var(--border-hairline);
   color: var(--text-caption);
 }
 /* layout-exempt: tag and name on one line */
@@ -174,8 +175,8 @@
   color: var(--surface-card);
 }
 .lpen__cell.is-today {
-  border-style: dashed;
   border-color: var(--border-stamped);
+  background: var(--accent-tint);
 }
 .lpen__total {
   font-family: var(--font-mono);
