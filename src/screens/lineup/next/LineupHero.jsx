@@ -35,7 +35,7 @@ function HeroBandHead({ series, mark }) {
 // The page's top card: club band, the crest on the tonight-treatment tile, the name and the
 // matchup line, then the first-pitch stamp with Game Notes and MLB.TV. The crest opens the
 // club's sketch sheet. Identity and schedule only; nothing here is a score.
-export function LineupHero({ id, side, treatment, info, series, gamePk, feed, onSketch, children }) {
+export function LineupHero({ id, side, treatment, info, series, gamePk, feed, onCrest, children }) {
   const { meta, oppMeta, masthead, season } = id
   return (
     <Card as="div" frame="stamped" body="flush" stampIn className="lnext__hero">
@@ -55,7 +55,7 @@ export function LineupHero({ id, side, treatment, info, series, gamePk, feed, on
         }
       />
       <div className="lnext__id">
-        <button type="button" className="lnext__crestbtn" onClick={() => onSketch(side)} aria-label={`Uniform and marks for ${meta.name}`}>
+        <button type="button" className="lnext__crestbtn" onClick={onCrest} aria-label={`Uniform and marks for ${meta.name}`}>
           <TeamTreatmentMark teamId={meta.id} name={meta.name} treatment={treatment} side={side} size={96} block="lnext__crest" season={season} />
         </button>
         <div className="lnext__who">

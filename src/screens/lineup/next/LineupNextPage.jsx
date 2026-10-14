@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { batterFigureUrls } from '../../../api/uniforms.js'
 import { selectGameInfo, selectOfficials } from '../../../api/select.js'
 import { headerThemeClass, headerThemeStyle } from '../../../lib/headerTheme.js'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
@@ -9,6 +11,7 @@ import { BullpenCard } from './cards/BullpenCard.jsx'
 import { FieldCard } from './cards/FieldCard.jsx'
 import { OrderCard } from './cards/OrderCard.jsx'
 import { SeriesCard } from './cards/SeriesCard.jsx'
+import { ClubSheet } from './sheets/ClubSheet.jsx'
 import { StarterCard } from './cards/StarterCard.jsx'
 import { TeammatesCard } from './cards/TeammatesCard.jsx'
 import { useLineupData } from './useLineupData.js'
@@ -19,6 +22,7 @@ import '../../../styles/lineup-next/starter.css'
 import '../../../styles/lineup-next/order.css'
 import '../../../styles/lineup-next/field.css'
 import '../../../styles/lineup-next/series.css'
+import '../../../styles/lineup-next/sheet.css'
 
 // The new lineup page (docs/lineup-redesign.md), at `?look=new` on lineup1 and lineup2.
 // It takes the props TeamInfo takes, plus the game chrome the live page leaves to GameView
@@ -30,6 +34,7 @@ export function LineupNextPage({
   oppPitcherLine, vsTeam, prospectsData, rookiesData, formerTeammatesData, careerMatchupsData, workloadData, callouts,
   onNext, nextLabel, onCatchUp = null, onReload, loading, lastUpdated,
 }) {
+  const [sheet, setSheet] = useState(false)
   const id = lineupIdentity(feed, side, treatment, oppTreatment)
   const info = selectGameInfo(feed)
   const officials = selectOfficials(feed)
@@ -44,7 +49,7 @@ export function LineupNextPage({
   return (
     <div className={`lnext ${headerThemeClass(id.theme)}`.trim()} style={headerThemeStyle(id.theme, id.masthead.scale)}>
       <Stack gap="section" className="lnext__page">
-        <LineupHero id={id} side={side} treatment={treatment} info={info} series={series} gamePk={game.gamePk} feed={feed} onSketch={onSketch}>
+        <LineupHero id={id} side={side} treatment={treatment} info={info} series={series} gamePk={game.gamePk} feed={feed} onCrest={() => setSheet(true)}>
         <LineupFacts
           feed={feed}
           side={side}
@@ -66,6 +71,21 @@ export function LineupNextPage({
         <SeriesCard data={data} />
         <BullpenCard data={data} workloadData={workloadData} />
         <TeammatesCard data={data} side={side} />
+        {sheet && (
+          <ClubSheet
+            name={id.meta.name}
+            teamId={id.meta.id}
+            treatment={treatment}
+            theme={id.theme}
+            uniform={uniform}
+            figureUrls={batterFigureUrls(uniformFigure)}
+            onSketch={() => {
+              setSheet(false)
+              onSketch(side)
+            }}
+            onClose={() => setSheet(false)}
+          />
+        )}
         <LineupDock
           onReload={onReload}
           loading={loading}

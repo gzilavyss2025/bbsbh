@@ -1,0 +1,60 @@
+/* ==== THE CREST SHEET (docs/lineup-redesign.md, slice S6) ====
+   Uniform, club colours, marks and the batter figure, in the app's bottom sheet. */
+
+.lsheet__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+.lsheet__sub {
+  margin: var(--space-1) 0 var(--space-3);
+  color: var(--text-caption);
+}
+.lsheet__head {
+  margin: var(--space-3) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+/* layout-exempt: swatches and marks wrap as a row */
+.lsheet__colors,
+.lsheet__marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: chip, label and value in one cell */
+.lsheet__color {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.lsheet__chip {
+  width: 22px;
+  height: 22px;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.lsheet__color small,
+.lsheet__mark small {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+/* layout-exempt: a mark over its name */
+.lsheet__mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1h);
+}
+
+/* The batter figure, smaller than the Uniform fact's own sheet so the marks stay in view. */
+.lsheet .ufig {
+  height: min(260px, 40dvh);
+}

@@ -11,6 +11,7 @@
 /* THE BAND TEXTURE: broadcast-style ripple rings from two corners, fading toward the middle,
    over a soft diagonal sheen. The same on the hero bar and every club bar below it. */
 .lnext .sectionhead--band {
+  border-radius: 0; /* a stamped card is square, so its bar is too */
   position: relative;
   isolation: isolate;
 }
