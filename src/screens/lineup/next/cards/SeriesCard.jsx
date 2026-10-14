@@ -1,10 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { fetchSeasonSeries } from '../../../../api/schedule.js'
 import { centeredScrollLeft, seasonSeriesCells, seasonSeriesRecord } from '../../../../api/seasonSeries.js'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { GameTime } from '../../../../components/teamstats/SeasonSeriesStrip.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
-import { useAsync } from '../../../../hooks/useAsync.js'
 import { monthDayYear } from '../../../../lib/dates.js'
 import { useNav } from '../../../../lib/nav.js'
 import { gamePath } from '../../../../lib/route.js'
@@ -28,12 +26,7 @@ export function SeriesCard({ data }) {
   const navigate = useNav()
   const stripRef = useRef(null)
   const currentRef = useRef(null)
-  const year = (info.officialDate ?? '').slice(0, 4)
-  const { data: games } = useAsync(
-    () => (meta.id && oppMeta.id && year ? fetchSeasonSeries(meta.id, oppMeta.id, Number(year), meta.sportId ?? 1, null) : Promise.resolve([])),
-    [meta.id, oppMeta.id, year, meta.sportId],
-  )
-  const cells = seasonSeriesCells(games ?? [], meta.id, data.gamePk, info.officialDate)
+  const cells = seasonSeriesCells(data.seriesGames, meta.id, data.gamePk, info.officialDate)
   // Land on the current game, centred in the strip, without scrolling the page.
   useEffect(() => {
     const strip = stripRef.current

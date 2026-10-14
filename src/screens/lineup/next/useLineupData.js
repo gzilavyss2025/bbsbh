@@ -12,6 +12,7 @@ import {
   lastFirst,
 } from '../../../api/select.js'
 import { selectRecordIsClosed } from '../../../api/gamerecord/played.js'
+import { fetchSeasonSeries } from '../../../api/schedule.js'
 import { fetchTeam, fetchTeamRoster } from '../../../api/team.js'
 import { POS_ORDER, splitDisplayName } from '../../../api/person.js'
 import { arsenalSidesView, arsenalTtoView, fetchPitchArsenalFor, pitchArsenalFor } from '../../../api/pitchArsenal.js'
@@ -129,11 +130,18 @@ export function useLineupData({ feed, side, vsTeam, careerMatchupsData, workload
     [hitterIds, season, info.officialDate, meta.sportId],
   )
 
+  // This season's meetings of the two clubs: the season series card and the hero's series tag.
+  const year = (info.officialDate ?? '').slice(0, 4)
+  const { data: seriesGames } = useAsync(
+    () => (meta.id && oppMeta.id && year ? fetchSeasonSeries(meta.id, oppMeta.id, Number(year), meta.sportId ?? 1, null) : Promise.resolve([])),
+    [meta.id, oppMeta.id, year, meta.sportId],
+  )
+
   // Which side a hitter bats from (L, R or S), from the game's player table.
   const batsOf = (id) => feed?.gameData?.players?.[`ID${id}`]?.batSide?.code ?? ''
 
   return {
-    batsOf, meta, oppMeta, info, season, isMlb, closed, lineup, birthdayIds, oppPitcher, oppDefense, oppBullpenArms,
+    batsOf, seriesGames: seriesGames ?? [], meta, oppMeta, info, season, isMlb, closed, lineup, birthdayIds, oppPitcher, oppDefense, oppBullpenArms,
     orgTeamId, oppOrgTeamId, careerVsOpp, vsOpponentAbbr, oppPitcherLine,
     arsenal, arsenalTto, arsenalSides, boardGameDate, projectedStarters,
     teammatePairs, orgTies, startingIds, matchups, starterLast, roster, hitterLines: hitterLines ?? {},

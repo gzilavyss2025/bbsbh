@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   selectLineup,
   selectBullpen,
@@ -14,7 +14,7 @@ import {
 } from '../api/select.js'
 import { selectRecordIsClosed } from '../api/gamerecord/played.js'
 import { fetchTeam, fetchTeamRoster } from '../api/team.js'
-import { resolveGameNotes } from '../api/gameNotes.js'
+import { useGameNotes } from './lineup/useGameNotes.js'
 import { BallparkModal } from '../components/ballpark/BallparkModal.jsx'
 import { BoxLinesDoor } from '../components/boxlines/BoxLinesDoor.jsx'
 import { ExpressLaneDoor } from '../components/game/ExpressLaneDoor.jsx'
@@ -975,38 +975,9 @@ export function seasonVsOpponentLine(v, oppAbbr) {
 // the plain link-out. The parser and the modal still exist, reachable only from
 // the unlisted /game-notes-debug QA page (src/screens/GameNotesDebugPage.jsx).
 
-// How often to re-check the live feed for a not-yet-posted note (see below).
-const NOTES_POLL_MS = 5 * 60 * 1000
-// Today's calendar date in America/New_York — the tz the game's officialDate and
-// the notes' publish dates are both keyed to (see gameNotes.js).
-const ET_TODAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' })
-const etToday = () => ET_TODAY.format(new Date())
-
 export function GameNotesButton({ feed, side }) {
-  const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
-  const info = useMemo(() => selectGameInfo(feed), [feed])
-  const isMlb = (meta.sportId ?? 1) === 1
-  const { data: notes, reload } = useAsync(
-    () =>
-      isMlb && meta.id ? resolveGameNotes(meta.id, info.officialDate) : Promise.resolve(null),
-    [isMlb, meta.id, info.officialDate],
-  )
-
-  // Tonight's note doesn't post until the afternoon/evening ET — after the page
-  // first loads — and the button stays hidden until it does (the gate only shows
-  // a note actually written for THIS game; see gameNotes.js). So while we're on
-  // the game's own day with no note yet, quietly re-poll the live feed every few
-  // minutes: the button then appears on its own the moment the note drops,
-  // without the user hunting for Refresh. Past games never gain a note, so they
-  // don't poll; once a note is in hand the interval clears.
-  const isGameDay = isMlb && !!info.officialDate && info.officialDate === etToday()
-  useEffect(() => {
-    if (!isGameDay || notes?.url) return
-    const id = setInterval(reload, NOTES_POLL_MS)
-    return () => clearInterval(id)
-  }, [isGameDay, notes?.url, reload])
-
-  if (!notes?.url) return null
+  const notes = useGameNotes(feed, side)
+  if (!notes) return null
 
   // One behavior for every club: tap opens the club's own notes PDF in a new tab.
   // The ↗ says so.

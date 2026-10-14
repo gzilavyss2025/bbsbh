@@ -32,20 +32,53 @@
 .lnext .sectionhead--band::after {
   background: linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%);
 }
-.lnext__bandhead .sectionhead__title {
+/* THE HERO BAND: the club mark and the game at the left, a tag at the right. */
+/* layout-exempt: mark and game at the left, tag at the right: two fixed ends */
+.lband {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1h) var(--space-3h);
+  border-radius: 0;
+}
+/* layout-exempt: mark, series mark and title on one line */
+.lband__mk {
   display: flex;
   align-items: center;
   gap: var(--space-2h);
+  min-width: 0;
 }
-.lnext__serieslink {
+.lband .teamlogo-crop-bar {
+  height: 34px;
+  flex: none;
+}
+.lband__link {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2h);
   color: inherit;
   text-decoration: none;
 }
+.lband__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lband__tag {
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-heavy) solid var(--band-accent);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 
-/* THE HERO: crest left of the identity, then the first-pitch stamp and the two links. */
+/* THE ID ROW: crest left of the identity. */
 /* layout-exempt: crest beside the identity, two fixed parts */
 .lnext__id {
   display: flex;
@@ -54,6 +87,7 @@
   padding: var(--space-3h);
 }
 .lnext__crestbtn {
+  position: relative;
   flex: none;
   padding: 0;
   border: 0;
@@ -77,6 +111,21 @@
 .lnext__crest .teamlogo {
   transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1));
 }
+/* The shirt badge: this tile opens the uniform sheet. */
+.lnext__badge {
+  position: absolute;
+  right: var(--space-1);
+  bottom: var(--space-1);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 50%;
+  background: var(--text-heading);
+  color: var(--surface-card);
+}
 .lnext__who {
   min-width: 0;
   flex: 1;
@@ -94,7 +143,7 @@
   margin: var(--space-1) 0 0;
   color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: var(--fs-display-lg);
+  font-size: var(--fs-display);
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
   text-transform: uppercase;
@@ -104,64 +153,101 @@
   color: inherit;
   text-decoration: none;
 }
-/* layout-exempt: marker, club logo and name on one wrapping line */
 .lnext__vs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
   margin: var(--space-2) 0 0;
+  color: var(--text-body);
   font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
-/* layout-exempt: the stamp over the two links, a fixed column */
-.lnext__side {
+
+/* THE ACTION BOX: first pitch, Game notes and MLB.TV as one stamped box. A row on a phone. */
+/* layout-exempt: three cells in a row (a column from the wide step) */
+.lact {
+  display: flex;
+  margin: 0 var(--space-3h) var(--space-3h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+  background: var(--surface-card);
+}
+/* layout-exempt: a label over the time */
+.lact__stamp {
+  flex: 1.2;
   display: flex;
   flex-direction: column;
-  border-top: var(--bw-heavy) solid var(--border-stamped);
-}
-.lnext__stamp {
-  padding: var(--space-3) var(--space-3h);
+  justify-content: center;
+  padding: var(--space-2) var(--space-2);
   background: var(--text-heading);
   color: var(--surface-card);
   text-align: center;
 }
-.lnext__stamplabel {
-  display: block;
+.lact__stamplabel {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-xwide);
   text-transform: uppercase;
 }
-.lnext__stamptime {
-  display: block;
+.lact__stamptime {
   margin-top: var(--space-1h);
   font-family: var(--font-mono);
-  font-size: var(--fs-h2);
+  font-size: var(--fs-title-md);
   font-weight: var(--w-medium);
 }
-.lnext__side .innings__notes {
-  justify-content: space-between;
-  border-radius: 0;
-}
-.lnext__watch {
+/* layout-exempt: icon over label on a phone, in a row from the wide step */
+.lact__notes,
+.lact__tv {
+  position: relative;
+  flex: 1;
+  min-width: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  min-height: var(--tap-min);
-  padding: 0 var(--space-3h);
-  background: var(--text-heading);
-  color: var(--surface-card);
+  justify-content: center;
+  gap: var(--space-1h);
+  padding: var(--space-2);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
   text-decoration: none;
+  text-transform: uppercase;
 }
-.lnext__watch:focus-visible {
+.lact__notes:focus-visible,
+.lact__tv:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: -4px;
 }
-.lnext__watchlogo {
+.lact__tv {
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--text-heading);
+  color: var(--surface-card);
+  overflow: hidden;
+  isolation: isolate;
+}
+.lact__tvlogo {
   height: 20px;
   width: auto;
+}
+/* The faded play mark: this opens the video. */
+.lact__play {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 46px;
+  height: 46px;
+  margin: auto;
+  opacity: 0.22;
+}
+.lact__tv:hover .lact__play {
+  opacity: 0.5;
+}
+.lact__watch {
+  letter-spacing: var(--ls-xwide);
+}
+.lact__arrow {
+  display: none;
 }
 
 /* THE FACTS: the strip under the hero, cells wrapping to fill each row. */
@@ -172,6 +258,64 @@
 }
 .lnext__facts .fact {
   flex: 1 1 140px;
+  min-width: 0;
+}
+.lnext__umps .fact {
+  flex-basis: 92px;
+}
+.lfact__value {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-1h) 0 0;
+  min-width: 0;
+}
+.lfact__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  text-transform: uppercase;
+}
+/* The round glyph: a tap opens a sheet or unfolds a note. */
+.lfact__glyph {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 50%;
+  background: var(--text-heading);
+  color: var(--surface-card);
+  cursor: pointer;
+}
+.lfact__glyph:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.lfact__glyph[aria-expanded='true'] {
+  background: var(--accent-tint);
+  color: var(--text-heading);
+}
+/* layout-exempt: two short lines, stacked */
+.lfact__note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  color: var(--text-body);
+  font-size: var(--fs-small);
+}
+/* The crew's cells: UmpiresCard's own markup, sized to the strip. */
+/* layout-exempt: name and tier glyph wrap as one run */
+.lnext__umps .umps__namerow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 /* THE DOCK rides the foot of the page, like the live page's floating bar. */
@@ -181,17 +325,42 @@
 }
 
 @media (min-width: 740px) {
-  /* layout-exempt: hero row, identity beside the first-pitch column */
+  /* layout-exempt: hero row, identity beside the action box */
   .lnext__hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 200px;
+    align-items: center;
   }
-  .lnext__hero > .sectionhead,
+  .lnext__hero > .lband,
   .lnext__hero > .lnext__facts {
     grid-column: 1 / -1;
   }
-  .lnext__side {
-    border-top: 0;
-    border-left: var(--bw-heavy) solid var(--border-stamped);
+  .lnext__name {
+    font-size: var(--fs-display-lg);
+  }
+  /* layout-exempt: the action box stacks its three cells */
+  .lact {
+    flex-direction: column;
+    margin: var(--space-3h);
+  }
+  .lact__notes,
+  .lact__tv {
+    flex-direction: row;
+    justify-content: space-between;
+    min-height: var(--tap-min);
+    padding: 0 var(--space-3h);
+    border-top: var(--bw-heavy) solid var(--border-stamped);
+    border-left: 0;
+  }
+  .lact__arrow {
+    display: inline;
+  }
+  .lact__watch {
+    display: none;
+  }
+  .lact__play {
+    inset: 0 var(--space-6) 0 auto;
+    margin: auto 0;
+    opacity: 0.3;
   }
 }

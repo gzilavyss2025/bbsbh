@@ -16,6 +16,7 @@ import { StarterCard } from './cards/StarterCard.jsx'
 import { TeammatesCard } from './cards/TeammatesCard.jsx'
 import { useLineupData } from './useLineupData.js'
 import { lineupIdentity } from './lineupIdentity.js'
+import { seriesPosition } from './seriesPosition.js'
 import { useLineupSeries } from './useLineupSeries.js'
 import '../../../styles/lineup-next/page.css'
 import '../../../styles/lineup-next/starter.css'
@@ -49,7 +50,7 @@ export function LineupNextPage({
   return (
     <div className={`lnext ${headerThemeClass(id.theme)}`.trim()} style={headerThemeStyle(id.theme, id.masthead.scale)}>
       <Stack gap="section" className="lnext__page">
-        <LineupHero id={id} side={side} treatment={treatment} info={info} series={series} gamePk={game.gamePk} feed={feed} onCrest={() => setSheet(true)}>
+        <LineupHero id={id} side={side} treatment={treatment} info={info} series={series} position={series ? null : seriesPosition(data.seriesGames, feed?.gamePk)} gamePk={game.gamePk} feed={feed} onCrest={() => setSheet(true)}>
         <LineupFacts
           feed={feed}
           side={side}
@@ -58,10 +59,10 @@ export function LineupNextPage({
           season={id.season}
           manager={manager}
           uniform={uniform}
-          uniformFigure={uniformFigure}
           broadcast={broadcast}
           weather={scorebookWeather}
           weatherLoading={scorebookWeatherLoading}
+          onUniform={() => setSheet(true)}
         />
         </LineupHero>
         <LineupJumpBar tabs={tabs} onSection={onSection} />
