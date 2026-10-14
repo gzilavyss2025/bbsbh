@@ -1,0 +1,59 @@
+/* ==== THE PAGE GRID (docs/lineup-redesign.md) ====
+   One column on a phone, in the order the cards read: starter, field, batting order, bullpen,
+   series, teammates. From the wide step, a side rail (starter, field, bullpen,
+   teammates) beside the main column (batting order, series). The two wrappers are drawn as
+   nothing on a phone, so the cards are the grid's own children and `order` can interleave them. */
+
+/* layout-exempt: cards reordered across two wrappers that are not boxes on a phone */
+.lgrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-section);
+}
+.lgrid__side,
+.lgrid__main {
+  display: contents;
+}
+.lgrid .lsp {
+  order: 1;
+}
+.lgrid .lfld {
+  order: 2;
+}
+.lgrid .lord {
+  order: 3;
+}
+.lgrid .lpen {
+  order: 4;
+}
+.lgrid .lss {
+  order: 5;
+}
+.lgrid .ltm {
+  order: 6;
+}
+
+@media (min-width: 740px) {
+  /* layout-exempt: a fixed-width rail beside a fluid main column */
+  .lgrid {
+    display: grid;
+    grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+    gap: var(--space-section);
+    align-items: start;
+  }
+  /* layout-exempt: the rail stacks its cards. It scrolls with the page: a sticky rail this tall
+     would hide the pitch scene below its own fold. */
+  .lgrid__side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section);
+    min-width: 0;
+  }
+  /* layout-exempt: the main column stacks its cards */
+  .lgrid__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section);
+    min-width: 0;
+  }
+}

@@ -20,9 +20,9 @@ const animName = (loc, pseudo) =>
 test('#980 the batting order staggers in once, and the roster does not', async ({ page }) => {
   await installMockApi(page)
   await page.goto(`${BASE}/lineup1`)
-  await expect(page.locator('.lineup__row').first()).toBeVisible()
+  await expect(page.locator('.lord__item').first()).toBeVisible()
 
-  const rows = page.locator('.lineup__list .lineup__row')
+  const rows = page.locator('.lord__list .lord__item')
   await expect(rows).toHaveCount(9)
 
   // Each row carries its own place in the order, and the delay steps 30ms.
@@ -175,8 +175,8 @@ test('the whole study is off under reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await installMockApi(page)
   await page.goto(`${BASE}/lineup1`)
-  await expect(page.locator('.lineup__row').first()).toBeVisible()
-  expect(await animName(page.locator('.lineup__row').first())).toBe('none')
+  await expect(page.locator('.lord__item').first()).toBeVisible()
+  expect(await animName(page.locator('.lord__item').first())).toBe('none')
 
   await page.goto('/animation-lab')
   await expect(page.locator('.animlab__live .liveedge__dot').first()).toBeVisible()

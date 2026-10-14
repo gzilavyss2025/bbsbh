@@ -55,7 +55,6 @@ test('E9: the slate keeps its .btn caps rule, and the slate\'s error line is a N
 const KEPT = [
   'txpage__empty',
   'roster__empty',
-  'starter__empty',
   'boxlines__empty',
   'prospects__empty',
   'payboard__empty',

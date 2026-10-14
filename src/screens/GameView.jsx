@@ -27,6 +27,7 @@ import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.j
 import { seriesForGame } from '../api/postseason/bracket.js'
 import { gameStatusLine } from '../api/postseason/text.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
+import { gameSectionTabs } from './lineup/gameSections.js'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime } from '../lib/scoresUnlocked.js'
 
@@ -35,7 +36,9 @@ import { formatResetTime } from '../lib/scoresUnlocked.js'
 // and each is a large module on its own. Splitting them further means opening
 // a game to read a lineup never downloads the innings viewer or box score
 // code until the user actually taps into that section.
-const TeamInfo = lazy(() => import('./TeamInfo.jsx').then((m) => ({ default: m.TeamInfo })))
+const LineupNextPage = lazy(() =>
+  import('./lineup/next/LineupNextPage.jsx').then((m) => ({ default: m.LineupNextPage })),
+)
 const InningViewer = lazy(() =>
   import('./InningViewer.jsx').then((m) => ({ default: m.InningViewer })),
 )
@@ -205,38 +208,7 @@ export function GameView({ game, section, onSection }) {
   // the wide layout (one bar of chrome) and stacked on a phone.
   const sectionTabs = feed ? (
     <nav className="stepnav" aria-label="Game sections">
-      {[
-        {
-          key: 'away',
-          label: game.away.abbreviation || 'Away',
-          active: step === 0,
-          section: 'lineup1',
-        },
-        {
-          key: 'home',
-          label: game.home.abbreviation || 'Home',
-          active: step === 1,
-          section: 'lineup2',
-        },
-        {
-          key: 'innings',
-          label: 'Innings',
-          active: step === 2,
-          section: lastInningSection,
-        },
-        { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
-        // Fifth stop: the live #22 sheet, filled through the reveal mark —
-        // last so the four scoring sections keep the order the "next" buttons
-        // walk, same as before this tab pointed here.
-        { key: 'scorecard', label: 'Scorecard', active: step === 6, section: 'scorecard' },
-        // The preview poster (step 4) and the printable sheet (step 5)
-        // deliberately have NO tab here. Not an omission: `.stepnav__btn` is
-        // `flex: 1 1 0`, so a sixth or seventh stop divides a phone's row into
-        // ever-narrower cells and wraps "Innings" onto two lines. Both doors
-        // live on the two lineup pages instead (TeamInfo), which is where a
-        // scorer is standing pre-first-pitch — the moment either one is worth
-        // a tap.
-      ].map((s) => (
+      {gameSectionTabs(game, step, lastInningSection).map((s) => (
         <button
           key={s.key}
           type="button"
@@ -249,6 +221,24 @@ export function GameView({ game, section, onSection }) {
       ))}
     </nav>
   ) : null
+
+  // The lineup pages carry their own hero, jump bar and dock (docs/lineup-redesign.md), so the
+  // masthead, series band and section tabs are left out once the game has loaded.
+  const ownChrome = Boolean(feed) && (step === 0 || step === 1)
+  const lineupNext = {
+    game,
+    tabs: gameSectionTabs(game, step, lastInningSection),
+    onSection,
+    isLive,
+    keepAwake,
+    onSetKeepAwake: setKeepAwake,
+    officialDate,
+    onSketch: setSketching,
+    // The postseason series the game belongs to (mark, tally, page), read once above for the band.
+    series: seriesMark
+      ? { mark: seriesMark, gameNumber: seriesHit?.gameNumber ?? null, status: seriesStatus, href: seriesPage }
+      : null,
+  }
 
   if (feed && step === 7) {
     return (
@@ -286,6 +276,7 @@ export function GameView({ game, section, onSection }) {
     <div className="screen">
       <SiteHeader />
 
+      {!ownChrome && (
       <Masthead
         away={game.away}
         home={game.home}
@@ -297,13 +288,14 @@ export function GameView({ game, section, onSection }) {
         onSetKeepAwake={setKeepAwake}
         treatment={jerseyTreatments}
       />
+      )}
 
       {/* A postseason game's series mark, on a navy band under the masthead —
           on both lineup pages and the box score, so the game reads as October
           before a name is read. Not on the innings view, where a phone's
           height belongs to the half being scored. A round name, never a
           score; null for a regular-season game or a season with no art. */}
-      {seriesMark && (step === 0 || step === 1 || step === 3) &&
+      {seriesMark && !ownChrome && (step === 0 || step === 1 || step === 3) &&
         (seriesPage ? (
           <a className="gameseries gameseries--link" aria-label={`${seriesMark.alt}: open the series page`} {...routeLink(seriesPage)}>
             <SeriesMark mark={seriesMark} height={40} decorative />
@@ -346,7 +338,7 @@ export function GameView({ game, section, onSection }) {
           scorebook pages instead of only marching forward. On the innings view
           the tabs ride down into InningViewer's nav row instead (see below), so
           they share one line with Back/Next on the wide layout. */}
-      {(step !== 2 || noPlays) && sectionTabs}
+      {(step !== 2 || noPlays) && !ownChrome && sectionTabs}
 
       {sketchTeam && (
         <LogoModal
@@ -371,7 +363,8 @@ export function GameView({ game, section, onSection }) {
 
       {feed && step === 0 && (
         <Suspense fallback={<Loader />}>
-        <TeamInfo
+        <LineupNextPage
+          {...lineupNext}
           feed={feed}
           side="away"
           manager={managers.data?.away}
@@ -393,8 +386,6 @@ export function GameView({ game, section, onSection }) {
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
-          onPrintSheet={() => onSection('sheet')}
-          onPreview={() => onSection('preview')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -403,7 +394,8 @@ export function GameView({ game, section, onSection }) {
       )}
       {feed && step === 1 && (
         <Suspense fallback={<Loader />}>
-        <TeamInfo
+        <LineupNextPage
+          {...lineupNext}
           feed={feed}
           side="home"
           manager={managers.data?.home}
@@ -425,8 +417,6 @@ export function GameView({ game, section, onSection }) {
           onNext={() => onSection(noPlays ? 'boxscore' : 'top1')}
           nextLabel={noPlays ? 'Box score ›' : 'Innings ›'}
           onCatchUp={onCatchUp}
-          onPrintSheet={() => onSection('sheet')}
-          onPreview={() => onSection('preview')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}

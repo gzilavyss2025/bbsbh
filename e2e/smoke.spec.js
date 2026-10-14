@@ -37,15 +37,16 @@ test('pinned game (2026-07-07 MIL@STL g2, gamePk 823035) box score stays sealed 
 })
 
 // The heading is "Defensive alignment", not "Defense" — renamed in #694 so the
-// lineup page matches focus mode's Field tab (TeamInfo.jsx's SectionMasthead
+// lineup page matches focus mode's Field tab (the lineup page's club bar
 // `title`). This assertion was left behind by that rename and the spec has been
 // red on `main` ever since; it is display copy, so if the wording moves again it
 // has to move here too. Playwright matches an accessible name in FULL, so
 // "Defense" does not match "Defensive alignment" — a substring would have
 // survived, which is exactly why it didn't.
-test('pinned game lineup1 renders the defense diamond', async ({ page }) => {
+test('pinned game lineup1 renders the defensive alignment', async ({ page }) => {
   await installMockApi(page)
   await page.goto('/07072026/milstl-2/lineup1')
   await expect(page.getByRole('heading', { name: 'Defensive alignment' }).first()).toBeVisible()
-  await expect(page.locator('.defdiamond').first()).toBeVisible()
+  // The field: the park drawing with each fielder's name, or the plain diamond for a venue with no layout.
+  await expect(page.locator('.lfld').first()).toBeVisible()
 })

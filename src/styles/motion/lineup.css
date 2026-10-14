@@ -98,7 +98,7 @@
    box.css), with the floor raised from 0 to 0.25.
 
    ONCE PER MOUNT, NEVER ON A POLL — AND NO RENDER DIFF IS NEEDED FOR IT.
-   TeamInfo renders these rows keyed by player id, so a poll that returns the
+   The lineup page (screens/lineup/next/cards/OrderCard.jsx) renders these rows keyed by player id, so a poll that returns the
    same nine names reconciles the same nine <li> nodes: React does not remount
    them, and a CSS animation does not restart on a node that was not remounted.
    The page's own Refresh goes through `useAsync`'s reload, which keeps the
@@ -122,7 +122,8 @@
    KEPT TO THE NINE. `.roster__row` is deliberately absent — running this down
    a 40-man roster would be slow and silly. */
 @media (prefers-reduced-motion: no-preference) {
-  .lineup__row {
+  .lineup__row,
+  .lord__item {
     animation: lineup-post 180ms var(--ease-out) calc(var(--row-i, 0) * 30ms) backwards;
   }
 }

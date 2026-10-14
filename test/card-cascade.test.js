@@ -608,7 +608,7 @@ const FACT_GRID_USERS = [
   'components/inning/focus/ExtrasFacts.jsx',
   'components/player/AdvancedStatsCard.jsx',
   'components/playerstats/FoulCard.jsx',
-  'screens/TeamInfo.jsx',
+  'screens/lineup/next/LineupFacts.jsx',
 ]
 
 // Every rule whose whole selector is `sel`, inside a media query too.
@@ -962,9 +962,6 @@ const C3 = [
     ns: 'metric',
     head: true,
   },
-  { css: '44-pre-game-cards.css', sel: '.lineup', jsx: ['screens/TeamInfo.jsx'], ns: 'lineup', head: true },
-  { css: '44-pre-game-cards.css', sel: '.opp', jsx: ['screens/TeamInfo.jsx'], ns: 'opp', head: true },
-  { css: '44-pre-game-cards.css', sel: '.starter', jsx: ['screens/TeamInfo.jsx'], ns: 'starter', head: true },
   { css: '10-lineup.css', sel: '.teammate', jsx: ['components/team/FormerTeammates.jsx'], ns: 'teammate', as: 'li' },
   { css: '10-lineup.css', sel: '.defdiamond', jsx: ['components/scoring/DefenseDiamond.jsx'], ns: 'defdiamond', as: 'div' },
   {
@@ -1718,13 +1715,9 @@ test('C6b: the umpire tendencies card keeps its house band and its four hosts', 
     assert.ok((sel.match(/\./g) ?? []).length > 1, `${sel} outranks .card`)
   }
   assert.equal(decl(ruleBody(css, '.umptendfold .umptend__bar') ?? '', 'display'), 'none')
-  assert.equal(decl(ruleBody(css, '.teaminfo__topzone > .umptend') ?? '', 'margin-top'), '14px')
-  assert.ok(css.includes('.teaminfo__topzone:has(> .umptend) > .umptend'), 'the wide zone still top-aligns the card')
-  assert.ok(css.includes('.teaminfo__topzone:has(> .umptend) {'), 'the wide zone still splits on the card')
-  // The three game screens still host the card under those class names.
+  // The two game screens that still host the card keep those class names.
   assert.match(src('components/umpire/UmpireAccuracyModal.jsx'), /umpmodal/)
   assert.match(src('components/umpire/UmpireTendenciesFold.jsx'), /umptendfold/)
-  assert.match(src('screens/TeamInfo.jsx'), /teaminfo__topzone/)
 })
 
 // The card is the box and nothing else: the tendencies card adds no reveal-only

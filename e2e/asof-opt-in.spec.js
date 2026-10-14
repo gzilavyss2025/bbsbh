@@ -22,7 +22,7 @@ import { test, expect } from './fixtures.js'
 // code would definitely have injected a cutoff here.
 //
 // `PlayerLink` and `TeamLink` both render as `.plink`, so the two cases are
-// separated by WHERE they sit rather than by class: `.lineup__name` is only ever
+// separated by WHERE they sit rather than by class: `.lord__link` is only ever
 // a batting-order player, and the club link is the first `.plink` on the page.
 // Both read the same `useLinkScope()` → `linkQuery` path, so this is belt and
 // braces rather than two mechanisms — but a selector that quietly matched the
@@ -42,7 +42,7 @@ async function expectLiveBanner(page) {
 test('a player link out of a started game carries no as-of cutoff', async ({ page }) => {
   await page.goto(`${GAME}/lineup1`)
 
-  const name = page.locator('.lineup__name').first()
+  const name = page.locator('.lord__link').first()
   await expect(name).toBeVisible()
   await name.click()
 

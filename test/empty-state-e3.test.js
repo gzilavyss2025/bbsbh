@@ -57,11 +57,11 @@ const SITES = [
     ],
   },
   {
-    file: 'screens/TeamInfo.jsx',
-    import: "import { EmptyState } from '../components/ui/state/EmptyState.jsx'",
-    jsx: '<EmptyState size="compact" className="starter__empty">\n          Not posted yet.\n        </EmptyState>',
+    file: 'screens/lineup/next/cards/StarterCard.jsx',
+    import: "import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'",
+    jsx: '<EmptyState size="compact">Not posted yet.</EmptyState>',
     old: /<p className="hint">Not posted yet\.<\/p>/,
-    tests: ['      ) : projected?.length ? (\n        <ProjectedStarters rows={projected} />\n      ) : (\n        <EmptyState'],
+    tests: ['      ) : projectedStarters?.length ? (\n        <ProjectedStarters rows={projectedStarters} />\n      ) : (\n        <EmptyState'],
   },
   {
     file: 'components/boxlines/BoxLinesSheet.jsx',
@@ -97,12 +97,6 @@ for (const s of SITES) {
 
 test('E3: the .refpanel__empty rule is gone, with no ground left to paint', () => {
   assert.equal(ruleBody(read('focus/reference.css'), '.refpanel__empty'), null)
-})
-
-test('E3: the starter card\'s `.starter > .hint` inset is gone; .starter__empty keeps only a margin', () => {
-  const css = read('10-lineup.css')
-  assert.doesNotMatch(css, /\.starter\s*>\s*\.hint/)
-  assert.deepEqual(props(ruleBody(css, '.starter__empty')), ['margin'])
 })
 
 test('E3: .roster__empty and .boxlines__empty keep only a margin, never a second frame', () => {
