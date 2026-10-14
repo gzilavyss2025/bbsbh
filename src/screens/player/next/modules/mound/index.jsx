@@ -3,6 +3,8 @@ import '../../../../../styles/player-next/pitcher/mound.css'
 import { fetchWorkload } from '../../../../../api/workload.js'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
+import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
+import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { teamAbbr } from '../../../../../lib/teams.js'
 import { moundView } from './moundView.js'
 
@@ -15,7 +17,6 @@ const at = (o) => (o.opp ? `${o.home ? 'vs' : 'at'} ${teamAbbr({ id: o.opp })}` 
 // averages; the apps also hold postseason outings, which count for rest, wear a round tag, and stay out of the average.
 export default function MoundModule({ bio, asOf, season, onEmpty }) {
   const { data, loading } = useAsync(fetchWorkload, [])
-  const [picked, setPicked] = useState(null)
   const view = useMemo(() => {
     if (!data || (season && data.season && Number(data.season) !== Number(season))) return null
     const p = data.pitchers?.[String(bio.id)]
@@ -29,10 +30,19 @@ export default function MoundModule({ bio, asOf, season, onEmpty }) {
   }, [empty, onEmpty])
   if (loading) return <div className="mound mound--loading" aria-busy="true" />
   if (empty) return null
+  return <MoundCard view={view} once={viewKey(bio.id, 'mound')} />
+}
+
+// The card. It mounts once the data is in, so the in-view ref sits on a node that exists at
+// mount. The entrance plays the first time the card comes into view in this page visit
+// (docs/motion.md, "The one-shot gate"); seen before, or under reduced motion, it rests drawn.
+function MoundCard({ view, once }) {
+  const [picked, setPicked] = useState(null)
+  const [ref, phase] = useInViewOnce(once)
   const tab = view.tabs.includes(picked) ? picked : view.tab
   const v = view.views[tab]
   return (
-    <div className="mound">
+    <div ref={ref} className={`mound${phase === 'wait' ? ' mound--pre' : phase === 'play' ? ' mound--in' : ''}`}>
       <div className="mound__top">
         {view.tabs.length > 1 && (
           <div role="group" aria-label="How the card reads" className="mound__tabs">
@@ -55,7 +65,7 @@ function Track({ v }) {
   const { track, last } = v
   const usual = track.usual && `${track.usual.min}${track.usual.max > track.usual.min ? `–${track.usual.max}` : ''}`
   return (
-    <div className="mound__block">
+    <div className="mound__block mound__block--track">
       <p className="mound__head">
         <span>{v.head}</span>
         {usual && <span>Usual gap · {usual} days</span>}
@@ -142,7 +152,7 @@ function Calendar({ chart }) {
           <span
             key={i}
             className={`mound__bar${b.relief ? ' mound__bar--relief' : ''}${b.post ? ' mound__bar--post' : ''}${b.last ? ' mound__bar--last' : ''}`}
-            style={{ left: `${b.left}%`, width: `${b.w}%`, height: `${b.h}%` }}
+            style={{ left: `${b.left}%`, width: `${b.w}%`, height: `${b.h}%`, '--k': i }}
           >
             <span className="mound__pv">{b.p}</span>
           </span>
