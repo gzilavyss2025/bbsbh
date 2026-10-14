@@ -222,7 +222,7 @@ const mod = read('src/screens/player/next/modules/arsenal/index.jsx')
 
 test('the timeline waits for the card to come into view, once per page visit', () => {
   assert.match(card, /useInViewOnce\(viewKey\(id, 'arsenal'\)\)/)
-  assert.match(card, /useArsenalClock\(.*, phase === 'rest' \? 'end' : 'wait'\)/)
+  assert.match(card, /useArsenalClock\(.*, phase === 'rest' \? 'end' : 'wait', at\)/)
   assert.match(card, /if \(phase === 'play'\) clock\.play\(\)/)
   assert.match(mod, /<ArsenalCard rows=\{rows\} id=\{bio\.id\} \/>/)
 })
@@ -262,4 +262,30 @@ test('a landing sweeps the row in mint and pops its glyph', () => {
   assert.match(decl(sweep, 'background'), /color-mix\(in srgb, var\(--accent-tint\) 50%, transparent\)/)
   assert.match(card, /scaleX\(\$\{b\.sweep\.x/)
   assert.match(card, /className="arsenal__pop"/)
+})
+
+const lab = read('src/screens/animlab/PlayerMotionLab.jsx')
+
+test('the speed button switches 1/3 and 1/6 and replays; the timeline length follows it', () => {
+  assert.match(card, /useState\(3\)/)
+  assert.match(card, /setS\(S === 3 \? 6 : 3\)/)
+  assert.match(card, /totalMs\(pitches, S\)/)
+  assert.match(card, /'⅓×' : '⅙×'/)
+})
+
+test('the scrubber spans the timeline and stops the clock where it is moved', () => {
+  assert.match(card, /type="range"/)
+  assert.match(card, /max=\{total\}/)
+  assert.match(card, /clock\.seek\(Number\(e\.target\.value\), false\)/)
+  assert.match(card, /aria-label="Scrub the pitch animation"/)
+  const body = ruleBody(css, '.arsenal__range')
+  assert.ok(body, 'no .arsenal__range rule')
+  assert.match(body, /height: var\(--tap-min\)/)
+})
+
+test('the lab shows the timeline live and as pinned frames', () => {
+  assert.match(card, /at \?\? t \?\? total/)
+  assert.match(lab, /function ArsenalTimelineEntry\(/)
+  assert.match(lab, /<ArsenalCard rows=\{DEMO_ROWS\}[^>]*at=\{ms\}/)
+  assert.match(lab, /<ArsenalTimelineEntry \/>/)
 })
