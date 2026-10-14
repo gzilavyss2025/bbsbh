@@ -87,7 +87,8 @@
   display: grid;
   align-content: start;
   transform-style: preserve-3d;
-  transition: transform var(--dur-slow) var(--ease-out);
+  /* The canvas turns in 520ms; the flip token times 1.15 is 518ms. */
+  transition: transform calc(var(--dur-flip) * 1.15) var(--ease-stamp);
 }
 /* layout-exempt: a label over a value */
 .pnext__ageface {
@@ -101,6 +102,11 @@
 }
 .is-flipped .pnext__ageflip {
   transform: rotateX(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pnext__ageflip {
+    transition: none;
+  }
 }
 
 /* THE TILES. Phone: the ink tile spans the row, then two by two. Wide: five in
