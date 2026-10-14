@@ -133,3 +133,26 @@ export const parseCells = (csv) => (csv ? csv.split(',').map(Number) : new Array
 export const markCommandIngested = (db) =>
   db.prepare('INSERT OR IGNORE INTO pitch_command_ingested_games (game_pk, level, date, season) VALUES (?, ?, ?, ?)')
 
+// The command grid's own shards, keyed like every other per-player dataset.
+// One file per pitcher bucket, each entry: { name, throws, mlb|aaa: { code:
+// { L: {...}, R: {...} } } }, where each hand carries the six 25-value arrays.
+// Zero-only arrays are dropped — a pitch type he never threw to lefties is
+// absent rather than twenty-five zeroes.
+export function exportCommandMap(db, season, scope = 'R') {
+  const rows = db
+    .prepare('SELECT * FROM pitch_command_cells WHERE season = ? AND scope = ? ORDER BY person_id, level, code, stand')
+    .all(season, scope)
+  const pit = {}
+  for (const r of rows) {
+    const entry = pit[r.person_id] ?? (pit[r.person_id] = { mlb: {}, aaa: {} })
+    const byCode = entry[r.level] ?? (entry[r.level] = {})
+    const hand = {}
+    CELLS.forEach((field, i) => {
+      const arr = parseCells(r[COLS[i]])
+      if (arr.some((v) => v > 0)) hand[field] = arr
+    })
+    if (!hand.cells) continue
+    ;(byCode[r.code] ?? (byCode[r.code] = {}))[r.stand] = hand
+  }
+  return { season, pit }
+}

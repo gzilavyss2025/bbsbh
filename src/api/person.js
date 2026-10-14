@@ -79,6 +79,7 @@ export {
   levelProgressionView,
   dropRehabStints,
   careerTimelineView,
+  teamSeasonsView,
 } from './person/career/progression.js'
 
 export {
