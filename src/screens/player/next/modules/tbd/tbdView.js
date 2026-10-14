@@ -10,7 +10,7 @@ export function tbdCards(section, role, bio) {
     // list holds it and the card hides itself for a man who never caught.
     return role === 'hitting' ? ['cmdreceived'] : []
   }
-  if (section === 'history' && first) return ['awards', 'timeline', 'transactions', 'media']
+  if (section === 'history' && first) return ['timeline', 'media']
   if (section === 'game-log' && role === 'pitching') return ['fouls']
   return []
 }

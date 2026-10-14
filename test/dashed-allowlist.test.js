@@ -29,6 +29,7 @@ const ALLOWED = {
     ['player-next/both/contract.css', '.cnext__bar--left'], // 2020: the contracted salary, not what the 60-game season paid
     ['player-next/both/contract.css', '.cnext__bar--gap'], // a season with a row and no figure
     ['player-next/gamelog/milestones.css', '.milestones__proj'], // a projection: pencilled in, or paused with no year yet
+    ['player-next/history/awards.css', '.awmod__org.awmod__none'], // an award row whose club or org the feed does not name
     ['34-postseason.css', '.seed--bye'],
     ['73-spray-map.css', '.spray__chip--thin'],
     ['77-express-lane.css', '.xl__chip--placed'],
@@ -37,6 +38,7 @@ const ALLOWED = {
     ['postseason/series-live.css', '.psseries__starter .projection'],
     ['postseason/primer-main.css', '.seriesribbon__game--ahead'], // a game still to play
     ['postseason/primer-main.css', '.seriesribbon__game--ifNecessary'], // a game that may not be played
+    ['player-next/history/moves.css', '.moves__noclub'], // a move whose club the feed does not name: a pencilled box, no mark
   ],
   // Waiting is provisional: an empty or loading slot that holds its place. The
   // EmptyState itself, sized tiles in a rail, round stamp slots (ADR-0035) and
