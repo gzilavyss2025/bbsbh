@@ -56,7 +56,7 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
   }, [all, asOf, onCount])
 
   if (empty) return null
-  if (!view) return <div className="fplate fplate--wait"><p className="hint">Loading plate approach…</p></div>
+  if (!view) return <div className="fplate fplate--wait" aria-busy="true"><p className="hint">Loading plate approach…</p></div>
 
   const name = code ? pitchMark(code).name : 'All pitches'
   const handName = HANDS.find((h) => h[0] === hand)[1]

@@ -12,7 +12,10 @@ import { Table } from '../../../../components/ui/table/Table.jsx'
 //   rows     data rows, each with a `key`; a row with a `divider` is a group's heading,
 //            with its `note` (a count) beside it.
 //   caption  the table's name for a screen reader ("Game log, 2026"); it does not show.
-export function LogTable({ columns, rows, caption }) {
+//   currentKey  the key of the row whose game is open elsewhere (the pitcher log's
+//            detail dialog). That row says aria-current="true" and keeps the selected
+//            fill. Optional.
+export function LogTable({ columns, rows, caption, currentKey }) {
   return (
     <div className="logtable">
       <Table frame="bare" density="keep" className="logtable__grid">
@@ -35,7 +38,7 @@ export function LogTable({ columns, rows, caption }) {
                 </th>
               </tr>
             ) : (
-              <tr key={r.key}>
+              <tr key={r.key} aria-current={currentKey != null && r.key === currentKey ? 'true' : undefined}>
                 {columns.map((c) => (
                   <td key={c.key} className={`logtable__${c.card} ${c.className ?? ''}`.trim()}>
                     {c.card === 'cell' && <span className="logtable__lab">{c.label}</span>}

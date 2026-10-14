@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
-import { CAMERAS, ZONE, towardOf, tunnelView, verdictOf } from './flightView.js'
+import { CAMERAS, ZONE, orbitOf, towardOf, tunnelView, verdictOf } from './flightView.js'
+import { flyStep, landedLoop, startLoop, stepLoop, stillCam, swingCam } from './flightMotion.js'
 import { FlightScene } from './FlightScene.jsx'
 import { PitchGlyph } from './PitchGlyph.jsx'
 
@@ -12,32 +13,71 @@ const MID = (ZONE.y0 + ZONE.y1) / 2
 const mph = (v) => (v == null ? '—' : `${v.toFixed(1)} mph`)
 const rpm = (v) => (v == null ? '—' : `${v.toLocaleString('en-US')} rpm`)
 
-// The flight clock: seconds into the flight, played by the animation frame. `end` is the flight's length,
-// `speed` the fraction of real time. A reader who asked for less motion gets the landed frame and a scrubber.
-function useFlightClock(end, speed, reduced) {
-  const [s, setS] = useState(reduced ? end : 0)
-  const [playing, setPlaying] = useState(!reduced)
-  const at = useRef(s)
+// The flight loop (#2073, board PitchFlight.dc.html): a wait at release, the flight, a hold on the landed
+// frame, then again (flightMotion.js). It runs only while the stage is on screen or within 120px of it.
+// A reader who asked for less motion gets the landed frame, a camera that snaps, and the scrubber.
+// `stage` is the ref of the element it watches. `onCycle` runs when a hold ends: the card moves to the next pitch there.
+function useFlightLoop({ stage, end, speed, reduced, onCycle }) {
+  const [snap, setSnap] = useState(() => ({
+    loop: reduced ? landedLoop() : startLoop(true),
+    cam: stillCam(orbitOf('catcher')),
+  }))
+  // The engine's state for the frame loop and the handlers; `snap` is the same state for the render.
+  const eng = useRef(snap)
+  const cfg = useRef({ end, speed, onCycle })
   useEffect(() => {
-    if (!playing) return undefined
+    cfg.current = { end, speed, onCycle }
+  })
+  const put = (next) => {
+    eng.current = next
+    setSnap(next)
+  }
+
+  useEffect(() => {
+    if (reduced) return undefined
+    let vis = true
+    const node = stage.current
+    const io =
+      node && typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver((es) => { vis = es.some((e) => e.isIntersecting) }, { rootMargin: '120px' })
+        : null
+    if (io) io.observe(node)
     let raf
     let last = performance.now()
-    const tick = (now) => {
-      at.current = Math.min(end, at.current + Math.min(0.05, (now - last) / 1000) * speed)
+    const frame = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000)
       last = now
-      setS(at.current)
-      if (at.current >= end) setPlaying(false)
-      else raf = requestAnimationFrame(tick)
+      const cur = eng.current
+      if (vis && (cur.loop.playing || cur.cam.tw < 1)) {
+        const { end: e, speed: v, onCycle: cycle } = cfg.current
+        const next = { loop: stepLoop(cur.loop, dt, e, v), cam: flyStep(cur.cam, dt) }
+        eng.current = next
+        setSnap(next)
+        if (next.loop.cycled) cycle()
+      }
+      raf = requestAnimationFrame(frame)
     }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [playing, end, speed])
-  const seek = (v, play) => {
-    at.current = v
-    setS(v)
-    setPlaying(play)
+    raf = requestAnimationFrame(frame)
+    return () => {
+      cancelAnimationFrame(raf)
+      if (io) io.disconnect()
+    }
+  }, [reduced, stage])
+
+  const { loop, cam } = snap
+  return {
+    s: Math.min(loop.s, end),
+    phase: loop.phase,
+    playing: loop.playing,
+    view: cam.view,
+    restart: () => put({ ...eng.current, loop: reduced ? landedLoop() : startLoop(true) }),
+    setPlaying: (on) => put({ ...eng.current, loop: { ...eng.current.loop, playing: on } }),
+    seek: (s) => put({ ...eng.current, loop: { ...eng.current.loop, phase: 'fly', timer: 0, s, prevS: s, playing: false } }),
+    flyTo: (key) => {
+      const to = orbitOf(key)
+      put({ ...eng.current, cam: reduced ? stillCam(to) : swingCam(eng.current.cam, to) })
+    },
   }
-  return { s, playing, seek }
 }
 
 // The Pitch flight card (#1892, board PitchFlight.dc.html): each pitch type's average path from the mound,
@@ -54,18 +94,26 @@ export function FlightCard({ rows, season, throws }) {
   const seq = mode === 'seq'
   const shown = seq ? [flyers[i]] : flyers.filter((r) => on.has(r.code))
   const end = Math.max(0.01, ...shown.map((r) => r.path.T))
-  const { s, playing, seek } = useFlightClock(end, speed, reduced)
-  const restart = () => (reduced ? seek(end, false) : seek(0, true))
-  // A new pitch, mode or selection changes the flight's length: start it over.
-  useEffect(restart, [mode, i, on, reduced]) // eslint-disable-line react-hooks/exhaustive-deps
-
+  const stage = useRef(null)
+  const fly = useFlightLoop({
+    stage,
+    end,
+    speed,
+    reduced,
+    // A hold ended: In order moves to the next pitch. The loop has already started over.
+    onCycle: () => {
+      if (seq && flyers.length > 1) setI((n) => (n + 1) % flyers.length)
+    },
+  })
+  const { s, playing } = fly
+  const held = fly.phase === 'hold'
   const p = seq ? flyers[i] : null
   const tunnel = seq ? null : tunnelView(shown)
   const onPlay = () => {
-    if (playing) return seek(s, false)
-    if (s < end) return seek(s, true)
+    if (playing) return fly.setPlaying(false)
+    if (!held) return fly.setPlaying(true)
     if (seq && flyers.length > 1) setI((i + 1) % flyers.length)
-    else restart()
+    fly.restart()
   }
   const label = seq
     ? `${p.code} · ${mph(p.velo)} · ${p.path.T.toFixed(2)} s`
@@ -78,8 +126,8 @@ export function FlightCard({ rows, season, throws }) {
         <em>{label}</em>
       </div>
       <div className="flight__row" role="group" aria-label="Show">
-        <button type="button" className="pnext-pick" aria-pressed={seq} onClick={() => setMode('seq')}>In order</button>
-        <button type="button" className="pnext-pick" aria-pressed={!seq} onClick={() => setMode('tog')}>Together</button>
+        <button type="button" className="pnext-pick" aria-pressed={seq} onClick={() => { setMode('seq'); fly.restart() }}>In order</button>
+        <button type="button" className="pnext-pick" aria-pressed={!seq} onClick={() => { setMode('tog'); fly.restart() }}>Together</button>
       </div>
       <div className="flight__row" role="group" aria-label="Pitches">
         {flyers.map((r, n) => (
@@ -89,8 +137,9 @@ export function FlightCard({ rows, season, throws }) {
             pressed={seq ? n === i : on.has(r.code)}
             aria-label={r.velo == null ? r.mark.name : `${r.mark.name}, ${mph(r.velo)}`}
             onClick={() => {
-              if (seq) setI(n)
-              else setOn((cur) => new Set(cur.has(r.code) ? [...cur].filter((c) => c !== r.code) : [...cur, r.code]))
+              if (!seq) return setOn((cur) => new Set(cur.has(r.code) ? [...cur].filter((c) => c !== r.code) : [...cur, r.code]))
+              setI(n)
+              fly.restart()
             }}
           >
             <PitchGlyph mark={r.mark} size={14} />
@@ -100,12 +149,12 @@ export function FlightCard({ rows, season, throws }) {
       </div>
       <div className="flight__row" role="group" aria-label="Camera">
         {CAMERAS.map(([key, name]) => (
-          <button key={key} type="button" className="pnext-pick" aria-pressed={camera === key} onClick={() => setCamera(key)}>{name}</button>
+          <button key={key} type="button" className="pnext-pick" aria-pressed={camera === key} onClick={() => { setCamera(key); fly.flyTo(key) }}>{name}</button>
         ))}
       </div>
-      <div className="flight__stage">
+      <div className="flight__stage" ref={stage}>
         <FlightScene
-          camera={camera}
+          camera={fly.view}
           w={336}
           h={300}
           items={shown}
@@ -115,7 +164,7 @@ export function FlightCard({ rows, season, throws }) {
         />
       </div>
       <div className="flight__bar">
-        {!reduced && <Button size="control" onClick={onPlay}>{playing ? 'Pause' : s >= end ? (seq && flyers.length > 1 ? 'Next' : 'Replay') : 'Play'}</Button>}
+        {!reduced && <Button size="control" onClick={onPlay}>{playing ? 'Pause' : held ? (seq && flyers.length > 1 ? 'Next' : 'Replay') : 'Play'}</Button>}
         <input
           className="flight__range"
           type="range"
@@ -123,7 +172,7 @@ export function FlightCard({ rows, season, throws }) {
           max="1000"
           aria-label="Time since release"
           value={Math.round((s / end) * 1000)}
-          onChange={(e) => seek((e.target.value / 1000) * end, false)}
+          onChange={(e) => fly.seek((e.target.value / 1000) * end)}
         />
         <output className="flight__clock">{s.toFixed(2)} s</output>
       </div>

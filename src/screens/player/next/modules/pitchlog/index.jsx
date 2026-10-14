@@ -203,7 +203,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
         <Fact label="K" value={t.k} mono />
         <Fact label="BB" value={t.bb} mono />
       </FactGrid>
-      <LogTable columns={COLUMNS} rows={lines} caption={`Game log, ${span}`} />
+      <LogTable columns={COLUMNS} rows={lines} caption={`Game log, ${span}`} currentKey={open} />
       {rows.length > SHOWN && (
         <Button size="control" onClick={() => setMore(!more)} aria-expanded={more}>
           {more ? 'Show fewer' : `Show all ${games(rows.length)}`}
