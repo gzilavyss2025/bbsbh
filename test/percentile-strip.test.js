@@ -219,9 +219,15 @@ test('the definition explains the baseline only when a baseline is present', () 
 })
 
 test('a lower-is-better metric\'s baseline is the raw figure, not a verdict', () => {
-  // Chase % is lower-is-better (swing length keeps Savant's order): the median printed beside
-  // them must still be Savant's own raw median rate, unflipped — the strip's
-  // dot position (not the baseline number) is what already encodes direction.
+  // Chase % is lower-is-better: the median printed beside it must still be
+  // Savant's own raw median rate, unflipped — the strip's dot position (not
+  // the baseline number) is what already encodes direction.
+  const chase = percentileRows(BAT, RAW_BAT, 'hitting', MEDIAN_BAT).find((r) => r.key === 'chase')
+  assert.equal(chase.lowerIsBetter, true)
+  assert.equal(chase.baseline, '29.5%')
+})
+
+test('swing length prints its raw median baseline without a lower-is-better flag', () => {
   const rows = percentileRows(BAT_WITH_TRACKING, RAW_BAT_WITH_TRACKING, 'hitting', {
     ...MEDIAN_BAT,
     swingLength: 7.3,
