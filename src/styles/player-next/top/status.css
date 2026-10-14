@@ -1,0 +1,87 @@
+/* The status band on the hero's top edge (HeroBand.jsx, #2008): one ledger row per status inside
+   the hero's border. The band is the query container, so rows stack on a phone and sit side by
+   side from 720px. Each mark is a shape (clip-path) beside the words, never colour alone. */
+.pnext__band {
+  container-type: inline-size;
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+/* layout-exempt: a column that turns into a row by container width */
+.pnext__bandrows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pnext__brow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.pnext__brow + .pnext__brow {
+  border-top: var(--bw-rule) solid var(--border-stamped);
+}
+.pnext__brow[data-status='allstar'] {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+@container (min-width: 720px) {
+  .pnext__bandrows {
+    flex-direction: row;
+  }
+  .pnext__brow {
+    flex: 1 1 0;
+  }
+  .pnext__brow + .pnext__brow {
+    border-top: 0;
+    border-left: var(--bw-rule) solid var(--border-stamped);
+  }
+}
+
+/* The mark: a square box with a glyph cut by clip-path. */
+/* layout-exempt: centres the glyph in the box */
+.pnext__bmark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.pnext__bmark::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: var(--ink-0);
+}
+.pnext__bmark[data-mark='star'] {
+  background: var(--marker);
+}
+.pnext__bmark[data-mark='star']::after {
+  clip-path: polygon(50% 0, 62% 36%, 100% 38%, 70% 60%, 80% 100%, 50% 76%, 20% 100%, 30% 60%, 0 38%, 38% 36%);
+}
+.pnext__bmark[data-mark='arrow'] {
+  background: var(--field-mint);
+}
+.pnext__bmark[data-mark='arrow']::after {
+  clip-path: polygon(0 38%, 55% 38%, 55% 10%, 100% 50%, 55% 90%, 55% 62%, 0 62%);
+}
+.pnext__bmark[data-mark='cross'] {
+  background: var(--clay);
+}
+.pnext__bmark[data-mark='cross']::after {
+  background: var(--text-on-ink-bright);
+  clip-path: polygon(35% 0, 65% 0, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0 65%, 0 35%, 35% 35%);
+}
+.pnext__bmark[data-mark='dash']::after {
+  height: 3px;
+}
