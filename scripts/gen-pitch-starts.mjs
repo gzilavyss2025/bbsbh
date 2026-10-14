@@ -46,14 +46,17 @@ export function rowsOfFeed(feed) {
 
 export function addGame(store, gamePk, { pit, mph }) {
   for (const [part, rows] of [['pit', pit], ['mph', mph]]) {
-    for (const [id, codes] of Object.entries(rows)) ((store[part][id] ??= {})[gamePk] = codes)
+    for (const [id, codes] of Object.entries(rows)) (store[part][id] ??= {})[gamePk] = codes
   }
 }
 
 const gamesOf = (store) => new Set(Object.values(store.pit).flatMap(Object.keys))
 
 // Resume: the games the store does not hold yet.
-export const pendingGames = (pks, store) => pks.filter((pk) => !gamesOf(store).has(String(pk)))
+export function pendingGames(pks, store) {
+  const have = gamesOf(store)
+  return pks.filter((pk) => !have.has(String(pk)))
+}
 
 // The same entries writeStarts gives: the mix shards, then the speed shards named NN.mph.
 export const shardsOf = (season, { pit, mph }) => [
