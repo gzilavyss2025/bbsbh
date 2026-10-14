@@ -30,6 +30,7 @@
   color: var(--text-body);
   cursor: pointer;
   scroll-snap-align: center;
+  transition: transform var(--dur-fast) var(--ease-stamp);
 }
 .splitsmod__club img {
   opacity: 0.5;
@@ -38,6 +39,7 @@
 .splitsmod__club[aria-pressed='true'] {
   border-color: var(--border-stamped);
   background: var(--surface-inset);
+  box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped);
 }
 .splitsmod__club[aria-pressed='true'] img {
   opacity: 1;
@@ -61,6 +63,9 @@
 .splitsmod__chipfig.is-thin {
   color: var(--text-caption);
   text-decoration: underline dotted;
+}
+.splitsmod__club:active {
+  transform: scale(0.97);
 }
 .splitsmod__next {
   position: absolute;
@@ -152,6 +157,7 @@
   justify-content: center;
   font-size: var(--fs-title-sm);
   line-height: var(--lh-solid);
+  transition: transform var(--dur-med) var(--ease-out);
 }
 .splitsmod__fold[aria-expanded='true'] .splitsmod__foldchev {
   transform: rotate(90deg);
@@ -188,4 +194,43 @@
 .splitsmod__more {
   width: 100%;
   margin-top: var(--space-3);
+}
+
+/* ---- motion: the fold cascade, hover and press (board Splits) ----
+   A fold the reader opens (GameLines.jsx) wraps each row in .splitsmod__appear with the row's
+   --i: the row rises one --stagger-step after the last, and its bar grows. The keyframes are
+   splits.css's splitsmod-rise and splitsmod-grow. Hover is for a fine pointer only: on a phone
+   :hover sticks where the last tap was. */
+.splitsmod__appear {
+  animation: splitsmod-rise calc(var(--dur-rise) * 2) var(--ease-unfold) calc(var(--stagger-step) * var(--i, 0)) backwards;
+}
+.splitsmod__appear .splitsmod__fill {
+  animation: splitsmod-grow var(--dur-grow) var(--ease-unfold) calc(var(--dur-fast) + var(--stagger-step) * var(--i, 0)) backwards;
+}
+.splitsmod__door.boxlines__door:active {
+  background: var(--bg-canvas);
+}
+@media (hover: hover) and (pointer: fine) {
+  .splitsmod__door.boxlines__door:hover {
+    background: var(--surface-inset);
+  }
+  .splitsmod__fold:hover {
+    background: var(--border-hairline);
+  }
+  .splitsmod__club:hover {
+    background: var(--bg-canvas);
+  }
+  .splitsmod__club[aria-pressed='true']:hover {
+    background: var(--surface-inset);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splitsmod__appear,
+  .splitsmod__appear .splitsmod__fill {
+    animation: none;
+  }
+  .splitsmod__club,
+  .splitsmod__foldchev {
+    transition: none;
+  }
 }
