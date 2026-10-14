@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   selectLineup,
   selectBullpen,
@@ -14,7 +14,8 @@ import {
 } from '../api/select.js'
 import { selectRecordIsClosed } from '../api/gamerecord/played.js'
 import { fetchTeam, fetchTeamRoster } from '../api/team.js'
-import { resolveGameNotes } from '../api/gameNotes.js'
+import { useGameNotes } from './lineup/useGameNotes.js'
+import { CrowdIcon, Fact, managerFact, seasonVsOpponentLine } from './lineup/parts.jsx'
 import { BallparkModal } from '../components/ballpark/BallparkModal.jsx'
 import { BoxLinesDoor } from '../components/boxlines/BoxLinesDoor.jsx'
 import { ExpressLaneDoor } from '../components/game/ExpressLaneDoor.jsx'
@@ -42,7 +43,6 @@ import { Button } from '../components/ui/control/Button.jsx'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
-import { ManagerLink } from '../components/team/ManagerLink.jsx'
 import { UmpiresCard } from '../components/umpire/UmpiresCard.jsx'
 import { UmpireTendencies } from '../components/umpire/UmpireTendencies.jsx'
 import { loadUmpire } from '../api/umpires.js'
@@ -938,28 +938,6 @@ function lastGameLine(g) {
   return `${[md, where].filter(Boolean).join(' ')}: ${stat}`
 }
 
-// "8/18 @ MIL: 6.0 IP, 3 H, 0 ER, 2 K, 1 BB" — his ONE start against tonight's
-// opponent so far this season (see fetchPitcherSeasonVsOpponent), formatted
-// exactly like lastGameLine since that's what it is: a single past outing.
-// The common case there's more than one, "3 GS vs MIL this year: ..." — no
-// single date to lead with, so it reads like the season-line row instead.
-function seasonVsOpponentLine(v, oppAbbr) {
-  const stat = [
-    v.inningsPitched && `${v.inningsPitched} IP`,
-    `${v.hits} H`,
-    `${v.earnedRuns} ER`,
-    `${v.strikeOuts} K`,
-    `${v.baseOnBalls} BB`,
-  ]
-    .filter(Boolean)
-    .join(', ')
-  if (v.games.length === 1) {
-    const g = v.games[0]
-    return `${monthDay(g.date)} ${g.home ? 'vs' : '@'} ${oppAbbr}: ${stat}`
-  }
-  return `${v.games.length} GS vs ${oppAbbr} this year: ${stat}`
-}
-
 // A link out to this club's official pre-game press-notes PDF, sitting just
 // under the team head on the lineup page (both the phone page and each spread
 // panel). Resolves the freshest note for the game's date — live for the game
@@ -975,38 +953,9 @@ function seasonVsOpponentLine(v, oppAbbr) {
 // the plain link-out. The parser and the modal still exist, reachable only from
 // the unlisted /game-notes-debug QA page (src/screens/GameNotesDebugPage.jsx).
 
-// How often to re-check the live feed for a not-yet-posted note (see below).
-const NOTES_POLL_MS = 5 * 60 * 1000
-// Today's calendar date in America/New_York — the tz the game's officialDate and
-// the notes' publish dates are both keyed to (see gameNotes.js).
-const ET_TODAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' })
-const etToday = () => ET_TODAY.format(new Date())
-
-function GameNotesButton({ feed, side }) {
-  const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
-  const info = useMemo(() => selectGameInfo(feed), [feed])
-  const isMlb = (meta.sportId ?? 1) === 1
-  const { data: notes, reload } = useAsync(
-    () =>
-      isMlb && meta.id ? resolveGameNotes(meta.id, info.officialDate) : Promise.resolve(null),
-    [isMlb, meta.id, info.officialDate],
-  )
-
-  // Tonight's note doesn't post until the afternoon/evening ET — after the page
-  // first loads — and the button stays hidden until it does (the gate only shows
-  // a note actually written for THIS game; see gameNotes.js). So while we're on
-  // the game's own day with no note yet, quietly re-poll the live feed every few
-  // minutes: the button then appears on its own the moment the note drops,
-  // without the user hunting for Refresh. Past games never gain a note, so they
-  // don't poll; once a note is in hand the interval clears.
-  const isGameDay = isMlb && !!info.officialDate && info.officialDate === etToday()
-  useEffect(() => {
-    if (!isGameDay || notes?.url) return
-    const id = setInterval(reload, NOTES_POLL_MS)
-    return () => clearInterval(id)
-  }, [isGameDay, notes?.url, reload])
-
-  if (!notes?.url) return null
+export function GameNotesButton({ feed, side }) {
+  const notes = useGameNotes(feed, side)
+  if (!notes) return null
 
   // One behavior for every club: tap opens the club's own notes PDF in a new tab.
   // The ↗ says so.
@@ -1021,26 +970,6 @@ function GameNotesButton({ feed, side }) {
       Game Notes
       <span className="btn__icon" aria-hidden="true">↗</span>
     </a>
-  )
-}
-
-// The manager fill-in: surname-first name with the uniform number inked in
-// seam red, like every lineup row. Null (→ the Fact's "—") until resolved.
-// Linked to his manager page once fetchManager resolves a personId (older
-// cached data / a fetch that raced ahead of that field lands here without
-// one — ManagerLink degrades to plain text rather than a dead link).
-function managerFact(manager) {
-  if (!manager) return null
-  return (
-    // The fact PRINTS surname-first; the address takes spoken order
-    // (ADR-0057), which `name` on the same object already is.
-    <ManagerLink id={manager.personId} name={manager.name} className="fact__person">
-      {manager.lastFirst}
-      {manager.jersey ? (
-        <span className="fact__jersey">{manager.jersey}</span>
-      ) : null}
-      {manager.interim ? <span className="fact__note">interim</span> : null}
-    </ManagerLink>
   )
 }
 
@@ -1073,32 +1002,6 @@ export function RefreshButton({ onReload, loading, lastUpdated, className = '' }
   )
 }
 
-function Fact({ label, value, aside }) {
-  const text = value || <span className="fact__na">—</span>
-  return (
-    <div className="fact">
-      <dt className="fact__label">{label}</dt>
-      <dd className="fact__value">{aside ? <div className="fact__figure"><span>{text}</span>{aside}</div> : text}</dd>
-    </div>
-  )
-}
-
-// A small crowd — three heads and shoulders — drawn as an SVG, filled like the
-// Umpires card's home plate (UmpireTierGlyph), so the Attendance dot and the HP
-// ump dot match. Exported so the box score's own Attendance field
-// (BoxScore.jsx) draws the same glyph.
-export function CrowdIcon() {
-  return (
-    <svg viewBox="0 0 20 20" width="12" height="12" aria-hidden="true" fill="currentColor">
-      <circle cx="10" cy="6.5" r="2.6" />
-      <path d="M5 16c0-3 2.2-5 5-5s5 2 5 5Z" />
-      <circle cx="3.8" cy="8.8" r="1.8" />
-      <circle cx="16.2" cy="8.8" r="1.8" />
-      <path d="M1 15c0-2 1.3-3.5 3-3.5.6 0 1.1.1 1.5.4-.8.9-1.2 1.9-1.3 3.1ZM19 15c0-2-1.3-3.5-3-3.5-.6 0-1.1.1-1.5.4.8.9 1.2 1.9 1.3 3.1Z" />
-    </svg>
-  )
-}
-
 // The Attendance fact. When the park's capacity is on file (the 30 MLB
 // parks — see ballparkData.js) and tonight's attendance parses to a number, a
 // crowd glyph sits next to the figure and unfolds a small note with the
@@ -1107,7 +1010,7 @@ export function CrowdIcon() {
 // "full breakdown" modal since there's nothing more to show. MiLB parks and
 // any venue not on file, or an attendance value that won't parse, degrade to
 // the plain read-only Fact, per the app's graceful-degradation rule.
-function AttendanceFact({ venue, attendance }) {
+export function AttendanceFact({ venue, attendance }) {
   const [open, setOpen] = useState(false)
   const park = ballparkFor(venue)
   const count = attendance ? Number(attendance.replace(/,/g, '')) : null
@@ -1145,7 +1048,7 @@ function AttendanceFact({ venue, attendance }) {
 // venue name becomes a button that opens the to-scale field diagram, plus
 // league-ranked dimensions for an MLB park. Any venue not on file degrades to
 // the plain read-only Fact, per the app's graceful-degradation rule.
-function BallparkFact({ venue, venueId, gameDate }) {
+export function BallparkFact({ venue, venueId, gameDate }) {
   const [open, setOpen] = useState(false)
   if (!ballparkFor(venue, venueId) && !resolveBallparkLayout({ venueId, venueName: venue, gameDate })) {
     return <Fact label="Ballpark" value={venue} />

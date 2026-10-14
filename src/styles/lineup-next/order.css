@@ -1,0 +1,240 @@
+/* ==== THE BATTING ORDER CARD (docs/lineup-redesign.md, slice S3) ====
+   One row per batter: number, photo, name and meta, the career line against the starter, the
+   season AVG. A tap opens the rest of the season line on a phone. Wide screens show it in the row.
+   The band is this club's own, from the page root's theme. */
+
+.lord__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lord__item {
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+/* layout-exempt: lead, photo, name block and figures: a fixed row */
+.lord__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3h);
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.lord__avg:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.lord__lead {
+  flex: none;
+  min-width: 1.6em;
+  padding: var(--space-1) var(--space-1h);
+  background: var(--text-heading);
+  color: var(--surface-card);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-align: center;
+}
+.shot.lord__shot {
+  flex: none;
+  width: 40px;
+  height: 46px;
+  border: var(--bw-hair) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--bg-canvas);
+}
+/* layout-exempt: name, meta and vs line stacked */
+.lord__name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.plink.lord__link {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+/* layout-exempt: hand, number and pills on one wrapping line */
+.lord__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+}
+.lord__pos {
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--accent-tint);
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.lord__num {
+  color: var(--clay);
+  font-weight: var(--w-bold);
+}
+.lord__vs {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  text-transform: uppercase;
+}
+/* layout-exempt: AVG over OPS */
+.lord__avg {
+  min-height: var(--tap-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+}
+.lord__avg b {
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-medium);
+}
+.lord__avg small {
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+.lord__figure {
+  flex: none;
+  width: 54px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+}
+.lord__figure--lead {
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+}
+
+/* THE COLUMN HEADER sticks to the top while the order scrolls under it. */
+/* layout-exempt: a heading over the figures, one flex row */
+.lord__cols {
+  position: sticky;
+  top: env(safe-area-inset-top, 0);
+  z-index: var(--z-raised);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3h);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lord__cols span:first-child {
+  flex: 1;
+  padding-left: calc(var(--space-6) + var(--space-10));
+}
+.lord__cols span:not(:first-child) {
+  width: 54px;
+  text-align: right;
+}
+
+/* THE DETAIL: the rest of the season line, under an open row. */
+/* layout-exempt: a fixed six-cell row */
+.lord__det {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--bw-hair);
+  margin: 0;
+  background: var(--border-hairline);
+}
+.lord__det div {
+  padding: var(--space-2);
+  background: var(--surface-card);
+  text-align: center;
+}
+.lord__det dt {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lord__det dd {
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+/* THE BENCH: who could pinch-hit, with a career line against the starter. */
+.lord__bench {
+  padding: var(--space-3) var(--space-3h);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+.lord__benchhead {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.lord__benchlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: photo, name block and the career line in a row */
+.lord__benchrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.shot.lord__benchshot {
+  flex: none;
+  width: 32px;
+  height: 38px;
+  border: var(--bw-hair) solid var(--border-stamped);
+  border-radius: 0;
+}
+/* layout-exempt: a name over its position and number */
+.lord__benchname {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.plink.lord__benchlink {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+.lord__benchname small {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+.lord__benchline {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-align: right;
+}
+.lord__foot {
+  padding: var(--space-2) var(--space-3h) var(--space-3);
+}

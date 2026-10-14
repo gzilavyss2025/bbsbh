@@ -1,0 +1,238 @@
+/* ==== THE DEFENSIVE ALIGNMENT CARD (docs/lineup-redesign.md, slice S4) ====
+   The park drawing, with each fielder's surname on his spot. The drawing's own
+   ink is kept barely visible, so the names carry the card. */
+
+.lfld__field {
+  position: relative;
+  aspect-ratio: 620 / 510;
+  overflow: hidden;
+  background: var(--bg-canvas);
+}
+.lfld__park {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+}
+.lfld__node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+.lfld__name {
+  display: block;
+  max-width: 78px;
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-hair) solid var(--border-stamped);
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lfld__name a {
+  color: var(--text-heading);
+  text-decoration: none;
+}
+/* An empty spot: the hairline border and the caption ink, solid (dashed is for pencilled marks). */
+.lfld__name--tbd {
+  border-color: var(--border-hairline);
+  color: var(--text-caption);
+}
+/* layout-exempt: tag and name on one line */
+.lfld__dh {
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-1h) var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+.lfld__dh span {
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--accent-tint);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+.lfld__hint {
+  position: absolute;
+  inset-inline: 0;
+  bottom: var(--space-2);
+  margin: 0;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* THE FOLDED CARDS (Former teammates, Bullpen): the head is one wide button. */
+.lfold__title {
+  margin: 0;
+}
+/* layout-exempt: name, count and chevron on one line */
+.lfold__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3h);
+  border: 0;
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lfold__head.sectionhead--band {
+  background: var(--band-fill);
+}
+.lfold__head:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+.lfold__name {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lfold__count {
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--accent-tint);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+/* The band head: the other club's colours, its mono mark at the right, the chevron after it. */
+.lfold__head--band {
+  border-bottom: 3px solid var(--band-accent);
+  color: var(--band-text);
+}
+.lfold__head--band .lfold__name {
+  color: inherit;
+}
+.lfold__head--band .teamlogo-crop-bar {
+  height: 34px;
+  flex: none;
+}
+.lfold__head--band .lfold__chev {
+  color: inherit;
+}
+.lpen__sum {
+  margin: 0;
+  padding: var(--space-3) var(--space-3h) 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+}
+.lfold__chev {
+  width: 10px;
+  height: 10px;
+  border-right: var(--bw-heavy) solid currentColor;
+  border-bottom: var(--bw-heavy) solid currentColor;
+  transform: rotate(45deg);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.lfold__head[aria-expanded='true'] .lfold__chev {
+  transform: rotate(-135deg);
+}
+.lfold__body {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+
+/* THE BULLPEN BOARD: one colour, a filled cell for a day he pitched. */
+.lpen__board {
+  padding: var(--space-3) var(--space-3h);
+}
+/* layout-exempt: name, nine day cells and a total: a fixed row */
+.lpen__row {
+  display: grid;
+  grid-template-columns: minmax(70px, 1.6fr) repeat(8, minmax(0, 1fr)) 34px;
+  gap: var(--space-1);
+  align-items: center;
+}
+.lpen__row--head {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-align: center;
+  text-transform: uppercase;
+}
+.lpen__item {
+  padding: var(--space-1h) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.plink.lpen__name {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+.lpen__cell {
+  display: block;
+  min-height: 24px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
+  padding-block: var(--space-1h);
+  text-align: center;
+}
+.lpen__cell.is-on {
+  border-color: var(--border-stamped);
+  background: var(--text-heading);
+  color: var(--surface-card);
+}
+.lpen__cell.is-today {
+  border-color: var(--border-stamped);
+  background: var(--accent-tint);
+}
+.lpen__total {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-align: right;
+}
+.lpen__why {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--text-caption);
+}
+/* layout-exempt: key items on one wrapping line */
+.lpen__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+.lpen__key i {
+  display: inline-block;
+  width: 14px;
+  min-height: 14px;
+  margin-right: var(--space-1h);
+  vertical-align: middle;
+}

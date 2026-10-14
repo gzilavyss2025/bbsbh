@@ -10,7 +10,7 @@ import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 // service worker's CacheFirst rule store the response. `urls` is
 // `batterFigureUrls`' result, which the caller has already checked for null.
 // The box size lives in uniform-figure.css (.ufig).
-function UniformFigure({ urls, label, onError }) {
+export function UniformFigure({ urls, label, onError }) {
   const img = (src, alt) => (
     <img
       className="ufig__img"

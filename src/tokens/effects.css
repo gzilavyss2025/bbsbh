@@ -32,6 +32,13 @@
   --shadow-stamped:      var(--stamped-offset) var(--stamped-offset) 0 var(--border-stamped);
   --shadow-stamped-soft: var(--stamped-offset) var(--stamped-offset) 0 var(--border-stamped-soft);
 
+  /* The band texture of the lineup page (docs/lineup-redesign.md): ripple rings and sheen. */
+  --ripple-light: rgb(255 255 255 / 0.2);
+  --ripple-dark: rgb(0 0 0 / 0.22);
+  --ripple-mask: black;
+  --sheen-light: rgb(255 255 255 / 0.14);
+  --sheen-dark: rgb(0 0 0 / 0.14);
+
   /* Focus ring */
   --ring: 0 0 0 3px rgba(47,110,79,0.35);
 

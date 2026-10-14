@@ -1,0 +1,334 @@
+/* ==== THE STARTING PITCHER CARD (docs/lineup-redesign.md) ====
+   Photo and name, four season cells, boxed last-start and career lines, then the pitch mix in a
+   card of its own. The band is the OTHER club's, because it is that club's arm (ADR-0030). */
+
+/* layout-exempt: photo beside the name block, two fixed parts */
+.lsp__who {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3h);
+}
+.shot.lsp__shot {
+  flex: none;
+  width: 64px;
+  height: 76px;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--bg-canvas);
+}
+/* layout-exempt: name, meta and pills stacked */
+.lsp__id {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.plink.lsp__name {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+/* layout-exempt: hand and number on one line */
+.lsp__meta {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.lsp__hand {
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--accent-tint);
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+}
+.lsp__jersey {
+  color: var(--clay);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+}
+/* layout-exempt: pills on one wrapping line */
+.lsp__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1h);
+}
+
+/* THE SEASON CELLS: four across, the first one ink. */
+/* layout-exempt: a fixed four-cell row */
+.lsp__cells {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--bw-hair);
+  margin: 0;
+  border-block: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--border-hairline);
+}
+.lsp__cell {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+}
+.lsp__cell--lead {
+  background: var(--text-heading);
+  color: var(--surface-card);
+}
+.lsp__celllabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lsp__cellvalue {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+
+/* THE STRIPS: a heading line, then the figures in boxes. */
+.lsp__rows {
+  padding: var(--space-3) var(--space-3h) 0;
+}
+.lsp__strip {
+  margin-bottom: var(--space-3);
+}
+/* layout-exempt: title, date and door on one line */
+.lsp__striphead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.lsp__striptitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lsp__stripwhen {
+  flex: 1;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+}
+.lsp__seeall,
+.plink.lsp__seeall {
+  margin-left: auto;
+  color: var(--field);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+/* layout-exempt: five boxed figures, a fixed row */
+.lsp__boxes {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+/* layout-exempt: a figure over its label */
+.lsp__box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1);
+}
+.lsp__box + .lsp__box {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+.lsp__boxvalue {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-medium);
+}
+.lsp__boxlabel {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+.lsp__thisyear {
+  margin: 0 0 var(--space-3);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+}
+/* The career strip is a door: the whole strip is the button, drawn as a plain block. */
+.lsp .lsp__career.door {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+/* THE PITCH MIX CARD, inside the starter card. */
+.lmix {
+  margin: var(--space-1) var(--space-3h) var(--space-3h);
+  padding: var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+/* layout-exempt: title block beside the Watch button */
+.lmix__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.lmix__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lmix__sub {
+  margin: var(--space-1) 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+}
+.lmix__watch {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+/* layout-exempt: a label beside its segmented control */
+.lmix__segrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.lmix__seglabel {
+  flex: none;
+  width: 5em;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+/* layout-exempt: the segments share the row */
+.lmix__seg {
+  flex: 1;
+  display: flex;
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.lmix__segbtn {
+  flex: 1;
+  min-height: 36px;
+  padding: 0 var(--space-1h);
+  border: 0;
+  white-space: nowrap;
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.lmix__segbtn + .lmix__segbtn {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+.lmix__segbtn.is-active {
+  background: var(--text-heading);
+  color: var(--surface-card);
+}
+.lmix__segbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+.lmix__segn {
+  margin-left: var(--space-1h);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+}
+.lmix__segbtn.is-active .lmix__segn {
+  color: inherit;
+}
+.lmix__list {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: mark, name, bar, share and speed: a fixed row */
+.lmix__row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1.5fr) minmax(0, 1fr) 48px 52px;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-1h) 0;
+}
+.lmix__row.is-active {
+  background: var(--surface-inset);
+}
+.lmix__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lmix__bar {
+  height: 10px;
+  background: var(--border-hairline);
+}
+.lmix__bar i {
+  display: block;
+  height: 100%;
+  border: var(--bw-hair) solid var(--border-stamped);
+}
+.lmix__pct,
+.lmix__velo {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-align: right;
+}
+.lmix__velo {
+  color: var(--text-caption);
+}
+.lmix__shift {
+  margin-left: var(--space-1);
+  font-size: var(--fs-label);
+}
+.lmix__scene {
+  /* The scene runs edge to edge across the pitch mix card, under its list. */
+  margin: var(--space-3) calc(-1 * var(--space-3)) calc(-1 * var(--space-3));
+  border-width: var(--bw-heavy) 0 0;
+  border-style: solid;
+  border-color: var(--border-stamped);
+  border-radius: 0;
+}

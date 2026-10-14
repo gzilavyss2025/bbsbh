@@ -62,7 +62,7 @@ export function StarterMix({ arsenal, tto, sides, lefty, name }) {
 // The phone sheet: the app's bottom sheet (.scrim/.sheet), the Now Pitching
 // card's scene and tiles, and a Close button. A tap on the dimmed backdrop,
 // or Escape, closes it too; focus goes back to the door.
-function MixSheet({ tiles, lefty, name, onClose }) {
+export function MixSheet({ tiles, lefty, name, onClose }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
   return (
