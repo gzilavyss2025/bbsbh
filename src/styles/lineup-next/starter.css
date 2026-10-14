@@ -1,0 +1,136 @@
+/* ==== THE STARTING PITCHER CARD (docs/lineup-redesign.md, slice S2) ====
+   Photo and name, four season cells, the last-start strips, then the pitch mix. The band is the
+   OTHER club's, because it is that club's arm (ADR-0030). */
+
+/* layout-exempt: photo beside the name block, two fixed parts */
+.lsp__who {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3h);
+}
+.shot.lsp__shot {
+  flex: none;
+  width: 72px;
+  height: 84px;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--bg-canvas);
+}
+/* layout-exempt: name, meta and pills stacked */
+.lsp__id {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+}
+.plink.lsp__name {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+/* layout-exempt: hand and number on one line */
+.lsp__meta {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.lsp__hand,
+.lsp__jersey {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+/* layout-exempt: pills on one wrapping line */
+.lsp__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1h);
+}
+
+/* THE SEASON CELLS: four across, the first one ink. */
+/* layout-exempt: a fixed four-cell row */
+.lsp__cells {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--bw-hair);
+  margin: 0;
+  border-block: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--border-hairline);
+}
+.lsp__cell {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+}
+.lsp__cell--lead {
+  background: var(--text-heading);
+  color: var(--surface-card);
+}
+.lsp__celllabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lsp__cellvalue {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-medium);
+}
+
+/* THE STRIPS: a label, then the line. */
+.lsp__rows {
+  padding: var(--space-2) var(--space-3h);
+}
+/* layout-exempt: a label over its line */
+.lsp__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.lsp__rowlabel {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.lsp__rowtext {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+
+/* THE PITCH MIX on a phone: the list, with a small Watch button over its corner. */
+.starter__mix--phone {
+  position: relative;
+  padding: var(--space-2) var(--space-3h) var(--space-3h);
+}
+.starter__watchbtn {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-3h);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.starter__watchbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

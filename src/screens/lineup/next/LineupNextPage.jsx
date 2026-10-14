@@ -5,9 +5,12 @@ import { LineupDock } from './LineupDock.jsx'
 import { LineupFacts } from './LineupFacts.jsx'
 import { LineupHero } from './LineupHero.jsx'
 import { LineupJumpBar } from './LineupJumpBar.jsx'
+import { StarterCard } from './cards/StarterCard.jsx'
+import { useLineupData } from './useLineupData.js'
 import { lineupIdentity } from './lineupIdentity.js'
 import { useLineupSeries } from './useLineupSeries.js'
 import '../../../styles/lineup-next/page.css'
+import '../../../styles/lineup-next/starter.css'
 
 // The new lineup page (docs/lineup-redesign.md), at `?look=new` on lineup1 and lineup2.
 // It takes the props TeamInfo takes, plus the game chrome the live page leaves to GameView
@@ -16,12 +19,19 @@ import '../../../styles/lineup-next/page.css'
 export function LineupNextPage({
   feed, side, game, tabs, onSection, isLive, keepAwake, onSetKeepAwake, officialDate, onSketch,
   manager, uniform, uniformFigure, treatment, oppTreatment, broadcast, scorebookWeather, scorebookWeatherLoading,
+  oppPitcherLine, vsTeam, prospectsData, rookiesData, formerTeammatesData, careerMatchupsData, workloadData, callouts,
   onNext, nextLabel, onCatchUp = null, onReload, loading, lastUpdated,
 }) {
   const id = lineupIdentity(feed, side, treatment, oppTreatment)
   const info = selectGameInfo(feed)
   const officials = selectOfficials(feed)
   const series = useLineupSeries(feed, officialDate)
+  const data = {
+    ...useLineupData({ feed, side, vsTeam, careerMatchupsData, workloadData, formerTeammatesData, oppPitcherLine }),
+    prospectsData,
+    rookiesData,
+    callouts,
+  }
   return (
     <div className={`lnext ${headerThemeClass(id.theme)}`.trim()} style={headerThemeStyle(id.theme, id.masthead.scale)}>
       <Stack gap="section" className="lnext__page">
@@ -41,6 +51,7 @@ export function LineupNextPage({
         />
         </LineupHero>
         <LineupJumpBar tabs={tabs} onSection={onSection} />
+        <StarterCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
         <LineupDock
           onReload={onReload}
           loading={loading}

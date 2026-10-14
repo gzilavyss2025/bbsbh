@@ -923,7 +923,7 @@ function ClubHead({ title, teamId, teamName, masthead, season, children }) {
 
 // "LAST: 7/12 AT BOS (AAA) — 6.0 IP · 5 H · 2 ER · 6 K" — the compact line
 // under .starter__last's dotted divider (see fetchPitcherLastGame).
-function lastGameLine(g) {
+export function lastGameLine(g) {
   const md = monthDay(g.date)
   const where = g.opponent ? `${g.home ? 'vs' : '@'} ${g.opponent}${g.level ? ` (${g.level})` : ''}` : ''
   const stat = [
@@ -943,7 +943,7 @@ function lastGameLine(g) {
 // exactly like lastGameLine since that's what it is: a single past outing.
 // The common case there's more than one, "3 GS vs MIL this year: ..." — no
 // single date to lead with, so it reads like the season-line row instead.
-function seasonVsOpponentLine(v, oppAbbr) {
+export function seasonVsOpponentLine(v, oppAbbr) {
   const stat = [
     v.inningsPitched && `${v.inningsPitched} IP`,
     `${v.hits} H`,
