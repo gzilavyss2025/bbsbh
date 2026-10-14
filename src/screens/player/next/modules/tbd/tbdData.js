@@ -26,7 +26,7 @@ import {
 } from '../../../../../api/savantPercentiles.js'
 import { awardLedgerFor, transactionRowsFor } from '../../../../../api/player/history.js'
 import { dayBefore, yearByYearFor } from '../../../../../api/player/context.js'
-import { isoToday } from '../../../../../lib/dates.js'
+import { isoToday, photoGameRows } from '../../../../../lib/dates.js'
 
 // bio.team carries `parentOrgId` only for a minor-league club (api/person/identity.js).
 // ponytail: a big leaguer on a rehab stint reads as minor here; the live tab pins him to MLB.
@@ -78,11 +78,7 @@ export async function transactionsFor(bio, asOf) {
 // the Photos rail's walk-back list. PlayerPage.jsx's PlayerPhotosSection does the same read.
 export async function photoGamesFor(bio, season) {
   const group = bio.isPitcher ? 'pitching' : 'hitting'
-  const today = isoToday()
-  return (await fetchPersonStats(bio.id, { type: 'gameLog', group, season, sportId: 1 }))
-    .filter((s) => s.game?.gamePk && s.date && s.date !== today)
-    .map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
-    .sort((a, b) => (a.apiDate < b.apiDate ? -1 : a.apiDate > b.apiDate ? 1 : 0))
+  return photoGameRows(await fetchPersonStats(bio.id, { type: 'gameLog', group, season, sportId: 1 }))
 }
 
 // The pitcher's two OpenCommand cards: each file holds one season, so a page on another gets none.
