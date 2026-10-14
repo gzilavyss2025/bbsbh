@@ -8,7 +8,8 @@ to reach for from anywhere. At the top level: `Loader`, `SectionMasthead`, `Copy
 - **`dock/`** — `SheetDock`, the phone's bottom sheet (rail / half / full) that the wire
   and the postseason bracket both sit in, and its pure `dockPhysics.js`.
 - **`control/`** — `Button`, `Door` and `Pill` (#1130, #1131): a button acts here, a door
-  leaves, a pill is a capsule.
+  leaves, a pill is a capsule. `Segmented` (#2073) is a joined row of 44px `.btn` toggles
+  for a choice inside a card: a group of Buttons, not a fourth control.
 - **`frame/`** — `SectionHead`, the one head a section or card wears (#1113;
   `SectionMasthead` is its thin band wrapper), and `Card`, the one box a section sits on:
   `frame` sheet, ledger or stamped (the player redesign, #1882: `label` name tab, `count`
