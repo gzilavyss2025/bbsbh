@@ -132,10 +132,6 @@
 .lfold__head--band .lfold__name {
   color: inherit;
 }
-.lfold__head--band .teamlogo-crop-bar {
-  height: 34px;
-  flex: none;
-}
 .lfold__head--band .lfold__chev {
   color: inherit;
 }

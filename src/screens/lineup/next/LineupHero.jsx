@@ -35,10 +35,9 @@ function HeroBand({ id, series, position }) {
         <TeamLogo
           teamId={meta.id}
           name={meta.name}
-          size={26}
+          size={30}
           variant="mono"
-          crop="bar"
-          overrideUrl={masthead.url}
+                    overrideUrl={masthead.url}
           season={season}
           className={`sectionhead__mark${masthead.url ? ' sectionhead__mark--custom' : ''}`}
         />
