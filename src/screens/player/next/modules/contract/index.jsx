@@ -100,7 +100,12 @@ function History({ past }) {
     <details className="cnext__hist">
       <summary>
         <span className="cnext__histname">Salary history</span>
-        <span className="cnext__histsub">{past.total} · {past.seasons} {past.seasons === 1 ? 'season' : 'seasons'}</span>
+        <span className="cnext__histend">
+          <span className="cnext__histsub">{past.total} · {past.seasons} {past.seasons === 1 ? 'season' : 'seasons'}</span>
+          <svg className="cnext__chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+            <path d="M2 5l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="square" />
+          </svg>
+        </span>
       </summary>
       <p className="cnext__note">
         {past.label}: {past.total}
