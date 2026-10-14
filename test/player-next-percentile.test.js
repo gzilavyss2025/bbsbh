@@ -82,7 +82,7 @@ test('the detail line and the spoken label come from the numbers', () => {
   assert.match(x.aria, /80th percentile/)
   assert.match(row(v, 'chase').aria, /lower is better/)
   const p = percentileView(data, 688107, 'pitching', 2026)
-  assert.equal(row(p, 'k').detail, 'His 22.3% · MLB median 22.3% · better than 49% of all pitchers')
+  assert.equal(row(p, 'k').detail, 'His 22.3% · MLB median 22.3% · better than 49% of 1 pitcher')
 })
 
 test('the sentence is the bare gloss, and swing length says Savant ranks a longer swing higher', () => {
@@ -97,7 +97,7 @@ test('a missing raw number or median prints a dash with no unit, never 0', () =>
   const x = row(noRaw, 'hardHit')
   assert.equal(x.value, '—')
   assert.equal(x.baseline, '—')
-  assert.equal(x.detail, 'His — · MLB median — · better than 54% of 612 hitters')
+  assert.equal(x.detail, 'His — · MLB median — · better than 54% of 2 hitters')
 })
 
 test('no view: another season, a player not on file, under three rows, no file', () => {
@@ -106,4 +106,12 @@ test('no view: another season, a player not on file, under three rows, no file',
   assert.equal(percentileView(data, 2, 'hitting', 2026), null)
   assert.equal(percentileView(null, 668930, 'hitting', 2026), null)
   assert.equal(percentileView({ season: null, bat: {}, pit: {} }, 668930, 'hitting', 2026), null)
+})
+
+test('each row counts its own ranked pool, and swing length is not "better than"', () => {
+  const v = percentileView(data, 668930, 'hitting', 2026)
+  // Only Turang is ranked on bat speed in the fixture: a pool of 1, not 612.
+  assert.match(row(v, 'batSpeed').detail, /of 1 hitters?$/)
+  assert.doesNotMatch(row(v, 'swingLength').detail, /better than/)
+  assert.match(row(v, 'swingLength').detail, /8th percentile of 1 hitter/)
 })

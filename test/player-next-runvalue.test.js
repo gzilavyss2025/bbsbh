@@ -87,3 +87,13 @@ test('no view when he is not in the file, or the file is another season', () => 
   assert.equal(runValueView(data, 668930, 2025), null)
   assert.equal(runValueView(null, 668930, 2026), null)
 })
+
+test('the sentence never prints a part bigger than the total, and never calls an offset part "all of it"', () => {
+  const one = (p) => runValueView({ season: 2026, players: [{ id: 5, name: 'X', pit: 0, ...p }] }, 5, 2026).sentence
+  // bat +25 with fld -10: batting is more than the whole +15.
+  assert.equal(one({ bat: 25, fld: -10, run: 0 }), 'Batting carries it: 25 runs at the plate, against 15 overall.')
+  // bat +12 with run -5 cancelled out: not "all of it".
+  assert.doesNotMatch(one({ bat: 12, fld: 5, run: -5 }), /All of it/)
+  // Three parts under a run each, 2 overall: not "within a run of average".
+  assert.equal(one({ bat: 0.8, fld: 0.7, run: 0.6 }), 'Spread across the parts: no one part reaches a run.')
+})

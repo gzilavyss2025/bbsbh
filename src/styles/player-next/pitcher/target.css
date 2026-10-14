@@ -78,7 +78,7 @@
   align-items: flex-end;
 }
 .target__val b {
-  font-size: var(--fs-lead, 1.1rem);
+  font-size: var(--fs-h3);
 }
 .target__val small {
   font-size: var(--fs-label);

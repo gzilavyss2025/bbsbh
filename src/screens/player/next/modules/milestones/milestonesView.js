@@ -15,7 +15,8 @@ export function milestonesView({ rows, projections = [], paused = false, asOf = 
     note: paused && !asOf ? MILESTONE_PAUSE_NOTE : null,
     rows: rows.map((r, i) => {
       const prev = MILESTONE_DEFS.find((d) => d.stat === r.stat)?.thresholds.filter((t) => t < r.threshold).pop() ?? 0
-      const proj = projections.find((p) => p.stat === r.stat)
+      // The nightly file projects today's chase; a dated page can show an earlier mark of the same stat.
+      const proj = projections.find((p) => p.stat === r.stat && p.threshold === r.threshold)
       return {
         key: r.stat,
         label: r.label,

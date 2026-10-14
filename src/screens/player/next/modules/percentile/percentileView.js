@@ -2,8 +2,7 @@
 // an open surface (ADR-0034), so nothing here is sealed.
 import { medianRatesFor, percentileRows, savantPercentilesFor, savantRawFor } from '../../../../../api/savantPercentiles.js'
 import { ordinal } from '../../../../../lib/format.js'
-
-const DASH = '—'
+import { DASH } from '../../../../../api/person/shared.js'
 
 // Savant ranks a longer swing higher and the app keeps that order (#1984, Q4), so the shared
 // sentence ("a shorter swing gets there quicker") is wrong on this card.
@@ -28,6 +27,14 @@ export function percentileView(data, id, role, season) {
   const bare = percentileRows(savant, raw, role, null)
   if (!bare) return null
   const withMedian = percentileRows(savant, raw, role, medianRatesFor(data, role))
+  // Savant ranks each metric against its own qualified pool (bat tracking is a much smaller one),
+  // so each row counts the players ranked on that metric.
+  const ranks = Object.values((role === 'pitching' ? data.pit : data.bat) ?? {})
+  const noun = role === 'pitching' ? 'pitcher' : 'hitter'
+  const poolOf = (key) => {
+    const n = ranks.filter((r) => r?.[key] != null).length
+    return `${n.toLocaleString()} ${noun}${n === 1 ? '' : 's'}`
+  }
   const pool = role === 'pitching' ? 'all pitchers' : `${Object.keys(data.bat ?? {}).length} hitters`
   const rows = bare.map((r) => {
     const value = r.value ?? DASH
@@ -44,8 +51,9 @@ export function percentileView(data, id, role, season) {
       lowerIsBetter: r.lowerIsBetter,
       def,
       ...tierOf(r.percentile),
-      detail: `His ${value} · MLB median ${baseline} · better than ${r.percentile}% of ${pool}`,
-      aria: `${r.label}: ${value}, MLB median ${baseline}, ${ord} percentile of ${pool}${r.lowerIsBetter ? '; lower is better, the rank already counts that' : ''}.`,
+      // Swing length keeps Savant's order: a high rank is a long swing, not a better one.
+      detail: `His ${value} · MLB median ${baseline} · ${r.key === 'swingLength' ? `${ord} percentile of` : `better than ${r.percentile}% of`} ${poolOf(r.key)}`,
+      aria: `${r.label}: ${value}, MLB median ${baseline}, ${ord} percentile of ${poolOf(r.key)}${r.lowerIsBetter ? '; lower is better, the rank already counts that' : ''}.`,
     }
   })
   return { rows, pool, tag: `vs ${pool}`, season: Number(data.season) }

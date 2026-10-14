@@ -6,7 +6,7 @@ import { milestonesFor } from '../src/screens/player/next/modules/milestones/mil
 
 // public/data/milestones.json, 2026-10-13.
 const yelich = [{ threshold: 250, value: 245, remaining: 5, stat: 'homeRuns', label: 'HR' }]
-const yelichProj = [{ stat: 'homeRuns', projection: { kind: 'year', year: 2027 } }]
+const yelichProj = [{ stat: 'homeRuns', threshold: 250, projection: { kind: 'year', year: 2027 } }]
 const jansen = [{ threshold: 500, value: 498, remaining: 2, stat: 'saves', label: 'SV' }]
 
 test('Yelich: bar 200..250 fills 90%, year projection, one mark', () => {
@@ -66,4 +66,10 @@ test('loader: asOf asks for endDate = the day before; minors and no debut load n
   assert.deepEqual(await milestonesFor({ id: 1, debut: '2010-01-01', team: { parentOrgId: 9 } }, 'hitting', 2026, null, stub), [])
   assert.deepEqual(await milestonesFor({ id: 1 }, 'hitting', 2026, null, stub), [])
   assert.equal(calls.length, 0)
+})
+
+test('a projection prints only under the milestone it projects, matched by stat and threshold', () => {
+  // A dated season shows the 250 mark; last night's file projects the 300 chase.
+  const v = milestonesView({ rows: yelich, projections: [{ stat: 'homeRuns', threshold: 300, projection: { kind: 'year', year: 2029 } }], role: 'hitting' })
+  assert.equal(v.rows[0].eta, null)
 })

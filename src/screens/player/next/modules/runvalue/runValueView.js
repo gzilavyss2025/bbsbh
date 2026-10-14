@@ -13,11 +13,15 @@ const round = (n) => Math.round(n ?? 0)
 
 function sentence(view, keys) {
   const total = view.total
+  const parts = keys.map((key) => ({ key, v: view[key] ?? 0 })).sort((a, b) => b.v - a.v)
+  const best = parts[0]
   if (Math.abs(total) < 1) return 'A season within a run of average overall.'
   if (total < 0) return 'Below average overall.'
-  const best = keys.map((key) => ({ key, v: view[key] ?? 0 })).sort((a, b) => b.v - a.v)[0]
-  if (!best || best.v < 1) return 'A season within a run of average overall.'
-  if (round(best.v) === round(total)) return `All of it is ${prose(best.key)}: ${round(total)} runs came ${CAME[best.key]}.`
+  if (!best || best.v < 1) return 'Spread across the parts: no one part reaches a run.'
+  // A part bigger than the whole: the others took runs away, so no share of the total is true.
+  if (round(best.v) > round(total)) return `${LABEL[best.key]} carries it: ${round(best.v)} runs ${CAME[best.key]}, against ${round(total)} overall.`
+  const others = parts.slice(1).every((p) => Math.abs(p.v) < 0.5)
+  if (others) return `All of it is ${prose(best.key)}: ${round(total)} runs came ${CAME[best.key]}.`
   const lead = best.v * 2 > total ? 'Most of it is' : 'The biggest piece is'
   return `${lead} ${prose(best.key)}: ${round(best.v)} of the ${round(total)} runs came ${CAME[best.key]}.`
 }

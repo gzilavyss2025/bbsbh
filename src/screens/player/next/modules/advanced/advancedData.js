@@ -11,7 +11,8 @@ export async function loadAdvanced(bio, role, season, asOf) {
   const [fetchBundle, view] = role === 'pitching' ? [fetchPitchingAdvanced, advancedPitchingView] : [fetchHittingAdvanced, advancedHittingView]
   const [reg, post, rates] = await Promise.all([
     fetchBundle(bio.id, season),
-    !asOf && (await postseasonStarted(season)) ? fetchBundle(bio.id, season, { gameType: 'P' }) : null,
+    // Not an await inside the array: that would hold the league read until the season check returns.
+    asOf ? null : postseasonStarted(season).then((on) => (on ? fetchBundle(bio.id, season, { gameType: 'P' }) : null)),
     leagueRates(season).catch(() => null),
   ])
   const regular = view(reg)
