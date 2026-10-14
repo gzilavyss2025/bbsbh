@@ -13,6 +13,8 @@ import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
 import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
+import { FlightMarks, useFlightClock } from './ContactFlight.jsx'
+import { flightFrame, flightOf } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
 
 // The batter Contact module (#1888): where each ball went, tapped for its exit velocity, launch
@@ -49,6 +51,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const [color, setColor] = useState('result')
   const [type, setType] = useState(null)
   const [sel, setSel] = useState(null)
+  const [shot, setShot] = useState(0) // counts taps, so a second tap on one ball flies it again
   // The dots drop in the first time the field is in view (spec.md, the one-shot rule), and
   // again on each view or type pick: `gen` swaps the a/b class, which restarts the drop.
   const [gen, setGen] = useState(0)
@@ -65,6 +68,18 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const shown = useMemo(() => (card ? pickBalls(card.balls, view, type) : []), [card, view, type])
   const marks = useMemo(() => shown.map((b) => ({ b, p: hitCoordToSvg(b.x, b.y) })).filter((m) => m.p), [shown])
 
+  const cur = sel && shown.includes(sel) ? sel : null
+  const curMark = cur ? marks.find((m) => m.b === cur) : null
+  const model = useMemo(
+    () => (curMark ? flightOf(curMark.b, Math.hypot(curMark.p.x - HOME.x, curMark.p.y - HOME.y)) : null),
+    [curMark],
+  )
+  const t = useFlightClock(shot, model)
+  const dotR = (b) => (b.result === 'hr' ? 11 : 9)
+  const frame = model ? flightFrame(model, t, { home: HOME, land: curMark.p, dotR: dotR(cur), hr: cur.result === 'hr' }) : null
+  const flying = !!frame?.flying
+  const tap = (b) => { setSel(b); setShot((s) => s + 1) }
+
   const empty = !!error || (!!data && !card)
   useEffect(() => {
     if (empty) onEmpty()
@@ -76,7 +91,6 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   if (empty) return null
   if (!card) return <div ref={fieldRef} className="fcontact fcontact--wait" aria-busy="true"><p className="hint">Loading the contact…</p></div>
 
-  const cur = sel && shown.includes(sel) ? sel : null
   const detail = cur && ballDetail(cur)
   const pick = (set, v) => { set(v); setSel(null); setGen((g) => g + 1) }
   // wait: the dots hide until the field shows. play: the first sighting this visit.
@@ -115,31 +129,44 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
                 {marks.map(({ b, p }, i) => (
                 <circle
                   key={i}
-                  className={`fcontact__dot fcontact__dot--${markKey(b, color)}${b === cur ? ' fcontact__dot--sel' : ''}`}
+                  className={`fcontact__dot fcontact__dot--${markKey(b, color)}${b === cur ? ' fcontact__dot--sel' : ''}${b === cur && flying ? ' fcontact__dot--hide' : ''}`}
                   style={{ '--fcontact-f': marks.length > 1 ? (i / (marks.length - 1)).toFixed(3) : '0' }}
                 cx={p.x}
                   cy={p.y}
-                  r={b.result === 'hr' ? 11 : 9}
+                  r={dotR(b)}
                   tabIndex={0}
                   role="button"
                   aria-label={`${ballDetail(b).eyebrow}${b.exitVelo == null ? '' : `, ${b.exitVelo} mph`}`}
-                  onClick={() => setSel(b)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSel(b) } }}
+                  onClick={() => tap(b)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(b) } }}
                 />
               ))}
             </g>
+            {frame && <FlightMarks frame={frame} home={HOME} />}
           </svg>
         </div>
-        <div className="fcontact__detail" aria-live="polite">
+        <div className={`fcontact__detail${flying ? ' fcontact__detail--fly' : ''}`}>
+          <span className="sr-only" aria-live="polite">
+            {cur && !flying ? `${detail.eyebrow}${cur.distance == null ? '' : `, ${cur.distance} feet`}, ${detail.when}` : ''}
+          </span>
           {detail ? (
             <>
-              <span className="fcontact__eyebrow">{detail.eyebrow}</span>
+              <span className="fcontact__eyebrow">
+                {flying ? (cur.launchAngle != null && cur.launchAngle < 10 ? 'On the ground' : 'In the air') : detail.eyebrow}
+              </span>
               <span className="fcontact__when">{detail.when}</span>
-              <span className="fcontact__big">{detail.big}<small>{detail.unit}</small></span>
+              <span className="fcontact__big">
+                {flying && cur.distance != null ? Math.round(cur.distance * frame.fr) : detail.big}
+                <small>{detail.unit}</small>
+              </span>
               <dl className="fcontact__stats">
-                {detail.stats.map(([k, v]) => (
-                  <div key={k}><dd>{v}</dd><dt>{k}</dt></div>
-                ))}
+                {detail.stats.map(([k, v], i) =>
+                  i < 2 ? (
+                    <div key={k}><dd>{v}</dd><dt>{k}</dt></div>
+                  ) : (
+                    <div key={k} className="fcontact__rise" style={{ '--fcontact-i': i - 2 }}><dd>{v}</dd><dt>{k}</dt></div>
+                  ),
+                )}
               </dl>
             </>
           ) : (
