@@ -1,22 +1,9 @@
 /* ==== THE PITCHER'S FOUL BALLS CARD (#2016) ====
    The card reuses the batter card's classes (batter/fouls.css). This file holds what the pitcher card alone needs. */
 
-/* layout-exempt: two equal scope buttons across the card */
+/* The Regular season / Postseason row (a Segmented): its place on the card. */
 .pfouls__scope {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
   margin-bottom: var(--space-4);
-}
-/* layout-exempt: the scope's name over its game count */
-.pfouls__opt {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.pfouls__g {
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
 }
 
 /* The ends from his side: a strikeout is good for him, a hit bad (the batter card is the other way). */
