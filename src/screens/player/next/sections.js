@@ -64,6 +64,7 @@ export const SLOTS = [
   { id: 'tbd-mound', module: 'tbd', section: 'on-the-mound', label: 'More on the mound', roles: P, load: () => import('./modules/tbd/index.jsx') },
   { id: 'path', module: 'path', section: 'career', label: 'Path to the Majors', roles: HP, load: () => import('./modules/path/index.jsx') },
   { id: 'prospects', module: 'prospects', section: 'career', label: 'Prospect rankings', roles: HP, load: () => import('./modules/prospects/index.jsx') },
+  { id: 'prospect', module: 'prospect', section: 'career', label: 'Prospect performance', roles: HP, once: true, load: () => import('./modules/prospect/index.jsx') },
   { id: 'tbd-career', module: 'tbd', section: 'career', label: 'More career', roles: HP, load: () => import('./modules/tbd/index.jsx') },
   { id: 'firsts', module: 'firsts', section: 'history', label: 'Firsts', roles: HP, load: () => import('./modules/firsts/index.jsx') },
   { id: 'innings', module: 'innings', section: 'history', label: 'Innings by position', roles: HP, pair: 'a', load: () => import('./modules/innings/index.jsx') },
