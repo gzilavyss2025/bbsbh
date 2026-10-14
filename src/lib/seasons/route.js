@@ -39,7 +39,7 @@ function seasonSegment(base, { seasonYear, vs } = {}) {
 // Regular is the bare address, so it is never written and a value we do not
 // know is dropped.
 const PITCH_SCOPES = new Set(['post', 'all'])
-export const pitchScopeOf = (v) => (PITCH_SCOPES.has(v) ? v : null)
+const pitchScopeOf = (v) => (PITCH_SCOPES.has(v) ? v : null)
 
 export function seasonPath(base, season) {
   const { path, vs } = seasonSegment(base, season)

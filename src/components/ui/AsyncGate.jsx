@@ -5,7 +5,7 @@ import { EmptyState } from './state/EmptyState.jsx'
 import { Notice } from './state/Notice.jsx'
 import { Button } from './control/Button.jsx'
 
-// The cold-load loading/error/not-found screen shared by PlayerPage and
+// The cold-load loading/error/not-found screen shared by the player page and
 // TeamPage: while there's no data yet, show "Loading {noun}…"; if the fetch
 // settles with nothing, show a retry-or-not-found message. Call as a plain
 // function (not JSX) and early-return its result when non-null — once `data`

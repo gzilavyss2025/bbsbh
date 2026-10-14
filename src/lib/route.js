@@ -196,7 +196,8 @@ const TEAM_TAB_ROUTES = {
 
 // The old player-hub tab addresses (#1898). The tabs are gone: each opens the one
 // player page, which scrolls to the tab's section, so every shared link still works.
-// Any other segment, or a fourth one (the old '/analytics/{year}'), is the bare page.
+// Any other segment is the bare page; a fourth one (the old '/analytics/{year}') is
+// dropped, and the tab it hangs off is kept.
 const PLAYER_OLD_TABS = new Set(['stats', 'analytics', 'history'])
 
 // --- Addresses that carry a name -------------------------------------------

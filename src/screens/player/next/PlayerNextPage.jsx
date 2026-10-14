@@ -36,12 +36,16 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
   useEffect(() => {
     if (!tab || !core.data || !overview.data) return
     const el = document.getElementById(tabSection(tab, rolesOf(core.data.bio, overview.data.blocks)))
+    // The landing is done once: the address becomes the bare page (keeping ?d= and ?s=),
+    // so Back or a reload does not scroll the reader away from where they were.
+    window.history.replaceState(window.history.state, '', window.location.pathname.replace(/\/(stats|analytics|history)(\/[^/]*)?\/?$/, '') + window.location.search)
     if (!el) return
-    el.scrollIntoView()
-    // Slots above it load as they come near and grow, which pushes the section down.
-    // Hold it at the top until the reader moves.
+    if (typeof ResizeObserver === 'undefined') return el.scrollIntoView()
+    // The observer fires once on observe(), which is the first scroll. Slots above the
+    // section load as they come near and grow, which pushes it down: hold it at the top
+    // until the reader moves, or until its own module empties it off the page.
     // ponytail: a fixed 4 s hold; a slot that loads later than that can still push it.
-    const hold = new ResizeObserver(() => el.scrollIntoView())
+    const hold = new ResizeObserver(() => (el.isConnected ? el.scrollIntoView() : stop()))
     hold.observe(el.parentElement)
     const MOVES = ['wheel', 'touchstart', 'keydown', 'pointerdown']
     const stop = () => {
