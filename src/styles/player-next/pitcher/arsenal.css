@@ -157,6 +157,27 @@
   }
 }
 
+/* A picked pitch leaves the others as ghosts: drawn whole, never drawn in, fading up to 0.22 after the
+   replay starts (board: 400ms from 300ms). */
+.arsenal__path--ghost {
+  opacity: 0.22;
+  animation: arsenal-ghost var(--dur-unfold) var(--ease-unfold) calc(var(--dur-unfold) * 0.75) backwards;
+}
+.arsenal__side .arsenal__path--ghost .arsenal__halo,
+.arsenal__side .arsenal__path--ghost .arsenal__trail {
+  animation: none;
+}
+@keyframes arsenal-ghost {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arsenal__path--ghost {
+    animation: none;
+  }
+}
+
 /* Where each type lands, from the catcher's seat, in the scene's corner. */
 .arsenal__inset {
   position: absolute;
@@ -187,34 +208,7 @@
   gap: var(--space-2);
 }
 
-/* The menu: a card a pitch. Opening one folds the rest into a rail. */
-/* layout-exempt: the pitch cards wrap */
-.arsenal__menu {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-/* layout-exempt: name, figures and sparkline stack in one card */
-.arsenal__pick.btn {
-  display: flex;
-  flex: 1 1 9rem;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-  gap: var(--space-1);
-  min-width: 0;
-  height: auto;
-  padding: var(--space-2) var(--space-3);
-  text-align: left;
-}
-.arsenal__name {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: inherit;
-  font-family: var(--font-body);
-  font-size: var(--fs-ui);
-}
+/* The menu card's figures; the card, rail and panel are MenuRail's (system/menurail/menurail.css). */
 .arsenal__figs {
   color: var(--text-muted);
   font-family: var(--font-mono);
@@ -238,14 +232,6 @@
   stroke-dasharray: 2 2;
   vector-effect: non-scaling-stroke;
 }
-.arsenal__menu--rail .arsenal__pick.btn {
-  flex: 0 0 auto;
-}
-.arsenal__menu--rail .arsenal__figs,
-.arsenal__menu--rail .arsenal__spark {
-  display: none;
-}
-
 /* One pitch opened. */
 .arsenal__title {
   display: flex;
