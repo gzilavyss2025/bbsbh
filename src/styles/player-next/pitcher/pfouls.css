@@ -55,6 +55,11 @@
   }
 }
 
+.pfouls .fouls__note {
+  margin: 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
 .pfouls__rank {
   color: var(--text-heading);
 }

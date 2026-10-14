@@ -4,7 +4,7 @@ import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 
 // The count explorer the Foul balls cards share (#1891, #2016): the 4 x 3 grid of counts and the
 // picked count's story. `view` is a foulsView; `copy` holds the words that differ by side
-// ({ pick, cellAria(cell), vs, who, ends }). The fouls__* classes stay; a card restyles them in its own CSS.
+// ({ pick, cellAria(cell), vs, who, ends }, and optional reached, of and note(cell), which the batter card leaves out). The fouls__* classes stay; a card restyles them in its own CSS.
 const STRIKES = [0, 1, 2]
 
 export function CountExplorer({ view, copy }) {
@@ -49,7 +49,7 @@ export function CountExplorer({ view, copy }) {
           {c.two && <span className="fouls__flag">Two strikes</span>}
         </Cluster>
         <div className="fouls__stats">
-          <Stat k="Reached in" v={c.reachPct} sub={`${c.reach} of ${view.pa} PA`} />
+          <Stat k={copy.reached ?? 'Reached in'} v={c.reachPct} sub={`${c.reach} of ${view.pa} ${copy.of ?? 'PA'}`} />
           <Stat k="Fouls here" v={c.fouls} sub={c.per100} />
           <Stat k="Fouls per swing" v={c.rate} sub={`of ${c.swings} swings`} />
         </div>
@@ -80,6 +80,7 @@ export function CountExplorer({ view, copy }) {
               </li>
             ))}
           </ul>
+          {copy.note && <p className="fouls__note">{copy.note(c)}</p>}
         </Stack>
       </Stack>
     </>

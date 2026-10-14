@@ -78,6 +78,8 @@ test('a cell reads from his side: rate against the league, ends led by the strik
   assert.equal(c.diff, '+5.9 pts')
   assert.deepEqual(c.ends.map((e) => [e.name, e.n]), [['Strikeout', 36], ['Out in play', 44], ['Walk', 20], ['Hit', 19]])
   assert.equal(c.ends[0].pct, '30%')
+  assert.equal(c.note, 'A foul here keeps the at-bat alive and costs him a pitch.')
+  assert.equal(view().cells[4].note, 'A foul here is a free strike for him.') // 1-1
 })
 
 test('the heat is fouls per swing, scaled to his hottest count of 10+ swings', () => {

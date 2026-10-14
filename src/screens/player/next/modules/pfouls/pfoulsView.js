@@ -42,6 +42,7 @@ export function pfoulsView({ id, line, league, pool, post = false }) {
       railFill: place(c.foulsPerSwing, 0.5),
       railTick: lgRate == null ? null : place(lgRate, 0.5),
       heat: hottest ? heatOf(c) / hottest : 0,
+      note: s === 2 ? 'A foul here keeps the at-bat alive and costs him a pitch.' : 'A foul here is a free strike for him.',
       ends: ENDS.map(([key, name]) => ({ key, name, n: c.ends[key], pct: pct(c.reach ? c.ends[key] / c.reach : null, 0) })),
     }
   })

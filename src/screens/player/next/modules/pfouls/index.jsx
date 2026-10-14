@@ -23,6 +23,9 @@ const COPY = {
   vs: 'Fouls per swing against the league',
   who: 'Him',
   ends: 'How those at-bats ended',
+  reached: 'Reached by',
+  of: 'batters',
+  note: (c) => c.note,
 }
 const SCOPES = [['R', 'Regular season'], ['P', 'Postseason']]
 
