@@ -18,12 +18,10 @@ test('Career holds nothing here: Prospect rankings moved to #1927', () => {
   assert.deepEqual(tbdCards('career', 'hitting', bat), [])
 })
 
-test('History: only media is left, once per player (Awards, Team history and Transactions have their own modules)', () => {
-  const all = ['media']
-  assert.deepEqual(tbdCards('history', 'hitting', bat), all)
-  assert.deepEqual(tbdCards('history', 'pitching', arm), all)
-  assert.deepEqual(tbdCards('history', 'hitting', both), all)
-  assert.deepEqual(tbdCards('history', 'pitching', both), [])
+test('History holds nothing here: Highlights has its own module (#2022)', () => {
+  assert.deepEqual(tbdCards('history', 'hitting', bat), [])
+  assert.deepEqual(tbdCards('history', 'pitching', arm), [])
+  assert.deepEqual(tbdCards('history', 'hitting', both), [])
 })
 
 test('On the mound: nothing left here (Target command has its own module)', () => {
