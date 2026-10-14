@@ -3,6 +3,8 @@ import { loadPlayerCore } from '../../../api/player/core.js'
 import { loadPlayerOverview } from '../../../api/player/overview.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../../hooks/useDocumentTitle.js'
+import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
+import { replayClass } from '../../../lib/jumpbar/land.js'
 import { LinkScope } from '../../../lib/nav.jsx'
 import { AsyncGate } from '../../../components/ui/AsyncGate.jsx'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
@@ -61,6 +63,9 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
   const [empty, setEmpty] = useState({})
   // The hero tile a rank chip lights: { group, tile }. Held here, stored nowhere.
   const [lit, setLit] = useState(null)
+  // The section a jump-bar tap landed on, and how many landings so far (decision 3):
+  // its cards stamp in once per landing. Never set on a cold load, Back or an old address.
+  const [landed, setLanded] = useState({ key: null, tick: 0 })
   const back = () => window.history.back()
   const gate = AsyncGate({
     loading: core.loading || overview.loading,
@@ -78,6 +83,17 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
   const gone = { ...seedEmpty(instances, blocks), ...empty }
   const sections = shownSections(jumpSections(core.data.bio, blocks), instances, gone)
   const markEmpty = (key) => setEmpty((e) => (e[key] ? e : { ...e, [key]: true }))
+  // Overview has no slots: its hero and tiles already carry the stamp-in, so it plays again.
+  // Replayed in place, not remounted: a remount would fetch the tiles' rank marks again (the
+  // rank lines blink) and turn the Age fact back.
+  const onLand = (key) => {
+    if (motionIsReduced()) return
+    if (key === 'overview') {
+      for (const el of document.querySelectorAll('#overview .card--stamp-in')) replayClass(el, 'card--stamp-in')
+      return
+    }
+    setLanded((l) => ({ key, tick: l.tick + 1 }))
+  }
   const rows = blocks.filter((b) => b.tiles.length)
   return (
     <LinkScope asOf={asOf} sportId={core.data.sportId ?? sportId ?? null}>
@@ -99,15 +115,24 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
             ))}
             <OverviewExtras blocks={blocks} lit={lit} onLight={setLit} season={core.data.season} playerId={core.data.bio.id} cutoff={asOf} />
           </Stack>
-          <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" />
+          <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" hold onLand={onLand} />
           {sections
             .filter((s) => s.key !== 'overview')
             .map((s) => (
               <Stack key={s.key} as="section" gap="section" id={s.key} className="pnext__section">
                 {instances
                   .filter((i) => i.section === s.key && !gone[i.key])
-                  .map((i) => (
-                    <Slot key={i.key} inst={i} bio={core.data.bio} asOf={asOf} season={core.data.season} onEmpty={markEmpty} />
+                  .map((i, n) => (
+                    <Slot
+                      key={i.key}
+                      inst={i}
+                      bio={core.data.bio}
+                      asOf={asOf}
+                      season={core.data.season}
+                      onEmpty={markEmpty}
+                      stamp={landed.key === s.key ? landed.tick : 0}
+                      order={n}
+                    />
                   ))}
               </Stack>
             ))}
