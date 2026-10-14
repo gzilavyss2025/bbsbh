@@ -1,0 +1,53 @@
+/* ==== PHOTOS (the new player page, #2021) ====
+   Draft D v2: six squares three across, each in an ink frame, its date (mono) and the play under it.
+   The frames are fixed squares, so a late image never moves the page; empty ones hold the load. Tokens only. */
+
+/* layout-exempt: the grid above its door, one column */
+.photos {
+  display: grid;
+  gap: var(--space-3);
+}
+/* layout-exempt: a fixed count, three across at every width (the draft) */
+.photos__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-2h);
+}
+/* layout-exempt: a frame and its two caption lines, one column */
+.photos__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  color: var(--text-body);
+  text-decoration: none;
+}
+.photos__frame {
+  display: block;
+  aspect-ratio: 1;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-inset);
+  overflow: hidden;
+}
+.photos__frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photos__date {
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.photos__caption {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-compact);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+a.photos__cell:hover .photos__caption {
+  text-decoration: underline;
+}
