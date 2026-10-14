@@ -9,7 +9,7 @@ import { leagueAveragesOf, rateText } from '../../lib/math/leagueAverages.js'
 // both groups, and kept in memory for the session. It is "to date": the caller
 // asks lastCompleteSeason() to know which figures are.
 //
-//   file: { lastSeason, seasons: { [year]: { avg, era } } }  (null = not recorded)
+//   file: { lastSeason, seasons: { [year]: { avg, era, k, bb, kbb, bbk, iso, babip, ppa, ops } } }  (null = not recorded)
 const file = staticJson('/data/league-averages.json', { fallback: null })
 const liveByYear = new Map()
 
@@ -17,15 +17,18 @@ export async function lastCompleteSeason() {
   return (await file())?.lastSeason ?? null
 }
 
-// A number, or null when the figure does not exist.
-export async function leagueAverage(season, group) {
+// The season's whole row { avg, era, k, bb, kbb, bbk, iso, babip, ppa, ops }, or null.
+// Each rate is a number or null (not recorded). k, bb, kbb are fractions (0.223 = 22.3%).
+export async function leagueRates(season) {
   const f = await file()
   const year = Number(season)
   if (!f || !year) return null
-  const row = year > f.lastSeason
-    ? await liveSeason(year)
-    : f.seasons?.[year]
-  return row?.[group === 'pitching' ? 'era' : 'avg'] ?? null
+  return (year > f.lastSeason ? await liveSeason(year) : f.seasons?.[year]) ?? null
+}
+
+// A number, or null when the figure does not exist.
+export async function leagueAverage(season, group) {
+  return (await leagueRates(season))?.[group === 'pitching' ? 'era' : 'avg'] ?? null
 }
 
 function liveSeason(year) {
