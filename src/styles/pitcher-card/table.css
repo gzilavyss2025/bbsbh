@@ -1,0 +1,140 @@
+/* The Now Pitching card as a table (a second sheet of pitcher-card/, split out of
+   card.css at its 600-line cap; loads right after it and wins on order).
+
+   The card reads as one stamped table: square corners, an ink name band, and
+   each stat block a label row over a value row with ruled cells, under caption
+   bands. SKIN ONLY: every selector is a class the markup already has.
+   - `column-reverse` on a cell puts its label (second in the DOM) above its
+     value, which is what makes a header row without touching StatGrid.
+   - The event Notice draws a rounded, marker-washed frame (`.notice--event`);
+     the three custom properties below turn it into the stamped paper frame
+     the other new-look cards wear, and the radius and padding go to zero so
+     the bands and tables run edge to edge.
+   - The compact relief cards (`.change--framed` without `.pcard`) keep the
+     Notice frame; only the full card is skinned here. */
+.pcard {
+  --notice-wash: var(--surface-card);
+  --notice-edge: var(--border-stamped);
+  gap: 0;
+  padding: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  box-shadow: var(--shadow-stamped);
+  overflow: hidden;
+}
+
+/* The name band, in the scorebug's ink and ripple. */
+.pcard > .change {
+  position: relative;
+  isolation: isolate;
+  padding: var(--space-2h) var(--space-3);
+  background: var(--ink-1);
+  color: var(--text-on-ink-cream);
+}
+.pcard > .change::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* raw-value-exempt: ripple ring colours are translucent white and black over any ground */
+  background:
+    repeating-radial-gradient(circle at 108% 130%, rgba(255, 255, 255, 0.14) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -8% -40%, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 9px);
+}
+.pcard .change__shot {
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--text-on-ink-cream);
+}
+.pcard .change__now {
+  color: var(--text-on-ink-soft);
+}
+.pcard .change__pitcher,
+.pcard .change__pitcher .plink {
+  color: var(--text-on-ink-cream);
+  font-size: var(--fs-title-md);
+}
+.pcard .change__jersey {
+  color: var(--marker);
+}
+.pcard .change__hand {
+  color: var(--field-mint);
+}
+
+/* Sections are tables and bands, full width. */
+.pcard__sec {
+  gap: 0;
+  padding: 0;
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+.pcard__postrule,
+.pcard__mixlabel,
+.pcard__lasthead {
+  margin: 0;
+  padding: var(--space-1h) var(--space-3);
+  background: var(--surface-inset);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.pcard__postrule {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.pcard__postrule::after {
+  display: none;
+}
+.pcard__sec > .pcard__postrule:first-child {
+  border-top: 0;
+}
+.pcard__mixlabel,
+.pcard__lasthead {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+/* The table: label row over value row, ruled cells. */
+.pcard__grid {
+  column-gap: 0;
+}
+/* layout-exempt: reverses the cell so its label becomes the header row above the value */
+.pcard__cell {
+  flex-direction: column-reverse;
+  gap: 0;
+  border-right: var(--bw-hair) solid var(--border-hairline);
+}
+.pcard__cell:last-child {
+  border-right: 0;
+}
+.pcard__cell .pcard__lbl {
+  padding: var(--space-1) 0;
+  background: var(--surface-card);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.pcard__val {
+  padding: var(--space-1h) 0;
+  color: var(--text-heading);
+}
+
+/* Pitch mix: the scene runs full width, the tiles are a ruled table. */
+.pcard__sec--mix {
+  gap: 0;
+}
+.pcard .pscene {
+  border-radius: 0;
+}
+.pcard__tiles {
+  gap: 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.pcard__tile {
+  border: 0;
+  border-right: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  border-radius: 0;
+  padding: var(--space-1h) var(--space-1h) var(--space-2);
+}
+.pcard__tile.is-active {
+  border-color: var(--border-hairline);
+  background: var(--surface-inset);
+  box-shadow: inset 0 -3px 0 var(--ink-0); /* raw-value-exempt: underline thickness */
+}
+.pcard__swatch {
+  border-radius: 0;
+}
