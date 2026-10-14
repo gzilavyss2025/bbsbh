@@ -175,6 +175,9 @@
 @import './styles/46-consent-modal.css';
 /* The JUMP BAR (#1883): HubTabBar variant="anchor". */
 @import './styles/system/jumpbar/jumpbar.css';
+/* The MENU RAIL (#2073): MenuRail.jsx. Its selectors outrank .btn, so its place does not
+   depend on system/button.css. The motion is motion/menurail.css. */
+@import './styles/system/menurail/menurail.css';
 @import './styles/48-stamp-strip.css';
 @import './styles/52-highlight-clip-card.css';
 @import './styles/54-my-tally.css';
