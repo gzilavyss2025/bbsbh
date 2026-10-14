@@ -42,13 +42,21 @@ short excerpts a slice needs. Never commit a whole board.
   control has none.
 - **Canvas hex becomes a token.** Never write a canvas hex in `src/styles/`
   (`check-raw-values.mjs` counts it). The map is in "Canvas colour map" below.
-  Slice 01 adds the two new surface tokens.
+  Slice 01a adds the two new surface tokens. A loss figure on a selected row
+  uses `--clay-deep`: `--accent-negative` on `--surface-row-selected` is 4.37:1,
+  under AA.
 - **The one-shot rule for entrances.** An entrance (a rise, a bar grow, a draw)
   plays the first time its card comes into view in this page visit. It does not
   play again on a re-render, a poll, or a data refresh. It plays again after a
   full page load. It does not play again on Back inside the app in the same tab:
   `useInViewOnce` keeps a module-level `Set` of keys (`<playerId>:<slotKey>`) for
-  the life of the JS bundle. A tap that changes what a card shows (a pick, a
+  the life of the JS bundle. Its API (slice 01c is the source of truth):
+  `const [ref, phase] = useInViewOnce(viewKey(playerId, slotKey))` from
+  `src/hooks/scroll/useInViewOnce.js`, with `viewKey` and `riseClass(phase)` from
+  `src/lib/motion/inViewOnce.js`. `phase` is `'rest'` (seen before, or reduced
+  motion: show the end state), `'wait'` (hold the start frame) or `'play'` (run
+  the entrance). The threshold is fixed at 0.1, with no `rootMargin`. Put `ref` on
+  a node that exists at mount. A tap that changes what a card shows (a pick, a
   filter) is a change the reader caused, so its motion may play every time
   (`docs/motion.md`, "The one-shot gate").
 - **Reduced motion.** CSS: `src/styles/01-base.css` (the `data-motion='reduced'`
@@ -57,10 +65,24 @@ short excerpts a slice needs. Never commit a whole board.
   as the existing motion sheets do. JS: every rAF loop and every JS tween checks
   `motionIsReduced()` (`src/hooks/preferences/motionIsReduced.js`) and jumps to
   the end state.
+- **React hook lint.** `eslint-plugin-react-hooks` 7.1.1 makes
+  `react-hooks/set-state-in-effect` an error, and its `refs` rule forbids reading
+  a ref during render. A clock sets state only from a rAF, timer or observer
+  callback, never in an effect body.
+- **Animation Lab entries go in `src/screens/animlab/PlayerMotionLab.jsx`.**
+  `AnimationLab.jsx` is at 597 of its 600 lines, so slice 01d makes that file the
+  home of every player-page entry (and moves `Frame` into `animlab/Entry.jsx`). A
+  frozen strip also needs its selector in the `.animlab__frame` list in
+  `src/styles/46-consent-modal.css`. Every slice that adds an entry depends on
+  01d merged.
+- **Check once** (`.claude/skills/orchestrate/SKILL.md`, "Check once"). A child
+  runs only the tests it wrote (`node --test test/<file>`) and `npm run lint`.
+  CI on its PR runs the full `npm test` and `npm run build`. No child runs
+  `ponytail-review` or `/code-review`: `/stack-prs` reviews the stack once.
 - **No new route, no new data.** Motion only. Do not change what a card shows,
   except where a slice says so.
 
-## Tokens (slice 01 adds them; every later slice reads them)
+## Tokens (slice 01a adds them; every later slice reads them)
 
 In `src/tokens/effects.css`, in the `/* Motion */` block:
 
@@ -80,16 +102,20 @@ Durations a slice needs only once (a 260ms ripple, a 1150ms dwell) stay in that
 slice's JS as named constants, or in CSS as `calc(var(--dur-…) * n)`. They never
 go into CSS as a raw time.
 
-JS reads the curves through `src/lib/motion/curves.js` (slice 01):
+JS reads the curves through `src/lib/motion/curves.js` (slice 01b):
 `cubicBezier(x1, y1, x2, y2)` (moved from `src/lib/scorecard/glide.js`, which
 re-exports it), `EASE_STAMP`, `EASE_UNFOLD`, `easeStamp`, `easeUnfold`, and
-`easeOutQuart(t) = 1 - (1 - t) ** 4` (the canvas `eo` helper in ArsenalReveal and
-PitchFlight). A test pins each array to its token, the same way
+`easeOutQuart(t) = 1 - (1 - t) ** 4` (the canvas `eo` helper in ArsenalReveal,
+and `easeOut` in PitchFlight). Contact's canvas `eo` is a cubic; slice 18 keeps
+it local to Contact's own module. A test pins each array to its token, the same way
 `test/scorecard-lens-glide.test.js` pins `EASE_OUT`.
 
 ## The two new parts: their API (fixed here, so the slices agree)
 
-### `Segmented` (slice 03, `src/components/ui/control/Segmented.jsx`)
+### `Segmented` (slice 03a, `src/components/ui/control/Segmented.jsx`)
+
+Slice 03a is the source of truth, and adds a `className` prop. Node cannot import
+`.jsx`, so the markup builder is `src/lib/design/segmentedClass.js`.
 
 ```jsx
 <Segmented
@@ -104,16 +130,28 @@ PitchFlight). A test pins each array to its token, the same way
 Markup: `<div role="group" aria-label class="segmented [segmented--fill]">`, then
 one `<button type="button" class="segmented__btn" aria-pressed>` per option, with
 an optional `<span class="segmented__count">`. CSS in
-`src/styles/system/segmented.css` (imported by `src/index.css` after `pill.css`):
+`src/styles/system/segmented/segmented.css` (`system/` is at its 12-file cap, so a
+new part takes a subfolder; imported by `src/index.css` between `pill.css` and
+`button.css`, because `test/button-cascade.test.js` needs `button.css` right
+before `07`):
 height `--tap-min` (44px); border `--bw-heavy` solid `--border-stamped`; every
 button after the first has `margin-left: calc(var(--bw-heavy) * -1)`; the face is
 `--surface-card` with `--text-heading`; `[aria-pressed='true']` is
 `--text-heading` fill with `--text-on-ink` text; no tick; display face, label
-tracking, uppercase (as `.btn`). Press: the stamp-press from slice 02. The canvas
+tracking, uppercase (as `.btn`). Press: the stamp-press from slice 02a. The canvas
 sources are `.gl-fbtn` (GameLog), `.ib-sb` (InningsByPosition), `.ll-segb`
 (SimilarPlayers), `.fe-tab` (FoulBalls).
 
 ### `MenuRail` (slice 05, `src/components/ui/control/MenuRail.jsx`)
+
+Slices 05a (the part) and 05b (the motion) are the source of truth. They add to the
+API below: `panel` is optional (Pitcher Splits opens one panel per section),
+`railMeta`, a root `className`, `items[].label`, `disabled`, `heading`, `style` and
+`className`, and two CSS variables, `--menurail-card` and `--menurail-rail`, for
+the card widths. The markup builder is `src/components/ui/control/menuRail.js`; the
+CSS is `src/styles/system/menurail/menurail.css` and `src/styles/motion/menurail.css`.
+Arsenal's canvas rise runs on the unfold curve; MenuRail uses the stamp curve, as
+Plate and Contact do. The batter Splits board has no menu.
 
 ```jsx
 <MenuRail
@@ -193,16 +231,20 @@ Pitch colours never come from the canvas. Use `pitchMark(code)`
   `src/styles/player-next/<group>/`. Keyframe names start with the block name
   (`splitsmod-rise`, not `rise`).
 - **File caps.** `check-file-size.mjs` caps a file at 600 lines and
-  `check-dir-size.mjs` caps a directory at 12 source files. `src/styles/motion/`
-  holds 7 files today. `src/styles/player-next/both/` is full: new player CSS goes
-  in `season/`, `history/`, `gamelog/`, `pitcher/`, `batter/` or `top/`.
+  `check-dir-size.mjs` caps a directory at 12 source files. At prep time:
+  `src/styles/system/` 12 (full), `src/lib/design/` 12 after 03a (full),
+  `src/styles/motion/` 7, `src/styles/player-next/both/` 11. New player CSS goes in
+  `season/`, `history/`, `gamelog/`, `pitcher/`, `batter/` or `top/`. The lint
+  guards do not read CSS outside `src/styles/` (for example
+  `modules/splits/parts.css`), so a slice that edits one checks it in its own test.
 - **Module contract.** A module never edits `sections.js`, `Slot.jsx` or the page
-  (`src/screens/player/next/CLAUDE.md`). Only slices 06 and 07 touch those files.
+  (`src/screens/player/next/CLAUDE.md`). Only slices 06, 07a and 07b touch those
+  files.
 - **Shared parts go in the design system** (`src/components/ui/`,
   `src/styles/system/`), with a `/design-lab` entry. A new animation gets an
-  `/animation-lab` entry in `src/screens/animlab/motionDemos.jsx`
-  (`docs/motion.md`, "Verifying"), using the real class names.
-- **Verify.** `npm run lint`, `npm test`, `npm run build`. Then render the route
+  `/animation-lab` entry in `src/screens/animlab/PlayerMotionLab.jsx` (see
+  above), using the real class names.
+- **Verify.** The tests you wrote and `npm run lint` ("Check once"). Then render the route
   in the preinstalled Chromium at 390px and at 1180px with `?nointro`: batter
   `/player/brice-turang-668930?nointro`, pitcher
   `/player/robert-gasser-688107?nointro`. Send Gary a screenshot (or a short
@@ -224,47 +266,27 @@ code to write), **Test first** (the test file and its cases), **Verify**,
 
 ## The slices
 
-| # | Slice | Model, effort | Depends on |
-|---|---|---|---|
-| 01 | Motion tokens, curves, rise, row surfaces, `useInViewOnce` | Sonnet, medium | none |
-| 02 | Site-wide stamp-press (`Button`, `Pill`, jump bar) | Sonnet, medium | 01 merged |
-| 03 | `Segmented`: the joined 44px control | Sonnet, high | 01 merged |
-| 04 | Swap player toggles onto `Segmented` | Sonnet, medium | 03 merged |
-| 05 | `MenuRail`: the shared menu, rail and panel | Sonnet, high | 01 merged |
-| 06 | Shell: stagger, age flip, jump-bar ease | Sonnet, medium | 01 merged |
-| 07 | Slot: hold height, no loading text, rise in, jump hold, stamp on land | Sonnet, high | 01 merged |
-| 08 | Splits motion: rise on view, bars grow and glide, fold cascade, hover, press | Sonnet, medium | 01 merged |
-| 09 | Splits menu onto `MenuRail` | Sonnet, medium | 05, 08 merged |
-| 10 | On the mound: track draw, bar grow, now chip, bar hover | Sonnet, medium | 01 merged |
-| 11 | Arsenal menu and panel onto `MenuRail`; replay on pick; ghost fade | Sonnet, medium | 05 merged |
-| 12 | Arsenal timeline: one clock, the canvas beats | Sonnet, high | 11 merged |
-| 13 | Pitch flight: loop, off-screen pause, camera tween | Sonnet, high | 01 merged |
-| 14 | Pitch flight: orbit drag and keys | Sonnet, medium | 13 merged |
-| 15 | Pitch flight: `<canvas>` trail renderer | Sonnet, high | 14 merged |
-| 16 | Plate approach onto `MenuRail`; rise on pick | Sonnet, high | 05 merged |
-| 17 | Contact: dots drop in, highlight fade, menu onto `MenuRail` | Sonnet, high | 05 merged |
-| 18 | Contact: ball flight on tap | Sonnet, high | 17 merged |
-| 19 | Contact: play through the balls | Sonnet, medium | 18 merged |
-| 20 | Small fixes: game-log rows, Season, Contract, Similar, Fouls | Sonnet, medium | 01 merged |
+The run order, the model and effort of each slice, and the prompts are in
+`run-plan.md`. Each brief in `slices/` names its files, its "Depends on" and the
+slices it can run beside.
 
-No slice needs Opus. Each one names its files, the values, the code shape and
-its tests. Moving up a rung (`write-prompt` step 5) is the fallback when a
-result is weak: Sonnet high, then Sonnet xhigh. Slices 12, 15 and 18 are the
-likely ones.
+| Group | Briefs | What |
+|---|---|---|
+| Foundation | 01a, 01b, 01c, 01d | Tokens and row surfaces; `curves.js` and the shared rise; `useInViewOnce`; the Animation Lab home |
+| Press | 02a, 02b | The site-wide stamp-press; the band press clean-up |
+| Segmented | 03a, 03b, 04a–04d | The part and its lab and docs; the swaps (logs, Innings and Similar, Fouls, Mound) |
+| MenuRail | 05a, 05b, 05c | The part, its motion, its lab entries |
+| Shell | 06, 07a, 07b | Stagger and age flip; slot height and rise; jump hold and stamp on land |
+| Splits | 08a, 08b, 09 | Rise and bar grow; folds, hover and press; onto MenuRail |
+| Mound | 10 | Track draw, bar grow, now chip, bar hover |
+| Arsenal | 11, 12a, 12b, 12c | Onto MenuRail; the clock; the card beats; speed and scrubber |
+| Pitch flight | 13, 14, 15 | Loop and camera; orbit drag; `<canvas>` trail |
+| Plate | 16 | Onto MenuRail |
+| Contact | 17a, 17b, 18, 19 | Dots drop in; onto MenuRail; ball flight; play through |
+| Small fixes | 20a, 20b, 20c | Game-log rows; Season and Contract; Similar rows and Fouls cells |
 
-## Shared files (two slices that touch one run one after the other)
+No slice needs Opus. When a result is weak, move up one rung (`write-prompt`
+step 5): Sonnet high, then Sonnet xhigh. Slices 12a, 15 and 18 are the likely ones.
 
-| File | Slices |
-|---|---|
-| `src/tokens/effects.css`, `src/tokens/colors.css` | 01 |
-| `src/styles/system/button.css`, `pill.css` | 02 |
-| `src/styles/system/jumpbar/jumpbar.css` | 02 (press), 06 (ease) — 06 waits for 02, or 06 drops the jump-bar line |
-| `src/screens/animlab/motionDemos.jsx` | 01, 02, 03, 05, 08, 10, 12, 17 — one line each; merge conflicts are trivial, but two open at once must merge `main` in |
-| `src/screens/player/next/Slot.jsx`, `PlayerNextPage.jsx` | 07 |
-| `src/screens/player/next/modules/splits/*` | 08, then 09 |
-| `src/screens/player/next/modules/arsenal/*` | 11, 12, 13, 14, 15 — in that order |
-| `src/screens/player/next/modules/contact/*` | 17, 18, 19 — in that order |
-| `src/styles/player-next/both/logtable.css` | 20 |
-
-Open PR at prep time: #2071 (hero Born fact, `PlayerNextHero.jsx`). Slice 06
-touches the hero `Card` props only. Merge `main` in if #2071 lands first.
+Open PR at prep time: #2071 (the hero Born fact). It changes only line 77 of
+`PlayerNextHero.jsx`, so it does not conflict with slice 06.
