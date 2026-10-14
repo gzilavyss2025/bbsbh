@@ -51,6 +51,7 @@ live hub.
 - **CSS:** the module's own file in `src/styles/player-next/<group>/`, imported from its `index.jsx`.
   `both/` is full: new files go in `season/`, `history/`, `gamelog/`, `pitcher/` or `top/`.
 - **Shared parts:** a part two modules use sits in `parts/`, not in one module's folder:
-  `LogTable.jsx`, the game log table (pitchlog #1851, batlog #1890).
+  `LogTable.jsx`, the game log table (pitchlog #1851, batlog #1890); `CountExplorer.jsx`
+  (count grid, panel, `Stat`, `Rail`) and `foulsFormat.js` (number formats), the Foul balls cards (#1891, #2016).
 - **Open surface (ADR-0034):** no seal, no gate. Keep `?d=` and `?s=` on every link (the
   page wraps everything in `LinkScope`) and ADR-0057 addresses (use the path builders).
