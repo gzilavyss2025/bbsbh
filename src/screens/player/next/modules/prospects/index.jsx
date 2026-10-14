@@ -26,7 +26,7 @@ export default function ProspectsModule({ bio, role, season, onEmpty, onCount })
   }, [settled, view?.badge]) // eslint-disable-line react-hooks/exhaustive-deps -- report once per answer
 
   // The height is reserved until the answer lands, so the page does not jump.
-  if (!view) return <div className="prospects prospects--wait" />
+  if (!view) return <div className="prospects prospects--wait" aria-busy={!settled} />
   return (
     <div className="prospects">
       <ol className="prospects__list" aria-label="Prospect ranking by year">

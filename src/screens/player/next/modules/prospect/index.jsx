@@ -20,7 +20,7 @@ export default function ProspectModule({ bio, asOf, onEmpty, onCount }) {
     else onEmpty()
   }, [settled, v?.count]) // eslint-disable-line react-hooks/exhaustive-deps -- report once per answer
 
-  if (!v) return <div className="prospect prospect--wait" />
+  if (!v) return <div className="prospect prospect--wait" aria-busy={!settled} />
   return (
     <div className="prospect">
       <div className="prospect__lead">

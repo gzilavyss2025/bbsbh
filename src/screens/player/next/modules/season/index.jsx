@@ -95,6 +95,7 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
           onAllCols={() => setAllCols(!allCols)}
           note={scope !== 'post' && scope !== 'milb'}
           onCompare={setOpen}
+          openKey={open?.key}
         />
       )}
 
@@ -104,7 +105,7 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
 }
 
 // The register's rows as a ledger, the "All columns" switch and the WAR hint.
-function YearTable({ table, label, allCols, onAllCols, note, onCompare }) {
+function YearTable({ table, label, allCols, onAllCols, note, onCompare, openKey }) {
   const warAt = table.columns.indexOf('WAR')
   const hideNarrow = allCols ? [] : table.columns.flatMap((c, i) => (NARROW.has(c) ? [i + 2] : []))
   const rows = table.rows.map((r) => ({
@@ -129,6 +130,7 @@ function YearTable({ table, label, allCols, onAllCols, note, onCompare }) {
                 type="button"
                 className="seasonmod__war"
                 aria-haspopup="dialog"
+                aria-expanded={openKey === r.key}
                 aria-label={`WAR ${c}, ${r.year}. Compare with the league`}
                 onClick={() => onCompare(r)}
               >

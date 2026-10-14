@@ -1,3 +1,4 @@
+import { MenuRailHalf } from './menurail/MenuRailLab.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
@@ -114,6 +115,7 @@ export function DesignLab() {
         <ClusterHalf />
         <GridHalf />
         <ComponentHalf />
+        <MenuRailHalf />
       </Band>
 
       <Band

@@ -67,7 +67,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   }, [card, onCount])
 
   if (empty) return null
-  if (!card) return <div className="fcontact fcontact--wait"><p className="hint">Loading the contact…</p></div>
+  if (!card) return <div className="fcontact fcontact--wait" aria-busy="true"><p className="hint">Loading the contact…</p></div>
 
   const cur = sel && shown.includes(sel) ? sel : null
   const detail = cur && ballDetail(cur)

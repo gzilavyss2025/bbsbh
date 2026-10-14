@@ -66,3 +66,12 @@ test('index.css loads it with the motion package, before focus/', () => {
   const focus = imports.findIndex((p) => p.startsWith('focus/'))
   assert.ok(focus === -1 || at < focus)
 })
+
+test('the Animation Lab shows the rail and freezes the rise', () => {
+  const lab = stripComments(read('styles/46-consent-modal.css'))
+  assert.match(lab, /\.animlab__frame \.menurail__body--a,/)
+  assert.match(lab, /\.animlab__frame \.menurail__body--b,/)
+  const demo = read('screens/animlab/PlayerMotionLab.jsx')
+  assert.match(demo, /<MenuRail /)
+  assert.match(demo, /className="menurail__body menurail__body--a"/)
+})

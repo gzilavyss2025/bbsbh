@@ -43,8 +43,14 @@
   text-align: left;
   cursor: pointer;
 }
-.simp__row:hover {
-  background: var(--bg-canvas);
+@media (hover: hover) {
+  .simp__row:hover {
+    background: var(--surface-row-hover);
+  }
+}
+.simp__row:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: calc(var(--bw-heavy) * -1);
 }
 /* The neighbour's headshot, in the box the initials used to fill. Compound with .shot
    (Headshot always sets it), so it outranks the base .shot sizing. Its monogram
