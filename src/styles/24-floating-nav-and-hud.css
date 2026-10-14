@@ -57,7 +57,7 @@
    visually; only the boundary the pointer sees changes.
 
    The offsets are measured from the BUTTON, not from the bar, and that is
-   load-bearing rather than incidental: .btn:active nudges the button 1px with
+   load-bearing rather than incidental: .btn:active moves the button 2px with
    a transform, and a transform makes the element a containing block for its
    own absolutely positioned pseudo. Anchor this to the bar instead (top/bottom
    0 against the fixed .pagenav — tidier, no magic numbers) and the press

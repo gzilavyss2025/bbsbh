@@ -82,7 +82,8 @@
      rest            the fill.
      hover           pointer devices only, inside @media (hover: hover). The
                      fill darkens a step.
-     pressed         :active. 1px down and --inset-cell, as the button does.
+     pressed         :active. The button's stamp-press (#2073): --bw-heavy
+                     down and right, no shadow.
      selected        [aria-pressed="true"] or [aria-current="page"]. Ink fill
                      AND a leading tick — the contract button.css wrote for
                      "Pill (#1131) inherits exactly this". The tick survives
@@ -152,7 +153,7 @@
   border-width: var(--bw-rule);
   cursor: pointer;
   transition:
-    transform var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-stamp),
     background-color var(--dur-fast) var(--ease-standard),
     border-color var(--dur-fast) var(--ease-standard);
 }
@@ -260,8 +261,7 @@
 }
 
 .pill--control:active {
-  transform: translateY(1px);
-  box-shadow: var(--inset-cell);
+  transform: translate(var(--bw-heavy), var(--bw-heavy));
 }
 
 .pill--control[aria-pressed='true'],

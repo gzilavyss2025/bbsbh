@@ -52,9 +52,10 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
+  transition: transform var(--dur-fast) var(--ease-stamp);
 }
-/* The press: the item moves 2px down and right. */
+/* The press: the item moves 2px down and right on the stamp curve, the same
+   press as Button and Pill (#2073). */
 .jumpbar__item:active {
   transform: translate(var(--bw-heavy), var(--bw-heavy));
 }
