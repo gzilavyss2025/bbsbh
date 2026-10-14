@@ -9,7 +9,7 @@ import {
 import { scorecardFull, scorecardStep } from '../../api/scorecardGame.js'
 import { Scorecard } from '../Scorecard.jsx'
 import { ScorecardCellEditor } from '../../components/scoring/ScorecardCellEditor.jsx'
-import { RefreshButton } from '../TeamInfo.jsx'
+import { RefreshButton } from '../../components/ui/control/RefreshButton.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { useStampUnseal } from '../../hooks/useStamps.js'
 import { useMediaQuery } from '../../hooks/useMediaQuery.js'

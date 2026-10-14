@@ -38,7 +38,7 @@ const val = (line, key) => (line?.[key] == null || line?.[key] === '' ? '—' : 
 // his position, hand and number, his career line against tonight's starter, and his season
 // line. A tap opens the rest of the line on a phone; a wide screen shows AVG, OPS, HR and RBI
 // across the row, so nothing needs a tap.
-function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills }) {
+function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills, index = 0 }) {
   const detailId = `lnext-det-${player.id}`
   // The row is a plain box, because the name inside it is a link and a link cannot sit inside a
   // button. On a phone the season line is the toggle (a real button, with the open state); a tap
@@ -63,7 +63,8 @@ function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills 
     </button>
   )
   return (
-    <li className="lord__item">
+    // `--row-i` is the row's place in the posted order: the ink-in cascade steps off it (styles/motion/lineup.css).
+    <li className="lord__item" style={{ '--row-i': index }}>
       <div className="lord__row" onClick={wide ? undefined : (e) => !e.target.closest('a, button') && onToggle()}>
         <span className="lord__lead">{lead}</span>
         <Headshot personId={player.id} name={player.name} className="lord__shot" />
@@ -147,9 +148,10 @@ export function OrderCard({ data, masthead }) {
       )}
       {posted ? (
         <ul className="lord__list">
-          {lineup.map((p) => (
+          {lineup.map((p, i) => (
             <OrderRow
               key={p.id}
+              index={i}
               lead={p.order}
               player={p}
               line={hitterLines[p.id]}

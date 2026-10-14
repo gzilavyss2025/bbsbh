@@ -46,16 +46,6 @@ export function managerFact(manager) {
   )
 }
 
-export function Fact({ label, value, aside }) {
-  const text = value || <span className="fact__na">—</span>
-  return (
-    <div className="fact">
-      <dt className="fact__label">{label}</dt>
-      <dd className="fact__value">{aside ? <div className="fact__figure"><span>{text}</span>{aside}</div> : text}</dd>
-    </div>
-  )
-}
-
 // A small crowd — three heads and shoulders — drawn as an SVG, filled like the
 // Umpires card's home plate (UmpireTierGlyph), so the Attendance dot and the HP
 // ump dot match. Exported so the box score's own Attendance field

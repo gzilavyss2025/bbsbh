@@ -30,8 +30,8 @@ test('the career line opens Box Lines, and no row is dated on or after the score
 
   const sheet = page.getByRole('dialog', { name: /vs the Brewers/ })
   await expect(sheet).toBeVisible()
-  // The headline is the door's own text, verbatim.
-  await expect(sheet.locator('.boxlines__headline')).toHaveText(await door.locator('span').first().textContent())
+  // The headline is the door's own label, verbatim: its accessible name.
+  await expect(sheet.locator('.boxlines__headline')).toHaveText(await door.getAttribute('aria-label'))
 
   // Rows land (or the sheet says why not); either way every row that exists
   // is dated before the cutoff and links to a box score.

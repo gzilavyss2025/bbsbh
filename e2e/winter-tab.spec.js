@@ -121,7 +121,7 @@ test('a winter game opens like any other game', async ({ page }) => {
   // timeout is the lazy route's own: a click does not go through the fixture's
   // `routeRendered` wait, so on a dev server that has not served the game route
   // yet this is charged the module's first compile (issue #1095).
-  await expect(page.locator('.lineup__row').first()).toBeVisible({ timeout: 20000 })
+  await expect(page.locator('.lord__item').first()).toBeVisible({ timeout: 20000 })
 })
 
 test('a shared winter game link resolves on a cold load', async ({ page }) => {
@@ -130,7 +130,7 @@ test('a shared winter game link resolves on a cold load', async ({ page }) => {
   // game, and the five-level scan cannot find it. Without the winter pass this
   // is the screen that says "Couldn't find that game".
   await page.goto('/10252025/pejgdd/lineup1')
-  await expect(page.locator('.lineup__row').first()).toBeVisible()
+  await expect(page.locator('.lord__item').first()).toBeVisible()
 })
 
 test('six cells do not overlap the wordmark on a phone', async ({ page }) => {

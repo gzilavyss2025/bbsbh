@@ -28,8 +28,6 @@ import { seriesForGame } from '../api/postseason/bracket.js'
 import { gameStatusLine } from '../api/postseason/text.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { gameSectionTabs } from './lineup/gameSections.js'
-import { isLookNew } from './lineup/next/lookFlag.js'
-import { LineupPage } from './lineup/next/LineupPage.jsx'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime } from '../lib/scoresUnlocked.js'
 
@@ -38,6 +36,9 @@ import { formatResetTime } from '../lib/scoresUnlocked.js'
 // and each is a large module on its own. Splitting them further means opening
 // a game to read a lineup never downloads the innings viewer or box score
 // code until the user actually taps into that section.
+const LineupNextPage = lazy(() =>
+  import('./lineup/next/LineupNextPage.jsx').then((m) => ({ default: m.LineupNextPage })),
+)
 const InningViewer = lazy(() =>
   import('./InningViewer.jsx').then((m) => ({ default: m.InningViewer })),
 )
@@ -221,8 +222,9 @@ export function GameView({ game, section, onSection }) {
     </nav>
   ) : null
 
-  // The new lineup page (docs/lineup-redesign.md) carries its own hero, jump bar and dock.
-  const lookNew = isLookNew() && Boolean(feed) && (step === 0 || step === 1)
+  // The lineup pages carry their own hero, jump bar and dock (docs/lineup-redesign.md), so the
+  // masthead, series band and section tabs are left out once the game has loaded.
+  const ownChrome = Boolean(feed) && (step === 0 || step === 1)
   const lineupNext = {
     game,
     tabs: gameSectionTabs(game, step, lastInningSection),
@@ -270,7 +272,7 @@ export function GameView({ game, section, onSection }) {
     <div className="screen">
       <SiteHeader />
 
-      {!lookNew && (
+      {!ownChrome && (
       <Masthead
         away={game.away}
         home={game.home}
@@ -289,7 +291,7 @@ export function GameView({ game, section, onSection }) {
           before a name is read. Not on the innings view, where a phone's
           height belongs to the half being scored. A round name, never a
           score; null for a regular-season game or a season with no art. */}
-      {seriesMark && !lookNew && (step === 0 || step === 1 || step === 3) &&
+      {seriesMark && !ownChrome && (step === 0 || step === 1 || step === 3) &&
         (seriesPage ? (
           <a className="gameseries gameseries--link" aria-label={`${seriesMark.alt}: open the series page`} {...routeLink(seriesPage)}>
             <SeriesMark mark={seriesMark} height={40} decorative />
@@ -332,7 +334,7 @@ export function GameView({ game, section, onSection }) {
           scorebook pages instead of only marching forward. On the innings view
           the tabs ride down into InningViewer's nav row instead (see below), so
           they share one line with Back/Next on the wide layout. */}
-      {(step !== 2 || noPlays) && !lookNew && sectionTabs}
+      {(step !== 2 || noPlays) && !ownChrome && sectionTabs}
 
       {sketchTeam && (
         <LogoModal
@@ -357,7 +359,7 @@ export function GameView({ game, section, onSection }) {
 
       {feed && step === 0 && (
         <Suspense fallback={<Loader />}>
-        <LineupPage
+        <LineupNextPage
           {...lineupNext}
           feed={feed}
           side="away"
@@ -380,8 +382,6 @@ export function GameView({ game, section, onSection }) {
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
-          onPrintSheet={() => onSection('sheet')}
-          onPreview={() => onSection('preview')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -390,7 +390,7 @@ export function GameView({ game, section, onSection }) {
       )}
       {feed && step === 1 && (
         <Suspense fallback={<Loader />}>
-        <LineupPage
+        <LineupNextPage
           {...lineupNext}
           feed={feed}
           side="home"
@@ -413,8 +413,6 @@ export function GameView({ game, section, onSection }) {
           onNext={() => onSection(noPlays ? 'boxscore' : 'top1')}
           nextLabel={noPlays ? 'Box score ›' : 'Innings ›'}
           onCatchUp={onCatchUp}
-          onPrintSheet={() => onSection('sheet')}
-          onPreview={() => onSection('preview')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}

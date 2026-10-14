@@ -23,7 +23,7 @@ test.skip(({ isMobile }) => isMobile, 'the hover card is desktop-only by design'
 async function openLineup(page) {
   await installMockApi(page)
   await page.goto(`${GAME}/lineup1`)
-  await expect(page.locator('.lineup__name').first()).toBeVisible()
+  await expect(page.locator('.lord__link').first()).toBeVisible()
 }
 
 // Hovers a name and waits for the card to open on it.
@@ -50,7 +50,7 @@ async function hoverName(page, link) {
 test('the card takes no pointer, so a name it covers still hovers', async ({ page }) => {
   await openLineup(page)
 
-  const names = page.locator('.lineup__name')
+  const names = page.locator('.lord__link')
   const first = names.nth(0)
   const second = names.nth(1)
   // The second row is the one the card has to cover, and it is no use to this
@@ -83,7 +83,7 @@ test('the card takes no pointer, so a name it covers still hovers', async ({ pag
 test('a wheel closes the card even when nothing scrolls', async ({ page }) => {
   await openLineup(page)
 
-  await hoverName(page, page.locator('.lineup__name').first())
+  await hoverName(page, page.locator('.lord__link').first())
 
   // Dispatched rather than scrolled on purpose: a real wheel over a page with
   // room left to move fires `scroll` too, which the card already closed on
@@ -105,7 +105,7 @@ test('a wheel closes the card even when nothing scrolls', async ({ page }) => {
 test('a trailing inertia tick does not cancel a card the reader is asking for', async ({ page }) => {
   await openLineup(page)
 
-  const name = page.locator('.lineup__name').first()
+  const name = page.locator('.lord__link').first()
   await name.scrollIntoViewIfNeeded()
   await page.waitForTimeout(SETTLE_MS)
   await name.hover()
