@@ -45,7 +45,7 @@ export default function FormModule({ bio, asOf, season, onEmpty, onCount }) {
   }, [running, cursor])
 
   if (error || (log && !view)) return null
-  if (!view) return <div className="fform fform--wait"><p className="hint">Loading the form trend…</p></div>
+  if (!view) return <div className="fform fform--wait" aria-busy="true"><p className="hint">Loading the form trend…</p></div>
 
   const scrub = (i) => {
     setPlaying(false)

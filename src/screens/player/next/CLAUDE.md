@@ -42,7 +42,7 @@ suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul
   hides the card, and the button hides when ALL slots of its section are empty. A module that is built leaves the stub list: add it to `BUILT` in `test/player-next-sections.test.js`.
 - **Count tag:** call `onCount(n)` (or a string); `Slot` draws it on the card's edge.
 - **Height:** `SLOTS` gives each slot `minH: [phone, wide]` (measured, a floor). `Slot` holds that height,
-  with no text, until the module shows content (nothing inside says `aria-busy`); then the body rises in once.
+  with no text, until the module shows content (nothing inside says `aria-busy`); then the body rises in once. So every wait block a module returns carries `aria-busy="true"` (`test/player-next-wait-busy.test.js`).
 - **Failure:** a module that throws, or whose chunk fails to load, hides its card like `onEmpty()`
   (`SlotBoundary`, which logs the error with the slot key); it never takes down the page. The page
   also hides the log slots from its own data: with no season or postseason games, `seedEmpty` hides
