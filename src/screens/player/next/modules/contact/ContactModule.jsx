@@ -14,7 +14,9 @@ import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
 import { FlightMarks, useFlightClock } from './ContactFlight.jsx'
-import { flightFrame, flightOf, isAirFlight } from './contactFlight.js'
+import { ContactPlayer } from './ContactPlayer.jsx'
+import { DWELL_MS, afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
+import { LEAD_MS, flightFrame, flightOf, isAirFlight } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
 
 // The batter Contact module (#1888): where each ball went, tapped for its exit velocity, launch
@@ -52,6 +54,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const [type, setType] = useState(null)
   const [sel, setSel] = useState(null)
   const [shot, setShot] = useState(0) // counts taps, so a second tap on one ball flies it again
+  const [playing, setPlaying] = useState(false)
   // The dots drop in the first time the field is in view (spec.md, the one-shot rule), and
   // again on each view or type pick: `gen` swaps the a/b class, which restarts the drop.
   const [gen, setGen] = useState(0)
@@ -66,7 +69,8 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const view = pickedView ?? (card ? firstView(card.counts) : 'hr')
   const mix = useMemo(() => card && mixRows(card.balls), [card])
   const shown = useMemo(() => (card ? pickBalls(card.balls, view, type) : []), [card, view, type])
-  const marks = useMemo(() => shown.map((b) => ({ b, p: hitCoordToSvg(b.x, b.y) })).filter((m) => m.p), [shown])
+  const marks = useMemo(() => byDate(shown.map((b) => ({ b, p: hitCoordToSvg(b.x, b.y) })).filter((m) => m.p)), [shown])
+  const axis = useMemo(() => (card ? seasonAxis(card.balls.map((b) => b.date)) : null), [card])
 
   const cur = sel && shown.includes(sel) ? sel : null
   const curMark = cur ? marks.find((m) => m.b === cur) : null
@@ -78,7 +82,35 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const dotR = (b) => (b.result === 'hr' ? 11 : 9)
   const frame = model ? flightFrame(model, t, { home: HOME, land: curMark.p, dotR: dotR(cur), hr: cur.result === 'hr' }) : null
   const flying = !!frame?.flying
-  const tap = (b) => { setSel(b); setShot((s) => s + 1) }
+  const idx = cur ? marks.findIndex((m) => m.b === cur) : -1
+  // Fly ball i. `play` keeps the run going; any other launch (a dot, prev, next, the
+  // timeline) stops it.
+  const launch = (i, play) => {
+    const m = marks[i]
+    if (!m) return
+    setSel(m.b)
+    setShot((s) => s + 1)
+    setPlaying(play)
+  }
+  // The run: after a ball lands and rests DWELL_MS, the next one flies. The rest is read
+  // off the flight clock; under reduced motion there is no clock (t is Infinity), so a
+  // plain timer holds each ball. The setters run in the timer callback, never in the
+  // effect body (react-hooks/set-state-in-effect).
+  const end = model ? LEAD_MS + model.ms : 0
+  const wait = !playing || idx < 0 ? null : t === Infinity ? DWELL_MS : t >= end + DWELL_MS ? 0 : null
+  useEffect(() => {
+    if (wait == null) return undefined
+    const id = setTimeout(() => {
+      const nx = afterDwell(idx, marks.length)
+      if (nx == null) {
+        setPlaying(false)
+        return
+      }
+      setSel(marks[nx].b)
+      setShot((s) => s + 1)
+    }, wait)
+    return () => clearTimeout(id)
+  }, [wait, idx, marks])
 
   const empty = !!error || (!!data && !card)
   useEffect(() => {
@@ -92,7 +124,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   if (!card) return <div ref={fieldRef} className="fcontact fcontact--wait" aria-busy="true"><p className="hint">Loading the contact…</p></div>
 
   const detail = cur && ballDetail(cur)
-  const pick = (set, v) => { set(v); setSel(null); setGen((g) => g + 1) }
+  const pick = (set, v) => { set(v); setSel(null); setGen((g) => g + 1); setPlaying(false) }
   // wait: the dots hide until the field shows. play: the first sighting this visit.
   // gen > 0: a pick since. rest (seen before, Back in the same tab): the dots show still.
   const dotsCls =
@@ -129,7 +161,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
                 {marks.map(({ b, p }, i) => (
                 <circle
                   key={i}
-                  className={`fcontact__dot fcontact__dot--${markKey(b, color)}${b === cur ? ' fcontact__dot--sel' : ''}${b === cur && flying ? ' fcontact__dot--hide' : ''}`}
+                  className={`fcontact__dot fcontact__dot--${markKey(b, color)}${b === cur ? ' fcontact__dot--sel' : ''}${b === cur && flying ? ' fcontact__dot--hide' : ''}${isAhead(i, idx, playing) ? ' fcontact__dot--ahead' : ''}`}
                   style={{ '--fcontact-f': marks.length > 1 ? (i / (marks.length - 1)).toFixed(3) : '0' }}
                 cx={p.x}
                   cy={p.y}
@@ -137,14 +169,15 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
                   tabIndex={0}
                   role="button"
                   aria-label={`${ballDetail(b).eyebrow}${b.exitVelo == null ? '' : `, ${b.exitVelo} mph`}`}
-                  onClick={() => tap(b)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(b) } }}
+                  onClick={() => launch(i, false)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(i, false) } }}
                 />
               ))}
             </g>
             {frame && <FlightMarks frame={frame} home={HOME} />}
           </svg>
         </div>
+        <div className="fcontact__side">
         <div className={`fcontact__detail${flying ? ' fcontact__detail--fly' : ''}`}>
           <span className="sr-only" aria-live="polite">
             {cur && !flying ? `${detail.eyebrow}${cur.distance == null ? '' : `, ${cur.distance} feet`}, ${detail.when}` : ''}
@@ -172,6 +205,8 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
           ) : (
             <p className="hint">Tap a ball to see its exit velocity, launch angle and xBA.</p>
           )}
+        </div>
+        <ContactPlayer marks={marks} idx={idx} playing={playing} axis={axis} onLaunch={launch} onPause={() => setPlaying(false)} />
         </div>
       </div>
       <p className="fcontact__note">
