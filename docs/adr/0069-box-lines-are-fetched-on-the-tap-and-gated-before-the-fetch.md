@@ -1025,3 +1025,28 @@ game-log calls with a few more rows in each.
 
 `calendarTypes` is renamed `widenedTypes` — it was never about the calendar, it
 is about a facet that means to count every kind of game.
+
+## Amendment (2026-10-14): a makeup under the same gamePk keeps its played record
+
+A game that is postponed and played on a later date keeps its gamePk. The
+schedule then sends TWO records for that gamePk: the first date's `Postponed`
+record (Final, no score) and the played date's `Final` record, with the score.
+Example, verified live 2026-10-13: gamePk 824134 is Postponed on 2026-04-03,
+then Final 2–8 on 2026-04-04 as game 2 of a doubleheader. `fetchSchedule` kept
+the FIRST record per gamePk, so the gate dropped the game. Brice Turang (668930)
+had no score on 3 of his 2026 games (824134, 823062, 823357), and Box Lines
+had no row for them.
+
+- **`fetchSchedule` keeps the first record, unless that record has no score and
+  a later record has one.** A suspended game also sends two records, but both
+  have the score, and only the first has `resumeDate` (777861). So it keeps the
+  first record, and the `resumeDate` gate does not change. A single stuck
+  `Postponed` record (#1031) has no second record, so it still goes to the
+  linescore recovery.
+- **The gate also checks the record's `officialDate`.** The played record can
+  have a later date than the postponed one. A record with an `officialDate` on
+  or after the cutoff is out, whatever date the split has. Today the split
+  moves to the played day, so the split date check holds it first. The new
+  check makes the gate safe if the split ever keeps the postponed day.
+
+Tests: `test/boxlines-makeup.test.js`.
