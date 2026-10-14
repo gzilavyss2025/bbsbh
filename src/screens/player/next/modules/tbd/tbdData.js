@@ -3,14 +3,13 @@
 // history.js and context.js.
 import {
   fetchPersonStats,
-  fetchPlayerAwards,
   fetchTransactions,
 } from '../../../../../api/person-fetch.js'
 import { fetchCommandReceived, commandReceivedFor } from '../../../../../api/commandReceived.js'
 import { fetchFoulsFor, foulCardView } from '../../../../../api/fouls.js'
 import { buildCareerTimeline } from '../../../../../api/careerTimeline.js'
 import { fetchRookieRecord } from '../../../../../api/rookies.js'
-import { awardLedgerFor, transactionRowsFor } from '../../../../../api/player/history.js'
+import { transactionRowsFor } from '../../../../../api/player/history.js'
 import { dayBefore, yearByYearFor } from '../../../../../api/player/context.js'
 import { isoToday, photoGameRows } from '../../../../../lib/dates.js'
 
@@ -19,11 +18,6 @@ import { isoToday, photoGameRows } from '../../../../../lib/dates.js'
 export const inMajors = (bio) => !bio.team?.parentOrgId
 
 const endDateOf = (asOf) => (asOf ? dayBefore(asOf) : isoToday())
-
-export async function awardsFor(bio, asOf) {
-  const ledger = await awardLedgerFor(await fetchPlayerAwards(bio.id), endDateOf(asOf))
-  return ledger.categories.length ? ledger : null
-}
 
 // Team history, for a player who has debuted (a pre-debut path leads the live Overview).
 export async function timelineFor(bio) {
