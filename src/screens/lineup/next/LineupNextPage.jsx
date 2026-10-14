@@ -17,7 +17,6 @@ import { TeammatesCard } from './cards/TeammatesCard.jsx'
 import { useLineupData } from './useLineupData.js'
 import { lineupIdentity } from './logic/lineupIdentity.js'
 import { seriesPosition } from './logic/seriesPosition.js'
-import { useLineupSeries } from './useLineupSeries.js'
 import '../../../styles/lineup-next/page.css'
 import '../../../styles/lineup-next/starter.css'
 import '../../../styles/lineup-next/order.css'
@@ -31,7 +30,7 @@ import '../../../styles/lineup-next/grid.css'
 // (tabs, keep-awake), so GameView swaps one page for the other. An open page like the
 // live one: nothing here is a score. The slices S2 to S6 add the cards under the facts.
 export function LineupNextPage({
-  feed, side, game, tabs, onSection, isLive, keepAwake, onSetKeepAwake, officialDate, onSketch,
+  feed, side, game, tabs, onSection, isLive, keepAwake, onSetKeepAwake, series, onSketch,
   manager, uniform, uniformFigure, treatment, oppTreatment, broadcast, scorebookWeather, scorebookWeatherLoading,
   oppPitcherLine, vsTeam, prospectsData, rookiesData, formerTeammatesData, careerMatchupsData, workloadData, callouts,
   onNext, nextLabel, onCatchUp = null, onReload, loading, lastUpdated,
@@ -40,7 +39,6 @@ export function LineupNextPage({
   const id = lineupIdentity(feed, side, treatment, oppTreatment)
   const info = selectGameInfo(feed)
   const officials = selectOfficials(feed)
-  const series = useLineupSeries(feed, officialDate)
   const data = {
     gamePk: feed?.gamePk,
     ...useLineupData({ feed, side, vsTeam, careerMatchupsData, workloadData, formerTeammatesData, oppPitcherLine }),

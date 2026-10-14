@@ -234,6 +234,10 @@ export function GameView({ game, section, onSection }) {
     onSetKeepAwake: setKeepAwake,
     officialDate,
     onSketch: setSketching,
+    // The postseason series the game belongs to (mark, tally, page), read once above for the band.
+    series: seriesMark
+      ? { mark: seriesMark, gameNumber: seriesHit?.gameNumber ?? null, status: seriesStatus, href: seriesPage }
+      : null,
   }
 
   if (feed && step === 7) {

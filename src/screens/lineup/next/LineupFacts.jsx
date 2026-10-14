@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { selectRecordIsClosed } from '../../../api/gamerecord/played.js'
 import { UmpiresCard } from '../../../components/umpire/UmpiresCard.jsx'
 import { FactGrid } from '../../../components/ui/frame/FactGrid.jsx'
-import { ballparkFor } from '../../../lib/ballpark/ballparkData.js'
+import { ballparkFor, rankedDimensions } from '../../../lib/ballpark/ballparkData.js'
 import { resolveBallparkLayout } from '../../../lib/ballpark/layout/resolveLayout.js'
 import { CrowdIcon, managerFact } from '../parts.jsx'
 import { parkShort, shortDate } from './logic/factText.js'
@@ -47,7 +47,8 @@ function Glyph({ label, open, onClick, children }) {
 // diamond glyph opens the ballpark sheet; otherwise it is plain text.
 function ParkCell({ info }) {
   const [open, setOpen] = useState(false)
-  const known = ballparkFor(info.venue, info.venueId) || resolveBallparkLayout({ venueId: info.venueId, venueName: info.venue, gameDate: info.officialDate })
+  // The glyph shows only when the sheet has something to draw (the same two checks ParkSheet makes).
+  const known = rankedDimensions(info.venue, info.venueId) || resolveBallparkLayout({ venueId: info.venueId, venueName: info.venue, gameDate: info.officialDate })
   return (
     <>
       <Cell

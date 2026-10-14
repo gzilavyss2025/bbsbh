@@ -45,7 +45,8 @@ function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills,
   // anywhere else on the row that is not the name toggles it too.
   const figures = wide ? (
     WIDE_COLS.map(([label, key], i) => (
-      <span key={key} className={`lord__figure${i === 0 ? ' lord__figure--lead' : ''}`} aria-label={label}>
+      <span key={key} className={`lord__figure${i === 0 ? ' lord__figure--lead' : ''}`}>
+        <span className="sr-only">{label} </span>
         {val(line, key)}
       </span>
     ))
@@ -107,7 +108,11 @@ function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills,
 export function OrderCard({ data, masthead }) {
   const { lineup, roster, hitterLines, matchups, closed, meta, info, season, isMlb, batsOf } = data
   const wide = useMediaQuery(WIDE_QUERY)
-  const [openId, setOpenId] = useState(() => lineup[0]?.id ?? null)
+  // Which row's season line is open. Until the reader picks one, the first hitter's is open, so a
+  // lineup that posts while the page is open gets the same first row as one loaded after it.
+  const [picked, setPicked] = useState(undefined)
+  const openId = picked === undefined ? (lineup[0]?.id ?? null) : picked
+  const setOpenId = setPicked
   const navigate = useNav()
   const level = SPORT_LABEL[meta.sportId] ?? 'MLB'
   const pills = (p) => (
