@@ -58,7 +58,9 @@
 .pfouls .fouls__note {
   margin: 0;
   color: var(--text-caption);
-  font-size: var(--fs-small);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
 }
 .pfouls__rank {
   color: var(--text-heading);
@@ -66,5 +68,7 @@
 .pfouls__why {
   margin: 0;
   color: var(--text-caption);
-  font-size: var(--fs-small);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
 }

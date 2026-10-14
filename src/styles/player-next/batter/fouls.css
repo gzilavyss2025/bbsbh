@@ -265,3 +265,10 @@
   border: var(--bw-heavy) solid var(--border-stamped);
   background: var(--surface-card);
 }
+
+.fouls__note {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+}

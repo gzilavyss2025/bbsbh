@@ -221,3 +221,10 @@
 .pitchlog__clip {
   margin-inline-start: auto;
 }
+
+.pitchlog__note {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+}

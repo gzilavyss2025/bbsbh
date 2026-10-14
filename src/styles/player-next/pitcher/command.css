@@ -114,7 +114,9 @@
 .command__note,
 .command__sub {
   margin: 0;
-  font-size: var(--fs-small);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
   color: var(--text-caption);
 }
 
