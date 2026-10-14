@@ -63,12 +63,14 @@ did, and end with a short list of what needs him.
      report as `[DECISION: ...]`, and merge the rest.
    - **A PR that will not merge cleanly and is not worth the fight:** leave it out,
      and say which one and why. Do not drop it silently.
-4. **Check the stack.** If step 3 resolved no conflict, skip the local run: CI
-   on the stack PR runs `npm run lint`, `npm test` and `npm run build`, and it
-   is the gate in step 7. Each source PR was already green in CI, and its
-   session did not review itself (`orchestrate`, "Check once"). If step 3
-   resolved a conflict, or step 6 made a fix, run all three here before you
-   push. Fix any failure the merge caused. Fix failures one PR caused in that PR's
+4. **Check the stack.** Do not run the full `npm test` or `npm run build` here:
+   CI on the stack PR runs `npm run lint`, `npm test` and `npm run build` on
+   every push, and it is the gate in step 7. Each source PR was already green in
+   CI (`orchestrate`, "Check once"). Only when you changed code (a conflict you
+   resolved in step 3, a fix in step 6, a `main` merge in step 7) run the narrow
+   check before you push: the test files that import a file you changed
+   (`git grep -l <basename> test/`, then `node --test` on them) and
+   `npm run lint`. Fix any failure the merge caused. Fix failures one PR caused in that PR's
    code, not by loosening a test. Never skip, delete, or weaken a test
    (CLAUDE.md, "Test discipline").
 5. **Open the stack PR.** Push the branch with `git push -u origin stack/<date>` (the session branch in a
@@ -103,13 +105,15 @@ did, and end with a short list of what needs him.
    branch with a clear message. A finding that needs a design choice goes to the
    maintainer, not into a guess. In an unattended orchestrate run,
    take the PR it is in out of the stack, record the finding as `[DECISION: ...]`,
-   and go on with the rest. Run step 4 again after the last fix. Push.
+   and go on with the rest. After the last fix, run step 4's narrow check once
+   (not once per fix), then push. CI runs the full suite on that push.
 7. **Merge gates.** Check all of these on the current head of the stack PR. The
    merge waits until every one is true:
    - CI `lint-and-build` is green on the latest commit. If it is red, root-cause
      it, fix it, and push. Do not re-run to hope.
    - No merge conflict with `main`. If `main` moved, merge it into the stack
-     branch and re-run step 4.
+     branch. Run step 4's narrow check only if the merge had a conflict; CI
+     runs the full suite on the push.
    - The review in step 6 found nothing left open.
    - The user did not ask for a dry run.
 

@@ -191,7 +191,8 @@ Each check runs at one layer, the cheapest one that can do it. Do not repeat it.
 | Check | Child session | Child PR CI | `/stack-prs` | Stack PR CI |
 |---|---|---|---|---|
 | The tests the child wrote or changed, the existing test files that import a file it changed (`git grep -l <basename> test/`), `npm run lint` | yes | | | |
-| Full `npm test`, `npm run build` | no | yes (the gate) | only after a conflict or a review fix | yes (the gate) |
+| Full `npm test`, `npm run build` | no | yes (the gate) | no | yes (the gate) |
+| The tests that import a file the stack changed, `npm run lint` | | | only after a conflict or a review fix, once before the push | |
 | `ponytail-review` and `/code-review` | no | | yes, one pass at `high`, over the whole stack | |
 
 Why: the full suite has about 5,500 tests, CI runs it at no token cost, and the
