@@ -261,6 +261,11 @@
   animation-play-state: paused;
   animation-delay: calc(var(--stamp-delay, 0s) + var(--animlab-delay, 0s));
 }
+/* The player rise (#2073) staggers a row with --rise-i steps of its own. */
+.animlab__frame .player-rise {
+  animation-play-state: paused;
+  animation-delay: calc(var(--stagger-step) * var(--rise-i, 0) + var(--animlab-delay, 0s));
+}
 .animlab__frame .lineup__row {
   animation-play-state: paused;
   animation-delay: calc(var(--row-i, 0) * 30ms + var(--animlab-delay, 0s));
