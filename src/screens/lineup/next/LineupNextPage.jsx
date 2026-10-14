@@ -5,14 +5,20 @@ import { LineupDock } from './LineupDock.jsx'
 import { LineupFacts } from './LineupFacts.jsx'
 import { LineupHero } from './LineupHero.jsx'
 import { LineupJumpBar } from './LineupJumpBar.jsx'
+import { BullpenCard } from './cards/BullpenCard.jsx'
+import { FieldCard } from './cards/FieldCard.jsx'
 import { OrderCard } from './cards/OrderCard.jsx'
+import { SeriesCard } from './cards/SeriesCard.jsx'
 import { StarterCard } from './cards/StarterCard.jsx'
+import { TeammatesCard } from './cards/TeammatesCard.jsx'
 import { useLineupData } from './useLineupData.js'
 import { lineupIdentity } from './lineupIdentity.js'
 import { useLineupSeries } from './useLineupSeries.js'
 import '../../../styles/lineup-next/page.css'
 import '../../../styles/lineup-next/starter.css'
 import '../../../styles/lineup-next/order.css'
+import '../../../styles/lineup-next/field.css'
+import '../../../styles/lineup-next/series.css'
 
 // The new lineup page (docs/lineup-redesign.md), at `?look=new` on lineup1 and lineup2.
 // It takes the props TeamInfo takes, plus the game chrome the live page leaves to GameView
@@ -29,6 +35,7 @@ export function LineupNextPage({
   const officials = selectOfficials(feed)
   const series = useLineupSeries(feed, officialDate)
   const data = {
+    gamePk: feed?.gamePk,
     ...useLineupData({ feed, side, vsTeam, careerMatchupsData, workloadData, formerTeammatesData, oppPitcherLine }),
     prospectsData,
     rookiesData,
@@ -55,6 +62,10 @@ export function LineupNextPage({
         <LineupJumpBar tabs={tabs} onSection={onSection} />
         <StarterCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
         <OrderCard data={data} masthead={id.masthead} />
+        <FieldCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
+        <SeriesCard data={data} />
+        <BullpenCard data={data} workloadData={workloadData} />
+        <TeammatesCard data={data} side={side} />
         <LineupDock
           onReload={onReload}
           loading={loading}

@@ -1,0 +1,62 @@
+/* ==== THE SEASON SERIES CARD (docs/lineup-redesign.md, slice S5) ====
+   One cell per meeting, scrolling sideways. The current game is ink; a win is tinted. */
+
+.lss__strip {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding: var(--space-4) var(--space-3h) var(--space-3h);
+  scrollbar-width: none;
+}
+.lss__strip::-webkit-scrollbar {
+  display: none;
+}
+/* layout-exempt: date, score and park stacked in a cell */
+.lss__cell {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  align-items: center;
+  min-width: 96px;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font: inherit;
+  cursor: pointer;
+}
+.lss__cell:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.lss__cell.is-win {
+  background: var(--accent-tint);
+}
+.lss__cell.is-current {
+  background: var(--text-heading);
+  color: var(--surface-card);
+}
+.lss__date,
+.lss__where,
+.lss__round,
+.lss__now {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-style: normal;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+/* layout-exempt: logo beside the score */
+.lss__score {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  font-family: var(--font-mono);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-medium);
+}
+.lss__score .seasonseries__time {
+  color: inherit;
+}

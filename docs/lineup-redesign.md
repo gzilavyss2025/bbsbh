@@ -34,9 +34,9 @@ nothing is fetched and then hidden.
 | --- | --- | --- |
 | S0 | Plan, `?look=new` flag, page shell | done |
 | S1 | Hero, fact grid, umpires, jump bar, dock | done |
-| S2 | Starting pitcher card, pitch mix, scene | |
-| S3 | Batting order, bench, roster fallback | |
-| S4 | Defensive field, former teammates | |
-| S5 | Season series, bullpen | |
+| S2 | Starting pitcher card, pitch mix, scene | done |
+| S3 | Batting order, bench, roster fallback | done |
+| S4 | Defensive field, former teammates | done |
+| S5 | Season series, bullpen | done |
 | S6 | Uniform, ballpark and umpire sheets | |
 | S7 | Tests, docs, swap PR (deletes the old code) | |
