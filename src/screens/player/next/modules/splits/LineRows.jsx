@@ -1,13 +1,16 @@
 // The Splits card's table parts (#1886): the head and the cells of one row. Two grids share them:
 // 'slash' (PA or BF, AVG/OBP/SLG, the OPS bar, HR, K%, BB%) and 'era' (G, IP, the ERA bar, K, BB).
 // A row is a line of splitsView.js; the bar is drawn from its `fill` and `tick`.
+import { HomePlateIcon } from '../../../../../components/badges/UmpireTierGlyph.jsx'
+
 const DASH = '—'
 
+// Best and weakest in a group: the umpire pages' home plate, solid green or solid clay (splits.css).
 export function Flag({ weak }) {
   return (
-    <svg className={`splitsmod__flag${weak ? ' is-weak' : ''}`} width="22" height="22" viewBox="0 0 22 22" role="img" aria-label={weak ? 'Weakest in its group' : 'Best in its group'}>
-      <rect x="2" y="2" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="4 3" />
-    </svg>
+    <span className={`splitsmod__flag${weak ? ' is-weak' : ''}`} role="img" aria-label={weak ? 'Weakest in its group' : 'Best in its group'}>
+      <HomePlateIcon size={22} />
+    </span>
   )
 }
 

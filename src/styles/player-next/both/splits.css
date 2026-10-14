@@ -120,10 +120,13 @@
 .splitsmod__flag {
   flex: none;
   display: block;
-  color: var(--text-heading);
+  color: var(--field-deep);
 }
 .splitsmod__flag.is-weak {
   color: var(--clay-deep);
+}
+.splitsmod__flag svg {
+  display: block;
 }
 
 /* ---- the pitcher's menu of the four parts ---- */
