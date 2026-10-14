@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Ledger } from '../../../../../components/player/Ledger.jsx'
 import { StatTile } from '../../../../../components/ui/frame/StatTile.jsx'
 import { ModalPortal } from '../../../../../components/ui/ModalPortal.jsx'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { EmptyState } from '../../../../../components/ui/state/EmptyState.jsx'
@@ -65,13 +66,12 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
   return (
     <Stack gap="loose" className="seasonmod">
       <Cluster gap="base" align="center" className="seasonmod__bar">
-        <Cluster gap="tight" role="group" aria-label="Show stats for">
-          {scopes.map((s) => (
-            <button key={s.id} type="button" className="pnext-pick" aria-pressed={s.id === scope} onClick={() => { setPick(s.id); setOpen(null) }}>
-              {s.label}
-            </button>
-          ))}
-        </Cluster>
+        <Segmented
+          label="Show stats for"
+          value={scope}
+          onChange={(id) => { setPick(id); setOpen(null) }}
+          options={scopes.map((s) => ({ value: s.id, label: s.label }))}
+        />
         <span className="seasonmod__caption">{CAPTION[scope]}</span>
       </Cluster>
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/season/advanced.css'
-import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
+import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { loadAdvanced } from './advancedData.js'
 import { advancedView } from './advancedView.js'
@@ -32,11 +32,12 @@ export default function AdvancedModule({ bio, role, asOf, season, onEmpty, onCou
     <div className="pnext-adv">
       <div className="pnext-adv__top">
         {views.post && (
-          <Cluster role="group" aria-label="Scope">
-            {SCOPES.map(([k, text]) => (
-              <button key={k} type="button" className="pnext-pick" aria-pressed={active === k} onClick={() => (setScope(k), setOpen(null))}>{text}</button>
-            ))}
-          </Cluster>
+          <Segmented
+            label="Scope"
+            value={active}
+            onChange={(k) => (setScope(k), setOpen(null))}
+            options={SCOPES.map(([k, text]) => ({ value: k, label: text }))}
+          />
         )}
         {shown.sample && <span className="pnext-adv__sample mono">{shown.sample}</span>}
       </div>
