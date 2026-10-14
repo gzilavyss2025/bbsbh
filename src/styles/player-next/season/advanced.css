@@ -1,0 +1,97 @@
+/* ==== ADVANCED (the new player page, #2012) ====
+   A scope switch over a flat tile grid with a 2px ink gap. Tokens only. */
+
+/* layout-exempt: the switch and the sample, a wrapping row */
+.pnext-adv {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+/* The reserve is for the load only: two rows of four tiles on a wide card, four of two on a phone. */
+.pnext-adv--loading {
+  min-height: 360px;
+}
+@container (min-width: 520px) {
+  .pnext-adv--loading {
+    min-height: 190px;
+  }
+}
+
+/* layout-exempt: the switch and the sample, a wrapping row */
+.pnext-adv__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.pnext-adv__sample {
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+
+/* layout-exempt: a flat grid, the gap is the ink rule between tiles */
+.pnext-adv__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--bw-heavy);
+  background: var(--text-heading);
+  border: var(--bw-heavy) solid var(--text-heading);
+}
+@container (min-width: 520px) {
+  .pnext-adv__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* layout-exempt: a tile stacks its label, value and caption */
+.pnext-adv__tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: flex-start;
+  min-height: 88px;
+  padding: var(--space-3);
+  border: 0;
+  background: var(--bg-page);
+  color: var(--text-heading);
+  text-align: start;
+  cursor: pointer;
+}
+.pnext-adv__tile--lead {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+.pnext-adv__tile--missing {
+  background: var(--hold-texture);
+  color: var(--text-heading);
+}
+.pnext-adv__tile--open {
+  outline: 3px solid var(--text-heading);
+  outline-offset: -5px;
+}
+.pnext-adv__tile--lead.pnext-adv__tile--open:not(.pnext-adv__tile--missing) {
+  outline-color: var(--text-on-ink-cream);
+}
+.pnext-adv__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+.pnext-adv__value {
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-semibold);
+}
+.pnext-adv__tile--missing .pnext-adv__value {
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+.pnext-adv__cap {
+  font-size: var(--fs-label);
+  opacity: 0.8;
+}
+.pnext-adv__note {
+  margin: 0;
+  color: var(--text-caption);
+}
