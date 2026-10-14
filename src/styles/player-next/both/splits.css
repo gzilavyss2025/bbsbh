@@ -129,40 +129,7 @@
   display: block;
 }
 
-/* ---- the pitcher's menu of the four parts ---- */
-/* layout-exempt: the menu cards share a wrapping row; picked, they shrink to a rail */
-.splitsmod__menu {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2h);
-}
-/* layout-exempt: a menu card stacks its title over its preview */
-.splitsmod__mc {
-  flex: 1 1 calc(var(--space-16) * 3);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: var(--space-12);
-  padding: var(--space-3) var(--space-3h);
-  border: var(--bw-heavy) solid var(--border-stamped);
-  border-radius: 0;
-  background: var(--surface-card);
-  color: var(--text-heading);
-  text-align: left;
-  cursor: pointer;
-}
-.splitsmod__mc[aria-pressed='true'] {
-  background: var(--text-body);
-  color: var(--text-on-ink);
-}
-.splitsmod__mt {
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  line-height: var(--lh-solid);
-  text-transform: uppercase;
-}
+/* ---- the pitcher's menu: the figures of a MenuRail card ---- */
 .splitsmod__mp {
   display: block;
   margin-top: var(--space-2);
@@ -174,23 +141,7 @@
   display: block;
   margin-top: var(--space-1);
   color: var(--text-caption);
-  font-family: var(--font-mono);
   font-size: var(--fs-cell);
-}
-.splitsmod__mc[aria-pressed='true'] .splitsmod__mp,
-.splitsmod__mc[aria-pressed='true'] .splitsmod__mh {
-  color: var(--text-on-ink);
-}
-.splitsmod__menu.is-rail .splitsmod__mc {
-  flex: 0 0 calc(var(--space-16) * 2);
-  padding: var(--space-1h) var(--space-3h);
-  justify-content: center;
-}
-.splitsmod__menu.is-rail .splitsmod__mt {
-  font-size: var(--fs-body);
-}
-.splitsmod__menu.is-rail .splitsmod__mx {
-  display: none;
 }
 
 /* ---- the four parts ---- */
@@ -250,6 +201,20 @@
   .splitsmod__fill {
     transition: none;
   }
+}
+
+/* ---- a part inside the pitcher's MenuRail panel ----
+   The panel rises on each pick (MenuRail), so a part in it does not rise a second time: it shows
+   at once and only its bars grow. Until the part is in view its fills hide, so a bar never shows
+   full and then drops to the start of its grow. */
+.menurail__panel .splitsmod__part.is-pre {
+  opacity: 1;
+}
+.menurail__panel .splitsmod__part.is-pre .splitsmod__fill {
+  visibility: hidden;
+}
+.menurail__panel .splitsmod__part.is-in {
+  animation: none;
 }
 
 /* ---- the rows ---- */

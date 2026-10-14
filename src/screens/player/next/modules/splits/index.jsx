@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
+import { MenuRail } from '../../../../../components/ui/control/MenuRail.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
@@ -9,7 +10,7 @@ import { Flag, Head, Part, Row } from './LineRows.jsx'
 import { GameLines } from './GameLines.jsx'
 import { VsTeam } from './VsTeam.jsx'
 import { loadCareer, loadGameLines, loadSplits, loadVsTeam } from './splitsData.js'
-import { doorFigure, gameLinesView, handTable, scopeText, seasonChoices, sitTable } from './splitsView.js'
+import { gameLinesView, handTable, scopeText, seasonChoices, sitTable, splitsMenu } from './splitsView.js'
 import '../../../../../styles/player-next/both/splits.css'
 import './parts.css'
 
@@ -27,7 +28,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
   const [picked, setPicked] = useState(null)
   const [wanted, setWanted] = useState('R')
   const [sitAll, setSitAll] = useState(false)
-  const [focus, setFocus] = useState('h')
+  const [focus, setFocus] = useState(null)
   const [ready, setReady] = useState(false)
   const key = picked ?? String(season)
   // October is not cut by a date and the career holds it: a dated page asks for neither.
@@ -77,20 +78,61 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
   if (empty) return null
   if (!ready && !splits.error) return <div className="splitsmod splitsmod--wait" aria-busy="true" />
 
-  const show = (id) => focus === id || focus === 'all'
   const hand = tables?.hand
   const sit = tables?.sit
-  const sitOps = (code) => sit?.groups.flatMap((g) => g.rows).find((r) => r.key === code)?.ops ?? '—'
-  const opsHint = pitching ? 'OPS against' : 'OPS'
-  const careerHint = pitching ? 'Career ERA' : 'Career OPS'
-  const menu = [
-    ['h', 'By handedness', hand && `${hand.rows[0].label} ${hand.rows[0].ops} · ${hand.rows[1].label} ${hand.rows[1].ops}`, opsHint],
-    ['s', 'Situational', sit && `Empty ${sitOps('r0')} · RISP ${sitOps('risp')}`, opsHint],
-    vs.data && ['v', 'Splits vs team', 'Every club, career', careerHint],
-    glView && ['g', 'Game lines', `Home ${doorFigure(glView, 'home', group)} · Road ${doorFigure(glView, 'road', group)}`, careerHint],
-    ['all', 'All four', 'Scroll through everything', 'Every section open'],
-  ].filter(Boolean)
+  const menu = splitsMenu({ hand, sit, vs: Boolean(vs.data), glView, group }).map(({ key, title, preview, hint }) => ({
+    key,
+    title,
+    figures: (
+      <>
+        <span className="splitsmod__mp">{preview}</span>
+        <span className="splitsmod__mh">{hint}</span>
+      </>
+    ),
+  }))
   const empties = <p className="splitsmod__none">{`No ${scope === 'P' ? 'postseason ' : ''}splits for ${shown === 'career' ? 'his career' : shown}.`}</p>
+
+  // The parts. A batter sees all of them; a pitcher sees the ones he picks, in the MenuRail panel.
+  const cards = (pick) => (
+    <div className="splitsmod__cards" aria-busy={splits.loading}>
+      {(pick === 'h' || pick === 'all') && (
+        <Part once={`${once}:h`} label="By handedness">
+          <SectionHead look="rule" note={text.tag}>By handedness</SectionHead>
+          {hand ? (
+            <>
+              <Head layout="slash" title="Split" group={group} vs={text.base} />
+              <Row base line={hand.base} layout="slash" />
+              {hand.rows.map((l, i) => <Row key={l.key} i={i + 1} line={l} layout="slash" />)}
+            </>
+          ) : splits.loading ? <p className="hint">Loading…</p> : empties}
+        </Part>
+      )}
+      {(pick === 's' || pick === 'all') && (
+        <Part once={`${once}:s`} label="Situational">
+          <SectionHead look="rule" note={text.tag}>Situational</SectionHead>
+          {sit ? (
+            <>
+              <Head layout="slash" title="Split" group={group} vs={text.base} />
+              {sit.base && <Row base line={sit.base} layout="slash" />}
+              {sit.groups.filter((g) => sitAll || g.family === 'base').map((g) => (
+                <div key={g.family}>
+                  <p className="splitsmod__fam">{g.title}</p>
+                  {g.rows.map((l, i) => <Row key={l.key} i={i + 1} line={l} layout="slash" />)}
+                </div>
+              ))}
+              {sit.groups.length > 1 && (
+                <Button size="control" skin="outline" className="splitsmod__more" aria-expanded={sitAll} onClick={() => setSitAll(!sitAll)}>
+                  {sitAll ? 'Show less' : 'Show more'}
+                </Button>
+              )}
+            </>
+          ) : splits.loading ? <p className="hint">Loading…</p> : empties}
+        </Part>
+      )}
+      {(pick === 'v' || pick === 'all') && vs.data && <VsTeam vs={vs.data} group={group} career={career.data} season={season} asOf={asOf} bio={bio} surname={surname} />}
+      {(pick === 'g' || pick === 'all') && glView && <GameLines view={glView} labels={lines.data.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
+    </div>
+  )
 
   return (
     <Stack gap="loose" className="splitsmod">
@@ -113,7 +155,7 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
         </div>
         <span className="splitsmod__sum">
           <span className="splitsmod__pa">{pa ?? '—'}</span> {pitching ? 'BF' : 'PA'}
-          <button type="button" className="pnext-pick" onClick={() => { setPicked(null); setWanted('R'); setSitAll(false); setFocus('h') }}>Reset</button>
+          <button type="button" className="pnext-pick" onClick={() => { setPicked(null); setWanted('R'); setSitAll(false); setFocus(null) }}>Reset</button>
         </span>
       </div>
       <ul className="splitsmod__legend" aria-label="How to read the bars">
@@ -126,56 +168,11 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
         <li><Flag weak />Weakest in its group</li>
       </ul>
 
-      <div className={`splitsmod__menu${focus ? ' is-rail' : ''}`} role="group" aria-label="Splits sections">
-        {menu.map(([id, title, preview, hint]) => (
-          <button key={id} type="button" className="splitsmod__mc" aria-pressed={focus === id} onClick={() => setFocus(focus === id ? '' : id)}>
-            <span className="splitsmod__mt">{title}</span>
-            <span className="splitsmod__mx">
-              <span className="splitsmod__mp">{preview}</span>
-              <span className="splitsmod__mh">{hint}</span>
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <div className="splitsmod__cards" aria-busy={splits.loading}>
-        {show('h') && (
-          <Part once={`${once}:h`} label="By handedness">
-            <SectionHead look="rule" note={text.tag}>By handedness</SectionHead>
-            {hand ? (
-              <>
-                <Head layout="slash" title="Split" group={group} vs={text.base} />
-                <Row base line={hand.base} layout="slash" />
-                {hand.rows.map((l, i) => <Row key={l.key} i={i + 1} line={l} layout="slash" />)}
-              </>
-            ) : splits.loading ? <p className="hint">Loading…</p> : empties}
-          </Part>
-        )}
-        {show('s') && (
-          <Part once={`${once}:s`} label="Situational">
-            <SectionHead look="rule" note={text.tag}>Situational</SectionHead>
-            {sit ? (
-              <>
-                <Head layout="slash" title="Split" group={group} vs={text.base} />
-                {sit.base && <Row base line={sit.base} layout="slash" />}
-                {sit.groups.filter((g) => sitAll || g.family === 'base').map((g) => (
-                  <div key={g.family}>
-                    <p className="splitsmod__fam">{g.title}</p>
-                    {g.rows.map((l, i) => <Row key={l.key} i={i + 1} line={l} layout="slash" />)}
-                  </div>
-                ))}
-                {sit.groups.length > 1 && (
-                  <Button size="control" skin="outline" className="splitsmod__more" aria-expanded={sitAll} onClick={() => setSitAll(!sitAll)}>
-                    {sitAll ? 'Show less' : 'Show more'}
-                  </Button>
-                )}
-              </>
-            ) : splits.loading ? <p className="hint">Loading…</p> : empties}
-          </Part>
-        )}
-        {show('v') && vs.data && <VsTeam vs={vs.data} group={group} career={career.data} season={season} asOf={asOf} bio={bio} surname={surname} />}
-        {show('g') && glView && <GameLines view={glView} labels={lines.data.labels} group={group} asOf={asOf} bio={bio} surname={surname} />}
-      </div>
+      {pitching ? (
+        <MenuRail label="Splits sections" items={menu} picked={focus} onPick={setFocus} panel={cards} />
+      ) : (
+        cards('all')
+      )}
     </Stack>
   )
 }
