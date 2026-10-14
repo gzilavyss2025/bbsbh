@@ -1,6 +1,6 @@
 /* ============================================================
    THE OVR BARS (#1703): the attribute rows the player page's header extras
-   draw (OvrBars.jsx, imported with this sheet by top/HeaderExtras.jsx). The
+   draw (OvrBars.jsx, imported with this sheet by top/HeroStrip.jsx). The
    tile and menu that also lived here left with the old tabs (#1898).
    The tier colours are tokens (--ovr-*, colors.css), picked by the element's
    --tier, which OvrBars sets inline per row.
