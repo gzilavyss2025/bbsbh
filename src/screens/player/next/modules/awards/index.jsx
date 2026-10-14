@@ -4,6 +4,7 @@ import { dayBefore } from '../../../../../api/player/context.js'
 import { awardLedgerFor } from '../../../../../api/player/history.js'
 import { fetchPlayerAwards } from '../../../../../api/person-fetch.js'
 import { useCopy } from '../../../../../copy/copyContext.js'
+import { Door } from '../../../../../components/ui/control/Door.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../../../hooks/useMediaQuery.js'
 import { isoToday } from '../../../../../lib/dates.js'
@@ -21,11 +22,11 @@ export default function AwardsModule({ bio, asOf, onEmpty, onCount }) {
   const wide = useMediaQuery(WIDE_QUERY)
   const [open, setOpen] = useState(false)
   const { data, loading: busy } = useAsync(
-    async () => ({ id: bio.id, ledger: await awardLedgerFor(await fetchPlayerAwards(bio.id), endDateOf(asOf)) }),
+    async () => ({ id: bio.id, asOf, ledger: await awardLedgerFor(await fetchPlayerAwards(bio.id), endDateOf(asOf)) }),
     [bio.id, asOf],
   )
-  // useAsync keeps the last player's data for one render after the id changes.
-  const loading = busy || Boolean(data && data.id !== bio.id)
+  // useAsync keeps the last read's data for one render after the player or the date changes.
+  const loading = busy || Boolean(data && (data.id !== bio.id || data.asOf !== asOf))
   const view = useMemo(() => {
     if (loading || !data) return null
     const order = parseAwardOrder(t('awards.order'))
@@ -73,9 +74,9 @@ export default function AwardsModule({ bio, asOf, onEmpty, onCount }) {
               ))}
             </ul>
           )}
-          <button type="button" className="awmod__door" aria-expanded={open} onClick={() => setOpen(!open)}>
+          <Door layout="block" aria-expanded={open} onClick={() => setOpen(!open)}>
             {open ? 'Show fewer' : view.doorOpen}
-          </button>
+          </Door>
         </>
       )}
     </div>
