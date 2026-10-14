@@ -5,7 +5,7 @@ import { mphBuckets, startsBuckets, foldStarts } from '../scripts/lib/pitch/arse
 import { aggregateGamePitchTypes } from '../scripts/gen-pitch-arsenal.mjs'
 import {
   addGame, boxVerdict, codesVerdict, coverageVerdict, pendingGames, rowsOfFeed, shardsOf,
-} from '../scripts/gen-pitch-starts.mjs'
+} from '../scripts/lib/pitch/starts-sweep.mjs'
 
 const pitch = (code, speed) => ({ isPitch: true, details: { type: { code, description: code } }, pitchData: speed == null ? undefined : { startSpeed: speed } })
 const play = (pitcher, stand, events) => ({

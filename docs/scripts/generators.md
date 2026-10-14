@@ -1886,7 +1886,7 @@ Re-run only to fold in a new season.
   pitch mix for a season before 2026, MLB only (ADR-0111). Run by hand, one season at a time:
   `node scripts/gen-pitch-starts.mjs --season=YYYY` (required), then the same command with `--verify`. It
   opens no SQLite database and writes no dump. It uses `aggregateGamePitchTypes` from `gen-pitch-arsenal.mjs`,
-  adds the two batter sides, and writes the shards through `bucketsOf` and `writeShards`. The numbers equal
+  adds the two batter sides (the pure half is `scripts/lib/pitch/starts-sweep.mjs`), and writes the shards through `bucketsOf` and `writeShards`. The numbers equal
   what `foldStarts` and `mphBuckets` give (a test pins this). **Resume:** it writes the shards every 100 games and
   reads them at the start, so it skips every game already stored. A feed that fails after the client's retries goes on a
   failed list: the script prints the list and exits non-zero. Run the same command again to fetch only what is missing.
