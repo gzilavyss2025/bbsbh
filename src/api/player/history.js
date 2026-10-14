@@ -99,6 +99,10 @@ export async function transactionRowsFor(bio, txns, rookieInfo, endDate) {
       asgTeamIds.add(t.fromTeam.id)
       asgTeamIds.add(t.toTeam.id)
     }
+    // A one-sided ASG/SC row (invite, All-Star, national team) needs its club's level too.
+    if ((t.typeCode === 'ASG' || t.typeCode === 'SC') && !t.fromTeam?.id && t.toTeam?.id && !/All-Stars?\b/i.test(t.description || '')) {
+      asgTeamIds.add(t.toTeam.id)
+    }
     if (t.typeCode === 'TR' && t.fromTeam?.id && t.toTeam?.id) trades.push(t)
   }
   const [levelPairs, cohorts] = await Promise.all([

@@ -261,7 +261,7 @@ test('the private-life lists stay off the timeline', () => {
   assert.equal(rows, null)
 })
 
-test('roster-status noise and number changes still drop', () => {
+test('roster-status noise and number changes still drop (an All-Star activation is now an event row)', () => {
   const rows = transactionTimelineView([
     sc('2025-04-15', 'TWP Shohei Ohtani changed number to 42.', DODGERS),
     { typeCode: 'NUM', date: '2025-04-16', effectiveDate: '2025-04-16', toTeam: DODGERS, description: 'TWP Shohei Ohtani changed number to 17.' },
@@ -269,7 +269,8 @@ test('roster-status noise and number changes still drop', () => {
     sc('2025-07-14', 'National League All-Stars activated TWP Shohei Ohtani.', DODGERS),
     sc('2024-03-01', 'Los Angeles Dodgers reassigned RHP Walker Buehler to the minor leagues.', DODGERS),
   ])
-  assert.equal(rows, null)
+  // Only the All-Star selection survives; 'Japan activated' has no level on file here, so it drops.
+  assert.deepEqual(rows.rows.map((r) => r.code), ['ALLSTAR'])
 })
 
 test('an IL stint after the spoiler cutoff is not shown', () => {
