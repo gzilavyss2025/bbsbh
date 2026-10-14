@@ -7,7 +7,6 @@ import { loadPositionScope } from '../../../../../api/player/history.js'
 import { fetchTeam } from '../../../../../api/team.js'
 import { BallparkDiagram } from '../../../../../components/ballpark/BallparkDiagram.jsx'
 import { FieldBackdrop } from '../../../../../components/scoring/field/FieldBackdrop.jsx'
-import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { Loader } from '../../../../../components/ui/Loader.jsx'
@@ -151,7 +150,7 @@ export default function InningsModule({ bio, role, asOf, season, onEmpty, onCoun
       {scopes.length > 1 && (
         <Cluster className="pnext-inn__scope" role="group" aria-label="Scope">
           {scopes.map((s) => (
-            <Button key={s.key} size="control" pressed={scope === s.key} onClick={() => pick(s.key)}>{s.label}</Button>
+            <button key={s.key} type="button" className="pnext-pick" aria-pressed={scope === s.key} onClick={() => pick(s.key)}>{s.label}</button>
           ))}
         </Cluster>
       )}

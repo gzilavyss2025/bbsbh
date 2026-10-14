@@ -151,32 +151,11 @@
   text-align: left;
   cursor: pointer;
 }
-.splitsmod__mc[aria-pressed='true'],
-.splitsmod__pick[aria-pressed='true'] {
+.splitsmod__mc[aria-pressed='true'] {
   background: var(--text-body);
   color: var(--text-on-ink);
 }
-/* The bar's Scope and Reset buttons wear the menu card's look, one line tall. */
-.splitsmod__pick {
-  min-height: var(--space-12);
-  padding: 0 var(--space-3h);
-  border: var(--bw-heavy) solid var(--border-stamped);
-  border-radius: 0;
-  background: var(--surface-card);
-  color: var(--text-heading);
-  font-family: var(--font-display);
-  font-size: var(--fs-body);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  line-height: var(--lh-solid);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-.splitsmod__pick:disabled {
-  opacity: var(--opacity-disabled);
-  cursor: default;
-}
-.splitsmod__segs .splitsmod__pick + .splitsmod__pick {
+.splitsmod__segs .pnext-pick + .pnext-pick {
   margin-left: calc(var(--bw-heavy) * -1);
 }
 .splitsmod__mt {

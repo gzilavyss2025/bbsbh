@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { OvrBars } from '../../../../components/ovr/OvrBars.jsx'
-import { Button } from '../../../../components/ui/control/Button.jsx'
 import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 import { CONSTANTS } from '../../../../api/ovr/rating.js'
 import { TIERS } from '../../../../lib/ovr/tiers.js'
@@ -57,7 +56,7 @@ export function HeroStrip({ id, ratings, open }) {
       {ratings.length > 1 && (
         <Cluster className="pnext-ovr__switch" role="group" aria-label="Rating">
           {ratings.map((r) => (
-            <Button key={r.group} size="control" pressed={r.group === view.group} onClick={() => { setGroup(r.group); setPicked(null) }}>{WORD[r.group]}</Button>
+            <button key={r.group} type="button" className="pnext-pick" aria-pressed={r.group === view.group} onClick={() => { setGroup(r.group); setPicked(null) }}>{WORD[r.group]}</button>
           ))}
         </Cluster>
       )}

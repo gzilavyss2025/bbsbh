@@ -5,7 +5,6 @@ import { MLB_LOG_GAME_TYPES } from '../../../../../api/boxlines/rows.js'
 import { fetchSprayFor, sprayView } from '../../../../../api/spray.js'
 import { rate3 } from '../../../../../api/person/shared.js'
 import { BattedBallMix } from '../../../../../components/charts/BattedBallMix.jsx'
-import { Pill } from '../../../../../components/ui/control/Pill.jsx'
 import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
@@ -79,14 +78,14 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
       <div className="fcontact__bar">
         <div className="fcontact__chips" role="group" aria-label="Which balls">
           {VIEWS.map(([k, name]) => (
-            <Pill key={k} role="control" fill="paper" pressed={k === view} disabled={!card.counts[k]} onClick={() => pick(setView, k)}>
+            <button key={k} type="button" className="pnext-pick" aria-pressed={k === view} disabled={!card.counts[k]} onClick={() => pick(setView, k)}>
               {name} {card.counts[k]}
-            </Pill>
+            </button>
           ))}
         </div>
         <div className="fcontact__chips" role="group" aria-label="Color by">
           {COLORS.map(([k, name]) => (
-            <Pill key={k} role="control" fill="paper" pressed={k === color} onClick={() => setColor(k)}>{name}</Pill>
+            <button key={k} type="button" className="pnext-pick" aria-pressed={k === color} onClick={() => setColor(k)}>{name}</button>
           ))}
         </div>
       </div>
@@ -115,9 +114,9 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
           </svg>
           <div className="fcontact__chips" role="group" aria-label="Highlight one kind of ball">
             {mix?.map((r) => (
-              <Pill key={r.key} role="control" fill="paper" pressed={r.key === type} disabled={!r.n} onClick={() => pick(setType, r.key === type ? null : r.key)}>
+              <button key={r.key} type="button" className="pnext-pick" aria-pressed={r.key === type} disabled={!r.n} onClick={() => pick(setType, r.key === type ? null : r.key)}>
                 {r.name} {r.n}
-              </Pill>
+              </button>
             ))}
           </div>
         </div>

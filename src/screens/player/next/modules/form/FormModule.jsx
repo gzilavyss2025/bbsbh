@@ -3,7 +3,6 @@ import '../../../../../styles/player-next/batter/form.css'
 import { fetchPersonStats } from '../../../../../api/person-fetch.js'
 import { MLB_LOG_GAME_TYPES } from '../../../../../api/boxlines/rows.js'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
-import { Pill } from '../../../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
@@ -67,9 +66,9 @@ export default function FormModule({ bio, asOf, season, onEmpty, onCount }) {
         <div className="fform__controls">
           <div className="fform__windows" role="group" aria-label="Rolling window">
             {WINDOWS.map((n) => (
-              <Pill key={n} role="control" fill="paper" pressed={n === w} disabled={!views[n]} onClick={() => { setPlaying(false); setPick(n); setAt(null) }}>
+              <button key={n} type="button" className="pnext-pick" aria-pressed={n === w} disabled={!views[n]} onClick={() => { setPlaying(false); setPick(n); setAt(null) }}>
                 {n} games
-              </Pill>
+              </button>
             ))}
           </div>
           {!motionIsReduced() && (

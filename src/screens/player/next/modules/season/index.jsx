@@ -5,7 +5,6 @@ import { ModalPortal } from '../../../../../components/ui/ModalPortal.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { EmptyState } from '../../../../../components/ui/state/EmptyState.jsx'
-import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { lastCompleteSeason, leagueAverage } from '../../../../../api/player/leagueAverages.js'
 import { spanCell } from '../../../../../lib/ledger.js'
@@ -68,9 +67,9 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
       <Cluster gap="base" align="center" className="seasonmod__bar">
         <Cluster gap="tight" role="group" aria-label="Show stats for">
           {scopes.map((s) => (
-            <Button key={s.id} size="control" skin="outline" pressed={s.id === scope} onClick={() => { setPick(s.id); setOpen(null) }}>
+            <button key={s.id} type="button" className="pnext-pick" aria-pressed={s.id === scope} onClick={() => { setPick(s.id); setOpen(null) }}>
               {s.label}
-            </Button>
+            </button>
           ))}
         </Cluster>
         <span className="seasonmod__caption">{CAPTION[scope]}</span>

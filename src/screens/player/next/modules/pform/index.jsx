@@ -5,7 +5,6 @@ import { fetchPersonStats } from '../../../../../api/person-fetch.js'
 import { fetchPitchMphFor } from '../../../../../api/pitchArsenal.js'
 import { MLB_LOG_GAME_TYPES } from '../../../../../api/boxlines/rows.js'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
-import { Pill } from '../../../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
@@ -96,16 +95,16 @@ export default function PformModule({ bio, asOf, season, onEmpty, onCount }) {
         <div className="fform__controls">
           <div className="fform__windows" role="group" aria-label="Rolling window">
             {chips.windows.map((n) => (
-              <Pill key={n} role="control" fill="paper" pressed={n === w} disabled={!views[n]} onClick={() => { setPlaying(false); setPick(n); setAt(null) }}>
+              <button key={n} type="button" className="pnext-pick" aria-pressed={n === w} disabled={!views[n]} onClick={() => { setPlaying(false); setPick(n); setAt(null) }}>
                 {n} {chips.unit}
-              </Pill>
+              </button>
             ))}
           </div>
           <div className="fform__windows" role="group" aria-label="Chart shows">
             {Object.entries(METRICS).filter(([k]) => fast || k !== 'mph').map(([k, { label }]) => (
-              <Pill key={k} role="control" fill="paper" pressed={k === shows} onClick={() => { setPlaying(false); setMetric(k) }}>
+              <button key={k} type="button" className="pnext-pick" aria-pressed={k === shows} onClick={() => { setPlaying(false); setMetric(k) }}>
                 {label}
-              </Pill>
+              </button>
             ))}
           </div>
           {!motionIsReduced() && (
