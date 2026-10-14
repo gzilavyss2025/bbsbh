@@ -28,10 +28,9 @@ export function FoldCard({ title, count, band = null, className = '', children }
             <TeamLogo
               teamId={band.teamId}
               name={band.teamName}
-              size={22}
+              size={30}
               variant="mono"
-              crop="bar"
-              overrideUrl={band.masthead.url}
+                            overrideUrl={band.masthead.url}
               season={band.season}
               className={`sectionhead__mark${band.masthead.url ? ' sectionhead__mark--custom' : ''}`}
             />

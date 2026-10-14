@@ -49,10 +49,6 @@
   gap: var(--space-2h);
   min-width: 0;
 }
-.lband .teamlogo-crop-bar {
-  height: 34px;
-  flex: none;
-}
 .lband__link {
   display: inline-flex;
   align-items: center;
