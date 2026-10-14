@@ -352,7 +352,7 @@ test('the frame values do not inherit, so a card nested in a stamped one keeps i
 test('the stat tile number is the heading ink, and paper on the ink tile (#1882)', () => {
   const css = read('system/stamped/stamped.css')
   assert.equal(decl(ruleBody(css, '.stattile__value'), 'color'), 'var(--text-heading)')
-  assert.equal(decl(ruleBody(css, '.card--ink .stattile__value'), 'color'), 'var(--text-on-ink)')
+  assert.equal(decl(ruleBody(css, '.card--ink .stattile__value'), 'color'), 'var(--text-on-ink-cream)')
 })
 
 test('the stamp-in is off under prefers-reduced-motion (#1882)', () => {

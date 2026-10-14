@@ -143,7 +143,8 @@
   --text-body:        var(--ink-1);
   --text-muted:       var(--ink-2);
   --text-caption:     var(--graphite);
-  --text-on-ink:      var(--paper-cream);
+  --text-on-ink:      var(--paper-2);
+  --text-on-ink-cream: var(--paper-cream); /* new player-page band, stamp and strip: the draft cream (#1984) */
   --text-on-seal:     var(--seal-ink);
   /* Three rungs of paper text on a dark fill (navy, ink, clay, graphite), by
      light: bright, soft, dim. Each aliases the primitive it replaces in the
@@ -214,7 +215,7 @@
      on paper, and falls under the >= 3:1 bar for a focus indicator (on the
      house navy it is 2.41:1 (--focus-ring on --navy)). The band ring is two
      colours: a paper ring with an ink halo around it (--ring-band in
-     effects.css). Paper and ink are 11.84:1 (--focus-ring-band on
+     effects.css). Paper and ink are 13.52:1 (--focus-ring-band on
      --focus-ring-band-halo) apart, so one of the two is at >= 3:1 on ANY
      colour, and the ring does not depend on the club.
      test/band-focus-ring.test.js checks it on every landed bar and tile. */

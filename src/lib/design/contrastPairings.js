@@ -372,7 +372,7 @@ export const PAIRINGS = [
   // THE STAMPED PARTS (#1882, system/stamped/stamped.css): the name tab, the
   // count tag, and the stat tile's three fills. The edge and the two shadows
   // are UI marks on the page they sit on.
-  { fg: 'text-on-ink', bg: 'surface-stamped-ink', min: TEXT, note: 'stamped card name tab; ink stat tile number' },
+  { fg: 'text-on-ink-cream', bg: 'surface-stamped-ink', min: TEXT, note: 'stamped card name tab; ink stat tile number' },
   { fg: 'text-on-ink-dim', bg: 'surface-stamped-ink', min: TEXT, note: 'ink stat tile label and caption' },
   { fg: 'text-heading', bg: 'surface-stamped-tint', min: TEXT, note: 'tint stat tile label and number' },
   { fg: 'text-muted', bg: 'surface-stamped-tint', min: TEXT, note: 'tint stat tile caption' },
