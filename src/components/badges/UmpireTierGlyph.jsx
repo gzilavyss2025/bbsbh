@@ -11,10 +11,10 @@ import { TIER_LABELS } from '../../lib/statTiers.js'
 // the tier tag + rank, not a second copy of the modal's numbers. The icon is
 // a solid home-plate silhouette — a fine-lined strike-zone grid tried first,
 // but thin strokes at 12px muddy on a phone; a single filled shape reads at
-// any size.
-export function HomePlateIcon() {
+// any size. `size` is in px; the Splits card's best/weakest flag draws it at 22.
+export function HomePlateIcon({ size = 12 }) {
   return (
-    <svg viewBox="0 0 20 20" width="12" height="12" aria-hidden="true">
+    <svg viewBox="0 0 20 20" width={size} height={size} aria-hidden="true">
       <polygon points="3,4 17,4 17,11 10,17 3,11" fill="currentColor" />
     </svg>
   )
