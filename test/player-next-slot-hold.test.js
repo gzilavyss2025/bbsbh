@@ -28,8 +28,8 @@ test('the hints are the measured floors', () => {
 })
 
 test('the hold class reads the two hints', () => {
-  assert.equal(ruleBody(page, '.pnext__slot--hold').trim(), 'min-height: var(--slot-hold);')
-  assert.match(page, /@media \(min-width: 740px\)\s*\{\s*\.pnext__slot--hold\s*\{\s*min-height:\s*var\(--slot-hold-wide\);/)
+  assert.equal(ruleBody(page, '.pnext__slot--hold').trim(), 'min-height: var(--slot-hold, 0px);')
+  assert.match(page, /@media \(min-width: 740px\)\s*\{\s*\.pnext__slot--hold\s*\{\s*min-height:\s*var\(--slot-hold-wide, 0px\);/)
 })
 
 test('the slot shows no loading text and sets the hints', () => {

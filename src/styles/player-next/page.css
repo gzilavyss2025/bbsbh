@@ -171,11 +171,11 @@
 /* A slot holds its measured height (sections.js `minH`) until its module shows content, so a
    slot that loads above the reader does not push the page. Slot.jsx sets the two numbers. */
 .pnext__slot--hold {
-  min-height: var(--slot-hold);
+  min-height: var(--slot-hold, 0px);
 }
 @media (min-width: 740px) {
   .pnext__slot--hold {
-    min-height: var(--slot-hold-wide);
+    min-height: var(--slot-hold-wide, 0px);
   }
 }
 
