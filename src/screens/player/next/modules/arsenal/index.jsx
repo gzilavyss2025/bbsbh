@@ -41,7 +41,7 @@ export default function ArsenalModule({ bio, season, onEmpty, onCount }) {
   if (!rows) return <div className="arsenal arsenal--wait" aria-busy="true"><p className="hint">Loading the arsenal…</p></div>
   return (
     <div className="arsenal">
-      <ArsenalCard rows={rows} />
+      <ArsenalCard rows={rows} id={bio.id} />
       {rows.some((r) => r.path) && <FlightCard rows={rows} season={season} throws={bio.throws} />}
     </div>
   )
