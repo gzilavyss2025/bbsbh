@@ -18,8 +18,8 @@ test('Career holds nothing here: Prospect rankings moved to #1927', () => {
   assert.deepEqual(tbdCards('career', 'hitting', bat), [])
 })
 
-test('History: team history and media, once per player (Awards and Transactions have their own modules)', () => {
-  const all = ['timeline', 'media']
+test('History: only media is left, once per player (Awards, Team history and Transactions have their own modules)', () => {
+  const all = ['media']
   assert.deepEqual(tbdCards('history', 'hitting', bat), all)
   assert.deepEqual(tbdCards('history', 'pitching', arm), all)
   assert.deepEqual(tbdCards('history', 'hitting', both), all)
@@ -31,9 +31,9 @@ test('On the mound: nothing left here (Target command has its own module)', () =
   assert.deepEqual(tbdCards('on-the-mound', 'hitting', bat), [])
 })
 
-test('Game log: Foul balls for a pitcher only (Milestone watch has its own module)', () => {
-  assert.deepEqual(tbdCards('game-log', 'pitching', arm), ['fouls'])
-  assert.deepEqual(tbdCards('game-log', 'pitching', both), ['fouls'])
+test('Game log: nothing left here (Milestone watch and the pitcher Foul balls have their own modules)', () => {
+  assert.deepEqual(tbdCards('game-log', 'pitching', arm), [])
+  assert.deepEqual(tbdCards('game-log', 'pitching', both), [])
   assert.deepEqual(tbdCards('game-log', 'hitting', bat), [])
   assert.deepEqual(tbdCards('game-log', 'hitting', both), [])
 })

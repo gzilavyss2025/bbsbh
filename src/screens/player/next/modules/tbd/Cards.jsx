@@ -1,17 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { CareerTimeline } from '../../../../../components/player/CareerTimeline.jsx'
 import { PlayerHighlightsRail } from '../../../../../components/player/PlayerHighlightsRail.jsx'
 import { PlayerPhotosRail } from '../../../../../components/player/PlayerPhotosRail.jsx'
 import { CommandReceivedCard } from '../../../../../components/playerstats/CommandReceivedCard.jsx'
-import { FoulCard } from '../../../../../components/playerstats/FoulCard.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { Part } from './Part.jsx'
 import {
   commandReceivedCardFor,
-  foulsFor,
   inMajors,
   photoGamesFor,
-  timelineFor,
 } from './tbdData.js'
 
 // Today's cards, each as the live tab draws them (PlayerAnalyticsTab, PlayerHistoryTab and
@@ -53,31 +49,10 @@ function Media({ p }) {
 }
 
 export const CARDS = {
-  timeline: ({ p }) => (
-    <Part
-      id="timeline"
-      hide={p.hide}
-      load={() => timelineFor(p.bio)}
-      deps={[p.bio.id]}
-      has={(t) => t?.entries?.length}
-    >
-      {(t) => <CareerTimeline entries={t.entries} />}
-    </Part>
-  ),
   media: Media,
   cmdreceived: ({ p }) => (
     <Part id="cmdreceived" hide={p.hide} load={() => commandReceivedCardFor(p.bio.id, p.season)} deps={[p.bio.id, p.season]}>
       {(data) => <CommandReceivedCard data={data} personId={p.bio.id} season={p.season} />}
-    </Part>
-  ),
-  fouls: ({ p }) => (
-    <Part
-      id="fouls"
-      hide={p.hide}
-      load={() => foulsFor(p.bio, p.role, p.season, p.asOf)}
-      deps={[p.bio.id, p.role, p.season, p.asOf]}
-    >
-      {() => <FoulCard playerId={p.bio.id} group={p.role} asOf={p.asOf} seasonYear={p.season} label={String(p.season)} />}
     </Part>
   ),
 }
