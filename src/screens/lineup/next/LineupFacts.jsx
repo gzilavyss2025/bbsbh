@@ -4,7 +4,7 @@ import { UmpiresCard } from '../../../components/umpire/UmpiresCard.jsx'
 import { FactGrid } from '../../../components/ui/frame/FactGrid.jsx'
 import { ballparkFor } from '../../../lib/ballpark/ballparkData.js'
 import { resolveBallparkLayout } from '../../../lib/ballpark/layout/resolveLayout.js'
-import { CrowdIcon, Fact, managerFact } from '../../TeamInfo.jsx'
+import { CrowdIcon, managerFact } from '../../TeamInfo.jsx'
 import { parkShort, shortDate } from './logic/factText.js'
 import { ParkSheet } from './sheets/ParkSheet.jsx'
 import { UmpSheet } from './sheets/UmpSheet.jsx'
@@ -98,7 +98,7 @@ export function LineupFacts({ feed, side, info, officials, season, manager, unif
         <Cell label="Date" value={shortDate(info.officialDate)} />
         <ParkCell info={info} />
         <Cell label="Weather" value={weatherLoading ? '…' : weather?.text} />
-        {!weatherLoading && !weather?.text && info.weather && <Fact label="Box weather" value={info.weather} />}
+        {!weatherLoading && !weather?.text && info.weather && <Cell label="Box weather" value={info.weather} />}
         <CrowdCell info={info} />
         <Cell label="Manager" value={managerFact(manager)} />
         <Cell
@@ -109,7 +109,7 @@ export function LineupFacts({ feed, side, info, officials, season, manager, unif
         {side === 'away' && <Cell label="Broadcast" value={broadcast} />}
       </FactGrid>
       <FactGrid look="strip" className={`lnext__facts lnext__umps lnext__umps--${officials.length}`}>
-        {officials.length === 0 && !selectRecordIsClosed(feed) && <Fact label="Umpires" value="Not posted yet" />}
+        {officials.length === 0 && !selectRecordIsClosed(feed) && <Cell label="Umpires" value="Not posted yet" />}
         <UmpiresCard officials={officials} seasonYear={season} closed={selectRecordIsClosed(feed)} Sheet={UmpSheet} />
       </FactGrid>
     </>
