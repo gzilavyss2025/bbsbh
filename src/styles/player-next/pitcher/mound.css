@@ -54,7 +54,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-3);
-  font-family: var(--font-body);
+  font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);

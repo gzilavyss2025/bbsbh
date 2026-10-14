@@ -71,7 +71,9 @@
 .prospects__note {
   margin: 0;
   padding: var(--space-2) var(--space-3);
-  font-size: var(--fs-small);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
   color: var(--text-caption);
 }
 

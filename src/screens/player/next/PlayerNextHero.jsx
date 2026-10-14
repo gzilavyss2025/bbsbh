@@ -96,7 +96,7 @@ export function PlayerNextHero({ core }) {
         <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} mono />
         <AgeFact fact={ageFact(bio, status)} birthDate={bio.birthDate} />
         <Fact label="Ht / Wt" value={bio.heightWeight} mono />
-        <Fact label="Born" value={bio.born} />
+        <Fact label="Born" value={bio.born} mono />
         <Fact label="MLB debut" value={bio.debut ? debutLabel(bio.debut) : DASH} mono />
         <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} mono />
       </FactGrid>
