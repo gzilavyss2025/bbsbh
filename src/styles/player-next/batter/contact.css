@@ -228,3 +228,116 @@
   font-family: var(--font-mono);
   font-size: var(--fs-small);
 }
+/* Play through the balls (#2073; ContactPlayer.jsx). The balls not played yet fade. */
+.fcontact__dot--ahead {
+  opacity: 0.1;
+}
+/* layout-exempt: the panel above the player */
+.fcontact__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+/* layout-exempt: the buttons and the counter in a row */
+.fcontact__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.fcontact__ic {
+  width: calc(var(--tap-min) + var(--space-1));
+  height: calc(var(--tap-min) + var(--space-1));
+  padding: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-inset);
+  color: var(--text-heading);
+  box-shadow: calc(var(--bw-heavy) * 1.5) calc(var(--bw-heavy) * 1.5) 0 var(--border-stamped);
+  transition: transform var(--dur-fast) var(--ease-stamp), box-shadow var(--dur-fast) var(--ease-stamp);
+}
+.fcontact__ic--play {
+  background: var(--accent-tint);
+}
+.fcontact__ic:active {
+  transform: translate(var(--bw-heavy), var(--bw-heavy));
+  box-shadow: var(--bw-hair) var(--bw-hair) 0 var(--border-stamped);
+}
+.fcontact__ic:disabled {
+  opacity: 0.4;
+  box-shadow: none;
+}
+.fcontact__count {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+/* The season timeline: a line, a fill to the current ball, one tick per ball. The range
+   input is invisible over it, so a drag anywhere picks the nearest ball. */
+.fcontact__tl {
+  position: relative;
+  height: var(--space-10);
+  margin: 0 var(--space-3);
+}
+.fcontact__tl:focus-within {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--space-1);
+}
+.fcontact__tl-line {
+  position: absolute;
+  inset: 50% 0 auto;
+  height: var(--bw-heavy);
+  background: var(--border-stamped);
+}
+.fcontact__tl-fill {
+  position: absolute;
+  top: calc(50% - var(--space-1));
+  left: 0;
+  height: var(--space-1);
+  box-sizing: content-box;
+  border: var(--bw-hair) solid var(--border-stamped);
+  border-left: 0;
+  background: var(--accent-tint);
+  transition: width calc(var(--dur-unfold) * 0.8) var(--ease-stamp);
+}
+.fcontact__tick {
+  position: absolute;
+  top: 30%;
+  width: var(--bw-heavy);
+  height: 40%;
+  background: var(--text-caption);
+}
+.fcontact__tick--cur {
+  width: calc(var(--bw-heavy) * 2);
+  background: var(--text-heading);
+}
+.fcontact__tick--ahead {
+  background: var(--border-hairline);
+}
+.fcontact__scrub {
+  position: absolute;
+  inset: 0 calc(var(--space-3) * -1);
+  width: calc(100% + var(--space-3) * 2);
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+.fcontact__months {
+  position: relative;
+  height: var(--fs-small);
+  margin: 0 var(--space-3);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  text-transform: uppercase;
+}
+.fcontact__months span {
+  position: absolute;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fcontact__ic,
+  .fcontact__tl-fill {
+    transition: none;
+  }
+}
