@@ -22,8 +22,8 @@ suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul
 
 ## The top cards
 
-`top/` holds three page-level cards that are NOT slots: `StatusBanners` and `HeaderExtras` (nickname,
-prospect pills, school, OVR bars) wrap the hero, `OverviewExtras` (rank chips, postseason, other
+`top/` holds the status band and two page-level cards that are NOT slots: `HeroBand` (the status rows, the first child of the hero card, #2008) and `HeaderExtras` (nickname,
+prospect pills, school, OVR bars) sits under the hero, `OverviewExtras` (rank chips, postseason, other
 levels) sits under the tiles (#1884, TbdWire "top"). Each is a plain stamped Card with the old
 page's content and hides when it has none. The banner text is `../statusBanners.js`.
 
