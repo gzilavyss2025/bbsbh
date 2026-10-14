@@ -1,13 +1,13 @@
 # 20b — Small fixes: Season (WAR state, focus rings) and Contract (the history fold)
 
-Part of slice 20 (split in three; see `20a-small-fixes-log-rows.md` for the table).
+Part of slice 20 (split in four; see `20a-small-fixes-log-rows.md` for the table).
 
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: **medium**.
 - Depends on: **01a merged** (`--ease-stamp`) and **04a merged** (04a edits
   `season/index.jsx`).
-- Parallel with: 20a, 20c, and any slice that does not touch these four files.
+- Parallel with: 20a, 20c, 20d, and any slice that does not touch these four files.
 
 ## Goal
 

@@ -1,13 +1,13 @@
 # 20c — Small fixes: the Similar rows and the Foul balls count cells
 
-Part of slice 20 (split in three; see `20a-small-fixes-log-rows.md` for the table).
+Part of slice 20 (split in four; see `20a-small-fixes-log-rows.md` for the table).
 
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: **medium** (a small slice; low would also do).
 - Depends on: **01a merged** (`--surface-row-hover`) and **04b merged** (04b edits
   `similar.css`). `batter/fouls.css` is touched by no other slice.
-- Parallel with: 20a, 20b.
+- Parallel with: 20a, 20b, 20d.
 
 ## Goal
 

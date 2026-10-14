@@ -28,7 +28,8 @@ short excerpts a slice needs. Never commit a whole board.
    stays for the rest of the app.
 3. **Jump-bar tap: stamp the section you land on.** After the scroll lands, the
    cards of the target section stamp in one time. Overview replays the hero and
-   the tiles. A cold load, Back and a return visit do not replay.
+   the tiles. A cold load, Back and a return visit do not replay. The hero and the tiles
+   themselves stamp once per page visit (slice 06b, added in the plan review).
 4. **In-card toggles: a joined 44px segmented control.** A new design-system part.
    `--control-min` (34px) stays for other small controls.
 5. **Menus: one shared menu, rail and panel part.** Built once. Arsenal, Splits
@@ -239,8 +240,8 @@ Pitch colours never come from the canvas. Use `pitchMark(code)`
   guards do not read CSS outside `src/styles/` (for example
   `modules/splits/parts.css`), so a slice that edits one checks it in its own test.
 - **Module contract.** A module never edits `sections.js`, `Slot.jsx` or the page
-  (`src/screens/player/next/CLAUDE.md`). Only slices 06, 07a and 07b touch those
-  files.
+  (`src/screens/player/next/CLAUDE.md`). Only slices 06, 06b, 07a and 07b touch
+  those files.
 - **Shared parts go in the design system** (`src/components/ui/`,
   `src/styles/system/`), with a `/design-lab` entry. A new animation gets an
   `/animation-lab` entry in `src/screens/animlab/PlayerMotionLab.jsx` (see
@@ -277,14 +278,14 @@ slices it can run beside.
 | Press | 02a, 02b | The site-wide stamp-press; the band press clean-up |
 | Segmented | 03a, 03b, 04a–04d | The part and its lab and docs; the swaps (logs, Innings and Similar, Fouls, Mound) |
 | MenuRail | 05a, 05b, 05c | The part, its motion, its lab entries |
-| Shell | 06, 07a, 07b | Stagger and age flip; slot height and rise; jump hold and stamp on land |
-| Splits | 08a, 08b, 09 | Rise and bar grow; folds, hover and press; onto MenuRail |
+| Shell | 06, 06b, 07a, 07b | Stagger and age flip; the top stamps once per visit; slot height and rise; jump hold and stamp on land |
+| Splits | 08a, 08b, 09 | Rise and bar grow; folds, hover, press and the picked club's shadow; onto MenuRail |
 | Mound | 10 | Track draw, bar grow, now chip, bar hover |
 | Arsenal | 11, 12a, 12b, 12c | Onto MenuRail; the clock; the card beats; speed and scrubber |
 | Pitch flight | 13, 14, 15 | Loop and camera; orbit drag; `<canvas>` trail |
 | Plate | 16 | Onto MenuRail |
 | Contact | 17a, 17b, 18, 19 | Dots drop in; onto MenuRail; ball flight; play through |
-| Small fixes | 20a, 20b, 20c | Game-log rows; Season and Contract; Similar rows and Fouls cells |
+| Small fixes | 20a, 20b, 20c, 20d | Game-log rows (pitcher door, batter pointer tint); Season and Contract; Similar rows and Fouls cells; the Form trend play icon |
 
 No slice needs Opus. When a result is weak, move up one rung (`write-prompt`
 step 5): Sonnet high, then Sonnet xhigh. Slices 12a, 15 and 18 are the likely ones.

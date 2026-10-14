@@ -1,19 +1,20 @@
 # 20a — Small fixes: the game-log rows
 
-Slice 20 is split in three by file count and by which slice last touched each file:
+Slice 20 is split in four by file count and by which slice last touched each file:
 
 | Part | Fixes | Files |
 |---|---|---|
-| **20a** (this file) | game-log rows (hover, focus ring, open row, the loss ink on the open row) | 4 product + 1 test |
+| **20a** (this file) | game-log rows (hover, focus ring, open row, the loss ink on the open row; the batter rows' pointer tint) | 4 product + 1 test |
 | 20b | Season (WAR state, two focus rings); Contract (chevron, hover, marker) | 4 product + 1 test |
 | 20c | Similar rows (hover token, focus ring); Foul balls cells 52px | 2 product + 1 test |
+| 20d | Form trend play and pause icon (batter and pitcher) | 3 product + 1 test |
 
 ## Run
 
 - Model: `claude-sonnet-5-5`. Effort: **medium**.
 - Depends on: **01a merged** (the two row tokens) and **04a merged** (04a edits
   `pitchlog/index.jsx`).
-- Parallel with: 20b, 20c, and any slice that does not touch these four files.
+- Parallel with: 20b, 20c, 20d, and any slice that does not touch these four files.
 
 ## Goal
 
@@ -24,6 +25,10 @@ the game whose detail is open keeps a selected fill. On that fill a loss reads
 `--clay-deep`, because `--accent-negative` there is under AA (slice 01a measured
 4.37:1 and added the `--clay-deep` pairing instead).
 
+The batter log's rows hold no control, so they have no door to follow. They tint under
+the pointer, as the canvas row does (Gary, 2026-10-14, on #2073: "tint rows anyway").
+Nothing else changes on them: no focus ring, no select state, no click.
+
 ## Done means
 
 - `LogTable` takes an optional `currentKey`; the row with that key carries
@@ -33,6 +38,8 @@ the game whose detail is open keeps a selected fill. On that fill a loss reads
   is hovered (pointer devices only), the house focus ring on a row that holds the
   keyboard focus, and the selected fill (`--surface-row-selected`) with a 2px stamped
   edge on the current row. The row is still a `<tr>`; only the door acts.
+- `logtable.css`: a row that holds no link and no button (every batter log row) tints
+  with `--surface-row-hover` while the pointer is on the row (pointer devices only).
 - `pitchlog.css`: on the current row, the loss score and the ER mark read
   `--clay-deep`.
 - `test/player-next-rows.test.js` passes; it fails before the change.
@@ -44,7 +51,7 @@ the game whose detail is open keeps a selected fill. On that fill a loss reads
 | File | Change |
 |---|---|
 | `src/screens/player/next/parts/LogTable.jsx` | `currentKey` prop; `aria-current` on the matching `<tr>` (l.15, l.38). |
-| `src/styles/player-next/both/logtable.css` | Three rules after `.logtable__div .mono` (after l.44), before the `@container` at l.49. |
+| `src/styles/player-next/both/logtable.css` | Four rules after `.logtable__div .mono` (after l.44), before the `@container` at l.49. |
 | `src/screens/player/next/modules/pitchlog/index.jsx` | l.207: pass `currentKey={open}`. |
 | `src/styles/player-next/pitcher/pitchlog.css` | One rule after `.pitchlog__hi--er` (l.79-80): the loss ink on the current row. |
 | `test/player-next-rows.test.js` | **new.** |
@@ -67,9 +74,10 @@ r.bg = sel === x.i ? '#EFE6C8' : 'transparent'
 Token map: `#F3EBD2` → `--surface-row-hover`, `#EFE6C8` → `--surface-row-selected`
 (both added by slice 01a), `#0F1822` → `--border-stamped`. The canvas row is a
 `<button>`; **the live row stays a `<tr>`** (the brief says do not turn rows into
-buttons). So the hover keys on the door inside the row, and the canvas 3px ink ring
-becomes the house ring (`--focus-ring` at `--bw-heavy`, spec.md "Focus rings stay the
-house ring").
+buttons). So on the pitcher log the hover keys on the door inside the row, and the
+canvas 3px ink ring becomes the house ring (`--focus-ring` at `--bw-heavy`, spec.md
+"Focus rings stay the house ring"). A batter row has no door, so the same hover colour
+keys on the row itself. The canvas `.gl-row:hover` is the same rule on both boards.
 
 
 ## Live today
@@ -97,8 +105,9 @@ renders `<button type="button" class="door door--inline pitchlog__open">`
 (`pitchlog/index.jsx` l.63-65; `ui/control/Door.jsx` l.27-31). A tap on it opens the
 `StartDetail` modal `<dialog>` (`pitchlog/index.jsx` l.177, l.230-246; `open` is the
 game's `gamePk`, l.135). The **batter** log's rows hold no link or button (the date
-is a `<b>`, `batlog/index.jsx` l.39), so the hover rule below does not fire there,
-which is right: nothing in those rows acts.
+is a `<b>`, `batlog/index.jsx` l.39), so the door rule below does not fire there. The
+fourth rule (a row with no control tints under the pointer) covers them. Nothing in a
+batter row acts, so it gets no focus ring and no select state.
 
 `pitchlog/index.jsx` l.207:
 
@@ -143,7 +152,9 @@ not touch it.) Slice 01a (`01a-motion-tokens.md`, colours step) measured
 `--accent-negative` on `--surface-row-selected` at 4.37:1, under AA, and paired
 `--clay-deep` on it instead (6.33:1). On `--surface-row-hover` `--accent-negative`
 is 4.57:1, so the hover needs no change. The batter log has no current row (it passes
-no `currentKey`), so `batlog.css` needs no change.
+no `currentKey`), so `batlog.css` needs no change. A batter row's figures sit on the
+hover fill too, so check the colour of a negative figure there in the screenshot
+(`--accent-negative` on `--surface-row-hover` is 4.57:1, as above).
 
 ## Build
 
@@ -172,11 +183,15 @@ export function LogTable({ columns, rows, caption, currentKey }) {
 /* A row answers its door (GameLog board). The row is not a button: only the door in
    it acts, so the tint shows while the pointer is on a link or button in the row,
    on pointer devices only, and the row draws the house ring while that control has
-   the keyboard focus. The open game's row (aria-current, the detail dialog) keeps the
+   the keyboard focus. A row with no control (every batter log row) tints under the
+   pointer itself, as the canvas row does; a group heading never tints. The open game's row (aria-current, the detail dialog) keeps the
    selected fill and a stamped edge. The focus rule comes last so its ring wins over
    the selected edge on the same row. */
 @media (hover: hover) {
   .logtable__grid tbody tr:not([aria-current='true']):has(:is(a, button):hover) {
+    background: var(--surface-row-hover);
+  }
+  .logtable__grid tbody tr:not(.logtable__div, :has(a, button)):hover {
     background: var(--surface-row-hover);
   }
 }
@@ -274,6 +289,16 @@ test('logtable.css: hover tint, the selected row, and the focus ring', () => {
   assert.ok(c.indexOf(':has(:focus-visible)') > c.indexOf("tr[aria-current='true'] {"), 'the ring rule comes after the selected rule')
 })
 
+test('logtable.css: a row with no control tints under the pointer, and a heading does not', () => {
+  const c = css('both/logtable.css')
+  const media = c.slice(c.indexOf('@media (hover: hover)'), c.indexOf("tr[aria-current='true'] {"))
+  assert.match(
+    media,
+    /\.logtable__grid tbody tr:not\(\.logtable__div, :has\(a, button\)\):hover \{\s*background: var\(--surface-row-hover\);/,
+  )
+  assert.doesNotMatch(src('screens/player/next/modules/batlog/index.jsx'), /<button|<a |Door/, 'the batter rows hold no control')
+})
+
 test('pitchlog.css: a loss on the open row reads the deeper clay', () => {
   const body = ruleBody(css('pitcher/pitchlog.css'), ".pitchlog tr[aria-current='true'] :is(.pitchlog__score--L, .pitchlog__hi--er)")
   assert.ok(body)
@@ -294,14 +319,18 @@ test('pitchlog.css: a loss on the open row reads the deeper clay', () => {
      Take a screenshot with the dialog open and the row visible behind it.
    - Open a game the pitcher lost: behind the scrim, its row's L score reads the
      deeper clay.
-   - Batter `/player/brice-turang-668930?nointro`: the batter log rows do not tint
-     (they hold no control).
+   - Batter `/player/brice-turang-668930?nointro`, Game log, with a mouse at 1180px:
+     the row under the pointer tints (`--surface-row-hover`), a month or season
+     heading row does not, and a tap on a row does nothing. At 390px (touch) nothing
+     tints. Tab through the card: no batter row takes focus and none draws a ring.
 4. Send Gary the screenshots with `SendUserFile`, with each route.
 
 ## Out of scope
 
 - Making the whole row clickable, or a row `onClick`. Only the door acts.
-- The batter log's rows (no control in them; a later issue may add a door).
+- A door, a click, a select state or a focus ring on batter log rows: nothing in a batter
+  row acts, so only the pointer tint is added. A later issue may add a door.
+- The batter log's "Show 20 more" paging (a behaviour change; a separate issue).
 - The Season, Contract, Similar and Foul balls fixes (20b, 20c).
 
 ## Stop if
@@ -309,7 +338,8 @@ test('pitchlog.css: a loss on the open row reads the deeper clay', () => {
 - 01a is not on `main` (`--surface-row-hover` or `--surface-row-selected` is missing
   from `src/tokens/colors.css`), or 04a is not on `main`.
 - The live rows now hold a different control (for example the batter log gained a
-  date link): the hover still works, but report it.
+  date link): the door rule then tints that row and the no-control rule skips it. Report
+  it.
 - Chromium draws no outline on a `<tr>` in the table look at 1180px: report it with a
   screenshot. Do not switch to a box-shadow on the cells without asking.
 - `test/` already has a `player-next-rows.test.js`.

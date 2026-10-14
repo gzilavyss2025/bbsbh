@@ -1,7 +1,7 @@
 # Run plan: player page motion (#2073)
 
 This is the run plan for `/orchestrate` Lane 3 (`.claude/skills/orchestrate/SKILL.md`).
-It has 37 prompts in 9 waves. Each prompt builds one brief in `slices/`. The rules
+It has 39 prompts in 9 waves. Each prompt builds one brief in `slices/`. The rules
 every brief follows are in `spec.md`.
 
 ## How to start it
@@ -13,7 +13,7 @@ every brief follows are in `spec.md`.
 3. Read the morning report: the last comment on #2073, and the session's last
    message.
 
-The run may need more than one night: about 37 Sonnet sessions, 3 at a time, with a
+The run may need more than one night: about 39 Sonnet sessions, 3 at a time, with a
 `/stack-prs` merge after each wave. To continue on a later night, send the same
 line. The orchestrator reads the ledger on #2073 and starts at the first wave that
 is not merged.
@@ -47,7 +47,8 @@ Two rows that edit the same file run in different waves, except for these
 - The `.animlab__frame` freeze list in `src/styles/46-consent-modal.css` (05c, 17a).
 - `docs/motion.md`: one paragraph each (01c, 05b).
 
-The waves already keep these apart: `page.css` (06, 07a), `Slot.jsx` (07a, 07b),
+The waves already keep these apart: `page.css` (06, 07a, then 06b), `Slot.jsx` (07a, 07b),
+`PlayerNextPage.jsx` (07b, then 06b), `form/FormModule.jsx` and `pform/index.jsx` (20d only),
 `splits/*` and `splits.css` (08a, 08b, 09), the arsenal folder and `arsenal.css`
 (11, 12a–12c, 13–15), the Contact folder (17a–19), `mound/*` (10, 04d),
 `season/index.jsx` and `pitchlog/index.jsx` (04a, then 20a and 20b), and
@@ -88,8 +89,10 @@ The waves already keep these apart: `page.css` (06, 07a), `Slot.jsx` (07a, 07b),
 | 04d | `slices/04d-segmented-swap-mound.md` | Swap the player toggles onto `Segmented`: On the mound | Sonnet 5.5 | medium | 03a, 10 | 5 |
 | 12a | `slices/12a-arsenal-timeline-clock.md` | Arsenal timeline, part 1: one clock and the side-view beats | Sonnet 5.5 | high | 11, 01b | 5 |
 | 17b | `slices/17b-contact-menu.md` | Contact: the batted-ball menu onto MenuRail | Sonnet 5.5 | medium | 05a, 05b, 17a | 5 |
+| 06b | `slices/06b-top-stamp-once.md` | Shell: the hero and tiles stamp once per page visit | Sonnet 5.5 | medium | 01c, 07b | 5 |
 | 12b | `slices/12b-arsenal-timeline-card.md` | Arsenal timeline, part 2: mix bar roll, menu rows, start in view | Sonnet 5.5 | high | 12a, 01c | 6 |
 | 18 | `slices/18-contact-flight.md` | Contact: ball flight on tap | Sonnet 5.5 | high | 17b | 6 |
+| 20d | `slices/20d-small-fixes-play-icon.md` | Small fixes: the Form trend play and pause icon | Sonnet 5.5 | medium | — | 6 |
 | 12c | `slices/12c-arsenal-timeline-controls.md` | Arsenal timeline, part 3: speed step, scrubber, lab entry | Sonnet 5.5 | medium | 12b, 01d | 7 |
 | 19 | `slices/19-contact-playthrough.md` | Contact: play through the balls | Sonnet 5.5 | medium | 18 | 7 |
 | 14 | `slices/14-flight-drag.md` | Pitch flight: orbit drag and keys | Sonnet 5.5 | medium | 13, 12c | 8 |
@@ -103,7 +106,7 @@ order of the table, 3 at a time.
 Orchestrate Lane 3 step 3 adds its own footer (parent session, draft PR, drive to
 green, remove `wip`). Use each prompt as written.
 
-### Prompt 1 of 37 (row 01a) — claude-sonnet-5-5, effort medium
+### Prompt 1 of 39 (row 01a) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -148,7 +151,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 2 of 37 (row 01c) — claude-sonnet-5-5, effort medium
+### Prompt 2 of 39 (row 01c) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -193,7 +196,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 3 of 37 (row 03a) — claude-sonnet-5-5, effort high
+### Prompt 3 of 39 (row 03a) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.
@@ -238,7 +241,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 4 of 37 (row 01b) — claude-sonnet-5-5, effort medium
+### Prompt 4 of 39 (row 01b) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -283,7 +286,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 5 of 37 (row 02a) — claude-sonnet-5-5, effort medium
+### Prompt 5 of 39 (row 02a) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -328,7 +331,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 6 of 37 (row 05a) — claude-sonnet-5-5, effort high
+### Prompt 6 of 39 (row 05a) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.
@@ -373,7 +376,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 7 of 37 (row 06) — claude-sonnet-5-5, effort medium
+### Prompt 7 of 39 (row 06) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -418,7 +421,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 8 of 37 (row 03b) — claude-sonnet-5-5, effort medium
+### Prompt 8 of 39 (row 03b) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -463,7 +466,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 9 of 37 (row 04a) — claude-sonnet-5-5, effort medium
+### Prompt 9 of 39 (row 04a) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -508,7 +511,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 10 of 37 (row 04b) — claude-sonnet-5-5, effort medium
+### Prompt 10 of 39 (row 04b) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -553,7 +556,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 11 of 37 (row 04c) — claude-sonnet-5-5, effort medium
+### Prompt 11 of 39 (row 04c) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -598,7 +601,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 12 of 37 (row 01d) — claude-sonnet-5-5, effort medium
+### Prompt 12 of 39 (row 01d) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -643,7 +646,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 13 of 37 (row 02b) — claude-sonnet-5-5, effort medium
+### Prompt 13 of 39 (row 02b) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -688,7 +691,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 14 of 37 (row 05b) — claude-sonnet-5-5, effort medium
+### Prompt 14 of 39 (row 05b) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -733,7 +736,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 15 of 37 (row 07a) — claude-sonnet-5-5, effort high
+### Prompt 15 of 39 (row 07a) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.
@@ -778,7 +781,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 16 of 37 (row 08a) — claude-sonnet-5-5, effort medium
+### Prompt 16 of 39 (row 08a) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -823,7 +826,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 17 of 37 (row 13) — claude-sonnet-5-5, effort high
+### Prompt 17 of 39 (row 13) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.
@@ -868,7 +871,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 18 of 37 (row 20a) — claude-sonnet-5-5, effort medium
+### Prompt 18 of 39 (row 20a) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -913,7 +916,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 19 of 37 (row 20b) — claude-sonnet-5-5, effort medium
+### Prompt 19 of 39 (row 20b) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -958,7 +961,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 20 of 37 (row 20c) — claude-sonnet-5-5, effort medium
+### Prompt 20 of 39 (row 20c) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1003,7 +1006,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 21 of 37 (row 05c) — claude-sonnet-5-5, effort medium
+### Prompt 21 of 39 (row 05c) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1048,7 +1051,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 22 of 37 (row 07b) — claude-sonnet-5-5, effort high
+### Prompt 22 of 39 (row 07b) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.
@@ -1093,7 +1096,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 23 of 37 (row 08b) — claude-sonnet-5-5, effort medium
+### Prompt 23 of 39 (row 08b) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1138,7 +1141,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 24 of 37 (row 10) — claude-sonnet-5-5, effort medium
+### Prompt 24 of 39 (row 10) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1183,7 +1186,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 25 of 37 (row 11) — claude-sonnet-5-5, effort medium
+### Prompt 25 of 39 (row 11) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1228,7 +1231,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 26 of 37 (row 16) — claude-sonnet-5-5, effort high
+### Prompt 26 of 39 (row 16) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.
@@ -1273,7 +1276,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 27 of 37 (row 17a) — claude-sonnet-5-5, effort medium
+### Prompt 27 of 39 (row 17a) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1318,7 +1321,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 28 of 37 (row 09) — claude-sonnet-5-5, effort medium
+### Prompt 28 of 39 (row 09) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1363,7 +1366,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 29 of 37 (row 04d) — claude-sonnet-5-5, effort medium
+### Prompt 29 of 39 (row 04d) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1408,7 +1411,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 30 of 37 (row 12a) — claude-sonnet-5-5, effort high
+### Prompt 30 of 39 (row 12a) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.
@@ -1453,7 +1456,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 31 of 37 (row 17b) — claude-sonnet-5-5, effort medium
+### Prompt 31 of 39 (row 17b) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1498,7 +1501,52 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 32 of 37 (row 12b) — claude-sonnet-5-5, effort high
+### Prompt 32 of 39 (row 06b) — claude-sonnet-5-5, effort medium
+
+```
+Run at medium.
+Issue: https://github.com/gzilavyss2025/bbsbh/issues/2073 — make the motion and the
+press, hover and focus feedback on /player/{id} match the design canvas. This is
+row 06b of .scratch/player-motion/run-plan.md: Shell: the hero and tiles stamp once per page visit.
+Use the branch the session gives you. It starts at current origin/main, which has rows 01c, 07b merged.
+Use the ponytail skill at level full. Reuse what the repo already has before you
+write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
+
+Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
+.scratch/player-motion/spec.md, and your brief,
+.scratch/player-motion/slices/06b-top-stamp-once.md. The brief is your spec. Build what it
+says, with the files it lists, the code it gives and the tests it gives. Its
+"Live today" quotes the code as it was at prep time; if an earlier row changed it,
+follow the brief's intent on the current code.
+
+Rules: test first (run each new test, see it fail, then make it pass). Touch only
+the files the brief lists. Follow spec.md, "Rules every slice follows". Never skip,
+delete or weaken a test.
+Verify (spec.md, "Check once"): the test files you wrote or changed, the existing
+test files that import a file you changed (git grep -l <basename> test/), and
+npm run lint. CI runs the full npm test and npm run build on your PR. Do not run
+ponytail-review or /code-review: the stack reviews once. Then do the brief's
+browser check and send the screenshot with SendUserFile, with the route.
+PR body: "Part of #2073 (slice 06b)", the base SHA, the files, and how you
+verified. Use .github/pull_request_template.md.
+Decisions: this run is unattended. Do not ask the user. Where the brief and
+spec.md do not answer a question, take the choice nearest the canvas values the
+brief quotes, write it in the PR body as [DECISION: ...], and go on.
+Stop if: a reason in the brief's "Stop if" list, the work needs a file the brief
+does not list, a test would need to be weakened, or CI fails twice for a reason
+you cannot fix.
+Keep working until everything asked for is done. Stop to ask only when you cannot
+go on without the user, or before a risky step. When the work is done and checked,
+stop and report; do not add features, tests, files or docs that were not asked
+for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
+for.
+```
+
+### Prompt 33 of 39 (row 12b) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.
@@ -1543,7 +1591,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 33 of 37 (row 18) — claude-sonnet-5-5, effort high
+### Prompt 34 of 39 (row 18) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.
@@ -1588,7 +1636,52 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 34 of 37 (row 12c) — claude-sonnet-5-5, effort medium
+### Prompt 35 of 39 (row 20d) — claude-sonnet-5-5, effort medium
+
+```
+Run at medium.
+Issue: https://github.com/gzilavyss2025/bbsbh/issues/2073 — make the motion and the
+press, hover and focus feedback on /player/{id} match the design canvas. This is
+row 20d of .scratch/player-motion/run-plan.md: Small fixes: the Form trend play and pause icon.
+Use the branch the session gives you. It starts at current origin/main.
+Use the ponytail skill at level full. Reuse what the repo already has before you
+write anything new.
+Do not invoke the superpowers skills (brainstorming, writing-plans,
+executing-plans, subagent-driven-development, and the like), even if a session
+note says you must: the brief is the plan and every design choice is made. Do not
+start subagents; do the work in this session.
+
+Read first: CLAUDE.md, docs/development.md ("Cloud sessions"),
+.scratch/player-motion/spec.md, and your brief,
+.scratch/player-motion/slices/20d-small-fixes-play-icon.md. The brief is your spec. Build what it
+says, with the files it lists, the code it gives and the tests it gives. Its
+"Live today" quotes the code as it was at prep time; if an earlier row changed it,
+follow the brief's intent on the current code.
+
+Rules: test first (run each new test, see it fail, then make it pass). Touch only
+the files the brief lists. Follow spec.md, "Rules every slice follows". Never skip,
+delete or weaken a test.
+Verify (spec.md, "Check once"): the test files you wrote or changed, the existing
+test files that import a file you changed (git grep -l <basename> test/), and
+npm run lint. CI runs the full npm test and npm run build on your PR. Do not run
+ponytail-review or /code-review: the stack reviews once. Then do the brief's
+browser check and send the screenshot with SendUserFile, with the route.
+PR body: "Part of #2073 (slice 20d)", the base SHA, the files, and how you
+verified. Use .github/pull_request_template.md.
+Decisions: this run is unattended. Do not ask the user. Where the brief and
+spec.md do not answer a question, take the choice nearest the canvas values the
+brief quotes, write it in the PR body as [DECISION: ...], and go on.
+Stop if: a reason in the brief's "Stop if" list, the work needs a file the brief
+does not list, a test would need to be weakened, or CI fails twice for a reason
+you cannot fix.
+Keep working until everything asked for is done. Stop to ask only when you cannot
+go on without the user, or before a risky step. When the work is done and checked,
+stop and report; do not add features, tests, files or docs that were not asked
+for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
+for.
+```
+
+### Prompt 36 of 39 (row 12c) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1633,7 +1726,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 35 of 37 (row 19) — claude-sonnet-5-5, effort medium
+### Prompt 37 of 39 (row 19) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1678,7 +1771,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 36 of 37 (row 14) — claude-sonnet-5-5, effort medium
+### Prompt 38 of 39 (row 14) — claude-sonnet-5-5, effort medium
 
 ```
 Run at medium.
@@ -1723,7 +1816,7 @@ for. Tests, docs and checks that this prompt or CLAUDE.md names count as asked
 for.
 ```
 
-### Prompt 37 of 37 (row 15) — claude-sonnet-5-5, effort high
+### Prompt 39 of 39 (row 15) — claude-sonnet-5-5, effort high
 
 ```
 Run at high.

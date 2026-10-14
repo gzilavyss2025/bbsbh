@@ -20,7 +20,8 @@ reader opens, turns the fold chevron, adds the canvas hover and press, and adds 
 Game lines rises on view like the other parts. When the reader opens a fold (by
 month, by weekday, ...), its rows rise one after the next and their bars grow. The
 fold chevron turns instead of jumping. Doors, folds and clubs answer a pointer
-hover with the canvas colours, and a club press shrinks the club a little.
+hover with the canvas colours, a club press shrinks the club a little, and the picked
+club prints with the canvas offset shadow.
 
 ## Done means
 
@@ -35,6 +36,9 @@ hover with the canvas colours, and a club press shrinks the club a little.
   `--bg-canvas`, a picked club keeps `--surface-inset` on hover.
 - A club press is `scale(0.97)` over `--dur-fast` on `--ease-stamp`. A door press
   is `--bg-canvas`.
+- The picked club (`aria-pressed='true'`) carries
+  `box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped)`, the canvas's
+  2px offset shadow in ink (added after the plan review of #2073; Gary, 2026-10-14).
 - Reduced motion: no cascade, no chevron turn, no press scale.
 - `/animation-lab` has a Splits entry with the real classes, in
   `src/screens/animlab/PlayerMotionLab.jsx`.
@@ -72,6 +76,7 @@ Boards `Splits` and `PitcherSplits`:
 .fold:hover{background:#DED6C0}
 .club:hover{background:#F6EFDC}
 .club[aria-pressed="true"]:hover{background:#FFFDF6}}
+.club[aria-pressed="true"]{border-color:#0F1822;background:#FFFDF6;box-shadow:2px 2px 0 #0F1822}
 @media (prefers-reduced-motion:reduce){
 .part.in,.appear,.part.in .fill,.appear .fill{animation:none !important}
 .fill,.segbtn,.resetbtn,.door,.fold,.fchev,.club{transition:none !important}}
@@ -90,9 +95,13 @@ Value map (`spec.md` colour map):
 | `.8s` rise | `calc(var(--dur-rise) * 2)` (as 08a) |
 | `.2s ease-out` chevron | `var(--dur-med) var(--ease-out)` (220ms) |
 | `.12s ease-out` club press | `var(--dur-fast) var(--ease-stamp)` (new player motion uses `--ease-stamp`) |
+| `#0F1822` picked club shadow colour | `--border-stamped` (as the MenuRail picked card, `spec.md`) |
+| `2px 2px 0` picked club shadow offset | `var(--bw-heavy) var(--bw-heavy) 0` (`--bw-heavy` is 2px) |
 
 The press stays the canvas `scale(.97)`. Decision 1 (the stamp-press) is for
-`Button` and `Pill`; a club is a plain `<button>` and has no offset shadow.
+`Button` and `Pill`; a club is a plain `<button>`, so it keeps the canvas scale press.
+Its resting offset shadow shows only on the picked club, as on the canvas. The shadow
+does not move on press: the canvas gives `.club:active` only the scale.
 
 ## Live today
 
@@ -130,7 +139,16 @@ but no `style`, so a door cannot carry its own `--i`. Each fold row gets a wrapp
 `<div>` that carries the class and `--i`.
 
 `parts.css:16-33` `.splitsmod__club { ... cursor: pointer; scroll-snap-align: center; }` (no
-transition). `parts.css:150-158`:
+transition). The picked club, `parts.css:38-41`, has a border and a fill and no shadow:
+
+```css
+.splitsmod__club[aria-pressed='true'] {
+  border-color: var(--border-stamped);
+  background: var(--surface-inset);
+}
+```
+
+`parts.css:150-158`:
 
 ```css
 .splitsmod__foldchev {
@@ -223,6 +241,17 @@ Add `transition` to the existing `.splitsmod__foldchev` rule (line 150):
 ```css
   transition: transform var(--dur-med) var(--ease-out);
 ```
+
+Add the shadow to the existing picked-club rule (`parts.css:38-41`), after `background`:
+
+```css
+  box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped);
+```
+
+The strip scrolls sideways (`overflow-x: auto`, `parts.css:7-15`), and an overflow box
+clips a shadow at its edge. The strip's padding (`var(--space-1h)` at the sides,
+`var(--space-2)` below) is wider than the 2px offset, so nothing is clipped. Do not
+change the padding.
 
 Add after `.splitsmod__chipfig.is-thin { ... }` (line 64):
 
@@ -376,6 +405,13 @@ test('the fold chevron turns, and a club press shrinks the club', () => {
   assert.equal(decl(ruleBody(parts, '.splitsmod__door.boxlines__door:active'), 'background'), 'var(--bg-canvas)')
 })
 
+test('the picked club prints with the canvas offset shadow', () => {
+  const body = ruleBody(parts, ".splitsmod__club[aria-pressed='true']")
+  assert.ok(body)
+  assert.equal(decl(body, 'box-shadow'), 'var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped)')
+  assert.equal(decl(ruleBody(parts, '.splitsmod__club') ?? '', 'box-shadow'), undefined, 'an unpicked club has no shadow')
+})
+
 test('hover colours, for a fine pointer only', () => {
   const at = parts.indexOf('@media (hover: hover) and (pointer: fine)')
   assert.ok(at > -1)
@@ -410,7 +446,9 @@ test('parts.css: no raw time and no hex', () => {
    open the weekday fold: its rows rise one after the next. Close and open it: it
    cascades again. The month fold that is open on load does not cascade.
 3. At 1180px with a mouse: hover a door, a fold and a club; check the colours.
-   Press a club: it shrinks a little. The fold chevron turns.
+   Press a club: it shrinks a little. The fold chevron turns. Pick a club: it shows a
+   2px ink shadow down and to the right; pick the first and the last club in the strip
+   and check that the shadow is not clipped at the strip's edge.
 4. Pitcher `/player/robert-gasser-688107?nointro`: pick "Game lines" in the menu;
    the same.
 5. `/animation-lab?nointro`: press Play on the Splits entry.
