@@ -40,16 +40,31 @@ const val = (line, key) => (line?.[key] == null || line?.[key] === '' ? '—' : 
 // across the row, so nothing needs a tap.
 function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills }) {
   const detailId = `lnext-det-${player.id}`
+  // The row is a plain box, because the name inside it is a link and a link cannot sit inside a
+  // button. On a phone the season line is the toggle (a real button, with the open state); a tap
+  // anywhere else on the row that is not the name toggles it too.
+  const figures = wide ? (
+    WIDE_COLS.map(([label, key], i) => (
+      <span key={key} className={`lord__figure${i === 0 ? ' lord__figure--lead' : ''}`} aria-label={label}>
+        {val(line, key)}
+      </span>
+    ))
+  ) : (
+    <button
+      type="button"
+      className="lord__avg"
+      aria-expanded={open}
+      aria-controls={detailId}
+      aria-label={`Season line for ${player.name}`}
+      onClick={onToggle}
+    >
+      <b>{val(line, 'avg')}</b>
+      <small>{val(line, 'ops')} OPS</small>
+    </button>
+  )
   return (
     <li className="lord__item">
-      <button
-        type="button"
-        className="lord__row"
-        aria-expanded={wide ? undefined : open}
-        aria-controls={wide ? undefined : detailId}
-        tabIndex={wide ? -1 : undefined}
-        onClick={wide ? undefined : onToggle}
-      >
+      <div className="lord__row" onClick={wide ? undefined : (e) => !e.target.closest('a, button') && onToggle()}>
         <span className="lord__lead">{lead}</span>
         <Headshot personId={player.id} name={player.name} className="lord__shot" />
         <span className="lord__name">
@@ -64,19 +79,8 @@ function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills 
           </span>
           {note && <span className="lord__vs">{note}</span>}
         </span>
-        {wide ? (
-          WIDE_COLS.map(([label, key], i) => (
-            <span key={key} className={`lord__figure${i === 0 ? ' lord__figure--lead' : ''}`} aria-label={label}>
-              {val(line, key)}
-            </span>
-          ))
-        ) : (
-          <span className="lord__avg">
-            <b>{val(line, 'avg')}</b>
-            <small>{val(line, 'ops')} OPS</small>
-          </span>
-        )}
-      </button>
+        {figures}
+      </div>
       {!wide && open && (
         <dl className="lord__det" id={detailId}>
           {DETAIL.map(([label, key]) => (

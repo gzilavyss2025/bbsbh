@@ -24,11 +24,10 @@
   color: inherit;
   font: inherit;
   text-align: left;
-  cursor: pointer;
 }
-.lord__row:focus-visible {
+.lord__avg:focus-visible {
   outline: 2px solid var(--focus-ring);
-  outline-offset: -3px;
+  outline-offset: 2px;
 }
 .lord__lead {
   flex: none;
@@ -94,6 +93,12 @@
 }
 /* layout-exempt: AVG over OPS */
 .lord__avg {
+  min-height: var(--tap-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
   flex: none;
   display: flex;
   flex-direction: column;

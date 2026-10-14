@@ -520,7 +520,7 @@ export default function App() {
         route={route}
         seed={seedMatches ? seed.game : null}
         onSection={(section, opts) =>
-          go(`/${route.date}/${route.matchup}/${section}${lookSuffix()}`, opts)
+          go(`/${route.date}/${route.matchup}/${section}${lookSuffix(window.location.search, section)}`, opts)
         }
         onHome={() => go('/')}
       />

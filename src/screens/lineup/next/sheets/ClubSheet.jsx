@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { UniformFigure } from '../../../../components/logo/UniformFigure.jsx'
 import { Door } from '../../../../components/ui/control/Door.jsx'
@@ -20,6 +21,8 @@ function swatches(theme, tile) {
 // figure once both pieces are posted. A bottom sheet like the pitch-mix sheet. "Sketch this
 // mark" hands off to the club's pencil-sketch modal. Spoiler-free: identity and art only.
 export function ClubSheet({ name, teamId, treatment, theme, uniform, figureUrls, onSketch, onClose }) {
+  // A figure image that fails to load is hidden, heading and all, like the Uniform fact's own sheet.
+  const [figureFailed, setFigureFailed] = useState(false)
   const tile = treatmentTile(teamId, treatment)
   const colors = swatches(theme, tile)
   return (
@@ -51,10 +54,10 @@ export function ClubSheet({ name, teamId, treatment, theme, uniform, figureUrls,
           </li>
         ))}
       </ul>
-      {figureUrls && uniform && (
+      {figureUrls && uniform && !figureFailed && (
         <>
           <h4 className="lsheet__head">Batter figure</h4>
-          <UniformFigure urls={figureUrls} label={uniform} onError={() => {}} />
+          <UniformFigure urls={figureUrls} label={uniform} onError={() => setFigureFailed(true)} />
         </>
       )}
       <Door onClick={onSketch}>Sketch this mark</Door>

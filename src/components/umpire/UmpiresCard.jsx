@@ -35,7 +35,8 @@ import { UmpireLink } from './UmpireLink.jsx'
 // never post, so an empty list says so in one line. Any other game keeps `null`:
 // its umpires may still post.
 // `Sheet` replaces the accuracy modal a name or the tier note opens, with the same props
-// ({ id, seasonYear, onClose }): the new lineup page draws its own (screens/lineup/next).
+// ({ id, seasonYear, plate, onClose }, `plate` true for tonight's plate umpire): the new
+// lineup page draws its own (screens/lineup/next).
 export function UmpiresCard({ officials, seasonYear, closed = false, Sheet = UmpireAccuracyModal }) {
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId, { seasonYear }), [hpId, seasonYear])
@@ -69,7 +70,7 @@ export function UmpiresCard({ officials, seasonYear, closed = false, Sheet = Ump
           </dd>
         </div>
       ))}
-      {modalId != null && <Sheet id={modalId} seasonYear={seasonYear} onClose={() => setModalId(null)} />}
+      {modalId != null && <Sheet id={modalId} plate={modalId === hpId} seasonYear={seasonYear} onClose={() => setModalId(null)} />}
     </>
   )
 }

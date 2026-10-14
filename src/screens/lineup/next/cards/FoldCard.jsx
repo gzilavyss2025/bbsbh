@@ -19,7 +19,7 @@ export function FoldCard({ title, count, band = null, className = '', children }
           type="button"
           className={`lfold__head${band ? ' lfold__head--band sectionhead--band' : ''}`}
           aria-expanded={open}
-          aria-controls={bodyId}
+          aria-controls={open ? bodyId : undefined}
           onClick={() => setOpen((o) => !o)}
         >
           <span className="lfold__name">{title}</span>

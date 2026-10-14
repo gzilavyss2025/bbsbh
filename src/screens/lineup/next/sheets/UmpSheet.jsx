@@ -1,4 +1,10 @@
 import { loadUmpire } from '../../../../api/umpires.js'
+import { PostseasonPlateLine } from '../../../../components/umpire/PostseasonPlateLine.jsx'
+import { Door } from '../../../../components/ui/control/Door.jsx'
+import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
+import { monthDayName } from '../../../../lib/dates.js'
+import { useNav } from '../../../../lib/nav.js'
+import { gamePath, umpirePath } from '../../../../lib/route.js'
 import { HomePlateIcon } from '../../../../components/badges/UmpireTierGlyph.jsx'
 import { UmpireZoneMap } from '../../../../components/umpire/UmpireZoneMap.jsx'
 import { useAsync } from '../../../../hooks/useAsync.js'
@@ -27,8 +33,19 @@ function Tile({ label, value, sup }) {
 // aggregates of finished games' ball and strike calls as the live card, never a run, hit or
 // result of any game, so it sits outside any seal. An umpire with no plate record shows his
 // name and nothing else.
-export function UmpSheet({ id, seasonYear, onClose }) {
+export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
+  const navigate = useNav()
   const { data: u } = useAsync(() => loadUmpire(id, { seasonYear }), [id, seasonYear])
+  // His last five plate games, each with its accuracy. A plate game's row lives in whichever
+  // level's byGamePk map covers it (MLB or Triple-A), so both are checked.
+  const hpGames = (u?.games ?? [])
+    .filter((g) => g.role === 'HP')
+    .map((g) => ({ ...g, row: u.accuracy?.byGamePk?.[g.gamePk] ?? u.accuracyAAA?.byGamePk?.[g.gamePk] ?? null }))
+    .slice(0, 5)
+  const openGame = (g) => {
+    onClose()
+    navigate(gamePath(g.date, g.awayAbbr, g.homeAbbr, 'boxscore', g.gameNumber))
+  }
   const season = u?.accuracy?.season
   const { lean, watchArea, zoneCells, rank, challenges, leagueChallenges } = u ?? {}
   return (
@@ -38,14 +55,14 @@ export function UmpSheet({ id, seasonYear, onClose }) {
           <HomePlateIcon size={22} />
         </span>
         <div>
-          <small className="lump__role">Home plate</small>
+          <small className="lump__role">{plate ? 'Home plate' : 'Plate record'}</small>
           <strong className="lump__name">{u?.name ?? '…'}</strong>
           {season?.called ? (
             <p className="lump__meta">
               {season.games} scored games · {season.called.toLocaleString()} called pitches
             </p>
           ) : (
-            u && <p className="lump__meta">No plate record yet.</p>
+            u && <EmptyState size="compact">No plate-accuracy data on file for this umpire yet.</EmptyState>
           )}
         </div>
       </div>
@@ -99,6 +116,26 @@ export function UmpSheet({ id, seasonYear, onClose }) {
             {u.generatedAt && ` · updated ${u.generatedAt.slice(0, 10)}`}
           </p>
         </>
+      )}
+      <PostseasonPlateLine post={u?.accuracyPost?.season} />
+      {hpGames.length > 0 && (
+        <>
+          <h4 className="lsheet__head">Last {hpGames.length} behind the plate</h4>
+          <ul className="lump__games">
+            {hpGames.map((g) => (
+              <li key={`${g.gamePk}-${g.gameNumber}`} className="lump__game">
+                <span>{monthDayName(g.date)}</span>
+                <button type="button" className="plink" onClick={() => openGame(g)}>
+                  {g.awayAbbr} @ {g.homeAbbr}
+                </button>
+                <b>{g.row?.called ? `${((g.row.correct / g.row.called) * 100).toFixed(1)}%` : '—'}</b>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {u && (
+        <Door onClick={() => { onClose(); navigate(umpirePath(id, u.name, { seasonYear: u.season ?? seasonYear })) }}>Full umpire page</Door>
       )}
     </SheetFrame>
   )

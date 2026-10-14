@@ -291,3 +291,19 @@
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
+.lump__games {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: date, matchup and accuracy in one row */
+.lump__game {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}

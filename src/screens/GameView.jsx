@@ -222,7 +222,7 @@ export function GameView({ game, section, onSection }) {
   ) : null
 
   // The new lineup page (docs/lineup-redesign.md) carries its own hero, jump bar and dock.
-  const lookNew = isLookNew() && (step === 0 || step === 1)
+  const lookNew = isLookNew() && Boolean(feed) && (step === 0 || step === 1)
   const lineupNext = {
     game,
     tabs: gameSectionTabs(game, step, lastInningSection),

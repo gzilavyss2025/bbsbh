@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import {
   selectBirthdayIds,
-  selectBullpen,
   selectGameInfo,
   selectGameSeason,
   selectHasStarted,
@@ -66,7 +65,6 @@ export function useLineupData({ feed, side, vsTeam, careerMatchupsData, workload
   const birthdayIds = useMemo(() => selectBirthdayIds(feed), [feed])
   const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side, { includeDerivedStarter: true }), [feed, side])
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
-  const oppBullpenArms = useMemo(() => selectBullpen(feed, oppSide), [feed, oppSide])
 
   // The parent org of each club, so a prospect badge is checked against the roster the
   // player is on today (prospectBadge, api/prospects.js).
@@ -147,7 +145,7 @@ export function useLineupData({ feed, side, vsTeam, careerMatchupsData, workload
   }
 
   return {
-    batsOf, tagOf, seriesGames: seriesGames ?? [], meta, oppMeta, info, season, isMlb, closed, lineup, birthdayIds, oppPitcher, oppDefense, oppBullpenArms,
+    batsOf, tagOf, seriesGames: seriesGames ?? [], meta, oppMeta, info, season, isMlb, closed, lineup, birthdayIds, oppPitcher, oppDefense,
     orgTeamId, oppOrgTeamId, careerVsOpp, vsOpponentAbbr, oppPitcherLine,
     arsenal, arsenalTto, arsenalSides, boardGameDate, projectedStarters,
     teammatePairs, orgTies, startingIds, matchups, starterLast, roster, hitterLines: hitterLines ?? {},

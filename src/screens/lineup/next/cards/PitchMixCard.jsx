@@ -55,9 +55,13 @@ export function PitchMixCard({ arsenal, tto, sides, lefty, name, counts }) {
   const [look, setLook] = useState(null)
   const [open, setOpen] = useState(false)
   const [activeCode, setActiveCode] = useState(null)
-  const rows = useMemo(() => mixRows(arsenal, tto, sides, side, look), [arsenal, tto, sides, side, look])
+  // A pick the data no longer carries (a new starter after Refresh, a look the side never reached)
+  // falls back to the season, so the rows and the lit tab always agree.
+  const activeSide = side && sides?.[side] ? side : null
+  const looks = looksFor(tto, sides, activeSide)
+  const activeLook = looks.some((l) => l.look === look) ? look : null
+  const rows = useMemo(() => mixRows(arsenal, tto, sides, activeSide, activeLook), [arsenal, tto, sides, activeSide, activeLook])
   const axis = barAxisMax(rows)
-  const looks = looksFor(tto, sides, side)
   const tiles = useMemo(() => pitchTiles(arsenal), [arsenal])
   const pitches = useMemo(() => scenePitches(tiles, lefty), [tiles, lefty])
   const onActive = useCallback((i) => setActiveCode(pitches[i]?.code ?? null), [pitches])
@@ -82,7 +86,7 @@ export function PitchMixCard({ arsenal, tto, sides, lefty, name, counts }) {
       {sides && (
         <Seg
           label="Batter"
-          value={side}
+          value={activeSide}
           onChange={chooseSide}
           items={[
             { key: null, label: 'All' },
@@ -92,7 +96,7 @@ export function PitchMixCard({ arsenal, tto, sides, lefty, name, counts }) {
         />
       )}
       {looks.length > 0 && (
-        <Seg label="Time through" value={look} onChange={setLook} items={[{ key: null, label: 'All' }, ...looks.map((l) => ({ key: l.look, label: LOOK_LABEL[l.look] }))]} />
+        <Seg label="Time through" value={activeLook} onChange={setLook} items={[{ key: null, label: 'All' }, ...looks.map((l) => ({ key: l.look, label: LOOK_LABEL[l.look] }))]} />
       )}
       <ul className="lmix__list">
         {rows.map((r) => (

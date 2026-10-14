@@ -14,7 +14,7 @@ import { ProjectedStarters } from '../../../../components/workload/ProjectedStar
 import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { headerThemeClass, headerThemeStyle } from '../../../../lib/headerTheme.js'
-import { seasonVsOpponentLine } from '../../../TeamInfo.jsx'
+import { seasonVsOpponentLine } from '../../parts.jsx'
 import { monthDay } from '../../../../lib/dates.js'
 import { ClubBar } from './ClubBar.jsx'
 import { PitchMixCard } from './PitchMixCard.jsx'
