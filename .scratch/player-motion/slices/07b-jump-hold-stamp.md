@@ -259,11 +259,12 @@ function holdTarget({ el, root, offset, onLand }) {
     return scroller.scrollHeight > height && scroller.scrollTop + height >= scroller.scrollHeight - 2
   }
   const landing = onLand ? createLanding({ isThere: () => Math.abs(topOf() - offset) <= 2 || atEnd(), onLand }) : null
+  // timer and ro exist before the first aim(), because aim() may call stop().
+  const timer = setTimeout(() => stop(), HOLD_MAX_MS)
   // The observer fires once on observe(): that is the first scroll.
   const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(aim)
   if (ro) ro.observe(el.parentElement)
   else aim()
-  const timer = setTimeout(() => stop(), HOLD_MAX_MS)
   function stop() {
     ro?.disconnect()
     clearTimeout(timer)
@@ -429,9 +430,9 @@ The slots (lines 109-113): pass the order inside the section and the stamp:
                   ))}
 ```
 
-A slot that is hidden (the empty ones) is filtered out, so `order` counts only the
-cards you see... and the stub slots that render `null` are hidden by `Slot` itself
-after mount, so they count. That off-by-one in the stagger is fine (one 55ms step).
+`order` counts the cards the page draws. A stub module (renders `null`) reports empty
+after it mounts and then leaves the list, so for a moment it can hold a place in the
+count. That shifts the stagger by one 55ms step at most; leave it.
 
 The module contract (`src/screens/player/next/CLAUDE.md`) lets only slices 06 and 07
 touch `Slot.jsx` and the page; this is 07.
