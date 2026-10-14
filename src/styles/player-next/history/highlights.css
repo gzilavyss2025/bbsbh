@@ -1,0 +1,18 @@
+/* The Highlights module (#2022): a 16:9 frame per clip, two across, three from a 480px container. */
+.hlmod { container-type: inline-size; }
+.hlmod--wait { min-height: 240px; }
+/* layout-exempt: a clip grid, two across and three from a wide container */
+.hlmod__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-2); }
+@container (min-width: 480px) {
+  .hlmod__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+/* layout-exempt: a clip is a frame over a date over a title */
+.hlmod__clip { display: flex; flex-direction: column; gap: var(--space-1); width: 100%; padding: 0; border: 0; background: none; font: inherit; text-align: left; color: var(--text-body); cursor: pointer; }
+.hlmod__frame { position: relative; display: block; aspect-ratio: 16 / 9; border: var(--bw-heavy) solid var(--ink-0); background: var(--surface-inset); overflow: hidden; }
+.hlmod__frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hlmod__box { position: absolute; bottom: 0; padding: 0 var(--space-1h); background: var(--surface-stamped-ink); color: var(--text-on-ink); font-size: var(--fs-cell); font-weight: var(--w-semibold); line-height: var(--lh-title); }
+.hlmod__box--play { left: 0; }
+.hlmod__box--len { right: 0; font-variant-numeric: tabular-nums; }
+.hlmod__when { font-size: var(--fs-cell); color: var(--text-muted); }
+.hlmod__title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: var(--fs-small); line-height: var(--lh-title); color: var(--text-body); }
+.hlmod__clip:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: 2px; }
