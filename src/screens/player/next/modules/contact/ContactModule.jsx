@@ -13,7 +13,7 @@ import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
 import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
-import { AutoAdvance, FlightClock, FlightLayer, SelDot } from './ContactFlight.jsx'
+import { AutoAdvance, FlightClock, FlightDot, FlightLayer } from './ContactFlight.jsx'
 import { ContactDetail } from './ContactDetail.jsx'
 import { ContactPlayer } from './ContactPlayer.jsx'
 import { afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
@@ -125,35 +125,34 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   return (
     <div ref={fieldRef} className="fcontact">
       <FlightClock shot={shot} model={model} land={curMark?.p} dotR={cur ? dotR(cur) : 0} hr={cur?.result === 'hr'}>
-      <AutoAdvance playing={playing} idx={idx} model={model} onAdvance={advance} />
-      <div className="fcontact__bar">
-        <div className="fcontact__chips" role="group" aria-label="Which balls">
-          {VIEWS.map(([k, name]) => (
-            <button key={k} type="button" className="pnext-pick" aria-pressed={k === view} disabled={!card.counts[k]} onClick={() => pick(setView, k)}>
-              {name} {card.counts[k]}
-            </button>
-          ))}
+        <AutoAdvance playing={playing} idx={idx} onAdvance={advance} />
+        <div className="fcontact__bar">
+          <div className="fcontact__chips" role="group" aria-label="Which balls">
+            {VIEWS.map(([k, name]) => (
+              <button key={k} type="button" className="pnext-pick" aria-pressed={k === view} disabled={!card.counts[k]} onClick={() => pick(setView, k)}>
+                {name} {card.counts[k]}
+              </button>
+            ))}
+          </div>
+          <div className="fcontact__chips" role="group" aria-label="Color by">
+            {COLORS.map(([k, name]) => (
+              <button key={k} type="button" className="pnext-pick" aria-pressed={k === color} onClick={() => setColor(k)}>{name}</button>
+            ))}
+          </div>
         </div>
-        <div className="fcontact__chips" role="group" aria-label="Color by">
-          {COLORS.map(([k, name]) => (
-            <button key={k} type="button" className="pnext-pick" aria-pressed={k === color} onClick={() => setColor(k)}>{name}</button>
-          ))}
-        </div>
-      </div>
-      <div className="fcontact__grid">
-        <div className="fcontact__plot">
-          <svg className="fcontact__field" viewBox={VIEWBOX} role="group" aria-label={`Spray field of ${shown.length} balls in play`}>
-            <g className="spray__art" aria-hidden="true">
-              <path className="spray__fence" d={FENCE} />
-              <path className="spray__foul" d={LINES} />
-              <path className="spray__diamond" d={DIAMOND} />
-            </g>
-            <g className={dotsCls}>
-              {marks.map(({ b, p }, i) => {
-                const Dot = b === cur ? SelDot : 'circle'
-                return (
-                  <Dot
+        <div className="fcontact__grid">
+          <div className="fcontact__plot">
+            <svg className="fcontact__field" viewBox={VIEWBOX} role="group" aria-label={`Spray field of ${shown.length} balls in play`}>
+              <g className="spray__art" aria-hidden="true">
+                <path className="spray__fence" d={FENCE} />
+                <path className="spray__foul" d={LINES} />
+                <path className="spray__diamond" d={DIAMOND} />
+              </g>
+              <g className={dotsCls}>
+                {marks.map(({ b, p }, i) => (
+                  <FlightDot
                     key={i}
+                    sel={b === cur}
                     className={`fcontact__dot fcontact__dot--${markKey(b, color)}${b === cur ? ' fcontact__dot--sel' : ''}${isAhead(i, idx, playing) ? ' fcontact__dot--ahead' : ''}`}
                     style={{ '--fcontact-f': marks.length > 1 ? (i / (marks.length - 1)).toFixed(3) : '0' }}
                     cx={p.x}
@@ -165,17 +164,16 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
                     onClick={() => launch(i, false)}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(i, false) } }}
                   />
-                )
-              })}
-            </g>
-            <FlightLayer />
-          </svg>
+                ))}
+              </g>
+              <FlightLayer />
+            </svg>
+          </div>
+          <div className="fcontact__side">
+          <ContactDetail cur={cur} detail={detail} />
+          <ContactPlayer marks={marks} idx={idx} playing={playing} axis={axis} onLaunch={launch} onPause={() => setPlaying(false)} />
+          </div>
         </div>
-        <div className="fcontact__side">
-        <ContactDetail cur={cur} detail={detail} />
-        <ContactPlayer marks={marks} idx={idx} playing={playing} axis={axis} onLaunch={launch} onPause={() => setPlaying(false)} />
-        </div>
-      </div>
       </FlightClock>
       <p className="fcontact__note">
         Exit velocity, launch angle, distance and xBA are Statcast, one value per ball. A missing value prints a dash.

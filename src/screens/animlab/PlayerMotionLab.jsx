@@ -13,7 +13,7 @@ import { ArsenalCard } from '../player/next/modules/arsenal/ArsenalCard.jsx'
 import { flightPath } from '../player/next/modules/arsenal/flightView.js'
 import { LEAD, totalMs } from '../player/next/modules/arsenal/timeline.js'
 import { HOME } from '../../lib/ballpark/ballparkGeometry.js'
-import { AutoAdvance, FlightClock, FlightLayer, SelDot } from '../player/next/modules/contact/ContactFlight.jsx'
+import { AutoAdvance, FlightClock, FlightDot, FlightLayer } from '../player/next/modules/contact/ContactFlight.jsx'
 import { ContactPlayer } from '../player/next/modules/contact/ContactPlayer.jsx'
 import { DWELL_MS, afterDwell, isAhead, seasonAxis } from '../player/next/modules/contact/contactPlay.js'
 import { flightOf } from '../player/next/modules/contact/contactFlight.js'
@@ -226,13 +226,13 @@ function ContactPlayDemo() {
   return (
     <div className="fcontact">
       <FlightClock shot={shot} model={model} land={cur?.p} dotR={cur?.b.result === 'hr' ? 11 : 9} hr={cur?.b.result === 'hr'}>
-        <AutoAdvance playing={playing} idx={idx} model={model} onAdvance={advance} />
+        <AutoAdvance playing={playing} idx={idx} onAdvance={advance} />
         <svg className="fcontact__field" viewBox="10 40 600 485" aria-hidden="true">
           <g className="fcontact__dots">
             {PLAY_BALLS.map(({ b, p }, i) => {
-              const Dot = i === idx ? SelDot : 'circle'
               return (
-                <Dot
+                <FlightDot
+                  sel={i === idx}
                   key={i}
                   className={`fcontact__dot fcontact__dot--${b.result}${i === idx ? ' fcontact__dot--sel' : ''}${isAhead(i, idx, playing) ? ' fcontact__dot--ahead' : ''}`}
                   cx={p.x}

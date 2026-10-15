@@ -147,7 +147,7 @@ test('the flying dot hides; the overlay takes no taps', () => {
 test('the module flies the tapped ball and speaks once, on landing', () => {
   assert.match(FLIGHT, /useFlightClock\(shot, model\)/)
   assert.match(FLIGHT, /<FlightMarks frame=\{frame\} home=\{HOME\} \/>/)
-  assert.match(FLIGHT, /fcontact__dot--hide/)
+  assert.match(FLIGHT, /sel && flying \? `\$\{className\} fcontact__dot--hide`/)
   assert.match(DETAIL, /<span className="sr-only" aria-live="polite">/)
   assert.doesNotMatch(DETAIL, /className="fcontact__detail" aria-live/)
 })

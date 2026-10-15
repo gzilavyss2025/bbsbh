@@ -98,7 +98,8 @@ test('the timeline fill glides over 320ms; the wrapper wears the house focus rin
 
 test('the module plays in date order and holds each ball DWELL_MS after it lands', () => {
   assert.match(JSX, /byDate\(/)
-  assert.match(FLIGHT, /t >= end \+ DWELL_MS \? 0/)
+  assert.match(FLIGHT, /t >= end \+ DWELL_MS \? 'rest'/)
+  assert.match(FLIGHT, /phase === 'rest' \? 0/)
   assert.match(JSX, /<ContactPlayer/)
   assert.match(JSX, /setPlaying\(false\) \}/)
 })

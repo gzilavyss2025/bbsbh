@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { DWELL_MS } from './contactPlay.js'
@@ -31,16 +31,29 @@ export function useFlightClock(shot, model) {
 }
 
 // The clock lives here, not in ContactModule, so a frame re-renders only the consumers of
-// the flight (the marks, the flying dot, the detail panel, the auto-advance), never the
-// module. The module passes its elements down as `children`; React skips them when this
-// provider re-renders. `land` is the tapped ball's spot, `dotR` its radius.
+// the flight, never the module. The module passes its elements down as `children`; React
+// skips them when this provider re-renders. `land` is the tapped ball's spot, `dotR` its
+// radius. Two contexts: the fast one (`t`, `frame`) changes every frame and feeds the marks
+// and the detail panel; the coarse one (`flying`, `phase`) changes twice a flight and feeds
+// the dots and the auto-advance, so a frame does not touch them.
 const FlightCtx = createContext({ t: Infinity, frame: null })
+const FlightStateCtx = createContext({ flying: false, phase: 'run' })
 export const useFlight = () => useContext(FlightCtx)
 
+// phase: 'reduced' (no clock: reduced motion, or no ball), 'rest' (landed and rested
+// DWELL_MS), 'run' (still flying or resting).
 export function FlightClock({ shot, model, land, dotR, hr, children }) {
   const t = useFlightClock(shot, model)
   const frame = model ? flightFrame(model, t, { home: HOME, land, dotR, hr }) : null
-  return <FlightCtx.Provider value={{ t, frame }}>{children}</FlightCtx.Provider>
+  const end = model ? LEAD_MS + model.ms : 0
+  const phase = t === Infinity ? 'reduced' : t >= end + DWELL_MS ? 'rest' : 'run'
+  const flying = !!frame?.flying
+  const state = useMemo(() => ({ flying, phase }), [flying, phase])
+  return (
+    <FlightStateCtx.Provider value={state}>
+      <FlightCtx.Provider value={{ t, frame }}>{children}</FlightCtx.Provider>
+    </FlightStateCtx.Provider>
+  )
 }
 
 export function FlightLayer() {
@@ -48,20 +61,19 @@ export function FlightLayer() {
   return frame ? <FlightMarks frame={frame} home={HOME} /> : null
 }
 
-// The selected ball's own dot: it hides while the flying ball stands in for it.
-export function SelDot({ className, ...rest }) {
-  const { frame } = useFlight()
-  return <circle className={frame?.flying ? `${className} fcontact__dot--hide` : className} {...rest} />
+// Every dot is one element type, so a pick never remounts it (a remount would replay the
+// drop-in and drop keyboard focus). The selected one hides while the flying ball stands in.
+export function FlightDot({ sel, className, ...rest }) {
+  const { flying } = useContext(FlightStateCtx)
+  return <circle className={sel && flying ? `${className} fcontact__dot--hide` : className} {...rest} />
 }
 
-// The run: after a ball lands and rests DWELL_MS, `onAdvance` flies the next one. The rest
-// is read off the flight clock; under reduced motion there is no clock (t is Infinity), so
-// a plain timer holds each ball. The timer callback calls the setters, never the effect
-// body (react-hooks/set-state-in-effect). Renders nothing.
-export function AutoAdvance({ playing, idx, model, onAdvance }) {
-  const { t } = useFlight()
-  const end = model ? LEAD_MS + model.ms : 0
-  const wait = !playing || idx < 0 ? null : t === Infinity ? DWELL_MS : t >= end + DWELL_MS ? 0 : null
+// The run: after a ball lands and rests DWELL_MS, `onAdvance` flies the next one. Under
+// reduced motion there is no clock, so a plain timer holds each ball. The timer callback
+// calls the setters, never the effect body (react-hooks/set-state-in-effect). Renders nothing.
+export function AutoAdvance({ playing, idx, onAdvance }) {
+  const { phase } = useContext(FlightStateCtx)
+  const wait = !playing || idx < 0 ? null : phase === 'reduced' ? DWELL_MS : phase === 'rest' ? 0 : null
   useEffect(() => {
     if (wait == null) return undefined
     const id = setTimeout(onAdvance, wait)
