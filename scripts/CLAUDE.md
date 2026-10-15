@@ -65,6 +65,9 @@ are rules rather than reference:
   and the old umpire kept the game's accuracy stats forever
   (`gen-umpire-accuracy.mjs`, fixed in `scripts/lib/umpire-accuracy-merge.mjs`).
 
+- **Ranks come from the app's code.** `gen-team-records.mjs` writes each shard's `ranks` via
+  `lib/records/ranks.mjs`, which calls `buildRankingIndex`/`rankMetric`. Never re-implement the ranking here.
+
 - **A generator reaches statsapi through `lib/statsapi.mjs`'s `getJson(path)`
   and nothing else** — no `fetch`, no retry loop, no `statsapi.mlb.com` string
   of its own (#1116). The client owns one retry policy (3 tries, 2000 ms x
