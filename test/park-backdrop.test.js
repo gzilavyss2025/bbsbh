@@ -60,12 +60,28 @@ test('an owner override wins over the bundled photo, with their own crop', () =>
 
 test('resolvePhoto drops the bundled credit rather than inheriting it on an override', () => {
   // Somebody else's name under somebody else's photograph is a worse failure
-  // than no credit at all. parkBackdrop no longer surfaces credit at all (no
-  // hover title on the slate card), but resolvePhoto's own rule still backs
-  // the Ballpark card's real, linked attribution — pinned here since this
-  // file already holds the fixtures for it.
+  // than no credit at all. resolvePhoto's own rule backs the Ballpark card's
+  // real, linked attribution and the park sheet's caption — pinned here since
+  // this file already holds the fixtures for it.
   const photo = resolvePhoto('Wrigley Field', { photo: 'https://blob.example.com/wrigley.jpg' })
   assert.equal(photo.creditText, '')
+})
+
+test('a bundled park carries its Commons credit and source link', () => {
+  const park = parkBackdrop('Wrigley Field', none)
+  assert.equal(park.creditText, 'Photo: Sea Cow · CC BY-SA 4.0')
+  assert.match(park.creditHref, /^https:\/\/commons\.wikimedia\.org\/wiki\//)
+})
+
+test('an override carries the owner\'s typed credit and no link, never the bundled one', () => {
+  const ids = fieldIds(venueKey('Wrigley Field'))
+  const photo = { [ids.photo]: 'https://blob.example.com/wrigley.jpg' }
+  const typed = parkBackdrop('Wrigley Field', reader({ ...photo, [ids.credit]: 'Photo: Jo Fan' }))
+  assert.equal(typed.creditText, 'Photo: Jo Fan')
+  assert.equal(typed.creditHref, null)
+  const bare = parkBackdrop('Wrigley Field', reader(photo))
+  assert.equal(bare.creditText, '')
+  assert.equal(bare.creditHref, null)
 })
 
 test('a src that would not be safe in a CSS url() yields no backdrop', () => {
