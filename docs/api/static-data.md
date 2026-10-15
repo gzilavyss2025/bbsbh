@@ -75,7 +75,7 @@ for each generator; the reader modules:
   to about 18 KB.
   `fetchWarHistory(personId)` + `warByYearFor(personId, group, current, history)`
   union the two into a player's `{season: war}` map (live season from war.json wins its own
-  year), which `loadPlayer.js` threads into the player page. MLB-only at source,
+  year), which `src/api/player/` (`context.js`) threads into the player page. MLB-only at source,
   so MiLB rows fall back to a dash. The same shard also carries `fld` (fielding runs) and
   `pa` (plate appearances) maps for 2023 on, read with `fldByYearFor(personId, history)` /
   `paByYearFor(personId, history)` (pure, `{}` for an unknown player). No UI reads them yet.
@@ -137,7 +137,7 @@ for each generator; the reader modules:
   actually use — MLB-only by design, since a debuted-but-still-rookie player
   showing up in a MiLB game (rehab, option) gets `hasDebuted`/DebutPill there
   instead, not a second ROOKIE claim. `fetchRookieRecord(id)` feeds
-  `rookieUntil` into `transactionTimelineView` (`person.js`) via `loadPlayer.js`.
+  `rookieUntil` into `transactionTimelineView` (`person.js`) via `src/api/player/` (`context.js`).
   **Three files, split by role.** `public/data/rookies.json`
   (`{personId: {debutDate, rookieUntil}}`, ~1.3 MB and growing) is the
   generator's MASTER record and is never fetched by the app. From it,
@@ -162,7 +162,7 @@ for each generator; the reader modules:
   rows by umpire id. MLB + AAA (one scan each, sportId 1 + 11; the same umpires
   shuttle between the levels, so each game row is `level`-tagged). Wired via
   `selectOfficials` (`select.js`) threading
-  each official's `id` to the Umpires card (`TeamInfo.jsx`), rendered as an
+  each official's `id` to the Umpires card (`src/screens/lineup/next/`), rendered as an
   `UmpireLink` to `/umpire/{id}`; the page needs no `SealBox` (assignments + dates
   carry no score). Each entry carries the venue, so `UmpirePage.jsx` tallies
   most-worked teams + ballparks client-side. A COMPANION dataset
@@ -210,7 +210,7 @@ for each generator; the reader modules:
   `zoneCellsPost` (postseason) — for `UmpirePage.jsx`'s plate-accuracy cards (one per
   level + a separate postseason card, rank line + `UmpireZoneMap`) and per-HP-row
   figures; `umpireAccuracySummary(id)` serves the MLB rank the lineup page's Umpires
-  card (`TeamInfo.jsx`) shows for tonight's plate ump, which opens
+  card (`src/screens/lineup/next/`) shows for tonight's plate ump, which opens
   `UmpireAccuracyModal` (zone map + last-5 plate games linking to their box scores).
   The summary, modal, and rankings page stay MLB-only (they front an MLB game).
   Still no `SealBox` — accuracy counts ball/strike JUDGMENTS, not runs or hits, and
@@ -226,7 +226,7 @@ for each generator; the reader modules:
   `public/data/vs-team-splits/`, and the play-by-play vs-opponent callout
   (`callout-notes/vsTeamNote.js`). Cost-driven: the API's vs-team split types
   carry no game granularity, so `gen-vs-team-splits.mjs` sweeps each player's whole
-  MLB game log season by season. `loadPlayer.js` (`vsTeamSplitsFor`) pre-selects the
+  MLB game log season by season. `src/api/player/` (`context.js`) (`vsTeamSplitsFor`) pre-selects the
   club's next opponent. The career totals are spoiler-free like "Season splits"; the
   one score-revealing element — the last-game line — is gated against the page's
   `asOf` cutoff in `SplitsVsTeam.jsx`. It also words the career line for BOTH
@@ -380,7 +380,7 @@ for each generator; the reader modules:
   be reassigned (esp. the 2021 reorganization) independent of the player changing
   orgs, so a naive "current parent org" lookup mislabels an old stint as a trade.
   `historicalParentOrg(teamId, year)` is a preferred-when-covered override in the
-  career timeline (`loadPlayer.js`) ahead of the live `fetchTeam()` lookup;
+  career timeline (`src/api/player/` (`context.js`)) ahead of the live `fetchTeam()` lookup;
   deliberately thin, so most (team, year) pairs fall through unchanged. A parallel
   `historicalClubName()` covers renames/relocations but isn't wired into any screen
   yet (no historical logo art; see `docs/milb-historical-logos.md`).
@@ -491,7 +491,7 @@ for each generator; the reader modules:
   one side is no split, the same rule a single look follows. `pitchFamily(code)` groups codes into
   fastball/breaking/offspeed/other for `PitchArsenalMix.jsx`'s bar coloring
   (`tokens/colors.css`'s `--arsenal-*`). Surface: the opposing-starter card's
-  wide-layout pitch-mix bar (`TeamInfo.jsx`'s `OpposingStarterCard`), filling
+  wide-layout pitch-mix bar (`src/screens/lineup/next/`), filling
   the space the name/stats column leaves open on a wide screen.
   `similarPitchersFor(pool, personId)` is the SECOND surface — the
   player page's "Pitches like" card. It only flattens the file's per-level
