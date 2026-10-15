@@ -105,9 +105,9 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 // DefenseSection above — it's the reference you copy onto the sheet before
 // scoring.
 //
-// The fielding side (the OTHER team from battingSide) also gets a "due up" /
-// "on deck" / "in the hole" pill on whichever of its own already-listed slots
-// lead off ITS next half — selectDueUpNext (same primitive DueUpNextCard's
+// The fielding side (the OTHER team from battingSide) also gets one highlighted
+// row: whichever of its own already-listed slots leads off ITS next half —
+// selectDueUpNext (same primitive DueUpNextCard's
 // separate stat-row card uses) carries its own spoiler gate, so this needs no
 // gate of its own: it simply returns null until the preview is safe to show
 // (current half fully revealed), same moment DueUpNextCard's own card would
@@ -120,7 +120,6 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 // placement (HalfInning.jsx's .halfentering) had no title at all, so the two
 // layouts disagreed on whether this needed a heading, and neither one named
 // the moment.
-const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
 
 // TWO PROPS FOR FOCUS MODE'S LINEUPS TAB, both defaulting to the stacked page's
 // existing behaviour — the same shape RosterPanel takes.
@@ -134,10 +133,10 @@ const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
 //    behind a swap. A scorer is scoring ONE half; both clubs' nine slots in a
 //    328px column is a long scroll past the eighteen names to reach the nine
 //    that matter. Worse, the club that ISN'T batting carries the
-//    "← Due up / On deck / In the hole" pills, because selectDueUpNext
-//    correctly describes ITS next half — accurate, and misread on a screen
-//    devoted to the half in progress. Leading with the batting club puts those
-//    pills behind a deliberate tap, where "who leads off their next half" is
+//    due-up highlight, because selectDueUpNext correctly describes ITS next
+//    half — accurate, and misread on a screen devoted to the half in progress.
+//    Leading with the batting club puts that highlight behind a deliberate
+//    tap, where "who leads off their next half" is
 //    the question the reader just asked. Null keeps both clubs stacked, which
 //    is right for the unfocused page, where the section is reference rather
 //    than the surface being worked.
@@ -166,12 +165,10 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
   const away = lineupEntering(feed, 'away', inning, half, revealedThrough)
   const home = lineupEntering(feed, 'home', inning, half, revealedThrough)
   if ((!away || away.length === 0) && (!home || home.length === 0)) return null
-  const dueUpNext = selectDueUpNext(feed, inning, half, revealedThrough, 3)
-  const upNextLabels = (side) => {
-    if (dueUpNext?.battingSide !== side) return null
-    const bySlot = new Map(dueUpNext.batters.map((b, i) => [b.slot, UP_NEXT_LABELS[i]]))
-    return bySlot
-  }
+  // The ONE slot that leads off the fielding club's next half. Asked for one
+  // batter, not the old trio: only the leadoff man is marked now.
+  const dueUpNext = selectDueUpNext(feed, inning, half, revealedThrough, 1)
+  const dueUpSlot = (side) => (dueUpNext?.battingSide === side ? dueUpNext.batters[0]?.slot ?? null : null)
   // On deck for the BATTING club only — leadSide-gated (see header above), so
   // the unfocused stacked page (leadSide null) never computes or shows this.
   const onDeck =
@@ -193,7 +190,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         isMlb={isMlb}
-        upNextLabels={upNextLabels(side)}
+        dueUpSlot={dueUpSlot(side)}
         onDeckSlot={onDeckSlot(side)}
       />
     )
@@ -205,7 +202,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
   const otherSide = shown === 'away' ? 'home' : 'away'
   const canSwap = leadSide != null && teamFor(otherSide).slots.length > 0
   return (
-    <Card body="flush" className="entering">
+    <Card frame="stamped" stampIn body="flush" className="entering">
       {!bare && (
         <button
           type="button"
@@ -236,13 +233,16 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
               nothing to knock the mark out AGAINST. */}
           {canSwap && (
             <button type="button" className="entering__swap" onClick={() => setShown(otherSide)}>
-              <TeamLogo
-                teamId={teamFor(otherSide).teamId}
-                name={teamFor(otherSide).name}
-                size={18}
-                className="entering__swaplogo"
-              />
-              {teamFor(otherSide).name} lineup ›
+              <span className="entering__swaplabel">
+                <TeamLogo
+                  teamId={teamFor(otherSide).teamId}
+                  name={teamFor(otherSide).name}
+                  size={20}
+                  className="entering__swaplogo"
+                />
+                {teamFor(otherSide).name} lineup
+              </span>
+              <span className="entering__swapchev" aria-hidden="true">&rsaquo;</span>
             </button>
           )}
         </Stack>
@@ -258,16 +258,13 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
 // numbered list of its nine batting slots. Each row reads name(s) on the left
 // and the standing occupant's jersey number + fielding position right-aligned
 // on a shared column. An empty side (a thin MiLB feed that never posted a
-// lineup) is dropped rather than shown as a bare header. `upNextLabels`, when
-// set, maps the up-to-three slots leading off this team's own next half to
-// their "Due up"/"On deck"/"In the hole" label (see LineupSection above).
-// `onDeckSlot`, when set, is the ONE slot due up next in THIS half for a
-// BATTING club — a different concept from `upNextLabels` (which only ever
-// marks the FIELDING club's own next half), so it gets its own highlighted
-// row and its own "Up next" wording rather than folding into `upNextLabels`'s
-// "On deck", which would read as this half's next batter and the other
-// club's next-half leadoff man sharing one label for two different moments.
-function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, upNextLabels, onDeckSlot = null }) {
+// lineup) is dropped rather than shown as a bare header. `dueUpSlot`, when set,
+// is the ONE slot leading off this team's own next half (see LineupSection
+// above). `onDeckSlot`, when set, is the ONE slot due up next in THIS half for a
+// BATTING club — a different moment from `dueUpSlot` (which only ever marks the
+// FIELDING club's own next half). Both wear the same single highlight, so a row
+// is either "up next" or not; the two never land on one card.
+function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, dueUpSlot = null, onDeckSlot = null }) {
   if (slots.length === 0) return null
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
   return (
@@ -279,40 +276,44 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
       <Stack gap="tight" as="ol" className="entering__list">
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant
-          const upNextLabel = upNextLabels?.get(s.slot)
-          const onDeck = s.slot === onDeckSlot
+          const isUpNext = s.slot === onDeckSlot || s.slot === dueUpSlot
           return (
             <li
-              className={`entering__row ${onDeck ? 'entering__row--ondeck' : ''}`}
+              className={`entering__row ${isUpNext ? 'entering__row--up' : ''}`.trim()}
               key={s.slot}
             >
-              <span className="entering__slot">{s.slot}</span>
+              <span className="entering__slot">
+                {s.slot}
+                {isUpNext && <span className="sr-only"> (Up next)</span>}
+              </span>
               {/* One line per occupant, so a substitute's number and position sit
                   beside HIS name, not over the man he replaced. The pills belong
                   to the standing occupant, so they ride the last line. */}
               <span className="entering__entries">
                 {s.entries.map((e, i) => {
                   const last = i === s.entries.length - 1
+                  // One inning per line, in its own column: the inning a sub
+                  // entered, or, for a man who changed spots, the inning of the move.
+                  const innNum = e.movedInning ?? e.inning
                   return (
-                    <span className="entering__entry" key={i}>
+                    <span className={`entering__entry ${e.replaced ? 'entering__entry--out' : ''}`.trim()} key={i}>
                       <span className="entering__names">
                         <LineupName entry={e} />
                         {last && (
                           <>
                             <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
                             <RookiePill active={showRookiePill(rookiesData, cur.id, isMlb)} />
-                            {onDeck && <span className="duepill entering__ondeck">Up next</span>}
-                            {upNextLabel && (
-                              <span className="duepill">
-                                {upNextLabel === 'Due up' && <span aria-hidden="true">&larr; </span>}
-                                {upNextLabel}
-                              </span>
-                            )}
                           </>
                         )}
                       </span>
-                      <span className="entering__meta">
-                        {e.jersey ? <span className="entering__jersey">{e.jersey}</span> : null}
+                      <span className="entering__inncell">
+                        {!e.replaced && innNum != null ? (
+                          <span className="entering__inn">{ordinal(innNum)}</span>
+                        ) : null}
+                      </span>
+                      <span className="entering__jersey">{e.jersey || null}</span>
+                      <span className="entering__poscell">
+                        {!e.replaced && e.prevPosition ? <span className="entering__prevpos">{e.prevPosition}</span> : null}
                         {e.position ? <span className="entering__pos">{e.position}</span> : null}
                       </span>
                     </span>
@@ -327,18 +328,14 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
   )
 }
 
-// One batting-order slot's name stack — struck through when replaced, tagged
-// with the inning he entered while he's the standing occupant. Jersey/position
-// sit in the entry line's own right-aligned meta column, so this renders name +
-// enter-tag only. Mirrors DefenseDiamond's DefenseName styling.
+// One batting-order slot's name — struck through when replaced. The inning he
+// entered (or moved spots), jersey and position sit in the entry line's own
+// columns, so this renders the name only. Mirrors DefenseDiamond's DefenseName styling.
 function LineupName({ entry }) {
-  const entered = entry.inning != null && !entry.replaced
   return (
     <StruckLine
       struck={entry.replaced}
-      className={`entering__name ${entry.replaced ? 'entering__name--out' : ''} ${
-        entered ? 'entering__name--in' : ''
-      }`}
+      className={`entering__name ${entry.replaced ? 'entering__name--out' : ''}`.trim()}
     >
       {/* The card PRINTS 'Last, First' — the scorebook's sorted spelling — but
           the address is spoken order, or the slug would read 'trout-mike'
@@ -347,9 +344,6 @@ function LineupName({ entry }) {
         {entry.last}
         {entry.first ? `, ${entry.first}` : ''}
       </PlayerLink>
-      {entry.inning != null && (
-        <span className="entering__enter">({ordinal(entry.inning)})</span>
-      )}
     </StruckLine>
   )
 }

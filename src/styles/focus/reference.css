@@ -266,19 +266,6 @@
   gap: var(--space-4);
 }
 
-/* The Lineups masthead (.lineupteam__name) sits one level deeper than the
-   Field/Bench mastheads (.halfdefense__title/.roster__toggle, both direct
-   children of their own bordered card) — it's nested inside
-   .entering__teams, whose own 12px top padding left a stripe of bare paper
-   ABOVE the club's colored bar that those other two tabs never had. Canceled
-   here rather than in the base rule (12-sealbox.css) even though
-   ReferencePanel's LINEUPS tab is `.entering`'s only caller now — an
-   override kept local to where it's needed reads clearer than a base rule
-   whose one remaining consumer has to be discovered by grep. */
-.refpanel__body .lineupteam__name {
-  margin-top: -12px;
-}
-
 /* One size for every club bar across the four tabs — the Lineups masthead
    (.lineupteam__name, --fs-compact elsewhere) and the Field masthead
    (.halfdefense__title, --fs-caption elsewhere) bumped up to match the Bench
@@ -512,43 +499,4 @@
    pressable. */
 .halfdefense__title--bare {
   cursor: default;
-}
-
-/* The swap onto the other club's nine. Reads as a footer action on the card
-   rather than a second masthead — the batting club's lineup is the answer, and
-   this is the way to the other one, not an equal partner to it.
-
-   Sized to its own text + chevron rather than the card's full width — a
-   footer action reading edge to edge looked like a third masthead bar, not a
-   small "one more tap" link. align-self pulls it out of .entering__teams'
-   stretched flex-column default; min-height still holds the tap floor even
-   though the box itself is now content-sized (a phone's docked sheet is where
-   the thumb is doing the reaching, same as before). */
-.entering__swap {
-  align-self: flex-start;
-  width: auto;
-  min-height: var(--tap-min);
-  padding: var(--space-2) var(--space-3);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-align: left;
-  cursor: pointer;
-}
-
-.entering__swaplogo {
-  flex: 0 0 auto;
-}
-
-.entering__swap:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
 }

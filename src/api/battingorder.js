@@ -53,9 +53,25 @@ export function lineupEntering(feed, battingSide, throughInning, throughHalf, re
   // regardless of whether revealedThrough is threaded through it too — but it
   // is, for defense in depth.
   const posById = {}
+  // Every spot a man has held, in the order he held it — a double switch puts
+  // the same id on two chains. `inning` is null for a starter's own spot.
+  const spotsById = {} // id -> [{ position, inning }]
   for (const spot of defenseEntering(feed, battingSide, throughInning, throughHalf, revealedThrough) ?? []) {
     const cur = spot.entries[spot.entries.length - 1]
     if (cur?.id != null) posById[cur.id] = spot.position
+    for (const e of spot.entries) {
+      if (e.id != null) (spotsById[e.id] ??= []).push({ position: spot.position, inning: e.inning ?? 0 })
+    }
+  }
+  // Sorted by inning, stable: a starter's spot (0) comes before any move.
+  for (const list of Object.values(spotsById)) list.sort((a, b) => a.inning - b.inning)
+  // The spot he stood in before his latest move, and the inning of that move —
+  // null for a man who has held one spot only.
+  const moveOf = (id) => {
+    const list = spotsById[id] ?? []
+    const last = list[list.length - 1]
+    if (list.length < 2 || last.position !== posById[id]) return { prevPosition: null, movedInning: null }
+    return { prevPosition: list[list.length - 2].position, movedInning: last.inning || null }
   }
   const jerseyOf = (id) =>
     boxPlayers[`ID${id}`]?.jerseyNumber ?? players[`ID${id}`]?.primaryNumber ?? ''
@@ -83,6 +99,7 @@ export function lineupEntering(feed, battingSide, throughInning, throughHalf, re
         first: firstNameOf(m.id),
         jersey: jerseyOf(m.id),
         position: posOf(m.id),
+        ...moveOf(m.id),
         inning: idx != null ? Math.floor(idx / 2) + 1 : null,
       })
     }

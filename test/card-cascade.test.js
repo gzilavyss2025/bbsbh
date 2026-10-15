@@ -785,7 +785,8 @@ const C4 = [
   // The whole .half rule was the frame, so it is gone (`gone`).
   { css: '11-innings.css', sel: '.half', jsx: ['components/inning/HalfInning.jsx'], ns: 'half', gone: true },
   { css: '12-sealbox.css', sel: '.statbox', jsx: ['components/gamehud/StatBox.jsx'], ns: 'statbox' },
-  { css: '12-sealbox.css', sel: '.entering', jsx: ['components/inning/EnteringReference.jsx'], ns: 'entering' },
+  // The lineup card is the stamped frame now (the lineup page's paper look): `frame` names it.
+  { css: '12-sealbox.css', sel: '.entering', jsx: ['components/inning/EnteringReference.jsx'], ns: 'entering', frame: 'stamped' },
   { css: '12-sealbox.css', sel: '.halfdefense', jsx: ['components/inning/EnteringReference.jsx'], ns: 'halfdefense' },
   // The focus-mode umpire drawer wears the same drawer (UmpireTendenciesFold).
   {
@@ -820,7 +821,7 @@ test('C4: no innings-view or HUD block draws a second frame over its Card', () =
   }
 })
 
-test('C4: every innings-view and HUD block renders on Card, a sheet with a flush body', () => {
+test('C4: every innings-view and HUD block renders on Card, a sheet (or its named frame) with a flush body', () => {
   for (const { jsx, ns, as, frame } of C4) {
     for (const rel of jsx) {
       const code = src(rel)
