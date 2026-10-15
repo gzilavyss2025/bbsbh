@@ -1,3 +1,4 @@
+import { Headshot } from '../../components/player/Headshot.jsx'
 import { ManagerLink } from '../../components/team/ManagerLink.jsx'
 import { monthDay } from '../../lib/dates.js'
 
@@ -26,21 +27,28 @@ export function seasonVsOpponentLine(v, oppAbbr) {
   return `${v.games.length} GS vs ${oppAbbr} this year: ${stat}`
 }
 
-// The manager fill-in: surname-first name with the uniform number inked in
-// seam red, like every lineup row. Null (→ the Fact's "—") until resolved.
+// The manager fill-in: his headshot (the coach photo, drawn like a lineup row's
+// shot; no photo on file draws nothing), then first name, last name and the
+// uniform number "#30" inked in seam red. Null (→ the Fact's "—") until resolved.
 // Linked to his manager page once fetchManager resolves a personId (older
 // cached data / a fetch that raced ahead of that field lands here without
 // one — ManagerLink degrades to plain text rather than a dead link).
 export function managerFact(manager) {
   if (!manager) return null
   return (
-    // The fact PRINTS surname-first; the address takes spoken order
-    // (ADR-0057), which `name` on the same object already is.
     <ManagerLink id={manager.personId} name={manager.name} className="fact__person">
-      {manager.lastFirst}
-      {manager.jersey ? (
-        <span className="fact__jersey">{manager.jersey}</span>
+      {manager.personId ? (
+        <Headshot personId={manager.personId} name={manager.name} coach hideFallback className="fact__shot" />
       ) : null}
+      <span className="fact__who">
+        {manager.name}
+        {manager.jersey ? (
+          <>
+            {' '}
+            <span className="fact__jersey">#{manager.jersey}</span>
+          </>
+        ) : null}
+      </span>
       {manager.interim ? <span className="fact__note">interim</span> : null}
     </ManagerLink>
   )

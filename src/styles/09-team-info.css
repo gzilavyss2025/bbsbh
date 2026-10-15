@@ -205,7 +205,23 @@
   min-width: 0;
 }
 
+/* The manager's headshot beside his name, framed like a lineup row's shot. */
+.fact__person .shot.fact__shot {
+  flex: none;
+  width: 32px;
+  height: 38px;
+  border: var(--bw-hair) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--bg-canvas);
+  align-self: center;
+}
+
+.fact__who {
+  min-width: 0;
+}
+
 .fact__jersey {
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
