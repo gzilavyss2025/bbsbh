@@ -22,11 +22,14 @@ import { isMlbTeamId } from '../../lib/teams.js'
 // line. That also makes the headshot the link target here, unlike TeamLeaders
 // where it's decoration beside a linked name; an art-only PlayerLink needs the
 // explicit `ariaLabel` it demands, or it announces as a nameless button.
-export function MilbAlumni({ players, minGames }) {
+// `cardProps`: the one-scroll page's stamped frame and name tab (props for Card); without it, the
+// page-level label above the grid.
+export function MilbAlumni({ players, minGames, cardProps }) {
   if (!players?.length) return null
+  const Frame = cardProps ? Card : 'section'
   return (
-    <section className="alum">
-      <SectionHead look="label" note={minGames ? `${minGames}+ games here` : undefined}>Made The Show</SectionHead>
+    <Frame className="alum" {...cardProps}>
+      {!cardProps && <SectionHead look="label" note={minGames ? `${minGames}+ games here` : undefined}>Made The Show</SectionHead>}
       <ul className="alum__grid">
         {players.map((p) => (
           <Card key={p.id} as="li" body="flush" className="alum__card">
@@ -79,6 +82,6 @@ export function MilbAlumni({ players, minGames }) {
           </Card>
         ))}
       </ul>
-    </section>
+    </Frame>
   )
 }

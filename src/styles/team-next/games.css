@@ -1,0 +1,70 @@
+/* ==== THE GAMES BAND OF THE ONE-SCROLL TEAM PAGE (#1107, row 6b) ====
+   games/index.jsx imports this file. The schedule, Highlights and Photos are today's modules,
+   skinned from here: the stamped edge and shadow of the player page's card, square corners, and
+   the house band head, since a club colours its own hero and nothing else on this page
+   (ADR-0030). The grid is a real stamped Card with a name tab. Motion is the stamped card's
+   drop-in, once per page visit (.tnext__games--still on a return) and off under reduced motion. */
+
+/* The sheet cards of the old modules wear the stamped edge, through the card's own custom properties (card.css is the one stylesheet that frames a card). A data dot stays round. */
+.tnext__games :not(.team-score__dot) {
+  border-radius: 0;
+}
+.tnext__games .card--sheet {
+  --card-edge: var(--bw-heavy) solid var(--border-stamped);
+  --card-shadow: var(--shadow-stamped);
+  --card-overflow: visible;
+}
+.tnext__games .teamlogo {
+  border-radius: 0;
+}
+
+/* The house band, not the club's (the club-coloured head is the hero's alone). */
+.tnext__games .sectionhead--club.sectionhead--band,
+.is-themed .tnext__games .sectionhead--club.sectionhead--band {
+  --band-fill: var(--navy);
+  --band-accent: var(--band-rule);
+  --band-text: var(--text-on-ink);
+  background: var(--band-fill);
+  border-bottom: 3px solid var(--band-accent);
+  color: var(--band-text);
+}
+.tnext__games .sectionhead--club .sectionhead__note {
+  color: var(--text-on-ink-dim);
+}
+
+/* The stamped body already pads the grid, so the grid drops its own top margin. */
+.tnext__gamescard .gamesgrid {
+  margin-top: 0;
+}
+
+/* Motion is once per page visit: a return shows the band at rest. */
+.tnext__games--still .card--stamp-in {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tnext__games .card--stamp-in {
+    animation: none !important;
+  }
+}
+:root[data-motion='reduced'] .tnext__games .card--stamp-in {
+  animation: none !important;
+}
+
+/* The three old cards drop into their shadow as the grid's card does, one after another, once
+   per page visit (the keyframe is motion/stamp-in.css's). */
+.tnext__games:not(.tnext__games--still) .card--sheet {
+  animation: card-stamp-in var(--dur-stamp-in) var(--ease-stamp-in) calc(var(--stagger-step) * 2) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tnext__games .card--sheet {
+    animation: none !important;
+  }
+}
+:root[data-motion='reduced'] .tnext__games .card--sheet {
+  animation: none !important;
+}
+
+/* A door in the house band reads on the navy: light ink, not the link colour. */
+.tnext__games .sectionhead--band .door {
+  color: var(--text-on-ink);
+}

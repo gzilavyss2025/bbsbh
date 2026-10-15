@@ -13,10 +13,11 @@ const years = (from, to) => (from === to ? `${from}` : `${from}–${to}`)
 // A span or park still running in the last season of the file reads "from on".
 const run = (from, to, through) => (to === through ? `${from} on` : years(from, to))
 
-export function FranchiseHistory({ spans, parks, through }) {
+// `cardProps`: the one-scroll page's stamped frame and name tab (props for Card); without it, the band head.
+export function FranchiseHistory({ spans, parks, through, cardProps }) {
   if (!spans?.length) return null
   return (
-    <Card head={<SectionHead look="band" club>Franchise history</SectionHead>} className="fhist">
+    <Card {...(cardProps ?? { head: <SectionHead look="band" club>Franchise history</SectionHead> })} className="fhist">
       <ol className="fhist__strip">
         {spans.map((s) => (
           <Stack gap="tight" as="li" key={s.from} className="fhist__span">

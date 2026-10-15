@@ -87,3 +87,23 @@ test('the tab routes (no sources) still each buy their own copy', async () => {
   const seen = await fired(() => loadPage(undefined))
   assert.ok(seen.filter((u) => /\/schedule\?.*teamId=158/.test(u)).length > 1)
 })
+
+// Row 6f: the jersey strip moved from Standings to About, so it is its own load.
+test('loadStandings no longer buys the jersey reads; loadJerseys does', async () => {
+  const seen = await fired(() => loadStandings(158, null))
+  assert.ok(!seen.some((u) => u.includes('/uniforms/')), 'Standings fetched uniforms')
+  const { loadJerseys } = await import('../src/screens/team/data/loadNumbers.js')
+  const team = { id: 158, sport: { id: 1 }, league: { id: 104 } }
+  const out = await loadJerseys(team, null)
+  assert.ok(Array.isArray(out.jerseyCombos))
+})
+
+test('loadJerseys at an affiliate reads the standings split and no uniforms', async () => {
+  const { loadJerseys } = await import('../src/screens/team/data/loadNumbers.js')
+  const seen = await fired(async () => {
+    const out = await loadJerseys({ id: 999, sport: { id: 11 }, league: { id: 1 } }, null)
+    assert.deepEqual(out.homeRecord, { wins: 0, losses: 0 })
+    assert.equal(out.jerseyCombos.length, 0)
+  })
+  assert.ok(!seen.some((u) => u.includes('/uniforms/')))
+})

@@ -1,0 +1,144 @@
+/* ==== THE FARM BAND OF THE ONE-SCROLL TEAM PAGE (#1107, row 6d) ====
+   farm/index.jsx imports this file. The four Minors cards are the old tab's modules, so this
+   file re-skins them from outside, scoped to .tnext__farm: each card takes the stamped frame
+   (square, 2px ink edge, hard offset shadow), its head becomes the ink name tab with the note
+   as the count tag, and the club colour leaves the band (the hero is the one club surface,
+   ADR-0030). The tiles inside a card take the soft shadow, so the card reads as the higher
+   layer. Motion hangs off .tnext__farm and is off in .tnext__farm--still (a return visit). */
+
+/* layout-exempt: display: contents hands the cards straight to the band's Stack */
+.tnext__farm {
+  display: contents;
+}
+.tnext__farm :not(.team-score__dot) {
+  border-radius: 0;
+}
+
+/* THE STAMPED FRAME on every card; a tile inside a card takes the soft shadow. */
+.tnext__farm .card {
+  --card-radius: 0;
+  --card-shadow: var(--shadow-stamped);
+  --card-edge: var(--bw-heavy) solid var(--border-stamped);
+  --card-overflow: visible;
+  position: relative;
+}
+.tnext__farm .card .card {
+  --card-shadow: var(--shadow-stamped-soft);
+}
+
+/* THE NAME TAB: the head's title, hung across the top-left edge as .card__name draws it. The
+   head itself drops out (its club band, rings and rule), and the body clears the tab. */
+.tnext__farm .sectionhead--club {
+  display: contents;
+}
+.tnext__farm .sectionhead--club > .sectionhead__title {
+  position: absolute;
+  top: calc(-1 * var(--space-3h));
+  left: var(--space-3);
+  z-index: var(--z-raised);
+  margin: 0;
+  padding: var(--space-1) var(--space-2h);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+/* THE COUNT TAG: the head's note, across the top-right edge as .card__count draws it. */
+.tnext__farm .sectionhead--club > .sectionhead__note {
+  position: absolute;
+  top: calc(-1 * var(--space-3));
+  right: var(--space-3);
+  z-index: var(--z-raised);
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-canvas);
+  color: var(--text-heading) !important; /* beats the themed club head's note colour */
+  font-family: var(--font-display-tag);
+  font-size: var(--fs-label);
+  font-style: normal;
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.tnext__farm > .card > .card__body {
+  padding-top: var(--space-6);
+}
+
+/* The horizon card keeps its amber rail no more: one accent, the ink edge. */
+.tnext__farm .horizoncard__section {
+  color: var(--text-heading);
+}
+
+/* Depth: a tapped tile sinks into its shadow, as the hero's tiles do. */
+.tnext__farm .card--interactive {
+  transition: transform var(--dur-fast) var(--ease-stamp);
+}
+.tnext__farm .card--interactive:active {
+  transform: translate(var(--bw-heavy), var(--bw-heavy));
+}
+
+/* The org's top three read as the rank leaders: their number sits on the marker. */
+.tnext__farm .prospecttable tbody tr:nth-child(-n + 3) .yr {
+  background: var(--marker);
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+
+/* Flat to alive: the three leaders' photos take the stamped edge, the ledger sits on its own
+   stamped sheet, and the depth chart's figure is a display figure with a marker rule. */
+.tnext__farm .prospectshowcase__shotwrap {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped-soft);
+}
+.tnext__farm .table:has(> .prospecttable) {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped-soft);
+}
+.tnext__farm .horizontile__statv {
+  background: linear-gradient(transparent 60%, var(--marker) 60%);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+}
+
+/* MOTION: the cards stamp into their shadows in turn, then the tiles in each card rise. */
+.tnext__farm:not(.tnext__farm--still) > .card {
+  animation: card-stamp-in var(--dur-stamp-in) var(--ease-stamp) backwards;
+}
+.tnext__farm:not(.tnext__farm--still) > .card:nth-of-type(2) {
+  animation-delay: calc(var(--stagger-step) * 3);
+}
+.tnext__farm:not(.tnext__farm--still) > .card:nth-of-type(3) {
+  animation-delay: calc(var(--stagger-step) * 6);
+}
+.tnext__farm:not(.tnext__farm--still) > .card:nth-of-type(n + 4) {
+  animation-delay: calc(var(--stagger-step) * 9);
+}
+.tnext__farm:not(.tnext__farm--still) .card .card,
+.tnext__farm:not(.tnext__farm--still) .prospectshowcase__card {
+  animation: player-rise-in var(--dur-rise) var(--ease-stamp) calc(var(--stagger-step) * 8) backwards;
+}
+.tnext__farm:not(.tnext__farm--still) .card .card:nth-child(2n),
+.tnext__farm:not(.tnext__farm--still) .prospectshowcase__card:nth-child(2n) {
+  animation-delay: calc(var(--stagger-step) * 11);
+}
+.tnext__farm:not(.tnext__farm--still) .card .card:nth-child(3n),
+.tnext__farm:not(.tnext__farm--still) .prospectshowcase__card:nth-child(3n) {
+  animation-delay: calc(var(--stagger-step) * 14);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tnext__farm *,
+  .tnext__farm .card--stamp-in {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+:root[data-motion='reduced'] .tnext__farm *,
+:root[data-motion='reduced'] .tnext__farm .card--stamp-in {
+  animation: none !important;
+  transition: none !important;
+}

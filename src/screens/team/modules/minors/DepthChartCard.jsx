@@ -27,7 +27,7 @@ function ScoutTile({ p }) {
         </div>
       </div>
       <div className="horizontile__statbox">
-        <span className="horizontile__statv">#{p.orgRank}</span>
+        <span className="horizontile__statv">{ordinal(p.orgRank)}</span>
         <span className="horizontile__statk">org rank</span>
       </div>
     </Card>

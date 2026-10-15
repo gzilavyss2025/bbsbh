@@ -44,7 +44,52 @@ function statRank(rows, teamId, key, label, lowerBetter) {
 // no `src` (each half takes one: sources.js; only the page passes SHARED).
 export async function loadNumbers(id, asOf) {
   const [standing, ranks] = await Promise.all([loadStandings(id, asOf), loadRanks(id, asOf)])
-  return standing && ranks ? { ...standing, ...ranks } : null
+  if (!standing || !ranks) return null
+  const jerseys = standing.team.sport?.id > 1 ? homeAway(standing.standings) : await loadJerseys(standing.team, asOf)
+  return { ...standing, ...ranks, ...jerseys }
+}
+
+// An affiliate wears one jersey at home and one away: its record in each is the standings split.
+const homeAway = (rows) => {
+  const mine = rows.find((s) => s.isMe)
+  return { jerseyCombos: [], homeRecord: mine?.homeRecord ?? { wins: 0, losses: 0 }, awayRecord: mine?.awayRecord ?? { wins: 0, losses: 0 } }
+}
+
+// The jersey strip's data (MLB: record by jersey; MiLB: the home and away splits). It sits
+// in the About band on the one-scroll page and on the Numbers tab, so it is its own load
+// (ADR-0082, #1107 row 6f). It moves with `?d=`: the schedule it reads gives `won` only to
+// a game on or before the cutoff, and the worn-jersey join below asks about those games
+// alone, so a jersey W-L never counts the game being scored. A record by jersey is a sum
+// of results; at `?d=` it must agree with the Standings record beside it.
+export async function loadJerseys(team, asOf, src = DIRECT) {
+  const id = team.id
+  const sportId = team.sport?.id ?? 1
+  const isMilb = sportId !== 1
+  const season = seasonOf(asOf, sportId)
+  const standingsDate = cutoffFor(asOf)
+  if (isMilb) {
+    const rows = team.league?.id ? await src.fetchStandings(team.league.id, season, standingsDate) : []
+    return homeAway(standingsRowsFor(rows, team, id))
+  }
+  const [schedule, uniformCatalog, uniformNameOverrides] = await Promise.all([
+    src.fetchTeamSchedule(id, season, sportId, standingsDate),
+    fetchTeamUniformCatalog([id], season),
+    fetchUniformNameOverrides(),
+  ])
+  const decided = schedule.filter((g) => g.won != null)
+  const wornByGame = decided.length ? await fetchGameJerseys(decided.map((g) => g.gamePk)) : {}
+  return {
+    jerseyCombos: buildJerseyCombos({
+      catalogAssets: uniformCatalog[id] ?? [],
+      clubName: teamClubName(id),
+      schedule,
+      wornByGame,
+      teamId: id,
+      nameOverrides: uniformNameOverrides,
+    }),
+    homeRecord: null,
+    awayRecord: null,
+  }
 }
 
 async function numbersScope(id, asOf) {
@@ -58,7 +103,7 @@ async function numbersScope(id, asOf) {
 export async function loadStandings(id, asOf, src = DIRECT) {
   const scope = await numbersScope(id, asOf)
   if (!scope) return null
-  const { team, sportId, isMilb, season, standingsDate, scoreCutoff } = scope
+  const { team, sportId, season, standingsDate, scoreCutoff } = scope
 
   const [
     standings,
@@ -73,8 +118,6 @@ export async function loadStandings(id, asOf, src = DIRECT) {
     // shard and the card simply doesn't render.
     scheduleShapeData,
     schedule,
-    uniformCatalog,
-    uniformNameOverrides,
   ] = await Promise.all([
     team.league?.id ? src.fetchStandings(team.league.id, season, standingsDate) : Promise.resolve([]),
     sportId === 1 ? fetchPostseasonOdds() : Promise.resolve(null),
@@ -86,8 +129,6 @@ export async function loadStandings(id, asOf, src = DIRECT) {
     // looking ahead. Don't re-derive it from Final status. Also feeds the
     // jersey-record join below (MLB only).
     src.fetchTeamSchedule(id, season, sportId, standingsDate),
-    isMilb ? Promise.resolve({}) : fetchTeamUniformCatalog([id], season),
-    isMilb ? Promise.resolve({}) : fetchUniformNameOverrides(),
   ])
 
   const standingsRows = standingsRowsFor(standings, team, id)
@@ -108,34 +149,6 @@ export async function loadStandings(id, asOf, src = DIRECT) {
   const regularSchedule = schedule.filter((g) => g.gameType === 'R')
   const dayOfWeek = regularSchedule.some((g) => g.won != null) ? dayOfWeekRecord(regularSchedule) : null
 
-  // Record-by-jersey strip (MLB only) — one card per catalog jersey, tagged
-  // with its logo treatment and the club's W-L in the games it wore it. The
-  // worn-jersey join needs the per-game uniform assignment, one extra batched
-  // /uniforms/game call over just the games with a VISIBLE result (`won`
-  // already cutoff-gated by fetchTeamSchedule above), so an `asOf` team page
-  // never counts a game past its own spoiler cutoff. Skipped for a club with
-  // no catalog (MiLB) — buildJerseyCombos then returns [].
-  const decidedGames = schedule.filter((g) => g.won != null)
-  const wornByGame =
-    !isMilb && decidedGames.length ? await fetchGameJerseys(decidedGames.map((g) => g.gamePk)) : {}
-  const jerseyCombos = isMilb
-    ? []
-    : buildJerseyCombos({
-        catalogAssets: uniformCatalog[id] ?? [],
-        clubName: teamClubName(id),
-        schedule,
-        wornByGame,
-        teamId: id,
-        nameOverrides: uniformNameOverrides,
-      })
-
-  // This club's own home/away split, off the standings row — feeds the
-  // Home/Away jersey cards below (MiLB only; an MLB club's cards carry a
-  // real per-jersey-worn record instead, from buildJerseyCombos above).
-  const myStanding = standingsRows.find((s) => s.isMe)
-  const homeRecord = myStanding?.homeRecord ?? { wins: 0, losses: 0 }
-  const awayRecord = myStanding?.awayRecord ?? { wins: 0, losses: 0 }
-
   return {
     team,
     standings: standingsRows,
@@ -148,9 +161,6 @@ export async function loadStandings(id, asOf, src = DIRECT) {
     // cutoff travels with the data rather than being applied here.
     recordsCutoff: standingsDate,
     dayOfWeek,
-    jerseyCombos,
-    homeRecord,
-    awayRecord,
   }
 }
 
