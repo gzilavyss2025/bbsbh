@@ -32,7 +32,7 @@ export const callOf = (call) => {
   return { word, tone }
 }
 
-export const ordinal = (n) => (n == null ? '' : withSuffix(n))
+export const meetingOrdinal = (n) => (n == null ? '' : withSuffix(n))
 
 // A pitch's full name: the board's pill name, else pitchLabel's.
 export const nameOf = (code, board) => board?.types.find((t) => t.code === code)?.name ?? (code ? pitchLabel(code) : 'Pitch')

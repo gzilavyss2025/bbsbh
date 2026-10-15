@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { parseSavantRows, plateAppearances } from '../src/api/scout/headToHead.js'
 import {
-  callOf, gamesOf, meetingFacts, mixRows, nameOf, ordinal, pitchWalk, playText, unseenNote,
+  callOf, gamesOf, meetingFacts, mixRows, nameOf, meetingOrdinal, pitchWalk, playText, unseenNote,
 } from '../src/screens/scout/meetings/meetings.js'
 
 const CSV = readFileSync(new URL('./fixtures/scout/chourio-pivetta.csv', import.meta.url), 'utf8')
@@ -73,7 +73,7 @@ test('calls in words, ordinals, and the play text without the batter’s name', 
   assert.deepEqual(callOf('swinging_strike_blocked'), { word: 'Swinging strike', tone: 'strike' })
   assert.deepEqual(callOf('hit_into_play'), { word: 'In play', tone: 'play' })
   assert.equal(callOf('some_new_call').word, 'Some new call')
-  assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22].map(ordinal), ['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '22nd'])
+  assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22].map(meetingOrdinal), ['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '22nd'])
   assert.equal(playText(PAS.at(-1).description, 'Jackson Chourio'), 'grounds out, shortstop Jose Iglesias to first baseman Luis Arraez.')
   assert.equal(playText('Wild pitch.', 'Jackson Chourio'), 'Wild pitch.')
 })

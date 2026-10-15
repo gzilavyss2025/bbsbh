@@ -9,7 +9,7 @@ import {
   fetchAbsExposureClubs,
 } from '../../../api/around-the-game/absExposure.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
-import { rankTeam, ordinal } from '../../../api/person.js'
+import { rankTeam, rankText } from '../../../api/person.js'
 import {
   fetchTeamUniformCatalog,
   fetchGameJerseys,
@@ -35,7 +35,7 @@ function statRank(rows, teamId, key, label, lowerBetter) {
   const r = rankTeam(rows, teamId, key, lowerBetter)
   const tone = r ? (r.rank <= 5 ? 'good' : r.rank >= 20 ? 'bad' : '') : ''
   const extreme = r ? (r.rank <= 5 ? 'best' : r.rank > r.of - 5 ? 'worst' : '') : ''
-  return { k: label, v: mine?.stat?.[key] ?? DASH, rank: r ? ordinal(r.rank) : DASH, tone, extreme }
+  return { k: label, v: mine?.stat?.[key] ?? DASH, rank: r ? rankText(r.rank) : DASH, tone, extreme }
 }
 
 // Each band of the one-scroll page (#1107) buys only its own share: Standing (the

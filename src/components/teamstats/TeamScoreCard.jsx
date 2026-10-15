@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { ordinal } from '../../api/person.js'
+import { rankText } from '../../api/person.js'
 import { leagueRank, leagueRankNoTies, rankedNoTies } from '../../api/teamScore.js'
 import { CURRENT_FORM_GAMES } from '../../api/teamScoreFormula.js'
 import { HOME_WIN_PROBABILITY } from '../../api/seasonScoreFormula.js'
@@ -221,7 +221,7 @@ function GradeHero({ grade, summary, rank, league, teamId, isOpen, onToggle }) {
           <strong>{grade ? seasonStoryline(grade, teamId) : 'Not yet graded'}</strong>
         </span>
         <span className="team-score__grade-result">
-          {rank && <span className="team-score__rank">{ordinal(rank.rank)} of {rank.of}</span>}
+          {rank && <span className="team-score__rank">{rankText(rank.rank)} of {rank.of}</span>}
           <span className="team-score__grade-score">
             {scoreValue(summary)}<small>/10</small>
           </span>
@@ -301,7 +301,7 @@ function ScoreRow({ label, phrase, summary, rank, metaText, isOpen, onToggle, le
           {phrase && <span className="team-score__label-phrase">{phrase}</span>}
         </span>
         <span className="team-score__rowright">
-          {rank && <span className="team-score__rank">{ordinal(rank.rank)} of {rank.of}</span>}
+          {rank && <span className="team-score__rank">{rankText(rank.rank)} of {rank.of}</span>}
           <span className="team-score__score">{scoreValue(summary)}</span>
         </span>
       </button>
@@ -388,7 +388,7 @@ function RankStrip({ league, teamId, compact = false }) {
           ref={railRef}
           onScroll={updateEdge}
           role="list"
-          aria-label={`League rank, ${ordinal(ranked[ownIndex]?.rank ?? ownIndex + 1)} of ${of}`}
+          aria-label={`League rank, ${rankText(ranked[ownIndex]?.rank ?? ownIndex + 1)} of ${of}`}
         >
           {ranked.map((r) => {
             const isSelf = r.teamId === teamId
@@ -409,7 +409,7 @@ function RankStrip({ league, teamId, compact = false }) {
                 type="button"
                 className="rankstrip__chip"
                 onClick={() => navigate(teamPath(r.teamId, { name, d: asOf, s: sportId }))}
-                aria-label={`${name}, ${ordinal(r.rank)} of ${of}`}
+                aria-label={`${name}, ${rankText(r.rank)} of ${of}`}
               >
                 {logo}
                 <span className="rankstrip__n">{r.rank}</span>

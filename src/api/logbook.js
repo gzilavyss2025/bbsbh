@@ -1,3 +1,4 @@
+import { chunk } from '../lib/math/number.js'
 import { getJson } from './statsapi.js'
 
 // The Logbook's game facts — runs, clubs, venue, innings — for a set of stamped
@@ -95,11 +96,8 @@ export async function fetchStampGames(gamePks, { signal } = {}) {
   const list = [...new Set((gamePks ?? []).map(Number).filter(Boolean))]
   if (!list.length) return {}
 
-  const batches = []
-  for (let i = 0; i < list.length; i += BATCH) batches.push(list.slice(i, i + BATCH))
-
   const results = await Promise.all(
-    batches.map(async (batch) => {
+    chunk(list, BATCH).map(async (batch) => {
       try {
         return await getJson(
           `/api/v1/schedule?gamePks=${batch.join(',')}&hydrate=${HYDRATE}`,

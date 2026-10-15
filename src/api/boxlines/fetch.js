@@ -79,6 +79,7 @@
 // Class: cutoff-gated (spoiler-manifest.json). Degrades to `null` on any
 // failure so the sheet shows its retry state rather than an empty ledger.
 import { getJson } from '../statsapi.js'
+import { chunk } from '../../lib/math/number.js'
 import { baseballToday } from '../../lib/time/standingsDates.js'
 import { facetPlan } from './facets.js'
 import {
@@ -188,10 +189,8 @@ async function fetchLog(personId, group, { season, endDate }, gameTypes) {
 }
 
 async function fetchSchedule(gamePks) {
-  const chunks = []
-  for (let i = 0; i < gamePks.length; i += SCHEDULE_CHUNK) chunks.push(gamePks.slice(i, i + SCHEDULE_CHUNK))
   const pages = await Promise.all(
-    chunks.map((pks) =>
+    chunk(gamePks, SCHEDULE_CHUNK).map((pks) =>
       getJson(
         `/api/v1/schedule?sportId=1&gamePks=${pks.join(',')}&hydrate=${SCHEDULE_HYDRATE}&${SCHEDULE_FIELDS}`,
       ),
@@ -239,10 +238,8 @@ async function fetchSchedule(gamePks) {
 // OUT of the map rather than answered `0`, so rows.js can tell "he came off
 // the bench" from "nobody posted a card".
 async function fetchLineupSlots(personId, gamePks) {
-  const chunks = []
-  for (let i = 0; i < gamePks.length; i += SCHEDULE_CHUNK) chunks.push(gamePks.slice(i, i + SCHEDULE_CHUNK))
   const pages = await Promise.all(
-    chunks.map((pks) =>
+    chunk(gamePks, SCHEDULE_CHUNK).map((pks) =>
       getJson(`/api/v1/schedule?sportId=1&gamePks=${pks.join(',')}&hydrate=lineups&${LINEUP_FIELDS}`),
     ),
   )

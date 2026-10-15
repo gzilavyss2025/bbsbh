@@ -13,6 +13,13 @@ export function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n))
 }
 
+// `arr` cut into consecutive slices of at most `size`: the batches a bulk statsapi call takes.
+export function chunk(arr, size) {
+  const out = []
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
+  return out
+}
+
 // One decimal place: 1.25 -> 1.3.
 export function round1(n) {
   return Math.round(n * 10) / 10

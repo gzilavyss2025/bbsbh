@@ -10,13 +10,8 @@
 // the whole call, so a failure stops the run instead of shipping a hole (a bad
 // logo conversion, a history backfill that would write a partial file).
 
-// `arr` cut into consecutive slices of at most `size`: the batches a bulk
-// statsapi call takes.
-export function chunk(arr, size) {
-  const out = []
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
-  return out
-}
+// `chunk` lives in src/lib/math/number.js; the generators keep importing it from here.
+export { chunk } from '../../src/lib/math/number.js'
 
 export async function mapConcurrent(items, limit, mapper, { strict = false } = {}) {
   const results = new Array(items.length)
