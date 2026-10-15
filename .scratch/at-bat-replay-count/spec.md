@@ -1,6 +1,6 @@
 # Spec: the at-bat replay shows the count and the bases
 
-Status: draft, waiting on Gary. Nothing here is built.
+Status: built in #1858 (Gary's decisions of 2026-10-12 apply: tap to play everywhere, balls and strikes only). Slice 2 differs: bases come from per-card `basesBefore`/`basesAfter` snapshots in `halfInningFeed.js`, not from `runnersOnBase`.
 
 ## Most of this already shipped
 

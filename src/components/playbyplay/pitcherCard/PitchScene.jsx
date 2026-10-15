@@ -26,9 +26,13 @@ const f1 = (v) => v.toFixed(1)
 // at-bat's pitch count: it plays the pitches through ONCE and rests, draws the
 // projected plate ground in a taller frame (scene.js REPLAY_H), and puts the
 // bar under the drawing with a second row, "Pitch N of M" and the call.
-// `play` { no } plays that one pitch, then holds it while the others dim; a new
-// object replays it. The effect restarts once per pick, never per frame.
-export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, view = 'hitter', slow = SLOW, zone, atBat, play }) {
+// `play` { no } plays that one pitch, then holds it while the others dim;
+// `play` { all: true } plays the whole at-bat; a new object replays it. With no
+// `play` the replay RESTS on its last pitch at full length, and does so for good
+// under reduced motion (the reader steps with `play` { no }); play starts on a tap.
+// `onLand(idx)` fires once when a pitch reaches the plate, `onActive(idx)` when
+// one is released. The effect restarts once per pick, never per frame.
+export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, onLand, view = 'hitter', slow = SLOW, zone, atBat, play }) {
   const ghostRefs = useRef([])
   const segRefs = useRef([])
   const ballRef = useRef(null)
@@ -42,7 +46,11 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
 
   useEffect(() => {
     let shownIdx = -1
-    const picked = play ? pitches.findIndex((q) => q.no === play.no) : -1
+    let landedIdx = -1
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    // The at-bat replay rests on its last pitch until a tap plays it.
+    const resting = atBat != null && (!play || (play.all && reduce))
+    const picked = resting ? pitches.length - 1 : play?.no != null ? pitches.findIndex((q) => q.no === play.no) : -1
     const draw = (elapsed) => {
       const frame = picked >= 0 ? sceneFrame([pitches[picked]], elapsed, slow, true) : sceneFrame(pitches, elapsed, slow, atBat != null)
       const { progress, done } = frame
@@ -60,6 +68,10 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         if (barStepRef.current) barStepRef.current.textContent = `Pitch ${p.no} of ${atBat}`
         if (barCallRef.current) barCallRef.current.textContent = p.call || '—'
         onActive?.(idx)
+      }
+      if (progress >= 1 && landedIdx !== idx) {
+        landedIdx = idx
+        onLand?.(idx)
       }
       const m = progress * SEGMENTS
       const whole = Math.floor(m)
@@ -102,9 +114,8 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
 
     // The replay starts at release; the card shows its first pitch whole
     // until the clock runs (and for good under reduced motion).
-    draw(atBat != null ? 0 : null)
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    if (reduce) return undefined
+    draw(atBat != null && !resting && !(reduce && picked >= 0) ? 0 : null)
+    if (reduce || resting) return undefined
 
     // On-screen time only, so a replay scrolled into view starts at its first
     // pitch, not wherever the wall clock got to.
@@ -130,7 +141,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
       stop()
       io.disconnect()
     }
-  }, [pitches, onActive, slow, atBat, play])
+  }, [pitches, onActive, onLand, slow, atBat, play])
 
   const [rx, ry] = pitches[0]?.pts[0] ?? releasePoint(lefty, view)
   const hitterStage = useMemo(() => (zone ? stage(zone) : STAGE), [zone])

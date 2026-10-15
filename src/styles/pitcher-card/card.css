@@ -382,14 +382,46 @@
    Replay wraps alone and the two icons stay together. */
 .pbp__replaybtn {
   margin: 7px 0 0 var(--space-2);
+  border-radius: 0; /* square, like every control on the card */
   padding-inline: var(--space-2);
   vertical-align: middle;
 }
-/* Phone: one numbered chip per pitch under the scene. Square, so eight fit
-   across the sheet's 304px and more wrap. */
-.pbp__replaypicks .btn {
-  min-width: var(--control-min);
-  padding-inline: 0;
+/* The count strip and the small diamond under the scene. Fixed height and
+   widths, so nothing moves while a pitch plays (ADR-0046). */
+.pbp__replaystate {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-min);
+  padding: var(--space-1) var(--space-2);
+}
+.pbp__replaycount {
+  min-width: 3.5ch;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-body);
+}
+.pbp__replaybases {
+  flex: none;
+  width: 28px;
+  height: 28px;
+}
+.pbp__replaybases rect {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1.2;
+}
+.pbp__replaybases rect.is-held {
+  fill: var(--accent-primary);
+}
+.pbp__replaystate .btn {
+  margin-left: auto;
+  border-radius: 0; /* square, like the Segmented row under it */
+}
+/* Phone: the pitch picks are a Segmented row under the scene (it wraps), set
+   off from the count strip above. */
+.pbp__replaypicks {
+  margin: var(--space-2);
 }
 
 /* Wide focus: the scene's slot at the top of the reference rail

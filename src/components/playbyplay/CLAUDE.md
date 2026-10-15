@@ -46,4 +46,6 @@ then rest. A pick plays one pitch and holds it: the pitch list's dots on wide (`
 `WIDE_QUERY` the top of the focus reference rail, which a revealed card fills by PORTAL (`ReplayRail`:
 the rail is outside the seal, so it only lends an empty slot; the last at-bat owns it until a pick
 moves it); else a "Replay" button opens `ReplaySheet` — closed, nothing mounts. It sits inside the revealed card, so it is reveal-only like the zone plot, and none of it
-(scene, picks, button) exists at an untracked park or under reduced motion — the zone plot and list stay.
+(scene, picks, button) exists at an untracked park or for a plate appearance still in progress (`live`) — the zone plot and list stay.
+
+**Tap to play, count and bases (#1858).** The replay rests on the at-bat's end state and plays only on a tap of "Play at-bat", on wide as on a phone (no autoplay). A strip ("2-1", balls and strikes only; the outs stay on the half's header) and a small diamond follow the pitch in view. The model is `lib/pitcherCard/replaySteps.js`: each pitch's count is its OWN event's (`pitchInfo.js` `balls`/`strikes`), steps are keyed by pitch number `no` (the scene drops untracked pitches), and the runners come from the card's `basesBefore`/`basesAfter` (`halfInningFeed.js`, a snapshot per card, so a stacked half shows each at-bat as it was and never as the half ended). The diamond switches to `basesAfter` when the scene's last pitch lands. Under reduced motion the replay stays, at the end state, with no Play button; the chips step it.

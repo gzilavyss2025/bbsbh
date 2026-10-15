@@ -55,7 +55,7 @@ const MIGRATED = {
   'team-hub__namerow': { file: '28a-team-hub-hero.css', gap: 'snug', sites: 2, align: 'baseline' },
   // C8: the rule is gone whole; .trrank__chips keeps only its sibling margin rule.
   trrank__chips: { gap: 'tight', sites: 5 },
-  pbp__replaypicks: { gap: 'tight', sites: 1 },
+  // (.pbp__replaypicks left this table in #1858: the pitch picks are a Segmented row now, not a Cluster.)
   // C9: three rows, each deleted whole. The identity drawer logo row aligns to the start.
   colorlab__swatchrow: { file: '15-team-color-lab.css', gap: 'base', sites: 1 },
   'colorlab__weardates-list': { file: '15-team-color-lab.css', gap: 'tight', sites: 1 },

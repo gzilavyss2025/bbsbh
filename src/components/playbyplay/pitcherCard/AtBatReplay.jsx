@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { PitchScene } from './PitchScene.jsx'
 import { Button } from '../../ui/control/Button.jsx'
@@ -6,14 +6,17 @@ import { PitchList, StrikeZone, ZoneSheet } from '../../scoring/StrikeZone.jsx'
 import { HOVER_CARD_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 import { atBatScenePitches, atBatZone } from '../../../lib/pitcherCard/atBat.js'
-import { Cluster } from '../../ui/layout/Cluster.jsx'
+import { basesAt, countAt, replaySteps } from '../../../lib/pitcherCard/replaySteps.js'
+import { Segmented } from '../../ui/control/Segmented.jsx'
 
 // WHAT THE AT-BAT LOOKED LIKE: every pitch of one plate appearance, thrown in
 // order from behind the plate, each along its own measured path. The Now
 // Pitching card's scene (PitchScene, in its `atBat` look) does the drawing;
-// this only hands it real flights (lib/pitcherCard/atBat.js). It plays the
-// at-bat through once and rests. A pick (a pitch-list row on wide, a numbered
-// chip in the phone sheet) plays that one pitch and holds it.
+// this only hands it real flights (lib/pitcherCard/atBat.js). It rests on the
+// at-bat's end state until a tap on "Play at-bat" plays it through once, wide
+// and phone alike. A pick (a pitch-list row on wide, a numbered chip in the
+// phone sheet) plays that one pitch and holds it. A count strip ("2-1") and a
+// small diamond (lib/pitcherCard/replaySteps.js) follow the pitch in view.
 //
 // Reveal-only by construction, like the zone plot beside it: `pitchDetails`
 // arrives on an at-bat card that is only built inside its half's SealBox reveal.
@@ -44,22 +47,54 @@ export function ReplayRail({ slot, inCard, children }) {
 // start every row it passes.
 const DWELL_MS = 250
 
-// The at-bat's flights, or null where there is no replay. No tracked flight
-// (most MiLB parks) and a reader who asked for less motion both fall back to
-// the static zone plot and pitch list: PitchScene's own reduced-motion path
-// would freeze on the first pitch, which says nothing about an at-bat.
+// The at-bat's replay, `{ pitches, model }`, or null where there is none. No
+// tracked flight (most MiLB parks) and a plate appearance still in progress (it
+// has no end state yet) fall back to the static zone plot and pitch list. A
+// reader who asked for less motion keeps the replay: it rests on the end state
+// and steps with the pitch chips (PitchScene never animates then).
 //
-// Keyed on the pitches' CONTENT: a live game's poll rebuilds `pitchDetails`
+// Keyed on the entry's CONTENT: a live game's poll rebuilds `pitchDetails`
 // every 15-60 s, and a new array would restart every replay on the page.
-export function useReplayPitches(pitchDetails) {
-  const key = JSON.stringify(pitchDetails ?? [])
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` is pitchDetails' content
-  const pitches = useMemo(() => atBatScenePitches(pitchDetails), [key])
-  return pitches.length > 0 && !motionIsReduced() ? pitches : null
+export function useReplayPitches(entry) {
+  const { pitchDetails, basesBefore, basesAfter, live } = entry
+  const key = JSON.stringify([pitchDetails ?? [], basesBefore, basesAfter])
+  const replay = useMemo(() => {
+    const pitches = live == null ? atBatScenePitches(pitchDetails) : []
+    return pitches.length > 0 ? { pitches, model: replaySteps(pitchDetails, pitches, basesBefore, basesAfter) } : null
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` is the entry's content
+  }, [key, live])
+  return replay
 }
 
-function ReplayScene({ pitches, pitchDetails, pitcher, play, children }) {
+// The count strip and the small diamond under the scene, a fixed size so
+// nothing moves while it plays (ADR-0046). `at` is the pitch in view and whether
+// it has landed; the strip reads the count after it, the diamond the runners.
+function ReplayState({ model, at, onPlay }) {
+  const count = at && countAt(model, at.no, at.landed)
+  const bases = at && basesAt(model, at.no, at.landed)
+  return (
+    <div className="pbp__replaystate">
+      {count && <span className="pbp__replaycount" aria-label={`Count ${count.balls} balls, ${count.strikes} strikes`}>{count.balls}-{count.strikes}</span>}
+      {bases && (
+        <svg className="pbp__replaybases" viewBox="0 0 24 24" role="img" aria-label={bases.length ? `Runners on ${bases.join(', ')}` : 'Bases empty'}>
+          {[[2, 12, 4], [3, 5, 12], [1, 19, 12]].map(([b, x, y]) => (
+            <rect key={b} className={bases.includes(b) ? 'is-held' : undefined} x={x - 3} y={y - 3} width="6" height="6" transform={`rotate(45 ${x} ${y})`} />
+          ))}
+        </svg>
+      )}
+      {!motionIsReduced() && <Button skin="ink" size="control" onClick={onPlay}>Play at-bat</Button>}
+    </div>
+  )
+}
+
+function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, children }) {
   const zone = useMemo(() => atBatZone(pitchDetails), [pitchDetails])
+  // The pitch in view and whether it has landed. State changes twice a pitch,
+  // never per frame; the scene's own drawing stays in refs.
+  const [at, setAt] = useState(null)
+  const { pitches, model } = replay
+  const onActive = useCallback((idx) => setAt({ no: pitches[idx].no, landed: false }), [pitches])
+  const onLand = useCallback((idx) => setAt({ no: pitches[idx].no, landed: true }), [pitches])
   return (
     <div className="pcard pbp__replay">
       <PitchScene
@@ -69,7 +104,10 @@ function ReplayScene({ pitches, pitchDetails, pitcher, play, children }) {
         zone={zone}
         atBat={pitchDetails.length}
         play={play}
+        onActive={onActive}
+        onLand={onLand}
       />
+      {model && <ReplayState model={model} at={at} onPlay={onPlay} />}
       {children}
     </div>
   )
@@ -78,7 +116,7 @@ function ReplayScene({ pitches, pitchDetails, pitcher, play, children }) {
 // Wide: the card's zone cell, its pitch list's number dots the picks (hover
 // picks too, only with a real mouse). The scene goes to the rail while this
 // card owns it: `id` is the at-bat, `last` says it is the last one on screen.
-export function ReplayCell({ pitchDetails, batSide, pitcher, pitches, id, last }) {
+export function ReplayCell({ pitchDetails, batSide, pitcher, replay, id, last }) {
   const { slot, inCard, owner, setOwner } = useContext(RailContext)
   const [play, setPlay] = useState(null)
   const mouse = useMediaQuery(HOVER_CARD_QUERY)
@@ -101,8 +139,14 @@ export function ReplayCell({ pitchDetails, batSide, pitcher, pitches, id, last }
     setOwner(id)
     setPlay({ no })
   }
+  // Play starts on a tap, wide as on a phone: the last at-bat waits in the rail.
+  const playAll = (own) => {
+    clearTimeout(dwell.current)
+    setOwner(own)
+    setPlay({ all: true })
+  }
   const pick = {
-    nos: new Set(pitches.map((p) => p.no)),
+    nos: new Set(replay.pitches.map((p) => p.no)),
     picked: inRail ? play?.no : undefined,
     onPick: playPitch,
     onHover: mouse
@@ -112,7 +156,7 @@ export function ReplayCell({ pitchDetails, batSide, pitcher, pitches, id, last }
         }
       : undefined,
   }
-  const scene = inRail && slot && <ReplayScene pitches={pitches} pitchDetails={pitchDetails} pitcher={pitcher} play={play} />
+  const scene = inRail && slot && <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => playAll(id)} />
   return (
     <>
       <PitchList pitchDetails={pitchDetails} pick={pick} />
@@ -124,24 +168,18 @@ export function ReplayCell({ pitchDetails, batSide, pitcher, pitches, id, last }
 }
 
 // Phone: the scene in a sheet like the zone's, with one numbered chip per pitch.
-export function ReplaySheet({ pitchDetails, pitches, batter, pitcher, onClose }) {
+export function ReplaySheet({ pitchDetails, replay, batter, pitcher, onClose }) {
   const [play, setPlay] = useState(null)
   return (
     <ZoneSheet note="Replay" batter={batter} pitcher={pitcher?.last} onClose={onClose}>
-      <ReplayScene pitches={pitches} pitchDetails={pitchDetails} pitcher={pitcher} play={play}>
-        <Cluster gap="tight" className="pbp__replaypicks">
-          {pitches.map((p) => (
-            <Button
-              key={p.no}
-              size="control"
-              pressed={play?.no === p.no}
-              onClick={() => setPlay({ no: p.no })}
-              aria-label={`Play pitch ${p.no}`}
-            >
-              {p.no}
-            </Button>
-          ))}
-        </Cluster>
+      <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => setPlay({ all: true })}>
+        <Segmented
+          label="Play a pitch"
+          className="pbp__replaypicks"
+          value={play?.no}
+          onChange={(no) => setPlay({ no })}
+          options={replay.pitches.map((p) => ({ value: p.no, label: String(p.no) }))}
+        />
       </ReplayScene>
     </ZoneSheet>
   )
