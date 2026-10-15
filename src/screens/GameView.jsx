@@ -285,7 +285,8 @@ export function GameView({ game, section, onSection }) {
       <SiteHeader />
 
       {!ownChrome && (step === 2 ? (
-        <MatchBand away={game.away} home={game.home} date={officialDate} onSketch={setSketching} treatment={jerseyTreatments} />
+        // The innings page draws its own masthead (the scorebug, InningsHeader) once it has a feed.
+        !noPlays && feed ? null : <MatchBand away={game.away} home={game.home} date={officialDate} onSketch={setSketching} treatment={jerseyTreatments} />
       ) : (
         <Masthead
           away={game.away}
@@ -467,6 +468,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeather={weather.data}
           spoilersOff={spoilersOff}
           passActive={passActive}
+          onSketch={setSketching}
         />
         </Suspense>
       )}

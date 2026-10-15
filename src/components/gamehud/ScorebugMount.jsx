@@ -1,6 +1,7 @@
 import { revealRunsThrough } from '../../api/linescore.js'
 import { selectFinalReached } from '../../api/select.js'
 import { Scorebug } from './Scorebug.jsx'
+import { HeaderBug } from './HeaderBug.jsx'
 
 // The scorebug's one placement now: an ANCHORED band at the top of the stage
 // (`.gamehud--console`, ConsoleBand.jsx), for every half — live or
@@ -31,6 +32,8 @@ export function ScorebugMount({
   viewIdx,
   viewInning,
   viewHalf,
+  season = null,
+  asHeader = false,
 }) {
   if (!started || !live) return null
 
@@ -80,8 +83,11 @@ export function ScorebugMount({
   // it).
   const finished = selectFinalReached(feed, throughIdx)
 
+  // The innings page's masthead draws the same resolved values as the split header: only the
+  // component differs, never what it is handed.
+  const Bug = asHeader ? HeaderBug : Scorebug
   return (
-    <Scorebug
+    <Bug
       awayName={meta.away.clubName}
       homeName={meta.home.clubName}
       awayTeamId={meta.away.id}
@@ -98,7 +104,7 @@ export function ScorebugMount({
       bases={live.bases}
       outs={live.outs}
       over={Boolean(live.over)}
-      className="gamehud--console"
+      {...(asHeader ? { season } : { className: 'gamehud--console' })}
     />
   )
 }

@@ -1,0 +1,282 @@
+/* THE INNINGS HEADER SCOREBUG (components/gamehud/HeaderBug.jsx). The scorebug laid out as the
+   split masthead: two slanted halves on the clubs' tile colours with the ripple behind each mark
+   (the slate card's versus split, held on, as in masthead-split.css), a dark plate between them
+   for the inning, bases and outs, and the pitcher and batter as two bars under the strip. It
+   shares no rule with the console band's `.gamehud--console` (focus/scorebug.css), which is why
+   it has classes of its own.
+
+   The halves lean the same way, so the plate between them is a constant-width parallelogram. A
+   half bleeds past the band on its outer side, where the band clips it, so the lean leaves no
+   gap at the corners; its padding puts the mark back where it would be. The runs sit in the
+   cells beside the plate, on the half's colour, and are not skewed. */
+.inhead {
+  --inhead-lean: 10deg;
+  --inhead-bleed: calc(var(--space-4) + var(--space-3));
+  position: relative;
+  overflow: hidden;
+  margin: var(--space-1) 0 var(--space-4);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--ink-0);
+  box-shadow: var(--shadow-stamped);
+}
+
+/* layout-exempt: logo, runs, plate, runs, logo: a fixed five-cell strip, the halves spanning two each */
+.inhead__strip {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) minmax(92px, 0.8fr) minmax(0, 1fr) 72px;
+  min-height: 128px;
+}
+
+.inhead__half {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  background: var(--tint, var(--bg-page));
+  transform: skewX(calc(-1 * var(--inhead-lean)));
+}
+.inhead__half--away {
+  grid-column: 1 / 3;
+  justify-content: flex-start;
+  margin-left: calc(-1 * var(--inhead-bleed));
+  padding-left: calc(var(--inhead-bleed) + var(--space-4));
+  border-right: var(--bw-heavy) solid var(--text-on-ink-cream);
+}
+.inhead__half--home {
+  grid-column: 4 / 6;
+  justify-content: flex-end;
+  margin-right: calc(-1 * var(--inhead-bleed));
+  padding-right: calc(var(--inhead-bleed) + var(--space-4));
+  border-left: var(--bw-heavy) solid var(--text-on-ink-cream);
+}
+.inhead__half .teamlogo {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32))
+    skewX(var(--inhead-lean));
+}
+/* The ripple rings and sheen of the lineup band, under the mark. */
+.inhead__half::before,
+.inhead__row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
+  mask-image: linear-gradient(100deg, var(--ripple-mask) 0%, transparent 50%, var(--ripple-mask) 100%);
+}
+.inhead__half::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%);
+}
+.inhead__half--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+/* The club at bat wears the marker underline on its half, as it does on the console band. */
+.inhead__half.is-atbat {
+  box-shadow: inset 0 -5px 0 var(--marker); /* raw-value-exempt: underline thickness */
+}
+
+/* The runs: cream with an ink outline, so they read on a light tint and a dark one alike. */
+.inhead__runs {
+  position: relative;
+  z-index: 1;
+  grid-row: 1;
+  align-self: center;
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-xl);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  -webkit-text-stroke: 5px var(--ink-0); /* raw-value-exempt: outline width scales with the digit */
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 rgba(15, 24, 34, 0.4); /* raw-value-exempt: ink drop under the digit */
+}
+.inhead__runs--away {
+  grid-column: 2;
+  justify-self: end;
+  padding-right: var(--space-2);
+}
+.inhead__runs--home {
+  grid-column: 4;
+  justify-self: start;
+  padding-left: var(--space-2);
+}
+
+/* The plate: inning on top, the bases, then the outs. */
+/* layout-exempt: inning, bases and outs stacked in one centred cell */
+.inhead__center {
+  position: relative;
+  z-index: 1;
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1h);
+  padding: var(--space-2) 0;
+}
+/* layout-exempt: the arrow beside the inning number */
+.inhead__inning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.inhead__num {
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-md);
+  line-height: var(--lh-solid);
+}
+/* Only the arrow for the half in play, in marker yellow. */
+.inhead__tri {
+  width: 0;
+  height: 0;
+  border-inline: var(--space-2) solid transparent;
+}
+.inhead__tri--up {
+  border-bottom: var(--space-2h) solid var(--marker);
+}
+.inhead__tri--down {
+  border-top: var(--space-2h) solid var(--marker);
+}
+.inhead .gamehud__diamond rect {
+  stroke: var(--text-on-ink-dim);
+}
+.inhead .gamehud__diamond rect[fill='transparent'] {
+  fill: var(--text-on-ink-soft);
+}
+.inhead .gamehud__diamond rect:not([fill='transparent']) {
+  fill: var(--marker);
+  stroke: var(--marker-deep);
+}
+/* layout-exempt: two out dots in a row */
+.inhead__outs {
+  display: flex;
+  gap: var(--space-2);
+}
+.inhead__outdot {
+  width: var(--space-3);
+  height: var(--space-3);
+  border: var(--bw-heavy) solid var(--text-on-ink-cream);
+  border-radius: var(--radius-pill);
+}
+.inhead__outdot.is-out {
+  background: var(--text-on-ink-cream);
+}
+
+/* The two bars under the strip: the pitcher over the batter, names left, lines right. */
+.inhead__bars {
+  border-top: var(--bw-heavy) solid var(--ink-0);
+}
+/* layout-exempt: a name at the left and its line at the right */
+.inhead__row {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1h) var(--space-3);
+}
+.inhead__row--pitcher {
+  background: var(--ink-2);
+}
+.inhead__row--batter {
+  background: var(--ink-1);
+  border-top: var(--bw-heavy) solid var(--ink-0);
+}
+.inhead__who,
+.inhead__val {
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-emphasis);
+}
+.inhead__row--pitcher .inhead__who,
+.inhead__row--pitcher .inhead__val {
+  font-size: var(--fs-title-sm);
+}
+.inhead__lbl {
+  margin-right: var(--space-1);
+}
+/* The half just ended: the bars keep the last batter and pitcher, dimmed. */
+.inhead--over .inhead__who,
+.inhead--over .inhead__val {
+  color: var(--text-on-ink-dim);
+}
+
+/* From the wide step the bars leave the foot of the band and stack as a column at its right
+   end, a quarter of the width, so the whole header is one row: the pitcher over the batter,
+   each name over its line. The strip takes the rest. The halves are far wider than a mark
+   there, so it takes more room at the edge. */
+@media (min-width: 740px) {
+  /* layout-exempt: the strip and the bars column, a fixed 3:1 split of one row */
+  .inhead {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  }
+  /* layout-exempt: the pitcher stacked over the batter, one column */
+  .inhead__bars {
+    display: flex;
+    flex-direction: column;
+    border-top: 0;
+    border-left: var(--bw-heavy) solid var(--ink-0);
+  }
+  /* layout-exempt: a name stacked over its line */
+  .inhead__row {
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+  .inhead__row--batter {
+    border-top: var(--bw-heavy) solid var(--ink-0);
+  }
+  .inhead__who,
+  .inhead__row--pitcher .inhead__who {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: var(--fs-title-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .inhead__val,
+  .inhead__row--pitcher .inhead__val {
+    font-size: var(--fs-ui);
+  }
+  .inhead__half--away {
+    padding-left: calc(var(--inhead-bleed) + var(--space-10) + var(--space-3));
+  }
+  .inhead__half--home {
+    padding-right: calc(var(--inhead-bleed) + var(--space-10) + var(--space-3));
+  }
+  /* The mark grows with `scale`, a property of its own, so it leaves the tile's own
+     transform (the counter-lean, the club's curated scale) alone. */
+  .inhead__half .teamlogo {
+    scale: 1.7;
+  }
+  .inhead__runs--away {
+    padding-right: var(--space-6);
+  }
+  .inhead__runs--home {
+    padding-left: var(--space-6);
+  }
+}
