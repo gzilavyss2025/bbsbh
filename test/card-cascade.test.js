@@ -795,8 +795,10 @@ const C4 = [
     ns: 'roster',
   },
   // The Card only clips: the Table inside it is the scroller (#1132, slice T3),
-  // so the Card's own overflow-x rule is gone (`gone`).
-  { css: '20-charts.css', sel: '.rolling__scroll', jsx: ['components/gamehud/RollingLine.jsx'], ns: 'rolling__scroll', gone: true },
+  // so the Card's own overflow-x rule is gone. The running line wears the
+  // stamped frame (the player-page look); its namespace rule keeps layout only
+  // (a fit-width card from 740px), never a second frame.
+  { css: '20-charts.css', sel: '.rolling__scroll', jsx: ['components/gamehud/RollingLine.jsx'], ns: 'rolling__scroll', frame: 'stamped' },
   { css: 'charts/winprob.css', sel: '.winprob', jsx: ['components/charts/WinProbChart.jsx'], ns: 'winprob' },
   { css: '20-charts.css', sel: '.marginnotes', jsx: ['components/inning/MarginNotes.jsx'], ns: 'marginnotes' },
   // ADR-0009: the table is gated by revealedThrough in the caller, not here.
@@ -819,7 +821,7 @@ test('C4: no innings-view or HUD block draws a second frame over its Card', () =
 })
 
 test('C4: every innings-view and HUD block renders on Card, a sheet with a flush body', () => {
-  for (const { jsx, ns, as } of C4) {
+  for (const { jsx, ns, as, frame } of C4) {
     for (const rel of jsx) {
       const code = src(rel)
       assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
@@ -827,7 +829,8 @@ test('C4: every innings-view and HUD block renders on Card, a sheet with a flush
       assert.ok(tags.length > 0, `${rel}: .${ns} renders on a Card`)
       for (const attrs of tags) {
         assert.match(attrs, /body="flush"/, `${rel}: .${ns}'s Card keeps the block's own inset`)
-        assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
+        if (frame) assert.match(attrs, new RegExp(`frame="${frame}"`), `${rel}: .${ns} is a ${frame} card`)
+        else assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
         if (as) assert.match(attrs, new RegExp(`as="${as}"`), `${rel}: .${ns} is a Card ${as}`)
         assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its band head as its first child, as H1b left it`)
       }
@@ -865,7 +868,7 @@ test('C4: each block keeps its own margin and inset', () => {
 test('C4: the running line is still a horizontal scroller', () => {
   assert.match(
     src('components/gamehud/RollingLine.jsx'),
-    /<Card as="div" body="flush" className="rolling__scroll">\s*<Table\b[^>]*\bclassName="rolling__grid"/,
+    /<Card as="div" frame="stamped" body="flush" stampIn=\{playStamp\} className="rolling__scroll" ref=\{cardRef\}>\s*<Table\b[^>]*\bclassName="rolling__grid"/,
     'the grid sits on a Table, straight inside the Card',
   )
   const body = ruleBody(read('system/table.css'), '.table')
