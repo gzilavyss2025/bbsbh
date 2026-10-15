@@ -107,12 +107,21 @@ test('selectDueUpNext previews the other side\'s next half, continuing case', ()
 import { readFileSync } from 'node:fs'
 
 test('DueUpNextCard: no SealBox, and only revealedThrough-bounded reads of the feed', () => {
-  const src = readFileSync(new URL('../src/components/playbyplay/DueUpNextCard.jsx', import.meta.url), 'utf8')
+  const src = readFileSync(new URL('../src/components/playbyplay/dueup/DueUpNextCard.jsx', import.meta.url), 'utf8')
   assert.doesNotMatch(src, /import .*SealBox|<SealBox/)
   // The two reads, each bounded by the reveal mark.
   assert.match(src, /selectDueUpNext\(feed, inning, half, revealedThrough\)/)
   assert.match(src, /batterLineText\(feed, due\.battingSide, b\.id, revealedThrough\)/)
   // No other api module: nothing reveal-only is imported but the capped line.
-  const apiImports = [...src.matchAll(/from '\.\.\/\.\.\/api\/([^']+)'/g)].map((m) => m[1])
+  const apiImports = [...src.matchAll(/from '\.\.\/\.\.\/\.\.\/api\/([^']+)'/g)].map((m) => m[1])
+  assert.deepEqual(apiImports.sort(), ['boxscore/batterLine.js', 'dueup.js'])
+})
+
+test('UpNextBatters: no SealBox, and only revealedThrough-bounded reads of the feed', () => {
+  const src = readFileSync(new URL('../src/components/playbyplay/dueup/UpNextBatters.jsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(src, /import .*SealBox|<SealBox/)
+  assert.match(src, /selectDueUpNow\(feed, inning, half, revealedThrough\)/)
+  assert.match(src, /batterLineText\(feed, due\.battingSide, b\.id, revealedThrough\)/)
+  const apiImports = [...src.matchAll(/from '\.\.\/\.\.\/\.\.\/api\/([^']+)'/g)].map((m) => m[1])
   assert.deepEqual(apiImports.sort(), ['boxscore/batterLine.js', 'dueup.js'])
 })

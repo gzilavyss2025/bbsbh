@@ -180,7 +180,8 @@
       "why": "The one line a due-up card prints under a batter: H-AB over the REVEALED halves, else his average entering the game. A thin wrapper over computeBatterLine and preGameAvg, so the cutoff is `revealedThrough` itself (ADR-0009) and nothing here reads past it. Split out of boxscore.js to keep it under its size budget.",
       "importers": [
         "components/gamehud/DueUpConsole.jsx",
-        "components/playbyplay/DueUpNextCard.jsx"
+        "components/playbyplay/dueup/DueUpNextCard.jsx",
+        "components/playbyplay/dueup/UpNextBatters.jsx"
       ]
     },
     "boxscore/gameNotes.js": {
