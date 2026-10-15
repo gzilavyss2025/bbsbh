@@ -64,7 +64,7 @@ import { resolve, join } from 'node:path'
 // N9 of the Notice collapse (#1132) measured 120 and left it: no Notice rule used --fs-caption.
 // 120 -> 119: .gamestory__note went with the Coverage label head (#1346, H2c).
 // 119 -> 115: the old player tabs' cards went with the swap (#1898).
-const BUDGET = 115
+const BUDGET = 113
 
 const stylesDir = resolve('src/styles')
 const sheets = []

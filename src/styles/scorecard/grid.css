@@ -342,13 +342,6 @@
   letter-spacing: var(--ls-num);
   color: var(--text-body);
 }
-.sc-sheet__ptlLabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 /* THE TOTALS PLATE — the kraft bar the #22 prints over its totals columns,
    and the four sums beneath it. One cell spanning AB/H/R/RBI (see
    ScorecardSheet): the bar is the heading, the figures are the reading.
