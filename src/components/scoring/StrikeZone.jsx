@@ -3,6 +3,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { EDGE, H, W, sx, sy } from '../../lib/zone/zoneGeometry.js'
+import { groundBoxes } from '../../lib/zone/ground.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { batterFigureUrls } from '../../api/uniforms.js'
 import { BattingUniformContext } from '../logo/uniformContexts.js'
@@ -134,6 +135,9 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
 // One pitch's mark on the plot: the family's shape in the pitch's colour, ink-outlined
 // (a ring is hollow), its number inside in plain ink. A ball in play gets a second, outer ring so the ball put in play
 // reads at a glance; every other ending is in the list beside the diagram.
+// A triangle's weight is low (its base is the wide part), so its number sits a little lower.
+const numY = (mark) => (mark.shape === 'triangle' ? 2.8 : 0.3)
+
 function PitchMarkDot({ mark, cat, x, y, no }) {
   return (
     <g transform={`translate(${x} ${y})`}>
@@ -143,7 +147,7 @@ function PitchMarkDot({ mark, cat, x, y, no }) {
         d={glyphD(mark.shape, 8.5)}
         style={{ '--pitch': mark.color }}
       />
-      <text className="strikezone__num" y={0.3}>
+      <text className="strikezone__num" y={numY(mark)}>
         {no}
       </text>
     </g>
@@ -206,6 +210,14 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
           <clipPath id={clipId}>
             <rect width={totalW} height={H} />
           </clipPath>
+          {/* The ground, in the replay scene's own field colours: grass, and a flat strip of dirt the plate sits in (not a mound: this view is from behind the pitcher). */}
+          <rect className="strikezone__grass" width={totalW} height={H} />
+          <rect className="strikezone__dirt" x={0} y={py - 32} width={totalW} height={H - (py - 32)} />
+          <g clipPath={`url(#${clipId})`}>
+            {groundBoxes(cx + zoneOffsetX, py - 8, zw).map((pts) => (
+              <polygon key={pts} className="strikezone__chalk" points={pts} />
+            ))}
+          </g>
           {useFigure ? (
             <BatterFigure urls={figureUrls} hand={batSide} zone={{ left: zx + zoneOffsetX, right: zr + zoneOffsetX, top: zyT, h: zh }} clipId={clipId} onError={() => setFailedUrl(figureUrls.jersey)} />
           ) : (
@@ -221,6 +233,9 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
         <line className="strikezone__third" x1={zx + (2 * zw) / 3} y1={zyT} x2={zx + (2 * zw) / 3} y2={zyB} />
         <line className="strikezone__third" x1={zx} y1={zyT + zh / 3} x2={zr} y2={zyT + zh / 3} />
         <line className="strikezone__third" x1={zx} y1={zyT + (2 * zh) / 3} x2={zr} y2={zyT + (2 * zh) / 3} />
+        {[zx, zr].map((x) => (
+          <line key={x} className="strikezone__drop" x1={x} y1={zyB} x2={x} y2={py - 8} />
+        ))}
         <polygon
           className="strikezone__plate"
           points={`${cx - half},${py - 8} ${cx + half},${py - 8} ${cx + half},${py - 2} ${cx},${py + 6} ${cx - half},${py - 2}`}
@@ -268,7 +283,7 @@ function ListMark({ p }) {
         d={glyphD(mark.shape, 8.5)}
         style={{ '--pitch': mark.color }}
       />
-      <text className="strikezone__num" y={0.3}>{p.no}</text>
+      <text className="strikezone__num" y={numY(mark)}>{p.no}</text>
     </svg>
   )
 }
