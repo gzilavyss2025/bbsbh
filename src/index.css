@@ -75,6 +75,7 @@
 @import './styles/06-loader-and-cards.css';
 @import './styles/06a-gamecard-parkart.css';
 @import './styles/06b-offday-cards.css';
+@import './styles/gamecard/versus.css';
 /* The STAMPED PARTS — the stamped card's name tab and count tag, the stat
    tile and the fact strip (#1882). After 06, because card-cascade.test.js pins
    what sits between card.css and 06. Their selectors are new, and the strip

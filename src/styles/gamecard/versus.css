@@ -1,0 +1,125 @@
+/* ---------------------------------------------------------------------------
+   THE VERSUS HOVER. A slate card at rest is two square tiles with an '@'
+   between them. Rest the pointer on it (or press it, or tab to it) and the two
+   tiles grow into slanted slabs that meet at a slash: the broadcast
+   "away / home" split card. The logos grow with them.
+
+   One idea: both slabs lean the SAME way, so their facing edges stay parallel
+   and the gap between them is a constant-width channel. The slash is a bar
+   that fills that channel. Nothing is duplicated and nothing is fetched: the
+   real tiles move, and the logo inside counter-leans so the mark stands
+   upright while the slab leans around it.
+
+   The row keeps its height. Each tile grows sideways, out to the card's edge on
+   its outer side, with its height pinned (06-loader-and-cards.css), so the
+   names and the meta row below never move.
+
+   Off under reduced motion, and off on a touch device unless the card is pressed
+   (a tap is navigation; the press is the feedback). Pure paint: no state, no
+   data, no gate.
+   --------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .gamecard__logobox {
+    transition:
+      width var(--dur-med) var(--ease-stamp),
+      max-width var(--dur-med) var(--ease-stamp),
+      translate var(--dur-med) var(--ease-stamp),
+      transform var(--dur-med) var(--ease-stamp);
+  }
+  .gamecard__logobox .teamlogo {
+    transition: transform var(--dur-med) var(--ease-stamp);
+  }
+  .gamecard__atmark-ghost,
+  .gamecard__atmark-ink {
+    transition: opacity var(--dur-fast) var(--ease-standard);
+  }
+}
+
+/* The slash. It sits in the first grid row, spanning both columns, centred, as
+   tall as the row: the same row the tiles grow in. Hidden until the versus state. */
+.gamecard__slash {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  justify-self: center;
+  align-self: stretch;
+  position: relative;
+  z-index: 2;
+  width: 4px;
+  background: var(--border-stamped);
+  outline: 1px solid var(--text-on-ink-cream);
+  pointer-events: none;
+  opacity: 0;
+  transform: skewX(-10deg) scaleY(0);
+}
+
+/* THE VERSUS STATE. Two triggers share one set of rules: a press, or the
+   keyboard on the open button, on any device; and a fine pointer resting on the
+   card. The rules are written twice only because a media query cannot sit
+   inside a selector list. */
+@media (prefers-reduced-motion: no-preference) {
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) .gamecard__logobox,
+  .gamecard:hover .gamecard__logobox {
+    /* Out to the card's edge on the outer side, the seam where it was on the
+       inner side: 28px is the card's padding plus the slant's lean, and the
+       tile re-centres by half of it. */
+    width: calc(100% + var(--space-4) + var(--space-3));
+    max-width: calc(100% + var(--space-4) + var(--space-3));
+  }
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) .gamecard__logobox--away,
+  .gamecard:hover .gamecard__logobox--away {
+    translate: calc(-0.5 * (var(--space-4) + var(--space-3)));
+  }
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) .gamecard__logobox--home,
+  .gamecard:hover .gamecard__logobox--home {
+    translate: calc(0.5 * (var(--space-4) + var(--space-3)));
+  }
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) .gamecard__logobox--away,
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) .gamecard__logobox--home,
+  .gamecard:hover .gamecard__logobox--away,
+  .gamecard:hover .gamecard__logobox--home {
+    transform: skewX(-10deg);
+  }
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) .gamecard__logobox .teamlogo,
+  .gamecard:hover .gamecard__logobox .teamlogo {
+    transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32)) skewX(10deg);
+    scale: 1.25;
+  }
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) .gamecard__slash,
+  .gamecard:hover .gamecard__slash {
+    opacity: 1;
+    transform: skewX(-10deg) scaleY(1);
+    transition:
+      transform var(--dur-med) var(--ease-stamp) 60ms,
+      opacity var(--dur-fast) var(--ease-standard) 60ms;
+  }
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) :is(.gamecard__atmark-ghost, .gamecard__atmark-ink),
+  .gamecard:hover :is(.gamecard__atmark-ghost, .gamecard__atmark-ink) {
+    opacity: 0;
+  }
+}
+
+/* A touch device has no resting pointer: a sticky :hover after a tap would leave
+   the card stuck open, so :hover only counts on a fine pointer. */
+@media (hover: none), (pointer: coarse) {
+  .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__logobox {
+    width: 100%;
+    max-width: 130px;
+  }
+  .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__logobox--away,
+  .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__logobox--home {
+    translate: none;
+  }
+  .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__logobox--away,
+  .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__logobox--home {
+    transform: none;
+  }
+  .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__logobox .teamlogo {
+    transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32)) skewX(0deg);
+    scale: 1;
+  }
+  .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__slash {
+    opacity: 0;
+    transform: skewX(-10deg) scaleY(0);
+  }
+}

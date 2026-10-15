@@ -90,12 +90,20 @@
   inset: -5%;
   /* Named only once GameCard has armed the card (first on screen) — see the
      comment there. `none` is the un-armed value, so nothing is requested. */
-  background-image: var(--park-art, none);
-  background-size: cover;
+  /* The photo, under two sets of contour waves (arcs from the bottom-left and
+     the top-right, like a topographic map) and a fine halftone dot screen. All
+     three are ink at a low alpha, so they print into the grayscale photo and the
+     club-colour wash tints them with it. */
+  background-image:
+    repeating-radial-gradient(ellipse 140% 110% at 8% 125%, transparent 0 15px, color-mix(in srgb, var(--ink-0) 46%, transparent) 15px 17px),
+    repeating-radial-gradient(ellipse 120% 100% at 100% -20%, transparent 0 19px, color-mix(in srgb, var(--ink-0) 34%, transparent) 19px 21px),
+    radial-gradient(circle, color-mix(in srgb, var(--ink-0) 42%, transparent) 1px, transparent 1.2px),
+    var(--park-art, none);
+  background-size: auto, auto, 5px 5px, cover;
   /* The focal point the owner picked on the Ballpark card's photo, in the same
      "50% 20%" form object-position takes there — one crop, both surfaces. */
-  background-position: var(--park-focus, 50% 50%);
-  background-repeat: no-repeat;
+  background-position: 0 0, 0 0, 0 0, var(--park-focus, 50% 50%);
+  background-repeat: repeat, repeat, repeat, no-repeat;
   /* Grayscale because the card's colour belongs to the two clubs. A photograph
      in full colour behind their marks competes with the thing it is backing. */
   filter: grayscale(1);
