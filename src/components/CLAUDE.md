@@ -32,7 +32,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `charts/` | `WinProbChart`, `HitChart`, `BallFlight`, `TargetCommand` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
 | `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `BackBtn` | Global site frame — header/footer/menu/search, not any one screen. Rules: `chrome/CLAUDE.md` |
 | `game/` | `GameCard`, `GameFinder`, `PastGameFlipCard`, `ContinueScoring`, `BoxScoreSkeleton` | The slate/game-selection layer — a game before you're inside its innings |
-| `gamehud/` | `RollingLine`, `Scorebug`, `ConsoleBand`, `HalfTally`, `BetweenInnings` | Persistent live-game heads-up widgets shown while scoring |
+| `gamehud/` | `RollingLine`, `HeaderBug`, `ConsoleBand`, `HalfTally`, `BetweenInnings` | Persistent live-game heads-up widgets shown while scoring |
 | `history/` | `BornNearPark`, `PeopleList` | History about people (ADR-0100): the preview's "Born near the park" line. Open surface, no SealBox |
 | `highlights/` | `HighlightClipCard` | Purely presentational video-clip cards — no fetching, no game-shape knowledge; the caller precomputes the caption and owns the `HighlightSheet` it opens |
 | `inning/` | `HalfInning`, `PitchersSection`, `RosterPanel`, `MarginNotes`, and `focus/` | The innings-viewer shell around the at-bat feed — one layout for every half (ADR-0043's unify amendment), built by `focus/` |

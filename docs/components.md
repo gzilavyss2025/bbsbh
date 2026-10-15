@@ -20,7 +20,7 @@ The OVR bars (`docs/ovr-rating.md`). `OvrBars` draws the attribute rows in the p
 
 ## `gamehud/`
 
-`ConsoleBand` is focus mode's whole top row (ADR-0043) — the placed scorebug plus exactly one companion: `DueUpConsole` while the half is being scored, or once it is over, `BetweenInnings` — one card that opens on `HalfTally`'s grid and cycles on tap through up to 5 score-free facts (`api/between-innings.js`) before returning to the grid
+`ConsoleBand` is focus mode's console row (ADR-0043) — exactly one card: `DueUpConsole` while the half is being scored, or once it is over, `BetweenInnings` — one card that opens on `HalfTally`'s grid and cycles on tap through up to 5 score-free facts (`api/between-innings.js`) before returning to the grid
 
 ## `inning/`
 

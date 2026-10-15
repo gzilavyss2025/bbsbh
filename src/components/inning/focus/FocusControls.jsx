@@ -229,7 +229,7 @@ export function useFocusMode(curIdx, currentSealed, halfLive) {
 // reference column (a chip row and sheet on a phone), rather than a button that
 // also switched the feed back to the stacked row layout.
 //
-// Purely presentational, the same discipline RollingLine/Scorebug keep: every
+// Purely presentational, the same discipline RollingLine/HeaderBug keep: every
 // value arrives already resolved and already reveal-gated (see PlayByPlay's
 // note on `items`). Takes the aria-disabled mid-turn guard every other
 // control on this page uses — paging resizes .turnscene, which

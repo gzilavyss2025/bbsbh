@@ -17,10 +17,10 @@ import { TALLY_STAGGER_MS } from '../inning/focus/beats.js'
 // of those stay in Summary, one tap away.
 //
 // It also gave the console row something real to hold once the half is over.
-// `.gamehud--console:only-child` used to stretch the scorebug across the whole
-// row whenever nothing sat beside it, which at 1280 drew a ~930px navy slab
+// The console band's scorebug (`.gamehud--console:only-child`) used to stretch across the
+// whole row whenever nothing sat beside it, which at 1280 drew a ~930px navy slab
 // holding two 24px club marks — in the state the reader lands in after EVERY
-// half. That rule is retired; this card spends the width instead.
+// half. The scorebug has since become the page's masthead; this card spends the width.
 //
 // SPOILER FOOTING. `revealInning` and `revealDerived` are the two original
 // reveal-only modules (ADR-0001): callable only from inside a SealBox's reveal

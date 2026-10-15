@@ -12,7 +12,6 @@ export function InningsHeader({ started, live, feed, unlocked, revealedThrough, 
   }
   return (
     <ScorebugMount
-      asHeader
       season={date}
       started={started}
       live={live}

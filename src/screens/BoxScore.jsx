@@ -911,7 +911,7 @@ function LineTotals({ away, home }) {
 //
 // The logo sits on its jersey-tinted tile (TeamTreatmentMark, `treatments` ==
 // `winProbTreatment` from BoxScoreBody) — the same shared tile the scorebug
-// HUD (Scorebug.jsx), the slate card, and the in-game masthead all wear,
+// HUD (HeaderBug.jsx), the slate card, and the in-game masthead all wear,
 // rather than a bare mark floating with no fill of its own.
 function Scoreboard({ away, home, innings, onSection, treatments, officialDate }) {
   const rows = [

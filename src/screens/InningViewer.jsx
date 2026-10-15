@@ -309,7 +309,7 @@ export function InningViewer({
     setRunsInProgress(null)
   }
 
-  // The persistent scorebug HUD's live snapshot (src/components/Scorebug.jsx):
+  // The persistent scorebug HUD's live snapshot (components/gamehud/HeaderBug.jsx):
   // batter/pitcher/bases/outs for the half on screen, reported up from
   // HalfInning (see its own onLiveState doc — the entering-fallback baseline
   // before any of a half is revealed, PlayByPlay's own cap-respecting

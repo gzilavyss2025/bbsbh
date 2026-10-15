@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------------
-   THE RESULT CARD (ADR-0112): a finished game's result, drawn from the focus-mode
-   scorebug (styles/focus/scorebug.css) and the slate's game card. The same
+   THE RESULT CARD (ADR-0112): a finished game's result, drawn from the innings
+   scorebug (styles/gameview/inning-head.css) and the slate's game card. The same
    parts, the same order: a club panel on each side with its mark and the big
    outlined score, a dark centre with the status, and the two name bars below
    (the pitcher and batter bars of the scorebug become the winning pitcher and

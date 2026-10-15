@@ -63,28 +63,15 @@
   --switch-w: 51px;
   --switch-h: 31px;
 
-  /* Focus mode's console masthead — the anchored scorebug band
-     (24-floating-nav-and-hud.css's `.gamehud--console`, ADR-0043). The band's
-     own resting height, as a number two other rules need to agree with it on:
-     the `min-height` that stops it collapsing between halves (when nobody is
-     up, its batter/pitcher rows unmount and it would otherwise shrink and jerk
-     the hero card up the page), and the fixed height of the due-up cards
-     parked beside it. Held here rather than in the partial because it is a
-     frame dimension the grid reasons about, same footing as --app-width.
+  /* Focus mode's console row (ADR-0043). The height of the due-up card's photo,
+     which used to match the scorebug band parked beside it. The scorebug is the page's
+     masthead now (components/gamehud/HeaderBug.jsx), so no band sets this number:
+     it is a frame dimension the grid reasons about, held here rather than in the
+     partial, same footing as --app-width. It was the band's measured height at
+     390px and 834px (top of the 1st with a batter and pitcher up), and it keeps
+     that value, so the card did not change size when the band left the row.
 
-     MEASURE IT, DON'T GUESS IT. These are the band's rendered heights at 390px
-     and 834px (dev tools, top of the 1st with a batter and pitcher up), not
-     targets — everything keyed to them lines up only while they are true. They
-     were 152/118 through the focus-mode rebuild while the band actually stood
-     at 167/130, which is why the due-up cards sat a visible step short of the
-     band they were meant to match. The phone number went 167 -> 126 when the
-     band's phone-only scale-up came off (focus/console.css) — a floor left above
-     the real height is not a floor, it is padding nothing can see.
-
-     One value for every width: the broadcast skin (focus/scorebug.css) fixes
-     the band's strip at 100px under two fixed-size name bars, so the band
-     measured 183px at 390, 834 and 1100. Re-measure it if a bar's type role or
-     the strip's min-height changes. */
+     One value for every width. Change it only to resize the due-up card. */
   --console-hud-h: 183px;
 
   /* The slate's team-logo nav banner (GameSelect's TeamFilterStrip) — the
