@@ -125,6 +125,11 @@
 .factgrid--strip .fact {
   padding: var(--space-2) var(--space-3);
 }
+/* The last narrow fact spans what is left of its row (--fill3 on a phone, --fill6 from the wide
+   step, set by the caller), so the rule colour never shows as an empty cell. */
+.factgrid--strip .fact--fill {
+  grid-column: span var(--fill3, 1);
+}
 
 @media (min-width: 740px) {
   .stattile {
@@ -138,5 +143,8 @@
   }
   .factgrid--strip .fact {
     padding: var(--space-2h) var(--space-3h);
+  }
+  .factgrid--strip .fact--fill {
+    grid-column: span var(--fill6, 1);
   }
 }

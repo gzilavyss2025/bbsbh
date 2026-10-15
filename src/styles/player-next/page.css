@@ -35,6 +35,11 @@
   position: relative;
   isolation: isolate;
 }
+/* The row keeps one height for the whole time a photo can still load, so a late photo moves nothing.
+   It is taller than the text, so the photo shows more than head and shoulders. */
+.pnext__id--wash {
+  min-height: 15rem;
+}
 .pnext__action {
   position: absolute;
   top: 0;
@@ -60,9 +65,7 @@
 /* Text can reach the photo's soft edge: a paper halo keeps it readable. */
 .pnext__id--photo .pnext__role,
 .pnext__id--photo .pnext__name,
-.pnext__id--photo .pnext__club,
-.pnext__id--photo .pnext-ovr__nick,
-.pnext__id--photo .pnext__attr {
+.pnext__id--photo .pnext__club {
   text-shadow:
     0 0 6px var(--surface-card),
     0 0 12px var(--surface-card);

@@ -28,9 +28,9 @@ export function roleWord(role) {
   return role === 'SP' ? 'starter' : role === 'CL' ? 'closer' : 'reliever'
 }
 
-export function Fact({ label, value, mono = false, wide = false }) {
+export function Fact({ label, value, mono = false, wide = false, className = '', style }) {
   return (
-    <div className={`fact${wide ? ' fact--wide' : ''}`}>
+    <div className={`fact${wide ? ' fact--wide' : ''}${className ? ` ${className}` : ''}`} style={style}>
       <div className="fact__label">{label}</div>
       <div className={`fact__value${value === DASH ? ' fact__na' : ''}`}>
         {mono ? <span className="mono">{value}</span> : value}
