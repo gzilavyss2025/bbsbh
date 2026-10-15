@@ -1,6 +1,5 @@
 import {
   fetchTeam,
-  fetchTeamRoster,
   fetchAffiliates,
   fetchComplexAffiliates,
   fetchRosterIdsForTeams,
@@ -15,6 +14,7 @@ import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { SPORT_LABEL } from '../../../lib/teams.js'
 import { rate3 as sharedRate3 } from '../../../api/person/shared.js'
 import { seasonOf, affiliateCardsFrom, parentOrgIdOf } from './shared.js'
+import { DIRECT } from './sources.js'
 
 const DASH = '—'
 
@@ -119,7 +119,8 @@ export function promotionWatchFrom(prospects, limit = 4) {
 // results, league stats, jersey combos, transactions and odds all belong to
 // other tabs (jersey combos moved to the Numbers tab — see loadNumbers.js).
 
-export async function loadMinors(id, asOf) {
+// `src`: the shared reads (sources.js); a tab passes nothing.
+export async function loadMinors(id, asOf, src = DIRECT) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
@@ -137,7 +138,7 @@ export async function loadMinors(id, asOf) {
   const [roster, affiliates, complexAffiliates, prospectsSnapshot, trendSnapshot, rehabSnapshot] = await Promise.all([
     // Only needed to seed this org's own roster ids below (MLB clubs only —
     // a MiLB affiliate's org roster comes from fetchTeamRosterIds instead).
-    isMilb ? Promise.resolve([]) : fetchTeamRoster(id, season, { sportId }),
+    isMilb ? Promise.resolve([]) : src.fetchTeamRoster(id, season, { sportId }),
     // The affiliate tree is keyed off the ORG id (not `id`), so an
     // affiliate's own page gets the same tree its MLB parent would.
     orgId ? fetchAffiliates(orgId, season) : Promise.resolve([]),
@@ -186,7 +187,11 @@ export async function loadMinors(id, asOf) {
   // fetched whenever this org has a ranked prospect pool at all.
   const statsPoolByPlayer = orgProspectRows.length
     ? new Map(
-        (await loadCombinedPoolForTeams([...affiliateById.values()].map((t) => ({ id: t.id })), season)).map(
+        (
+          await loadCombinedPoolForTeams([...affiliateById.values()].map((t) => ({ id: t.id })), season, {
+            fetchStats: src.fetchTeamSeasonStats,
+          })
+        ).map(
           (p) => [p.id, p],
         ),
       )

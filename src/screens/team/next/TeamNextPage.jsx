@@ -9,7 +9,7 @@ import { loadTeamIdentity } from '../loadTeamIdentity.js'
 import { hiddenTeamSections } from '../data/shared.js'
 import { Band } from './Band.jsx'
 import { BANDS } from './bands.js'
-import { forgetLoads } from './once.js'
+import { forgetLoads, SHARED } from './once.js'
 import '../../../styles/team-next/page.css'
 
 // The one-scroll team page (ADR-0082, #1107, row 3), hidden at /team/{id}/next until the
@@ -25,7 +25,7 @@ const BAR_H = 68
 
 export function TeamNextPage({ id, asOf, sportId, tab }) {
   const teamId = Number(id)
-  const identity = useAsync(() => loadTeamIdentity(teamId, asOf), [teamId, asOf])
+  const identity = useAsync(() => loadTeamIdentity(teamId, asOf, SHARED), [teamId, asOf])
   // Band key -> the jump bar's badge, reported by the band once its data is in.
   const [counts, setCounts] = useState({})
   const onCount = useCallback((key, n) => setCounts((c) => (c[key] === n ? c : { ...c, [key]: n })), [])

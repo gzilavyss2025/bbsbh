@@ -40,7 +40,9 @@ before it is. **A row edits only its own band folder**, never `bands.js`, `Band.
 Module props: `{ team, asOf, sportId, onReady, onCount }`; call `useBandData` for the two
 reports. Absent bands come from `hiddenTeamSections(team)` (`data/shared.js`; the league test
 first). Foundation bands mount the tab bodies as they are (`NumbersBody`, `GamesBody`,
-`RosterBody`, `MinorsBody`, `ContractsBody`); Standing and Ranks share one `loadNumbers`
-through `next/once.js`. `/team/{id}/next/{roster|games|numbers|contracts|minors}` lands on the
-band (`TEAM_TAB_BAND`, `lib/route.js`) and keeps `?d=` and `?s=`. The six tab routes stay until
-the swap (row 7).
+`RosterBody`, `MinorsBody`, `ContractsBody`). Standing and Ranks each have their own loader
+(`loadStanding`, `loadRanks`; the Numbers tab's `loadNumbers` runs both). A loader's last
+argument is `src` (`data/sources.js`): the tabs pass nothing, the page passes `SHARED`
+(`next/once.js`), so standings, schedule, roster and /stats are bought once per page.
+`/team/{id}/next/{roster|games|numbers|contracts|minors}` lands on the band (`TEAM_TAB_BAND`,
+`lib/route.js`) and keeps `?d=` and `?s=`. The six tab routes stay until the swap (row 7).
