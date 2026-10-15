@@ -61,7 +61,7 @@
   "src/styles/12-sealbox.css": {
     "column": 17,
     "wrap": 3,
-    "grid": 9
+    "grid": 7
   },
   "src/styles/13-play-by-play.css": {
     "column": 4

@@ -182,7 +182,6 @@ test('every band in the innings view and the box score wears the band paint', ()
   // carry .sectionhead--band in its markup, or it draws no band at all now.
   const heads = {
     'components/gamehud/StatBox.jsx': ['statbox__title', 'abs__title'],
-    'components/playbyplay/DueUpNextCard.jsx': ['dueup__title'],
     'components/inning/EnteringReference.jsx': ['entering__title', 'lineupteam__name', 'halfdefense__title'],
     'components/inning/RosterPanel.jsx': ['roster__toggle'],
     'components/umpire/UmpireTendenciesFold.jsx': ['roster__toggle'],
@@ -786,7 +785,6 @@ const C4 = [
   // The whole .half rule was the frame, so it is gone (`gone`).
   { css: '11-innings.css', sel: '.half', jsx: ['components/inning/HalfInning.jsx'], ns: 'half', gone: true },
   { css: '12-sealbox.css', sel: '.statbox', jsx: ['components/gamehud/StatBox.jsx'], ns: 'statbox' },
-  { css: '12-sealbox.css', sel: '.dueup', jsx: ['components/playbyplay/DueUpNextCard.jsx'], ns: 'dueup' },
   { css: '12-sealbox.css', sel: '.entering', jsx: ['components/inning/EnteringReference.jsx'], ns: 'entering' },
   { css: '12-sealbox.css', sel: '.halfdefense', jsx: ['components/inning/EnteringReference.jsx'], ns: 'halfdefense' },
   // The focus-mode umpire drawer wears the same drawer (UmpireTendenciesFold).
@@ -845,7 +843,6 @@ test('C4: each block keeps its own margin and inset', () => {
     ['12-sealbox.css', '.entering', 'margin', '12px 14px 0'],
     ['12-sealbox.css', '.halfdefense', 'margin', '12px 14px 0'],
     ['12-sealbox.css', '.statbox', 'min-width', '0'],
-    ['12-sealbox.css', '.dueup', 'padding', 'var(--space-3) var(--space-3h)'],
     ['13-play-by-play.css', '.roster', 'margin-top', '10px'],
     ['charts/winprob.css', '.winprob', 'margin-bottom', 'var(--space-4)'],
     ['charts/winprob.css', '.winprob', 'padding', 'var(--space-3) var(--space-3h) var(--space-2h)'],
@@ -934,7 +931,6 @@ test('C4: focus mode still drops the half sheet around a lone staged notice', ()
 const C4_SEAL = {
   'components/inning/HalfInning.jsx': { reveal: ['boxscore.js', 'highlights.js', 'hitchart.js', 'playbyplay.js'], sealBoxes: 1, revealedThrough: 12 },
   'components/gamehud/StatBox.jsx': { reveal: ['boxscore.js', 'challenges.js', 'derive.js', 'linescore.js', 'umpireFavor.js'], sealBoxes: 2, revealedThrough: 0 },
-  'components/playbyplay/DueUpNextCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 2 },
   'components/inning/EnteringReference.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 9 },
   'components/inning/RosterPanel.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 2 },
   'components/umpire/UmpireTendenciesFold.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },

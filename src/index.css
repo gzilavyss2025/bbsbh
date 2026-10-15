@@ -260,6 +260,7 @@
    specificity. See focus/stage.css's header. */
 @import './styles/focus/stage.css';
 @import './styles/focus/console.css';
+@import './styles/focus/dueup-next.css';
 @import './styles/focus/atbat.css';
 @import './styles/focus/reference.css';
 

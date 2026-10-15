@@ -17,7 +17,7 @@ import { PitcherNotice } from '../playbyplay/PitcherNotice.jsx'
 import { PitcherCard } from '../playbyplay/pitcherCard/PitcherCard.jsx'
 import { BatterNotice } from '../playbyplay/BatterNotice.jsx'
 import { FinalizedLineCard } from '../playbyplay/PitcherHandoffCard.jsx'
-import { UpNextBatters } from '../playbyplay/UpNextBatters.jsx'
+import { UpNextBatters } from '../playbyplay/dueup/UpNextBatters.jsx'
 import { useBecameTrue } from '../../hooks/motion/useBecameTrue.js'
 import { liveAtThirdOut } from '../../lib/scorebug/liveState.js'
 
