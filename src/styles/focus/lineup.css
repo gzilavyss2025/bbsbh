@@ -61,24 +61,39 @@
   outline-offset: var(--bw-heavy);
 }
 
-/* WHO BATS NEXT: one soft tint of the club's own band colours on the row, and
-   the slot number in heading ink. The batting club's next slot, or the fielding
-   club's leadoff man next half. The tint is mostly the band's accent (--bar-accent)
-   with a touch of its fill (--bar-fill), both set on .lineupteam, mixed into the
-   card paper, so it names the club it sits in; an unthemed club gets the house
-   rule colour. A screen reader hears the word. */
-.entering__row--up {
-  /* component-reuse-exempt: a row tint of the club colour, not a band head */
-  background: color-mix(
+/* WHO BATS NEXT: one soft tint of the club's own colours on the row.
+   --surface-club-tint is mostly the band's accent (--bar-accent) with a touch of
+   its fill (--bar-fill), both set on .lineupteam by the club's header theme,
+   mixed into the card paper. An unthemed club (a thin minor-league feed) gets
+   the house --marker. The mixes are small on purpose: even a black accent
+   darkens the paper by about a fifth, so the ink text on the row, set below,
+   holds 4.5:1 for any club. Other club-tinted rows inside a themed card can read
+   the same token. A screen reader hears "Up next" beside the slot number. */
+.lineupteam {
+  /* component-reuse-exempt: defines a row-tint token from the club's band colours; draws no band */
+  --surface-club-tint: color-mix(
     in srgb,
-    var(--bar-accent, var(--border-rule)) 20%,
-    color-mix(in srgb, var(--bar-fill, var(--navy)) 6%, var(--surface-card))
+    var(--bar-accent, var(--marker)) 16%,
+    color-mix(in srgb, var(--bar-fill, var(--navy)) 4%, var(--surface-card))
   );
 }
 
+.entering__row--up {
+  background: var(--surface-club-tint);
+}
+
+/* On the tint, pencil is too faint (graphite is 3.4:1 on the darkest tint): the
+   slot, jersey and struck figures take soft ink instead. */
 .entering__row--up .entering__slot {
   color: var(--text-heading);
   font-weight: var(--w-bold);
+}
+
+.entering__row--up .entering__jersey,
+.entering__row--up .entering__prevpos,
+.entering__row--up .entering__name--out,
+.entering__row--up .entering__entry--out .entering__pos {
+  color: var(--text-muted);
 }
 
 /* A tinted row is darker than the card paper: clay on it can fall under the

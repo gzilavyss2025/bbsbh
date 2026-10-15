@@ -105,9 +105,9 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 // DefenseSection above — it's the reference you copy onto the sheet before
 // scoring.
 //
-// The fielding side (the OTHER team from battingSide) also gets a "due up" /
-// "on deck" / "in the hole" pill on whichever of its own already-listed slots
-// lead off ITS next half — selectDueUpNext (same primitive DueUpNextCard's
+// The fielding side (the OTHER team from battingSide) also gets one highlighted
+// row: whichever of its own already-listed slots leads off ITS next half —
+// selectDueUpNext (same primitive DueUpNextCard's
 // separate stat-row card uses) carries its own spoiler gate, so this needs no
 // gate of its own: it simply returns null until the preview is safe to show
 // (current half fully revealed), same moment DueUpNextCard's own card would
@@ -120,11 +120,6 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 // placement (HalfInning.jsx's .halfentering) had no title at all, so the two
 // layouts disagreed on whether this needed a heading, and neither one named
 // the moment.
-const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
-// One highlight says who bats next: the BATTING club's next slot, or the
-// FIELDING club's leadoff man next half ("Due up"). On deck and In the hole are
-// not marked. The word is for screen readers; the sighted reader sees the tint.
-const STATE_WORDS = { up: 'Up next' }
 
 // TWO PROPS FOR FOCUS MODE'S LINEUPS TAB, both defaulting to the stacked page's
 // existing behaviour — the same shape RosterPanel takes.
@@ -138,10 +133,10 @@ const STATE_WORDS = { up: 'Up next' }
 //    behind a swap. A scorer is scoring ONE half; both clubs' nine slots in a
 //    328px column is a long scroll past the eighteen names to reach the nine
 //    that matter. Worse, the club that ISN'T batting carries the
-//    "← Due up / On deck / In the hole" pills, because selectDueUpNext
-//    correctly describes ITS next half — accurate, and misread on a screen
-//    devoted to the half in progress. Leading with the batting club puts those
-//    pills behind a deliberate tap, where "who leads off their next half" is
+//    due-up highlight, because selectDueUpNext correctly describes ITS next
+//    half — accurate, and misread on a screen devoted to the half in progress.
+//    Leading with the batting club puts that highlight behind a deliberate
+//    tap, where "who leads off their next half" is
 //    the question the reader just asked. Null keeps both clubs stacked, which
 //    is right for the unfocused page, where the section is reference rather
 //    than the surface being worked.
@@ -170,12 +165,10 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
   const away = lineupEntering(feed, 'away', inning, half, revealedThrough)
   const home = lineupEntering(feed, 'home', inning, half, revealedThrough)
   if ((!away || away.length === 0) && (!home || home.length === 0)) return null
-  const dueUpNext = selectDueUpNext(feed, inning, half, revealedThrough, 3)
-  const upNextLabels = (side) => {
-    if (dueUpNext?.battingSide !== side) return null
-    const bySlot = new Map(dueUpNext.batters.map((b, i) => [b.slot, UP_NEXT_LABELS[i]]))
-    return bySlot
-  }
+  // The ONE slot that leads off the fielding club's next half. Asked for one
+  // batter, not the old trio: only the leadoff man is marked now.
+  const dueUpNext = selectDueUpNext(feed, inning, half, revealedThrough, 1)
+  const dueUpSlot = (side) => (dueUpNext?.battingSide === side ? dueUpNext.batters[0]?.slot ?? null : null)
   // On deck for the BATTING club only — leadSide-gated (see header above), so
   // the unfocused stacked page (leadSide null) never computes or shows this.
   const onDeck =
@@ -197,7 +190,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         isMlb={isMlb}
-        upNextLabels={upNextLabels(side)}
+        dueUpSlot={dueUpSlot(side)}
         onDeckSlot={onDeckSlot(side)}
       />
     )
@@ -265,16 +258,13 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
 // numbered list of its nine batting slots. Each row reads name(s) on the left
 // and the standing occupant's jersey number + fielding position right-aligned
 // on a shared column. An empty side (a thin MiLB feed that never posted a
-// lineup) is dropped rather than shown as a bare header. `upNextLabels`, when
-// set, maps the up-to-three slots leading off this team's own next half to
-// their "Due up"/"On deck"/"In the hole" label (see LineupSection above).
-// `onDeckSlot`, when set, is the ONE slot due up next in THIS half for a
-// BATTING club — a different concept from `upNextLabels` (which only ever
-// marks the FIELDING club's own next half), so it gets its own highlighted
-// row and its own "Up next" wording rather than folding into `upNextLabels`'s
-// "On deck", which would read as this half's next batter and the other
-// club's next-half leadoff man sharing one label for two different moments.
-function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, upNextLabels, onDeckSlot = null }) {
+// lineup) is dropped rather than shown as a bare header. `dueUpSlot`, when set,
+// is the ONE slot leading off this team's own next half (see LineupSection
+// above). `onDeckSlot`, when set, is the ONE slot due up next in THIS half for a
+// BATTING club — a different moment from `dueUpSlot` (which only ever marks the
+// FIELDING club's own next half). Both wear the same single highlight, so a row
+// is either "up next" or not; the two never land on one card.
+function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, dueUpSlot = null, onDeckSlot = null }) {
   if (slots.length === 0) return null
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
   return (
@@ -286,15 +276,15 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
       <Stack gap="tight" as="ol" className="entering__list">
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant
-          const state = onDeckSlot === s.slot || upNextLabels?.get(s.slot) === 'Due up' ? 'up' : null
+          const isUpNext = s.slot === onDeckSlot || s.slot === dueUpSlot
           return (
             <li
-              className={`entering__row ${state ? `entering__row--${state}` : ''}`.trim()}
+              className={`entering__row ${isUpNext ? 'entering__row--up' : ''}`.trim()}
               key={s.slot}
             >
               <span className="entering__slot">
                 {s.slot}
-                {state && <span className="sr-only"> ({STATE_WORDS[state]})</span>}
+                {isUpNext && <span className="sr-only"> (Up next)</span>}
               </span>
               {/* One line per occupant, so a substitute's number and position sit
                   beside HIS name, not over the man he replaced. The pills belong
