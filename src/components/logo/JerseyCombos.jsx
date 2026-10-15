@@ -121,26 +121,29 @@ function useDragScroll() {
 // `awayRecord` are the club's own standings splits ({ wins, losses } —
 // data/shared.js's splitRecord), degrading to a games-not-yet-played dash via
 // recordLabel same as an MLB club's unworn jersey.
-export function MilbUniformStrip({ teamId, teamName, homeRecord, awayRecord }) {
+export function MilbUniformStrip({ teamId, teamName, homeRecord, awayRecord, cardProps }) {
   const combos = [
     { side: 'home', name: 'Home', ...(homeRecord ?? { wins: 0, losses: 0 }) },
     { side: 'away', name: 'Away', ...(awayRecord ?? { wins: 0, losses: 0 }) },
   ]
-  return <JerseyCombos combos={combos} teamId={teamId} teamName={teamName} variant="static" />
+  return <JerseyCombos combos={combos} teamId={teamId} teamName={teamName} variant="static" cardProps={cardProps} />
 }
 
-export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
+// `cardProps`: the one-scroll page's stamped frame and name tab (props for Card); without it, the band head.
+export function JerseyCombos({ combos, teamId, teamName, variant = 'record', cardProps }) {
   const { ref, handlers } = useDragScroll()
   if (!combos?.length) return null
   const isMlb = isMlbTeamId(teamId)
   return (
     <Card
       body="flush"
-      head={
-        <SectionHead look="band" club note={variant === 'static' ? 'home and away' : 'record by jersey'}>
-          Logos & jerseys
-        </SectionHead>
-      }
+      {...(cardProps ?? {
+        head: (
+          <SectionHead look="band" club note={variant === 'static' ? 'home and away' : 'record by jersey'}>
+            Logos & jerseys
+          </SectionHead>
+        ),
+      })}
     >
       <div className="jerseydeck" ref={ref} {...handlers}>
         {combos.map((c) => {
