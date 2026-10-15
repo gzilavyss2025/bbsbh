@@ -1,0 +1,117 @@
+/* ==== THE MONEY BAND OF THE ONE-SCROLL TEAM PAGE (#1107, row 6e) ====
+   money/index.jsx imports this file. The Contracts tab's grid, cliff and source line sit on
+   stamped cards; their own sheet frames (70-contracts-grid.css) are flattened from here, CSS
+   only, so the old tab is untouched. Motion hangs off .tnext__money and is off in
+   .tnext__money--still (a return visit) and under reduced motion. */
+
+/* layout-exempt: display: contents hands the band's children to its Stack, like .tnext__square */
+.tnext__money {
+  display: contents;
+}
+.tnext__money :not(.team-score__dot) {
+  border-radius: 0;
+}
+
+/* layout-exempt: a fixed count of tile columns */
+.tnext__tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+/* THE CLIFF CARD: the card names it, so the chart's own head goes; its sheet frame goes too. */
+.tnext__cliff .cliff {
+  margin: 0;
+  border: 0;
+}
+.tnext__cliff .cliff > .sectionhead {
+  display: none;
+}
+.tnext__reading {
+  margin: 0;
+  padding: var(--space-2) var(--space-3h) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-size: var(--fs-small);
+}
+
+/* The cliff's bars grow from the baseline once per page visit, a beat after the card stamps. */
+@keyframes tnext-money-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+.tnext__money:not(.tnext__money--still) .cliff__bar {
+  transform-origin: bottom;
+  animation: tnext-money-grow var(--dur-stamp-in) var(--ease-stamp-in) calc(var(--stagger-step) * 5) backwards;
+}
+
+/* THE GRID CARD: same. On a phone the pinned player column was 168px of 390; it takes less
+   now and the seasons get the rest. Age stays (the footer rows span two columns). */
+.tnext__grid {
+  padding-top: var(--space-4); /* clears the name tab and the count tag that hang over the edge */
+}
+.tnext__grid .ctr__card {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+}
+.tnext__grid .ctr__card > .sectionhead {
+  display: none;
+}
+.tnext__grid .ctr__namehead,
+.tnext__grid .ctr__name {
+  min-width: 0;
+  max-width: 128px;
+}
+.tnext__grid .ctr__playername {
+  overflow: visible; /* a long name wraps to a second line; it is never cut */
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-overflow: clip;
+  line-height: var(--lh-tight);
+}
+.tnext__grid .ctr__terms {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tnext__grid .ctr__age,
+.tnext__grid .ctr__agehead {
+  padding-inline: var(--space-1h);
+}
+.tnext__key {
+  padding: var(--space-1) var(--space-3h) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  background: var(--surface-inset);
+}
+.tnext__key .ctr__key {
+  margin: 0;
+}
+.tnext__money .paysource {
+  margin: 0;
+}
+
+@media (min-width: 740px) {
+  .tnext__tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .tnext__grid .ctr__namehead,
+  .tnext__grid .ctr__name {
+    min-width: 168px;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tnext__money .card--stamp-in,
+  .tnext__money .cliff__bar {
+    animation: none !important;
+  }
+}
+:root[data-motion='reduced'] .tnext__money .card--stamp-in,
+:root[data-motion='reduced'] .tnext__money .cliff__bar,
+.tnext__money--still .card--stamp-in {
+  animation: none !important;
+}
