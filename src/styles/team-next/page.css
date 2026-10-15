@@ -3,9 +3,11 @@
   scroll-margin-top: 68px; /* the sticky jump bar's height, see BAR_H in TeamNextPage.jsx */
 }
 /* Until a band's module has loaded, the slot holds a floor so the bands below stay far
-   from the viewport and load one at a time (Band.jsx). */
+   from the viewport and load one at a time (Band.jsx). A full screen, not less: the next
+   band must start past the screen plus Band.jsx's 300px near margin. At 70svh the Ranks
+   band started inside it on a phone and loaded with Standing (#1107, row 4). */
 .tnext__band--hold {
-  min-height: 70svh;
+  min-height: 100svh;
 }
 
 /* The jump bar stays on screen as the page scrolls, so the mark that follows the reader is

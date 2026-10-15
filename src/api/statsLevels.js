@@ -91,11 +91,13 @@ export async function fetchTeamSeasonStats(teamId, group, season) {
 // leaderboard pool — team, league/level, and org (see leaders.js) — so a
 // traded-away Rengifo or a promoted-out-of-A Fischer still shows up, credited
 // only for his time on the club being viewed.
-export async function loadCombinedPoolForTeams(teams, season, { withHand = false } = {}) {
+// `fetchStats` lets a page that already holds a club's lines share them (the one-scroll
+// team page, screens/team/data/sources.js).
+export async function loadCombinedPoolForTeams(teams, season, { withHand = false, fetchStats = fetchTeamSeasonStats } = {}) {
   if (!teams.length) return []
   const [hit, pit] = await Promise.all([
-    Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'hitting', season))),
-    Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'pitching', season))),
+    Promise.allSettled(teams.map((t) => fetchStats(t.id, 'hitting', season))),
+    Promise.allSettled(teams.map((t) => fetchStats(t.id, 'pitching', season))),
   ])
   const settledFlat = (results) => results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
   const pool = await attachDisplayTeams(combineToPool(settledFlat(hit), settledFlat(pit)))

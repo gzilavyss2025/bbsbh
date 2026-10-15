@@ -1,8 +1,9 @@
 import { fetchTeam } from '../../../api/team.js'
-import { fetchTeamSchedule, fetchAllStarGame } from '../../../api/schedule.js'
+import { fetchAllStarGame } from '../../../api/schedule.js'
 import { allDecidedGames, allStartedGames } from '../../../api/scheduleGames.js'
 import { loadClubTransactionsPage } from '../../../api/transactions/clubFeed.js'
 import { seasonOf, cutoffFor } from './shared.js'
+import { DIRECT } from './sources.js'
 
 // The Games tab's own data — the season schedule, every decided game so far,
 // the All-Star game card, and the first transactions page. Fetch nothing else here:
@@ -13,7 +14,8 @@ import { seasonOf, cutoffFor } from './shared.js'
 // transactions card in phase 1 — both degrade to null/empty rather than
 // fetching.
 
-export async function loadGames(id, asOf) {
+// `src`: the shared reads (sources.js); a tab passes nothing.
+export async function loadGames(id, asOf, src = DIRECT) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
@@ -23,7 +25,7 @@ export async function loadGames(id, asOf) {
   const standingsDate = cutoffFor(asOf)
 
   const [schedule, allStarGame, transactionsPage] = await Promise.all([
-    fetchTeamSchedule(id, season, sportId, standingsDate),
+    src.fetchTeamSchedule(id, season, sportId, standingsDate),
     // MLB only — MiLB clubs play through the break, so no All-Star card
     // belongs in their strip.
     sportId === 1 ? fetchAllStarGame(season) : Promise.resolve(null),

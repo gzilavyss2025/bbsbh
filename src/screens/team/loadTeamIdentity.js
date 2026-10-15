@@ -1,6 +1,7 @@
-import { fetchTeam, fetchStandings } from '../../api/team.js'
+import { fetchTeam } from '../../api/team.js'
 import { fetchManager } from '../../api/game.js'
 import { seasonOf, cutoffFor, teamRecordFor } from './data/shared.js'
+import { DIRECT } from './data/sources.js'
 
 // The team hub's shared header data — everything TeamHubShell draws above the
 // tab bar, and NOTHING else.
@@ -20,7 +21,8 @@ import { seasonOf, cutoffFor, teamRecordFor } from './data/shared.js'
 // standings row yields `record: null` and the record line simply hides, and
 // fetchManager already swallows its own failure and answers null.
 
-export async function loadTeamIdentity(id, asOf) {
+// `src`: the shared reads (data/sources.js); the one-scroll page shares the standings.
+export async function loadTeamIdentity(id, asOf, src = DIRECT) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
@@ -31,7 +33,7 @@ export async function loadTeamIdentity(id, asOf) {
     // whose link carried `?d=`, so a visitor mid-scoring never sees a record
     // that already counts tonight's result (see cutoffFor).
     team.league?.id
-      ? fetchStandings(team.league.id, season, cutoffFor(asOf))
+      ? src.fetchStandings(team.league.id, season, cutoffFor(asOf))
       : Promise.resolve([]),
     fetchManager(id, season),
   ])

@@ -1,0 +1,130 @@
+<!--
+G1 PICKED FRAME: "Standing Picked Frame.dc.html" from Claude Design (Gary picked 1b + 1e).
+Source: the Tally Baseball design system project in claude.ai/design, relayed on 2026-10-15.
+READ THIS AS A SPEC, NOT AS CODE TO COPY:
+- `{{ }}`, <sc-for> and <sc-if> are Claude Design template bindings. Values come from renderVals() at the bottom.
+- The CSS classes (card--stamped, card--named, stattile, factgrid--strip, jumpbar__item, ...) belong to the design
+  system. Map each to the repo part that really exists (src/styles/system/, src/components/ui/); do not assume
+  the class names exist in the repo.
+- The frame uses inline styles and a raw hex (#12284B, the Brewers plate). The repo must use tokens, and the
+  club colour must come from the repo's club-colour source (see ADR-0030), not from a literal.
+- Known sample values: the Now tile copy, the jump-bar counts and every rank except the grade and the record.
+- The division table card is a placeholder: it was not redrawn.
+- Designer's note: the design system says club colour never reaches a card, so here the colour is on the hero's
+  logo plate only. Gary asked for club colour on the hero and card heads. This conflict is open (ledger #1664).
+- Ranks use the design system's wording ("1 of 30" for rates, "3rd" for counts). Gary may prefer "1st of 30".
+- At >= 740px: hero 1.1fr and tiles 2x2 share the top row; the team score card and the division card sit 1fr/1fr.
+-->
+<div id="root" style="padding:var(--space-8) var(--app-gutter) var(--space-12);font-family:var(--font-body);color:var(--text-body)">
+<div style="display:flex;flex-direction:column;gap:var(--space-6)">
+
+  <div style="display:grid;grid-template-columns:{{ topCols }};gap:var(--space-6);align-items:start">
+    <section class="card card--stamped card--named card--stamp-in" aria-labelledby="hero-h">
+      <h2 id="hero-h" class="card__name">{{ c.name }}</h2>
+      <span class="card__count">2026</span>
+      <div class="card__body" style="display:flex;align-items:center;gap:var(--space-4)">
+        <div style="flex:none;width:88px;height:88px;background:{{ c.plate }};border:var(--bw-heavy) solid var(--border-stamped);display:grid;place-items:center"><img src="{{ c.logo }}" alt="{{ c.name }}" style="width:60px;height:60px"></div>
+        <div style="min-width:0">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)">
+            <span style="padding:var(--space-1) var(--space-2);border:var(--bw-heavy) solid var(--border-stamped);background:var(--accent-tint);color:var(--text-heading);font-family:var(--font-display);font-size:var(--fs-label);letter-spacing:var(--ls-wide);line-height:var(--lh-solid)">{{ c.level }}</span>
+            <span style="font-family:var(--font-display);font-size:var(--fs-label);letter-spacing:var(--ls-label);color:var(--text-caption)">{{ c.flag }}</span>
+          </div>
+          <p class="stattile__label" style="margin-top:var(--space-3)">{{ c.leadLabel }}</p>
+          <p style="font-family:var(--font-display);font-size:var(--fs-hero-2xl);line-height:var(--lh-hero);color:var(--text-heading);margin-top:var(--space-1)">{{ c.leadValue }}</p>
+          <p style="font-family:var(--font-display);font-size:var(--fs-title-sm);letter-spacing:var(--ls-caps);color:var(--text-heading);margin-top:var(--space-1)">{{ c.leadCaption }}</p>
+          <p class="rankmark">{{ c.leadRank }}</p>
+        </div>
+      </div>
+      <dl class="factgrid factgrid--strip" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div class="fact"><dt class="fact__label">Manager</dt><dd class="fact__value">{{ c.manager }}</dd></div>
+        <div class="fact"><dt class="fact__label">Ballpark</dt><dd class="fact__value">{{ c.park }}</dd></div>
+        <div class="fact"><dt class="fact__label">League · Div</dt><dd class="fact__value">{{ c.div }}</dd></div>
+      </dl>
+      <div style="display:flex;gap:var(--space-5);align-items:center;min-height:var(--tap-min);padding:0 var(--space-4);border-top:var(--bw-hair) solid var(--border-hairline);font-family:var(--font-display);font-size:var(--fs-ui);letter-spacing:var(--ls-label)">
+        <a href="#">Game notes ></a><a href="#">Notes archive ></a>
+      </div>
+    </section>
+    <div style="display:grid;grid-template-columns:{{ tileCols }};gap:{{ tileGap }}">
+      <sc-for list="{{ c.tiles }}" as="t" hint-placeholder-count="4">
+        <div class="{{ t.cls }}" style="--stamp-delay:{{ t.delay }}"><p class="stattile__label">{{ t.label }}</p><p class="stattile__value">{{ t.value }}</p><p class="stattile__caption">{{ t.caption }}</p></div>
+      </sc-for>
+    </div>
+  </div>
+
+  <nav class="jumpbar" aria-label="Team page" style="position:sticky;top:0;z-index:var(--z-sticky);margin:var(--space-2) {{ barBleed }} 0">
+    <div class="cluster cluster--snug jumpbar__row">
+      <sc-for list="{{ c.bands }}" as="b" hint-placeholder-count="7">
+        <button class="{{ b.cls }}">{{ b.name }}<span class="jumpbar__count">{{ b.n }}</span></button>
+      </sc-for>
+    </div>
+  </nav>
+
+  <div class="sectionhead sectionhead--bleed" style="margin:var(--space-6) calc(-1 * var(--app-gutter)) 0;border-bottom:var(--bw-heavy) solid var(--ink-0);color:var(--text-heading)"><h2 class="sectionhead__title">Standing</h2><span class="sectionhead__note">Regular season</span></div>
+
+  <div style="display:grid;grid-template-columns:{{ lowCols }};gap:var(--space-6);align-items:start">
+    <section class="card card--stamped card--named card--stamp-in" aria-labelledby="ts-h">
+      <h2 id="ts-h" class="card__name">{{ c.scoreName }}</h2>
+      <span class="card__count">{{ c.scoreCount }}</span>
+      <div class="card__body">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-3)">
+          <div>
+            <p class="stattile__label">{{ c.rankLabel }}</p>
+            <p style="font-family:var(--font-display);font-size:var(--fs-score-lg);line-height:var(--lh-tight);color:var(--text-heading);margin-top:var(--space-1)">{{ c.rankValue }}</p>
+          </div>
+          <a href="#" style="font-family:var(--font-display);font-size:var(--fs-ui);letter-spacing:var(--ls-label);min-height:var(--tap-min);display:inline-flex;align-items:center">{{ c.allDoor }}</a>
+        </div>
+        <div style="display:grid;grid-template-columns:{{ c.stripCols }};gap:2px;margin-top:var(--space-3)">
+          <sc-for list="{{ c.strip }}" as="s" hint-placeholder-count="30">
+            <sc-if value="{{ s.on }}"><span style="height:20px;background:var(--marker);border:var(--bw-heavy) solid var(--ink-0)"></span></sc-if>
+            <sc-if value="{{ s.off }}"><span style="height:20px;background:var(--surface-inset);border:var(--bw-hair) solid var(--border-rule)"></span></sc-if>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:var(--space-1);font-family:var(--font-display);font-size:var(--fs-caption);letter-spacing:var(--ls-label);color:var(--text-caption)"><span>1st</span><span>{{ c.last }}</span></div>
+        <sc-if value="{{ c.hasGrade }}">
+          <p style="margin-top:var(--space-3);font-family:var(--font-display);font-size:var(--fs-ui);letter-spacing:var(--ls-caps);color:var(--text-heading)">Grade 9.5 · Making it look easy</p>
+        </sc-if>
+      </div>
+      <div class="table table--bare table--row table--sticky" style="border-top:var(--bw-heavy) solid var(--border-stamped)">
+        <table class="table__grid">
+          <thead><tr><th style="text-align:left;padding-left:var(--space-4)">Part</th><th>Value</th><th style="padding-right:var(--space-4)">{{ c.rankCol }}</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="4">
+              <tr><td style="text-align:left;padding-left:var(--space-4);font-family:var(--font-display);letter-spacing:var(--ls-label)">{{ r.part }}</td><td>{{ r.value }}</td><td style="padding-right:var(--space-4)"><span class="rankmark" style="margin:0">{{ r.rank }}</span></td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <details style="border-top:var(--bw-heavy) solid var(--border-stamped)">
+        <summary style="display:flex;align-items:center;justify-content:space-between;min-height:var(--tap-min);padding:0 var(--space-4);font-family:var(--font-display);font-size:var(--fs-ui);letter-spacing:var(--ls-label);color:var(--text-heading)"><span>{{ c.railsName }}</span><span>+</span></summary>
+        <div style="padding:0 var(--space-4) var(--space-4);font-size:var(--fs-small);color:var(--text-muted)">Folded rails</div>
+      </details>
+    </section>
+    <section class="card card--stamped card--named card--stamp-in" aria-labelledby="dv-h" style="--stamp-delay:55ms">
+      <h2 id="dv-h" class="card__name">{{ c.divName }}</h2>
+      <span class="card__count">{{ c.divCount }}</span>
+      <div class="card__body"><p style="font-size:var(--fs-small);color:var(--text-caption)">Division table (unchanged, not redrawn)</p></div>
+    </section>
+  </div>
+</div>
+</div>
+
+<script type="text/x-dc" data-dc-script>
+// Data shape only (the layout logic is above). Wide = window.innerWidth >= 740.
+// Tiles, in order and tone: Record (card--ink), Run diff (card--tint), Last 10, Now.
+// 390: Record "103-59" / ".636"; Run diff "+214" / "Season"; Last 10 "8-2" / "W5"; Now "G4" / "NLCS 7:08".
+// 1180: captions are longer: ".636 · 1st NL Central", "832 scored · 618 allowed", "Streak W5", "Game 4 · tonight 7:08".
+// Tile classes: `card card--stamped ${tone} stattile${wide ? '' : ' stattile--compact'} card--stamp-in`.
+// Brewers (158): name "Milwaukee Brewers", plate #12284B (club colour, from data), level "MLB",
+//   flag "z · Clinched NL Central", lead "Season grade" 9.5 "Making it look easy" rank "1 of 30",
+//   manager "Pat Murphy", park "American Family Field", div "NL · Central".
+//   bands: Standing 4, Ranks 6, Games 162, Roster 26, Farm 7, Money 2, About 3 (counts are samples).
+//   score card: name "Team score", count "9.5", label "MLB rank", value "1 of 30", door "All 30 >",
+//   30-cell strip (marker cell at rank 1), "1st" ... "30th", line "Grade 9.5 · Making it look easy",
+//   rank column "MLB", rows Run diff +214 "1 of 30" / Win pct .636 "1 of 30" / Runs allowed 618 "2nd" / Runs scored 832 "3rd",
+//   rails "League rails" (folded), division card "NL Central" / "5 clubs".
+// Single-A (249): lead "Division" "2nd" "3.5 games back" "2 of 6"; flag "Season over"; level "A";
+//   score card "Division rank" / "2 of 6" / door "All 6 >" / 6-cell strip / rank column "Div" / rails "Division rails";
+//   Money absent from the jump bar. Name, record and facts are placeholders.
+// Layout: top row cols wide ? '1.1fr 1fr' : '1fr'; tile cols wide ? 'repeat(2,1fr)' : 'repeat(4,1fr)';
+//   tile gap wide ? space-4 : space-2; lower row cols wide ? '1fr 1fr' : '1fr'; jump bar bleeds to the gutter at < 740.
+</script>
