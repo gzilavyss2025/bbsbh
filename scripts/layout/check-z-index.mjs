@@ -25,13 +25,15 @@ import { readFileSync } from 'node:fs'
 import { relative } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { ROOT, walk } from '../lib/walk.mjs'
+import { maskComments } from './mask-comments.mjs'
 
 const MAX_RAW = 3
 const EXEMPT = /z-index-exempt\s*:\s*\S/
 const CSS_RE = /z-index\s*:\s*([^;}]+)/g
 // `zIndex: v` in an object and `el.style.zIndex = v`; `===` and `==` are not writes.
 const JS_RE = /\bzIndex\s*(?::|=(?!=))\s*([^,;}\n]+)/g
-const KEYWORD = /^(?:auto|inherit|initial|unset|revert|revert-layer)$/
+// Keywords, and the empty string, undefined and null that clear an inline style.
+const KEYWORD = /^(?:auto|inherit|initial|unset|revert|revert-layer|undefined|null|)$/
 const TOKEN = /^var\(\s*--z-([a-z]+)\s*\)$/
 const OFFSET = /^calc\(\s*var\(\s*--z-([a-z]+)\s*\)\s*([+-])\s*(\d+)\s*\)$/
 
@@ -40,20 +42,21 @@ const LAYOUT = readFileSync(new URL('../../src/tokens/layout.css', import.meta.u
 const TIERS = Object.fromEntries(
   [...LAYOUT.matchAll(/--z-([a-z]+):\s*(\d+);/g)].map((m) => [m[1], Number(m[2])]),
 )
+if (!Object.keys(TIERS).length) throw new Error('check-z-index: no --z-* tiers found in src/tokens/layout.css')
 const LEVELS = Object.values(TIERS).sort((a, b) => a - b)
-const TOP_SPAN = 100 // above the last tier there is no next tier to cross
 const MAX_OFFSET = 20 // the largest offset the table in layout.css lists
 
 // An offset must stay in its tier's own band: above the tier below it (or MAX_RAW),
 // below the tier above it. calc(var(--z-modal) + 500) would pass the toast tier.
 const band = (base) => {
   const i = LEVELS.indexOf(base)
-  return [LEVELS[i - 1] ?? MAX_RAW, LEVELS[i + 1] ?? base + TOP_SPAN]
+  return [LEVELS[i - 1] ?? MAX_RAW, LEVELS[i + 1] ?? Infinity]
 }
 
 // null when the value is fine, else why it is not.
-function judge(raw) {
-  const v = raw.replace(/!\s*important\s*$/i, '').trim().replace(/^(['"`])(.*)\1$/, '$2').trim()
+const clean = (raw) => raw.replace(/!\s*important\s*$/i, '').trim().replace(/^(['"`])(.*)\1$/, '$2').trim()
+
+function judge(v) {
   if (KEYWORD.test(v)) return null
   if (/^-?\d+$/.test(v)) return Number(v) <= MAX_RAW ? null : 'a raw number'
   const tier = v.match(TOKEN)
@@ -69,82 +72,17 @@ function judge(raw) {
   return 'not a layer token, a banded offset or a number'
 }
 
-// Comments blanked, every newline kept, so a line number still points at the file.
-// A scanner, not a regex: a `/*` or ` // ` inside a string, a template or a regex
-// literal is code, and must not blank what follows it (#1831). Strings stay in the
-// output, because the guard reads values such as 'calc(var(--z-toast) + 5)'.
-const blank = (m) => m.replace(/[^\n]/g, ' ')
-// After one of these a `/` opens a regex; after a name, `)` or `}` it divides.
-const REGEX_AFTER = /^$|[(,=:[!&|?{;+\-*%~^]/
-const REGEX_KEYWORD = /\b(?:return|typeof|case|in|of)\s*$/
-
-function skipString(src, i) {
-  const quote = src[i]
-  let j = i + 1
-  while (j < src.length && src[j] !== quote) {
-    if (src[j] === '\\') j++
-    else if (quote !== '`' && src[j] === '\n') return j
-    j++
-  }
-  return Math.min(j + 1, src.length)
-}
-
-// End of a regex literal that starts at i, or -1 when this is not one.
-function regexEnd(src, i) {
-  let inClass = false
-  for (let j = i + 1; j < src.length && src[j] !== '\n'; j++) {
-    const ch = src[j]
-    if (ch === '\\') j++
-    else if (ch === '[') inClass = true
-    else if (ch === ']') inClass = false
-    else if (ch === '/' && !inClass) return j + 1
-  }
-  return -1
-}
-
-const mask = (src, kind) => {
-  const js = kind !== 'css'
-  let out = ''
-  let prev = ''
-  let i = 0
-  while (i < src.length) {
-    const c = src[i]
-    const d = src[i + 1]
-    let end = -1
-    if (c === '/' && d === '*') {
-      const close = src.indexOf('*/', i + 2)
-      end = close < 0 ? src.length : close + 2
-      out += blank(src.slice(i, end))
-    } else if (js && c === '/' && d === '/' && (i === 0 || /\s/.test(src[i - 1]))) {
-      const nl = src.indexOf('\n', i)
-      end = nl < 0 ? src.length : nl
-      out += blank(src.slice(i, end))
-    } else if (c === '"' || c === "'" || (js && c === '`')) {
-      end = skipString(src, i)
-      out += src.slice(i, end)
-      prev = c
-    } else if (js && c === '/' && (REGEX_AFTER.test(prev) || REGEX_KEYWORD.test(out))) {
-      end = regexEnd(src, i)
-      if (end > 0) { out += src.slice(i, end); prev = ')' }
-    }
-    if (end > 0) { i = end; continue }
-    out += c
-    if (!/\s/.test(c)) prev = c
-    i++
-  }
-  return out
-}
-
 export function findRawZIndex(src, kind = 'css') {
   const rawLines = src.split('\n')
-  const masked = mask(src, kind)
+  const masked = maskComments(src, kind)
   const found = []
   for (const m of masked.matchAll(kind === 'css' ? CSS_RE : JS_RE)) {
-    const why = judge(m[1])
+    const value = clean(m[1])
+    const why = judge(value)
     if (!why) continue
     const line = masked.slice(0, m.index).split('\n').length
     if (EXEMPT.test(rawLines[line - 1]) || EXEMPT.test(rawLines[line - 2] ?? '')) continue
-    found.push({ line, why, value: m[1].replace(/!\s*important\s*$/i, '').trim().replace(/^(['"`])(.*)\1$/, '$2') })
+    found.push({ line, why, value })
   }
   return found
 }

@@ -20,6 +20,7 @@ import { readFileSync } from 'node:fs'
 import { relative } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { ROOT, walk } from '../lib/walk.mjs'
+import { maskComments } from './mask-comments.mjs'
 
 export const WIDTHS = [
   '350px', '359px', '360px', '370px', '420px', '430px', '480px', '520px', '560px',
@@ -43,13 +44,9 @@ const COMPARES = new RegExp(
   `^\\s*(?:(?:min-|max-)?width\\s*(?::|[<>]=?)\\s*${LEN}|${LEN}\\s*[<>]=?\\s*width(?:\\s*[<>]=?\\s*${LEN})?)\\s*$`,
 )
 
-const blank = (m) => m.replace(/[^\n]/g, ' ')
-const maskCss = (src) => src.replace(/\/\*[\s\S]*?\*\//g, blank)
-const maskJs = (src) => maskCss(src).replace(/(^|\s)\/\/.*$/gm, blank)
-
 export function findUnlistedWidths(src, kind = 'css') {
   const rawLines = src.split('\n')
-  const masked = kind === 'css' ? maskCss(src) : maskJs(src)
+  const masked = maskComments(src, kind)
   const found = []
   // A CSS query is a group inside an @media prelude; a JS one is any group in the file.
   const spans = kind === 'css'
@@ -58,6 +55,8 @@ export function findUnlistedWidths(src, kind = 'css') {
   for (const span of spans) {
     for (const g of span.text.matchAll(WIDTH_GROUP)) {
       if (kind === 'js' && !COMPARES.test(g[1])) continue
+      // `@container (min-width: 500px)` in a string is a container query: not covered.
+      if (kind === 'js' && /@container[^()]*$/.test(masked.slice(Math.max(0, g.index - 80), g.index))) continue
       const at = kind === 'css' ? span.at : g.index
       const line = masked.slice(0, at).split('\n').length
       if (EXEMPT.test(rawLines[line - 1]) || EXEMPT.test(rawLines[line - 2] ?? '')) continue

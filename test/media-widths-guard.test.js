@@ -55,6 +55,12 @@ test('a JS comment that quotes a query does not fail, and the exempt marker work
   assert.deepEqual(js("// breakpoint-exempt\nuseMediaQuery('(min-width: 735px)')"), ['2:735px'])
 })
 
+test('a container query in a JS string is not covered, and a string cannot hide a query (#1831)', () => {
+  assert.deepEqual(js("const q = '@container card (min-width: 500px)'"), [])
+  assert.deepEqual(js("const s = 'a /* b'\nuseMediaQuery('(min-width: 735px)')\n/* c */"), ['2:735px'])
+  assert.deepEqual(w('.a::before { content: "/*"; }\n@media (min-width: 735px) { }\n/* c */'), ['2:735px'])
+})
+
 test('layout.css documents every width the guard lists', () => {
   const css = readFileSync(new URL('../src/tokens/layout.css', import.meta.url), 'utf8')
   const table = css.slice(css.indexOf('SCREEN WIDTHS'))
