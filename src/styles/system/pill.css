@@ -195,9 +195,11 @@
    yellow never sits on paper without an edge (1.58:1 against paper).
 
    MARK. A pill that holds one figure or one or two letters: a rank, a clinch
-   letter, a position. It is as wide as it is tall and centres its content, and
-   it draws in capitals like every label (the all-caps invariant). It takes the rule edge, one step
-   heavier than a tag's hairline, so a small box still reads. */
+   letter, a position. It is at least as wide as it is tall and centres its
+   content, and it draws in capitals like every label (the all-caps invariant). A
+   FIGURE mark is wide enough for two digits, so a column of ranks lines up; a
+   letter mark is the square minimum and grows with a second letter. It takes the
+   rule edge, one step heavier than a tag's hairline, so a small box still reads. */
 .pill--marker {
   --pill-fill: var(--marker);
   --pill-edge: var(--border-stamped);
@@ -209,6 +211,9 @@
   min-width: var(--space-5);
   padding-inline: var(--space-1);
   border-width: var(--bw-rule);
+}
+.pill--mark.pill--figure {
+  min-width: var(--space-6);
 }
 
 /* ---- the figure face (#1186) ----
@@ -292,6 +297,15 @@
 .pill--control[aria-pressed='true'],
 .pill--control[aria-current='page'] {
   box-shadow: inset 0 calc(-1 * var(--space-1)) 0 var(--marker);
+}
+@media (forced-colors: active) {
+  .pill--control[aria-pressed='true'],
+  .pill--control[aria-current='page'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
 }
 
 /* A pressed PAPER control keeps a paper edge. Paper is the fill that rides a

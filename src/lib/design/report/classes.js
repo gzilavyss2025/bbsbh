@@ -65,7 +65,9 @@ export function keyModel(items) {
       if (it.tone != null && !METER_TONES.includes(it.tone)) {
         throw new Error(`Key: unknown tone "${it.tone}" (${METER_TONES.join(', ')})`)
       }
-      if ((it.tone == null) === (it.mark == null)) throw new Error(`Key: item "${it.label}" takes a tone or a mark`)
+      // A mark is a real node: not null, not false and not an empty string, which draw nothing.
+      const hasMark = it.mark != null && it.mark !== false && it.mark !== ''
+      if ((it.tone == null) === !hasMark) throw new Error(`Key: item "${it.label}" takes a tone or a mark`)
       return it.tone != null ? 'swatch' : 'mark'
     }),
   )

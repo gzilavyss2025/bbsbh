@@ -12,8 +12,9 @@ export function Key({ items, className = '' }) {
   const { look, items: list } = keyModel(items)
   return (
     <ul className={`key ${className}`.trim()}>
-      {list.map((it) => (
-        <li className="key__item" key={it.label}>
+      {list.map((it, i) => (
+        // Keyed by position: two items may share a label.
+        <li className="key__item" key={i}>
           {look === 'swatch' ? <span className={`key__swatch key__swatch--${it.tone}`} aria-hidden="true" /> : it.mark}
           {it.label}
         </li>

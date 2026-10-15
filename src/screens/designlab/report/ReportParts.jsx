@@ -68,8 +68,8 @@ export function ReportParts() {
 
       <ResultCard
         label="Sample final: Dodgers 5, Yankees 3"
-        away={{ name: 'Yankees', mark: mark(147, 'Yankees'), score: 3, tint: 'var(--accent-primary)' }}
-        home={{ name: 'Dodgers', mark: mark(119, 'Dodgers'), score: 5, winner: true }}
+        away={{ mark: mark(147, 'Yankees'), score: 3, tint: 'var(--accent-primary)' }}
+        home={{ mark: mark(119, 'Dodgers'), score: 5, winner: true }}
         status="Final"
         note="Game 6"
         bars={[

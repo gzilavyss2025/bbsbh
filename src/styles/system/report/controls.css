@@ -16,7 +16,11 @@
   display: flex;
   gap: var(--space-1h);
   overflow-x: auto;
-  padding-bottom: var(--space-1);
+  /* The row clips on every side once it scrolls. The padding is as wide as the
+     focus ring plus its offset (2px + 2px), and the margin pulls the row back,
+     so the ring shows in full and the row does not look indented. */
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
   scrollbar-width: thin;
 }
 .chips--rail > .btn {

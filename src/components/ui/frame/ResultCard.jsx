@@ -6,8 +6,9 @@ import { Card } from './Card.jsx'
 // winning pitcher and the player of the game) and a footer row. Styled once, in
 // styles/system/report/result.css.
 //
-//   away, home  { mark, name, score, tint, winner }. `mark` is a node for the 40px
-//               slot (a TeamLogo); `tint` is the club's treatment tint as a CSS
+//   away, home  { mark, score, tint, winner }. `mark` is a node for the 40px
+//               slot (a TeamLogo, which is decorative: the card's `label` names the
+//               clubs); `tint` is the club's treatment tint as a CSS
 //               colour, or nothing for the soft ink; `winner` draws the marker
 //               underline under that panel.
 //   status      the centre word ("Final").   note  the small line under it ("Game 6").
@@ -23,9 +24,7 @@ function Panel({ side, club }) {
   const cls = `result__club result__club--${side}${club.winner ? ' result__club--win' : ''}`
   return (
     <div className={cls} style={club.tint ? { '--result-tint': club.tint } : undefined}>
-      <span className="result__mark" role="img" aria-label={club.name}>
-        {club.mark}
-      </span>
+      <span className="result__mark">{club.mark}</span>
       <span className="result__runs">{club.score}</span>
     </div>
   )
@@ -50,8 +49,9 @@ export function ResultCard({ away, home, status = 'Final', note, bars = [], foot
         </div>
         <Panel side="home" club={home} />
       </div>
-      {bars.map((bar) => (
-        <div className="result__bar" key={bar.tag}>
+      {bars.map((bar, i) => (
+        // Keyed by position: the list is fixed per render, and two bars may share a tag.
+        <div className="result__bar" key={i}>
           <span>
             <b className="result__tag">{bar.tag}</b>
             {bar.name}

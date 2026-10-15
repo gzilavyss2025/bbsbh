@@ -9,8 +9,14 @@
 //   checked   on or off.   onChange  called with the new value.
 //   className the caller's namespace.
 //
+// The switch owns role, aria-checked, onClick and type: passing one throws, since
+// it would silently turn the switch off. id, aria-describedby and data-* pass through.
+//
 // A choice that waits for a Save button is a checkbox, not a switch.
 export function Switch({ label, hint, checked, onChange, className = '', ...rest }) {
+  for (const own of ['role', 'aria-checked', 'onClick', 'type']) {
+    if (own in rest) throw new Error(`Switch: ${own} is the switch's own; use checked and onChange`)
+  }
   return (
     <button
       type="button"

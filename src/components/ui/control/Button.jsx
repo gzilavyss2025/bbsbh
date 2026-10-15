@@ -21,7 +21,7 @@ import { buttonAria, buttonClassName } from '../../../lib/design/buttonClass.js'
 //   block  a full-width row (ADR-0112): the label, an optional `hint` line under
 //          it, and the icon slot at the right. A disclosure row passes
 //          aria-expanded and an icon (›); the arrow turns when it is open.
-//   hint   the small mono line under a block button's label.
+//   hint   the small mono line under a block button's label. Without block it throws.
 //   href   makes it an anchor, the way Door does, for the rare control whose
 //          action really is an address (a PDF). type is then not written.
 //
@@ -41,7 +41,7 @@ export function Button({
   children,
   ...rest
 }) {
-  const cls = buttonClassName({ size, skin, block, className })
+  const cls = buttonClassName({ size, skin, block, hint, className })
   const aria = buttonAria({ pressed, busy })
   const handle = busy ? (e) => e.preventDefault() : onClick
   const body = (
@@ -51,14 +51,8 @@ export function Button({
           {icon}
         </span>
       )}
-      {block && hint != null ? (
-        <>
-          <span>{children}</span>
-          <span className="btn__hint">{hint}</span>
-        </>
-      ) : (
-        children
-      )}
+      {block ? <span>{children}</span> : children}
+      {block && hint != null && <span className="btn__hint">{hint}</span>}
     </>
   )
   if (href !== undefined) {

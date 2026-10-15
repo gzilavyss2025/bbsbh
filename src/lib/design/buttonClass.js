@@ -11,7 +11,8 @@
 export const SIZES = ['tap', 'control']
 export const SKINS = ['outline', 'ink', 'ghost', 'danger', 'seal']
 
-export function buttonClassName({ size = 'tap', skin = 'outline', block = false, className = '' } = {}) {
+export function buttonClassName({ size = 'tap', skin = 'outline', block = false, hint, className = '' } = {}) {
+  if (hint != null && !block) throw new Error('Button: hint is for block (a hint line needs the row layout)')
   if (!SIZES.includes(size)) throw new Error(`Button: unknown size "${size}" (${SIZES.join(', ')})`)
   if (!SKINS.includes(skin)) throw new Error(`Button: unknown skin "${skin}" (${SKINS.join(', ')})`)
   const parts = ['btn']

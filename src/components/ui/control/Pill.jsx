@@ -28,8 +28,9 @@ import { buttonAria } from '../../../lib/design/buttonClass.js'
 //          (pill--figure, #1186). The host adds only its tint and its place.
 //   pressed  control only: makes it a TOGGLE (aria-pressed), which draws the
 //          selected state. Leave it undefined for an ordinary action.
-//   mark   true for the square mark shape (ADR-0112): a rank, a clinch letter, a
-//          position. As wide as it is tall, content centred, case kept as written.
+//   mark   true for the small box shape (ADR-0112): a rank, a clinch letter, a
+//          position. At least as wide as it is tall, content centred; a figure
+//          mark holds two digits so a rank column lines up.
 //          fill="marker" is the highlighter fill, for the one pill that leads.
 //   href   control only: renders an anchor, for a pill that is an address.
 //

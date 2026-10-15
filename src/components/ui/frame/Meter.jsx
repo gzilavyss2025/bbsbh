@@ -17,9 +17,10 @@ export function Meter({ parts, label, className = '' }) {
   const model = meterModel(parts)
   return (
     <div className={`meter ${className}`.trim()} role="img" aria-label={label ?? model.label}>
-      {model.parts.map((p) => (
+      {model.parts.map((p, i) => (
         <div
-          key={p.code}
+          // Keyed by position: two parts may share a code (two OTH parts).
+          key={i}
           className={`meter__seg meter__seg--${p.tone}${p.ring ? ' meter__seg--ring' : ''}`}
           style={{ '--share': p.share }}
         >

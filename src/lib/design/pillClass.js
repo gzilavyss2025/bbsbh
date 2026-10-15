@@ -14,8 +14,9 @@ import { TEXT, ratio } from './contrastPairings.js'
 export const FILLS = ['outline', 'paper', 'ink', 'seal', 'marker', 'solid']
 export const ROLES = ['tag', 'control']
 
-// `mark` (ADR-0112) is the square mark shape: one figure or one or two letters,
-// as wide as it is tall (a rank, a clinch letter). `marker` is the highlighter
+// `mark` (ADR-0112) is the small box shape: one figure or one or two letters, at
+// least as wide as it is tall (a rank, a clinch letter). A figure mark is wide
+// enough for two digits, so a column of ranks lines up. `marker` is the highlighter
 // fill for the one pill in a row that leads (rank 1); it carries its own ink.
 //
 // `figure` is the mono figure face (#1186): a rank, a level, a count. It is not

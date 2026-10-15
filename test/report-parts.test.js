@@ -54,6 +54,9 @@ test('a key is swatches or marks, never a mix, and every item says what it means
   assert.equal(keyModel([{ label: 'Clinched', mark: 'x' }]).look, 'mark')
   assert.throws(() => keyModel([{ label: 'A', tone: 'good' }, { label: 'B', mark: 'x' }]), /one kind per key/)
   assert.throws(() => keyModel([{ label: 'A' }]), /a tone or a mark/)
+  assert.throws(() => keyModel([{ label: 'A', mark: '' }]), /a tone or a mark/)
+  assert.throws(() => keyModel([{ label: 'A', mark: false }]), /a tone or a mark/)
+  assert.equal(keyModel([{ label: 'Out', tone: 'bad' }, { label: 'Out', tone: 'good' }]).items.length, 2, 'a repeated label is allowed')
   assert.throws(() => keyModel([{ tone: 'good' }]), /no label/)
 })
 
@@ -83,6 +86,8 @@ test('the pill gains a mark shape and a marker fill, and the marker carries its 
 test('the block button and the soft card tone add one class each', () => {
   assert.equal(buttonClassName({ block: true }), 'btn btn--block')
   assert.equal(buttonClassName(), 'btn')
+  assert.throws(() => buttonClassName({ hint: 'x' }), /hint is for block/)
+  assert.equal(buttonClassName({ block: true, hint: 'x' }), 'btn btn--block')
   assert.match(cardClassName({ frame: 'stamped', tone: 'soft' }), /card--soft/)
   assert.throws(() => cardClassName({ frame: 'sheet', tone: 'soft' }), /frame="stamped"/)
 })
