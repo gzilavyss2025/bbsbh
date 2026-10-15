@@ -52,9 +52,6 @@ export function ContractsTab({ id, asOf, sportId }) {
   if (gate) return gate
 
   const { team, record, manager } = identity.data
-  const data = contracts.data
-  const ledger = data?.ledger
-  const cliff = ledger ? commitmentCliff(ledger.totals) : null
 
   return (
     <TeamHubShell
@@ -67,71 +64,85 @@ export function ContractsTab({ id, asOf, sportId }) {
       hiddenTabs={hiddenTeamTabs(team)}
       datable={false}
     >
-      <AsyncStatus
-        loading={contracts.loading}
-        error={contracts.error}
-        hasData={data != null}
-        errorMessage="Couldn’t load the contract ledger. Try again."
-      />
-
-      {data?.isMilb && (
-        <EmptyState>Contract terms are published for the major leagues only, so this club has no ledger.</EmptyState>
-      )}
-
-      {data && !data.isMilb && !ledger && (
-        <EmptyState>This club’s contract ledger has not been published yet.</EmptyState>
-      )}
-
-      {ledger && (
-        <section className="ctr">
-          <div className="ctr__wall">
-            <Tile
-              label={`${ledger.season} payroll`}
-              value={moneyLabel(ledger.payroll)}
-              note={
-                data.standing
-                  ? `${ordinal(data.standing.rank)} of ${data.clubCount}`
-                  : `${ledger.totals[0]?.players ?? 0} players`
-              }
-            />
-            <Tile
-              label={`Committed after ${ledger.season}`}
-              value={moneyLabel(ledger.committedAfter)}
-              note={`Through ${ledger.years[ledger.years.length - 1]}`}
-            />
-            <Tile
-              label="Option years"
-              value={String(ledger.counts.option)}
-              note="Not yet exercised"
-              tone={ledger.counts.option > 0 ? null : 'good'}
-            />
-            <Tile
-              label="Arbitration years"
-              value={String(ledger.counts.arbitration)}
-              note="Figure not yet set"
-            />
-          </div>
-
-          <CommitmentCliff totals={ledger.totals} scale={payrollScale(ledger.totals)} />
-
-          <ContractGrid ledger={ledger} />
-          <ContractKey />
-
-          {cliff && cliff.drop > 0 && (
-            <p className="hint">
-              The book falls {moneyLabel(cliff.drop)} between {cliff.from} and {cliff.to}.
-            </p>
-          )}
-
-          {/* Says out loud what `datable={false}` above does silently, so a
-              reader who arrived from a dated page knows why this one carries no
-              date rather than assuming the date was lost. */}
-          <SourceLine
-            meta={ledger.meta}
-            note="A season’s book, not a day’s — these figures do not move with a date. Pre-arbitration figures are estimates."
-          />
-        </section>
-      )}
+      <ContractsBody contracts={contracts} />
     </TeamHubShell>
+  )
+}
+
+// The tab's body, apart from its shell, so the one-scroll page's Money band
+// (next/money/) mounts the same cards (#1107). `contracts` is the useAsync result.
+export function ContractsBody({ contracts }) {
+  const data = contracts.data
+  const ledger = data?.ledger
+  const cliff = ledger ? commitmentCliff(ledger.totals) : null
+
+  return (
+    <>
+    <AsyncStatus
+      loading={contracts.loading}
+      error={contracts.error}
+      hasData={data != null}
+      errorMessage="Couldn’t load the contract ledger. Try again."
+    />
+
+    {data?.isMilb && (
+      <EmptyState>Contract terms are published for the major leagues only, so this club has no ledger.</EmptyState>
+    )}
+
+    {data && !data.isMilb && !ledger && (
+      <EmptyState>This club’s contract ledger has not been published yet.</EmptyState>
+    )}
+
+    {ledger && (
+      <section className="ctr">
+        <div className="ctr__wall">
+          <Tile
+            label={`${ledger.season} payroll`}
+            value={moneyLabel(ledger.payroll)}
+            note={
+              data.standing
+                ? `${ordinal(data.standing.rank)} of ${data.clubCount}`
+                : `${ledger.totals[0]?.players ?? 0} players`
+            }
+          />
+          <Tile
+            label={`Committed after ${ledger.season}`}
+            value={moneyLabel(ledger.committedAfter)}
+            note={`Through ${ledger.years[ledger.years.length - 1]}`}
+          />
+          <Tile
+            label="Option years"
+            value={String(ledger.counts.option)}
+            note="Not yet exercised"
+            tone={ledger.counts.option > 0 ? null : 'good'}
+          />
+          <Tile
+            label="Arbitration years"
+            value={String(ledger.counts.arbitration)}
+            note="Figure not yet set"
+          />
+        </div>
+
+        <CommitmentCliff totals={ledger.totals} scale={payrollScale(ledger.totals)} />
+
+        <ContractGrid ledger={ledger} />
+        <ContractKey />
+
+        {cliff && cliff.drop > 0 && (
+          <p className="hint">
+            The book falls {moneyLabel(cliff.drop)} between {cliff.from} and {cliff.to}.
+          </p>
+        )}
+
+        {/* Says out loud what `datable={false}` above does silently, so a
+            reader who arrived from a dated page knows why this one carries no
+            date rather than assuming the date was lost. */}
+        <SourceLine
+          meta={ledger.meta}
+          note="A season’s book, not a day’s — these figures do not move with a date. Pre-arbitration figures are estimates."
+        />
+      </section>
+    )}
+    </>
   )
 }

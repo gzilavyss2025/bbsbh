@@ -444,6 +444,22 @@ export function hiddenTeamTabs(team) {
   return hidden
 }
 
+// Which bands of the one-scroll team page (ADR-0082, #1107) a club cannot fill, off the
+// same cheap `team` object, never a band's own payload. Absent, never disabled: a hidden
+// band does not render and has no jump-bar button. The league test comes FIRST, before any
+// sport test: /team/11 is `sport.id: 1` with a league that has no id, and a sport-first
+// early return waved it through (#1143). Standing and About are never hidden; Games and
+// Roster are not either, since every club plays a schedule and keeps a roster.
+export function hiddenTeamSections(team) {
+  const hidden = new Set()
+  if (!team.league?.id) hidden.add('ranks')
+  if ((team.sport?.id ?? 1) !== 1) {
+    hidden.add('money') // Cot's covers the major leagues only
+    if (!parentOrgIdOf(team)) hidden.add('farm')
+  }
+  return hidden
+}
+
 // IS THE TEAM-RECORDS LEDGER WHOLE ENOUGH TO PRINT (#1363)? A Records card
 // (api/teamRecords.js) built on a fraction of a season says something false.
 // The Dominican Summer League files (sportId 16) hold about a fifth of each

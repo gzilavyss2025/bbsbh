@@ -1,0 +1,17 @@
+/* The one-scroll team page (#1107, ADR-0082). Foundation only: the band slots. */
+.tnext__band {
+  scroll-margin-top: 68px; /* the sticky jump bar's height, see BAR_H in TeamNextPage.jsx */
+}
+/* Until a band's module has loaded, the slot holds a floor so the bands below stay far
+   from the viewport and load one at a time (Band.jsx). */
+.tnext__band--hold {
+  min-height: 70svh;
+}
+
+/* The jump bar stays on screen as the page scrolls, so the mark that follows the reader is
+   always visible (ADR-0082). The app's own colours, never the club's (ADR-0030). */
+.jumpbar.tnext__jump {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
