@@ -3,7 +3,8 @@
    Four roles, one family each (see tokens/fonts.css for the @font-face
    rules and which ship a second, real bold weight):
    - Barlow Condensed → athletic stat/section headers (uppercase, tracked)
-   - Source Sans 3     → UI + body
+   - JetBrains Mono    → UI + body, as well as the figures below (#2165). Source Sans 3 is
+                         no longer a role; only the poster canvas still draws it.
    - JetBrains Mono    → numbers, the ledger/scorebook figures
    - Lora              → sentence-like copy that must read at small sizes in
      all caps (play-by-play descriptions). A serif gives the play
@@ -13,7 +14,7 @@
 
 :root {
   --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
-  --font-body:    "Source Sans 3", system-ui, sans-serif;
+  --font-body:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;  /* same stack as --font-mono (#2165) */
   --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
   --font-read:    "Lora", Georgia, "Times New Roman", serif;
   --font-display-tag: "Barlow Condensed Tag", "Barlow Condensed", "Arial Narrow", sans-serif;  /* the card count tag only, its 600 face */
@@ -21,8 +22,8 @@
   /* Weights. 500 was removed once because it blurred ordinary copy and
      emphasized UI. It is back (ADR-0109, #1932) for one role: the weight of
      .fact__value, the fact values on the player, team, umpire and lineup
-     cards. The canvas draws "Born" at 500. Source Sans 3 is the only family
-     with a real 500 face; Barlow and mono ship one weight each. */
+     cards. The canvas draws "Born" at 500. Since #2165 the body face is mono, whose one
+     weight is 500; Barlow ships one weight too. Every weight of body copy draws 500. */
   --w-regular: 400;
   --w-medium: 500;
   --w-semibold: 600;

@@ -8,30 +8,6 @@
   padding-top: var(--space-4);
 }
 
-/* THE BAND TEXTURE: broadcast-style ripple rings from two corners, fading toward the middle,
-   over a soft diagonal sheen. The same on the hero bar and every club bar below it. */
-.lnext .sectionhead--band {
-  border-radius: 0; /* a stamped card is square, so its bar is too */
-  position: relative;
-  isolation: isolate;
-}
-.lnext .sectionhead--band::before,
-.lnext .sectionhead--band::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-.lnext .sectionhead--band::before {
-  background:
-    repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
-    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
-  mask-image: linear-gradient(100deg, var(--ripple-mask) 0%, transparent 50%, var(--ripple-mask) 100%);
-}
-.lnext .sectionhead--band::after {
-  background: linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%);
-}
 /* THE HERO BAND: the club mark and the game at the left, a tag at the right. */
 /* layout-exempt: mark and game at the left, tag at the right: two fixed ends */
 .lband {

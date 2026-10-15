@@ -131,14 +131,50 @@ test('the house band is navy and the pencil rule whatever club the page wears', 
   assert.doesNotMatch(house, /--bar-/, 'the house band reads no club colour (ADR-0030)')
 })
 
-test('the paint travels alone: the band sets no layout, and only a real head gets corners', () => {
+test('the paint travels alone: the band sets no layout and no corners, and the head is square (#2165)', () => {
   const css = read('system/section-head.css')
   const band = ruleBody(css, '.sectionhead--band')
   for (const prop of ['padding', 'display', 'margin', 'border-radius', 'font-size']) {
     assert.equal(decl(band, prop), undefined, `.sectionhead--band sets no ${prop}; the innings heads keep their own`)
   }
-  const corners = ruleBody(css, ':where(.sectionhead).sectionhead--band')
-  assert.equal(decl(corners, 'border-radius'), 'var(--radius-md) var(--radius-md) 0 0')
+  // Gary squared the band head (#2165): the rounded-corner rule is gone, not just overridden.
+  assert.equal(ruleBody(css, ':where(.sectionhead).sectionhead--band'), null, 'no rule rounds a band head')
+  assert.doesNotMatch(css, /radius-md\) var\(--radius-md\) 0 0/, 'no band corner is rounded')
+})
+
+test('every band wears the ripple rings and sheen, and a host that sets its own position wins (#2165)', () => {
+  const css = read('system/section-head.css')
+  // :where() keeps position at no weight, so a sticky or absolute host keeps its own.
+  const host = ruleBody(css, ':where(.sectionhead--band)')
+  assert.ok(host, 'a :where(.sectionhead--band) rule')
+  assert.equal(decl(host, 'position'), 'relative')
+  assert.equal(decl(host, 'isolation'), 'isolate')
+  const rings = ruleBody(css, '.sectionhead--band::before')
+  assert.match(rings, /repeating-radial-gradient/, 'the rings are a ::before')
+  assert.match(rings, /var\(--ripple-light\)/)
+  assert.match(rings, /var\(--ripple-dark\)/)
+  assert.match(css, /\.sectionhead--band::after\s*\{[^}]*var\(--sheen-light\)/, 'the sheen is an ::after')
+  // Behind the text and out of the way of taps.
+  const both = ruleBody(css, '.sectionhead--band::before,\n.sectionhead--band::after')
+  assert.equal(decl(both, 'z-index'), '-1')
+  assert.equal(decl(both, 'pointer-events'), 'none')
+  // The lineup page's own copy is gone: one rule, in system/.
+  assert.doesNotMatch(read('lineup-next/page.css'), /repeating-radial-gradient/, 'one copy of the band rings')
+})
+
+test('the compact stat tile is one class in system/, and the player-page tiles use it (#2165)', () => {
+  const css = read('system/stamped/stamped.css')
+  const tile = ruleBody(css, '.stattile.stattile--compact')
+  assert.equal(decl(tile, 'padding'), 'var(--space-2)')
+  assert.equal(decl(ruleBody(css, '.stattile--compact .stattile__value'), 'font-size'), 'var(--fs-hero-sm)')
+  // The label keeps --fs-label: --fs-caption may only shrink (check-caption-budget).
+  assert.equal(ruleBody(css, '.stattile--compact .stattile__label'), null)
+  for (const rel of ['screens/player/next/modules/season/index.jsx', 'screens/player/next/modules/command/index.jsx']) {
+    assert.match(readFileSync(join(SRC, rel), 'utf8'), /stattile--compact/, `${rel} uses the compact tile`)
+  }
+  // The two hand-made small tiles lost their own value sizes.
+  assert.doesNotMatch(read('player-next/both/season.css'), /stattile__value/)
+  assert.doesNotMatch(read('player-next/pitcher/command.css'), /stattile__value/)
 })
 
 test('every band in the innings view and the box score wears the band paint', () => {

@@ -16,7 +16,7 @@ Every value here is copied from the repo (`src/tokens/*.css`, `src/styles/system
 | Part | Classes |
 | --- | --- |
 | Stamped card | `card card--stamped` + `card--named` (name tab) + `card--tint` or `card--ink` + `card--stamp-in`; inside: `card__name` (an `h2`, the card heading), `card__count`, `card__body` |
-| Stat tile | `card card--stamped stattile` + tone; inside: `stattile__label`, `stattile__value`, `stattile__caption`, `rankmark`. Add `stattile--compact` for a tile about 40% smaller (a design-system addition, not in the app repo): value 28px on a phone and 32px from 740px, label 11px |
+| Stat tile | `card card--stamped stattile` + tone; inside: `stattile__label`, `stattile__value`, `stattile__caption`, `rankmark`. Add `stattile--compact` for a tile about 40% smaller (it is in the app too): value 28px on a phone and 32px from 740px, label 12px (unchanged) |
 | Fact strip | `dl.factgrid.factgrid--strip` of `div.fact` with `dt.fact__label` and `dd.fact__value`, flush inside a stamped card |
 | Jump bar | `nav.jumpbar` > `div.cluster.cluster--snug.jumpbar__row` > `button.jumpbar__item` (+ `is-current`) with `span.jumpbar__count` |
 | Section head | `sectionhead` + `sectionhead--label`, `--rule` or `--band sectionhead--house`; `sectionhead__title`, `sectionhead__note` |
@@ -39,7 +39,7 @@ The six previews under `components/` show each part with real CSS. Where to look
 
 ## The rules
 
-- **Square corners.** A stamped card, a stat tile, a count tag, a jump-bar item and a section-head band have no radius (this system squares the band head; the app repo rounds its top corners). The radius tokens (`radius-xs` to `radius-pill`) belong to older sheet cards and pills. Do not round a stamped part.
+- **Square corners.** A stamped card, a stat tile, a count tag, a jump-bar item and a section-head band have no radius. The radius tokens (`radius-xs` to `radius-pill`) belong to older sheet cards and pills. Do not round a stamped part.
 - **Tokens only, no raw hex.** Fill with `surface-card`, `surface-stamped-tint` or `surface-stamped-ink`. Edge with `border-stamped` at `bw-heavy`. Shadow with `shadow-stamped` (4px right and down, no blur). On an ink fill the shadow is `shadow-stamped-soft`.
 - **A rank reads "78 of 89" on its own line**, with no "#". A counting-stat rank reads "6th". It is drawn by `rankmark`.
 - **Rank emphasis uses `--marker`, never `--seal`.** `seal` (kraft amber) means "sealed" and nothing else (ADR-0083). It is only for a surface where a tap can reveal a score.
@@ -54,7 +54,7 @@ The six previews under `components/` show each part with real CSS. Where to look
 
 - `font-display`: Barlow Condensed 700. Stat values, name tabs, labels, jump-bar items. Uppercase, tracked.
 - `font-display-tag`: "Barlow Condensed Tag" 600. The card count tag and nothing else.
-- `font-body`: JetBrains Mono 500. Copy, UI and fact values. **Design-system change:** the app repo sets `--font-body` to Source Sans 3; this system sets it to JetBrains Mono and ships no Source Sans 3.
+- `font-body`: JetBrains Mono 500. Copy, UI and fact values. The app uses the same face (#2165). This system ships no Source Sans 3.
 - `font-mono`: JetBrains Mono 500. Every figure, with tabular numbers.
 - `font-read`: Lora. Sentence-like copy at small sizes (play-by-play).
 
@@ -105,7 +105,7 @@ Motion is part of the look, and it is small. The previews in `components/Motion/
 
 ## The band texture
 
-A band head can carry the ripple rings and soft sheen of the lineup page. Add `sectionhead--textured` next to `sectionhead--band`. It is square. It uses `ripple-light`, `ripple-dark`, `ripple-mask`, `sheen-light` and `sheen-dark`. Use it on a house band or on a band that names a club (ADR-0030).
+Every band head carries the ripple rings and soft sheen of the lineup page, with no extra class. It is square. It uses `ripple-light`, `ripple-dark`, `ripple-mask`, `sheen-light` and `sheen-dark`. Use it on a house band or on a band that names a club (ADR-0030).
 
 ## The player cards
 

@@ -80,7 +80,7 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
       ) : view.tiles.length ? (
         <div className="seasonmod__tiles">
           {view.tiles.map((t) => (
-            <StatTile key={t.k} label={t.k} value={t.v} tone={t.tone} className="seasonmod__tile" />
+            <StatTile key={t.k} label={t.k} value={t.v} tone={t.tone} className="seasonmod__tile stattile--compact" />
           ))}
         </div>
       ) : (

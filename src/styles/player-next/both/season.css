@@ -22,18 +22,12 @@
   gap: var(--space-2);
 }
 .seasonmod__tile.stattile {
-  padding: var(--space-2) var(--space-1);
+  padding-inline: var(--space-1); /* five across on a phone: the compact tile's side padding is too wide */
   text-align: center;
-}
-.seasonmod__tile .stattile__value {
-  font-size: var(--fs-hero-sm);
 }
 @media (min-width: 740px) {
   .seasonmod__tile.stattile {
-    padding: var(--space-3h) var(--space-2);
-  }
-  .seasonmod__tile .stattile__value {
-    font-size: var(--fs-hero-xl);
+    padding-inline: var(--space-2);
   }
 }
 

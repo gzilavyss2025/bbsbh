@@ -141,10 +141,32 @@
   border-bottom: 3px solid var(--band-accent);
   color: var(--band-text);
 }
-/* :where() keeps this at one class, so a host that squares or rounds the
-   corners (.umptend__bar, .lgstand__bar .sectionhead) wins on order. */
-:where(.sectionhead).sectionhead--band {
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+/* THE BAND TEXTURE: broadcast-style ripple rings from two corners, fading toward the middle,
+   over a soft diagonal sheen. Every band wears it (#2165), the lineup page's look made the
+   default. A band head is square: a stamped card is square, so its bar is too.
+   :where() keeps position and isolation at no weight, so a host that sets its own position
+   (a sticky or absolute band) wins. The rings sit behind the text (z-index -1 inside the
+   isolated band), so contrast is the band ground's, and the guard reads that ground. */
+:where(.sectionhead--band) {
+  position: relative;
+  isolation: isolate;
+}
+.sectionhead--band::before,
+.sectionhead--band::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.sectionhead--band::before {
+  background:
+    repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
+  mask-image: linear-gradient(100deg, var(--ripple-mask) 0%, transparent 50%, var(--ripple-mask) 100%);
+}
+.sectionhead--band::after {
+  background: linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%);
 }
 
 /* THE HOUSE BAND: navy and the pencil rule whatever club the page wears. A club may

@@ -13,9 +13,9 @@ rebuild, then upload.
 
 | Path | What it is | Source |
 | --- | --- | --- |
-| `tokens/*.css` | colour, spacing, effects, type, layout | `src/tokens/`, copied. Two deliberate changes, below |
+| `tokens/*.css` | colour, spacing, effects, type, layout | `src/tokens/`, copied |
 | `tokens/TOKENS.md` | a usage line per token | `.design-sync/build/usage-data.json` |
-| `_ds_bundle.css` | the part styles | `src/styles/system/`, `09-team-info.css`, `motion/`, and `.design-sync/build/ds-*.css` |
+| `_ds_bundle.css` | the part styles | `src/styles/system/`, `09-team-info.css` and `motion/`, copied |
 | `fonts/` | five woff2 files and three OFL licences | `node_modules/@fontsource/` |
 | `components/` | one preview per part, a Motion preview, seven player cards | `.design-sync/build/previews.mjs`, `motion.mjs`, `playercards.mjs` |
 | `README.md` | the brand book | `.design-sync/build/README.template.md` |
@@ -25,12 +25,13 @@ stub that the design tool needs.
 
 ## Where this system differs from the app
 
-Gary asked for these changes. Each one has a comment in the CSS.
+Two small differences remain. The three that Gary asked for in October 2026 are in the app now
+(#2165): mono body copy, a square band head, and the ripple on every band head. The compact
+stat tile (`stattile--compact`) is in the app too.
 
-- `--font-body` is JetBrains Mono 500. The app uses Source Sans 3. Source Sans 3 is not in the project.
-- A band head (`sectionhead--band`) is square. The app rounds its top corners.
-- `stattile--compact` (a stat tile about 40% smaller) and `sectionhead--textured` (the lineup
-  page's ripple rings, opt-in) are new classes.
+- The project ships no Source Sans 3. The app still bundles it for the poster canvas
+  (`src/lib/preview/posterPaper.js`), and the project has no use for it.
+- The compact tile's label is 12px (`--fs-label`) in both. An earlier project version used 11px.
 
 ## Rebuild
 
