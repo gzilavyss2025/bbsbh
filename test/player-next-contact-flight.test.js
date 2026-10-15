@@ -124,6 +124,8 @@ test('every landed beat ends inside SETTLE_MS, so the clock may stop there', () 
 const read = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
 const CSS = stripComments(read('src/styles/player-next/batter/contact.css'))
 const JSX = read('src/screens/player/next/modules/contact/ContactModule.jsx')
+const FLIGHT = read('src/screens/player/next/modules/contact/ContactFlight.jsx')
+const DETAIL = read('src/screens/player/next/modules/contact/ContactDetail.jsx')
 const decl = (body, prop) =>
   body?.split(';').map((d) => d.trim()).find((d) => d.startsWith(`${prop}:`))?.slice(prop.length + 1).trim()
 
@@ -143,11 +145,23 @@ test('the flying dot hides; the overlay takes no taps', () => {
 })
 
 test('the module flies the tapped ball and speaks once, on landing', () => {
-  assert.match(JSX, /useFlightClock\(shot, model\)/)
-  assert.match(JSX, /<FlightMarks frame=\{frame\} home=\{HOME\} \/>/)
-  assert.match(JSX, /fcontact__dot--hide/)
-  assert.match(JSX, /<span className="sr-only" aria-live="polite">/)
-  assert.doesNotMatch(JSX, /className="fcontact__detail" aria-live/)
+  assert.match(FLIGHT, /useFlightClock\(shot, model\)/)
+  assert.match(FLIGHT, /<FlightMarks frame=\{frame\} home=\{HOME\} \/>/)
+  assert.match(FLIGHT, /fcontact__dot--hide/)
+  assert.match(DETAIL, /<span className="sr-only" aria-live="polite">/)
+  assert.doesNotMatch(DETAIL, /className="fcontact__detail" aria-live/)
+})
+
+test('the flight clock lives in a child: ContactModule holds no per-frame state (#2073)', () => {
+  assert.doesNotMatch(JSX, /useFlightClock|flightFrame|<FlightMarks/)
+  assert.match(JSX, /<FlightClock\b/)
+  assert.match(JSX, /<FlightLayer \/>/)
+  assert.match(JSX, /<AutoAdvance\b/)
+  assert.match(JSX, /<ContactDetail\b/)
+  assert.match(FLIGHT, /export function FlightClock\(/)
+  assert.match(FLIGHT, /useFlight\(\)/)
+  // The root div stays the one element both branches return (the in-view ref survives).
+  assert.match(JSX, /<div ref=\{fieldRef\} className="fcontact">\s*<FlightClock/)
 })
 
 test('isAirFlight is the one predicate for the flight model and its in-flight label', async () => {
@@ -157,4 +171,11 @@ test('isAirFlight is the one predicate for the flight model and its in-flight la
   assert.equal(isAirFlight({ launchAngle: null, exitVelo: 90, distance: 150 }), false, 'no angle hops')
   assert.equal(isAirFlight({ launchAngle: 25, exitVelo: null, distance: 150 }), false, 'no speed hops')
   assert.equal(isAirFlight({ launchAngle: 25, exitVelo: 90, distance: null }), false, 'no distance hops')
+})
+
+test('the Animation Lab shows the play-through on the real clock child', () => {
+  const LAB = read('src/screens/animlab/PlayerMotionLab.jsx')
+  assert.match(LAB, /title="Contact — play through the balls"/)
+  assert.match(LAB, /<ContactPlayEntry \/>/)
+  assert.match(LAB, /<FlightClock\b/)
 })

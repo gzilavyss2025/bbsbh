@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import '../../../../../styles/player-next/batter/contact.css'
 import { fetchPersonStats } from '../../../../../api/person-fetch.js'
 import { MLB_LOG_GAME_TYPES } from '../../../../../api/boxlines/rows.js'
@@ -13,10 +13,11 @@ import { useInViewOnce } from '../../../../../hooks/scroll/useInViewOnce.js'
 import { viewKey } from '../../../../../lib/motion/inViewOnce.js'
 import { HOME } from '../../../../../lib/ballpark/ballparkGeometry.js'
 import { hitCoordToSvg } from '../../../../../lib/ballpark/hitProjection.js'
-import { FlightMarks, useFlightClock } from './ContactFlight.jsx'
+import { AutoAdvance, FlightClock, FlightLayer, SelDot } from './ContactFlight.jsx'
+import { ContactDetail } from './ContactDetail.jsx'
 import { ContactPlayer } from './ContactPlayer.jsx'
-import { DWELL_MS, afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
-import { LEAD_MS, flightFrame, flightOf, isAirFlight } from './contactFlight.js'
+import { afterDwell, byDate, isAhead, seasonAxis } from './contactPlay.js'
+import { flightOf } from './contactFlight.js'
 import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKey, menuRows, mixRows, pickBalls } from './contactView.js'
 
 // The batter Contact module (#1888): where each ball went, tapped for its exit velocity, launch
@@ -78,10 +79,7 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
     () => (curMark ? flightOf(curMark.b, Math.hypot(curMark.p.x - HOME.x, curMark.p.y - HOME.y)) : null),
     [curMark],
   )
-  const t = useFlightClock(shot, model)
   const dotR = (b) => (b.result === 'hr' ? 11 : 9)
-  const frame = model ? flightFrame(model, t, { home: HOME, land: curMark.p, dotR: dotR(cur), hr: cur.result === 'hr' }) : null
-  const flying = !!frame?.flying
   const idx = cur ? marks.findIndex((m) => m.b === cur) : -1
   // Fly ball i. `play` keeps the run going; any other launch (a dot, prev, next, the
   // timeline) stops it.
@@ -92,25 +90,16 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
     setShot((s) => s + 1)
     setPlaying(play)
   }
-  // The run: after a ball lands and rests DWELL_MS, the next one flies. The rest is read
-  // off the flight clock; under reduced motion there is no clock (t is Infinity), so a
-  // plain timer holds each ball. The setters run in the timer callback, never in the
-  // effect body (react-hooks/set-state-in-effect).
-  const end = model ? LEAD_MS + model.ms : 0
-  const wait = !playing || idx < 0 ? null : t === Infinity ? DWELL_MS : t >= end + DWELL_MS ? 0 : null
-  useEffect(() => {
-    if (wait == null) return undefined
-    const id = setTimeout(() => {
-      const nx = afterDwell(idx, marks.length)
-      if (nx == null) {
-        setPlaying(false)
-        return
-      }
-      setSel(marks[nx].b)
-      setShot((s) => s + 1)
-    }, wait)
-    return () => clearTimeout(id)
-  }, [wait, idx, marks])
+  // The run's next step, called by <AutoAdvance> once the ball has landed and rested.
+  const advance = useCallback(() => {
+    const nx = afterDwell(idx, marks.length)
+    if (nx == null) {
+      setPlaying(false)
+      return
+    }
+    setSel(marks[nx].b)
+    setShot((s) => s + 1)
+  }, [idx, marks])
 
   const empty = !!error || (!!data && !card)
   useEffect(() => {
@@ -135,6 +124,8 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
         : 'fcontact__dots'
   return (
     <div ref={fieldRef} className="fcontact">
+      <FlightClock shot={shot} model={model} land={curMark?.p} dotR={cur ? dotR(cur) : 0} hr={cur?.result === 'hr'}>
+      <AutoAdvance playing={playing} idx={idx} model={model} onAdvance={advance} />
       <div className="fcontact__bar">
         <div className="fcontact__chips" role="group" aria-label="Which balls">
           {VIEWS.map(([k, name]) => (
@@ -158,57 +149,34 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
               <path className="spray__diamond" d={DIAMOND} />
             </g>
             <g className={dotsCls}>
-                {marks.map(({ b, p }, i) => (
-                <circle
-                  key={i}
-                  className={`fcontact__dot fcontact__dot--${markKey(b, color)}${b === cur ? ' fcontact__dot--sel' : ''}${b === cur && flying ? ' fcontact__dot--hide' : ''}${isAhead(i, idx, playing) ? ' fcontact__dot--ahead' : ''}`}
-                  style={{ '--fcontact-f': marks.length > 1 ? (i / (marks.length - 1)).toFixed(3) : '0' }}
-                cx={p.x}
-                  cy={p.y}
-                  r={dotR(b)}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`${ballDetail(b).eyebrow}${b.exitVelo == null ? '' : `, ${b.exitVelo} mph`}`}
-                  onClick={() => launch(i, false)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(i, false) } }}
-                />
-              ))}
+              {marks.map(({ b, p }, i) => {
+                const Dot = b === cur ? SelDot : 'circle'
+                return (
+                  <Dot
+                    key={i}
+                    className={`fcontact__dot fcontact__dot--${markKey(b, color)}${b === cur ? ' fcontact__dot--sel' : ''}${isAhead(i, idx, playing) ? ' fcontact__dot--ahead' : ''}`}
+                    style={{ '--fcontact-f': marks.length > 1 ? (i / (marks.length - 1)).toFixed(3) : '0' }}
+                    cx={p.x}
+                    cy={p.y}
+                    r={dotR(b)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${ballDetail(b).eyebrow}${b.exitVelo == null ? '' : `, ${b.exitVelo} mph`}`}
+                    onClick={() => launch(i, false)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(i, false) } }}
+                  />
+                )
+              })}
             </g>
-            {frame && <FlightMarks frame={frame} home={HOME} />}
+            <FlightLayer />
           </svg>
         </div>
         <div className="fcontact__side">
-        <div className={`fcontact__detail${flying ? ' fcontact__detail--fly' : ''}`}>
-          <span className="sr-only" aria-live="polite">
-            {cur && !flying ? `${detail.eyebrow}${cur.distance == null ? '' : `, ${cur.distance} feet`}, ${detail.when}` : ''}
-          </span>
-          {detail ? (
-            <>
-              <span className="fcontact__eyebrow">
-                {flying ? (isAirFlight(cur) ? 'In the air' : 'On the ground') : detail.eyebrow}
-              </span>
-              <span className="fcontact__when">{detail.when}</span>
-              <span className="fcontact__big">
-                {flying && cur.distance != null ? Math.round(cur.distance * frame.fr) : detail.big}
-                <small>{detail.unit}</small>
-              </span>
-              <dl className="fcontact__stats">
-                {detail.stats.map(([k, v], i) =>
-                  i < 2 ? (
-                    <div key={k}><dd>{v}</dd><dt>{k}</dt></div>
-                  ) : (
-                    <div key={k} className="fcontact__rise" style={{ '--fcontact-i': i - 2 }}><dd>{v}</dd><dt>{k}</dt></div>
-                  ),
-                )}
-              </dl>
-            </>
-          ) : (
-            <p className="hint">Tap a ball to see its exit velocity, launch angle and xBA.</p>
-          )}
-        </div>
+        <ContactDetail cur={cur} detail={detail} />
         <ContactPlayer marks={marks} idx={idx} playing={playing} axis={axis} onLaunch={launch} onPause={() => setPlaying(false)} />
         </div>
       </div>
+      </FlightClock>
       <p className="fcontact__note">
         Exit velocity, launch angle, distance and xBA are Statcast, one value per ball. A missing value prints a dash.
         Spray angle is read from the hit location, on a standard field, not the park where he hit the ball.
