@@ -13,6 +13,14 @@ import { BaseState } from '../scoring/BaseState.jsx'
 // score's masthead still open it.
 const MARK = 40
 
+// One spoken line for the plate: where the game is, the outs, and who is on. It says only what the
+// plate shows, so it is as safe as the plate. Bare numbers would read as "0" and "0" with no club.
+function plateLabel({ final, top, inning, outs, bases }) {
+  if (final) return 'Final'
+  const on = ['first', 'second', 'third'].filter((b) => bases?.[b])
+  return `${top ? 'Top' : 'Bottom'} ${inning}, ${outs} out, ${on.length ? `runners on ${on.join(' and ')}` : 'bases empty'}`
+}
+
 export function HeaderBug({
   awayName,
   homeName,
@@ -48,8 +56,10 @@ export function HeaderBug({
           block="inhead__half"
           className={`inhead__half--away${batting === 'away' ? ' is-atbat' : ''}`}
         />
-        <span className="inhead__runs inhead__runs--away">{awayRuns}</span>
-        <div className="inhead__center">
+        <span className="inhead__runs inhead__runs--away" role="img" aria-label={`${awayName}: ${awayRuns}`}>
+          {awayRuns}
+        </span>
+        <div className="inhead__center" role="img" aria-label={plateLabel({ final, top, inning, outs, bases })}>
           <div className="inhead__inning">
             {final ? (
               <span className="inhead__num" aria-label="Final">
@@ -70,7 +80,9 @@ export function HeaderBug({
             ))}
           </div>
         </div>
-        <span className="inhead__runs inhead__runs--home">{homeRuns}</span>
+        <span className="inhead__runs inhead__runs--home" role="img" aria-label={`${homeName}: ${homeRuns}`}>
+          {homeRuns}
+        </span>
         <TeamTreatmentMark
           teamId={homeTeamId}
           name={homeName}

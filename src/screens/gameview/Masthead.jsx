@@ -11,7 +11,7 @@ export function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake
   return (
     <div className="masthead">
       <div className="masthead__teams">
-        <MastheadLogo team={away} treatment={treatment?.away} side="away" season={date} onSketch={() => onSketch('away')} />
+        <MastheadLogo team={away} treatment={treatment?.away} side="away" season={date} onSketch={() => onSketch?.('away')} />
         {/* The same screen-print '@' the slate card uses (Big Shoulders
             Display, kraft-amber + navy a couple px out of register — see
             .gamecard__atmark), here an inline mark between the two logos
@@ -20,7 +20,7 @@ export function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake
           <span className="masthead__at-ghost">@</span>
           <span className="masthead__at-ink">@</span>
         </span>
-        <MastheadLogo team={home} treatment={treatment?.home} side="home" season={date} onSketch={() => onSketch('home')} />
+        <MastheadLogo team={home} treatment={treatment?.home} side="home" season={date} onSketch={() => onSketch?.('home')} />
       </div>
       <MastheadSide date={date} gamePk={gamePk} isLive={isLive} keepAwake={keepAwake} onSetKeepAwake={onSetKeepAwake} />
     </div>
@@ -33,8 +33,8 @@ export function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake
 export function MatchBand({ away, home, date, onSketch, treatment }) {
   return (
     <div className="masthead masthead--split">
-      <MastheadLogo team={away} treatment={treatment?.away} side="away" season={date} onSketch={() => onSketch('away')} half />
-      <MastheadLogo team={home} treatment={treatment?.home} side="home" season={date} onSketch={() => onSketch('home')} half />
+      <MastheadLogo team={away} treatment={treatment?.away} side="away" season={date} onSketch={() => onSketch?.('away')} half />
+      <MastheadLogo team={home} treatment={treatment?.home} side="home" season={date} onSketch={() => onSketch?.('home')} half />
       <span className="masthead__slash" aria-hidden="true" />
     </div>
   )
@@ -108,6 +108,7 @@ function WatchButton({ gamePk }) {
     </a>
   )
 }
+
 // The mark inside the masthead tile, sized so the EDGE_BLEED overscale
 // TeamTreatmentMark applies (1.32) lands it at ~53px — 20% larger than the
 // bare 44px logo this tile replaced. The tile itself is a little larger

@@ -3,8 +3,8 @@ import { selectFinalReached } from '../../api/select.js'
 import { Scorebug } from './Scorebug.jsx'
 import { HeaderBug } from './HeaderBug.jsx'
 
-// The scorebug's one placement now: an ANCHORED band at the top of the stage
-// (`.gamehud--console`, ConsoleBand.jsx), for every half — live or
+// The scorebug's one placement now: the innings page's masthead
+// (screens/gameview/InningsHeader.jsx, drawn by HeaderBug.jsx), for every half — live or
 // historical. Split out of InningViewer.jsx — which was at its 1000-line
 // budget — so the runs arithmetic sits in one file instead of being spelled
 // out at the call site.

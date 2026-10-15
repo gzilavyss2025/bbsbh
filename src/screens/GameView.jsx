@@ -440,7 +440,8 @@ export function GameView({ game, section, onSection }) {
         </EmptyState>
       )}
       {feed && step === 2 && !noPlays && (
-        <Suspense fallback={<Loader />}>
+        // While the viewer's chunk loads, the band stands in for the header it will draw.
+        <Suspense fallback={<><MatchBand away={game.away} home={game.home} date={officialDate} treatment={jerseyTreatments} /><Loader /></>}>
         <InningViewer
           feed={feed}
           started={started}
