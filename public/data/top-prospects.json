@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T06:56:16.895Z",
+  "generatedAt": "2026-10-15T06:55:44.162Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -667,7 +667,7 @@
     {
       "rank": 57,
       "playerId": 695491,
-      "name": "Joshua Baez",
+      "name": "Joshua Báez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -1929,7 +1929,7 @@
     {
       "orgRank": 8,
       "playerId": 801725,
-      "name": "Luis De León",
+      "name": "Luis De Leon",
       "teamId": 110,
       "team": "bal",
       "position": "LHP",
@@ -4611,7 +4611,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "54.0 IP, 4.50 ERA, 55 SO",
-      "age": 25,
+      "age": 26,
       "topRank": null
     },
     {
@@ -7413,7 +7413,7 @@
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Baez",
+      "name": "Joshua Báez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
