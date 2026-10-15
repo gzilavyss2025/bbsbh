@@ -1,35 +1,13 @@
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../components/ui/frame/Card.jsx'
 import { isoToday } from '../../../lib/dates.js'
+import { DOW_LABELS } from '../data/shared.js'
 
-const DASH = '—'
-
-// Sunday-first, matching the calendar week Date.getUTCDay() indexes (0=Sun).
-export const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+// Sunday-first; the day-of-week record itself is pure, in data/shared.js (loadNumbers.js
+// imports it, and a loader must not import a .jsx card).
+export { DOW_LABELS }
 export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-// Record by day of week, off the same cutoff-gated `schedule` rows the
-// Schedule section below already renders (fetchTeamSchedule only sets `won`
-// once a game is Final AND on/before the asOf cutoff — see api/schedule.js —
-// so this reads no further ahead than the rest of the page). Days with no
-// decided games yet show DASH rather than "0-0".
-export function dayOfWeekRecord(games) {
-  const tally = DOW_LABELS.map(() => ({ wins: 0, losses: 0 }))
-  for (const g of games) {
-    if (g.won == null) continue
-    const dow = new Date(`${g.apiDate}T00:00:00Z`).getUTCDay()
-    if (g.won) tally[dow].wins++
-    else tally[dow].losses++
-  }
-  return DOW_LABELS.map((label, i) => {
-    const { wins, losses } = tally[i]
-    const total = wins + losses
-    return {
-      k: label,
-      v: total ? `${wins}-${losses}` : DASH,
-      rank: total ? (wins / total).toFixed(3).replace(/^0/, '') : DASH,
-    }
-  })
-}
+
 // Same UTC-parse convention as dayOfWeekRecord's own apiDate → weekday
 // mapping (and isoToday() itself), so "today" lines up with whichever row
 // that same calendar date would have tallied into.

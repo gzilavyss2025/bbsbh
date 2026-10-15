@@ -1,6 +1,8 @@
-// Share one in-flight load between two bands that need it (Standing and Ranks both read the
-// Numbers loader), so the page buys it once. Keyed by the caller; `forgetLoads` runs when
-// the page unmounts, so a return visit fetches fresh. A failed load is forgotten at once.
+import { DIRECT } from '../data/sources.js'
+
+// Share one in-flight load between bands that need it, so the page buys it once. Keyed by
+// the caller; `forgetLoads` runs when the page unmounts, so a return visit fetches fresh.
+// A failed load is forgotten at once.
 const loads = new Map()
 
 export function once(key, load) {
@@ -9,3 +11,12 @@ export function once(key, load) {
 }
 
 export const forgetLoads = () => loads.clear()
+
+// The page's loader sources (data/sources.js): the four shared reads, each bought once per
+// argument list while the page is open.
+export const SHARED = Object.fromEntries(
+  Object.entries(DIRECT).map(([name, fetch]) => [
+    name,
+    (...args) => once(`${name}:${JSON.stringify(args)}`, () => fetch(...args)),
+  ]),
+)
