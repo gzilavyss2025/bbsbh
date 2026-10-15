@@ -108,34 +108,39 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2h);
+  /* Mono by default: the row is facts and figures. The tags and the park name
+     below set the display face themselves. */
+  font-family: var(--font-mono);
   font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 
+/* The level and doubleheader tags are the canvas's count tag: square, a 2px ink
+   edge on the page paper (.card__count, system/stamped/stamped.css). */
 .gamecard__level {
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  border: var(--bw-hair) solid var(--border-rule);
+  padding: 1px var(--space-2);
+  border-radius: 0;
+  background: var(--bg-canvas);
+  border: var(--bw-heavy) solid var(--border-stamped);
   font-family: var(--font-display);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-heading);
 }
 
 /* "Game 1 / Game 2" doubleheader chip — same pill as the level tag but tinted
    so a twin bill's two rows are told apart without a second glance. */
 .gamecard__dh {
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  border: var(--bw-hair) solid var(--border-rule);
+  padding: 1px var(--space-2);
+  border-radius: 0;
+  background: var(--bg-canvas);
+  border: var(--bw-heavy) solid var(--border-stamped);
   font-family: var(--font-display);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-heading);
 }
 
 /* "N Prospects on this roster" — a bonus fact, not a functional tag like
@@ -174,9 +179,9 @@
    just ink), rather than the plain caption-weight text it used to share with
    the bonus badges around it. */
 .gamecard__status {
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-num);
   text-transform: uppercase;
   color: var(--text-heading);
 }
@@ -258,7 +263,7 @@
   /* Match the base rule's top padding — a fill makes lopsided padding
      visible in a way the bare paper row never showed. */
   padding-bottom: var(--space-2);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   background: var(--field-soft);
   border-top-color: color-mix(in srgb, var(--field) 35%, var(--border-rule));
   /* Root a stacking context so the hover sheen below can sit at z -1 —
@@ -352,9 +357,9 @@
 }
 
 .gamecard__readypill--complete {
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  border: var(--bw-hair) solid color-mix(in srgb, var(--field) 35%, var(--border-rule));
+  padding: 1px var(--space-2);
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--field-deep);
   background: var(--field-soft);
   font-family: var(--font-display);
   letter-spacing: var(--ls-caps);

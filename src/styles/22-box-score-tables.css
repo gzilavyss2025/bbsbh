@@ -135,11 +135,11 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4) var(--space-3h);
-  border-radius: var(--radius-md);
-  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
   background: var(--surface-card);
   color: var(--text-body);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-stamped);
 }
 /* The card-level accent tint (GameResultFace.jsx's cardAccent/isPinnedGame):
    two independent channels, since a card can carry both at once (your team's

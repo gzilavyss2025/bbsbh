@@ -168,7 +168,7 @@ export function ReadyPill({ game }) {
             title={`${it.label}: ${it.ok ? 'posted' : 'not posted yet'}`}
           >
             <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-              <rect x="1.5" y="1.5" width="13" height="13" rx="3" />
+              <rect x="1.5" y="1.5" width="13" height="13" />
               <path className="pip__tick" d="M4 8.5l2.5 2.5L12 5.5" />
             </svg>
           </span>
