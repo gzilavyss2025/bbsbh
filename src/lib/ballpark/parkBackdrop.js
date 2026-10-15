@@ -96,5 +96,9 @@ export function parkBackdrop(venueName, t, venueId = null) {
     // The bare park name, printed on the card itself (GameCard's
     // .gamecard__parkname) rather than riding in a hover title.
     name,
+    // The credit that goes with whichever photo won, for a surface that shows the
+    // photo as a picture rather than a wash (the lineup page's park sheet).
+    creditText: photo.creditText,
+    creditHref: photo.creditHref,
   }
 }

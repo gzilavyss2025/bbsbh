@@ -106,7 +106,27 @@
   height: min(260px, 40dvh);
 }
 
-/* THE PARK: stat boxes, then ranked rows with a dot on a bar. */
+/* THE PARK: the photo, stat boxes, then ranked rows with a dot on a bar. */
+/* Full width: it breaks out of the body's padding and sits flush under the house band. */
+.lpark__photo {
+  margin: calc(-1 * var(--space-3h)) calc(-1 * var(--space-3h)) 0;
+}
+.lpark__photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-inset);
+}
+.lpark__photo figcaption {
+  padding: var(--space-1) var(--space-3h) 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+.lpark__photo a {
+  color: inherit;
+}
 /* layout-exempt: three boxed facts, a fixed row */
 .lpark__facts {
   display: grid;
