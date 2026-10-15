@@ -28,6 +28,44 @@
   align-items: center;
   padding: var(--space-3h);
 }
+/* THE ACTION PHOTO (#1863, layout C): a wash behind the hero row. It is anchored top right and
+   fades to paper on the left and at the foot, so the headshot and name keep the paper. The row's
+   own children sit above it. No photo (a 404), or one still loading: nothing shows. */
+.pnext__id {
+  position: relative;
+}
+.pnext__id > :not(.pnext__action) {
+  position: relative;
+}
+.pnext__action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 52%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  opacity: 0;
+  filter: saturate(0.85);
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, black 62%), linear-gradient(to top, transparent 0, black 22%);
+  mask-image:
+    linear-gradient(to right, transparent 0, black 62%), linear-gradient(to top, transparent 0, black 22%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.pnext__action.is-ready {
+  opacity: 0.92;
+}
+/* The name can reach the photo's soft edge: a paper halo keeps its edge readable. */
+.pnext__id--photo .pnext__role,
+.pnext__id--photo .pnext__name {
+  text-shadow:
+    0 0 6px var(--bg-canvas),
+    0 0 12px var(--bg-canvas);
+}
+
 .shot.pnext__shot {
   width: 96px;
   height: 112px;

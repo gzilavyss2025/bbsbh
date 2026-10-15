@@ -11,6 +11,7 @@ import { ProspectPill } from '../../../components/badges/ProspectPill.jsx'
 import { useOvr } from '../../../components/ovr/useOvr.js'
 import { DASH, Fact, debutLabel, draftLabel } from '../parts.jsx'
 import { HERO_STAMP_DELAY, ageFact, headerExtras } from './heroData.js'
+import { HeroActionPhoto } from './top/HeroActionPhoto.jsx'
 import { HeroBand } from './top/HeroBand.jsx'
 import { HeroStamp } from './top/HeroStamp.jsx'
 import { HeroStrip } from './top/HeroStrip.jsx'
@@ -55,19 +56,30 @@ export function PlayerNextHero({ core }) {
   const x = headerExtras(core, useOvr(bio))
   const stamp = x?.ratings[0]
   const [open, setOpen] = useState(false)
+  // The action photo: 'wait' until it loads, 'ready' once shown, 'gone' after a 404.
+  const [photo, setPhoto] = useState('wait')
   const stripId = useId()
   const club = status ? null : bio.team
   const pos = bio.twoWay ? 'DH/P' : (bio.isPitcher && heroRole) || bio.posAbbr
+  const isMlb = isMlbTeamId(club?.id) || Boolean(status && bio.debut)
   const role = bio.twoWay ? 'Two-way' : bio.isPitcher ? 'Pitcher' : 'Batter'
   return (
     <Card as="div" frame="stamped" body="flush" stampIn className="pnext__hero" style={{ '--stamp-delay': HERO_STAMP_DELAY }}>
       <HeroBand core={core} />
-      <div className="pnext__id">
+      <div className={`pnext__id${photo === 'ready' ? ' pnext__id--photo' : ''}`}>
+        {isMlb && photo !== 'gone' && (
+          <HeroActionPhoto
+            personId={bio.id}
+            ready={photo === 'ready'}
+            onReady={() => setPhoto('ready')}
+            onGone={() => setPhoto('gone')}
+          />
+        )}
         <Headshot
           personId={bio.id}
           name={bio.fullName}
           teamId={club?.parentOrgId ?? club?.id}
-          isMlb={isMlbTeamId(club?.id) || Boolean(status && bio.debut)}
+          isMlb={isMlb}
           className="pnext__shot"
         />
         <div className="pnext__who">
