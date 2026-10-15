@@ -1,5 +1,3 @@
-
-
 /* The lineup page's Attendance dot sits at the cell's right edge, like the
    Uniform and HP ump dots. Scoped to the fact cell, so the box score's inline
    Attendance figure keeps its dot beside the number. */

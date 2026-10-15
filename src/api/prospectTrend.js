@@ -277,8 +277,8 @@ export function prospectCardView(entry, ageYears, levelAverageAge, tenure = null
   }
 }
 
-// The Prospect Card for one player, as both player-page loaders build it
-// (src/api/player/overview.js). `snapshot` is the trend file,
+// The Prospect Card for one player, as the player page builds it
+// (src/screens/player/next/modules/prospect/prospectView.js). `snapshot` is the trend file,
 // `entry` his row in it (or null), `liveSportId` the level of his live team.
 // Returns the card's view and `sportId`, the level the card names.
 //

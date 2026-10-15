@@ -87,7 +87,7 @@ Module issue: #1885.
 | Tiles in each scope | same lines | have | — |
 | Postseason by round | `fetchPostseasonByRound` (`src/api/player/postseasonRegister.js`, `gameLog` with `gameType=F,D,L,W`, never `P`) | have | — |
 | League AVG / ERA per season (WAR popover) | `leagueAverage()` + `public/data/league-averages.json` (`scripts/gen-league-averages.mjs`) | have | Run the generator after the 2026 Final: `lastSeason` is still 2025 |
-| All-Star star | `fetchAllStarRosterIds` sets `r.allStar` in `src/api/player/context.js` | have | Render it. MLB only. Neither board player has an MLB All-Star season |
+| All-Star star | `fetchAllStarRosterIds` (`src/api/player/core.js`) marks the All-Star seasons | have | Render it. MLB only. Neither board player has an MLB All-Star season |
 | Gap rows (injured / did not play) | `missingSeasonRows` (`src/api/person/careerRegister.js`) with IL transactions | reshape | It starts at the MLB debut. Start at the first pro season, and add a fixed "2020: no minor-league season" note |
 
 The known gaps "All-Star star" and "gap rows" are **refuted**: the repo has both
@@ -100,7 +100,7 @@ batting spots `3`–`10` and days `dsu`–`dsa` all return rows. `s2` returns no
 
 | Field | Source today | Status | Fix |
 | --- | --- | --- | --- |
-| Season picker (2026 … 2023) | the player loader uses the current season only | missing | Add a season argument to the `statSplits` calls in `src/api/player/context.js` |
+| Season picker (2026 … 2023) | the player loader uses the current season only | missing | Add a season argument to the `statSplits` calls in `src/api/boxlines/splitsLoad.js` and `src/screens/player/next/modules/splits/splitsData.js` |
 | Career option | `fetchCareerSplits` (`src/api/boxlines/careerSplits.js`, `careerStatSplits`) | reshape | Call it with `vl,vr` + `SITUATIONAL_SIT_CODES` and feed `splitsView` unchanged |
 | Scope Regular / Postseason | `postseasonSplits` (`gameType=P`), `SplitsSection` | have | — |
 | Scope All (regular + postseason) | none | missing | Extend `mergeCareerSplits` (`careerSplits.js`) to return OBP, SLG, SO, BB, HR, PA per sitCode |

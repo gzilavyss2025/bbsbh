@@ -547,7 +547,7 @@
 }
 /* Most-Fouls-In-A-PA's row is the roomiest on the page (its own scorebug
    below already fills the card's width), so its headshot steps up one size
-   further still, past Single-Game Highs' --lg. */
+   further still, past Single-Game Highs' base size. */
 .shot.sgh-shot.sgh-shot--xl {
   width: var(--shot-lg-w);
   height: var(--shot-lg-h);
