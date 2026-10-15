@@ -77,7 +77,7 @@ export function TeamFilterStrip({
               type="button"
               role="tab"
               aria-selected={isAll}
-              title="MLB"
+              aria-label="MLB"
               className={`vsteam__team teamfilterstrip__pin${isAll ? ' is-active' : ''}`}
               onClick={() => onSelect(null)}
             >
@@ -112,7 +112,7 @@ export function TeamFilterStrip({
                 type="button"
                 role="tab"
                 aria-selected={active}
-                title={t.name}
+                aria-label={t.name}
                 data-team-id={t.id}
                 ref={active ? activeRef : null}
                 className={`vsteam__team${active ? ' is-active' : ''}`}

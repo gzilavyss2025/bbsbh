@@ -220,17 +220,15 @@ export async function fetchRosterEntriesForTeams(teamIds, rosterType = 'active')
 // card list still shows every current affiliate. Sorted highest level first.
 // Degrades to [].
 const AFFILIATE_SPORT_IDS = [11, 12, 13, 14]
-let cachedAffiliates = null
-async function fetchStaticAffiliates() {
-  if (cachedAffiliates) return cachedAffiliates
-  try {
-    const res = await fetch('/data/affiliates.json')
-    if (!res.ok) throw new Error(`affiliates.json ${res.status}`)
-    cachedAffiliates = await res.json()
-  } catch {
-    cachedAffiliates = { season: null, byOrgId: {} }
-  }
-  return cachedAffiliates
+let affiliatesLoad = null
+export function fetchStaticAffiliates() {
+  affiliatesLoad ??= fetch('/data/affiliates.json')
+    .then((res) => {
+      if (!res.ok) throw new Error(`affiliates.json ${res.status}`)
+      return res.json()
+    })
+    .catch(() => ({ season: null, byOrgId: {} }))
+  return affiliatesLoad
 }
 export async function fetchAffiliates(teamId, season) {
   if (!teamId || !season) return []

@@ -37,6 +37,7 @@
 // date would print a three-day-old dateline inside a card headed "Last 48
 // hours" (probe-retro-il.mjs).
 import { getJson } from '../statsapi.js'
+import { fetchStaticAffiliates } from '../team.js'
 import { addDays, toApiDate } from '../../lib/dates.js'
 import { fetchTeams } from '../schedule.js'
 import { SPORT_IDS } from '../../lib/teams.js'
@@ -148,24 +149,16 @@ export function shapeLeagueFeed(rows, ctx, window) {
 // option or a call-up logged only against the Triple-A club stops finding its
 // parent. Worth failing soft for — the card is still a card without it.
 let affiliateMap = null
-export async function fetchAffiliateParentMap() {
-  if (affiliateMap) return affiliateMap
-  affiliateMap = (async () => {
+export function fetchAffiliateParentMap() {
+  affiliateMap ??= fetchStaticAffiliates().then((data) => {
     const map = new Map()
-    try {
-      const res = await fetch('/data/affiliates.json')
-      if (!res.ok) throw new Error(`affiliates.json ${res.status}`)
-      const data = await res.json()
-      for (const [orgId, clubs] of Object.entries(data.byOrgId ?? {})) {
-        for (const club of clubs ?? []) {
-          if (club?.id != null) map.set(club.id, Number(orgId))
-        }
+    for (const [orgId, clubs] of Object.entries(data.byOrgId ?? {})) {
+      for (const club of clubs ?? []) {
+        if (club?.id != null) map.set(club.id, Number(orgId))
       }
-    } catch {
-      // Left empty on purpose — see above.
     }
     return map
-  })()
+  })
   return affiliateMap
 }
 
