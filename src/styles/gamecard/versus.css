@@ -84,8 +84,8 @@
 }
 
 /* The seam tag: the stamped ink square from the canvas, with the watermark's
-   '@' blown up inside it, tilted, and clipped by the square. The square stands
-   upright while the stripes lean; the glyph is tilted on its own. It presses in
+   '@' blown up inside it and clipped by the square. The square and the glyph
+   both stand upright while the stripes lean. It presses in
    after the stripes. */
 /* layout-exempt: one glyph centred in a square tag, not a layout */
 .gamecard__slashtag {
@@ -110,9 +110,8 @@
   font-weight: var(--w-black);
   font-size: var(--fs-title-sm);
   line-height: var(--lh-solid);
-  scale: 2.5;
+  scale: 3;
   translate: 0 -8%;
-  transform: rotate(-14deg);
 }
 
 /* THE VERSUS STATE. Two triggers share one set of rules: a press, or the
