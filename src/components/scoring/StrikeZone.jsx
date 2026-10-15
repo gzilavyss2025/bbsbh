@@ -7,17 +7,14 @@ import { groundBoxes } from '../../lib/zone/ground.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { batterFigureUrls } from '../../api/uniforms.js'
 import { BattingUniformContext } from '../logo/uniformContexts.js'
-import { pitchMark } from '../../lib/pitch/pitchTypes.js'
-import { glyphD } from '../../lib/pitch/pitchGlyph.js'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet) against THIS batter's own zone
 // (strikeZoneTop/Bottom), drawn from the BROADCAST CAMERA behind the pitcher
 // rather than the umpire's eye — the mirror lives in lib/zone/zoneGeometry.js,
 // whose header carries the argument. Dots are numbered in pitch order
-// and drawn as the pitch's own mark (pitchMark: family is the shape, pitch is the
-// colour, docs/pitch-types.md), so the zone, the list beside it and the player
-// page's arsenal read as one system. How each pitch ENDED is the list's job.
+// and colored by the same five categories as the pitch ladder (pitchDotCategory
+// → cat), so the two read as one system.
 //
 // This is reveal-only by construction: it reads `pitchDetails` off a
 // computeHalfInningFeed at-bat card, which is only built inside a SealBox reveal
@@ -132,28 +129,6 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
   )
 }
 
-// One pitch's mark on the plot: the family's shape in the pitch's colour, ink-outlined
-// (a ring is hollow), its number inside in plain ink. A ball in play gets a second, outer ring so the ball put in play
-// reads at a glance; every other ending is in the list beside the diagram.
-// A triangle's weight is low (its base is the wide part), so its number sits a little lower.
-const numY = (mark) => (mark.shape === 'triangle' ? 2.8 : 0.3)
-
-function PitchMarkDot({ mark, cat, x, y, no }) {
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      {cat === 'inplay' && <circle className="strikezone__inplay" r={13} />}
-      <path
-        className={`strikezone__mark${mark.ring ? ' strikezone__mark--ring' : ''}`}
-        d={glyphD(mark.shape, 8.5)}
-        style={{ '--pitch': mark.color }}
-      />
-      <text className="strikezone__num" y={numY(mark)}>
-        {no}
-      </text>
-    </g>
-  )
-}
-
 // A batter stands in the box on the side of the plate closer to the base he
 // runs out of the box toward: right-handed batters box on the third-base
 // side, left-handed on the first-base side. This diagram is drawn from the
@@ -245,7 +220,10 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
           const y = sy(p.pz)
           return (
             <g key={p.no}>
-              <PitchMarkDot mark={pitchMark(p.typeCode)} cat={p.cat} x={x} y={y} no={p.no} />
+              <circle className={`strikezone__dot strikezone__dot--${p.cat}`} cx={x} cy={y} r={8.5} />
+              <text className={`strikezone__num strikezone__num--${p.cat}`} x={x} y={y + 0.3}>
+                {p.no}
+              </text>
             </g>
           )
         })}
@@ -273,21 +251,6 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
 // onPick, onHover } turns the number dot of each pitch in `nos` into a ghost
 // .btn that plays that pitch; its hit area is the whole row (pitcher-card/card.css).
 // Without it the list is the static one the zone sheet shows.
-// The number cell of a list row: the same mark the plot draws, the row's number inside it.
-function ListMark({ p }) {
-  const mark = pitchMark(p.typeCode)
-  return (
-    <svg className="pitchlist__num" viewBox="-12 -12 24 24" width="22" height="22" aria-hidden="true">
-      <path
-        className={`strikezone__mark${mark.ring ? ' strikezone__mark--ring' : ''}`}
-        d={glyphD(mark.shape, 8.5)}
-        style={{ '--pitch': mark.color }}
-      />
-      <text className="strikezone__num" y={numY(mark)}>{p.no}</text>
-    </svg>
-  )
-}
-
 export function PitchList({ pitchDetails, pick }) {
   const pitches = pitchDetails ?? []
   if (pitches.length === 0) return null
@@ -309,10 +272,10 @@ export function PitchList({ pitchDetails, pick }) {
               onMouseEnter={pick.onHover && (() => pick.onHover(p.no))}
               onMouseLeave={pick.onHover && (() => pick.onHover(null))}
             >
-              <ListMark p={p} />
+              <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
             </Button>
           ) : (
-            <ListMark p={p} />
+            <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
           )}
           <span className="pitchlist__type">{p.type || '—'}</span>
           <span className="pitchlist__meta">
