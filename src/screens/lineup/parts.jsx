@@ -1,4 +1,3 @@
-import { ManagerLink } from '../../components/team/ManagerLink.jsx'
 import { monthDay } from '../../lib/dates.js'
 
 // Small parts both lineup pages draw: the live page (screens/TeamInfo.jsx) and the new one
@@ -24,26 +23,6 @@ export function seasonVsOpponentLine(v, oppAbbr) {
     return `${monthDay(g.date)} ${g.home ? 'vs' : '@'} ${oppAbbr}: ${stat}`
   }
   return `${v.games.length} GS vs ${oppAbbr} this year: ${stat}`
-}
-
-// The manager fill-in: surname-first name with the uniform number inked in
-// seam red, like every lineup row. Null (→ the Fact's "—") until resolved.
-// Linked to his manager page once fetchManager resolves a personId (older
-// cached data / a fetch that raced ahead of that field lands here without
-// one — ManagerLink degrades to plain text rather than a dead link).
-export function managerFact(manager) {
-  if (!manager) return null
-  return (
-    // The fact PRINTS surname-first; the address takes spoken order
-    // (ADR-0057), which `name` on the same object already is.
-    <ManagerLink id={manager.personId} name={manager.name} className="fact__person">
-      {manager.lastFirst}
-      {manager.jersey ? (
-        <span className="fact__jersey">{manager.jersey}</span>
-      ) : null}
-      {manager.interim ? <span className="fact__note">interim</span> : null}
-    </ManagerLink>
-  )
 }
 
 // A small crowd — three heads and shoulders — drawn as an SVG, filled like the
