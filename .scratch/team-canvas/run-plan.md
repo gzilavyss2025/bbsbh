@@ -1,7 +1,7 @@
 # Run plan: team page, one page in the new look (#1107, #1154)
 
 This is the run plan for `/orchestrate` Lane 3 (`.claude/skills/orchestrate/SKILL.md`).
-It has 11 rows for the orchestrator, in 7 waves, and 2 steps that Gary does himself.
+It has 11 rows for the orchestrator, in 6 waves, and 2 steps that Gary does himself.
 
 **Goal.** `/team/{id}` becomes one page of seven bands (Standing, Ranks, Games, Roster,
 Farm, Money, About) with a sticky jump bar, in the player-page look (ADR-0109): square
@@ -21,7 +21,7 @@ element goes in which band, the data decisions and the request counts.
 
 | Gate | When | What Gary does |
 |---|---|---|
-| **G1: pick layouts** | After row 1 is merged. Runs while rows 2 and 3 run. | Paste the prompt in "Gary's step G1" into Claude Design. Choose a layout (A, B or C) for each element. Send the choices to the orchestrator. |
+| **G1: pick layouts** | After row 1 is merged. Runs while row 3 runs. | Paste the prompt in "Gary's step G1" into Claude Design. Choose a layout (A, B or C) for each element. Send the choices to the orchestrator. |
 | **G2: judge the pilot** | After row 5 (the Standing band) is green. | Look at the screenshots. Say "go" or say what to change. Rows 6a to 6f start only after "go". |
 
 The orchestrator replaces `{PICKS}` in row 5 with Gary's G1 message, word for word.
@@ -31,10 +31,11 @@ The orchestrator replaces `{PICKS}` in row 5 with Gary's G1 message, word for wo
 | Question | Answer |
 |---|---|
 | Merge each wave? | Yes. When every PR of a wave is green, `/stack-prs` those PR numbers (standing permission). Then start the next wave from the new `origin/main`. |
-| Stack a child on an unmerged PR? | No. A row starts only when every row in its "Depends on" is merged. Row 4 is the one exception: it continues row 3's open PR. |
+| Stack a child on an unmerged PR? | No. A row starts only when every row in its "Depends on" is merged. Row 4 reviews row 3's code after it merges, and opens its own PR. |
 | Cap | 3 children at once. |
 | Models | As in the table. Opus 5.5 only for row 4. |
-| Ledger | Comments on #1107, one per wave. No new issue. |
+| Row 4 opens no PR | It found nothing to fix. Count row 4 as merged and start row 5. |
+| Ledger | The "Orchestrator ledger" issue (orchestrate skill, "Ledger"), one comment per wave. Ask Gary before you create it if it does not exist. |
 | PR text | Each PR says `Part of #1107 (row <n>)`. Only row 7 says `Closes #1107 and #1154`. |
 | A row fails | Mark it and its dependents blocked. Run the rest. |
 | Close #1107 or #1154 | Only through row 7's PR. |
@@ -45,36 +46,41 @@ The orchestrator replaces `{PICKS}` in row 5 with Gary's G1 message, word for wo
   `.claude/skills/run/shot.mjs`, send them to Gary with `SendUserFile`, and name the exact
   route and `gamePk`. Add `?nointro` to every test URL.
 - The new page lives at an unlisted address that row 3 creates. Rows 5 and 6 use it.
-- Cold-load request counts need a production build (`npm run build`, then
-  `npm run preview`). StrictMode doubles dev counts.
+- Request counts need a production build (`npm run build`, then `npm run preview`).
+  StrictMode doubles dev counts. The limit for `/team/158` is ADR-0082's: **≤ 20 cold,
+  ≤ 110 fully scrolled**. `.scratch/team-one-scroll/count-requests.mjs` reports both.
 
 ## Shared files
 
 Two rows that edit the same file run in different waves. Rows 5 and 6a to 6f each edit
-only their own band's files. These are **append-only** and may be shared in one wave:
+only their own band's files. This one is **append-only** and may be shared in one wave:
 
 - `src/index.css`: one `@import` each.
-- `docs/` and `src/screens/team/CLAUDE.md`: one paragraph each.
+
+The band rows do not edit `docs/` or any `CLAUDE.md`. Row 7 documents all seven bands.
 
 ## The table
 
 | # | What | Model | Effort | Depends on (merged) | Wave |
 |---|---|---|---|---|---|
 | 1 | Audit every team-page element (read-only, writes `audit.md`) | `claude-sonnet-5-5` | high | none | 1 |
-| 3 | Foundation: ADR-0082, hidden page shell, jump bar, lazy bands, redirects | `claude-sonnet-5-5` | high | 1 | 2 |
-| 4 | Review and fix row 3's PR | `claude-opus-5-5` | medium | 3 green (continues row 3's PR) | 3 |
+| 3 | Foundation: hidden page shell, jump bar, lazy bands, redirects | `claude-sonnet-5-5` | high | 1 | 2 |
+| 4 | Review row 3's merged code; fix in a new PR | `claude-opus-5-5` | medium | 3 | 3 |
 | 5 | Pilot: build the Standing band | `claude-sonnet-5-5` | high | 3, 4, and G1 | 4 |
 | 6a | Ranks band | `claude-sonnet-5-5` | medium | 5, and G2 "go" | 5 |
 | 6b | Games band | `claude-sonnet-5-5` | medium | 5, G2 | 5 |
 | 6c | Roster band | `claude-sonnet-5-5` | medium | 5, G2 | 5 |
-| 6d | Farm band | `claude-sonnet-5-5` | medium | 5, G2 | 6 |
-| 6e | Money band | `claude-sonnet-5-5` | medium | 5, G2 | 6 |
-| 6f | About band | `claude-sonnet-5-5` | medium | 5, G2 | 6 |
-| 7 | Swap `/team/{id}` and delete the old tab code | `claude-sonnet-5-5` | medium | 6a to 6f | 7 |
+| 6d | Farm band | `claude-sonnet-5-5` | medium | 5, G2 | 5 |
+| 6e | Money band | `claude-sonnet-5-5` | medium | 5, G2 | 5 |
+| 6f | About band | `claude-sonnet-5-5` | medium | 5, G2 | 5 |
+| 7 | Swap `/team/{id}` and delete the old tab code | `claude-sonnet-5-5` | medium | 6a to 6f | 6 |
 
 Row 2 is G1 (Gary, in Claude Design). It has no number in the table because the
 orchestrator does not run it. It may start as soon as row 1 is merged, in parallel with
 row 3.
+
+Rows 6a to 6f are one wave of six. The cap of 3 runs them three at a time, and the wave
+is stacked when all six are green.
 
 ## Row 1 — Sonnet 5.5, effort high
 
@@ -97,7 +103,7 @@ src/components/ui/. /design-lab shows them. Read docs/player-redesign.md section
 and src/screens/player/next/CLAUDE.md to see how the player page used them.
 
 Do this:
-1. List every card, table, chart and rail on the Overview and all six tabs. Start from
+1. List every card, table, chart and rail on all six tabs (the Overview is one of them). Start from
    src/screens/TeamPage.jsx, src/screens/team/*Tab.jsx, src/screens/team/modules/**,
    TeamHubShell.jsx and src/components/teamstats/.
 2. One row per element: element; file; band; the shared part it maps to (or "none");
@@ -162,8 +168,7 @@ docs/player-redesign.md, src/screens/player/next/CLAUDE.md, src/screens/team/CLA
 084376666 (the player page before its swap, #1884; the hidden route itself is gone now).
 
 Do this, test-first where a function is new:
-1. ADR-0082: change status from DRAFT to Accepted, note ADR-0109 in it, and mark ADR-0034
-   superseded. Do not delete ADR-0034.
+1. Do not change the status of ADR-0082 or ADR-0034. That lands with the swap (row 7).
 2. Add an unlisted route in src/lib/route.js and src/App.jsx. Page shell: TeamHubShell, then
    seven band slots in this order: Standing, Ranks, Games, Roster, Farm, Money, About. Mount
    each band with src/hooks/scroll/useNearView.js, as the player page does, so nothing loads
@@ -172,13 +177,16 @@ Do this, test-first where a function is new:
 3. Write hiddenTeamSections(team) in src/screens/team/data/shared.js (test the league?.id
    case before any sport test). A band with no data does not render and has no jump-bar
    button. Keep hiddenTeamTabs for the old routes until the swap.
-4. Build the sticky jump bar from src/components/chrome/HubTabBar.jsx and
-   src/styles/system/jumpbar/. It marks the band you scroll through. Keep it club-neutral
-   (ADR-0030).
+4. Extend the shared jump bar: src/components/chrome/HubTabBar.jsx and
+   src/styles/system/jumpbar/, as src/screens/player/next/PlayerNextPage.jsx and
+   src/screens/lineup/next/LineupJumpBar.jsx already do. Give each button a count badge
+   (ADR-0109). It marks the band you scroll through. Keep it club-neutral (ADR-0030).
+   Do not make a second jump bar or stamped card in src/screens/team/ (ADR-0109).
 5. Redirect the five tab routes to anchors on the new page, behind the hidden address for now.
-6. Count requests for a cold load of /team/158 in a PRODUCTION build (npm run build, then
-   npm run preview). Use .scratch/team-one-scroll/count-requests.mjs. Today's Overview is
-   the ceiling. Put the before and after numbers in the PR text.
+6. Count requests for /team/158 in a PRODUCTION build (npm run build, then npm run
+   preview), cold and fully scrolled. Use .scratch/team-one-scroll/count-requests.mjs.
+   The ceiling is ADR-0082's: at most 20 cold and 110 scrolled. Put the before and after
+   numbers in the PR text.
 
 Keep: ?d=/?s= on every door out (a dropped ?d= is a spoiler bug); file and directory
 caps (check-file-size, check-dir-size); TeamPage.jsx must not grow.
@@ -191,23 +199,26 @@ ponytail-review on the diff, apply its cuts, then run /code-review.
 Stop and ask when: the count goes over the ceiling, or an old route cannot redirect.
 ```
 
-## Row 4 — Opus 5.5, effort medium (continues row 3's PR)
+## Row 4 — Opus 5.5, effort medium (reviews row 3 after it merges)
 
-The orchestrator uses its "row that continues an open PR" footer, with `source_revision`
-and `outcome_branch` set to row 3's branch.
+Row 4 starts from `main` after row 3's PR is merged. It opens its own PR only if it fixes
+something. If it finds no defect it can prove, it opens no PR, and row 4 counts as merged.
 
 ```
-Review the foundation PR for the team page (row 3's PR). Fix only a defect you can prove
-with a failing test or a command; list every other finding in a PR comment, worst first.
+Review the foundation of the new team page. It is on main now, merged from row 3's PR
+(the orchestrator gives you its number). Fix only a defect you can prove with a failing
+test or a command, in a new PR. Put every other finding, worst first, in a comment on
+row 3's PR. If you find no provable defect, open no PR and tell your parent.
 
-Check, with evidence: (1) every link out keeps ?d= and ?s=; (2) cold-load request count for
-/team/158 in a production build is at or under today's Overview, and the PR text shows both
-numbers; (3) a band with no data does not render and has no jump-bar button, for 556, 249
-and 675; (4) the five old tab routes land on the right anchor; (5) ADR-0082 is Accepted and
-ADR-0034 is marked superseded, not deleted; (6) file and directory caps hold and
-TeamPage.jsx did not grow; (7) no gate was added to the team page (it is an open page;
-ADR-0034 "The cutoff is opt-in now"); (8) each band has its own folder, so rows 5 and 6
-can edit one band each.
+Check, with evidence: (1) every link out keeps ?d= and ?s=; (2) the request count for
+/team/158 in a production build is at most 20 cold and 110 fully scrolled (ADR-0082), and
+row 3's PR text shows the before and after numbers; (3) a band with no data does not render
+and has no jump-bar button, for 556, 249 and 675; (4) the five old tab routes land on the
+right anchor; (5) the jump bar extends the shared HubTabBar with count badges, and there is
+no second jump bar or stamped card in src/screens/team/ (ADR-0109); (6) file and directory
+caps hold and TeamPage.jsx did not grow; (7) no gate was added to the team page (it is an
+open page; ADR-0034 "The cutoff is opt-in now"); (8) each band has its own folder, so rows
+5 and 6 can edit one band each; (9) ADR-0082 and ADR-0034 did not change status yet.
 ```
 
 ## Row 5 — Sonnet 5.5, effort high
@@ -235,7 +246,7 @@ Square corners. Tokens only, no raw hex. Rank reads "78 of 89" on its own line.
 Rank emphasis uses --marker, never --seal. No title= tooltips.
 
 Keep: ?d=/?s= on every link; MiLB fallbacks; the band does not render when empty; the
-request count of /team/158 stays at or under the ceiling.
+request count of /team/158 stays at most 20 cold and 110 scrolled (ADR-0082).
 Check: the hidden address with ?nointro at 390 and 1180 px, for 158 and 249. Take
 screenshots with .claude/skills/run/shot.mjs, zoom on each card, compare to the matching
 player-page card, list three differences and fix them. Send the final screenshots to Gary
@@ -267,7 +278,8 @@ gave no choice, take the layout nearest the pilot's and log a [DECISION: ...] li
 PR text. Reuse the module and its loader. Tokens only. Square corners. Edit only {BAND}'s
 folder, plus one @import line in src/index.css if you add a partial.
 
-Keep: ?d=/?s= on every link; MiLB fallbacks; request count at or under the ceiling.
+Keep: ?d=/?s= on every link; MiLB fallbacks; request count of /team/158 at most 20 cold
+and 110 scrolled (ADR-0082).
 Check: the hidden address with ?nointro at 390 and 1180 px for 158 and one affiliate that
 has this band. Take screenshots with .claude/skills/run/shot.mjs; compare to the pilot and
 the player page; list three differences; fix them. Send the final screenshots to Gary with
@@ -288,11 +300,14 @@ Goal: the swap PR. /team/{id} serves the new page; delete the old tab code.
 Do this: route /team/{id} to the new page; keep the five old tab routes as redirects to
 anchors; remove the hidden address; delete the old Tab components and loaders that nothing
 uses (src/screens/TeamPage.jsx old body, *Tab.jsx, load*.js) and hiddenTeamTabs if nothing
-uses it; update src/screens/team/CLAUDE.md and src/CLAUDE.md. Put "Closes #1107 and #1154"
-in the PR text.
+uses it. ADR-0082: change status from DRAFT to Accepted. ADR-0034: mark it superseded by
+ADR-0082; do not delete it. Document the page: one paragraph per band (seven) in
+src/screens/team/CLAUDE.md, and update src/CLAUDE.md and docs/ where they name the old
+tabs. Put "Closes #1107 and #1154" in the PR text.
 Check before you open the PR: screenshots at 390 px of an MLB club (158), Triple-A (556),
-Single-A (249) and winter ball (675), sent to Gary with SendUserFile. Run the cold-load
-request count again (production build) and put both numbers in the PR.
+Single-A (249) and winter ball (675), sent to Gary with SendUserFile. Run the request
+count again (production build), cold and scrolled: at most 20 and 110 (ADR-0082). Put the
+before and after numbers in the PR.
 Done means: lint, npm test, build pass; PR into main; never push to main. Last step:
 ponytail-review, apply cuts, then /code-review.
 ```
@@ -302,5 +317,7 @@ ponytail-review, apply cuts, then /code-review.
 - Row 5 is a pilot because Gary judges the look on one band before six more are built.
 - Rows 2 (design) and 3 (foundation) run in parallel: the foundation does not need the boards.
 - Row 4 is Opus 5.5 because a fresh reader finds `?d=` and request-count faults the author misses.
+  It runs after row 3 merges, so a wave stack cannot remove the PR it works on.
+- The ADR status change is in row 7, because ADR-0082 and ADR-0109 say it lands when #1107 ships.
 - Rows 6a to 6f run at medium because they copy the pilot's pattern.
 - Design effort does not improve taste or variety. Variety comes from G1's "3 layouts" step.
