@@ -10,7 +10,7 @@
      red for any strike (called, swinging, foul), blue for a ball in play. Same three here. */
   --pd-ball: var(--accent-positive);
   --pd-strike: var(--accent-negative);
-  --pd-inplay: var(--allstar-blue);
+  --pd-inplay: var(--accent-inplay);
 }
 
 .strikezone {

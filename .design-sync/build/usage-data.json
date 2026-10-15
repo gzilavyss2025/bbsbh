@@ -119,6 +119,7 @@
   "award-line": "Medal-amber border and timeline node for honors.",
   "award-soft": "Soft medal-amber chip fill.",
   "accent-primary-hover": "Filled ink button under a pointer (alias of ink-2).",
+  "accent-inplay": "A ball in play: the dot in the strike zone and the pitch list. MLB colours a pitch green, red or blue. The number on it is 8.1:1 (paper-3 on allstar-blue).",
   "accent-negative-hover": "Filled clay button under a pointer (alias of clay-deep).",
   "seal-cover": "The sealed cover fill (alias of seal). Only where a tap can reveal a score.",
   "seal-cover-ink": "Text on the sealed cover (alias of seal-ink).",
