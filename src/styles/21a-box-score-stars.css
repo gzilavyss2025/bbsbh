@@ -15,6 +15,7 @@
    each tile are Cards (#1113, slice C5): a tile is a ledger Card, and the
    phone query strips its frame back to a list row. */
 .bs__stars {
+  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h);
 }
 

@@ -11,6 +11,7 @@
    the score AFTER the play, and a small ▶ at the right edge. The score is kept
    off the head: there it reads as the score before the play. */
 .bs__scoring {
+  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h);
 }
 
@@ -19,7 +20,7 @@
    margin matching the padding above rather than a padding-less container. */
 .bs__scoring > .sectionhead {
   margin: -12px -14px 10px;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: 0;
 }
 
 .scoresum__plays {
