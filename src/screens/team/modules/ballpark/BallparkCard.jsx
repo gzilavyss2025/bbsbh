@@ -114,7 +114,6 @@ function ParkPhoto({ name, photo, onPickFocus, onBroken }) {
       className="ballparkcard__photo"
       src={photo.src}
       alt={alt}
-      title={photo.creditText || undefined}
       style={{ objectPosition: photo.focus }}
       loading="lazy"
       decoding="async"
@@ -130,7 +129,7 @@ function ParkPhoto({ name, photo, onPickFocus, onBroken }) {
         type="button"
         className="ballparkcard__photoWrap bpadmin__focusTarget"
         onClick={onPickFocus}
-        title="Tap the part of the photo to keep when it is cropped"
+        aria-label="Tap the part of the photo to keep when it is cropped"
       >
         {img}
       </button>

@@ -1,5 +1,4 @@
 import { fetchTeam } from '../../api/team.js'
-import { fetchManager } from '../../api/game.js'
 import { seasonOf, cutoffFor, teamRecordFor } from './data/shared.js'
 import { DIRECT } from './data/sources.js'
 
@@ -35,7 +34,7 @@ export async function loadTeamIdentity(id, asOf, src = DIRECT) {
     team.league?.id
       ? src.fetchStandings(team.league.id, season, cutoffFor(asOf))
       : Promise.resolve([]),
-    fetchManager(id, season),
+    src.fetchManager(id, season),
   ])
 
   return {

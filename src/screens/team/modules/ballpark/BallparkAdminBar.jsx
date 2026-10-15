@@ -25,7 +25,7 @@ import '../../../../styles/61-ballpark-admin.css'
 
 function GearButton({ onClick }) {
   return (
-    <button type="button" className="bpadmin__gear" onClick={onClick} title="Edit this ballpark">
+    <button type="button" className="bpadmin__gear" onClick={onClick} aria-label="Edit this ballpark">
       {/* A gear, drawn rather than imported: the app ships no icon set, and
           eight teeth on two circles is smaller than a font subset would be.
           aria-hidden because the button's own label already names the action. */}
