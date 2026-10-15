@@ -830,6 +830,9 @@ don't run these by hand.
   `gen-fouls.mjs` (`--days` trailing window; `--since`/`--until` backfill;
   `--sports=1,11` restricts the sweep, its real use being `--since=…
   --sports=11` to backfill AAA alone into a file that already has MLB).
+  RETRY (#2069): each run reads the season's whole schedule and takes the window's un-ingested
+  Finals, then up to 50 older ones per level (`scripts/lib/sweep/retry.mjs`). A game whose fetch
+  fails sits in `pitch_arsenal_failed_games`; the run exits 1 only when the same game fails twice in a row.
   SQLite-backed (`pitch-arsenal` group, ADR-0021); `pitch_arsenal_ingested_games`
   is the idempotency guard, keyed `(game_pk, level)`. Both totals tables also key on
   `scope`: `'R'` for the regular season, `'P'` for the postseason. The column has
@@ -991,7 +994,10 @@ don't run these by hand.
   spray rows; rows swept before it have none until `--season=<year> --rebuild`)
   (per-batter buckets on `personId % 100`; a season store, ADR-0086: a run folds
   only its own season's games into its own folder, and writes nothing until the
-  new season has a ball in play) — the batter-side sibling of `gen-pitch-arsenal.mjs`: every
+  new season has a ball in play; retry, #2069: each run also takes up to 50 older un-ingested
+  decided games per level, a failed gamePk waits in the `failed` list of
+  `scripts/data/spray-ingested.json`, and the same game failing twice in a row exits 1)
+  — the batter-side sibling of `gen-pitch-arsenal.mjs`: every
   ball in play this season, with the raw Gameday landing coordinate, the exit
   velocity, the result class, the pitcher's hand, the side the batter used that
   time up, the level and the pitcher's id. Read by `src/api/spray.js` for the

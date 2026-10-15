@@ -591,6 +591,15 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_ingested_games (
   PRIMARY KEY (game_pk, level)
 );
 
+-- A Final game whose feed fetch failed on the last run that took it (#2069, as foul_failed_games).
+-- The row goes when a fetch succeeds; a game that fails while it has a row fails the run.
+CREATE TABLE IF NOT EXISTS pitch_arsenal_failed_games (
+  game_pk INTEGER NOT NULL,
+  level   TEXT NOT NULL,
+  season  INTEGER NOT NULL,
+  PRIMARY KEY (game_pk, level)
+);
+
 -- WHERE he put it, as opposed to what he threw. One row per
 -- (pitcher, level, pitch type, batter hand); each counter is a 25-value CSV
 -- over the 5x5 command grid (src/lib/zone/zoneGeometry.js), whose middle nine

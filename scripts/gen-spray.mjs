@@ -91,6 +91,7 @@ import { round1 } from '../src/lib/math/number.js'
 import { HARD_HIT_MPH } from '../src/lib/ballpark/hitProjection.js'
 import { parseArgs, dateRange, isoDay } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
+import { GAP_CAP, collectPending, runSweep } from './lib/sweep/retry.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const storeDir = join(here, '..', 'public', 'data', 'spray')
@@ -99,7 +100,6 @@ const ledgerPath = join(here, 'data', 'spray-ingested.json')
 
 const DEFAULT_DAYS = 3
 const CHECKPOINT_EVERY = 400
-const CONCURRENCY = 8
 
 // The levels swept, most-senior first — see the header for why AAA rides along
 // and AA/below don't. MLB also reads its postseason (see the header); Triple-A's
@@ -398,6 +398,28 @@ async function writeStore(store, contact, season, v = SCHEMA_VERSION) {
 
 // --- CLI ---------------------------------------------------------------------
 
+// The ledger file: the games on file, and the ones whose fetch failed on the last run (#2069).
+export const ledgerOf = (season, ingested, failed) => ({
+  season,
+  games: [...ingested].sort((a, b) => a - b),
+  ...(failed.size ? { failed: [...failed].sort((a, b) => a - b) } : {}),
+})
+
+// The row to queue for one scheduled game, or null. Decided games only, this season's only.
+export function acceptSprayGame(g, level, { ingested, season, today }) {
+  // A CANCELLED GAME REPORTS AS FINAL. Twenty AAA games this season carry
+  // `abstractGameState: 'Final'` with `detailedState: 'Cancelled'` and a
+  // linescore that never reached the first inning — a game that was
+  // called off, not one that was decided. Fetching them is a wasted
+  // request that reads as a feed-shape failure downstream, since a
+  // cancelled game's feed holds no contact at all.
+  if (g.status?.detailedState === 'Cancelled') return null
+  if (g.officialDate >= today) return null // decided games only, never today's
+  if (!g.officialDate.startsWith(`${season}-`)) return null // this season's folder only
+  if (ingested.has(g.gamePk)) return null
+  return { gamePk: g.gamePk, level, date: g.officialDate, post: scopeOfGameType(g.gameType) === 'P' }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2))
   let { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
@@ -411,6 +433,9 @@ async function main() {
   const read = await readStore(season)
   const ledger = await readJsonOr(ledgerPath, { season, games: [] })
   let ingested = new Set(ledger.season === season ? ledger.games : [])
+  // Games whose fetch failed on the last run that took them (#2069). Kept beside `games`.
+  const failedBefore = new Set(ledger.season === season ? ledger.failed ?? [] : [])
+  const failedNow = new Set(failedBefore)
   // An older schema (see SCHEMA_VERSION), or --rebuild: sweep the whole season
   // again into an empty store. Checkpoints keep the OLD version number, so only
   // a finished sweep marks the season current.
@@ -424,6 +449,7 @@ async function main() {
   const writeVersion = rebuild ? 1 : SCHEMA_VERSION
   if (rebuild) {
     ingested = new Set()
+    failedNow.clear()
     startDate = `${season}-01-01`
     console.log(`rebuilding ${season} from ${startDate} (store schema v${read.version} → v${SCHEMA_VERSION})`)
   }
@@ -435,69 +461,48 @@ async function main() {
   // Regular season at both levels, plus the postseason at MLB. Same
   // postponed-replay dedup as the other sweeps: a replayed game is listed under
   // both dates, so keep only the officialDate bucket.
+  // Each run reads the season's whole schedule: the window's games first, then up to GAP_CAP
+  // older ones a failed fetch left out (#2069).
   const pending = []
   for (const { sportId, level, gameTypes } of LEVELS) {
     const schedule = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}&gameType=${gameTypes}` +
+      `/api/v1/schedule?sportId=${sportId}&startDate=${season}-01-01&endDate=${endDate}&gameType=${gameTypes}` +
         '&fields=dates,date,games,gamePk,gameType,officialDate,status,abstractGameState,detailedState',
     )
-    for (const d of schedule.dates ?? []) {
-      for (const g of d.games ?? []) {
-        if (g.status?.abstractGameState !== 'Final') continue
-        // A CANCELLED GAME REPORTS AS FINAL. Twenty AAA games this season carry
-        // `abstractGameState: 'Final'` with `detailedState: 'Cancelled'` and a
-        // linescore that never reached the first inning — a game that was
-        // called off, not one that was decided. Fetching them is a wasted
-        // request that reads as a feed-shape failure downstream, since a
-        // cancelled game's feed holds no contact at all.
-        if (g.status?.detailedState === 'Cancelled') continue
-        if (d.date !== g.officialDate) continue
-        if (g.officialDate >= today) continue // decided games only, never today's
-        if (!g.officialDate.startsWith(`${season}-`)) continue // this season's folder only
-        if (ingested.has(g.gamePk)) continue
-        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, post: scopeOfGameType(g.gameType) === 'P' })
-      }
-    }
+    pending.push(...collectPending(schedule, { startDate, accept: (g) => acceptSprayGame(g, level, { ingested, season, today }) }))
   }
   console.log(
-    `${startDate}..${endDate}: ${pending.length} un-ingested decided games across ${LEVELS.length} level(s)`,
+    `${startDate}..${endDate}: ${pending.length} un-ingested decided games across ${LEVELS.length} level(s) (the window, then up to ${GAP_CAP} older each)`,
   )
 
   const writeOut = async () => {
     await writeStore(store, contact, season, writeVersion)
-    await writeJsonAtomic(ledgerPath, { season, games: [...ingested].sort((a, b) => a - b) })
+    await writeJsonAtomic(ledgerPath, ledgerOf(season, ingested, failedNow))
   }
 
-  let done = 0
   let empty = 0
-  const queue = [...pending]
-  async function worker() {
-    while (queue.length) {
-      const g = queue.shift()
-      if (!g) return
-      try {
-        const feed = await getJson(`/api/v1.1/game/${g.gamePk}/feed/live?fields=${FEED_FIELDS}`)
-        const agg = aggregateGameSpray(feed, g.level, xba)
-        // A decided game with no tracked contact at all is either a very short
-        // weather-shortened game or a `fields` allowlist that has stopped
-        // matching the feed. Neither should fail the run, and neither should
-        // pass unremarked — a silent zero is how a 30x bandwidth saving turns
-        // into an empty dataset nobody notices.
-        if (agg.size === 0) empty += 1
-        const part = g.post ? 'post' : 'bat'
-        foldGame(store[part], agg, g.date, feed?.gameData?.venue?.id ?? null, contact[part], g.gamePk)
-        ingested.add(g.gamePk)
-      } catch (err) {
-        console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
-      }
-      done += 1
-      if (done % CHECKPOINT_EVERY === 0) {
-        console.log(`${done}/${pending.length} ingested, checkpointing...`)
-        await writeOut()
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker))
+  const { done, failed, again } = await runSweep({
+    pending,
+    failedBefore,
+    keyOf: (g) => g.gamePk,
+    ingest: async (g) => {
+      const feed = await getJson(`/api/v1.1/game/${g.gamePk}/feed/live?fields=${FEED_FIELDS}`)
+      const agg = aggregateGameSpray(feed, g.level, xba)
+      // A decided game with no tracked contact at all is either a very short
+      // weather-shortened game or a `fields` allowlist that has stopped
+      // matching the feed. Neither should fail the run, and neither should
+      // pass unremarked — a silent zero is how a 30x bandwidth saving turns
+      // into an empty dataset nobody notices.
+      if (agg.size === 0) empty += 1
+      const part = g.post ? 'post' : 'bat'
+      foldGame(store[part], agg, g.date, feed?.gameData?.venue?.id ?? null, contact[part], g.gamePk)
+      ingested.add(g.gamePk)
+    },
+    onOk: (g) => failedNow.delete(g.gamePk),
+    onFail: (g) => failedNow.add(g.gamePk),
+    checkpoint: writeOut,
+    every: CHECKPOINT_EVERY,
+  })
   // Nothing for this season yet (the new year before Opening Day): write
   // nothing, so last season's folder, the ledger and the index stay as they are.
   if (Object.keys(store.bat).length + Object.keys(store.post).length === 0) {
@@ -505,16 +510,21 @@ async function main() {
     return
   }
   const { written, swept } = await writeStore(store, contact, season, SCHEMA_VERSION)
-  await writeJsonAtomic(ledgerPath, { season, games: [...ingested].sort((a, b) => a - b) })
+  await writeJsonAtomic(ledgerPath, ledgerOf(season, ingested, failedNow))
   const index = await writeSeasons(storeDir, season)
 
+  if (failed.length) console.error(`${failed.length} game(s) failed and stay out of the ledger, for the next run: ${failed.map((g) => g.gamePk).join(', ')}`)
+  if (again.length) {
+    console.error(`failed twice in a row: ${again.map((g) => g.gamePk).join(', ')}`)
+    process.exitCode = 1
+  }
   if (empty > 0) console.error(`${empty} decided game(s) yielded no tracked contact — check the feed shape`)
   const balls = Object.values(store.bat).reduce((n, e) => n + e.p.length, 0)
   const postBalls = Object.values(store.post).reduce((n, e) => n + e.p.length, 0)
   console.log(
     `wrote ${written} buckets (${swept} swept) — ${Object.keys(store.bat).length} batters, ` +
       `${balls} plotted balls (+${postBalls} postseason, ${Object.keys(store.post).length} batters), ` +
-      `${ingested.size} games on file (+${done} swept this run); ` +
+      `${ingested.size} games on file (+${done - failed.length} swept this run); ` +
       `serving ${index.current} of [${index.seasons.join(', ')}]`,
   )
 }
