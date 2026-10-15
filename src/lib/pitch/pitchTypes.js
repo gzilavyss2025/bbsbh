@@ -8,8 +8,9 @@
 // works alone: draw the code (FF, SL, CH) next to the mark where room allows.
 //
 // Pure data, no React, no feed reads. Colours are tuned on a DARK ground (the
-// design-lab artifact). No screen uses them yet; a paper-ground tone is an open
-// item in the doc.
+// design-lab artifact). Screens already draw them on paper: a mark is the fill
+// with an ink outline, and the pitcher card tints its active tile. A second
+// paper tone for a colour drawn alone is an open item in the doc.
 
 export const PITCH_FAMILIES = {
   H: { name: 'Fastballs', shape: 'circle' },

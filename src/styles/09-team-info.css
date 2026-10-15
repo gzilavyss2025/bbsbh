@@ -196,16 +196,31 @@
   color: var(--graphite-soft);
 }
 
-/* A person inside a fact box (the manager): surname-first name with the
-   uniform number inked in seam red, like every lineup row. */
+/* A person inside a fact box (the manager): headshot, then first and last name with the
+   uniform number "#30" inked in seam red (components/team/ManagerFact.jsx). */
 .fact__person {
   display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-1h);
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* The manager's headshot beside his name, framed like a lineup row's shot. */
+.fact__person .shot.fact__shot {
+  flex: none;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+  border: var(--bw-hair) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--bg-canvas);
+}
+
+.fact__who {
   min-width: 0;
 }
 
 .fact__jersey {
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);

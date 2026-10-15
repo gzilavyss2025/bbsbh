@@ -1,7 +1,7 @@
 import { Fragment, useMemo } from 'react'
 import { selectGameInfo, selectGameSeason, selectOfficials } from '../../../api/select.js'
 import { scorebookDate } from '../../../lib/dates.js'
-import { ManagerLink } from '../../team/ManagerLink.jsx'
+import { managerFact } from '../../team/ManagerFact.jsx'
 import { UmpireLink } from '../../umpire/UmpireLink.jsx'
 import { SectionHead } from '../../ui/frame/SectionHead.jsx'
 import { FactGrid } from '../../ui/frame/FactGrid.jsx'
@@ -109,21 +109,6 @@ export function ExtrasFacts({ feed, meta, managers, uniforms, scorebookWeather }
 // the label never reads " MANAGER" with a hole at the front.
 function clubTag(meta, side) {
   return meta?.[side]?.abbreviation || (side === 'away' ? 'Away' : 'Home')
-}
-
-// Surname-first name with the uniform number inked in seam red and an interim
-// appointment marked, the same shape the lineup page's Manager fact uses.
-function managerFact(manager) {
-  if (!manager) return null
-  return (
-    // The fact PRINTS surname-first; the address takes spoken order
-    // (ADR-0057), which `name` on the same object already is.
-    <ManagerLink id={manager.personId} name={manager.name} className="fact__person">
-      {manager.lastFirst}
-      {manager.jersey ? <span className="fact__jersey">{manager.jersey}</span> : null}
-      {manager.interim ? <span className="fact__note">interim</span> : null}
-    </ManagerLink>
-  )
 }
 
 function Fact({ label, value }) {
