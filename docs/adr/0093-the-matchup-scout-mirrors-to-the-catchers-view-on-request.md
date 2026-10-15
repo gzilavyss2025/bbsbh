@@ -1,6 +1,6 @@
 # The Matchup Scout mirrors to the catcher's view on request
 
-**Status:** Accepted (Gary approved the design on 2026-10-02; an addendum to ADR-0077, scoped to one page)
+**Status:** Accepted (Gary approved the design on 2026-10-02; an addendum to ADR-0077, scoped to one page). **Decision 5 is superseded by [ADR-0099](0099-the-matchup-scout-scene-plays-in-both-views-from-a-second-camera.md).**
 **Date:** 2026-10-02
 **Issue:** #1408
 

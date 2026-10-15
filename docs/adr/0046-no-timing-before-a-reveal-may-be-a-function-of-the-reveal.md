@@ -1,6 +1,6 @@
 # ADR-0046 — No timing before a reveal may be a function of the reveal
 
-Status: accepted (2026-08-13)
+Status: accepted (2026-08-13); **superseded in part** by the 2026-08-13 amendment at the foot of this file. The principle stands. The timings and the `HalfClose` files it names do not.
 
 ## Context
 

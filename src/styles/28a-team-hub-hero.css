@@ -104,7 +104,7 @@
    justify-self keeps it at its natural size: grid blockifies its items, so the
    pill would otherwise stretch the whole row. The chips inside render on their
    own opaque `--surface-card` rather than as text sitting directly in the tint,
-   same idiom 09-team-info.css's .teaminfo__head note documents for Game Notes —
+   same idiom the Game Notes button uses on the hub hero (11-innings.css) —
    a chip's legibility can't depend on guessing right against every club's own
    color. */
 .team-hub__id > .team-hub__actions {

@@ -12,7 +12,7 @@ import { HexField } from '../HexField.jsx'
 // is read-only and captioned with which bar that jersey wears.
 //
 // No longer a sketch: since ADR-0030 these three drive the real
-// `.teaminfo__head` bar and that side's section mastheads (screens/TeamInfo.jsx
+// club bar and that side's section mastheads (the lineup page,
 // via lib/headerTheme.js). Coverage is partial by design, so the panel states
 // which side of that line a club is on (the Themed / Default chrome chip)
 // rather than leaving a preview that looks identical either way.

@@ -648,17 +648,6 @@
   letter-spacing: var(--ls-label);
   opacity: 0.7;
 }
-/* The tier phrase (favorTier) — smaller and softer than the main caption
-   lines above it, since it's supporting context ("how notable is this"),
-   not the headline fact. */
-.favormeter__tier {
-  margin-top: 2px;
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  font-style: italic;
-  font-weight: var(--w-regular);
-  color: var(--text-muted);
-}
 
 /* Pre-pitch subs/pitching changes for the half about to be revealed, shown
    above the seal (see api/select.js's selectPrePitchChanges). Kept visually

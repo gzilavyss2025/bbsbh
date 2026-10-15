@@ -122,7 +122,7 @@
 
 /* The masthead this club wears in this jersey — the app's default navy and
    band-rule chrome recolored to its Bar/Accent/On-bar. What it previews is real since
-   ADR-0030: the same triad dresses .teaminfo__head and that side's .metricbar
+   ADR-0030: the same triad dresses the club bar and that side's .metricbar
    mastheads on the lineup page. It is NOT the .topbar/.sitebar, which stay
    plain navy-on-paper. */
 .idlab__barmock {

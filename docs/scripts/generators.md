@@ -2019,7 +2019,7 @@ Re-run only to fold in a new season.
   (`npm run gen:ballpark-thumbs`) after adding or replacing a bundled photo,
   same cadence as the photos themselves.
 - `gen-icons.mjs` — regenerate PWA PNG icons from `public/icons/icon.svg`.
-- `gen-og-image.mjs` — NOT currently used. `public/og-image.jpg` (1200×630
+- `gen-og-image.mjs` — NOT currently used. `public/og-image.png` (1200×630
   link-preview card) is a hand-provided phone-mockup asset instead. This script +
   `scripts/og-image.html` render an alternate generated-art version, kept in case we
   go back to it. The `og:*`/`twitter:*` tags in `index.html` point at the current

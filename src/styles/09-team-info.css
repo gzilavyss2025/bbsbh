@@ -1,59 +1,3 @@
-/* ---------------------------------------------------------------- team info */
-/* Room at the bottom so the last section clears the fixed .pagenav bar. */
-.teaminfo {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
-}
-
-.teaminfo__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin: 4px 0 16px;
-}
-
-/* ------------------------------------------------------------- club theming
-   ADR-0030. `.is-themed` carries three custom properties resolved from the
-   jersey that club is wearing tonight — lib/headerTheme.js. Every themed rule
-   below reads them WITH the default as its fallback, so an unthemed surface
-   (most of them — coverage is partial) renders byte-identically to how it did
-   before this feature existed.
-
-   Each themed surface adds `.is-themed` to its own root rather than one
-   page-wide ancestor: .teaminfo (the club-name bar + its section mastheads)
-   and, per card, the box score's .bs__team/.bs__abscard/.bs__defensecard
-   (BoxScore.jsx) — the same club, jersey, and triad as that club's lineup
-   page, just resolved a second time per card instead of once per page. The
-   innings viewer carries the seal metaphor — kraft amber on manila, navy
-   chrome around it — and stays untouched because nothing there ever adds the
-   class; recoloring it would put a club's brand in a fight with the spoiler
-   UI's own visual language.
-
-   The club-name bar is the one surface that CHANGES shape when themed: unthemed
-   it's a plain heading on the page canvas, themed it becomes a real bar so the
-   colour has something to sit in. */
-.teaminfo.is-themed > .teaminfo__head {
-  padding: var(--space-2h) var(--space-4);
-  background: var(--bar-fill, transparent);
-  border-bottom: 3px solid var(--bar-accent, transparent);
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-}
-.teaminfo.is-themed > .teaminfo__head .teaminfo__name,
-.teaminfo.is-themed > .teaminfo__head .teaminfo__namelink {
-  color: var(--bar-text, var(--text-heading));
-}
-/* Away/Home rides the bar directly (plain text, no background of its own), so
-   it takes the bar's ink too — at the muted weight it already reads at, via a
-   partial alpha over the bar rather than a second hand-picked hex the
-   contrast guard couldn't see. The Game Notes button is its own opaque card
-   (`--surface-card`) floating on the bar, not text sitting in it, so it stays
-   unthemed — recoloring just its text to the bar's ink went invisible
-   whenever that ink came out light (white-on-white against the card). */
-.teaminfo.is-themed > .teaminfo__head .teaminfo__side {
-  color: var(--bar-text, var(--text-caption));
-  opacity: 0.78;
-}
-
 /* The section mastheads on a themed page (Batting order / Starting pitcher /
    Defense and every .metric card head) are the SectionHead band now, which
    reads the same three properties with the same fallbacks from the nearest
@@ -199,31 +143,6 @@
 .team-hub.is-themed .team-score__howlink {
   border-bottom-color: color-mix(in srgb, var(--bar-text, var(--text-caption)) 40%, transparent);
 }
-.teaminfo__headright {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex: none;
-}
-
-.teaminfo__name {
-  font-family: var(--font-display);
-  font-size: var(--fs-h1);
-  font-weight: var(--w-bold);
-  margin: 0;
-  min-width: 0;
-  letter-spacing: var(--ls-num);
-  color: var(--text-heading);
-}
-
-.teaminfo__side {
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 
 /* The fact card is a Card (sheet, flush body; #1113, slice C2), and this rule
    keeps only its margin. The rules between the facts are the gap-rule trick:
@@ -253,14 +172,6 @@
    rather than a deliberate space. (PlayerPage's "Last Team", shown only for a
    free-agent/retired player, is the one such fact today.) */
 .fact--wide {
-  grid-column: 1 / -1;
-}
-
-/* The lineup page's one top table: the game facts and the umpire crew share a
-   grid, so an odd total leaves the last cell alone on its row — stretch it
-   across. "Of .fact" counts only the cells, so the accuracy modal the crew
-   mounts in the same grid (position: fixed, out of the flow) cannot shift it. */
-.teaminfo__facts .fact:nth-child(odd of .fact):nth-last-child(1 of .fact) {
   grid-column: 1 / -1;
 }
 

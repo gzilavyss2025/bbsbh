@@ -83,9 +83,9 @@ because:
 Once art lands in `public/logos/historical/`, the shape of the fix in
 `src/components/player/CareerTimeline.jsx` (and optionally `TransactionTimeline.jsx`)
 is: resolve `historicalClubName(e.teamId, e.minSeason)` alongside the existing
-`historicalParentOrg` call in `src/api/loadPlayer.js`, and when it returns a
+`historicalParentOrg` call in `src/api/careerTimeline.js`, and when it returns a
 `logo`, pass `/logos/historical/{logo}` into a new `<TeamLogo>` prop (e.g.
 `src`) that short-circuits the CDN url and skips straight to rendering it,
 still falling back to the monogram on a 404. The parent-org fix already wired
-in (see `loadPlayer.js`) is a good model: prefer the historical override,
+in (see `careerTimeline.js`) is a good model: prefer the historical override,
 fall back to today's live value, never break when nothing is covered.

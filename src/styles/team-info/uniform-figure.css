@@ -1,26 +1,3 @@
-/* The Uniform fact's shirt button and the sheet it opens (#1852): the text stays
-   plain ink, the button sits beside it. In the sheet, two images stack in a box
-   of fixed size, so it does not jump when they load. */
-
-/* layout-exempt: text shrinks beside a fixed-size button; a wrapping Cluster would drop the button under the text */
-.fact__figure {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-/* Same 21px solid dot as the HP ump's .umptier__glyph in the next cell. The
-   IconButton keeps its 44px tap area around the smaller mark. */
-.fact__figure > .fact__shirt {
-  --icon-mark: 21px;
-  --btn-fill: var(--text-muted);
-  --btn-edge: var(--text-muted);
-  --btn-ink: var(--text-on-ink);
-  --btn-fill-hover: var(--accent-primary);
-  --btn-edge-hover: var(--accent-primary);
-}
-
 /* The lineup page's Attendance dot sits at the cell's right edge, like the
    Uniform and HP ump dots. Scoped to the fact cell, so the box score's inline
    Attendance figure keeps its dot beside the number. */
@@ -44,8 +21,4 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-
-.ufig__text {
-  text-align: center;
 }
