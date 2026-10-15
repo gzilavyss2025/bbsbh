@@ -20,8 +20,8 @@ reads it with the Artifact tool: `action: "read"`, `path: "project/<board>.dc.ht
 | Pitcher | `D2-phone` (390), `D2-wide` (1180), `ArsenalReveal`, `PitcherSplits`, `GameLog`, `SeasonStatsPitcher`, `MoundCard` |
 | Shared | `TbdWire`: the dashed wireframes for sections that the canvas does not draw yet |
 
-The canvas uses the house faces (`src/tokens/fonts.css`: Barlow Condensed, Source
-Sans 3, JetBrains Mono) and the house paper and ink (`--paper-0` #F6EFDC, `--paper-2`
+The canvas uses the house faces (`src/tokens/fonts.css`: Barlow Condensed, JetBrains
+Mono, and Source Sans 3 for body copy until #2165 moved it to mono) and the house paper and ink (`--paper-0` #F6EFDC, `--paper-2`
 #FBF6E9, `--ink-0` #0F1822, `--graphite` #6B6558). The look is an extension of the
 design system. It does not replace it.
 
