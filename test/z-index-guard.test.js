@@ -15,11 +15,28 @@ test('a raw value above 3 fails, in CSS and in an inline style', () => {
   assert.deepEqual(z('<div style={{ zIndex: 1000 }} />', 'js'), ['1:1000'])
 })
 
-test('3 and below, a negative, a token and a calc pass', () => {
+test('3 and below, a negative, a token and a banded calc pass', () => {
   assert.deepEqual(z('.a { z-index: 3; } .b { z-index: 0; } .c { z-index: -1; }'), [])
   assert.deepEqual(z('.a { z-index: var(--z-modal); }'), [])
   assert.deepEqual(z('.a { z-index: calc(var(--z-sticky) - 10); }'), [])
+  assert.deepEqual(z('.a { z-index: calc(var(--z-overlay) + 20); }'), [])
+  assert.deepEqual(z('.a { z-index: auto; } .b { z-index: inherit !important; }'), [])
   assert.deepEqual(z("<div style={{ zIndex: 'var(--z-toast)' }} />", 'js'), [])
+})
+
+test('a calc, a custom property or a quoted number cannot hide a raw layer (#1831)', () => {
+  assert.deepEqual(z('.a { z-index: calc(var(--z-modal) + 500); }'), ['1:calc(var(--z-modal) + 500)'])
+  assert.deepEqual(z('.a { z-index: calc(var(--z-raised) + 16); }'), ['1:calc(var(--z-raised) + 16)'])
+  assert.deepEqual(z('.a { z-index: calc(var(--z-sticky) - 16); }'), ['1:calc(var(--z-sticky) - 16)'])
+  assert.deepEqual(z('.a { z-index: calc(1000 + 1); }'), ['1:calc(1000 + 1)'])
+  assert.deepEqual(z('.a { z-index: var(--mine); }'), ['1:var(--mine)'])
+  assert.deepEqual(z('.a { z-index: var(--z-nope); }'), ['1:var(--z-nope)'])
+  assert.deepEqual(z("<div style={{ zIndex: '9999' }} />", 'js'), ['1:9999'])
+  assert.deepEqual(z('el.style.zIndex = 50', 'js'), ['1:50'])
+  assert.deepEqual(z("el.style.zIndex = 'calc(var(--z-toast) + 5000)'", 'js'), ['1:calc(var(--z-toast) + 5000)'])
+  assert.deepEqual(z('<div style={{ zIndex: depth }} />', 'js'), ['1:depth'])
+  assert.deepEqual(z("<div style={{ zIndex: 'calc(var(--z-raised) + 1)' }} />", 'js'), [])
+  assert.deepEqual(z('if (el.style.zIndex === "5") run()', 'js'), [])
 })
 
 test('a comment that quotes a value does not fail', () => {
