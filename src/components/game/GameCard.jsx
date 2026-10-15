@@ -237,11 +237,7 @@ export function GameCard({
             <span className="gamecard__atmark-ink">@</span>
           </span>
           {/* The slash the two tiles split around on hover (gamecard/versus.css). */}
-          <span className="gamecard__slash" aria-hidden="true">
-            <span className="gamecard__slashtag">
-              <span className="gamecard__slashat">@</span>
-            </span>
-          </span>
+          <span className="gamecard__slash" aria-hidden="true" />
           <TeamMark
             team={game.away}
             side="away"

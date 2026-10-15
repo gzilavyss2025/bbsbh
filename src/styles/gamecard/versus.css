@@ -83,37 +83,6 @@
   transform: skewX(-10deg) scaleY(0);
 }
 
-/* The seam tag: the stamped ink square from the canvas, with the watermark's
-   '@' blown up inside it and clipped by the square. The square and the glyph
-   both stand upright while the stripes lean. It presses in
-   after the stripes. */
-/* layout-exempt: one glyph centred in a square tag, not a layout */
-.gamecard__slashtag {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: var(--space-10);
-  height: var(--space-10);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: var(--surface-stamped-ink);
-  outline: var(--bw-heavy) solid var(--text-on-ink-cream);
-  opacity: 0;
-  transform: translate(-50%, -50%) skewX(10deg) scale(0.4);
-}
-/* The watermark's own face (.gamecard__atmark-ink, 06-loader-and-cards.css),
-   scaled well past the box so only part of the glyph shows. */
-.gamecard__slashat {
-  color: var(--text-on-ink-cream);
-  font-family: "Big Shoulders Display", var(--font-display);
-  font-weight: var(--w-black);
-  font-size: var(--fs-title-sm);
-  line-height: var(--lh-solid);
-  scale: 3;
-  translate: 0 -8%;
-}
-
 /* THE VERSUS STATE. Two triggers share one set of rules: a press, or the
    keyboard on the open button, on any device; and a fine pointer resting on the
    card. The rules are written twice only because a media query cannot sit
@@ -154,14 +123,6 @@
       transform var(--dur-med) var(--ease-stamp) 60ms,
       opacity var(--dur-fast) var(--ease-standard) 60ms;
   }
-  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) .gamecard__slashtag,
-  .gamecard:hover .gamecard__slashtag {
-    opacity: 1;
-    transform: translate(-50%, -50%) skewX(10deg) scale(1);
-    transition:
-      transform var(--dur-med) var(--ease-stamp) var(--dur-med),
-      opacity var(--dur-fast) var(--ease-standard) var(--dur-med);
-  }
   .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) :is(.gamecard__atmark-ghost, .gamecard__atmark-ink),
   .gamecard:hover :is(.gamecard__atmark-ghost, .gamecard__atmark-ink) {
     opacity: 0;
@@ -190,9 +151,5 @@
   .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__slash {
     opacity: 0;
     transform: skewX(-10deg) scaleY(0);
-  }
-  .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__slashtag {
-    opacity: 0;
-    transform: translate(-50%, -50%) skewX(10deg) scale(0.4);
   }
 }
