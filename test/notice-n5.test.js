@@ -48,7 +48,9 @@ const N5_SEAL = {
   'components/inning/DelayCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/inning/ExtrasBanner.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/game/GameCardParts.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'screens/InningViewer.jsx': { reveal: ['winprob.js'], sealBoxes: 0, revealedThrough: 15 },
+  // 16: the scorebug's mount moved from ConsoleBand to InningsHeader (the page's masthead), so the
+  // viewer hands the same clamped mark to one more child. Same consumer, same clamp, no new import (ruled on by the maintainer).
+  'screens/InningViewer.jsx': { reveal: ['winprob.js'], sealBoxes: 0, revealedThrough: 16 },
   'components/game/GameCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
 }
 const SPOILER_MANIFEST = JSON.parse(src('api/spoiler-manifest.json')).modules

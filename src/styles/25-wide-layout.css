@@ -354,30 +354,12 @@
     max-width: 780px;
   }
 
-  /* Section tabs + the half navigator share ONE row here — LINEUPS / INNINGS /
-     BOX on the left, ‹ Back · Bottom 4th · Next › on the right — instead of two
-     stacked bars. Centered to a comfortable measure. The base rule sets
-     flex-direction: column for the phone-stacked layout; row must be
-     re-asserted here; a same-specificity rule that doesn't mention a
-     property never resets it, so without this the two bars silently kept
-     stacking (and centering, each far narrower than the 780px measure) at
-     every width. */
+  /* The jump bar and the half navigator stay stacked here, as on a phone, and run the
+     masthead card's full width: all three are bordered boxes, so a narrower middle one
+     reads as a mistake. They shared one centered 780px row while the tabs were five
+     small buttons. */
   .inningchrome {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-4);
-    max-width: 780px;
-    margin: 0 auto 14px;
-  }
-  .inningchrome .stepnav {
-    flex: 1 1 0;
-    max-width: none;
-    margin: 0;
-  }
-  .inningchrome .inningnav {
-    flex: 1 1 0;
-    margin: 0;
+    margin: 0 0 14px;
   }
 
   /* ABS Challenges' whole-card copy (AbsCard) unhides at this breakpoint —

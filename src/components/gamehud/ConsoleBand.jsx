@@ -1,17 +1,15 @@
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { DueUpConsole } from './DueUpConsole.jsx'
 import { BetweenInnings } from './BetweenInnings.jsx'
-import { ScorebugMount } from './ScorebugMount.jsx'
 
 // The innings viewer's console row (ADR-0043) — the whole top of the scorer's
 // console, mounted for every half now, live or historical, as one component
 // rather than ninety lines inside InningViewer.jsx (which is at its own size
 // budget, and where the row's states read as unrelated conditionals).
 //
-// The band itself is `ScorebugMount`: the same scorebug, placed rather than
-// floated, at its own dock width — its one placement now, there is no
-// floating dock any more. Beside it, exactly one of two cards spends the
-// width the band does not use — and which one is a plain statement of
+// The scorebug is NOT in this row any more: it is the page's masthead
+// (screens/gameview/InningsHeader.jsx, components/gamehud/HeaderBug.jsx).
+// Exactly one of two cards fills the row — and which one is a plain statement of
 // whether the half on screen is sealed or revealed, not of how the reader
 // got there:
 //
@@ -41,14 +39,9 @@ import { ScorebugMount } from './ScorebugMount.jsx'
 // Purely a placement component: every value arrives already resolved and
 // already reveal-gated by InningViewer, exactly as it did at the old call site.
 export function ConsoleBand({
-  started,
-  live,
   feed,
-  unlocked,
   revealedThrough,
-  runsInProgress,
   meta,
-  treatment,
   viewIdx,
   viewInning,
   viewHalf,
@@ -86,25 +79,6 @@ export function ConsoleBand({
 
   return (
     <div className="consolebar">
-      <ScorebugMount
-        started={started}
-        // Unmodified `live`: the band's batter row used to be blanked here
-        // before the first step (the argument being DueUpConsole beside it
-        // already named the leadoff man), which left the band looking
-        // half-built — pitcher named, batter row just gone — at the exact
-        // moment (waiting on the first pitch) a reader looks at it most.
-        // Naming him twice reads better than a card that looks unfinished.
-        live={live}
-        feed={feed}
-        unlocked={unlocked}
-        revealedThrough={revealedThrough}
-        runsInProgress={runsInProgress}
-        meta={meta}
-        treatment={treatment}
-        viewIdx={viewIdx}
-        viewInning={viewInning}
-        viewHalf={viewHalf}
-      />
       {showDueUp && (
         <DueUpConsole
           feed={feed}

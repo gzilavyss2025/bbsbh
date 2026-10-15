@@ -35,6 +35,8 @@
 @import './styles/04-site-bar.css';
 @import './styles/04a-wire-dock.css';
 @import './styles/05-masthead-nav.css';
+@import './styles/gameview/masthead-split.css';
+@import './styles/gameview/inning-head.css';
 @import './styles/05a-career-timeline.css';
 /* The STACK — a column with one step of space between its children (#1180).
    Before 06, so a block that keeps its own gap or alignment loads later and

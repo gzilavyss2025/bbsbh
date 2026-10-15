@@ -30,6 +30,7 @@ import { ReplayRail } from '../components/playbyplay/pitcherCard/AtBatReplay.jsx
 import { DueUpNextCard } from '../components/playbyplay/DueUpNextCard.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { ConsoleBand } from '../components/gamehud/ConsoleBand.jsx'
+import { InningsHeader } from './gameview/InningsHeader.jsx'
 import { InningPage } from './innings/InningPage.jsx'
 import { InningPageTurn } from '../components/page-turn/InningPageTurn.jsx'
 import { PregameScoreboard } from '../components/inning/PregameScoreboard.jsx'
@@ -120,6 +121,7 @@ export function InningViewer({
   scorebookWeather,
   spoilersOff = false,
   passActive = false,
+  onSketch,
 }) {
   const { t: copy } = useCopy()
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
@@ -236,6 +238,7 @@ export function InningViewer({
   // a rehab/optioned player still under the rookie limit gets DebutPill on a
   // MiLB roster/lineup surface here, not a second ROOKIE claim (see
   // showRookiePill, api/rookies.js).
+  const gameDate = feed?.gameData?.datetime?.officialDate ?? null
   const isMlb = (meta.away.sportId ?? 1) === 1
   const firstPitchThrown = useMemo(() => selectHasFirstPitch(feed), [feed])
 
@@ -731,6 +734,7 @@ export function InningViewer({
     return (
       <div className="innings">
         {cloudSync}
+        <InningsHeader started={false} meta={meta} treatment={winProbTreatment} date={gameDate} onSketch={onSketch} />
         {/* Keep the LINEUPS / INNINGS / BOX tabs on screen pre-game — a deep
             link straight to an innings URL (e.g. /…/top1) lands here, and
             without the nav there'd be no way to reach the lineup/box pages
@@ -795,9 +799,25 @@ export function InningViewer({
     <CalloutLedgerProvider value={calloutLedger}>
     <div className={`innings innings--focus innings--${focus.windowed ? 'windowed' : 'stacked'}`}>
       {cloudSync}
-      {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
-          and the half-inning navigator share one chrome row on the wide layout,
-          stacked on a phone. Refresh no longer sits up here — it moved to the
+      {/* The masthead: the scorebug itself once the half has a live snapshot, the plain split
+          band before that. The jump bar below carries the date and Watch. */}
+      <InningsHeader
+        started={started}
+        live={curLiveState}
+        feed={feed}
+        unlocked={renderUnlocked}
+        revealedThrough={renderRevealedThrough}
+        runsInProgress={runsInProgress}
+        meta={meta}
+        treatment={winProbTreatment}
+        viewIdx={curIdx}
+        viewInning={effInning}
+        viewHalf={effHalf}
+        date={gameDate}
+        onSketch={onSketch}
+      />
+      {/* The section jump bar (handed down from GameView) and the half-inning
+          navigator stack in one chrome block at every width. Refresh no longer sits up here — it moved to the
           floating bottom bar (below) at every width, so refreshing live data is
           always one reach from the Next button. */}
       <div className="inningchrome">
@@ -805,7 +825,7 @@ export function InningViewer({
         <nav className="inningnav" aria-label="Half-inning navigator">
           <button
             type="button"
-            className="btn btn--control"
+            className="btn"
             onClick={() => goTo(Math.max(0, curIdx - 1))}
             disabled={curIdx === 0}
             aria-disabled={turning || undefined}
@@ -818,7 +838,7 @@ export function InningViewer({
           </span>
           <button
             type="button"
-            className="btn btn--control"
+            className="btn"
             onClick={() => requestForwardHalf(Math.min(maxIdx, curIdx + 1))}
             disabled={curIdx === maxIdx || skippedBottomHalf}
             aria-disabled={turning || undefined}
@@ -865,14 +885,9 @@ export function InningViewer({
             row's states. There is no floating dock any more — this is the
             scorebug's one placement. */}
         <ConsoleBand
-          started={started}
-          live={curLiveState}
           feed={feed}
-          unlocked={renderUnlocked}
           revealedThrough={renderRevealedThrough}
-          runsInProgress={runsInProgress}
           meta={meta}
-          treatment={winProbTreatment}
           viewIdx={curIdx}
           viewInning={effInning}
           viewHalf={effHalf}

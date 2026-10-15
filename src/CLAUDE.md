@@ -150,7 +150,7 @@ must key on the `feed` object (ADR-0007).
   between pitches (`midAtBat`), or any steal/pickoff, which leads its own step and window (ADR-0016's amendment). A step therefore ends
   mid-play, which is why the pinch-runner pencil-in keys on its notice's index rather
   than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`.
-- **The console** (ADR-0043): anchored scorebug band, wrapping trail, tabbed
+- **The console** (ADR-0043): the scorebug is the page's masthead now (`screens/gameview/InningsHeader.jsx`, `components/gamehud/HeaderBug.jsx`; the plain split band before first pitch, still gated by `ScorebugMount`'s clamp), then the due-up/tally band, wrapping trail, tabbed
   reference, `RollingLine` demoted but NEVER removed — every half, live or
   historical. Only the play-by-play varies: **windowed** (one at-bat, every half
   by default) vs. **stacked** (only after "See the whole half"); `focusView.js`.
