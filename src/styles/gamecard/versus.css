@@ -68,12 +68,43 @@
   align-self: stretch;
   position: relative;
   z-index: 2;
-  width: 4px;
-  background: var(--border-stamped);
-  outline: 1px solid var(--text-on-ink-cream);
+  /* Three stripes, the broadcast split: a thick ink bar, a cream gap, a thin ink
+     bar. 12px is the channel between the slabs, so the stripes fill it. */
+  width: var(--space-3);
+  background: linear-gradient(
+    90deg,
+    var(--border-stamped) 0 var(--space-1),
+    var(--text-on-ink-cream) var(--space-1) calc(var(--space-1) + var(--bw-heavy)),
+    var(--border-stamped) calc(var(--space-1) + var(--bw-heavy)) calc(var(--space-1) + 2 * var(--bw-heavy)),
+    transparent calc(var(--space-1) + 2 * var(--bw-heavy))
+  );
   pointer-events: none;
   opacity: 0;
   transform: skewX(-10deg) scaleY(0);
+}
+
+/* The seam tag: the stamped square from the canvas (the ink name tab), holding
+   the '@'. It stands upright while the stripes lean, and it presses in last. */
+.gamecard__slash::after {
+  content: '@';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--space-6);
+  height: var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-stamped-ink);
+  outline: var(--bw-heavy) solid var(--text-on-ink-cream);
+  color: var(--text-on-ink-cream);
+  /* The watermark's own face (.gamecard__atmark-ink, 06-loader-and-cards.css). */
+  font-family: "Big Shoulders Display", var(--font-display);
+  font-weight: var(--w-black);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  opacity: 0;
+  transform: translate(-50%, -50%) skewX(10deg) scale(0.4);
 }
 
 /* THE VERSUS STATE. Two triggers share one set of rules: a press, or the
@@ -116,6 +147,14 @@
       transform var(--dur-med) var(--ease-stamp) 60ms,
       opacity var(--dur-fast) var(--ease-standard) 60ms;
   }
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) .gamecard__slash::after,
+  .gamecard:hover .gamecard__slash::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) skewX(10deg) scale(1);
+    transition:
+      transform var(--dur-med) var(--ease-stamp) var(--dur-med),
+      opacity var(--dur-fast) var(--ease-standard) var(--dur-med);
+  }
   .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) :is(.gamecard__atmark-ghost, .gamecard__atmark-ink),
   .gamecard:hover :is(.gamecard__atmark-ghost, .gamecard__atmark-ink) {
     opacity: 0;
@@ -144,5 +183,9 @@
   .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__slash {
     opacity: 0;
     transform: skewX(-10deg) scaleY(0);
+  }
+  .gamecard:hover:not(:has(.gamecard__open:active)) .gamecard__slash::after {
+    opacity: 0;
+    transform: translate(-50%, -50%) skewX(10deg) scale(0.4);
   }
 }
