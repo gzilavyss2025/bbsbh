@@ -6,6 +6,7 @@ import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { Table } from '../../../../components/ui/table/Table.jsx'
+import { ordinal } from '../../../../lib/format.js'
 
 const DASH = '—'
 // Org prospect list starts collapsed to the top 10, expandable to the full ~30.
@@ -57,7 +58,7 @@ export function ProspectsCard({ prospects, showAllProspects, onShowAll }) {
                 <td className="lft yr">{p.orgRank}</td>
                 <td className="lft ledger__label">
                   <PlayerLink id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>
-                  {isTop && <Pill figure className="prospecttable__top">#{p.topRank}</Pill>}
+                  {isTop && <Pill figure className="prospecttable__top">{ordinal(p.topRank)}</Pill>}
                 </td>
                 <td>{p.position || DASH}</td>
                 <td className="prospecttable__level">
