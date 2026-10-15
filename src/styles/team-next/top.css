@@ -335,7 +335,7 @@
   position: absolute;
   top: calc(-1 * var(--space-2h));
   bottom: calc(-1 * var(--space-2h));
-  left: calc(100% / 8 * var(--today-col));
+  left: calc(100% / 8 * var(--today-col, 0));
   width: calc(100% / 8);
   border: var(--bw-heavy) solid var(--text-heading);
   pointer-events: none;
