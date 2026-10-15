@@ -117,6 +117,7 @@ export function TeamHubShell({
   hiddenTabs,
   datable = true,
   bar,
+  top,
   children,
 }) {
   const navigate = useNav()
@@ -187,9 +188,10 @@ export function TeamHubShell({
   // between clubs — sourced from this club's own level so it re-lists on every
   // level switch, same as there.
   const navSportId = team.sport?.id ?? sportId ?? null
+  const hasTop = Boolean(top)
   const levelTeams = useAsync(
-    () => (navSportId ? fetchTeams(navSportId) : Promise.resolve([])),
-    [navSportId],
+    () => (navSportId && !hasTop ? fetchTeams(navSportId) : Promise.resolve([])),
+    [navSportId, hasTop],
   )
   const back = () => window.history.back()
 
@@ -202,6 +204,20 @@ export function TeamHubShell({
         <SiteHeader />
         <BackBtn onClick={back} />
 
+        {/* `top` is the one-scroll page's own hero and tiles (#1107, row 5): they replace the
+            identity header and the club strip. The owner's identity gear stays, since the page
+            above is still the preview the drawer edits through. */}
+        {top && (
+          <>
+            {top}
+            {isClerkEnabled && (
+              <Suspense fallback={null}>
+                <IdentityAdminBar teamId={team.id} isMilb={isMilb} draft={identity} />
+              </Suspense>
+            )}
+          </>
+        )}
+        {!top && (
         <header
           className={`team-hub__id${headerTile.pinstripeColor ? ' team-hub__id--pinstripe' : ''}`}
           style={headerStyle}
@@ -262,6 +278,7 @@ export function TeamHubShell({
             )}
           </div>
         </header>
+        )}
 
         {/* Below the header, never over it — the header is themed from the data
             being edited, so it has to stay visible while the drawer is open. */}
@@ -284,7 +301,7 @@ export function TeamHubShell({
             (selectedTeamId null, nav styling), tapping a logo jumps straight to
             that club's team page, and centerTeamId lands on the club currently
             being viewed. */}
-        {levelTeams.data?.length > 0 && (
+        {!top && levelTeams.data?.length > 0 && (
           <TeamFilterStrip
             teams={levelTeams.data}
             selectedTeamId={null}

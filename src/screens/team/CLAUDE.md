@@ -34,15 +34,16 @@ postseason row dated after the page's own day is never returned (ADR-0087).
 ## The one-scroll page (hidden, `/team/{id}/next`; ADR-0082, #1107)
 
 `next/TeamNextPage.jsx`: `TeamHubShell` with the anchor jump bar (`bar` prop), then one `Band`
-per `BANDS` entry (`next/bands.js`: Standing, Ranks, Games, Roster, Farm, Money, About). A band
+per `BANDS` entry (`next/bands.js`: Standings, Ranks, Games, Roster, Farm, Money, About). A band
 mounts its folder (`next/<band>/index.jsx`) only when near (`useNearView`), so nothing loads
 before it is. **A row edits only its own band folder**, never `bands.js`, `Band.jsx` or the page.
 Module props: `{ team, asOf, sportId, onReady, onCount }`; call `useBandData` for the two
 reports. Absent bands come from `hiddenTeamSections(team)` (`data/shared.js`; the league test
 first). Foundation bands mount the tab bodies as they are (`NumbersBody`, `GamesBody`,
-`RosterBody`, `MinorsBody`, `ContractsBody`). Standing and Ranks each have their own loader
-(`loadStanding`, `loadRanks`; the Numbers tab's `loadNumbers` runs both). A loader's last
+`RosterBody`, `MinorsBody`, `ContractsBody`). Standings and Ranks each have their own loader
+(`loadStandings`, `loadRanks`; the Numbers tab's `loadNumbers` runs both). A loader's last
 argument is `src` (`data/sources.js`): the tabs pass nothing, the page passes `SHARED`
 (`next/once.js`), so standings, schedule, roster and /stats are bought once per page.
+`next/top/` (row 5) is the hero and the two tiles above the jump bar, handed to the shell as `top` (it replaces the identity header and the club strip). `top/topData.js` holds the pure shapes: the form line, the stretches, Last 10, the days calendar and the record grid read only games with a `won`, so `?d=` stops every one of them. The grid's other-league standings are the page's one request on a tap.
 `/team/{id}/next/{roster|games|numbers|contracts|minors}` lands on the band (`TEAM_TAB_BAND`,
 `lib/route.js`) and keeps `?d=` and `?s=`. The six tab routes stay until the swap (row 7).

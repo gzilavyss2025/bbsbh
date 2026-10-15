@@ -12,7 +12,7 @@ import { DIRECT } from './data/sources.js'
 // loaders instead — the whole point of the tab split is that a visitor who wants
 // one section doesn't pay for the other four (see .scratch/team-page-ia/PRD.md).
 //
-// The Overview is the one tab that does NOT call this: its Standing preview
+// The Overview is the one tab that does NOT call this: its Standings preview
 // already needs the standings response, so it shapes the header's three fields
 // off that same fetch rather than paying for a second identical request (see
 // data/loadOverview.js). The shaping itself is shared, so the two can't drift.
@@ -42,6 +42,7 @@ export async function loadTeamIdentity(id, asOf, src = DIRECT) {
     team,
     season,
     sportId,
+    standings,
     record: teamRecordFor(standings, team, id),
     manager,
   }

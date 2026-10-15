@@ -96,7 +96,7 @@ w('Navigation', 'JumpBar', page('Navigation', 'Jump Bar',
   .pv-sticky { position: sticky; top: 0; z-index: var(--z-sticky); }`,
 `<nav class="jumpbar pv-sticky" aria-label="Team page sections">
   <div class="cluster cluster--snug jumpbar__row">
-    <button type="button" class="jumpbar__item is-current" aria-current="true">Standing <span class="jumpbar__count">4</span></button>
+    <button type="button" class="jumpbar__item is-current" aria-current="true">Standings <span class="jumpbar__count">4</span></button>
     <button type="button" class="jumpbar__item">Ranks <span class="jumpbar__count">6</span></button>
     <button type="button" class="jumpbar__item">Games <span class="jumpbar__count">12</span></button>
     <button type="button" class="jumpbar__item">Roster <span class="jumpbar__count">3</span></button>

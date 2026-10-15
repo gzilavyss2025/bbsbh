@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
-// The one-scroll team page's loaders (#1107, row 4): Standing and Ranks each buy only their
+// The one-scroll team page's loaders (#1107, row 4): Standings and Ranks each buy only their
 // own share of the old Numbers load, and the page-level reads more than one band makes
 // (standings, schedule, roster, /stats) are bought once per page through SHARED. The tab
 // routes call the same loaders with no sources, so each still fetches on its own.
@@ -27,7 +27,7 @@ globalThis.fetch = async (url) => {
   return { ok, status: ok ? 200 : 404, headers: new Headers(), json: async () => body, text: async () => JSON.stringify(body) }
 }
 
-const { loadStanding, loadRanks, loadNumbers } = await import('../src/screens/team/data/loadNumbers.js')
+const { loadStandings, loadRanks, loadNumbers } = await import('../src/screens/team/data/loadNumbers.js')
 const { loadGames } = await import('../src/screens/team/data/loadGames.js')
 const { loadRoster } = await import('../src/screens/team/data/loadRoster.js')
 const { loadMinors } = await import('../src/screens/team/data/loadMinors.js')
@@ -42,13 +42,13 @@ async function fired(run) {
 const RANKS_ONLY = ['/teams/stats', 'playerPool=all', 'run-value.json', '/abs/', '/people?']
 const STANDING_ONLY = ['/standings', '/schedule', '/uniforms/', 'postseason-odds', 'comeback-wins', 'team-records', 'schedule-shape']
 
-test('loadStanding buys none of the Ranks reads', async () => {
-  const seen = await fired(() => loadStanding(158, null))
-  for (const part of RANKS_ONLY) assert.ok(!seen.some((u) => u.includes(part)), `Standing fetched ${part}`)
+test('loadStandings buys none of the Ranks reads', async () => {
+  const seen = await fired(() => loadStandings(158, null))
+  for (const part of RANKS_ONLY) assert.ok(!seen.some((u) => u.includes(part)), `Standings fetched ${part}`)
   assert.ok(seen.some((u) => u.includes('/standings')))
 })
 
-test('loadRanks buys none of the Standing reads', async () => {
+test('loadRanks buys none of the Standings reads', async () => {
   const seen = await fired(() => loadRanks(158, null))
   for (const part of STANDING_ONLY) assert.ok(!seen.some((u) => u.includes(part)), `Ranks fetched ${part}`)
   assert.ok(seen.some((u) => u.includes('/teams/stats')))
@@ -66,7 +66,7 @@ const PAGE_READS = [/\/standings\?/, /\/schedule\?.*teamId=158/, /\/teams\/158\/
 const loadPage = (src) =>
   Promise.all([
     loadTeamIdentity(158, null, src),
-    loadStanding(158, null, src),
+    loadStandings(158, null, src),
     loadRanks(158, null, src),
     loadGames(158, null, src),
     loadRoster(158, null, src),

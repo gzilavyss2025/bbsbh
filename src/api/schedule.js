@@ -761,7 +761,7 @@ export async function fetchTeamSchedule(
 // in UTC (and after midnight in the East) while a late West-coast game is still
 // on, and tomorrow's card must not draw while tonight's game is still unseen
 // (ADR-0087).
-function pageDay(resultsCutoff) {
+export function pageDay(resultsCutoff) {
   if (resultsCutoff) {
     const [y, m, d] = resultsCutoff.split('-').map(Number)
     return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10)

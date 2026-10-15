@@ -38,12 +38,12 @@ function statRank(rows, teamId, key, label, lowerBetter) {
   return { k: label, v: mine?.stat?.[key] ?? DASH, rank: r ? rankText(r.rank) : DASH, tone, extreme }
 }
 
-// Each band of the one-scroll page (#1107) buys only its own share: Standing (the
+// Each band of the one-scroll page (#1107) buys only its own share: Standings (the
 // standings, the record cards, the jerseys) and Ranks (the rank tables, the leaders, the
 // run value and the challenge card). The Numbers tab buys both, as `loadNumbers`, with
 // no `src` (each half takes one: sources.js; only the page passes SHARED).
 export async function loadNumbers(id, asOf) {
-  const [standing, ranks] = await Promise.all([loadStanding(id, asOf), loadRanks(id, asOf)])
+  const [standing, ranks] = await Promise.all([loadStandings(id, asOf), loadRanks(id, asOf)])
   return standing && ranks ? { ...standing, ...ranks } : null
 }
 
@@ -55,7 +55,7 @@ async function numbersScope(id, asOf) {
   return { team, sportId, isMilb: sportId !== 1, season: seasonOf(asOf, sportId), standingsDate, scoreCutoff: scoreCutoffFor(asOf) }
 }
 
-export async function loadStanding(id, asOf, src = DIRECT) {
+export async function loadStandings(id, asOf, src = DIRECT) {
   const scope = await numbersScope(id, asOf)
   if (!scope) return null
   const { team, sportId, isMilb, season, standingsDate, scoreCutoff } = scope

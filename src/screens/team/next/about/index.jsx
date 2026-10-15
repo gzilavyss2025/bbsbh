@@ -5,7 +5,7 @@ import { useBandData } from '../useBandData.js'
 import { loadAbout } from './loadAbout.js'
 
 // About: the Ballpark, the franchise history and (MiLB) Made The Show, as the Overview draws
-// them. The jerseys stay in Standing until row 6f moves them.
+// them. The jerseys stay in Standings until row 6f moves them.
 const NOOP = () => {}
 export default function About({ team, asOf, onReady }) {
   const about = useBandData(() => loadAbout(team, asOf), [team.id, asOf], { onReady, onCount: NOOP })

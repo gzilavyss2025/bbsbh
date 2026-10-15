@@ -474,7 +474,7 @@ export function hiddenTeamTabs(team) {
 // same cheap `team` object, never a band's own payload. Absent, never disabled: a hidden
 // band does not render and has no jump-bar button. The league test comes FIRST, before any
 // sport test: /team/11 is `sport.id: 1` with a league that has no id, and a sport-first
-// early return waved it through (#1143). Standing and About are never hidden; Games and
+// early return waved it through (#1143). Standings and About are never hidden; Games and
 // Roster are not either, since every club plays a schedule and keeps a roster.
 export function hiddenTeamSections(team) {
   const hidden = new Set()

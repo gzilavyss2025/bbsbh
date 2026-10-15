@@ -120,7 +120,7 @@ test('no league id loses Ranks, even on a club whose sport is MLB (#1143)', () =
   )
 })
 
-test('Standing, Games, Roster and About are never hidden', () => {
+test('Standings, Games, Roster and About are never hidden', () => {
   const worst = hiddenTeamSections({ sport: { id: 16 }, league: null, parentOrgId: null })
-  for (const k of ['standing', 'games', 'roster', 'about']) assert.equal(worst.has(k), false, k)
+  for (const k of ['standings', 'games', 'roster', 'about']) assert.equal(worst.has(k), false, k)
 })
