@@ -64,7 +64,7 @@
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  /* .gamecard's --radius-md, so the photo turns the same corners the card does.
+  /* .gamecard's square corners, so the photo turns the same corners the card does.
      Positioned against the padding box, so this is a hair rounder than the
      border it sits inside — invisible at this radius and this opacity. */
   border-radius: inherit;

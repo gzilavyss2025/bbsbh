@@ -329,9 +329,10 @@
 
 /* The box-score shortcut under the card: a Button (size control), so the face,
    the ink edge and the press are .btn's. This rule only lays it out. */
-.gamecard__box {
+.gamecard .gamecard__box {
   align-self: stretch;
   margin-top: 2px;
+  border-radius: 0;
 }
 
 /* The Home Run Derby hand-off card (DerbyCard.jsx) — the whole card is the
@@ -422,7 +423,7 @@
   content: '';
   width: 6px;
   height: 6px;
-  border-radius: 50%;
+  border-radius: 0;
   background: currentColor;
 }
 
@@ -530,7 +531,7 @@
   padding: var(--space-1) var(--space-2) 3px;
   /* Double rule + a slight tilt = a pressed rubber stamp, not a UI chip. */
   border: 2px double var(--text-heading);
-  border-radius: 3px;
+  border-radius: 0;
   transform: rotate(-4deg);
   /* The stamp itself gets the hero motion: it presses DOWN onto the paper —
      starting larger (nearer the eye) and motion-blurred, overshooting past its
