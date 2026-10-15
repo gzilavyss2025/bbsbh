@@ -1,0 +1,33 @@
+/* ==== THE FOOT OF THE ONE-SCROLL TEAM PAGE (#1107, row 5c) ====
+   The club strip and the Game Notes card, stamped, after the About band. The app's own ink,
+   never the club's colour (ADR-0030). Each name tab hangs --space-3h above its card. */
+.tnext__foot {
+  row-gap: calc(var(--space-section) + var(--space-3h));
+}
+/* The empty foot keeps no height (and no gap), so it can still be watched for coming near. */
+.tnext__foot:has(> *) {
+  padding-top: calc(var(--space-section) + var(--space-3h));
+}
+.tnext__parent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  border-radius: 0;
+}
+.tnext__parent-label {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.tnext__clubstrip .teamfilterstrip {
+  border-radius: 0;
+}
+
+.tnext__doorcap {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
