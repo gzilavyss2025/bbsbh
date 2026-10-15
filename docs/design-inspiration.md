@@ -177,6 +177,39 @@ here as the worked example of "research → decision → build":
 
 ---
 
+## 9. Ball-flight traces: golf, tennis, and research on animation
+
+Added 2026-10-15, for the ball-flight side view (#1875). These are sports
+outside baseball, plus research on animated charts.
+
+- **Toptracer (golf).** It began because its founder could not see on TV if a
+  shot faded or drew ([golf.com](https://golf.com/news/toptracer-every-shot-nbc-broadcasts/?amp=1)).
+  The trace line is the main graphic. Ball speed, apex, curve and carry go
+  beside it, and the flight can animate as a side view
+  ([Toptracer](https://www.toptracer.com/tv), fetched). On a range, every shot
+  stays traced on one screen. Fit: keep the finished trace on screen, mark the
+  peak on the line, and overlay a half-inning's flights.
+- **Hawk-Eye (tennis).** The landing mark in a replay is an inference and can
+  differ from the real mark ([Cosmos](https://cosmosmagazine.com/features/order-in-the-court/));
+  critics say the drawn mark is too large
+  ([TennisNerd](https://www.tennisnerd.net/?p=39915)). Fit: label every drawn
+  value that is not measured ("est.", "drawn").
+- **Animated transitions (Heer and Robertson, InfoVis 2007).** Keep
+  transitions simple, stage complex ones, keep each mark tied to one data item,
+  and do not rescale an axis during a transition
+  ([paper](https://homes.cs.washington.edu/~jheer/files/2007-AnimatedTrans-InfoVis.pdf)).
+  Tversky et al. (2002) say the benefit of animation is often overstated, and
+  that small multiples can do as well (in the
+  [UW lecture](https://courses.cs.washington.edu/courses/cse442/18au/lectures/CSE442-Animation.pdf)).
+  Fit: keep one scale for a whole half-inning, and make the still end state
+  complete without the animation.
+- **Material motion.** Interface transitions stay short, about 150 to 200 ms
+  on desktop ([Material](https://m1.material.io/motion/duration-easing.html)).
+  Inference: a ball's flight is content, not an interface transition. Pace it
+  from the ball's hang time; keep the stamps and tile changes short.
+
+---
+
 ## Domains searched, and what's still open
 
 Finance (trading terminals, portfolio/risk, quant research), business/SaaS
