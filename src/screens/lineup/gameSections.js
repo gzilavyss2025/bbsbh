@@ -9,7 +9,9 @@ export function gameSectionTabs(game, step, lastInningSection) {
     { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
     // Fifth stop: the live #22 sheet, filled through the reveal mark. Last, so the four
     // scoring sections keep the order the "next" buttons walk.
-    { key: 'scorecard', label: 'Scorecard', active: step === 6, section: 'scorecard' },
+    { key: 'scorecard', label: 'Scorecard', active: step === 6, section: 'scorecard', wideOnly: true },
+    // `wideOnly`: a jump bar that carries an aside drops this stop under 740px, where five no longer
+    // fit one row. The innings page still opens it from its reference panel.
     // The preview poster (step 4) and the printable sheet (step 5) have NO stop here:
     // `.stepnav__btn` is `flex: 1 1 0`, so a sixth stop wraps "Innings" on a phone.
   ]

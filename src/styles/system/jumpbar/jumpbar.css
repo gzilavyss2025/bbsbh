@@ -57,6 +57,12 @@
   padding-top: var(--space-2h);
   border-top: var(--bw-hair) solid var(--border-rule);
 }
+/* Under 740px a bar with an aside drops its wide-only stops, so the rest fit one row at full size. */
+@media (max-width: 739.98px) {
+  .jumpbar--aside .jumpbar__item--wide {
+    display: none;
+  }
+}
 @media (min-width: 740px) {
   .jumpbar--aside {
     flex-direction: row;

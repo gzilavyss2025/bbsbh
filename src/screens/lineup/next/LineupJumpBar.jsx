@@ -13,7 +13,7 @@ export function LineupJumpBar({ tabs, onSection, aside }) {
           <button
             key={t.key}
             type="button"
-            className={`jumpbar__item${t.active ? ' is-current' : ''}`}
+            className={`jumpbar__item${t.active ? ' is-current' : ''}${t.wideOnly ? ' jumpbar__item--wide' : ''}`}
             aria-current={t.active ? 'page' : undefined}
             onClick={() => !t.active && onSection(t.section)}
           >
