@@ -4,6 +4,8 @@ The report for #1118. It lists the baseball quantities that this repo computes
 in two or more places, compares the formulas, and puts each one in one bucket.
 It changes no code. The collapse work comes later, after the owner reads this.
 
+*Status checked 2026-10-15 against `main`: none of the Duplicate rows is fully fixed. U1 and U12 are mostly fixed. The other nine are still duplicated.*
+
 The three homes:
 
 - **`src/api/`** (and a few `src/lib/`, `src/screens/` helpers): the live path,
@@ -22,7 +24,7 @@ numbers, so that you can run it again.
 | --- | --- |
 | Actual disagreement (each has an issue, label `needs-triage`) | **9** |
 | Deliberate difference (a comment to add, below) | **12** |
-| Duplicate (same formula, collapse later) | **12** |
+| Duplicate (same formula, collapse later) | **11** (U1 to U4, U6 to U12; there is no U5) |
 
 The three that matter most:
 
@@ -84,7 +86,7 @@ Bucket codes: **A** = actual disagreement, **D** = deliberate difference,
 
 | # | Quantity | Homes (file: function) | Edge, if any | Which home should win |
 | --- | --- | --- | --- | --- |
-| U1 | Innings pitched to outs, and back | `src/lib/math/innings.js`: `ipToOuts`, `outsToIp` (one home since #1306). Copies left: `scripts/gen-workload.mjs`, `scripts/gen-vs-team-splits.mjs`, `scripts/lib/pitcher-starts.mjs` (inline), `.scratch/*`; `scripts/lib/abs/exposure.mjs`: `inningsFromOuts` | All agree on real input. Only `"5.10"` differed, and the feed never sends it. `inningsFromOuts` rejects `".3"`; the others read it as 3 outs. | `src/lib/math/innings.js`. Keep `inningsFromOuts`'s strict parse. The generators left can import it. |
+| U1 | Innings pitched to outs, and back | `src/lib/math/innings.js`: `ipToOuts`, `outsToIp` (one home since #1306). Copies left: `scripts/lib/pitcher-starts.mjs` (inline), `.scratch/*`. `scripts/gen-workload.mjs` and `scripts/gen-vs-team-splits.mjs` now import it; `scripts/lib/abs/exposure.mjs`: `inningsFromOuts` | All agree on real input. Only `"5.10"` differed, and the feed never sends it. `inningsFromOuts` rejects `".3"`; the others read it as 3 outs. | `src/lib/math/innings.js`. Keep `inningsFromOuts`'s strict parse. The generators left can import it. |
 | U2 | Is a play a plate appearance | `src/api/playbyplay/eventTypes.js`: `NON_PA_EVENT_TYPES`, `GAME_ADVISORY_EVENT_TYPE`; `scripts/lib/long-at-bats.mjs`: `isPlateAppearance`; `derive.js`, `callout-notes/tto.js`, `rollup.js`, `progress.js` skip the advisory check | A top-level `game_advisory` play. It exists only before the first pitch, so no revealed count moves. | Move `isPlateAppearance` into `eventTypes.js`. A8 (#1282) is the one copy that disagrees. |
 | U3 | Was a called pitch a missed call | `src/api/derive.js`: `isMissedCall`; `src/api/umpireFavor.js`: `selectUmpireFavor`, `missEdge`; `scripts/gen-umpire-accuracy.mjs`: `computeGameAccuracy`, `missRegion` (same body as `missEdge`) | A pitch with a corrupt pre-pitch count: `derive.js` drops it from the missed count, the generator counts it | A pure per-pitch helper in `src/lib/zone/`. The feed walks stay where they are: `derive.js` and `umpireFavor.js` stay reveal-only (ADR-0001). Only one pitch's geometry moves, and geometry is not a score. |
 | U4 | Base-out state, play by play | `scripts/gen-run-expectancy.mjs`: `accumulateGame`; `scripts/gen-umpire-accuracy.mjs`: `computeGameAccuracy`; `src/api/umpireFavor.js`: `selectUmpireFavor`; `scripts/lib/abs/rows.mjs`: `challengeRowsForGame` | None found | A pure step function in `src/lib/runExpectancy.js` beside the table code. The reveal-only walk in `umpireFavor.js` stays there. |
@@ -93,8 +95,8 @@ Bucket codes: **A** = actual disagreement, **D** = deliberate difference,
 | U8 | A club's Team Score at a cutoff | `src/api/teamScore.js`: `teamScoreFor`; `scripts/gen-postseason-odds.mjs`: `teamScoreSnapshot` (says it is a deliberate copy) | None | `teamScore.js`. `src/api/CLAUDE.md` says a generator that needs app logic imports it. |
 | U9 | The league's ABS challenge rate | `src/api/around-the-game/absExposure.js`: `leagueBaseline` and `clubRate` over every club | A player with challenges and no exposure: counted in one, dropped in the other | One function. The gap today is 6.392 against 6.391 per 1,000 pitches, below the printed precision. |
 | U10 | A player's ABS challenge rate | `scripts/lib/abs/exposure.mjs`: `exposureRates`; `absExposure.js`: `clubChallengeBoard` (`players[].rate`) | None | The shipped per-player field. |
-| U11 | Median and quantile | `scripts/gen-gate.mjs`: `median` (rounds an even pair); `scripts/lib/salaries.mjs`, `scripts/lib/opencommand.mjs`, `scripts/lib/savant.mjs` (`round1`): `median`; `scripts/gen-level-tenure-benchmark.mjs`: `percentile`; `absExposure.js`: `quantile`; `src/api/workload.js` (upper middle) | Even-length lists and storage precision | Low value. Each precision is stated where it lives. Collapse only if one of them moves. |
-| U12 | Which season a job is about | `scripts/lib/time/season-in-play.mjs`: `fetchSeasonInPlay` in 9 nightly generators (war, savant-percentiles, workload, gate, attendance, farm-system, doubleheaders, run-differential, schedule-shape); `noteSeasonFor` and `offseasonPhase` in 4; the calendar year in the rest | Closed by #1465 for the nightly jobs that broke on January 1. The rest keep the calendar year on purpose: they skip a season with no data (umpires, spray, minors-leaders, prospect-trend, postseason-records, the OpenCommand three), or the calendar year is the right meaning (callouts, rehab, milestones, affiliates, team-transactions, war-history, run-expectancy). | `seasonInPlay`: this year from Opening Day, last year before it. |
+| U11 | Median and quantile | `scripts/gen-gate.mjs`: `median` (rounds an even pair); `scripts/lib/salaries.mjs`, `scripts/lib/opencommand.mjs`, `scripts/lib/savant.mjs` (`round1`): `median`; `scripts/gen-level-tenure-benchmark.mjs`: `percentile`; `src/components/scoring/StrikeZone.jsx` and `src/lib/pitcherCard/atBat.js`: `median`; `absExposure.js`: `quantile`; `src/api/workload.js` (upper middle) | Even-length lists and storage precision | Low value. Each precision is stated where it lives. Collapse only if one of them moves. |
+| U12 | Which season a job is about | `scripts/lib/time/season-in-play.mjs`: `fetchSeasonInPlay` in 11 nightly generators (war, savant-percentiles, workload, gate, attendance, farm-system, doubleheaders, run-differential, schedule-shape, league-averages, notable); `noteSeasonFor` and `offseasonPhase` in 4; the calendar year in the rest | Closed by #1465 for the nightly jobs that broke on January 1. The rest keep the calendar year on purpose: they skip a season with no data (umpires, spray, minors-leaders, prospect-trend, postseason-records, the OpenCommand three), or the calendar year is the right meaning (callouts, rehab, milestones, affiliates, team-transactions, war-history, run-expectancy). | `seasonInPlay`: this year from Opening Day, last year before it. |
 
 ## Checked: one home
 
