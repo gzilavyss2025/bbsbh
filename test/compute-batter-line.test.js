@@ -122,3 +122,8 @@ test('batterLineText: an at-bat past the cap is not counted (the average shows)'
 test('batterLineText: a batter missing from the record reads a dash', () => {
   assert.equal(batterLineText(boxFeed([], seasonBox), 'home', 99, 1), '—')
 })
+
+test('batterLineText: no average on record reads a dash, not ".---"', () => {
+  const empty = { seasonStats: { batting: { atBats: 0, hits: 0 } }, stats: { batting: { atBats: 0, hits: 0 } } }
+  assert.equal(batterLineText(boxFeed([], empty), 'home', 7, 1), '—')
+})

@@ -34,9 +34,6 @@
   border: var(--bw-heavy) solid var(--border-stamped);
   box-sizing: border-box;
 }
-.dueup__col--lead .dueup__photo {
-  box-shadow: var(--shadow-stamped-soft);
-}
 .shot.dueup__shot {
   width: 100%;
   height: 100%;
@@ -61,11 +58,9 @@
   font-variant-numeric: tabular-nums;
   line-height: var(--lh-solid);
 }
-.dueup__col--lead .dueup__slot {
-  background: var(--accent-tint);
-  color: var(--text-heading);
-}
 .dueup__name {
+  display: flex;
+  justify-content: center;
   max-width: 100%;
   font-family: var(--font-display);
   font-size: var(--fs-h3);
@@ -82,4 +77,15 @@
   font-variant-numeric: tabular-nums;
   line-height: var(--lh-solid);
   color: var(--text-body);
+}
+/* The name is the column's one tap target: a --tap-min box, the text centred in it.
+   The negative block margin folds the box's spare height back out of the layout, so
+   the column keeps its tight rhythm and only the hit area is 44px. */
+.dueup__name > * {
+  margin-block: calc((var(--fs-h3) - var(--tap-min)) / 2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
 }

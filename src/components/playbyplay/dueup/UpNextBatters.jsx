@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { selectDueUpNow } from '../../../api/dueup.js'
 import { batterLineText } from '../../../api/boxscore/batterLine.js'
-import { DueUpBatters } from './DueUpBatters.jsx'
+import { DueUpBatters, dueUpMotionKey } from './DueUpBatters.jsx'
 
 // Who's due up to face the entering pitcher, BEFORE any of this half is
 // revealed — the stamped due-up card (DueUpBatters), same "entering the half"
@@ -24,5 +24,5 @@ export function UpNextBatters({ feed, inning, half, revealedThrough, teamId, tea
     return { ...due, batters }
   }, [feed, inning, half, revealedThrough])
   if (!info) return null
-  return <DueUpBatters label="Due up" teamName={teamName} teamId={teamId} batters={info.batters} className="upnext" />
+  return <DueUpBatters label="Due up" teamName={teamName} teamId={teamId} batters={info.batters} motionKey={dueUpMotionKey(feed, inning, half, 'now')} className="upnext" />
 }

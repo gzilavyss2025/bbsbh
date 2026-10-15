@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { selectDueUpNext } from '../../../api/dueup.js'
 import { batterLineText } from '../../../api/boxscore/batterLine.js'
-import { DueUpBatters } from './DueUpBatters.jsx'
+import { DueUpBatters, dueUpMotionKey } from './DueUpBatters.jsx'
 
 // A preview of the OTHER team's next half: the first few spots due up, drawn by
 // DueUpBatters (the stamped card, the headshots and the one stat line each).
@@ -25,5 +25,5 @@ export function DueUpNextCard({ feed, inning, half, revealedThrough, awayId, hom
   const teamId = info.battingSide === 'away' ? awayId : homeId
   const teamName = info.battingSide === 'away' ? awayName : homeName
 
-  return <DueUpBatters label="Due up next" teamName={teamName} teamId={teamId} batters={info.batters} className="dueupnext" />
+  return <DueUpBatters label="Due up next" teamName={teamName} teamId={teamId} batters={info.batters} motionKey={dueUpMotionKey(feed, inning, half, 'next')} className="dueupnext" />
 }
