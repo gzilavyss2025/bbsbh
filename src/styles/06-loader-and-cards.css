@@ -199,6 +199,12 @@
     box-shadow var(--dur-fast) var(--ease-stamp);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .gamecard {
+    transition: none;
+  }
+}
+
 /* The press: the whole card sinks into its own shadow, the way .btn does
    (system/button.css). The card moves by the border width and the shadow
    shrinks by the same, so the shadow stays where it was printed. Keyed on the
@@ -262,10 +268,12 @@
 .gamecard__seriesline {
   display: flex;
   justify-content: space-between;
-  /* One band height with or without the series mark, so the status pill below
-     can sit under it at a known offset. */
+  /* One band height with or without the series mark, and on a long round name,
+     so the status pill below can sit under it at a known offset. */
   align-items: center;
-  min-height: var(--space-8);
+  height: var(--space-8);
+  white-space: nowrap;
+  overflow: hidden;
   gap: var(--space-2);
   margin: -14px -16px 0;
   /* Wider on both sides than .gamecard__datebanner's plain --space-4: the
@@ -327,7 +335,7 @@
   cursor: pointer;
 }
 
-/* The box-score shortcut under the card: a Button (size control), so the face,
+/* The box-score shortcut under the card: a Button (the 44px tap size), so the face,
    the ink edge and the press are .btn's. This rule only lays it out. */
 .gamecard .gamecard__box {
   align-self: stretch;
@@ -687,8 +695,9 @@
   opacity: 0.07;
 }
 
-/* A uniform framed tile for each club mark: a paper-filled square with a
-   hairline border and rounded corners. The mark is contained but slightly
+/* A uniform framed tile for each club mark: a square filled with the club
+   colour, a 2px ink edge, no rounded corners. Its texture (ripple rings and
+   sheen) and its hover growth live in gamecard/versus.css. The mark is contained but slightly
    overscaled and the tile clips overflow, so it just reaches the frame — a
    gentle crop that makes mismatched source logos read at one consistent
    size. `position: relative` + a z-index above the '@' watermark's 0 (see

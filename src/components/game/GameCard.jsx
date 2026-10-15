@@ -349,7 +349,7 @@ export function GameCard({
         </div>
       </button>
       {onBoxScore && !postponed && (
-        <Button size="control" className="gamecard__box" onClick={onBoxScore}>
+        <Button className="gamecard__box" onClick={onBoxScore}>
           Box score ›
         </Button>
       )}
