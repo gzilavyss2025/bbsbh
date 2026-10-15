@@ -12,6 +12,9 @@
                    control (ADR-0084, clause 5).
      .stattile     a stat tile's inside: one label, one big number, one
                    caption (StatTile.jsx, a stamped Card).
+     .stattile--compact  the same tile about 40% smaller, for a row of four or
+                   five. Add it next to .stattile (the Claude Design project
+                   has the same class, docs/design-sync.md).
      .factgrid--strip  the fact strip under the hero: three columns on a
                    phone, six from the wide step (FactGrid look="strip").
 
@@ -126,12 +129,32 @@
   padding: var(--space-2) var(--space-3);
 }
 
+/* The compact tile: the value drops from --fs-score-lg (46px) to --fs-hero-sm (28px) on a phone
+   and from --fs-hero-xl (56px) to --fs-hero-lg (32px) from the wide step; the padding drops to
+   --space-2 (--space-2h from the wide step). Frame, tones, label, caption and rank mark do not
+   change. The Claude Design project also sets the label to 11px; the app keeps --fs-label (12px),
+   because --fs-caption may only shrink (check-caption-budget). Two classes, so it wins over
+   .stattile at both widths. */
+.stattile.stattile--compact {
+  padding: var(--space-2);
+}
+.stattile--compact .stattile__value {
+  font-size: var(--fs-hero-sm);
+  line-height: var(--lh-solid);
+}
+
 @media (min-width: 740px) {
   .stattile {
     padding: var(--space-3h);
   }
   .stattile__value {
     font-size: var(--fs-hero-xl);
+  }
+  .stattile.stattile--compact {
+    padding: var(--space-2h);
+  }
+  .stattile--compact .stattile__value {
+    font-size: var(--fs-hero-lg);
   }
   .factgrid.factgrid--strip {
     grid-template-columns: repeat(6, minmax(0, 1fr));

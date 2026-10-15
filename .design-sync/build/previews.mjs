@@ -113,8 +113,7 @@ w('Headings', 'SectionHead', page('Headings', 'Section Head',
 `<div class="pv-row"><div class="sectionhead sectionhead--label"><h3 class="sectionhead__title">Standing</h3><em class="sectionhead__note">1st NL Central</em></div></div>
 <div class="pv-row"><div class="sectionhead sectionhead--rule"><h3 class="sectionhead__title">Last 10</h3><em class="sectionhead__note">8-2</em></div></div>
 <div class="pv-row"><div class="sectionhead sectionhead--band sectionhead--house"><h3 class="sectionhead__title">Run differential</h3><em class="sectionhead__note">+214</em></div></div>
-<div class="pv-row"><div class="sectionhead sectionhead--band sectionhead--house sectionhead--textured"><h3 class="sectionhead__title">Run differential, textured</h3><em class="sectionhead__note">+214</em></div></div>
-<p class="pv-note">Label: graphite caps on a hairline. Rule: the label, then a pencil leader to the note. House band: navy with a pencil rule. Textured: add sectionhead--textured for the ripple rings and sheen. A club colour may fill only a band that names the club (ADR-0030).</p>`))
+<p class="pv-note">Label: graphite caps on a hairline. Rule: the label, then a pencil leader to the note. House band: navy with a pencil rule. Every band carries the ripple rings and sheen. A club colour may fill only a band that names the club (ADR-0030).</p>`))
 
 // ---- Table
 w('Data', 'Table', page('Data', 'Table',

@@ -2,7 +2,7 @@
    toward the middle (--ripple-*, tokens/effects.css), over a soft diagonal
    sheen. The rings sit UNDER the mark, so the solid club colour reads as a
    printed, rippled field; the sheen sits over everything, so the whole tile
-   reads as one lit surface. Same recipe as `.lnext .sectionhead--band`. */
+   reads as one lit surface. Same recipe as `.sectionhead--band` (system/section-head.css). */
 .gamecard__logobox::before {
   content: '';
   position: absolute;

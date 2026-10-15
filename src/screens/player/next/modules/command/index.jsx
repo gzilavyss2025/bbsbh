@@ -79,7 +79,7 @@ export default function CommandModule({ bio, season, onEmpty, onCount }) {
                 value={t.value}
                 caption={t.caption}
                 tone={t.lead ? 'ink' : 'plain'}
-                className={`command__tile${view.thin ? ' command__tile--thin' : ''}`}
+                className={`command__tile stattile--compact${view.thin ? ' command__tile--thin' : ''}`}
               />
             ))}
           </div>
