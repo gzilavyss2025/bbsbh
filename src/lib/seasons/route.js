@@ -47,6 +47,9 @@ export function seasonPath(base, season) {
   if (vs != null) q.set('vs', String(vs))
   const scope = pitchScopeOf(season?.scope)
   if (scope) q.set('scope', scope)
+  // The page's own cutoff and level ride along when a caller has them (the team page's doors).
+  if (season?.d) q.set('d', season.d)
+  if (season?.s) q.set('s', String(season.s))
   const qs = q.toString()
   return `${path}${qs ? `?${qs}` : ''}`
 }

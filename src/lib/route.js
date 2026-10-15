@@ -893,8 +893,8 @@ export function foulsPath(season = {}) {
 // The league run value board. No arguments: the role filter and the club filter
 // are page state, not an address, the same call StandingsPage and the four
 // broadcast reports already made (see lib/reportPages.js's REPORT_ROUTES note).
-export function runValuePath() {
-  return '/run-value'
+export function runValuePath(opts = {}) {
+  return `/run-value${linkQuery(opts)}`
 }
 // The league ABS challenge board, for the same reason and with the same shape:
 // the level chip and every board's sort are page state, not an address.
