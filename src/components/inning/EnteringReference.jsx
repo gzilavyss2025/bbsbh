@@ -278,13 +278,14 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
 function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, upNextLabels, onDeckSlot = null }) {
   if (slots.length === 0) return null
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
-  // Which of the four "who bats next" states this card carries, in batting
-  // order of urgency — the legend names only those, and the rows say them by wash
-  // and slot square instead of by a word.
+  // Which "who bats next" states this card carries, in batting order of
+  // urgency. The rows say them by wash and slot square instead of by a word; the
+  // legend names the fielding club's three, and leaves out 'up' — the batting
+  // club's lone inked row needs no key.
   const present = new Set(
     slots.map((s) => (onDeckSlot === s.slot ? 'up' : STATE_OF_LABEL[upNextLabels?.get(s.slot)] ?? null)),
   )
-  const legend = ['up', 'due', 'deck', 'hole'].filter((st) => present.has(st))
+  const legend = ['due', 'deck', 'hole'].filter((st) => present.has(st))
   return (
     <div className={`lineupteam ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <h5 className="lineupteam__name sectionhead--band">

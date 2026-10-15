@@ -84,7 +84,6 @@
 .entering__row--up .entering__slot,
 .entering__row--due .entering__slot,
 .entering__key,
-.entering__legenditem--up .entering__key,
 .entering__legenditem--due .entering__key {
   background: var(--surface-stamped-ink);
   color: var(--text-on-ink-cream);
