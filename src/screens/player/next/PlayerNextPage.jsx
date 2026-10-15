@@ -101,7 +101,7 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
         <BackBtn onClick={back} />
         <Stack gap="section" className="pnext__page">
           <Stack gap="section" id="overview" className={still ? 'pnext__top--still' : undefined}>
-            <PlayerNextHero core={core.data} />
+            <PlayerNextHero key={core.data.bio.id} core={core.data} />
             {rows.map((b) => (
               <PlayerNextTiles
                 key={b.group}

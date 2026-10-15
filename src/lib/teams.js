@@ -920,7 +920,7 @@ export function treatmentTile(teamId, treatment) {
 // then distinguishable from a real photo and can fall back to something more
 // useful (Headshot.jsx falls back further to the player's team logo, or a
 // monogram with no team).
-const HEADSHOT_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload'
+export const HEADSHOT_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload'
 
 // `width` is the CDN-delivered pixel width, NOT the CSS display size. It
 // defaults to 320 so the largest on-screen rung (--shot-xl, 104px wide) is

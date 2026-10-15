@@ -6,11 +6,11 @@ import { TeamLink } from '../../../components/team/TeamLink.jsx'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { Card } from '../../../components/ui/frame/Card.jsx'
 import { FactGrid } from '../../../components/ui/frame/FactGrid.jsx'
-import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { ProspectPill } from '../../../components/badges/ProspectPill.jsx'
 import { useOvr } from '../../../components/ovr/useOvr.js'
 import { DASH, Fact, debutLabel, draftLabel } from '../parts.jsx'
 import { HERO_STAMP_DELAY, ageFact, headerExtras } from './heroData.js'
+import { HeroActionPhoto } from './top/HeroActionPhoto.jsx'
 import { HeroBand } from './top/HeroBand.jsx'
 import { HeroStamp } from './top/HeroStamp.jsx'
 import { HeroStrip } from './top/HeroStrip.jsx'
@@ -21,7 +21,7 @@ import '../../../styles/player-next/top/header-extras.css'
 function AgeFact({ fact, birthDate }) {
   const [flipped, setFlipped] = useState(false)
   const [still] = useState(motionIsReduced)
-  if (still || !fact.flip) return <Fact label={fact.label} value={fact.value} mono />
+  if (still || !fact.flip) return <Fact label={fact.label} value={fact.value} />
   return (
     <div className="fact fact--flip">
       <button
@@ -34,11 +34,11 @@ function AgeFact({ fact, birthDate }) {
         <span className="pnext__ageflip">
           <span className="pnext__ageface">
             <span className="fact__label">Age</span>
-            <span className="fact__value mono">{fact.value}</span>
+            <span className="fact__value">{fact.value}</span>
           </span>
           <span className="pnext__ageface pnext__ageface--back" aria-hidden="true">
             <span className="fact__label">Birthday</span>
-            <span className="fact__value mono">{debutLabel(birthDate)}</span>
+            <span className="fact__value">{debutLabel(birthDate)}</span>
           </span>
         </span>
       </button>
@@ -55,48 +55,77 @@ export function PlayerNextHero({ core }) {
   const x = headerExtras(core, useOvr(bio))
   const stamp = x?.ratings[0]
   const [open, setOpen] = useState(false)
+  // The action photo: 'wait' until it loads, 'ready' once shown, 'gone' after a 404.
+  const [photo, setPhoto] = useState('wait')
   const stripId = useId()
   const club = status ? null : bio.team
   const pos = bio.twoWay ? 'DH/P' : (bio.isPitcher && heroRole) || bio.posAbbr
+  const isMlb = isMlbTeamId(club?.id) || Boolean(status && bio.debut)
+  const wash = isMlb && status?.state !== 'retired' && photo !== 'gone'
+  // The fact table: two columns, so when the count is odd the last cell spans both (no empty cell).
+  const facts = [
+    club
+      ? { key: 'team', label: 'Team', value: <TeamLink id={club.id}>{club.name}</TeamLink> }
+      : status && { key: 'status', label: 'Status', value: status.label },
+    pos && { key: 'pos', label: 'Position', value: pos },
+    { key: 'bt', label: 'Bats / Throws', value: `${bio.bats || DASH} / ${bio.throws || DASH}` },
+    { key: 'age', age: true },
+    { key: 'hw', label: 'Height / Weight', value: bio.heightWeight },
+    { key: 'born', label: 'Born', value: bio.born },
+    { key: 'debut', label: 'MLB debut', value: bio.debut ? debutLabel(bio.debut) : DASH },
+    { key: 'draft', label: 'Draft', value: draftLabel(bio.draft, bio.signedYear) },
+    x?.nickname && { key: 'nick', label: 'Nickname', value: `“${x.nickname}”` },
+    x?.education && { key: 'school', label: 'School', value: x.education },
+  ].filter(Boolean)
   const role = bio.twoWay ? 'Two-way' : bio.isPitcher ? 'Pitcher' : 'Batter'
   return (
     <Card as="div" frame="stamped" body="flush" stampIn className="pnext__hero" style={{ '--stamp-delay': HERO_STAMP_DELAY }}>
       <HeroBand core={core} />
-      <div className="pnext__id">
+      <div className={`pnext__id${wash ? ' pnext__id--wash' : ''}${photo === 'ready' ? ' pnext__id--photo' : ''}`}>
+        {wash && (
+          <HeroActionPhoto
+            personId={bio.id}
+            ready={photo === 'ready'}
+            onReady={() => setPhoto('ready')}
+            onGone={() => setPhoto('gone')}
+          />
+        )}
         <Headshot
           personId={bio.id}
           name={bio.fullName}
           teamId={club?.parentOrgId ?? club?.id}
-          isMlb={isMlbTeamId(club?.id) || Boolean(status && bio.debut)}
+          isMlb={isMlb}
           className="pnext__shot"
         />
         <div className="pnext__who">
-          <p className="pnext__role">{[role, bio.number && `#${bio.number}`].filter(Boolean).join(' · ')}</p>
+          <p className="pnext__role">{[pos || role, bio.number && `#${bio.number}`].filter(Boolean).join(' · ')}</p>
           <h1 className="pnext__name">{bio.fullName}</h1>
-          {x?.nickname && <p className="pnext-ovr__nick">“{x.nickname}”</p>}
-          <p className="pnext__club">
-            {club && <TeamLogo teamId={club.id} name={club.name} size={22} />}
-            {club ? <TeamLink id={club.id}>{club.name}</TeamLink> : status && <span>{status.label}</span>}
-            {pos && <Pill fill="paper">{pos}</Pill>}
-            {stamp && <Pill className="pnext-ovr__tier">{stamp.tier.name}</Pill>}
-            <ProspectPill rank={x?.rank} />
-            <ProspectPill
-              orgRank={x?.orgRank}
-              orgTeamId={club?.parentOrgId ?? club?.id}
-              orgTeamName={club?.parentOrgName ?? club?.name}
-            />
-          </p>
-          {x?.education && <p className="pnext__attr pnext-ovr__school">{x.education}</p>}
+          {(club || x?.rank || x?.orgRank) && (
+            <p className="pnext__club">
+              {club && (
+                <TeamLink id={club.id}>
+                  <TeamLogo teamId={club.id} name={club.name} size={28} />
+                </TeamLink>
+              )}
+              <ProspectPill rank={x?.rank} />
+              <ProspectPill
+                orgRank={x?.orgRank}
+                orgTeamId={club?.parentOrgId ?? club?.id}
+                orgTeamName={club?.parentOrgName ?? club?.name}
+              />
+            </p>
+          )}
         </div>
         {stamp && <HeroStamp view={stamp} open={open} controls={stripId} onToggle={() => setOpen((o) => !o)} />}
       </div>
-      <FactGrid look="strip" as="div">
-        <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} mono />
-        <AgeFact fact={ageFact(bio, status)} birthDate={bio.birthDate} />
-        <Fact label="Ht / Wt" value={bio.heightWeight} mono />
-        <Fact label="Born" value={bio.born} mono />
-        <Fact label="MLB debut" value={bio.debut ? debutLabel(bio.debut) : DASH} mono />
-        <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} mono />
+      <FactGrid look="strip" as="div" className="pnext__facts">
+        {facts.map((f, i) =>
+          f.age ? (
+            <AgeFact key={f.key} fact={ageFact(bio, status)} birthDate={bio.birthDate} />
+          ) : (
+            <Fact key={f.key} label={f.label} value={f.value} wide={facts.length % 2 === 1 && i === facts.length - 1} />
+          ),
+        )}
       </FactGrid>
       {stamp && <HeroStrip id={stripId} ratings={x.ratings} open={open} />}
     </Card>

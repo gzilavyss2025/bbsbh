@@ -28,6 +28,49 @@
   align-items: center;
   padding: var(--space-3h);
 }
+/* THE ACTION PHOTO (#1863, layout C): a wash behind the hero row. It is anchored top right and
+   fades to paper on the left and at the foot, so the headshot and name keep the paper. The row's
+   own children sit above it. No photo (a 404), or one still loading: nothing shows. */
+.pnext__id {
+  position: relative;
+  isolation: isolate;
+}
+/* The row keeps one height for the whole time a photo can still load, so a late photo moves nothing.
+   It is taller than the text, so the photo shows more than head and shoulders. */
+.pnext__id--wash {
+  min-height: 15rem;
+}
+.pnext__action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 52%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  z-index: -1;
+  opacity: 0;
+  filter: saturate(0.85);
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, black 62%), linear-gradient(to top, transparent 0, black 22%);
+  mask-image:
+    linear-gradient(to right, transparent 0, black 62%), linear-gradient(to top, transparent 0, black 22%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.pnext__action.is-ready {
+  opacity: 0.92;
+}
+/* Text can reach the photo's soft edge: a paper halo keeps it readable. */
+.pnext__id--photo .pnext__role,
+.pnext__id--photo .pnext__name,
+.pnext__id--photo .pnext__club {
+  text-shadow:
+    0 0 6px var(--surface-card),
+    0 0 12px var(--surface-card);
+}
+
 .shot.pnext__shot {
   width: 96px;
   height: 112px;
@@ -63,6 +106,23 @@
   gap: var(--space-2);
   margin: var(--space-2) 0 0;
   font-weight: var(--w-semibold);
+}
+
+/* THE FACT TABLE (#1863): two columns on every width, so a value gets half the card and stays on one
+   line. One voice for the values: the body face, no mono. The page stays all-caps (01-base.css).
+   The Team link is plain. */
+.factgrid--strip.pnext__facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.pnext__facts .fact__value {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-none);
+}
+.pnext__facts .fact__value a {
+  color: inherit;
+  text-decoration: none;
 }
 
 /* THE AGE FLIP. The button is the fact cell; its two faces share a grid cell and

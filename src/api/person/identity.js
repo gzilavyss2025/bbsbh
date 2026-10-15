@@ -112,7 +112,7 @@ export function personBio(person) {
     twoWay: isTwoWay(person),
     heightWeight:
       person.height && person.weight
-        ? `${person.height} · ${person.weight}`
+        ? `${person.height} · ${person.weight} lb`
         : person.height || DASH,
     age: person.currentAge ?? DASH,
     birthDate: person.birthDate ?? null,
