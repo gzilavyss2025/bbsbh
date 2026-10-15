@@ -8,6 +8,7 @@ import { TeamHubShell } from '../TeamHubShell.jsx'
 import { loadTeamIdentity } from '../loadTeamIdentity.js'
 import { hiddenTeamSections } from '../data/shared.js'
 import { Band } from './Band.jsx'
+import { TeamNextFoot } from './foot/index.jsx'
 import { TeamNextTop } from './top/TeamNextTop.jsx'
 import { BANDS } from './bands.js'
 import { forgetLoads, SHARED } from './once.js'
@@ -79,6 +80,7 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
       {bands.map((b) => (
         <Band key={b.key} band={b} team={team} asOf={asOf} sportId={sportId} onCount={onCount} />
       ))}
+      <TeamNextFoot team={team} asOf={asOf} sportId={sportId} />
     </TeamHubShell>
   )
 }

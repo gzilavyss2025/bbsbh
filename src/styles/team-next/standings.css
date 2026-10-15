@@ -1,0 +1,196 @@
+/* ==== THE STANDINGS BAND OF THE ONE-SCROLL TEAM PAGE (#1107, row 5b) ====
+   standings/index.jsx imports this file. Every card is a stamped Card with a name tab. The four
+   modules the old Numbers tab still draws (Records, Last Time, Day of week, Comebacks) keep their
+   markup and lose their own sheet frame and head from here, CSS only, so the old tab is untouched.
+   The club colour is not used here: it is the hero's. Motion plays once per page visit. */
+
+/* layout-exempt: display: contents hands the band's children straight to the page's Stack */
+.stnd {
+  display: contents;
+}
+/* No rounded corners on the new page; a data dot stays round. */
+.stnd :not(.team-score__dot) {
+  border-radius: 0;
+}
+
+/* A flush card keeps its first row clear of the name tab that hangs over its edge. */
+.stnd__card {
+  padding-top: var(--space-3);
+}
+
+/* THE WRAPPED CARDS: the module's own frame and head go; the stamped card names it. A module that
+   drew nothing (Records with an incomplete ledger, Last Time on a quiet day) leaves no empty card. */
+.stnd__wrap > .tstats {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.stnd__wrap > .tstats > .sectionhead {
+  display: none;
+}
+.stnd__wrap:not(:has(.tstats)) {
+  display: none;
+}
+
+/* THE DIVISION TABLE's foot: the L10 note and the Postseason Odds control. */
+/* layout-exempt: a note and one control on a row, wrapping on a phone */
+.stnd__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.stnd__note {
+  margin: 0;
+  flex: 1 1 14rem;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+
+/* THE TEAM SCORE CARD */
+.stnd__lead {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+}
+/* layout-exempt: the rank at the left, the door at the right */
+.stnd__top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.stnd__rank {
+  display: inline-block;
+  margin: var(--space-1) 0 0;
+  background: linear-gradient(transparent 62%, var(--marker) 62%);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-score-lg);
+  line-height: var(--lh-tight);
+}
+/* layout-exempt: one cell per club, the count set by the card */
+.stnd__strip {
+  display: grid;
+  grid-template-columns: repeat(var(--cells, 30), minmax(0, 1fr));
+  gap: 2px;
+  margin-top: var(--space-3);
+}
+.stnd__cell {
+  height: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-inset);
+}
+.stnd__strip--tall .stnd__cell {
+  height: var(--space-5);
+}
+/* The club's own cell takes the marker with the whole ink edge; never the seal. */
+.stnd__cell--me {
+  border: var(--bw-heavy) solid var(--ink-0);
+  background: var(--marker);
+}
+/* layout-exempt: the strip's first and last place */
+.stnd__ends {
+  display: flex;
+  justify-content: space-between;
+  margin: var(--space-1) 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+
+.stnd__parts {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+.stnd__parts th:first-child,
+.stnd__parts td:first-child {
+  text-align: left;
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-label);
+}
+.stnd__parts .rankmark {
+  margin: 0;
+}
+.stnd__best {
+  background: var(--marker);
+}
+
+/* THE RAILS: the same strips, one a part, folded. */
+.stnd__rails {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+/* layout-exempt: the fold's name at the left, its plus at the right */
+.stnd__rails > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+.stnd__rails > summary::after {
+  content: '+';
+}
+.stnd__rails[open] > summary::after {
+  content: '−';
+}
+.stnd__rail {
+  padding: 0 var(--space-3) var(--space-3);
+}
+/* layout-exempt: a part's name at the left, its rank at the right */
+.stnd__railname {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+.stnd__railname span {
+  color: var(--text-caption);
+}
+.stnd__rail .stnd__strip {
+  margin-top: var(--space-1);
+}
+
+/* Motion: the strip wipes in left to right, then the club's cell inks in a beat after the card stamps, once per page visit. */
+@keyframes stnd-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+.stnd:not(.stnd--still) .stnd__strip--tall {
+  animation: stnd-wipe calc(var(--dur-stamp-in) * 3) var(--ease-stamp-in) calc(var(--stagger-step) * 2) backwards;
+}
+@keyframes stnd-ink {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+.stnd:not(.stnd--still) .stnd__cell--me {
+  animation: stnd-ink var(--dur-stamp-in) var(--ease-stamp-in) calc(var(--stagger-step) * 3) backwards;
+}
+.stnd--still .card--stamp-in {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stnd *,
+  .stnd .card--stamp-in {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+:root[data-motion='reduced'] .stnd *,
+:root[data-motion='reduced'] .stnd .card--stamp-in {
+  animation: none !important;
+  transition: none !important;
+}

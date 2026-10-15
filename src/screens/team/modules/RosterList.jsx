@@ -16,7 +16,7 @@ export function RosterList({ rows, season, showProspect }) {
             <PlayerLink id={r.id} className="thub-name">
               {r.name}
               {r.allStar && (
-                <span className="thub-allstar" title={`${season} All Star`}>★</span>
+                <span className="thub-allstar" role="img" aria-label={`${season} All Star`}>★</span>
               )}
             </PlayerLink>
             <InjuredMark hurt={r.hurt} />
@@ -26,7 +26,7 @@ export function RosterList({ rows, season, showProspect }) {
           {r.war !== undefined && (
             <Pill
               className={`rank__tag${r.war == null ? '' : r.war >= 3 ? ' rank__tag--good' : r.war < 0 ? ' rank__tag--bad' : ''}`}
-              title="Season WAR (MLB calc)"
+              aria-label={`Season WAR (MLB calc): ${r.war == null ? DASH : r.war.toFixed(1)}`}
             >
               {r.war == null ? DASH : r.war.toFixed(1)}
             </Pill>
