@@ -16,8 +16,9 @@ import { buttonAria } from '../../../lib/design/buttonClass.js'
 //          disabled. A tag and a control never share a height.
 //   fill   'outline' (the default: the ground shows through, the ink draws
 //          the edge), 'paper' (a paper chip — the one that rides a coloured
-//          band), 'ink' (navy, paper text) or 'seal' (kraft — ONLY a sealed
-//          thing, ADR-0083).
+//          band), 'ink' (navy, paper text), 'marker' (the highlighter, for the
+//          one pill that leads) or 'seal' (kraft — ONLY a sealed thing,
+//          ADR-0083).
 //   ink    a colour token by NAME, '--field', for an outline or paper pill.
 //          This is where a pill's meaning goes: the copy says what it is, the
 //          ink says which kind. There is no tone prop. See lib/design/pillClass.js
@@ -27,6 +28,10 @@ import { buttonAria } from '../../../lib/design/buttonClass.js'
 //          (pill--figure, #1186). The host adds only its tint and its place.
 //   pressed  control only: makes it a TOGGLE (aria-pressed), which draws the
 //          selected state. Leave it undefined for an ordinary action.
+//   mark   true for the small box shape (ADR-0112): a rank, a clinch letter, a
+//          position. At least as wide as it is tall, content centred; a figure
+//          mark holds two digits so a rank column lines up.
+//          fill="marker" is the highlighter fill, for the one pill that leads.
 //   href   control only: renders an anchor, for a pill that is an address.
 //
 // WHEN A CONTROL IS A PILL AND NOT A BUTTON (signed off for #1131). A pill
@@ -42,6 +47,7 @@ export function Pill({
   fill = 'outline',
   ink,
   figure = false,
+  mark = false,
   pressed,
   href,
   type = 'button',
@@ -50,7 +56,7 @@ export function Pill({
   children,
   ...rest
 }) {
-  const cls = pillClassName({ fill, role, figure, className })
+  const cls = pillClassName({ fill, role, figure, mark, className })
   const inkStyle = pillInkStyle({ fill, ink })
   const merged = inkStyle || style ? { ...inkStyle, ...style } : undefined
 

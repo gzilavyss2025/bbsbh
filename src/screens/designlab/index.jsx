@@ -16,6 +16,7 @@ import { NestedBoxes } from './nested/NestedBoxes.jsx'
 import { ReportLook } from './report/ReportLook.jsx'
 import { JumpBarLab } from './jumpbar/JumpBarLab.jsx'
 import { StampedParts } from './stamped/StampedParts.jsx'
+import { ReportParts } from './report/ReportParts.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import '../../styles/designlab/lab.css'
 
@@ -147,6 +148,7 @@ export function DesignLab() {
             {p.id === 'report-look' && <ReportLook />}
             {p.id === 'jump-bar' && <JumpBarLab />}
             {p.id === 'stamped-parts' && <StampedParts />}
+            {p.id === 'report-parts' && <ReportParts />}
           </Entry>
         ))}
       </Band>

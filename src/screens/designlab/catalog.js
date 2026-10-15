@@ -399,6 +399,13 @@ export const PROTOTYPES = [
     verdict: 'Prototype',
     note: 'Spec: docs/player-redesign.md, section 3. The real parts on invented data: Card frame="stamped" with its name tab and count tag, StatTile in its ink, tint and plain fills, FactGrid look="strip", and the stamp-in. Check at 390 and 1180 px.',
   },
+  {
+    id: 'report-parts',
+    title: 'Report parts (ADR-0112)',
+    path: 'src/styles/system/report/',
+    verdict: 'Prototype',
+    note: 'The cards, pills, buttons, meter and key the report pages share, as the real parts on invented data: StatStrip and StatTile look="band", LeaderList, ResultCard, CornerBadge, Pill mark and marker, Chips, Segmented, Button block, Stepper, Switch, Meter and Key. Check at 390 and 1180 px.',
+  },
 ]
 
 export const GROUP_TITLES = {

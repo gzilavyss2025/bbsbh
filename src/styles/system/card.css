@@ -65,6 +65,9 @@
 .card--tint {
   --card-ground: var(--surface-stamped-tint);
 }
+.card--soft {
+  --card-shadow: var(--shadow-stamped-soft);
+}
 .card--ink {
   --card-ground: var(--surface-stamped-ink);
   --card-shadow: var(--shadow-stamped-soft);

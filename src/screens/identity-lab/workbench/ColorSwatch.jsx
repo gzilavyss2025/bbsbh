@@ -62,7 +62,7 @@ export function ColorSwatch({ swatch, active, wpaSelected, onPickWpaBand, editab
       )}
       <span className="colorlab__swatchlabel">
         {swatch.label}
-        {copied && <span className="idlab__tapeflash">✓ copied</span>}
+        {copied && <span className="idlab__tapeflash">Copied</span>}
       </span>
       {editable ? (
         <HexField

@@ -1,0 +1,163 @@
+/* ---------------------------------------------------------------------------
+   THE REPORT CONTROLS (ADR-0112): the chip rows, the stepper, the switch and the
+   row button's block form. Each is the Button (system/button.css) set in a
+   layout, not a new control: a chip is a control-size outline Button that
+   toggles; a stepper is two Buttons around a label; a switch is a button with
+   role="switch". Selected needs no tick: the ink fill and the marker underline
+   are .btn's (ADR-0112).
+
+   CHIPS. Two layouts here. `rail` is one row that scrolls sideways (the
+   Salaries filter); `wrap` lets a short list fall onto more lines. A pick-one
+   row that fills the width is the Segmented control, which already exists.
+   --------------------------------------------------------------------------- */
+
+/* layout-exempt: the rail is one row that scrolls */
+.chips--rail {
+  display: flex;
+  gap: var(--space-1h);
+  overflow-x: auto;
+  /* The row clips on every side once it scrolls. The padding is as wide as the
+     focus ring plus its offset (2px + 2px), and the margin pulls the row back,
+     so the ring shows in full and the row does not look indented. */
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+  scrollbar-width: thin;
+}
+.chips--rail > .btn {
+  flex: none;
+}
+/* layout-exempt: the wrap layout lets a short list fall onto more lines */
+.chips--wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1h);
+}
+.chips__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-none);
+}
+
+/* THE ROW BUTTON: a block Button with a hint under its label and a mark at the
+   right (a disclosure arrow turns when the row is open). */
+.btn--block {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-1) var(--space-3);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding-block: var(--space-2);
+  text-align: left;
+}
+/* The hint takes the skin's own ink, so it reads on ink, danger and ghost alike. */
+.btn__hint {
+  grid-column: 1;
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-none);
+}
+.btn--block .btn__icon {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.btn--block[aria-expanded='true'] .btn__icon {
+  transform: rotate(90deg);
+}
+
+/* THE STEPPER: previous, the current stop, next, in one ruled box. */
+/* layout-exempt: three fixed cells, a button, the label and a button */
+.stepper {
+  display: inline-grid;
+  grid-template-columns: var(--tap-min) minmax(7.5rem, auto) var(--tap-min);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.stepper__btn.btn {
+  min-height: var(--tap-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.stepper__label {
+  display: grid;
+  place-items: center;
+  padding-inline: var(--space-3);
+  border-inline: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+/* THE SWITCH: the one round shape (ADR-0112). The standard on/off switch every
+   reader already knows (a 51 by 31 track, a round knob, green when on). The row
+   around it is a ruled box with a label and a hint. */
+/* layout-exempt: label and hint on the left, the track on the right */
+.switch {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3h);
+  border: var(--bw-rule) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.switch__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.switch__hint {
+  display: block;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.switch__track {
+  position: relative;
+  width: var(--switch-w);
+  height: var(--switch-h);
+  border-radius: var(--radius-pill);
+  background: var(--border-rule);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.switch__knob {
+  position: absolute;
+  top: var(--bw-heavy);
+  left: var(--bw-heavy);
+  width: calc(var(--switch-h) - 2 * var(--bw-heavy));
+  height: calc(var(--switch-h) - 2 * var(--bw-heavy));
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.switch[aria-checked='true'] .switch__track {
+  background: var(--accent-positive);
+}
+.switch[aria-checked='true'] .switch__knob {
+  transform: translateX(calc(var(--switch-w) - var(--switch-h)));
+}
+.switch:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn--block .btn__icon,
+  .switch__track,
+  .switch__knob {
+    transition: none;
+  }
+}

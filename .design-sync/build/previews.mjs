@@ -131,4 +131,97 @@ w('Data', 'Table', page('Data', 'Table',
   </div>
 </section>
 <p class="pv-note">A table sits flush in a stamped card. Mono figures, condensed heads, a hairline above each row, a pinned first column.</p>`))
+// ---- Report parts (ADR-0112). Club marks are monograms here: the project holds no logo files.
+const mk = (ab) => `<span class="leaderrow__mark" style="display:grid;place-items:center;font-family:var(--font-display);font-size:var(--fs-label);letter-spacing:var(--ls-label)">${ab}</span>`
+w('Report', 'StatBandAndStrip', page('Report', 'Stat Band And Strip',
+`  .pv-stack { display: grid; gap: var(--space-6); }
+  .pv-tiles { display: flex; flex-wrap: wrap; gap: var(--space-4); }`,
+`<div class="pv-stack">
+  <div class="card card--stamped statstrip">
+    <div class="statcell"><span class="statcell__label">Clubs sampled</span><span class="statcell__value">30</span><span class="statcell__note">Regular season</span></div>
+    <div class="statcell statcell--lead"><span class="statcell__label">Largest gate</span><span class="statcell__value">48,231</span><span class="statcell__note">Lead</span></div>
+    <div class="statcell"><span class="statcell__label">Avg time of game</span><span class="statcell__value">2:41</span></div>
+    <div class="statcell"><span class="statcell__label">Doubleheaders</span><span class="statcell__value">11</span></div>
+  </div>
+  <div class="pv-tiles">
+    <div class="card card--stamped stattile stattile--band"><p class="stattile__label">League payroll</p><p class="stattile__value">$5.2B</p><p class="stattile__caption">30 clubs</p></div>
+    <div class="card card--stamped stattile stattile--band stattile--lead"><p class="stattile__label">Top club</p><p class="stattile__value">$298M</p><p class="stattile__caption">Athletics</p></div>
+    <div class="card card--stamped card--soft stattile stattile--compact"><p class="stattile__label">AVG</p><p class="stattile__value">.312</p></div>
+  </div>
+</div>
+<p class="pv-note">Strip for three or four figures that read together; band for a figure that stands alone. One lead per row. Soft tone: the graphite offset shadow for a small tile.</p>`))
+
+w('Report', 'LeaderList', page('Report', 'Leader List',
+`  .pv-list { max-width: 440px; }`,
+`<section class="card card--stamped card--named pv-list" aria-labelledby="l1">
+  <h3 id="l1" class="card__name">Payroll leaders</h3>
+  <span class="card__count">30 clubs</span>
+  <ol class="leaders">
+    <li class="leaderrow leaderrow--lead"><span class="pill pill--marker pill--figure pill--mark">1</span>${mk('ATH')}<div><div class="leaderrow__name">Athletics</div><span class="leaderrow__sub">AL West</span></div><div class="leaderrow__figure">$298M<span class="leaderrow__unit">payroll</span></div></li>
+    <li class="leaderrow"><span class="pill pill--figure pill--mark">2</span>${mk('NYY')}<div><div class="leaderrow__name">Yankees</div><span class="leaderrow__sub">AL East</span></div><div class="leaderrow__figure">$281M<span class="leaderrow__unit">payroll</span></div></li>
+    <li class="leaderrow leaderrow--mine"><span class="pill pill--figure pill--mark">3</span>${mk('MIL')}<div><div class="leaderrow__name">Brewers</div><span class="leaderrow__sub">NL Central · your club</span></div><div class="leaderrow__figure">$263M<span class="leaderrow__unit">payroll</span></div></li>
+  </ol>
+</section>
+<p class="pv-note">Lead: field wash and a marker rank pill. Mine: an ink tint and an ink bar. The 36px mark slot takes a logo or a headshot.</p>`))
+
+w('Report', 'ResultCard', page('Report', 'Result Card',
+`  .pv-result { max-width: 440px; }`,
+`<section class="card card--stamped card--soft result pv-result" aria-label="Sample final: Dodgers 5, Yankees 3">
+  <div class="result__strip">
+    <div class="result__club result__club--away" style="--result-tint: var(--accent-primary)"><span class="result__mark" style="display:grid;place-items:center;font-family:var(--font-display)">NYY</span><span class="result__runs">3</span></div>
+    <div class="result__mid"><b class="result__status">Final</b><span class="result__note">Game 6</span></div>
+    <div class="result__club result__club--home result__club--win"><span class="result__mark" style="display:grid;place-items:center;font-family:var(--font-display)">LAD</span><span class="result__runs">5</span></div>
+  </div>
+  <div class="result__bar"><span><b class="result__tag">WP</b>Sample Pitcher</span><span class="result__line">7.0 IP · 9 K</span></div>
+  <div class="result__bar"><span><b class="result__tag">MVP</b>Sample Player</span><span class="result__line">2-for-4 · HR · 3 RBI</span></div>
+  <div class="result__foot"><span>Sample data · Oct 28 · Sample Park</span><button type="button" class="btn btn--control">Box score</button></div>
+</section>
+<p class="pv-note">From the focus-mode scorebug. For a finished game on a history page only; a current score never goes in it.</p>`))
+
+w('Report', 'MeterAndKey', page('Report', 'Meter And Key',
+`  .pv-stack { display: grid; gap: var(--space-4); max-width: 440px; }`,
+`<div class="pv-stack">
+  <div class="meter" role="img" aria-label="Fresh 5, Ltd 2, Out 1">
+    <div class="meter__seg meter__seg--good" style="--share:5">Fresh<span class="meter__figure">5</span></div>
+    <div class="meter__seg meter__seg--caution" style="--share:2">Ltd<span class="meter__figure">2</span></div>
+    <div class="meter__seg meter__seg--bad" style="--share:1">Out<span class="meter__figure">1</span></div>
+  </div>
+  <div class="meter" role="img" aria-label="FB 52%, SL 28%, OTH 20%">
+    <div class="meter__seg meter__seg--good" style="--share:52">FB<span class="meter__figure">52%</span></div>
+    <div class="meter__seg meter__seg--caution" style="--share:28">SL<span class="meter__figure">28%</span></div>
+    <div class="meter__seg meter__seg--neutral meter__seg--ring" style="--share:20">OTH<span class="meter__figure">20%</span></div>
+  </div>
+  <ul class="key"><li class="key__item"><span class="key__swatch key__swatch--good"></span>Fresh</li><li class="key__item"><span class="key__swatch key__swatch--caution"></span>Limited</li><li class="key__item"><span class="key__swatch key__swatch--bad"></span>Down</li></ul>
+  <ul class="key"><li class="key__item"><span class="pill pill--ink pill--mark">x</span>Clinched a postseason berth</li><li class="key__item"><span class="pill pill--mark" style="--pill-ink: var(--accent-negative)">e</span>Eliminated</li></ul>
+</div>
+<p class="pv-note">The player page's pitch mix bar as a shared part: 40px, a 2px ink edge, square, one segment per part as wide as its share.</p>`))
+
+w('Report', 'PillMarks', page('Report', 'Pill Marks',
+`  .pv-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }`,
+`<div class="pv-row">
+  <span class="pill pill--marker pill--figure pill--mark">1</span>
+  <span class="pill pill--figure pill--mark">12</span>
+  <span class="pill pill--ink pill--figure pill--mark">7</span>
+  <span class="pill pill--ink pill--mark">x</span>
+  <span class="pill pill--mark" style="--pill-ink: var(--accent-positive)">y</span>
+  <span class="pill pill--mark">CF</span>
+  <span class="pill pill--ink">AAA</span>
+  <span class="pill" style="--pill-ink: var(--accent-positive)">W5</span>
+  <span class="pill" style="--pill-ink: var(--accent-negative)">L3</span>
+</div>
+<p class="pv-note">Square, like every pill and button. A mark holds one figure or one or two letters. Marker fill: the one pill in a row that leads.</p>`))
+
+w('Report', 'ReportControls', page('Report', 'Report Controls',
+`  .pv-stack { display: grid; gap: var(--space-4); max-width: 440px; }`,
+`<div class="pv-stack">
+  <div class="chips chips--rail" role="group" aria-label="Division">
+    <button type="button" class="btn btn--control" aria-pressed="true">All <span class="chips__count">30</span></button>
+    <button type="button" class="btn btn--control" aria-pressed="false">AL East <span class="chips__count">5</span></button>
+    <button type="button" class="btn btn--control" aria-pressed="false">NL Central <span class="chips__count">5</span></button>
+  </div>
+  <button type="button" class="btn btn--block" aria-expanded="false"><span class="btn__icon" aria-hidden="true">›</span><span>More filters</span><span class="btn__hint">Level, age, ETA</span></button>
+  <div class="stepper"><button type="button" class="btn btn--ghost stepper__btn" aria-label="Previous year">‹</button><span class="stepper__label">2025</span><button type="button" class="btn btn--ghost stepper__btn" aria-label="Next year" disabled>›</button></div>
+  <button type="button" class="switch" role="switch" aria-checked="true"><span><span class="switch__label">Show headshots</span><span class="switch__hint">Turn off to save data</span></span><span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span></button>
+</div>
+<p class="pv-note">Selected: an ink fill and a marker underline, no checkmark. The switch is the one round shape.</p>`))
 console.log('previews done')

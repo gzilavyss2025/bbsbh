@@ -81,6 +81,13 @@
    what sits between card.css and 06. Their selectors are new, and the strip
    out-ranks .factgrid in 09 on specificity, so the slot carries no weight. */
 @import './styles/system/stamped/stamped.css';
+/* The report parts (ADR-0112): the stat band and strip, the leader row, the result
+   card, the meter and key. A subfolder, since system/ is at the 12-file cap. They
+   build on the stamped card above, so they load right after it. */
+@import './styles/system/report/stat.css';
+@import './styles/system/report/leader.css';
+@import './styles/system/report/result.css';
+@import './styles/system/report/meter.css';
 /* The postseason SERIES MARK and its navy plate (lib/postseason/
    seriesMarks.js). Class-only rules that no earlier partial sets, so their
    place in the order carries no cascade weight. */
@@ -180,6 +187,10 @@
 /* The MENU RAIL (#2073): MenuRail.jsx. Its selectors outrank .btn, so its place does not
    depend on system/button.css. The motion is motion/menurail.css. */
 @import './styles/system/menurail/menurail.css';
+/* The report CONTROLS (ADR-0112): chip rows, the block Button's grid, the stepper and
+   the switch. After system/button.css and 07 on purpose: .btn--block redraws .btn's
+   display at the same specificity, so it must win on order. */
+@import './styles/system/report/controls.css';
 @import './styles/48-stamp-strip.css';
 @import './styles/52-highlight-clip-card.css';
 @import './styles/54-my-tally.css';

@@ -126,11 +126,6 @@
   color: var(--text-on-ink);
 }
 
-.stampin__check {
-  font-size: var(--fs-small);
-  line-height: var(--lh-solid);
-}
-
 /* The season cap refuses rather than prunes (ADR-0035), so the row says so
    instead of leaving a dead control to be poked at. */
 .stampin__refusal {

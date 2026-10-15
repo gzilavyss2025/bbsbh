@@ -11,20 +11,26 @@
 
 import { TEXT, ratio } from './contrastPairings.js'
 
-export const FILLS = ['outline', 'paper', 'ink', 'seal', 'solid']
+export const FILLS = ['outline', 'paper', 'ink', 'seal', 'marker', 'solid']
 export const ROLES = ['tag', 'control']
 
+// `mark` (ADR-0112) is the small box shape: one figure or one or two letters, at
+// least as wide as it is tall (a rank, a clinch letter). A figure mark is wide
+// enough for two digits, so a column of ranks lines up. `marker` is the highlighter
+// fill for the one pill in a row that leads (rank 1); it carries its own ink.
+//
 // `figure` is the mono figure face (#1186): a rank, a level, a count. It is not
 // a third colour axis; it sets the face and centres it on its cap height, for
 // a tag and a control alike (styles/system/pill.css, "THE FIGURE FACE"). A
 // hand-written pill opts in with the same class, pill--figure.
-export function pillClassName({ fill = 'outline', role = 'tag', figure = false, className = '' } = {}) {
+export function pillClassName({ fill = 'outline', role = 'tag', figure = false, mark = false, className = '' } = {}) {
   if (!FILLS.includes(fill)) throw new Error(`Pill: unknown fill "${fill}" (${FILLS.join(', ')})`)
   if (!ROLES.includes(role)) throw new Error(`Pill: unknown role "${role}" (${ROLES.join(', ')})`)
   const parts = ['pill']
   if (role !== 'tag') parts.push(`pill--${role}`)
   if (fill !== 'outline' && fill !== 'solid') parts.push(`pill--${fill}`)
   if (figure) parts.push('pill--figure')
+  if (mark) parts.push('pill--mark')
   if (className) parts.push(className)
   return parts.join(' ')
 }
@@ -55,7 +61,7 @@ export function pillInkStyle({ fill = 'outline', ink } = {}) {
   if (ink === undefined) return undefined
   if (!TOKEN.test(ink)) throw new Error(`Pill: ink must be a token name like "--field", not "${ink}"`)
   for (const [re, why] of REFUSED) if (re.test(ink)) throw new Error(`Pill: ink "${ink}" refused — ${why}`)
-  if (fill === 'ink' || fill === 'seal' || fill === 'solid') {
+  if (fill === 'ink' || fill === 'seal' || fill === 'marker' || fill === 'solid') {
     throw new Error(`Pill: fill="${fill}" carries its own ink; ink is for outline and paper`)
   }
   return { '--pill-ink': `var(${ink})` }

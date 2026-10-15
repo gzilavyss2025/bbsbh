@@ -48,7 +48,7 @@ export function CopyIconButton({ text, label }) {
 
   return (
     <button type="button" className="copybox__iconbtn" onClick={copy} aria-label={label} title={label}>
-      {copied ? '✓' : '⧉'}
+      {copied ? '■' : '⧉'}
     </button>
   )
 }

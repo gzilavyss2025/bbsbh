@@ -1,0 +1,99 @@
+/* ---------------------------------------------------------------------------
+   THE METER AND THE KEY (ADR-0112). The meter is the player page's pitch mix bar
+   (styles/player-next/pitcher/arsenal.css, .arsenal__mix) as a shared part: 40px
+   tall, a 2px ink edge, square, one segment per part as wide as its share, the
+   code over the figure, a 2px ink rule between segments. It replaces
+   .statusmeter, .pillars and .foulavg__meter.
+
+   TONE is a role, never a colour name: good, caution, bad or neutral, and `ring`
+   draws a part that is not a real share (the "other" of a mix) as a ringed
+   segment. The ink rules between segments mean no two fills rest on hue alone.
+
+   The key is the one legend under a chart: a swatch or a mark, then what it
+   means. It replaces .clinchkey, .rptkey, .pillar-key, .ninekeys__legend and
+   .rvsplit__legend.
+   --------------------------------------------------------------------------- */
+
+.meter {
+  display: flex;
+  height: var(--space-10);
+  overflow: hidden;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+/* layout-exempt: code over share, centred in the segment, as .arsenal__seg */
+.meter__seg {
+  display: flex;
+  flex: var(--share, 1) 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  border-right: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--meter-fill, var(--text-caption));
+  color: var(--meter-ink, var(--text-heading));
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+.meter__seg:last-child {
+  border-right: 0;
+}
+.meter__figure {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-none);
+}
+/* A ringed part sits on card paper, so it takes the heading ink whatever its tone. */
+.meter__seg--ring {
+  --meter-ink: var(--text-heading);
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 var(--space-1) var(--meter-fill, var(--text-caption));
+}
+
+.meter__seg--good,
+.key__swatch--good {
+  --meter-fill: var(--field-infield);
+}
+.meter__seg--caution,
+.key__swatch--caution {
+  --meter-fill: var(--marker);
+}
+.meter__seg--bad,
+.key__swatch--bad {
+  --meter-fill: var(--accent-negative);
+  --meter-ink: var(--text-on-ink-cream);
+}
+.meter__seg--neutral,
+.key__swatch--neutral {
+  --meter-fill: var(--text-muted);
+  --meter-ink: var(--text-on-ink-cream);
+}
+
+/* layout-exempt: key items wrap onto the next line */
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1h) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-body);
+  font-size: var(--fs-small);
+}
+.key__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.key__swatch {
+  display: inline-block;
+  width: var(--space-3);
+  height: var(--space-3);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--meter-fill, var(--text-caption));
+}

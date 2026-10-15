@@ -18,9 +18,6 @@ export function StampInButton({ stamped = false, seasonFull = false, onStamp, la
   if (state === 'stamped') {
     return (
       <span className="stampin__mark stampin__mark--on">
-        <span className="stampin__check" aria-hidden="true">
-          ✓
-        </span>
         Stamped
         <span className="sr-only">{suffix}</span>
       </span>

@@ -81,7 +81,7 @@
   "radius-sm": "Legacy ledger card.",
   "radius-md": "Legacy sheet card and band corner.",
   "radius-lg": "Legacy large surfaces.",
-  "radius-pill": "Pills and capsules only.",
+  "radius-pill": "Round marks only: the switch track and knob and the icon button. A pill and a button are square (ADR-0112).",
   "shadow-stamped": "The stamped card hard offset shadow: no blur, ink, 4px down and right (border-stamped, stamped-offset).",
   "shadow-stamped-soft": "The shadow under an ink tile (border-stamped-soft).",
   "shadow-card": "Soft elevation of a legacy sheet card.",
@@ -250,7 +250,16 @@
   "ls-fixed": "Fixed 1px tracking.",
   "space-section": "Gap between a page top-level sections (16px, alias of space-4).",
   "app-width": "Phone-column width every screen is capped to.",
-  "control-min": "Height of a control inside a card (34px)."
+  "control-min": "Height of a control inside a card (34px).",
+  "surface-mine": "The reader's own club on a ranked board (leader row, state mine): an ink tint on the card paper, with an ink bar on the left.",
+  "mark-md": "Round dismiss mark of an icon button (32px).",
+  "mark-sm": "Round (i) mark of an icon button (18px), and the corner badge on a photo.",
+  "mark-lg": "The leader row's mark slot (36px): a club logo or a headshot in an ink-edged box.",
+  "mark-xl": "The result card's club mark (40px).",
+  "result-mid": "Width of the result card's centre cell (84px): the status and its note.",
+  "result-strip": "Minimum height of the result card's score strip (96px).",
+  "switch-w": "Width of the on/off switch track (51px).",
+  "switch-h": "Height of the on/off switch track (31px); the knob is two stamped edges smaller."
  },
  "flags": {
   "graphite-soft": " FLAG: 3.10:1 on paper-2 and 2.91:1 on paper-0, under 4.5:1. Kept exact; use only for \"not available\" placeholders, never a figure.",

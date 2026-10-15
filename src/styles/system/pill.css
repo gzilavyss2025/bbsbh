@@ -1,16 +1,17 @@
 /* ---------------------------------------------------------------------------
-   PILL — the app's one capsule (#1131). components/ui/control/Pill.jsx writes
+   PILL — the app's one small label box (#1131; square since ADR-0112). components/ui/control/Pill.jsx writes
    it; a hand-written <span class="pill …"> wears the same classes.
 
    Three shapes share a screen on the team hub, and each has one job:
 
-     BUTTON  a ruled box, --radius-sm. Acts on the page you stand on.
+     BUTTON  a ruled box, square. Acts on the page you stand on.
      DOOR    a link in --accent-link, no box. Leaves the page.
-     PILL    a capsule, --radius-pill. A label you read, or a small choice
-             you flip.
+     PILL    a small box with a hairline edge, square. A label you read, or a
+             small choice you flip.
 
-   The capsule is how a reader tells a pill from a button. The HEIGHT is how a
-   thumb tells a pill you read from a pill you press: a tag is about 20px and a
+   The edge weight tells a pill from a button (a hairline against the button's
+   rule), and the HEIGHT is how a thumb tells a pill you read from a pill you
+   press: a tag is about 20px and a
    control is --control-min (34px), and the two never meet in between.
 
    TWO AXES, NO TONE. The census found 70 capsules (finding 1 of
@@ -28,7 +29,7 @@
                 line + 2px + the edge ≈ 20px    button's own control height
      padding    2px --space-1h                  0 --space-3
      edge       --bw-hair                       --bw-rule, the button's edge
-     radius     --radius-pill, for both. That is the whole family.
+     radius     none, for both (ADR-0112). That is the whole family.
      type       --font-display, --fs-label, --ls-label, uppercase,
                 --lh-compact, for both. No font-weight: the display face ships
                 one weight (700), so a weight does nothing. Emphasis is the
@@ -90,7 +91,7 @@
                      forced-colors mode; the fill alone would not. A
                      PAPER control keeps a paper edge when selected, so
                      the navy chip still shows on a navy club bar.
-     focus-visible   a 2px --focus-ring outline, 2px off the capsule. On a
+     focus-visible   a 2px --focus-ring outline, 2px off the box. On a
                      coloured band the host makes it the band ring (#1215):
                      --focus-ring-band with the --ring-band halo.
      disabled        :disabled or [aria-disabled="true"]. The fill stays and
@@ -124,7 +125,7 @@
   gap: var(--space-1);
   padding: 2px var(--space-1h);
   border: var(--bw-hair) solid var(--pill-edge);
-  border-radius: var(--radius-pill);
+  border-radius: 0;
   background: var(--pill-fill);
   color: var(--pill-text);
   font-family: var(--font-display);
@@ -187,6 +188,34 @@
   --pill-edge-hover: var(--seal-hatch);
 }
 
+/* ---- the marker fill and the mark shape (ADR-0112) ----
+
+   MARKER. The highlighter fill, for the ONE pill in a row that leads: rank 1.
+   Rank emphasis takes --marker (ADR-0083). The edge is the stamped ink, so the
+   yellow never sits on paper without an edge (1.58:1 against paper).
+
+   MARK. A pill that holds one figure or one or two letters: a rank, a clinch
+   letter, a position. It is at least as wide as it is tall and centres its
+   content, and it draws in capitals like every label (the all-caps invariant). A
+   FIGURE mark is wide enough for two digits, so a column of ranks lines up; a
+   letter mark is the square minimum and grows with a second letter. It takes the
+   rule edge, one step heavier than a tag's hairline, so a small box still reads. */
+.pill--marker {
+  --pill-fill: var(--marker);
+  --pill-edge: var(--border-stamped);
+  --pill-text: var(--text-heading);
+}
+
+.pill--mark {
+  justify-content: center;
+  min-width: var(--space-5);
+  padding-inline: var(--space-1);
+  border-width: var(--bw-rule);
+}
+.pill--mark.pill--figure {
+  min-width: var(--space-6);
+}
+
 /* ---- the figure face (#1186) ----
 
    THE FIGURE FACE. The mono face, tabular figures, the cell size and the caps
@@ -238,12 +267,6 @@
   padding-block: 0;
 }
 
-/* inline-block has no flex gap, so the selected tick keeps its space here. */
-.pill--control.pill--figure[aria-pressed='true']::before,
-.pill--control.pill--figure[aria-current='page']::before {
-  margin-inline-end: var(--space-1h);
-}
-
 @supports (text-box: trim-both cap alphabetic) {
   .pill--figure {
     text-box: trim-both cap alphabetic;
@@ -270,12 +293,19 @@
   border-color: var(--accent-primary);
   color: var(--text-on-ink);
 }
-.pill--control[aria-pressed='true']::before,
-.pill--control[aria-current='page']::before {
-  content: '✓';
-  content: '✓' / '';
-  flex: none;
-  line-height: var(--lh-solid);
+/* No tick (ADR-0112): ink fill and a marker underline, as on .btn. */
+.pill--control[aria-pressed='true'],
+.pill--control[aria-current='page'] {
+  box-shadow: inset 0 calc(-1 * var(--space-1)) 0 var(--marker);
+}
+@media (forced-colors: active) {
+  .pill--control[aria-pressed='true'],
+  .pill--control[aria-current='page'] {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
 }
 
 /* A pressed PAPER control keeps a paper edge. Paper is the fill that rides a

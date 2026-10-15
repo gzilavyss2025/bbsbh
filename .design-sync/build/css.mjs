@@ -41,7 +41,7 @@ wr('tokens/fonts.css', "/* Design-system copy of the app's src/tokens/fonts.css:
 // ---- part styles: the repo's own CSS
 const team = rd('src/styles/09-team-info.css')
 const sectionHead = rd('src/styles/system/section-head.css') // square and rippled in the app itself (#2165)
-let bundle = '/* _ds_bundle.css: the stamped look, copied from the repo. Order follows the app (cluster, card, stamped, jump bar, section head, table, stamp-in). */\n'
+let bundle = '/* _ds_bundle.css: the stamped look, copied from the repo. Order follows the app (cluster, card, stamped, jump bar, section head, table, pill, segmented, button, report parts, stamp-in). */\n'
 const add = (label, css) => { bundle += `\n/* ==== ${label} ==== */\n${css}\n` }
 add('src/styles/system/cluster.css', rd('src/styles/system/cluster.css'))
 add('src/styles/system/card.css', rd('src/styles/system/card.css'))
@@ -51,6 +51,10 @@ add('src/styles/09-team-info.css (the fact rules the fact strip uses)',
   ['.factgrid', '.factgrid__grid', '.fact', '.fact--wide', '.fact__label', '.fact__value', '.fact__na'].map((s) => block(team, s)).join('\n\n'))
 add('src/styles/system/jumpbar/jumpbar.css', rd('src/styles/system/jumpbar/jumpbar.css'))
 add('src/styles/system/table.css', rd('src/styles/system/table.css'))
+add('src/styles/system/pill.css', rd('src/styles/system/pill.css'))
+add('src/styles/system/segmented/segmented.css', rd('src/styles/system/segmented/segmented.css'))
+add('src/styles/system/button.css', rd('src/styles/system/button.css'))
+for (const f of ['stat', 'leader', 'result', 'meter', 'controls']) add(`src/styles/system/report/${f}.css`, rd(`src/styles/system/report/${f}.css`))
 add('src/styles/motion/stamp-in.css', rd('src/styles/motion/stamp-in.css'))
 bundle += '\n/* ==== src/styles/motion/player-rise.css (the player rise) ==== */\n' + rd('src/styles/motion/player-rise.css')
 wr('_ds_bundle.css', bundle)
