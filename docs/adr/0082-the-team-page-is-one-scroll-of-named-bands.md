@@ -89,7 +89,7 @@ STANDING  →  RANKS  →  GAMES  →  ROSTER  →  FARM  →  MONEY  →  ABOUT
 
 | Band | The question it answers |
 | --- | --- |
-| **Standing** | How is the season going? |
+| **Standings** | How is the season going? |
 | **Ranks** | Where does this club sit among the rest? |
 | **Games** | What have they played? |
 | **Roster** | Who plays here? |
@@ -105,7 +105,7 @@ anchor on a phone jump bar and it buys the rule below.
 It holds the Ballpark, **Logos & jerseys**, and — on an affiliate —
 **Affiliation history** and **Made The Show**: the building, the marks, the orgs
 this club has belonged to, and the players it sent up. Decided 2026-09-21, and
-it overrules the wireframe, which had put the jersey card in Standing (a record
+it overrules the wireframe, which had put the jersey card in Standings (a record
 by X, beside its siblings) and the other two in Farm (the org ladder). The test
 that moved all three is the one every other band on this page is held to: a
 band is one question, and every season band's answer changed yesterday. Change
@@ -116,7 +116,7 @@ are not "who is coming".
 > **Every page ends on a band that no subject can fail to fill.**
 
 Money needs Cot's coverage. Ranks needs a league. Farm needs a parent org.
-Standing needs a division. A ballpark is a building, and every club in this app
+Standings needs a division. A ballpark is a building, and every club in this app
 plays in one — so Milwaukee's 20,050px page and a Single-A club's 13,570px page
 close on the same band, with the same head, in the same place. **A page that
 loses a band from its tail no longer ends on an absence.** That is worth more to
@@ -132,7 +132,7 @@ width on 2026-09-21, card heights only: Milwaukee **1,274px**, Nashville
 
 > **Corrected by #1106, 2026-09-21.** This paragraph ended "On all three
 > affiliates it is the page's longest band after Roster." It is not. Measured by
-> band on `/team/249`, the order is Standing **3,488px** · Farm **3,205** ·
+> band on `/team/249`, the order is Standings **3,488px** · Farm **3,205** ·
 > Roster **2,974** · Games **2,010** · About **1,357** · Ranks **534** — About
 > is fifth of six. The claim worth making is the one this section opened with:
 > About is the band no club can fail, and it is **four times the 349px floor's
@@ -191,7 +191,7 @@ This is the failure the new shape is **built to demonstrate**, and the
 demonstration is literal. ADR-0034 named four cards by name. Here they are, in
 one band, with nothing between them:
 
-> **Standing** — division standings + postseason odds, Team Score, Records,
+> **Standings** — division standings + postseason odds, Team Score, Records,
 > record by day of week, record by jersey, comeback wins, Last Time.
 
 Cards 2, 5, 10 and 13 of the old page are now the first band of the new one, and
@@ -247,12 +247,12 @@ section. #1107 writes the shared hook.
 Two corrections to the naive "every band owns its loader":
 
 - **The header must not buy the standings twice.** `loadTeamIdentity` fetches
-  standings for the record line and `loadStanding` fetches the same response for
+  standings for the record line and `loadStandings` fetches the same response for
   the table — the single most repeated request today, ×7. The Overview already
   solves this: `loadOverview` does not call `loadTeamIdentity`, and shapes the
   header's three fields off its own standings response through the shared
   `teamRecordFor`. The long page does the same.
-- **The schedule is a page-level fetch.** Three bands read it — Standing (the
+- **The schedule is a page-level fetch.** Three bands read it — Standings (the
   day-of-week and jersey joins), Games (the schedule and the grid), Roster (the
   recent-form window). It is bought ×4 today.
 
@@ -272,7 +272,7 @@ is still true.
 **The cold target is below today's Overview, not level with it.** #1107 says the
 page must fire "no more than today's Overview" — that is the floor. A page that
 buys its identity header once instead of six times should be *cheaper* than the
-summary page it replaces, and the arithmetic says it can be: the Standing band is
+summary page it replaces, and the arithmetic says it can be: the Standings band is
 a strict subset of today's Numbers tab (22 requests) plus two static score files,
 over a four-request shell.
 
@@ -329,11 +329,11 @@ nothing else in this app does. Recorded here rather than discovered later.
 | --- | --- |
 | `/team/{id}/roster` | `#roster` |
 | `/team/{id}/games` | `#games` |
-| `/team/{id}/numbers` | **`#standing`** |
+| `/team/{id}/numbers` | **`#standings`** |
 | `/team/{id}/contracts` | `#money` |
 | `/team/{id}/minors` | `#farm` |
 
-`/numbers` lands on `#standing` rather than `#ranks`, although the name looks
+`/numbers` lands on `#standings` rather than `#ranks`, although the name looks
 like it should go the other way. A redirect should land where the tab's **lead
 content** went, and the Numbers tab's first module is the standings table.
 
@@ -403,8 +403,8 @@ share one org's farm system. Every band a Single-A club keeps, it fills.
 
 **`hiddenTeamTabs()` cannot express this rule and is replaced.** It decides at
 tab grain, and the bands do not map one-to-one onto the tabs: the Numbers tab
-alone splits into **Standing and Ranks**, which are absent under different
-conditions — a club with no league id loses Ranks and keeps Standing. One
+alone splits into **Standings and Ranks**, which are absent under different
+conditions — a club with no league id loses Ranks and keeps Standings. One
 boolean per tab cannot say that. It also has a hole (below). #1107 writes
 `hiddenTeamSections(team)` in the same file, decided off the same cheap identity
 data `loadTeamIdentity` already has — **never by fetching a band's payload to
@@ -456,7 +456,7 @@ What the page becomes once that lands was measured, not guessed, against Los
 Mochis for season 2025: the league standings return **10 clubs** (with `division`
 null on both sides, which `divisionRecordFor` already normalises), the leader
 pool returns **23 hitting and 32 pitching splits**, and the full-season roster
-returns **55 players**. So the winter shape is **five bands** — Standing, Ranks,
+returns **55 players**. So the winter shape is **five bands** — Standings, Ranks,
 Games, Roster, About — not the empty page it is today. Thin, but named and
 closed.
 

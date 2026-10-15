@@ -58,10 +58,10 @@ export function NumbersTab({ id, asOf, sportId }) {
   )
 }
 
-// The tab's body, apart from its shell, so the one-scroll page's Standing and
-// Ranks bands (next/standing/, next/ranks/) mount the same cards (#1107). `numbers`
+// The tab's body, apart from its shell, so the one-scroll page's Standings and
+// Ranks bands (next/standings/, next/ranks/) mount the same cards (#1107). `numbers`
 // is the useAsync result. `part` picks a band's share, in the tab's own order:
-// 'standing' is the standings table and the record cards, 'ranks' the rank tables
+// 'standings' is the standings table and the record cards, 'ranks' the rank tables
 // and the leaders ledger, 'all' (the tab) both.
 export function NumbersBody({ numbers, team, asOf, sportId, part = 'all' }) {
   const teamId = team.id
@@ -69,7 +69,7 @@ export function NumbersBody({ numbers, team, asOf, sportId, part = 'all' }) {
   const isMilb = (team.sport?.id ?? 1) !== 1
   const n = numbers.data
   const showStanding = part !== 'ranks'
-  const showRanks = part !== 'standing'
+  const showRanks = part !== 'standings'
 
   return (
     <>

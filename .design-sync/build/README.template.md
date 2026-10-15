@@ -74,11 +74,11 @@ Every text pair in the look holds 4.5:1 except the pairs below. They are kept ex
 
 The team page (`/team/{id}`, ADR-0082, still a draft) is **one scroll of seven bands under a sticky jump bar**:
 
-**Standing, Ranks, Games, Roster, Farm, Money, About.**
+**Standings, Ranks, Games, Roster, Farm, Money, About.**
 
 | Band | The question it answers |
 | --- | --- |
-| Standing | How is the season going? |
+| Standings | How is the season going? |
 | Ranks | Where does this club sit among the rest? |
 | Games | What have they played? |
 | Roster | Who plays here? |
@@ -91,7 +91,7 @@ The team page (`/team/{id}`, ADR-0082, still a draft) is **one scroll of seven b
 - **Open the page** with a stamped hero card: the club name on the tab, a fact strip (record, pct, division, run diff, last 10, streak), then a row of stat tiles. The lead tile is ink, the second is tint, the rest are plain.
 - **Inside a band** use stamped cards. Pair two cards side by side only at wide widths. Space them with the `space-*` tokens.
 - **Design the phone (390 px) and the desktop (1180 px) together, as one design, and neither leads.** Decide each layout choice for both widths at once. At 390 px: one column, tiles in a wrapping grid, the jump bar scrolling sideways. At 1180 px: the strip goes to six columns, the tile value grows to 56 px (`fs-hero-xl`), and the jump bar wraps inside a stamped box. The switch is at 740 px.
-- **Example, Brewers, Standing band:** record `103-59`, `.636`, `1st NL Central`, run differential `+214`, last 10 `8-2`, streak `W5`, season grade `9.5` "Making it look easy".
+- **Example, Brewers, Standings band:** record `103-59`, `.636`, `1st NL Central`, run differential `+214`, last 10 `8-2`, streak `W5`, season grade `9.5` "Making it look easy".
 
 ## Motion
 

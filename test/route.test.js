@@ -1265,7 +1265,7 @@ test('the hidden team page parses, and carries the cutoff', () => {
 })
 
 test('each old tab address behind the hidden page names its band, with ?d= and ?s= kept', () => {
-  const band = { roster: 'roster', games: 'games', numbers: 'standing', contracts: 'money', minors: 'farm' }
+  const band = { roster: 'roster', games: 'games', numbers: 'standings', contracts: 'money', minors: 'farm' }
   for (const [tab, key] of Object.entries(band)) {
     const r = parseRoute(`/team/158/next/${tab}?d=2026-04-01&s=11`)
     assert.equal(r.name, 'team-next', tab)

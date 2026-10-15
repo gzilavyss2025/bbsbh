@@ -8,6 +8,7 @@ import { TeamHubShell } from '../TeamHubShell.jsx'
 import { loadTeamIdentity } from '../loadTeamIdentity.js'
 import { hiddenTeamSections } from '../data/shared.js'
 import { Band } from './Band.jsx'
+import { TeamNextTop } from './top/TeamNextTop.jsx'
 import { BANDS } from './bands.js'
 import { forgetLoads, SHARED } from './once.js'
 import '../../../styles/team-next/page.css'
@@ -52,7 +53,7 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
   })
   if (gate) return gate
 
-  const { team, record, manager } = identity.data
+  const { team, record, manager, standings, season } = identity.data
   const hidden = hiddenTeamSections(team)
   const bands = BANDS.filter((b) => !hidden.has(b.key))
   return (
@@ -63,6 +64,7 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
       asOf={asOf}
       sportId={sportId}
       active="next"
+      top={<TeamNextTop team={team} standings={standings} season={season} asOf={asOf} />}
       bar={
         <HubTabBar
           variant="anchor"
