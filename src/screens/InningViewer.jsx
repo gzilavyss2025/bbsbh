@@ -795,9 +795,8 @@ export function InningViewer({
     <CalloutLedgerProvider value={calloutLedger}>
     <div className={`innings innings--focus innings--${focus.windowed ? 'windowed' : 'stacked'}`}>
       {cloudSync}
-      {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
-          and the half-inning navigator share one chrome row on the wide layout,
-          stacked on a phone. Refresh no longer sits up here — it moved to the
+      {/* The section jump bar (handed down from GameView) and the half-inning
+          navigator stack in one chrome block at every width. Refresh no longer sits up here — it moved to the
           floating bottom bar (below) at every width, so refreshing live data is
           always one reach from the Next button. */}
       <div className="inningchrome">
@@ -805,7 +804,7 @@ export function InningViewer({
         <nav className="inningnav" aria-label="Half-inning navigator">
           <button
             type="button"
-            className="btn btn--control"
+            className="btn"
             onClick={() => goTo(Math.max(0, curIdx - 1))}
             disabled={curIdx === 0}
             aria-disabled={turning || undefined}
@@ -818,7 +817,7 @@ export function InningViewer({
           </span>
           <button
             type="button"
-            className="btn btn--control"
+            className="btn"
             onClick={() => requestForwardHalf(Math.min(maxIdx, curIdx + 1))}
             disabled={curIdx === maxIdx || skippedBottomHalf}
             aria-disabled={turning || undefined}

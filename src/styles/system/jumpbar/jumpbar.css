@@ -35,6 +35,42 @@
     box-shadow: var(--shadow-stamped);
   }
 }
+/* THE ASIDE (.jumpbar--aside): a cluster of its own beside the stops, so the bar cannot scroll
+   as a whole or the aside would scroll away. Under 740px the stops scroll inside their own row
+   and the aside is a second line under a hairline; from 740px they share one row, the aside
+   at the right. */
+.jumpbar--aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2h);
+  overflow: visible;
+}
+.jumpbar--aside .jumpbar__row {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.jumpbar--aside .jumpbar__row::-webkit-scrollbar {
+  display: none;
+}
+.jumpbar__aside {
+  padding-top: var(--space-2h);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+@media (min-width: 740px) {
+  .jumpbar--aside {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .jumpbar--aside .jumpbar__row {
+    overflow: visible;
+  }
+  .jumpbar__aside {
+    padding-top: 0;
+    border-top: 0;
+  }
+}
 .jumpbar__item {
   flex-shrink: 0;
   display: inline-flex;

@@ -10,14 +10,14 @@ import { Door } from '../components/ui/control/Door.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { catchUpPlan, catchUpRevealTo } from '../hooks/useRevealProgress.js'
-import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
 import { LogoModal } from '../components/logo/LogoModal.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { Masthead, MatchBand, MastheadSide } from './gameview/Masthead.jsx'
+import { LineupJumpBar } from './lineup/next/LineupJumpBar.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 import { useRouteLink } from '../lib/nav.js'
-import { humanDateWithYear } from '../lib/dates.js'
 import { ordinal } from '../lib/format.js'
 import { useGameRound } from '../hooks/postseason/useGameRound.js'
 import { titleWithRound } from '../lib/postseason/gameRound.js'
@@ -206,9 +206,17 @@ export function GameView({ game, section, onSection }) {
   // and box-score sections; for the innings view it's handed to InningViewer
   // instead, which sets it on the same row as the half-inning Back/Next nav on
   // the wide layout (one bar of chrome) and stacked on a phone.
-  const sectionTabs = feed ? (
+  const tabs = gameSectionTabs(game, step, lastInningSection)
+  // The innings page takes the lineup pages' jump bar; the box score and scorecard keep the outline row.
+  const sectionTabs = !feed ? null : step === 2 ? (
+    <LineupJumpBar
+      tabs={tabs}
+      onSection={onSection}
+      aside={<MastheadSide date={officialDate} gamePk={game.gamePk} isLive={isLive} keepAwake={keepAwake} onSetKeepAwake={setKeepAwake} />}
+    />
+  ) : (
     <nav className="stepnav" aria-label="Game sections">
-      {gameSectionTabs(game, step, lastInningSection).map((s) => (
+      {tabs.map((s) => (
         <button
           key={s.key}
           type="button"
@@ -220,14 +228,14 @@ export function GameView({ game, section, onSection }) {
         </button>
       ))}
     </nav>
-  ) : null
+  )
 
   // The lineup pages carry their own hero, jump bar and dock (docs/lineup-redesign.md), so the
   // masthead, series band and section tabs are left out once the game has loaded.
   const ownChrome = Boolean(feed) && (step === 0 || step === 1)
   const lineupNext = {
     game,
-    tabs: gameSectionTabs(game, step, lastInningSection),
+    tabs,
     onSection,
     isLive,
     keepAwake,
@@ -276,19 +284,21 @@ export function GameView({ game, section, onSection }) {
     <div className="screen">
       <SiteHeader />
 
-      {!ownChrome && (
-      <Masthead
-        away={game.away}
-        home={game.home}
-        date={officialDate}
-        gamePk={game.gamePk}
-        onSketch={setSketching}
-        isLive={isLive}
-        keepAwake={keepAwake}
-        onSetKeepAwake={setKeepAwake}
-        treatment={jerseyTreatments}
-      />
-      )}
+      {!ownChrome && (step === 2 ? (
+        <MatchBand away={game.away} home={game.home} date={officialDate} onSketch={setSketching} treatment={jerseyTreatments} />
+      ) : (
+        <Masthead
+          away={game.away}
+          home={game.home}
+          date={officialDate}
+          gamePk={game.gamePk}
+          onSketch={setSketching}
+          isLive={isLive}
+          keepAwake={keepAwake}
+          onSetKeepAwake={setKeepAwake}
+          treatment={jerseyTreatments}
+        />
+      ))}
 
       {/* A postseason game's series mark, on a navy band under the masthead —
           on both lineup pages and the box score, so the game reads as October
@@ -529,103 +539,6 @@ export function GameView({ game, section, onSection }) {
   )
 }
 
-// The game's masthead: two grayscale marks — away on the left, home on the
-// right, an @ between — sized like the logos on the lineup pages, left-aligned
-// in the page header, with the game's date and a Watch link side by side,
-// right-aligned opposite them. Tapping a mark opens it enlarged for pencil
-// sketching. The date and the Watch link are both structural, not
-// score-revealing, so they render unconditionally (no seal).
-function Masthead({
-  away,
-  home,
-  date,
-  gamePk,
-  onSketch,
-  isLive,
-  keepAwake,
-  onSetKeepAwake,
-  treatment,
-}) {
-  return (
-    <div className="masthead">
-      <div className="masthead__teams">
-        <MastheadLogo team={away} treatment={treatment?.away} side="away" season={date} onSketch={() => onSketch('away')} />
-        {/* The same screen-print '@' the slate card uses (Big Shoulders
-            Display, kraft-amber + navy a couple px out of register — see
-            .gamecard__atmark), here an inline mark between the two logos
-            rather than a faint background watermark. */}
-        <span className="masthead__at" aria-hidden="true">
-          <span className="masthead__at-ghost">@</span>
-          <span className="masthead__at-ink">@</span>
-        </span>
-        <MastheadLogo team={home} treatment={treatment?.home} side="home" season={date} onSketch={() => onSketch('home')} />
-      </div>
-      <div className="masthead__side">
-        {date && <span className="masthead__date">{humanDateWithYear(date)}</span>}
-        {/* Only worth showing (and worth the tap) while the game can actually
-            hold the lock — pregame/Final it would just sit there inert. */}
-        {isLive && <KeepAwakeToggle on={keepAwake} onToggle={() => onSetKeepAwake(!keepAwake)} />}
-        {gamePk && <WatchButton gamePk={gamePk} />}
-      </div>
-    </div>
-  )
-}
-
-// Screen-wake-lock toggle, same switch convention as the Settings modal's
-// Game Score pref (FavoriteTeamModal.jsx's favteamsheet__prefToggle) but
-// compact enough to ride in the masthead next to Watch — this is a per-game,
-// in-the-moment choice, not something worth burying in a separate modal.
-function KeepAwakeToggle({ on, onToggle }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={on ? 'Keep screen awake: on' : 'Keep screen awake: off'}
-      title="Keep the screen from sleeping during this live game"
-      className={`awaketoggle${on ? ' is-on' : ''}`}
-      onClick={onToggle}
-    >
-      <span className="awaketoggle__icon" aria-hidden="true">
-        {on ? '☀' : '☾'}
-      </span>
-    </button>
-  )
-}
-
-// Hands off to MLB.TV's own video player for this game — mlb.com's
-// /tv/g{gamePk} route (confirmed live against mlb.com/tv: the page identifies
-// itself as "MLB.TV Web"). Deliberately NOT /gameday/{gamePk} (an earlier
-// version of this button used that): mlb.com's own
-// /.well-known/apple-app-site-association lists "/tv/g*" as a path the MLB
-// app registers for universal links but does NOT list "/gameday/*" at all —
-// so a gameday link never actually opened the app, only Safari — and
-// gameday is MLB's play-by-play/box-score tracker, i.e. exactly the kind of
-// score-revealing page this app exists to seal, the opposite of what a
-// "watch" button should hand off to. /tv/g* is registered, opens the app
-// directly into the video player, and never routes through that tracker.
-// Never spoiler-revealing on OUR side — it's a game identifier, not a score;
-// once the user is watching, seeing the live broadcast (and its score) is
-// the point of tapping Watch, not a leak from this app's own UI.
-// The wordmark is MLB's own "MLBTV-19-ondark" asset (linked from
-// mlb.com/live-stream-games), saved locally at public/icons/mlbtv-logo.svg
-// rather than hotlinked — it already carries its own light badge shape,
-// meant to sit on a dark surface like this pill's navy fill.
-function WatchButton({ gamePk }) {
-  return (
-    <a
-      className="btn btn--control btn--ink masthead__watch"
-      href={`https://www.mlb.com/tv/g${gamePk}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="Watch this game on MLB.TV"
-    >
-      <img className="masthead__watchlogo" src="/icons/mlbtv-logo.svg" alt="Watch on MLB.TV" />
-      <span className="btn__icon" aria-hidden="true">↗</span>
-    </a>
-  )
-}
-
 // Delayed/suspended/postponed banner, shown between the masthead and the
 // step nav. `status` is selectGameStatus's output; renders nothing for a
 // normal scheduled/live/final game. Appends the free-text reason ("Rain")
@@ -661,30 +574,3 @@ function gameTitle(game, step, inning, half, round = '') {
   return titleWithRound(matchup, section, round)
 }
 
-// The mark inside the masthead tile, sized so the EDGE_BLEED overscale
-// TeamTreatmentMark applies (1.32) lands it at ~53px — 20% larger than the
-// bare 44px logo this tile replaced. The tile itself is a little larger
-// still, so the mark reads as printed on a uniform patch rather than filling
-// a frame edge to edge.
-const MASTHEAD_MARK = 40
-
-function MastheadLogo({ team, treatment, side, season, onSketch }) {
-  return (
-    <button
-      type="button"
-      className="masthead__logo"
-      onClick={onSketch}
-      aria-label={`Enlarge ${team.name || 'team'} logo for sketching`}
-    >
-      <TeamTreatmentMark
-        teamId={team.id}
-        name={team.name}
-        treatment={treatment}
-        side={side}
-        size={MASTHEAD_MARK}
-        season={season}
-        block="masthead__logobox"
-      />
-    </button>
-  )
-}

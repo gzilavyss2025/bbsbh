@@ -26,6 +26,7 @@
 .inningchrome {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
 }
 
 /* Extra-innings team-record banner (see ExtrasBanner) — a compact info Notice
@@ -201,16 +202,16 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  margin: 4px 0 10px;
+  margin: 0 0 var(--space-1);
 }
 
-/* ‹ Back and Next › are Buttons (control size, outline), the same control as
-   the .stepnav__btn row they sit beside on the shared iPad/desktop chrome row
-   (min-width: 740px). Nothing is left to say about them here. */
+/* ‹ Back and Next › are Buttons at the tap size, outline: the same 44px as the jump bar's
+   stops above them, since they are the controls a thumb uses most on this page. Nothing is
+   left to say about them here. */
 
 .inningnav__label {
   font-family: var(--font-display);
-  font-size: var(--fs-num-md);
+  font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);

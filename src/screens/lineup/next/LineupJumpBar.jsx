@@ -2,10 +2,12 @@ import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 
 // The game's section bar in the jump bar's look (system/jumpbar): the stops are routes, so
 // each button navigates and the current one is ink. Not the scroll-spy bar of a one-scroll
-// page, which is why it does not use HubTabBar.
-export function LineupJumpBar({ tabs, onSection }) {
+// page, which is why it does not use HubTabBar. `aside` (the innings page: the date, keep-awake
+// and Watch) sits under the stops on a phone, where only the stops scroll, and at the right
+// end of the row from the wide step.
+export function LineupJumpBar({ tabs, onSection, aside }) {
   return (
-    <nav className="jumpbar lnext__jump" aria-label="Game sections">
+    <nav className={`jumpbar lnext__jump${aside ? ' jumpbar--aside' : ''}`} aria-label="Game sections">
       <Cluster gap="snug" className="jumpbar__row">
         {tabs.map((t) => (
           <button
@@ -19,6 +21,7 @@ export function LineupJumpBar({ tabs, onSection }) {
           </button>
         ))}
       </Cluster>
+      {aside && <div className="jumpbar__aside">{aside}</div>}
     </nav>
   )
 }

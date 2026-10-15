@@ -180,7 +180,6 @@ const BUDGETS = {
   // the paragraph above already makes for the catch-up wiring, and the band is
   // coarse — 100 lines granted for 14 used. The slack is not an invitation:
   // the next door should trim this one rather than spend it.
-  'src/screens/GameView.jsx': 700, // 626
   // 1300 -> 1360: the starting-pitcher card's season-vs-opponent and
   // career-vs-opponent rows (see OpposingStarterCard). 1360 -> 1400 for the
   // pitch-mix card's batter-side split — one more arsenalSidesView memo beside

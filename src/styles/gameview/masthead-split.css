@@ -1,0 +1,119 @@
+/* THE SPLIT MASTHEAD (the innings page, MatchBand). The two clubs 50/50, each half its club's own
+   tile colour (--tint, set by TeamTreatmentMark on the half itself) with the scorebug's ripple
+   rings and sheen behind the mark, in a stamped edge and hard shadow. The slate card's colour
+   wash, held on. The rings sit behind the logo (z-index -1 in the isolated half). */
+/* layout-exempt: a fixed pair of halves, one per club */
+.masthead--split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: var(--space-1) 0 var(--space-4);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+}
+/* Two classes: the base .masthead__logo rule comes later in this file and would win the padding. */
+.masthead__logo.masthead__logo--half {
+  position: relative;
+  display: block;
+  min-height: 112px;
+  padding: 0;
+  border-radius: 0;
+}
+/* The versus split of the slate card (gamecard/versus.css) held on: both slabs lean the same
+   way so the channel between them (the masthead's own gap) is a constant width, and the slash
+   fills it. Each tile bleeds past its cell on its outer side, where the container clips it, so
+   the lean leaves no gap at the corners; the padding keeps the mark centred in the cell, and the
+   mark counter-leans to stand upright. */
+.masthead--split {
+  --split-lean: 10deg;
+  --split-bleed: calc(var(--space-4) + var(--space-3));
+  position: relative;
+  overflow: hidden;
+}
+.masthead__half {
+  position: absolute;
+  inset-block: 0;
+  box-sizing: border-box;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% + var(--split-bleed));
+  background: var(--tint, var(--bg-page));
+  transform: skewX(calc(-1 * var(--split-lean)));
+}
+.masthead__half--away {
+  right: 0;
+  padding-left: var(--split-bleed);
+}
+.masthead__half--home {
+  left: 0;
+  padding-right: var(--split-bleed);
+}
+.masthead__half .teamlogo {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32))
+    skewX(var(--split-lean));
+}
+/* The slash: three stripes, the broadcast split (a thick ink bar, a cream gap, a thin ink bar),
+   centred in the channel and as tall as the band. */
+.masthead__slash {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  z-index: 2;
+  width: calc(var(--space-1) + 2 * var(--bw-heavy));
+  translate: -50% 0;
+  transform: skewX(calc(-1 * var(--split-lean)));
+  background: linear-gradient(
+    90deg,
+    var(--border-stamped) 0 var(--space-1),
+    var(--text-on-ink-cream) var(--space-1) calc(var(--space-1) + var(--bw-heavy)),
+    var(--border-stamped) calc(var(--space-1) + var(--bw-heavy)) 100%
+  );
+  pointer-events: none;
+}
+.masthead__half::before,
+.masthead__half::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.masthead__half::before {
+  background:
+    repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
+  mask-image: linear-gradient(100deg, var(--ripple-mask) 0%, transparent 50%, var(--ripple-mask) 100%);
+}
+.masthead__half::after {
+  background: linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%);
+}
+.masthead__half--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+
+/* The aside of the jump bar (MastheadSide): the date left, the switch and Watch right on a
+   phone's second line; all at the right end of the stops from the wide step. */
+.jumpbar__aside .masthead__side {
+  justify-content: space-between;
+}
+.jumpbar__aside .masthead__date {
+  color: var(--text-heading);
+}
+.jumpbar__aside .awaketoggle {
+  border-width: var(--bw-heavy);
+  border-radius: 0;
+}
+@media (min-width: 740px) {
+  .jumpbar__aside .masthead__side {
+    justify-content: flex-end;
+  }
+}
