@@ -5,7 +5,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { usePlayerHoverStats } from '../../hooks/usePlayerHoverStats.js'
 import { subscribeHover, getHoverSnapshot, hideHoverNow } from '../../lib/playerHoverStore.js'
 import { hoverCardPosition } from '../../lib/playerHoverPosition.js'
-import { teamPrimaryColor } from '../../lib/teams.js'
+import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../../lib/headerTheme.js'
 import { Pill } from '../ui/control/Pill.jsx'
 
 const CARD_ID = 'player-hover-card'
@@ -50,7 +50,10 @@ export function PlayerHoverCard() {
   if (!active || !rect || (!loading && !data)) return null
 
   const pos = hoverCardPosition(rect, { width: window.innerWidth, height: window.innerHeight })
-  const accent = data?.team ? teamPrimaryColor(data.team.id) : null
+  // The club's band, from the Identity Lab's header triad (ADR-0030: a club may
+  // colour a card that names the club). No curated triad, or no club: the house
+  // navy band, which is what the band's own var() fallbacks draw.
+  const theme = data?.team ? headerThemeFor(data.team.id, themeKeyFor(data.team.id, 'home', 'main')) : null
 
   return (
     <ModalPortal>
@@ -62,7 +65,7 @@ export function PlayerHoverCard() {
         style={{
           left: pos.left,
           top: pos.top,
-          ...(accent ? { '--phcard-accent': accent } : undefined),
+          ...headerThemeStyle(theme),
         }}
       >
         {data ? <PlayerHoverCardBody data={data} /> : <div className="phcard__loading" aria-hidden="true" />}
@@ -95,50 +98,64 @@ function identityTag(data) {
     : { kind: 'level', text: place }
 }
 
+function StatRow({ label, fields, post = false }) {
+  return (
+    <tr className={post ? 'phcard__row phcard__row--post' : 'phcard__row'}>
+      <th scope="row" className="phcard__rowk">{label}</th>
+      {fields.map((f) => (
+        <td key={f.k} className="phcard__rowv">{f.v}</td>
+      ))}
+    </tr>
+  )
+}
+
+// The scorebook line: a club-coloured band (photo, two-line name, crest), an
+// optional level/rehab strip, then one table — the four season figures, and a
+// Postseason row under them in the same columns once he has played an October
+// game. The two rows share the season row's heads (see pitcherHoverFields).
 function PlayerHoverCardBody({ data }) {
   const tag = identityTag(data)
   return (
     <>
-      <div className="phcard__spine" />
-      <div className="phcard__head">
-        <Headshot
-          personId={data.id}
-          name={data.fullName}
-          teamId={data.team?.id ?? null}
-          fallbackTeamId={data.team?.parentOrgId ?? null}
-          className="phcard__photo"
-        />
+      <div className="phcard__band sectionhead--band">
+        <span className="phcard__photo">
+          <Headshot
+            personId={data.id}
+            name={data.fullName}
+            teamId={data.team?.id ?? null}
+            fallbackTeamId={data.team?.parentOrgId ?? null}
+          />
+        </span>
         <div className="phcard__id">
-          <div className="phcard__name">{data.fullName}</div>
+          {data.firstName && <div className="phcard__first">{data.firstName}</div>}
+          <div className="phcard__last">{data.lastName}</div>
           <div className="phcard__meta">{metaLine(data)}</div>
-          {tag && <Pill fill="paper" className={`phcard__tag phcard__tag--${tag.kind}`}>{tag.text}</Pill>}
         </div>
         {data.team && (
-          <TeamLogo teamId={data.team.id} name={data.team.name} size={30} className="phcard__crest" />
+          <span className="phcard__crest">
+            <TeamLogo teamId={data.team.id} name={data.team.name} size={32} />
+          </span>
         )}
       </div>
-      <div className="phcard__rule" />
-      <div className="phcard__stats">
-        {data.fields.map((f) => (
-          <div className="phcard__tile" key={f.k}>
-            <span className="phcard__tilev">{f.v}</span>
-            <span className="phcard__tilek">{f.k}</span>
-          </div>
-        ))}
-      </div>
-      {data.postFields && (
-        <>
-          <div className="phcard__postlabel">Postseason</div>
-          <div className="phcard__stats phcard__stats--post">
-            {data.postFields.map((f) => (
-              <div className="phcard__tile" key={f.k}>
-                <span className="phcard__tilev">{f.v}</span>
-                <span className="phcard__tilek">{f.k}</span>
-              </div>
-            ))}
-          </div>
-        </>
+      {tag && (
+        <div className="phcard__tagrow">
+          <Pill fill="paper" className={`phcard__tag phcard__tag--${tag.kind}`}>{tag.text}</Pill>
+        </div>
       )}
+      <table className="phcard__table">
+        <thead>
+          <tr>
+            <th scope="col"><span className="sr-only">Split</span></th>
+            {data.fields.map((f) => (
+              <th key={f.k} scope="col" className="phcard__colk">{f.k}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <StatRow label="Season" fields={data.fields} />
+          {data.postFields && <StatRow label="Postseason" fields={data.postFields} post />}
+        </tbody>
+      </table>
     </>
   )
 }

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { hoverCardPosition, CARD_WIDTH, VIEWPORT_MARGIN } from '../src/lib/playerHoverPosition.js'
@@ -37,4 +38,11 @@ test('hoverCardPosition: no room below OR above — stays below, clamped to the 
   const p = hoverCardPosition(rect, short)
   assert.equal(p.flipped, false)
   assert.ok(p.top >= VIEWPORT_MARGIN)
+})
+
+test('CARD_WIDTH is the width .phcard is drawn at', () => {
+  const css = readFileSync(new URL('../src/styles/72-player-hover-card.css', import.meta.url), 'utf8')
+  const rule = css.match(/\.phcard\s*\{[^}]*?width:\s*(\d+)px/)
+  assert.ok(rule, 'found the .phcard width')
+  assert.equal(Number(rule[1]), CARD_WIDTH)
 })
