@@ -543,7 +543,7 @@
 }
 /* The line score's mark fills its cell edge to edge on its jersey-tinted
    tile — the same TeamTreatmentMark/treatmentTile pair the scorebug HUD
-   (.gamehud__tile, Scorebug.jsx) wears, and the same "100% width/height, no
+   (.inhead__half, HeaderBug.jsx) wears, and the same "100% width/height, no
    padding" block-class contract that tile documents — rather than sitting in
    a bordered, padded box of its own inside the cell. The slate card
    (.gamecard__logobox) and in-game masthead (.masthead__logobox) keep the

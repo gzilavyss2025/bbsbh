@@ -120,8 +120,7 @@
     "grid": 2
   },
   "src/styles/24-floating-nav-and-hud.css": {
-    "column": 4,
-    "grid": 2
+    "column": 1
   },
   "src/styles/25-wide-layout.css": {
     "column": 2,

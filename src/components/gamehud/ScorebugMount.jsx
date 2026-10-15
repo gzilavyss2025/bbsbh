@@ -1,6 +1,5 @@
 import { revealRunsThrough } from '../../api/linescore.js'
 import { selectFinalReached } from '../../api/select.js'
-import { Scorebug } from './Scorebug.jsx'
 import { HeaderBug } from './HeaderBug.jsx'
 
 // The scorebug's one placement now: the innings page's masthead
@@ -12,9 +11,9 @@ import { HeaderBug } from './HeaderBug.jsx'
 // There used to be a second placement — a floating dock, corner-stepping
 // affordance included, for a revealed half on the old unfocused stacked
 // page — retired along with that page. The dock existed to survive a page
-// that scrolled its own linescore out of view; every half gets the anchored
-// band now, and nothing here scrolls the band out of reach, so there is
-// nothing left for a floating dock to answer.
+// that scrolled its own linescore out of view; every half gets the header
+// now, and nothing here scrolls it out of reach, so there is nothing left
+// for a floating dock to answer.
 //
 // Spoiler footing is unchanged from the call site this replaces.
 // `revealRunsThrough` is reveal-only (linescore.js, ADR-0001) and is still
@@ -33,7 +32,6 @@ export function ScorebugMount({
   viewInning,
   viewHalf,
   season = null,
-  asHeader = false,
 }) {
   if (!started || !live) return null
 
@@ -83,11 +81,9 @@ export function ScorebugMount({
   // it).
   const finished = selectFinalReached(feed, throughIdx)
 
-  // The innings page's masthead draws the same resolved values as the split header: only the
-  // component differs, never what it is handed.
-  const Bug = asHeader ? HeaderBug : Scorebug
   return (
-    <Bug
+    <HeaderBug
+      season={season}
       awayName={meta.away.clubName}
       homeName={meta.home.clubName}
       awayTeamId={meta.away.id}
@@ -104,7 +100,6 @@ export function ScorebugMount({
       bases={live.bases}
       outs={live.outs}
       over={Boolean(live.over)}
-      {...(asHeader ? { season } : { className: 'gamehud--console' })}
     />
   )
 }

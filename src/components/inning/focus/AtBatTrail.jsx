@@ -29,7 +29,7 @@ import { Button } from '../../ui/control/Button.jsx'
 //
 // `items` is a plain array built by PlayByPlay from entries already ≤
 // effectiveCap (see its own header comment) — this component only lays it out,
-// same discipline as FocusControls/RollingLine/Scorebug.
+// same discipline as FocusControls/RollingLine/HeaderBug.
 // NOT a tablist, though it was written as one first. `role="tab"` is a promise
 // about structure that this strip does not keep: there is no `role="tabpanel"`
 // for a cell to own via `aria-controls` (the thing a cell pages is the at-bat

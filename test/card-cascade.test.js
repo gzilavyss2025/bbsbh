@@ -603,7 +603,6 @@ test('no band underline reads the seal', () => {
   const bands = [
     ['system/section-head.css', '.sectionhead--band'],
     ['system/section-head.css', '.sectionhead--band.sectionhead--house'],
-    ['focus/console.css', '.gamehud--console'],
     ['69-pitch-arsenal.css', '.pitchslab__head'],
     ['17-identity-lab-workbench.css', '.idlab__barmock'],
     ['62-identity-admin.css', '.idlab__barmock'],

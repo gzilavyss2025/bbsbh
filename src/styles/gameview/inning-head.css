@@ -2,8 +2,8 @@
    split masthead: two slanted halves on the clubs' tile colours with the ripple behind each mark
    (the slate card's versus split, held on, as in masthead-split.css), a dark plate between them
    for the inning, bases and outs, and the pitcher and batter as two bars under the strip. It
-   shares no rule with the console band's `.gamehud--console` (focus/scorebug.css), which is why
-   it has classes of its own.
+   replaced the console band's scorebug (`.gamehud--console`, retired with its skin), and its
+   classes are its own.
 
    The halves lean the same way, so the plate between them is a constant-width parallelogram. A
    half bleeds past the band on its outer side, where the band clips it, so the lean leaves no
@@ -154,13 +154,13 @@
 .inhead__tri--down {
   border-top: var(--space-2h) solid var(--marker);
 }
-.inhead .gamehud__diamond rect {
+.inhead .basestate rect {
   stroke: var(--text-on-ink-dim);
 }
-.inhead .gamehud__diamond rect[fill='transparent'] {
+.inhead .basestate rect[fill='transparent'] {
   fill: var(--text-on-ink-soft);
 }
-.inhead .gamehud__diamond rect:not([fill='transparent']) {
+.inhead .basestate rect:not([fill='transparent']) {
   fill: var(--marker);
   stroke: var(--marker-deep);
 }

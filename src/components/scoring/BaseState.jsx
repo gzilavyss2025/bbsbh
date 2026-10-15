@@ -37,7 +37,7 @@ function BaseSquare({ cx, cy, filled }) {
 export function BaseState({ bases = { first: false, second: false, third: false }, size = 32 }) {
   return (
     <svg
-      className="gamehud__diamond"
+      className="basestate"
       width={size}
       height={size}
       viewBox="0 0 34 34"

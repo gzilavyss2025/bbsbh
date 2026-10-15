@@ -251,7 +251,7 @@ export function HalfInning({
       : []),
   ]
 
-  // The persistent scorebug HUD (src/components/Scorebug.jsx): a batter/
+  // The persistent scorebug HUD (components/gamehud/HeaderBug.jsx): a batter/
   // pitcher/bases/outs snapshot reported UP to InningViewer, which owns
   // whether it's actually mounted. `hasContent` is the SAME `revealed ||
   // isNextToReveal` gate every other above-the-seal card on this half already

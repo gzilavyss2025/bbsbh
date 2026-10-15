@@ -109,7 +109,7 @@ function feedAvg(boxPlayer) {
 }
 
 // TRUE pre-game AVG — the scorebug's fallback for a batter with no revealed
-// plate appearance yet THIS game (see src/components/Scorebug.jsx). Unlike
+// plate appearance yet THIS game (see components/gamehud/HeaderBug.jsx). Unlike
 // feedAvg above, this must not read `seasonStats.batting.avg` directly:
 // `seasonStats` updates DURING the game, so once he's actually batted it
 // already bakes tonight's still-sealed result into what reads as "season"
@@ -141,7 +141,7 @@ const NOT_AN_AT_BAT = new Set([
   'catcher_interf',
 ])
 // The scorebug's "H-AB this game" line, reveal-gated — see
-// src/components/Scorebug.jsx. `feed.liveData.boxscore...stats.batting`
+// components/gamehud/HeaderBug.jsx. `feed.liveData.boxscore...stats.batting`
 // (what the box score itself renders) is the TRUE, always-live line, so
 // reading it directly for the scorebug — which is visible well before the
 // box score's own SealBox — would show a batter's actual, unrevealed at-bats

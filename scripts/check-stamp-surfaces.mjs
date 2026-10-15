@@ -115,7 +115,6 @@ const FORBIDDEN_SURFACES = [
   'components/game/ContinueScoring.jsx',
   'components/game/PastGameFlipCard.jsx',
   'components/game/GameResultFace.jsx',
-  'components/gamehud/Scorebug.jsx',
   'components/game/GameFinder.jsx',
   'components/teamstats/DeckNudge.jsx',
 ]
