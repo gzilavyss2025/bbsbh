@@ -52,8 +52,13 @@ rely on one; `docs/MLB_STATS_API.md` has the feed notes.
 ## Open items
 
 - **Paper ground.** The colours were tuned on a dark ground. The app's scorebook
-  pages are light. Add a second tone per pitch (and run `npm run lint`'s contrast
-  guard) before a screen adopts the table. Do not darken a colour in a screen.
+  pages are light. Screens already draw the colours on paper without a second tone:
+  a mark is the fill with an ink outline, and the Now Pitching card tints its active
+  tile with 28% of the pitch colour on `--surface-card` (text on that tint measures
+  6.3:1 or better, worst case the slider). A pale pitch such as the knuckleball
+  shows by its outline and the tile's ink underline. A second tone is still open for
+  any use that draws a colour alone, such as a line or text. Do not darken a colour
+  in a screen.
 - **The rare marks are the least distinct** (KC, CS, FO, SC, EP). Tune them with a
   real arsenal on screen.
 - The first artifact gave each of five pitches its own shape. The family rule
