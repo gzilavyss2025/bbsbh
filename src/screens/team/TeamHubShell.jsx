@@ -1,7 +1,7 @@
 import { Suspense, lazy, useMemo } from 'react'
 import { fetchTeams } from '../../api/schedule.js'
 import { resolveGameNotes } from '../../api/gameNotes.js'
-import { ordinal } from '../../api/person.js'
+import { rankText } from '../../api/person.js'
 import { SPORT_LABEL, treatmentTile, defaultHomeTreatmentFor } from '../../lib/teams.js'
 import { milbTreatmentTile } from '../../lib/milbColors.js'
 import { readableTextColor } from '../../lib/contrast.js'
@@ -227,7 +227,7 @@ export function TeamHubShell({
               <p className="team-hub__rec">
                 <span className="mono">{record.wins}–{record.losses}</span>
                 {record.rank && record.div && (
-                  <span className="team-hub__div">{ordinal(record.rank)} · {record.div}</span>
+                  <span className="team-hub__div">{rankText(record.rank)} · {record.div}</span>
                 )}
                 {asOf && <em>· entering {humanDate(asOf)}</em>}
               </p>

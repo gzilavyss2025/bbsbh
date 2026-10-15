@@ -6,7 +6,7 @@ import { pitcherRole } from './identity.js'
 import { ordinal as withSuffix } from '../../lib/format.js'
 
 // A rank as "3rd"; a dash when there is no rank to print.
-export function ordinal(n) {
+export function rankText(n) {
   const v = num(n)
   return v ? withSuffix(v) : DASH
 }

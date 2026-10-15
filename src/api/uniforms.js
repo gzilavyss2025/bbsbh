@@ -5,6 +5,7 @@
 // posted. It IS empty until around first pitch, and MiLB games return
 // nothing, so this degrades to null and callers show the usual "—".
 
+import { chunk } from '../lib/math/number.js'
 import { getJson } from './statsapi.js'
 
 // Assets sort jersey → pants → cap so the composed line always reads top-down.
@@ -73,8 +74,7 @@ export async function fetchGameJerseys(gamePks, options) {
     if (!j?.uniformAssetText) return null
     return { code: j.uniformAssetCode ?? null, text: j.uniformAssetText }
   }
-  for (let i = 0; i < gamePks.length; i += GAME_UNIFORM_BATCH) {
-    const batch = gamePks.slice(i, i + GAME_UNIFORM_BATCH)
+  for (const batch of chunk(gamePks, GAME_UNIFORM_BATCH)) {
     try {
       const data = await getJson(`/api/v1/uniforms/game?gamePks=${batch.join(',')}`, options)
       for (const game of data.uniforms ?? []) {

@@ -11,7 +11,7 @@ import { FilmPane } from '../../expresslane/FilmPane.jsx'
 import { ScoutScene } from '../ScoutScene.jsx'
 import { ContactFacts, Fact, fixed } from './Facts.jsx'
 import { PitchZone } from './PitchZone.jsx'
-import { callOf, inPlay, nameOf, ordinal, playText } from './meetings.js'
+import { callOf, inPlay, nameOf, meetingOrdinal, playText } from './meetings.js'
 
 // THE PITCH MODAL (#1490, "like the express lane"): one pitch of a past
 // meeting. Its REAL flight in the page's scene and view (camera.js
@@ -72,7 +72,7 @@ export function PitchModal({ walk, index, onIndex, onClose, board, data, view, s
         <header className="scout__pmhead">
           <div>
             <p className="scout__kicker">
-              {pa.inning ? `${ordinal(pa.inning)} inning · ` : ''}pitch {k} of {of} · count {pitch.balls}-{pitch.strikes}
+              {pa.inning ? `${meetingOrdinal(pa.inning)} inning · ` : ''}pitch {k} of {of} · count {pitch.balls}-{pitch.strikes}
             </p>
             <h2 className="scout__pmtitle">{name} · {fixed(pitch.mph, 1)} mph</h2>
             <p className="scout__pmcall" data-tone={call.tone}>

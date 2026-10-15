@@ -40,6 +40,7 @@ import { getJson } from '../statsapi.js'
 import { addDays, toApiDate } from '../../lib/dates.js'
 import { fetchTeams } from '../schedule.js'
 import { SPORT_IDS } from '../../lib/teams.js'
+import { chunk } from '../../lib/math/number.js'
 import { groupLeagueWide, leagueCandidateIds } from './league.js'
 // The thirty club ids, bundled rather than fetched — this is the same table
 // every logo and colour in the app already reads, and its `identity/overlay.js`
@@ -177,9 +178,7 @@ const PEOPLE_BATCH = 100
 export async function fetchPeople(ids, signal) {
   const positions = {}
   const debutedIds = new Set()
-  for (let i = 0; i < ids.length; i += PEOPLE_BATCH) {
-    const batch = ids.slice(i, i + PEOPLE_BATCH)
-    if (!batch.length) continue
+  for (const batch of chunk(ids, PEOPLE_BATCH)) {
     const data = await getJson(`/api/v1/people?personIds=${batch.join(',')}`, { signal })
     for (const p of data.people ?? []) {
       positions[p.id] = p.primaryPosition?.abbreviation || ''

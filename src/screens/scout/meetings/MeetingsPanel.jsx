@@ -9,7 +9,7 @@ import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { AsyncStatus } from '../../../components/ui/AsyncGate.jsx'
 import { EmptyState } from '../../../components/ui/state/EmptyState.jsx'
 import { AsOfBanner } from '../../../components/seal/AsOfBanner.jsx'
-import { callOf, gamesOf, inPlay, meetingFacts, mixRows, nameOf, ordinal, pitchWalk, playText, unseenNote } from './meetings.js'
+import { callOf, gamesOf, inPlay, meetingFacts, mixRows, nameOf, meetingOrdinal, pitchWalk, playText, unseenNote } from './meetings.js'
 import { PitchModal } from './PitchModal.jsx'
 import { ContactFacts, Fact, fixed, xw } from './Facts.jsx'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
@@ -106,7 +106,7 @@ export function MeetingsPanel({ data, board, cutoff, asOf, scope, view, stance, 
               return (
                 <Stack gap="snug" as="article" key={pa.key} className="scout__pa">
                   <header className="scout__pahead">
-                    <span className="scout__patitle">{pa.inning ? `${ordinal(pa.inning)} inning` : 'Plate appearance'}</span>
+                    <span className="scout__patitle">{pa.inning ? `${meetingOrdinal(pa.inning)} inning` : 'Plate appearance'}</span>
                     <span className="scout__pameta">
                       <Pill figure>{resultShort(pa)}</Pill> {list.length} {list.length === 1 ? 'pitch' : 'pitches'}
                     </span>

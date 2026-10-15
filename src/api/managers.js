@@ -1,6 +1,7 @@
 import { teamFullName } from '../lib/teams.js'
 import { shardKey100 } from '../lib/shardKey.js'
 import { MANAGER_HISTORY_FIRST_SEASON } from '../lib/records/managerHistory.js'
+import { chunk } from '../lib/math/number.js'
 import { getJson } from './statsapi.js'
 import { staticJsonBy } from './staticJson.js'
 
@@ -220,10 +221,8 @@ export async function coachedUnder(managerId) {
   const names = {}
   // Batches of NAME_BATCH keep the URL short for a manager with a long staff. A failed
   // batch leaves its people nameless; they still render, as a bare link.
-  const batches = []
-  for (let i = 0; i < rows.length; i += NAME_BATCH) batches.push(rows.slice(i, i + NAME_BATCH))
   await Promise.all(
-    batches.map(async (batch) => {
+    chunk(rows, NAME_BATCH).map(async (batch) => {
       try {
         const ids = batch.map(([id]) => id).join(',')
         const data = await getJson(`/api/v1/people?personIds=${ids}&fields=people,id,fullName`)

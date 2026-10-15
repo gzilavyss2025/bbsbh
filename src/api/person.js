@@ -118,7 +118,7 @@ export {
 } from './person/positionInnings.js'
 
 export {
-  ordinal,
+  rankText,
   rankTeam,
   rosterPitcherRole,
   firstLast,

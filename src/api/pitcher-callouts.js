@@ -40,6 +40,7 @@ import { CENTURY_CLUB_MIN, CENTURY_MPH, pitchFamily } from './pitchArsenal.js'
 // a pre-half note cannot be merged into one ranked list (ReferencePanel.jsx)
 // without the merge quietly favouring whichever surface capped its bonus higher.
 import { magnitudeOf, corroborationBonus } from './callout-notes.js'
+import { clampScore } from './callout-notes/shared.js'
 import { ipToOuts } from '../lib/math/innings.js'
 import { ordinal } from '../lib/format.js'
 
@@ -68,7 +69,6 @@ const SCORE_BASE = {
   cgShutout: 25,
   recentAppearances: 20, // plain "Nth appearance in the last several days" fallback
 }
-const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
 
 const SIX_IP_OUTS = 18
 const TEN_K_THRESHOLD = 10

@@ -4,7 +4,7 @@
 import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
 import { rateText } from '../../lib/math/leagueAverages.js'
 import { DASH, num, rate3, mlbOps, eraOf, whipOf } from './shared.js'
-import { ordinal } from './teamPage.js'
+import { rankText } from './teamPage.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { pctOf } from '../../lib/math/number.js'
 
@@ -428,7 +428,7 @@ function ranksView(splits, stats) {
     const items = []
     for (const { key, label, marksOnly } of stats) {
       const rank = !marksOnly && topRank(s.stat, key)
-      if (rank) items.push({ label, rank, text: ordinal(rank) })
+      if (rank) items.push({ label, rank, text: rankText(rank) })
     }
     if (!items.length) continue
     items.sort((a, b) => a.rank - b.rank)
