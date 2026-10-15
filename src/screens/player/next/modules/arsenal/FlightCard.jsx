@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
 import { CAMERAS, ZONE, orbitOf, towardOf, tunnelView, verdictOf } from './flightView.js'
 import {
   KEY_TURN, dragTurn, flyStep, isDragStart, isPlainKey, landedLoop, needsFrame, seekLoop, setPlayingLoop, startLoop, stepLoop, stillCam, swingCam, turnView,
 } from './flightMotion.js'
-import { FlightScene } from './FlightScene.jsx'
+import { flightPalette, paintFlight } from './flightPaint.js'
 import { PitchGlyph } from './PitchGlyph.jsx'
 
 const SPEEDS = [[1, '1×', 'real speed'], [1 / 3, '⅓×', 'one-third speed'], [1 / 4, '¼×', 'one-quarter speed']]
@@ -15,20 +15,45 @@ const MID = (ZONE.y0 + ZONE.y1) / 2
 const mph = (v) => (v == null ? '—' : `${v.toFixed(1)} mph`)
 const rpm = (v) => (v == null ? '—' : `${v.toLocaleString('en-US')} rpm`)
 
+// Writes a DOM property of a ref's element without React: the scrubber and the clock move every frame.
+// A field the reader has focus on is left alone.
+function setProp(ref, key, value, keepFocus = false) {
+  const el = ref.current
+  if (el && !(keepFocus && document.activeElement === el)) el[key] = value
+}
+
+// Backs the canvas with up to 2 device pixels a CSS pixel and records its CSS size in `box`.
+// False while the canvas has no width (hidden), when there is nothing to paint.
+function sizeCanvas(cv, box) {
+  const r = cv.getBoundingClientRect()
+  if (r.width < 2) return false
+  const dpr = Math.min(2, window.devicePixelRatio || 1)
+  box.W = r.width
+  box.H = r.height
+  cv.width = Math.round(r.width * dpr)
+  cv.height = Math.round(r.height * dpr)
+  return true
+}
+
 // The flight loop (#2073, board PitchFlight.dc.html): a wait at release, the flight, a hold on the landed
-// frame, then again (flightMotion.js). It runs only while the stage is on screen or within 120px of it.
+// frame, then again (flightMotion.js), painted on a canvas (flightPaint.js). Each frame paints the canvas and
+// writes the scrubber and the clock; React renders only when the Play button's word changes.
+// It runs only while the stage is on screen or within 120px of it.
 // A reader who asked for less motion gets the landed frame, a camera that snaps, and the scrubber.
-// `stage` is the ref of the element it watches. `onCycle` runs when a hold ends: the card moves to the next pitch there.
-function useFlightLoop({ stage, end, speed, reduced, onCycle }) {
+// `stage` is the ref of the element it watches; `canvas`, `scrub` and `clock` are the refs it paints, moves and writes. `onCycle` runs when a hold ends: the card moves to the next pitch there.
+// `scene`: { items, done, ghost, num } for paintFlight.
+function useFlightLoop({ stage, canvas, scrub, clock, end, speed, reduced, onCycle, scene }) {
   const [snap, setSnap] = useState(() => ({
     loop: reduced ? landedLoop() : startLoop(true),
     cam: stillCam(orbitOf('catcher')),
   }))
   // The engine's state for the frame loop and the handlers; `snap` is the same state for the render.
   const eng = useRef(snap)
-  const cfg = useRef({ end, speed, onCycle })
+  const cfg = useRef({ end, speed, onCycle, scene })
+  const landT = useRef(new Map())
+  const box = useRef({ W: 0, H: 0, pal: null })
   useEffect(() => {
-    cfg.current = { end, speed, onCycle }
+    cfg.current = { end, speed, onCycle, scene }
   })
   // Starts the frame loop if it is idle; the effect below sets it.
   const wake = useRef(null)
@@ -37,6 +62,41 @@ function useFlightLoop({ stage, end, speed, reduced, onCycle }) {
     setSnap(next)
     wake.current?.()
   }
+
+  // Paint the frame as the engine holds it. Reads refs only, so every effect can call it.
+  const paint = useCallback((now) => {
+    const cv = canvas.current
+    const b = box.current
+    if (!cv || !b.W) return
+    b.pal ??= flightPalette(cv)
+    const { end: e, scene: sc } = cfg.current
+    const { loop, cam } = eng.current
+    const s = Math.min(loop.s, e)
+    const ctx = cv.getContext('2d')
+    ctx.setTransform(cv.width / b.W, 0, 0, cv.height / b.H, 0, 0)
+    paintFlight(ctx, { W: b.W, H: b.H, pal: b.pal, view: cam.view, s, now, landT: landT.current, ...sc })
+    setProp(scrub, 'value', String(Math.round((s / e) * 1000)), true)
+    setProp(clock, 'textContent', `${s.toFixed(2)} s`)
+  }, [])
+
+  // After each render (a pick, a mode, a pause, a drag): paint once.
+  useEffect(() => {
+    paint(performance.now() / 1000)
+  })
+
+  // The canvas backs its CSS size at up to 2 device pixels a pixel.
+  useEffect(() => {
+    const cv = canvas.current
+    if (!cv) return undefined
+    const fit = () => {
+      if (sizeCanvas(cv, box.current)) paint(performance.now() / 1000)
+    }
+    fit()
+    if (typeof ResizeObserver === 'undefined') return undefined
+    const ro = new ResizeObserver(fit)
+    ro.observe(cv)
+    return () => ro.disconnect()
+  }, [canvas, paint])
 
   useEffect(() => {
     wake.current = null
@@ -63,11 +123,16 @@ function useFlightLoop({ stage, end, speed, reduced, onCycle }) {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       const cur = eng.current
-      const { end: e, speed: v, onCycle: cycle } = cfg.current
+      const { end: e, speed: v, onCycle: cycle, scene: sc } = cfg.current
       const next = { loop: stepLoop(cur.loop, dt, e, v), cam: flyStep(cur.cam, dt) }
       eng.current = next
-      setSnap(next)
-      if (next.loop.cycled) cycle()
+      const L = next.loop
+      if (L.phase === 'pre') landT.current.clear()
+      for (const it of sc.items) if (L.prevS < it.path.T && L.s >= it.path.T) landT.current.set(it.code, now / 1000)
+      // React renders only when the Play button's word changes.
+      if (L.phase !== cur.loop.phase || L.playing !== cur.loop.playing) setSnap(next)
+      if (L.cycled) cycle()
+      paint(now / 1000)
       if (needsFrame(vis, next.loop, next.cam)) raf = requestAnimationFrame(frame)
     }
     // Frames run only while there is something to move (needsFrame); anything that changes that calls this.
@@ -82,17 +147,21 @@ function useFlightLoop({ stage, end, speed, reduced, onCycle }) {
       cancelAnimationFrame(raf)
       if (io) io.disconnect()
     }
-  }, [reduced, stage])
+  }, [reduced, stage, paint])
 
-  const { loop, cam } = snap
+  const { loop } = snap
   return {
-    s: Math.min(loop.s, end),
     phase: loop.phase,
     playing: loop.playing,
-    view: cam.view,
-    restart: () => put({ ...eng.current, loop: reduced ? landedLoop() : startLoop(true) }),
+    restart: () => {
+      landT.current.clear()
+      put({ ...eng.current, loop: reduced ? landedLoop() : startLoop(true) })
+    },
     setPlaying: (on) => put({ ...eng.current, loop: setPlayingLoop(eng.current.loop, on) }),
-    seek: (s) => put({ ...eng.current, loop: seekLoop(eng.current.loop, s) }),
+    seek: (s) => {
+      landT.current.clear()
+      put({ ...eng.current, loop: seekLoop(eng.current.loop, s) })
+    },
     turn: (yaw, pitch) => put({ ...eng.current, cam: turnView(eng.current.cam, yaw, pitch) }),
     flyTo: (key) => {
       const to = orbitOf(key)
@@ -116,17 +185,25 @@ export function FlightCard({ rows, season, throws }) {
   const shown = seq ? [flyers[i]] : flyers.filter((r) => on.has(r.code))
   const end = Math.max(0.01, ...shown.map((r) => r.path.T))
   const stage = useRef(null)
+  const canvas = useRef(null)
+  const scrub = useRef(null)
+  const clock = useRef(null)
   const fly = useFlightLoop({
     stage,
+    canvas,
+    scrub,
+    clock,
     end,
     speed,
     reduced,
+    // In order, the earlier pitches of the round stay on as faint numbered trails.
+    scene: { items: shown, done: seq ? flyers.slice(0, i) : [], ghost: seq && ghost, num: seq ? i + 1 : null },
     // A hold ended: In order moves to the next pitch. The loop has already started over.
     onCycle: () => {
       if (seq && flyers.length > 1) setI((n) => (n + 1) % flyers.length)
     },
   })
-  const { s, playing } = fly
+  const { playing } = fly
   const p = seq ? flyers[i] : null
   const tunnel = seq ? null : tunnelView(shown)
   // Drag or the arrow keys turn the view (the board's orbit). The loop plays on; no camera preset is pressed after.
@@ -212,28 +289,26 @@ export function FlightCard({ rows, season, throws }) {
           turn(m[0], m[1])
         }}
       >
-        <FlightScene
-          camera={fly.view}
-          w={336}
-          h={300}
-          items={shown}
-          s={s}
-          ghost={seq && ghost}
-          label="The pitches from the mound to the plate, seen from the chosen camera"
+        <canvas
+          ref={canvas}
+          className="flight__canvas"
+          role="img"
+          aria-label="The pitches from the mound to the plate, seen from the chosen camera"
         />
       </div>
       <div className="flight__bar">
         {!reduced && <Button size="control" onClick={() => fly.setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</Button>}
         <input
+          ref={scrub}
           className="flight__range"
           type="range"
           min="0"
           max="1000"
           aria-label="Time since release"
-          value={Math.round((s / end) * 1000)}
+          defaultValue="0"
           onChange={(e) => fly.seek((e.target.value / 1000) * end)}
         />
-        <output className="flight__clock">{s.toFixed(2)} s</output>
+        <output ref={clock} className="flight__clock" />
       </div>
       <div className="flight__bar">
         {seq && <button type="button" className="pnext-pick" aria-pressed={ghost} onClick={() => setGhost(!ghost)}>Gravity path</button>}

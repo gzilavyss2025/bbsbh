@@ -106,3 +106,26 @@ export const isDragStart = (e) => e.button === 0 && e.isPrimary !== false
 
 // A modified arrow key belongs to the browser (Alt+Left is Back), so the stage only turns on a plain one.
 export const isPlainKey = (e) => !(e.altKey || e.metaKey || e.ctrlKey || e.shiftKey)
+
+// The trail, the ball and the ripple, sized as the board sizes them. `px` is pixels per foot at a point
+// (project(...).k). Pure, so a test pins the board's numbers.
+export const TRAIL_N = 32
+export const RIPPLE_S = 0.7
+export const BALL_FT = 0.121 // the ball's radius, feet
+
+// A ball's radius on screen: never under 3.4px.
+export const ballR = (px) => Math.max(3.4, px * BALL_FT * 1.3)
+
+// Segment k of n of a trail: it fades in from the release and grows with distance toward the lens.
+// `alpha` dims a whole trail (an earlier pitch); `wm` thins or thickens it. No point on screen: 2px.
+export function trailStyle(k, n, px, { alpha = 1, wm = 1 } = {}) {
+  const f = k / n
+  const width = px == null ? 2 : Math.min(9, Math.max(2, px * BALL_FT * wm * (0.3 + 0.7 * f)))
+  return { alpha: (0.08 + 0.85 * f ** 1.6) * alpha, width }
+}
+
+// The landing ripple `age` seconds after a pitch lands, for a mark of radius r; null when there is none.
+export function rippleAt(age, r) {
+  if (!(age >= 0) || age >= RIPPLE_S) return null
+  return { r: r * (1 + age * 3.2), alpha: 1 - age / RIPPLE_S }
+}

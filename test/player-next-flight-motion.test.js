@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { ruleBody, stripComments } from './helpers/css.js'
 import {
-  DRAG_PITCH, DRAG_YAW, FLY_S, HOLD_S, KEY_TURN, PITCH_MAX, PITCH_MIN, PRE_S,
-  dragTurn, flyStep, isDragStart, isPlainKey, landedLoop, needsFrame, seekLoop, setPlayingLoop, startLoop, stepLoop, stillCam, swingCam, turnView, viewAt, wrapAngle,
+  BALL_FT, DRAG_PITCH, DRAG_YAW, FLY_S, HOLD_S, KEY_TURN, PITCH_MAX, PITCH_MIN, PRE_S, RIPPLE_S, TRAIL_N,
+  ballR, dragTurn, flyStep, isDragStart, isPlainKey, landedLoop, needsFrame, seekLoop, setPlayingLoop, startLoop, rippleAt, stepLoop, stillCam, swingCam, trailStyle, turnView, viewAt, wrapAngle,
 } from '../src/screens/player/next/modules/arsenal/flightMotion.js'
 import { makeCamera, orbitOf, project } from '../src/screens/player/next/modules/arsenal/flightView.js'
 
@@ -173,4 +173,52 @@ test('isPlainKey: a modified arrow is left to the browser (Alt+Left is Back)', (
   for (const k of ['altKey', 'metaKey', 'ctrlKey', 'shiftKey']) {
     assert.equal(isPlainKey({ altKey: false, metaKey: false, ctrlKey: false, shiftKey: false, [k]: true }), false, k)
   }
+})
+
+test('the board trail: 32 pieces, fading in from release', () => {
+  assert.equal(TRAIL_N, 32)
+  assert.equal(BALL_FT, 0.121)
+  close(trailStyle(32, 32, 50).alpha, 0.93)
+  close(trailStyle(1, 32, 50).alpha, 0.08 + 0.85 * (1 / 32) ** 1.6)
+  let was = 0
+  for (let k = 1; k <= 32; k++) {
+    const a = trailStyle(k, 32, 50).alpha
+    assert.ok(a > was)
+    was = a
+  }
+  close(trailStyle(32, 32, 50, { alpha: 0.32 }).alpha, 0.93 * 0.32)
+})
+
+test('the board trail: width grows toward the ball, held to 2..9px', () => {
+  close(trailStyle(16, 32, 40, { wm: 1.1 }).width, 40 * 0.121 * 1.1 * (0.3 + 0.35))
+  assert.equal(trailStyle(1, 32, 10).width, 2)
+  assert.equal(trailStyle(32, 32, 1000).width, 9)
+  assert.equal(trailStyle(32, 32, null).width, 2)
+})
+
+test('ballR: never under 3.4px', () => {
+  assert.equal(ballR(0), 3.4)
+  close(ballR(100), 100 * 0.121 * 1.3)
+})
+
+test('rippleAt: grows 3.2 radii a second and fades out over 0.7 s', () => {
+  assert.equal(RIPPLE_S, 0.7)
+  assert.deepEqual(rippleAt(0, 5), { r: 5, alpha: 1 })
+  const mid = rippleAt(0.35, 5)
+  close(mid.r, 5 * (1 + 0.35 * 3.2))
+  close(mid.alpha, 0.5)
+  assert.equal(rippleAt(0.7, 5), null)
+  assert.equal(rippleAt(-0.1, 5), null)
+  assert.equal(rippleAt(NaN, 5), null)
+})
+
+test('the flight card draws on a labelled canvas, at the board shape', () => {
+  const jsx = readFileSync(new URL('../src/screens/player/next/modules/arsenal/FlightCard.jsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(jsx, /FlightScene/)
+  assert.match(jsx, /<canvas[\s\S]*?role="img"[\s\S]*?aria-label="The pitches from the mound to the plate, seen from the chosen camera"/)
+  const css = stripComments(readFileSync(new URL('../src/styles/player-next/pitcher/arsenal.css', import.meta.url), 'utf8'))
+  const body = ruleBody(css, '.flight__canvas') ?? ''
+  assert.match(body, /display:\s*block;/)
+  assert.match(body, /width:\s*100%;/)
+  assert.match(body, /aspect-ratio:\s*336 \/ 300;/)
 })
