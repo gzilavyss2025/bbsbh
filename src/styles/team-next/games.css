@@ -5,14 +5,14 @@
    (ADR-0030). The grid is a real stamped Card with a name tab. Motion is the stamped card's
    drop-in, once per page visit (.tnext__games--still on a return) and off under reduced motion. */
 
-/* The sheet cards of the old modules wear the stamped edge. A data dot stays round. */
+/* The sheet cards of the old modules wear the stamped edge, through the card's own custom properties (card.css is the one stylesheet that frames a card). A data dot stays round. */
 .tnext__games :not(.team-score__dot) {
   border-radius: 0;
 }
 .tnext__games .card--sheet {
-  border: var(--bw-heavy) solid var(--border-stamped);
-  box-shadow: var(--shadow-stamped);
-  overflow: visible;
+  --card-edge: var(--bw-heavy) solid var(--border-stamped);
+  --card-shadow: var(--shadow-stamped);
+  --card-overflow: visible;
 }
 .tnext__games .teamlogo {
   border-radius: 0;
