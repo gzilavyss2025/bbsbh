@@ -53,16 +53,19 @@ list says what each guard checks.
 - `layout/check-media-widths.mjs` — an `@media` width must be on the grandfather
   list in the guard (`WIDTHS`), which `src/tokens/layout.css` mirrors as a table:
   740px is the one wide step, the rest are widths already in use (#1179). It moves
-  no layout; it stops a new width. A real new one goes on the list with its reason,
+  no layout; it stops a new width, in CSS and in a JS media query string (`useMediaQuery`,
+  `matchMedia`; #1831). A real new one goes on the list with its reason,
   or takes `breakpoint-exempt: <reason>` in a comment on the `@media` line or the
   line above. It lives in `scripts/layout/` so `scripts/` stays inside its
   `check-dir-size` budget.
-- `layout/check-layout-ratchet.mjs` — hand-written layout rules in `src/styles/` may only
-  shrink. Per file it counts rules with `flex-direction: column`, `flex-wrap: wrap` and
-  `display: grid` (the census logic), skips `src/styles/system/`, and compares with
+- `layout/check-layout-ratchet.mjs` — hand-written layout rules in `src/styles/`,
+  `src/index.css` and `src/tokens/` may only shrink. Per file it counts rules with
+  `flex-direction: column`, `flex-wrap: wrap` and `display: grid` (any case; the census
+  logic), skips `@keyframes` steps and `src/styles/system/`, and compares with
   `layout-ratchet-budget.json`. Growth fails; a drop fails until the same PR lowers the
   budget (`--write`). New layout uses Stack, Cluster or Grid, or takes `layout-exempt:
-  <reason>` in a comment on the line before the rule. Lives in `scripts/layout/` for the
+  <reason>` in a comment on its own line before the rule. A merge race between two PRs that
+  lower the same entry is accepted (#1831): the stack run catches it. Lives in `scripts/layout/` for the
   `check-dir-size` budget.
 - `check-strike-links.mjs` — every rule that draws a `line-through` must name
   `.plink` in its selector list, because a player name is a `<button

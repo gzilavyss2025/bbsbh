@@ -15,16 +15,57 @@ test('a raw value above 3 fails, in CSS and in an inline style', () => {
   assert.deepEqual(z('<div style={{ zIndex: 1000 }} />', 'js'), ['1:1000'])
 })
 
-test('3 and below, a negative, a token and a calc pass', () => {
+test('3 and below, a negative, a token and a banded calc pass', () => {
   assert.deepEqual(z('.a { z-index: 3; } .b { z-index: 0; } .c { z-index: -1; }'), [])
   assert.deepEqual(z('.a { z-index: var(--z-modal); }'), [])
   assert.deepEqual(z('.a { z-index: calc(var(--z-sticky) - 10); }'), [])
+  assert.deepEqual(z('.a { z-index: calc(var(--z-overlay) + 20); }'), [])
+  assert.deepEqual(z('.a { z-index: auto; } .b { z-index: inherit !important; }'), [])
   assert.deepEqual(z("<div style={{ zIndex: 'var(--z-toast)' }} />", 'js'), [])
+})
+
+test('a calc, a custom property or a quoted number cannot hide a raw layer (#1831)', () => {
+  assert.deepEqual(z('.a { z-index: calc(var(--z-modal) + 500); }'), ['1:calc(var(--z-modal) + 500)'])
+  assert.deepEqual(z('.a { z-index: calc(var(--z-raised) + 16); }'), ['1:calc(var(--z-raised) + 16)'])
+  assert.deepEqual(z('.a { z-index: calc(var(--z-sticky) - 16); }'), ['1:calc(var(--z-sticky) - 16)'])
+  assert.deepEqual(z('.a { z-index: calc(1000 + 1); }'), ['1:calc(1000 + 1)'])
+  assert.deepEqual(z('.a { z-index: var(--mine); }'), ['1:var(--mine)'])
+  assert.deepEqual(z('.a { z-index: var(--z-nope); }'), ['1:var(--z-nope)'])
+  assert.deepEqual(z("<div style={{ zIndex: '9999' }} />", 'js'), ['1:9999'])
+  assert.deepEqual(z('el.style.zIndex = 50', 'js'), ['1:50'])
+  assert.deepEqual(z("el.style.zIndex = 'calc(var(--z-toast) + 5000)'", 'js'), ['1:calc(var(--z-toast) + 5000)'])
+  assert.deepEqual(z('<div style={{ zIndex: depth }} />', 'js'), ['1:depth'])
+  assert.deepEqual(z("<div style={{ zIndex: 'calc(var(--z-raised) + 1)' }} />", 'js'), [])
+  assert.deepEqual(z('if (el.style.zIndex === "5") run()', 'js'), [])
 })
 
 test('a comment that quotes a value does not fail', () => {
   assert.deepEqual(z('/* was z-index: 100 */\n.a { z-index: 1; }'), [])
   assert.deepEqual(z('// zIndex: 50 once\nconst a = 1', 'js'), [])
+})
+
+test('a comment opener inside a string or a template does not hide real code (#1831)', () => {
+  const real = '/* real */'
+  assert.deepEqual(z(`const s = 'a /* b'\nconst o = { zIndex: 9999 }\n${real}`, 'js'), ['2:9999'])
+  assert.deepEqual(z(`const s = "it\\"s /* b"\nconst o = { zIndex: 9999 }\n${real}`, 'js'), ['2:9999'])
+  assert.deepEqual(z('<div title="a // b" style={{ zIndex: 9999 }} />', 'js'), ['1:9999'])
+  assert.deepEqual(z('const u = `http://x // y`; const o = { zIndex: 9999 }', 'js'), ['1:9999'])
+  assert.deepEqual(z(`const g = ['src/**/*.css']\nconst o = { zIndex: 9999 }`, 'js'), ['2:9999'])
+  assert.deepEqual(z(`.a::before { content: "/*"; }\n.b { z-index: 9999; }\n${real}`), ['2:9999'])
+})
+
+test('clearing an inline z-index is not a layer (#1831)', () => {
+  assert.deepEqual(z("el.style.zIndex = ''", 'js'), [])
+  assert.deepEqual(z('<div style={{ zIndex: undefined }} />', 'js'), [])
+  assert.deepEqual(z('<div style={{ zIndex: null }} />', 'js'), [])
+  assert.deepEqual(z('.a { z-index: ; }'), [])
+})
+
+test('a real comment is still masked, to its end, in CSS and JS', () => {
+  assert.deepEqual(z("const s = 'x' // zIndex: 9999\nconst b = 2", 'js'), [])
+  assert.deepEqual(z("/* zIndex: 9999\n   more */ const a = 1", 'js'), [])
+  assert.deepEqual(z('/* never closed\n.a { z-index: 9999; }'), [])
+  assert.deepEqual(z('const a = b / 2 /* zIndex: 9999 */', 'js'), [])
 })
 
 test('the exempt marker needs a reason, on the line or the line above', () => {
