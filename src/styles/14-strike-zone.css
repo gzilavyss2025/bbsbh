@@ -27,12 +27,12 @@
 }
 
 .strikezone__fill {
-  fill: color-mix(in srgb, var(--ink-0) 9%, var(--surface-card));
+  fill: var(--surface-stamped-tint);
 }
 .strikezone__frame {
   fill: none;
-  stroke: var(--ink-0);
-  stroke-width: 2.4;
+  stroke: var(--border-stamped);
+  stroke-width: 3;
 }
 .strikezone__third {
   stroke: var(--border-rule);
@@ -47,8 +47,8 @@
   stroke-linejoin: round;
 }
 /* A pitch: the pitchMark shape in the pitch's own colour (--pitch), ink-outlined; a ring is
-   hollow (docs/pitch-types.md). The number sits inside in ink with a paper halo, since the
-   pitch colours were tuned on a dark ground and some are pale. */
+   hollow (docs/pitch-types.md). The number sits BESIDE the mark in ink with a paper halo: the
+   design system keeps text off pitch fills, and the colours were tuned on a dark ground. */
 .strikezone__mark {
   fill: var(--pitch, var(--text-caption));
   stroke: var(--ink-0);
@@ -56,9 +56,9 @@
   stroke-linejoin: round;
 }
 .strikezone__mark--ring {
-  fill: var(--surface-card);
+  fill: none;
   stroke: var(--pitch, var(--text-caption));
-  stroke-width: 2.6;
+  stroke-width: 3;
 }
 .strikezone__inplay {
   fill: none;
@@ -73,6 +73,8 @@
   stroke: var(--surface-card);
   stroke-width: 2.4px;
   paint-order: stroke;
+}
+.strikezone__num--list {
   text-anchor: middle;
   dominant-baseline: central;
 }
@@ -133,6 +135,11 @@
   padding-block: 1px;
 }
 .pitchlist__row--decisive .pitchlist__num {
+  outline: 2px solid color-mix(in srgb, var(--marker) 70%, transparent);
+  outline-offset: -3px;
+  border-radius: 50%;
+}
+.pitchlist__num {
   width: 22px;
   height: 22px;
 }
@@ -806,7 +813,7 @@
   position: absolute;
   right: 6px;
   bottom: 6px;
-  width: 24px;
+  width: 20px;
   height: 24px;
   display: flex;
   align-items: center;
