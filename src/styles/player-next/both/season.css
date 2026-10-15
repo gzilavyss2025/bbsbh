@@ -22,19 +22,7 @@
   gap: var(--space-2);
 }
 .seasonmod__tile.stattile {
-  padding: var(--space-2) var(--space-1);
   text-align: center;
-}
-.seasonmod__tile .stattile__value {
-  font-size: var(--fs-hero-sm);
-}
-@media (min-width: 740px) {
-  .seasonmod__tile.stattile {
-    padding: var(--space-3h) var(--space-2);
-  }
-  .seasonmod__tile .stattile__value {
-    font-size: var(--fs-hero-xl);
-  }
 }
 
 /* The register sits bare in the card, dressed like the game log table: heads on the card paper
