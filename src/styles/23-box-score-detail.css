@@ -390,13 +390,13 @@
   gap: var(--space-1h);
   min-width: 0;
 }
-/* Source Sans at the app's NAME role — every player name in this app is
-   --font-body at --fs-body/--w-semibold (.tlead__name-last, .playerline__name,
-   .lineup__name), and this row is no exception; it read a size small before,
-   at --fs-ui, which is the role for UI chrome rather than for content.
-   (Source Sans ships four weights, so --w-semibold draws a real 600 — it is
-   declared because that is the role, and because a second weight would
-   otherwise reach every name in the app but this one.)
+/* The app's NAME role — every player name in this app is --font-body at
+   --fs-body/--w-semibold (.tlead__name-last, .playerline__name, .lineup__name),
+   and this row is no exception; it read a size small before, at --fs-ui, which
+   is the role for UI chrome rather than for content.
+   (Since #2165 --font-body is mono, which ships one weight, so --w-semibold
+   draws 500 — it stays declared because that is the role, and because a
+   second weight would otherwise reach every name in the app but this one.)
    The tracking is the part that was genuinely missing: this row sits between a
    tracked condensed label and a mono figure, and an all-caps run with no
    tracking between those two reads soft.

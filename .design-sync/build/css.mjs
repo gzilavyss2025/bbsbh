@@ -34,8 +34,8 @@ for (const pkg of ['barlow-condensed', 'jetbrains-mono', 'lora']) fs.copyFileSyn
 let fonts = rd('src/tokens/fonts.css').replace(/url\("@fontsource\/[a-z0-9-]+\/files\/([^"]+)"\)/g, 'url("../fonts/$1")')
 fonts = fonts.replace(/@font-face \{\n  font-family: "Source Sans 3";[\s\S]*?\}\n\n?/g, '')
 fonts = fonts.slice(0, fonts.indexOf('/* One weight, one use: the slate'))
-fonts = swap(fonts, '   - Source Sans 3 ships 400, 500, 600 and 700.\n', '')
-fonts = swap(fonts, 'Lora ships TWO, and Source Sans 3 more: the regular', 'Lora ships TWO: the regular')
+fonts = swap(fonts, '   - Source Sans 3 ships 400, 500, 600 and 700, and no CSS rule asks for it since #2165: only the\n     poster canvas (src/lib/preview/posterPaper.js) draws it.\n', '')
+fonts = swap(fonts, 'Lora ships TWO, as Source Sans 3 does: the regular', 'Lora ships TWO: the regular')
 wr('tokens/fonts.css', "/* Design-system copy of the app's src/tokens/fonts.css: each url() points at ../fonts/, and the Big Shoulders watermark face is removed. The files are OFL 1.1 (fonts/LICENSE-*.txt). Source Sans 3 is removed (Gary): no token uses it. */\n" + fonts.trimEnd() + '\n')
 
 // ---- part styles: the repo's own CSS
