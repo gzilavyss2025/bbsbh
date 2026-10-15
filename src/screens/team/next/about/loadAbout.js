@@ -11,6 +11,8 @@ import { SHARED } from '../once.js'
 // the rest does not. The standings and the schedule come through SHARED.
 // The manager is the one read the page's header also makes; Band hands a module no manager,
 // so About asks once more (one small request). Row 7 can pass it down and drop this.
+const NO_JERSEYS = { jerseyCombos: [], homeRecord: { wins: 0, losses: 0 }, awayRecord: { wins: 0, losses: 0 } }
+
 export async function loadAbout(team, asOf) {
   const isMilb = (team.sport?.id ?? 1) !== 1
   const season = seasonOf(asOf, team.sport?.id ?? 1)
@@ -19,7 +21,8 @@ export async function loadAbout(team, asOf) {
     isMilb ? Promise.resolve(null) : fetchAttendance(),
     isMilb ? Promise.resolve(null) : franchiseFor(team.id),
     fetchManager(team.id, season),
-    loadJerseys(team, asOf, SHARED),
+    // One failed jersey read must not blank the ballpark and franchise cards.
+    loadJerseys(team, asOf, SHARED).catch(() => NO_JERSEYS),
   ])
   return {
     milbAlumni,

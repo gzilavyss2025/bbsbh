@@ -117,7 +117,7 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
   const isMilb = (team.sport?.id ?? 1) !== 1
   const orgId = isMilb ? parentOrgIdOf(team) : team.id
   const clubName = teamClubName(team)
-  const any = n && (n.batting || n.pitching || n.runValue || n.absExposureClubs || blocks.length)
+  const any = Boolean(n && (n.batting || n.pitching || n.runValue || n.absExposureClubs || blocks.length))
 
   return (
     <div className={`tnext__square rnk${still ? ' rnk--still' : ''}`}>
