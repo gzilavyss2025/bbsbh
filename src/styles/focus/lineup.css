@@ -1,0 +1,142 @@
+/* ---------------------------------------------------------------------------
+   THE LINEUP CARD'S OWN RULES inside focus mode's LINEUPS tab: the swap onto the
+   other club's nine, and how a row says who bats next. Split out of
+   reference.css when it reached the 600-line cap (ADR-0038). Loads right after
+   it, so it wins on cascade order like the other focus sheets.
+   --------------------------------------------------------------------------- */
+
+/* The swap onto the other club's nine. Reads as a footer action on the card
+   rather than a second masthead — the batting club's lineup is the answer, and
+   this is the way to the other one, not an equal partner to it.
+
+   Sized to its own text + chevron rather than the card's full width — a
+   footer action reading edge to edge looked like a third masthead bar, not a
+   small "one more tap" link. align-self pulls it out of .entering__teams'
+   stretched flex-column default; min-height still holds the tap floor even
+   though the box itself is now content-sized (a phone's docked sheet is where
+   the thumb is doing the reaching, same as before). */
+.entering__swap {
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: var(--space-3);
+  padding: 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-stamp);
+}
+
+.entering__swap:hover {
+  background: var(--surface-row-selected);
+}
+
+.entering__swap:active {
+  transform: translate(2px, 2px);
+}
+
+.entering__swaplabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2h);
+}
+
+.entering__swaplogo {
+  flex: 0 0 auto;
+}
+
+.entering__swap:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+
+/* WHO BATS NEXT, SAID WITHOUT A WORD ON THE ROW. The slot square grades the
+   four states and the row takes a wash; the legend under the band names the
+   ones the card carries, and a screen reader hears the word beside the number.
+     up    the BATTING club's next slot (LineupSection's `onDeckSlot`): picked-row
+           paper, ink square. --marker stays out: rank and flags only, and this is
+           the app's plain "next" mark.
+     due   the FIELDING club's leadoff man next half: ink square.
+     deck  graphite square.
+     hole  an ink outline only.
+   The fielding trio shares the lighter row wash. */
+.entering__row--up {
+  background: var(--surface-row-selected);
+}
+
+.entering__row--due,
+.entering__row--deck,
+.entering__row--hole {
+  background: var(--surface-row-hover);
+}
+
+.entering__row--up .entering__slot,
+.entering__row--due .entering__slot,
+.entering__key,
+.entering__legenditem--up .entering__key,
+.entering__legenditem--due .entering__key {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+
+.entering__row--deck .entering__slot,
+.entering__legenditem--deck .entering__key {
+  background: var(--border-stamped-soft);
+  color: var(--text-on-ink);
+}
+
+.entering__row--hole .entering__slot,
+.entering__legenditem--hole .entering__key {
+  background: none;
+  box-shadow: inset 0 0 0 var(--bw-heavy) var(--border-stamped);
+  color: var(--text-heading);
+}
+
+/* The legend: one line under the band, only the states this card carries. */
+/* layout-exempt: a wrapping key line; its items are inline-flex, not stacked cards */
+.entering__legend {
+  margin: 0 -10px;
+  padding: var(--space-2) var(--space-2h);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1h) var(--space-3);
+  list-style: none;
+  background: var(--bg-page);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.entering__legenditem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+
+.entering__key {
+  width: 12px;
+  height: 12px;
+}
+
+/* The picked row is paper-5: clay on it is 4.37:1, under the 4.5:1 text floor, so
+   the inning pill takes clay-deep there (the design system's own rule for a
+   picked row). */
+.entering__row--up .entering__inn {
+  border-color: var(--accent-negative-hover);
+  color: var(--accent-negative-hover);
+}

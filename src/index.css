@@ -255,13 +255,14 @@
    a partial that outgrew the 600-line file cap was to subdivide, which is what
    ADR-0038 asks for in the first place. It happened a second time when the
    half's tally joined the console row: console.css came out of stage.css along
-   the same seam — the shell versus one band inside it. These four stay LAST,
+   the same seam — the shell versus one band inside it. These five stay LAST,
    and in this order — every rule in them wins on cascade order, not
    specificity. See focus/stage.css's header. */
 @import './styles/focus/stage.css';
 @import './styles/focus/console.css';
 @import './styles/focus/atbat.css';
 @import './styles/focus/reference.css';
+@import './styles/focus/lineup.css';
 
 /* ------------------------------------------------------------
    Per-route partials — still in src/styles/, still numbered, still

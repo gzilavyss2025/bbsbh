@@ -1394,29 +1394,6 @@
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
-/* The BATTING club's on-deck row (LineupSection's `onDeckSlot`, focus mode's
-   Lineups tab): the picked-row paper, an inked slot number and a --marker
-   "Up next" pill. --marker is the same highlighter yellow as the at-bat card's
-   decisive-pitch row (14-strike-zone.css). Not .duepill's kraft-amber: that
-   pill answers a different question (the FIELDING club's next half). */
-.entering__row--ondeck {
-  background: var(--surface-row-selected);
-}
-
-.entering__row--ondeck .entering__slot {
-  background: var(--surface-stamped-ink);
-  color: var(--text-on-ink-cream);
-}
-
-/* Reuses .duepill's shape (className="duepill entering__ondeck"), square and
-   recolored — see comment above. */
-.entering__ondeck {
-  background: var(--marker);
-  color: var(--text-heading);
-  border-color: transparent;
-  border-radius: 0;
-}
-
 /* A 24px square beside the first line of the slot; the 10px margin centres it
    in a 44px tap-height row. */
 .entering__slot {

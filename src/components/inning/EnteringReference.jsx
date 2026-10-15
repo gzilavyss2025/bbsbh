@@ -121,6 +121,11 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 // layouts disagreed on whether this needed a heading, and neither one named
 // the moment.
 const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
+// The four states a lineup row can wear, keyed from the selector's own wording.
+// 'up' is the BATTING club's single next slot; the other three are the fielding
+// club's next-half trio. Words go to the legend and to screen readers only.
+const STATE_OF_LABEL = { 'Due up': 'due', 'On deck': 'deck', 'In the hole': 'hole' }
+const STATE_WORDS = { up: 'Up next', due: 'Due up', deck: 'On deck', hole: 'In the hole' }
 
 // TWO PROPS FOR FOCUS MODE'S LINEUPS TAB, both defaulting to the stacked page's
 // existing behaviour — the same shape RosterPanel takes.
@@ -205,7 +210,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
   const otherSide = shown === 'away' ? 'home' : 'away'
   const canSwap = leadSide != null && teamFor(otherSide).slots.length > 0
   return (
-    <Card frame="stamped" body="flush" className="entering">
+    <Card frame="stamped" stampIn body="flush" className="entering">
       {!bare && (
         <button
           type="button"
@@ -273,23 +278,42 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
 function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, upNextLabels, onDeckSlot = null }) {
   if (slots.length === 0) return null
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
+  // Which of the four "who bats next" states this card carries, in batting
+  // order of urgency — the legend names only those, and the rows say them by wash
+  // and slot square instead of by a word.
+  const present = new Set(
+    slots.map((s) => (onDeckSlot === s.slot ? 'up' : STATE_OF_LABEL[upNextLabels?.get(s.slot)] ?? null)),
+  )
+  const legend = ['up', 'due', 'deck', 'hole'].filter((st) => present.has(st))
   return (
     <div className={`lineupteam ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <h5 className="lineupteam__name sectionhead--band">
         <span className="lineupteam__namelabel">{name} Lineup</span>
         <TeamLogo teamId={teamId} name={name} size={20} variant="mono" crop="bar" className="sectionhead__mark" />
       </h5>
+      {legend.length > 0 && (
+        <ul className="entering__legend" aria-hidden="true">
+          {legend.map((st) => (
+            <li className={`entering__legenditem entering__legenditem--${st}`} key={st}>
+              <span className="entering__key" />
+              {STATE_WORDS[st]}
+            </li>
+          ))}
+        </ul>
+      )}
       <Stack gap="tight" as="ol" className="entering__list">
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant
-          const upNextLabel = upNextLabels?.get(s.slot)
-          const onDeck = s.slot === onDeckSlot
+          const state = onDeckSlot === s.slot ? 'up' : STATE_OF_LABEL[upNextLabels?.get(s.slot)] ?? null
           return (
             <li
-              className={`entering__row ${onDeck ? 'entering__row--ondeck' : ''}`}
+              className={`entering__row ${state ? `entering__row--${state}` : ''}`.trim()}
               key={s.slot}
             >
-              <span className="entering__slot">{s.slot}</span>
+              <span className="entering__slot">
+                {s.slot}
+                {state && <span className="sr-only"> ({STATE_WORDS[state]})</span>}
+              </span>
               {/* One line per occupant, so a substitute's number and position sit
                   beside HIS name, not over the man he replaced. The pills belong
                   to the standing occupant, so they ride the last line. */}
@@ -307,13 +331,6 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
                           <>
                             <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
                             <RookiePill active={showRookiePill(rookiesData, cur.id, isMlb)} />
-                            {onDeck && <span className="duepill entering__ondeck">Up next</span>}
-                            {upNextLabel && (
-                              <span className="duepill">
-                                {upNextLabel === 'Due up' && <span aria-hidden="true">&larr; </span>}
-                                {upNextLabel}
-                              </span>
-                            )}
                           </>
                         )}
                       </span>
