@@ -146,7 +146,7 @@ export function NumbersBody({ numbers, team, asOf, sportId, part = 'all' }) {
 
           {showStanding && n.scheduleShape && <LastTimeCard data={n.scheduleShape} cutoff={n.recordsCutoff} />}
 
-          {showStanding && (isMilb || n.jerseyCombos.length > 0) &&
+          {part === 'all' && (isMilb || n.jerseyCombos.length > 0) &&
             (isMilb ? (
               <MilbUniformStrip
                 teamId={team.id}
