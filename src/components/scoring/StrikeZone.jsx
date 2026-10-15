@@ -3,6 +3,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { EDGE, H, W, sx, sy } from '../../lib/zone/zoneGeometry.js'
+import { groundBoxes } from '../../lib/zone/ground.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { batterFigureUrls } from '../../api/uniforms.js'
 import { BattingUniformContext } from '../logo/uniformContexts.js'
@@ -102,7 +103,7 @@ const ART_ZONE_BOTTOM = 700
 // The mirrored body's edge nearest the plate, per hand, and how far outside the
 // zone's edge it stands.
 const ART_NEAR_EDGE = { R: 56, L: 416 }
-const FIGURE_GAP = 18
+const FIGURE_GAP = 34
 function BatterFigure({ urls, hand, zone, clipId, onError }) {
   const scale = zone.h / (ART_ZONE_BOTTOM - ART_ZONE_TOP)
   const x = (hand === 'L' ? zone.left - FIGURE_GAP : zone.right + FIGURE_GAP) - ART_NEAR_EDGE[hand] * scale
@@ -156,7 +157,8 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
   const zyB = sy(zb)
   const zw = zr - zx
   const zh = zyB - zyT
-  // A small home-plate pentagon under the zone anchors the view.
+  // Home plate under the zone anchors the view: the plate is as wide as the zone,
+  // point toward the catcher (down the page, the camera is behind the pitcher).
   const py = sy(0.6)
   const cx = (zx + zr) / 2
   const half = zw / 2
@@ -183,6 +185,14 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
           <clipPath id={clipId}>
             <rect width={totalW} height={H} />
           </clipPath>
+          {/* The ground, in the replay scene's own field colours: grass, and a flat strip of dirt the plate sits in (not a mound: this view is from behind the pitcher). */}
+          <rect className="strikezone__grass" width={totalW} height={H} />
+          <rect className="strikezone__dirt" x={0} y={py - 32} width={totalW} height={H - (py - 32)} />
+          <g clipPath={`url(#${clipId})`}>
+            {groundBoxes(cx + zoneOffsetX, py - 8, zw).map((pts) => (
+              <polygon key={pts} className="strikezone__chalk" points={pts} />
+            ))}
+          </g>
           {useFigure ? (
             <BatterFigure urls={figureUrls} hand={batSide} zone={{ left: zx + zoneOffsetX, right: zr + zoneOffsetX, top: zyT, h: zh }} clipId={clipId} onError={() => setFailedUrl(figureUrls.jersey)} />
           ) : (
@@ -192,11 +202,15 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
         </>
       )}
       <g transform={`translate(${zoneOffsetX}, 0)`}>
+        <rect className="strikezone__fill" x={zx} y={zyT} width={zw} height={zh} />
         <rect className="strikezone__frame" x={zx} y={zyT} width={zw} height={zh} />
         <line className="strikezone__third" x1={zx + zw / 3} y1={zyT} x2={zx + zw / 3} y2={zyB} />
         <line className="strikezone__third" x1={zx + (2 * zw) / 3} y1={zyT} x2={zx + (2 * zw) / 3} y2={zyB} />
         <line className="strikezone__third" x1={zx} y1={zyT + zh / 3} x2={zr} y2={zyT + zh / 3} />
         <line className="strikezone__third" x1={zx} y1={zyT + (2 * zh) / 3} x2={zr} y2={zyT + (2 * zh) / 3} />
+        {[zx, zr].map((x) => (
+          <line key={x} className="strikezone__drop" x1={x} y1={zyB} x2={x} y2={py - 8} />
+        ))}
         <polygon
           className="strikezone__plate"
           points={`${cx - half},${py - 8} ${cx + half},${py - 8} ${cx + half},${py - 2} ${cx},${py + 6} ${cx - half},${py - 2}`}
@@ -206,14 +220,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
           const y = sy(p.pz)
           return (
             <g key={p.no}>
-              <circle className={`strikezone__dot strikezone__dot--${p.cat}`} cx={x} cy={y} r={8.5}>
-                <title>
-                  Pitch {p.no}
-                  {p.mph != null ? `: ${p.mph} MPH` : ''}
-                  {p.type ? ` ${p.type}` : ''}
-                  {p.callDesc ? `, ${p.callDesc}` : ''}
-                </title>
-              </circle>
+              <circle className={`strikezone__dot strikezone__dot--${p.cat}`} cx={x} cy={y} r={8.5} />
               <text className={`strikezone__num strikezone__num--${p.cat}`} x={x} y={y + 0.3}>
                 {p.no}
               </text>
