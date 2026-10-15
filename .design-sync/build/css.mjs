@@ -17,16 +17,8 @@ const block = (src, sel) => {
   return lines.slice(i, j + 1).join('\n')
 }
 
-// ---- tokens: five repo files, verbatim, plus one deliberate change in typography.css
-for (const f of ['colors', 'spacing', 'effects', 'layout']) wr(`tokens/${f}.css`, rd(`src/tokens/${f}.css`))
-let typo = rd('src/tokens/typography.css')
-typo = swap(typo, '   - Source Sans 3     → UI + body\n', '')
-typo = swap(typo, '  --font-body:    "Source Sans 3", system-ui, sans-serif;\n',
-  '  /* Design-system change (Gary): body copy and fact values are JetBrains Mono 500, not Source Sans 3, which is removed from this system. The app repo still has "Source Sans 3", system-ui, sans-serif here. */\n' +
-  '  --font-body:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;\n')
-typo = swap(typo, 'The canvas draws "Born" at 500. Source Sans 3 is the only family\n     with a real 500 face; Barlow and mono ship one weight each. */',
-  'The canvas draws "Born" at 500. In the app Source Sans 3 is the only family\n     with a real 500 face; Barlow and mono ship one weight each. This system ships no Source Sans 3, so the fact value draws JetBrains Mono 500. */')
-wr('tokens/typography.css', typo)
+// ---- tokens: the repo files, verbatim. The app and the project now agree on the body font (#2165)
+for (const f of ['colors', 'spacing', 'effects', 'layout', 'typography']) wr(`tokens/${f}.css`, rd(`src/tokens/${f}.css`))
 
 // ---- fonts: the Fontsource files the app bundles, minus Source Sans 3 and Big Shoulders; all OFL 1.1
 const FONT_FILES = [
@@ -46,11 +38,9 @@ fonts = swap(fonts, '   - Source Sans 3 ships 400, 500, 600 and 700.\n', '')
 fonts = swap(fonts, 'Lora ships TWO, and Source Sans 3 more: the regular', 'Lora ships TWO: the regular')
 wr('tokens/fonts.css', "/* Design-system copy of the app's src/tokens/fonts.css: each url() points at ../fonts/, and the Big Shoulders watermark face is removed. The files are OFL 1.1 (fonts/LICENSE-*.txt). Source Sans 3 is removed (Gary): no token uses it. */\n" + fonts.trimEnd() + '\n')
 
-// ---- part styles: the repo's own CSS, then the design-system additions
+// ---- part styles: the repo's own CSS
 const team = rd('src/styles/09-team-info.css')
-const sectionHead = swap(rd('src/styles/system/section-head.css'),
-  '  border-radius: var(--radius-md) var(--radius-md) 0 0;',
-  '  /* Design-system change (Gary): square, like every stamped part. The app repo rounds the top corners to var(--radius-md) here. */\n  border-radius: 0;')
+const sectionHead = rd('src/styles/system/section-head.css') // square and rippled in the app itself (#2165)
 let bundle = '/* _ds_bundle.css: the stamped look, copied from the repo. Order follows the app (cluster, card, stamped, jump bar, section head, table, stamp-in). */\n'
 const add = (label, css) => { bundle += `\n/* ==== ${label} ==== */\n${css}\n` }
 add('src/styles/system/cluster.css', rd('src/styles/system/cluster.css'))
@@ -62,9 +52,7 @@ add('src/styles/09-team-info.css (the fact rules the fact strip uses)',
 add('src/styles/system/jumpbar/jumpbar.css', rd('src/styles/system/jumpbar/jumpbar.css'))
 add('src/styles/system/table.css', rd('src/styles/system/table.css'))
 add('src/styles/motion/stamp-in.css', rd('src/styles/motion/stamp-in.css'))
-bundle += '\n' + rd(HERE + 'ds-compact-tile.css')
 bundle += '\n/* ==== src/styles/motion/player-rise.css (the player rise) ==== */\n' + rd('src/styles/motion/player-rise.css')
-bundle += '\n' + rd(HERE + 'ds-texture.css')
 wr('_ds_bundle.css', bundle)
 
 // ---- base rules, entry stylesheet, stub bundle, update marker

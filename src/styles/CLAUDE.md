@@ -90,16 +90,10 @@ The "Tally Baseball" project in claude.ai/design is the design system a designer
 design. It is built from `src/tokens/` and `src/styles/system/`, never edited by hand. Rebuild and
 upload steps: `docs/design-sync.md`. A token change reaches the project only after a rebuild.
 
-Four differences between the project and the app. Gary made these calls on 2026-10-15; issue #2165
-is the build for the first three:
-
-- **Body font.** The project sets `--font-body` to JetBrains Mono 500. The app uses Source Sans 3.
-  **Decision:** the app moves to mono body copy. Not done yet. Until it is, a design from the
-  project draws body text in mono, and the app does not.
-- **Band head.** The project draws `sectionhead--band` square. The app rounds its top corners.
-  **Decision:** the app goes square too (`system/section-head.css`). Not done yet.
-- **Ripple texture.** The project has the ripple rings as an opt-in class, `sectionhead--textured`.
-  The app has them only on the lineup page (`lineup-next/page.css`). **Decision:** every band head
-  in the app gets the rings by default. Not done yet.
-- **`stattile--compact`.** A stat tile about 40% smaller. It exists only in the project and stays
-  design-only. The implementer of a design that uses it adds it to `system/` then.
+The project and the app agree (#2165, 2026-10-15). Body copy is JetBrains Mono 500 in both
+(`--font-body` is the mono stack). A band head is square and carries the ripple rings and sheen by
+default (`system/section-head.css`; a host that sets its own `position` still wins, because the
+band's `position` and `isolation` sit in `:where()`). `stattile--compact` is in `system/stamped/`.
+One weight rule follows from mono body: every weight of body copy draws 500. Source Sans 3 is no
+longer a role; `src/lib/preview/posterPaper.js` still draws it on the poster canvas, so its font
+files stay. The build copies these files verbatim; `docs/design-sync.md` lists what still differs.

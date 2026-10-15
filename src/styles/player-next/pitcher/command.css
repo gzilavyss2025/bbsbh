@@ -102,6 +102,7 @@
   gap: var(--space-2);
 }
 .command__tile.stattile {
+  padding-inline: var(--space-1); /* four across at every width: the compact tile's side padding is too wide */
   text-align: center;
 }
 .command__tile--thin.stattile {
