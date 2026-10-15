@@ -135,11 +135,14 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4) var(--space-3h);
-  border-radius: var(--radius-md);
-  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
   background: var(--surface-card);
   color: var(--text-body);
-  box-shadow: var(--shadow-card);
+  /* Mono, not the body face: the decisions and the play are facts. Labels and
+     names set the display face themselves. */
+  font-family: var(--font-mono);
+  box-shadow: var(--shadow-stamped);
 }
 /* The card-level accent tint (GameResultFace.jsx's cardAccent/isPinnedGame):
    two independent channels, since a card can carry both at once (your team's
@@ -286,8 +289,8 @@
   padding-top: var(--space-2);
   margin-top: 2px;
   border-top: var(--bw-hair) solid var(--border-hairline);
-  font-family: var(--font-body);
-  font-size: var(--fs-compact);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
   color: var(--text-muted);
 }
 .flipback__decision b {
@@ -325,7 +328,8 @@
 }
 .flipback__potg {
   margin: 0;
-  font-size: var(--fs-small);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
   color: var(--text-body);
 }
 .flipback__potgLabel {
@@ -342,13 +346,13 @@
   color: var(--graphite-soft);
 }
 /* Play of the game (and its batter-name link) reads as a natural sentence in
-   the app's serif "read" face, not the usual all-caps display type — same
+   mono, not the usual all-caps display type — same
    sanctioned exception as .pbp__desc (see the ALL-CAPS INVARIANT block
    comment near the top of this file). A nested .plink needs its OWN entry
    here too: `#root *`'s uppercase would otherwise win over it directly. */
 .flipback__potg,
 .flipback__potg .plink {
-  font-family: var(--font-read);
+  font-family: var(--font-mono);
 }
 #root .flipback__potg,
 #root .flipback__potg .plink {
@@ -736,4 +740,10 @@
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   color: var(--text-muted);
+}
+
+/* The flip back wears the square look too: every box on it, the shared pills
+   and the clip card included, takes square corners. */
+.flipback :is(.pill, .btn, .hlclip, .hlclip__frame, .hlclip__play, .flipback__potgShotwrap, .plink) {
+  border-radius: 0;
 }

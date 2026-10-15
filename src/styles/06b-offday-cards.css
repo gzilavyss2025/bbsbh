@@ -62,8 +62,8 @@
     var(--pinstripe-bg, #fff) 7px
   );
 }
-/* Same diagonal gloss sheen as .gamecard__logobox::after, so an off-day tile
-   reads as the identical glossy badge as a slate card's. */
+/* A diagonal gloss sheen over the tile, so it reads as a glossy badge. (The slate
+   tile moved on to ripple and sheen, gamecard/versus.css.) */
 .offday__logobox::after {
   content: '';
   position: absolute;

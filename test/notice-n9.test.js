@@ -78,7 +78,7 @@ test('N9: .hint--error keeps its rule, and only the five dev-only tool pages wea
 // ---- 3. the budgets ----
 
 test('N9: the raw-value and caption budgets are the measured counts', () => {
-  assert.deepEqual(BUDGETS, { hex: 24, radius: 81, motion: 55, shadow: 41 })
+  assert.deepEqual(BUDGETS, { hex: 19, radius: 77, motion: 54, shadow: 41 })
   assert.match(readFileSync(join(ROOT, 'scripts/check-caption-budget.mjs'), 'utf8'), /^const BUDGET = 115$/m)
 })
 

@@ -44,7 +44,7 @@ const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 // Measured on origin/main at 2324e44b (band 3 less the one in system/), then
 // triaged (.scratch/design-system/component-reuse-triage.md): controls skipped by
 // the detector, stamp/slate one-offs exempted in place.
-export const BUDGETS = { capsule: 6, sheet: 3, ledger: 16, band: 1 }
+export const BUDGETS = { capsule: 4, sheet: 3, ledger: 15, band: 1 }
 export const KINDS = Object.keys(BUDGETS)
 
 const FIX = {

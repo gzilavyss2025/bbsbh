@@ -6,6 +6,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { fetchJerseysData } from '../../api/jerseys.js'
 import { fetchWorkloadSummary, penSummaryClubs } from '../../api/workload.js'
 import { PenDots } from '../workload/PenDots.jsx'
+import { Button } from '../ui/control/Button.jsx'
 import { parkBackdrop } from '../../lib/ballpark/parkBackdrop.js'
 import { parkWashColorOverride } from '../../lib/ballpark/parkWash.js'
 import { useCopy } from '../../copy/copyContext.js'
@@ -235,6 +236,8 @@ export function GameCard({
             <span className="gamecard__atmark-ghost">@</span>
             <span className="gamecard__atmark-ink">@</span>
           </span>
+          {/* The slash the two tiles split around on hover (gamecard/versus.css). */}
+          <span className="gamecard__slash" aria-hidden="true" />
           <TeamMark
             team={game.away}
             side="away"
@@ -346,13 +349,9 @@ export function GameCard({
         </div>
       </button>
       {onBoxScore && !postponed && (
-        <button
-          type="button"
-          className="gamecard__box"
-          onClick={onBoxScore}
-        >
+        <Button className="gamecard__box" onClick={onBoxScore}>
           Box score ›
-        </button>
+        </Button>
       )}
       {/* The band of light a phone rakes down this card as it crosses the
           screen — last child so it falls ON everything above, and decorative

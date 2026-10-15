@@ -72,9 +72,9 @@ const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 // N9 of the Notice collapse (#1132) banked the savings that were not yet banked:
 // hex 26 -> 24, radius 82 -> 81, motion 56 -> 55. Shadow stays at 41.
 export const BUDGETS = {
-  hex: 24,
-  radius: 81,
-  motion: 55,
+  hex: 19,
+  radius: 77,
+  motion: 54,
   shadow: 41,
 }
 

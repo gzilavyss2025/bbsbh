@@ -184,18 +184,34 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-3h) var(--space-4);
-  border-radius: var(--radius-md);
-  /* Back to --bw-hair (1px), the hairline every other bordered surface uses —
-     the thickened --bw-heavy frame read heavier than the photo backdrop
-     needed. ONE fixed color for every card, favorite or not — a blend of the
-     plain rule tone and --text-muted, weighted toward --text-muted (was
-     50/50) so the hairline still reads as a deliberate frame rather than
-     fading out at 1px. The star badge + background tint below still say
-     which card is pinned; the frame no longer needs to. */
-  border: var(--bw-hair) solid color-mix(in srgb, var(--border-rule) 35%, var(--text-muted) 65%);
+  /* THE STAMPED FRAME (ADR-0109, docs/player-redesign.md section 3): square, a
+     2px ink edge and a hard ink offset shadow, the same frame as .card--stamped
+     (system/card.css) and the lineup page's cards. One fixed frame for every
+     card, favorite or not; the star badge and the background tint below still
+     say which card is pinned. */
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
   background: var(--surface-card);
   color: var(--text-body);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-stamped);
+  transition:
+    transform var(--dur-fast) var(--ease-stamp),
+    box-shadow var(--dur-fast) var(--ease-stamp);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gamecard {
+    transition: none;
+  }
+}
+
+/* The press: the whole card sinks into its own shadow, the way .btn does
+   (system/button.css). The card moves by the border width and the shadow
+   shrinks by the same, so the shadow stays where it was printed. Keyed on the
+   open button, so a tap on the box-score row below does not press the card. */
+.gamecard:has(.gamecard__open:active) {
+  transform: translate(var(--bw-heavy), var(--bw-heavy));
+  box-shadow: calc(var(--stamped-offset) - var(--bw-heavy)) calc(var(--stamped-offset) - var(--bw-heavy)) 0 var(--border-stamped);
 }
 
 /* A back-to-back twin bill before first pitch: one card standing for two
@@ -221,9 +237,8 @@
   right: 4px;
   bottom: -8px;
   background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
 }
 
 /* Full-width date banner (All-Star Rosters page — see GameCard.jsx's
@@ -239,14 +254,13 @@
   text-transform: uppercase;
   color: var(--text-caption);
   background: var(--surface-inset);
-  border-bottom: var(--bw-hair) solid var(--border-rule);
-  border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
 }
 
 /* The postseason series line (#1224, slice 4) — "Game 2 · NL Wild Card" plus
    the heading-in record, text only, no pips (the bracket alone draws those).
    Same bleed-to-the-edges technique as .gamecard__datebanner above, but
-   inked as a navy pennant band — the idiom the series page's result hero
+   inked as an ink band — the idiom the series page's result hero
    already uses (35-postseason-series.css's .psseries__banner) — since this
    line, like that headline, is a fact about the SERIES, not the matchup.
    GameCard.jsx renders it only when handed a `postseasonLine`, so a MiLB or
@@ -254,7 +268,12 @@
 .gamecard__seriesline {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  /* One band height with or without the series mark, and on a long round name,
+     so the status pill below can sit under it at a known offset. */
+  align-items: center;
+  height: var(--space-8);
+  white-space: nowrap;
+  overflow: hidden;
   gap: var(--space-2);
   margin: -14px -16px 0;
   /* Wider on both sides than .gamecard__datebanner's plain --space-4: the
@@ -269,18 +288,21 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-on-ink);
-  background: var(--accent-primary);
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  color: var(--text-on-ink-cream);
+  background: var(--surface-stamped-ink);
   /* Above the park-art wash (z 2) and the logo tiles, so a hover on the card's
      colours never tints or covers the band. The corner badges below sit at 4. */
   position: relative;
   z-index: 3;
 }
-/* With the series mark: the mark leads the band and the game number rides
-   beside it, both centred on the mark rather than on a text baseline. */
-.gamecard__seriesline--marked {
-  align-items: center;
+/* The star tile centres in the band rather than hanging off its foot. */
+.gamecard:has(.gamecard__seriesline) .gamecard__pinbadge {
+  top: var(--space-1);
+}
+/* With a series band the corner pill (live, delay) would sit on the band's own
+   right-hand text, so it drops to just under the band instead. */
+.gamecard:has(.gamecard__seriesline) :is(.gamecard__live, .gamecard__delay) {
+  top: calc(var(--space-8) + var(--space-1h));
 }
 .gamecard__seriesline-round {
   display: inline-flex;
@@ -311,29 +333,14 @@
   padding: 0;
   color: inherit;
   cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
 }
 
-/* A quiet secondary action under the card — jumps straight to the box score for
-   a completed game on a past date. */
-.gamecard__box {
+/* The box-score shortcut under the card: a Button (the 44px tap size), so the face,
+   the ink edge and the press are .btn's. This rule only lays it out. */
+.gamecard .gamecard__box {
   align-self: stretch;
-  min-height: var(--tap-min);
   margin-top: 2px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--bg-page);
-  color: var(--text-heading);
-  font-family: var(--font-display);
-  font-size: var(--fs-small);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.gamecard__box:active {
-  transform: translateY(1px);
+  border-radius: 0;
 }
 
 /* The Home Run Derby hand-off card (DerbyCard.jsx) — the whole card is the
@@ -408,8 +415,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 3px var(--space-2) 3px var(--space-2);
-  border-radius: var(--radius-pill);
+  padding: 1px var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
   background: var(--clay, #c0392b);
   color: #fff4f1;
   font-family: var(--font-display);
@@ -423,7 +431,7 @@
   content: '';
   width: 6px;
   height: 6px;
-  border-radius: 50%;
+  border-radius: 0;
   background: currentColor;
 }
 
@@ -442,8 +450,9 @@
   -webkit-backface-visibility: hidden;
   display: inline-flex;
   align-items: center;
-  padding: 3px var(--space-2);
-  border-radius: var(--radius-pill);
+  padding: 1px var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
   background: var(--marker);
   color: var(--text-heading);
   font-family: var(--font-display);
@@ -454,8 +463,8 @@
 }
 
 /* Favorite-team star, mirrored to the top-LEFT corner — same badge idiom as
-   .gamecard__live/.gamecard__delay's top-right pill, just a round coin
-   instead of a text pill (a single glyph doesn't need the label's width).
+   .gamecard__live/.gamecard__delay's top-right tag, just a square tile
+   instead of a text tag (a single glyph doesn't need the label's width).
    Used to sit inline in .gamecard__meta at the bottom of the card; moved up
    here so it reads as a corner marker at a glance, the way the live/delay
    status does on the opposite corner. A small opaque backing (rather than
@@ -473,10 +482,9 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-inset);
-  box-shadow: var(--shadow-card);
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
   font-size: var(--fs-small);
   line-height: var(--lh-solid);
   color: var(--pin-accent, var(--field));
@@ -489,10 +497,6 @@
 .gamecard__pinbadge-star {
   display: inline-block;
   transform: translateY(-1px);
-}
-
-.gamecard__open:active {
-  transform: translateY(1px);
 }
 
 /* ---- Postponed game treatment ----------------------------------------------
@@ -511,9 +515,9 @@
   gap: var(--space-3);
   margin-top: 4px;
   padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2h);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   /* A faint highlighter wash rather than a full fill, edged with a dashed
-     rule — reads as "held" without shouting. The 16% marker wash is the app's
+     rule (pencilled in: the game did not happen) — reads as "held" without shouting. The 16% marker wash is the app's
      own highlighter recipe (12-sealbox.css, 14-strike-zone.css). */
   background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
   border: var(--bw-hair) dashed var(--border-rule);
@@ -535,7 +539,7 @@
   padding: var(--space-1) var(--space-2) 3px;
   /* Double rule + a slight tilt = a pressed rubber stamp, not a UI chip. */
   border: 2px double var(--text-heading);
-  border-radius: 3px;
+  border-radius: 0;
   transform: rotate(-4deg);
   /* The stamp itself gets the hero motion: it presses DOWN onto the paper —
      starting larger (nearer the eye) and motion-blurred, overshooting past its
@@ -620,6 +624,13 @@
 .gamecard__teams {
   position: relative;
   overflow: hidden;
+  /* The row bleeds to the card's own edges, with the padding put back inside it,
+     so the columns sit where they always did. On hover the tiles grow out to
+     those edges (gamecard/versus.css). The container makes cqw the width of the
+     columns' box, which is what pins the tile's height. */
+  margin-inline: calc(-1 * var(--space-4));
+  padding-inline: var(--space-4);
+  container-type: inline-size;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
@@ -684,8 +695,9 @@
   opacity: 0.07;
 }
 
-/* A uniform framed tile for each club mark: a paper-filled square with a
-   hairline border and rounded corners. The mark is contained but slightly
+/* A uniform framed tile for each club mark: a square filled with the club
+   colour, a 2px ink edge, no rounded corners. Its texture (ripple rings and
+   sheen) and its hover growth live in gamecard/versus.css. The mark is contained but slightly
    overscaled and the tile clips overflow, so it just reaches the frame — a
    gentle crop that makes mismatched source logos read at one consistent
    size. `position: relative` + a z-index above the '@' watermark's 0 (see
@@ -703,17 +715,19 @@
   -webkit-backface-visibility: hidden;
   width: 100%;
   max-width: 130px;
-  aspect-ratio: 1 / 1;
+  /* A square at rest, with its height named outright (a column's width, capped
+     at 130) so the hover can widen the tile and the row keeps its height. */
+  height: min(130px, calc((100cqw - var(--space-3)) / 2));
   justify-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   padding: 2px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
+  /* The lineup crest's frame: square, a 2px ink edge. */
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
   background: var(--tint, var(--bg-page));
-  box-shadow: var(--inset-cell);
 }
 
 /* A hand-styled pattern instead of a flat --tint swatch, same recipe as Team
@@ -729,26 +743,6 @@
   );
 }
 
-/* A diagonal white-to-black sheen over every tile face (background AND mark
-   alike, via this ::after stacking above both) — reads as a glossy, slightly
-   domed badge instead of a flat paint chip. Same recipe as Team Identity Lab's
-   .colorlab__logobox--gloss, applied here to every team/treatment rather than
-   only a tinted one, so a plain paper tile gets the same finish as a colored
-   one. */
-.gamecard__logobox::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    155deg,
-    rgba(255, 255, 255, 0.35) 0%,
-    rgba(255, 255, 255, 0) 40%,
-    rgba(0, 0, 0, 0) 60%,
-    rgba(0, 0, 0, 0.35) 100%
-  );
-  pointer-events: none;
-}
-
 .gamecard__logobox .teamlogo {
   width: 100% !important;
   height: 100% !important;
@@ -761,7 +755,7 @@
      (TeamMark, GameCard.jsx) shrink a dense mark so it doesn't read as "the
      whole tile is this color" against its own new fill — same var Team Color
      Lab's own tiles use. */
-  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32)) skewX(0deg);
 }
 
 /* The monogram fallback already is a bordered tile — drop its own chrome so it
@@ -792,7 +786,8 @@
 }
 
 .gamecard__mascot {
-  font-size: var(--fs-h3);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-num);

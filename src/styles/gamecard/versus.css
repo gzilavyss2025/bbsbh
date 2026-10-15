@@ -1,0 +1,151 @@
+/* THE TILE TEXTURE: the lineup band's ripple rings from two corners, fading
+   toward the middle (--ripple-*, tokens/effects.css), over a soft diagonal
+   sheen. The rings sit UNDER the mark, so the solid club colour reads as a
+   printed, rippled field; the sheen sits over everything, so the whole tile
+   reads as one lit surface. Same recipe as `.lnext .sectionhead--band`. */
+.gamecard__logobox::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
+  mask-image: linear-gradient(100deg, var(--ripple-mask) 0%, transparent 50%, var(--ripple-mask) 100%);
+  pointer-events: none;
+}
+.gamecard__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+   THE VERSUS HOVER. A slate card at rest is two square tiles with an '@'
+   between them. Rest a fine pointer on it (or press it, or tab to it) and the
+   two tiles grow into slanted slabs that meet at a slash: the broadcast
+   "away / home" split card. The logos grow with them.
+
+   One idea: both slabs lean the SAME way, so their facing edges stay parallel
+   and the gap between them is a constant-width channel, and the slash is a bar
+   that fills that channel. Nothing is duplicated and nothing is fetched: the
+   real tiles move, and the logo inside counter-leans so the mark stands
+   upright while the slab leans around it.
+
+   ONE SWITCH. `--versus` is 0 at rest and 1 in the state, set on the card. Every
+   property below reads it (`calc(var(--versus) * ...)`), so there is one set of
+   rules, the in and out transitions come free, and the lean and the bleed are
+   named once. The state is set in two places only: a fine pointer resting on
+   the card, and a press or keyboard focus on any device. A tap on a touch device
+   is navigation, so a sticky :hover there never sets it.
+
+   The row keeps its height. Each tile grows sideways, out to the card's edge on
+   its outer side, with its height pinned (06-loader-and-cards.css), so the
+   names and the meta row below never move.
+
+   Off under reduced motion: the switch is never set. Pure paint: no state, no
+   data, no gate.
+   --------------------------------------------------------------------------- */
+
+.gamecard {
+  --versus: 0;
+  /* The lean of both slabs, and how far a tile bleeds past its column: the
+     card's padding plus the slant's lean at the card's edge. */
+  --versus-lean: 10deg;
+  --versus-bleed: calc(var(--space-4) + var(--space-3));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @media (hover: hover) and (pointer: fine) {
+    .gamecard:hover {
+      --versus: 1;
+    }
+  }
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) {
+    --versus: 1;
+  }
+
+  .gamecard__logobox {
+    transition:
+      width var(--dur-med) var(--ease-stamp),
+      max-width var(--dur-med) var(--ease-stamp),
+      translate var(--dur-med) var(--ease-stamp),
+      transform var(--dur-med) var(--ease-stamp);
+  }
+  /* Not the monogram fallback, which draws its own plain letters. */
+  .gamecard__logobox .teamlogo:not(.teamlogo--fallback) {
+    transition:
+      transform var(--dur-med) var(--ease-stamp),
+      scale var(--dur-med) var(--ease-stamp);
+  }
+  .gamecard__slash {
+    transition:
+      transform var(--dur-med) var(--ease-stamp),
+      opacity var(--dur-fast) var(--ease-standard);
+  }
+  .gamecard__atmark-ghost,
+  .gamecard__atmark-ink {
+    transition: opacity var(--dur-fast) var(--ease-standard);
+  }
+}
+
+/* The tile: wider by the bleed, re-centred by half of it toward its own edge,
+   and leaning. */
+.gamecard__logobox {
+  width: calc(100% + var(--versus) * var(--versus-bleed));
+  max-width: calc(130px + var(--versus) * (100% + var(--versus-bleed) - 130px));
+}
+.gamecard__logobox--away,
+.gamecard__logobox--home {
+  transform: skewX(calc(var(--versus) * -1 * var(--versus-lean)));
+}
+.gamecard__logobox--away {
+  translate: calc(var(--versus) * -0.5 * var(--versus-bleed));
+}
+.gamecard__logobox--home {
+  translate: calc(var(--versus) * 0.5 * var(--versus-bleed));
+}
+/* The mark: counter-leaning so it stands upright, and grown a quarter. */
+.gamecard__logobox .teamlogo:not(.teamlogo--fallback) {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32))
+    skewX(calc(var(--versus) * var(--versus-lean)));
+  scale: calc(1 + var(--versus) * 0.25);
+}
+
+/* The slash. It sits in the first grid row, spanning both columns, centred, as
+   tall as the row: the same row the tiles grow in. It draws from its middle out. */
+.gamecard__slash {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  justify-self: center;
+  align-self: stretch;
+  position: relative;
+  z-index: 2;
+  /* Three stripes, the broadcast split: a thick ink bar, a cream gap, a thin ink
+     bar. The bar is exactly as wide as the stripes, centred in the 12px channel
+     between the slabs. */
+  width: calc(var(--space-1) + 2 * var(--bw-heavy));
+  background: linear-gradient(
+    90deg,
+    var(--border-stamped) 0 var(--space-1),
+    var(--text-on-ink-cream) var(--space-1) calc(var(--space-1) + var(--bw-heavy)),
+    var(--border-stamped) calc(var(--space-1) + var(--bw-heavy)) 100%
+  );
+  pointer-events: none;
+  opacity: var(--versus);
+  transform: skewX(calc(var(--versus) * -1 * var(--versus-lean))) scaleY(var(--versus));
+}
+
+/* The '@' watermark steps aside while the slash is up. Only where the switch is
+   actually set: the watermark has its own resting opacities. */
+@media (prefers-reduced-motion: no-preference) {
+  @media (hover: hover) and (pointer: fine) {
+    .gamecard:hover :is(.gamecard__atmark-ghost, .gamecard__atmark-ink) {
+      opacity: 0;
+    }
+  }
+  .gamecard:has(.gamecard__open:focus-visible, .gamecard__open:active) :is(.gamecard__atmark-ghost, .gamecard__atmark-ink) {
+    opacity: 0;
+  }
+}
