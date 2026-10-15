@@ -62,11 +62,21 @@ export function PlayerNextHero({ core }) {
   const pos = bio.twoWay ? 'DH/P' : (bio.isPitcher && heroRole) || bio.posAbbr
   const isMlb = isMlbTeamId(club?.id) || Boolean(status && bio.debut)
   const wash = isMlb && status?.state !== 'retired' && photo !== 'gone'
-  // The fact grid has two columns, so an odd count lets the last cell span both and leaves no empty cell.
-  const hasEdu = Boolean(x?.education)
-  const hasNick = Boolean(x?.nickname)
-  const odd = (6 + Number(Boolean(club || status)) + Number(Boolean(pos)) + Number(hasNick) + Number(hasEdu)) % 2 === 1
-  const heightWeight = bio.heightWeight?.includes(' · ') ? `${bio.heightWeight} lb` : bio.heightWeight
+  // The fact table: two columns, so when the count is odd the last cell spans both (no empty cell).
+  const facts = [
+    club
+      ? { key: 'team', label: 'Team', value: <TeamLink id={club.id}>{club.name}</TeamLink> }
+      : status && { key: 'status', label: 'Status', value: status.label },
+    pos && { key: 'pos', label: 'Position', value: pos },
+    { key: 'bt', label: 'Bats / Throws', value: `${bio.bats || DASH} / ${bio.throws || DASH}` },
+    { key: 'age', age: true },
+    { key: 'hw', label: 'Height / Weight', value: bio.heightWeight },
+    { key: 'born', label: 'Born', value: bio.born },
+    { key: 'debut', label: 'MLB debut', value: bio.debut ? debutLabel(bio.debut) : DASH },
+    { key: 'draft', label: 'Draft', value: draftLabel(bio.draft, bio.signedYear) },
+    x?.nickname && { key: 'nick', label: 'Nickname', value: `“${x.nickname}”` },
+    x?.education && { key: 'school', label: 'School', value: x.education },
+  ].filter(Boolean)
   const role = bio.twoWay ? 'Two-way' : bio.isPitcher ? 'Pitcher' : 'Batter'
   return (
     <Card as="div" frame="stamped" body="flush" stampIn className="pnext__hero" style={{ '--stamp-delay': HERO_STAMP_DELAY }}>
@@ -109,20 +119,13 @@ export function PlayerNextHero({ core }) {
         {stamp && <HeroStamp view={stamp} open={open} controls={stripId} onToggle={() => setOpen((o) => !o)} />}
       </div>
       <FactGrid look="strip" as="div" className="pnext__facts">
-        {club ? (
-          <Fact label="Team" value={<TeamLink id={club.id}>{club.name}</TeamLink>} />
-        ) : (
-          status && <Fact label="Status" value={status.label} />
+        {facts.map((f, i) =>
+          f.age ? (
+            <AgeFact key={f.key} fact={ageFact(bio, status)} birthDate={bio.birthDate} />
+          ) : (
+            <Fact key={f.key} label={f.label} value={f.value} wide={facts.length % 2 === 1 && i === facts.length - 1} />
+          ),
         )}
-        {pos && <Fact label="Position" value={pos} />}
-        <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} />
-        <AgeFact fact={ageFact(bio, status)} birthDate={bio.birthDate} />
-        <Fact label="Height / Weight" value={heightWeight} />
-        <Fact label="Born" value={bio.born} />
-        <Fact label="MLB debut" value={bio.debut ? debutLabel(bio.debut) : DASH} />
-        <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} wide={odd && !hasNick && !hasEdu} />
-        {hasNick && <Fact label="Nickname" value={`“${x.nickname}”`} wide={odd && !hasEdu} />}
-        {hasEdu && <Fact label="School" value={x.education} wide={odd} />}
       </FactGrid>
       {stamp && <HeroStrip id={stripId} ratings={x.ratings} open={open} />}
     </Card>

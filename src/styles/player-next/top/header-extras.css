@@ -68,20 +68,6 @@
   white-space: nowrap;
 }
 
-/* THE NAME BLOCK: a nickname under the name, the school under the club line. */
-.pnext-ovr__nick {
-  margin: var(--space-1) 0 0;
-  color: var(--text-heading);
-  font-size: var(--fs-small);
-  font-style: italic;
-}
-.pnext-ovr__school {
-  margin-top: var(--space-1h);
-}
-.pnext__club .pill.pnext-ovr__tier {
-  background: var(--surface-card);
-}
-
 /* THE STRIP. */
 .pnext-ovr__strip {
   container-type: inline-size;
