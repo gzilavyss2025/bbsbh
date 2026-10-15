@@ -124,3 +124,8 @@ undefined/
 # the screenshot suite's output (npm run visual, docs/testing.md): the recorded
 # traffic, the base shots and the report. Rebuilt on every run; never committed.
 /visual-report/
+
+# design-sync (docs/design-sync.md): build output and machine state
+/ds-bundle/
+/.ds-sync/
+/.design-sync/.cache/
