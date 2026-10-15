@@ -91,7 +91,7 @@ fooled by one unusually good or bad year across the whole league.
 
 ## Checking two named worries from the prior spike
 
-`docs/blockage-exit-reason-join.md` (the PR that first classified these
+`docs/price-the-blockage.md` (the PR that first classified these
 exits) flagged two ways its own classification could be hiding a real
 signal. Both were checked here and neither rescues one:
 

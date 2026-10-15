@@ -75,7 +75,7 @@ Module issue: #1885.
 | Field | Source today | Status | Fix |
 | --- | --- | --- | --- |
 | Scope switch MLB / Minors / All / Postseason | rows from the sources below | have | UI only |
-| MLB rows by year (every column, both roles) | `yearByYear` sportId 1 in `src/api/player/stats.js`, then `careerRegisterView` (`src/api/person/careerRegister.js`) | have | — |
+| MLB rows by year (every column, both roles) | `yearByYear` sportId 1 in `src/api/player/context.js`, then `careerRegisterView` (`src/api/person/careerRegister.js`) | have | — |
 | Minor-league rows by level | `fetchMilbYearByYear` (`src/api/person-fetch.js`, one call per level) | have | — |
 | Level pill (AAA, AA, A+, A, ROK) | `SPORT_LABEL` (`src/lib/teams.js`) | have | — |
 | Team abbreviation | `fetchTeamAbbrevs` (`src/api/person-fetch.js`) | reshape | It reads today's abbreviation ("ACL" for the 2018 "AZL Brewers"). Pass `season` to `/teams` |
@@ -87,7 +87,7 @@ Module issue: #1885.
 | Tiles in each scope | same lines | have | — |
 | Postseason by round | `fetchPostseasonByRound` (`src/api/player/postseasonRegister.js`, `gameLog` with `gameType=F,D,L,W`, never `P`) | have | — |
 | League AVG / ERA per season (WAR popover) | `leagueAverage()` + `public/data/league-averages.json` (`scripts/gen-league-averages.mjs`) | have | Run the generator after the 2026 Final: `lastSeason` is still 2025 |
-| All-Star star | `fetchAllStarRosterIds` sets `r.allStar` in `src/api/player/stats.js` | have | Render it. MLB only. Neither board player has an MLB All-Star season |
+| All-Star star | `fetchAllStarRosterIds` sets `r.allStar` in `src/api/player/context.js` | have | Render it. MLB only. Neither board player has an MLB All-Star season |
 | Gap rows (injured / did not play) | `missingSeasonRows` (`src/api/person/careerRegister.js`) with IL transactions | reshape | It starts at the MLB debut. Start at the first pro season, and add a fixed "2020: no minor-league season" note |
 
 The known gaps "All-Star star" and "gap rows" are **refuted**: the repo has both
@@ -100,7 +100,7 @@ batting spots `3`–`10` and days `dsu`–`dsa` all return rows. `s2` returns no
 
 | Field | Source today | Status | Fix |
 | --- | --- | --- | --- |
-| Season picker (2026 … 2023) | `loadPlayerStats` uses the current season only | missing | Add a season argument to the `statSplits` calls in `src/api/player/stats.js` |
+| Season picker (2026 … 2023) | the player loader uses the current season only | missing | Add a season argument to the `statSplits` calls in `src/api/player/context.js` |
 | Career option | `fetchCareerSplits` (`src/api/boxlines/careerSplits.js`, `careerStatSplits`) | reshape | Call it with `vl,vr` + `SITUATIONAL_SIT_CODES` and feed `splitsView` unchanged |
 | Scope Regular / Postseason | `postseasonSplits` (`gameType=P`), `SplitsSection` | have | — |
 | Scope All (regular + postseason) | none | missing | Extend `mergeCareerSplits` (`careerSplits.js`) to return OBP, SLG, SO, BB, HR, PA per sitCode |

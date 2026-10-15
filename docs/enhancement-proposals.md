@@ -1,5 +1,10 @@
 # Enhancement proposals — five candidate features with agent planning prompts
 
+> **Historical.** Paths below name code that is gone (`TeamInfo.jsx`,
+> `PlayerPage.jsx`, `src/api/loadPlayer.js`, `src/api/vsPitcher.js`). The lineup page
+> is now `src/screens/lineup/next/`. The player page is `src/screens/player/next/`.
+> `public/data/umpires.json` and `umpire-accuracy.json` are now directories. The body is unchanged.
+
 Written 2026-07-11 from a survey of the codebase, `docs/data-enrichment.md`
 (the verified catalog of free, CORS-open endpoints), the ADRs, and the
 `.scratch/` issue backlog. Each proposal below:
