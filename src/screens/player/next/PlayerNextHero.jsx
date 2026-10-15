@@ -21,7 +21,7 @@ import '../../../styles/player-next/top/header-extras.css'
 function AgeFact({ fact, birthDate }) {
   const [flipped, setFlipped] = useState(false)
   const [still] = useState(motionIsReduced)
-  if (still || !fact.flip) return <Fact label={fact.label} value={fact.value} mono />
+  if (still || !fact.flip) return <Fact label={fact.label} value={fact.value} />
   return (
     <div className="fact fact--flip">
       <button
@@ -34,11 +34,11 @@ function AgeFact({ fact, birthDate }) {
         <span className="pnext__ageflip">
           <span className="pnext__ageface">
             <span className="fact__label">Age</span>
-            <span className="fact__value mono">{fact.value}</span>
+            <span className="fact__value">{fact.value}</span>
           </span>
           <span className="pnext__ageface pnext__ageface--back" aria-hidden="true">
             <span className="fact__label">Birthday</span>
-            <span className="fact__value mono">{debutLabel(birthDate)}</span>
+            <span className="fact__value">{debutLabel(birthDate)}</span>
           </span>
         </span>
       </button>
@@ -62,10 +62,11 @@ export function PlayerNextHero({ core }) {
   const pos = bio.twoWay ? 'DH/P' : (bio.isPitcher && heroRole) || bio.posAbbr
   const isMlb = isMlbTeamId(club?.id) || Boolean(status && bio.debut)
   const wash = isMlb && status?.state !== 'retired' && photo !== 'gone'
-  // Narrow facts: Team or Status, Position, OVR tier (when each exists) plus the six bio facts. The
-  // last one (Draft) spans the rest of its row, so no empty cell shows the rule colour.
-  const narrow = 6 + Number(Boolean(club || status)) + Number(Boolean(pos)) + Number(Boolean(stamp))
-  const fill = { '--fill3': 1 + ((3 - (narrow % 3)) % 3), '--fill6': 1 + ((6 - (narrow % 6)) % 6) }
+  // The fact grid has two columns, so an odd count lets the last cell span both and leaves no empty cell.
+  const hasEdu = Boolean(x?.education)
+  const hasNick = Boolean(x?.nickname)
+  const odd = (6 + Number(Boolean(club || status)) + Number(Boolean(pos)) + Number(hasNick) + Number(hasEdu)) % 2 === 1
+  const heightWeight = bio.heightWeight?.includes(' · ') ? `${bio.heightWeight} lb` : bio.heightWeight
   const role = bio.twoWay ? 'Two-way' : bio.isPitcher ? 'Pitcher' : 'Batter'
   return (
     <Card as="div" frame="stamped" body="flush" stampIn className="pnext__hero" style={{ '--stamp-delay': HERO_STAMP_DELAY }}>
@@ -87,7 +88,7 @@ export function PlayerNextHero({ core }) {
           className="pnext__shot"
         />
         <div className="pnext__who">
-          <p className="pnext__role">{[role, bio.number && `#${bio.number}`].filter(Boolean).join(' · ')}</p>
+          <p className="pnext__role">{[pos || role, bio.number && `#${bio.number}`].filter(Boolean).join(' · ')}</p>
           <h1 className="pnext__name">{bio.fullName}</h1>
           {(club || x?.rank || x?.orgRank) && (
             <p className="pnext__club">
@@ -107,22 +108,21 @@ export function PlayerNextHero({ core }) {
         </div>
         {stamp && <HeroStamp view={stamp} open={open} controls={stripId} onToggle={() => setOpen((o) => !o)} />}
       </div>
-      <FactGrid look="strip" as="div">
+      <FactGrid look="strip" as="div" className="pnext__facts">
         {club ? (
           <Fact label="Team" value={<TeamLink id={club.id}>{club.name}</TeamLink>} />
         ) : (
           status && <Fact label="Status" value={status.label} />
         )}
-        {pos && <Fact label="Position" value={pos} mono />}
-        {stamp && <Fact label="OVR tier" value={stamp.tier.name} />}
-        <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} mono />
+        {pos && <Fact label="Position" value={pos} />}
+        <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} />
         <AgeFact fact={ageFact(bio, status)} birthDate={bio.birthDate} />
-        <Fact label="Ht / Wt" value={bio.heightWeight} mono />
-        <Fact label="Born" value={bio.born} mono />
-        <Fact label="MLB debut" value={bio.debut ? debutLabel(bio.debut) : DASH} mono />
-        <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} mono className="fact--fill" style={fill} />
-        {x?.nickname && <Fact label="Nickname" value={`“${x.nickname}”`} wide />}
-        {x?.education && <Fact label="School" value={x.education} wide />}
+        <Fact label="Height / Weight" value={heightWeight} />
+        <Fact label="Born" value={bio.born} />
+        <Fact label="MLB debut" value={bio.debut ? debutLabel(bio.debut) : DASH} />
+        <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} wide={odd && !hasNick && !hasEdu} />
+        {hasNick && <Fact label="Nickname" value={`“${x.nickname}”`} wide={odd && !hasEdu} />}
+        {hasEdu && <Fact label="School" value={x.education} wide={odd} />}
       </FactGrid>
       {stamp && <HeroStrip id={stripId} ratings={x.ratings} open={open} />}
     </Card>

@@ -108,6 +108,23 @@
   font-weight: var(--w-semibold);
 }
 
+/* THE FACT TABLE (#1863): two columns on every width, so a value gets half the card and stays on one
+   line. One voice for the values: the body face, no mono. The page stays all-caps (01-base.css).
+   The Team link is plain. */
+.factgrid--strip.pnext__facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.pnext__facts .fact__value {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-none);
+}
+.pnext__facts .fact__value a {
+  color: inherit;
+  text-decoration: none;
+}
+
 /* THE AGE FLIP. The button is the fact cell; its two faces share a grid cell and
    turn about the horizontal axis. Only the motion changes on a reduced-motion
    page, and there AgeFact draws no button at all. */
