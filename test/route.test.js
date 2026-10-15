@@ -43,6 +43,7 @@ import {
   umpireRankingsPath,
   foulsPath,
   absChallengesPath,
+  runValuePath,
   gamePhotosPath,
   logbookPath,
   logbookStatsPath,
@@ -1236,6 +1237,15 @@ test('the season path builders write the segment and the compare query', () => {
   assert.equal(absChallengesPath({ seasonYear: 'all' }), '/abs-challenges/all')
   assert.equal(umpirePath(427044, 'Pat Hoberg', { seasonYear: 2024 }), '/umpire/pat-hoberg-427044/2024')
   assert.equal(umpirePath(427044, null, { seasonYear: 2026, vs: 2025 }), '/umpire/427044/2026?vs=2025')
+})
+
+// The Ranks band's two board doors keep ?d= and ?s= (#1107, row 6a).
+test('the run value and ABS challenge board doors carry d and s', () => {
+  assert.equal(runValuePath(), '/run-value')
+  assert.equal(runValuePath({ d: '2026-06-01', s: 11 }), '/run-value?d=2026-06-01&s=11')
+  assert.equal(absChallengesPath({ seasonYear: 2025 }), '/abs-challenges/2025')
+  assert.equal(absChallengesPath({ d: '2026-06-01', s: 11 }), '/abs-challenges?d=2026-06-01&s=11')
+  assert.equal(absChallengesPath({ seasonYear: 2025, vs: 2024, d: '2026-06-01' }), '/abs-challenges/2025?vs=2024&d=2026-06-01')
 })
 
 test('every season path round-trips through parseRoute', () => {
