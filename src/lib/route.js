@@ -606,7 +606,7 @@ export function parseRoute(url) {
       id: idFromSlug(parts[1]),
       asOf,
       sportId,
-      tab: TEAM_TAB_BAND[parts[3]] ? parts[3] : null,
+      tab: Object.hasOwn(TEAM_TAB_BAND, parts[3]) ? parts[3] : null,
     }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }

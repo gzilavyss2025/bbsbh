@@ -37,7 +37,7 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
     window.history.replaceState(
       window.history.state,
       '',
-      window.location.pathname.replace(new RegExp(`/${tab}$`), '') + window.location.search + `#${key}`,
+      window.location.pathname.replace(new RegExp(`/${tab}/?$`), '') + window.location.search + `#${key}`,
     )
     const el = document.getElementById(key)
     return el ? holdSectionInView(el) : undefined

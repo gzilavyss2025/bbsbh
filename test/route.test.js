@@ -1276,6 +1276,8 @@ test('each old tab address behind the hidden page names its band, with ?d= and ?
   }
   // An unknown tab is the bare page, never a bogus game route.
   assert.equal(parseRoute('/team/158/next/media').tab, null)
+  // Inherited Object.prototype names are not tabs either.
+  for (const k of ['constructor', 'toString', '__proto__']) assert.equal(parseRoute(`/team/158/next/${k}`).tab, null, k)
 })
 
 test('the old tab addresses stay what they were until the swap', () => {
