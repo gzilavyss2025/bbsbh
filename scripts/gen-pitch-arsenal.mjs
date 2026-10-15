@@ -45,7 +45,7 @@ import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 import { commandLeague } from '../src/api/commandMap.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { POSTSEASON_GAME_TYPES, scopeOfGameType } from './lib/records/postseason.mjs'
+import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { CELLS, COLS, aggregateGameCommand, commandStmts, exportCommandMap, markCommandIngested, parseCells } from './lib/command-grid.mjs'
 import { aggregateGameHitters, clearHitterSeason, foldHitters, hitterStmts, writeHitterGrid } from './lib/pitch/hitter-grid.mjs'
 import { readXwobaTable } from './lib/pitch/xwoba.mjs'
@@ -53,6 +53,8 @@ import { PHYS_JOIN, PHYS_SELECT, addPhys, clearArsenalSeason, emptyPhys, foldPhy
 import { foldStarts, writeStarts } from './lib/pitch/arsenal-starts.mjs'
 import { fetchPitcherHands } from './lib/pitch/pitcher-hands.mjs'
 import { centuryRankMap } from './lib/pitch/century-rank.mjs'
+import { acceptArsenalGame } from './lib/pitch/arsenal-sweep.mjs'
+import { GAP_CAP, collectPending, runSweep } from './lib/sweep/retry.mjs'
 
 export { centuryRankMap, exportCommandMap } // moved to lib/ to hold this file's size budget; tests import them from here
 
@@ -66,8 +68,6 @@ const outPools = join(here, '..', 'public', 'data', 'pitch-arsenal-pool')
 // Where he PUT it — one shard bucket per hundred pitcher ids, like the mix.
 const outCommand = join(here, '..', 'public', 'data', 'pitch-command')
 const DEFAULT_DAYS = 3
-const CHECKPOINT_EVERY = 100
-const CONCURRENCY = 8
 
 // --- pure per-game aggregation (exported for tests) --------------------------
 //
@@ -574,58 +574,47 @@ async function main() {
     db.prepare(`SELECT game_pk, level FROM pitch_${k}_ingested_games`).all().map((r) => `${r.game_pk}:${r.level}`),
   )]))
 
-  // Same postponed-replay dedup as the other sweeps: keep only the officialDate bucket.
+  // Every run reads the whole season's schedule: the window's games first, then up to GAP_CAP
+  // older ones a failed fetch left out (#2069). Same postponed-replay dedup as the other sweeps.
+  const failedBefore = new Set(db.prepare('SELECT game_pk, level FROM pitch_arsenal_failed_games').all().map((r) => `${r.game_pk}:${r.level}`))
   const pending = []
   for (const { sportId, level, gameTypes } of LEVELS) {
     const schedule = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}&gameType=${gameTypes}`,
+      `/api/v1/schedule?sportId=${sportId}&startDate=${startDate.slice(0, 4)}-01-01&endDate=${endDate}&gameType=${gameTypes}`,
     )
-    for (const d of schedule.dates ?? []) {
-      for (const g of d.games ?? []) {
-        if (g.status?.abstractGameState !== 'Final') continue
-        if (d.date !== g.officialDate) continue
-        const key = `${g.gamePk}:${level}`
-        const need = Object.fromEntries(Object.entries(ledgers).map(([k, set]) => [k, !set.has(key)]))
-        need.hitter &&= level === 'mlb' // the hitter grid is MLB only for now (ADR-0096)
-        if (!Object.values(need).some(Boolean)) continue
-        // The season comes from the game, never the clock (#1200).
-        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: Number(g.season ?? g.officialDate.slice(0, 4)), scope: scopeOfGameType(g.gameType), need })
-      }
-    }
+    pending.push(...collectPending(schedule, { startDate, accept: (g) => acceptArsenalGame(g, level, ledgers) }))
   }
-  console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final games across ${LEVELS.length} level(s)`)
+  console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final games across ${LEVELS.length} level(s) (the window, then up to ${GAP_CAP} older each)`)
 
-  let done = 0
-  const failed = []
-  const queue = [...pending]
-  async function worker() {
-    while (queue.length) {
-      const g = queue.shift()
-      if (!g) return
-      try {
-        await ingestGame(db, stmts, g)
-        touched.add(g.season)
-      } catch (err) {
-        console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
-        failed.push(g)
-      }
-      done += 1
-      if (done % CHECKPOINT_EVERY === 0) {
-        console.log(`${done}/${pending.length} ingested, checkpointing...`)
-        await writeOut()
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker))
+  const forget = db.prepare('DELETE FROM pitch_arsenal_failed_games WHERE game_pk = ? AND level = ?')
+  const remember = db.prepare('INSERT OR IGNORE INTO pitch_arsenal_failed_games (game_pk, level, season) VALUES (?, ?, ?)')
+  const { done, failed, again } = await runSweep({
+    pending,
+    failedBefore,
+    keyOf: (g) => `${g.gamePk}:${g.level}`,
+    ingest: async (g) => {
+      await ingestGame(db, stmts, g)
+      touched.add(g.season)
+    },
+    onOk: (g) => forget.run(g.gamePk, g.level),
+    onFail: (g) => remember.run(g.gamePk, g.level, g.season),
+    checkpoint: writeOut,
+  })
   await writeOut()
+  if (failed.length && !touched.size) await dumpGroup(db, 'pitch-arsenal') // keep pitch_arsenal_failed_games for the next run
 
   for (const season of touched) {
     const total = db.prepare('SELECT COUNT(*) AS n FROM pitch_arsenal_ingested_games WHERE season = ?').get(season).n
-    console.log(`wrote pitch-arsenal/${season}/ — ${total} games on file (+${done} swept this run)`)
+    console.log(`wrote pitch-arsenal/${season}/ — ${total} games on file (+${done - failed.length} swept this run)`)
   }
   if (!touched.size) console.log('no new game — wrote nothing')
+  if (failed.length) console.error(`${failed.length} game(s) failed and stay out of the ledgers, for the next run: ${failed.map((g) => g.gamePk).join(', ')}`)
   if (args['clear-arsenal'] && failed.length) {
     console.error(rewalkFailures(failed))
+    process.exitCode = 1
+  }
+  if (again.length) {
+    console.error(`failed twice in a row: ${again.map((g) => g.gamePk).join(', ')}`)
     process.exitCode = 1
   }
   db.close()
