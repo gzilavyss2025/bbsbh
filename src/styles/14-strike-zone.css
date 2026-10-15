@@ -2,18 +2,9 @@
    Per-at-bat pitch-location diagram. Additive to the play-by-play card: on a
    phone an icon button (.pbp__zonebtn) opens it in a modal; from the wide
    breakpoint up the card and its zone pane sit side by side (.pbp__atbat grid
-   below). Pitch-dot colors mirror the five pitch-ladder categories so the two
-   read as one system. Score-adjacent (part of the at-bat account), so it only
+   below). Pitch marks are pitchMark(code), the same shape and colour as the
+   player page's arsenal. Score-adjacent (part of the at-bat account), so it only
    ever renders inside revealed play-by-play. */
-.strikezone,
-.pitchlist {
-  --pd-called: var(--accent-negative);
-  --pd-whiff: var(--ink-1);
-  --pd-foul: var(--graphite);
-  --pd-inplay: var(--accent-positive);
-  --pd-ball-line: var(--graphite-soft);
-  --pd-ball-fill: var(--surface-inset);
-}
 
 .strikezone {
   display: block;
@@ -35,45 +26,56 @@
   width: 295px;
 }
 
+.strikezone__fill {
+  fill: color-mix(in srgb, var(--ink-0) 9%, var(--surface-card));
+}
 .strikezone__frame {
   fill: none;
-  stroke: var(--graphite);
-  stroke-width: 1.4;
+  stroke: var(--ink-0);
+  stroke-width: 2.4;
 }
 .strikezone__third {
-  stroke: var(--graphite);
-  stroke-width: 0.6;
+  stroke: var(--border-rule);
+  stroke-width: 0.8;
   stroke-dasharray: 2 3;
-  opacity: 0.55;
 }
+/* Home plate: a solid, ink-edged pentagon filled darker than the zone above it. */
 .strikezone__plate {
-  fill: none;
-  stroke: var(--graphite-soft);
-  stroke-width: 1;
+  fill: color-mix(in srgb, var(--ink-0) 22%, var(--surface-card));
+  stroke: var(--ink-0);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
 }
-.strikezone__dot--called { fill: var(--pd-called); }
-.strikezone__dot--whiff { fill: var(--pd-whiff); }
-.strikezone__dot--foul { fill: var(--pd-foul); }
-.strikezone__dot--ball {
-  fill: var(--pd-ball-fill);
-  stroke: var(--pd-ball-line);
-  stroke-width: 1.3;
+/* A pitch: the pitchMark shape in the pitch's own colour (--pitch), ink-outlined; a ring is
+   hollow (docs/pitch-types.md). The number sits inside in ink with a paper halo, since the
+   pitch colours were tuned on a dark ground and some are pale. */
+.strikezone__mark {
+  fill: var(--pitch, var(--text-caption));
+  stroke: var(--ink-0);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
 }
-.strikezone__dot--inplay {
+.strikezone__mark--ring {
+  fill: var(--surface-card);
+  stroke: var(--pitch, var(--text-caption));
+  stroke-width: 2.6;
+}
+.strikezone__inplay {
   fill: none;
-  stroke: var(--pd-inplay);
-  stroke-width: 2.4;
+  stroke: var(--ink-0);
+  stroke-width: 1.4;
 }
 .strikezone__num {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-weight: var(--w-bold);
-  fill: var(--text-on-ink-bright);
+  fill: var(--text-heading);
+  stroke: var(--surface-card);
+  stroke-width: 2.4px;
+  paint-order: stroke;
   text-anchor: middle;
   dominant-baseline: central;
 }
-.strikezone__num--ball { fill: var(--ink-1); }
-.strikezone__num--inplay { fill: var(--pd-inplay); }
 
 /* The batter's-box silhouette (see BatterSilhouette in StrikeZone.jsx) — a
    filled figure, inked no heavier than the home-plate outline it stands
@@ -81,8 +83,8 @@
    below) rather than shrinking the pitch plot to make room. */
 .strikezone__box {
   fill: none;
-  stroke: var(--graphite-soft);
-  stroke-width: 1;
+  stroke: var(--border-stamped);
+  stroke-width: 2;
 }
 .strikezone__battersil {
   fill: var(--graphite-soft);
@@ -102,10 +104,10 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 16px 1fr auto auto;
+  grid-template-columns: 22px 1fr auto auto;
   column-gap: var(--space-1h);
   row-gap: 2px;
-  align-items: baseline;
+  align-items: center;
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   color: var(--text-muted);
@@ -120,8 +122,7 @@
    look at". The row itself is display: contents (see above), so the tint has
    to paint each of its grid cells rather than the <li> — the shared column
    gap is tight enough that the cells still read as one highlighted band. The
-   pitch-number dot keeps its own call-color fill (.pitchlist__num--*, below,
-   wins the cascade on equal specificity by coming later) and gets an outline
+   pitch-number mark keeps its own pitch colour and gets an outline
    ring instead, so the two color systems — call type on the dot, "look here"
    on the row — stay legible side by side rather than the tint erasing the dot. */
 .pitchlist__row--decisive > .pitchlist__type,
@@ -132,32 +133,8 @@
   padding-block: 1px;
 }
 .pitchlist__row--decisive .pitchlist__num {
-  outline: 2px solid color-mix(in srgb, var(--marker) 70%, transparent);
-  outline-offset: 1px;
-}
-.pitchlist__num {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  color: var(--text-on-ink-bright);
-}
-.pitchlist__num--called { background: var(--accent-negative); }
-.pitchlist__num--whiff { background: var(--ink-1); }
-.pitchlist__num--foul { background: var(--graphite); }
-.pitchlist__num--ball {
-  background: var(--surface-inset);
-  border: 1.4px solid var(--graphite-soft);
-  color: var(--ink-1);
-}
-.pitchlist__num--inplay {
-  background: transparent;
-  border: 2.4px solid var(--accent-positive);
-  color: var(--accent-positive);
+  width: 22px;
+  height: 22px;
 }
 .pitchlist__type { font-family: var(--font-display); color: var(--text-body); }
 

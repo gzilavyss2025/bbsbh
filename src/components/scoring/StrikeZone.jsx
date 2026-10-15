@@ -6,14 +6,17 @@ import { EDGE, H, W, sx, sy } from '../../lib/zone/zoneGeometry.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { batterFigureUrls } from '../../api/uniforms.js'
 import { BattingUniformContext } from '../logo/uniformContexts.js'
+import { pitchMark } from '../../lib/pitch/pitchTypes.js'
+import { glyphD } from '../../lib/pitch/pitchGlyph.js'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet) against THIS batter's own zone
 // (strikeZoneTop/Bottom), drawn from the BROADCAST CAMERA behind the pitcher
 // rather than the umpire's eye — the mirror lives in lib/zone/zoneGeometry.js,
 // whose header carries the argument. Dots are numbered in pitch order
-// and colored by the same five categories as the pitch ladder (pitchDotCategory
-// → cat), so the two read as one system.
+// and drawn as the pitch's own mark (pitchMark: family is the shape, pitch is the
+// colour, docs/pitch-types.md), so the zone, the list beside it and the player
+// page's arsenal read as one system. How each pitch ENDED is the list's job.
 //
 // This is reveal-only by construction: it reads `pitchDetails` off a
 // computeHalfInningFeed at-bat card, which is only built inside a SealBox reveal
@@ -102,7 +105,7 @@ const ART_ZONE_BOTTOM = 700
 // The mirrored body's edge nearest the plate, per hand, and how far outside the
 // zone's edge it stands.
 const ART_NEAR_EDGE = { R: 56, L: 416 }
-const FIGURE_GAP = 18
+const FIGURE_GAP = 34
 function BatterFigure({ urls, hand, zone, clipId, onError }) {
   const scale = zone.h / (ART_ZONE_BOTTOM - ART_ZONE_TOP)
   const x = (hand === 'L' ? zone.left - FIGURE_GAP : zone.right + FIGURE_GAP) - ART_NEAR_EDGE[hand] * scale
@@ -124,6 +127,23 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
           />
         ))}
       </g>
+    </g>
+  )
+}
+
+// One pitch's mark on the plot: the family's shape in the pitch's colour, ink-outlined
+// (a ring is hollow). A ball in play gets a second, outer ring so the ball put in play
+// reads at a glance; every other ending is in the list beside the diagram.
+function PitchMarkDot({ mark, cat, x, y, children }) {
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      {cat === 'inplay' && <circle className="strikezone__inplay" r={13} />}
+      <path
+        className={`strikezone__mark${mark.ring ? ' strikezone__mark--ring' : ''}`}
+        d={glyphD(mark.shape, 8.5)}
+        style={{ '--pitch': mark.color }}
+      />
+      {children}
     </g>
   )
 }
@@ -156,7 +176,8 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
   const zyB = sy(zb)
   const zw = zr - zx
   const zh = zyB - zyT
-  // A small home-plate pentagon under the zone anchors the view.
+  // Home plate under the zone anchors the view: the plate is as wide as the zone,
+  // point toward the catcher (down the page, the camera is behind the pitcher).
   const py = sy(0.6)
   const cx = (zx + zr) / 2
   const half = zw / 2
@@ -192,6 +213,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
         </>
       )}
       <g transform={`translate(${zoneOffsetX}, 0)`}>
+        <rect className="strikezone__fill" x={zx} y={zyT} width={zw} height={zh} />
         <rect className="strikezone__frame" x={zx} y={zyT} width={zw} height={zh} />
         <line className="strikezone__third" x1={zx + zw / 3} y1={zyT} x2={zx + zw / 3} y2={zyB} />
         <line className="strikezone__third" x1={zx + (2 * zw) / 3} y1={zyT} x2={zx + (2 * zw) / 3} y2={zyB} />
@@ -206,15 +228,15 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
           const y = sy(p.pz)
           return (
             <g key={p.no}>
-              <circle className={`strikezone__dot strikezone__dot--${p.cat}`} cx={x} cy={y} r={8.5}>
+              <PitchMarkDot mark={pitchMark(p.typeCode)} cat={p.cat} x={x} y={y}>
                 <title>
                   Pitch {p.no}
                   {p.mph != null ? `: ${p.mph} MPH` : ''}
                   {p.type ? ` ${p.type}` : ''}
                   {p.callDesc ? `, ${p.callDesc}` : ''}
                 </title>
-              </circle>
-              <text className={`strikezone__num strikezone__num--${p.cat}`} x={x} y={y + 0.3}>
+              </PitchMarkDot>
+              <text className="strikezone__num" x={x} y={y + 0.3}>
                 {p.no}
               </text>
             </g>
@@ -244,6 +266,21 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
 // onPick, onHover } turns the number dot of each pitch in `nos` into a ghost
 // .btn that plays that pitch; its hit area is the whole row (pitcher-card/card.css).
 // Without it the list is the static one the zone sheet shows.
+// The number dot of a list row: the same mark the plot draws, number inside.
+function ListMark({ p }) {
+  const mark = pitchMark(p.typeCode)
+  return (
+    <svg className="pitchlist__num" viewBox="-12 -12 24 24" width="22" height="22" aria-hidden="true">
+      <path
+        className={`strikezone__mark${mark.ring ? ' strikezone__mark--ring' : ''}`}
+        d={glyphD(mark.shape, 8.5)}
+        style={{ '--pitch': mark.color }}
+      />
+      <text className="strikezone__num" y={0.3}>{p.no}</text>
+    </svg>
+  )
+}
+
 export function PitchList({ pitchDetails, pick }) {
   const pitches = pitchDetails ?? []
   if (pitches.length === 0) return null
@@ -265,10 +302,10 @@ export function PitchList({ pitchDetails, pick }) {
               onMouseEnter={pick.onHover && (() => pick.onHover(p.no))}
               onMouseLeave={pick.onHover && (() => pick.onHover(null))}
             >
-              <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
+              <ListMark p={p} />
             </Button>
           ) : (
-            <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
+            <ListMark p={p} />
           )}
           <span className="pitchlist__type">{p.type || '—'}</span>
           <span className="pitchlist__meta">
