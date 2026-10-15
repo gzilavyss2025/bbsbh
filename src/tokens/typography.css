@@ -1,15 +1,16 @@
 /* ============================================================
    TYPOGRAPHY — Scorekeeper
-   Four roles, one family each (see tokens/fonts.css for the @font-face
-   rules and which ship a second, real bold weight):
+   Three families (see tokens/fonts.css for the @font-face rules and which
+   ship a second, real bold weight):
    - Barlow Condensed → athletic stat/section headers (uppercase, tracked)
-   - JetBrains Mono    → UI + body, as well as the figures below (#2165). Source Sans 3 is
-                         no longer a role; only the poster canvas still draws it.
-   - JetBrains Mono    → numbers, the ledger/scorebook figures
-   - Lora              → sentence-like copy that must read at small sizes in
+   - JetBrains Mono   → UI, body copy and every figure: the ledger and
+     scorebook numbers too. It ships one weight (500), so every weight of
+     body copy draws 500 (#2165). Source Sans 3 is no longer a role; only
+     the poster canvas still draws it.
+   - Lora             → sentence-like copy that must read at small sizes in
      all caps (play-by-play descriptions). A serif gives the play
      descriptions a "box-score notes" editorial feel, distinct from the
-     sans/mono elsewhere.
+     condensed and mono faces elsewhere.
    ============================================================ */
 
 :root {
