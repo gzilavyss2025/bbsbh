@@ -140,6 +140,19 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     entries[cardIndex].earned = earnedByBatter.has(batterId) ? earnedByBatter.get(batterId) : true
   }
 
+  // The bases held right now, as of the plays walked so far: the bases the live
+  // trips stand on (1-3), minus a man already put out. The at-bat replay's
+  // small diamond reads it before and after a plate appearance. Same answer as
+  // `runnersOnBase` over a feed capped at that card (test/replay-steps.test.js).
+  const heldBases = () => {
+    const held = new Set()
+    for (const [id, base] of progress) {
+      if (base >= 1 && base <= 3 && entries[originIndex.get(id)]?.outAt == null) held.add(base)
+    }
+    return [...held].sort()
+  }
+  let cardNow = null // the plate-appearance card whose `basesAfter` this play still owes
+
   // Whether any real pitch has been thrown yet this half — used below to
   // recognize the half's very first pitching change (announced before its
   // first pitch) as the one selectHalfStartingPitcher already reports via
@@ -550,6 +563,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // live, gamePk 824238). A count in progress is not a spoiler.
         live: play.about?.isComplete === false ? { balls: play.count?.balls ?? 0, strikes: play.count?.strikes ?? 0 } : null,
       }
+      card.basesBefore = heldBases()
+      cardNow = card
       entries.push(card)
       // A repeat plate appearance — the lineup batting around — bumps out
       // whatever's tracked under this batter id. His prior trip is already
@@ -844,6 +859,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         }
       }
     }
+    if (cardNow) cardNow.basesAfter = heldBases()
+    cardNow = null
   }
 
   // Bank every batter's final (or only) trip.

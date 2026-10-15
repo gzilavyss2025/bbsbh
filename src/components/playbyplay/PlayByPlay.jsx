@@ -335,7 +335,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // The last at-bat on screen with a tracked flight (what useReplayPitches
   // needs, so a replay really exists) owns the wide rail's replay until a pick
   // moves it (AtBatReplay.jsx's ReplayRail).
-  const lastAtBat = visibleEntries.findLastIndex((e) => e.kind === 'atbat' && atBatScenePitches(e.pitchDetails).length > 0)
+  const lastAtBat = visibleEntries.findLastIndex((e) => e.kind === 'atbat' && e.live == null && atBatScenePitches(e.pitchDetails).length > 0)
 
   // Windowed: the previous at-bat's trailing notes, repeated first (windowLeadIn).
   const leadIn = windowLeadIn(entries, wins, beatKey)
@@ -554,7 +554,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
   // The at-bat replay (AtBatReplay.jsx), in one place at a time: inside the
   // zone cell on wide, in a sheet a phone opens on demand. Null at an untracked
   // park or under reduced motion, where the zone plot and list are the account.
-  const replay = useReplayPitches(pitchDetails)
+  const replay = useReplayPitches(entry)
   const wide = useMediaQuery(WIDE_QUERY)
   const [replayOpen, setReplayOpen] = useState(false)
   if (wide && replayOpen) setReplayOpen(false) // the sheet is a phone's; it must not reopen by itself
@@ -762,7 +762,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
       {hasZone && (
         <Card as="div" frame="ledger" body="flush" className="pbp__zonecell">
           {replay && wide ? (
-            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} pitches={replay} id={entry.atBatIndex} last={replayLast} />
+            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} replay={replay} id={entry.atBatIndex} last={replayLast} />
           ) : (
             <>
               <PitchList pitchDetails={pitchDetails} />
@@ -772,7 +772,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
         </Card>
       )}
       {replayOpen && replay && !wide && (
-        <ReplaySheet pitchDetails={pitchDetails} pitches={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} />
+        <ReplaySheet pitchDetails={pitchDetails} replay={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} />
       )}
       {zoneOpen && hasZone && (
         <StrikeZoneModal

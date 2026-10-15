@@ -161,6 +161,11 @@ export function pitchCardInfo(feed, play) {
       ay: num(co.aY),
       az: num(co.aZ),
       releaseY: num(pd.extension) == null ? null : 60.5 - pd.extension,
+      // The count AFTER this pitch, off the pitch's own event (never its index:
+      // an automatic call moves the count with no pitch). Null when the feed
+      // sent none (the at-bat replay then draws no count strip).
+      balls: num(e.count?.balls),
+      strikes: num(e.count?.strikes),
       typeCode: e.details?.type?.code ?? '',
       mph: typeof pd.startSpeed === 'number' ? pd.startSpeed : null,
       type: e.details?.type?.description ?? '',

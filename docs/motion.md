@@ -117,6 +117,16 @@ narrower. The turn runs on its own tap. The docked card's fade is the one on
 | Cards | A docked card fades in 220 ms (`--dur-med`), opacity + `scale(1.04)` → 1 | `useBecameTrue(dock)` in `LensFrame`: not on a cold load or a return to the lens. A card a poll brings is an arrival, and it fades |
 | Pitcher sheet | Slides up 260 ms (`--dur-lens-sheet`) from `translateY(40px)` | Mounts only on a tap |
 
+## The at-bat replay's count and bases (#1858)
+
+No new animation: the count strip ("2-1") and the small diamond change by text and
+fill when a pitch lands, at a fixed size (ADR-0046). `PitchScene`'s `onLand` fires
+once per pitch (state twice a pitch, never per frame). The replay rests on the end
+state and plays only on a tap of "Play at-bat", wide as on a phone; a pitch pick
+plays that one pitch. Under reduced motion it stays at the end state, the Play
+button is gone, and the pitch chips step it. A plate appearance still in progress
+has no replay. The Animation Lab has no entry: nothing here is a new transition.
+
 Reduced motion: no tear, no glide, no turn (the JS reads `motionIsReduced`);
 the cards and the sheet arrive at once under the blanket rules; the runner tint
 opts out of the blanket and stays, still, until the next tap.
