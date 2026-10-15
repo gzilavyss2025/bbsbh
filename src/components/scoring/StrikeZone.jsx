@@ -132,12 +132,9 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
 }
 
 // One pitch's mark on the plot: the family's shape in the pitch's colour, ink-outlined
-// (a ring is hollow). A ball in play gets a second, outer ring so the ball put in play
+// (a ring is hollow), its number inside in plain ink. A ball in play gets a second, outer ring so the ball put in play
 // reads at a glance; every other ending is in the list beside the diagram.
 function PitchMarkDot({ mark, cat, x, y, no }) {
-  // The number rides beside the mark, never on its fill (the design system's rule: no text on a
-  // pitch colour). It flips to the left near the right edge so the svg never clips it.
-  const left = x > W - 34
   return (
     <g transform={`translate(${x} ${y})`}>
       {cat === 'inplay' && <circle className="strikezone__inplay" r={13} />}
@@ -146,7 +143,7 @@ function PitchMarkDot({ mark, cat, x, y, no }) {
         d={glyphD(mark.shape, 8.5)}
         style={{ '--pitch': mark.color }}
       />
-      <text className="strikezone__num" x={left ? -12 : 12} y={-9} textAnchor={left ? 'end' : 'start'}>
+      <text className="strikezone__num" y={0.3}>
         {no}
       </text>
     </g>
@@ -261,8 +258,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
 // onPick, onHover } turns the number dot of each pitch in `nos` into a ghost
 // .btn that plays that pitch; its hit area is the whole row (pitcher-card/card.css).
 // Without it the list is the static one the zone sheet shows.
-// The number cell of a list row: the same mark the plot draws, the row's number inside it (the
-// list has no room to set it beside the mark; the plot, where the marks sit on a chart, does).
+// The number cell of a list row: the same mark the plot draws, the row's number inside it.
 function ListMark({ p }) {
   const mark = pitchMark(p.typeCode)
   return (
@@ -272,7 +268,7 @@ function ListMark({ p }) {
         d={glyphD(mark.shape, 8.5)}
         style={{ '--pitch': mark.color }}
       />
-      <text className="strikezone__num strikezone__num--list" y={0.3}>{p.no}</text>
+      <text className="strikezone__num" y={0.3}>{p.no}</text>
     </svg>
   )
 }

@@ -47,8 +47,8 @@
   stroke-linejoin: round;
 }
 /* A pitch: the pitchMark shape in the pitch's own colour (--pitch), ink-outlined; a ring is
-   hollow (docs/pitch-types.md). The number sits BESIDE the mark in ink with a paper halo: the
-   design system keeps text off pitch fills, and the colours were tuned on a dark ground. */
+   hollow (docs/pitch-types.md). The number sits inside in one solid ink, no outline: ink reads on
+   every pitch colour and on the hollow rings' paper. */
 .strikezone__mark {
   fill: var(--pitch, var(--text-caption));
   stroke: var(--ink-0);
@@ -69,12 +69,7 @@
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-weight: var(--w-bold);
-  fill: var(--text-heading);
-  stroke: var(--surface-card);
-  stroke-width: 2.4px;
-  paint-order: stroke;
-}
-.strikezone__num--list {
+  fill: var(--ink-0);
   text-anchor: middle;
   dominant-baseline: central;
 }
