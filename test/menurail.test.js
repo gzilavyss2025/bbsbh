@@ -163,3 +163,11 @@ test('index.css loads the sheet, and not between button.css and 07', () => {
   assert.ok(imports.indexOf('system/menurail/menurail.css') > -1)
   assert.equal(imports[imports.indexOf('system/button.css') + 1], '07-team-logo-and-buttons.css')
 })
+
+test('card top row: the title keeps a floor and the meta wraps under it, never a one-letter name', () => {
+  const c = css()
+  assert.equal(decl(ruleBody(c, '.menurail__top'), 'flex-wrap'), 'wrap')
+  const flex = decl(ruleBody(c, '.menurail__title'), 'flex')
+  assert.ok(flex && !/\bauto$/.test(flex), `the title needs a real flex-basis, got "${flex}"`)
+  assert.match(decl(ruleBody(c, '.menurail'), '--menurail-title-min') ?? '', /^calc\(/)
+})

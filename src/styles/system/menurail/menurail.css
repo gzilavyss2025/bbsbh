@@ -19,6 +19,7 @@
 .menurail {
   --menurail-card: calc(var(--space-2h) * 15);
   --menurail-rail: calc(var(--tap-min) * 3);
+  --menurail-title-min: calc(var(--space-2h) * 8);
 }
 
 .menurail__menu {
@@ -82,6 +83,7 @@
 
 .menurail__top {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
@@ -90,8 +92,10 @@
   display: inline-flex;
   flex: none;
 }
+/* The title keeps a floor of its own: a card two to a row is too narrow for mark, title and meta
+   on one line, so the meta drops under the name before the name is cut to one letter. */
 .menurail__title {
-  flex: 1 1 auto;
+  flex: 1 1 var(--menurail-title-min);
   min-width: 0;
   overflow: hidden;
   font-family: var(--font-display);
