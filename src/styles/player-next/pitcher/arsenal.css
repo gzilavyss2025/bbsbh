@@ -137,6 +137,14 @@
   line-height: var(--lh-zero);
 }
 
+/* The flight draws on a canvas at the board's 336 by 300 shape. */
+.flight__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 336 / 300;
+}
+
 /* The stage turns under a drag or the arrow keys (the board's orbit). A vertical swipe still scrolls the page. */
 .flight__turn {
   cursor: grab;
