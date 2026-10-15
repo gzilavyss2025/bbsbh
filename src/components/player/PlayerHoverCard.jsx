@@ -145,7 +145,7 @@ function PlayerHoverCardBody({ data }) {
       <table className="phcard__table">
         <thead>
           <tr>
-            <td />
+            <th scope="col"><span className="sr-only">Split</span></th>
             {data.fields.map((f) => (
               <th key={f.k} scope="col" className="phcard__colk">{f.k}</th>
             ))}

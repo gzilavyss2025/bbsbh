@@ -134,7 +134,7 @@ export const CARDS = [
     // frame gives way to the specimen, never the other way round.
     contained: true,
     wide: true,
-    note: 'position:fixed, pointer-events:none, z-index 100, the stamped edge and --shadow-stamped, and a club band (the Identity Lab triad).  It is a popover. Popovers and cards diverge the moment either one grows.',
+    note: 'position:fixed, pointer-events:none, z-index 100, the stamped edge and --shadow-stamped, and a club band (the Identity Lab triad). It is a popover. Popovers and cards diverge the moment either one grows.',
   },
   {
     cls: 'tally-cl-card',

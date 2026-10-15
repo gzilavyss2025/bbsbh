@@ -48,7 +48,7 @@ export function pitcherHoverFields(stat, lead = null) {
       : Boolean(stat) && role !== 'SP' && num(stat.saves) >= SAVES_THRESHOLD
   return [
     leadsWithSaves
-      ? { k: 'SV', v: stat.saves != null ? String(stat.saves) : DASH }
+      ? { k: 'SV', v: stat?.saves != null ? String(stat.saves) : DASH }
       : { k: 'W–L', v: stat ? `${num(stat.wins)}–${num(stat.losses)}` : DASH },
     { k: 'ERA', v: stat?.era ?? DASH },
     { k: 'K', v: stat?.strikeOuts != null ? String(stat.strikeOuts) : DASH },

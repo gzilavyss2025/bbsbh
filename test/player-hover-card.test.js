@@ -201,3 +201,12 @@ test('nameParts: with no split in the feed, cut fullName at the first space; a m
   assert.deepEqual(nameParts({}, 'Elly De La Cruz'), { firstName: 'Elly', lastName: 'De La Cruz' })
   assert.deepEqual(nameParts(null, 'Ichiro'), { firstName: '', lastName: 'Ichiro' })
 })
+
+test('pitcherHoverFields: a pinned SV lead on a null stat dashes every field, never throws', () => {
+  assert.deepEqual(pitcherHoverFields(null, 'SV'), [
+    { k: 'SV', v: '—' },
+    { k: 'ERA', v: '—' },
+    { k: 'K', v: '—' },
+    { k: 'WHIP', v: '—' },
+  ])
+})
