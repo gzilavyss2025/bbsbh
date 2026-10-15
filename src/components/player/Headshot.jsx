@@ -36,6 +36,9 @@ import { useHeadshotStep, useImgReady } from '../../hooks/images/useHeadshotStep
 // monogram fallback, whose graphite letter needs the light inset chip for
 // contrast.
 //
+// `tint` (optional, default true) turns that wash off for a card that wants the
+// bare cutout on its own paper (the stamped due-up card).
+//
 // `isMlb` (optional) decides the milb-rung gate (see headshotSources). It
 // defaults to whether `teamId` is a current MLB club — correct for the many
 // callers whose teamId IS the player's real team. The few that pass a parent
@@ -60,6 +63,7 @@ export function Headshot({
   className = '',
   onFallback,
   hideFallback = false,
+  tint = true,
 }) {
   // Ordered photo-source URLs for this person; each gets two tries, then the
   // chain falls through to logo/monogram below. The rung
@@ -139,7 +143,7 @@ export function Headshot({
   return (
     <span
       className={`shot ${showLogo ? 'shot--logo ' : ''}${className}`}
-      style={bg ? { backgroundColor: bg } : undefined}
+      style={bg && tint ? { backgroundColor: bg } : undefined}
       aria-hidden="true"
     >
       {photoUrl && (

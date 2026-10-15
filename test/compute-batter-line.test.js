@@ -87,3 +87,38 @@ test('ignores another batter\'s plays entirely', () => {
   }
   assert.deepEqual(computeBatterLine(feed, 2, 5), { hits: 1, atBats: 1 })
 })
+
+// batterLineText — the one line a due-up card prints under a batter.
+import { batterLineText } from '../src/api/boxscore/batterLine.js'
+
+function boxFeed(plays, box) {
+  return {
+    liveData: {
+      plays: { allPlays: plays },
+      boxscore: { teams: { home: { players: { ID7: box } }, away: { players: {} } } },
+    },
+  }
+}
+const seasonBox = {
+  seasonStats: { batting: { atBats: 267, hits: 61 } },
+  stats: { batting: { atBats: 0, hits: 0 } },
+}
+
+test('batterLineText: H-AB once he has an at-bat in the revealed halves', () => {
+  const feed = boxFeed([play(1, 'bottom', 7, 'single'), play(3, 'bottom', 7, 'flyout')], seasonBox)
+  assert.equal(batterLineText(feed, 'home', 7, 1), '1-1')
+})
+
+test('batterLineText: a walk is no at-bat, so the average still shows', () => {
+  const feed = boxFeed([play(1, 'bottom', 7, 'walk')], seasonBox)
+  assert.equal(batterLineText(feed, 'home', 7, 1), '.228')
+})
+
+test('batterLineText: an at-bat past the cap is not counted (the average shows)', () => {
+  const feed = boxFeed([play(3, 'bottom', 7, 'home_run')], seasonBox)
+  assert.equal(batterLineText(feed, 'home', 7, 1), '.228')
+})
+
+test('batterLineText: a batter missing from the record reads a dash', () => {
+  assert.equal(batterLineText(boxFeed([], seasonBox), 'home', 99, 1), '—')
+})

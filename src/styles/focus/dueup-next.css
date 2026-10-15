@@ -1,0 +1,84 @@
+/* DueUpNextCard: the OTHER team's next half, previewed — a stamped Card with a
+   "Due up next" name tab and the club on the count tag, stacked below the
+   at-bat on both breakpoints. The name tab hangs above the card, so the card
+   keeps its own top margin. */
+.dueup {
+  margin-top: var(--space-4);
+}
+/* layout-exempt: a fixed three across, one column per due-up slot */
+.dueup__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: a photo, a name and a line stacked in one slot */
+.dueup__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  text-align: center;
+}
+/* The photo box owns the slot tag's corner. The cutout floats on the card's
+   paper: no wash, no radius, a 2px ink edge like every stamped part. */
+.dueup__photo {
+  position: relative;
+  display: block;
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-sizing: border-box;
+}
+.dueup__col--lead .dueup__photo {
+  box-shadow: var(--shadow-stamped-soft);
+}
+.shot.dueup__shot {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+.dueup__slot {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  min-width: var(--space-5);
+  height: var(--space-5);
+  box-sizing: border-box;
+  padding: 0 var(--space-1h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-solid);
+}
+.dueup__col--lead .dueup__slot {
+  background: var(--accent-tint);
+  color: var(--text-heading);
+}
+.dueup__name {
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+.dueup__line {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-solid);
+  color: var(--text-body);
+}

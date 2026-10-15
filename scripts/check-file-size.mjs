@@ -94,7 +94,7 @@ const BUDGETS = {
   'src/styles/03-slate-header.css': 650, // 602
   'src/styles/06-loader-and-cards.css': 800, // 900 -> 742: the off-day club tiles left for 06b-offday-cards.css, taking their hover/focus states with them
   'src/styles/08-site-shell.css': 800, // 900 -> 800 after the dead accountpitch rules went; 1000 -> 898: the footer's flat link-list rules left for 08a-site-menu.css, which holds the shared site-directory language the sheet, the footer and /more all read
-  'src/styles/12-sealbox.css': 1700, // 1639 — unified focus/stacked layout: dropped the unfocused page's .prehalf, .half__entering/.halfentering, .innings__reference/.innings__ref-*, .innings__rosters, and .innings__row2 rules
+  'src/styles/12-sealbox.css': 1600, // 1571 — DueUpNextCard's rules moved to focus/dueup-next.css; before that 1639: unified focus/stacked layout: dropped the unfocused page's .prehalf, .half__entering/.halfentering, .innings__reference/.innings__ref-*, .innings__rosters, and .innings__row2 rules
   'src/styles/14-strike-zone.css': 900, // 898 — the sheet's ✕ left for IconButton (system/button.css, #1209); both pitch-colour keys left earlier
   'src/styles/15-team-color-lab.css': 680, // 674
   'src/styles/17-identity-lab-workbench.css': 1196, // 1200 -> 1196: .idlab__monoinksource moved onto Cluster (#1180, slice C10). 1300 -> 1200 at 1200: .idlab__umpire moved onto Cluster (#1180, slice C4). 1229 — stamp-ink rules
