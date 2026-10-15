@@ -1470,7 +1470,7 @@
 }
 
 /* The inning a sub entered, or a man changed spots, in its own pill: a clay
-   outline at rest, a soft clay wash and a heavier underline on hover. */
+   outline at rest, a darker clay and a heavier underline on hover. */
 .entering__inncell {
   display: flex;
   justify-content: flex-end;
@@ -1487,13 +1487,10 @@
   line-height: var(--lh-solid);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  transition:
-    background var(--dur-fast) var(--ease-stamp),
-    color var(--dur-fast) var(--ease-stamp);
+  transition: color var(--dur-fast) var(--ease-stamp);
 }
 
 .entering__inn:hover {
-  background: var(--clay-soft);
   color: var(--accent-negative-hover);
   border-bottom-width: var(--bw-heavy);
 }
