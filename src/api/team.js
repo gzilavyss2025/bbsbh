@@ -227,7 +227,10 @@ export function fetchStaticAffiliates() {
       if (!res.ok) throw new Error(`affiliates.json ${res.status}`)
       return res.json()
     })
-    .catch(() => ({ season: null, byOrgId: {} }))
+    .catch(() => {
+      affiliatesLoad = null // a failure is not kept: the next call tries again
+      return { season: null, byOrgId: {} }
+    })
   return affiliatesLoad
 }
 export async function fetchAffiliates(teamId, season) {

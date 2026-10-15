@@ -58,6 +58,9 @@ export function scoreCard(standings, other, team) {
   }
 }
 
+// Whether the Last time card has any chance to report; the card and the badge ask the same thing.
+export const hasDroughts = (n, cutoff) => Boolean(n?.scheduleShape && droughtsFor(n.scheduleShape, { cutoff }).length)
+
 // The jump-bar badge: one per card the band draws. The score card needs a pool of two or more.
 export const standingsCount = (n, cutoff) =>
   (n.standings.length > 0) +
@@ -65,7 +68,7 @@ export const standingsCount = (n, cutoff) =>
   Boolean(n.teamRecords) +
   Boolean(n.dayOfWeek) +
   Boolean(n.comeback) +
-  Boolean(n.scheduleShape && droughtsFor(n.scheduleShape, { cutoff }).length)
+  hasDroughts(n, cutoff)
 
 // Games back as the table prints it. A winter leader can arrive as "-1.0" (a one-game lead);
 // a minus is never a games-back figure, so it reads "—" like the "-" the feed gives other leaders.

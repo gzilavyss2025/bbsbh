@@ -62,3 +62,21 @@ test('the club coaches read is bought once through SHARED', async () => {
   assert.equal(x.name, 'Pat Murphy')
   assert.equal(y, x)
 })
+
+test('a failed affiliates.json load is not kept: the next call tries again', async () => {
+  const real = globalThis.fetch
+  let calls = 0
+  globalThis.fetch = async () => {
+    calls += 1
+    if (calls === 1) throw new Error('offline')
+    return { ok: true, status: 200, headers: new Headers(), json: async () => ({ season: 2026, byOrgId: { 158: [{ id: 1 }] } }), text: async () => '' }
+  }
+  try {
+    const fresh = await import('../src/api/team.js?affiliates-retry')
+    assert.deepEqual((await fresh.fetchStaticAffiliates()).byOrgId, {})
+    assert.deepEqual(Object.keys((await fresh.fetchStaticAffiliates()).byOrgId), ['158'])
+    assert.equal(calls, 2)
+  } finally {
+    globalThis.fetch = real
+  }
+})

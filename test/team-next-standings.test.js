@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { OTHER_LEAGUE, gbText, scoreCard, standingsCount } from '../src/screens/team/next/standings/standingsData.js'
+import { OTHER_LEAGUE, gbText, hasDroughts, scoreCard, standingsCount } from '../src/screens/team/next/standings/standingsData.js'
 
 // The Standings band's team score card and jump-bar count (#1107, row 5b): pure shapes over the
 // standings the page already fetched. No season grade anywhere. Offline.
@@ -93,6 +93,11 @@ test('standingsCount: one per card the band draws', () => {
   assert.equal(standingsCount(full), 5)
   assert.equal(standingsCount({ standings: [1], teamRecords: null, dayOfWeek: null, comeback: null }), 1)
   assert.equal(standingsCount({ standings: [], teamRecords: null, dayOfWeek: null, comeback: null }), 0)
+})
+
+test('hasDroughts: a schedule shape with nothing to report draws no Last time card', () => {
+  assert.equal(hasDroughts({ scheduleShape: null }), false)
+  assert.equal(hasDroughts({ scheduleShape: { games: [] } }, null), false)
 })
 
 test('gbText: a negative games-back (a winter leader) reads as a dash, the rest is untouched', () => {

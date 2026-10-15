@@ -16,7 +16,7 @@ import { SHARED } from '../once.js'
 import { useBandData } from '../useBandData.js'
 import { DivisionCard } from './DivisionCard.jsx'
 import { ScoreCard } from './ScoreCard.jsx'
-import { OTHER_LEAGUE, scoreCard, standingsCount } from './standingsData.js'
+import { OTHER_LEAGUE, hasDroughts, scoreCard, standingsCount } from './standingsData.js'
 import '../../../../styles/team-next/standings.css'
 
 // Standings (#1107, row 5b): the Standings share of the Numbers tab, every card on a stamped frame
@@ -32,7 +32,7 @@ export default function Standings({ team, asOf, onReady, onCount }) {
   const navigate = useNav()
   const sportId = team.sport?.id ?? 1
   const cutoff = cutoffFor(asOf)
-  const count = useCallback((n) => standingsCount(n, cutoff), [cutoff])
+  const count = useCallback((n) => standingsCount(n, n.recordsCutoff), [])
   const numbers = useBandData(() => loadStandings(team.id, asOf, SHARED), [team.id, asOf], { onReady, onCount, count })
   const n = numbers.data
 
@@ -76,7 +76,7 @@ export default function Standings({ team, asOf, onReady, onCount }) {
         <ScoreCard card={card} onAll={() => navigate(`/standings${linkQuery({ d: asOf, s: sportId })}`)} stampIn={!still} style={stampAt(i++)} />
       )}
       {n?.teamRecords && wrap('Records', 'win pct', <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} />, 'records')}
-      {n?.scheduleShape && wrap('Last time', 'chances since', <LastTimeCard data={n.scheduleShape} cutoff={n.recordsCutoff} />, 'last')}
+      {hasDroughts(n, n?.recordsCutoff) && wrap('Last time', 'chances since', <LastTimeCard data={n.scheduleShape} cutoff={n.recordsCutoff} />, 'last')}
       {n?.dayOfWeek && wrap('Day of week', 'win pct', <TeamStats title="Record by Day of Week" stats={n.dayOfWeek} note="win pct" highlightKey={todayDowLabel()} />, 'dow')}
       {n?.comeback && wrap('Comeback wins', 'all 30 teams', <ComebackCard data={n.comeback} teamId={team.id} clubName={clubName} />, 'comeback')}
     </div>
