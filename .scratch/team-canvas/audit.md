@@ -3,6 +3,8 @@
 Read-only audit. No product code changed. Written 2026-10-15 for the run plan in
 `.scratch/team-canvas/run-plan.md` (row 1). Rows 3 to 7 and the G1 gate use this file.
 
+**ID note.** In this file `G1`, `G2` ... are Games-band rows. "The G1 gate" is the run plan's Claude Design step, and `G-1` ... are shared-part gaps. Read the context before applying a verdict.
+
 **Inputs.** ADR-0082 (bands, absent-never-disabled, request budget), #1107,
 `.scratch/team-one-scroll/design.md` (sections 3, 13, 14) and `scope.md` (2B, 2F) for
 *which element goes in which band* and the data decisions. ADR-0109 and
@@ -77,7 +79,7 @@ One (H16, band loading state) needs no board.
    is chrome before the first data card [M]. The strongest facts about the club (season grade
    9.5 of 10, first of 30; run differential; form) sit 1,600 to 2,000px lower or on another tab.
    All of them are in data the page already fetches. See section 3.
-2. **The Records card is the one real scale problem.** 3,236px, 61 rows, 68% of Standing at 158
+2. **The Records card is the one real scale problem.** 3,236px, 61 rows, 70% of Standing at 158
    [M]. ADR-0082 and design.md 10 already decided the answer: a sub-head, and the card becomes
    an index that unfolds (826px closed). It needs a board in the new look.
 3. **Same people, far apart, in Roster.** The projection card lists the bullpen (9 names, WAR).
@@ -119,7 +121,7 @@ Route `/team/158?nointro`, 390x844 [M, screenshot `team-158-390-fold.jpg`]:
 | 100–286 | Hero: logo 104px, name, `103–59`, `1st · National League Central`, `Manager: Pat Murphy`, Game Notes, Notes archive | Name, W-L, division place, manager. Record text is the smallest thing in the card. Buttons take a full row (70px) |
 | 294–360 | Club strip, 30 logos | Nothing about this club |
 | 372–406 | Tab bar (the sixth tab, Minors, is off screen at 390; Contracts is clipped) | Navigation |
-| 422–690 | NL Central table, 5 rows: W, L, GB, Streak, L10 | Division race. **RD (run differential) is clipped by the table's sideways scroll** at 390 on all four clubs (158, 556, 249, 675): the RD header's right edge sits at 395, 381, 419 and 368px, past the card edge [M, DOM check] |
+| 422–690 | NL Central table, 5 rows: W, L, GB, Streak, L10 | Division race. **RD (run differential) is clipped by the table's sideways scroll** at 390 on three of four clubs (158, 556, 249; 675 fits, edge at 368px): the RD header right edge sits at 395, 381 and 419px, past the card edge (about 374px) [M, DOM check] |
 | 708+ | Ballpark head, a stadium photo | Nothing about the season |
 
 At 1180 the hero is a 930px banner with the text at the left and two buttons at the right,
@@ -224,7 +226,7 @@ way*: Records, day of week, Comebacks, Last Time. The band head carries the page
 | S4c | Breakdown disclosure (`dl` of quality, adjustment, expectation) | `TeamScoreCard.jsx` `ScoreDetail` | Standing | none | **RE-SKIN** | Folded detail. Works. | none |
 | S4d | `Form` row (last-10 score with rails) | `TeamScoreCard.jsx` `ScoreRow` | Standing | stamped Card | **RE-SKIN** | Second rail for current form. Works. | none |
 | S4e | `How this is calculated` link + explainer modal | `TeamScoreExplainer.jsx` | Standing | `Door` in head slot + sheet | **RE-SKIN** | A door to a sheet. Needs a slot (G-2). | none |
-| S5 | Records card (3,236px; 61 rows; about 12 groups [D]) | `screens/team/modules/records/RecordsCard.jsx` | Standing | stamped Card + fold index (MenuRail or a fold row) | **RE-DESIGN** (Board) | 68% of the band and the largest object on the page by a factor of three. It fails at scale: four screens of splits, no way to see which group holds what. The decision exists (design.md 10: sub-head, plus an index that unfolds, 826px closed). It needs a board in the new look. ADR-0109 d4 allows a stopgap: ship today's content in a stamped card, build the index later. | none. 556: 3,102px; 249: 2,975px [M]. Winter: absent (ledger incomplete). |
+| S5 | Records card (3,236px; 61 rows; about 12 groups [D]) | `screens/team/modules/records/RecordsCard.jsx` | Standing | stamped Card + fold index (MenuRail or a fold row) | **RE-DESIGN** (Board) | 70% of the band and the largest object on the page (the next, the contract grid, is 1,792px). It fails at scale: four screens of splits, no way to see which group holds what. The decision exists (design.md 10: sub-head, plus an index that unfolds, 826px closed). It needs a board in the new look. ADR-0109 d4 allows a stopgap: ship today's content in a stamped card, build the index later. | none. 556: 3,102px; 249: 2,975px [M]. Winter: absent (ledger incomplete). |
 | S5a | Half toggle (Full / Pre / Post All-Star) and month pills (All + up to 12) | `RecordsCard.jsx:121–150` | Standing | `Segmented` (halves); month row open | **RE-SKIN** | Hand-built pill rows today (about 29px, under the 44px minimum, design.md 14·K). Halves map to `Segmented`. The month row (up to 13 pills, wraps to two lines at 390) may not fit `Segmented`: check on the board. | none |
 | S5b | Group rows (`RecordRows`: label door, W-L, pct) | `RecordsCard.jsx:38` | Standing | none (ledger rows) | **RE-SKIN** | A ledger of label, figure, figure is the right shape; the dotted label = "opens a page" (design.md 14·F). | none |
 | S5c | Scoring by inning grid (9 innings × top/bottom; 4 lines per cell; 620px at 390) | `records/InningScoringGrid.jsx` | Standing | `Table` | **RE-DESIGN** (Board) | One group takes about 20% of the card. Each cell stacks four lines (W-L, pct, last date, result) so 18 cells need 620px. Related facts (top vs bottom of one inning) are two columns apart but the cells are too tall to compare down a column. | none |
@@ -487,3 +489,14 @@ state). 249: Overview 3,521, Records 2,975. 675: Overview 2,050, Ballpark 89, Ro
 **Screenshots** (in the session's scratchpad `shots/`, sent to Gary with the PR): fold at 390
 and at 1180 for `/team/158`, `/team/556`, `/team/249`, `/team/675`; a player page
 (`/player/660271`) for the look reference.
+
+## 9. Review findings left open (stack review, 2026-10-15)
+
+Found by the review of the stack PR. Each needs a check against the code in the row that owns it:
+
+- **Roster door (RO6c vs H15):** `All transactions ›` at `TeamPage.jsx:230` is a PreviewDoor, which H15 cuts. Row 6c must keep a door to `/transactions` with `{ d, s }`.
+- **Form tile source:** the standings L10 and streak count the regular season only. In October the tile may be stale. Row 5 must label it or pick the rail.
+- **Head or no head (finding 5 vs G2):** the Games grid is described two ways. Check before counting name tabs.
+- **Jersey tiles and `?d=` (A3):** code moves them with the cutoff, the ADR says not. Row 6f must settle this, as a spoiler-scope question.
+- **"Now" tile:** needs a `nextGame` shaper. It must show no result of an unrevealed game.
+- **Counts:** S9 and H15 may both cover the `Season numbers` door, so MERGE/CUT may be one too high.
