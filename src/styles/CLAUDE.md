@@ -83,3 +83,19 @@ A `z-index` above 3 reads a layer token (`--z-raised`, `--z-sticky`, `--z-overla
 one-off). An `@media` width must be on the guard's `WIDTHS` list (mirrored in `tokens/layout.css`); 740px is the
 one wide step, and `scripts/layout/check-media-widths.mjs` stops new widths (`breakpoint-exempt: <reason>`)
 (ADR-0108).
+
+## The Claude Design project
+
+The "Tally Baseball" project in claude.ai/design is the design system a designer picks for a new
+design. It is built from `src/tokens/` and `src/styles/system/`, never edited by hand. Rebuild and
+upload steps: `docs/design-sync.md`. A token change reaches the project only after a rebuild.
+
+Three differences between the project and the app. Gary made these calls on 2026-10-15:
+
+- **Body font.** The project sets `--font-body` to JetBrains Mono 500. The app uses Source Sans 3.
+  **Decision:** the app moves to mono body copy. Not done yet. Until it is, a design from the
+  project draws body text in mono, and the app does not.
+- **Band head.** The project draws `sectionhead--band` square. The app rounds its top corners.
+  **Decision:** the app goes square too (`system/section-head.css`). Not done yet.
+- **New classes.** `stattile--compact` and `sectionhead--textured` exist only in the project. They
+  stay design-only. The implementer of a design that uses one adds it to `system/` then.
