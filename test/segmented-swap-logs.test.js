@@ -39,3 +39,11 @@ test('season and advanced import no Button they no longer use', () => {
   assert.doesNotMatch(src('season/index.jsx'), /import \{ Button \}/)
   assert.doesNotMatch(src('advanced/index.jsx'), /import \{ (Button|Cluster) \}/)
 })
+
+test('the game logs\' "Show games" row drops its counts on a phone so it stays one row', () => {
+  for (const rel of ['batlog/index.jsx', 'pitchlog/index.jsx']) {
+    assert.match(src(rel), /label="Show games"\s+className="segmented--lean"/, `${rel} marks the row lean`)
+  }
+  const css = readFileSync(join(MODS, '..', '..', '..', '..', 'styles', 'system', 'segmented', 'segmented.css'), 'utf8')
+  assert.match(css, /@media \(max-width: 480px\)\s*\{\s*\.segmented--lean \.segmented__count\s*\{\s*display: none;/)
+})

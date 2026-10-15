@@ -121,6 +121,7 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
         {post > 0 && (
           <Segmented
             label="Show games"
+            className="segmented--lean"
             value={scope}
             onChange={(id) => (setScope(id), setMore(false))}
             options={SCOPES.map(([id, label]) => ({ value: id, label, count: counts[id] }))}

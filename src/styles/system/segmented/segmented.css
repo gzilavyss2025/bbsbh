@@ -78,6 +78,14 @@
   letter-spacing: var(--ls-none);
 }
 
+/* .segmented--lean: a row whose labels are long (Regular season) drops its counts on a phone, so
+   it stays one joined row at 390px instead of wrapping its last option under the others. */
+@media (max-width: 480px) {
+  .segmented--lean .segmented__count {
+    display: none;
+  }
+}
+
 @media (forced-colors: active) {
   .segmented .segmented__btn[aria-pressed='true'] {
     background: Highlight;
