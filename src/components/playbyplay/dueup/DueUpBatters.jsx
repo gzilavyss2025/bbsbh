@@ -21,13 +21,19 @@ export const dueUpMotionKey = (feed, inning, half, which) => viewKey(feed?.gameP
 //
 // It computes and fetches nothing. A caller hands it `batters` already carrying
 // `line` (api/boxscore/batterLine.js), so each caller owns its spoiler gate.
-export function DueUpBatters({ label, teamId, batters, motionKey, className = '' }) {
+export function DueUpBatters(props) {
+  // One instance per motionKey (game, half, which card): a half the reader steps to
+  // is its own mount, so it makes its own once-per-visit stamp-in decision.
+  return <DueUpCard key={props.motionKey} {...props} />
+}
+
+function DueUpCard({ label, teamId, batters, motionKey, className = '' }) {
   const [still] = useState(() => hasSeen(motionKey))
   useEffect(() => {
     markSeen(motionKey)
   }, [motionKey])
   return (
-    <Card frame="stamped" label={label} stampIn={!still} className={`dueup ${className}`.trim()}>
+    <Card frame="stamped" as="div" labelAs="h3" label={label} stampIn={!still} className={`dueup ${className}`.trim()}>
       <ol className="dueup__row">
         {batters.map((b) => (
           <li className="dueup__col" key={b.id}>
