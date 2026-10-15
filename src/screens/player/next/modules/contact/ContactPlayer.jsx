@@ -2,9 +2,9 @@ import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { counter, isAhead, nearestBall, playStart } from './contactPlay.js'
 
 // The Contact player (#2073): step or play through the balls in date order, or pick one
-// on the season timeline. It only calls `onLaunch(i, play)` and `onPause()`; the module
-// owns the clock. The range input is invisible over the timeline, so a drag anywhere on
-// it picks the nearest ball by date; the arrow keys step one ball.
+// on the season timeline. It only calls `onLaunch(i, play)` and `onPause()`; the
+// flight clock is `FlightClock`'s (ContactFlight.jsx). The range input is invisible over the
+// timeline, so a drag anywhere on it picks the nearest ball by date; the arrow keys step one ball.
 const PREV = 'M13 3L5 9L13 15Z M3 3H5V15H3Z'
 const NEXT = 'M5 3L13 9L5 15Z M13 3H15V15H13Z'
 const PLAY = 'M5 3L16 10L5 17Z'

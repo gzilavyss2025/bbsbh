@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { MenuRail } from '../../components/ui/control/MenuRail.jsx'
 import { StatTile } from '../../components/ui/frame/StatTile.jsx'
 import { Entry, Frame } from './Entry.jsx'
@@ -12,6 +12,11 @@ import { pitchMark } from '../../lib/pitch/pitchTypes.js'
 import { ArsenalCard } from '../player/next/modules/arsenal/ArsenalCard.jsx'
 import { flightPath } from '../player/next/modules/arsenal/flightView.js'
 import { LEAD, totalMs } from '../player/next/modules/arsenal/timeline.js'
+import { HOME } from '../../lib/ballpark/ballparkGeometry.js'
+import { AutoAdvance, FlightClock, FlightDot, FlightLayer } from '../player/next/modules/contact/ContactFlight.jsx'
+import { ContactPlayer } from '../player/next/modules/contact/ContactPlayer.jsx'
+import { DWELL_MS, afterDwell, isAhead, seasonAxis } from '../player/next/modules/contact/contactPlay.js'
+import { flightOf } from '../player/next/modules/contact/contactFlight.js'
 
 // ---------------------------------------------------------------------------
 // THE PLAYER PAGE'S MOTION (#2073) on /animation-lab.
@@ -187,6 +192,83 @@ function ArsenalTimelineEntry() {
   )
 }
 
+// The Contact play-through (#2073, slice 19 and its clock child): the real flight clock, flight marks,
+// player and auto-advance on four invented balls. The flight is a requestAnimationFrame loop, not a CSS
+// animation, so there is no frozen strip; press the play button to fly the balls in date order.
+const PLAY_BALLS = [
+  [{ date: '2026-04-09', exitVelo: 104, launchAngle: 27, distance: 402, result: 'hr' }, { x: 395, y: 170 }],
+  [{ date: '2026-05-21', exitVelo: 96, launchAngle: 14, distance: 238, result: 'single' }, { x: 250, y: 300 }],
+  [{ date: '2026-07-02', exitVelo: 88, launchAngle: 4, distance: 96, result: 'out' }, { x: 340, y: 430 }],
+  [{ date: '2026-08-30', exitVelo: 101, launchAngle: 31, distance: 371, result: 'double' }, { x: 205, y: 190 }],
+].map(([b, p]) => ({ b, p }))
+const PLAY_AXIS = seasonAxis(PLAY_BALLS.map((m) => m.b.date))
+
+function ContactPlayDemo() {
+  const [idx, setIdx] = useState(-1)
+  const [shot, setShot] = useState(0)
+  const [playing, setPlaying] = useState(false)
+  const cur = idx >= 0 ? PLAY_BALLS[idx] : null
+  const model = cur ? flightOf(cur.b, Math.hypot(cur.p.x - HOME.x, cur.p.y - HOME.y)) : null
+  const launch = (i, play) => {
+    setIdx(i)
+    setShot((n) => n + 1)
+    setPlaying(play)
+  }
+  const advance = useCallback(() => {
+    const nx = afterDwell(idx, PLAY_BALLS.length)
+    if (nx == null) {
+      setPlaying(false)
+      return
+    }
+    setIdx(nx)
+    setShot((n) => n + 1)
+  }, [idx])
+  return (
+    <div className="fcontact">
+      <FlightClock shot={shot} model={model} land={cur?.p} dotR={cur?.b.result === 'hr' ? 11 : 9} hr={cur?.b.result === 'hr'}>
+        <AutoAdvance playing={playing} idx={idx} onAdvance={advance} />
+        <svg className="fcontact__field" viewBox="10 40 600 485" aria-hidden="true">
+          <g className="fcontact__dots">
+            {PLAY_BALLS.map(({ b, p }, i) => {
+              return (
+                <FlightDot
+                  sel={i === idx}
+                  key={i}
+                  className={`fcontact__dot fcontact__dot--${b.result}${i === idx ? ' fcontact__dot--sel' : ''}${isAhead(i, idx, playing) ? ' fcontact__dot--ahead' : ''}`}
+                  cx={p.x}
+                  cy={p.y}
+                  r={b.result === 'hr' ? 11 : 9}
+                />
+              )
+            })}
+          </g>
+          <FlightLayer />
+        </svg>
+        <ContactPlayer marks={PLAY_BALLS} idx={idx} playing={playing} axis={PLAY_AXIS} onLaunch={launch} onPause={() => setPlaying(false)} />
+      </FlightClock>
+    </div>
+  )
+}
+
+function ContactPlayEntry() {
+  return (
+    <Entry
+      title="Contact — play through the balls"
+      note={
+        <>
+          The batter Contact field (#2073, modules/contact). Play flies each ball in date order: a
+          lead-in, the drag-and-lift flight, a landing ring, then a {DWELL_MS}ms rest before the next
+          ball. Balls not yet flown sit at 10%; the timeline fill glides as the run moves. Prev, next
+          and the scrubber fly one ball and stop the run. One clock lives in a child, so only the
+          flight marks, the flying dot and the detail panel redraw each frame. Under reduced motion each
+          ball shows landed and a plain timer holds it.
+        </>
+      }
+      live={<ContactPlayDemo />}
+    />
+  )
+}
+
 export function PlayerMotionLab() {
   return (
     <>
@@ -274,6 +356,7 @@ export function PlayerMotionLab() {
         live={<MoundDemo />}
       />
       <ArsenalTimelineEntry />
+      <ContactPlayEntry />
     </>
   )
 }

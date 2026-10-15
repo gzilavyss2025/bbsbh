@@ -73,6 +73,7 @@ test('counter: "3 of 9", or the count when no ball is picked', () => {
 const read = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
 const CSS = stripComments(read('src/styles/player-next/batter/contact.css'))
 const JSX = read('src/screens/player/next/modules/contact/ContactModule.jsx')
+const FLIGHT = read('src/screens/player/next/modules/contact/ContactFlight.jsx')
 const decl = (body, prop) =>
   body?.split(';').map((d) => d.trim()).find((d) => d.startsWith(`${prop}:`))?.slice(prop.length + 1).trim()
 
@@ -97,7 +98,8 @@ test('the timeline fill glides over 320ms; the wrapper wears the house focus rin
 
 test('the module plays in date order and holds each ball DWELL_MS after it lands', () => {
   assert.match(JSX, /byDate\(/)
-  assert.match(JSX, /t >= end \+ DWELL_MS \? 0/)
+  assert.match(FLIGHT, /t >= end \+ DWELL_MS \? 'rest'/)
+  assert.match(FLIGHT, /phase === 'rest' \? 0/)
   assert.match(JSX, /<ContactPlayer/)
   assert.match(JSX, /setPlaying\(false\) \}/)
 })
