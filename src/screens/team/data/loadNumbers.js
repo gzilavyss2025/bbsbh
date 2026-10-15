@@ -1,5 +1,4 @@
-import { fetchTeam, fetchStandings, fetchLeagueTeamStats, fetchTeamIL } from '../../../api/team.js'
-import { fetchTeamSchedule } from '../../../api/schedule.js'
+import { fetchTeam, fetchLeagueTeamStats, fetchTeamIL } from '../../../api/team.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
 import { fetchTeamRecords } from '../../../api/teamRecords.js'
 import { fetchScheduleShape } from '../../../api/scheduleShape.js'
@@ -18,8 +17,8 @@ import {
   buildJerseyCombos,
 } from '../../../api/uniforms.js'
 import { teamClubName } from '../../../lib/teams.js'
-import { dayOfWeekRecord } from '../modules/TeamStatsCard.jsx'
-import { seasonOf, cutoffFor, scoreCutoffFor, standingsRowsFor, injuredIdsFrom, ledgerIsComplete } from './shared.js'
+import { seasonOf, cutoffFor, scoreCutoffFor, standingsRowsFor, injuredIdsFrom, ledgerIsComplete, dayOfWeekRecord } from './shared.js'
+import { DIRECT } from './sources.js'
 
 const DASH = '—'
 
@@ -39,36 +38,32 @@ function statRank(rows, teamId, key, label, lowerBetter) {
   return { k: label, v: mine?.stat?.[key] ?? DASH, rank: r ? ordinal(r.rank) : DASH, tone, extreme }
 }
 
+// Each band of the one-scroll page (#1107) buys only its own share: Standing (the
+// standings, the record cards, the jerseys) and Ranks (the rank tables, the leaders, the
+// run value and the challenge card). The Numbers tab buys both, as `loadNumbers`. `src`
+// is the four shared reads (sources.js); a tab passes nothing.
 export async function loadNumbers(id, asOf) {
+  const [standing, ranks] = await Promise.all([loadStanding(id, asOf), loadRanks(id, asOf)])
+  return standing && ranks ? { ...standing, ...ranks } : null
+}
+
+async function numbersScope(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
-  const isMilb = sportId !== 1
-  // Null below Triple-A, which is what keeps the challenge card off a level
-  // that runs no ABS rig — and keeps its file off that page's fetch list.
-  const absExposureLevel = exposureClubLevelFor(sportId)
-  const season = seasonOf(asOf, sportId)
   const standingsDate = cutoffFor(asOf)
-  const scoreCutoff = scoreCutoffFor(asOf)
+  return { team, sportId, isMilb: sportId !== 1, season: seasonOf(asOf, sportId), standingsDate, scoreCutoff: scoreCutoffFor(asOf) }
+}
+
+export async function loadStanding(id, asOf, src = DIRECT) {
+  const scope = await numbersScope(id, asOf)
+  if (!scope) return null
+  const { team, sportId, isMilb, season, standingsDate, scoreCutoff } = scope
 
   const [
     standings,
-    league,
-    leaderPool,
     postseasonOddsData,
     comebackWinsData,
-    // Baseball Savant's season run values, MLB only — it runs no minor-league
-    // board, so an affiliate's card simply doesn't render. One static file,
-    // read through staticJson and shared with the player card and the league
-    // board, so a reader who has opened either already has it.
-    runValueData,
-    // The ABS challenge card's denominators, one row per player per CLUB
-    // (ADR-0076, scripts/lib/abs/export.mjs). Its own file rather than a key
-    // in the league list precisely so this tab does not download the 418 KB
-    // that page reads — and one file per LEVEL for the same reason again, so
-    // a major-league club never carries Triple-A's 129 KB. MLB and Triple-A
-    // run the rig; below that there is no level, no fetch, and no card.
-    absExposureClubs,
     // The situational-records ledger — one static file per club per season,
     // every level. The card tallies it against `standingsDate` itself, so it
     // reads no further ahead than the standings and the day-of-week card.
@@ -78,25 +73,19 @@ export async function loadNumbers(id, asOf) {
     // shard and the card simply doesn't render.
     scheduleShapeData,
     schedule,
-    ilRoster,
     uniformCatalog,
     uniformNameOverrides,
   ] = await Promise.all([
-    team.league?.id ? fetchStandings(team.league.id, season, standingsDate) : Promise.resolve([]),
-    sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
-    loadCombinedPoolForTeams([{ id }], season, { withHand: true }),
+    team.league?.id ? src.fetchStandings(team.league.id, season, standingsDate) : Promise.resolve([]),
     sportId === 1 ? fetchPostseasonOdds() : Promise.resolve(null),
     sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
-    sportId === 1 ? fetchRunValue() : Promise.resolve(null),
-    fetchAbsExposureClubs(absExposureLevel),
     fetchTeamRecords(id, season),
     sportId === 1 ? fetchScheduleShape(id) : Promise.resolve(null),
     // Cutoff-gated rows only — `won` stays null past standingsDate (see
     // fetchTeamSchedule), which is what keeps the day-of-week record from
     // looking ahead. Don't re-derive it from Final status. Also feeds the
     // jersey-record join below (MLB only).
-    fetchTeamSchedule(id, season, sportId, standingsDate),
-    fetchTeamIL(id, season),
+    src.fetchTeamSchedule(id, season, sportId, standingsDate),
     isMilb ? Promise.resolve({}) : fetchTeamUniformCatalog([id], season),
     isMilb ? Promise.resolve({}) : fetchUniformNameOverrides(),
   ])
@@ -109,37 +98,6 @@ export async function loadNumbers(id, asOf) {
           .filter((r) => r.postseasonPct != null)
       : []
 
-  const batting = league.hitting.length
-    ? [
-        statRank(league.hitting, id, 'runs', 'Runs', false),
-        statRank(league.hitting, id, 'homeRuns', 'Home runs', false),
-        statRank(league.hitting, id, 'avg', 'AVG', false),
-        statRank(league.hitting, id, 'ops', 'OPS', false),
-        statRank(league.hitting, id, 'stolenBases', 'Stolen bases', false),
-        statRank(league.hitting, id, 'hits', 'Hits', false),
-        statRank(league.hitting, id, 'groundIntoDoublePlay', 'GIDP', true),
-        statRank(league.hitting, id, 'atBatsPerHomeRun', 'AB/HR', true),
-        statRank(league.hitting, id, 'babip', 'BABIP', false),
-      ]
-    : null
-  const pitching = league.pitching.length
-    ? [
-        statRank(league.pitching, id, 'era', 'ERA', true),
-        statRank(league.pitching, id, 'whip', 'WHIP', true),
-        statRank(league.pitching, id, 'strikeOuts', 'Strikeouts', false),
-        statRank(league.pitching, id, 'saves', 'Saves', false),
-        statRank(league.pitching, id, 'shutouts', 'Shutouts', false),
-        statRank(league.pitching, id, 'completeGames', 'Complete games', false),
-        statRank(league.pitching, id, 'avg', 'AVG against', true),
-        statRank(league.pitching, id, 'strikeoutsPer9Inn', 'SO/9', false),
-        statRank(league.pitching, id, 'walksPer9Inn', 'BB/9', true),
-        statRank(league.pitching, id, 'strikeoutWalkRatio', 'K/BB', false),
-        statRank(league.pitching, id, 'groundIntoDoublePlay', 'GDP', false),
-        statRank(league.pitching, id, 'wildPitches', 'WP', true),
-        statRank(league.pitching, id, 'pitchesPerInning', 'P/IP', true),
-      ]
-    : null
-
   const comebackData = comebackRatesFor(comebackWinsData, id, season)
   const comeback =
     comebackData && comebackData.thresholds.some((t) => t.wins > 0) ? comebackData : null
@@ -149,21 +107,6 @@ export async function loadNumbers(id, asOf) {
   // gen-team-records), so they count the 'R' rows only.
   const regularSchedule = schedule.filter((g) => g.gameType === 'R')
   const dayOfWeek = regularSchedule.some((g) => g.won != null) ? dayOfWeekRecord(regularSchedule) : null
-
-  // The club's own run value ledger plus where it stands among the clubs — the
-  // ranking is derived here, in the reader, never shipped in the file (see
-  // api/around-the-game/runValue.js). Null when the club has nobody in the
-  // file at all, which is every MiLB affiliate and, in the first days of a
-  // season, possibly a real club too.
-  const clubRuns = clubRunValue(runValueData, id)
-  const clubs = clubRuns ? clubBoard(runValueData) : []
-  const runValue = clubRuns
-    ? {
-        club: clubRuns,
-        rank: clubs.find((r) => r.teamId === id)?.rank ?? null,
-        of: clubs.length,
-      }
-    : null
 
   // Record-by-jersey strip (MLB only) — one card per catalog jersey, tagged
   // with its logo treatment and the club's W-L in the games it wore it. The
@@ -197,9 +140,6 @@ export async function loadNumbers(id, asOf) {
     team,
     standings: standingsRows,
     divisionPostseasonOdds,
-    batting,
-    pitching,
-    leaderPool,
     comeback,
     // A ledger that holds only part of the season is not shown (#1363).
     teamRecords: ledgerIsComplete(teamRecordsData, regularSchedule, standingsDate) ? teamRecordsData : null,
@@ -208,15 +148,101 @@ export async function loadNumbers(id, asOf) {
     // cutoff travels with the data rather than being applied here.
     recordsCutoff: standingsDate,
     dayOfWeek,
+    jerseyCombos,
+    homeRecord,
+    awayRecord,
+  }
+}
+
+export async function loadRanks(id, asOf, src = DIRECT) {
+  const scope = await numbersScope(id, asOf)
+  if (!scope) return null
+  const { team, sportId, season } = scope
+  // Null below Triple-A, which is what keeps the challenge card off a level
+  // that runs no ABS rig — and keeps its file off that page's fetch list.
+  const absExposureLevel = exposureClubLevelFor(sportId)
+
+  const [
+    league,
+    leaderPool,
+    // Baseball Savant's season run values, MLB only — it runs no minor-league
+    // board, so an affiliate's card simply doesn't render. One static file,
+    // read through staticJson and shared with the player card and the league
+    // board, so a reader who has opened either already has it.
+    runValueData,
+    // The ABS challenge card's denominators, one row per player per CLUB
+    // (ADR-0076, scripts/lib/abs/export.mjs). Its own file rather than a key
+    // in the league list precisely so this tab does not download the 418 KB
+    // that page reads — and one file per LEVEL for the same reason again, so
+    // a major-league club never carries Triple-A's 129 KB. MLB and Triple-A
+    // run the rig; below that there is no level, no fetch, and no card.
+    absExposureClubs,
+    ilRoster,
+  ] = await Promise.all([
+    sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
+    loadCombinedPoolForTeams([{ id }], season, { withHand: true, fetchStats: src.fetchTeamSeasonStats }),
+    sportId === 1 ? fetchRunValue() : Promise.resolve(null),
+    fetchAbsExposureClubs(absExposureLevel),
+    fetchTeamIL(id, season),
+  ])
+
+  const batting = league.hitting.length
+    ? [
+        statRank(league.hitting, id, 'runs', 'Runs', false),
+        statRank(league.hitting, id, 'homeRuns', 'Home runs', false),
+        statRank(league.hitting, id, 'avg', 'AVG', false),
+        statRank(league.hitting, id, 'ops', 'OPS', false),
+        statRank(league.hitting, id, 'stolenBases', 'Stolen bases', false),
+        statRank(league.hitting, id, 'hits', 'Hits', false),
+        statRank(league.hitting, id, 'groundIntoDoublePlay', 'GIDP', true),
+        statRank(league.hitting, id, 'atBatsPerHomeRun', 'AB/HR', true),
+        statRank(league.hitting, id, 'babip', 'BABIP', false),
+      ]
+    : null
+  const pitching = league.pitching.length
+    ? [
+        statRank(league.pitching, id, 'era', 'ERA', true),
+        statRank(league.pitching, id, 'whip', 'WHIP', true),
+        statRank(league.pitching, id, 'strikeOuts', 'Strikeouts', false),
+        statRank(league.pitching, id, 'saves', 'Saves', false),
+        statRank(league.pitching, id, 'shutouts', 'Shutouts', false),
+        statRank(league.pitching, id, 'completeGames', 'Complete games', false),
+        statRank(league.pitching, id, 'avg', 'AVG against', true),
+        statRank(league.pitching, id, 'strikeoutsPer9Inn', 'SO/9', false),
+        statRank(league.pitching, id, 'walksPer9Inn', 'BB/9', true),
+        statRank(league.pitching, id, 'strikeoutWalkRatio', 'K/BB', false),
+        statRank(league.pitching, id, 'groundIntoDoublePlay', 'GDP', false),
+        statRank(league.pitching, id, 'wildPitches', 'WP', true),
+        statRank(league.pitching, id, 'pitchesPerInning', 'P/IP', true),
+      ]
+    : null
+
+  // The club's own run value ledger plus where it stands among the clubs — the
+  // ranking is derived here, in the reader, never shipped in the file (see
+  // api/around-the-game/runValue.js). Null when the club has nobody in the
+  // file at all, which is every MiLB affiliate and, in the first days of a
+  // season, possibly a real club too.
+  const clubRuns = clubRunValue(runValueData, id)
+  const clubs = clubRuns ? clubBoard(runValueData) : []
+  const runValue = clubRuns
+    ? {
+        club: clubRuns,
+        rank: clubs.find((r) => r.teamId === id)?.rank ?? null,
+        of: clubs.length,
+      }
+    : null
+
+  return {
+    team,
+    batting,
+    pitching,
+    leaderPool,
     runValue,
     // Handed through whole rather than sliced here: the card ranks this club
     // against every other one in the file, so it needs them all. The level
     // travels with it because the rows are keyed on it inside the file too.
     absExposureClubs,
     absExposureLevel,
-    jerseyCombos,
-    homeRecord,
-    awayRecord,
     injuredIds: injuredIdsFrom(ilRoster),
   }
 }

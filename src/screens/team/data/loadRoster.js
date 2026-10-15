@@ -4,13 +4,8 @@
 // game-log fixup). Fetch nothing another tab owns: no standings,
 // schedule-for-display, photos, uniforms, transactions, comebacks, odds,
 // affiliates or prospects table.
-import {
-  fetchTeam,
-  fetchTeamRoster,
-  fetchTeamIL,
-} from '../../../api/team.js'
+import { fetchTeam, fetchTeamIL } from '../../../api/team.js'
 import { fetchAllStarRosterIds, fetchPersonStats } from '../../../api/person-fetch.js'
-import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { fetchWarData } from '../../../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../../../api/recentForm.js'
 import { splitPitchingStaff } from '../../../api/pitcherSplit.js'
@@ -28,6 +23,7 @@ import {
   rosterHittingStat,
   rosterPitchingStat,
 } from './shared.js'
+import { DIRECT } from './sources.js'
 import { ipToOuts } from '../../../lib/math/innings.js'
 
 const DASH = '—'
@@ -49,7 +45,8 @@ function roleFromCounts(gamesStarted, gamesPitched, saves) {
   return 'RP'
 }
 
-export async function loadRoster(id, asOf) {
+// `src`: the shared reads (sources.js); a tab passes nothing.
+export async function loadRoster(id, asOf, src = DIRECT) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
@@ -66,12 +63,12 @@ export async function loadRoster(id, asOf) {
 
   const [roster, fullRoster, seasonRoster, ilRoster, allStarIds, warData, prospectsSnapshot, rookiesData, schedule] =
     await Promise.all([
-      fetchTeamRoster(id, season, { sportId }),
+      src.fetchTeamRoster(id, season, { sportId }),
       // 40Man superset of the active roster above — the projection deliberately
       // includes the IL and rehab assignments: a season's ace doesn't stop
       // being the club's preferred answer at his spot just because he's hurt
       // right now (the Injured List shelf flags that separately).
-      fetchTeamRoster(id, season, { sportId, rosterType: '40Man' }),
+      src.fetchTeamRoster(id, season, { sportId, rosterType: '40Man' }),
       // Every player who appeared for this exact club this season, feeding
       // preferredLineupFrom ONLY — a player since promoted or optioned to
       // another level of the org (a AAA regular called up to the majors) is
@@ -79,13 +76,13 @@ export async function loadRoster(id, asOf) {
       // roster type wide enough to still carry him (see preferredLineupFrom,
       // shared.js). Top Substitutes and the pitching staff below stay scoped
       // to fullRoster — those answer "who's actually on this roster."
-      fetchTeamRoster(id, season, { sportId, rosterType: 'fullSeason' }),
+      src.fetchTeamRoster(id, season, { sportId, rosterType: 'fullSeason' }),
       fetchTeamIL(id, season),
       sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
       sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
       fetchTopProspects(),
       fetchRookiesData(),
-      fetchTeamSchedule(id, season, sportId, standingsDate),
+      src.fetchTeamSchedule(id, season, sportId, standingsDate),
     ])
 
   const warBat = warData.season === season ? warData.bat : {}
