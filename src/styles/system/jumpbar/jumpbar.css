@@ -57,9 +57,10 @@
   padding-top: var(--space-2h);
   border-top: var(--bw-hair) solid var(--border-rule);
 }
-/* Under 740px a bar with an aside drops its wide-only stops, so the rest fit one row at full size. */
+/* Under 740px a bar drops its wide-only stops, so the rest fit one row at full size. Two classes:
+   the .jumpbar__item rule below sets display and would win on order. */
 @media (max-width: 739.98px) {
-  .jumpbar--aside .jumpbar__item--wide {
+  .jumpbar .jumpbar__item--wide {
     display: none;
   }
 }
