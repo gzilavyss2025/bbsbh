@@ -1,5 +1,7 @@
 # The lineup page wears the club's jersey — and theming's only inputs are (teamId, treatment)
 
+> **Superseded in part.** The line between seal chrome and reference cards moved. See "The line moved: reference cards, not seal chrome" below. The rest of this ADR stands.
+
 Until now every surface in the app wore the same chrome: navy bars with a
 kraft-gold tape edge, the scorebook metaphor from `src/CLAUDE.md`. Two
 hand-tuned tables — `TREATMENT_HEADER_COLOR_OVERRIDES` (`src/lib/teams.js`) and
