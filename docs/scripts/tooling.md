@@ -53,7 +53,8 @@ list says what each guard checks.
 - `layout/check-media-widths.mjs` — an `@media` width must be on the grandfather
   list in the guard (`WIDTHS`), which `src/tokens/layout.css` mirrors as a table:
   740px is the one wide step, the rest are widths already in use (#1179). It moves
-  no layout; it stops a new width. A real new one goes on the list with its reason,
+  no layout; it stops a new width, in CSS and in a JS media query string (`useMediaQuery`,
+  `matchMedia`; #1831). A real new one goes on the list with its reason,
   or takes `breakpoint-exempt: <reason>` in a comment on the `@media` line or the
   line above. It lives in `scripts/layout/` so `scripts/` stays inside its
   `check-dir-size` budget.
