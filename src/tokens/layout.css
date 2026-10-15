@@ -191,12 +191,12 @@
 
    Every other CSS @media width in use when the guard landed is a grandfather. It
    is a list of what exists, not a set to copy; it moves no layout, and it only
-   stops the next width from being 735px. The guard reads CSS only: a width in a
-   JS media query (useMediaQuery.js 1000px, PassportBook.jsx 900px,
-   scorecard/geometry.js 480px) is not on the list and is not checked.
+   stops the next width from being 735px. The guard reads CSS and JS media queries
+   alike: useMediaQuery.js 1000px (the bracket rail), PassportBook.jsx 900px and
+   scorecard/geometry.js 480px are on the list.
 
      under a phone      350px  359px  360px  370px
      phone              420px  430px  480px  520px
      large phone        560px  600px  620px  640px
      small tablet       700px  720px  739px  739.98px  760px  860px  30rem
-     tablet, laptop     899px  900px  959.98px  1024px  1040px  1200px  1279px */
+     tablet, laptop     899px  900px  959.98px  1000px  1024px  1040px  1200px  1279px */
