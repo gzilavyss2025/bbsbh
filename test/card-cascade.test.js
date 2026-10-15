@@ -871,7 +871,7 @@ test('C4: each block keeps its own margin and inset', () => {
 test('C4: the running line is still a horizontal scroller', () => {
   assert.match(
     src('components/gamehud/RollingLine.jsx'),
-    /<Card as="div" frame="stamped" body="flush" stampIn className="rolling__scroll" ref=\{cardRef\}>\s*<Table\b[^>]*\bclassName="rolling__grid"/,
+    /<Card as="div" frame="stamped" body="flush" stampIn=\{playStamp\} className="rolling__scroll" ref=\{cardRef\}>\s*<Table\b[^>]*\bclassName="rolling__grid"/,
     'the grid sits on a Table, straight inside the Card',
   )
   const body = ruleBody(read('system/table.css'), '.table')

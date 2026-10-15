@@ -5,6 +5,10 @@ import { ordinal } from '../../lib/format.js'
 import { Card } from '../ui/frame/Card.jsx'
 import { Table } from '../ui/table/Table.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { markPlayed, shouldPlay } from '../../lib/motion/playOnce.js'
+
+// Games whose running line has already stamped in this session.
+const playedGames = new Set()
 
 // The running line at the top of the innings view. It "builds as you reveal":
 // each half you uncover drops its runs into this grid; halves you haven't
@@ -48,6 +52,11 @@ export function RollingLine({
   // keep the current half between the pins, and tell the CSS whether there is
   // more to scroll, which is when the chevron beside R shows.
   const cardRef = useRef(null)
+  // The card's stamp-in plays once per game: a remount (paging halves, the
+  // page-turn preview) finds the game already stamped and skips it.
+  const gamePk = feed?.gamePk ?? feed?.gameData?.game?.pk ?? null
+  const [playStamp] = useState(() => shouldPlay(gamePk, playedGames))
+  useEffect(() => markPlayed(gamePk, playedGames), [gamePk])
   const [more, setMore] = useState(false)
   useEffect(() => {
     const wrap = cardRef.current?.querySelector('.table')
@@ -136,7 +145,7 @@ export function RollingLine({
 
   return (
     <section className="rolling" aria-label="Running line" ref={sectionRef} data-more={more ? '' : undefined}>
-      <Card as="div" frame="stamped" body="flush" stampIn className="rolling__scroll" ref={cardRef}>
+      <Card as="div" frame="stamped" body="flush" stampIn={playStamp} className="rolling__scroll" ref={cardRef}>
         <Table frame="bare" density="tight" sticky label="Running line" className="rolling__grid">
           <thead>
             <tr>
