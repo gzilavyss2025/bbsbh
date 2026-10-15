@@ -415,12 +415,12 @@
 }
 .pbp__replaystate .btn {
   margin-left: auto;
+  border-radius: 0; /* square, like the Segmented row under it */
 }
-/* Phone: one numbered chip per pitch under the scene. Square, so eight fit
-   across the sheet's 304px and more wrap. */
-.pbp__replaypicks .btn {
-  min-width: var(--control-min);
-  padding-inline: 0;
+/* Phone: the pitch picks are a Segmented row under the scene (it wraps), set
+   off from the count strip above. */
+.pbp__replaypicks {
+  margin: var(--space-2);
 }
 
 /* Wide focus: the scene's slot at the top of the reference rail

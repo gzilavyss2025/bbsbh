@@ -7,7 +7,7 @@ import { HOVER_CARD_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery.js
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 import { atBatScenePitches, atBatZone } from '../../../lib/pitcherCard/atBat.js'
 import { basesAt, countAt, replaySteps } from '../../../lib/pitcherCard/replaySteps.js'
-import { Cluster } from '../../ui/layout/Cluster.jsx'
+import { Segmented } from '../../ui/control/Segmented.jsx'
 
 // WHAT THE AT-BAT LOOKED LIKE: every pitch of one plate appearance, thrown in
 // order from behind the plate, each along its own measured path. The Now
@@ -82,7 +82,7 @@ function ReplayState({ model, at, onPlay }) {
           ))}
         </svg>
       )}
-      {!motionIsReduced() && <Button size="control" onClick={onPlay}>Play at-bat</Button>}
+      {!motionIsReduced() && <Button skin="ink" size="control" onClick={onPlay}>Play at-bat</Button>}
     </div>
   )
 }
@@ -173,19 +173,13 @@ export function ReplaySheet({ pitchDetails, replay, batter, pitcher, onClose }) 
   return (
     <ZoneSheet note="Replay" batter={batter} pitcher={pitcher?.last} onClose={onClose}>
       <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => setPlay({ all: true })}>
-        <Cluster gap="tight" className="pbp__replaypicks">
-          {replay.pitches.map((p) => (
-            <Button
-              key={p.no}
-              size="control"
-              pressed={play?.no === p.no}
-              onClick={() => setPlay({ no: p.no })}
-              aria-label={`Play pitch ${p.no}`}
-            >
-              {p.no}
-            </Button>
-          ))}
-        </Cluster>
+        <Segmented
+          label="Play a pitch"
+          className="pbp__replaypicks"
+          value={play?.no}
+          onChange={(no) => setPlay({ no })}
+          options={replay.pitches.map((p) => ({ value: p.no, label: String(p.no) }))}
+        />
       </ReplayScene>
     </ZoneSheet>
   )
