@@ -121,11 +121,10 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 // layouts disagreed on whether this needed a heading, and neither one named
 // the moment.
 const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
-// The four states a lineup row can wear, keyed from the selector's own wording.
-// 'up' is the BATTING club's single next slot; the other three are the fielding
-// club's next-half trio. Words go to the legend and to screen readers only.
-const STATE_OF_LABEL = { 'Due up': 'due', 'On deck': 'deck', 'In the hole': 'hole' }
-const STATE_WORDS = { up: 'Up next', due: 'Due up', deck: 'On deck', hole: 'In the hole' }
+// One highlight says who bats next: the BATTING club's next slot, or the
+// FIELDING club's leadoff man next half ("Due up"). On deck and In the hole are
+// not marked. The word is for screen readers; the sighted reader sees the tint.
+const STATE_WORDS = { up: 'Up next' }
 
 // TWO PROPS FOR FOCUS MODE'S LINEUPS TAB, both defaulting to the stacked page's
 // existing behaviour — the same shape RosterPanel takes.
@@ -278,34 +277,16 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
 function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, upNextLabels, onDeckSlot = null }) {
   if (slots.length === 0) return null
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
-  // Which "who bats next" states this card carries, in batting order of
-  // urgency. The rows say them by wash and slot square instead of by a word; the
-  // legend names the fielding club's three, and leaves out 'up' — the batting
-  // club's lone inked row needs no key.
-  const present = new Set(
-    slots.map((s) => (onDeckSlot === s.slot ? 'up' : STATE_OF_LABEL[upNextLabels?.get(s.slot)] ?? null)),
-  )
-  const legend = ['due', 'deck', 'hole'].filter((st) => present.has(st))
   return (
     <div className={`lineupteam ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <h5 className="lineupteam__name sectionhead--band">
         <span className="lineupteam__namelabel">{name} Lineup</span>
         <TeamLogo teamId={teamId} name={name} size={20} variant="mono" crop="bar" className="sectionhead__mark" />
       </h5>
-      {legend.length > 0 && (
-        <ul className="entering__legend" aria-hidden="true">
-          {legend.map((st) => (
-            <li className={`entering__legenditem entering__legenditem--${st}`} key={st}>
-              <span className="entering__key" />
-              {STATE_WORDS[st]}
-            </li>
-          ))}
-        </ul>
-      )}
       <Stack gap="tight" as="ol" className="entering__list">
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant
-          const state = onDeckSlot === s.slot ? 'up' : STATE_OF_LABEL[upNextLabels?.get(s.slot)] ?? null
+          const state = onDeckSlot === s.slot || upNextLabels?.get(s.slot) === 'Due up' ? 'up' : null
           return (
             <li
               className={`entering__row ${state ? `entering__row--${state}` : ''}`.trim()}
