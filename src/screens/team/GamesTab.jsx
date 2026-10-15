@@ -20,7 +20,6 @@ import { isoToday } from '../../lib/dates.js'
 // tab that owns games shows them all — then Photos and Transactions, each its
 // own full card. See data/loadGames.js for what this tab fetches and why.
 export function GamesTab({ id, asOf, sportId }) {
-  const navigate = useNav()
   const teamId = Number(id)
   const identity = useAsync(() => loadTeamIdentity(teamId, asOf), [teamId, asOf])
   const games = useAsync(() => loadGames(teamId, asOf), [teamId, asOf])
@@ -37,7 +36,6 @@ export function GamesTab({ id, asOf, sportId }) {
   if (gate) return gate
 
   const { team, record, manager } = identity.data
-  const { schedule, allStarGame, seasonGames, photoGames, transactionsPage } = games.data
 
   return (
     <TeamHubShell
@@ -49,6 +47,19 @@ export function GamesTab({ id, asOf, sportId }) {
       active="games"
       hiddenTabs={hiddenTeamTabs(team)}
     >
+      <GamesBody team={team} asOf={asOf} sportId={sportId} games={games.data} />
+    </TeamHubShell>
+  )
+}
+
+// The tab's body, apart from its shell, so the one-scroll page's Games band
+// (next/games/) mounts the same cards (#1107).
+export function GamesBody({ team, asOf, sportId, games }) {
+  const navigate = useNav()
+  const { schedule, allStarGame, seasonGames, photoGames, transactionsPage } = games
+
+  return (
+    <>
       {schedule.length > 0 && (
         <SeasonSchedule
           teamId={team.id}
@@ -103,6 +114,6 @@ export function GamesTab({ id, asOf, sportId }) {
           </div>
         </>
       )}
-    </TeamHubShell>
+    </>
   )
 }

@@ -30,3 +30,17 @@ MLB, each row tagged `gameType`, so the Games tab, Last 10, Stamp In and the pho
 them. A number that must reconcile with a regular-season ledger (the day-of-week record, the
 Records card's completeness check in `loadNumbers.js`) filters on `gameType === 'R'` first. A
 postseason row dated after the page's own day is never returned (ADR-0087).
+
+## The one-scroll page (hidden, `/team/{id}/next`; ADR-0082, #1107)
+
+`next/TeamNextPage.jsx`: `TeamHubShell` with the anchor jump bar (`bar` prop), then one `Band`
+per `BANDS` entry (`next/bands.js`: Standing, Ranks, Games, Roster, Farm, Money, About). A band
+mounts its folder (`next/<band>/index.jsx`) only when near (`useNearView`), so nothing loads
+before it is. **A row edits only its own band folder**, never `bands.js`, `Band.jsx` or the page.
+Module props: `{ team, asOf, sportId, onReady, onCount }`; call `useBandData` for the two
+reports. Absent bands come from `hiddenTeamSections(team)` (`data/shared.js`; the league test
+first). Foundation bands mount the tab bodies as they are (`NumbersBody`, `GamesBody`,
+`RosterBody`, `MinorsBody`, `ContractsBody`); Standing and Ranks share one `loadNumbers`
+through `next/once.js`. `/team/{id}/next/{roster|games|numbers|contracts|minors}` lands on the
+band (`TEAM_TAB_BAND`, `lib/route.js`) and keeps `?d=` and `?s=`. The six tab routes stay until
+the swap (row 7).

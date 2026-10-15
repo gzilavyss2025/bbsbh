@@ -154,6 +154,8 @@ const GamesTab = lazyNamed(() => import('./screens/team/GamesTab.jsx'), 'GamesTa
 const NumbersTab = lazyNamed(() => import('./screens/team/NumbersTab.jsx'), 'NumbersTab')
 const ContractsTab = lazyNamed(() => import('./screens/team/ContractsTab.jsx'), 'ContractsTab')
 const MinorsTab = lazyNamed(() => import('./screens/team/MinorsTab.jsx'), 'MinorsTab')
+// The hidden one-scroll team page (#1107): '/team/{id}/next', until the swap.
+const TeamNextPage = lazyNamed(() => import('./screens/team/next/TeamNextPage.jsx'), 'TeamNextPage')
 // Stamp In (ADR-0042) — NOT a sixth tab. A standalone page under the team's
 // address, reached only from the Schedule card's button on the Games tab, and
 // lazily loaded like every other screen so nobody who never opens it pays for
@@ -336,6 +338,7 @@ const ID_ROUTES = {
   'team-numbers': NumbersTab,
   'team-contracts': ContractsTab,
   'team-minors': MinorsTab,
+  'team-next': TeamNextPage,
   'team-stamp-in': StampInPage,
   'team-photos': TeamPhotosPage,
   'team-transactions': TeamTransactionsPage,

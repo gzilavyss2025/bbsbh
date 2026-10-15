@@ -116,6 +116,7 @@ export function TeamHubShell({
   active,
   hiddenTabs,
   datable = true,
+  bar,
   children,
 }) {
   const navigate = useNav()
@@ -298,13 +299,16 @@ export function TeamHubShell({
           />
         )}
 
-        <TeamTabBar
-          teamId={team.id}
-          active={active}
-          asOf={asOf}
-          sportId={sportId}
-          hidden={hiddenTabs}
-        />
+        {/* `bar` swaps the tab bar for another control: the one-scroll page's jump bar (#1107). */}
+        {bar ?? (
+          <TeamTabBar
+            teamId={team.id}
+            active={active}
+            asOf={asOf}
+            sportId={sportId}
+            hidden={hiddenTabs}
+          />
+        )}
 
         {children}
 

@@ -27,7 +27,6 @@ import { LastTimeCard } from './modules/records/LastTimeCard.jsx'
 // never pays for another tab's data.
 export function NumbersTab({ id, asOf, sportId }) {
   const teamId = Number(id)
-  const navigate = useNav()
   const identity = useAsync(() => loadTeamIdentity(teamId, asOf), [teamId, asOf])
   const numbers = useAsync(() => loadNumbers(teamId, asOf), [teamId, asOf])
   const back = () => window.history.back()
@@ -43,8 +42,6 @@ export function NumbersTab({ id, asOf, sportId }) {
   if (gate) return gate
 
   const { team, record, manager } = identity.data
-  const isMilb = (team.sport?.id ?? 1) !== 1
-  const n = numbers.data
 
   return (
     <TeamHubShell
@@ -56,6 +53,26 @@ export function NumbersTab({ id, asOf, sportId }) {
       active="numbers"
       hiddenTabs={hiddenTeamTabs(team)}
     >
+      <NumbersBody numbers={numbers} team={team} asOf={asOf} sportId={sportId} />
+    </TeamHubShell>
+  )
+}
+
+// The tab's body, apart from its shell, so the one-scroll page's Standing and
+// Ranks bands (next/standing/, next/ranks/) mount the same cards (#1107). `numbers`
+// is the useAsync result. `part` picks a band's share, in the tab's own order:
+// 'standing' is the standings table and the record cards, 'ranks' the rank tables
+// and the leaders ledger, 'all' (the tab) both.
+export function NumbersBody({ numbers, team, asOf, sportId, part = 'all' }) {
+  const teamId = team.id
+  const navigate = useNav()
+  const isMilb = (team.sport?.id ?? 1) !== 1
+  const n = numbers.data
+  const showStanding = part !== 'ranks'
+  const showRanks = part !== 'standing'
+
+  return (
+    <>
       <AsyncStatus
         loading={numbers.loading}
         error={numbers.error}
@@ -65,7 +82,7 @@ export function NumbersTab({ id, asOf, sportId }) {
 
       {n && (
         <>
-          {n.standings.length > 0 && (
+          {showStanding && n.standings.length > 0 && (
             <StandingsCard
               team={team}
               standings={n.standings}
@@ -74,8 +91,8 @@ export function NumbersTab({ id, asOf, sportId }) {
             />
           )}
 
-          {n.batting && <TeamStats title="Team batting" stats={n.batting} />}
-          {n.pitching && <TeamStats title="Team pitching" stats={n.pitching} />}
+          {showRanks && n.batting && <TeamStats title="Team batting" stats={n.batting} />}
+          {showRanks && n.pitching && <TeamStats title="Team pitching" stats={n.pitching} />}
 
           {/* Between the two rank tables and the ledger on purpose: those
               tables rank the club on runs scored and runs allowed, this says
@@ -83,7 +100,7 @@ export function NumbersTab({ id, asOf, sportId }) {
               scale — and it names the men carrying it, which reads straight
               into the leaders below. MLB only (Savant runs no minor-league
               board), so an affiliate's page is unchanged. */}
-          <TeamRunValueCard data={n.runValue} clubName={teamClubName(team)} />
+          {showRanks && <TeamRunValueCard data={n.runValue} clubName={teamClubName(team)} />}
 
           {/* And beside it, the one question the run-value card cannot ask: who
               on this club argues with the plate umpire, against how much
@@ -92,40 +109,44 @@ export function NumbersTab({ id, asOf, sportId }) {
               cannot show that the same club is last at the plate and third
               behind it. MLB and Triple-A, the two levels that run the rig; a
               club below that draws nothing and fetches nothing. */}
-          <TeamChallengeCard
-            data={n.absExposureClubs}
-            teamId={teamId}
-            clubName={teamClubName(team)}
-            level={n.absExposureLevel}
-          />
+          {showRanks && (
+            <TeamChallengeCard
+              data={n.absExposureClubs}
+              teamId={teamId}
+              clubName={teamClubName(team)}
+              level={n.absExposureLevel}
+            />
+          )}
 
           {/* The full ledger — six categories a side, every one on screen. The
               "See all ›" door goes on to /team/{id}/leaders, which is where the
               headshot card board and the runners-up still live. */}
-          <TeamLeadersLedger
-            pool={n.leaderPool}
-            hitting={LEDGER_HITTING}
-            pitching={LEDGER_PITCHING}
-            onSeeAll={() => navigate(teamLeadersPath(teamId, { d: asOf, s: sportId }))}
-            injuredIds={n.injuredIds}
-            secondaryAction={
-              (!isMilb || parentOrgIdOf(team)) && (
-                <Door
-                  onClick={() =>
-                    navigate(orgLeadersPath(isMilb ? parentOrgIdOf(team) : teamId, { d: asOf, s: sportId }))
-                  }
-                >
-                  Org leaders
-                </Door>
-              )
-            }
-          />
+          {showRanks && (
+            <TeamLeadersLedger
+              pool={n.leaderPool}
+              hitting={LEDGER_HITTING}
+              pitching={LEDGER_PITCHING}
+              onSeeAll={() => navigate(teamLeadersPath(teamId, { d: asOf, s: sportId }))}
+              injuredIds={n.injuredIds}
+              secondaryAction={
+                (!isMilb || parentOrgIdOf(team)) && (
+                  <Door
+                    onClick={() =>
+                      navigate(orgLeadersPath(isMilb ? parentOrgIdOf(team) : teamId, { d: asOf, s: sportId }))
+                    }
+                  >
+                    Org leaders
+                  </Door>
+                )
+              }
+            />
+          )}
 
-          {n.teamRecords && <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} />}
+          {showStanding && n.teamRecords && <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} />}
 
-          {n.scheduleShape && <LastTimeCard data={n.scheduleShape} cutoff={n.recordsCutoff} />}
+          {showStanding && n.scheduleShape && <LastTimeCard data={n.scheduleShape} cutoff={n.recordsCutoff} />}
 
-          {(isMilb || n.jerseyCombos.length > 0) &&
+          {showStanding && (isMilb || n.jerseyCombos.length > 0) &&
             (isMilb ? (
               <MilbUniformStrip
                 teamId={team.id}
@@ -137,7 +158,7 @@ export function NumbersTab({ id, asOf, sportId }) {
               <JerseyCombos combos={n.jerseyCombos} teamId={team.id} teamName={team.name} />
             ))}
 
-          {n.dayOfWeek && (
+          {showStanding && n.dayOfWeek && (
             <TeamStats
               title="Record by Day of Week"
               stats={n.dayOfWeek}
@@ -146,11 +167,11 @@ export function NumbersTab({ id, asOf, sportId }) {
             />
           )}
 
-          {n.comeback && (
+          {showStanding && n.comeback && (
             <ComebackCard data={n.comeback} teamId={teamId} clubName={teamClubName(team)} />
           )}
         </>
       )}
-    </TeamHubShell>
+    </>
   )
 }

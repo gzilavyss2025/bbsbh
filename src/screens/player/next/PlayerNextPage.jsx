@@ -4,6 +4,7 @@ import { loadPlayerCore } from '../../../api/player/core.js'
 import { loadPlayerOverview } from '../../../api/player/overview.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../../hooks/useDocumentTitle.js'
+import { holdSectionInView } from '../../../hooks/scroll/holdSectionInView.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 import { hasSeen, markSeen, viewKey } from '../../../lib/motion/inViewOnce.js'
 import { replayClass } from '../../../lib/jumpbar/land.js'
@@ -42,24 +43,7 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
     // so Back or a reload does not scroll the reader away from where they were.
     window.history.replaceState(window.history.state, '', window.location.pathname.replace(/\/(stats|analytics|history)(\/[^/]*)?\/?$/, '') + window.location.search)
     if (!el) return
-    if (typeof ResizeObserver === 'undefined') return el.scrollIntoView()
-    // The observer fires once on observe(), which is the first scroll. Slots above the
-    // section load as they come near and grow, which pushes it down: hold it at the top
-    // until the reader moves, or until its own module empties it off the page.
-    // ponytail: a fixed 4 s hold; a slot that loads later than that can still push it.
-    const hold = new ResizeObserver(() => (el.isConnected ? el.scrollIntoView() : stop()))
-    hold.observe(el.parentElement)
-    const MOVES = ['wheel', 'touchstart', 'keydown', 'pointerdown']
-    const stop = () => {
-      hold.disconnect()
-      for (const e of MOVES) window.removeEventListener(e, stop)
-    }
-    for (const e of MOVES) window.addEventListener(e, stop, { passive: true })
-    const timer = setTimeout(stop, 4000)
-    return () => {
-      clearTimeout(timer)
-      stop()
-    }
+    return holdSectionInView(el)
   }, [tab, core.data, overview.data])
   // Instance key -> true once that slot's module has said it has no data.
   const [empty, setEmpty] = useState({})

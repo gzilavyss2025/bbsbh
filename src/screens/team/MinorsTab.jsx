@@ -33,14 +33,6 @@ export function MinorsTab({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { isMilb, affiliateCards, prospects, affiliationHistory, horizon, depthChart } = minors.data
-
-  const showAffiliates = affiliateCards.length > 0
-  const showProspects = prospects.length > 0
-  const showHistory = isMilb && affiliationHistory.length > 0
-  const showHorizon = horizon.promotionWatch.length > 0 || horizon.milestones.length > 0
-  const showDepthChart = depthChart.positions.length > 0
-
   return (
     <TeamHubShell
       team={data.team}
@@ -51,6 +43,24 @@ export function MinorsTab({ id, asOf, sportId }) {
       active="minors"
       hiddenTabs={hiddenTeamTabs(data.team)}
     >
+      <MinorsBody minors={minors.data} />
+    </TeamHubShell>
+  )
+}
+
+// The tab's body, apart from its shell, so the one-scroll page's Farm band
+// (next/farm/) mounts the same cards (#1107).
+export function MinorsBody({ minors }) {
+  const { isMilb, affiliateCards, prospects, affiliationHistory, horizon, depthChart } = minors
+
+  const showAffiliates = affiliateCards.length > 0
+  const showProspects = prospects.length > 0
+  const showHistory = isMilb && affiliationHistory.length > 0
+  const showHorizon = horizon.promotionWatch.length > 0 || horizon.milestones.length > 0
+  const showDepthChart = depthChart.positions.length > 0
+
+  return (
+    <>
       {showHistory && <CareerTimeline entries={affiliationHistory} title="Affiliation history" headLook="label" />}
 
       {showAffiliates && <AffiliatesCard affiliates={affiliateCards} />}
@@ -66,6 +76,6 @@ export function MinorsTab({ id, asOf, sportId }) {
       )}
 
       {showDepthChart && <DepthChartCard depthChart={depthChart} />}
-    </TeamHubShell>
+    </>
   )
 }
