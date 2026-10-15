@@ -103,7 +103,7 @@ async function measure(browser, route) {
 }
 
 const routes = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_ROUTES
-const browser = await chromium.launch()
+const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {})
 const rows = []
 for (const route of routes) {
   // Uncounted warm-up: compiles the lazy route chunk and primes vite's

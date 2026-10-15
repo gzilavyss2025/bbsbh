@@ -80,6 +80,7 @@
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
 //   '/team/{id}/{roster|games|numbers|contracts|minors}'
 //                                       -> { name: 'team-{tab}', id, asOf, sportId }
+//   '/team/{id}/next[/{tab}]'          -> { name: 'team-next', id, asOf, sportId, tab }  (hidden, #1107)
 //   '/team/{id}/stamp-in'               -> { name: 'team-stamp-in', id, asOf, sportId }
 //                                          (a club's played season, every result showing, one
 //                                           stamp per game you watched — ADR-0042. NOT a tab.)
@@ -192,6 +193,16 @@ const TEAM_TAB_ROUTES = {
   numbers: 'team-numbers',
   contracts: 'team-contracts',
   minors: 'team-minors',
+}
+
+// Where each old tab lands on the one-scroll team page (ADR-0082, #1107). `/numbers`
+// lands on Standing, where the Numbers tab's lead content (the standings table) went.
+export const TEAM_TAB_BAND = {
+  roster: 'roster',
+  games: 'games',
+  numbers: 'standing',
+  contracts: 'money',
+  minors: 'farm',
 }
 
 // The old player-hub tab addresses (#1898). The tabs are gone: each opens the one
@@ -586,6 +597,17 @@ export function parseRoute(url) {
   // either, same reasoning and same placement as the two above.
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'transactions')
     return { name: 'team-transactions', id: idFromSlug(parts[1]), asOf, sportId }
+  // The hidden one-scroll team page (#1107): '/team/{id}/next', and behind it the five
+  // old tab addresses ('/team/{id}/next/roster') that land on a band. Until the swap the
+  // live tab routes below are untouched. Both sit above the unknown-segment branch.
+  if ((parts.length === 3 || parts.length === 4) && parts[0] === 'team' && parts[2] === 'next')
+    return {
+      name: 'team-next',
+      id: idFromSlug(parts[1]),
+      asOf,
+      sportId,
+      tab: TEAM_TAB_BAND[parts[3]] ? parts[3] : null,
+    }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }
   // An UNKNOWN third segment ('/team/158/media', a hand-edited URL, a tab
@@ -937,6 +959,11 @@ export function teamTabPath(id, tab, opts = {}) {
   return tab === 'overview'
     ? teamPath(id, opts)
     : `/team/${teamSegment(id, opts.name)}/${tab}${linkQuery(opts)}`
+}
+// The hidden one-scroll team page, and a band on it. `band` is the id of the band's
+// section; the cutoff rides the query like every other team link.
+export function teamBandPath(id, band, opts = {}) {
+  return `/team/${teamSegment(id, opts.name)}/next${linkQuery(opts)}${band ? `#${band}` : ''}`
 }
 // Stamp In — the club's played season, one stamp per game you watched
 // (ADR-0042). Built in exactly one place, the Schedule card's button on the

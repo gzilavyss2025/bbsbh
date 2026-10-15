@@ -84,3 +84,43 @@ test('a club with no parent org at all is unchanged', () => {
 test('a winter-ball club hides Contracts and Minors, and keeps Numbers', () => {
   assert.deepEqual(hiddenTeamTabs(LOS_MOCHIS), new Set(['contracts', 'minors']))
 })
+
+// ---------------------------------------------------------------------------
+// hiddenTeamSections — the one-scroll page's absent bands (ADR-0082, #1107)
+//
+// Same rule as the tabs, at band grain: a band a club cannot fill does not
+// render and has no jump-bar button. The league test comes before any sport
+// test, so a league-less club of ANY sport loses Ranks.
+// ---------------------------------------------------------------------------
+import { hiddenTeamSections } from '../src/screens/team/data/shared.js'
+
+test('an MLB club with a league keeps all seven bands', () => {
+  assert.deepEqual(hiddenTeamSections({ sport: { id: 1 }, league: { id: 103 }, parentOrgId: null }), new Set())
+})
+
+test('an affiliate loses Money, and Farm only when it has no parent org', () => {
+  assert.deepEqual(hiddenTeamSections({ sport: { id: 11 }, league: { id: 117 }, parentOrgId: 158 }), new Set(['money']))
+  assert.deepEqual(
+    hiddenTeamSections({ sport: { id: 11 }, league: { id: 117 }, parentOrgId: null }),
+    new Set(['money', 'farm']),
+  )
+})
+
+test('a winter club keeps Ranks and loses Money and Farm: five bands', () => {
+  assert.deepEqual(hiddenTeamSections(LOS_MOCHIS), new Set(['money', 'farm']))
+})
+
+test('no league id loses Ranks, even on a club whose sport is MLB (#1143)', () => {
+  // /team/11: sport.id 1 with a league object that carries no id. The old
+  // function returned on !isMilb before it reached this test.
+  assert.deepEqual(hiddenTeamSections({ sport: { id: 1 }, league: {}, parentOrgId: 11 }), new Set(['ranks']))
+  assert.deepEqual(
+    hiddenTeamSections({ sport: { id: 16 }, league: null, parentOrgId: null }),
+    new Set(['ranks', 'money', 'farm']),
+  )
+})
+
+test('Standing, Games, Roster and About are never hidden', () => {
+  const worst = hiddenTeamSections({ sport: { id: 16 }, league: null, parentOrgId: null })
+  for (const k of ['standing', 'games', 'roster', 'about']) assert.equal(worst.has(k), false, k)
+})

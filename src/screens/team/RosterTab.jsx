@@ -24,11 +24,6 @@ export function RosterTab({ id, asOf, sportId }) {
   const roster = useAsync(() => loadRoster(teamId, asOf), [teamId, asOf])
   const back = () => window.history.back()
 
-  // Season / Current toggle, keyed by team id so client-side navigation to a
-  // different club naturally resets to the Current default rather than
-  // inheriting the last club's chosen view (same idiom TeamPage.jsx used).
-  const [seasonRosterTeamId, setSeasonRosterTeamId] = useState(null)
-
   const gate = AsyncGate({
     loading: identity.loading || roster.loading,
     error: identity.error || roster.error,
@@ -39,6 +34,28 @@ export function RosterTab({ id, asOf, sportId }) {
   })
   if (gate) return gate
 
+  return (
+    <TeamHubShell
+      team={identity.data.team}
+      record={identity.data.record}
+      manager={identity.data.manager}
+      asOf={asOf}
+      sportId={sportId}
+      active="roster"
+      hiddenTabs={hiddenTeamTabs(identity.data.team)}
+    >
+      <RosterBody teamId={teamId} roster={roster.data} sportId={sportId} />
+    </TeamHubShell>
+  )
+}
+
+// The tab's body, apart from its shell, so the one-scroll page's Roster band
+// (next/roster/) mounts the same cards (#1107).
+export function RosterBody({ teamId, roster: data, sportId }) {
+  // Season / Current toggle, keyed by team id so client-side navigation to a
+  // different club naturally resets to the Current default rather than
+  // inheriting the last club's chosen view (same idiom TeamPage.jsx used).
+  const [seasonRosterTeamId, setSeasonRosterTeamId] = useState(null)
   const {
     season,
     isMilb,
@@ -53,7 +70,7 @@ export function RosterTab({ id, asOf, sportId }) {
     recentSubstitutes,
     recentStartingPitchers,
     recentBullpen,
-  } = roster.data
+  } = data
 
   const injuredIds = new Set(injured.map((p) => p.id))
   // Same diamond row shape the Overview's lineup preview uses (shared.js), so
@@ -74,45 +91,35 @@ export function RosterTab({ id, asOf, sportId }) {
   const rosterBullpen = showRecentRoster ? recentBullpen : bullpen
 
   return (
-    <TeamHubShell
-      team={identity.data.team}
-      record={identity.data.record}
-      manager={identity.data.manager}
-      asOf={asOf}
-      sportId={sportId}
-      active="roster"
-      hiddenTabs={hiddenTeamTabs(identity.data.team)}
-    >
-      <Stack gap="section">
-        {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
-          <RosterProjection
-            hasRecentRoster={hasRecentRoster}
-            showRecentRoster={showRecentRoster}
-            onShowSeason={() => setSeasonRosterTeamId(teamId)}
-            onShowCurrent={() => setSeasonRosterTeamId(null)}
-            rosterLineup={rosterLineup}
-            rosterSubs={rosterSubs}
-            rosterSP={rosterSP}
-            rosterBullpen={rosterBullpen}
-            injuredIds={injuredIds}
-            season={season}
-            isMilb={isMilb}
-          />
-        )}
+    <Stack gap="section">
+      {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
+        <RosterProjection
+          hasRecentRoster={hasRecentRoster}
+          showRecentRoster={showRecentRoster}
+          onShowSeason={() => setSeasonRosterTeamId(teamId)}
+          onShowCurrent={() => setSeasonRosterTeamId(null)}
+          rosterLineup={rosterLineup}
+          rosterSubs={rosterSubs}
+          rosterSP={rosterSP}
+          rosterBullpen={rosterBullpen}
+          injuredIds={injuredIds}
+          season={season}
+          isMilb={isMilb}
+        />
+      )}
 
-        {/* The club's pen over its last seven days — self-fetching and
-            self-hiding, so a MiLB affiliate (absent from workload.json) and a
-            club with no recent relief work both simply render nothing. */}
-        <BullpenHealthCard teamId={teamId} />
+      {/* The club's pen over its last seven days — self-fetching and
+          self-hiding, so a MiLB affiliate (absent from workload.json) and a
+          club with no recent relief work both simply render nothing. */}
+      <BullpenHealthCard teamId={teamId} />
 
-        {(position.length > 0 || pitchers.length > 0) && (
-          <CurrentRosterCard position={position} pitchers={pitchers} season={season} isMilb={isMilb} sportId={sportId} />
-        )}
+      {(position.length > 0 || pitchers.length > 0) && (
+        <CurrentRosterCard position={position} pitchers={pitchers} season={season} isMilb={isMilb} sportId={sportId} />
+      )}
 
-        {injured.length > 0 && (
-          <InjuredListCard injured={injured} season={season} showInjured onShowInjured={() => {}} />
-        )}
-      </Stack>
-    </TeamHubShell>
+      {injured.length > 0 && (
+        <InjuredListCard injured={injured} season={season} showInjured onShowInjured={() => {}} />
+      )}
+    </Stack>
   )
 }
