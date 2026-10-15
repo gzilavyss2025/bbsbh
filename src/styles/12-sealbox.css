@@ -654,47 +654,12 @@
    distinct from the sealed content below it: a plain rule and caption, no
    seal texture, since it isn't gated by the tap. */
 /* UpNextBatters: who's due up to face the entering pitcher, before any of the
-   half is revealed — three headshot columns. Horizontal margin (not just
-   .prehalf's margin-bottom): a headshot flush against .half's own border
-   (which carries no padding of its own) reads worse than the text-only cards
-   around it do, the same reasoning the kraft "now pitching" card's own
-   horizontal margin follows (see .change--framed). */
+   half is revealed — the stamped due-up card (focus/dueup-next.css). This rule
+   is only its place in `.half`: the horizontal margin keeps the card off .half's
+   own border (which carries no padding), and the top margin leaves room for the
+   name tab that hangs above a stamped card. */
 .upnext {
-  margin: 10px 14px 4px;
-}
-.upnext__title {
-  display: block;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  margin-bottom: 8px;
-}
-.upnext__row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-2h);
-}
-.upnext__col {
-  align-items: center;
-  text-align: center;
-  min-width: 0;
-}
-.shot.upnext__shot {
-  width: var(--shot-lg-w);
-  height: var(--shot-lg-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.upnext__name {
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  max-width: 100%;
-  overflow-wrap: anywhere;
+  margin: var(--space-6) 14px var(--space-1);
 }
 
 .prepitch {
@@ -1200,57 +1165,6 @@
    (`.statbox__abs`, always visible there below this breakpoint). */
 .absframe {
   display: none;
-}
-
-/* DueUpNextCard: the OTHER team's next half, previewed — a Card like
-   .statbox (#1113 slice C4), stacked below it on both breakpoints (unlike
-   .absframe, this has no other-breakpoint home to hide from). A flush Card:
-   the inset is this rule's own. */
-.dueup {
-  padding: var(--space-3) var(--space-3h);
-}
-/* Bleeds past the card's own padding to cap it flush (same masthead recipe
-   as .pitchers__title) — the Card's overflow: hidden clips the
-   square corners here to the card's own rounded ones. */
-.dueup__title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1h);
-  margin: -12px -14px 8px;
-  padding: var(--space-2) var(--space-2h);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-}
-/* Same headshot-column recipe as .upnext (UpNextBatters.jsx) — this card
-   previews the OTHER side's next half instead of the batting side's own, so
-   it keeps its own team-identifying title, but the body reads as the same
-   "who's due up" widget either way. */
-.dueup__row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-2h);
-}
-.dueup__col {
-  align-items: center;
-  text-align: center;
-  min-width: 0;
-}
-.shot.dueup__shot {
-  width: var(--shot-lg-w);
-  height: var(--shot-lg-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.dueup__name {
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  max-width: 100%;
-  overflow-wrap: anywhere;
 }
 
 /* Phone-only. `.inning` goes display:contents so `.half` (its one child now —

@@ -61,7 +61,7 @@
   "src/styles/12-sealbox.css": {
     "column": 17,
     "wrap": 3,
-    "grid": 9
+    "grid": 7
   },
   "src/styles/13-play-by-play.css": {
     "column": 4
@@ -359,10 +359,6 @@
   },
   "src/styles/72-club-transactions.css": {
     "grid": 3
-  },
-  "src/styles/72-player-hover-card.css": {
-    "column": 1,
-    "grid": 1
   },
   "src/styles/74-contract-workbench.css": {
     "column": 1,

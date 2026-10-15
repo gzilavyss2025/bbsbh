@@ -1,0 +1,56 @@
+/* ==== THE RANKS BAND OF THE ONE-SCROLL TEAM PAGE (#1107, row 6a) ====
+   next/ranks/ imports this file. Every card is a stamped Card with a name tab; the 22 rank cells
+   are the compact stat tile. Cards sit one gap apart in the page's Stack (.tnext__square hands
+   the band's children straight to it). The club colour is not used here: it is the hero's. */
+
+/* layout-exempt: the rank cells, three across at every width, one compact tile each */
+.rnk__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.rnk__tile .stattile__label {
+  overflow-wrap: anywhere;
+}
+/* The best five ranks take the whole marker stroke; the others keep the half underline. */
+.rnk__tile--best .rankmark {
+  background: var(--marker);
+}
+
+/* Wide: five cells across, so a tile keeps its phone size instead of stretching. */
+@media (min-width: 740px) {
+  .rnk__grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* Parts inside a card sit one step apart; the lead tile fills the card's width. */
+.rnk__card > .card__body > * + * {
+  margin-top: var(--space-3);
+}
+.rnk__lead {
+  width: 100%;
+}
+
+/* The two leader doors and a card's door sit on the right, as on the old tabs. */
+/* layout-exempt: two doors in one right-aligned row */
+.rnk__doors {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+}
+
+/* Motion is once per page visit: a return shows the band at rest. */
+.rnk--still .card--stamp-in {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rnk .card--stamp-in {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+:root[data-motion='reduced'] .rnk .card--stamp-in {
+  animation: none !important;
+  transition: none !important;
+}

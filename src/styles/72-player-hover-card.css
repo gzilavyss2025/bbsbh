@@ -1,12 +1,18 @@
 /* ============================================================
    PLAYER HOVER CARD
-   The global desktop popover PlayerLink opens on hover/focus —
-   a compact season-stat card in the app's paper-scorebook system.
+   The global desktop popover PlayerLink opens on hover/focus: a scorebook
+   line in the stamped look. A band in the club's own colours (the Identity
+   Lab's header triad, through headerThemeStyle; house navy when a club has
+   none) with the player's photo, a two-line name and the crest, then one
+   ruled table of season figures and, once he has played October, a
+   Postseason row in the same columns.
    Rendered by the one <PlayerHoverCard> (components/player/), which
-   ModalPortal puts in <body>, OUTSIDE #root — so this file also
+   ModalPortal puts in <body>, OUTSIDE #root, so this file also
    re-states the ALL-CAPS INVARIANT for its own subtree (01-base.css's
    `#root *` cannot reach a body-portalled node; same reason
    focus/reference.css re-states it for `.focusrail__sheet`).
+   The band's ground, underline, ink and texture are .sectionhead--band's
+   (system/section-head.css); this file only lays it out.
    ============================================================ */
 .phcard * {
   text-transform: uppercase;
@@ -15,46 +21,46 @@
 .phcard {
   position: fixed;
   z-index: var(--z-modal);
-  width: 300px;
+  width: 320px;
   background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-raised);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
   font-family: var(--font-body);
-  /* The card takes NO pointer. It is read-only — a headshot, a name, four
-     stat tiles, nothing to click or reach — so a reader travelling DOWN a
+  /* The card takes NO pointer. It is read-only (a photo, a name, a few
+     figures, nothing to click or reach), so a reader travelling DOWN a
      lineup passes straight through it onto the next name, which re-anchors
      the card, instead of having to steer around it first. The card still
      COVERS the row under it; it just no longer holds the road.
      Anything clickable added in here turns this back on and re-creates that
-     block, so it has to earn it — and it then owes the trigger-to-card
+     block, so it has to earn it, and it then owes the trigger-to-card
      travel gap a safe polygon, not a plain grace period. */
   pointer-events: none;
 }
 
-.phcard__spine {
-  height: 3px;
-  border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
-  /* A flat wash of the club's own color, never the kraft-amber --seal — this
-     card identifies a CLUB, it is not a spoiler cover (ADR-0030's "a club
-     may colour a card that identifies the club"). No known color (an
-     unaffiliated MiLB id) just leaves the spine the card's own paper. */
-  background: var(--phcard-accent, var(--border-hairline));
-}
-
-.phcard__head {
+.phcard__band {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-4) var(--space-3);
+  padding: var(--space-3);
 }
 
-.shot.phcard__photo {
+/* The photo frame wears the band's own ground; the headshot's club tint
+   washes over it. */
+.phcard__photo {
+  flex: 0 0 auto;
+  display: block;
   width: var(--shot-sm-w);
   height: var(--shot-sm-h);
-  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: var(--bw-heavy) solid var(--band-text);
+  background: var(--band-fill);
 }
-.shot.phcard__photo.shot--fallback {
+.phcard__photo .shot {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+.phcard__photo .shot.shot--fallback {
   font-size: var(--fs-title-md);
 }
 
@@ -63,36 +69,59 @@
   flex: 1 1 auto;
 }
 
-.phcard__name {
+.phcard__first,
+.phcard__last {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: var(--fs-title-md);
-  line-height: var(--lh-tight);
-  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.phcard__first {
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-xwide);
+  line-height: var(--lh-solid);
+}
+.phcard__last {
+  margin-top: var(--space-1);
+  font-size: var(--fs-hero-sm);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
 }
 
 .phcard__meta {
-  margin-top: 4px;
+  margin-top: var(--space-1h);
   font-family: var(--font-display);
   font-weight: var(--w-semibold);
   font-size: var(--fs-compact);
   letter-spacing: var(--ls-label);
-  color: var(--text-caption);
+  line-height: var(--lh-compact);
 }
 
-/* The club tag under the name, a paper Pill tag (#1131) on the inset paper.
-   The level tag takes the paper fill's own rule edge and body ink. The rehab
-   tag only differs in its edge colour and ink. The card
-   stays bespoke; the tag keeps its place under the name, its overflow rules,
-   and its tighter caps tracking. It is as wide as the name column at most,
-   and at the pill's --ls-label "On rehab · AAA · Iowa Cubs" ran 5px past it. */
+/* The crest rides on a paper chip: a cap logo is drawn for light ground. */
+.phcard__crest {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  background: var(--surface-inset);
+  border: var(--bw-heavy) solid var(--band-text);
+}
+
+/* The level / rehab strip under the band. The level tag takes the paper
+   fill's own rule edge and body ink; rehab only differs in its edge and ink,
+   dashed because it is a temporary status, not his real team. A block, not
+   the pill's inline-flex, so the ellipsis draws (#1183). */
+.phcard__tagrow {
+  padding: var(--space-1h) var(--space-3);
+  background: var(--surface-inset);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
 .phcard__tag {
   --pill-fill: var(--surface-inset);
-  /* A block, not the pill's inline-flex: text-overflow acts only on a block
-     container, so without this the ellipsis never draws (#1183). */
   display: inline-block;
   max-width: 100%;
-  margin-top: var(--space-2);
   letter-spacing: var(--ls-caps);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -102,60 +131,35 @@
   --pill-ink: var(--text-caption);
 }
 
-.phcard__crest {
-  flex: 0 0 auto;
+.phcard__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
-
-.phcard__rule {
-  height: var(--bw-hair);
-  background: var(--border-hairline);
-  margin: 0 var(--space-4);
-}
-
-.phcard__stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4) var(--space-4);
-}
-
-/* The postseason line (#1436): a caption, then the same four tiles, only once he has
-   played an October game. It sits under the season row and never replaces it. */
-.phcard__postlabel {
-  padding: 0 var(--space-4);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
-.phcard__stats--post {
-  padding-top: var(--space-2);
-}
-
-.phcard__tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: var(--space-2) 2px;
+.phcard__table th,
+.phcard__table td {
+  box-sizing: border-box;
+  padding: 0;
   text-align: center;
-  background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
+}
+.phcard__table tr > :first-child {
+  width: 92px;
+  padding-left: var(--space-3);
+  text-align: left;
+  border-left: 0;
+}
+.phcard__table tr > :last-child {
+  border-right: 0;
+}
+.phcard__table tbody tr:last-child > * {
+  border-bottom: 0;
 }
 
-.phcard__tilev {
-  font-family: var(--font-mono);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-body);
-  color: var(--text-heading);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-}
-
-.phcard__tilek {
+.phcard__colk {
+  height: var(--space-6);
+  background: var(--bg-page);
+  border-top: 0;
   font-family: var(--font-display);
   font-weight: var(--w-semibold);
   font-size: var(--fs-label);
@@ -163,9 +167,30 @@
   color: var(--text-caption);
 }
 
+.phcard__rowk {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+/* One size for both rows: the postseason line matches the season line. */
+.phcard__rowv {
+  height: var(--space-10);
+  font-family: var(--font-mono);
+  font-weight: var(--w-medium);
+  font-size: var(--fs-h3);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+.phcard__row--post > * {
+  background: var(--surface-inset);
+}
+
 .phcard__loading {
   height: 148px;
-  border-radius: var(--radius-md);
   background: linear-gradient(
     90deg,
     var(--surface-card) 0%,

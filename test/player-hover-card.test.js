@@ -12,6 +12,7 @@ import {
   pitcherHoverFields,
   hitterHoverFields,
   resolveHoverIdentity,
+  nameParts,
 } from '../src/api/playerHoverCard.js'
 
 function pitchingStat(overrides = {}) {
@@ -175,4 +176,37 @@ test('resolveHoverIdentity: a released/retired player — the crest is nulled, n
   })
   const r = resolveHoverIdentity({ person: p, transactions: [], endDate: '2026-08-15' })
   assert.equal(r.team, null)
+})
+
+test('pitcherHoverFields: a pinned lead keeps the postseason row under the season heads', () => {
+  const post = pitchingStat({ saves: 0, wins: 1, losses: 0 })
+  assert.equal(pitcherHoverFields(post, 'SV')[0].k, 'SV')
+  const closerPost = pitchingStat({ saves: 7 })
+  assert.equal(pitcherHoverFields(closerPost, 'W–L')[0].k, 'W–L')
+  assert.equal(pitcherHoverFields(closerPost, 'W–L')[0].v, '4–2')
+})
+
+test('nameParts: the feed split wins, a suffix stays with the last name', () => {
+  assert.deepEqual(
+    nameParts({ firstName: 'Ronald', lastName: 'Acuña', useName: 'Ronald', useLastName: 'Acuña Jr.' }, 'Ronald Acuña Jr.'),
+    { firstName: 'Ronald', lastName: 'Acuña Jr.' },
+  )
+  assert.deepEqual(
+    nameParts({ useName: 'Elly', useLastName: 'De La Cruz' }, 'Elly De La Cruz'),
+    { firstName: 'Elly', lastName: 'De La Cruz' },
+  )
+})
+
+test('nameParts: with no split in the feed, cut fullName at the first space; a mononym is all last name', () => {
+  assert.deepEqual(nameParts({}, 'Elly De La Cruz'), { firstName: 'Elly', lastName: 'De La Cruz' })
+  assert.deepEqual(nameParts(null, 'Ichiro'), { firstName: '', lastName: 'Ichiro' })
+})
+
+test('pitcherHoverFields: a pinned SV lead on a null stat dashes every field, never throws', () => {
+  assert.deepEqual(pitcherHoverFields(null, 'SV'), [
+    { k: 'SV', v: '—' },
+    { k: 'ERA', v: '—' },
+    { k: 'K', v: '—' },
+    { k: 'WHIP', v: '—' },
+  ])
 })

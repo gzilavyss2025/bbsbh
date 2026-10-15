@@ -1,0 +1,91 @@
+/* The stamped due-up card (DueUpBatters.jsx), drawn for both due-up previews:
+   DueUpNextCard (the other team's next half, stacked below the at-bat on both
+   breakpoints) and UpNextBatters (`.upnext`, the half's own batters before it
+   starts). Each caller owns its margin, since the name tab hangs above the
+   card: `.dueupnext` here, `.upnext` in 12-sealbox.css. */
+.dueupnext {
+  margin-top: var(--space-4);
+}
+/* layout-exempt: a fixed three across, one column per due-up slot */
+.dueup__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: a photo, a name and a line stacked in one slot */
+.dueup__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  text-align: center;
+}
+/* The photo box owns the slot tag's corner. The cutout floats on the card's
+   paper: no wash, no radius, a 2px ink edge like every stamped part. */
+.dueup__photo {
+  position: relative;
+  display: block;
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-sizing: border-box;
+}
+.shot.dueup__shot {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+.dueup__slot {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  min-width: var(--space-5);
+  height: var(--space-5);
+  box-sizing: border-box;
+  padding: 0 var(--space-1h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-solid);
+}
+.dueup__name {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+.dueup__line {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-solid);
+  color: var(--text-body);
+}
+/* The name is the column's one tap target: a --tap-min box, the text centred in it.
+   The negative block margin folds the box's spare height back out of the layout, so
+   the column keeps its tight rhythm and only the hit area is 44px. */
+.dueup__name > * {
+  margin-block: calc((var(--fs-h3) - var(--tap-min)) / 2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+}

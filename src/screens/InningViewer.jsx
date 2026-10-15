@@ -27,7 +27,7 @@ import { InningActionBar } from '../components/inning/InningActionBar.jsx'
 import { bookIsClosed } from '../components/inning/focus/beats.js'
 import { ReferencePanel } from '../components/inning/focus/ReferencePanel.jsx'
 import { ReplayRail } from '../components/playbyplay/pitcherCard/AtBatReplay.jsx'
-import { DueUpNextCard } from '../components/playbyplay/DueUpNextCard.jsx'
+import { DueUpNextCard } from '../components/playbyplay/dueup/DueUpNextCard.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { ConsoleBand } from '../components/gamehud/ConsoleBand.jsx'
 import { InningsHeader } from './gameview/InningsHeader.jsx'
@@ -762,6 +762,8 @@ export function InningViewer({
       homeAbbr={meta.home.abbreviation}
       awayName={meta.away.clubName}
       homeName={meta.home.clubName}
+      awayId={meta.away.id}
+      homeId={meta.home.id}
       runsInProgress={runsInProgress}
       curIdx={curIdx}
       onSelect={(idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx))}
@@ -946,8 +948,6 @@ export function InningViewer({
             revealedThrough={renderRevealedThrough}
             awayId={meta.away.id}
             homeId={meta.home.id}
-            awayName={meta.away.clubName}
-            homeName={meta.home.clubName}
           />
 
           <FocusControls focus={focus} turning={turning} />

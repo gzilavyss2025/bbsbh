@@ -1,0 +1,41 @@
+/* ==== THE ABOUT BAND OF THE ONE-SCROLL TEAM PAGE (#1107, row 6f) ====
+   Stamped cards with name tabs, stacked. Each tab hangs --space-3h above its card, so the
+   gap between cards is a band gap plus that tab. No club colour here (it is the hero's alone). */
+.tnext__about {
+  padding-top: var(--space-3h);
+  row-gap: calc(var(--space-section) + var(--space-3h));
+}
+
+/* The park's fact strip: never wider than its cells, and the last cell takes the row's
+   remainder, so no grey hole shows. Three across at most; the strip's wide step is six. */
+.tnext__about .factgrid--strip.tnext__parkfacts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-3);
+}
+.tnext__about .factgrid--strip.tnext__parkfacts--1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tnext__about .factgrid--strip.tnext__parkfacts--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.tnext__parkfacts--4 .fact:last-child {
+  grid-column: span 3;
+}
+.tnext__parkfacts--5 .fact:last-child {
+  grid-column: span 2;
+}
+/* A rank under a figure: the marker underline, as the hero's "1st of 30" (never the seal). */
+.tnext__parkfacts .fact__note {
+  display: block;
+  width: fit-content;
+  box-shadow: inset 0 calc(-1 * var(--bw-heavy)) var(--marker);
+}
+
+/* The franchise's years lead each span: the display face, not a grey mono caption. */
+.tnext__about .fhist__years {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}

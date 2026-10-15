@@ -12,6 +12,9 @@ import {
 import { isClerkEnabled } from '../../../../lib/clerkConfig.js'
 import { useCopy } from '../../../../copy/copyContext.js'
 import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram.jsx'
+import { managerFact } from '../../../../components/team/ManagerFact.jsx'
+import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
+import { FactGrid } from '../../../../components/ui/frame/FactGrid.jsx'
 import { Facts, RankGroup } from '../../../../components/ballpark/BallparkFacts.jsx'
 import { useBallparkDraft, useFocalPick } from './useBallparkDraft.js'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
@@ -111,7 +114,6 @@ function ParkPhoto({ name, photo, onPickFocus, onBroken }) {
       className="ballparkcard__photo"
       src={photo.src}
       alt={alt}
-      title={photo.creditText || undefined}
       style={{ objectPosition: photo.focus }}
       loading="lazy"
       decoding="async"
@@ -127,7 +129,7 @@ function ParkPhoto({ name, photo, onPickFocus, onBroken }) {
         type="button"
         className="ballparkcard__photoWrap bpadmin__focusTarget"
         onClick={onPickFocus}
-        title="Tap the part of the photo to keep when it is cropped"
+        aria-label="Tap the part of the photo to keep when it is cropped"
       >
         {img}
       </button>
@@ -160,17 +162,32 @@ function ParkPhoto({ name, photo, onPickFocus, onBroken }) {
 // is the whole reason the season high/low pair above needs no null guard: a
 // club with no capacity on file (a park not in BALLPARKS) still shows its
 // crowds and simply cannot show its fill.
-function AttendanceFacts({ attendance }) {
+// One cell of the page's fact strip (the player page's .fact parts).
+function ParkFact({ label, value, note }) {
+  return (
+    <div className="fact">
+      <dt className="fact__label">{label}</dt>
+      <dd className="fact__value">
+        {value || '—'}
+        {note && <span className="fact__note">{note}</span>}
+      </dd>
+    </div>
+  )
+}
+
+function AttendanceFacts({ attendance, skipAvg }) {
   const { rank, of, total, totalRank, totalOf, sellouts, selloutOf, selloutPct } = attendance
   const { fill, fillRank, fillOf } = attendance
   return (
     <>
       <dl className="bpsheet__facts">
-        <Facts
-          label="Avg attendance"
-          value={attendance.avg.toLocaleString()}
-          note={rank ? `${ordinal(rank)} of ${of}` : null}
-        />
+        {!skipAvg && (
+          <Facts
+            label="Avg attendance"
+            value={attendance.avg.toLocaleString()}
+            note={rank ? `${ordinal(rank)} of ${of}` : null}
+          />
+        )}
         <Facts label="Season high" value={attendance.high.toLocaleString()} />
         <Facts label="Season low" value={attendance.low.toLocaleString()} />
       </dl>
@@ -195,7 +212,10 @@ function AttendanceFacts({ attendance }) {
   )
 }
 
-export function BallparkCard({ team, attendance }) {
+// `cardProps` is the one-scroll page's stamped frame and name tab (props for Card). With it the
+// card is laid out for that page: the park's facts and the manager in a strip under the photo
+// and name, and a plain empty state for a park with nothing drawn. `manager` shows only there.
+export function BallparkCard({ team, attendance, cardProps, manager }) {
   const { t } = useCopy()
   const venueName = team.venue?.name
   const park = venueName ? rankedDimensions(venueName, team.venue?.id) : null
@@ -263,23 +283,35 @@ export function BallparkCard({ team, attendance }) {
     focus: shown.focus,
   })
 
+  const admin = isClerkEnabled && (
+    <Suspense fallback={null}>
+      <BallparkAdminBar parkKey={key} draft={draft} saved={saved} />
+    </Suspense>
+  )
+  const drawn = Boolean(park || layout)
+  const facts = [
+    park && <ParkFact key="o" label="Opened" value={park.built} />,
+    park && <ParkFact key="r" label="Roof" value={park.roof} />,
+    park?.capacity && <ParkFact key="c" label="Capacity" value={park.capacity.toLocaleString()} />,
+    attendance && (
+      <ParkFact
+        key="a"
+        label="Avg crowd"
+        value={attendance.avg.toLocaleString()}
+        note={attendance.rank ? `${ordinal(attendance.rank)} of ${attendance.of}` : null}
+      />
+    ),
+    manager && <ParkFact key="m" label="Manager" value={managerFact(manager)} />,
+  ].filter(Boolean)
   return (
     <Card
-      head={
-        <SectionHead
-          look="band"
-          club
-          action={
-            isClerkEnabled && (
-              <Suspense fallback={null}>
-                <BallparkAdminBar parkKey={key} draft={draft} saved={saved} />
-              </Suspense>
-            )
-          }
-        >
-          Ballpark
-        </SectionHead>
-      }
+      {...(cardProps ?? {
+        head: (
+          <SectionHead look="band" club action={admin}>
+            Ballpark
+          </SectionHead>
+        ),
+      })}
     >
       <div className="ballparkcard__hero">
         {photo && (
@@ -308,6 +340,13 @@ export function BallparkCard({ team, attendance }) {
         </div>
       </div>
 
+      {cardProps && admin}
+      {cardProps && facts.length > 0 && (
+        <FactGrid look="strip" className={`tnext__parkfacts tnext__parkfacts--${facts.length}`}>
+          {facts}
+        </FactGrid>
+      )}
+
       {draft.editing && (
         <Suspense fallback={null}>
           <BallparkEditFields draft={draft} defaultName={name} />
@@ -319,18 +358,21 @@ export function BallparkCard({ team, attendance }) {
           registry can draw (#1859) gets the drawing alone: its posted
           distances label it, and there is no league to rank it in. A park
           with neither ends at the hero + gear above. */}
-      {(park || layout) && (
+      {cardProps && !drawn && (
+        <EmptyState size="compact">No dimensions on file for this park.</EmptyState>
+      )}
+      {drawn && (
         <div className="ballparkcard__layout">
           {layout && <BallparkDiagram className="ballparkcard__diagram" layout={layout} />}
           <div className="ballparkcard__details">
-            {park && (
+            {park && !cardProps && (
               <dl className="bpsheet__facts">
                 <Facts label="Opened" value={park.built} />
                 <Facts label="Roof" value={park.roof} />
                 <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
               </dl>
             )}
-            {attendance && <AttendanceFacts attendance={attendance} />}
+            {attendance && <AttendanceFacts attendance={attendance} skipAvg={Boolean(cardProps)} />}
             {note && <p className="ballparkcard__note">{note}</p>}
             {park && (
               <Stack gap="loose" className="bpsheet__ranks">

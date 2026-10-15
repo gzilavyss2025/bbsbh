@@ -1,0 +1,18 @@
+/* The Roster band (#1107, row 6c). The cards are the stamped Card; the rows are RosterList's. */
+.tnext__roster-door {
+  align-self: flex-end;
+}
+/* Motion is once per page visit: a return shows the cards at rest. */
+.tnext__roster--still .card--stamp-in {
+  animation: none;
+}
+:root[data-motion='reduced'] .tnext__roster .card--stamp-in {
+  animation: none !important;
+}
+/* The pen's week sits on the inset ground, as the hero's foot does: a second layer of paper
+   under the lists, so the staff card has depth. */
+.tnext__roster .roster-sub:has(.staffgrid) {
+  padding: var(--space-3);
+  background: var(--surface-inset);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}

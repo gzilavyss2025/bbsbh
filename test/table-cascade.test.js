@@ -263,6 +263,9 @@ const T3 = [
     ns: 'rolling__grid',
     bases: [['20-charts.css', 'rolling__grid']],
     attrs: ['frame="bare"', 'density="tight"', 'sticky'],
+    // The running line is a linescore, not a ledger: its own mono head and a 2px
+    // ink rule under it (the stamped look), so it may dress its own head.
+    ownHead: true,
     label: /label="Running line"/,
     apis: ['../../api/select.js', '../../api/linescore.js'],
   },
@@ -373,7 +376,7 @@ test('T3: no rule that reaches a moved table draws a frame, pads a plain cell, d
   const FRAME = ['border', 'border-radius', 'box-shadow', 'background', 'overflow', 'border-collapse', 'border-spacing', 'width']
   const HEAD = ['padding', 'background', 'font-family', 'letter-spacing', 'text-transform', 'font-size', 'color']
   const ROW = ['border-top', 'border-bottom', 'border']
-  for (const { bases } of T3) {
+  for (const { bases, ownHead } of T3) {
     for (const [css, ns] of bases) {
       for (const [sel, body] of rules(read(css))) {
         const names = props(body)
@@ -386,6 +389,9 @@ test('T3: no rule that reaches a moved table draws a frame, pads a plain cell, d
           )
           if (part === `.${ns}`) {
             for (const p of FRAME) assert.ok(!names.includes(p), `${css}: .${ns} still sets ${p}`)
+          } else if (plain && ownHead && /^(thead th|th)$/.test(plain[1])) {
+            // the head is the namespace's own (see ownHead above); padding still stays with Table
+            assert.ok(!names.includes('padding'), `${css}: ${part} still sets padding`)
           } else if (plain) {
             for (const p of ['padding', ...ROW]) assert.ok(!names.includes(p), `${css}: ${part} still sets ${p}`)
             if (/th$/.test(plain[1]) || plain[1] === 'th') for (const p of HEAD) assert.ok(!names.includes(p), `${css}: ${part} still sets ${p}`)
@@ -414,7 +420,7 @@ test('T3: the held scorecard and inning tally keep their base rules, at their ol
 test('T3: a moved table keeps its own margin, column widths and figure alignment', () => {
   const kept = [
     ['20-charts.css', '.rolling', 'margin-bottom', 'var(--space-4)'],
-    ['20-charts.css', '.rolling__grid td', 'min-width', '24px'],
+    ['20-charts.css', '.rolling__grid td', 'min-width', 'var(--rolling-cell)'],
     ['20-charts.css', '.rolling__grid td', 'text-align', 'center'],
     ['20-charts.css', '.rolling__grid td + td', 'border-left', 'var(--bw-hair) solid var(--border-hairline)'],
     ['20-charts.css', '.rolling__grid td.rolling__cell', 'padding', '0'],

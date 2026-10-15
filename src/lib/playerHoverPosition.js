@@ -4,16 +4,16 @@
 // component that types a coordinate has put it somewhere nothing can
 // check").
 
-export const CARD_WIDTH = 300
+export const CARD_WIDTH = 320 // .phcard's width in 72-player-hover-card.css; test/player-hover-position.test.js pins the two together
 export const VIEWPORT_MARGIN = 10
 const TRIGGER_GAP = 10
 const LEFT_NUDGE = 18 // the card sits slightly left of the trigger's own edge, matching the caret's offset in its CSS
-const ESTIMATED_CARD_HEIGHT = 210 // a card with the level/rehab pill line — the taller of the two shapes
+const ESTIMATED_CARD_HEIGHT = 240 // the tallest shape: band, level/rehab strip and both table rows (about 238px measured)
 
 // `rect` is the trigger's own getBoundingClientRect(); `viewport` is
 // {width, height} (window.innerWidth/innerHeight in the real caller — passed
 // in rather than read here so this stays pure and testable). Returns fixed
-// -position CSS: clamped horizontally so the 300px card never runs past
+// -position CSS: clamped horizontally so the 320px card never runs past
 // either viewport edge, and flipped ABOVE the trigger when there isn't room
 // below but there is above.
 //

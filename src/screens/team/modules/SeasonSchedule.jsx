@@ -62,7 +62,7 @@ function SeriesStrip({ games, allStarGame, refDate }) {
               type="button"
               className="sstrip__series sstrip__series--allstar"
               onClick={() => openGame(it)}
-              title={`${it.apiDate} · All-Star Game · ${it.away.name} vs ${it.home.name}`}
+              aria-label={`${it.apiDate} · All-Star Game · ${it.away.name} vs ${it.home.name}`}
             >
               <div className="sstrip__opp">
                 <TeamLogo teamId={it.away.id} name={it.away.name} size={18} />
@@ -75,7 +75,7 @@ function SeriesStrip({ games, allStarGame, refDate }) {
         const isCurrent = it.games.some((g) => g.apiDate === refDate)
         return (
           <div key={it.key} className={`sstrip__series${isCurrent ? ' sstrip__series--current' : ''}`}>
-            <div className="sstrip__opp" title={it.opponent.name}>
+            <div className="sstrip__opp">
               <TeamLogo teamId={it.opponent.id} name={it.opponent.name} size={18} />
               <span className="sstrip__opplabel">
                 {it.opponent.abbreviation}
@@ -93,7 +93,7 @@ function SeriesStrip({ games, allStarGame, refDate }) {
                     type="button"
                     className={`sstrip__cell${g.isHome ? ' sstrip__cell--home' : ''}${resultClass}`}
                     onClick={() => openGame(g)}
-                    title={`${g.apiDate} · ${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${seriesAbbr(g.gameType) ? ` · ${seriesAbbr(g.gameType)}` : ''}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
+                    aria-label={`${g.apiDate} · ${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${seriesAbbr(g.gameType) ? ` · ${seriesAbbr(g.gameType)}` : ''}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
                   />
                 )
               })}

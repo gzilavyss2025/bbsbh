@@ -130,11 +130,11 @@ export const CARDS = [
     verdict: 'Stays bespoke',
     // The app positions this one FIXED. Its stage becomes the containing block
     // so the specimen draws inside its own entry (Entry.jsx's `contained`), and
-    // the entry spans the grid because the popover is a real 300px wide — the
+    // the entry spans the grid because the popover is a real 320px wide — the
     // frame gives way to the specimen, never the other way round.
     contained: true,
     wide: true,
-    note: 'position:fixed, pointer-events:none, z-index 100, --border-hairline and --shadow-raised. It is a popover. Popovers and cards diverge the moment either one grows.',
+    note: 'position:fixed, pointer-events:none, z-index 100, the stamped edge and --shadow-stamped, and a club band (the Identity Lab triad). It is a popover. Popovers and cards diverge the moment either one grows.',
   },
   {
     cls: 'tally-cl-card',

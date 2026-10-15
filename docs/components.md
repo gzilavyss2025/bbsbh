@@ -20,6 +20,8 @@ The OVR bars (`docs/ovr-rating.md`). `OvrBars` draws the attribute rows in the p
 
 ## `gamehud/`
 
+The two stamped "due up" cards in the innings viewer, `DueUpNextCard` ("Due up next", the other side's next half) and `UpNextBatters` ("Due up", the half's own batters before it starts), both draw through `dueup/DueUpBatters` (`styles/focus/dueup-next.css`): a bare headshot, the batting slot, the name and one `H-AB` or average line per batter, from `api/boxscore/batterLine.js`, capped at `revealedThrough`.
+
 `ConsoleBand` is focus mode's console row (ADR-0043) — exactly one card: `DueUpConsole` while the half is being scored, or once it is over, `BetweenInnings` — one card that opens on `HalfTally`'s grid and cycles on tap through up to 5 score-free facts (`api/between-innings.js`) before returning to the grid
 
 ## `inning/`
