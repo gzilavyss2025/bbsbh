@@ -70,10 +70,69 @@ function judge(raw) {
 }
 
 // Comments blanked, every newline kept, so a line number still points at the file.
+// A scanner, not a regex: a `/*` or ` // ` inside a string, a template or a regex
+// literal is code, and must not blank what follows it (#1831). Strings stay in the
+// output, because the guard reads values such as 'calc(var(--z-toast) + 5)'.
 const blank = (m) => m.replace(/[^\n]/g, ' ')
+// After one of these a `/` opens a regex; after a name, `)` or `}` it divides.
+const REGEX_AFTER = /^$|[(,=:[!&|?{;+\-*%~^]/
+const REGEX_KEYWORD = /\b(?:return|typeof|case|in|of)\s*$/
+
+function skipString(src, i) {
+  const quote = src[i]
+  let j = i + 1
+  while (j < src.length && src[j] !== quote) {
+    if (src[j] === '\\') j++
+    else if (quote !== '`' && src[j] === '\n') return j
+    j++
+  }
+  return Math.min(j + 1, src.length)
+}
+
+// End of a regex literal that starts at i, or -1 when this is not one.
+function regexEnd(src, i) {
+  let inClass = false
+  for (let j = i + 1; j < src.length && src[j] !== '\n'; j++) {
+    const ch = src[j]
+    if (ch === '\\') j++
+    else if (ch === '[') inClass = true
+    else if (ch === ']') inClass = false
+    else if (ch === '/' && !inClass) return j + 1
+  }
+  return -1
+}
+
 const mask = (src, kind) => {
-  const noBlock = src.replace(/\/\*[\s\S]*?\*\//g, blank)
-  return kind === 'css' ? noBlock : noBlock.replace(/(^|\s)\/\/.*$/gm, (m) => blank(m))
+  const js = kind !== 'css'
+  let out = ''
+  let prev = ''
+  let i = 0
+  while (i < src.length) {
+    const c = src[i]
+    const d = src[i + 1]
+    let end = -1
+    if (c === '/' && d === '*') {
+      const close = src.indexOf('*/', i + 2)
+      end = close < 0 ? src.length : close + 2
+      out += blank(src.slice(i, end))
+    } else if (js && c === '/' && d === '/' && (i === 0 || /\s/.test(src[i - 1]))) {
+      const nl = src.indexOf('\n', i)
+      end = nl < 0 ? src.length : nl
+      out += blank(src.slice(i, end))
+    } else if (c === '"' || c === "'" || (js && c === '`')) {
+      end = skipString(src, i)
+      out += src.slice(i, end)
+      prev = c
+    } else if (js && c === '/' && (REGEX_AFTER.test(prev) || REGEX_KEYWORD.test(out))) {
+      end = regexEnd(src, i)
+      if (end > 0) { out += src.slice(i, end); prev = ')' }
+    }
+    if (end > 0) { i = end; continue }
+    out += c
+    if (!/\s/.test(c)) prev = c
+    i++
+  }
+  return out
 }
 
 export function findRawZIndex(src, kind = 'css') {

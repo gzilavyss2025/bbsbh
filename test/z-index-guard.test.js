@@ -44,6 +44,24 @@ test('a comment that quotes a value does not fail', () => {
   assert.deepEqual(z('// zIndex: 50 once\nconst a = 1', 'js'), [])
 })
 
+test('a comment opener inside a string or a regex does not hide real code (#1831)', () => {
+  const real = '/* real */'
+  assert.deepEqual(z(`const s = 'a /* b'\nconst o = { zIndex: 9999 }\n${real}`, 'js'), ['2:9999'])
+  assert.deepEqual(z(`const s = "it\\"s /* b"\nconst o = { zIndex: 9999 }\n${real}`, 'js'), ['2:9999'])
+  assert.deepEqual(z('<div title="a // b" style={{ zIndex: 9999 }} />', 'js'), ['1:9999'])
+  assert.deepEqual(z('const u = `http://x // y`; const o = { zIndex: 9999 }', 'js'), ['1:9999'])
+  assert.deepEqual(z(`const re = /x\\/*y/\nconst o = { zIndex: 9999 }\n${real}`, 'js'), ['2:9999'])
+  assert.deepEqual(z(`const g = ['src/**/*.css']\nconst o = { zIndex: 9999 }`, 'js'), ['2:9999'])
+  assert.deepEqual(z(`.a::before { content: "/*"; }\n.b { z-index: 9999; }\n${real}`), ['2:9999'])
+})
+
+test('a real comment is still masked, to its end, in CSS and JS', () => {
+  assert.deepEqual(z("const s = 'x' // zIndex: 9999\nconst b = 2", 'js'), [])
+  assert.deepEqual(z("/* zIndex: 9999\n   more */ const a = 1", 'js'), [])
+  assert.deepEqual(z('/* never closed\n.a { z-index: 9999; }'), [])
+  assert.deepEqual(z('const a = b / 2 /* zIndex: 9999 */', 'js'), [])
+})
+
 test('the exempt marker needs a reason, on the line or the line above', () => {
   assert.deepEqual(z('.a { z-index: 20; /* z-index-exempt: local to the lens */ }'), [])
   assert.deepEqual(z('/* z-index-exempt: local to the lens */\n.a { z-index: 20; }'), [])
