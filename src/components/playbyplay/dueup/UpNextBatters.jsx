@@ -13,7 +13,7 @@ import { DueUpBatters, dueUpMotionKey } from './DueUpBatters.jsx'
 // drops this alongside PrePitchChanges/the entering reference on
 // startedRevealing) — once real at-bats are on screen, "who's due up" is just
 // the top of the live play-by-play feed.
-export function UpNextBatters({ feed, inning, half, revealedThrough, teamId, teamName }) {
+export function UpNextBatters({ feed, inning, half, revealedThrough, teamId }) {
   const info = useMemo(() => {
     const due = selectDueUpNow(feed, inning, half, revealedThrough)
     if (!due) return null
@@ -24,5 +24,5 @@ export function UpNextBatters({ feed, inning, half, revealedThrough, teamId, tea
     return { ...due, batters }
   }, [feed, inning, half, revealedThrough])
   if (!info) return null
-  return <DueUpBatters label="Due up" teamName={teamName} teamId={teamId} batters={info.batters} motionKey={dueUpMotionKey(feed, inning, half, 'now')} className="upnext" />
+  return <DueUpBatters label="Due up" teamId={teamId} batters={info.batters} motionKey={dueUpMotionKey(feed, inning, half, 'now')} className="upnext" />
 }

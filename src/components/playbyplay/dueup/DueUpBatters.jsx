@@ -8,8 +8,8 @@ export const dueUpMotionKey = (feed, inning, half, which) => viewKey(feed?.gameP
 
 // The stamped "who is due up" card, drawn once for both of focus mode's due-up
 // previews: DueUpNextCard (the other side's next half) and UpNextBatters (the
-// batting side's own half, before it starts). The name tab says which; the count
-// tag names the club (never its colour, ADR-0030).
+// batting side's own half, before it starts). The name tab says which. The card names no club
+// (a club colour belongs to a head that names it, ADR-0030).
 //
 // Each column is a bare headshot, the batting-order slot on its bottom-left
 // corner, the name, and one line: "H-AB" so far this game, or his average
@@ -21,13 +21,13 @@ export const dueUpMotionKey = (feed, inning, half, which) => viewKey(feed?.gameP
 //
 // It computes and fetches nothing. A caller hands it `batters` already carrying
 // `line` (api/boxscore/batterLine.js), so each caller owns its spoiler gate.
-export function DueUpBatters({ label, teamName, teamId, batters, motionKey, className = '' }) {
+export function DueUpBatters({ label, teamId, batters, motionKey, className = '' }) {
   const [still] = useState(() => hasSeen(motionKey))
   useEffect(() => {
     markSeen(motionKey)
   }, [motionKey])
   return (
-    <Card frame="stamped" label={label} count={teamName} stampIn={!still} className={`dueup ${className}`.trim()}>
+    <Card frame="stamped" label={label} stampIn={!still} className={`dueup ${className}`.trim()}>
       <ol className="dueup__row">
         {batters.map((b) => (
           <li className="dueup__col" key={b.id}>

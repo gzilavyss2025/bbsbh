@@ -946,8 +946,6 @@ export function InningViewer({
             revealedThrough={renderRevealedThrough}
             awayId={meta.away.id}
             homeId={meta.home.id}
-            awayName={meta.away.clubName}
-            homeName={meta.home.clubName}
           />
 
           <FocusControls focus={focus} turning={turning} />

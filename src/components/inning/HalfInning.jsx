@@ -405,7 +405,6 @@ export function HalfInning({
             half={half}
             revealedThrough={revealedThrough}
             teamId={battingSide === 'away' ? awayId : homeId}
-            teamName={battingSide === 'away' ? awayName : homeName}
           />
         )}
 

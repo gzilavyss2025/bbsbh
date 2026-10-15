@@ -11,7 +11,7 @@ import { DueUpBatters, dueUpMotionKey } from './DueUpBatters.jsx'
 // `revealedThrough` as its own hard boundary (the same tier DueUpConsole and
 // the Pitchers table stand on, ADR-0009), so this is safe at render top level
 // with no SealBox of its own.
-export function DueUpNextCard({ feed, inning, half, revealedThrough, awayId, homeId, awayName, homeName }) {
+export function DueUpNextCard({ feed, inning, half, revealedThrough, awayId, homeId }) {
   const info = useMemo(() => {
     const due = selectDueUpNext(feed, inning, half, revealedThrough)
     if (!due) return null
@@ -23,7 +23,6 @@ export function DueUpNextCard({ feed, inning, half, revealedThrough, awayId, hom
   }, [feed, inning, half, revealedThrough])
   if (!info) return null
   const teamId = info.battingSide === 'away' ? awayId : homeId
-  const teamName = info.battingSide === 'away' ? awayName : homeName
 
-  return <DueUpBatters label="Due up next" teamName={teamName} teamId={teamId} batters={info.batters} motionKey={dueUpMotionKey(feed, inning, half, 'next')} className="dueupnext" />
+  return <DueUpBatters label="Due up next" teamId={teamId} batters={info.batters} motionKey={dueUpMotionKey(feed, inning, half, 'next')} className="dueupnext" />
 }
