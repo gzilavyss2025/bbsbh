@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { compare, countLayout } from '../scripts/layout/check-layout-ratchet.mjs'
+import { compare, countLayout, grew, layoutFiles } from '../scripts/layout/check-layout-ratchet.mjs'
 
 // The matcher behind the layout ratchet. It is pure: every case is a CSS string.
 
@@ -49,4 +49,36 @@ test('a file that is gone but still in the budget fails', () => {
 
 test('matching counts pass', () => {
   assert.deepEqual(compare({ 'a.css': { ...none, grid: 1, wrap: 2 } }, { 'a.css': { grid: 1, wrap: 2 } }), [])
+})
+
+// #1831 item 3: the ratchet's gaps.
+
+test('property and keyword case do not hide a rule (a)', () => {
+  assert.deepEqual(countLayout('.a { DISPLAY: GRID; FLEX-DIRECTION: Column; Flex-Wrap: Wrap; }'), { column: 1, wrap: 1, grid: 1 })
+})
+
+test('a rule inside @keyframes is not counted (b)', () => {
+  const src = '@keyframes pop { from { display: grid; } to { flex-direction: column; } }\n@-webkit-keyframes pop { 0% { display: grid; } }\n.a { display: grid; }'
+  assert.deepEqual(countLayout(src), { ...none, grid: 1 })
+})
+
+test('grew reads the numbers, not the message text (c)', () => {
+  assert.equal(grew({ 'a.css': { ...none, grid: 2 } }, { 'a.css': { grid: 1 } }), true)
+  assert.equal(grew({ 'new.css': { ...none, wrap: 1 } }, {}), true)
+  assert.equal(grew({ 'a.css': { ...none, grid: 1 } }, { 'a.css': { grid: 2 } }), false)
+  assert.equal(grew({ 'a.css': { ...none, grid: 1 } }, { 'a.css': { grid: 1 } }), false)
+})
+
+test('an exempt comment that ends the previous rule line does not exempt the next rule (d)', () => {
+  const src = '.a { color: red; } /* layout-exempt: for a */\n.b { display: grid; }'
+  assert.deepEqual(countLayout(src), { ...none, grid: 1 })
+  assert.deepEqual(countLayout('/* layout-exempt: ok */\n.b { display: grid; }'), none)
+  assert.deepEqual(countLayout('.a { color: red; }\n/* layout-exempt: ok */\n.b { display: grid; }'), none)
+})
+
+test('index.css and the token files are counted with src/styles (e)', () => {
+  const files = layoutFiles()
+  assert.ok(files.includes('src/index.css'))
+  assert.ok(files.includes('src/tokens/layout.css'))
+  assert.ok(!files.some((f) => f.startsWith('src/styles/system/')))
 })
