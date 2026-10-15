@@ -102,7 +102,7 @@ const ART_ZONE_BOTTOM = 700
 // The mirrored body's edge nearest the plate, per hand, and how far outside the
 // zone's edge it stands.
 const ART_NEAR_EDGE = { R: 56, L: 416 }
-const FIGURE_GAP = 6
+const FIGURE_GAP = 18
 function BatterFigure({ urls, hand, zone, clipId, onError }) {
   const scale = zone.h / (ART_ZONE_BOTTOM - ART_ZONE_TOP)
   const x = (hand === 'L' ? zone.left - FIGURE_GAP : zone.right + FIGURE_GAP) - ART_NEAR_EDGE[hand] * scale
