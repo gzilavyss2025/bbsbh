@@ -17,7 +17,7 @@ test('the Farm band keeps the prospect count and the one-shot motion gate', () =
 })
 
 test('farm.css is tokens only and square', () => {
-  const css = read('styles/team-next/farm.css')
+  const css = read('styles/team-next/farm.css').replace(/\/\*[^]*?\*\//g, '')
   assert.doesNotMatch(css, /#[0-9a-fA-F]{3,8}\b/)
-  assert.doesNotMatch(css, /border-radius:\s*(?!0)/)
+  assert.doesNotMatch(css, /border-radius:\s*[^0\s]/)
 })

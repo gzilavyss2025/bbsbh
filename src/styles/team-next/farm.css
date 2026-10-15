@@ -28,10 +28,10 @@
 
 /* THE NAME TAB: the head's title, hung across the top-left edge as .card__name draws it. The
    head itself drops out (its club band, rings and rule), and the body clears the tab. */
-.tnext__farm .card > .sectionhead {
+.tnext__farm .sectionhead--club {
   display: contents;
 }
-.tnext__farm .card > .sectionhead > .sectionhead__title {
+.tnext__farm .sectionhead--club > .sectionhead__title {
   position: absolute;
   top: calc(-1 * var(--space-3h));
   left: var(--space-3);
@@ -48,7 +48,7 @@
   text-transform: uppercase;
 }
 /* THE COUNT TAG: the head's note, across the top-right edge as .card__count draws it. */
-.tnext__farm .card > .sectionhead > .sectionhead__note {
+.tnext__farm .sectionhead--club > .sectionhead__note {
   position: absolute;
   top: calc(-1 * var(--space-3));
   right: var(--space-3);
