@@ -22,12 +22,13 @@
 // an accent would carry a colour nothing draws, so that throws too.
 //
 // THE STAMPED FRAME'S OPTIONS, which no other frame takes (each throws there):
-//   tone     the fill: plain (the card paper, the default), tint or ink (the
+//   tone     the fill: plain (the card paper, the default), tint, soft (card
+//            paper with the graphite offset shadow, for a small tile) or ink (the
 //            lead stat tile).
 //   named    the card wears a name tab on its top edge, so its body clears it.
 //   stampIn  the card drops into its shadow as it appears (motion/stamp-in.css).
 export const FRAMES = ['sheet', 'ledger', 'stamped']
-export const TONES = ['plain', 'tint', 'ink']
+export const TONES = ['plain', 'tint', 'soft', 'ink']
 export const BODIES = ['padded', 'flush']
 export const CARD_TAGS = ['section', 'div', 'article', 'li', 'aside', 'a', 'button']
 const INTERACTIVE = ['a', 'button']

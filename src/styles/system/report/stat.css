@@ -1,0 +1,105 @@
+/* ---------------------------------------------------------------------------
+   THE STAT BAND AND THE STAT STRIP (ADR-0112). Two forms of the report page's
+   big-number tile, both on the stamped Card (system/card.css) and both in the
+   house type: one label, one mono figure, one note. They replace the hand-built
+   .slab (68-around-the-game.css) and its copies.
+
+     .stattile--band   ONE tile. An ink column head carries the label, like a
+                       column in the scorebook; the figure sits below on the
+                       card paper. A lead tile (.stattile--lead) heads in the
+                       negative accent and wears the marker stroke under its
+                       figure. StatTile look="band" writes it.
+     .statstrip        ALL the figures of a row in ONE stamped box, the cells split
+                       by hairline rules. The lead cell (.statcell--lead) is
+                       filled ink, and its figure takes the marker. StatStrip and
+                       StatCell write it.
+
+   WHICH ONE. A strip for three or four figures that read together; a band for a
+   figure that stands alone. One lead per row, at most: a row where every tile
+   leads has led nothing.
+
+   The figure is the caller's, already formatted (a clock reading, a gate with
+   its commas). Nothing here reads a score, a seal or a club colour.
+   --------------------------------------------------------------------------- */
+
+.stattile.stattile--band {
+  padding: 0;
+}
+.stattile--band .stattile__label {
+  padding: var(--space-1) var(--space-3);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-xwide);
+  line-height: var(--lh-compact);
+}
+.stattile--band .stattile__value {
+  margin: 0;
+  padding: var(--space-2) var(--space-3) 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-hero-lg);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-tight-score);
+  line-height: var(--lh-solid);
+}
+.stattile--band .stattile__caption {
+  margin: 0;
+  padding: var(--space-1) var(--space-3) var(--space-2);
+}
+.stattile--lead .stattile__label {
+  background: var(--accent-negative);
+}
+/* The stroke runs under the lower part of the figure, inside its own box. */
+.stattile--lead .stattile__value {
+  display: inline-block;
+  margin-inline: var(--space-3);
+  padding-inline: 0;
+  background: linear-gradient(transparent 62%, var(--marker) 62%);
+}
+
+/* layout-exempt: the strip's cells share one row and wrap by their own minimum width */
+.statstrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--bw-hair);
+  background: var(--border-hairline);
+}
+.statcell {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-2h) var(--space-3);
+  background: var(--surface-card);
+}
+.statcell__label {
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.statcell__value {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-hero-sm);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-tight-score);
+  line-height: var(--lh-solid);
+}
+.statcell__note {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+}
+.statcell--lead {
+  background: var(--surface-stamped-ink);
+}
+.statcell--lead .statcell__label,
+.statcell--lead .statcell__note {
+  color: var(--text-on-ink-dim);
+}
+.statcell--lead .statcell__value {
+  color: var(--marker);
+}

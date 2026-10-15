@@ -17,7 +17,7 @@ rebuild, then upload.
 | `tokens/TOKENS.md` | a usage line per token | `.design-sync/build/usage-data.json` |
 | `_ds_bundle.css` | the part styles | `src/styles/system/`, `09-team-info.css` and `motion/`, copied |
 | `fonts/` | five woff2 files and three OFL licences | `node_modules/@fontsource/` |
-| `components/` | one preview per part, a Motion preview, seven player cards | `.design-sync/build/previews.mjs`, `motion.mjs`, `playercards.mjs` |
+| `components/` | one preview per part (six for the report parts, ADR-0112), a Motion preview, seven player cards | `.design-sync/build/previews.mjs`, `motion.mjs`, `playercards.mjs` |
 | `README.md` | the brand book | `.design-sync/build/README.template.md` |
 
 There is no JavaScript bundle. The look is CSS and class names. `_ds_bundle.js` is an empty

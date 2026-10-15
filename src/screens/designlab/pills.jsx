@@ -14,7 +14,7 @@ const PATH = 'src/components/ui/control/Pill.jsx'
 
 // The inks a tag is really passed, one per meaning the old tone names carried.
 // The copy says what the tag is; the ink says which kind. Only outline and
-// paper take one — ink and seal carry their own.
+// paper take one — ink, seal and marker carry their own.
 const TAG_INKS = {
   outline: [
     { ink: undefined, label: 'Top 100', logo: true },
@@ -28,6 +28,7 @@ const TAG_INKS = {
   ],
   ink: [{ label: '1st of 30' }],
   seal: [{ label: 'Due up' }],
+  marker: [{ label: 'Leader' }],
   solid: [{ label: 'Solid' }],
 }
 

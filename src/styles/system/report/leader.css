@@ -1,0 +1,127 @@
+/* ---------------------------------------------------------------------------
+   THE LEADER LIST AND ITS ROW (ADR-0112). One row of a ranked board: rank, a
+   mark slot (a club logo, a headshot), a name over a small line, and the figure
+   on the right. The list is a stamped, named Card; the rows run flush to its
+   edge. They replace .payboard__row, .sgh-row, .awardhistory__card--fav,
+   .psleaders__teamrow--fav and their copies.
+
+   STATES, each a plain class on the row (LeaderRow state=...):
+     lead   the field wash, for the first row. Its rank is the marker pill.
+     mine   the reader's own club: an ink tint and an ink bar on the left. It
+            reads --surface-mine, one token, where three pages each mixed their
+            own tint from --fav-accent.
+   ZEBRA is a list option (LeaderList zebra), not a state.
+
+   The mark slot is 36px square with an ink edge, so a logo drops in without a
+   change in row height. A club colour reaches the row only through that mark
+   (ADR-0030); the row never wears a club bar.
+   --------------------------------------------------------------------------- */
+
+.leaders {
+  margin: 0;
+  padding: var(--space-2) 0 0;
+  list-style: none;
+}
+
+.leaderrow {
+  display: grid;
+  grid-template-columns: auto var(--mark-lg) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2h);
+  min-height: calc(var(--tap-min) + var(--space-2));
+  padding: var(--space-2) var(--space-3h);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.leaderrow:first-child {
+  border-top: 0;
+}
+.leaders--zebra > .leaderrow:nth-child(even) {
+  background: var(--surface-inset);
+}
+.leaderrow--lead {
+  background: var(--surface-stamped-tint);
+}
+.leaderrow--mine {
+  background: var(--surface-mine);
+  box-shadow: inset var(--space-1) 0 0 var(--border-stamped);
+}
+
+.leaderrow__mark {
+  display: block;
+  width: var(--mark-lg);
+  height: var(--mark-lg);
+  overflow: hidden;
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.leaderrow__name {
+  overflow: hidden;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-tight);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.leaderrow__sub {
+  display: block;
+  overflow: hidden;
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.leaderrow__figure {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-h3);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.leaderrow__unit {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--fs-cell);
+}
+
+/* ---------------------------------------------------------------------------
+   THE CORNER BADGE (ADR-0112): a label that sits on the corner of a photo. A
+   position tab on a headshot (bottom left, ink) or an action mark on a photo tile
+   (top right, a small paper square). CornerBadge writes it; the host is the
+   photo's own box. It replaces .prospectshowcase__posbadge,
+   .horizontile__posbadge, .allstarlegacy__honoreepos and .gamephotos__expand.
+   --------------------------------------------------------------------------- */
+.cornerhost {
+  position: relative;
+  display: inline-block;
+}
+.cornerbadge {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+  text-transform: uppercase;
+}
+.cornerbadge--pos {
+  bottom: 0;
+  left: 0;
+  padding: 0 var(--space-1h);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+.cornerbadge--action {
+  top: var(--space-1);
+  right: var(--space-1);
+  display: grid;
+  place-items: center;
+  width: var(--mark-sm);
+  height: var(--mark-sm);
+  border: var(--bw-hair) solid var(--border-stamped);
+  background: color-mix(in srgb, var(--surface-card) 92%, transparent);
+  color: var(--text-heading);
+}

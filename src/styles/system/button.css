@@ -17,7 +17,8 @@
      padding    tap: --space-2 / --space-4. control: --space-1 / --space-3.
                 Vertical padding only shows once a label wraps.
      icon gap   --space-1h, between the icon slot and the label.
-     radius     --radius-sm, for every skin. A capsule is a PILL (#1131): a
+     radius     none: square corners, for every skin (ADR-0112). A capsule was
+                a PILL (#1131), and a pill is square now too: a
                 tag you read. A ruled box is a control you press.
      border     --bw-rule, solid. Never dashed: a dashed line means
                 "pencilled in", provisional (finding 7, #1132).
@@ -122,7 +123,7 @@
   min-height: var(--tap-min);
   padding: var(--space-2) var(--space-4);
   border: var(--bw-rule) solid var(--btn-edge);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   background: var(--btn-fill);
   color: var(--btn-ink);
   font-family: var(--font-display);
@@ -252,12 +253,12 @@
   border-color: var(--accent-primary);
   color: var(--text-on-ink);
 }
-.btn[aria-pressed='true']::before,
-.btn[aria-current='page']::before {
-  content: '✓';
-  content: '✓' / '';
-  flex: none;
-  line-height: var(--lh-solid);
+/* The selected state has no tick (ADR-0112). It is the ink fill plus a marker
+   underline, the mark the scorebug puts under the club at bat. The underline is
+   an inset shadow, so it adds no height and survives forced-colors as the edge. */
+.btn[aria-pressed='true'],
+.btn[aria-current='page'] {
+  box-shadow: inset 0 calc(-1 * var(--space-1)) 0 var(--marker);
 }
 
 .btn:focus-visible {

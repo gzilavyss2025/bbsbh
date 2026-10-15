@@ -11,12 +11,13 @@
 export const SIZES = ['tap', 'control']
 export const SKINS = ['outline', 'ink', 'ghost', 'danger', 'seal']
 
-export function buttonClassName({ size = 'tap', skin = 'outline', className = '' } = {}) {
+export function buttonClassName({ size = 'tap', skin = 'outline', block = false, className = '' } = {}) {
   if (!SIZES.includes(size)) throw new Error(`Button: unknown size "${size}" (${SIZES.join(', ')})`)
   if (!SKINS.includes(skin)) throw new Error(`Button: unknown skin "${skin}" (${SKINS.join(', ')})`)
   const parts = ['btn']
   if (size !== 'tap') parts.push(`btn--${size}`)
   if (skin !== 'outline') parts.push(`btn--${skin}`)
+  if (block) parts.push('btn--block')
   if (className) parts.push(className)
   return parts.join(' ')
 }

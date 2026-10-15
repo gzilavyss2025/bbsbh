@@ -109,7 +109,7 @@ export function JerseyBench({
             Press style here
           </button>
         )}
-        {pressed && <span className="idlab__tapeflash">✓ pressed</span>}
+        {pressed && <span className="idlab__tapeflash">Pressed</span>}
       </div>
 
       <div className="idlab__benchcols">

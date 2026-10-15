@@ -169,7 +169,7 @@ function SaveStamp({ onSave, status, blockedNameEdits }) {
           'Save'
         )}
       </button>
-      {landed && <span className="idlab__landed">Landed ✓</span>}
+      {landed && <span className="idlab__landed">Landed</span>}
       {status === 'error' && (
         <span className="hint hint--error idlab__savemsg">Didn’t land — is `npm run dev` running?</span>
       )}

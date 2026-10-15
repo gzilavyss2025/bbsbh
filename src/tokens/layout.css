@@ -51,6 +51,17 @@
      default mark is --tap-min itself, so it has no token of its own. */
   --mark-md: 32px;
   --mark-sm: 18px;
+  /* The report parts' mark slot (ADR-0112): a club logo or headshot in a leader
+     row (--mark-lg) and on a result card's club panel (--mark-xl). A box, with
+     an ink edge. */
+  --mark-lg: 36px;
+  --mark-xl: 40px;
+  /* The result card's centre cell and its strip height (styles/system/report/result.css). */
+  --result-mid: 84px;
+  --result-strip: 96px;
+  /* The on/off switch (styles/system/report/controls.css): the standard 51 by 31 track. */
+  --switch-w: 51px;
+  --switch-h: 31px;
 
   /* Focus mode's console masthead — the anchored scorebug band
      (24-floating-nav-and-hud.css's `.gamehud--console`, ADR-0043). The band's

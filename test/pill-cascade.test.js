@@ -87,7 +87,7 @@ test('a control is --control-min tall and a tag declares no height, so the two n
   assert.equal(decl(tag, 'min-height'), undefined)
   assert.equal(decl(tag, 'height'), undefined)
   assert.equal(decl(tag, 'padding'), '2px var(--space-1h)')
-  assert.equal(decl(tag, 'border-radius'), 'var(--radius-pill)')
+  assert.equal(decl(tag, 'border-radius'), '0', 'a pill is square (ADR-0112)')
 })
 
 test('the pill names no font-weight and no dashed edge', () => {

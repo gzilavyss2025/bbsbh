@@ -1,0 +1,141 @@
+/* ---------------------------------------------------------------------------
+   THE RESULT CARD (ADR-0112): a finished game's result, drawn from the focus-mode
+   scorebug (styles/focus/scorebug.css) and the slate's game card. The same
+   parts, the same order: a club panel on each side with its mark and the big
+   outlined score, a dark centre with the status, and the two name bars below
+   (the pitcher and batter bars of the scorebug become the winning pitcher and
+   the player of the game). The winner wears the marker underline that the club at
+   bat wears in the scorebug.
+
+   FOR A FINISHED GAME ON A HISTORY PAGE ONLY. The card draws the figure it is
+   given and gates nothing. A current-season score never goes in it: those
+   surfaces stay sealed (root CLAUDE.md, the spoiler rule). The bases and outs of
+   the scorebug are left out on purpose: they only mean something live.
+
+   The panel tint comes from the caller as --result-tint (the club's treatment
+   tint); with none, the panel is the soft ink. No club colour reaches anything
+   else on the card.
+   --------------------------------------------------------------------------- */
+
+.result {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+
+/* layout-exempt: the strip is club panel, centre, club panel */
+.result__strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--result-mid) minmax(0, 1fr);
+  min-height: var(--result-strip);
+}
+.result__club {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2h);
+  padding: var(--space-2) var(--space-3);
+  overflow: hidden;
+  background: var(--result-tint, var(--accent-primary));
+}
+.result__club--home {
+  flex-direction: row-reverse;
+}
+/* The ripple the scorebug panels wear, from the same tokens. */
+.result__club::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    repeating-radial-gradient(circle at 108% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -8% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
+}
+.result__club--win {
+  box-shadow: inset 0 calc(-1 * var(--space-1)) 0 var(--marker);
+}
+.result__mark {
+  flex: none;
+  width: var(--mark-xl);
+  height: var(--mark-xl);
+  overflow: hidden;
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+}
+.result__runs {
+  margin-inline-start: auto;
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-xl);
+  line-height: var(--lh-solid);
+  -webkit-text-stroke: 5px var(--surface-stamped-ink); /* raw-value-exempt: outline width scales with the digit, as the scorebug's */
+  paint-order: stroke fill;
+}
+.result__club--home .result__runs {
+  margin-inline: 0 auto;
+}
+/* layout-exempt: status and its note stack in the centre cell */
+.result__mid {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1);
+  border-inline: var(--bw-heavy) solid var(--text-on-ink-cream);
+}
+.result__status {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  letter-spacing: var(--ls-xwide);
+  line-height: var(--lh-solid);
+}
+.result__note {
+  color: var(--text-on-ink-dim);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+
+.result__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1h) var(--space-3);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+  text-transform: uppercase;
+}
+.result__bar + .result__bar {
+  background: var(--text-muted);
+}
+.result__tag {
+  margin-inline-end: var(--space-2);
+  color: var(--marker);
+}
+.result__line {
+  color: var(--text-on-ink-dim);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-none);
+  text-align: right;
+}
+
+.result__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}

@@ -124,6 +124,6 @@ The player page (`/player/{id}`, a batter or a pitcher) is built from the shared
 - `tokens/`: `colors.css`, `spacing.css`, `typography.css`, `effects.css`, `layout.css` (copied verbatim), `fonts.css`, `base.css` (base rules from `01-base.css`), `TOKENS.md` (a usage line per token).
 - `_ds_bundle.css`: the part styles, copied from `src/styles/system/` (card, stamped, jump bar, section head, table, cluster) and the fact rules from `09-team-info.css`, plus the stamp-in motion.
 - `fonts/`: the five woff2 files and three OFL licence texts.
-- `components/`: one preview each for the Stamped Card, Stat Tile, Fact Strip, Jump Bar, Section Head, Table and Motion, and seven player cards under `components/Player/`.
+- `components/`: one preview each for the Stamped Card, Stat Tile, Fact Strip, Jump Bar, Section Head, Table, the report parts (Stat Band And Strip, Leader List, Result Card, Meter And Key, Pill Marks, Report Controls) and Motion, and seven player cards under `components/Player/`.
 
 There is no JavaScript bundle. The look is CSS and class names. The React parts (`Card`, `StatTile`, `FactGrid`, `SectionHead`, `Table`, `HubTabBar`) live in the repo and draw these same classes.
