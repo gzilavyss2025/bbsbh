@@ -33,9 +33,7 @@
    own children sit above it. No photo (a 404), or one still loading: nothing shows. */
 .pnext__id {
   position: relative;
-}
-.pnext__id > :not(.pnext__action) {
-  position: relative;
+  isolation: isolate;
 }
 .pnext__action {
   position: absolute;
@@ -45,6 +43,7 @@
   height: 100%;
   object-fit: cover;
   object-position: top;
+  z-index: -1;
   opacity: 0;
   filter: saturate(0.85);
   pointer-events: none;
@@ -58,12 +57,15 @@
 .pnext__action.is-ready {
   opacity: 0.92;
 }
-/* The name can reach the photo's soft edge: a paper halo keeps its edge readable. */
+/* Text can reach the photo's soft edge: a paper halo keeps it readable. */
 .pnext__id--photo .pnext__role,
-.pnext__id--photo .pnext__name {
+.pnext__id--photo .pnext__name,
+.pnext__id--photo .pnext__club,
+.pnext__id--photo .pnext-ovr__nick,
+.pnext__id--photo .pnext__attr {
   text-shadow:
-    0 0 6px var(--bg-canvas),
-    0 0 12px var(--bg-canvas);
+    0 0 6px var(--surface-card),
+    0 0 12px var(--surface-card);
 }
 
 .shot.pnext__shot {

@@ -14,6 +14,7 @@ export function HeroActionPhoto({ personId, ready, onReady, onGone }) {
       alt=""
       crossOrigin={HEADSHOT_CROSS_ORIGIN}
       decoding="async"
+      fetchPriority="low"
       onLoad={onReady}
       onError={onGone}
     />

@@ -67,7 +67,7 @@ export function PlayerNextHero({ core }) {
     <Card as="div" frame="stamped" body="flush" stampIn className="pnext__hero" style={{ '--stamp-delay': HERO_STAMP_DELAY }}>
       <HeroBand core={core} />
       <div className={`pnext__id${photo === 'ready' ? ' pnext__id--photo' : ''}`}>
-        {isMlb && photo !== 'gone' && (
+        {isMlb && status?.state !== 'retired' && photo !== 'gone' && (
           <HeroActionPhoto
             personId={bio.id}
             ready={photo === 'ready'}
