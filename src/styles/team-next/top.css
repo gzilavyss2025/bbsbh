@@ -1,0 +1,570 @@
+/* ==== THE TOP OF THE ONE-SCROLL TEAM PAGE (#1107, row 5; design B, "form line") ====
+   TeamNextTop.jsx and its parts import this file. The hero is a stamped Card; the club band
+   head is the one club-coloured surface on the page (ADR-0030), its colours read from the shell
+   root (lib/headerTheme.js). The form line is the player Form trend's chart, the record grid the
+   Plate approach's zone map, the days rail On the mound's, the Runs bar the Pitch arsenal's mix
+   bar. Motion hangs off .tnext__top and is off in .tnext__top--still (a return visit) and under
+   reduced motion; an opened part rises in (player-rise-in) on every tap, since a tap caused it. */
+
+/* The count tag sits over the club band head, which paints after it. */
+.tnext__hero > .card__count {
+  z-index: var(--z-raised);
+}
+
+/* THE CLUB BAND HEAD: logo plate, name, sub line, the clinch flag. */
+/* layout-exempt: plate, name block and flag in one row */
+.tnext__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3h);
+}
+/* layout-exempt: one centred mark */
+.tnext__plate {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: calc(var(--space-12) + var(--space-2));
+  height: calc(var(--space-12) + var(--space-2));
+  border: var(--bw-heavy) solid var(--band-accent);
+  background: var(--band-fill);
+  filter: none;
+}
+.tnext__plate img {
+  filter: var(--mark-filter, none);
+}
+.tnext__club {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.tnext__name {
+  margin: 0;
+  color: var(--band-text);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.tnext__sub {
+  margin: var(--space-1) 0 0;
+  color: var(--text-on-ink-dim);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+/* The flag is a marker, never the seal (ADR-0083). */
+.tnext__flag {
+  flex: none;
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--marker);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+/* THE RECORD SPOT: the figure and its rank mark, a button with no face of its own (the hero is
+   its card). The hover tint and the focus ring are the interactive card's (system/card.css). */
+/* layout-exempt: the figure with its rank beside it, bottom-aligned */
+.tnext__spot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+}
+.tnext__record {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-2xl);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.tnext__spot .rankmark {
+  margin: 0;
+}
+
+/* THE LABEL ROW over a part: a name and its figure. */
+/* layout-exempt: a name at the left, a figure at the right */
+.tnext__label {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+.tnext__label span:last-child {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  letter-spacing: var(--ls-none);
+}
+
+/* An opened part rises in (styles/motion/player-rise.css). A second tap remounts it, so it plays again. */
+.tnext__panel {
+  animation: player-rise-in var(--dur-rise) var(--ease-stamp) backwards;
+}
+
+/* THE WIN-PERCENTAGE GRID: five wide, best record first. */
+.tnext__clubs {
+  padding: 0 var(--space-4) var(--space-4);
+}
+/* layout-exempt: a fixed five-wide count */
+.tnext__map {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+}
+/* layout-exempt: one centred figure */
+.tnext__cell {
+  display: grid;
+  place-items: center;
+  height: var(--space-8);
+  border-right: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+  animation: tnext-cell var(--dur-rise) var(--ease-stamp) calc(var(--stagger-step) * (6 + var(--i, 0))) backwards;
+}
+.tnext__cell--hi {
+  background: var(--marker);
+}
+.tnext__cell--mid {
+  background: var(--award-soft);
+}
+.tnext__cell--lo {
+  background: var(--surface-card);
+  color: var(--text-caption);
+}
+.tnext__cell--me {
+  position: relative;
+  z-index: 1;
+  outline: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  animation: card-stamp-in var(--dur-stamp-in) var(--ease-stamp) calc(var(--stagger-step) * 20) backwards;
+}
+/* layout-exempt: a key at each end */
+.tnext__mapkey {
+  display: flex;
+  justify-content: space-between;
+  margin: var(--space-1) 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+@keyframes tnext-cell {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+}
+
+/* THE FORM BLOCK: the line, then the parts the tiles open under it. Tight padding (space-3). */
+/* layout-exempt: label, chart and opened parts in one column */
+.tnext__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  padding: 0 var(--space-3) var(--space-3);
+}
+.tnext__formsvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-stamped);
+}
+.tnext__formgrid {
+  stroke: var(--border-hairline);
+  stroke-width: 1;
+}
+.tnext__formzero {
+  stroke: var(--text-heading);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.tnext__formfill {
+  fill: var(--field-wash);
+}
+.tnext__formfill--down {
+  fill: var(--clay-soft);
+}
+.tnext__formline {
+  fill: none;
+  stroke: var(--text-heading);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.tnext__formdot {
+  fill: var(--marker);
+  stroke: var(--text-heading);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.tnext__formaxis {
+  fill: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.tnext__formval {
+  fill: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+/* The line draws, the fill fades in, then today's dot stamps. */
+.tnext__top:not(.tnext__top--still) .tnext__formline {
+  stroke-dasharray: 1;
+  animation: tnext-draw var(--dur-draw) var(--ease-unfold) calc(var(--stagger-step) * 6) backwards;
+}
+.tnext__top:not(.tnext__top--still) .tnext__formfill {
+  animation: tnext-fade var(--dur-slow) var(--ease-out) calc(var(--stagger-step) * 20) backwards;
+}
+.tnext__top:not(.tnext__top--still) .tnext__formdot {
+  animation: tnext-pop var(--dur-stamp-in) var(--ease-stamp) calc(var(--stagger-step) * 22) backwards;
+}
+@keyframes tnext-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes tnext-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes tnext-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
+/* THE DAYS RAIL: eight days, the Today box over its column. */
+/* layout-exempt: label over the rail */
+.tnext__daysbox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+/* layout-exempt: eight equal day columns */
+.tnext__days {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-stamped);
+}
+.tnext__day {
+  padding: var(--space-1) 0 var(--space-1h);
+  border-right: var(--bw-hair) solid var(--border-hairline);
+  text-align: center;
+}
+.tnext__day:last-of-type {
+  border-right: 0;
+}
+.tnext__dayd {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-wide);
+}
+/* layout-exempt: one centred letter */
+.tnext__chip {
+  display: grid;
+  place-items: center;
+  min-width: var(--space-6);
+  height: var(--space-6);
+  margin: var(--space-1) auto 0;
+  padding: 0 var(--space-1);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  width: max-content;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+.tnext__chip--w {
+  background: var(--field-infield);
+}
+.tnext__chip--l {
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+}
+.tnext__chip--off {
+  border-style: dashed;
+  border-color: var(--border-rule);
+}
+.tnext__chip--next {
+  background: var(--marker);
+  animation: tnext-pop var(--dur-stamp-in) var(--ease-stamp) calc(var(--stagger-step) * 24) backwards;
+}
+.tnext__today {
+  position: absolute;
+  top: calc(-1 * var(--space-2h));
+  bottom: calc(-1 * var(--space-2h));
+  left: calc(100% / 8 * var(--today-col, 0));
+  width: calc(100% / 8);
+  border: var(--bw-heavy) solid var(--text-heading);
+  pointer-events: none;
+  animation: tnext-slide calc(var(--dur-draw) * 1.2) var(--ease-unfold) calc(var(--stagger-step) * 6) backwards;
+}
+.tnext__today span {
+  position: absolute;
+  top: calc(-1 * var(--space-3));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 var(--space-1);
+  background: var(--text-heading);
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+@keyframes tnext-slide {
+  from {
+    left: 0;
+  }
+}
+
+/* THE RUNS BAR: scored | allowed, as wide as their shares. */
+/* layout-exempt: label over the bar */
+.tnext__runs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  margin-top: var(--space-2);
+}
+/* layout-exempt: two segments sized by flex share */
+.tnext__runsbar {
+  display: flex;
+  height: var(--space-12);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+  animation: tnext-roll var(--dur-grow) var(--ease-unfold) backwards;
+}
+/* layout-exempt: a name over a figure, centred */
+.tnext__seg {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+.tnext__seg + .tnext__seg {
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+}
+.tnext__seg b {
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+}
+.tnext__seg span {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+.tnext__seg--rs {
+  background: var(--marker);
+}
+.tnext__seg--ra {
+  background: var(--surface-inset);
+}
+/* The flash: a card-coloured wash that fades off each segment, after the roll. */
+.tnext__seg i {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-card);
+  opacity: 0;
+  animation: tnext-flash var(--dur-slow) var(--ease-out) var(--flash-delay, 600ms) backwards;
+}
+@keyframes tnext-roll {
+  from {
+    clip-path: inset(calc(-1 * var(--space-2)) 100% calc(-1 * var(--space-2)) 0);
+  }
+  to {
+    clip-path: inset(calc(-1 * var(--space-2)) 0 calc(-1 * var(--space-2)) 0);
+  }
+}
+@keyframes tnext-flash {
+  0% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* THE HERO FOOT: the two stretches, full width, flush to the card's edges. */
+/* layout-exempt: two equal halves */
+.tnext__ends {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+.tnext__ends > div {
+  padding: var(--space-3) var(--space-4);
+}
+.tnext__ends > div + div {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+.tnext__endk {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.tnext__endv {
+  margin: var(--space-1) 0 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  font-variant-numeric: tabular-nums;
+}
+.tnext__endv--good {
+  background: linear-gradient(transparent 55%, var(--field-infield) 55%);
+  width: max-content;
+}
+.tnext__endv--bad {
+  background: linear-gradient(transparent 55%, var(--clay-soft) 55%);
+  width: max-content;
+}
+
+/* THE TWO TILES: plain stamped tiles, a button when they open a part. */
+/* layout-exempt: two equal tiles */
+.tnext__tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.tnext__tile > span {
+  display: block;
+}
+.tnext__tile.card--interactive {
+  width: 100%;
+  transition: transform var(--dur-fast) var(--ease-stamp);
+}
+.tnext__tile.card--interactive:active {
+  transform: translate(var(--bw-heavy), var(--bw-heavy));
+}
+
+/* Motion is once per page visit: a return shows the top at rest. */
+.tnext__top--still .tnext__cell,
+.tnext__top--still .tnext__chip--next,
+.tnext__top--still .tnext__today {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tnext__top *,
+  .tnext__top .card--stamp-in {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+:root[data-motion='reduced'] .tnext__top *,
+:root[data-motion='reduced'] .tnext__top .card--stamp-in {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* THE BAND HEAD: the band's name, full bleed on a heavy ink rule (ADR-0082). */
+.tnext__bandhead {
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: var(--space-2) var(--app-gutter);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+/* NO ROUNDED CORNERS on the new page. The hero and its parts are square already (the stamped
+   frame); the logo mark is too. The Standings band's cards are the old sheet frames until their
+   own re-skin (row 5b), so the band squares them from here, CSS only. A data dot stays round. */
+.tnext__top .teamlogo {
+  border-radius: 0;
+}
+/* layout-exempt: display: contents hands the band's children straight to its Stack */
+.tnext__square {
+  display: contents;
+}
+.tnext__square :not(.team-score__dot) {
+  border-radius: 0;
+}
+
+/* Wide: the record spot and its grid beside the form line, so the chart keeps its phone scale. */
+@media (min-width: 740px) {
+  /* layout-exempt: two equal columns of the hero body */
+  .tnext__main {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .tnext__form {
+    padding-top: var(--space-4);
+  }
+}
+
+/* Depth, as the real Season and Pitch arsenal cards have it: a small mark carries the soft stamped
+   shadow, a tapped control reads as picked by an ink edge (the Form trend's picked row, without
+   its tint: the tiles take no fill), and the hero's foot sits on the inset ground. */
+.tnext__flag,
+.tnext__chip:not(.tnext__chip--off) {
+  box-shadow: var(--shadow-stamped-soft);
+}
+.tnext__top .tnext__spot[aria-expanded='true'] {
+  box-shadow: inset var(--space-1) 0 0 var(--border-stamped);
+}
+.tnext__top .tnext__tile[aria-expanded='true'] {
+  box-shadow: inset var(--space-1) 0 0 var(--border-stamped), var(--shadow-stamped);
+}
+.tnext__ends {
+  background: var(--surface-inset);
+}

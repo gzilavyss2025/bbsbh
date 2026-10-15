@@ -4,7 +4,7 @@ import { lazy } from 'react'
 // band's folder, loaded when the band comes near. A later row edits only its own folder:
 // this list, Band.jsx and the page are not a module's to touch.
 export const BANDS = [
-  { key: 'standing', label: 'Standing', Module: lazy(() => import('./standing/index.jsx')) },
+  { key: 'standings', label: 'Standings', Module: lazy(() => import('./standings/index.jsx')) },
   { key: 'ranks', label: 'Ranks', Module: lazy(() => import('./ranks/index.jsx')) },
   { key: 'games', label: 'Games', Module: lazy(() => import('./games/index.jsx')) },
   { key: 'roster', label: 'Roster', Module: lazy(() => import('./roster/index.jsx')) },

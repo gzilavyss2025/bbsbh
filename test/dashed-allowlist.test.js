@@ -33,6 +33,7 @@ const ALLOWED = {
     ['postseason/primer-main.css', '.seriesribbon__game--ahead'], // a game still to play
     ['postseason/primer-main.css', '.seriesribbon__game--ifNecessary'], // a game that may not be played
     ['player-next/history/moves.css', '.moves__noclub'], // a move whose club the feed does not name: a pencilled box, no mark
+    ['team-next/top.css', '.tnext__chip--off'], // a day with no game: an empty slot in the days rail
   ],
   // Waiting is provisional: an empty or loading slot that holds its place. The
   // EmptyState itself, sized tiles in a rail, round stamp slots (ADR-0035) and

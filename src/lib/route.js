@@ -196,11 +196,11 @@ const TEAM_TAB_ROUTES = {
 }
 
 // Where each old tab lands on the one-scroll team page (ADR-0082, #1107). `/numbers`
-// lands on Standing, where the Numbers tab's lead content (the standings table) went.
+// lands on Standings, where the Numbers tab's lead content (the standings table) went.
 export const TEAM_TAB_BAND = {
   roster: 'roster',
   games: 'games',
-  numbers: 'standing',
+  numbers: 'standings',
   contracts: 'money',
   minors: 'farm',
 }
