@@ -22,8 +22,7 @@
 .stat__v,
 .datenav__label,
 .lineup__jersey,
-.roster__jersey,
-.starter__jersey {
+.roster__jersey {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);

@@ -134,87 +134,6 @@
   text-align: right;
 }
 
-/* Birthday cake beside a name on the staging sheet (see TeamInfo's
-   BirthdayCake), sitting in the namewrap after the prospect pill. A small
-   emoji flourish — its own color, no ink token needed. */
-.name-cake {
-  font-size: var(--fs-compact);
-  line-height: var(--lh-solid);
-}
-
-/* ---------------------------------------------- opposing starter/defense */
-/* The opposing starter's headshot card — leads the page ahead of the
-   batting order, since it's the one useful fact on hand before the lineup
-   posts. Same card chrome as .opp__defense below; the headshot anchors a
-   name/handedness/jersey column, with the season line as its own row. */
-.starter__body {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2h) var(--space-3);
-  /* The edge, the corners and the shadow are the Card's (.starter, #1113 slice
-     C3), so the masthead caps one card cleanly. */
-}
-.shot.starter__shot {
-  flex: none;
-  width: var(--shot-lg-w);
-  height: var(--shot-lg-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.shot.starter__shot.shot--fallback {
-  font-size: var(--fs-hero-md);
-}
-
-.starter__info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
-  flex: 1;
-}
-
-.starter__namewrap {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-1h);
-  min-width: 0;
-}
-
-.starter__name {
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-title-sm);
-  color: var(--text-body);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-/* Rendered as a PlayerLink → .plink button, and .plink (declared later, same
-   specificity) resets weight/color to `inherit` via its `font`/`color`
-   shorthand — same fix as .plink.lineup__name/.plink.roster__name above. */
-.plink.starter__name {
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
-
-.starter__badges {
-  display: flex;
-  gap: var(--space-2h);
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-}
-.starter__jersey {
-  color: var(--clay);
-}
-.starter__hand {
-  color: var(--field);
-}
-
 /* The starter's season line, then — same treatment, its own divider —
    his most recent appearance, his summed line against tonight's opponent this
    season, and (conditionally) his whole career against them, so the card
@@ -243,26 +162,6 @@
 button.starter__careervs {
   padding-top: var(--space-1);
   border-top: var(--bw-hair) solid var(--border-hairline);
-}
-
-/* The pitch mix (StarterMix.jsx). Phone: a "Watch his pitches" door, a full row
-   under the headshot + info, that opens the scene in a sheet. Wide: the band in
-   the WIDE LAYOUT section. The body wraps so either can take a row of its own. */
-.starter__body .starter__watch {
-  flex: 0 0 100%;
-  margin: 0;
-}
-.starter__sheet {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-.starter__sheet .pcard__sec {
-  padding-top: 0;
-  border-top: 0;
-}
-.starter__sheet .btn {
-  width: 100%;
 }
 
 /* The mix's own rows, its times-through filter and the card's dark dress live

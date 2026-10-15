@@ -225,34 +225,6 @@
   color: var(--text-heading);
 }
 
-/* ── Ballpark modal ─────────────────────────────────────────────────────────
-   The venue name on the lineup page opens a to-scale ink sketch of the field
-   (BallparkDiagram) plus the park's outfield distances / wall heights ranked
-   against the league. Paper-scorebook idiom: manila fills, navy fence, graphite
-   lines, mono tabular figures — see BallparkModal.jsx / BallparkDiagram.jsx. */
-
-/* Venue name rendered as a tap target when the park is on file. */
-.fact__link {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  text-align: left;
-  text-transform: uppercase;
-  letter-spacing: var(--ls-num);
-  color: var(--accent-primary);
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-
-.fact__link:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-  border-radius: var(--radius-sm);
-}
-
 .bpsheet {
   max-height: min(90vh, 780px);
   display: flex;

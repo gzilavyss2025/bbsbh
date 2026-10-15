@@ -337,48 +337,6 @@
     margin-inline: auto;
   }
 
-  /* ---- lineup page, wide layout: the batting order and the opposing defense
-     diamond run side by side rather than stacking — a 3fr/2fr split rather
-     than 50/50, since the order (nine rows of names) needs more room than the
-     diamond (a compact fielding chart). Falls back to a single column when
-     there's no defense card to show (oppDefense empty pregame). */
-  .teaminfo__lineupdefense {
-    display: grid;
-    grid-template-columns: 3fr 2fr;
-    align-items: start;
-    gap: 0 var(--space-6);
-  }
-  .teaminfo__lineupdefense:has(> :only-child) {
-    grid-template-columns: 1fr;
-  }
-
-  /* ---- opposing-starter card, wide layout: the pitch mix is a band under the
-     headshot + info row — the list left, the animated scene (StarterMix.jsx)
-     filling the right column, which sets the arcs' size. A starter with no arc
-     to draw gets the list alone, full width. */
-  .starter__body {
-    align-items: flex-start;
-  }
-  .starter__info {
-    flex: 1;
-  }
-  .starter__mix {
-    flex: 0 0 100%;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: var(--space-5);
-    padding-top: var(--space-3);
-    border-top: var(--bw-hair) solid var(--border-hairline);
-  }
-  .starter__mix:not(:has(.starter__scene)) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  /* The pitch the scene is playing (StarterMix's `activeCode`). */
-  .starter__mix .arsenal__row.is-active {
-    background: var(--surface-inset);
-  }
-
   /* ---- innings, wide layout. Refresh rides in the floating bottom bar above
      Next at every width now (see .pagenav--innings), so it's always one reach
      from the primary action — the old top toolbar is gone. */

@@ -474,14 +474,6 @@
   color: var(--text-caption);
 }
 
-.bs__avg {
-  color: var(--text-muted);
-}
-.bs__ps {
-  color: var(--text-muted);
-  font-size: var(--fs-caption);
-}
-
 .bs__totals td {
   font-weight: var(--w-bold);
   color: var(--text-heading);

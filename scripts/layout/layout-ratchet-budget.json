@@ -44,8 +44,8 @@
     "grid": 2
   },
   "src/styles/10-lineup.css": {
-    "column": 6,
-    "wrap": 4,
+    "column": 4,
+    "wrap": 2,
     "grid": 3
   },
   "src/styles/10b-former-teammates.css": {
@@ -126,7 +126,7 @@
   "src/styles/25-wide-layout.css": {
     "column": 2,
     "wrap": 2,
-    "grid": 6
+    "grid": 4
   },
   "src/styles/26-player-page.css": {
     "wrap": 2,
