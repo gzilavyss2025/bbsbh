@@ -250,8 +250,8 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
 
   // Each club's batting/pitching card, ABS card, and Defense card wear the header
   // colors of the jersey it's actually wearing that game — the same ADR-0030
-  // mechanism TeamInfo.jsx's club-name bar uses, scoped per card here instead of to
-  // one page-wide `.teaminfo`. `winProbTreatment` is the same jersey-treatment pair
+  // mechanism the lineup page's club-name bar uses, scoped per card here instead of to
+  // one page-wide scope. `winProbTreatment` is the same jersey-treatment pair
   // already threaded to WinProbChart, so this is no new fetch. Null for a club with
   // no curated triad, which leaves that card on the app's default navy chrome.
   // Resolved on every render rather than memoized. It is a table lookup and two

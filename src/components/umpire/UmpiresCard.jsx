@@ -11,8 +11,8 @@ import { UmpireLink } from './UmpireLink.jsx'
 // It draws CELLS, not a card and not a header: TeamInfo renders it inside the
 // same FactGrid as the date / ballpark / weather facts, so the page's two top
 // tables are one table and the crew fills the cell an odd fact count left
-// empty. The full Umpire Tendencies card is NOT in here — TeamInfo renders it
-// as the page-top zone's right column (see .teaminfo__topzone).
+// empty. The full Umpire Tendencies card is NOT in here — the lineup page
+// (src/screens/lineup/next/) renders it.
 //
 // Under tonight's plate ump: his season accuracy TIER (Elite/Good/Average/
 // Below Average — see api/umpires.js's tierForZ), as a tap glyph next to
