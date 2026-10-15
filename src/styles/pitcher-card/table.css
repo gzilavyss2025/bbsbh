@@ -134,9 +134,12 @@
   border-radius: 0;
   padding: var(--space-1h) var(--space-1h) var(--space-2);
 }
+/* The pitch in flight washes its tile in a soft tint of its own colour (--pitch,
+   set inline from pitchMark). The ink underline stays: a pale pitch such as the
+   knuckleball would not show as a tint alone. */
 .pcard__tile.is-active {
   border-color: var(--border-hairline);
-  background: var(--surface-inset);
+  background: color-mix(in srgb, var(--pitch, var(--text-caption)) 28%, var(--surface-card));
   box-shadow: inset 0 -3px 0 var(--ink-0); /* raw-value-exempt: underline thickness */
 }
 

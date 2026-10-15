@@ -41,20 +41,27 @@ export function PitchMix({ tiles, lefty, name }) {
         </span>
       </span>
       <div className="pcard__tiles" style={{ '--pcard-tile-cols': tileColumns(tiles.length) }}>
-        {tiles.map((t) => (
-          <div key={t.code ?? 'other'} className={`pcard__tile${t.code && t.code === activeCode ? ' is-active' : ''}`}>
-            <span className="pcard__tilehead">
-              <PitchMark mark={pitchMark(t.code)} />
-              {t.code && <span className="pcard__code">{t.code}</span>}
-            </span>
-            <span className="pcard__tname">{t.name}</span>
-            <span className="pcard__pct">{t.pct}%</span>
-            <span className="pcard__mph">
-              {t.mph}
-              {!t.other && <span className="pcard__unit"> mph</span>}
-            </span>
-          </div>
-        ))}
+        {tiles.map((t) => {
+          const mark = pitchMark(t.code)
+          return (
+            <div
+              key={t.code ?? 'other'}
+              className={`pcard__tile${t.code && t.code === activeCode ? ' is-active' : ''}`}
+              style={{ '--pitch': mark.color }}
+            >
+              <span className="pcard__tilehead">
+                <PitchMark mark={mark} />
+                {t.code && <span className="pcard__code">{t.code}</span>}
+              </span>
+              <span className="pcard__tname">{t.name}</span>
+              <span className="pcard__pct">{t.pct}%</span>
+              <span className="pcard__mph">
+                {t.mph}
+                {!t.other && <span className="pcard__unit"> mph</span>}
+              </span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
