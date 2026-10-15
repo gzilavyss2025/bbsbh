@@ -382,6 +382,7 @@
    Replay wraps alone and the two icons stay together. */
 .pbp__replaybtn {
   margin: 7px 0 0 var(--space-2);
+  border-radius: 0; /* square, like every control on the card */
   padding-inline: var(--space-2);
   vertical-align: middle;
 }
