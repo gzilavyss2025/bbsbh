@@ -15,7 +15,7 @@ globalThis.fetch = async (url) => {
 }
 
 const {
-  STRETCH, formSeries, formGeometry, stretches, lastTen, daysRail, clubLine, gridCells, rankOf, flagOf,
+  STRETCH, formSeries, formGeometry, stretches, lastTen, daysRail, clubLine, gridCells, rankOf, flagOf, runsCaption,
 } = await import('../src/screens/team/next/top/topData.js')
 const { fetchTeamSchedule } = await import('../src/api/schedule.js')
 const { BANDS } = await import('../src/screens/team/next/bands.js')
@@ -208,6 +208,19 @@ test('gridCells: best record first, the club marked, tiers by place, a diagonal 
   assert.equal(many[5].i, 1)
   assert.equal(many[0].tier, 'me')
   assert.deepEqual([many[1].tier, many[5].tier, many[6].tier, many[17].tier, many[18].tier], ['hi', 'hi', 'mid', 'mid', 'lo'])
+})
+
+test('gridCells follows the feed sportRank on a tie, so the grid and the record spot agree', () => {
+  // Same pct (.625), different wins: a wins tie-break puts 100-60 first; the feed puts the 50-30 club first.
+  const cells = gridCells([rec(1, 100, 60, { sportRank: '2' }), rec(2, 50, 30, { sportRank: '1' })], 1)
+  assert.deepEqual(cells.map((c) => c.id), [2, 1])
+})
+
+test('runsCaption needs both runs; a missing runs-allowed gives no caption, never "null"', () => {
+  assert.equal(runsCaption({ rs: 832, ra: 618 }), '832 for · 618 against')
+  assert.equal(runsCaption({ rs: 700, ra: null }), null)
+  assert.equal(runsCaption({ rs: null, ra: 700 }), null)
+  assert.equal(runsCaption(null), null)
 })
 
 test('the page keeps its seven bands, the standing key and folder, and its hidden rules', () => {

@@ -13,7 +13,7 @@ import { ClubGrid } from './ClubGrid.jsx'
 import { DaysRail } from './DaysRail.jsx'
 import { FormLine } from './FormLine.jsx'
 import { RunsBar } from './RunsBar.jsx'
-import { clubLine, daysRail, formSeries, gridCells, lastTen, stretches } from './topData.js'
+import { clubLine, daysRail, formSeries, gridCells, lastTen, runsCaption, stretches } from './topData.js'
 import '../../../../styles/team-next/top.css'
 
 // The top of the one-scroll team page (#1107, row 5, design B "form line"): a stamped hero
@@ -53,7 +53,7 @@ export function TeamNextTop({ team, standings, season, asOf }) {
   const openClubs = () => {
     tap('clubs')
     const league = OTHER_LEAGUE[team.league?.id]
-    if (mlb && league && !other) SHARED.fetchStandings(league, season, cutoff).then(setOther)
+    if (mlb && league && !other) SHARED.fetchStandings(league, season, cutoff).then((s) => s?.length && setOther(s))
   }
 
   // MLB: all thirty clubs, so the other league's standings are needed. Any other club: its own
@@ -99,7 +99,7 @@ export function TeamNextTop({ team, standings, season, asOf }) {
                 </>
               )}
               <div id="tnext-days">{taps.days > 0 && rail && <DaysRail key={taps.days} rail={rail} />}</div>
-              <div id="tnext-runs">{taps.runs > 0 && line?.rs != null && <RunsBar key={taps.runs} rs={line.rs} ra={line.ra} diff={line.diff} />}</div>
+              <div id="tnext-runs">{taps.runs > 0 && line?.rs != null && line.ra != null && <RunsBar key={taps.runs} rs={line.rs} ra={line.ra} diff={line.diff} />}</div>
             </div>
           )}
         </div>
@@ -117,7 +117,7 @@ export function TeamNextTop({ team, standings, season, asOf }) {
               controls={rail ? 'tnext-days' : null} open={taps.days > 0} onTap={() => tap('days')} />
           )}
           {line?.diff && (
-            <Tile label="Run diff" value={line.diff} caption={line.rs != null ? `${line.rs} for · ${line.ra} against` : null} delay={TILE_DELAY[1]}
+            <Tile label="Run diff" value={line.diff} caption={runsCaption(line)} delay={TILE_DELAY[1]}
               controls={line.rs != null ? 'tnext-runs' : null} open={taps.runs > 0} onTap={() => tap('runs')} />
           )}
         </div>

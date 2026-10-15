@@ -64,7 +64,7 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
       asOf={asOf}
       sportId={sportId}
       active="next"
-      top={<TeamNextTop team={team} standings={standings} season={season} asOf={asOf} />}
+      top={<TeamNextTop key={`${team.id}:${asOf ?? ''}`} team={team} standings={standings} season={season} asOf={asOf} />}
       bar={
         <HubTabBar
           variant="anchor"

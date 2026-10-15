@@ -148,6 +148,9 @@ export function rankOf(row, team, poolSize) {
   return Number.isFinite(rank) && rank > 0 ? { rank, of: mlb ? MLB_CLUBS : poolSize } : null
 }
 
+// The Run diff tile's caption: both runs or none, so a feed gap never prints "null".
+export const runsCaption = (line) => (line?.rs != null && line.ra != null ? `${line.rs} for · ${line.ra} against` : null)
+
 // The club's own line out of a fetchStandings response, or null with no row for it.
 export function clubLine(standings, team) {
   const division = divisionRecordFor(standings, team)
@@ -175,8 +178,11 @@ const share = (t) => t.wins / ((t.wins + t.losses) || 1)
 
 // The clubs of a pool, best record first, as grid cells: `i` is the cell's place on the diagonal
 // the cells ink in on (row + column of a five-wide grid), `tier` its shade, `me` the viewed club.
+// A pool where every club carries the feed's `sportRank` follows it, so the grid's place and the record
+// spot's rank agree on a tie; any other pool sorts by win share.
 export function gridCells(records, id) {
-  const sorted = [...records].sort((a, b) => share(b) - share(a) || b.wins - a.wins)
+  const fed = records.every((t) => Number.isFinite(Number(t.sportRank)))
+  const sorted = [...records].sort((a, b) => (fed ? a.sportRank - b.sportRank : share(b) - share(a) || b.wins - a.wins))
   return sorted.map((t, n) => ({
     id: t.team.id,
     g: t.leagueRecord?.pct ?? '',
