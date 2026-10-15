@@ -1,0 +1,28 @@
+/* ==== THE BAND TEXTURE: ripple rings and sheen on a band head ====
+   Copied from src/styles/lineup-next/page.css (the lineup page's band texture), where the rule
+   is scoped to .lnext .sectionhead--band. Here it is opt-in: add sectionhead--textured next to
+   sectionhead--band. Square, like the lineup page's band. Broadcast-style ripple rings from two
+   corners, fading toward the middle, over a soft diagonal sheen. Tokens: ripple-light,
+   ripple-dark, ripple-mask, sheen-light, sheen-dark (effects.css). */
+.sectionhead--band.sectionhead--textured {
+  border-radius: 0;
+  position: relative;
+  isolation: isolate;
+}
+.sectionhead--band.sectionhead--textured::before,
+.sectionhead--band.sectionhead--textured::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.sectionhead--band.sectionhead--textured::before {
+  background:
+    repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
+  mask-image: linear-gradient(100deg, var(--ripple-mask) 0%, transparent 50%, var(--ripple-mask) 100%);
+}
+.sectionhead--band.sectionhead--textured::after {
+  background: linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%);
+}

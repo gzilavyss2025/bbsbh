@@ -179,6 +179,8 @@ thirteen, each with its ADR: `api/CLAUDE.md`.
   `ready-for-human` / `wontfix`, used as-is. See `docs/agents/triage-labels.md`.
 - **Domain docs** — single-context: one `CONTEXT.md` + `docs/adr/`. See
   `docs/agents/domain.md`.
+- **Design system sync** — the "Tally Baseball" project in claude.ai/design is built from this repo
+  by `.design-sync/build/`; rebuild and upload steps are in `docs/design-sync.md`.
 - **Peer sites** — when Gary asks what other baseball sites do that is cool, start from
   `docs/peer-sites.md` and add to it.
 - **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR

@@ -1,0 +1,7 @@
+{
+  "projectId": "419659a9-0431-40ef-b2ae-c04dce4c076a",
+  "pkg": "bbsbh",
+  "globalName": "TallyBaseball",
+  "shape": "package",
+  "buildCmd": "node .design-sync/build/run.mjs --out ds-bundle"
+}

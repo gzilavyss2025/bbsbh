@@ -1,0 +1,24 @@
+/* ==== DESIGN-SYSTEM ADDITION (Gary): the compact stat tile ====
+   Not in the app repo. A stat tile about 40% smaller than the standard one: the value
+   drops from --fs-score-lg (46px) to --fs-hero-sm (28px) on a phone and from --fs-hero-xl
+   (56px) to --fs-hero-lg (32px) from 740px; the label drops to --fs-caption (11px) and the
+   padding to --space-2 (--space-2h from 740px). Frame, tones, caption and rank mark are
+   unchanged. Add the class next to .stattile: <div class="card card--stamped stattile stattile--compact">. */
+.stattile.stattile--compact {
+  padding: var(--space-2);
+}
+.stattile--compact .stattile__label {
+  font-size: var(--fs-caption);
+}
+.stattile--compact .stattile__value {
+  font-size: var(--fs-hero-sm);
+  line-height: var(--lh-solid);
+}
+@media (min-width: 740px) {
+  .stattile.stattile--compact {
+    padding: var(--space-2h);
+  }
+  .stattile--compact .stattile__value {
+    font-size: var(--fs-hero-lg);
+  }
+}
