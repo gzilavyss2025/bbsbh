@@ -11,9 +11,10 @@
    - Barlow Condensed Tag is the card count tag's own 600 face and nothing else
      (--font-display-tag, used by .card__count only). It is a separate family
      name so no other Barlow rule that asks for 600 can reach it.
-   - Source Sans 3 ships 400, 500, 600 and 700.
+   - Source Sans 3 ships 400, 500, 600 and 700, and no CSS rule asks for it since #2165: only the
+     poster canvas (src/lib/preview/posterPaper.js) draws it.
 
-   Lora ships TWO, and Source Sans 3 more: the regular weight for running prose,
+   Lora ships TWO, as Source Sans 3 does: the regular weight for running prose,
    plus the weight several components ask for to bold a name or a number
    inline inside that same prose (a wire-dock/transactions player name, a
    box score's Play of the Game score) — a bold run beside regular text of

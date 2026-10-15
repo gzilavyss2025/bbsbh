@@ -80,7 +80,8 @@ weight, so the site ships one weight per face:
   figure is colour, never weight (ADR-0073).
 - The card count tag is the one Barlow 600. It has its own family name, "Barlow
   Condensed Tag" (`--font-display-tag`), so no other rule can reach that face.
-- Source Sans 3 keeps 400, 500, 600 and 700. The fact strip value is 500.
+- Source Sans 3 keeps 400, 500, 600 and 700. The fact strip value is 500. (Replaced on
+  2026-10-15: see "Amendment (2026-10-15)" at the end.)
 
 ## Older ADRs
 
@@ -139,3 +140,23 @@ that tab's section once it has loaded (Season; Plate approach, or Pitches for a 
 History). An old `?look=new` link opens the page too. The old tab screens, the tab bar,
 the shell, the old Overview and the cards and CSS that only they drew are deleted.
 `docs/player-hub.md` describes the page as it is now.
+
+## Amendment (2026-10-15): mono body, square band heads, ripple everywhere (#2165)
+
+Gary made three calls on the look. The Claude Design project (`docs/design-sync.md`) already
+drew them. The app now matches it.
+
+- **Body copy is JetBrains Mono 500.** `--font-body` is the mono stack. This replaces "Source
+  Sans 3 keeps 400, 500, 600 and 700" under "Type weights". Every weight of body copy now draws
+  500, as every figure already did, so emphasis is colour or size, as ADR-0073 says. Source Sans 3
+  is no longer a role. `fonts.css` still declares it, and only the poster canvas
+  (`src/lib/preview/posterPaper.js`) draws it.
+- **A band head is square.** `sectionhead--band` has no rounded corners. The rule that rounded
+  its top corners is gone.
+- **Every band head wears the ripple rings and sheen**, with no extra class. The lineup page's
+  rule moved into `src/styles/system/section-head.css`. A host that sets its own `position`
+  still wins.
+- **The compact stat tile** (`stattile--compact`) is in `src/styles/system/stamped/`. The
+  season and command tiles on the player page use it.
+
+What did not change: the club-colour rule (ADR-0030) and the `--seal` scope (ADR-0083).
