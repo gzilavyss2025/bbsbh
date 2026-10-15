@@ -122,3 +122,39 @@ test('halfIndex agrees with the gate the selectors enforce', () => {
   assert.equal(halfIndex(2, 'top'), 2)
   assert.equal(halfIndex(1, 'bottom'), 1)
 })
+
+// --------------------------------------------------------------------------
+// lineupEntering — a player who changes position mid-game (double switch)
+// --------------------------------------------------------------------------
+function feedWithSwitch() {
+  // Before top 2's first pitch the home club swaps its 1B (#13, slot 3) and 2B
+  // (#19, slot 9): the same two men, new spots.
+  const feed = buildFeed()
+  const play = feed.liveData.plays.allPlays.find((p) => p.about.inning === 2 && p.about.halfInning === 'top')
+  play.playEvents.unshift(
+    { details: { eventType: 'defensive_switch' }, position: { abbreviation: '1B' }, player: { id: 19 } },
+    { details: { eventType: 'defensive_switch' }, position: { abbreviation: '2B' }, player: { id: 13 } },
+  )
+  return feed
+}
+
+test('a player who moves spots keeps his slot and carries the old spot and the inning of the move', () => {
+  const slot3 = slotOf(lineupEntering(feedWithSwitch(), 'home', 2, 'top', 1), 3)
+  assert.equal(slot3.entries.length, 1) // same man, no second line
+  const e = slot3.entries[0]
+  assert.equal(e.position, '2B')
+  assert.equal(e.prevPosition, '1B')
+  assert.equal(e.movedInning, 2)
+})
+
+test('a player who never moves carries no previous spot', () => {
+  const slot3 = slotOf(lineupEntering(buildFeed(), 'home', 2, 'top', 1), 3)
+  assert.equal(slot3.entries[0].prevPosition, null)
+  assert.equal(slot3.entries[0].movedInning, null)
+})
+
+test('the move stays sealed until its own half is the next reveal', () => {
+  const slot3 = slotOf(lineupEntering(feedWithSwitch(), 'home', 1, 'top', -1), 3)
+  assert.equal(slot3.entries[0].position, '1B')
+  assert.equal(slot3.entries[0].prevPosition, null)
+})

@@ -205,7 +205,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
   const otherSide = shown === 'away' ? 'home' : 'away'
   const canSwap = leadSide != null && teamFor(otherSide).slots.length > 0
   return (
-    <Card body="flush" className="entering">
+    <Card frame="stamped" body="flush" className="entering">
       {!bare && (
         <button
           type="button"
@@ -236,13 +236,16 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
               nothing to knock the mark out AGAINST. */}
           {canSwap && (
             <button type="button" className="entering__swap" onClick={() => setShown(otherSide)}>
-              <TeamLogo
-                teamId={teamFor(otherSide).teamId}
-                name={teamFor(otherSide).name}
-                size={18}
-                className="entering__swaplogo"
-              />
-              {teamFor(otherSide).name} lineup ›
+              <span className="entering__swaplabel">
+                <TeamLogo
+                  teamId={teamFor(otherSide).teamId}
+                  name={teamFor(otherSide).name}
+                  size={20}
+                  className="entering__swaplogo"
+                />
+                {teamFor(otherSide).name} lineup
+              </span>
+              <span className="entering__swapchev" aria-hidden="true">&rsaquo;</span>
             </button>
           )}
         </Stack>
@@ -293,8 +296,11 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
               <span className="entering__entries">
                 {s.entries.map((e, i) => {
                   const last = i === s.entries.length - 1
+                  // One inning per line, in its own column: the inning a sub
+                  // entered, or, for a man who changed spots, the inning of the move.
+                  const innNum = e.movedInning ?? e.inning
                   return (
-                    <span className="entering__entry" key={i}>
+                    <span className={`entering__entry ${e.replaced ? 'entering__entry--out' : ''}`.trim()} key={i}>
                       <span className="entering__names">
                         <LineupName entry={e} />
                         {last && (
@@ -311,8 +317,14 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
                           </>
                         )}
                       </span>
-                      <span className="entering__meta">
-                        {e.jersey ? <span className="entering__jersey">{e.jersey}</span> : null}
+                      <span className="entering__inncell">
+                        {!e.replaced && innNum != null ? (
+                          <span className="entering__inn">{ordinal(innNum)}</span>
+                        ) : null}
+                      </span>
+                      <span className="entering__jersey">{e.jersey || null}</span>
+                      <span className="entering__poscell">
+                        {!e.replaced && e.prevPosition ? <span className="entering__prevpos">{e.prevPosition}</span> : null}
                         {e.position ? <span className="entering__pos">{e.position}</span> : null}
                       </span>
                     </span>
@@ -327,18 +339,14 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
   )
 }
 
-// One batting-order slot's name stack — struck through when replaced, tagged
-// with the inning he entered while he's the standing occupant. Jersey/position
-// sit in the entry line's own right-aligned meta column, so this renders name +
-// enter-tag only. Mirrors DefenseDiamond's DefenseName styling.
+// One batting-order slot's name — struck through when replaced. The inning he
+// entered (or moved spots), jersey and position sit in the entry line's own
+// columns, so this renders the name only. Mirrors DefenseDiamond's DefenseName styling.
 function LineupName({ entry }) {
-  const entered = entry.inning != null && !entry.replaced
   return (
     <StruckLine
       struck={entry.replaced}
-      className={`entering__name ${entry.replaced ? 'entering__name--out' : ''} ${
-        entered ? 'entering__name--in' : ''
-      }`}
+      className={`entering__name ${entry.replaced ? 'entering__name--out' : ''}`.trim()}
     >
       {/* The card PRINTS 'Last, First' — the scorebook's sorted spelling — but
           the address is spoken order, or the slug would read 'trout-mike'
@@ -347,9 +355,6 @@ function LineupName({ entry }) {
         {entry.last}
         {entry.first ? `, ${entry.first}` : ''}
       </PlayerLink>
-      {entry.inning != null && (
-        <span className="entering__enter">({ordinal(entry.inning)})</span>
-      )}
     </StruckLine>
   )
 }

@@ -1328,9 +1328,15 @@
 }
 
 /* Away over home, each a self-contained nine-slot list. Stacked so a long name
-   with its number/position never has to wrap in a cramped column on a phone. */
+   with its number/position never has to wrap in a cramped column on a phone.
+   The club band bleeds to the stamped card's edge, so the card has no top
+   padding of its own; a "Lineups" title bar above it (non-bare) gets its gap back. */
 .entering__teams {
-  padding: var(--space-3) var(--space-2h);
+  padding: 0 var(--space-2h) var(--space-3);
+}
+
+.entering__title + .entering__teams {
+  padding-top: var(--space-3);
 }
 
 /* Same navy-bar recipe as .halfdefense__title — a themed club recolors it via
@@ -1338,10 +1344,11 @@
    navy/seal/white default every other masthead bar wears, not a one-off look.
    EDGE TO EDGE: the margin cancels .entering__teams' 10px side padding that
    `width: 100%` cannot reach past (the bar read as a label ON the card, not its
-   masthead); padding-inline holds the text at the same x, so only the fill moves. */
+   masthead); padding-inline holds the text at the same x, so only the fill moves.
+   The ripple rings and sheen are the band's own (system/section-head.css). */
 .lineupteam__name {
   width: auto;
-  margin: 0 -10px 8px;
+  margin: 0 -10px;
   padding: var(--space-2) 18px;
   display: flex;
   align-items: center;
@@ -1372,66 +1379,84 @@
   display: inline;
 }
 
+/* Rows run edge to edge under the band: the margin cancels .entering__teams'
+   side padding, and each row's own padding holds the text where it was. */
 .entering__list {
-  padding: 0 var(--space-2);
+  margin-inline: -10px;
+  padding: 0;
 }
 
 .entering__row {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: var(--space-2);
+  padding-inline: var(--space-2) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 /* The BATTING club's on-deck row (LineupSection's `onDeckSlot`, focus mode's
-   Lineups tab) — --marker, same highlighter-yellow as the at-bat card's
+   Lineups tab): the picked-row paper, an inked slot number and a --marker
+   "Up next" pill. --marker is the same highlighter yellow as the at-bat card's
    decisive-pitch row (14-strike-zone.css). Not .duepill's kraft-amber: that
    pill answers a different question (the FIELDING club's next half). */
 .entering__row--ondeck {
-  background: color-mix(in srgb, var(--marker) 18%, var(--surface-card));
-  border-radius: var(--radius-sm);
-  margin-inline: -6px;
-  padding: 3px var(--space-1h);
+  background: var(--surface-row-selected);
 }
 
-/* Reuses .duepill's shape (className="duepill entering__ondeck"), just
+.entering__row--ondeck .entering__slot {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+
+/* Reuses .duepill's shape (className="duepill entering__ondeck"), square and
    recolored — see comment above. */
 .entering__ondeck {
   background: var(--marker);
   color: var(--text-heading);
   border-color: transparent;
+  border-radius: 0;
 }
 
+/* A 24px square beside the first line of the slot; the 10px margin centres it
+   in a 44px tap-height row. */
 .entering__slot {
+  flex: 0 0 24px;
+  height: 24px;
+  margin-block: var(--space-2h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-cell);
   color: var(--text-caption);
-  min-width: 12px;
-  text-align: right;
 }
 
-/* The name stack grows to fill the row so the number/position column is pushed
-   to the right edge; a substitution stack wraps within it. center, not
-   baseline: a bordered/padded pill (RookiePill/ProspectPill) needs more room
-   above its own baseline than plain text does, so baseline alignment was
-   inflating the whole row's height just to fit one pill — same fix already
-   used by .lineup__namewrap elsewhere. */
+/* The name stack grows to fill the row; a substitution adds a line to it. */
 .entering__entries {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
 }
 
+/* One line per occupant: name, inning, jersey, position. The three right
+   columns are fixed, so every row's figures line up down the card. The
+   standing line holds the tap floor; a struck line may be shorter. */
+/* layout-exempt: a fixed four-column ledger line, so figures align across rows */
 .entering__entry {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
+  min-height: var(--tap-min);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px 32px 64px;
+  column-gap: var(--space-1h);
+  align-items: center;
+}
+
+.entering__entry--out {
+  min-height: 36px;
 }
 
 .entering__names {
-  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -1448,53 +1473,87 @@
 /* A batter who's been replaced: struck through in pencil, same as the defense
    diamond's --out name. The strike is a drawn bar now rather than
    `text-decoration` — see styles/motion/strike.css, which took the `.plink`
-   half of this rule with it by covering the wrapper instead. */
+   half of this rule with it by covering the wrapper instead. His number and
+   position are struck too, in plain text-decoration. */
 .entering__name--out {
   color: var(--text-caption);
 }
 
-/* The standing occupant of a slot that's seen a sub: inked seam-red, same as
-   the defense diamond's --in name. */
-.entering__name--in,
-.entering__name--in .plink {
-  color: var(--accent-negative);
+.entering__entry--out .entering__jersey,
+.entering__entry--out .entering__pos,
+.entering__prevpos {
+  /* strike-link-exempt: a number and a position hold no link */
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-thickness: var(--bw-rule);
 }
 
-.entering__enter {
-  margin-left: 5px;
-  color: var(--accent-negative);
-  font-weight: var(--w-bold);
+.entering__entry--out .entering__pos {
+  background: none;
 }
 
-/* Right-aligned number + position for the slot's standing occupant: jersey in
-   clay (like the roster cards), then the fielding position in field green.
-   Held on one line, flush to the row's right edge. */
-.entering__meta {
-  margin-left: auto;
-  flex: 0 0 auto;
+/* The inning a sub entered, or a man changed spots, in its own pill: a clay
+   outline at rest, a soft clay wash and a heavier underline on hover. */
+.entering__inncell {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-1);
-  white-space: nowrap;
+  justify-content: flex-end;
 }
 
-.entering__jersey {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  color: var(--clay);
-}
-
-.entering__pos {
-  min-width: 20px;
-  text-align: right;
+.entering__inn {
+  padding: var(--space-1) var(--space-1h) 2px;
+  border: var(--bw-rule) solid var(--accent-negative);
+  border-radius: 0;
+  color: var(--accent-negative);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
-  color: var(--field);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
+  transition:
+    background var(--dur-fast) var(--ease-stamp),
+    color var(--dur-fast) var(--ease-stamp);
+}
+
+.entering__inn:hover {
+  background: var(--clay-soft);
+  color: var(--accent-negative-hover);
+  border-bottom-width: var(--bw-heavy);
+}
+
+/* Jersey number in pencil, right-aligned in its own column. */
+.entering__jersey {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+/* The position column: a mint pill, with the spot he left struck beside it
+   when he has changed spots. */
+.entering__poscell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1h);
+}
+
+.entering__pos {
+  min-width: 36px;
+  padding: 3px var(--space-1);
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--accent-tint);
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-ui);
+}
+
+.entering__prevpos {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
 }
 
 /* The fielding team's live alignment for the half, below the feed — the lineup

@@ -787,7 +787,8 @@ const C4 = [
   { css: '11-innings.css', sel: '.half', jsx: ['components/inning/HalfInning.jsx'], ns: 'half', gone: true },
   { css: '12-sealbox.css', sel: '.statbox', jsx: ['components/gamehud/StatBox.jsx'], ns: 'statbox' },
   { css: '12-sealbox.css', sel: '.dueup', jsx: ['components/playbyplay/DueUpNextCard.jsx'], ns: 'dueup' },
-  { css: '12-sealbox.css', sel: '.entering', jsx: ['components/inning/EnteringReference.jsx'], ns: 'entering' },
+  // The lineup card is the stamped frame now (the lineup page's paper look): `frame` names it.
+  { css: '12-sealbox.css', sel: '.entering', jsx: ['components/inning/EnteringReference.jsx'], ns: 'entering', frame: 'stamped' },
   { css: '12-sealbox.css', sel: '.halfdefense', jsx: ['components/inning/EnteringReference.jsx'], ns: 'halfdefense' },
   // The focus-mode umpire drawer wears the same drawer (UmpireTendenciesFold).
   {
@@ -820,8 +821,8 @@ test('C4: no innings-view or HUD block draws a second frame over its Card', () =
   }
 })
 
-test('C4: every innings-view and HUD block renders on Card, a sheet with a flush body', () => {
-  for (const { jsx, ns, as } of C4) {
+test('C4: every innings-view and HUD block renders on Card, a sheet (or its named frame) with a flush body', () => {
+  for (const { jsx, ns, as, frame } of C4) {
     for (const rel of jsx) {
       const code = src(rel)
       assert.match(code, /import \{ Card \} from ["'][\w./]+\/ui\/frame\/Card\.jsx["']/, `${rel} imports Card`)
@@ -829,7 +830,8 @@ test('C4: every innings-view and HUD block renders on Card, a sheet with a flush
       assert.ok(tags.length > 0, `${rel}: .${ns} renders on a Card`)
       for (const attrs of tags) {
         assert.match(attrs, /body="flush"/, `${rel}: .${ns}'s Card keeps the block's own inset`)
-        assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
+        if (frame) assert.match(attrs, new RegExp(`frame="${frame}"`), `${rel}: .${ns} is a ${frame} card`)
+        else assert.doesNotMatch(attrs, /frame=/, `${rel}: .${ns} is a sheet (the default)`)
         if (as) assert.match(attrs, new RegExp(`as="${as}"`), `${rel}: .${ns} is a Card ${as}`)
         assert.doesNotMatch(attrs, /head=/, `${rel}: .${ns} keeps its band head as its first child, as H1b left it`)
       }
