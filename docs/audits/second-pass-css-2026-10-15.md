@@ -1,5 +1,7 @@
 # Second pass, Job A: CSS overlap — 2026-10-15
 
+> **Snapshot of 2026-10-15.** Line counts, line numbers and paths drift as the code changes. Check a claim against `main` before you act on it.
+
 Report for issue #1837, "Job A: CSS overlap". It reads only. It changes no CSS,
 no test and no guard.
 

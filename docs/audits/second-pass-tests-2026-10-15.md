@@ -1,5 +1,7 @@
 # Second pass: test overlap (2026-10-15)
 
+> **Snapshot of 2026-10-15.** Line counts, line numbers and paths drift as the code changes. Check a claim against `main` before you act on it.
+
 Issue #1837, "Job B: test overlap". This is research only. No test was deleted,
 skipped or loosened. Every break below was made on the live tree and reverted at
 once with `git checkout`. The tree is clean apart from this report.

@@ -1,5 +1,8 @@
 # Second pass, Job C: docs — 2026-10-15
 
+> **Snapshot of 2026-10-15.** Line counts, line numbers and paths drift as the code changes. Check a claim against `main` before you act on it.
+> **Correction.** The pointer fixes proposed in finding 1 to 6 below named the wrong modules in places. The stack that landed this report (PR #2178) corrected them against the code. Check each target with a search before you copy it.
+
 Report for issue #1837, "Job C: docs". It reads only. It changes no ADR,
 no doc and no guard. It never proposes to delete an ADR. A superseded ADR gets
 a status line at the top that links to its replacement. That is an edit.
