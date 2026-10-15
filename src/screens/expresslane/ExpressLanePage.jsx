@@ -417,6 +417,8 @@ export function ExpressLanePage({ feed, gamePk, section, onSection, onLeave }) {
         homeAbbr={meta.home.abbreviation}
         awayName={meta.away.clubName}
         homeName={meta.home.clubName}
+        awayId={meta.away.id}
+        homeId={meta.home.id}
         curIdx={lane.halfIdx}
         onSelect={lane.goToHalf}
       />

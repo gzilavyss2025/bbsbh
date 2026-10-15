@@ -1,8 +1,10 @@
+import { useEffect, useRef, useState } from 'react'
 import { halfIndex, selectSkippedBottomHalf } from '../../api/select.js'
 import { revealInning } from '../../api/linescore.js'
 import { ordinal } from '../../lib/format.js'
 import { Card } from '../ui/frame/Card.jsx'
 import { Table } from '../ui/table/Table.jsx'
+import { TeamLogo } from '../logo/TeamLogo.jsx'
 
 // The running line at the top of the innings view. It "builds as you reveal":
 // each half you uncover drops its runs into this grid; halves you haven't
@@ -29,6 +31,8 @@ export function RollingLine({
   homeAbbr,
   awayName,
   homeName,
+  awayId,
+  homeId,
   runsInProgress,
   curIdx,
   onSelect,
@@ -38,6 +42,44 @@ export function RollingLine({
   const firstCol = Math.max(1, unlocked - regulation + 1)
   const cols = []
   for (let n = firstCol; n <= unlocked; n++) cols.push(n)
+
+  // The phone grid scrolls sideways under a pinned club column and pinned R/H/E.
+  // Two effects, both layout only (they read the DOM and curIdx, never a score):
+  // keep the current half between the pins, and tell the CSS whether there is
+  // more to scroll, which is when the chevron beside R shows.
+  const cardRef = useRef(null)
+  const [more, setMore] = useState(false)
+  useEffect(() => {
+    const wrap = cardRef.current?.querySelector('.table')
+    if (!wrap) return undefined
+    const sync = () => setMore(wrap.scrollLeft + wrap.clientWidth < wrap.scrollWidth - 1)
+    sync()
+    wrap.addEventListener('scroll', sync, { passive: true })
+    const ro = new ResizeObserver(sync)
+    ro.observe(wrap)
+    return () => {
+      wrap.removeEventListener('scroll', sync)
+      ro.disconnect()
+    }
+  }, [cols.length])
+  const firstScroll = useRef(true)
+  useEffect(() => {
+    const wrap = cardRef.current?.querySelector('.table')
+    const cell = wrap?.querySelector('.rolling__pick.is-active')?.closest('td')
+    if (!wrap || !cell) return
+    const pinL = wrap.querySelector('.rolling__team')?.offsetWidth ?? 0
+    let pinR = 0
+    wrap.querySelectorAll('thead .rolling__tot').forEach((th) => { pinR += th.offsetWidth })
+    const from = wrap.scrollLeft + pinL
+    const to = wrap.scrollLeft + wrap.clientWidth - pinR
+    let left = null
+    if (cell.offsetLeft < from) left = cell.offsetLeft - pinL
+    else if (cell.offsetLeft + cell.offsetWidth > to) left = cell.offsetLeft + cell.offsetWidth - (wrap.clientWidth - pinR)
+    if (left === null) return
+    const calm = firstScroll.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    wrap.scrollTo({ left, behavior: calm ? 'auto' : 'smooth' })
+    firstScroll.current = false
+  }, [curIdx, cols.length])
 
   // A half not yet fully committed still builds up its own cell as you STEP
   // through it (ADR-0016) — `runsInProgress` (InningViewer, reported from
@@ -56,8 +98,8 @@ export function RollingLine({
   // Team label: the mascot/club name ("BREWERS", "WHITE SOX"), falling back to
   // the abbreviation for a thin MiLB feed that never posted a clubName.
   const rows = [
-    { abbr: awayName || awayAbbr || 'AWY', half: 'top', side: 'away' },
-    { abbr: homeName || homeAbbr || 'HOM', half: 'bottom', side: 'home' },
+    { abbr: awayName || awayAbbr || 'AWY', half: 'top', side: 'away', teamId: awayId },
+    { abbr: homeName || homeAbbr || 'HOM', half: 'bottom', side: 'home', teamId: homeId },
   ]
 
   // Totals span every revealed inning (1..unlocked), not just the visible window.
@@ -93,18 +135,18 @@ export function RollingLine({
   }
 
   return (
-    <section className="rolling" aria-label="Running line" ref={sectionRef}>
-      <Card as="div" body="flush" className="rolling__scroll">
+    <section className="rolling" aria-label="Running line" ref={sectionRef} data-more={more ? '' : undefined}>
+      <Card as="div" frame="stamped" body="flush" stampIn className="rolling__scroll" ref={cardRef}>
         <Table frame="bare" density="tight" sticky label="Running line" className="rolling__grid">
           <thead>
             <tr>
-              <th />
+              <th aria-label="Club" />
               {cols.map((n) => (
                 <th key={n}>{n}</th>
               ))}
-              <th className="rolling__tot">R</th>
-              <th className="rolling__tot">H</th>
-              <th className="rolling__tot">E</th>
+              <th className="rolling__tot rolling__tot--r">R</th>
+              <th className="rolling__tot rolling__tot--h">H</th>
+              <th className="rolling__tot rolling__tot--e">E</th>
             </tr>
           </thead>
           <tbody>
@@ -112,7 +154,13 @@ export function RollingLine({
               const t = totals(row.half, row.side)
               return (
                 <tr key={row.side}>
-                  <th className="rolling__team">{row.abbr}</th>
+                  <th className="rolling__team">
+                    {/* The phone shows the club's mark and the wide layout its
+                        name; the name stays in the DOM on both, so it is always
+                        the row's accessible label (20-charts.css). */}
+                    <TeamLogo teamId={row.teamId} name={row.abbr} size={32} className="rolling__logo" />
+                    <span className="rolling__name">{row.abbr}</span>
+                  </th>
                   {cols.map((n) => {
                     const l = lineFor(n, row.half, row.side)
                     const idx = halfIndex(n, row.half)
@@ -170,9 +218,9 @@ export function RollingLine({
                       </td>
                     )
                   })}
-                  <td className="rolling__tot">{t.r}</td>
-                  <td className="rolling__tot">{t.h}</td>
-                  <td className="rolling__tot">{t.e}</td>
+                  <td className="rolling__tot rolling__tot--r">{t.r}</td>
+                  <td className="rolling__tot rolling__tot--h">{t.h}</td>
+                  <td className="rolling__tot rolling__tot--e">{t.e}</td>
                 </tr>
               )
             })}

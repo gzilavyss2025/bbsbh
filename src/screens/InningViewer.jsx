@@ -762,6 +762,8 @@ export function InningViewer({
       homeAbbr={meta.home.abbreviation}
       awayName={meta.away.clubName}
       homeName={meta.home.clubName}
+      awayId={meta.away.id}
+      homeId={meta.home.id}
       runsInProgress={runsInProgress}
       curIdx={curIdx}
       onSelect={(idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx))}
