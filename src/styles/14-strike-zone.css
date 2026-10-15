@@ -2,17 +2,15 @@
    Per-at-bat pitch-location diagram. Additive to the play-by-play card: on a
    phone an icon button (.pbp__zonebtn) opens it in a modal; from the wide
    breakpoint up the card and its zone pane sit side by side (.pbp__atbat grid
-   below). Pitch-dot colors mirror the five pitch-ladder categories so the two
-   read as one system. Score-adjacent (part of the at-bat account), so it only
+   below). Pitch-dot colors are the three MLB's feed uses (ball, strike, in play). Score-adjacent (part of the at-bat account), so it only
    ever renders inside revealed play-by-play. */
 .strikezone,
 .pitchlist {
-  --pd-called: var(--accent-negative);
-  --pd-whiff: var(--ink-1);
-  --pd-foul: var(--graphite);
-  --pd-inplay: var(--accent-positive);
-  --pd-ball-line: var(--graphite-soft);
-  --pd-ball-fill: var(--surface-inset);
+  /* MLB's own feed colours every pitch one of three ways (details.ballColor): green for a ball,
+     red for any strike (called, swinging, foul), blue for a ball in play. Same three here. */
+  --pd-ball: var(--accent-positive);
+  --pd-strike: var(--accent-negative);
+  --pd-inplay: var(--allstar-blue);
 }
 
 .strikezone {
@@ -76,19 +74,11 @@
   stroke-width: 1.8;
   stroke-linejoin: round;
 }
-.strikezone__dot--called { fill: var(--pd-called); }
-.strikezone__dot--whiff { fill: var(--pd-whiff); }
-.strikezone__dot--foul { fill: var(--pd-foul); }
-.strikezone__dot--ball {
-  fill: var(--pd-ball-fill);
-  stroke: var(--pd-ball-line);
-  stroke-width: 1.3;
-}
-.strikezone__dot--inplay {
-  fill: none;
-  stroke: var(--pd-inplay);
-  stroke-width: 2.4;
-}
+.strikezone__dot--called,
+.strikezone__dot--whiff,
+.strikezone__dot--foul { fill: var(--pd-strike); }
+.strikezone__dot--ball { fill: var(--pd-ball); }
+.strikezone__dot--inplay { fill: var(--pd-inplay); }
 .strikezone__num {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
@@ -97,8 +87,6 @@
   text-anchor: middle;
   dominant-baseline: central;
 }
-.strikezone__num--ball { fill: var(--ink-1); }
-.strikezone__num--inplay { fill: var(--pd-inplay); }
 
 /* The batter's-box silhouette (see BatterSilhouette in StrikeZone.jsx) — a
    filled figure, inked no heavier than the home-plate outline it stands
@@ -171,19 +159,11 @@
   font-weight: var(--w-bold);
   color: var(--text-on-ink-bright);
 }
-.pitchlist__num--called { background: var(--accent-negative); }
-.pitchlist__num--whiff { background: var(--ink-1); }
-.pitchlist__num--foul { background: var(--graphite); }
-.pitchlist__num--ball {
-  background: var(--surface-inset);
-  border: 1.4px solid var(--graphite-soft);
-  color: var(--ink-1);
-}
-.pitchlist__num--inplay {
-  background: transparent;
-  border: 2.4px solid var(--accent-positive);
-  color: var(--accent-positive);
-}
+.pitchlist__num--called,
+.pitchlist__num--whiff,
+.pitchlist__num--foul { background: var(--pd-strike); }
+.pitchlist__num--ball { background: var(--pd-ball); }
+.pitchlist__num--inplay { background: var(--pd-inplay); }
 .pitchlist__type { font-family: var(--font-display); color: var(--text-body); }
 
 /* ABS challenge marker (ChallengeMark, StrikeZone.jsx) — its own trailing
