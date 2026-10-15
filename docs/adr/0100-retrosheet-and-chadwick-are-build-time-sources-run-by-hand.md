@@ -1,6 +1,6 @@
 # Retrosheet and Chadwick are build-time sources, run by hand
 
-**Status:** Accepted
+**Status:** Accepted. **Superseded in part by [ADR-0106](0106-born-near-the-park-is-fifty-miles-by-map-distance.md)** for birthplaces.
 **Date:** 2026-10-06
 
 ## Context

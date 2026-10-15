@@ -1,6 +1,6 @@
 # "Born near the park" is 50 miles by map distance
 
-**Status:** Accepted
+**Status:** Accepted. Supersedes in part [ADR-0100](0100-retrosheet-and-chadwick-are-build-time-sources-run-by-hand.md) for birthplaces.
 **Date:** 2026-10-07
 **Issue:** #1598 (source: #1585; builds on ADR-0100)
 
