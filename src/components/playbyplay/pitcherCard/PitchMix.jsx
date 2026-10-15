@@ -19,6 +19,7 @@ export function PitchMix({ tiles, lefty, name }) {
   const [activeCode, setActiveCode] = useState(pitches[0]?.code ?? null)
   const [noteOpen, setNoteOpen] = useState(false)
   const onActive = useCallback((idx) => setActiveCode(pitches[idx]?.code ?? null), [pitches])
+  const marks = useMemo(() => tiles.map((t) => pitchMark(t.code)), [tiles])
 
   return (
     <div className="pcard__sec pcard__sec--mix">
@@ -41,8 +42,8 @@ export function PitchMix({ tiles, lefty, name }) {
         </span>
       </span>
       <div className="pcard__tiles" style={{ '--pcard-tile-cols': tileColumns(tiles.length) }}>
-        {tiles.map((t) => {
-          const mark = pitchMark(t.code)
+        {tiles.map((t, i) => {
+          const mark = marks[i]
           return (
             <div
               key={t.code ?? 'other'}
