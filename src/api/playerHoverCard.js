@@ -38,9 +38,14 @@ const SAVES_THRESHOLD = 5
 // returns the full four-field shape with every value dashed, never an empty
 // array, so the card always has a label to show, same as the rest of the
 // app's "not posted yet" convention.
-export function pitcherHoverFields(stat) {
+export function pitcherHoverFields(stat, lead = null) {
   const role = stat ? pitcherRole(stat) : null
-  const leadsWithSaves = Boolean(stat) && role !== 'SP' && num(stat.saves) >= SAVES_THRESHOLD
+  // `lead` pins the first column ('SV' | 'W–L') so a second row (the postseason
+  // line) lines up under the season row's heads; absent, the stat decides.
+  const leadsWithSaves =
+    lead != null
+      ? lead === 'SV'
+      : Boolean(stat) && role !== 'SP' && num(stat.saves) >= SAVES_THRESHOLD
   return [
     leadsWithSaves
       ? { k: 'SV', v: stat.saves != null ? String(stat.saves) : DASH }
@@ -97,6 +102,18 @@ export function resolveHoverIdentity({ person, transactions, endDate }) {
   }
 }
 
+// { firstName, lastName } for the card's two-line name. A one-word name
+// (a mononym) puts it all in lastName.
+export function nameParts(person, fullName) {
+  const first = person?.useName ?? person?.firstName ?? ''
+  const last = person?.useLastName ?? person?.lastName ?? ''
+  if (first && last) return { firstName: first, lastName: last }
+  const cut = (fullName ?? '').trim().indexOf(' ')
+  return cut < 0
+    ? { firstName: '', lastName: (fullName ?? '').trim() }
+    : { firstName: fullName.slice(0, cut), lastName: fullName.slice(cut + 1).trim() }
+}
+
 // personId -> the hover card's full view model, or null (bad id / no
 // person). Three requests: bio + transactions in parallel, then one season
 // stat line at the resolved level.
@@ -121,9 +138,14 @@ export async function loadHoverCardStats(personId) {
   const stat = aggregateSplits(splits, group)
   const postStat = aggregateSplits(postSplits, group)
   const fieldsOf = group === 'pitching' ? pitcherHoverFields : hitterHoverFields
+  const fields = fieldsOf(stat)
   return {
     id: person.id,
     fullName: bio.fullName,
+    // The card sets the first name small over the last, so it asks the feed
+    // for the split (useName/useLastName carry a suffix: "Acuña Jr."), and
+    // falls back to cutting fullName at its first space.
+    ...nameParts(person, bio.fullName),
     posAbbr: bio.posAbbr,
     number: bio.number,
     bats: bio.bats,
@@ -132,7 +154,10 @@ export async function loadHoverCardStats(personId) {
     team,
     onRehab,
     teamLevelLabel,
-    fields: fieldsOf(stat),
-    postFields: postStat && Number(postStat.gamesPlayed) > 0 ? fieldsOf(postStat) : null,
+    fields,
+    postFields:
+      postStat && Number(postStat.gamesPlayed) > 0
+        ? fieldsOf(postStat, group === 'pitching' ? fields[0].k : undefined)
+        : null,
   }
 }
