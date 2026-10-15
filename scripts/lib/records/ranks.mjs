@@ -18,20 +18,28 @@ export function levelRanks(shards) {
   const entries = shards.filter((s) => s.games?.length).map((data) => ({ team: { id: data.teamId }, data }))
   const halves = entries.some((e) => e.data.allStarDate) ? ['all', 'pre', 'post'] : ['all']
   const months = levelMonths(entries).map((m) => m.month)
-  const scopes = halves.flatMap((half) =>
+  const candidates = halves.flatMap((half) =>
     [null, ...months].map((month) => ({ half, month, key: rankScopeKey(half, month) })),
   )
+  // Rank each scope once, then keep only those some club is ranked in: a month
+  // on the wrong side of the break (post-All-Star April) would ship all zeros.
+  const ranked = candidates.map(({ half, month }) => {
+    const index = buildRankingIndex(entries, { half, month })
+    return [...index.metrics.keys()].map((id) => [id, rankMetric(index, id).ranked.filter((r) => r.rank != null)])
+  })
+  const scopes = candidates.filter((_, i) => ranked[i].some(([, rows]) => rows.length))
 
   const out = new Map(entries.map((e) => [e.team.id, { n: entries.length, scopes: scopes.map((s) => s.key), m: {} }]))
-  scopes.forEach(({ half, month }, i) => {
-    const index = buildRankingIndex(entries, { half, month })
-    for (const id of index.metrics.keys()) {
-      for (const row of rankMetric(index, id).ranked) {
-        if (row.rank == null) continue
+  let i = 0
+  ranked.forEach((metrics, c) => {
+    if (!scopes.includes(candidates[c])) return
+    for (const [id, rows] of metrics) {
+      for (const row of rows) {
         const m = out.get(row.teamId).m
         ;(m[id] ??= new Array(scopes.length).fill(0))[i] = row.rank
       }
     }
+    i++
   })
   return out
 }

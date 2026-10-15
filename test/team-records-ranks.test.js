@@ -35,6 +35,17 @@ test('every rank equals rankMetric for the same scope, ties sharing a rank', () 
   assert.deepEqual([t(1).rank, t(3).rank, t(2).rank], [1, 1, 3])
 })
 
+test('hand-checked: club 2 alone wins after the break, clubs 1 and 3 tie', () => {
+  const ranks = levelRanks(shards)
+  const at = (id) => rankOf({ ranks: ranks.get(id) }, 'scored-4-plus', { half: 'post' })
+  assert.deepEqual([at(2).rank, at(1).rank, at(3).rank], [1, 2, 2])
+})
+
+test('a scope no club is ranked in is not shipped', () => {
+  // Nobody played April after the break.
+  assert.ok(!levelRanks(shards).get(1).scopes.includes('post:4'))
+})
+
 test('half and month combine: Pre-All-Star May ranks differ from full-season May', () => {
   const ranks = levelRanks(shards)
   assert.ok(ranks.get(1).scopes.includes('pre:5'))

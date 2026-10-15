@@ -705,7 +705,7 @@ don't run these by hand.
   [rank per scope] } }`, `n` the level's club count, `0` unranked; `scopes` keys
   are `half` or `half:month` (`rankScopeKey`). It is a field in the shard and not
   a second file so the team page's Records card stays at ONE request; it costs
-  about 7 KB raw, 2.3 KB gzip, per MLB shard (+48 % gzip). Ranks are the season
+  about 6 KB raw, 2.1 KB gzip, per MLB shard (+44 % gzip). Ranks are the season
   through the last nightly, so `rankOf` (`src/api/teamrecords/ranks.js`) reads
   null on a dated page. Rides `--export-only`; no new cron step.
   **Verified against statsapi's own splits**, which publishes eight of these
