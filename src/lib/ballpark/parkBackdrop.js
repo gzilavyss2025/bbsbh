@@ -21,10 +21,13 @@
 //     of Dreams card would quietly wear Wrigley.
 //   - a lean feed row carries no venue name at all.
 //
-// ATTRIBUTION. This surface deliberately carries none — no title tooltip, no
-// caption. The full linked credit still lives on the team hub's Ballpark card,
-// which is where the licence's "a URI or hyperlink to a resource that includes
-// the required information" is satisfied in full for CC BY / CC BY-SA photos.
+// ATTRIBUTION. The slate card's wash deliberately carries none — no title tooltip,
+// no caption. The full linked credit lives on the team hub's Ballpark card, which
+// is where the licence's "a URI or hyperlink to a resource that includes the
+// required information" is satisfied in full for CC BY / CC BY-SA photos. A surface
+// that shows the photo as a PICTURE (the lineup page's park sheet) reads
+// `creditText` / `creditHref` from here and prints them itself: the credit that
+// goes with whichever photo won, the owner's typed one for an override.
 
 // ONE SIZE rides out of here for the wash: `cssUrl` is the ~480px WebP
 // companion (see resolvePhoto's `thumbSrc`), the same smaller photo every
@@ -73,7 +76,7 @@ export function parkBackdrop(venueName, t, venueId = null) {
   // which a sponsor rename does not move.
   const key = parkKey(venueName, venueId)
   const ids = fieldIds(key)
-  const photo = resolvePhoto(key, { photo: t(ids.photo), focus: t(ids.focus) })
+  const photo = resolvePhoto(key, { photo: t(ids.photo), focus: t(ids.focus), credit: t(ids.credit) })
   if (!photo || !SAFE_CSS_URL.test(photo.src)) return null
   // thumbSrc is a second, independently-built path (scripts/gen-ballpark-
   // thumbs.mjs) for a bundled park, so it earns the same scrutiny rather than

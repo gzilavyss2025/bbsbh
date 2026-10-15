@@ -43,8 +43,9 @@
   outline-offset: 2px;
 }
 .lsheet__body {
+  --lsheet-pad: var(--space-3h);
   overflow-y: auto;
-  padding: var(--space-3h) var(--space-3h) calc(var(--space-4) + env(safe-area-inset-bottom));
+  padding: var(--lsheet-pad) var(--lsheet-pad) calc(var(--space-4) + env(safe-area-inset-bottom));
 }
 .lsheet__name {
   font-family: var(--font-display);
@@ -107,9 +108,10 @@
 }
 
 /* THE PARK: the photo, stat boxes, then ranked rows with a dot on a bar. */
-/* Full width: it breaks out of the body's padding and sits flush under the house band. */
+/* Full width: it breaks out of the body's padding (--lsheet-pad) and sits flush under the
+   house band, with a gap before whatever follows it. */
 .lpark__photo {
-  margin: calc(-1 * var(--space-3h)) calc(-1 * var(--space-3h)) 0;
+  margin: calc(-1 * var(--lsheet-pad)) calc(-1 * var(--lsheet-pad)) var(--space-3);
 }
 .lpark__photo img {
   display: block;
@@ -120,7 +122,7 @@
   background: var(--surface-inset);
 }
 .lpark__photo figcaption {
-  padding: var(--space-1) var(--space-3h) 0;
+  padding: var(--space-1) var(--lsheet-pad) 0;
   color: var(--text-caption);
   font-size: var(--fs-small);
 }
