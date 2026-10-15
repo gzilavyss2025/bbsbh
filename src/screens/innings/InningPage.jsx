@@ -1,6 +1,7 @@
-import { memo } from 'react'
+import { memo, useContext } from 'react'
 import { halfIndex } from '../../api/select.js'
 import { HalfInning } from '../../components/inning/HalfInning.jsx'
+import { BattingUniformContext, GameUniformsContext } from '../../components/logo/uniformContexts.js'
 
 // A no-op stand-in for HalfInning's onReveal, which HalfInning calls directly
 // (not via `?.()`) both from SealBox's onReveal and from PlayByPlay's
@@ -68,8 +69,10 @@ export const InningPage = memo(function InningPage({
   const revealed = idx <= revealedThrough
   const isNextToReveal = idx === revealedThrough + 1
   const battingSide = half === 'top' ? 'away' : 'home'
+  const battingUniform = useContext(GameUniformsContext)?.[battingSide] ?? null
 
   return (
+    <BattingUniformContext.Provider value={battingUniform}>
     <div className="inning">
       {/* The three report-backs are tagged with this page's own half-index on
           the way up, so InningViewer's handlers can stay stable across
@@ -104,5 +107,6 @@ export const InningPage = memo(function InningPage({
         onLiveState={presentationOnly ? undefined : (data) => onLiveState?.(idx, data)}
       />
     </div>
+    </BattingUniformContext.Provider>
   )
 })

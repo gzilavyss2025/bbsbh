@@ -79,6 +79,11 @@
    filled figure, inked no heavier than the home-plate outline it stands
    beside. The diagram grows a bit wider to fit it (.strikezone--withbatter
    below) rather than shrinking the pitch plot to make room. */
+.strikezone__box {
+  fill: none;
+  stroke: var(--graphite-soft);
+  stroke-width: 1;
+}
 .strikezone__battersil {
   fill: var(--graphite-soft);
 }

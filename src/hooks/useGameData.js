@@ -84,6 +84,10 @@ function useEverActive(active, resetKey) {
 // up in the DOM. A cold open always lands on step 0, and neither winProb nor
 // highlights has a consumer there, so paying for them before the user ever
 // reaches the innings/box-score view is wasted bytes on every game open.
+// One shared empty value, so an unposted assignment is the same object every render
+// (the figure context below it would otherwise change on each one).
+const NO_UNIFORMS = {}
+
 export function useGameData(game, spoilersOff = false, activeStep = null) {
   // Session-only cache of the last resolved feed + the timecode it was as-of,
   // used to poll via the MLB Stats API's diffPatch mode instead of always
@@ -206,7 +210,7 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   }, [feedState.data, game.away.teamName, game.home.teamName])
 
   // Raw per-side assets (null/absent until posted) for the Gameday batter figure.
-  const uniformFigure = feedState.data?.uniforms ?? {}
+  const uniformFigure = feedState.data?.uniforms ?? NO_UNIFORMS
 
   // Managers need a separate endpoint per team. The coaches endpoint needs
   // nothing from the feed — the game prop already carries both team ids and

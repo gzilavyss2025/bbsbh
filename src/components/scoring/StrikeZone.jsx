@@ -1,9 +1,11 @@
-import { useRef } from 'react'
+import { useContext, useId, useRef, useState } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { EDGE, H, W, sx, sy } from '../../lib/zone/zoneGeometry.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { batterFigureUrls } from '../../api/uniforms.js'
+import { BattingUniformContext } from '../logo/uniformContexts.js'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet) against THIS batter's own zone
@@ -79,6 +81,53 @@ function BatterSilhouette({ x, mirror }) {
   )
 }
 
+// The batter in the club's own uniform: Gameday's figure for the jersey and
+// pants posted for this game, in the stance for the hand he bats from this
+// plate appearance (a switch-hitter's side is the play's own, halfInningFeed).
+// Gameday draws it from the catcher's side; this diagram is the pitcher's, so
+// the art is mirrored to leave his chest toward the plate (jersey lettering
+// reads reversed, the cost of facing the right way). He is drawn LARGE, behind
+// the plot, and the box's own edge clips the bat off. The plain silhouette
+// stands in wherever the figure cannot come: MiLB, an assignment not posted
+// yet, or an image that fails to load (the CDN is unofficial,
+// docs/gameday-assets.md). Pants go under the jersey at one size.
+// SIZED FROM THE ZONE, not the box: the art's own strike zone (the band from
+// mid-torso to the knees) is stretched over the zone this at-bat drew, so he
+// stands in proportion to the plate and the dots. That makes him taller than
+// the box, and the box clips his head, feet and bat. Art coordinates, 496x1050.
+const ART_W = 496
+const ART_H = 1050
+const ART_ZONE_TOP = 390
+const ART_ZONE_BOTTOM = 700
+// The mirrored body's edge nearest the plate, per hand, and how far outside the
+// zone's edge it stands.
+const ART_NEAR_EDGE = { R: 56, L: 416 }
+const FIGURE_GAP = 6
+function BatterFigure({ urls, hand, zone, clipId, onError }) {
+  const scale = zone.h / (ART_ZONE_BOTTOM - ART_ZONE_TOP)
+  const x = (hand === 'L' ? zone.left - FIGURE_GAP : zone.right + FIGURE_GAP) - ART_NEAR_EDGE[hand] * scale
+  const w = ART_W * scale
+  return (
+    <g className="strikezone__figure" aria-hidden="true" clipPath={`url(#${clipId})`}>
+      <g transform="scale(-1, 1)">
+        {[urls.pants, urls.jersey].map((href) => (
+          <image
+            key={href}
+            href={href}
+            x={-(x + w)}
+            y={zone.top - ART_ZONE_TOP * scale}
+            width={w}
+            height={ART_H * scale}
+            crossOrigin="anonymous"
+            // React listens for `error` on an svg <image> itself; the lint rule's tag list is older.
+            onError={onError} // eslint-disable-line react/no-unknown-property
+          />
+        ))}
+      </g>
+    </g>
+  )
+}
+
 // A batter stands in the box on the side of the plate closer to the base he
 // runs out of the box toward: right-handed batters box on the third-base
 // side, left-handed on the first-base side. This diagram is drawn from the
@@ -87,6 +136,11 @@ function BatterSilhouette({ x, mirror }) {
 // right of the plate and an 'L' batter's box to the left, which is where a
 // viewer watching the telecast beside this app has just seen them stand.
 export function StrikeZone({ pitchDetails, batSide, className = '' }) {
+  const figureAssets = useContext(BattingUniformContext)
+  const figureUrls = batterFigureUrls(figureAssets, batSide === 'L' ? 'left' : 'right')
+  // A failed load drops to the silhouette; keyed by URL so a new batter retries.
+  const [failedUrl, setFailedUrl] = useState(null)
+  const clipId = useId()
   const shown = (pitchDetails ?? []).filter(plottable)
   if (shown.length === 0) return null
 
@@ -113,6 +167,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
   const showBatter = batSide === 'L' || batSide === 'R'
   const zoneOffsetX = batSide === 'L' ? BATTER_W : 0
   const totalW = showBatter ? W + BATTER_W : W
+  const useFigure = figureUrls && failedUrl !== figureUrls.jersey
 
   return (
     <svg
@@ -123,6 +178,19 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
         showBatter ? `, ${batSide === 'L' ? 'left' : 'right'}-handed batter's box shown` : ''
       }`}
     >
+      {showBatter && (
+        <>
+          <clipPath id={clipId}>
+            <rect width={totalW} height={H} />
+          </clipPath>
+          {useFigure ? (
+            <BatterFigure urls={figureUrls} hand={batSide} zone={{ left: zx + zoneOffsetX, right: zr + zoneOffsetX, top: zyT, h: zh }} clipId={clipId} onError={() => setFailedUrl(figureUrls.jersey)} />
+          ) : (
+            <BatterSilhouette x={batSide === 'L' ? 0 : W + zoneOffsetX} mirror={batSide === 'L'} />
+          )}
+          <rect className="strikezone__box" x={0.5} y={0.5} width={totalW - 1} height={H - 1} />
+        </>
+      )}
       <g transform={`translate(${zoneOffsetX}, 0)`}>
         <rect className="strikezone__frame" x={zx} y={zyT} width={zw} height={zh} />
         <line className="strikezone__third" x1={zx + zw / 3} y1={zyT} x2={zx + zw / 3} y2={zyB} />
@@ -153,7 +221,6 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
           )
         })}
       </g>
-      {showBatter && <BatterSilhouette x={batSide === 'L' ? 0 : W + zoneOffsetX} mirror={batSide === 'L'} />}
     </svg>
   )
 }

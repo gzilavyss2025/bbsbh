@@ -11,6 +11,7 @@ import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { catchUpPlan, catchUpRevealTo } from '../hooks/useRevealProgress.js'
 import { LogoModal } from '../components/logo/LogoModal.jsx'
+import { GameUniformsContext } from '../components/logo/uniformContexts.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { Masthead, MatchBand, MastheadSide } from './gameview/Masthead.jsx'
 import { LineupJumpBar } from './lineup/next/LineupJumpBar.jsx'
@@ -442,35 +443,37 @@ export function GameView({ game, section, onSection }) {
       {feed && step === 2 && !noPlays && (
         // While the viewer's chunk loads, the band stands in for the header it will draw.
         <Suspense fallback={<><MatchBand away={game.away} home={game.home} date={officialDate} treatment={jerseyTreatments} /><Loader /></>}>
-        <InningViewer
-          feed={feed}
-          started={started}
-          sectionNav={sectionTabs}
-          inning={inning}
-          half={half}
-          onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
-          onBoxScore={() => onSection('boxscore')}
-          onScorecard={() => onSection('scorecard')}
-          onReload={feedState.reload}
-          loading={feedState.loading}
-          lastUpdated={feedState.lastUpdated}
-          pitcherRoles={pitcherRoles.data}
-          winProbability={winProb.data}
-          winProbTreatment={jerseyTreatments}
-          prospectsData={prospectsData}
-          rookiesData={rookiesData}
-          callouts={gameCallouts}
-          vsTeam={vsTeamSplitsData}
-          highlights={highlightsData}
-          runExpectancy={runExpectancyData}
-          workload={workloadData}
-          managers={managers.data}
-          uniforms={uniformBrief}
-          scorebookWeather={weather.data}
-          spoilersOff={spoilersOff}
-          passActive={passActive}
-          onSketch={setSketching}
-        />
+        <GameUniformsContext.Provider value={uniformFigure}>
+          <InningViewer
+            feed={feed}
+            started={started}
+            sectionNav={sectionTabs}
+            inning={inning}
+            half={half}
+            onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
+            onBoxScore={() => onSection('boxscore')}
+            onScorecard={() => onSection('scorecard')}
+            onReload={feedState.reload}
+            loading={feedState.loading}
+            lastUpdated={feedState.lastUpdated}
+            pitcherRoles={pitcherRoles.data}
+            winProbability={winProb.data}
+            winProbTreatment={jerseyTreatments}
+            prospectsData={prospectsData}
+            rookiesData={rookiesData}
+            callouts={gameCallouts}
+            vsTeam={vsTeamSplitsData}
+            highlights={highlightsData}
+            runExpectancy={runExpectancyData}
+            workload={workloadData}
+            managers={managers.data}
+            uniforms={uniformBrief}
+            scorebookWeather={weather.data}
+            spoilersOff={spoilersOff}
+            passActive={passActive}
+            onSketch={setSketching}
+          />
+        </GameUniformsContext.Provider>
         </Suspense>
       )}
       {feed && step === 3 && (
