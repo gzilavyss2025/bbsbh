@@ -188,6 +188,9 @@
   --accent-primary:   var(--navy);
   --accent-positive:  var(--field);
   --accent-negative:  var(--clay);
+  /* A ball in play, in the strike zone's dots and the pitch list beside it: MLB's feed colours
+     a pitch green (ball), red (strike) or blue (in play). Blue is not otherwise in the palette. */
+  --accent-inplay:    var(--allstar-blue);
   /* The two filled button skins under a pointer (styles/system/button.css,
      #1130). A step toward the paper for ink and a step deeper for clay, each
      one primitive already in the palette, so hover is a change of shade and
