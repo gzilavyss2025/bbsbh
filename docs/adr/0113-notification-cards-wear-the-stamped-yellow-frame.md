@@ -129,6 +129,12 @@ as they did and the tiles add to 100 less the folded share. The lineup page's pi
 Scout read the same `pitchTiles` and lose the tile too. `test/pitcher-card-model.test.js` changed
 on purpose for this.
 
+**Two follow-ups in the same slice.** The full card's stat labels and its three bands ("Postseason",
+"Pitch mix", "Last appearance") painted `--surface-card` and `--surface-inset`, which read as white on
+the yellow ground; they paint no ground now, so the event yellow shows through (the departure card's
+table strip keeps its paper ground, as the design draws it). "Before this at-bat" is an inked tag in
+the count tag's face, for every repeated notice.
+
 **What does not change.** No gate, `SealBox`, `revealedThrough` read or reveal-only import moves;
 `C4_SEAL` passes unchanged. Nothing here reads a score. Tests: `card-arrival.test.js` pins the band's
 paint, the gate, the shared answer, the scene colours, the times and the reduced-motion state; the

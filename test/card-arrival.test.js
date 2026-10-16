@@ -219,6 +219,20 @@ test('reduced motion: no transition runs', () => {
   for (const sel of ['.card__name', '> .cardband', '.cardband__label', '> .change', '.unfold']) assert.ok(reduced.includes(sel), sel)
 })
 
+test('the full card draws no white of its own: its labels and bands show the event yellow', () => {
+  const table = css('pitcher-card/table.css')
+  const body = (sel) => table.match(new RegExp(`(?:^|\\n)${sel.replace(/[.]/g, '\\.')}\\s*\\{([^}]*)\\}`))?.[1] ?? ''
+  assert.match(table, /\.pcard__postrule,\s*\.pcard__mixlabel,\s*\.pcard__lasthead \{[^}]*padding/)
+  for (const block of table.match(/\.pcard__postrule,\s*\.pcard__mixlabel,\s*\.pcard__lasthead \{[^}]*\}/g)) assert.doesNotMatch(block, /background/)
+  assert.doesNotMatch(body('.pcard__cell .pcard__lbl'), /background/)
+  assert.doesNotMatch(table, /--surface-card|--surface-inset/, 'no ground but the card\'s own yellow')
+})
+
+test('"Before this at-bat" is an inked tag in the count tag\'s face', () => {
+  const tag = css('pitcher-card/arrival.css').match(/\.pbp__repeat-tag \{([^}]*)\}/)[1]
+  for (const part of ['border: var(--bw-heavy) solid var(--border-stamped)', 'font-family: var(--font-display-tag)', 'text-transform: uppercase', 'width: fit-content']) assert.ok(tag.includes(part), part)
+})
+
 // ---- 6. the callers ----
 
 test('the repeat is the full card; ReliefRepeat is gone', () => {
