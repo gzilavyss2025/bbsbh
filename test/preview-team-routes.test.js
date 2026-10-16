@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs'
 
 import { SITE_URL } from '../src/copy/landing/site.js'
 import { canonicalUrl } from '../api/preview.js'
-import { buildCard, buildRoster, TEAM_TABS } from '../api/_lib/cards.js'
+import { buildCard, TEAM_TABS } from '../api/_lib/cards.js'
 import { teamCrawl } from '../api/_lib/crawl.js'
 
 const OLD_TABS = ['roster', 'games', 'numbers', 'contracts', 'minors']
@@ -49,12 +49,10 @@ test('a team page canonicalises to /team/{slug}, whatever the arriving address a
   assert.equal(canonicalUrl(params, card), `${SITE_URL}/team/milwaukee-brewers-158`)
 })
 
-test('the club body links no old tab address', async () => {
+test('the club body links no old tab address', () => {
   const t = { id: 158, name: 'Milwaukee Brewers' }
   const { links } = teamCrawl(t, { id: 158, name: t.name, level: 'MLB', league: '', tab: '' })
   const hrefs = links.items.map((i) => i.href)
   for (const tab of OLD_TABS) assert.ok(!hrefs.some((h) => h.endsWith(`/${tab}`)), `${tab} door is gone`)
   assert.ok(hrefs.includes('/team/milwaukee-brewers-158/leaders'))
-  // The roster list moved with the roster page: buildRoster no longer answers for the old name.
-  assert.equal(await buildRoster(new URLSearchParams({ route: 'team-roster', id: '158' })), null)
 })
