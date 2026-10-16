@@ -11,13 +11,10 @@
 // only once the 8th is at or under the reveal mark, the same gate as buildAfterInningNote.
 import { lastBefore } from '../../../lib/worldSeries/lastBefore.js'
 import * as C from '../../../lib/worldSeries/classify.js'
-import { SCORE_BASE, clampScore, magnitudeOf, skewBonus, gameResult } from '../shared.js'
+import { SCORE_BASE, clampScore, magnitudeOf, skewBonus, gameResult, dateText } from '../shared.js'
 
 export const WS_MIN_GAP_SEASONS = 3
 const GAP_FULL = 25 // seasons for the full magnitude bonus
-
-const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
-const dateText = (iso) => `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}, ${iso.slice(0, 4)}`
 
 // Every row before tonight can come from here; null while the file is not loaded, so a slow
 // fetch never reads as "the first in history".

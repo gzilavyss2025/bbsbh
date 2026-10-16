@@ -232,6 +232,13 @@
       "class": "caller-gated",
       "why": "Entering-tense pre-half builders (inning run differential, starter record, foul volume, pitch pace, bullpen health). prehalf-callouts.js owns the gate."
     },
+    "callout-notes/lastTime.js": {
+      "class": "reveal-only",
+      "why": "The 'last time' lines for a triple play, cycle or no-hitter, built from the feat index (ADR-0101). It names results, so hooks/callouts/useLastTime.js calls it only for a revealed play card or inside the box score's reveal.",
+      "importers": [
+        "hooks/callouts/useLastTime.js"
+      ]
+    },
     "callout-notes/liveAtBat.js": {
       "class": "caller-gated",
       "why": "`buildCallouts` may fold in only what the reader has revealed through the play it builds for, never the game's outcome. PlayByPlay.jsx is the gating caller."
@@ -557,6 +564,7 @@
       "class": "reveal-only",
       "why": "The feat index (no-hitters, cycles, triple plays): a feat names the result, so it is read only inside the box score's SealBox reveal (ADR-0101).",
       "importers": [
+        "hooks/callouts/useLastTime.js",
         "screens/boxscore/FeatLabel.jsx"
       ]
     },

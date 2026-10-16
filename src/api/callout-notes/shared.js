@@ -88,11 +88,17 @@ export const SCORE_BASE = {
   wsLastTime: 50, // World Series play card: the last time this happened
   wsLastTimeGame: 45, // World Series Final roll-up: the last game like this
   wsWtaTrailing9: 55, // World Series winner-take-all, entering the 9th: the trailing club's record
+  lastTimeClub: 40, // a triple play, cycle or no-hitter: the club's last one (lastTime.js)
+  lastTimePlayer: 45, // …the player's own earlier one
+  lastTimeLeague: 50, // …the league's last one, after a year or more without
   ttoPitches: 30, // pitches per PA escalating each time through the order
   risp: 25,
   platoon: 25,
   tto: 20, // …and the plain trip-fact fallback without one
 }
+const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
+// "Oct. 24, 2025" from an ISO date.
+export const dateText = (iso) => `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}, ${iso.slice(0, 4)}`
 export const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
 // How far a W-L record sits from .500, 0–0.5 — the lopsidedness bonus scale.
 export const skew = (w, l) => (w + l > 0 ? Math.abs(w / (w + l) - 0.5) : 0)
