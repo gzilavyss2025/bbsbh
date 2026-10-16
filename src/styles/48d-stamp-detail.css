@@ -27,18 +27,6 @@
   margin: 0;
 }
 
-.stampdetail__close {
-  flex: none;
-  background: none;
-  border: none;
-  padding: var(--space-1);
-  margin: -4px -4px 0 0;
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  line-height: var(--lh-solid);
-  cursor: pointer;
-}
-
 .stampdetail__close:focus-visible {
   outline: none;
   box-shadow: var(--ring);

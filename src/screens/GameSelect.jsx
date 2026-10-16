@@ -902,7 +902,7 @@ export function GameSelect({
             other signed-in devices.
             <button
               type="button"
-              className="daystate__scopenotedismiss"
+              className="strip-dismiss daystate__scopenotedismiss"
               onClick={() => {
                 dismissPassScopeNote()
                 setJustEnabledPass(false)

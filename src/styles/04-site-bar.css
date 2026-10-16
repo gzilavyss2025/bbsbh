@@ -295,16 +295,6 @@
   flex: 0 0 auto;
 }
 
-.continuebar__dismiss {
-  flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  background: none;
-  color: var(--text-caption);
-  cursor: pointer;
-}
-
 /* There is no global :focus-visible rule, so a control without this falls back
    to the UA default ring. Its three sibling dismiss buttons added alongside it
    (.daystate__scopenotedismiss, .logbooklanding__devicenotedismiss,

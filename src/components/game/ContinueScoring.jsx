@@ -106,7 +106,7 @@ export function ContinueScoring() {
         </SignInButton>
         <button
           type="button"
-          className="continuebar__dismiss"
+          className="strip-dismiss continuebar__dismiss"
           onClick={dismissPitch}
           aria-label="Dismiss this suggestion"
         >

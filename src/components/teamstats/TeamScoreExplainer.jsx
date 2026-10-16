@@ -29,7 +29,7 @@ export function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
       <div className="sheet tscoremodal" role="dialog" aria-modal="true" aria-label="How the Season Grade is calculated">
         <div className="tscoremodal__head">
           <p className="tscoremodal__note">How We Score It</p>
-          <button ref={closeRef} type="button" className="gsmodal__close" onClick={onClose} aria-label="Close">✕</button>
+          <button ref={closeRef} type="button" className="sheet-close gsmodal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <h2 className="sheet__title tscoremodal__title">
           How good have they been — and how much have they exceeded the assignment?
