@@ -1,5 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { HALVES, monthsPlayed, teamRecordsFor } from '../../../../../api/teamRecords.js'
+import { Door } from '../../../../../components/ui/control/Door.jsx'
 import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { RankStrip } from '../../../../../components/ui/frame/RankBar.jsx'
 import { EmptyState } from '../../../../../components/ui/state/EmptyState.jsx'
@@ -42,7 +43,7 @@ function Group({ group, of, open, onToggle, scope }) {
   )
 }
 
-export function RecordsCard({ data, cutoff, asOf }) {
+export function RecordsCard({ data, cutoff, asOf, door }) {
   const [halfPick, setHalf] = useState('all')
   const [monthPick, setMonth] = useState(null)
   const [openGroups, setOpenGroups] = useState(() => new Set())
@@ -114,6 +115,7 @@ export function RecordsCard({ data, cutoff, asOf }) {
       ) : (
         <EmptyState size="compact">No games in this stretch of the season yet.</EmptyState>
       )}
+      {door && <div className="rec__doorrow"><Door {...door}>Postseason records</Door></div>}
     </div>
   )
 }

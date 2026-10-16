@@ -39,3 +39,7 @@
   letter-spacing: var(--ls-label);
   color: var(--text-heading);
 }
+
+.tnext__about-door {
+  align-self: flex-end;
+}
