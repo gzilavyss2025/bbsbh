@@ -1,0 +1,80 @@
+/* THE GAME LOADER (components/game/versus/GameLoader.jsx). The phone's wait after a slate-card
+   tap: the two club tiles grow from squares into the slanted slabs the desktop hover makes
+   (versus.css) and hold there, a slash between them. Same lean, same slash stripes, same
+   tile fill (--tint) as the card. Only mounted for a phone without reduced motion. */
+/* layout-exempt: a fixed two-slab stage that animates its tiles */
+.versusload__stage {
+  --versus-lean: 10deg;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  width: 100%;
+  height: min(46vw, 200px);
+  padding: 0 var(--space-4);
+  overflow: clip;
+}
+
+.versusload__tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  height: 100%;
+  padding: 2px;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--tint, var(--bg-page));
+  animation: versusload-grow var(--dur-slow) var(--ease-stamp) both;
+}
+.versusload__tile--away {
+  animation-name: versusload-grow-away;
+}
+.versusload__tile--home {
+  animation-name: versusload-grow-home;
+}
+.versusload__tile .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32))
+    skewX(var(--versus-lean));
+  animation: versusload-logo var(--dur-slow) var(--ease-stamp) both;
+}
+
+.versusload__slash {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  z-index: 2;
+  width: calc(var(--space-1) + 2 * var(--bw-heavy));
+  margin-left: calc((var(--space-1) + 2 * var(--bw-heavy)) / -2);
+  background: linear-gradient(
+    90deg,
+    var(--border-stamped) 0 var(--space-1),
+    var(--text-on-ink-cream) var(--space-1) calc(var(--space-1) + var(--bw-heavy)),
+    var(--border-stamped) calc(var(--space-1) + var(--bw-heavy)) 100%
+  );
+  transform: skewX(calc(var(--versus-lean) * -1));
+  animation: versusload-slash var(--dur-slow) var(--ease-stamp) both;
+}
+
+/* From a square at rest to a leaning slab bleeding out to the screen's edge. */
+@keyframes versusload-grow-away {
+  from { transform: none; translate: 0; scale: 0.7; }
+  to   { transform: skewX(calc(var(--versus-lean) * -1)); translate: calc(var(--space-4) * -1); scale: 1; width: calc(100% + var(--space-4)); }
+}
+@keyframes versusload-grow-home {
+  from { transform: none; translate: 0; scale: 0.7; }
+  to   { transform: skewX(calc(var(--versus-lean) * -1)); translate: 0; scale: 1; width: calc(100% + var(--space-4)); }
+}
+@keyframes versusload-logo {
+  from { scale: 1; }
+  to   { scale: 1.1; }
+}
+@keyframes versusload-slash {
+  from { opacity: 0; scale: 1 0; }
+  to   { opacity: 1; scale: 1 1; }
+}

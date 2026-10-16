@@ -17,6 +17,7 @@ import { Masthead, MatchBand, MastheadSide } from './gameview/Masthead.jsx'
 import { LineupJumpBar } from './lineup/next/LineupJumpBar.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
+import { GameLoader } from '../components/game/versus/GameLoader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 import { useRouteLink } from '../lib/nav.js'
 import { ordinal } from '../lib/format.js'
@@ -364,8 +365,9 @@ export function GameView({ game, section, onSection }) {
           refresh failure with a feed already in hand (useAsync retains the
           last-good feed) instead flags a non-blocking stale-refresh notice so
           one flaky request at a live game doesn't tear down the view. */}
+      {feedState.loading && !feed && <GameLoader game={game} treatment={jerseyTreatments} />}
       <AsyncStatus
-        loading={feedState.loading}
+        loading={false}
         error={feedState.error}
         hasData={Boolean(feed)}
         errorMessage="Couldn’t load this game. Try again in a moment."
@@ -374,7 +376,7 @@ export function GameView({ game, section, onSection }) {
       />
 
       {feed && step === 0 && (
-        <Suspense fallback={<Loader />}>
+        <Suspense fallback={<GameLoader game={game} treatment={jerseyTreatments} />}>
         <LineupNextPage
           {...lineupNext}
           feed={feed}
@@ -405,7 +407,7 @@ export function GameView({ game, section, onSection }) {
         </Suspense>
       )}
       {feed && step === 1 && (
-        <Suspense fallback={<Loader />}>
+        <Suspense fallback={<GameLoader game={game} treatment={jerseyTreatments} />}>
         <LineupNextPage
           {...lineupNext}
           feed={feed}
