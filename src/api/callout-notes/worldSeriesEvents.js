@@ -146,6 +146,7 @@ export function buildWsWtaTrailing9Note({ row, inning, half, bundle, history, ga
   if (gameType !== 'W' || !rows || !bundle?.wsEvents?.wta || inning !== 9 || half !== 'top' || row?.inning !== 8) return null
   if (row.cumAway === row.cumHome) return null
   const past = lastBefore(rows, { before: gameDate, tag: 'wtaTrailing9' })
+  if (!past.length) return null
   const w = past.filter((r) => r.value === 1).length
   const l = past.length - w
   return {

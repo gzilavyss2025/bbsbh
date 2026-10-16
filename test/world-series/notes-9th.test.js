@@ -53,3 +53,8 @@ test('an older shard without wsEvents, no history, or another game type: nothing
   f.gameData.game.type = 'R'
   assert.deepEqual(strip(f), [])
 })
+
+test('a history with no earlier winner-take-all row gives no "0-0" note', () => {
+  const noRows = { ...EVENTS_JSON, events: EVENTS_JSON.events.filter((r) => r.tag !== 'wtaTrailing9') }
+  assert.deepEqual(strip(feedThrough8(2, 1), { history: noRows }), [])
+})
