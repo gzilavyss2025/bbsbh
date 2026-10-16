@@ -1134,6 +1134,15 @@
     grid-column: 2;
     grid-row: 1;
   }
+  /* The full card's head has the club's logo too: a third column, as tall as the photo. */
+  .change:has(.change__entering):has(.change__logo) {
+    grid-template-columns: auto 1fr auto;
+  }
+  .change:has(.change__entering) .change__logo {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    align-self: center;
+  }
   .change:has(.change__entering) .change__entering {
     grid-column: 2;
     grid-row: 2;

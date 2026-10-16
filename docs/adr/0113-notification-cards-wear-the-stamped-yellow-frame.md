@@ -87,7 +87,7 @@ for the trip that pulled the pitcher). An ejection shows the ejected person at 7
 the game." or "Play stopped for 1 hr 47 min."). "Pitch N" moved to the count tag, and the
 handoff table scrolls in the Table's own wrap with the pitcher column pinned. No fetch and no
 feed read was added; the ejection's club is read off the sentence's leading club name.
-The full Now Pitching card and the persistent header (`entering`) draw no logo.
+The full Now Pitching card draws the logo on its club band, as the artifact does; the persistent header (`entering`) draws none.
 Tests that pinned the old text and markup changed on purpose: `event-card-frame` (tabs now
 live in `ActorHead`), `notice-n6` (the bar's gap is 12px), `notice-n8a` (the photo class),
 `notice-n8b` (the code, team mark, spacer, count and pitch-number parts are gone) and

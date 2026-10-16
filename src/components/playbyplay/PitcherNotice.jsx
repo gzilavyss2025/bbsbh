@@ -33,7 +33,7 @@ export function PitcherNotice({ pitcher, teamId = null, teamName, className = ''
   if (!pitcher) return null
   return (
     <div className={`change ${className}`}>
-      <ActorHead tab={label} id={pitcher.id} name={pitcher.name} jersey={pitcher.jersey} hand={pitcher.hand} teamId={teamId} teamName={teamName} logo={logo && !entering}>
+      <ActorHead tab={label} id={pitcher.id} name={pitcher.name} jersey={pitcher.jersey} hand={pitcher.hand} teamId={teamId} teamName={teamName} logo={logo}>
         {flag && <span className="change__flag">{flag}</span>}
       </ActorHead>
       {entering && (
