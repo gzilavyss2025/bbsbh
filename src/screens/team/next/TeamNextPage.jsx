@@ -14,13 +14,13 @@ import { BANDS } from './bands.js'
 import { forgetLoads, SHARED } from './once.js'
 import '../../../styles/team-next/page.css'
 
-// The one-scroll team page (ADR-0082, #1107, row 3), hidden at /team/{id}/next until the
-// swap: TeamHubShell, a jump bar, and seven band slots. Each band mounts its module only
+// The one-scroll team page (ADR-0082, #1107), the club's page at /team/{id}: TeamHubShell, a jump bar, and seven band slots. Each band mounts its module only
 // when it comes near, so the first screen costs the first band. A band the club cannot
 // fill is absent, with no button (hiddenTeamSections). Open surface (ADR-0034): the shell
 // wraps everything in LinkScope, which keeps ?d= and ?s= on every door out.
-// `tab` is an old tab address ('/team/{id}/next/roster'): the page lands on that tab's band
-// once, then the address becomes the bare page, keeping ?d= and ?s=.
+// `tab` is an old tab address ('/team/{id}/roster'): the page lands on that tab's band
+// once, then the address becomes the bare page, keeping ?d= and ?s=. The hidden '/next'
+// address is cleaned the same way.
 // The sticky jump bar's height (68px measured), so a tap lands a band under it.
 // Keep in step with `.tnext__band` scroll-margin-top in team-next/page.css.
 const BAR_H = 68
@@ -34,14 +34,17 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
   useEffect(() => forgetLoads, [])
   const loaded = Boolean(identity.data)
   useEffect(() => {
-    if (!tab || !loaded) return undefined
+    const onNext = /\/next\/?$/.test(window.location.pathname)
+    if ((!tab && !onNext) || !loaded) return undefined
     const key = TEAM_TAB_BAND[tab]
     window.history.replaceState(
       window.history.state,
       '',
-      window.location.pathname.replace(new RegExp(`/${tab}/?$`), '') + window.location.search + `#${key}`,
+      window.location.pathname.replace(/(\/next)?(\/(roster|games|numbers|contracts|minors))?\/?$/, '') +
+        window.location.search +
+        (key ? `#${key}` : ''),
     )
-    const el = document.getElementById(key)
+    const el = key && document.getElementById(key)
     return el ? holdSectionInView(el) : undefined
   }, [tab, loaded])
   const gate = AsyncGate({
@@ -64,7 +67,6 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
       manager={manager}
       asOf={asOf}
       sportId={sportId}
-      active="next"
       top={<TeamNextTop key={`${team.id}:${asOf ?? ''}`} team={team} standings={standings} season={season} asOf={asOf} />}
       bar={
         <HubTabBar

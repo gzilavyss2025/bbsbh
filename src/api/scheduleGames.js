@@ -16,7 +16,7 @@ export function postseasonThrough(schedule, through) {
   return schedule.filter((g) => !g.gameType || g.gameType === 'R' || g.apiDate <= through)
 }
 
-// The Last 10 Games card's window (TeamPage.jsx's LastTenGamesStrip) — the
+// The Last 10 Games card's window (the team page's Last 10) — the
 // most recently DECIDED games from a team's fetchTeamSchedule() list, oldest
 // -> newest (the list is already sorted ascending). Filters on `won != null`,
 // which fetchTeamSchedule already cutoff-gates, NEVER on Final status

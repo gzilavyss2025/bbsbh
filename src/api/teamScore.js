@@ -13,24 +13,6 @@ export function teamScoreFor(data, teamId, season, cutoff) {
   return snapshots ? latestAtOrBefore(snapshots, cutoff) : null
 }
 
-// Every team's score at the same cutoff, for the "how do we compare to the
-// other 29" dots on the Team Score card. statKey is 'season' or
-// 'currentForm' — the two grades TeamScoreCard shows. `tiebreak` carries the
-// finer-grained pre-rounding signal (see leagueRankNoTies) — unused by the
-// plain, ties-allowed leagueRank the Quality driver row still ranks with.
-export function leagueScoresFor(data, season, cutoff, statKey) {
-  const byTeamId = data?.seasons?.[season]?.byTeamId
-  if (!byTeamId) return []
-  const rows = []
-  for (const [teamId, snapshots] of Object.entries(byTeamId)) {
-    const stat = latestAtOrBefore(snapshots, cutoff)?.[statKey]
-    if (stat?.score != null) {
-      rows.push({ teamId: Number(teamId), score: stat.score, tiebreak: [stat.weightedWinsAbove500, stat.runDifferential] })
-    }
-  }
-  return rows
-}
-
 // Every team's Season Grade at one shared spoiler-safe cutoff. Quality and
 // Surprise live in separate generated files, so rows only enter the comparison
 // pool when both same-date-safe readers can provide a value.

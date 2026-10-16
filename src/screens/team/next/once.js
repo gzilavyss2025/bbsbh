@@ -12,7 +12,7 @@ export function once(key, load) {
 
 export const forgetLoads = () => loads.clear()
 
-// The page's loader sources (data/sources.js): the four shared reads, each bought once per
+// The page's loader sources (data/sources.js): the shared reads, each bought once per
 // argument list while the page is open.
 export const SHARED = Object.fromEntries(
   Object.entries(DIRECT).map(([name, fetch]) => [

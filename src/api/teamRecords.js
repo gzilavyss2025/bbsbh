@@ -82,7 +82,7 @@ export const RECORD_GROUPS = [
   // render surfaces both key their headings, their jump nav and their
   // "more in this group" list off a group title, and a Scoring group of
   // twenty-three would have swamped all three. The card draws this one as a
-  // compact inning grid (records/InningScoringGrid.jsx) instead of flat rows.
+  // compact inning grid (next/standings/records/) instead of flat rows.
   //
   // Each row carries `last: true`: teamRecordsFor appends the most recent
   // game that matched, which is the "when was the last time…" half of the

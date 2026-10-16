@@ -42,7 +42,7 @@ The two stamped "due up" cards in the innings viewer, `DueUpNextCard` ("Due up n
 
 ## `teamstats/`
 
-The two leader renderings share `computeLeaders` and the descriptors, not a box model: `TeamLeaders` is the headshot-card board the dedicated leader pages render, `TeamLeadersLedger` the two-block ruled ledger (two `Table`s with named columns, #1132) the team hub renders
+`TeamLeaders` is the headshot-card board the dedicated leader pages render. The Ranks band of the team page draws its own leaders (`next/ranks/`) off the same `computeLeaders` and descriptors.
 
 ## `umpire/`
 

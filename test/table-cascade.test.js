@@ -325,14 +325,6 @@ const T3 = [
     attrs: ['frame="bare"', 'density="tight"'],
     label: /label="Line score"/,
   },
-  {
-    jsx: 'components/teamstats/TeamLeadersLedger.jsx',
-    ns: 'tledg__rows',
-    bases: [['23-box-score-detail.css', 'tledg__rows']],
-    attrs: ['frame="bare"', 'density="row"'],
-    label: null,
-    apis: ['../../api/teamLeaders.js'],
-  },
 ]
 // A selector that reaches only the HELD tables.
 const HELD = ':where(:not(.table__grid))'
@@ -468,18 +460,6 @@ test('T3: the line score draws each box once, with no doubled edge', () => {
 
 test('T3: the running line\'s focus ring sits inside the Card that clips it', () => {
   assert.equal(decl(need(read('20-charts.css'), '.rolling__scroll .table:focus-visible'), 'outline-offset'), 'calc(-1 * var(--bw-heavy))')
-})
-
-test('T3: the team leaders are a table of words, with three named columns', () => {
-  const code = src('components/teamstats/TeamLeadersLedger.jsx')
-  assert.doesNotMatch(code, /<(ul|li)\b/, 'no list rows any more')
-  const heads = [...code.matchAll(/<th\b[^>]*>([^<]*)<\/th>/g)].map((m) => m[1])
-  assert.deepEqual(heads, ['Category', 'Leader', 'Stat'])
-  // The position tag and the injured mark ride in the Leader cell, beside the name.
-  assert.match(code, /<td className="tledg__leader">\s*<span className="tledg__who">[\s\S]*tledg__pos[\s\S]*<InjuredMark[\s\S]*<\/span>\s*<\/td>/)
-  const body = ruleBody(read('23-box-score-detail.css'), '.tledg__rows')
-  assert.equal(decl(body, 'font-family'), 'inherit', 'category and name are words, not mono figures')
-  assert.equal(decl(body, 'font-variant-numeric'), 'normal')
 })
 
 test('T3: the seal stays where it was: no gate moved and no api/ import added', () => {
@@ -1109,13 +1089,12 @@ test('T6b: the seal pin: Nine Keys reads no reveal-only module, seal or stamp', 
 
 // One row per file that moved in T8. Every table is a club table: one club a
 // row, a `.team` name cell, sometimes a favorite-team row. `clubtable` is the
-// namespace on each; `extra` is the second class its tag must carry. All six
+// namespace on each; `extra` is the second class its tag must carry. All five
 // are sheets at row density and scroll sideways on a phone, so each has a label;
 // only the /standings boards and the /postseason-race mini table pin the club.
 const T8 = [
   { jsx: 'screens/StandingsPage.jsx', tags: 2, sticky: true, extra: 'clubtable--full' },
   { jsx: 'screens/PostseasonRacePage.jsx', tags: 1, sticky: true, extra: 'clubtable--full' },
-  { jsx: 'screens/team/modules/StandingsCard.jsx', tags: 1, sticky: false },
   { jsx: 'components/teamstats/PostseasonOddsModal.jsx', tags: 1, sticky: false, extra: 'psoddstable' },
   { jsx: 'screens/GameNotesDebugPage.jsx', tags: 1, sticky: false },
 ]
@@ -1140,7 +1119,7 @@ test('T8: each club table renders on Table with the frame, density, sticky and l
     }
     tables += own.length
   }
-  assert.equal(tables, 6, 'T8 moves 6 tables')
+  assert.equal(tables, 5, 'T8 moves 5 tables')
 })
 
 test('T8: two boards on one page have two different labels', () => {

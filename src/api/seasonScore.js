@@ -14,14 +14,3 @@ export function seasonScoreFor(data, teamId, season, cutoff) {
   const snapshots = data?.seasons?.[season]?.byTeamId?.[teamId]
   return snapshots ? latestAtOrBefore(snapshots, cutoff) : null
 }
-
-export function leagueSurpriseScoresFor(data, season, cutoff) {
-  const byTeamId = data?.seasons?.[season]?.byTeamId
-  if (!byTeamId) return []
-  const rows = []
-  for (const [teamId, snapshots] of Object.entries(byTeamId)) {
-    const score = latestAtOrBefore(snapshots, cutoff)?.score
-    if (score != null) rows.push({ teamId: Number(teamId), score })
-  }
-  return rows
-}

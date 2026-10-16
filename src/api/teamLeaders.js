@@ -147,7 +147,7 @@ export const ALL_CATEGORIES = [...HITTING_CATEGORIES, ...PITCHING_CATEGORIES]
 // column, so the pitching half sat three swipes behind a gesture nothing
 // announced. Two lists, rendered as two labelled blocks, make "half of this is
 // pitching" a fact of the layout instead of a promise about scroll position
-// (see components/teamstats/TeamLeadersLedger.jsx).
+// (see next/ranks/ in screens/team).
 //
 // Each list is ordered rate-first, then counting — the order a scorekeeper
 // reads a leaderboard in — and the ledger's two depths take a PREFIX of each:

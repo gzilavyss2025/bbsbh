@@ -105,6 +105,6 @@ test('the player page opts in; the bar stays opt-in', () => {
   const read = (rel) => readFileSync(new URL(`../${rel}`, import.meta.url), 'utf8')
   assert.match(read('src/screens/player/next/PlayerNextPage.jsx'), /<HubTabBar variant="anchor"[^>]* hold onLand=\{onLand\}/)
   assert.match(read('src/components/chrome/HubTabBar.jsx'), /hold = false, onLand \}/)
-  assert.doesNotMatch(read('src/screens/team/TeamTabBar.jsx'), /onLand|hold/)
+  assert.doesNotMatch(read('src/screens/team/next/TeamNextPage.jsx'), /onLand/)
   assert.match(read('src/screens/player/next/Slot.jsx'), /e\.animationName === 'card-stamp-in'/)
 })

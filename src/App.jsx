@@ -140,7 +140,6 @@ const FoulTrackerPage = lazyNamed(
   () => import('./screens/FoulTrackerPage.jsx'),
   'FoulTrackerPage',
 )
-const TeamPage = lazyNamed(() => import('./screens/TeamPage.jsx'), 'TeamPage')
 const TeamLeadersPage = lazyNamed(
   () => import('./screens/TeamLeadersPage.jsx'),
   'TeamLeadersPage',
@@ -149,11 +148,6 @@ const TeamLeadersPage = lazyNamed(
 // tab must not pull another tab's data, which is half the reason the team page
 // was split at all (see .scratch/team-page-ia/PRD.md). Lazily loaded like every
 // other screen, so a visitor who opens one tab never downloads the other four.
-const RosterTab = lazyNamed(() => import('./screens/team/RosterTab.jsx'), 'RosterTab')
-const GamesTab = lazyNamed(() => import('./screens/team/GamesTab.jsx'), 'GamesTab')
-const NumbersTab = lazyNamed(() => import('./screens/team/NumbersTab.jsx'), 'NumbersTab')
-const ContractsTab = lazyNamed(() => import('./screens/team/ContractsTab.jsx'), 'ContractsTab')
-const MinorsTab = lazyNamed(() => import('./screens/team/MinorsTab.jsx'), 'MinorsTab')
 // The hidden one-scroll team page (#1107): '/team/{id}/next', until the swap.
 const TeamNextPage = lazyNamed(() => import('./screens/team/next/TeamNextPage.jsx'), 'TeamNextPage')
 // Stamp In (ADR-0042) — NOT a sixth tab. A standalone page under the team's
@@ -331,14 +325,8 @@ const BARE_ROUTES = {
 // and the league.
 const ID_ROUTES = {
   player: PlayerNextPage,
-  team: TeamPage,
+  team: TeamNextPage,
   'team-leaders': TeamLeadersPage,
-  'team-roster': RosterTab,
-  'team-games': GamesTab,
-  'team-numbers': NumbersTab,
-  'team-contracts': ContractsTab,
-  'team-minors': MinorsTab,
-  'team-next': TeamNextPage,
   'team-stamp-in': StampInPage,
   'team-photos': TeamPhotosPage,
   'team-transactions': TeamTransactionsPage,

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { OTHER_LEAGUE, gbText, hasDroughts, scoreCard, standingsCount } from '../src/screens/team/next/standings/standingsData.js'
+import { OTHER_LEAGUE, gbText, hasDroughts, hasRecords, scoreCard, standingsCount } from '../src/screens/team/next/standings/standingsData.js'
 
 // The Standings band's team score card and jump-bar count (#1107, row 5b): pure shapes over the
 // standings the page already fetched. No season grade anywhere. Offline.
@@ -88,11 +88,23 @@ test('scoreCard: no row for the club, or a pool of one, is no card; no grade key
   assert.ok(!JSON.stringify(scoreCard(own, other, mlbTeam)).toLowerCase().includes('grade'))
 })
 
+const played = { allStarDate: null, games: [{ d: '2026-04-01', o: 'CHC', r: 'W', h: 1 }] }
+
 test('standingsCount: one per card the band draws', () => {
-  const full = { standings: [1, 2], teamRecords: {}, scheduleShape: null, dayOfWeek: [1], comeback: {} }
+  const full = { standings: [1, 2], teamRecords: played, scheduleShape: null, dayOfWeek: [1], comeback: {} }
   assert.equal(standingsCount(full), 5)
   assert.equal(standingsCount({ standings: [1], teamRecords: null, dayOfWeek: null, comeback: null }), 1)
   assert.equal(standingsCount({ standings: [], teamRecords: null, dayOfWeek: null, comeback: null }), 0)
+})
+
+test('hasRecords: no game counted at the cutoff is no Records card, and no badge', () => {
+  assert.equal(hasRecords(played, null), true)
+  assert.equal(hasRecords(played, '2026-03-31'), false)
+  assert.equal(hasRecords({ allStarDate: null, games: [] }, null), false)
+  assert.equal(hasRecords(null, null), false)
+  const none = { standings: [1, 2], teamRecords: played, dayOfWeek: null, comeback: null }
+  assert.equal(standingsCount(none, null), 3)
+  assert.equal(standingsCount(none, '2026-03-31'), 2)
 })
 
 test('hasDroughts: a schedule shape with nothing to report draws no Last time card', () => {

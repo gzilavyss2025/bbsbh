@@ -22,9 +22,9 @@ Themed surfaces are picked per ELEMENT, not per page: **a club may colour a card
 that identifies the club** (box score and innings view included), never a control,
 cover, or seal-state report — ADR-0030's 2026-08-10 addendum replaces that rule.
 
-### The team hub (`/team/{id}`, `src/screens/team/`)
+### The team page (`/team/{id}`, `src/screens/team/`)
 
-Tabs, loaders, and where things live: `src/screens/team/CLAUDE.md`. The hub itself
+Bands, loaders, and where things live: `src/screens/team/CLAUDE.md`. The page itself
 opens on **current** stats — links out of a game stopped stamping that cutoff on
 (ADR-0034's "The cutoff is opt-in now"); `?d=` still applies when a URL carries
 one, and `components/seal/AsOfBanner.jsx` is the way IN (a date picker on a live

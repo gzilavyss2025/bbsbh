@@ -2,19 +2,13 @@ import { fetchTeam } from '../../api/team.js'
 import { seasonOf, cutoffFor, teamRecordFor } from './data/shared.js'
 import { DIRECT } from './data/sources.js'
 
-// The team hub's shared header data — everything TeamHubShell draws above the
-// tab bar, and NOTHING else.
+// The team page's shared header data — everything TeamHubShell draws above the
+// jump bar, and NOTHING else.
 //
-// Every tab pays for this on top of its own loader, so it must stay cheap: three
+// Every visit pays for this on top of the bands' own loaders, so it must stay cheap: three
 // requests, no roster, no schedule, no per-player fan-out. If you are tempted to
-// add a fetch here because two tabs happen to want it, put it in both tabs'
-// loaders instead — the whole point of the tab split is that a visitor who wants
-// one section doesn't pay for the other four (see .scratch/team-page-ia/PRD.md).
-//
-// The Overview is the one tab that does NOT call this: its Standings preview
-// already needs the standings response, so it shapes the header's three fields
-// off that same fetch rather than paying for a second identical request (see
-// data/loadOverview.js). The shaping itself is shared, so the two can't drift.
+// add a fetch here because two bands happen to want it, share it through data/sources.js
+// instead.
 //
 // Degrades the way every MiLB-facing loader here does: a thin feed with no
 // standings row yields `record: null` and the record line simply hides, and

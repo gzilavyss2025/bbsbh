@@ -17,7 +17,7 @@ const SCRIPT = path.join(fileURLToPath(new URL('.', import.meta.url)), '../scrip
 const ROOT_MD = `# CLAUDE.md
 
 **Two Vercel functions live in \`api/\`**, each inert; **one never render or fetch a score.**
-**The second stores a score, by design**. A one-tab hub.
+**The second stores a score, by design**. A one-band page.
 
 - **Nested \`CLAUDE.md\`** files:
   - \`src/\` — the app.
@@ -34,7 +34,7 @@ function run(extra) {
       'api/a.js': '',
       'api/b.js': '',
       'src/CLAUDE.md': '# src\n',
-      'src/screens/team/TeamTabBar.jsx': "const TABS = [{ key: 'overview' }]\n",
+      'src/screens/team/next/bands.js': "export const BANDS = [{ key: 'standings' }]\n",
       ...extra,
     }
     for (const [file, text] of Object.entries(files)) {

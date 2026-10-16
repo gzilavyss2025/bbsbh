@@ -24,7 +24,7 @@ specific first:
   guard finds them on disk; the facts guard checks this list.
   - `api/` — the Vercel functions, one line each.
   - `src/` — screen flow, routing, fetching, the design system, and the UI half of the
-    spoiler rule. Folder detail sits below it: `src/screens/team/` (the six-tab hub),
+    spoiler rule. Folder detail sits below it: `src/screens/team/` (the seven-band page),
     `src/screens/profile/` (My Tally), `src/screens/player/next/` (the new player page, module contract), `src/screens/lineup/next/` (the new lineup page), `src/styles/`, `src/components/`, and in that
     folder `src/components/ui/`, `src/components/boxlines/`, `src/components/chrome/`,
     `src/components/logbook/`, `src/components/offseason/`, `src/components/passport/`,
@@ -108,7 +108,7 @@ where you score a game — the slate's score cells, the lineup pages, the inning
 the box score — a score-revealing value never exists in the DOM until you reveal it. It
 is never fetched-then-hidden, and never computed early. Everything else about baseball opens live:
 season and career stats, player and team pages, leader boards, standings, the money pages (`/salaries`
-and a club's Contracts tab, ADR-0052), and the standalone pages outside the scoring flow. A stat line
+and a club's Money band, ADR-0052), and the standalone pages outside the scoring flow. A stat line
 is not a score, and gating one was the rule reaching past what it protects (ADR-0034, "The cutoff is
 opt-in now"). Four **opt-in, consented** departures lift the seal inside the scope. Three are *render*
 overrides that persist nothing: the site-wide **Scores Unlocked** switch, unsealing a day you agree to

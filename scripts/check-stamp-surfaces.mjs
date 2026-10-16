@@ -116,7 +116,6 @@ const FORBIDDEN_SURFACES = [
   'components/game/PastGameFlipCard.jsx',
   'components/game/GameResultFace.jsx',
   'components/game/GameFinder.jsx',
-  'components/teamstats/DeckNudge.jsx',
 ]
 const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'useStamps']
 

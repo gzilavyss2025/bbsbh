@@ -24,7 +24,7 @@ import { linkQuery } from '../../lib/route.js'
 // `sportId` is the route's own `?s=` hint, threaded straight through (never
 // re-derived from fetched data) so applying a new date reproduces the
 // address the visitor is already on, plus the changed day — same
-// don't-invent-a-query-the-URL-never-had rule `TeamTabBar` follows.
+// don't-invent-a-query-the-URL-never-had rule the team page's jump bar follows.
 export function AsOfBanner({ asOf, sportId = null }) {
   const navigate = useNav()
   const inputId = useId()

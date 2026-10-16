@@ -4,7 +4,7 @@
 // game-log fixup). Fetch nothing another tab owns: no standings,
 // schedule-for-display, photos, uniforms, transactions, comebacks, odds,
 // affiliates or prospects table.
-import { fetchTeam, fetchTeamIL } from '../../../api/team.js'
+import { fetchTeam } from '../../../api/team.js'
 import { fetchAllStarRosterIds, fetchPersonStats } from '../../../api/person-fetch.js'
 import { fetchWarData } from '../../../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../../../api/recentForm.js'
@@ -77,7 +77,7 @@ export async function loadRoster(id, asOf, src = DIRECT) {
       // shared.js). Top Substitutes and the pitching staff below stay scoped
       // to fullRoster — those answer "who's actually on this roster."
       src.fetchTeamRoster(id, season, { sportId, rosterType: 'fullSeason' }),
-      fetchTeamIL(id, season),
+      src.fetchTeamIL(id, season),
       sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
       sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
       fetchTopProspects(),
