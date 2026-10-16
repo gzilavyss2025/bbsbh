@@ -29,8 +29,8 @@ for (const [rel, label, count] of SWAPS) {
   })
 }
 
-test('the side effects stay: batlog closes "Show all", Season closes the WAR dialog, Advanced closes the note', () => {
-  assert.match(src('batlog/index.jsx'), /onChange=\{\(id\) => \(setScope\(id\), setMore\(false\)\)\}/)
+test('the side effects stay: batlog folds the page back to the first, Season closes the WAR dialog, Advanced closes the note', () => {
+  assert.match(src('batlog/index.jsx'), /onChange=\{\(id\) => \(setScope\(id\), setLimit\(SHOWN\)\)\}/)
   assert.match(src('season/index.jsx'), /onChange=\{\(id\) => \{ setPick\(id\); setOpen\(null\) \}\}/)
   assert.match(src('advanced/index.jsx'), /onChange=\{\(k\) => \(setScope\(k\), setOpen\(null\)\)\}/)
 })

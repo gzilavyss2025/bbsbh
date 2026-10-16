@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import '../../../../../styles/player-next/batter/batlog.css'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
-import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { DASH, Fact } from '../../../parts.jsx'
+import { LogMore } from '../../parts/LogMore.jsx'
 import { LogTable } from '../../parts/LogTable.jsx'
 import { COLUMNS, loadBatlog, scopeRows, totalsOf } from './batlogView.js'
 
@@ -89,7 +89,7 @@ const TABLE_COLUMNS = COLUMNS.map((c) => ({
 export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
   const { data: view, loading, error } = useAsync(() => loadBatlog(bio.id, season, asOf), [bio.id, season, asOf])
   const [scope, setScope] = useState('all')
-  const [more, setMore] = useState(false)
+  const [limit, setLimit] = useState(SHOWN)
   const empty = Boolean(error) || (!loading && !view) // a null load (no game, no log) ends the loader
   useEffect(() => {
     if (empty) onEmpty()
@@ -105,7 +105,7 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
   const rows = scopeRows(all, scope)
   const post = scopeRows(all, 'post').length
   const t = totalsOf(rows)
-  const shown = more ? rows : rows.slice(0, SHOWN)
+  const shown = rows.slice(0, limit)
   // In the All view, a heading over each group, with its count.
   const groups = scope === 'all' && post > 0
   const lines = shown.flatMap((r, i) =>
@@ -123,7 +123,7 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
             label="Show games"
             className="segmented--lean"
             value={scope}
-            onChange={(id) => (setScope(id), setMore(false))}
+            onChange={(id) => (setScope(id), setLimit(SHOWN))}
             options={SCOPES.map(([id, label]) => ({ value: id, label, count: counts[id] }))}
           />
         )}
@@ -138,11 +138,7 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
         <Fact label="RBI" value={t.rbi} mono />
       </FactGrid>
       <LogTable columns={TABLE_COLUMNS} rows={lines} caption={`Game log, ${season}`} />
-      {rows.length > SHOWN && (
-        <Button size="control" onClick={() => setMore(!more)} aria-expanded={more}>
-          {more ? 'Show fewer' : `Show all ${games(rows.length)}`}
-        </Button>
-      )}
+      <LogMore total={rows.length} limit={limit} first={SHOWN} onPage={setLimit} />
       <Cluster as="ul" className="batlog__key">
         {SEGS.map(([k, name]) => (
           <li key={k}>

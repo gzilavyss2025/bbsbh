@@ -1,7 +1,10 @@
 import { JerseyCombos, MilbUniformStrip } from '../../../../components/logo/JerseyCombos.jsx'
 import { MilbAlumni } from '../../../../components/teamstats/MilbAlumni.jsx'
+import { Door } from '../../../../components/ui/control/Door.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
+import { useRouteLink } from '../../../../lib/nav.js'
+import { postseasonDoor } from '../../data/shared.js'
 import { BallparkCard } from '../../modules/ballpark/BallparkCard.jsx'
 import { FranchiseHistory } from '../../modules/ballpark/FranchiseHistory.jsx'
 import { useBandData } from '../useBandData.js'
@@ -15,6 +18,8 @@ import '../../../../styles/team-next/about.css'
 const stamp = (still, i) => (still ? {} : { stampIn: true, style: { '--stamp-delay': `${i * 90}ms` } })
 
 export default function About({ team, asOf, onReady, onCount }) {
+  const linkProps = useRouteLink()
+  const door = postseasonDoor(team.id, asOf, team.sport?.id)
   const about = useBandData(() => loadAbout(team, asOf), [team.id, asOf], {
     onReady,
     onCount,
@@ -30,6 +35,7 @@ export default function About({ team, asOf, onReady, onCount }) {
     <Stack gap="section" className="tnext__about">
       <BallparkCard team={team} attendance={d.attendance} manager={d.manager} cardProps={card('Ballpark', i++)} />
       {d.franchise && <FranchiseHistory {...d.franchise} cardProps={card('Franchise history', i++)} />}
+      {door && <Door className="tnext__about-door" {...linkProps(door)}>Postseason history</Door>}
       {jerseyCombos.length > 0 && (
         <JerseyCombos combos={jerseyCombos} teamId={team.id} teamName={team.name} cardProps={card('Logos & jerseys', i++, 'record by jersey')} />
       )}
