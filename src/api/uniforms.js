@@ -56,7 +56,7 @@ export async function fetchGameUniforms(gamePk, options) {
 const GAME_UNIFORM_BATCH = 100
 
 // The JERSEY ('J') asset each team actually WORE in each of a batch of games,
-// for the team-page record-by-jersey rollup (TeamPage.jsx). One
+// for the team-page record-by-jersey rollup. One
 // /api/v1/uniforms/game call per GAME_UNIFORM_BATCH gamePks (the endpoint
 // takes a comma list — see fetchTeamUniformCatalog / gen-jerseys.mjs). Returns
 // `{ [gamePk]: { [teamId]: { code, text } } }`, one entry per side with a
@@ -460,7 +460,7 @@ const TREATMENT_RANK = {
 
 const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
 
-// Builds the Team Page's "logo + jersey + record" strip (TeamPage.jsx): one
+// Builds the Team Page's "logo + jersey + record" strip: one
 // entry per JERSEY in the club's uniform catalog, each carrying its logo
 // TREATMENT (classifyUniformAsset — a jersey maps to exactly one logo, though
 // several jerseys can share the same one, e.g. Home White and Road Grey both

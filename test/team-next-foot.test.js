@@ -28,7 +28,7 @@ test('no clubs and no notes: nothing to render', () => {
 test('the foot carries the page ?d= and ?s= on the club links and is square, tokens only', () => {
   const src = read('screens/team/next/foot/index.jsx')
   assert.match(src, /d: asOf, s: sportId/)
-  assert.match(src, /hasSeen\(seenKey\)/)
+  assert.match(src, /useViewOnce\(team\.id, 'team-\w+'/)
   const css = read('styles/team-next/foot.css').replace(/\/\*[^]*?\*\//g, '')
   assert.doesNotMatch(css, /#[0-9a-fA-F]{3,8}\b/)
   assert.doesNotMatch(css, /border-radius:\s*[^0\s]/)

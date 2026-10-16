@@ -13,7 +13,7 @@ test('the Farm rank labels are ordinals, not "#"', () => {
 test('the Farm band keeps the prospect count and the one-shot motion gate', () => {
   const src = read('screens/team/next/farm/index.jsx')
   assert.match(src, /m\.prospects\.length/)
-  assert.match(src, /hasSeen\(seenKey\)/)
+  assert.match(src, /useViewOnce\(team\.id, 'team-\w+'/)
 })
 
 test('farm.css is tokens only and square', () => {

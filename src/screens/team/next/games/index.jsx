@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
 import { AsyncStatus } from '../../../../components/ui/AsyncGate.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 import { isoToday } from '../../../../lib/dates.js'
-import { hasSeen, markSeen, viewKey } from '../../../../lib/motion/inViewOnce.js'
+import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { isMlbTeamId } from '../../../../lib/teams.js'
 import { loadGames } from '../../data/loadGames.js'
 import { AllGames } from '../../modules/TeamGames.jsx'
@@ -28,11 +27,7 @@ const count = (g) => g.seasonGames.length
 export default function Games({ team, asOf, sportId, onReady, onCount }) {
   const games = useBandData(() => loadGames(team.id, asOf, SHARED), [team.id, asOf], { onReady, onCount, count })
   // Motion plays once per page visit (docs/motion.md, "The one-shot gate"); a return shows it at rest.
-  const seenKey = viewKey(team.id, 'team-games')
-  const [still] = useState(() => hasSeen(seenKey))
-  useEffect(() => {
-    if (games.data) markSeen(seenKey)
-  }, [games.data, seenKey])
+  const still = useViewOnce(team.id, 'team-games', !!games.data)
 
   const g = games.data
   const mlb = isMlbTeamId(team.id)

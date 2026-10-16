@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
 import '../../../../styles/70-contracts-grid.css'
 import '../../../../styles/team-next/money.css'
 import { commitmentCliff, payrollScale } from '../../../../api/salaries.js'
-import { hasSeen, markSeen, viewKey } from '../../../../lib/motion/inViewOnce.js'
+import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { CommitmentCliff } from '../../../../components/salaries/CommitmentCliff.jsx'
 import { ContractGrid, ContractKey } from '../../../../components/salaries/ContractGrid.jsx'
 import { SourceLine } from '../../../../components/salaries/SourceLine.jsx'
@@ -21,11 +20,7 @@ import { MONEY_NOTE, moneyCount, moneyTiles } from './moneyData.js'
 export default function Money({ team, onReady, onCount }) {
   const contracts = useBandData(() => loadContracts(team.id), [team.id], { onReady, onCount, count: moneyCount })
   // Motion plays once per page visit (docs/motion.md, "The one-shot gate"); a return shows it at rest.
-  const seenKey = viewKey(team.id, 'money')
-  const [still] = useState(() => hasSeen(seenKey))
-  useEffect(() => {
-    markSeen(seenKey)
-  }, [seenKey])
+  const still = useViewOnce(team.id, 'money')
 
   const { data } = contracts
   const ledger = data?.ledger

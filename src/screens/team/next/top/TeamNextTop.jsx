@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { pageDay } from '../../../../api/schedule.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { ordinal } from '../../../../lib/format.js'
-import { hasSeen, markSeen, viewKey } from '../../../../lib/motion/inViewOnce.js'
+import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { SPORT_LABEL } from '../../../../lib/teams.js'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
@@ -41,11 +41,7 @@ export function TeamNextTop({ team, standings, season, asOf }) {
   const rail = useMemo(() => schedule && daysRail(schedule, today), [schedule, today])
 
   // Motion plays once per page visit (docs/motion.md, "The one-shot gate"); a return shows it at rest.
-  const seenKey = viewKey(team.id, 'team-top')
-  const [still] = useState(() => hasSeen(seenKey))
-  useEffect(() => {
-    markSeen(seenKey)
-  }, [seenKey])
+  const still = useViewOnce(team.id, 'team-top')
 
   const [taps, setTaps] = useState({ clubs: 0, days: 0, runs: 0 })
   const tap = (k) => setTaps((t) => ({ ...t, [k]: t[k] + 1 }))

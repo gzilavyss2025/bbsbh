@@ -7,7 +7,7 @@ record is. It is a visible driver of Season Grade and opens its own breakdown on
 the Team Page. See `docs/season-grade.md` for the composite.
 
 The pipeline is `scripts/gen-season-score.mjs` →
-`public/data/season-score.json` → `src/api/seasonScore.js` → `TeamPage.jsx`.
+`public/data/season-score.json` → `src/api/seasonScore.js` → the team page.
 It runs in the nightly batch. See ADR-0018 for the unsealed-rendering and
 date-cutoff decision.
 

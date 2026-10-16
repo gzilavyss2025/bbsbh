@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useAsync } from '../../../../hooks/useAsync.js'
-import { hasSeen, markSeen, viewKey } from '../../../../lib/motion/inViewOnce.js'
+import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { fetchWorkload, staffGridFor } from '../../../../api/workload.js'
 import { AsyncStatus } from '../../../../components/ui/AsyncGate.jsx'
@@ -46,11 +46,7 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
   const roster = useBandData(() => loadRoster(team.id, asOf, SHARED), [team.id, asOf], { onReady, onCount, count: rosterCount })
   const linkProps = useRouteLink()
   // Motion plays once per page visit; a return shows the cards at rest.
-  const seenKey = viewKey(team.id, 'team-roster')
-  const [still] = useState(() => hasSeen(seenKey))
-  useEffect(() => {
-    markSeen(seenKey)
-  }, [seenKey])
+  const still = useViewOnce(team.id, 'team-roster')
   const [seasonFor, setSeasonFor] = useState(null) // the club whose Season view was picked
 
   const d = roster.data

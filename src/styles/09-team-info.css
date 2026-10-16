@@ -47,9 +47,9 @@
    unthemed label. Not tied to any one game, so PlayerPage.jsx always resolves
    the club's Main/Home triad rather than a jersey worn tonight. */
 
-/* The team page (TeamPage.jsx, /team/:id) — not tied to any one game, so it
+/* The team page (screens/team/next/TeamNextPage.jsx, /team/:id) — not tied to any one game, so it
    always resolves the club's Main/Home triad rather than tonight's jersey (see
-   TeamPage.jsx's own theme useMemo). Scoped to .team-hub so it never leaks
+   TeamHubShell.jsx's theme). Scoped to .team-hub so it never leaks
    onto the heads the player and team-leaders pages share. The player page
    themes its own section bars (SectionHead look="band" club bleed, see
    above); team-leaders is the one surface still deliberately unthemed.

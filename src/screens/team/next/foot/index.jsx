@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { useNearView } from '../../../../hooks/scroll/useNearView.js'
 import { fetchTeams } from '../../../../api/schedule.js'
@@ -12,7 +11,7 @@ import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 import { useNav, useRouteLink } from '../../../../lib/nav.js'
 import { gameNotesPath, teamPath } from '../../../../lib/route.js'
 import { SPORT_LABEL } from '../../../../lib/teams.js'
-import { hasSeen, markSeen, viewKey } from '../../../../lib/motion/inViewOnce.js'
+import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { footParts } from './footData.js'
 import '../../../../styles/team-next/foot.css'
 
@@ -30,11 +29,7 @@ export function TeamNextFoot({ team, asOf, sportId }) {
   // Nothing draws until the clubs are in (or failed), so the notes card does not sit alone and
   // then jump down when the strip arrives above it.
   const parts = clubs.data || clubs.error ? footParts(team, clubs.data) : null
-  const seenKey = viewKey(team.id, 'team-foot')
-  const [still] = useState(() => hasSeen(seenKey))
-  useEffect(() => {
-    if (parts) markSeen(seenKey)
-  }, [parts, seenKey])
+  const still = useViewOnce(team.id, 'team-foot', !!parts)
   const stamp = (i) => (still ? {} : { stampIn: true, style: { '--stamp-delay': `${i * 90}ms` } })
   const level = SPORT_LABEL[navSportId] ?? ''
   return (

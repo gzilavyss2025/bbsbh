@@ -55,9 +55,8 @@ const teamRosterCache = new Map()
 // (there is no role field in the API), hitting+pitching so the Team Leaders
 // section can rank individual players by any season stat (see
 // api/teamLeaders.js), fielding so the Preferred Lineup diamond can find each
-// position's #1 starter by games started there (see rosterFieldingSplits,
-// TeamPage.jsx). All three arrive in one request; the API returns only the
-// split(s) a given player has, so a position player carries a hitting split
+// position's #1 starter by games started there. All three arrive in one request; the API
+// returns only the split(s) a given player has, so a position player carries a hitting split
 // (plus one fielding split per position he's played), a pitcher a pitching
 // one, and a two-way player all three. Degrades to [].
 //
