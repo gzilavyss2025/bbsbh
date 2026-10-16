@@ -1,6 +1,5 @@
-import { PitcherPhoto } from './PitcherNotice.jsx'
-import { PlayerLink } from '../player/PlayerLink.jsx'
-import { ordinal } from '../../lib/format.js'
+import { ActorHead } from './PitcherNotice.jsx'
+import { TABS, forLine } from './cardCopy.js'
 
 // The "pinch running" notification card, at the moment a pinch runner enters
 // mid-flow — same headshot + label + name layout as PitcherNotice/FielderNotice.
@@ -10,30 +9,15 @@ import { ordinal } from '../../lib/format.js'
 // of who's on base now; this is the announcement as it happens. `runner` /
 // `replaced` are the { id, name, jersey } shapes pinchRunningPlayers builds;
 // `base` is the numeric base (1-3) he entered at, same field PlayDiamond's
-// PR mark keys off of. The entering runner reads on his own line (name left,
-// number + PR badge right, same layout PitcherNotice uses for jersey/hand);
-// who he replaced and where drops to a second line below.
+// PR mark keys off of. The entering runner's number and PR badge sit in the badge row under his
+// name; who he replaced and where is a second line below, in First Last order.
 export function PinchRunNotice({ runner, replaced, base = null, teamId = null, teamName, className = '' }) {
   if (!runner) return null
   return (
     <div className={`change ${className}`}>
-      <PitcherPhoto personId={runner.id} name={runner.name} teamId={teamId} />
-      <div className="change__body">
-        <h4 className="card__name">Pinch running{teamName ? ` for the ${teamName}` : ''}</h4>
-        <span className="change__pitcher">
-          <PlayerLink id={runner.id}>{runner.name}</PlayerLink>
-          <span className="change__badges">
-            {runner.jersey ? <span className="change__jersey">{runner.jersey}</span> : null}
-            <span className="change__prtag">PR</span>
-          </span>
-        </span>
-        {replaced && (
-          <span className="change__forline">
-            For <PlayerLink id={replaced.id}>{replaced.name}</PlayerLink>
-            {base ? ` at ${ordinal(base)} base` : ''}
-          </span>
-        )}
-      </div>
+      <ActorHead tab={TABS.pinchRun} id={runner.id} name={runner.name} jersey={runner.jersey} pr teamId={teamId} teamName={teamName}>
+        {replaced && <span className="change__forline">{forLine(replaced.name, base)}</span>}
+      </ActorHead>
     </div>
   )
 }

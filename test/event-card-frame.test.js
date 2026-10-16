@@ -86,11 +86,11 @@ test('no notification card passes the Notice frame any more; each passes eventCa
 
 test('every card has a name tab that is its heading, drawn by .card__name', () => {
   const tabs = {
-    'components/playbyplay/PitcherNotice.jsx': 1,
-    'components/playbyplay/BatterNotice.jsx': 1,
-    'components/playbyplay/FielderNotice.jsx': 1,
-    'components/playbyplay/PinchRunNotice.jsx': 1,
-    'components/playbyplay/PitcherHandoffCard.jsx': 2, // departure, final line
+    'components/playbyplay/PitcherNotice.jsx': 1, // ActorHead: the four actor cards and the two handoff cards draw their tab here (slice 2)
+    'components/playbyplay/BatterNotice.jsx': 0,
+    'components/playbyplay/FielderNotice.jsx': 0,
+    'components/playbyplay/PinchRunNotice.jsx': 0,
+    'components/playbyplay/PitcherHandoffCard.jsx': 0,
     'components/playbyplay/EventCards.jsx': 4, // mound visit, ejection, event, delay
   }
   for (const [rel, n] of Object.entries(tabs)) {

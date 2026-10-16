@@ -1,5 +1,5 @@
-import { PitcherPhoto } from './PitcherNotice.jsx'
-import { PlayerLink } from '../player/PlayerLink.jsx'
+import { ActorHead } from './PitcherNotice.jsx'
+import { TABS } from './cardCopy.js'
 
 // The "now batting" notification card for a pinch hitter — same headshot +
 // label + name layout as PitcherNotice/FielderNotice (shares its
@@ -17,16 +17,7 @@ export function BatterNotice({ batter, teamId = null, teamName, className = '' }
   if (!batter) return null
   return (
     <div className={`change ${className}`}>
-      <PitcherPhoto personId={batter.id} name={batter.name} teamId={teamId} />
-      <div className="change__body">
-        <h4 className="card__name">
-          Now batting{teamName ? ` for the ${teamName}` : ''}
-        </h4>
-        <span className="change__pitcher">
-          <PlayerLink id={batter.id}>{batter.name}</PlayerLink>
-          {batter.jersey ? ` ${batter.jersey}` : ''}
-        </span>
-      </div>
+      <ActorHead tab={TABS.batting} id={batter.id} name={batter.name} jersey={batter.jersey} teamId={teamId} teamName={teamName} />
     </div>
   )
 }

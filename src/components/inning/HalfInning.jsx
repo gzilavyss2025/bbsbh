@@ -374,6 +374,7 @@ export function HalfInning({
             teamName={battingSide === 'away' ? homeName : awayName}
             className={eventCardClass('change--framed')}
             label={nowPitchingLabel}
+            logo={false} // the plain header has no room for a mark; the full card ignores this and draws one
             entering={entering}
             treatment={treatment}
             side={battingSide === 'away' ? 'home' : 'away'}

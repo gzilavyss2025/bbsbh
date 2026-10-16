@@ -281,7 +281,7 @@ const T3 = [
     jsx: 'components/playbyplay/PitcherHandoffCard.jsx',
     ns: 'pitchers__grid',
     bases: [['20-charts.css', 'pitchers__grid']],
-    attrs: ['frame="bare"', 'density="tight"'],
+    attrs: ['frame="bare"', 'density="tight"', 'sticky'], // slice 2 (ADR-0113): the pitcher column is pinned
     label: /label=\{label\}/,
     apis: [],
   },
