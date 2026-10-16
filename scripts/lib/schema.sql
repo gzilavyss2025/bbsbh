@@ -983,3 +983,29 @@ CREATE TABLE IF NOT EXISTS abs_ingested_games (
   scheduled_innings INTEGER,
   scope            TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P'))
 );
+
+-- CHALLENGEABLE CALLS (gen-abs-challenges.mjs). One row per man per role per
+-- club per game: how many calls he could have challenged. A batter can only
+-- challenge a called strike and a catcher only a called ball, counted by the
+-- umpire's ORIGINAL call (scripts/lib/abs/calls.mjs). It is the denominator
+-- behind "what share of the calls he could challenge did he challenge". NOTHING
+-- IN STATSAPI COUNTS IT, so it is replayed from each game's feed. A mid-half
+-- catcher change credits the NEXT half (src/api/catcherOfRecord.js); a half with
+-- no known catcher credits no catcher.
+--
+-- A game with nobody found gets ONE SENTINEL ROW (team_id 0, player_id 0,
+-- role 'none', calls 0) so --backfill-calls knows it is done. The export skips it.
+--
+-- Filled for new games by the ordinary sweep, and for older ones by
+-- `--backfill-calls --season=YYYY`. The table is empty until then, and the
+-- export ships null for every man.
+CREATE TABLE IF NOT EXISTS abs_game_calls (
+  season    INTEGER NOT NULL,
+  level     TEXT NOT NULL,                 -- 'MLB' | 'AAA'
+  game_pk   INTEGER NOT NULL,
+  team_id   INTEGER NOT NULL,              -- the club the man played for
+  player_id INTEGER NOT NULL,
+  role      TEXT NOT NULL,                 -- 'batter' | 'catcher' | 'none'
+  calls     INTEGER NOT NULL,
+  PRIMARY KEY (game_pk, team_id, player_id, role)
+);

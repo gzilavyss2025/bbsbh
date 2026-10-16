@@ -19,7 +19,7 @@ const CARD_ID = 'player-hover-card'
 // context, not under whatever card/section happened to render the trigger,
 // several of which set overflow: hidden or isolation: isolate.
 export function PlayerHoverCard() {
-  const { id, name, rect } = useSyncExternalStore(subscribeHover, getHoverSnapshot, getHoverSnapshot)
+  const { id, name, rect, detail } = useSyncExternalStore(subscribeHover, getHoverSnapshot, getHoverSnapshot)
   const active = id != null
   const { data, loading } = usePlayerHoverStats(id, active)
 
@@ -68,7 +68,7 @@ export function PlayerHoverCard() {
           ...headerThemeStyle(theme),
         }}
       >
-        {data ? <PlayerHoverCardBody data={data} /> : <div className="phcard__loading" aria-hidden="true" />}
+        {data ? <PlayerHoverCardBody data={data} detail={detail} /> : <div className="phcard__loading" aria-hidden="true" />}
       </div>
     </ModalPortal>
   )
@@ -113,7 +113,7 @@ function StatRow({ label, fields, post = false }) {
 // optional level/rehab strip, then one table — the four season figures, and a
 // Postseason row under them in the same columns once he has played an October
 // game. The two rows share the season row's heads (see pitcherHoverFields).
-function PlayerHoverCardBody({ data }) {
+function PlayerHoverCardBody({ data, detail }) {
   const tag = identityTag(data)
   return (
     <>
@@ -142,6 +142,9 @@ function PlayerHoverCardBody({ data }) {
           <Pill fill="paper" className={`phcard__tag phcard__tag--${tag.kind}`}>{tag.text}</Pill>
         </div>
       )}
+      {detail ? (
+        <HoverDetail detail={detail} />
+      ) : (
       <table className="phcard__table">
         <thead>
           <tr>
@@ -156,6 +159,65 @@ function PlayerHoverCardBody({ data }) {
           {data.postFields && <StatRow label="Postseason" fields={data.postFields} post />}
         </tbody>
       </table>
+      )}
     </>
+  )
+}
+
+// A caller's own figures in the card's table, in place of the season line
+// (lib/playerHoverStore.js, `detail`). The ABS Challenges card is the one
+// caller: the numbers that place a man on its plot, and below them one mark per
+// review he made, oldest first, filled when the call was overturned (he was
+// right) and hollow when it stood. All of it arrives as plain data:
+//   columns  the column heads.
+//   row      { label, cells: [{ v, over? }] }, one cell per column.
+//   strip    { label, marks, right, wrong, total, shown } for a man with
+//            reviews, { label } alone for a man with none, or nothing.
+// The marks are a picture, so a screen reader gets the counts as text instead.
+function HoverDetail({ detail }) {
+  const { columns, row, strip } = detail
+  return (
+    <table className="phcard__table">
+      <thead>
+        <tr>
+          <th scope="col"><span className="sr-only">Split</span></th>
+          {columns.map((c) => (
+            <th key={c} scope="col" className="phcard__colk">{c}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        <tr className="phcard__row">
+          <th scope="row" className="phcard__rowk">{row.label}</th>
+          {row.cells.map((cell, i) => (
+            <td key={columns[i]} className={cell.over ? 'phcard__rowv phcard__rowv--over' : 'phcard__rowv'}>{cell.v}</td>
+          ))}
+        </tr>
+        {strip && (
+          <tr className="phcard__row phcard__row--marks">
+            <th scope="row" className="phcard__rowk">{strip.label}</th>
+            <td colSpan={columns.length} className="phcard__marks">
+              {strip.marks ? (
+                <>
+                  <span className="phcard__strip" aria-hidden="true">
+                    {[...strip.marks].map((m, i) => (
+                      <i key={i} className={m === '1' ? 'phcard__mark' : 'phcard__mark phcard__mark--wrong'} />
+                    ))}
+                  </span>
+                  <span className="phcard__markkey">
+                    <i className="phcard__mark" /> {strip.right} right <i className="phcard__mark phcard__mark--wrong" /> {strip.wrong} wrong
+                  </span>
+                  <span className="phcard__markkey">
+                    {strip.total > strip.shown ? `Last ${strip.shown} of ${strip.total}, oldest first` : 'Oldest first'}
+                  </span>
+                </>
+              ) : (
+                <span className="phcard__markkey">No reviews</span>
+              )}
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   )
 }

@@ -277,6 +277,7 @@ export function challengeRowsForGame(feed, table) {
 export function clearSeasonRows(db, season) {
   db.prepare('DELETE FROM abs_challenges WHERE season = ?').run(season)
   db.prepare('DELETE FROM abs_ingested_games WHERE season = ?').run(season)
+  db.prepare('DELETE FROM abs_game_calls WHERE season = ?').run(season)
 }
 
 // --- the postseason beside the regular season (#1514, ADR-0094's shape) -------

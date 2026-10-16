@@ -34,6 +34,8 @@ const ALLOWED = {
     ['postseason/primer-main.css', '.seriesribbon__game--ifNecessary'], // a game that may not be played
     ['player-next/history/moves.css', '.moves__noclub'], // a move whose club the feed does not name: a pencilled box, no mark
     ['team-next/top.css', '.tnext__chip--off'], // a day with no game: an empty slot in the days rail
+    ['report/challenge-faces.css', '.chalplot__face--thin'], // a face with fewer than five reviews behind its success rate: too thin a sample to read
+    ['report/challenge-faces.css', '.chalplot__swatch--thin'], // the key's swatch for that same face
   ],
   // Waiting is provisional: an empty or loading slot that holds its place. The
   // EmptyState itself, sized tiles in a rail, round stamp slots (ADR-0035) and
@@ -56,6 +58,7 @@ const ALLOWED = {
   chartLine: [
     ['26a-percentile-strip.css', '.pctstrip__track::before'],
     ['report/charts.css', '.colchart__rule--mean'],
+    ['report/challenge-faces.css', '.chalplot__swatch--line'], // the key's swatch for the dashed MLB-average line on the ABS Challenges plot
     ['postseason/series-parts.css', '.psseries__keybar'],
     ['player-next/top/header-extras.css', '.pnext-ovr__cap'], // a minor leaguer's level cap on the OVR meter: the most his level can give
   ],

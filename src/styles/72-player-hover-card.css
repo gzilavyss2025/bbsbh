@@ -189,6 +189,50 @@
   background: var(--surface-inset);
 }
 
+/* The ABS Challenges card's figures (HoverDetail): a rate that is over the
+   league's reads in clay, and a "Reviews" row draws one mark per challenge,
+   filled when the call was overturned and hollow when it stood. */
+.phcard__rowv--over {
+  color: var(--clay-deep);
+}
+.phcard__table td.phcard__marks {
+  height: auto;
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+}
+/* layout-exempt: the review marks wrap across the card's width */
+.phcard__strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.phcard__mark {
+  display: inline-block;
+  box-sizing: border-box;
+  width: var(--space-3);
+  height: var(--space-3);
+  background: var(--text-heading);
+}
+.phcard__mark--wrong {
+  background: transparent;
+  border: var(--bw-heavy) solid var(--accent-negative);
+}
+.phcard__markkey {
+  display: block;
+  margin-top: var(--space-1h);
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+  color: var(--text-caption);
+}
+.phcard__markkey .phcard__mark {
+  width: var(--space-2);
+  height: var(--space-2);
+  vertical-align: baseline;
+}
+
 .phcard__loading {
   height: 148px;
   background: linear-gradient(

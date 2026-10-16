@@ -481,6 +481,11 @@ don't run these by hand.
   `--since=2026-03-26` for the one-time backfill (Opening Day — there is no
   history before it), `--sports=1,11` to restrict a level, `--export-only` to
   re-derive every split with no re-sweep, `--rebuild` for a schema change.
+  `--backfill-calls --season=YYYY` fills `abs_game_calls` (the calls each
+  batter and catcher could have challenged, per game) for ledger games that have
+  none: it refetches those feeds, and a failed fetch is retried on the next run.
+  A game with nobody found gets a sentinel row (`team_id` 0, `player_id` 0). A
+  frozen season needs `REFREEZE=1`. New games write these rows in the ordinary sweep.
   A game is admitted on `codedGameState === 'F'` alone (`isPlayedGame` in
   `scripts/lib/abs/rows.mjs`), which takes a game shortened by rain and leaves
   out a cancelled one — the old abstract-Final rule put 23 never-played
@@ -551,7 +556,9 @@ don't run these by hand.
   fold. The team-hub card needs it back, which is what the THIRD file is:
   `abs-exposure-clubs-{level}.json`, the same sweep cut by `team_id`, 733 MLB
   rows against the fold's 659 and 93 KB against its 418. It ships counts and
-  denominators and NO rates — `per1000Pitches` prints as eleven significant
+  denominators and NO rates (the one exception: per man, `resultsBatter` and
+  `resultsCatcher` strings, one character a challenge, with `wonBatter`,
+  `wonCatcher`, `strikesSeen` and `ballsReceived`) — `per1000Pitches` prints as eleven significant
   figures, and three a row was 210 KB of a first draft that came out at 465.
   ONE FILE PER LEVEL, named for the level lowercased: `EXPOSURE_CLUB_LEVELS` is
   `['MLB', 'AAA']` and the writer loops it, so a club's hub tab never carries

@@ -123,7 +123,7 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
       {n?.pitching && <RankBoard title="Team pitching" stats={n.pitching} still={still} />}
       {n && <RunValueBoard data={n.runValue} clubName={clubName} asOf={asOf} sportId={sportId} still={still} />}
       {n && (
-        <ChallengeBoard data={n.absExposureClubs} teamId={team.id} clubName={clubName} level={n.absExposureLevel} asOf={asOf} sportId={sportId} still={still} />
+        <ChallengeBoard data={n.absExposureClubs} teamId={team.id} level={n.absExposureLevel} still={still} />
       )}
       {n && <Leaders blocks={blocks} injuredIds={n.injuredIds} still={still} />}
       {blocks.length > 0 && (

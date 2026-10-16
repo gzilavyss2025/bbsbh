@@ -23,7 +23,8 @@
 const SHOW_DELAY_MS = 300
 const HIDE_DELAY_MS = 150
 
-let state = { id: null, name: null, rect: null }
+let state = { id: null, name: null, rect: null, detail: null }
+const CLOSED = { id: null, name: null, rect: null, detail: null }
 let timer = null
 const listeners = new Set()
 
@@ -46,13 +47,18 @@ export function getHoverSnapshot() {
 // tracking it live (see PlayerHoverCard.jsx). `immediate` skips the
 // hover-intent delay for a keyboard focus, which shouldn't feel laggy the
 // way a mouse pass-over would.
-export function scheduleHoverShow(id, name, rect, { immediate = false } = {}) {
+//
+// `detail` is a caller's own figures for the card to print in place of the
+// season line (the ABS Challenges card's plot figures and review marks, drawn
+// by PlayerHoverCard's HoverDetail). Plain data, so the store stays free of
+// React and of any one card's shape. Null is the ordinary season line.
+export function scheduleHoverShow(id, name, rect, { immediate = false, detail = null } = {}) {
   clearTimeout(timer)
   if (immediate) {
-    commit({ id, name, rect })
+    commit({ id, name, rect, detail })
     return
   }
-  timer = setTimeout(() => commit({ id, name, rect }), SHOW_DELAY_MS)
+  timer = setTimeout(() => commit({ id, name, rect, detail }), SHOW_DELAY_MS)
 }
 
 // Only clears state that still belongs to `id` — a leave event queued from a
@@ -64,7 +70,7 @@ export function scheduleHoverShow(id, name, rect, { immediate = false } = {}) {
 export function scheduleHoverHide(id) {
   clearTimeout(timer)
   timer = setTimeout(() => {
-    if (state.id === id) commit({ id: null, name: null, rect: null })
+    if (state.id === id) commit(CLOSED)
   }, HIDE_DELAY_MS)
 }
 
@@ -73,5 +79,5 @@ export function scheduleHoverHide(id) {
 // following its trigger the moment the page moves).
 export function hideHoverNow() {
   clearTimeout(timer)
-  if (state.id !== null) commit({ id: null, name: null, rect: null })
+  if (state.id !== null) commit(CLOSED)
 }
