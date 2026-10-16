@@ -1932,6 +1932,19 @@ Re-run only to fold in a new season.
   `(date, gamePk)`. No `generatedAt`: `coverage` is the file's clock. The pure half is
   `scripts/lib/world-series/series.mjs`; tests are in `test/world-series/`.
 
+- `gen-world-series-events.mjs` → `public/data/world-series/events.json` — the tagged events of every
+  World Series game, 1903 to 2025 (#2235). A row is `{ tag, pk, date, season, n, club, player, value, wta }`, sorted
+  by `(date, pk, tag)`; the 17 tags and their exact rules are the header of `src/lib/worldSeries/classify.js`, the one
+  classifier (the live callout builder imports it too). **A hand run, once after each World Series; no cron runs it**:
+  `node scripts/gen-world-series-events.mjs --from=1903 --to=2025` (`--to` defaults to last year, so pass the new year;
+  `--out=DIR` for a measuring run; `--check` compares with the committed file and writes nothing). It replaces the whole
+  file. The game list comes from the `series.json` beside it when that covers the range, else from one
+  schedule call per season (a postponed game keeps its last listing, key by `gamePk`); then one `playByPlay` call for
+  each distinct `gamePk` (about 830 calls, 8 at a time). Scores come from the last play, never the schedule. `wta` (a
+  winner-take-all game: the last decided game when both clubs had `winsNeeded - 1` wins; a tie is not a win) is decided
+  in `lib/world-series/events.mjs` from the Series' own win counts. No `generatedAt`; `coverage` is the clock
+  (`check-data-freshness.mjs` EXCEPT). Tests: `test/world-series/`.
+
 ## Assets / off-app
 
 - `research-db.mjs` — NOT a generator and NOT on any cron: the local DuckDB query

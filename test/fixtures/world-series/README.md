@@ -30,6 +30,9 @@ final score.
 | `813024-plays.json` | 2025 G7, Dodgers at Blue Jays | Winner-take-all. Road club won in 11 innings. Research (O4) names Ohtani's hit. | O3: road club. `pitcherHit` (O4: 2025). O13 check. |
 | `813027-plays.json` | 2025 G1, Dodgers at Blue Jays | Research (O12) names a pinch-hit grand slam by Barger. | O12: pinch-hit grand slam count (check the count is 1). |
 | `813032-plays.json` | 2025 G3, Blue Jays at Dodgers | 18 innings, the largest play count in the set. | O5: 18 innings (with 2018). O7: Ohtani reached base 9 times. `reachedBase`. |
+| `67724-plays.json` | 1977 G6, Dodgers at Yankees | Three home runs by one batter. | `multiHrGame` (3). |
+| `775296-plays.json` | 2024 G5, Dodgers at Yankees | The Dodgers won 7-6 after trailing 5-0. | `bigComeback` (value 5). |
+| `67316-plays.json` | 1920 G5, Dodgers at Indians | The one World Series triple play in the data. | `triplePlay`. |
 
 ### Notes on the play files
 
