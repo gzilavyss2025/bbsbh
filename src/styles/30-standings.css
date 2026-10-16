@@ -48,7 +48,7 @@
 /* The date quick-jumps grow a new "Month 1" tab every month of the season —
    left to wrap, that's an ever-taller control (already 3 lines by July; 7+
    month tabs by October). Horizontal scroll instead, same full-bleed
-   edge-mask idiom as .txcard__scroll/.seasonseries__strip, keeps this row
+   edge-mask idiom as .seasonseries__strip, keeps this row
    pinned to exactly one line no matter how far the season has gone. */
 .standings-jumps--scroll {
   flex-wrap: nowrap;

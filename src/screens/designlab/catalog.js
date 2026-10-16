@@ -251,14 +251,6 @@ export const CARDS = [
     note: 'A notice, not a card: the delay card is a Notice, tone info (#1132, N5). Its namespace .delay keeps the margin, the pop-in and the icon bubble.',
   },
   {
-    cls: 'txcard',
-    partial: '29-team-transactions.css',
-    consumers: 1,
-    group: 'notcard',
-    verdict: 'Leave',
-    note: 'display:grid and a margin. A transaction row.',
-  },
-  {
     cls: 'derbycard',
     partial: '06-loader-and-cards.css',
     consumers: 1,

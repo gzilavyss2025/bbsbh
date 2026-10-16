@@ -46,9 +46,8 @@
    23-box-score-detail.css, the slot the text door’s rule already held while it
    was parked in that per-route partial. Nothing that used to beat the text door
    stops beating it, and every per-site residual in a later partial or a route
-   chunk still wins on order — which is what .txcard__door and .txpage__door
-   rely on for the declarations each of them keeps: four that place the deck's
-   door in its scroll row, one margin on the page-wide pager.
+   chunk still wins on order — which is what .txpage__door relies on for
+   the one margin it keeps on the page-wide pager.
    --------------------------------------------------------------------------- */
 
 .door {
