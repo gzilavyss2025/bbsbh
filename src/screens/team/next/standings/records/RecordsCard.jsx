@@ -115,7 +115,7 @@ export function RecordsCard({ data, cutoff, asOf, door }) {
       ) : (
         <EmptyState size="compact">No games in this stretch of the season yet.</EmptyState>
       )}
-      {door && <Door className="rec__door" {...door}>Postseason records</Door>}
+      {door && <div className="rec__doorrow"><Door {...door}>Postseason records</Door></div>}
     </div>
   )
 }

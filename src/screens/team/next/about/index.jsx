@@ -17,9 +17,9 @@ import '../../../../styles/team-next/about.css'
 // Motion plays once per page visit (docs/motion.md, "The one-shot gate").
 const stamp = (still, i) => (still ? {} : { stampIn: true, style: { '--stamp-delay': `${i * 90}ms` } })
 
-export default function About({ team, asOf, sportId, onReady, onCount }) {
+export default function About({ team, asOf, onReady, onCount }) {
   const linkProps = useRouteLink()
-  const door = postseasonDoor(team.id, asOf, sportId ?? team.sport?.id ?? 1)
+  const door = postseasonDoor(team.id, asOf, team.sport?.id)
   const about = useBandData(() => loadAbout(team, asOf), [team.id, asOf], {
     onReady,
     onCount,

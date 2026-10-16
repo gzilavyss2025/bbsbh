@@ -32,8 +32,9 @@ const stampAt = (i) => ({ '--stamp-delay': `calc(var(--stagger-step) * ${i})` })
 export default function Standings({ team, asOf, onReady, onCount }) {
   const navigate = useNav()
   const linkProps = useRouteLink()
-  const psDoor = postseasonDoor(team.id, asOf, sportId)
   const sportId = team.sport?.id ?? 1
+  // The door needs a known sport: an unknown one must not read as MLB.
+  const psDoor = postseasonDoor(team.id, asOf, team.sport?.id)
   const cutoff = cutoffFor(asOf)
   const count = useCallback((n) => standingsCount(n, n.recordsCutoff), [])
   const numbers = useBandData(() => loadStandings(team.id, asOf, SHARED), [team.id, asOf], { onReady, onCount, count })

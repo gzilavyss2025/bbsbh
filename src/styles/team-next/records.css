@@ -339,8 +339,7 @@
   }
 }
 
-.rec__door {
-  display: block;
+.rec__doorrow {
   padding: var(--space-3) var(--space-4);
   text-align: right;
 }
