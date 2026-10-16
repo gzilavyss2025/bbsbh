@@ -133,3 +133,9 @@ test('a past 3-1 comeback by the 1997 club says Indians, not Guardians', () => {
   const [n] = buildWorldSeriesOddsNotes({ history, bundle: bundleAfter(1, 2, [1, 1, 2, 1]), gameDate: '2001-10-20', gameType: 'W' })
   assert.ok(n.text.endsWith('The last was the 1997 Indians.'), n.text)
 })
+
+test('the last-meeting winner is named as he was that season', () => {
+  const named = { ...HISTORY, series: HISTORY.series.map((x) => (x.season === 2000 ? { ...x, names: { 1: 'Old Club1', 2: 'Club2' } } : x)) }
+  const t = buildWorldSeriesOddsNotes({ history: named, bundle: bundleAfter(1, 2, []), gameDate: '2001-10-20', gameType: 'W' }).map((n) => n.text)
+  assert.ok(t.includes('The Club1 and the Club2 last met in the World Series in 2000; the Old Club1 won.'), t.join(' | '))
+})

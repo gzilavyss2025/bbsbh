@@ -51,11 +51,12 @@ export function buildWorldSeriesOddsNotes({ history, bundle, gameDate, gameType 
     const nameOf = (id) => [a, h].find((t) => t.teamId === id)?.name ?? null
     const f = clubFacts(history, gameDate, a.teamId, h.teamId)
     const season = Number(gameDate.slice(0, 4))
+    const winner = f.meetingWinnerName ?? nameOf(f.meetingWinner) // the winner's name that season, else tonight's
     const champ = [a, h].find((t) => t.teamId === f.champion)
     if (champ?.name) out.push(note('repeat', `The ${champ.name} won the ${season - 1} World Series.`, 0, champ === a ? 'away' : 'home'))
     out.push(f.lastMeeting == null
       ? note('meeting', `This is the first World Series meeting between the ${a.name} and the ${h.name}.`, magnitudeOf(1, 1))
-      : note('meeting', `The ${a.name} and the ${h.name} last met in the World Series in ${f.lastMeeting}${nameOf(f.meetingWinner) ? `; the ${nameOf(f.meetingWinner)} won` : ''}.`, magnitudeOf(season - f.lastMeeting, GAP_FULL)))
+      : note('meeting', `The ${a.name} and the ${h.name} last met in the World Series in ${f.lastMeeting}${winner ? `; the ${winner} won` : ''}.`, magnitudeOf(season - f.lastMeeting, GAP_FULL)))
     for (const [side, t] of [['away', a], ['home', h]]) {
       const gap = f.lastSeen[t.teamId] == null ? 0 : season - f.lastSeen[t.teamId]
       if (gap >= WS_DROUGHT_SEASONS) {
