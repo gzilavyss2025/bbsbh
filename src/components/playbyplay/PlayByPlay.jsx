@@ -52,7 +52,7 @@ import {
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from '../scoring/StrikeZone.jsx'
 import { ReplayCell, ReplaySheet, useReplayPitches } from './pitcherCard/AtBatReplay.jsx'
 import { atBatScenePitches } from '../../lib/pitcherCard/atBat.js'
-import { noticeClass } from '../../lib/design/noticeClass.js'
+import { eventCardClass } from '../../lib/design/cardClass.js'
 import { Button } from '../ui/control/Button.jsx'
 import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
 import { HighlightSheet } from './HighlightSheet.jsx'
@@ -389,7 +389,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
                 feed={feed} relief pitcher={pitcher} treatment={treatment} side={battingSide === 'away' ? 'home' : 'away'}
                 teamId={pitchingTeamId}
                 teamName={pitchingName}
-                className={noticeClass({ tone: 'event', className: 'change--framed' })}
+                className={eventCardClass('change--framed')}
               />
               {departureLine && (
                 <DepartureLineCard
@@ -427,7 +427,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               fielder={fielder}
               teamId={pitchingTeamId}
               teamName={pitchingName}
-              className={noticeClass({ tone: 'event', className: 'change--framed' })}
+              className={eventCardClass('change--framed')}
             />
           ) : (
             <EventNote entry={entry} />
@@ -459,7 +459,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               base={entry.base}
               teamId={battingTeamId}
               teamName={battingName}
-              className={noticeClass({ tone: 'event', className: 'change--framed' })}
+              className={eventCardClass('change--framed')}
             />
           ) : (
             <EventNote entry={entry} />
@@ -477,7 +477,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               batter={batter}
               teamId={battingTeamId}
               teamName={battingName}
-              className={noticeClass({ tone: 'event', className: 'change--framed' })}
+              className={eventCardClass('change--framed')}
             />
           ) : (
             <EventNote entry={entry} />

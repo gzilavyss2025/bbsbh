@@ -19,10 +19,10 @@ export function FielderNotice({ fielder, teamId = null, teamName, className = ''
     <div className={`change ${className}`}>
       <PitcherPhoto personId={fielder.id} name={fielder.name} teamId={teamId} />
       <div className="change__body">
-        <span className="change__now">
+        <h4 className="card__name">
           Now playing{fielder.position ? ` ${fielder.position}` : ''}
           {teamName ? ` for the ${teamName}` : ''}
-        </span>
+        </h4>
         <span className="change__pitcher">
           <PlayerLink id={fielder.id}>{fielder.name}</PlayerLink>
           {fielder.jersey ? ` ${fielder.jersey}` : ''}

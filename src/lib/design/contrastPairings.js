@@ -224,10 +224,11 @@ export const PAIRINGS = [
   // to the non-text bar (WCAG 1.4.11): the resting line, then the traced one.
   { fg: 'graphite-soft', bg: 'surface-card', min: UI, note: 'former teammates ladder line' },
   { fg: 'accent-primary', bg: 'surface-card', min: UI, note: 'former teammates ladder traced line' },
-  // The arsenal "other" family (#1347) draws on the Now Pitching card, whose
-  // fill is --marker 16% over --surface-card (.notice--event, #1132 N7). Neither
+  // The arsenal "other" family (#1347) drew on the Now Pitching card, whose
+  // fill was --marker 16% over --surface-card (.notice--event, #1132 N7). Neither
   // reader parses color-mix(), so that composite is the literal #FAEED0,
-  // worked out by hand.
+  // worked out by hand. The card wears --surface-stamped-event now (ADR-0113);
+  // this pair stays for the other users of .notice--event.
   { fg: 'arsenal-other', bg: '#FAEED0', min: UI, note: 'arsenal other family on the Now Pitching card fill' },
   { fg: 'arsenal-other', bg: 'surface-card', min: UI, note: 'arsenal other family on a raised card' },
   // Trade Deadline's cash-consideration icon frame — the positive/acquired
@@ -343,6 +344,13 @@ export const PAIRINGS = [
   { fg: 'text-heading', bg: 'bg-canvas', min: TEXT, note: 'stamped card count tag' },
   { fg: 'border-stamped', bg: 'bg-canvas', min: UI, note: 'stamped edge and shadow on the page' },
   { fg: 'border-stamped-soft', bg: 'bg-canvas', min: UI, note: 'soft stamped shadow under the ink tile' },
+  // THE NOTIFICATION CARD (ADR-0113): one yellow ground for every card. 14.2:1,
+  // 11.6:1, 7.2:1 and 4.58:1 as measured; the name tab is the cream-on-ink pair above.
+  { fg: 'ink-0', bg: 'surface-stamped-event', min: TEXT, note: 'notification card name and figures' },
+  { fg: 'ink-1', bg: 'surface-stamped-event', min: TEXT, note: 'notification card sentence' },
+  { fg: 'ink-2', bg: 'surface-stamped-event', min: TEXT, note: 'notification card secondary line' },
+  { fg: 'text-caption', bg: 'surface-stamped-event', min: TEXT, note: 'notification card caption (graphite)' },
+  { fg: 'arsenal-other', bg: 'surface-stamped-event', min: UI, note: 'arsenal other family on the full Now Pitching card' },
   // THE ROW SURFACES (#2073): a table row under the pointer, and a picked row
   // (game logs, Firsts, Similar Players). The row's own text sits on them.
   // --accent-negative on a picked row is not paired: it is
