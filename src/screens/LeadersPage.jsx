@@ -10,6 +10,7 @@ import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useNav } from '../lib/nav.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { leadersPath } from '../lib/route.js'
+import { armBoardIn } from '../lib/motion/boardIn.js'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsOfBanner } from '../components/seal/AsOfBanner.jsx'
@@ -60,7 +61,12 @@ function ScopeNav({ scope, asOf, sportId, navigate }) {
           type="button"
           aria-pressed={scope === s.key}
           className={`levelnav__btn ${scope === s.key ? 'is-active' : ''}`}
-          onClick={() => navigate(leadersPath(s.key, { d: asOf, s: sportId }))}
+          onClick={() => {
+            // A tap to ANOTHER scope fades the new board in (motion/board-in.css); the same
+            // scope again remounts nothing, so it must not leave the flag armed.
+            if (scope !== s.key) armBoardIn()
+            navigate(leadersPath(s.key, { d: asOf, s: sportId }))
+          }}
         >
           {s.label}
         </button>

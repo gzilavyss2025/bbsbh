@@ -507,7 +507,7 @@ test('the team hub keeps its space between cards, from the hub and not from Card
 // jersey tile's per-jersey tint, the alumni card's inset ring, and the
 // contract tile's 3px top rule.
 const C1 = [
-  { css: '23-box-score-detail.css', sel: '.tlead__cat', jsx: 'components/teamstats/TeamLeaders.jsx', ns: 'tlead__cat' },
+  { css: 'leaders/board.css', sel: '.tlead__cat', jsx: 'components/teamstats/TeamLeaders.jsx', ns: 'tlead__cat', card: 'LeaderList' },
   { css: '28-team-hub.css', sel: '.jerseydeck__card', jsx: 'components/logo/JerseyCombos.jsx', ns: 'jerseydeck__card', keep: ['background'] },
   { css: '28-team-hub.css', sel: '.team-score', jsx: 'components/teamstats/TeamScoreCard.jsx', ns: 'team-score' },
   { css: '29-team-transactions.css', sel: '.txstory', jsx: 'components/transactions/TxStory.jsx', ns: 'txstory' },
@@ -534,9 +534,10 @@ test('C1: no hub block draws a second frame over its Card', () => {
 })
 
 test('C1: every hub block renders on Card, never on a bare element', () => {
-  for (const { jsx, ns } of C1) {
+  for (const { jsx, ns, card = 'Card' } of C1) {
     const code = readFileSync(join(SRC, jsx), 'utf8')
-    assert.match(code, /<Card[\s>]/, `${jsx} renders a Card`)
+    // `card` names the part that draws the Card when the block is not a bare <Card>: LeaderList is a stamped Card.
+    assert.match(code, new RegExp(`<${card}[\\s>]`), `${jsx} renders a ${card}`)
     const bare = new RegExp(`<(div|section|li|article)\\s+(key=\\{[^}]+\\}\\s+)?className=\\{?["'\`]${ns}(?![\\w-])`)
     assert.doesNotMatch(code, bare, `${jsx}: .${ns} is on a bare element`)
   }
@@ -574,13 +575,16 @@ test('C1: the stat grid is .tstats__grid, and no rule still sizes a bare .tstats
 // widest row. On /leaders/org a chaser row carries a name, a club, a level tag
 // and a prospect tag on one line, and that row pushed the column to 418px on a
 // 390px phone (#1184). Card's `overflow: hidden` hides this today, because a
-// clipping grid item's automatic minimum is zero. The leader grid must not lean
-// on that clip: its tracks say `minmax(0, 1fr)` themselves.
+// clipping grid item's automatic minimum is zero. The leader board must not lean
+// on that clip. It is a Grid (min 20rem) now, with no grid rule of its own, and
+// the Grid's tracks say `minmax(min(var(--grid-min), 100%), 1fr)` themselves.
 test('the leader card grid lets its columns shrink below the widest row', () => {
-  const css = read('23-box-score-detail.css')
-  const columns = [...css.matchAll(/\.tlead__grid\s*\{([^}]*)\}/g)].map((m) => decl(m[1], 'grid-template-columns'))
-  assert.equal(columns.length, 2, 'the phone rule and the 560px rule')
-  for (const value of columns) assert.doesNotMatch(value.replaceAll('minmax(0, 1fr)', ''), /1fr/, `.tlead__grid uses a bare 1fr track (${value}); write minmax(0, 1fr)`)
+  const board = readFileSync(join(SRC, 'components/teamstats/TeamLeaders.jsx'), 'utf8')
+  assert.match(board, /<Grid[^>]*min="20rem"/, 'the board is a Grid with a 20rem minimum column')
+  assert.doesNotMatch(read('leaders/board.css'), /\.tlead__grid|grid-template-columns:[^;]*\bfr\b/, 'the board draws no grid of its own')
+  const columns = [...read('system/grid.css').matchAll(/(?<![\w-])\.grid(?:--fit)?\s*\{([^}]*)\}/g)].map((m) => decl(m[1], 'grid-template-columns')).filter(Boolean)
+  assert.ok(columns.length >= 2, 'the fill rule and the fit rule')
+  for (const value of columns) assert.doesNotMatch(value.replaceAll('minmax(min(var(--grid-min), 100%), 1fr)', ''), /1fr/, `.grid uses a bare 1fr track (${value})`)
 })
 
 // Kraft means "sealed" and nothing else (ADR-0083). A band's underline lifts no

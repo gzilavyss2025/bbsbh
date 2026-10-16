@@ -47,7 +47,7 @@ const HOSTS = [
   { css: '04a-wire-dock.css', sel: '.wiredock__count', jsx: 'components/transactions/WireDock.jsx' },
   { css: 'charts/winprob.css', sel: '.winprob__ledger-chip', jsx: 'components/charts/winprob/SwingLedger.jsx' },
   { css: 'charts/winprob.css', sel: '.winprob__change', jsx: 'components/charts/WinProbChart.jsx' },
-  { css: '23-box-score-detail.css', sel: '.tlead__level', jsx: 'components/teamstats/TeamLeaders.jsx' },
+  { css: 'leaders/board.css', sel: '.tlead__level', jsx: 'components/teamstats/TeamLeaders.jsx' },
   { css: '31-wild-card.css', sel: '.thub-affiliate__level', jsx: 'screens/team/modules/minors/AffiliatesCard.jsx' },
   { css: '31-wild-card.css', sel: '.prospecttable__top', jsx: 'screens/team/modules/minors/ProspectsCard.jsx' },
 ]
@@ -116,7 +116,7 @@ test('every figure host opts in to the figure rule', () => {
 })
 
 test('the two level tags share the rule, not seven copied declarations', () => {
-  const tlead = rulesFor(readCss('23-box-score-detail.css'), '.tlead__level')[0].body
+  const tlead = rulesFor(readCss('leaders/board.css'), '.tlead__level')[0].body
   const affiliate = rulesFor(readCss('31-wild-card.css'), '.thub-affiliate__level')[0].body
   for (const property of ['font-family', 'font-size', 'letter-spacing', 'padding-block']) {
     assert.equal(decl(tlead, property), undefined, `.tlead__level still sets ${property}`)

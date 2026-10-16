@@ -45,7 +45,7 @@ move exactly as their own headers instruct. That also covers `focus/` and
 
 ## The one-shot gate
 
-Every one-shot in the package hangs off one of three gates:
+Every one-shot in the package hangs off one of three gates (the leader board's fade-in is the one exception: a module flag, in the table below):
 `src/hooks/motion/useBecameTrue.js` for a change the reader sees happen,
 `src/hooks/scroll/useInViewOnce.js` for an entrance on the player page, and
 `src/hooks/motion/useViewOnce.js` for a team-page band (plays once per page visit).
@@ -97,6 +97,7 @@ is one.
 | `playbyplay.css` | #982 | The four-beat write-on |
 | `innings.css` | #978, #983 | The live-edge dot's breath and the frontier seal's |
 | `scorecard-lens.css` | #724 (L7) | The phone lens (ADR-0092): the tear, the runner-move fade, the page turn, the two-cycle seal breath, the docked card's fade and the pitcher sheet's slide. The glide is beside it in JS |
+| `board-in.css` | M1 | The leader board's fade-in after a scope tap on `/leaders`: up 6 px and opacity, 180 ms (`--dur-board-in`), `--ease-out`. Its gate is a one-shot module flag, `lib/motion/boardIn.js`: `ScopeNav` arms it on a tap to another scope, and `TeamLeaders` spends it on its first render. A cold load, a Back, a poll and a force-reveal never play it. The resting look is `styles/leaders/board.css` |
 
 ### The scorecard lens (#724, L7)
 
