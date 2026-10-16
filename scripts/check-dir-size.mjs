@@ -854,7 +854,9 @@ const BUDGETS = {
   // as logoCdn.js/buildInfo.js above. Not a new subsystem.
   // 58 -> 59 for milestoneCelebrations.js — the milestone shelf's one-shot
   // completion-animation store, same shape as account/prompts.js beside it.
-  'src/lib': 59,
+  // 59 -> 58: ledger.js (spanCell) moved into components/player/Ledger.jsx, the
+  // reader of its __ledgerSpan key (#1836).
+  'src/lib': 58,
   // New entry (was under the default 12-file cap): +1 for
   // prospectPercentile.mjs, the pure percentile math gen-prospect-trend.mjs
   // imports — scripts/CLAUDE.md's testable-helper convention (lib/roster.mjs
