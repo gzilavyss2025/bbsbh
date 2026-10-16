@@ -88,3 +88,23 @@
   from { opacity: 0; scale: 1 0; }
   to   { opacity: 1; scale: 1 1; }
 }
+
+/* The fade-out: the layer stays up one beat after the game lands (GameLoaderHold), then dissolves.
+   `settled` is the same layer already full, for a fallback that follows the first loader. */
+.versusload--leaving {
+  pointer-events: none;
+  animation: versusload-out var(--dur-med) var(--ease-standard) both;
+}
+.versusload--settled :is(.versusload__tile, .versusload__slash, .teamlogo) {
+  animation: none;
+}
+.versusload--settled .versusload__tile--away {
+  clip-path: polygon(0 0, calc(50% + var(--slant) / 2) 0, calc(50% - var(--slant) / 2) 100%, 0 100%);
+}
+.versusload--settled .versusload__tile--home {
+  clip-path: polygon(calc(50% + var(--slant) / 2) 0, 100% 0, 100% 100%, calc(50% - var(--slant) / 2) 100%);
+}
+@keyframes versusload-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
