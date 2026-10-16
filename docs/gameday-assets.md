@@ -61,7 +61,7 @@ was tried.
 
 | Asset | Template | Status | Home |
 |---|---|---|---|
-| Batter figure, per uniform | `{base}/batters/{year}/{right\|left}/{uniformAssetCode}.png` | In use | `docs/uniforms-and-logos.md`, #1852 |
+| Batter figure, per uniform | `{base}/batters/{year}/{right\|left}/{uniformAssetCode}.png` | In use: the lineup crest sheet, and the batter beside each at-bat's strike zone (`StrikeZone.jsx`, silhouette when the art cannot come) | `docs/uniforms-and-logos.md`, #1852 |
 | Club's usual batter ("immortal") | `{base}/batters/immortal/{right\|left}/{teamId}-{home\|away}.png` | Not used. 496×1050, jersey and pants in one image. `GENERIC-home` also exists | — |
 | Field outline per park | `{base}/fields/{venueId}.svg` | MLB and MiLB parks; `generic.svg` is the fallback | PR #1860 (`docs/ballpark-layouts.md`) |
 | Player action photo | `img.mlbstatic.com/mlb-photos/image/upload/w_{w},q_auto:best/v1/people/{personId}/action/{vertical\|pitching}/current` | Not used. Active MLB players only | #1863 |
