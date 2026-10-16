@@ -1,84 +1,5 @@
 /* ---------------------------------------------------- team transactions
-   The team page's roster-move feed, one story per swipeable card in a
-   horizontal deck (see .scratch/team-transactions/ for the original locked
-   design; reworked into a horizontal scroller per feedback — see
-   .txcard__scroll below). The deck full-bleeds to the SCREEN's own edges
-   (the negative --app-gutter margin, same breakout .slatehead already uses
-   for its rule), so no outer bordered "card" shell wraps it — a bordered box
-   whose own content escapes past its border reads as broken, not deliberate.
-   The section label (.txcard__head) stays inset like any other section
-   caption; only the card deck below it bleeds. */
-.txcard {
-  display: grid;
-  margin: 14px 0 14px;
-}
-/* A SectionHead label (#1113); only its place on the card is kept here. */
-.txcard__head {
-  padding-bottom: var(--space-1h);
-  margin: 0 0 4px;
-}
-
-/* A horizontally swipeable deck of story cards, full-bleed to the screen's
-   edges regardless of viewport width — an "infinite scroll" of cards reads
-   oddly boxed into a reading column. Native scroll-snap + an edge mask, the
-   same idiom .vsteam__team already uses for the splits-vs-team club picker,
-   so this reads as a familiar "flip through" gesture, not a new one-off
-   interaction. TeamTransactionsCard.jsx lazy-reveals more cards
-   (already-fetched days first, then a fresh loadMoreTeamTransactions page)
-   as a trailing sentinel nears the visible edge. */
-.txcard__scroll {
-  display: flex;
-  /* Cards size to their own story rather than stretching to the tallest one in
-     the deck. A day's cutline runs from one clause to ten, so stretch printed
-     a three-line roster move as a bordered box with 250px of nothing under it —
-     an empty box reads as content that failed to load, where a short card just
-     reads as a short story. The deck's own height is unchanged (a single flex
-     line is still as tall as its tallest item), so only the dead space inside
-     the short cards goes away. .txcard__door keeps its own align-self: stretch
-     and so stays a full-height tap target. */
-  align-items: flex-start;
-  gap: var(--space-2h);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
-  margin: 0 calc(-1 * var(--app-gutter));
-  padding: 2px var(--app-gutter) var(--space-1h);
-  /* scrollbar-width is Firefox-only — Chrome/Safari/Edge ignore it entirely
-     and fall back to a full-size native horizontal scrollbar, which reads as
-     a stray gray bar under a touch-first swipe deck. The ::-webkit-scrollbar
-     rule below is what actually hides it in Chromium/WebKit. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-mask-image: linear-gradient(
-    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
-  );
-  mask-image: linear-gradient(
-    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
-  );
-}
-.txcard__scroll::-webkit-scrollbar {
-  display: none;
-}
-.txcard__sentinel {
-  flex: 0 0 auto;
-  width: 1px;
-}
-/* The deck's own door wears .door--block like every other one; all it keeps is
-   where it stands. A block door is a full-width row at the foot of a list, and
-   this one is a flex item at the end of a horizontal scroll deck, so the four
-   declarations that place it there are the four that stay. Its edge used to be
-   dashed; dashed now means provisional and nothing else (#1132).
-
-   `align-self` is the one of those four that is easy to read as dress and drop.
-   It is not: .txcard__scroll sets `align-items: flex-start` so a short story
-   does not print as a bordered box with 250px of nothing under it, and this
-   door opts back out so it stays a full-height tap target beside the tallest card. */
-.txcard__door {
-  flex: 0 0 160px;
-  align-self: stretch;
-  scroll-snap-align: start;
-  margin: 0;
-}
+   One roster-move story per card (.txstory). */
 
 /* Each story is its own Card (sheet, flush body; #1113) — wider than the
    deck's first cut (a 3-photo rail, a real 2-for-1 trade, needs the room so
@@ -88,8 +9,7 @@
   scroll-snap-align: start;
   width: 320px;
   padding: var(--space-2h) var(--space-2h) var(--space-3);
-  /* Overrides .team-hub's per-card spacing rule (09-team-info.css) — these sit
-     in .txcard__scroll, a flex row with its own gap, not stacked sections. */
+  /* Overrides .team-hub's per-card spacing rule (09-team-info.css). */
   margin-top: 0;
   /* A new block-formatting context, so the floated rail is contained here
      rather than bleeding past this card's own border. */

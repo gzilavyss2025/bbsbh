@@ -14,9 +14,8 @@
    tile color (the same tint TeamTreatmentMark resolves for the slate card),
    real logo art unaltered on top, name and the club's record in games it
    wore it below. Native overflow-x scroll gives touch/trackpad panning;
-   useDragScroll (JerseyCombos.jsx) adds mouse click-drag. Same carousel
-   idiom as .txcard__scroll elsewhere on this page, rather than a third
-   different scrolling pattern. */
+   useDragScroll (JerseyCombos.jsx) adds mouse click-drag. Native scroll,
+   edge mask and drag, as .seasonseries__strip does. */
 .jerseydeck {
   display: flex;
   gap: var(--space-3);
