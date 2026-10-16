@@ -31,7 +31,7 @@ import {
   buildDayOfWeekNotes,
 } from './heldNotes.js'
 import { buildInningRunDiffNote } from './inningAndStarter.js'
-import { buildWsLastTimeGameNotes } from './worldSeriesEvents.js'
+import { buildWsLastTimeGameNotes } from './worldSeries/events.js'
 
 // "2026-06-25" -> "6/25" — the season-scoped date the streak prose cites
 // ("a streak that began 6/25"). No year: every streak lives inside one season.

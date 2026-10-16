@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { classifyGame, orderedPlays, batterId } from '../../src/lib/worldSeries/classify.js'
-import { buildWsLastTimeNotes } from '../../src/api/callout-notes/worldSeriesEvents.js'
+import { buildWsLastTimeNotes } from '../../src/api/callout-notes/worldSeries/events.js'
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'world-series')
 const load = (pk) => JSON.parse(readFileSync(join(FIX, `${pk}-plays.json`), 'utf8'))

@@ -1260,12 +1260,12 @@ section 3). It is `cutoff-gated`: the only reader is `ReferencePanel.jsx`, and o
 game whose type is `W`. It returns `null` until the generator has written the file.
 `lib/worldSeries/odds.js` turns it into the `wsSeriesOdds` numbers, and every lookup goes
 through `lib/worldSeries/lastBefore.js`, strictly before the game's own date. The builder
-is `callout-notes/worldSeries.js`; it shows on the pre-half strip of the first half only.
+is `callout-notes/worldSeries/odds.js`; it shows on the pre-half strip of the first half only.
 
 `loadEventHistory()` reads `world-series/events.json` (one row per notable event of every
 finished Series, contract section 4) on the same footing. Its readers are `useWsEvents.js`
 (play card, Final roll-up, pre-half strip), only for a game of type `W`. The builders are in
-`callout-notes/worldSeriesEvents.js` (see `docs/callouts.md`).
+`callout-notes/worldSeries/events.js` (see `docs/callouts.md`).
 
 The nightly callouts shard of a World Series game also carries a `wsEvents` key:
 `{ events, wta }`. `events` are the classified events of the Series' counted games (the
