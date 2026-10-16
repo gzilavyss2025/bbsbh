@@ -154,10 +154,10 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
 }
 
 // An ejection: the ejected person's photo (a manager's resolves on the chain's coach rung),
-// the feed's one sentence, and the club's logo. The sentence leads with the club's name,
-// which is how the card finds the club (ejectedClub); no match, no logo. No photo, no box.
-export function EjectionBar({ text, playerId = null, clubs = [] }) {
-  const club = ejectedClub(text, clubs)
+// the feed's one sentence, and the club's logo, which ejectedClub finds (the boxscore roster's club for a
+// player, the sentence's leading club name for a manager); no club, no logo. No photo, no box.
+export function EjectionBar({ text, playerId = null, clubs = [], feed = null }) {
+  const club = ejectedClub(text, clubs, feed, playerId)
   return (
     <div className={`change ${eventCardClass()} change--event`}>
       <h4 className="card__name">{TABS.ejection}</h4>

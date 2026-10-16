@@ -86,7 +86,7 @@ for the trip that pulled the pitcher). An ejection shows the ejected person at 7
 `entry.playerId`, and a delay's tab is its headline with one sentence ("Cal Quantrill leaves
 the game." or "Play stopped for 1 hr 47 min."). "Pitch N" moved to the count tag, and the
 handoff table scrolls in the Table's own wrap with the pitcher column pinned. No fetch and no
-feed read was added; the ejection's club is read off the sentence's leading club name.
+fetch was added. The ejection's club is the one the player's boxscore roster names; a manager is in no roster, so he falls back to the sentence's leading club name.
 The full Now Pitching card draws the logo on its club band, as the artifact does; the persistent header (`entering`) draws none.
 Tests that pinned the old text and markup changed on purpose: `event-card-frame` (tabs now
 live in `ActorHead`), `notice-n6` (the bar's gap is 12px), `notice-n8a` (the photo class),

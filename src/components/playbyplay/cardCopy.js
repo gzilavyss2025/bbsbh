@@ -46,7 +46,14 @@ export function moundPips({ remaining, allowed }) {
   }
 }
 
-// The ejection sentence leads with the club ("Athletics manager Mark Kotsay ejected by ..."),
-// and a card has no club prop for it, so it reads the club off the sentence. `clubs` is
-// [{ id, name }]; no club named, no logo.
-export const ejectedClub = (text, clubs) => clubs.find((c) => c.name && (text ?? '').startsWith(c.name)) ?? null
+// The club of the man ejected. A PLAYER is in his club's boxscore roster (liveData.boxscore.teams
+// [side].players; gameData.players has no club); a manager or coach is in neither (verified, gamePk
+// 824381), so he falls back
+// to the sentence, which leads with the club ("Athletics manager Mark Kotsay ejected by ...").
+// `clubs` is [{ id, name }]; no club found, no logo.
+export function ejectedClub(text, clubs, feed = null, playerId = null) {
+  const box = feed?.liveData?.boxscore?.teams
+  const side = ['away', 'home'].find((k) => box?.[k]?.players?.[`ID${playerId}`])
+  const teamId = side ? feed.gameData?.teams?.[side]?.id : null
+  return clubs.find((c) => c.id === teamId) ?? clubs.find((c) => c.name && (text ?? '').startsWith(c.name)) ?? null
+}

@@ -436,7 +436,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // An ejection is a thin notification bar, same weight as a mound
           // visit — the description sentence already carries every detail
           // (who, by which umpire), so there's nothing else to add to a card.
-          node = <EjectionBar text={entry.text} playerId={entry.playerId} clubs={[{ id: pitchingTeamId, name: pitchingName }, { id: battingTeamId, name: battingName }]} />
+          node = <EjectionBar text={entry.text} playerId={entry.playerId} feed={feed} clubs={[{ id: pitchingTeamId, name: pitchingName }, { id: battingTeamId, name: battingName }]} />
         } else if (entry.eventType === 'game_advisory') {
           // A delay (injury, on-field, weather) that came to something — the
           // only kind that reaches the feed now (ADR-0060). Same card family as

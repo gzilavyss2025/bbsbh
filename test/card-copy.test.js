@@ -59,6 +59,10 @@ test('the ejection card shows the ejected person from entry.playerId (coach rung
   const clubs = [{ id: 1, name: 'Brewers' }, { id: 2, name: 'Athletics' }]
   assert.equal(ejectedClub('Athletics manager Mark Kotsay ejected by HP umpire Stu Scheurwater.', clubs).id, 2)
   assert.equal(ejectedClub('Umpire Joe Smith ejected someone.', clubs), null)
+  // A player's club comes from the feed, even when the sentence names no club; a manager is in no list.
+  const feed = { gameData: { teams: { away: { id: 2 }, home: { id: 1 } } }, liveData: { boxscore: { teams: { away: { players: {} }, home: { players: { ID9: {} } } } } } }
+  assert.equal(ejectedClub('Joe Player ejected by HP umpire X.', clubs, feed, 9).id, 1)
+  assert.equal(ejectedClub('Athletics manager Mark Kotsay ejected.', clubs, feed, 117276).id, 2)
 })
 
 test('no code chips: SB, CS, WP, PB, BK, DELAY and EJ are not drawn; EVENT_CODES stays', () => {
