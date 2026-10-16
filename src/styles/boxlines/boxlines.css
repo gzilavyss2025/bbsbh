@@ -22,6 +22,37 @@
   flex-direction: column;
   overflow-y: auto;
   padding: var(--space-4) var(--space-5) calc(var(--space-5) + env(safe-area-inset-bottom));
+  /* THE STAMPED EDGE (ADR-0115): square, an ink edge, no blur. .sheet's soft top corners and
+     raised shadow are the old paper-sheet look this replaced. The wide rule below moves the
+     edge to the left side. */
+  border: 0;
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: var(--radius-square);
+  box-shadow: none;
+}
+
+/* THE BAND. The card the door sat on lends its club's colours and mark; with none it is the house
+   navy (bandFor.js). .sectionhead--band draws the ground, the underline, the ink and the ripple
+   and sheen; this only sizes it and bleeds it to the sheet's edges. */
+.boxlines__band {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--space-10);
+  margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-5)) 0;
+  padding: 0 var(--space-5);
+}
+
+/* What the sheet is about, in the band's own ink. */
+.boxlines__note {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: inherit;
 }
 
 .boxlines__head {
@@ -29,42 +60,61 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
+  padding-top: var(--space-3);
 }
 
-.boxlines__note {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
+.boxlines__headtxt {
+  min-width: 0;
 }
 
 .boxlines__title {
-  margin-top: 2px;
-  margin-bottom: 0;
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-title-lg);
+  line-height: var(--lh-tight);
 }
 
-/* The tapped line, verbatim, on the inset paper — so the door and the sheet
-   can never disagree about what the rows add up to. */
+/* The close button, stamped: a square with the ink edge. IconButton's round ghost is the
+   default; this raises the specificity to win without a second control. */
+.boxlines .boxlines__close {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: var(--radius-square);
+  background: var(--surface-card);
+  color: var(--text-heading);
+}
+
+/* The tapped line, verbatim, as the sheet's one tinted stamped card — so the door and the
+   sheet can never disagree about what the rows add up to. A door that is a grid of figures
+   hands them in as cells instead (.boxlines__stats below) and the line is not drawn. */
 .boxlines__headline {
-  margin: 10px 0 0;
+  margin: var(--space-3) 0 0;
   padding: var(--space-2) var(--space-2h);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
   font-size: var(--fs-compact);
-  color: var(--text-body);
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
+  color: var(--text-heading);
+  background: var(--surface-stamped-tint);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: var(--radius-square);
+  box-shadow: var(--shadow-stamped);
 }
 
+/* The small label over the lead grid, as the door's own head reads on the page. */
+.boxlines__cap {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-body);
+}
+
+/* The rows sit under an ink rule; a new season starts under another (.boxline--new). */
 .boxlines__rows {
   list-style: none;
-  margin: 10px 0 0;
+  margin: var(--space-4) 0 0;
   padding: 0;
-  border-top: var(--bw-rule) solid var(--border-rule);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
 }
 
 /* One row: season gutter · club mark · date + side · score · chevron, with the
@@ -75,13 +125,15 @@
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
-.boxline--band {
-  background: var(--surface-inset);
+/* A new season: an ink rule above its first row, the year in the gutter. This replaced the
+   alternating band, which a nine-game list across seven seasons read as stripes. */
+.boxline--new {
+  border-top: var(--bw-rule) solid var(--border-stamped);
 }
 
 .boxline__link {
   display: grid;
-  grid-template-columns: 38px 24px minmax(0, 1fr) auto 14px;
+  grid-template-columns: 40px 26px minmax(0, 1fr) auto 14px;
   grid-template-rows: auto auto;
   column-gap: var(--space-2);
   row-gap: 2px;
@@ -108,28 +160,24 @@ a.boxline__link:focus-visible {
   font-weight: var(--w-bold);
   font-size: var(--fs-body);
   letter-spacing: var(--ls-title);
-  color: var(--graphite-soft);
+  color: var(--text-caption);
 }
 
-/* The knockout mark, inked for paper. TeamLogo's `mono` variant is the white
-   silhouette the navy mastheads wear; brightness(0) is the same re-ink the
-   themed mastheads apply for a dark bar (--mark-filter, lib/headerTheme.js),
-   and the opacity settles black into the page's navy-graphite ink. */
+/* The club's own cap logo, in full colour (TeamLogo `cap`, art made for paper). The white
+   knockout the mastheads wear, inked black, was the mark here until ADR-0115. */
 .boxline__mark {
   grid-row: 1 / span 2;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .boxline__mark img {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
-  filter: brightness(0);
-  opacity: 0.82;
 }
 
 .boxline__meta {
@@ -154,8 +202,8 @@ a.boxline__link:focus-visible {
   color: var(--text-body);
 }
 
-/* The postseason round — WC, DS, LCS, WS — on a postseason row only. A printed
-   tab on the ledger's own inset paper, not a colored badge: the amber chip a
+/* The postseason round — NLWC, ALDS, NLCS, WS — on a postseason row only (a split with no
+   league says WC, DS, LCS). A printed tab on the ledger's own inset paper, not a colored badge: the amber chip a
    round like this invites is the SEAL's vocabulary in this app (kraft tape over
    a score not yet revealed), and a row that has already given up its score must
    not wear it. --text-body on --surface-inset is a pairing check-contrast
@@ -169,8 +217,8 @@ a.boxline__link:focus-visible {
   letter-spacing: var(--ls-caps);
   color: var(--text-body);
   background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-stamped);
+  border-radius: var(--radius-square);
   white-space: nowrap;
 }
 
@@ -254,7 +302,7 @@ a.boxline__link:focus-visible {
 .boxline--skel .boxline__mark i {
   width: 20px;
   height: 20px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-square);
 }
 
 .boxline--skel .boxline__line i {
@@ -281,8 +329,14 @@ a.boxline__link:focus-visible {
     border-top: none;
     border-bottom: none;
     border-right: none;
+    border-left: var(--bw-heavy) solid var(--border-stamped);
     padding: var(--space-5) var(--space-6) var(--space-6);
     animation: boxlines-slidein var(--dur-slow) var(--ease-out);
+  }
+
+  .scrim--boxlines .boxlines__band {
+    margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-6)) 0;
+    padding: 0 var(--space-6);
   }
 
   .scrim--boxlines .boxline {

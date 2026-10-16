@@ -78,3 +78,10 @@ and NO label source, for a question with too many answers to be doors:
 - **Both lists count October** (`postseason: true` on the list's facet). A list door must
   never set `spansPostseason`: that widens a LABEL's fetch and a list has no label
   source, so a test pins it undefined.
+
+## The round's name
+
+A postseason row's `series` pill names its league (NLDS, ALCS) when the game-log split carries
+one: `seriesAbbr(gameType, LEAGUE_BY_ID[s.league?.id])`. Both field lists in `fetch.js` ask for
+`league`; drop it and every pill falls back to WC, DS, LCS with nothing to say why. The World
+Series is both leagues' and stays WS.

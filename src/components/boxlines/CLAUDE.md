@@ -6,7 +6,7 @@ rows that add up to it, each linking to that game's box score. The facet registr
 
 - **"Box Lines" is internal and never renders.** Use the name only in a prompt: "make the
   box lines open from X, showing Y". On the page the door says the house `See all ›`
-  (`ui/control/Door.jsx`'s words) and the sheet's head note says `Game lines · {facet}`.
+  (`ui/control/Door.jsx`'s words) and the sheet's band says `Game lines · {facet}`.
 - **`BoxLinesDoor` is a FULL button reset, padding included.** A host that wants its row's
   vertical dress back states it at `button.` specificity (`.starter__careervs` in
   `10-lineup.css`). Hover draws the design canvas's outline, pointer devices only.
@@ -31,3 +31,11 @@ rows that add up to it, each linking to that game's box score. The facet registr
   group is picked, when the headline is that entry's own line, verbatim: `BoxLinesDoor`'s
   `headline` defaults to `label`, and a list door passes null. The join is memoized per
   (person, group, cutoff, gameTypes).
+- **The sheet is stamped (ADR-0115).** Square, an ink edge, a club band over the head. The
+  caller hands the band in as `sheet.band` (`bandFor(teamId, theme)`): the sheet is portalled
+  outside the themed root, so it cannot inherit one. No band, or a club with no colours, is the
+  house navy. A door that is a row of figures also hands in `sheet.cells`
+  (`{ title, items }`), and the sheet leads with that grid instead of the verbatim line.
+- **A new season starts under an ink rule** (`startsSeason`), the year in the gutter. There is
+  no banding. The row mark is the full-colour `cap` logo, never the `mono` knockout. A
+  postseason pill names its league (NLDS), which needs `league` in both game-log field lists.

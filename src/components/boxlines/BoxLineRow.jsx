@@ -15,11 +15,13 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // Every value here arrived already gated (api/boxlines/rows.js); this row
 // decides nothing about what may show.
 //
-// The mark is the knockout art the navy mastheads wear (TeamLogo `mono`),
-// re-inked for paper with the same `brightness(0)` the themed mastheads use
-// for a dark ink (lib/headerTheme.js's --mark-filter) — a knockout is a
-// silhouette, and a silhouette in ink is exactly the pencil-scorebook mark.
-export function BoxLineRow({ row, showSeason, band }) {
+// The mark is the club's own cap logo in full colour (TeamLogo `cap`, the mlbstatic
+// `team-cap-on-light` art made for paper). It was the white knockout inked black, which is
+// the mastheads' one-ink art and read as a smudge at this size.
+//
+// A new season starts under an ink rule (`newSeason`, seasons.js), with the year in the
+// gutter. This replaced the alternating band.
+export function BoxLineRow({ row, showSeason, newSeason }) {
   const link = useRouteLink()
   const where = `${row.home ? 'vs' : '@'} ${row.opponentAbbr || '—'}`
   const score =
@@ -30,7 +32,7 @@ export function BoxLineRow({ row, showSeason, band }) {
     <>
       <span className="boxline__season">{showSeason ? row.season : ''}</span>
       <span className="boxline__mark">
-        {row.teamId ? <TeamLogo teamId={row.teamId} name={row.teamAbbr} size={24} variant="mono" /> : null}
+        {row.teamId ? <TeamLogo teamId={row.teamId} name={row.teamAbbr} size={26} variant="cap" /> : null}
       </span>
       <span className="boxline__meta">
         <span className="boxline__date">{monthDay(row.date)}</span>
@@ -47,7 +49,7 @@ export function BoxLineRow({ row, showSeason, band }) {
       <span className="boxline__line">{row.line}</span>
     </>
   )
-  const cls = `boxline${band ? ' boxline--band' : ''}`
+  const cls = `boxline${newSeason ? ' boxline--new' : ''}`
   return (
     <li className={cls}>
       {row.boxScorePath ? (

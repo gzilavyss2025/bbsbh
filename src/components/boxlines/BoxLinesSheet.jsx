@@ -7,6 +7,8 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { BoxLineRow, BoxLineSkeleton } from './BoxLineRow.jsx'
 import { BoxLinesList } from './BoxLinesList.jsx'
+import { startsSeason } from './seasons.js'
+import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Stat } from '../gamehud/StatBox.jsx'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { IconButton } from '../ui/control/IconButton.jsx'
@@ -86,6 +88,8 @@ export function BoxLinesSheet({
   title,
   footNote = null,
   headline,
+  band = null,
+  cells = null,
   cutoff = null,
   onClose,
 }) {
@@ -142,6 +146,11 @@ export function BoxLinesSheet({
     [picked, rows, group],
   )
   const head = picked || listing ? null : headline
+  // THE LEAD GRID. A door that is itself a row of figures (the lineup page's "Career vs MIL")
+  // hands those figures in as `cells`, and the sheet restates them as its lead object instead
+  // of the verbatim line, so the door and the sheet show the same grid and cannot disagree. A
+  // door with no cells keeps the line.
+  const lead = !picked && !listing && cells ? cells : null
 
   // Back to the list, with the focus kept inside the dialog: the control the
   // reader pressed is the one that unmounts, and focus would otherwise fall to
@@ -158,21 +167,37 @@ export function BoxLinesSheet({
         onClick={(e) => e.target.classList.contains('scrim') && onClose()}
       >
         <div className="sheet boxlines" role="dialog" aria-modal="true" aria-label={heading}>
+          {/* THE BAND, as the card the door sat on wears its own head (ADR-0030): that club's
+              colours and mark, or the house navy with none. It carries the note, which says what
+              the sheet is about before the title says who it is about. */}
+          <div className="boxlines__band sectionhead--band" style={band?.style}>
+            <p className="boxlines__note">{headNote}</p>
+            {band?.teamId ? <TeamLogo teamId={band.teamId} name="" size={26} variant="mono" /> : null}
+          </div>
           <div className="boxlines__head">
-            <div>
+            <div className="boxlines__headtxt">
               {picked && (
                 <button type="button" className="boxlines__back" onClick={toList}>
                   ‹ Back
                 </button>
               )}
-              <p className="boxlines__note">{headNote}</p>
               <h2 className="sheet__title boxlines__title">{heading}</h2>
             </div>
-            <IconButton ref={closeRef} onClick={onClose} label="Close">
+            <IconButton ref={closeRef} onClick={onClose} label="Close" className="boxlines__close">
               ✕
             </IconButton>
           </div>
-          {head && <p className="boxlines__headline">{head}</p>}
+          {lead && (
+            <>
+              <p className="boxlines__cap">{lead.title}</p>
+              <div className="boxlines__stats" style={{ '--cols': lead.items.length }} role="group" aria-label={headline}>
+                {lead.items.map(([v, k]) => (
+                  <Stat key={k} k={k} v={v ?? '·'} tone={v == null ? 'nil' : undefined} />
+                ))}
+              </div>
+            </>
+          )}
+          {head && !lead && <p className="boxlines__headline">{head}</p>}
           {stats && (
             <div className="boxlines__stats">
               {stats.map((c) => (
@@ -235,8 +260,8 @@ export function BoxLinesSheet({
                     row={row}
                     // The year prints once per season group, at its head.
                     showSeason={i === 0 || rows[i - 1].season !== row.season}
-                    // Every other season group sits on the brighter paper.
-                    band={seasonBand(rows, i)}
+                    // A new season starts under an ink rule.
+                    newSeason={startsSeason(rows, i)}
                   />
                 ))}
               </ul>
@@ -253,12 +278,4 @@ export function BoxLinesSheet({
       </div>
     </ModalPortal>
   )
-}
-
-// Whether row `i` sits on a banded season group: the first season is plain,
-// the second banded, and so on, so two games in one year read as one band.
-export function seasonBand(rows, i) {
-  let band = false
-  for (let k = 1; k <= i; k++) if (rows[k].season !== rows[k - 1].season) band = !band
-  return band
 }

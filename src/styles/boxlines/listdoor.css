@@ -52,8 +52,11 @@
   list-style: none;
   margin: 10px 0 0;
   padding: 0;
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-md);
+  /* A stamped card (ADR-0115): the ink edge and the hard offset shadow. The panel's soft
+     rounded hairline was the paper-sheet look. */
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: var(--radius-square);
+  box-shadow: var(--shadow-stamped);
   overflow: hidden;
 }
 
@@ -95,9 +98,10 @@ button.boxlines-entry {
   cursor: pointer;
 }
 
-/* The band, the same alternation the card's panel uses. */
-.boxlines__listrow:nth-child(even) .boxlines-entry {
-  background: var(--surface-inset);
+/* A hairline under each entry, none under the last. No banding: it read as stripes against the
+   sheet's other ruled lists. */
+.boxlines__listrow + .boxlines__listrow .boxlines-entry {
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 .boxlines-entry__name {
@@ -163,22 +167,29 @@ button.boxlines-entry {
   box-shadow: var(--ring);
 }
 
-/* BACK TO THE LIST. Above the note, in the door’s own voice, which the app uses
-   for every "back to where this opened" control, and it is the only thing in
-   the sheet's head that is not the sheet's own name — so it is small, and it
-   leads with the mark that says which way it goes. */
+/* BACK TO THE LIST. Above the title, and the only thing in the sheet's head that is not the
+   sheet's own name — so it is small, a stamped square, and it leads with the mark that says
+   which way it goes. */
 button.boxlines__back {
-  display: block;
-  padding: 0;
-  margin: 0 0 4px;
-  border: none;
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: calc(var(--space-6) + var(--space-1));
+  padding: 0 var(--space-2h);
+  margin: 0 0 var(--space-1);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: var(--radius-square);
+  background: var(--surface-card);
   font-family: var(--font-display);
   font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
-  color: var(--accent-link);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
   cursor: pointer;
+}
+
+/* The stamp press, as every control draws it: down and right by the edge's width. */
+button.boxlines__back:active {
+  translate: var(--bw-heavy) var(--bw-heavy);
 }
 
 .boxlines__back:focus-visible {
@@ -209,18 +220,20 @@ button.boxlines__back {
    hairline gaps over a rule-coloured ground, so the cells read as one object
    and not as twelve chips.
 
-   Four across, three down. Counts fill the first two rows and the rates the
+   Four across, three down (a door's lead grid sets --cols: the lineup page's five). Counts fill the first two rows and the rates the
    last, which is the order a box score is read in — so the slash line lands
    together on a row of its own rather than being hunted for among the counts. */
 .boxlines__stats {
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
   gap: 1px;
-  margin: 10px 0 0;
-  background: var(--border-rule);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
+  margin: var(--space-2) 0 0;
+  background: var(--border-hairline);
+  /* A stamped card (ADR-0115), the same edge and shadow as the list above. */
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: var(--radius-square);
+  box-shadow: var(--shadow-stamped);
   overflow: hidden;
 }
 
@@ -236,10 +249,10 @@ button.boxlines__back {
 }
 
 .boxlines__stats .stat__v {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
   font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  font-size: var(--fs-title-sm);
+  font-size: var(--fs-title-lg);
 }
 
 /* A rate with no denominator — a group of games with no at-bat, an outing with

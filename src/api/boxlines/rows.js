@@ -48,6 +48,7 @@ import { gamePath } from '../../lib/route.js'
 import { hitterLine, pitcherLine } from '../person/gameLog.js'
 import { ipToOuts } from '../../lib/math/innings.js'
 import { baseballToday } from '../../lib/time/standingsDates.js'
+import { LEAGUE_BY_ID } from '../../lib/postseason/seriesMarks.js'
 
 const n = (v) => Number(v) || 0
 
@@ -330,7 +331,9 @@ export function boxLineRows({
       gamePk: s.game.gamePk,
       gameNumber: g.gameNumber ?? s.game.gameNumber ?? 1,
       gameType: s.gameType,
-      series: seriesAbbr(s.gameType),
+      // The league names whose round it was (NLDS, ALCS), off the split's own league. A split
+      // with none gives the plain round, as it did before (WC, DS, LCS).
+      series: seriesAbbr(s.gameType, LEAGUE_BY_ID[s.league?.id]),
       home: !awayIsHis,
       teamId,
       teamAbbr: mine?.team?.abbreviation ?? '',
