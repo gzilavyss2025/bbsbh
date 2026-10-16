@@ -154,6 +154,8 @@ four fields. `hitterGrid.js` reads the nightly
 hitter-grid shards (ADR-0096, ADR-0097); it is spoiler-FREE, with season sums over Final
 games.
 
+`teamrecords/ranks.js` reads the nightly `ranks` block in the team-records shard (one request, null on any cutoff); notes in `docs/api/static-data.md`.
+
 `expresslane/` holds the Express Lane rail and clip index: `expresslane/CLAUDE.md`.
 
 The subdirectories with their own CLAUDE.md are `around-the-game/`, `boxlines/`,

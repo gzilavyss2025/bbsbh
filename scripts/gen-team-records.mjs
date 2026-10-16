@@ -74,6 +74,7 @@ import {
 } from './lib/team-records.mjs'
 import { pitchHandsFor, pitcherRolesFor, rowsForGame, shipRow, storeGame,
   REREAD_DAYS, rereadPks } from './lib/records/ingest.mjs'
+import { levelRanks } from './lib/records/ranks.mjs'
 import { homeVenueByTeam, siteOf } from './lib/schedule-shape.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -287,6 +288,14 @@ async function exportSeason(db, season, teamMeta, allStarDate) {
     ])
     // No generatedAt per shard, on purpose: 150 committed files on a nightly
     // cron must not all churn on a timestamp (gen-milb-alumni.mjs's lesson).
+  }
+  // Each club's rank among its level, in the same file so the team page's
+  // Records card stays at one request. Ranked by the app's own code, once the
+  // level's shards are whole (scripts/lib/records/ranks.mjs).
+  const byLevel = Map.groupBy(entries, ([, shard]) => shard.sportId)
+  for (const level of byLevel.values()) {
+    const ranks = levelRanks(level.map(([, shard]) => shard))
+    for (const [, shard] of level) if (ranks.has(shard.teamId)) shard.ranks = ranks.get(shard.teamId)
   }
   return writeShards(join(outDir, String(season)), entries)
 }

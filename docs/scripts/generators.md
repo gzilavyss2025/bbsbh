@@ -695,6 +695,19 @@ don't run these by hand.
   last good snapshot stands. The refresh rides with a sweep and never with
   `--export-only`; `--export-only --refresh-roles` runs it alone, which is how
   a season's snapshot is first filled and how a failed level is repaired.
+  **Ranks (S5, #1107).** Each shard also carries `ranks`: the club's rank among
+  its level (same `sportId`) for every split and count, per scope. Scopes are
+  Full, Pre- and Post-All-Star (only when `allStarDate` is set) crossed with
+  All plus each month the level played, so the half and the month combine.
+  `scripts/lib/records/ranks.mjs` runs the app's own `buildRankingIndex` and
+  `rankMetric` (`src/api/situationalRecordRankings.js`), so the numbers are the
+  `/situational-records` board's. Shape: `{ n, scopes: [key…], m: { metricId:
+  [rank per scope] } }`, `n` the level's club count, `0` unranked; `scopes` keys
+  are `half` or `half:month` (`rankScopeKey`). It is a field in the shard and not
+  a second file so the team page's Records card stays at ONE request; it costs
+  about 6 KB raw, 2.1 KB gzip, per MLB shard (+44 % gzip). Ranks are the season
+  through the last nightly, so `rankOf` (`src/api/teamrecords/ranks.js`) reads
+  null on a dated page. Rides `--export-only`; no new cron step.
   **Verified against statsapi's own splits**, which publishes eight of these
   records per club at every level (home, away, vs. LHS, vs. RHS, day, night,
   one-run, extra-inning — one `/standings` call per league) and so makes a free
