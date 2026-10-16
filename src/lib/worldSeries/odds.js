@@ -65,12 +65,13 @@ export function seriesOdds(history, before) {
     if (r.homeWon) break
     roadStreak += 1
   }
+  const lastWin = trail.find((r) => r.won)
   return {
     // The Series length of the latest finished Series: what "a 3-1 lead" means now.
     winsNeeded: at('final')[0]?.winsNeeded ?? null,
     game1: record(at('game1')),
     lead20: record(at('lead20')),
-    trail31: { ...record(trail), last: trail.find((r) => r.won)?.season ?? null, lastClub: trail.find((r) => r.won)?.winner ?? null, lastName: nameIn(trail.find((r) => r.won), trail.find((r) => r.won)?.winner) },
+    trail31: { ...record(trail), last: lastWin?.season ?? null, lastClub: lastWin?.winner ?? null, lastName: nameIn(lastWin, lastWin?.winner) },
     wta: {
       home: { w: home.filter((r) => r.homeWon).length, l: home.filter((r) => !r.homeWon).length },
       roadStreak,
