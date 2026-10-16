@@ -172,10 +172,10 @@ export function EjectionBar({ text, playerId = null, clubs = [], feed = null }) 
 // pickoff, wild pitch, passed ball, balk): the tab names it, the runner's (or pitcher's)
 // photo leads, the feed's sentence follows and the club's logo ends the row. "Pitch N"
 // rides the count tag. The logo is the club of the person in the photo (playerClubId); a person
-// in no roster gets `clubId`, the batting club. The scorer's shorthand (EVENT_CODES) is no longer drawn: the trail
+// in no roster gets `teamId`, the club his photo's fallback already uses, so the two agree. The scorer's shorthand (EVENT_CODES) is no longer drawn: the trail
 // and the scorebook still read it.
-export function EventCard({ code, runnerId, teamId, clubId = teamId, feed = null, segments, pitchLabel = null }) {
-  const logoId = playerClubId(feed, runnerId) ?? clubId
+export function EventCard({ code, runnerId, teamId, feed = null, segments, pitchLabel = null }) {
+  const logoId = playerClubId(feed, runnerId) ?? teamId
   return (
     <div className={`change ${eventCardClass()} change--event`}>
       <h4 className="card__name">{EVENT_NAMES[code]}</h4>

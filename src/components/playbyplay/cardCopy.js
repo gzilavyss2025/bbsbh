@@ -50,6 +50,7 @@ export function moundPips({ remaining, allowed }) {
 // [side].players; gameData.players has no club) mapped to that side's team id. A manager or coach
 // is in no roster (verified, gamePk 824381), so he gets null.
 export function playerClubId(feed, playerId) {
+  if (playerId == null) return null
   const box = feed?.liveData?.boxscore?.teams
   const side = ['away', 'home'].find((k) => box?.[k]?.players?.[`ID${playerId}`])
   return side ? (feed.gameData?.teams?.[side]?.id ?? null) : null

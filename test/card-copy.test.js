@@ -65,6 +65,8 @@ test('the ejection card shows the ejected person from entry.playerId (coach rung
   assert.equal(ejectedClub('Athletics manager Mark Kotsay ejected.', clubs, feed, 117276).id, 2)
   assert.equal(playerClubId(feed, 9), 1)
   assert.equal(playerClubId(feed, 117276), null)
+  assert.equal(playerClubId(feed, null), null)
+  assert.match(code('components/playbyplay/PlayByPlay.jsx'), /<EventCard[^>]*feed=\{feed\}/, 'the call site hands EventCard the feed')
 })
 
 test('no code chips: SB, CS, WP, PB, BK, DELAY and EJ are not drawn; EVENT_CODES stays', () => {
@@ -78,7 +80,7 @@ test('club logo ends the row; the pitch label rides the count tag', () => {
   const cards = code('components/playbyplay/EventCards.jsx')
   assert.match(cards, /<TeamLogo[^>]*size=\{36\}/)
   assert.match(cards, /<TeamLogo[^>]*size=\{32\}/, 'baserunning cards are 32')
-  assert.match(cards, /playerClubId\(feed, runnerId\) \?\? clubId/, 'the logo is the photo person\'s club')
+  assert.match(cards, /playerClubId\(feed, runnerId\) \?\? teamId/, 'the logo is the photo person\'s club')
   assert.match(cards, /card__count/)
   assert.doesNotMatch(cards, /change__pitchno/)
 })
