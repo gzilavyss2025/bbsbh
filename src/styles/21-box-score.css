@@ -841,3 +841,16 @@
 .bs .card {
   --card-radius: 0;
 }
+
+/* Thumbnails, chips and buttons on the box score are square too. A club mark,
+   a toggle track and a hairline rule keep their own shape. */
+.bs :is(
+  .photostrip__thumb, .photostrip__viewall, .photostrip__nav,
+  .hlclip, .hlclip__frame, .hlclip__play, .cliprail__nav,
+  .shot.shot, .playerline__shotwrap, .playerline__posbadge,
+  .scoresum__watch, .winprob__ledger-watch, .bs__tallyWash, .bs__tallyLogobox,
+  .bs__potgWatch, .bs__potgPlay,
+  .hitchart__chip, .hitchart__readout, .defdiamond__spot
+) {
+  border-radius: 0;
+}
