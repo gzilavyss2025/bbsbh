@@ -138,6 +138,7 @@ saturation is worth changed. The column below names that saturation point, so
 | inningRunDiff | 30 | a margin of 40 |
 | dayOfWeek | 30 | a spotless record |
 | wsSeriesOdds | 45 | a spotless record, or a 25-season gap (World Series games only) |
+| wsStarterStart | 40 | none; fixed. "His first World Series start" at 0 earlier starts, or his 5th or 10th (World Series games only; pre-half strip, inning 1, on the half he takes the mound) |
 | foulSpoiler | 30 | rank 1; the roll-up restatement adds a second bonus, full at 18 fouls tonight |
 | matchupSkill | 36 | a 2.0-SD collision on the weaker of its two sides |
 | matchupStyle | 33 | a 2.0-SD collision on the weaker of its two sides |

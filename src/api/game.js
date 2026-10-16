@@ -360,11 +360,11 @@ export function managerLabel(mgr) {
 // Verified against /api/v1/people/{id}/stats?stats=byDateRange on 2026-10-01.
 // ---------------------------------------------------------------------------
 
-async function readPitcherSeasonLine(personId, season, sportId = 1, officialDate = null, { postseason = false } = {}) {
+async function readPitcherSeasonLine(personId, season, sportId = 1, officialDate = null, { postseason = false, worldSeries = false } = {}) {
   if (!personId || !season || !officialDate) return null
   try {
     const sport = sportId && sportId !== 1 ? `&sportId=${sportId}` : ''
-    const gameType = postseason ? 'F,D,L,W' : 'R'
+    const gameType = worldSeries ? 'W' : postseason ? 'F,D,L,W' : 'R'
     const data = await getJson(
       `/api/v1/people/${personId}/stats?stats=byDateRange&group=pitching&season=${season}` +
         `&startDate=${season}-01-01&endDate=${dayBefore(officialDate)}&gameType=${gameType}${sport}`,

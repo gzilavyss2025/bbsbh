@@ -1,5 +1,6 @@
 import { fetchPitcherLastGame, fetchPitcherSeasonLine } from '../../api/game.js'
 import { fetchPitcherPostseasonCareer } from '../../api/postseason/pitcherCareer.js'
+import { fetchPitcherWorldSeriesCareer } from '../../api/postseason/pitcherWorldSeries.js'
 import { fetchWorkload } from '../../api/workload.js'
 import { projectFromLiveLogs } from '../../api/rotation/liveStarters.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -36,9 +37,10 @@ import { Card } from '../ui/frame/Card.jsx'
 //   season    the season's year
 //   cutoff    the page's cutoff date (ISO)
 //   gameNumber  the game's number in the DAY (a doubleheader), 1 here
-export function SeriesStarters({ head, note, game, season, cutoff, gameNumber = 1 }) {
+//   worldSeries true for the World Series: adds the All-time World Series row
+export function SeriesStarters({ head, note, game, season, cutoff, gameNumber = 1, worldSeries = false }) {
   if (!game) return null
-  const shared = { season, cutoff, restOn: game.date || cutoff, gameNumber }
+  const shared = { season, cutoff, restOn: game.date || cutoff, gameNumber, worldSeries }
   return (
     <section className="psseries__startersection">
       <SectionHead look="label" note={note}>
@@ -55,7 +57,7 @@ export function SeriesStarters({ head, note, game, season, cutoff, gameNumber = 
   )
 }
 
-function Starter({ clubId, arm, season, cutoff, restOn, gameNumber }) {
+function Starter({ clubId, arm, season, cutoff, restOn, gameNumber, worldSeries }) {
   const club = teamClubNameShort(clubId)
   const { data } = useAsync(async () => {
     if (!arm?.id) return null
@@ -65,8 +67,12 @@ function Starter({ clubId, arm, season, cutoff, restOn, gameNumber }) {
       fetchPitcherLastGame(arm.id, season, cutoff, gameNumber),
     ])
     const career = await fetchPitcherPostseasonCareer(arm.id, season, post)
-    return { line, post, career, last }
-  }, [arm?.id, season, cutoff, gameNumber])
+    // The World Series line: this Series through the day before, plus his earlier Series.
+    const ws = worldSeries
+      ? await fetchPitcherWorldSeriesCareer(arm.id, season, await fetchPitcherSeasonLine(arm.id, season, 1, cutoff, { worldSeries: true }))
+      : null
+    return { line, post, career, ws, last }
+  }, [arm?.id, season, cutoff, gameNumber, worldSeries])
   if (!arm) return <NoStarter clubId={clubId} club={club} restOn={restOn} />
   const role = pitcherRole(data?.line)
   const hasPost = (data?.post?.games ?? 0) > 0
@@ -104,6 +110,14 @@ function Starter({ clubId, arm, season, cutoff, restOn, gameNumber }) {
                 <span className="pcard__lbl pcard__lbl--ink">All-time postseason</span>
               </div>
               <StatGrid cells={seasonCells(role, data.career)} />
+            </>
+          )}
+          {data.ws && (
+            <>
+              <div className="pcard__postrule">
+                <span className="pcard__lbl pcard__lbl--ink">All-time World Series</span>
+              </div>
+              <StatGrid cells={seasonCells(role, data.ws)} />
             </>
           )}
         </div>

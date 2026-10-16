@@ -892,6 +892,10 @@
       "class": "spoiler-free",
       "why": "A starter's all-time postseason line for the live series page: finished prior seasons (yearByYear) plus the cutoff-gated line it is handed. Never stats=career, which counts a game in progress. ADR-0088."
     },
+    "postseason/pitcherWorldSeries.js": {
+      "class": "spoiler-free",
+      "why": "A starter's all-time World Series line and his count of earlier World Series starts: finished prior seasons (yearByYear, gameType=W) plus this Series' games through the day before the game (byDateRange). Never stats=career, which counts a game in progress. ADR-0088."
+    },
     "postseason/records.js": {
       "class": "cutoff-gated",
       "why": "Reads the per-season postseason ledgers (gen-postseason-records.mjs) and hands them to teamRecordsFor and the situational-record pivot, so it inherits teamRecords.js's footing whole, including the `cutoff = null` default: a bare call tallies every Final postseason game on file, tonight's included once the nightly lands. It computes no value those two do not. Open surface by rule (ADR-0034); nothing here is read on a scoring surface."

@@ -51,7 +51,7 @@
 
 import { halfIndex, derivedHalfStartingPitcherId, sideOnMoundFor } from './select.js'
 import { matchupNotesForHalf } from './matchup/forHalf.js'
-import { buildWorldSeriesOddsNotes } from './callout-notes/worldSeries.js'
+import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from './callout-notes/worldSeries.js'
 import {
   cumulativeInnings,
   buildStarterTeamRecordNote,
@@ -76,7 +76,7 @@ const PREHALF_MAX_RECORDS = 1
 
 export function buildPreHalfCallouts({
   feed, bundle, inning, half, revealedThrough, workload, gameDate, shownCounts = null,
-  savantMatchup = null, seriesHistory = null,
+  savantMatchup = null, seriesHistory = null, wsStarts = null,
 }) {
   if (!bundle) return []
   const notes = []
@@ -97,6 +97,9 @@ export function buildPreHalfCallouts({
       ?? derivedHalfStartingPitcherId(feed, inning, half, revealedThrough)
     const note = pid != null ? buildStarterTeamRecordNote(bundle, side, pid) : null
     if (note) notes.push(note)
+    // World Series only: his count of World Series starts, entering tonight.
+    const wsStart = buildWorldSeriesStarterNote({ starts: wsStarts, pid, side, gameType: feed?.gameData?.game?.type })
+    if (wsStart) notes.push(wsStart)
     const pen = buildBullpenThinNote(bundle, side, workload, gameDate)
     if (pen) notes.push(pen)
 

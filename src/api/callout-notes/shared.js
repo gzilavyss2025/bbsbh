@@ -84,6 +84,7 @@ export const SCORE_BASE = {
   inningRunDiff: 30,
   dayOfWeek: 30, // record on tonight's day of the week
   wsSeriesOdds: 45, // World Series state heading in: what that state has meant before
+  wsStarterStart: 40, // a starter's first (or 5th, 10th) World Series start
   ttoPitches: 30, // pitches per PA escalating each time through the order
   risp: 25,
   platoon: 25,
@@ -217,7 +218,7 @@ export const SHOWN_DECAY = 25
 // grows, and restating IS the note.
 export const ONCE_PER_GAME_KINDS = new Set([
   // pre-half / between-innings season and calendar facts
-  'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff', 'wsSeriesOdds',
+  'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff', 'wsSeriesOdds', 'wsStarterStart',
   // Margin Notes' season aggregates (pitcher-callouts.js's buildPitcherNotes)
   'homeAway', 'cgShutout', 'scorelessStreak', 'workload', 'backToBack',
   'penFatigue', 'leverage', 'centuryClub', 'sideSplit', 'recentAppearances',
