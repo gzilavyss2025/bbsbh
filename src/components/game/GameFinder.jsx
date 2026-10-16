@@ -66,7 +66,7 @@ export function GameFinder() {
 
       {teamA && teamB && !sameTeam && (
         <div className="gamefinder__season">
-          <label htmlFor="gamefinder-season">Season</label>
+          <label className="t-label" htmlFor="gamefinder-season">Season</label>
           <select
             id="gamefinder-season"
             value={season}

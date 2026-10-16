@@ -63,7 +63,7 @@ export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchi
         </StruckLine>
         <span className="abhero__meta">
           {batter.jersey ? <span className="abhero__jersey">{batter.jersey}</span> : null}
-          {batter.pos && <span className="abhero__pos">{batter.pos}</span>}
+          {batter.pos && <span className="t-label">{batter.pos}</span>}
         </span>
         {/* The pinch-runner chain, penciled in under the batter he took over
             for — the same crossed-out-and-replaced convention .pbp__top used,
@@ -75,7 +75,7 @@ export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchi
             className={`abhero__pr ${i < pinchRunners.length - 1 ? 'pbp__replaced' : ''}`}
           >
             <PlayerLink id={pr.id}>{pr.last}</PlayerLink>
-            <span className="abhero__pos">PR</span>
+            <span className="t-label">PR</span>
           </StruckLine>
         ))}
       </div>
@@ -99,7 +99,7 @@ export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchi
             </span>
             <span className="abhero__meta abhero__meta--arm">
               {pitcher.jersey ? <span className="abhero__jersey">{pitcher.jersey}</span> : null}
-              {pitcher.hand && <span className="abhero__pos">{pitcher.hand}HP</span>}
+              {pitcher.hand && <span className="t-label">{pitcher.hand}HP</span>}
             </span>
           </div>
           <div className="abhero__shot abhero__shot--arm">

@@ -1095,14 +1095,6 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
 }
-.hzntile__tilek {
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  text-transform: uppercase;
-}
 
 /* Depth Chart's position pills. */
 .depthchart__positions {

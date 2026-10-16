@@ -105,7 +105,7 @@ function FeaturedLeader({
             and there is no string for the link to borrow for the address —
             `entry.name` is the whole name it was split from (ADR-0057). */}
         <PlayerLink id={entry.id} name={entry.name} className="tlead__name">
-          {first && <span className="tlead__name-first">{first}</span>}
+          {first && <span className="t-label">{first}</span>}
           <span className="tlead__name-last">
             {last}
             {entry.position && <span className="tlead__pos">{entry.position}</span>}
