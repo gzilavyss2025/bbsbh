@@ -173,10 +173,10 @@ export function lastAppearanceCells(last) {
 // THE ARRIVAL BAND'S PAINT (ADR-0113, slice 3). The band that wipes across the full Now
 // Pitching card wears the pitching club's hand-set triad (ADR-0030's 2026-10-14 addendum:
 // identity only, the inputs are `(teamId, side, treatment)` and nothing else). A club with no
-// triad, and every handoff card (`house`), wears the house navy: `house: true` makes the band
-// carry `.sectionhead--house`, so it keeps the navy even inside a themed ancestor. A club
-// colour is never invented.
-export function bandPaint({ teamId, side, treatment, house = false }) {
-  const theme = house ? null : headerThemeFor(teamId, themeKeyFor(teamId, side, treatment?.[side]))
+// triad wears the house navy: `house: true` makes the band carry `.sectionhead--house`, so it
+// keeps the navy even inside a themed ancestor. A club colour is never invented. The two handoff
+// cards are always the house navy and ask for it on `CardBand` directly (`<CardBand house>`).
+export function bandPaint({ teamId, side, treatment }) {
+  const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment?.[side]))
   return theme ? { house: false, style: headerThemeStyle(theme) } : { house: true, style: undefined }
 }

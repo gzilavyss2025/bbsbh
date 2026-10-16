@@ -54,9 +54,10 @@ test('a club with no triad, or no jersey to read, keeps the house navy', () => {
   }
 })
 
-test('a handoff card is the house navy whatever the club has', () => {
-  const band = bandPaint({ teamId: 119, side: 'home', treatment: BOTH_MAIN, house: true })
-  assert.deepEqual(band, { house: true, style: undefined })
+test('a handoff card is the house navy whatever the club has: it asks CardBand for it', () => {
+  const handoff = src('components/playbyplay/PitcherHandoffCard.jsx')
+  assert.equal([...handoff.matchAll(/<CardBand label=\{TABS\.(departing|final)\} house \/>/g)].length, 2)
+  assert.doesNotMatch(handoff, /bandPaint/, 'no club paint reaches a handoff card')
 })
 
 test('the band paints from identity only: the same inputs give the same answer', () => {
@@ -117,6 +118,17 @@ test('the repeat reads the kept answer: one read for an arm and a game', async (
   assert.equal(reads, 2, 'another arm is another read')
 })
 
+test('an answer `keep` refuses is returned but not kept: the next ask tries again', async () => {
+  const cache = keyedCache()
+  let reads = 0
+  const read = async () => ({ shard: ++reads > 1 ? { ok: true } : null })
+  const keep = (a) => a.shard != null
+  assert.equal((await cache.load('a', read, keep)).shard, null)
+  assert.equal(cache.peek('a'), null, 'the answer with no shard is not kept')
+  assert.deepEqual((await cache.load('a', read, keep)).shard, { ok: true })
+  assert.deepEqual(cache.peek('a').shard, { ok: true })
+})
+
 test('a failed read is not kept: the next ask tries again', async () => {
   const cache = keyedCache()
   let reads = 0
@@ -134,6 +146,18 @@ test('a scene pitch carries its mark colour: the one its tile wears', () => {
   const tiles = pitchTiles([row('FF', 500, 95), row('SL', 300, 86), row('CH', 200, 85)])
   const pitches = scenePitches(tiles, false)
   assert.deepEqual(pitches.map((p) => p.color), ['FF', 'SL', 'CH'].map((c) => pitchMark(c).color))
+})
+
+test('a scene pitch that brings its own colour keeps it', () => {
+  const tile = { code: 'FF', name: 'Four-seam', family: 'fastball', pct: '100', mph: '95.0', velo: 95, color: '#123456' }
+  assert.equal(scenePitches([tile], false)[0].color, '#123456')
+})
+
+test('the full card tolerates a missing pitcher, and never shows another key\'s answer', () => {
+  const card = src('components/playbyplay/pitcherCard/PitcherCard.jsx')
+  assert.match(card, /lefty=\{pitcher\?\.hand === 'L'\} name=\{pitcher\?\.name\}/)
+  assert.match(card, /asked\?\.key === key \? asked : null/)
+  assert.match(card, /\{ key, line, post, career, last, shard \}/)
 })
 
 test('the at-bat replay colours each pitch by its type, though its scene code is "FF-3"', () => {
@@ -229,7 +253,7 @@ test('the full card draws no white of its own: its labels and bands show the eve
 })
 
 test('"Before this at-bat" is an inked tag in the count tag\'s face', () => {
-  const tag = css('pitcher-card/arrival.css').match(/\.pbp__repeat-tag \{([^}]*)\}/)[1]
+  const tag = css('play-by-play/repeat-tag.css').match(/\.pbp__repeat-tag \{([^}]*)\}/)[1]
   for (const part of ['border: var(--bw-heavy) solid var(--border-stamped)', 'font-family: var(--font-display-tag)', 'text-transform: uppercase', 'width: fit-content']) assert.ok(tag.includes(part), part)
 })
 

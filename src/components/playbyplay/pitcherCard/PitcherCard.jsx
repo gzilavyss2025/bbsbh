@@ -48,8 +48,9 @@ import { SeasonLines } from './SeasonLines.jsx'
 // arrives the band wipes in over the top, the tab fades, and the three sections unfold
 // (Arrival.jsx; it plays only for a fetch the reader watched, so a card with its data in hand
 // draws final). The repeat at the head of the next at-bat is this same card: it shares the
-// answer through `cardData` below, keyed by arm and game, so it asks the network for nothing
-// and draws complete on its first render. `after` renders what sits right below the card and
+// answer through `cardData` below, keyed by arm and game: once the first card has loaded it asks
+// the network for nothing and draws complete on its first render (opened directly, with no first
+// card, it is the first asker and arrives like any card). `after` renders what sits right below the card and
 // arrives with it (the departing arm's line), told whether the card has settled.
 const cardData = keyedCache()
 
@@ -67,6 +68,8 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
   const positionPlayer = position !== '1' && position !== 'Y'
 
   const key = `${id}|${season}|${sportId}|${gameType}|${officialDate}|${gameNumber}`
+  // A read that lost the pitch-arsenal shard (a failed fetch gives null) is shown but not kept, so the next ask retries it.
+  const kept = (a) => a != null && (!(sportId === 1 || sportId === 11) || a.shard != null)
   const { data: asked, loading } = useAsync(
     () =>
       cardData.load(key, async () => {
@@ -81,12 +84,13 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
         // His earlier Octobers: one extra yearByYear request, only in a postseason
         // game, and it ends the day before this one like `post` (ADR-0088).
         const career = isPostseason(gameType) ? await fetchPitcherPostseasonCareer(id, season, post) : null
-        return { line, post, career, last, shard }
-      }),
+        return { key, line, post, career, last, shard }
+      }, kept),
     [key],
   )
-  // A kept answer is in hand on the first render; otherwise it is the fetch's.
-  const data = cardData.peek(key) ?? asked
+  // A kept answer is in hand on the first render; otherwise it is the fetch's, and only this key's
+  // (useAsync clears the last key's answer in an effect, one render late).
+  const data = cardData.peek(key) ?? (asked?.key === key ? asked : null)
 
   const role = pitcherRole(data?.line)
   const tiles = positionPlayer ? [] : pitchTiles(pitchArsenalFor(data?.shard, id, sportId === 1))
@@ -120,7 +124,7 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
           />
         </Unfold>
         <Unfold open={open && tiles.length > 0} delay={435}>
-          <PitchMix tiles={tiles} lefty={pitcher.hand === 'L'} name={pitcher.name} />
+          <PitchMix tiles={tiles} lefty={pitcher?.hand === 'L'} name={pitcher?.name} />
         </Unfold>
         <Unfold open={Boolean(data?.last)} delay={490}>
           <LastAppearance

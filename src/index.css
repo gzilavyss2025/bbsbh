@@ -129,6 +129,7 @@
 @import './styles/12-sealbox.css';
 @import './styles/12a-seal-tear.css';
 @import './styles/13-play-by-play.css';
+@import './styles/play-by-play/repeat-tag.css';
 /* The full Now Pitching card (#1344) — a subdirectory, since src/styles is at
    its file ratchet (scripts/check-dir-size.mjs). */
 @import './styles/pitcher-card/card.css';

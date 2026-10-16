@@ -35,8 +35,10 @@ read off the window bounds), in feed order, with a "Before this at-bat" tag (whe
 notice component as the original (`MoundVisitBar`, `BatterNotice`, …), except a pitching
 change: the FULL Now Pitching card (`PitcherCard`, labelled "Pitching", ADR-0113 slice 3; it is the
 same branch as the original in `PlayByPlay.jsx`, with no handoff line), or `EventNote` when the arm
-does not resolve. It reads the answer the first card kept (`cardData` below), so it asks the network
-for nothing and draws arrived, with no motion. A standalone play (pickoff, balk) is never repeated.
+does not resolve. It reads the answer the first card kept (`cardData` below), so when that card has
+loaded it asks the network for nothing and draws arrived, with no motion. A reader who opens the
+window directly (the first card never mounted) makes the repeat the first asker: it fetches and
+plays the arrival like any card. A standalone play (pickoff, balk) is never repeated.
 
 ## The files
 

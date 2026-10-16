@@ -102,22 +102,3 @@
 .unfold[data-open] > .unfold__in {
   overflow: visible;
 }
-
-/* "Before this at-bat": the tag over a notice repeated at the head of the next at-bat's window
-   (PlayByPlay, windowLeadIn) — when it happened, not "seen". It is an inked tag, the count tag's
-   face (stamped.css .card__count), as the design draws it. Here, not in 13-play-by-play.css, which
-   is at its line cap; the repeat of the full card is what it mostly tags. */
-.pbp__repeat-tag {
-  display: block;
-  width: fit-content;
-  margin: 0 var(--space-3h) var(--space-1);
-  padding: var(--space-1) var(--space-2);
-  border: var(--bw-heavy) solid var(--border-stamped);
-  color: var(--text-heading);
-  font-family: var(--font-display-tag);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  line-height: var(--lh-solid);
-  letter-spacing: var(--ls-wide);
-  text-transform: uppercase;
-}

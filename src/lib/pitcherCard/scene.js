@@ -118,7 +118,7 @@ export function arc(code, mph, lefty, view = 'hitter') {
 export function scenePitches(tiles, lefty, view = 'hitter') {
   return tiles
     .filter((t) => MOVE[t.code] && t.velo > 0)
-    .map((t) => ({ ...t, T: flightTime(t.velo), pts: arc(t.code, t.velo, lefty, view), color: pitchMark(t.code).color }))
+    .map((t) => ({ ...t, T: flightTime(t.velo), pts: arc(t.code, t.velo, lefty, view), color: t.color ?? pitchMark(t.code).color }))
 }
 
 // ONE REAL PITCH for the scene (the Scout's pitch modal): `flight` is

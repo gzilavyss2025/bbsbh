@@ -114,8 +114,10 @@ so the two arrive together.
 card (`ReliefRepeat` is deleted), with the "Before this at-bat" tag above it. It is the same branch of
 `PlayByPlay.jsx` as the original, with no handoff line. It asks for nothing: `lib/pitcherCard/cardData.js`
 keeps the finished answer (season line, last game, arsenal, career) by arm, season, level, game type,
-date and game number. The repeat reads it on its first render, so it is drawn final. Two cards that
-ask while the first request is in flight share the one request. A failed read is not kept.
+date and game number. Once the first card has loaded, the repeat reads it on its first render and is
+drawn final. A reader who opens the window directly, with no first card, makes the repeat the first
+asker: it fetches and plays the arrival like any card. Two cards that ask while the first request is
+in flight share the one request. A failed read, or one that lost the arsenal shard, is not kept.
 **ADR-0030's 2026-10-14 addendum now covers the repeat card**: it names the same club, so its band
 wears the same triad, from the same two inputs, `(teamId, treatment)`.
 
