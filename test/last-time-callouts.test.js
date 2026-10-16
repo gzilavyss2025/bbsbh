@@ -118,3 +118,27 @@ test('a no-hitter needs a Final game and an opponent with no hits', () => {
   live.gameData.status.abstractGameState = 'Live'
   assert.deepEqual(detectNoHitters(live), [])
 })
+
+// --- the link (#1570) ----------------------------------------------------------------------
+test('the date links the earlier game\'s box score, with no score in the path', () => {
+  const prev = row(1, '2026-05-03', 'away', { gameNumber: 2, away: club(158, 'MIL'), home: club(112, 'CHC') })
+  const [note] = buildLastTimeNotes(docsOf('tripleplays', [prev]), feed(), tp)
+  assert.deepEqual(note.link, { label: 'May 3, 2026', path: '/05032026/milchc-2/boxscore' })
+  assert.ok(note.text.includes(note.link.label))
+  assert.doesNotMatch(note.link.path, /\d+-\d+|\?/)
+})
+
+test('a "since at least" line has no date, so no link', () => {
+  const [note] = buildLastTimeNotes(docsOf('tripleplays', [row(1, '1955-08-03', 'away')]), feed(), tp)
+  assert.equal(note.link, null)
+})
+
+test('each line links its own earlier game and carries the club identity', () => {
+  const me = { id: 7, name: 'Hitter' }
+  const docs = docsOf('cycles', [row(1, '2024-05-01', 'away', { player: me }), row(2, '2026-06-01', 'home', { player: { id: 9, name: 'O' } })])
+  const notes = buildLastTimeNotes(docs, feed(), { kind: 'cycles', side: 'away', player: me })
+  const by = Object.fromEntries(notes.map((n) => [n.kind, n]))
+  assert.equal(by.lastTimePlayer.link.label, 'May 1, 2024')
+  assert.equal(by.lastTimePlayer.teamId, 158)
+  assert.equal(by.lastTimePlayer.personName, 'Hitter')
+})
