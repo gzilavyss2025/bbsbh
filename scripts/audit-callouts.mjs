@@ -36,6 +36,7 @@
 //   node scripts/audit-callouts.mjs --since=2026-08-09 --until=2026-08-17
 //   node scripts/audit-callouts.mjs --date=2026-08-12 --limit=20
 //   node scripts/audit-callouts.mjs --bundle-only          # no network
+//   node scripts/audit-callouts.mjs --world-series=2024,2025   # the five ws* kinds, on those Series
 // Report: .scratch/callout-audit/report.json (gitignored) plus a table on stdout.
 
 import { readdir } from 'node:fs/promises'
@@ -46,8 +47,13 @@ import { parseArgs } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
+import { historyBefore, wsBundle, wsGames, wsSkeleton } from './lib/world-series/audit.mjs'
+import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from '../src/api/callout-notes/worldSeries.js'
+import { buildWsWtaTrailing9Note, wsPlayCtx } from '../src/api/callout-notes/worldSeriesEvents.js'
+import { fetchWorldSeriesStartsBefore } from '../src/api/postseason/pitcherWorldSeries.js'
 
 import { halfIndex } from '../src/api/select.js'
+import { cumulativeInnings } from '../src/api/callout-notes/checkpoints.js'
 import { buildCallouts, computeCalloutProgress, computeGameCalloutNotes } from '../src/api/callout-notes.js'
 import { buildPreHalfCallouts } from '../src/api/prehalf-callouts.js'
 import { buildBetweenInnings } from '../src/api/between-innings.js'
@@ -250,7 +256,7 @@ function rollupGroupRanks(notes) {
 
 // One game -> a flat list of measured instances plus per-surface counters.
 // `rank` is null on a surface whose builder already truncated.
-function replayGame(feed, bundle, ctx, workload, vsTeam) {
+function replayGame(feed, bundle, ctx, workload, vsTeam, ws = null) {
   const instances = []
   const opportunities = Object.fromEntries(SURFACES.map((s) => [s, 0]))
   const empty = Object.fromEntries(SURFACES.map((s) => [s, 0]))
@@ -259,7 +265,7 @@ function replayGame(feed, bundle, ctx, workload, vsTeam) {
     if (!notes.length) empty[surface] += 1
     notes.forEach((n, i) => {
       if (!n?.kind) return
-      instances.push({ surface, kind: n.kind, score: n.score ?? 0, rank: ranked ? ranked[i] : null })
+      instances.push({ surface, kind: n.kind, score: n.score ?? 0, rank: ranked ? ranked[i] : null, text: n.text })
     })
   }
 
@@ -272,6 +278,7 @@ function replayGame(feed, bundle, ctx, workload, vsTeam) {
     firstPA: firstPAIndexByBatter(feed),
     firstRispPA: firstRispPAIndexByBatter(feed),
     progress: computeCalloutProgress(feed),
+    ws: ws && wsPlayCtx(feed, bundle, ws.eventHistory),
   }
 
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
@@ -284,7 +291,7 @@ function replayGame(feed, bundle, ctx, workload, vsTeam) {
     const entering = halfIndex(inning, half) - 1
     const leaving = halfIndex(inning, half)
     push('preHalf', buildPreHalfCallouts({
-      feed, bundle, inning, half, revealedThrough: entering, workload, gameDate: ctx.gameDate,
+      feed, bundle, inning, half, revealedThrough: entering, workload, gameDate: ctx.gameDate, ...ws,
     }), null)
 
     const margin = buildMarginNotes(feed, leaving, bundle, teamNames, extras)
@@ -295,7 +302,7 @@ function replayGame(feed, bundle, ctx, workload, vsTeam) {
     }), null)
   }
 
-  const roll = computeGameCalloutNotes(feed, bundle, vsTeam)
+  const roll = computeGameCalloutNotes(feed, bundle, vsTeam, ws?.eventHistory)
   push('rollup', roll, rollupGroupRanks(roll))
   return { instances, opportunities, empty }
 }
@@ -385,6 +392,69 @@ function deadFamilies(report, eligible) {
   return { dead, untested }
 }
 
+// --- World Series replay (--world-series) ---------------------------------------
+// The preHalf builder truncates itself, so for the ws kinds the strip also gets an OFFERED count:
+// the same three builders, called with the same arguments, before the 2-slot cut.
+const WS_KINDS = ['wsSeriesOdds', 'wsStarterStart', 'wsLastTime', 'wsLastTimeGame', 'wsWtaTrailing9']
+
+function wsOffered(feed, bundle, ws, gameDate) {
+  const type = feed.gameData.game.type
+  const out = [...buildWorldSeriesOddsNotes({ history: ws.seriesHistory, bundle, gameDate, gameType: type })]
+  for (const side of ['away', 'home']) {
+    const pid = feed.gameData.probablePitchers?.[side]?.id
+    const n = buildWorldSeriesStarterNote({ starts: ws.wsStarts, pid, side, gameType: type })
+    if (n) out.push(n)
+  }
+  const row = cumulativeInnings(feed).find((r) => r.inning === 8)
+  const wta = row && buildWsWtaTrailing9Note({ row, inning: 9, half: 'top', bundle, history: ws.eventHistory, gameDate, gameType: type })
+  return wta ? [...out, wta] : out
+}
+
+async function worldSeriesAudit(seasons) {
+  const series = await readJsonOr(join(ROOT, 'public', 'data', 'world-series', 'series.json'), null)
+  const events = await readJsonOr(join(ROOT, 'public', 'data', 'world-series', 'events.json'), null)
+  const rows = new Map()
+  const offered = new Map()
+  const bump = (m, k) => m.set(k, (m.get(k) ?? 0) + 1)
+  let games = 0
+  for (const season of seasons) {
+    const skel = await wsSkeleton(season)
+    for (const g of await wsGames(season)) {
+      const bundle = await wsBundle(season, g, skel)
+      const feed = await getJson(`/api/v1.1/game/${g.gamePk}/feed/live`)
+      const ids = [feed.gameData.probablePitchers?.away?.id, feed.gameData.probablePitchers?.home?.id].filter(Boolean)
+      const counts = await Promise.all(ids.map((id) => fetchWorldSeriesStartsBefore(id, g.date)))
+      const ws = { ...historyBefore(series, events, season), wsStarts: Object.fromEntries(ids.map((id, i) => [id, counts[i]])) }
+      const ctx = { ...gameContext(feed, null, null), gameDate: g.date }
+      const replay = replayGame(feed, bundle, ctx, null, null, ws)
+      games += 1
+      for (const n of wsOffered(feed, bundle, ws, g.date)) bump(offered, n.kind)
+      for (const inst of replay.instances.filter((i) => WS_KINDS.includes(i.kind))) {
+        const key = `${inst.surface}|${inst.kind}`
+        if (!rows.has(key)) rows.set(key, { kind: inst.kind, surface: inst.surface, scores: [], games: new Set(), kept: 0, texts: new Map() })
+        const r = rows.get(key)
+        r.scores.push(inst.score)
+        r.texts.set(inst.text, `${inst.score} (${g.date})`)
+        r.games.add(g.gamePk)
+        if (inst.rank == null || inst.rank < (CAPS[inst.surface] ?? Infinity)) r.kept += 1
+      }
+    }
+  }
+  const report = [...rows.values()].map((r) => {
+    const s = r.scores.sort((a, b) => a - b)
+    return {
+      kind: r.kind, surface: r.surface, games: r.games.size, instances: s.length,
+      min: s[0], median: s[Math.floor(s.length / 2)], max: s[s.length - 1], kept: r.kept,
+      offered: r.surface === 'preHalf' ? offered.get(r.kind) ?? 0 : null,
+      texts: [...r.texts].slice(0, 40),
+    }
+  }).sort((a, b) => a.kind.localeCompare(b.kind))
+  console.log(`\n${games} World Series games, seasons ${seasons.join(', ')}`)
+  console.table(report.map(({ texts, ...r }) => r))
+  for (const r of report.filter((x) => x.kind !== 'wsStarterStart')) for (const [t, sc] of r.texts) console.log(`${r.kind} ${sc}: ${t}`)
+  await writeJsonAtomic(join(ROOT, '.scratch', 'callout-audit', 'report-ws.json'), { seasons, games, report, offered: Object.fromEntries(offered) }, 2)
+}
+
 async function bundleOnly(bundles, workload) {
   // No network and no game state: this can only say the bundle CARRIES the data
   // a family's precompute gate wants. An upper bound, never a fire rate.
@@ -413,6 +483,7 @@ async function bundleOnly(bundles, workload) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
+  if (args['world-series']) return worldSeriesAudit(String(args['world-series']).split(',').map(Number))
   const since = args.date || args.since || null
   const until = args.date || args.until || null
   const limit = Number(args.limit) || Infinity
