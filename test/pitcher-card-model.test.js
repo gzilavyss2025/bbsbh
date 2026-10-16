@@ -123,28 +123,25 @@ test('percents add to 100 by largest remainder (Painter)', () => {
   assert.equal(tiles[3].family, 'offspeed')
 })
 
-test('a pitch under 3% folds into "Other", shown as "<1" when it rounds to 0 (Fuentes)', () => {
+// ADR-0113, slice 3: the "Other" tile is gone. A pitch under 3% has no tile, and the other
+// tiles' percents are NOT renormalised: they are what they were with "Other" beside them.
+test('a pitch under 3% gets no tile, and the others keep their percents (Fuentes)', () => {
   const tiles = pitchTiles(FUENTES)
-  assert.deepEqual(tiles.map((t) => t.pct), ['69', '24', '7', '<1'])
-  const other = tiles[3]
-  assert.equal(other.other, true)
-  assert.equal(other.code, null)
-  assert.equal(other.mph, '–')
-  assert.equal(other.family, 'other')
+  assert.deepEqual(tiles.map((t) => t.code), ['FF', 'SL', 'FS'])
+  assert.deepEqual(tiles.map((t) => t.pct), ['69', '24', '7']) // the same as before; the 0.7% curveball is not folded in
+  assert.ok(tiles.every((t) => !t.other && t.code), 'no tile is "Other"')
 })
 
-test('several small pitches fold into ONE "Other" tile, last', () => {
+test('several small pitches leave no tile, and the kept percents still add to 100 less their share', () => {
   const tiles = pitchTiles([row('FF', 900, 95), row('SL', 60, 85), row('CU', 20, 78), row('CH', 20, 86)])
-  assert.equal(tiles.length, 3)
-  assert.equal(tiles[2].other, true)
-  assert.equal(tiles[2].pct, '4')
-  assert.equal(tiles.reduce((n, t) => n + Number(t.pct), 0), 100)
+  assert.deepEqual(tiles.map((t) => t.code), ['FF', 'SL'])
+  assert.deepEqual(tiles.map((t) => t.pct), ['90', '6'])
+  assert.equal(tiles.reduce((n, t) => n + Number(t.pct), 0), 96) // 4% is the folded share: not renormalised
 })
 
-test('the tiles always add to 100', () => {
-  for (const rows of [FUENTES, PAINTER, [row('FF', 1, 90), row('SL', 1, 80), row('CH', 1, 85)]]) {
-    const sum = pitchTiles(rows).reduce((n, t) => n + (t.pct === '<1' ? 0 : Number(t.pct)), 0)
-    assert.equal(sum, 100)
+test('with nothing under 3%, the tiles add to 100', () => {
+  for (const rows of [PAINTER, [row('FF', 1, 90), row('SL', 1, 80), row('CH', 1, 85)]]) {
+    assert.equal(pitchTiles(rows).reduce((n, t) => n + Number(t.pct), 0), 100)
   }
 })
 
@@ -262,7 +259,7 @@ test('a left-hander mirrors a right-hander about the plate', () => {
   }
 })
 
-test('the scene draws only pitches with a shape: no "Other", no knuckleball', () => {
+test('the scene draws only pitches with a shape: no knuckleball, no pitch under 3%', () => {
   const tiles = pitchTiles([row('FF', 500, 95), row('KN', 300, 76), row('SL', 190, 85), row('CU', 10, 78)])
   const pitches = scenePitches(tiles, false)
   assert.deepEqual(pitches.map((p) => p.code), ['FF', 'SL'])

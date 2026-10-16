@@ -1,4 +1,5 @@
 import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
+import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../headerTheme.js'
 import { gamePath } from '../route.js'
 import { SPORT_LABEL } from '../teams.js'
 
@@ -60,31 +61,32 @@ export function showCareerRow(gameType, career, post) {
 
 const FOLD_UNDER = 3 // percent
 
-// One tile per pitch, most-thrown first, from pitchArsenalFor's rows. A pitch
-// under 3% folds into one "Other" tile, last. Percents are rounded by largest
-// remainder so the tiles add to 100; "Other" reads "<1" when its share rounds
-// to 0 (Fuentes 2026: a 0.7% curveball). Each tile: { code, name, family,
-// pct, mph, velo, other }. `code` is null on "Other".
+// One tile per pitch, most-thrown first, from pitchArsenalFor's rows. A pitch under 3% of
+// his pitches gets no tile (it used to fold into an "Other" tile; ADR-0113, slice 3). The
+// percents are NOT renormalised: they are rounded by largest remainder over ALL his pitches,
+// the folded share included, so a kept tile reads the same as it did with "Other" beside
+// it and the tiles add to 100 less the folded share. Each tile: { code, name, family, pct,
+// mph, velo }.
 export function pitchTiles(rows) {
   if (!rows?.length) return []
   const total = rows.reduce((n, r) => n + r.pitches, 0)
   if (!total) return []
   const kept = []
-  let otherPitches = 0
+  let folded = 0
   for (const r of rows) {
-    if ((r.pitches / total) * 100 < FOLD_UNDER) otherPitches += r.pitches
-    else kept.push({ code: r.code, name: pitchLabel(r.code), family: pitchFamily(r.code), pitches: r.pitches, velo: r.avgVelo ?? 0, other: false })
+    if ((r.pitches / total) * 100 < FOLD_UNDER) folded += r.pitches
+    else kept.push({ code: r.code, name: pitchLabel(r.code), family: pitchFamily(r.code), pitches: r.pitches, velo: r.avgVelo ?? 0 })
   }
-  if (otherPitches > 0) kept.push({ code: null, name: 'Other', family: 'other', pitches: otherPitches, velo: 0, other: true })
-  const pcts = largestRemainder(kept.map((t) => (t.pitches / total) * 100))
+  const shares = kept.map((t) => (t.pitches / total) * 100)
+  if (folded > 0) shares.push((folded / total) * 100)
+  const pcts = largestRemainder(shares)
   return kept.map((t, i) => ({
     code: t.code,
     name: t.name,
     family: t.family,
-    pct: t.other && pcts[i] === 0 ? '<1' : String(pcts[i]),
-    mph: t.other ? '–' : t.velo.toFixed(1),
+    pct: String(pcts[i]),
+    mph: t.velo.toFixed(1),
     velo: t.velo,
-    other: t.other,
   }))
 }
 
@@ -166,4 +168,15 @@ export function lastAppearanceCells(last) {
     ['BB', last.baseOnBalls],
     ['K', last.strikeOuts],
   ].map(([label, value]) => ({ label, value: String(value) }))
+}
+
+// THE ARRIVAL BAND'S PAINT (ADR-0113, slice 3). The band that wipes across the full Now
+// Pitching card wears the pitching club's hand-set triad (ADR-0030's 2026-10-14 addendum:
+// identity only, the inputs are `(teamId, side, treatment)` and nothing else). A club with no
+// triad wears the house navy: `house: true` makes the band carry `.sectionhead--house`, so it
+// keeps the navy even inside a themed ancestor. A club colour is never invented. The two handoff
+// cards are always the house navy and ask for it on `CardBand` directly (`<CardBand house>`).
+export function bandPaint({ teamId, side, treatment }) {
+  const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment?.[side]))
+  return theme ? { house: false, style: headerThemeStyle(theme) } : { house: true, style: undefined }
 }

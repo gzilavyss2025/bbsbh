@@ -134,7 +134,6 @@ test('N8c: the nine call sites pass change--framed through eventCardClass (ADR-0
     'components/inning/HalfInning.jsx': 3,
     'components/playbyplay/PlayByPlay.jsx': 4,
     'components/scoring/lens/PitcherSheet.jsx': 1,
-    'components/playbyplay/PitcherNotice.jsx': 1,
   }
   for (const [rel, n] of Object.entries(callers)) assert.equal(count(src(rel), `className={${FRAME}}`), n, `${rel}: ${n} call sites`)
 })

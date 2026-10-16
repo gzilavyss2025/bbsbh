@@ -9,7 +9,8 @@ const f1 = (v) => v.toFixed(1)
 // in order of use: the pitch in flight draws a trail that thickens as the ball
 // comes closer, then the ball; it holds at the plate, then the next pitch. His
 // other pitches stay on as faint lines with an end ring. A navy bar names the
-// pitch in flight and its speed. No controls, no tap targets.
+// pitch in flight and its speed. No controls, no tap targets. Every line, ring and
+// trail is drawn in the pitch's own `color` (pitchTypes.js), the one its tile wears.
 //
 // PERFORMANCE: one SVG, drawn by setting attributes through refs from a
 // requestAnimationFrame loop — no React state per frame. The loop stops while
@@ -62,7 +63,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
           g?.setAttribute('visibility', j === idx ? 'hidden' : 'visible')
           g?.classList.toggle('is-dim', picked >= 0)
         })
-        segRefs.current.forEach((s) => s?.setAttribute('class', `stroke--${p.family}`))
+        segRefs.current.forEach((s) => s?.setAttribute('stroke', p.color))
         if (barNameRef.current) barNameRef.current.textContent = p.name
         if (barMphRef.current) barMphRef.current.textContent = `${p.mph} mph`
         if (barStepRef.current) barStepRef.current.textContent = `Pitch ${p.no} of ${atBat}`
@@ -196,8 +197,8 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
             <g key={p.code} ref={(el) => {
                 ghostRefs.current[j] = el
               }} className="pscene__ghost">
-              <polyline className={`stroke--${p.family}`} points={p.pts.map((q) => `${f1(q[0])},${f1(q[1])}`).join(' ')} />
-              <circle className={`stroke--${p.family} pscene__ring`} cx={f1(end[0])} cy={f1(end[1])} r={f1(end[2] / 2)} />
+              <polyline stroke={p.color} points={p.pts.map((q) => `${f1(q[0])},${f1(q[1])}`).join(' ')} />
+              <circle className="pscene__ring" stroke={p.color} cx={f1(end[0])} cy={f1(end[1])} r={f1(end[2] / 2)} />
             </g>
           )
         })}

@@ -118,6 +118,41 @@ narrower. The turn runs on its own tap. The docked card's fade is the one on
 | Cards | A docked card fades in 220 ms (`--dur-med`), opacity + `scale(1.04)` → 1 | `useBecameTrue(dock)` in `LensFrame`: not on a cold load or a return to the lens. A card a poll brings is an arrival, and it fades |
 | Pitcher sheet | Slides up 260 ms (`--dur-lens-sheet`) from `translateY(40px)` | Mounts only on a tap |
 
+## The arrival (ADR-0113, slice 3)
+
+A notification card that has extra data to fetch starts as the plain yellow card (ink tab, photo,
+name, badges, logo). When its data arrives, a club band wipes across the top. The full Now Pitching
+card (`PitcherCard`) does this, and so do the two handoff cards (`DepartureLineCard`,
+`FinalizedLineCard`). All times are CSS transitions on `--ease-stamp`
+(`cubic-bezier(0.2, 0.9, 0.3, 1)`); the sheet is `motion/arrival.css`, the resting looks are
+`pitcher-card/arrival.css`, and the times are tokens (`--dur-arrive*`, `--delay-arrive-*`).
+
+| What | Spec |
+| --- | --- |
+| Tab | The ink tab fades out in 160 ms (`--dur-snappy`), at t = 0 |
+| Band | 33 px: 30 px of fill and a 3 px underline. `clip-path: inset(0 100% 0 0)` to `inset(0)` in 380 ms (`--dur-arrive`), at t = 0 |
+| Label | The band repeats the tab's words; it fades in over 220 ms after 200 ms |
+| Texture | The ripple rings and sheen of `.sectionhead--band` (`--ripple-*`, `--sheen-*`, read there, not copied) fade in over 520 ms after 260 ms |
+| Head | The top padding grows from 28 px to 47 px (band 33 + the 14 px the tab hung) in 380 ms |
+| Sections | `grid-template-rows` 0fr to 1fr in 380 ms, and opacity in 260 ms (`Unfold`). The season line waits 380 ms, the pitch mix 435 ms, the last appearance 490 ms. The handoff table waits 380 ms |
+
+**The band's colour.** The full card's band is the club's hand-set triad (`--bar-fill`,
+`--bar-accent`, `--bar-text`, set by `bandPaint` from the club and the jersey it wears); a club with no
+triad keeps the house navy (`--navy`, `--band-rule`, `--text-on-ink`). The two handoff cards are
+always the house navy (`.sectionhead--house`). No colour is invented.
+
+**The gate is `useBecameTrue` (`hooks/motion/useArrival.js`).** `arrival--play`, the class every
+transition hangs off, is on only for the render in which the card's data went from absent to present
+with the card already mounted, and it stays on. A card with its data in hand when it mounts (the
+lead-in repeat, which reads `cardData`'s kept answer; a return to a half) is drawn `arrival is-in`,
+final, with no motion. The timing depends on the fetch alone, never on the game (ADR-0046). Under
+`prefers-reduced-motion` no transition runs.
+
+**What the gate cannot see.** A fetch still has to finish after a page load, so a card on a freshly
+loaded page arrives the same way, once its data is in. The Scores Unlocked pass and a stamp change the
+seal, not the card, so they do not change this. `FinalizedLineCard` has no fetch of its own: it is
+drawn final unless a caller passes `open={false}` first.
+
 ## The at-bat replay's count and bases (#1858)
 
 No new animation: the count strip ("2-1") and the small diamond change by text and

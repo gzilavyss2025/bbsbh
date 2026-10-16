@@ -99,7 +99,8 @@ test('N6: the two handoff cards take the event frame on their Stack and keep the
   assert.match(code, HELPER)
   for (const name of ['DepartureLineCard', 'FinalizedLineCard']) {
     const body = fn(code, name)
-    assert.ok(body.includes(`<Stack gap="snug" className={eventCardClass('pitcherhandoff')}>`), `${name}'s root`)
+    // Slice 3 (ADR-0113): the root also carries the arrival's class list (useArrival).
+    assert.ok(body.includes("<Stack gap=\"snug\" className={`${eventCardClass('pitcherhandoff')} ${arrival}`}>"), `${name}'s root`)
     assert.ok(body.includes('<div className="change">'), `${name} keeps its header row`)
     assert.ok(body.includes('<PitcherLineTable line={line}'), `${name} keeps its table`)
   }
@@ -141,8 +142,8 @@ test('N6: .change--framed keeps the margin and no-wrap for the lens button, and 
   assert.equal(decl(frame, 'margin'), 'var(--space-1) var(--space-3h)')
   assert.equal(decl(frame, 'flex-wrap'), 'nowrap')
   for (const prop of ['padding', 'border', 'border-radius', 'background', 'box-shadow']) assert.equal(decl(frame, prop), undefined, `.card--event draws the ${prop}`)
+  // Slice 3 (ADR-0113): ReliefRepeat is gone, so PitcherNotice.jsx no longer passes the frame; the repeat is a PlayByPlay caller of the full card.
   for (const rel of [
-    'components/playbyplay/PitcherNotice.jsx',
     'components/playbyplay/PlayByPlay.jsx',
     'components/inning/HalfInning.jsx',
     'components/scoring/lens/PitcherSheet.jsx',

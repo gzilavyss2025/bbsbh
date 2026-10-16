@@ -47,6 +47,7 @@ const SPOT = {
   FS: [-0.15, 1.45],
 }
 
+import { pitchMark } from '../pitch/pitchTypes.js'
 import { camera } from './camera.js'
 
 export const SCENE_W = 336
@@ -110,16 +111,19 @@ export function arc(code, mph, lefty, view = 'hitter') {
 }
 
 // The scene's pitches, in the tiles' order (order of use): every tile with a
-// shape. "Other" and KN/EP/SC keep their tile and get no arc.
+// shape. KN/EP/SC keep their tile and get no arc. `color` is the pitch's mark
+// colour (pitchTypes.js), the one its tile wears: the scene draws every line,
+// ring and trail in it, never in a family colour. A pitch whose `code` is not a
+// pitch code (the at-bat replay's "FF-3", atBat.js) carries its own `color`.
 export function scenePitches(tiles, lefty, view = 'hitter') {
   return tiles
-    .filter((t) => !t.other && MOVE[t.code] && t.velo > 0)
-    .map((t) => ({ ...t, T: flightTime(t.velo), pts: arc(t.code, t.velo, lefty, view) }))
+    .filter((t) => MOVE[t.code] && t.velo > 0)
+    .map((t) => ({ ...t, T: flightTime(t.velo), pts: arc(t.code, t.velo, lefty, view), color: t.color ?? pitchMark(t.code).color }))
 }
 
 // ONE REAL PITCH for the scene (the Scout's pitch modal): `flight` is
 // camera.js realFlight, `t` the label fields { code, name, mph, family }.
-// Same shape as a scenePitches entry, so PitchScene draws it unchanged.
+// Same shape as a scenePitches entry (`t` carries `color`), so PitchScene draws it unchanged.
 export function realScenePitch(flight, t, view = 'hitter') {
   if (!flight) return null
   const P = projFor(view)

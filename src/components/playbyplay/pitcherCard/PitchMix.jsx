@@ -46,19 +46,19 @@ export function PitchMix({ tiles, lefty, name }) {
           const mark = marks[i]
           return (
             <div
-              key={t.code ?? 'other'}
-              className={`pcard__tile${t.code && t.code === activeCode ? ' is-active' : ''}`}
+              key={t.code}
+              className={`pcard__tile${t.code === activeCode ? ' is-active' : ''}`}
               style={{ '--pitch': mark.color }}
             >
               <span className="pcard__tilehead">
                 <PitchMark mark={mark} />
-                {t.code && <span className="pcard__code">{t.code}</span>}
+                <span className="pcard__code">{t.code}</span>
               </span>
               <span className="pcard__tname">{t.name}</span>
               <span className="pcard__pct">{t.pct}%</span>
               <span className="pcard__mph">
                 {t.mph}
-                {!t.other && <span className="pcard__unit"> mph</span>}
+                <span className="pcard__unit"> mph</span>
               </span>
             </div>
           )

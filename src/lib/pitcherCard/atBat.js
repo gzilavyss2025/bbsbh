@@ -12,6 +12,7 @@
 // caller draws nothing.
 
 import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
+import { pitchMark } from '../pitch/pitchTypes.js'
 import { realFlight } from './camera.js'
 import { realScenePitch } from './scene.js'
 
@@ -43,6 +44,7 @@ export function atBatScenePitches(pitchDetails, view = 'hitter') {
         name: `${p.no} · ${type}`,
         mph: p.mph == null ? '—' : p.mph.toFixed(1),
         family: pitchFamily(p.typeCode),
+        color: pitchMark(p.typeCode).color, // the pitch's own mark colour: `code` above is not a pitch code
       },
       view,
     )

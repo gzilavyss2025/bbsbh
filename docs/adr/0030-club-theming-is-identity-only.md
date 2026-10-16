@@ -221,3 +221,7 @@ card left that family when its frame became the stamped paper card (the
 scorebug and table skin, #2096); only its band is themed, never its stat
 tables, its pitch tiles or any control. The safety argument is unchanged: the
 inputs are `(teamId, treatment)` and nothing else.
+
+Since ADR-0113's slice 3 the band is the one that wipes in across the top of the card when its data
+arrives, and the addendum also covers the lead-in repeat of that card at the head of the next
+at-bat: it names the same club, with the same two inputs.
