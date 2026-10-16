@@ -137,6 +137,7 @@ saturation is worth changed. The column below names that saturation point, so
 | scoringFirst / oppScoringFirst | 30 | .300 deviation from the league norm |
 | inningRunDiff | 30 | a margin of 40 |
 | dayOfWeek | 30 | a spotless record |
+| wsSeriesOdds | 45 | a spotless record, or a 25-season gap (World Series games only) |
 | foulSpoiler | 30 | rank 1; the roll-up restatement adds a second bonus, full at 18 fouls tonight |
 | matchupSkill | 36 | a 2.0-SD collision on the weaker of its two sides |
 | matchupStyle | 33 | a 2.0-SD collision on the weaker of its two sides |

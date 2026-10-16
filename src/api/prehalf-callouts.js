@@ -51,6 +51,7 @@
 
 import { halfIndex, derivedHalfStartingPitcherId, sideOnMoundFor } from './select.js'
 import { matchupNotesForHalf } from './matchup/forHalf.js'
+import { buildWorldSeriesOddsNotes } from './callout-notes/worldSeries.js'
 import {
   cumulativeInnings,
   buildStarterTeamRecordNote,
@@ -75,7 +76,7 @@ const PREHALF_MAX_RECORDS = 1
 
 export function buildPreHalfCallouts({
   feed, bundle, inning, half, revealedThrough, workload, gameDate, shownCounts = null,
-  savantMatchup = null,
+  savantMatchup = null, seriesHistory = null,
 }) {
   if (!bundle) return []
   const notes = []
@@ -108,6 +109,11 @@ export function buildPreHalfCallouts({
         const note = buildDayOfWeekNote(bundle, s, dow)
         if (note) notes.push(note)
       }
+      // 1c. World Series only: the Series state heading in, and what it has meant
+      // before. Entering-tense, reads no score from tonight (ADR-0014, ADR-0087).
+      notes.push(...buildWorldSeriesOddsNotes({
+        history: seriesHistory, bundle, gameDate, gameType: feed?.gameData?.game?.type,
+      }))
     }
   }
 

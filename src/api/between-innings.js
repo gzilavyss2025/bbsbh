@@ -51,7 +51,7 @@ export const BETWEEN_INNINGS_ALLOWED_KINDS = new Set([
   'foulVolume', 'pitchPace', 'tto', 'ttoPitches',
   'laboring', 'veloVariety', 'veloDecay', 'penFatigue', 'workload', 'backToBack',
   'leverage', 'centuryClub', 'sideSplit', 'tenK', 'scorelessStreak', 'sixIp', 'homeAway',
-  'cgShutout', 'recentAppearances',
+  'cgShutout', 'recentAppearances', 'wsSeriesOdds',
   // The matchup families (api/matchup/notes.js, api/matchup/arsenal.js) —
   // season Statcast rates for a due-up hitter against the arm he will face.
   // They read no liveData at all, so they clear this surface's stricter bar
