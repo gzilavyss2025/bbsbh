@@ -123,3 +123,58 @@ test('batterDone is false for a mid-count stoppage — the same batter is still 
   assert.equal(state.batter.last, 'Yelich')
   assert.equal(state.batterDone, false)
 })
+
+// THE SCOREBUG FOLLOWS THE WINDOW ON SCREEN (focus mode, a half read back).
+//
+// The reported bug: step through an already-revealed half with "Next at-bat ›"
+// and the scorebug's bases and outs never moved — they sat on the half's FINAL
+// state. A read-back half has no `stepCap` (it is committed), so the cursor
+// (`focusStep`) is the ONLY thing that moves, and the snapshot used to ignore
+// it. `liveCapFor` is the cap the snapshot is taken at; the entries must also be
+// REBUILT at that cap, because `reached`/`scored`/`outNumber` on a card are
+// folded to the cap the feed was built with, so slicing a full-half build only
+// ever shows each runner where the half left him.
+import { readFileSync } from 'node:fs'
+import { focusWindows, liveCapFor } from '../src/api/playbyplay.js'
+
+test('liveCapFor: a windowed cursor caps the snapshot at the end of that window', () => {
+  const wins = [{ start: 0, end: 1 }, { start: 1, end: 3 }, { start: 3, end: 4 }]
+  assert.equal(liveCapFor({ wins, focusStep: 1, windowed: true, effectiveCap: null, entriesLength: 4 }), 3)
+  assert.equal(liveCapFor({ wins, focusStep: 0, windowed: true, effectiveCap: 2, entriesLength: 4 }), 1)
+})
+
+test('liveCapFor: a cursor past the windows is clamped, never trusted', () => {
+  const wins = [{ start: 0, end: 1 }, { start: 1, end: 3 }]
+  assert.equal(liveCapFor({ wins, focusStep: 9, windowed: true, effectiveCap: null, entriesLength: 3 }), 3)
+  assert.equal(liveCapFor({ wins, focusStep: -4, windowed: true, effectiveCap: null, entriesLength: 3 }), 1)
+})
+
+test('liveCapFor: following the newest, or a stacked half, keeps the reveal cap', () => {
+  const wins = [{ start: 0, end: 1 }, { start: 1, end: 3 }]
+  assert.equal(liveCapFor({ wins, focusStep: null, windowed: true, effectiveCap: 3, entriesLength: 5 }), 3)
+  assert.equal(liveCapFor({ wins, focusStep: null, windowed: true, effectiveCap: null, entriesLength: 5 }), 5)
+  assert.equal(liveCapFor({ wins, focusStep: 0, windowed: false, effectiveCap: null, entriesLength: 5 }), 5)
+  assert.equal(liveCapFor({ wins: [], focusStep: 0, windowed: true, effectiveCap: null, entriesLength: 0 }), 0)
+})
+
+test('integration: rebuilt at each window, the snapshot tracks runners and outs through a real half', () => {
+  const feed = JSON.parse(readFileSync(new URL('./fixtures/game-823035.trimmed.json', import.meta.url), 'utf8'))
+  // Top of the 7th: walk, double, single, walk, single... a half with runners
+  // moving between windows, and the shape the reported bug hid.
+  const full = computeHalfInningFeed(feed, 7, 'top', 'away')
+  const wins = focusWindows(full, full.length)
+  const at = (i) => {
+    const cap = liveCapFor({ wins, focusStep: i, windowed: true, effectiveCap: null, entriesLength: full.length })
+    return deriveLiveState(computeHalfInningFeed(feed, 7, 'top', 'away', cap), cap)
+  }
+  const occupied = (s) => `${s.bases.first ? 1 : '-'}${s.bases.second ? 2 : '-'}${s.bases.third ? 3 : '-'}`
+  assert.equal(occupied(at(2)), '1--', 'Lara walked: runner on first') // window 2 = Lara
+  assert.equal(occupied(at(3)), '-2-', 'Turang doubled and Lara scored: runner on second')
+  assert.equal(occupied(at(5)), '123', 'Bauers walked: bases loaded')
+  assert.equal(at(5).outs, 1)
+  assert.equal(at(5).batter.last, 'Bauers')
+  // The thing the reported bug did: slicing the FULL build leaves every runner
+  // at the half's final position, so the same window read empty bases.
+  const sliced = deriveLiveState(full, wins[5].end)
+  assert.equal(occupied(sliced), '---', 'a sliced full build is stale — why the entries are rebuilt at the cap')
+})

@@ -90,6 +90,7 @@ export {
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
+  liveCapFor,
   buildTrailItems,
 } from './playbyplay/entriesView.js'
 

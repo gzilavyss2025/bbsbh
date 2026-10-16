@@ -260,6 +260,30 @@ export function lastVisibleAtBatIndex(entries, cap) {
   return null
 }
 
+// The cap the scorebug's snapshot is taken at. The reveal cap (`effectiveCap`,
+// else the whole half) UNLESS the reader has put the cursor on a window: then the
+// end of THAT window. A half read back (#1539) is committed — it has no
+// `stepCap` — so "Next at-bat ›" moves `focusStep` and nothing else, and a
+// snapshot keyed only to the reveal cap sat on the half's final state for the
+// whole walk. The same goes for paging BACK inside a half still being stepped.
+//
+// Spoiler footing: `wins` is already clamped to the reveal cap (focusWindows), so
+// a window's end can only be at or before it — this never reads further than the
+// reveal cap did. `focusStep` is clamped like PlayByPlay's own window pick, never
+// trusted. A null cursor FOLLOWS the newest, and a stacked half shows everything,
+// so both keep the reveal cap exactly as before.
+//
+// The caller must rebuild its entries at the cap this returns
+// (computeHalfInningFeed's stepCap): a card's `reached`/`scored`/`outNumber` are
+// folded to the cap the feed was built with, so a slice of a fuller build leaves
+// each runner where the half left him, not where the window found him.
+export function liveCapFor({ wins, focusStep, windowed, effectiveCap, entriesLength }) {
+  if (windowed && focusStep != null && wins.length > 0) {
+    return wins[Math.min(Math.max(focusStep, 0), wins.length - 1)].end
+  }
+  return effectiveCap ?? entriesLength
+}
+
 // Cap-respecting live-state snapshot for the persistent scorebug HUD: base
 // occupancy, outs, how many pitches the pitcher CURRENTLY of record has
 // thrown, and which batter's card is the most recently visible one — folded
