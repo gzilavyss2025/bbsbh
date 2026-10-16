@@ -20,7 +20,7 @@ export function SplitRow({ row, label = row.k, count = false }) {
     <li className="rec__split">
       <button type="button" className="rec__door" onClick={() => navigate(row.to)}>{label}</button>
       {count ? (
-        <span className="rec__wl">{row.value}</span>
+        <span className="rec__fig"><span className="rec__wl">{row.value}</span></span>
       ) : (
         <span className="rec__fig">
           <span className="rec__wl">{row.v}</span>

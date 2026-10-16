@@ -192,14 +192,10 @@
   gap: 0 var(--space-2);
 }
 .rec__wl {
-  grid-area: fig;
   font-family: var(--font-display);
   font-size: var(--fs-title-lg);
   line-height: var(--lh-title);
   color: var(--text-heading);
-}
-.rec__fig .rec__wl {
-  grid-area: auto;
 }
 .rec__pct,
 .rec__last,
@@ -274,9 +270,6 @@
 }
 .rec__half--best .rec__halfwl {
   color: var(--text-heading);
-}
-.rec__half--none {
-  color: var(--text-caption);
 }
 .rec__track {
   position: relative;
