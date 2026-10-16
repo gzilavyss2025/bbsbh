@@ -6,7 +6,6 @@
 import { seriesBlockFor } from '../callouts.js'
 import { seriesOdds, clubFacts } from '../../lib/worldSeries/odds.js'
 import { ordinal } from '../../lib/format.js'
-import { teamClubName } from '../../lib/teams.js'
 import { SCORE_BASE, clampScore, skewBonus, magnitudeOf } from './shared.js'
 
 // A club that has not played in this many seasons gets the drought note.
@@ -49,18 +48,19 @@ export function buildWorldSeriesOddsNotes({ history, bundle, gameDate, gameType 
   if (games.length === 0) {
     const [a, h] = [bundle.away, bundle.home]
     if (!a?.teamId || !h?.teamId) return []
-    const nameOf = (id) => [a, h].find((t) => t.teamId === id)?.name ?? teamClubName(id)
+    const nameOf = (id) => [a, h].find((t) => t.teamId === id)?.name ?? null
     const f = clubFacts(history, gameDate, a.teamId, h.teamId)
     const season = Number(gameDate.slice(0, 4))
+    const winner = f.meetingWinnerName ?? nameOf(f.meetingWinner) // the winner's name that season, else tonight's
     const champ = [a, h].find((t) => t.teamId === f.champion)
     if (champ?.name) out.push(note('repeat', `The ${champ.name} won the ${season - 1} World Series.`, 0, champ === a ? 'away' : 'home'))
     out.push(f.lastMeeting == null
       ? note('meeting', `This is the first World Series meeting between the ${a.name} and the ${h.name}.`, magnitudeOf(1, 1))
-      : note('meeting', `The ${a.name} and the ${h.name} last met in the World Series in ${f.lastMeeting}${nameOf(f.meetingWinner) ? `; the ${nameOf(f.meetingWinner)} won` : ''}.`, magnitudeOf(season - f.lastMeeting, GAP_FULL)))
+      : note('meeting', `The ${a.name} and the ${h.name} last met in the World Series in ${f.lastMeeting}${winner ? `; the ${winner} won` : ''}.`, magnitudeOf(season - f.lastMeeting, GAP_FULL)))
     for (const [side, t] of [['away', a], ['home', h]]) {
       const gap = f.lastSeen[t.teamId] == null ? 0 : season - f.lastSeen[t.teamId]
       if (gap >= WS_DROUGHT_SEASONS) {
-        out.push(note(`drought-${side}`, `The ${t.name} last played in the World Series in ${f.lastSeen[t.teamId]}${teamClubName(f.lastOpponent[t.teamId]) ? `, against the ${teamClubName(f.lastOpponent[t.teamId])}` : ''}.`, magnitudeOf(gap, GAP_FULL), side))
+        out.push(note(`drought-${side}`, `The ${t.name} last played in the World Series in ${f.lastSeen[t.teamId]}${f.lastOpponentName[t.teamId] ? `, against the ${f.lastOpponentName[t.teamId]}` : ''}.`, magnitudeOf(gap, GAP_FULL), side))
       }
     }
     return out
@@ -75,8 +75,8 @@ export function buildWorldSeriesOddsNotes({ history, bundle, gameDate, gameType 
     out.push(note('lead20', `Teams that lead 2-0 are ${w}-${l} in the World Series.`, skewBonus(w, l)))
   }
   if (wn != null && lead === wn - 1 && trail === wn - 3) {
-    const { w, l, last, lastClub } = odds.trail31
-    const lastText = last == null ? '' : teamClubName(lastClub) ? ` The last was the ${last} ${teamClubName(lastClub)}.` : ` The last was in ${last}.`
+    const { w, l, last, lastName } = odds.trail31
+    const lastText = last == null ? '' : lastName ? ` The last was the ${last} ${lastName}.` : ` The last was in ${last}.`
     out.push(note('trail31', `Teams that trailed ${wn - 1}-${wn - 3} have won the World Series ${times(w)} in ${w + l}.${lastText}`, skewBonus(w, l)))
   }
   if (wn != null && lead === wn - 1 && trail === wn - 1) {

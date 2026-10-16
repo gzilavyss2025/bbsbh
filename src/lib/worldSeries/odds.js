@@ -22,7 +22,7 @@ function rowsOf(history) {
     const after = walk(s)
     const decided = (i) => !s.games[i].tie
     const winOf = (g) => (g.homeRuns > g.awayRuns ? g.home : g.away)
-    const base = { season: s.season, winsNeeded: s.winsNeeded }
+    const base = { season: s.season, winsNeeded: s.winsNeeded, names: s.names }
     rows.push({ ...base, tag: 'final', date: end, clubs: s.clubs, winner: s.winner })
     if (decided(0)) rows.push({ ...base, tag: 'game1', date: end, won: winOf(s.games[0]) === s.winner })
     if (s.games.length > 1 && decided(0) && decided(1) && winOf(s.games[0]) === winOf(s.games[1])) {
@@ -46,6 +46,9 @@ function rowsOf(history) {
   return rows
 }
 
+// A club's nickname in the season of that row, or null (an older file has no names).
+const nameIn = (row, club) => row?.names?.[club] ?? null
+
 const record = (rows) => {
   const w = rows.filter((r) => r.won).length
   return { w, l: rows.length - w }
@@ -62,12 +65,13 @@ export function seriesOdds(history, before) {
     if (r.homeWon) break
     roadStreak += 1
   }
+  const lastWin = trail.find((r) => r.won)
   return {
     // The Series length of the latest finished Series: what "a 3-1 lead" means now.
     winsNeeded: at('final')[0]?.winsNeeded ?? null,
     game1: record(at('game1')),
     lead20: record(at('lead20')),
-    trail31: { ...record(trail), last: trail.find((r) => r.won)?.season ?? null, lastClub: trail.find((r) => r.won)?.winner ?? null },
+    trail31: { ...record(trail), last: lastWin?.season ?? null, lastClub: lastWin?.winner ?? null, lastName: nameIn(lastWin, lastWin?.winner) },
     wta: {
       home: { w: home.filter((r) => r.homeWon).length, l: home.filter((r) => !r.homeWon).length },
       roadStreak,
@@ -86,7 +90,8 @@ export function clubFacts(history, before, ...clubs) {
     champion: clubs.includes(champion) ? champion : null,
     lastMeeting: meeting?.season ?? null,
     meetingWinner: meeting?.winner ?? null,
+    meetingWinnerName: nameIn(meeting, meeting?.winner),
     lastSeen: Object.fromEntries(clubs.map((c) => [c, lastRow(c)?.season ?? null])),
-    lastOpponent: Object.fromEntries(clubs.map((c) => [c, lastRow(c)?.clubs.find((x) => x !== c) ?? null])),
+    lastOpponentName: Object.fromEntries(clubs.map((c) => [c, nameIn(lastRow(c), lastRow(c)?.clubs.find((x) => x !== c))])),
   }
 }

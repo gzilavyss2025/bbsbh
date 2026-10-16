@@ -67,6 +67,7 @@ A row that thinks it must loosen any of these stops with `NEEDS PARENT`.
 
 - `clubs` lists Game 1's away club, then its home club. Ids are franchise ids.
 - `winner` is a club id. A series with no winner does not exist in the range.
+- `names` maps each club id to its nickname as of that season (`teamName` of the schedule row), the words the notes print after "the".
 - `awayRuns` and `homeRuns` come from the last play. `innings` is the linescore length.
 - `venue` is the venue id from the schedule row, or `null`.
 - `tie` is `true` for a tied game. A tied game has no winner and counts for no club.

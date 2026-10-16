@@ -36,8 +36,12 @@ export function buildSeries(season, rows, playsByPk) {
     wins.set(w, (wins.get(w) ?? 0) + 1)
   }
   const [winner, winsNeeded] = [...wins].sort((a, b) => b[1] - a[1])[0]
+  const clubs = [games[0].away, games[0].home]
+  // Each club's nickname as of THIS season ("Indians" in 1997), from the schedule's team objects.
+  const teams = Object.fromEntries(rows.flatMap((g) => [g.teams.away.team, g.teams.home.team]).map((t) => [t.id, t.teamName ?? t.name]))
+  const names = Object.fromEntries(clubs.filter((c) => teams[c]).map((c) => [c, teams[c]]))
   return {
-    season, winsNeeded, clubs: [games[0].away, games[0].home], winner,
+    season, winsNeeded, clubs, winner, names,
     games: games.map(({ pk, n, date, away, home, awayRuns, homeRuns, innings, venue, tie }) =>
       ({ pk, n, date, away, home, awayRuns, homeRuns, innings, venue, tie })),
   }

@@ -100,8 +100,11 @@ test('an old World Series game (no workload date) still gets the odds note; a no
   assert.ok(!kinds('D').includes('wsSeriesOdds'))
 })
 
-// Real club ids (112 Cubs, 114 Guardians, 119 Dodgers): the lookup names them.
-const REAL = { series: [mk(2016, 4, [114, 112], [114, 114, 112, 114, 112, 112, 112]), mk(1990, 4, [119, 141], [119, 119, 119, 119])] }
+// Real club ids, with the names the file stores for that season (114 was the Indians in 2016).
+const REAL = { series: [
+  { ...mk(2016, 4, [114, 112], [114, 114, 112, 114, 112, 112, 112]), names: { 114: 'Indians', 112: 'Cubs' } },
+  { ...mk(1990, 4, [119, 141], [119, 119, 119, 119]), names: { 119: 'Dodgers', 141: 'Blue Jays' } },
+] }
 const real = (bundle, gameDate) => buildWorldSeriesOddsNotes({ history: REAL, bundle, gameDate, gameType: 'W' }).map((n) => n.text)
 
 test('the comeback note names the last club to do it', () => {
@@ -114,4 +117,25 @@ test('the comeback note names the last club to do it', () => {
 test('the drought note names that last Series\' opponent', () => {
   assert.ok(real(bundleAfter(141, 5, []), '2020-10-20')
     .includes('The Club141 last played in the World Series in 1990, against the Dodgers.'))
+})
+
+test('past clubs are named as they were that season, never undefined', () => {
+  const named = { ...HISTORY, series: HISTORY.series.map((x) => (x.season === 1991 ? { ...x, names: { 3: 'Indians', 4: 'Expos' } } : x)) }
+  const t = buildWorldSeriesOddsNotes({ history: named, bundle: bundleAfter(1, 2, [1, 1, 2, 1]), gameDate: '2001-10-20', gameType: 'W' }).map((n) => n.text)
+  assert.ok(t[0].endsWith('The last was the 1991 Expos.'))
+  assert.ok(!t[0].includes('undefined'))
+  const d = buildWorldSeriesOddsNotes({ history: { ...named, series: named.series.map((x) => (x.season === 2000 ? { ...x, names: { 1: 'Mets', 2: 'Expos' } } : x)) }, bundle: bundleAfter(2, 9, []), gameDate: '2020-10-20', gameType: 'W' }).map((n) => n.text)
+  assert.ok(d.includes('The Club2 last played in the World Series in 2000, against the Mets.'))
+})
+
+test('a past 3-1 comeback by the 1997 club says Indians, not Guardians', () => {
+  const history = { series: [{ ...mk(1997, 4, [114, 146], [146, 146, 114, 146, 114, 114, 114]), names: { 114: 'Indians', 146: 'Marlins' } }] }
+  const [n] = buildWorldSeriesOddsNotes({ history, bundle: bundleAfter(1, 2, [1, 1, 2, 1]), gameDate: '2001-10-20', gameType: 'W' })
+  assert.ok(n.text.endsWith('The last was the 1997 Indians.'), n.text)
+})
+
+test('the last-meeting winner is named as he was that season', () => {
+  const named = { ...HISTORY, series: HISTORY.series.map((x) => (x.season === 2000 ? { ...x, names: { 1: 'Old Club1', 2: 'Club2' } } : x)) }
+  const t = buildWorldSeriesOddsNotes({ history: named, bundle: bundleAfter(1, 2, []), gameDate: '2001-10-20', gameType: 'W' }).map((n) => n.text)
+  assert.ok(t.includes('The Club1 and the Club2 last met in the World Series in 2000; the Old Club1 won.'), t.join(' | '))
 })
