@@ -467,7 +467,8 @@
 /* The World Series trophy: a 37x75 source drawn at 1.7em tall, 3x-sharp on a phone. */
 .pbp__calloutmark--ws {
   height: 1.7em;
-  width: auto;
+  width: 1.1em; /* about the star's width, so note text lines up */
+  object-fit: contain;
   align-self: center;
 }
 
