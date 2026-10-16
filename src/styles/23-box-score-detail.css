@@ -1,280 +1,21 @@
-/* ---------------------------------------------------------------------------
-   TEAM LEADERS — per-category season leaderboards on the team page + the
-   dedicated /team/{id}/leaders page. The featured (rank-1) card mirrors the
-   slate's Top Performers card in spirit (headshot + logo ahead of a name/stat
-   column); the parallel `.tlead__*` classes keep this always-visible board's
-   own markup from coupling to `.playerline`, which the spoiler-gated Top
-   Performers/Day Recap/Insights cards share.
-   --------------------------------------------------------------------------- */
-.tlead {
-  margin-top: 4px;
-}
-/* One column, two from 560px; minmax(0, …) lets a long row truncate (#1184). */
-.tlead__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-3h);
-}
-@media (min-width: 560px) {
-  .tlead__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-/* A category is a Card (sheet, flush body; #1113). Its padding is its own.
-   margin-top: 0 overrides .team-hub's per-card spacing rule (09-team-info.css)
-   — these sit in .tlead__grid, a grid with its own gap, not stacked sections. */
-.tlead__cat {
-  margin-top: 0;
-  padding: var(--space-3);
-}
-.tlead__cat-title {
-  margin: 0 0 10px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-/* Featured leader row — headshot + name/stat stack. */
-.tlead__featured {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-/* Favorite-team highlight (league/level leader pages only, not team/org — see
-   TeamLeaders' favoriteTeamId doc) — tints a leader's row in that club's own
-   accent (--fav-accent, set inline from favoriteAccentColor()) so a fan's team
-   jumps out on a board otherwise full of strangers. */
-.tlead__featured--fav {
-  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, var(--surface-card));
-  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
-  border-radius: var(--radius-sm);
-  margin: -4px -6px;
-  padding: var(--space-1) var(--space-1h);
-}
-/* The team filter's "everyone else" treatment (LeadersPage's TeamFilterStrip)
-   — dulled, not hidden, so a picked club's leaders stand out without the
-   board's overall category structure disappearing. Never set alongside
-   --fav, since a pick always supersedes the favorite-team tint. */
-.tlead__featured--dim {
-  opacity: 0.35;
-  filter: grayscale(60%);
-}
-/* Compound with .shot/.shot--fallback (both always set by Headshot) so this
-   outranks the base .shot sizing, same reason as .playerline__shot. Sized well
-   past that shared 52px baseline — the leader card is this component's one
-   hero image, so it earns a bigger, more readable frame. */
-.shot.tlead__shot {
-  flex: none;
-  width: var(--shot-md-w);
-  height: var(--shot-md-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.shot.tlead__shot.shot--fallback {
-  font-size: var(--fs-hero-lg);
-}
-/* Team tag — logo over abbreviation, pinned to the card's far right edge
-   (last flex child, after the flex:1 .tlead__who soaks up the rest of the
-   row). Always names the club the leader plays FOR (see FeaturedLeader's
-   displayTeamId/displayTeamAbbr). */
-.tlead__teamtag {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-.tlead__logo {
-  flex: none;
-}
-.tlead__teamabbr {
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-muted);
-}
-.tlead__who {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-/* Two-line hero name — same idiom as PlayerPage's .player__name (a flex
-   column of first/last spans; being flex children blockifies the spans, so
-   the ellipsis trio below actually takes effect). Compound to beat .plink's
-   `font: inherit`/`text-align: inherit`. */
-.tlead__who .tlead__name {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  min-width: 0;
-  width: 100%;
-}
-/* The surname gets its own full-width line rather than sharing one with the
-   stat value (the old layout's overflow bug — a long name like
-   "Adamczewski" ran into the stat beside it). Still falls back to an
-   ellipsis, same safety net as .player__name-last, for the rare name that
-   doesn't fit even with the full card width to itself. */
-.tlead__name-last {
-  font-family: var(--font-body);
-  font-size: var(--fs-body);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  color: var(--text-heading);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 /* Shared inline IL cross (see components/InjuredMark.jsx) — same glyph/color
    as .il-banner__mark (player page), sized inline for a name rather than a
    full banner. Base rule here; each context that uses it sets its own size.
-   The `.tlead__*` board carried two of those sizings until it stopped
-   rendering the mark; the ledger below is this file's only user now. */
+   The ledger below is this file's only user now. */
 .ilmark {
   flex: none;
   color: var(--accent-negative);
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
 }
-.tlead__pos {
-  margin-left: 6px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-.tlead__stat {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-1);
-}
-.tlead__statval {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-num-md);
-  font-weight: var(--w-semibold);
-  color: var(--text-heading);
-}
-.tlead__statlabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-/* Chasers (ranks 2–N) — plain rows: rank, name, value. */
-.tlead__rest {
-  list-style: none;
-  margin: 10px 0 0;
-  padding: var(--space-2) 0 0;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-.tlead__row {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-}
-/* Same favorite-team highlight as .tlead__featured--fav, sized down for a
-   chaser row. */
-.tlead__row--fav {
-  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
-  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
-  border-radius: var(--radius-xs);
-  margin: 0 -6px;
-  padding: 1px var(--space-1h);
-}
-/* Same team-filter dim treatment as .tlead__featured--dim, for a chaser row. */
-.tlead__row--dim {
-  opacity: 0.35;
-  filter: grayscale(60%);
-}
-.tlead__rank {
-  flex: none;
-  width: 14px;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
-  text-align: right;
-}
-.tlead__row .tlead__rowname {
-  flex: 1;
-  min-width: 0;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  color: var(--text-body);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.tlead__rowval {
-  flex: none;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
-}
-/* Chaser-row team tag — same typography as .tlead__teamabbr (the featured
-   leader's abbreviation under its logo), set inline next to the name instead
-   of stacked, since a chaser row has no logo to sit under. */
-.tlead__rowteam {
-  flex: none;
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-muted);
-}
-
-/* Leader badges (broader league/level/org pools only) — the featured card
-   stacks them under the name; the chaser rows tuck them just left of the value
-   (the flex:1 name keeps the value pinned right). */
-.tlead__badges {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-1h);
-}
-.tlead__badges:empty {
-  display: none;
-}
-/* The level is a paper figure Pill tag (#1131, #1186) on the inset paper with
-   a hairline edge. The figure rule sets the mono face, its 1px block pad and
-   its centring: on a chaser row it sits beside the prospect tag, which pads
-   1px to match it (below). */
-.tlead__level {
-  --pill-fill: var(--surface-inset);
-  --pill-edge: var(--border-hairline);
-  --pill-ink: var(--text-muted);
-  flex: none;
-}
-/* On a chaser row the pill/level sit small and inline before the value: the
-   prospect pill keeps a 1px pad here, a hair under the tag's own 2px, to match
-   the level tag beside it (the figure pill's 1px). Its size is the pill's own
-   --fs-label. */
-.tlead__row .prospect__tag {
-  flex: none;
-  padding: 1px var(--space-1h);
-}
 
 /* ---------------------------------------------------------------------------
    TEAM LEADERS, LEDGER FORM (`.tledg`) — what the team HUB renders instead of
-   the `.tlead` card board above: two ink-banded blocks, BATTING over PITCHING,
-   one ruled row per category. See TeamLeadersLedger.jsx for why the hub stopped
+   the `.tlead` card board (styles/leaders/board.css): two ink-banded
+   blocks, BATTING over PITCHING, one ruled row per category. See TeamLeadersLedger.jsx for why the hub stopped
    rendering cards. Deliberately a PARALLEL class family rather than a modifier
-   on `.tlead`, for the same reason `.tlead` is parallel to `.playerline`: they
-   share a data source, not a box model, and a shared root here would mean every
-   `.tlead__*` rule needs a "but not in the ledger" clause.
+   on `.tlead`: they share a data source, not a box model, and a shared root would
+   mean every `.tlead__*` rule needs a "but not in the ledger" clause.
 
    A printed ledger, so: an inked block header (the pair --text-on-ink on
    --accent-primary is asserted in check-contrast.mjs), hairline rules between
@@ -355,7 +96,7 @@
   min-width: 0;
 }
 /* The app's NAME role — every player name in this app is --font-body at
-   --fs-body/--w-semibold (.tlead__name-last, .playerline__name, .lineup__name),
+   --fs-body/--w-semibold (.playerline__name, .lineup__name),
    and this row is no exception; it read a size small before, at --fs-ui, which
    is the role for UI chrome rather than for content.
    (Since #2165 --font-body is mono, which ships one weight, so --w-semibold
@@ -364,8 +105,7 @@
    The tracking is the part that was genuinely missing: this row sits between a
    tracked condensed label and a mono figure, and an all-caps run with no
    tracking between those two reads soft.
-   Compound to beat .plink's `font: inherit` / `text-align: inherit` reset —
-   same fix as .tlead__row .tlead__rowname above. */
+   Compound to beat .plink's `font: inherit` / `text-align: inherit` reset. */
 .tledg__who .tledg__name {
   min-width: 0;
   font-family: var(--font-body);
@@ -378,10 +118,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Position, or an arm's throwing hand as RHP/LHP — the same quiet condensed
-   aside .tlead__pos gives the card board's featured leader, so a position
-   reads identically on both leader surfaces. `flex: none` keeps it whole while
-   the name beside it ellipsises. */
+/* Position, or an arm's throwing hand as RHP/LHP — a quiet condensed aside.
+   `flex: none` keeps it whole while the name beside it ellipsises. */
 .tledg__pos {
   flex: none;
   font-family: var(--font-display);

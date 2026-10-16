@@ -115,9 +115,9 @@
     "grid": 3
   },
   "src/styles/23-box-score-detail.css": {
-    "column": 6,
-    "wrap": 2,
-    "grid": 2
+    "column": 2,
+    "wrap": 1,
+    "grid": 1
   },
   "src/styles/24-floating-nav-and-hud.css": {
     "column": 1
