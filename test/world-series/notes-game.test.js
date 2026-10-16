@@ -1,7 +1,7 @@
 // wsLastTimeGame: the Final roll-up. The only result-aware World Series note.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildWsLastTimeGameNotes } from '../../src/api/callout-notes/worldSeriesEvents.js'
+import { buildWsLastTimeGameNotes } from '../../src/api/callout-notes/worldSeries/events.js'
 import { computeGameCalloutNotes } from '../../src/api/callout-notes/rollup.js'
 import { BETWEEN_INNINGS_ALLOWED_KINDS } from '../../src/api/between-innings.js'
 import { SCORE_BASE } from '../../src/api/callout-notes/shared.js'

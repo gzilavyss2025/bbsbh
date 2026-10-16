@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildWorldSeriesOddsNotes } from '../../src/api/callout-notes/worldSeries.js'
+import { buildWorldSeriesOddsNotes } from '../../src/api/callout-notes/worldSeries/odds.js'
 import { SCORE_BASE, ONCE_PER_GAME_KINDS, RECORD_KINDS } from '../../src/api/callout-notes/shared.js'
 import { BETWEEN_INNINGS_ALLOWED_KINDS } from '../../src/api/between-innings.js'
 import { HISTORY, bundleAfter, mk } from './ws-fixture.js'

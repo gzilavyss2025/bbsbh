@@ -1193,7 +1193,7 @@
       "class": "cutoff-gated",
       "why": "Static world-series/series.json and events.json: every FINISHED World Series, one row per game with its runs. A finished Series is no spoiler on its own, but a game of the current Series must never come back from it: every read goes through lib/worldSeries/lastBefore.js (strictly before the game's own date, and it throws without one), via lib/worldSeries/odds.js. Its consumers are ReferencePanel.jsx, PlayByPlay.jsx and BoxScore.jsx, and only for a game of type W. No read of Scores Unlocked (ADR-0087)."
     },
-    "callout-notes/worldSeriesEvents.js": {
+    "callout-notes/worldSeries/events.js": {
       "class": "mixed",
       "why": "The World Series \"last time\" notes. buildWsLastTimeNotes (play card) reads only the revealed play, and only calls a play the last of the game once the feed is Final; buildWsWtaTrailing9Note reads tonight's score through the 8th, so prehalf-callouts.js calls it inside the same revealedThrough gate as buildAfterInningNote. buildWsLastTimeGameNotes folds in the final result, so it is reveal-only. Every history lookup is cut strictly before the game's date by lib/worldSeries/lastBefore.js (ADR-0087).",
       "revealOnlyExports": [
@@ -1203,7 +1203,7 @@
         "api/callout-notes/rollup.js"
       ]
     },
-    "callout-notes/worldSeries.js": {
+    "callout-notes/worldSeries/odds.js": {
       "class": "spoiler-free",
       "why": "The wsSeriesOdds notes (entering-tense). The Series state heading in comes from the callouts bundle's series block, which holds only games Final before the slate date (ADR-0087); the history it quotes is cut strictly before that date by lib/worldSeries/lastBefore.js. It reads no linescore, no feed and no reveal mark, so it clears the pre-half strip and Between Innings without a gate of its own."
     }

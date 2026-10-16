@@ -576,7 +576,7 @@ count — `(N PA)` — only when the batter's PA against the type is under 80
   first, ~.34 conceding) — a banal record earns no card, in either
   direction. Roll-up folds tonight in once Final.
 
-### World Series event notes (`callout-notes/worldSeriesEvents.js`)
+### World Series event notes (`callout-notes/worldSeries/events.js`)
 
 World Series games only; a game of any other type is unchanged and costs no request. What a
 tag means is `lib/worldSeries/classify.js`, the code that built `events.json`; every lookup is

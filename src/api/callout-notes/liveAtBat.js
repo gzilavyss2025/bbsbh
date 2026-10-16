@@ -8,7 +8,7 @@ import { FOUL_CODES, FOUL_ENDS_AB_CODES, pitchDotCategory } from '../playbyplay.
 import { dayWordFor } from '../select.js'
 import { HIT_TRIGGERS, STRIKEOUT_EVENTS, SB_EVENTS, otherSide, isNum, clampScore, skewBonus, magnitudeOf, corroborationBonus, SCORE_BASE, parseRecord } from './shared.js'
 import { buildVsTeamNote } from './vsTeamNote.js'
-import { buildWsLastTimeNotes } from './worldSeriesEvents.js'
+import { buildWsLastTimeNotes } from './worldSeries/events.js'
 // The league-rank clause the scoring-first cards append (rank.js). Additive —
 // no rank in the bundle leaves the sentence exactly as it reads today.
 import { withRank } from './rank.js'
