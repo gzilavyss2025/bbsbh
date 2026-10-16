@@ -66,3 +66,14 @@ test('a best-of-nine has winsNeeded 5 (read from the data, not a constant)', () 
   assert.equal(s.winsNeeded, 5)
   assert.equal(s.winner, 111)
 })
+
+test('names: each club\'s nickname as of that season, from the schedule rows', () => {
+  const s = buildSeries(1912, schedule(1912), playsFor(schedule(1912)))
+  assert.deepEqual(s.names, { 111: 'Red Sox', 137: 'Giants' })
+  const row = (pk, away, home, aw, hm) => ({
+    gamePk: pk, officialDate: '1997-10-18', venue: { id: 1 },
+    teams: { away: { team: { id: away[0], name: `X ${away[1]}`, teamName: away[1] }, score: aw }, home: { team: { id: home[0], name: `X ${home[1]}`, teamName: home[1] }, score: hm } },
+  })
+  const rows = [row(1, [146, 'Marlins'], [114, 'Indians'], 3, 1), row(2, [114, 'Indians'], [146, 'Marlins'], 1, 3)]
+  assert.deepEqual(buildSeries(1997, rows, playsFor(rows)).names, { 114: 'Indians', 146: 'Marlins' })
+})
