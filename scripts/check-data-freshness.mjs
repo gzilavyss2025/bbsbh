@@ -51,6 +51,7 @@ export const EXCEPT = {
   'first-scorebook.json': 'hand-run retrospective of one scored game',
   'postseason-history.json': 'hand-run; only October adds to it',
   'postseason-leaders.json': 'hand-run; only October adds to it',
+  'series.json': 'hand-run; only a finished World Series adds to it (ADR-0114)',
   'run-expectancy.json': 'hand-run; the 24-state table is recomputed per season',
   'level-tenure-benchmark.json': 'hand-run research dataset (docs/level-tenure-benchmark.md)',
   'milb-history.json': 'hand-run backfill of completed MiLB seasons',
