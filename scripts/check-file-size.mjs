@@ -41,6 +41,10 @@
 // is the claim that nobody added a thousand lines to a file nobody was reading.
 //
 // Run by `npm run lint` (so it gates every push).
+//
+// HISTORY of every budget move is in `git log -p -- scripts/check-file-size.mjs`.
+// The trailing `// N` on an entry is the measured length when it was last set,
+// not a reason; a reason, where one exists, is the comment block above it.
 
 import { readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -69,50 +73,28 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // improvement. The 24 entries below are the stylesheet's remaining real debt,
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
-  // 600 -> 900 across steps 3 and 4 of the offseason home page (issues #1077,
-  // #1078): the picked-game card, then the notebook note and the season-record
-  // row. Growth this sheet was expected to take — check-dir-size.mjs's own
-  // 'src/styles' entry says so in as many words — because src/styles is AT its
-  // 115-file directory budget, so a 116th flat partial cannot exist and the
-  // /design-lab sheet already had to become a subdirectory to get in. One page,
-  // one sheet, and every selector in it is read by the five components in
-  // src/components/offseason/.
-  // 900 -> 1200 for step 4's two additions (issue #1078): the notebook note,
-  // which borrows the /fouls page's batter-vs-pitcher row rather than importing
-  // 43-foul-tracker.css's 877 lines onto the home slate to reuse forty of them,
-  // and the winter rail. Still one page, one sheet — src/styles is AT its
-  // 115-file directory budget (check-dir-size.mjs), so a 116th flat partial
-  // cannot exist and that entry's own note already said this sheet would take
-  // steps 3 and 4. The shared version of the row is the design lab's job
-  // (issues #1112-1114), which is where this and .movedup and .pgame all go.
+  // Every src/styles partial below is over the line for the same standing reason:
+  // src/styles is AT its directory budget in check-dir-size.mjs (the partials are
+  // an ordered @import sequence and cannot nest), so a new rule cannot go in a new
+  // flat file. Split a sheet by moving a component's rules into a subdirectory
+  // (src/styles/system/, focus/, report/) before you raise a number here.
   'src/styles/78-offseason.css': 1200, // 1151
-  // 600 -> 700: the winter league picker's row (issue #1055) — the control that
-  // covers the gap between one rail tab and the four leagues behind it. It sits
-  // in this file rather than beside .levelnav in 05-masthead-nav.css because
-  // that file is AT its own 700 cap, and because the picker is a slate-header
-  // row: it renders between the rail and the club strip it scopes.
   'src/styles/03-slate-header.css': 650, // 602
-  'src/styles/06-loader-and-cards.css': 800, // 900 -> 742: the off-day club tiles left for 06b-offday-cards.css, taking their hover/focus states with them
-  'src/styles/08-site-shell.css': 800, // 900 -> 800 after the dead accountpitch rules went; 1000 -> 898: the footer's flat link-list rules left for 08a-site-menu.css, which holds the shared site-directory language the sheet, the footer and /more all read
-  'src/styles/12-sealbox.css': 1600, // 1536 — DueUpNextCard's rules moved to focus/dueup-next.css; before that 1639: unified focus/stacked layout: dropped the unfocused page's .prehalf, .half__entering/.halfentering, .innings__reference/.innings__ref-*, .innings__rosters, and .innings__row2 rules
-  'src/styles/14-strike-zone.css': 900, // 898 — the sheet's ✕ left for IconButton (system/button.css, #1209); both pitch-colour keys left earlier
+  'src/styles/06-loader-and-cards.css': 800, // 900
+  'src/styles/08-site-shell.css': 800, // 900
+  'src/styles/12-sealbox.css': 1600, // 1536
+  'src/styles/14-strike-zone.css': 900, // 898
   'src/styles/15-team-color-lab.css': 680, // 674
-  'src/styles/17-identity-lab-workbench.css': 1196, // 1200 -> 1196: .idlab__monoinksource moved onto Cluster (#1180, slice C10). 1300 -> 1200 at 1200: .idlab__umpire moved onto Cluster (#1180, slice C4). 1229 — stamp-ink rules
-  'src/styles/21-box-score.css': 900, // 800 -> 869: the Coverage card's lead-story treatment (.gamestory__lead*) — a full-bleed photo, team badge, headline and blurb for the first enriched story, same .gamestory namespace the compact-row rules already live in here. 771 — the Three Stars card split out to 21a-box-score-stars.css,
-  //                                    the by-inning tally to 21b-box-score-tally.css
+  'src/styles/17-identity-lab-workbench.css': 1196, // 1200
+  'src/styles/21-box-score.css': 900, // 800
   'src/styles/22-box-score-tables.css': 800, // 789
-  'src/styles/23-box-score-detail.css': 700, // 800 -> 700 at 692: .tlead__cat and .tledg__block moved their frames onto Card (#1113, slice C1). 637 -> 721: the team hub's leader ledger (.tledg), which lands here beside the .tlead card board it renders instead of. It cannot be its own partial: src/styles is AT its directory budget (check-dir-size.mjs), the same squeeze 68-around-the-game.css records. Paid for in part by deleting the horizontal deck, its header-actions row and two dead .ilmark sizings.
-  'src/styles/28-team-hub.css': 900, // 859 — the identity hero split out to 28a-team-hub-hero.css
-  'src/styles/29-team-transactions.css': 800, // 950 -> 800: the deck's day tab and Last 10 rail chrome went with the team page swap (#1107).
-  'src/styles/31-wild-card.css': 1200, // 1300 -> 1200: the Fever radar glyph block left with the feature. 1400 -> 1300: the two card heads moved to system/section-head.css (#1113, slice H1a). 1088 -> 1365: the Minors tab's Horizon + Depth Chart cards share one broadcast-card tile (.horizontile, its stat box reusing the hover card's .phcard__tile recipe) plus the depth chart's position pill row; Horizon's own .hznlist/.hzntile grid (real stat-line tiles, multi-column past phone width) came after the first pass looked "terrible" as one full-width column of sparse rows.
-  'src/styles/35-postseason-series.css': 800, // 693 -> 774: the live series page's today/still-to-play blocks (#1230, slice 6), new sections with no finished-page counterpart, added to this same partial rather than a second one
+  'src/styles/23-box-score-detail.css': 700, // 800
+  'src/styles/28-team-hub.css': 900, // 859
+  'src/styles/29-team-transactions.css': 800, // 950
+  'src/styles/31-wild-card.css': 1200, // 1300
+  'src/styles/35-postseason-series.css': 800, // 693
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877
-  // 1000 -> 1100 was CoverColorPicker.jsx's rules (ADR-0036's shelf). That
-  // component is gone — BookCoverPicker.jsx replaced it, and its rules live in
-  // 58-logbook-shelf.css beside the rest of the book-management UI — so what is
-  // left here is PassportBook/PassportPage/PassportCover's own art, including
-  // the three league-mark board colours.
   'src/styles/49-passport-book.css': 1100, // 1036
   // ONE sheet for the four pages in src/screens/around-the-game/, which is why it is
   // over the line: four partials would cost src/styles four directory slots
@@ -126,44 +108,9 @@ const BUDGETS = {
   // caps-exempt method-note prose, whose `#root` prefix is the whole reason
   // it works. Both notes prevented a real regression. Trimming them to hit a
   // line count would be deleting the reason the rules are correct.
-  'src/styles/69-hit-chart.css': 900, // 811 — the ball-flight card, the chart's per-play sibling: same marks, same heat ring, same drawing, so one partial rather than two that can drift
-  'src/styles/68-around-the-game.css': 1100, // 1200 -> 1100 at 1097: the ABS boards moved onto Table (#1132, slice T6a), and the `.rpt` scroller rules went. Earlier: 1041 -> 1117: the run differential report's outcome cell (.rdiff__out and its three tones, .rdiff__series, .rdiff__era) — the one column on that board that is words rather than figures, and the two tones that mark the outcomes which are not results at all. 1100 -> 1200 is the second deliberate one-band raise for the same reason the first one records: splitting is the preferred answer and is still not available, because src/styles remains AT its directory budget of 115 (check-dir-size.mjs), which is why this package keeps one sheet for all of its pages. Earlier: 954 -> 1041: the diverging bar (.barcell--diverge), a variant of the shared bar cell that measures from a baseline rather than from zero, plus the row that counts the middle of a two-ended board. 1000 -> 1100 is a deliberate one-band raise, not absorbed growth: the file sat at 993 with SEVEN lines of headroom, so the next rule of any size was going to cross it. Splitting is the preferred answer and is not available — the sixth partial it would need cannot exist, because src/styles is AT its directory budget of 115 (check-dir-size.mjs), which is why this package keeps one sheet for all of its pages in the first place. Earlier: 642 -> 954 for the doubleheader report's year slider (.yrange, two stacked native range inputs), its board cells and its year drawer.
-  // The directory-budget table itself. Every entry in it carries an inline
-  // rationale BY DESIGN — that is the whole convention, and it means the file
-  // grows a few lines on any commit that adds a deliberate exception. It was
-  // trimmed back under the cap once already (c1b9043b) and immediately went
-  // over again on the next such commit, which is the signal that the cap is
-  // the wrong instrument for a documented lookup table. The thing worth
-  // watching here is the BUDGET NUMBERS, and check-dir-size.mjs watches those
-  // itself.
-  // 600 -> 620 for the `?d=` calendar-validity guard. route.js had been held at
-  // EXACTLY 600 for several commits, which is why this is written down rather
-  // than quietly absorbed: the guard is a bug fix, not a feature, and the nine
-  // lines are the reason it exists — an unparseable date threw out of
-  // dayBefore() and took the team hub, /player, /leaders and
-  // /situational-records down in three different ways. A one-line guard with no
-  // explanation in a file where every other branch is explained would be the
-  // thing a later reader deletes.
-  'src/lib/route.js': 620, // 614
-  // 800 -> 850: two documented budget bumps in one integration — scripts/lib
-  // for rookie-crossing.mjs, and src/lib/research/diary for the diary's first
-  // `corrected` entry. Banded, not fitted: this file's own budgets grow a
-  // comment block at a time, so a little headroom is the point.
-  'scripts/check-dir-size.mjs': 1200, // 807 -> 854: the src/styles bump for the contract workbench's two partials, and its paragraph of why (ADR-0067). This file grows one paragraph per real budget move, which is the point of it. 900 -> 950 at 905, for the scripts/ bump that check-missing-imports.mjs needed: same shape, one more paragraph, and the band keeps its headroom rather than being re-fitted to the line count of the day. 950 -> 1000 at 954, for ADR-0070's two entries (migrate-contract-row-keys.mjs in scripts/, contract-row-key.mjs in scripts/lib/) landing beside the schedule-shape pair that reached main first. Both paragraphs are kept because both budget moves are real and each states its own reason; banding again is the recorded trade, not a re-fit. 1000 -> 1100 at 1015, for the four entries the OpenCommand cards moved (scripts/, scripts/lib/, src/api/, src/styles/) plus a new src/components/charts entry that records why a thirteenth chart takes a budget rather than a subdivision. Banded, not trimmed: the paragraphs ARE this file's product, and a guard whose reasons have been cut to fit its own cap has stopped explaining itself. 1100 -> 1200 at 1110, for the three entries the offseason page's game pool moved (scripts/, scripts/lib/, src/api/ — ADR-0080). Banded again for the reason the last three bands give: the paragraphs ARE this file's product, and the alternative on the table each time is to cut the reasons to fit, which would leave a guard that no longer explains itself.
+  'src/styles/69-hit-chart.css': 900, // 811 — the ball-flight card shares marks, heat ring and drawing with the chart: one partial, not two that can drift
+  'src/styles/68-around-the-game.css': 1100, // 1200
   'src/api/whatsBrewing.js': 1600, // 1581
-  // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):
-  // +9 lines to attach gen-pitch-arsenal.mjs's century-pitch sweep
-  // (scripts/lib/century-club.mjs) onto starterRecords per pitcher/level. The
-  // query/row-shaping itself already lives in that lib module, not here.
-  // 1600 -> 1700 for the Game Notes curation signal (issue #774): 23 lines to
-  // read the hand-scanned corroboration file and attach a `corroborated` map
-  // per bundle. Same shape as the century-club bump above — the rule, the
-  // vocabulary and the staleness window all live in
-  // scripts/lib/game-notes-corroboration.mjs, which is also what the manual
-  // scan and the unit test import; what lands here is the read and the join,
-  // and the comment explaining why a spoiler-adjacent source is safe to read
-  // at all. The file had been sitting 4 lines under its cap, so there was no
-  // absorbing this one.
   'scripts/gen-callouts.mjs': 1700, // 1619
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
   // GameView is the game's ROUTER — one screen per section, each lazily
@@ -173,56 +120,10 @@ const BUDGETS = {
   // shared chrome out would move the section tabs into a 12th file in
   // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
   // trades a real limit for a nominal one.
-  // 620 -> 700 for Express Lane's door (step 7). Fourteen lines, all of them
-  // routing: a lazy import and a short-circuit that returns the full-screen
-  // surface before the chrome this file otherwise wraps every section in. That
-  // is the same "a feature that adds a door lands here by construction" case
-  // the paragraph above already makes for the catch-up wiring, and the band is
-  // coarse — 100 lines granted for 14 used. The slack is not an invitation:
-  // the next door should trim this one rather than spend it.
-  // 1300 -> 1360: the starting-pitcher card's season-vs-opponent and
-  // career-vs-opponent rows (see OpposingStarterCard). 1360 -> 1400 for the
-  // pitch-mix card's batter-side split — one more arsenalSidesView memo beside
-  // the times-through one it crosses with, and the prop that carries it down.
-  'src/screens/BoxScore.jsx': 1200, // 1191 — the hit chart's 3-line mount; the card itself is screens/boxscore/HitChartCard.jsx
+  'src/screens/BoxScore.jsx': 1200, // 1191
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
-  // 1200 -> 1225 for the runtime logo-override hooks (ADR-0050's logo
-  // dimension): the store/reader themselves went to their own module
-  // (src/lib/identity/logoUrlOverrides.js), but the two consult points must
-  // live here — teamLogoUrl's, ahead of the *_USES_BASE_LOGO early returns
-  // that would shadow it, and mainOverrideLogoUrl's, which is what routes
-  // Main's tile through 'main-recolor'.
-  // 1225 -> 1240: found already over budget on `origin/claude/postseason`
-  // (base branch drift the guard's own header warns about — a merged
-  // favorite-team comment edit re-expanded past the pinned count) while
-  // building #1225. Not this slice's growth; bumped only so this PR's own
-  // lint passes, and flagged on the issue per #1224's rule 9.
   'src/lib/teams.js': 1240, // 1227
-  // 700 -> 800: the slug helpers that put a name in front of an id
-  // (slugify/idFromSlug/entitySegment, ADR-0057). They belong to routing and to
-  // nothing else — a one-file src/lib/url/ existing only to dodge this number
-  // would hide the rule halfway down a directory instead of beside the parse
-  // branches and the builders that are its only two callers.
-  // 800 -> 900: the player hub's tab table, its parse branch and playerTabPath
-  // (the /player counterpart of the team hub's five tabs). They belong beside
-  // TEAM_TAB_ROUTES and teamTabPath, which they are modelled on line for line —
-  // a separate module for one table and one builder would put the two halves of
-  // the same convention in two files and let them drift.
-  // 900 -> 1000: the four winter-league slugs (issue #1055). They are table
-  // entries and a `leagueId` on one existing parse branch, which is the whole
-  // reason flat '/fall' beat nested '/winter/fall' — but the three paragraphs
-  // that record WHY sportId 17 needs a second key, and why slatePath had to
-  // learn it or every winter league would build the same URL, are worth more
-  // here than beside the four-line table they explain.
-  // 950 -> 1000: the live postseason series route (#1224, slice 3) — one parse
-  // branch, its path builder, and seriesHref, which decides between that page
-  // and the finished one. They sit beside postseasonSeriesPath because the two
-  // pages share one series id, and a second module would split that pair.
   'src/lib/route.js': 1000, // 970
-  // 1000 -> 1100: the season store (#1200, ADR-0086). Season in every key, a
-  // season-scoped team pitch-type wipe, and an all-seasons export that sums
-  // rows (combine) rather than averaging rates. The export and the counting
-  // rules it sums are the pair that must be read together.
   'scripts/gen-fouls.mjs': 1100, // 1057
   // The sweep gained a batter-side dimension: the side is read off the matchup,
   // it keys the type buckets, and the export folds the sides back into the one
@@ -230,41 +131,9 @@ const BUDGETS = {
   // put the counting rules and the shape they are exported in on either side of
   // a module boundary, which is the one pair that has to be read together.
   'scripts/gen-pitch-arsenal.mjs': 661, // 661
-  'src/api/teamTransactions.js': 700, // 619 — the prose half moved to transactions/cutline.js, the vocabulary before it
-  'src/screens/InningViewer.jsx': 1100, // 1003 — wired in useHeadshotPrefetch (one hook call + its doc comment) so at-bat stepping warms both rosters' headshot CDN URLs up front; the hook's own logic lives in src/hooks/useHeadshotPrefetch.js, not here
-  'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js
-  // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's
-  // wiring, the merge-receipt slate strip, and the scores-unlocked-local
-  // contextual prompt (all PRD §6.1/§6.2). GameSelect is already the one
-  // screen that legitimately owns first-visit and slate-level onboarding
-  // hooks — splitting three small pieces of state out would scatter the
-  // slate's own logic rather than shrink it.
-  // 1100 -> 1200: the offseason home page (issue #1038). The slate gains a
-  // whole page STATE — from November to February its games area holds the
-  // roster wire at full width instead of "No games scheduled." — and this
-  // screen is where a page state for the slate has to be decided, because it
-  // is the file that owns the empty day, the break window and the off-day
-  // banner already. The growth was kept to ~28 lines by moving both halves
-  // out first: the gate into hooks/useOffseason.js and the surface into
-  // components/offseason/. What is left here is the branch itself.
-  // The conditional WINTER tab (issue #1055) landed inside this budget. The
-  // slate gains a SIXTH level whose existence is a fetched question, and this
-  // screen is where a rail that changes shape has to be decided, for the same
-  // reason the offseason page was: it already owns the level rail, the club
-  // strip and the empty day. It fits because both halves moved out first — the
-  // gate into hooks/useWinter.js over pure rules in src/lib/winter/, and the
-  // surface into components/winter/LeaguePicker.jsx.
-  // 1200 -> 1225: the postseason slate date cutoff (ADR-0087, #1225). Gary
-  // took the cap off the slate again the same day (the ADR's addendum), so
-  // that wiring is gone; the bracket below uses the room.
-  // 1225 -> 1300: the bracket above the cards (#1224, slice 5) — the
-  // window's own season-row fetch (keyed to the slate's own year, not
-  // today's), the Off Day grid's postseason branch, and suppressing the
-  // generic off-day banner and empty-slate message for a window the bracket
-  // already covers. The bracket itself is a component
-  // (components/bracket/PostseasonBracket.jsx) over a pure module
-  // (src/lib/postseason/bracketDisplay.js); what is left here is the same
-  // kind of wiring the cutoff above already owns.
+  'src/api/teamTransactions.js': 700, // 619
+  'src/screens/InningViewer.jsx': 1100, // 1003
+  'src/api/boxscore.js': 800, // 762
   'src/screens/GameSelect.jsx': 1300, // 1247
   // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's
   // one new reader tipped it. fetchSeasonMeta belongs here and nowhere else:
@@ -276,52 +145,21 @@ const BUDGETS = {
   // to spare: fetchWinterCalendar belongs in this module for the same reason
   // fetchSeasonMeta did — it is a schedule call, and the alternative was a new
   // src/api file for one fetcher, bought with that directory's budget.
-  // 700 -> 800: fetchLevelSeasonDates (issue #1077) — the minor levels' own
-  // counterpart of fetchSeasonMeta, which had one line of headroom left. It is
-  // a schedule call and it belongs beside the two season-date fetchers it
-  // reasons against; splitting one fetcher into a new src/api file would be
-  // bought with that directory's budget instead, and would separate the three
-  // readings of "when is this season over" that have to stay comparable.
   'src/api/schedule.js': 800, // 741
-  // 800 -> 900: selectFinalHalfIndex — the cloud scorebook index's
-  // auto-drop-once-fully-revealed check needs the SAME structural, isFinal-
-  // gated reasoning selectSkippedBottomHalf right above it already has, so it
-  // belongs beside that function rather than in a new file duplicating it.
-  // 900 -> 1000: derivedHalfStartingPitcherId — the shared derivation behind
-  // selectHalfStartingPitcher, split out so selectTeamMeta and the two
-  // starter-record note builders (prehalf-callouts.js, between-innings.js)
-  // can fall back to it when gameData.probablePitchers is empty (issue
-  // #851) without a second copy of the reveal-gated play walk.
   'src/api/select.js': 1000, // 912
   // computeHalfInningFeed's own state machinery (pinch-runner aliasing,
   // per-batter trip tracking, the visible-step gate) is tightly coupled and
   // deliberately not decomposed further when playbyplay.js was split
   // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
-  // 800 -> 900: wiring uncoveredRunnerNotes (runnerNotes.js, a new file) into
-  // the per-play loop — a coveredRunnerEvents Set plus one call, the sentence
-  // building itself lives in the new module, not here.
   'src/api/playbyplay/halfInningFeed.js': 900, // 807
   // src/screens/PlayerPage.jsx surrendered its entry when /player became a hub
   // of four tab routes: it is now the Overview tab alone (226 lines), and the
   // rest of the old page lives in src/screens/player/ — one screen per tab, each
   // well under the cap. That is the outcome this guard's third assertion exists
   // to force, so the entry is gone rather than tightened.
-  // 700 -> 750 for Focus Mode's matchup header: threading pitchingTeamId and
-  // a focusHeader flag into AtBatCard, plus the buildTrailItems import for
-  // the at-bat trail. The header itself (AtBatHero.jsx), the trail's
-  // item-building logic and the stepped-so-far R/H tally (both entriesView.js)
-  // were all pulled out to keep this growth to wiring only — see those files'
-  // own headers.
-  // 750 -> 700 as the ratchet asks: the notification-card family (EventNote,
-  // MoundVisitBar, EjectionBar, EventCard, BaserunningNote and the two
-  // shorthand lookups they are captioned from) moved to EventCards.jsx when
-  // the scoring loop's beat (ADR-0046) pushed this file past its budget. Those
-  // five were the part of this file with no reveal reasoning in them at all,
-  // which is what made them the right thing to lift out; the markup, classes
-  // and comments moved verbatim.
-  'src/components/playbyplay/PlayByPlay.jsx': 800, // 705 — the at-bat card's third opener: a ball in play makes the base diamond a handle on where it went (components/charts/BallFlight.jsx)
+  'src/components/playbyplay/PlayByPlay.jsx': 800, // 705
   'src/api/tradeDeadline.js': 700, // 629
-  'src/App.jsx': 700, // 606 — mounts the one global PlayerHoverCard, same as SyncStatusProvider beside it. 701: the postseason series route branch (#1230, slice 6). 693: one /postseason/{id} route (SeriesRoute)
+  'src/App.jsx': 700, // 606
 }
 
 const walk = (dir) =>
