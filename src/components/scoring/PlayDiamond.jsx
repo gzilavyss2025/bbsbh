@@ -134,7 +134,7 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
           <polygon
             points={`${HOME} ${FIRST} ${SECOND} ${THIRD}`}
             fill="none"
-            stroke="var(--border-rule)"
+            stroke="var(--graphite-soft)"
             strokeWidth={1.5}
             strokeLinejoin="round"
           />
