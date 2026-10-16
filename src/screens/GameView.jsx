@@ -38,9 +38,11 @@ import { formatResetTime } from '../lib/scoresUnlocked.js'
 // and each is a large module on its own. Splitting them further means opening
 // a game to read a lineup never downloads the innings viewer or box score
 // code until the user actually taps into that section.
-const LineupNextPage = lazy(() =>
-  import('./lineup/next/LineupNextPage.jsx').then((m) => ({ default: m.LineupNextPage })),
-)
+const importLineupNextPage = () =>
+  import('./lineup/next/LineupNextPage.jsx').then((m) => ({ default: m.LineupNextPage }))
+const LineupNextPage = lazy(importLineupNextPage)
+// Starts the lineup page's code with the game's data, so the loader rarely waits on it alone.
+importLineupNextPage()
 const InningViewer = lazy(() =>
   import('./InningViewer.jsx').then((m) => ({ default: m.InningViewer })),
 )
