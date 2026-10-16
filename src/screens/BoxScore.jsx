@@ -599,7 +599,7 @@ function InsightNoteCard({ group }) {
       <span className="bs__noteBody">
         {group.personName && <span className="bs__noteWho">{group.personName}</span>}
         {group.notes.map((note, i) => (
-          <CalloutNote key={i} text={note.text} />
+          <CalloutNote key={i} text={note.text} kind={note.kind} />
         ))}
       </span>
     </Card>
