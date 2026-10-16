@@ -4,7 +4,7 @@ import { ProspectsCard } from '../../modules/minors/ProspectsCard.jsx'
 import { HorizonCard } from '../../modules/minors/HorizonCard.jsx'
 import { DepthChartCard } from '../../modules/minors/DepthChartCard.jsx'
 
-// The Farm band's four cards (affiliation history, affiliates, Horizon, prospects, Depth
+// The Farm band's cards (affiliation history, affiliates, Horizon, prospects, Depth
 // Chart), in reading order. Horizon sits right after Affiliates on purpose: Affiliates is
 // the rearview (last night's recaps), Horizon is what's next.
 export function MinorsBody({ minors }) {
@@ -25,10 +25,9 @@ export function MinorsBody({ minors }) {
       {showHorizon && <HorizonCard horizon={horizon} />}
 
       {showProspects && (
-        // showAllProspects locked true: the tab has room for the whole org
-        // list, so this drops ProspectsCard's ten-row preview cap and its
-        // "Show all" button (which only renders when showAllProspects is
-        // false) without editing the shared module.
+        // showAllProspects locked true: the band lists the whole org, so this drops
+        // ProspectsCard's ten-row preview cap and its "Show all" button (which
+        // only renders when showAllProspects is false) without editing the shared module.
         <ProspectsCard prospects={prospects} showAllProspects onShowAll={() => {}} />
       )}
 

@@ -591,14 +591,8 @@ export function parseRoute(url) {
   // unknown '/team/{id}/next/{x}' is the bare page. All sit above the unknown-segment branch.
   if (parts[0] === 'team' && (parts.length === 3 || (parts.length === 4 && parts[2] === 'next'))) {
     const seg = parts[parts.length - 1]
-    if (Object.hasOwn(TEAM_TAB_BAND, seg) || parts.length === 4)
-      return {
-        name: 'team',
-        id: idFromSlug(parts[1]),
-        asOf,
-        sportId,
-        ...(Object.hasOwn(TEAM_TAB_BAND, seg) && { tab: seg }),
-      }
+    const tab = Object.hasOwn(TEAM_TAB_BAND, seg) ? seg : null
+    if (tab || parts.length === 4) return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId, ...(tab && { tab }) }
   }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }

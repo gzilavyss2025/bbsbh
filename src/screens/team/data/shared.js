@@ -257,7 +257,7 @@ const PREFERRED_LINEUP_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF
 
 // Roster-entry status codes that mean a player has LEFT the organization
 // entirely, rather than merely being unavailable within it. `fullRoster` here
-// is a `rosterType=fullSeason` fetch (see loadRoster.js/loadOverview.js) so a
+// is a `rosterType=fullSeason` fetch (see loadRoster.js) so a
 // player promoted or optioned to a different level of the SAME org this
 // season still counts toward his old club's Preferred Lineup — but a release,
 // trade, waiver claim (by another club), or free agency ends that: the club

@@ -15,7 +15,7 @@
    not paper", for the one card whose numbers are the reason the
    reader came.
 
-   Per-route partial: imported by screens/team/ContractsTab.jsx,
+   Per-route partial: imported by screens/team/next/money/index.jsx,
    never by index.css. No selector here is named anywhere else.
    ============================================================ */
 

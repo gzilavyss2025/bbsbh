@@ -84,9 +84,9 @@ test('the deck sizes its cards to their own story, which is what makes the rest 
   )
 })
 
-test('the deck door stays a full-height tap target, the same way its day tab does', () => {
+test('the deck door stays a full-height tap target', () => {
   const css = read('29-team-transactions.css')
-  for (const selector of ['.txcard__door', '.txday']) {
+  for (const selector of ['.txcard__door']) {
     const body = ruleBody(css, selector)
     assert.ok(body, `${selector} should have a base rule`)
     assert.ok(

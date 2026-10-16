@@ -43,7 +43,7 @@ test('a MiLB affiliate page leads with the parent MLB club, then affiliates, the
   assert.deepEqual(cards[0], { id: 158, sportId: 1, name: 'Milwaukee Brewers', city: '', state: '' })
 })
 
-test('a MiLB team with no parent org gets no parent card (hiddenTeamTabs hides the whole tab anyway)', () => {
+test('a MiLB team with no parent org gets no parent card (hiddenTeamSections hides the whole band anyway)', () => {
   const team = { id: 999, sport: { id: 11 }, parentOrgId: null }
   const cards = affiliateCardsFrom(team, true, [], [])
   assert.deepEqual(cards, [])

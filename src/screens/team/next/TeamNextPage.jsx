@@ -24,6 +24,8 @@ import '../../../styles/team-next/page.css'
 // The sticky jump bar's height (68px measured), so a tap lands a band under it.
 // Keep in step with `.tnext__band` scroll-margin-top in team-next/page.css.
 const BAR_H = 68
+// The tail an old address leaves on the path: '/next', a tab, or both.
+const OLD_TAIL = new RegExp(`(/next)?(/(${Object.keys(TEAM_TAB_BAND).join('|')}))?/?$`)
 
 export function TeamNextPage({ id, asOf, sportId, tab }) {
   const teamId = Number(id)
@@ -36,15 +38,12 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
   useEffect(() => {
     const onNext = /\/next\/?$/.test(window.location.pathname)
     if ((!tab && !onNext) || !loaded) return undefined
-    const key = TEAM_TAB_BAND[tab]
+    const el = document.getElementById(TEAM_TAB_BAND[tab])
     window.history.replaceState(
       window.history.state,
       '',
-      window.location.pathname.replace(/(\/next)?(\/(roster|games|numbers|contracts|minors))?\/?$/, '') +
-        window.location.search +
-        (key ? `#${key}` : ''),
+      window.location.pathname.replace(OLD_TAIL, '') + window.location.search + (el ? `#${el.id}` : ''),
     )
-    const el = key && document.getElementById(key)
     return el ? holdSectionInView(el) : undefined
   }, [tab, loaded])
   const gate = AsyncGate({
