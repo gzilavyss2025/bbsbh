@@ -108,25 +108,12 @@
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 .coachstaff__pos {
-  flex: none;
-  min-width: 84px;
+  flex: 1 1 auto;
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--fs-label);
   font-variant-numeric: tabular-nums;
   color: var(--text-body);
-}
-.coachstaff__rule {
-  position: relative;
-  flex: 1 1 auto;
-  height: var(--bw-heavy);
-  background: var(--border-rule);
-}
-.coachstaff__rule span {
-  position: absolute;
-  top: calc(-1 * var(--bw-hair));
-  height: calc(var(--bw-heavy) * 2);
-  background: var(--border-stamped);
 }
 /* A phone swipes; the two buttons are for a pointer. */
 .coachstaff__btn {
@@ -138,8 +125,5 @@
   }
   .coachstaff__slide {
     flex-basis: 176px;
-  }
-  .coachstaff__pos {
-    min-width: 96px;
   }
 }

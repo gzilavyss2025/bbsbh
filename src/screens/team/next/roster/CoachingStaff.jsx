@@ -18,7 +18,7 @@ import '../../../../styles/team-next/coaching.css'
 // so does a failed read: missing data is quiet.
 // [DECISION: each slide opens that person's career page (`/manager/{id}`), the page the manager
 // link already uses. It lists any staff job, so it works for a bench coach or a bullpen catcher.]
-const EMPTY = { first: 1, last: 1, left: 0, share: 1 }
+const EMPTY = { first: 1, last: 1 }
 
 export function CoachingStaff({ team, asOf, sportId }) {
   const season = seasonOf(asOf, sportId)
@@ -28,8 +28,8 @@ export function CoachingStaff({ team, asOf, sportId }) {
   const [view, setView] = useState(EMPTY)
   const total = data?.length ?? 0
 
-  // Which slides sit fully inside the track, and how far along it is scrolled. A half-seen
-  // slide at the edge is the peek that says "swipe", so it is not counted.
+  // Which slides sit fully inside the track. A half-seen slide at the edge is the peek that
+  // says "swipe", so it is not counted.
   const measure = useCallback(() => {
     const t = track.current
     if (!t) return
@@ -43,20 +43,12 @@ export function CoachingStaff({ team, asOf, sportId }) {
         last = i + 1
       }
     })
-    const next = {
-      first: first || 1,
-      last: last || first || 1,
-      left: t.scrollWidth ? t.scrollLeft / t.scrollWidth : 0,
-      share: t.scrollWidth ? t.clientWidth / t.scrollWidth : 1,
-    }
-    setView((v) => (v.first === next.first && v.last === next.last && v.left === next.left && v.share === next.share ? v : next))
+    const next = { first: first || 1, last: last || first || 1 }
+    setView((v) => (v.first === next.first && v.last === next.last ? v : next))
   }, [])
   // Before paint, so the first frame reads the real slides in view, not the empty guess.
   useLayoutEffect(() => {
-    if (!total) return undefined
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
+    if (total) measure()
   }, [total, measure])
 
   if (!total) return null
@@ -86,9 +78,6 @@ export function CoachingStaff({ team, asOf, sportId }) {
       </ul>
       <div className="coachstaff__foot">
         <p className="coachstaff__pos">{rangeLabel(view.first, view.last, total)}</p>
-        <div className="coachstaff__rule" aria-hidden="true">
-          <span style={{ left: `${view.left * 100}%`, width: `${view.share * 100}%` }} />
-        </div>
         <IconButton label="Previous coaches" skin="outline" className="coachstaff__btn" disabled={view.first <= 1} onClick={() => page(-1)}>‹</IconButton>
         <IconButton label="Next coaches" skin="outline" className="coachstaff__btn" disabled={view.last >= total} onClick={() => page(1)}>›</IconButton>
       </div>
