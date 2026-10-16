@@ -1,0 +1,70 @@
+/* ==== THE RANK BAR (#1107, row 7b; components/ui/frame/RankBar.jsx) ====
+   Lifted from styles/player-next/season/percentile.css. Best at the right edge, a hollow square at
+   the middle club, fill plus a shape plus the number beside it. Tokens only; open surface, no seal. */
+
+.rankbar {
+  position: relative;
+  display: block;
+  height: 16px;
+  border: var(--bw-heavy) solid var(--ink-0);
+  background: var(--surface-card);
+}
+.rankbar__fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+}
+.rankbar__fill--top {
+  background: var(--field-mint);
+}
+.rankbar__fill--mid {
+  background: var(--field-soft);
+}
+.rankbar__fill--low {
+  background: var(--clay);
+}
+/* The strip washes the best third, the top-third ranks at the right. */
+.rankbar--strip::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: 33.3%;
+  background: var(--field-soft);
+}
+.rankbar__mid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  translate: -50% -50%;
+  border: var(--bw-heavy) solid var(--ink-0);
+  background: var(--surface-card);
+}
+.rankbar__tick {
+  position: absolute;
+  inset-block: -4px;
+  width: 3px;
+  translate: -50% 0;
+  background: var(--ink-0);
+}
+.rankbar--strip .rankbar__tick {
+  width: var(--bw-heavy);
+  inset-block: -2px;
+}
+
+/* The key's swatches: the same fills, as small boxes. */
+.rankbar__swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: var(--bw-heavy) solid var(--ink-0);
+  vertical-align: -2px;
+}
+.rankbar__swatch--top {
+  background: var(--field-mint);
+}
+.rankbar__swatch--low {
+  background: var(--clay);
+}

@@ -1,0 +1,347 @@
+/* ==== THE RECORDS CARD OF THE ONE-SCROLL TEAM PAGE (#1107, row 7b) ====
+   standings/records/RecordsCard.jsx imports this file. A rank-strip index of the 12 groups, each
+   folding open in place; the bar and the strip are components/ui/frame/RankBar.jsx. Tokens only,
+   square, nothing needs hover, every target is 44px or more. Open surface: no seal. */
+
+/* layout-exempt: one column of the card's blocks */
+.rec {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--space-3) var(--space-3);
+  container-type: inline-size;
+}
+
+/* THE SCOPE: the half, then the month, one joined row each. The month toggle is two even rows. */
+/* layout-exempt: the two toggles share a row when the card is wide */
+.rec__scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.rec__halves {
+  flex: 1 1 100%;
+}
+/* layout-exempt: the month buttons in two even rows, the column count set by the card */
+.rec__months .segmented {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
+  padding: 0 var(--bw-heavy) var(--bw-heavy) 0;
+}
+/* A grid cell has no left neighbour to overlap, so each button grows into the next one's edge. */
+.rec__months .segmented .segmented__btn,
+.rec__months .segmented .segmented__btn + .segmented__btn {
+  margin: 0 calc(var(--bw-heavy) * -1) calc(var(--bw-heavy) * -1) 0;
+  padding: 0;
+}
+.rec__months {
+  flex: 1 1 100%;
+}
+
+/* THE INDEX HEAD: a band across the card, the table head's look. */
+/* layout-exempt: the index columns, shared by the head and every line */
+.rec__head,
+.rec__line {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 7.5rem) minmax(0, 1fr) 2rem;
+  align-items: center;
+  column-gap: var(--space-2);
+}
+.rec__head {
+  min-height: var(--space-6);
+  margin-inline: calc(var(--space-3) * -1);
+  padding-inline: var(--space-3);
+  background: var(--bg-page);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+/* layout-exempt: 30th at the left edge, 1st at the right */
+.rec__scale {
+  display: flex;
+  justify-content: space-between;
+}
+.rec__head > :last-child,
+.rec__n {
+  text-align: end;
+}
+
+/* THE INDEX LINE: one 44px line per group. A chevron on a line means it folds in place. */
+.rec__line {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0;
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.rec__line[aria-expanded='true'],
+.rec__innbtn[aria-expanded='true'] {
+  outline: var(--bw-heavy) solid var(--ink-0);
+  outline-offset: calc(var(--bw-heavy) * -1);
+}
+.rec__chev {
+  width: 0;
+  height: 0;
+  border-inline: 5px solid transparent;
+  border-block-start: 6px solid var(--ink-0);
+  rotate: -90deg;
+}
+.rec__line[aria-expanded='true'] .rec__chev {
+  rotate: 0deg;
+}
+.rec__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.rec__n {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+/* THE FOLD: rows 0fr to 1fr, the inside clipped. */
+/* layout-exempt: the fold animates one row from 0fr to 1fr */
+.rec__fold {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+.rec__fold--open {
+  grid-template-rows: 1fr;
+}
+.rec__foldin {
+  min-height: 0;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rec__fold {
+    transition: grid-template-rows var(--dur-unfold) var(--ease-unfold);
+  }
+  .rec__chev {
+    transition: rotate var(--dur-unfold) var(--ease-unfold);
+  }
+  .rec__innopen {
+    animation: rec-rise var(--dur-stamp-in) var(--ease-stamp) backwards;
+  }
+}
+@keyframes rec-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* THE SPLIT ROW: label (a door), W-L over pct, the rank on its own line; the bar at the right. */
+.rec__splits,
+.rec__innopen {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* layout-exempt: the label, the figures and the rank at the left, the bar spanning at the right */
+.rec__split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5rem, 38%);
+  grid-template-areas:
+    'door door'
+    'fig bar'
+    'rank bar';
+  align-items: center;
+  column-gap: var(--space-3);
+  padding-block: var(--space-1) var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.rec__door {
+  grid-area: door;
+  justify-self: start;
+  min-height: var(--tap-min);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: start;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-title);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  text-decoration: underline dotted var(--border-rule);
+  text-underline-offset: 3px;
+}
+.rec__door:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* layout-exempt: W-L and pct on one baseline, the last date under them */
+.rec__fig {
+  grid-area: fig;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+}
+.rec__wl {
+  grid-area: fig;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  line-height: var(--lh-title);
+  color: var(--text-heading);
+}
+.rec__fig .rec__wl {
+  grid-area: auto;
+}
+.rec__pct,
+.rec__last,
+.rec__rank {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.rec__last {
+  flex-basis: 100%;
+}
+.rec__rank {
+  grid-area: rank;
+  justify-self: start;
+}
+.rec__bar {
+  grid-area: bar;
+}
+
+/* THE INNING GRID: one 48px row per inning, both halves on one win-pct axis. */
+/* layout-exempt: the inning, the top half, the axis, the bottom half */
+.rec__innhead,
+.rec__innbtn {
+  display: grid;
+  grid-template-columns: 2.5rem 4.25rem minmax(0, 1fr) 4.25rem;
+  align-items: center;
+  column-gap: var(--space-2);
+}
+.rec__innhead {
+  min-height: 30px;
+  background: var(--bg-page);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.rec__axis {
+  position: relative;
+  height: 1lh;
+}
+.rec__axis > span {
+  position: absolute;
+  translate: -50% 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.rec__innbtn {
+  width: 100%;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.rec__innno {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+}
+/* layout-exempt: W-L over pct, stacked */
+.rec__half {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.rec__half--best .rec__halfwl {
+  color: var(--text-heading);
+}
+.rec__half--none {
+  color: var(--text-caption);
+}
+.rec__track {
+  position: relative;
+  align-self: stretch;
+  background:
+    linear-gradient(var(--border-hairline), var(--border-hairline)) 20% / var(--bw-hair) 100% no-repeat,
+    linear-gradient(var(--border-hairline), var(--border-hairline)) 40% / var(--bw-hair) 100% no-repeat,
+    linear-gradient(var(--border-hairline), var(--border-hairline)) 60% / var(--bw-hair) 100% no-repeat,
+    linear-gradient(var(--border-hairline), var(--border-hairline)) 80% / var(--bw-hair) 100% no-repeat;
+}
+.rec__join {
+  position: absolute;
+  top: 50%;
+  height: var(--bw-heavy);
+  translate: 0 -50%;
+  background: var(--ink-0);
+}
+.rec__mark {
+  position: absolute;
+  translate: -50% 0;
+  font-size: var(--fs-label);
+  line-height: var(--lh-solid);
+  color: var(--ink-0);
+}
+.rec__mark--top {
+  bottom: 50%;
+}
+.rec__mark--bot {
+  top: 50%;
+}
+
+.rec__key {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+  color: var(--text-caption);
+}
+
+/* WIDE: the months on one row, the split rows in two columns, the index at most 860px. */
+@media (min-width: 740px) {
+  .rec__months {
+    flex: 1 1 18rem;
+  }
+  .rec__halves {
+    flex: 0 1 27rem;
+  }
+  .rec__months .segmented {
+    grid-template-columns: repeat(var(--n, 8), minmax(0, 1fr));
+  }
+  .rec__head,
+  .rec__line {
+    grid-template-columns: 14px 230px minmax(0, 1fr) 2rem;
+  }
+  .rec__head,
+  .rec__group,
+  .rec__key {
+    max-width: 860px;
+  }
+  /* layout-exempt: the split rows in two columns */
+  .rec__splits {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-4);
+  }
+  .rec__inn {
+    max-width: 720px;
+  }
+}
