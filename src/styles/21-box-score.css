@@ -834,3 +834,10 @@
   line-height: var(--lh-prose);
 }
 
+
+/* Every card on the box score is square, with a head or without one: the head
+   cards above already are, so the headerless ones (totals, board, decisions,
+   tally, win probability, hit chart, photos, the player lines) match them. */
+.bs .card {
+  --card-radius: 0;
+}
