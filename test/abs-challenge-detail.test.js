@@ -14,7 +14,7 @@ test('called: calls, the pitches behind them, the rate, and the review marks', (
   const d = challengeDetail(j, 'called', j.rows[0])
   assert.deepEqual(d.columns, ['Calls', 'Pitches', 'Rate'])
   assert.equal(d.row.label, 'Season')
-  assert.deepEqual(d.row.cells.map((c) => c.v), ['10', '2,000', '0.50%'])
+  assert.deepEqual(d.row.cells.map((c) => c.v), ['10', '2,000', '0.5%'])
   assert.equal(d.row.cells[2].over, true)
   assert.equal(d.strip.label, 'Reviews')
   assert.equal(d.strip.marks, '1110100110')

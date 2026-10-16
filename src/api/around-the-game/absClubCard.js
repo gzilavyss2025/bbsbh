@@ -13,13 +13,17 @@
 //            added them gives no success view (`hasSuccess` false) rather than
 //            a card of dashes.
 //
-// A CATCHER'S EXPOSURE IS PITCHES RECEIVED WHEN THE FILE HAS THEM, and innings
-// caught when it does not. `pitchesReceived` arrives with the generator's
-// backfill; until then the catcher half keeps the per-nine-innings rate it has
-// always drawn, so the card never reads a column that is not there. The basis
-// is named on the model (`basis`) so the caption can say which one it is.
+// THE RATE IS OVER THE CALLS A MAN COULD HAVE CHALLENGED. A batter can only
+// challenge a called strike, a catcher only a called ball, so the share is his
+// reviews over the strikes he saw or the balls he received, counted by the
+// umpire's ORIGINAL call (`strikesSeen`, `ballsReceived` in the club file: an
+// overturned strike is still a strike seen). Until the generator's backfill has
+// written those, the card keeps the rate it had before: all pitches seen for a
+// hitter, innings caught (per nine) for a catcher, so it never reads a column
+// that is not there. The basis is named on the model (`basis`: 'calls',
+// 'pitches' or 'innings') so the caption can say which one it is.
 //
-// SHARES ARE CUT, NOT ROUNDED. 0.249% prints 0.24%, and 29 of 100 prints 29.0%.
+// SHARES ARE CUT, NOT ROUNDED. 0.249% prints 0.2%, and 29 of 100 prints 29.0%.
 // `cutPercent` does it in integer arithmetic, so a float's last digit cannot
 // move a figure across a boundary.
 
@@ -27,7 +31,7 @@ import { MIN_CATCHER_INNINGS, MIN_PLATE_APPEARANCES } from './absExposure.js'
 
 const num0 = (n) => Math.round(n).toLocaleString('en-US')
 
-// "0.24%" for 7 of 2,890 at two places. Null when there is nothing to divide.
+// "0.2%" for 7 of 2,890 at one place. Null when there is nothing to divide.
 export function cutPercent(part, whole, places = 2) {
   if (!(whole > 0) || part == null) return null
   const scale = 10 ** (places + 2)
@@ -36,7 +40,7 @@ export function cutPercent(part, whole, places = 2) {
 
 const per9 = (calls, innings) => (innings > 0 ? ((calls / innings) * 9).toFixed(2) : null)
 
-// The two jobs, as data. `exposureOn` lists the file fields tried in order.
+// The two jobs, as data.
 const JOBS = {
   batter: {
     key: 'batter',
@@ -49,7 +53,12 @@ const JOBS = {
     floorOn: 'plateAppearances',
     floor: MIN_PLATE_APPEARANCES,
     floorText: '200+ plate appearances',
-    exposureOn: 'pitches',
+    // The chances (original called strikes), then the pitch count it replaces.
+    callsFieldOn: 'strikesSeen',
+    fallbackOn: 'pitches',
+    fallbackBasis: 'pitches',
+    callWord: 'Called strikes seen',
+    callLabel: 'Strikes',
   },
   catcher: {
     key: 'catcher',
@@ -62,17 +71,24 @@ const JOBS = {
     floorOn: 'catcherInnings',
     floor: MIN_CATCHER_INNINGS,
     floorText: '200+ innings caught',
-    exposureOn: 'pitchesReceived',
+    callsFieldOn: 'ballsReceived',
+    fallbackOn: 'catcherInnings',
+    fallbackBasis: 'innings',
+    callWord: 'Called balls received',
+    callLabel: 'Balls',
   },
 }
 
 const sum = (list, f) => list.reduce((t, x) => t + (f(x) ?? 0), 0)
 
 // One club's roster rows for one job, every man who had any exposure, with the
-// figures the card prints. `basis` is 'pitches' or 'innings' (catchers only,
-// until the file carries pitches received).
+// figures the card prints. `basis` is 'calls' (the chances), or the older
+// 'pitches' (hitters) / 'innings' (catchers) until the file carries them.
+const shareBasis = (basis) => basis === 'calls' || basis === 'pitches'
+const fieldOf = (job, basis) => (basis === 'calls' ? job.callsFieldOn : job.fallbackOn)
+
 function rowsOf(rows, job, basis) {
-  const exposureField = basis === 'pitches' ? job.exposureOn : 'catcherInnings'
+  const exposureField = fieldOf(job, basis)
   return (rows ?? [])
     .filter((r) => (r[exposureField] ?? 0) > 0)
     .map((r) => {
@@ -88,7 +104,7 @@ function rowsOf(rows, job, basis) {
         // The plotted share is calls over exposure on the card's basis; for a
         // catcher on innings, calls per innings (the same order as per nine).
         frac: calls / exposure,
-        rateText: basis === 'pitches' ? cutPercent(calls, exposure, 2) : per9(calls, exposure),
+        rateText: shareBasis(basis) ? cutPercent(calls, exposure, 1) : per9(calls, exposure),
         won,
         pct: won != null && calls > 0 ? won / calls : null,
         successText: won != null && calls > 0 ? cutPercent(won, calls, 1) : '—',
@@ -99,12 +115,11 @@ function rowsOf(rows, job, basis) {
     .sort((a, b) => b.exposure - a.exposure)
 }
 
-// Which exposure a job runs on. A catcher runs on pitches received only when
-// at least one catcher in the whole file has them: a half-filled file is the
+// Which exposure a job runs on. A job runs on the calls it could challenge only
+// when at least one man in the whole file has them: a half-filled file is the
 // generator's backfill mid-run, and a mixed card would compare two bases.
 function basisFor(job, clubs) {
-  if (job.key !== 'catcher') return 'pitches'
-  return clubs.some((rows) => rows.some((r) => (r.pitchesReceived ?? 0) > 0)) ? 'pitches' : 'innings'
+  return clubs.some((rows) => rows.some((r) => (r[job.callsFieldOn] ?? 0) > 0)) ? 'calls' : job.fallbackBasis
 }
 
 function totals(rows, job, basis) {
@@ -140,6 +155,10 @@ function jobModel(job, mine, clubs, teamId) {
       ? { exposure: sum(regulars, (r) => r.exposure) / regulars.length, calls: sum(regulars, (r) => r.calls) / regulars.length, of: regulars.length }
       : null
 
+  // The club's overturn rate ranked against every club's, on the same job.
+  const successFracs = clubs.map((c) => totals(c, job, basis)).filter((x) => x.called > 0).map((x) => x.won / x.called)
+  const successRank = club.called > 0 ? { rank: successFracs.filter((f) => f > club.won / club.called).length + 1, of: successFracs.length } : null
+
   const hasSuccess = rows.some((r) => r.won != null)
   const leagueSuccess = league.called > 0 ? league.won / league.called : null
   return {
@@ -149,8 +168,8 @@ function jobModel(job, mine, clubs, teamId) {
     plural: job.plural,
     floorText: job.floorText,
     basis,
-    exposureLabel: basis === 'pitches' ? 'Pitches' : 'Innings',
-    exposureWord: basis === 'pitches' ? (job.key === 'batter' ? 'seen' : 'received') : 'caught',
+    exposureLabel: basis === 'calls' ? job.callLabel : basis === 'pitches' ? 'Pitches' : 'Innings',
+    exposureTitle: basis === 'calls' ? job.callWord : basis === 'pitches' ? 'Pitches seen' : 'Innings caught',
     teamId,
     rows,
     plotted: rows.filter((r) => r.qualified),
@@ -163,20 +182,19 @@ function jobModel(job, mine, clubs, teamId) {
     // Strings the lead tile prints, per measure.
     lead: {
       called: {
-        label: basis === 'pitches' ? `Pitches ${job.key === 'batter' ? 'seen' : 'received'}, challenged` : 'Per 9 innings caught',
-        value: basis === 'pitches' ? cutPercent(club.calls, club.exposure, 2) : per9(club.calls, club.exposure),
+        label: basis === 'calls' ? `${job.callWord}, challenged` : basis === 'pitches' ? 'Pitches seen, challenged' : 'Per 9 innings caught',
+        value: shareBasis(basis) ? cutPercent(club.calls, club.exposure, 1) : per9(club.calls, club.exposure),
         rank,
-        side: rank ? null : `${num0(club.calls)} of ${num0(club.exposure)}`,
-        caption: `MLB average ${basis === 'pitches' ? cutPercent(league.calls, league.exposure, 2) : per9(league.calls, league.exposure)}`,
+        caption: `MLB average ${shareBasis(basis) ? cutPercent(league.calls, league.exposure, 1) : per9(league.calls, league.exposure)}`,
       },
       success: {
-        label: `Overturned ${job.where}`,
+        label: `Overturned ${job.where}, ${num0(club.won)} of ${num0(club.called)}`,
         value: cutPercent(club.won, club.called, 1),
-        side: `${num0(club.won)} of ${num0(club.called)}`,
+        rank: successRank,
         caption: `MLB average ${cutPercent(league.won, league.called, 1)}`,
       },
     },
-    averageRate: basis === 'pitches' ? cutPercent(league.calls, league.exposure, 2) : per9(league.calls, league.exposure),
+    averageRate: shareBasis(basis) ? cutPercent(league.calls, league.exposure, 1) : per9(league.calls, league.exposure),
     averageSuccess: cutPercent(league.won, league.called, 1),
   }
 }

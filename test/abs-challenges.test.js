@@ -1412,8 +1412,8 @@ test('buildExposureClubsExport: counts and denominators, and NOT the rates', () 
   const out = buildExposureClubsExport([row({})], [seenRow({})], { season: 2026 })
   const p = out.levels.MLB.byTeam['100'][0]
   assert.deepEqual(Object.keys(p).sort(), [
-    'asBatter', 'asCatcher', 'catcherInnings', 'name', 'pitches', 'pitchesReceived', 'plateAppearances', 'playerId',
-    'resultsBatter', 'resultsCatcher', 'wonBatter', 'wonCatcher',
+    'asBatter', 'asCatcher', 'ballsReceived', 'catcherInnings', 'name', 'pitches', 'plateAppearances', 'playerId',
+    'resultsBatter', 'resultsCatcher', 'strikesSeen', 'wonBatter', 'wonCatcher',
   ])
 })
 

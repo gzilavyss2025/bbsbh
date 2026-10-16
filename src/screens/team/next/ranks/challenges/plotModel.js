@@ -112,7 +112,7 @@ export function buildPlot(job, measure) {
       ? { x: success ? avg.calls : avg.exposure, y: success ? (leagueSuccess ?? 0) * 100 : avg.calls }
       : null,
     legend: { thin: points.some((p) => p.thin), off: points.some((p) => p.off) },
-    xTitle: success ? 'Reviews called' : `${job.exposureLabel} ${job.exposureWord}`,
+    xTitle: success ? 'Reviews called' : job.exposureTitle,
     yTitle: success ? 'Overturned' : 'Reviews called',
   }
 }

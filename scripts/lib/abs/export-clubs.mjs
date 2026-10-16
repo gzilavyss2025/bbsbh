@@ -37,14 +37,14 @@ function resultsByPlayerTeam(rows) {
   return out
 }
 
-// Pitches received, summed per `${teamId}:${playerId}` for one level. The
-// sentinel row of a game with no catcher (player_id 0, received.mjs) is skipped.
-function receivedByPlayerTeam(rows, level) {
+// Challengeable calls, summed per `${role}:${teamId}:${playerId}` for one level.
+// The sentinel row of a game with nobody found (player_id 0, calls.mjs) is skipped.
+function callsByPlayerTeam(rows, level) {
   const out = new Map()
   for (const r of rows ?? []) {
     if (r.level !== level || !r.player_id) continue
-    const key = `${r.team_id}:${r.player_id}`
-    out.set(key, (out.get(key) ?? 0) + r.pitches)
+    const key = `${r.role}:${r.team_id}:${r.player_id}`
+    out.set(key, (out.get(key) ?? 0) + r.calls)
   }
   return out
 }
@@ -89,24 +89,27 @@ const countOf = (s, ch) => (s.match(new RegExp(ch, 'g')) ?? []).length
 // byte a challenge, a few thousand in all. `wonBatter` and `wonCatcher` are the
 // counts of '1' in them, shipped so the reader does not recount.
 //
-// `pitchesReceived` is the catcher's denominator (received.mjs). It is null for a
-// man who never caught, and null for everyone while `catcherPitches` is empty.
+// `strikesSeen` and `ballsReceived` are the denominators of the challenge rate
+// (calls.mjs). A batter can only challenge a called strike and a catcher only a
+// called ball, both counted by the umpire's ORIGINAL call. `strikesSeen` is for
+// a batter, `ballsReceived` for a catcher. Each is null for a man with no rows,
+// and null for everyone while `gameCalls` is empty.
 export const EXPOSURE_CLUB_LEVELS = ['MLB', 'AAA']
 
 export function buildExposureClubsExport(
   allRows,
   allExposure,
-  { season, generatedAt, levels = EXPOSURE_CLUB_LEVELS, catcherPitches = [] } = {},
+  { season, generatedAt, levels = EXPOSURE_CLUB_LEVELS, gameCalls = [] } = {},
 ) {
   const rows = ofSeason(allRows, season)
-  const received = ofSeason(catcherPitches, season)
+  const received = ofSeason(gameCalls, season)
   const exposure = ofSeason(allExposure, season)
   const out = {}
   for (const level of levels) {
     const levelRows = rows.filter((r) => r.level === level)
     const roles = rolesByPlayerTeam(levelRows)
     const results = resultsByPlayerTeam(levelRows)
-    const caught = receivedByPlayerTeam(received, level)
+    const callCounts = callsByPlayerTeam(received, level)
     // Folded per man per club (exposureByPlayer): a no-op inside one season,
     // and across seasons it adds his seasons for that club, never lists him twice.
     const rowsByTeam = Map.groupBy(exposure.filter((x) => x.level === level && x.team_id != null), (x) => x.team_id)
@@ -134,7 +137,8 @@ export function buildExposureClubsExport(
           wonCatcher: countOf(resultsCatcher, '1'),
           resultsBatter,
           resultsCatcher,
-          pitchesReceived: caught.get(`${teamId}:${playerId}`) ?? null,
+          strikesSeen: callCounts.get(`batter:${teamId}:${playerId}`) ?? null,
+          ballsReceived: callCounts.get(`catcher:${teamId}:${playerId}`) ?? null,
         })
       }
     }

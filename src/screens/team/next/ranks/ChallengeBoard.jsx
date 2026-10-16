@@ -55,14 +55,11 @@ export function ChallengeBoard({ data, teamId, level = 'MLB', still }) {
   const shown = { id: known ? pick.id : (leader?.playerId ?? null), fromPlot: known ? pick.fromPlot : false }
 
   const lead = job.lead[measure]
-  const rank = measure === 'success'
-    ? { rank: job.club.won.toLocaleString('en-US'), of: job.club.called.toLocaleString('en-US') }
-    : lead.rank
   const jobs = JOBS.filter((j) => card[j.value].rows.length)
 
   return (
     <Card frame="stamped" label="ABS Challenges" labelAs="h3" stampIn={!still} className="rnk__card chalboard">
-      <StatTile tone="ink" className="stattile--compact rnk__lead" label={lead.label} value={lead.value} caption={lead.caption} rank={rank ?? undefined} />
+      <StatTile tone="ink" className="stattile--compact rnk__lead" label={lead.label} value={lead.value} caption={lead.caption} rank={lead.rank ?? undefined} />
       {jobs.length > 1 && (
         <Segmented label="At the plate or behind it" value={job.key} onChange={(v) => setJobKey(v)} fill options={jobs} />
       )}

@@ -117,11 +117,11 @@ export const GROUPS = {
   // exposure table is the odd one: a SEASON SNAPSHOT rather than an
   // append-only ledger, rewritten a club at a time, so its nightly diff is
   // every row of whichever clubs were swept rather than a handful of appends.
-  // abs_catcher_pitches is append-only (a few rows a game). A frozen season
+  // abs_game_calls is append-only (a few dozen rows a game). A frozen season
   // dump that predates it simply lacks its lines: the table loads empty.
   'abs-challenges': {
     bySeason: true,
-    tables: ['abs_challenges', 'abs_ingested_games', 'abs_player_exposure', 'abs_catcher_pitches'],
+    tables: ['abs_challenges', 'abs_ingested_games', 'abs_player_exposure', 'abs_game_calls'],
   },
 }
 

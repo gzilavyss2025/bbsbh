@@ -68,7 +68,7 @@
 //   node scripts/gen-abs-challenges.mjs --recheck [--since=2026-03-26]
 //   node scripts/gen-abs-challenges.mjs --exposure [--sports=1] [--season=2026]
 //   node scripts/gen-abs-challenges.mjs --rebuild --season=2026 --since=2026-03-26
-//   node scripts/gen-abs-challenges.mjs --backfill-received --season=2026
+//   node scripts/gen-abs-challenges.mjs --backfill-calls --season=2026
 //
 // The --since form is the one-time backfill (2026-03-26 is Opening Day, and
 // there is no MLB history before it — the system did not exist). --sports
@@ -95,10 +95,10 @@
 // worse than one that is missing. It rides the nightly job for that reason
 // (.github/workflows/update-nightly-data.yml).
 //
-// --backfill-received IS THE ONE-TIME FILL OF PITCHES RECEIVED (scripts/lib/abs/received.mjs).
+// --backfill-calls IS THE ONE-TIME FILL OF CHALLENGEABLE CALLS (scripts/lib/abs/calls.mjs).
 // New games write their catcher rows with the ordinary sweep. Games swept before
 // that existed have none, so this mode finds the ledger games of --season with no
-// row in abs_catcher_pitches, refetches each feed, and writes them. A failed fetch
+// row in abs_game_calls, refetches each feed, and writes them. A failed fetch
 // leaves the game unfilled, so a rerun retries it. A game whose feed names no
 // catcher gets a sentinel row, so a rerun does not refetch it forever. A FROZEN
 // season (ADR-0086) needs REFREEZE=1, because the backfill changes its dump.
@@ -139,12 +139,12 @@ import {
   EXPOSURE_CLUB_LEVELS,
   exposureRowsFor,
   gameShape,
-  gamesMissingReceived,
+  gamesMissingCalls,
   ingestGame,
-  ingestReceived,
+  ingestCalls,
   inScope,
   isPlayedGame,
-  pitchesReceivedForGame,
+  challengeableCallsForGame,
   restampGame,
   scopeOfGameType,
 } from './lib/abs/index.mjs'
@@ -251,7 +251,7 @@ async function writeOut() {
   // Every season on file, each cut from its own rows, then all/ over every
   // row. writeJsonIfChanged leaves a file alone when only its stamp would
   // move, so a completed season's folder does not change.
-  const catcherPitches = db.prepare('SELECT * FROM abs_catcher_pitches ORDER BY game_pk, team_id, player_id').all()
+  const gameCalls = db.prepare('SELECT * FROM abs_game_calls ORDER BY game_pk, team_id, player_id').all()
   const seasons = [...new Set([...games, ...exposure].map((r) => r.season))].sort((a, b) => a - b)
   // The denominators are regular-season roster totals, so only regular-season
   // challenges are divided by them.
@@ -271,7 +271,7 @@ async function writeOut() {
     await write(dir, exposureOut, { ...buildExposureExport(regRows, exposure, { season }), ...extra })
     for (const level of EXPOSURE_CLUB_LEVELS) {
       await write(dir, exposureClubsOut(level), {
-        ...buildExposureClubsExport(regRows, exposure, { season, levels: [level], catcherPitches }),
+        ...buildExposureClubsExport(regRows, exposure, { season, levels: [level], gameCalls }),
         ...extra,
       })
     }
@@ -351,7 +351,7 @@ if (args['export-only']) {
   })
   const dropGame = db.prepare('DELETE FROM abs_ingested_games WHERE game_pk = ?')
   const dropRows = db.prepare('DELETE FROM abs_challenges WHERE game_pk = ?')
-  const dropCaught = db.prepare('DELETE FROM abs_catcher_pitches WHERE game_pk = ?')
+  const dropCalls = db.prepare('DELETE FROM abs_game_calls WHERE game_pk = ?')
   let lostChallenges = 0
   for (const r of evict) {
     const status = seen.get(String(r.game_pk))
@@ -361,7 +361,7 @@ if (args['export-only']) {
     )
     lostChallenges += r.challenges
     dropRows.run(r.game_pk)
-    dropCaught.run(r.game_pk)
+    dropCalls.run(r.game_pk)
     dropGame.run(r.game_pk)
   }
 
@@ -390,17 +390,17 @@ if (args['export-only']) {
       `(${unshaped} still without a length)`,
   )
   db.close()
-} else if (args['backfill-received']) {
-  // THE ONE-TIME FILL OF PITCHES RECEIVED for games swept before the table
+} else if (args['backfill-calls']) {
+  // THE ONE-TIME FILL OF CHALLENGEABLE CALLS for games swept before the table
   // existed. Same batch and checkpoint shape as the sweep: fetched in parallel,
   // written serially, and a killed run resumes because a written game is no
   // longer missing.
-  if (!args.season) throw new Error('--backfill-received needs --season=YYYY')
+  if (!args.season) throw new Error('--backfill-calls needs --season=YYYY')
   const season = Number(args.season)
-  const missing = gamesMissingReceived(db, season).filter(
+  const missing = gamesMissingCalls(db, season).filter(
     (g) => !sportsFilter || activeLevels.some((l) => l.level === g.level),
   )
-  console.log(`--backfill-received ${season}: ${missing.length} game(s) to fill`)
+  console.log(`--backfill-calls ${season}: ${missing.length} game(s) to fill`)
   let filled = 0
   let sinceCheckpoint = 0
   for (let i = 0; i < missing.length; i += BATCH) {
@@ -412,10 +412,10 @@ if (args['export-only']) {
       // A failed fetch writes nothing, so the game stays missing and a rerun retries it.
       if (!item) continue
       const { game, feed } = item
-      ingestReceived(
+      ingestCalls(
         db,
         { season: game.season, level: game.level, gamePk: game.game_pk },
-        pitchesReceivedForGame(feed),
+        challengeableCallsForGame(feed),
       )
       filled++
       sinceCheckpoint++
@@ -428,7 +428,7 @@ if (args['export-only']) {
   }
   const { rows, games } = await writeOut()
   console.log(
-    `--backfill-received ${season}: ${filled} of ${missing.length} game(s) filled — ` +
+    `--backfill-calls ${season}: ${filled} of ${missing.length} game(s) filled — ` +
       `${rows} challenges over ${games} games on file`,
   )
   db.close()
@@ -560,8 +560,8 @@ if (args['export-only']) {
       const rows = challengeRowsForGame(feed, reTable)
       // The game's length, off the feed already in hand — no extra call.
       ingestGame(db, { ...t, umpId, umpName }, rows, gameShape(feed?.liveData?.linescore, feed?.liveData?.plays?.allPlays))
-      // The catcher of record's pitches, off the same feed (received.mjs).
-      ingestReceived(db, t, pitchesReceivedForGame(feed))
+      // The calls each man could challenge, off the same feed (calls.mjs).
+      ingestCalls(db, t, challengeableCallsForGame(feed))
       ingested++
       sinceCheckpoint++
       found += rows.length

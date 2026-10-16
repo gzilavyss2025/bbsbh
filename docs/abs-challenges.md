@@ -218,15 +218,18 @@ them never called for a review all season**, and Gary Sánchez called for 32 in
 Catchers cluster far tighter: 0.73 to 1.56 over 71 qualifiers.
 
 **The catcher's league denominator is still innings caught.** The roster call
-counts no pitches received, so `abs-exposure.json` keeps innings. The per-club
-file now carries a second figure, `pitchesReceived`: the pitches thrown while a
-man was the catcher of record (`scripts/lib/abs/received.mjs`). It is replayed
-from each game's feed with `catcherChart` in `src/api/catcherOfRecord.js`. A
-catcher who comes in mid-half is credited from the NEXT half, and a half with no
-known catcher credits nobody. Both are accepted limits. It is null for a man who
-never caught, and for everyone until `--backfill-received` has run. The two
-figures are different measurements and **cannot be read straight across**, and
-the page says so once.
+counts no calls, so `abs-exposure.json` keeps innings. The per-club file carries
+a better pair, from `scripts/lib/abs/calls.mjs`: `strikesSeen` for a batter and
+`ballsReceived` for a catcher. A batter can only challenge a called strike. A
+catcher can only challenge a called ball. So the rate is reviews divided by the
+calls he could have challenged. The feed stores each taken pitch's FINAL call, so
+the count uses the umpire's ORIGINAL call: the final one, unless that pitch's
+challenge was overturned, then the opposite. A strike goes to the batter of the
+plate appearance. A ball goes to the catcher of record of the fielding club
+(`catcherChart` in `src/api/catcherOfRecord.js`). Accepted limits: a catcher who
+comes in mid-half is credited from the NEXT half, and a half with no known
+catcher credits no catcher. Both fields are null for a man with no rows, and for
+everyone until `--backfill-calls` has run.
 
 **Each rate counts only the challenges its own denominator can explain.** A
 catcher who also hits is two challengers: dividing all of a two-way man's calls
@@ -436,10 +439,10 @@ audit of statsapi is `docs/MLB_STATS_API.md`.
 - **A traded player's splits arrive per club**, so `team.id` on each split is
   what attributes his numbers, not his current roster. `splitsForTeam` in
   `scripts/lib/abs/exposure.mjs` is the filter.
-- **No endpoint counts pitches RECEIVED by a catcher.** Innings caught is the
-  roster stand-in. The per-club file counts pitches received itself, from the
-  catcher-of-record replay of each game feed (table `abs_catcher_pitches`).
-  Limit: a mid-half catcher change credits the next half.
+- **No endpoint counts the calls a man could challenge.** Innings caught is the
+  roster stand-in. The per-club file counts called strikes seen and called balls
+  received itself, by the umpire's original call, from each game feed (table
+  `abs_game_calls`). Limit: a mid-half catcher change credits the next half.
 - **`hydrate=linescore` rides free on a schedule sweep**, handing back
   `currentInning`, `scheduledInnings` and the per-inning shape while a
   `codedGameState` check is being made anyway.

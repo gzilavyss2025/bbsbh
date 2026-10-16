@@ -107,6 +107,6 @@ asks.
   big" but "does the page that fetches it read this". A dataset that fails the
   second test does not belong in it, at any size.
 - **Fields added later to the club file.** Each man in `abs-exposure-clubs-{level}.json`
-  gained `wonBatter`, `wonCatcher`, `resultsBatter`, `resultsCatcher` and
-  `pitchesReceived`. The results strings are the one place the file ships more than
-  counts, and `abs_catcher_pitches` feeds `pitchesReceived`. The split rule is unchanged.
+  gained `wonBatter`, `wonCatcher`, `resultsBatter`, `resultsCatcher`,
+  `strikesSeen` and `ballsReceived`. The results strings are the one place the file ships more than
+  counts, and `abs_game_calls` feeds the last two. The split rule is unchanged.
