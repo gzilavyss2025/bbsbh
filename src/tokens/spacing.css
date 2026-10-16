@@ -43,6 +43,7 @@
   --radius-md:  10px;
   --radius-lg:  16px;
   --radius-pill: 999px;
+  --radius-square: 0; /* a band head, its card, a chip or a thumbnail on the scorebook pages */
 
   /* Borders */
   --bw-hair: 1px;

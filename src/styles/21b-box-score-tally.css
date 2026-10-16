@@ -119,7 +119,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: var(--radius-square);
   background: var(--tint, var(--surface-card));
 }
 .bs__tallyLogobox--pinstripe {
@@ -158,7 +158,7 @@
 .bs__tallyWash {
   position: absolute;
   inset: 1px;
-  border-radius: 2px;
+  border-radius: var(--radius-square);
   background: var(--graphite);
   opacity: calc(var(--fill, 0) * 0.45);
 }

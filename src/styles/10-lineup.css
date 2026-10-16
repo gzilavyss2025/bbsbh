@@ -448,7 +448,7 @@ button.starter__careervs {
   /* One paper label per spot: a substitution stack shares it, so a starter,
      his reliever and a second reliever cost three lines, not three boxes. */
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-square);
   background: var(--surface-card);
   padding: 1px var(--space-1);
 }

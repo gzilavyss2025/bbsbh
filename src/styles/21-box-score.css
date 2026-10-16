@@ -262,7 +262,7 @@
    Card's, and the block keeps its own inset and space. The six that sat on
    page paper (--paper-1) take the Card's paper (Q3). */
 .bs__team {
-  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
+  --card-radius: var(--radius-square); /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h) var(--space-2h);
 }
 
@@ -280,7 +280,7 @@
 .bs__statcastCard > .sectionhead,
 .bs__insights > .sectionhead {
   margin: -12px -14px 10px;
-  border-radius: 0;
+  border-radius: var(--radius-square);
 }
 
 /* Every navy/gold header on this page reads at the same, larger size —
@@ -555,7 +555,7 @@
    computePlayOfTheGame), sitting above the three stars. Same card treatment;
    the description reads like a scorebook note, the inning tag trails it. */
 .bs__potg {
-  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
+  --card-radius: var(--radius-square); /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h);
   margin-bottom: 10px;
 }
@@ -573,7 +573,7 @@
   flex: none;
   width: var(--shot-sm-w);
   height: var(--shot-sm-h);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-square);
   overflow: hidden;
 }
 .shot.bs__potgShot.shot--fallback {
@@ -655,7 +655,7 @@
   margin-top: 10px;
   height: 32px;
   padding: 0 var(--space-3);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-square);
   background: var(--accent-primary);
   border: var(--bw-hair) solid var(--accent-primary);
   color: var(--text-on-ink);
@@ -675,7 +675,7 @@
   height: auto;
   padding: 0;
   overflow: hidden;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-square);
   background: var(--surface-card);
 }
 .bs__potgPoster {
@@ -702,7 +702,7 @@
   bottom: 8px;
   height: 28px;
   padding: 0 var(--space-2h);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-square);
   background: var(--accent-primary);
   border: var(--bw-hair) solid var(--accent-primary);
   color: var(--text-on-ink);
@@ -719,7 +719,7 @@
    time in the innings view, rolled up here). Sits last inside the sealed box
    score, directly above the Game Buzz card, which shares this same seal. */
 .bs__insights {
-  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
+  --card-radius: var(--radius-square); /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h);
   margin-top: var(--space-3);
 }
@@ -744,7 +744,7 @@
    the same idiom as that slate box rather than its own small tiles. Matches the
    frame of .bs__insights/.bs__stars beside it. */
 .bs__statcastCard {
-  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
+  --card-radius: var(--radius-square); /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h);
 }
 /* Phone: the three superlatives stack, same as any other playerline list.
@@ -839,18 +839,5 @@
    cards above already are, so the headerless ones (totals, board, decisions,
    tally, win probability, hit chart, photos, the player lines) match them. */
 .bs .card {
-  --card-radius: 0;
-}
-
-/* Thumbnails, chips and buttons on the box score are square too. A club mark,
-   a toggle track and a hairline rule keep their own shape. */
-.bs :is(
-  .photostrip__thumb, .photostrip__viewall, .photostrip__nav,
-  .hlclip, .hlclip__frame, .hlclip__play, .cliprail__nav,
-  .shot.shot, .playerline__shotwrap, .playerline__posbadge,
-  .scoresum__watch, .winprob__ledger-watch, .bs__tallyWash, .bs__tallyLogobox,
-  .bs__potgWatch, .bs__potgPlay,
-  .hitchart__chip, .hitchart__readout, .defdiamond__spot
-) {
-  border-radius: 0;
+  --card-radius: var(--radius-square);
 }

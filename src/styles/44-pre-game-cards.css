@@ -259,7 +259,7 @@
   gap: var(--space-1);
   min-height: 24px;
   padding: 0 var(--space-2h);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-square);
   border: var(--bw-hair) solid #FFFFFF;
   background: #FFFFFF;
   font-family: var(--font-display);
@@ -291,7 +291,7 @@
   flex: 0 0 auto;
   width: 32px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-square);
   background: var(--surface-inset);
   color: var(--text-body);
   font-size: var(--fs-title-sm);
@@ -337,7 +337,7 @@
   scroll-snap-align: start;
   width: 163px;
   height: 163px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-square);
   overflow: hidden;
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-inset);

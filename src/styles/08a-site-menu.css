@@ -353,7 +353,7 @@
      var() makes the whole declaration invalid at computed-value time — so this
      edge has been drawing at the `medium` initial width since it shipped. */
   border-left: var(--bw-heavy) solid var(--accent-primary);
-  border-radius: 0;
+  border-radius: var(--radius-square);
   background: var(--surface-card);
   text-decoration: none;
 }
