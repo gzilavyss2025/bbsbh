@@ -17,6 +17,7 @@ import { Masthead, MatchBand, MastheadSide } from './gameview/Masthead.jsx'
 import { LineupJumpBar } from './lineup/next/LineupJumpBar.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
+import { GameLoader, GameLoaderHold } from '../components/game/versus/GameLoader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 import { useRouteLink } from '../lib/nav.js'
 import { ordinal } from '../lib/format.js'
@@ -37,9 +38,11 @@ import { formatResetTime } from '../lib/scoresUnlocked.js'
 // and each is a large module on its own. Splitting them further means opening
 // a game to read a lineup never downloads the innings viewer or box score
 // code until the user actually taps into that section.
-const LineupNextPage = lazy(() =>
-  import('./lineup/next/LineupNextPage.jsx').then((m) => ({ default: m.LineupNextPage })),
-)
+const importLineupNextPage = () =>
+  import('./lineup/next/LineupNextPage.jsx').then((m) => ({ default: m.LineupNextPage }))
+const LineupNextPage = lazy(importLineupNextPage)
+// Starts the lineup page's code with the game's data, so the loader rarely waits on it alone.
+importLineupNextPage()
 const InningViewer = lazy(() =>
   import('./InningViewer.jsx').then((m) => ({ default: m.InningViewer })),
 )
@@ -364,8 +367,9 @@ export function GameView({ game, section, onSection }) {
           refresh failure with a feed already in hand (useAsync retains the
           last-good feed) instead flags a non-blocking stale-refresh notice so
           one flaky request at a live game doesn't tear down the view. */}
+      <GameLoaderHold active={feedState.loading && !feed} game={game} treatment={jerseyTreatments} />
       <AsyncStatus
-        loading={feedState.loading}
+        loading={false}
         error={feedState.error}
         hasData={Boolean(feed)}
         errorMessage="Couldn’t load this game. Try again in a moment."
@@ -374,7 +378,7 @@ export function GameView({ game, section, onSection }) {
       />
 
       {feed && step === 0 && (
-        <Suspense fallback={<Loader />}>
+        <Suspense fallback={<GameLoader settled game={game} treatment={jerseyTreatments} />}>
         <LineupNextPage
           {...lineupNext}
           feed={feed}
@@ -405,7 +409,7 @@ export function GameView({ game, section, onSection }) {
         </Suspense>
       )}
       {feed && step === 1 && (
-        <Suspense fallback={<Loader />}>
+        <Suspense fallback={<GameLoader settled game={game} treatment={jerseyTreatments} />}>
         <LineupNextPage
           {...lineupNext}
           feed={feed}

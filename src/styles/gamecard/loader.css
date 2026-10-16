@@ -1,0 +1,125 @@
+/* THE GAME LOADER (components/game/versus/GameLoader.jsx). The phone's wait after a slate-card
+   tap: each club's colour grows out of a logo tile the size of the card's, at the middle of the
+   screen, until the two fill it, split on the slash the card's hover draws (versus.css), and hold there until the game is
+   ready. A fixed layer over the page; only mounted for a phone without reduced motion. */
+.versusload {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+  z-index: var(--z-overlay);
+  background: var(--bg-page);
+}
+.versusload__stage {
+  --slant: 48px;
+  --mark: min(46vw, 220px);
+  /* The card tile the colours grow from, and where it sits: the middle of the screen. */
+  --tile-w: 122px;
+  --tile-h: 120px;
+  --tile-gap: 16px;
+  position: absolute;
+  inset: 0;
+}
+
+/* One full-screen colour layer per club, clipped to its slanted half. The logo sits in the middle
+   of that half: padding keeps it out of the other club's side. */
+.versusload__tile {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tint, var(--bg-page));
+  animation: var(--dur-slow) var(--ease-stamp) both;
+}
+.versusload__tile--away {
+  padding-right: 50%;
+  animation-name: versusload-away;
+}
+.versusload__tile--home {
+  padding-left: 50%;
+  animation-name: versusload-home;
+}
+.versusload__tile .teamlogo {
+  width: var(--mark) !important;
+  height: var(--mark) !important;
+  object-fit: contain;
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0));
+  animation: versusload-logo var(--dur-slow) var(--ease-stamp) both;
+}
+.versusload__tile.versusload__tile--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+
+/* The slash: the card's three stripes, drawn from the middle out. */
+.versusload__slash {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  z-index: 2;
+  width: calc(var(--space-1) + 2 * var(--bw-heavy));
+  margin-left: calc((var(--space-1) + 2 * var(--bw-heavy)) / -2);
+  background: linear-gradient(
+    90deg,
+    var(--border-stamped) 0 var(--space-1),
+    var(--text-on-ink-cream) var(--space-1) calc(var(--space-1) + var(--bw-heavy)),
+    var(--border-stamped) calc(var(--space-1) + var(--bw-heavy)) 100%
+  );
+  /* Leans exactly as the clipped edges do (a --slant run over the layer's height), so the stripes
+     sit on the edge at any screen height. */
+  transform: skewX(calc(atan2(var(--slant), 100dvh) * -1));
+  animation: versusload-slash var(--dur-slow) var(--ease-stamp) both;
+}
+
+/* From a slanted tile as big as the card's, at the middle of the screen, out to the full half. Both polygons have four points, so the browser can blend them. */
+@keyframes versusload-away {
+  from { clip-path: polygon(calc(50% - var(--tile-w) - var(--tile-gap) / 2) calc(50% - var(--tile-h) / 2), calc(50% - var(--tile-gap) / 2) calc(50% - var(--tile-h) / 2), calc(50% - var(--tile-gap) / 2 - 12px) calc(50% + var(--tile-h) / 2), calc(50% - var(--tile-w) - var(--tile-gap) / 2 - 12px) calc(50% + var(--tile-h) / 2)); }
+  to   { clip-path: polygon(0 0, calc(50% + var(--slant) / 2) 0, calc(50% - var(--slant) / 2) 100%, 0 100%); }
+}
+@keyframes versusload-home {
+  from { clip-path: polygon(calc(50% + var(--tile-gap) / 2) calc(50% - var(--tile-h) / 2), calc(50% + var(--tile-w) + var(--tile-gap) / 2) calc(50% - var(--tile-h) / 2), calc(50% + var(--tile-w) + var(--tile-gap) / 2 - 12px) calc(50% + var(--tile-h) / 2), calc(50% + var(--tile-gap) / 2 - 12px) calc(50% + var(--tile-h) / 2)); }
+  to   { clip-path: polygon(calc(50% + var(--slant) / 2) 0, 100% 0, 100% 100%, calc(50% - var(--slant) / 2) 100%); }
+}
+@keyframes versusload-logo {
+  from { scale: 0.5; }
+  to   { scale: 1; }
+}
+@keyframes versusload-slash {
+  from { opacity: 0; scale: 1 0; }
+  to   { opacity: 1; scale: 1 1; }
+}
+
+/* The fade-out: the layer stays up one beat after the game lands (GameLoaderHold), then dissolves.
+   `settled` is the same layer already full, for a fallback that follows the first loader. */
+.versusload__back {
+  position: absolute;
+  top: calc(var(--space-2) + env(safe-area-inset-top));
+  left: var(--space-2);
+  z-index: 3;
+}
+/* Above a fallback layer the lineup chunk may mount behind it, so the fade is seen, not covered. */
+.versusload--leaving {
+  z-index: calc(var(--z-overlay) + 1);
+  pointer-events: none;
+  animation: versusload-out var(--dur-med) var(--ease-standard) both;
+}
+.versusload--settled :is(.versusload__tile, .versusload__slash, .teamlogo) {
+  animation: none;
+}
+.versusload--settled .versusload__tile--away {
+  clip-path: polygon(0 0, calc(50% + var(--slant) / 2) 0, calc(50% - var(--slant) / 2) 100%, 0 100%);
+}
+.versusload--settled .versusload__tile--home {
+  clip-path: polygon(calc(50% + var(--slant) / 2) 0, 100% 0, 100% 100%, calc(50% - var(--slant) / 2) 100%);
+}
+@keyframes versusload-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
