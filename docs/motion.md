@@ -45,9 +45,10 @@ move exactly as their own headers instruct. That also covers `focus/` and
 
 ## The one-shot gate
 
-Every one-shot in the package hangs off one of two gates:
-`src/hooks/motion/useBecameTrue.js` for a change the reader sees happen, and
-`src/hooks/scroll/useInViewOnce.js` for an entrance on the player page.
+Every one-shot in the package hangs off one of three gates:
+`src/hooks/motion/useBecameTrue.js` for a change the reader sees happen,
+`src/hooks/scroll/useInViewOnce.js` for an entrance on the player page, and
+`src/hooks/motion/useViewOnce.js` for a team-page band (plays once per page visit).
 
 A CSS animation runs when its element mounts, or when the element gains the
 class carrying it. That is right for a change the reader just caused and wrong
