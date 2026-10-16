@@ -1084,7 +1084,7 @@ test('C3: the rules that reshape the diamond inside a host still win over the Ca
   const imports = importOrder()
   const card = imports.indexOf('system/card.css')
   const hosts = [
-    ['12-sealbox.css', '.bs__defensecard .defdiamond', { 'border-top': 'none', 'border-radius': '0 0 var(--radius-md) var(--radius-md)' }],
+    ['12-sealbox.css', '.bs__defensecard .defdiamond', { 'border-top': 'none', 'border-radius': '0' }],
     ['12-sealbox.css', '.refpanel__body .defdiamond', { border: 'none', 'box-shadow': 'none', background: 'none' }],
     ['44-pre-game-cards.css', '.opp .defdiamond', { border: '0', 'border-radius': '0' }],
   ]

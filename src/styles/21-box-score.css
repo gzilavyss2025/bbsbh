@@ -262,6 +262,7 @@
    Card's, and the block keeps its own inset and space. The six that sat on
    page paper (--paper-1) take the Card's paper (Q3). */
 .bs__team {
+  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h) var(--space-2h);
 }
 
@@ -279,7 +280,7 @@
 .bs__statcastCard > .sectionhead,
 .bs__insights > .sectionhead {
   margin: -12px -14px 10px;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: 0;
 }
 
 /* Every navy/gold header on this page reads at the same, larger size —
@@ -554,6 +555,7 @@
    computePlayOfTheGame), sitting above the three stars. Same card treatment;
    the description reads like a scorebook note, the inning tag trails it. */
 .bs__potg {
+  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h);
   margin-bottom: 10px;
 }
@@ -717,6 +719,7 @@
    time in the innings view, rolled up here). Sits last inside the sealed box
    score, directly above the Game Buzz card, which shares this same seal. */
 .bs__insights {
+  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h);
   margin-top: var(--space-3);
 }
@@ -741,6 +744,7 @@
    the same idiom as that slate box rather than its own small tiles. Matches the
    frame of .bs__insights/.bs__stars beside it. */
 .bs__statcastCard {
+  --card-radius: 0; /* a card with a band head is square, so its bar is too (#2165) */
   padding: var(--space-3) var(--space-3h);
 }
 /* Phone: the three superlatives stack, same as any other playerline list.

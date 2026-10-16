@@ -134,7 +134,7 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border-radius: 0;
   margin-bottom: 0;
 }
 .abs__rows {
@@ -1517,12 +1517,15 @@
   /* A plain <h4> here, not the innings view's collapsible <button> copy —
      restore the non-interactive cursor the base rule's button reset assumes. */
   margin-bottom: 0;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border-radius: 0;
   cursor: default;
 }
 .bs__defensecard .defdiamond {
   border-top: none;
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  border-radius: 0;
+}
+.bs__abscard .abs__rows {
+  border-radius: 0;
 }
 
 /* Focus mode's Field tab: zeroing the OUTER .halfdefense like the box score
