@@ -25,7 +25,7 @@ export function TeamSearchBox({ label = 'Find a team', placeholder = 'Team nameâ
 
   return (
     <Stack gap="tight" className="searchbox">
-      <label className="searchbox__label">{label}</label>
+      <label className="t-label">{label}</label>
       {selected ? (
         <div className="searchbox__chosen">
           <span>{selected.name}</span>
