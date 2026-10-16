@@ -51,11 +51,11 @@ record ("leads 2-1") is a result and never goes on the sheet (ADR-0087).
 
 Three modules are off limits, and two guards enforce it rather than this paragraph:
 
-- `api/linescore.js` and `api/derive.js` are reveal-only and carry an `importers`
+- `src/api/linescore.js` and `src/api/derive.js` are reveal-only and carry an `importers`
   allowlist in `src/api/spoiler-manifest.json`;
   `scripts/check-spoiler-manifest.mjs` fails `npm run lint` on any importer not on
   it.
-- `api/loadScorecard.js` is classed `mixed` and the manifest would *permit* its
+- `src/api/loadScorecard.js` is classed `mixed` and the manifest would *permit* its
   spoiler-free half — so `test/print-sheet.test.js` blocks it separately. Its
   spoiler-free half sits two lines above an import of `revealInning`, and pulling
   any of it in would drag the full-reveal grid into the production bundle.

@@ -147,7 +147,7 @@ the studio's `overflows` warning do its job.
 ## What was considered for the right-hand card, and why records won
 
 A research pass over the site's pre-game modules ranked five candidates.
-**Bullpen availability** (`api/workload.js` + `selectBullpen`) was the closest
+**Bullpen availability** (`src/api/workload.js` + `selectBullpen`) was the closest
 rival and is the best fallback if this ever needs replacing: it is the only
 candidate that is *exclusively* a tonight fact, it rides `workloadData` already
 in `useGameData`, and its pen list populates before the lineups do. It lost on

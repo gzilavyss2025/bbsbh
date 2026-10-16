@@ -114,14 +114,6 @@
   min-width: 0;
   width: 100%;
 }
-.tlead__name-first {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 /* The surname gets its own full-width line rather than sharing one with the
    stat value (the old layout's overflow bug — a long name like
    "Adamczewski" ran into the stat beside it). Still falls back to an

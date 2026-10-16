@@ -49,7 +49,7 @@ export function WhatsBrewingModal({ notes, teamId, title = 'Game Notes', onClose
       >
         <div className="brewsheet__head">
           <h2 className="sheet__title">{title}</h2>
-          <button ref={closeRef} className="brewsheet__close" onClick={onClose} aria-label="Close">
+          <button ref={closeRef} className="sheet-close brewsheet__close" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>

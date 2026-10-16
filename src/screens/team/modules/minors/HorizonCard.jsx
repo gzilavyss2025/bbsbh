@@ -30,7 +30,7 @@ function StatGrid({ stats }) {
       {stats.map((s) => (
         <div className="hzntile__tile" key={s.k}>
           <span className="hzntile__tilev">{s.v}</span>
-          <span className="hzntile__tilek">{s.k}</span>
+          <span className="t-label">{s.k}</span>
         </div>
       ))}
     </Grid>

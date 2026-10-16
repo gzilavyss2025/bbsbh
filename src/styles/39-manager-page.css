@@ -244,18 +244,6 @@
   margin: 0;
 }
 
-.bpsheet__close {
-  flex: none;
-  background: none;
-  border: none;
-  padding: var(--space-1);
-  margin: -4px -4px 0 0;
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  line-height: var(--lh-solid);
-  cursor: pointer;
-}
-
 .bpsheet__close:focus-visible {
   outline: none;
   box-shadow: var(--ring);
@@ -462,18 +450,6 @@
 
 .gsmodal__head .sheet__title {
   margin: 0;
-}
-
-.gsmodal__close {
-  flex: none;
-  background: none;
-  border: none;
-  padding: var(--space-1);
-  margin: -4px -4px 0 0;
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  line-height: var(--lh-solid);
-  cursor: pointer;
 }
 
 /* ---------------------------------------------------- postseason odds pill

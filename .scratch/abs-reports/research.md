@@ -50,7 +50,7 @@ did not need to bat, the last `innings[]` entry's `home` object carries **no
 half was never played. `isTopInning` agrees but is a state flag describing where
 the game stopped, not a record of what happened.
 
-Captured in `test/fixtures/abs-denominators.json`:
+Captured in `test/fixtures/abs-denominators.json` (deleted in #2183; `build-fixture.mjs` rebuilds it):
 
 | gamePk | State | currentInning | Bottom played |
 |---|---|---|---|
@@ -289,7 +289,7 @@ errors. Suggestive at most, and it must be reported as that.
 |---|---|
 | `fetch-innings.mjs` | Sweeps both levels' schedules with `hydrate=linescore`, writes `final-innings.json` |
 | `fetch-exposure.mjs` | Sweeps every club's fullSeason roster, writes `exposure.json` |
-| `build-fixture.mjs` | Rebuilds `test/fixtures/abs-denominators.json` |
+| `build-fixture.mjs` | Rebuilds `test/fixtures/abs-denominators.json` (deleted; no test reads it) |
 | `diag-cancelled.mjs` | Quantifies the never-played games behind #1073 |
 | `analysis.mjs` | Every figure in section 3, from the row store plus the two caches |
 

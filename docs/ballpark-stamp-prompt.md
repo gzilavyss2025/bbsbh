@@ -10,7 +10,7 @@ That last part is why this table is worth finishing, and then some: **only the 3
 MLB parks have bundled art at all.** Every minor-league park falls back to the
 graphite placeholder, so the AAA/AA/A+/A panes are captions and marks today. A
 minor-league park enters by exactly the same door as an MLB one below — a file in
-`public/ballparks/stamp/` plus a manifest key (see below), keyed on the venue name
+`public/ballparks/stamp/` (to be created; the folder does not exist yet) plus a manifest key (see below), keyed on the venue name
 the static team snapshot carries (`public/data/teams.json`, `venueName`).
 
 Today that image is the park's **photograph** (`ballparkPhotoThumb`). The intent is

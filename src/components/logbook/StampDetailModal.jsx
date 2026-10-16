@@ -45,7 +45,7 @@ export function StampDetailModal({ kind, slot, onClose }) {
       <div className="sheet stampdetail" role="dialog" aria-modal="true" aria-label={title}>
         <div className="stampdetail__head">
           <h2 className="sheet__title">{title}</h2>
-          <button ref={closeRef} className="stampdetail__close" onClick={onClose} aria-label="Close">
+          <button ref={closeRef} className="sheet-close stampdetail__close" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>

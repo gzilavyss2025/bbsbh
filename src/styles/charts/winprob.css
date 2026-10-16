@@ -236,15 +236,6 @@
   letter-spacing: var(--ls-label);
 }
 
-.winprob__ledger-half {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
 /* A real control: an outlined button, drawn 28px tall with a 44px hit area. */
 .winprob__ledger-watch {
   position: absolute;
