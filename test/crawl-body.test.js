@@ -217,7 +217,7 @@ test('a player body carries a season aggregate and nothing per-game', () => {
 
 test('buildRoster answers only for the club page', async () => {
   // Every other route resolves to null without a request, which is what keeps
-  // the ~29 other rewrites at one upstream call each.
+  // the other rewrites at one upstream call each.
   for (const route of ['player', 'team-leaders', 'game', 'standings']) {
     assert.equal(await buildRoster(new URLSearchParams({ route, id: '158' })), null, route)
   }
@@ -272,19 +272,18 @@ test('the sitemap lists every club, at the address the canonical names', () => {
   // The slugged form, spelled by route.js itself. A sitemap naming the OTHER of
   // two working addresses lists a page whose canonical points somewhere else.
   assert.ok(xml.includes(`<loc>https://tallybb.com/team/${entitySegment(158, 'Milwaukee Brewers')}</loc>`))
-  assert.ok(xml.includes('/team/milwaukee-brewers-158/roster</loc>'))
-  assert.ok(xml.includes('/team/milwaukee-brewers-158/numbers</loc>'), 'an MLB club gets all six doors')
-  // A MiLB affiliate gets the two tabs its feed actually fills.
+  assert.ok(xml.includes('/team/milwaukee-brewers-158/leaders</loc>'), 'an MLB club also gets /leaders')
+  assert.doesNotMatch(xml, /\/team\/[^<]*\/(roster|games|numbers|contracts|minors)</, 'the old tab addresses redirect, so they are not listed')
+  // A MiLB affiliate gets the page its feed actually fills.
   assert.ok(xml.includes('/team/toledo-mud-hens-512</loc>'))
-  assert.ok(xml.includes('/team/toledo-mud-hens-512/roster</loc>'))
-  assert.doesNotMatch(xml, /toledo-mud-hens-512\/numbers/, 'not an affiliate’s thinnest tabs')
+  assert.doesNotMatch(xml, /toledo-mud-hens-512\/leaders/, 'not an affiliate’s thinnest page')
 })
 
 test('the sitemap still lists no player page and no scoring surface', () => {
   const xml = buildSitemap()
   assert.doesNotMatch(xml, /<loc>[^<]*\/player\//, 'players are discovered by links, not listed')
   assert.doesNotMatch(xml, /<loc>[^<]*\/\d{8}[^<]*<\/loc>/, 'no dated slate')
-  assert.ok(xml.match(/<loc>/g).length > 300, 'the clubs really are in there')
+  assert.ok(xml.match(/<loc>/g).length > 200, 'the clubs really are in there (150 clubs plus the app routes)')
 })
 
 test('a missing club file degrades to a shorter sitemap, never a failed build', () => {

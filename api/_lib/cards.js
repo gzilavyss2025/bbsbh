@@ -247,7 +247,7 @@ async function teamCard(idSegment, origin, { tab } = {}) {
 // so the route's wall-clock is unchanged even though its request count is two.
 //
 // What it buys is the reason ADR-0059 leaves player pages out of the sitemap: a
-// crawler that reaches one club roster page reaches 26 player pages from it, by
+// crawler that reaches one club page reaches 26 player pages from it, by
 // following links, which is how discovery is supposed to work on a site whose
 // whole player set is five figures. Verified 2026-08-20 against teams 158 (MLB),
 // 512 (AAA) and 5015 (A) — the endpoint answers at every level this app serves.

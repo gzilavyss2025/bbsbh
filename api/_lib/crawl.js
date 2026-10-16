@@ -159,7 +159,6 @@ export function playerCrawl(p, { id, name, pos, team, born, status = null }) {
           heading: `${team} on Tally`,
           items: [
             { href: `/team/${clubSegment}`, text: `${team} club page` },
-            { href: `/team/${clubSegment}/roster`, text: `${team} roster` },
             { href: `/team/${clubSegment}/leaders`, text: `${team} team leaders` },
           ],
         }
@@ -241,7 +240,7 @@ function esc(s) {
 // Every body ends with the same short rail. A crawler learns a URL from a link,
 // and until now the only markup this site offered one was a sitemap — so the
 // pages that ARE listed there had nothing pointing onward to the pages that are
-// not. See ADR-0059 on why a club's roster page carries the rest of that graph.
+// not. See ADR-0059 on why a club's page carries the rest of that graph.
 const SITE_LINKS = [
   { href: '/', text: "Today's games" },
   { href: '/learn', text: 'Scorekeeping guides' },

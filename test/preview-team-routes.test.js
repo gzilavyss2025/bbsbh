@@ -15,7 +15,7 @@ import { teamCrawl } from '../api/_lib/crawl.js'
 const OLD_TABS = ['roster', 'games', 'numbers', 'contracts', 'minors']
 const { rewrites } = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'))
 
-// First matching rewrite wins, as on Vercel. `:id` is one segment; `:tab(a|b)` is a group.
+// First matching rewrite wins, as on Vercel. `:id` is one segment.
 function resolve(path) {
   for (const { source, destination } of rewrites) {
     const re = new RegExp(`^${source.replace(/:\w+\(([^)]*)\)/g, '($1)').replace(/:\w+/g, '([^/]+)')}$`)
