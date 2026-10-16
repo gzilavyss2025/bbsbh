@@ -1184,6 +1184,14 @@
     "commandReceived.js": {
       "class": "spoiler-free",
       "why": "Static command-received.json — per catcher, a season median distance from his target for each pitcher who threw to him, over games already final. The substitution replay that BUILT it is caller-gated where it lives (catcherOfRecord.js); what survives into this reader is an aggregate with the timing washed out — no line, no score, no per-game granularity. Same footing as targetCommand.js on the player page, an open surface (ADR-0034)."
+    },
+    "worldSeries/history.js": {
+      "class": "cutoff-gated",
+      "why": "Static world-series/series.json: every FINISHED World Series, one row per game with its runs. A finished Series is no spoiler on its own, but a game of the current Series must never come back from it: every read goes through lib/worldSeries/lastBefore.js (strictly before the game's own date, and it throws without one), via lib/worldSeries/odds.js. Its one consumer is ReferencePanel.jsx, and only for a game of type W. No read of Scores Unlocked (ADR-0087)."
+    },
+    "callout-notes/worldSeries.js": {
+      "class": "spoiler-free",
+      "why": "The wsSeriesOdds notes (entering-tense). The Series state heading in comes from the callouts bundle's series block, which holds only games Final before the slate date (ADR-0087); the history it quotes is cut strictly before that date by lib/worldSeries/lastBefore.js. It reads no linescore, no feed and no reveal mark, so it clears the pre-half strip and Between Innings without a gate of its own."
     }
   }
 }

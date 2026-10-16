@@ -1922,6 +1922,29 @@ Re-run only to fold in a new season.
   `personId % 100` bucket. Only when all four pass does it add the season to `seasons.json`. Reader:
   `fetchPitchMixFor` in `src/api/pitchArsenal.js`.
 
+- `gen-world-series.mjs` → `public/data/world-series/series.json` — every World Series game
+  from 1903 (121 Series, 707 games, 3 ties): both clubs, final runs, innings, venue and a
+  game number. **Runs by hand after each World Series**, never on a cron (ADR-0114).
+  `node scripts/gen-world-series.mjs --from=1903 --to=2025`; `--check` prints the counts and
+  writes nothing; `--out=DIR` writes elsewhere. A full run replaces the whole file and costs
+  about 830 calls: one schedule call per season, one `playByPlay` call per distinct `gamePk`.
+  The final score comes from the last play, a tie has no winner, and games are numbered by
+  `(date, gamePk)`. No `generatedAt`: `coverage` is the file's clock. The pure half is
+  `scripts/lib/world-series/series.mjs`; tests are in `test/world-series/`.
+
+- `gen-world-series-events.mjs` → `public/data/world-series/events.json` — the tagged events of every
+  World Series game, 1903 to 2025 (#2235). A row is `{ tag, pk, date, season, n, club, player, value, wta }`, sorted
+  by `(date, pk, tag)`; the 17 tags and their exact rules are the header of `src/lib/worldSeries/classify.js`, the one
+  classifier (the live callout builder imports it too). **A hand run, once after each World Series; no cron runs it**:
+  `node scripts/gen-world-series-events.mjs --from=1903 --to=2025` (`--to` defaults to last year, so pass the new year;
+  `--out=DIR` for a measuring run; `--check` compares with the committed file and writes nothing). It replaces the whole
+  file. The game list comes from the `series.json` beside it when that covers the range, else from one
+  schedule call per season (a postponed game keeps its last listing, key by `gamePk`); then one `playByPlay` call for
+  each distinct `gamePk` (about 830 calls, 8 at a time). Scores come from the last play, never the schedule. `wta` (a
+  winner-take-all game: the last decided game when both clubs had `winsNeeded - 1` wins; a tie is not a win) is decided
+  in `lib/world-series/events.mjs` from the Series' own win counts. No `generatedAt`; `coverage` is the clock
+  (`check-data-freshness.mjs` EXCEPT). Tests: `test/world-series/`.
+
 ## Assets / off-app
 
 - `research-db.mjs` — NOT a generator and NOT on any cron: the local DuckDB query

@@ -70,6 +70,7 @@ export const EXCEPT = {
   'league-averages.json': 'hand-run; a finished season never changes and the file carries no clock',
   'ovr/': 'nightly (gen-ovr.mjs, #1720), but the shards carry no clock, so a rerun on the same files writes the same bytes and there is no stamp to age',
   'ovr-history/': 'nightly with gen-ovr.mjs (#1722); the shards carry no clock (a row is dated by the inputs it was built from), so there is no stamp to age',
+  'world-series/': 'hand-run after each World Series (gen-world-series.mjs, gen-world-series-events.mjs); a finished Series never changes and the files carry no clock',
   'milb-seasons/': 'hand-run once a year (gen-milb-seasons.mjs, #1719); a finished minor-league season never changes',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
   // dead generator. A level's pool is a list of games from a season that is
