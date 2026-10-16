@@ -44,6 +44,7 @@ function rowOf(r) {
     tier: r.tier,
     className: [`reg-${r.tier === 'gap' ? 'gap' : r.tier}`, r.subtotal && 'reg-subtotal'].filter(Boolean).join(' '),
     team: r.team || '',
+    teamId: !r.subtotal && r.teamIds?.length === 1 ? r.teamIds[0] : null,
     pill: r.pill || '',
     gap: Boolean(r.gap),
     allStar: Boolean(r.allStar),

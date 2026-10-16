@@ -102,7 +102,7 @@ test('careerRegisterView: a same-season AA -> AAA promotion produces two indepen
 // level sort prints MIL / CHC / Nashville / Iowa / Durham even though his real
 // path was MIL -> Nashville -> CHC -> Iowa -> Durham. Each level also needs a
 // combined row, but that row must not feed either career total a second time.
-test('careerRegisterView: a multi-org MLB + AAA season is chronological, footed once, and marks affiliates', () => {
+test('careerRegisterView: a multi-org MLB + AAA season reads newest stint first, footed once, and marks affiliates', () => {
   const pitch = (gamesPlayed, inningsPitched) => ({
     gamesPlayed, gamesStarted: 0, wins: 0, losses: 0, saves: 0,
     inningsPitched, earnedRuns: 0, hits: 0, baseOnBalls: 0, strikeOuts: gamesPlayed,
@@ -138,8 +138,8 @@ test('careerRegisterView: a multi-org MLB + AAA season is chronological, footed 
 
   assert.deepEqual(
     register.rows.map((r) => r.subtotal ? r.teamLabel : r.teamIds[0]),
-    [158, 556, 112, 451, 234, '2 TM', '3 TM'],
-    'chronological stints come first, followed by the season subtotal rows',
+    ['2 TM', '3 TM', 234, 451, 112, 556, 158],
+    'the season subtotal rows lead, then the stints from the last club back to the first',
   )
 
   const mlbSubtotal = register.rows.find((r) => r.subtotal && r.sportId === SPORT_IDS.MLB)
@@ -160,7 +160,7 @@ test('careerRegisterView: a multi-org MLB + AAA season is chronological, footed 
   assert.equal(milbTotal.cells[0], 8, 'the AAA subtotal is not counted again')
   assert.deepEqual(
     register.rows.filter((r) => !r.subtotal && r.tier === 'milb').map((r) => r.pillTeamId),
-    [158, 112, 139],
+    [139, 112, 158],
     'a multi-org season puts each historical MLB affiliate mark in its level pill',
   )
 })
@@ -234,8 +234,8 @@ test('careerRegisterView: an MLB season split between two clubs is one row per c
   const stints = register.rows.filter((r) => !r.subtotal)
   assert.equal(subtotal.teamLabel, '2 TM')
   assert.equal(subtotal.pill, '', 'an MLB-only multi-team season needs no redundant MLB pill')
-  assert.deepEqual(stints.map((r) => r.teamIds), [[111], [147]])
-  assert.deepEqual(register.rows.map((r) => r.subtotal ? r.teamLabel : r.teamIds[0]), [111, 147, '2 TM'])
+  assert.deepEqual(stints.map((r) => r.teamIds), [[147], [111]])
+  assert.deepEqual(register.rows.map((r) => r.subtotal ? r.teamLabel : r.teamIds[0]), ['2 TM', 147, 111])
   assert.deepEqual(register.rows.map((r) => r.year), ['2026', '2026', '2026'])
   // cells: [G, GS, W-L, ERA, IP, K, BB, WHIP, WAR]
   assert.equal(subtotal.cells[8], '1.8')
@@ -272,8 +272,8 @@ test('careerRegisterView: with warByTeam supplied, each stint row carries its ow
   const stints = register.rows.filter((r) => !r.subtotal)
   // cells: [G, GS, W-L, ERA, IP, K, BB, WHIP, WAR]
   assert.equal(subtotal.cells[8], '1.8', 'the combined row still carries the season total')
-  assert.deepEqual(stints.map((r) => r.teamIds[0]), [111, 147])
-  assert.deepEqual(stints.map((r) => r.cells[8]), ['-0.4', '2.2'], 'each stint shows its OWN club\'s split, not a dash')
+  assert.deepEqual(stints.map((r) => r.teamIds[0]), [147, 111])
+  assert.deepEqual(stints.map((r) => r.cells[8]), ['2.2', '-0.4'], 'each stint shows its OWN club\'s split, not a dash')
 })
 
 test('careerRegisterView: warByTeam only applies to the CURRENT season, not a past stint at the same club', () => {
@@ -459,8 +459,8 @@ test('careerRegisterView: the current season splits per club from the date-cut s
 
   assert.deepEqual(
     register.rows.filter((r) => !r.subtotal).map((r) => r.cells[0]),
-    [40, 20],
-    'the date-cut figures, per club',
+    [20, 40],
+    'the date-cut figures, per club, newest club first',
   )
 })
 

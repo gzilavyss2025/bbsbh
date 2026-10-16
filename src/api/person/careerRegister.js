@@ -279,8 +279,8 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   const withWar = (cells, war) => (showWar ? [...cells, war] : cells)
 
   // Baseball-Reference's compact convention is a combined N-TM row. Here each
-  // season's chronological stints come first and its combined rows foot them,
-  // equation-style. Career totals still sum `real`, never these display rows.
+  // season's combined rows head its stints, which read newest first. Career
+  // totals still sum `real`, never these display rows.
   const levelGroups = new Map()
   for (const st of real) {
     const key = `${st.year}-${st.sid}`
@@ -314,20 +314,22 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
       ),
     })
   }
-  for (let index = 0; index < real.length; index++) {
-    const st = real[index]
-    const key = `${st.year}-${st.sid}`
-    const members = levelGroups.get(key)
-    appendRow(st, members)
-    if (real[index + 1]?.year === st.year) continue
+  // A season reads newest-first like the years do: its combined N TM rows lead, then the clubs from
+  // the last one he joined back to the first, so the first club sits at the bottom of its year.
+  for (let from = 0; from < real.length;) {
+    let to = from
+    while (to < real.length && real[to].year === real[from].year) to++
+    const stints = real.slice(from, to)
     for (const levelMembers of levelGroups.values()) {
-      if (levelMembers.length < 2 || levelMembers[0].year !== st.year) continue
+      if (levelMembers.length < 2 || levelMembers[0].year !== stints[0].year) continue
       appendRow(
         { ...levelMembers[0], stat: aggregateSplits(levelMembers.map((member) => ({ stat: member.stat })), group) },
         levelMembers,
         true,
       )
     }
+    for (const st of stints.reverse()) appendRow(st, levelGroups.get(`${st.year}-${st.sid}`))
+    from = to
   }
 
   // Split totals — never blend levels. MLB uses the API career line when we have
