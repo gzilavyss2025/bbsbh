@@ -15,7 +15,7 @@ test('2-0 leaders', () => {
 
 test('3-1 comebacks are read from winsNeeded (a best-of-nine 4-2 is a different shape)', () => {
   assert.equal(O.winsNeeded, 4)
-  assert.deepEqual(O.trail31, { w: 1, l: 0, last: 1991 })
+  assert.deepEqual(O.trail31, { w: 1, l: 0, last: 1991, lastClub: 4 })
 })
 
 test('winner-take-all: home and road records, road streak, last one', () => {

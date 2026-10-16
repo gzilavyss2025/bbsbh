@@ -647,7 +647,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
             <BaserunningNote key={i} segments={note.segments} />
           ))}
           {calloutNotes.map((note, i) => (
-            <CalloutNote key={`c-${i}`} text={note.text} />
+            <CalloutNote key={`c-${i}`} text={note.text} kind={note.kind} />
           ))}
           {hasZone && (
             <button

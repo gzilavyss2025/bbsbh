@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { buildWorldSeriesOddsNotes } from '../../src/api/callout-notes/worldSeries.js'
 import { SCORE_BASE, ONCE_PER_GAME_KINDS, RECORD_KINDS } from '../../src/api/callout-notes/shared.js'
 import { BETWEEN_INNINGS_ALLOWED_KINDS } from '../../src/api/between-innings.js'
-import { HISTORY, bundleAfter } from './ws-fixture.js'
+import { HISTORY, bundleAfter, mk } from './ws-fixture.js'
 
 const run = (bundle, extra = {}) =>
   buildWorldSeriesOddsNotes({ history: HISTORY, bundle, gameDate: '2001-10-20', gameType: 'W', ...extra })
@@ -45,7 +45,7 @@ test('entering Game 1: defending champion and last meeting', () => {
   const t = text(bundleAfter(1, 2, []))
   assert.deepEqual(t, [
     'The Club1 won the 2000 World Series.',
-    'The Club1 and the Club2 last met in the World Series in 2000.',
+    'The Club1 and the Club2 last met in the World Series in 2000; the Club1 won.',
   ])
 })
 
@@ -98,4 +98,20 @@ test('an old World Series game (no workload date) still gets the odds note; a no
   }).map((n) => n.kind)
   assert.ok(kinds('W').includes('wsSeriesOdds'))
   assert.ok(!kinds('D').includes('wsSeriesOdds'))
+})
+
+// Real club ids (112 Cubs, 114 Guardians, 119 Dodgers): the lookup names them.
+const REAL = { series: [mk(2016, 4, [114, 112], [114, 114, 112, 114, 112, 112, 112]), mk(1990, 4, [119, 141], [119, 119, 119, 119])] }
+const real = (bundle, gameDate) => buildWorldSeriesOddsNotes({ history: REAL, bundle, gameDate, gameType: 'W' }).map((n) => n.text)
+
+test('the comeback note names the last club to do it', () => {
+  assert.deepEqual(
+    real(bundleAfter(119, 141, [119, 119, 141, 119]), '2017-10-20'),
+    ['Teams that trailed 3-1 have won the World Series 1 time in 1. The last was the 2016 Cubs.'],
+  )
+})
+
+test('the drought note names that last Series\' opponent', () => {
+  assert.ok(real(bundleAfter(141, 5, []), '2020-10-20')
+    .includes('The Club141 last played in the World Series in 1990, against the Dodgers.'))
 })

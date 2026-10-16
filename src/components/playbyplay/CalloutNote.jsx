@@ -1,12 +1,18 @@
+import { isWorldSeriesKind } from '../../lib/worldSeries/calloutKind.js'
+
 // A season-context call-out line — the leader / streak / situational-record
 // fun fact (see api/callout-notes.js), marked off with a small star and the
-// kraft-amber seal accent. Shared by the play-by-play at-bat card (one note at
+// kraft-amber seal accent (a World Series note wears the trophy instead). Shared by the play-by-play at-bat card (one note at
 // a time, where it fired) and the box score's Insights card (the whole game's
 // notes rolled up in one list).
-export function CalloutNote({ text }) {
+export function CalloutNote({ text, kind }) {
   return (
     <div className="pbp__callout">
-      <span className="pbp__calloutmark" aria-hidden="true">★</span>
+      {isWorldSeriesKind(kind) ? (
+        <img className="pbp__calloutmark pbp__calloutmark--ws" src="/brand/world-series-trophy-icon.png" alt="" aria-hidden="true" />
+      ) : (
+        <span className="pbp__calloutmark" aria-hidden="true">★</span>
+      )}
       {text}
     </div>
   )
