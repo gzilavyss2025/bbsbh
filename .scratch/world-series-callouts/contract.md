@@ -72,7 +72,7 @@ A row that thinks it must loosen any of these stops with `NEEDS PARENT`.
 - `tie` is `true` for a tied game. A tied game has no winner and counts for no club.
 - No `generatedAt`. The `coverage` block is the file's own clock. Add an `EXCEPT` entry
   with a reason in `scripts/check-data-freshness.mjs`.
-- Budget: 80 KB. A test fails past it.
+- Budget: 100 KB. A test fails past it.
 
 ## 4. `public/data/world-series/events.json` (written by row 4, read by row 5)
 

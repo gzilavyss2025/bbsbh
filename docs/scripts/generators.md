@@ -1922,6 +1922,16 @@ Re-run only to fold in a new season.
   `personId % 100` bucket. Only when all four pass does it add the season to `seasons.json`. Reader:
   `fetchPitchMixFor` in `src/api/pitchArsenal.js`.
 
+- `gen-world-series.mjs` → `public/data/world-series/series.json` — every World Series game
+  from 1903 (121 Series, 707 games, 3 ties): both clubs, final runs, innings, venue and a
+  game number. **Runs by hand after each World Series**, never on a cron (ADR-0114).
+  `node scripts/gen-world-series.mjs --from=1903 --to=2025`; `--check` prints the counts and
+  writes nothing; `--out=DIR` writes elsewhere. A full run replaces the whole file and costs
+  about 830 calls: one schedule call per season, one `playByPlay` call per distinct `gamePk`.
+  The final score comes from the last play, a tie has no winner, and games are numbered by
+  `(date, gamePk)`. No `generatedAt`: `coverage` is the file's clock. The pure half is
+  `scripts/lib/world-series/series.mjs`; tests are in `test/world-series/`.
+
 ## Assets / off-app
 
 - `research-db.mjs` — NOT a generator and NOT on any cron: the local DuckDB query

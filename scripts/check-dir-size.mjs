@@ -79,7 +79,7 @@ const BUDGETS = {
   // package.json and the docs name them by path (docs/scripts/generators.md).
   // Each generator's pure half lives in scripts/lib/ (ADR-0100, ADR-0111 for the
   // open-data and pitch-start generators), so the script itself stays a thin runner.
-  scripts: 129,
+  scripts: 130,
   'src/lib': 58,
   // Testable helpers the generators import (scripts/CLAUDE.md's convention,
   // lib/roster.mjs is the worked example). They run nothing on import and share
