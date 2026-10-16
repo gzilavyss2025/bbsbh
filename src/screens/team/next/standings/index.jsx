@@ -3,11 +3,11 @@ import { AsyncStatus } from '../../../../components/ui/AsyncGate.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
-import { useNav } from '../../../../lib/nav.js'
+import { useNav, useRouteLink } from '../../../../lib/nav.js'
 import { linkQuery } from '../../../../lib/route.js'
 import { teamClubName } from '../../../../lib/teams.js'
 import { loadStandings } from '../../data/loadNumbers.js'
-import { cutoffFor, seasonOf } from '../../data/shared.js'
+import { cutoffFor, postseasonDoor, seasonOf } from '../../data/shared.js'
 import { ComebackCard } from '../../modules/ComebackCard.jsx'
 import { LastTimeCard } from '../../modules/records/LastTimeCard.jsx'
 import { TeamStats, todayDowLabel } from '../../modules/TeamStatsCard.jsx'
@@ -31,6 +31,8 @@ const stampAt = (i) => ({ '--stamp-delay': `calc(var(--stagger-step) * ${i})` })
 
 export default function Standings({ team, asOf, onReady, onCount }) {
   const navigate = useNav()
+  const linkProps = useRouteLink()
+  const psDoor = postseasonDoor(team.id, asOf, sportId)
   const sportId = team.sport?.id ?? 1
   const cutoff = cutoffFor(asOf)
   const count = useCallback((n) => standingsCount(n, n.recordsCutoff), [])
@@ -73,7 +75,7 @@ export default function Standings({ team, asOf, onReady, onCount }) {
       {card && (
         <ScoreCard card={card} onAll={() => navigate(`/standings${linkQuery({ d: asOf, s: sportId })}`)} stampIn={!still} style={stampAt(i++)} />
       )}
-      {recordGroups > 0 && wrap('Records', `${recordGroups} groups`, <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} asOf={asOf} />, 'records')}
+      {recordGroups > 0 && wrap('Records', `${recordGroups} groups`, <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} asOf={asOf} door={psDoor && linkProps(psDoor)} />, 'records')}
       {hasDroughts(n, n?.recordsCutoff) && wrap('Last time', 'chances since', <LastTimeCard data={n.scheduleShape} cutoff={n.recordsCutoff} />, 'last')}
       {n?.dayOfWeek && wrap('Day of week', 'win pct', <TeamStats title="Record by Day of Week" stats={n.dayOfWeek} note="win pct" highlightKey={todayDowLabel()} />, 'dow')}
       {n?.comeback && wrap('Comeback wins', 'all 30 teams', <ComebackCard data={n.comeback} teamId={team.id} clubName={clubName} />, 'comeback')}

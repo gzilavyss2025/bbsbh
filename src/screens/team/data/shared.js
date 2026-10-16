@@ -3,6 +3,7 @@ import { firstLast } from '../../../api/person.js'
 import { isWinterSport } from '../../../lib/winter/leagues.js'
 import { winterSeasonFor } from '../../../lib/winter/window.js'
 import { isoToday } from '../../../lib/dates.js'
+import { postseasonRecordsPath } from '../../../lib/postseason/recordsRoute.js'
 
 // Pieces MORE THAN ONE team-hub loader genuinely needs, collapsed here once the
 // tabs had all landed (issue 07 of .scratch/team-page-ia — the tab loaders were
@@ -442,3 +443,8 @@ export function ledgerIsComplete(ledger, schedule, cutoff) {
   const held = (ledger.games ?? []).filter((g) => g.d <= checkedThrough).length
   return played - held <= Math.max(2, Math.floor(played / 10))
 }
+
+// The door to a club's postseason ledger (`/postseason-records?view=teams&team={id}`), carrying the
+// page's `?d=`. MLB only: the postseason files hold no minor-league club (ADR-0087).
+export const postseasonDoor = (teamId, asOf, sportId) =>
+  sportId === 1 ? postseasonRecordsPath({ view: 'teams', team: teamId, d: asOf }) : null

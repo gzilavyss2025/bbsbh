@@ -338,3 +338,9 @@
     max-width: 720px;
   }
 }
+
+.rec__door {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  text-align: right;
+}
