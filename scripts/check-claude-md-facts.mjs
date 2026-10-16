@@ -11,7 +11,7 @@
 //   - "Eleven narrow, opt-in exceptions (api/)" was written when there were
 //     eleven. Three landed in one week; the PROSE below the count was updated
 //     to describe all three and the COUNT above it was not.
-//   - "a five-tab hub" survived the Contracts tab's arrival.
+//   - "a five-tab hub" survived the Contracts tab's arrival (the team page has bands now).
 //   - Three nested CLAUDE.md files were listed; six existed.
 //
 // Every one of those is a fact a machine can hold. None of them is style, and
@@ -85,10 +85,8 @@ claims(
   'Stamps is described last, so its ordinal is the total.',
 )
 
-const tabBar = readFileSync(join(ROOT, 'src/screens/team/TeamTabBar.jsx'), 'utf8')
-const tabs = /const TABS = \[(.*?)\]/s.exec(tabBar)
-if (!tabs) problems.push('Could not find the TABS array in src/screens/team/TeamTabBar.jsx.')
-else claims('the team hub tab count', /(\w+)-tab hub/i, (tabs[1].match(/key:/g) ?? []).length, 'See TABS in TeamTabBar.jsx.')
+const bands = readFileSync(join(ROOT, 'src/screens/team/next/bands.js'), 'utf8')
+claims('the team page band count', /(\w+)-band page/i, (bands.match(/\bkey: '/g) ?? []).length, 'See BANDS in next/bands.js.')
 
 // ------------------------------------------------- the nested CLAUDE.md list
 

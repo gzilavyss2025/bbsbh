@@ -9,34 +9,6 @@
 .tlead {
   margin-top: 4px;
 }
-/* DeckNudge — the desktop "‹ ›" step control for TeamTransactionsCard's swipe
-   deck (Team Leaders had one too until the hub moved to the ledger, which does
-   not scroll). Bare text, same quiet register
-   as .door--inline/.inningnav's chevron labels, not a floating icon button:
-   no border, no background, no shadow. Mouse/trackpad only — a deck you can
-   swipe never needs a click alternative, so this only exists where hover is
-   possible at all. */
-.decknudge {
-  display: none;
-  align-items: center;
-  gap: 2px;
-}
-@media (hover: hover) and (pointer: fine) {
-  .decknudge {
-    display: inline-flex;
-  }
-}
-.decknudge__btn {
-  border: none;
-  background: none;
-  padding: 2px var(--space-1);
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-semibold);
-  color: var(--accent-link);
-  line-height: var(--lh-solid);
-}
 /* One column, two from 560px; minmax(0, …) lets a long row truncate (#1184). */
 .tlead__grid {
   display: grid;

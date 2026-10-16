@@ -1,6 +1,6 @@
 # The team page is one scroll of named bands, not six tabs
 
-**Status:** DRAFT — awaiting sign-off on #1105. Not accepted until #1107 ships.
+**Status:** Accepted (2026-10-16; shipped in #1107).
 **Date:** 2026-09-21
 **Supersedes:** ADR-0034, *The team page is five tabs, not one scroll*.
 **Amended by:** ADR-0109, *The canvas is the site-wide look* (counts on the jump bar; the cards use the shared parts).
@@ -8,8 +8,8 @@
 > ADR-0034 is not wrong, and it is not deleted. It holds the record of why the
 > old one-scroll page failed, and those three failures are still the test any
 > replacement has to pass. This ADR says how a long page passes them **without
-> tabs**, and what changed to make that possible. The `superseded` mark on
-> ADR-0034 lands with #1107, alongside the code.
+> tabs**, and what changed to make that possible. ADR-0034 is marked
+> superseded by this one.
 
 The wireframe this records is `.scratch/team-one-scroll/scope.md`, which carries
 the measurements, the per-club module lists and the section-by-section
@@ -569,3 +569,15 @@ the row-by-row table. In short:
   generalise, and should not — except **Money**, which #928 already named.
 - `CLAUDE.md` and `src/CLAUDE.md` both say "`/team/{id}` is a six-tab hub; each
   tab is a real route". That stops being true the day #1107 merges.
+
+## Shipped (2026-10-16, #1107)
+
+`/team/{id}` serves the page. The five old tab addresses (`/roster`, `/games`, `/numbers`,
+`/contracts`, `/minors`) parse to the same page with a `tab`; it lands on the band
+(`TEAM_TAB_BAND`) and rewrites the address to the bare page, keeping `?d=` and `?s=`.
+`/team/{id}/leaders` is unchanged. The hidden `/team/{id}/next[/{tab}]` address is cleaned the
+same way, so a link someone saved still works. The tab components, `TeamTabBar`,
+`hiddenTeamTabs`, `loadOverview` and `loadNumbers` are deleted; `TeamHubShell` takes the jump
+bar as `bar`. The 40-man Injured List read (`fetchTeamIL`) joined the shared sources, since
+Roster and Ranks asked for it at once. The Records head draws only when a game counted.
+

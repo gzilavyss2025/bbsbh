@@ -1,4 +1,4 @@
-import { fetchTeam, fetchLeagueTeamStats, fetchTeamIL } from '../../../api/team.js'
+import { fetchTeam, fetchLeagueTeamStats } from '../../../api/team.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
 import { fetchTeamRecords } from '../../../api/teamRecords.js'
 import { fetchScheduleShape } from '../../../api/scheduleShape.js'
@@ -22,13 +22,12 @@ import { DIRECT } from './sources.js'
 
 const DASH = '—'
 
-// The Numbers tab's own data: standings, team batting/pitching ranks, the
-// leaderboard pool, comeback-win rates, the day-of-week record, the club's
-// season run value, and jersey combos — see
-// .scratch/team-page-ia/issues/05-numbers-tab.md.
+// The Standings, Ranks and About (jerseys) bands' data: standings, team batting/pitching
+// ranks, the leaderboard pool, comeback-win rates, the day-of-week record, the club's
+// season run value, and jersey combos.
 //
 // Fetches nothing else — no roster, 40-man, WAR, photos, prospects,
-// affiliates or transactions. Those belong to the other tabs.
+// affiliates or transactions. Those belong to the other bands.
 
 function statRank(rows, teamId, key, label, lowerBetter) {
   const mine = rows.find((r) => r.teamId === teamId)
@@ -39,15 +38,8 @@ function statRank(rows, teamId, key, label, lowerBetter) {
 }
 
 // Each band of the one-scroll page (#1107) buys only its own share: Standings (the
-// standings, the record cards, the jerseys) and Ranks (the rank tables, the leaders, the
-// run value and the challenge card). The Numbers tab buys both, as `loadNumbers`, with
-// no `src` (each half takes one: sources.js; only the page passes SHARED).
-export async function loadNumbers(id, asOf) {
-  const [standing, ranks] = await Promise.all([loadStandings(id, asOf), loadRanks(id, asOf)])
-  if (!standing || !ranks) return null
-  const jerseys = standing.team.sport?.id > 1 ? homeAway(standing.standings) : await loadJerseys(standing.team, asOf)
-  return { ...standing, ...ranks, ...jerseys }
-}
+// standings, the record cards) and Ranks (the rank tables, the leaders, the run value and the
+// challenge card); About buys the jerseys. Each takes a `src` (sources.js; the page passes SHARED).
 
 // An affiliate wears one jersey at home and one away: its record in each is the standings split.
 const homeAway = (rows) => {
@@ -193,7 +185,7 @@ export async function loadRanks(id, asOf, src = DIRECT) {
     loadCombinedPoolForTeams([{ id }], season, { withHand: true, fetchStats: src.fetchTeamSeasonStats }),
     sportId === 1 ? fetchRunValue() : Promise.resolve(null),
     fetchAbsExposureClubs(absExposureLevel),
-    fetchTeamIL(id, season),
+    src.fetchTeamIL(id, season),
   ])
 
   const batting = league.hitting.length

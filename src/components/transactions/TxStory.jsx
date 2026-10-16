@@ -1,4 +1,4 @@
-import { BANNER_TONE, Cutline, TYPE_TONE, datelineParts } from './MoveRow.jsx'
+import { BANNER_TONE, Cutline, TYPE_TONE } from './MoveRow.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Card } from '../ui/frame/Card.jsx'
@@ -53,7 +53,7 @@ function RailSlot({ slot }) {
 }
 
 // The card itself. It carries NO dateline of its own: both surfaces group by
-// day around it (the deck's DayTab below, the page's own heading), which is
+// day around it (the page's own heading), which is
 // what took 950 of 3,199 repeated datelines off the club surfaces — 29.7% of
 // cards restated the date of the card immediately before them, measured over
 // the shipped 2026 club files.
@@ -78,37 +78,4 @@ export function TxStory({ story }) {
       <Cutline segments={story.cutline} className="txstory__cutline" />
     </Card>
   )
-}
-
-// The deck's day divider — a narrow tab standing between one day's run of
-// cards and the next, carrying the day and how many moves it holds. It is the
-// wire's dateline row (MoveRow's `wire__date`) turned on its side, and it does
-// the same two jobs: it says the date ONCE per day, and it makes a day
-// boundary visible in a run of cards that otherwise has none.
-//
-// Written in short stacked lines rather than rotated text: a deck is only as
-// tall as its tallest card, and a quiet day of one-line cutlines leaves under
-// 100px to write in. Stacked lines simply reflow; a rotated dateline would
-// have been clipped.
-export function DayTab({ weekday, month, day, count }) {
-  return (
-    <div className="txday">
-      <span className="txday__wd">{weekday}</span>
-      <span className="txday__mo">{month}</span>
-      <span className="txday__day">{day}</span>
-      <span className="txday__count">{count}</span>
-    </div>
-  )
-}
-
-// `Wed` / `Aug` / `19` — the three tokens a day tab writes, off the same
-// weekday and month tables the spelled-out dateline uses, so no surface can
-// disagree about what day a story landed on.
-//
-// Three separate tokens rather than one string: a tab is ~40px wide, and
-// "Aug 19" set in the display face at caption size wraps at that measure on
-// some days and not others. Splitting it makes every tab the same shape.
-export function dayTabParts(iso) {
-  const { weekday, month, day } = datelineParts(iso)
-  return { weekday: weekday.slice(0, 3), month: month.slice(0, 3), day }
 }

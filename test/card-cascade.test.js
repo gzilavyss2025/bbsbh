@@ -508,17 +508,14 @@ test('the team hub keeps its space between cards, from the hub and not from Card
 // contract tile's 3px top rule.
 const C1 = [
   { css: '23-box-score-detail.css', sel: '.tlead__cat', jsx: 'components/teamstats/TeamLeaders.jsx', ns: 'tlead__cat' },
-  { css: '23-box-score-detail.css', sel: '.tledg__block', jsx: 'components/teamstats/TeamLeadersLedger.jsx', ns: 'tledg__block' },
   { css: '28-team-hub.css', sel: '.jerseydeck__card', jsx: 'components/logo/JerseyCombos.jsx', ns: 'jerseydeck__card', keep: ['background'] },
   { css: '28-team-hub.css', sel: '.team-score', jsx: 'components/teamstats/TeamScoreCard.jsx', ns: 'team-score' },
   { css: '29-team-transactions.css', sel: '.txstory', jsx: 'components/transactions/TxStory.jsx', ns: 'txstory' },
   { css: '31-wild-card.css', sel: '.tstats', jsx: 'screens/team/modules/TeamStatsCard.jsx', ns: 'tstats' },
-  { css: '31-wild-card.css', sel: '.roster-super', jsx: 'screens/team/modules/RosterProjection.jsx', ns: 'roster-super' },
   { css: '31-wild-card.css', sel: '.thub-affiliate', jsx: 'screens/team/modules/minors/AffiliatesCard.jsx', ns: 'thub-affiliate' },
   { css: '31-wild-card.css', sel: '.horizontile', jsx: 'screens/team/modules/minors/DepthChartCard.jsx', ns: 'horizontile' },
   { css: '31-wild-card.css', sel: '.hzntile', jsx: 'screens/team/modules/minors/HorizonCard.jsx', ns: 'hzntile' },
   { css: '64-milb-alumni.css', sel: '.alum__card', jsx: 'components/teamstats/MilbAlumni.jsx', ns: 'alum__card', keep: ['box-shadow'] },
-  { css: '70-contracts-grid.css', sel: '.ctr__tile', jsx: 'screens/team/ContractsTab.jsx', ns: 'ctr__tile', keep: ['border-top'] },
   { css: '70-contracts-grid.css', sel: '.ctr__card', jsx: 'components/salaries/ContractGrid.jsx', ns: 'ctr__card' },
 ]
 const FRAME_DECL = /^(border|border-radius|background|box-shadow|overflow)\s*:/
@@ -548,12 +545,6 @@ test('C1: every hub block renders on Card, never on a bare element', () => {
 test('C1: the all-star rosters page wears the roster card on Card too', () => {
   const code = readFileSync(join(SRC, 'screens', 'AllStarRostersPage.jsx'), 'utf8')
   assert.doesNotMatch(code, /<div className="roster-super"/)
-})
-
-test('C1: the contract tile is a ledger and keeps its 3px top rule', () => {
-  const tab = readFileSync(join(SRC, 'screens', 'team', 'ContractsTab.jsx'), 'utf8')
-  assert.match(tab, /frame="ledger"/)
-  assert.equal(decl(ruleBody(read('70-contracts-grid.css'), '.ctr__tile'), 'border-top'), '3px solid var(--border-rule)')
 })
 
 test('C1: the alumni card keeps its inset ring over the card shadow', () => {

@@ -151,7 +151,7 @@
     "grid": 1
   },
   "src/styles/29-team-transactions.css": {
-    "column": 5,
+    "column": 4,
     "wrap": 2,
     "grid": 2
   },
@@ -319,11 +319,6 @@
   },
   "src/styles/65-about-page.css": {
     "grid": 5
-  },
-  "src/styles/65-team-records.css": {
-    "column": 3,
-    "wrap": 1,
-    "grid": 2
   },
   "src/styles/66-situational-records.css": {
     "column": 5,

@@ -79,8 +79,7 @@
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
 //   '/team/{id}/{roster|games|numbers|contracts|minors}'
-//                                       -> { name: 'team-{tab}', id, asOf, sportId }
-//   '/team/{id}/next[/{tab}]'          -> { name: 'team-next', id, asOf, sportId, tab }  (hidden, #1107)
+//                                       -> { name: 'team', id, asOf, sportId, tab }  (a band on the one-scroll page)
 //   '/team/{id}/stamp-in'               -> { name: 'team-stamp-in', id, asOf, sportId }
 //                                          (a club's played season, every result showing, one
 //                                           stamp per game you watched — ADR-0042. NOT a tab.)
@@ -180,22 +179,13 @@ const SPORT_ID_BY_SLUG = Object.freeze({
   ...Object.fromEntries(WINTER_LEAGUES.map((l) => [l.slug, WINTER_SPORT_ID])),
 })
 
-// The team hub's tabs, as `third URL segment -> route name`. Every one of these
-// is a real address (the URL changes, back/forward work, each tab is
-// shareable), and each loads only its own data — see .scratch/team-page-ia.
-// `leaders` predates the rebuild and is unchanged; it lives here so the whole
-// set is ONE parse branch rather than a growing stack of near-identical ones.
-// The Overview tab is the bare '/team/{id}', so it is deliberately absent.
+// The team hub's own pages, as `third URL segment -> route name`. The old tabs
+// (roster, games, numbers, contracts, minors) are gone: see TEAM_TAB_BAND.
 const TEAM_TAB_ROUTES = {
   leaders: 'team-leaders',
-  roster: 'team-roster',
-  games: 'team-games',
-  numbers: 'team-numbers',
-  contracts: 'team-contracts',
-  minors: 'team-minors',
 }
 
-// Where each old tab lands on the one-scroll team page (ADR-0082, #1107). `/numbers`
+// Where each old tab address lands on the one-scroll team page (ADR-0082, #1107). `/numbers`
 // lands on Standings, where the Numbers tab's lead content (the standings table) went.
 export const TEAM_TAB_BAND = {
   roster: 'roster',
@@ -579,8 +569,7 @@ export function parseRoute(url) {
   // Stamp In (ADR-0042) — a club's played season with every result showing, so
   // the reader can press a stamp for each game they watched. Deliberately NOT
   // in TEAM_TAB_ROUTES above: it is a standalone page with exactly one entry
-  // point (the Schedule card's button on the Games tab), not a sixth tab, and
-  // TeamTabBar draws a button for every name in that table. Same 3-segment
+  // point (the Schedule card's button on the Games band), not a band. Same 3-segment
   // shape as the tabs, so it needs the same placement above the generic game
   // branch below, which would otherwise read it as date='team'.
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'stamp-in')
@@ -597,17 +586,14 @@ export function parseRoute(url) {
   // either, same reasoning and same placement as the two above.
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'transactions')
     return { name: 'team-transactions', id: idFromSlug(parts[1]), asOf, sportId }
-  // The hidden one-scroll team page (#1107): '/team/{id}/next', and behind it the five
-  // old tab addresses ('/team/{id}/next/roster') that land on a band. Until the swap the
-  // live tab routes below are untouched. Both sit above the unknown-segment branch.
-  if ((parts.length === 3 || parts.length === 4) && parts[0] === 'team' && parts[2] === 'next')
-    return {
-      name: 'team-next',
-      id: idFromSlug(parts[1]),
-      asOf,
-      sportId,
-      tab: Object.hasOwn(TEAM_TAB_BAND, parts[3]) ? parts[3] : null,
-    }
+  // The old tab addresses ('/team/{id}/roster', and behind the hidden '/team/{id}/next/' the
+  // same five) are the one-scroll team page, which lands on the tab's band (#1107). A bare or
+  // unknown '/team/{id}/next/{x}' is the bare page. All sit above the unknown-segment branch.
+  if (parts[0] === 'team' && (parts.length === 3 || (parts.length === 4 && parts[2] === 'next'))) {
+    const seg = parts[parts.length - 1]
+    const tab = Object.hasOwn(TEAM_TAB_BAND, seg) ? seg : null
+    if (tab || parts.length === 4) return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId, ...(tab && { tab }) }
+  }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }
   // An UNKNOWN third segment ('/team/158/media', a hand-edited URL, a tab
@@ -949,21 +935,14 @@ export function profilePath() {
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/leaders${linkQuery(opts)}`
 }
-// Any team-hub tab, by its URL segment ('roster' / 'games' / 'numbers' /
-// 'contracts' / 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}'
-// the tabs hang off.
-// Goes through linkQuery like every other team link: a team page opened at a
-// dated URL must keep `?d=`/`?s=` across a tab switch, or the same visit would
-// answer "entering April 1" on one tab and "today" on the next.
+// A team address by its old tab segment ('roster' / 'games' / 'numbers' / 'contracts' /
+// 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}'. An old tab segment
+// parses to the one-scroll page on that band. Goes through linkQuery like every other team
+// link, so a dated page keeps `?d=`/`?s=`.
 export function teamTabPath(id, tab, opts = {}) {
   return tab === 'overview'
     ? teamPath(id, opts)
     : `/team/${teamSegment(id, opts.name)}/${tab}${linkQuery(opts)}`
-}
-// The hidden one-scroll team page, and a band on it. `band` is the id of the band's
-// section; the cutoff rides the query like every other team link.
-export function teamBandPath(id, band, opts = {}) {
-  return `/team/${teamSegment(id, opts.name)}/next${linkQuery(opts)}${band ? `#${band}` : ''}`
 }
 // Stamp In — the club's played season, one stamp per game you watched
 // (ADR-0042). Built in exactly one place, the Schedule card's button on the
