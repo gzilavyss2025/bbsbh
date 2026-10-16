@@ -49,6 +49,7 @@ import { useStampUnseal } from '../hooks/useStamps.js'
 import { useBoxScoreReveal } from '../hooks/useRevealProgress.js'
 import { BoxRevealSyncMount } from '../components/sync/BoxRevealSyncMount.jsx'
 import { Door } from '../components/ui/control/Door.jsx'
+import { useRollupNotes } from '../hooks/callouts/useLastTime.js'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -426,7 +427,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
             override). */}
         <StatcastLeadersCard feed={feed} insights={insights} />
         {/* The catch-all for whatever the game turned up as notable. */}
-        <InsightsCard calloutNotes={calloutNotes} />
+        <InsightsCard calloutNotes={calloutNotes} feed={feed} />
         {/* Headingless on purpose — the kraft tab and the posters say what it
             is. Rendered here, inside the seal, is what makes it safe: see
             GameVideoRow.jsx. */}
@@ -541,9 +542,10 @@ function StatcastLeadersCard({ feed, insights }) {
   )
 }
 
-// Every leader/streak/situational-record note that fired somewhere in the
-// game (see computeGameCalloutNotes). Hidden entirely when nothing fired.
-function InsightsCard({ calloutNotes }) {
+// Every note that fired somewhere in the game (computeGameCalloutNotes, plus a no-hitter's
+// "last time" lines, useRollupNotes). Hidden entirely when nothing fired.
+function InsightsCard({ calloutNotes: rolled, feed }) {
+  const calloutNotes = useRollupNotes(feed, rolled)
   const [showAll, setShowAll] = useState(false)
   const hasNotes = calloutNotes && calloutNotes.length > 0
   if (!hasNotes) return null
@@ -553,16 +555,12 @@ function InsightsCard({ calloutNotes }) {
   return (
     <Card body="flush" className="bs__insights">
       <SectionMasthead as="h3" title="Insights" />
-      {/* Every leader/streak/situational-record note that fired somewhere in
-          the game (see computeGameCalloutNotes) — the same notes shown one at
-          a time on the play they belong to in the innings view, rolled up
-          here as tonight's full set with the game's outcome folded into the
-          record-based ones ("moved to 18-2…"), grouped one card per player
-          (or club) with a headshot/logo(s) so it's clear at a glance who it's
-          about. A waterfall column layout (see .bs__noteGrid) packs the
-          variable-height cards tightly instead of stretching every row to its
-          tallest card. Ranked most-impactful-first by the shared worthiness
-          score; the tail waits behind Show more. */}
+      {/* The notes shown one at a time on the play they belong to in the innings view, rolled up
+          here as tonight's full set with the game's outcome folded into the record-based ones
+          ("moved to 18-2…"), grouped one card per player (or club) with a headshot/logo(s) so
+          it's clear at a glance who it's about. A waterfall column layout (see .bs__noteGrid)
+          packs the variable-height cards tightly instead of stretching every row to its tallest
+          card. Ranked most-impactful-first by the shared worthiness score; the tail waits behind Show more. */}
       <div className="bs__noteGrid">
         {shownGroups.map((group, i) => (
           <InsightNoteCard key={i} group={group} />

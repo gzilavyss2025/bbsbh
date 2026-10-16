@@ -25,7 +25,8 @@ import {
 } from '../../api/playbyplay.js'
 import { halfIndex } from '../../api/select.js'
 import { pitcherHandoffs, pitcherLineAt, isLastHalfOfGame, handoffsResolvingAt } from '../../api/pitchers.js'
-import { buildCallouts, computeCalloutProgress } from '../../api/callout-notes.js'
+import { computeCalloutProgress } from '../../api/callout-notes.js'
+import { useCalloutNotes } from '../../hooks/callouts/useLastTime.js'
 import { INK_SET_MS, INK_SET_OVERSHOOT } from '../inning/focus/beats.js'
 import { useDenotationBeat } from '../inning/focus/useDenotationBeat.js'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
@@ -102,9 +103,8 @@ const WRITE_ON_CAP = 6
 export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo, writing = false, treatment }) {
   const ws = useWsPlayCtx(feed, callouts) // World Series only: the play card's "last time" notes
   const stepping = stepCap != null
-  // Whether RAW pitch clips can exist for this game at all — the same rules
-  // that decide whether Express Lane draws a door, and what keeps a MiLB or
-  // pre-2016 game from drawing a Watch button that can only ever say "not yet".
+  // Whether RAW pitch clips can exist for this game at all — the same rules as Express Lane's
+  // door; keeps a MiLB or pre-2016 game from a Watch button that can only say "not yet".
   // Spoiler-free and safe at render top-level (eligibility.js says why).
   const filmEligible = useMemo(() => filmCanExist(feed), [feed])
   // Pass stepCap through so any runner advancement/out that happens on a
@@ -362,7 +362,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               gameDate={feed?.gameData?.datetime?.officialDate}
               battingTeamId={battingTeamId}
               pitchingTeamId={pitchingTeamId}
-              calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress, ws }}
+              calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress, ws, feed }}
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
               filmEligible={filmEligible}
               windowed={windowed}
@@ -570,7 +570,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
   // pre-inked, no flash; useDenotationBeat's own `!active` short-circuit is
   // what makes that automatic.
   const beat = useDenotationBeat(windowed, beatKey)
-  const calloutNotes = buildCallouts(entry, calloutCtx)
+  const calloutNotes = useCalloutNotes(entry, calloutCtx)
   // The pitch-zone diagram only exists where the park tracked plate locations
   // (most MiLB parks don't). On a phone it opens in a modal from an icon button
   // tucked into the card's bottom-left whitespace; the desktop layout shows it

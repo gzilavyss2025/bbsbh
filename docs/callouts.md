@@ -141,6 +141,9 @@ saturation is worth changed. The column below names that saturation point, so
 | wsStarterStart | 40 | none; fixed. "His first World Series start" at 0 earlier starts, or his 5th or 10th (World Series games only; pre-half strip, inning 1, on the half he takes the mound) |
 | wsLastTime | 50 | a 25-season gap since the last such play (World Series games only) |
 | wsLastTimeGame | 45 | a 25-season gap since the last such game (World Series games only) |
+| lastTimeClub | 40 | a 10-season gap since the club's last one (triple play, cycle, no-hitter) |
+| lastTimePlayer | 45 | a 10-season gap since the player's earlier one (cycle, no-hitter) |
+| lastTimeLeague | 50 | a 3-year gap since the league's last one (shows only past 365 days) |
 | wsWtaTrailing9 | 55 | a spotless record (World Series winner-take-all games only) |
 | foulSpoiler | 30 | rank 1; the roll-up restatement adds a second bonus, full at 18 fouls tonight |
 | matchupSkill | 36 | a 2.0-SD collision on the weaker of its two sides |
@@ -593,6 +596,28 @@ seasons or more, or when no earlier row exists ("The first … in World Series h
 - **wsLastTimeGame** (roll-up) — "The first World Series game of 18 or more innings since
   Oct. 27, 2005." Final only (reveal-only, behind the box score's seal): extraInnings,
   shutout, bigScore, bigComeback, reachedBase; the earlier row must be as big (`value >=`).
+### Last time: a triple play, a cycle, a no-hitter
+
+`src/api/callout-notes/lastTime.js`, from the feat index in `public/data/notable/` (ADR-0101; the
+reader is `src/api/notable/notable.js`). Every lookup is strictly before tonight's game. The index
+is a list of results, so `src/hooks/callouts/useLastTime.js` fetches it only for a feat already on
+screen: a revealed play card, or the Final box score's Insights card inside its seal.
+
+- **lastTimeClub** — "The Brewers' first triple play since Aug. 3, 2019." Always shows when the
+  club has an earlier row (matched by team id, so a renamed club counts). A club with no earlier
+  row gets no note: it never invents a span. A last find older than the era floor (1901 for
+  no-hitters and cycles, 1960 for triple plays) reads "since at least 1960".
+- **lastTimePlayer** — "His second cycle; the first was May 1, 2024." Cycles and no-hitters
+  only, and only past the player's first.
+- **lastTimeLeague** — "The first triple play in the majors since Aug. 1, 2024." Shows only
+  after `LEAGUE_GAP_DAYS` (365). How it was set: the gaps between consecutive feats, offseason
+  included, have a p95 of 520 days (no-hitters), 440 (cycles) and 297 (triple plays; p99 370). A
+  year is where a gap crosses a whole offseason with no feat: about 5% of no-hitters and cycles,
+  about 1% of triple plays. Re-measure with the data in `public/data/notable/`.
+- **Where.** A triple play and a cycle on the play card that completes them (the cycle on the
+  hit that finishes it). A no-hitter in the Final roll-up only, never during the game.
+- **No link** to the earlier game yet (#1570).
+
 - **wsWtaTrailing9** (pre-half strip) — "Teams trailing entering the 9th of a winner-take-all
   game are 3-33." Top of the 9th, for the club that trails after eight (none when level), in
   a winner-take-all game (`bundle.wsEvents.wta`). It reads tonight's score, so it runs inside

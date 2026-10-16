@@ -100,6 +100,10 @@ opens that game sealed, under this ADR.
   top of the opened sheet. `BoxScoreBody` renders only inside the box score's `SealBox`
   reveal render, so the label is absent from the DOM while the box score is sealed.
   `check-stamp-surfaces.mjs` pins `BoxScore.jsx` as the one importer of `FeatLabel.jsx`.
+- **The callout.** `callout-notes/lastTime.js` builds the club, player and league lines. It is
+  `reveal-only`, with one importer, `hooks/callouts/useLastTime.js`. That hook fetches the files only
+  for a play card that completes a triple play or a cycle, and inside the box score's Insights card
+  for a no-hitter. `docs/callouts.md` has the families and the league threshold.
 - **The fetch.** The component fetches the files when it mounts, so nothing about a feat is
   fetched, held or rendered before the reveal. No seal input changed, and the label persists
   nothing. Under the day pass, a stamp or a remembered tap it shows, because the box score
