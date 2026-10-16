@@ -6,12 +6,17 @@ of three tiers — a fresh/changed actor (`PitcherNotice`/`FielderNotice`/
 batting" notice the pre-pitch staged list shows, for symmetry with every other
 substitution type), a team/administrative event (mound visit, ejection), or a
 baserunning/misc event with no plate appearance of its own (steal, wild pitch,
-balk, …) — and all three render in the *same* marker-wash card (the event
-Notice frame, `noticeClass({ tone: 'event' })`; an actor card's CALLER passes it, with
-`.change--framed` as the margin namespace, since `PitcherNotice` is also the bare
-header inside the full card; the card's root class is `.change`, ADR-0084), distinguished by what's inside (a
-headshot vs. a scorer's-shorthand code) rather than a colored accent rail.
-Read ADR-0017 before touching any of `PlayByPlay.jsx`'s notification
+balk, …) — and all three render in the *same* yellow card (the stamped event card,
+`eventCardClass()` in `lib/design/cardClass.js`: square corners, 2px ink edge, hard
+shadow, one `--surface-stamped-event` ground, an ink name tab; ADR-0113, which amends
+ADR-0017's frame and keeps ADR-0030). An actor card's CALLER passes it, with
+`.change--framed` as the namespace, since `PitcherNotice` is also the header row inside
+the full card; the card's root class is `.change`, ADR-0084. The tabs are the cards'
+headings (`<h4 className="card__name">`). A parent leaves 34px above a card (`.card--event`'s
+margin). The cards are distinguished by what's inside (a headshot vs. a scorer's-shorthand
+code), never by a coloured frame or rail. `.notice--event` is not this frame: the
+postponed strip and the lens arm button keep it.
+Read ADR-0017 and ADR-0113 before touching any of `PlayByPlay.jsx`'s notification
 components, `MoundVisitBar` (in `EventCards.jsx`), or `HalfInning.jsx`'s
 `PrePitchChanges` — it also covers the `--accent-positive`/`--accent-negative`
 color pairing, and the button/label conventions (chevron vs. destination-named

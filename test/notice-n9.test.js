@@ -119,7 +119,7 @@ test('N9: the ADR-0084 addendum records the two rows that did not fit the rule, 
 test('N9: the ui and playbyplay notes read true after the rename', () => {
   assert.match(src('components/ui/CLAUDE.md'), /`Notice` \(#1132\)/)
   const play = src('components/playbyplay/CLAUDE.md')
-  assert.match(play, /noticeClass\(\{ tone: 'event' \}\)/)
+  assert.match(play, /eventCardClass\(\)/)
   assert.match(play, /`\.change--framed`/)
   assert.match(play, /root class is `\.change`/)
 })

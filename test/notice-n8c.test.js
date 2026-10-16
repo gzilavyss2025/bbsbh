@@ -119,7 +119,8 @@ test('N8c: every part of the family keeps its rule under the new root', () => {
 // ---- 4. the roots and the callers ----
 
 const count = (code, s) => code.split(s).length - 1
-const FRAME = "noticeClass({ tone: 'event', className: 'change--framed' })"
+const FRAME = "eventCardClass('change--framed')"
+const NOTICE_FRAME = "noticeClass({ tone: 'event', className: 'change--framed' })"
 
 test('N8c: the four role roots wear change, and a handoff header row too', () => {
   for (const name of ['PitcherNotice', 'BatterNotice', 'FielderNotice', 'PinchRunNotice']) {
@@ -128,7 +129,7 @@ test('N8c: the four role roots wear change, and a handoff header row too', () =>
   assert.equal(count(src('components/playbyplay/PitcherHandoffCard.jsx'), '<div className="change">'), 2, 'both handoff headers')
 })
 
-test('N8c: the nine call sites pass change--framed through noticeClass', () => {
+test('N8c: the nine call sites pass change--framed through eventCardClass (ADR-0113)', () => {
   const callers = {
     'components/inning/HalfInning.jsx': 3,
     'components/playbyplay/PlayByPlay.jsx': 4,
@@ -138,14 +139,14 @@ test('N8c: the nine call sites pass change--framed through noticeClass', () => {
   for (const [rel, n] of Object.entries(callers)) assert.equal(count(src(rel), `className={${FRAME}}`), n, `${rel}: ${n} call sites`)
 })
 
-test('N8c: ArmNotice is still one <button> and wears change and the frame', () => {
+test('N8c: ArmNotice is still one <button> and wears change and the Notice frame', () => {
   const code = src('components/scoring/lens/LensCards.jsx')
-  assert.equal(count(code, `<button type="button" className={\`change \${${FRAME}} sc-armnotice\`} onClick={onOpen}>`), 1)
+  assert.equal(count(code, `<button type="button" className={\`change \${${NOTICE_FRAME}} sc-armnotice\`} onClick={onOpen}>`), 1)
 })
 
 test('N8c: the event bars wear change, change--event and (the mound visit) change--mv', () => {
   const code = src('components/playbyplay/EventCards.jsx')
-  const bar = "<div className={`change ${noticeClass({ tone: 'event' })} change--event"
+  const bar = "<div className={`change ${eventCardClass()} change--event"
   assert.equal(count(code, bar), 4, 'four event bars')
   assert.equal(count(code, `${bar} change--mv\`}>`), 1, 'the mound visit')
 })

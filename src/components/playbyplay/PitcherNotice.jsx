@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { logHeadshotEvent } from '../../lib/headshot/log.js'
-import { noticeClass } from '../../lib/design/noticeClass.js'
+import { eventCardClass } from '../../lib/design/cardClass.js'
 import { useHeadshotStep, useImgReady } from '../../hooks/images/useHeadshotStep.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 
@@ -33,9 +33,9 @@ export function PitcherNotice({ pitcher, teamId = null, teamName, className = ''
     <div className={`change ${className}`}>
       <PitcherPhoto personId={pitcher.id} name={pitcher.name} teamId={teamId} />
       <div className="change__body">
-        <span className="change__now">
+        <h4 className="card__name">
           {label}{teamName ? ` for the ${teamName}` : ''}
-        </span>
+        </h4>
         <span className="change__pitcher">
           <PlayerLink id={pitcher.id}>{pitcher.name}</PlayerLink>
           {/* Uniform number + throwing hand, right-aligned same as the
@@ -64,7 +64,7 @@ export function PitcherNotice({ pitcher, teamId = null, teamName, className = ''
 // never names him. "Pitching", not "Now pitching": he is already in, the wording
 // the persistent header drops to for an arm already in.
 export function ReliefRepeat({ pitcher, teamId, teamName }) {
-  return <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={noticeClass({ tone: 'event', className: 'change--framed' })} label="Pitching" />
+  return <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={eventCardClass('change--framed')} label="Pitching" />
 }
 
 // The entering pitcher's headshot. Walks the same ordered fallback chain as

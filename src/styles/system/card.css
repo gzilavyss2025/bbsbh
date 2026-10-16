@@ -53,7 +53,8 @@
    top edge (system/stamped/stamped.css draws them). It takes no band head, so
    there are no corners to clip to.
 
-   TONES fill a stat tile: tint, or ink for the lead tile. An ink shadow does
+   TONES fill a stat tile: tint, or ink for the lead tile. The event tone is the
+   one yellow of a notification card (ADR-0113). An ink shadow does
    not show under an ink tile, so the ink tone takes the soft shadow. */
 .card--stamped {
   --card-radius: 0;
@@ -67,6 +68,9 @@
 }
 .card--soft {
   --card-shadow: var(--shadow-stamped-soft);
+}
+.card--event {
+  --card-ground: var(--surface-stamped-event);
 }
 .card--ink {
   --card-ground: var(--surface-stamped-ink);

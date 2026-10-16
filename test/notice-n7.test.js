@@ -81,8 +81,9 @@ test('N7: the seal pin — no reveal-only import, SealBox or revealedThrough rea
 
 // ---- 2. the callers ----
 
-const FRAME = "noticeClass({ tone: 'event', className: 'change--framed' })"
-const HELPER = /^import \{ noticeClass \} from '(\.\.\/)+lib\/design\/noticeClass\.js'$/m
+// ADR-0113: the callers pass the stamped event card, not the Notice frame.
+const FRAME = "eventCardClass('change--framed')"
+const HELPER = /^import \{ eventCardClass \} from '(\.\.\/)+lib\/design\/cardClass\.js'$/m
 // file -> how many of its card props take the frame from the helper
 const CALLERS = {
   'components/inning/HalfInning.jsx': 3, // the Now Pitching card, the staged batter and fielder
@@ -101,10 +102,11 @@ test('N7: the nine call sites pass the event frame from noticeClass, never the b
   }
 })
 
-test('N7: ArmNotice is still one <button> and takes the frame from noticeClass', () => {
+test('N7: ArmNotice is still one <button> and keeps the Notice frame (ADR-0113 leaves the lens button)', () => {
   const code = src('components/scoring/lens/LensCards.jsx')
-  assert.match(code, HELPER)
-  assert.equal(count(code, `<button type="button" className={\`change \${${FRAME}} sc-armnotice\`} onClick={onOpen}>`), 1)
+  const NOTICE_FRAME = "noticeClass({ tone: 'event', className: 'change--framed' })"
+  assert.match(code, /^import \{ noticeClass \} from/m)
+  assert.equal(count(code, `<button type="button" className={\`change \${${NOTICE_FRAME}} sc-armnotice\`} onClick={onOpen}>`), 1)
   assert.doesNotMatch(code, /className="[^"]*change--framed/, 'no bare frame class left')
 })
 
@@ -117,7 +119,7 @@ test('N7: the role roots keep the caller\'s className, and the full card\'s head
     assert.ok(code.includes('<div className={`change ${className}`}>'), `${name}'s root`)
     // PitcherNotice.jsx's one call is ReliefRepeat's, a caller (above).
     const live = code.replace(/^\s*\/\/.*$/gm, '') // a comment may name the helper
-    assert.equal(count(live, 'noticeClass('), name === 'PitcherNotice' ? 1 : 0, `${name} does not draw the frame itself`)
+    assert.equal(count(live, 'eventCardClass('), name === 'PitcherNotice' ? 1 : 0, `${name} does not draw the frame itself`)
   }
   const card = src('components/playbyplay/pitcherCard/PitcherCard.jsx')
   // The root also carries the pitching club's theme properties as `style` (ADR-0030's 2026-10-14 addendum); the frame class still lands on it.
@@ -132,13 +134,11 @@ test('N7: the role roots keep the caller\'s className, and the full card\'s head
 // so the card would sit flush) and no wrap: .notice wraps, the cards did not.
 // None of this goes in notice.css: notice-cascade.test.js pins every rule
 // there as one class.
-test('N7: .change--framed keeps only the margin and the no-wrap', () => {
-  const body = ruleBody(css('12-sealbox.css'), '.change--framed')
-  assert.equal(decl(body, 'margin'), 'var(--space-1) var(--space-3h)', '4px 14px, as tokens')
-  assert.equal(decl(body, 'flex-wrap'), 'nowrap')
-  for (const prop of ['padding', 'border', 'border-radius', 'background']) {
-    assert.equal(decl(body, prop), undefined, `Notice draws the ${prop} now`)
-  }
+test('N7: .change--framed keeps only the row padding; the margin and the frame are .card--event\'s', () => {
+  const body = ruleBody(css('12-sealbox.css'), '.change--framed,\n.change--event')
+  assert.equal(decl(body, 'padding'), 'calc(var(--space-6) + var(--space-1)) var(--space-4) var(--space-4)')
+  for (const prop of ['margin', 'flex-wrap', 'border', 'border-radius', 'background']) assert.equal(decl(body, prop), undefined, `${prop} is not the namespace's`)
+  assert.ok(ruleBody(css('12-sealbox.css'), '.card--event'), 'the event card has the margin (event-card-frame.test.js pins it)')
 })
 
 // ---- 4. the full card ----
@@ -155,8 +155,10 @@ test('N7: .pcard stretches its sections, does not wrap and keeps its gap', () =>
 
 // ---- 5. the console ----
 
-test('N7: the console finds a lone staged card by the event frame', () => {
+// card-cascade.test.js forbids a rule outside card.css from naming .card--, so
+// the console keys on the namespaces every staged card carries instead.
+test('N7: the console finds a lone staged card by its namespace', () => {
   const sheet = css('focus/console.css')
-  assert.ok(sheet.includes('.half:has(.notice--event):not(:has(.statgrid))'))
-  assert.doesNotMatch(sheet, /change--framed/)
+  assert.ok(sheet.includes('.half:has(:is(.change--framed, .pitcherhandoff)):not(:has(.statgrid))'))
+  assert.doesNotMatch(sheet, /notice--event/)
 })
