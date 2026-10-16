@@ -18,7 +18,7 @@
 .stampstrip {
   /* component-reuse-exempt: the Game Log stamp surface, bespoke by ADR-0035 (stamp art is contained by where it renders) */
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-square);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
@@ -53,7 +53,7 @@
   height: 66px;
   padding: var(--space-1);
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-square);
   background: var(--surface-inset);
 }
 

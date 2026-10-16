@@ -134,7 +134,7 @@
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  border-radius: 0;
+  border-radius: var(--radius-square);
   margin-bottom: 0;
 }
 .abs__rows {
@@ -1517,7 +1517,7 @@
   /* A plain <h4> here, not the innings view's collapsible <button> copy —
      restore the non-interactive cursor the base rule's button reset assumes. */
   margin-bottom: 0;
-  border-radius: 0;
+  border-radius: var(--radius-square);
   cursor: default;
 }
 .bs__defensecard .defdiamond {

@@ -87,7 +87,7 @@
   color: var(--seal-cover-ink);
   background: var(--seal-cover);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-square);
   padding: var(--space-1) var(--space-2);
   margin-bottom: var(--space-2);
   cursor: pointer;
