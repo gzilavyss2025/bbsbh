@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useWsPlayCtx } from '../../hooks/postseason/useWsEvents.js'
 import {
   computeHalfInningFeed,
   pitchLadder,
@@ -98,6 +99,7 @@ import { filmCanExist } from '../../api/expresslane/eligibility.js'
 const WRITE_ON_CAP = 6
 
 export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo, writing = false, treatment }) {
+  const ws = useWsPlayCtx(feed, callouts) // World Series only: the play card's "last time" notes
   const stepping = stepCap != null
   // Whether RAW pitch clips can exist for this game at all — the same rules
   // that decide whether Express Lane draws a door, and what keeps a MiLB or
@@ -360,7 +362,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               gameDate={feed?.gameData?.datetime?.officialDate}
               battingTeamId={battingTeamId}
               pitchingTeamId={pitchingTeamId}
-              calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress }}
+              calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress, ws }}
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
               filmEligible={filmEligible}
               windowed={windowed}

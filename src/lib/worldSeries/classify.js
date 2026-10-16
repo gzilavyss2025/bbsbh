@@ -51,8 +51,8 @@ const HITS = new Set(['single', 'double', 'triple', 'home_run'])
 
 const evt = (p) => p.result?.eventType
 const rbi = (p) => p.result?.rbi ?? 0
-const batterId = (p) => p.matchup?.batter?.id ?? null
-const isHr = (p) => evt(p) === 'home_run'
+export const batterId = (p) => p.matchup?.batter?.id ?? null
+export const isHr = (p) => evt(p) === 'home_run'
 const battingSide = (p) => (p.about?.isTopInning ? 'away' : 'home')
 const fieldingSide = (p) => (p.about?.isTopInning ? 'home' : 'away')
 

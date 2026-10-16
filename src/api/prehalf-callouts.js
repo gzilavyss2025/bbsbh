@@ -52,6 +52,7 @@
 import { halfIndex, derivedHalfStartingPitcherId, sideOnMoundFor } from './select.js'
 import { matchupNotesForHalf } from './matchup/forHalf.js'
 import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from './callout-notes/worldSeries.js'
+import { buildWsWtaTrailing9Note } from './callout-notes/worldSeriesEvents.js'
 import {
   cumulativeInnings,
   buildStarterTeamRecordNote,
@@ -76,7 +77,7 @@ const PREHALF_MAX_RECORDS = 1
 
 export function buildPreHalfCallouts({
   feed, bundle, inning, half, revealedThrough, workload, gameDate, shownCounts = null,
-  savantMatchup = null, seriesHistory = null, wsStarts = null,
+  savantMatchup = null, seriesHistory = null, wsStarts = null, eventHistory = null,
 }) {
   if (!bundle) return []
   const notes = []
@@ -141,6 +142,11 @@ export function buildPreHalfCallouts({
     }
     const row = cumulativeInnings(feed).find((r) => r.inning === inning - 1)
     if (row) {
+      // World Series winner-take-all: the trailing club's record entering the 9th. Same gate as above.
+      const wta = buildWsWtaTrailing9Note({
+        row, inning, half, bundle, history: eventHistory, gameDate, gameType: feed?.gameData?.game?.type,
+      })
+      if (wta) notes.push(wta)
       const both0 = row.cumAway === 0 && row.cumHome === 0
       if (both0) {
         for (const side of ['away', 'home']) {

@@ -85,6 +85,9 @@ export const SCORE_BASE = {
   dayOfWeek: 30, // record on tonight's day of the week
   wsSeriesOdds: 45, // World Series state heading in: what that state has meant before
   wsStarterStart: 40, // a starter's first (or 5th, 10th) World Series start
+  wsLastTime: 50, // World Series play card: the last time this happened
+  wsLastTimeGame: 45, // World Series Final roll-up: the last game like this
+  wsWtaTrailing9: 55, // World Series winner-take-all, entering the 9th: the trailing club's record
   ttoPitches: 30, // pitches per PA escalating each time through the order
   risp: 25,
   platoon: 25,

@@ -31,6 +31,7 @@ import {
   buildDayOfWeekNotes,
 } from './heldNotes.js'
 import { buildInningRunDiffNote } from './inningAndStarter.js'
+import { buildWsLastTimeGameNotes } from './worldSeriesEvents.js'
 
 // "2026-06-25" -> "6/25" — the season-scoped date the streak prose cites
 // ("a streak that began 6/25"). No year: every streak lives inside one season.
@@ -118,7 +119,7 @@ function actualStarters(feed) {
 // and every folded variant stays in entering-tense.
 // `vsTeam` (the separately-fetched vs-team-splits file, api/vsTeamSplits.js)
 // is optional — the career-vs-opponent note simply doesn't fire without it.
-export function computeGameCalloutNotes(feed, bundle, vsTeam) {
+export function computeGameCalloutNotes(feed, bundle, vsTeam, eventHistory = null) {
   if (!bundle) return []
 
   // A note's `side`/`oppSide` ('away'|'home') resolve to the bundle's own
@@ -363,6 +364,8 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
   for (const note of buildScorelessHeldNotes(feed, bundle, result)) add(note)
   for (const note of buildBothScorelessHeldNotes(feed, bundle, result)) add(note)
   for (const note of buildDayOfWeekNotes(feed, bundle, result)) add(note)
+  // World Series: the last game like this one (Final only, History cut before tonight).
+  for (const note of buildWsLastTimeGameNotes(feed, bundle, eventHistory)) add(note)
 
   // Each club's single most lopsided inning-differential note (its signature
   // inning), tonight's runs in that inning folded in once decided. One per
