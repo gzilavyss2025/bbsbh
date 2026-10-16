@@ -1,5 +1,5 @@
-// fetchPlays (scripts/lib/world-series/plays.mjs): a failed play-by-play read is retried once, then
-// logged with its gamePk; the block still drops (wsEventsBlock.js) when a counted game has none.
+// fetchPlays (scripts/lib/world-series/plays.mjs): a play-by-play read that fails (after getJson's own
+// retries) is logged with its gamePk; the block still drops (wsEventsBlock.js) when a counted game has none.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { bracket2025 } from '../postseason/fixtures.js'
@@ -11,7 +11,6 @@ const box = { teams: { away: { team: { id: 119 } }, home: { team: { id: 141 } } 
 const boxes = Object.fromEntries(WS_2025.map((pk) => [pk, { box }]))
 const body = { allPlays: [] }
 const block = (pbp) => wsEventsBlock(bracket2025('2025-10-29'), 813022, boxes, pbp)
-const noSleep = async () => {}
 
 // A fetcher that fails the first `fails` times for gamePk `bad`, and always succeeds elsewhere.
 const fetcher = (bad, fails) => {
@@ -22,17 +21,9 @@ const fetcher = (bad, fails) => {
   }
 }
 
-test('a read that fails once is retried and gives a normal block', async () => {
+test('a read that fails is logged with its gamePk and the block drops', async () => {
   const logs = []
-  const pbp = await fetchPlays(WS_2025, { get: fetcher(813027, 1), log: (m) => logs.push(m), sleep: noSleep })
-  assert.equal(pbp[813027], body)
-  assert.deepEqual(logs, [])
-  assert.deepEqual(block(pbp), { events: [], wta: false })
-})
-
-test('a read that fails twice is logged with its gamePk and the block drops', async () => {
-  const logs = []
-  const pbp = await fetchPlays(WS_2025, { get: fetcher(813027, 2), log: (m) => logs.push(m), sleep: noSleep })
+  const pbp = await fetchPlays(WS_2025, { get: fetcher(813027, 1), log: (m) => logs.push(m) })
   assert.equal(pbp[813027], null)
   assert.equal(logs.length, 1)
   assert.match(logs[0], /813027/)
@@ -41,7 +32,7 @@ test('a read that fails twice is logged with its gamePk and the block drops', as
 
 test('no failures: every game read, nothing logged', async () => {
   const logs = []
-  const pbp = await fetchPlays(WS_2025, { get: fetcher(0, 0), log: (m) => logs.push(m), sleep: noSleep })
+  const pbp = await fetchPlays(WS_2025, { get: fetcher(0, 0), log: (m) => logs.push(m) })
   assert.deepEqual(Object.keys(pbp).map(Number).sort(), [...WS_2025].sort())
   assert.ok(Object.values(pbp).every((p) => p === body))
   assert.deepEqual(logs, [])
