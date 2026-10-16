@@ -15,7 +15,7 @@ vocabulary the sheet's own hints already use ("Pulling his game lines…").
 
 - `BoxLinesDoor` is a full button reset because the user agent's `padding: 1px 6px` used
   to start the line's ink 6px right of the rows above it.
-- Since #997 the shell is handed its facet (`sheet.facet`, `api/boxlines/facets.js`) plus an
+- Since #997 the shell is handed its facet (`sheet.facet`, `src/api/boxlines/facets.js`) plus an
   optional `note` and `title`, both defaulting to the club case, so a caller that names
   only an opponent needs nothing new.
 - It opens from two doors: the lineup page's "Career vs MIL" line (a pitcher against the

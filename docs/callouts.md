@@ -516,7 +516,7 @@ count — `(N PA)` — only when the batter's PA against the type is under 80
   `AVG_DEVIATION_THRESHOLD` gating `vsTeam` below. `platoon` fires once, on
   his first PA (a pitcher's throwing hand is live on every plate appearance).
   `risp` fires once, on his first PA with a runner ACTUALLY on 2nd or 3rd
-  (`firstRispPAIndexByBatter` in `api/playbyplay.js`) — a bases-empty PA gets
+  (`firstRispPAIndexByBatter` in `src/api/playbyplay.js`) — a bases-empty PA gets
   no card, since "hitting .349 with RISP" reads as a non sequitur with nobody
   on.
 - **marathonAb** — he fouled off 6+ pitches in this one at-bat, read straight
@@ -665,7 +665,7 @@ count — `(N PA)` — only when the batter's PA against the type is under 80
   MLB + MiLB.
 - **bullpenThin** — 1st inning, on the half where the club takes the field:
   how many of its relievers enter the night likely unavailable under the
-  workload rules (`buildBullpenThinNote` → `api/workload.js`'s
+  workload rules (`buildBullpenThinNote` → `src/api/workload.js`'s
   `availabilityFor` — 3 straight days, 25+ pitches yesterday, 35+ over three
   days). "Bullpen watch: 3 Brewers relievers are likely down after heavy
   recent work — Uribe, Payamps, Koenig." Backward-looking completed
