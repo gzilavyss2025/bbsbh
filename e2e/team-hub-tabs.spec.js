@@ -1,46 +1,56 @@
 import { test, expect } from './fixtures.js'
 
-// One end-to-end walk across the team hub's five tabs (see
-// .scratch/team-page-ia/issues/08-polish-and-tests.md), against the Brewers
-// (id 158) — an MLB club with real data in every tab, so nothing here is
-// hidden by hiddenTeamTabs (test/team-tab-visibility.test.js covers the
-// hidden case directly). Each step asserts a headline element only that tab
-// renders, so a tab that regressed to blank or to another tab's content fails
-// here rather than only in a unit test.
+// The team page is ONE scroll of seven bands (ADR-0082, #1107). This walks its jump
+// bar against the Brewers (id 158) — an MLB club with real data in every band, so
+// nothing here is hidden by hiddenTeamSections (test/team-section-visibility covers the
+// hidden case). Each step asserts a headline only that band renders, so a band that
+// regressed to blank or to another band's content fails here rather than only in a unit
+// test. A jump-bar click scrolls; it never changes the path.
 //
-// The walk starts at the BARE '/team/158' on purpose — the pre-slug address, the
-// shape of every link shared before ADR-0057 — and each tab click lands on the
-// slugged one, because the tab bar builds the address a club should have rather
-// than reproducing the one the visitor happened to arrive on.
+// The old tab addresses (/team/{id}/roster …) must still work: each lands on its band,
+// then the address becomes the bare page, keeping ?d= and ?s=.
 
-test('team hub: overview steps through all five tabs, each rendering its headline section', async ({
-  page,
-}) => {
+const NAV = 'nav[aria-label="Team sections"]'
+
+test('team page: the jump bar scrolls to each band without changing the path', async ({ page }) => {
   await page.goto('/team/158')
-  await expect(page.locator('.team-hub__id h1')).toHaveText('Milwaukee Brewers')
+  await expect(page.locator('h1.tnext__name')).toHaveText('Milwaukee Brewers')
+  const path = new URL(page.url()).pathname
 
-  // Scoped to the tab bar itself (`.teamtabs`) — several tab labels ("Roster",
-  // "Games") also appear as preview-door link text on the Overview, which a
-  // bare getByRole('button', { name }) would ambiguously match too.
-  const tabs = page.locator('.teamtabs')
+  // Scoped to the jump bar: "Roster" and "Games" also appear as link text inside bands.
+  const bar = page.locator(NAV)
+  const jump = async (label, band, headline) => {
+    await bar.getByRole('button', { name: new RegExp(`^${label}`) }).click()
+    await expect(bar.getByRole('button', { name: new RegExp(`^${label}`) })).toHaveAttribute('aria-current', 'location')
+    await expect(page.locator(`#${band}`)).toBeVisible()
+    await expect(headline).toBeVisible()
+    expect(new URL(page.url()).pathname).toBe(path)
+  }
 
-  await tabs.getByRole('button', { name: 'Roster' }).click()
-  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/roster$/)
-  await expect(page.getByText('Current Roster')).toBeVisible()
-
-  await tabs.getByRole('button', { name: 'Games' }).click()
-  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/games$/)
-  await expect(page.getByText('Schedule')).toBeVisible()
-
-  await tabs.getByRole('button', { name: 'Numbers' }).click()
-  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/numbers$/)
-  await expect(page.locator('.card > .sectionhead').first()).toBeVisible()
-
-  await tabs.getByRole('button', { name: 'Minors' }).click()
-  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/minors$/)
-  await expect(page.getByText('Affiliates')).toBeVisible()
-
-  await tabs.getByRole('button', { name: 'Overview' }).click()
-  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158$/)
-  await expect(page.locator('.team-hub__id h1')).toHaveText('Milwaukee Brewers')
+  await jump('Roster', 'roster', page.locator('#roster').getByRole('heading', { name: 'Roster', exact: true }))
+  await jump('Games', 'games', page.locator('#games').getByText('Schedule'))
+  await jump('Farm', 'farm', page.locator('#farm').getByText('Affiliates'))
+  await jump('Money', 'money', page.locator('#money').getByRole('heading', { name: 'The commitment cliff' }))
+  await jump('Standings', 'standings', page.locator('#standings .card').first())
 })
+
+// old address -> the band it lands on (TEAM_TAB_BAND, lib/route.js)
+const OLD_ADDRESSES = [
+  ['roster', 'roster'],
+  ['games', 'games'],
+  ['numbers', 'standings'],
+  ['contracts', 'money'],
+  ['minors', 'farm'],
+]
+
+for (const [tab, band] of OLD_ADDRESSES) {
+  test(`team page: the old /${tab} address lands on #${band}, keeping ?d= and ?s=`, async ({ page }) => {
+    await page.goto(`/team/158/${tab}?d=2026-04-10&s=1`)
+    await expect(page.locator(`#${band}`)).toBeVisible()
+    await expect(page).toHaveURL(new RegExp(`/team/158\\?[^#]*d=2026-04-10[^#]*s=1[^#]*#${band}$`))
+    const url = new URL(page.url())
+    expect(url.pathname).toBe('/team/158')
+    expect(url.searchParams.get('d')).toBe('2026-04-10')
+    expect(url.searchParams.get('s')).toBe('1')
+  })
+}

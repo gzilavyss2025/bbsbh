@@ -110,9 +110,10 @@ export const ROUTES = [
     shots: [{ name: 'page' }],
   },
   {
+    // The Standings band, reached by the old Numbers address (it redirects to #standings).
     name: 'team-numbers',
     path: '/team/milwaukee-brewers-158/numbers',
-    ready: '.card',
+    ready: '#standings .card',
     shots: [{ name: 'page' }],
   },
   {
