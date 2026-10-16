@@ -1261,3 +1261,16 @@ game whose type is `W`. It returns `null` until the generator has written the fi
 `lib/worldSeries/odds.js` turns it into the `wsSeriesOdds` numbers, and every lookup goes
 through `lib/worldSeries/lastBefore.js`, strictly before the game's own date. The builder
 is `callout-notes/worldSeries.js`; it shows on the pre-half strip of the first half only.
+
+`loadEventHistory()` reads `world-series/events.json` (one row per notable event of every
+finished Series, contract section 4) on the same footing. Its readers are `useWsEvents.js`
+(play card, Final roll-up, pre-half strip), only for a game of type `W`. The builders are in
+`callout-notes/worldSeriesEvents.js` (see `docs/callouts.md`).
+
+The nightly callouts shard of a World Series game also carries a `wsEvents` key:
+`{ events, wta }`. `events` are the classified events of the Series' counted games (the
+bracket's own, dated before the slate date; one `playByPlay` call per game, then
+`classifyGame`), in `events.json`'s row shape, so the live notes see the current Series
+without a static file. `wta` says tonight's game is winner-take-all. A game on or after the slate date is never in
+it. The builder is `src/lib/postseason/primer/wsEventsBlock.js`; `test/world-series/shard.test.js`
+pins the cutoff. A failed read drops the key, and an older shard without it works.

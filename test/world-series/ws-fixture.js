@@ -45,3 +45,38 @@ export function bundleAfter(away, home, winners) {
     },
   }
 }
+
+// --- event-note helpers (notes-*.test.js) ---------------------------------
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'world-series')
+export const playsOf = (pk) => JSON.parse(readFileSync(join(FIXTURES, `${pk}-plays.json`), 'utf8')).allPlays
+export const EVENTS_JSON = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'public', 'data', 'world-series', 'events.json'), 'utf8'))
+
+// One hand-made play. Score is the running score after it.
+export function pl(i, { inning = 1, top = true, ev = 'single', rbi = 0, bat = 100 + i, pit = 900, away = 0, home = 0, events = [] } = {}) {
+  return {
+    result: { eventType: ev, rbi, awayScore: away, homeScore: home, description: '' },
+    about: { atBatIndex: i, inning, isTopInning: top, halfInning: top ? 'top' : 'bottom' },
+    matchup: { batter: { id: bat }, pitcher: { id: pit } },
+    playEvents: events,
+    atBatIndex: i,
+  }
+}
+
+// A live-feed shape the event notes read: type W, an official date, a status, the plays, a linescore.
+export function feedOf(plays, { date = '2024-10-26', final = true } = {}) {
+  const last = plays.at(-1)?.result ?? {}
+  const innings = Array.from({ length: Math.max(...plays.map((p) => p.about.inning)) }, (_, k) => ({ num: k + 1 }))
+  return {
+    gameData: { game: { type: 'W' }, datetime: { officialDate: date }, status: { abstractGameState: final ? 'Final' : 'Live' } },
+    liveData: {
+      plays: { allPlays: plays },
+      linescore: { innings, teams: { away: { runs: last.awayScore ?? 0 }, home: { runs: last.homeScore ?? 0 } } },
+    },
+  }
+}
+
+export const BUNDLE = { away: { teamId: 1, name: 'Aways' }, home: { teamId: 2, name: 'Homes' } }

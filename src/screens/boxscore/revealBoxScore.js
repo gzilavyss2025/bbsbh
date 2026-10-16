@@ -34,7 +34,7 @@ import { computeScoringSummary } from '../../api/boxscore/scoringSummary.js'
 // on a pre-refresh derivation — the exact bug ADR-0007 was written about. The
 // other four inputs are keyed the same way for the same reason: `highlights` is
 // re-polled during a live game and decides the Play of the Game's clip.
-export function revealBoxScore(cacheRef, feed, winProbability, highlights, callouts, vsTeam) {
+export function revealBoxScore(cacheRef, feed, winProbability, highlights, callouts, vsTeam, eventHistory = null) {
   const cached = cacheRef.current
   const k = cached.key
   if (
@@ -43,7 +43,8 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
     k.winProbability === winProbability &&
     k.highlights === highlights &&
     k.callouts === callouts &&
-    k.vsTeam === vsTeam
+    k.vsTeam === vsTeam &&
+    k.eventHistory === eventHistory
   ) {
     return cached.value
   }
@@ -81,7 +82,7 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
   // Every leader/streak/situational-record note that fired somewhere in the
   // game (see api/callout-notes.js) — the same notes the innings view shows one
   // at a time on the play they belong to, rolled up here into the Insights card.
-  const calloutNotes = computeGameCalloutNotes(feed, callouts, vsTeam)
+  const calloutNotes = computeGameCalloutNotes(feed, callouts, vsTeam, eventHistory)
   // The Logbook stamp's game facts (ADR-0035) — the final score, the two clubs,
   // the venue, the date. Reveal-only for the same reason as everything else
   // here. See StampGameButton for why rendering inside the reveal render
@@ -106,6 +107,6 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
     calloutNotes,
     stampFacts,
   }
-  cacheRef.current = { key: { feed, winProbability, highlights, callouts, vsTeam }, value }
+  cacheRef.current = { key: { feed, winProbability, highlights, callouts, vsTeam, eventHistory }, value }
   return value
 }
