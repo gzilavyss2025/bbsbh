@@ -169,6 +169,12 @@
 .shot.txstory__shot.shot--fallback {
   font-size: var(--fs-h1);
 }
+/* The base logo fallback bleeds with scale(1.6): clipped by the overflow above, but
+   its box (86px) leaves the 54px frame and the card. Cover-crop inside the box instead. */
+.shot.txstory__shot.shot--logo img {
+  object-fit: cover;
+  transform: none;
+}
 
 /* The pre-decided kicker banner (In/Out/Up/Down/Up-Down/IL-N) — solid fill +
    light text is the app's existing convention for a colored badge on a photo
