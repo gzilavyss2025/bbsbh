@@ -504,8 +504,15 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       // Sisneros singles, out at 2nd on the throw): two entries, same
       // playIndex, reach-then-out in that order — falling back to the bare
       // `.find()` keeps this a no-op for the common one-entry case.
+      // A dropped third strike also gives him two start-null entries: the
+      // strikeout leg with EVERY movement field null, then the wild-pitch /
+      // passed-ball leg that puts him on 1st (gamePk 823804's bottom 6th,
+      // 849830's top 4th). Skip the empty leg, or scorebookCode never sees
+      // that he reached and writes a plain K out.
+      const ownLegs = runners.filter((r) => r.details?.runner?.id === batterId && r.movement?.start == null)
       const batterRunner =
-        runners.find((r) => r.details?.runner?.id === batterId && r.movement?.start == null) ??
+        ownLegs.find((r) => r.movement?.end != null || r.movement?.isOut != null) ??
+        ownLegs[0] ??
         runners.find((r) => r.details?.runner?.id === batterId)
       const card = {
         kind: 'atbat',
