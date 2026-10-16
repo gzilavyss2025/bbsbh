@@ -1008,6 +1008,13 @@ for each generator; the reader modules:
   module header: ~99 KB over the wire per level, which is why this is a page a
   reader opts into rather than a card. Spoiler-free, same footing as
   `teamRecords.js`.
+- `teamrecords/ranks.js` — a club's rank among its level for one situational
+  split, from the `ranks` block in the same `team-records` shard (written by
+  `gen-team-records.mjs` with `buildRankingIndex`/`rankMetric`, so it matches
+  `situationalRecordRankings.js`). `rankOf(data, metricId, { half, month,
+  cutoff })` returns `{ rank, of }` (`of` is the level's club count) or null:
+  no shard, no ranks, unknown metric or scope, or any `cutoff` (ranks are
+  not dated). Never throws. Cutoff-gated; no UI importer yet.
 - `postseasonOdds.js` — MLB postseason odds (overall / division / bye
   probability + projected wins) from `public/data/postseason-odds.json`, the
   Team hub's odds pill. DATE-KEYED, exactly like `seasonScore.js` and
