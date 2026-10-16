@@ -9,8 +9,9 @@ import { teamAbbr } from '../../lib/teams.js'
 // Pure: the caller hands over the gameLog splits it already fetched (regular season and
 // October, MLB_LOG_GAME_TYPES) and the window the role calls for: `{ by: 'apps', w }` for
 // a starter (pass his starts only) or `{ by: 'outs', w: 3 * IP }` for a reliever. Null
-// when the log never fills one window. The stretches include October; `season` is the
-// regular season only, the line the card compares them to.
+// when the log never fills one window. `{ by: 'all' }` is the season-to-date window: it never
+// drops a game, so each point sums his first appearance through that one. The stretches include
+// October; `season` is the regular season only, the line the card compares them to.
 const BF = (g) => Number(g.stat.battersFaced) || 0
 const sum = (games, key) => games.reduce((t, g) => t + (Number(g.stat[key]) || 0), 0)
 
@@ -39,7 +40,9 @@ export function pitcherRollingSeries(log, { by, w }) {
   let from = 0
   for (let end = 0, held = 0; end < games.length; end++) {
     held += outs[end]
-    if (by === 'apps') {
+    if (by === 'all') {
+      from = 0
+    } else if (by === 'apps') {
       if (end + 1 < w) continue
       from = end + 1 - w
     } else {

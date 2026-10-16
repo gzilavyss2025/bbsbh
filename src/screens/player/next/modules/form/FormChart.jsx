@@ -20,10 +20,13 @@ const TOP = 14
 const PLOT = 196
 const pct = (x) => `${((100 * x) / H).toFixed(2)}%`
 
-export function FormChart({ points, season, better, step, best, worst, cursor, onCursor, format, label }) {
+export function FormChart({ points, season, better, step: base, best, worst, cursor, onCursor, format, label }) {
   const id = useId().replaceAll(':', '')
   const N = points.length
   const vals = points.map((p) => p.v).concat(season ?? [])
+  // A wide range (a season-to-date ERA from 0 to 12) doubles the gap, so the labels never crowd.
+  let step = base
+  while ((Math.max(...vals) - Math.min(...vals)) / step > 6) step *= 2
   const lo = Math.floor(Math.min(...vals) / step) * step - step / 2
   const hi = Math.ceil(Math.max(...vals) / step) * step + step / 2
   const x = (i) => (N > 1 ? 8 + (i * (W - 16)) / (N - 1) : W / 2)

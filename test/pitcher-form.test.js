@@ -208,3 +208,12 @@ test('an appearance with an out and no batter faced (a pickoff, 0.1 IP) still co
   assert.equal(s.points[0].era, 3)
   assert.equal(s.season.ip, '3.0')
 })
+
+test("by 'all' is the season to date: one point per appearance from the first, each summing every game so far", () => {
+  const s = pitcherRollingSeries(gasser, { by: 'all' })
+  assert.equal(s.points.length, gasser.length)
+  assert.equal(s.points[0].gamePk, gasser[0].game.gamePk)
+  // The last point sums the whole log, as a window as long as the log does.
+  assert.deepEqual(s.points.at(-1), pitcherRollingSeries(gasser, { by: 'apps', w: gasser.length }).points[0])
+  assert.equal(pitcherRollingSeries([], { by: 'all' }), null)
+})

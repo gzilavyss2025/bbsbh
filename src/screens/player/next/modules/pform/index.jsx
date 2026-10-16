@@ -12,7 +12,7 @@ import { PlayPauseIcon } from '../../parts/PlayPauseIcon.jsx'
 import { FormChart } from '../form/FormChart.jsx'
 import { StretchTable } from '../form/StretchTable.jsx'
 import { ENDS, OUTCOMES } from '../form/formView.js'
-import { CHIPS, COLUMNS, METRICS, chartOf, cursorText, pformView, roleOf, shownGames, stretchRows, withSpeed } from './pformView.js'
+import { CHIPS, COLUMNS, METRICS, SEASON, chartOf, chipsOf, cursorText, pformView, roleOf, shownGames, stretchRows, withSpeed } from './pformView.js'
 
 // The pitcher Form trend (#1930): his rolling ERA, or K%, against the season line, and how each
 // stretch ended. The batter card's twin (../form/): the same chart, table and look, so the CSS
@@ -34,16 +34,18 @@ export default function PformModule({ bio, asOf, season, onEmpty, onCount }) {
   const kind = roleOf(log, asOf)
   const chips = CHIPS[kind]
   const views = useMemo(
-    () => (chips ? Object.fromEntries(chips.windows.map((w) => [w, pformView(log, kind, w, asOf)])) : {}),
+    () => (chips ? Object.fromEntries(chipsOf(kind).map((w) => [w, pformView(log, kind, w, asOf)])) : {}),
     [log, kind, chips, asOf],
   )
-  // A short season has no window of the chip asked for: fall back to the longest it has.
-  const w = views[pick ?? chips?.pick] ? (pick ?? chips.pick) : chips?.windows.findLast((n) => views[n])
+  // A short season has no window of the chip asked for: fall back to the longest fixed one it has, else the season to date.
+  const longest = chips?.windows.findLast((n) => views[n]) ?? (views[SEASON] ? SEASON : undefined)
+  const w = views[pick ?? chips?.pick] ? (pick ?? chips.pick) : longest
   const view = views[w]
   const shown = useMemo(() => {
-    const widest = views[chips?.windows.findLast((n) => views[n])] // every other window's games are inside it
+    // Every fixed window's games are inside the widest one; the season chip reaches back to his first game, so it reads its own.
+    const widest = views[w === SEASON ? SEASON : longest]
     return widest ? shownGames(widest) : []
-  }, [views, chips])
+  }, [views, w, longest])
   const { data: speeds } = useAsync(
     () => Promise.all(shown.map((g) => fetchPitchMphFor(bio.id, g.game?.gamePk, undefined, { seasonYear: season }).catch(() => null))),
     [bio.id, season, shown],
@@ -95,9 +97,9 @@ export default function PformModule({ bio, asOf, season, onEmpty, onCount }) {
         </div>
         <div className="fform__controls">
           <div className="fform__windows" role="group" aria-label="Rolling window">
-            {chips.windows.map((n) => (
+            {chipsOf(kind).map((n) => (
               <button key={n} type="button" className="pnext-pick" aria-pressed={n === w} disabled={!views[n]} onClick={() => { setPlaying(false); setPick(n); setAt(null) }}>
-                {n} {chips.unit}
+                {n === SEASON ? 'Season' : `${n} ${chips.unit}`}
               </button>
             ))}
           </div>
@@ -119,7 +121,7 @@ export default function PformModule({ bio, asOf, season, onEmpty, onCount }) {
         {...chart}
         cursor={near}
         onCursor={(j) => scrub(chart.idx[j])}
-        label={`Line chart of ${w}-${chips.unit === 'IP' ? 'inning' : 'start'} rolling ${name} across ${view.games.length} games. Best ${chart.format(points[chart.best].v)}, worst ${chart.format(points[chart.worst].v)}${chart.season == null ? '' : `, season ${chart.format(chart.season)}`}.`}
+        label={`Line chart of ${w === SEASON ? 'season-to-date' : `${w}-${chips.unit === 'IP' ? 'inning' : 'start'} rolling`} ${name} across ${view.games.length} games. Best ${chart.format(points[chart.best].v)}, worst ${chart.format(points[chart.worst].v)}${chart.season == null ? '' : `, season ${chart.format(chart.season)}`}.`}
       />
       <ul className="fform__legend">
         <li>Best stretch <b>{chart.format(points[chart.best].v)}</b></li>
@@ -127,7 +129,7 @@ export default function PformModule({ bio, asOf, season, onEmpty, onCount }) {
         {chart.season != null && <li>Season <b>{chart.format(chart.season)}</b></li>}
       </ul>
       <p className="fform__note">
-        Each point is {shows === 'mph' ? 'his mean primary-fastball speed' : name} over his last {w} {chips.unit === 'IP' ? 'innings' : 'starts'}.
+        Each point is {shows === 'mph' ? 'his mean primary-fastball speed' : name} over {w === SEASON ? `all his ${chips.unit === 'IP' ? 'games' : 'starts'} so far` : `his last ${w} ${chips.unit === 'IP' ? 'innings' : 'starts'}`}.
         {shows === 'mph' ? ' A point is left off where none of its games has a speed.' : ` Green fill sits ${chart.better === 'down' ? 'below' : 'above'} his season ${name}, the other fill ${chart.better === 'down' ? 'above' : 'below'}.`}{' '}
         Open surface: season stats only, no game result is shown.
       </p>
