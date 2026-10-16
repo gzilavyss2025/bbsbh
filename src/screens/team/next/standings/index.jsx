@@ -10,11 +10,12 @@ import { loadStandings } from '../../data/loadNumbers.js'
 import { cutoffFor, seasonOf } from '../../data/shared.js'
 import { ComebackCard } from '../../modules/ComebackCard.jsx'
 import { LastTimeCard } from '../../modules/records/LastTimeCard.jsx'
-import { RecordsCard } from '../../modules/records/RecordsCard.jsx'
 import { TeamStats, todayDowLabel } from '../../modules/TeamStatsCard.jsx'
 import { SHARED } from '../once.js'
 import { useBandData } from '../useBandData.js'
 import { DivisionCard } from './DivisionCard.jsx'
+import { RecordsCard } from './records/RecordsCard.jsx'
+import { groupCount } from './records/recordsModel.js'
 import { ScoreCard } from './ScoreCard.jsx'
 import { OTHER_LEAGUE, hasDroughts, scoreCard, standingsCount } from './standingsData.js'
 import '../../../../styles/team-next/standings.css'
@@ -56,6 +57,7 @@ export default function Standings({ team, asOf, onReady, onCount }) {
     if (n) markSeen(seenKey)
   }, [n, seenKey])
 
+  const recordGroups = useMemo(() => (n?.teamRecords ? groupCount(n.teamRecords, n.recordsCutoff) : 0), [n])
   const clubName = teamClubName(team)
   let i = 0
   const wrap = (label, tag, body, key) => (
@@ -75,7 +77,7 @@ export default function Standings({ team, asOf, onReady, onCount }) {
       {card && (
         <ScoreCard card={card} onAll={() => navigate(`/standings${linkQuery({ d: asOf, s: sportId })}`)} stampIn={!still} style={stampAt(i++)} />
       )}
-      {n?.teamRecords && wrap('Records', 'win pct', <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} />, 'records')}
+      {n?.teamRecords && wrap('Records', `${recordGroups} groups`, <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} asOf={asOf} />, 'records')}
       {hasDroughts(n, n?.recordsCutoff) && wrap('Last time', 'chances since', <LastTimeCard data={n.scheduleShape} cutoff={n.recordsCutoff} />, 'last')}
       {n?.dayOfWeek && wrap('Day of week', 'win pct', <TeamStats title="Record by Day of Week" stats={n.dayOfWeek} note="win pct" highlightKey={todayDowLabel()} />, 'dow')}
       {n?.comeback && wrap('Comeback wins', 'all 30 teams', <ComebackCard data={n.comeback} teamId={team.id} clubName={clubName} />, 'comeback')}
