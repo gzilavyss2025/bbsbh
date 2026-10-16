@@ -81,6 +81,10 @@ export function buildPreHalfCallouts({
 }) {
   if (!bundle) return []
   const notes = []
+  // World Series notes cut history at the game's own date (spoiler-free, ADR-0087), not at
+  // `gameDate`, which is null on a game too old for the workload file.
+  const gameType = feed?.gameData?.game?.type
+  const wsDate = gameType === 'W' ? feed?.gameData?.datetime?.officialDate ?? gameDate : gameDate
 
   // 1. The record in tonight's starter's starts — first inning only, pinned to
   // the half where that starter is the one pitching. The same half also
@@ -116,7 +120,7 @@ export function buildPreHalfCallouts({
       // 1c. World Series only: the Series state heading in, and what it has meant
       // before. Entering-tense, reads no score from tonight (ADR-0014, ADR-0087).
       notes.push(...buildWorldSeriesOddsNotes({
-        history: seriesHistory, bundle, gameDate, gameType: feed?.gameData?.game?.type,
+        history: seriesHistory, bundle, gameDate: wsDate, gameType,
       }))
     }
   }
@@ -144,7 +148,7 @@ export function buildPreHalfCallouts({
     if (row) {
       // World Series winner-take-all: the trailing club's record entering the 9th. Same gate as above.
       const wta = buildWsWtaTrailing9Note({
-        row, inning, half, bundle, history: eventHistory, gameDate, gameType: feed?.gameData?.game?.type,
+        row, inning, half, bundle, history: eventHistory, gameDate: wsDate, gameType,
       })
       if (wta) notes.push(wta)
       const both0 = row.cumAway === 0 && row.cumHome === 0
