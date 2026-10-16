@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { headshotSources, isMlbTeamId, teamClubName, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { logHeadshotEvent } from '../../lib/headshot/log.js'
-import { eventCardClass } from '../../lib/design/cardClass.js'
 import { useHeadshotStep, useImgReady } from '../../hooks/images/useHeadshotStep.js'
 import { TABS } from './cardCopy.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -69,15 +68,6 @@ export function ActorHead({ tab, id, name, jersey, hand, pr = false, teamId = nu
       {logo && teamId != null && <TeamLogo teamId={teamId} name={teamName ?? teamClubName(teamId) ?? ''} size={36} className="change__logo" />}
     </>
   )
-}
-
-// A reliever's card repeated at the head of the window holding his first batter
-// (focus mode, PlayByPlay's lead-in, which owns the wrapper). The change itself
-// trails the at-bat BEFORE it, so without this the page with his first result
-// never names him. "Pitching", not "Now pitching": he is already in, the wording
-// the persistent header drops to for an arm already in.
-export function ReliefRepeat({ pitcher, teamId, teamName }) {
-  return <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={eventCardClass('change--framed')} label={TABS.reminder} />
 }
 
 // The entering pitcher's headshot. Walks the same ordered fallback chain as

@@ -1,8 +1,8 @@
 /* The Now Pitching card as a table (a second sheet of pitcher-card/, split out of
    card.css at its 600-line cap; loads right after it and wins on order).
 
-   The card reads as one stamped table: square corners, an ink name band, and
-   each stat block a label row over a value row with ruled cells, under caption
+   The card reads as one stamped table: square corners, a club band that arrives over the
+   top, and each stat block a label row over a value row with ruled cells, under caption
    bands. SKIN ONLY: every selector is a class the markup already has.
    - `column-reverse` on a cell puts its label (second in the DOM) above its
      value, which is what makes a header row without touching StatGrid.
@@ -15,46 +15,11 @@
   padding: 0;
 }
 
-/* The name band: the pitching club's bar when it has hand-set colours
-   (--bar-fill, --bar-accent and --bar-text, set on `.pcard` by
-   headerThemeStyle), else the scorebug's navy. The ripple is the scorebug's.
-   ADR-0030's addendum themes THIS BAND ONLY: nothing else under `.pcard` may
-   read the three properties, so a new descendant must not use `--bar-*`. */
+/* The head is the yellow card's own (ADR-0113, slice 3): the photo, the name, the badges and
+   the logo on the event ground, with room for the band that wipes in over it
+   (pitcher-card/arrival.css). The club's band is that wipe, not this row. */
 .pcard > .change {
-  /* component-reuse-exempt: the card's own name row (PitcherNotice's markup, a headshot beside a name), not a section heading SectionHead could draw */
-  position: relative;
-  isolation: isolate;
-  padding: var(--space-6) var(--space-3) var(--space-2h);
-  background: var(--bar-fill, var(--ink-1));
-  border-bottom: 3px solid var(--bar-accent, transparent); /* raw-value-exempt: the themed bar's accent rule, as system/section-head.css */
-  color: var(--bar-text, var(--text-on-ink-cream));
-}
-.pcard > .change::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  /* raw-value-exempt: ripple ring colours are translucent white and black over any ground */
-  background:
-    repeating-radial-gradient(circle at 108% 130%, rgba(255, 255, 255, 0.14) 0 1px, transparent 1px 7px),
-    repeating-radial-gradient(circle at -8% -40%, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 9px);
-}
-.pcard .change__shot {
-  border-radius: 0;
-  border: var(--bw-heavy) solid var(--bar-text, var(--text-on-ink-cream));
-}
-.pcard .change__jersey,
-.pcard .change__hand {
-  color: var(--bar-text, var(--text-on-ink-soft));
-}
-.pcard .change__pitcher,
-.pcard .change__pitcher .plink {
-  color: var(--bar-text, var(--text-on-ink-cream));
-  font-size: var(--fs-title-md);
-}
-.pcard .change__jersey {
-  opacity: 0.85; /* raw-value-exempt: a dim step, not a colour */
+  padding: calc(var(--space-6) + var(--space-1)) var(--space-4) var(--space-4);
 }
 
 /* Sections are tables and bands, full width. */

@@ -360,8 +360,8 @@ test('T3: two tables on one page never share a spoken name', () => {
   // The departure card and the finalized card can show together, for the same
   // pitcher: each passes its own name for the table.
   const handoff = src('components/playbyplay/PitcherHandoffCard.jsx')
-  assert.match(handoff, /<PitcherLineTable line=\{line\} label=\{`Line at departure, \$\{displayName\(line\)\}`\} \/>/)
-  assert.match(handoff, /<PitcherLineTable line=\{line\} label=\{`Final line, \$\{displayName\(line\)\}`\} \/>/)
+  assert.match(handoff, /<PitcherLineTable line=\{line\} label=\{`Line at departure, \$\{displayName\(line\)\}`\} open=\{open\} \/>/)
+  assert.match(handoff, /<PitcherLineTable line=\{line\} label=\{`Final line, \$\{displayName\(line\)\}`\} open=\{open\} \/>/)
 })
 
 test('T3: no rule that reaches a moved table draws a frame, pads a plain cell, dresses the head or draws a row rule', () => {

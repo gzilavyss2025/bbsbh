@@ -30,7 +30,8 @@ import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
 import { BallFlight } from '../charts/BallFlight.jsx'
 import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
-import { PitcherPhoto, ReliefRepeat } from './PitcherNotice.jsx'
+import { PitcherPhoto } from './PitcherNotice.jsx'
+import { TABS } from './cardCopy.js'
 import { Card } from '../ui/frame/Card.jsx'
 import { PitcherCard } from './pitcherCard/PitcherCard.jsx'
 import { DepartureLineCard, FinalizedLineCard } from './PitcherHandoffCard.jsx'
@@ -368,38 +369,35 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               replayLast={i === lastAtBat}
             />
           )
-        } else if (repeat && entry.eventType === 'pitching_substitution') {
-          const pitcher = pitchingChangePitcher(feed, entry.playerId)
-          node = pitcher ? <ReliefRepeat pitcher={pitcher} teamId={pitchingTeamId} teamName={pitchingName} /> : <EventNote entry={entry} />
         } else if (entry.eventType === 'pitching_substitution') {
           // A mid-inning pitching change renders as the same "now pitching" card
           // the stat slot shows for a between-halves change (see PitcherNotice),
           // headshot and all — falling back to the plain note only if the pitcher
           // can't be resolved (the FULL card, #1344). Immediately below it, the arm going OUT gets his
           // own line frozen at this exact moment (DepartureLineCard) — see the
-          // `handoffs` note above.
+          // `handoffs` note above. A lead-in repeat is this card labelled "Pitching" (tagged below),
+          // from the answer the first kept, with no handoff line.
           const pitcher = pitchingChangePitcher(feed, entry.playerId)
-          const handoff = handoffByIncomingId.get(entry.playerId)
+          const handoff = repeat ? null : handoffByIncomingId.get(entry.playerId)
           const departureLine = handoff
             ? pitcherLineAt(feed, handoff.side, handoff.departingPitcherId, handoff.snapshotAtBatIndex, stepHalfIdx)
             : null
           node = pitcher ? (
-            <>
-              <PitcherCard
-                feed={feed} relief pitcher={pitcher} treatment={treatment} side={battingSide === 'away' ? 'home' : 'away'}
-                teamId={pitchingTeamId}
-                teamName={pitchingName}
-                className={eventCardClass('change--framed')}
-              />
-              {departureLine && (
-                <DepartureLineCard
-                  line={departureLine}
-                  teamId={pitchingTeamId}
-                  bookOpen={handoff.inheritedCount > 0}
-                  inheritedCount={handoff.inheritedCount}
-                />
-              )}
-            </>
+            <PitcherCard
+              feed={feed} relief pitcher={pitcher} treatment={treatment} side={battingSide === 'away' ? 'home' : 'away'}
+              teamId={pitchingTeamId}
+              teamName={pitchingName}
+              className={eventCardClass('change--framed')}
+              label={repeat ? TABS.reminder : undefined}
+              after={(open) =>
+                departureLine && (
+                  <DepartureLineCard
+                    line={departureLine} teamId={pitchingTeamId} open={open}
+                    bookOpen={handoff.inheritedCount > 0} inheritedCount={handoff.inheritedCount}
+                  />
+                )
+              }
+            />
           ) : (
             <EventNote entry={entry} />
           )

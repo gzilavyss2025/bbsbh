@@ -133,6 +133,7 @@
    its file ratchet (scripts/check-dir-size.mjs). */
 @import './styles/pitcher-card/card.css';
 @import './styles/pitcher-card/table.css';
+@import './styles/pitcher-card/arrival.css';
 @import './styles/14-strike-zone.css';
 @import './styles/18-uniforms-and-jerseys.css';
 @import './styles/19-pattern-and-sketch-labs.css';
@@ -249,6 +250,7 @@
 @import './styles/motion/stamp-in.css';
 @import './styles/motion/player-rise.css';
 @import './styles/motion/menurail.css';
+@import './styles/motion/arrival.css';
 
 /* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
    rather than three more numbered siblings: src/styles is a flat directory at

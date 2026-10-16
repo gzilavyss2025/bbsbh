@@ -136,16 +136,23 @@
   stroke-width: 0.6;
   opacity: 0.3;
 }
+/* The other pitches: a line and an end ring, in the pitch's own colour (PitchScene sets the
+   stroke from the pitch's `color`). Every arc, these and the trail, gets a thin dark edge so
+   a pale pitch colour holds on the ground. */
 .pscene__ghost polyline {
   fill: none;
-  stroke-width: 1.3;
+  stroke-width: 1.8; /* raw-value-exempt: SVG stroke width in the scene's own units */
   stroke-linecap: round;
-  opacity: 0.45;
+  opacity: 0.8; /* raw-value-exempt: a dim step, not a colour */
 }
 .pscene__ghost .pscene__ring {
   fill: none;
-  stroke-width: 1.2;
-  opacity: 0.55;
+  stroke-width: 1.6; /* raw-value-exempt: SVG stroke width in the scene's own units */
+  opacity: 0.85; /* raw-value-exempt: a dim step, not a colour */
+}
+.pscene__ghost,
+.pscene__trail {
+  filter: drop-shadow(0 0 0.7px color-mix(in srgb, var(--ink-0) 90%, transparent)); /* raw-value-exempt: a 0.7px edge */
 }
 .pscene__trail line {
   stroke-linecap: round;
@@ -188,15 +195,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* One colour per family (pitchFamily), the same tokens as .pitchmix__seg. */
-.pcard .fill--fastball { background: var(--arsenal-fastball); }
-.pcard .fill--breaking { background: var(--arsenal-breaking); }
-.pcard .fill--offspeed { background: var(--arsenal-offspeed); }
-.pcard .fill--other { background: var(--arsenal-other); }
-.pcard .stroke--fastball { stroke: var(--arsenal-fastball); }
-.pcard .stroke--breaking { stroke: var(--arsenal-breaking); }
-.pcard .stroke--offspeed { stroke: var(--arsenal-offspeed); }
-.pcard .stroke--other { stroke: var(--arsenal-other); }
+/* The scene's colours are the pitch's own (pitchMark in lib/pitch/pitchTypes.js), set on the
+   SVG by PitchScene: the same colour as the tile's mark. No family colour is drawn here. */
 
 /* ---- "Pitch mix" and its (i) note ----------------------------------------- */
 

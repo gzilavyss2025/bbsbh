@@ -1,0 +1,104 @@
+/* ---------------------------------------------------------------------------
+   THE ARRIVED CARD (ADR-0113, slice 3). The resting look of a notification card that gets
+   a band when its extra data is in: the full Now Pitching card (.pcard) and the two
+   pitching-handoff cards (.pitcherhandoff). Components/playbyplay/pitcherCard/Arrival.jsx
+   draws the parts; the motion between the two looks is motion/arrival.css.
+
+   TWO LOOKS. The plain card has the ink name tab and a head with 28px above it. The arrived
+   card (.arrival.is-in on the card) has the band across its top, the tab hidden, and the head with
+   room for the band (33px of band and the 14px the tab used to hang). Sections open
+   (.unfold[data-open]). A card with its data in hand at mount is drawn arrived, with no
+   motion.
+
+   THE BAND is the section head's band (.sectionhead--band, system/section-head.css): the
+   ground, the underline, the ink and the ripple and sheen texture. This file only sizes it,
+   hides it until it arrives, and gives it a label. The club comes through --bar-fill,
+   --bar-accent and --bar-text (set on the card by headerThemeStyle); with none, or on a
+   handoff card (.sectionhead--house), it is the house navy.
+   --------------------------------------------------------------------------- */
+.arrival {
+  --cardband-fill: 30px; /* raw-value-exempt: the band's fill; the 3px rule is below it */
+  --cardband-rule: 3px; /* raw-value-exempt: the band's underline, as .sectionhead--band */
+}
+
+.cardband {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  height: calc(var(--cardband-fill) + var(--cardband-rule));
+  overflow: hidden;
+  clip-path: inset(0 100% 0 0);
+}
+.arrival.is-in > .cardband {
+  clip-path: inset(0);
+}
+
+/* The texture (ripple rings, sheen) is drawn by .sectionhead--band's two pseudo-elements. It
+   fades in after the wipe starts. */
+.cardband.sectionhead--band::before,
+.cardband.sectionhead--band::after {
+  opacity: 0;
+}
+.arrival.is-in > .cardband.sectionhead--band::before,
+.arrival.is-in > .cardband.sectionhead--band::after {
+  opacity: 1;
+}
+
+/* The label repeats the tab's words, in the tab's type, on the band's ink. */
+.cardband__label {
+  position: absolute;
+  left: var(--space-3);
+  top: 0;
+  line-height: var(--cardband-fill);
+  color: var(--band-text);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+  opacity: 0;
+}
+.arrival.is-in > .cardband .cardband__label {
+  opacity: 1;
+}
+
+/* The tab gives way to the band. It stays in the DOM: it is the card's heading. */
+.arrival.is-in .card__name {
+  opacity: 0;
+}
+
+/* The head makes room for the band. */
+.arrival.is-in > .change {
+  padding-top: calc(var(--cardband-fill) + var(--cardband-rule) + var(--space-3h));
+}
+/* A handoff card's head ends where its table begins, as the plain card's head does. */
+.pitcherhandoff.arrival {
+  gap: 0;
+}
+.pitcherhandoff.arrival > .change {
+  padding-bottom: var(--space-4);
+}
+
+/* A section that unfolds: a grid whose one row goes 0fr -> 1fr. Its content mounts when it
+   opens, so a closed one is empty and takes no room. Open, it lets its content overflow
+   (the (i) note of the pitch mix hangs below its label). */
+/* layout-exempt: a one-row grid whose track opens 0fr -> 1fr; Stack and Grid cannot animate a track */
+.unfold {
+  --unfold-delay: 0ms; /* Arrival.jsx sets each section's own */
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.unfold[data-open] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.unfold__in {
+  min-height: 0;
+  overflow: hidden;
+}
+.unfold[data-open] > .unfold__in {
+  overflow: visible;
+}

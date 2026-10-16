@@ -87,9 +87,8 @@ const HELPER = /^import \{ eventCardClass \} from '(\.\.\/)+lib\/design\/cardCla
 // file -> how many of its card props take the frame from the helper
 const CALLERS = {
   'components/inning/HalfInning.jsx': 3, // the Now Pitching card, the staged batter and fielder
-  'components/playbyplay/PlayByPlay.jsx': 4, // mid-half pitcher, fielder, pinch runner, pinch hitter
+  'components/playbyplay/PlayByPlay.jsx': 4, // mid-half pitcher (and, slice 3, its lead-in repeat), fielder, pinch runner, pinch hitter
   'components/scoring/lens/PitcherSheet.jsx': 1, // the full card in the lens sheet
-  'components/playbyplay/PitcherNotice.jsx': 1, // ReliefRepeat
 }
 const count = (code, s) => code.split(s).length - 1
 
@@ -117,13 +116,13 @@ test('N7: the role roots keep the caller\'s className, and the full card\'s head
   for (const name of ['PitcherNotice', 'BatterNotice', 'FielderNotice', 'PinchRunNotice']) {
     const code = src(`components/playbyplay/${name}.jsx`)
     assert.ok(code.includes('<div className={`change ${className}`}>'), `${name}'s root`)
-    // PitcherNotice.jsx's one call is ReliefRepeat's, a caller (above).
     const live = code.replace(/^\s*\/\/.*$/gm, '') // a comment may name the helper
-    assert.equal(count(live, 'eventCardClass('), name === 'PitcherNotice' ? 1 : 0, `${name} does not draw the frame itself`)
+    assert.equal(count(live, 'eventCardClass('), 0, `${name} does not draw the frame itself`)
   }
   const card = src('components/playbyplay/pitcherCard/PitcherCard.jsx')
   // The root also carries the pitching club's theme properties as `style` (ADR-0030's 2026-10-14 addendum); the frame class still lands on it.
-  assert.ok(card.includes("<div className={`pcard ${className ?? ''}`} style={headerThemeStyle(theme)}>"), 'the frame lands on .pcard')
+  // Slice 3 (ADR-0113) adds the arrival's class list and moves the club paint to bandPaint.
+  assert.ok(card.includes("<div className={`pcard ${arrival} ${className ?? ''}`} style={band.style}>"), 'the frame lands on .pcard')
   assert.doesNotMatch(card.slice(card.indexOf('<PitcherNotice')).split('/>')[0], /className/, 'the header takes no frame')
 })
 

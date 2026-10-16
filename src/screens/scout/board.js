@@ -34,7 +34,7 @@ export function pitcherBoard({ arsenal, command, pitcherId, stance, scope = 'all
     return list.length ? list.reduce(add) : null
   }
   const tiles = pitchTiles(rows)
-  const types = tiles.filter((t) => !t.other && Number(t.pct) >= USAGE_FLOOR).slice(0, MAX_TYPES)
+  const types = tiles.filter((t) => Number(t.pct) >= USAGE_FLOOR).slice(0, MAX_TYPES)
   // All pools every type the command store holds for this stance, pill or not.
   const allCodes = [...new Set(cmds.flatMap((m) => Object.keys(m)))].filter(cellsOf)
   return {

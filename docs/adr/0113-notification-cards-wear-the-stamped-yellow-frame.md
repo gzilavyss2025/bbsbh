@@ -96,3 +96,41 @@ live in `ActorHead`), `notice-n6` (the bar's gap is 12px), `notice-n8a` (the pho
 A baserunning card's logo is the club of the person in its photo, read off the boxscore roster
 (`playerClubId`); a person in no roster gets the club his photo already falls back to. A balk's pitcher therefore wears
 his own club's logo, as the artifact's balk does.
+
+## Slice 3: the arrival and the repeat (2026-10-16)
+
+**The arrival.** A card with data to fetch is the plain yellow card until the data is in; then a
+band wipes across its top (380 ms, `--ease-stamp`), its tab fades, the head makes room (28 px to 47 px)
+and the sections unfold at 380, 435 and 490 ms. `docs/motion.md`, "The arrival", has the full table.
+It applies to the full Now Pitching card (the band is the club's triad, `bandPaint`; a club with
+none keeps the house navy) and to `DepartureLineCard` and `FinalizedLineCard` (always the house navy,
+the table unfolds at 380 ms). The band is `.sectionhead--band`, so its texture is the section head's
+and no gradient is copied. It plays only for data that arrives while the card is on screen
+(`useBecameTrue`, `useArrival`); a card with its data in hand draws final. Timing depends on the fetch,
+never on the game (ADR-0046). `PitcherCard`'s `after` hands the departing arm's card the same state,
+so the two arrive together.
+
+**The repeat.** In the focus window the "Pitching" reminder at the head of the next at-bat is the full
+card (`ReliefRepeat` is deleted), with the "Before this at-bat" tag above it. It is the same branch of
+`PlayByPlay.jsx` as the original, with no handoff line. It asks for nothing: `lib/pitcherCard/cardData.js`
+keeps the finished answer (season line, last game, arsenal, career) by arm, season, level, game type,
+date and game number. The repeat reads it on its first render, so it is drawn final. Two cards that
+ask while the first request is in flight share the one request. A failed read is not kept.
+**ADR-0030's 2026-10-14 addendum now covers the repeat card**: it names the same club, so its band
+wears the same triad, from the same two inputs, `(teamId, treatment)`.
+
+**The pitch scene and mix.** Scene lines, end rings and trail are the pitch's mark colour
+(`pitchMark(code).color`, the colour of its tile), never the family colours. A scene pitch carries
+its own `color`, because the at-bat replay's scene `code` is "FF-3" and not a pitch code. The
+faint lines are 1.8 wide at 0.8 opacity, the end rings 1.6 at 0.85, and every arc has a 0.7px dark
+edge. The ball keeps its cream face and ink outline, as in the artifact. The "Other" tile is gone:
+`pitchTiles` returns no tile for a pitch under 3%, and does not renormalise, so the kept tiles read
+as they did and the tiles add to 100 less the folded share. The lineup page's pitch card and the
+Scout read the same `pitchTiles` and lose the tile too. `test/pitcher-card-model.test.js` changed
+on purpose for this.
+
+**What does not change.** No gate, `SealBox`, `revealedThrough` read or reveal-only import moves;
+`C4_SEAL` passes unchanged. Nothing here reads a score. Tests: `card-arrival.test.js` pins the band's
+paint, the gate, the shared answer, the scene colours, the times and the reduced-motion state; the
+frame tests that pinned the old markup (`notice-n6`, `notice-n7`, `notice-n8c`, `table-cascade`,
+`event-card-frame`, `pinch-hitter-notice`) changed on purpose.
