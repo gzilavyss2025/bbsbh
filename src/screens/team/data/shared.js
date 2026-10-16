@@ -1,8 +1,7 @@
 import { lastName } from '../../../api/select.js'
-import { firstLast, isTwoWay } from '../../../api/person.js'
+import { firstLast } from '../../../api/person.js'
 import { isWinterSport } from '../../../lib/winter/leagues.js'
 import { winterSeasonFor } from '../../../lib/winter/window.js'
-import { ipToOuts } from '../../../lib/math/innings.js'
 import { isoToday } from '../../../lib/dates.js'
 
 // Pieces MORE THAN ONE team-hub loader genuinely needs, collapsed here once the
@@ -249,49 +248,6 @@ export function rosterHittingStat(r, teamId) {
 }
 
 // ---------------------------------------------------------------------------
-// Pitching staff (season line)
-// ---------------------------------------------------------------------------
-
-// Every roster pitcher's season line — starts, saves, innings-as-outs — off
-// the 40Man roster so a hurt ace or closer still counts. Shared by the Roster
-// tab's own Starting Pitchers sort and the Overview's smaller preview, which
-// must rank the same way.
-export function fullPitchingLineFrom(fullRoster, teamId) {
-  return fullRoster
-    .filter((r) => r.position?.type === 'Pitcher' || isTwoWay(r.person))
-    .map((r) => {
-      const stat = rosterPitchingStat(r, teamId)
-      return {
-        id: r.person?.id,
-        name: firstLast(r.person),
-        jersey: r.jerseyNumber ?? '',
-        gs: Number(stat?.gamesStarted) || 0,
-        saves: Number(stat?.saves) || 0,
-        ipOuts: ipToOuts(stat?.inningsPitched),
-      }
-    })
-}
-
-// Top-N by games started; a tie goes to whoever logged more innings (more of
-// the season's workload behind the same start count), then jersey number for
-// a stable sort.
-export function topStartingPitchersFrom(fullPitchers, limit = 5) {
-  return [...fullPitchers]
-    .filter((p) => p.gs > 0)
-    .sort((a, b) => b.gs - a.gs || b.ipOuts - a.ipOuts || Number(a.jersey) - Number(b.jersey))
-    .slice(0, limit)
-}
-
-// The most saves among pitchers NOT already claiming a starter slot — a
-// swingman who picked up a save or two before moving into the rotation
-// shouldn't out-close the bullpen's actual closer.
-export function closerFrom(fullPitchers, startingIds) {
-  const relievers = fullPitchers.filter((p) => !startingIds.has(p.id))
-  const maxSaves = relievers.reduce((max, p) => Math.max(max, p.saves), 0)
-  return maxSaves > 0 ? relievers.find((p) => p.saves === maxSaves) : null
-}
-
-// ---------------------------------------------------------------------------
 // Preferred lineup
 // ---------------------------------------------------------------------------
 
@@ -301,7 +257,7 @@ const PREFERRED_LINEUP_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF
 
 // Roster-entry status codes that mean a player has LEFT the organization
 // entirely, rather than merely being unavailable within it. `fullRoster` here
-// is a `rosterType=fullSeason` fetch (see loadRoster.js/loadOverview.js) so a
+// is a `rosterType=fullSeason` fetch (see loadRoster.js) so a
 // player promoted or optioned to a different level of the SAME org this
 // season still counts toward his old club's Preferred Lineup — but a release,
 // trade, waiver claim (by another club), or free agency ends that: the club
@@ -440,35 +396,8 @@ export function parentOrgIdOf(team) {
 }
 
 // ---------------------------------------------------------------------------
-// Empty-tab detection (issue 08)
+// Absent bands
 // ---------------------------------------------------------------------------
-
-// Which of the five tab buttons opens onto nothing for this club, decided
-// cheaply off the identity data every tab already has (loadTeamIdentity's
-// `team`) — never by fetching a tab's own payload just to find out (PRD
-// non-negotiable 2). An MLB club never hides anything: every one of them has a
-// farm system and a league. Only two MiLB cases are cheap enough to trust:
-//  - `minors`: the Minors tab's own affiliates/prospects lookup is keyed off
-//    parentOrgIdOf(team) — with none, every module in that tab comes back
-//    empty. A winter-ball club is the case that made the bare `parentOrgId`
-//    read wrong rather than merely thin (#1143).
-//  - `numbers`: with no league at all there are no standings and no rank
-//    context — the tab would open onto nothing but a 0-0 jersey strip.
-// A hidden tab is still a real route — this only decides the BUTTON (see
-// TeamTabBar's `hidden` prop). Roster and Games are never hidden: every club
-// reachable in this app has an active roster and plays a schedule.
-export function hiddenTeamTabs(team) {
-  const hidden = new Set()
-  const isMilb = (team.sport?.id ?? 1) !== 1
-  if (!isMilb) return hidden
-  // Cot's covers the major leagues only, so a MiLB club's Contracts tab would
-  // open on an empty ledger every time. Hidden rather than shown-and-apologetic:
-  // a tab that is always empty is not a tab.
-  hidden.add('contracts')
-  if (!parentOrgIdOf(team)) hidden.add('minors')
-  if (!team.league?.id) hidden.add('numbers')
-  return hidden
-}
 
 // Which bands of the one-scroll team page (ADR-0082, #1107) a club cannot fill, off the
 // same cheap `team` object, never a band's own payload. Absent, never disabled: a hidden

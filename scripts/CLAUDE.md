@@ -49,12 +49,7 @@ are rules rather than reference:
   added beside `team-records/`'s. Never raise the budget as a reflex fix for a
   guard failure — that unstamped count is a ratchet the guard checks against
   itself, and widening it on request is exactly the drift it exists to catch.
-- **A generator that needs app logic imports it** rather than keeping a second
-  copy (`gen-minors-leaders.mjs` imports `combineToPool`/`computeLeaders`;
-  `gen-milestones.mjs` imports the projection math from `src/api/person.js`;
-  `gen-callouts.mjs` imports the checkpoint constants from
-  `src/api/callout-notes/checkpoints.js`). The deliberate exceptions are small
-  self-contained mirrors, and each one says so at its own top.
+- **A generator that needs app logic imports it**, never a second copy: `docs/scripts/generators.md`, "Sharing app logic".
 - **An append-only generator that merges fresh rows into a carried-forward
   store, keyed on an upstream-asserted identity** (an official, a player, any
   id the source itself assigns rather than one this repo mints) **must use

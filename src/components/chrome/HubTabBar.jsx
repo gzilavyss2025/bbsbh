@@ -6,7 +6,7 @@ import { createLanding } from '../../lib/jumpbar/land.js'
 import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
 
 // The tab bar under a hub's pinned identity header. ONE control, two shapes —
-// the team hub's tabs (screens/team/TeamTabBar.jsx) and the player page's jump
+// the team page's jump bar (screens/team/next/TeamNextPage.jsx) and the player page's jump
 // bar (variant="anchor", below) — so the two can never drift into two
 // different-looking strips. It owns the markup and the `.teamtabs` classes
 // (styles/46-consent-modal.css) and nothing else; each caller supplies its own

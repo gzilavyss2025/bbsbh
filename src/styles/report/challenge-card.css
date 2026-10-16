@@ -15,9 +15,7 @@
    IT DOES NOT REUSE `.rpt`. The report board's table lives in
    68-around-the-game.css, which only the five Around the game pages load, and
    pulling 1,071 lines onto a team hub for one four-column table would be a
-   worse trade than the forty lines below. The chip pair follows
-   65-team-records.css's `.trec__half` instead, which is the control language
-   the cards beside this one already speak. */
+   worse trade than the forty lines below. */
 
 /* ---- the headline ------------------------------------------ */
 
@@ -60,8 +58,6 @@
 
 /* ---- the chip pair ----------------------------------------- */
 
-/* `.trec__half`'s shape, because the Records card two along uses it and a
-   second control language on one tab is a second thing to learn. */
 .chal__views {
   display: flex;
   gap: var(--space-1);

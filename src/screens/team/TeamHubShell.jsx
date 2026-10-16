@@ -21,7 +21,6 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsOfBanner } from '../../components/seal/AsOfBanner.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
-import { TeamTabBar } from './TeamTabBar.jsx'
 import { parentOrgIdOf } from './data/shared.js'
 import { useIdentityDraft } from './modules/identity/useIdentityDraft.js'
 import { Pill } from '../../components/ui/control/Pill.jsx'
@@ -51,15 +50,6 @@ const DASH = '—'
 // WCAG math against, not a CSS var reference.
 const INK_DARK = '#16222F'
 const INK_LIGHT = '#FBF6E9'
-
-const TAB_TITLE = {
-  overview: null,
-  roster: 'Roster',
-  games: 'Games',
-  numbers: 'Numbers',
-  contracts: 'Contracts',
-  minors: 'Minors',
-}
 
 // The club's most recent official press-notes PDF — a direct link-out, the same
 // as the lineup page's Game Notes button. No gameDate, so resolveGameNotes falls
@@ -104,17 +94,14 @@ function GameNotesLink({ teamId }) {
 // independent of each other. Its own data comes from loadTeamIdentity.js, which
 // is deliberately three cheap requests, because every tab pays for it.
 //
-// `asOf` / `sportId` are the route's own query hints, threaded to TeamTabBar so
-// a tab switch reproduces the address the visitor arrived on — see PRD
-// non-negotiable 1 in .scratch/team-page-ia.
+// `asOf` / `sportId` are the route's own query hints, so a door out reproduces the
+// address the visitor arrived on. `bar` is the jump bar (next/TeamNextPage.jsx).
 export function TeamHubShell({
   team,
   record,
   manager,
   asOf = null,
   sportId = null,
-  active,
-  hiddenTabs,
   datable = true,
   bar,
   top,
@@ -126,8 +113,7 @@ export function TeamHubShell({
   // Commissioner, which is not a club and whose page is not one either
   // (#1143). Same call the Minors tab gate and the Affiliates card list make.
   const parentOrgId = parentOrgIdOf(team)
-  const tabTitle = TAB_TITLE[active] ?? null
-  useDocumentTitle(team.name ? [team.name, tabTitle].filter(Boolean).join(' · ') : null)
+  useDocumentTitle(team.name || null)
 
   // Called for every visitor, admin or not — it touches no Clerk API and holds
   // nothing but unsaved text, so it is safe with no provider mounted. Nothing
@@ -316,16 +302,7 @@ export function TeamHubShell({
           />
         )}
 
-        {/* `bar` swaps the tab bar for another control: the one-scroll page's jump bar (#1107). */}
-        {bar ?? (
-          <TeamTabBar
-            teamId={team.id}
-            active={active}
-            asOf={asOf}
-            sportId={sportId}
-            hidden={hiddenTabs}
-          />
-        )}
+        {bar}
 
         {children}
 

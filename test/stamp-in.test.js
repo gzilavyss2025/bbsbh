@@ -189,9 +189,9 @@ test('the page never advances the reveal ratchet', () => {
   }
 })
 
-test('the tab bar does not grow a sixth button for it', () => {
-  const src = readFileSync(new URL('../src/screens/team/TeamTabBar.jsx', import.meta.url), 'utf8')
-  assert.ok(!src.includes('stamp-in'), 'Stamp In is a standalone page, not a team-hub tab')
+test('the team page does not grow a band for it', () => {
+  const src = readFileSync(new URL('../src/screens/team/next/bands.js', import.meta.url), 'utf8')
+  assert.ok(!src.includes('stamp-in'), 'Stamp In is a standalone page, not a band of the team page')
 })
 
 test('SeasonSchedule is the only file that links to the page', () => {

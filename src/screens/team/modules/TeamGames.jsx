@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useLayoutEffect, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { extraInningsOf } from '../../../api/select.js'
 import { seriesAbbr } from '../../../api/boxlines/rows.js'
 import { gamePath } from '../../../lib/route.js'
@@ -6,25 +6,14 @@ import { useNav } from '../../../lib/nav.js'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { DOW_LABELS, MONTH_LABELS } from './TeamStatsCard.jsx'
-import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
 import { Grid } from '../../../components/ui/layout/Grid.jsx'
-import { Card } from '../../../components/ui/frame/Card.jsx'
-import { jumpScrollLeft } from '../../../hooks/scroll/useScrollRail.js'
 
-// Two surfaces over the same ticket-stub card, both fed lists the caller has
-// already `won != null`-filtered (see loadGames.js / loadOverview.js — never
-// re-derived from Final status here, which would bypass the fetchTeamSchedule
-// cutoff and leak the very game a mid-scoring visitor opened this page from):
-//
-//   LastTenGames — the Overview's preview door: a horizontal strip of the true
-//                  last ten, oldest -> newest, opening at the newest card.
-//   AllGames     — the Games tab's list of decided games: the same cards laid
-//                  out in a wrapping grid, newest first, capped until the user
-//                  asks for more.
-//
-// The card markup/CSS (`.last10__*`) is shared by both — the class prefix
-// predates the grid and is left as-is rather than churned through ~40 CSS
-// rules; see the block comment over `.last10` in index.css.
+// The Games band's list of decided games: ticket-stub cards in a wrapping grid, newest first,
+// capped until the user asks for more. The caller has already `won != null`-filtered the list
+// (see loadGames.js — never re-derived from Final status here, which would bypass the
+// fetchTeamSchedule cutoff and leak the very game a mid-scoring visitor opened this page from).
+// The card CSS (`.last10__*`) keeps its old prefix rather than churn ~40 rules; see the block
+// comment over `.last10` in index.css.
 
 // Ticket-stub day/month/date parts for a game card. Same UTC-parse convention
 // as dayOfWeekRecord/todayDowLabel in TeamStatsCard, so the weekday can't
@@ -98,120 +87,6 @@ function GameStubCard({ game: g }) {
         {gmTag && <div className="last10__meta">{gmTag}</div>}
       </div>
     </button>
-  )
-}
-
-// The Overview's Last 10 strip — one card per decided game, oldest -> newest
-// (the same reading direction as the Schedule strip, so the two never scan in
-// mirror directions), opening pre-scrolled to the newest (rightmost) card. It
-// holds the true last ten and nothing older; the rest of the season is the
-// Games tab's grid, which is where scrolling back used to lead.
-function LastTenGamesStrip({ games }) {
-  const trackRef = useRef(null)
-  // Stays pinned to the newest (rightmost) card across every resize/content
-  // change — a club logo swapping in from its placeholder, a font finishing
-  // its load — right up until the visitor actually touches the strip
-  // themselves. `el.scrollWidth` isn't stable at mount (those late layout
-  // shifts grow it after the first paint), so a one-shot jump used to leave
-  // the strip short of true right if it landed before they finished.
-  const pinnedToEnd = useRef(true)
-  const [canScroll, setCanScroll] = useState(false)
-  const [atStart, setAtStart] = useState(true)
-  const [atEnd, setAtEnd] = useState(true)
-
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const check = () => {
-      setCanScroll(el.scrollWidth > el.clientWidth + 1)
-      if (pinnedToEnd.current) jumpScrollLeft(el, el.scrollWidth - el.clientWidth)
-    }
-    check()
-    const ro = new ResizeObserver(check)
-    ro.observe(el)
-    window.addEventListener('resize', check)
-    const unpin = () => {
-      pinnedToEnd.current = false
-    }
-    el.addEventListener('pointerdown', unpin)
-    el.addEventListener('wheel', unpin, { passive: true })
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', check)
-      el.removeEventListener('pointerdown', unpin)
-      el.removeEventListener('wheel', unpin)
-    }
-  }, [games.length])
-
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const update = () => {
-      setAtStart(el.scrollLeft <= 1)
-      setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 1)
-    }
-    update()
-    el.addEventListener('scroll', update)
-    return () => el.removeEventListener('scroll', update)
-  }, [games.length, canScroll])
-
-  const scroll = (dir) => {
-    const el = trackRef.current
-    if (!el) return
-    pinnedToEnd.current = false
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
-  }
-
-  return (
-    <div className="last10">
-      {canScroll && (
-        <button
-          type="button"
-          className="last10__nav"
-          onClick={() => scroll(-1)}
-          disabled={atStart}
-          aria-label="Scroll to older games"
-        >
-          &lsaquo;
-        </button>
-      )}
-      <div className="last10__track" ref={trackRef}>
-        {games.map((g) => (
-          <GameStubCard key={g.gamePk} game={g} />
-        ))}
-      </div>
-      {canScroll && (
-        <button
-          type="button"
-          className="last10__nav"
-          onClick={() => scroll(1)}
-          disabled={atEnd}
-          aria-label="Scroll to more recent games"
-        >
-          &rsaquo;
-        </button>
-      )}
-    </div>
-  )
-}
-
-// The Overview's Last 10 door. It shows all ten: the card is titled "Last 10
-// Games" and its header carries a ten-game W-L, so a strip holding fewer than
-// that would make the card contradict its own masthead (and, on a viewport
-// wide enough to fit them, would show no scroll arrows to suggest anything was
-// missing).
-export function LastTenGames({ teamId, asOf, recentGames }) {
-  const recentWins = recentGames.filter((g) => g.won).length
-  return (
-    <Card
-      head={
-        <SectionHead look="band" club note={`${recentWins}-${recentGames.length - recentWins}`}>
-          Last 10 Games
-        </SectionHead>
-      }
-    >
-      <LastTenGamesStrip key={`${teamId}-${asOf ?? ''}`} games={recentGames} />
-    </Card>
   )
 }
 

@@ -27,7 +27,7 @@ globalThis.fetch = async (url) => {
   return { ok, status: ok ? 200 : 404, headers: new Headers(), json: async () => body, text: async () => JSON.stringify(body) }
 }
 
-const { loadStandings, loadRanks, loadNumbers } = await import('../src/screens/team/data/loadNumbers.js')
+const { loadStandings, loadRanks } = await import('../src/screens/team/data/loadNumbers.js')
 const { loadGames } = await import('../src/screens/team/data/loadGames.js')
 const { loadRoster } = await import('../src/screens/team/data/loadRoster.js')
 const { loadMinors } = await import('../src/screens/team/data/loadMinors.js')
@@ -54,13 +54,6 @@ test('loadRanks buys none of the Standings reads', async () => {
   assert.ok(seen.some((u) => u.includes('/teams/stats')))
 })
 
-test('loadNumbers (the Numbers tab) still returns both shares', async () => {
-  const n = await loadNumbers(158, null)
-  for (const key of ['standings', 'teamRecords', 'dayOfWeek', 'jerseyCombos', 'batting', 'leaderPool', 'runValue', 'injuredIds']) {
-    assert.ok(key in n, `missing ${key}`)
-  }
-})
-
 // The page-level reads: each URL that two loaders share.
 const PAGE_READS = [/\/standings\?/, /\/schedule\?.*teamId=158/, /\/teams\/158\/roster\?rosterType=active/, /\/stats\?.*group=hitting.*teamId=158/, /\/stats\?.*group=pitching.*teamId=158/]
 const loadPage = (src) =>
@@ -83,7 +76,16 @@ test('the one-scroll page buys each shared read once', async () => {
   forgetLoads()
 })
 
-test('the tab routes (no sources) still each buy their own copy', async () => {
+// Roster and Ranks both read the club's 40-man view for the Injured List. They run at the
+// same time, so fetchTeamIL's own cache is empty for both: the shared source is what buys it once.
+test('Roster and Ranks read the Injured List through the shared source', async () => {
+  const asked = []
+  const src = { ...SHARED, fetchTeamIL: async (...args) => (asked.push(args), []) }
+  await fired(() => Promise.all([loadRoster(158, null, src), loadRanks(158, null, src)]))
+  assert.equal(asked.length, 2)
+})
+
+test('loaders with no sources each buy their own copy', async () => {
   const seen = await fired(() => loadPage(undefined))
   assert.ok(seen.filter((u) => /\/schedule\?.*teamId=158/.test(u)).length > 1)
 })

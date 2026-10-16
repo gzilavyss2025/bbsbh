@@ -2051,3 +2051,11 @@ Re-run only to fold in a new season.
   that page's own `updated` field, not from the clock, so the file does not
   churn on every build. Exports `buildSitemap()` for `test/landing-pages.test.js`
   and only writes when run as a script.
+
+## Sharing app logic
+
+A generator that needs app logic imports it rather than keeping a second copy
+(`gen-minors-leaders.mjs` imports `combineToPool`/`computeLeaders`; `gen-milestones.mjs`
+imports the projection math from `src/api/person.js`; `gen-callouts.mjs` imports the checkpoint
+constants from `src/api/callout-notes/checkpoints.js`). The deliberate exceptions are small
+self-contained mirrors, and each one says so at its own top.

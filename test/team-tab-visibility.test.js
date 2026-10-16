@@ -1,39 +1,8 @@
-// Coverage for hiddenTeamTabs (src/screens/team/data/shared.js) — which of the
-// team hub's six tab buttons a club with a thin feed should not render, per
-// .scratch/team-page-ia/issues/08-polish-and-tests.md. Decided cheaply off the
-// `team` object every tab's loadTeamIdentity already fetches, never a tab's own
-// payload.
+// Coverage for parentOrgIdOf and hiddenTeamSections (src/screens/team/data/shared.js) — which
+// bands of the team page a club with a thin feed cannot fill. Decided cheaply off the `team`
+// object loadTeamIdentity already fetches, never a band's own payload.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { hiddenTeamTabs } from '../src/screens/team/data/shared.js'
-
-test('an MLB club never hides a tab', () => {
-  const team = { sport: { id: 1 }, league: { id: 103 }, parentOrgId: null }
-  assert.deepEqual(hiddenTeamTabs(team), new Set())
-})
-
-// Contracts is the one tab hidden for a reason that has nothing to do with a
-// thin feed: Cot's covers the major leagues only, so every MiLB club's ledger
-// would be empty. A tab that is always empty is not a tab.
-test('every MiLB club hides the Contracts tab, however complete its feed', () => {
-  const team = { sport: { id: 11 }, league: { id: 117 }, parentOrgId: 158 }
-  assert.deepEqual(hiddenTeamTabs(team), new Set(['contracts']))
-})
-
-test('a MiLB team with no parent org hides the Minors tab', () => {
-  const team = { sport: { id: 11 }, league: { id: 117 }, parentOrgId: null }
-  assert.deepEqual(hiddenTeamTabs(team), new Set(['contracts', 'minors']))
-})
-
-test('a MiLB team with no league at all hides the Numbers tab', () => {
-  const team = { sport: { id: 11 }, league: null, parentOrgId: 158 }
-  assert.deepEqual(hiddenTeamTabs(team), new Set(['contracts', 'numbers']))
-})
-
-test('a MiLB team missing both hides both, and Roster/Games never hide', () => {
-  const team = { sport: { id: 16 }, league: null, parentOrgId: null }
-  assert.deepEqual(hiddenTeamTabs(team), new Set(['contracts', 'minors', 'numbers']))
-})
 
 // ---------------------------------------------------------------------------
 // parentOrgIdOf — "who is this club's parent org?", asked once (#1143)
@@ -75,14 +44,6 @@ test('a club with no parent org at all is unchanged', () => {
   assert.equal(parentOrgIdOf({ sport: { id: 1 }, parentOrgId: null }), null)
   assert.equal(parentOrgIdOf({ sport: { id: 11 } }), null)
   assert.equal(parentOrgIdOf(null), null)
-})
-
-// Farm is absent on a winter club, and it is absent for the honest reason:
-// there is no org above it. Contracts goes for the usual MiLB reason (no Cot's
-// coverage), and Numbers stays, because a winter league DOES have a league id
-// — 132 for Los Mochis — so the standings and the leader pool both resolve.
-test('a winter-ball club hides Contracts and Minors, and keeps Numbers', () => {
-  assert.deepEqual(hiddenTeamTabs(LOS_MOCHIS), new Set(['contracts', 'minors']))
 })
 
 // ---------------------------------------------------------------------------

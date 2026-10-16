@@ -1033,7 +1033,7 @@ const BUDGETS = {
   // bracket + Wild Card standings, same one-route-one-screen shape.
   // +1: NineKeysPage.jsx — one route, one screen, same as its neighbours.
   // 44 -> 43: PlayerPage.jsx went with the player swap (#1898).
-  'src/screens': 42,
+  'src/screens': 41,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

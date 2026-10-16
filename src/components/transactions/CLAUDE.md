@@ -23,7 +23,7 @@ split. `GameSelect` picks at `WIDE_QUERY`.
   `ui/dock/dockPhysics.js` is the drag's arithmetic, pure and unit-tested
   (`test/dock-physics.test.js`), because a sheet's feel is otherwise only assessable by
   flicking a phone.
-- Neither reuses `TeamTransactionsCard`. That deck sits under a club's own name, so
+- Neither reuses a club's `TxStory`. A club's page sits under its own name, so
   `stripLeadingClub` takes the club out of every cutline; on a league-wide feed half the
   cards would read "Sent LHP Kent Emanuel outright to Louisville Bats" with no subject at
   all. Naming the club is the sentence's missing half here, which is why each row leads
@@ -40,10 +40,7 @@ split. `GameSelect` picks at `WIDE_QUERY`.
 ## The club surfaces reuse the primitives, never the layout
 
 `MoveRow` is where the tone maps, the dateline and the cutline renderer live for every
-surface, wire and club alike — the deck and the club ledger page
-(`screens/team/TeamTransactionsPage.jsx`) held byte-identical private copies until they
-were folded in. A club's card is `TxStory`, shared BY the deck and that page, and it
-carries no dateline of its own: both surfaces group by day around it (the deck's `DayTab`,
-the page's heading), which took 950 of 3,199 repeated datelines off the club surfaces —
-29.7% of cards restated the date of the card before them. The wire's club chip goes to that
-page, not to the Games tab: the deck IS on that tab, as its last section under four others.
+surface, wire and club alike. A club's card is `TxStory`; it carries no dateline of its own,
+and the club ledger page (`screens/team/TeamTransactionsPage.jsx`) groups by day around it,
+which took 950 of 3,199 repeated datelines off the club surfaces — 29.7% of cards restated
+the date of the card before them. The wire's club chip goes to that page.

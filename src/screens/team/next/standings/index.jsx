@@ -77,7 +77,7 @@ export default function Standings({ team, asOf, onReady, onCount }) {
       {card && (
         <ScoreCard card={card} onAll={() => navigate(`/standings${linkQuery({ d: asOf, s: sportId })}`)} stampIn={!still} style={stampAt(i++)} />
       )}
-      {n?.teamRecords && wrap('Records', `${recordGroups} groups`, <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} asOf={asOf} />, 'records')}
+      {recordGroups > 0 && wrap('Records', `${recordGroups} groups`, <RecordsCard data={n.teamRecords} cutoff={n.recordsCutoff} asOf={asOf} />, 'records')}
       {hasDroughts(n, n?.recordsCutoff) && wrap('Last time', 'chances since', <LastTimeCard data={n.scheduleShape} cutoff={n.recordsCutoff} />, 'last')}
       {n?.dayOfWeek && wrap('Day of week', 'win pct', <TeamStats title="Record by Day of Week" stats={n.dayOfWeek} note="win pct" highlightKey={todayDowLabel()} />, 'dow')}
       {n?.comeback && wrap('Comeback wins', 'all 30 teams', <ComebackCard data={n.comeback} teamId={team.id} clubName={clubName} />, 'comeback')}

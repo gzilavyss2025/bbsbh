@@ -32,7 +32,7 @@ import {
   playerPath,
   teamPath,
   teamTabPath,
-  teamBandPath,
+  TEAM_TAB_BAND,
   leadersPath,
   orgLeadersPath,
   teamLeadersPath,
@@ -335,11 +335,11 @@ test('teamTabPath builds each tab path and carries the spoiler cutoff through', 
   )
 })
 
-test('parseRoute resolves all five team-hub tab URLs, carrying the cutoff query', () => {
-  for (const tab of ['roster', 'games', 'numbers', 'minors']) {
+test('the old team tab URLs parse to the one-scroll page on a band, carrying the cutoff query', () => {
+  for (const tab of ['roster', 'games', 'numbers', 'contracts', 'minors']) {
     assert.deepEqual(
       parseRoute(`/team/158/${tab}`),
-      { name: `team-${tab}`, id: '158', asOf: null, sportId: null },
+      { name: 'team', id: '158', asOf: null, sportId: null, tab },
       tab,
     )
   }
@@ -351,10 +351,11 @@ test('parseRoute resolves all five team-hub tab URLs, carrying the cutoff query'
   })
   assert.deepEqual(parseRoute('/team/158'), { name: 'team', id: '158', asOf: null, sportId: null })
   assert.deepEqual(parseRoute('/team/158/roster?d=2026-07-05&s=11'), {
-    name: 'team-roster',
+    name: 'team',
     id: '158',
     asOf: '2026-07-05',
     sportId: 11,
+    tab: 'roster',
   })
 })
 
@@ -364,10 +365,11 @@ test('a team tab segment is not mistaken for a date-first game route', () => {
   // TEAM_TAB_ROUTES branch must be checked before the generic game branch, or
   // this parses as a bogus game with date='team', matchup='158', section='roster'.
   assert.deepEqual(parseRoute('/team/158/roster'), {
-    name: 'team-roster',
+    name: 'team',
     id: '158',
     asOf: null,
     sportId: null,
+    tab: 'roster',
   })
 })
 
@@ -1260,36 +1262,43 @@ test('every season path round-trips through parseRoute', () => {
 })
 
 // --------------------------------------------------------------------------
-// The hidden one-scroll team page (#1107, row 3): '/team/{id}/next', and the
-// five old tab addresses behind it, which land on an anchor.
+// The hidden '/team/{id}/next' address (#1107) is the team page now: it parses to it, and the
+// five old tab addresses behind it land on a band.
 // --------------------------------------------------------------------------
-test('the hidden team page parses, and carries the cutoff', () => {
-  assert.deepEqual(parseRoute('/team/158/next'), { name: 'team-next', id: '158', asOf: null, sportId: null, tab: null })
+test('the hidden /next address is the bare team page, carrying the cutoff', () => {
+  assert.deepEqual(parseRoute('/team/158/next'), { name: 'team', id: '158', asOf: null, sportId: null })
   assert.deepEqual(parseRoute('/team/milwaukee-brewers-158/next?d=2026-04-01&s=11'), {
-    name: 'team-next',
+    name: 'team',
     id: '158',
     asOf: '2026-04-01',
     sportId: 11,
-    tab: null,
   })
 })
 
-test('each old tab address behind the hidden page names its band, with ?d= and ?s= kept', () => {
-  const band = { roster: 'roster', games: 'games', numbers: 'standings', contracts: 'money', minors: 'farm' }
-  for (const [tab, key] of Object.entries(band)) {
+test('each old tab address behind /next names its tab, with ?d= and ?s= kept', () => {
+  for (const tab of Object.keys(TEAM_TAB_BAND)) {
     const r = parseRoute(`/team/158/next/${tab}?d=2026-04-01&s=11`)
-    assert.equal(r.name, 'team-next', tab)
+    assert.equal(r.name, 'team', tab)
     assert.equal(r.asOf, '2026-04-01', tab)
     assert.equal(r.sportId, 11, tab)
     assert.equal(r.tab, tab, tab)
-    assert.equal(teamBandPath(158, key, { d: '2026-04-01', s: 11 }), `/team/milwaukee-brewers-158/next?d=2026-04-01&s=11#${key}`)
   }
   // An unknown tab is the bare page, never a bogus game route.
-  assert.equal(parseRoute('/team/158/next/media').tab, null)
+  assert.equal(parseRoute('/team/158/next/media').name, 'team')
+  assert.equal(parseRoute('/team/158/next/media').tab, undefined)
   // Inherited Object.prototype names are not tabs either.
-  for (const k of ['constructor', 'toString', '__proto__']) assert.equal(parseRoute(`/team/158/next/${k}`).tab, null, k)
+  for (const k of ['constructor', 'toString', '__proto__']) {
+    assert.equal(parseRoute(`/team/158/next/${k}`).tab, undefined, k)
+    assert.equal(parseRoute(`/team/158/${k}`).tab, undefined, k)
+  }
 })
 
-test('the old tab addresses stay what they were until the swap', () => {
-  assert.equal(parseRoute('/team/158/roster').name, 'team-roster')
+test('each tab lands on its band', () => {
+  assert.deepEqual(TEAM_TAB_BAND, {
+    roster: 'roster',
+    games: 'games',
+    numbers: 'standings',
+    contracts: 'money',
+    minors: 'farm',
+  })
 })

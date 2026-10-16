@@ -11,8 +11,7 @@ import { SplitList } from './Splits.jsx'
 
 // The Records card of the one-scroll team page (#1107, row 7b; spec .scratch/team-canvas/records-pick.md).
 // Today's Records content in a rank-strip index: one 44px line per group, folded open in place, with
-// the half and the month combined as the two scope levers. The old /team/{id} page still draws
-// modules/records/RecordsCard.jsx until the swap row; this card is the new one beside it.
+// the half and the month combined as the two scope levers.
 //
 // ONE request: the shard already holds each club's rank per scope (`ranks`), read by recordsModel
 // through the cutoff-gated rankOf. `cutoff` is the page's day-before cutoff, `asOf` its ?d= date.

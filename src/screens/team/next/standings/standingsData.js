@@ -1,4 +1,5 @@
 import { droughtsFor } from '../../../../api/scheduleShape.js'
+import { teamRecordsFor } from '../../../../api/teamRecords.js'
 import { divisionRecordFor } from '../../data/shared.js'
 import { rankOf } from '../top/topData.js'
 
@@ -61,11 +62,15 @@ export function scoreCard(standings, other, team) {
 // Whether the Last time card has any chance to report; the card and the badge ask the same thing.
 export const hasDroughts = (n, cutoff) => Boolean(n?.scheduleShape && droughtsFor(n.scheduleShape, { cutoff }).length)
 
+// The Records card draws only when a game counted at the cutoff (the card hides itself, so the
+// band must not draw its head or badge around nothing).
+export const hasRecords = (data, cutoff) => teamRecordsFor(data, { cutoff }) != null
+
 // The jump-bar badge: one per card the band draws. The score card needs a pool of two or more.
 export const standingsCount = (n, cutoff) =>
   (n.standings.length > 0) +
   (n.standings.length > 1) +
-  Boolean(n.teamRecords) +
+  hasRecords(n.teamRecords, cutoff) +
   Boolean(n.dayOfWeek) +
   Boolean(n.comeback) +
   hasDroughts(n, cutoff)
