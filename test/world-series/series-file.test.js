@@ -64,3 +64,12 @@ test('corrected figures: Game 1 winner 76 of 120, 2-0 leader 46 of 57, 3-1 comeb
   const back = lead3.filter(([s, t]) => t.find(([, n]) => n === 1)[0] === s.winner).map(([s]) => s.season)
   assert.deepEqual([back, lead3.length], [[1903, 1925, 1958, 1968, 1979, 1985, 2016], 51])
 })
+
+test('names: every series names both clubs; 1997 Cleveland is the Indians, none after 2021 is', () => {
+  for (const s of series) {
+    assert.deepEqual(Object.keys(s.names).map(Number).sort(), [...s.clubs].sort(), `${s.season}`)
+    for (const n of Object.values(s.names)) assert.ok(n && n !== 'undefined', `${s.season}`)
+  }
+  assert.equal(series.find((s) => s.season === 1997).names[114], 'Indians')
+  assert.ok(!series.filter((s) => s.season >= 2022).some((s) => Object.values(s.names).includes('Indians')))
+})
