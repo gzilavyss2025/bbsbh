@@ -223,6 +223,7 @@ export const PAIRINGS = [
   // The Former Teammates Ladder's lines (#1352) carry meaning, so they are held
   // to the non-text bar (WCAG 1.4.11): the resting line, then the traced one.
   { fg: 'graphite-soft', bg: 'surface-card', min: UI, note: 'former teammates ladder line' },
+  { fg: 'graphite-soft', bg: 'surface-inset', min: UI, note: 'empty at-bat diamond outline (#2213)' },
   { fg: 'accent-primary', bg: 'surface-card', min: UI, note: 'former teammates ladder traced line' },
   // The arsenal "other" family (#1347) drew on the Now Pitching card, whose
   // fill was --marker 16% over --surface-card (.notice--event, #1132 N7). Neither
