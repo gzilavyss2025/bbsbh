@@ -42,6 +42,9 @@ const GAMES = [
   [67272, '1912 G8'],
   [67266, '1912 G2, tied 6-6'],
   [67237, '1907 G1, tied 3-3'],
+  [67724, '1977 G6, three home runs by one batter'],
+  [775296, '2024 G5, a 5-run comeback'],
+  [67316, '1920 G5, a triple play'],
 ]
 
 async function getJson(path, params = {}) {
