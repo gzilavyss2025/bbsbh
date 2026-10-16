@@ -1,7 +1,7 @@
 import { rankPos, rankThird } from './rankBar.js'
 import '../../../styles/system/report/rankbar.css'
 
-// THE RANK BAR (#1107, row 7b), lifted from the player page's Percentile rank card: a 2px ink box,
+// THE RANK BAR (#1107, row 7b), modeled on the player page's Percentile rank card: a 2px ink box,
 // best at the RIGHT edge, a hollow square at the middle club. Pure drawing: the number it stands
 // for is printed beside it, so the bar is hidden from a screen reader.
 //

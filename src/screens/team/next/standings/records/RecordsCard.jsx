@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { HALVES, monthsPlayed, teamRecordsFor } from '../../../../../api/teamRecords.js'
 import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { RankStrip } from '../../../../../components/ui/frame/RankBar.jsx'
@@ -28,10 +28,10 @@ function GroupLine({ group, of, open, onToggle, bodyId }) {
   )
 }
 
-function Group({ group, of, open, onToggle }) {
+function Group({ group, of, open, onToggle, scope }) {
   const bodyId = useId()
   const body = group.title === INNING_GROUP
-    ? <InningGrid group={group} />
+    ? <InningGrid key={scope} group={group} />
     : <SplitList rows={group.rows} count={group.title === COUNTS_GROUP} />
   return (
     <div className="rec__group">
@@ -47,10 +47,11 @@ export function RecordsCard({ data, cutoff, asOf }) {
   const [half, setHalf] = useState('all')
   const [month, setMonth] = useState(null)
   const [openGroups, setOpenGroups] = useState(() => new Set())
-  // The toggles come from the whole season, so a stretch with no games still shows its way back.
-  if (!teamRecordsFor(data, { cutoff })) return null
-  const model = recordsModel(data, { cutoff, asOf, half, month })
-  const months = monthsPlayed(data, { cutoff })
+  const model = useMemo(() => recordsModel(data, { cutoff, asOf, half, month }), [data, cutoff, asOf, half, month])
+  const months = useMemo(() => monthsPlayed(data, { cutoff }), [data, cutoff])
+  // A half and a month combine, so an option with no games in the other lever's pick is disabled.
+  const has = (h, m) => Boolean(teamRecordsFor(data, { cutoff, half: h, month: m }))
+  if (!has('all', null)) return null
   const toggle = (title) =>
     setOpenGroups((s) => {
       const next = new Set(s)
@@ -68,7 +69,7 @@ export function RecordsCard({ data, cutoff, asOf }) {
             label="Season half"
             value={half}
             onChange={setHalf}
-            options={HALVES.map((h) => ({ value: h.key, label: h.label }))}
+            options={HALVES.map((h) => ({ value: h.key, label: h.label, disabled: !has(h.key, month) }))}
           />
         )}
         {months.length > 1 && (
@@ -78,7 +79,7 @@ export function RecordsCard({ data, cutoff, asOf }) {
               label="Month"
               value={month}
               onChange={setMonth}
-              options={[{ value: null, label: 'All' }, ...months.map((m) => ({ value: m.month, label: m.short }))]}
+              options={[{ value: null, label: 'All' }, ...months.map((m) => ({ value: m.month, label: m.short, disabled: !has(half, m.month) }))]}
             />
           </div>
         )}
@@ -94,7 +95,7 @@ export function RecordsCard({ data, cutoff, asOf }) {
             <span>N</span>
           </div>
           {model.groups.map((g) => (
-            <Group key={g.title} group={g} of={model.of} open={openGroups.has(g.title)} onToggle={() => toggle(g.title)} />
+            <Group key={g.title} group={g} of={model.of} open={openGroups.has(g.title)} onToggle={() => toggle(g.title)} scope={`${half}:${month}`} />
           ))}
           <p className="rec__key">
             {model.of != null
