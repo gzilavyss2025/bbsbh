@@ -1251,3 +1251,13 @@ for each generator; the reader modules:
 `contractsHistory.js` reads sharded `public/data/contracts-history/`
 chunks and joins an admin's identity correction live at read time, never on
 rebuild — ADR-0067 has the reasoning.
+
+## `worldSeries/history.js`
+
+`loadSeriesHistory()` reads the static `world-series/series.json` (every finished
+World Series, one row per game; shape in `.scratch/world-series-callouts/contract.md`
+section 3). It is `cutoff-gated`: the only reader is `ReferencePanel.jsx`, and only for a
+game whose type is `W`. It returns `null` until the generator has written the file.
+`lib/worldSeries/odds.js` turns it into the `wsSeriesOdds` numbers, and every lookup goes
+through `lib/worldSeries/lastBefore.js`, strictly before the game's own date. The builder
+is `callout-notes/worldSeries.js`; it shows on the pre-half strip of the first half only.

@@ -6,6 +6,7 @@ import { rankNotes } from '../../../api/callout-notes.js'
 import { useCalloutLedger } from '../../../hooks/useCalloutLedger.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { fetchSavantMatchup } from '../../../api/matchup/savant.js'
+import { loadSeriesHistory } from '../../../api/worldSeries/history.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
 import { Door } from '../../ui/control/Door.jsx'
@@ -278,6 +279,9 @@ function Section({
   // and the Between Innings card asking independently cost one fetch between
   // them (api/staticJson.js). Above the early return, like the ledger.
   const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
+  // World Series games only: a game of any other type costs no request.
+  const isWorldSeries = feed?.gameData?.game?.type === 'W'
+  const seriesHistory = useAsync(() => (isWorldSeries ? loadSeriesHistory() : null), [isWorldSeries]).data ?? null
   if (tab === 'lineups' && showEntering) {
     return (
       <LineupSection
@@ -444,7 +448,7 @@ function Section({
   const armsHalfIdx = halfIndex(effInning, effHalf)
   const shownCounts = ledger.countsFor(armsHalfIdx)
   const preHalf = showEntering
-    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate, shownCounts, savantMatchup })
+    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate, shownCounts, savantMatchup, seriesHistory })
     : []
   const notes = mergeNotes(preHalf, marginNotes, shownCounts)
   const armsEmpty = !notes.length && !pitcherTeams.some((t) => t.rows?.length)
