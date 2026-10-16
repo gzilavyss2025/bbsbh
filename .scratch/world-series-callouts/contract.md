@@ -107,7 +107,7 @@ A "play" is one entry of `allPlays`. The *last play* is the one with the highest
 | `pinchHitGrandSlam` | `pinchHitHr` with `rbi === 4` | `null` |
 | `extraInningHr` | `home_run` with `about.inning >= 10` | `null` |
 | `multiHrGame` | one batter, 3 or more home runs in the game | count |
-| `pitcherHit` | `wta` games only. The batter's id is also a `matchup.pitcher.id` in the game. Result is `single`, `double`, `triple` or `home_run`. One row per hit | `null` |
+| `pitcherHit` | `wta` games only. The batter is a starting pitcher, or has a `matchup.pitcher.id` in a play up to and including this one (never a later play, so the live card agrees). Result is `single`, `double`, `triple` or `home_run`. One row per hit | `null` |
 | `gameEndingDp` | last play `eventType` contains `double_play` | `null` |
 | `triplePlay` | any play with `eventType === 'triple_play'` or a description with "triple play" | `null` |
 | `extraInnings` | `innings >= 10` | innings |
