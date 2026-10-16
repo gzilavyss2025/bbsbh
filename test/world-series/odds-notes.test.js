@@ -88,3 +88,14 @@ test('the pre-half strip shows it on the first half of a World Series game only'
   assert.ok(!kinds(args('W', 2, 'top')).includes('wsSeriesOdds'))
   assert.ok(!kinds(args('D', 1, 'top')).includes('wsSeriesOdds'))
 })
+
+test('an old World Series game (no workload date) still gets the odds note; a non-W game does not', async () => {
+  const { buildPreHalfCallouts } = await import('../../src/api/prehalf-callouts.js')
+  const feed = (type) => ({ gameData: { game: { type }, datetime: { officialDate: '2001-10-12' } }, liveData: { plays: { allPlays: [] }, linescore: { innings: [] } } })
+  const kinds = (type) => buildPreHalfCallouts({
+    feed: feed(type), bundle: bundleAfter(1, 2, [1]), inning: 1, half: 'top', revealedThrough: -1,
+    workload: null, gameDate: null, seriesHistory: HISTORY,
+  }).map((n) => n.kind)
+  assert.ok(kinds('W').includes('wsSeriesOdds'))
+  assert.ok(!kinds('D').includes('wsSeriesOdds'))
+})

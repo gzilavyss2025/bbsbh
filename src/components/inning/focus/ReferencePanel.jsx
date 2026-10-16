@@ -286,12 +286,13 @@ function Section({
   const seriesHistory = useAsync(() => (isWorldSeries ? loadSeriesHistory() : null), [isWorldSeries]).data ?? null
   // And each probable's earlier World Series starts, cut at the game's own date.
   const probables = feed?.gameData?.probablePitchers
+  const wsDate = isWorldSeries ? feed?.gameData?.datetime?.officialDate : null
   const wsStarts = useAsync(async () => {
-    if (!isWorldSeries || !workloadGameDate) return null
+    if (!wsDate) return null
     const ids = [probables?.away?.id, probables?.home?.id].filter(Boolean)
-    const counts = await Promise.all(ids.map((id) => fetchWorldSeriesStartsBefore(id, workloadGameDate)))
+    const counts = await Promise.all(ids.map((id) => fetchWorldSeriesStartsBefore(id, wsDate)))
     return Object.fromEntries(ids.map((id, i) => [id, counts[i]]))
-  }, [isWorldSeries, workloadGameDate, probables?.away?.id, probables?.home?.id]).data ?? null
+  }, [wsDate, probables?.away?.id, probables?.home?.id]).data ?? null
   const eventHistory = useEventHistory(feed)
   if (tab === 'lineups' && showEntering) {
     return (
