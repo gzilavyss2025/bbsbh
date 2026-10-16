@@ -7,6 +7,7 @@ import { groundBoxes } from '../../lib/zone/ground.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { batterFigureUrls } from '../../api/uniforms.js'
 import { BattingUniformContext } from '../logo/uniformContexts.js'
+import { PITCH_CAT_LETTER } from '../../lib/pitch/callLetter.js'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet) against THIS batter's own zone
@@ -220,7 +221,11 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
           const y = sy(p.pz)
           return (
             <g key={p.no}>
-              <circle className={`strikezone__dot strikezone__dot--${p.cat}`} cx={x} cy={y} r={8.5} />
+              {p.cat === 'called' ? (
+                <rect className="strikezone__dot strikezone__dot--called" x={x - 7.5} y={y - 7.5} width={15} height={15} rx={1.5} />
+              ) : (
+                <circle className={`strikezone__dot strikezone__dot--${p.cat}`} cx={x} cy={y} r={8.5} />
+              )}
               <text className={`strikezone__num strikezone__num--${p.cat}`} x={x} y={y + 0.3}>
                 {p.no}
               </text>
@@ -272,12 +277,14 @@ export function PitchList({ pitchDetails, pick }) {
               onMouseEnter={pick.onHover && (() => pick.onHover(p.no))}
               onMouseLeave={pick.onHover && (() => pick.onHover(null))}
             >
-              <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
+              <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{PITCH_CAT_LETTER[p.cat]}</span>
             </Button>
           ) : (
-            <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
+            <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{PITCH_CAT_LETTER[p.cat]}</span>
           )}
-          <span className="pitchlist__type">{p.type || '—'}</span>
+          <span className="pitchlist__type">
+            {p.no} · {p.type || '—'}
+          </span>
           <span className="pitchlist__meta">
             {p.mph != null ? `${p.mph} MPH, ` : ''}
             {p.callDesc}
