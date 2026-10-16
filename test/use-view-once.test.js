@@ -23,3 +23,12 @@ test('the gate is per club and per band', () => {
   assert.equal(probe(159, 'test-band'), 'false')
   assert.equal(probe(158, 'other-band'), 'false')
 })
+
+// The gate reads `hasSeen` once, at mount. A band that stays mounted while the club changes keeps
+// the first club's answer (a club seen before replays its entrance on return). So the page keys
+// every band by club as well as by band, like it keys the top.
+test('the team page remounts each band when the club changes', async () => {
+  const { readFileSync } = await import('node:fs')
+  const src = readFileSync(new URL('../src/screens/team/next/TeamNextPage.jsx', import.meta.url), 'utf8')
+  assert.match(src, /<Band\s+key=\{`\$\{team\.id\}:\$\{b\.key\}`\}/)
+})

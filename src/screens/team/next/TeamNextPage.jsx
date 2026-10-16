@@ -79,7 +79,7 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
       }
     >
       {bands.map((b) => (
-        <Band key={b.key} band={b} team={team} asOf={asOf} sportId={sportId} onCount={onCount} />
+        <Band key={`${team.id}:${b.key}`} band={b} team={team} asOf={asOf} sportId={sportId} onCount={onCount} />
       ))}
       <TeamNextFoot team={team} asOf={asOf} sportId={sportId} />
     </TeamHubShell>
