@@ -92,3 +92,7 @@ Tests that pinned the old text and markup changed on purpose: `event-card-frame`
 live in `ActorHead`), `notice-n6` (the bar's gap is 12px), `notice-n8a` (the photo class),
 `notice-n8b` (the code, team mark, spacer, count and pitch-number parts are gone) and
 `table-cascade` (the handoff table is sticky).
+
+A baserunning card's logo is the club of the person in its photo, read off the boxscore roster
+(`playerClubId`); a person in no roster gets the batting club. A balk's pitcher therefore wears
+his own club's logo, as the artifact's balk does.

@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { headshotSources, coachHeadshotUrl } from '../src/lib/teams.js'
-import { TABS, fielderTab, firstLast, forLine, delayTab, delaySentence, moundPips, ejectedClub } from '../src/components/playbyplay/cardCopy.js'
+import { playerClubId, TABS, fielderTab, firstLast, forLine, delayTab, delaySentence, moundPips, ejectedClub } from '../src/components/playbyplay/cardCopy.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const src = (rel) => readFileSync(join(SRC, rel), 'utf8')
@@ -63,6 +63,8 @@ test('the ejection card shows the ejected person from entry.playerId (coach rung
   const feed = { gameData: { teams: { away: { id: 2 }, home: { id: 1 } } }, liveData: { boxscore: { teams: { away: { players: {} }, home: { players: { ID9: {} } } } } } }
   assert.equal(ejectedClub('Joe Player ejected by HP umpire X.', clubs, feed, 9).id, 1)
   assert.equal(ejectedClub('Athletics manager Mark Kotsay ejected.', clubs, feed, 117276).id, 2)
+  assert.equal(playerClubId(feed, 9), 1)
+  assert.equal(playerClubId(feed, 117276), null)
 })
 
 test('no code chips: SB, CS, WP, PB, BK, DELAY and EJ are not drawn; EVENT_CODES stays', () => {
@@ -76,6 +78,7 @@ test('club logo ends the row; the pitch label rides the count tag', () => {
   const cards = code('components/playbyplay/EventCards.jsx')
   assert.match(cards, /<TeamLogo[^>]*size=\{36\}/)
   assert.match(cards, /<TeamLogo[^>]*size=\{32\}/, 'baserunning cards are 32')
+  assert.match(cards, /playerClubId\(feed, runnerId\) \?\? clubId/, 'the logo is the photo person\'s club')
   assert.match(cards, /card__count/)
   assert.doesNotMatch(cards, /change__pitchno/)
 })

@@ -46,14 +46,18 @@ export function moundPips({ remaining, allowed }) {
   }
 }
 
-// The club of the man ejected. A PLAYER is in his club's boxscore roster (liveData.boxscore.teams
-// [side].players; gameData.players has no club); a manager or coach is in neither (verified, gamePk
-// 824381), so he falls back
-// to the sentence, which leads with the club ("Athletics manager Mark Kotsay ejected by ...").
-// `clubs` is [{ id, name }]; no club found, no logo.
-export function ejectedClub(text, clubs, feed = null, playerId = null) {
+// The club a PLAYER plays for in this game: his boxscore roster's side (liveData.boxscore.teams
+// [side].players; gameData.players has no club) mapped to that side's team id. A manager or coach
+// is in no roster (verified, gamePk 824381), so he gets null.
+export function playerClubId(feed, playerId) {
   const box = feed?.liveData?.boxscore?.teams
   const side = ['away', 'home'].find((k) => box?.[k]?.players?.[`ID${playerId}`])
-  const teamId = side ? feed.gameData?.teams?.[side]?.id : null
+  return side ? (feed.gameData?.teams?.[side]?.id ?? null) : null
+}
+
+// The club of the man ejected: his roster's, else (a manager) the club the sentence leads with
+// ("Athletics manager Mark Kotsay ejected by ..."). `clubs` is [{ id, name }]; none, no logo.
+export function ejectedClub(text, clubs, feed = null, playerId = null) {
+  const teamId = playerClubId(feed, playerId)
   return clubs.find((c) => c.id === teamId) ?? clubs.find((c) => c.name && (text ?? '').startsWith(c.name)) ?? null
 }

@@ -1,7 +1,7 @@
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherPhoto } from './PitcherNotice.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { TABS, delaySentence, delayTab, ejectedClub, moundPips } from './cardCopy.js'
+import { TABS, delaySentence, delayTab, ejectedClub, moundPips, playerClubId } from './cardCopy.js'
 import { formatDelay } from '../inning/DelayCard.jsx'
 import { eventCardClass } from '../../lib/design/cardClass.js'
 import { teamClubName } from '../../lib/teams.js'
@@ -171,10 +171,11 @@ export function EjectionBar({ text, playerId = null, clubs = [], feed = null }) 
 // A baserunning/misc event with no plate appearance of its own (steal, caught stealing,
 // pickoff, wild pitch, passed ball, balk): the tab names it, the runner's (or pitcher's)
 // photo leads, the feed's sentence follows and the club's logo ends the row. "Pitch N"
-// rides the count tag. The logo is the batting club's (`clubId`), the runner's side, even on a
-// wild pitch or a balk, where `teamId` (the photo's fallback club) is the pitching side. The scorer's shorthand (EVENT_CODES) is no longer drawn: the trail
+// rides the count tag. The logo is the club of the person in the photo (playerClubId); a person
+// in no roster gets `clubId`, the batting club. The scorer's shorthand (EVENT_CODES) is no longer drawn: the trail
 // and the scorebook still read it.
-export function EventCard({ code, runnerId, teamId, clubId = teamId, segments, pitchLabel = null }) {
+export function EventCard({ code, runnerId, teamId, clubId = teamId, feed = null, segments, pitchLabel = null }) {
+  const logoId = playerClubId(feed, runnerId) ?? clubId
   return (
     <div className={`change ${eventCardClass()} change--event`}>
       <h4 className="card__name">{EVENT_NAMES[code]}</h4>
@@ -191,7 +192,7 @@ export function EventCard({ code, runnerId, teamId, clubId = teamId, segments, p
           ),
         )}
       </span>
-      {clubId != null && <TeamLogo teamId={clubId} name={teamClubName(clubId) ?? ''} size={32} className="change__logo" />}
+      {logoId != null && <TeamLogo teamId={logoId} name={teamClubName(logoId) ?? ''} size={32} className="change__logo" />}
     </div>
   )
 }

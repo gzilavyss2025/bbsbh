@@ -490,7 +490,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // most of these events are actually about.
           node = (
             <EventCard
-              code={EVENT_CODES[entry.eventType]} runnerId={entry.playerId} pitchLabel={entry.pitchLabel} clubId={battingTeamId}
+              code={EVENT_CODES[entry.eventType]} runnerId={entry.playerId} pitchLabel={entry.pitchLabel} clubId={battingTeamId} feed={feed}
               teamId={BASERUNNER_EVENTS.has(entry.eventType) ? battingTeamId : pitchingTeamId}
               segments={entry.segments}
             />

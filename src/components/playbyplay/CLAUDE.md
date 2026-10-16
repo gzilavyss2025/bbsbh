@@ -21,7 +21,7 @@ the four actor cards and the two handoff cards: 56x68 photo, a 28px name, a badg
 a filled PR). No code chip is drawn; `EVENT_CODES` stays for the trail and the scorebook. An ejection
 or delay shows the person's photo at 72x88 (`PitcherPhoto bare large`: no photo, nothing), the mound
 visit shows five pips and an "N left" `.card__count` (none when the trip pulled the pitcher), and
-"Pitch N" is the count tag. The full card (`pcard`) draws the logo on its band; the persistent header (`HalfInning` passes `logo={false}`) does not. `.notice--event` is not this frame: the
+"Pitch N" is the count tag. A baserunning or ejection logo is the photo person's club (`playerClubId`, the boxscore roster; a manager falls back to the sentence or the batting club). The full card (`pcard`) draws the logo on its band; the persistent header (`HalfInning` passes `logo={false}`) does not. `.notice--event` is not this frame: the
 postponed strip and the lens arm button keep it.
 Read ADR-0017 and ADR-0113 before touching any of `PlayByPlay.jsx`'s notification
 components, `MoundVisitBar` (in `EventCards.jsx`), or `HalfInning.jsx`'s
