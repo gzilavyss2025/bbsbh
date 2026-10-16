@@ -80,24 +80,29 @@ test('a hand-dated team URL still freezes, survives a tab switch, offers the way
   await expect(banner).toContainText(/Stats entering/i)
 
   // The propagation rule ADR-0034 states, and the one part of the old design
-  // that is unchanged: a tab switch must not silently drop the cutoff, or one
-  // visit would answer two different ways.
-  await page.locator('.teamtabs').getByRole('button', { name: 'Roster' }).click()
-  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/roster\?d=2026-04-10/)
+  // that is unchanged: moving to another band must not silently drop the cutoff,
+  // or one visit would answer two different ways. The tabs are gone (ADR-0082):
+  // the jump bar scrolls the one page, and the old Roster address still lands on
+  // its band, keeping `?d=`.
+  await page.locator('nav[aria-label="Team sections"]').getByRole('button', { name: /^Roster/ }).click()
+  await expect(page).toHaveURL(/\/team\/158\?d=2026-04-10/)
+  await expect(page.locator('.asof-banner')).toBeVisible()
+  await page.goto('/team/158/roster?d=2026-04-10')
+  await expect(page).toHaveURL(/\/team\/158\?d=2026-04-10.*#roster$/)
   await expect(page.locator('.asof-banner')).toBeVisible()
 
   // "Change date" reopens the same picker, pre-filled with the date already
-  // in the URL, and re-applies it to the SAME tab (roster).
+  // in the URL, and re-applies it to the SAME page.
   await page.getByRole('button', { name: 'Change date' }).click()
   await expect(page.locator('.asof-banner__input')).toHaveValue('2026-04-10')
   await page.locator('.asof-banner__input').fill('2026-05-01')
   await page.getByRole('button', { name: 'Go' }).click()
-  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/roster\?d=2026-05-01/)
+  await expect(page).toHaveURL(/\/team\/158\?d=2026-05-01/)
   await expect(page.locator('.asof-banner')).toContainText(/Stats entering/i)
 
   // And back to current, without hand-editing the URL.
   await page.getByRole('button', { name: 'Show current' }).click()
-  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/roster$/)
+  await expect(page).toHaveURL(/\/team\/158(?:\?nointro)?(?:#roster)?$/)
   await expectLiveBanner(page)
 })
 
