@@ -13,8 +13,15 @@ ADR-0017's frame and keeps ADR-0030). An actor card's CALLER passes it, with
 `.change--framed` as the namespace, since `PitcherNotice` is also the header row inside
 the full card; the card's root class is `.change`, ADR-0084. The tabs are the cards'
 headings (`<h4 className="card__name">`). A parent leaves 34px above a card (`.card--event`'s
-margin). The cards are distinguished by what's inside (a headshot vs. a scorer's-shorthand
-code), never by a coloured frame or rail. `.notice--event` is not this frame: the
+margin). The cards are distinguished by what's inside, never by a coloured frame or rail.
+**The contents (ADR-0113, slice 2).** The tab names the event and the club is a 36px `TeamLogo`
+at the row's right end (32px on a baserunning card; no club, no logo). The words are `cardCopy.js`
+(pure, pinned by `test/card-copy.test.js`). `ActorHead` (in `PitcherNotice.jsx`) is the one body of
+the four actor cards and the two handoff cards: 56x68 photo, a 28px name, a badge row (jersey, hand,
+a filled PR). No code chip is drawn; `EVENT_CODES` stays for the trail and the scorebook. An ejection
+or delay shows the person's photo at 72x88 (`PitcherPhoto bare large`: no photo, nothing), the mound
+visit shows five pips and an "N left" `.card__count` (none when the trip pulled the pitcher), and
+"Pitch N" is the count tag. The full card (`pcard`) and the persistent header with `entering` draw no logo. `.notice--event` is not this frame: the
 postponed strip and the lens arm button keep it.
 Read ADR-0017 and ADR-0113 before touching any of `PlayByPlay.jsx`'s notification
 components, `MoundVisitBar` (in `EventCards.jsx`), or `HalfInning.jsx`'s

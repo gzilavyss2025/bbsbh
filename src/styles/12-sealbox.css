@@ -846,70 +846,73 @@
   margin: 0;
   min-width: 460px;
 }
-/* A subheading under the pitcher's name/jersey/hand line, inside
-   .change__body (its flex-column stacks it below, not beside, the
-   name row). Text-only, no fill — same recipe as .change__code--alert
-   below (color, no background). check-contrast.mjs only walks its own fixed
-   pairing list, not arbitrary CSS, so this isn't guarded the way that one
-   is; --clay-deep/--field-deep against this card's ~14%-seal-tinted
-   background both measure over 6:1, well past the 4.5:1 AA floor for text. */
+/* The chip under a handoff card's badges ("Incomplete stat line — 2 on base" / "Final line"):
+   an inked outline in the count tag's face (ADR-0113, slice 2). */
 .pitcherhandoff__chip {
-  font-family: var(--font-display);
+  align-self: flex-start;
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  color: var(--text-heading);
+  font-family: var(--font-display-tag);
   font-size: var(--fs-label);
-  font-weight: var(--w-bold);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-wide);
   text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
 }
-.pitcherhandoff__chip--open {
-  color: var(--clay-deep);
-}
-.pitcherhandoff__chip--closed {
-  color: var(--field-deep);
+/* The Table's own wrap scrolls the ten columns sideways; the pitcher column is pinned (Table
+   sticky). The pinned cell is opaque, so it takes the strip's ground. */
+.pitcherhandoff__strip {
+  --table-pin: var(--surface-card);
+  background: var(--surface-card);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
 }
 
-/* Notification-card family, tier 2/3 — mound visits, ejections, and the
-   baserunning/misc events with no plate appearance of their own (steal,
-   caught stealing, pickoff, wild pitch, passed ball, balk) all ride the SAME
-   card tier 1 (pitching/defensive/pinch-running notices) already uses — the
-   same values, drawn here by the event Notice — no separate colored-rail
-   strip. What used to be a bare icon is now the real scorer's shorthand for
-   the event ("MV", "EJ", "SB", "WP", …), same family as the at-bat card's own
-   .pbp__code. --event just tightens the gap for this denser, iconless row.
-   The frame is the stamped event card (eventCardClass, ADR-0113). The mound
-   visit (--mv) has a one-line tab and no photo, so its body starts 24px down,
-   not 28px. Two classes, to out-rank .change.card--event above. */
+/* Notification-card family, tier 2/3: mound visits, ejections, delays and the
+   baserunning/misc events. The frame is the stamped event card (eventCardClass,
+   ADR-0113); the tab names the event and the club is a logo at the row's right end
+   (slice 2). The mound visit (--mv) has a one-line tab and no photo, so its body
+   starts 24px down, not 28px. Two classes, to out-rank .change.card--event above. */
 .change--event {
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 .change--mv.card--event {
   padding-top: var(--space-6);
 }
-.change__code {
-  font-family: var(--font-mono);
+.change__logo {
+  flex: none;
+  object-fit: contain;
+}
+/* The mound visit's body: the club's name, then five square pips, then the logo. A pip is
+   18px with a 2px ink edge; used = ink, open = the card's own yellow. */
+.change__club {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
   font-weight: var(--w-bold);
-  font-size: var(--fs-small);
-  letter-spacing: var(--ls-title);
-  color: var(--ink-1);
-  flex: none;
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
 }
-/* An ejection's code, in the same negative accent .pbp__code--error uses for
-   a reached-on-error play — this is the one alert-weight event in the family. */
-.change__code--alert {
-  color: var(--clay-deep);
+.change__pips {
+  display: flex;
+  gap: var(--space-2);
 }
-.change__teammark {
-  flex: none;
+.change__pip {
+  box-sizing: border-box;
+  width: 18px; /* raw-value-exempt: the design's pip */
+  height: 18px; /* raw-value-exempt: the design's pip */
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-stamped-event);
 }
-.change__spacer {
-  flex: 1;
+.change__pip--used {
+  background: var(--border-stamped);
 }
-/* UsagePips (shared by the mound-visit notice above and StatBox.jsx's ABS
-   challenge row) — "how many of a capped resource are left" as used/open
-   circles. Drawn as CSS shapes rather than ●/○/✕ glyphs: those characters
-   aren't rendered at the same optical size in any font (a filled dot reads
-   smaller than a hollow ring at an identical font-size), so a glyph-based
-   pip row can never actually match itself pip-to-pip; a shared fixed box
-   with only the fill/border swapped can. */
+/* UsagePips (StatBox.jsx's ABS challenge row) — "how many of a capped resource are left"
+   as used/open circles. Drawn as CSS shapes rather than glyphs: those characters aren't
+   rendered at the same optical size in any font. */
 .usagepips {
   display: inline-flex;
   align-items: center;
@@ -928,51 +931,15 @@
 .usagepips__pip--open {
   border: 1.3px solid var(--graphite-soft);
 }
-/* Mound-visit card: the pips are the card's one figure, so they read at 2x
-   size. */
-.change--mv .usagepips {
-  gap: var(--space-2);
-}
-.change--mv .usagepips__pip {
-  width: 14px;
-  height: 14px;
-}
-.change--mv .usagepips__pip--open {
-  border-width: 2.6px;
-}
-/* "N left" tail beside the pips — same idiom as the ABS row's own .abs__rec
-   readout: the fill/outline pips alone don't say which state means used vs.
-   still available, so this spells it out in words. */
-.change__mvcount {
-  flex: none;
-  margin-left: 8px;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
-}
-/* Which pitch a steal / caught stealing / pickoff came on ("Pitch 3"), pushed to
-   the card's right edge — the same caption recipe as the "N left" tail above. */
-.change__pitchno {
-  flex: none;
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
-}
-/* An ejection/event card's sentence — same natural-case prose treatment as
-   .pbp__note (exempted from the ALL-CAPS INVARIANT below), since it's a full
-   sentence straight from the feed, not a caps token. */
+/* An event card's one sentence — mono, natural case (the #root exemption in
+   13-play-by-play.css), since it is a full sentence straight from the feed. */
 .change__eventtext {
-  font-family: var(--font-read);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-text);
-  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  line-height: var(--lh-event);
+  color: var(--text-body);
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 /* The entering pitcher's headshot (see PitcherPhoto in StatBox.jsx) — sized
@@ -1022,10 +989,29 @@
   filter: none;
 }
 
+/* The photo on a stamped notification card (ADR-0113, slice 2): 56x68, a 2px ink edge on the
+   cream ground, cover from the top. An ejection or delay card's person is 72x88. The full
+   Now Pitching card (.pcard) keeps its own edge. */
+.change__shot--stamped {
+  width: 56px; /* raw-value-exempt: the design's photo */
+  height: 68px; /* raw-value-exempt: the design's photo */
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--paper-cream);
+}
+.change__shot--stamped.change__shot--lg {
+  width: 72px; /* raw-value-exempt: the design's large photo */
+  height: 88px; /* raw-value-exempt: the design's large photo */
+}
+.change__shot--stamped img {
+  filter: none;
+}
+
 .change__body {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1h);
   min-width: 0;
 }
 
@@ -1039,62 +1025,55 @@
 }
 
 .change__pitcher {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
+  display: block;
   font-family: var(--font-display);
-  font-size: var(--fs-ui);
+  font-size: var(--fs-card-name);
   font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-num);
   color: var(--text-heading);
-}
-.change__pitcher > :first-child {
-  min-width: 0;
   overflow-wrap: anywhere;
 }
 
-/* Uniform number + throwing hand, pinned to the row's right edge — same
-   right-aligned treatment as the lineup card's .lineup__jersey/.lineup__pos. */
+/* The badge row under the name: jersey (mono), throwing hand (display), PR (filled). Each
+   wears a 2px outline in its own colour, so the full card's band recolours them (.pcard). */
 .change__badges {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-1h);
-  flex: none;
-  font-size: var(--fs-compact);
+  font-size: var(--fs-label);
+}
+.change__jersey,
+.change__hand,
+.change__prtag {
+  padding: 2px var(--space-1);
+  border: var(--bw-heavy) solid currentColor;
+  color: var(--text-heading);
+  line-height: var(--lh-solid);
 }
 .change__jersey {
-  color: var(--clay);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  text-align: right;
 }
-.change__hand {
-  color: var(--field);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-}
-
-/* The "PR" badge beside the entering pinch runner's jersey number — same red
-   the diamond's own PR mark uses (.pbp__pr). */
+.change__hand,
 .change__prtag {
-  color: var(--clay-deep);
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-weight: var(--w-bold);
-  letter-spacing: var(--ls-title);
+  letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
+/* The pinch runner's PR: filled ink with cream text. */
+.change__prtag {
+  background: var(--surface-stamped-ink);
+  border-color: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
 
-/* Who the entering runner replaced and where — a second line below the name
-   row, same caption weight as the pitching-change card's other trailing
-   detail (.change__mvcount). Condensed display face like the rest of
-   this card's text, not --font-read (that's reserved for full sentences
-   straight from the feed, e.g. .change__eventtext). */
+/* Who the entering runner replaced and where: "For Andrew Vaughn at 1st base", First Last. */
 .change__forline {
-  font-family: var(--font-display);
+  font-family: var(--font-mono);
   font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
+  color: var(--text-muted);
 }
 
 /* How many pitches he'd already thrown entering this half (PitcherNotice's

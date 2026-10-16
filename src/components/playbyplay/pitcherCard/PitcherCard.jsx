@@ -84,6 +84,7 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
         label={label}
         entering={entering}
         flag={flag}
+        logo={false}
       />
       {data && (
         <>

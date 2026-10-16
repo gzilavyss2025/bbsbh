@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
+import { headshotSources, isMlbTeamId, teamClubName, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { logHeadshotEvent } from '../../lib/headshot/log.js'
 import { eventCardClass } from '../../lib/design/cardClass.js'
 import { useHeadshotStep, useImgReady } from '../../hooks/images/useHeadshotStep.js'
+import { TABS } from './cardCopy.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { TeamLogo } from '../logo/TeamLogo.jsx'
 
 // The "now pitching" notification card — the entering pitcher's headshot beside
 // his name / number / throwing hand, on the seal-amber attention surface. Shared
@@ -27,27 +29,13 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 //
 // `flag`, when given, is the full Now Pitching card's note under the name —
 // "Pitched yesterday" or "Starter in relief" (pitcherCard/PitcherCard.jsx).
-export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = 'Now pitching', entering = null, flag = null }) {
+export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = TABS.pitching, entering = null, flag = null, logo = true }) {
   if (!pitcher) return null
   return (
     <div className={`change ${className}`}>
-      <PitcherPhoto personId={pitcher.id} name={pitcher.name} teamId={teamId} />
-      <div className="change__body">
-        <h4 className="card__name">
-          {label}{teamName ? ` for the ${teamName}` : ''}
-        </h4>
-        <span className="change__pitcher">
-          <PlayerLink id={pitcher.id}>{pitcher.name}</PlayerLink>
-          {/* Uniform number + throwing hand, right-aligned same as the
-              lineup card's .lineup__jersey (see index.css) rather than
-              trailing inline after the name. */}
-          <span className="change__badges">
-            {pitcher.jersey ? <span className="change__jersey">{pitcher.jersey}</span> : null}
-            {pitcher.hand ? <span className="change__hand">{pitcher.hand}HP</span> : null}
-          </span>
-        </span>
+      <ActorHead tab={label} id={pitcher.id} name={pitcher.name} jersey={pitcher.jersey} hand={pitcher.hand} teamId={teamId} teamName={teamName} logo={logo && !entering}>
         {flag && <span className="change__flag">{flag}</span>}
-      </div>
+      </ActorHead>
       {entering && (
         <span className="change__entering">
           <span className="change__enteringcount">{entering.pitches} pitches</span>
@@ -58,13 +46,38 @@ export function PitcherNotice({ pitcher, teamId = null, teamName, className = ''
   )
 }
 
+// The body every actor card shares (ADR-0113, slice 2): the photo, the tab naming the
+// event, the name ("Last, First"), a row of badges (jersey, throwing hand, PR), what the
+// caller adds under them, and the club's logo at the right end. The club is a logo, not
+// words; `teamName` is its alt text. A card with no club draws no logo.
+export function ActorHead({ tab, id, name, jersey, hand, pr = false, teamId = null, teamName, logo = true, children }) {
+  return (
+    <>
+      <PitcherPhoto personId={id} name={name} teamId={teamId} stamped />
+      <div className="change__body">
+        <h4 className="card__name">{tab}</h4>
+        <span className="change__pitcher">
+          <PlayerLink id={id}>{name}</PlayerLink>
+        </span>
+        <span className="change__badges">
+          {jersey ? <span className="change__jersey">{jersey}</span> : null}
+          {hand ? <span className="change__hand">{hand}HP</span> : null}
+          {pr ? <span className="change__prtag">PR</span> : null}
+        </span>
+        {children}
+      </div>
+      {logo && teamId != null && <TeamLogo teamId={teamId} name={teamName ?? teamClubName(teamId) ?? ''} size={36} className="change__logo" />}
+    </>
+  )
+}
+
 // A reliever's card repeated at the head of the window holding his first batter
 // (focus mode, PlayByPlay's lead-in, which owns the wrapper). The change itself
 // trails the at-bat BEFORE it, so without this the page with his first result
 // never names him. "Pitching", not "Now pitching": he is already in, the wording
 // the persistent header drops to for an arm already in.
 export function ReliefRepeat({ pitcher, teamId, teamName }) {
-  return <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={eventCardClass('change--framed')} label="Pitching" />
+  return <PitcherNotice pitcher={pitcher} teamId={teamId} teamName={teamName} className={eventCardClass('change--framed')} label={TABS.reminder} />
 }
 
 // The entering pitcher's headshot. Walks the same ordered fallback chain as
@@ -77,7 +90,7 @@ export function ReliefRepeat({ pitcher, teamId, teamName }) {
 // `teamId` is known — same treatment as Headshot.jsx's own logo rung) rather
 // than a faceless placeholder, then to a plain monogram once neither a photo
 // nor a team is available.
-export function PitcherPhoto({ personId, name, teamId = null }) {
+export function PitcherPhoto({ personId, name, teamId = null, bare = false, large = false, stamped = false }) {
   const mlb = isMlbTeamId(teamId)
   const sources = headshotSources(personId, { mlb })
   const [logoFailed, setLogoFailed] = useState(false)
@@ -94,7 +107,7 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
   const { url, onError: onPhotoError } = useHeadshotStep(identityKey, sources, stepInfo)
   // The logo is the base layer from the first paint; the photo replaces it once
   // loaded (same rule as Headshot.jsx).
-  const underlayUrl = teamId && !logoFailed ? teamLogoUrl(teamId) : null
+  const underlayUrl = teamId && !logoFailed && !bare ? teamLogoUrl(teamId) : null
   const logoUrl = !url ? underlayUrl : null
   const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
   // Issue #1446's trace: note every time a real face is NOT what's drawn.
@@ -109,7 +122,9 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
   const photoShown = Boolean(url) && photoReady.pending === undefined
   const showLogo = Boolean(underlayUrl) && !photoShown
 
+  // `bare`: a person's photo or nothing (the ejection card), never a logo or a monogram box.
   if (!url && !underlayUrl) {
+    if (bare) return null
     return (
       <span className="change__shot change__shot--fallback" aria-hidden="true">
         {monogram}
@@ -118,7 +133,7 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
   }
   return (
     <span
-      className={`change__shot${showLogo ? ' change__shot--logo' : ''}`}
+      className={`change__shot${showLogo ? ' change__shot--logo' : ''}${stamped || large ? ' change__shot--stamped' : ''}${large ? ' change__shot--lg' : ''}`}
       style={showLogo && bg ? { backgroundColor: bg } : undefined}
       aria-hidden="true"
     >

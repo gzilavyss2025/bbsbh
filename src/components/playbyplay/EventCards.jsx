@@ -1,9 +1,10 @@
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherPhoto } from './PitcherNotice.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { UsagePips } from '../charts/UsagePips.jsx'
+import { TABS, delaySentence, delayTab, ejectedClub, moundPips } from './cardCopy.js'
 import { formatDelay } from '../inning/DelayCard.jsx'
 import { eventCardClass } from '../../lib/design/cardClass.js'
+import { teamClubName } from '../../lib/teams.js'
 
 // THE NOTIFICATION-CARD FAMILY of the half-inning feed — everything
 // PlayByPlay.jsx renders BETWEEN plate appearances, plus the two shorthand
@@ -129,69 +130,56 @@ export function EventNote({ entry }) {
   )
 }
 
-// A mound visit: the same kraft-amber notification card as a substitution —
-// no headshot to show (it's a team-level event, not a person), so the visiting
-// club's own mark sits up front instead of a code (the "Mound visit" label
-// already says what this is). The useful bit is how many visits the club has
-// left (MLB caps them — see moundVisitsAllowed), drawn as used/open pips
-// (UsagePips) — the same shared component StatBox.jsx's ABS challenge row
-// uses, sized up here (change--mv) since this card has no other figure
-// competing for attention. A visible "N left" tail rides alongside the pips,
-// same idiom as the ABS row's own .abs__rec readout — the dots alone don't
-// say which fill state means used vs. still available, so a viewer has to
-// guess (verified feedback: kraft-brown fill read as ambiguous either way).
+// A mound visit: the stamped event card (ADR-0113). The body is the club's name, five
+// square pips (ink = used, yellow = open) and the club's logo; the "N left" count tag rides
+// the top right edge. The trip that pulled the pitcher is not charged (`remaining` null):
+// no pips, no tag (moundPips).
 export function MoundVisitBar({ team, teamId, remaining, allowed }) {
-  const used = remaining != null && allowed != null ? Math.max(0, allowed - remaining) : null
-  const label =
-    used != null ? `${used} of ${allowed} mound visits used, ${remaining} left` : undefined
+  const pips = moundPips({ remaining, allowed })
   return (
     <div className={`change ${eventCardClass()} change--event change--mv`}>
-      <h4 className="card__name">Mound visit{team ? ` — ${team}` : ''}</h4>
-      <TeamLogo teamId={teamId} name={team} size={20} className="change__teammark" />
-      <span className="change__spacer" />
-      {used != null && (
-        <>
-          <UsagePips allowed={allowed} used={used} label={label} />
-          <span className="change__mvcount" aria-hidden="true">
-            {remaining} left
-          </span>
-        </>
+      <h4 className="card__name">{TABS.moundVisit}</h4>
+      {pips && <span className="card__count">{pips.tag}</span>}
+      <span className="change__club">{team}</span>
+      {pips && (
+        <span className="change__pips" role="img" aria-label={pips.label}>
+          {Array.from({ length: pips.total }, (_, i) => (
+            <span key={i} className={`change__pip${i < pips.used ? ' change__pip--used' : ''}`} />
+          ))}
+        </span>
       )}
+      <TeamLogo teamId={teamId} name={team} size={36} className="change__logo" />
     </div>
   )
 }
 
-// An ejection: the same kraft-amber notification card, captioned in the
-// negative accent instead of an icon — the description sentence already
-// carries every detail worth showing (who, by which umpire), so there's
-// nothing else to add.
-//
-// This used to caption delay advisories too, on the reasoning that a delay had
-// no one person to card. It has one — just not the one the feed names — so
-// delays moved to DelayNotice below (ADR-0060). The `code` prop stays because
-// it costs nothing and the default is what every caller passes.
-export function EjectionBar({ text, code = 'EJ' }) {
+// An ejection: the ejected person's photo (a manager's resolves on the chain's coach rung),
+// the feed's one sentence, and the club's logo. The sentence leads with the club's name,
+// which is how the card finds the club (ejectedClub); no match, no logo. No photo, no box.
+export function EjectionBar({ text, playerId = null, clubs = [] }) {
+  const club = ejectedClub(text, clubs)
   return (
     <div className={`change ${eventCardClass()} change--event`}>
-      <h4 className="card__name">Ejection</h4>
-      <span className="change__code change__code--alert">{code}</span>
+      <h4 className="card__name">{TABS.ejection}</h4>
+      {playerId != null && <PitcherPhoto personId={playerId} teamId={club?.id ?? null} bare large />}
       <span className="change__eventtext">{text}</span>
+      {club && <TeamLogo teamId={club.id} name={club.name} size={36} className="change__logo" />}
     </div>
   )
 }
 
-// A baserunning/misc event with no plate appearance of its own (steal, caught
-// stealing, pickoff, wild pitch, passed ball, balk) — the same kraft-amber
-// notification card, captioned with the real scorer's shorthand (EVENT_CODES)
-// instead of an emoji, plus the one clear person the event is actually about
-// when the feed names one (a runner stealing, the pitcher on a balk/wild
-// pitch, the catcher on a passed ball).
-export function EventCard({ code, runnerId, teamId, segments, pitchLabel = null }) {
+// A baserunning/misc event with no plate appearance of its own (steal, caught stealing,
+// pickoff, wild pitch, passed ball, balk): the tab names it, the runner's (or pitcher's)
+// photo leads, the feed's sentence follows and the club's logo ends the row. "Pitch N"
+// rides the count tag. The logo is the batting club's (`clubId`), the runner's side, even on a
+// wild pitch or a balk, where `teamId` (the photo's fallback club) is the pitching side. The scorer's shorthand (EVENT_CODES) is no longer drawn: the trail
+// and the scorebook still read it.
+export function EventCard({ code, runnerId, teamId, clubId = teamId, segments, pitchLabel = null }) {
   return (
     <div className={`change ${eventCardClass()} change--event`}>
       <h4 className="card__name">{EVENT_NAMES[code]}</h4>
-      <span className="change__code">{code}</span>
-      {runnerId != null && <PitcherPhoto personId={runnerId} teamId={teamId} />}
+      {pitchLabel && <span className="card__count">{pitchLabel}</span>}
+      {runnerId != null && <PitcherPhoto personId={runnerId} teamId={teamId} stamped />}
       <span className="change__eventtext">
         {segments.map((seg, i) =>
           seg.id != null ? (
@@ -203,48 +191,23 @@ export function EventCard({ code, runnerId, teamId, segments, pitchLabel = null 
           ),
         )}
       </span>
-      {pitchLabel && <span className="change__pitchno">{pitchLabel}</span>}
+      {clubId != null && <TeamLogo teamId={clubId} name={teamClubName(clubId) ?? ''} size={32} className="change__logo" />}
     </div>
   )
 }
 
-// A DELAY that came to something — an injury or on-field stoppage that took a
-// player out of the game, an umpire change, or a stoppage long enough to be
-// worth a mark on its own. The same kraft-amber notification card as an
-// ejection, given the one thing a delay card was always missing: a subject.
-//
-// The feed's own account of a delay is two words ("Injury Delay.") attached to
-// whoever happened to be batting, so the card used to land beside a plate
-// appearance it had nothing to do with and say nothing about it. Everything
-// here is the answer to that — `title` is the stoppage in readable words,
-// `detail` says what became of the man it was actually about, `playerId` is
-// that man rather than the batter, and `minutes` is how long play stopped. A
-// delay that can fill none of them never reaches this component: the feed
-// builder drops it (api/playbyplay/notificationCards.js's delayNoteFields,
-// ADR-0060), which is four delay advisories in five.
-//
-// The whole entry comes in rather than five props because the caller has one
-// thing left to decide — `teamId`, the club the subject came off, which the
-// entry gives as a side ('pitching'/'batting') and only PlayByPlay can resolve
-// to an id. An umpire change belongs to neither club and carries no headshot.
+// A DELAY that came to something (ADR-0060): the tab is the headline ("Injury delay"),
+// the sentence is the man who left or, with nobody, how long play stopped (delaySentence).
+// He is `playerId`, not the batter the feed names. A rain delay has no club and no logo.
 export function DelayNotice({ entry, teamId }) {
-  const { title, detail, minutes, playerId } = entry
-  // The length rides INSIDE the heading rather than as a right-hand tail like
-  // the mound-visit card's "N left". Tried as a tail first and it loses at
-  // phone width: the tail will not shrink, so the sentence absorbs every pixel
-  // it takes and "Inclement weather delay — Grant Taylor leaves the game"
-  // broke over five lines beside it. In the heading it costs four words and
-  // the sentence keeps the whole card.
-  const lead = minutes != null ? `${title} (${formatDelay(minutes)})` : title
+  const { title, playerId } = entry
+  const club = playerId != null ? teamId : null
   return (
     <div className={`change ${eventCardClass()} change--event`}>
-      <h4 className="card__name">Delay</h4>
-      <span className="change__code change__code--alert">DELAY</span>
-      {playerId != null && <PitcherPhoto personId={playerId} teamId={teamId} />}
-      <span className="change__eventtext">
-        <b>{lead}</b>
-        {detail ? ` — ${detail}` : ''}
-      </span>
+      <h4 className="card__name">{delayTab(title)}</h4>
+      {playerId != null && <PitcherPhoto personId={playerId} teamId={teamId} bare large />}
+      <span className="change__eventtext">{delaySentence(entry, formatDelay)}</span>
+      {club != null && <TeamLogo teamId={club} name={teamClubName(club) ?? ''} size={36} className="change__logo" />}
     </div>
   )
 }

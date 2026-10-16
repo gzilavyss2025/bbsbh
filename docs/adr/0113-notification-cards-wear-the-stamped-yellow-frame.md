@@ -72,3 +72,23 @@ This slice changes no content.
   in the tab at 390px. Slice 2 moves the club to a mark and shortens the tab.
 - The tab moves with the card: it is part of the card, so a card that hides, hides
   its tab.
+
+## Slice 2: the contents (2026-10-16)
+
+The tab names the event only ("Now batting", "Stolen base", "Injury delay"); the team name
+left the card text and a 36px club logo (32px on a baserunning card) ends the row, with the
+team name as its alt text. The SB, CS, WP, PB, BK, DELAY and EJ chips are no longer drawn
+(`EVENT_CODES` stays for the trail and the scorebook). Actor and handoff cards share
+`ActorHead`: a 56x68 photo, a 28px "Last, First" name and a badge row (jersey, hand, a filled
+PR); the pinch runner's second line reads "For Andrew Vaughn at 1st base". The mound visit is
+the club name, five 18px pips and the logo, with the count tag "N left" (no pips and no tag
+for the trip that pulled the pitcher). An ejection shows the ejected person at 72x88 from
+`entry.playerId`, and a delay's tab is its headline with one sentence ("Cal Quantrill leaves
+the game." or "Play stopped for 1 hr 47 min."). "Pitch N" moved to the count tag, and the
+handoff table scrolls in the Table's own wrap with the pitcher column pinned. No fetch and no
+feed read was added; the ejection's club is read off the sentence's leading club name.
+The full Now Pitching card and the persistent header (`entering`) draw no logo.
+Tests that pinned the old text and markup changed on purpose: `event-card-frame` (tabs now
+live in `ActorHead`), `notice-n6` (the bar's gap is 12px), `notice-n8a` (the photo class),
+`notice-n8b` (the code, team mark, spacer, count and pitch-number parts are gone) and
+`table-cascade` (the handoff table is sticky).

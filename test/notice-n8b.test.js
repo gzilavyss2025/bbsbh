@@ -76,7 +76,10 @@ test('N8b: the seal pin — no reveal-only import, SealBox or revealedThrough re
 const PARTS = ['code', 'code--alert', 'label', 'teammark', 'spacer', 'mvcount', 'eventtext', 'pitchno']
 // ADR-0113: the mound visit's label is its name tab (.card__name), so .change__label is gone;
 // the old pitchernotice__label name stays retired.
-const LIVE = PARTS.filter((p) => p !== 'label')
+// Slice 2 (ADR-0113) retired the code chip, the team mark, the spacer, the "N left" tail and
+// the pitch number from the bars (the club is a logo, "Pitch N" the count tag), so only the
+// event text is still a live part. Their old pitchernotice__ names stay retired.
+const LIVE = ['eventtext']
 const RETIRED_N8B = new RegExp(`pitchernotice__(${PARTS.join('|')})(?![A-Za-z0-9_])`)
 
 test('N8b: the eight event-bar parts are gone from src, e2e and scripts, comments too', () => {
@@ -101,7 +104,6 @@ test('N8b: the four event bars wear the new names', () => {
     assert.match(code, new RegExp(`change__${part}(?![\\w-])`), `change__${part}`)
   }
   assert.equal((code.match(/change__eventtext/g) ?? []).length, 3, 'ejection, baserunning and delay each carry the event text')
-  assert.equal((code.match(/change__code(?![\w-])/g) ?? []).length, 3, 'ejection, baserunning and delay each carry a code')
 })
 
 // ---- 4. the caps exemption ----

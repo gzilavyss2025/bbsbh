@@ -116,7 +116,8 @@ test('N6: the two handoff cards take the event frame on their Stack and keep the
 // shrink the full-width table to its content.
 test('N6: .change--event keeps its gap and .pitcherhandoff its stretch; neither sets a margin', () => {
   const sheet = css('12-sealbox.css')
-  assert.match(sheet, /\.change--event \{\s*gap: var\(--space-2\);\s*\}/, 'the bar keeps its tighter gap')
+  // Slice 2 (ADR-0113): the design's gap between the photo, the sentence and the logo is 12px.
+  assert.match(sheet, /\.change--event \{\s*gap: var\(--space-3\);\s*\}/, 'the bar has the design\'s gap')
   assert.equal(ruleBody(sheet, '.change--event').includes('margin'), false, 'the margin is .card--event\'s')
   const handoff = ruleBody(sheet, '.pitcherhandoff')
   assert.equal(decl(handoff, 'align-items'), 'stretch')

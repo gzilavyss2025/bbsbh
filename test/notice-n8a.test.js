@@ -103,7 +103,7 @@ test('N8a: PitcherNotice.jsx builds the well class with the new name', () => {
   const code = src('components/playbyplay/PitcherNotice.jsx')
   assert.ok(code.includes('className="change__shot change__shot--fallback"'), 'the fallback well')
   assert.ok(
-    code.includes("className={`change__shot${showLogo ? ' change__shot--logo' : ''}`}"),
+    code.includes("className={`change__shot${showLogo ? ' change__shot--logo' : ''}${stamped || large ? ' change__shot--stamped' : ''}${large ? ' change__shot--lg' : ''}`}"),
     'the logo well is built by template with the new name',
   )
 })

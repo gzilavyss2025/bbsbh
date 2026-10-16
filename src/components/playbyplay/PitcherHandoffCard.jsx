@@ -1,5 +1,5 @@
-import { PlayerLink } from '../player/PlayerLink.jsx'
-import { PitcherPhoto } from './PitcherNotice.jsx'
+import { ActorHead } from './PitcherNotice.jsx'
+import { TABS } from './cardCopy.js'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Table } from '../ui/table/Table.jsx'
 import { eventCardClass } from '../../lib/design/cardClass.js'
@@ -25,20 +25,11 @@ export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCoun
   return (
     <Stack gap="snug" className={eventCardClass('pitcherhandoff')}>
       <div className="change">
-        <PitcherPhoto personId={line.id} name={displayName(line)} teamId={teamId} />
-        <div className="change__body">
-          <h4 className="card__name">Departing</h4>
-          <span className="change__pitcher">
-            <PlayerLink id={line.id}>{displayName(line)}</PlayerLink>
-            <span className="change__badges">
-              {line.jersey ? <span className="change__jersey">{line.jersey}</span> : null}
-              {line.hand ? <span className="change__hand">{line.hand}HP</span> : null}
-            </span>
-          </span>
+        <ActorHead tab={TABS.departing} id={line.id} name={displayName(line)} jersey={line.jersey} hand={line.hand} teamId={teamId}>
           <span className={`pitcherhandoff__chip pitcherhandoff__chip--${bookOpen ? 'open' : 'closed'}`}>
             {bookOpen ? `Incomplete stat line — ${inheritedCount} on base` : 'Final line'}
           </span>
-        </div>
+        </ActorHead>
       </div>
       <PitcherLineTable line={line} label={`Line at departure, ${displayName(line)}`} />
     </Stack>
@@ -50,17 +41,7 @@ export function FinalizedLineCard({ line, teamId = null }) {
   return (
     <Stack gap="snug" className={eventCardClass('pitcherhandoff')}>
       <div className="change">
-        <PitcherPhoto personId={line.id} name={displayName(line)} teamId={teamId} />
-        <div className="change__body">
-          <h4 className="card__name">Final line for</h4>
-          <span className="change__pitcher">
-            <PlayerLink id={line.id}>{displayName(line)}</PlayerLink>
-            <span className="change__badges">
-              {line.jersey ? <span className="change__jersey">{line.jersey}</span> : null}
-              {line.hand ? <span className="change__hand">{line.hand}HP</span> : null}
-            </span>
-          </span>
-        </div>
+        <ActorHead tab={TABS.final} id={line.id} name={displayName(line)} jersey={line.jersey} hand={line.hand} teamId={teamId} />
       </div>
       <PitcherLineTable line={line} label={`Final line, ${displayName(line)}`} />
     </Stack>
@@ -79,7 +60,8 @@ export function FinalizedLineCard({ line, teamId = null }) {
 // for the same pitcher, so each names its own scroll region (`label`).
 function PitcherLineTable({ line, label }) {
   return (
-    <Table frame="bare" density="tight" label={label} className="pitchers__grid">
+    <div className="pitcherhandoff__strip">
+    <Table frame="bare" density="tight" sticky label={label} className="pitchers__grid">
       <thead>
         <tr>
           <th className="pitchers__pitcher">Pitcher</th>
@@ -114,5 +96,6 @@ function PitcherLineTable({ line, label }) {
         </tr>
       </tbody>
     </Table>
+    </div>
   )
 }
