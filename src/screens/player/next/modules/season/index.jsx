@@ -3,6 +3,7 @@ import { Ledger, spanCell } from '../../../../../components/player/Ledger.jsx'
 import { StatTile } from '../../../../../components/ui/frame/StatTile.jsx'
 import { ModalPortal } from '../../../../../components/ui/ModalPortal.jsx'
 import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
+import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { EmptyState } from '../../../../../components/ui/state/EmptyState.jsx'
@@ -119,7 +120,14 @@ function YearTable({ table, label, allCols, onAllCols, note, onCompare, openKey 
             {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
           </>,
           <>
-            {r.team || DASH}
+            {r.teamId ? (
+              <span className="seasonmod__club" title={r.team || undefined}>
+                <TeamLogo teamId={r.teamId} name={r.team} size={20} />
+                <span className="sr-only">{r.team}</span>
+              </span>
+            ) : (
+              r.team || DASH
+            )}
             {r.pill && <span className="reg-pill">{r.pill}</span>}
           </>,
           ...r.cells.map((c, i) =>

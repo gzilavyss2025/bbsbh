@@ -49,6 +49,11 @@
 .seasonmod .ledger .ledger__label {
   font-family: var(--font-mono);
 }
+/* A single club is its logo; the abbreviation stays for screen readers and the hover title. */
+.seasonmod__club {
+  display: inline-flex;
+  vertical-align: middle;
+}
 .seasonmod .ledger tfoot .yr {
   font-size: var(--fs-label);
 }

@@ -128,17 +128,17 @@ test('careerRegisterView: a traded season is one row PER CLUB, each counted once
   })
 
   // cells: [G, GS, W-L, ERA, IP, K, BB, WHIP, WAR]
-  // The traded season is TWO rows now, one per club, in the order he played for
-  // them — and the team-less roll-up must not become a phantom third row.
+  // The traded season is TWO rows now, one per club, newest club first (the
+  // first club he played for sits at the bottom of the year) — and the team-less roll-up must not become a phantom third row.
   const subtotal2026 = register.rows.find((r) => r.year === '2026' && r.subtotal)
   const rows2026 = register.rows.filter((r) => r.year === '2026' && !r.subtotal)
   assert.equal(rows2026.length, 2, 'one row per club, and no row for the roll-up')
   assert.equal(subtotal2026.teamLabel, '2 TM', 'the deliberate subtotal is identified, not a phantom API roll-up')
   assert.equal(subtotal2026.cells[0], 37)
   assert.equal(subtotal2026.cells[4], '52.1')
-  assert.deepEqual(rows2026.map((r) => r.teamIds), [[135], [134]])
-  assert.deepEqual(rows2026.map((r) => r.cells[0]), [33, 4])
-  assert.deepEqual(rows2026.map((r) => r.cells[4]), ['47.0', '5.1'])
+  assert.deepEqual(rows2026.map((r) => r.teamIds), [[134], [135]])
+  assert.deepEqual(rows2026.map((r) => r.cells[0]), [4, 33])
+  assert.deepEqual(rows2026.map((r) => r.cells[4]), ['5.1', '47.0'])
   // The bug's fingerprint, restated for the split rows: no row may carry the
   // roll-up's own 37 G / 52.1 IP, and the two must still sum to exactly that.
   assert.ok(!rows2026.some((r) => r.cells[0] === 37), 'no row may be the roll-up')

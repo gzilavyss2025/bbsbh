@@ -64,7 +64,7 @@ test('MLB scope: a traded season keeps its club rows and the 2 TM subtotal; the 
   assert.equal(sub.team, '2 TM')
   assert.deepEqual(
     view.rows.filter((r) => r.year === '2023').map((r) => r.team),
-    ['AAA', 'BBB', '2 TM'],
+    ['2 TM', 'BBB', 'AAA'],
   )
   assert.ok(view.rows.every((r) => r.tier !== 'milb'))
   assert.deepEqual(view.totals.map((t) => t.label), ['MLB'])
