@@ -85,6 +85,11 @@ list says what each guard checks.
 - `check-claude-md-facts.mjs` — checks the root `CLAUDE.md`'s facts: the three `api/` count
   phrases, the `N-tab hub` phrase, every backticked path, every ADR number, and that the
   "Nested `CLAUDE.md`" bullet lists exactly the directories that hold one.
+- `scripts/docs/check-doc-paths.mjs` — every backticked path in `docs/*.md` that starts with `src/`,
+  `scripts/`, `api/`, `public/`, `test/`, `e2e/` or `docs/` must exist. It skips `docs/audits/`,
+  `docs/adr/`, a doc with a `> **Historical.**` status line in its first 10 lines, and any line
+  that says the file "was deleted" (or "to be created"). A short form such as `api/spray.js`
+  fails: write `src/api/spray.js`. It does not check `.scratch/` paths.
 - `check-spoiler-manifest.mjs` — guards `src/api/spoiler-manifest.json`, the
   machine-readable spoiler classification of every module in `src/api/`. Four
   assertions: every module has an entry, every entry names a real file, entries are

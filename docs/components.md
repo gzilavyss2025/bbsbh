@@ -4,7 +4,7 @@ Reference moved out of `src/components/CLAUDE.md`. That file keeps each bucket's
 
 ## `charts/`
 
-`BallFlight` is `HitChart`'s per-play sibling: the base diamond in the at-bat feed is its handle (hover on a pointer, tap on a phone), and it adds the PATH from the plate that a chart of thirty dots cannot draw. Same marks, same 95-mph ring, one stylesheet (`69-hit-chart.css`). `SprayMap` is the season-long third: the same projection and the same ink, but its data (`api/spray.js`) is spoiler-FREE, so it needs no gate — and it draws a GENERIC field, because a season is sixty parks and picking one would invent a distance (`73-spray-map.css`)
+`BallFlight` is `HitChart`'s per-play sibling: the base diamond in the at-bat feed is its handle (hover on a pointer, tap on a phone), and it adds the PATH from the plate that a chart of thirty dots cannot draw. Same marks, same 95-mph ring, one stylesheet (`69-hit-chart.css`). `SprayMap` is the season-long third: the same projection and the same ink, but its data (`src/api/spray.js`) is spoiler-FREE, so it needs no gate — and it draws a GENERIC field, because a season is sixty parks and picking one would invent a distance (`73-spray-map.css`)
 
 ## `bracket/`
 
@@ -20,9 +20,9 @@ The OVR bars (`docs/ovr-rating.md`). `OvrBars` draws the attribute rows in the p
 
 ## `gamehud/`
 
-The two stamped "due up" cards in the innings viewer, `DueUpNextCard` ("Due up next", the other side's next half) and `UpNextBatters` ("Due up", the half's own batters before it starts), both draw through `dueup/DueUpBatters` (`styles/focus/dueup-next.css`): a bare headshot, the batting slot, the name and one `H-AB` or average line per batter, from `api/boxscore/batterLine.js`, capped at `revealedThrough`.
+The two stamped "due up" cards in the innings viewer, `DueUpNextCard` ("Due up next", the other side's next half) and `UpNextBatters` ("Due up", the half's own batters before it starts), both draw through `dueup/DueUpBatters` (`styles/focus/dueup-next.css`): a bare headshot, the batting slot, the name and one `H-AB` or average line per batter, from `src/api/boxscore/batterLine.js`, capped at `revealedThrough`.
 
-`ConsoleBand` is focus mode's console row (ADR-0043) — exactly one card: `DueUpConsole` while the half is being scored, or once it is over, `BetweenInnings` — one card that opens on `HalfTally`'s grid and cycles on tap through up to 5 score-free facts (`api/between-innings.js`) before returning to the grid
+`ConsoleBand` is focus mode's console row (ADR-0043) — exactly one card: `DueUpConsole` while the half is being scored, or once it is over, `BetweenInnings` — one card that opens on `HalfTally`'s grid and cycles on tap through up to 5 score-free facts (`src/api/between-innings.js`) before returning to the grid
 
 ## `inning/`
 
@@ -50,6 +50,6 @@ Umpire-specific surfaces: the Tendencies card and its hosts — the modal, the l
 
 ## `workload/`
 
-The four marks that draw `api/workload.js` without a sentence, shared by six surfaces (the slate card, the lineup page's board, the player page's mound card, The Pen, the team hub's Roster tab, the innings viewer's ARMS tab). One palette, ticked to the app's own tired thresholds, so a shaded cell and a "likely down" tag can never tell different stories about one outing — every one of them reads a single `tiredFlagsFor` evaluation. `DayStrip` is a CSS grid rather than a flex row on purpose: the rest rail is placed by grid column, so it covers the cells AND the gaps at any width. Their ink is global (`styles/76-workload-marks.css`), not component-imported, because a slate card's dots cannot wait on a route chunk
+The four marks that draw `src/api/workload.js` without a sentence, shared by six surfaces (the slate card, the lineup page's board, the player page's mound card, The Pen, the team hub's Roster tab, the innings viewer's ARMS tab). One palette, ticked to the app's own tired thresholds, so a shaded cell and a "likely down" tag can never tell different stories about one outing — every one of them reads a single `tiredFlagsFor` evaluation. `DayStrip` is a CSS grid rather than a flex row on purpose: the rest rail is placed by grid column, so it covers the cells AND the gaps at any width. Their ink is global (`styles/76-workload-marks.css`), not component-imported, because a slate card's dots cannot wait on a route chunk
 
 `ProjectedStarters` is the Starting pitcher card's "Likely starters" guess when no probable is announced (ADR-0089): a labeled list, never an announced-looking card.
