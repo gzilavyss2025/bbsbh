@@ -11,6 +11,7 @@ import { useAsync } from '../../../../../hooks/useAsync.js'
 import { splitDisplayName } from '../../../../../api/person/identity.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
 import { DASH, Fact } from '../../../parts.jsx'
+import { LogMore } from '../../parts/LogMore.jsx'
 import { LogTable } from '../../parts/LogTable.jsx'
 import { earlierSeason, games, keyOf, linesOf, loadPitchlog, scopeRows, totalsOf } from './pitchlogView.js'
 import { StartDetail } from './StartDetail.jsx'
@@ -129,7 +130,7 @@ const COLUMNS = [
 export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) {
   const { data: view, loading, error } = useAsync(() => loadPitchlog(bio.id, season, asOf), [bio.id, season, asOf])
   const [scope, setScope] = useState('all')
-  const [more, setMore] = useState(false)
+  const [limit, setLimit] = useState(SHOWN)
   const [earlier, setEarlier] = useState([]) // [{ season, rows }], newest first
   const [busy, setBusy] = useState(false)
   const [open, setOpen] = useState(null) // the gamePk in the detail view
@@ -149,7 +150,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   const rows = scopeRows(all, scope)
   const post = scopeRows(all, 'post').length
   const t = totalsOf(rows)
-  const lines = linesOf(blocks, scope, more ? Infinity : SHOWN)
+  const lines = linesOf(blocks, scope, limit)
   const shown = lines.filter((l) => !l.divider)
   const codes = keyOf(shown)
   const counts = { all: all.length, reg: all.length - post, post }
@@ -158,7 +159,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
   const span = oldest === season ? season : `${oldest}–${season}`
   const loadEarlier = () => {
     setBusy(true)
-    setMore(true)
+    setLimit(Infinity)
     loadPitchlog(bio.id, next, asOf)
       .catch(() => null)
       .then((v) => {
@@ -205,11 +206,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
         <Fact label="BB" value={t.bb} mono />
       </FactGrid>
       <LogTable columns={COLUMNS} rows={lines} caption={`Game log, ${span}`} currentKey={open} />
-      {rows.length > SHOWN && (
-        <Button size="control" onClick={() => setMore(!more)} aria-expanded={more}>
-          {more ? 'Show fewer' : `Show all ${games(rows.length)}`}
-        </Button>
-      )}
+      <LogMore total={rows.length} limit={limit} first={SHOWN} onPage={setLimit} />
       {codes.length > 0 && (
         <Cluster as="ul" className="pitchlog__key">
           {codes.map((code) => (
@@ -235,7 +232,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
           onEarlier={
             at < rows.length - 1
               ? () => {
-                  setMore(true) // the row it opens may sit past the collapsed list
+                  setLimit(Infinity) // the row it opens may sit past the collapsed list
                   setOpen(rows[at + 1].gamePk)
                 }
               : null
