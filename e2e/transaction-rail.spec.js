@@ -65,7 +65,7 @@ test('a story\'s photo rail never escapes its own card', async ({ page }) => {
     `no club currently shows a rail past ${RAIL_FLOAT_MAX} headshots (widest is ${target.slots})`,
   )
 
-  await page.goto(`/team/${target.teamId}/games`)
+  await page.goto(`/team/${target.teamId}/transactions`)
   await page.waitForSelector('.txstory', { timeout: 90_000 })
   await expect(page.locator('.photorail').first()).toBeVisible()
 
@@ -86,14 +86,12 @@ test('a story\'s photo rail never escapes its own card', async ({ page }) => {
         escapeLeft = Math.max(escapeLeft, card.left - b.left)
         escapeRight = Math.max(escapeRight, b.right - card.right)
       }
-      // The day the card belongs to now sits on the DAY TAB before its run
-      // (TxStory.jsx's DayTab) rather than on the card, so walk back to it —
-      // this is only the label on a failure message, but a blank one is a
-      // failure message that names no card.
-      let tab = story.previousElementSibling
-      while (tab && !tab.classList.contains('txday')) tab = tab.previousElementSibling
+      // The day the card belongs to is the dateline heading of its day section
+      // (TeamTransactionsPage.jsx) — this is only the label on a failure
+      // message, but a blank one is a failure message that names no card.
+      const dateline = story.closest('.txpage__day')?.querySelector('.txpage__dateline')
       out.push({
-        date: (tab?.textContent ?? '').replace(/s+/g, ' ').trim(),
+        date: (dateline?.textContent ?? '').replace(/\s+/g, ' ').trim(),
         slots: story.querySelectorAll('.photorail__slot').length,
         isStrip: rail.classList.contains('photorail--strip'),
         escapeLeft: Math.round(escapeLeft),

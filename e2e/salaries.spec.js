@@ -1,7 +1,7 @@
 import { test, expect } from './fixtures.js'
 
 // The two money pages, driven the way a reader drives them: `/salaries` (the
-// thirty-club board) and `/team/{id}/contracts` (one club's book). Four things
+// thirty-club board) and a club's Money band, `/team/{id}#money` (one club's book). Four things
 // are checked here, and only the third is about the spoiler rule.
 //
 //   1. THE TWO FILTERS COMPOSE. The club rail and the position chips narrow the
@@ -19,11 +19,9 @@ import { test, expect } from './fixtures.js'
 //      on ADR-0034's reasoning: a salary is season-long identity context, not a
 //      result). That decision is only safe while it stays true that nothing on
 //      these pages comes from a game, so it is asserted rather than assumed.
-//   4. THE LEDGER CARRIES NO AS-OF BANNER, and its siblings still do. A contract
-//      ledger is a season's book, not a day's, so the tab opts out of the
-//      cutoff — and the assertion is two-sided on purpose, because the failure
-//      worth catching is the opt-out leaking into the shell's default and
-//      quietly taking the date picker off every team page.
+//   4. THE MONEY BAND SAYS IT IS UNDATED. A contract ledger is a season's book,
+//      not a day's, so the band opts out of the cutoff and prints a note saying
+//      so, while the page's date banner stays for the bands that do move.
 //
 // The scope of check 3 is narrow on purpose, and the exclusions are the
 // interesting part — each is a real string these pages print that is
@@ -32,7 +30,7 @@ import { test, expect } from './fixtures.js'
 //   - `.ctr__terms` — Cot's own contract shorthand, "9 y/$215M (20-28)+29 m
 //     opt*". "20-28" is a span of seasons.
 //   - `.paysource` — the attribution line, carrying Cot's as-of date.
-//   - The Contracts tab check is scoped to `.ctr`, the tab's own section. The
+//   - The Money band check is scoped to `#money`, the band's own section. The
 //     team-hub header wrapped around it carries the club's WON-LOST RECORD on
 //     every tab, which is a standings fact the app has always shown live; it is
 //     not this page's doing and not this page's to assert.
@@ -164,17 +162,20 @@ test('/salaries prints nothing score-shaped and never reaches the game feed', as
   expect(body).not.toMatch(/\b(top|bottom) \d/i)
 })
 
-test('/team/158/contracts renders the ledger, and the ledger prints nothing score-shaped', async ({
+test('the Money band renders the ledger, and the ledger prints nothing score-shaped', async ({
   page,
 }) => {
+  // The old Contracts address redirects to the bare page at #money (ADR-0082).
   await page.goto('/team/158/contracts')
-  await expect(page.locator('.team-hub__id h1')).toHaveText('Milwaukee Brewers')
+  await expect(page).toHaveURL(/\/team\/158(?:\?[^#]*)?#money$/)
+  await expect(page.locator('h1.tnext__name')).toHaveText('Milwaukee Brewers')
 
-  // The tab's own furniture: the stat wall, the cliff bars, the grid, the key.
-  await expect(page.locator('.ctr__tile')).toHaveCount(4)
-  await expect(page.getByText('Commitment by season')).toBeVisible()
-  await expect(page.locator('.ctr__table tbody').first()).toBeVisible()
-  await expect(page.getByText('Free agent — no commitment')).toBeVisible()
+  // The band's own furniture: the stat wall, the cliff bars, the grid, the key.
+  const money = page.locator('#money')
+  await expect(money.locator('.stattile')).toHaveCount(4)
+  await expect(money.getByRole('heading', { name: 'The commitment cliff' })).toBeVisible()
+  await expect(money.locator('.ctr__table tbody').first()).toBeVisible()
+  await expect(money.getByText('Free agent — no commitment')).toBeVisible()
 
   // A code cell prints its code, never a figure — the money rule of ADR-0052,
   // seen on the page rather than in the arithmetic. The Brewers carry dozens of
@@ -183,31 +184,22 @@ test('/team/158/contracts renders the ledger, and the ledger prints nothing scor
   expect(codes.length).toBeGreaterThan(0)
   for (const code of codes) expect(code).toMatch(/^(A\d+|.*opt.*|OPT)$/i)
 
-  const ledger = await textWithout(page, '.ctr', ['.paysource', '.ctr__terms'])
+  const ledger = await textWithout(page, '#money', ['.paysource', '.ctr__terms'])
   expect(ledger).not.toMatch(SCORE)
   expect(ledger).not.toMatch(/\bfinal\b/i)
   expect(ledger).not.toMatch(/\b(top|bottom) \d/i)
 })
 
-test('the contract ledger carries no as-of banner, and the rest of the hub still does', async ({
+test('the Money band says the page date does not move it, and the page still offers the date', async ({
   page,
 }) => {
   // A contract ledger is a SEASON's book, so loadContracts.js is deliberately
-  // not keyed on `asOf` and the tab passes `datable={false}`. Without that, the
-  // shell's banner offered "View as of a date" on a page that will not date,
-  // and would have printed "Stats entering <day>" over today's figures.
-  await page.goto('/team/158/contracts')
-  await expect(page.locator('.ctr__table tbody').first()).toBeVisible()
-  await expect(page.locator('.asof-banner')).toHaveCount(0)
-
-  // Scoped, not removed: the suppression is one tab's, and a sibling tab that
-  // DOES move with the cutoff must still offer the way in. If this half ever
-  // fails, `datable` leaked into the shell's default rather than staying the
-  // Contracts tab's own answer.
-  await page.goto('/team/158/roster')
+  // not keyed on `asOf`. The tab used to hide the shell's banner; the one-scroll
+  // page keeps the banner for its other bands (ADR-0082), so the Money band says
+  // in words what the missing banner said by absence: a season's book, not a
+  // day's. A dated visit must leave the ledger on the page, unchanged in kind.
+  await page.goto('/team/158/contracts?d=2026-04-10')
+  await expect(page.locator('#money .ctr__table tbody').first()).toBeVisible()
+  await expect(page.locator('#money .paysource')).toContainText('A season’s book, not a day’s')
   await expect(page.locator('.asof-banner')).toHaveCount(1)
-
-  // And the page says in words what the missing banner says by absence.
-  await page.goto('/team/158/contracts')
-  await expect(page.locator('.paysource')).toContainText('A season’s book, not a day’s')
 })
