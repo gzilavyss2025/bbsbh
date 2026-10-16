@@ -33,20 +33,36 @@ link, "Reveal" always visible, accessible name contains the visible word).
 so a windowed `PlayByPlay` draws it again at the head of the next window (`windowLeadIn`,
 read off the window bounds), in feed order, with a "Before this at-bat" tag (when it happened, not a claim the reader saw it). Each repeat is the same
 notice component as the original (`MoundVisitBar`, `BatterNotice`, …), except a pitching
-change: `ReliefRepeat` ("Pitching"), or `EventNote` when the arm does not resolve. A
-standalone play (pickoff, balk) is never repeated.
+change: the FULL Now Pitching card (`PitcherCard`, labelled "Pitching", ADR-0113 slice 3; it is the
+same branch as the original in `PlayByPlay.jsx`, with no handoff line), or `EventNote` when the arm
+does not resolve. It reads the answer the first card kept (`cardData` below), so when that card has
+loaded it asks the network for nothing and draws arrived, with no motion. A reader who opens the
+window directly (the first card never mounted) makes the repeat the first asker: it fetches and
+plays the arrival like any card. A standalone play (pickoff, balk) is never repeated.
 
 ## The files
 
 `DelayNotice` (a function in `EventCards.jsx`) cards a stoppage only when it came to
 something, and names the man who left rather than the batter the feed names (ADR-0060).
 
-**`pitcherCard/`** (`PitcherCard`, `SeasonLines`, `PitchMix`, `PitchScene`,
+**`pitcherCard/`** (`PitcherCard`, `Arrival`, `SeasonLines`, `PitchMix`, `PitchScene`,
 `LastAppearance`) is the FULL Now Pitching card (#1344): only where an arm takes the
 mound — `HalfInning`'s card at `isFreshPitcher` and `PlayByPlay`'s mid-half
-`pitching_substitution` card; the persistent header and `ReliefRepeat` stay
+`pitching_substitution` card and its lead-in repeat; the persistent header with no fresh arm stays
 `PitcherNotice` alone. Its stat lines end the day before the game (ADR-0088). The pure
-model (role rule, tiles, scene math) is `lib/pitcherCard/`, so `npm test` can pin it.
+model (role rule, tiles, scene math) is `lib/pitcherCard/`, so `npm test` can pin it. **No "Other"
+tile:** a pitch under 3% gets no tile, and the other percents are not renormalised
+(`pitchTiles`). **Scene colour:** every line, ring and trail is the pitch's own `color`
+(`pitchMark(code).color`, set by `scenePitches`, `atBatScenePitches` and the Scout modal), never a
+family colour; every arc has a thin dark edge.
+**The arrival (ADR-0113, slice 3).** The full card, and `DepartureLineCard` and `FinalizedLineCard`,
+start as the plain yellow card and gain a band when their data is in: `useArrival(open)`
+(`hooks/motion/useArrival.js`) gives the card its `arrival is-in arrival--play` classes, `CardBand` and
+`Unfold` (`pitcherCard/Arrival.jsx`) are the parts, `styles/pitcher-card/arrival.css` is the resting
+look and `styles/motion/arrival.css` the motion (`docs/motion.md`). The band is `.sectionhead--band`
+(the club's triad through `bandPaint`, else the house navy; the two handoff cards are always house
+navy). `PitcherCard`'s `after` renders the departing arm's card beside it and hands it the state, so
+the two arrive together. The answer is `cardData` (`lib/pitcherCard/cardData.js`), kept by arm and game.
 `PitchScene` draws through refs from a rAF loop — never React state per frame — stops off
 screen, and stays still under reduced motion.
 

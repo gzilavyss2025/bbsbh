@@ -59,7 +59,7 @@ function scout({ hitter, scope, hand, hitterHand, hitterStance, metric, stance, 
   const typeCells = (code) => byScope.map((b) => b[code][stance]).reduce(add)
   const counts = allCodes.map((code) => ({ code, pitches: sum(typeCells(code)), avgVelo: PITCHER.mph[code] }))
   const tiles = pitchTiles(counts.sort((a, b) => b.pitches - a.pitches))
-  const types = tiles.filter((t) => !t.other && Number(t.pct) >= USAGE_FLOOR).slice(0, MAX_TYPES)
+  const types = tiles.filter((t) => Number(t.pct) >= USAGE_FLOOR).slice(0, MAX_TYPES)
 
   function maps(codes) {
     const cells = codes.map(typeCells).reduce(add)

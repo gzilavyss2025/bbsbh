@@ -78,7 +78,8 @@ test('no notification card passes the Notice frame any more; each passes eventCa
   for (const rel of CARD_FILES) {
     const code = live(src(rel))
     assert.doesNotMatch(code, /noticeClass\(/, `${rel} draws no Notice frame`)
-    if (!rel.endsWith('PinchRunNotice.jsx') && !rel.endsWith('BatterNotice.jsx') && !rel.endsWith('FielderNotice.jsx')) {
+    // PitcherNotice.jsx took no frame once ReliefRepeat left it (slice 3): its callers pass it.
+    if (!rel.endsWith('PinchRunNotice.jsx') && !rel.endsWith('BatterNotice.jsx') && !rel.endsWith('FielderNotice.jsx') && !rel.endsWith('PitcherNotice.jsx')) {
       assert.match(code, /eventCardClass\(/, `${rel} passes the stamped event frame`)
     }
   }

@@ -95,6 +95,17 @@
   --dur-stamp-in:  380ms;
   --ease-stamp-in: var(--ease-stamp);
 
+  /* The arrival (ADR-0113, slice 3; motion/arrival.css): a notification card whose extra
+     data arrives. A club band wipes across its top, the head makes room and the sections
+     unfold, all on --ease-stamp. The label, the texture and a section's opacity run on
+     their own times. A section waits --unfold-delay (set per section) after the wipe starts. */
+  --dur-arrive:          380ms;
+  --dur-arrive-fade:     260ms;
+  --dur-arrive-label:    220ms;
+  --dur-arrive-texture:  520ms;
+  --delay-arrive-label:  200ms;
+  --delay-arrive-texture: 260ms;
+
   /* Sub-200ms press feedback (review-animations STANDARDS.md's "button press
      feedback" spec) for controls a touch heavier than the plain --dur-fast tap. */
   --dur-snappy: 160ms;

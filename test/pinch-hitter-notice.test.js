@@ -214,19 +214,20 @@ test('a standalone play between batters is not repeated; the managers’ notices
 // The render half, read off the source the way button-placement.test.js does
 // (the suite runs no JSX): a repeat never carries the departing arm's line, a
 // repeated change is the short card, and the repeat wrapper is the only one.
-test('PlayByPlay draws a repeat as the short card, with no handoff line and one wrapper', () => {
+// Slice 3 (ADR-0113): the repeat of a pitching change is the FULL Now Pitching card, from the answer the first one kept.
+test('PlayByPlay draws a repeat as the full card, with no handoff line and one wrapper', () => {
   const src = (rel) => readFileSync(new URL(`../src/components/playbyplay/${rel}`, import.meta.url), 'utf8')
   const pbp = src('PlayByPlay.jsx')
   assert.match(pbp, /const finals =\s+repeat \|\| entry\.atBatIndex == null/)
   // When it happened, never "Earlier": a repeat may be a note the reader never saw.
   assert.match(pbp, /\{repeat && <span className="pbp__repeat-tag">Before this at-bat<\/span>\}/)
-  const shortAt = pbp.indexOf("} else if (repeat && entry.eventType === 'pitching_substitution') {")
-  const fullAt = pbp.indexOf("} else if (entry.eventType === 'pitching_substitution') {")
-  assert.ok(shortAt > 0 && shortAt < fullAt, 'the repeat branch comes before the full card')
-  assert.match(pbp.slice(shortAt, fullAt), /<ReliefRepeat\b/)
-  assert.doesNotMatch(pbp.slice(shortAt, fullAt), /PitcherCard|DepartureLineCard/)
-  const relief = src('PitcherNotice.jsx').split('export function ReliefRepeat')[1].split('\nexport ')[0]
-  assert.doesNotMatch(relief, /pbp__entry/, 'PlayByPlay owns the wrapper; no nested .pbp__entry')
+  const at = pbp.indexOf("} else if (entry.eventType === 'pitching_substitution') {")
+  const branch = pbp.slice(at, pbp.indexOf("} else if (entry.eventType === 'mound_visit') {"))
+  assert.doesNotMatch(pbp, /ReliefRepeat|repeat && entry\.eventType === 'pitching_substitution'/, 'no separate short-card branch')
+  assert.match(branch, /const handoff = repeat \? null :/, 'a repeat carries no handoff line')
+  assert.match(branch, /label=\{repeat \? TABS\.reminder : undefined\}/)
+  assert.match(branch, /<PitcherCard\b/)
+  assert.doesNotMatch(src('pitcherCard/PitcherCard.jsx'), /pbp__entry/, 'PlayByPlay owns the wrapper; no nested .pbp__entry')
 })
 
 // The spoiler invariant, on the captured game it is pinned to (see

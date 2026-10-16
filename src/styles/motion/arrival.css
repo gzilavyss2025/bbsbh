@@ -1,0 +1,56 @@
+/* ---------------------------------------------------------------------------
+   THE ARRIVAL (ADR-0113, slice 3; docs/motion.md). A notification card is the plain yellow
+   card until its extra data arrives. Then, on --ease-stamp:
+
+     t = 0          the ink tab fades out (160ms, --dur-snappy)
+     t = 0          the band wipes left to right (clip-path, 380ms)
+     t = 0          the head's top padding grows to make room (380ms)
+     t = 200ms      the band's label fades in (220ms)
+     t = 260ms      the band's texture fades in (520ms)
+     t = 380 / 435 / 490ms   the sections unfold: grid rows 0fr -> 1fr (380ms) and opacity
+                    (260ms). A section's delay is its --unfold-delay (Arrival.jsx).
+
+   The resting looks it moves between are pitcher-card/arrival.css. Every rule here hangs off
+   .arrival--play, which Arrival.jsx's useArrival sets only for the render in which the data
+   arrived with the card already on screen (the one-shot gate, useBecameTrue). A cold load of
+   the card with its data in hand has no .arrival--play: it draws the final state, still.
+   Nothing here reads the game (ADR-0046): the clock starts when the fetch ends.
+   --------------------------------------------------------------------------- */
+.arrival--play .card__name {
+  transition: opacity var(--dur-snappy) ease;
+}
+.arrival--play > .cardband {
+  transition: clip-path var(--dur-arrive) var(--ease-stamp);
+}
+.arrival--play > .cardband.sectionhead--band::before,
+.arrival--play > .cardband.sectionhead--band::after {
+  transition: opacity var(--dur-arrive-texture) ease var(--delay-arrive-texture);
+}
+.arrival--play .cardband__label {
+  transition: opacity var(--dur-arrive-label) ease var(--delay-arrive-label);
+}
+.arrival--play > .change {
+  transition: padding-top var(--dur-arrive) var(--ease-stamp);
+}
+.arrival--play .unfold {
+  transition:
+    grid-template-rows var(--dur-arrive) var(--ease-stamp) var(--unfold-delay),
+    opacity var(--dur-arrive-fade) ease var(--unfold-delay);
+}
+/* The unfold clips while it opens and lets go when it is open (the (i) note needs room). */
+.arrival--play .unfold > .unfold__in {
+  transition: overflow 0s linear calc(var(--unfold-delay) + var(--dur-arrive)) allow-discrete;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrival--play .card__name,
+  .arrival--play > .cardband,
+  .arrival--play > .cardband.sectionhead--band::before,
+  .arrival--play > .cardband.sectionhead--band::after,
+  .arrival--play .cardband__label,
+  .arrival--play > .change,
+  .arrival--play .unfold,
+  .arrival--play .unfold > .unfold__in {
+    transition: none;
+  }
+}

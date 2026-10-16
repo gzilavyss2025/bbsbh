@@ -1,0 +1,18 @@
+/* "Before this at-bat": the tag over a notice repeated at the head of the next at-bat's window
+   (PlayByPlay, windowLeadIn) — when it happened, not "seen". It is an inked tag, the count tag's
+   face (stamped.css .card__count), as the design draws it (ADR-0113, slice 3). Its own sheet:
+   13-play-by-play.css is at its line cap, so the play-by-play's newer rules go in this folder. */
+.pbp__repeat-tag {
+  display: block;
+  width: fit-content;
+  margin: 0 var(--space-3h) var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  color: var(--text-heading);
+  font-family: var(--font-display-tag);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}

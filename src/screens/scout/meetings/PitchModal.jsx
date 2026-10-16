@@ -4,6 +4,7 @@ import { useDialogFocus } from '../../../hooks/dialog/useDialogFocus.js'
 import { pitchFamily } from '../../../api/pitchArsenal.js'
 import { fetchPlayIds, playIdFor } from '../../../api/scout/playIds.js'
 import { resolveClipUrl } from '../../../api/expresslane/clipIndex.js'
+import { pitchMark } from '../../../lib/pitch/pitchTypes.js'
 import { realFlight } from '../../../lib/pitcherCard/camera.js'
 import { realScenePitch } from '../../../lib/pitcherCard/scene.js'
 import { Button } from '../../../components/ui/control/Button.jsx'
@@ -51,7 +52,7 @@ export function PitchModal({ walk, index, onIndex, onClose, board, data, view, s
   const call = callOf(pitch.call)
   const isLast = k === of
   const scene = useMemo(() => {
-    const p = realScenePitch(realFlight(pitch), { code: pitch.code ?? 'XX', name, mph: fixed(pitch.mph, 1), family }, view)
+    const p = realScenePitch(realFlight(pitch), { code: pitch.code ?? 'XX', name, mph: fixed(pitch.mph, 1), family, color: pitchMark(pitch.code).color }, view)
     return p ? [p] : []
   }, [pitch, name, family, view])
   const zone = useMemo(() => (pitch.szBot != null && pitch.szTop != null ? [pitch.szBot, pitch.szTop] : undefined), [pitch])

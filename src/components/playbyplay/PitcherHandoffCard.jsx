@@ -3,6 +3,8 @@ import { TABS } from './cardCopy.js'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Table } from '../ui/table/Table.jsx'
 import { eventCardClass } from '../../lib/design/cardClass.js'
+import { useArrival } from '../../hooks/motion/useArrival.js'
+import { CardBand, Unfold } from './pitcherCard/Arrival.jsx'
 
 // The two pitching-handoff cards (ADR to follow — see pitcherHandoffs in
 // api/pitchers.js for the spoiler footing both rely on): a departing
@@ -12,6 +14,12 @@ import { eventCardClass } from '../../lib/design/cardClass.js'
 // layout PitcherNotice uses) over a full ten-column table, the SAME markup
 // PitchersSection (the Arms tab) renders, not a compact summary row.
 //
+// THE ARRIVAL (ADR-0113, slice 3). Each card wears the house navy band (never a club colour:
+// these cards name a man leaving, not a club taking the mound) and its table unfolds at
+// 380 ms. `open` is "the line is here": it defaults to true, so a card that is in hand when
+// it mounts draws final, and a caller that pairs it with a card whose data is still on the
+// way (PitcherCard's `after`) hands it that card's state, so the two arrive together.
+//
 // `line` is one row of computePitcherLines' output — { id, last, first,
 // jersey, hand, ip, pitches, bf, h, r, er, bb, k } — as returned by
 // api/pitchers.js's `pitcherLineAt`. Callers must not render either card for
@@ -20,10 +28,12 @@ function displayName(line) {
   return line.last ? `${line.last}${line.first ? `, ${line.first}` : ''}` : ''
 }
 
-export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCount = 0 }) {
+export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCount = 0, open = true }) {
+  const arrival = useArrival(open)
   if (!line) return null
   return (
-    <Stack gap="snug" className={eventCardClass('pitcherhandoff')}>
+    <Stack gap="snug" className={`${eventCardClass('pitcherhandoff')} ${arrival}`}>
+      <CardBand label={TABS.departing} house />
       <div className="change">
         <ActorHead tab={TABS.departing} id={line.id} name={displayName(line)} jersey={line.jersey} hand={line.hand} teamId={teamId}>
           <span className={`pitcherhandoff__chip pitcherhandoff__chip--${bookOpen ? 'open' : 'closed'}`}>
@@ -31,19 +41,21 @@ export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCoun
           </span>
         </ActorHead>
       </div>
-      <PitcherLineTable line={line} label={`Line at departure, ${displayName(line)}`} />
+      <PitcherLineTable line={line} label={`Line at departure, ${displayName(line)}`} open={open} />
     </Stack>
   )
 }
 
-export function FinalizedLineCard({ line, teamId = null }) {
+export function FinalizedLineCard({ line, teamId = null, open = true }) {
+  const arrival = useArrival(open)
   if (!line) return null
   return (
-    <Stack gap="snug" className={eventCardClass('pitcherhandoff')}>
+    <Stack gap="snug" className={`${eventCardClass('pitcherhandoff')} ${arrival}`}>
+      <CardBand label={TABS.final} house />
       <div className="change">
         <ActorHead tab={TABS.final} id={line.id} name={displayName(line)} jersey={line.jersey} hand={line.hand} teamId={teamId} />
       </div>
-      <PitcherLineTable line={line} label={`Final line, ${displayName(line)}`} />
+      <PitcherLineTable line={line} label={`Final line, ${displayName(line)}`} open={open} />
     </Stack>
   )
 }
@@ -58,8 +70,9 @@ export function FinalizedLineCard({ line, teamId = null }) {
 // reading as "0.111"). Table's wrap scrolls horizontally instead of letting
 // the columns compress below a legible width. Both cards can show on one page
 // for the same pitcher, so each names its own scroll region (`label`).
-function PitcherLineTable({ line, label }) {
+function PitcherLineTable({ line, label, open }) {
   return (
+    <Unfold open={open} delay={380}>
     <div className="pitcherhandoff__strip">
     <Table frame="bare" density="tight" sticky label={label} className="pitchers__grid">
       <thead>
@@ -97,5 +110,6 @@ function PitcherLineTable({ line, label }) {
       </tbody>
     </Table>
     </div>
+    </Unfold>
   )
 }
