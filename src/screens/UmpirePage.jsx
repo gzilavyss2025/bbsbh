@@ -20,6 +20,7 @@ import { useSeasonData } from '../hooks/seasons/useSeasonData.js'
 import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
 import { UmpireSeasonCompare } from '../components/umpire/UmpireSeasonCompare.jsx'
 import { Cluster } from '../components/ui/layout/Cluster.jsx'
+import { roundTag } from '../lib/postseason/roundTag.js'
 
 const TOP_VENUES_LIMIT = 5
 const HP_RECORDS_LIMIT = 10
@@ -27,7 +28,9 @@ const HP_RECORDS_LIMIT = 10
 // Non-regular-season game contexts get a small chip in the game log. Short label
 // for the chip, full name for its tooltip; a regular-season row (gameType R or
 // untagged) gets no chip.
-const CTX_SHORT = { F: 'WC', D: 'DS', L: 'LCS', W: 'WS', A: 'ASG' }
+// The rounds are named by roundTag (the league from the home club); the All-Star Game is not a round.
+const CTX_SHORT = { A: 'ASG' }
+const ctxChip = (g) => roundTag(g.gameType, g.homeId, g.date) || CTX_SHORT[g.gameType] || ''
 const CTX_FULL = {
   F: 'Wild Card',
   D: 'Division Series',
@@ -300,9 +303,9 @@ export function UmpirePage({ id, seasonYear, vs }) {
                     {g.awayAbbr} @ {g.homeAbbr}
                   </button>
                   {g.level === 'AAA' && <span className="umpage__levelchip">AAA</span>}
-                  {CTX_SHORT[g.gameType] && (
+                  {ctxChip(g) && (
                     <span className="umpage__ctxchip" title={CTX_FULL[g.gameType]}>
-                      {CTX_SHORT[g.gameType]}
+                      {ctxChip(g)}
                     </span>
                   )}
                   {acc?.called ? (

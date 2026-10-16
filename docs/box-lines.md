@@ -13,6 +13,10 @@ vocabulary the sheet's own hints already use ("Pulling his game lines…").
 
 ## The sheet
 
+- **The look (ADR-0115, 2026-10-16).** The sheet moved from the paper-sheet look to the stamped
+  look of the pages it opens from: a club band, a stamped close, season rules instead of banding,
+  full-colour cap logos, and a pill that names its league. The old look is in `git log` for
+  `src/styles/boxlines/boxlines.css`.
 - `BoxLinesDoor` is a full button reset because the user agent's `padding: 1px 6px` used
   to start the line's ink 6px right of the rows above it.
 - Since #997 the shell is handed its facet (`sheet.facet`, `src/api/boxlines/facets.js`) plus an

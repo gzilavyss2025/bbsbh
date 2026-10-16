@@ -2,6 +2,7 @@
 // the days-since track and the calendar of recent outings. No React, no fetch.
 import { dayIndex, turnStripFor } from '../../../../../api/workload.js'
 import { monthDay } from '../../../../../lib/dates.js'
+import { clubLeague, roundName } from '../../../../../lib/postseason/roundTag.js'
 
 const WEEKDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -78,7 +79,10 @@ export function calendarFor(apps, today, maxP, { from, usual, hatch } = {}) {
   return { bars, dates, gaps, months, live }
 }
 
-const lastOf = (a) => ({ md: monthDay(a.d), home: a.h, opp: a.o, p: a.p, tag: ROUND[a.t] ?? '' })
+// The league of an October round is the opponent's (a round below the World Series is inside one
+// league), and the shard holds his id. With none the tag is the old short one (CS, DS, WC).
+const tagOf = (a) => roundName(a.t, clubLeague(a.o, a.d)) || ROUND[a.t] || ''
+const lastOf = (a) => ({ md: monthDay(a.d), home: a.h, opp: a.o, p: a.p, tag: tagOf(a) })
 
 // One pitcher's record (data.pitchers[id]) and the page's cutoff day in, the card out. Null: nothing to draw.
 export function moundView(p, today) {

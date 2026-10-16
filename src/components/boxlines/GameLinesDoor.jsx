@@ -6,6 +6,7 @@ import { Door } from '../ui/control/Door.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { BoxLineRow } from './BoxLineRow.jsx'
+import { startsSeason } from './seasons.js'
 
 // The door to the GAMES BEHIND A TEAM'S RECORD, on the postseason page: the
 // record's own figure ("8-3") as a door, and the sheet it opens, every game
@@ -54,14 +55,6 @@ function GameLinesSheet({ title, note, headline, rows: makeRows, onClose }) {
   const all = useMemo(() => makeRows(), [makeRows])
   const [shown, setShown] = useState(PAGE)
   const rows = useMemo(() => all.slice(0, shown), [all, shown])
-  // Alternates with each new season down the list (seasonBand's rule), in one pass.
-  const bands = useMemo(() => {
-    const out = []
-    rows.forEach((row, i) => {
-      out.push(i > 0 && (row.season !== rows[i - 1].season ? !out[i - 1] : out[i - 1]))
-    })
-    return out
-  }, [rows])
   return (
     <ModalPortal>
       <div
@@ -69,12 +62,15 @@ function GameLinesSheet({ title, note, headline, rows: makeRows, onClose }) {
         onClick={(e) => e.target.classList.contains('scrim') && onClose()}
       >
         <div className="sheet boxlines" role="dialog" aria-modal="true" aria-label={title}>
+          {/* The house band: this sheet names no one club, so it stays the navy. */}
+          <div className="boxlines__band sectionhead--band">
+            <p className="boxlines__note">{note}</p>
+          </div>
           <div className="boxlines__head">
-            <div>
-              <p className="boxlines__note">{note}</p>
+            <div className="boxlines__headtxt">
               <h2 className="sheet__title boxlines__title">{title}</h2>
             </div>
-            <IconButton ref={closeRef} onClick={onClose} label="Close">
+            <IconButton ref={closeRef} onClick={onClose} label="Close" className="boxlines__close">
               ✕
             </IconButton>
           </div>
@@ -89,7 +85,7 @@ function GameLinesSheet({ title, note, headline, rows: makeRows, onClose }) {
                     key={`${row.gamePk ?? `${row.date}-${row.opponentId}`}-${row.teamId}`}
                     row={row}
                     showSeason={i === 0 || rows[i - 1].season !== row.season}
-                    band={bands[i]}
+                    newSeason={startsSeason(rows, i)}
                   />
                 ))}
               </ul>

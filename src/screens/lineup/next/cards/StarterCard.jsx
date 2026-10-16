@@ -4,6 +4,7 @@ import { milestoneTextFor } from '../../../../api/callouts.js'
 import { splitDisplayName } from '../../../../api/person.js'
 import { vsTeamDoorLabel } from '../../../../api/vsTeamSplits.js'
 import { BoxLinesDoor } from '../../../../components/boxlines/BoxLinesDoor.jsx'
+import { bandFor } from '../../../../components/boxlines/bandFor.js'
 import { DebutPill } from '../../../../components/badges/DebutPill.jsx'
 import { MilestonePill } from '../../../../components/badges/MilestonePill.jsx'
 import { ProspectPill } from '../../../../components/badges/ProspectPill.jsx'
@@ -74,6 +75,15 @@ function SeasonCells({ line }) {
   )
 }
 
+// The five figures of the "Career vs" door, one list for the door's face and the sheet's lead grid.
+const careerCells = (c) => [
+  [c.g, 'G'],
+  [c.ip, 'IP'],
+  [c.era, 'ERA'],
+  [c.k, 'K'],
+  [c.bb, 'BB'],
+]
+
 // The starter this club's lineup is about to face, on the OTHER club's colours (the club
 // whose arm it is), as the live page does. Season figures, his last start and his line
 // against this club all end the day before the game (ADR-0088); his pitch mix is a season
@@ -143,16 +153,7 @@ export function StarterCard({ data, theme, masthead }) {
                 face={
                   <span className="lsp__strip">
                     <StripHead title={`Career vs ${data.vsOpponentAbbr}`} end={<span className="lsp__seeall">See all ›</span>} />
-                    <StatBoxes
-                      inline
-                      cells={[
-                        [data.careerVsOpp.g, 'G'],
-                        [data.careerVsOpp.ip, 'IP'],
-                        [data.careerVsOpp.era, 'ERA'],
-                        [data.careerVsOpp.k, 'K'],
-                        [data.careerVsOpp.bb, 'BB'],
-                      ]}
-                    />
+                    <StatBoxes inline cells={careerCells(data.careerVsOpp)} />
                   </span>
                 }
                 sheet={{
@@ -162,6 +163,10 @@ export function StarterCard({ data, theme, masthead }) {
                   opponentId: meta.id,
                   opponentName: meta.teamName || meta.name,
                   cutoff: data.info.officialDate ?? null,
+                  // The sheet wears this card's own band and restates its figures as its lead
+                  // grid, so the door and the sheet show one set of numbers.
+                  band: bandFor(oppMeta.id, theme),
+                  cells: { title: `Career vs ${data.vsOpponentAbbr}`, items: careerCells(data.careerVsOpp) },
                 }}
               />
             )}

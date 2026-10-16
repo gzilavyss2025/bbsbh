@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BoxLinesDoor } from '../../../../../components/boxlines/BoxLinesDoor.jsx'
+import { bandFor } from '../../../../../components/boxlines/bandFor.js'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { doorLine } from '../../../../../api/boxlines/careerSplits.js'
@@ -28,6 +29,7 @@ export function GameLines({ view, labels, group, asOf, bio, surname }) {
     title: row.title(surname),
     footNote: row.footNote ?? null,
     cutoff: asOf ?? null,
+    band: bandFor(bio.team?.id),
   })
 
   const door = (line, sub, i = 0) =>

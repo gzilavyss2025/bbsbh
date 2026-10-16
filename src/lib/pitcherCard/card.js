@@ -2,6 +2,7 @@ import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 import { headerThemeFor, headerThemeStyle, themeKeyFor } from '../headerTheme.js'
 import { gamePath } from '../route.js'
 import { SPORT_LABEL } from '../teams.js'
+import { roundName, roundTag } from '../postseason/roundTag.js'
 
 // The Now Pitching card's view model (#1344): the role rule, the stat rows, the
 // pitch tiles and the last-appearance heading. Pure, so `npm test` pins it
@@ -41,10 +42,8 @@ export function seasonCells(role, line) {
   ]
 }
 
-const ROUND = { F: 'WC', D: 'DS', L: 'LCS', W: 'WS' }
-
 export function isPostseason(gameType) {
-  return Object.hasOwn(ROUND, gameType ?? '')
+  return roundName(gameType ?? '') !== ''
 }
 
 // Only in a postseason game, and only once he has a postseason game before it.
@@ -150,7 +149,8 @@ export function lastAppearanceHeading(last, season, sportId = 1) {
   const home = last.home ? last.team : last.opponent
   return {
     when: `${weekday} ${m}/${d} ${last.home ? 'vs' : '@'} ${last.opponent}`,
-    round: ROUND[last.gameType] && last.seriesGameNumber ? `${ROUND[last.gameType]} Gm ${last.seriesGameNumber}` : '',
+    // The league comes from the club he pitched for and the year (roundTag.js): "NLDS Gm 2".
+    round: isPostseason(last.gameType) && last.seriesGameNumber ? `${roundTag(last.gameType, last.teamId, last.date)} Gm ${last.seriesGameNumber}` : '',
     tag,
     path: gamePath(last.date, away, home, 'boxscore', last.gameNumber ?? 1),
   }

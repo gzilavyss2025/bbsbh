@@ -48,6 +48,8 @@ import { gamePath } from '../../lib/route.js'
 import { hitterLine, pitcherLine } from '../person/gameLog.js'
 import { ipToOuts } from '../../lib/math/innings.js'
 import { baseballToday } from '../../lib/time/standingsDates.js'
+import { LEAGUE_BY_ID } from '../../lib/postseason/seriesMarks.js'
+import { roundName } from '../../lib/postseason/roundTag.js'
 
 const n = (v) => Number(v) || 0
 
@@ -184,9 +186,7 @@ export function surfaceOf(turfType) {
 // `league` ('AL' or 'NL', optional) names whose round it is — NLDS, ALCS, NLWC.
 // The World Series is both leagues', so it stays WS.
 export function seriesAbbr(gameType, league = '') {
-  const round = { F: 'WC', D: 'DS', L: 'LCS', W: 'WS' }[gameType] ?? ''
-  if (!league || !round || round === 'WS') return round
-  return round === 'LCS' ? `${league}CS` : `${league}${round}`
+  return roundName(gameType, league)
 }
 
 // The splits a row may be built from: the right game types, dated, joinable by
@@ -330,7 +330,9 @@ export function boxLineRows({
       gamePk: s.game.gamePk,
       gameNumber: g.gameNumber ?? s.game.gameNumber ?? 1,
       gameType: s.gameType,
-      series: seriesAbbr(s.gameType),
+      // The league names whose round it was (NLDS, ALCS), off the split's own league. A split
+      // with none gives the plain round, as it did before (WC, DS, LCS).
+      series: seriesAbbr(s.gameType, LEAGUE_BY_ID[s.league?.id]),
       home: !awayIsHis,
       teamId,
       teamAbbr: mine?.team?.abbreviation ?? '',

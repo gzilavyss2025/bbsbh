@@ -3,11 +3,12 @@
 
 import { teamAbbr } from '../lib/teams.js'
 import { extraInningsOf } from './select.js'
+import { roundName, roundTag } from '../lib/postseason/roundTag.js'
 
-// The postseason round a schedule row's gameType names — the same four short
-// tags the rest of the app prints (WC / DS / LCS / WS). Anything else, the
-// regular season included, is null.
-const ROUND_TAG = { F: 'WC', D: 'DS', L: 'LCS', W: 'WS' }
+// The postseason round a schedule row's gameType names, and the tag it wears: NLDS, ALCS, WS,
+// the league named from the club (roundTag.js). Anything else, the regular season included, is
+// null.
+const isRound = (gameType) => roundName(gameType) !== ''
 
 // The scrollLeft that puts a card at the centre of its scrolling strip. Works
 // from on-screen rects: the strip is not its cards' offsetParent (it is not
@@ -42,8 +43,8 @@ function isAfter(g, ref) {
 export function seasonSeriesCells(games, viewingTeamId, currentGamePk, officialDate) {
   const all = games ?? []
   const current = all.find((g) => g.gamePk === currentGamePk)
-  const rows = ROUND_TAG[current?.gameType]
-    ? all.filter((g) => !(ROUND_TAG[g.gameType] && isAfter(g, current)))
+  const rows = isRound(current?.gameType)
+    ? all.filter((g) => !(isRound(g.gameType) && isAfter(g, current)))
     : all
   const isSealed = (g) => (current ? isAfter(g, current) : Boolean(officialDate) && g.apiDate >= officialDate)
   return rows.map((g) => {
@@ -70,8 +71,8 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk, officialD
       gameNumber: g.gameNumber,
       // A postseason game's round tag and its place in that series ("G2"); both
       // null for a regular-season game. A fact about the schedule, not a result.
-      round: ROUND_TAG[g.gameType] ?? null,
-      seriesGame: ROUND_TAG[g.gameType] ? (g.seriesGameNumber ?? null) : null,
+      round: roundTag(g.gameType, viewingTeamId, g.apiDate) || null,
+      seriesGame: isRound(g.gameType) ? (g.seriesGameNumber ?? null) : null,
       awayId: g.awayId,
       homeId: g.homeId,
       isHome,

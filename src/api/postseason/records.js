@@ -24,7 +24,7 @@
 
 import { staticJson, staticJsonBy } from '../staticJson.js'
 import { gamePath } from '../../lib/route.js'
-import { seriesAbbr } from '../boxlines/rows.js'
+import { roundTag } from '../../lib/postseason/roundTag.js'
 import { fetchStaticTeams } from '../teams-static.js'
 import { RECORD_GROUPS, teamRecordsFor } from '../teamRecords.js'
 import { rankMetric } from '../situationalRecordRankings.js'
@@ -242,7 +242,8 @@ export function gameRowsFor(entry, metricId, { cutoff = null } = {}) {
       teamAbbr,
       opponentId: g.o,
       opponentAbbr,
-      series: seriesAbbr(g.gt),
+      // The ledger carries no league; the club and the season name it (roundTag.js).
+      series: roundTag(g.gt, team.id, season),
       won: g.r === 'W',
       runs: g.rs,
       oppRuns: g.ra,

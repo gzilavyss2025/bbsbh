@@ -80,7 +80,8 @@ test('Gasser: 87 pitches per start, starts only (1735 / 20), and the Division Se
   assert.equal(s.chart.avg, 87)
   assert.equal(s.chart.avgLabel, 'Averages 87 pitches per start')
   assert.equal(s.track.since, 6)
-  assert.deepEqual(s.last, { md: '10/7', home: false, opp: 135, p: 56, tag: 'DS' })
+  // Opponent 135 is San Diego, an NL club: the Division Series start is the NLDS.
+  assert.deepEqual(s.last, { md: '10/7', home: false, opp: 135, p: 56, tag: 'NLDS' })
   assert.equal(s.chart.bars.at(-1).last, true)
   // The 8/26 relief outing is a bar too, hatched.
   assert.equal(s.chart.bars[0].relief, true)
@@ -95,7 +96,8 @@ test('a reliever has the Bullpen tab only, averaging pitches per appearance', ()
   assert.equal(v.tab, 'bullpen')
   assert.equal(v.views.bullpen.chart.avg, 18)
   assert.equal(v.views.bullpen.track.since, 1)
-  assert.equal(v.views.bullpen.last.tag, 'CS')
+  // A League Championship Series game against Tampa Bay (an AL club): the tag names the league.
+  assert.equal(v.views.bullpen.last.tag, 'ALCS')
   // The 9/26 app is outside the fourteen-day window.
   assert.equal(v.views.bullpen.chart.bars.length, 3)
 })

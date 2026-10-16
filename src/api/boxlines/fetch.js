@@ -97,8 +97,11 @@ const LOG_FIELDS = {
   // `homeRuns` is here for the FOLD, not for a row's own line: a ballpark's
   // question is the home run, and a park list that could not say how many he
   // gave up there would be answering a different one. One field name.
+  //
+  // `league` (its id is the one `id` already listed) names whose round a postseason row was:
+  // NLDS, ALCS (seriesAbbr, rows.js). It rides on both lists.
   pitching:
-    'fields=stats,splits,date,gameType,isHome,isWin,opponent,id,team,game,gamePk,gameNumber,' +
+    'fields=stats,splits,date,gameType,isHome,isWin,opponent,id,team,league,game,gamePk,gameNumber,' +
     'stat,gamesStarted,inningsPitched,hits,runs,earnedRuns,homeRuns,strikeOuts,baseOnBalls',
   // `positionsPlayed` is the hitting log's own list of the positions he played
   // that day, in the order he played them, and it is what answers the pinch-hit
@@ -115,7 +118,7 @@ const LOG_FIELDS = {
   // price `positionsPlayed` pays below, on the same shared join, and it buys
   // every hitting door the real figure instead of an approximation.
   hitting:
-    'fields=stats,splits,date,gameType,isHome,isWin,opponent,id,team,game,gamePk,gameNumber,' +
+    'fields=stats,splits,date,gameType,isHome,isWin,opponent,id,team,league,game,gamePk,gameNumber,' +
     'positionsPlayed,abbreviation,' +
     'stat,hits,atBats,doubles,triples,homeRuns,rbi,baseOnBalls,stolenBases,strikeOuts,' +
     'plateAppearances,hitByPitch,sacFlies',

@@ -98,7 +98,7 @@ export function MeetingsPanel({ data, board, cutoff, asOf, scope, view, stance, 
           <Stack gap="snug" key={g.gamePk} className="scout__game">
             <p className="scout__gamehead">
               <span>{monthDayYear(g.date)}</span>
-              <Pill>{ROUND_TAG[g.round] ?? g.round}</Pill>
+              <Pill>{g.tag || (ROUND_TAG[g.round] ?? g.round)}</Pill>
             </p>
             {g.pas.map((pa) => {
               const list = pa.pitchList ?? []

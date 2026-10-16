@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { BoxLinesDoor } from '../../../../../components/boxlines/BoxLinesDoor.jsx'
+import { bandFor } from '../../../../../components/boxlines/bandFor.js'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
@@ -92,6 +93,7 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
             opponentId: team.id,
             opponentName: teamClubName(team.id) ?? team.name,
             cutoff: asOf ?? null,
+            band: bandFor(bio.team?.id),
           }}
         />
       ) : (
