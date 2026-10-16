@@ -892,6 +892,10 @@
       "class": "spoiler-free",
       "why": "A starter's all-time postseason line for the live series page: finished prior seasons (yearByYear) plus the cutoff-gated line it is handed. Never stats=career, which counts a game in progress. ADR-0088."
     },
+    "postseason/pitcherWorldSeries.js": {
+      "class": "spoiler-free",
+      "why": "A starter's all-time World Series line and his count of earlier World Series starts: finished prior seasons (yearByYear, gameType=W) plus this Series' games through the day before the game (byDateRange). Never stats=career, which counts a game in progress. ADR-0088."
+    },
     "postseason/records.js": {
       "class": "cutoff-gated",
       "why": "Reads the per-season postseason ledgers (gen-postseason-records.mjs) and hands them to teamRecordsFor and the situational-record pivot, so it inherits teamRecords.js's footing whole, including the `cutoff = null` default: a bare call tallies every Final postseason game on file, tonight's included once the nightly lands. It computes no value those two do not. Open surface by rule (ADR-0034); nothing here is read on a scoring surface."
@@ -1187,7 +1191,17 @@
     },
     "worldSeries/history.js": {
       "class": "cutoff-gated",
-      "why": "Static world-series/series.json: every FINISHED World Series, one row per game with its runs. A finished Series is no spoiler on its own, but a game of the current Series must never come back from it: every read goes through lib/worldSeries/lastBefore.js (strictly before the game's own date, and it throws without one), via lib/worldSeries/odds.js. Its one consumer is ReferencePanel.jsx, and only for a game of type W. No read of Scores Unlocked (ADR-0087)."
+      "why": "Static world-series/series.json and events.json: every FINISHED World Series, one row per game with its runs. A finished Series is no spoiler on its own, but a game of the current Series must never come back from it: every read goes through lib/worldSeries/lastBefore.js (strictly before the game's own date, and it throws without one), via lib/worldSeries/odds.js. Its consumers are ReferencePanel.jsx, PlayByPlay.jsx and BoxScore.jsx, and only for a game of type W. No read of Scores Unlocked (ADR-0087)."
+    },
+    "callout-notes/worldSeriesEvents.js": {
+      "class": "mixed",
+      "why": "The World Series \"last time\" notes. buildWsLastTimeNotes (play card) reads only the revealed play, and only calls a play the last of the game once the feed is Final; buildWsWtaTrailing9Note reads tonight's score through the 8th, so prehalf-callouts.js calls it inside the same revealedThrough gate as buildAfterInningNote. buildWsLastTimeGameNotes folds in the final result, so it is reveal-only. Every history lookup is cut strictly before the game's date by lib/worldSeries/lastBefore.js (ADR-0087).",
+      "revealOnlyExports": [
+        "buildWsLastTimeGameNotes"
+      ],
+      "importers": [
+        "api/callout-notes/rollup.js"
+      ]
     },
     "callout-notes/worldSeries.js": {
       "class": "spoiler-free",

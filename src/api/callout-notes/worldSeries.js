@@ -5,6 +5,7 @@
 // before tonight by lib/worldSeries (ADR-0087). Nothing here reads tonight's score.
 import { seriesBlockFor } from '../callouts.js'
 import { seriesOdds, clubFacts } from '../../lib/worldSeries/odds.js'
+import { ordinal } from '../../lib/format.js'
 import { SCORE_BASE, clampScore, skewBonus, magnitudeOf } from './shared.js'
 
 // A club that has not played in this many seasons gets the drought note.
@@ -82,4 +83,22 @@ export function buildWorldSeriesOddsNotes({ history, bundle, gameDate, gameType 
     out.push(note('wta', `In winner-take-all World Series games the home club is ${home.w}-${home.l}.${streak}`, skewBonus(home.w, home.l)))
   }
   return out
+}
+
+// A starter's World Series start count, entering tonight (kind wsStarterStart).
+// `starts[pid]` is his EARLIER starts, from api/postseason/pitcherWorldSeries.js,
+// which ends the day before the game (ADR-0088): a pregame fact, no score.
+const WS_START_MILESTONES = [5, 10]
+
+export function buildWorldSeriesStarterNote({ starts, pid, side, gameType }) {
+  const earlier = starts?.[pid]
+  if (gameType !== 'W' || pid == null || earlier == null) return null
+  const n = earlier + 1
+  if (earlier !== 0 && !WS_START_MILESTONES.includes(n)) return null
+  return {
+    text: `His ${n === 1 ? 'first' : ordinal(n)} World Series start.`,
+    personId: pid, side, kind: 'wsStarterStart',
+    dedupeKey: `wsStarterStart-${pid}`,
+    score: SCORE_BASE.wsStarterStart,
+  }
 }

@@ -138,6 +138,10 @@ saturation is worth changed. The column below names that saturation point, so
 | inningRunDiff | 30 | a margin of 40 |
 | dayOfWeek | 30 | a spotless record |
 | wsSeriesOdds | 45 | a spotless record, or a 25-season gap (World Series games only) |
+| wsStarterStart | 40 | none; fixed. "His first World Series start" at 0 earlier starts, or his 5th or 10th (World Series games only; pre-half strip, inning 1, on the half he takes the mound) |
+| wsLastTime | 50 | a 25-season gap since the last such play (World Series games only) |
+| wsLastTimeGame | 45 | a 25-season gap since the last such game (World Series games only) |
+| wsWtaTrailing9 | 55 | a spotless record (World Series winner-take-all games only) |
 | foulSpoiler | 30 | rank 1; the roll-up restatement adds a second bonus, full at 18 fouls tonight |
 | matchupSkill | 36 | a 2.0-SD collision on the weaker of its two sides |
 | matchupStyle | 33 | a 2.0-SD collision on the weaker of its two sides |
@@ -571,6 +575,30 @@ count — `(N PA)` — only when the batter's PA against the type is under 80
   win% ≥ .08 away from the league norm for that situation (~.66 scoring
   first, ~.34 conceding) — a banal record earns no card, in either
   direction. Roll-up folds tonight in once Final.
+
+### World Series event notes (`callout-notes/worldSeriesEvents.js`)
+
+World Series games only; a game of any other type is unchanged and costs no request. What a
+tag means is `lib/worldSeries/classify.js`, the code that built `events.json`; every lookup is
+`lastBefore`, strictly before the game's own date (ADR-0087). The history is `events.json`
+plus `bundle.wsEvents` (the current Series, from the nightly shard); an older shard without
+the key leaves the second half empty. A note fires when the gap is `WS_MIN_GAP_SEASONS` (3)
+seasons or more, or when no earlier row exists ("The first … in World Series history.").
+
+- **wsLastTime** (play card) — "The last World Series grand slam came on Oct. 24, 2025."
+  Only on the revealed play. One note per play, the most specific tag that fires:
+  walkOffGrandSlam, pinchHitGrandSlam, walkOffHr, openingHrPair, pinchHitHr, grandSlam,
+  extraInningHr, multiHrGame, pitcherHit (winner-take-all), triplePlay, gameEndingDp. A play
+  counts as the game's last (walk-off, game-ending double play) only once the feed is Final.
+- **wsLastTimeGame** (roll-up) — "The first World Series game of 18 or more innings since
+  Oct. 27, 2005." Final only (reveal-only, behind the box score's seal): extraInnings,
+  shutout, bigScore, bigComeback, reachedBase; the earlier row must be as big (`value >=`).
+- **wsWtaTrailing9** (pre-half strip) — "Teams trailing entering the 9th of a winner-take-all
+  game are 3-33." Top of the 9th, for the club that trails after eight (none when level), in
+  a winner-take-all game (`bundle.wsEvents.wta`). It reads tonight's score, so it runs inside
+  `prehalf-callouts.js`'s `revealedThrough` gate, the same one `buildAfterInningNote` uses.
+
+None of the three is in `BETWEEN_INNINGS_ALLOWED_KINDS` or `RECORD_KINDS`.
 
 ### Pre-half strip (entering the half)
 

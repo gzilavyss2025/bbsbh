@@ -6,6 +6,8 @@ import { rankNotes } from '../../../api/callout-notes.js'
 import { useCalloutLedger } from '../../../hooks/useCalloutLedger.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { fetchSavantMatchup } from '../../../api/matchup/savant.js'
+import { fetchWorldSeriesStartsBefore } from '../../../api/postseason/pitcherWorldSeries.js'
+import { useEventHistory } from '../../../hooks/postseason/useWsEvents.js'
 import { loadSeriesHistory } from '../../../api/worldSeries/history.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
@@ -282,6 +284,15 @@ function Section({
   // World Series games only: a game of any other type costs no request.
   const isWorldSeries = feed?.gameData?.game?.type === 'W'
   const seriesHistory = useAsync(() => (isWorldSeries ? loadSeriesHistory() : null), [isWorldSeries]).data ?? null
+  // And each probable's earlier World Series starts, cut at the game's own date.
+  const probables = feed?.gameData?.probablePitchers
+  const wsStarts = useAsync(async () => {
+    if (!isWorldSeries || !workloadGameDate) return null
+    const ids = [probables?.away?.id, probables?.home?.id].filter(Boolean)
+    const counts = await Promise.all(ids.map((id) => fetchWorldSeriesStartsBefore(id, workloadGameDate)))
+    return Object.fromEntries(ids.map((id, i) => [id, counts[i]]))
+  }, [isWorldSeries, workloadGameDate, probables?.away?.id, probables?.home?.id]).data ?? null
+  const eventHistory = useEventHistory(feed)
   if (tab === 'lineups' && showEntering) {
     return (
       <LineupSection
@@ -448,7 +459,7 @@ function Section({
   const armsHalfIdx = halfIndex(effInning, effHalf)
   const shownCounts = ledger.countsFor(armsHalfIdx)
   const preHalf = showEntering
-    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate, shownCounts, savantMatchup, seriesHistory })
+    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate, shownCounts, savantMatchup, seriesHistory, wsStarts, eventHistory })
     : []
   const notes = mergeNotes(preHalf, marginNotes, shownCounts)
   const armsEmpty = !notes.length && !pitcherTeams.some((t) => t.rows?.length)

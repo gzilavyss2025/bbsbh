@@ -13,6 +13,7 @@ import { ordinal } from '../lib/format.js'
 import { umpireAccuracySummary } from '../api/umpires.js'
 import { selectChallengeState, gameHasAbs } from '../api/challenges.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useEventHistory } from '../hooks/postseason/useWsEvents.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { Table } from '../components/ui/table/Table.jsx'
 import { GuideLink } from '../components/chrome/GuideLink.jsx'
@@ -130,6 +131,7 @@ export function BoxScore({
   // the input objects THEMSELVES rather than a gamePk or a timestamp: a poll
   // mints a fresh feed, a fresh feed is a cache miss, and the sheet recomputes.
   const revealCacheRef = useRef({ key: null, value: null })
+  const eventHistory = useEventHistory(feed)
   const stamped = useStampUnseal(feed?.gamePk)
   // THIS BOX SCORE'S OWN MARK (ADR-0049): the reader already lifted this seal,
   // here or on another of their devices. Alone among the three openers below, it
@@ -171,7 +173,7 @@ export function BoxScore({
         gamePk={feed?.gamePk}
       >
         {() => {
-          const r = revealBoxScore(revealCacheRef, feed, winProbability, highlights, callouts, vsTeam)
+          const r = revealBoxScore(revealCacheRef, feed, winProbability, highlights, callouts, vsTeam, eventHistory)
           return (
             <BoxScoreBody
               stampFacts={r.stampFacts}

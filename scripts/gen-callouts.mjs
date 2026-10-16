@@ -173,6 +173,8 @@ import { deriveBracket, seriesForGame } from '../src/api/postseason/bracket.js'
 import { resultRowsFrom, resultsUrl, skeletonRowsFrom, skeletonUrl } from '../src/api/postseason/fetch.js'
 import { WHIFF_FEED_FIELDS } from '../src/api/postseasonSeries.js'
 import { seriesBlock } from '../src/lib/postseason/primer/seriesBlock.js'
+import { wsEventsBlock, wsCountedPks } from '../src/lib/postseason/primer/wsEventsBlock.js'
+import { fetchPlays } from './lib/world-series/plays.mjs'
 
 // The browser client this file used to import capped every call at 15 s; keep
 // that cap on the shared client, whose own default is none.
@@ -1240,12 +1242,13 @@ try {
       ])
       dataByPk[pk] = { box, feed, winProb }
     })
+    const pbpByPk = await fetchPlays(wsCountedPks(bracket, pks)) // World Series only
     const [ay, am, ad] = asOf.split('-')
     for (const pk of pks) {
       const block = seriesBlock(bracket, pk, dataByPk)
       const path = join(outDir, `${am}${ad}${ay}`, `${pk}.json`)
       const bundle = block && JSON.parse(await readFile(path, 'utf8').catch(() => 'null'))
-      if (bundle) await writeJsonAtomic(path, { ...bundle, series: block })
+      if (bundle) await writeJsonAtomic(path, { ...bundle, series: block, wsEvents: wsEventsBlock(bracket, pk, dataByPk, pbpByPk) ?? undefined })
       console.log(`series block for ${asOf} ${pk}: ${bundle ? `${block.gamePks.length} games` : 'none'}`)
     }
   }
