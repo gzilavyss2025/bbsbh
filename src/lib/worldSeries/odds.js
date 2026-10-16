@@ -32,7 +32,7 @@ function rowsOf(history) {
     const hit = after.findIndex((w) => Object.values(w).includes(wn - 1) && Object.values(w).includes(wn - 3) && Object.keys(w).length === 2)
     if (hit >= 0) {
       const trailer = Object.keys(after[hit]).find((c) => after[hit][c] === wn - 3)
-      rows.push({ ...base, tag: 'trail31', date: end, won: Number(trailer) === s.winner })
+      rows.push({ ...base, tag: 'trail31', date: end, winner: s.winner, won: Number(trailer) === s.winner })
     }
     // Winner-take-all: a decided game when both clubs already had winsNeeded - 1.
     s.games.forEach((g, i) => {
@@ -67,7 +67,7 @@ export function seriesOdds(history, before) {
     winsNeeded: at('final')[0]?.winsNeeded ?? null,
     game1: record(at('game1')),
     lead20: record(at('lead20')),
-    trail31: { ...record(trail), last: trail.find((r) => r.won)?.season ?? null },
+    trail31: { ...record(trail), last: trail.find((r) => r.won)?.season ?? null, lastClub: trail.find((r) => r.won)?.winner ?? null },
     wta: {
       home: { w: home.filter((r) => r.homeWon).length, l: home.filter((r) => !r.homeWon).length },
       roadStreak,
@@ -78,12 +78,15 @@ export function seriesOdds(history, before) {
 
 export function clubFacts(history, before, ...clubs) {
   const finals = lastBefore(rowsOf(history), { before, tag: 'final' })
-  const last = (c) => finals.find((r) => r.clubs.includes(c))?.season ?? null
+  const lastRow = (c) => finals.find((r) => r.clubs.includes(c))
+  const meeting = finals.find((r) => clubs.every((c) => r.clubs.includes(c)))
   const prev = Number(before.slice(0, 4)) - 1
   const champion = finals.find((r) => r.season === prev)?.winner
   return {
     champion: clubs.includes(champion) ? champion : null,
-    lastMeeting: finals.find((r) => clubs.every((c) => r.clubs.includes(c)))?.season ?? null,
-    lastSeen: Object.fromEntries(clubs.map((c) => [c, last(c)])),
+    lastMeeting: meeting?.season ?? null,
+    meetingWinner: meeting?.winner ?? null,
+    lastSeen: Object.fromEntries(clubs.map((c) => [c, lastRow(c)?.season ?? null])),
+    lastOpponent: Object.fromEntries(clubs.map((c) => [c, lastRow(c)?.clubs.find((x) => x !== c) ?? null])),
   }
 }

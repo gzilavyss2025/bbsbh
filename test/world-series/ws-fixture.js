@@ -1,7 +1,7 @@
 // A hand-made four-series history in the contract.md section 3 shape. Not data.
 // Home club: odd game number -> clubs[1], even -> clubs[0]. `results` is the
 // winner of each game in order; null is a tie.
-function mk(season, winsNeeded, clubs, results) {
+export function mk(season, winsNeeded, clubs, results) {
   const games = results.map((w, i) => {
     const n = i + 1
     const home = n % 2 ? clubs[1] : clubs[0]
