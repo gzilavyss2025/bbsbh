@@ -55,6 +55,12 @@ decision above does not change. N8c renamed the card's root from `.pitchernotice
 `.change--framed`. `.change--framed` is only the actor cards' margin namespace, which
 each caller passes with the frame.
 
+**2026-10-16 (ADR-0113).** The shared card's frame is now the stamped event card
+(`eventCardClass()`, `.card--stamped` with the `event` tone): square corners, a 2px ink
+edge, a hard ink shadow, one yellow ground, and an ink name tab. This amends the frame
+named above. The three tiers, the single card family and the "no accent rail" decision do
+not change. `.notice--event` stays for its other users.
+
 ## Casing: the global CSS invariant is the only source of truth
 
 Per-component `.toUpperCase()`/`.toLowerCase()` calls on a rendered name or

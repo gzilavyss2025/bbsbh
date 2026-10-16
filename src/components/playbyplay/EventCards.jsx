@@ -3,7 +3,7 @@ import { PitcherPhoto } from './PitcherNotice.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { UsagePips } from '../charts/UsagePips.jsx'
 import { formatDelay } from '../inning/DelayCard.jsx'
-import { noticeClass } from '../../lib/design/noticeClass.js'
+import { eventCardClass } from '../../lib/design/cardClass.js'
 
 // THE NOTIFICATION-CARD FAMILY of the half-inning feed — everything
 // PlayByPlay.jsx renders BETWEEN plate appearances, plus the two shorthand
@@ -18,8 +18,8 @@ import { noticeClass } from '../../lib/design/noticeClass.js'
 // happened" moment sorts into one of three tiers — a fresh/changed actor, a
 // team/administrative event, or a baserunning/misc event with no plate
 // appearance of its own — and all three render in the SAME marker-wash card
-// (the event Notice frame, `noticeClass({ tone: 'event' })` here; an actor
-// card's caller passes the same call, since #1132 N7), distinguished by what is inside
+// (the stamped event card, `eventCardClass()` here; an actor card's caller
+// passes the same call, ADR-0113), distinguished by what is inside
 // (a headshot vs. a scorer's shorthand code) rather than by a coloured accent
 // rail. That is the decision, and it is easy to undo by accident.
 
@@ -66,6 +66,13 @@ export const EVENT_CODES = {
   // surface on its own, it gets this card's real shorthand instead of
   // EventNote's generic fallback icon.
   runner_placed: 'RP', defensive_indiff: 'DI',
+}
+
+// The name tab of an EventCard (ADR-0113), by its shorthand code. The code
+// stays in the row; the tab is the card's heading.
+export const EVENT_NAMES = {
+  SB: 'Stolen base', CS: 'Caught stealing', PK: 'Pickoff', WP: 'Wild pitch', PB: 'Passed ball',
+  BK: 'Balk', RP: 'Runner placed', DI: 'Defensive indifference',
 }
 
 // Which side EventCard's one named person belongs to, for its headshot's team
@@ -138,9 +145,9 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
   const label =
     used != null ? `${used} of ${allowed} mound visits used, ${remaining} left` : undefined
   return (
-    <div className={`change ${noticeClass({ tone: 'event' })} change--event change--mv`}>
+    <div className={`change ${eventCardClass()} change--event change--mv`}>
+      <h4 className="card__name">Mound visit{team ? ` — ${team}` : ''}</h4>
       <TeamLogo teamId={teamId} name={team} size={20} className="change__teammark" />
-      <span className="change__label">Mound visit{team ? ` — ${team}` : ''}</span>
       <span className="change__spacer" />
       {used != null && (
         <>
@@ -165,7 +172,8 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
 // it costs nothing and the default is what every caller passes.
 export function EjectionBar({ text, code = 'EJ' }) {
   return (
-    <div className={`change ${noticeClass({ tone: 'event' })} change--event`}>
+    <div className={`change ${eventCardClass()} change--event`}>
+      <h4 className="card__name">Ejection</h4>
       <span className="change__code change__code--alert">{code}</span>
       <span className="change__eventtext">{text}</span>
     </div>
@@ -180,7 +188,8 @@ export function EjectionBar({ text, code = 'EJ' }) {
 // pitch, the catcher on a passed ball).
 export function EventCard({ code, runnerId, teamId, segments, pitchLabel = null }) {
   return (
-    <div className={`change ${noticeClass({ tone: 'event' })} change--event`}>
+    <div className={`change ${eventCardClass()} change--event`}>
+      <h4 className="card__name">{EVENT_NAMES[code]}</h4>
       <span className="change__code">{code}</span>
       {runnerId != null && <PitcherPhoto personId={runnerId} teamId={teamId} />}
       <span className="change__eventtext">
@@ -228,7 +237,8 @@ export function DelayNotice({ entry, teamId }) {
   // the sentence keeps the whole card.
   const lead = minutes != null ? `${title} (${formatDelay(minutes)})` : title
   return (
-    <div className={`change ${noticeClass({ tone: 'event' })} change--event`}>
+    <div className={`change ${eventCardClass()} change--event`}>
+      <h4 className="card__name">Delay</h4>
       <span className="change__code change__code--alert">DELAY</span>
       {playerId != null && <PitcherPhoto personId={playerId} teamId={teamId} />}
       <span className="change__eventtext">

@@ -181,6 +181,11 @@
   --border-stamped-soft:  var(--graphite);
   --surface-stamped-ink:  var(--ink-0);
   --surface-stamped-tint: var(--field-wash);
+  /* The ground of every notification card (ADR-0113): --marker at 35% over
+     --paper-2, worked out once as a literal because the contrast checker does not
+     parse color-mix() (the same precedent as the #FAEED0 pair in
+     src/lib/design/contrastPairings.js). One yellow for every card; no tier colours. */
+  --surface-stamped-event: #F8E3B3;
   /* The reader's own club on a ranked board (ADR-0112): an ink tint on the card
      paper. One token, where three pages each mixed their own from --fav-accent. */
   --surface-mine:         color-mix(in srgb, var(--accent-primary) 8%, var(--surface-card));

@@ -23,12 +23,13 @@
 //
 // THE STAMPED FRAME'S OPTIONS, which no other frame takes (each throws there):
 //   tone     the fill: plain (the card paper, the default), tint, soft (card
-//            paper with the graphite offset shadow, for a small tile) or ink (the
-//            lead stat tile).
+//            paper with the graphite offset shadow, for a small tile), ink (the
+//            lead stat tile) or event (the one yellow of every notification
+//            card, ADR-0113).
 //   named    the card wears a name tab on its top edge, so its body clears it.
 //   stampIn  the card drops into its shadow as it appears (motion/stamp-in.css).
 export const FRAMES = ['sheet', 'ledger', 'stamped']
-export const TONES = ['plain', 'tint', 'soft', 'ink']
+export const TONES = ['plain', 'tint', 'soft', 'ink', 'event']
 export const BODIES = ['padded', 'flush']
 export const CARD_TAGS = ['section', 'div', 'article', 'li', 'aside', 'a', 'button']
 const INTERACTIVE = ['a', 'button']
@@ -54,6 +55,10 @@ export function cardClassName({
   if (className) parts.push(className)
   return parts.join(' ')
 }
+
+// THE NOTIFICATION CARD'S FRAME (ADR-0113): the stamped event card with its name
+// tab. A caller passes this where it passed noticeClass({ tone: 'event' }).
+export const eventCardClass = (className = '') => cardClassName({ frame: 'stamped', tone: 'event', named: true, className })
 
 // A link or a button holds phrasing content only, and never a heading or a
 // second control. So an interactive card takes no head.

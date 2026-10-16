@@ -74,6 +74,9 @@ test('N8b: the seal pin — no reveal-only import, SealBox or revealedThrough re
 // keep the old name, since the ledger records it. The next character may not be
 // a word character, so `__code` cannot hide inside a longer name.
 const PARTS = ['code', 'code--alert', 'label', 'teammark', 'spacer', 'mvcount', 'eventtext', 'pitchno']
+// ADR-0113: the mound visit's label is its name tab (.card__name), so .change__label is gone;
+// the old pitchernotice__label name stays retired.
+const LIVE = PARTS.filter((p) => p !== 'label')
 const RETIRED_N8B = new RegExp(`pitchernotice__(${PARTS.join('|')})(?![A-Za-z0-9_])`)
 
 test('N8b: the eight event-bar parts are gone from src, e2e and scripts, comments too', () => {
@@ -87,14 +90,14 @@ test('N8b: the eight event-bar parts are gone from src, e2e and scripts, comment
 
 test('N8b: 12-sealbox.css draws the eight parts under .change', () => {
   const css = src('styles/12-sealbox.css')
-  for (const part of PARTS) {
+  for (const part of LIVE) {
     assert.match(css, new RegExp(`^\\.change__${part} \\{`, 'm'), `.change__${part}`)
   }
 })
 
 test('N8b: the four event bars wear the new names', () => {
   const code = src('components/playbyplay/EventCards.jsx')
-  for (const part of PARTS) {
+  for (const part of LIVE) {
     assert.match(code, new RegExp(`change__${part}(?![\\w-])`), `change__${part}`)
   }
   assert.equal((code.match(/change__eventtext/g) ?? []).length, 3, 'ejection, baserunning and delay each carry the event text')
@@ -119,5 +122,5 @@ test('N8b: the root and its modifiers took the .change name in N8c', () => {
   assert.match(css, /^\.change--event \{/m)
   assert.match(css, /^\.change--framed \{/m)
   const code = src('components/playbyplay/EventCards.jsx')
-  assert.match(code, /change \$\{noticeClass\(\{ tone: 'event' \}\)\} change--event/)
+  assert.match(code, /change \$\{eventCardClass\(\)\} change--event/)
 })

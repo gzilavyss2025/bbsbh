@@ -80,12 +80,13 @@ test('N6: the seal pin — no reveal-only import, SealBox or revealedThrough rea
 
 // ---- 2. the roots ----
 
-const HELPER = /import \{ noticeClass \} from '\.\.\/\.\.\/lib\/design\/noticeClass\.js'/
+// ADR-0113 moved the six roots from the Notice frame to the stamped event card.
+const HELPER = /import \{ eventCardClass \} from '\.\.\/\.\.\/lib\/design\/cardClass\.js'/
 
 test('N6: the four event bars take the event frame from noticeClass and keep their own classes', () => {
   const code = src('components/playbyplay/EventCards.jsx')
   assert.match(code, HELPER)
-  const bar = '<div className={`change ${noticeClass({ tone: \'event\' })} change--event'
+  const bar = '<div className={`change ${eventCardClass()} change--event'
   assert.ok(fn(code, 'MoundVisitBar').includes(`${bar} change--mv\`}>`), 'the mound visit keeps change--mv')
   for (const name of ['EjectionBar', 'EventCard', 'DelayNotice']) {
     assert.ok(fn(code, name).includes(`${bar}\`}>`), `${name}'s root`)
@@ -98,7 +99,7 @@ test('N6: the two handoff cards take the event frame on their Stack and keep the
   assert.match(code, HELPER)
   for (const name of ['DepartureLineCard', 'FinalizedLineCard']) {
     const body = fn(code, name)
-    assert.ok(body.includes(`<Stack gap="snug" className={noticeClass({ tone: 'event', className: 'pitcherhandoff' })}>`), `${name}'s root`)
+    assert.ok(body.includes(`<Stack gap="snug" className={eventCardClass('pitcherhandoff')}>`), `${name}'s root`)
     assert.ok(body.includes('<div className="change">'), `${name} keeps its header row`)
     assert.ok(body.includes('<PitcherLineTable line={line}'), `${name} keeps its table`)
   }
@@ -107,51 +108,46 @@ test('N6: the two handoff cards take the event frame on their Stack and keep the
 
 // ---- 3. the namespaces ----
 
-// THE MARGIN, THE WRAP AND THE STRETCH. The old frame gave a 4px 14px margin
-// (written here as the tokens --space-1 and --space-3h)
-// (.half has no padding, so a card without it sits flush); Notice owns no
-// margin, so it moves to the namespace. .notice wraps, and the old bars did
-// not: at 390px the mound visit (mark, label, spacer, pips, "N left") would
-// break its row. N5 met the same trap. On the handoff cards .notice also
-// centres its items, which would shrink the full-width table; the Stack's
-// column must stretch, as it did with no align-items at all. None of this goes
-// in notice.css: notice-cascade.test.js pins every rule there as one class.
-test('N6: .change--event and .pitcherhandoff carry the old margin and do not wrap', () => {
+// THE GAP AND THE STRETCH. ADR-0113 moved the margin onto .card--event (the
+// stamped event card's room: 34px above for the tab, 4px below for the shadow;
+// event-card-frame.test.js pins it) and dropped the wrap, because the stamped
+// card is not a .notice, which wrapped. What the namespaces keep: the bar's
+// tighter gap, and the handoff card's stretched column, which would otherwise
+// shrink the full-width table to its content.
+test('N6: .change--event keeps its gap and .pitcherhandoff its stretch; neither sets a margin', () => {
   const sheet = css('12-sealbox.css')
-  const event = ruleBody(sheet, '.change--event')
-  assert.equal(decl(event, 'margin'), 'var(--space-1) var(--space-3h)', '4px 14px, as tokens')
-  assert.equal(decl(event, 'flex-wrap'), 'nowrap')
-  assert.equal(decl(event, 'gap'), 'var(--space-2)', 'the bar keeps its tighter gap')
+  assert.match(sheet, /\.change--event \{\s*gap: var\(--space-2\);\s*\}/, 'the bar keeps its tighter gap')
+  assert.equal(ruleBody(sheet, '.change--event').includes('margin'), false, 'the margin is .card--event\'s')
   const handoff = ruleBody(sheet, '.pitcherhandoff')
-  assert.equal(decl(handoff, 'margin'), 'var(--space-1) var(--space-3h)', '4px 14px, as tokens')
-  assert.equal(decl(handoff, 'flex-wrap'), 'nowrap')
   assert.equal(decl(handoff, 'align-items'), 'stretch')
+  assert.equal(decl(handoff, 'margin'), undefined, 'the margin is .card--event\'s')
 })
 
-// The handoff card's gap: .notice loads after stack.css and sets its own gap,
-// which beats the Stack's "snug" step. Both must stay the same 8px.
+// The handoff card's gap: the Stack's "snug" step is the only gap now (the
+// Notice's own gap, which equalled it, no longer applies).
 test('N6: the handoff card keeps the 8px gap of Stack\'s "snug" step', () => {
-  assert.equal(decl(ruleBody(css('system/notice.css'), '.notice'), 'gap'), 'var(--space-2)')
   assert.equal(decl(ruleBody(css('system/stack.css'), '.stack--snug'), '--stack-gap'), 'var(--space-2)')
   assert.equal(decl(ruleBody(css('12-sealbox.css'), '.pitcherhandoff'), 'gap'), undefined)
 })
 
 // ---- 4. the old frame left the actor cards in N7 ----
 
-// N7 moved the actor cards onto the helper. The frame stays the caller's: each
-// call site passes noticeClass with .change--framed as the namespace, and
-// the rule keeps only the margin Notice does not draw (notice-n7.test.js).
-test('N6: the .change--framed rule is the margin-only namespace, and the actor-card callers wear the helper', () => {
+// The actor cards' callers pass eventCardClass with .change--framed as the
+// namespace. The namespace keeps the margin and no-wrap that the lens arm
+// button needs (ADR-0113); a stamped card's margin and padding are .card--event's.
+test('N6: .change--framed keeps the margin and no-wrap for the lens button, and the actor-card callers wear eventCardClass', () => {
   const frame = ruleBody(css('12-sealbox.css'), '.change--framed')
   assert.equal(decl(frame, 'margin'), 'var(--space-1) var(--space-3h)')
-  assert.equal(decl(frame, 'border'), undefined)
+  assert.equal(decl(frame, 'flex-wrap'), 'nowrap')
+  for (const prop of ['padding', 'border', 'border-radius', 'background', 'box-shadow']) assert.equal(decl(frame, prop), undefined, `.card--event draws the ${prop}`)
   for (const rel of [
     'components/playbyplay/PitcherNotice.jsx',
     'components/playbyplay/PlayByPlay.jsx',
     'components/inning/HalfInning.jsx',
-    'components/scoring/lens/LensCards.jsx',
     'components/scoring/lens/PitcherSheet.jsx',
   ]) {
-    assert.match(src(rel), /\{noticeClass\(\{ tone: 'event', className: 'change--framed' \}\)\}/, `${rel} wears the helper`)
+    assert.match(src(rel), /\{eventCardClass\('change--framed'\)\}/, `${rel} wears the helper`)
   }
+  // The lens's arm button is its own element and keeps the Notice frame.
+  assert.match(src('components/scoring/lens/LensCards.jsx'), /noticeClass\(\{ tone: 'event', className: 'change--framed' \}\)/)
 })

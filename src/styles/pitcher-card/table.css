@@ -6,20 +6,13 @@
    bands. SKIN ONLY: every selector is a class the markup already has.
    - `column-reverse` on a cell puts its label (second in the DOM) above its
      value, which is what makes a header row without touching StatGrid.
-   - The event Notice draws a rounded, marker-washed frame (`.notice--event`);
-     the three custom properties below turn it into the stamped paper frame
-     the other new-look cards wear, and the radius and padding go to zero so
-     the bands and tables run edge to edge.
-   - The compact relief cards (`.change--framed` without `.pcard`) keep the
-     Notice frame; only the full card is skinned here. */
+   - The caller's eventCardClass draws the frame (ADR-0113): the stamped edge,
+     the hard shadow and the one yellow ground, shared with every compact
+     notification card. Padding goes to zero so the bands and tables run edge
+     to edge. */
 .pcard {
-  --notice-wash: var(--surface-card);
-  --notice-edge: var(--border-stamped);
   gap: 0;
   padding: 0;
-  border: var(--bw-heavy) solid var(--border-stamped);
-  border-radius: 0;
-  box-shadow: var(--shadow-stamped);
 }
 
 /* The name band: the pitching club's bar when it has hand-set colours
@@ -31,7 +24,7 @@
   /* component-reuse-exempt: the card's own name row (PitcherNotice's markup, a headshot beside a name), not a section heading SectionHead could draw */
   position: relative;
   isolation: isolate;
-  padding: var(--space-2h) var(--space-3);
+  padding: var(--space-6) var(--space-3) var(--space-2h);
   background: var(--bar-fill, var(--ink-1));
   border-bottom: 3px solid var(--bar-accent, transparent); /* raw-value-exempt: the themed bar's accent rule, as system/section-head.css */
   color: var(--bar-text, var(--text-on-ink-cream));
@@ -51,7 +44,6 @@
   border-radius: 0;
   border: var(--bw-heavy) solid var(--bar-text, var(--text-on-ink-cream));
 }
-.pcard .change__now,
 .pcard .change__jersey,
 .pcard .change__hand {
   color: var(--bar-text, var(--text-on-ink-soft));

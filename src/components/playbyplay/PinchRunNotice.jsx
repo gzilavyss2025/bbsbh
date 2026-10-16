@@ -19,7 +19,7 @@ export function PinchRunNotice({ runner, replaced, base = null, teamId = null, t
     <div className={`change ${className}`}>
       <PitcherPhoto personId={runner.id} name={runner.name} teamId={teamId} />
       <div className="change__body">
-        <span className="change__now">Pinch running{teamName ? ` for the ${teamName}` : ''}</span>
+        <h4 className="card__name">Pinch running{teamName ? ` for the ${teamName}` : ''}</h4>
         <span className="change__pitcher">
           <PlayerLink id={runner.id}>{runner.name}</PlayerLink>
           <span className="change__badges">

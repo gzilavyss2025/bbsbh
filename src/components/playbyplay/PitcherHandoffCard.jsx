@@ -2,7 +2,7 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherPhoto } from './PitcherNotice.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Table } from '../ui/table/Table.jsx'
-import { noticeClass } from '../../lib/design/noticeClass.js'
+import { eventCardClass } from '../../lib/design/cardClass.js'
 
 // The two pitching-handoff cards (ADR to follow — see pitcherHandoffs in
 // api/pitchers.js for the spoiler footing both rely on): a departing
@@ -23,11 +23,11 @@ function displayName(line) {
 export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCount = 0 }) {
   if (!line) return null
   return (
-    <Stack gap="snug" className={noticeClass({ tone: 'event', className: 'pitcherhandoff' })}>
+    <Stack gap="snug" className={eventCardClass('pitcherhandoff')}>
       <div className="change">
         <PitcherPhoto personId={line.id} name={displayName(line)} teamId={teamId} />
         <div className="change__body">
-          <span className="change__now">Departing</span>
+          <h4 className="card__name">Departing</h4>
           <span className="change__pitcher">
             <PlayerLink id={line.id}>{displayName(line)}</PlayerLink>
             <span className="change__badges">
@@ -48,11 +48,11 @@ export function DepartureLineCard({ line, teamId = null, bookOpen, inheritedCoun
 export function FinalizedLineCard({ line, teamId = null }) {
   if (!line) return null
   return (
-    <Stack gap="snug" className={noticeClass({ tone: 'event', className: 'pitcherhandoff' })}>
+    <Stack gap="snug" className={eventCardClass('pitcherhandoff')}>
       <div className="change">
         <PitcherPhoto personId={line.id} name={displayName(line)} teamId={teamId} />
         <div className="change__body">
-          <span className="change__now">Final line for</span>
+          <h4 className="card__name">Final line for</h4>
           <span className="change__pitcher">
             <PlayerLink id={line.id}>{displayName(line)}</PlayerLink>
             <span className="change__badges">

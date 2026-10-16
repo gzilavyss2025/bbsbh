@@ -19,9 +19,9 @@ export function BatterNotice({ batter, teamId = null, teamName, className = '' }
     <div className={`change ${className}`}>
       <PitcherPhoto personId={batter.id} name={batter.name} teamId={teamId} />
       <div className="change__body">
-        <span className="change__now">
+        <h4 className="card__name">
           Now batting{teamName ? ` for the ${teamName}` : ''}
-        </span>
+        </h4>
         <span className="change__pitcher">
           <PlayerLink id={batter.id}>{batter.name}</PlayerLink>
           {batter.jersey ? ` ${batter.jersey}` : ''}
