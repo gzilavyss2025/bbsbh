@@ -1,0 +1,129 @@
+/* The Coaching staff card of the Roster band: a swipe row of headshot slides. The manager's slide
+   is the ink tone (the lead tile). No club colour: the photo frame is neutral paper. */
+.coachstaff__track {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-6) var(--space-4) var(--space-1);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--space-4);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.coachstaff__track::-webkit-scrollbar {
+  display: none;
+}
+.coachstaff__slide {
+  flex: 0 0 136px;
+  scroll-snap-align: start;
+  display: flex;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  color: var(--text-body);
+}
+.coachstaff__slide--lead {
+  background: var(--surface-stamped-ink);
+  border-color: var(--border-stamped);
+  color: var(--text-on-ink-cream);
+}
+/* layout-exempt: a photo stacked over its caption inside one tap target; an anchor takes no Stack */
+.coachstaff__link {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+.coachstaff__link:active {
+  background: var(--surface-row-hover);
+}
+.coachstaff__slide--lead .coachstaff__link:active {
+  background: var(--ink-1);
+}
+/* The coach photo is a 2:3 studio portrait on a grey ground, with about 7% of empty ground above
+   the cap. A 3:4 frame whose focus sits 35% down trims that and keeps the chin and the collar.
+   Beats the shared .shot frame on specificity; the shared rule is left alone for every player. */
+.coachstaff__photo {
+  position: relative;
+  display: block;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-row-hover);
+}
+.coachstaff__slide--lead .coachstaff__photo {
+  border-bottom-color: var(--border-stamped);
+}
+.coachstaff .coachstaff__photo .shot {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  border: 0;
+  border-radius: 0;
+}
+.coachstaff .coachstaff__photo .shot img {
+  object-position: center 35%;
+}
+.coachstaff__num {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: var(--space-1) var(--space-2);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  font-variant-numeric: tabular-nums;
+}
+.coachstaff__text {
+  padding: var(--space-2h) var(--space-2h) var(--space-3);
+}
+.coachstaff__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.coachstaff__role {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+.coachstaff__slide--lead .coachstaff__name {
+  color: var(--text-on-ink-cream);
+}
+.coachstaff__slide--lead .coachstaff__role {
+  color: var(--text-on-ink-dim);
+}
+.coachstaff__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+.coachstaff__pos {
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+}
+/* A phone swipes; the two buttons are for a pointer. */
+.coachstaff__btn {
+  display: none;
+}
+@media (min-width: 740px) {
+  .coachstaff__btn {
+    display: inline-flex;
+  }
+  .coachstaff__slide {
+    flex-basis: 176px;
+  }
+}

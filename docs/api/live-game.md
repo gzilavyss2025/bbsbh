@@ -385,6 +385,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   story, not this one. Both are pure and take the page's cutoff date, so a
   player page opened from an old box score reports his status THAT day.
 - `team.js` — team identity, roster, affiliates, standings, ranked team stats.
+- `staff/coaches.js` — a club's whole coaching staff for a season, off `/teams/{id}/coaches` (the endpoint `fetchManager` reads for one row). One card per person: the feed repeats a coach once per jersey number and lists a man twice when he holds two jobs. Spoiler-free; the team page's Coaching staff card reads it.
 - `search.js` — the footer's player/team directory search.
 - `select.js` — pure, spoiler-free selectors over the raw feed. `selectLineup`
   returns the STARTING nine, from each boxscore player's own `battingOrder`
