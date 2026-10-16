@@ -21,8 +21,10 @@
 //   pinchHitGrandSlam pinchHitHr with rbi 4.
 //   extraInningHr     home_run in inning 10 or later.
 //   multiHrGame       one batter, 3 or more home runs. value: the count.
-//   pitcherHit        wta games only. The batter's id is also a matchup.pitcher.id in
-//                     the game, and the result is single, double, triple or home_run.
+//   pitcherHit        wta games only. The result is single, double, triple or home_run, and
+//                     the batter is a starting pitcher or has thrown a pitch in a play up to
+//                     and including this one. It reads no later play, so the live card (which
+//                     may not) gives the same answer as the history.
 //   gameEndingDp      the last play's eventType holds "double_play". club: the fielding
 //                     club, the one that turned it.
 //   triplePlay        eventType triple_play, or a description saying "triple play".
@@ -91,10 +93,20 @@ export const isGameEndingDp = (last) => Boolean(last) && (evt(last) ?? '').inclu
 
 export const isTriplePlay = (p) => evt(p) === 'triple_play' || /triple play/i.test(p.result?.description ?? '')
 
-// ids that threw a pitch in the game.
+// ids that threw a pitch in `plays`.
 export const pitcherIds = (plays) => new Set(plays.map((p) => p.matchup?.pitcher?.id).filter(Boolean))
 
-export const isPitcherHit = (p, pitchers) => HITS.has(evt(p)) && pitchers.has(batterId(p))
+// The two starting pitchers, from the plays: the first arm each side fields. The live card
+// reads the lineup instead (boxscore pitchers[0], known before the first pitch).
+export function startingPitchers(plays) {
+  const first = {}
+  for (const p of plays) first[fieldingSide(p)] ??= p.matchup?.pitcher?.id
+  return Object.values(first).filter(Boolean)
+}
+
+// THE pitcherHit rule: plays[i] is a hit by a starter or by a man who has pitched by then.
+export const isPitcherHitAt = (plays, i, starters) =>
+  HITS.has(evt(plays[i])) && (starters.includes(batterId(plays[i])) || pitcherIds(plays.slice(0, i + 1)).has(batterId(plays[i])))
 
 // The largest deficit the side `winner` faced after any play.
 export function largestDeficit(plays, winner) {
@@ -132,8 +144,8 @@ export function classifyGame(pbp, { innings, wta = false, clubs, game = {} } = {
   const club = (side) => clubs[side]
 
   const perBatter = new Map()
-  const pitchers = pitcherIds(plays)
-  for (const p of plays) {
+  const starters = startingPitchers(plays)
+  plays.forEach((p, i) => {
     const bat = batterId(p)
     if (isGrandSlam(p)) add('grandSlam', club(battingSide(p)), bat)
     if (isExtraInningHr(p)) add('extraInningHr', club(battingSide(p)), bat)
@@ -141,13 +153,13 @@ export function classifyGame(pbp, { innings, wta = false, clubs, game = {} } = {
       add('pinchHitHr', club(battingSide(p)), bat, rbi(p))
       if (rbi(p) === 4) add('pinchHitGrandSlam', club(battingSide(p)), bat)
     }
-    if (wta && isPitcherHit(p, pitchers)) add('pitcherHit', club(battingSide(p)), bat)
+    if (wta && isPitcherHitAt(plays, i, starters)) add('pitcherHit', club(battingSide(p)), bat)
     if (isTriplePlay(p)) add('triplePlay', club(fieldingSide(p)))
     const t = perBatter.get(bat) ?? { side: battingSide(p), hr: 0, base: 0 }
     if (isHr(p)) t.hr += 1
     if (ON_BASE_EVENTS.has(evt(p))) t.base += 1
     perBatter.set(bat, t)
-  }
+  })
   for (const [bat, t] of perBatter) {
     if (t.hr >= WS_MULTI_HR) add('multiHrGame', club(t.side), bat, t.hr)
     if (t.base >= WS_REACHED_BASE) add('reachedBase', club(t.side), bat, t.base)

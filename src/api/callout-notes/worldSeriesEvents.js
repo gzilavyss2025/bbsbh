@@ -56,11 +56,13 @@ export function wsPlayCtx(feed, bundle, history) {
   return {
     rows, gameDate, final: gameResult(feed).final, wta: Boolean(bundle?.wsEvents?.wta),
     plays: C.orderedPlays(feed.liveData?.plays),
+    // The lineup's starters (known before the first pitch); a batter who starts is a pitcher from play one.
+    starters: ['away', 'home'].map((s) => feed.liveData?.boxscore?.teams?.[s]?.pitchers?.[0]).filter(Boolean),
   }
 }
 
 function playTags(play, ws) {
-  const { plays, final, wta } = ws
+  const { plays, final, wta, starters = [] } = ws
   const i = plays.findIndex((p) => p.about.atBatIndex === play.about.atBatIndex)
   if (i < 0) return {}
   const gameEnds = final && i === plays.length - 1
@@ -77,7 +79,7 @@ function playTags(play, ws) {
     grandSlam: slam,
     extraInningHr: C.isExtraInningHr(play),
     multiHrGame: C.isHr(play) && hrs === C.WS_MULTI_HR,
-    pitcherHit: wta && C.isPitcherHit(play, C.pitcherIds(plays.slice(0, i + 1))),
+    pitcherHit: wta && C.isPitcherHitAt(plays, i, starters),
     triplePlay: C.isTriplePlay(play),
     gameEndingDp: gameEnds && C.isGameEndingDp(play),
   }

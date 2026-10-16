@@ -829,6 +829,7 @@ instances survived the surface's cap. It is read-only and touches no app file.
 node scripts/audit-callouts.mjs --concurrency=8
 node scripts/audit-callouts.mjs --date=2026-08-16 --limit=20   # cheap smoke run
 node scripts/audit-callouts.mjs --bundle-only                  # no network
+node scripts/audit-callouts.mjs --world-series=2024,2025       # the five ws* kinds; hand-run
 ```
 
 Read the output with two cautions. A family the bundle cannot feed counts as

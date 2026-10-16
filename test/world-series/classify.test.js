@@ -6,7 +6,8 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { classifyGame } from '../../src/lib/worldSeries/classify.js'
+import { classifyGame, orderedPlays, batterId } from '../../src/lib/worldSeries/classify.js'
+import { buildWsLastTimeNotes } from '../../src/api/callout-notes/worldSeriesEvents.js'
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'world-series')
 const load = (pk) => JSON.parse(readFileSync(join(FIX, `${pk}-plays.json`), 'utf8'))
@@ -144,5 +145,22 @@ test('a tied game gives no winner-based row', () => {
   for (const pk of [67237, 67266]) {
     const tags = new Set(rows(load(pk), { innings: 12 }).map((r) => r.tag))
     for (const t of ['shutout', 'bigComeback', 'walkOffHr']) assert.equal(tags.has(t), false, `${pk} ${t}`)
+  }
+})
+
+// One definition (#2235): the history classifier and the live play card (which may read
+// only the plays up to the current one) give the same answer for a batter who bats before
+// he pitches. 2025 G7: Ohtani singles in the 1st and again in the 5th; he starts the game.
+test('pitcherHit: history and the live play card agree for a hitter who bats before he pitches (2025 G7)', () => {
+  const pbp = load(813024)
+  const plays = orderedPlays(pbp)
+  const OHTANI = 660271
+  const hits = plays.filter((p) => batterId(p) === OHTANI && ['single', 'double', 'triple', 'home_run'].includes(p.result.eventType))
+  assert.equal(of('pitcherHit', pbp, { wta: true, innings: 11 }).length, hits.length)
+  const ws = { plays, rows: [], gameDate: '2025-11-01', final: false, wta: true, starters: [OHTANI, 453286] }
+  for (const h of hits) {
+    const notes = buildWsLastTimeNotes({ atBatIndex: h.about.atBatIndex, batterId: OHTANI }, ws)
+    assert.equal(notes.length, 1, `live card for the hit in inning ${h.about.inning}`)
+    assert.match(notes[0].text, /hit by a pitcher/)
   }
 })
