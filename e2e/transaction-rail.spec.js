@@ -91,7 +91,7 @@ test('a story\'s photo rail never escapes its own card', async ({ page }) => {
       // message, but a blank one is a failure message that names no card.
       const dateline = story.closest('.txpage__day')?.querySelector('.txpage__dateline')
       out.push({
-        date: (dateline?.textContent ?? '').replace(/s+/g, ' ').trim(),
+        date: (dateline?.textContent ?? '').replace(/\s+/g, ' ').trim(),
         slots: story.querySelectorAll('.photorail__slot').length,
         isStrip: rail.classList.contains('photorail--strip'),
         escapeLeft: Math.round(escapeLeft),

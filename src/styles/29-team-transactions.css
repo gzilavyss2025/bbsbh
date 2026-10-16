@@ -170,9 +170,8 @@
   font-size: var(--fs-h1);
 }
 /* The base logo fallback bleeds with scale(1.6): clipped by the overflow above, but
-   its box (86px) leaves the 54px frame and the card. Cover-crop inside the box instead. */
+   its box (86px) leaves the 54px frame and the card. Keep the whole mark in its box. */
 .shot.txstory__shot.shot--logo img {
-  object-fit: cover;
   transform: none;
 }
 
