@@ -69,7 +69,6 @@ const COLUMNS = [
         <TeamLogo teamId={r.oppId} name={r.opp} size={30} />
         <span className="sr-only">{r.opp}</span>
         {r.series && <span className="pitchlog__tag">{r.series}</span>}
-        {r.relief && <span className="pitchlog__tag pitchlog__tag--relief">Relief</span>}
       </Cluster>
     ),
   },
@@ -118,7 +117,7 @@ const COLUMNS = [
         <span className="pitchlog__mix" role="img" aria-label={`Pitch mix: ${r.mix.map((m) => `${pitchMark(m.code).name} ${m.n}`).join(', ')}`}>
           {r.mix.map((m) => (
             <span key={m.code} className="mono pitchlog__seg" title={`${pitchMark(m.code).name} ${m.n} (${m.pct}%)`} style={{ flexGrow: m.n, background: pitchMark(m.code).color }}>
-              {m.pct >= 13 ? m.pct : ''}
+              {m.pct >= 13 ? <>{m.pct}<small>%</small></> : ''}
             </span>
           ))}
         </span>
