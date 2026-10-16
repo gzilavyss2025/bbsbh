@@ -16,6 +16,7 @@ import { RosterList } from '../../modules/RosterList.jsx'
 import { SHARED } from '../once.js'
 import { useBandData } from '../useBandData.js'
 import { rosterCount, transactionsDoor } from './rosterData.js'
+import { CoachingStaff } from './CoachingStaff.jsx'
 import '../../../../styles/team-next/roster.css'
 
 // Roster band (#1107, row 6c): the old Roster tab's data (loadRoster, through SHARED, so no new
@@ -95,6 +96,7 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
             </Stack>
           </Card>
         )}
+        <CoachingStaff team={team} asOf={asOf} sportId={sportId} cardProps={card()} />
         {rosterCount(d) > 0 && (
           <Card frame="stamped" label="40-man roster" labelAs="h3" count={`${rosterCount(d)} players`} {...card()}>
             <div className="roster-cols">

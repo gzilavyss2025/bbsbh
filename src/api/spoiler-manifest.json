@@ -1173,6 +1173,10 @@
       "class": "caller-gated",
       "why": "Who was catching as a half begins — asks defense.js's own chain a narrower question and inherits its gate whole, passing revealedThrough straight through (ADR-0003/0010). Substitution TIMING is the risk, exactly as for defenseEntering. Its only consumer today is the nightly precompute (scripts/gen-command-received.mjs) over games already final, which reads the whole game the way BoxScore.jsx does from inside its own seal; a live surface must gate it as it would gate defenseEntering."
     },
+    "staff/coaches.js": {
+      "class": "spoiler-free",
+      "why": "A club's coaching staff for one season, from /teams/{id}/coaches: who is on a staff, never a score. Feeds the team page's Coaching staff card, an open surface."
+    },
     "commandReceived.js": {
       "class": "spoiler-free",
       "why": "Static command-received.json — per catcher, a season median distance from his target for each pitcher who threw to him, over games already final. The substitution replay that BUILT it is caller-gated where it lives (catcherOfRecord.js); what survives into this reader is an aggregate with the timing washed out — no line, no score, no per-game granularity. Same footing as targetCommand.js on the player page, an open surface (ADR-0034)."

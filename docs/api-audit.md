@@ -40,7 +40,7 @@ which sets no default params and no caching.
 | `game_winProbability` | `/api/v1/game/{gamePk}/winProbability` | none | `game.js:18` `fetchWinProbability` | **YES** |
 | `game_boxscore` | `/api/v1/game/{gamePk}/boxscore` | none | `postseasonSeries.js:73` | **YES** |
 | `venue` | `/api/v1/venues/{venueId}` | `hydrate=location,fieldInfo` | `game.js:34` `fetchVenue` | no |
-| `team_coaches` | `/api/v1/teams/{teamId}/coaches` | `?season={season}` (optional) | `game.js:60` `fetchManager` | no |
+| `team_coaches` | `/api/v1/teams/{teamId}/coaches` | `?season={season}` (optional) | `game.js:60` `fetchManager`; `staff/coaches.js` `fetchCoachingStaff` (the whole staff) | no |
 | `person_stats` (byDateRange) | `/api/v1/people/{personId}/stats` | `stats=byDateRange&group=pitching&season={y}&startDate={y}-01-01&endDate={officialDate−1}&gameType={R or F,D,L,W}[&sportId]` (ADR-0088) | `game.js` `fetchPitcherSeasonLine` | aggregate |
 | `person_stats` (yearByYear, postseason) | `/api/v1/people/{personId}/stats` | `stats=yearByYear&group=pitching&gameType=F,D,L,W`; only seasons before the page's season are read (ADR-0088) | `postseason/pitcherCareer.js` `fetchPitcherPostseasonCareer` | aggregate |
 | `schedule` | `/api/v1/schedule` | `sportId&date&hydrate=team,venue(timezone),lineups,officials,probablePitcher` | `schedule.js:88` `fetchSchedule` | rows carry scores; **dropped in `normalizeGame`** |

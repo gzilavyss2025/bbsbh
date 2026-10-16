@@ -40,7 +40,8 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
 - **Games** (`next/games/`): the season schedule, Highlights, Photos and the grid of every
   decided game (`modules/TeamGames.jsx` `AllGames`). Every row has `won != null`, cut at `?d=`.
 - **Roster** (`next/roster/`): lineup and bench, the staff (starters, bullpen, the seven-day pen
-  grid), the 40-man, the injured list, and a door to the transactions ledger.
+  grid), the coaching staff (`CoachingStaff.jsx`, a swipe row that reads its own `fetchCoachingStaff`), the 40-man,
+  the injured list, and a door to the transactions ledger.
 - **Farm** (`next/farm/`): `MinorsBody`, the affiliation history, affiliates, Horizon, prospects
   and the depth chart. Absent for a club with no parent org (a MiLB club or winter ball).
 - **Money** (`next/money/`): payroll, contract grid, the cliff and the source line. MLB only.
