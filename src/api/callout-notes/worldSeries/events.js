@@ -9,9 +9,9 @@
 // earlier plays, and "last play" only once the game is Final); the roll-up builder is
 // reveal-only; the 9th-inning builder reads tonight's score, so prehalf-callouts.js calls it
 // only once the 8th is at or under the reveal mark, the same gate as buildAfterInningNote.
-import { lastBefore } from '../../lib/worldSeries/lastBefore.js'
-import * as C from '../../lib/worldSeries/classify.js'
-import { SCORE_BASE, clampScore, magnitudeOf, skewBonus, gameResult } from './shared.js'
+import { lastBefore } from '../../../lib/worldSeries/lastBefore.js'
+import * as C from '../../../lib/worldSeries/classify.js'
+import { SCORE_BASE, clampScore, magnitudeOf, skewBonus, gameResult } from '../shared.js'
 
 export const WS_MIN_GAP_SEASONS = 3
 const GAP_FULL = 25 // seasons for the full magnitude bonus

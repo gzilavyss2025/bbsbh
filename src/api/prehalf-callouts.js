@@ -51,8 +51,8 @@
 
 import { halfIndex, derivedHalfStartingPitcherId, sideOnMoundFor } from './select.js'
 import { matchupNotesForHalf } from './matchup/forHalf.js'
-import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from './callout-notes/worldSeries.js'
-import { buildWsWtaTrailing9Note } from './callout-notes/worldSeriesEvents.js'
+import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from './callout-notes/worldSeries/odds.js'
+import { buildWsWtaTrailing9Note } from './callout-notes/worldSeries/events.js'
 import {
   cumulativeInnings,
   buildStarterTeamRecordNote,

@@ -3,7 +3,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildCallouts } from '../../src/api/callout-notes/liveAtBat.js'
-import { wsPlayCtx, WS_MIN_GAP_SEASONS } from '../../src/api/callout-notes/worldSeriesEvents.js'
+import { wsPlayCtx, WS_MIN_GAP_SEASONS } from '../../src/api/callout-notes/worldSeries/events.js'
 import { pl, feedOf, playsOf, BUNDLE } from './ws-fixture.js'
 
 const row = (tag, date, extra = {}) => ({ tag, pk: 1, date, season: Number(date.slice(0, 4)), n: 1, club: 1, player: 5, value: null, wta: false, ...extra })
