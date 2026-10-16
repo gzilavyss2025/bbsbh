@@ -59,6 +59,29 @@ test('an active interim manager replaces the permanent one, as the box score doe
   assert.deepEqual(staff.map((c) => c.id), [11, 12])
 })
 
+test('a man listed as Bench Coach and as Interim Manager is the manager (2026 Phillies)', () => {
+  const staff = coachingStaffFrom([
+    row(20, 'Rob Thomson', '59', 'Manager', 'MNGR'),
+    row(21, 'Other Coach', '5', 'Hitting Coach', 'COAT'),
+    row(22, 'Don Mattingly', '8', 'Bench Coach', 'COAB'),
+    row(22, 'Don Mattingly', '8', 'Interim Manager', 'NTRM'),
+  ])
+  assert.deepEqual(staff.map((c) => [c.id, c.manager, c.title]), [[22, true, 'Interim Manager'], [21, false, 'Hitting Coach']])
+})
+
+test('a man who holds two jobs reads as both, whatever the feed order', () => {
+  const a = coachingStaffFrom([row(30, 'X Y', '62', 'Bench Coach', 'COAB'), row(30, 'X Y', '62', 'Third Base Coach', 'COA3')])
+  const b = coachingStaffFrom([row(30, 'X Y', '62', 'Third Base Coach', 'COA3'), row(30, 'X Y', '62', 'Bench Coach', 'COAB')])
+  assert.equal(a.length, 1)
+  assert.equal(a[0].title, 'Bench Coach / Third Base Coach')
+  assert.equal(b[0].title, 'Third Base Coach / Bench Coach')
+})
+
+test('the same title on two jersey numbers is not repeated', () => {
+  const [c] = coachingStaffFrom([row(1, 'A B', '0', 'Manager', 'MNGR'), row(1, 'A B', '49', 'Manager', 'MNGR')])
+  assert.equal(c.title, 'Manager')
+})
+
 test('an Associate Manager is not a manager', () => {
   const [c] = coachingStaffFrom([row(7, 'Senior Advisor', '9', 'Associate Manager', 'ASSM')])
   assert.equal(c.manager, false)

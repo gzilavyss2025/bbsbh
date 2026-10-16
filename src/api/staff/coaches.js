@@ -5,8 +5,7 @@ import { getJson } from '../statsapi.js'
 //
 // `/api/v1/teams/{id}/coaches` is the endpoint fetchManager (game.js) reads for the manager.
 // It returns one row per JERSEY NUMBER a person wore, not one per job (verified live,
-// 2026 Brewers: Pat Murphy is listed as #00 and #49). So this keeps the first row of each
-// person. `title` is the specific role ("Lead Hitting Coach"); `job` is only its group
+// 2026 Brewers: Pat Murphy is listed as #00 and #49), so a person is one card however many rows. `title` is the specific role ("Lead Hitting Coach"); `job` is only its group
 // ("Hitting Coach"), so the title wins and the job is the fallback.
 //
 // The manager is matched by jobId, not by name: 'MNGR' or the fill-in 'NTRM'. An
@@ -17,22 +16,30 @@ const MANAGER_JOB_IDS = new Set(['MNGR', 'NTRM'])
 export function coachingStaffFrom(roster) {
   const rows = Array.isArray(roster) ? roster : []
   const hasInterim = rows.some((r) => r.jobId === 'NTRM')
-  const seen = new Set()
-  const staff = []
+  // Group the rows by person, in the order each person first appears. One person can carry
+  // several jobs (verified live, 2026: the Phillies' Don Mattingly is listed as Bench Coach and
+  // as Interim Manager, the Giants' Bench Coach and Third Base Coach is one man), so the first
+  // row is not always the right one.
+  const byId = new Map()
   for (const r of rows) {
     const id = r.person?.id
-    const name = r.person?.fullName
-    if (!id || !name || seen.has(id)) continue
+    if (!id || !r.person?.fullName) continue
     if (hasInterim && r.jobId === 'MNGR') continue
-    seen.add(id)
-    staff.push({
-      id,
-      name,
-      jersey: r.jerseyNumber ?? '',
-      title: r.title || r.job || '',
-      manager: MANAGER_JOB_IDS.has(r.jobId),
-    })
+    if (!byId.has(id)) byId.set(id, [])
+    byId.get(id).push(r)
   }
+  const staff = [...byId.values()].map((mine) => {
+    const lead = mine.find((r) => MANAGER_JOB_IDS.has(r.jobId))
+    // A manager reads as his managing job. Anyone else reads as every distinct title he holds.
+    const titles = lead ? [lead] : mine
+    return {
+      id: mine[0].person.id,
+      name: mine[0].person.fullName,
+      jersey: mine[0].jerseyNumber ?? '',
+      title: [...new Set(titles.map((r) => r.title || r.job).filter(Boolean))].join(' / '),
+      manager: Boolean(lead),
+    }
+  })
   // Array.sort is stable: the manager moves to the front, every other row keeps its place.
   return staff.sort((a, b) => Number(b.manager) - Number(a.manager))
 }

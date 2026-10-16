@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { managerPath } from '../../../../lib/route.js'
@@ -20,7 +20,7 @@ import '../../../../styles/team-next/coaching.css'
 // link already uses. It lists any staff job, so it works for a bench coach or a bullpen catcher.]
 const EMPTY = { first: 1, last: 1, left: 0, share: 1 }
 
-export function CoachingStaff({ team, asOf, sportId, cardProps }) {
+export function CoachingStaff({ team, asOf, sportId }) {
   const season = seasonOf(asOf, sportId)
   const { data } = useAsync(() => fetchCoachingStaff(team.id, season), [team.id, season])
   const linkProps = useRouteLink()
@@ -51,7 +51,8 @@ export function CoachingStaff({ team, asOf, sportId, cardProps }) {
     }
     setView((v) => (v.first === next.first && v.last === next.last && v.left === next.left && v.share === next.share ? v : next))
   }, [])
-  useEffect(() => {
+  // Before paint, so the first frame reads the real slides in view, not the empty guess.
+  useLayoutEffect(() => {
     if (!total) return undefined
     measure()
     window.addEventListener('resize', measure)
@@ -66,8 +67,8 @@ export function CoachingStaff({ team, asOf, sportId, cardProps }) {
   }
 
   return (
-    <Card frame="stamped" label="Coaching staff" labelAs="h3" body="flush" className="coachstaff" {...cardProps}>
-      <ul ref={track} className="coachstaff__track" tabIndex={0} aria-label="Coaching staff, scroll sideways" onScroll={measure}>
+    <Card frame="stamped" label="Coaching staff" labelAs="h3" body="flush" className="coachstaff" stampIn>
+      <ul ref={track} role="list" className="coachstaff__track" tabIndex={0} aria-label="Coaching staff, scroll sideways" onScroll={measure}>
         {data.map((c) => (
           <li key={c.id} className={`coachstaff__slide${c.manager ? ' coachstaff__slide--lead' : ''}`}>
             <a className="coachstaff__link" {...linkProps(managerPath(c.id, c.name))}>
@@ -84,7 +85,7 @@ export function CoachingStaff({ team, asOf, sportId, cardProps }) {
         ))}
       </ul>
       <div className="coachstaff__foot">
-        <p className="coachstaff__pos" aria-live="polite">{rangeLabel(view.first, view.last, total)}</p>
+        <p className="coachstaff__pos">{rangeLabel(view.first, view.last, total)}</p>
         <div className="coachstaff__rule" aria-hidden="true">
           <span style={{ left: `${view.left * 100}%`, width: `${view.share * 100}%` }} />
         </div>

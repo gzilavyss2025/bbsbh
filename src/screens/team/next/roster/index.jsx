@@ -96,7 +96,8 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
             </Stack>
           </Card>
         )}
-        <CoachingStaff team={team} asOf={asOf} sportId={sportId} cardProps={card()} />
+        {/* Keyed so a new club or day starts a fresh card; it arrives on its own read, so it takes no stagger step. */}
+        <CoachingStaff key={`${team.id}|${asOf ?? ''}|${sportId}`} team={team} asOf={asOf} sportId={sportId} />
         {rosterCount(d) > 0 && (
           <Card frame="stamped" label="40-man roster" labelAs="h3" count={`${rosterCount(d)} players`} {...card()}>
             <div className="roster-cols">
