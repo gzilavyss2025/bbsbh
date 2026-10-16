@@ -1,0 +1,38 @@
+/* ---------------------------------------------------------------------------
+   DISMISS — the two bare "put this away" buttons, drawn once.
+
+   .sheet-close   the X at the end of a sheet or modal head (it rides up into
+                  the head's corner with a negative margin).
+   .strip-dismiss the tap-sized X or "not now" at the end of a strip or note.
+
+   They own the plain look only: no frame, no background, caption ink. Focus
+   ring and hover stay with the block that uses them, as before. This is NOT a
+   third button kind: a button that acts on the page is .btn
+   (system/button.css). These two are the bare chrome that closes something.
+
+   HERE IN THE ORDER, after 05a and before the stack: every block that wore
+   the copy of this recipe keeps its own class beside this one, so a block that
+   needs a different look loads later and wins on order (it is one class here
+   too). Found by the second audit pass (docs/audits/second-pass-css-2026-10-15.md).
+   --------------------------------------------------------------------------- */
+.sheet-close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: var(--space-1);
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+.strip-dismiss {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  cursor: pointer;
+}

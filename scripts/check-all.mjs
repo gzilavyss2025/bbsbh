@@ -23,6 +23,7 @@ const GUARDS = [
   'check-contrast',
   'check-claude-md',
   'check-claude-md-facts',
+  'docs/check-doc-paths',
   'check-adr-numbers',
   'check-diary-voice',
   'check-report-pages',

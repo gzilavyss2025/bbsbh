@@ -43,7 +43,7 @@ export function BallparkModal({ venue, venueId, gameDate, onClose }) {
       <div className="sheet bpsheet" role="dialog" aria-modal="true" aria-label={name}>
         <div className="bpsheet__head">
           <h2 className="sheet__title">{name}</h2>
-          <button ref={closeRef} className="bpsheet__close" onClick={onClose} aria-label="Close">
+          <button ref={closeRef} className="sheet-close bpsheet__close" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>

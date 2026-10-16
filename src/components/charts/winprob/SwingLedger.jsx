@@ -45,7 +45,7 @@ export function SwingLedger({ bigPlays, activeIdx, home, away, keys, stepAt, cli
                   >
                     {chipText}
                   </span>
-                  <span className="winprob__ledger-half">{tag}</span>
+                  <span className="t-label">{tag}</span>
                 </span>
                 <span className="winprob__ledger-desc">{p.desc || `${abbr} rally`}</span>
               </button>

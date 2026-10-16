@@ -92,15 +92,6 @@
   flex-wrap: wrap;
 }
 
-.abhero__pos {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-
 /* Jersey number before position — EnteringReference.jsx's own lineup-row
    convention (.entering__jersey), reused here rather than reinvented. */
 .abhero__jersey {

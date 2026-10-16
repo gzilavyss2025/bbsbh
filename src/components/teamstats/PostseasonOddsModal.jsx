@@ -41,7 +41,7 @@ export function PostseasonOddsModal({ divisionName, rows, onClose }) {
       >
         <div className="gsmodal__head">
           <h2 className="sheet__title">Postseason Odds</h2>
-          <button ref={closeRef} type="button" className="gsmodal__close" onClick={onClose} aria-label="Close">
+          <button ref={closeRef} type="button" className="sheet-close gsmodal__close" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>

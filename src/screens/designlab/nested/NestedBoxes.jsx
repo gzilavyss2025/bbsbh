@@ -155,7 +155,7 @@ function WellCard({ flat }) {
                 {t.stats.map(([k, v]) => (
                   <div className="nested__stat" key={k}>
                     <span className="hzntile__tilev">{v}</span>
-                    <span className="hzntile__tilek">{k}</span>
+                    <span className="t-label">{k}</span>
                   </div>
                 ))}
               </div>
@@ -164,7 +164,7 @@ function WellCard({ flat }) {
                 {t.stats.map(([k, v]) => (
                   <div className="hzntile__tile" key={k}>
                     <span className="hzntile__tilev">{v}</span>
-                    <span className="hzntile__tilek">{k}</span>
+                    <span className="t-label">{k}</span>
                   </div>
                 ))}
               </Grid>

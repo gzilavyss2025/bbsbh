@@ -19,15 +19,6 @@
   min-width: 0;
 }
 
-.searchbox__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-
 .searchbox__input {
   min-height: var(--tap-min);
   padding: 0 var(--space-3);
@@ -152,15 +143,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-}
-
-.gamefinder__season label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
 }
 
 .gamefinder__season select {
@@ -707,16 +689,6 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-body);
   color: var(--text-body);
-  cursor: pointer;
-}
-
-.mergestrip__dismiss {
-  flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  background: none;
-  color: var(--text-caption);
   cursor: pointer;
 }
 

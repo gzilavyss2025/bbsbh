@@ -105,7 +105,7 @@ export function GameNotesArchivePage({ teamId: requestedId = null }) {
       </p>
 
       <div className="gamefinder__season">
-        <label htmlFor="game-notes-club">Club</label>
+        <label className="t-label" htmlFor="game-notes-club">Club</label>
         <select
           id="game-notes-club"
           value={pick}
