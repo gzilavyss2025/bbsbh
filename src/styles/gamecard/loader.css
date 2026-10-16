@@ -1,49 +1,57 @@
 /* THE GAME LOADER (components/game/versus/GameLoader.jsx). The phone's wait after a slate-card
-   tap: the two club tiles grow from squares into the slanted slabs the desktop hover makes
-   (versus.css) and hold there, a slash between them. Same lean, same slash stripes, same
-   tile fill (--tint) as the card. Only mounted for a phone without reduced motion. */
-/* layout-exempt: a fixed two-slab stage that animates its tiles */
+   tap: each club's colour grows out of a logo tile the size of the card's until the two fill the
+   screen, split on the slash the card's hover draws (versus.css), and hold there until the game is
+   ready. A fixed layer over the page; only mounted for a phone without reduced motion. */
+.versusload {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--bg-page);
+}
 .versusload__stage {
-  --versus-lean: 10deg;
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-  width: 100%;
-  height: min(46vw, 200px);
-  padding: 0 var(--space-4);
-  overflow: clip;
+  --slant: 48px;
+  --mark: min(46vw, 220px);
+  position: absolute;
+  inset: 0;
 }
 
+/* One full-screen colour layer per club, clipped to its slanted half. The logo sits in the middle
+   of that half: padding keeps it out of the other club's side. */
 .versusload__tile {
-  position: relative;
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  height: 100%;
-  padding: 2px;
-  border: var(--bw-heavy) solid var(--border-stamped);
-  border-radius: 0;
   background: var(--tint, var(--bg-page));
-  animation: versusload-grow var(--dur-slow) var(--ease-stamp) both;
+  animation: var(--dur-slow) var(--ease-stamp) both;
 }
 .versusload__tile--away {
-  animation-name: versusload-grow-away;
+  padding-right: 50%;
+  animation-name: versusload-away;
 }
 .versusload__tile--home {
-  animation-name: versusload-grow-home;
+  padding-left: 50%;
+  animation-name: versusload-home;
 }
 .versusload__tile .teamlogo {
-  width: 100% !important;
-  height: 100% !important;
+  width: var(--mark) !important;
+  height: var(--mark) !important;
   object-fit: contain;
-  border-radius: 0;
-  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32))
-    skewX(var(--versus-lean));
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0));
   animation: versusload-logo var(--dur-slow) var(--ease-stamp) both;
 }
+.versusload__tile.versusload__tile--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
 
+/* The slash: the card's three stripes, drawn from the middle out. */
 .versusload__slash {
   position: absolute;
   inset-block: 0;
@@ -57,22 +65,24 @@
     var(--text-on-ink-cream) var(--space-1) calc(var(--space-1) + var(--bw-heavy)),
     var(--border-stamped) calc(var(--space-1) + var(--bw-heavy)) 100%
   );
-  transform: skewX(calc(var(--versus-lean) * -1));
+  /* Leans the way the clipped edges do: the top sits right of the bottom. */
+  transform: skewX(-3.3deg);
   animation: versusload-slash var(--dur-slow) var(--ease-stamp) both;
 }
 
-/* From a square at rest to a leaning slab bleeding out to the screen's edge. */
-@keyframes versusload-grow-away {
-  from { transform: none; translate: 0; scale: 0.7; }
-  to   { transform: skewX(calc(var(--versus-lean) * -1)); translate: calc(var(--space-4) * -1); scale: 1; width: calc(100% + var(--space-4)); }
+/* From a slanted tile as big as the card's, sitting where the card's tile sits, out to the full
+   half. Both polygons have four points, so the browser can blend them. */
+@keyframes versusload-away {
+  from { clip-path: polygon(calc(50% - 130px) calc(50% - 60px), calc(50% - 8px) calc(50% - 60px), calc(50% - 20px) calc(50% + 60px), calc(50% - 142px) calc(50% + 60px)); }
+  to   { clip-path: polygon(0 0, calc(50% + var(--slant) / 2) 0, calc(50% - var(--slant) / 2) 100%, 0 100%); }
 }
-@keyframes versusload-grow-home {
-  from { transform: none; translate: 0; scale: 0.7; }
-  to   { transform: skewX(calc(var(--versus-lean) * -1)); translate: 0; scale: 1; width: calc(100% + var(--space-4)); }
+@keyframes versusload-home {
+  from { clip-path: polygon(calc(50% + 8px) calc(50% - 60px), calc(50% + 130px) calc(50% - 60px), calc(50% + 118px) calc(50% + 60px), calc(50% - 4px) calc(50% + 60px)); }
+  to   { clip-path: polygon(calc(50% + var(--slant) / 2) 0, 100% 0, 100% 100%, calc(50% - var(--slant) / 2) 100%); }
 }
 @keyframes versusload-logo {
-  from { scale: 1; }
-  to   { scale: 1.1; }
+  from { scale: 0.5; }
+  to   { scale: 1; }
 }
 @keyframes versusload-slash {
   from { opacity: 0; scale: 1 0; }
