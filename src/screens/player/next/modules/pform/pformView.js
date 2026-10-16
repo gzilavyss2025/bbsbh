@@ -16,6 +16,10 @@ export const CHIPS = {
   SP: { windows: [3, 5, 10], pick: 5, unit: 'starts' },
   RP: { windows: [10, 15, 20], pick: 15, unit: 'IP' },
 }
+// The fourth chip, after the fixed windows: the season to date, which grows with each game and
+// so never stops at 20 IP or 10 starts. It is a `w` like the numbers, and takes no count.
+export const SEASON = 'season'
+export const chipsOf = (kind) => [...CHIPS[kind].windows, SEASON]
 export const COLUMNS = [
   { key: 'ip', label: 'IP' },
   { key: 'era', label: 'ERA' },
@@ -52,15 +56,17 @@ export function roleOf(log, asOf) {
 }
 
 // The game log (R and October rows) to the view, or null when the log never fills one window.
-// `w` is the chip: starts for 'SP', innings for 'RP'. `asOf` keeps the games before that day.
+// `w` is the chip: starts for 'SP', innings for 'RP', or SEASON for every game so far (null with
+// fewer than two games, which is no trend). `asOf` keeps the games before that day.
 // The stretches take October too and a starter's count his starts only; the season line is his
 // regular season whole (a relief outing included), the line the box score and the hero show.
 export function pformView(log, kind, w, asOf) {
   const starter = kind === 'SP'
   const dated = (log ?? []).filter((g) => !asOf || g.date < asOf)
   const rows = starter ? dated.filter((g) => n(g, 'gamesStarted') > 0) : dated
-  const series = pitcherRollingSeries(rows, { by: starter ? 'apps' : 'outs', w: starter ? w : 3 * w })
-  if (!series) return null
+  const whole = w === SEASON
+  const series = pitcherRollingSeries(rows, whole ? { by: 'all' } : { by: starter ? 'apps' : 'outs', w: starter ? w : 3 * w })
+  if (!series || (whole && series.points.length < 2)) return null
   // The games the series counted, in its order. Its points are the last ones: one per game from the first full window on.
   const games = inOrder(rows).filter((g) => n(g, 'battersFaced') > 0 || outsOf([g]) > 0)
   const ends = series.points.map((_, i) => games.length - series.points.length + i)
@@ -72,8 +78,9 @@ export function pformView(log, kind, w, asOf) {
     regular,
     points: series.points,
     season: regular.length && { era: eraOf(sum(regular, 'earnedRuns'), outsOf(regular)), kPct: bf ? (100 * sum(regular, 'strikeOuts')) / bf : null },
-    // Each point's first game: the last w starts, or the fewest outings holding w innings.
+    // Each point's first game: the last w starts, or the fewest outings holding w innings. The season's is the first.
     starts: ends.map((end) => {
+      if (whole) return 0
       if (starter) return end + 1 - w
       let from = end
       for (let held = outsOf([games[end]]); held < 3 * w; held += outsOf([games[--from]]));

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { CHIPS, chartOf, cursorText, pformView, roleOf, shownGames, stretchRows, withSpeed } from '../src/screens/player/next/modules/pform/pformView.js'
+import { CHIPS, SEASON, chartOf, chipsOf, cursorText, pformView, roleOf, shownGames, stretchRows, withSpeed } from '../src/screens/player/next/modules/pform/pformView.js'
 
 // The pitcher Form trend's pure view (#1930): pitcherRollingSeries' points plus the chips by role,
 // the cursor line and the "How the stretches ended" rows. Samples are built, not live.
@@ -62,6 +62,30 @@ test('a reliever view windows by innings: the chip is IP, the window holds that 
   assert.deepEqual(v.points.map((p) => p.ip), ['3.0', '3.0', '3.0', '3.0'])
   assert.deepEqual(v.points.map((p) => p.era), [6, 6, 6, 0])
   assert.equal(pformView(pen, 'RP', 7), null) // only 6 IP
+})
+
+test('the fourth chip is the season to date: every start so far, with no cap at the longest window', () => {
+  assert.deepEqual(chipsOf('SP'), [3, 5, 10, SEASON])
+  assert.deepEqual(chipsOf('RP'), [10, 15, 20, SEASON])
+  const v = pformView(LOG, 'SP', SEASON)
+  assert.equal(v.points.length, 5) // one per start, from the first
+  assert.deepEqual(v.starts, [0, 0, 0, 0, 0]) // each point reaches back to his first start
+  assert.deepEqual(v.ends, [0, 1, 2, 3, 4])
+  assert.deepEqual(v.points.map((p) => p.era), [0, 3.27, 2.65, 4.95, 3.67]) // ER over IP, summed from the first start: 0/6, 4/11, 5/17, 11/20, 11/27
+  assert.equal(v.points.at(-1).ip, '27.0') // his five starts; the relief inning is not one
+  assert.equal(shownGames(v).length, 5)
+  // A reliever's season grows past 20 IP; a fixed 20 IP window cannot see the early outings.
+  const pen = Array.from({ length: 30 }, (_, i) => app(`2026-05-${String(i + 1).padStart(2, '0')}`, 100 + i, { ip: '1.0', er: i === 0 ? 3 : 0, k: 1, bf: 4, gs: 0 }))
+  const wide = pformView(pen, 'RP', SEASON)
+  assert.equal(wide.points.length, 30)
+  assert.equal(wide.points[0].era, 27)
+  assert.equal(wide.points.at(-1).ip, '30.0')
+  assert.equal(pformView(pen, 'RP', 20).points[0].ip, '20.0') // the fixed window never holds the season
+  // Under two games there is no trend; the as-of day cuts the season too.
+  assert.equal(pformView(LOG.slice(0, 1), 'SP', SEASON), null)
+  assert.equal(pformView(LOG, 'SP', SEASON, '2026-04-13').points.length, 2) // two starts before Apr 13
+  assert.equal(pformView(LOG, 'SP', SEASON, '2026-04-07'), null)
+  assert.equal(pformView([], 'SP', SEASON), null)
 })
 
 test('best and worst follow the metric: lowest ERA but highest K% is best; the season line is the regular season', () => {
