@@ -34,6 +34,9 @@
 // one file IS the thing being watched for, so there is no slack to give.
 //
 // Run by `npm run lint` (so it gates every push).
+//
+// HISTORY of every budget move is in `git log -p -- scripts/check-dir-size.mjs`.
+// The table below holds only WHY an entry is an exception, not its changelog.
 
 import { readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -63,7 +66,7 @@ const BUDGETS = {
   // See ADR-0038.
   'src/styles': 112,
   // Static-file readers over nightly precomputes (targetCommand, gloveTarget,
-  // milbPool, notebook, ...) sit flat beside the siblings they are read with and
+  // milbPool (ADR-0080), notebook, ...) sit flat beside the siblings they are read with and
   // written to match; every module the player page's Analytics tab loads is here
   // together. catcherOfRecord.js sits BESIDE defense.js, whose chain it asks a
   // narrower question of and whose spoiler gate it inherits whole.
@@ -73,10 +76,11 @@ const BUDGETS = {
   // module would hide it from check-spoiler-manifest's flat classification.
   'src/api/person': 13,
   // Flat lint guards (check-*.mjs) and hand-run or nightly generators (gen-*.mjs).
-  // package.json and the docs name them by path. Each generator's pure half lives
-  // in scripts/lib/, so the script itself stays a thin runner.
+  // package.json and the docs name them by path (docs/scripts/generators.md).
+  // Each generator's pure half lives in scripts/lib/ (ADR-0100, ADR-0111 for the
+  // open-data and pitch-start generators), so the script itself stays a thin runner.
   scripts: 129,
-  'src/lib': 59,
+  'src/lib': 58,
   // Testable helpers the generators import (scripts/CLAUDE.md's convention,
   // lib/roster.mjs is the worked example). They run nothing on import and share
   // code between generators, so inlining them would copy it into each one.

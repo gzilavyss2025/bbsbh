@@ -41,6 +41,10 @@
 // is the claim that nobody added a thousand lines to a file nobody was reading.
 //
 // Run by `npm run lint` (so it gates every push).
+//
+// HISTORY of every budget move is in `git log -p -- scripts/check-file-size.mjs`.
+// The trailing `// N` on an entry is the measured length when it was last set,
+// not a reason; a reason, where one exists, is the comment block above it.
 
 import { readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -69,6 +73,11 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // improvement. The 24 entries below are the stylesheet's remaining real debt,
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
+  // Every src/styles partial below is over the line for the same standing reason:
+  // src/styles is AT its directory budget in check-dir-size.mjs (the partials are
+  // an ordered @import sequence and cannot nest), so a new rule cannot go in a new
+  // flat file. Split a sheet by moving a component's rules into a subdirectory
+  // (src/styles/system/, focus/, report/) before you raise a number here.
   'src/styles/78-offseason.css': 1200, // 1151
   'src/styles/03-slate-header.css': 650, // 602
   'src/styles/06-loader-and-cards.css': 800, // 900
