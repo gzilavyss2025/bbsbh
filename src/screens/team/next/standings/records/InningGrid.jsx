@@ -52,7 +52,7 @@ export function InningGrid({ group }) {
             type="button"
             className="rec__innbtn"
             aria-expanded={open === n}
-            aria-label={`${ordinal(n)} inning, top and bottom`}
+            aria-label={`${ordinal(n)} inning. Top ${top ? `${top.v}, ${top.pct}` : 'no games'}. Bottom ${bottom ? `${bottom.v}, ${bottom.pct}` : 'no games'}.`}
             onClick={() => setOpen(open === n ? null : n)}
           >
             <span className="rec__innno">{ordinal(n)}</span>

@@ -68,8 +68,10 @@ test('Single-A: 11 groups with the counts, no "By league"', () => {
   const m = recordsModel(milb, {})
   assert.ok(!m.groups.some((g) => g.title === 'By league'))
   assert.equal(m.groups.length, groupCount(milb))
-  assert.equal(groupCount(brewers), 12)
-  assert.equal(groupCount(milb), 11)
+  // The shards are regenerated nightly, so the count is pinned by shape, not by a number: the MLB
+  // shard has exactly the one extra "By league" group.
+  assert.ok(recordsModel(brewers, {}).groups.some((g) => g.title === 'By league'))
+  assert.equal(groupCount(brewers), groupCount(milb) + 1)
 })
 
 test('the inning rows pair the halves and pick the better one', () => {

@@ -44,13 +44,22 @@ function Group({ group, of, open, onToggle, scope }) {
 }
 
 export function RecordsCard({ data, cutoff, asOf }) {
-  const [half, setHalf] = useState('all')
-  const [month, setMonth] = useState(null)
+  const [halfPick, setHalf] = useState('all')
+  const [monthPick, setMonth] = useState(null)
   const [openGroups, setOpenGroups] = useState(() => new Set())
-  const model = useMemo(() => recordsModel(data, { cutoff, asOf, half, month }), [data, cutoff, asOf, half, month])
   const months = useMemo(() => monthsPlayed(data, { cutoff }), [data, cutoff])
   // A half and a month combine, so an option with no games in the other lever's pick is disabled.
-  const has = (h, m) => Boolean(teamRecordsFor(data, { cutoff, half: h, month: m }))
+  // One pass per data or cutoff, not per render.
+  const played = useMemo(() => {
+    const s = new Set()
+    for (const h of HALVES) for (const m of [null, ...months.map((x) => x.month)]) if (teamRecordsFor(data, { cutoff, half: h.key, month: m })) s.add(`${h.key}:${m}`)
+    return s
+  }, [data, cutoff, months])
+  const has = (h, m) => played.has(`${h}:${m}`)
+  // A pick the data no longer holds (the page date moved the cutoff) falls back to the whole season.
+  const month = months.some((m) => m.month === monthPick) ? monthPick : null
+  const half = has(halfPick, month) ? halfPick : 'all'
+  const model = useMemo(() => recordsModel(data, { cutoff, asOf, half, month }), [data, cutoff, asOf, half, month])
   if (!has('all', null)) return null
   const toggle = (title) =>
     setOpenGroups((s) => {
