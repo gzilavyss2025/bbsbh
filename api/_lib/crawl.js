@@ -159,7 +159,6 @@ export function playerCrawl(p, { id, name, pos, team, born, status = null }) {
           heading: `${team} on Tally`,
           items: [
             { href: `/team/${clubSegment}`, text: `${team} club page` },
-            { href: `/team/${clubSegment}/roster`, text: `${team} roster` },
             { href: `/team/${clubSegment}/leaders`, text: `${team} team leaders` },
           ],
         }
@@ -174,15 +173,11 @@ function bothSides(p) {
   return `${bats || '—'} / ${throws || '—'}`
 }
 
-// The six doors of the team hub (ADR-0034 — each tab is a real route that loads
-// only its own data). The body lists the five a reader is NOT on, which is what
-// gives a crawler a path from any club page to the other five.
+// The two doors of the team hub: the one-scroll page and /leaders (ADR-0082; the old
+// roster/games/numbers/minors tabs are redirects, so a crawler is not sent to them).
+// The body lists the one a reader is NOT on.
 const TEAM_DOORS = [
   { tab: '', suffix: '', text: 'Club overview' },
-  { tab: 'roster', suffix: '/roster', text: 'Roster' },
-  { tab: 'games', suffix: '/games', text: 'Schedule and results' },
-  { tab: 'numbers', suffix: '/numbers', text: 'Standings and team stats' },
-  { tab: 'minors', suffix: '/minors', text: 'Affiliates and prospects' },
   { tab: 'leaders', suffix: '/leaders', text: 'Team leaders' },
 ]
 
@@ -190,7 +185,7 @@ const TEAM_DOORS = [
 // Tigers, Colombia): a placeholder, wrong for a Korean club. The page shows no location.
 const knownLocation = (t) => (t.locationName === 'United States' ? '' : clean(t.locationName || ''))
 
-// A club's readable body: identity, where it plays, and its own six doors.
+// A club's readable body: identity, where it plays, and its other door.
 //
 // NO RECORD, and that is a decision rather than an omission. A club's W-L is
 // what the cutoff-gated modules in src/api/spoiler-manifest.json handle
@@ -245,7 +240,7 @@ function esc(s) {
 // Every body ends with the same short rail. A crawler learns a URL from a link,
 // and until now the only markup this site offered one was a sitemap — so the
 // pages that ARE listed there had nothing pointing onward to the pages that are
-// not. See ADR-0059 on why a club's roster page carries the rest of that graph.
+// not. See ADR-0059 on why a club's page carries the rest of that graph.
 const SITE_LINKS = [
   { href: '/', text: "Today's games" },
   { href: '/learn', text: 'Scorekeeping guides' },

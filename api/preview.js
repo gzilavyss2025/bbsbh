@@ -89,18 +89,6 @@ export function canonicalUrl(params, card = null) {
     case 'team-leaders':
       path = `/team/${entity}/leaders`
       break
-    case 'team-roster':
-      path = `/team/${entity}/roster`
-      break
-    case 'team-games':
-      path = `/team/${entity}/games`
-      break
-    case 'team-numbers':
-      path = `/team/${entity}/numbers`
-      break
-    case 'team-minors':
-      path = `/team/${entity}/minors`
-      break
     case 'game':
       path = `/${params.get('date')}/${params.get('matchup')}/${params.get('section')}`
       break
@@ -199,9 +187,9 @@ export default async function handler(req) {
   const origin = url.origin
 
   // Two requests at most, and never in series. buildRoster answers null for
-  // every route but /team/{id}/roster, so this is one upstream call on ~29 of
-  // the ~30 rewritten routes and two — concurrent, so the same wall-clock — on
-  // the one whose body is a list of names.
+  // every route but /team/{id} (and the old tab addresses that
+  // rewrite to it), so this is one upstream call on most rewritten routes and
+  // two — concurrent, so the same wall-clock — on the one whose body is a list of names.
   let card = null
   let roster = null
   try {

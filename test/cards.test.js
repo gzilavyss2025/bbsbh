@@ -158,7 +158,7 @@ test('a route canonical is built on SITE_URL, never on the requested host', () =
 test('every rewritten route resolves to its own canonical path, not the home page', () => {
   const cases = [
     [{ route: 'team', id: '158' }, '/team/158'],
-    [{ route: 'team-roster', id: '158' }, '/team/158/roster'],
+    [{ route: 'team-leaders', id: '158' }, '/team/158/leaders'],
     [{ route: 'leaders', scope: 'pitching' }, '/leaders/pitching'],
     [{ route: 'leaders-org', orgId: '158' }, '/leaders/org/158'],
     [{ route: 'standings' }, '/standings'],
@@ -208,10 +208,10 @@ test('the canonical names the SLUGGED address, spelled from the resolved name', 
   const card = { segment: 'mike-trout-545361' }
   assert.equal(canonicalUrl(params, card), `${SITE_URL}/player/mike-trout-545361`)
 
-  const team = new URLSearchParams({ route: 'team-roster', id: '158' })
+  const team = new URLSearchParams({ route: 'team', id: '158' })
   assert.equal(
     canonicalUrl(team, { segment: 'milwaukee-brewers-158' }),
-    `${SITE_URL}/team/milwaukee-brewers-158/roster`,
+    `${SITE_URL}/team/milwaukee-brewers-158`,
   )
 })
 
@@ -261,12 +261,12 @@ test('the injected head carries a rel=canonical, and it agrees with og:url', () 
   assert.ok(head.includes(card.image))
 })
 
-// Every team-hub tab (Overview is untagged; the other five pass `tab`) needs
+// Every team-hub page that is not the untagged overview (only /leaders now) needs
 // a description that actually mentions the team, so a copy-pasted config entry
 // can't silently describe the wrong one.
 test('every team-hub tab has a description that names the team', () => {
   const tabs = Object.keys(TEAM_TABS)
-  assert.deepEqual(tabs.sort(), ['games', 'leaders', 'minors', 'numbers', 'roster'].sort())
+  assert.deepEqual(tabs, ['leaders'])
   for (const tab of tabs) {
     const cfg = TEAM_TABS[tab]
     const desc = cfg.description('Milwaukee Brewers')

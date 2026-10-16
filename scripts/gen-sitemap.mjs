@@ -108,19 +108,13 @@ const APP_ROUTES = [
   { path: '/postseason-records', priority: '0.4', changefreq: 'monthly' },
 ]
 
-// The six doors of the team hub (ADR-0034). MLB-only on four of them: an
-// affiliate's Numbers, Games, Minors and Leaders tabs are the thinnest pages on
-// this site — minor-league feeds routinely carry no standings, no jerseys and no
-// prospects (the MiLB degrade in root CLAUDE.md) — and listing 480 URLs where
-// 330 are substantive is how a sitemap earns a reputation. The hub and the
-// roster are the two every club genuinely fills.
+// The team hub's two canonical addresses (ADR-0082): the one-scroll page and /leaders. The old
+// roster/games/numbers/contracts/minors addresses redirect to the page, so they are not listed.
+// /leaders is MLB-only: an affiliate's is among the thinnest pages on this site (minor-league
+// feeds routinely carry no standings or leaders; the MiLB degrade in root CLAUDE.md).
 const CLUB_TABS = [
   { suffix: '', priority: '0.6', changefreq: 'weekly', mlbOnly: false },
-  { suffix: '/roster', priority: '0.6', changefreq: 'daily', mlbOnly: false },
-  { suffix: '/games', priority: '0.5', changefreq: 'daily', mlbOnly: true },
-  { suffix: '/numbers', priority: '0.5', changefreq: 'daily', mlbOnly: true },
   { suffix: '/leaders', priority: '0.5', changefreq: 'daily', mlbOnly: true },
-  { suffix: '/minors', priority: '0.4', changefreq: 'weekly', mlbOnly: true },
 ]
 
 // Every club at every level this app serves, from the file gen-teams.mjs already

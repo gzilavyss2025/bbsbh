@@ -93,17 +93,16 @@ test('the Born fact reads City, ST for the US and adds the country abroad', () =
   )
 })
 
-test('a club body carries its identity and its own five other doors', () => {
+test('a club body carries its identity and its other door', () => {
   const out = clubBody()
   assert.ok(out.includes('<h1>Milwaukee Brewers</h1>'))
   assert.ok(out.includes('American Family Field'), 'the ballpark is named')
-  for (const suffix of ['/roster', '/games', '/numbers', '/minors', '/leaders']) {
-    assert.ok(out.includes(`href="/team/milwaukee-brewers-158${suffix}"`), `it links to ${suffix}`)
-  }
-  // A tab does not link to itself, and says which tab it is.
-  const roster = clubBody('roster')
-  assert.ok(roster.includes('<h1>Milwaukee Brewers — Roster</h1>'))
-  assert.doesNotMatch(roster, /href="\/team\/milwaukee-brewers-158\/roster"/, 'the roster tab does not link to itself')
+  assert.ok(out.includes('href="/team/milwaukee-brewers-158/leaders"'), 'it links to /leaders')
+  // A page does not link to itself, and says which page it is.
+  const leaders = clubBody('leaders')
+  assert.ok(leaders.includes('<h1>Milwaukee Brewers — Team leaders</h1>'))
+  assert.doesNotMatch(leaders, /href="\/team\/milwaukee-brewers-158\/leaders"/, 'leaders does not link to itself')
+  assert.ok(leaders.includes('href="/team/milwaukee-brewers-158"'), 'leaders links back to the club page')
 })
 
 test('a missing field renders as nothing, not as a blank row', () => {
@@ -216,10 +215,10 @@ test('a player body carries a season aggregate and nothing per-game', () => {
   assert.doesNotMatch(out, /\b(final|walk-?off|beat|defeated)\b/i)
 })
 
-test('buildRoster answers only for the roster tab', async () => {
+test('buildRoster answers only for the club page', async () => {
   // Every other route resolves to null without a request, which is what keeps
-  // the ~29 other rewrites at one upstream call each.
-  for (const route of ['player', 'team', 'team-games', 'game', 'standings']) {
+  // the other rewrites at one upstream call each.
+  for (const route of ['player', 'team-leaders', 'game', 'standings']) {
     assert.equal(await buildRoster(new URLSearchParams({ route, id: '158' })), null, route)
   }
 })
@@ -273,19 +272,18 @@ test('the sitemap lists every club, at the address the canonical names', () => {
   // The slugged form, spelled by route.js itself. A sitemap naming the OTHER of
   // two working addresses lists a page whose canonical points somewhere else.
   assert.ok(xml.includes(`<loc>https://tallybb.com/team/${entitySegment(158, 'Milwaukee Brewers')}</loc>`))
-  assert.ok(xml.includes('/team/milwaukee-brewers-158/roster</loc>'))
-  assert.ok(xml.includes('/team/milwaukee-brewers-158/numbers</loc>'), 'an MLB club gets all six doors')
-  // A MiLB affiliate gets the two tabs its feed actually fills.
+  assert.ok(xml.includes('/team/milwaukee-brewers-158/leaders</loc>'), 'an MLB club also gets /leaders')
+  assert.doesNotMatch(xml, /\/team\/[^<]*\/(roster|games|numbers|contracts|minors)</, 'the old tab addresses redirect, so they are not listed')
+  // A MiLB affiliate gets the page its feed actually fills.
   assert.ok(xml.includes('/team/toledo-mud-hens-512</loc>'))
-  assert.ok(xml.includes('/team/toledo-mud-hens-512/roster</loc>'))
-  assert.doesNotMatch(xml, /toledo-mud-hens-512\/numbers/, 'not an affiliate’s thinnest tabs')
+  assert.doesNotMatch(xml, /toledo-mud-hens-512\/leaders/, 'not an affiliate’s thinnest page')
 })
 
 test('the sitemap still lists no player page and no scoring surface', () => {
   const xml = buildSitemap()
   assert.doesNotMatch(xml, /<loc>[^<]*\/player\//, 'players are discovered by links, not listed')
   assert.doesNotMatch(xml, /<loc>[^<]*\/\d{8}[^<]*<\/loc>/, 'no dated slate')
-  assert.ok(xml.match(/<loc>/g).length > 300, 'the clubs really are in there')
+  assert.ok(xml.match(/<loc>/g).length > 200, 'the clubs really are in there (150 clubs plus the app routes)')
 })
 
 test('a missing club file degrades to a shorter sitemap, never a failed build', () => {

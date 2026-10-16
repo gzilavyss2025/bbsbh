@@ -5,7 +5,8 @@
 three phrases `scripts/check-claude-md-facts.mjs` checks, so change both together.
 
 - `preview.js` + `_lib/cards.js` — link previews. They render Open Graph cards, failing
-  safe to the default (ADR-0012).
+  safe to the default (ADR-0012). The old team tab addresses (`/roster|games|numbers|contracts|minors`)
+  rewrite in `vercel.json` to `route=team`, the same card as `/team/{id}`; only `/leaders` keeps its own.
 - `reveal.js` — reveal sync (Clerk-gated). It mirrors `revealedThrough` through Upstash
   Redis, ratcheted on both sides (ADR-0022).
 - `spoiled-days.js` — mirrors which days the user consented to spoil: consent, reversible

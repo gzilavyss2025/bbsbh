@@ -227,29 +227,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/athletics-133/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/athletics-133/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/athletics-133/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/athletics-133/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/athletics-133/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/pittsburgh-pirates-134</loc>
@@ -257,29 +237,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/pittsburgh-pirates-134/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/pittsburgh-pirates-134/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/pittsburgh-pirates-134/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/pittsburgh-pirates-134/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/pittsburgh-pirates-134/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/san-diego-padres-135</loc>
@@ -287,29 +247,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/san-diego-padres-135/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/san-diego-padres-135/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/san-diego-padres-135/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/san-diego-padres-135/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/san-diego-padres-135/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/seattle-mariners-136</loc>
@@ -317,29 +257,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/seattle-mariners-136/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/seattle-mariners-136/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/seattle-mariners-136/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/seattle-mariners-136/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/seattle-mariners-136/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/san-francisco-giants-137</loc>
@@ -347,29 +267,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/san-francisco-giants-137/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/san-francisco-giants-137/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/san-francisco-giants-137/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/san-francisco-giants-137/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/san-francisco-giants-137/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/st-louis-cardinals-138</loc>
@@ -377,29 +277,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/st-louis-cardinals-138/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/st-louis-cardinals-138/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/st-louis-cardinals-138/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/st-louis-cardinals-138/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/st-louis-cardinals-138/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/tampa-bay-rays-139</loc>
@@ -407,29 +287,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/tampa-bay-rays-139/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/tampa-bay-rays-139/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/tampa-bay-rays-139/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/tampa-bay-rays-139/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/tampa-bay-rays-139/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/texas-rangers-140</loc>
@@ -437,29 +297,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/texas-rangers-140/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/texas-rangers-140/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/texas-rangers-140/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/texas-rangers-140/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/texas-rangers-140/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/toronto-blue-jays-141</loc>
@@ -467,29 +307,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/toronto-blue-jays-141/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/toronto-blue-jays-141/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/toronto-blue-jays-141/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/toronto-blue-jays-141/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/toronto-blue-jays-141/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/minnesota-twins-142</loc>
@@ -497,29 +317,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/minnesota-twins-142/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/minnesota-twins-142/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/minnesota-twins-142/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/minnesota-twins-142/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/minnesota-twins-142/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/philadelphia-phillies-143</loc>
@@ -527,29 +327,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/philadelphia-phillies-143/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/philadelphia-phillies-143/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/philadelphia-phillies-143/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/philadelphia-phillies-143/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/philadelphia-phillies-143/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/atlanta-braves-144</loc>
@@ -557,29 +337,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/atlanta-braves-144/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/atlanta-braves-144/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/atlanta-braves-144/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/atlanta-braves-144/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/atlanta-braves-144/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/chicago-white-sox-145</loc>
@@ -587,29 +347,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/chicago-white-sox-145/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/chicago-white-sox-145/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/chicago-white-sox-145/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/chicago-white-sox-145/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/chicago-white-sox-145/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/miami-marlins-146</loc>
@@ -617,29 +357,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/miami-marlins-146/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/miami-marlins-146/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/miami-marlins-146/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/miami-marlins-146/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/miami-marlins-146/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/new-york-yankees-147</loc>
@@ -647,29 +367,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/new-york-yankees-147/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/new-york-yankees-147/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/new-york-yankees-147/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/new-york-yankees-147/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/new-york-yankees-147/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/milwaukee-brewers-158</loc>
@@ -677,29 +377,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/milwaukee-brewers-158/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/milwaukee-brewers-158/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/milwaukee-brewers-158/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/milwaukee-brewers-158/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/milwaukee-brewers-158/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/los-angeles-angels-108</loc>
@@ -707,29 +387,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/los-angeles-angels-108/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/los-angeles-angels-108/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/los-angeles-angels-108/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/los-angeles-angels-108/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/los-angeles-angels-108/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/arizona-diamondbacks-109</loc>
@@ -737,29 +397,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/arizona-diamondbacks-109/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/arizona-diamondbacks-109/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/arizona-diamondbacks-109/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/arizona-diamondbacks-109/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/arizona-diamondbacks-109/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/baltimore-orioles-110</loc>
@@ -767,29 +407,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/baltimore-orioles-110/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/baltimore-orioles-110/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/baltimore-orioles-110/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/baltimore-orioles-110/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/baltimore-orioles-110/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/boston-red-sox-111</loc>
@@ -797,29 +417,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/boston-red-sox-111/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/boston-red-sox-111/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/boston-red-sox-111/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/boston-red-sox-111/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/boston-red-sox-111/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/chicago-cubs-112</loc>
@@ -827,29 +427,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/chicago-cubs-112/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/chicago-cubs-112/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/chicago-cubs-112/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/chicago-cubs-112/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/chicago-cubs-112/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/cincinnati-reds-113</loc>
@@ -857,29 +437,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/cincinnati-reds-113/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/cincinnati-reds-113/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/cincinnati-reds-113/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/cincinnati-reds-113/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/cincinnati-reds-113/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/cleveland-guardians-114</loc>
@@ -887,29 +447,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/cleveland-guardians-114/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/cleveland-guardians-114/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/cleveland-guardians-114/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/cleveland-guardians-114/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/cleveland-guardians-114/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/colorado-rockies-115</loc>
@@ -917,29 +457,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/colorado-rockies-115/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/colorado-rockies-115/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/colorado-rockies-115/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/colorado-rockies-115/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/colorado-rockies-115/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/detroit-tigers-116</loc>
@@ -947,29 +467,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/detroit-tigers-116/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/detroit-tigers-116/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/detroit-tigers-116/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/detroit-tigers-116/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/detroit-tigers-116/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/houston-astros-117</loc>
@@ -977,29 +477,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/houston-astros-117/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/houston-astros-117/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/houston-astros-117/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/houston-astros-117/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/houston-astros-117/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/kansas-city-royals-118</loc>
@@ -1007,29 +487,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/kansas-city-royals-118/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/kansas-city-royals-118/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/kansas-city-royals-118/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/kansas-city-royals-118/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/kansas-city-royals-118/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/los-angeles-dodgers-119</loc>
@@ -1037,29 +497,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/los-angeles-dodgers-119/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/los-angeles-dodgers-119/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/los-angeles-dodgers-119/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/los-angeles-dodgers-119/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/los-angeles-dodgers-119/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/washington-nationals-120</loc>
@@ -1067,29 +507,9 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/washington-nationals-120/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/washington-nationals-120/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/washington-nationals-120/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/washington-nationals-120/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/washington-nationals-120/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>https://tallybb.com/team/new-york-mets-121</loc>
@@ -1097,38 +517,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/new-york-mets-121/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/new-york-mets-121/games</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/new-york-mets-121/numbers</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/new-york-mets-121/leaders</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/new-york-mets-121/minors</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/toledo-mud-hens-512</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/toledo-mud-hens-512/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1137,18 +532,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/lehigh-valley-ironpigs-1410/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/iowa-cubs-451</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/iowa-cubs-451/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1157,18 +542,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/reno-aces-2310/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/las-vegas-aviators-400</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/las-vegas-aviators-400/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1177,18 +552,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/tacoma-rainiers-529/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/scranton-wilkes-barre-railriders-531</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/scranton-wilkes-barre-railriders-531/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1197,18 +562,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/worcester-red-sox-533/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/albuquerque-isotopes-342</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/albuquerque-isotopes-342/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1217,18 +572,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/rochester-red-wings-534/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/omaha-storm-chasers-541</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/omaha-storm-chasers-541/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1237,18 +582,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/louisville-bats-416/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/indianapolis-indians-484</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/indianapolis-indians-484/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1257,18 +592,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/round-rock-express-102/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/buffalo-bisons-422</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/buffalo-bisons-422/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1277,18 +602,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/el-paso-chihuahuas-4904/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/st-paul-saints-1960</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/st-paul-saints-1960/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1297,18 +612,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/syracuse-mets-552/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/sacramento-river-cats-105</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/sacramento-river-cats-105/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1317,18 +622,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/durham-bulls-234/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/memphis-redbirds-235</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/memphis-redbirds-235/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1337,18 +632,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/nashville-sounds-556/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/charlotte-knights-494</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/charlotte-knights-494/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1357,18 +642,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/oklahoma-city-comets-238/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/gwinnett-stripers-431</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/gwinnett-stripers-431/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1377,18 +652,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/salt-lake-bees-561/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/jacksonville-jumbo-shrimp-564</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/jacksonville-jumbo-shrimp-564/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1397,18 +662,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/norfolk-tides-568/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/sugar-land-space-cowboys-5434</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/sugar-land-space-cowboys-5434/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1417,18 +672,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/columbus-clippers-445/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/altoona-curve-452</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/altoona-curve-452/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1437,18 +682,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/tulsa-drillers-260/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/northwest-arkansas-naturals-1350</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/northwest-arkansas-naturals-1350/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1457,18 +692,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/reading-fightin-phils-522/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/new-hampshire-fisher-cats-463</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/new-hampshire-fisher-cats-463/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1477,18 +702,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/richmond-flying-squirrels-3410/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/akron-rubberducks-402</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/akron-rubberducks-402/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1497,18 +712,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/biloxi-shuckers-5015/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/hartford-yard-goats-538</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/hartford-yard-goats-538/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1517,18 +722,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/pensacola-blue-wahoos-4124/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/frisco-roughriders-540</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/frisco-roughriders-540/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1537,18 +732,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/corpus-christi-hooks-482/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/portland-sea-dogs-546</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/portland-sea-dogs-546/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1557,18 +742,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/chesapeake-baysox-418/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/harrisburg-senators-547</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/harrisburg-senators-547/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1577,18 +752,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/somerset-patriots-1956/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/montgomery-biscuits-421</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/montgomery-biscuits-421/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1597,18 +762,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/knoxville-smokies-553/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/erie-seawolves-106</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/erie-seawolves-106/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1617,18 +772,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/midland-rockhounds-237/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/rocket-city-trash-pandas-559</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/rocket-city-trash-pandas-559/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1637,18 +782,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/chattanooga-lookouts-498/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/columbus-clingstones-6325</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/columbus-clingstones-6325/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1657,18 +792,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/birmingham-barons-247/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/amarillo-sod-poodles-5368</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/amarillo-sod-poodles-5368/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1677,18 +802,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/springfield-cardinals-440/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/binghamton-rumble-ponies-505</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/binghamton-rumble-ponies-505/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1697,18 +812,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/wichita-wind-surge-3898/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/san-antonio-missions-510</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/san-antonio-missions-510/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1717,18 +822,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/arkansas-travelers-574/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/bowling-green-hot-rods-2498</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/bowling-green-hot-rods-2498/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1737,18 +832,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/winston-salem-dash-580/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/brooklyn-cyclones-453</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/brooklyn-cyclones-453/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1757,18 +842,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/west-michigan-whitecaps-582/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/fort-wayne-tincaps-584</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/fort-wayne-tincaps-584/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1777,18 +852,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/great-lakes-loons-456/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/dayton-dragons-459</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/dayton-dragons-459/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1797,18 +862,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/tri-city-dust-devils-460/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/eugene-emeralds-461</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/eugene-emeralds-461/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1817,18 +872,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/everett-aquasox-403/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/hudson-valley-renegades-537</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/hudson-valley-renegades-537/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1837,18 +882,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/greensboro-grasshoppers-477/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/hillsboro-hops-419</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/hillsboro-hops-419/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1857,18 +892,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/spokane-indians-486/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/south-bend-cubs-550</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/south-bend-cubs-550/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1877,18 +902,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/beloit-sky-carp-554/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/wilmington-blue-rocks-426</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/wilmington-blue-rocks-426/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1897,18 +912,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/jersey-shore-blueclaws-427/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/cedar-rapids-kernels-492</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/cedar-rapids-kernels-492/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1917,18 +922,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/greenville-drive-428/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/frederick-keys-493</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/frederick-keys-493/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1937,18 +932,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/rome-emperors-432/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/lansing-lugnuts-499</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/lansing-lugnuts-499/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1957,18 +942,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/vancouver-canadians-435/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/hub-city-spartanburgers-6324</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/hub-city-spartanburgers-6324/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1977,18 +952,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/quad-cities-river-bandits-565/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/lake-county-captains-437</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/lake-county-captains-437/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1997,18 +962,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/peoria-chiefs-443/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/wisconsin-timber-rattlers-572</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/wisconsin-timber-rattlers-572/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2017,18 +972,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/asheville-tourists-573/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/hickory-crawdads-448</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/hickory-crawdads-448/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2037,18 +982,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/fayetteville-woodpeckers-3712/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/daytona-tortugas-450</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/daytona-tortugas-450/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2057,18 +992,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/fresno-grizzlies-259/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/visalia-rawhide-516</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/visalia-rawhide-516/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2077,18 +1002,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/myrtle-beach-pelicans-521/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/tampa-tarpons-587</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/tampa-tarpons-587/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2097,18 +1012,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/stockton-ports-524/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/rancho-cucamonga-quakes-526</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/rancho-cucamonga-quakes-526/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2117,18 +1022,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/inland-empire-66ers-401/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/ontario-tower-buzzers-6482</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/ontario-tower-buzzers-6482/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2137,18 +1032,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/palm-beach-cardinals-279/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/san-jose-giants-476</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/san-jose-giants-476/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2157,18 +1042,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/augusta-greenjackets-478/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/salem-ridgeyaks-414</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/salem-ridgeyaks-414/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2177,18 +1052,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/jupiter-hammerheads-479/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/hill-city-howlers-481</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/hill-city-howlers-481/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2197,18 +1062,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/delmarva-shorebirds-548/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/kannapolis-cannon-ballers-487</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/kannapolis-cannon-ballers-487/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2217,18 +1072,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/lake-elsinore-storm-103/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/dunedin-blue-jays-424</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/dunedin-blue-jays-424/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2237,18 +1082,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/charleston-riverdogs-233/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/fredericksburg-nationals-436</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/fredericksburg-nationals-436/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2257,18 +1092,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/clearwater-threshers-566/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/columbia-fireflies-3705</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/columbia-fireflies-3705/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2277,18 +1102,8 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/wilson-warbirds-249/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/lakeland-flying-tigers-570</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/lakeland-flying-tigers-570/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -2297,28 +1112,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/st-lucie-mets-507/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/fort-myers-mighty-mussels-509</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tallybb.com/team/fort-myers-mighty-mussels-509/roster</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://tallybb.com/team/bradenton-marauders-3390</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://tallybb.com/team/bradenton-marauders-3390/roster</loc>
-    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
 </urlset>

@@ -11,7 +11,7 @@
 // asserts these copies against the app's own rather than trusting this comment.
 //
 // They lived in cards.js until the crawlable body (ADR-0059) gave them a second
-// caller. A club's roster page names 26 players as links, so the '{slug}-{id}'
+// caller. A club's page names 26 players as links, so the '{slug}-{id}'
 // spelling is no longer something one file uses once per request to write a
 // canonical — it is what every link in every body is built from, and the two
 // sides have to agree.
