@@ -118,13 +118,28 @@ test('the frame uses no seal token, no blurred shadow and no club colour', () =>
 
 test('a row of an event card clears the tab: 28px above the body (24px on a mound visit), 16px around', () => {
   const sheet = css('12-sealbox.css')
-  const row = ruleBody(sheet, '.change--framed,\n.change--event')
+  const row = ruleBody(sheet, '.change.card--event')
   assert.equal(row.match(/padding:\s*([^;]+);/)?.[1].trim(), 'calc(var(--space-6) + var(--space-1)) var(--space-4) var(--space-4)')
-  const mv = ruleBody(sheet, '.change--mv')
+  const mv = ruleBody(sheet, '.change--mv.card--event')
   assert.equal(mv.match(/padding-top:\s*([^;]+);/)?.[1].trim(), 'var(--space-6)')
 })
 
-test('a parent leaves 34px above a card (tab 14px, shadow 4px, room) and the card keeps its 14px inset', () => {
+test('a parent leaves 34px above a card (tab 14px, shadow 4px, room), 12px below, and the card keeps its 14px inset', () => {
   const card = ruleBody(css('12-sealbox.css'), '.card--event')
-  assert.equal(card.match(/margin:\s*([^;]+);/)?.[1].trim(), 'calc(var(--space-6) + var(--space-2h)) var(--space-3h) var(--space-1)')
+  assert.equal(card.match(/margin:\s*([^;]+);/)?.[1].trim(), 'calc(var(--space-6) + var(--space-2h)) var(--space-3h) var(--space-3)')
+})
+
+test('every shorthand code EventCard can get has a tab name, so no tab is empty', () => {
+  const cards = src('components/playbyplay/EventCards.jsx')
+  const codes = new Set([...cards.match(/export const EVENT_CODES = \{[\s\S]*?\n\}/)[0].matchAll(/: '([A-Z]{2})'/g)].map((m) => m[1]))
+  const names = new Set([...cards.match(/export const EVENT_NAMES = \{[\s\S]*?\n\}/)[0].matchAll(/\b([A-Z]{2}): '/g)].map((m) => m[1]))
+  assert.ok(codes.size >= 8)
+  for (const code of codes) assert.ok(names.has(code), `${code} has a tab name`)
+})
+
+test('the lens arm button keeps the Notice frame, and .change--framed keeps its margin and no-wrap for it', () => {
+  const body = ruleBody(css('12-sealbox.css'), '.change--framed')
+  assert.match(body, /margin:\s*var\(--space-1\) var\(--space-3h\)/)
+  assert.match(body, /flex-wrap:\s*nowrap/)
+  assert.doesNotMatch(body, /padding/, 'only an event card has a tab to clear')
 })

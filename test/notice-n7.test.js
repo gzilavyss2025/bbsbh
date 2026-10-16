@@ -134,10 +134,11 @@ test('N7: the role roots keep the caller\'s className, and the full card\'s head
 // so the card would sit flush) and no wrap: .notice wraps, the cards did not.
 // None of this goes in notice.css: notice-cascade.test.js pins every rule
 // there as one class.
-test('N7: .change--framed keeps only the row padding; the margin and the frame are .card--event\'s', () => {
-  const body = ruleBody(css('12-sealbox.css'), '.change--framed,\n.change--event')
-  assert.equal(decl(body, 'padding'), 'calc(var(--space-6) + var(--space-1)) var(--space-4) var(--space-4)')
-  for (const prop of ['margin', 'flex-wrap', 'border', 'border-radius', 'background']) assert.equal(decl(body, prop), undefined, `${prop} is not the namespace's`)
+test('N7: .change--framed keeps only the margin and the no-wrap (the lens button); a stamped card\'s room is .card--event\'s', () => {
+  const body = ruleBody(css('12-sealbox.css'), '.change--framed')
+  assert.equal(decl(body, 'margin'), 'var(--space-1) var(--space-3h)', '4px 14px, as tokens')
+  assert.equal(decl(body, 'flex-wrap'), 'nowrap')
+  for (const prop of ['padding', 'border', 'border-radius', 'background']) assert.equal(decl(body, prop), undefined, `${prop} is not the namespace's`)
   assert.ok(ruleBody(css('12-sealbox.css'), '.card--event'), 'the event card has the margin (event-card-frame.test.js pins it)')
 })
 
@@ -159,6 +160,6 @@ test('N7: .pcard stretches its sections, does not wrap and keeps its gap', () =>
 // the console keys on the namespaces every staged card carries instead.
 test('N7: the console finds a lone staged card by its namespace', () => {
   const sheet = css('focus/console.css')
-  assert.ok(sheet.includes('.half:has(:is(.change--framed, .pitcherhandoff)):not(:has(.statgrid))'))
+  assert.ok(sheet.includes('.half:has(:is(.change--framed, .change--event, .pitcherhandoff)):not(:has(.statgrid))'))
   assert.doesNotMatch(sheet, /notice--event/)
 })

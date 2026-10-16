@@ -795,21 +795,26 @@
    note line). The frame is the stamped event card (ADR-0113): each CALLER
    passes eventCardClass('change--framed'), because PitcherNotice is also the
    header row inside the full card (.pcard), which wears the frame itself.
-   The frame is system/card.css's; the margin is `.card--event` below, and
-   `.change--framed` (a name ADR-0084's rename will change) keeps the row's
-   padding. Three kinds of element wear it: the compact cards (which also wear .change), the
-   full card .pcard (which does not) and the arm button of the scorecard lens.
+   The frame is system/card.css's. `.change--framed` (a name ADR-0084's rename
+   will change) keeps what the lens arm button, which still wears the Notice
+   frame, needs: the margin and no wrap (.notice wraps). A stamped event card
+   takes its margin from `.card--event` below, which loads later and wins.
+   Three kinds of element wear it: the compact cards (which also wear .change),
+   the full card .pcard (which does not) and the arm button of the scorecard lens.
 
    THE EVENT CARD'S ROOM (ADR-0113). The name tab hangs 14px above the card
    and the shadow 4px below it, so a parent leaves 34px above a card (the tab
-   and breathing room) and 4px below it, and a card sits 14px in from .half's
-   borderless edge. A .change row clears the tab with 28px above its body and
-   16px around it. */
-.card--event {
-  margin: calc(var(--space-6) + var(--space-2h)) var(--space-3h) var(--space-1);
+   and breathing room) and 12px below it, and a card sits 14px in from .half's
+   borderless edge. A .change row of an event card clears the tab with 28px
+   above its body and 16px around it. */
+.change--framed {
+  margin: var(--space-1) var(--space-3h);
+  flex-wrap: nowrap;
 }
-.change--framed,
-.change--event {
+.card--event {
+  margin: calc(var(--space-6) + var(--space-2h)) var(--space-3h) var(--space-3);
+}
+.change.card--event {
   padding: calc(var(--space-6) + var(--space-1)) var(--space-4) var(--space-4);
 }
 
@@ -872,11 +877,11 @@
    .pbp__code. --event just tightens the gap for this denser, iconless row.
    The frame is the stamped event card (eventCardClass, ADR-0113). The mound
    visit (--mv) has a one-line tab and no photo, so its body starts 24px down,
-   not 28px. */
+   not 28px. Two classes, to out-rank .change.card--event above. */
 .change--event {
   gap: var(--space-2);
 }
-.change--mv {
+.change--mv.card--event {
   padding-top: var(--space-6);
 }
 .change__code {

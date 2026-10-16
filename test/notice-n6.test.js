@@ -117,7 +117,7 @@ test('N6: the two handoff cards take the event frame on their Stack and keep the
 test('N6: .change--event keeps its gap and .pitcherhandoff its stretch; neither sets a margin', () => {
   const sheet = css('12-sealbox.css')
   assert.match(sheet, /\.change--event \{\s*gap: var\(--space-2\);\s*\}/, 'the bar keeps its tighter gap')
-  assert.equal(decl(ruleBody(sheet, '.change--framed,\n.change--event'), 'margin'), undefined, 'the margin is .card--event\'s')
+  assert.equal(ruleBody(sheet, '.change--event').includes('margin'), false, 'the margin is .card--event\'s')
   const handoff = ruleBody(sheet, '.pitcherhandoff')
   assert.equal(decl(handoff, 'align-items'), 'stretch')
   assert.equal(decl(handoff, 'margin'), undefined, 'the margin is .card--event\'s')
@@ -133,12 +133,13 @@ test('N6: the handoff card keeps the 8px gap of Stack\'s "snug" step', () => {
 // ---- 4. the old frame left the actor cards in N7 ----
 
 // The actor cards' callers pass eventCardClass with .change--framed as the
-// namespace. The namespace keeps only the row padding now (ADR-0113): the
-// frame and the margin are .card--event's.
-test('N6: .change--framed keeps only the row padding, and the actor-card callers wear eventCardClass', () => {
-  const frame = ruleBody(css('12-sealbox.css'), '.change--framed,\n.change--event')
-  assert.equal(decl(frame, 'padding'), 'calc(var(--space-6) + var(--space-1)) var(--space-4) var(--space-4)')
-  for (const prop of ['margin', 'border', 'border-radius', 'background', 'box-shadow']) assert.equal(decl(frame, prop), undefined, `.card--event draws the ${prop}`)
+// namespace. The namespace keeps the margin and no-wrap that the lens arm
+// button needs (ADR-0113); a stamped card's margin and padding are .card--event's.
+test('N6: .change--framed keeps the margin and no-wrap for the lens button, and the actor-card callers wear eventCardClass', () => {
+  const frame = ruleBody(css('12-sealbox.css'), '.change--framed')
+  assert.equal(decl(frame, 'margin'), 'var(--space-1) var(--space-3h)')
+  assert.equal(decl(frame, 'flex-wrap'), 'nowrap')
+  for (const prop of ['padding', 'border', 'border-radius', 'background', 'box-shadow']) assert.equal(decl(frame, prop), undefined, `.card--event draws the ${prop}`)
   for (const rel of [
     'components/playbyplay/PitcherNotice.jsx',
     'components/playbyplay/PlayByPlay.jsx',

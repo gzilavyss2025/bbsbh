@@ -70,7 +70,7 @@ export const EVENT_CODES = {
 
 // The name tab of an EventCard (ADR-0113), by its shorthand code. The code
 // stays in the row; the tab is the card's heading.
-const EVENT_NAMES = {
+export const EVENT_NAMES = {
   SB: 'Stolen base', CS: 'Caught stealing', PK: 'Pickoff', WP: 'Wild pitch', PB: 'Passed ball',
   BK: 'Balk', RP: 'Runner placed', DI: 'Defensive indifference',
 }

@@ -120,7 +120,7 @@ test('N8b: the event text keeps its #root caps exemption', () => {
 test('N8b: the root and its modifiers took the .change name in N8c', () => {
   const css = src('styles/12-sealbox.css')
   assert.match(css, /^\.change--event \{/m)
-  assert.match(css, /^\.change--framed,$/m, 'ADR-0113: the row padding is shared with .change--event')
+  assert.match(css, /^\.change--framed \{/m)
   const code = src('components/playbyplay/EventCards.jsx')
   assert.match(code, /change \$\{eventCardClass\(\)\} change--event/)
 })
