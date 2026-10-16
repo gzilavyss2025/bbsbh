@@ -66,7 +66,7 @@ export function TeamPhotosPage({ id, asOf, sportId: _sportId }) {
 
 // ---------------------------------------------------------------------------
 // The season grid — its own component so `games`/`team` are stable props a
-// walk-back's refs can close over, the same split GamesTab uses between
+// walk-back's refs can close over, the same split the Games band uses between
 // itself and TeamPhotosRail.
 // ---------------------------------------------------------------------------
 function TeamPhotosSeason({ team, season, games, onBack }) {

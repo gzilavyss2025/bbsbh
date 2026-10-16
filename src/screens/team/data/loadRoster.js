@@ -143,8 +143,7 @@ export async function loadRoster(id, asOf, src = DIRECT) {
       }
     })
   // Which of these pitchers is CURRENTLY starting, from each one's own most
-  // recent outing — see TeamPage.jsx's copy of this fixup for the full
-  // incident writeup on why a season GS total alone misreads a pitcher who's
+  // recent outing. A season GS total alone misreads a pitcher who has
   // moved into the rotation mid-season.
   const recentStarterIds = new Set(
     (

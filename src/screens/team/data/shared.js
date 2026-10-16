@@ -6,7 +6,7 @@ import { isoToday } from '../../../lib/dates.js'
 
 // Pieces MORE THAN ONE team-hub loader genuinely needs, collapsed here once the
 // tabs had all landed (issue 07 of .scratch/team-page-ia — the tab loaders were
-// deliberately written by copying out of the old TeamPage.jsx `loadTeam`, so
+// deliberately written by copying out of the old team page's `loadTeam`, so
 // four agents could work in parallel without sharing a function).
 //
 // The bar for living here is "two loaders answer the SAME question with the same
