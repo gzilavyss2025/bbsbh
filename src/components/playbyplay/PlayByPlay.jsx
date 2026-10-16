@@ -20,6 +20,7 @@ import {
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
+  liveCapFor,
   buildTrailItems,
 } from '../../api/playbyplay.js'
 import { halfIndex } from '../../api/select.js'
@@ -216,20 +217,19 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     onRunsSoFar?.(runsSoFar, hitsSoFar)
   }, [stepping, runsSoFar, hitsSoFar]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // The scorebug HUD's live snapshot (bases/outs/pitches/current batter),
-  // reported for the SCOREBUG'S benefit only — deliberately NOT gated on
-  // `stepping` the way onStepInfo/onRunsSoFar above are. Those two only fire
-  // while a half is being actively stepped through one at-bat at a time; the
-  // scorebug still needs a final snapshot once a half is fully committed
-  // (stepCap null, effectiveCap null) or the HUD would go blank the instant
-  // the last at-bat reveals. `deriveLiveState` itself is what keeps this
-  // spoiler-safe either way — it never reads past `effectiveCap`.
-  // Same `entries`-identity trap as onRunsSoFar above: the dependency is the set
-  // of INPUTS `entries` is derived from — a poll minting a fresh feed still
-  // re-reports, a bare re-render no longer does.
+  // The scorebug HUD's live snapshot, NOT gated on `stepping` (a committed half still
+  // needs its final one). It follows the WINDOW on screen, not only the reveal cap:
+  // `liveCapFor` (entriesView.js) says why that reads no further than the cap and why
+  // `entries` are rebuilt at it. Deps are the INPUTS `entries` derives from.
+  const revealCap = effectiveCap ?? entries.length
+  const liveCap = liveCapFor({ wins, focusStep, windowed, effectiveCap, entriesLength: entries.length })
+  const liveEntries = useMemo(
+    () => (liveCap === revealCap ? entries : computeHalfInningFeed(feed, inning, half, battingSide, liveCap)),
+    [feed, inning, half, battingSide, liveCap, revealCap], // eslint-disable-line react-hooks/exhaustive-deps
+  )
   useEffect(() => {
-    onLiveState?.(deriveLiveState(entries, effectiveCap ?? entries.length))
-  }, [feed, inning, half, battingSide, effectiveCap]) // eslint-disable-line react-hooks/exhaustive-deps
+    onLiveState?.(deriveLiveState(liveEntries, liveCap))
+  }, [feed, inning, half, battingSide, effectiveCap, liveCap]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // (This file no longer reports the revealed pitcher up to HalfInning: that put
   // a reliever's card in two places at once. The header names the half's starting
