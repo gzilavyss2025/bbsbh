@@ -57,6 +57,9 @@ add('src/styles/system/button.css', rd('src/styles/system/button.css'))
 for (const f of ['stat', 'leader', 'result', 'meter', 'controls']) add(`src/styles/system/report/${f}.css`, rd(`src/styles/system/report/${f}.css`))
 add('src/styles/motion/stamp-in.css', rd('src/styles/motion/stamp-in.css'))
 bundle += '\n/* ==== src/styles/motion/player-rise.css (the player rise) ==== */\n' + rd('src/styles/motion/player-rise.css')
+// The notification card's arrival (ADR-0113): the resting looks, then the motion between them.
+add('src/styles/pitcher-card/arrival.css (the arrival: resting looks)', rd('src/styles/pitcher-card/arrival.css'))
+add('src/styles/motion/arrival.css (the arrival: motion)', rd('src/styles/motion/arrival.css'))
 wr('_ds_bundle.css', bundle)
 
 // ---- base rules, entry stylesheet, stub bundle, update marker

@@ -15,7 +15,7 @@ rebuild, then upload.
 | --- | --- | --- |
 | `tokens/*.css` | colour, spacing, effects, type, layout | `src/tokens/`, copied |
 | `tokens/TOKENS.md` | a usage line per token | `.design-sync/build/usage-data.json` |
-| `_ds_bundle.css` | the part styles | `src/styles/system/`, `09-team-info.css` and `motion/`, copied |
+| `_ds_bundle.css` | the part styles | `src/styles/system/`, `09-team-info.css`, `motion/` and the arrival sheets (`pitcher-card/arrival.css`, `motion/arrival.css`), copied |
 | `fonts/` | five woff2 files and three OFL licences | `node_modules/@fontsource/` |
 | `components/` | one preview per part (six for the report parts, ADR-0112), a Motion preview, seven player cards | `.design-sync/build/previews.mjs`, `motion.mjs`, `playercards.mjs` |
 | `README.md` | the brand book | `.design-sync/build/README.template.md` |
