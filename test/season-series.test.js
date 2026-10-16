@@ -131,7 +131,8 @@ const post = (gamePk, gameType, seriesGameNumber, awayScore, homeScore, extra = 
 test('seasonSeriesCells: a postseason game carries its round tag and series game number', () => {
   const games = [post(10, 'F', 1, 2, 3), post(11, 'D', 2, 4, 1), post(12, 'L', 3, 0, 1), post(13, 'W', 4, 5, 6)]
   const cells = seasonSeriesCells(games, MIL, 99)
-  assert.deepEqual(cells.map((c) => c.round), ['WC', 'DS', 'LCS', 'WS'])
+  // The Brewers were an NL club in 2026, so the three rounds below the World Series name the NL.
+  assert.deepEqual(cells.map((c) => c.round), ['NLWC', 'NLDS', 'NLCS', 'WS'])
   assert.deepEqual(cells.map((c) => c.seriesGame), [1, 2, 3, 4])
 })
 
@@ -145,7 +146,7 @@ test('seasonSeriesCells: a regular-season game (or a row with no game type) has 
 
 test('seasonSeriesCells: the viewed postseason game is still sealed', () => {
   const [cell] = seasonSeriesCells([post(16, 'D', 2, 9, 0)], MIL, 16)
-  assert.equal(cell.round, 'DS')
+  assert.equal(cell.round, 'NLDS')
   assert.equal(cell.final, false)
   assert.equal(cell.winnerScore, null)
 })

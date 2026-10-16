@@ -76,6 +76,7 @@ import { isRealDate } from '../../lib/dates.js'
 import { baseballToday, shiftDays } from '../../lib/time/standingsDates.js'
 import { HIT_EVENT_TYPES, NON_PA_EVENT_TYPES } from '../playbyplay/eventTypes.js'
 import { NON_AB_EVENTS } from '../scorecard/notation.js'
+import { roundTag } from '../../lib/postseason/roundTag.js'
 
 export const SAVANT_ROW_CAP = 25000
 
@@ -180,6 +181,8 @@ export function plateAppearances(rows) {
         atBat: Number(r.at_bat_number),
         date: r.game_date,
         round: r.game_type,
+        // The round's short name with its league, from the home club Savant names (roundTag.js).
+        roundTag: roundTag(r.game_type, r.home_team, r.game_date),
         roundLabel: ROUND_LABELS[r.game_type] ?? r.game_type,
         event: r.events,
         description: r.des ?? '',

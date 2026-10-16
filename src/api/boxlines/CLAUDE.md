@@ -85,3 +85,8 @@ A postseason row's `series` pill names its league (NLDS, ALCS) when the game-log
 one: `seriesAbbr(gameType, LEAGUE_BY_ID[s.league?.id])`. Both field lists in `fetch.js` ask for
 `league`; drop it and every pill falls back to WC, DS, LCS with nothing to say why. The World
 Series is both leagues' and stays WS.
+
+`seriesAbbr` is `lib/postseason/roundTag.js`'s `roundName`, the one table of round names. A row
+with no league on it (the postseason ledger in `postseason/records.js`) asks `roundTag(gameType,
+clubId, season)`, which finds the league from the club and the year. Never add a table of
+`{ F: 'WC', D: 'DS', … }` beside it: six surfaces did, and drifted.

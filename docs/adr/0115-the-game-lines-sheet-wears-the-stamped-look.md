@@ -38,10 +38,22 @@ sheet, the real fonts and real rows from the data layer. Gary then approved it.
    band. The club mark is the full-colour cap logo (`TeamLogo variant="cap"`), not the
    knockout. A comment of 2026-10-16 asked for full colour. The band keeps the white
    knockout, as every band does.
-6. **A postseason pill names its league.** NLWC, ALDS, NLCS. The World Series stays WS.
-   `seriesAbbr` already took a league; the sheet's request did not ask for one. Both game-log
-   field lists now include `league`, and a split with none keeps the plain round (WC, DS,
-   LCS). A comment of 2026-10-16 asked for this.
+6. **A round's tag names its league, on every surface.** NLWC, ALDS, NLCS. The World Series
+   stays WS. A comment of 2026-10-16 asked for this, and then asked for it site-wide.
+   - The sheet's own rows: `seriesAbbr` already took a league, but the request did not ask for
+     one. Both game-log field lists now include `league`.
+   - Every other surface printed a plain tag from a table of its own, because its row carries
+     no league: the postseason records ledger, the season-series strip, the umpire game log,
+     the pitcher card's last appearance, the Matchup Scout's meetings and the mound card.
+     `src/lib/postseason/roundTag.js` is now the one table. It finds the league from the club
+     and the season, which every one of those rows carries (a team id, or an abbreviation for
+     the Scout's Savant rows). A round below the World Series is inside one league, so either
+     club works.
+   - A club the table does not know, or a row with no club, keeps the plain round (WC, DS,
+     LCS). A tag never claims a league it cannot name.
+   - Two clubs changed league since the 1995 ledger starts: the Astros (NL through 2012) and
+     the Brewers (AL through 1997). The table holds both moves. A test pins every club against
+     `public/data/teams.json`.
 7. **The list and the figure grid are stamped cards.** Square, ink edge, hard shadow. The
    list has no banding. The picked group's twelve figures are plain cells with no lead cell
    (a comment of 2026-10-16: "remove the emphasis on a card here").
@@ -61,7 +73,12 @@ sheet, the real fonts and real rows from the data layer. Gary then approved it.
 ## Consequences
 
 - Both game-log field lists add `league`. The cost is a few bytes a row.
-- The postseason page's sheet (`GameLinesDoor`) shares the shell and wears the house band.
-  Its pills still say WC, DS, LCS, because its rows come from the postseason ledger, which
-  does not carry a league.
+- The postseason page's sheet (`GameLinesDoor`) shares the shell and wears the house band. Its
+  pills now name the league too, through `roundTag`.
+- Six tables of round names (`seasonSeries.js`, `scout/format.js`' postseason tags,
+  `pitcherCard/card.js`, `UmpirePage.jsx`, `moundView.js` and `records.js`) lost their own
+  copy of the tag, or fall back to it only when no league is known. A test fails if a new
+  copy of the table appears.
+- A club table (30 rows) is data to keep. A new club or a league move needs one edit in
+  `roundTag.js`; the `teams.json` test fails until it is made.
 - `seasonBand` is gone. `startsSeason` replaces it.

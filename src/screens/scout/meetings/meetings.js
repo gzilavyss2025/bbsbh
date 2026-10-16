@@ -111,7 +111,7 @@ export function gamesOf(pas) {
   const by = new Map()
   for (const pa of pas) by.set(pa.gamePk, [...(by.get(pa.gamePk) ?? []), pa])
   return [...by.values()]
-    .map((list) => ({ gamePk: list[0].gamePk, date: list[0].date, round: list[0].round, pas: [...list].sort((a, b) => a.atBat - b.atBat) }))
+    .map((list) => ({ gamePk: list[0].gamePk, date: list[0].date, round: list[0].round, tag: list[0].roundTag ?? '', pas: [...list].sort((a, b) => a.atBat - b.atBat) }))
     .sort((a, b) => b.date.localeCompare(a.date) || b.gamePk - a.gamePk)
 }
 

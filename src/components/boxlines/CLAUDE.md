@@ -38,4 +38,5 @@ rows that add up to it, each linking to that game's box score. The facet registr
   (`{ title, items }`), and the sheet leads with that grid instead of the verbatim line.
 - **A new season starts under an ink rule** (`startsSeason`), the year in the gutter. There is
   no banding. The row mark is the full-colour `cap` logo, never the `mono` knockout. A
-  postseason pill names its league (NLDS), which needs `league` in both game-log field lists.
+  postseason pill names its league (NLDS): from `league` in both game-log field lists, or from
+  `roundTag` for a row that carries none (the postseason ledger).
