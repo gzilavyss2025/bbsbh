@@ -93,17 +93,16 @@ test('the Born fact reads City, ST for the US and adds the country abroad', () =
   )
 })
 
-test('a club body carries its identity and its own five other doors', () => {
+test('a club body carries its identity and its other door', () => {
   const out = clubBody()
   assert.ok(out.includes('<h1>Milwaukee Brewers</h1>'))
   assert.ok(out.includes('American Family Field'), 'the ballpark is named')
-  for (const suffix of ['/roster', '/games', '/numbers', '/minors', '/leaders']) {
-    assert.ok(out.includes(`href="/team/milwaukee-brewers-158${suffix}"`), `it links to ${suffix}`)
-  }
-  // A tab does not link to itself, and says which tab it is.
-  const roster = clubBody('roster')
-  assert.ok(roster.includes('<h1>Milwaukee Brewers — Roster</h1>'))
-  assert.doesNotMatch(roster, /href="\/team\/milwaukee-brewers-158\/roster"/, 'the roster tab does not link to itself')
+  assert.ok(out.includes('href="/team/milwaukee-brewers-158/leaders"'), 'it links to /leaders')
+  // A page does not link to itself, and says which page it is.
+  const leaders = clubBody('leaders')
+  assert.ok(leaders.includes('<h1>Milwaukee Brewers — Team leaders</h1>'))
+  assert.doesNotMatch(leaders, /href="\/team\/milwaukee-brewers-158\/leaders"/, 'leaders does not link to itself')
+  assert.ok(leaders.includes('href="/team/milwaukee-brewers-158"'), 'leaders links back to the club page')
 })
 
 test('a missing field renders as nothing, not as a blank row', () => {
@@ -216,10 +215,10 @@ test('a player body carries a season aggregate and nothing per-game', () => {
   assert.doesNotMatch(out, /\b(final|walk-?off|beat|defeated)\b/i)
 })
 
-test('buildRoster answers only for the roster tab', async () => {
+test('buildRoster answers only for the club page', async () => {
   // Every other route resolves to null without a request, which is what keeps
   // the ~29 other rewrites at one upstream call each.
-  for (const route of ['player', 'team', 'team-games', 'game', 'standings']) {
+  for (const route of ['player', 'team-leaders', 'game', 'standings']) {
     assert.equal(await buildRoster(new URLSearchParams({ route, id: '158' })), null, route)
   }
 })

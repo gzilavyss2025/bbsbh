@@ -174,15 +174,11 @@ function bothSides(p) {
   return `${bats || '—'} / ${throws || '—'}`
 }
 
-// The six doors of the team hub (ADR-0034 — each tab is a real route that loads
-// only its own data). The body lists the five a reader is NOT on, which is what
-// gives a crawler a path from any club page to the other five.
+// The two doors of the team hub: the one-scroll page and /leaders (ADR-0082; the old
+// roster/games/numbers/minors tabs are redirects, so a crawler is not sent to them).
+// The body lists the one a reader is NOT on.
 const TEAM_DOORS = [
   { tab: '', suffix: '', text: 'Club overview' },
-  { tab: 'roster', suffix: '/roster', text: 'Roster' },
-  { tab: 'games', suffix: '/games', text: 'Schedule and results' },
-  { tab: 'numbers', suffix: '/numbers', text: 'Standings and team stats' },
-  { tab: 'minors', suffix: '/minors', text: 'Affiliates and prospects' },
   { tab: 'leaders', suffix: '/leaders', text: 'Team leaders' },
 ]
 
@@ -190,7 +186,7 @@ const TEAM_DOORS = [
 // Tigers, Colombia): a placeholder, wrong for a Korean club. The page shows no location.
 const knownLocation = (t) => (t.locationName === 'United States' ? '' : clean(t.locationName || ''))
 
-// A club's readable body: identity, where it plays, and its own six doors.
+// A club's readable body: identity, where it plays, and its other door.
 //
 // NO RECORD, and that is a decision rather than an omission. A club's W-L is
 // what the cutoff-gated modules in src/api/spoiler-manifest.json handle
