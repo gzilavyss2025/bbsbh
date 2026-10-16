@@ -57,4 +57,7 @@ test('seasonRange defaults, validates and refuses an unknown flag', () => {
   assert.deepEqual(seasonRange({ from: '1950', to: '1960' }, 2025), { from: 1950, to: 1960 })
   assert.throws(() => seasonRange({ from: '1800' }, 2025))
   assert.throws(() => seasonRange({ frm: '1950' }, 2025), /unknown flag/)
+  // right after the 2026 Series the run must accept --to=2026 although the default stays 2025
+  assert.deepEqual(seasonRange({ to: '2026' }, 2025, 2026), { from: 1903, to: 2026 })
+  assert.throws(() => seasonRange({ to: '2027' }, 2025, 2026))
 })

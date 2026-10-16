@@ -28,7 +28,7 @@ import {
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const parsed = parseArgs(process.argv.slice(2))
-const { from, to } = seasonRange(parsed, new Date().getUTCFullYear() - 1)
+const { from, to } = seasonRange(parsed, new Date().getUTCFullYear() - 1, new Date().getUTCFullYear())
 const outDir = parsed.out ? resolve(parsed.out) : join(root, 'public', 'data', 'world-series')
 const outFile = join(outDir, 'events.json')
 

@@ -17,15 +17,15 @@ export const PLAY_FIELDS = [
 const FLAGS = ['from', 'to', 'out', 'check']
 
 // `parsed` is lib/args.mjs parseArgs. `last` is the default final season. -> { from, to }.
-export function seasonRange(parsed, last) {
+export function seasonRange(parsed, last, cap = last) {
   const stray = Object.keys(parsed).filter((k) => !FLAGS.includes(k))
   if (stray.length) throw new Error(`unknown flag: --${stray.join(', --')}`)
   if (parsed.out === true) throw new Error('--out takes a folder: --out=DIR')
   const year = (flag, fallback) => {
     if (parsed[flag] === undefined) return fallback
     const n = Number(parsed[flag])
-    if (!Number.isInteger(n) || n < FIRST_SEASON || n > last) {
-      throw new Error(`--${flag} takes a year from ${FIRST_SEASON} to ${last}, not "${parsed[flag]}"`)
+    if (!Number.isInteger(n) || n < FIRST_SEASON || n > cap) {
+      throw new Error(`--${flag} takes a year from ${FIRST_SEASON} to ${cap}, not "${parsed[flag]}"`)
     }
     return n
   }
