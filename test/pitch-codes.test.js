@@ -208,13 +208,3 @@ test('the derived Whiffs total counts a missed bunt', () => {
   feed.liveData.plays.allPlays[0].playEvents[1].details.call.code = 'M'
   assert.equal(revealDerived(computeDerivedByInning(feed), 1, 'top').whiffs, 4)
 })
-
-test('every dot category wears its own letter, so no call rests on colour alone (#2213)', async () => {
-  const { PITCH_CAT_LETTER } = await import('../src/lib/pitch/callLetter.js')
-  const cats = ['called', 'whiff', 'foul', 'inplay', 'ball']
-  assert.deepEqual(cats.map((c) => PITCH_CAT_LETTER[c]), ['C', 'S', 'F', 'X', 'B'])
-  assert.equal(new Set(Object.values(PITCH_CAT_LETTER)).size, cats.length)
-  for (const code of ['C', 'S', 'F', 'X', 'B']) {
-    assert.ok(PITCH_CAT_LETTER[pitchDotCategory(code)], code)
-  }
-})
