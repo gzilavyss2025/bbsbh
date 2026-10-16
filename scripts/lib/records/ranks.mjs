@@ -23,23 +23,21 @@ export function levelRanks(shards) {
   )
   // Rank each scope once, then keep only those some club is ranked in: a month
   // on the wrong side of the break (post-All-Star April) would ship all zeros.
-  const ranked = candidates.map(({ half, month }) => {
-    const index = buildRankingIndex(entries, { half, month })
-    return [...index.metrics.keys()].map((id) => [id, rankMetric(index, id).ranked.filter((r) => r.rank != null)])
-  })
-  const scopes = candidates.filter((_, i) => ranked[i].some(([, rows]) => rows.length))
+  const scopes = candidates
+    .map((c) => {
+      const index = buildRankingIndex(entries, { half: c.half, month: c.month })
+      return { ...c, metrics: [...index.metrics.keys()].map((id) => [id, rankMetric(index, id).ranked.filter((r) => r.rank != null)]) }
+    })
+    .filter((c) => c.metrics.some(([, rows]) => rows.length))
 
   const out = new Map(entries.map((e) => [e.team.id, { n: entries.length, scopes: scopes.map((s) => s.key), m: {} }]))
-  let i = 0
-  ranked.forEach((metrics, c) => {
-    if (!scopes.includes(candidates[c])) return
+  scopes.forEach(({ metrics }, i) => {
     for (const [id, rows] of metrics) {
       for (const row of rows) {
         const m = out.get(row.teamId).m
         ;(m[id] ??= new Array(scopes.length).fill(0))[i] = row.rank
       }
     }
-    i++
   })
   return out
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { computeLeaders, positionTag, LEDGER_HITTING, LEDGER_PITCHING } from '../../../../api/teamLeaders.js'
 import { AsyncStatus } from '../../../../components/ui/AsyncGate.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
@@ -7,7 +7,7 @@ import { Door } from '../../../../components/ui/control/Door.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { StatTile } from '../../../../components/ui/frame/StatTile.jsx'
 import { Table } from '../../../../components/ui/table/Table.jsx'
-import { hasSeen, markSeen, viewKey } from '../../../../lib/motion/inViewOnce.js'
+import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { useNav } from '../../../../lib/nav.js'
 import { orgLeadersPath, teamLeadersPath } from '../../../../lib/route.js'
 import { teamClubName } from '../../../../lib/teams.js'
@@ -98,11 +98,7 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
   const n = numbers.data
 
   // Motion plays once per page visit; a return shows the band at rest.
-  const seenKey = viewKey(team.id, 'team-ranks')
-  const [still] = useState(() => hasSeen(seenKey))
-  useEffect(() => {
-    markSeen(seenKey)
-  }, [seenKey])
+  const still = useViewOnce(team.id, 'team-ranks')
 
   const blocks = useMemo(
     () =>

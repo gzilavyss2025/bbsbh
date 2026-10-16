@@ -7,8 +7,6 @@ import { SplitRow } from './Splits.jsx'
 // on one win-pct axis. Left: the top half's W-L over its pct. Right: the bottom half's. The better
 // half's W-L is heading ink. A tap on an inning unfolds both halves under it, extras are one bucket.
 // The rules sit at .500, .600, .700 and .800; only the ends are labelled, since the track is narrow.
-const ENDS = [['.500', 20], ['.800', 80]]
-
 function Side({ row, better }) {
   if (!row) return <span className="rec__half rec__half--none">—</span>
   return (
@@ -43,7 +41,7 @@ export function InningGrid({ group }) {
       <div className="rec__innhead" aria-hidden="true">
         <span>Inn</span>
         <span>▲ Top</span>
-        <span className="rec__axis">{ENDS.map(([t, at]) => <span key={t} style={{ left: `${at}%` }}>{t}</span>)}</span>
+        <span className="rec__axis"><span style={{ left: '20%' }}>.500</span><span style={{ left: '80%' }}>.800</span></span>
         <span>▼ Bot</span>
       </div>
       {innings.map(({ n, top, bottom, better }) => (

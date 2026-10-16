@@ -1,4 +1,4 @@
-// The same words the Contracts tab's SourceLine carries (ContractsTab.jsx), so a reader who
+// The same words the old Contracts tab's source line carried, so a reader who
 // picked a date on this page learns the book did not move with it (ADR-0082).
 export const MONEY_NOTE =
   'A season’s book, not a day’s — these figures do not move with a date. Pre-arbitration figures are estimates.'

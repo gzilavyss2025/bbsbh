@@ -31,8 +31,7 @@
   min-width: 0;
 }
 /* Each league reuses the Team Page's "roster super-section" card
-   (.roster-super/.roster-super__row/__col, .roster-sub/__title — see
-   TeamPage.jsx's Preferred Lineup) instead of a loose flex-wrap of inline
+   (.roster-super/.roster-super__row/__col, .roster-sub/__title) instead of a loose flex-wrap of inline
    names — Starting Lineup / Bullpen / Substitutes each get their OWN column
    (not two sections stacked in one tall column), so a short and a long
    section sitting side by side don't leave a visible block of blank card

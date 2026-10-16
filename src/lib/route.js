@@ -589,10 +589,11 @@ export function parseRoute(url) {
   // The old tab addresses ('/team/{id}/roster', and behind the hidden '/team/{id}/next/' the
   // same five) are the one-scroll team page, which lands on the tab's band (#1107). A bare or
   // unknown '/team/{id}/next/{x}' is the bare page. All sit above the unknown-segment branch.
-  if (parts[0] === 'team' && (parts.length === 3 || (parts.length === 4 && parts[2] === 'next'))) {
-    const seg = parts[parts.length - 1]
-    const tab = Object.hasOwn(TEAM_TAB_BAND, seg) ? seg : null
-    if (tab || parts.length === 4) return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId, ...(tab && { tab }) }
+  if (parts[0] === 'team' && parts.length === 3 && Object.hasOwn(TEAM_TAB_BAND, parts[2]))
+    return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId, tab: parts[2] }
+  if (parts[0] === 'team' && parts.length === 4 && parts[2] === 'next') {
+    const page = { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
+    return Object.hasOwn(TEAM_TAB_BAND, parts[3]) ? { ...page, tab: parts[3] } : page
   }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }

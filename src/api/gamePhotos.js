@@ -290,7 +290,7 @@ export function withoutGraphics(photos) {
 
 // Subject lookups, matched against every tagged id rather than just the
 // primary, so a montage tagging three players is found under all three.
-// `photosForTeam` backs the Team Page's Photos rail (TeamPage.jsx); no
+// `photosForTeam` backs the Team Page's Photos rail (screens/team/modules/media/TeamPhotosRail.jsx); no
 // screen calls `photosForPlayer` yet.
 export function photosForPlayer(photos, personId) {
   if (personId == null) return []

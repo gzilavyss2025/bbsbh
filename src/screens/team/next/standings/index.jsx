@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { AsyncStatus } from '../../../../components/ui/AsyncGate.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { useAsync } from '../../../../hooks/useAsync.js'
-import { hasSeen, markSeen, viewKey } from '../../../../lib/motion/inViewOnce.js'
+import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { useNav } from '../../../../lib/nav.js'
 import { linkQuery } from '../../../../lib/route.js'
 import { teamClubName } from '../../../../lib/teams.js'
@@ -51,11 +51,7 @@ export default function Standings({ team, asOf, onReady, onCount }) {
   const card = useMemo(() => raw && scoreCard(raw.own, raw.other, team), [raw, team])
 
   // Motion plays once per page visit (docs/motion.md, "The one-shot gate"); a return shows it at rest.
-  const seenKey = viewKey(team.id, 'team-standings')
-  const [still] = useState(() => hasSeen(seenKey))
-  useEffect(() => {
-    if (n) markSeen(seenKey)
-  }, [n, seenKey])
+  const still = useViewOnce(team.id, 'team-standings', !!n)
 
   const recordGroups = useMemo(() => (n?.teamRecords ? groupCount(n.teamRecords, n.recordsCutoff) : 0), [n])
   const clubName = teamClubName(team)

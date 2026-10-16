@@ -679,7 +679,7 @@ export async function fetchTodayPlateUmpireIds(dateStr, sportId = 1) {
 // `oppRuns`, and `innings` are all gated together by `resultsCutoff`: the
 // same day-level cutoff the team page already freezes its standings table to
 // (`dayBefore(asOf)` when reached from inside a sealed game, `null`/unbounded
-// on a bare visit — see TeamPage.jsx). A game on or after the cutoff gets
+// on a bare visit — see screens/team/loadTeamIdentity.js). A game on or after the cutoff gets
 // `won: null` (and no score) regardless of what the feed says, so the
 // specific game the caller opened this page from (and anything same-day or
 // later) never has a result attached to the object handed back. Score used

@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { hasSeen, markSeen, viewKey } from '../../../../lib/motion/inViewOnce.js'
+import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { AsyncStatus } from '../../../../components/ui/AsyncGate.jsx'
 import { loadMinors } from '../../data/loadMinors.js'
 import { MinorsBody } from './MinorsBody.jsx'
@@ -13,11 +12,7 @@ import '../../../../styles/team-next/farm.css'
 const count = (m) => m.prospects.length
 export default function Farm({ team, asOf, onReady, onCount }) {
   const minors = useBandData(() => loadMinors(team.id, asOf, SHARED), [team.id, asOf], { onReady, onCount, count })
-  const seenKey = viewKey(team.id, 'team-farm')
-  const [still] = useState(() => hasSeen(seenKey))
-  useEffect(() => {
-    markSeen(seenKey)
-  }, [seenKey])
+  const still = useViewOnce(team.id, 'team-farm')
   return (
     <div className={`tnext__farm${still ? ' tnext__farm--still' : ''}`}>
       <h2 className="tnext__bandhead">Farm</h2>

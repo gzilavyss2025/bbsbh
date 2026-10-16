@@ -391,7 +391,7 @@
 /* The Overview's preview door — the link that ends each preview card and
    carries on to the tab holding the whole thing. Wraps a .door--inline (the
    same shared "See all ›" primitive TeamLeaders' own header action and
-   NumbersTab's "Org leaders ›" use), NOT a second card: the tab bar and the
+   the "Org leaders ›" door use), NOT a second card: the tab bar and the
    Org index tile stay the only new chrome the IA rebuild introduces.
    Right-aligned; a Card carries no bottom margin of its own, so the
    door's own top margin is what keeps it from reading as glued to the

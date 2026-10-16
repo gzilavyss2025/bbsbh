@@ -440,7 +440,7 @@
   scroll-snap-align: none;
 }
 /* Team Page Photos rail — professional camera stills of this club, lazily
-   fetched a few games at a time (TeamPhotosRail in TeamPage.jsx). Same
+   fetched a few games at a time (screens/team/modules/media/TeamPhotosRail.jsx). Same
    nav/track/sentinel structure as .last10 just above (single-row flex track,
    IntersectionObserver-driven growth), thumbnail sizing/treatment borrowed
    from .photostrip__thumb (GamePhotosStrip) since this rail shows photos,
@@ -541,7 +541,7 @@
 
 /* team-hub schedule strip — one block per series (run of consecutive games
    vs. the same opponent), wrapping left-to-right/top-to-bottom instead of
-   paging by month; see SeriesStrip in TeamPage.jsx. */
+   paging by month. */
 .sstrip {
   display: flex;
   flex-wrap: wrap;

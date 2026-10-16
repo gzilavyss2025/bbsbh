@@ -8,7 +8,7 @@ import { rankThird } from '../../../../../components/ui/frame/rankBar.js'
 // Line 3: the rank, "4 of 30", on its own line; a split with no rank reads "—" and draws no bar.
 // The top-third rank wears the marker (.rankmark); the others are plain caption mono.
 
-export function RankLine({ rank }) {
+function RankLine({ rank }) {
   if (!rank) return <span className="rec__rank">—</span>
   const top = rankThird(rank.rank, rank.of) === 'top'
   return <span className={`rec__rank${top ? ' rankmark' : ''}`}>{`${rank.rank} of ${rank.of}`}</span>
