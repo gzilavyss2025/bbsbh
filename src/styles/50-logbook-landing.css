@@ -77,16 +77,6 @@
   font-size: var(--fs-caption);
 }
 
-.logbooklanding__devicenotedismiss {
-  flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  background: none;
-  color: var(--text-caption);
-  cursor: pointer;
-}
-
 .logbooklanding__devicenotedismiss:focus-visible {
   outline: none;
   box-shadow: var(--ring);

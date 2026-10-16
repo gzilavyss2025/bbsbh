@@ -121,7 +121,7 @@ function DeviceScopeNote() {
       This book lives on this device. An account carries it to the others.
       <button
         type="button"
-        className="logbooklanding__devicenotedismiss"
+        className="strip-dismiss logbooklanding__devicenotedismiss"
         onClick={dismiss}
         aria-label="Dismiss this note"
       >

@@ -710,16 +710,6 @@
   cursor: pointer;
 }
 
-.mergestrip__dismiss {
-  flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  background: none;
-  color: var(--text-caption);
-  cursor: pointer;
-}
-
 .mergestrip__link:focus-visible,
 .mergestrip__dismiss:focus-visible {
   outline: none;

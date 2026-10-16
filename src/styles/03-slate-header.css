@@ -536,16 +536,6 @@
   color: var(--text-caption);
 }
 
-.daystate__scopenotedismiss {
-  flex: 0 0 auto;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border: none;
-  background: none;
-  color: var(--text-caption);
-  cursor: pointer;
-}
-
 .daystate__scopenotedismiss:focus-visible {
   outline: none;
   box-shadow: var(--ring);

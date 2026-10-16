@@ -100,7 +100,7 @@ export function HighlightSheet({ item, src = null, loading = false, notice = '',
                   not a file anything can save. A clip with no MP4 rendition
                   simply gets no save button. */}
               {mp4 && <SaveClipButton url={mp4} title={label} filename={filename} />}
-              <button ref={closeRef} className="hlsheet__close" onClick={onClose} aria-label="Close">
+              <button ref={closeRef} className="sheet-close hlsheet__close" onClick={onClose} aria-label="Close">
                 ✕
               </button>
             </div>

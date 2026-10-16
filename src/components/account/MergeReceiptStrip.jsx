@@ -54,7 +54,7 @@ export function MergeReceiptStrip() {
       </button>
       <button
         type="button"
-        className="mergestrip__dismiss"
+        className="strip-dismiss mergestrip__dismiss"
         onClick={() => {
           markMergeReceiptSeen(user?.id)
           setDismissedThisSession(true)
