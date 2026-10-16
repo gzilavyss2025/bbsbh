@@ -1,6 +1,6 @@
 // The Team Page's "Last 10 Games" roster view — the same Preferred Lineup /
-// Top Substitutes / Starting Pitchers / Bullpen shape TeamPage.jsx already
-// builds from season-cumulative stats (see its own "Preferred Lineup" block),
+// Top Substitutes / Starting Pitchers / Bullpen shape the team page
+// builds from season-cumulative stats,
 // but keyed off actual starts/appearances in the club's last N COMPLETED
 // games instead. Spoiler-free: every game this reads is already Final, same
 // footing as postseasonSeries.js (which this fetcher is modeled on) — no
@@ -19,7 +19,7 @@ async function fetchGameBoxscore(gamePk) {
 }
 
 // The club's last `windowSize` COMPLETED games (schedule rows with `won` set —
-// same `.won != null` idiom TeamPage.jsx's `decidedGames` already uses, so a
+// same `.won != null` idiom the team page uses, so a
 // game the caller is mid-viewing stays excluded via fetchTeamSchedule's own
 // resultsCutoff), each resolved to its standalone boxscore. A game whose
 // boxscore fails to load is dropped rather than aborting the whole window.
@@ -50,9 +50,8 @@ export function recentFormEligibleRoster(activeRoster, fullRoster, injuredIds = 
   return pool.filter((r) => r.person?.id && !injuredIds.has(r.person.id))
 }
 
-// Same nine-spot order the season Preferred Lineup card uses (see
-// TeamPage.jsx's PREFERRED_LINEUP_POSITIONS) — kept in sync manually since
-// this module has no other reason to import from the screen.
+// Same nine-spot order the season Preferred Lineup card uses, kept in sync
+// manually since this module has no other reason to import from the screen.
 const LINEUP_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
 
 // Pure aggregation over the fetched boxscore window, restricted to players
@@ -60,7 +59,7 @@ const LINEUP_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
 // optioned doesn't belong in a "current lineup" projection, even if he started
 // half the window) — the caller passes `recentFormEligibleRoster`'s output
 // above, so eligibility here is the active roster, not the 40-man.
-// Returns id lists only; the caller (TeamPage.jsx) already has a roster
+// Returns id lists only; the caller (the team page's roster band) already has a roster
 // metadata lookup (name/jersey/WAR/badges) built for the season cards and
 // maps these ids through the same one, so this module carries no rendering
 // shape of its own.
@@ -179,7 +178,7 @@ export function buildRecentForm(games, roster) {
   const bullpenIds = bullpen.map((s) => s.id)
 
   // Every current-roster pitcher who threw not one pitch in the window (a
-  // true zero, not just "didn't start") — the caller (TeamPage.jsx) infers a
+  // true zero, not just "didn't start") — the caller infers a
   // role for these from AAA/prior-team stats and folds them into the lists
   // above, since a rookie call-up or a just-returned rehabber genuinely has
   // no window data to rank by either.

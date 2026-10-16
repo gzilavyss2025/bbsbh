@@ -627,8 +627,7 @@
 }
 
 /* Prospect showcase — headshot spotlight strip above the ranked table,
-   spotlighting only the very top of the org list (see PROSPECT_SHOWCASE_COUNT
-   in TeamPage.jsx). Fixed column counts (not auto-fill) so the strip always
+   spotlighting only the very top of the org list. Fixed column counts (not auto-fill) so the strip always
    reads as one full row rather than wrapping an odd card onto its own line;
    the row grows from 3 to 5 cards as the viewport (and .screen's own
    max-width) widens, so a phone shows fewer, wider faces and the desktop

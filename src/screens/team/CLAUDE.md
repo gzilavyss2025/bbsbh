@@ -52,7 +52,7 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
 
 Every link keeps `?d=` and `?s=` (the shell wraps the page in `LinkScope`). Open surface
 (ADR-0034, "The cutoff is opt-in now"): nothing here is sealed, and adding a gate is a regression.
-Motion plays once per page visit (`viewKey`, `docs/motion.md`).
+Motion plays once per page visit: every band reads `useViewOnce(team.id, band, ready)` (`hooks/motion/useViewOnce.js`, `docs/motion.md`).
 
 **The club schedule runs into October.** `fetchTeamSchedule` returns the postseason rounds at
 MLB, each row tagged `gameType`, so the Games band, Stamp In and the photo pages list them. A

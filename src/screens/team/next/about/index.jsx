@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
 import { JerseyCombos, MilbUniformStrip } from '../../../../components/logo/JerseyCombos.jsx'
 import { MilbAlumni } from '../../../../components/teamstats/MilbAlumni.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
-import { hasSeen, markSeen, viewKey } from '../../../../lib/motion/inViewOnce.js'
+import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { BallparkCard } from '../../modules/ballpark/BallparkCard.jsx'
 import { FranchiseHistory } from '../../modules/ballpark/FranchiseHistory.jsx'
 import { useBandData } from '../useBandData.js'
@@ -21,11 +20,7 @@ export default function About({ team, asOf, onReady, onCount }) {
     onCount,
     count: (d) => aboutCount(d, team),
   })
-  const seenKey = viewKey(team.id, 'team-about')
-  const [still] = useState(() => hasSeen(seenKey))
-  useEffect(() => {
-    if (about.data) markSeen(seenKey)
-  }, [about.data, seenKey])
+  const still = useViewOnce(team.id, 'team-about', !!about.data)
   const d = about.data
   if (!d) return null
   const card = (label, i, count) => ({ frame: 'stamped', label, count, ...stamp(still, i) })

@@ -145,7 +145,7 @@
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.22));
 }
 /* The parent MLB club's mark plus an "Affiliate" caption, both riding in
-   their own small opaque chip — only on a MiLB team page (see TeamPage.jsx).
+   their own small opaque chip — only on a MiLB team page (see TeamHubShell.jsx).
    Links through to that club's page. Bare logo + 0.9 opacity used to be
    enough sitting on plain paper; against an arbitrary club tint it needs a
    surface of its own AND a label, since a bare mark alone doesn't say what

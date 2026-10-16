@@ -45,8 +45,12 @@ export function recordsModel(data, { cutoff = null, asOf = null, half = 'all', m
   }
 }
 
-// The group count for the card's tag ("12 groups"), live or dated: it does not depend on ranks.
-export const groupCount = (data, cutoff = null) => recordsModel(data, { cutoff })?.groups.length ?? 0
+// The group count for the card's tag ("12 groups"), live or dated: it does not depend on ranks, so
+// it skips the model's ranking pass. The model always adds one Season counts group after these.
+export const groupCount = (data, cutoff = null) => {
+  const rec = teamRecordsFor(data, { cutoff })
+  return rec ? rec.groups.length + 1 : 0
+}
 
 // The inning grid: one row per inning with the top and bottom halves on one win-pct axis.
 const AXIS_LO = 0.4

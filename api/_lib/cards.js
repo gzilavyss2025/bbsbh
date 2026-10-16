@@ -16,7 +16,7 @@
 // else moved (`rosterEntries` joined it for #1779).
 //
 // `buildRoster` is the single exception, and it is deliberately not part of
-// `buildCard`: a club's active roster is what makes /team/{id}/roster worth
+// `buildCard`: a club's active roster is what makes the club page worth
 // crawling and is the link graph the rest of this site has never had, but the
 // card and its image do not need it. So it is a separate export that
 // api/preview.js calls in parallel with buildCard, leaving buildCard's own
@@ -195,31 +195,16 @@ async function playerCard(idSegment, origin) {
   }
 }
 
-// The team-hub tab a card is built for (see src/screens/team/CLAUDE.md —
-// Overview/bare `/team/{id}` is the untagged default, plus the five real
-// tabs). Exported so its shape is unit-testable without a network call —
+// The team-hub pages a card is built for. Bare `/team/{id}` is the untagged default
+// and the one-scroll page (ADR-0082); the old roster/games/numbers/contracts/minors
+// addresses redirect to it, and vercel.json rewrites them to the same card. Only
+// `/leaders` is still its own page. Exported so its shape is unit-testable without a network call —
 // each tab needs a description that's actually about that tab, not a
 // copy-paste of another one.
 export const TEAM_TABS = {
   leaders: {
     suffix: ' — Team Leaders',
     description: (name) => `${name} statistical leaders — spoiler-safe. Every level, every category.`,
-  },
-  roster: {
-    suffix: ' — Roster',
-    description: (name) => `${name} active roster, injured list, and 40-man — a spoiler-safe scorecard companion.`,
-  },
-  games: {
-    suffix: ' — Games',
-    description: (name) => `${name} schedule and every decided game this season — a spoiler-safe scorecard companion.`,
-  },
-  numbers: {
-    suffix: ' — Numbers',
-    description: (name) => `${name} standings, ranks, and leaders — a spoiler-safe scorecard companion.`,
-  },
-  minors: {
-    suffix: ' — Minors',
-    description: (name) => `${name} affiliates and top prospects — a spoiler-safe scorecard companion.`,
   },
 }
 
@@ -262,7 +247,7 @@ async function teamCard(idSegment, origin, { tab } = {}) {
 // so the route's wall-clock is unchanged even though its request count is two.
 //
 // What it buys is the reason ADR-0059 leaves player pages out of the sitemap: a
-// crawler that reaches one club roster page reaches 26 player pages from it, by
+// crawler that reaches one club page reaches 26 player pages from it, by
 // following links, which is how discovery is supposed to work on a site whose
 // whole player set is five figures. Verified 2026-08-20 against teams 158 (MLB),
 // 512 (AAA) and 5015 (A) — the endpoint answers at every level this app serves.
@@ -270,7 +255,7 @@ async function teamCard(idSegment, origin, { tab } = {}) {
 // Nothing in the response is a score: person id, name, jersey number, position
 // and roster status, which is what the app's own Roster tab shows openly.
 export async function buildRoster(params) {
-  if (params.get('route') !== 'team-roster') return null
+  if (params.get('route') !== 'team') return null
   try {
     const id = idFromSlug(params.get('id'))
     const data = await getJson(`/api/v1/teams/${id}/roster?rosterType=active`)
@@ -407,14 +392,6 @@ export async function buildCard(params, origin) {
         return await teamCard(params.get('id'), origin)
       case 'team-leaders':
         return await teamCard(params.get('id'), origin, { tab: 'leaders' })
-      case 'team-roster':
-        return await teamCard(params.get('id'), origin, { tab: 'roster' })
-      case 'team-games':
-        return await teamCard(params.get('id'), origin, { tab: 'games' })
-      case 'team-numbers':
-        return await teamCard(params.get('id'), origin, { tab: 'numbers' })
-      case 'team-minors':
-        return await teamCard(params.get('id'), origin, { tab: 'minors' })
       case 'game':
         return await gameCard(params.get('date'), params.get('matchup'), origin)
       case 'leaders-org':

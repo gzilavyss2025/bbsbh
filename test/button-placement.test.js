@@ -1,8 +1,8 @@
 // A control's per-site rule must keep every declaration that PLACES it (#1130).
 //
-// The door collapse (#1161) lost `.txcard__door`'s `align-self: stretch` in a
-// cut that read "all it keeps is where it stands", and the door went from 151px
-// to 54px with lint green (test/door-placement.test.js). The button collapse
+// The door collapse (#1161) lost the team-transactions deck door's
+// `align-self: stretch` in a cut that read "all it keeps is where it stands", and
+// the door went from 151px to 54px with lint green. The button collapse
 // makes the same cut on about twenty controls, so every declaration it keeps ON
 // PURPOSE is pinned here, from the stylesheet text, where it is always true or
 // always false rather than true only on the day a page happens to render it.

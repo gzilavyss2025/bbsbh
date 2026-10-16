@@ -106,8 +106,7 @@
   margin: 20px 0;
 }
 
-/* The pager, laid across the page rather than standing at the end of a scroll
-   row the way the deck's .txcard__door does. .door--block draws it; the margin
+/* The pager, laid across the page. .door--block draws it; the margin
    is the only thing a page-wide pager needs that a card-foot door does not. */
 .txpage__door {
   margin: 4px 0 20px;

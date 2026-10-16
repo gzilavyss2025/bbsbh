@@ -388,7 +388,7 @@ const OFFICE_OF_THE_COMMISSIONER_ID = 11
 // This club's parent organization, or null when it has none a reader could
 // open. Asked by the header's Affiliate chip (TeamHubShell.jsx), the Minors
 // tab gate below, the Affiliates card list above, the Org leaders door
-// (NumbersTab.jsx), and the org keys the Minors and Roster loaders match
+// (the Org leaders door), and the org keys the Minors and Roster loaders match
 // prospects against — one answer, so those five cannot disagree.
 export function parentOrgIdOf(team) {
   const orgId = team?.parentOrgId ?? null

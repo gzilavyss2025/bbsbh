@@ -153,7 +153,7 @@
   "src/styles/29-team-transactions.css": {
     "column": 4,
     "wrap": 2,
-    "grid": 2
+    "grid": 1
   },
   "src/styles/30-standings.css": {
     "wrap": 3,
