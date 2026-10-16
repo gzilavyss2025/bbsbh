@@ -12,6 +12,7 @@ import { splitDisplayName } from '../../../../../api/person/identity.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
 import { DASH, Fact } from '../../../parts.jsx'
 import { LogMore } from '../../parts/LogMore.jsx'
+import { revealThrough } from '../../parts/logPaging.js'
 import { LogTable } from '../../parts/LogTable.jsx'
 import { earlierSeason, games, keyOf, linesOf, loadPitchlog, scopeRows, totalsOf } from './pitchlogView.js'
 import { StartDetail } from './StartDetail.jsx'
@@ -190,7 +191,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
               label="Show games"
               className="segmented--lean"
               value={scope}
-              onChange={setScope}
+              onChange={(id) => (setScope(id), setLimit(SHOWN))}
               options={SCOPES.map(([id, label]) => ({ value: id, label, count: counts[id] }))}
             />
           )}
@@ -232,7 +233,7 @@ export default function PitchlogModule({ bio, asOf, season, onEmpty, onCount }) 
           onEarlier={
             at < rows.length - 1
               ? () => {
-                  setLimit(Infinity) // the row it opens may sit past the collapsed list
+                  setLimit((l) => revealThrough(l, at + 1)) // the row it opens may sit past the page
                   setOpen(rows[at + 1].gamePk)
                 }
               : null

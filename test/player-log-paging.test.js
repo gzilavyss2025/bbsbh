@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pageOf } from '../src/screens/player/next/parts/logPaging.js'
+import { pageOf, revealThrough } from '../src/screens/player/next/parts/logPaging.js'
 
 test('a short log has no pager', () => {
   assert.equal(pageOf(8, 8, 8).canToggle, false)
@@ -23,4 +23,13 @@ test('the last page offers only what is left, then Show less folds to the first 
 test('Infinity (all shown) reads Show less; the pitcher first page is its own', () => {
   assert.equal(pageOf(12, Infinity, 5).label, 'Show less')
   assert.equal(pageOf(12, 5, 5).label, 'Show 7 more · 7 left')
+})
+
+test('a limit below the first page counts as the first page', () => {
+  assert.equal(pageOf(30, 0, 8).label, 'Show 20 more · 22 left')
+})
+test('revealThrough opens the stepped-to row and never shrinks the page', () => {
+  assert.equal(revealThrough(5, 6), 6)
+  assert.equal(revealThrough(28, 6), 28)
+  assert.equal(revealThrough(Infinity, 9), Infinity)
 })

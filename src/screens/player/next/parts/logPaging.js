@@ -5,11 +5,16 @@ export const STEP = 20
 
 // `limit` is how many rows show now (Infinity is all of them); `first` is the first page.
 export function pageOf(total, limit, first, step = STEP) {
-  const left = Math.max(0, total - limit)
+  const now = Math.max(limit, first)
+  const left = Math.max(0, total - now)
   return {
     canToggle: total > first,
     left,
     label: left > 0 ? `Show ${Math.min(step, left)} more · ${left} left` : 'Show less',
-    next: left > 0 ? limit + step : first,
+    next: left > 0 ? now + step : first,
   }
 }
+
+// The limit that shows row `count` (1-based) without shrinking what already shows: the pitcher
+// log's detail view steps to an older start that may sit past the page.
+export const revealThrough = (limit, count) => Math.max(limit, count)
