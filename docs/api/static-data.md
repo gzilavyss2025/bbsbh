@@ -1261,3 +1261,12 @@ game whose type is `W`. It returns `null` until the generator has written the fi
 `lib/worldSeries/odds.js` turns it into the `wsSeriesOdds` numbers, and every lookup goes
 through `lib/worldSeries/lastBefore.js`, strictly before the game's own date. The builder
 is `callout-notes/worldSeries.js`; it shows on the pre-half strip of the first half only.
+
+## `postseason/pitcherWorldSeries.js`
+
+`fetchPitcherWorldSeriesCareer(personId, season, thisSeasonWs)` is `fetchPitcherPostseasonCareer`
+with `gameType=W`: `yearByYear` for seasons before `season`, plus the caller's World Series
+line for this season. It never uses `stats=career` (ADR-0088). `fetchWorldSeriesStartsBefore(id, date)`
+returns his starts before `date`. The live series page draws the line as the "All-time World
+Series" row (World Series only); `ReferencePanel.jsx` feeds the counts to the `wsStarterStart`
+note ("His first World Series start", 5th, 10th). A failed read counts as 0 starts.

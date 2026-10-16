@@ -14,10 +14,11 @@ import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
 // on 2026-10-05.
 // ---------------------------------------------------------------------------
 
-export async function fetchPitcherPostseasonCareer(personId, season, thisSeason = null) {
+// `gameType` defaults to every postseason round; pitcherWorldSeries.js passes 'W'.
+export async function fetchPitcherPostseasonCareer(personId, season, thisSeason = null, gameType = 'F,D,L,W') {
   if (!personId || !season) return null
   try {
-    const data = await getJson(`/api/v1/people/${personId}/stats?stats=yearByYear&group=pitching&gameType=F,D,L,W`)
+    const data = await getJson(`/api/v1/people/${personId}/stats?stats=yearByYear&group=pitching&gameType=${gameType}`)
     const bySeason = new Map()
     for (const s of data.stats?.[0]?.splits ?? []) {
       if (!s.stat || !(Number(s.season) < Number(season))) continue

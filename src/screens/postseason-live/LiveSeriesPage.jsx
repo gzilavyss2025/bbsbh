@@ -290,6 +290,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           game={nextDetail}
           season={bracket.season}
           cutoff={cutoff}
+          worldSeries={series.round === 'worldseries'}
         />
       )}
 

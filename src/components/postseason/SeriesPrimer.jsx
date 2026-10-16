@@ -78,6 +78,7 @@ function Main({ primer: { list, series, game, setPick, data, bracket, cutoff, sl
           game={today}
           season={bracket.season}
           cutoff={cutoff}
+          worldSeries={series.round === 'worldseries'}
         />
       )}
       <SeriesEdges
