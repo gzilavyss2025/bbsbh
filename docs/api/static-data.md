@@ -877,6 +877,16 @@ for each generator; the reader modules:
   file cannot: which club a traded man's pitches belong to, and — by holding
   every club's rows — the league line the card draws its dots against, without
   fetching the 418 KB list to get it.
+- `around-the-game/absClubCard.js` — the pure model behind the team page's ABS
+  Challenges card, read off that same per-club file (`challengeCard`). Per job
+  (hitters, catchers) it returns every roster man with his share of pitches
+  challenged, his wins and his review marks, the club's figures and rank, the
+  league's, and the average qualified player the card draws as the MLB logo.
+  Shares are CUT at their place, never rounded (`cutPercent`). A catcher runs on
+  `pitchesReceived` once any catcher in the file has it, and on innings caught
+  before then, and a file without `wonBatter` / `wonCatcher` gives no Success
+  view. `resultsStrip` shapes the marks the hover card draws. Spoiler-free:
+  season totals, no game named.
 - `around-the-game/clubs.js` — the one club-identity lookup those boards share,
   off the static `teams.json`. `clubShort` (Padres) is what a board ROW uses
   and `clubName` (San Diego Padres) what prose uses; the full name in a row

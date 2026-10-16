@@ -77,7 +77,7 @@ export {
   summarizeLevel,
   buildExport,
   buildExposureExport,
-  buildExposureClubsExport,
-  EXPOSURE_CLUB_LEVELS,
 } from './export.mjs'
+export { buildExposureClubsExport, EXPOSURE_CLUB_LEVELS } from './export-clubs.mjs'
+export { pitchesReceivedForGame, ingestReceived, gamesMissingReceived, NO_CATCHER } from './received.mjs'
 export { buildPostGamesExport } from './postgames.mjs'

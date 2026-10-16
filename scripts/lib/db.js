@@ -110,16 +110,18 @@ export const GROUPS = {
     bySeason: true,
     tables: ['postseason_record_games', 'postseason_record_ingested_games', 'postseason_record_pitcher_roles'],
   },
-  // All three tables are written by the one nightly gen-abs-challenges.mjs —
+  // All four tables are written by the one nightly gen-abs-challenges.mjs —
   // its own group, same as jerseys/pitch-arsenal/team-records above. The row
   // table stays small (one row per ABS challenge, a few thousand a season
   // across MLB and Triple-A); the ledger carries one row per swept game. The
   // exposure table is the odd one: a SEASON SNAPSHOT rather than an
   // append-only ledger, rewritten a club at a time, so its nightly diff is
   // every row of whichever clubs were swept rather than a handful of appends.
+  // abs_catcher_pitches is append-only (a few rows a game). A frozen season
+  // dump that predates it simply lacks its lines: the table loads empty.
   'abs-challenges': {
     bySeason: true,
-    tables: ['abs_challenges', 'abs_ingested_games', 'abs_player_exposure'],
+    tables: ['abs_challenges', 'abs_ingested_games', 'abs_player_exposure', 'abs_catcher_pitches'],
   },
 }
 

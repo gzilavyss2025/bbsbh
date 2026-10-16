@@ -983,3 +983,27 @@ CREATE TABLE IF NOT EXISTS abs_ingested_games (
   scheduled_innings INTEGER,
   scope            TEXT NOT NULL DEFAULT 'R' CHECK (scope IN ('R', 'P'))
 );
+
+-- PITCHES RECEIVED (gen-abs-challenges.mjs). One row per catcher per club per
+-- game: how many pitches were thrown while he was the catcher of record
+-- (scripts/lib/abs/received.mjs). It is the denominator behind "what share of
+-- the pitches he received did he challenge". NOTHING IN STATSAPI COUNTS IT, so
+-- it is replayed from each game's feed. A mid-half catcher change credits the
+-- NEXT half (src/api/catcherOfRecord.js); a half with no known catcher credits
+-- nobody.
+--
+-- A game with no catcher at all gets ONE SENTINEL ROW (team_id 0, player_id 0,
+-- pitches 0) so --backfill-received knows it is done. The export skips it.
+--
+-- Filled for new games by the ordinary sweep, and for older ones by
+-- `--backfill-received --season=YYYY`. The table is empty until then, and the
+-- export ships `pitchesReceived: null` for every man.
+CREATE TABLE IF NOT EXISTS abs_catcher_pitches (
+  season    INTEGER NOT NULL,
+  level     TEXT NOT NULL,                 -- 'MLB' | 'AAA'
+  game_pk   INTEGER NOT NULL,
+  team_id   INTEGER NOT NULL,              -- the club that was FIELDING
+  player_id INTEGER NOT NULL,
+  pitches   INTEGER NOT NULL,
+  PRIMARY KEY (game_pk, team_id, player_id)
+);

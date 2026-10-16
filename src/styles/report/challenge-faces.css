@@ -1,0 +1,433 @@
+/* THE ABS CHALLENGES CARD (screens/team/next/ranks/ChallengeBoard.jsx and its
+   challenges/ folder), the version with a face on the chart.
+
+   IN report/ BESIDE challenge-card.css, which the Design Lab's old
+   TeamChallengeCard still reads (its `.chal__*` rules stay as they are). The
+   rules here are new blocks, named for their job (ADR-0084): `chalboard` is the
+   card's own layout, `chalplot` the chart, `challist` the scrolling list.
+   Imported by the card, not by index.css: the Ranks band is a lazy route.
+
+   THE CARD IS THE CONTAINER. From 700px of card width the plot sits left and
+   the list right; below that they stack. A container query rather than a
+   viewport query, because the band's width is the card's, not the screen's.
+
+   A FACE IS 32px. `--chalplot-face` below is the same number as FACE_SIZE in
+   challenges/plotModel.js, which spreads faces until their centres are one
+   face apart; test/abs-challenge-plot.test.js pins the pair. */
+
+.chalboard {
+  container-type: inline-size;
+}
+
+/* layout-exempt: the plot and the list share a row from 700px of card width */
+.chalboard__body {
+  display: grid;
+  grid-template-areas: 'plot' 'list';
+  gap: var(--space-3);
+}
+.chalboard__plotcol,
+.chalboard__list {
+  min-width: 0;
+}
+.chalboard__plotcol {
+  grid-area: plot;
+}
+.chalboard__list {
+  grid-area: list;
+}
+@container (min-width: 700px) {
+  .chalboard__body {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-areas: 'plot list';
+    gap: var(--space-6);
+    align-items: start;
+  }
+}
+
+/* The Called / Success pair: the same joined Segmented, one size down, on the
+   right above the chart it changes. */
+.chalboard__measure {
+  justify-content: flex-end;
+  margin-bottom: var(--space-1);
+}
+.chalboard__measure.segmented .segmented__btn {
+  min-height: var(--control-min);
+  padding: 0 var(--space-2h);
+  font-size: var(--fs-label);
+}
+
+/* ---- the plot ---- */
+
+.chalplot {
+  --chalplot-face: 32px;
+  position: relative;
+  width: 100%;
+  height: 280px;
+}
+.chalplot--few {
+  height: 176px;
+}
+@container (min-width: 700px) {
+  .chalplot {
+    height: 380px;
+  }
+  .chalplot--few {
+    height: 200px;
+  }
+}
+
+.chalplot__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.chalplot__grid {
+  stroke: var(--border-hairline);
+  stroke-width: var(--bw-hair);
+}
+.chalplot__axis {
+  stroke: var(--text-heading);
+  stroke-width: var(--bw-heavy);
+}
+.chalplot__tick {
+  fill: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.chalplot__title {
+  fill: var(--text-caption);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+/* The league's own pace, dashed: it is a prediction for this club's men, not a
+   measurement of them, and a solid rule reads as a threshold somebody set. */
+.chalplot__line {
+  fill: none;
+  stroke: var(--accent-negative);
+  stroke-width: var(--bw-rule);
+  stroke-dasharray: 4 3;
+}
+.chalplot__leader {
+  stroke: var(--text-caption);
+  stroke-width: var(--bw-hair);
+}
+.chalplot__anchor {
+  fill: var(--text-heading);
+}
+
+/* A face: square, a heavy ink edge, clay when the man is over the league's
+   rate, dashed when too few reviews stand behind him. The picked face takes the
+   marker fill and the stamped shadow. */
+/* layout-exempt: a face centres its photo in a square frame */
+.chalplot__face {
+  position: absolute;
+  width: var(--chalplot-face);
+  height: var(--chalplot-face);
+  padding: 0;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-inset);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+.chalplot__face:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+.chalplot__face--over {
+  border-color: var(--accent-negative);
+}
+.chalplot__face--thin {
+  border-style: dashed;
+}
+.chalplot__face.is-on {
+  z-index: 3;
+  overflow: visible;
+  background: var(--marker);
+  box-shadow: var(--shadow-stamped);
+}
+/* A face pinned to the top edge because it is past the axis. */
+.chalplot__face--off::after {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--space-2));
+  left: 50%;
+  margin-left: calc(-1 * var(--space-1));
+  border: var(--space-1) solid transparent;
+  border-top: 0;
+  border-bottom: var(--space-1h) solid var(--accent-negative);
+}
+.shot.chalplot__shot {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background: transparent;
+}
+.shot.chalplot__shot.shot--fallback {
+  font-size: var(--fs-label);
+}
+.chalplot__mlb {
+  width: 100%;
+  height: 100%;
+  padding: var(--space-1);
+  object-fit: contain;
+  display: block;
+}
+
+/* The picked man's name tab: the card's ink tab, with the figure in marker. */
+.chalplot__tab {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1h) var(--space-2);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-xwide);
+  line-height: var(--lh-solid);
+  white-space: nowrap;
+}
+.chalplot__tab .plink {
+  color: inherit;
+}
+.chalplot__tabfig {
+  font-family: var(--font-mono);
+  letter-spacing: var(--ls-none);
+  color: var(--marker);
+}
+
+/* layout-exempt: the key's swatches wrap as one row of labelled marks */
+.chalplot__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1h) var(--space-3h);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.chalplot__key li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.chalplot__swatch {
+  width: var(--space-2h);
+  height: var(--space-2h);
+  box-sizing: border-box;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-inset);
+}
+.chalplot__swatch--over {
+  border-color: var(--accent-negative);
+}
+.chalplot__swatch--thin {
+  border-style: dashed;
+}
+.chalplot__swatch--line {
+  width: var(--space-4);
+  height: 0;
+  border: 0;
+  border-top: var(--bw-heavy) dashed var(--accent-negative);
+  background: none;
+}
+.chalplot__swatch--off {
+  width: 0;
+  height: 0;
+  border: var(--space-1) solid transparent;
+  border-top: 0;
+  border-bottom: var(--space-1h) solid var(--accent-negative);
+  background: none;
+}
+
+/* ---- the list ---- */
+
+.challist {
+  min-width: 0;
+}
+.challist__scroll {
+  position: relative;
+  max-height: 336px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-caption) var(--bg-page);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+@container (min-width: 700px) {
+  .challist__scroll {
+    max-height: 424px;
+  }
+}
+.challist__scroll:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+
+/* One grid for the head and every row, so the figures line up. The figure
+   columns widen from 700px, where the room is. */
+/* layout-exempt: one fixed column set for the head and every row */
+.challist__head,
+.challist__row {
+  display: grid;
+  grid-template-columns: var(--space-8) minmax(0, 1fr) 34px 52px 50px;
+  align-items: center;
+  column-gap: var(--space-1);
+}
+@container (min-width: 700px) {
+  .challist__head,
+  .challist__row {
+    grid-template-columns: var(--space-8) minmax(0, 1fr) 44px 64px 62px;
+    column-gap: var(--space-2);
+  }
+}
+.challist__head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  align-items: end;
+  padding: var(--space-2) var(--space-1) var(--space-1h);
+  background: var(--bg-page);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.challist__floor {
+  grid-column: 1 / 3;
+  font-family: var(--font-mono);
+  font-weight: var(--w-regular);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-none);
+}
+.challist__head > :not(.challist__floor) {
+  text-align: right;
+}
+
+.challist__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.challist__row {
+  min-height: var(--tap-min);
+  padding: var(--space-1) var(--space-1);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  cursor: pointer;
+}
+.challist__rows > li:first-child > .challist__row {
+  border-top: 0;
+}
+.challist__row.is-on {
+  background: var(--surface-row-selected);
+  box-shadow: inset var(--space-1) 0 0 var(--marker);
+}
+.shot.challist__shot {
+  width: var(--space-8);
+  height: var(--space-8);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-inset);
+}
+.shot.challist__shot.shot--fallback {
+  font-size: var(--fs-label);
+}
+.challist__row--over .shot.challist__shot {
+  border-color: var(--accent-negative);
+}
+.challist__row.is-on .shot.challist__shot {
+  background: var(--marker);
+}
+.challist__name {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-compact);
+}
+.challist__figure {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+}
+.challist__figure--rate {
+  font-weight: var(--w-bold);
+}
+.challist__figure--over {
+  color: var(--accent-negative);
+}
+.challist__row--minor .challist__name,
+.challist__row--minor .challist__figure {
+  color: var(--text-caption);
+}
+.challist__row--minor .shot.challist__shot {
+  border-color: var(--border-stamped-soft);
+}
+
+/* The MLB average: the first row, pinned under the head while the list scrolls. */
+.challist__rows > li.challist__avg {
+  position: sticky;
+  z-index: 1;
+  background: var(--bg-page);
+}
+.challist__avg .challist__row {
+  background: var(--bg-page);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+.challist__avg .challist__row.is-on {
+  background: var(--surface-row-selected);
+}
+.challist__avg .challist__name {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.shot.challist__shot .challist__mlb {
+  width: 100%;
+  height: 100%;
+  padding: var(--space-1);
+  object-fit: contain;
+  display: block;
+}
+.challist__photo {
+  display: block;
+  width: var(--space-8);
+  height: var(--space-8);
+}
+
+/* The divider before the men under the floor. */
+.challist__sep {
+  padding: var(--space-1h) var(--space-1) var(--space-1);
+  background: var(--bg-page);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}

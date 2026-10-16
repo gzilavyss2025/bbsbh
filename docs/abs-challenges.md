@@ -217,10 +217,16 @@ them never called for a review all season**, and Gary Sánchez called for 32 in
 
 Catchers cluster far tighter: 0.73 to 1.56 over 71 qualifiers.
 
-**The catcher denominator is innings caught, not pitches received, and nothing
-in any feed counts the latter.** That makes the two figures different
-measurements which **cannot be read straight across**, and the page says so
-once rather than implying they can be by drawing them alike without a word.
+**The catcher's league denominator is still innings caught.** The roster call
+counts no pitches received, so `abs-exposure.json` keeps innings. The per-club
+file now carries a second figure, `pitchesReceived`: the pitches thrown while a
+man was the catcher of record (`scripts/lib/abs/received.mjs`). It is replayed
+from each game's feed with `catcherChart` in `src/api/catcherOfRecord.js`. A
+catcher who comes in mid-half is credited from the NEXT half, and a half with no
+known catcher credits nobody. Both are accepted limits. It is null for a man who
+never caught, and for everyone until `--backfill-received` has run. The two
+figures are different measurements and **cannot be read straight across**, and
+the page says so once.
 
 **Each rate counts only the challenges its own denominator can explain.** A
 catcher who also hits is two challengers: dividing all of a two-way man's calls
@@ -430,9 +436,10 @@ audit of statsapi is `docs/MLB_STATS_API.md`.
 - **A traded player's splits arrive per club**, so `team.id` on each split is
   what attributes his numbers, not his current roster. `splitsForTeam` in
   `scripts/lib/abs/exposure.mjs` is the filter.
-- **Nothing anywhere counts pitches RECEIVED by a catcher.** Innings caught is
-  the only denominator available, and it is a stand-in rather than the same
-  measurement as a hitter's pitches seen.
+- **No endpoint counts pitches RECEIVED by a catcher.** Innings caught is the
+  roster stand-in. The per-club file counts pitches received itself, from the
+  catcher-of-record replay of each game feed (table `abs_catcher_pitches`).
+  Limit: a mid-half catcher change credits the next half.
 - **`hydrate=linescore` rides free on a schedule sweep**, handing back
   `currentInning`, `scheduledInnings` and the per-inning shape while a
   `codedGameState` check is being made anyway.
