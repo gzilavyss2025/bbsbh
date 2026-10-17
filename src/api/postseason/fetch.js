@@ -93,7 +93,7 @@ export function resultsUrl(season, cutoffDate, { live = false } = {}) {
 // old date too (officialDate = the new date, "Final", no winner); a resumed
 // game is listed again on its resume date (officialDate = the old date). Both
 // extra listings go.
-function keptGames(json) {
+export function keptGames(json) {
   const seen = new Set()
   const out = []
   for (const d of json?.dates ?? []) {

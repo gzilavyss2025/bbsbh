@@ -888,6 +888,10 @@
       "class": "cutoff-gated",
       "why": "The bracket's two statsapi reads, separate from fetchSchedule like fetchSlateScores. The results read asks only for dates BEFORE the cutoff (endDate is the day before) and only for `isWinner` and the game state: never runs, a score, a linescore, `seriesStatus` or `leagueRecord`, the last two being the state AFTER a game (trap 1). The skeleton read asks for every date but for no result field at all, not even the game state. The heading-into-the-date gate is the cutoff the caller passes; bracket.js applies it a second time."
     },
+    "postseason/worldSeriesHome.js": {
+      "class": "cutoff-gated",
+      "why": "The World Series home page's reads (#1906): hot-bat splits, each club's postseason games, bullpen and ledger box scores, standings, regular-season meetings, and the reel's clips and photos. Every read is bounded to games dated BEFORE the slate date, in the request (endDate is the day before) and again on the rows returned, so the slate date's own game never comes back; the one exception is `live`, the reader's Scores Unlocked unlock, which counts the slate date's Finals as fetchPostseasonResults does (ADR-0026). Past games' runs, clip titles and photos are open by decision (ADR-0087: yesterday's results are not protected). fetchReelGames drops a game dated on or after the slate date before it requests any content, so today's clips and photos are never fetched. test/postseason/world-series-fetch.test.js pins the cutoff on the URLs and the rows."
+    },
     "postseason/upcoming.js": {
       "class": "spoiler-free",
       "why": "The live series page's read of the games still to play: each one's park and announced probable pitchers, and those pitchers' throwing hand. A probable pitcher and a park are not results. The caller hands it only DATED upcoming gamePks (never today's game, never an if-necessary game, which has no gamePk), and the field list asks for no state, score, winner, linescore, seriesStatus or leagueRecord, so even a wrong pk brings back no result. test/postseason/upcoming-games.test.js pins that list."
