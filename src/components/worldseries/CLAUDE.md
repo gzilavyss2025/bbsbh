@@ -13,4 +13,5 @@ series primer then. Hero on a phone; hero plus `Ledger` table from 740px.
   `Key`, controls `Button`/`Door`. New shapes (schedule strip, fence overlay, pitch bars)
   live here under the `ww-` namespace in `styles/worldseries/`. No new token: the mockup's
   two fills are `--surface-stamped-tint` and `--accent-tint`.
-- Stamp actions, the played list and the cards after the ledger land in later slices.
+- `Reel` ("Series reel", or "Road here" before Game 1 is played) is a snap rail with a Chips filter; clip and photo logic is `lib/postseason/worldseries/reel.js`.
+- Stamp actions, the played list and the stat cards land in later slices.

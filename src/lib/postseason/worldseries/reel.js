@@ -73,3 +73,37 @@ export function roadHereGames(clubs, slateDate, { perClub = 2 } = {}) {
       .map((g) => ({ ...g, clubId: c.clubId, tag: `${c.round} G${g.gameNumber}`, filter: c.abbr })),
   )
 }
+
+// Each Series club's LCS, for "Road here". `clubGames` is { [clubId]: rows from
+// fetchClubGames } (every postseason game before the slate date); `lcsRound`
+// names a club's league ("NLCS") from the bracket, or '' when it cannot.
+export function roadClubs(slots, clubGames, lcsRound) {
+  return slots.map(({ club }) => ({
+    clubId: club.id,
+    abbr: club.abbreviation,
+    round: lcsRound(club.id) || 'LCS',
+    games: (clubGames?.[club.id] ?? []).filter((g) => g.gameType === 'L'),
+  }))
+}
+
+// Which reel to draw and from which games. From the day after Game 1 (a game
+// day or an off day) it is the "Series reel": the Series' counted games, tagged
+// G{n}. On Game 1 day, and on the off days before it, no Series game has been
+// played, so it is "Road here": each club's last LCS games.
+export function reelSources({ seriesGames, roadClubList, slateDate }) {
+  if (seriesGames?.length) {
+    return {
+      title: 'Series reel',
+      games: seriesGames.map((g) => ({ gamePk: g.gamePk, gameNumber: g.gameNumber, date: g.date, tag: `G${g.gameNumber}`, filter: `G${g.gameNumber}` })),
+    }
+  }
+  return { title: 'Road here', games: roadHereGames(roadClubList, slateDate) }
+}
+
+// The filter chips: "All", then each distinct filter key in game order (Series
+// reel) or club order (Road here).
+export function reelFilterOptions(cards, order = null) {
+  const keys = [...new Set(cards.map((c) => c.filter))]
+  keys.sort((a, b) => (order ? order.indexOf(a) - order.indexOf(b) : a.localeCompare(b, undefined, { numeric: true })))
+  return [{ value: 'all', label: 'All' }, ...keys.map((k) => ({ value: k, label: k }))]
+}

@@ -7,6 +7,7 @@ import { worldSeriesMode } from '../../lib/postseason/worldseries/mode.js'
 import { Hero } from './Hero.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Ledger } from './Ledger.jsx'
+import { Reel } from './Reel.jsx'
 
 // THE WORLD SERIES HOME (#1906). Rendered by GameSelect on every slate date in
 // the postseason window; it draws nothing unless the bracket says both clubs are
@@ -23,6 +24,12 @@ export function WorldSeriesHome({ bracket, slateDate, live = false, wide = false
   const focusPk = focus?.gamePk ?? null
   const park = useAsync(() => (focusPk ? fetchUpcomingSeriesGames([focusPk]) : Promise.resolve({})), [focusPk])
   if (!mode) return null
+
+  // "NLCS" / "ALCS": the league whose LCS the club played in, from the bracket.
+  const lcsRound = (id) => {
+    const lg = ['AL', 'NL'].find((l) => bracket.leagues?.[l]?.lcs?.slots.some((s) => s.club?.id === id))
+    return lg ? `${lg}CS` : ''
+  }
 
   const model = ledgerModel({
     clubIds,
@@ -46,6 +53,7 @@ export function WorldSeriesHome({ bracket, slateDate, live = false, wide = false
         onRevealScores={onRevealScores}
       />
       {wide && <Ledger series={series} model={model} onRevealScores={onRevealScores} />}
+      {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={lcsRound} />}
     </Stack>
   )
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildReel, roadHereGames } from '../../src/lib/postseason/worldseries/reel.js'
+import { buildReel, reelFilterOptions, reelSources, roadClubs, roadHereGames } from '../../src/lib/postseason/worldseries/reel.js'
 
 const SLATE = '2026-10-27'
 const img = (id) => ({ templateUrl: `https://img.mlbstatic.com/mlb-images/image/upload/t_16x9/t_w1280/mlb/${id}.jpg`, cuts: [] })
@@ -71,4 +71,27 @@ test('Road here takes the last 2 LCS games before the slate date, per club', () 
   assert.deepEqual(out.map((g) => g.gamePk).sort((a, b) => a - b), [2, 3, 11, 12])
   assert.equal(out.find((g) => g.gamePk === 3).tag, 'NLCS G3')
   assert.equal(out.find((g) => g.gamePk === 3).filter, 'LAD')
+})
+
+test('Road here is chosen until a Series game has been played; then the Series reel', () => {
+  const road = [{ clubId: 1, abbr: 'LAD', round: 'NLCS', games: [{ gamePk: 5, gameNumber: 7, date: '2026-10-18' }] }]
+  const before = reelSources({ seriesGames: [], roadClubList: road, slateDate: SLATE })
+  assert.equal(before.title, 'Road here')
+  assert.deepEqual(before.games.map((g) => g.gamePk), [5])
+  const after = reelSources({ seriesGames: [{ gamePk: 9, gameNumber: 1, date: '2026-10-24' }], roadClubList: road, slateDate: SLATE })
+  assert.equal(after.title, 'Series reel')
+  assert.deepEqual(after.games.map((g) => [g.gamePk, g.tag, g.filter]), [[9, 'G1', 'G1']])
+})
+
+test('roadClubs keeps only LCS rows and names the round from the bracket', () => {
+  const slots = [{ club: { id: 119, abbreviation: 'LAD' } }, { club: { id: 141, abbreviation: 'TOR' } }]
+  const clubGames = { 119: [{ gameType: 'D', gamePk: 1 }, { gameType: 'L', gamePk: 2 }], 141: [{ gameType: 'L', gamePk: 3 }] }
+  const out = roadClubs(slots, clubGames, (id) => (id === 119 ? 'NLCS' : 'ALCS'))
+  assert.deepEqual(out.map((c) => [c.abbr, c.round, c.games.map((g) => g.gamePk)]), [['LAD', 'NLCS', [2]], ['TOR', 'ALCS', [3]]])
+})
+
+test('filter options: All, then game order (G2 before G10) or the given club order', () => {
+  const cards = [{ filter: 'G10' }, { filter: 'G2' }, { filter: 'G2' }]
+  assert.deepEqual(reelFilterOptions(cards).map((o) => o.value), ['all', 'G2', 'G10'])
+  assert.deepEqual(reelFilterOptions([{ filter: 'TOR' }, { filter: 'LAD' }], ['LAD', 'TOR']).map((o) => o.value), ['all', 'LAD', 'TOR'])
 })
