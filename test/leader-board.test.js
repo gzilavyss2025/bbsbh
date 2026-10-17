@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { ruleBody, stripComments } from './helpers/css.js'
 import { displayRanks, rankedCategories, rowLook } from '../src/components/teamstats/leaderBoard.js'
-import { armBoardIn, takeBoardIn } from '../src/lib/motion/boardIn.js'
+import { armBoardIn, disarmBoardIn, takeBoardIn } from '../src/lib/motion/boardIn.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const src = (rel) => readFileSync(join(SRC, rel), 'utf8')
@@ -90,6 +90,14 @@ test('ScopeNav arms the flag on a tap to another scope, and the board spends it 
   const board = src('components/teamstats/TeamLeaders.jsx')
   assert.match(board, /useState\(takeBoardIn\)/)
   assert.match(board, /tlead--in/)
+})
+
+test('a scope tap that ends with no board (an empty scope, a load error) disarms the flag', () => {
+  armBoardIn()
+  disarmBoardIn()
+  assert.equal(takeBoardIn(), false, 'the next board, on any page, must not play the fade')
+  const page = src('screens/LeadersPage.jsx')
+  assert.match(page, /disarmBoardIn\(\)/, 'LeadersPage disarms once it settles with no board')
 })
 
 // ---- 5. the markup and the styles ----
