@@ -6,7 +6,9 @@ import { glideTo } from '../../components/scoring/lens/useLens.js'
 import { PitchLadder } from '../../components/scoring/PitchLadder.jsx'
 import { PlayDiamond } from '../../components/scoring/PlayDiamond.jsx'
 import { Card } from '../../components/ui/frame/Card.jsx'
+import { LeaderList, LeaderRow } from '../../components/ui/frame/LeaderList.jsx'
 import { StatTile } from '../../components/ui/frame/StatTile.jsx'
+import { Entry, Frame } from './Entry.jsx'
 
 // ---------------------------------------------------------------------------
 // THE MOTION STUDY'S DEMOS (issues #976-#983), for /animation-lab.
@@ -346,4 +348,50 @@ export function LensTurnDemo({ beat }) {
 // invented figure.
 export function StampInDemo() {
   return <StatTile label="HR" value="18" caption="Invented" tone="tint" stampIn />
+}
+
+// The leader board after a scope tap (M1): the real `.tlead` board classes, three invented
+// rows. `tlead--in` is what TeamLeaders puts on the board for the render after the tap.
+const DEMO_BOARD = [
+  ['Sample Slugger', '.331'],
+  ['Test Hitter', '.318'],
+  ['Made-up Player', '.305'],
+]
+function BoardInDemo() {
+  return (
+    <div className="tlead tlead--in">
+      <LeaderList label="Batting average" count="Top 10" className="tlead__cat">
+        {DEMO_BOARD.map(([name, figure], i) => (
+          <LeaderRow key={name} rank={i + 1} state={i === 0 ? 'lead' : undefined} mark={<span />} name={name} figure={figure} className="tlead__row" />
+        ))}
+      </LeaderList>
+    </div>
+  )
+}
+
+// The whole entry, so AnimationLab.jsx (at its file cap) adds one line for it.
+export function BoardInEntry() {
+  return (
+    <Entry
+      title="Leader board — the scope tap"
+      note={
+        <>
+          Tap MLB, AL, NL, AAA, AA, A+ or A on /leaders and the new board fades in and moves up
+          6px, 180ms on the ease-out curve (styles/motion/board-in.css). Only that tap plays it: a
+          cold load, a Back, a poll and a force-reveal show the board still. Off under reduced
+          motion.
+        </>
+      }
+      live={<BoardInDemo />}
+    >
+      <span className="animlab__stagelabel">The 180ms fade, frame by frame</span>
+      <div className="animlab__frozen">
+        {[0, 45, 90, 135, 180].map((ms) => (
+          <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+            <BoardInDemo />
+          </Frame>
+        ))}
+      </div>
+    </Entry>
+  )
 }

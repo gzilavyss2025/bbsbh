@@ -1,0 +1,81 @@
+/* ---------------------------------------------------------------------------
+   THE LEADER BOARD (components/teamstats/TeamLeaders.jsx) — /leaders, a club's
+   /team/{id}/leaders and /postseason-leaders. Each category is a LeaderList, a stamped
+   Card with its name tab and a "Top 10" tag, and each player is a LeaderRow
+   (ADR-0112, styles/system/report/leader.css). The cards sit in a Grid: one column on
+   a phone, two when the page is wide enough for two 20rem columns. This file keeps
+   only what a caller adds to the row: the mark slot's Headshot, the sub line, the
+   wider rank column and the team filter's dim.
+
+   Rank 1 is state="lead" and the reader's club is state="mine" (the ink tint, ADR-0030).
+   No club accent reaches a row. The fade-in after a scope tap is
+   styles/motion/board-in.css.
+
+   Moved here from 23-box-score-detail.css, in the same slot in the order.
+   --------------------------------------------------------------------------- */
+.tlead {
+  margin-top: var(--space-1);
+}
+/* A category is a Card. margin-top: 0 overrides .team-hub's per-card spacing rule
+   (09-team-info.css): these sit in a Grid, which has its own gap. */
+.tlead__cat {
+  margin-top: 0;
+}
+
+/* The rank column is as wide as the mark, so "T10" fits the pill and every mark lines up. */
+.tlead__row {
+  grid-template-columns: var(--mark-lg) var(--mark-lg) minmax(0, 1fr) auto;
+}
+/* The team filter's "everyone else": dulled, not hidden, so the picked club's rows stand
+   out and the board keeps its shape. Set on a row that is not the pick, never on the
+   favorite. 0.55 keeps the name readable; do not go lower. It does not animate. */
+.tlead__row--dim {
+  opacity: 0.55;
+}
+
+/* The mark slot is 36px square: the headshot fills it. Compound with .shot/.shot--fallback
+   (Headshot always sets both) so it outranks the base .shot size. */
+.shot.tlead__shot {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+.shot.tlead__shot.shot--fallback {
+  font-size: var(--fs-label);
+}
+
+/* The name is a player link: a button, so it needs the name's own clip. Compound to beat
+   .plink's `font: inherit` and `text-align: inherit`. */
+.leaderrow__name .tlead__name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The sub line: the club's logo and abbreviation (only on a board of strangers), then the
+   level and the prospect pills. */
+.tlead__teamtag {
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+.tlead__logo {
+  flex: none;
+}
+/* The level is a paper figure Pill tag (#1131, #1186) on the inset paper with a hairline
+   edge. The figure rule sets the mono face, its 1px block pad and its centring. */
+.tlead__level {
+  --pill-fill: var(--surface-inset);
+  --pill-edge: var(--border-hairline);
+  --pill-ink: var(--text-muted);
+  flex: none;
+}
+/* The prospect pill keeps a 1px pad here, a hair under the tag's own 2px, to match the
+   level tag beside it (the figure pill's 1px). Its size is the pill's own --fs-label. */
+.tlead__row .prospect__tag {
+  flex: none;
+  padding: 1px var(--space-1h);
+}

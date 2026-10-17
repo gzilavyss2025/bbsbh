@@ -153,6 +153,9 @@
   --dur-turn-in:     200ms;
   --dur-lens-sheet:  260ms;
 
+  /* The leader board's fade-in after a scope tap (styles/motion/board-in.css). */
+  --dur-board-in: 180ms;
+
   /* Sealed cover — kraft tape look, reused via background */
   --seal-texture: repeating-linear-gradient(
       -45deg,

@@ -10,6 +10,7 @@ import { CLOSE_SEQUENCE_MS, INK_SET_MS, INK_SET_OVERSHOOT, TALLY_STAGGER_MS } fr
 import { Entry, Frame } from './animlab/Entry.jsx'
 import {
   AtMarkDemo,
+  BoardInEntry,
   BoxLinesEntrance,
   BreathDemo,
   LensGlideDemo,
@@ -485,6 +486,8 @@ export function AnimationLab() {
           ))}
         </div>
       </Entry>
+
+      <BoardInEntry />
 
       <PlayerMotionLab />
     </div>

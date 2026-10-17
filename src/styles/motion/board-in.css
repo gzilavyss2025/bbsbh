@@ -1,0 +1,28 @@
+/* ---------------------------------------------------------------------------
+   THE LEADER BOARD'S FADE-IN (docs/motion.md). When the reader taps a scope button on /leaders
+   (MLB, AL, NL, AAA, AA, A+, A), the new board fades in and moves up 6px, 180ms
+   (--dur-board-in) on --ease-out. Transform and opacity only.
+
+   .tlead--in is on the board only for the render that follows that tap: ScopeNav arms
+   lib/motion/boardIn.js and TeamLeaders spends it on its first render. A cold load, a Back, a
+   poll and a force-reveal never carry the class. The resting look is styles/leaders/board.css.
+   --------------------------------------------------------------------------- */
+@keyframes tlead-board-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.tlead--in {
+  animation: tlead-board-in var(--dur-board-in) var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tlead--in {
+    animation: none;
+  }
+}

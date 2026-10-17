@@ -234,6 +234,8 @@
 /* The menu rail's rise (styles/motion/menurail.css), no delay of its own. */
 .animlab__frame .menurail__body--a,
 .animlab__frame .menurail__body--b,
+/* The leader board's fade-in (styles/motion/board-in.css), no delay of its own. */
+.animlab__frame .tlead--in,
 /* The scorecard lens (styles/motion/scorecard-lens.css). None has a delay of
    its own. The turn and the fade are shorthands there, so each is matched at
    one class more than its own rule, for the same tie as the seal above. */

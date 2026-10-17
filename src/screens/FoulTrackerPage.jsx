@@ -57,9 +57,8 @@ const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 
 // A `.foulboard` <tr> or `.sgh-row`/`.gamehigh-row` <li>'s favorite-team
 // highlight — same `is-me` class + `--fav-accent` inline var convention as
-// StandingsPage/TeamLeaders (see .foulboard tr.is-me in 43-foul-tracker.css,
-// .tlead__row--fav), reused as-is so a fan's team tints the same way here as
-// everywhere else in the app.
+// StandingsPage (see .foulboard tr.is-me in 43-foul-tracker.css), reused
+// as-is so a fan's team tints the same way here as on the other tables.
 function favRowProps(teamId, favoriteTeamId) {
   if (favoriteTeamId == null || teamId !== favoriteTeamId) return {}
   return { className: 'is-me', style: { '--fav-accent': favoriteAccentColor(teamId) } }
