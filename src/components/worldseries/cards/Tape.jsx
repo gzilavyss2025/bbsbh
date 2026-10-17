@@ -16,15 +16,17 @@ function Bar({ value, peak, side }) {
 }
 
 export function Tape({ awayId, homeId, data, slateDate }) {
-  const side = (id) => ({
-    wins: data.standings?.[id]?.wins ?? null,
-    runDiff: data.standings?.[id]?.runDiff ?? null,
-    ...(() => {
-      const { wins, losses } = octRecord(data.clubGames?.[id], id, slateDate)
-      return { octW: wins, octL: losses }
-    })(),
-    ...franchiseHistory(data.seriesHistory, id, { before: slateDate }),
-  })
+  const side = (id) => {
+    const { wins: octW, losses: octL } = octRecord(data.clubGames?.[id], id, slateDate)
+    const runDiff = Number(data.standings?.[id]?.runDiff)
+    return {
+      wins: data.standings?.[id]?.wins ?? null,
+      runDiff: Number.isFinite(runDiff) ? runDiff : null,
+      octW,
+      octL,
+      ...franchiseHistory(data.seriesHistory, id, { before: slateDate }),
+    }
+  }
   const meetingWins = {
     away: data.meetings.filter((g) => g.winnerId === awayId).length,
     home: data.meetings.filter((g) => g.winnerId === homeId).length,

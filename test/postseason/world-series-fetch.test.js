@@ -118,3 +118,13 @@ test('cutoff: a pitcher\'s outings stop the day before the slate date, and a lea
     stub.restore()
   }
 })
+
+test('the reel makes one /content read per game', async () => {
+  const stub = stubFetch(() => ({}))
+  try {
+    await fetchReelGames([{ gamePk: 1, date: '2026-10-24' }], SLATE)
+    assert.equal(stub.calls.filter((c) => c.includes('/game/1/content')).length, 1)
+  } finally {
+    stub.restore()
+  }
+})

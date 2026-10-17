@@ -19,7 +19,7 @@ export function Played({ rows }) {
           <li key={r.gamePk} className="ww-played__row">
             <span className="ww-played__game">{`Game ${r.gameNumber}`}</span>
             <span className="ww-played__meta">{[r.date.slice(5).replace('-', '/'), r.park].filter(Boolean).join(' · ')}</span>
-            <Door {...link(gamePath(r.date, r.awayAbbr, r.homeAbbr, 'boxscore'))}>Box</Door>
+            {r.awayAbbr && r.homeAbbr && <Door {...link(gamePath(r.date, r.awayAbbr, r.homeAbbr, 'boxscore'))}>Box</Door>}
             <Door {...link(logbookNewPath(r.gamePk))}>Stamp</Door>
           </li>
         ))}

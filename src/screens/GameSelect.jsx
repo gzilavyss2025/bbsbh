@@ -957,7 +957,7 @@ export function GameSelect({
               date in the window, off days included. On an off day this is
               the only thing here besides the chrome above (Gary's decision,
               2026-09-28: "the bracket is the whole page"). */}
-          {inPostseasonWindow && !bracketInRail && !bracketInDock && !wsMode && (
+          {inPostseasonWindow && !bracketInRail && !bracketInDock && (
             <PostseasonBracket
               bracket={postseasonBracket.bracket}
               cutoff={postseasonBracket.cutoff}

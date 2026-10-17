@@ -26,10 +26,12 @@ export function Reel({ series, slateDate, clubGames, lcsRound }) {
 
   const road = source.title === 'Road here'
   const options = reelFilterOptions(cards, road ? series.slots.map((s) => s.club.abbreviation) : null)
-  const shown = filter === 'all' ? cards : cards.filter((c) => c.filter === filter)
+  // A pick from the other reel (a club chip, then the Series reel's G chips) falls back to All.
+  const active = options.some((o) => o.value === filter) ? filter : 'all'
+  const shown = active === 'all' ? cards : cards.filter((c) => c.filter === active)
   return (
     <Card frame="stamped" label={source.title} className="ww-reel">
-      <Chips label="Filter the reel" options={options} value={filter} onChange={(v) => setFilter(v ?? 'all')} />
+      <Chips label="Filter the reel" options={options} value={active} onChange={(v) => setFilter(v ?? 'all')} />
       <ul className="ww-reel__rail">
         {shown.map((c) => (
           <li key={`${c.kind}-${c.gamePk}-${c.kind === 'photo' ? c.photo.id : c.item.id}`} className="ww-reel__slot">

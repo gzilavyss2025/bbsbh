@@ -56,13 +56,16 @@ export function WorldSeriesHome({ bracket, slateDate, live = false, wide = false
   const game = focusPk ? parkOf[focusPk] ?? null : null
   const gameDay = mode.dayType === 'game'
   const abbr = Object.fromEntries(series.slots.map((s) => [s.club.id, s.club.abbreviation]))
+  // Home and away come from the clubs' own schedule rows, so a failed park read
+  // cannot leave the Box door with an empty matchup.
+  const rowOf = Object.fromEntries(Object.values(data?.clubGames ?? {}).flat().map((r) => [r.gamePk, r]))
   const played = series.games.map((g) => ({
     gamePk: g.gamePk,
     gameNumber: g.gameNumber,
     date: g.date,
     park: parkOf[g.gamePk]?.venue?.name ?? '',
-    awayAbbr: abbr[parkOf[g.gamePk]?.awayId] ?? '',
-    homeAbbr: abbr[parkOf[g.gamePk]?.homeId] ?? '',
+    awayAbbr: abbr[rowOf[g.gamePk]?.awayId] ?? '',
+    homeAbbr: abbr[rowOf[g.gamePk]?.homeId] ?? '',
   }))
   const lastPlayed = series.games.at(-1)
   const bullpen = data && <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={slateDate} wide={wide} />

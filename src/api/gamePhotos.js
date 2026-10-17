@@ -216,9 +216,11 @@ export function classifyPhotoAsset({ title = '', taxonomy = [], shape = null } =
 // have no subject to report. Degrades to [] on failure or a game with no
 // editorial content package yet (common for a game that just started, or most
 // MiLB games).
-export async function fetchGamePhotos(gamePk) {
+// `content` is the game's already-read /content body, for a caller that needs the
+// clips too and would otherwise read it twice (the World Series reel).
+export async function fetchGamePhotos(gamePk, content = null) {
   try {
-    const data = await getJson(`/api/v1/game/${gamePk}/content`)
+    const data = content ?? (await getJson(`/api/v1/game/${gamePk}/content`))
     const rows = new Map()
 
     for (const item of data?.highlights?.highlights?.items ?? []) {

@@ -13,6 +13,7 @@
 // date (api/postseason/worldSeriesHome.js). The reel loads separately, from the
 // reel component.
 import { useAsync } from '../useAsync.js'
+import { fetchGameBoxscore } from '../../api/postseasonSeries.js'
 import {
   fetchClubBoxscores,
   fetchClubGames,
@@ -26,15 +27,23 @@ import { loadSeriesHistory } from '../../api/worldSeries/history.js'
 async function load(clubIds, games, slateDate, live, signal) {
   const season = Number(slateDate.slice(0, 4))
   const [a, b] = clubIds
+  // One box score read per game, shared by the ledger's runs and the bullpen.
+  const boxes = new Map()
+  const getBox = (pk) => {
+    if (!boxes.has(pk)) boxes.set(pk, fetchGameBoxscore(pk))
+    return boxes.get(pk)
+  }
+  // A card whose read fails goes without; it never blanks the others.
+  const soft = (p, fallback) => p.catch(() => fallback)
   const [clubGamesList, hotBatList, runsByGame, standings, meetings, history] = await Promise.all([
-    Promise.all(clubIds.map((id) => fetchClubGames(season, id, slateDate, { signal, live }))),
+    Promise.all(clubIds.map((id) => soft(fetchClubGames(season, id, slateDate, { signal, live }), []))),
     Promise.all(clubIds.map((id) => fetchHotBatSplits(season, id, slateDate, { signal }))),
-    fetchSeriesRuns(games, slateDate, { live }),
-    fetchStandingsFor(season, { signal }).catch(() => ({})),
+    soft(fetchSeriesRuns(games, slateDate, { live, getBox }), {}),
+    soft(fetchStandingsFor(season, { signal }), {}),
     fetchMeetings(season, a, b, slateDate, { signal }),
-    loadSeriesHistory(),
+    soft(loadSeriesHistory(), null),
   ])
-  const boxList = await Promise.all(clubGamesList.map((rows) => fetchClubBoxscores(rows, slateDate)))
+  const boxList = await Promise.all(clubGamesList.map((rows) => soft(fetchClubBoxscores(rows, slateDate, { getBox }), [])))
   const byClub = (list) => Object.fromEntries(clubIds.map((id, i) => [id, list[i]]))
   return {
     runsByGame,

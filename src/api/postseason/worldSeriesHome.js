@@ -19,7 +19,6 @@ import { teamAbbr } from '../../lib/teams.js'
 import { fetchPersonStats } from '../person-fetch.js'
 import { getJson } from '../statsapi.js'
 import { fetchGamePhotos } from '../gamePhotos.js'
-import { fetchHighlights } from '../highlights.js'
 import { fetchGameBoxscore, foldRunsByGame } from '../postseasonSeries.js'
 import { dayBefore, keptGames } from './fetch.js'
 
@@ -81,16 +80,16 @@ export async function fetchClubGames(season, teamId, slateDate, { signal, live =
 
 // The bullpen grid's input: box scores of the club's last `limit` Final games
 // before the slate date. A box score that fails to load is left out.
-export async function fetchClubBoxscores(games, slateDate, { limit = 6 } = {}) {
+export async function fetchClubBoxscores(games, slateDate, { limit = 6, getBox = fetchGameBoxscore } = {}) {
   const recent = (games ?? []).filter((g) => g.final && g.date < slateDate).slice(-limit)
-  const boxes = await Promise.all(recent.map((g) => fetchGameBoxscore(g.gamePk)))
+  const boxes = await Promise.all(recent.map((g) => getBox(g.gamePk)))
   return recent.map((g, i) => ({ gamePk: g.gamePk, date: g.date, boxscore: boxes[i] })).filter((g) => g.boxscore)
 }
 
 // The ledger's runs, folded by club id. Only games that count (see `live`).
-export async function fetchSeriesRuns(games, slateDate, { live = false } = {}) {
+export async function fetchSeriesRuns(games, slateDate, { live = false, getBox = fetchGameBoxscore } = {}) {
   const list = (games ?? []).filter((g) => g.date && counts(g.date, slateDate, live))
-  const boxes = await Promise.all(list.map((g) => fetchGameBoxscore(g.gamePk)))
+  const boxes = await Promise.all(list.map((g) => getBox(g.gamePk)))
   return foldRunsByGame(list, boxes)
 }
 
@@ -144,8 +143,15 @@ export async function fetchReelGames(games, slateDate) {
   const past = (games ?? []).filter((g) => g.date < slateDate)
   return Promise.all(
     past.map(async (g) => {
-      const [clips, photos] = await Promise.all([fetchHighlights(g.gamePk), fetchGamePhotos(g.gamePk)])
-      return { ...g, clips, photos }
+      // One /content read feeds both the clips and the photos.
+      let content = null
+      try {
+        content = await getJson(`/api/v1/game/${g.gamePk}/content`)
+      } catch {
+        return { ...g, clips: [], photos: [] }
+      }
+      const items = content?.highlights?.highlights?.items
+      return { ...g, clips: Array.isArray(items) ? items : [], photos: await fetchGamePhotos(g.gamePk, content) }
     }),
   )
 }
@@ -169,8 +175,14 @@ export async function fetchPostseasonOutings(personId, season, slateDate) {
 // A park for the trip card: where it is, its clock, roof and seats, and the
 // posted fence distances. Geography only, no game: spoiler-free. null on any
 // failure, which hides the card.
-export async function fetchTripVenue(venueId) {
-  if (!venueId) return null
+const tripVenues = new Map()
+export function fetchTripVenue(venueId) {
+  if (!venueId) return Promise.resolve(null)
+  if (!tripVenues.has(venueId)) tripVenues.set(venueId, readTripVenue(venueId))
+  return tripVenues.get(venueId)
+}
+
+async function readTripVenue(venueId) {
   try {
     const data = await getJson(`/api/v1/venues/${venueId}?hydrate=location,fieldInfo,timezone`)
     const v = data.venues?.[0]
@@ -182,7 +194,8 @@ export async function fetchTripVenue(venueId) {
       name: v.name,
       lat: Number(c.latitude),
       lon: Number(c.longitude),
-      offset: v.timeZone?.offset ?? null,
+      // The offset on game day, not the standard one: Phoenix keeps no DST.
+      offset: v.timeZone?.offsetAtGameTime ?? v.timeZone?.offset ?? null,
       roof: v.fieldInfo?.roofType ?? park?.roof ?? '',
       seats: park?.capacity ?? v.fieldInfo?.capacity ?? null,
       dist: park?.dist ?? null,
