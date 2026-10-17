@@ -7,7 +7,6 @@ import { GameLink } from '../player/GameLink.jsx'
 // a time, where it fired) and the box score's Insights card (the whole game's
 // notes rolled up in one list).
 export function CalloutNote({ text, kind, link = null }) {
-  const at = link ? text.indexOf(link.label) : -1
   return (
     <div className="pbp__callout">
       {isWorldSeriesKind(kind) ? (
@@ -15,13 +14,13 @@ export function CalloutNote({ text, kind, link = null }) {
       ) : (
         <span className="pbp__calloutmark" aria-hidden="true">★</span>
       )}
-      {at < 0 ? text : (
+      {link ? (
         <>
-          {text.slice(0, at)}
+          {link.before}
           <GameLink path={link.path}>{link.label}</GameLink>
-          {text.slice(at + link.label.length)}
+          {link.after}
         </>
-      )}
+      ) : text}
     </div>
   )
 }
