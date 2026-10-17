@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-16T06:55:29.675Z",
+  "generatedAt": "2026-10-17T06:55:21.061Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -85,7 +85,7 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".351, 5 HR, 59 RBI",
-      "age": 18,
+      "age": 19,
       "number": null
     },
     {
@@ -409,7 +409,7 @@
       "position": "SS",
       "levelRaw": "ALL (5)",
       "statLine": ".263, 16 HR, 51 RBI",
-      "age": 20,
+      "age": 21,
       "number": null
     },
     {
@@ -667,7 +667,7 @@
     {
       "rank": 57,
       "playerId": 695491,
-      "name": "Joshua Baez",
+      "name": "Joshua Báez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -1057,7 +1057,7 @@
       "position": "LHP",
       "levelRaw": "ALL (3)",
       "statLine": "103.0 IP, 2.01 ERA, 151 SO",
-      "age": 22,
+      "age": 23,
       "number": null
     },
     {
@@ -1203,7 +1203,7 @@
       "position": "SS",
       "levelRaw": "ALL (5)",
       "statLine": ".263, 16 HR, 51 RBI",
-      "age": 20,
+      "age": 21,
       "topRank": 34
     },
     {
@@ -1784,18 +1784,6 @@
     },
     {
       "orgRank": 27,
-      "playerId": 808087,
-      "name": "Junior Sanchez",
-      "teamId": 109,
-      "team": "ari",
-      "position": "RHP",
-      "levelRaw": "ALL (2)",
-      "statLine": "113.2 IP, 4.28 ERA, 130 SO",
-      "age": 21,
-      "topRank": null
-    },
-    {
-      "orgRank": 27,
       "playerId": 826536,
       "name": "Brian Curley",
       "teamId": 109,
@@ -1804,6 +1792,18 @@
       "levelRaw": "ALL (2)",
       "statLine": "116.0 IP, 5.28 ERA, 130 SO",
       "age": 23,
+      "topRank": null
+    },
+    {
+      "orgRank": 27,
+      "playerId": 808087,
+      "name": "Junior Sanchez",
+      "teamId": 109,
+      "team": "ari",
+      "position": "RHP",
+      "levelRaw": "ALL (2)",
+      "statLine": "113.2 IP, 4.28 ERA, 130 SO",
+      "age": 21,
       "topRank": null
     },
     {
@@ -1887,7 +1887,7 @@
       "position": "LHP",
       "levelRaw": "ALL (3)",
       "statLine": "103.0 IP, 2.01 ERA, 151 SO",
-      "age": 22,
+      "age": 23,
       "topRank": 92
     },
     {
@@ -4587,7 +4587,7 @@
       "position": "SS",
       "levelRaw": "A",
       "statLine": ".266, 7 HR, 47 RBI",
-      "age": 19,
+      "age": 20,
       "topRank": null
     },
     {
@@ -5715,7 +5715,7 @@
       "position": "RHP",
       "levelRaw": "ALL (2)",
       "statLine": "114.0 IP, 3.39 ERA, 125 SO",
-      "age": 21,
+      "age": 22,
       "topRank": null
     },
     {
@@ -7059,7 +7059,7 @@
       "position": "SS",
       "levelRaw": "ALL (2)",
       "statLine": ".351, 5 HR, 59 RBI",
-      "age": 18,
+      "age": 19,
       "topRank": 7
     },
     {
@@ -7413,7 +7413,7 @@
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Baez",
+      "name": "Joshua Báez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
