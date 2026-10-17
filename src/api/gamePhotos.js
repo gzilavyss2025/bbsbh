@@ -102,7 +102,7 @@ function isGraphicTaxonomy(taxonomy) {
 // carries an unresolved `{formatInstructions}` template string some places,
 // which this rejects since it has no `mlb/` id segment of its own — it's
 // literally the word `{formatInstructions}` in the path).
-function originalPhotoUrl(url) {
+export function originalPhotoUrl(url) {
   const m = UPLOAD_RE.exec(url ?? '')
   if (!m) return null
   let id = m[1]
