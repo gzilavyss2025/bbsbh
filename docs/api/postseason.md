@@ -404,3 +404,7 @@ date and its 26-player check), `upcoming-games`, `day-shape`, `series-flow`,
 parts for a seal or a Scores Unlocked read. The route is in `test/route.test.js`,
 and the slate model's `seriesStatus`/`leagueRecord` guard in
 `test/slate-scores.test.js`.
+
+## World Series home reads (`worldSeriesHome.js`, #1906)
+
+One file, cutoff-gated (manifest entry). Every read ends the day before the slate date in the request and is filtered again on the rows; `live` (Scores Unlocked) lets the slate date's own Finals count. `fetchClubGames` rows: `{ gamePk, date, gameType, gameNumber, final, homeId, awayId, winnerId }`, no runs. `fetchSeriesRuns` folds box scores with `foldRunsByGame`. `fetchReelGames` drops a game dated on or after the slate date before any content read. `useWorldSeriesHome` (`src/hooks/postseason/`) returns the raw rows for the World Series selectors (slice 2).
