@@ -20,10 +20,11 @@ export function StatStrip({ className = '', children, ...rest }) {
 }
 
 // One cell: a label, a mono figure, a note. `lead` fills it ink and sets its
-// figure in the marker. One lead per strip, at most.
-export function StatCell({ label, value, note, lead = false }) {
+// figure in the marker. One lead per strip, at most. `className` is the caller's
+// namespace for a state of its own (the World Series cards' "leads the two" fill).
+export function StatCell({ label, value, note, lead = false, className = '' }) {
   return (
-    <div className={lead ? 'statcell statcell--lead' : 'statcell'}>
+    <div className={`${lead ? 'statcell statcell--lead' : 'statcell'}${className ? ` ${className}` : ''}`}>
       <span className="statcell__label">{label}</span>
       <span className="statcell__value">{value}</span>
       {note != null && note !== '' && <span className="statcell__note">{note}</span>}

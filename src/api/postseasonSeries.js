@@ -72,7 +72,7 @@ export function findSeriesById(history, seriesId) {
   return null
 }
 
-async function fetchGameBoxscore(gamePk) {
+export async function fetchGameBoxscore(gamePk) {
   try {
     return await getJson(`/api/v1/game/${gamePk}/boxscore`)
   } catch {
