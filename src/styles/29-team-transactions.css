@@ -668,7 +668,7 @@
 /* The highlighted favorite-team row tints to that club's own accent
    (--fav-accent, a per-team hex set inline by the row's caller from
    favoriteAccentColor() — see lib/teams.js), same convention as
-   .gamecard--pinned / .tlead__row--fav, rather than a fixed green — an
+   .gamecard--pinned, rather than a fixed green — an
    Orioles fan's row reads orange, a Reds fan's reads red. Falls back to the
    original --field green for a pinned team with no known accent (MiLB).
    Mixed into --surface-card, not transparent: the sheet under it is that card,

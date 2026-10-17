@@ -616,7 +616,7 @@
   gap: var(--space-1h);
 }
 /* Compound (beats .plink's `font: inherit`/`text-align: inherit` reset —
-   same convention as .tlead__who .tlead__name). */
+   same convention as .leaderrow__name .tlead__name). */
 .sgh-top .sgh-name {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
