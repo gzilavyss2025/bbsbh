@@ -32,6 +32,9 @@ const ALLOWED = {
     ['postseason/series-live.css', '.psseries__starter .projection'],
     ['postseason/primer-main.css', '.seriesribbon__game--ahead'], // a game still to play
     ['postseason/primer-main.css', '.seriesribbon__game--ifNecessary'], // a game that may not be played
+    ['worldseries/home.css', '.ww-strip__cell--maybe'], // the World Series strip: an if-necessary game that may not be played
+    ['worldseries/home.css', '.ww-swatch--maybe'], // the key's swatch for that same cell
+    ['worldseries/home.css', '.ww-ledger__maybe'], // the ledger's header for an if-necessary game
     ['player-next/history/moves.css', '.moves__noclub'], // a move whose club the feed does not name: a pencilled box, no mark
     ['team-next/top.css', '.tnext__chip--off'], // a day with no game: an empty slot in the days rail
     ['report/challenge-faces.css', '.chalplot__face--thin'], // a face with fewer than five reviews behind its success rate: too thin a sample to read

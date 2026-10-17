@@ -43,6 +43,7 @@ export function shapeUpcoming(data, hands = {}) {
       const withHand = (a) => (a ? { ...a, hand: hands[a.id] ?? '' } : null)
       out[g.gamePk] = {
         date: g.officialDate ?? '',
+        gameDate: g.gameDate ?? '',
         awayId: g.teams?.away?.team?.id ?? null,
         homeId: g.teams?.home?.team?.id ?? null,
         venue: { id: g.venue?.id ?? null, name: g.venue?.name ?? '' },

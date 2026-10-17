@@ -91,19 +91,20 @@ export async function fetchSeriesRuns(games, slateDate, { live = false } = {}) {
   return foldRunsByGame(list, boxes)
 }
 
-export function standingsUrl(season, slateDate) {
-  return (
-    `/api/v1/standings?leagueId=103,104&season=${season}&standingsTypes=regularSeason&date=${dayBefore(slateDate)}` +
-    '&fields=records,teamRecords,team,id,wins,runDifferential'
-  )
+// No `date`: a date inside the postseason answers with no records at all
+// (checked live, 2025-10-23). The regular season is over whenever the World
+// Series is on, so the undated answer is the final regular-season table, which
+// no postseason game can change.
+export function standingsUrl(season) {
+  return `/api/v1/standings?leagueId=103,104&season=${season}&standingsTypes=regularSeason&fields=records,teamRecords,team,id,wins,losses,runDifferential`
 }
 
-// { [teamId]: { wins, runDiff } }, a league aggregate as of the day before.
-export async function fetchStandingsFor(season, slateDate, { signal } = {}) {
-  const data = await getJson(standingsUrl(season, slateDate), { signal })
+// { [teamId]: { wins, losses, runDiff } }, the final regular-season table.
+export async function fetchStandingsFor(season, { signal } = {}) {
+  const data = await getJson(standingsUrl(season), { signal })
   const out = {}
   for (const r of data?.records ?? []) {
-    for (const t of r.teamRecords ?? []) out[t.team?.id] = { wins: t.wins ?? null, runDiff: t.runDifferential ?? null }
+    for (const t of r.teamRecords ?? []) out[t.team?.id] = { wins: t.wins ?? null, losses: t.losses ?? null, runDiff: t.runDifferential ?? null }
   }
   return out
 }

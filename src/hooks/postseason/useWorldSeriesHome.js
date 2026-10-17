@@ -30,7 +30,7 @@ async function load(clubIds, games, slateDate, live, signal) {
     Promise.all(clubIds.map((id) => fetchClubGames(season, id, slateDate, { signal, live }))),
     Promise.all(clubIds.map((id) => fetchHotBatSplits(season, id, slateDate, { signal }))),
     fetchSeriesRuns(games, slateDate, { live }),
-    fetchStandingsFor(season, slateDate, { signal }).catch(() => ({})),
+    fetchStandingsFor(season, { signal }).catch(() => ({})),
     fetchMeetings(season, a, b, slateDate, { signal }),
     loadSeriesHistory(),
   ])

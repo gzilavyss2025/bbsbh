@@ -34,13 +34,19 @@ test('hot bats: endDate is the day before the slate date', () => {
   assert.equal(p.get('playerPool'), 'ALL')
 })
 
-test('club games, standings and meetings all stop the day before; none asks for a score', () => {
-  for (const url of [clubGamesUrl(2026, 119, SLATE), standingsUrl(2026, SLATE), meetingsUrl(2026, 119, 141, SLATE)]) {
+test('club games and meetings stop the day before; none asks for a score', () => {
+  for (const url of [clubGamesUrl(2026, 119, SLATE), meetingsUrl(2026, 119, 141, SLATE), standingsUrl(2026)]) {
     const p = q(url)
-    assert.equal(p.get('endDate') ?? p.get('date'), '2026-10-26', url)
+    if (!url.includes('standings')) assert.equal(p.get('endDate'), '2026-10-26', url)
     assert.ok(!/score|runs|linescore|seriesstatus|leaguerecord/i.test(p.get('fields').replace('runDifferential', '')), url)
   }
   assert.equal(q(clubGamesUrl(2026, 119, SLATE, { live: true })).get('endDate'), SLATE)
+})
+
+test('standings carry no date: a postseason date answers with no records', () => {
+  const p = q(standingsUrl(2026))
+  assert.equal(p.get('date'), null)
+  assert.equal(p.get('standingsTypes'), 'regularSeason')
 })
 
 const sched = (games) => ({ dates: games.map((g) => ({ date: g.officialDate, games: [g] })) })

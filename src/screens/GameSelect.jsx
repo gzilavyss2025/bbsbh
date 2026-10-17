@@ -23,6 +23,8 @@ import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/game/PastGameFlipCard.jsx'
 import { PostseasonBracket } from '../components/bracket/PostseasonBracket.jsx'
 import { SeriesPrimer } from '../components/postseason/SeriesPrimer.jsx'
+import { WorldSeriesHome } from '../components/worldseries/WorldSeriesHome.jsx'
+import { worldSeriesMode } from '../lib/postseason/worldseries/mode.js'
 import { usePrimer } from '../hooks/postseason/usePrimer.js'
 import { BracketDock } from '../components/bracket/BracketDock.jsx'
 import { LevelNav } from '../components/team/LevelNav.jsx'
@@ -158,6 +160,7 @@ export function GameSelect({
     useScoresUnlocked()
   const scoresUnlocked = spoilersOffFor(dateStr)
   const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null, { live: scoresUnlocked })
+  const wsMode = Boolean(worldSeriesMode(postseasonBracket.bracket)) // the World Series hero replaces the fold and primer (#1906)
   // The bracket stands in for the off-day banner and the empty-slate line
   // only when it can draw. A failed read falls back to the plain slate, never
   // to a blank page.
@@ -199,7 +202,7 @@ export function GameSelect({
   const bracketInRail = october && wide && bracketRoom
   const bracketInDock =
     october && !wide && Boolean(postseasonBracket.bracket) &&
-    !bracketOpensByItself(postseasonBracket.bracket, dateStr)
+    (wsMode || !bracketOpensByItself(postseasonBracket.bracket, dateStr))
   const wireOn = showWire && !october
   // The dock renders nothing on a quiet window, and only IT knows that (the
   // answer arrives with the fetch). It reports back so the slate pads its floor
@@ -948,11 +951,13 @@ export function GameSelect({
             }
           />
 
+          {inPostseasonWindow && <WorldSeriesHome bracket={postseasonBracket.bracket} slateDate={dateStr} live={scoresUnlocked} wide={wide} onRevealScores={() => setAskUnlock(true)} />}
+
           {/* The postseason bracket (#1224, slice 5) — above the cards, every
               date in the window, off days included. On an off day this is
               the only thing here besides the chrome above (Gary's decision,
               2026-09-28: "the bracket is the whole page"). */}
-          {inPostseasonWindow && !bracketInRail && !bracketInDock && (
+          {inPostseasonWindow && !bracketInRail && !bracketInDock && !wsMode && (
             <PostseasonBracket
               bracket={postseasonBracket.bracket}
               cutoff={postseasonBracket.cutoff}
@@ -1063,7 +1068,7 @@ export function GameSelect({
                 winter that is every club — and wide, it moves to the rail
                 (WinterRail.jsx, #1078). */}
             {/* October: the survivors' board, or the series primer on a primer day. */}
-            {october && <SeriesPrimer part="main" primer={primer} />}
+            {october && !wsMode && <SeriesPrimer part="main" primer={primer} />}
             {offDayTeams.length > 0 && !(wide && winter) && !october && (
               <OffDaySection
                 teams={offDayTeams}

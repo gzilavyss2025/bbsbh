@@ -49,6 +49,7 @@ test('a side with no probable is null, and a hand is attached when known', () =>
   const shaped = shapeUpcoming(live, { 694819: 'R' })
   assert.deepEqual(shaped[849830], {
     date: '2026-10-03',
+    gameDate: '',
     awayId: 135,
     homeId: 158,
     venue: { id: 32, name: 'American Family Field' },
