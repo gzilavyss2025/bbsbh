@@ -14,6 +14,7 @@
 // Field paths checked against live statsapi on 2026-10-17 (stats byDateRange
 // splits: stat.plateAppearances, stat.ops as a string; see the issue's
 // pre-research item 2).
+import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { fetchPersonStats } from '../person-fetch.js'
 import { getJson } from '../statsapi.js'
@@ -163,4 +164,30 @@ export async function fetchPostseasonOutings(personId, season, slateDate) {
   return splits
     .filter((s) => s.date && s.date < slateDate)
     .map((s) => ({ ...s, opponent: { ...s.opponent, abbreviation: teamAbbr(s.opponent) } }))
+}
+
+// A park for the trip card: where it is, its clock, roof and seats, and the
+// posted fence distances. Geography only, no game: spoiler-free. null on any
+// failure, which hides the card.
+export async function fetchTripVenue(venueId) {
+  if (!venueId) return null
+  try {
+    const data = await getJson(`/api/v1/venues/${venueId}?hydrate=location,fieldInfo,timezone`)
+    const v = data.venues?.[0]
+    const c = v?.location?.defaultCoordinates
+    if (!v || c?.latitude == null) return null
+    const park = ballparkFor(v.name, v.id)
+    return {
+      id: v.id,
+      name: v.name,
+      lat: Number(c.latitude),
+      lon: Number(c.longitude),
+      offset: v.timeZone?.offset ?? null,
+      roof: v.fieldInfo?.roofType ?? park?.roof ?? '',
+      seats: park?.capacity ?? v.fieldInfo?.capacity ?? null,
+      dist: park?.dist ?? null,
+    }
+  } catch {
+    return null
+  }
 }

@@ -9,10 +9,14 @@ const box = (gamePk, date, side, pitches) => ({
   date,
   boxscore: {
     teams: {
-      [side]: { team: { id: CLUB }, pitchers: pitches.map(([id]) => id) },
-      [side === 'home' ? 'away' : 'home']: { team: { id: 999 }, pitchers: [] },
+      // The real shape (gamePk 813032): player lines sit under the side, not at the top level.
+      [side]: {
+        team: { id: CLUB },
+        pitchers: pitches.map(([id]) => id),
+        players: Object.fromEntries(pitches.map(([id, n]) => [`ID${id}`, { person: { fullName: `P${id}` }, stats: { pitching: { numberOfPitches: n } } }])),
+      },
+      [side === 'home' ? 'away' : 'home']: { team: { id: 999 }, pitchers: [], players: {} },
     },
-    players: Object.fromEntries(pitches.map(([id, n]) => [`ID${id}`, { person: { fullName: `P${id}` }, stats: { pitching: { numberOfPitches: n } } }])),
   },
 })
 const SLATE = '2026-10-27'

@@ -4,7 +4,9 @@
 // are read, so a box score for the slate date's game is dropped here even if
 // the caller handed it in.
 //
-//   games: [{ gamePk, date, boxscore }]   boxscore: the /game/{pk}/boxscore body
+//   games: [{ gamePk, date, boxscore }]   boxscore: the /game/{pk}/boxscore body; a
+//   pitcher's line is teams.{side}.players.ID{n}.stats.pitching (checked live,
+//   gamePk 813032: there is no top-level `players`)
 //
 // A reliever is a pitcher who did not start that game: `pitchers[0]` is the
 // starter. Columns are the club's last `columns` games, oldest first. Rows are
@@ -26,7 +28,7 @@ export function bullpenGrid(games, clubId, { slateDate, relievers = 3, columns =
   shown.forEach((g, col) => {
     const ids = g.boxscore.teams[g.side].pitchers ?? []
     ids.slice(1).forEach((id) => {
-      const p = g.boxscore.players?.[`ID${id}`]
+      const p = g.boxscore.teams[g.side].players?.[`ID${id}`]
       const n = p?.stats?.pitching?.numberOfPitches
       if (!(n > 0)) return
       if (!pitchers.has(id)) pitchers.set(id, { id, name: p?.person?.fullName ?? '', cells: Array(shown.length).fill(null), total: 0 })

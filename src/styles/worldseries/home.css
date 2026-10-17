@@ -435,3 +435,135 @@
 .ww-tape__bar--neg {
   background: var(--border-stamped-soft);
 }
+
+/* ---------- bullpen, home and road, trip, played ---------- */
+
+.ww-bull__club,
+.ww-hr__club {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  color: var(--text-heading);
+}
+
+.ww-bulltable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-cell);
+}
+
+.ww-bulltable th,
+.ww-bulltable td {
+  padding: var(--space-1);
+  text-align: center;
+  border: 1px solid var(--border-hairline);
+}
+
+.ww-bulltable__name {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.ww-bulltable__on {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+}
+
+.ww-hr__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ww-hr__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-cell);
+}
+
+.ww-hr__label {
+  width: 40px;
+  color: var(--text-caption);
+}
+
+.ww-hr__marks {
+  flex: 1;
+}
+
+.ww-hr__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: var(--space-1);
+  border: 2px solid var(--border-stamped);
+}
+
+.ww-hr__mark--W {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+}
+
+.ww-hr__mark--L {
+  background: var(--surface-card);
+  color: var(--text-caption);
+}
+
+.ww-trip__fences {
+  display: block;
+  width: 220px;
+  max-width: 100%;
+  margin: var(--space-3) auto 0;
+}
+
+.ww-trip__fence {
+  stroke-width: 2;
+}
+
+.ww-trip__fence--from,
+.ww-swatch--from {
+  fill: var(--surface-stamped-tint);
+  stroke: var(--accent-primary);
+  stroke-dasharray: 4 3;
+  background: var(--surface-stamped-tint);
+}
+
+.ww-trip__fence--to,
+.ww-swatch--to {
+  fill: none;
+  stroke: var(--accent-negative);
+  background: var(--accent-negative);
+}
+
+.ww-trip__key {
+  margin-top: var(--space-3);
+}
+
+.ww-played__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ww-played__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ww-played__game {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  color: var(--text-heading);
+}
+
+.ww-played__meta {
+  flex: 1;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}

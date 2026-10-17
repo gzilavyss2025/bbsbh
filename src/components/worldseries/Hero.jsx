@@ -1,5 +1,5 @@
 import { teamLocationName, teamClubNameShort } from '../../lib/teams.js'
-import { gamePath } from '../../lib/route.js'
+import { gamePath, logbookNewPath } from '../../lib/route.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { timeOfDay } from '../../lib/dates.js'
 import { Pips } from '../bracket/bracketParts.jsx'
@@ -32,7 +32,7 @@ function ClubRow({ slot, record, winsNeeded, runs }) {
   )
 }
 
-export function Hero({ mode, model, game, records, slateDate, live, wide, onRevealScores }) {
+export function Hero({ mode, model, game, records, slateDate, live, wide, played = [], onRevealScores }) {
   const link = useRouteLink()
   const { series, dayType, gameNumber } = mode
   const gameDay = dayType === 'game'
@@ -59,6 +59,8 @@ export function Hero({ mode, model, game, records, slateDate, live, wide, onReve
   const lineups = gameDay ? path('lineup1') : null
   const innings = gameDay ? path('top1') : null
   const preview = !gameDay && gameNumber ? path('preview') : null
+  // Wide off day: one Stamp door per played game here (phone has them in Played).
+  const stamps = wide && !gameDay ? played : []
 
   return (
     <Card frame="stamped" label={gameDay ? 'Tonight' : 'Off day'} count={`World Series · ${series.slots.map((s) => s.wins).join('–')}`} className="ww-hero">
@@ -75,10 +77,13 @@ export function Hero({ mode, model, game, records, slateDate, live, wide, onReve
         </Button>
       )}
       {!wide && <ScheduleStrip columns={model.columns} />}
-      {(lineups || preview) && (
+      {(lineups || preview || stamps.length > 0) && (
         <Cluster gap="base" className="ww-hero__actions">
           {lineups && <Door {...link(lineups)}>Lineups</Door>}
           {innings && <Door {...link(innings)}>Innings</Door>}
+          {stamps.map((r) => (
+            <Door key={r.gamePk} {...link(logbookNewPath(r.gamePk))}>{`Stamp G${r.gameNumber}`}</Door>
+          ))}
           {preview && <Door {...link(preview)}>{`G${gameNumber} preview`}</Door>}
         </Cluster>
       )}

@@ -15,4 +15,4 @@ series primer then. Hero on a phone; hero plus `Ledger` table from 740px.
   two fills are `--surface-stamped-tint` and `--accent-tint`.
 - `Reel` ("Series reel", or "Road here" before Game 1 is played) is a snap rail with a Chips filter; clip and photo logic is `lib/postseason/worldseries/reel.js`.
 - `cards/` holds Probables, Tale of the tape and Hot bats: `leadSide` marks the tile that leads the two clubs with `.ww-best` (`--surface-stamped-tint`).
-- Stamp actions, the played list, bullpen, trip and home-and-road land in slice 7.
+- `cards/` also holds Bullpen, The trip, Home and road and Played. Stamp is a door to the Game Log flow (`logbookNewPath`), so no stamp part is imported.
