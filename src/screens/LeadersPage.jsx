@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { fetchTeam } from '../api/team.js'
 import { loadLeaderPool, LEADER_SCOPES, scopeMeta, isMilbScope, isMultiLevelScope } from '../api/leaders.js'
 import { fetchMinorsLeaders } from '../api/minorsLeaders.js'
@@ -10,7 +10,7 @@ import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useNav } from '../lib/nav.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { leadersPath } from '../lib/route.js'
-import { armBoardIn } from '../lib/motion/boardIn.js'
+import { armBoardIn, disarmBoardIn } from '../lib/motion/boardIn.js'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsOfBanner } from '../components/seal/AsOfBanner.jsx'
@@ -83,6 +83,13 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
     () => loadLeaders(scope, orgId, asOf),
     [scope, orgId, asOf],
   )
+
+  // A scope tap armed the board's fade-in; once the load settles with no board to spend it
+  // (an error, an empty scope), disarm it so a board on another page does not play it.
+  useEffect(() => {
+    const board = data && (data.precomputed ? Object.keys(data.precomputed).length : data.pool.length)
+    if (!loading && !board) disarmBoardIn()
+  }, [loading, data])
 
   const org = data?.org
   const title = org ? `${org.name} · Organization leaders` : scopeMeta(scope)?.title ?? 'Leaders'

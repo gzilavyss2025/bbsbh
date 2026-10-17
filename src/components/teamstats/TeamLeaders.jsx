@@ -36,25 +36,26 @@ function levelLabel(entry) {
 
 // The sub line under a leader's name: the club's logo and abbreviation, then the level and the
 // prospect pill. Each is opt-in and draws nothing when off or inapplicable, so a single-team
-// page has no sub line at all. The logo names the club the leader plays FOR — a MiLB entry
+// page has no sub line at all. `leadLogo` (rank 1 of a category whose leaders play for several
+// clubs) draws the logo alone, with no abbreviation, when `showTeamAbbr` is off. The logo names the club the leader plays FOR — a MiLB entry
 // shows its MLB parent affiliate's mark (`displayTeamId`/`displayTeamAbbr`, attached in
 // api/statsLevels.js) — and rides with its abbreviation only on `showTeamAbbr`: on a
 // single-team pool every row plays for the one club the page is about, so it is redundant.
 // `showLevel` (a multi-level pool) tags the level(s) the row's total covers;
 // `prospectSnapshot` (any MiLB scope) adds the same prospect pill the lineup/roster surfaces
 // use, which self-hides when unranked.
-function leaderSub({ entry, teamId, teamAbbr, showLevel, prospectSnapshot, showTeamAbbr }) {
+function leaderSub({ entry, teamId, teamAbbr, showLevel, prospectSnapshot, showTeamAbbr, leadLogo }) {
   const level = showLevel ? levelLabel(entry) : ''
   const prospect = prospectSnapshot ? prospectBadge(prospectSnapshot, entry.id) : null
   const hasProspect = prospect && (prospect.rank || prospect.orgRank)
-  const hasTeam = showTeamAbbr && teamId
+  const hasTeam = (showTeamAbbr || leadLogo) && teamId
   if (!hasTeam && !level && !hasProspect) return null
   return (
     <Cluster as="span" gap="snug" align="center" className="tlead__sub">
       {hasTeam && (
         <Cluster as="span" gap="tight" align="center" className="tlead__teamtag">
           <TeamLogo teamId={teamId} name={teamAbbr} size={16} className="tlead__logo" />
-          {teamAbbr}
+          {showTeamAbbr && teamAbbr}
         </Cluster>
       )}
       {level && <Pill fill="paper" figure className="tlead__level">{level}</Pill>}
@@ -78,6 +79,9 @@ function LeaderCategory({
   showTeamAbbr,
 }) {
   const ranks = displayRanks(entries)
+  // One club on the whole board (a team page) needs no mark; a mixed one (the postseason
+  // boards) names rank 1's club, since showTeamAbbr is off there.
+  const mixedClubs = new Set(entries.map((e) => e.displayTeamId ?? e.teamId)).size > 1
   return (
     <LeaderList label={category.label} count="Top 10" className="tlead__cat">
       {entries.map((e, i) => {
@@ -105,7 +109,7 @@ function LeaderCategory({
                 {e.name || DASH}
               </PlayerLink>
             }
-            sub={leaderSub({ entry: e, teamId, teamAbbr, showLevel, prospectSnapshot, showTeamAbbr })}
+            sub={leaderSub({ entry: e, teamId, teamAbbr, showLevel, prospectSnapshot, showTeamAbbr, leadLogo: i === 0 && mixedClubs })}
             figure={e.display}
           />
         )
