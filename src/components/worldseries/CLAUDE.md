@@ -14,4 +14,5 @@ series primer then. Hero on a phone; hero plus `Ledger` table from 740px.
   live here under the `ww-` namespace in `styles/worldseries/`. No new token: the mockup's
   two fills are `--surface-stamped-tint` and `--accent-tint`.
 - `Reel` ("Series reel", or "Road here" before Game 1 is played) is a snap rail with a Chips filter; clip and photo logic is `lib/postseason/worldseries/reel.js`.
-- Stamp actions, the played list and the stat cards land in later slices.
+- `cards/` holds Probables, Tale of the tape and Hot bats: `leadSide` marks the tile that leads the two clubs with `.ww-best` (`--surface-stamped-tint`).
+- Stamp actions, the played list, bullpen, trip and home-and-road land in slice 7.

@@ -7,7 +7,11 @@ import { worldSeriesMode } from '../../lib/postseason/worldseries/mode.js'
 import { Hero } from './Hero.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Ledger } from './Ledger.jsx'
+import { HotBats } from './cards/HotBats.jsx'
+import { Probables } from './cards/Probables.jsx'
+import { Tape } from './cards/Tape.jsx'
 import { Reel } from './Reel.jsx'
+import { Grid } from '../ui/layout/Grid.jsx'
 
 // THE WORLD SERIES HOME (#1906). Rendered by GameSelect on every slate date in
 // the postseason window; it draws nothing unless the bracket says both clubs are
@@ -54,6 +58,13 @@ export function WorldSeriesHome({ bracket, slateDate, live = false, wide = false
       />
       {wide && <Ledger series={series} model={model} onRevealScores={onRevealScores} />}
       {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={lcsRound} />}
+      <Probables game={game} season={Number(slateDate.slice(0, 4))} slateDate={slateDate} />
+      {data && (
+        <Grid min={340} gap="loose">
+          <Tape awayId={game?.awayId ?? clubIds[0]} homeId={game?.homeId ?? clubIds[1]} data={data} slateDate={slateDate} />
+          <HotBats clubIds={clubIds} splitsByClub={data.hotBats} />
+        </Grid>
+      )}
     </Stack>
   )
 }

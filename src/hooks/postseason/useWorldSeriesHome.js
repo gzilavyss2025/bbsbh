@@ -51,7 +51,6 @@ export function useWorldSeriesHome({ clubIds, games, slateDate, live = false }) 
   const key = clubIds ? clubIds.join('-') : ''
   const { data, loading } = useAsync(
     (signal) => (clubIds && slateDate ? load(clubIds, games ?? [], slateDate, live, signal) : Promise.resolve(null)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` stands for clubIds; games change only with the slate date
     [key, slateDate, live, (games ?? []).length],
   )
   return { data, loading: Boolean(clubIds) && loading }

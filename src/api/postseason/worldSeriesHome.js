@@ -14,6 +14,8 @@
 // Field paths checked against live statsapi on 2026-10-17 (stats byDateRange
 // splits: stat.plateAppearances, stat.ops as a string; see the issue's
 // pre-research item 2).
+import { teamAbbr } from '../../lib/teams.js'
+import { fetchPersonStats } from '../person-fetch.js'
 import { getJson } from '../statsapi.js'
 import { fetchGamePhotos } from '../gamePhotos.js'
 import { fetchHighlights } from '../highlights.js'
@@ -145,4 +147,20 @@ export async function fetchReelGames(games, slateDate) {
       return { ...g, clips, photos }
     }),
   )
+}
+
+// A pitcher's postseason game log this year, through the day before the slate
+// date (endDate in the request, and the rows filtered again): the Probables
+// card's bars and line. Each split gets `opponent.abbreviation`.
+export async function fetchPostseasonOutings(personId, season, slateDate) {
+  const splits = await fetchPersonStats(personId, {
+    type: 'gameLog',
+    group: 'pitching',
+    season,
+    gameType: 'F,D,L,W',
+    endDate: dayBefore(slateDate),
+  })
+  return splits
+    .filter((s) => s.date && s.date < slateDate)
+    .map((s) => ({ ...s, opponent: { ...s.opponent, abbreviation: teamAbbr(s.opponent) } }))
 }

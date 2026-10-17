@@ -5,6 +5,7 @@ import test, { mock } from 'node:test'
 import {
   clubGamesUrl,
   fetchClubGames,
+  fetchPostseasonOutings,
   fetchReelGames,
   fetchSeriesRuns,
   hotBatsUrl,
@@ -99,6 +100,20 @@ test('cutoff: the reel never requests content for a game on or after the slate d
     assert.deepEqual(out.map((g) => g.gamePk), [1])
     assert.ok(stub.calls.length > 0)
     assert.ok(stub.calls.every((c) => c.includes('/game/1/')), stub.calls.join())
+  } finally {
+    stub.restore()
+  }
+})
+
+test('cutoff: a pitcher\'s outings stop the day before the slate date, and a leaked row is dropped', async () => {
+  const split = (date, id) => ({ date, opponent: { id }, stat: { numberOfPitches: 90 } })
+  const stub = stubFetch(() => ({ stats: [{ splits: [split('2026-10-20', 114), split(SLATE, 135)] }] }))
+  try {
+    const rows = await fetchPostseasonOutings(660271, 2026, SLATE)
+    const p = q(stub.calls[0])
+    assert.equal(p.get('endDate'), '2026-10-26')
+    assert.equal(p.get('gameType'), 'F,D,L,W')
+    assert.deepEqual(rows.map((r) => [r.date, r.opponent.abbreviation]), [['2026-10-20', 'CLE']])
   } finally {
     stub.restore()
   }
