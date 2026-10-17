@@ -616,7 +616,9 @@ screen: a revealed play card, or the Final box score's Insights card inside its 
   about 1% of triple plays. Re-measure with the data in `public/data/notable/`.
 - **Where.** A triple play and a cycle on the play card that completes them (the cycle on the
   hit that finishes it). A no-hitter in the Final roll-up only, never during the game.
-- **No link** to the earlier game yet (#1570).
+- **The link (#1570).** The date in each line opens that earlier game's `boxscore` (`gamePath`), sealed:
+  no URL flag, no arrival rule (ADR-0101, alternative A). The path holds a date and two clubs, never a
+  score. A "since at least {floor}" line has no date and no link. `CalloutNote` draws it.
 
 - **wsWtaTrailing9** (pre-half strip) — "Teams trailing entering the 9th of a winner-take-all
   game are 3-33." Top of the 9th, for the club that trails after eight (none when level), in

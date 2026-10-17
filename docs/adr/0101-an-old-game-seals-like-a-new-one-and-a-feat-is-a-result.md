@@ -86,9 +86,9 @@ A triple play or a cycle note renders on the revealed play card. A no-hitter not
 renders in the box score's Final roll-up, never during the game. A "last time" claim
 stays inside the years where the index has measured recall. When the last found event is
 older than that, the note says "the first since at least {year}". The note always
-names the club. It adds the player and the league only when that line is notable. It
-does not link the earlier game yet (gzilavyss2025/bbsbh#1570); when it does, the link
-opens that game sealed, under this ADR.
+names the club. It adds the player and the league only when that line is notable. The
+date in each line links the earlier game (gzilavyss2025/bbsbh#1570). The link opens its box score
+sealed, under this ADR.
 
 ## As built
 

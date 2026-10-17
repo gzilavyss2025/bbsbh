@@ -8,13 +8,21 @@
 // REVEAL-ONLY (ADR-0101). The docs hold results, so this module takes them as an argument and
 // never fetches. The hook that fetches them (hooks/callouts/useLastTime.js) runs only for a play card
 // already on screen or inside the box score's reveal. Every lookup is cut strictly before
-// tonight (a feat of tonight's own never counts as the earlier one). No link yet (#1570).
+// tonight (a feat of tonight's own never counts as the earlier one).
+//
+// A note is `{ text, link, personId, side, teamId, teamName, personName, kind, dedupeKey, score }`.
+// `teamId`, `teamName` and `personName` are what the Insights card groups and draws by (the
+// roll-up's own notes get them from identify()). `link` is `{ before, label, after, path }`, and
+// `text` is `before + label + after`: the date opens that earlier game's box score (#1570),
+// sealed. A link never opens a seal, so it carries no flag (ADR-0101, alternative A); the path
+// holds a date and two clubs, no score. `link` is null on a "since at least {floor}" line.
 //
 // Era floors (plan.md section 3): the index measured recall back to 1901 for no-hitters and
 // cycles, and to 1960 for triple plays. A last-found event older than the floor reads "since
 // at least {floor}". A club with no earlier row in the index gets no note: it never invents a span.
 import { ordinal } from '../../lib/format.js'
 import { orderedPlays } from '../../lib/worldSeries/classify.js'
+import { gamePath } from '../../lib/route.js'
 import { SCORE_BASE, clampScore, magnitudeOf, otherSide, gameResult, dateText } from './shared.js'
 
 export const LAST_TIME_FLOOR = { nohitters: 1901, cycles: 1901, tripleplays: 1960 }
@@ -42,14 +50,29 @@ function tonightOf(feed) {
   return { gamePk: feed.gamePk, date, gameNumber: feed.gameData.game?.gameNumber ?? 1 }
 }
 
-// Newest first, strictly before tonight. Same-day games order by game number.
+// Newest first, strictly before tonight. Same-day games order by game number, so game 2 of a
+// doubleheader comes before game 1.
 function priorRows(docs, kind, t) {
   const before = (r) => r.gamePk !== t.gamePk && (r.officialDate < t.date || (r.officialDate === t.date && (r.gameNumber ?? 1) < t.gameNumber))
-  return (docs?.[kind]?.rows ?? []).filter(before).sort((a, b) => (a.officialDate < b.officialDate ? 1 : a.officialDate > b.officialDate ? -1 : 0))
+  const newer = (a, b) => (a.officialDate === b.officialDate ? (b.gameNumber ?? 1) - (a.gameNumber ?? 1) : a.officialDate < b.officialDate ? 1 : -1)
+  return (docs?.[kind]?.rows ?? []).filter(before).sort(newer)
 }
 
-const since = (kind, prev) =>
-  yearOf(prev.officialDate) < LAST_TIME_FLOOR[kind] ? `since at least ${LAST_TIME_FLOOR[kind]}` : `since ${dateText(prev.officialDate)}`
+// `lead` + the earlier game's date + `tail`, the date linked.
+function dated(prev, lead, tail) {
+  const link = {
+    before: lead, label: dateText(prev.officialDate), after: tail,
+    path: gamePath(prev.officialDate, prev.away.abbr, prev.home.abbr, 'boxscore', prev.gameNumber ?? 1),
+  }
+  return { text: lead + link.label + tail, link }
+}
+
+// "{lead}since {date}{tail}", or "{lead}since at least {floor}{tail}" (no date, so no link) when the
+// last find is older than the era floor.
+function sinceLine(kind, prev, lead, tail) {
+  if (yearOf(prev.officialDate) >= LAST_TIME_FLOOR[kind]) return dated(prev, `${lead}since `, tail)
+  return { text: `${lead}since at least ${LAST_TIME_FLOOR[kind]}${tail}`, link: null }
+}
 
 // The year a gap is measured from: the floor when the last find is older than it.
 const gapStart = (kind, prev) => Math.max(yearOf(prev.officialDate), LAST_TIME_FLOOR[kind])
@@ -68,12 +91,13 @@ export function buildLastTimeNotes(docs, feed, feat, { atBatIndex = null } = {})
   const notes = []
 
   const club = feed.gameData?.teams?.[side]
+  const who = (p) => ({ teamId: club?.id ?? null, teamName: club?.teamName ?? club?.name ?? '', personName: p?.name ?? '' })
   const clubName = club?.teamName ?? club?.name
   const prevClub = rows.find((r) => r[r.side]?.id === club?.id)
   if (prevClub && clubName) {
     notes.push({
-      text: `The ${possessive(clubName)} first ${noun} ${since(kind, prevClub)}.`,
-      personId: null, side, kind: 'lastTimeClub', dedupeKey: key('club'),
+      ...sinceLine(kind, prevClub, `The ${possessive(clubName)} first ${noun} `, '.'),
+      personId: null, side, ...who(null), kind: 'lastTimeClub', dedupeKey: key('club'),
       score: clampScore(SCORE_BASE.lastTimeClub + magnitudeOf(t.date.slice(0, 4) - gapStart(kind, prevClub), CLUB_GAP_FULL)),
     })
   }
@@ -84,8 +108,8 @@ export function buildLastTimeNotes(docs, feed, feat, { atBatIndex = null } = {})
     if (!p || !mine.length) continue
     const n = mine.length + 1
     notes.push({
-      text: `His ${wordOf(n)} ${noun}; the ${n === 2 ? 'first' : 'last'} was ${dateText(mine[0].officialDate)}.`,
-      personId: p.id, side, kind: 'lastTimePlayer', dedupeKey: `lastTime-player-${kind}-${p.id}-${atBatIndex ?? 'game'}`,
+      ...dated(mine[0], `His ${wordOf(n)} ${noun}; the ${n === 2 ? 'first' : 'last'} was `, '.'),
+      personId: p.id, side, ...who(p), kind: 'lastTimePlayer', dedupeKey: `lastTime-player-${kind}-${p.id}-${atBatIndex ?? 'game'}`,
       score: clampScore(SCORE_BASE.lastTimePlayer + magnitudeOf(t.date.slice(0, 4) - yearOf(mine[0].officialDate), CLUB_GAP_FULL)),
     })
   }
@@ -93,8 +117,8 @@ export function buildLastTimeNotes(docs, feed, feat, { atBatIndex = null } = {})
   const gap = daysBetween(rows[0].officialDate, t.date)
   if (gap >= LEAGUE_GAP_DAYS) {
     notes.push({
-      text: `The first ${noun} in the majors ${since(kind, rows[0])}.`,
-      personId: null, side, kind: 'lastTimeLeague', dedupeKey: key('league'),
+      ...sinceLine(kind, rows[0], `The first ${noun} in the majors `, '.'),
+      personId: null, side, ...who(null), kind: 'lastTimeLeague', dedupeKey: key('league'),
       score: clampScore(SCORE_BASE.lastTimeLeague + magnitudeOf(gap, LEAGUE_GAP_FULL)),
     })
   }
