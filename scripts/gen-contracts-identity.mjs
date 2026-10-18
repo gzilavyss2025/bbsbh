@@ -279,10 +279,13 @@ async function main() {
   const filled = crossReference([extensions, arbitration, freeAgency, salaries])
   console.log(`Cross-reference pass: filled ${filled} otherwise-unresolved rows from elsewhere in the dataset.`)
 
+  // extensions, arbitration and pending stay indented: they are small and a human
+  // reads them in git diffs and the review queue. free_agency and salaries are
+  // written compact (-24%); keep them compact, or every regeneration re-bloats them.
   await writeJsonAtomic(join(outDir, 'extensions.json'), extensions, 2)
   await writeJsonAtomic(join(outDir, 'arbitration.json'), arbitration, 2)
-  await writeJsonAtomic(join(outDir, 'free_agency.json'), freeAgency, 2)
-  await writeJsonAtomic(join(outDir, 'salaries.json'), salaries, 2)
+  await writeJsonAtomic(join(outDir, 'free_agency.json'), freeAgency)
+  await writeJsonAtomic(join(outDir, 'salaries.json'), salaries)
 
   // A separate, much smaller file for the /admin/contracts review queue
   // (PR2): every non-exact row across all four files, so the review page
