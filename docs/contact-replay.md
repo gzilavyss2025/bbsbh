@@ -37,11 +37,22 @@ Each phase ships alone. Do the phases in this order.
 | Phase | What ships | Data | Blocked on |
 | --- | --- | --- | --- |
 | A | Drawn swing (default timing), contact, whiff, foul, exit trail, trajectory tag, side view, quality line with exit velocity only | MLB feed `hitData` only | Nothing |
-| B | Swing timed from bat speed; squared-up %, xBA, barrel, home-run parks on the quality line | Savant `/gf` | Gary's `/gf` spoiler call (issue #1771, "Spoiler rule") |
-| C | The bat at contact in ink, with the measured attack angle | Savant Statcast CSV | Gary's "both tiers?" answer, and one measurement of when the CSV fills |
+| B | Swing timed from bat speed; squared-up %, xBA, barrel, home-run parks on the quality line | Savant `/gf` | Nothing (decided: strip on parse, section 3.2) |
+| C | The bat at contact in ink, with the measured attack angle | Savant Statcast CSV | One measurement of when the CSV fills (section 3.3) |
 
-Phase A needs no new fetch. Start there. Do not start phase B or C without
-Gary's answer in the issue.
+Phase A needs no new fetch. Start there.
+
+**Decisions (Gary, 2026-10-18).**
+
+1. **`/gf`: strip on parse.** The phone fetches `/gf` in a reveal-only module.
+   The parser keeps only the per-pitch quality fields and drops everything else
+   at once (section 3.2). No Vercel function.
+2. **Both tiers.** Phase C ships after phase B.
+3. **Tap size.** "Play at-bat" and the pitch chips use `Button size="tap"`
+   (44 px), not `control` (section 9).
+4. **MLB now, AAA later.** Phases B and C fetch for MLB games only
+   (`sportId` 1). A MiLB game with tracked pitches still gets phase A from the
+   MLB feed. Checking AAA `/gf` bat data is a separate follow-up.
 
 ## 3. Data contract
 
@@ -63,6 +74,9 @@ hit: hitData ? {
 } : null,
 ```
 
+Also add `playId: e.playId ?? null` to every pitch detail. Phase B joins on
+it. An automatic call has no `playId`; it gets no swing anyway.
+
 These are the same paths `src/api/hitchart.js` reads. Verify each path against
 a live game first (root `CLAUDE.md`, "Verify feed field paths"). Write the
 gamePk you checked in the comment, as `pitchInfo.js` does for `vX0`.
@@ -82,17 +96,46 @@ there. Do not copy the numbers.
 (`WHIFF_CODES`, `FOUL_CODES`, and the in-play codes). A called pitch (ball,
 called strike) gets no bat. Do not draw a bat for a pitch the batter took.
 
-### 3.2 Phase B: `/gf` fields (only after Gary's call)
+### 3.2 Phase B: `/gf` fields, stripped on parse
 
-Join a `/gf` row to an MLB pitch on `play_id` = `playId`. Read `batSpeed`,
-`xba`, `is_barrel` and `homeRunBallparks`. Follow the spoiler decision Gary
-records in #1771. Classify the new module in `spoiler-manifest.json` before
-anything imports it.
+`/gf?game_pk=` returns the WHOLE game: `scoreboard.linescore`, `boxscore`, and
+play text for halves the reader has not revealed. The rule (Gary, 2026-10-18):
+**nothing score-bearing survives the parse.**
 
-### 3.3 Phase C: CSV fields (only after Gary's call)
+- A new module in `src/api/` (to be created) fetches `/gf` and parses it in the
+  same function. The parser reads ONLY `team_home[]` and `team_away[]`, and from
+  each row ONLY `play_id`, `batSpeed`, `xba`, `is_barrel` and
+  `homeRunBallparks`. It returns a `Map` of `playId` to
+  `{ batSpeed, xba, barrel, hrParks }`. The raw response goes out of scope
+  inside that function. No cache, ref or state holds the raw body.
+- Do not read `scoreboard`, `boxscore`, `des`, `events`, `result` or any other
+  field, not even to log it.
+- Classify the module `reveal-only` in `spoiler-manifest.json` before anything
+  imports it. Call it only from the replay, which renders inside the half's
+  reveal. Look up only the `playId`s of the at-bat in view.
+- Fetch for MLB games only (`sportId` 1). Fetch once when a replay opens, and
+  again only when the reader re-opens a replay and a pitch still has no
+  `batSpeed` (bat speed arrives a median of 162 s late, issue #1771). Never
+  poll.
+- A unit test proves the strip: feed the parser a recorded `/gf` body and
+  assert that its output, serialised, contains no key from `scoreboard` or
+  `boxscore` and no play text.
+
+### 3.3 Phase C: CSV fields
 
 Join on `game_pk` + `at_bat_number` (= `atBatIndex + 1`) + `pitch_number`. Read
-`attack_angle` and `attack_direction`.
+`attack_angle` and `attack_direction`. The CSV carries `bat_score` and
+`post_bat_score`, so strip on parse here too: keep only the join keys and the
+two angles.
+
+- **Measure first.** Before any code, record once how long after the final out
+  the CSV first has rows for a game. Write the result in issue #1771 and in
+  `docs/peer-sites.md`, "Data notes", beside the `/gf` freshness table.
+- Fetch only for a game whose status is Final, MLB only. Use the existing CSV
+  fetch in `src/api/scout/headToHead.js` as the pattern.
+- One fetch per gamePk per page load. If the CSV has no rows yet, the bat stays
+  pencil, and the next page load tries again. Never poll.
+- Classify the module `reveal-only` in `spoiler-manifest.json`.
 
 ### 3.4 Squared-up %
 
@@ -108,7 +151,9 @@ Savant code.
 
 | File | Change |
 | --- | --- |
-| `src/api/playbyplay/pitchInfo.js` | Add `hit` (section 3.1) |
+| `src/api/playbyplay/pitchInfo.js` | Add `hit` and `playId` (section 3.1) |
+| new `/gf` module in `src/api/`, to be created (phase B) | Fetch and strip on parse (section 3.2), with its manifest entry |
+| new CSV module in `src/api/`, to be created (phase C) | Fetch and strip on parse (section 3.3), with its manifest entry |
 | `src/lib/pitcherCard/atBat.js` | Pass `hit`, the call class (swing, whiff, foul, in play) and the bat side to each scene pitch |
 | new `lib/pitcherCard/swing.js`, to be created | The swing model: pure math, no React. Section 6.2 |
 | new `lib/pitcherCard/batted.js`, to be created | The batted ball in the scene camera, and the side-view path. Section 6.4 |
@@ -424,6 +469,9 @@ buttons are the only way into the replay on a phone.
 
 - **No tracked flight** (most MiLB parks): no replay, as today
   (`useReplayPitches` returns null).
+- **MiLB game with tracked pitches** (some AAA parks): phase A only. No `/gf`
+  or CSV fetch, so the swing keeps its default timing and the quality line
+  shows exit velocity only, with no waiting figures (they would wait forever).
 - **Tracked pitch, no `hitData`** on a ball in play: draw the swing and the
   contact; no exit trail; the side view says `NO TRACKING FOR THIS BALL`; the
   quality line shows no figures.
@@ -464,7 +512,10 @@ without the fix (root `CLAUDE.md`).
 - `flightModel.js` (moved): the Contact card's existing tests still pass
   unchanged; a start height of 3 ft gives the old numbers exactly.
 - `pitchInfo.js`: `hit` is null for a pitch with no `hitData`; the paths match
-  a recorded feed fixture.
+  a recorded feed fixture; `playId` is on every tracked pitch.
+- The `/gf` parser (phase B) and the CSV parser (phase C): the output holds only
+  the kept fields (section 3.2, 3.3); serialised, it contains no score, box
+  score or play text from a recorded response. A MiLB game makes no fetch.
 - The quality line's verdict rules: one test per row of the table in 7.2,
   plus the boundaries (.500 and .250).
 - Squared-up: a result above 1 shows as `100%`.
@@ -497,13 +548,16 @@ the route with `?nointro` and the gamePk.
 
 - Everything here is reveal-only. `pitchDetails` exists only inside a revealed
   half, and the new fields ride on it. Do not read `hitData` anywhere else.
+- `/gf` and the CSV carry the whole game's score. Their parsers drop it at once
+  (sections 3.2 and 3.3), so the app never holds it. This is Gary's decision of
+  2026-10-18; do not keep the raw body "for later".
 - The replay's timing depends on the play (a home run's replay is longer than a
   whiff's). That is safe, because the replay plays only after the reveal and
   after a tap. ADR-0046 forbids timing that is a function of the reveal BEFORE
   the reveal. Do not move any of this timing to a surface outside the seal.
 - `npm run lint` runs the guards that apply: `check-typography` (no raw type
   sizes in `contact.css`), `check-raw-values`, `check-caps`,
-  `check-spoiler-manifest` (phase B module), `check-dir-size`,
+  `check-spoiler-manifest` (the phase B and C modules), `check-dir-size`,
   `check-file-size`. Put SVG stroke widths in CSS with the
   `raw-value-exempt: SVG stroke width in the scene's own units` marker, as
   `card.css` does.
