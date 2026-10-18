@@ -162,7 +162,7 @@
 
 /* THE BULLPEN BOARD: one colour, a filled cell for a day he pitched. */
 .lpen__board {
-  padding: var(--space-3) 0 0;
+  padding-top: var(--space-3);
 }
 /* layout-exempt: name, nine day cells and a total: a fixed row */
 .lpen__row {

@@ -217,7 +217,7 @@
   align-items: center;
   gap: 2px;
   height: 15px;
-  padding: 0 var(--space-1) 0 2px;
+  padding: 0 2px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
   font-family: var(--font-mono);
@@ -228,6 +228,7 @@
 
 /* A sideways column is 54px or more; the badge's years must fit it. */
 .ladder--sideways .ladder__badge {
+  padding: 0 var(--space-1) 0 2px;
   font-size: 0.82em;
 }
 
