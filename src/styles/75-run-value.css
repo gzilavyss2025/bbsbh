@@ -297,58 +297,6 @@
   margin-top: var(--space-2);
 }
 
-/* ---- the club card ----------------------------------------- */
-
-/* The club's own men under its four totals — a short list, not a board: the
-   whole roster is what /run-value's club filter is for, and the card's job is
-   to say who is carrying the season. */
-.rvclub__list {
-  list-style: none;
-  margin: var(--space-3) 0 0;
-  padding: 0;
-}
-
-.rvclub__row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1h) 0;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-
-.rvclub__row:first-child {
-  border-top: 0;
-}
-
-.rvclub__seat {
-  flex: none;
-  min-width: 1.6em;
-  font-family: var(--font-mono);
-  font-size: var(--fs-compact);
-  color: var(--text-caption);
-}
-
-.rvclub__name {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: var(--fs-small);
-}
-
-.rvclub__pos {
-  flex: none;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
-.rvclub__value {
-  flex: none;
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-md);
-  font-variant-numeric: tabular-nums;
-}
-
 /* ---- the four single-skill boards -------------------------- */
 
 /* Four short boards rather than one four-column table, because they answer four

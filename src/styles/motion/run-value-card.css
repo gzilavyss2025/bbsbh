@@ -5,7 +5,7 @@
    surface that draws it, and RunValueBoard.jsx imports it.
 
    Two gates. The ENTRANCE hangs off .rvclub--intro, which the card wears from the time it
-   first shows (useInViewOnce at a third) until the first tap; .rvclub--wait holds every
+   first shows (useInViewOnce, a tenth in view) until the first tap; .rvclub--wait holds every
    entrance frozen on its first frame while the card is still below the fold. A RE-RANK is a
    change the reader caused, so it plays on every tap: a row that joins the board stamps in
    (.rvrow--enter-a / -b, picked by the tap count's parity so the keyframe restarts), and a

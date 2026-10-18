@@ -13,10 +13,9 @@ const startFor = (key) => ({ key, phase: firstPhase(key, { canObserve: canObserv
 // [ref, phase] for one block on the player page (#2073). Put `ref` on the element
 // that wears the entrance class, and pick the class from `phase` ('rest', 'wait'
 // or 'play'; riseClass() in lib/motion/inViewOnce.js maps the shared rise).
-// `key` is viewKey(playerId, slotKey). `threshold` overrides the tenth for a block that
-// should wait until more of it shows (the team page's run value card, #2295). The rule and its reasons are in
+// `key` is viewKey(playerId, slotKey). The rule and its reasons are in
 // lib/motion/inViewOnce.js and docs/motion.md, "The one-shot gate".
-export function useInViewOnce(key, { threshold = IN_VIEW_THRESHOLD } = {}) {
+export function useInViewOnce(key) {
   const ref = useRef(null)
   const [held, setHeld] = useState(() => startFor(key))
 
@@ -41,11 +40,11 @@ export function useInViewOnce(key, { threshold = IN_VIEW_THRESHOLD } = {}) {
         markSeen(key)
         setHeld({ key, phase: 'play' })
       },
-      { threshold },
+      { threshold: IN_VIEW_THRESHOLD },
     )
     io.observe(node)
     return () => io.disconnect()
-  }, [key, phase, threshold])
+  }, [key, phase])
 
   return [ref, phase]
 }

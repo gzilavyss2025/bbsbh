@@ -39,6 +39,9 @@ export function LeaderList({ club, part, prev, gen, ref }) {
         const shown = i >= 0
         const lead = i === 0
         const entering = shown && gen > 0 && !prev?.includes(p.id)
+        // A face loads only for a man on the board, or leaving it on this tap (he fades out): the
+        // other rows are hidden, and their photos would all load with the card for nothing.
+        const face = shown || Boolean(prev?.includes(p.id))
         const value = part === 'total' ? p.total : p[part]
         const cls = [
           'rvrow',
@@ -57,7 +60,7 @@ export function LeaderList({ club, part, prev, gen, ref }) {
           >
             <span className="rvrow__rank">{shown ? i + 1 : ''}</span>
             <span className="rvrow__frame" data-flip={`frame:${p.id}`}>
-              <Headshot personId={p.id} name={p.name} teamId={p.teamId} className="rvrow__shot" tint={false} />
+              {face ? <Headshot personId={p.id} name={p.name} teamId={p.teamId} className="rvrow__shot" tint={false} /> : null}
             </span>
             <span className="rvrow__body">
               <span className="rvrow__name">
@@ -72,7 +75,8 @@ export function LeaderList({ club, part, prev, gen, ref }) {
             </span>
             <span
               className={`rvrow__value rv__num--${tone(value)}`}
-              {...(shown ? { 'data-count': value, 'data-count-at': `${900 + i * 55},900` } : null)}
+              data-count={value}
+              data-count-at={shown ? `${900 + i * 55},900` : undefined}
             >
               {signed(value)}
             </span>

@@ -21,7 +21,9 @@ export function measureFlip(root) {
       left: el.offsetLeft,
       width: el.offsetWidth,
       height: el.offsetHeight,
-      opacity: getComputedStyle(el).opacity,
+      // Only a segment animates its opacity; reading it for the rows and frames too would resolve
+      // style for every node on the list for nothing.
+      opacity: el.dataset.flip.startsWith('seg:') ? getComputedStyle(el).opacity : null,
       shown: el.dataset.shown !== 'false',
     })
   }

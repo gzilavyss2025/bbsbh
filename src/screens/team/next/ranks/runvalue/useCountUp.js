@@ -3,8 +3,10 @@ import { useEffect } from 'react'
 const easeOutCubic = (t) => 1 - (1 - t) ** 3
 
 // The run value card's count-ups (#2295), in one requestAnimationFrame loop with no re-render: each
-// element under `root` that carries `data-count` (the final value) has its own text node rewritten
-// every frame, from 0 to that value, through `format`. `data-count-at` is "delay,duration" in ms.
+// element under `root` that carries `data-count-at` ("delay,duration" in ms) has its own text node
+// rewritten every frame, from 0 to its `data-count` (the final value), through `format`. An element
+// keeps `data-count` while it is off the count (a row off the board), so the cleanup below can
+// always write back what React rendered.
 // An element with `data-count-mask` shows its mask text until its count is `data-count-mask-at`
 // done, then its own text.
 //
@@ -15,7 +17,7 @@ const easeOutCubic = (t) => 1 - (1 - t) ** 3
 export function useCountUp(root, play, format) {
   useEffect(() => {
     if (!play || !root.current) return undefined
-    const items = [...root.current.querySelectorAll('[data-count]')].map((el) => {
+    const items = [...root.current.querySelectorAll('[data-count-at]')].map((el) => {
       const [delay, dur] = (el.dataset.countAt ?? '0,1000').split(',').map(Number)
       return { el, delay, dur }
     })

@@ -23,16 +23,14 @@ import { useCountUp } from './runvalue/useCountUp.js'
 // .scratch/run-value-motion/handoff.md). MLB only: `data` is null for an affiliate and the card
 // does not render. Season aggregates, so an open surface (ADR-0034): nothing here is sealed.
 //
-// The entrance plays once per page visit, when the card is a third in view (it sits below the
-// fold): the stamp-in, a count-up on the total and the six values, the league bars, the split bar's
+// The entrance plays once per page visit, when the card first shows (it sits below the fold; the
+// gate's own tenth, since the card is taller than a phone held sideways): the stamp-in, a count-up on the total and the six values, the league bars, the split bar's
 // wipe, then the buttons and rows. `still` (the band already played) or reduced motion draws the end
 // state at once. The picked part is a view of this card only: not in the URL, not stored.
-const INTRO_THRESHOLD = 0.3
-
 export function RunValueBoard({ data, clubName, asOf, sportId, still }) {
   const navigate = useNav()
   const club = data?.club
-  const [cardRef, seen] = useInViewOnce(viewKey(club?.teamId ?? 0, 'team-run-value'), { threshold: INTRO_THRESHOLD })
+  const [cardRef, seen] = useInViewOnce(viewKey(club?.teamId ?? 0, 'team-run-value'))
   const phase = still ? 'rest' : seen
   const [view, setView] = useState({ part: 'total', prev: null, gen: 0 })
   const listRef = useRef(null)
