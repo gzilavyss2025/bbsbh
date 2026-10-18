@@ -38,3 +38,20 @@ test('the Bullpen parts take no inline inset of their own, so the body is the on
     assert.equal(inline, '0', `${sel} pads its sides (${p}); the fold body owns that inset`)
   }
 })
+
+// The lineup page is square: its cards, sheets and rows set no radius. The
+// Ladder came from the old rounded card, so inside the fold every part of it
+// goes square too. The old card on /postseason-live keeps its rounding.
+test('every rounded Ladder part is square inside the lineup fold', () => {
+  const ladderCss = stripComments(
+    readFileSync(join(dirname(FIELD), '..', '10b-former-teammates.css'), 'utf8'),
+  )
+  const rounded = [...ladderCss.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+    .filter((m) => /border-radius:\s*var\(--radius-(xs|sm|pill)\)/.test(m[2]))
+    .map((m) => m[1].trim())
+  assert.ok(rounded.length >= 6, `expected the Ladder's rounded parts, found ${rounded.join(', ')}`)
+  const square = [...css.matchAll(/([^{}]+)\{([^}]*border-radius:\s*0;[^}]*)\}/g)].flatMap((m) =>
+    m[1].split(',').map((s) => s.trim()),
+  )
+  for (const sel of rounded) assert.ok(square.includes(`.ltm ${sel}`), `.ltm ${sel} should set border-radius: 0`)
+})
