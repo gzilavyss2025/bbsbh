@@ -255,9 +255,27 @@ test('the fingerprint tracks the SHAPES, so pins survive a recolor but not a red
 
 test('slimSvgNumbers rounds an absolute traced path and leaves a relative one alone (#2288)', async () => {
   const { slimSvgNumbers } = await import('../src/lib/logoMono.js')
-  const traced = '<path opacity="1.000000" d="\nM1.000000,447.123456 \n\tC1.5,2.0 3.0,4.0 5.999999,6.0 \n\tz"/>'
-  assert.equal(slimSvgNumbers(traced), '<path opacity="1" d="M1,447.12C1.5,2 3,4 6,6z"/>')
-  const relative = '<path d="M68.889 68.467h-.012l-.518-1.465z"/>'
-  assert.equal(slimSvgNumbers(relative), '<path d="M68.889 68.467h-.012l-.518-1.465z"/>')
+  const svg = (d, box = '0 0 300 300') => `<svg viewBox="${box}"><path opacity="1.000000" d="${d}"/></svg>`
+  assert.equal(
+    slimSvgNumbers(svg('\nM1.000000,447.123456 \n\tC1.5,2.0 3.0,4.0 5.999999,6.0 \n\tz')),
+    '<svg viewBox="0 0 300 300"><path opacity="1" d="M1,447.12C1.5,2 3,4 6,6z"/></svg>',
+  )
   assert.ok(slimSvgNumbers('<svg viewBox="0 0 188.382 178.119"/>').includes('188.382 178.119'))
+  // Each of these used to be rounded into a different shape; all stay as written.
+  for (const d of [
+    'M68.889 68.467h-.012l-.518-1.465z', // relative commands carry their error forward
+    'M0,0A5 5 0 01.5 2', // compact arc flags read as one number
+    'M5.0.5L1 1', // "5.0" then ".5", merged into 5.5 if rounded
+    'M1.234567e-5,2L3,4', // exponent
+  ]) {
+    assert.equal(slimSvgNumbers(svg(d)), svg(d).replace('1.000000', '1'), d)
+  }
+})
+
+test('slimSvgNumbers leaves a small coordinate space and a data-d attribute untouched (#2288)', async () => {
+  const { slimSvgNumbers } = await import('../src/lib/logoMono.js')
+  const small = '<svg viewBox="0 0 1 1"><path d="M0.123456,0.654321L0.5,0.5"/></svg>'
+  assert.equal(slimSvgNumbers(small), small)
+  const data = '<svg viewBox="0 0 300 300"><path data-d="1.234567" d="M1.123456,2L3,4z"/></svg>'
+  assert.equal(slimSvgNumbers(data), '<svg viewBox="0 0 300 300"><path data-d="1.234567" d="M1.12,2L3,4z"/></svg>')
 })

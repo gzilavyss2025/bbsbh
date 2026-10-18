@@ -366,20 +366,32 @@ function bodyOf(svg) {
 // The tracer (Potrace-style) writes six decimals and tab-and-newline padding on
 // every path point: "M1.000000,447.000000". Two decimals is far below one pixel
 // at any size the app draws a mark, so only `d` paths and `opacity` are touched.
-// A path with a relative command (lower-case letter other than z) is left at
-// full precision: each rounded step would carry its error into every point
-// after it.
+// A path is left byte-for-byte alone unless rounding it is provably safe:
+//   - every command is absolute and not an arc (a relative step carries its
+//     rounding error into every point after it; arc flags can be written
+//     without separators, "01.5", and would read as one number);
+//   - no two numbers run together ("1.5.5"), and no exponent ("1e-5");
+//   - the art is at least MIN_SLIM_BOX wide, so 0.01 stays well below a pixel
+//     (a 0..1 viewBox drawn large would visibly lose its shape).
+const SLIM_PATH = /^[MLCHVSQTZz\d\s,.-]*$/
+const MIN_SLIM_BOX = 100
 const round2 = (x) => String(Math.round(Number(x) * 100) / 100)
 
+function slimPath(d) {
+  if (!SLIM_PATH.test(d) || /\.\d*\./.test(d)) return d
+  return d
+    .replace(/-?\d+\.\d+/g, round2)
+    .replace(/\s+/g, ' ')
+    .replace(/ ?([MLCHVSQTZz]) ?/g, '$1')
+    .trim()
+}
+
 export function slimSvgNumbers(svg) {
+  const box = /viewBox="[^"]*?([\d.]+)\s+([\d.]+)"/.exec(svg)
+  const big = box && Math.max(Number(box[1]), Number(box[2])) >= MIN_SLIM_BOX
   return svg
-    .replace(/\bd="([^"]*)"/g, (_, d) =>
-      `d="${(/[a-y]/.test(d) ? d : d.replace(/-?\d+\.\d+/g, round2))
-        .replace(/\s+/g, ' ')
-        .replace(/ ?([MLCZHVSQTAmlczhvsqta]) ?/g, '$1')
-        .trim()}"`,
-    )
-    .replace(/\bopacity="(\d+\.\d+)"/g, (_, v) => `opacity="${round2(v)}"`)
+    .replace(/(\sd=)"([^"]*)"/g, (all, attr, d) => (big ? `${attr}"${slimPath(d)}"` : all))
+    .replace(/(\sopacity=)"(\d+\.\d+)"/g, (_, attr, v) => `${attr}"${round2(v)}"`)
 }
 
 // The one-color knockout SVG for `svg`, or null when the art can't be re-inked
