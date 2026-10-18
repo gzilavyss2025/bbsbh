@@ -362,6 +362,26 @@ function bodyOf(svg) {
     .trim()
 }
 
+// Shrinks the numbers in a traced SVG without changing how it draws (#2288).
+// The tracer (Potrace-style) writes six decimals and tab-and-newline padding on
+// every path point: "M1.000000,447.000000". Two decimals is far below one pixel
+// at any size the app draws a mark, so only `d` paths and `opacity` are touched.
+// A path with a relative command (lower-case letter other than z) is left at
+// full precision: each rounded step would carry its error into every point
+// after it.
+const round2 = (x) => String(Math.round(Number(x) * 100) / 100)
+
+export function slimSvgNumbers(svg) {
+  return svg
+    .replace(/\bd="([^"]*)"/g, (_, d) =>
+      `d="${(/[a-y]/.test(d) ? d : d.replace(/-?\d+\.\d+/g, round2))
+        .replace(/\s+/g, ' ')
+        .replace(/ ?([MLCZHVSQTAmlczhvsqta]) ?/g, '$1')
+        .trim()}"`,
+    )
+    .replace(/\bopacity="(\d+\.\d+)"/g, (_, v) => `opacity="${round2(v)}"`)
+}
+
 // The one-color knockout SVG for `svg`, or null when the art can't be re-inked
 // (no viewBox, an embedded raster, or a mark that is entirely paper — nothing
 // would be left to draw). A null tells the caller to fall back rather than
@@ -403,9 +423,9 @@ export function monoLogoSvg(svg, { maskId = 'ink', pins = null } = {}) {
   // a fill: SVG's own default is black, which in mask space would silently
   // punch the shape out instead of drawing it. An element's own fill —
   // attribute, inline style, or CSS rule — still wins over an inherited one.
-  return (
+  return slimSvgNumbers(
     `<svg xmlns="http://www.w3.org/2000/svg"${decls} viewBox="${box.join(' ')}">` +
-    `<mask id="${maskId}" maskUnits="userSpaceOnUse" ${geom}><g fill="#fff">${markup}</g></mask>` +
-    `<rect ${geom} fill="#fff" mask="url(#${maskId})"/></svg>`
+      `<mask id="${maskId}" maskUnits="userSpaceOnUse" ${geom}><g fill="#fff">${markup}</g></mask>` +
+      `<rect ${geom} fill="#fff" mask="url(#${maskId})"/></svg>`,
   )
 }

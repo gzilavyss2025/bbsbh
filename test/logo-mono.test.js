@@ -252,3 +252,12 @@ test('the fingerprint tracks the SHAPES, so pins survive a recolor but not a red
   // every pin onto the wrong shape.
   assert.notEqual(monoLogoFingerprint(twoShapes), monoLogoFingerprint(wrap('<path d="M0 0h9v9H0z" fill="#12284b"/>')))
 })
+
+test('slimSvgNumbers rounds an absolute traced path and leaves a relative one alone (#2288)', async () => {
+  const { slimSvgNumbers } = await import('../src/lib/logoMono.js')
+  const traced = '<path opacity="1.000000" d="\nM1.000000,447.123456 \n\tC1.5,2.0 3.0,4.0 5.999999,6.0 \n\tz"/>'
+  assert.equal(slimSvgNumbers(traced), '<path opacity="1" d="M1,447.12C1.5,2 3,4 6,6z"/>')
+  const relative = '<path d="M68.889 68.467h-.012l-.518-1.465z"/>'
+  assert.equal(slimSvgNumbers(relative), '<path d="M68.889 68.467h-.012l-.518-1.465z"/>')
+  assert.ok(slimSvgNumbers('<svg viewBox="0 0 188.382 178.119"/>').includes('188.382 178.119'))
+})
