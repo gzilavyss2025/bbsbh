@@ -204,7 +204,7 @@
   white-space: nowrap;
 }
 
-/* A starter: the position fills green (the legend names it). */
+/* A starter: the position fills green (the legend names it, where the host shows one). */
 .ladder__pos--starting {
   padding: 1px 3px;
   border-radius: var(--ladder-radius, var(--radius-xs));

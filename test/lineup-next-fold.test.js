@@ -20,7 +20,8 @@ test('the fold body insets its content on every side', () => {
 
 test('the Bullpen parts take no side inset of their own, so the body is the one inset', () => {
   assert.doesNotMatch(ruleBody(css, '.lpen__sum') ?? '', /padding/)
-  assert.doesNotMatch(ruleBody(css, '.lpen__board') ?? '', /padding:/)
+  // The board keeps only its top gap: no shorthand, no side or bottom longhand.
+  assert.doesNotMatch(ruleBody(css, '.lpen__board') ?? '', /padding(?!-top)[\w-]*:/)
 })
 
 // The lineup page is square; the Ladder came from the old rounded card. The
