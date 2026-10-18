@@ -37,7 +37,9 @@ export function packUmpireGames(games) {
   return { teams, venues, games: rows }
 }
 
-// The reverse. A shard written before the pack (no `teams`) passes through.
+// The reverse. A shard written before the pack (no `teams`) passes through. A
+// key still on the row, even a null, is the row's own value: only a missing key
+// is read from the tables.
 export function unpackUmpireGames(shard) {
   const { teams, venues, games } = shard ?? {}
   if (!teams || !Array.isArray(games)) return games ?? []
@@ -45,11 +47,19 @@ export function unpackUmpireGames(shard) {
     const implied = impliedWins(g)
     return {
       ...g,
-      awayAbbr: g.awayAbbr ?? teams[g.awayId],
-      homeAbbr: g.homeAbbr ?? teams[g.homeId],
-      venueName: g.venueName ?? venues?.[g.venueId],
+      awayAbbr: 'awayAbbr' in g ? g.awayAbbr : teams[g.awayId],
+      homeAbbr: 'homeAbbr' in g ? g.homeAbbr : teams[g.homeId],
+      venueName: 'venueName' in g ? g.venueName : venues?.[g.venueId],
       awayIsWinner: 'awayIsWinner' in g ? g.awayIsWinner : implied.away,
       homeIsWinner: 'homeIsWinner' in g ? g.homeIsWinner : implied.home,
     }
   })
+}
+
+// The whole shard as a reader wants it: rows unpacked, the tables dropped.
+// Every read path goes through this, one season or all.
+export function unpackUmpireShard(shard) {
+  if (!shard) return shard
+  const { teams, venues, ...rest } = shard
+  return { ...rest, games: unpackUmpireGames(shard) }
 }

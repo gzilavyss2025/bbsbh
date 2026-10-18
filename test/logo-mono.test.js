@@ -279,3 +279,11 @@ test('slimSvgNumbers leaves a small coordinate space and a data-d attribute unto
   const data = '<svg viewBox="0 0 300 300"><path data-d="1.234567" d="M1.123456,2L3,4z"/></svg>'
   assert.equal(slimSvgNumbers(data), '<svg viewBox="0 0 300 300"><path data-d="1.234567" d="M1.12,2L3,4z"/></svg>')
 })
+
+test('slimSvgNumbers skips art with a transform, and reads only the root viewBox (#2288)', async () => {
+  const { slimSvgNumbers } = await import('../src/lib/logoMono.js')
+  const scaled = '<svg viewBox="0 0 300 300"><g transform="scale(50)"><path d="M0.123456,0.5L1,1z"/></g></svg>'
+  assert.equal(slimSvgNumbers(scaled), scaled)
+  const nested = '<svg viewBox="0,0,300,300"><svg viewBox="0 0 1 1"/><path d="M1.234567,2L3,4z"/></svg>'
+  assert.equal(slimSvgNumbers(nested), nested.replace('1.234567', '1.23'))
+})

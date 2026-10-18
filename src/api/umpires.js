@@ -1,7 +1,7 @@
 import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 import { readSeasonShard, seasonFolderOf, seasonStaticJson, staticJsonBy } from './staticJson.js'
 import { joinGameRows } from '../lib/seasons/combine.js'
-import { unpackUmpireGames } from '../lib/umpire/rows.js'
+import { unpackUmpireShard } from '../lib/umpire/rows.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
 // he's worked this season plus which base he had — read from a static
@@ -49,6 +49,9 @@ import { unpackUmpireGames } from '../lib/umpire/rows.js'
 // with no data, degrades to null before the file exists or on any failure.
 // One umpire's shard of one season, `{season}/{personId}`, memoized per file.
 const assignmentShard = staticJsonBy((key) => `/data/umpires/${key}.json`)
+// Rows come out of the shard's club and venue tables on every read path (#2288),
+// one season or all, so nothing past this point sees the packed shape.
+const readAssignments = async (key) => unpackUmpireShard(await assignmentShard(key))
 const accuracyShard = staticJsonBy((key) => `/data/umpire-accuracy/${key}.json`)
 // accuracyIndex is memoized per season and level ('MLB' | 'AAA') — the two
 // levels rank against separate pools and have separate zone-map baselines, so
@@ -222,7 +225,7 @@ function load(id, seasonYear, strict) {
   return readSeasonShard(
     'umpires',
     seasonYear,
-    (season) => assignmentShard(`${season}/${id}`),
+    (season) => readAssignments(`${season}/${id}`),
     (shards, seasons) => {
       const found = shards.filter(Boolean)
       if (!found.length) return null
@@ -233,7 +236,7 @@ function load(id, seasonYear, strict) {
         generatedAt: last.generatedAt,
         season: null,
         seasons,
-        games: joinGameRows(found.map(unpackUmpireGames)),
+        games: joinGameRows(found.map((s) => s.games)),
       }
     },
     { strict },

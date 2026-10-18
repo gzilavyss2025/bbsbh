@@ -371,8 +371,9 @@ function bodyOf(svg) {
 //     rounding error into every point after it; arc flags can be written
 //     without separators, "01.5", and would read as one number);
 //   - no two numbers run together ("1.5.5"), and no exponent ("1e-5");
-//   - the art is at least MIN_SLIM_BOX wide, so 0.01 stays well below a pixel
-//     (a 0..1 viewBox drawn large would visibly lose its shape).
+//   - the root viewBox is at least MIN_SLIM_BOX wide, so 0.01 stays well below
+//     a pixel (a 0..1 viewBox drawn large would visibly lose its shape), and no
+//     element carries a `transform`, which could scale the path up.
 const SLIM_PATH = /^[MLCHVSQTZz\d\s,.-]*$/
 const MIN_SLIM_BOX = 100
 const round2 = (x) => String(Math.round(Number(x) * 100) / 100)
@@ -387,8 +388,9 @@ function slimPath(d) {
 }
 
 export function slimSvgNumbers(svg) {
-  const box = /viewBox="[^"]*?([\d.]+)\s+([\d.]+)"/.exec(svg)
-  const big = box && Math.max(Number(box[1]), Number(box[2])) >= MIN_SLIM_BOX
+  const root = /<svg\b[^>]*>/.exec(svg)?.[0] ?? ''
+  const box = /viewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"/.exec(root)
+  const big = box && Math.max(Number(box[1]), Number(box[2])) >= MIN_SLIM_BOX && !svg.includes('transform=')
   return svg
     .replace(/(\sd=)"([^"]*)"/g, (all, attr, d) => (big ? `${attr}"${slimPath(d)}"` : all))
     .replace(/(\sopacity=)"(\d+\.\d+)"/g, (_, attr, v) => `${attr}"${round2(v)}"`)

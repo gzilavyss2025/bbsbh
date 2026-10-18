@@ -4,6 +4,11 @@
 // renders one). Keyed by MLB Stats API personId (umpires get real personIds,
 // same id space as players).
 //
+// A shard is PACKED (#2288): club abbreviations and venue names sit in `teams` and
+// `venues` tables keyed by id, and a winner flag the scores imply is left off its
+// row. src/lib/umpire/rows.js packs and unpacks; src/api/umpires.js unpacks on
+// every read.
+//
 // ONE FILE PER UMPIRE, not one file for the league. Every surface that reads
 // this data reads a SINGLE umpire — the detail page and the lineup page's
 // accuracy modal, both of which already know whose id they want. The league-wide
