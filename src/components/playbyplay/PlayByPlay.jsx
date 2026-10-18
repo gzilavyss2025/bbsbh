@@ -597,7 +597,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
         writing ? ' pbp__atbat--writing' : ''
       }`}
     >
-      <BigPlay entry={entry} windowed={windowed} beatKey={beatKey} inked={beat === ' pbp__code--ink'} />
+      <BigPlay entry={entry} gamePk={calloutCtx?.feed?.gamePk} windowed={windowed} beatKey={beatKey} inked={beat === ' pbp__code--ink'} />
       {/* Unconditional now — see AtBatHero.jsx. It REPLACES the old .pbp__top
           name row outright (that row and its gate are gone; card identity is
           chrome now, not a mode). */}

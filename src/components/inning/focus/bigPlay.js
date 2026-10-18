@@ -29,8 +29,11 @@ export function bigPlayKind(entry) {
       return 'double'
     default:
   }
-  // The third out with all three bases still held: the half ends, they stay.
-  if (entry.outNumber === 3 && Array.isArray(entry.basesAfter) && entry.basesAfter.length === 3) {
+  // The third out, made by this plate appearance (`codeKind: 'out'`), with all
+  // three bases still held: the half ends, they stay. A walk whose runner is
+  // thrown out for the third out later carries that `outNumber` too, once the
+  // whole half is known, and is not this play.
+  if (entry.codeKind === 'out' && entry.outNumber === 3 && Array.isArray(entry.basesAfter) && entry.basesAfter.length === 3) {
     return 'stranded'
   }
   return null

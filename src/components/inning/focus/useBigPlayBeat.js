@@ -20,17 +20,25 @@ import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 //  • Reduced motion skips it outright; the denotation is the account.
 const seen = new Set()
 
+// One key per at-bat across the whole page load. `atBatIndex` restarts at 0 in
+// every game, so it is never a key on its own: without a gamePk, or without
+// either id, there is no key and the stamp plays (null never marks as seen).
+export function playKeyFor(gamePk, entry) {
+  const id = entry.playId ?? entry.atBatIndex
+  return gamePk == null || id == null ? null : `${gamePk}:${id}`
+}
+
 export function useBigPlayBeat(active, beatKey, inked, kind, playKey) {
   const [shown, setShown] = useState(null)
-  const [firedFor, setFiredFor] = useState(null)
+  const [firedFor, setFiredFor] = useState(undefined)
   const [prevBeat, setPrevBeat] = useState(beatKey)
   if (beatKey !== prevBeat) {
     setPrevBeat(beatKey)
     setShown(null)
-    setFiredFor(null)
+    setFiredFor(undefined)
   }
-  if (active && inked && kind && firedFor !== `${beatKey}` && !motionIsReduced() && shouldPlay(playKey, seen)) {
-    setFiredFor(`${beatKey}`)
+  if (active && inked && kind && firedFor !== beatKey && !motionIsReduced() && shouldPlay(playKey, seen)) {
+    setFiredFor(beatKey)
     setShown(kind)
   }
   useEffect(() => {
