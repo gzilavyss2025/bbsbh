@@ -1,6 +1,7 @@
 import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 import { readSeasonShard, seasonFolderOf, seasonStaticJson, staticJsonBy } from './staticJson.js'
 import { joinGameRows } from '../lib/seasons/combine.js'
+import { unpackUmpireGames } from '../lib/umpire/rows.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
 // he's worked this season plus which base he had — read from a static
@@ -232,7 +233,7 @@ function load(id, seasonYear, strict) {
         generatedAt: last.generatedAt,
         season: null,
         seasons,
-        games: joinGameRows(found.map((s) => s.games)),
+        games: joinGameRows(found.map(unpackUmpireGames)),
       }
     },
     { strict },

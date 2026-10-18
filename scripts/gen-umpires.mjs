@@ -44,6 +44,7 @@ import { dirname, join } from 'node:path'
 import { readdir, rm } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { teamAbbr } from '../src/lib/teams.js'
+import { packUmpireGames } from '../src/lib/umpire/rows.js'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic, writeSeasons } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
@@ -153,7 +154,8 @@ for (const [id, u] of umpires) {
   u.games.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
   // Each shard carries the season + stamp of the run that wrote it, so a reader
   // needs one fetch, not a shard plus an index.
-  await writeJsonAtomic(join(outDir, `${id}.json`), { generatedAt, season, ...u })
+  const { games, ...rest } = u
+  await writeJsonAtomic(join(outDir, `${id}.json`), { generatedAt, season, ...rest, ...packUmpireGames(games) })
   kept.add(`${id}.json`)
 }
 
