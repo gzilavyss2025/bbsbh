@@ -4,6 +4,11 @@
 // renders one). Keyed by MLB Stats API personId (umpires get real personIds,
 // same id space as players).
 //
+// A shard is PACKED (#2288): club abbreviations and venue names sit in `teams` and
+// `venues` tables keyed by id, and a winner flag the scores imply is left off its
+// row. src/lib/umpire/rows.js packs and unpacks; src/api/umpires.js unpacks on
+// every read.
+//
 // ONE FILE PER UMPIRE, not one file for the league. Every surface that reads
 // this data reads a SINGLE umpire — the detail page and the lineup page's
 // accuracy modal, both of which already know whose id they want. The league-wide
@@ -44,6 +49,7 @@ import { dirname, join } from 'node:path'
 import { readdir, rm } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { teamAbbr } from '../src/lib/teams.js'
+import { packUmpireGames } from '../src/lib/umpire/rows.js'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic, writeSeasons } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
@@ -153,7 +159,8 @@ for (const [id, u] of umpires) {
   u.games.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
   // Each shard carries the season + stamp of the run that wrote it, so a reader
   // needs one fetch, not a shard plus an index.
-  await writeJsonAtomic(join(outDir, `${id}.json`), { generatedAt, season, ...u })
+  const { games, ...rest } = u
+  await writeJsonAtomic(join(outDir, `${id}.json`), { generatedAt, season, ...rest, ...packUmpireGames(games) })
   kept.add(`${id}.json`)
 }
 
