@@ -7,6 +7,9 @@ has to clear. The craft bar itself is
 Built as the motion study, issues #976–#983 — eight animations across the home
 slate, the lineup card and the play-by-play feed.
 
+The at-bat replay's swing, contact and ball flight (#1771) run in JS from one
+clock, not in this folder. Their spec is `docs/contact-replay.md`.
+
 ## The seam: motion here, resting appearance there
 
 `src/styles/motion/` holds **motion and nothing else**: keyframes, the rules
