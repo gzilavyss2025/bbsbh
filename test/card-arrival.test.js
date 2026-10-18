@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { stripComments } from './helpers/css.js'
+import { stripComments, ruleBody } from './helpers/css.js'
 import { useArrival } from '../src/hooks/motion/useArrival.js'
 import { bandPaint } from '../src/lib/pitcherCard/card.js'
 import { keyedCache } from '../src/lib/pitcherCard/cardData.js'
@@ -272,4 +272,12 @@ test('the departing arm\'s card arrives with the pitching card, in the house nav
   assert.match(pbp, /after=\{\(open\) =>[\s\S]*<DepartureLineCard[\s\S]*open=\{open\}/)
   const handoff = src('components/playbyplay/PitcherHandoffCard.jsx')
   assert.equal([...handoff.matchAll(/<CardBand label=\{TABS\.(departing|final)\} house \/>/g)].length, 2)
+})
+
+// A wide child must scroll inside its own box. `.unfold`'s one implicit column is `auto`, which
+// sizes to the child's min-content: a 460px table made the track 460px inside a 296px card, so the
+// table's wrap grew with it, had nothing to scroll, and ran past the card on a phone.
+test('.unfold\'s column cannot grow past the card, so a wide table scrolls inside it', () => {
+  const body = ruleBody(css('pitcher-card/arrival.css'), '.unfold')
+  assert.match(body, /grid-template-columns:\s*minmax\(0,\s*1fr\)/)
 })

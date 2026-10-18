@@ -88,6 +88,7 @@
 .unfold {
   --unfold-delay: 0ms; /* Arrival.jsx sets each section's own */
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* an auto column grows to a wide child's min-content */
   grid-template-rows: 0fr;
   opacity: 0;
 }
