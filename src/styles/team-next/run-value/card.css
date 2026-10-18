@@ -1,0 +1,368 @@
+/* ==== THE CLUB RUN VALUE CARD, RESTING (#2295) ====
+   next/ranks/RunValueBoard.jsx imports this file; spec .scratch/run-value-motion/handoff.md. The
+   ink lead tile with its league strip, the split bar with its four part buttons, and the top six
+   with a face and a mini bar each. Everything that moves is motion/run-value-card.css. The part
+   colours are 75-run-value.css's, shared with the report board and the player card. */
+
+.rnk__card.rvclub > .card__body > * + * {
+  margin-top: var(--space-5);
+}
+
+/* ---- the lead tile: club total, rank, league strip ---- */
+.rvclub__lead {
+  position: relative;
+  padding: var(--space-4);
+}
+.rvclub__rank {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  margin: 0;
+  text-align: right;
+}
+.rvclub__rankno {
+  display: block;
+  color: var(--marker);
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  font-variant-numeric: tabular-nums;
+}
+.rvclub__rankof {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--text-on-ink-dim);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-label);
+}
+.rvclub__lead .stattile__value {
+  font-variant-numeric: tabular-nums;
+}
+
+.rvleague {
+  margin-top: var(--space-3);
+}
+/* layout-exempt: thirty equal bar slots in one row */
+.rvleague__bars {
+  position: relative;
+  display: flex;
+  gap: 2px; /* raw-value-exempt: the strip's slot gap, thirty across 318px */
+  height: 72px; /* raw-value-exempt: the strip's height, 30px a side and room for the club tag */
+}
+.rvleague__bars::before {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  height: var(--bw-hair);
+  background: var(--border-stamped-soft);
+}
+.rvleague__slot {
+  position: relative;
+  flex: 1 1 0;
+}
+.rvleague__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: max(2px, calc(var(--h, 0) * 30px)); /* raw-value-exempt: bar height, 30px at the league's biggest total */
+}
+.rvleague__bar--up {
+  bottom: 50%;
+  transform-origin: bottom;
+  background: var(--graphite-soft);
+}
+.rvleague__bar--down {
+  top: calc(50% + var(--bw-hair));
+  transform-origin: top;
+  background: var(--accent-negative);
+}
+.rvleague__bar.rvleague__bar--mine {
+  background: var(--marker);
+}
+.rvleague__tag {
+  position: absolute;
+  top: calc(var(--space-1h) * -1);
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--marker);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  line-height: var(--lh-solid);
+}
+/* layout-exempt: best club, title, worst club across one line */
+.rvleague__captions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: var(--space-1h) 0 0;
+  color: var(--text-on-ink-dim);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+
+/* ---- the split bar and the part buttons ---- */
+.rvclub__split {
+  container-type: inline-size;
+}
+.rvclub .rvsplit {
+  margin-top: 0;
+}
+.rvclub .rvsplit__track:not(.rvsplit__track--mini) {
+  height: 22px; /* raw-value-exempt: the split bar's track, from the spec */
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--border-grid);
+}
+.rvclub .rvsplit__track:not(.rvsplit__track--mini) .rvsplit__seg {
+  top: 2px; /* raw-value-exempt: the track's inner padding */
+  bottom: 2px; /* raw-value-exempt: the track's inner padding */
+  border-right: 2px solid transparent; /* raw-value-exempt: the gap between two parts */
+  background-clip: padding-box;
+}
+.rvsplit__hint {
+  margin: var(--space-2h) 0 var(--space-2);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-label);
+}
+/* layout-exempt: the four part buttons, two by two, four across from 480px of card */
+.rvsplit__parts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+@container (min-width: 480px) {
+  .rvsplit__parts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+/* layout-exempt: swatch and label left, value right, in one button */
+.rvsplit__part {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  min-height: calc(var(--tap-min) + var(--space-1));
+  padding: var(--space-1h) var(--space-2h);
+  border: var(--bw-heavy) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.rvsplit__part .rvsplit__swatch {
+  flex: none;
+  width: var(--space-3);
+  height: var(--space-3);
+  margin: 0;
+}
+.rvsplit__partname {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.rvsplit__partvalue {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-medium);
+  line-height: var(--lh-solid);
+  font-variant-numeric: tabular-nums;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rvsplit__part:hover {
+    border-color: var(--border-stamped);
+  }
+}
+.rvsplit__part:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+.rvsplit__part[aria-pressed='true'] {
+  border-color: var(--border-stamped);
+  background: var(--surface-stamped-ink);
+  box-shadow: var(--shadow-stamped-soft);
+  color: var(--text-on-ink-cream);
+}
+.rvsplit__part[aria-pressed='true'] .rvsplit__partvalue {
+  color: var(--text-on-ink-cream);
+}
+.rvsplit__part[aria-pressed='true'] .rvsplit__swatch {
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--text-on-ink-cream);
+}
+
+/* ---- the top six ---- */
+.rvclub__title {
+  margin: 0;
+  padding-bottom: var(--space-1h);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+.rnk__card.rvclub > .card__body > .rvlead {
+  margin-top: 0;
+}
+.rvlead {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: rank, face, name and bar, value; one row of the top six */
+.rvrow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 22px auto minmax(0, 1fr) auto; /* raw-value-exempt: the rank column */
+  column-gap: var(--space-3);
+  align-items: center;
+  height: 77px; /* raw-value-exempt: a row of the top six, the list's height is counted from it */
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.rvrow--lead {
+  height: 104px; /* raw-value-exempt: the leader's row, the list's height is counted from it */
+  border-top: 0;
+}
+.rvrow--off {
+  visibility: hidden;
+  opacity: 0;
+}
+/* layout-exempt: the rank number centred in its 22px square */
+.rvrow__rank {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  height: 22px; /* raw-value-exempt: square with the rank column */
+  display: grid;
+  place-items: center;
+  line-height: var(--lh-solid);
+}
+.rvrow--lead .rvrow__rank {
+  background: var(--marker);
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.rvrow__frame {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 48px; /* raw-value-exempt: the face, 1 : 1.18 */
+  height: 57px; /* raw-value-exempt: the face, 1 : 1.18 */
+  overflow: hidden;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-row-hover);
+  box-shadow: var(--shadow-stamped);
+}
+.rvrow--lead .rvrow__frame {
+  width: 64px; /* raw-value-exempt: the leader's face, 1 : 1.18 */
+  height: 76px; /* raw-value-exempt: the leader's face, 1 : 1.18 */
+}
+.shot.rvrow__shot {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+.rvrow__shot img {
+  mix-blend-mode: multiply;
+}
+/* layout-exempt: the name over the position and bar */
+.rvrow__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.rvrow__name {
+  overflow: hidden;
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-medium);
+  letter-spacing: var(--ls-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* layout-exempt: position and mini bar on one line */
+.rvrow__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.rvrow__pos {
+  flex: none;
+  width: 20px; /* raw-value-exempt: two letters of position, so every bar starts in line */
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.rvrow__value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-medium);
+  line-height: var(--lh-solid);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The mini bar: 8px on the grid track, with an ink tick at zero that stands out of it. */
+.rvsplit__track--mini {
+  flex: 1 1 auto;
+  height: 8px; /* raw-value-exempt: the row's mini bar */
+  overflow: visible;
+  border-radius: 0;
+  background: var(--border-grid);
+}
+.rvsplit__track--mini .rvsplit__seg {
+  top: 0;
+  bottom: 0;
+}
+.rvsplit__track--mini .rvsplit__seg--off {
+  opacity: 0.2;
+}
+.rvsplit__track--mini .rvsplit__zero {
+  top: -3px; /* raw-value-exempt: the zero tick stands 3px out of the bar */
+  bottom: -3px; /* raw-value-exempt: the zero tick stands 3px out of the bar */
+  width: var(--bw-heavy);
+  margin-left: calc(var(--bw-heavy) / -2);
+  background: var(--border-stamped);
+  z-index: 2;
+}
+
+/* ---- the foot ---- */
+/* layout-exempt: the source line left, the door right */
+.rvclub__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.rvclub__source {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+
+@media (min-width: 740px) {
+  .rvclub__lead .stattile__value {
+    font-size: var(--fs-hero-xl);
+  }
+}

@@ -52,11 +52,13 @@ test('riseClass maps each phase to the shared rise', () => {
   assert.equal(riseClass('rest'), '')
 })
 
-test('the observer: a tenth in view, no rootMargin', () => {
+test('the observer: a tenth in view by default, no rootMargin', () => {
   assert.equal(IN_VIEW_THRESHOLD, 0.1)
   const src = readFileSync(fileURLToPath(new URL('../src/hooks/scroll/useInViewOnce.js', import.meta.url)), 'utf8')
     .replace(/\/\/.*$/gm, '') // code only: the comments name the option to rule it out
-  assert.match(src, /threshold:\s*IN_VIEW_THRESHOLD/)
+  // The default is the tenth; a caller may ask for more (#2295), and the observer reads that option.
+  assert.match(src, /\{\s*threshold\s*=\s*IN_VIEW_THRESHOLD\s*\}\s*=\s*\{\}/)
+  assert.match(src, /\{\s*threshold\s*\},?\s*\)/)
   assert.doesNotMatch(src, /rootMargin\s*:/, 'no rootMargin option')
 })
 

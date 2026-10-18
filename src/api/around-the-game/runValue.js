@@ -260,6 +260,15 @@ export function clubRunValue(data, teamId) {
   }
 }
 
+// The club's top `limit` by one part ('total' or a COMPONENTS key), for the club card's part
+// buttons (#2295). Ties break on name, the same rule clubRunValue uses, so a board never reorders
+// between renders. A part re-ranks on that part alone: a man's total does not move him.
+export function clubLeaders(club, key = 'total', limit = 6) {
+  return [...(club?.players ?? [])]
+    .sort((a, b) => (b[key] ?? 0) - (a[key] ?? 0) || a.name.localeCompare(b.name))
+    .slice(0, limit)
+}
+
 // Every club that has a player in the file, ranked by club total — the report
 // page's club rail, and the rank a club card prints beside its own figure.
 export function clubBoard(data) {
