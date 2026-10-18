@@ -518,3 +518,17 @@ test('seasons read as a two-digit span', () => {
   assert.equal(seasonRange([2021]), '’21')
   assert.equal(seasonRange([]), '')
 })
+
+// The vertical Ladder gives a player at most 132px (layout.js), and headshot,
+// position and a full ex-org badge ("P [cap] ’21–’24") need about 136px. So on
+// a phone the badge ran past the card edge (TB @ CLE, ARMSTRONG and DÍAZ). The
+// vertical Ladder shows the cap only; the years stay in the button's label.
+test('the vertical Ladder shows the ex-org badge as the cap only; sideways keeps the years', () => {
+  const root = new URL('../src/', import.meta.url)
+  const jsx = readFileSync(new URL('components/team/ladder/Ladder.jsx', root), 'utf8')
+  assert.match(jsx, /<span className="ladder__badgeyears">\{seasonRange\(f\.seasons\)\}<\/span>/)
+  assert.match(jsx, /formerly \$\{f\.teamName\} \$\{yearSpan\(f\.seasons\)\}/, 'the years stay in the label')
+  const css = readFileSync(new URL('styles/10b-former-teammates.css', root), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.match(css, /\n\.ladder__badgeyears\s*\{[^}]*display:\s*none/)
+  assert.match(css, /\n\.ladder--sideways \.ladder__badgeyears\s*\{[^}]*display:\s*inline/)
+})
