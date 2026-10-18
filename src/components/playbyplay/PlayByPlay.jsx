@@ -29,6 +29,7 @@ import { computeCalloutProgress } from '../../api/callout-notes.js'
 import { useCalloutNotes } from '../../hooks/callouts/useLastTime.js'
 import { INK_SET_MS, INK_SET_OVERSHOOT } from '../inning/focus/beats.js'
 import { useDenotationBeat } from '../inning/focus/useDenotationBeat.js'
+import { BigPlay } from '../inning/focus/BigPlay.jsx'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
 import { BallFlight } from '../charts/BallFlight.jsx'
 import { PitchLadder } from '../scoring/PitchLadder.jsx'
@@ -565,10 +566,8 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
   // THE BEAT (ADR-0046), windowed cards only: the denotation cells below hold
   // blank for a CONSTANT 180ms and then land. It takes no argument off `entry`
   // and must never take one — a duration that varied with the play would
-  // announce the play. See useDenotationBeat.js. `windowed` is what gates it
-  // — a stacked mount (a batch of cards landing at once) renders every card
-  // pre-inked, no flash; useDenotationBeat's own `!active` short-circuit is
-  // what makes that automatic.
+  // announce the play. See useDenotationBeat.js. `windowed` gates it: a stacked
+  // mount (a batch of cards at once) renders pre-inked, no flash.
   const beat = useDenotationBeat(windowed, beatKey)
   const calloutNotes = useCalloutNotes(entry, calloutCtx)
   // The pitch-zone diagram only exists where the park tracked plate locations
@@ -598,6 +597,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
         writing ? ' pbp__atbat--writing' : ''
       }`}
     >
+      <BigPlay entry={entry} gamePk={calloutCtx?.feed?.gamePk} windowed={windowed} beatKey={beatKey} inked={beat === ' pbp__code--ink'} />
       {/* Unconditional now — see AtBatHero.jsx. It REPLACES the old .pbp__top
           name row outright (that row and its gate are gone; card identity is
           chrome now, not a mode). */}

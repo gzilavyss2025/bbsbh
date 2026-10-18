@@ -1,0 +1,159 @@
+/* THE BIG-PLAY STAMP (focus mode, ADR-0046's footing; docs/motion.md).
+
+   A home run, a grand slam, a triple, a double, or the bases left loaded gets
+   an ink stamp over the at-bat card. It is the scorebook's own gesture — the
+   mark pressed onto paper — made large for the plays a scorer circles.
+
+     t = 0            the stamp drops in: scale 1.7 -> 1, rotate -16 -> -5deg, 14% of the run
+     t = 140ms        the ring spreads and fades (560ms); a grand slam adds a second at 260ms
+     t = 140ms        home runs and up: sixteen ticks fan out, each from the ring's edge
+     last 12%         the stamp fades out
+
+   THE CLOCK STARTS AT THE END OF THE INK-SET, not at the card's arrival
+   (useBigPlayBeat.js). Before the denotation prints, the reader does not know
+   the play, and a stamp that arrived with the card would say it (ADR-0046).
+   The run's length is `--bigplay-ms`, set inline from beats.js; this file holds
+   no second copy of it (the fallback is for a stray render). The ring and tick times are one-offs of this sheet.
+
+   Only `transform` and `opacity` move, on the individual `scale`/`rotate`/
+   `translate` properties. The overlay takes no pointer events, so the next tap
+   always lands on the bar, and the next step removes it. Reduced motion never
+   mounts it (JS) and this sheet hides it as well. */
+/* layout-exempt: the stamp, ring and ticks stack in one grid cell */
+.bigplay {
+  --bigplay-after: 140ms; /* raw-value-exempt: the ring and ticks start as the stamp lands */
+  --bigplay-ring-ms: 560ms; /* raw-value-exempt: one-off of the stamp timeline */
+  --bigplay-tick-ms: 520ms; /* raw-value-exempt: one-off of the stamp timeline */
+  --bigplay-second-ring: 260ms; /* raw-value-exempt: the slam's second ring */
+  position: fixed;
+  inset: 0;
+  padding-bottom: 30dvh; /* raw-value-exempt: lifts the stamp above the action bar */
+  z-index: var(--z-overlay);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.bigplay__stamp {
+  grid-area: 1 / 1;
+  text-align: center;
+  padding: var(--space-2) var(--space-4);
+  border: 3px solid currentColor;
+  border-radius: var(--radius-sm);
+  color: var(--field-deep);
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+  line-height: var(--lh-solid);
+  rotate: -5deg;
+  animation: bigplay-stamp var(--bigplay-ms, 1500ms) var(--ease-stamp) both;
+}
+.bigplay--stranded .bigplay__stamp {
+  color: var(--clay-deep);
+}
+.bigplay--slam .bigplay__stamp {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.bigplay__label {
+  display: block;
+  font-size: var(--fs-hero-lg);
+  font-weight: var(--w-bold);
+}
+.bigplay--double .bigplay__label,
+.bigplay--stranded .bigplay__label {
+  font-size: var(--fs-title-lg);
+}
+.bigplay--slam .bigplay__label {
+  font-size: var(--fs-hero-xl);
+}
+.bigplay__sub {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-xwide);
+}
+
+.bigplay__ring {
+  grid-area: 1 / 1;
+  width: 9rem;
+  aspect-ratio: 1;
+  border: 3px solid var(--field-deep);
+  border-radius: 50%;
+  opacity: 0;
+  animation: bigplay-ring var(--bigplay-ring-ms) var(--ease-out) var(--bigplay-after) both;
+}
+.bigplay--stranded .bigplay__ring {
+  border-color: var(--clay-deep);
+}
+.bigplay__ring--late {
+  animation-delay: var(--bigplay-second-ring);
+}
+
+/* Each tick is a short bar at the centre, turned to its angle and pushed out
+   along it: rotate, then translate on the turned axis. */
+.bigplay__tick {
+  grid-area: 1 / 1;
+  width: 3px;
+  height: 1.1rem;
+  background: var(--field-deep);
+  border-radius: 2px;
+  rotate: calc(var(--i, 0) * 22.5deg);
+  opacity: 0;
+  animation: bigplay-tick var(--bigplay-tick-ms) var(--ease-out) var(--bigplay-after) both;
+}
+
+@keyframes bigplay-stamp {
+  0% {
+    opacity: 0;
+    scale: 1.7;
+    rotate: -16deg;
+  }
+  14% {
+    opacity: 1;
+    scale: 1;
+    rotate: -5deg;
+  }
+  88% {
+    opacity: 1;
+    scale: 1;
+    rotate: -5deg;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.98;
+    rotate: -5deg;
+  }
+}
+
+@keyframes bigplay-ring {
+  from {
+    opacity: 0.6;
+    scale: 0.5;
+  }
+  to {
+    opacity: 0;
+    scale: 1.9;
+  }
+}
+
+/* `translate` is applied before `rotate`, so a plain Y offset would not follow
+   the tick's angle; the offset rides a transform that is applied after the
+   rotation instead. */
+@keyframes bigplay-tick {
+  from {
+    opacity: 0.9;
+    transform: translateY(-4.5rem) scaleY(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8.5rem) scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bigplay {
+    display: none;
+  }
+}
