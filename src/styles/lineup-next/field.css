@@ -159,15 +159,10 @@
   padding: var(--space-3) var(--space-3h);
   border-top: var(--bw-heavy) solid var(--border-stamped);
 }
-/* The page is square. The Ladder came from the old rounded card, so its parts go square here; the
-   old card on /postseason-live keeps its rounding. */
-.ltm .ladder__mark,
-.ltm .shot.ladder__shot,
-.ltm .ladder__pos--starting,
-.ltm .ladder__badge,
-.ltm .ladder__club,
-.ltm .ladder__level {
-  border-radius: 0;
+/* The page is square; the Ladder came from the old rounded card. The card on /postseason-live
+   keeps its rounding. */
+.ltm {
+  --ladder-radius: var(--radius-square);
 }
 
 /* THE BULLPEN BOARD: one colour, a filled cell for a day he pitched. */

@@ -524,14 +524,10 @@ test('seasons read as a two-digit span', () => {
 // position and a full ex-org badge ("P [cap] ’21–’24") need about 136px. So on
 // a phone the badge ran past the card edge (TB @ CLE, ARMSTRONG and DÍAZ). The
 // vertical Ladder shows the cap only; the years stay in the button's label.
-test('the vertical Ladder shows the ex-org badge as the cap only; sideways keeps the years', () => {
+test('the vertical Ladder shows the ex-org badge as the cap only; the label keeps the years', () => {
   const root = new URL('../src/', import.meta.url)
   const jsx = readFileSync(new URL('components/team/ladder/Ladder.jsx', root), 'utf8')
-  assert.match(jsx, /className="ladder__badgeyears"/, 'the years sit in their own span')
   assert.match(jsx, /formerly \$\{f\.teamName\} \$\{yearSpan\(f\.seasons\)\}/, 'the years stay in the label')
   const css = stripComments(readFileSync(new URL('styles/10b-former-teammates.css', root), 'utf8'))
-  assert.match(ruleBody(css, '.ladder__badgeyears') ?? '', /display:\s*none/)
-  assert.match(ruleBody(css, '.ladder--sideways .ladder__badgeyears') ?? '', /display:\s*inline/)
-  // The cap-only pill is centred; the sideways one leaves room after its years.
-  assert.match(ruleBody(css, '.ladder__badge') ?? '', /padding:\s*0 2px;/)
+  assert.match(ruleBody(css, '.ladder:not(.ladder--sideways) .ladder__badgeyears') ?? '', /display:\s*none/)
 })

@@ -171,10 +171,10 @@ export function Ladder({ ladder, dayNight, away, home, legend = true }) {
 
 // One player: his headshot at the end the line meets, then surname, position
 // (green when he starts) and, for a tie to tonight's own org, a badge with that
-// club's cap, and its years when the Ladder is sideways (the vertical one has no
-// room; the button's label keeps them). The button always holds the headshot; it holds the name
-// too until the name becomes his link, so the button (and its focus) never
-// remounts.
+// club's cap, and its years when the Ladder is sideways (the vertical one has
+// no room; the button's label keeps them). The button always holds the
+// headshot; it holds the name too until the name becomes his link, so the
+// button (and its focus) never remounts.
 function PlayerNode({ p, side, box, cls, pinned, linked, onPin, onPoint }) {
   const f = p.former
   const formerLabel = f ? `, formerly ${f.teamName} ${yearSpan(f.seasons)}` : ''

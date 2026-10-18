@@ -1,4 +1,6 @@
-// The folded card's body inset (FoldCard.jsx, styles/lineup-next/field.css).
+// The lineup page's folded Former teammates card (FoldCard.jsx,
+// cards/TeammatesCard.jsx, styles/lineup-next/field.css).
+//
 // The fold renders its Card flush, so the body is the one place that insets
 // what it holds. Without it the Ladder ran to the card's edge: the legend and
 // the club names touched the border, and the right column's badges were cut
@@ -7,51 +9,32 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
 import { stripComments, ruleBody } from './helpers/css.js'
 
-const FIELD = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'styles', 'lineup-next', 'field.css')
-const css = stripComments(readFileSync(FIELD, 'utf8'))
-
-const padding = (selector) =>
-  ruleBody(css, selector)
-    ?.split(';')
-    .map((d) => d.trim())
-    .find((d) => d.startsWith('padding:'))
-    ?.slice('padding:'.length)
-    .trim()
+const read = (rel) => readFileSync(new URL(`../src/${rel}`, import.meta.url), 'utf8')
+const css = stripComments(read('styles/lineup-next/field.css'))
 
 test('the fold body insets its content on every side', () => {
-  const p = padding('.lfold__body')
-  assert.ok(p, '.lfold__body should set padding')
-  const parts = p.split(/\s+/)
-  assert.ok(parts.length <= 2 && parts.every((v) => v.startsWith('var(--space-')), `want a token inset on all sides, got "${p}"`)
+  assert.match(ruleBody(css, '.lfold__body') ?? '', /padding:\s*var\(--space-3\) var\(--space-3h\);/)
 })
 
-test('the Bullpen parts take no inline inset of their own, so the body is the one inset', () => {
-  for (const sel of ['.lpen__sum', '.lpen__board']) {
-    const p = padding(sel)
-    if (!p) continue
-    const parts = p.split(/\s+/)
-    const inline = parts.length === 1 ? parts[0] : parts[1]
-    assert.equal(inline, '0', `${sel} pads its sides (${p}); the fold body owns that inset`)
-  }
+test('the Bullpen parts take no side inset of their own, so the body is the one inset', () => {
+  assert.doesNotMatch(ruleBody(css, '.lpen__sum') ?? '', /padding/)
+  assert.doesNotMatch(ruleBody(css, '.lpen__board') ?? '', /padding:/)
 })
 
-// The lineup page is square: its cards, sheets and rows set no radius. The
-// Ladder came from the old rounded card, so inside the fold every part of it
-// goes square too. The old card on /postseason-live keeps its rounding.
-test('every rounded Ladder part is square inside the lineup fold', () => {
-  const ladderCss = stripComments(
-    readFileSync(join(dirname(FIELD), '..', '10b-former-teammates.css'), 'utf8'),
-  )
-  const rounded = [...ladderCss.matchAll(/([^{}]+)\{([^}]*)\}/g)]
-    .filter((m) => /border-radius:\s*var\(--radius-(xs|sm|pill)\)/.test(m[2]))
-    .map((m) => m[1].trim())
-  assert.ok(rounded.length >= 6, `expected the Ladder's rounded parts, found ${rounded.join(', ')}`)
-  const square = [...css.matchAll(/([^{}]+)\{([^}]*border-radius:\s*0;[^}]*)\}/g)].flatMap((m) =>
-    m[1].split(',').map((s) => s.trim()),
-  )
-  for (const sel of rounded) assert.ok(square.includes(`.ltm ${sel}`), `.ltm ${sel} should set border-radius: 0`)
+// The lineup page is square; the Ladder came from the old rounded card. The
+// card sets --ladder-radius once, and every rounded Ladder part reads it, so a
+// new rounded part cannot slip in rounded. /postseason-live keeps its rounding.
+test('the fold squares the Ladder through its one radius property', () => {
+  assert.match(ruleBody(css, '.ltm') ?? '', /--ladder-radius:\s*var\(--radius-square\);/)
+  const ladder = stripComments(read('styles/10b-former-teammates.css'))
+  const radii = [...ladder.matchAll(/border-radius:\s*([^;]+);/g)].map((m) => m[1])
+  assert.ok(radii.length >= 6, 'the Ladder has rounded parts')
+  for (const r of radii) assert.match(r, /^var\(--ladder-radius, /, `border-radius: ${r} should read --ladder-radius`)
+})
+
+// Gary does not want the legend line on the lineup page (2026-10-18).
+test('the fold card leaves out the Ladder legend', () => {
+  assert.match(read('screens/lineup/next/cards/TeammatesCard.jsx'), /<Ladder [^>]*legend=\{false\}/)
 })
