@@ -570,5 +570,8 @@ the route with `?nointro` and the gamePk.
 - Bounce, overshoot and confetti. A home run gets the second landing ring and
   nothing more.
 - Any change to how the Now Pitching card draws pitches.
+- Three more quality-line signals from issue #1771: fast swing or blast,
+  two-strike shortening, and "topped it" or "got under it". Gary kept them on
+  the issue as a later pass (2026-10-18). The quality line stays short.
 - The real park's wall in the side view (a later pass could read it from
   `src/lib/ballpark/`).
