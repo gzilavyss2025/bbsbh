@@ -17,9 +17,8 @@ function monthDay(iso) {
   })
 }
 
-// The real stat line — the hover card's own tile grid (.phcard__stats/
-// .phcard__tile), reused under a Horizon-scoped class name rather than a
-// third boxed-stat pattern. `stats` is loadMinors.js's statLineFor output:
+// The real stat line — figures under a pencil rule each, flat on the tile
+// (#1775; the hover card's .phcard__tile wells stay boxed). `stats` is loadMinors.js's statLineFor output:
 // W-L/ERA/K/WHIP for a pitcher, AVG/HR/RBI/OPS for a hitter, or the
 // Milestones tile's two-cell Status/Since pair. auto-fit rather than a fixed 4,
 // so the two-cell line and the Promotion Watch tile's four-cell line both size

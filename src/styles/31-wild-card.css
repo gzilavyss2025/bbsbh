@@ -372,23 +372,21 @@
   display: block;
 }
 
-/* team-hub roster (own classes — the .roster panel is a different component) */
+/* team-hub roster (own classes — the .roster panel is a different component).
+   It sits on its card's paper: a pencil rule above and below, no box of its own
+   (#1775, case 2). */
 .thub-roster {
   list-style: none;
   margin: 0;
   padding: 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
+  border-block: var(--bw-hair) solid var(--border-rule);
 }
 .thub-row {
   display: grid;
   grid-template-columns: 40px 1fr auto auto auto;
   align-items: center;
   gap: var(--space-2h);
-  padding: var(--space-2h) var(--space-3);
+  padding: var(--space-2h) 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-size: var(--fs-ui);
 }
@@ -1072,20 +1070,17 @@
   color: var(--award-ink);
 }
 
-/* The stat-line tile — the hover card's own .phcard__stats/.phcard__tile
-   recipe, reused under Horizon-scoped names rather than a third boxed-stat
-   pattern. Its row (.hzntile__stats) is a <Grid fit> in HorizonCard.jsx. */
+/* The stat-line tile: a figure under a pencil rule, not a grey well inside
+   the tile (#1775, case 3). Its row (.hzntile__stats) is a <Grid fit> in
+   HorizonCard.jsx. */
 .hzntile__tile {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: var(--space-2) 2px;
+  padding-top: var(--space-2);
   text-align: center;
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 .hzntile__tilev {
   font-family: var(--font-mono);

@@ -41,7 +41,7 @@ export function ProspectsCard({ prospects, showAllProspects, onShowAll }) {
           </PlayerLink>
         ))}
       </div>
-      <Table label="Org prospects" className="ledger prospecttable">
+      <Table frame="bare" label="Org prospects" className="ledger prospecttable">
         <thead>
           <tr>
             <th className="lft">Rk</th>
