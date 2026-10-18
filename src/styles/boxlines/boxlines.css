@@ -389,11 +389,7 @@ a.boxline__link:focus-visible {
    page) — the one thing a stat line stacked with its neighbours cannot do.
    This partial loads after the host's, so the reset wins: a host that wants
    its row's vertical dress back states it at `button.` specificity (see
-   .starter__careervs in 10-lineup.css).
-
-   The ink too: a button's text colour comes from the browser, not its
-   parent, and iOS Safari's is system blue. Without this a face's title and
-   figures print in that blue on the phone and look right on the desktop. */
+   .starter__careervs in 10-lineup.css). */
 .boxlines__door {
   display: flex;
   align-items: center;
@@ -405,7 +401,6 @@ a.boxline__link:focus-visible {
   border: none;
   border-radius: 0;
   background: none;
-  color: inherit;
   text-align: left;
   cursor: pointer;
 }

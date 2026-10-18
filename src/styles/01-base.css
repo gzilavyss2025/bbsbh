@@ -143,6 +143,15 @@ a {
   touch-action: manipulation;
 }
 
+/* A button's text colour comes from the browser, not its parent, and iOS
+   Safari's is system blue. So any button whose reset forgets `color` prints
+   blue on the phone and looks right on the desktop (Chromium's is black).
+   Hand every button its parent's ink here. `:where()` keeps it at zero
+   specificity, so a colour any component states still wins. */
+:where(button) {
+  color: inherit;
+}
+
 html,
 body,
 #root {
