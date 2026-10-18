@@ -610,9 +610,16 @@ test('T4: the seal pin: no moved ledger reads a reveal-only module or a seal', (
 })
 
 test('T4: the prospects table keeps the look it had in its Card: no extra sheet shadow', () => {
-  const body = rules(read('31-wild-card.css')).find(([sel]) => sel === '.table:has(> .prospecttable)')?.[1]
-  assert.ok(body, 'a rule reaches the Table wrap from .prospecttable')
-  assert.equal(decl(body, 'box-shadow'), 'none')
+  // It is frame="bare" now (#1775), so no override has to switch the sheet's
+  // shadow off: the wrap draws none, and no partial may give it one back.
+  const attrs = src('screens/team/modules/minors/ProspectsCard.jsx').match(/<Table\b([^>]*className="ledger prospecttable"[^>]*)>/)?.[1]
+  assert.match(attrs ?? '', /frame="bare"/)
+  assert.equal(decl(ruleBody(read('system/table.css'), '.table'), 'box-shadow'), undefined)
+  for (const sheet of ['31-wild-card.css', 'team-next/farm.css']) {
+    for (const [sel, body] of rules(read(sheet)).filter(([sel]) => sel.includes('.prospecttable)'))) {
+      assert.ok([undefined, 'none'].includes(decl(body, 'box-shadow')), `${sheet}: ${sel} gives the prospects wrap a shadow`)
+    }
+  }
 })
 
 // ---- slice T7: the standalone boards ----

@@ -611,9 +611,9 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
-/* Same bordered/hairline-divided row-list idiom as the Team page's
-   .thub-roster — no box-shadow here since this
-   list already sits inside .psseries__rostercard's own elevated card. */
+/* A hairline-divided row list, the row idiom of the Team page's .thub-roster
+   (whose own box went in #1775) — no box-shadow here since this list already
+   sits inside .psseries__rostercard's own elevated card. */
 .psseries__rosterlist {
   list-style: none;
   margin: 0;
