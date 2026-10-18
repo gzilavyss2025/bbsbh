@@ -279,10 +279,10 @@ async function main() {
   const filled = crossReference([extensions, arbitration, freeAgency, salaries])
   console.log(`Cross-reference pass: filled ${filled} otherwise-unresolved rows from elsewhere in the dataset.`)
 
-  await writeJsonAtomic(join(outDir, 'extensions.json'), extensions, 2)
-  await writeJsonAtomic(join(outDir, 'arbitration.json'), arbitration, 2)
-  await writeJsonAtomic(join(outDir, 'free_agency.json'), freeAgency, 2)
-  await writeJsonAtomic(join(outDir, 'salaries.json'), salaries, 2)
+  await writeJsonAtomic(join(outDir, 'extensions.json'), extensions)
+  await writeJsonAtomic(join(outDir, 'arbitration.json'), arbitration)
+  await writeJsonAtomic(join(outDir, 'free_agency.json'), freeAgency)
+  await writeJsonAtomic(join(outDir, 'salaries.json'), salaries)
 
   // A separate, much smaller file for the /admin/contracts review queue
   // (PR2): every non-exact row across all four files, so the review page
@@ -291,7 +291,7 @@ async function main() {
   const pending = [extensions, arbitration, freeAgency, salaries]
     .flat()
     .filter((row) => row.confidence !== 'exact')
-  await writeJsonAtomic(join(outDir, 'pending.json'), pending, 2)
+  await writeJsonAtomic(join(outDir, 'pending.json'), pending)
   console.log(`Wrote pending.json: ${pending.length} rows needing review`)
 
   console.log('\nMatch-rate report:')
