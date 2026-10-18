@@ -60,6 +60,8 @@ export function unpackUmpireGames(shard) {
 // Every read path goes through this, one season or all.
 export function unpackUmpireShard(shard) {
   if (!shard) return shard
-  const { teams, venues, ...rest } = shard
-  return { ...rest, games: unpackUmpireGames(shard) }
+  const rest = { ...shard, games: unpackUmpireGames(shard) }
+  delete rest.teams
+  delete rest.venues
+  return rest
 }
