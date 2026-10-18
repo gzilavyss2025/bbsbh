@@ -84,7 +84,7 @@ The card is one column inside `Card frame="stamped"`. Inner width at 390px is 31
 | Block | Spec |
 |---|---|
 | Card | `Card frame="stamped" label="Run value" labelAs="h3" count="runs above average" stampIn={!still}`. Gap between blocks `space-5`. |
-| Lead tile | `StatTile tone="ink"`. Padding `space-4`. Value `fs-display` style, 64px from the design (see Open questions). Rank `3` in `marker`, `font-display`, 34px, with "of 30 clubs" under it in `fs-caption` `text-on-ink-dim`. |
+| Lead tile | `StatTile tone="ink"`. Padding `space-4`. Value `fs-score-lg` (46px), `fs-hero-xl` (56px) from 740px (see Decisions). Rank `3` in `marker`, `font-display`, 34px, with "of 30 clubs" under it in `fs-caption` `text-on-ink-dim`. |
 | League strip | Height 72px. Zero line at 50%, 1px `graphite`. 30 flex slots, gap 2px. Bar height = abs(total) ÷ max abs(total) × 30px, minimum 2px. Positive bars sit above the line in `graphite-soft`. Negative bars sit below in `clay`. The viewed club is `marker`, with its abbreviation 6px above the strip in `marker`, `font-display` 11px. |
 | Strip captions | One row, `justify-content: space-between`: best club, "League, best to worst", worst club. `fs-caption`, `text-on-ink-dim`, `ls-label`. |
 | Split bar | Reuse `RunValueSplit`. Track 22px, `bw-heavy` `ink-0` edge, 2px inner padding, 2px gap between segments. |
@@ -140,7 +140,7 @@ same component, and that is correct: one part, one colour everywhere.
 |---|---|---|---|
 | `RunValueBoard` | Holds `part` state (`'total'` or a part key) | add `league` (the `clubBoard` rows) | Passes `part` down. Hides the league strip when `league` is missing. |
 | `LeagueStrip` (new, in `RunValueParts.jsx` or `ranks/`) | 30 bars | `rows`, `teamId` | `aria-hidden`. The rank text in the tile carries the meaning. |
-| `RunValueSplit` | New props: `selected`, `onSelect` | `entry`, `scale`, `selected`, `onSelect` | Without `onSelect` it renders the `<dl>` exactly as today, so the report board and player card do not change. With `onSelect` the legend renders buttons. Unselected segments go to opacity 0.18 when `selected` is set. |
+| `RunValueSplit` | New props: `selected`, `onSelect` | `entry`, `scale`, `selected`, `onSelect` | Without `onSelect` it renders the `<dl>` exactly as today, so the report board and player card do not change. With `onSelect` the legend renders buttons. When `selected` is set, the selected part's segments draw in `field` and the other segments go to opacity 0.18 (see Decisions). |
 | `RunValueLeaderRow` (new) | One row | `player`, `rank`, `part`, `scale`, `lead` | Mini bar = `RunValueSplit` track without legend, or a small `RunValueBar` built from the same math. Do not copy the clamping math a second time. |
 | `Headshot` | none | `personId`, `name`, `teamId` | Already `aria-hidden` and has its own retry and fallback chain. |
 
@@ -159,7 +159,7 @@ same component, and that is correct: one part, one colour everywhere.
 | Hint | a part selected | "Tap it again for all four parts" |
 | Board title | `total` / part | "Top six · all four parts" / "Top six · batting" (lower case in source, caps by CSS) |
 | Row value | `total` / part | Player total / that part's value, signed, tone colour. |
-| Mini bar | part selected | Every other part's segment at opacity 0.2. |
+| Mini bar | part selected | The selected part's positive segment draws in `field`; every other part's segment at opacity 0.2. |
 | Name | tap | `PlayerLink` to the player page, as today. |
 | Row | tap outside name | Nothing. The row is not a control. |
 | `Door` | tap | `runValuePath({ d: asOf, s: sportId })`, as today. |
@@ -291,14 +291,16 @@ Sentence case in the source; CSS sets caps. No exclamation marks.
 - The report page (`/run-value`) and the player card. They change only through the shared
   part colours.
 
-## Open questions
+## Decisions (Gary, 2026-10-18)
 
-1. **Lead value size.** The design uses 64px. The design system gives 46px on a phone
-   (`fs-score-lg`) and 56px from 740px. Keep the system sizes unless Gary wants the larger
-   figure.
-2. **Running colour when selected.** The selected part is the brightest thing on the bar,
-   except Running (`field-wash`), which is the palest. One option: when Running is selected,
-   draw its segments in `field` with the wash as the dimmed state.
+1. **Lead value size: the design-system sizes.** `fs-score-lg` (46px) below 740px and
+   `fs-hero-xl` (56px) from 740px, the same as every other lead stat tile. Do not use the
+   design's 64px.
+2. **Selected part: drawn in `field`.** When a part is selected, its segments on the split bar
+   and on every mini bar draw in `--field`, whichever part it is. The other parts keep their
+   own colours and dim (opacity 0.18 on the split bar, 0.2 on the mini bars). Negative
+   segments of the selected part stay `clay`. With no part selected, each part has its own
+   colour. This rule also fixes Running, whose own colour (`field-wash`) is the palest.
 
 ## Check before merge
 
