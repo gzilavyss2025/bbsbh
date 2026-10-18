@@ -1,5 +1,5 @@
 import { teamLocationName, teamClubNameShort } from '../../lib/teams.js'
-import { gamePath, logbookNewPath } from '../../lib/route.js'
+import { gamePath, logbookNewPath, umpirePath } from '../../lib/route.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { timeOfDay } from '../../lib/dates.js'
 import { Pips } from '../bracket/bracketParts.jsx'
@@ -32,7 +32,7 @@ function ClubRow({ slot, record, winsNeeded, runs }) {
   )
 }
 
-export function Hero({ mode, model, game, records, slateDate, live, wide, played = [], onRevealScores }) {
+export function Hero({ mode, model, game, records, slateDate, live, wide, played = [], umpire = null, onRevealScores }) {
   const link = useRouteLink()
   const { series, dayType, gameNumber } = mode
   const gameDay = dayType === 'game'
@@ -81,6 +81,7 @@ export function Hero({ mode, model, game, records, slateDate, live, wide, played
         <Cluster gap="base" className="ww-hero__actions">
           {lineups && <Door {...link(lineups)}>Lineups</Door>}
           {innings && <Door {...link(innings)}>Innings</Door>}
+          {wide && gameDay && umpire && <Door {...link(umpirePath(umpire.id, umpire.name))}>Plate umpire</Door>}
           {stamps.map((r) => (
             <Door key={r.gamePk} {...link(logbookNewPath(r.gamePk))}>{`Stamp G${r.gameNumber}`}</Door>
           ))}

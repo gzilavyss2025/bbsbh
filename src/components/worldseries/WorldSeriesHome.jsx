@@ -1,4 +1,5 @@
 import '../../styles/worldseries/home.css'
+import { fetchPlateUmpires } from '../../api/postseason/plateUmpire.js'
 import { fetchUpcomingSeriesGames } from '../../api/postseason/upcoming.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useWorldSeriesHome } from '../../hooks/postseason/useWorldSeriesHome.js'
@@ -37,6 +38,9 @@ export function WorldSeriesHome({ bracket, slateDate, live = false, wide = false
   const playedPks = (series?.games ?? []).map((g) => g.gamePk)
   const parkKey = [focusPk, ...playedPks].join(',')
   const parks = useAsync(() => fetchUpcomingSeriesGames([focusPk, ...playedPks]), [parkKey])
+  // Tonight's plate umpire, once posted (an assignment, not a result). Game day only.
+  const dayType = mode?.dayType
+  const umpires = useAsync(() => (dayType === 'game' ? fetchPlateUmpires(slateDate) : Promise.resolve({})), [dayType, slateDate])
   if (!mode) return null
 
   // "NLCS" / "ALCS": the league whose LCS the club played in, from the bracket.
@@ -81,6 +85,7 @@ export function WorldSeriesHome({ bracket, slateDate, live = false, wide = false
         live={live}
         wide={wide}
         played={played}
+        umpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
         onRevealScores={onRevealScores}
       />
       {wide && <Ledger series={series} model={model} onRevealScores={onRevealScores} />}
