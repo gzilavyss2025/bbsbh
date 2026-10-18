@@ -137,7 +137,6 @@
 }
 .lpen__sum {
   margin: 0;
-  padding: var(--space-3) var(--space-3h) 0;
   color: var(--text-caption);
   font-family: var(--font-mono);
   font-size: var(--fs-small);
@@ -154,13 +153,16 @@
 .lfold__head[aria-expanded='true'] .lfold__chev {
   transform: rotate(-135deg);
 }
+/* The fold renders its Card flush, so the body owns the one inset for whatever it holds: the
+   Ladder runs to its box's edge and would touch the card's border without it. */
 .lfold__body {
+  padding: var(--space-3) var(--space-3h);
   border-top: var(--bw-heavy) solid var(--border-stamped);
 }
 
 /* THE BULLPEN BOARD: one colour, a filled cell for a day he pitched. */
 .lpen__board {
-  padding: var(--space-3) var(--space-3h);
+  padding: var(--space-3) 0 0;
 }
 /* layout-exempt: name, nine day cells and a total: a fixed row */
 .lpen__row {
