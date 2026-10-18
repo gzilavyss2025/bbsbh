@@ -1,0 +1,150 @@
+/* ------------------------------------------- the D1 masthead, in motion
+   The resting look is slate/masthead.css. Every motion here answers a change
+   the reader made; none plays on a cold load, a poll or Back (docs/motion.md):
+
+   - the levelladder ball rolls only under .levelladder--rolling, which LevelLadder sets
+     only while the level on screen is the stop the reader tapped;
+   - the date slides only under .slatedate__turn--next/--prev, which
+     DateStepper sets only for a step taken there (keyed per date, so each
+     step mounts afresh and restarts the entrance);
+   - the stamp-in plays once a session (.slatemast--stamp).
+
+   Transitions for what can be interrupted (ball, bars, menu); keyframes for
+   entrances. All of it is off under reduced motion. */
+
+.levelladder--rolling .levelladder__ball,
+.levelladder--rolling .levelladder__ballart {
+  transition: transform var(--dur-slow) var(--ease-stamp);
+}
+
+.slatedate__turn--next {
+  animation: slatedate-in-next var(--dur-med) var(--ease-out) both;
+}
+
+.slatedate__turn--prev {
+  animation: slatedate-in-prev var(--dur-med) var(--ease-out) both;
+}
+
+@keyframes slatedate-in-next {
+  from {
+    opacity: 0;
+    transform: translateX(var(--space-5));
+  }
+}
+
+@keyframes slatedate-in-prev {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--space-5)));
+  }
+}
+
+.slatedate__arrow,
+.slatemast__brand,
+.slatecompact__chip,
+.slatestrip .teamfilterstrip--chips .vsteam__team {
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.slatedate__arrow:not(:disabled):active {
+  transform: scale(0.9);
+}
+
+.slatemast__brand:active,
+.slatecompact__chip:active {
+  transform: scale(0.97);
+}
+
+.slatestrip .teamfilterstrip--chips .vsteam__team:active {
+  transform: translate(var(--bw-heavy), var(--bw-heavy));
+  box-shadow: 0 0 0 var(--border-stamped);
+}
+
+.slatecompact__caret {
+  transition: transform var(--dur-med) var(--ease-out);
+}
+
+.slatemenu {
+  transition:
+    transform var(--dur-snappy) var(--ease-out),
+    opacity var(--dur-snappy) var(--ease-out),
+    visibility 0s linear var(--dur-snappy);
+}
+
+.slatemenu.is-open {
+  transition:
+    transform var(--dur-snappy) var(--ease-out),
+    opacity var(--dur-snappy) var(--ease-out),
+    visibility 0s;
+}
+
+.slatemast__compactbar {
+  transition: transform var(--dur-med) var(--ease-out), visibility 0s linear var(--dur-med);
+}
+
+.slatemast__compactbar.is-on {
+  transition: transform var(--dur-med) var(--ease-out), visibility 0s;
+}
+
+@media (min-width: 740px) {
+  .slatemast__bar {
+    transition:
+      background-color var(--dur-med) var(--ease-out),
+      border-color var(--dur-med) var(--ease-out),
+      box-shadow var(--dur-med) var(--ease-out);
+  }
+
+  .slatemast__centre .slatecompact {
+    animation: slatemast-centre-in var(--dur-med) var(--ease-out) both;
+  }
+}
+
+@keyframes slatemast-centre-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1));
+  }
+}
+
+/* The first slate of a session: the bar, then the card, stamped down. */
+.slatemast__bar.slatemast--stamp,
+.slatemast__card.slatemast--stamp {
+  animation: slatemast-stamp var(--dur-stamp-in) var(--ease-stamp) both;
+}
+
+.slatemast__card.slatemast--stamp {
+  animation-delay: 55ms; /* raw-value-exempt: the D1 stamp-in stagger, spec'd */
+}
+
+@keyframes slatemast-stamp {
+  from {
+    opacity: 0;
+    transform: translate(var(--stamped-offset), var(--stamped-offset));
+    box-shadow: 0 0 0 var(--border-stamped);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .levelladder--rolling .levelladder__ball,
+  .levelladder--rolling .levelladder__ballart,
+  .slatedate__arrow,
+  .slatemast__brand,
+  .slatecompact__chip,
+  .slatecompact__caret,
+  .slatemenu,
+  .slatemenu.is-open,
+  .slatemast__compactbar,
+  .slatemast__compactbar.is-on,
+  .slatemast__bar,
+  .slatestrip .teamfilterstrip--chips .vsteam__team {
+    transition: none;
+  }
+
+  .slatedate__turn--next,
+  .slatedate__turn--prev,
+  .slatemast__centre .slatecompact,
+  .slatemast__bar.slatemast--stamp,
+  .slatemast__card.slatemast--stamp {
+    animation: none;
+  }
+}

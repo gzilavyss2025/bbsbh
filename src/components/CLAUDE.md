@@ -51,6 +51,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `scout/` | `Matchup`, `ScoutMap`, `Choice` | The Matchup Scout's parts (`docs/scout-design.md`) |
 | `season/` | `SeasonPicker`, `SeasonStack` | The season views' shared parts (ADR-0086, #1202). **`SeasonPicker` is the one season picker**; a page that takes a season renders it, never a second one |
 | `seal/` | `ConsentModal`, `AsOfBanner` | Spoiler-consent surfaces that aren't `SealBox` itself |
+| `slatehead/` | `SlateMasthead`, `LevelLadder`, `DateStepper`, `CompactControls` | The top of the home slate (the D1 masthead): which level and which day. Draw-only; every move navigates (ADR-0056). The counts come from `api/slate/levelCounts.js`, score-free by its field list |
 | `situational/` | `SituationalBoard`, `SituationalIndex`, `TeamRecordsList` | The situational team-record boards: every club ranked on one split |
 | `sync/` | `RevealCloudSync`, `StampsCloudSync`, `SyncStatusProvider`, `OwnerGuards` | Headless multi-device cloud-sync components (ADR-0022/0026/0035/0036/0041/0049). `OwnerGuards` is app-wide on purpose |
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `OffDaySection` | Team-identity/navigation primitives |

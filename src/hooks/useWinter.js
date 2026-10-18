@@ -67,6 +67,9 @@ export function useWinter(dateStr, sportId, leagueId) {
       // the default rather than drawing an empty tab — a shared '/fall/12152025'
       // lands on whichever league is actually playing in December.
       leagueId: onWinter ? resolveWinterLeagueId(calendar, dateStr, leagueId) : null,
+      // This day's games across every shipped winter league: the masthead
+      // ladder's Winter count, read off the same calendar at no extra fetch.
+      games: leaguesOnDate(calendar, dateStr).reduce((n, l) => n + l.games, 0),
       // Where a bare tap on WINTER goes, when no league is named.
       defaultLeagueId: defaultWinterLeagueId(calendar, dateStr),
       sportId: WINTER_SPORT_ID,

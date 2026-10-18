@@ -92,6 +92,7 @@ is one.
 | Sheet | Issues | Holds |
 | --- | --- | --- |
 | `slate.css` | #976, #977, #978 | The `@` plates pulling into register on hover, the doubleheader sheet's riffle, and `@keyframes tally-breathe` + the LIVE pill's dot |
+| `masthead.css` | D1 handoff (2026-10-18) | The slate masthead (`components/slatehead/`): the ladder ball's roll (`--dur-slow`, `--ease-stamp`) only under `.levelladder--rolling`, which `LevelLadder` sets only while the level on screen is the stop the reader tapped; the date's slide-in, only for a step taken in `DateStepper` (keyed per date); the compact bar, the level menu and the presses; the stamp-in once a session (`sessionStorage`). Back, a link and a poll play none of it. The resting look is `styles/slate/masthead.css` |
 | `lineup.css` | #979, #980 | The row's straightedge rule on hover, and the batting order's ink-in cascade |
 | `strike.css` | #981 | The drawn cross-out, all four sites |
 | `playbyplay.css` | #982 | The four-beat write-on |

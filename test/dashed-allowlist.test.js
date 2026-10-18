@@ -65,6 +65,12 @@ const ALLOWED = {
     ['postseason/series-parts.css', '.psseries__keybar'],
     ['player-next/top/header-extras.css', '.pnext-ovr__cap'], // a minor leaguer's level cap on the OVR meter: the most his level can give
   ],
+  // A stop set apart from a system it is not part of: the slate masthead's
+  // Winter stop sits off the farm system's rail, after a dashed divider (the D1
+  // handoff, Gary, 2026-10-18).
+  offRail: [
+    ['slate/masthead.css', '.levelladder__stop--winter'],
+  ],
   // Admin and lab screens: dev-only, not the reader's app.
   adminLab: [
     ['15-team-color-lab.css', '.colorlab__logodropzone--over'],

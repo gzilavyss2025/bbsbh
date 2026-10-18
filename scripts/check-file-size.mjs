@@ -133,7 +133,7 @@ const BUDGETS = {
   'src/api/teamTransactions.js': 700, // 619
   'src/screens/InningViewer.jsx': 1100, // 1003
   'src/api/boxscore.js': 800, // 762
-  'src/screens/GameSelect.jsx': 1300, // 1247
+  'src/screens/GameSelect.jsx': 1100, // 1044
   // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's
   // one new reader tipped it. fetchSeasonMeta belongs here and nowhere else:
   // this module already owned the seasons endpoint (fetchAllStarInfo was a

@@ -163,6 +163,9 @@
 @import './styles/23-box-score-detail.css';
 @import './styles/24-floating-nav-and-hud.css';
 @import './styles/25-wide-layout.css';
+/* The D1 masthead (components/slatehead/). After the wide layout, whose old
+   slate topbar rules it replaces, and after system/stack.css. */
+@import './styles/slate/masthead.css';
 @import './styles/26-player-page.css';
 @import './styles/72-player-hover-card.css';
 @import './styles/67-awards-ledger.css';
@@ -246,6 +249,7 @@
    package must not quietly take away. Where a motion rule has to outrank one
    of them it does so on specificity, not position. See motion/slate.css. */
 @import './styles/motion/slate.css';
+@import './styles/motion/masthead.css';
 @import './styles/motion/lineup.css';
 @import './styles/motion/strike.css';
 @import './styles/motion/playbyplay.css';

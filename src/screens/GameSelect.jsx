@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useMemo, useRef, useState } from 'react'
 import { useNav } from '../lib/nav.js'
 import { apiDateToUrl, slatePath, teamPath } from '../lib/route.js'
 import { fetchDayVideos } from '../api/gamehighlights.js'
@@ -10,7 +10,6 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useIntroFlag } from '../hooks/preferences/useIntroFlag.js'
-import { usePromptDismiss } from '../hooks/preferences/usePromptDismiss.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { isPostseasonWindow } from '../lib/postseason/capSlateDate.js'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
@@ -27,9 +26,10 @@ import { WorldSeriesHome } from '../components/worldseries/WorldSeriesHome.jsx'
 import { worldSeriesMode } from '../lib/postseason/worldseries/mode.js'
 import { usePrimer } from '../hooks/postseason/usePrimer.js'
 import { BracketDock } from '../components/bracket/BracketDock.jsx'
-import { LevelNav } from '../components/team/LevelNav.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
-import { TallyLockup } from '../components/chrome/TallyBrand.jsx'
+import { SlateMasthead } from '../components/slatehead/SlateMasthead.jsx'
+import { fetchLevelCounts } from '../api/slate/levelCounts.js'
+import { ladderStops } from '../lib/slate/ladder.js'
 import { SiteSearchButton } from '../components/chrome/SiteSearch.jsx'
 import { SiteMenuButton } from '../components/chrome/SiteMenu.jsx'
 import { LogbookButton } from '../components/chrome/LogbookButton.jsx'
@@ -60,7 +60,6 @@ import {
 } from '../lib/resultCards.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { ConsentModal } from '../components/seal/ConsentModal.jsx'
-import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 import { slateScoreLine } from '../lib/slateScoreLine.js'
 import { trackToggleConsent, TOGGLES, ACTIONS, SURFACES } from '../lib/analytics.js'
@@ -156,8 +155,7 @@ export function GameSelect({
   // Site-wide "Scores Unlocked" pass (see the toggle below). Read here, ahead of
   // the bracket, because revealing the day's live scores also moves the bracket
   // (Gary, 2026-09-30, ADR-0087 addendum).
-  const { passActive, resetAt, spoilersOffFor, enable: enableUnlock, disable: disableUnlock } =
-    useScoresUnlocked()
+  const { spoilersOffFor, enable: enableUnlock } = useScoresUnlocked()
   const scoresUnlocked = spoilersOffFor(dateStr)
   const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null, { live: scoresUnlocked })
   const wsMode = Boolean(worldSeriesMode(postseasonBracket.bracket)) // the World Series hero replaces the fold and primer (#1906)
@@ -225,27 +223,11 @@ export function GameSelect({
   // that renders both halves.
   const gamesColRef = useRef(null)
 
-  // Site-wide "Scores Unlocked" pass. The toggle is only OFFERED on today's
-  // slate — you can't retroactively consent to a day you've paged back to — but
-  // its EFFECT is date-scoped; see `scoresUnlocked` below. The consent modal
-  // gates turning it on; turning it off is immediate and takes today's consent
-  // back with it.
-  const { t: copy } = useCopy()
-  // Spoilers are off for THIS slate's date when the pass is running (today) or
-  // when this is a day already consented to and locked in (ADR-0026). A past day
-  // you spoiled keeps showing plainly forever — you agreed to see it, and
-  // pretending otherwise the next morning would be a fiction.
+  // The Scores Unlocked pass's consent sheet. The slate no longer offers the
+  // pass's own switch (the D1 masthead dropped it ahead of its removal); the
+  // World Series hero still asks through this sheet. A day consented to keeps
+  // its effect through `scoresUnlocked` above (ADR-0026).
   const [askUnlock, setAskUnlock] = useState(false)
-  // The `scores-unlocked-local` contextual prompt (PRD-adjacent, §6.2's honest-
-  // wording mandate): right after the user consents, quietly confirm the
-  // choice does NOT follow their other devices — bbsbh:scoresUnlocked is
-  // device-local by hard invariant (P2) and always will be, so this has to be
-  // said plainly rather than left to be assumed from the rest of My Tally's
-  // sync claims. Tied to the actual enable action (not to passActive being
-  // true on a reload), and one-shot forever via usePromptDismiss.
-  const [justEnabledPass, setJustEnabledPass] = useState(false)
-  const [passScopeNoteDismissed, dismissPassScopeNote] = usePromptDismiss('scores-unlocked-local')
-  const resetLabel = formatResetTime(resetAt ?? nextResetAt())
   // Every slate move rewrites the whole address, league and day together, so
   // whichever one you changed the URL still names the exact page on screen.
   // Today is passed as null, which is how slatePath knows to leave the date
@@ -253,13 +235,9 @@ export function GameSelect({
   const goToSlate = (apiDate, level, league = null) =>
     navigate(slatePath(apiDate === todayStr ? null : apiDate, level, league))
   const goToDate = (apiDate) => goToSlate(apiDate, sportId, activeLeagueId)
-  // The rail hands back a leagueId for the WINTER tab and null for the five
-  // ordinary levels, because one tab covers four leagues (issue #1055).
-  const pickLevel = (level, league) => goToSlate(dateStr, level, league)
-  const pageDay = (n) => {
-    const [y, m, d] = dateStr.split('-').map(Number)
-    goToDate(toApiDate(addDays(new Date(y, m - 1, d), n)))
-  }
+  // A ladder stop carries a leagueId for the WINTER stop and null for the five
+  // ordinary levels, because one stop covers four leagues (issue #1055).
+  const pickLevel = (stop) => goToSlate(dateStr, stop.sportId, stop.leagueId)
 
   // IS THERE A SIXTH TAB TODAY? Read off each winter league's own published
   // schedule, never off the clock (hooks/useWinter.js). Fails closed in every
@@ -272,10 +250,9 @@ export function GameSelect({
   // than for a bare sportId=17 — which would answer with four other leagues'
   // games, three of which this app does not ship.
   const activeLeagueId = onWinter ? (winterBall.leagueId ?? leagueId ?? null) : null
-  // SECOND, RIGHT AFTER MLB — chosen over appending it after A, with the cost
-  // named and accepted: the ladder splits in the middle and the rail re-orders
-  // itself each October and February. The reason is that for the months this
-  // tab exists it is the only one with games on it. Do not quietly move it back.
+  // The masthead's ladder draws WINTER last, after a dashed divider, off the
+  // farm system's rail (lib/slate/ladder.js; the D1 handoff, 2026-10-18). It
+  // used to sit second, right after MLB, on the old level rail.
   const levels = useMemo(
     () =>
       winterBall.tabVisible
@@ -295,6 +272,14 @@ export function GameSelect({
     [dateStr, sportId, onWinter, activeLeagueId],
   )
   const { loading, error, data } = slate
+  // Each level's game count for the ladder: one score-free call for all five
+  // (api/slate/levelCounts.js), and the winter's off the calendar useWinter
+  // already holds.
+  const levelCounts = useAsync(() => fetchLevelCounts(dateStr), [dateStr])
+  const stops = useMemo(
+    () => ladderStops({ levels, counts: levelCounts.data, sportId, winterGames: winterBall.games }),
+    [levels, levelCounts.data, sportId, winterBall.games],
+  )
 
   // A COLD load — the first fetch for this date/level, with nothing on the page
   // under the loader yet. Only then does the loader reserve a screen (see
@@ -539,62 +524,6 @@ export function GameSelect({
   // pass off the same day collapses this straight back to `revealedAll`.
   const slateRevealAll = revealedAll || scoresUnlocked
 
-  // A paged-back day whose every Final has been revealed has nothing left in
-  // the chip cluster beside the date stepper (Live Scores is today-only, and
-  // Reveal All has been used up), so the stepper takes that freed room and
-  // steps up a size — see .datenav--lg. Deliberately not today: today keeps a
-  // chip in that row either way (Live Scores, or its own Reveal All once every
-  // game has gone Final), so there's no room to give. `finals.length > 0`
-  // keeps a day with nothing to reveal — a future date, an off day, a slate of
-  // nothing but postponements — from growing on a vacuously-true condition.
-  const dayFullyRevealed = !isToday && finals.length > 0 && slateRevealAll
-
-  // The floating bottom "Reveal all results" bar (RevealAllBar, mobile-only —
-  // see its own comment below) would otherwise sit on screen at the same time
-  // as the header's inline .daystate__chip--reveal, right below the date
-  // stepper — redundant when both are already in view. Same
-  // IntersectionObserver-on-a-ref pattern as InningViewer's scorebug dock
-  // (`pastLine`/`.gamehud-dock--show`): the floating bar stays hidden while
-  // the header chip is visible, and only appears once scrolling has carried
-  // that chip out of view.
-  const revealChipRef = useRef(null)
-  const [revealChipOutOfView, setRevealChipOutOfView] = useState(false)
-  // The chip itself only exists once the async schedule fetch resolves with
-  // at least one Final game (see the render condition below), so the observer
-  // can't just attach once on mount — it has to re-attach whenever the chip's
-  // presence flips, or a chip that mounts after this effect's first (and
-  // only, with `[]` deps) run would never get observed.
-  const showRevealChip = finals.length > 0 && !slateRevealAll
-  useEffect(() => {
-    const el = revealChipRef.current
-    if (!el || typeof IntersectionObserver === 'undefined') return undefined
-    const obs = new IntersectionObserver(([entry]) => setRevealChipOutOfView(!entry.isIntersecting), {
-      threshold: 0,
-    })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [showRevealChip])
-
-  // Same trick again, this time to drop a shadow under the sticky desktop
-  // topbar (.topbar--slate in 25-wide-layout.css) once a card is actually
-  // scrolling underneath it — a permanent shadow would look like a fixed
-  // banner even at the very top of a fresh page. `topbarSentinel` is its own
-  // 1px `position: sticky; top: 0` element placed just above the real
-  // header (see the JSX below); a sticky element's intersectionRatio drops
-  // below 1 the instant it starts sticking, which happens at the same
-  // scroll position the real header does — no header-height math needed.
-  const topbarSentinelRef = useRef(null)
-  const [topbarStuck, setTopbarStuck] = useState(false)
-  useEffect(() => {
-    const el = topbarSentinelRef.current
-    if (!el || typeof IntersectionObserver === 'undefined') return undefined
-    const obs = new IntersectionObserver(([entry]) => setTopbarStuck(entry.intersectionRatio < 1), {
-      threshold: [1],
-    })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
-
   // Per-game pill classification (Game of the Night / Dominant Performance /
   // Blowout / Close Game / Extra Innings) for every card in `finals` — see
   // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
@@ -703,68 +632,35 @@ export function GameSelect({
         docked ? ' screen--wiredock' : ''
       }${railed ? ' screen--wirerail' : ''}${bracketInRail ? ' screen--bracketrail' : ''}`}
     >
-      {/* Title + league toggle + search share one row: the Tally wordmark
-          reloads THIS league's slate for today on the left (a full page load —
-          see lib/home.js), the condensed MLB/AAA/… buttons — the URL's own
-          league segment now, not a stored preference (ADR-0056) — and the
-          search trigger ride together to its right (grouped so
-          `justify-content: space-between` splits only title vs. that cluster,
-          not each button individually). A direct
-          child of .screen (not .slatehead below) so a sticky containing
-          block spans the whole scrollable page on desktop/iPad — nested one
-          level deeper, position: sticky could only hold it in view for the
-          height of its own short parent (see .topbar--slate's desktop rule
-          in index.css). */}
-      <div ref={topbarSentinelRef} className="topbar__stickysentinel" aria-hidden="true" />
-      <header className={`topbar topbar--slate${topbarStuck ? ' topbar--stuck' : ''}`}>
-        <button
-          type="button"
-          className="topbar__title topbar__home"
-          onClick={() => goHome(slatePath(null, sportId, activeLeagueId))}
-          aria-label="Reload games"
-        >
-          <TallyLockup height={20} />
-        </button>
-        <div className="topbar__slateactions">
-          <LevelNav sportId={sportId} onChange={pickLevel} levels={levels} />
-          {/* The icon buttons live in one nowrap sub-group so that when the
-              row runs out of width they drop below the level pills together —
-              as bare siblings flex-wrap moved them one at a time, orphaning
-              whichever single button no longer fit onto its own row. */}
-          <div className="topbar__iconcluster">
-            <SiteSearchButton className="topbar__search" />
-            <LogbookButton className="topbar__search" />
-            <SiteMenuButton className="topbar__search" />
+      {/* The D1 masthead: the brand bar, the ladder card (level + day) and,
+          on a phone, the compact bar that replaces the card on scroll. Every
+          move navigates (ADR-0056). The brand reloads this level's slate for today (a
+          full page load — see lib/home.js). The pass's Live scores switch
+          and Reveal all are no longer drawn here (the D1 handoff). */}
+      <SlateMasthead
+        stops={stops}
+        dateStr={dateStr}
+        isToday={isToday}
+        wide={wide}
+        onLevel={pickLevel}
+        onDate={goToDate}
+        onToday={() => goToDate(todayStr)}
+        onHome={() => goHome(slatePath(null, sportId, activeLeagueId))}
+        actions={
+          <>
+            <SiteSearchButton className="slatemast__icon" />
+            <LogbookButton className="slatemast__icon" />
+            <SiteMenuButton className="slatemast__icon" />
             {AccountButton && (
               <Suspense fallback={null}>
                 <AccountButton />
               </Suspense>
             )}
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
-      {/* This level's whole club set, in the same finger-scrollable logo strip
-          League Leaders uses to highlight a team (TeamFilterStrip) — minus
-          the pinned "MLB" reset button (showMlbPin=false), since there's no
-          "every team" state to return to here. Tapping a logo jumps straight
-          to that club's team page rather than picking a highlight, so
-          selectedTeamId is always null (nothing is ever "active") and
-          teamfilterstrip--nav keeps every logo full-color instead of
-          dimming everything the strip's filter callers grayscale until
-          picked (see index.css). Sourced from levelTeams (fetchTeams(sportId)
-          above), so it re-lists automatically on every level switch.
-          showArrows gives non-touch users a click target to scrub through the
-          strip; centerTeamId lands on the favorite team on arrival (only
-          meaningful when it's actually in this level's club set — an MLB
-          favorite scrolled to a minor-league level's strip just no-ops). */}
-      {/* The wrapper is ALWAYS rendered, and holds the strip's height open
-          while fetchTeams(sportId) is still in flight — see .slatestrip in
-          03-slate-header.css. The strip used to be a bare conditional, so it
-          appeared out of nothing on arrival and shoved the date banner, the
-          games and the footer down by its own 82px. That single insertion was
-          worth ~0.37 CLS on the slate's cold load. */}
-      {/* Four leagues share the one WINTER tab, so the choice between them is
+      {/* Four leagues share the one WINTER stop, so the choice between them is
           made here — above the club strip, which the pick then scopes. Every
           chip is a real address, never local state (ADR-0056). */}
       {onWinter && (
@@ -776,6 +672,11 @@ export function GameSelect({
         />
       )}
 
+      {/* This level's whole club set as round chips (TeamFilterStrip, the
+          D1 "Your clubs" row): a tap opens that club's page, the favourite is
+          filled and centred on arrival. The wrapper is ALWAYS rendered and
+          holds the strip's height open while fetchTeams is in flight — see
+          .slatestrip in 03-slate-header.css (a ~0.37 CLS fix). */}
       <div className="slatestrip">
         {levelTeams.data?.length > 0 && (
           <TeamFilterStrip
@@ -785,136 +686,10 @@ export function GameSelect({
             showMlbPin={false}
             showArrows
             centerTeamId={favoriteTeamId}
-            ariaLabel={`Browse ${levels.find((l) => l.sportId === sportId)?.label ?? ''} teams`}
-            className="teamfilterstrip--nav"
+            markedTeamId={favoriteTeamId}
+            ariaLabel={`Browse ${stops.find((s) => s.picked)?.fullName ?? ''} teams`}
+            className="teamfilterstrip--nav teamfilterstrip--chips"
           />
-        )}
-      </div>
-
-      {/* The date stepper's own solid banner, divided from the game cards by
-          a bottom rule — deliberately NOT sticky (see the comment on
-          .slatehead in index.css), so it scrolls away under the pinned
-          topbar above rather than nagging "you're on {date}" forever. */}
-      <div className="slatehead">
-        <div
-          className={`datenav datenav--row${dayFullyRevealed ? ' datenav--lg' : ''}`}
-        >
-          <button onClick={() => pageDay(-1)} aria-label="Previous day">
-            ‹
-          </button>
-          <span className="datenav__label">
-            {humanDate(dateStr)}
-            {/* One tap back to today once you've paged away — no arrow-mashing
-                home from a date you browsed to. */}
-            {!isToday && (
-              <button
-                type="button"
-                className="datenav__today"
-                onClick={() => goToDate(todayStr)}
-              >
-                Today
-              </button>
-            )}
-          </span>
-          <button onClick={() => pageDay(1)} aria-label="Next day">
-            ›
-          </button>
-        </div>
-
-        {/* Day-state chip row: whichever of {Live Scores, Reveal All} applies
-            to this date rides beside the date stepper instead of stacking
-            below it. Not mutually exclusive — today, once every game on it
-            has gone Final (see showPastDayTreatment), BOTH can apply at once
-            (the pass is still off and the day hasn't been reveal-alled), so
-            this holds up to two chips rather than assuming only one. */}
-        {((isToday && !todayAllFinal) || (finals.length > 0 && !slateRevealAll)) && (
-          <div className="daystate">
-            {/* Live-scores day pass — today's slate only. The reset time is no
-                longer spelled out visually (it's implied: the pass always
-                clears at 8am), but stays in the accessible name for screen
-                reader users. Tapping again while on turns it off — the chip
-                is its own off-switch, no separate banner needed. */}
-            {isToday && !todayAllFinal && (
-              <button
-                type="button"
-                role="switch"
-                // Checked reports `scoresUnlocked` — what this slate is ACTUALLY
-                // doing — not `passActive`, the local pass alone. The two can
-                // disagree: a day mirrored in as consented by another device
-                // (SpoiledDaysCloudSync) unseals every card here with no pass
-                // behind it, and a switch that reads "off" over a slate full of
-                // live scores is the one thing this control must never do. Same
-                // reason it is the off switch in that state — before this, the
-                // only affordance was a tap that opened the consent sheet for a
-                // day already consented to.
-                data-testid="scores-unlock-switch"
-                aria-checked={scoresUnlocked}
-                aria-label={
-                  passActive
-                    ? `Live scores — on, resets ${resetLabel}`
-                    : scoresUnlocked
-                      ? 'Live scores — on for today'
-                      : 'Live scores — off'
-                }
-                className={`daystate__chip daystate__chip--live${scoresUnlocked ? ' daystate__chip--live-on' : ''}`}
-                onClick={() => {
-                  if (scoresUnlocked) {
-                    // `dateStr` is today here (the chip renders only when
-                    // isToday) — named so the day being re-sealed is the day on
-                    // screen, never a clock read that could disagree with it.
-                    disableUnlock(dateStr)
-                    // The note says "Live scores stays on this device". Once
-                    // the pass is off there is no "live scores" to say it
-                    // about, and leaving it up asserted a scope for a setting
-                    // that no longer applied. Clearing it here is NOT the
-                    // one-shot dismissal — that is the ✕, and only the ✕
-                    // writes bbsbh:prompts.
-                    setJustEnabledPass(false)
-                  } else {
-                    setAskUnlock(true)
-                  }
-                }}
-              >
-                <span className="daystate__dot" aria-hidden="true" />
-                {copy('scoresUnlocked.toggleLabel')}
-              </button>
-            )}
-            {finals.length > 0 && !slateRevealAll && (
-              <button
-                ref={revealChipRef}
-                type="button"
-                className="btn btn--reveal daystate__chip--reveal"
-                onClick={() => setRevealedAll(true)}
-              >
-                <span className="btn__ball" aria-hidden="true">
-                  ⚾️
-                </span>{' '}
-                Reveal all results
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* The scores-unlocked-local prompt: fires only right after THIS tap
-            enables the pass (see the ConsentModal onConfirm below), never on
-            a reload where the pass happens to still be active — and only
-            where an account exists to be confused about (isClerkEnabled). */}
-        {isClerkEnabled && justEnabledPass && !passScopeNoteDismissed && (
-          <p className="daystate__scopenote caps-exempt">
-            Live scores stays on this device — it won&rsquo;t turn on for your
-            other signed-in devices.
-            <button
-              type="button"
-              className="strip-dismiss daystate__scopenotedismiss"
-              onClick={() => {
-                dismissPassScopeNote()
-                setJustEnabledPass(false)
-              }}
-              aria-label="Dismiss this note"
-            >
-              ✕
-            </button>
-          </p>
         )}
       </div>
 
@@ -986,10 +761,6 @@ export function GameSelect({
               <span className="offday-banner__text">Off Day</span>
               <span className="offday-banner__detail">Games resume {humanDate(resumeDate)}</span>
             </div>
-          )}
-
-          {finals.length > 0 && !slateRevealAll && revealChipOutOfView && (
-            <RevealAllBar onReveal={() => setRevealedAll(true)} />
           )}
 
           {availableFilters.length > 0 && (
@@ -1142,7 +913,6 @@ export function GameSelect({
           time={formatResetTime(nextResetAt())}
           onConfirm={() => {
             enableUnlock()
-            if (isClerkEnabled) setJustEnabledPass(true)
             trackToggleConsent({
               toggle: TOGGLES.SCORES_UNLOCKED,
               action: ACTIONS.CONFIRM,
@@ -1182,28 +952,6 @@ export function GameSelect({
           singleDay={!isToday}
         />
       )}
-    </div>
-  )
-}
-
-// The mobile-only fixed bottom bar duplicate of the header's "Reveal all
-// results" chip (see .daystate in the slatehead render above) — the same
-// floating-bar convention InningViewer uses for "Reveal {half}"
-// (.pagenav/.btn--reveal), so the action stays in thumb reach on a long
-// single-column list. Only rendered once the header chip has scrolled out of
-// view (`revealChipOutOfView`) — while it's still on screen near the top,
-// showing this floating duplicate too would just be the same button twice.
-// Desktop has no floating duplicate: the header chip is already inline and
-// reachable there, same split as .pagenav--boxscore's
-// Refresh control. One tap flips every Final game's card, which also
-// triggers useDayCardMeta's batched classification pass — there's no
-// per-card unlock.
-function RevealAllBar({ onReveal }) {
-  return (
-    <div className="pagenav pagenav--revealall">
-      <button type="button" className="btn btn--reveal" onClick={onReveal}>
-        <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all results
-      </button>
     </div>
   )
 }
