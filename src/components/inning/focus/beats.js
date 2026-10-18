@@ -85,6 +85,13 @@ export const CLOSE_SEQUENCE_MS = (TALLY_CELL_COUNT - 1) * TALLY_STAGGER_MS
 // A plain timer: no tap cuts it short, because the stray tap is the thing held.
 export const STEP_HOLD_MS = 400
 
+// (2c) THE BIG-PLAY STAMP — how long the stamp (BigPlayStamp.jsx) stays up
+// after a big play's denotation has inked. A map of literals, one per kind of
+// play; the kind is only known once the mark has printed, so a number here
+// can say nothing the reader has not already read. It STARTS at the ink's end
+// (useBigPlayBeat.js) and never earlier. The next step cuts it short.
+export const BIG_PLAY_MS = { slam: 1800, homer: 1500, triple: 1300, double: 1000, stranded: 1300 }
+
 // (3) THE BOOK CLOSING — whether the book is closed: the reader has revealed
 // every half that was actually played.
 //

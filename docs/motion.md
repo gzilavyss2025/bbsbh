@@ -273,3 +273,20 @@ load, that a half writes itself only when laid out to be read back, that the cap
 holds, and that the whole study is off under reduced motion. It runs offline
 against the captured anchor game (`e2e/fixtures/mock-api.js`), so it needs no
 live statsapi.
+
+## The big-play stamp (focus mode)
+
+Stepping through a half in focus mode, a home run, a grand slam, a triple, a double
+and the bases left loaded each get an ink stamp over the page
+(`components/inning/focus/BigPlay*.jsx`, `styles/focus/bigplay.css`). It is a plain
+CSS animation on `transform` and `opacity`: no motion library, because every other
+motion here is CSS on tokens and the bundle stays as it was.
+
+| Rule | Why |
+| --- | --- |
+| It starts when the denotation has inked, not when the card arrives | The stamp names the play. Before the mark prints, the reader does not know it (ADR-0046) |
+| Its length is a literal per kind (`BIG_PLAY_MS` in `beats.js`) | `beats.js` imports nothing, so no timing can come from a feed |
+| `bigPlayKind` reads only the entry the reader stepped to | `stepCap` has cut the feed to what they revealed |
+| The next step removes it, and it never holds the bar | A stepping tap is a frequent action. The overlay takes no pointer events |
+| Once per at-bat per page load | Stepping back to a play does not replay it |
+| Reduced motion mounts nothing | The denotation is the account |
