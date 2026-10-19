@@ -106,32 +106,43 @@ test('lists read as English', () => {
   assert.equal(listOf(['a', 'b', 'c']), 'a, b and c')
 })
 
-test('the Zones callout: the hottest spots, by region name, and the pitcher’s busiest one', async () => {
-  const { zoneCallout } = await import('../src/screens/scout/zones/callout.js')
-  const parts = zoneCallout({ board, side: sides.xwoba, stance: 'R', names: NAMES })
-  // 33%, not the mockup's 34%: 88 of 263 is 33.46%, the figure the map's
-  // own cell prints. The mockup rounded the share to .335 first.
-  assert.equal(
-    textOf(parts),
-    'Chourio’s three hottest spots (up · inside · 3B side; middle · inside · 3B side; heart) get 14% of Pivetta’s pitches. ' +
-      'His most common spot is above the zone (33%), where Chourio is at league level.',
-  )
-  assert.ok(!/\b(left|right)\b/.test(textOf(parts)))
-  // Not at league level in his busiest region: no last clause.
-  const hotTop = { ...sides.xwoba, all: { ...sides.xwoba.all, cells: { ...sides.xwoba.all.cells, high: { tone: 'hi1' } } } }
-  assert.ok(textOf(zoneCallout({ board, side: hotTop, stance: 'R', names: NAMES })).endsWith('(33%).'))
-  assert.equal(zoneCallout({ board: { ...board, all: { ...board.all, thin: true } }, side: sides.xwoba, stance: 'R', names: NAMES }), null)
+test('the hot and cold spots: the share of the pitcher’s mix that goes there, and the regions', async () => {
+  const { spotShares } = await import('../src/screens/scout/zones/callout.js')
+  const { hot, cold } = spotShares({ board, side: sides.xwoba, stance: 'R' })
+  // Hot is the map's top tone (hi2): 6.5 + 1.5 + 5.7 = 13.7%. Cold is both blue tones (lo1 and lo2),
+  // 3.0 + 17.9 + 4.6 = 25.5%: 25, not the canvas's 26, which added the rounded cells (3 + 18 + 5).
+  assert.deepEqual([hot.share, cold.share].map((x) => Math.round(x * 100)), [14, 25])
+  assert.deepEqual(hot.names, ['Up · inside · 3B side', 'Middle · inside · 3B side', 'Heart'])
+  assert.deepEqual(hot.range, ['.385', '.604'])
+  assert.deepEqual(cold.range, ['.177', '.237'])
+  assert.equal(cold.names.length, 3)
+  assert.ok(![...hot.names, ...cold.names].some((n) => /\b(left|right)\b/.test(n)))
+  // Nothing hot: that tile is null; a thin pitcher board or no hitter map: no tiles at all.
+  const noHot = { all: { cells: Object.fromEntries(Object.entries(sides.xwoba.all.cells).map(([r, c]) => [r, { ...c, tone: 'mid' }])) } }
+  assert.equal(spotShares({ board, side: noHot, stance: 'R' }).hot, null)
+  assert.equal(spotShares({ board: { ...board, all: { ...board.all, thin: true } }, side: sides.xwoba, stance: 'R' }), null)
+  assert.equal(spotShares({ board, side: null, stance: 'R' }), null)
 })
 
-test('the Zones callout names no inside or away when the two maps draw different stances', async () => {
-  const { zoneCallout } = await import('../src/screens/scout/zones/callout.js')
+test('the spot names say no inside or away when the two maps draw different stances', async () => {
+  const { spotShares } = await import('../src/screens/scout/zones/callout.js')
   // A switch hitter with the other hand picked: the pitcher board is drawn for R and the
   // hitter map for L, so "inside" would be true on one map only (regionLabel, stance null).
-  const text = textOf(zoneCallout({ board, side: sides.xwoba, stance: 'R', hitterStance: 'L', names: NAMES }))
+  const text = spotShares({ board, side: sides.xwoba, stance: 'R', hitterStance: 'L' }).hot.names.join('; ')
   assert.ok(!/\b(inside|away)\b/.test(text), text)
   assert.match(text, /3B side/)
-  // The same stance on both maps keeps the words.
-  assert.match(textOf(zoneCallout({ board, side: sides.xwoba, stance: 'R', hitterStance: 'R', names: NAMES })), /inside/)
+  assert.match(spotShares({ board, side: sides.xwoba, stance: 'R', hitterStance: 'R' }).hot.names.join('; '), /inside/)
+})
+
+test('the hottest region: the most xwOBA, never a region too thin to show a value', async () => {
+  const { hottestRegion } = await import('../src/screens/scout/zones/callout.js')
+  // .604 in the heart beats .602 in the middle row's inside cell and every other region.
+  assert.equal(hottestRegion(sides.xwoba.all.cells), 'r2c2')
+  // A hotter region with no value (under the floor, count only) is never picked.
+  assert.equal(hottestRegion({ ...sides.xwoba.all.cells, high: { tone: 'gray', count: 3 } }), 'r2c2')
+  const thin = Object.fromEntries(Object.keys(sides.xwoba.all.cells).map((r) => [r, { tone: 'gray', count: 2 }]))
+  assert.equal(hottestRegion(thin), null)
+  assert.equal(hottestRegion(undefined), null)
 })
 
 test('a pitch that favors the pitcher, and a board too thin to judge, read as plain sentences', () => {

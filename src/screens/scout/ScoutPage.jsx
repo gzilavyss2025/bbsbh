@@ -32,6 +32,8 @@ import { FilterSheet, filterSummary } from './FilterSheet.jsx'
 import { PitchRows } from './pitches/PitchRows.jsx'
 import { EdgePanel } from './edge/EdgePanel.jsx'
 import { ZonesPanel } from './zones/ZonesPanel.jsx'
+import { SpotTiles } from './zones/MapParts.jsx'
+import { hottestRegion, spotShares } from './zones/callout.js'
 import { MeetingsPanel } from './meetings/MeetingsPanel.jsx'
 
 // THE MATCHUP SCOUT (#1410, #1411, #1490; design docs/scout-design.md,
@@ -73,7 +75,8 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
   const view = 'hitter'
   const [picks, setPicks] = useState(noPicks)
   const [changing, setChanging] = useState(false)
-  const [picked, setPicked] = useState(null)
+  // `undefined` is untouched: the page then picks the hitter's hottest region (zones/callout.js); a tap sets it, or null for none.
+  const [pickedState, setPicked] = useState(undefined)
   const [filters, setFilters] = useState(false)
 
   const hasPair = Boolean(pitcherId && hitterId)
@@ -112,6 +115,10 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
   )
   const side = sides[metric] ?? null
   const hmap = side ? (sel ? side.byType[sel] : side.all) : null
+  const xside = sides.xwoba ?? null
+  const picked = pickedState === undefined ? hottestRegion((sel ? xside?.byType[sel] : xside?.all)?.cells) : pickedState
+  // The hot and cold tiles, on All + xwOBA (est.) only. A phone shows them in Where, a desktop beside the scene.
+  const spots = !sel && metric === 'xwoba' ? spotShares({ board, side: xside, stance, hitterStance }) : null
   const scene = useMemo(
     () => (board ? scenePitches(sel ? board.tiles.filter((t) => t.code === sel) : board.types, lefty, view) : []),
     [board, sel, lefty, view],
@@ -123,7 +130,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
   }
   const setMetric = (k) => go({ metric: k === metrics[0] ? null : k })
   const selectPitch = (code) => {
-    setPicked(null)
+    setPicked(undefined)
     go({ pitch: code })
   }
   const onPick = (role, person) => {
@@ -131,7 +138,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
     setPicks(next)
     if (next.pitcher && next.hitter) {
       setChanging(false)
-      setPicked(null)
+      setPicked(undefined)
       // A new pair is a new page: push, so Back returns to the old one.
       go({ ...next, pitch: null, hand: null }, false)
     }
@@ -183,7 +190,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
                 data={data}
                 board={board}
                 side={side}
-                xside={sides.xwoba ?? null}
+                spots={spots}
                 map={map}
                 hmap={hmap}
                 sel={sel}
@@ -196,7 +203,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
                 onMetric={setMetric}
                 onPitch={selectPitch}
                 picked={picked}
-                onPick={setPicked}
+                onPick={(r) => setPicked(picked === r ? null : r)}
               />
             </>
           ),
@@ -266,6 +273,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
                   caption={sceneCaption}
                 />
               ) : null}
+              <SpotTiles spots={spots} className="scout__spots--wide" />
             </div>
 
             <div className="scout__main">
