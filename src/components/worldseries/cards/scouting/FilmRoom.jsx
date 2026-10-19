@@ -1,7 +1,7 @@
-import '../../../styles/worldseries/film.css'
-import { filmRoomModel, filmRoomNote } from '../../../lib/postseason/worldseries/scouting/filmRoom.js'
-import { SectionHead } from '../../ui/frame/SectionHead.jsx'
-import { Stack } from '../../ui/layout/Stack.jsx'
+import '../../../../styles/worldseries/film.css'
+import { filmRoomModel, filmRoomNote } from '../../../../lib/postseason/worldseries/scouting/filmRoom.js'
+import { SectionHead } from '../../../ui/frame/SectionHead.jsx'
+import { Stack } from '../../../ui/layout/Stack.jsx'
 import { FilmMeeting } from './FilmMeeting.jsx'
 
 // FILM ROOM (#2316): one stamped card per regular-season meeting of the two Series clubs, oldest

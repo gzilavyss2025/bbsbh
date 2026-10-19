@@ -1,11 +1,11 @@
-import { pitchMark } from '../../../lib/pitch/pitchTypes.js'
-import { useRouteLink } from '../../../lib/nav.js'
-import { gamePath, playerPath } from '../../../lib/route.js'
-import { PitchMark } from '../../playbyplay/pitcherCard/PitchMark.jsx'
-import { Headshot } from '../../player/Headshot.jsx'
-import { Door } from '../../ui/control/Door.jsx'
-import { Card } from '../../ui/frame/Card.jsx'
-import { Stack } from '../../ui/layout/Stack.jsx'
+import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'
+import { useRouteLink } from '../../../../lib/nav.js'
+import { gamePath, playerPath } from '../../../../lib/route.js'
+import { PitchMark } from '../../../playbyplay/pitcherCard/PitchMark.jsx'
+import { Headshot } from '../../../player/Headshot.jsx'
+import { Door } from '../../../ui/control/Door.jsx'
+import { Card } from '../../../ui/frame/Card.jsx'
+import { Stack } from '../../../ui/layout/Stack.jsx'
 
 function Starter({ s, teamId }) {
   return (

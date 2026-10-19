@@ -4,7 +4,7 @@ Where each of the six measures on the World Series scouting report's "Glove and 
 comes from. Every URL and column below was run against a real response on **2026-10-19**
 (2026 regular season over; no host was blocked). The generator is
 `scripts/gen-club-defense-running.mjs`; it writes `public/data/club-defense-running.json`.
-Reader: `src/api/clubDefenseRunning.js`. The card reads it: `src/components/worldseries/cards/GloveLegs.jsx`.
+Reader: `src/api/clubDefenseRunning.js`. The card reads it: `src/components/worldseries/cards/scouting/GloveLegs.jsx`.
 
 `[DECISION: the card gets one file with six measures per club, keyed by MLB team id; a measure with no source is null.]`
 
