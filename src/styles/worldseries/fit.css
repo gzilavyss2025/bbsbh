@@ -1,0 +1,79 @@
+/* PLATOON and PARK FIT (#2316). Platoon reuses the glove sheet's leader mark; the cell a club faces
+   in the next game takes the stamped tint. The leader mark is never colour alone: it is an
+   underline shape plus hidden text. Dim captions use --text-caption. */
+.ww-platoon__head {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* layout-exempt: a fixed two-up pair, one cell per club */
+.ww-platoon__cells {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.ww-platoon__cell {
+  padding: var(--space-2);
+  border: 1px solid var(--border-hairline);
+}
+
+.ww-platoon__cell--faces {
+  background: var(--surface-stamped-tint);
+}
+
+.ww-platoon__club {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  color: var(--text-heading);
+}
+
+.ww-platoon__ops {
+  display: inline-block;
+  margin: var(--space-1) 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-sm);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-compact);
+  color: var(--text-heading);
+}
+
+.ww-platoon .ww-best {
+  padding: 0 var(--space-2);
+  box-shadow: inset 0 calc(-1 * var(--space-1)) 0 color-mix(in srgb, var(--marker) 40%, transparent);
+}
+
+.ww-platoon__cap {
+  display: block;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+.ww-fit__field {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto var(--space-2);
+}
+
+.ww-fit__table th,
+.ww-fit__table td {
+  font-variant-numeric: tabular-nums;
+}
+
+.ww-fit__table td {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.ww-fit__note {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}

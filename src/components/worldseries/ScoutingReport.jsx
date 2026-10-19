@@ -3,6 +3,7 @@ import { loadCareerMatchups, starterMatchupsFor } from '../../api/careerMatchups
 import { loadClubDefenseRunning } from '../../api/clubDefenseRunning.js'
 import { loadNineKeys } from '../../api/nineKeys.js'
 import { loadPitchByPitch } from '../../api/scout/pitchByPitch.js'
+import { loadParkFit, loadPlatoon } from '../../api/scout/seriesFit.js'
 import { fetchMeetings } from '../../api/postseason/meetings.js'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -10,15 +11,20 @@ import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { matchupEdges } from '../../lib/postseason/primer/matchupEdges.js'
 import { gloveLegsModel } from '../../lib/postseason/worldseries/scouting/gloveLegs.js'
-import { scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
+import { parkFitModel } from '../../lib/postseason/worldseries/scouting/parkFit.js'
+import { platoonModel } from '../../lib/postseason/worldseries/scouting/platoon.js'
+import { MILWAUKEE_VENUE_ID, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
+import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { HubTabBar } from '../chrome/HubTabBar.jsx'
 import { MatchupEdges } from '../postseason/edges/MatchupEdges.jsx'
 import { UmpireEdge } from '../postseason/edges/UmpireEdge.jsx'
 import { SeriesNineKeys } from '../postseason/SeriesNineKeys.jsx'
-import { FilmRoom } from './cards/FilmRoom.jsx'
-import { GloveLegs } from './cards/GloveLegs.jsx'
-import { PitchByPitch } from './cards/PitchByPitch.jsx'
+import { FilmRoom } from './cards/scouting/FilmRoom.jsx'
+import { GloveLegs } from './cards/scouting/GloveLegs.jsx'
+import { ParkFit } from './cards/scouting/ParkFit.jsx'
+import { PitchByPitch } from './cards/scouting/PitchByPitch.jsx'
+import { Platoon } from './cards/scouting/Platoon.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Grid } from '../ui/layout/Grid.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
@@ -36,6 +42,7 @@ import { Stack } from '../ui/layout/Stack.jsx'
 //   gamePk        the game the edges read: the home's focus game (today's on a game day,
 //                 the next one on an off day), the same one the umpire is read for
 //   plateUmpire   { id, name } from fetchPlateUmpires, or null (game day)
+//   game          the focus game's upcoming row (api/postseason/upcoming.js): venue and probables, or null
 // Adding a card: one entry in scouting.js, one here.
 const CARD = {
   'nine-keys': ({ nineKeys, clubIds, season }) => <SeriesNineKeys data={nineKeys} clubs={clubIds.map((id) => ({ id }))} season={season} />,
@@ -45,10 +52,12 @@ const CARD = {
   'pitch-by-pitch': ({ pitchByPitch, noteClub, clubIds, gameNumber }) => (
     <PitchByPitch data={pitchByPitch} clubId={noteClub} oppId={clubIds.find((id) => id !== noteClub)} gameNumber={gameNumber} />
   ),
+  platoon: ({ platoon }) => <Platoon blocks={platoon} />,
+  'park-fit': ({ parkFit, parkLayout, sides }) => <ParkFit model={parkFit} layout={parkLayout} clubIds={sides} />,
   'umpire-edge': ({ plateUmpire, umpire }) => <UmpireEdge name={plateUmpire.name} lean={umpire?.lean ?? null} />,
 }
 
-export function ScoutingReport({ clubIds, sides = clubIds, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null }) {
+export function ScoutingReport({ clubIds, sides = clubIds, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null }) {
   const season = Number(slateDate.slice(0, 4))
   const { data: nineKeys } = useAsync(() => loadNineKeys(), [])
   const { data: career } = useAsync(() => loadCareerMatchups(), [])
@@ -73,7 +82,22 @@ export function ScoutingReport({ clubIds, sides = clubIds, slateDate, dayType, g
   const hasNineKeys = Boolean(nineKeysTeams(nineKeys, clubIds.map((id) => ({ id })), season))
   const { data: defense } = useAsync(() => loadClubDefenseRunning(), [])
   const gloveLegs = useMemo(() => gloveLegsModel(defense, { clubA: sides[0], clubB: sides[1] }), [defense, sides[0], sides[1]])
-  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, pitchByPitch, plateUmpire, meetings })
+  // Platoon: regular-season OPS by pitcher hand; the tint follows the focus game's probables.
+  const { data: opsByClub } = useAsync(() => loadPlatoon({ clubIds, season }), [clubA, clubB, season])
+  const platoon = useMemo(
+    () => platoonModel(opsByClub, { clubA: sides[0], clubB: sides[1], game, gameNumber }),
+    [opsByClub, sides[0], sides[1], game, gameNumber],
+  )
+  // Park fit: always Milwaukee's field (the park of Games 1, 2, 6 and 7; the other club's park is not
+  // on file for Games 3 to 5). On a game day the card shows only when tonight's park is Milwaukee, and
+  // the spray read waits for that answer. The loaders key on the stable clubIds (their data is keyed by
+  // club id); only the models read `sides`, which WorldSeriesHome reorders once the park resolves.
+  const venueId = game?.venue?.id ?? null
+  const parkLayout = useMemo(() => resolveBallparkLayout({ venueId: MILWAUKEE_VENUE_ID, gameDate: slateDate }), [slateDate])
+  const wantPark = Boolean(parkLayout) && (dayType !== 'game' || venueId === MILWAUKEE_VENUE_ID)
+  const { data: balls } = useAsync(() => (wantPark ? loadParkFit({ clubIds, slateDate }) : null), [clubA, clubB, slateDate, wantPark])
+  const parkFit = useMemo(() => (wantPark ? parkFitModel(balls, { clubA: sides[0], clubB: sides[1] }) : null), [balls, wantPark, sides[0], sides[1]])
+  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, pitchByPitch, plateUmpire, meetings, platoon, parkFit, venueId })
   // The sticky chrome over a card: the slate's own bar (the probe reads --slate-bar-h) plus this
   // jump bar. One measured number feeds the bar's scroll offset and each card's scroll-margin.
   const rootRef = useRef(null)
@@ -91,7 +115,7 @@ export function ScoutingReport({ clubIds, sides = clubIds, slateDate, dayType, g
     return () => ro.disconnect()
   }, [shown])
   if (!shown) return null
-  const ctx = { noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, gloveLegs, sides, clubIds, season, edges, plateUmpire, umpire }
+  const ctx = { noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, gloveLegs, sides, clubIds, season, edges, plateUmpire, umpire, platoon, parkFit, parkLayout }
   const names = clubIds.map((id) => teamClubNameShort(id)).filter(Boolean).join(' and ')
   return (
     <Stack gap="loose" className="ww-scout" ref={rootRef} style={{ '--ww-scout-offset': `${offset}px` }}>

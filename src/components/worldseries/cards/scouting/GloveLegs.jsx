@@ -1,11 +1,11 @@
 import { Fragment } from 'react'
-import '../../../styles/worldseries/glove.css'
-import { gloveFigure } from '../../../lib/postseason/worldseries/scouting/gloveLegs.js'
-import { teamClubNameShort } from '../../../lib/teams.js'
-import { TeamLogo } from '../../logo/TeamLogo.jsx'
-import { Card } from '../../ui/frame/Card.jsx'
-import { SectionHead } from '../../ui/frame/SectionHead.jsx'
-import { Stack } from '../../ui/layout/Stack.jsx'
+import '../../../../styles/worldseries/glove.css'
+import { gloveFigure } from '../../../../lib/postseason/worldseries/scouting/gloveLegs.js'
+import { teamClubNameShort } from '../../../../lib/teams.js'
+import { TeamLogo } from '../../../logo/TeamLogo.jsx'
+import { Card } from '../../../ui/frame/Card.jsx'
+import { SectionHead } from '../../../ui/frame/SectionHead.jsx'
+import { Stack } from '../../../ui/layout/Stack.jsx'
 
 // GLOVE AND LEGS (#2316): defense and baserunning of the two Series clubs, side by side, on the
 // Tale of the tape rows. `rows` is gloveLegsModel's output (never null here). The club that leads a

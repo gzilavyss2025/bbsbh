@@ -1040,6 +1040,10 @@
       "class": "cutoff-gated",
       "why": "The World Series Pitch by pitch card's reads (#2316): the starter named on the schedule, his season arsenal, the other club's hitter-grid and league sums (all over Final games, built before the day's games), and the club's postseason hitting splits, which end the day before the slate date in the request (fetchHotBatSplits). No score, line or result of a game on or after the slate date is read. An open surface (ADR-0034), so no SealBox."
     },
+    "scout/seriesFit.js": {
+      "class": "cutoff-gated",
+      "why": "The World Series Platoon and Park fit cards' reads (#2316): a club's regular-season OPS by pitcher hand from the team statSplits (the regular season is over before the Series starts), and the spray store's balls in play for the club's regulars (all from games already Final, built before the day's games) picked by postseason PA through fetchHotBatSplits, which ends the day before the slate date in the request. No score, line or result of a game on or after the slate date is read. An open surface (ADR-0034), so no SealBox."
+    },
     "search.js": {
       "class": "spoiler-free",
       "why": "The player/team directory search. Identity fields only."

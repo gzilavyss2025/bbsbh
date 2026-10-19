@@ -82,6 +82,7 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
       dayType={mode.dayType}
       gamePk={focusPk}
       gameNumber={mode.gameNumber}
+      game={game}
       plateUmpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
     />
   )
