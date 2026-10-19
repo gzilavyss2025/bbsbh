@@ -47,10 +47,11 @@ test('same shape whatever the opponent', () => {
   assert.deepEqual(a.map((r) => Object.keys(r)), b.map((r) => Object.keys(r)))
 })
 
-test('scoutingModel shows Glove and legs on an off day only when the data is there', () => {
+test('scoutingModel shows Glove and legs on both day types when the data is there', () => {
   const ids = (i) => scoutingModel(i).map((c) => c.id)
   assert.deepEqual(ids({ dayType: 'off', nineKeys: true, edges: [{}], gloveLegs: [{}] }), ['nine-keys', 'glove-legs', 'matchup-edges'])
   assert.deepEqual(scoutingModel({ dayType: 'off', gloveLegs: [{}] }), [{ id: 'glove-legs', label: 'Glove and legs' }])
   assert.deepEqual(ids({ dayType: 'off', nineKeys: true, edges: [{}], gloveLegs: null }), ['nine-keys', 'matchup-edges'])
-  assert.deepEqual(ids({ dayType: 'game', gloveLegs: [{}] }), [])
+  assert.deepEqual(ids({ dayType: 'game', edges: [{}], meetings: [{}], gloveLegs: [{}] }), ['matchup-edges', 'film-room', 'glove-legs'])
+  assert.deepEqual(ids({ dayType: 'game', gloveLegs: null }), [])
 })

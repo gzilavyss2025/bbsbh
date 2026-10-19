@@ -11,7 +11,7 @@
 //            5 Platoon, 6 Park fit, 7 Film room
 //   game day 1 Matchup edges, 2 Umpire edge, 3 Pitch by pitch, 4 Platoon, 5 Film room,
 //            6 Park fit (only at Milwaukee)
-// Built so far: Nine keys, Glove and legs (off day only, as the handoff has it), Matchup edges,
+// Built so far: Nine keys, Glove and legs (game day: last, rank 7, Gary 2026-10-19), Matchup edges,
 // Umpire edge, Film room (full off day, compact on a game day; the card reads the day type
 // itself). Pitch by pitch, Platoon and Park fit keep their slots and are absent until built.
 //
@@ -19,7 +19,7 @@
 // for any opponent.
 const CARDS = [
   { id: 'nine-keys', label: 'Nine keys', rank: { off: 1 }, has: (i) => Boolean(i.nineKeys) },
-  { id: 'glove-legs', label: 'Glove and legs', rank: { off: 2 }, has: (i) => Boolean(i.gloveLegs) },
+  { id: 'glove-legs', label: 'Glove and legs', rank: { off: 2, game: 7 }, has: (i) => Boolean(i.gloveLegs) },
   { id: 'matchup-edges', label: 'Matchup edges', rank: { off: 3, game: 1 }, has: (i) => Boolean(i.edges?.length) },
   { id: 'umpire-edge', label: 'Umpire edge', rank: { game: 2 }, has: (i) => Boolean(i.plateUmpire?.name) },
   // Ranks 7 and 5 leave the unbuilt cards' slots in place. The jump-bar item reads "Film".
