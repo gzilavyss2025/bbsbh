@@ -6,6 +6,7 @@ import { SideView } from './SideView.jsx'
 import { Button } from '../../ui/control/Button.jsx'
 import { PitchList, StrikeZone, ZoneSheet } from '../../scoring/StrikeZone.jsx'
 import { HOVER_CARD_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery.js'
+import { fetchAttackAngles } from '../../../api/savant/attackAngle.js'
 import { fetchAtBatTracking } from '../../../api/savant/gameFeed.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 import { atBatScenePitches, atBatZone, markHomeRun } from '../../../lib/pitcherCard/atBat.js'
@@ -94,25 +95,33 @@ function ReplayState({ model, at, onPlay }) {
 
 // Savant's bat tracking for this at-bat's swings (phase B, §3.2): asked once when the replay opens, and
 // again only on a later open while a swing still lacks bat speed. Never polled; MiLB asks nothing.
-// ReplayScene renders inside the half's reveal, which is what makes the call safe.
-function useBatTracking(pitches, gamePk, sportId) {
+// Phase C (§3.3) adds the Statcast CSV's attack angle, joined on at-bat number + pitch number; it is asked
+// once per game, only for a Final MLB game, and a swing with no row stays pencil.
+// ReplayScene renders inside the half's reveal, which is what makes the calls safe.
+function useBatTracking(pitches, gamePk, sportId, gameState, gameDate, atBatIndex) {
   const [bat, setBat] = useState()
   useEffect(() => {
     let live = true
-    const ids = pitches.filter((p) => p.swing && p.playId).map((p) => p.playId)
-    fetchAtBatTracking(gamePk, sportId, ids).then((m) => live && setBat(m), () => {})
+    const swings = pitches.filter((p) => p.swing && p.playId)
+    Promise.all([
+      fetchAtBatTracking(gamePk, sportId, swings.map((p) => p.playId)).catch(() => new Map()),
+      fetchAttackAngles(gamePk, sportId, gameState, gameDate),
+    ]).then(([gf, csv]) => {
+      if (!live) return
+      setBat(new Map(swings.map((p) => [p.playId, { ...gf.get(p.playId), ...csv.get(`${atBatIndex + 1}-${p.no}`) }])))
+    })
     return () => { live = false }
-  }, [pitches, gamePk, sportId])
+  }, [pitches, gamePk, sportId, gameState, gameDate, atBatIndex])
   return bat
 }
 
-function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, gamePk, sportId, eventType, children }) {
+function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, gamePk, sportId, eventType, gameState, gameDate, atBatIndex, children }) {
   const zone = useMemo(() => atBatZone(pitchDetails), [pitchDetails])
   // The pitch in view and whether it has landed. State changes twice a pitch,
   // never per frame; the scene's own drawing stays in refs.
   const [at, setAt] = useState(null)
   const { pitches, model } = replay
-  const bat = useBatTracking(pitches, gamePk, sportId)
+  const bat = useBatTracking(pitches, gamePk, sportId, gameState, gameDate, atBatIndex)
   const drawers = useRef(new Set()) // SideView and QualityLine draw from PitchScene's one clock
   const onActive = useCallback((idx) => setAt({ no: pitches[idx].no, landed: false }), [pitches])
   const onLand = useCallback((idx) => setAt({ no: pitches[idx].no, landed: true }), [pitches])
@@ -141,7 +150,7 @@ function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, gamePk, spor
 // Wide: the card's zone cell, its pitch list's number dots the picks (hover
 // picks too, only with a real mouse). The scene goes to the rail while this
 // card owns it: `id` is the at-bat, `last` says it is the last one on screen.
-export function ReplayCell({ pitchDetails, batSide, pitcher, replay, id, last, gamePk, sportId, eventType }) {
+export function ReplayCell({ pitchDetails, batSide, pitcher, replay, id, last, gamePk, sportId, eventType, gameState, gameDate, atBatIndex }) {
   const { slot, inCard, owner, setOwner } = useContext(RailContext)
   const [play, setPlay] = useState(null)
   const mouse = useMediaQuery(HOVER_CARD_QUERY)
@@ -181,7 +190,7 @@ export function ReplayCell({ pitchDetails, batSide, pitcher, replay, id, last, g
         }
       : undefined,
   }
-  const scene = inRail && slot && <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => playAll(id)} gamePk={gamePk} sportId={sportId} eventType={eventType} />
+  const scene = inRail && slot && <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => playAll(id)} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={atBatIndex} />
   return (
     <>
       <PitchList pitchDetails={pitchDetails} pick={pick} />
@@ -193,11 +202,11 @@ export function ReplayCell({ pitchDetails, batSide, pitcher, replay, id, last, g
 }
 
 // Phone: the scene in a sheet like the zone's, with one numbered chip per pitch.
-export function ReplaySheet({ pitchDetails, replay, batter, pitcher, onClose, gamePk, sportId, eventType }) {
+export function ReplaySheet({ pitchDetails, replay, batter, pitcher, onClose, gamePk, sportId, eventType, gameState, gameDate, atBatIndex }) {
   const [play, setPlay] = useState(null)
   return (
     <ZoneSheet note="Replay" batter={batter} pitcher={pitcher?.last} onClose={onClose}>
-      <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => setPlay({ all: true })} gamePk={gamePk} sportId={sportId} eventType={eventType}>
+      <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => setPlay({ all: true })} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={atBatIndex}>
         <Segmented
           label="Play a pitch"
           className="pbp__replaypicks"

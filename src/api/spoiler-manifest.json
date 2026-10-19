@@ -1015,6 +1015,13 @@
         "screens/scorecard/ScorecardPage.jsx"
       ]
     },
+    "savant/attackAngle.js": {
+      "class": "reveal-only",
+      "why": "Contact replay phase C (#1771) — the bat's measured attack angle and direction from Savant's Statcast CSV, stripped on parse. The CSV carries the whole game's bat_score and post_bat_score, so the module fetches and parses in one scope, keeps game_pk, at_bat_number, pitch_number, attack_angle and attack_direction, and lets the text go out of scope; nothing holds or logs it. What survives describes one swing, so it is callable only from the replay inside the half's reveal. Fetches only for a Final MLB game, once per gamePk per page load, never polled; any other game returns an empty Map and makes no fetch.",
+      "importers": [
+        "components/playbyplay/pitcherCard/AtBatReplay.jsx"
+      ]
+    },
     "savant/gameFeed.js": {
       "class": "reveal-only",
       "why": "Contact replay phase B (#1771) — Savant /gf bat-tracking fields (batSpeed, xba, barrel, homeRunBallparks) for one game, stripped on parse. The /gf body carries the whole game's linescore, box score and play text, so the module fetches and parses in one scope, reads only team_home[] and team_away[], keeps five fields per row and lets the raw body go out of scope; no cache, ref or state holds it and nothing logs it. What survives still describes one batted ball, so it is callable only from the replay inside the half's reveal. MLB only: sportId other than 1 returns an empty Map and makes no fetch. Its one importer is the replay, which mounts only inside the half's reveal; it keeps only the at-bat's own swings (fetchAtBatTracking).",

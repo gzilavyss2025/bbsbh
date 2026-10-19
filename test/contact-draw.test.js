@@ -138,7 +138,7 @@ const game = JSON.parse(readFileSync(new URL('./fixtures/contact-replay/game-849
 const turang = atBatScenePitches(pitchCardInfo(game, game.liveData.plays.allPlays.find((p) => p.about.atBatIndex === 1)).pitchDetails, 'hitter', 'L')
 const marks = () => ({
   smear: nodes(4), arc: node(), segs: nodes(24), line: node(), track: node(), shadow: node(), drop: node(), bat: node(), cap: node(),
-  ring: node(), ticks: nodes(8), mitt: node(), tag: node(), parts: { rect: node(), text: node() },
+  ring: node(), ticks: nodes(8), mitt: node(), tag: node(), label: node(), parts: { rect: node(), text: node() },
 })
 
 test('drawContact: a whiff has no batted ball; the bat passes, the ball runs on to the mitt, a pencil ring marks it', () => {
@@ -189,4 +189,21 @@ test('drawContact: a bunt holds one pencil bat still at the contact pose, with n
   assert.equal(rest.bat.a.points, mk.bat.a.points)
   assert.equal(rest.arc.a.visibility, 'hidden')
   assert.ok(rest.smear.every((n) => n.a.visibility === 'hidden'))
+})
+
+test('drawContact: a measured attack angle draws the bat at contact in ink with its label; before contact it is pencil', () => {
+  const p = turang.at(-2)
+  const b = pitchBeats(p, 3)
+  const m = swingScene(p, b, { attackDeg: 9.4 })
+  const [pre, rest, plain] = [marks(), marks(), marks()]
+  drawContact(pre, p, b, m, b.contactMs - 300, 3, false)
+  assert.doesNotMatch(pre.bat.a.class, /ink/)
+  assert.equal(pre.label.a.visibility, 'hidden')
+  drawContact(rest, p, b, m, b.totalMs, 3, true)
+  assert.match(rest.bat.a.class, /ink/)
+  assert.equal(rest.label.textContent, 'attack +9° · measured')
+  assert.equal(rest.label.a.visibility, 'visible')
+  drawContact(plain, p, b, swingScene(p, b), b.totalMs, 3, true)
+  assert.doesNotMatch(plain.bat.a.class, /ink/)
+  assert.equal(plain.label.a.visibility, 'hidden')
 })
