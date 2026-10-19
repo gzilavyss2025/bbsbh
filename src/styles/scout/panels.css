@@ -53,11 +53,12 @@
     grid-row: span 2;
     align-self: start;
   }
+  /* The map leads the right column; the scene sits under it (V19). The phone keeps the scene above the jump bar. */
+  #scout-where { order: 3; grid-column: 2; }
   .scout__stage {
-    order: 3;
+    order: 4;
     grid-column: 2;
   }
-  #scout-where { order: 4; grid-column: 2; }
   #scout-meet { order: 5; }
   .scout__stage .scout__control--scroll {
     flex-wrap: wrap;

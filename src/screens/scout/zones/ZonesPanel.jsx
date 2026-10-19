@@ -63,11 +63,20 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
         {side && <Choice label="Metric" options={metrics.map((k) => [k, METRICS[k].label])} value={metric} onChange={onMetric} />}
       </div>
 
-      <figure className="scout__fig">
+      <figure className="scout__fig scout__mappanel">
         <figcaption className="scout__figcap">
-          {mode === 'locations'
-            ? `Where ${names.pitcher} throws ${selType ? `the ${lower(selType.name)} ` : ''}to ${crowd} · % of pitches`
-            : `${mode === 'both' ? 'Both' : names.hitter} · ${METRICS[metric].label}`}
+          <span>
+            {mode === 'locations'
+              ? `Where ${names.pitcher} throws ${selType ? `the ${lower(selType.name)} ` : ''}to ${crowd} · % of pitches`
+              : `${mode === 'both' ? 'Both' : names.hitter} · ${METRICS[metric].label}`}
+          </span>
+          {shown && (
+            <span className="scout__figcount">
+              {mode === 'locations' && map.thin ? `Under ${MIN_COMMAND_PITCHES} pitches · ` : ''}
+              {selType ? selType.name : 'All'} · {(mode === 'results' || !map ? hmap.seen : map.n).toLocaleString()} pitches
+              {mode === 'locations' && selType ? ` · ${selType.mph} mph` : ''}
+            </span>
+          )}
         </figcaption>
         {mode === 'both' && map?.thin && (
           <p className="scout__note">{typeName}: {map.n.toLocaleString()} pitches to {crowd}, under the {MIN_COMMAND_PITCHES}-pitch floor.</p>
@@ -87,11 +96,6 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
               label={`${typeName}: ${mode === 'locations' ? 'location share' : `hitter’s ${METRICS[metric].label}`} by region, ${view} view`}
             />
             <Sides view={view} />
-            <span className="scout__cap">
-              {mode === 'locations'
-                ? `${map.thin ? `Under ${MIN_COMMAND_PITCHES} pitches · ` : ''}${map.n.toLocaleString()} pitches${selType ? ` · ${selType.mph} mph` : ''}`
-                : `${hmap.seen.toLocaleString()} pitches seen`}
-            </span>
           </>
         ) : (
           <EmptyState size="compact">Not posted</EmptyState>

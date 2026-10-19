@@ -475,7 +475,7 @@ svg.scout__swatch {
 .scout__stance { fill: var(--text-heading); }
 /* ".381" in an 11px mono face is 26px; a 27px phone cell needs the tight
    tracking the score figures already use. */
-.scout__figure { letter-spacing: var(--ls-tight-score); }
+.scout__figure { letter-spacing: var(--ls-tight-score); font-weight: var(--w-bold); }
 .scout__count { fill: var(--text-caption); }
 
 /* --- motion --- */

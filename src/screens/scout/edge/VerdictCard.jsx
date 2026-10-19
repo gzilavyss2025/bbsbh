@@ -20,11 +20,13 @@ export function VerdictCard({ v, names, once }) {
   const mark = 50 + Math.max(-1, Math.min(1, v.gap / 0.1)) * 50
   return (
     <Card frame="stamped" tone="ink" label="The verdict" labelAs="h3" className="scout__vcard" ref={ref} data-motion={phase} stampIn={phase === 'play'}>
+      <div className="scout__vtop">
       <p className="scout__vhead">{lead ? `Edge ${names[lead]}` : 'Even'}</p>
       {lead && <p className="scout__vstep">{Math.abs(v.band) === 2 ? 'Clear' : 'Slight'}</p>}
       <p className="scout__vsub">
         {lead ? `Past ±.0${Math.abs(v.band) === 2 ? '70' : '30'}` : 'Inside the ±.030 band · no side has the edge'}
       </p>
+      </div>
       <div className="scout__scale" role="img" aria-label={`Verdict scale: ${signed(v.gap)} xwOBA, ${lead ? `${Math.abs(v.band) === 2 ? 'clear' : 'slight'} edge ${names[lead]}` : 'inside the even band'}`}>
         <span className="scout__scalemark" data-count={v.gap} data-count-at="260,640" style={{ left: `${mark}%` }}>{signed(v.gap)}</span>
         <span className="scout__scalepin" style={{ left: `${mark}%` }} />
