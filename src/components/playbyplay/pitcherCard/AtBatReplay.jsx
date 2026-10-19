@@ -1,11 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { PitchScene } from './PitchScene.jsx'
+import { QualityLine } from './QualityLine.jsx'
+import { SideView } from './SideView.jsx'
 import { Button } from '../../ui/control/Button.jsx'
 import { PitchList, StrikeZone, ZoneSheet } from '../../scoring/StrikeZone.jsx'
 import { HOVER_CARD_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
-import { atBatScenePitches, atBatZone } from '../../../lib/pitcherCard/atBat.js'
+import { atBatScenePitches, atBatZone, markHomeRun } from '../../../lib/pitcherCard/atBat.js'
 import { basesAt, countAt, replaySteps } from '../../../lib/pitcherCard/replaySteps.js'
 import { Segmented } from '../../ui/control/Segmented.jsx'
 
@@ -56,10 +58,12 @@ const DWELL_MS = 250
 // Keyed on the entry's CONTENT: a live game's poll rebuilds `pitchDetails`
 // every 15-60 s, and a new array would restart every replay on the page.
 export function useReplayPitches(entry) {
-  const { pitchDetails, basesBefore, basesAfter, batSide, live } = entry
-  const key = JSON.stringify([pitchDetails ?? [], basesBefore, basesAfter, batSide])
+  const { pitchDetails, basesBefore, basesAfter, batSide, live, eventType } = entry
+  const key = JSON.stringify([pitchDetails ?? [], basesBefore, basesAfter, batSide, eventType])
   const replay = useMemo(() => {
-    const pitches = live == null ? atBatScenePitches(pitchDetails, undefined, batSide) : []
+    const all = live == null ? atBatScenePitches(pitchDetails, undefined, batSide) : []
+    // A home run ends its plate appearance, so only the last pitch can carry it (the side view's second ring).
+    const pitches = eventType === 'home_run' ? markHomeRun(all, pitchDetails) : all
     return pitches.length > 0 ? { pitches, model: replaySteps(pitchDetails, pitches, basesBefore, basesAfter) } : null
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` is the entry's content
   }, [key, live])
@@ -93,6 +97,7 @@ function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, children }) 
   // never per frame; the scene's own drawing stays in refs.
   const [at, setAt] = useState(null)
   const { pitches, model } = replay
+  const drawers = useRef(new Set()) // SideView and QualityLine draw from PitchScene's one clock
   const onActive = useCallback((idx) => setAt({ no: pitches[idx].no, landed: false }), [pitches])
   const onLand = useCallback((idx) => setAt({ no: pitches[idx].no, landed: true }), [pitches])
   return (
@@ -106,9 +111,12 @@ function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, children }) 
         play={play}
         onActive={onActive}
         onLand={onLand}
+        onFrame={(i, t, r) => drawers.current.forEach((d) => d(i, t, r))}
+        under={<SideView pitches={pitches} drawers={drawers} />}
       />
       {model && <ReplayState model={model} at={at} onPlay={onPlay} />}
       {children}
+      <QualityLine pitches={pitches} drawers={drawers} />
     </div>
   )
 }

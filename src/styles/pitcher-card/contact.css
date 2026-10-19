@@ -92,3 +92,96 @@
   stroke-linejoin: round;
   paint-order: stroke;
 }
+
+/* ---- The side view and the quality line (docs/contact-replay.md section 7, SideView.jsx, QualityLine.jsx).
+   SideView sets the geometry through refs; this holds what does not move. INK IS MEASURED, PENCIL IS
+   DRAWN: the flight is the fitted model, so its apex is pencil. */
+.pside {
+  display: block;
+  width: 100%;
+  background: var(--surface-inset);
+}
+.pside__ground,
+.pside__trace,
+.pside__ring {
+  fill: none;
+  stroke: var(--text-heading);
+}
+.pside__ground {
+  stroke-width: 1; /* raw-value-exempt: SVG stroke width in the scene's own units */
+}
+.pside__tick,
+.pside__drop {
+  stroke: var(--text-caption);
+  stroke-width: 1; /* raw-value-exempt: SVG stroke width in the scene's own units */
+}
+.pside__drop {
+  stroke-dasharray: 2 2; /* raw-value-exempt: SVG dash in the scene's own units */
+}
+.pside__fence {
+  stroke: var(--field);
+  stroke-width: 2; /* raw-value-exempt: SVG stroke width in the scene's own units */
+}
+.pside__plate {
+  fill: var(--text-heading);
+}
+.pside__trace {
+  stroke-width: 1.8; /* raw-value-exempt: SVG stroke width in the scene's own units */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pside__ball {
+  fill: var(--surface-inset);
+  stroke: var(--text-heading);
+  stroke-width: 1; /* raw-value-exempt: SVG stroke width in the scene's own units */
+}
+.pside__ring {
+  stroke-width: 1.4; /* raw-value-exempt: SVG stroke width in the scene's own units */
+}
+.pside__ring--thin {
+  stroke-width: 1; /* raw-value-exempt: SVG stroke width in the scene's own units */
+}
+.pside__title,
+.pside__empty {
+  fill: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+.pside__axis,
+.pside__dist {
+  fill: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.pside__dist {
+  fill: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+
+/* The quality line keeps one row and a verdict of height on every pitch, with or without contact (ADR-0046). */
+.pqual {
+  display: flex;
+  align-items: flex-start;
+  min-height: calc(2 * var(--control-min));
+  padding: var(--space-2h);
+}
+.pqual__num,
+.pqual__label {
+  display: block;
+}
+.pqual__num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+.pqual__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
