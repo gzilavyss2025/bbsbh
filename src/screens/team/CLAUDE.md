@@ -37,8 +37,11 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
 - **Ranks** (`next/ranks/`): batting and pitching ranks, leaders, run value and the ABS challenge
   card, on `loadRanks`. The challenge card (`ChallengeBoard.jsx`, parts in `ranks/challenges/`) draws a face a player on a plot and a scrolling list; its model is `api/around-the-game/absClubCard.js`, and a face or photo opens the global hover card with the card's own figures (`playerHoverStore`'s `detail`). Absent for a club with no league id. The run value card (`RunValueBoard.jsx`, parts in `ranks/runvalue/`) re-ranks its top six by a part on a tap; spec `.scratch/run-value-motion/handoff.md`. A card that needs MLB data draws
   nothing for a club below it.
-- **Games** (`next/games/`): the season schedule, Highlights, Photos and the grid of every
-  decided game (`modules/TeamGames.jsx` `AllGames`). Every row has `won != null`, cut at `?d=`.
+- **Games** (`next/games/`): the **season grid** (`SeasonGrid.jsx`, model `seasonGrid.js`, ADR-0119),
+  then Highlights and Photos. One stamped card of weeks, a week to a row. A decided game links to
+  its box score, one to play to its lineup. The gold Postseason band exists only when a game has
+  `gameType !== 'R'`. The card holds the one Stamp In door (ADR-0042). Results come from
+  `fetchTeamSchedule`, cut at `?d=`: the grid reads `won`, `runs` and `oppRuns` and never `Final`.
 - **Roster** (`next/roster/`): lineup and bench, the staff (starters, bullpen, the seven-day pen
   grid), the coaching staff (`CoachingStaff.jsx`, a swipe row that reads its own `fetchCoachingStaff`), the 40-man,
   the injured list, and a door to the transactions ledger.

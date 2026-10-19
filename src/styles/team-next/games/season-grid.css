@@ -1,0 +1,231 @@
+/* ==== THE SEASON GRID OF THE GAMES BAND ====
+   games/SeasonGrid.jsx imports this file. It replaces the Schedule strip and the Games ticket
+   grid. A week is a row: a month label and seven day cells. A game is a link in its cell. Solid is
+   a win, hollow a loss, dashed is still to play, gold is the page's own day, ink is the All-Star
+   Game. The gold band is the postseason. On a phone a cell is about 48px wide; on the 960px wide
+   column it is about 120px, and the opponent and score sit side by side. */
+
+.sgrid {
+  --sgrid-label: calc(var(--space-6) + var(--space-1));
+  --sgrid-gap: var(--space-1);
+}
+
+.sgrid__bar {
+  margin-bottom: var(--space-3);
+}
+.sgrid__chips {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* THE KEY */
+.sgrid__legend {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+}
+/* layout-exempt: a swatch and its word on one line */
+.sgrid__key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.sgrid__swatch {
+  display: block;
+  flex: none;
+  width: var(--space-5);
+  height: var(--space-4);
+  border: var(--bw-heavy) solid transparent;
+}
+.sgrid__swatch--w {
+  background: var(--accent-positive);
+  border-color: var(--field-deep);
+}
+.sgrid__swatch--l {
+  background: var(--surface-inset);
+  border-color: var(--accent-negative);
+}
+.sgrid__swatch--next {
+  background: var(--marker);
+  border-color: var(--border-stamped);
+}
+.sgrid__swatch--todo {
+  border-style: dashed;
+  border-color: var(--graphite-soft);
+}
+/* A doubleheader day: a win over a loss, in the one swatch. */
+.sgrid__swatch--split {
+  height: var(--space-5);
+  border-width: 0;
+  background: linear-gradient(var(--accent-positive) 0 45%, transparent 45% 55%, var(--accent-negative) 55%);
+}
+
+/* THE WEEKS */
+/* layout-exempt: a month label and seven day cells, the same seven columns in every row */
+.sgrid__days,
+.sgrid__week {
+  display: grid;
+  grid-template-columns: var(--sgrid-label) repeat(7, minmax(0, 1fr));
+  gap: var(--sgrid-gap);
+}
+.sgrid__days {
+  margin-bottom: var(--space-1);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-align: center;
+  text-transform: uppercase;
+}
+.sgrid__week--post {
+  background: var(--surface-stamped-event);
+  padding-block: var(--sgrid-gap);
+}
+.sgrid__mon {
+  align-self: start;
+  padding-top: var(--space-1);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.sgrid__band {
+  display: flex;
+  align-items: center;
+  min-height: var(--space-8);
+  margin-top: var(--space-2);
+  padding-inline: var(--space-3);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--marker);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+/* THE DAY CELL AND ITS GAME */
+/* layout-exempt: a split day stacks game 1 over game 2 in one cell */
+.sgrid__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bw-heavy);
+  min-height: var(--tap-min);
+  border: var(--bw-hair) solid var(--border-grid);
+}
+.sgrid__cell:has(.sgrid__game) {
+  border-width: 0;
+}
+/* layout-exempt: the opponent over the score in a narrow cell, side by side in a wide one */
+.sgrid__game {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  border: var(--bw-heavy) solid transparent;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-tight);
+  text-decoration: none;
+  min-width: 0;
+  overflow: hidden;
+}
+.sgrid__mark {
+  white-space: nowrap;
+}
+.sgrid__score {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  letter-spacing: var(--ls-tight-score);
+}
+/* The opponent is its one-colour mark, with an @ before it on the road. The mark is light art
+   made for a dark surface, so on a paper or gold cell it is turned to ink. */
+/* layout-exempt: the @ and the mark on one line */
+.sgrid__opp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.sgrid__at {
+  flex: none;
+}
+/* The mark shrinks with its cell, so a narrow phone loses mark size, never the cell's edge. */
+.sgrid__logo {
+  display: block;
+  flex: 0 1 22px;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+.sgrid__game--l .sgrid__logo,
+.sgrid__game--next .sgrid__logo,
+.sgrid__game--todo .sgrid__logo {
+  filter: brightness(0);
+}
+.sgrid__game--w {
+  border-color: var(--field-deep);
+  background: var(--accent-positive);
+  color: var(--text-on-ink-bright);
+}
+.sgrid__game--l {
+  border-color: var(--accent-negative);
+  background: var(--surface-inset);
+  color: var(--clay-deep);
+}
+.sgrid__game--next {
+  border-color: var(--border-stamped);
+  background: var(--marker);
+  color: var(--text-heading);
+}
+.sgrid__game--todo {
+  border-style: dashed;
+  border-color: var(--graphite-soft);
+  color: var(--text-caption);
+}
+.sgrid__game--asg {
+  border-color: var(--border-stamped);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-bright);
+}
+.sgrid__game--post {
+  box-shadow: 0 0 0 var(--bw-heavy) var(--border-stamped);
+}
+.sgrid__game--dim {
+  opacity: 0.16;
+}
+a.sgrid__game:hover {
+  position: relative;
+  z-index: var(--z-raised);
+  box-shadow: 0 0 0 var(--bw-heavy) var(--border-stamped);
+}
+a.sgrid__game:focus-visible {
+  position: relative;
+  z-index: var(--z-raised);
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+
+@media (min-width: 740px) {
+  .sgrid__game {
+    flex-direction: row;
+    gap: var(--space-2);
+  }
+  .sgrid__cell {
+    min-height: var(--space-10);
+  }
+}
