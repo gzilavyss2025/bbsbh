@@ -17,7 +17,8 @@ import { originalPhotoUrl } from '../../../api/gamePhotos.js'
 const RECAP = /^game\s+\d+\s+highlights?$/i
 const CDN_PREFIX = 'https://img.mlbstatic.com/mlb-images/image/upload/'
 
-// highlights.js keeps selectCondensedGame on a reveal-only allowlist, so the
+// highlights.js keeps selectCondensedGame on a reveal-only allowlist (its one
+// importer is the box score's GameVideoRow), so the
 // reel reads the same taxonomy tag itself rather than widen that list.
 const isCondensed = (item) => (item?.keywordsAll ?? []).some((k) => k.type === 'taxonomy' && k.value === 'condensed-game')
 
