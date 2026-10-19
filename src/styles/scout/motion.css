@@ -1,0 +1,67 @@
+/* ============================================================
+   MATCHUP SCOUT, THE MOTION (#2319, slice 9, ADR-0118) — pointer in docs/motion.md.
+   Imported by ScoutPage.jsx after the other scout sheets. src/styles/motion/ is at the
+   12-file cap, so the scout's own motion lives here. The map's fill tween and the figures'
+   ink-in are in scout.css (the "motion" block).
+
+   One-shot entrances hang off useInViewOnce: the block wears data-motion="wait" (held
+   hidden), then "play" (it runs once), or "rest" (seen, reduced motion, no observer: its
+   end state). Everything sits inside no-preference, so reduced motion shows the end state.
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The verdict: Card's stampIn plays the stamp; the marker and pin slide from the centre line. */
+  .scout__vcard[data-motion='wait'] { opacity: 0; }
+  .scout__vcard[data-motion='play'] :is(.scout__scalemark, .scout__scalepin) {
+    animation: scout-slide var(--dur-rv-grow) var(--ease-out) 260ms backwards;
+  }
+
+  /* Push bars and tug bars grow from the centre line, 55 ms apart. */
+  .scout__pushfill--hitter,
+  .scout__pull[data-tone='hitter'] .scout__pullbar { transform-origin: left; }
+  .scout__pushfill--pitcher,
+  .scout__pull[data-tone='pitcher'] .scout__pullbar { transform-origin: right; }
+  [data-motion='wait'] :is(.scout__pushfill, .scout__pullbar) { transform: scaleX(0); }
+  [data-motion='play'] :is(.scout__pushfill, .scout__pullbar) {
+    animation: scout-grow var(--dur-rise) var(--ease-out) calc(var(--stagger-step) * var(--i, 0)) backwards;
+  }
+
+  /* Meeting cards stamp in. */
+  .scout__panel[data-motion='wait'] .scout__pa { opacity: 0; }
+  .scout__panel[data-motion='play'] .scout__pa {
+    animation: card-stamp-in var(--dur-stamp-in) var(--ease-stamp) calc(var(--stagger-step) * var(--i, 0)) backwards;
+  }
+
+  /* A Show or Metric tap resizes the pitcher's squares (the fill tween is in scout.css). */
+  .scout__share {
+    transition: x var(--dur-med) var(--ease-out), y var(--dur-med) var(--ease-out),
+      width var(--dur-med) var(--ease-out), height var(--dur-med) var(--ease-out);
+  }
+
+  /* Presses: 2 px down and right. (A Pill already does this in pill.css.) */
+  .scout__rowall,
+  .scout__prow,
+  .scout__pbtn {
+    transition: transform var(--dur-fast) var(--ease-stamp);
+  }
+  .scout__rowall:active,
+  .scout__prow:active,
+  .scout__pbtn:active {
+    transform: translate(var(--bw-heavy), var(--bw-heavy));
+  }
+
+  /* The scene's pitch in flight pulses only its mark, in the rows and the chips. */
+  [data-inflight] :is(.scout__prowmark, .pcard__mark) {
+    animation: scout-pulse var(--dur-med) var(--ease-out) infinite alternate;
+  }
+}
+
+@keyframes scout-slide {
+  from { left: 50%; }
+}
+@keyframes scout-grow {
+  from { transform: scaleX(0); }
+}
+@keyframes scout-pulse {
+  to { transform: scale(1.3); }
+}

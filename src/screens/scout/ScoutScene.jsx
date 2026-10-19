@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef } from 'react'
 import { PitchScene } from '../../components/playbyplay/pitcherCard/PitchScene.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 
@@ -9,10 +10,26 @@ import { Pill } from '../../components/ui/control/Pill.jsx'
 //
 // `options` [[value, label], ...], `value`, `onChange` and `label` name that
 // one choice, which is optional (the page has none); the rest goes to PitchScene unchanged.
-export function ScoutScene({ caption, label, options, value, onChange, ...scene }) {
+//
+// The pitch in flight marks its rows and chips (`data-code`) with `data-inflight`; motion.css
+// pulses their pitch mark. It sets the attribute on the DOM, not React state, so the page and
+// PitchScene (memo'd on `onActive`) never re-render for it.
+export function ScoutScene({ caption, label, options, value, onChange, onActive, ...scene }) {
+  const root = useRef(null)
+  const marked = () => root.current?.closest('.scout')?.querySelectorAll('[data-code]') ?? []
+  const { pitches } = scene
+  const active = useCallback(
+    (idx) => {
+      const code = pitches[idx]?.code
+      marked().forEach((el) => el.toggleAttribute('data-inflight', el.dataset.code === code))
+      onActive?.(idx)
+    },
+    [pitches, onActive],
+  )
+  useEffect(() => () => marked().forEach((el) => el.removeAttribute('data-inflight')), [])
   return (
-    <div className="pcard scout__scene">
-      <PitchScene {...scene} />
+    <div className="pcard scout__scene" ref={root}>
+      <PitchScene {...scene} onActive={active} />
       <div className="scout__scenebar">
         <span className="scout__scenecap">{caption}</span>
         {options && (

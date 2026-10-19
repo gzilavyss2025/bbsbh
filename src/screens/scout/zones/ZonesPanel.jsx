@@ -41,7 +41,7 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
         <div className="scout__chipstrip" role="group" aria-label="Pitch">
           <Pill role="control" fill="paper" pressed={sel === null} onClick={() => onPitch(null)}>All</Pill>
           {board.types.map((t) => (
-            <Pill key={t.code} role="control" fill="paper" pressed={sel === t.code} onClick={() => onPitch(t.code)}>
+            <Pill key={t.code} data-code={t.code} role="control" fill="paper" pressed={sel === t.code} onClick={() => onPitch(t.code)}>
               <PitchMark mark={pitchMark(t.code)} size={12} /> {t.name}
             </Pill>
           ))}

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { totalsOf } from '../../../api/scout/headToHead.js'
 import { fetchVsPlayerTotal } from '../../../api/scout/vsPlayer.js'
+import { useInViewOnce } from '../../../hooks/scroll/useInViewOnce.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { rate3 } from '../../../api/person/shared.js'
 import { pitchFamily } from '../../../api/pitchArsenal.js'
@@ -48,6 +49,7 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
   const games = useMemo(() => gamesOf(pas), [pas])
   const walk = useMemo(() => pitchWalk(games), [games])
   const [open, setOpen] = useState(null)
+  const [ref, phase] = useInViewOnce(`scout:${data.pitcher.id}:${data.hitter.id}:meetings`)
   const failed = !h2h.loading && h2h.data === null
   const names = { hitter: data.hitter.last, pitcher: data.pitcher.last }
   const crowd = stance === 'L' ? 'lefties' : 'righties'
@@ -115,7 +117,7 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
               const list = pa.pitchList ?? []
               const last = list.at(-1)
               return (
-                <Stack gap="snug" as="article" key={pa.key} className="scout__pa">
+                <Stack gap="snug" as="article" key={pa.key} className="scout__pa" style={{ '--i': Math.min(pas.indexOf(pa), 6) }}>
                   <header className="scout__pahead">
                     <span className="scout__patitle">{pa.inning ? `${meetingOrdinal(pa.inning)} inning` : 'Plate appearance'}</span>
                     <span className="scout__pameta">
@@ -161,7 +163,7 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
   }
 
   return (
-    <section className="scout__panel" aria-label="Meetings">
+    <section className="scout__panel" aria-label="Meetings" ref={ref} data-motion={phase}>
       {body}
       {open != null && walk[open] && (
         <PitchModal

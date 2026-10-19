@@ -1,3 +1,4 @@
+import { useInViewOnce } from '../../../hooks/scroll/useInViewOnce.js'
 import { fmtValue } from '../../../lib/scout/metrics.js'
 import { Card } from '../../../components/ui/frame/Card.jsx'
 import { listOf } from './edge.js'
@@ -7,16 +8,17 @@ import { listOf } from './edge.js'
 const lower = (s) => s.toLowerCase() // caps-js-exempt: a pitch name inside a sentence
 const signed = (x) => `${x < 0 ? '−' : '+'}${fmtValue('xwoba', Math.abs(x))}`
 
-export function Pushes({ v, names, crowd }) {
+export function Pushes({ v, names, crowd, once }) {
+  const [ref, phase] = useInViewOnce(once)
   const unmapped = v.rows.filter((r) => !r.mapped)
   return (
-    <Card frame="stamped" label="What pushes it" labelAs="h3" className="scout__pushes">
+    <Card frame="stamped" label="What pushes it" labelAs="h3" className="scout__pushes" ref={ref} data-motion={phase}>
       <p className="scout__pushnote">
         Each pitch’s usage × {names.hitter}’s gap to the league. They add up to {signed(v.gap)}.
       </p>
       <ul className="scout__pushlist">
-        {v.rows.map((r) => (
-          <li key={r.code} className="scout__push">
+        {v.rows.map((r, i) => (
+          <li key={r.code} className="scout__push" style={{ '--i': i }}>
             <span className="scout__pushname">
               {r.name}
               <span className="scout__pushshare">{Math.round(r.share * 100)}% of pitches</span>
