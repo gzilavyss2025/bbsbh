@@ -42,7 +42,7 @@
 @media (min-width: 740px) {
   .scout__body {
     display: grid;
-    align-items: start;
+    align-items: start; /* columns and areas: panels.css */
   }
   .scout__maps {
     gap: var(--space-4);
@@ -52,10 +52,10 @@
     flex-wrap: wrap;
     gap: var(--space-4);
   }
-  /* The pair keeps the main column's width: two faces a screen apart are
-     not a matchup. */
-  .scout__pairrow {
-    max-width: 560px;
+  /* The pair in one row, with 96px faces. */
+  .shot.scout__shot {
+    width: 96px;
+    height: 96px;
   }
 }
 

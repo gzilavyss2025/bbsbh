@@ -345,3 +345,16 @@
   font-size: var(--fs-small);
   color: var(--text-caption);
 }
+
+/* Desktop (slice 8): each game's meeting cards in a three-column grid. */
+@media (min-width: 740px) {
+  /* layout-exempt: cards in three columns, the game head across all */
+  .scout__game {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+  .scout__gamehead {
+    grid-column: 1 / -1;
+  }
+}
