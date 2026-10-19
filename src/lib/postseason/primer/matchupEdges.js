@@ -20,15 +20,21 @@ export function matchupEdgeLine(r) {
   return `${r.h}-for-${r.ab}${r.hr > 0 ? `, ${r.hr} HR` : ''} · ${r.pa} PA`
 }
 
+// The face-off row's two sides. Side A is always the batter (id, name) and side B the starter
+// (vs, vsId); `kind` only says which of them holds the edge. -> { a, b } of { role, edge }.
+export function faceoffRoles(e) {
+  return { a: { role: 'hitter', edge: e.kind === 'hitter' }, b: { role: 'pitcher', edge: e.kind === 'pitcher' } }
+}
+
 // sides: starterMatchupsFor results (null for a side with no file row).
-// -> [{ kind: 'hitter' | 'pitcher', id, name, vs, line }], hitters first.
+// -> [{ kind: 'hitter' | 'pitcher', id, name, vs, vsId, line }]; vsId is the starter's person id, or null, hitters first.
 export function matchupEdges(sides) {
   const hitters = []
   const pitchers = []
   for (const side of sides ?? []) {
     for (const r of side?.batters ?? []) {
       const a = avg(r)
-      const edge = { id: r.id, name: r.name, vs: side.pitcher?.name ?? '', line: matchupEdgeLine(r) }
+      const edge = { id: r.id, name: r.name, vs: side.pitcher?.name ?? '', vsId: side.pitcher?.id ?? null, line: matchupEdgeLine(r) }
       if (r.pa >= HITTER_MIN_PA && (a >= HITTER_MIN_AVG || r.hr >= HITTER_MIN_HR)) hitters.push({ a, pa: r.pa, edge: { kind: 'hitter', ...edge } })
       else if (a != null && r.ab >= PITCHER_MIN_AB && a <= PITCHER_MAX_AVG) pitchers.push({ a, ab: r.ab, edge: { kind: 'pitcher', ...edge } })
     }
