@@ -39,7 +39,7 @@ Each phase ships alone. Do the phases in this order.
 | --- | --- | --- | --- |
 | A | Drawn swing (default timing), contact, whiff, foul, exit trail, trajectory tag, side view, quality line with exit velocity only | MLB feed `hitData` only | Nothing |
 | B | Swing timed from bat speed; squared-up %, xBA, barrel, home-run parks on the quality line | Savant `/gf` | Nothing (decided: strip on parse, section 3.2) |
-| C | The bat at contact in ink, with the measured attack angle | Savant Statcast CSV | One measurement of when the CSV fills (section 3.3) |
+| C | The bat at contact in ink, with the measured attack angle | Savant Statcast CSV | Nothing (the fill-time measurement is no longer a gate, section 3.3) |
 
 Phase A needs no new fetch. Start there.
 
@@ -131,9 +131,11 @@ Join on `game_pk` + `at_bat_number` (= `atBatIndex + 1`) + `pitch_number`. Read
 `post_bat_score`, so strip on parse here too: keep only the join keys and the
 two angles.
 
-- **Measure first.** Before any code, record once how long after the final out
-  the CSV first has rows for a game. Write the result in issue #1771 and in
-  `docs/peer-sites.md`, "Data notes", beside the `/gf` freshness table.
+- **Fill time: not measured yet, and not a gate.** How long after the final
+  out the CSV first has rows for a game is still unknown. Gary removed it as a
+  gate on 2026-10-19: the rules below work for any fill time (the bat stays
+  pencil until rows exist). Issue #2349 measures it at the next MLB game and
+  writes the result here and in `docs/peer-sites.md`, "Data notes".
 - Fetch only for a game whose status is Final, MLB only. Use the existing CSV
   fetch in `src/api/scout/headToHead.js` as the pattern.
 - One fetch per gamePk per page load. If the CSV has no rows yet, the bat stays
