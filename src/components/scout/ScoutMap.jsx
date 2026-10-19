@@ -34,7 +34,7 @@ import { REGIONS, mapBox, platePoints, regionLabel, regionRect, stanceRect } fro
 // spans the three zone rows, he stands on the stance's side, and the svg clips
 // the bat. No mirror: `hand` picks the art's own right or left folder. No set,
 // or an image that fails: the stance box stays.
-const ART = { w: 496, h: 1050, top: 385, bottom: 820 }
+const ART = { w: 496, h: 1050, top: 385, bottom: 820, head: 100 } // `head`: the art's empty margin above his helmet
 export function ScoutMap({ view, stance, cells, label, picked, onSelect, unit = '', shares, className = '', homeSet }) {
   const [failed, setFailed] = useState(null)
   const inner = ['r1c1', 'r3c3'].map((r) => regionRect(r, view))
@@ -51,10 +51,16 @@ export function ScoutMap({ view, stance, cells, label, picked, onSelect, unit = 
     const x = box.x > fx ? Math.max(a.x + a.width, b.x + b.width) : Math.min(a.x, b.x) - w
     return { x, y: top - ART.top * k, width: w, height: ART.h * k }
   })() : null
+  // The viewBox keeps only the figure's near half: the far half (bat tip, back) clips off, as on the canvas.
+  const crop = fig && { x: box.x > fx ? fig.x : fig.x + fig.width / 2, width: fig.width / 2 }
+  // With a figure the viewBox also spans his height, helmet to shoes, so he never clips.
+  const [bx, by, bw, bh] = mapBox(stance, view, crop ?? box).split(' ').map(Number)
+  const top = fig ? Math.min(by, fig.y + (fig.height * ART.head) / ART.h) : by
+  const bottom = fig ? Math.max(by + bh, fig.y + fig.height) : by + bh
   const hatch = useId()
   const maxShare = shares ? Math.max(...REGIONS.map((r) => shares[r])) : 0
   return (
-    <svg className={`scout__map ${className}`.trim()} viewBox={mapBox(stance, view, fig ?? box)} role="group" aria-label={label}>
+    <svg className={`scout__map ${className}`.trim()} viewBox={`${bx} ${top} ${bw} ${bottom - top}`} role="group" aria-label={label}>
       <defs>
         <pattern id={hatch} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <rect className="scout__hatchground" width="5" height="5" />
@@ -67,7 +73,9 @@ export function ScoutMap({ view, stance, cells, label, picked, onSelect, unit = 
         const cx = x + width / 2
         const cy = y + height / 2
         const sh = shares ? Math.round(shares[r] * 100) : null
-        const side = sh != null && maxShare ? Math.round(Math.min(width, height) * 0.3 * Math.sqrt(shares[r] / maxShare)) : 0
+        const side = sh != null && maxShare ? Math.round(Math.min(width, height) * 0.4 * Math.sqrt(shares[r] / maxShare)) : 0
+        // The share row: a square and its "%", side by side under the figure, centred as one (a mono digit is 0.6em).
+        const shareW = sh != null ? side + 3 + `${sh}%`.length * 6.6 : 0
         const figure = c.value != null ? `${c.value}${unit}` : c.count != null ? `${c.count}, under the floor` : ''
         return (
           <g
@@ -89,19 +97,19 @@ export function ScoutMap({ view, stance, cells, label, picked, onSelect, unit = 
               style={c.tone === 'gray' ? { fill: `url(#${hatch})` } : undefined} />
             {sh != null && (
               <>
-                <rect className="scout__share" x={cx - side / 2} y={cy + 1 - side / 2} width={side} height={side} />
-                <text className="scout__count" x={cx} y={cy + 13}>{sh}%</text>
+                <rect className="scout__share" x={cx - shareW / 2} y={cy + 11 - side / 2} width={side} height={side} />
+                <text className="scout__count scout__sharecount" x={cx - shareW / 2 + side + 3} y={cy + 15}>{sh}%</text>
               </>
             )}
             {c.value != null ? (
               <>
-                <text key={`v${c.value}`} className="scout__figure" x={cx} y={sh != null ? cy - 6 : c.count != null ? cy - 2 : cy + 4}>
+                <text key={`v${c.value}`} className="scout__figure" x={cx} y={sh != null ? cy - 3 : c.count != null ? cy - 2 : cy + 4}>
                   {c.value}{unit && <tspan className="scout__unit">{unit}</tspan>}
                 </text>
                 {c.count != null && sh == null && <text key={`n${c.count}`} className="scout__count" x={cx} y={cy + 10}>{c.count}</text>}
               </>
             ) : (
-              <text key={`n${c.count}`} className="scout__count" x={cx} y={sh != null ? cy - 6 : cy + 4}>{c.count}</text>
+              <text key={`n${c.count}`} className="scout__count" x={cx} y={sh != null ? cy - 3 : cy + 4}>{c.count}</text>
             )}
           </g>
         )
