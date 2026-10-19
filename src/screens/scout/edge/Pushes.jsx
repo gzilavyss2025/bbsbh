@@ -12,6 +12,7 @@ export function Pushes({ v, names, crowd, once }) {
   const [ref, phase] = useInViewOnce(once)
   const unmapped = v.rows.filter((r) => !r.mapped)
   return (
+    <>
     <Card frame="stamped" label="What pushes it" labelAs="h3" className="scout__pushes" ref={ref} data-motion={phase}>
       <p className="scout__pushnote">
         Each pitch’s usage × {names.hitter}’s gap to the league. They add up to {signed(v.gap)}.
@@ -33,11 +34,12 @@ export function Pushes({ v, names, crowd, once }) {
           </li>
         ))}
       </ul>
-      <p className="scout__pushnote">
+    </Card>
+      <p className="scout__pushnote scout__edgenote">
         xwOBA (est.) counts every plate appearance, and a strikeout counts 0, so whiffs are already in this number.
         {unmapped.length > 0 &&
           ` ${names.hitter}’s whole-pitch rate stands in for the ${listOf(unmapped.map((r) => `${lower(r.name)} (${r.n})`))}: too few to ${crowd} for a map.`}
       </p>
-    </Card>
+    </>
   )
 }
