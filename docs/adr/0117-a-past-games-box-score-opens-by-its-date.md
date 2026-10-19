@@ -27,8 +27,9 @@ of an old game needs a tap, and ADR-0049 remembers the tap.
 
 ## Decision
 
-**A box score opens with no tap when its schedule date is before the reader's current
-slate date. On the schedule date itself, the seal stays and works as before.**
+**A box score opens with no tap when its schedule date is before the slate's today (the
+earliest of the UTC, local and Pacific date, section 1). On the schedule date itself, the
+seal stays and works as before.**
 
 A suspended game that has not resumed opens like any other past game (Gary, 2026-10-19).
 The rule reads the date and nothing else.
@@ -127,8 +128,17 @@ opens like any other past game. See the first consequence below for the risk.
 
 ### C. A later rollover, such as 6 AM
 
-A game that ends after midnight would not open early. Rejected. Gary chose the slate's
-date roll-over: it is simple and agrees with the date the reader sees on the slate.
+A game that ends after midnight would not open early. Rejected. The earliest-date rule
+already keeps a late West-coast game sealed, with no fixed hour to tune.
+
+### F. The device clock only
+
+Compare `officialDate` with `toApiDate(new Date())` and nothing else. Simpler, and it
+matches what the slate shows. Rejected by Gary on 2026-10-19, who saw this option, the
+Pacific `baseballToday()` option and the earliest-date rule, and chose the earliest-date
+rule twice. With the device clock alone, a game still on after the reader's local midnight
+has an `officialDate` of "yesterday", and its box score opens while the game is live (for
+example, an extra-inning game in Tampa, scored from the Eastern time zone).
 
 ### D. Persist the open state as a bit
 
@@ -141,6 +151,10 @@ record a reveal the reader never made, and the bit would outlive the date rule.
   Its Alternative B stays rejected for every other surface. A classic game (the planned
   "score a classic game", #1525) now shows its final score on the box score tab. The
   innings viewer stays sealed, so a reader who scores it can avoid that tab.
+- **The World Series home is another way in.** `components/worldseries/cards/Played.jsx` has
+  a "Box" door to the box scores of earlier Series games. Under this ADR they open with no
+  tap, which agrees with ADR-0087 (the home already shows the Series so far). That file's header
+  comment says the box score is sealed there. It needs a one-line update when the patch lands.
 - A device with the wrong clock moves the boundary. A clock set a day forward opens
   today's box score. This is accepted. The reader controls the device.
 - The Scores Unlocked and reveal-all openers are gone (ADR-0116), so the box score has
@@ -163,4 +177,7 @@ record a reveal the reader never made, and the bit would outlive the date rule.
 - **A tap-through shows tonight's result.** A reader scoring tonight's game who taps the
   starter's name reaches his player page, and the Game Log shows tonight's score and
   decision. ADR-0110 guarded this exact path. Gary chose to remove the guard knowing this
-  (2026-10-19): the player page is a browse page, and the tap is the reader's own.
+  (2026-10-19): the player page is a browse page, and the tap is the reader's own. The lineup
+  page is one entry point. Another is the World Series home, where
+  `components/postseason/edges/MatchupEdges.jsx` links players with `PlayerLink` and #2316 plans
+  to show it on game days. The same acceptance covers it.
