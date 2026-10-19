@@ -520,6 +520,14 @@ never "left" or "right") and the pitcher's busiest one.
   of 263) where the mockup read 26%, and 33% (88 of 263) where it read 34%;
   the map cells print the same 33%.
 
+## G. The redesign (#2319, Gary, 2026-10-19)
+
+ADR-0118 supersedes sections B, C, E15 and F for the live page: one scroll with a
+jump bar, one verdict (expected xwOBA (est.) against the league, headline on the
+bands), one overlay map, one view from behind the plate, blue and amber side colours,
+and a meetings-first page for retired players. The design canvas and the build slices
+are in #2319; the slice specs are in `.scratch/scout-redesign/`.
+
 ## Decided by Gary (2026-10-02)
 
 Gary answered every open item on 2026-10-02. These answers are the design.
