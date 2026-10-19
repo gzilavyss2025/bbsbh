@@ -14,7 +14,7 @@ export function Watch({ items, players }) {
           return (
             <li key={i} className="scout__watchitem">
               <span className="scout__watchn">{i + 1}</span>
-              <Headshot personId={p.id ?? null} name={p.name} teamId={p.teamId ?? null} className="scout__watchshot" />
+              <Headshot personId={p.id ?? null} name={p.name} teamId={p.teamId ?? null} tint={false} className="scout__watchshot" />
               <div>
                 <span className={`scout__tag scout__tag--${w.who}`}>{p.last}</span>
                 <p className="scout__watchtext"><Rich parts={w.parts} /></p>

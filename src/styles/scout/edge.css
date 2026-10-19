@@ -209,6 +209,7 @@
 .scout__watchshot {
   width: 56px;
   height: 56px;
+  background: var(--surface-stamped-tint);
   border: var(--bw-heavy) solid var(--border-stamped);
   box-sizing: border-box;
   overflow: hidden;
@@ -235,17 +236,25 @@
   font-weight: var(--w-bold);
 }
 
-/* Desktop (slice 8): the verdict card beside "What pushes it"; the watch list
-   below, in two columns. */
+/* Desktop (slice 8, V21): the wide, short verdict card beside a narrower
+   "What pushes it"; the note and the watch list run across both. */
 @media (min-width: 740px) {
-  /* layout-exempt: two cards side by side, the watch list across both */
+  /* layout-exempt: two cards side by side, the note and the watch list across both */
   #scout-edge > .stack {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
   }
+  .scout__edgenote,
   .scout__watch {
     grid-column: 1 / -1;
+  }
+  /* layout-exempt: "Even" beside its sub-line on one row */
+  .scout__vtop {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--space-3);
   }
   /* layout-exempt: the watch items run in two columns */
   .scout__watchlist {
