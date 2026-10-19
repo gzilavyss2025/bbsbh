@@ -154,11 +154,8 @@
   gap: var(--space-2);
 }
 
-/* One condensed-uppercase control recipe, shared rather than spelled out
-   twice: the rail's tabs and the phone chips are the same object at two
-   sizes. */
-.refpanel__tab,
-.refbar__chip {
+/* The rail's tabs: a condensed-uppercase strip inside one hairline box. */
+.refpanel__tab {
   min-width: 0;
   border: none;
   background: none;
@@ -187,14 +184,18 @@
   color: var(--text-on-ink);
 }
 
-.refbar__chip {
+/* The phone chips are Buttons, re-inked to the jump bar's dress (system/jumpbar): a
+   2px ink rule, square, no shadow. The Button draws the press, hover, focus and
+   disabled states. Only the four-across fit is this rule's own. */
+.refbar__chip.btn {
+  --btn-edge: var(--text-heading);
+  --btn-ink: var(--text-heading);
+  --btn-edge-hover: var(--text-heading);
+
   flex: 1 1 0;
-  min-height: var(--tap-min);
-  padding: 0 var(--space-1);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
+  min-width: 0;
+  padding-inline: var(--space-1);
+  border-width: var(--bw-heavy);
 }
 
 /* "Back to the live at-bat" (AtBatTrail.jsx) and the post-half "See the whole
@@ -217,7 +218,6 @@
    tapped until the reader taps somewhere else. The reader's own tab — or the
    live at-bat's own cell — was the one they could not read. */
 .refpanel__tab:not([aria-selected='true']):hover,
-.refbar__chip:hover,
 .trailcell:not([aria-current='true']):hover {
   background: var(--surface-inset);
 }
@@ -226,13 +226,8 @@
   border-color: var(--border-rule);
 }
 
-.refbar__chip:active {
-  transform: scale(0.96);
-}
-
 .trailcell:focus-visible,
-.refpanel__tab:focus-visible,
-.refbar__chip:focus-visible {
+.refpanel__tab:focus-visible {
   outline: none;
   box-shadow: var(--ring);
 }

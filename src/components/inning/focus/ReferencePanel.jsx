@@ -12,6 +12,7 @@ import { loadSeriesHistory } from '../../../api/worldSeries/history.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
 import { Door } from '../../ui/control/Door.jsx'
+import { Button } from '../../ui/control/Button.jsx'
 import { DefenseSection, LineupSection } from '../EnteringReference.jsx'
 import { MarginNotes } from '../MarginNotes.jsx'
 import { PitchersSection } from '../PitchersSection.jsx'
@@ -139,9 +140,8 @@ export const ReferencePanel = memo(function ReferencePanel(props) {
     <>
       <div className="refbar">
         {tabs.map((t) => (
-          <button
+          <Button
             key={t.key}
-            type="button"
             className="refbar__chip"
             // A chip opens a dialog rather than switching a panel in place, so
             // it says so — and reports whether that dialog is currently open,
@@ -152,7 +152,7 @@ export const ReferencePanel = memo(function ReferencePanel(props) {
             onClick={() => openSheet(t.key)}
           >
             {t.label}
-          </button>
+          </Button>
         ))}
       </div>
       {sheetOpen && (
