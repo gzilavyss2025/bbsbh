@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs'
 import test, { mock } from 'node:test'
 import { fetchMeetings, meetingCard, meetingsUrl } from '../../src/api/postseason/meetings.js'
 import { keptGames } from '../../src/api/postseason/fetch.js'
-import { selectMeetings } from '../../src/lib/postseason/worldseries/meetings.js'
+import { selectMeetings } from '../../src/lib/postseason/worldseries/scouting/meetings.js'
 
 const load = (name) => JSON.parse(readFileSync(new URL(`./meetings-fixtures/${name}`, import.meta.url), 'utf8'))
 const rows = keptGames(load('brewers-2026-schedule.json'))
@@ -129,6 +129,26 @@ test('fetchMeetings: a failed schedule read is []', async () => {
   const m = mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 404, json: async () => ({}) }))
   try {
     assert.deepEqual(await fetchMeetings({ clubA: MIL, clubB: 114, slateDate: '2026-10-22' }), [])
+  } finally {
+    m.mock.restore()
+  }
+})
+
+test('the schedule request asks for gameNumber, for a doubleheader\'s second game', () => {
+  const p = new URLSearchParams(meetingsUrl(158, 114, '2026-10-22').split('?')[1])
+  assert.match(p.get('fields'), /gameNumber/)
+})
+
+test('fetchMeetings: a game whose feed fails keeps its clubs and game number from the schedule', async () => {
+  const m = mock.method(globalThis, 'fetch', async (url) =>
+    String(url).includes('/schedule')
+      ? { ok: true, status: 200, json: async () => load('brewers-2026-schedule.json') }
+      : { ok: false, status: 500, json: async () => ({}) })
+  try {
+    const out = await fetchMeetings({ clubA: MIL, clubB: 114, slateDate: '2026-06-17' })
+    assert.equal(out.length, 1)
+    assert.deepEqual([out[0].away.id, out[0].away.abbr, out[0].home.id, out[0].home.abbr], [114, 'CLE', 158, 'MIL'])
+    assert.equal(out[0].gameNumber >= 1, true)
   } finally {
     m.mock.restore()
   }
