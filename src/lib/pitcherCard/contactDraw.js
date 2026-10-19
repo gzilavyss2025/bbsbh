@@ -5,7 +5,7 @@
 // Ported from .scratch/contact-replay/prototype.html `render`, `batPolygon` and `drawBat`.
 import { clamp } from '../math/number.js'
 import { easeOut } from '../motion/curves.js'
-import { SIDE_X, battedPath, foulPath, isBunt } from './batted.js'
+import { SIDE_X, battedPath, foulPath, isBunt, sideViewPath } from './batted.js'
 import { SCENE_W, proj } from './scene.js'
 import { FOLLOW, swingModel } from './swing.js'
 import { sceneClock } from './contactTimeline.js'
@@ -234,3 +234,7 @@ export function sideLabel(p, path) {
   const apex = path.apex ? `, apex about ${Math.round(path.apex.ft)} feet (drawn)` : ''
   return `Side view: ${(TRAJ[p.hit.trajectory]?.[0] ?? 'ball in play').toLowerCase()}${ft}${apex}.`
 }
+
+// The side view's path for a pitch: a ball in play WITH a contact point. Without one `pitchBeats` has
+// no side beats (a take's { totalMs }), so there is nothing to time a path by.
+export const sidePathFor = (p, beats) => (p.swing === 'inplay' && beats.sideStartMs != null ? sideViewPath(p.hit) : null)

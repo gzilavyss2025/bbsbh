@@ -69,3 +69,10 @@ export function atBatZone(pitchDetails) {
   if (zones.length === 0) return undefined
   return [median(zones.map((p) => p.szBottom)), median(zones.map((p) => p.szTop))]
 }
+
+// A home run ends its plate appearance, so only the at-bat's LAST pitch can carry it (the side view's
+// second ring). The scene drops untracked pitches: when its last one is not the at-bat's last, none does.
+export function markHomeRun(pitches, pitchDetails) {
+  const last = pitchDetails?.at(-1)?.no
+  return pitches.map((p, i) => (i === pitches.length - 1 && p.no === last ? { ...p, hr: true } : p))
+}

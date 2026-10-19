@@ -7,7 +7,7 @@ import { Button } from '../../ui/control/Button.jsx'
 import { PitchList, StrikeZone, ZoneSheet } from '../../scoring/StrikeZone.jsx'
 import { HOVER_CARD_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
-import { atBatScenePitches, atBatZone } from '../../../lib/pitcherCard/atBat.js'
+import { atBatScenePitches, atBatZone, markHomeRun } from '../../../lib/pitcherCard/atBat.js'
 import { basesAt, countAt, replaySteps } from '../../../lib/pitcherCard/replaySteps.js'
 import { Segmented } from '../../ui/control/Segmented.jsx'
 
@@ -63,7 +63,7 @@ export function useReplayPitches(entry) {
   const replay = useMemo(() => {
     const all = live == null ? atBatScenePitches(pitchDetails, undefined, batSide) : []
     // A home run ends its plate appearance, so only the last pitch can carry it (the side view's second ring).
-    const pitches = eventType === 'home_run' ? all.map((p, i) => (i === all.length - 1 ? { ...p, hr: true } : p)) : all
+    const pitches = eventType === 'home_run' ? markHomeRun(all, pitchDetails) : all
     return pitches.length > 0 ? { pitches, model: replaySteps(pitchDetails, pitches, basesBefore, basesAfter) } : null
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` is the entry's content
   }, [key, live])

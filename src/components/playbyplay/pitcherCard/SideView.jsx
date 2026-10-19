@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { SIDE_X, sideViewPath } from '../../../lib/pitcherCard/batted.js'
-import { apexLabel, distanceLabel, sideLabel } from '../../../lib/pitcherCard/contactDraw.js'
+import { SIDE_X } from '../../../lib/pitcherCard/batted.js'
+import { apexLabel, distanceLabel, sideLabel, sidePathFor } from '../../../lib/pitcherCard/contactDraw.js'
 import { pitchBeats } from '../../../lib/pitcherCard/contactTimeline.js'
 import { SLOW } from '../../../lib/pitcherCard/scene.js'
 import { clamp } from '../../../lib/math/number.js'
@@ -17,7 +17,7 @@ const EMPTY = { whiff: 'NO CONTACT', foul: 'FOUL · NO FLIGHT DRAWN', inplay: 'N
 
 export function SideView({ pitches, drawers }) {
   const n = useRef({})
-  const sides = useMemo(() => pitches.map((p) => ({ beats: pitchBeats(p, SLOW), path: p.swing === 'inplay' ? sideViewPath(p.hit) : null })), [pitches])
+  const sides = useMemo(() => pitches.map((p) => { const beats = pitchBeats(p, SLOW); return { beats, path: sidePathFor(p, beats) } }), [pitches])
 
   useEffect(() => {
     const r = n.current
@@ -35,7 +35,7 @@ export function SideView({ pitches, drawers }) {
       vis(r.tick400, true)
       if (!path) {
         marks.forEach((m) => vis(m, false))
-        vis(r.empty, rest || tau >= beats.sceneEndMs)
+        vis(r.empty, rest || tau >= (beats.sceneEndMs ?? 0)) // no contact point, no scene end: say so at once
         return
       }
       vis(r.empty, false)

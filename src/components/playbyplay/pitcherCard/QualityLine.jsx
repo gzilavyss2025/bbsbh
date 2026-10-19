@@ -23,7 +23,7 @@ export function QualityLine({ pitches, drawers }) {
         num.current.textContent = ev == null ? '' : ev.toFixed(1)
         label.current.textContent = ev == null ? '' : 'mph off the bat'
       }
-      const e = easeStamp(rest ? 1 : clamp((tau - beats[idx].figsStartMs) / 220, 0, 1))
+      const e = easeStamp(rest ? 1 : clamp((tau - (beats[idx].figsStartMs ?? 0)) / 220, 0, 1))
       fig.current.style.opacity = e.toFixed(3)
       fig.current.style.transform = `translateY(${(4 * (1 - e)).toFixed(1)}px)`
     }
