@@ -29,7 +29,7 @@ export function topHitters(splits, n = MAX_HITTERS) {
 export const seatOf = (game, clubId) => (game.awayId === clubId ? 'away' : game.homeId === clubId ? 'home' : null)
 
 // Whole numbers that sum to 100 (largest remainder).
-function shares(counts) {
+export function shares(counts) {
   const total = sum(counts)
   const exact = counts.map((c) => (c / total) * 100)
   const out = exact.map(Math.floor)
