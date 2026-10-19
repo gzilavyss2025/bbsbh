@@ -94,14 +94,17 @@
 
 /* --- natural case for the Scout's sentences --- */
 
-/* The Edge verdict, the Zones callout, the Meetings play text and notes are
+/* The Edge notes, the Zones callout, the Meetings play text and notes are
    sentences, written to be read rather than skimmed (#1490). Natural case,
    under the ALL-CAPS INVARIANT's sanctioned exemption (01-base.css lists
    them): every heading, label, tab, chip, figure and pill around them stays
    shouted, the same split as the Command Received note. The `*` reaches the
    bold figures inside a sentence. */
-#root .scout__verdictline,
-#root .scout__verdictline *,
+#root .scout__watchtext,
+#root .scout__watchtext *,
+#root .scout__pushnote,
+#root .scout__vfoot,
+#root .scout__vfoot *,
 #root .scout__callout,
 #root .scout__callout *,
 #root .scout__play,

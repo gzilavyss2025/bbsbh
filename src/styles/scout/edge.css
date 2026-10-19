@@ -1,45 +1,236 @@
 /* ============================================================
-   MATCHUP SCOUT, THE EDGE SECTION (#2319, ADR-0118) — screens/scout/edge/. The verdict.
-   Imported by ScoutPage.jsx only. Every selector is .scout__*.
+   MATCHUP SCOUT, THE EDGE SECTION (#2319, ADR-0118) — screens/scout/edge/.
+   The verdict card, what pushes it, things to watch. Imported by
+   ScoutPage.jsx only. Every selector is .scout__*. The pitcher's side is
+   --allstar-blue, the hitter's --award-line (fill) and --award-ink (text).
    ============================================================ */
 
-/* --- EDGE: the verdict --- */
+/* --- the verdict card (an ink Card) --- */
 
-.scout__verdict {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1h);
-  padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-}
-.scout__lean {
+.scout__vhead {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-h1);
+  font-size: var(--fs-hero-lg);
   font-weight: var(--w-bold);
-  letter-spacing: var(--ls-title);
-  line-height: var(--lh-title);
+  line-height: var(--lh-tight);
+  color: var(--text-on-ink-cream);
+}
+.scout__vstep,
+.scout__vsub {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink-dim);
+}
+.scout__vstep {
+  font-size: var(--fs-ui);
+  color: var(--text-on-ink-cream);
+}
+.scout__vfoot {
+  font-family: var(--font-body);
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-label);
+  color: var(--text-on-ink-cream);
+}
+
+/* The scale: five steps on the map's bands, the marker at the gap, a centre
+   line at the league. */
+.scout__scale {
+  position: relative;
+  height: var(--space-12);
+  margin-top: var(--space-4);
+}
+.scout__scalebar {
+  position: absolute;
+  inset: var(--space-6) 0 auto;
+  height: var(--space-4);
+  display: flex;
+  border: var(--bw-hair) solid var(--text-on-ink-dim);
+}
+.scout__step--pitcher2 { flex: 0 0 15%; background: var(--allstar-blue); }
+.scout__step--pitcher1 { flex: 0 0 20%; background: color-mix(in srgb, var(--allstar-blue) 70%, var(--surface-stamped-ink)); }
+.scout__step--even { flex: 0 0 30%; background: var(--graphite); }
+.scout__step--hitter1 { flex: 0 0 20%; background: color-mix(in srgb, var(--award-line) 60%, var(--surface-stamped-ink)); }
+.scout__step--hitter2 { flex: 1 1 auto; background: var(--award-line); }
+.scout__scalemid {
+  position: absolute;
+  top: var(--space-5);
+  left: 50%;
+  width: var(--bw-heavy);
+  height: var(--space-6);
+  margin-left: calc(var(--bw-heavy) / -2);
+  background: var(--text-heading);
+}
+.scout__scalepin {
+  position: absolute;
+  top: var(--space-4);
+  width: var(--bw-heavy);
+  height: var(--space-8);
+  margin-left: calc(var(--bw-heavy) / -2);
+  background: var(--text-on-ink-cream);
+}
+.scout__scalemark {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  padding: 0 var(--space-1h);
+  background: var(--text-on-ink-cream);
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  white-space: nowrap;
+}
+/* layout-exempt: the five words sit under the five steps, 15/20/30/20/15 */
+.scout__scalewords {
+  display: grid;
+  grid-template-columns: 15fr 20fr 30fr 20fr 15fr;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-on-ink-dim);
+}
+.scout__scalesides {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink-cream);
+}
+.scout__scaleside--pitcher { border-bottom: var(--bw-heavy) solid var(--allstar-blue); }
+.scout__scaleside--hitter { border-bottom: var(--bw-heavy) solid var(--award-line); }
+
+/* --- what pushes it --- */
+
+.scout__pushlist,
+.scout__watchlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.scout__pushlist {
+  margin-block: var(--space-3);
+}
+/* layout-exempt: name, bar and value share one set of columns */
+.scout__push {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr) 3rem;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-1h);
+}
+/* layout-exempt: a name over its share */
+.scout__pushname {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-compact);
   color: var(--text-heading);
 }
-.scout__leanname--hitter { color: var(--clay); }
-.scout__leanname--pitcher { color: var(--allstar-blue); }
-.scout__verdictline {
+.scout__pushshare {
+  font-family: var(--font-body);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+.scout__pushbar {
+  position: relative;
+  height: var(--space-3h);
+  background: var(--surface-inset);
+}
+/* The centre line is the league. */
+.scout__pushbar::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--space-1) / -2) auto;
+  left: 50%;
+  width: var(--bw-heavy);
+  background: var(--text-heading);
+}
+.scout__pushfill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.scout__pushfill--hitter { left: 50%; background: var(--award-line); }
+.scout__pushfill--pitcher { right: 50%; background: var(--allstar-blue); }
+.scout__pushval {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-align: right;
+}
+.scout__pushval--hitter { color: var(--award-ink); }
+.scout__pushval--pitcher { color: var(--allstar-blue); }
+.scout__pushnote {
   margin: 0;
-  font-size: var(--fs-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-caption);
+}
+
+/* --- things to watch --- */
+
+.scout__watchhead {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.scout__watchlist {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+/* layout-exempt: number, photo and sentence in three columns */
+.scout__watchitem {
+  display: grid;
+  grid-template-columns: var(--space-4) 56px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.scout__watchn {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+.scout__watchshot {
+  width: 56px;
+  height: 56px;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.scout__tag {
+  display: inline-block;
+  padding: 0 var(--space-1h);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.scout__tag--pitcher { background: var(--allstar-blue); color: var(--text-on-ink); }
+.scout__tag--hitter { background: var(--award-line); color: var(--text-heading); }
+.scout__watchtext {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-small);
   line-height: var(--lh-prose);
   color: var(--text-body);
 }
-.scout__verdictline strong,
-.scout__callout strong {
+.scout__watchtext strong,
+.scout__vfoot strong {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.scout__verdictrule {
-  width: 100%;
-  margin: var(--space-1) 0;
-  border: 0;
-  border-top: var(--bw-hair) solid var(--border-rule);
 }
