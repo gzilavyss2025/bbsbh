@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-18T06:55:28.645Z",
+  "generatedAt": "2026-10-19T06:56:35.456Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -1929,7 +1929,7 @@
     {
       "orgRank": 8,
       "playerId": 801725,
-      "name": "Luis De León",
+      "name": "Luis De Leon",
       "teamId": 110,
       "team": "bal",
       "position": "LHP",
@@ -2523,7 +2523,7 @@
       "position": "OF",
       "levelRaw": "ROK",
       "statLine": ".260, 5 HR, 33 RBI",
-      "age": 17,
+      "age": 18,
       "topRank": null
     },
     {
@@ -9441,7 +9441,7 @@
     {
       "orgRank": 20,
       "playerId": 691548,
-      "name": "Rolddy Muñoz",
+      "name": "Rolddy Munoz",
       "teamId": 144,
       "team": "atl",
       "position": "RHP",
