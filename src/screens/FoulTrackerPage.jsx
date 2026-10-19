@@ -1076,8 +1076,8 @@ function ByPitchType({ league, teamRates }) {
 // whiff% follow as plain percentages — no count riding along in either rate
 // cell, so every number in a rate column is directly comparable to the one
 // above/below it. A row whose two foul% figures diverge by SIGNIFICANT_
-// RATE_GAP or more gets the same amber "outlier" wash the umpire favor-meter
-// uses elsewhere in the app (.favormeter--outlier) — reused so "notable, look
+// RATE_GAP or more gets a soft --marker "outlier" wash, the colour the umpire
+// favor-meter's outlier pill wears (.favormeter__tierpill--outlier) — reused so "notable, look
 // here" reads the same way anywhere in the app rather than inventing a new
 // accent.
 function TeamPitchCategoryGroup({ group }) {
