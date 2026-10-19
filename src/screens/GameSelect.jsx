@@ -1,8 +1,7 @@
 import { lazy, Suspense, useMemo, useRef, useState } from 'react'
 import { useNav } from '../lib/nav.js'
-import { apiDateToUrl, slatePath, teamPath } from '../lib/route.js'
-import { fetchDayVideos } from '../api/gamehighlights.js'
-import { fetchSchedule, fetchSlateScores, allStarInfoFrom, fetchSeasonMeta, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
+import { slatePath, teamPath } from '../lib/route.js'
+import { fetchSchedule, allStarInfoFrom, fetchSeasonMeta, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchGameJerseys } from '../api/uniforms.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
@@ -19,7 +18,6 @@ import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus, selectHasResult } from '../api/select.js'
 import { GameCard } from '../components/game/GameCard.jsx'
 import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
-import { PastGameFlipCard } from '../components/game/PastGameFlipCard.jsx'
 import { PostseasonBracket } from '../components/bracket/PostseasonBracket.jsx'
 import { SeriesPrimer } from '../components/postseason/SeriesPrimer.jsx'
 import { WorldSeriesHome } from '../components/worldseries/WorldSeriesHome.jsx'
@@ -48,18 +46,12 @@ import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
 import { WINTER_SPORT_ID, isWinterSport } from '../lib/winter/leagues.js'
 import { useMediaQuery, WIDE_QUERY, BRACKET_RAIL_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
-import { Pill } from '../components/ui/control/Pill.jsx'
-import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
 import {
-  FILTER_CHIPS,
-  reorderGameOfTheNight,
   reorderLiveGames,
   reorderNationalBroadcasts,
   stackDoubleHeaders,
   stackSuspendedContinuation,
 } from '../lib/resultCards.js'
-import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
-import { slateScoreLine } from '../lib/slateScoreLine.js'
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -149,13 +141,7 @@ export function GameSelect({
   // different shape, so its slate stays the plain one.
   const inPostseasonWindow =
     sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
-  // Site-wide "Scores Unlocked" pass: a day consented to (ADR-0026). The slate
-  // no longer offers the switch itself (the D1 masthead). Read here, ahead of
-  // the bracket, because revealing the day's live scores also moves the bracket
-  // (Gary, 2026-09-30, ADR-0087 addendum).
-  const { spoilersOffFor } = useScoresUnlocked()
-  const scoresUnlocked = spoilersOffFor(dateStr)
-  const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null, { live: scoresUnlocked })
+  const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null)
   const wsMode = Boolean(worldSeriesMode(postseasonBracket.bracket)) // the World Series hero replaces the fold and primer (#1906)
   // The bracket stands in for the off-day banner and the empty-slate line
   // only when it can draw. A failed read falls back to the plain slate, never
@@ -283,24 +269,6 @@ export function GameSelect({
   // line wanted here — a date or level switch is a cold load again.
   const coldLoad = loading && !data
 
-  // Slate score line — fetched ONLY while the Scores Unlocked pass is on AND we
-  // are on today's slate. The default
-  // slate model stays score-free (see fetchSchedule/normalizeGame); this rides a
-  // separate request whose data never merges into it. Degrades to {} on failure,
-  // so a card silently falls back to its ordinary spoiler-free self. Re-fetches
-  // on foreground (the score-critical convention) so a checked-in glance is fresh.
-  const showSlateScores = scoresUnlocked
-  const slateScores = useAsync(
-    () =>
-      showSlateScores
-        ? fetchSlateScores(dateStr, sportId, activeLeagueId)
-        : Promise.resolve({}),
-    [showSlateScores, dateStr, sportId, activeLeagueId],
-    { refetchOnForeground: showSlateScores },
-  )
-  const liveLineFor = (game) =>
-    showSlateScores ? slateScoreLine(slateScores.data?.[game.gamePk], game) : null
-
   // The favorite team is always an MLB club (FavoriteTeamModal only offers
   // those), so on a MiLB level its own game never appears — pin its current
   // affiliate at THIS level instead. Season keys off the slate's own date
@@ -327,7 +295,7 @@ export function GameSelect({
   // A back-to-back twin bill collapses to one card until game 1 starts —
   // see stackDoubleHeaders for why game 2's scheduled time is a placeholder
   // rather than a time. Applied BEFORE everything downstream (jersey/broadcast
-  // batching, the filter bar's "showing N of M", the reorder passes) so the
+  // batching, the reorder passes) so the
   // whole screen agrees on how many cards this day has.
   const stackedDh = useMemo(() => stackDoubleHeaders(data ?? []), [data])
   // A second stacking pass for a suspended game's same-day continuation
@@ -474,16 +442,14 @@ export function GameSelect({
   const showOffDayBanner = needsResumeLookup && !isBreakWindow && !!resumeDate
 
   // A day you've paged BACK to (any date before today) gets the past-day
-  // treatment: each Final game's card flips over to a result summary, and the Day Recap panel
-  // (Top Performers + Day Highlights) replaces the plain Top Performers box.
-  // Today gets the SAME treatment once every one of its games has
-  // gone Final — at that point there's no more live refreshing to do, so it's
-  // effectively already a "day you're looking back on". Before that (any game
-  // still in Preview/Live), today keeps the ordinary live-refresh slate.
-  // A postponed or cancelled game reports abstractGameState 'Final' (coded
-  // 'D' / 'C') but has no result to reveal (#1248), so it's excluded from the flip-card set, the day recap,
-  // AND the "every game Final" check below — a day with only a postponed game
-  // never flips to the past-day treatment, since there's nothing to reveal.
+  // treatment: each Final game's card opens its box score (sealed, as on every
+  // scoring surface) instead of the lineup flow. Today gets the SAME treatment
+  // once every one of its games has gone Final — at that point there's no more
+  // live refreshing to do, so it's effectively already a "day you're looking
+  // back on". Before that (any game still in Preview/Live), today keeps the
+  // ordinary live-refresh slate. A postponed or cancelled game reports
+  // abstractGameState 'Final' (coded 'D' / 'C') but has no result (#1248), so
+  // `selectHasResult` keeps it on the ordinary card.
   // A postponed game also reports abstractGameState 'Final' (see above), so
   // this alone means "nothing on today's slate is still Preview/Live" —
   // exactly the "day is done" signal, without separately excluding
@@ -491,37 +457,6 @@ export function GameSelect({
   const todayAllFinal =
     isToday && sorted.length > 0 && sorted.every((g) => g.abstractState === 'Final')
   const showPastDayTreatment = dateStr < todayStr || todayAllFinal
-  const finals = useMemo(
-    () =>
-      showPastDayTreatment
-        ? sorted.filter(selectHasResult)
-        : [],
-    [sorted, showPastDayTreatment],
-  )
-  // The day's flip cards open only for a day the reader consented to spoil
-  // (ADR-0026). The slate's own "Reveal all results" tap went with the D1
-  // masthead (Gary, 2026-10-18), ahead of the Scores Unlocked removal PR, which
-  // decides how a past day's results open from here. Until then a box score
-  // still opens each game.
-  const dayKey = `${dateStr}|${sportId}|${activeLeagueId ?? ''}`
-  const slateRevealAll = scoresUnlocked
-
-  // Per-game pill classification (Game of the Night / Dominant Performance /
-  // Blowout / Close Game / Extra Innings) for every card in `finals` — see
-  // GameResultFace.jsx's ResultPills. Empty until slateRevealAll is true.
-  const cardMetaByGamePk = useDayCardMeta(finals, dateStr, slateRevealAll)
-  // This day's condensed-game posters, one 8 KB static file for the whole
-  // slate (see fetchDayVideos — the live alternative is 430 KB PER GAME). Same
-  // reveal gate as the card meta above, though for presentation rather than
-  // spoiler safety: the file carries no score, but nothing about a result card
-  // should be fetched before the day is revealed. A day the nightly job hasn't
-  // covered yet — today's, above all — simply resolves to no entries, and each
-  // card falls back to fetching its own on tap (WatchCondensedButton).
-  const dayVideos = useAsync(
-    () => (slateRevealAll ? fetchDayVideos(apiDateToUrl(dateStr)) : Promise.resolve({ games: {} })),
-    [slateRevealAll, dateStr],
-  )
-
   // The slate's actual render order, in four tiers: the favorite team's own
   // game, then the games already underway (reorderLiveGames), then the
   // national-broadcast games among those that haven't started
@@ -529,58 +464,11 @@ export function GameSelect({
   // `sorted`'s soonest → latest order, and the Finals still last. A game in
   // progress outranks a national game that hasn't thrown a pitch, which is why
   // the live pass runs FIRST and the national pass is confined to what's left.
-  // The crowned "Game of the Night" is then promoted to the front slot (see
-  // reorderGameOfTheNight) — a no-op until cardMetaByGamePk is populated, so
-  // this can't leak which game is crowned ahead of the reveal-all gate above.
   const gamesForDisplay = useMemo(() => {
     const pinned = (g) => isPinned(g, favoriteTeamId, favoriteAffiliateIds)
     const liveFirst = reorderLiveGames(sorted, pinned)
-    const nationallyOrdered = reorderNationalBroadcasts(liveFirst, nationalBroadcasts, pinned)
-    return reorderGameOfTheNight(nationallyOrdered, cardMetaByGamePk, pinned)
-  }, [sorted, nationalBroadcasts, cardMetaByGamePk, favoriteTeamId, favoriteAffiliateIds])
-
-  // The filter bar's own selection — which category chip(s) (see FILTER_CHIPS
-  // above) the user has toggled on. Reset on a new day/level (`dayKey`
-  // above), so a stale filter never silently hides next slate's cards.
-  const [activeFilters, setActiveFilters] = useState(new Set())
-  const [prevDayKeyForFilters, setPrevDayKeyForFilters] = useState(dayKey)
-  if (dayKey !== prevDayKeyForFilters) {
-    setPrevDayKeyForFilters(dayKey)
-    setActiveFilters(new Set())
-  }
-  const toggleFilter = (key) =>
-    setActiveFilters((prev) => {
-      const next = new Set(prev)
-      next.has(key) ? next.delete(key) : next.add(key)
-      return next
-    })
-  // Only offer a chip for a category that actually occurs somewhere in
-  // today's finals — an empty chip would just be a dead button. Empty until
-  // cardMetaByGamePk is populated, same reveal-all gate as everything else
-  // classification-derived on this page.
-  const availableFilters = useMemo(() => {
-    const present = new Set()
-    for (const meta of cardMetaByGamePk.values()) {
-      if (meta.isGameOfTheNight) present.add('crown')
-      if (meta.scenario) present.add(meta.scenario)
-    }
-    return FILTER_CHIPS.filter((c) => present.has(c.key))
-  }, [cardMetaByGamePk])
-  // With no filter selected, every card shows (gamesForDisplay unchanged). A
-  // selection shows the UNION of matching games — multi-select is "any of
-  // these", not "all of these" — and everything else drops out, so the
-  // selected categories are literally all that's left on screen.
-  const visibleGames = useMemo(() => {
-    if (activeFilters.size === 0) return gamesForDisplay
-    return gamesForDisplay.filter((g) => {
-      const meta = cardMetaByGamePk.get(g.gamePk)
-      if (!meta) return false
-      return (
-        (activeFilters.has('crown') && meta.isGameOfTheNight) ||
-        (meta.scenario && activeFilters.has(meta.scenario))
-      )
-    })
-  }, [gamesForDisplay, activeFilters, cardMetaByGamePk])
+    return reorderNationalBroadcasts(liveFirst, nationalBroadcasts, pinned)
+  }, [sorted, nationalBroadcasts, favoriteTeamId, favoriteAffiliateIds])
 
   // "N prospects on this roster" badge — MiLB games only (the slate's level
   // toggle is single-select, so gating this fetch on sportId covers every
@@ -707,7 +595,7 @@ export function GameSelect({
             }
           />
 
-          {inPostseasonWindow && <WorldSeriesHome bracket={postseasonBracket.bracket} slateDate={dateStr} live={scoresUnlocked} wide={wide} />}
+          {inPostseasonWindow && <WorldSeriesHome bracket={postseasonBracket.bracket} slateDate={dateStr} wide={wide} />}
 
           {/* The postseason bracket (#1224, slice 5) — above the cards, every
               date in the window, off days included. On an off day this is
@@ -744,19 +632,9 @@ export function GameSelect({
             </div>
           )}
 
-          {availableFilters.length > 0 && (
-            <ResultFilterBar
-              chips={availableFilters}
-              active={activeFilters}
-              onToggle={toggleFilter}
-              shown={visibleGames.length}
-              total={gamesForDisplay.length}
-            />
-          )}
-
           {/* role="region" (not a bare div) so the aria-label is actually
-              honored and ResultFilterBar's aria-controls has a real target —
-              an aria-label on a role-less generic element is discarded. */}
+              honored — an aria-label on a role-less generic element is
+              discarded. */}
           <div className="slate-main" id="slate-games" role="region" aria-label="Games">
             <ul className="gamelist">
               {sorted.length === 0 && isDerbyDay && (
@@ -764,7 +642,7 @@ export function GameSelect({
                   <DerbyCard />
                 </li>
               )}
-              {visibleGames.map((g, idx) => {
+              {gamesForDisplay.map((g, idx) => {
                 const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
                   ? favoriteTeamId
                   : null
@@ -775,42 +653,23 @@ export function GameSelect({
                 // paint is waiting on). Two cards ≈ one phone viewport.
                 const eager = idx < 2
                 const isPastFinal = showPastDayTreatment && selectHasResult(g)
-                // Suspended: a paused checkpoint (like a Final's box score) that still gets the ordinary GameCard, so it needs its own onBoxScore.
+                // A past Final and a Suspended game (a paused checkpoint) both offer the box score.
                 const isSuspended = selectGameStatus(g).isSuspended
                 const postseasonLine = postseasonBracket.bracket ? cardLines(g, postseasonBracket.bracket) : null
                 return (
                   <li key={`${g.sportId}-${g.gamePk}`}>
-                    {isPastFinal ? (
-                      <PastGameFlipCard
-                        game={g}
-                        dateStr={dateStr}
-                        revealed={slateRevealAll}
-                        pinnedTeamId={pinnedTeamId}
-                        prospectCount={pCount}
-                        cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
-                        video={dayVideos.data?.games?.[g.gamePk] ?? null}
-                        liveJerseys={liveJerseys.data}
-                        national={nationalBroadcasts[g.gamePk]}
-                        eager={eager}
-                        postseasonLine={postseasonLine}
-                        onSelect={() => onPick(g, dateStr)}
-                        onBoxScore={() => onPick(g, dateStr, 'boxscore')}
-                      />
-                    ) : (
-                      <GameCard
-                        game={g}
-                        pinnedTeamId={pinnedTeamId}
-                        prospectCount={pCount}
-                        liveLine={liveLineFor(g)}
-                        liveJerseys={liveJerseys.data}
-                        national={nationalBroadcasts[g.gamePk]}
-                        eager={eager}
-                        postseasonLine={postseasonLine}
-                        stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
-                        onSelect={() => onPick(g, dateStr)}
-                        onBoxScore={isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
-                      />
-                    )}
+                    <GameCard
+                      game={g}
+                      pinnedTeamId={pinnedTeamId}
+                      prospectCount={pCount}
+                      liveJerseys={liveJerseys.data}
+                      national={nationalBroadcasts[g.gamePk]}
+                      eager={eager}
+                      postseasonLine={postseasonLine}
+                      stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
+                      onSelect={() => onPick(g, dateStr)}
+                      onBoxScore={isPastFinal || isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
+                    />
                   </li>
                 )
               })}
@@ -888,9 +747,8 @@ export function GameSelect({
         />
       )}
 
-
       {/* Last child on purpose: the dock is fixed, so its position on the page
-          is decided by CSS, but being last puts it after RevealAllBar in the
+          is decided by CSS, but being last puts it after the games in the
           DOM — which is the tab order a thumb-height control should have, and
           which keeps the slate's own content ahead of it for a screen reader.
           It publishes --wire-rail-h and reports whether it rendered at all;
@@ -910,44 +768,6 @@ export function GameSelect({
           singleDay={!isToday}
         />
       )}
-    </div>
-  )
-}
-
-// The revealed day's category filter — one chip per "storyline" (see
-// FILTER_CHIPS in lib/resultCards.js) that actually occurs somewhere on
-// today's slate. Toggling a chip filters the grid below to the UNION of every
-// selected category (multi-select is "any of these") and lifts the matching
-// games to the only ones left on screen; toggling every chip back off shows
-// the whole slate again. Only ever rendered once `availableFilters` is
-// non-empty — itself gated on cardMetaByGamePk, so this can't appear (or leak
-// which categories exist) before the slate's reveal-all.
-//
-// `aria-controls` names the grid the chips actually govern (#slate-games,
-// role="region" on .slate-main), and the count line is a live region: a chip
-// silently deleting most of the slate is exactly the change a screen reader
-// user would otherwise never hear.
-function ResultFilterBar({ chips, active, onToggle, shown, total }) {
-  return (
-    <div className="slate-filterbar">
-      <div className="slate-filterbar__chips" role="group" aria-label="Filter by result" aria-controls="slate-games">
-        {chips.map((c) => (
-          <Pill
-            key={c.key}
-            role="control"
-            fill="paper"
-            className="slate-filterbar__chip"
-            style={{ '--chip-accent': c.accent }}
-            pressed={active.has(c.key)}
-            onClick={() => onToggle(c.key)}
-          >
-            {c.label}
-          </Pill>
-        ))}
-      </div>
-      <p className="slate-filterbar__count" role="status">
-        {active.size > 0 ? `Showing ${shown} of ${total} games` : ''}
-      </p>
     </div>
   )
 }

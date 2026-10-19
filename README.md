@@ -35,11 +35,8 @@ series pages show each series as it stood heading into the day on screen. A game
 counts only after it went final on an earlier day. Last night's results are
 visible; tonight's never are.
 
-Three opt-in doors lift the seal, and you have to ask for each one:
+Two opt-in doors lift the seal, and you have to ask for each one:
 
-- **Scores Unlocked** — a site-wide pass for the day you agree to spoil. Use it
-  when you are not scoring and just want to glance at the numbers. It never
-  changes what you have revealed by hand.
 - **Stamp In** (`/team/{id}/stamp-in`) — one club's played season with every
   result showing, so you can stamp the games you watched. Nothing on the page
   loads until you agree to see it.

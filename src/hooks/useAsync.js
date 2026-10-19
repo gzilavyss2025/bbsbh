@@ -62,7 +62,7 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
     // under the new deps' header while the new request is in flight. `reload`
     // (the same `run`, same deps) deliberately skips this reset, keeping the
     // stale-while-revalidate behavior for in-place refreshes.
-    // Same shape as React's own "Fetching data" example (see PastGameFlipCard.jsx) —
+    // Same shape as React's own "Fetching data" example —
     // the loading state is reset as this effect starts synchronizing to a new
     // `run` identity, not as a derived-from-props value.
     // eslint-disable-next-line react-hooks/set-state-in-effect

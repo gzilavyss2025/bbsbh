@@ -20,13 +20,6 @@
 // ---------------------------------------------------------------------------
 // WHAT IS DELIBERATELY *NOT* IN HERE
 // ---------------------------------------------------------------------------
-//   bbsbh:scoresUnlocked  the Scores Unlocked pass expiry. Syncing it would
-//                         unseal a SECOND DEVICE THE USER NEVER CONSENTED ON,
-//                         which is the single worst thing this subsystem could
-//                         do. It stays device-local forever (ADR-0026). Only
-//                         the per-day CONSENT record syncs, on its own key,
-//                         its own shape and its own endpoint.
-//   bbsbh:spoiledDays     consent, not preference. src/lib/spoiledDays.js.
 //   bbsbh:reveal:*        scoring progress. ADR-0022.
 //   bbsbh:stamps          the Game Log. ADR-0035.
 //   bbsbh:search:recent   a browsing trail; device-local by nature.
@@ -174,7 +167,7 @@ export function normalizeEntry(field, raw) {
 
 // Valid entries only, keyed by field name. Unknown keys are dropped silently —
 // garbage can LOSE a preference (harmless: the fallback resumes) but can never
-// invent one, which is the same fail-quiet posture as parseSpoiledDays.
+// invent one, the same fail-quiet posture as parseRevealMark.
 export function normalizePreferences(map) {
   const out = {}
   if (!map || typeof map !== 'object' || Array.isArray(map)) return out
@@ -292,15 +285,13 @@ export function seedFromLegacy(doc, legacy = {}) {
 // A preference cannot: a club change is not "more" than the club before it. So
 // the two sides reconcile PER FIELD on `updatedAt`, last write wins.
 //
-// Safe for a reason specific to this data, and it is the same reason ADR-0026
-// gives for spoiled days: the only two writers are the same person's own two
-// hands. There is no third party to race, and the loser of a tie is always one
+// Safe for a reason specific to this data: the only two writers are the same
+// person's own two hands. There is no third party to race, and the loser of a tie is always one
 // of the user's own taps.
 //
 // There is deliberately NO TOMBSTONE here. A preference cannot be "removed",
-// only changed to another valid value, so the explicit-'off' machinery
-// spoiledDays needs has no analogue — which is most of why preferences get
-// their own module instead of being squeezed into the day-state map.
+// only changed to another valid value, so the explicit-'off' tombstone
+// machinery a removable record needs has no analogue.
 
 // Apply a remote document to the local one. A field the remote says nothing
 // about is left exactly as it is: **absence means "no opinion", never

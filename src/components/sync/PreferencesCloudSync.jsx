@@ -13,13 +13,12 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // Headless — renders nothing, only runs the effects. Only ever mounted when
 // isClerkEnabled (see clerkConfig.js), so useAuth() always has a ClerkProvider
 // ancestor; App.jsx conditionally renders this component rather than
-// conditionally calling a hook, exactly as it does for SpoiledDaysCloudSync and
-// StampsCloudSync.
+// conditionally calling a hook, exactly as it does for StampsCloudSync and
+// BooksCloudSync.
 //
 // What it syncs: the My Tally preference document — the club you follow, the
 // level the slate opens on, keep-awake, motion. Never a score, never anything
-// derived from one. It cannot touch `revealedThrough`, the spoiled-day map, or
-// the Logbook; each of those has its own key, shape, endpoint and merge rule.
+// derived from one. It cannot touch `revealedThrough` or the Logbook; each of those has its own key, shape, endpoint and merge rule.
 //
 // Sync model mirrors its two siblings: localStorage stays the instant,
 // offline-first source of truth and this only adds a background merge. A
@@ -38,8 +37,8 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // on the first pull instead of sitting on one device forever. That module's
 // header carries the full argument; the short version is that a change log
 // cannot describe state that never changed, and a comparison can. Both
-// SpoiledDaysCloudSync and StampsCloudSync had to be fixed from the former to
-// the latter (ADR-0026, 2026-08-06). This one starts there.
+// StampsCloudSync and the since-removed spoiled-day sync had to be fixed from
+// the former to the latter (ADR-0026, 2026-08-06). This one starts there.
 //
 // ---------------------------------------------------------------------------
 // WHOSE DOCUMENT IS IT — the shared-device guard

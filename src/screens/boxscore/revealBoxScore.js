@@ -29,7 +29,7 @@ import { computeScoringSummary } from '../../api/boxscore/scoringSummary.js'
 //
 // **ADR-0007 is the rule this obeys**: a manual cache of a reveal-only
 // derivation must key on the FEED OBJECT itself, never on a gamePk, a date or a
-// timestamp. A live refresh (or a Follow Live poll) mints a new feed object, and
+// timestamp. A live refresh (or the live poll) mints a new feed object, and
 // a new feed object misses this cache outright, so a live sheet can never freeze
 // on a pre-refresh derivation — the exact bug ADR-0007 was written about. The
 // other four inputs are keyed the same way for the same reason: `highlights` is

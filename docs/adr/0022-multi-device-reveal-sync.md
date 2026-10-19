@@ -196,3 +196,11 @@ its in-memory mark and undo the clear.
 
 - Pinned by `test/reveal-owner.test.js`, together with ADR-0026's half of the
   same fix.
+
+## Note (2026-10-18) — the ADR-0026 amendment is moot
+
+The "Amended by ADR-0026" section above described the Scores Unlocked pass. ADR-0116
+removed the pass, so nothing unseals scores beside `revealedThrough` except the
+stamp override (ADR-0048) and the box score's own bit (ADR-0049). The mark still
+only advances by hand. The spoiled-day owner guard that sat beside this channel's
+guard is gone with it.

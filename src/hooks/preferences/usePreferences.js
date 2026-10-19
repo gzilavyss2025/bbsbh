@@ -120,9 +120,10 @@ export function usePreferences() {
       // therefore runs before the write it is reacting to and queues the
       // pre-change document behind the change: React applies the updater, then
       // applies this, and the change is reverted in state while localStorage
-      // keeps the new value. useScoresUnlocked and useStamps both shipped that
-      // bug (ADR-0026's 2026-08-05 amendment, ADR-0036's addendum). Reading
-      // from inside the updater puts the read after the write, where it belongs.
+      // keeps the new value. useStamps and the since-removed Scores Unlocked hook
+      // both shipped that bug (ADR-0026's 2026-08-05 amendment, ADR-0036's
+      // addendum). Reading from inside the updater puts the read after the
+      // write, where it belongs.
       setPrefs(() => readPreferences())
     }
     window.addEventListener('storage', onStorage)

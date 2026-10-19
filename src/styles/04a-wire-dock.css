@@ -285,14 +285,10 @@
 
 /* ------------------------------------------------------------ the slate's
    floor. Published by the dock, consumed here: the screen pads its bottom by
-   exactly the rail's measured height so the last game card, the footer and —
-   the one that actually matters — the Reveal all results bar are never under
-   the dock. A scoring surface may not have its seal control covered. */
+   exactly the rail's measured height so the last game card and the footer are
+   never under the dock. */
 .screen--slate.screen--wiredock {
   padding-bottom: calc(var(--wire-rail-h, 62px) + var(--space-4));
-}
-.screen--slate.screen--wiredock .pagenav--revealall {
-  bottom: var(--wire-rail-h, 62px);
 }
 
 /* --------------------------------------------------------- reduced motion
@@ -318,5 +314,4 @@
 @media (min-width: 740px) {
   .wiredock { display: none; }
   .screen--slate.screen--wiredock { padding-bottom: 0; }
-  .screen--slate.screen--wiredock .pagenav--revealall { bottom: 0; }
 }

@@ -75,8 +75,8 @@ export function isStampMode(value) {
   return STAMP_MODES.includes(value)
 }
 
-// 'on' | 'off' — the same state-map vocabulary as spoiledDays.js, and for the
-// same reason. See `applyRemoteStamps`.
+// 'on' | 'off' — the same state-map vocabulary as books.js, and for the same
+// reason. See `applyRemoteStamps`.
 export function isStampState(value) {
   return value === 'on' || value === 'off'
 }
@@ -257,7 +257,7 @@ function normalizeAll(map) {
 
 // Parse the raw localStorage value. Never throws — malformed JSON, an array, a
 // stray number all collapse to {} ("no stamps"), which loses a collection but
-// can never invent one. Same fail-empty posture as parseSpoiledDays.
+// can never invent one. Same fail-empty posture as parseBooks.
 export function parseStamps(raw) {
   if (raw == null) return {}
   try {
@@ -427,8 +427,8 @@ export function removeStamp(map, gamePk, { now } = {}) {
 // it's a keepsake, not a spoiler mark, so there is no ratchet here (the one
 // place the Logbook differs in character from revealedThrough).
 //
-// A plain union merge would therefore be wrong in the same specific way it is
-// wrong for spoiled days: stamp on the phone, sync, un-stamp on the phone, and
+// A plain union merge would therefore be wrong for a removable record: stamp on
+// the phone, sync, un-stamp on the phone, and
 // the next fetch unions the server's stale 'on' straight back in, silently
 // undoing the removal. So a removal is published as an explicit 'off' and the
 // two sides reconcile per gamePk on `updatedAt`, last write wins.

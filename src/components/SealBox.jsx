@@ -49,7 +49,7 @@ import { motionIsReduced } from '../hooks/preferences/motionIsReduced.js'
 // Two smaller rules fall out of that, both load-bearing:
 //   • The tear only ever runs on a real TAP, never on a `forceRevealed` mount.
 //     A force-revealed box never drew a cover, so there is nothing to tear —
-//     and Scores Unlocked (ADR-0026) would otherwise flap a torn seal over
+//     and a stamped game (ADR-0048) would otherwise flap a torn seal over
 //     every half at once.
 //   • Under reduced motion nothing tears at all; the panel arrives exactly as
 //     it does today. See `motionIsReduced` (hooks/preferences/), which used to

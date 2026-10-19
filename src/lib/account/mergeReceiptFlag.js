@@ -6,7 +6,7 @@
 //
 // Extracted out of MergeReceipt.jsx (which held these as private functions
 // until MergeReceiptStrip needed the identical key). Not unit-tested: like
-// useScoresUnlocked.js/useStamps.js, this touches `window.localStorage`
+// useStamps.js, this touches `window.localStorage`
 // directly rather than taking a storage argument, so it is verified in the
 // browser (e2e) rather than under node:test, which has no `window` at all.
 
@@ -62,9 +62,6 @@ export function mergeReceiptLines({ status, counts, clubName }) {
   }
   if (reached('reveal') && counts?.games > 0) {
     lines.push({ id: 'games', text: `${n(counts.games, 'game', 'games')} in progress` })
-  }
-  if (reached('spoiledDays') && counts?.days > 0) {
-    lines.push({ id: 'days', text: `${n(counts.days, 'day', 'days')} you'd already unsealed` })
   }
   if (reached('prefs') && clubName) lines.push({ id: 'club', text: clubName })
   return lines

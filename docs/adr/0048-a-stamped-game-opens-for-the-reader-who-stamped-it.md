@@ -166,3 +166,10 @@ score. Its reversibility is now pinned on the innings viewer rather than the box
 score: un-stamping a game the reader also opened by hand re-seals the halves, and
 leaves the box score open on its own account. `e2e/invariants/logbook-stamp.spec.js`
 asserts that pair.
+
+## Addendum (2026-10-18) — `stamped` is the only input
+
+ADR-0116 removed the Scores Unlocked pass, so `effectiveReveal` has one opener now:
+`effectiveReveal({ stamped, revealedThrough, unlocked, actualCount })`. The contract
+above is unchanged: render only, and `commitReveals` is false while stamped. The
+"It is NOT the day pass" section is history; there is no day pass to confuse it with.

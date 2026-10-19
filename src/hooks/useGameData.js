@@ -1,8 +1,6 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   fetchGameFeed,
-  fetchGameFeedDiff,
-  mergeFeedDiff,
   fetchManager,
   fetchPitcherSeasonLine,
   fetchPitcherLastGame,
@@ -44,14 +42,6 @@ const HIGHLIGHTS_POLL_MS = 5 * 60 * 1000
 // every score-revealing render path stays gated by SealBox/revealedThrough.
 const FEED_POLL_MS = 60 * 1000
 
-// A tighter cadence used ONLY while the spoilers-off pass is running (ADR-0026).
-// Someone with the pass on is watching, not scoring — pitch-level freshness is
-// the point, and 60s leaves the current half feeling frozen between polls when
-// pitches land every ~20s. Scoped to the consented window: with the pass off, a
-// live game polls at FEED_POLL_MS as it always has, so the extra network and
-// battery cost is only paid where it was asked for.
-const FOLLOW_POLL_MS = 15 * 1000
-
 // Sticky "has `active` ever been true for the current `resetKey`" flag — lets
 // a fetch start lazily on first visit to its consuming surface (winProb: the
 // innings view or the box score; highlights: either one too — see below),
@@ -88,27 +78,7 @@ function useEverActive(active, resetKey) {
 // (the figure context below it would otherwise change on each one).
 const NO_UNIFORMS = {}
 
-export function useGameData(game, spoilersOff = false, activeStep = null) {
-  // Session-only cache of the last resolved feed + the timecode it was as-of,
-  // used to poll via the MLB Stats API's diffPatch mode instead of always
-  // refetching the full feed (ADR-0032). In-memory ONLY — never persisted to
-  // localStorage/IndexedDB/the Cache API, which would reopen the hole
-  // ADR-0004's NetworkOnly service-worker rule closes. Naturally keyed to the
-  // current game: the `cache.gamePk` check below falls back to a full fetch
-  // whenever it doesn't match `game.gamePk`, so a gamePk change can never
-  // merge one game's patches onto another's feed, with no extra reset code
-  // needed (useAsync already blanks feedState's data on a gamePk change).
-  const feedCacheRef = useRef({ gamePk: null, feed: null, timecode: null })
-  // Mirrors the latest `spoilersOff` into a ref: the useAsync `fn` below is
-  // only re-created when `game.gamePk` changes (see useAsync's deps), so a
-  // plain closure over `spoilersOff` would see whichever value was current
-  // the LAST time gamePk changed, not live toggles of Follow Live/Scores
-  // Unlocked (ADR-0026/ADR-0027) mid-game.
-  const spoilersOffRef = useRef(spoilersOff)
-  useLayoutEffect(() => {
-    spoilersOffRef.current = spoilersOff
-  })
-
+export function useGameData(game, activeStep = null) {
   // The uniform assignment rides the SAME fetch/reload as the feed: it's empty
   // until around first pitch, so each live Refresh must re-pull it, and
   // useAsync's reload keeps the last-good pair so a flaky refetch never blanks
@@ -118,33 +88,8 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
     async (signal) => {
       const [uniforms, feed] = await Promise.all([
         fetchGameUniforms(game.gamePk, { signal }),
-        (async () => {
-          // Only attempted during the tighter Follow Live/Scores Unlocked
-          // cadence (FOLLOW_POLL_MS) — see ADR-0032: at the default 60s poll,
-          // ordinary gaps between half-innings and pitching changes cross the
-          // diffPatch endpoint's real-time window often enough that the win
-          // shrinks to ~2x, not worth the added cache-invalidation surface.
-          const cache = feedCacheRef.current
-          const canDiff =
-            spoilersOffRef.current &&
-            String(cache.gamePk ?? '') === String(game.gamePk) &&
-            cache.feed &&
-            cache.timecode
-          if (canDiff) {
-            const diffResponse = await fetchGameFeedDiff(game.gamePk, cache.timecode, { signal }).catch(
-              () => null,
-            )
-            const merged = diffResponse ? mergeFeedDiff(cache.feed, diffResponse, game.gamePk) : null
-            if (merged) return merged
-          }
-          // No usable cache, diffPatch failed, or the merge's sanity check
-          // rejected it — fall back to exactly today's behavior. The worst
-          // realistic regression from any diffPatch problem is "we silently
-          // do what we already do," never a wrong or stale feed.
-          return fetchGameFeed(game.gamePk, { signal })
-        })(),
+        fetchGameFeed(game.gamePk, { signal }),
       ])
-      feedCacheRef.current = { gamePk: game.gamePk, feed, timecode: feed?.metaData?.timeStamp ?? null }
       return { feed, uniforms }
     },
     [game.gamePk],
@@ -318,16 +263,15 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
     return () => clearInterval(id)
   }, [isLive, highlights.reload])
 
-  // Auto-refresh the feed itself while the game is Live — see FEED_POLL_MS, or
-  // the tighter FOLLOW_POLL_MS while the spoilers-off pass is running.
+  // Auto-refresh the feed itself while the game is Live — see FEED_POLL_MS.
   // feedState.reload is useAsync's stale-while-revalidate `run`, so a
   // transient poll failure keeps showing the last-good feed rather than
   // blanking the page (AsyncStatus's staleErrorMessage in GameView).
   useEffect(() => {
     if (!isLive) return
-    const id = setInterval(feedState.reload, spoilersOff ? FOLLOW_POLL_MS : FEED_POLL_MS)
+    const id = setInterval(feedState.reload, FEED_POLL_MS)
     return () => clearInterval(id)
-  }, [isLive, spoilersOff, feedState.reload])
+  }, [isLive, feedState.reload])
 
   // Each pitcher's inferred role (SP/CL/RP) from season stats — the same
   // gamesStarted-ratio/saves heuristic the team page badges pitchers with

@@ -5,7 +5,6 @@
 // (.scratch/design-system/inventory.md and pill-collapse/map.md). Where it fit,
 // the list also covers every page that #1131's slices 3 to 5 change:
 //   - the player page's contract card (`.contractcard__regime`, slice 3);
-//   - the slate's result filter chips (`.slate-filterbar__chip`, slice 4);
 //   - the themed team hub whose Standings card shows "Postseason odds"
 //     (`.psodds-pill`, slice 5), and /situational-records (`.trrank__*`, 4 + 5).
 //
@@ -13,17 +12,14 @@
 // committed, but they land in a report that is easy to open and pass around, and
 // a picture of a sealed surface must never hold a score.
 // The game pages (lineup, innings, box score) are shot with nothing revealed.
-// The one shot that needs a revealed state, the filter chips, is an ELEMENT
-// shot of the chip bar alone: the chips are storyline labels, and the cards
-// that hold the scores are not in the image. The team hub, player pages,
+// (The slate's result filter chips had an element shot here until ADR-0116
+// removed them.) The team hub, player pages,
 // standings and reports are outside the spoiler scope (CLAUDE.md, ADR-0034).
 //
 // THE DATE. The pinned anchor game (docs/test-games.md: 823035, MIL@STL game 2,
 // 2026-07-07) supplies the game pages. The frozen clock below is the same on
 // both servers and on every run, so a page that reads "today" reads the same
 // day: a September postseason race, not whatever the calendar says.
-
-import { expect } from '../fixtures.js'
 
 // 2026-09-23, 11:00 in Chicago (the timezone in setup.js). A page asks statsapi
 // for dates computed from this clock, and each run records what it asks for.
@@ -73,31 +69,6 @@ export const ROUTES = [
     path: '/07072026',
     ready: '.gamecard',
     shots: [{ name: 'page' }],
-  },
-  {
-    // The result filter chips exist only after "Reveal all results" (they are
-    // gated on the revealed day, GameSelect.jsx ResultFilterBar). So this is
-    // the chip bar ALONE — the flipped cards with their scores are never in
-    // the image.
-    name: 'slate-chips',
-    path: '/07072026',
-    ready: '.daystate__chip--reveal',
-    // Retried: under load the slate can re-render between the click and the
-    // reveal, and the click is then lost.
-    prepare: async (page) => {
-      const reveal = page.locator('.daystate__chip--reveal')
-      const bar = page.locator('.slate-filterbar')
-      await expect(async () => {
-        if (await reveal.isVisible()) await reveal.click()
-        await expect(bar).toBeVisible({ timeout: 5_000 })
-      }).toPass({ timeout: 60_000 })
-    },
-    shots: [{ name: 'bar', selector: '.slate-filterbar' }],
-    // The flipped cards' photos. They are outside the shot, and whether a face
-    // asks for one depends on a race between two fetches (BoxScoreSkeleton.jsx
-    // describes it), so the recording cannot promise to hold them. Not holding
-    // one is not a failure here: a LOADING allowance, for this route alone.
-    offShot: /^https:\/\/img\.mlbstatic\.com\//,
   },
   { name: 'lineup', path: `${ANCHOR}/lineup1`, ready: '.lineup', shots: [{ name: 'page' }] },
   { name: 'innings', path: `${ANCHOR}/top1`, ready: '.pagenav--innings', shots: [{ name: 'page' }] },

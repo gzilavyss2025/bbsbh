@@ -1,6 +1,7 @@
 # Follow Live — the fourth reveal-ratchet source
 
 > **SUPERSEDED by [ADR-0026](0026-scores-unlocked-ephemeral-override.md) (2026-07-24), before either shipped to `main`.**
+> ADR-0026 is itself retired, by [ADR-0116](0116-scores-unlocked-and-reveal-all-are-removed.md) (2026-10-18).
 > Follow Live no longer exists as a separate feature. It was folded into the one
 > spoilers-off pass, and in the process it stopped being a ratchet source at all.
 >

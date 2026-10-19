@@ -29,7 +29,7 @@ import { localStore, readOwner, writeOwner } from '../lib/account/localStore.js'
 // minted before sign-in still land on this device; signing in merges that local
 // collection upward through StampsCloudSync before LogbookPage renders the book.
 // A deploy without Clerk continues to use this store directly, exactly as it
-// does for the reveal mark and the spoiled-day map.
+// does for the reveal mark.
 //
 // WHAT IS NOT IN HERE: the score. A local record is
 // `{ state, mode, stampedAt, updatedAt, note, date, placement }` and nothing

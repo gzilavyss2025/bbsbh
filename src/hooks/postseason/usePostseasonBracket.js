@@ -16,11 +16,10 @@
 // after today through outside the window; the bracket never may, because its
 // results read runs to the day before the cutoff.
 //
-// Scores Unlocked does NOT apply on its own (Gary's decision, 2026-09-28): this
-// hook never reads the switch, and it writes nothing to storage. The caller
-// passes `live` (Gary, 2026-09-30: when the reader reveals the day's live
-// scores, the bracket moves too). Without `live`, the state is the same with
-// the switch on or off. test/postseason/bracket-hook.test.js pins both.
+// The bracket never counts the cutoff date's own games, and this hook writes
+// nothing to storage. (It once took a `live` option for the Scores Unlocked
+// pass; the pass and the option went in ADR-0116.)
+// test/postseason/bracket-hook.test.js pins both.
 
 import { useAsync } from '../useAsync.js'
 import { loadPostseasonBracket } from '../../api/postseason/fetch.js'
@@ -40,13 +39,12 @@ export function bracketFor(data, cutoff) {
   return cutoff && data?.cutoff === cutoff ? data : null
 }
 
-export function usePostseasonBracket(cutoffDate, { season, live = false } = {}) {
+export function usePostseasonBracket(cutoffDate, { season } = {}) {
   const cutoff = bracketCutoff(cutoffDate)
   const year = season ?? (cutoff ? Number(cutoff.slice(0, 4)) : null)
   const { data, loading, error } = useAsync(
-    (signal) => (cutoff && year ? loadPostseasonBracket(cutoff, year, { signal, live }) : Promise.resolve(null)),
-    [cutoff, year, live],
-    { refetchOnForeground: live },
+    (signal) => (cutoff && year ? loadPostseasonBracket(cutoff, year, { signal }) : Promise.resolve(null)),
+    [cutoff, year],
   )
   return { bracket: bracketFor(data, cutoff), loading: Boolean(cutoff) && loading, error, cutoff }
 }

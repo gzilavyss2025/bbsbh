@@ -4,7 +4,6 @@ import { useRouteLink } from '../../lib/nav.js'
 import { timeOfDay } from '../../lib/dates.js'
 import { Pips } from '../bracket/bracketParts.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { Button } from '../ui/control/Button.jsx'
 import { Door } from '../ui/control/Door.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { Cluster } from '../ui/layout/Cluster.jsx'
@@ -13,10 +12,10 @@ import { ScheduleStrip } from './ScheduleStrip.jsx'
 
 // The hero: "Tonight" on a game day, "Off day" on an off day. Headline, park
 // and first pitch, one row per club (logo, short name, regular-season record,
-// pips), the sealed score control on a game day, the schedule strip on a phone,
-// and the doors to the game. Pips show the state heading INTO the slate date
-// (ADR-0087). Today's runs reach this file only through the ledger model, which
-// holds them back unless `live`.
+// pips), the schedule strip on a phone, and the doors to the game. Pips show the
+// state heading INTO the slate date (ADR-0087). Today's runs reach this file
+// only through the ledger model, which holds them back: a game day shows no
+// score slot at all (ADR-0116 removed the seal that sat here).
 function ClubRow({ slot, record, winsNeeded, runs }) {
   const { club } = slot
   return (
@@ -32,7 +31,7 @@ function ClubRow({ slot, record, winsNeeded, runs }) {
   )
 }
 
-export function Hero({ mode, model, game, records, slateDate, live, wide, played = [], umpire = null, onRevealScores }) {
+export function Hero({ mode, model, game, records, slateDate, wide, played = [], umpire = null }) {
   const link = useRouteLink()
   const { series, dayType, gameNumber } = mode
   const gameDay = dayType === 'game'
@@ -71,15 +70,6 @@ export function Hero({ mode, model, game, records, slateDate, live, wide, played
           <ClubRow key={slot.club.id} slot={slot} record={recordOf(slot.club.id)} winsNeeded={series.winsNeeded} runs={runsOf(i)} />
         ))}
       </Stack>
-      {/* Without a reveal handler (the home slate no longer offers the pass)
-          the seal is a plain statement, never a button that does nothing. */}
-      {gameDay && !live && (onRevealScores ? (
-        <Button block hint="Tap to reveal" onClick={onRevealScores} className="ww-hero__seal">
-          Score sealed
-        </Button>
-      ) : (
-        <p className="ww-hero__seal ww-hero__sealnote">Score sealed</p>
-      ))}
       {!wide && <ScheduleStrip columns={model.columns} />}
       {(lineups || preview || stamps.length > 0) && (
         <Cluster gap="base" className="ww-hero__actions">

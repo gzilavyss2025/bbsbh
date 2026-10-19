@@ -68,9 +68,8 @@ export function HalfInning({
   // half the reader JUST unsealed write themselves, in the order a scorer's
   // hand makes the marks. True only for the render in which this half went
   // sealed -> unsealed with the page already open, so a cold load, a poll, a
-  // return visit, a navigation between halves and a force-reveal (the Scores
-  // Unlocked pass, ADR-0026, or the reader's own stamp, ADR-0048) all render
-  // settled ink — see useBecameTrue.
+  // return visit, a navigation between halves and a force-reveal (the
+  // reader's own stamp, ADR-0048) all render settled ink — see useBecameTrue.
   //
   // NOT WHILE WINDOWED, WHICH IS WHAT DECIDES THE MOMENT THIS FIRES. A half
   // the reader unseals does NOT snap to the stacked view — `useFocusMode`

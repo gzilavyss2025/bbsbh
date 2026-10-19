@@ -154,17 +154,15 @@ must key on the `feed` object (ADR-0007).
   reference, `RollingLine` demoted but NEVER removed — every half, live or
   historical. Only the play-by-play varies: **windowed** (one at-bat, every half
   by default) vs. **stacked** (only after "See the whole half"); `focusView.js`.
-- **Two opt-in departures** ride through `InningViewer` without touching its guarantees.
-  `GameView` resolves `spoilersOffFor(officialDate)` — the Scores Unlocked pass is running, or
-  this day was consented to (ADR-0026) — and hands it down; the reader's own **stamp** on this
-  game (ADR-0048, from `useStamps`) opens it too. `effectiveReveal` takes both, substituting a render-only
+- **One opt-in departure** rides through `InningViewer` without touching its guarantees:
+  the reader's own **stamp** on this game (ADR-0048, from `useStamps`). `effectiveReveal`
+  takes it, substituting a render-only
   `renderRevealedThrough`/`renderUnlocked` for every render consumer while the
   persisted `revealedThrough` (what feeds `useRevealProgress`, `RevealCloudSync`,
   and localStorage) stays untouched. Its `commitReveals` is the other half of that
   and must not be dropped: `SealBox` fires `onReveal` on a force-revealed mount as
   well as a tap, so without it every half merely LOOKED at ratchets the real mark.
-  `selectLiveEdge` drives navigation only — under the pass everything already
-  renders open, so there is nothing for a ratchet to advance.
+  The Scores Unlocked day pass was a second departure until ADR-0116 removed it.
 - **"Logbook" is the CODE name only — the UI says "Game Log."** Route
   (`/logbook`), modules, CSS classes, and storage keys all keep `logbook`; every
   user-visible string says Game Log. Renaming the route would break every shared
@@ -183,8 +181,8 @@ must key on the `feed` object (ADR-0007).
   gate is the render **function**, not a position on the page; the strip's layout is in
   `src/components/logbook/CLAUDE.md`. That host `SealBox` has an `onReveal` since ADR-0049, but only for a real TAP: it writes
   `bbsbh:boxreveal:{gamePk}`, one bit that re-opens this page and nothing else, withheld under
-  the pass and under a stamp — either would record a permanent mark for a seal nobody touched,
-  and neither may ever reach `revealedThrough`. `GameStamp.jsx` (the art) and
+  a stamp — that would record a permanent mark for a seal nobody touched — and it may never
+  reach `revealedThrough`. `GameStamp.jsx` (the art) and
   `StampGameButton.jsx` may be imported only from their allowlists —
   `scripts/check-stamp-surfaces.mjs` fails `npm run lint` otherwise, and
   `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection and its local-first store: `src/components/logbook/CLAUDE.md`.

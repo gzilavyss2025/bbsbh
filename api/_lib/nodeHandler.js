@@ -1,5 +1,6 @@
 // Request/response adapter for the `runtime: 'nodejs'` serverless functions
-// (api/reveal.js, api/copy.js, api/spoiled-days.js).
+// (first written for three of them: api/reveal.js, api/copy.js, and a
+// day-consent endpoint removed in ADR-0116).
 //
 // WHY THIS EXISTS — read before "simplifying" any of it. All three functions
 // were written against the Web-standard fetch shape: `new URL(req.url)`,
@@ -145,8 +146,8 @@ export function jsonResponse(res, body, status = 200, headers = {}) {
 
 // jsonResponse for per-user, auth-gated answers: never let a shared cache (or
 // the browser) hold one user's data and hand it to another request. Used by
-// account, ballpark-photo, books, identity-logo, preferences, reveal,
-// spoiled-days and stamps. Never relax the header — stamps.js answers carry a
+// account, ballpark-photo, books, identity-logo, preferences, reveal and
+// stamps. Never relax the header — stamps.js answers carry a
 // score.
 export function privateJson(res, body, status = 200) {
   return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })

@@ -58,25 +58,6 @@
   color: var(--text-heading);
 }
 
-.ww-hero__seal {
-  margin-top: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-
-/* The seal as a statement, when the page offers no reveal (the home slate). */
-.ww-hero__sealnote,
-.ww-ledger__sealnote {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-heading);
-}
-
-.ww-hero__sealnote {
-  text-align: center;
-}
-
 .ww-hero__actions {
   margin-top: var(--space-3);
 }
@@ -187,10 +168,6 @@
 
 .ww-ledger__maybe {
   border-style: dashed;
-}
-
-.ww-ledger__seal {
-  background: var(--surface-stamped-tint);
 }
 
 .ww-ledger__wins {

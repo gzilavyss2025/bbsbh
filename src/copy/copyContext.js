@@ -7,7 +7,7 @@ import { defaultCopy, fillTokens } from './registry.js'
 
 export const CopyContext = createContext(null)
 
-// Components call useCopy().t('scoresUnlocked.title', { time }). Usable even
+// Components call useCopy().t('stampIn.title', tokens). Usable even
 // with no provider mounted (defaults only) so a stray render or a unit test
 // can't crash on a missing context.
 export function useCopy() {

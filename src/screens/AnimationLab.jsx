@@ -63,7 +63,7 @@ export function AnimationLab() {
         title="Box-score skeleton — rolling ball"
         note={
           <>
-            PastGameFlipCard&rsquo;s &ldquo;still fetching&rdquo; placeholder (src/components/BoxScoreSkeleton.jsx) —
+            A result card&rsquo;s &ldquo;still fetching&rdquo; placeholder (src/components/game/BoxScoreSkeleton.jsx) —
             grayscale blocks pulse together while a hand-drawn baseball tumbles across the card.
           </>
         }

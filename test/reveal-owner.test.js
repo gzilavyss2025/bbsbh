@@ -1,19 +1,20 @@
-// The shared-device guard on the two channels ADR-0022 and ADR-0026 own — the
-// scoring frontier (`bbsbh:reveal:*`) and the days the reader consented to
-// spoil (`bbsbh:spoiledDays`) — plus the storage mechanics every owner tag
-// shares (src/lib/account/deviceOwner.js).
+// The shared-device guard on the channel ADR-0022 owns — the scoring frontier
+// (`bbsbh:reveal:*`) — plus the storage mechanics every owner tag shares
+// (src/lib/account/deviceOwner.js). (The second channel once pinned here, the
+// days a reader consented to spoil, went with the Scores Unlocked pass in
+// ADR-0116.)
 //
-// THE LEAK, for both. The state is keyed by gamePk, or by nothing at all: no
-// account, and nothing cleared it on sign-out. On a family iPad user A signs in
+// THE LEAK. The state is keyed by gamePk: no account, and nothing cleared it
+// on sign-out. On a family iPad user A signs in
 // and scores six innings; A signs out and the marks stay, local-first by design;
 // B signs in, opens that game, and the innings viewer renders six innings
 // already unsealed — then publishes A's frontier into B's account, where the
 // ratchet carries it to every device B owns.
 //
-// This is the pair the whole spoiler rule rests on, which is why #771 called it
-// the highest-priority follow-up rather than account hygiene. And both are
-// one-directional — a ratchet, and a consent that only grows by consenting — so
-// neither undoes itself by signing out again.
+// This is the state the whole spoiler rule rests on, which is why #771 called
+// it the highest-priority follow-up rather than account hygiene. And it is
+// one-directional — a ratchet — so it does not undo itself by signing out
+// again.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
@@ -26,7 +27,6 @@ import {
   readRevealOwnerIn,
   writeRevealOwnerIn,
 } from '../src/lib/account/revealOwner.js'
-import { SPOILED_DAYS_OWNER_KEY, parseSpoiledDays, serializeSpoiledDays } from '../src/lib/spoiledDays.js'
 import { mergeStrategyFor } from '../src/lib/account/preferences.js'
 import { fakeStorage } from './helpers/fakeStorage.js'
 
@@ -37,7 +37,6 @@ test('every reveal mark comes off, and the at-bat cursor goes with it', () => {
     [`${REVEAL_MARK_PREFIX}777749`]: '0',
     [`${ATBAT_MARK_PREFIX}777747`]: '13:2',
     'bbsbh:boxreveal:777747': '1',
-    'bbsbh:spoiledDays': '["2026-05-27"]',
     'bbsbh:stamps': '{}',
     'unrelated:key': 'x',
   })
@@ -55,7 +54,6 @@ test('every reveal mark comes off, and the at-bat cursor goes with it', () => {
   // separate owner tags; a device that reached one endpoint but not another
   // must not have both decided for it.
   assert.equal(storage.getItem('bbsbh:boxreveal:777747'), '1')
-  assert.equal(storage.getItem('bbsbh:spoiledDays'), '["2026-05-27"]')
   assert.equal(storage.getItem('bbsbh:stamps'), '{}')
   assert.equal(storage.getItem('unrelated:key'), 'x')
 })
@@ -123,25 +121,24 @@ test('an owner tag round-trips, and an empty user clears it', () => {
   writeRevealOwnerIn(storage, null)
   assert.equal(storage.getItem(REVEAL_OWNER_KEY), null, 'signed out records no owner')
   assert.equal(readRevealOwnerIn(storage), '')
-  // The generic pair the two new channels and the box-score bit all share.
-  assert.equal(writeOwnerIn(storage, SPOILED_DAYS_OWNER_KEY, 'user_b'), true)
-  assert.equal(readOwnerIn(storage, SPOILED_DAYS_OWNER_KEY), 'user_b')
+  // The generic pair the box-score bit and the other channels share.
+  assert.equal(writeOwnerIn(storage, 'bbsbh:boxrevealOwner', 'user_b'), true)
+  assert.equal(readOwnerIn(storage, 'bbsbh:boxrevealOwner'), 'user_b')
   assert.equal(readOwnerIn(storage, REVEAL_OWNER_KEY), '', 'the two tags are independent')
 })
 
 // Every channel keeps its OWN tag. A single shared one would have the first
 // channel to succeed vouch for the ones that failed — a device that reached the
-// reveal endpoint but not the consent endpoint would be recorded as holding both.
-test('the four owner keys are four distinct keys', () => {
+// reveal endpoint but not the box-score endpoint would be recorded as holding both.
+test('the five owner keys are five distinct keys', () => {
   const keys = new Set([
     REVEAL_OWNER_KEY,
-    SPOILED_DAYS_OWNER_KEY,
     'bbsbh:boxrevealOwner',
     'bbsbh:stampsOwner',
     'bbsbh:booksOwner',
     'bbsbh:prefsOwner',
   ])
-  assert.equal(keys.size, 6, 'no two channels share a tag')
+  assert.equal(keys.size, 5, 'no two channels share a tag')
 })
 
 test('the reveal owner tag adopts only for a different account', () => {
@@ -151,28 +148,22 @@ test('the reveal owner tag adopts only for a different account', () => {
   assert.equal(mergeStrategyFor('user_a', null), 'none', 'signed out reconciles nothing')
 })
 
-// The end-to-end shape of both leaks, in the terms the guards run in.
-test('B signing in on A’s device inherits neither A’s innings nor A’s consent', () => {
+// The end-to-end shape of the leak, in the terms the guard runs in.
+test('B signing in on A’s device does not inherit A’s innings', () => {
   const storage = fakeStorage({
     [`${REVEAL_MARK_PREFIX}777747`]: '11',
     [`${ATBAT_MARK_PREFIX}777747`]: '11:3',
-    'bbsbh:spoiledDays': serializeSpoiledDays(['2026-05-27', '2026-05-28']),
   })
   writeRevealOwnerIn(storage, 'user_a')
-  writeOwnerIn(storage, SPOILED_DAYS_OWNER_KEY, 'user_a')
 
-  // B signs in. Both guards see a foreign owner.
+  // B signs in. The guard sees a foreign owner.
   assert.equal(mergeStrategyFor(readRevealOwnerIn(storage), 'user_b'), 'adopt')
-  assert.equal(mergeStrategyFor(readOwnerIn(storage, SPOILED_DAYS_OWNER_KEY), 'user_b'), 'adopt')
 
   clearRevealMarksIn(storage)
   writeRevealOwnerIn(storage, 'user_b')
-  storage.setItem('bbsbh:spoiledDays', serializeSpoiledDays([]))
-  writeOwnerIn(storage, SPOILED_DAYS_OWNER_KEY, 'user_b')
 
   assert.equal(storage.getItem(`${REVEAL_MARK_PREFIX}777747`), null, 'A’s eleven halves are sealed again for B')
   assert.equal(storage.getItem(`${ATBAT_MARK_PREFIX}777747`), null)
-  assert.deepEqual(parseSpoiledDays(storage.getItem('bbsbh:spoiledDays')), [], 'B consented to nothing')
 
   // And B's own scoring sticks, rather than being swept by a guard that fires
   // again on the next render.

@@ -23,16 +23,17 @@ import { Reel } from './Reel.jsx'
 // known and the Series is not decided heading into the slate date (mode.js).
 // It replaces the bracket fold and the series primer on those dates. Phone
 // (below 740px): the hero carries the schedule strip. Wide: the ledger table
-// carries it. `live` is Scores Unlocked for the slate date.
+// carries it. Today's game shows no score at all until the slate date has
+// passed (ADR-0116 removed the seal and the day pass that lifted it).
 //
 // Cards, top to bottom. Game day: hero, [ledger], reel, probables, tape + hot
 // bats, bullpen. Off day: hero, [ledger], reel, [played on a phone], the trip,
 // home and road + bullpen (side by side wide).
-export function WorldSeriesHome({ bracket, slateDate, live = false, wide = false, onRevealScores }) {
+export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
   const mode = worldSeriesMode(bracket)
   const series = mode?.series ?? null
   const clubIds = series ? series.slots.map((s) => s.club.id) : null
-  const { data } = useWorldSeriesHome({ clubIds, games: series?.games, slateDate, live })
+  const { data } = useWorldSeriesHome({ clubIds, games: series?.games, slateDate })
   const focus = series?.upcoming.find((g) => g.gameNumber === mode.gameNumber) ?? null
   const focusPk = focus?.gamePk ?? null
   const playedPks = (series?.games ?? []).map((g) => g.gamePk)
@@ -54,7 +55,6 @@ export function WorldSeriesHome({ bracket, slateDate, live = false, wide = false
     upcoming: series.upcoming,
     runsByGame: data?.runsByGame ?? {},
     slateDate,
-    live,
   })
   const parkOf = parks.data ?? {}
   const game = focusPk ? parkOf[focusPk] ?? null : null
@@ -82,13 +82,11 @@ export function WorldSeriesHome({ bracket, slateDate, live = false, wide = false
         game={game}
         records={data?.standings ?? {}}
         slateDate={slateDate}
-        live={live}
         wide={wide}
         played={played}
         umpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
-        onRevealScores={onRevealScores}
       />
-      {wide && <Ledger series={series} model={model} onRevealScores={onRevealScores} />}
+      {wide && <Ledger series={series} model={model} />}
       {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={lcsRound} />}
       {gameDay ? (
         <>

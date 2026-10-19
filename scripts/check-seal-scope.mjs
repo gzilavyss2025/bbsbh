@@ -12,7 +12,7 @@
 // "A reveal is possible" means one of:
 //   - the cover itself, its copy, and the tear it splits into;
 //   - a control that LIFTS a seal — the reveal button, the standings reveal
-//     chip, the Scores Unlocked switch, the consent to spoil a day (ADR-0026),
+//     chip, the consent to open a season of results (Stamp In, ADR-0042),
 //     the scorecard's face-down at-bat, the due-up pill;
 //   - the Game Log's mint strip, which is the one action that leaves something
 //     behind on the far side of a seal (ADR-0035);
@@ -49,16 +49,13 @@ const STYLES = join(ROOT, 'src', 'styles')
 // rule is written under. Adding a name here is a design-system decision — read
 // ADR-0083 first, and say in the PR why a reveal is possible on that surface.
 const ALLOWLIST = {
-  // The Scores Unlocked switch, ON. It lifts every seal on the slate (ADR-0026).
-  '03-slate-header.css': ['.daystate__chip--live-on'],
-
   // The "@" watermark, on the masthead and on a slate card. Finding 9's
   // must-survive list: the mark is the scorebook's own, drawn in tape amber.
   '05-masthead-nav.css': ['.masthead__at-ghost'],
   '06-loader-and-cards.css': ['.gamecard__atmark-ghost'],
 
   // .btn--reveal IS the cover carried into the innings bar. .liveedge replaces
-  // it at the live frontier and says "the seal is off, and we're current".
+  // it once the reader has caught up to a half still being played (ADR-0055).
   '07-team-logo-and-buttons.css': ['.liveedge', '.liveedge__dot', '.btn--reveal'],
   // .btn--seal is the Game Log's mint strip (ADR-0035): minting is the one
   // action that leaves something behind on the far side of a seal. It moved
@@ -96,7 +93,7 @@ const ALLOWLIST = {
   // Controls that lift a seal.
   '30-standings.css': ['.standings-reveal'],
   '31-wild-card.css': ['.duepill'],
-  '46-consent-modal.css': ['.consent__btn--confirm', '.modestrip'],
+  '46-consent-modal.css': ['.consent__btn--confirm'],
   // The lens's tear (#724 L7) wears the same face on its two flying halves.
   'scorecard/box.css': ['.sc-ab__seal', '.sc-ab__sealtext', '.sc-lens__tearface', '.sc-lens__teartext'],
   // The lens bar's Unwrap button (ADR-0092): it lifts the same seal the frame

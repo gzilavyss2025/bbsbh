@@ -53,8 +53,8 @@ import { SeriesMark } from '../../components/postseason/SeriesMark.jsx'
 // of `decided`. Same sections as the finished page (record, game-by-game log,
 // series leaders, rosters), plus two this page alone needs: today's game
 // (named, never scored) and the games still to play. The cutoff is this
-// page's own `?d=` (asOf), capped at today by usePostseasonBracket — never
-// Scores Unlocked, which does not apply to the postseason bracket (ADR-0087).
+// page's own `?d=` (asOf), capped at today by usePostseasonBracket, and
+// nothing else moves it (ADR-0087).
 export function LiveSeriesPage({ seriesId, asOf }) {
   const back = () => window.history.back()
   const cutoffInput = asOf ?? toApiDate(new Date())

@@ -19,17 +19,15 @@ import { GameStamp } from './GameStamp.jsx'
 // only once revealed, so nothing here reaches the DOM until the user has opened
 // the box score. That placement is the CLIENT-side reveal gate, and it is why
 // this component doesn't re-check one: you cannot reach the button without
-// having revealed the game (or having turned on the Scores Unlocked pass, which
-// is the other way a user legitimately comes to know the score — ADR-0026 — and
-// which the server-side gate accepts for exactly the same reason).
+// having revealed the game.
 //
 // The authoritative gate is still the server's, on every mint. See ADR-0035.
 //
 // TWO THINGS NOT TO CHANGE about that host SealBox: it has no `onReveal` and it
 // persists nothing. The stamp button is purely additive — it must not turn the
 // box score into a surface that ratchets `revealedThrough`, because a box score
-// opened under the Scores Unlocked pass would then silently mark the whole game
-// as hand-revealed.
+// opened by a stamp would then silently mark the whole game as hand-revealed.
+// (Its one `onReveal`, since ADR-0049, writes only the box score's own bit.)
 //
 // Being at the TOP of the page rather than the foot of it changes none of that.
 // The seal is a render-function boundary, not a position on the sheet: this is

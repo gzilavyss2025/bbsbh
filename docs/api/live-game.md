@@ -246,12 +246,8 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   the box score to actually be opened, not merely the feed landing — a cold
   open always starts on a lineup page, which reads neither) and the DOM only
   gets it inside a seal/reveal clamp; it's null-guarded (absent at most MiLB
-  parks). Also exports `fetchGameFeedDiff`/`mergeFeedDiff`, the
-  undocumented diffPatch polling path `useGameData` uses ONLY during the
-  tight Follow Live/Scores Unlocked cadence (ADR-0032) — `mergeFeedDiff`
-  never mutates its `base` argument (see `../lib/jsonPatch.js`) and never
-  throws, falling back to `null` (→ a normal `fetchGameFeed` call) on any
-  apply failure or gamePk mismatch.
+  parks). The diffPatch polling path of ADR-0032 was removed with the
+  Scores Unlocked pass (ADR-0116): a live game always polls the full feed.
   Two pitcher fetchers here feed the lineup pages' starter card and the full
   Now Pitching card (#1344). Both stop BEFORE the game (ADR-0088):
   `fetchPitcherSeasonLine(id, season, sportId, officialDate, { postseason })`
@@ -399,18 +395,13 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   so a reader paging back through a game they already unsealed sees the bench
   that half opened with (ADR-0005's amendment).
 - `liveEdge.js` — a THIRD classification, neither reveal-only nor an ordinary
-  spoiler-free selector: `selectLiveEdge(feed, spoilersOff)` reports only how far
-  the game has progressed (the last play's half-index), never a score, and only
-  when the user has consented (returns null unless the flag is exactly `true`, and
-  before first pitch / on empty play data). Under the Scores Unlocked pass
-  (ADR-0026) it keeps a caught-up viewer on the newest half — NAVIGATION only. It
-  deliberately feeds no reveal mark: everything already renders open under the
-  pass, so there is nothing to ratchet. Two UNGATED readers sit beside it
-  (ADR-0055), answering a narrower question from the linescore's own live state
+  spoiler-free selector (the plays-based live-edge reader that drove the Scores
+  Unlocked pass's navigation was removed with the pass, ADR-0116). Two UNGATED
+  readers (ADR-0055) answer a narrow question from the linescore's own live state
   rather than from the plays: `selectLiveHalf(feed)` — which half is the game IN
   (or, between halves, which did it just finish), `{ idx, inning, half,
   inProgress }` or null — and `selectCatchUpTarget(feed)`, the same thing shaped
-  as a destination for the lineup page's "Catch up to live". They need no pass
+  as a destination for the lineup page's "Catch up to live". They need no gate
   because they report an inning number and which half and nothing else, and
   neither caller RENDERS the inning: `InningViewer` compares `idx` against the
   half on screen to stop a still-being-played half committing itself early, and

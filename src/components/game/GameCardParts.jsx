@@ -40,36 +40,6 @@ export function resolveTreatment(team, side, gamePk, officialDate, jerseysData, 
   )
 }
 
-// The Scores Unlocked run totals, one per team column (away left, home right,
-// matching the marks above), with the game-state token optically centered
-// between them (absolutely positioned, so its width never nudges the numerals
-// off the column centers). Winner/loser inking applies only once the game is
-// FINAL — the settled scorebook convention — never mid-game. The visual spans
-// are aria-hidden and the full screen-reader sentence rides in one .sr-only
-// span, because "4 … BOT 7 … 2" read aloud in DOM order carries no team
-// context. (.sr-only's absolute positioning is also what keeps that span from
-// becoming the grid's first item and shoving both numerals a track over.)
-export function ScoreLine({ liveLine }) {
-  const { awayRuns, homeRuns, state, final, awayResult, homeResult, label } = liveLine
-  // 'winner'/'loser' only once a Final settles it; null (no modifier) while
-  // live and on a tie — the formatter owns that rule (slateScoreLine.js).
-  const mod = (result) => (result ? ` gamecard__runs--${result}` : '')
-  return (
-    <div className={`gamecard__scoreline${final ? '' : ' gamecard__scoreline--live'}`}>
-      <span className="sr-only">{label}</span>
-      <span aria-hidden="true" className={`gamecard__runs t-num gamecard__runs--away${mod(awayResult)}`}>
-        {awayRuns}
-      </span>
-      <span aria-hidden="true" className="gamecard__scorestate t-label">
-        {state}
-      </span>
-      <span aria-hidden="true" className={`gamecard__runs t-num gamecard__runs--home${mod(homeResult)}`}>
-        {homeRuns}
-      </span>
-    </div>
-  )
-}
-
 // The postseason series line (#1224, slice 4): `{ seriesLine, recordLine }`
 // from `api/postseason/text.js`'s `cardLines` — GameCard reads slice 3's
 // derived state through this shape alone and never re-derives it. A navy
@@ -274,7 +244,7 @@ export function TeamName({ team, side }) {
 // starts on-site. The parenthetical is dropped when the feed carries no venue
 // timezone (lean MiLB rows) or when the two clocks read the same (viewer is in
 // the park's zone) — no redundant "(7:10 CDT)".
-export function StatusText({ game, hasScoreLine = false }) {
+export function StatusText({ game }) {
   const status = selectGameStatus(game)
   if (status.isSuspended) {
     // The corner pill alone just says SUSPENDED; once the league has set a
@@ -288,13 +258,7 @@ export function StatusText({ game, hasScoreLine = false }) {
   }
   if (status.label) return null // the delay pill carries it; no redundant text
   const s = game.abstractState
-  if (s === 'Final') {
-    // While the Scores Unlocked line renders, its centered state slot already
-    // says FINAL (or F/n) right between the run totals — the corner text here
-    // would be the same word orphaned a row below, so it moves, not repeats.
-    if (hasScoreLine) return null
-    return <span className="gamecard__status">Final</span>
-  }
+  if (s === 'Final') return <span className="gamecard__status">Final</span>
   if (s === 'Live') return null // the LIVE pill carries it; no redundant text
   let local
   let park = null

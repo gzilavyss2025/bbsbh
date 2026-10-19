@@ -190,8 +190,8 @@ Everything works with none of these set — each feature they gate degrades to
 - `VITE_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` — multi-device reveal sync
   (ADR-0022). Unset, no sign-in UI renders at all.
 - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — the backing store for
-  every authenticated endpoint: reveal sync (ADR-0022), spoiled days (ADR-0026),
-  admin copy (ADR-0025) and the Logbook (ADR-0035). All four return `501 sync not
+  every authenticated endpoint: reveal sync (ADR-0022), admin copy (ADR-0025),
+  the Logbook (ADR-0035), and the other per-user stores. All of them return `501 sync not
   configured` without them, even if Clerk is configured.
   `KV_REST_API_URL` / `KV_REST_API_TOKEN` are accepted as an equivalent pair —
   Vercel's **KV** integration injects the same Upstash REST credentials under

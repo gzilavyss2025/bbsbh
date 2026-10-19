@@ -1,5 +1,5 @@
-// Slice 4 of #1224 (#1228): the slate card's two lines — GameCard and
-// PastGameFlipCard render `cardLines(game, bracket)` verbatim (slice 3's
+// Slice 4 of #1224 (#1228): the slate card's two lines — GameCard renders
+// `cardLines(game, bracket)` verbatim (slice 3's
 // text.js) and derive nothing themselves. This file is the card's own
 // contract: each of the four record wordings, on slice 3's captured 2025
 // postseason fixture, by the real gamePk the card would look up. 2025 has no

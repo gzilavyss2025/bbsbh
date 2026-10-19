@@ -1,18 +1,14 @@
 // Presentation vocabulary shared by the slate's game cards, both faces — the
-// pill/chip labels and colors, the doubleheader label, the plain score line,
-// the twin-bill stack, and the slate's crowned-game promotion. Lives here, not
-// inside a component,
-// because four modules need it and they would otherwise import each other:
-// GameResultFace renders PerformerCard, and PerformerCard needs
-// scorePairsLine, which used to live in GameResultFace — a real import cycle;
-// GameResultFace also reached sideways into GameCard for doubleHeaderLabel.
-// GameSelect (a screen) likewise needs the labels/colors for its filter chips
-// without pulling in a component module for two constants.
+// pill labels and colors, the doubleheader label, the plain score line, and the
+// twin-bill stack. Lives here, not inside a component, because several modules
+// need it and they would otherwise import each other: GameResultFace renders
+// PerformerCard, and PerformerCard needs scorePairsLine, which used to live in
+// GameResultFace — a real import cycle; GameResultFace also reached sideways
+// into GameCard for doubleHeaderLabel.
 //
-// Spoiler-free: nothing here reads a score. The CLASSIFICATION that decides
-// which label a card wears is reveal-only (dayHighlights.js's
-// classifyGameCards); these are just the words and hues it maps onto. The three
-// list-reshaping functions at the bottom do take schedule rows, but only their
+// Spoiler-free: nothing here reads a score. These are just the words and hues
+// a result card's pill maps onto. The list-reshaping functions at the bottom
+// do take schedule rows, but only their
 // identity, clock, and coarse abstract state — never a run, an inning, or a
 // linescore.
 
@@ -51,8 +47,7 @@ export function resumeLabel(game) {
   return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
 }
 
-// Pill category label per scenario, in the fixed order the chips and pills
-// both render.
+// Pill category label per scenario, in the fixed order the pills render.
 export const SCENARIO_LABEL = {
   dominant: 'Dominant Performance',
   blowout: 'Blowout',
@@ -83,19 +78,6 @@ export const SCENARIO_STYLE = {
   close: { accent: 'var(--marker)', text: 'var(--text-heading)' },
   extras: { accent: 'var(--allstar-blue)', text: 'var(--text-on-ink)' },
 }
-
-// Every filter chip GameSelect's ResultFilterBar can show, in a fixed display
-// order — crown first (the single biggest deal), then the four scenarios in
-// the same order their own pills render on a card. A chip's `accent` is its
-// card pill's colour (the crown's is --award-ink, see .flipback__pill--crown),
-// worn as the chip's tint and edge, so a chip and the card pill it filters for
-// read as one colour. A pressed chip is the Pill's navy, with a tick (#1131
-// slice 4), so the chip reads no `text` colour; the scenarios' `text` is their
-// card pill's.
-export const FILTER_CHIPS = [
-  { key: 'crown', label: '★ Game of the Night', accent: 'var(--award-ink)' },
-  ...Object.entries(SCENARIO_LABEL).map(([key, label]) => ({ key, label, ...SCENARIO_STYLE[key] })),
-]
 
 // "MIL 5, STL 3" — comma-joined "ABBR score" pairs, in caller-supplied order.
 // Shared so every "final score, plain text" spot renders the same shape
@@ -277,31 +259,6 @@ export function stackSuspendedContinuation(games) {
   }
   if (hidden.size === 0) return { games, stackedBehind }
   return { games: games.filter((g) => !hidden.has(g.gamePk)), stackedBehind }
-}
-
-// Promotes the crowned "Game of the Night" (dayHighlights.js's
-// classifyGameCards, via useDayCardMeta) to the front of the slate — but
-// behind the favorite team's own game, which sortGames already floated to
-// slot 0 and which outranks any storyline for a user who has a favorite. With
-// no pinned game leading the slate there's nothing to sit behind, so the
-// crown takes slot 0 outright rather than hiding behind whichever game merely
-// happened to start earliest.
-//
-// `isPinned(game)` reports whether a game is the favorite's own (or its
-// affiliate's, on a MiLB level) — the same predicate that produced the sort.
-// `cardMetaByGamePk` is an empty Map until the day's reveal-all fires, so this
-// is a no-op before then: nothing here can promote a game ahead of time based
-// on which one WILL turn out to be crowned.
-export function reorderGameOfTheNight(games, cardMetaByGamePk, isPinned = () => false) {
-  if (cardMetaByGamePk.size === 0 || games.length === 0) return games
-  const crownedIdx = games.findIndex((g) => cardMetaByGamePk.get(g.gamePk)?.isGameOfTheNight)
-  if (crownedIdx === -1) return games
-  const target = isPinned(games[0]) ? 1 : 0
-  if (crownedIdx <= target) return games
-  const next = [...games]
-  const [crowned] = next.splice(crownedIdx, 1)
-  next.splice(target, 0, crowned)
-  return next
 }
 
 // Underway, by the same test the slate card's own LIVE pill uses

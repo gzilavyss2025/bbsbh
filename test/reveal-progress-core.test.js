@@ -90,16 +90,21 @@ test('unlockedInnings never exceeds the innings the game actually has', () => {
 })
 
 // --------------------------------------------------------------------------
-// effectiveReveal — the "Scores Unlocked" render override (ADR-0026)
+// effectiveReveal — the stamped-game render override (ADR-0048)
 //
 // The one spoiler-critical property: this changes what RENDERS, never what
 // PERSISTS. The override must not touch the high-water mark the ratchet stores.
+// A stamp says the user was there and already knows how it ended, so
+// re-sealing a game they stamped protects them from nothing. Its one input is
+// `stamped`: the Scores Unlocked day pass that once shared it is gone
+// (ADR-0116).
 // --------------------------------------------------------------------------
-test('effectiveReveal is the identity when the day pass is off', () => {
-  // Pass off: the real mark and real extras-unlock count pass straight through,
-  // untouched — a partly-revealed game keeps rendering exactly as far as it was.
+test('effectiveReveal is the identity when stamped is false', () => {
+  // Not stamped: the real mark and real extras-unlock count pass straight
+  // through, untouched — a partly-revealed game keeps rendering exactly as far
+  // as it was.
   const out = effectiveReveal({
-    scoresUnlocked: false,
+    stamped: false,
     revealedThrough: 3,
     unlocked: 9,
     actualCount: 11,
@@ -107,124 +112,10 @@ test('effectiveReveal is the identity when the day pass is off', () => {
   assert.deepEqual(out, { renderRevealedThrough: 3, renderUnlocked: 9, commitReveals: true })
 })
 
-// The other half of the pass's contract — the part a render mark alone cannot
-// deliver. A half that renders revealed mounts its SealBox force-revealed, and
-// SealBox fires onReveal on ANY transition to shown, flag included, not just a
-// tap. If the caller keeps wiring that to `revealTo` while the pass is on, then
-// merely LOOKING at a half ratchets the real mark — persisted, and cloud-synced
-// to every signed-in device — which is exactly what ADR-0026 says can never
-// happen. Browser-confirmed before the fix: opening /top1 under an active pass
-// wrote `bbsbh:reveal:{gamePk}` = "0".
-test('effectiveReveal stops committing reveals while the pass is on', () => {
-  assert.equal(
-    effectiveReveal({ scoresUnlocked: true, revealedThrough: -1, unlocked: 9, actualCount: 9 })
-      .commitReveals,
-    false,
-  )
-  // Off, reveals commit normally — the default path must be untouched.
-  assert.equal(
-    effectiveReveal({ scoresUnlocked: false, revealedThrough: -1, unlocked: 9, actualCount: 9 })
-      .commitReveals,
-    true,
-  )
-  // Still false for a user who has already revealed by hand: the pass suspends
-  // RECORDING, it doesn't erase what was recorded — the render mark still covers
-  // their real progress via the Math.max above.
-  assert.equal(
-    effectiveReveal({ scoresUnlocked: true, revealedThrough: 5, unlocked: 9, actualCount: 11 })
-      .commitReveals,
-    false,
-  )
-})
-
-test('effectiveReveal reveals every half and unlocks every inning when on', () => {
-  // A 9-regulation game that went 11, opened while the pass is on with NOTHING
-  // revealed by hand (-1). Rendering shows the whole game: mark advances to the
-  // final half, and all 11 innings — extras included — are unlocked, because
-  // opting into spoilers for the day means opting into them (ADR-0008's
-  // extras-never-spoil guard is a default-mode guard the pass lifts on purpose).
+test('effectiveReveal opens a stamped game', () => {
+  // The whole point: a game the user never revealed by hand — and it still
+  // renders open, because they stamped it.
   const out = effectiveReveal({
-    scoresUnlocked: true,
-    revealedThrough: -1,
-    unlocked: 9,
-    actualCount: 11,
-  })
-  assert.equal(out.renderRevealedThrough, halfIndex(11, 'bottom')) // last half
-  assert.equal(out.renderUnlocked, 11)
-})
-
-test('effectiveReveal never walks the render mark backward past real progress', () => {
-  // Contrived: a real mark already at/beyond the computed last half (a game
-  // still loading its full inning count, say). Math.max keeps the higher value
-  // so the override can never *hide* a half the user already earned.
-  const out = effectiveReveal({
-    scoresUnlocked: true,
-    revealedThrough: 99,
-    unlocked: 9,
-    actualCount: 9,
-  })
-  assert.equal(out.renderRevealedThrough, 99)
-})
-
-test('effectiveReveal never yields a non-finite render mark', () => {
-  // Guards the deliberate choice of a finite last-half index over Infinity:
-  // an Infinity mark could reach an array index or be stringified into storage.
-  for (const actualCount of [7, 9, 11, 18]) {
-    const { renderRevealedThrough } = effectiveReveal({
-      scoresUnlocked: true,
-      revealedThrough: -1,
-      unlocked: 7,
-      actualCount,
-    })
-    assert.ok(Number.isInteger(renderRevealedThrough), `finite for ${actualCount}`)
-  }
-})
-
-test('the day-pass override can NEVER advance the persisted ratchet', () => {
-  // The mutation invariant. Simulate the InningViewer wiring: the persisted
-  // high-water mark is `persisted`; the pass is ON, so the render override
-  // fully reveals the screen. The ratchet (mergeMark) is the ONLY thing that
-  // writes storage, and the component feeds it the real mark — NEVER the render
-  // override. Assert that after a full-reveal render, the persisted mark is
-  // still exactly where the user left it by hand.
-  const actualCount = 9
-  let persisted = 3 // revealed through the bottom of the 2nd, by hand
-
-  const { renderRevealedThrough } = effectiveReveal({
-    scoresUnlocked: true,
-    revealedThrough: persisted,
-    unlocked: 9,
-    actualCount,
-  })
-  assert.equal(renderRevealedThrough, halfIndex(9, 'bottom')) // 17 — fully open
-
-  // What the component actually persists on every reveal source is the real
-  // mark. Nothing about turning the pass on runs it through the ratchet.
-  persisted = mergeMark(persisted, persisted)
-  assert.equal(persisted, 3) // untouched — the pass leaked nothing into storage
-
-  // And this is precisely the bug the separation prevents: had the render
-  // override been wired into the ratchet, it would have jumped the stored mark
-  // to 17 and the game would stay spoiled after 8am. It must not.
-  const ifLeaked = mergeMark(3, renderRevealedThrough)
-  assert.equal(ifLeaked, 17)
-  assert.notEqual(persisted, ifLeaked)
-})
-
-// --------------------------------------------------------------------------
-// effectiveReveal — the stamped-game render override (ADR-0048)
-//
-// The THIRD departure inside the spoiler rule's scope, and it rides the same
-// seam as the day pass for the same reason: a stamp says the user was there
-// and already knows how it ended, so re-sealing a game they stamped protects
-// them from nothing. Same contract as ADR-0026's pass — RENDER only, never a
-// byte into the ratchet.
-// --------------------------------------------------------------------------
-test('effectiveReveal opens a stamped game with the day pass off', () => {
-  // The whole point: no pass, no consented day, a game the user never revealed
-  // by hand — and it still renders open, because they stamped it.
-  const out = effectiveReveal({
-    scoresUnlocked: false,
     stamped: true,
     revealedThrough: -1,
     unlocked: 9,
@@ -234,15 +125,31 @@ test('effectiveReveal opens a stamped game with the day pass off', () => {
   assert.equal(out.renderUnlocked, 11)
 })
 
-// The ADR-0026 trap, inherited. A stamp unlock is a new force-reveal source,
-// so it owes the same answer: a half that renders revealed mounts its SealBox
-// force-revealed, SealBox fires onReveal on any transition to shown, and a
-// caller still wired to `revealTo` would ratchet the REAL mark for every half
-// the reader merely looked at — written to localStorage and cloud-synced to
-// every device. Opening a stamped game must persist nothing.
+// The other half of the contract — the part a render mark alone cannot
+// deliver. A half that renders revealed mounts its SealBox force-revealed, and
+// SealBox fires onReveal on ANY transition to shown, flag included, not just a
+// tap. A caller still wired to `revealTo` would ratchet the REAL mark for every
+// half the reader merely looked at — written to localStorage and cloud-synced
+// to every device. Browser-confirmed before the first fix (under the retired
+// day pass): opening /top1 wrote `bbsbh:reveal:{gamePk}` = "0". Opening a
+// stamped game must persist nothing.
 test('effectiveReveal stops committing reveals for a stamped game', () => {
   assert.equal(
-    effectiveReveal({ scoresUnlocked: false, stamped: true, revealedThrough: -1, unlocked: 9, actualCount: 9 })
+    effectiveReveal({ stamped: true, revealedThrough: -1, unlocked: 9, actualCount: 9 })
+      .commitReveals,
+    false,
+  )
+  // Unstamped, reveals commit normally — the default path must be untouched.
+  assert.equal(
+    effectiveReveal({ stamped: false, revealedThrough: -1, unlocked: 9, actualCount: 9 })
+      .commitReveals,
+    true,
+  )
+  // Still false for a user who has already revealed by hand: the override
+  // suspends RECORDING, it doesn't erase what was recorded — the render mark
+  // still covers their real progress via the Math.max.
+  assert.equal(
+    effectiveReveal({ stamped: true, revealedThrough: 5, unlocked: 9, actualCount: 11 })
       .commitReveals,
     false,
   )
@@ -253,33 +160,67 @@ test('effectiveReveal stops committing reveals for a stamped game', () => {
 // alike. This is the regression guard: the overwhelming majority of games the
 // user opens are unstamped, and they must still seal.
 test('effectiveReveal is untouched for an unstamped game', () => {
-  const base = { scoresUnlocked: false, revealedThrough: 3, unlocked: 9, actualCount: 11 }
+  const base = { revealedThrough: 3, unlocked: 9, actualCount: 11 }
   const expected = { renderRevealedThrough: 3, renderUnlocked: 9, commitReveals: true }
   assert.deepEqual(effectiveReveal(base), expected)
   assert.deepEqual(effectiveReveal({ ...base, stamped: false }), expected)
-})
-
-// The two overrides are independent inputs to one branch: either alone opens
-// the game, and neither cancels the other.
-test('effectiveReveal treats the pass and the stamp as independent openers', () => {
-  const base = { revealedThrough: -1, unlocked: 9, actualCount: 9 }
-  const open = { renderRevealedThrough: halfIndex(9, 'bottom'), renderUnlocked: 9, commitReveals: false }
-  assert.deepEqual(effectiveReveal({ ...base, scoresUnlocked: true, stamped: false }), open)
-  assert.deepEqual(effectiveReveal({ ...base, scoresUnlocked: false, stamped: true }), open)
-  assert.deepEqual(effectiveReveal({ ...base, scoresUnlocked: true, stamped: true }), open)
 })
 
 // The stamp override never walks the render mark BACKWARD. A user who revealed
 // further by hand than the override's floor keeps every half they reached.
 test('effectiveReveal never walks a stamped game backward past real progress', () => {
   const { renderRevealedThrough } = effectiveReveal({
-    scoresUnlocked: false,
     stamped: true,
     revealedThrough: 40, // absurdly far — a suspended game resumed, say
     unlocked: 9,
     actualCount: 9,
   })
   assert.equal(renderRevealedThrough, 40)
+})
+
+test('effectiveReveal never yields a non-finite render mark', () => {
+  // Guards the deliberate choice of a finite last-half index over Infinity:
+  // an Infinity mark could reach an array index or be stringified into storage.
+  for (const actualCount of [7, 9, 11, 18]) {
+    const { renderRevealedThrough } = effectiveReveal({
+      stamped: true,
+      revealedThrough: -1,
+      unlocked: 7,
+      actualCount,
+    })
+    assert.ok(Number.isInteger(renderRevealedThrough), `finite for ${actualCount}`)
+  }
+})
+
+test('the stamp override can NEVER advance the persisted ratchet', () => {
+  // The mutation invariant. Simulate the InningViewer wiring: the persisted
+  // high-water mark is `persisted`; the game is stamped, so the render override
+  // fully reveals the screen. The ratchet (mergeMark) is the ONLY thing that
+  // writes storage, and the component feeds it the real mark — NEVER the render
+  // override. Assert that after a full-reveal render, the persisted mark is
+  // still exactly where the user left it by hand.
+  const actualCount = 9
+  let persisted = 3 // revealed through the bottom of the 2nd, by hand
+
+  const { renderRevealedThrough } = effectiveReveal({
+    stamped: true,
+    revealedThrough: persisted,
+    unlocked: 9,
+    actualCount,
+  })
+  assert.equal(renderRevealedThrough, halfIndex(9, 'bottom')) // 17 — fully open
+
+  // What the component actually persists on every reveal source is the real
+  // mark. Nothing about a stamp runs it through the ratchet.
+  persisted = mergeMark(persisted, persisted)
+  assert.equal(persisted, 3) // untouched — the stamp leaked nothing into storage
+
+  // And this is precisely the bug the separation prevents: had the render
+  // override been wired into the ratchet, it would have jumped the stored mark
+  // to 17 and the game would stay open after an unstamp. It must not.
+  const ifLeaked = mergeMark(3, renderRevealedThrough)
+  assert.equal(ifLeaked, 17)
+  assert.notEqual(persisted, ifLeaked)
 })
 
 // --------------------------------------------------------------------------

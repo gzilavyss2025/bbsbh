@@ -24,7 +24,7 @@ test('lensOn: off wider than a phone', () => {
   assert.equal(lensOn({ phone: false, stepInfo: STEP, commitReveals: true }), false)
 })
 
-test('lensOn: off with no frontier (a caught-up game, Scores Unlocked, a stamp)', () => {
+test('lensOn: off with no frontier (a caught-up game, a stamp)', () => {
   assert.equal(lensOn({ phone: true, stepInfo: null, commitReveals: true }), false)
 })
 

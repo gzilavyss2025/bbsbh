@@ -53,7 +53,7 @@ Every one-shot in the package hangs off one of three gates (the leader board's f
 A CSS animation runs when its element mounts, or when the element gains the
 class carrying it. That is right for a change the reader just caused and wrong
 for a cold load, a return visit, a navigation, a poll, or a force-reveal (the
-Scores Unlocked pass, ADR-0026, or the reader's own stamp, ADR-0048) — all of
+reader's own stamp, ADR-0048, or a box score they opened before, ADR-0049) — all of
 which present the same already-changed DOM and would replay a gesture nobody
 made. A substitution from the third inning must render struck through, not draw
 itself again every time the page is opened.
@@ -151,8 +151,8 @@ final, with no motion. The timing depends on the fetch alone, never on the game 
 `prefers-reduced-motion` no transition runs.
 
 **What the gate cannot see.** A fetch still has to finish after a page load, so a card on a freshly
-loaded page arrives the same way, once its data is in. The Scores Unlocked pass and a stamp change the
-seal, not the card, so they do not change this. `FinalizedLineCard` has no fetch of its own: it is
+loaded page arrives the same way, once its data is in. A stamp changes the seal, not the card, so it
+does not change this. `FinalizedLineCard` has no fetch of its own: it is
 drawn final unless a caller passes `open={false}` first.
 
 ## The at-bat replay's count and bases (#1858)
@@ -184,10 +184,10 @@ referenced where it stands in `styles/scorecard/box.css` rather than promoted �
 that file is in `index.css`'s core list, so the keyframe is always defined, and
 a keyframe resolves by name wherever it was declared. The frontier seal runs it,
 byte for byte what `.sc-ab__seal` runs — scoped to `.pagenav--innings`, because
-`.btn--reveal` is the kraft skin and not the frontier. The home slate wears it
-on "Reveal all results" and a live game's lineup page on "Catch up to live", and
-a bare `.btn--reveal` rule put a permanent breath on a spoiler action on the
-app's front door.
+`.btn--reveal` is the kraft skin and not the frontier. A live game's lineup page
+wears it on "Catch up to live" (the home slate wore it on "Reveal all results"
+until ADR-0116), and a bare `.btn--reveal` rule put a permanent breath on a
+spoiler action on the app's front door.
 
 They stayed two keyframes rather than one: a full tape cover reads at opacity
 alone, while a 6–9px dot needs the deeper fade and a little scale to register.

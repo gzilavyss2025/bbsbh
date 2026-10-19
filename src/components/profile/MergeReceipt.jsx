@@ -5,8 +5,8 @@ import { hasSeenMergeReceipt, markMergeReceiptSeen } from '../../lib/account/mer
 // time this device's things become an account's things.
 //
 // WHY IT EXISTS. That moment is the one this whole subsystem needs to explain
-// and the one it has always done silently. Invisible is how the spoiled-day
-// backfill bug went unnoticed on the owner's own second device for weeks
+// and the one it has always done silently. Invisible is how the (since-removed)
+// spoiled-day backfill bug went unnoticed on the owner's own second device for weeks
 // (ADR-0026, 2026-08-06): everything looked fine because nothing ever claimed
 // to have happened. A receipt is cheap and it makes a silent merge legible.
 //

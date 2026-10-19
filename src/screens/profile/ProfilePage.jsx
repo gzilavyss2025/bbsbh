@@ -9,13 +9,11 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { usePreferences } from '../../hooks/preferences/usePreferences.js'
 import { useRecentSearches } from '../../hooks/useRecentSearches.js'
-import { useScoresUnlocked } from '../../hooks/useScoresUnlocked.js'
 import { useStamps } from '../../hooks/useStamps.js'
 import { countGamesInProgress } from '../../lib/account/localData.js'
 import { browserStorage } from '../../lib/account/preferencesStorage.js'
 import { normalizeSilentChannels } from '../../lib/account/syncStatus.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
-import { formatResetTime } from '../../lib/scoresUnlocked.js'
 import { allStamps } from '../../lib/stamps.js'
 import { SPORT_IDS } from '../../lib/teams.js'
 import { ClubSection } from './sections/ClubSection.jsx'
@@ -76,7 +74,6 @@ export function ProfilePage() {
 
   const { club, keepAwake, motion, set } = usePreferences()
   const { stamps } = useStamps()
-  const { spoiledDays, passActive, resetAt, disable } = useScoresUnlocked()
   const { recent, clear: clearRecent } = useRecentSearches()
   const rawStatus = useSyncStatusState()
 
@@ -101,8 +98,8 @@ export function ProfilePage() {
   const [gameCount] = useState(() => countGamesInProgress(browserStorage()))
   const stampCount = useMemo(() => allStamps(stamps).length, [stamps])
   const counts = useMemo(
-    () => ({ stamps: stampCount, games: gameCount, days: spoiledDays.length }),
-    [stampCount, gameCount, spoiledDays.length],
+    () => ({ stamps: stampCount, games: gameCount }),
+    [stampCount, gameCount],
   )
 
   return (
@@ -128,16 +125,11 @@ export function ProfilePage() {
           onKeepAwake={(value) => set('keepAwake', value)}
           motion={motion}
           onMotion={(value) => set('motion', value)}
-          passActive={passActive}
-          passResetLabel={formatResetTime(resetAt)}
-          onReseal={disable}
-          spoiledDayCount={spoiledDays.length}
         />
 
         <LedgerSection
           stampCount={stampCount}
           gameCount={gameCount}
-          spoiledDayCount={spoiledDays.length}
         />
 
         <DataSection

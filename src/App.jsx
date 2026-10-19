@@ -23,18 +23,10 @@ function lazyNamed(loader, name) {
   return lazy(() => loader().then((module) => ({ default: module[name] })))
 }
 
-// Headless cross-device sync for the spoiled-day list (ADR-0026). Imports
-// @clerk/clerk-react at its top, so — like RevealCloudSync and AccountButton —
-// it is only ever dynamically imported, and only on a deploy that configures
-// Clerk. Mounted app-wide rather than per screen: the consent it syncs is
-// site-wide, not per game.
-const SpoiledDaysCloudSync = isClerkEnabled
-  ? lazyNamed(() => import('./components/sync/SpoiledDaysCloudSync.jsx'), 'SpoiledDaysCloudSync')
-  : null
-
-// Headless cross-device sync for the Logbook's game stamps (ADR-0035). Same
-// shape as the two above it: imports @clerk/clerk-react at its top, so it is
-// only ever dynamically imported and only on a deploy that configures Clerk.
+// Headless cross-device sync for the Logbook's game stamps (ADR-0035). Like
+// RevealCloudSync and AccountButton, it imports @clerk/clerk-react at its top,
+// so it is only ever dynamically imported and only on a deploy that configures
+// Clerk.
 // App-wide rather than per screen, because a stamp minted in a box score has to
 // publish even after the user navigates away from that game.
 const StampsCloudSync = isClerkEnabled
@@ -60,14 +52,14 @@ const PreferencesCloudSync = isClerkEnabled
   ? lazyNamed(() => import('./components/sync/PreferencesCloudSync.jsx'), 'PreferencesCloudSync')
   : null
 
-// The shared-device guard for the three channels whose local state is one key
-// per game, or none at all: the scoring frontier (ADR-0022), the box score's own
-// bit (ADR-0049), and the days consented to (ADR-0026). Not a sync channel — it
+// The shared-device guard for the two channels whose local state is one key
+// per game: the scoring frontier (ADR-0022) and the box score's own bit
+// (ADR-0049). Not a sync channel — it
 // makes no request — but it lives with them because it acts on the same signal
 // they do, the sign-in transition. Same dynamic-import shape for the same
 // reason, since it reads Clerk's userId.
 //
-// App-wide is the whole point: all three are RENDER overrides, read
+// App-wide is the whole point: both open seals, read
 // synchronously as a scoring surface first paints, so a guard that waited for
 // that surface's own network pull would decide after the score was on the page.
 // Its own header has the full argument.
@@ -552,11 +544,6 @@ export default function App() {
           a sync report re-renders only what reads the status, never this
           subtree. */}
       <SyncStatusProvider enabled={isClerkEnabled}>
-        {SpoiledDaysCloudSync && (
-          <Suspense fallback={null}>
-            <SpoiledDaysCloudSync />
-          </Suspense>
-        )}
         {StampsCloudSync && (
           <Suspense fallback={null}>
             <StampsCloudSync />

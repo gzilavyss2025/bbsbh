@@ -66,7 +66,7 @@ test('a patch still clears the one field it explicitly empties', () => {
 test('the six fields of one park do not disturb the other twenty-nine', () => {
   const prev = {
     [`ballpark.${WRIGLEY}Wordmark`]: WORDMARK,
-    'scoresUnlocked.toggleLabel': 'Show me the scores',
+    'stampIn.confirm': 'Show me the scores',
   }
   const { clean, staleKeys } = writePlan(prev, {
     patch: {
@@ -78,7 +78,7 @@ test('the six fields of one park do not disturb the other twenty-nine', () => {
   })
 
   assert.deepEqual(staleKeys, [])
-  assert.equal(clean['scoresUnlocked.toggleLabel'], 'Show me the scores')
+  assert.equal(clean['stampIn.confirm'], 'Show me the scores')
   assert.equal(clean[`ballpark.${WRIGLEY}Wordmark`], WORDMARK)
   assert.equal(clean[`ballpark.${FENWAY}Focus`], '50 20')
 })

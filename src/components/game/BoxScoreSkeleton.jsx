@@ -1,33 +1,25 @@
 import { useId } from 'react'
 import { showsPerformerCard } from '../../lib/resultCards.js'
 
-// Placeholder for a PastGameFlipCard's back face while a revealed game's
-// feed/win-probability are still in flight (see PastGameFlipCard.jsx) —
+// Placeholder for a result card (GameResultFace) while a revealed game's
+// feed/win-probability are still in flight (Stamp In's season list) —
 // grayscale blocks shaped like GameResultFace's layout, pulsing together as
 // one unit, with a small baseball rolling across the middle of the card,
 // overlaid above the pulsing content on its own z-index, as the "still
 // fetching" tell. Replaces the shared page-level Loader here since
-// N of these can be on screen at once (one per still-loading card after
-// "Reveal all results"), each finishing independently as its own fetch
+// N of these can be on screen at once (one per still-loading card), each
+// finishing independently as its own fetch
 // lands — a per-card skeleton reads as normal progressive loading, where N
 // copies of the scoreboard-flip Loader reads as the same animation
 // stuttering/repeating. Purely decorative (aria-hidden); the one accessible
 // string is the status message screen readers get instead.
 //
-// `cardMeta` is the SAME classification PastGameFlipCard forwards to
-// GameResultFace once revealed, threaded through here too so
-// showsPerformerCard (resultCards.js) can reserve a matching
-// .skel__perfcard block when the real face is going to stack an extra
-// PerformerCard above its Play of the Game text (the crowned Game of the
-// Night shows both). Best-effort, NOT a guarantee against every layout
-// jump: cardMeta comes from a day-wide batch (useDayCardMeta.js) that needs
-// every game's own signals before it can classify any one of them, so it
-// can populate no earlier than — and often slightly after — this card's own
-// fetch resolves and this skeleton unmounts. When it lands late,
-// GameResultFace itself mounts without the block and grows into it on the
-// next render, same as it already could before this skeleton existed; this
-// placeholder only narrows that window, for whichever cards' own fetches
-// happen to be slower than the day-wide classification.
+// `cardMeta` is the same optional classification GameResultFace takes, so
+// showsPerformerCard (resultCards.js) can reserve a matching .skel__perfcard
+// block when the real face is going to stack an extra PerformerCard above its
+// Play of the Game text. No caller passes one since the slate's day-wide
+// classification was removed with its reveal-all (ADR-0116), so the block
+// does not render today.
 export function BoxScoreSkeleton({ cardMeta = null }) {
   const showPerformer = showsPerformerCard(cardMeta)
   return (
@@ -399,7 +391,7 @@ export function BallGlyph({ className = '' }) {
 
 function SkelBall() {
   // A prefix, not a raw id: possibly several skeleton cards are on screen
-  // at once (one per still-loading game after "Reveal all results"), and
+  // at once, and
   // plain hardcoded <defs> ids would collide across those instances — the
   // <use> elements below would all end up pointing at the FIRST card's
   // defs. useId() keeps each instance's frame ids unique to it.

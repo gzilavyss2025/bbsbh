@@ -25,13 +25,13 @@ import { Button } from '../ui/control/Button.jsx'
 // per-play button here would dead-end roughly four times in ten. Every one of
 // the 41 Final games in the live sweep had a condensed cut.
 //
-// SPOILER RULE: this renders only from the flip card's BACK face, which
-// PastGameFlipCard mounts only once `revealed` is true — the same gate that
-// lets GameResultFace call reveal-only selectors directly. The label is
-// deliberately structural ("Condensed game", never a clip title, which would
-// narrate the outcome), so even the button's own text would survive being seen
-// early. It must not move to the front face, `cardMeta`, or anything
-// classifyGameCards computes before the reveal.
+// SPOILER RULE: this renders only from GameResultFace, which its hosts mount
+// only once the result is meant to show (Stamp In's consented page, the
+// postseason series pages) — the same gate that lets GameResultFace call
+// reveal-only selectors directly. The label is deliberately structural
+// ("Condensed game", never a clip title, which would narrate the outcome), so
+// even the button's own text would survive being seen early. It must not move
+// to anything computed before the result is shown.
 export function WatchCondensedButton({ gamePk }) {
   const [open, setOpen] = useState(false)
   const [item, setItem] = useState(null)

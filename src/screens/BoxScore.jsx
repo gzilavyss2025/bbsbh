@@ -111,7 +111,6 @@ export function BoxScore({
   loading,
   lastUpdated,
   onSection,
-  spoilersOff = false,
 }) {
   // The masthead above every section (GameView.jsx) already carries this
   // game's date, so the title itself just says "Box score" — no second date
@@ -135,7 +134,7 @@ export function BoxScore({
   const eventHistory = useEventHistory(feed)
   const stamped = useStampUnseal(feed?.gamePk)
   // THIS BOX SCORE'S OWN MARK (ADR-0049): the reader already lifted this seal,
-  // here or on another of their devices. Alone among the three openers below, it
+  // here or on another of their devices. Alone of the two openers below, it
   // persists — one bit per gamePk, written only on a real tap.
   const { boxOpened, markBoxOpened } = useBoxScoreReveal(feed?.gamePk)
 
@@ -153,24 +152,23 @@ export function BoxScore({
         )}
       </div>
 
-      {/* THREE OPENERS, ONE INPUT. The day pass for a day the reader agreed to
-          spoil (`spoilersOff`, ADR-0026, resolved from the date by GameView);
-          their own stamp on this game (ADR-0048); and their own record of having
-          already lifted THIS seal (ADR-0049). All three ride SealBox's existing
-          `forceRevealed`, so the render-function gate is untouched: children are
-          invoked only in the revealed branch (ADR-0001/0002); the flags choose
-          WHICH branch renders, never what it computes.
-          ONLY THE THIRD WRITES ANYTHING, and the `onReveal` gate is the
+      {/* TWO OPENERS, ONE INPUT. The reader's own stamp on this game
+          (ADR-0048), and their own record of having already lifted THIS seal
+          (ADR-0049). Both ride SealBox's existing `forceRevealed`, so the
+          render-function gate is untouched: children are invoked only in the
+          revealed branch (ADR-0001/0002); the flags choose WHICH branch
+          renders, never what it computes.
+          ONLY THE SECOND WRITES ANYTHING, and the `onReveal` gate is the
           load-bearing line: SealBox fires it whenever the box becomes shown, by
           tap OR by flag (SealBox.jsx). Handing it over unconditionally would let
-          the pass and the stamp record a permanent mark for a seal nobody
-          touched — what ADR-0026 promises the pass can never do, and what keeps
-          ADR-0048's override as reversible as the stamp behind it. Under either
-          flag there is no seal, so there is no tap to record. */}
+          the stamp record a permanent mark for a seal nobody touched — and
+          ADR-0048's override must stay as reversible as the stamp behind it.
+          Under a stamp there is no seal, so there is no tap to record. (The
+          Scores Unlocked day pass was a third opener until ADR-0116.) */}
       <SealBox
         label="Tap to reveal the box score"
-        forceRevealed={spoilersOff || stamped || boxOpened}
-        onReveal={spoilersOff || stamped ? undefined : markBoxOpened}
+        forceRevealed={stamped || boxOpened}
+        onReveal={stamped ? undefined : markBoxOpened}
         gamePk={feed?.gamePk}
       >
         {() => {

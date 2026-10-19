@@ -20,7 +20,7 @@
 // The things that cross devices. Ordered as the receipt reads them. `books`
 // sits next to `stamps` — the Game Log's named books and its stamps are one
 // feature (ADR-0036) and read as one thing to a user.
-export const SYNC_CHANNELS = Object.freeze(['reveal', 'spoiledDays', 'stamps', 'books', 'prefs'])
+export const SYNC_CHANNELS = Object.freeze(['reveal', 'stamps', 'books', 'prefs'])
 
 // off          this deploy configures no account at all (no Clerk publishable
 //              key) — there is nothing to sync and nothing is wrong.

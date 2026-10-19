@@ -1,5 +1,5 @@
-// The one place the four backend exceptions (api/reveal.js, api/spoiled-days.js,
-// api/copy.js, api/stamps.js) decide whether a Redis store is configured at all.
+// The one place the backend exceptions (api/reveal.js, api/copy.js,
+// api/stamps.js, and the rest) decide whether a Redis store is configured at all.
 //
 // WHY THIS EXISTS — the failure it was written for. Each of those functions used
 // to read `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` itself, and each

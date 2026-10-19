@@ -1,5 +1,5 @@
 // Clerk token verification for the authenticated endpoints (api/reveal.js,
-// api/spoiled-days.js, api/stamps.js, and the admin half of api/copy.js).
+// api/stamps.js, and the admin half of api/copy.js, among others).
 //
 // WHY THIS EXISTS — the same failure as api/_lib/redis.js, one layer down. Each
 // of those functions had its own `authenticate()` that collapsed every possible
@@ -111,7 +111,8 @@ function keyShape(secretKey) {
 // `data` property, so `data` came back `undefined` for a PERFECTLY VALID
 // token, `!data?.sub` was therefore always true, and every authenticated
 // request in production was answered `401 invalid token` — reveal sync, the
-// spoiled-day map, and the Logbook alike, since the day Clerk was added.
+// since-removed spoiled-day map, and the Logbook alike, since the day Clerk was
+// added.
 //
 // It hid so well because it fails in the direction that looks like a
 // misconfiguration. A bad token throws and is caught, and a GOOD token was

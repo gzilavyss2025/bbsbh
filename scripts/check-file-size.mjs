@@ -86,7 +86,7 @@ const BUDGETS = {
   'src/styles/15-team-color-lab.css': 680, // 674
   'src/styles/17-identity-lab-workbench.css': 1196, // 1200
   'src/styles/21-box-score.css': 900, // 800
-  'src/styles/22-box-score-tables.css': 800, // 789
+  'src/styles/22-box-score-tables.css': 700, // 680
   'src/styles/28-team-hub.css': 900, // 859
   'src/styles/29-team-transactions.css': 800, // 950
   'src/styles/31-wild-card.css': 1200, // 1300
@@ -130,9 +130,9 @@ const BUDGETS = {
   // a module boundary, which is the one pair that has to be read together.
   'scripts/gen-pitch-arsenal.mjs': 661, // 661
   'src/api/teamTransactions.js': 700, // 619
-  'src/screens/InningViewer.jsx': 1100, // 1003
+  'src/screens/InningViewer.jsx': 1000, // 941
   'src/api/boxscore.js': 800, // 762
-  'src/screens/GameSelect.jsx': 1100, // 1044
+  'src/screens/GameSelect.jsx': 850, // 822
   // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's
   // one new reader tipped it. fetchSeasonMeta belongs here and nowhere else:
   // this module already owned the seasons endpoint (fetchAllStarInfo was a

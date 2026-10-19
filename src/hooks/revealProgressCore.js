@@ -57,38 +57,27 @@ export function unlockedInnings(regulation, actualCount, revealedThrough) {
   return u
 }
 
-// Render-time reveal override, from either of TWO independent openers:
+// Render-time reveal override, from ONE opener: `stamped` — this one game
+// carries the user's own stamp (ADR-0048). A stamp is minted only from inside a
+// revealed box score of a FINAL game and means "I was there / I watched this,"
+// so a seal on a game they stamped protects them from nothing: they already
+// know how it ended. Scoped to that one gamePk, and derived from a record they
+// created. (A second opener, the Scores Unlocked day pass, was removed in
+// ADR-0116.)
 //
-//   • `scoresUnlocked` — the site-wide "Scores Unlocked" day pass
-//     (useScoresUnlocked.js / ADR-0026), scoped to a day the user agreed to
-//     spoil.
-//   • `stamped` — this one game carries the user's own stamp (ADR-0048). A
-//     stamp is minted only from inside a revealed box score of a FINAL game
-//     and means "I was there / I watched this," so a seal on a game they
-//     stamped protects them from nothing: they already know how it ended.
-//     Scoped to that one gamePk, and derived from a record they created
-//     rather than from a consent tap — which is why it needs its own ADR
-//     rather than riding the pass's `spoilersOff` flag. It must NOT: the
-//     pass's flag also drives the day-pass chrome ("scores are unlocked
-//     today"), and a stamped game on an ordinary sealed day would make that
-//     copy a lie.
+// When `stamped` is false this is the identity: the real high-water mark and
+// the real extras-unlock count pass straight through. When it is true, every
+// real half renders as revealed — the RENDER mark advances to the game's final
+// half and every inning the game actually has is unlocked (extras included:
+// the reader already knows how the game ended, so ADR-0008's default-mode
+// guard protects nothing here).
 //
-// Either alone opens the game and neither cancels the other, so they share one
-// branch. When BOTH are off this is the identity:
-// the real high-water mark and the real extras-unlock count pass straight
-// through. When it's ON, every real half renders as revealed — the RENDER mark
-// advances to the game's final half and every inning the game actually has is
-// unlocked (extras included: opting into spoilers for the day is opting into
-// them, ADR-0008's protection is a *default-mode* guard the pass deliberately
-// lifts).
-//
-// This is the whole spoiler-safety contract of the pass, so read it carefully:
-// the values returned here are for RENDERING ONLY. They must never be fed back
-// to the ratchet (mergeMark), written to localStorage, or handed to the cloud
-// sync — the caller keeps the untouched `revealedThrough` for all of that. The
-// pass unseals the screen for today without persisting a single half you didn't
-// reveal by hand, so flipping it off (or the 8am reset) drops straight back to
-// the real mark with nothing leaked into storage or across devices.
+// This is the whole spoiler-safety contract of the override, so read it
+// carefully: the values returned here are for RENDERING ONLY. They must never
+// be fed back to the ratchet (mergeMark), written to localStorage, or handed to
+// the cloud sync — the caller keeps the untouched `revealedThrough` for all of
+// that. Unstamping a game drops straight back to the real mark with nothing
+// leaked into storage or across devices.
 //
 // Finite, deliberately not Infinity: an Infinity render mark could reach an
 // array index or be stringified into a storage value (parseRevealMark rejects
@@ -97,26 +86,18 @@ export function unlockedInnings(regulation, actualCount, revealedThrough) {
 // 'bottom'), reveals every half cleanly with an ordinary integer.
 //
 // `commitReveals` is the OTHER half of the contract, and it is load-bearing: the
-// caller MUST stop committing reveals while the pass is on. A render mark alone
-// is not enough, because a half that renders revealed mounts its `SealBox`
-// force-revealed, and `SealBox` fires `onReveal` whenever it becomes shown — by
-// tap OR by the flag (see SealBox.jsx). Wire that straight through to `revealTo`
-// and the pass ratchets the REAL mark for every half the user merely looks at:
-// written to localStorage, and for a signed-in user propagated to every other
-// device by RevealCloudSync. That is exactly what ADR-0026 promises can never
-// happen, and what the consent copy means by "it does not track or advance your
-// by-hand scoring". So it is false while unlocked. Nothing is lost: under the
-// pass there are no seals to tap, so there is no genuine reveal to record.
-//
-// THE SAME ANSWER, FOR THE SAME REASON, FOR `stamped`. ADR-0026 asks every
-// future force-reveal source whether it must also stop the commit, and this one
-// must — more urgently, even. The pass expires; a stamp does not. Were a
-// stamped game to commit, merely REVISITING one would ratchet a mark the reader
-// never earned by hand, write it to localStorage, and push it through
+// caller MUST stop committing reveals while the override is on. A render mark
+// alone is not enough, because a half that renders revealed mounts its
+// `SealBox` force-revealed, and `SealBox` fires `onReveal` whenever it becomes
+// shown — by tap OR by the flag (see SealBox.jsx). Wire that straight through
+// to `revealTo` and merely REVISITING a stamped game would ratchet a mark the
+// reader never earned by hand, write it to localStorage, and push it through
 // RevealCloudSync to every device they own — permanently, and for a game whose
-// seal they might well want back if they ever unstamp it.
-export function effectiveReveal({ scoresUnlocked, stamped, revealedThrough, unlocked, actualCount }) {
-  if (!scoresUnlocked && !stamped) {
+// seal they might well want back if they ever unstamp it. So it is false while
+// stamped. Nothing is lost: with every half open there are no seals to tap, so
+// there is no genuine reveal to record.
+export function effectiveReveal({ stamped, revealedThrough, unlocked, actualCount }) {
+  if (!stamped) {
     return {
       renderRevealedThrough: revealedThrough,
       renderUnlocked: unlocked,

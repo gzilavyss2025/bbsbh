@@ -197,3 +197,9 @@ Nothing about this page changes. Stamp In still mounts no `SealBox`, imports no
 ratchet nowhere, which is the property this ADR needed. And ADR-0049's bit is
 scoped to the one box score whose seal was tapped, so a season of games listed
 here can never acquire one.
+
+## Note (2026-10-18)
+
+ADR-0116 removed the Scores Unlocked pass. Stamp In is now the one surface that asks
+for consent through `ConsentModal`, and its "render-only, in ADR-0026's exact sense"
+rule still holds: the sense is the same, the pass that first used it is gone.
