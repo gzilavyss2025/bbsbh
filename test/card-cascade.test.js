@@ -989,7 +989,7 @@ const C3 = [
       'components/teamstats/BullpenBoard.jsx',
       'components/teamstats/SeasonSeriesStrip.jsx',
       'components/team/FormerTeammates.jsx',
-      'screens/FoulTrackerPage.jsx',
+      'screens/foul-tracker/Boards.jsx',
     ],
     ns: 'metric',
     head: true,
@@ -1805,10 +1805,10 @@ test('C6b: the ledger frames stay ledgers, and the ledger keeps the old .tradeca
 // .factgrid__grid).
 const C6C = [
   { css: '06b-offday-cards.css', sel: '.offday__tile', jsx: ['components/team/OffDaySection.jsx'], ns: 'offday__tile', as: 'button' },
-  { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulboard__hero', as: 'div', keep: ['overflow'] },
-  { css: '43-foul-tracker.css', sel: '.foulavg', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulavg', as: 'div' },
-  { css: '43-foul-tracker.css', sel: '.gamehigh-tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'gamehigh-tiles', as: 'div', frame: 'ledger', ground: '.gamehigh-tiles__grid' },
-  { css: '43-foul-tracker.css', sel: '.souvenir-row__tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'souvenir-row__tiles', as: 'div', frame: 'ledger', ground: '.souvenir-row__tilegrid' },
+  { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/foul-tracker/Boards.jsx'], ns: 'foulboard__hero', as: 'div', keep: ['overflow'] },
+  { css: '43-foul-tracker.css', sel: '.foulavg', jsx: ['screens/foul-tracker/SeasonBoards.jsx'], ns: 'foulavg', as: 'div' },
+  { css: '43-foul-tracker.css', sel: '.gamehigh-tiles', jsx: ['screens/foul-tracker/GameBoards.jsx'], ns: 'gamehigh-tiles', as: 'div', frame: 'ledger', ground: '.gamehigh-tiles__grid' },
+  { css: '43-foul-tracker.css', sel: '.souvenir-row__tiles', jsx: ['screens/foul-tracker/GameBoards.jsx'], ns: 'souvenir-row__tiles', as: 'div', frame: 'ledger', ground: '.souvenir-row__tilegrid' },
   { css: '78-offseason.css', sel: '.springcount', jsx: ['components/offseason/WinterCalendar.jsx'], ns: 'springcount', as: 'aside', frame: 'ledger' },
   { css: '78-offseason.css', sel: '.pgame__card', jsx: ['components/offseason/PickedGame.jsx'], ns: 'pgame__card', as: 'div' },
   { css: '78-offseason.css', sel: '.srecord', jsx: ['components/offseason/SeasonRecord.jsx'], ns: 'srecord' },
@@ -1892,7 +1892,7 @@ test('C6c: the souvenir lists sit in their board Card and draw no frame of their
   for (const sel of ['.sgh-list', '.foulboard-block .sgh-list']) {
     for (const body of bodiesOf(css, sel)) assert.deepEqual(frameDecls(body), [], `${sel} draws no frame`)
   }
-  const board = src('screens/FoulTrackerPage.jsx')
+  const board = src('screens/foul-tracker/Boards.jsx')
   assert.match(board, /<Card className="metric foulboard-block" head=\{head\} body="flush">/)
   assert.equal((board.match(/<Card\b[^>]*>\s*<ol className="sgh-list"/g) ?? []).length, 0)
 })
@@ -1906,7 +1906,7 @@ test('C6c: the two tile grids keep their --border-rule ground inside a ledger Ca
     assert.ok(body, `${css}: a ${ground} rule`)
     assert.equal(decl(body, 'background'), 'var(--border-rule)', `${ground} keeps the rule ground`)
     assert.equal(decl(body, 'gap'), '1px', `${ground} keeps its 1px rules`)
-    const code = src('screens/FoulTrackerPage.jsx')
+    const code = src('screens/foul-tracker/GameBoards.jsx')
     const ns = sel.slice(1)
     const inner = ground.slice(1)
     assert.match(
