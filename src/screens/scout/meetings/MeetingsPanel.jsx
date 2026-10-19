@@ -13,6 +13,7 @@ import { callOf, gamesOf, inPlay, meetingFacts, mixRows, nameOf, meetingOrdinal,
 import { PitchModal } from './PitchModal.jsx'
 import { ContactFacts, Fact, fixed, xw } from './Facts.jsx'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
+import { Grid } from '../../../components/ui/layout/Grid.jsx'
 
 // THE MEETINGS TAB (#1490, was the head-to-head list of #1410): every past
 // plate appearance between the two, pitch by pitch. A facts row, the pitch
@@ -111,6 +112,8 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
               <span>{monthDayYear(g.date)}</span>
               <Pill>{g.tag || (ROUND_TAG[g.round] ?? g.round)}</Pill>
             </p>
+            {/* Grid: three cards across on a desktop (about 300px each), one on a phone. */}
+            <Grid min={300} gap="base">
             {g.pas.map((pa) => {
               const list = pa.pitchList ?? []
               const last = list.at(-1)
@@ -154,6 +157,7 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
                 </Stack>
               )
             })}
+            </Grid>
           </Stack>
         ))}
       </>
