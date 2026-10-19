@@ -6,7 +6,6 @@ import '../../styles/scout/where.css'
 import '../../styles/scout/meet.css'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { fetchHeadToHead } from '../../api/scout/headToHead.js'
-import { METRICS } from '../../lib/scout/metrics.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useNav } from '../../lib/nav.js'
@@ -20,7 +19,6 @@ import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { Notice } from '../../components/ui/state/Notice.jsx'
-import { Choice } from '../../components/scout/Choice.jsx'
 import { HubTabBar } from '../../components/chrome/HubTabBar.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Matchup } from '../../components/scout/Matchup.jsx'
@@ -205,9 +203,6 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
           show: true,
           node: (
             <>
-              {side && (
-                <Choice label="Metric" options={metrics.map((k) => [k, METRICS[k].label])} value={metric} onChange={setMetric} />
-              )}
               <ZonesPanel
                 data={data}
                 board={board}
@@ -221,6 +216,9 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
                 stance={stance}
                 hitterStance={hitterStance}
                 metric={metric}
+                metrics={metrics}
+                onMetric={setMetric}
+                onPitch={selectPitch}
                 picked={picked}
                 onPick={setPicked}
               />
@@ -279,7 +277,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
             <Pill>{data.season ? `${data.season} · ` : ''}{SCOPE_TAG[scope]}</Pill>
             {board && <Pill>{board.all.n.toLocaleString()} pitches to {crowd}</Pill>}
             <Pill role="control" fill="paper" className="scout__filterchip" aria-haspopup="dialog" onClick={() => setFilters(true)}>
-              {filterSummary({ hand, scope, metric, showHitter: Boolean(side) })} ▾
+              {filterSummary({ hand, scope, showHitter: Boolean(side) })} ▾
             </Pill>
           </p>
 
@@ -324,9 +322,6 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
               switchHitter={switchHitter}
               scope={scope}
               onScope={(k) => go({ scope: k })}
-              metric={metric}
-              metrics={metrics}
-              onMetric={setMetric}
             />
           )}
         </>

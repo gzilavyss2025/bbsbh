@@ -27,3 +27,43 @@
   line-height: var(--lh-prose);
   color: var(--text-body);
 }
+
+/* --- the overlay map (ADR-0118) --- */
+
+/* The pitcher's share: an ink square sized by area (ScoutMap `shares`). */
+.scout__share {
+  fill: var(--text-heading);
+}
+/* Tones flip by side. More whiffs is the pitcher's side, so hi is blue and lo
+   is amber; Swing % has no side, so both ends are ink tints. xwOBA (est.)
+   keeps hi amber and lo blue (scout.css). */
+.scout__map--whiff .scout__region--hi1 { fill: var(--allstar-blue); fill-opacity: 0.16; }
+.scout__map--whiff .scout__region--hi2 { fill: var(--allstar-blue); fill-opacity: 0.36; }
+.scout__map--whiff .scout__region--lo1 { fill: var(--award-line); fill-opacity: 0.2; }
+.scout__map--whiff .scout__region--lo2 { fill: var(--award-line); fill-opacity: 0.4; }
+.scout__map--swing .scout__region--hi1 { fill: var(--text-heading); fill-opacity: 0.16; }
+.scout__map--swing .scout__region--hi2 { fill: var(--text-heading); fill-opacity: 0.32; }
+.scout__map--swing .scout__region--lo1 { fill: var(--text-heading); fill-opacity: 0.06; }
+.scout__map--swing .scout__region--lo2 { fill: var(--text-heading); fill-opacity: 0.1; }
+
+/* The phone's pitch strip: pinned under the jump bar while the Where section
+   is on screen, and the same selection as the Pitches rows. */
+.scout__chipstrip {
+  display: flex; /* layout-exempt: a sticky, sideways-scrolling strip of pills */
+  gap: var(--space-1h);
+  position: sticky;
+  top: 68px; /* the jump bar's height, see BAR_H in ScoutPage.jsx */
+  z-index: 2;
+  padding-block: var(--space-2);
+  overflow-x: auto;
+  background: var(--bg-page);
+  border-block-end: var(--bw-hair) solid var(--border-hairline);
+}
+.scout__chipstrip > * {
+  flex: none;
+}
+@media (min-width: 740px) {
+  .scout__chipstrip {
+    display: none;
+  }
+}
