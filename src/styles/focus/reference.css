@@ -166,9 +166,6 @@
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   cursor: pointer;
-}
-
-.refpanel__tab {
   flex: 1 1 0;
   min-height: 34px;
   padding: 0 var(--space-1);
@@ -184,18 +181,13 @@
   color: var(--text-on-ink);
 }
 
-/* The phone chips are Buttons, re-inked to the jump bar's dress (system/jumpbar): a
-   2px ink rule, square, no shadow. The Button draws the press, hover, focus and
-   disabled states. Only the four-across fit is this rule's own. */
-.refbar__chip.btn {
-  --btn-edge: var(--text-heading);
-  --btn-ink: var(--text-heading);
-  --btn-edge-hover: var(--text-heading);
-
+/* The phone chips are Buttons in the jump bar's dress (styles/11-innings.css, with
+   ‹ Back and Next ›). Only the four-across fit is this rule's own; the chips keep the
+   Button's --fs-ui, because four labels at the jump bar's --fs-h3 do not fit 390px. */
+.refbar__chip {
   flex: 1 1 0;
   min-width: 0;
   padding-inline: var(--space-1);
-  border-width: var(--bw-heavy);
 }
 
 /* "Back to the live at-bat" (AtBatTrail.jsx) and the post-half "See the whole

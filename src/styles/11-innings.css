@@ -206,16 +206,21 @@ body:has(.innings) {
   margin: 0 0 var(--space-1);
 }
 
-/* ‹ Back and Next › are Buttons at the tap size, re-inked to the jump bar's dress
-   (system/jumpbar): a 2px ink rule and the jump bar's type size, so the navigator reads
-   as the same set as the TB / CLE / INNINGS / BOX stops above it. The Button draws the
-   press, hover, focus and disabled states. */
-.inningnav .btn {
-  --btn-edge: var(--text-heading);
+/* ‹ Back and Next › and the reference chips (styles/focus/reference.css) are Buttons
+   re-inked to the jump bar's dress (system/jumpbar): a 2px ink rule, square, the same
+   recipe .segmented__btn uses. So they read as one set with the TB / CLE / INNINGS / BOX
+   stops above them. The Button draws the press, hover, focus and disabled states. */
+.inningnav .btn,
+.refbar__chip {
+  --btn-edge: var(--border-stamped);
   --btn-ink: var(--text-heading);
-  --btn-edge-hover: var(--text-heading);
+  --btn-edge-hover: var(--btn-edge);
 
   border-width: var(--bw-heavy);
+}
+
+/* Back and Next take the jump bar's type size too. */
+.inningnav .btn {
   font-size: var(--fs-h3);
 }
 
