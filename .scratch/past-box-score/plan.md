@@ -56,9 +56,8 @@ Retire ADR-0110 on the player-page Game Log. Everything else is unchanged.
    (`src/screens/player/next/modules/pitchlog/pitchlogView.js`, `gameDetail.js`,
    `StartDetail.jsx`, `index.jsx`) so it asks for today's score. `fetchFinalScores` is called
    only by player-page modules (pitchlog, batlog, photos). Lineup-page Box Lines use
-   `fetchBoxLines` with the scored game's date as cutoff, so they are not affected. Assumption, not yet confirmed
-   by Gary: the hitter log and photos open too, since the change is one default in the shared
-   function and matches "browse pages are open". Update `test/player-next-pitchlog.test.js`, `docs/player-hub.md`,
+   `fetchBoxLines` with the scored game's date as cutoff, so they are not affected. Gary confirmed (2026-10-19): the
+   hitter log and photos open too. It is one default in the shared function. Update `test/player-next-pitchlog.test.js`, `docs/player-hub.md`,
    `src/api/spoiler-manifest.json` if it names 0110, and mark ADR-0110 retired.
 8. **Verify.** `npm run lint`, `npm test`, `npm run build`. Then render `?nointro` routes
    in Chromium: a past Final game's `boxscore` section (open), today's game (sealed), the
