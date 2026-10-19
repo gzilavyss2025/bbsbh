@@ -83,8 +83,9 @@ test('a start with no row in the per-start store has no mix bar', () => {
   assert.equal(pitchlogView([app('2026-05-01', 1)]).rows[0].mix, null)
 })
 
-// The one guard (ADR-0110): a game still in progress today, start or relief, shows no final score and no decision.
-test('a game in progress today: no score and no decision, though the split already says W or SV', async () => {
+// ADR-0117 retired ADR-0110's guard: a game played today, start or relief, shows its score and decision once Final.
+// (A game still on has no row: see test/player-log-today.test.js.)
+test('a game played today shows its score and decision, start or relief', async () => {
   const asked = []
   const m = mock.method(globalThis, 'fetch', async (url) => {
     const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
@@ -98,11 +99,11 @@ test('a game in progress today: no score and no decision, though the split alrea
   })
   try {
     const games = [app('2026-10-08', 1, { w: 1 }), app('2026-10-13', 2, { w: 1 }), app('2026-10-13', 3, { gs: 0, saves: 1 })]
-    const scores = await fetchFinalScores(games, 'pitching', null, '2026-10-13')
-    assert.deepEqual(asked, [1])
+    const scores = await fetchFinalScores(games, 'pitching', null)
+    assert.deepEqual(asked, [1, 2, 3])
     const [relief, today, before] = pitchlogView(games, { scores }).rows
-    assert.deepEqual([relief.relief, relief.result, relief.runs, relief.dec], [true, null, null, null])
-    assert.deepEqual([today.result, today.runs, today.oppRuns, today.dec], [null, null, null, null])
+    assert.deepEqual([relief.relief, relief.result, relief.runs, relief.dec], [true, 'W', 6, 'SV'])
+    assert.deepEqual([today.result, today.runs, today.oppRuns, today.dec], ['W', 6, 2, 'W'])
     assert.deepEqual([before.result, before.runs, before.oppRuns, before.dec], ['W', 6, 2, 'W'])
   } finally {
     m.mock.restore()

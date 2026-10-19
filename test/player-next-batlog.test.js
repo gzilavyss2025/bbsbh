@@ -69,7 +69,7 @@ test('pitches seen, whiffs and fouls join on the gamePk; the rest are the other 
 })
 
 // The one guard (ADR-0034): a game on today's date shows no score and no result.
-test('a game today, and a game before it: today shows no score and no result', async () => {
+test('a game today, and a game before it: both show their score and result once Final (ADR-0117)', async () => {
   const asked = []
   const m = mock.method(globalThis, 'fetch', async (url) => {
     const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
@@ -83,10 +83,10 @@ test('a game today, and a game before it: today shows no score and no result', a
   })
   try {
     const games = [game('2026-10-08', 1), game('2026-10-13', 2)]
-    const scores = await fetchFinalScores(games, 'hitting', null, '2026-10-13')
-    assert.deepEqual(asked, [1])
+    const scores = await fetchFinalScores(games, 'hitting', null)
+    assert.deepEqual(asked, [1, 2])
     const [today, before] = batlogView(games, { scores }).rows
-    assert.deepEqual([today.result, today.runs, today.oppRuns], [null, null, null])
+    assert.deepEqual([today.result, today.runs, today.oppRuns], ['W', 6, 2])
     assert.deepEqual([before.result, before.runs, before.oppRuns], ['W', 6, 2])
   } finally {
     m.mock.restore()

@@ -21,8 +21,7 @@ import { StartDetail } from './StartDetail.jsx'
 // newest first, a totals row that follows the filter, and each game's pitch mix. A row opens the
 // game detail view (StartDetail.jsx). "Load earlier season" adds one season back per press; the
 // filter and the totals span every loaded season. Open surface
-// (ADR-0034, ADR-0110): the score and decision show, except for a game on today's date
-// (pitchlogView.js holds it).
+// (ADR-0034, ADR-0117): the score and decision show once a game is Final, today's included.
 const SHOWN = 5
 const SCOPES = [
   ['all', 'All'],

@@ -77,8 +77,8 @@ export function pitcherLine(st) {
 //
 // `scores` (optional) is boxlines/fetch.js's fetchFinalScores map, gamePk ->
 // a row carrying { runs, oppRuns }, asked for over `loggedSplits` alone, so it
-// can hold no game the cutoff turned away, nor one played today (fetch.js
-// holds today's back). Without it a row carries no score.
+// can hold no game the cutoff turned away, and no game that is not Final yet.
+// Without it a row carries no score.
 // A hitter's `result` is his club's (W, L, T); a pitcher's is his own decision
 // (W, L, SV, or null), read off the gameLog stat, which carries it per game.
 export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false, scores = null } = {}) {

@@ -1,6 +1,6 @@
 # The pitcher Game Log is open, except a game in progress today
 
-**Status:** Accepted
+**Status:** Retired by ADR-0117 (2026-10-19). A game played today shows its score and decision once Final.
 **Date:** 2026-10-13
 **Issue:** #1851; parent #1878 (the player page redesign)
 

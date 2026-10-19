@@ -15,14 +15,12 @@ export function isoToday() {
   return new Date().toISOString().slice(0, 10)
 }
 
-// A player's this-season game-log rows for the photo rail, oldest first. Only
-// games dated before the baseball day (US Pacific): a game tonight may still be
-// in progress, and its photos can show the result. Not isoToday(): after 00:00
-// UTC that is already tomorrow, and tonight's game would pass.
-export function photoGameRows(games, now = new Date()) {
-  const today = baseballToday(now)
+// A player's this-season game-log rows for the photo rail, oldest first. A game still being
+// played is held back by photosView's `finals` map (Final and scored only), not here
+// (ADR-0117, which retired ADR-0110).
+export function photoGameRows(games) {
   return games
-    .filter((s) => s.game?.gamePk && s.date && s.date < today)
+    .filter((s) => s.game?.gamePk && s.date)
     .map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
     .sort((a, b) => a.apiDate.localeCompare(b.apiDate))
 }

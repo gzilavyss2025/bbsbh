@@ -115,21 +115,21 @@ test('fetchFinalScores: nothing before the cutoff asks nothing', async () => {
   }
 })
 
-test("fetchFinalScores: with no cutoff, today's games hold back their score and are never asked for", async () => {
+test("fetchFinalScores: with no cutoff, today's games are asked for and show their score once Final (ADR-0117)", async () => {
   const api = stubSchedule()
   try {
     const splits = [row('2026-10-12', 201), row('2026-10-13', 202, 1), row('2026-10-13', 203, 2)]
-    const scores = await fetchFinalScores(splits, 'hitting', null, '2026-10-13')
-    assert.deepEqual(api.asked, [201])
-    assert.deepEqual([...scores.keys()], [201])
+    const scores = await fetchFinalScores(splits, 'hitting', null)
+    assert.deepEqual(api.asked, [201, 202, 203])
+    assert.deepEqual([...scores.keys()].sort(), [201, 202, 203])
     const view = gameLogView(splits, 'hitting', null, 8, { scores }).rows
-    assert.deepEqual(view.map((r) => [r.gamePk, r.result, r.runs]), [[203, null, null], [202, null, null], [201, 'W', 6]])
+    assert.deepEqual(view.map((r) => [r.gamePk, r.result, r.runs]), [[203, 'W', 6], [202, 'W', 6], [201, 'W', 6]])
   } finally {
     api.restore()
   }
 })
 
-test('fetchFinalScores: a suspended game that ends today holds its score, though its split keeps the first day', async () => {
+test('fetchFinalScores: a suspended game that ends today shows its score, though its split keeps the first day', async () => {
   // Shaped like gamePk 777861: suspended 2025-05-19, finished 2025-05-21. The
   // split and officialDate keep 05-19; only the schedule's resumeDate says 05-21.
   const api = stubSchedule({
@@ -137,17 +137,17 @@ test('fetchFinalScores: a suspended game that ends today holds its score, though
     302: { officialDate: '2026-10-10', resumeDate: '2026-10-12T17:10:00Z' },
   })
   try {
-    const scores = await fetchFinalScores([row('2026-10-11', 301), row('2026-10-10', 302)], 'hitting', null, '2026-10-13')
-    assert.deepEqual([...scores.keys()], [302])
+    const scores = await fetchFinalScores([row('2026-10-11', 301), row('2026-10-10', 302)], 'hitting', null)
+    assert.deepEqual([...scores.keys()].sort(), [301, 302])
   } finally {
     api.restore()
   }
 })
 
-test('fetchFinalScores: an earlier ?d= cutoff still rules over today', async () => {
+test('fetchFinalScores: a ?d= cutoff still turns its day and later days away', async () => {
   const api = stubSchedule()
   try {
-    await fetchFinalScores([row('2026-05-22', 101), row('2026-06-01', 105)], 'hitting', '2026-05-23', '2026-10-13')
+    await fetchFinalScores([row('2026-05-22', 101), row('2026-06-01', 105)], 'hitting', '2026-05-23')
     assert.deepEqual(api.asked, [101])
   } finally {
     api.restore()

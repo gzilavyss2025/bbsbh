@@ -8,28 +8,23 @@ const split = (gamePk, date, gameNumber = 1) => ({ date, gameType: 'R', game: { 
 // fetchFinalScores' map: only the games the schedule calls Final, scored, and not resuming today.
 const finals = (...pks) => new Map(pks.map((pk) => [pk, {}]))
 // 2026-10-14 at noon Pacific.
-const NOON = new Date('2026-10-14T19:00:00Z')
 
-test('a game on the baseball day contributes no photo, even when the schedule calls it final', () => {
-  assert.deepEqual(photoGames([split(1, '2026-10-14'), split(2, '2026-10-13')], finals(1, 2), NOON), [
+test('a game played today contributes photos once the schedule calls it final (ADR-0117)', () => {
+  assert.deepEqual(photoGames([split(1, '2026-10-14'), split(2, '2026-10-13')], finals(1, 2)), [
+    { gamePk: 1, apiDate: '2026-10-14' },
     { gamePk: 2, apiDate: '2026-10-13' },
   ])
 })
 
-test('the UTC flip: past 00:00 UTC, last night is still the baseball day and stays out', () => {
-  // 2026-10-14T01:30Z is 18:30 Pacific on 10-13: the 10-13 game may be in its sixth inning.
-  assert.deepEqual(photoGames([split(1, '2026-10-13')], finals(1), new Date('2026-10-14T01:30:00Z')), [])
-})
-
-test('a game dated before today that is not final (suspended, or past midnight) contributes no photo', () => {
-  assert.deepEqual(photoGames([split(1, '2026-10-12'), split(2, '2026-10-13')], finals(1), NOON), [
+test('a game that is not final (still on, or suspended) contributes no photo', () => {
+  assert.deepEqual(photoGames([split(1, '2026-10-12'), split(2, '2026-10-13')], finals(1)), [
     { gamePk: 1, apiDate: '2026-10-12' },
   ])
 })
 
 test('a final game from the day before is kept; rows with no gamePk or no date are dropped; newest first', () => {
   const rows = [split(1, '2026-10-11'), split(2, '2026-10-13'), split(null, '2026-10-12'), split(3, '')]
-  assert.deepEqual(photoGames(newestFirst(rows), finals(1, 2, 3, null), NOON), [
+  assert.deepEqual(photoGames(newestFirst(rows), finals(1, 2, 3, null)), [
     { gamePk: 2, apiDate: '2026-10-13' },
     { gamePk: 1, apiDate: '2026-10-11' },
   ])
@@ -38,7 +33,7 @@ test('a final game from the day before is kept; rows with no gamePk or no date a
 test('the walk reads the log newest first, game 2 of a doubleheader before game 1, and keeps that order', () => {
   const rows = newestFirst([split(1, '2026-04-01'), split(4, '2026-09-27', 1), split(5, '2026-09-27', 2), split(3, '2026-06-15')])
   assert.deepEqual(rows.map((s) => s.game.gamePk), [5, 4, 3, 1])
-  assert.deepEqual(photoGames(rows, finals(1, 3, 4, 5), NOON).map((g) => g.gamePk), [5, 4, 3, 1])
+  assert.deepEqual(photoGames(rows, finals(1, 3, 4, 5)).map((g) => g.gamePk), [5, 4, 3, 1])
 })
 
 test('photos are merged by id: a photo two games carry shows once', () => {

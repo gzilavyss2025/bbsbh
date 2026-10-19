@@ -151,7 +151,7 @@ _Avoid_: Logbook in any user-visible string
 **Pitcher Game Log**:
 A different thing with the same name: on a pitcher's player page, his games of a
 season, starts and relief outings, one row per game, with the score, his decision, his
-line and the pitch mix (#1851, ADR-0110). The stamp Game Log is the games that YOU
+line and the pitch mix (#1851, ADR-0110, retired by ADR-0117). The stamp Game Log is the games that YOU
 stamped; the pitcher Game Log is the games that HE pitched. The code name is `pitchlog`.
 _Avoid_: Start by start
 
