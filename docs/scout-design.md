@@ -449,7 +449,7 @@ Tabs: EDGE (who it favors) | ZONES (where) | MEETINGS (pitch by pitch)
 
 1. **The scene and the pills stay in place.** Only the panel under the tabs
    changes. The scene, the pills, the ledger and the maps share one selection
-   (`?pitch=`). The tab persists in `?tab=edge|zones|meet` (absent is edge).
+   (`?pitch=`). The tabs are gone: four sections stack under a jump bar (ADR-0118), and `?tab=` is not read.
 2. **One filter sheet** holds Hand, Scope and Metric (`FilterSheet.jsx`). The
    chip's label sums up the choices. View is not in the sheet: it sits on the
    scene's bar (ADR-0099). Hand still defaults to both hands for a one-sided
