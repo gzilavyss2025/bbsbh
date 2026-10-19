@@ -6,6 +6,8 @@ import { teamClubNameShort } from '../../../teams.js'
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+const SUFFIX = /^(jr|sr|ii|iii|iv)\.?$/i
+
 // 'Mon Aug 4' from 'YYYY-MM-DD'; '' for a date that is not one.
 function dayLabel(date) {
   const d = new Date(`${date}T00:00:00Z`)
@@ -20,7 +22,8 @@ function mixPercents(mix) {
   if (!total) return []
   const rows = entries.map(([code, c]) => ({ code, c, pct: Math.floor((c * 100) / total), rem: (c * 100) % total }))
   const byRem = [...rows].sort((a, b) => b.rem - a.rem || b.c - a.c || a.code.localeCompare(b.code))
-  for (let i = 0; i < 100 - rows.reduce((n, r) => n + r.pct, 0); i++) byRem[i].pct++
+  const left = 100 - rows.reduce((n, r) => n + r.pct, 0)
+  for (let i = 0; i < left; i++) byRem[i].pct++
   return rows.sort((a, b) => b.pct - a.pct || a.code.localeCompare(b.code)).map(({ code, pct }) => ({ code, pct }))
 }
 
@@ -41,7 +44,7 @@ function starterOf(side) {
     id: s.id,
     abbr: side.abbr,
     name: s.name,
-    surname: s.name.split(' ').at(-1),
+    surname: s.name.split(' ').filter((w) => !SUFFIX.test(w)).at(-1) ?? '',
     hand: s.hand ? `${s.hand}HP` : '',
     line,
     mix: mixPercents(s.mix),
@@ -49,7 +52,7 @@ function starterOf(side) {
 }
 
 // -> one entry per meeting, oldest first (the order handed in):
-// { gamePk, date, day, ump, awayAbbr, homeAbbr, rows: [{ id, abbr, runs, hits, errors, win }],
+// { gamePk, date, gameNumber, day, ump, awayAbbr, homeAbbr, rows: [{ id, abbr, runs, hits, errors, win }],
 //   decisions, starters: [{ id, abbr, name, surname, hand, line, mix: [{ code, pct }] }],
 //   scoring?, lineups? }  (the last two only when not `compact`)
 export function filmRoomModel(meetings, { compact = false } = {}) {
@@ -60,6 +63,7 @@ export function filmRoomModel(meetings, { compact = false } = {}) {
     const out = {
       gamePk: m.gamePk,
       date: m.date,
+      gameNumber: m.gameNumber ?? 1,
       day: dayLabel(m.date),
       ump: m.ump,
       awayAbbr: m.away.abbr,

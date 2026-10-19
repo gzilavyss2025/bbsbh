@@ -84,8 +84,8 @@ export function FilmMeeting({ m }) {
           </details>
         )}
         <div className="ww-film__doors">
-          <Door {...link(gamePath(m.date, m.awayAbbr, m.homeAbbr, 'boxscore'))}>Box score</Door>
-          {full && m.starters.map((s) => <Door key={s.id} {...link(playerPath(s.id))}>{`Scout ${s.surname}`}</Door>)}
+          <Door {...link(gamePath(m.date, m.awayAbbr, m.homeAbbr, 'boxscore', m.gameNumber))}>Box score</Door>
+          {full && m.starters.map((s) => <Door key={s.id} {...link(playerPath(s.id))}>{`Scout ${s.surname || 'starter'}`}</Door>)}
         </div>
       </Stack>
     </Card>

@@ -4,6 +4,7 @@ import { loadNineKeys } from '../../api/nineKeys.js'
 import { fetchMeetings } from '../../api/postseason/meetings.js'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { matchupEdges } from '../../lib/postseason/primer/matchupEdges.js'
 import { scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
@@ -33,7 +34,7 @@ import { Stack } from '../ui/layout/Stack.jsx'
 const CARD = {
   'nine-keys': ({ nineKeys, clubIds, season }) => <SeriesNineKeys data={nineKeys} clubs={clubIds.map((id) => ({ id }))} season={season} />,
   'matchup-edges': ({ edges }) => <MatchupEdges edges={edges} variant="faceoff" />,
-  'film-room': ({ meetings, dayType, clubIds }) => <FilmRoom meetings={meetings} compact={dayType === 'game'} clubId={clubIds.includes(158) ? 158 : clubIds[0]} />,
+  'film-room': ({ meetings, dayType, noteClub }) => <FilmRoom meetings={meetings} compact={dayType === 'game'} clubId={noteClub} />,
   'umpire-edge': ({ plateUmpire, umpire }) => <UmpireEdge name={plateUmpire.name} lean={umpire?.lean ?? null} />,
 }
 
@@ -46,8 +47,9 @@ export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, plateUmpir
     [plateUmpire?.id, season],
   )
   const [clubA, clubB] = clubIds
+  const { favoriteTeamId } = useFavoriteTeam()
   // Past regular-season meetings, cut off the day before the slate date (api/postseason/meetings.js).
-  const { data: meetings } = useAsync(() => fetchMeetings({ clubA, clubB, slateDate }), [clubA, clubB, slateDate])
+  const { data: meetings } = useAsync((signal) => fetchMeetings({ clubA, clubB, slateDate }, { signal }), [clubA, clubB, slateDate])
   const edges = useMemo(
     () => matchupEdges([clubA, clubB].map((id) => starterMatchupsFor(career, gamePk, id))),
     [career, gamePk, clubA, clubB],
@@ -71,7 +73,7 @@ export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, plateUmpir
     return () => ro.disconnect()
   }, [shown])
   if (!shown) return null
-  const ctx = { dayType, meetings, nineKeys, clubIds, season, edges, plateUmpire, umpire }
+  const ctx = { noteClub: clubIds.includes(favoriteTeamId) ? favoriteTeamId : clubA, dayType, meetings, nineKeys, clubIds, season, edges, plateUmpire, umpire }
   const names = clubIds.map((id) => teamClubNameShort(id)).filter(Boolean).join(' and ')
   return (
     <Stack gap="loose" className="ww-scout" ref={rootRef} style={{ '--ww-scout-offset': `${offset}px` }}>
