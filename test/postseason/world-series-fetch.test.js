@@ -43,6 +43,12 @@ test('club games and meetings stop the day before; none asks for a score', () =>
   }
 })
 
+test('the meetings url asks for a date range: the schedule answers 400 with endDate alone', () => {
+  const p = q(meetingsUrl(2026, 119, 141, SLATE))
+  assert.equal(p.get('startDate'), '2026-01-01')
+  assert.equal(p.get('endDate'), '2026-10-26')
+})
+
 test('standings carry no date: a postseason date answers with no records', () => {
   const p = q(standingsUrl(2026))
   assert.equal(p.get('date'), null)

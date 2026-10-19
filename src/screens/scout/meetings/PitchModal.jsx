@@ -111,7 +111,7 @@ export function PitchModal({ walk, index, onIndex, onClose, board, data, view, s
           <PitchZone pitch={pitch} view={view} stance={pa.stand ?? stance} family={family} />
         </div>
         {inPlay(pitch) && <ContactFacts pitch={pitch} />}
-        {isLast && pa.description && <p className="scout__play">{playText(pa.description, data.hitter.name)}</p>}
+        {isLast && pa.description && <p className="scout__play">{playText(pa.description, data.hitter.name, data.hitter.last)}</p>}
 
         <PitchFilm pa={pa} pitch={pitch} cutoff={cutoff} />
 

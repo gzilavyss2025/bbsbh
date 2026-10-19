@@ -500,9 +500,6 @@
     "wrap": 2,
     "grid": 2
   },
-  "src/styles/scout/edge.css": {
-    "column": 1
-  },
   "src/styles/scout/meet.css": {
     "column": 3,
     "wrap": 1,
@@ -513,9 +510,7 @@
     "wrap": 3
   },
   "src/styles/scout/pitches.css": {
-    "column": 3,
-    "wrap": 1,
-    "grid": 1
+    "column": 3
   },
   "src/styles/scout/scout.css": {
     "column": 3,

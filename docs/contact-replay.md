@@ -7,7 +7,8 @@ research and the data facts are in issue #1771. Do not repeat that research.
 The design exists as a working prototype. Gary owns the link (a private
 claude.ai page): https://claude.ai/artifact/XQbzftrqC9xN6qgEuacNmg. It uses the
 app's real camera and tokens, with invented sample data. When this spec and the
-prototype do not agree, this spec wins.
+prototype do not agree, this spec wins. A copy of its source, for builders who
+cannot open the page: `.scratch/contact-replay/prototype.html`.
 
 ## 1. Overview
 
@@ -38,7 +39,7 @@ Each phase ships alone. Do the phases in this order.
 | --- | --- | --- | --- |
 | A | Drawn swing (default timing), contact, whiff, foul, exit trail, trajectory tag, side view, quality line with exit velocity only | MLB feed `hitData` only | Nothing |
 | B | Swing timed from bat speed; squared-up %, xBA, barrel, home-run parks on the quality line | Savant `/gf` | Nothing (decided: strip on parse, section 3.2) |
-| C | The bat at contact in ink, with the measured attack angle | Savant Statcast CSV | One measurement of when the CSV fills (section 3.3) |
+| C | The bat at contact in ink, with the measured attack angle | Savant Statcast CSV | Nothing (the fill-time measurement is no longer a gate, section 3.3) |
 
 Phase A needs no new fetch. Start there.
 
@@ -104,10 +105,12 @@ called strike) gets no bat. Do not draw a bat for a pitch the batter took.
 play text for halves the reader has not revealed. The rule (Gary, 2026-10-18):
 **nothing score-bearing survives the parse.**
 
-- A new module in `src/api/` (to be created) fetches `/gf` and parses it in the
+- A new module in `src/api/savant/` (to be created; `src/api/` itself is at its `check-dir-size` budget) fetches `/gf` and parses it in the
   same function. The parser reads ONLY `team_home[]` and `team_away[]`, and from
   each row ONLY `play_id`, `batSpeed`, `xba`, `is_barrel` and
-  `homeRunBallparks`. It returns a `Map` of `playId` to
+  `contextMetrics.homeRunBallparks` (nested, not a top-level field; `xba` is a
+  string such as `".820"`; checked on gamePk 849810,
+  `.scratch/contact-replay/facts.md`). It returns a `Map` of `playId` to
   `{ batSpeed, xba, barrel, hrParks }`. The raw response goes out of scope
   inside that function. No cache, ref or state holds the raw body.
 - Do not read `scoreboard`, `boxscore`, `des`, `events`, `result` or any other
@@ -130,9 +133,11 @@ Join on `game_pk` + `at_bat_number` (= `atBatIndex + 1`) + `pitch_number`. Read
 `post_bat_score`, so strip on parse here too: keep only the join keys and the
 two angles.
 
-- **Measure first.** Before any code, record once how long after the final out
-  the CSV first has rows for a game. Write the result in issue #1771 and in
-  `docs/peer-sites.md`, "Data notes", beside the `/gf` freshness table.
+- **Fill time: not measured yet, and not a gate.** How long after the final
+  out the CSV first has rows for a game is still unknown. Gary removed it as a
+  gate on 2026-10-19: the rules below work for any fill time (the bat stays
+  pencil until rows exist). Issue #2349 measures it at the next MLB game and
+  writes the result here and in `docs/peer-sites.md`, "Data notes".
 - Fetch only for a game whose status is Final, MLB only. Use the existing CSV
   fetch in `src/api/scout/headToHead.js` as the pattern.
 - One fetch per gamePk per page load. If the CSV has no rows yet, the bat stays
@@ -154,8 +159,8 @@ Savant code.
 | File | Change |
 | --- | --- |
 | `src/api/playbyplay/pitchInfo.js` | Add `hit` and `playId` (section 3.1) |
-| new `/gf` module in `src/api/`, to be created (phase B) | Fetch and strip on parse (section 3.2), with its manifest entry |
-| new CSV module in `src/api/`, to be created (phase C) | Fetch and strip on parse (section 3.3), with its manifest entry |
+| new `/gf` module in `src/api/savant/`, to be created (phase B) | Fetch and strip on parse (section 3.2), with its manifest entry |
+| new CSV module in `src/api/savant/`, to be created (phase C) | Fetch and strip on parse (section 3.3), with its manifest entry |
 | `src/lib/pitcherCard/atBat.js` | Pass `hit`, the call class (swing, whiff, foul, in play) and the bat side to each scene pitch |
 | new `lib/pitcherCard/swing.js`, to be created | The swing model: pure math, no React. Section 6.2 |
 | new `lib/pitcherCard/batted.js`, to be created | The batted ball in the scene camera, and the side-view path. Section 6.4 |
@@ -203,6 +208,45 @@ the plate's centre, y is toward the mound from the plate's back point, z is up.
 plate's back point. The contact point `K` is the measured pitch path at
 `y = YC` (the `realFlight` of the pitch, `camera.js`). Contact time `tc` is the
 time the pitch reaches `y = YC`.
+
+#### Measured on real games
+
+Measured 2026-10-19 for #2345. No value in this spec changed.
+
+- **Games (9, all completed, sportId 1).** Postseason, 2026-10-12 to 2026-10-15:
+  849810, 849811, 849812, 849818, 849820. Regular season, 2026-09-27: 822679,
+  823408, 824705, 824948. The 849810 parse kept 295 of its 296 CSV rows.
+- **Query.** One request per game:
+  `https://baseballsavant.mlb.com/statcast_search/csv?all=true&type=details&player_type=batter&hfGT=R%7CF%7CD%7CL%7CW%7C&game_date_gt=<date>&game_date_lt=<date>&game_pk=<pk>`
+  (the pattern of `savantUrl` in `src/api/scout/headToHead.js`, with `game_pk`).
+  Script: `.scratch/contact-replay-tuning/measure.mjs`.
+- **Rule.** A swing with contact is a pitch whose `description` is
+  `hit_into_play`, `foul` or `foul_tip`. Rows with an empty
+  `intercept_ball_minus_batter_pos_y_inches` are left out of the figures.
+
+| Swings with contact | Swings | With intercept | Median | p10 | p90 |
+| --- | --- | --- | --- | --- | --- |
+| All | 995 | 970 | 28.7 in | 16.7 in | 41.6 in |
+| In play | 455 | 436 | 29.6 in | 19.3 in | 40.1 in |
+| Foul | 540 | 534 | 27.9 in | 14.7 in | 42.2 in |
+
+Savant defines the field as the distance between the bat/ball intercept point
+and the batter's center of mass, in the mound-to-plate direction
+(https://baseballsavant.mlb.com/csv-docs). That page does not state the sign.
+All but a few values are positive, so positive means toward the mound.
+
+**Conversion.** The median of 28.7 in is 2.39 ft in front of the batter's center
+of mass. *Inference:* the center of mass stands about 8.5 in (half the plate's
+17 in depth) in front of the plate's back point. This depth is an assumption,
+not a measurement. With it, the median contact is about 37.2 in, or 3.1 ft, in
+front of the back point. With a center of mass at the back point itself, it is
+2.39 ft.
+
+**Judgement: `YC = 2.2` looks off.** *Judgement:* 2.2 ft is below the measured
+median under both assumed depths (2.4 ft to 3.1 ft), so the bat meets the ball
+farther out front than the spec draws it. The gap is small (0.2 ft to 0.9 ft),
+and the spread (p10 to p90 is 1.4 ft to 3.5 ft before the depth offset) is wider
+than the gap. Gary decides the value.
 
 ### 6.2 The swing (pencil, always, until phase C)
 
@@ -375,6 +419,38 @@ rules are a first cut. Tune them on real games:
 A verdict needs xBA or the barrel flag, so it ships in phase B. The stamp is
 `--font-display`, `--w-bold`, `--fs-ui`, `--ls-label`, a 2 px border,
 `--radius-xs`, and a resting turn of -3°.
+
+#### Measured on real games
+
+Measured 2026-10-19 for #2345. No value in this spec changed.
+
+- **Games, dates and query.** The same nine games and the same CSV query as
+  section 6.1 (2026-09-27 to 2026-10-15). They give 18 team-games.
+- **Rule.** A ball in play is a row with `description` = `hit_into_play` and a
+  value in `estimated_ba_using_speedangle`. A hit is `events` in `single`,
+  `double`, `triple`, `home_run`. An out is any other ball in play. Errors
+  (`field_error`) and fielder's choice with no out (`fielders_choice`) are left
+  out: 2 rows. 10 balls in play had no xBA and are also left out.
+- **Count.** 443 balls in play: 144 hits and 299 outs (24.6 per team-game).
+
+| Cutoffs | `Hard-luck out` count | Of outs | Of balls in play | Per team-game | `Lucky hit` count | Of hits | Of balls in play | Per team-game |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| xBA ≥ .450 / < .200 | 35 | 11.7% | 7.9% | 1.94 | 12 | 8.3% | 2.7% | 0.67 |
+| **xBA ≥ .500 / < .250 (spec)** | **25** | **8.4%** | **5.6%** | **1.39** | **15** | **10.4%** | **3.4%** | **0.83** |
+| xBA ≥ .550 / < .300 | 20 | 6.7% | 4.5% | 1.11 | 19 | 13.2% | 4.3% | 1.06 |
+
+The rate per team-game is the count divided by 18. It is an average over the
+sample; no team-game was tallied on its own.
+
+**Sensitivity.** A move of .050 on the `Hard-luck out` cutoff changes its count
+by 40% up and 20% down. The same move on the `Lucky hit` cutoff changes its
+count by 20% down and 27% up.
+
+**Judgement: both rules hold up.** *Judgement:* at the spec cutoffs a team sees
+about 1.4 `Hard-luck out` stamps and 0.8 `Lucky hit` stamps in a game, on 5.6%
+and 3.4% of balls in play. That is rare enough to mean something and common
+enough to show in a game. The `Lucky hit` rule is the less stable one:
+its count changes by 7 between the neighbouring cutoffs, from 12 to 19.
 
 ## 8. Motion
 

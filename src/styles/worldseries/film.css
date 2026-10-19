@@ -1,0 +1,163 @@
+/* ---------- film room (scouting report, #2316) ---------- */
+
+/* layout-exempt: one column of cards; the rail and the wide three-across override it */
+.ww-film__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+  /* room for each card's name tab, which sits on the top edge */
+  padding-top: var(--space-3);
+}
+
+.ww-film__list--rail {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: var(--space-2);
+}
+
+.ww-film__list--rail .ww-film__slot {
+  flex: 0 0 82%;
+  scroll-snap-align: start;
+}
+
+.ww-film__list:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.ww-film__score {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+}
+
+.ww-film__score th {
+  text-align: left;
+  font-family: var(--font-display);
+  color: var(--text-heading);
+}
+
+.ww-film__score td {
+  text-align: right;
+  color: var(--text-body);
+}
+
+.ww-film__runs {
+  font-size: var(--fs-h3);
+}
+
+/* The winner's runs: the leader fill, never bold. */
+.ww-film__runs--lead {
+  background: var(--surface-stamped-tint);
+}
+
+.ww-film__dec,
+.ww-film__line,
+.ww-film__mix {
+  margin: 0;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+/* layout-exempt: a fixed photo-and-text pair; the bar and the mix span both */
+.ww-film__starter {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-2);
+  align-items: center;
+}
+
+/* layout-exempt: a name over its pitching line, beside a 36px photo */
+.ww-film__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ww-film__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  color: var(--text-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shot.ww-film__shot {
+  width: 36px;
+  height: 48px;
+}
+
+.ww-film__bar,
+.ww-film__mix {
+  grid-column: 1 / -1;
+}
+
+.ww-film__bar {
+  display: flex;
+  height: 10px;
+  border: 1px solid var(--border-stamped);
+}
+
+.ww-film__bar span {
+  flex-basis: 0;
+}
+
+/* layout-exempt: a wrapping row of pitch marks */
+.ww-film__mix {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+}
+
+.ww-film__details summary {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-family: var(--font-display);
+  color: var(--text-heading);
+}
+
+.ww-film__details summary::after {
+  content: '+';
+  margin-left: auto;
+}
+
+.ww-film__details[open] summary::after {
+  content: '−';
+}
+
+.ww-film__details ul {
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: var(--fs-small);
+}
+
+.ww-film__details p {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-small);
+}
+
+/* layout-exempt: a wrapping row of doors */
+.ww-film__doors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
+@media (min-width: 740px) {
+  /* layout-exempt: a fixed three across from 740px */
+  .ww-film__list--rail {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: visible;
+  }
+}

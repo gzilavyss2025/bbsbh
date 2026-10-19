@@ -96,9 +96,8 @@ export function platePoints(view) {
 }
 
 // The map's viewBox: the ring, the plate, and whichever side the box is on.
-export function mapBox(stance, view) {
+export function mapBox(stance, view, s = stanceRect(stance, view)) {
   const xs = [projX(X_EDGES[0] * EDGE, view), projX(X_EDGES[5] * EDGE, view)]
-  const s = stanceRect(stance, view)
   xs.push(s.x, s.x + s.width)
   const top = sy(pzOf(Z_EDGES[0]))
   const bottom = sy(pzOf(Z_EDGES[5])) + 3 + PLATE_DEPTH

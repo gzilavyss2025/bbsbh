@@ -4,9 +4,9 @@ import '../../styles/scout/edge.css'
 import '../../styles/scout/pitches.css'
 import '../../styles/scout/where.css'
 import '../../styles/scout/meet.css'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import '../../styles/scout/motion.css'
+import { useMemo, useState } from 'react'
 import { fetchHeadToHead } from '../../api/scout/headToHead.js'
-import { METRICS } from '../../lib/scout/metrics.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useNav } from '../../lib/nav.js'
@@ -20,7 +20,6 @@ import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { Notice } from '../../components/ui/state/Notice.jsx'
-import { Choice } from '../../components/scout/Choice.jsx'
 import { HubTabBar } from '../../components/chrome/HubTabBar.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Matchup } from '../../components/scout/Matchup.jsx'
@@ -76,7 +75,6 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
   const [picks, setPicks] = useState(noPicks)
   const [changing, setChanging] = useState(false)
   const [picked, setPicked] = useState(null)
-  const [inFlight, setInFlight] = useState(null)
   const [filters, setFilters] = useState(false)
 
   const hasPair = Boolean(pitcherId && hitterId)
@@ -119,14 +117,6 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
     () => (board ? scenePitches(sel ? board.tiles.filter((t) => t.code === sel) : board.types, lefty, view) : []),
     [board, sel, lefty, view],
   )
-  const onActive = useCallback((idx) => setInFlight(scene[idx]?.code ?? null), [scene])
-  // On a phone the pill row scrolls sideways: bring the selected pill into
-  // view, so a shared `?pitch=` link shows which pitch the page is on.
-  const pillRow = useRef(null)
-  useEffect(() => {
-    pillRow.current?.querySelector('[aria-pressed="true"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
-  }, [sel, board])
-
   // Every choice rewrites the address in place.
   const go = (patch, replace = true) => {
     const pair = data ? { pitcher: data.pitcher, hitter: data.hitter } : picks
@@ -158,56 +148,38 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
     [h2h.data, scope],
   )
 
+  // No scouting data for one of them (retired, or not in the season stores):
+  // show only the meetings, under one line (slice 7b).
+  const noScout = Boolean(data) && !(data.pitcher.inStores && data.hitter.inStores)
+  const gone = data && [data.hitter, data.pitcher].find((p) => p.retired && p.lastYear)
   const names = data ? { hitter: data.hitter.last, pitcher: data.pitcher.last } : null
-  // The section list: flip `show` to hide a section (slice 7b hides by this).
+  // The section list: `show` hides a section (slice 7b hides three by it).
   const sections = data
     ? [
         {
           key: 'scout-edge',
           label: 'Edge',
-          show: true,
+          show: !noScout,
           node: <EdgePanel data={data} board={board} sides={sides} metric={metric} sel={sel} stance={stance} scope={scope} hand={hand} />,
         },
         {
           key: 'scout-pitches',
           label: 'Pitches',
           count: board?.types.length,
-          show: true,
+          show: !noScout,
           node: (
             <>
-              {board && (
-                <div ref={pillRow} className="scout__control scout__control--scroll" role="group" aria-label="Pitch">
-                  <Pill role="control" fill="paper" pressed={sel === null} onClick={() => selectPitch(null)}>All</Pill>
-                  {board.types.map((t) => (
-                    <Pill
-                      key={t.code}
-                      role="control"
-                      fill="paper"
-                      className={`scout__pitchbtn${!sel && inFlight === t.code ? ' is-inflight' : ''}`}
-                      data-family={t.family}
-                      pressed={sel === t.code}
-                      onClick={() => selectPitch(t.code)}
-                    >
-                      {t.name} <span className="scout__pilln">{t.pct}%</span>
-                      <span className="scout__usage" style={{ '--usage': t.pct }} aria-hidden="true" />
-                    </Pill>
-                  ))}
-                </div>
-              )}
               {!board && <EmptyState size="compact">No pitch mix posted for this pitcher</EmptyState>}
-              <PitchRows board={board} side={side} metric={metric} names={names} sel={sel} onSelect={selectPitch} />
+              <PitchRows board={board} sides={sides} names={names} sel={sel} onSelect={selectPitch} />
             </>
           ),
         },
         {
           key: 'scout-where',
           label: 'Where',
-          show: true,
+          show: !noScout,
           node: (
             <>
-              {side && (
-                <Choice label="Metric" options={metrics.map((k) => [k, METRICS[k].label])} value={metric} onChange={setMetric} />
-              )}
               <ZonesPanel
                 data={data}
                 board={board}
@@ -221,6 +193,9 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
                 stance={stance}
                 hitterStance={hitterStance}
                 metric={metric}
+                metrics={metrics}
+                onMetric={setMetric}
+                onPitch={selectPitch}
                 picked={picked}
                 onPick={setPicked}
               />
@@ -279,7 +254,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
             <Pill>{data.season ? `${data.season} · ` : ''}{SCOPE_TAG[scope]}</Pill>
             {board && <Pill>{board.all.n.toLocaleString()} pitches to {crowd}</Pill>}
             <Pill role="control" fill="paper" className="scout__filterchip" aria-haspopup="dialog" onClick={() => setFilters(true)}>
-              {filterSummary({ hand, scope, metric, showHitter: Boolean(side) })} ▾
+              {filterSummary({ hand, scope, showHitter: Boolean(side) })} ▾
             </Pill>
           </p>
 
@@ -292,7 +267,6 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
                   lefty={lefty}
                   name={data.pitcher.name}
                   view={view}
-                  onActive={onActive}
                   caption={sceneCaption}
                 />
               ) : null}
@@ -307,6 +281,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
                 offset={BAR_H}
                 hold
               />
+              {noScout && gone && <p className="scout__note">{gone.last} last played in {gone.lastYear} · scouting data covers {data.season}</p>}
               {sections.map((x) => (
                 <Stack key={x.key} id={x.key} className="scout__section">
                   {x.node}
@@ -324,9 +299,6 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
               switchHitter={switchHitter}
               scope={scope}
               onScope={(k) => go({ scope: k })}
-              metric={metric}
-              metrics={metrics}
-              onMetric={setMetric}
             />
           )}
         </>

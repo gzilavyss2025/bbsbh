@@ -23,16 +23,50 @@
   min-width: 0;
 }
 
+/* Desktop (slice 8, ADR-0118): a 1240px page. The main column dissolves into
+   the body grid so the sections can sit side by side. Pitch by pitch (left,
+   pinned on a tall window) stands beside the scene and Where (right). */
 @media (min-width: 740px) {
+  .screen.scout {
+    max-width: 1240px;
+  }
+  /* layout-exempt: two columns of sections; ScoutPage.jsx fixes the DOM order */
   .scout__body {
-    grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: dense;
+    gap: var(--space-6);
+  }
+  .scout__main {
+    display: contents;
+  }
+  .scout__jump,
+  .scout__note,
+  #scout-edge,
+  #scout-meet {
+    grid-column: 1 / -1;
+  }
+  .scout__note { order: 1; }
+  #scout-edge { order: 2; }
+  #scout-pitches {
+    order: 3;
+    grid-column: 1;
+    grid-row: span 2;
+    align-self: start;
   }
   .scout__stage {
-    position: sticky;
-    top: var(--space-3);
+    order: 3;
+    grid-column: 2;
   }
+  #scout-where { order: 4; grid-column: 2; }
+  #scout-meet { order: 5; }
   .scout__stage .scout__control--scroll {
     flex-wrap: wrap;
+  }
+}
+@media (min-width: 740px) and (min-height: 900px) {
+  #scout-pitches {
+    position: sticky;
+    top: calc(68px + var(--space-3)); /* under the jump bar, see BAR_H in ScoutPage.jsx */
   }
 }
 
@@ -94,14 +128,17 @@
 
 /* --- natural case for the Scout's sentences --- */
 
-/* The Edge verdict, the Zones callout, the Meetings play text and notes are
+/* The Edge notes, the Zones callout, the Meetings play text and notes are
    sentences, written to be read rather than skimmed (#1490). Natural case,
    under the ALL-CAPS INVARIANT's sanctioned exemption (01-base.css lists
    them): every heading, label, tab, chip, figure and pill around them stays
    shouted, the same split as the Command Received note. The `*` reaches the
    bold figures inside a sentence. */
-#root .scout__verdictline,
-#root .scout__verdictline *,
+#root .scout__watchtext,
+#root .scout__watchtext *,
+#root .scout__pushnote,
+#root .scout__vfoot,
+#root .scout__vfoot *,
 #root .scout__callout,
 #root .scout__callout *,
 #root .scout__play,

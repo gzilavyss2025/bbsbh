@@ -1,63 +1,90 @@
-import { METRICS } from '../../../lib/scout/metrics.js'
-import { ledgerRows, ledgerScale, rowTag, versus } from '../edge/edge.js'
+import { useInViewOnce } from '../../../hooks/scroll/useInViewOnce.js'
+import { fmtValue } from '../../../lib/scout/metrics.js'
+import { glyphD } from '../../../lib/pitch/pitchGlyph.js'
+import { pitchMark } from '../../../lib/pitch/pitchTypes.js'
+import { ledgerRows, rowTag, versus } from '../edge/edge.js'
 
-// THE PITCH ROWS (#2319): the ledger, one row per pill, drawn on one scale per
-// metric. Moved unchanged out of EdgePanel. A row is a pitch pill too: a tap
-// selects that pitch, a second tap clears it. Nothing without a hitter side.
-export function PitchRows({ board, side, metric, names, sel, onSelect }) {
-  if (!board || !side) return null
-  const rows = ledgerRows(board.types, side, metric)
-  const scale = ledgerScale(rows)
+// THE PITCH ROWS (#2319, ADR-0118): one tug-of-war per pitch. A row is a
+// button: a tap selects that pitch, a second tap clears it. Contact (xwOBA)
+// and Whiff pull a bar from the league centre toward the side that metric
+// favors; the swing line favors neither. Fixed metrics, so the Metric control
+// does not move these rows. `sides` is the page's { [metric]: hitterSide }.
+const SCALE = { xwoba: 0.1, whiff: 0.12 } // a full half-bar, in rate points
+
+// The bar's left and width, in % of the track. Even or too few: no bar.
+function pull(metric, row) {
+  if (row.value == null || row.league == null || (row.who !== 'hitter' && row.who !== 'pitcher')) return null
+  const w = Math.min(Math.abs(row.value - row.league) / SCALE[metric], 1) * 50
+  return { left: row.who === 'hitter' ? 50 : 50 - w, width: w }
+}
+
+function Pull({ label, metric, row, names }) {
+  const tag = rowTag(row, names)
+  const bar = pull(metric, row)
   return (
-    <>
-      <div className="scout__ledgerhead">
-        <span className="scout__ledgertitle">{names.hitter} vs league, {METRICS[metric].label}</span>
-        <span className="scout__ledgerkey" aria-hidden="true">
-          <span className="scout__keytick" />league
-          <span className="scout__keydot" />{names.hitter}
-          <span className="scout__keyusage" />usage
-        </span>
+    <span className="scout__pull" data-tone={tag.tone}>
+      <span className="scout__pulllabel">{label}</span>
+      <span className="scout__pulltrack" aria-hidden="true">
+        {bar && <span className="scout__pullbar" style={{ left: `${bar.left}%`, width: `${bar.width}%` }} />}
+        <span className="scout__pullmid" />
+      </span>
+      <span className="scout__pulltag">
+        <b className="scout__pullword">{tag.word}</b>
+        <span className="scout__pullvs">{versus(metric, row)}</span>
+      </span>
+    </span>
+  )
+}
+
+export function PitchRows({ board, sides, names, sel, onSelect }) {
+  const [ref, phase] = useInViewOnce(`scout:${names?.pitcher}:${names?.hitter}:pitches`)
+  const xw = sides.xwoba
+  if (!board || !xw) return null
+  const contact = ledgerRows(board.types, xw, 'xwoba')
+  const whiff = sides.whiff ? ledgerRows(board.types, sides.whiff, 'whiff') : []
+  const swing = sides.swing ? ledgerRows(board.types, sides.swing, 'swing') : []
+  return (
+    <div className="scout__rows" ref={ref} data-motion={phase} role="group" aria-label="Pitch by pitch">
+      <div className="scout__rowshead" aria-hidden="true">
+        <span className="scout__rowsp">◀ {names.pitcher}’s side</span>
+        <span>League</span>
+        <span className="scout__rowsh">{names.hitter}’s side ▶</span>
       </div>
-      <div className="scout__ledger" role="group" aria-label={`${METRICS[metric].label} by pitch`}>
-        {rows.map((r) => {
-          const tag = rowTag(r, names)
-          const has = r.value != null && r.league != null && scale
-          const a = has ? scale.at(r.value) : 0
-          const b = has ? scale.at(r.league) : 0
-          return (
-            <button
-              key={r.code}
-              type="button"
-              className="scout__lrow"
-              data-family={r.family}
-              data-tone={tag.tone}
-              aria-pressed={sel === r.code}
-              aria-label={`${r.name}: ${tag.word}, ${versus(metric, r)}`}
-              onClick={() => onSelect(sel === r.code ? null : r.code)}
-            >
-              <span className="scout__lname">
-                <span className="scout__lpitch">{r.name}</span>
-                <span className="scout__lsub">{r.pct}% · {r.mph} mph</span>
+      <button type="button" className="scout__rowall" aria-pressed={sel === null} onClick={() => onSelect(null)}>
+        <span>All pitches</span>
+        <span className="scout__pullvs">{board.all.n.toLocaleString()} pitches</span>
+      </button>
+      {contact.map((r, i) => {
+        const mark = pitchMark(r.code)
+        const sw = swing[i]
+        return (
+          <button
+            key={r.code}
+            type="button"
+            className="scout__prow"
+            data-code={r.code}
+            style={{ '--i': i }}
+            aria-pressed={sel === r.code}
+            onClick={() => onSelect(sel === r.code ? null : r.code)}
+          >
+            <span className="scout__prowhead">
+              <svg className="scout__prowmark" width="16" height="16" viewBox="-11 -11 22 22" aria-hidden="true">
+                <path d={glyphD(mark.shape, 7)} style={{ '--pitch': mark.color }} data-ring={mark.ring || undefined} />
+              </svg>
+              <span className="scout__prowname">{r.name}</span>
+              <span className="scout__pullvs">{r.pct}% · {r.mph} mph</span>
+            </span>
+            <span className="scout__prowuse" aria-hidden="true"><span style={{ width: `${r.pct}%` }} /></span>
+            <Pull label="Contact" metric="xwoba" row={r} names={names} />
+            {whiff[i] && <Pull label="Whiff" metric="whiff" row={whiff[i]} names={names} />}
+            {sw?.value != null && sw.league != null && (
+              <span className="scout__prowswing">
+                Swings at {fmtValue('swing', sw.value)} · league {fmtValue('swing', sw.league)} · favors neither
               </span>
-              <span className="scout__lplot" aria-hidden="true">
-                <span className="scout__laxis" />
-                {has && (
-                  <>
-                    <span className="scout__lgap" style={{ left: `${Math.min(a, b)}%`, width: `${Math.abs(a - b)}%` }} />
-                    <span className="scout__ltick" style={{ left: `${b}%` }} />
-                    <span className="scout__ldot" style={{ left: `${a}%` }} />
-                </>
-              )}
-              <span className="scout__lusage" style={{ width: `${r.pct}%` }} />
-            </span>
-            <span className="scout__ltag">
-              <span className="scout__lword">{tag.word}</span>
-              <span className="scout__lvs">{versus(metric, r)}</span>
-            </span>
+            )}
           </button>
         )
       })}
     </div>
-    </>
   )
 }

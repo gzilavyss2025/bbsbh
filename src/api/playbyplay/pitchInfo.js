@@ -139,6 +139,7 @@ export function pitchCardInfo(feed, play) {
     const co = pd.coordinates ?? {}
     const no = e.pitchNumber ?? i + 1
     const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null)
+    const hitData = e.hitData
     return {
       no,
       code,
@@ -171,6 +172,25 @@ export function pitchCardInfo(feed, play) {
       type: e.details?.type?.description ?? '',
       callDesc: e.details?.call?.description ?? '',
       challenge: byPitch.get(no) ?? null,
+      // The ball put in play, off THIS pitch's own playEvents entry (never the
+      // play's last event by index: at-bat 37 ends on a non-pitch event). Paths
+      // checked against gamePk 849810 (MIL @ LAD, 2026-10-15): `hitData.launchSpeed`,
+      // `.launchAngle` (negative into the ground), `.totalDistance`, `.trajectory`
+      // and `.coordinates.coordX/coordY`, on all five balls in play. Null on a
+      // pitch with no `hitData`. The contact replay reads it (docs/contact-replay.md).
+      hit: hitData
+        ? {
+            exitVelo: num(hitData.launchSpeed),
+            launchAngle: num(hitData.launchAngle),
+            distance: num(hitData.totalDistance),
+            trajectory: hitData.trajectory ?? null,
+            coordX: num(hitData.coordinates?.coordX),
+            coordY: num(hitData.coordinates?.coordY),
+          }
+        : null,
+      // The feed's id for this pitch; Savant's `play_id` is the same string
+      // (gamePk 849810, at-bat 16). Null for an automatic call, which has none.
+      playId: e.playId ?? null,
     }
   })
   return { pitchEvents, pitches, pitchDetails }
