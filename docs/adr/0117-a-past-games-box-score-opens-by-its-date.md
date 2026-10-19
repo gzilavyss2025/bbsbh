@@ -1,6 +1,6 @@
 # A past game's box score opens by its date
 
-**Status:** Proposed (draft for Gary's review)
+**Status:** Accepted (2026-10-19). Gary chose this design in an interview on 2026-10-19.
 **Date:** 2026-10-19
 **Issue:** none; Gary's interview of 2026-10-19
 **Amends:** ADR-0101 (section 1 and Alternative B), ADR-0049 (the openers), ADR-0035 (a note on the entry point)

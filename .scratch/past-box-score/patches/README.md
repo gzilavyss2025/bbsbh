@@ -13,7 +13,7 @@ If another PR has moved a touched file, `git apply --3way` helps; otherwise re-m
 
 | Patch | What it does | Checked |
 | --- | --- | --- |
-| A | `boxScoreOpensByDate` and `slateToday` in `src/lib/dates.js`; the third opener in `BoxScore.jsx`; 7 unit tests; ADR-0101, 0049, 0035 notes; `check-stamp-surfaces` comment; `CLAUDE.md`, `src/CLAUDE.md`, `CONTEXT.md` lines | Alone: `npm run lint` and `npm test` pass |
+| A | `boxScoreOpensByDate` and `slateToday` in `src/lib/dates.js`; the third opener in `BoxScore.jsx`; 7 unit tests; ADR-0101, 0049, 0035 notes; `check-stamp-surfaces` comment; `CLAUDE.md`, `src/CLAUDE.md`, `CONTEXT.md` lines; the `Played.jsx` header comment | Alone: `npm run lint` and `npm test` pass |
 | B | Retires ADR-0110: `fetchFinalScores` loses its today limit; `photoGameRows` and `highlightsView` lose theirs; ten tests rewritten to the new rule; one new test file; stale comments; ADR-0110 marked retired | A then B: `npm run lint`, `npm test` and `npm run build` pass |
 
 Not in the patches, because they need a browser: the screenshots in `plan.md` step 8.
