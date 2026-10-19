@@ -5,7 +5,7 @@ import { Card } from '../ui/frame/Card.jsx'
 import { StruckLine } from './StruckLine.jsx'
 import { FieldBackdrop } from './field/FieldBackdrop.jsx'
 import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
-import { VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
+import { DEFENSE_SPOTS, defenseWindow } from '../../lib/ballpark/layout/defenseWindow.js'
 
 // A grass-and-clay field with each fielder's surname at his position.
 // Position names remain available to assistive technology. Fielders only —
@@ -36,30 +36,6 @@ const SPOTS = {
   '1B': { x: 79, y: 60, label: 'First base' },
   C: { x: 50, y: 88, label: 'Catcher' },
 }
-
-// The same spots on the park's own drawing, in feet off home plate (1:1 with the SVG units of
-// lib/ballpark/ballparkGeometry.js). Used when a `layout` is passed: the fielders then stand
-// where they stand in the park the game is played in. The same spots as lineup/next's FieldCard,
-// minus the pitcher; keep the two tables in step.
-const PARK_SPOTS = {
-  LF: { x: 156, y: 238 },
-  CF: { x: 310, y: 182 },
-  RF: { x: 464, y: 238 },
-  SS: { x: 222, y: 338 },
-  '2B': { x: 398, y: 338 },
-  '3B': { x: 188, y: 446 },
-  '1B': { x: 432, y: 446 },
-  C: { x: 310, y: 512 },
-}
-
-// The park window for this card: ballparkGeometry.js's plot window with 22 more units of dead sky
-// cropped off the top, so the field and the fielders sit ~12px higher and nothing is lost at the
-// bottom. It is still a window onto the fixed viewBox, never a rescale. 72 keeps the CF distance
-// sign of the deepest park on file (415 ft, label near y 74).
-const PARK_TOP = 72
-const PARK_H = VIEWBOX.h - PARK_TOP
-const PARK_VIEWBOX = `0 ${PARK_TOP} ${VIEWBOX.w} ${PARK_H}`
-const parkPercent = ({ x, y }) => ({ left: (x / VIEWBOX.w) * 100, top: ((y - PARK_TOP) / PARK_H) * 100 })
 
 // Normalize either input shape to a { position -> [{ last, inning, replaced }] }
 // stack. The simple lineup form becomes a single, un-struck entry.
@@ -98,6 +74,7 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
   // (.opp, .bs__defensecard, .refpanel__body). The Card computes nothing, so
   // it is safe inside the box score's reveal render.
   const park = Boolean(layout)
+  const win = layout ? defenseWindow(layout) : null
   const dh = byPos.DH ? (
     <p className={`defdiamond__dh${park ? ' defdiamond__dh--park' : ''}`}>
       <span className="defdiamond__dhpos">DH</span>
@@ -111,11 +88,11 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
   return (
     <Card as="div" body="flush" className="defdiamond">
       {layout ? (
-        <div className="defdiamond__field defdiamond__field--park">
-          <BallparkDiagram layout={layout} viewBox={PARK_VIEWBOX} className="defdiamond__park" label={label} />
-          {Object.entries(PARK_SPOTS).map(([pos, xy]) => {
-            const { left, top } = parkPercent(xy)
-            return <DefenseSpot key={pos} stack={byPos[pos]} spot={{ x: left, y: top, label: SPOTS[pos].label }} park />
+        <div className="defdiamond__field defdiamond__field--park" style={{ aspectRatio: win.aspectRatio }}>
+          <BallparkDiagram layout={layout} viewBox={win.viewBox} className="defdiamond__park" label={label} />
+          {Object.entries(SPOTS).map(([pos, spot]) => {
+            const { left, top } = win.percent(DEFENSE_SPOTS[pos])
+            return <DefenseSpot key={pos} stack={byPos[pos]} spot={{ x: left, y: top, label: spot.label }} park />
           })}
           {dh}
         </div>

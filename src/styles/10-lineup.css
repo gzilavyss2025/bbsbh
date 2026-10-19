@@ -437,7 +437,6 @@ button.starter__careervs {
 }
 
 .defdiamond__field--park {
-  aspect-ratio: 620 / 488; /* PARK_H in DefenseDiamond.jsx */
   max-width: none;
   overflow: hidden;
   background: var(--bg-canvas);
@@ -453,6 +452,7 @@ button.starter__careervs {
    (.lfld__name, lineup-next/field.css). */
 .defdiamond__spot.defdiamond__spot--park {
   transform: translate(-50%, -50%);
+  max-width: 78px; /* the lineup page's label cap: long surnames ellipsize rather than collide */
   padding: var(--space-1) var(--space-1h);
   border: var(--bw-hair) solid var(--border-stamped);
 }

@@ -5,22 +5,8 @@ import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { PLOT_VIEWBOX, plotPercent } from '../../../../lib/ballpark/ballparkGeometry.js'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { headerThemeClass, headerThemeStyle } from '../../../../lib/headerTheme.js'
+import { DEFENSE_SPOTS } from '../../../../lib/ballpark/layout/defenseWindow.js'
 import { ClubBar } from './ClubBar.jsx'
-
-// Where each position stands, in the park drawing's own coordinates (feet off home plate,
-// 1:1 with SVG units: lib/ballpark/ballparkGeometry.js). plotPercent maps them onto the
-// cropped plot window the card draws.
-const SPOT = {
-  CF: { x: 310, y: 182 },
-  LF: { x: 156, y: 238 },
-  RF: { x: 464, y: 238 },
-  SS: { x: 222, y: 338 },
-  '2B': { x: 398, y: 338 },
-  '3B': { x: 188, y: 446 },
-  '1B': { x: 432, y: 446 },
-  P: { x: 310, y: 442 },
-  C: { x: 310, y: 512 },
-}
 
 // The other club's defense, as names on the park the game is played in: surnames only, no
 // photos or positions. The park is the real layout for the venue and date; a venue with no
@@ -46,7 +32,7 @@ export function FieldCard({ data, theme, masthead }) {
       ) : layout ? (
         <div className="lfld__field">
           <BallparkDiagram layout={layout} viewBox={PLOT_VIEWBOX} className="lfld__park" label={`${info.venue} with the defense`} />
-          {Object.entries(SPOT).map(([pos, xy]) => {
+          {Object.entries(DEFENSE_SPOTS).map(([pos, xy]) => {
             const { left, top } = plotPercent(xy)
             const who = by[pos]
             return (
