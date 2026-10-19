@@ -81,6 +81,7 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
               unit={mode === 'locations' || metric !== 'xwoba' ? '%' : ''}
               shares={mode === 'both' && map && !map.thin && stance === hitterStance ? map.share : undefined}
               className={mode === 'locations' ? '' : `scout__map--${metric}`}
+              homeSet={data.homeSet}
               picked={picked}
               onSelect={pick}
               label={`${typeName}: ${mode === 'locations' ? 'location share' : `hitter’s ${METRICS[metric].label}`} by region, ${view} view`}
