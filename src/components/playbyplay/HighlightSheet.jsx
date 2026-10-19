@@ -38,7 +38,7 @@ import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 // on the video, matching that same discipline — and a raw clip's poster frame
 // carries the broadcast scorebug burned into the pixels, so it stays off here
 // as well.
-export function HighlightSheet({ item, src = null, loading = false, notice = '', title: fallbackTitle = '', onClose }) {
+export function HighlightSheet({ item, src = null, notice = '', title: fallbackTitle = '', onClose }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
 
@@ -65,12 +65,9 @@ export function HighlightSheet({ item, src = null, loading = false, notice = '',
     return () => video.textTracks.removeEventListener?.('addtrack', silence)
   }, [item, src])
 
-  // Three ways to be open with no video in hand yet: `loading` (a caller that
-  // fetches on tap — see WatchCondensedButton, which opens the dialog first so
-  // the tap doesn't sit there looking dead through a 430 KB fetch), `notice`
-  // (fetched, nothing to play, and a sentence explaining why), and neither, in
-  // which case there is nothing to show at all.
-  if (!item && !src && !loading && !notice) return null
+  // Open with no video in hand: `notice` (nothing to play, and a sentence
+  // explaining why), else there is nothing to show at all.
+  if (!item && !src && !notice) return null
   // A raw clip is one progressive mp4 and no manifest, so it fills the mp4
   // slot the package's own rendition would take and the HLS source is simply
   // absent — the <source> list below already handles either being null.
@@ -107,11 +104,7 @@ export function HighlightSheet({ item, src = null, loading = false, notice = '',
           </div>
 
           <div className="hlsheet__video">
-            {loading ? (
-              // Holds the 16:9 box the video will occupy, so the dialog doesn't
-              // resize under the pointer the moment the fetch lands.
-              <p className="hlsheet__empty hlsheet__empty--wait">Loading&hellip;</p>
-            ) : notice ? (
+            {notice ? (
               <p className="hlsheet__empty">{notice}</p>
             ) : hls || mp4 ? (
               // playsInline keeps this from taking over the whole screen on

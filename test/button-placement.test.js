@@ -130,8 +130,6 @@ test('the swept toggles take their selected state from aria, not .is-active or a
     assert.doesNotMatch(src, /btn--ghost|skin=/, `${rel}: the unselected half is outline; pressed carries the state`)
     assert.equal(src.match(/<Button size="control" pressed=\{side === '(top|bottom)'\}/g)?.length, 2, rel)
   }
-  const watch = jsx('components/highlights/WatchCondensedButton.jsx')
-  assert.match(watch, /<Button size="control" skin="ink" className="flipback__watchbtn"/)
   const face = jsx('components/game/GameResultFace.jsx')
   assert.match(face, /<Door className="flipback__door" \{\.\.\.routeLink\(boxScorePath\)\}>/, 'Box score leaves the card, so it is a door')
 })

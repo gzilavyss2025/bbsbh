@@ -406,7 +406,6 @@
       "importers": [
         "components/highlights/GameVideoRow.jsx",
         "components/charts/winprob/useSwingClip.js",
-        "components/highlights/WatchCondensedButton.jsx",
         "components/inning/HalfInning.jsx",
         "screens/boxscore/revealBoxScore.js",
         "screens/logbook/RetrospectiveSections.jsx",

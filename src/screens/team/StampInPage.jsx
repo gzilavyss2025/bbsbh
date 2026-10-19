@@ -172,7 +172,8 @@ function StampInRow({ game, getSignals, stamped, seasonFull, onStamp }) {
     const job = {
       cancelled: false,
       run: () =>
-        getSignals(gamePk).then(
+        // The card draws no play of the game, so skip the win probability read.
+        getSignals(gamePk, { winProb: false }).then(
           (s) => {
             if (!job.cancelled) setSignals(s)
           },
