@@ -17,6 +17,7 @@ import { Trip } from './cards/Trip.jsx'
 import { Hero } from './Hero.jsx'
 import { Ledger } from './Ledger.jsx'
 import { Reel } from './Reel.jsx'
+import { ScoutingReport } from './ScoutingReport.jsx'
 
 // THE WORLD SERIES HOME (#1906). Rendered by GameSelect on every slate date in
 // the postseason window; it draws nothing unless the bracket says both clubs are
@@ -27,7 +28,8 @@ import { Reel } from './Reel.jsx'
 // passed (ADR-0116 removed the seal and the day pass that lifted it).
 //
 // Cards, top to bottom. Game day: hero, [ledger], reel, probables, tape + hot
-// bats, bullpen. Off day: hero, [ledger], reel, [played on a phone], the trip,
+// bats, bullpen; the scouting report follows probables. Off day: hero, [ledger], reel,
+// scouting report, [played on a phone], the trip,
 // home and road + bullpen (side by side wide).
 export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
   const mode = worldSeriesMode(bracket)
@@ -72,6 +74,15 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
     homeAbbr: abbr[rowOf[g.gamePk]?.homeId] ?? '',
   }))
   const lastPlayed = series.games.at(-1)
+  const scouting = (
+    <ScoutingReport
+      clubIds={clubIds}
+      slateDate={slateDate}
+      dayType={mode.dayType}
+      gamePk={focusPk}
+      plateUmpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
+    />
+  )
   const bullpen = data && <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={slateDate} wide={wide} />
 
   return (
@@ -91,6 +102,7 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
       {gameDay ? (
         <>
           <Probables game={game} season={Number(slateDate.slice(0, 4))} slateDate={slateDate} />
+          {scouting}
           {data && (
             <Grid min={340} gap="loose">
               <Tape awayId={game?.awayId ?? clubIds[0]} homeId={game?.homeId ?? clubIds[1]} data={data} slateDate={slateDate} />
@@ -101,6 +113,7 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
         </>
       ) : (
         <>
+          {scouting}
           {!wide && <Played rows={played} />}
           <Trip
             fromVenueId={lastPlayed ? parkOf[lastPlayed.gamePk]?.venue?.id : null}

@@ -1,0 +1,149 @@
+// The roll-ups behind public/data/club-defense-running.json
+// (scripts/lib/club-defense-running.mjs) and the loader's pure picker
+// (src/api/clubDefenseRunning.js). Small fixtures, no network.
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { fetchSavantCsv } from '../scripts/lib/savant.mjs'
+import {
+  buildClubs,
+  carryForward,
+  pct,
+  sprintByClub,
+  sumByClub,
+} from '../scripts/lib/club/defense-running.mjs'
+import { clubsFor } from '../src/api/clubDefenseRunning.js'
+
+test('pct is part over whole in percent, one decimal, null on an empty whole', () => {
+  assert.equal(pct(162, 162 + 54), 75)
+  assert.equal(pct(1, 3), 33.3)
+  assert.equal(pct(0, 10), 0)
+  assert.equal(pct(5, 0), null)
+  assert.equal(pct(null, 10), null)
+})
+
+test('sumByClub adds a column per club and skips blank values', () => {
+  const rows = [
+    { playerId: '1', teamId: 158, v: '2.5' },
+    { playerId: '2', teamId: 158, v: '-1' },
+    { playerId: '3', teamId: 112, v: '' },
+    { playerId: '4', teamId: 112, v: '4' },
+  ]
+  assert.deepEqual(sumByClub(rows, 'v'), { 158: 1.5, 112: 4 })
+})
+
+test('sumByClub gives a traded player one share per club, and counts a repeated row once', () => {
+  const rows = [
+    { playerId: '9', teamId: 120, v: 3 }, // traded: 3 with WSH...
+    { playerId: '9', teamId: 147, v: 1 }, // ...and 1 with NYY
+    { playerId: '9', teamId: 147, v: 1 }, // the same stint listed twice
+  ]
+  assert.deepEqual(sumByClub(rows, 'v'), { 120: 3, 147: 1 })
+})
+
+test('sumByClub leaves out a club with no usable row (null, never 0)', () => {
+  const out = sumByClub([{ playerId: '1', teamId: 158, v: '' }], 'v')
+  assert.equal(158 in out, false)
+})
+
+test('sprintByClub is a competitive-run weighted mean, one row per player', () => {
+  const rows = [
+    { player_id: '1', team_id: '158', sprint_speed: '30', competitive_runs: '10' },
+    { player_id: '2', team_id: '158', sprint_speed: '27', competitive_runs: '30' },
+    // a traded player: listed twice, counted once (first row wins)
+    { player_id: '3', team_id: '147', sprint_speed: '26', competitive_runs: '100' },
+    { player_id: '3', team_id: '120', sprint_speed: '26', competitive_runs: '100' },
+    // no speed, or no runs: no weight
+    { player_id: '4', team_id: '147', sprint_speed: '', competitive_runs: '50' },
+    { player_id: '5', team_id: '147', sprint_speed: '29', competitive_runs: '0' },
+  ]
+  assert.deepEqual(sprintByClub(rows), { 158: 27.8, 147: 26 })
+})
+
+test('buildClubs fills each club and nulls a measure with no source', () => {
+  const clubs = buildClubs({
+    teamIds: [158, 112],
+    oaa: [{ team_id: '158', outs_above_average: '20' }],
+    framing: [{ playerId: '1', teamId: 158, rv_tot: '-6.5' }], // 112: no catcher rows
+    sprint: [{ player_id: '1', team_id: '158', sprint_speed: '28', competitive_runs: '10' }],
+    stats: [
+      { teamId: 158, stolenBases: 162, caughtStealing: 54 },
+      { teamId: 112, stolenBases: 90, caughtStealing: 10 },
+    ],
+    baserunning: [{ playerId: '1', teamId: 158, n_safe: '40', n_opp_xb: '100' }],
+  })
+  assert.deepEqual(clubs[158], {
+    oaa: 20,
+    framingRuns: -6.5,
+    sprintSpeed: 28,
+    stolenBases: 162,
+    stolenBaseSuccess: 75,
+    extraBasesTaken: 40,
+  })
+  assert.deepEqual(clubs[112], {
+    oaa: null,
+    framingRuns: null,
+    sprintSpeed: null,
+    stolenBases: 90,
+    stolenBaseSuccess: 90,
+    extraBasesTaken: null,
+  })
+})
+
+test('clubsFor returns both clubs, in the order asked, or null', () => {
+  const data = { clubs: { 158: { oaa: 1 }, 112: { oaa: 2 } } }
+  assert.deepEqual(clubsFor(data, 112, '158'), [{ oaa: 2 }, { oaa: 1 }])
+  assert.equal(clubsFor(data, 158, 999), null)
+  assert.equal(clubsFor({ clubs: {} }, 158, 112), null)
+  assert.equal(clubsFor(null, 158, 112), null)
+})
+
+test('sumByClub throws on any row with no player id, never under-counts a club', () => {
+  const rows = [
+    { playerId: '1', teamId: 158, v: 2 },
+    { teamId: 158, v: 5 },
+  ]
+  assert.throws(() => sumByClub(rows, 'v'), /no player id/)
+  assert.throws(() => sumByClub([{ playerId: '', teamId: 112, v: 1 }], 'v'), /no player id/)
+})
+
+test('sumByClub throws when a club has rows but none with an id (a renamed id column)', () => {
+  const rows = [{ teamId: 158, v: 2 }, { teamId: 158, v: 3 }]
+  assert.throws(() => sumByClub(rows, 'v'), /no player id/)
+})
+
+// fetchSavantCsv, with a stubbed fetch
+async function withBody(body, opts) {
+  const real = globalThis.fetch
+  globalThis.fetch = async () => ({ ok: true, text: async () => body })
+  try {
+    return await fetchSavantCsv('t', 'https://x', { attempts: 1, ...opts })
+  } finally {
+    globalThis.fetch = real
+  }
+}
+
+test('fetchSavantCsv: a header-only body is no rows when allowEmpty, an error otherwise', async () => {
+  const body = '\uFEFF"id","rv_tot"\n'
+  assert.deepEqual(await withBody(body, { allowEmpty: true, columns: ['id', 'rv_tot'] }), [])
+  await assert.rejects(withBody(body, {}), /empty response/)
+})
+
+test('fetchSavantCsv: a header that lost an expected column fails loud, empty or not', async () => {
+  await assert.rejects(withBody('"id"\n', { allowEmpty: true, columns: ['id', 'rv_tot'] }), /rv_tot/)
+  await assert.rejects(withBody('"id"\n1\n', { columns: ['id', 'rv_tot'] }), /rv_tot/)
+})
+
+test('carryForward keeps last night value for a failed measure, only if it is on file', () => {
+  const clubs = { 158: { oaa: null, framingRuns: null, sprintSpeed: 28 }, 112: { oaa: null, framingRuns: null, sprintSpeed: 27 } }
+  const prev = { season: 2026, clubs: { 158: { oaa: 20, framingRuns: null, sprintSpeed: 99 } } }
+  assert.deepEqual(carryForward(clubs, prev, 2026, ['oaa', 'framingRuns']), {
+    158: { oaa: 20, framingRuns: null, sprintSpeed: 28 }, // sprintSpeed did not fail: not touched
+    112: { oaa: null, framingRuns: null, sprintSpeed: 27 }, // no previous row
+  })
+})
+
+test('carryForward ignores a previous file from another season, or none', () => {
+  const clubs = { 158: { oaa: null } }
+  assert.deepEqual(carryForward(clubs, { season: 2025, clubs: { 158: { oaa: 9 } } }, 2026, ['oaa']), clubs)
+  assert.deepEqual(carryForward(clubs, null, 2026, ['oaa']), clubs)
+})

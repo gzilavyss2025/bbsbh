@@ -119,6 +119,8 @@ function holdTarget({ el, root, offset, onLand }) {
 //   className   optional namespace for the caller (for example, sticky).
 //   hold        optional. A tap holds its section in place while the page above it
 //               grows, until the reader moves (holdTarget). The player page sets it.
+//   badges      optional, default true. False draws plain buttons, no count badge or dot
+//               (the World Series scouting report).
 //   onLand      optional, with `hold`. Called with the key once the tap's scroll has
 //               landed (lib/jumpbar/land.js). Not called if the reader moved first.
 //
@@ -133,7 +135,7 @@ function holdTarget({ el, root, offset, onLand }) {
 //    a tap attached would catch that same tap as it bubbles.
 //
 // The colours are the app's own (ADR-0030): ink, paper and --accent-tint.
-function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', hold = false, onLand }) {
+function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', badges = true, hold = false, onLand }) {
   const [current, setCurrent] = useState(tabs[0]?.key ?? null)
   const navRef = useRef(null)
   const btnRefs = useRef(new Map())
@@ -280,11 +282,16 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', hold
               aria-current={isCurrent ? 'location' : undefined}
               onClick={() => jump(t.key)}
             >
-              <span>{t.label}</span>{' '}
-              {count != null ? (
-                <span className="jumpbar__count">{count}</span>
-              ) : (
-                <span className="jumpbar__count" aria-hidden="true">·</span>
+              <span>{t.label}</span>
+              {badges && (
+                <>
+                  {' '}
+                  {count != null ? (
+                    <span className="jumpbar__count">{count}</span>
+                  ) : (
+                    <span className="jumpbar__count" aria-hidden="true">·</span>
+                  )}
+                </>
               )}
             </button>
           )
