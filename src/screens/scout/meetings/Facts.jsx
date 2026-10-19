@@ -26,23 +26,26 @@ export function ContactFacts({ pitch }) {
 }
 
 // One label over one value, the cell both lists below share.
-const Pair = ({ label, children }) => (
-  <div>
+const Pair = ({ label, className, children }) => (
+  <div className={className}>
     <dt className="scout__dtlabel">{label}</dt>
     <dd className="scout__dtvalue">{children}</dd>
   </div>
 )
 
-// The section's facts: six cells, three across (#2319, V10). `slash` is the "AVG/OBP/SLG" string;
-// a <wbr> after its second slash lets a narrow cell break there, ".262/.370/" over ".485", instead
-// of spilling into its neighbour. A slash is no break point before a digit, so it needs the <wbr>.
+// The section's facts: six cells, three across (#2319, V10). `slash` is the "AVG/OBP/SLG" string.
+// A cell too narrow for the whole line shows the average alone (".262"), never a broken line:
+// meet.css swaps the two spans by the cell's own width.
 export function MeetingFacts({ f, kbb, slash }) {
   return (
     <dl className="scout__mfacts">
       <Pair label="Line">{f.h}-for-{f.ab}</Pair>
       <Pair label="Pitches">{f.pitches}</Pair>
       <Pair label="K · BB">{kbb}</Pair>
-      <Pair label="Slash">{slash.slice(0, slash.lastIndexOf('/') + 1)}<wbr />{slash.slice(slash.lastIndexOf('/') + 1)}</Pair>
+      <Pair label="Slash" className="scout__slashcell">
+        <span className="scout__slashfull">{slash}</span>
+        <span className="scout__slashavg">{slash.split('/')[0]}</span>
+      </Pair>
       <Pair label="Avg EV">{fixed(f.avgExit, 1)}</Pair>
       <Pair label="xwOBA con">{xw(f.xwobaContact)}</Pair>
     </dl>

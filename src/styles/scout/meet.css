@@ -108,6 +108,18 @@
   font-size: var(--fs-body);
   font-weight: var(--w-bold);
 }
+/* The Slash cell: the whole line where it fits, else the average alone. 130px is ".000/.000/.000"
+   in the 15px mono value (14 characters at 9px, 126px). */
+.scout__slashcell {
+  container-type: inline-size;
+}
+.scout__slashfull {
+  display: none;
+}
+@container (min-width: 130px) {
+  .scout__slashfull { display: inline; }
+  .scout__slashavg { display: none; }
+}
 
 /* --- the mix: what the hitter saw in the meetings against the season, in the Pitches section's marks --- */
 
