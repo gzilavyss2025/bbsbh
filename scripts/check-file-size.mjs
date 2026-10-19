@@ -79,7 +79,6 @@ const BUDGETS = {
   // flat file. Split a sheet by moving a component's rules into a subdirectory
   // (src/styles/system/, focus/, report/) before you raise a number here.
   'src/styles/78-offseason.css': 1200, // 1151
-  'src/styles/03-slate-header.css': 650, // 602
   'src/styles/06-loader-and-cards.css': 800, // 900
   'src/styles/08-site-shell.css': 800, // 900
   'src/styles/12-sealbox.css': 1600, // 1536

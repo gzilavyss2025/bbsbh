@@ -42,8 +42,9 @@ function calendarFor(season) {
 // `sportId` and `leagueId` are what the URL asked for. The return is what the
 // slate should actually draw:
 //
-//   tabVisible   put WINTER on the rail, second, after MLB
+//   tabVisible   put the Winter stop on the masthead's ladder (last, after A)
 //   leagues      the picker's chips, in rail order, with this day's game counts
+//   games        this day's games across those leagues (the ladder's count)
 //   leagueId     the league to fetch and highlight — null off the winter tab
 //   ready        the calendar has landed, so the rail can stop guessing
 //

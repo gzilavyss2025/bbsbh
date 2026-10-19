@@ -1,0 +1,136 @@
+/* -------------------------------------------------- the D1 level ladder
+   The masthead's level picker (components/slatehead/LevelLadder.jsx): the farm
+   system as one rail, a node per level, the ball on the level on screen, and
+   Winter off the rail after a dashed divider. Split out of slate/masthead.css,
+   which holds the rest of the masthead and this ladder's wide-layout sizes.
+   Motion is motion/masthead.css. */
+
+.levelladder {
+  position: relative;
+  display: flex;
+  padding: var(--space-2) 0 var(--space-1h);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+
+/* The rail runs from the centre of the first stop to the centre of the last
+   farm stop (MLB to A). Every stop is the same width, so both ends are plain
+   fractions of the row. Its top is the node's centre: the ladder's padding,
+   the stop's, and half a node, less half the rail. */
+.levelladder__rail {
+  position: absolute;
+  top: calc(var(--space-2) + var(--space-4) + var(--space-1h) - var(--bw-hair));
+  left: calc(100% / var(--stops, 5) / 2);
+  width: calc(100% * (var(--farm, 5) - 1) / var(--stops, 5));
+  height: var(--bw-heavy);
+  background: var(--border-stamped);
+}
+
+.levelladder__ball {
+  position: absolute;
+  top: calc(var(--space-2) + var(--space-4) + var(--space-1h) - var(--space-3));
+  left: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  width: calc(100% / var(--stops, 5));
+  pointer-events: none;
+  transform: translateX(calc(var(--at, 0) * 100%));
+}
+
+.levelladder--nopick .levelladder__ball {
+  visibility: hidden;
+}
+
+.levelladder__ballart {
+  display: block;
+  width: var(--space-6);
+  height: var(--space-6);
+  transform: rotate(calc(var(--at, 0) * 120deg));
+}
+
+.levelladder__hide {
+  fill: var(--surface-inset);
+  stroke: var(--border-stamped);
+  stroke-width: 2;
+}
+
+.levelladder__seam {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 1.6;
+}
+
+.levelladder__stop {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  display: block;
+  min-height: 76px; /* raw-value-exempt: the D1 rung height, spec'd */
+  padding: var(--space-4) 0 0;
+  border: 0;
+  background: none;
+  color: var(--text-heading);
+  text-align: center;
+  cursor: pointer;
+}
+
+.levelladder__stop:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: calc(-1 * var(--bw-heavy));
+}
+
+@media (hover: hover) {
+  .levelladder__stop:hover {
+    background: var(--surface-row-hover);
+  }
+}
+
+.levelladder__stop--winter {
+  border-left: var(--bw-hair) dashed var(--border-rule);
+}
+
+.levelladder__node {
+  display: block;
+  box-sizing: border-box;
+  width: var(--space-3);
+  height: var(--space-3);
+  margin: 0 auto var(--space-1h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+
+.levelladder__stop--winter .levelladder__node {
+  border-radius: 50%; /* raw-value-exempt: a round node, a circle not a corner */
+}
+
+.levelladder__name {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-emphasis);
+  white-space: nowrap;
+}
+
+.levelladder__stop.is-empty .levelladder__name {
+  color: var(--text-caption);
+}
+
+/* The marker underline. Decoration only: aria-pressed and the ball carry the
+   picked state too. */
+.levelladder__stop.is-picked .levelladder__name {
+  color: var(--text-heading);
+  box-shadow: inset 0 calc(-1 * var(--space-1h)) 0 var(--marker);
+}
+
+.levelladder__count {
+  display: block;
+  min-height: var(--fs-cell);
+  margin-top: var(--space-1h);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-solid);
+  color: var(--text-caption);
+}

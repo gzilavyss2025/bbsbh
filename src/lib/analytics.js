@@ -9,10 +9,10 @@
 // it emits ONLY the three enumerated, coarse props below and drops everything
 // else, so a future careless caller cannot smuggle a game key into telemetry.
 //
-// Inert when unconfigured: `track` from @vercel/analytics is a no-op unless the
-// <Analytics/> component (main.jsx) is live on a Vercel deploy, so importing and
-// calling this off-platform (dev, tests, a self-host) does nothing.
-import { track } from '@vercel/analytics'
+// NO CALLER SINCE THE D1 MASTHEAD (2026-10-18). The slate's consent sheet was
+// the only place the event fired, and its sender (`trackToggleConsent`) went
+// with it. The allowlist stays, still pinned by test/analytics.test.js, until
+// the Scores Unlocked removal PR deletes this module whole.
 
 export const TOGGLES = Object.freeze({
   SCORES_UNLOCKED: 'scores_unlocked',
@@ -33,11 +33,6 @@ const TOGGLE_VALUES = new Set(Object.values(TOGGLES))
 const ACTION_VALUES = new Set(Object.values(ACTIONS))
 const SURFACE_VALUES = new Set(Object.values(SURFACES))
 
-// The single event name. One event, distinguished by its `action` prop, so the
-// Vercel dashboard shows one confirm/decline funnel rather than a sprawl of
-// event names.
-export const TOGGLE_CONSENT_EVENT = 'toggle_consent'
-
 // Validate + reduce an input to the exact allowlisted, enumerated props, or
 // return null if any of the three is missing or not a known enum value. Pure —
 // no side effects — so it can be unit-tested without a browser or the Vercel SDK.
@@ -50,16 +45,4 @@ export function buildToggleEventProps(input) {
   // Rebuild from scratch (never spread `input`) so ONLY the three keys survive,
   // regardless of what else the caller passed.
   return { toggle, action, surface }
-}
-
-// Fire the event if — and only if — the props validate. A malformed call is
-// silently dropped rather than emitting a partial/garbage event.
-export function trackToggleConsent(input) {
-  const props = buildToggleEventProps(input)
-  if (!props) return
-  try {
-    track(TOGGLE_CONSENT_EVENT, props)
-  } catch {
-    // Never let telemetry break a user action.
-  }
 }

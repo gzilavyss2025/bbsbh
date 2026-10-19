@@ -37,7 +37,10 @@ export function ladderStops({ levels, counts, sportId, winterGames = null }) {
   const farm = levels.filter((l) => !isWinterSport(l.sportId))
   const winter = levels.find((l) => isWinterSport(l.sportId))
   const all = winter ? [...farm, winter] : farm
-  const merged = winter && winterGames != null ? { ...counts, [winter.sportId]: winterGames } : counts
+  // The Winter count joins only once the farm counts have landed: merged into
+  // a null `counts`, it would make every farm level read "no games" while its
+  // own count is still in flight.
+  const merged = counts && winter && winterGames != null ? { ...counts, [winter.sportId]: winterGames } : counts
   return all.map((l) => {
     const isWinter = isWinterSport(l.sportId)
     const full = FULL_NAME[l.label] ?? l.label

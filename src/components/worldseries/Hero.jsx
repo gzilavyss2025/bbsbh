@@ -71,11 +71,15 @@ export function Hero({ mode, model, game, records, slateDate, live, wide, played
           <ClubRow key={slot.club.id} slot={slot} record={recordOf(slot.club.id)} winsNeeded={series.winsNeeded} runs={runsOf(i)} />
         ))}
       </Stack>
-      {gameDay && !live && (
+      {/* Without a reveal handler (the home slate no longer offers the pass)
+          the seal is a plain statement, never a button that does nothing. */}
+      {gameDay && !live && (onRevealScores ? (
         <Button block hint="Tap to reveal" onClick={onRevealScores} className="ww-hero__seal">
           Score sealed
         </Button>
-      )}
+      ) : (
+        <p className="ww-hero__seal ww-hero__sealnote">Score sealed</p>
+      ))}
       {!wide && <ScheduleStrip columns={model.columns} />}
       {(lineups || preview || stamps.length > 0) && (
         <Cluster gap="base" className="ww-hero__actions">

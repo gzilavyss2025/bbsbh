@@ -17,9 +17,13 @@ function Cell({ cell, onRevealScores }) {
     if (!cell.lead) return null
     return (
       <td rowSpan={2} className="ww-ledger__seal">
-        <Button size="control" onClick={onRevealScores} className="ww-ledger__sealbtn">
-          Sealed
-        </Button>
+        {onRevealScores ? (
+          <Button size="control" onClick={onRevealScores} className="ww-ledger__sealbtn">
+            Sealed
+          </Button>
+        ) : (
+          <span className="ww-ledger__sealnote">Sealed</span>
+        )}
       </td>
     )
   }

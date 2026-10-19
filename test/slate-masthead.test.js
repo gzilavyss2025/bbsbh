@@ -80,3 +80,17 @@ test('dateLines reads the weekday and month off the date itself', () => {
   assert.deepEqual(dateLines('2026-07-20'), { dow: 'Monday', md: 'Jul 20', short: 'Mon Jul 20' })
   assert.equal(dateLines('2026-10-18').dow, 'Sunday')
 })
+
+test('ladderStops: a known Winter count does not blank the farm levels while they load', () => {
+  const winter = { label: 'WINTER', sportId: 17, leagueId: 131 }
+  const stops = ladderStops({ levels: [...LEVELS, winter], counts: null, sportId: 1, winterGames: 12 })
+  assert.equal(stops[0].count, '')
+  assert.equal(stops[0].empty, false)
+  assert.equal(stops[0].aria, 'Major League')
+})
+
+test('ladderStops: a level the rail does not carry yet picks no stop', () => {
+  // A cold '/fall/...' load: the Winter stop waits on the calendar.
+  const stops = ladderStops({ levels: LEVELS, counts: null, sportId: 17 })
+  assert.equal(stops.some((s) => s.picked), false)
+})

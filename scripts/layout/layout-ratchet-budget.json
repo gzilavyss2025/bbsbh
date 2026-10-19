@@ -1,7 +1,4 @@
 {
-  "src/styles/03-slate-header.css": {
-    "wrap": 3
-  },
   "src/styles/04-site-bar.css": {
     "column": 2,
     "wrap": 1,
@@ -125,7 +122,7 @@
   "src/styles/25-wide-layout.css": {
     "column": 2,
     "wrap": 2,
-    "grid": 4
+    "grid": 3
   },
   "src/styles/26-player-page.css": {
     "wrap": 2,

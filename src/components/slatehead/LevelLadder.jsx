@@ -12,20 +12,31 @@ import { useState } from 'react'
 //
 // THE BALL ROLLS ONLY FOR A TAP. A level change also arrives by Back, by a
 // shared link or by the compact bar's menu; only the stop the reader tapped
-// here may roll the ball to it. `rolledTo` remembers that tap, and the
-// transition class is on only while the level on screen is the one tapped.
+// here may roll the ball to it. `rolledTo` remembers that tap, and the first
+// level change that lands anywhere else forgets it, so a later Back to the
+// same stop jumps rather than rolls.
+//
+// No stop is picked while the URL names a level the rail does not carry yet
+// (a cold winter link, before the winter calendar lands). The ball hides then,
+// as the old level rail highlighted nothing.
 export function LevelLadder({ stops, onPick }) {
   const [rolledTo, setRolledTo] = useState(null)
-  const at = Math.max(0, stops.findIndex((s) => s.picked))
+  const at = stops.findIndex((s) => s.picked)
+  const pickedKey = stops[at]?.key ?? null
+  const [seenKey, setSeenKey] = useState(pickedKey)
+  if (pickedKey !== seenKey) {
+    setSeenKey(pickedKey)
+    if (pickedKey !== rolledTo) setRolledTo(null)
+  }
   const farm = stops.filter((s) => !s.winter).length
-  const rolling = rolledTo != null && stops[at]?.key === rolledTo
+  const rolling = rolledTo != null && pickedKey === rolledTo
 
   return (
     <div
-      className={`levelladder${rolling ? ' levelladder--rolling' : ''}`}
+      className={`levelladder${rolling ? ' levelladder--rolling' : ''}${at < 0 ? ' levelladder--nopick' : ''}`}
       role="group"
       aria-label="Level"
-      style={{ '--stops': stops.length, '--farm': farm, '--at': at }}
+      style={{ '--stops': stops.length, '--farm': farm, '--at': Math.max(0, at) }}
     >
       <span className="levelladder__rail" aria-hidden="true" />
       <span className="levelladder__ball" aria-hidden="true">

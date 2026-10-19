@@ -59,10 +59,7 @@ import {
   stackSuspendedContinuation,
 } from '../lib/resultCards.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
-import { ConsentModal } from '../components/seal/ConsentModal.jsx'
-import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 import { slateScoreLine } from '../lib/slateScoreLine.js'
-import { trackToggleConsent, TOGGLES, ACTIONS, SURFACES } from '../lib/analytics.js'
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -152,10 +149,11 @@ export function GameSelect({
   // different shape, so its slate stays the plain one.
   const inPostseasonWindow =
     sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
-  // Site-wide "Scores Unlocked" pass (see the toggle below). Read here, ahead of
+  // Site-wide "Scores Unlocked" pass: a day consented to (ADR-0026). The slate
+  // no longer offers the switch itself (the D1 masthead). Read here, ahead of
   // the bracket, because revealing the day's live scores also moves the bracket
   // (Gary, 2026-09-30, ADR-0087 addendum).
-  const { spoilersOffFor, enable: enableUnlock } = useScoresUnlocked()
+  const { spoilersOffFor } = useScoresUnlocked()
   const scoresUnlocked = spoilersOffFor(dateStr)
   const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null, { live: scoresUnlocked })
   const wsMode = Boolean(worldSeriesMode(postseasonBracket.bracket)) // the World Series hero replaces the fold and primer (#1906)
@@ -205,8 +203,7 @@ export function GameSelect({
   // The dock renders nothing on a quiet window, and only IT knows that (the
   // answer arrives with the fetch). It reports back so the slate pads its floor
   // for a rail that actually exists — see .screen--wiredock in
-  // 04a-wire-dock.css, and note the padding is what keeps the dock off the
-  // Reveal all results bar.
+  // 04a-wire-dock.css.
   const [dockPresent, setDockPresent] = useState(false)
   const docked = (wireOn && !wide && dockPresent) || bracketInDock
   // The rail's copy of that arrangement, with the default flipped. The dock
@@ -223,11 +220,6 @@ export function GameSelect({
   // that renders both halves.
   const gamesColRef = useRef(null)
 
-  // The Scores Unlocked pass's consent sheet. The slate no longer offers the
-  // pass's own switch (the D1 masthead dropped it ahead of its removal); the
-  // World Series hero still asks through this sheet. A day consented to keeps
-  // its effect through `scoresUnlocked` above (ADR-0026).
-  const [askUnlock, setAskUnlock] = useState(false)
   // Every slate move rewrites the whole address, league and day together, so
   // whichever one you changed the URL still names the exact page on screen.
   // Today is passed as null, which is how slatePath knows to leave the date
@@ -292,7 +284,7 @@ export function GameSelect({
   const coldLoad = loading && !data
 
   // Slate score line — fetched ONLY while the Scores Unlocked pass is on AND we
-  // are on today's slate (a past day has its own reveal-all path). The default
+  // are on today's slate. The default
   // slate model stays score-free (see fetchSchedule/normalizeGame); this rides a
   // separate request whose data never merges into it. Degrades to {} on failure,
   // so a card silently falls back to its ordinary spoiler-free self. Re-fetches
@@ -506,27 +498,17 @@ export function GameSelect({
         : [],
     [sorted, showPastDayTreatment],
   )
-  const [revealedAll, setRevealedAll] = useState(false)
-  // Reset computed during render (not in an effect) on a day/level change —
-  // see Headshot.jsx for the same pattern. Shares `dayKey` with the filter
-  // reset below since both key off the same (dateStr, sportId) change.
+  // The day's flip cards open only for a day the reader consented to spoil
+  // (ADR-0026). The slate's own "Reveal all results" tap went with the D1
+  // masthead (Gary, 2026-10-18), ahead of the Scores Unlocked removal PR, which
+  // decides how a past day's results open from here. Until then a box score
+  // still opens each game.
   const dayKey = `${dateStr}|${sportId}|${activeLeagueId ?? ''}`
-  const [prevDayKeyForReveal, setPrevDayKeyForReveal] = useState(dayKey)
-  if (dayKey !== prevDayKeyForReveal) {
-    setPrevDayKeyForReveal(dayKey)
-    setRevealedAll(false)
-  }
-  // Spoilers-off counts as "reveal all" for this day's flip cards too: the user
-  // has consented to every score on this date (ADR-0026), so the amber banner
-  // must never sit over a still-sealed slate once the day has gone all-final —
-  // and a day locked in from an earlier consent shouldn't ask for the tap again
-  // either. A day never consented to keeps its own tap-to-reveal-all. Turning the
-  // pass off the same day collapses this straight back to `revealedAll`.
-  const slateRevealAll = revealedAll || scoresUnlocked
+  const slateRevealAll = scoresUnlocked
 
   // Per-game pill classification (Game of the Night / Dominant Performance /
   // Blowout / Close Game / Extra Innings) for every card in `finals` — see
-  // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
+  // GameResultFace.jsx's ResultPills. Empty until slateRevealAll is true.
   const cardMetaByGamePk = useDayCardMeta(finals, dateStr, slateRevealAll)
   // This day's condensed-game posters, one 8 KB static file for the whole
   // slate (see fetchDayVideos — the live alternative is 430 KB PER GAME). Same
@@ -558,9 +540,8 @@ export function GameSelect({
   }, [sorted, nationalBroadcasts, cardMetaByGamePk, favoriteTeamId, favoriteAffiliateIds])
 
   // The filter bar's own selection — which category chip(s) (see FILTER_CHIPS
-  // above) the user has toggled on. Reset on a new day/level, same as
-  // revealedAll above, so a stale filter never silently hides next slate's
-  // cards.
+  // above) the user has toggled on. Reset on a new day/level (`dayKey`
+  // above), so a stale filter never silently hides next slate's cards.
   const [activeFilters, setActiveFilters] = useState(new Set())
   const [prevDayKeyForFilters, setPrevDayKeyForFilters] = useState(dayKey)
   if (dayKey !== prevDayKeyForFilters) {
@@ -726,7 +707,7 @@ export function GameSelect({
             }
           />
 
-          {inPostseasonWindow && <WorldSeriesHome bracket={postseasonBracket.bracket} slateDate={dateStr} live={scoresUnlocked} wide={wide} onRevealScores={() => setAskUnlock(true)} />}
+          {inPostseasonWindow && <WorldSeriesHome bracket={postseasonBracket.bracket} slateDate={dateStr} live={scoresUnlocked} wide={wide} />}
 
           {/* The postseason bracket (#1224, slice 5) — above the cards, every
               date in the window, off days included. On an off day this is
@@ -907,29 +888,6 @@ export function GameSelect({
         />
       )}
 
-      {askUnlock && (
-        <ConsentModal
-          group="scoresUnlocked"
-          time={formatResetTime(nextResetAt())}
-          onConfirm={() => {
-            enableUnlock()
-            trackToggleConsent({
-              toggle: TOGGLES.SCORES_UNLOCKED,
-              action: ACTIONS.CONFIRM,
-              surface: SURFACES.SLATE,
-            })
-            setAskUnlock(false)
-          }}
-          onDismiss={() => {
-            trackToggleConsent({
-              toggle: TOGGLES.SCORES_UNLOCKED,
-              action: ACTIONS.DISMISS,
-              surface: SURFACES.SLATE,
-            })
-            setAskUnlock(false)
-          }}
-        />
-      )}
 
       {/* Last child on purpose: the dock is fixed, so its position on the page
           is decided by CSS, but being last puts it after RevealAllBar in the

@@ -2,7 +2,7 @@
    The resting look is slate/masthead.css. Every motion here answers a change
    the reader made; none plays on a cold load, a poll or Back (docs/motion.md):
 
-   - the levelladder ball rolls only under .levelladder--rolling, which LevelLadder sets
+   - the ladder ball rolls only under .levelladder--rolling, which LevelLadder sets
      only while the level on screen is the stop the reader tapped;
    - the date slides only under .slatedate__turn--next/--prev, which
      DateStepper sets only for a step taken there (keyed per date, so each

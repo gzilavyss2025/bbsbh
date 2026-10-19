@@ -260,6 +260,6 @@ test('a browsed-to past day keeps the dock, narrowed to that one day', async ({ 
 test('a Triple-A slate carrying no MLB-scoped stories gets no dock', async ({ page }) => {
   await openSlate(page)
   await page.goto('/aaa')
-  await expect(page.locator('.datenav')).toBeVisible()
+  await expect(page.locator('.slatemast__card .slatedate')).toBeVisible()
   await expect(page.locator('.wiredock')).toHaveCount(0)
 })

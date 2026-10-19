@@ -28,7 +28,7 @@ const GameResultFace = lazy(() =>
 // front is the ordinary spoiler-free GameCard; the back — only fetched once
 // revealed, via the shared usePastGameSignals cache — is a result summary
 // (final line, decisions, play of the game). Fully controlled by `revealed`
-// (the slate's page-level "Reveal all results" action — see GameSelect.jsx);
+// (GameSelect's `slateRevealAll`: a day the reader consented to spoil);
 // tapping the card itself always navigates to the real game, same as any
 // other slate card.
 export function PastGameFlipCard({
@@ -104,8 +104,8 @@ export function PastGameFlipCard({
           return <BoxScoreSkeleton cardMeta={cardMeta} />
         }
         if (state.error) {
-          // role="note", static like the old line: Reveal all turns every card
-          // at once, and a live region per failed card would speak once per card.
+          // role="note", static like the old line: a consented day turns every
+          // card at once, and a live region per failed card would speak once per card.
           return (
             <Notice tone="error" role="note">
               Couldn&apos;t load this game.

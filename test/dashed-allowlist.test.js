@@ -69,7 +69,7 @@ const ALLOWED = {
   // Winter stop sits off the farm system's rail, after a dashed divider (the D1
   // handoff, Gary, 2026-10-18).
   offRail: [
-    ['slate/masthead.css', '.levelladder__stop--winter'],
+    ['slate/ladder.css', '.levelladder__stop--winter'],
   ],
   // Admin and lab screens: dev-only, not the reader's app.
   adminLab: [

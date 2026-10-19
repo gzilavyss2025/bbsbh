@@ -337,7 +337,7 @@ test('a browsed-to past day keeps the rail, narrowed to that one day', async ({ 
 test('a Triple-A slate does not show a major-league wire', async ({ page }) => {
   await page.setViewportSize({ width: TWO_COL_W, height: 900 })
   await openSlate(page, '/aaa')
-  await expect(page.locator('.datenav')).toBeVisible()
+  await expect(page.locator('.slatemast__card .slatedate')).toBeVisible()
   await expect(page.locator('.wirerail')).toHaveCount(0)
   await expect(page.locator('.wiredock')).toHaveCount(0)
   expect((await readSlate(page)).shellW).toBe(SHELL_PLAIN)

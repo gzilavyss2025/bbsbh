@@ -12,7 +12,9 @@ export function CompactControls({ stops, dateStr, isToday, onLevel, onDate }) {
   const [open, setOpen] = useState(false)
   const chipRef = useRef(null)
   const menuRef = useRef(null)
-  const picked = stops.find((s) => s.picked) ?? stops[0]
+  // No stop is picked on a cold winter link until the calendar lands; the chip
+  // then names no level rather than claiming MLB.
+  const picked = stops.find((s) => s.picked)
 
   useEffect(() => {
     if (!open) return undefined
@@ -46,10 +48,10 @@ export function CompactControls({ stops, dateStr, isToday, onLevel, onDate }) {
           className={`slatecompact__chip${open ? ' is-open' : ''}`}
           aria-haspopup="menu"
           aria-expanded={open}
-          aria-label={`Level: ${picked?.fullName ?? ''}`}
+          aria-label={picked ? `Level: ${picked.fullName}` : 'Level'}
           onClick={() => setOpen((o) => !o)}
         >
-          {picked?.label}
+          {picked?.label ?? 'Level'}
           <svg viewBox="0 0 24 24" className="slatecompact__caret" aria-hidden="true">
             <path d="M6 9l6 6 6-6" />
           </svg>

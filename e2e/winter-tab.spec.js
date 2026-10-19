@@ -32,17 +32,17 @@ const WINTER_DONE = '/02032026'
 const IN_SEASON = '/07152026'
 const BOOKMARK_OUT_OF_SEASON = '/dom/07152026'
 
-const rail = (page) => page.locator('.levelnav__btn')
+const rail = (page) => page.locator('.slatemast__card .levelladder__stop')
+const railNames = (page) => page.locator('.slatemast__card .levelladder__name')
 const chips = (page) => page.locator('.leaguepicker__chip')
 
-test('the tab appears second, and only inside a winter', async ({ page }) => {
+test('the Winter stop appears last, and only inside a winter', async ({ page }) => {
   await page.goto(FOUR_LEAGUES)
-  await expect(rail(page)).toHaveText(['MLB', 'WINTER', 'AAA', 'AA', 'A+', 'A'])
-  // Second is the decision, not an accident of array order — the ladder splits
-  // in the middle on purpose, because for these months this is the only tab
-  // with games on it.
-  await expect(rail(page).nth(1)).toHaveText('WINTER')
-  await expect(rail(page).nth(1)).toHaveAttribute('aria-pressed', 'true')
+  await expect(railNames(page)).toHaveText(['MLB', 'AAA', 'AA', 'A+', 'A', 'Winter'])
+  // Last, after a dashed divider and off the farm system's rail: the D1
+  // masthead's decision (Gary, 2026-10-18), not an accident of array order.
+  await expect(rail(page).nth(5)).toHaveClass(/levelladder__stop--winter/)
+  await expect(rail(page).nth(5)).toHaveAttribute('aria-pressed', 'true')
 
   // The day after the winter's last game, and midsummer: back to five.
   //
@@ -53,7 +53,7 @@ test('the tab appears second, and only inside a winter', async ({ page }) => {
   // That is the whole reason there is no special case here to maintain.
   for (const path of [WINTER_DONE, IN_SEASON, BOOKMARK_OUT_OF_SEASON]) {
     await page.goto(path)
-    await expect(rail(page)).toHaveText(['MLB', 'AAA', 'AA', 'A+', 'A'])
+    await expect(railNames(page)).toHaveText(['MLB', 'AAA', 'AA', 'A+', 'A'])
     await expect(chips(page)).toHaveCount(0)
   }
 })
@@ -82,7 +82,7 @@ test('the picker offers the leagues in season, and opens on FALL', async ({ page
 
   // One league is not a choice: the tab already says where the reader is.
   await page.goto(AFL_ALONE)
-  await expect(rail(page).nth(1)).toHaveText('WINTER')
+  await expect(railNames(page).nth(5)).toHaveText('Winter')
   await expect(chips(page)).toHaveCount(0)
 })
 
@@ -97,7 +97,7 @@ test('every chip is a real address', async ({ page }) => {
   // And it survives a reload, which is the whole point of it being an address.
   await page.reload()
   await expect(chips(page).nth(1)).toHaveClass(/is-active/)
-  await expect(rail(page).nth(1)).toHaveAttribute('aria-pressed', 'true')
+  await expect(rail(page).nth(5)).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('the club strip is scoped to one league, and the wire is off', async ({ page }) => {
@@ -133,15 +133,19 @@ test('a shared winter game link resolves on a cold load', async ({ page }) => {
   await expect(page.locator('.lord__item').first()).toBeVisible()
 })
 
-test('six cells do not overlap the wordmark on a phone', async ({ page }) => {
+test('six stops fit the ladder on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 640 })
   await page.goto(FOUR_LEAGUES)
   await expect(rail(page)).toHaveCount(6)
 
-  const wordmark = await page.locator('.topbar__home').boundingBox()
-  const actions = await page.locator('.topbar__slateactions').boundingBox()
-  // Below the wide breakpoint the strip takes its own row under the lockup.
-  expect(actions.y).toBeGreaterThanOrEqual(wordmark.y + wordmark.height - 1)
+  // The ladder sits in its card under the brand bar, and every stop keeps the
+  // 44px tap target at the narrowest width.
+  const bar = await page.locator('.slatemast__bar').boundingBox()
+  const card = await page.locator('.slatemast__card').boundingBox()
+  expect(card.y).toBeGreaterThanOrEqual(bar.y + bar.height - 1)
+  for (const box of await rail(page).evaluateAll((els) => els.map((el) => el.getBoundingClientRect().width))) {
+    expect(box).toBeGreaterThanOrEqual(44)
+  }
 
   // And nothing runs off the side of the page.
   const overflow = await page.evaluate(
