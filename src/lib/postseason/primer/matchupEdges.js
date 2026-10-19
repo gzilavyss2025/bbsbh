@@ -20,6 +20,12 @@ export function matchupEdgeLine(r) {
   return `${r.h}-for-${r.ab}${r.hr > 0 ? `, ${r.hr} HR` : ''} · ${r.pa} PA`
 }
 
+// The face-off row's two sides. Side A is always the batter (id, name) and side B the starter
+// (vs, vsId); `kind` only says which of them holds the edge. -> { a, b } of { role, edge }.
+export function faceoffRoles(e) {
+  return { a: { role: 'hitter', edge: e.kind === 'hitter' }, b: { role: 'pitcher', edge: e.kind === 'pitcher' } }
+}
+
 // sides: starterMatchupsFor results (null for a side with no file row).
 // -> [{ kind: 'hitter' | 'pitcher', id, name, vs, vsId, line }]; vsId is the starter's person id, or null, hitters first.
 export function matchupEdges(sides) {

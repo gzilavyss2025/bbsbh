@@ -3,7 +3,7 @@
 // ribbon's win-chance line.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { matchupEdges, matchupEdgeLine } from '../../src/lib/postseason/primer/matchupEdges.js'
+import { matchupEdges, matchupEdgeLine, faceoffRoles } from '../../src/lib/postseason/primer/matchupEdges.js'
 import { wpSpark } from '../../src/lib/postseason/primer/wpSpark.js'
 
 const row = (id, name, ab, h, hr = 0, pa = ab) => ({ id, name, ab, h, hr, bb: pa - ab, hbp: 0, k: 0, pa, levels: ['MLB'] })
@@ -56,6 +56,13 @@ test('an edge carries the opponent starter id as vsId, or null when the file has
   assert.deepEqual([a.kind, a.id, a.name, a.vs], ['hitter', 1, 'Jesse Winker', 'Jack Flaherty'])
   const [b] = matchupEdges([{ pitcher: { name: 'Jack Flaherty' }, batters: [row(1, 'Jesse Winker', 8, 3, 1, 9)] }])
   assert.equal(b.vsId, null)
+})
+
+test('faceoffRoles: side A is always the batter and side B the starter; the edge kind says who holds the edge', () => {
+  const hitterEdge = faceoffRoles({ kind: 'hitter' })
+  assert.deepEqual([hitterEdge.a.role, hitterEdge.a.edge, hitterEdge.b.role, hitterEdge.b.edge], ['hitter', true, 'pitcher', false])
+  const pitcherEdge = faceoffRoles({ kind: 'pitcher' })
+  assert.deepEqual([pitcherEdge.a.role, pitcherEdge.a.edge, pitcherEdge.b.role, pitcherEdge.b.edge], ['hitter', false, 'pitcher', true])
 })
 
 test('wpSpark: one point per value, home chance up, flipped for the away club', () => {

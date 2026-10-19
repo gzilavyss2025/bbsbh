@@ -9,18 +9,16 @@
 // rows: schedule games as the API sends them (gamePk, gameType, officialDate,
 // status.abstractGameState, teams.{away,home}.team.id). Oldest first.
 export function selectMeetings(rows, { clubA, clubB, slateDate }) {
+  if (clubA === clubB) return []
   const clubs = new Set([clubA, clubB])
   return (rows ?? [])
-    .filter((g) => {
-      const ids = [g?.teams?.away?.team?.id, g?.teams?.home?.team?.id]
-      return (
+    .filter(
+      (g) =>
         g?.gameType === 'R' &&
         g.status?.abstractGameState === 'Final' &&
         g.officialDate < slateDate &&
-        clubs.size === 2 &&
-        ids.every((id) => clubs.has(id)) &&
-        ids[0] !== ids[1]
-      )
-    })
+        clubs.has(g.teams?.away?.team?.id) &&
+        clubs.has(g.teams?.home?.team?.id),
+    )
     .sort((a, b) => a.officialDate.localeCompare(b.officialDate) || a.gamePk - b.gamePk)
 }

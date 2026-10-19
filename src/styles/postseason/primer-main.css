@@ -224,7 +224,7 @@
 /* Face-off rows: side A, "vs", side B, the career line under them. */
 /* layout-exempt: three fixed columns (1fr auto 1fr), not a fit-to-width grid */
 .seriesedges__row--faceoff {
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   padding-bottom: var(--space-2);
 }

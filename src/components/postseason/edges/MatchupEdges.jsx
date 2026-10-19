@@ -1,4 +1,5 @@
 import { pillSolidStyle } from '../../../lib/design/pillClass.js'
+import { faceoffRoles } from '../../../lib/postseason/primer/matchupEdges.js'
 import { Headshot } from '../../player/Headshot.jsx'
 import { PlayerLink } from '../../player/PlayerLink.jsx'
 import { Pill } from '../../ui/control/Pill.jsx'
@@ -19,15 +20,17 @@ const KIND = {
 }
 
 // One face-off side: photo, name, role pill. `flip` mirrors it for side B. The
-// whole side is one PlayerLink; with no id the Headshot draws its monogram.
-function Side({ id, name, kind, flip }) {
+// whole side is one PlayerLink; with no id the Headshot draws its monogram. The
+// role word is fixed (side A hitter, side B pitcher); the side that holds the
+// edge wears the solid pill, the other an outline one.
+function Side({ id, name, role, edge, flip }) {
   return (
     <PlayerLink id={id} name={name} className={`seriesedges__side${flip ? ' seriesedges__side--b' : ''}`}>
       <Headshot personId={id} name={name} className="seriesedges__shot" />
       <span className="seriesedges__who2">
         <span className="seriesedges__sidename">{name}</span>
-        <Pill fill="solid" style={KIND[kind].style}>
-          {KIND[kind].word}
+        <Pill fill={edge ? 'solid' : 'outline'} style={edge ? KIND[role].style : undefined}>
+          {KIND[role].word}
         </Pill>
       </span>
     </PlayerLink>
@@ -42,14 +45,17 @@ export function MatchupEdges({ edges, variant }) {
     return (
       <EdgeCard title="Matchup edges" note="Career vs today's starters" className="seriesedges__matchups">
         <ul className="seriesedges__rows">
-          {edges.map((e) => (
-            <li key={e.id} className="seriesedges__row seriesedges__row--faceoff">
-              <Side id={e.id} name={e.name} kind={e.kind} />
-              <span className="seriesedges__vs">vs</span>
-              <Side id={e.vsId} name={e.vs} kind={e.kind === 'hitter' ? 'pitcher' : 'hitter'} flip />
-              <span className="seriesedges__line">{e.line}</span>
-            </li>
-          ))}
+          {edges.map((e) => {
+            const { a, b } = faceoffRoles(e)
+            return (
+              <li key={e.id} className="seriesedges__row seriesedges__row--faceoff">
+                <Side id={e.id} name={e.name} role={a.role} edge={a.edge} />
+                <span className="seriesedges__vs">vs</span>
+                <Side id={e.vsId} name={e.vs} role={b.role} edge={b.edge} flip />
+                <span className="seriesedges__line">{e.line}</span>
+              </li>
+            )
+          })}
         </ul>
       </EdgeCard>
     )
