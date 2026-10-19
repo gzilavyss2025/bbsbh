@@ -6,6 +6,13 @@ import { clamp } from '../math/number.js'
 export const HARD_LUCK_XBA = 0.5 // an out at or above this
 export const LUCKY_XBA = 0.25 // a hit below this
 
+// The later signals (#1771, docs/contact-replay.md §7.3): a first cut, tuned on real games.
+export const BLAST_SUM = 164 // Savant's blast: squared-up % + bat speed (mph) at or above this
+export const FAST_SWING_MPH = 75 // Savant's "fast swing"
+export const SHORTEN_MPH = 5 // two strikes: this far under his own season bat speed (the league gap is only ~2)
+export const TOPPED_GAP = -20 // launch angle minus attack angle, at or under this: driven down
+export const UNDER_GAP = 45 // at or over this: the bat went under the ball (2026-10-13 and 14: the 10th and 90th percentiles are -23 and 45)
+
 const HITS = new Set(['single', 'double', 'triple', 'home_run'])
 const NEITHER = new Set(['field_error', 'fielders_choice', 'catcher_interf']) // not a clean hit or out
 const PARKS = 30
@@ -32,14 +39,29 @@ export function verdictFor(eventType, tr) {
   return tr.barrel ? 'Barrel' : null
 }
 
+// §7.3. Short pencil notes, never stamps. `norm` is his season bat speed, `tr.attackDeg` is final-tier only.
+export function swingNotes(p, tr, { norm } = {}) {
+  const notes = []
+  const bs = tr?.batSpeed
+  if (bs == null) return notes
+  const su = p.swing === 'inplay' ? squaredUp(p.hit?.exitVelo, bs, Number(p.mph)) : null
+  if (su != null && Math.min(1, su) * 100 + bs >= BLAST_SUM) notes.push('Blast')
+  else if (bs >= FAST_SWING_MPH) notes.push('Fast swing')
+  if (p.twoStrikes && norm != null && bs <= norm - SHORTEN_MPH) notes.push('Shortened up with two strikes')
+  const gap = p.swing === 'inplay' && tr.attackDeg != null && p.hit?.launchAngle != null ? p.hit.launchAngle - tr.attackDeg : null
+  if (gap != null && gap <= TOPPED_GAP) notes.push('Topped it')
+  else if (gap != null && gap >= UNDER_GAP) notes.push('Got under it')
+  return notes
+}
+
 const pct = (v) => `${Math.round(Math.min(1, v) * 100)}%`
 
 // `tr` is the pitch's /gf row (or undefined); `mlb` false means no /gf was asked for (§10), so no waiting figures.
-// Returns { figs: [{ num, label, wait? }], verdict }.
-export function qualityFigures(p, tr, { eventType, mlb }) {
+// Returns { figs: [{ num, label, wait? }], verdict, notes }.
+export function qualityFigures(p, tr, { eventType, mlb, norm }) {
   const figs = []
   if (p.swing === 'inplay') {
-    if (p.hit?.exitVelo == null) return { figs, verdict: null }
+    if (p.hit?.exitVelo == null) return { figs, verdict: null, notes: [] }
     figs.push({ num: p.hit.exitVelo.toFixed(1), label: 'mph off the bat' })
     if (mlb) {
       const su = squaredUp(p.hit.exitVelo, tr?.batSpeed, Number(p.mph))
@@ -47,9 +69,9 @@ export function qualityFigures(p, tr, { eventType, mlb }) {
       if (tr?.xba != null) figs.push({ num: tr.xba.toFixed(3).replace(/^0/, ''), label: 'xBA' })
       if (eventType === 'home_run' && tr?.hrParks != null) figs.push({ num: `${tr.hrParks} of ${PARKS}`, label: 'parks a home run' })
     }
-    return { figs, verdict: mlb ? verdictFor(eventType, tr) : null }
+    return { figs, verdict: mlb ? verdictFor(eventType, tr) : null, notes: mlb ? swingNotes(p, tr, { norm }) : [] }
   }
   if (mlb && tr?.batSpeed != null) figs.push({ num: tr.batSpeed.toFixed(1), label: 'mph bat speed' })
   if (p.swing === 'whiff' && p.breakH != null) figs.push({ num: `${Math.abs(p.breakH).toFixed(1)} in`, label: 'horizontal break' })
-  return { figs, verdict: null }
+  return { figs, verdict: null, notes: mlb ? swingNotes(p, tr, { norm }) : [] }
 }

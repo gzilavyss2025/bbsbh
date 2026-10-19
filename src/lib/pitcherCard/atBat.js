@@ -40,7 +40,10 @@ const SWINGS = new Set(['whiff', 'foul', 'inplay'])
 
 export function atBatScenePitches(pitchDetails, view = 'hitter', batSide = '') {
   const out = []
+  let before = 0 // the strikes before this pitch: the previous pitch's count after it
   for (const p of pitchDetails ?? []) {
+    const twoStrikes = before === 2
+    before = p.strikes ?? before
     const flight = realFlight({ ...p, release: [0, p.releaseY ?? FALLBACK_RELEASE_Y, 0] })
     if (!flight) continue
     const type = p.type || pitchLabel(p.typeCode) || 'Pitch'
@@ -56,7 +59,7 @@ export function atBatScenePitches(pitchDetails, view = 'hitter', batSide = '') {
       view,
     )
     const swing = SWINGS.has(p.cat) ? p.cat : null
-    out.push({ ...scene, no: p.no, call: p.callDesc, hit: p.hit, playId: p.playId, breakH: p.breakH, batSide, swing, ...(swing && { contact: contactPoint(flight), flight }) })
+    out.push({ ...scene, no: p.no, call: p.callDesc, hit: p.hit, playId: p.playId, breakH: p.breakH, batSide, twoStrikes, swing, ...(swing && { contact: contactPoint(flight), flight }) })
   }
   return out
 }
