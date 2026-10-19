@@ -185,3 +185,30 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
+
+.pqual__fig--wait .pqual__num {
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+.pqual__stamp {
+  margin-left: auto;
+  padding: 0 var(--space-1h);
+  border: 2px solid currentColor;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.pqual__stamp--out {
+  color: var(--clay-deep);
+  border-color: var(--clay);
+}
+.pqual__stamp--good {
+  color: var(--field-deep);
+  border-color: var(--field);
+}
+#root .pqual__num {
+  text-transform: none; /* caps-exempt: a figure like `20 of 30` reads as written; `#root` out-ranks `#root *` (01-base.css) */
+}

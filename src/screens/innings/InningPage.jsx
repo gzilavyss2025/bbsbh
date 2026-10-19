@@ -96,6 +96,7 @@ export const InningPage = memo(function InningPage({
         callouts={callouts}
         vsTeam={vsTeam}
         treatment={treatment}
+        sportId={meta.away.sportId}
         highlights={highlights}
         revealedAtBatCount={atBatCountFor(inning, half)}
         halfInProgress={halfInProgress}
