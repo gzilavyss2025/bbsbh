@@ -59,7 +59,7 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
       )}
 
       <div className="scout__controls">
-        <Choice label="Show" options={SHOWS} value={show} onChange={setShow} />
+        {hmap && <Choice label="Show" options={SHOWS} value={show} onChange={setShow} />}
         {side && <Choice label="Metric" options={metrics.map((k) => [k, METRICS[k].label])} value={metric} onChange={onMetric} />}
       </div>
 
@@ -79,7 +79,7 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
               stance={mode === 'locations' ? stance : hitterStance}
               cells={shown.cells}
               unit={mode === 'locations' || metric !== 'xwoba' ? '%' : ''}
-              shares={mode === 'both' && map && !map.thin ? map.share : undefined}
+              shares={mode === 'both' && map && !map.thin && stance === hitterStance ? map.share : undefined}
               className={mode === 'locations' ? '' : `scout__map--${metric}`}
               picked={picked}
               onSelect={pick}
