@@ -119,3 +119,14 @@ test('gamePk 849810 at-bat 16: the home run is hit in front of the plate and lan
   near(Math.hypot(x - hr.contact.K[0], y - hr.contact.K[1]), 428, 1)
   assert.ok(x > hr.contact.K[0], 'hit to right field')
 })
+
+test('pitchBeats: a whiff whose path never reaches the mitt still ends its scene after contact', () => {
+  const w = bySwing(1, 'whiff')
+  const b = pitchBeats({ ...w, contact: { ...w.contact, tMitt: null } }, SLOW)
+  assert.ok(b.contactMs < b.sceneEndMs && b.sceneEndMs < b.figsStartMs)
+})
+
+test('replayFrame: a picked pitch past the end of the list plays the whole list instead of throwing', () => {
+  const list = [{ totalMs: 1000 }, { totalMs: 3000 }]
+  assert.deepEqual(replayFrame(list, 500, 5), { idx: 0, tau: 500, done: false })
+})

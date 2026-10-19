@@ -50,7 +50,7 @@ export function pitchBeats(pitch, slow, figCount = 1) {
   const path = swing === 'inplay' ? battedPath(hit, contact.K) : swing === 'foul' ? foulPath(contact.K, batSide) : null
   const exitSec = path?.exitSec ?? 0
   const contactMs = contact.tc * ms
-  const sceneEndMs = (swing === 'whiff' ? contact.tMitt : contact.tc + Math.max(exitSec, FOLLOW)) * ms + freezeMs
+  const sceneEndMs = (swing === 'whiff' ? contact.tMitt ?? contact.tc + FOLLOW : contact.tc + Math.max(exitSec, FOLLOW)) * ms + freezeMs
   const exitMs = contactMs + freezeMs + exitSec * ms
   const side = swing === 'inplay' && path
   const sideStartMs = side ? exitMs + SIDE_DELAY_MS : null
@@ -70,7 +70,7 @@ export function sceneClock(beats, tau) {
 // Plays the pitches ONCE, in order, each in its own totalMs slot: { idx, tau: ms inside that slot, done }.
 // `picked` (an index) plays only that pitch. With no clock yet (`elapsed` null) it rests on the last pitch.
 export function replayFrame(beatsList, elapsed, picked) {
-  const one = Number.isInteger(picked) && picked >= 0
+  const one = Number.isInteger(picked) && picked >= 0 && picked < beatsList.length
   const [from, to] = one ? [picked, picked + 1] : [0, beatsList.length]
   let left = elapsed ?? Infinity
   for (let idx = from; idx < to; idx++) {
