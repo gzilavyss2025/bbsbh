@@ -1,3 +1,4 @@
+import '../../../styles/postseason/primer-main.css'
 import { pillSolidStyle } from '../../../lib/design/pillClass.js'
 import { faceoffRoles } from '../../../lib/postseason/primer/matchupEdges.js'
 import { Headshot } from '../../player/Headshot.jsx'

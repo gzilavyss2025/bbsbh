@@ -1,3 +1,4 @@
+import '../../styles/postseason/series-parts.css'
 import { keysVerdict, nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { ordinal } from '../../lib/format.js'
 import { teamAbbr } from '../../lib/teams.js'

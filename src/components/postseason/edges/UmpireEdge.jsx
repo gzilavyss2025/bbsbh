@@ -1,3 +1,4 @@
+import '../../../styles/postseason/primer-main.css'
 import { LEAN_TIERS, LEAN_TIER_LABELS, leanCaretFraction } from '../../../lib/statTiers.js'
 import { EdgeCard } from './EdgeCard.jsx'
 
