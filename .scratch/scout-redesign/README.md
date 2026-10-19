@@ -12,7 +12,7 @@ Files in this folder:
 | `README.md` | This plan: shared rules, the slices, and one ready prompt per slice |
 | `verdict-draft.js` | Slice 1's function, checked against real store data |
 | `verdict-draft.test.js` | Slice 1's six tests, all passing against the draft |
-| `vsplayer-bonds-maddux.json` | A trimmed real Stats API `vsPlayer` answer for slice 7's test |
+| `vsplayer-bonds-maddux.json` | A trimmed real Stats API `vsPlayer` answer for slice 7b's test |
 | `shot.mjs` | A screenshot helper that works in the cloud container (see "Verify") |
 
 ## Run plan
@@ -21,30 +21,35 @@ Slice 0 is this folder plus ADR-0118. It must be on `main` before any slice star
 
 | # | Slice | Model | Effort | Depends on | Parallel with |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Verdict function + tests | Haiku 5.5 | high | 0 | 2 |
+| 1 | Verdict function + tests | Haiku 5.5 | medium | 0 | 2 |
 | 2 | One view (retire the View toggle) | Sonnet 5.5 | medium | 0 | 1 |
-| 3 | One scroll: sections, jump bar, CSS partials | Sonnet 5.5 | medium | 2 | — |
+| 3 | One scroll: sections, jump bar, CSS partials, page wiring | Sonnet 5.5 | medium | 2 | — |
 | 4 | The edge: verdict card, pushes, things to watch, side colours | Sonnet 5.5 | high | 1, 3 | 5, 6, 7 |
-| 5 | Pitch by pitch: tug-of-war rows, phone chip strip | Sonnet 5.5 | medium | 3 | 4, 6, 7 |
-| 6 | Where: one overlay map, Show, Metric, batter figure | Sonnet 5.5 | high | 3 | 4, 5, 7 |
-| 7 | Meetings restyle + retired and pre-2008 states | Sonnet 5.5 | high | 3 | 4, 5, 6 |
-| 8 | Desktop layout (740 px and wider) | Sonnet 5.5 | medium | 4–7 | 9 |
-| 9 | Motion | Sonnet 5.5 | medium | 4–7 | 8 |
+| 5 | Pitch by pitch: tug-of-war rows | Sonnet 5.5 | medium | 3 | 4, 6, 7 |
+| 6 | Where: one overlay map, Show, Metric, phone chip strip | Sonnet 5.5 | high | 3 | 4, 5, 7 |
+| 6b | Where: the batter figure in the home uniform | Sonnet 5.5 | medium | 6 | 4, 5, 7 |
+| 7 | Meetings restyle (numbered pitch rows, written-out calls) | Sonnet 5.5 | medium | 3 | 4, 5, 6 |
+| 7b | Retired players: meetings first, last club, pre-2008 line | Sonnet 5.5 | high | 7 | 4, 5, 6, 6b |
+| 8 | Desktop layout (740 px and wider) | Sonnet 5.5 | medium | 4, 5, 6, 6b, 7, 7b | 9 |
+| 9 | Motion | Sonnet 5.5 | medium | 4, 5, 6, 6b, 7, 7b | 8 |
 
 The model picks follow `.claude/skills/write-prompt/SKILL.md`:
 
-- **Slice 1** is a paste of verified code and tests, so it runs on Haiku 5.5 at high effort.
-- **Slices 2, 3, 5, 8 and 9** follow a spec and existing patterns, so they run on Sonnet 5.5 at medium effort.
-- **Slices 4, 6 and 7** carry judgment in layout or data, so they run on Sonnet 5.5 at high effort.
+- **Slice 1** is a paste of verified code and tests, so it runs on Haiku 5.5 at medium effort.
+- **Slices 2, 3, 5, 6b, 7, 8 and 9** follow a spec and existing patterns, so they run on Sonnet 5.5 at medium effort.
+- **Slices 4, 6 and 7b** carry judgment in layout or data, so they run on Sonnet 5.5 at high effort.
 - **If a result comes back weak,** raise the effort on the same model first. Change the model only after that.
 
-**Why slice 3 comes before the rest:** slices 4 to 7 each own one section, one folder and one CSS partial. Slice 3 creates those homes, so slices 4 to 7 can run at the same time without editing the same file.
+**Why slice 3 comes before the rest:** slices 4 to 7 each own one section, one folder and one CSS partial. Slice 3 creates those homes and does all the wiring in `ScoutPage.jsx`, so slices 4 to 7 can run at the same time without editing the same file. Slices 6b and 7b follow 6 and 7 because they edit the same files.
 
-Each slice is one PR. Its body says `Part of #2319`. The last slice to land says `Closes #2319`. The PRs land through `/stack-prs`.
+**Who may edit `ScoutPage.jsx` after slice 3:** slice 6 (the Where wrapper lines: the Metric control and the chip strip) and slice 7b (the one flag that hides the Edge, Pitches and Where sections). No other slice edits it. A slice that needs another change there stops and reports.
+
+Each slice is one PR. Its body says `Part of #2319`, never `Closes`. Gary closes #2319 by hand after the last slice lands (an unattended session never closes an issue). The PRs land through `/stack-prs`.
 
 ## Shared rules (every slice)
 
 - **Start.** Read `CLAUDE.md`, `src/CLAUDE.md`, `src/styles/CLAUDE.md`, ADR-0118 and this file's section for your slice. Then list the open PRs and their files. Stop and report if one of them touches a file you will change.
+- **The canvas.** Read it with the Artifact tool (`action: "read"`, the URL at the top of this file). If it does not open, stop and report; do not guess the look.
 - **Test discipline.** New pure logic lands with a test. Write the test first and watch it fail. Never loosen an assertion to pass. A test whose behaviour this redesign changes on purpose is changed in the same commit, and the PR says which test and why.
 - **CSS guards** (`npm run lint`):
   - `font-size` is `var(--fs-*)`. The smallest sizes are `--fs-cell` and `--fs-caption`, both 11 px. Never use 10 px.
@@ -72,7 +77,7 @@ Each slice is one PR. Its body says `Part of #2319`. The last slice to land says
   - Pujols 405395 vs Kershaw 477132: both retired, with Statcast meetings from 2008 to 2022.
   - Bonds 111188 vs Maddux 118120: both retired, no Savant rows. The Stats API career line is 154 PA, .262/.370/.485.
 - **Handoff.**
-  - Open a draft PR and push.
+  - Open a draft PR and push. When the work is done and CI is green, remove the `wip` label. Never merge. Never push to `main`.
   - Keep working until everything asked for is done. Stop to ask only when you cannot go on without the user, or before a risky step. When the work is done and checked, stop and report. Do not add features, tests, files or docs that were not asked for. Tests, docs and checks that this plan or CLAUDE.md names count as asked for.
 
 ## Code map (verified 2026-10-19)
@@ -82,14 +87,15 @@ Each slice is one PR. Its body says `Part of #2319`. The last slice to land says
   - The View controls: `VIEWS` and `VIEW_KEY` (lines 58–59), `storedView` (65–72), `setView` (139–148), and the `ScoutScene` options (202–214).
 - **Edge:** `src/screens/scout/edge/`.
   - `EdgePanel.jsx` holds the ledger and the verdict text.
-  - `edge.js` exports `ledgerRows`, `ledgerScale`, `rowTag`, `versus`, `typeSentences`, `whiffSentence`, `locationLens`, `locationSentences`, `verdict` and `FAVORS`.
+  - `edge.js` exports `FAVORS`, `whoFavors`, `ledgerRows`, `rowTag`, `versus`, `ledgerScale`, `listOf`, `leanMetric`, `headline`, `textOf`, `typeSentences`, `whiffSentence`, `locationLens`, `leftOut`, `locationSentences` and `verdict`. `test/scout-edge.test.js` covers them.
 - **Zones:** `src/screens/scout/zones/`.
   - `ZonesPanel.jsx` uses `turns` and `.is-turning`.
   - `MapParts.jsx` exports `Swatch`, `Sides`, `Answer`, `Readout` and `Key`.
   - `callout.js`.
   - The map itself is `src/components/scout/ScoutMap.jsx`, an SVG with cells `{tone, value, count}`.
 - **Meetings:** `src/screens/scout/meetings/`.
-  - `MeetingsPanel.jsx` has three states: loading, `null` meaning "No head-to-head on file", and empty `pas`.
+  - `MeetingsPanel.jsx` has three states: loading, `null` meaning "No head-to-head on file", and empty `pas`. It fetches its own data (`useAsync(() => fetchHeadToHead(...))`, line 48; `fetchHeadToHead` is in `src/api/scout/headToHead.js`). The plate-appearance count for the jump bar therefore lives inside it today.
+  - `headToHead.js` lines 68–69 say why `vsPlayer` is not its source: it lists each plate appearance twice. `test/fixtures/scout/vs-player-total.json` and `test/scout-head-to-head.test.js` already cross-check against the `vsPlayerTotal` entry. Nothing in `src/` calls `vsPlayer` yet.
   - `PitchModal.jsx`, `PitchZone.jsx`, `Facts.jsx`, and `meetings.js` (pure).
 - **Data:**
   - `board.js` `pitcherBoard` returns `{tiles, types, codes, all, byType}`. Each map is `{n, thin, regionN, share, cells}`.
@@ -109,7 +115,9 @@ Each slice is one PR. Its body says `Part of #2319`. The last slice to land says
   - `batterFigureUrls(assets, hand)` with `UniformFigure`.
   - `fetchTeamUniformCatalog(teamIds, season)` returns `{[teamId]: [{text, piece, code}]}`.
   - `rosterStatusView(person, onDate, {isMlbTeamId})` returns `{state, lastTeam, ...}` and needs `person.rosterEntries`, which `fetchPerson` already hydrates.
-  - `yearsPlayed(p)` lives in `src/api/search.js` and gives "2001-2022" with an ASCII hyphen.
+  - `yearsPlayed(p)` lives in `src/api/search.js`. It gives "2001-2022" with an ASCII hyphen for a retired player, "2001-" for an active one, and '' when `lastPlayedDate` is missing. The last year of play is `p.lastPlayedDate.slice(0, 4)`.
+  - `isMlbTeamId(teamId)` lives in `src/lib/teams.js`.
+  - `hitterBoard.js` already imports `band` (line 2) and has `expectedAll` (lines 81–93) above `hitterSide` (line 95).
   - `useInViewOnce(key)` returns `[ref, 'rest'|'wait'|'play']`.
   - `useCountUp` lives at `src/screens/team/next/ranks/runvalue/useCountUp.js` and is DOM-driven through `data-count-*`.
 - **Tokens:**
@@ -122,9 +130,9 @@ Each slice is one PR. Its body says `Part of #2319`. The last slice to land says
 
 Done means:
 
-- `test/scout-verdict.test.js` is a copy of `verdict-draft.test.js`. It runs and fails first, because the function does not exist yet.
-- `matchupVerdict` from `verdict-draft.js` is pasted into `src/screens/scout/hitterBoard.js`, below `expectedAll`. Import `band` from `../../lib/scout/metrics.js`.
-- All six tests pass.
+- `test/scout-verdict.test.js` is a copy of `verdict-draft.test.js`. It runs and fails first, because the function does not exist yet. Change the `DRAFT for slice 1` header comment to a plain description; keep the fixture note.
+- `matchupVerdict` from `verdict-draft.js` is pasted into `src/screens/scout/hitterBoard.js`, between `expectedAll` and `hitterSide`, with its comment block. `band` is already imported there; add no import.
+- All six tests pass, and `npm run lint` passes.
 - `check-dead-exports` counts a test import as a use, so the new test keeps `matchupVerdict` from being flagged before slice 4 imports it.
 
 ## Slice 2: one view (Sonnet 5.5, medium)
@@ -138,9 +146,9 @@ Remove the View toggle and the pitcher's view **from the page**. Keep the geomet
 - **`ScoutScene.jsx`:** render the segmented control only when `options` is given, or delete it if nothing else passes `options`.
 - **`ZonesPanel.jsx`:** remove `turns`, `key={turns}` and `.is-turning`.
 - **`scout.css`:** remove `.scout__board` perspective, `.scout__maps.is-turning` and `@keyframes scout-turn`.
-- **`path.js`:** stop writing `?view`, and drop the `view` parameter.
-- **`route.js`:** keep parsing `view`, so old links work, unless nothing reads it. If nothing reads it, drop it and update the round-trip test in `test/scout-page.test.js`, lines 18–36. That test change is on purpose; say so in the PR.
-- **Meetings:** `PitchModal` and `PitchZone` get `view='hitter'` from the page as today, so they need no change.
+- **`src/lib/scout/path.js` and `route.js`:** stop writing and stop parsing `view` (ADR-0118: "`?view=` stops being read"). An old link with `?view=pitcher` still opens the page, because the parser ignores unknown parameters. Update the two tests in `test/scout-page.test.js` (lines 18–36) on purpose, and say in the PR which assertions changed and why.
+- **Meetings:** `PitchModal` and `PitchZone` take their `view` from the page. Today the page default is `'pitcher'`, so after this slice the modal draws the hitter's view. That is the intended change (ADR-0118, 4). Check `test/scout-scene.test.js` and `test/scout-meetings.test.js` for a test that expects the pitcher's view.
+- **The motion block** in `scout.css` loses the `scout-turn` keyframes and `.is-turning`; keep `scout-ink`.
 
 Verify with `test/scout-page.test.js`, `test/scout-scene.test.js`, `test/scout-regions.test.js` and lint.
 
@@ -149,14 +157,17 @@ Verify with `test/scout-page.test.js`, `test/scout-scene.test.js`, `test/scout-r
 Turn the three tabs into four stacked sections under a `HubTabBar` with `variant="anchor"`. **Keep each section's content as it is today.** Slices 4–7 restyle the sections.
 
 - **Section ids and labels:** `scout-edge` "Edge", `scout-pitches` "Pitches", `scout-where` "Where", `scout-meet` "Meetings".
-- **Badge counts:** Pitches gets `board.types.length`, and Meetings gets the plate-appearance count once it is known (leave it empty while loading). Edge and Where get none.
+- **Badge counts:** Pitches gets `board.types.length`. Meetings gets the plate-appearance count: lift the `fetchHeadToHead` read out of `MeetingsPanel.jsx` into `ScoutPage.jsx` and pass the result down as a prop (leave the badge empty while loading). Edge and Where get none.
 - **Move the ledger and the pills:**
-  - Move the ledger, meaning the `.scout__ledgerhead` and `.scout__ledger` block and the Metric `Choice` under it, out of `EdgePanel.jsx` into a new `src/screens/scout/pitches/PitchRows.jsx`. Move it unchanged.
-  - Move the pitch-pill row from `ScoutPage.jsx` into the same new section.
+  - Move the ledger, meaning the `.scout__ledgerhead` and `.scout__ledger` block, out of `EdgePanel.jsx` into a new `src/screens/scout/pitches/PitchRows.jsx`. Move it unchanged.
+  - Move the Metric `Choice` that sits under the ledger into `ScoutPage.jsx`, at the top of the Where section. The page owns the `metric` state; the ledger still reads it. Slice 6 moves the control into the Where panel's own control row.
+  - Move the pitch-pill row from `ScoutPage.jsx` into the Pitches section.
   - The scene stays where it is, above the sections, for now.
-- **Delete** `TABS`, the tab buttons, `role="tablist"`, `?tab` writing in `path.js` and `TABS` in `route.js`. Keep the parse of `?tab` only if needed for old links; otherwise remove it and update the route tests on purpose.
+- **Page wiring.** Do all of it here: pass `selectedPitch`, `metric` and the lifted head-to-head result to the panels as props, and build the section list in one array so that slice 7b can hide sections by changing one flag. Slices 4 to 7 then need no other edit in `ScoutPage.jsx`.
+- **Delete** `TABS`, the tab buttons, `role="tablist"`, `?tab` writing in `path.js` and `TABS` in `route.js`. Stop parsing `?tab` too (ADR-0118, 1). Update the `tab` assertions in `test/scout-page.test.js` on purpose and say so in the PR.
 - **Create four CSS partials** in `src/styles/scout/`: `edge.css`, `pitches.css`, `where.css` and `meet.css`. Each holds one header comment and the rules moved for its section. `ScoutPage.jsx` imports all of them after the three that exist. Slices 4–7 each own one partial.
 - **The jump bar's offset** matches the sticky site header. Read how `TeamNextPage` sets `BAR_H`.
+- **Verify:** `test/scout-page.test.js`, the scout tests that import a file you changed, lint, and the 390 px screenshot.
 
 ## Slice 4: the edge (Sonnet 5.5, high)
 
@@ -187,7 +198,7 @@ Build the edge section from the canvas (phone board, section "The edge"). Files:
      - The hot/cold sentence from `locationSentences` goes to the hitter when `lens.hot > lens.cold`, else to the pitcher.
      - Drop the "Leaves out" sentence (the pushes note covers it), and the "Too few" sentence.
    - Add a pure `watchList({board, sides, names, stance})` to `edge.js` that returns `[{who: 'hitter'|'pitcher', parts}]`, with a test.
-4. **Remove from `EdgePanel`** the old "Lean …" headline and the paragraphs it replaces.
+4. **Remove from `EdgePanel`** the old "Lean …" headline and the paragraphs it replaces. Delete each `edge.js` export that goes dead (likely `verdict`, `headline` and `leanMetric`) and change `test/scout-edge.test.js` on purpose; the PR says which tests. Keep `FAVORS`, `whoFavors`, `ledgerRows`, `ledgerScale`, `rowTag` and `versus`: `PitchRows` uses them and slice 5 builds on them.
 5. **Contrast pairs:** register `award-ink`/`surface-card`, `text-heading`/`award-line` and `text-on-ink`/`surface-stamped-ink` if they are missing.
 
 ## Slice 5: pitch by pitch (Sonnet 5.5, medium)
@@ -201,52 +212,65 @@ Files: `src/screens/scout/pitches/` and `src/styles/scout/pitches.css`. Restyle 
   - A swing line: "Swings at {x}% · league {y}% · favors neither".
   - Even uses the graphite tone.
 - **Above the rows:** the "◀ {pitcher}'s side · League · {hitter}'s side ▶" header and an "All pitches" button.
-- **Remove** the pitch-pill row and the Metric `Choice` from this section. Metric moves to Where in slice 6.
-- **Phone chip strip:** add a sticky strip (All plus one chip per pitch, each with its mark) at the top of the Where section (`#scout-where`). Pin it under the jump bar. Below 740 px only.
+- **Remove** the pitch-pill row from this section. The rows select the pitch now. Do not touch the Metric control: it sits in the Where section since slice 3, and slice 6 owns it. The contact and whiff lines use fixed metrics, so the rows no longer depend on `metric`.
+- **Not in this slice:** the phone chip strip (slice 6 builds it in the Where section).
 
 ## Slice 6: Where (Sonnet 5.5, high)
 
-Files: `src/screens/scout/zones/`, `src/components/scout/ScoutMap.jsx` and `src/styles/scout/where.css`. Draw **one** map in place of the two.
+Files: `src/screens/scout/zones/`, `src/components/scout/ScoutMap.jsx`, `src/styles/scout/where.css`, `FilterSheet.jsx` and the Where lines in `ScoutPage.jsx`. Draw **one** map in place of the two. The batter figure is slice 6b.
 
 - **`ScoutMap` gets `mode`:**
-  - `'both'`: the fill is the hitter's tone, plus a centred black square with side `round(maxSide * sqrt(share / maxShare))` and the share % under the figure.
+  - `'both'`: the fill is the hitter's tone, plus a centred square in the ink token (no raw colour) with side `round(maxSide * sqrt(share / maxShare))` and the share % under the figure.
   - `'locations'`: the pitcher's map as today.
   - `'results'`: the hitter's map as today.
   - Hatching rules stay. In `'both'` mode, when the pitcher's map is thin, draw no squares and show the note "{Pitch}: {n} pitches to {crowd}, under the 50-pitch floor."
 - **Tones flip by side for Whiff %.** A higher whiff rate is the pitcher's side, so in Whiff % `hi*` uses `--allstar-blue` and `lo*` uses `--award-line`. xwOBA (est.) keeps hi as amber and lo as blue. Swing % uses neutral ink tints. Do this with a class on the map, for example `.scout__map--whiff`, not in JS colours.
 - **Controls above the map:**
   - Show (Both / Locations / Results), with the default Both.
-  - Metric (xwOBA / Whiff % / Swing %), moved here from the Filters sheet. Remove it from `FilterSheet.jsx` and from `filterSummary`, and update its test.
+  - Metric (xwOBA / Whiff % / Swing %). Slice 3 left the control at the top of the Where section in `ScoutPage.jsx`; move it into this control row. It was also in the Filters sheet: remove it from `FilterSheet.jsx` and from `filterSummary`, and update the tests that import them on purpose.
   - Both use `Choice`.
+- **Phone chip strip:** a sticky strip (All plus one chip per pitch, each with its mark) at the top of the Where section (`#scout-where`). It sets the same selected pitch as the rows in the Pitches section. Pin it under the jump bar. Below 740 px only.
+- **Keep:** the readout, the key, the hot and cold tiles (the `zoneCallout` numbers) and the answer strip.
+- **Delete** `Sides` view logic that only served the pitcher's view, if slice 2 left any.
+
+## Slice 6b: the batter figure (Sonnet 5.5, medium)
+
+Needs slice 6 merged (it edits `ScoutMap.jsx` and `where.css`). Files: `ScoutMap.jsx`, `where.css`, `loadScout.js` or the Where panel for the catalog fetch, and a new pure `homeSetOf`.
+
 - **Batter figure:**
   - Replace the stance box with `UniformFigure`, built from `batterFigureUrls(homeSet, hand)`.
   - `homeSet` is the hitter's club home set from `fetchTeamUniformCatalog([teamId], season)`. Choose the jersey whose text says "Home", then the pants from the same set. Add a pure `homeSetOf(catalog, teamId)` with a test. If nothing is found, keep today's stance box.
   - `hand` is 'right' for a right-handed stance and 'left' for a left-handed one. Never use a CSS mirror.
   - Scale it so the art's y 385 to 820 (of 1050) spans the zone rows, and let the bat clip. See the canvas for the exact numbers at 390 px.
-- **Keep:** the readout, the key, the hot and cold tiles (the `zoneCallout` numbers) and the answer strip.
-- **Delete** `Sides` view logic that only served the pitcher's view, if slice 2 left any.
+- **Verify:** the new `homeSetOf` test, lint, and a 390 px screenshot of a right-handed and a left-handed hitter.
 
-## Slice 7: meetings and retired players (Sonnet 5.5, high)
+## Slice 7: meetings restyle (Sonnet 5.5, medium)
 
-Files: `src/screens/scout/meetings/`, `src/styles/scout/meet.css`, `loadScout.js`, the `Matchup.jsx` card, and a new `src/api/scout/vsPlayer.js`.
+Files: `src/screens/scout/meetings/` and `src/styles/scout/meet.css`.
 
-1. **Restyle the cards to the canvas.**
-   - A pitch is a numbered row: mark, name · mph, "Count b-s", and the call **written out** in a tag:
-     - Called strike, Swinging strike, Foul, Ball and In play come from `callOf`.
-     - Strikes take a blue tag, a ball a paper tag, and in play an ink tag.
-   - Remove `AsOfBanner` and the intro line from this section; the cutoff logic stays.
-2. **Retired detection** (`loadScout.js`).
+- **Restyle the cards to the canvas.**
+  - A pitch is a numbered row: mark, name · mph, "Count b-s", and the call **written out** in a tag:
+    - Called strike, Swinging strike, Foul, Ball and In play come from `callOf`.
+    - Strikes take a blue tag, a ball a paper tag, and in play an ink tag.
+  - Remove `AsOfBanner` and the intro line from this section; the cutoff logic stays.
+- **Verify:** `test/scout-meetings.test.js`, lint, and a 390 px screenshot of the Pivetta vs Chourio meetings.
+
+## Slice 7b: retired players (Sonnet 5.5, high)
+
+Needs slice 7 merged (it edits `MeetingsPanel.jsx`). Files: `loadScout.js`, the `Matchup.jsx` card, `MeetingsPanel.jsx`, the one hide-sections flag in `ScoutPage.jsx` (slice 3 built it), and a new `src/api/scout/vsPlayer.js`.
+
+1. **Retired detection** (`loadScout.js`).
    - Add `retired: boolean` to each person: `p.active === false`.
    - Add `inStores: boolean`: the pitcher has `arsenal.pit[id]`, and the hitter has `grid` or a Savant `bat` row.
    - When either `inStores` is false, `ScoutPage` hides the Edge, Pitches and Where sections and their jump-bar tabs, and shows one line above Meetings: "{Last name} last played in {yyyy} · scouting data covers {season}".
 3. **Card identity for a retired player.**
-   - The logo comes from `rosterStatusView(person, today, { isMlbTeamId }).lastTeam.id`. Find the `isMlbTeamId` helper the other callers pass.
+   - The logo comes from `rosterStatusView(person, today, { isMlbTeamId }).lastTeam.id`. Pass `isMlbTeamId` from `src/lib/teams.js`.
    - The hand line reads "Bats R · {yearsPlayed(p)} · Retired". The span uses an ASCII hyphen.
-4. **Before pitch tracking.** When `fetchHeadToHead` returns `{pas: []}` and either player's last season is before 2008:
+4. **Before pitch tracking.** Read `src/api/scout/headToHead.js` lines 60–75 first: `vsPlayer` lists each plate appearance twice. When `fetchHeadToHead` returns `{pas: []}` and either player's last year of play (`lastPlayedDate.slice(0, 4)`) is before 2008:
    - Fetch `/api/v1/people/{hitterId}/stats?stats=vsPlayer&group=hitting&opposingPlayerId={pitcherId}&sportId=1` through `getJson`.
    - Read **only** the split under `stats[].type.displayName === 'vsPlayerTotal'`.
    - Show PA, AVG/OBP/SLG, HR, K and BB with the label "Regular season · no pitch tracking before 2008".
-   - Add `parseVsPlayerTotal(json)` as a pure function, with a test on `vsplayer-bonds-maddux.json`. Copy that file to `test/fixtures/scout/`. Expected: PA 154, .262/.370/.485, HR 8, K 16, BB 23. The test must show that the per-season `vsPlayer` splits are ignored.
+   - Add `parseVsPlayerTotal(json)` as a pure function, with a test on `vsplayer-bonds-maddux.json`. Copy that file to `test/fixtures/scout/vs-player-bonds-maddux.json` (beside the existing `vs-player-total.json`). Expected: PA 154, .262/.370/.485, HR 8, K 16, BB 23. The test must show that the per-season `vsPlayer` splits are ignored.
 5. **Verify on the three test pairs.**
 
 ## Slice 8: desktop (Sonnet 5.5, medium)
@@ -262,7 +286,7 @@ At 740 px and wider, follow the canvas desktop board. Each rule goes in its sect
 
 ## Slice 9: motion (Sonnet 5.5, medium)
 
-Put the rules in a new `src/styles/motion/scout.css`, imported by `ScoutPage`, or in the existing scout motion block if `docs/motion.md` says so. Read `docs/motion.md` first. Everything goes inside `@media (prefers-reduced-motion: no-preference)`.
+Put the rules in a new `src/styles/scout/motion.css`, imported by `ScoutPage.jsx` after the other scout sheets. Do not use `src/styles/motion/`: it holds 12 source files, the `check-dir-size` cap, so a 13th file fails lint. The scout sheets are already page-imported and hold their own motion block (`scout.css` lines 488–520). Add a one-line pointer to the new file in `docs/motion.md`. Read `docs/motion.md` and `.agents/skills/review-animations/STANDARDS.md` first. Everything goes inside `@media (prefers-reduced-motion: no-preference)`.
 
 | Motion | Spec | Gate |
 | --- | --- | --- |
@@ -280,20 +304,36 @@ Under reduced motion every part shows its end state, and the count-up shows the 
 
 ## Prompts
 
-Paste one prompt per cloud session, on its own branch from current `origin/main`. Every prompt has the same shape. Replace `N` with the slice number.
+Paste one prompt per cloud session. The spec for each slice is its section above, so the prompts are short. Each one names the slice it needs on `main`; the agent checks that first and stops if it is missing.
+
+**Landing order.** Start a wave only when the earlier waves are merged:
+
+| Wave | Slices | Starts when |
+| --- | --- | --- |
+| 0 | PR 2320 (this folder and ADR-0118) | now |
+| 1 | 1 and 2 | wave 0 is on `main` |
+| 2 | 3 | slice 2 is on `main` |
+| 3 | 4, 5, 6, 7 | slices 1 and 3 are on `main` |
+| 4 | 6b and 7b | slice 6 (for 6b) or slice 7 (for 7b) is on `main`; they can start while 4 and 5 run |
+| 5 | 8 and 9 | all of 4, 5, 6, 6b, 7, 7b are on `main` |
+
+**If a slice stalls.** Raise the effort on the same model, then the model (one rung at a time), as in "Run plan". A slice that stops with "a file I need to change is in another open PR" waits for that PR. A slice that reports "the canvas did not open" needs Gary.
+
+**Unverified when this plan was written:** that a child cloud session can open the canvas artifact; the `/scout/` slugs for Kershaw, Pujols, Maddux and Bonds (they follow the name-id pattern of the Pivetta route); and the band-edge behaviour of the verdict at exactly .030 and .070 (the code uses a strict less-than, so a gap of exactly .030 reads Slight).
+
+### Slice 1 — Haiku 5.5, effort medium
 
 ```
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
 
-You are building slice N of the Matchup Scout redesign, GitHub issue #2319 in gzilavyss2025/bbsbh.
-Read .scratch/scout-redesign/README.md: "Shared rules", "Code map", and "Slice N". That section is the
-whole spec. ADR-0118 holds the decisions; do not reopen them. The look is the design canvas linked
-at the top of the README; match it, using the repo's tokens and components, not the canvas's raw values.
+Build slice 1 of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 1". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. This is a paste of verified code: copy the test, run it and see it fail, paste the function, run it and see it pass.
 
-Do only slice N. Its PR body says "Part of #2319". Open it as a draft.
-Verify as "Shared rules → Verify" says, and send Gary the 390 px screenshot of
-/scout/nick-pivetta-601713/jackson-chourio-694192?nointro (slice 7: also the Pujols vs Kershaw and
-Bonds vs Maddux routes; slice 8: also 1280 px).
+Do only slice 1, on your session's branch from current origin/main. PR 2320 (ADR-0118 and this folder) must be on main; if not, stop and report.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. No screenshot: this slice changes no screen.
 
 Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
 user, or before a risky step. When the work is done and checked, stop and report; do not add features,
@@ -301,5 +341,225 @@ tests, files or docs that were not asked for. Tests, docs and checks that this p
 names count as asked for.
 ```
 
-Slice 1 adds: "This is a paste of verified code: copy the test, run it and see it fail, paste the
-function, run it and see it pass."
+### Slice 2 — Sonnet 5.5, effort medium
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 2 of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 2". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 2, on your session's branch from current origin/main. PR 2320 must be on main; if not, stop and report.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Send Gary the 390 px screenshot of
+/scout/nick-pivetta-601713/jackson-chourio-694192?nointro.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
+
+### Slice 3 — Sonnet 5.5, effort medium
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 3 of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 3". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 3, on your session's branch from current origin/main. Slice 2 must be merged to main; if not, stop and report.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Send Gary the 390 px screenshot of
+/scout/nick-pivetta-601713/jackson-chourio-694192?nointro.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
+
+### Slice 4 — Sonnet 5.5, effort high
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 4 of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 4". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 4, on your session's branch from current origin/main. Slices 1 and 3 must be merged to main; if not, stop and report. Do not edit ScoutPage.jsx.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Send Gary the 390 px screenshot of
+/scout/nick-pivetta-601713/jackson-chourio-694192?nointro.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
+
+### Slice 5 — Sonnet 5.5, effort medium
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 5 of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 5". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 5, on your session's branch from current origin/main. Slice 3 must be merged to main; if not, stop and report. Do not edit ScoutPage.jsx, and do not touch the Metric control.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Send Gary the 390 px screenshot of
+/scout/nick-pivetta-601713/jackson-chourio-694192?nointro.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
+
+### Slice 6 — Sonnet 5.5, effort high
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 6 of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 6". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 6, on your session's branch from current origin/main. Slice 3 must be merged to main; if not, stop and report. In ScoutPage.jsx edit only the Where lines (the Metric control).
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Send Gary the 390 px screenshot of
+/scout/nick-pivetta-601713/jackson-chourio-694192?nointro.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
+
+### Slice 6b — Sonnet 5.5, effort medium
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 6b of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 6b". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 6b, on your session's branch from current origin/main. Slice 6 must be merged to main; if not, stop and report. Do not edit ScoutPage.jsx.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Send Gary the 390 px screenshot of
+/scout/nick-pivetta-601713/jackson-chourio-694192?nointro, and one of a left-handed hitter.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
+
+### Slice 7 — Sonnet 5.5, effort medium
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 7 of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 7". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 7, on your session's branch from current origin/main. Slice 3 must be merged to main; if not, stop and report. Do not edit ScoutPage.jsx.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Send Gary the 390 px screenshot of
+/scout/nick-pivetta-601713/jackson-chourio-694192?nointro.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
+
+### Slice 7b — Sonnet 5.5, effort high
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 7b of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 7b". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 7b, on your session's branch from current origin/main. Slice 7 must be merged to main; if not, stop and report. In ScoutPage.jsx edit only the hide-sections flag.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Send Gary the 390 px screenshots of
+/scout/nick-pivetta-601713/jackson-chourio-694192?nointro,
+/scout/clayton-kershaw-477132/albert-pujols-405395?nointro and
+/scout/greg-maddux-118120/barry-bonds-111188?nointro (the last two slugs follow
+the name-id pattern of the first; if one does not open, fix the slug).
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
+
+### Slice 8 — Sonnet 5.5, effort medium
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 8 of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 8". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 8, on your session's branch from current origin/main. Slices 4, 5, 6, 6b, 7 and 7b must all be merged to main; if not, stop and report. Do not edit ScoutPage.jsx.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Send Gary the 390 px and 1280 px screenshots of
+/scout/nick-pivetta-601713/jackson-chourio-694192?nointro.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
+
+### Slice 9 — Sonnet 5.5, effort medium
+
+```
+Use the ponytail skill at level full. Reuse what the repo already has before you write anything new.
+
+Build slice 9 of the Matchup Scout redesign (issue #2319, gzilavyss2025/bbsbh). Read
+.scratch/scout-redesign/README.md: "Shared rules", "Code map" and "Slice 9". That section is the whole
+spec; ADR-0118 holds the decisions, so do not reopen them. Match the design canvas with the repo's
+tokens and components.
+
+Do only slice 9, on your session's branch from current origin/main. Slices 4, 5, 6, 6b, 7 and 7b must all be merged to main; if not, stop and report. Put the rules in src/styles/scout/motion.css, not in src/styles/motion/ (that folder is at the file cap). In ScoutPage.jsx add only the one import.
+The PR body says "Part of #2319", never "Closes". Open it as a draft; when the work is done and CI is
+green, remove the wip label. Never merge.
+Verify as "Shared rules → Verify" says. Motion cannot show in a still, so tell Gary how to see each motion in the dev server, and send
+the 390 px reduced-motion end state of /scout/nick-pivetta-601713/jackson-chourio-694192?nointro.
+
+Keep working until everything asked for is done. Stop to ask only when you cannot go on without the
+user, or before a risky step. When the work is done and checked, stop and report; do not add features,
+tests, files or docs that were not asked for. Tests, docs and checks that this prompt or CLAUDE.md
+names count as asked for.
+```
