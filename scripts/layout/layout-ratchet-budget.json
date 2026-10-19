@@ -147,8 +147,8 @@
     "grid": 1
   },
   "src/styles/29-team-transactions.css": {
-    "column": 4,
-    "wrap": 2,
+    "column": 1,
+    "wrap": 1,
     "grid": 1
   },
   "src/styles/30-standings.css": {
@@ -500,6 +500,9 @@
     "wrap": 2,
     "grid": 2
   },
+  "src/styles/scout/edge.css": {
+    "column": 1
+  },
   "src/styles/scout/meet.css": {
     "column": 3,
     "wrap": 1,
@@ -508,6 +511,11 @@
   "src/styles/scout/panels.css": {
     "column": 1,
     "wrap": 3
+  },
+  "src/styles/scout/pitches.css": {
+    "column": 3,
+    "wrap": 1,
+    "grid": 1
   },
   "src/styles/scout/scout.css": {
     "column": 3,
@@ -523,13 +531,5 @@
   },
   "src/styles/workload/projection.css": {
     "column": 3
-  },
-  "src/styles/scout/edge.css": {
-    "column": 1
-  },
-  "src/styles/scout/pitches.css": {
-    "column": 3,
-    "wrap": 1,
-    "grid": 1
   }
 }

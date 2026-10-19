@@ -36,6 +36,8 @@ const ALLOWED = {
     ['worldseries/home.css', '.ww-swatch--maybe'], // the key's swatch for that same cell
     ['worldseries/home.css', '.ww-ledger__maybe'], // the ledger's header for an if-necessary game
     ['player-next/history/moves.css', '.moves__noclub'], // a move whose club the feed does not name: a pencilled box, no mark
+    ['team-next/games/season-grid.css', '.sgrid__game--todo'], // a game still to play: pencilled in the season grid
+    ['team-next/games/season-grid.css', '.sgrid__swatch--todo'], // the key's swatch for that same cell
     ['team-next/top.css', '.tnext__chip--off'], // a day with no game: an empty slot in the days rail
     ['report/challenge-faces.css', '.chalplot__face--thin'], // a face with fewer than five reviews behind its success rate: too thin a sample to read
     ['report/challenge-faces.css', '.chalplot__swatch--thin'], // the key's swatch for that same face

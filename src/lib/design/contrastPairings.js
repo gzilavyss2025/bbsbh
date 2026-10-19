@@ -326,4 +326,9 @@ export const PAIRINGS = [
   { fg: 'text-caption', bg: 'surface-row-selected', min: TEXT, note: 'picked row: caption' },
   { fg: 'accent-positive', bg: 'surface-row-selected', min: TEXT, note: 'picked row: a win' },
   { fg: 'clay-deep', bg: 'surface-row-selected', min: TEXT, note: 'picked row: a loss' },
+  // THE SEASON GRID (Games band, games/SeasonGrid.jsx): a win is paper on field green, a loss is
+  // deep clay on the inset paper, the All-Star Game is paper on the ink tile.
+  { fg: 'text-on-ink-bright', bg: 'accent-positive', min: TEXT, note: 'season grid: a win cell' },
+  { fg: 'clay-deep', bg: 'surface-inset', min: TEXT, note: 'season grid: a loss cell' },
+  { fg: 'text-on-ink-bright', bg: 'surface-stamped-ink', min: TEXT, note: 'season grid: the All-Star Game cell' },
 ]
