@@ -1,5 +1,3 @@
-import { MILWAUKEE_VENUE_ID } from './parkFit.js'
-
 // The World Series scouting report's card list (#2316, .scratch/ws-scouting/handoff.md
 // sections 2 and 5). Pure. It answers: which cards, in what order, for this day type.
 //
@@ -19,6 +17,9 @@ import { MILWAUKEE_VENUE_ID } from './parkFit.js'
 //
 // Input: { dayType, nineKeys, gloveLegs, edges, pitchByPitch, plateUmpire, meetings, platoon, parkFit,
 // venueId }. No club id: the list is the same for any opponent.
+// Park fit draws Milwaukee's field (Stats API venue id), so a game day shows it only there.
+export const MILWAUKEE_VENUE_ID = 32
+
 const CARDS = [
   { id: 'nine-keys', label: 'Nine keys', rank: { off: 1 }, has: (i) => Boolean(i.nineKeys) },
   { id: 'glove-legs', label: 'Glove and legs', rank: { off: 2, game: 7 }, has: (i) => Boolean(i.gloveLegs) },
@@ -27,7 +28,7 @@ const CARDS = [
   { id: 'umpire-edge', label: 'Umpire edge', rank: { game: 2 }, has: (i) => Boolean(i.plateUmpire?.name) },
   { id: 'platoon', label: 'Platoon', rank: { off: 5, game: 4 }, has: (i) => Boolean(i.platoon) },
   { id: 'park-fit', label: 'Park fit', rank: { off: 6, game: 6 }, has: (i) => Boolean(i.parkFit) && (i.dayType !== 'game' || i.venueId === MILWAUKEE_VENUE_ID) },
-  // Ranks 7 and 5 keep the order above. The jump-bar item reads "Film".
+  // The jump-bar item reads "Film".
   { id: 'film-room', label: 'Film', rank: { off: 7, game: 5 }, has: (i) => Boolean(i.meetings?.length) },
 ]
 

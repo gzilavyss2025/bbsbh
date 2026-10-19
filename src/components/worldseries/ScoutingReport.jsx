@@ -11,9 +11,9 @@ import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { matchupEdges } from '../../lib/postseason/primer/matchupEdges.js'
 import { gloveLegsModel } from '../../lib/postseason/worldseries/scouting/gloveLegs.js'
-import { MILWAUKEE_VENUE_ID, parkFitModel } from '../../lib/postseason/worldseries/scouting/parkFit.js'
+import { parkFitModel } from '../../lib/postseason/worldseries/scouting/parkFit.js'
 import { platoonModel } from '../../lib/postseason/worldseries/scouting/platoon.js'
-import { scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
+import { MILWAUKEE_VENUE_ID, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
 import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { HubTabBar } from '../chrome/HubTabBar.jsx'
@@ -83,17 +83,20 @@ export function ScoutingReport({ clubIds, sides = clubIds, slateDate, dayType, g
   const { data: defense } = useAsync(() => loadClubDefenseRunning(), [])
   const gloveLegs = useMemo(() => gloveLegsModel(defense, { clubA: sides[0], clubB: sides[1] }), [defense, sides[0], sides[1]])
   // Platoon: regular-season OPS by pitcher hand; the tint follows the focus game's probables.
-  const { data: opsByClub } = useAsync(() => loadPlatoon({ clubIds: [sides[0], sides[1]], season }), [sides[0], sides[1], season])
+  const { data: opsByClub } = useAsync(() => loadPlatoon({ clubIds, season }), [clubA, clubB, season])
   const platoon = useMemo(
     () => platoonModel(opsByClub, { clubA: sides[0], clubB: sides[1], game, gameNumber }),
     [opsByClub, sides[0], sides[1], game, gameNumber],
   )
   // Park fit: always Milwaukee's field (the park of Games 1, 2, 6 and 7; the other club's park is not
-  // on file for Games 3 to 5). On a game day the card shows only when tonight's park is Milwaukee.
-  const parkLayout = useMemo(() => resolveBallparkLayout({ venueId: MILWAUKEE_VENUE_ID, gameDate: slateDate }), [slateDate])
-  const { data: balls } = useAsync(() => (parkLayout ? loadParkFit({ clubIds: [sides[0], sides[1]], slateDate }) : null), [sides[0], sides[1], slateDate, Boolean(parkLayout)])
-  const parkFit = useMemo(() => (parkLayout ? parkFitModel(balls, { clubA: sides[0], clubB: sides[1] }) : null), [balls, parkLayout, sides[0], sides[1]])
+  // on file for Games 3 to 5). On a game day the card shows only when tonight's park is Milwaukee, and
+  // the spray read waits for that answer. The loaders key on the stable clubIds (their data is keyed by
+  // club id); only the models read `sides`, which WorldSeriesHome reorders once the park resolves.
   const venueId = game?.venue?.id ?? null
+  const parkLayout = useMemo(() => resolveBallparkLayout({ venueId: MILWAUKEE_VENUE_ID, gameDate: slateDate }), [slateDate])
+  const wantPark = Boolean(parkLayout) && (dayType !== 'game' || venueId === MILWAUKEE_VENUE_ID)
+  const { data: balls } = useAsync(() => (wantPark ? loadParkFit({ clubIds, slateDate }) : null), [clubA, clubB, slateDate, wantPark])
+  const parkFit = useMemo(() => (wantPark ? parkFitModel(balls, { clubA: sides[0], clubB: sides[1] }) : null), [balls, wantPark, sides[0], sides[1]])
   const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, pitchByPitch, plateUmpire, meetings, platoon, parkFit, venueId })
   // The sticky chrome over a card: the slate's own bar (the probe reads --slate-bar-h) plus this
   // jump bar. One measured number feeds the bar's scroll offset and each card's scroll-margin.

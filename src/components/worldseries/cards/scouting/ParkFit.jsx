@@ -34,7 +34,7 @@ export function ParkFit({ model, layout, clubIds }) {
           ))}
         </tbody>
       </Table>
-      <p className="ww-fit__note">{`Regular season, the regulars' fly balls (${model.counts.join(' and ')}).`}</p>
+      <p className="ww-fit__note">{`Regular season, the regulars' fly balls: ${names.map((n, i) => `${n} ${model.counts[i]}`).join(', ')}.`}</p>
     </Card>
   )
 }

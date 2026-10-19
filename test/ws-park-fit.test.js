@@ -8,11 +8,12 @@ import { HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
 
 const { x: ox, y: oy } = HIT_COORD_ORIGIN
 // A ball at `deg` off dead centre (negative: left field), hit from `side`, at launch angle `la`.
-const ball = (deg, side = 'R', la = 30) => ({
+const ball = (deg, side = 'R', la = 30, level = 'mlb') => ({
   x: ox + 100 * Math.sin((deg * Math.PI) / 180),
   y: oy - 100 * Math.cos((deg * Math.PI) / 180),
   side,
   launchAngle: la,
+  level,
 })
 const many = (n, b) => Array.from({ length: n }, () => b)
 
@@ -25,6 +26,13 @@ test('only fly balls count: 25 to 50 degrees; no launch angle is left out', () =
   const s = flyShares([...many(30, ball(0, 'R', 30)), ball(-30, 'R', 10), ball(-30, 'R', 60), ball(-30, 'R', null), ball(-30, 'R', 24.9)])
   assert.equal(s.n, 30)
   assert.equal(s.center, 100)
+})
+
+test('Triple-A balls are not counted: the card is the regular season in the majors', () => {
+  const s = flyShares([...many(30, ball(0)), ...many(50, ball(-30, 'R', 30, 'aaa'))])
+  assert.equal(s.n, 30)
+  assert.equal(s.center, 100)
+  assert.equal(flyShares(many(60, ball(0, 'R', 30, 'aaa'))), null)
 })
 
 test('the three shares add up to 100', () => {

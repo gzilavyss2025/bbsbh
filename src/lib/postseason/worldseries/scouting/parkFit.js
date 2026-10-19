@@ -4,7 +4,6 @@ import { shares } from './pitchByPitch.js'
 // PARK FIT (#2316): where each Series club's fly balls go, as pull, centre and opposite-field
 // shares, set beside the Milwaukee field. Pure. The balls are decodeSprayBalls rows (api/spray.js)
 // for the club's regulars; the pull side is read through the side each ball was hit from.
-export const MILWAUKEE_VENUE_ID = 32
 // Statcast's fly-ball band: launch angle 25 to 50 degrees. A ball with no launch angle is left out.
 const FLY_MIN = 25
 const FLY_MAX = 50
@@ -22,6 +21,7 @@ export function flyShares(balls) {
   const count = { pull: 0, center: 0, oppo: 0 }
   let n = 0
   for (const b of balls ?? []) {
+    if (b.level !== 'mlb') continue // a regular's Triple-A balls are not the club's regular season
     if (!(b.launchAngle >= FLY_MIN && b.launchAngle <= FLY_MAX)) continue
     const third = directionOf(sprayAngle(b.x, b.y), b.side)
     if (!third) continue
