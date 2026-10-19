@@ -11,15 +11,20 @@
 // `atEnd` is true when the scroll area is at its bottom. Then the last section
 // is current, because a short last section can never scroll its top up to
 // the line, and its button would otherwise never be marked.
-export function currentSection(sections, { line = 0, atEnd = false } = {}) {
+//
+// `prefer` is the key of the section the reader tapped. Two cards side by side
+// share one top, and the later one would win. When `prefer` shares the winner's
+// top, `prefer` is current instead.
+export function currentSection(sections, { line = 0, atEnd = false, prefer = null } = {}) {
   if (!sections.length) return null
   if (atEnd) return sections[sections.length - 1].key
-  let current = sections[0].key
+  let current = sections[0]
   for (const s of sections) {
     if (s.top > line) break
-    current = s.key
+    current = s
   }
-  return current
+  const tied = sections.find((s) => s.key === prefer && Math.abs(s.top - current.top) <= 1)
+  return (tied ?? current).key
 }
 
 // The bar's next scrollLeft, so the whole current button shows with `pad`
