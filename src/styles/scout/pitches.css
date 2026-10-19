@@ -46,10 +46,15 @@
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
-.scout__rowall[aria-pressed='true'],
+/* V13: "All" inverts to ink when it is the pick; a picked pitch row keeps an ink border and prints a hard ink shadow. */
+.scout__rowall[aria-pressed='true'] {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+.scout__rowall[aria-pressed='true'] .scout__pullvs { color: var(--text-on-ink-cream); }
 .scout__prow[aria-pressed='true'] {
-  background: var(--surface-inset);
-  box-shadow: var(--ring);
+  border-width: var(--bw-heavy);
+  box-shadow: var(--shadow-stamped);
 }
 .scout__rowall:focus-visible,
 .scout__prow:focus-visible { outline: none; box-shadow: var(--ring); }
