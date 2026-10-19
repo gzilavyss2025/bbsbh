@@ -135,7 +135,7 @@ function holdTarget({ el, root, offset, onLand }) {
 //    a tap attached would catch that same tap as it bubbles.
 //
 // The colours are the app's own (ADR-0030): ink, paper and --accent-tint.
-function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', hold = false, badges = true, onLand }) {
+function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', badges = true, hold = false, onLand }) {
   const [current, setCurrent] = useState(tabs[0]?.key ?? null)
   const navRef = useRef(null)
   const btnRefs = useRef(new Map())
