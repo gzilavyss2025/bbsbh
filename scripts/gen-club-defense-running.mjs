@@ -70,22 +70,24 @@ const teamIds = stats.length ? stats.map((s) => s.teamId) : oaa.map((r) => Numbe
 
 // One request per club, rows tagged with the club asked for. Both boards need a
 // floor of 1 or they hide small samples (`min` on framing, `n` on baserunning).
-async function perClub(label, url) {
+async function perClub(label, url, columns) {
   const rows = []
   for (const teamId of teamIds) {
     // A failed club throws: a partial board would undercount, so the measure goes null.
-    const body = await fetchSavantCsv(`${label} ${teamId}`, `${url}&team=${teamId}&csv=true`, { attempts: 3 })
+    // A club with no rows (header only) adds none and reads null.
+    const body = await fetchSavantCsv(`${label} ${teamId}`, `${url}&team=${teamId}&csv=true`, { attempts: 3, columns, allowEmpty: true })
     for (const r of body) rows.push({ ...r, teamId, playerId: r.id ?? r.entity_id })
     await sleep(THROTTLE_MS)
   }
+  if (!rows.length) throw new Error('no rows for any club')
   return rows
 }
 
 const framing = await soft('Savant catcher framing', () =>
-  perClub('Savant framing', `${SAVANT}/catcher-framing?type=catcher&seasonStart=${season}&seasonEnd=${season}&min=1&gameType=Regular`),
+  perClub('Savant framing', `${SAVANT}/catcher-framing?type=catcher&seasonStart=${season}&seasonEnd=${season}&min=1&gameType=Regular`, ['id', 'rv_tot']),
 )
 const baserunning = await soft('Savant baserunning', () =>
-  perClub('Savant baserunning', `${SAVANT}/baserunning?year=${season}&type=batter&n=1&game_type=Regular`),
+  perClub('Savant baserunning', `${SAVANT}/baserunning?year=${season}&type=batter&n=1&game_type=Regular`, ['entity_id', 'n_safe', 'n_opp_xb']),
 )
 
 if (!teamIds.length) throw new Error('no club list: statsapi and Savant OAA both failed')

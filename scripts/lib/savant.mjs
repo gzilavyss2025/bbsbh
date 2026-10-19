@@ -55,12 +55,19 @@ export async function fetchCustomBoard(type, { season, selections, min = 25, att
 // Any Savant CSV leaderboard by full URL, with the same retry and fail-loud
 // habits as the two boards above. The caller owns the URL, so it owns the trap
 // that comes with it: check the columns it reads against a live response.
-export async function fetchSavantCsv(label, url, { attempts = 4 } = {}) {
+// `columns` are header names the caller reads: a header that lost one throws,
+// even on a body with no rows. `allowEmpty` makes a header-only body no rows
+// instead of an error (a per-club board where one club may have none).
+export async function fetchSavantCsv(label, url, { attempts = 4, columns = [], allowEmpty = false } = {}) {
   return withRetry(label, attempts, async () => {
     const res = await fetch(url)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const rows = csvObjects(await res.text())
-    if (!rows.length) throw new Error('empty response')
+    const text = await res.text()
+    const header = (parseCsv(text.replace(/^\uFEFF/, ''))[0] ?? []).map((n) => n.trim())
+    const lost = columns.filter((c) => !header.includes(c))
+    if (lost.length) throw new Error(`expected column ${lost.join(', ')} not found`)
+    const rows = csvObjects(text)
+    if (!rows.length && !allowEmpty) throw new Error('empty response')
     return rows
   })
 }

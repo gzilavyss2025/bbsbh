@@ -16,14 +16,21 @@ export function pct(part, whole) {
 // out, so the caller reads null.
 export function sumByClub(rows, key) {
   const seen = new Set()
+  const withId = new Set()
+  const clubs = new Set()
   const out = {}
   for (const r of rows) {
+    clubs.add(r.teamId)
+    if (!r.playerId) continue // no id to dedupe on: skip, never collapse
+    withId.add(r.teamId)
     const id = `${r.playerId}:${r.teamId}`
     const v = num(r[key])
     if (seen.has(id) || v == null) continue
     seen.add(id)
     out[r.teamId] = (out[r.teamId] ?? 0) + v
   }
+  // A club whose rows ALL lack an id means the id column was renamed or blanked.
+  for (const c of clubs) if (!withId.has(c)) throw new Error(`club ${c}: rows have no player id`)
   return out
 }
 

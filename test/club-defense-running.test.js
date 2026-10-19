@@ -3,6 +3,7 @@
 // (src/api/clubDefenseRunning.js). Small fixtures, no network.
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { fetchSavantCsv } from '../scripts/lib/savant.mjs'
 import {
   buildClubs,
   pct,
@@ -93,4 +94,40 @@ test('clubsFor returns both clubs, in the order asked, or null', () => {
   assert.equal(clubsFor(data, 158, 999), null)
   assert.equal(clubsFor({ clubs: {} }, 158, 112), null)
   assert.equal(clubsFor(null, 158, 112), null)
+})
+
+test('sumByClub skips a row with no player id', () => {
+  const rows = [
+    { playerId: '1', teamId: 158, v: 2 },
+    { teamId: 158, v: 5 },
+    { playerId: '', teamId: 158, v: 7 },
+  ]
+  assert.deepEqual(sumByClub(rows, 'v'), { 158: 2 })
+})
+
+test('sumByClub throws when a club has rows but none with an id (a renamed id column)', () => {
+  const rows = [{ teamId: 158, v: 2 }, { teamId: 158, v: 3 }]
+  assert.throws(() => sumByClub(rows, 'v'), /no player id/)
+})
+
+// fetchSavantCsv, with a stubbed fetch
+async function withBody(body, opts) {
+  const real = globalThis.fetch
+  globalThis.fetch = async () => ({ ok: true, text: async () => body })
+  try {
+    return await fetchSavantCsv('t', 'https://x', { attempts: 1, ...opts })
+  } finally {
+    globalThis.fetch = real
+  }
+}
+
+test('fetchSavantCsv: a header-only body is no rows when allowEmpty, an error otherwise', async () => {
+  const body = '\uFEFF"id","rv_tot"\n'
+  assert.deepEqual(await withBody(body, { allowEmpty: true, columns: ['id', 'rv_tot'] }), [])
+  await assert.rejects(withBody(body, {}), /empty response/)
+})
+
+test('fetchSavantCsv: a header that lost an expected column fails loud, empty or not', async () => {
+  await assert.rejects(withBody('"id"\n', { allowEmpty: true, columns: ['id', 'rv_tot'] }), /rv_tot/)
+  await assert.rejects(withBody('"id"\n1\n', { columns: ['id', 'rv_tot'] }), /rv_tot/)
 })
