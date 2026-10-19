@@ -185,6 +185,19 @@
   color: var(--text-caption);
 }
 
+/* NO ROUNDED CORNERS ON THE INNINGS PAGE. The page wears the jump bar's square dress
+   throughout: the radius steps go to 0 while an innings page is mounted, so every card,
+   logo tile, tab strip and sheet that reads them draws a square corner. Set on <body>, not
+   on .innings, because the reference sheet and the other dialogs portal out to <body>
+   (ModalPortal.jsx). --radius-pill is left alone: it draws circles (the ball glyph), not
+   rounded boxes. */
+body:has(.innings) {
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+}
+
 .inningnav {
   display: flex;
   align-items: center;
@@ -193,9 +206,23 @@
   margin: 0 0 var(--space-1);
 }
 
-/* ‹ Back and Next › are Buttons at the tap size, outline: the same 44px as the jump bar's
-   stops above them, since they are the controls a thumb uses most on this page. Nothing is
-   left to say about them here. */
+/* ‹ Back and Next › and the reference chips (styles/focus/reference.css) are Buttons
+   re-inked to the jump bar's dress (system/jumpbar): a 2px ink rule, square, the same
+   recipe .segmented__btn uses. So they read as one set with the TB / CLE / INNINGS / BOX
+   stops above them. The Button draws the press, hover, focus and disabled states. */
+.inningnav .btn,
+.refbar__chip {
+  --btn-edge: var(--border-stamped);
+  --btn-ink: var(--text-heading);
+  --btn-edge-hover: var(--btn-edge);
+
+  border-width: var(--bw-heavy);
+}
+
+/* Back and Next take the jump bar's type size too. */
+.inningnav .btn {
+  font-size: var(--fs-h3);
+}
 
 .inningnav__label {
   font-family: var(--font-display);
