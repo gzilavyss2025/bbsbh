@@ -60,19 +60,6 @@ test('an empty slate, a day past the cutoff and no bracket prime nothing', () =>
   assert.deepEqual(primerSeriesFor(null, '2025-10-17', [ALCS_G5]), [])
 })
 
-// With Scores Unlocked on, the home page's bracket counts today's Final games
-// (ADR-0087, 2026-09-30 addendum). The primer must never show that state: a
-// live bracket whose cutoff game is already counted primes nothing, so every
-// primer part (head, chip, ribbon) stays heading into the cutoff.
-test('sentinel: a live bracket that counts today\u2019s Final game primes nothing', () => {
-  const live = deriveBracket(skeleton(2025), results(2025), '2025-10-17', { live: true })
-  assert.ok(seriesWith(live, 'NL', 'lcs', 'LAD').games.some((g) => g.gamePk === NLCS_G4))
-  assert.deepEqual(primerSeriesFor(live, '2025-10-17', [ALCS_G5, NLCS_G4]), [])
-  // Before today's games go Final, the live bracket equals the usual one.
-  const morning = deriveBracket(skeleton(2025), results(2025).filter((r) => r.officialDate < '2025-10-17'), '2025-10-17', { live: true })
-  assert.equal(primerSeriesFor(morning, '2025-10-17', [ALCS_G5, NLCS_G4]).length, 2)
-})
-
 test('the default tab: the favourite club, else the earlier first pitch, else the NL series', () => {
   const list = primerSeriesFor(bracket2025('2025-10-17'), '2025-10-17', [ALCS_G5, NLCS_G4])
   const pick = (opts) => defaultPrimerSeries(list, opts).league

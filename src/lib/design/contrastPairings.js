@@ -122,15 +122,6 @@ export const PAIRINGS = [
   { fg: 'text-muted', bg: 'surface-inset', min: TEXT, note: 'inset pill: a level tag' },
   { fg: 'text-caption', bg: 'surface-inset', min: TEXT, note: 'inset pill: routine night, rehab tag, a reason' },
   { fg: 'accent-primary', bg: 'surface-inset', min: TEXT, note: 'inset pill: the row-share reason' },
-  // The slate result card's scenario pills (GameResultFace.jsx's
-  // SCENARIO_STYLE) — each filled solid in its own accent, so the fg/bg pair
-  // (and which text color a given accent needs) is asserted here rather than
-  // left to eyeball: field/clay/allstar-blue are dark/saturated enough for
-  // light on-ink text, but marker (Close Game) is a bright highlighter
-  // yellow — reversed, dark heading-ink text is what holds AA against IT.
-  { fg: 'text-on-ink', bg: 'field', min: TEXT, note: 'Dominant Performance pill text' },
-  { fg: 'text-on-ink', bg: 'clay', min: TEXT, note: 'Blowout pill text' },
-  { fg: 'text-heading', bg: 'marker', min: TEXT, note: 'Close Game pill text' },
   // The jump bar's current count badge and the player page's position pill
   // (#1883): heading ink on the soft green tint.
   { fg: 'text-heading', bg: 'accent-tint', min: TEXT, note: 'jump-bar current count badge, position pill' },
@@ -140,10 +131,6 @@ export const PAIRINGS = [
   // the line above; only the hatch stripe is new here. ADR-0083 moved that tape
   // off the kraft weave, so this pair replaces the seal-ink one that covered it.
   { fg: 'text-heading', bg: 'marker-deep', min: TEXT, note: 'on-hold tape text on the hatch stripe' },
-  { fg: 'text-on-ink', bg: 'allstar-blue', min: TEXT, note: 'Extra Innings pill text' },
-  // The crown outranks all four and carries its own medal-amber fill on the
-  // card pill (.flipback__pill--crown).
-  { fg: 'text-on-ink', bg: 'award-ink', min: TEXT, note: 'Game of the Night crown pill text' },
   // Stamp In's row action, in both states (ADR-0042): a soft neutral until you
   // press it, field green once you hold that stamp. The green pair is the same
   // one the win stamp already asserts above; the neutral pair is asserted here

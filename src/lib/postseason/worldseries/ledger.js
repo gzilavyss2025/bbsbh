@@ -2,7 +2,7 @@
 //
 // SPOILER FOOTING (ADR-0087). Past games (official date BEFORE the slate date)
 // show their runs openly. The slate date's own game is a seal: its runs are
-// read only under `live` (Scores Unlocked). A runsByGame entry for any other
+// never read. A runsByGame entry for any other
 // game is never read, so a Final that landed after the cutoff cannot leak
 // through a caller that handed in too much.
 //
@@ -19,7 +19,7 @@ import { dayShape } from '../dayShape.js'
 
 const OFF_SHAPES = new Set(['Off day before', 'Travel day before'])
 
-export function ledgerModel({ clubIds, games = [], upcoming = [], runsByGame = {}, slateDate, live = false }) {
+export function ledgerModel({ clubIds, games = [], upcoming = [], runsByGame = {}, slateDate }) {
   const byNumber = new Map()
   for (const g of games) byNumber.set(g.gameNumber, { gameNumber: g.gameNumber, gamePk: g.gamePk, date: g.date ?? null, ifNecessary: false })
   for (const g of upcoming) {
@@ -60,9 +60,7 @@ export function ledgerModel({ clubIds, games = [], upcoming = [], runsByGame = {
         return v == null ? { kind: 'empty' } : { kind: 'runs', value: v }
       }
       if (col.state === 'today') {
-        if (!live) return { kind: 'seal', lead: rowIdx === 0 }
-        const v = runsFor(col.gamePk, clubId)
-        return v == null ? { kind: 'empty' } : { kind: 'runs', value: v }
+        return { kind: 'seal', lead: rowIdx === 0 }
       }
       return { kind: 'empty' }
     }),

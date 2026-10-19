@@ -172,7 +172,8 @@ function StampInRow({ game, getSignals, stamped, seasonFull, onStamp }) {
     const job = {
       cancelled: false,
       run: () =>
-        getSignals(gamePk).then(
+        // The card draws no play of the game, so skip the win probability read.
+        getSignals(gamePk, { winProb: false }).then(
           (s) => {
             if (!job.cancelled) setSignals(s)
           },
@@ -236,13 +237,7 @@ function StampInRow({ game, getSignals, stamped, seasonFull, onStamp }) {
         <div className="stampin__facewrap">
           <GameResultFace
             feed={signals.feed}
-            winProb={signals.winProb}
             boxScorePath={boxScorePath}
-            // The line and the decisions, nothing else. A season is up to 162
-            // rows and this page is read by scrolling it, so the play of the
-            // game — a photo and two lines each — costs more height than it
-            // earns here.
-            hidePlayOfGame
             trailing={
               <StampInButton
                 stamped={stamped}

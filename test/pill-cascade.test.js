@@ -252,7 +252,7 @@ test('the foul tracker\'s result tag names its two kinds as variants, not states
     assert.ok(ruleBody(css, `.scorebug__result--${kind}`) !== null, `.scorebug__result--${kind} should carry the ${kind} tint`)
     assert.equal(ruleBody(css, `.scorebug__result.is-${kind}`), null)
   }
-  const jsx = readFileSync(join(SRC, 'screens/FoulTrackerPage.jsx'), 'utf8')
+  const jsx = readFileSync(join(SRC, 'screens/foul-tracker/Boards.jsx'), 'utf8')
   assert.match(jsx, /scorebug__result scorebug__result--\$\{positive \? 'positive' : 'negative'\}/)
 })
 

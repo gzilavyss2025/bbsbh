@@ -292,8 +292,6 @@ const T3 = [
     attrs: ['frame="bare"', 'density="tight"'],
     label: /label=\{`Batting, \$\{side\.teamName\}`\}/,
     apis: [
-      '../api/boxscore.js',
-      '../api/highlights.js',
       '../api/expresslane/eligibility.js',
       '../api/game.js',
       '../api/defense.js',
@@ -634,10 +632,18 @@ const T7 = [
   {
     css: '43-foul-tracker.css',
     ns: 'foulboard',
-    jsx: 'screens/FoulTrackerPage.jsx',
+    jsx: 'screens/foul-tracker/Boards.jsx',
     want: [
       { frame: 'bare', label: true },
       { frame: 'bare', label: true },
+    ],
+    gone: ['standings foulboard', 'className="ledger-wrap"', 'foulboard__whiffcol-scroll'],
+  },
+  {
+    css: '43-foul-tracker.css',
+    ns: 'foulboard',
+    jsx: 'screens/foul-tracker/SeasonBoards.jsx',
+    want: [
       { frame: 'bare', label: false },
       { frame: 'bare', label: true },
       { frame: 'bare', label: true },

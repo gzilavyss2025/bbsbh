@@ -1,5 +1,4 @@
 import { useId } from 'react'
-import { showsPerformerCard } from '../../lib/resultCards.js'
 
 // Placeholder for a result card (GameResultFace) while a revealed game's
 // feed/win-probability are still in flight (Stamp In's season list) —
@@ -14,14 +13,7 @@ import { showsPerformerCard } from '../../lib/resultCards.js'
 // stuttering/repeating. Purely decorative (aria-hidden); the one accessible
 // string is the status message screen readers get instead.
 //
-// `cardMeta` is the same optional classification GameResultFace takes, so
-// showsPerformerCard (resultCards.js) can reserve a matching .skel__perfcard
-// block when the real face is going to stack an extra PerformerCard above its
-// Play of the Game text. No caller passes one since the slate's day-wide
-// classification was removed with its reveal-all (ADR-0116), so the block
-// does not render today.
-export function BoxScoreSkeleton({ cardMeta = null }) {
-  const showPerformer = showsPerformerCard(cardMeta)
+export function BoxScoreSkeleton() {
   return (
     <div className="flipback skel" role="status">
       <span className="sr-only">Pulling the box score…</span>
@@ -38,7 +30,6 @@ export function BoxScoreSkeleton({ cardMeta = null }) {
           <span className="skel__bar skel__bar--decision" />
           <span className="skel__bar skel__bar--decision" />
         </div>
-        {showPerformer && <SkelPerformerCard />}
         <div className="skel__potg">
           <span className="skel__circle skel__circle--shot" />
           <div className="skel__potgLines">
@@ -60,22 +51,6 @@ function SkelTeamRow() {
       <span className="skel__bar skel__bar--num" />
       <span className="skel__bar skel__bar--num" />
       <span className="skel__bar skel__bar--num" />
-    </div>
-  )
-}
-
-// Mirrors PerformerCard.jsx's shape (headshot + name/team/stat lines) — only
-// rendered when showsPerformerCard(cardMeta) says the real GameResultFace
-// will show one too (see the BoxScoreSkeleton header comment above).
-function SkelPerformerCard() {
-  return (
-    <div className="skel__perfcard">
-      <span className="skel__bar skel__bar--perfShot" />
-      <div className="skel__perfLines">
-        <span className="skel__bar skel__bar--perfName" />
-        <span className="skel__bar skel__bar--perfTeam" />
-        <span className="skel__bar skel__bar--perfStat" />
-      </div>
     </div>
   )
 }

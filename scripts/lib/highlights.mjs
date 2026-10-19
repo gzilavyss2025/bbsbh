@@ -16,11 +16,8 @@ import { readJsonOr, writeJsonAtomic } from './io.js'
 import {
   classifyHighlight,
   fetchHighlights,
-  highlightPlaybacks,
-  highlightPoster,
   isEligibleForPositiveFilter,
 } from '../../src/api/highlights.js'
-import { pickHeroPhoto } from '../../src/api/gamePhotos.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 export const OUT_DIR = join(here, '..', '..', 'public', 'data', 'highlights')
@@ -45,56 +42,6 @@ export async function loadBlocklist() {
 // stay dumb.
 export async function clipsForGame(gamePk, blocklist) {
   return clipsFromItems(await fetchHighlights(gamePk), blocklist)
-}
-
-// One game's content, read THREE ways from a single fetch: the per-play clips
-// for the team files, the condensed cut for the day index, and its hero photo
-// (see pickHeroPhoto's header). All three generators' sweeps already pay for
-// this one request — asking the same endpoint again for either would double a
-// nightly sweep's traffic. `clipsForGame` above stays as-is for the backfill,
-// which doesn't build day files.
-export async function sweepGame(gamePk, blocklist) {
-  const items = await fetchHighlights(gamePk)
-  return {
-    clips: clipsFromItems(items, blocklist),
-    condensed: condensedEntry(items),
-    heroPhoto: await pickHeroPhoto(items),
-  }
-}
-
-// The day index's per-game row: the condensed cut plus its hero photo (or
-// `null` for either half a game happens to lack), composed in one place so the
-// two generators that write day files (gen-highlights.mjs, the backfill) and
-// the unit suite all agree on the shape. `condensed` itself is never `null`
-// here — callers only invoke this once they've already checked that.
-export function dayIndexEntry(condensed, heroPhoto) {
-  return { ...condensed, heroPhoto: heroPhoto ?? null }
-}
-
-// The condensed game as the day index stores it: enough to render the card's
-// poster AND play it with no live fetch at all, which is the entire point of
-// precomputing this. `playbacks` is already resolved to `{hls, mp4}` here, the
-// shape highlightPlaybacks accepts back on the read side (see its header), so
-// the reader stays dumb.
-//
-// `title` is safe to store and to render: a condensed cut's title is
-// "Condensed Game: NYM@CLE - 8/4/26" — structural, no score in it, unlike the
-// per-play titles above and unlike the RECAP's ("...fuels Mets' 6-2 win"),
-// which is why the recap is not in this file.
-export function condensedEntry(items) {
-  const item = (items ?? []).find((i) =>
-    (i?.keywordsAll ?? []).some((k) => k.type === 'taxonomy' && k.value === 'condensed-game'),
-  )
-  if (!item) return null
-  const playbacks = highlightPlaybacks(item)
-  if (!playbacks.hls && !playbacks.mp4) return null
-  return {
-    id: item.id ?? null,
-    title: item.title || item.headline || null,
-    duration: item.duration ?? null,
-    poster: highlightPoster(item),
-    playbacks,
-  }
 }
 
 function clipsFromItems(items, blocklist) {
@@ -178,68 +125,6 @@ export async function writeTeamFiles(byTeam, { generatedAt }) {
     teams++
   }
   return { added, teams }
-}
-
-// The per-DAY condensed-game index: public/data/highlights/day/<MMDDYYYY>.json,
-// one file per slate date, `{ gamePk: condensedEntry }`. Read by the home
-// slate's revealed result cards (src/api/gamehighlights.js), which need a
-// poster for every game on the day and cannot afford the live alternative —
-// `content` is 430 KB per game and doesn't honor `?fields=`, so 16 cards would
-// parse ~6.9 MB. This file is ~7 KB for a full slate.
-//
-// MMDDYYYY, matching public/data/callouts/ — the same per-slate-date file
-// convention, keyed the way the app's own routes spell a date.
-//
-// MERGED into whatever the file already holds, not rewritten over it. The
-// nightly job sweeps a whole date at once and so would be safe either way, but
-// the BACKFILL is not: it only fetches games missing an entry, so a date where
-// one game was previously missed would be rebuilt from that single game and
-// the other fifteen would vanish. Merging makes a partial sweep additive, the
-// same append-only guarantee the team files have, and a Final game's condensed
-// cut is immutable so a re-swept entry overwrites itself with equal content.
-export async function writeDayFiles(byDate, { generatedAt }) {
-  let days = 0
-  let entries = 0
-  for (const [date, games] of byDate) {
-    if (!Object.keys(games).length) continue
-    const path = join(OUT_DIR, 'day', `${urlDateFor(date)}.json`)
-    const prev = await readJsonOr(path, { date, games: {} })
-    const merged = { ...(prev.games ?? {}), ...games }
-    await writeJsonAtomic(path, { date, generatedAt, games: merged })
-    days++
-    entries += Object.keys(games).length
-  }
-  return { days, entries }
-}
-
-// Every gamePk that already has a day-index entry — the backfill's "don't
-// re-fetch what's done" guard for THIS output, which is a different question
-// from ingestedGamePks below: that one answers "are this game's clips filed",
-// and a game can easily be done there and missing here (every game swept
-// before day files existed is). A game needs fetching if EITHER is missing.
-//
-// An absent directory (no day file written yet) is an empty set, not an error.
-export async function dayIndexedGamePks() {
-  const seen = new Set()
-  let files = []
-  try {
-    files = (await readdir(join(OUT_DIR, 'day'))).filter((f) => /^\d{8}\.json$/.test(f))
-  } catch (err) {
-    if (err.code !== 'ENOENT') throw err
-    return seen
-  }
-  for (const file of files) {
-    const data = await readJsonOr(join(OUT_DIR, 'day', file), { games: {} })
-    for (const gamePk of Object.keys(data.games ?? {})) seen.add(Number(gamePk))
-  }
-  return seen
-}
-
-// "2026-07-07" -> "07072026", the form the app's routes and the callouts files
-// both use.
-function urlDateFor(isoDate) {
-  const [y, m, d] = isoDate.split('-')
-  return `${m}${d}${y}`
 }
 
 // Every gamePk already on file, across every team file that exists — the

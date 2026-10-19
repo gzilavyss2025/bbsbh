@@ -86,7 +86,6 @@ const BUDGETS = {
   'src/styles/15-team-color-lab.css': 680, // 674
   'src/styles/17-identity-lab-workbench.css': 1196, // 1200
   'src/styles/21-box-score.css': 900, // 800
-  'src/styles/22-box-score-tables.css': 700, // 680
   'src/styles/28-team-hub.css': 900, // 859
   'src/styles/29-team-transactions.css': 800, // 950
   'src/styles/31-wild-card.css': 1200, // 1300
@@ -109,7 +108,7 @@ const BUDGETS = {
   'src/styles/69-hit-chart.css': 900, // 811 — the ball-flight card shares marks, heat ring and drawing with the chart: one partial, not two that can drift
   'src/styles/68-around-the-game.css': 1100, // 1200
   'src/api/whatsBrewing.js': 1600, // 1581
-  'scripts/gen-callouts.mjs': 1700, // 1619
+  'scripts/gen-callouts.mjs': 1700, // 1608
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
   // GameView is the game's ROUTER — one screen per section, each lazily
   // imported, plus the chrome every section shares — so a feature that adds a
@@ -118,8 +117,7 @@ const BUDGETS = {
   // shared chrome out would move the section tabs into a 12th file in
   // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
   // trades a real limit for a nominal one.
-  'src/screens/BoxScore.jsx': 1200, // 1191
-  'src/screens/FoulTrackerPage.jsx': 1200, // 1168
+  'src/screens/BoxScore.jsx': 900, // 824
   'src/lib/teams.js': 1240, // 1227
   'src/lib/route.js': 1000, // 970
   'scripts/gen-fouls.mjs': 1100, // 1057
@@ -144,7 +142,7 @@ const BUDGETS = {
   // fetchSeasonMeta did — it is a schedule call, and the alternative was a new
   // src/api file for one fetcher, bought with that directory's budget.
   'src/api/schedule.js': 800, // 741
-  'src/api/select.js': 1000, // 912
+  'src/api/select.js': 800, // 770
   // computeHalfInningFeed's own state machinery (pinch-runner aliasing,
   // per-batter trip tracking, the visible-step gate) is tightly coupled and
   // deliberately not decomposed further when playbyplay.js was split

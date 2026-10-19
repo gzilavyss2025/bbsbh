@@ -227,7 +227,7 @@ date can come in. The bracket decides which games these are.
 
 - `useSeriesPrimerData(series, cutoff)` (`src/hooks/postseason/`) returns
   `{ games, stats, source, loading, error }`. `error` is the live read's. `source` is `"shard"`, `"live"` or
-  `"mixed"`. `series` is a bracket series read without `{ live: true }`.
+  `"mixed"`. `series` is a bracket series read from the bracket.
 - It reads the callouts bundle of **today's** game with `fetchCallouts`. The
   bundle can hold a `series` block: `{ id, gamePks, games, stats? }`. `gamePks` is
   required, because `stats` carry no game ids. A game is
@@ -407,4 +407,4 @@ and the slate model's `seriesStatus`/`leagueRecord` guard in
 
 ## World Series home reads (`worldSeriesHome.js`, #1906)
 
-One file, cutoff-gated (manifest entry). Every read ends the day before the slate date in the request and is filtered again on the rows; an inert `live` option (default false, no caller since ADR-0116) would let the slate date's own Finals count. `fetchClubGames` rows: `{ gamePk, date, gameType, gameNumber, final, homeId, awayId, winnerId }`, no runs. `fetchSeriesRuns` folds box scores with `foldRunsByGame`. `fetchReelGames` drops a game dated on or after the slate date before any content read. `useWorldSeriesHome` (`src/hooks/postseason/`) returns the raw rows for the World Series selectors (slice 2).
+One file, cutoff-gated (manifest entry). Every read ends the day before the slate date in the request and is filtered again on the rows. No option lets the slate date's own Finals count (the inert `live` option was removed, #2308). `fetchClubGames` rows: `{ gamePk, date, gameType, gameNumber, final, homeId, awayId, winnerId }`, no runs. `fetchSeriesRuns` folds box scores with `foldRunsByGame`. `fetchReelGames` drops a game dated on or after the slate date before any content read. `useWorldSeriesHome` (`src/hooks/postseason/`) returns the raw rows for the World Series selectors (slice 2).

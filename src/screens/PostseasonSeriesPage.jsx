@@ -290,9 +290,7 @@ export function PostseasonSeriesPage({ seriesId }) {
                       <div className="psseries__facewrap">
                         <GameResultFace
                           feed={signals.feed}
-                          winProb={signals.winProb}
                           boxScorePath={boxScorePath}
-                          hidePlayOfGame
                         />
                       </div>
                       <SeriesPlayOfTheGame

@@ -19,7 +19,7 @@
    then which game it came from (mono graphite, the scorebook's
    figures voice). The play affordance is a small tab
    stuck on the print's lower-left, a hair off-square the way tape
-   goes down by hand — navy ink, like .flipback__watchbtn's tab. It
+   goes down by hand — navy ink. It
    was solid --seal until ADR-0083: every affordance meaning "there is
    video here" wore the cover's own colour, on a card that is the
    opposite of sealed. --text-on-ink carries its own validated
@@ -319,22 +319,4 @@
   color: var(--text-caption);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
-}
-
-/* ---- "Condensed game" button on a revealed slate card.
-
-   The button itself is a Button, ink skin at control size (#1174), so it
-   has no rule of its own here. Its glyph lives HERE, not beside its
-   .flipback__* siblings in 22-box-score-tables.css, because it belongs to
-   the video family: every affordance in the app that means "there is video
-   here" wears the same ink (the WATCH tab above, the condensed panel's tab,
-   the player's SAVE pill). They wore kraft tape until ADR-0083.
-
-   The same border-drawn ▶ the clip cards use, at caption scale. */
-.flipback__watchIcon {
-  width: 0;
-  height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 6px solid currentColor;
 }

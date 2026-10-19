@@ -927,6 +927,11 @@ test('C4: focus mode still drops the half sheet around a lone staged notice', ()
 // many SealBoxes and revealedThrough reads it holds, as measured on
 // origin/main. A frame move changes none of these. If this fails, the slice
 // moved a seal: stop and ask, never update the literal to match.
+// The BoxScore.jsx split (#2312) moved `api/boxscore.js` (via resolveCardPlayer)
+// into boxscore/InsightCards.jsx and added boxscore/GameNotes.jsx. The SealBox,
+// the revealedThrough reads and the render site stayed in BoxScore.jsx; Gary
+// approved re-pinning the two new files. The containment test below keeps
+// them reachable only from that render site.
 const C4_SEAL = {
   'components/inning/HalfInning.jsx': { reveal: ['boxscore.js', 'highlights.js', 'hitchart.js', 'playbyplay.js'], sealBoxes: 1, revealedThrough: 12 },
   'components/gamehud/StatBox.jsx': { reveal: ['boxscore.js', 'challenges.js', 'derive.js', 'linescore.js', 'umpireFavor.js'], sealBoxes: 2, revealedThrough: 0 },
@@ -939,7 +944,9 @@ const C4_SEAL = {
   'components/inning/PitchersSection.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/gamehud/HalfTally.jsx': { reveal: ['derive.js', 'linescore.js'], sealBoxes: 1, revealedThrough: 0 },
   'components/gamehud/BetweenInnings.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 3 },
-  'screens/BoxScore.jsx': { reveal: ['boxscore.js', 'challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  'screens/boxscore/InsightCards.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
+  'screens/boxscore/GameNotes.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
 }
 const SPOILER_MANIFEST = JSON.parse(readFileSync(join(SRC, 'api', 'spoiler-manifest.json'), 'utf8')).modules
 
@@ -987,7 +994,7 @@ const C3 = [
       'components/teamstats/BullpenBoard.jsx',
       'components/teamstats/SeasonSeriesStrip.jsx',
       'components/team/FormerTeammates.jsx',
-      'screens/FoulTrackerPage.jsx',
+      'screens/foul-tracker/Boards.jsx',
     ],
     ns: 'metric',
     head: true,
@@ -1150,16 +1157,16 @@ test('C3: the animation lab draws the batting order on the same Card', () => {
 const C5 = [
   { css: '21-box-score.css', sel: '.gamestory', jsx: ['components/game/GameStoryCard.jsx'], ns: 'gamestory' },
   { css: '21-box-score.css', sel: '.bs__team', jsx: ['screens/BoxScore.jsx'], ns: 'bs__team' },
-  { css: '21-box-score.css', sel: '.bs__decisions', jsx: ['screens/BoxScore.jsx'], ns: 'bs__decisions', as: 'div' },
-  { css: '21-box-score.css', sel: '.bs__potg', jsx: ['screens/BoxScore.jsx'], ns: 'bs__potg', as: 'div' },
-  { css: '21-box-score.css', sel: '.bs__insights', jsx: ['screens/BoxScore.jsx'], ns: 'bs__insights' },
-  { css: '21-box-score.css', sel: '.bs__statcastCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__statcastCard' },
+  { css: '21-box-score.css', sel: '.bs__decisions', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'bs__decisions', as: 'div' },
+  { css: '21-box-score.css', sel: '.bs__potg', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'bs__potg', as: 'div' },
+  { css: '21-box-score.css', sel: '.bs__insights', jsx: ['screens/boxscore/InsightCards.jsx'], ns: 'bs__insights' },
+  { css: '21-box-score.css', sel: '.bs__statcastCard', jsx: ['screens/boxscore/InsightCards.jsx'], ns: 'bs__statcastCard' },
   // A note tile keeps its soft edge and inset shadow over the ledger frame
   // (Gary, 2026-09-29): that is its look, not a second frame.
-  { css: '21-box-score.css', sel: '.bs__noteCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__noteCard', frame: 'ledger', as: 'div', keep: ['box-shadow'] },
-  { css: '21a-box-score-stars.css', sel: '.bs__stars', jsx: ['screens/BoxScore.jsx'], ns: 'bs__stars', as: 'div' },
+  { css: '21-box-score.css', sel: '.bs__noteCard', jsx: ['screens/boxscore/InsightCards.jsx'], ns: 'bs__noteCard', frame: 'ledger', as: 'div', keep: ['box-shadow'] },
+  { css: '21a-box-score-stars.css', sel: '.bs__stars', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'bs__stars', as: 'div' },
   // Boxed only from 740px: its phone rules strip the frame (test below).
-  { css: '21a-box-score-stars.css', sel: '.stars3__card', jsx: ['screens/BoxScore.jsx'], ns: 'stars3__card', frame: 'ledger', as: 'li', phoneOnly: true },
+  { css: '21a-box-score-stars.css', sel: '.stars3__card', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'stars3__card', frame: 'ledger', as: 'li', phoneOnly: true },
   { css: '21b-box-score-tally.css', sel: '.bs__tally', jsx: ['screens/boxscore/InningTally.jsx'], ns: 'bs__tally', as: 'div' },
   // No band head to round, so the tile opts out of the Card's clip, which
   // cut the name link's focus ring in the tight award tiles (test below).
@@ -1172,7 +1179,7 @@ const C5 = [
     as: 'li',
     keep: ['overflow'],
   },
-  { css: '23-box-score-detail.css', sel: '.bs__info', jsx: ['screens/BoxScore.jsx'], ns: 'bs__info', as: 'div' },
+  { css: '23-box-score-detail.css', sel: '.bs__info', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'bs__info', as: 'div' },
   { css: '23-box-score-detail.css', sel: '.bs__totalsCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__totalsCard', as: 'div' },
   { css: '23-box-score-detail.css', sel: '.bs__board', jsx: ['screens/BoxScore.jsx'], ns: 'bs__board', as: 'div' },
   { css: '23-box-score-detail.css', sel: '.bs__fill', jsx: ['screens/BoxScore.jsx'], ns: 'bs__fill', as: 'div', keep: ['background'] },
@@ -1352,9 +1359,9 @@ test('C5: the coverage card wears the label head and returns null before the Car
 // The same for every box-score block that can be empty: an empty frame would
 // show that a star, a note or a decision exists.
 test('C5: every box-score block that can be empty returns null before its Card', () => {
-  const code = src('screens/BoxScore.jsx')
+  const code = src('screens/boxscore/InsightCards.jsx') + src('screens/boxscore/GameNotes.jsx')
   for (const name of ['StatcastLeadersCard', 'InsightsCard', 'Decisions', 'PlayOfTheGame', 'ThreeStars', 'GameInfo']) {
-    const from = code.indexOf(`\nfunction ${name}(`)
+    const from = code.indexOf(`\nexport function ${name}(`)
     assert.ok(from > 0, name)
     const next = code.indexOf('\nfunction ', from + 1)
     const body = code.slice(from, next === -1 ? undefined : next)
@@ -1377,15 +1384,15 @@ test('C5: .playercard is gone, from stylesheets, markup, comments and e2e', () =
   assert.deepEqual(found, [])
 })
 
-// Two hosts draw the tile with no frame of their own: the innings view's
-// Statcast row (.halfcast) and the slate result card's performer slot. Their
-// two-class rules outrank .card, in partials that load after system/card.css.
-test('C5: the two hosts that draw the tile unframed still drop its frame', () => {
+// The innings view's Statcast row (.halfcast) draws the tile with no frame of
+// its own. Its two-class rule outranks .card, in a partial that loads after
+// system/card.css. (The slate result card's performer slot was the second host
+// until ADR-0116 removed it.)
+test('C5: the host that draws the tile unframed still drops its frame', () => {
   const imports = importOrder()
   const card = imports.indexOf('system/card.css')
   const hosts = [
     ['12-sealbox.css', '.halfcast .playerline', { border: 'none', 'border-radius': '0', background: 'none', padding: '0' }],
-    ['22-box-score-tables.css', '.flipback__perfcard .playerline', { border: 'none', background: 'none', padding: '0' }],
   ]
   for (const [rel, sel, want] of hosts) {
     const body = ruleBody(read(rel), sel)
@@ -1408,8 +1415,15 @@ test('C5: the design lab draws the performer tile on the ledger frame', () => {
 // sealed export is imported), and how many SealBoxes and revealedThrough
 // reads it holds. A frame move changes none of these. If this fails, the
 // slice moved a seal: stop and ask, never update the literal to match.
+// The BoxScore.jsx split (#2312) moved `api/boxscore.js` (via resolveCardPlayer)
+// into boxscore/InsightCards.jsx and added boxscore/GameNotes.jsx. The SealBox,
+// the revealedThrough reads and the render site stayed in BoxScore.jsx; Gary
+// approved re-pinning the two new files. The containment test below keeps
+// them reachable only from that render site.
 const C5_SEAL = {
-  'screens/BoxScore.jsx': { reveal: ['boxscore.js', 'challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  'screens/boxscore/InsightCards.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
+  'screens/boxscore/GameNotes.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/game/GameStoryCard.jsx': { reveal: ['gameStory.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/boxscore/InningTally.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/player/PerformerCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
@@ -1801,10 +1815,10 @@ test('C6b: the ledger frames stay ledgers, and the ledger keeps the old .tradeca
 // .factgrid__grid).
 const C6C = [
   { css: '06b-offday-cards.css', sel: '.offday__tile', jsx: ['components/team/OffDaySection.jsx'], ns: 'offday__tile', as: 'button' },
-  { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulboard__hero', as: 'div', keep: ['overflow'] },
-  { css: '43-foul-tracker.css', sel: '.foulavg', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'foulavg', as: 'div' },
-  { css: '43-foul-tracker.css', sel: '.gamehigh-tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'gamehigh-tiles', as: 'div', frame: 'ledger', ground: '.gamehigh-tiles__grid' },
-  { css: '43-foul-tracker.css', sel: '.souvenir-row__tiles', jsx: ['screens/FoulTrackerPage.jsx'], ns: 'souvenir-row__tiles', as: 'div', frame: 'ledger', ground: '.souvenir-row__tilegrid' },
+  { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/foul-tracker/Boards.jsx'], ns: 'foulboard__hero', as: 'div', keep: ['overflow'] },
+  { css: '43-foul-tracker.css', sel: '.foulavg', jsx: ['screens/foul-tracker/SeasonBoards.jsx'], ns: 'foulavg', as: 'div' },
+  { css: '43-foul-tracker.css', sel: '.gamehigh-tiles', jsx: ['screens/foul-tracker/GameBoards.jsx'], ns: 'gamehigh-tiles', as: 'div', frame: 'ledger', ground: '.gamehigh-tiles__grid' },
+  { css: '43-foul-tracker.css', sel: '.souvenir-row__tiles', jsx: ['screens/foul-tracker/GameBoards.jsx'], ns: 'souvenir-row__tiles', as: 'div', frame: 'ledger', ground: '.souvenir-row__tilegrid' },
   { css: '78-offseason.css', sel: '.springcount', jsx: ['components/offseason/WinterCalendar.jsx'], ns: 'springcount', as: 'aside', frame: 'ledger' },
   { css: '78-offseason.css', sel: '.pgame__card', jsx: ['components/offseason/PickedGame.jsx'], ns: 'pgame__card', as: 'div' },
   { css: '78-offseason.css', sel: '.srecord', jsx: ['components/offseason/SeasonRecord.jsx'], ns: 'srecord' },
@@ -1888,7 +1902,7 @@ test('C6c: the souvenir lists sit in their board Card and draw no frame of their
   for (const sel of ['.sgh-list', '.foulboard-block .sgh-list']) {
     for (const body of bodiesOf(css, sel)) assert.deepEqual(frameDecls(body), [], `${sel} draws no frame`)
   }
-  const board = src('screens/FoulTrackerPage.jsx')
+  const board = src('screens/foul-tracker/Boards.jsx')
   assert.match(board, /<Card className="metric foulboard-block" head=\{head\} body="flush">/)
   assert.equal((board.match(/<Card\b[^>]*>\s*<ol className="sgh-list"/g) ?? []).length, 0)
 })
@@ -1902,7 +1916,7 @@ test('C6c: the two tile grids keep their --border-rule ground inside a ledger Ca
     assert.ok(body, `${css}: a ${ground} rule`)
     assert.equal(decl(body, 'background'), 'var(--border-rule)', `${ground} keeps the rule ground`)
     assert.equal(decl(body, 'gap'), '1px', `${ground} keeps its 1px rules`)
-    const code = src('screens/FoulTrackerPage.jsx')
+    const code = src('screens/foul-tracker/GameBoards.jsx')
     const ns = sel.slice(1)
     const inner = ground.slice(1)
     assert.match(
@@ -2315,4 +2329,15 @@ test('H3: the between-innings button is still named by its fact', () => {
   assert.match(button, /betweeninnings__progress/)
   assert.match(button, /\{card\.text\}/)
   assert.doesNotMatch(button, /aria-label/)
+})
+
+// The new box-score files hold reveal-only reads, so they may be imported only by
+// BoxScore.jsx, whose single SealBox render function is what keeps them sealed.
+test('C5: InsightCards and GameNotes are imported only by BoxScore.jsx', () => {
+  const importers = (name) =>
+    files(SRC, ['.js', '.jsx'])
+      .filter((rel) => new RegExp(`from ['"][./\\w-]*boxscore/${name}\\.jsx['"]`).test(src(rel)))
+      .sort()
+  assert.deepEqual(importers('InsightCards'), ['screens/BoxScore.jsx'])
+  assert.deepEqual(importers('GameNotes'), ['screens/BoxScore.jsx'])
 })

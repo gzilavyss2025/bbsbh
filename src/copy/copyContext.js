@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { defaultCopy, fillTokens } from './registry.js'
+import { defaultCopy } from './registry.js'
 
 // The copy context object and its consumer hook live here, apart from the
 // provider component (CopyProvider.jsx), so each file has a single kind of
@@ -7,14 +7,13 @@ import { defaultCopy, fillTokens } from './registry.js'
 
 export const CopyContext = createContext(null)
 
-// Components call useCopy().t('stampIn.title', tokens). Usable even
+// Components call useCopy().t('stampIn.title'). Usable even
 // with no provider mounted (defaults only) so a stray render or a unit test
 // can't crash on a missing context.
 export function useCopy() {
   const ctx = useContext(CopyContext)
   const resolved = ctx ? ctx.resolved : defaultCopy()
-  const t = (id, tokens) =>
-    Object.prototype.hasOwnProperty.call(resolved, id) ? fillTokens(resolved[id], tokens) : ''
+  const t = (id) => (Object.prototype.hasOwnProperty.call(resolved, id) ? resolved[id] : '')
   // `applyOverrides` is a no-op in the provider-less fallback. Nothing is
   // holding state to update, and a component that saves copy is by definition
   // mounted inside the real app — so the alternative (omitting it) would only

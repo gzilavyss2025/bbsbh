@@ -96,10 +96,10 @@ The box score's seal is `forceRevealed={stamped || boxOpened}` and
 - ADR-0087's decision 4 ("Scores Unlocked does not apply here") and its 2026-09-30
   addendum ("revealing the day's live scores moves the bracket") are moot: there is
   no pass to apply.
-- **Follow-ups.** The data layer keeps an inert `{ live }` option, default false,
-  that no caller passes: `src/api/postseason/bracket.js`, `src/api/postseason/fetch.js`,
+- **Follow-ups.** Done in #2308: the inert `{ live }` option is deleted from
+  `src/api/postseason/bracket.js`, `src/api/postseason/fetch.js`,
   `src/api/postseason/worldSeriesHome.js` and `src/lib/postseason/worldseries/ledger.js`,
-  with their tests. A later change can delete it. The nightly highlights job still
+  with its tests. The nightly highlights job still
   writes `public/data/highlights/day/{MMDDYYYY}.json`, which nothing reads now; that
   generator step can go too.
 - The removed e2e spec (`e2e/invariants/scores-unlocked.spec.js`) and the unit tests

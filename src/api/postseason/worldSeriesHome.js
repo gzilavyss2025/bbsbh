@@ -5,9 +5,7 @@
 // SPOILER FOOTING (ADR-0087, ADR-0088). Every read here is bounded to games
 // dated BEFORE the slate date, in the request (endDate is the day before) and
 // again on the rows that come back, so a caller that hands in too much cannot
-// get the slate date's game. The one exception is `live`: the reader unlocked
-// the day's scores (ADR-0026), so the slate date's own Finals count, exactly as
-// fetchPostseasonResults does. Past games' runs, clip titles and photos are
+// get the slate date's game. Past games' runs, clip titles and photos are
 // open by decision (the bracket brief: yesterday's results are not protected).
 // Today's game never has its play feed, clips or photos read.
 //
@@ -23,8 +21,7 @@ import { fetchGameBoxscore, foldRunsByGame } from '../postseasonSeries.js'
 import { dayBefore, keptGames } from './fetch.js'
 
 // The last day a read may include.
-const lastDay = (slateDate, live) => (live ? slateDate : dayBefore(slateDate))
-const counts = (date, slateDate, live) => (live ? date <= slateDate : date < slateDate)
+const counts = (date, slateDate) => date < slateDate
 
 export function hotBatsUrl(season, teamId, slateDate) {
   return (
@@ -48,19 +45,19 @@ const CLUB_GAME_FIELDS = [
   'teams', 'away', 'home', 'team', 'id', 'isWinner',
 ].join(',')
 
-export function clubGamesUrl(season, teamId, slateDate, { live = false } = {}) {
+export function clubGamesUrl(season, teamId, slateDate) {
   return (
     `/api/v1/schedule?sportId=1&season=${season}&gameType=F,D,L,W&teamId=${teamId}` +
-    `&startDate=${season}-01-01&endDate=${lastDay(slateDate, live)}&fields=${CLUB_GAME_FIELDS}`
+    `&startDate=${season}-01-01&endDate=${dayBefore(slateDate)}&fields=${CLUB_GAME_FIELDS}`
   )
 }
 
 // One club's postseason games before the slate date, oldest first:
 // { gamePk, date, gameType, gameNumber, final, homeId, awayId, winnerId }.
-export async function fetchClubGames(season, teamId, slateDate, { signal, live = false } = {}) {
-  const json = await getJson(clubGamesUrl(season, teamId, slateDate, { live }), { signal })
+export async function fetchClubGames(season, teamId, slateDate, { signal } = {}) {
+  const json = await getJson(clubGamesUrl(season, teamId, slateDate), { signal })
   return keptGames(json)
-    .filter((g) => counts(g.officialDate, slateDate, live))
+    .filter((g) => counts(g.officialDate, slateDate))
     .map((g) => {
       const { away, home } = g.teams ?? {}
       const winnerId = away?.isWinner === true ? away.team?.id : home?.isWinner === true ? home.team?.id : null
@@ -86,9 +83,9 @@ export async function fetchClubBoxscores(games, slateDate, { limit = 6, getBox =
   return recent.map((g, i) => ({ gamePk: g.gamePk, date: g.date, boxscore: boxes[i] })).filter((g) => g.boxscore)
 }
 
-// The ledger's runs, folded by club id. Only games that count (see `live`).
-export async function fetchSeriesRuns(games, slateDate, { live = false, getBox = fetchGameBoxscore } = {}) {
-  const list = (games ?? []).filter((g) => g.date && counts(g.date, slateDate, live))
+// The ledger's runs, folded by club id. Only games that count (dated before the slate date).
+export async function fetchSeriesRuns(games, slateDate, { getBox = fetchGameBoxscore } = {}) {
+  const list = (games ?? []).filter((g) => g.date && counts(g.date, slateDate))
   const boxes = await Promise.all(list.map((g) => getBox(g.gamePk)))
   return foldRunsByGame(list, boxes)
 }

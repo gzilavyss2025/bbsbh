@@ -343,10 +343,9 @@ export async function fetchTeamPhotoBatch(games, teamId, consumed, batchSize, ca
   return { photos: results.flat(), consumed: batch.length }
 }
 
-// The single best still for a game, for scripts/gen-highlights.mjs's day
-// index — the home slate's revealed result cards use this as the condensed
-// game's poster instead of MLB's own "CONDENSED GAME" graphic card. Takes the
-// highlight ITEMS array the generator already fetched via fetchHighlights()
+// The single best still for a game, used by the box score's condensed-game
+// print (GameVideoRow) instead of MLB's own "CONDENSED GAME" graphic card.
+// Takes the highlight ITEMS array the caller already fetched via fetchHighlights()
 // for that same game (no second content request), so it only ever sees the
 // attributed pass — never the recursive stray walk fetchGamePhotos does, which
 // needs the full content payload this call site doesn't have. That cost every
@@ -355,7 +354,7 @@ export async function fetchTeamPhotoBatch(games, teamId, consumed, batchSize, ca
 //
 // EARLY-EXITS the moment a `photographer` candidate turns up — the top rank
 // KIND_ORDER assigns, so nothing later in the list can beat it. That is what
-// keeps this affordable in a nightly sweep: the common case costs a title
+// keeps this cheap: the common case costs a title
 // check and at most a couple of shape probes, not one probe per photo the way
 // fetchGamePhotos pays (that function has to classify EVERY photo for its
 // gallery; this one only needs the first best one). Falls back to the first
@@ -363,20 +362,11 @@ export async function fetchTeamPhotoBatch(games, teamId, consumed, batchSize, ca
 // has nothing usable — same "fail open, never guess" posture as
 // classifyPhotoAsset.
 //
-// RETURNS BARE URLs ONLY — no `headline`, no `focus`. This feeds
-// public/data/highlights/day/<date>.json, which the slate fetches whole for
-// EVERY game on the date the instant the page loads, regardless of which of
-// those games the visitor has actually revealed yet (see gen-highlights.mjs's
-// day-index comment) — so nothing legible as plain text may ride along, same
-// reason that file stores the condensed cut's structural title and never the
-// recap's. A photo URL is safe there by the reasoning that already covers that
-// same file's condensed-cut poster/playback URLs: GameResultFace.jsx renders
-// it only once the flip card's already-revealed back face has mounted, so nothing
-// paints before the visitor chose to reveal that specific game.
+// RETURNS BARE URLs ONLY — no `headline`, no `focus`, so nothing legible as plain
+// text rides along. The box score renders the still only from inside its reveal.
 //
 // `width` sizes the `thumb` render only — same photograph, same CDN id, just a
-// different resize instruction. The 480 default is the slate card's size and is
-// what the day index stores; the box score asks for a wider one because its
+// different resize instruction. The 480 default is a card thumbnail; the box score asks for a wider one because its
 // condensed print fills a half-page column on a desktop, where 480 reads soft.
 export async function pickHeroPhoto(items, { width = 480 } = {}) {
   const seen = new Set()
