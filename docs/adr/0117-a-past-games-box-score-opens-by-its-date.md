@@ -147,7 +147,9 @@ record a reveal the reader never made, and the bit would outlive the date rule.
   and plays, its box score is open while the game is live. This follows from the date-only
   rule. It is the cost of rejecting Alternative E.
 - **ADR-0110 is retired.** The player-page Game Log shows the score and decision of a game
-  in progress today. The guard is `fetchFinalScores` (`src/api/boxlines/fetch.js`), and
-  Box Lines on the lineup page (ADR-0069) uses the same function. Box Lines is not part of
-  this decision and must keep its guard. The change goes in the player-page caller, not in
-  the shared function.
+  in progress today. The guard is `fetchFinalScores` (`src/api/boxlines/fetch.js`), which
+  holds back every game on today's baseball date. Its callers are all player-page modules:
+  the pitcher log, the hitter log (`batlog`) and the photos module. The lineup page's Box
+  Lines (ADR-0069) do not use it. They use `fetchBoxLines`, whose cutoff is the date of the
+  game being scored, so the game on screen and every later game are never fetched. That gate
+  stays as it is, and retiring ADR-0110 does not touch it.

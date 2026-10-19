@@ -54,9 +54,10 @@ Retire ADR-0110 on the player-page Game Log. Everything else is unchanged.
 7. **Retire ADR-0110 on the player page.** Write the failing test first: a game in progress
    today shows its score and decision on the pitcher Game Log. Change the player-page caller
    (`src/screens/player/next/modules/pitchlog/pitchlogView.js`, `gameDetail.js`,
-   `StartDetail.jsx`, `index.jsx`) so it asks for today's score. Keep `fetchFinalScores`
-   guarding Box Lines on the lineup page: add an option or a second caller, do not drop the
-   guard. Update `test/player-next-pitchlog.test.js`, `docs/player-hub.md`,
+   `StartDetail.jsx`, `index.jsx`) so it asks for today's score. `fetchFinalScores` is called
+   only by player-page modules (pitchlog, batlog, photos). Lineup-page Box Lines use
+   `fetchBoxLines` with the scored game's date as cutoff, so they are not affected. Decide
+   whether the hitter log and photos open too (see open question below). Update `test/player-next-pitchlog.test.js`, `docs/player-hub.md`,
    `src/api/spoiler-manifest.json` if it names 0110, and mark ADR-0110 retired.
 8. **Verify.** `npm run lint`, `npm test`, `npm run build`. Then render `?nointro` routes
    in Chromium: a past Final game's `boxscore` section (open), today's game (sealed), the
@@ -65,8 +66,11 @@ Retire ADR-0110 on the player-page Game Log. Everything else is unchanged.
 
 ## Risks
 
-- **Retiring 0110 must not open Box Lines.** `fetchFinalScores` is shared. Test that the
-  lineup page still withholds today's score.
+- **Retiring 0110 must not touch the lineup page.** It uses `fetchBoxLines`, not
+  `fetchFinalScores`. Add a test that Box Lines on the lineup page still end the day before
+  the scored game.
+- **Scope of the change.** Changing the default in `fetchFinalScores` also opens the hitter
+  log and photos modules. Open question for Gary.
 - **A resumed suspended game is open while live.** Accepted by the date-only rule.
 - **A wrong date check opens today's box score.** The fail-closed unit cases and the
   e2e "today stays sealed" case guard this.
