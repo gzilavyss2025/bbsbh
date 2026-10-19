@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import { Cluster } from '../../ui/layout/Cluster.jsx'
 import { clamp } from '../../../lib/math/number.js'
 import { easeStamp } from '../../../lib/motion/curves.js'
@@ -18,7 +18,7 @@ const STAMP_MS = 380 // --dur-stamp-in
 export function QualityLine({ pitches, drawers, at, bat, mlb, eventType }) {
   const row = useRef(null)
   const stamp = useRef(null)
-  const idx = Math.max(0, pitches.findIndex((p) => p.no === at?.no))
+  const idx = at ? Math.max(0, pitches.findIndex((p) => p.no === at.no)) : pitches.length - 1 // the replay rests on its last pitch
   const { figs, verdict } = useMemo(
     () => qualityFigures(pitches[idx], bat?.get(pitches[idx].playId), { eventType, mlb }),
     [pitches, idx, bat, eventType, mlb],
@@ -26,7 +26,7 @@ export function QualityLine({ pitches, drawers, at, bat, mlb, eventType }) {
   const beats = useMemo(() => pitches.map((p) => pitchBeats(p, SLOW, figs.length)), [pitches, figs.length])
   const frame = useRef([idx, 0, true]) // the last frame drawn, redrawn when the text changes
 
-  useEffect(() => {
+  useLayoutEffect(() => { // before paint: new figures never show one frame at full opacity
     const draw = (i, tau, rest) => {
       frame.current = [i, tau, rest]
       const b = beats[i]

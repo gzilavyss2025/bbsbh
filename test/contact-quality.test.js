@@ -74,3 +74,18 @@ test('a MiLB game makes no /gf call', async () => {
     assert.equal(calls, 0)
   } finally { globalThis.fetch = real }
 })
+
+// Savant's parse (gameFeed.js `num`) gives batSpeed: null for a swing whose bat speed has not arrived. `1.23 * null`
+// is 0, so squaredUp read it as a measured zero and showed "100%" and a full ring instead of waiting.
+test('squaredUp: a null bat speed or a null exit speed is unknown, not zero', () => {
+  assert.equal(squaredUp(100, null, 90), null)
+  assert.equal(squaredUp(100, 0, 90), null)
+  assert.equal(squaredUp(null, 72, 90), null)
+  assert.equal(squaredUp(100, undefined, 90), null)
+})
+
+test('a row with a null bat speed shows the waiting figure and the default ring', () => {
+  const { figs } = qualityFigures(inplay, tr({ batSpeed: null }), { eventType: 'single', mlb: true })
+  assert.deepEqual(figs[1], { num: '—', label: 'squared up · waits for bat speed', wait: true })
+  assert.equal(ringStrength(squaredUp(100, null, 90)), 0.8)
+})

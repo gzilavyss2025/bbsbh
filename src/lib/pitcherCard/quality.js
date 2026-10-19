@@ -13,6 +13,7 @@ const DEFAULT_SWING_SEC = 0.16
 
 // §3.4. Null when any input is missing.
 export function squaredUp(exitVelo, batSpeed, mph) {
+  if (exitVelo == null || !(batSpeed > 0)) return null // a missing bat speed is unknown, not a measured 0 (`1.23 * null` is 0)
   const v = exitVelo / (1.23 * batSpeed + 0.2116 * mph)
   return Number.isFinite(v) ? v : null
 }

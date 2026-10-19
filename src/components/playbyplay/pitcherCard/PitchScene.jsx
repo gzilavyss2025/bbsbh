@@ -146,10 +146,11 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
     // The replay starts at release; the card shows its first pitch whole
     // until the clock runs (and for good under reduced motion).
     draw(atBat != null && !resting && !(reduce && picked >= 0) ? 0 : null)
-    // New bat data: rebuild the swings; a resting frame redraws, a running replay picks them up on its next frame.
+    // New bat data: a resting frame rebuilds its swings and redraws; a running replay keeps the swing it has.
     redrawRef.current = () => {
+      if (!resting && !reduce) return // a running replay keeps its swing: new data must not jump the bat mid-swing
       scenes.length = 0
-      if (resting || reduce) draw(null)
+      draw(null)
     }
     if (reduce || resting) return undefined
 
