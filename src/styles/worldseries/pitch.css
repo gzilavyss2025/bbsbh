@@ -70,8 +70,18 @@
   background: linear-gradient(to right, var(--text-heading) var(--uses, 0%), var(--surface-stamped-tint) var(--uses, 0%));
 }
 
+/* The bar is the first thing to go on a phone: without it the table fits its card. */
+@media not all and (min-width: 740px) {
+  .ww-pitch__bar {
+    display: none;
+  }
+}
+
 .ww-pitch__door {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: var(--tap-min);
   padding: var(--space-3) var(--space-4);
   text-align: right;
 }

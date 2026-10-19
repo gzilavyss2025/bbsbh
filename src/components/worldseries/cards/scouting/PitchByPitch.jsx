@@ -19,12 +19,17 @@ import { Table } from '../../../ui/table/Table.jsx'
 //   clubId    the starter's club
 //   oppId     the hitters' club
 //   gameNumber  the Series game the starter is named for
-const fig = (x) => (x == null ? '—' : x.toFixed(3).replace(/^0/, ''))
+const NONE = (
+  <>
+    —<span className="sr-only"> no figure</span>
+  </>
+)
+const fig = (x) => (x == null ? NONE : x.toFixed(3).replace(/^0/, ''))
 const EDGE = {
   arm: <Pill fill="ink">Arm</Pill>,
   bats: <Pill fill="solid" style={pillSolidStyle({ ground: 'var(--surface-stamped-tint)', text: 'var(--text-heading)' })}>Bats</Pill>,
   even: <span className="ww-pitch__even">Even</span>,
-  none: <span className="ww-pitch__even">—</span>,
+  none: <span className="ww-pitch__even">{NONE}</span>,
 }
 
 export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
@@ -33,7 +38,7 @@ export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
   const last = surnameOf(starter.name)
   const meta = [starter.hand && `${starter.hand}HP`, teamClubNameShort(clubId), `${starter.projected ? 'projected' : 'probable'}${gameNumber ? ` Game ${gameNumber}` : ''} starter`]
   return (
-    <Card frame="stamped" label="Pitch by pitch" count={`${last} vs ${teamAbbr({ id: oppId })}`} body="flush" className="ww-pitch">
+    <Card frame="stamped" label="Pitch by pitch" labelAs="h3" count={`${last} vs ${teamAbbr({ id: oppId })}`} body="flush" className="ww-pitch">
       <PlayerLink id={starter.id} name={starter.name} className="ww-pitch__head">
         <Headshot personId={starter.id} name={starter.name} teamId={clubId} className="ww-pitch__shot" />
         <span className="ww-pitch__who">
@@ -41,7 +46,7 @@ export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
           <span className="ww-pitch__meta">{meta.filter(Boolean).join(' · ')}</span>
         </span>
       </PlayerLink>
-      <Table frame="bare" className="ww-pitch__table">
+      <Table frame="bare" label="Pitch by pitch, by pitch type" className="ww-pitch__table">
         <caption className="ww-pitch__cap">
           xwOBA against each pitch. Club hitters, not the posted lineup ({hitters} hitters).
         </caption>
