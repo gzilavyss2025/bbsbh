@@ -39,8 +39,8 @@ const SPOTS = {
 
 // The same spots on the park's own drawing, in feet off home plate (1:1 with the SVG units of
 // lib/ballpark/ballparkGeometry.js). Used when a `layout` is passed: the fielders then stand
-// where they stand in the park the game is played in. Close to lineup/next's FieldCard, with the
-// corners and the catcher pulled in so a label never clips at the card's edge or covers a sign.
+// where they stand in the park the game is played in. The same spots as lineup/next's FieldCard,
+// minus the pitcher; keep the two tables in step.
 const PARK_SPOTS = {
   LF: { x: 156, y: 238 },
   CF: { x: 310, y: 168 },
