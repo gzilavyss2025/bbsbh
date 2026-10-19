@@ -21,13 +21,16 @@ export function Matchup({ pitcher, hitter, onChange }) {
         Matchup
       </SectionHead>
       <div className="scout__pairrow">
-        <Side person={pitcher} note={`Throws ${pitcher.throws}`} />
+        <Side person={pitcher} note={handLine('Throws', pitcher.throws, pitcher)} />
         <span className="scout__vs" aria-hidden="true">vs</span>
-        <Side person={hitter} note={hitter.bats === 'S' ? 'Bats both' : `Bats ${hitter.bats}`} />
+        <Side person={hitter} note={handLine('Bats', hitter.bats === 'S' ? 'both' : hitter.bats, hitter)} />
       </div>
     </Stack>
   )
 }
+
+// A retired player's line adds his years and "Retired" (slice 7b).
+const handLine = (verb, hand, p) => [`${verb} ${hand}`, ...(p.retired ? [p.years, 'Retired'] : [])].filter(Boolean).join(' · ')
 
 function Side({ person, note }) {
   return (

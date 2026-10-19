@@ -147,21 +147,25 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
     [h2h.data, scope],
   )
 
+  // No scouting data for one of them (retired, or not in the season stores):
+  // show only the meetings, under one line (slice 7b).
+  const noScout = Boolean(data) && !(data.pitcher.inStores && data.hitter.inStores)
+  const gone = data && [data.hitter, data.pitcher].find((p) => p.retired && p.lastYear)
   const names = data ? { hitter: data.hitter.last, pitcher: data.pitcher.last } : null
-  // The section list: flip `show` to hide a section (slice 7b hides by this).
+  // The section list: `show` hides a section (slice 7b hides three by it).
   const sections = data
     ? [
         {
           key: 'scout-edge',
           label: 'Edge',
-          show: true,
+          show: !noScout,
           node: <EdgePanel data={data} board={board} sides={sides} metric={metric} sel={sel} stance={stance} scope={scope} hand={hand} />,
         },
         {
           key: 'scout-pitches',
           label: 'Pitches',
           count: board?.types.length,
-          show: true,
+          show: !noScout,
           node: (
             <>
               {!board && <EmptyState size="compact">No pitch mix posted for this pitcher</EmptyState>}
@@ -172,7 +176,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
         {
           key: 'scout-where',
           label: 'Where',
-          show: true,
+          show: !noScout,
           node: (
             <>
               <ZonesPanel
@@ -276,6 +280,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
                 offset={BAR_H}
                 hold
               />
+              {noScout && gone && <p className="scout__note">{gone.last} last played in {gone.lastYear} · scouting data covers {data.season}</p>}
               {sections.map((x) => (
                 <Stack key={x.key} id={x.key} className="scout__section">
                   {x.node}
