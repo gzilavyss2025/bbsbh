@@ -4,6 +4,7 @@
 // names, one scene entry per tracked pitch, and the degrade where tracking is
 // missing.
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { pitchCardInfo } from '../src/api/playbyplay/pitchInfo.js'
 import { atBatScenePitches, atBatZone } from '../src/lib/pitcherCard/atBat.js'
@@ -202,3 +203,60 @@ test('one picked pitch plays alone, then holds on its full path', () => {
 function close(a, b) {
   assert.ok(Math.abs(a - b) < 1e-9, `${a} vs ${b}`)
 }
+
+// Contact replay phase A (docs/contact-replay.md §3.1): gamePk 849810, MIL @ LAD,
+// 2026-10-15, trimmed to six at-bats. `hit` rides on the pitch that was put in play.
+const fixture849810 = JSON.parse(
+  readFileSync(new URL('./fixtures/contact-replay/game-849810.trimmed.json', import.meta.url), 'utf8'),
+)
+const playsOf849810 = fixture849810.liveData.plays.allPlays
+const cardOf = (atBatIndex) => pitchCardInfo(fixture849810, playsOf849810.find((p) => p.about.atBatIndex === atBatIndex))
+
+test('pitchInfo: hit is null for a pitch with no hitData', () => {
+  assert.equal(card([event(1)]).pitchDetails[0].hit, null)
+  for (const d of cardOf(1).pitchDetails) assert.equal(d.hit, null) // Turang's strikeout
+})
+
+test('pitchInfo: hit reads the feed paths of gamePk 849810 (Ohtani, at-bat 16)', () => {
+  const [, , inPlay] = cardOf(15).pitchDetails
+  assert.deepEqual(inPlay.hit, {
+    exitVelo: 113.1,
+    launchAngle: 34,
+    distance: 428,
+    trajectory: 'fly_ball',
+    coordX: 187.05,
+    coordY: 36.53,
+  })
+  assert.equal(cardOf(0).pitchDetails[0].hit.launchAngle, -5) // negative stays negative
+})
+
+test('pitchInfo: hit sits on the pitch that was put in play, not on the play\'s last event', () => {
+  // At-bat 37 ends on a non-pitch event; the lineout is pitch 5 of the thrown pitches.
+  const hits = cardOf(36).pitchDetails.filter((d) => d.hit)
+  assert.equal(hits.length, 1)
+  assert.equal(hits[0].code, 'X')
+})
+
+test('pitchInfo: playId is on every tracked pitch', () => {
+  for (const ab of [0, 1, 15, 36, 44, 61]) {
+    for (const d of cardOf(ab).pitchDetails) assert.match(d.playId, /^[0-9a-f-]{36}$/)
+  }
+  assert.equal(card([event(1)]).pitchDetails[0].playId, null)
+})
+
+test('atBatScenePitches: swing is the detail cat for a whiff, foul or in play, else null', () => {
+  const swings = atBatScenePitches(cardOf(1).pitchDetails).map((p) => [p.call, p.swing])
+  assert.deepEqual(swings.filter(([c]) => /Ball/.test(c)).map(([, s]) => s), [null, null, null])
+  assert.deepEqual(swings.filter(([c]) => /Called/.test(c)).map(([, s]) => s), [null, null])
+  assert.equal(swings.at(-2)[1], 'foul')
+  assert.equal(swings.at(-1)[1], 'whiff')
+  assert.equal(atBatScenePitches(cardOf(0).pitchDetails)[0].swing, 'inplay')
+})
+
+test('atBatScenePitches: hit, playId and batSide pass through', () => {
+  const details = cardOf(15).pitchDetails
+  const scene = atBatScenePitches(details, 'hitter', 'L')
+  assert.deepEqual(scene.map((p) => p.batSide), ['L', 'L', 'L'])
+  assert.deepEqual(scene[2].hit, details[2].hit)
+  assert.equal(scene[2].playId, details[2].playId)
+})

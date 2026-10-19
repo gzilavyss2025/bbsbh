@@ -127,7 +127,7 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
                       <Pill figure>{resultShort(pa)}</Pill> {list.length} {list.length === 1 ? 'pitch' : 'pitches'}
                     </span>
                   </header>
-                  {pa.description && <p className="scout__play">{playText(pa.description, data.hitter.name)}</p>}
+                  {pa.description && <p className="scout__play">{playText(pa.description, data.hitter.name, data.hitter.last)}</p>}
                   {last && inPlay(last) && <ContactFacts pitch={last} />}
                   {list.length ? (
                     <div className="scout__pitches">
