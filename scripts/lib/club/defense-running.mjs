@@ -16,21 +16,17 @@ export function pct(part, whole) {
 // out, so the caller reads null.
 export function sumByClub(rows, key) {
   const seen = new Set()
-  const withId = new Set()
-  const clubs = new Set()
   const out = {}
   for (const r of rows) {
-    clubs.add(r.teamId)
-    if (!r.playerId) continue // no id to dedupe on: skip, never collapse
-    withId.add(r.teamId)
+    // No id to dedupe on: the id column was renamed or blanked. Throw rather
+    // than skip, or the club under-counts with no error.
+    if (!r.playerId) throw new Error(`club ${r.teamId}: a row has no player id`)
     const id = `${r.playerId}:${r.teamId}`
     const v = num(r[key])
     if (seen.has(id) || v == null) continue
     seen.add(id)
     out[r.teamId] = (out[r.teamId] ?? 0) + v
   }
-  // A club whose rows ALL lack an id means the id column was renamed or blanked.
-  for (const c of clubs) if (!withId.has(c)) throw new Error(`club ${c}: rows have no player id`)
   return out
 }
 
@@ -76,4 +72,16 @@ export function buildClubs({ teamIds, oaa, framing, sprint, stats, baserunning }
     }
   }
   return clubs
+}
+
+// A measure that failed tonight keeps its previous committed value, when the
+// previous file is the same season and has one. `failed` lists measure keys.
+export function carryForward(clubs, prev, season, failed) {
+  if (prev?.season !== season) return clubs
+  const out = {}
+  for (const [id, row] of Object.entries(clubs)) {
+    out[id] = { ...row }
+    for (const m of failed) out[id][m] = prev.clubs?.[id]?.[m] ?? row[m]
+  }
+  return out
 }

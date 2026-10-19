@@ -22,8 +22,8 @@
 import { setTimeout as sleep } from 'node:timers/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { writeJsonAtomic } from './lib/io.js'
-import { buildClubs } from './lib/club/defense-running.mjs'
+import { readJsonOr, writeJsonAtomic } from './lib/io.js'
+import { buildClubs, carryForward } from './lib/club/defense-running.mjs'
 import { fetchSavantCsv } from './lib/savant.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
@@ -33,12 +33,22 @@ const season = await fetchSeasonInPlay()
 const SAVANT = 'https://baseballsavant.mlb.com/leaderboard'
 const THROTTLE_MS = 400 // between Savant calls: one per club on two boards
 
-// A failed source reads as no rows, and says so in the job log.
+// A failed source reads as no rows, says so in the job log, and its measures
+// keep last night's value (carryForward below).
+const MEASURES = {
+  'statsapi team stats': ['stolenBases', 'stolenBaseSuccess'],
+  'Savant OAA': ['oaa'],
+  'Savant sprint speed': ['sprintSpeed'],
+  'Savant catcher framing': ['framingRuns'],
+  'Savant baserunning': ['extraBasesTaken'],
+}
+const failed = []
 const soft = async (label, fn) => {
   try {
     return await fn()
   } catch (err) {
-    console.error(`${label}: ${err.message} — measure left null`)
+    console.error(`${label}: ${err.message} — measure keeps its last value, or null`)
+    failed.push(...MEASURES[label])
     return []
   }
 }
@@ -47,7 +57,9 @@ const stats = await soft('statsapi team stats', async () => {
   const body = await getJson(
     `/api/v1/teams/stats?stats=season&group=hitting&season=${season}&gameType=R&sportIds=1`,
   )
-  return (body.stats?.[0]?.splits ?? []).map((s) => ({
+  const splits = body.stats?.[0]?.splits ?? []
+  if (!splits.length) throw new Error('no clubs')
+  return splits.map((s) => ({
     teamId: s.team.id,
     stolenBases: s.stat.stolenBases,
     caughtStealing: s.stat.caughtStealing,
@@ -59,11 +71,14 @@ const oaa = await soft('Savant OAA', () =>
     'Savant OAA',
     `${SAVANT}/outs_above_average?type=Fielding_Team&startYear=${season}&endYear=${season}` +
       `&split=no&team=&range=year&min=0&pos=&roles=&viz=hide&csv=true`,
+    { columns: ['team_id', 'outs_above_average'] },
   ),
 )
 
 const sprint = await soft('Savant sprint speed', () =>
-  fetchSavantCsv('Savant sprint speed', `${SAVANT}/sprint_speed?year=${season}&position=&team=&min=0&csv=true`),
+  fetchSavantCsv('Savant sprint speed', `${SAVANT}/sprint_speed?year=${season}&position=&team=&min=0&csv=true`, {
+    columns: ['player_id', 'team_id', 'sprint_speed', 'competitive_runs'],
+  }),
 )
 
 const teamIds = stats.length ? stats.map((s) => s.teamId) : oaa.map((r) => Number(r.team_id))
@@ -91,7 +106,8 @@ const baserunning = await soft('Savant baserunning', () =>
 )
 
 if (!teamIds.length) throw new Error('no club list: statsapi and Savant OAA both failed')
-const clubs = buildClubs({ teamIds, oaa, framing, sprint, stats, baserunning })
+const built = buildClubs({ teamIds, oaa, framing, sprint, stats, baserunning })
+const clubs = carryForward(built, await readJsonOr(out, null), season, failed)
 if (!Object.values(clubs).some((c) => Object.values(c).some((v) => v != null))) {
   throw new Error('every source failed — keeping the previous file')
 }

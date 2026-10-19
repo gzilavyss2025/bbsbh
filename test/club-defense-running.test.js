@@ -6,6 +6,7 @@ import { test } from 'node:test'
 import { fetchSavantCsv } from '../scripts/lib/savant.mjs'
 import {
   buildClubs,
+  carryForward,
   pct,
   sprintByClub,
   sumByClub,
@@ -96,13 +97,13 @@ test('clubsFor returns both clubs, in the order asked, or null', () => {
   assert.equal(clubsFor(null, 158, 112), null)
 })
 
-test('sumByClub skips a row with no player id', () => {
+test('sumByClub throws on any row with no player id, never under-counts a club', () => {
   const rows = [
     { playerId: '1', teamId: 158, v: 2 },
     { teamId: 158, v: 5 },
-    { playerId: '', teamId: 158, v: 7 },
   ]
-  assert.deepEqual(sumByClub(rows, 'v'), { 158: 2 })
+  assert.throws(() => sumByClub(rows, 'v'), /no player id/)
+  assert.throws(() => sumByClub([{ playerId: '', teamId: 112, v: 1 }], 'v'), /no player id/)
 })
 
 test('sumByClub throws when a club has rows but none with an id (a renamed id column)', () => {
@@ -130,4 +131,19 @@ test('fetchSavantCsv: a header-only body is no rows when allowEmpty, an error ot
 test('fetchSavantCsv: a header that lost an expected column fails loud, empty or not', async () => {
   await assert.rejects(withBody('"id"\n', { allowEmpty: true, columns: ['id', 'rv_tot'] }), /rv_tot/)
   await assert.rejects(withBody('"id"\n1\n', { columns: ['id', 'rv_tot'] }), /rv_tot/)
+})
+
+test('carryForward keeps last night value for a failed measure, only if it is on file', () => {
+  const clubs = { 158: { oaa: null, framingRuns: null, sprintSpeed: 28 }, 112: { oaa: null, framingRuns: null, sprintSpeed: 27 } }
+  const prev = { season: 2026, clubs: { 158: { oaa: 20, framingRuns: null, sprintSpeed: 99 } } }
+  assert.deepEqual(carryForward(clubs, prev, 2026, ['oaa', 'framingRuns']), {
+    158: { oaa: 20, framingRuns: null, sprintSpeed: 28 }, // sprintSpeed did not fail: not touched
+    112: { oaa: null, framingRuns: null, sprintSpeed: 27 }, // no previous row
+  })
+})
+
+test('carryForward ignores a previous file from another season, or none', () => {
+  const clubs = { 158: { oaa: null } }
+  assert.deepEqual(carryForward(clubs, { season: 2025, clubs: { 158: { oaa: 9 } } }, 2026, ['oaa']), clubs)
+  assert.deepEqual(carryForward(clubs, null, 2026, ['oaa']), clubs)
 })
