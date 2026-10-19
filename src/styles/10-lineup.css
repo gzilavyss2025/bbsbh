@@ -436,6 +436,36 @@ button.starter__careervs {
   height: 100%;
 }
 
+.defdiamond__field--park {
+  max-width: none;
+  overflow: hidden;
+  background: var(--bg-canvas);
+}
+.defdiamond__park {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+}
+/* On the park drawing a spot is centred on its coordinates and wears the lineup page's label
+   (.lfld__name, lineup-next/field.css). */
+.defdiamond__spot.defdiamond__spot--park {
+  transform: translate(-50%, -50%);
+  max-width: 78px; /* the lineup page's label cap: long surnames ellipsize rather than collide */
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-hair) solid var(--border-stamped);
+}
+.defdiamond__spot--park .defdiamond__name {
+  min-height: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+
 .defdiamond__spot {
   position: absolute;
   transform: translateX(-50%);
@@ -539,4 +569,32 @@ button.starter__careervs {
 .defdiamond__dhstack .defdiamond__name {
   min-width: 58px;
   border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+/* On the park the DH is a corner tag, as on the lineup page (.lfld__dh). */
+.defdiamond__dh--park {
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  width: auto;
+  margin: 0;
+  gap: var(--space-1h);
+  padding: var(--space-1) var(--space-1h);
+  border: var(--bw-hair) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.defdiamond__dh--park .defdiamond__dhpos {
+  padding: 0 var(--space-1);
+  border: var(--bw-hair) solid var(--border-stamped);
+  background: var(--accent-tint);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+.defdiamond__dh--park .defdiamond__name {
+  min-width: 0;
+  min-height: 0;
+  border-bottom: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
 }
