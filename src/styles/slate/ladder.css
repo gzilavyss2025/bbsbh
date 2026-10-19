@@ -3,7 +3,7 @@
    system as one rail, a node per level, the ball on the level on screen, and
    Winter off the rail after a dashed divider. Split out of slate/masthead.css,
    which holds the rest of the masthead and this ladder's wide-layout sizes.
-   Motion is motion/masthead.css. */
+   Motion is motion/slate/masthead.css. */
 
 .levelladder {
   /* The rail's line, measured from the ladder's top: the ladder's padding,

@@ -3,7 +3,7 @@
    ladder and the date stepper, the club strip under it, and the compact bar
    that stands in for the card once it has scrolled away. Components:
    src/components/slatehead/. Spec: Gary's "Slate masthead D1" handoff,
-   2026-10-18. Motion is motion/masthead.css; this file is the resting look.
+   2026-10-18. Motion is motion/slate/masthead.css; this file is the resting look.
 
    A subdirectory because src/styles is a flat directory at its file ratchet
    (scripts/check-dir-size.mjs, ADR-0038). */

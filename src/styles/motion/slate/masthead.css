@@ -10,7 +10,10 @@
    - the stamp-in plays once a session (.slatemast--stamp).
 
    Transitions for what can be interrupted (ball, bars, menu); keyframes for
-   entrances. All of it is off under reduced motion. */
+   entrances. All of it is off under reduced motion.
+
+   In motion/slate/ because motion/ reached its flat-directory cap
+   (scripts/check-dir-size.mjs, ADR-0038). */
 
 .levelladder--rolling .levelladder__ball,
 .levelladder--rolling .levelladder__ballart {
