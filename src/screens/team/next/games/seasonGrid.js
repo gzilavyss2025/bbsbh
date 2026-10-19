@@ -50,6 +50,9 @@ function cellGame(g, refDate, doubled) {
     state,
     post: g.gameType !== 'R',
     isHome: g.isHome,
+    dayNight: g.dayNight ?? '',
+    opponentId: g.opponent.id,
+    opponentName: g.opponent.name,
     doubled,
     // A split day has no room for both lines: each half prints its score, else its opponent.
     mark: doubled ? score || mark : mark,
@@ -65,6 +68,9 @@ function allStarCell(a) {
     state: 'asg',
     post: false,
     isHome: false,
+    dayNight: '',
+    opponentId: null,
+    opponentName: '',
     doubled: false,
     mark: 'ASG',
     score: '',
@@ -74,7 +80,7 @@ function allStarCell(a) {
 }
 
 // The filters over the grid. A game the filter does not match fades; nothing is removed.
-export function filterOptions(hasPost) {
+export function filterOptions({ hasPost = false, hasDayNight = false } = {}) {
   const base = [
     { value: 'all', label: 'All' },
     { value: 'home', label: 'Home' },
@@ -82,7 +88,9 @@ export function filterOptions(hasPost) {
     { value: 'wins', label: 'Wins' },
     { value: 'losses', label: 'Losses' },
   ]
-  return hasPost ? [...base, { value: 'post', label: 'Postseason' }] : base
+  if (hasDayNight) base.push({ value: 'day', label: 'Day' }, { value: 'night', label: 'Night' })
+  if (hasPost) base.push({ value: 'post', label: 'Postseason' })
+  return base
 }
 
 export function matchesFilter(cell, filter) {
@@ -95,6 +103,10 @@ export function matchesFilter(cell, filter) {
       return cell.state === 'w'
     case 'losses':
       return cell.state === 'l'
+    case 'day':
+      return cell.dayNight === 'day'
+    case 'night':
+      return cell.dayNight === 'night'
     case 'post':
       return cell.post
     default:
@@ -153,5 +165,6 @@ export function buildSeasonGrid(schedule, allStarGame, refDate) {
   if (firstPost >= 0) {
     weeks[firstPost].postLead = true
   }
-  return { weeks, hasPost: firstPost >= 0, doubleHeaders: [...counts.values()].filter((n) => n > 1).length }
+  const hasDayNight = [...dayCells.values()].some((list) => list.some((c) => c.dayNight))
+  return { weeks, hasPost: firstPost >= 0, hasDayNight, doubleHeaders: [...counts.values()].filter((n) => n > 1).length }
 }

@@ -123,8 +123,8 @@ test('a club with no postseason has no band, and the grid just ends', () => {
   const grid = buildSeasonGrid([game('2026-09-26'), game('2026-09-27')], null, null)
   assert.equal(grid.hasPost, false)
   assert.ok(grid.weeks.every((w) => !w.post && !w.postLead))
-  assert.deepEqual(filterOptions(grid.hasPost).map((o) => o.value), ['all', 'home', 'away', 'wins', 'losses'])
-  assert.equal(filterOptions(true).at(-1).value, 'post')
+  assert.deepEqual(filterOptions(grid).map((o) => o.value), ['all', 'home', 'away', 'wins', 'losses'])
+  assert.equal(filterOptions({ hasPost: true }).at(-1).value, 'post')
 })
 
 test('the All-Star Game takes its own cell on its day', () => {
@@ -156,4 +156,21 @@ test('filters fade what they do not match and never touch the All-Star cell as a
   assert.ok(matchesFilter(home, 'wins') && !matchesFilter(away, 'wins'))
   assert.ok(matchesFilter(away, 'losses') && !matchesFilter(home, 'losses'))
   assert.ok(matchesFilter(post, 'post') && !matchesFilter(home, 'post'))
+})
+
+test('Day and Night filters come from the schedule\'s dayNight, and only when it is there', () => {
+  const none = buildSeasonGrid([game('2026-04-10')], null, null)
+  assert.equal(none.hasDayNight, false)
+  const grid = buildSeasonGrid([game('2026-04-10', { dayNight: 'day' }), game('2026-04-11', { dayNight: 'night' })], null, null)
+  assert.equal(grid.hasDayNight, true)
+  assert.deepEqual(filterOptions(grid).map((o) => o.value), ['all', 'home', 'away', 'wins', 'losses', 'day', 'night'])
+  const [d, n] = cells(grid)
+  assert.ok(matchesFilter(d, 'day') && !matchesFilter(d, 'night'))
+  assert.ok(matchesFilter(n, 'night') && !matchesFilter(n, 'day'))
+})
+
+test('a cell carries the opponent id and name for its mark', () => {
+  const [g] = cells(buildSeasonGrid([game('2026-04-10')], null, null))
+  assert.equal(g.opponentId, 147)
+  assert.equal(g.opponentName, 'New York Yankees')
 })

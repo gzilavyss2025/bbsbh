@@ -1,4 +1,5 @@
 import { Fragment, useMemo, useState } from 'react'
+import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { Chips } from '../../../../components/ui/control/Chips.jsx'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
@@ -6,6 +7,7 @@ import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 import { useNav, useRouteLink } from '../../../../lib/nav.js'
 import { teamStampInPath } from '../../../../lib/route.js'
+import { isMlbTeamId } from '../../../../lib/teams.js'
 import { GRID_DAYS, buildSeasonGrid, filterOptions, matchesFilter } from './seasonGrid.js'
 
 // THE SEASON GRID (the Games band): the whole schedule as one calendar, a week to a row, seven days across,
@@ -30,7 +32,7 @@ export function SeasonGrid({ teamId, asOf, sportId, schedule, allStarGame, refDa
       <Cluster gap="snug" align="center" className="sgrid__bar">
         <Chips
           label="Filter games"
-          options={filterOptions(grid.hasPost)}
+          options={filterOptions(grid)}
           value={filter}
           onChange={setFilter}
           className="sgrid__chips"
@@ -96,7 +98,14 @@ export function SeasonGrid({ teamId, asOf, sportId, schedule, allStarGame, refDa
                         aria-label={g.label}
                         {...link(g.path)}
                       >
-                        <span className="sgrid__mark">{g.mark}</span>
+                        {g.opponentId && !g.doubled && isMlbTeamId(g.opponentId) ? (
+                          <span className="sgrid__opp">
+                            {!g.isHome && <span className="sgrid__at">@</span>}
+                            <TeamLogo teamId={g.opponentId} name={g.opponentName} size={22} variant="mono" className="sgrid__logo" />
+                          </span>
+                        ) : (
+                          <span className="sgrid__mark">{g.mark}</span>
+                        )}
                         {g.score && <span className="sgrid__score">{g.score}</span>}
                       </a>
                     ))}

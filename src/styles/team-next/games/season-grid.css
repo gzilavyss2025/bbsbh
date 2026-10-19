@@ -142,6 +142,22 @@
 .sgrid__score {
   white-space: nowrap;
 }
+/* The opponent is its one-colour mark, with an @ before it on the road. The mark is light art
+   made for a dark surface, so on a paper or gold cell it is turned to ink. */
+/* layout-exempt: the @ and the mark on one line */
+.sgrid__opp {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.sgrid__logo {
+  display: block;
+}
+.sgrid__game--l .sgrid__logo,
+.sgrid__game--next .sgrid__logo,
+.sgrid__game--todo .sgrid__logo {
+  filter: brightness(0);
+}
 .sgrid__game--w {
   border-color: var(--field-deep);
   background: var(--accent-positive);
