@@ -7,6 +7,13 @@ import { Door } from '../../../ui/control/Door.jsx'
 import { Card } from '../../../ui/frame/Card.jsx'
 import { Stack } from '../../../ui/layout/Stack.jsx'
 
+// A missing figure draws a dash and says so to a screen reader.
+const NONE = (
+  <>
+    —<span className="sr-only"> no figure</span>
+  </>
+)
+
 function Starter({ s, teamId }) {
   return (
     <div className="ww-film__starter">
@@ -50,11 +57,11 @@ export function FilmMeeting({ m }) {
               <tr key={r.abbr}>
                 <th scope="row">{r.abbr}</th>
                 <td className={r.win ? 'ww-film__runs ww-film__runs--lead' : 'ww-film__runs'}>
-                  {r.runs ?? '—'}
+                  {r.runs ?? NONE}
                   {r.win && <span className="sr-only"> winner</span>}
                 </td>
-                <td>{r.hits ?? '—'} H</td>
-                <td>{r.errors ?? '—'} E</td>
+                <td>{r.hits ?? NONE} H</td>
+                <td>{r.errors ?? NONE} E</td>
               </tr>
             ))}
           </tbody>

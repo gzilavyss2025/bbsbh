@@ -1,7 +1,7 @@
 # World Series scouting report: design handoff (#2316)
 
 Design source: the "World Series Scouting Report" canvas in Claude Design, built on the Tally Baseball design system (https://claude.ai/artifact/S9gsCQAyDdR1ntfMcxcydx, private). Four boards: off day and game day, each at 390px and 1180px.
-Wireframe: PR #2318, `.scratch/ws-scouting/` (its notes.md holds the order proposal). Issue: #2316. Build gate: PR #2317 merged and ADR-0117 Accepted (checked 2026-10-19).
+Built order and rules: `docs/world-series-scouting.md`. Wireframe: PR #2318, `.scratch/ws-scouting/` (its notes.md holds the order proposal). Issue: #2316. Build gate: PR #2317 merged and ADR-0117 Accepted (checked 2026-10-19).
 
 The canvas is a mockup. Numbers tagged "Sample figures" are samples. The product reads real data and ships no sample number. A card with no real data renders nothing, and its jump-bar button hides with it.
 
@@ -15,7 +15,7 @@ Phone order. Pairs in brackets sit side by side from 740px.
 
 - Off day: Hero, [Ledger], Reel, then the band head and jump bar, [Nine keys | Glove and legs], [Matchup edges | Pitch by pitch], [Platoon | Park fit], Film room (full), Played (phone), The trip, [Home and road | Bullpen].
 - Game day: Hero, [Ledger], Reel, Probables, then the band head and jump bar, [Matchup edges | Umpire edge], [Pitch by pitch | Platoon], [Tale of the tape | Hot bats], Film room (compact), [Park fit | Bullpen].
-- Existing cards do not change. Glove and legs is not built until a data source exists. Park fit shows on a game day only when tonight's park is Milwaukee. The order is the wireframe's proposal.
+- Existing cards do not change. Park fit shows on a game day only when tonight's park is Milwaukee. The built order is in `docs/world-series-scouting.md` (Gary moved Glove and legs to the second place on an off day and the last place on a game day; the lists above are the wireframe's proposal).
 
 ## 3. Parts
 
@@ -24,7 +24,7 @@ Phone order. Pairs in brackets sit side by side from 740px.
 | Stamped card with name tab and count tag | `Card frame="stamped"` with `label` and `count` (`ui/frame/Card.jsx`) |
 | Band head | `SectionHead look="band" house` |
 | Film room head | `SectionHead look="rule"` |
-| Jump bar with count badges | `HubTabBar variant="anchor"` (`chrome/HubTabBar.jsx`); styles in `styles/system/jumpbar/` |
+| Jump bar, no count badges (Gary, 2026-10-19) | `HubTabBar variant="anchor"` (`chrome/HubTabBar.jsx`); styles in `styles/system/jumpbar/` |
 | Door link | `Door` (`ui/control/Door.jsx`) |
 | Hitter and Pitcher tag | `Pill`. Keep the as-built grounds: `--field-soft` for hitter, `--clay-soft` for pitcher. The word carries the meaning. |
 | Photo slot | `Headshot` (`components/player/Headshot.jsx`). Chain: silo, then milb, then team logo, then monogram. Sizes use the `--shot-*` rungs. |
@@ -46,7 +46,6 @@ Use semantic tokens from `src/tokens`. Check that each name exists before you us
 | `--text-heading`, `--text-body`, `--text-muted`, `--text-caption` | Text roles |
 | `--marker` | Leader emphasis (highlighter yellow). Never `--seal*`. |
 | `--field`, `--clay-deep` | Positive and negative, always paired with a word or sign |
-| `--accent-tint` | Count badge on the current jump-bar item |
 | `--focus-ring` | 2px ring with a 2px offset |
 | `--space-1` to `--space-16`, `--app-gutter`, `--tap-min` (44px) | Spacing and tap targets |
 | `--fs-label` 12, `--fs-cell` 11, `--fs-small` 13, `--fs-ui` 14, `--fs-h3` 17 | Type sizes |
@@ -59,7 +58,7 @@ Names, labels and tab text use the display face, uppercase by the style sheet. F
 | Card | Verdict style | Day types | Player links | Data | Renders nothing when |
 | --- | --- | --- | --- | --- | --- |
 | Nine keys (as built) | Numbers on a 1 to 30 track; a failed key is struck | Off day | No | `nine-keys.json` | No file for the season |
-| Glove and legs | Mark on the leader | Off day | No | NO SOURCE: do not build | Always |
+| Glove and legs | Mark on the leader | Both | No | `club-defense-running.json` | Fewer than 4 of 6 measures real |
 | Matchup edges | Numbers only; face-off rows | Both | Yes, both players | `career-matchups.json` by gamePk | No row clears a threshold |
 | Umpire edge (as built) | Five-step lean | Game day, once the crew posts | No | `umpires/` | No umpire posted |
 | Pitch by pitch | Edge pill: Arm, Bats or Even, with xwOBA behind it | Both | No (Door to Scout) | `hitter-grid`, `pitch-arsenal` | No data |
@@ -81,7 +80,7 @@ Names, labels and tab text use the display face, uppercase by the style sheet. F
 
 | Element | State | Behaviour |
 | --- | --- | --- |
-| Jump-bar item | Current | Ink fill, cream text, count badge on `--accent-tint` |
+| Jump-bar item | Current | Ink fill, cream text. No count badge. |
 | Jump-bar item | Press | Moves 2px down and right (stamp ease) |
 | Jump-bar item | Focus | 2px `--focus-ring`, 2px offset |
 | Door | Press | Moves 2px down and right |

@@ -1,12 +1,11 @@
-// The World Series scouting report's card list (#2316, .scratch/ws-scouting/handoff.md
-// sections 2 and 5). Pure. It answers: which cards, in what order, for this day type.
+// The World Series scouting report's card list (#2316, docs/world-series-scouting.md). Pure. It answers: which cards, in what order, for this day type.
 //
 // ONE ENTRY PER CARD. `rank` is the card's place on each day type (a day type with no
 // rank does not show the card); `has(input)` says whether it has data. A card with no
 // data is dropped, and its jump-bar button goes with it. To add a card, add an entry
 // here and its renderer in components/worldseries/ScoutingReport.jsx.
 //
-// The order from handoff.md section 2, so a later card slots in by its rank:
+// The built order, so a later card slots in by its rank:
 //   off day  1 Nine keys, 2 Glove and legs, 3 Matchup edges, 4 Pitch by pitch,
 //            5 Platoon, 6 Park fit, 7 Film room
 //   game day 1 Matchup edges, 2 Umpire edge, 3 Pitch by pitch, 4 Platoon, 5 Film room,
@@ -19,6 +18,13 @@
 // venueId }. No club id: the list is the same for any opponent.
 // Park fit draws Milwaukee's field (Stats API venue id), so a game day shows it only there.
 export const MILWAUKEE_VENUE_ID = 32
+
+// The two Series clubs in the order Tale of the tape draws them (away, home). Every card follows it.
+// `sides` that do not name exactly the two clubs fall back to `clubIds`.
+export function clubOrder(clubIds, sides) {
+  const ok = Array.isArray(sides) && sides.length === 2 && sides.every((id) => clubIds.includes(id)) && sides[0] !== sides[1]
+  return ok ? sides : clubIds
+}
 
 const CARDS = [
   { id: 'nine-keys', label: 'Nine keys', rank: { off: 1 }, has: (i) => Boolean(i.nineKeys) },

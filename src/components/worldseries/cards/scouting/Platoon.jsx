@@ -29,7 +29,7 @@ function Cell({ cell }) {
 
 export function Platoon({ blocks }) {
   return (
-    <Card frame="stamped" label="Platoon" count="Lineup OPS" className="ww-platoon">
+    <Card frame="stamped" label="Platoon" labelAs="h3" count="Lineup OPS" className="ww-platoon">
       <Stack gap="base">
         {blocks.map((b) => (
           <section key={b.hand} aria-label={b.title}>
