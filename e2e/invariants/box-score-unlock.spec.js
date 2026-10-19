@@ -12,10 +12,11 @@ import { test, expect } from '../fixtures.js'
 //
 //   1. A tap opens the page and keeps it open across a reload.
 //   2. The bit is written ONLY on a real tap. A box score force-revealed by the
-//      Scores Unlocked pass (ADR-0026) or by the reader's own stamp (ADR-0048)
-//      must write nothing, because `SealBox` fires `onReveal` on any transition
-//      to shown — flag included. Either would turn an ephemeral, reversible
-//      override into a permanent record of a seal nobody touched.
+//      reader's own stamp (ADR-0048) must write nothing, because `SealBox` fires
+//      `onReveal` on any transition to shown — flag included. That would turn a
+//      reversible override into a permanent record of a seal nobody touched.
+//      (The Scores Unlocked pass was a second force-reveal source until
+//      ADR-0116 removed it; its test went with it.)
 //   3. It stays out of `bbsbh:reveal:{gamePk}`. That mark is the BY-HAND scoring
 //      frontier the innings viewer, the scorecard's ink and the slate's "pick up
 //      your pencil" strip all read. Opening a box score is not scoring a half.
@@ -48,25 +49,6 @@ test('a tapped box score is still open on the next visit', async ({ page }) => {
   await page.reload()
   await expect(page.getByRole('button', { name: SEAL })).toHaveCount(0)
   await expect(page.locator('.bs__team').first()).toBeVisible()
-  expect(await revealMark(page)).toBeNull()
-})
-
-test('a box score opened under the Scores Unlocked pass records nothing', async ({ page }) => {
-  // The pass is a consent to spoil a DAY, and it expires. Were the page to
-  // record its own opening under it, the 8am reset would drop every OTHER seal
-  // back into place and leave this one permanently lifted — a mark the reader
-  // never made, outliving the consent it came from.
-  // The consented DAY is what `spoilersOffFor` reads for a game on that date —
-  // the same record the pass writes on confirm and the one that outlives 8am
-  // (see scores-unlocked.spec.js).
-  await page.addInitScript(() => {
-    localStorage.setItem('bbsbh:spoiledDays', JSON.stringify(['2026-07-07']))
-  })
-  await page.goto(`${GAME}/boxscore`)
-
-  await expect(page.getByRole('button', { name: SEAL })).toHaveCount(0)
-  await expect(page.locator('.bs__team').first()).toBeVisible()
-  expect(await boxMark(page)).toBeNull()
   expect(await revealMark(page)).toBeNull()
 })
 

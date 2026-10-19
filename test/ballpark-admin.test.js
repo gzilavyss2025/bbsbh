@@ -41,14 +41,14 @@ const FENWAY = venueKey('Fenway Park')
 
 test('a partial save leaves every field it does not name exactly as it was', () => {
   const current = {
-    'scoresUnlocked.title': 'Sure you want the scores?',
+    'stampIn.title': 'Sure you want the scores?',
     'stampIn.confirm': 'Show me the season',
     [`ballpark.${venueKey('Wrigley Field')}`]: 'The ivy is real.',
     [`ballpark.${FENWAY}Photo`]: 'https://example.com/old.jpg',
   }
   const merged = mergeOverrides(current, { [`ballpark.${FENWAY}Name`]: 'The Fens' })
 
-  assert.equal(merged['scoresUnlocked.title'], 'Sure you want the scores?')
+  assert.equal(merged['stampIn.title'], 'Sure you want the scores?')
   assert.equal(merged['stampIn.confirm'], 'Show me the season')
   assert.equal(merged[`ballpark.${venueKey('Wrigley Field')}`], 'The ivy is real.')
   assert.equal(merged[`ballpark.${FENWAY}Photo`], 'https://example.com/old.jpg')
@@ -59,13 +59,13 @@ test('an empty patch value clears that one field and only that one', () => {
   const current = {
     [`ballpark.${FENWAY}Name`]: 'The Fens',
     [`ballpark.${FENWAY}Credit`]: 'Photo: G. Zilavy',
-    'scoresUnlocked.title': 'Sure you want the scores?',
+    'stampIn.title': 'Sure you want the scores?',
   }
   const merged = mergeOverrides(current, { [`ballpark.${FENWAY}Name`]: '' })
 
   assert.ok(!(`ballpark.${FENWAY}Name` in merged), 'the cleared field is gone, not stored empty')
   assert.equal(merged[`ballpark.${FENWAY}Credit`], 'Photo: G. Zilavy')
-  assert.equal(merged['scoresUnlocked.title'], 'Sure you want the scores?')
+  assert.equal(merged['stampIn.title'], 'Sure you want the scores?')
 })
 
 test('a whitespace-only patch value clears rather than storing a blank', () => {
@@ -80,10 +80,10 @@ test('the merge still runs everything through the registry choke point', () => {
   // the server — the merged map is what gets POSTed, and a value the server
   // silently drops would leave the editor reporting a save that did not happen.
   const merged = mergeOverrides(
-    { 'ballpark.nosuchpark': 'x', 'scoresUnlocked.title': 'kept' },
+    { 'ballpark.nosuchpark': 'x', 'stampIn.title': 'kept' },
     { [`ballpark.${FENWAY}Name`]: 'x'.repeat(500) },
   )
-  assert.deepEqual(merged, { 'scoresUnlocked.title': 'kept' })
+  assert.deepEqual(merged, { 'stampIn.title': 'kept' })
 })
 
 test('a javascript: URL cannot reach the wordmark field through the merge', () => {

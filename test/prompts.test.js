@@ -12,8 +12,10 @@ import {
   serializePrompts,
 } from '../src/lib/account/prompts.js'
 
-test('the three contextual-prompt ids are exactly what the PRD scoped', () => {
-  assert.deepEqual(PROMPT_IDS, ['first-stamp', 'third-game', 'scores-unlocked-local'])
+test('the two contextual-prompt ids are exactly what the PRD scoped, less the retired one', () => {
+  // The PRD scoped a third, scores-unlocked-local; it went with the Scores
+  // Unlocked pass (ADR-0116).
+  assert.deepEqual(PROMPT_IDS, ['first-stamp', 'third-game'])
 })
 
 test('intro-account and settings-pitch are deliberately NOT one-shot ids here', () => {
@@ -39,10 +41,21 @@ test('parsePrompts drops unknown ids and invalid timestamps, keeps the rest', ()
         'first-stamp': 100,
         'not-a-real-prompt': 200,
         'third-game': -5,
-        'scores-unlocked-local': 1.5,
       }),
     ),
     { 'first-stamp': 100 },
+  )
+  // A fractional timestamp is invalid too.
+  assert.deepEqual(parsePrompts(JSON.stringify({ 'third-game': 1.5 })), {})
+})
+
+test('parsePrompts drops a dismissal left behind by the retired scores-unlocked-local prompt', () => {
+  // A browser that dismissed the Scores Unlocked scope note before ADR-0116
+  // still holds the id under bbsbh:prompts. It is not a prompt id any more, so
+  // it is dropped on read and never written back.
+  assert.deepEqual(
+    parsePrompts(JSON.stringify({ 'scores-unlocked-local': 100, 'first-stamp': 7 })),
+    { 'first-stamp': 7 },
   )
 })
 

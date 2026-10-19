@@ -6,8 +6,8 @@ import { useState } from 'react'
 // THE PROBLEM IT SOLVES. A CSS animation runs when its element mounts, or when
 // the element gains the class that carries it. That is exactly right for a
 // change the reader just caused, and exactly wrong for a cold load, a return
-// visit, a navigation, or a force-reveal (the Scores Unlocked pass, ADR-0026,
-// or the reader's own stamp, ADR-0048), where the very same DOM appears
+// visit, a navigation, or a force-reveal (the reader's own stamp, ADR-0048, or
+// a box score they opened before, ADR-0049), where the very same DOM appears
 // already-changed and would replay a gesture nobody made. A substitution that
 // happened in the third inning must render struck through, not draw itself
 // again every time the page is opened.

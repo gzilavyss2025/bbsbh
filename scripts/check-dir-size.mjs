@@ -57,7 +57,7 @@ const BUDGETS = {
   // every client falls back to its "not configured" degrade, the class of outage
   // the KV_* episode was (api/_lib/redis.js). So the endpoints stay flat; this is
   // a deliberate exception, not a directory awaiting subdivision.
-  api: 14,
+  api: 13,
   // The stylesheet partials src/index.css @imports in order. The files are an
   // ORDERED SEQUENCE, not independent modules, and the numeric prefix is what
   // makes the @import list and the cascade readable. Nesting them would break
@@ -70,7 +70,7 @@ const BUDGETS = {
   // written to match; every module the player page's Analytics tab loads is here
   // together. catcherOfRecord.js sits BESIDE defense.js, whose chain it asks a
   // narrower question of and whose spoiler gate it inherits whole.
-  'src/api': 115,
+  'src/api': 114,
   // awards.js, split out of transactions.js. Same "nothing here fetches"
   // convention and person-shaping job as its siblings; a subdirectory for one
   // module would hide it from check-spoiler-manifest's flat classification.
@@ -80,13 +80,13 @@ const BUDGETS = {
   // Each generator's pure half lives in scripts/lib/ (ADR-0100, ADR-0111 for the
   // open-data and pitch-start generators), so the script itself stays a thin runner.
   scripts: 131, // +gen-world-series.mjs and gen-world-series-events.mjs (#2235): the contract names these paths
-  'src/lib': 58,
+  'src/lib': 53,
   // Testable helpers the generators import (scripts/CLAUDE.md's convention,
   // lib/roster.mjs is the worked example). They run nothing on import and share
   // code between generators, so inlining them would copy it into each one.
   'scripts/lib': 42,
   'src/screens': 41,
-  'src/hooks': 28,
+  'src/hooks': 26,
   'src/screens/identity-lab': 15,
   // One file per diary finding. A research diary is append-only
   // (docs/agents/research-diary.md, docs/agents/contender-diary.md), so these

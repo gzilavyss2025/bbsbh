@@ -16,11 +16,10 @@ import test from 'node:test'
 
 import { mergeReceiptLines } from '../src/lib/account/mergeReceiptFlag.js'
 
-const COUNTS = { stamps: 12, games: 8, days: 3 }
+const COUNTS = { stamps: 12, games: 8 }
 
 const statusOf = (phase) => ({
   reveal: { phase },
-  spoiledDays: { phase },
   stamps: { phase },
   prefs: { phase },
 })
@@ -31,11 +30,10 @@ test('every channel synced draws every line it has a count for', () => {
     counts: COUNTS,
     clubName: 'Brewers',
   })
-  assert.deepEqual(lines.map((l) => l.id), ['stamps', 'games', 'days', 'club'])
+  assert.deepEqual(lines.map((l) => l.id), ['stamps', 'games', 'club'])
   assert.deepEqual(lines.map((l) => l.text), [
     '12 stamps',
     '8 games in progress',
-    "3 days you'd already unsealed",
     'Brewers',
   ])
 })
@@ -58,13 +56,13 @@ test('each line is gated on its OWN channel, not on the rollup', () => {
     reveal: { phase: 'error' },
   }
   const lines = mergeReceiptLines({ status, counts: COUNTS, clubName: 'Brewers' })
-  assert.deepEqual(lines.map((l) => l.id), ['days', 'club'])
+  assert.deepEqual(lines.map((l) => l.id), ['club'])
 })
 
 test('a synced channel with a zero count draws no line either', () => {
   const lines = mergeReceiptLines({
     status: statusOf('synced'),
-    counts: { stamps: 0, games: 0, days: 0 },
+    counts: { stamps: 0, games: 0 },
     clubName: '',
   })
   assert.deepEqual(lines, [])
@@ -73,13 +71,12 @@ test('a synced channel with a zero count draws no line either', () => {
 test('singulars read as singulars', () => {
   const lines = mergeReceiptLines({
     status: statusOf('synced'),
-    counts: { stamps: 1, games: 1, days: 1 },
+    counts: { stamps: 1, games: 1 },
     clubName: '',
   })
   assert.deepEqual(lines.map((l) => l.text), [
     '1 stamp',
     '1 game in progress',
-    "1 day you'd already unsealed",
   ])
 })
 

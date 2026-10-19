@@ -28,10 +28,7 @@ import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
 import { seriesForGame } from '../api/postseason/bracket.js'
 import { gameStatusLine } from '../api/postseason/text.js'
-import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { gameSectionTabs } from './lineup/gameSections.js'
-import { useCopy } from '../copy/copyContext.js'
-import { formatResetTime } from '../lib/scoresUnlocked.js'
 
 // GameView is itself a lazily-loaded route (App.jsx), but its three sections
 // — lineups, innings, box score — are mutually exclusive per render (`step`)
@@ -86,10 +83,6 @@ export function GameView({ game, section, onSection }) {
   // starter lines, win probability, pitcher roles, prospects, callouts,
   // broadcast, former teammates) lives in one hook — see useGameData for the
   // per-fetch sequencing/keying/caching rationale.
-  // The spoilers-off pass is resolved first: while it's running, the feed poll
-  // tightens its cadence so a live game you're watching stays current — see
-  // useGameData's second argument.
-  const { passActive, resetAt, spoilersOffFor, disable: endPass } = useScoresUnlocked()
   const {
     feedState,
     feed,
@@ -113,7 +106,7 @@ export function GameView({ game, section, onSection }) {
     workloadData,
     jerseyTreatments,
     started,
-  } = useGameData(game, passActive, addressedStep)
+  } = useGameData(game, addressedStep)
 
   // THE EXPRESS LANE ROUTE FAILS CLOSED, not only the door onto it.
   //
@@ -148,17 +141,6 @@ export function GameView({ game, section, onSection }) {
   const isLive = feed?.gameData?.status?.abstractGameState === 'Live'
   useWakeLock(keepAwake && isLive)
 
-  // Should THIS game render plainly? Two ways to get there, and the difference
-  // matters for what the chrome says (ADR-0026):
-  //   - the pass is running right now — any game opened during the window is
-  //     open, and the banner below offers the off switch;
-  //   - or this game's day is one the user already consented to spoil, locked in
-  //     when that day's pass expired. Nothing to turn off; that day is simply
-  //     spoiled now, and saying otherwise would be a lie.
-  // Consent itself lives on the slate — there is no per-game toggle, because
-  // there is no longer a per-game mode to consent to.
-  const { t: copy } = useCopy()
-  const spoilersOff = spoilersOffFor(officialDate)
 
   // Where "Innings" returns to: the last half-inning page the user was on, so
   // hopping out to a lineup or the box score and back doesn't lose your place
@@ -323,25 +305,6 @@ export function GameView({ game, section, onSection }) {
           </div>
         ))}
 
-      {/* The spoilers-off strip, on EVERY section of the game (both lineups,
-          innings, box score) — not just the innings view, so you can never be
-          looking at an unsealed screen with nothing on it saying why. It is
-          itself the off switch, the same "the banner is the toggle" convention
-          the slate uses. Shown only while the pass is actually running: for a
-          day that's already locked in there is nothing to switch off, so a strip
-          offering to would be lying. */}
-      {passActive && (
-        <button
-          type="button"
-          className="modestrip"
-          data-testid="spoilers-off-banner"
-          onClick={endPass}
-          aria-label="Turn off live scores"
-        >
-          {copy('scoresUnlocked.banner', { time: formatResetTime(resetAt) })}
-        </button>
-      )}
-
       {/* Delayed/suspended/postponed is structural game state, not a score —
           safe to render unconditionally, same as the masthead date above. Sits
           above the seal on every section of this game so it stays visible no
@@ -473,8 +436,6 @@ export function GameView({ game, section, onSection }) {
             managers={managers.data}
             uniforms={uniformBrief}
             scorebookWeather={weather.data}
-            spoilersOff={spoilersOff}
-            passActive={passActive}
             onSketch={setSketching}
           />
         </GameUniformsContext.Provider>
@@ -496,7 +457,6 @@ export function GameView({ game, section, onSection }) {
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
           onSection={onSection}
-          spoilersOff={spoilersOff}
         />
         </Suspense>
       )}
@@ -528,14 +488,13 @@ export function GameView({ game, section, onSection }) {
       {feed && step === 6 && (
         <Suspense fallback={<Loader />}>
         {/* The live scorecard fills only through the user's own reveal mark
-            (api/scorecardGame.js's clamp — ADR-0009's pattern); `spoilersOff`
-            substitutes the render mark under the Scores Unlocked pass exactly
-            as the innings viewer does, persisting nothing (ADR-0026). */}
+            (api/scorecardGame.js's clamp — ADR-0009's pattern); a stamp on
+            this game substitutes the render mark exactly as the innings viewer
+            does, persisting nothing (ADR-0048). */}
         <ScorecardPage
           feed={feed}
           managers={managers.data}
           uniformBrief={uniformBrief}
-          spoilersOff={spoilersOff}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}

@@ -47,10 +47,9 @@ import { useLensMotion } from '../../components/scoring/lens/motion/useLensMotio
 //    double-reveal. Whole-half facts (P/WH/FO, the scoreboard cell, the
 //    inning-end rule and its leads-off-next diagonal) ink on commit only,
 //    exactly as the innings viewer holds its tally until a half commits.
-//  • Under the Scores Unlocked pass / a consented day (ADR-0026), GameView
-//    hands down `spoilersOff` and the RENDER clamp substitutes the game's
-//    last half; there is nothing left to step, so the frontier seal
-//    disappears and nothing this page renders can commit a reveal
+//  • On a game the reader stamped (ADR-0048), the RENDER clamp substitutes
+//    the game's last half; there is nothing left to step, so the frontier
+//    seal disappears and nothing this page renders can commit a reveal
 //    (revealProgressCore's commitReveals contract).
 //  • Extras never spoil (ADR-0008): the clamp also decides how many inning
 //    columns exist, so a marathon reveals its columns one at a time.
@@ -58,7 +57,7 @@ import { useLensMotion } from '../../components/scoring/lens/motion/useLensMotio
 // The sheet is EDITABLE: tapping a filled box opens the notation editor and
 // the override is stored per-cell on this device (lib/scorecardNotes.js) —
 // the pencil-over-ink layer, never a change to anything derived.
-export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onReload, loading, lastUpdated, round = '', treatment }) {
+export function ScorecardPage({ feed, managers, uniformBrief, onReload, loading, lastUpdated, round = '', treatment }) {
   const [side, setSide] = useState('top')
   const regulation = selectRegulationInnings(feed)
   const actualCount = selectInningCount(feed)
@@ -67,22 +66,16 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     regulation,
     actualCount,
   )
-  // THE THIRD OPENER (ADR-0048): the reader's own stamp on this game. A stamp is
+  // THE ONE OPENER (ADR-0048): the reader's own stamp on this game. A stamp is
   // minted only from inside a revealed box score of a FINAL game and records "I
   // was there", so re-sealing a game they stamped protects them from nothing.
-  //
-  // Read HERE rather than handed down beside `spoilersOff`, because the two are
-  // different KINDS of fact. `spoilersOff` is a property of the DAY and needs
-  // GameView's `officialDate` to resolve; a stamp is a property of this one
-  // gamePk, which this screen already holds. Keeping them apart also keeps the
-  // day-pass chrome honest — a stamped game must never make the banner announce
-  // an unlocked day (see effectiveReveal, which takes them as two inputs).
+  // Read HERE, because a stamp is a property of this one gamePk, which this
+  // screen already holds.
   //
   // Why a latch rather than `isStamped` straight: useStampUnseal's own header.
   const stamped = useStampUnseal(feed?.gamePk)
 
   const { renderRevealedThrough, commitReveals } = effectiveReveal({
-    scoresUnlocked: spoilersOff,
     stamped,
     revealedThrough,
     unlocked,
@@ -92,10 +85,10 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   const { notes, setCell, clearCell } = useScorecardNotes(feed?.gamePk)
   const [editing, setEditing] = useState(null) // the tapped cell's card
 
-  // The reveal frontier. Under the pass renderRevealedThrough already covers
+  // The reveal frontier. On a stamped game renderRevealedThrough already covers
   // the whole game, so this resolves null and the seal never renders — which
-  // is also what keeps this page from committing anything while spoilers are
-  // off (commitReveals, ADR-0026).
+  // is also what keeps this page from committing anything there
+  // (commitReveals, ADR-0048).
   const stepInfo = useMemo(
     () => scorecardStep(feed, renderRevealedThrough, atBatCountFor),
     [feed, renderRevealedThrough, atBatCountFor],
@@ -153,12 +146,11 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // waits for Refresh to bring the next batter.
   const onFrontierTap = () => {
     // ASK `effectiveReveal`, do not re-derive the answer. `commitReveals` is
-    // false under EVERY force-reveal source — the day pass (ADR-0026) and a
-    // stamp (ADR-0048) today — for one reason that covers both: the sheet is
-    // already inked to the end, so there is no frontier left to tap, and
-    // committing would ratchet a mark the reader never earned by hand. Spelling
-    // that list out again here meant a third source would have to remember to
-    // update this line, which is the drift ADR-0026 asks each new source about.
+    // false under EVERY force-reveal source — a stamp (ADR-0048) today — for
+    // one reason: the sheet is already inked to the end, so there is no
+    // frontier left to tap, and committing would ratchet a mark the reader
+    // never earned by hand. Spelling that list out again here would mean a new
+    // source has to remember to update this line.
     if (!stepInfo || !commitReveals) return
     setArmed(true)
     const { inning, half, total, nextCount, halfOver } = stepInfo
@@ -190,7 +182,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // ours). Naming the inning rather than "the newest" is what keeps every
   // OLDER diagonal plain notation. An inning of 0 (the bottom sheet before
   // top 1 has closed) matches no end mark, so nothing renders — and neither
-  // does anything under the Scores Unlocked pass, where `stepInfo` is null.
+  // does anything on a stamped game, where `stepInfo` is null.
   //
   // A half that died mid-count on the bases (an inning-ending caught
   // stealing) hands off too: its location is the empty box directly under the

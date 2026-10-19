@@ -1,6 +1,6 @@
 // Cross-device sync for the Game Log's named books (the shelf a passport lives
 // on) — the cover half of ADR-0036, riding the same Clerk + Upstash stack as
-// api/spoiled-days.js (ADR-0026) and api/stamps.js (ADR-0035).
+// api/reveal.js (ADR-0022) and api/stamps.js (ADR-0035).
 //
 //   GET    /api/books                 -> { books: [ { id, state, title, subtitle, coverTeamId, coverMark, coverColor, createdAt, updatedAt } ] }
 //   POST   /api/books { id, title?, subtitle?, coverTeamId?, coverMark?, coverColor? }
@@ -20,14 +20,13 @@
 // worth of stamps needs one route for a page and a separate one for a sync
 // engine; twenty books do not.
 //
-// Why a state map and not a set (restating spoiled-days.js's argument for this
-// data): a book is a shelf the user arranges, not a mark that only advances.
+// Why a state map and not a set: a book is a shelf the user arranges, not a mark that only advances.
 // Create a book, sync it, remove it on the same device, and a plain union merge
 // would see the server's stale 'on' on the next fetch and resurrect a book its
 // owner just took away. So a removal is published as an explicit 'off'
 // tombstone and the two sides reconcile per id on `updatedAt`, last write wins
 // — src/lib/books.js's `applyRemoteBooks` runs the client half of the same
-// rule. Safe for the same reason spoiled-days.js gives: a book only ever
+// rule. Safe because a book only ever
 // changes by a deliberate action on one of THIS user's own devices, so the
 // loser of a tie is always one of the user's own two taps, never a stranger's.
 //
@@ -53,7 +52,7 @@ import { authenticateUser } from './_lib/auth.js'
 import { privateJson, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
-// Node runtime, not edge — same reason as reveal.js/spoiled-days.js/stamps.js:
+// Node runtime, not edge — same reason as reveal.js/stamps.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
 

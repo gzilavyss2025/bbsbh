@@ -324,9 +324,7 @@
   color: var(--text-body);
 }
 
-/* The slate's date stepper shares .slatehead's row with the Live Scores/Reveal
-   chip cluster (.daystate below) rather than stacking below it — see
-   GameSelect.jsx. */
+/* The slate's date stepper, centered in .slatehead's row — see GameSelect.jsx. */
 .datenav--row {
   justify-content: center;
   gap: var(--space-2);
@@ -352,40 +350,11 @@
   font-size: var(--fs-compact);
 }
 
-/* Paged-back day, every result revealed: the chip cluster that normally shares
-   this row is empty (Live Scores is today-only; Reveal All has been used up),
-   so the stepper claims the room and grows — arrows back up to a full tap
-   target, the date up to the row's own UI size. Gated in GameSelect.jsx
-   (dayFullyRevealed), never on today, so the compact stepper above stays the
-   default everywhere the row still carries a chip. */
-.datenav--lg > button {
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  font-size: var(--fs-title-md);
-}
-
-.datenav--lg .datenav__label {
-  max-width: 320px;
-  gap: var(--space-2);
-  font-size: var(--fs-ui);
-}
-
-/* Today drops back to a genuine secondary size here. In the compact row it
-   inherits .datenav--row button's body size and ends up matching the date it
-   sits beside; with the date promoted there's finally room for the quiet chip
-   .datenav__today above describes, so it takes its own label size rather than
-   scaling up alongside. */
-.datenav--lg .datenav__today {
-  min-height: 24px;
-  padding: 2px var(--space-2);
-  font-size: var(--fs-compact);
-}
-
 /* One-tap return to today once the date has been paged away from. Kept small —
    a quiet secondary chip beside the date, not a button competing with it. Same
-   rectangular shape as the date stepper's own arrow buttons (above) and the
-   Reveal All chip (.daystate below), so all three read as one species of
-   control rather than Today being an odd pill among rectangles. It's a
+   rectangular shape as the date stepper's own arrow buttons (above), so they
+   read as one species of control rather than Today being an odd pill among
+   rectangles. It's a
    <button> inside .datenav, so the hover-inverts/press-scales feedback above
    already applies here for free — no separate :hover/:active needed. */
 .datenav__today {
@@ -404,143 +373,6 @@
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease,
     transform 0.08s ease;
 }
-
-/* Day-state row on the slate (GameSelect): whichever of {Live Scores, Reveal
-   All} applies to the current date, riding beside the date stepper in
-   .slatehead's own row (see .slatehead above) rather than stacking below it.
-   Two families, matching the app's existing kraft vocabulary rather than
-   inventing a third: Live Scores OFF is a quiet ghost chip (same rectangular
-   shape + hover-inverts/press-scales as .datenav__today and the arrow buttons
-   above); Live Scores ON promotes to the flat kraft "mode" fill .modestrip
-   elsewhere in the app also uses for "an unsealed screen says why it's
-   unsealed" (a MODE you're in); Reveal All reuses .btn--reveal's hatched
-   "peel the tape" texture (an ACTION you take) rather than a third look.
-   Defined here (ahead of the 740px block) rather than down by the old
-   .slateunlock location, so the desktop overrides there — same selector,
-   equal specificity — actually win the cascade by source order. */
-.daystate {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-.daystate__chip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1h);
-  border: none;
-  cursor: pointer;
-  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease,
-    filter 0.12s ease, transform 0.08s ease;
-}
-.daystate__chip:active {
-  transform: scale(0.98);
-}
-
-/* OFF — the default, most-common state, so it stays ordinary chrome rather
-   than banner weight. */
-.daystate__chip--live {
-  /* component-reuse-exempt: a switch (role=switch button), not a card: Button work (#1174) */
-  padding: var(--space-1) var(--space-2h);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-}
-.daystate__chip--live:hover {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-}
-
-/* ON — a contained kraft chip, same footprint as OFF, so switching it on
-   never pushes the date stepper or forces a wrap onto its own row. */
-.daystate__chip--live-on {
-  padding: var(--space-1) var(--space-2h);
-  border: var(--bw-hair) solid var(--seal-hatch);
-  border-radius: var(--radius-sm);
-  background: var(--seal-cover);
-  color: var(--seal-cover-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-}
-.daystate__chip--live-on:hover {
-  filter: brightness(0.95);
-}
-
-/* The switch glyph: a small pill track, the dot sliding via currentColor so
-   it never needs its own ON/OFF color rules beyond the chip's own. */
-.daystate__dot {
-  position: relative;
-  width: 20px;
-  height: 12px;
-  flex: none;
-  border: var(--bw-hair) solid currentColor;
-  border-radius: var(--radius-pill);
-}
-.daystate__dot::before {
-  content: '';
-  position: absolute;
-  top: 1px;
-  left: 1px;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-pill);
-  background: currentColor;
-  transition: transform 0.15s ease;
-}
-.daystate__chip--live-on .daystate__dot::before {
-  transform: translateX(8px);
-}
-@media (prefers-reduced-motion: reduce) {
-  .daystate__dot::before {
-    transition: none;
-  }
-}
-
-/* Reveal All rides in this row on desktop, replacing the old full-width
-   .revealall__top banner (see RevealAllBar in GameSelect.jsx) — hidden below
-   740px, where the floating bottom bar (same component) keeps the action in
-   thumb reach on a long scroll instead of duplicating it up here. */
-.daystate__chip--reveal {
-  display: none;
-}
-
-/* The scores-unlocked-local contextual prompt (GameSelect.jsx) — a quiet,
-   one-shot line right under the day-state chips, only right after the tap
-   that turned Live Scores on. Honest wording, not a warning: the pass is
-   device-local by hard invariant (P2), and this says so plainly rather than
-   leaving it to be assumed. */
-/* The note sits as a sibling of .daystate inside .slatehead (see
-   GameSelect.jsx), not inside it — descendant selector targets the whole
-   header so a future sibling note doesn't need a third scoping rule. */
-#root .slatehead .caps-exempt {
-  text-transform: none; /* caps-exempt: the pass-scope note reads as a natural sentence */
-}
-
-.daystate__scopenote {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  max-width: 40ch;
-  margin: var(--space-2) 0 0;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-body);
-  color: var(--text-caption);
-}
-
-.daystate__scopenotedismiss:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
-
 
 /* ------------------------------------------------ winter league picker
    One rail tab covers four leagues (issue #1055), so the choice between

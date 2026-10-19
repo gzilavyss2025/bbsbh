@@ -58,11 +58,6 @@
   color: var(--text-heading);
 }
 
-.ww-hero__seal {
-  margin-top: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-
 .ww-hero__actions {
   margin-top: var(--space-3);
 }
@@ -173,10 +168,6 @@
 
 .ww-ledger__maybe {
   border-style: dashed;
-}
-
-.ww-ledger__seal {
-  background: var(--surface-stamped-tint);
 }
 
 .ww-ledger__wins {

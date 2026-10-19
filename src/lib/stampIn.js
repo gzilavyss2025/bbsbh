@@ -9,13 +9,14 @@
 // before changing anything here.
 //
 // WHAT THIS MODULE MAY NEVER GROW: a reveal mark. The page is render-only, in
-// the exact sense ADR-0026 gives that word — it never writes
+// the exact sense ADR-0026 gave that word (that ADR is retired; the sense
+// stands) — it never writes
 // `bbsbh:reveal:{gamePk}` and never advances `revealedThrough` for any game.
 // Nothing in this file, or in the screen over it, may reach the reveal ratchet.
 
 // The one-time consent, kept on this device only. A record, not a mark: it
-// says "I agreed to see this page", never anything about a game. Same
-// separation ADR-0026 keeps between `bbsbh:spoiledDays` and the reveal mark.
+// says "I agreed to see this page", never anything about a game, and it never
+// touches the reveal mark.
 export const STAMP_IN_CONSENT_KEY = 'bbsbh:stampIn'
 
 // Parse the stored consent, or null. FAILS CLOSED on everything: bad JSON, an

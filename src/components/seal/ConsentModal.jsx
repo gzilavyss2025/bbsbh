@@ -2,8 +2,9 @@ import { useEffect, useId, useRef } from 'react'
 import { useCopy } from '../../copy/copyContext.js'
 import { Cluster } from '../ui/layout/Cluster.jsx'
 
-// The spoiler-consent modal — the one place the app's single opt-in departure
-// from the spoiler rule is agreed to (ADR-0026). All wording comes from the
+// The spoiler-consent modal — where a reader agrees to Stamp In's played season
+// (ADR-0042), the one consented departure from the spoiler rule that asks
+// first. All wording comes from the
 // admin-editable copy registry via `group` — the slots
 // title/body/changesNote/humorLine/resetNote/confirm/dismiss. A slot the group
 // doesn't define resolves to '' and is skipped, so the component stays usable
@@ -19,9 +20,9 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 // resolver (built from unsaved edits) to preview the REAL modal with in-progress
 // wording. Left undefined, the modal reads the live published copy.
 
-export function ConsentModal({ group, time, onConfirm, onDismiss, resolveText }) {
+export function ConsentModal({ group, onConfirm, onDismiss, resolveText }) {
   const { t } = useCopy()
-  const text = (slot) => (resolveText ? resolveText(slot) : t(`${group}.${slot}`, { time }))
+  const text = (slot) => (resolveText ? resolveText(slot) : t(`${group}.${slot}`))
 
   const sheetRef = useRef(null)
   const dismissRef = useRef(null)

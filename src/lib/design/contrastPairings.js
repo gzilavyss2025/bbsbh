@@ -142,9 +142,7 @@ export const PAIRINGS = [
   { fg: 'text-heading', bg: 'marker-deep', min: TEXT, note: 'on-hold tape text on the hatch stripe' },
   { fg: 'text-on-ink', bg: 'allstar-blue', min: TEXT, note: 'Extra Innings pill text' },
   // The crown outranks all four and carries its own medal-amber fill on the
-  // card pill (.flipback__pill--crown). The filter chip that selects it
-  // (FILTER_CHIPS, src/lib/resultCards.js) wears the same amber only as its
-  // tint and edge; a pressed chip is the Pill's navy (#1131 slice 4).
+  // card pill (.flipback__pill--crown).
   { fg: 'text-on-ink', bg: 'award-ink', min: TEXT, note: 'Game of the Night crown pill text' },
   // Stamp In's row action, in both states (ADR-0042): a soft neutral until you
   // press it, field green once you hold that stamp. The green pair is the same
@@ -161,15 +159,6 @@ export const PAIRINGS = [
   // later nudge to either accent has less margin here than anywhere else.
   { fg: 'text-on-ink', bg: 'accent-positive', min: TEXT, note: 'standings clinch mark' },
   { fg: 'text-on-ink', bg: 'accent-negative', min: TEXT, note: 'standings eliminated mark' },
-  // The slate's Scores Unlocked live band: run totals (heading ink) and the
-  // centered state token (muted ink) over the field-green wash.
-  { fg: 'text-heading', bg: 'field-soft', min: TEXT, note: 'live score band numerals' },
-  { fg: 'text-muted', bg: 'field-soft', min: TEXT, note: 'live score band state token' },
-  // The band's hover mow stripe: `color-mix(in srgb, var(--field) 10%,
-  // transparent)` over --field-soft — precomputed by hand like the Last 10
-  // Games stub above, since this checker doesn't parse color-mix().
-  { fg: 'text-heading', bg: '#D1E0D3', min: TEXT, note: 'live band numerals on hover mow stripe' },
-  { fg: 'text-muted', bg: '#D1E0D3', min: TEXT, note: 'live band state token on hover mow stripe' },
   // Link / text-button ink, on each of the three grounds it lands on: the app
   // canvas, a page, and a raised card. Held to the full text bar because these
   // run SMALL — "See all ›" and the "more" affordance are --fs-label caps (#1128).
@@ -255,23 +244,6 @@ export const PAIRINGS = [
   { fg: 'heat-band-ink', bg: 'heat-band', min: TEXT, note: '100 mph band figures on the band' },
   { fg: 'clay-deep', bg: 'surface-card', min: TEXT, note: 'rundown card eyebrow' },
 
-  // THE SLATE'S FILTER CHIPS AS PILL CONTROLS (#1131 slice 4). Each chip is a
-  // host tint: heading ink on its scenario accent mixed into the page, 16% at
-  // rest and 28% under the pointer (22-box-score-tables.css). The checker does
-  // not parse color-mix(), so each mix is its sRGB result on --bg-page
-  // (#F6EFDC), one pair per accent in FILTER_CHIPS. A pressed chip is the
-  // Pill's navy, the ink-chip pair above. Every other pair this slice's
-  // controls draw is on the list already.
-  { fg: 'text-heading', bg: '#E5D7BE', min: TEXT, note: 'slate filter chip at rest: crown (award-ink 16%)' },
-  { fg: 'text-heading', bg: '#D8C5A7', min: TEXT, note: 'slate filter chip on hover: crown (award-ink 28%)' },
-  { fg: 'text-heading', bg: '#D6DAC5', min: TEXT, note: 'slate filter chip at rest: dominant (field 16%)' },
-  { fg: 'text-heading', bg: '#BECBB5', min: TEXT, note: 'slate filter chip on hover: dominant (field 28%)' },
-  { fg: 'text-heading', bg: '#EBD4C2', min: TEXT, note: 'slate filter chip at rest: blowout (clay 16%)' },
-  { fg: 'text-heading', bg: '#E4BFAF', min: TEXT, note: 'slate filter chip on hover: blowout (clay 28%)' },
-  { fg: 'text-heading', bg: '#F5E8C5', min: TEXT, note: 'slate filter chip at rest: close game (marker 16%)' },
-  { fg: 'text-heading', bg: '#F5E2B4', min: TEXT, note: 'slate filter chip on hover: close game (marker 28%)' },
-  { fg: 'text-heading', bg: '#D3D5D0', min: TEXT, note: 'slate filter chip at rest: extra innings (allstar-blue 16%)' },
-  { fg: 'text-heading', bg: '#B9C2C6', min: TEXT, note: 'slate filter chip on hover: extra innings (allstar-blue 28%)' },
   // THE BAND CONTROLS (#1131 slice 5). The Postseason Odds and Stamp In pill
   // on a club-themed card band is a paper chip tinted through the pill's own
   // properties (09-team-info.css): heading ink on paper at rest (asserted

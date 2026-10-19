@@ -43,7 +43,6 @@ import MILB_BALLPARKS from '../lib/data/milb-ballparks.json' with { type: 'json'
 // the flag renders as plain fields — the ballpark notes are 30 unrelated
 // paragraphs with no shared modal to stage.
 export const GROUPS = [
-  { id: 'scoresUnlocked', label: 'Scores Unlocked (the spoilers-off switch)', preview: 'consentModal' },
   { id: 'stampIn', label: 'Stamp In (a club’s played season)', preview: 'consentModal' },
   { id: 'ballparks', label: 'Ballparks (team hub → Overview)' },
   { id: 'ballparksMilb', label: 'Ballparks — Minor League (team hub → Overview)' },
@@ -63,9 +62,14 @@ export const GROUPS = [
 // gap it leaves. Nothing outside this set is honored, so editable copy can never
 // smuggle in markup or arbitrary substitution.
 //
-//   {time}   — the concrete local reset time (e.g. "8:00 AM").
+//   {time}   — a concrete local clock time (e.g. "8:00 AM").
 //   {inning} — the half-inning label of the half ALREADY ON SCREEN (e.g.
-//              "Top 7th"). Used only by `scoresUnlocked.liveEdgeLabel`.
+//              "Top 7th").
+//
+// No shipped field uses either token since the Scores Unlocked group was
+// removed (ADR-0116); the set stays closed and stays here, so a future field
+// that needs one inherits the guard below rather than inventing a path around
+// it.
 //
 // SPOILER GUARD (do not relax): no field here may be rendered inside a
 // sealed/reveal-gated surface, and no field's VALUE may be derived from game
@@ -77,8 +81,7 @@ export const GROUPS = [
 // be added ONLY if its value is categorically incapable of carrying a score. The
 // two above qualify: a clock time is not game data at all, and `{inning}` is the
 // same structural half-inning label the innings chrome already prints for the
-// half the user is looking at — a position in the game, never a run, and only
-// ever filled while the user's spoilers-off consent is active. A run/score/result
+// half the user is looking at — a position in the game, never a run. A run/score/result
 // token must NEVER be added, and no field may be interpolated with any other
 // game data. That is what keeps an admin-editable string incapable of leaking a
 // score. If this panel ever grows to govern other app copy, keep score-bearing
@@ -291,107 +294,11 @@ function milbParkFields() {
 }
 
 export const FIELDS = [
-  // ---- Scores Unlocked: the one "just show me the scores" switch. It covers
-  // the whole slate, every game surface, and keeps up with a game in progress —
-  // there is no second per-game mode, and no second consent. ----
-  {
-    id: 'scoresUnlocked.toggleLabel',
-    group: 'scoresUnlocked',
-    label: 'Home toggle label',
-    help: 'The label next to the physical toggle on the home slate.',
-    maxLength: 40,
-    multiline: false,
-    default: 'Live scores',
-  },
-  {
-    id: 'scoresUnlocked.title',
-    group: 'scoresUnlocked',
-    label: 'Confirm — title',
-    help: 'Heading of the pop-up that appears when you flip the home toggle on.',
-    maxLength: 80,
-    multiline: false,
-    default: 'Sure you want the scores?',
-  },
-  {
-    id: 'scoresUnlocked.body',
-    group: 'scoresUnlocked',
-    label: 'Confirm — explanation',
-    help: 'The main paragraph. Explain that the app hides scores until you reveal them, and that this flips that off for today.',
-    maxLength: 500,
-    multiline: true,
-    default:
-      'This whole app is built so nothing gets spoiled — every score stays sealed until you decide you are ready for it. But if you are not scoring along right now, and you just want to see how the games are going, you can override that. Flip this on and every score shows plainly: no seals, no tapping, on the slate and inside every game. A game still being played will keep up with itself while you watch.',
-  },
-  {
-    id: 'scoresUnlocked.humorLine',
-    group: 'scoresUnlocked',
-    label: 'Confirm — the bit',
-    help: 'A lighter line to give the moment some personality. Keep it optional-feeling; the honest part is the explanation above and the note about today staying unlocked.',
-    maxLength: 200,
-    multiline: true,
-    default: 'No judgment. Some days you just want the number, not the whole ritual. Your paper scorecard will never know.',
-  },
-  {
-    id: 'scoresUnlocked.resetNote',
-    group: 'scoresUnlocked',
-    label: 'Confirm — the 8am promise',
-    help: 'Must clearly state that this switches itself off so TOMORROW starts sealed, and that today stays unlocked. Use {time} for the reset time.',
-    maxLength: 240,
-    multiline: true,
-    default:
-      'This is a one-day thing. At {time} it switches itself off, so tomorrow starts sealed again — you would turn it on if you wanted it. Today stays unlocked though. You already said you were fine seeing it.',
-  },
-  {
-    id: 'scoresUnlocked.confirm',
-    group: 'scoresUnlocked',
-    label: 'Confirm — accept button',
-    help: 'The button that turns scores on. Use {time} to name the reset time if you like.',
-    maxLength: 48,
-    multiline: false,
-    default: 'Show scores until {time}',
-  },
-  {
-    id: 'scoresUnlocked.dismiss',
-    group: 'scoresUnlocked',
-    label: 'Confirm — decline button',
-    help: 'The safe, default-focused button that keeps things sealed.',
-    maxLength: 48,
-    multiline: false,
-    default: 'Keep them sealed',
-  },
-  {
-    id: 'scoresUnlocked.banner',
-    group: 'scoresUnlocked',
-    label: 'Active banner',
-    help: 'The strip shown while scores are unlocked — it appears on the slate AND on every screen inside a game. Use {time} for the reset time. The strip is also the off switch.',
-    maxLength: 80,
-    multiline: false,
-    default: 'Scores unlocked until {time}',
-  },
-  {
-    id: 'scoresUnlocked.changesNote',
-    group: 'scoresUnlocked',
-    label: 'Confirm — what changes',
-    help: 'Spell out the concrete trade: no seals anywhere today, extra innings included, and that your by-hand scoring is left alone.',
-    maxLength: 300,
-    multiline: true,
-    default:
-      'That means the score is right there wherever you look today, extra innings included. It leaves your by-hand scoring alone — nothing you have not tapped yourself gets marked as scored, on this phone or any other.',
-  },
-  {
-    id: 'scoresUnlocked.liveEdgeLabel',
-    group: 'scoresUnlocked',
-    label: 'Caught-up-to-live status',
-    help: 'Shown at the bottom of the innings view when a game you are watching is in progress and you are caught up to the newest half — there is no next half to move to yet. Use {inning} where the current half should appear (e.g. "Top 7th").',
-    maxLength: 60,
-    multiline: false,
-    default: 'Live · {inning} in progress',
-  },
   // ---- Stamp In: the club's played season, every result showing, one stamp
-  // per game you watched (ADR-0042). The SECOND consented departure from the
-  // spoiler rule, and the second group here to compose a ConsentModal. It is
-  // scoped to one address rather than to a day, so it names no {time} and
-  // carries no reset — the two slots Scores Unlocked leans on hardest.
+  // per game you watched (ADR-0042). A consented departure from the spoiler
+  // rule, and the one group here that composes a ConsentModal. It is scoped to
+  // one address rather than to a day, so it names no {time} and carries no
+  // reset.
   //
   // Voice: docs/game-log.md §3. Second person, physical verbs, warm and never
   // cute, and never a word about progress — this page is what you SAW, not a
@@ -554,8 +461,8 @@ export function resolveCopy(overrides) {
 // Substitute the honored TOKENS into a resolved string. Missing or non-string
 // input yields ''. A value with no token is returned unchanged. A token the
 // caller has no value for is DROPPED along with the gap it leaves, so a string
-// like "Show scores until {time}" reads "Show scores until", not "Show scores
-// until " (or "… at  today" for a mid-sentence token). The tidy pass runs only
+// like "Back at {time}" reads "Back at", not "Back at " (or "… at  today" for a
+// mid-sentence token). The tidy pass runs only
 // when something was actually stripped, so a fully-substituted string keeps the
 // admin's exact spacing.
 export function fillTokens(text, tokens = {}) {

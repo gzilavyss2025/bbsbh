@@ -28,12 +28,12 @@ import { ordinal } from '../../lib/format.js'
 // dead-space claims answer for themselves there: the -76px reach is behind
 // `:has(.innings__refresh--float)`, with a bare -20px for exactly that case.
 //
-// FOUR STATES, plus a hold:
+// THREE STATES, plus a hold:
 //
 //  • A SEALED HALF offers two reveal choices (ADR-0016) — step one at-bat, or
 //    the whole half at once.
 //  • A REVEALED HALF STILL ONE AT-BAT AT A TIME, with at-bats after the one on
-//    screen (#1539: a reload, a direct link, the pass, Stamp In, a stamp):
+//    screen (#1539: a reload, a direct link, Stamp In, a stamp):
 //    "Next at-bat ›" in the advance's ink skin, never the kraft one — it moves
 //    useFocusMode's cursor only, so no reveal is possible (ADR-0083). The last
 //    at-bat hands back to the advance below, held for STEP_HOLD_MS (beats.js)
@@ -41,8 +41,6 @@ import { ordinal } from '../../lib/format.js'
 //  • OTHERWISE the plain advance: the next-half label once one unlocks, or the
 //    last action at the furthest revealed inning. Never "Top 10th ›", which
 //    would leak the game going to extras before the reader gets there.
-//  • UNDER THE SCORES UNLOCKED PASS at the live frontier (ADR-0026), a calm
-//    status instead of either.
 //
 // A SEALED HALF THAT IS STILL BEING PLAYED SPLITS THE FIRST OF THOSE (ADR-0055).
 // `halfLive` says the game is in this exact half right now, and it takes "Rest
@@ -50,8 +48,8 @@ import { ordinal } from '../../lib/format.js'
 // commit a half on the strength of however many batters happen to have reached
 // the feed, which is the whole defect ADR-0055 exists to fix. "Next at-bat"
 // stands alone and full width. Then `atHalfEdge` — every fetched entry already
-// stepped through — replaces even that with the same calm live status the pass's
-// frontier gets, because a tap there would move nothing. Neither is a fourth
+// stepped through — replaces even that with a calm live status ("Caught up"),
+// because a tap there would move nothing. Neither is a fourth
 // state so much as the sealed state told the truth about a half in motion; both
 // end on their own as the next plate appearance reaches the feed, or as the
 // third out turns the half into an ordinary finished one.
@@ -76,8 +74,6 @@ export function InningActionBar({
   focus,
   turning,
   refresh,
-  atLiveEdge,
-  liveEdgeLabel,
   currentSealed,
   halfLive,
   atHalfEdge,
@@ -105,17 +101,11 @@ export function InningActionBar({
         >
           Next at-bat ›
         </button>
-      ) : atLiveEdge ? (
-        <div className="liveedge" role="status" aria-live="polite">
-          <span className="liveedge__dot" aria-hidden="true" />
-          <span className="liveedge__label">{liveEdgeLabel}</span>
-        </div>
       ) : currentSealed && atHalfEdge ? (
-        /* Caught up INSIDE a half still being played (ADR-0055) — the same
-           calm status the pass's own frontier gets, and deliberately the same
-           markup, because it is the same fact: the reader has reached the game.
-           `aria-live="polite"` announces it once when the last tap lands you
-           here, and the ordinary Refresh above is what brings the next batter. */
+        /* Caught up INSIDE a half still being played (ADR-0055): the reader
+           has reached the game. `aria-live="polite"` announces it once when
+           the last tap lands you here, and the ordinary Refresh above is what
+           brings the next batter. */
         <div className="liveedge" role="status" aria-live="polite">
           <span className="liveedge__dot" aria-hidden="true" />
           <span className="liveedge__label">Caught up — waiting on the next batter</span>

@@ -93,7 +93,7 @@ export function genBookId() {
   return `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
 }
 
-// 'on' | 'off' — the same state-map vocabulary as stamps.js and spoiledDays.js,
+// 'on' | 'off' — the same state-map vocabulary as stamps.js,
 // and for the same reason: see `applyRemoteBooks` for why a book is removed by
 // tombstone rather than by deleting the key.
 export function isBookState(value) {

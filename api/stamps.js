@@ -1,7 +1,6 @@
 // The Logbook — a user's collection of game stamps (ADR-0035). The fourth
 // opt-in backend exception, and the FIRST one that stores score-bearing data,
-// riding the same Clerk + Upstash stack as api/reveal.js (ADR-0022) and
-// api/spoiled-days.js (ADR-0026).
+// riding the same Clerk + Upstash stack as api/reveal.js (ADR-0022).
 //
 //   GET    /api/stamps?season=2026     -> { season, stamps: [ { gamePk, …, game } ] }
 //   GET    /api/stamps?seasons=1       -> { seasons: [ { season, count } ] }
@@ -25,10 +24,9 @@
 //     `e2e/invariants/logbook-stamp.spec.js`). That guard is untouched and is now
 //     the entire containment argument.
 //   - **It refused the ordinary case.** The mint affordance lives inside the box
-//     score's `SealBox` reveal render function, which deliberately persists
-//     nothing (an `onReveal` would let Scores Unlocked ratchet `revealedThrough`;
-//     see src/CLAUDE.md) — so the normal path to a stamp left no mark for the
-//     gate to find, and every such mint 403'd.
+//     score's `SealBox` reveal render function, which deliberately persists no
+//     reveal mark (see src/CLAUDE.md) — so the normal path to a stamp left no
+//     mark for the gate to find, and every such mint 403'd.
 //   - **What it defended against was a hostile client**, and the only client is
 //     the user themself, spoiling a game they went out of their way to stamp.
 //
@@ -62,7 +60,7 @@ import { authenticateUser } from './_lib/auth.js'
 import { privateJson, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
-// Node runtime, not edge — same reason as reveal.js/spoiled-days.js:
+// Node runtime, not edge — same reason as reveal.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
 
@@ -186,7 +184,7 @@ async function resolveGameFinal(redis, gamePk) {
 }
 
 // Re-validate whatever Redis hands back before it reaches a client, exactly as
-// spoiled-days.js does: a hand-edited or cross-version hash can only ever yield
+// preferences.js does: a hand-edited or cross-version hash can only ever yield
 // known-shape entries.
 function sanitizeStored(raw) {
   const out = {}

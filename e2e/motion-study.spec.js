@@ -145,12 +145,12 @@ test('#983 only the innings frontier seal breathes, not every kraft button', asy
   await page.goto(`/${MMDDYYYY}`)
   await expect(page.locator('.gamecard').first()).toBeVisible()
 
-  // The home slate's "Reveal all results" wears `.btn--reveal` for its kraft
-  // texture — the same warning every reveal in the app wears — but it is not a
-  // frontier, it is on screen for as long as the reader browses the slate, and
-  // it spoils a whole day. A bare `.btn--reveal` rule breathed it.
-  const chip = page.locator('.daystate__chip--reveal')
-  if (await chip.count()) expect(await animName(chip.first())).toBe('none')
+  // A kraft `.btn--reveal` off the innings bar is not a frontier. The home
+  // slate's "Reveal all results" chip was the case a bare `.btn--reveal` rule
+  // breathed; the chip went in ADR-0116, so this now holds for any kraft
+  // button the slate may draw.
+  const kraft = page.locator('.screen--slate .btn--reveal')
+  if (await kraft.count()) expect(await animName(kraft.first())).toBe('none')
 })
 
 test('#978 the live dot breathes and nothing animates box-shadow', async ({ page }) => {

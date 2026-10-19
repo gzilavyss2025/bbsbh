@@ -1,5 +1,10 @@
 # Toggle-consent analytics — measuring the spoiler departures, without a score
 
+> **RETIRED by [ADR-0116](0116-scores-unlocked-and-reveal-all-are-removed.md) (2026-10-18).**
+> The pass was the only toggle this event measured, and it was removed, so
+> `src/lib/analytics.js` and the `toggle_consent` event went with it. Page
+> analytics (`<Analytics />` in `main.jsx`) stay.
+
 ADR-0026 (Scores Unlocked) adds an opt-in way to
 lift the spoiler seal, each gated by a consent modal. The site owner wants to
 know how those land: how often each toggle is confirmed vs. declined, and from

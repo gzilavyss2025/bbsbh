@@ -9,15 +9,16 @@ import { defaultCopy, fillTokens } from './registry.js'
 // sanitizeOverrides drops an empty override (registry.js) and the app renders
 // the default — so previewing a blanked title as an empty modal would show a
 // state production can never produce. A slot the group doesn't define
-// (scoresUnlocked has no changesNote) resolves to '' and ConsentModal skips it.
+// (stampIn has no humorLine) resolves to '' and ConsentModal skips it.
 //
-// {time} is filled HERE because ConsentModal only runs fillTokens on its default
-// t() path — a resolveText result is taken verbatim.
+// fillTokens runs HERE because ConsentModal only runs it on its default t()
+// path — a resolveText result is taken verbatim. No token is passed, so a stray
+// token is stripped exactly as production strips it.
 const DEFAULTS = defaultCopy()
 
-export function makePreviewResolver(group, values, time) {
+export function makePreviewResolver(group, values) {
   return (slot) => {
     const id = `${group}.${slot}`
-    return fillTokens(values?.[id] || DEFAULTS[id] || '', { time })
+    return fillTokens(values?.[id] || DEFAULTS[id] || '')
   }
 }

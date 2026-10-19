@@ -275,34 +275,6 @@ test('creditLine names the licence for every photo that requires it', () => {
   }
 })
 
-// The pass reveals real scores everywhere, so the default consent copy must be
-// HONEST about the one thing it leaves alone: your by-hand scoring. Nothing the
-// pass shows is ever recorded as scored, on this device or any other — that is
-// what effectiveReveal's `commitReveals` enforces in code, and the copy has to
-// say it. (ADR-0026)
-test('scoresUnlocked consent copy is honest that hand-scoring is left alone', () => {
-  const copy = defaultCopy()
-  const said = `${copy['scoresUnlocked.body']} ${copy['scoresUnlocked.changesNote']}`
-  assert.match(said, /\b(scoring|scored)\b/i)
-  assert.match(said, /\b(leaves .* alone|does not track|not tracked|left alone)\b/i)
-})
-
-// The consent must name what 8am actually does, and it is NOT "everything
-// re-seals" — that would be a lie, since a day you consented to stays unlocked
-// (spoiledDays.js). It must say the switch turns itself off so the NEXT day is
-// sealed, must be honest that today stays open, and must name the exact time via
-// the {time} token.
-test('scoresUnlocked resetNote is honest about what 8am does', () => {
-  const note = defaultCopy()['scoresUnlocked.resetNote']
-  assert.match(note, /\{time\}/)
-  // Tomorrow re-seals...
-  assert.match(note, /tomorrow|next day/i)
-  // ...and today does not. The promise the old copy made ("no matter what, it
-  // all re-seals") must never come back — it stopped being true.
-  assert.match(note, /today stays|stays unlocked|stays open/i)
-  assert.doesNotMatch(note, /re-seals on its own/i)
-})
-
 test('field ids are unique and dotted group.slot', () => {
   const seen = new Set()
   for (const id of FIELD_IDS) {
@@ -341,37 +313,43 @@ test('sanitizeOverrides drops unknown ids', () => {
 })
 
 test('sanitizeOverrides keeps a known id with an in-budget string', () => {
-  const out = sanitizeOverrides({ 'scoresUnlocked.title': 'Show me everything?' })
-  assert.deepEqual(out, { 'scoresUnlocked.title': 'Show me everything?' })
+  const out = sanitizeOverrides({ 'stampIn.title': 'Show me everything?' })
+  assert.deepEqual(out, { 'stampIn.title': 'Show me everything?' })
 })
 
 test('sanitizeOverrides drops a value over the field maxLength', () => {
-  const field = FIELDS.find((f) => f.id === 'scoresUnlocked.title')
+  const field = FIELDS.find((f) => f.id === 'stampIn.title')
   const tooLong = 'x'.repeat(field.maxLength + 1)
-  assert.deepEqual(sanitizeOverrides({ 'scoresUnlocked.title': tooLong }), {})
+  assert.deepEqual(sanitizeOverrides({ 'stampIn.title': tooLong }), {})
 })
 
 test('sanitizeOverrides keeps a value exactly at the maxLength boundary', () => {
-  const field = FIELDS.find((f) => f.id === 'scoresUnlocked.title')
+  const field = FIELDS.find((f) => f.id === 'stampIn.title')
   const exact = 'x'.repeat(field.maxLength)
-  assert.deepEqual(sanitizeOverrides({ 'scoresUnlocked.title': exact }), {
-    'scoresUnlocked.title': exact,
+  assert.deepEqual(sanitizeOverrides({ 'stampIn.title': exact }), {
+    'stampIn.title': exact,
   })
 })
 
 test('sanitizeOverrides drops non-string and empty/whitespace values', () => {
   const out = sanitizeOverrides({
-    'scoresUnlocked.title': 42,
-    'scoresUnlocked.body': '',
-    'scoresUnlocked.humorLine': '   ',
-    'scoresUnlocked.banner': null,
+    'stampIn.title': 42,
+    'stampIn.body': '',
+    'stampIn.resetNote': '   ',
+    'stampIn.dismiss': null,
   })
   assert.deepEqual(out, {})
 })
 
 test('sanitizeOverrides trims trailing whitespace but keeps leading', () => {
-  const out = sanitizeOverrides({ 'scoresUnlocked.banner': '  Scores unlocked   ' })
-  assert.equal(out['scoresUnlocked.banner'], '  Scores unlocked')
+  const out = sanitizeOverrides({ 'stampIn.dismiss': '  Back to games   ' })
+  assert.equal(out['stampIn.dismiss'], '  Back to games')
+})
+
+// A copy store written before ADR-0116 may still hold scoresUnlocked.* fields.
+// They are unknown ids now, so they are dropped on read like any other.
+test('sanitizeOverrides drops a leftover override for the retired Scores Unlocked group', () => {
+  assert.deepEqual(sanitizeOverrides({ 'scoresUnlocked.title': 'Show me everything?' }), {})
 })
 
 test('sanitizeOverrides tolerates garbage input without throwing', () => {
@@ -383,26 +361,26 @@ test('sanitizeOverrides tolerates garbage input without throwing', () => {
 
 test('sanitizeOverrides strips bidi-override and control characters', () => {
   // A right-to-left override (U+202E) embedded in a button label must not survive.
-  const out = sanitizeOverrides({ 'scoresUnlocked.confirm': 'Show ‮scores' })
-  assert.equal(out['scoresUnlocked.confirm'], 'Show scores')
+  const out = sanitizeOverrides({ 'stampIn.confirm': 'Show ‮scores' })
+  assert.equal(out['stampIn.confirm'], 'Show scores')
 })
 
 test('sanitizeOverrides drops newlines in a single-line field but keeps them multiline', () => {
-  // scoresUnlocked.confirm is single-line; scoresUnlocked.body is multiline.
-  const single = sanitizeOverrides({ 'scoresUnlocked.confirm': 'Show\nscores' })
-  assert.equal(single['scoresUnlocked.confirm'], 'Showscores')
-  const multi = sanitizeOverrides({ 'scoresUnlocked.body': 'line one\nline two' })
-  assert.equal(multi['scoresUnlocked.body'], 'line one\nline two')
+  // stampIn.confirm is single-line; stampIn.body is multiline.
+  const single = sanitizeOverrides({ 'stampIn.confirm': 'Show\nscores' })
+  assert.equal(single['stampIn.confirm'], 'Showscores')
+  const multi = sanitizeOverrides({ 'stampIn.body': 'line one\nline two' })
+  assert.equal(multi['stampIn.body'], 'line one\nline two')
 })
 
 test('resolveCopy layers valid overrides over defaults and ignores junk', () => {
   const resolved = resolveCopy({
-    'scoresUnlocked.title': 'Custom title',
+    'stampIn.title': 'Custom title',
     'unknown.key': 'ignored',
   })
-  assert.equal(resolved['scoresUnlocked.title'], 'Custom title')
+  assert.equal(resolved['stampIn.title'], 'Custom title')
   // An untouched field still resolves to its default.
-  const untouched = FIELDS.find((f) => f.id !== 'scoresUnlocked.title')
+  const untouched = FIELDS.find((f) => f.id !== 'stampIn.title')
   assert.equal(resolved[untouched.id], untouched.default)
   assert.equal(resolved['unknown.key'], undefined)
 })

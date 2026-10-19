@@ -78,7 +78,7 @@ Bucket codes: **A** = actual disagreement, **D** = deliberate difference,
 | D6 | Times through the order: the trip number | Distinct innings faced: `src/api/callout-notes/tto.js`: `enteringStarterTrip`. Every PA in the game: `scripts/gen-callouts.mjs`: `ttoSplits` | A batter who bats twice in one inning against the starter | The live card can only fire later than the generator's bucket, never earlier. But the generator's comment cites a live `timesFacingPitcher` walk that no longer exists and says the two match. Fix the comment. |
 | D7 | Average age of a group | `scripts/lib/prospectAgeBenchmark.mjs`: `fetchLevelAverageAges` (age today, PA ≥ 40 or outs ≥ 30, per level); `scripts/lib/youngest-regulars.mjs`: `averageAge` over `ageOnJune30` (age on June 30, regulars, per league) | Every level | Two questions: "how old is this level now" and "how old were this league's regulars this season". |
 | D8 | A player's season age | `scripts/lib/youngest-regulars.mjs`: `ageOnJune30` (decimal); `.scratch/team-success/build-roster-age.mjs` (statsapi's integer `stat.age`) | Every player | The spike compares clubs with each other in one season, and its header says the integer is good enough for that. |
-| D9 | How far a winner came back | `src/api/dayHighlights.js` (lowest win probability, seeded at 50); `scripts/gen-comeback-wins.mjs`: `bothMinWinProbs` (true minimum) | A winner who never fell below 50 | The seed only matters below the threshold (deficit > 25), so the two agree on every game either one reports. |
+| D9 | How far a winner came back | Resolved: the slate's day-highlights module (lowest win probability, seeded at 50) was deleted with the reveal-all chain (ADR-0116). `scripts/gen-comeback-wins.mjs`: `bothMinWinProbs` (true minimum) is the one left | — | — |
 | D10 | ABS chances per inning | `.scratch/abs-reports/analysis.mjs`: `chancesByInning` (failures before the half); `scripts/lib/abs/chances.mjs`: `chancesByInning` (`replayBank`, extra-inning re-arm, `scheduled_innings`) | Extra innings, and innings 8–9 of a seven-inning game | The spike is the draft. ADR-0075 records the correction. Quote the export, not the spike. |
 | D12 | An umpire's called ball | `scripts/gen-umpire-accuracy.mjs`, `src/api/umpireFavor.js`, `src/api/derive.js` (`'B'`, `'*B'`); `src/api/playbyplay/pitchInfo.js`: `BALL_CODES` (adds pitchouts, HBP, intentional and automatic balls) | A pitchout or an automatic ball | Those codes move the count but are not a zone judgment. |
 
@@ -209,14 +209,6 @@ named. The text is exact.
 // Not youngest-regulars.mjs's averageAge, which is age on June 30 over one
 // LEAGUE's regulars: "how old is this level now" is a different question
 // from "how old were this league's regulars this season".
-```
-
-**`src/api/dayHighlights.js`, beside `let worst = 50` (D9):**
-
-```js
-// Seeded at 50, so a winner who never trailed reads as a deficit of 0.
-// gen-comeback-wins.mjs's bothMinWinProbs takes the true minimum. The two
-// agree on every game this signal can fire on (deficit > 25).
 ```
 
 **`.scratch/abs-reports/analysis.mjs`, above `chancesByInning` (D10):**

@@ -40,9 +40,9 @@
    the point — not a second breath, the same one.
 
    SCOPED TO `.pagenav--innings`, AND THAT IS NOT DECORATION. `.btn--reveal` is
-   the kraft skin, not the frontier: the home slate wears it on "Reveal all
-   results" (both the day-state chip and its floating mobile twin) and a live
-   game's lineup page wears it on "Catch up to live". A bare `.btn--reveal` rule
+   the kraft skin, not the frontier: a live game's lineup page wears it on
+   "Catch up to live" (and the home slate once wore it on "Reveal all results",
+   removed in ADR-0116). A bare `.btn--reveal` rule
    put a permanent breath on the app's front door — a spoiler action, pulling
    the eye every time the slate is opened — which is the opposite of what this
    is for. InningActionBar's bar is the one place the tape is the frontier, so

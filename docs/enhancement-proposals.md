@@ -126,8 +126,9 @@ doesn't say "finished" (you'd need the feed to know how many halves the
 game had), so the plan must pick a mechanism — e.g. persist a small
 completion flag when the final half is revealed (a deliberate, ADR-worthy
 extension of the "only the half-index is stored, never a score" rule), or
-render every card sealed the way past-slate cards already do
-(`PastGameFlipCard` / `GameResultFace` are prior art).
+render every card sealed the way past-slate cards once did
+(`GameResultFace` is prior art; the slate flip card around it was removed in
+ADR-0116).
 
 **Likely touchpoints.** `src/hooks/useRevealProgress.js` (key enumeration,
 possibly a completion flag), a new `src/screens/` page, `src/lib/route.js`
@@ -163,7 +164,7 @@ Produce a plan document at .scratch/my-scorebook-shelf/plan.md covering:
    (which deletes the reveal mark — call out that this re-seals the game).
 3. Route + entry point: the new route shape in src/lib/route.js, where the
    link lives (SiteMenu? slate header next to /logos?), and the page's
-   screen component structure reusing GameCard/PastGameFlipCard prior art.
+   screen component structure reusing GameCard/GameResultFace prior art.
 4. Spoiler audit per rendered element (progress label wording matters:
    "through TOP 7" is safe; anything derived from outcomes is not).
 5. A verification plan (seed localStorage with a few known pks from

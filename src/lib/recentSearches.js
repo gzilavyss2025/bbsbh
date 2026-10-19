@@ -2,7 +2,7 @@
 // last opened from search, so the search screen has something useful on it the
 // moment it opens instead of a "type at least 2 letters" hint. React-free and
 // dependency-free so the parse rules can be pinned by the unit suite
-// (test/recent-searches.test.js), same shape as spoiledDays.js.
+// (test/recent-searches.test.js), same shape as stamps.js.
 //
 // Spoiler-safe by construction, and the reason is worth writing down rather
 // than assuming: an entry holds a person/club id, a display name, and the

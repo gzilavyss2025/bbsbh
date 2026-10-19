@@ -27,8 +27,7 @@
     "column": 2
   },
   "src/styles/07-team-logo-and-buttons.css": {
-    "wrap": 1,
-    "grid": 1
+    "wrap": 1
   },
   "src/styles/08-site-shell.css": {
     "column": 7,
@@ -111,7 +110,7 @@
   },
   "src/styles/22-box-score-tables.css": {
     "column": 10,
-    "wrap": 5,
+    "wrap": 4,
     "grid": 3
   },
   "src/styles/23-box-score-detail.css": {
@@ -124,7 +123,7 @@
   },
   "src/styles/25-wide-layout.css": {
     "column": 2,
-    "wrap": 2,
+    "wrap": 1,
     "grid": 4
   },
   "src/styles/26-player-page.css": {

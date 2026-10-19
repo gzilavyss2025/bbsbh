@@ -13,7 +13,7 @@
 // Ship the sync, then claim it, in the same PR.
 //
 // Every claim is also, necessarily, score-free — each names a MECHANISM (a mark,
-// a consent record, a keepsake, a setting), never a result. Read docs/game-log.md
+// a keepsake, a setting), never a result. Read docs/game-log.md
 // §3 before writing any of the labels: warm, second person, no exclamation
 // marks, and never a promise that this is a BACKUP. Sync is a convenience.
 
@@ -26,14 +26,6 @@ export const SYNCED_ITEMS = Object.freeze([
     // score (ADR-0022).
     blurb: 'How far you have opened each game, carried device to device.',
     module: 'src/components/sync/RevealCloudSync.jsx',
-  },
-  {
-    id: 'spoiledDays',
-    channel: 'spoiledDays',
-    label: 'Days you unsealed',
-    // The per-day consent record, never the pass itself (ADR-0026).
-    blurb: 'The days you agreed to see plainly stay agreed to, everywhere.',
-    module: 'src/components/sync/SpoiledDaysCloudSync.jsx',
   },
   {
     id: 'stamps',
@@ -73,20 +65,12 @@ export const SYNCED_ITEMS = Object.freeze([
 
 // Things that must NEVER appear in the ledger, with the reason attached. Pinned
 // by the unit suite, so an entry added here can only be removed deliberately.
-//
-// `scoresUnlocked` is the one that matters: mirroring the pass expiry would
-// unseal a second device the user never consented on. It is not a feature we
-// have not built yet — it is a thing we will not build (ADR-0026).
+// Each `label` is the user-facing name, so the copy that says what stays put is
+// rendered from this list rather than hand-written next to it. The whole point
+// of this module is that a claim — including a claim about what does NOT travel
+// — cannot drift from the code. (The Scores Unlocked pass was listed here until
+// the pass itself was removed, ADR-0116.)
 export const NEVER_SYNCED = Object.freeze([
-  {
-    id: 'scoresUnlocked',
-    // The user-facing name, so the copy that says what stays put is rendered
-    // from this list rather than hand-written next to it. The whole point of
-    // this module is that a claim — including a claim about what does NOT
-    // travel — cannot drift from the code.
-    label: 'Scores Unlocked',
-    why: 'The pass is an ephemeral, device-local render override. Mirroring it would unseal a device the user never consented on.',
-  },
   {
     id: 'recentSearches',
     label: 'your recent searches',

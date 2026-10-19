@@ -5,7 +5,7 @@
 //
 //   1. The CONSENT predicate. It decides whether the season is drawn at all,
 //      so it must fail CLOSED on anything stale, garbled or hand-edited —
-//      the same posture isUnlocked takes in src/lib/scoresUnlocked.js.
+//      the same posture parseRevealMark takes for the reveal mark.
 //   2. The GAME list. Only games already played may appear (a scheduled game
 //      has no result and nothing to stamp), newest first.
 //   3. The BUTTON's state. Stamped, ready to press, or refused because the

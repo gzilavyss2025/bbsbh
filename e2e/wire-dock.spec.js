@@ -11,9 +11,8 @@ import { stubWire } from './fixtures/wire-stub.js'
 //     .wirerail is absent; at and above it, the reverse. Two presentations of
 //     one feed, and never both at once.
 //  2. **The floor.** The slate pads its bottom by the rail's MEASURED height,
-//     so nothing the reader needs — the last game card, the footer, and above
-//     all the Reveal all results bar, which is a seal control on a scoring
-//     surface — can end up underneath the dock. That is a claim about two
+//     so nothing the reader needs — the last game card and the footer — can
+//     end up underneath the dock. That is a claim about two
 //     rendered boxes; no unit test can see it.
 //  3. **The gesture.** A tap opens a step, a drag lands on a detent, the
 //     ledger scrolls upward without moving the sheet, and a pull-down from
@@ -101,9 +100,8 @@ test('a desktop gets the rail beside the games and never the dock', async ({ pag
   await expect(page.locator('.screen--slate')).not.toHaveClass(/screen--wiredock/)
 })
 
-// The one that protects a scoring surface. The dock is fixed over the slate,
-// so if the slate did not pad itself the rail would sit on top of whatever the
-// page ends with — including the Reveal all results bar.
+// The dock is fixed over the slate, so if the slate did not pad itself the rail
+// would sit on top of whatever the page ends with.
 test('the slate keeps its floor clear of the dock', async ({ page }) => {
   await openSlate(page)
   await dockReady(page)

@@ -274,16 +274,16 @@ The reach half is that `StampGameButton.jsx` renders **inside** the box score's
 `SealBox` reveal render function. That host `SealBox` carries an `onReveal` since
 **ADR-0049** — but only on a real TAP, and it writes only
 `bbsbh:boxreveal:{gamePk}`, the one bit that re-opens that page. It is withheld
-whenever the pass or a stamp is the thing doing the opening, and it never touches
+whenever a stamp is the thing doing the opening, and it never touches
 `revealedThrough`. Both halves of that are load-bearing: an unconditional
-`onReveal` would let a box score opened under the Scores Unlocked pass record a
-mark for a seal nobody touched, and reaching `revealedThrough` would ratchet the
+`onReveal` would let a box score opened by a stamp record a mark for a seal
+nobody touched, and reaching `revealedThrough` would ratchet the
 whole game's by-hand frontier from one tap on a different page.
 
 #### The retired mint gate
 
 `POST /api/stamps` used to refuse unless the server could prove, from
-`reveal:{userId}:{gamePk}` or `spoiled:{userId}`, that the user had finished
+`reveal:{userId}:{gamePk}` or the since-removed `spoiled:{userId}` consent map, that the user had finished
 revealing the game (`meetsRevealGate`). **That gate is gone** — ADR-0035's second
 amendment has the full reasoning, and the short version is that the `SealBox`
 above deliberately persists nothing, so the ordinary way to stamp left no mark
@@ -428,7 +428,7 @@ character.
 
 A book's own identity (title, subtitle, cover club) syncs on a separate
 `books` channel — `api/books.js` + `src/components/sync/BooksCloudSync.jsx`,
-modeled on `api/spoiled-days.js`'s shape (one small per-user Redis hash, no
+modeled on the shape of the day-consent endpoint that was deleted in ADR-0116 (one small per-user Redis hash, no
 season sharding, since a user holds at most `MAX_BOOKS` of them) rather than
 `api/stamps.js`'s. Same removability-sync shape as stamps: a removed book
 publishes an explicit `'off'` rather than being deleted, so a device that was

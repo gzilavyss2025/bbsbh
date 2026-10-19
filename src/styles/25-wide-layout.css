@@ -78,13 +78,9 @@
     pointer-events: none;
   }
 
-  /* ---- slate: the date stepper and the day-state row (Live Scores toggle
-     and/or Reveal All) already share .slatehead's row at every width (base
-     rule further up); a 3-column grid replaces the base flex space-between
-     here so the date stepper reads as truly centered once there's room to
-     spare — on a plain day with neither control, the outer 1fr columns still
-     balance evenly and the date stepper doesn't drift toward whichever side
-     a control would have occupied. */
+  /* ---- slate: a 3-column grid replaces the base flex space-between here so
+     the date stepper in .slatehead's row reads as truly centered once there's
+     room to spare — the outer 1fr columns balance evenly. */
   .slatehead {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -95,24 +91,6 @@
   .datenav--row {
     grid-column: 2;
     max-width: 560px;
-  }
-
-  /* Rides in the grid's third column, right of the centered date stepper.
-     Both chips can be present at once (today, every game gone Final, pass
-     still off — see the JSX comment), so this stays a row that can hold
-     either or both rather than a single slot. */
-  .daystate {
-    grid-column: 3;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-  .daystate__chip--reveal {
-    display: inline-flex;
-    width: auto;
-    min-height: 28px;
-    margin-top: 0;
-    padding: 0 var(--space-3);
-    font-size: var(--fs-caption);
   }
 
   /* ---- the slate's two columns: the games, and the league's roster wire
@@ -269,15 +247,7 @@
     gap: var(--space-3);
   }
 
-  /* "Reveal all games" rides inline in the header's .daystate row once
-     there's room for it (see the .daystate__chip--reveal override above);
-     the mobile floating bottom bar hides here since there's no long scroll
-     to reach for. */
-  .pagenav--revealall {
-    display: none;
-  }
-
-  /* Same split for the box score's Refresh control (not Final games, which
+  /* The box score's Refresh control (not Final games, which
      drop it entirely — see BoxScore.jsx): inline in the header once there's
      room, the mobile floating pill hides here. */
   .boxscore__headright .innings__refresh {

@@ -9,8 +9,8 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // Headless — renders nothing, only runs the effects. Only ever mounted when
 // isClerkEnabled (see clerkConfig.js), so useAuth() always has a
 // ClerkProvider ancestor; App.jsx conditionally renders this component rather
-// than conditionally calling a hook, exactly as it does for
-// SpoiledDaysCloudSync and StampsCloudSync.
+// than conditionally calling a hook, exactly as it does for StampsCloudSync
+// and PreferencesCloudSync.
 //
 // What it syncs: a book's COVER — id, title, subtitle, cover club, and what is
 // stamped on it (`coverMark`/`coverColor`, the league-mark presets) (ADR-0036).
@@ -18,17 +18,15 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // the STAMP record's own `placement.bookId` (src/lib/stamps.js) and travels
 // with StampsCloudSync, not here.
 //
-// Sync model mirrors SpoiledDaysCloudSync exactly, `known`/`seen` refs and
-// all — not StampsCloudSync's single-ref shape. The reason is the shape of the
+// Sync model uses `known`/`seen` refs (the shape the since-removed spoiled-day
+// sync used) — not StampsCloudSync's single-ref shape. The reason is the shape of the
 // LOCAL store: `useStamps()` hands StampsCloudSync the raw map, tombstones
 // included, so a removal is right there to read off `entry.state`.
 // `useBooks()` deliberately does not — its public `books` is `listBooks(map)`,
-// LIVE ONLY (see the hook's own comments on `list`), on the same footing as
-// `useScoresUnlocked()`'s plain day list. So a book this device removed is not
-// distinguishable from a book it never had by looking at `books` alone; the
-// `seen` ref — this device's live books as of the last look — is what tells
-// the two apart, exactly as SpoiledDaysCloudSync's `seen` does for a day that
-// disappeared from the local list.
+// LIVE ONLY (see the hook's own comments on `list`). So a book this device
+// removed is not distinguishable from a book it never had by looking at
+// `books` alone; the `seen` ref — this device's live books as of the last
+// look — is what tells the two apart.
 //
 // localStorage (via useBooks) stays the instant, offline-first source of
 // truth and this only adds a background merge on top. On mount/sign-in, GET
@@ -40,15 +38,13 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // ---------------------------------------------------------------------------
 // WHAT A PULL LEAVES BEHIND — the baseline, and why it is the REMOTE
 // ---------------------------------------------------------------------------
-// Restating SpoiledDaysCloudSync's own header for this data, rather than
-// re-deriving it: `known` is what we believe the SERVER holds, and every pull
+// `known` is what we believe the SERVER holds, and every pull
 // overwrites it with what the server just said. The publish step then asks
 // `booksToPublish` — "what do I have that it doesn't?" — so a shelf that
 // predates sign-in backfills on the first pull instead of sitting on one
 // device forever. `src/lib/books.js`'s own header on `booksToPublish` — "WHY
-// THIS IS A COMPARISON AND NOT A CHANGE LOG" — makes the identical argument
-// for books that SpoiledDaysCloudSync's header makes for days (and
-// `stampsToPublish` made for stamps): a device that only diffs
+// THIS IS A COMPARISON AND NOT A CHANGE LOG" — makes the argument for books
+// that `stampsToPublish` made for stamps: a device that only diffs
 // against the last thing IT observed can never describe a collection that
 // predates that first observation, so read either header rather than this
 // one for the full case.

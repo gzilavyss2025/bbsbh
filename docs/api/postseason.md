@@ -21,8 +21,8 @@ The bracket shows each series **heading into the cutoff date**.
   live series page uses its `?d=` date, capped at today, or today.
 - Yesterday's results are not protected. That is a decision, not a gap. There
   is no `SealBox`, no seal and no kraft on any of this.
-- Scores Unlocked does not apply. Nothing here reads the switch, and nothing
-  writes to storage. `test/postseason/bracket-hook.test.js` scans for both.
+- No pass applies (the Scores Unlocked pass was removed in ADR-0116), and
+  nothing writes to storage. `test/postseason/bracket-hook.test.js` scans for both.
 
 ## The modules
 
@@ -37,7 +37,7 @@ The bracket shows each series **heading into the cutoff date**.
 
 ### The two reads (`fetch.js`)
 
-Both are separate from `fetchSchedule`, like `fetchSlateScores`.
+Both are separate from `fetchSchedule`.
 
 - **Skeleton**, `skeletonUrl(season)`: every postseason game (`gameType=F,D,L,W`)
   with `hydrate=team`. Fields: game ids, dates, `description`,
@@ -287,7 +287,7 @@ up. Below that width the page does not change.
   starter who really pitched once the day is past.
 - **Spoiler footing.** The cutoff is a date. A finished game before the cutoff shows
   plainly. Nothing from the day's own game, or a later game, is read. There is no
-  `SealBox`, no `--seal` token and no Scores Unlocked read. A live bracket that counts
+  `SealBox` and no `--seal` token. A live bracket that counts
   today's game gives no primer (`primerSeriesFor`).
 - **Past dates.** They have no nightly block, so the live read runs. The career
   matchups file covers only the current slate, so the matchup edges do not show.
@@ -401,10 +401,10 @@ grid (`styles/postseason/series-live.css`).
 page's pure game-bucket sort, slice 6), `series-roster` (the declared roster's
 date and its 26-player check), `upcoming-games`, `day-shape`, `series-flow`,
 `series-totals`, `keys-verdict`, `primer` and `primer-edges` (the series primer's rules), `use-primer` (its hook). `bracket-hook` also scans the series pages'
-parts for a seal or a Scores Unlocked read. The route is in `test/route.test.js`,
+parts for a seal or a pass read. The route is in `test/route.test.js`,
 and the slate model's `seriesStatus`/`leagueRecord` guard in
 `test/slate-scores.test.js`.
 
 ## World Series home reads (`worldSeriesHome.js`, #1906)
 
-One file, cutoff-gated (manifest entry). Every read ends the day before the slate date in the request and is filtered again on the rows; `live` (Scores Unlocked) lets the slate date's own Finals count. `fetchClubGames` rows: `{ gamePk, date, gameType, gameNumber, final, homeId, awayId, winnerId }`, no runs. `fetchSeriesRuns` folds box scores with `foldRunsByGame`. `fetchReelGames` drops a game dated on or after the slate date before any content read. `useWorldSeriesHome` (`src/hooks/postseason/`) returns the raw rows for the World Series selectors (slice 2).
+One file, cutoff-gated (manifest entry). Every read ends the day before the slate date in the request and is filtered again on the rows; an inert `live` option (default false, no caller since ADR-0116) would let the slate date's own Finals count. `fetchClubGames` rows: `{ gamePk, date, gameType, gameNumber, final, homeId, awayId, winnerId }`, no runs. `fetchSeriesRuns` folds box scores with `foldRunsByGame`. `fetchReelGames` drops a game dated on or after the slate date before any content read. `useWorldSeriesHome` (`src/hooks/postseason/`) returns the raw rows for the World Series selectors (slice 2).
