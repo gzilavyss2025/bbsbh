@@ -56,6 +56,12 @@ return cur`
 // score, same footing as revealedThrough itself (see ADR-0022).
 const SCOREBOOK_MAX = 24
 
+// The two per-game keys, built in one place so GET and POST cannot drift apart.
+const revealKeys = (userId, gamePk) => ({
+  key: `reveal:${userId}:${gamePk}`,
+  boxKey: `revealbox:${userId}:${gamePk}`,
+})
+
 export function sanitizeSnapshot(game) {
   if (!game || typeof game !== 'object') return null
   const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '')
@@ -193,8 +199,7 @@ export default async function handler(req, res) {
     return privateJson(res, { ok: true })
   }
 
-  const key = `reveal:${userId}:${gamePk}`
-  const boxKey = `revealbox:${userId}:${gamePk}`
+  const { key, boxKey } = revealKeys(userId, gamePk)
 
   if (req.method === 'GET') {
     // Both facts in one trip, in parallel: the client that asks for one of them
@@ -240,8 +245,7 @@ export default async function handler(req, res) {
 // The POST half, split out so a fake Redis can drive it and the unit suite can
 // count its round trips. Returns the reply body, or `{ error }` for a 400.
 export async function storeReveal(redis, userId, gamePk, body) {
-  const key = `reveal:${userId}:${gamePk}`
-  const boxKey = `revealbox:${userId}:${gamePk}`
+  const { key, boxKey } = revealKeys(userId, gamePk)
   const plan = plannedWrites(body)
   if (plan.error) {
     return { error: plan.error }
@@ -264,10 +268,22 @@ export async function storeReveal(redis, userId, gamePk, body) {
   // opens is small enough to leave alone. Failing to record one must never fail
   // the ratchet, which is the write that matters; losing it costs completeness on
   // a future erase, never a mark.
+  //
+  // The index write no longer waits on the ratchet, so a failed ratchet can leave
+  // a gamePk in the index with no mark behind it. That is harmless: the index is
+  // an identity, and the erase deletes a key that was never written as a no-op.
+  // The try/await/catch (not a bare `.catch`) also covers a synchronous throw.
+  const recordIndex = async () => {
+    try {
+      await redis.sadd(`reveal:index:${userId}`, gamePk)
+    } catch {
+      // Losing an index write costs completeness on a future erase, never a mark.
+    }
+  }
   const [ratcheted] = await Promise.all([
     plan.mark === null ? null : redis.eval(RATCHET_SCRIPT, [key], [plan.mark]),
     plan.box ? redis.set(boxKey, 1) : null,
-    redis.sadd(`reveal:index:${userId}`, gamePk).catch(() => {}),
+    recordIndex(),
   ])
   const next = ratcheted === null ? null : Number(ratcheted)
 
@@ -296,10 +312,12 @@ export async function storeReveal(redis, userId, gamePk, body) {
         // GET ?recent=1's own prune either way.
       }
     } else {
-      await redis.hset(bookKey, { [gamePk]: entry })
+      // The write and the length check go out together: the common case (a game
+      // already on the shelf, or room left) is then one trip, not two.
+      const [, size] = await redis.multi().hset(bookKey, { [gamePk]: entry }).hlen(bookKey).exec()
       // The full read is only needed to find WHAT to prune, so it waits until the
-      // cheap length check says something must go.
-      if ((await redis.hlen(bookKey)) > SCOREBOOK_MAX) {
+      // length says something must go.
+      if (size > SCOREBOOK_MAX) {
         const all = (await redis.hgetall(bookKey)) || {}
         const stale = Object.entries(all)
           .sort(([, a], [, b]) => (b?.updatedAt ?? 0) - (a?.updatedAt ?? 0))

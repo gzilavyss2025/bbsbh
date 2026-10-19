@@ -21,6 +21,7 @@ function fakeRedis(hashes = {}) {
   }
   const fake = {
     peak: 0,
+    execs: 0,
     calls,
     hashes,
     store: {},
@@ -42,6 +43,26 @@ function fakeRedis(hashes = {}) {
     async hset(key, obj) {
       await log('hset')
       this.hashes[key] = { ...(this.hashes[key] ?? {}), ...obj }
+    },
+    multi() {
+      const queued = []
+      const tx = {
+        hset: (key, obj) => (queued.push(['hset', key, obj]), tx),
+        hlen: (key) => (queued.push(['hlen', key]), tx),
+        exec: async () => {
+          await log('multi')
+          fake.execs += 1
+          const out = []
+          for (const [name, ...args] of queued) {
+            if (name === 'hset') {
+              fake.hashes[args[0]] = { ...(fake.hashes[args[0]] ?? {}), ...args[1] }
+              out.push(1)
+            } else out.push(Object.keys(fake.hashes[args[0]] ?? {}).length)
+          }
+          return out
+        },
+      }
+      return tx
     },
     async hlen(key) {
       await log('hlen')
@@ -69,12 +90,47 @@ test('a mark POST under the scorebook cap never reads the whole hash', async () 
   assert.ok(redis.hashes['scorebook:u1']['100'])
 })
 
+test('the scorebook write and its length check share one trip', async () => {
+  const redis = fakeRedis()
+  await storeReveal(redis, 'u1', '100', { revealedThrough: 3, game })
+  assert.equal(redis.execs, 1)
+  assert.equal(redis.calls.includes('hlen'), false)
+  assert.equal(redis.calls.includes('hset'), false)
+  assert.ok(redis.hashes['scorebook:u1']['100'])
+})
+
+test('an index write that throws synchronously is swallowed and the mark still returns', async () => {
+  const redis = fakeRedis()
+  redis.sadd = () => {
+    throw new TypeError('bad argument')
+  }
+  const out = await storeReveal(redis, 'u1', '100', { revealedThrough: 3 })
+  assert.deepEqual(out, { revealedThrough: 3, boxRevealed: false })
+})
+
+test('an index write that rejects is swallowed and the mark still returns', async () => {
+  const redis = fakeRedis()
+  redis.sadd = async () => {
+    throw new Error('down')
+  }
+  const out = await storeReveal(redis, 'u1', '100', { revealedThrough: 3 })
+  assert.deepEqual(out, { revealedThrough: 3, boxRevealed: false })
+})
+
+test('a failed ratchet surfaces to the caller instead of answering ok', async () => {
+  const redis = fakeRedis()
+  redis.eval = async () => {
+    throw new Error('script error')
+  }
+  await assert.rejects(storeReveal(redis, 'u1', '100', { revealedThrough: 3 }), /script error/)
+})
+
 test('a mark POST makes its independent writes together, then the scorebook write', async () => {
   const redis = fakeRedis()
   await storeReveal(redis, 'u1', '100', { revealedThrough: 3, boxRevealed: true, game })
   // eval, set and sadd have no dependency on each other; they may land in any
   // order but must all precede the scorebook write that needs the ratcheted mark.
-  const firstBook = redis.calls.indexOf('hset')
+  const firstBook = redis.calls.indexOf('multi')
   assert.deepEqual([...redis.calls.slice(0, firstBook)].sort(), ['eval', 'sadd', 'set'])
   assert.equal(redis.peak, 3)
 })
