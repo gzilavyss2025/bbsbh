@@ -412,3 +412,11 @@ One file, cutoff-gated (manifest entry). Every read ends the day before the slat
 ## World Series scouting meetings (`meetings.js`, #2316)
 
 `selectMeetings(rows, { clubA, clubB, slateDate })` (`src/lib/postseason/worldseries/scouting/meetings.js`, pure) keeps the Final regular-season games between the two clubs dated before the slate date, oldest first. `fetchMeetings({ clubA, clubB, slateDate })` reads the schedule, runs it, then reads each game's feed and returns `meetingCard` cards (the shape is in the file header; missing fields are `''`, `null`, `[]` or `{}`). The schedule request needs `startDate` with `endDate`: `endDate` alone answers HTTP 400. Cutoff-gated (manifest entry); `test/postseason/world-series-meetings.test.js`.
+
+## World Series scouting reads (`scout/`, `clubDefenseRunning.js`, #2316)
+
+All are open surfaces (ADR-0034) with no score. Every one degrades to an empty result on a failed read, and the card drops.
+
+- `src/api/scout/pitchByPitch.js`: a club's starter for a gamePk (the named probable, else the projected one) against the other club's regular hitters. Reads the arsenal, the hitter grid and the postseason splits, which end the day before the slate date. The model is `lib/postseason/worldseries/scouting/pitchByPitch.js`.
+- `src/api/scout/seriesFit.js`: the Platoon card (regular-season `statSplits` by pitcher hand) and the Park fit card (the `spray` store plus postseason PA that ends the day before the slate date). Models: `platoon.js`, `parkFit.js` in the same folder.
+- `src/api/clubDefenseRunning.js`: six season measures per club from `public/data/club-defense-running.json`, built nightly by `scripts/gen-club-defense-running.mjs`. A measure with no source is null, never 0. Sources: `docs/glove-and-legs-data.md`.
