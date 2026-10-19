@@ -101,7 +101,7 @@ import { filmCanExist } from '../../api/expresslane/eligibility.js'
 // at `writingUpTo` below for why there is a cap at all, and why it is small.
 const WRITE_ON_CAP = 6
 
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo, writing = false, treatment }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo, writing = false, treatment, sportId }) {
   const ws = useWsPlayCtx(feed, callouts) // World Series only: the play card's "last time" notes
   const stepping = stepCap != null
   // Whether RAW pitch clips can exist for this game at all — the same rules as Express Lane's
@@ -369,7 +369,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               windowed={windowed}
               beatKey={beatKey}
               writing={writingUpTo.has(i)}
-              replayLast={i === lastAtBat}
+              replayLast={i === lastAtBat} gamePk={feed?.gamePk} sportId={sportId}
             />
           )
         } else if (entry.eventType === 'pitching_substitution') {
@@ -549,8 +549,8 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 // have one home (see that file's TUNING note).
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
-function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false, replayLast = false }) {
-  const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live } = entry
+function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false, replayLast = false, gamePk, sportId }) {
+  const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live, eventType } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   // The at-bat replay (AtBatReplay.jsx), in one place at a time: inside the
   // zone cell on wide, in a sheet a phone opens on demand. Null at an untracked
@@ -762,7 +762,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
       {hasZone && (
         <Card as="div" frame="ledger" body="flush" className="pbp__zonecell">
           {replay && wide ? (
-            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} replay={replay} id={entry.atBatIndex} last={replayLast} />
+            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} replay={replay} id={entry.atBatIndex} last={replayLast} gamePk={gamePk} sportId={sportId} eventType={eventType} />
           ) : (
             <>
               <PitchList pitchDetails={pitchDetails} />
@@ -772,7 +772,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
         </Card>
       )}
       {replayOpen && replay && !wide && (
-        <ReplaySheet pitchDetails={pitchDetails} replay={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} />
+        <ReplaySheet pitchDetails={pitchDetails} replay={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} gamePk={gamePk} sportId={sportId} eventType={eventType} />
       )}
       {zoneOpen && hasZone && (
         <StrikeZoneModal

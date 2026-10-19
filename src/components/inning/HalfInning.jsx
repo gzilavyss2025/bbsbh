@@ -47,6 +47,7 @@ export function HalfInning({
   onRunsSoFar,
   onLiveState,
   treatment,
+  sportId,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
   // appearance at a time (the floating bar's "Next at-bat" button) has
@@ -468,6 +469,7 @@ export function HalfInning({
                 callouts={callouts}
                 vsTeam={vsTeam}
                 treatment={treatment}
+                sportId={sportId}
                 highlightsMap={highlightsMap}
                 writing={writing}
                 stepCap={stepping ? revealedAtBatCount : null}

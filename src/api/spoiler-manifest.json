@@ -1017,8 +1017,10 @@
     },
     "savant/gameFeed.js": {
       "class": "reveal-only",
-      "why": "Contact replay phase B (#1771) — Savant /gf bat-tracking fields (batSpeed, xba, barrel, homeRunBallparks) for one game, stripped on parse. The /gf body carries the whole game's linescore, box score and play text, so the module fetches and parses in one scope, reads only team_home[] and team_away[], keeps five fields per row and lets the raw body go out of scope; no cache, ref or state holds it and nothing logs it. What survives still describes one batted ball, so it is callable only from the replay inside the half's reveal. MLB only: sportId other than 1 returns an empty Map and makes no fetch. Nothing imports it yet.",
-      "importers": []
+      "why": "Contact replay phase B (#1771) — Savant /gf bat-tracking fields (batSpeed, xba, barrel, homeRunBallparks) for one game, stripped on parse. The /gf body carries the whole game's linescore, box score and play text, so the module fetches and parses in one scope, reads only team_home[] and team_away[], keeps five fields per row and lets the raw body go out of scope; no cache, ref or state holds it and nothing logs it. What survives still describes one batted ball, so it is callable only from the replay inside the half's reveal. MLB only: sportId other than 1 returns an empty Map and makes no fetch. Its one importer is the replay, which mounts only inside the half's reveal; it keeps only the at-bat's own swings (fetchAtBatTracking).",
+      "importers": [
+        "components/playbyplay/pitcherCard/AtBatReplay.jsx"
+      ]
     },
     "scout/headToHead.js": {
       "class": "spoiler-free",

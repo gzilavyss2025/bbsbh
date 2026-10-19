@@ -36,3 +36,18 @@ export async function fetchSavantBatTracking(gamePk, sportId) {
   }
   return out
 }
+
+// Only this at-bat's swings (playIds in), kept for the session: a later open asks Savant again only
+// while one of them still has no bat speed (it arrives minutes late, #1771). The whole-game Map never
+// leaves this function, so nothing else of the game is held. MiLB: nothing and no fetch.
+const kept = new Map()
+export async function fetchAtBatTracking(gamePk, sportId, playIds) {
+  const out = new Map()
+  if (sportId !== 1 || playIds.length === 0) return out
+  if (!playIds.every((id) => kept.get(id)?.batSpeed != null)) {
+    const all = await fetchSavantBatTracking(gamePk, sportId)
+    playIds.forEach((id) => all.has(id) && kept.set(id, all.get(id)))
+  }
+  playIds.forEach((id) => kept.has(id) && out.set(id, kept.get(id)))
+  return out
+}

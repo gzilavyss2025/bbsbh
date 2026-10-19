@@ -41,8 +41,9 @@ const f1 = (v) => v.toFixed(1)
 // the contact and the batted ball (contactDraw.js). Its ball stops at the contact point, not the plate,
 // and `onLand` fires at contact. `onFrame(idx, tau, rest)` is a plain callback on EVERY draw: `tau` is ms
 // on the pitch's slot, `rest` true for the rest frame (the end state, and all of reduced motion).
-// `under` is drawn between the scene and its bar (the side view, §5).
-export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, onLand, onFrame, under, view = 'hitter', slow = SLOW, zone, atBat, play }) {
+// `under` is drawn between the scene and its bar (the side view, §5). `bat` is the Map of Savant bat tracking by playId
+// (phase B); it is read through a ref, so data arriving redraws the rest frame and never restarts a replay.
+export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, onLand, onFrame, under, bat, view = 'hitter', slow = SLOW, zone, atBat, play }) {
   const ghostRefs = useRef([])
   const segRefs = useRef([])
   const ballRef = useRef(null)
@@ -56,6 +57,9 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
   const mk = useRef({ smear: [], segs: [], ticks: [], parts: {} })
   const frameRef = useRef(onFrame) // a ref: an inline callback must not restart the replay
   frameRef.current = onFrame
+  const batRef = useRef(bat)
+  batRef.current = bat
+  const redrawRef = useRef(null)
 
   useEffect(() => {
     let shownIdx = -1
@@ -72,7 +76,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
       const done = rf ? rf.done : frame.done
       const idx = rf ? rf.idx : picked >= 0 ? picked : frame.idx
       const p = pitches[idx]
-      const sw = rf && (idx in scenes ? scenes[idx] : (scenes[idx] = swingScene(p, beatsList[idx])))
+      const sw = rf && (idx in scenes ? scenes[idx] : (scenes[idx] = swingScene(p, beatsList[idx], batRef.current?.get(p.playId))))
       let { progress } = frame
       let ball
       if (sw) ({ progress, ball } = drawContact(mk.current, p, beatsList[idx], sw, rf.tau, slow, done))
@@ -142,6 +146,11 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
     // The replay starts at release; the card shows its first pitch whole
     // until the clock runs (and for good under reduced motion).
     draw(atBat != null && !resting && !(reduce && picked >= 0) ? 0 : null)
+    // New bat data: rebuild the swings; a resting frame redraws, a running replay picks them up on its next frame.
+    redrawRef.current = () => {
+      scenes.length = 0
+      if (resting || reduce) draw(null)
+    }
     if (reduce || resting) return undefined
 
     // On-screen time only, so a replay scrolled into view starts at its first
@@ -169,6 +178,8 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
       io.disconnect()
     }
   }, [pitches, onActive, onLand, slow, atBat, play])
+
+  useEffect(() => redrawRef.current?.(), [bat])
 
   const [rx, ry] = pitches[0]?.pts[0] ?? releasePoint(lefty, view)
   const hitterStage = useMemo(() => (zone ? stage(zone) : STAGE), [zone])
