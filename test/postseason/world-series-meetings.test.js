@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs'
 import test, { mock } from 'node:test'
 import { fetchMeetings, meetingCard, meetingsUrl } from '../../src/api/postseason/meetings.js'
 import { keptGames } from '../../src/api/postseason/fetch.js'
-import { selectMeetings } from '../../src/lib/postseason/worldseries/meetings.js'
+import { selectMeetings } from '../../src/lib/postseason/worldseries/scouting/meetings.js'
 
 const load = (name) => JSON.parse(readFileSync(new URL(`./meetings-fixtures/${name}`, import.meta.url), 'utf8'))
 const rows = keptGames(load('brewers-2026-schedule.json'))

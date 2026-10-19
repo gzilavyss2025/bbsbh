@@ -23,7 +23,7 @@
 //     starter: { id, name, hand, ip, h, er, bb, k, pitches, mix: { [pitchCode]: count } },
 //     lineup: [{ id, name, pos }] },
 //   scoring: [{ inning: 'T1' | 'B6', text }] }
-import { selectMeetings } from '../../lib/postseason/worldseries/meetings.js'
+import { selectMeetings } from '../../lib/postseason/worldseries/scouting/meetings.js'
 import { getJson } from '../statsapi.js'
 import { dayBefore, keptGames } from './fetch.js'
 

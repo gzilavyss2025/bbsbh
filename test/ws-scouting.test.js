@@ -2,7 +2,7 @@
 // in what order, and which are dropped for want of data.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { scoutingModel } from '../src/lib/postseason/worldseries/scouting.js'
+import { scoutingModel } from '../src/lib/postseason/worldseries/scouting/scouting.js'
 
 const FULL = { nineKeys: true, edges: [{ id: 1 }], plateUmpire: { id: 9, name: 'A. Ump' } }
 const ids = (m) => m.map((c) => c.id)
