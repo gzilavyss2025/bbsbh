@@ -228,8 +228,8 @@ PHONE (375 px)                              TABLET / DESKTOP (≥ 740 px, screen
   on this pitcher's hand. Each map draws the stance box of its own data. With
   "vs L" against a right-hander, the two maps show two different boxes. See
   Gary, item 1.
-- **Persistence (Phase 1).** View, Scope, Hand, Metric and Pitch go in the URL
-  (`?view=hitter&scope=post&hand=r&metric=whiff&pitch=SL`) and in
+- **Persistence (Phase 1).** Scope, Hand, Metric and Pitch go in the URL
+  (`?scope=post&hand=r&metric=whiff&pitch=SL`) and in
   `localStorage`. Not in My Tally: its set is closed at four fields
   (ADR-0039).
 

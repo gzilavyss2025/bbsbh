@@ -15,7 +15,6 @@ import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { Notice } from '../../components/ui/state/Notice.jsx'
-import { Choice } from '../../components/scout/Choice.jsx'
 import { Matchup } from '../../components/scout/Matchup.jsx'
 import { loadScout } from './loadScout.js'
 import { pitcherBoard } from './board.js'
@@ -40,10 +39,10 @@ import { MeetingsPanel } from './meetings/MeetingsPanel.jsx'
 // here is a season aggregate over final games, except the meetings, which
 // hold back every game dated on or after the cutoff (MeetingsPanel.jsx).
 //
-// THE ADDRESS HOLDS THE CHOICES (lib/scout/route.js): `?view`, `?scope`,
+// THE ADDRESS HOLDS THE CHOICES (lib/scout/route.js): `?scope`,
 // `?pitch`, `?hand`, `?metric`, `?tab`, `?d`. A change replaces the address, so
-// Back leaves the page rather than undoing a tap. The view also persists in
-// localStorage (ADR-0093), never in My Tally (ADR-0039).
+// Back leaves the page rather than undoing a tap. There is one view, the
+// hitter's (ADR-0118); an old `?view=` link opens the page and is ignored.
 //
 // SCOPE moves the maps, the ledger and the meetings together (the stores keep
 // the postseason beside the regular season, ADR-0094); the chip names it.
@@ -55,31 +54,18 @@ import { MeetingsPanel } from './meetings/MeetingsPanel.jsx'
 // value: with no hitter regions it would be his whole-type value, the same
 // for every pitcher.
 
-const VIEWS = [['pitcher', 'Pitcher’s'], ['hitter', 'Hitter’s']]
-const VIEW_KEY = 'bbsbh:scout:view'
 const SCOPE_TAG = { reg: 'Regular season', post: 'Postseason', all: 'Regular season + postseason' }
 const TABS = [['edge', 'Edge', 'who it favors'], ['zones', 'Zones', 'where'], ['meet', 'Meetings', 'pitch by pitch']]
 const other = (h) => (h === 'R' ? 'L' : 'R')
 const noPicks = { pitcher: null, hitter: null }
 
-function storedView() {
-  try {
-    const v = window.localStorage.getItem(VIEW_KEY)
-    return v === 'hitter' || v === 'pitcher' ? v : null
-  } catch {
-    return null
-  }
-}
-
-export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, pitch, hand: handParam, metric: metricParam, tab = 'edge' }) {
+export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handParam, metric: metricParam, tab = 'edge' }) {
   useDocumentTitle('Matchup Scout')
   const navigate = useNav()
-  const [savedView, setSavedView] = useState(storedView)
-  const view = viewParam ?? savedView ?? 'pitcher'
+  const view = 'hitter'
   const [picks, setPicks] = useState(noPicks)
   const [changing, setChanging] = useState(false)
   const [picked, setPicked] = useState(null)
-  const [turns, setTurns] = useState(0)
   const [inFlight, setInFlight] = useState(null)
   const [filters, setFilters] = useState(false)
 
@@ -134,17 +120,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
   // Every choice rewrites the address in place.
   const go = (patch, replace = true) => {
     const pair = data ? { pitcher: data.pitcher, hitter: data.hitter } : picks
-    navigate(scoutPath({ ...pair, view, scope, pitch: sel, hand: handParam, metric: metricParam, tab, d: asOf, ...patch }), { replace })
-  }
-  const setView = (v) => {
-    try {
-      window.localStorage.setItem(VIEW_KEY, v)
-    } catch {
-      // A blocked store only costs the default on the next visit.
-    }
-    setSavedView(v)
-    setTurns((n) => n + 1)
-    go({ view: v })
+    navigate(scoutPath({ ...pair, scope, pitch: sel, hand: handParam, metric: metricParam, tab, d: asOf, ...patch }), { replace })
   }
   const setMetric = (k) => go({ metric: k === metrics[0] ? null : k })
   const selectPitch = (code) => {
@@ -207,14 +183,8 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
                   view={view}
                   onActive={onActive}
                   caption={sceneCaption}
-                  label="View"
-                  options={VIEWS}
-                  value={view}
-                  onChange={setView}
                 />
-              ) : (
-                <Choice label="View" options={VIEWS} value={view} onChange={setView} />
-              )}
+              ) : null}
 
               {board && (
                 <div ref={pillRow} className="scout__control scout__control--scroll" role="group" aria-label="Pitch">
@@ -288,7 +258,6 @@ export function ScoutPage({ pitcherId, hitterId, asOf, view: viewParam, scope, p
                     metric={metric}
                     picked={picked}
                     onPick={setPicked}
-                    turns={turns}
                   />
                 )}
                 {tab === 'meet' && (
