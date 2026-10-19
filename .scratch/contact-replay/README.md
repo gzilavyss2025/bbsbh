@@ -10,3 +10,7 @@ claude.ai page, copied 2026-10-19). Open it in a browser to see the replay.
 - It is one page with one loop. The app splits the work across `PitchScene`,
   `SideView` and `QualityLine`. Use the clock design in the run plan's prompts.
 - When this file and `docs/contact-replay.md` do not agree, the spec wins.
+
+`run-plan.md` is the run plan for `/orchestrate`: the table, the standing
+answers and the ten prompts. `facts.md` holds the facts those prompts treat as
+settled.
