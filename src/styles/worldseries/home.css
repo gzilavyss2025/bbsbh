@@ -558,3 +558,14 @@
   font-size: var(--fs-cell);
   color: var(--text-caption);
 }
+
+/* The scouting report (#2316). The jump bar stays on screen as the page scrolls; each card
+   stops below it when a button scrolls to it. 68px is BAR_H in ScoutingReport.jsx. */
+.jumpbar.ww-scout__jump {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+.ww-scout__card {
+  scroll-margin-top: 68px;
+}
