@@ -1,0 +1,1011 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Contact Replay Study</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a scorebook spread. Left page = the working replay card at phone size;
+   right page = its beat sheet with a live playhead. Rules and sources follow below.
+   Single paper theme on purpose: the app itself is light paper only. */
+:root {
+  color-scheme: light;
+  /* Tally Baseball tokens (src/tokens/colors.css) */
+  --paper-0: #F6EFDC;   /* canvas */
+  --paper-2: #FBF6E9;   /* card */
+  --paper-3: #FFFDF6;   /* inset */
+  --ink-0: #0F1822;
+  --ink-1: #1B2A3A;     /* navy: measured ink */
+  --ink-2: #3C4A5A;
+  --graphite: #6B6558;  /* pencil: drawn inference */
+  --graphite-soft: #938C7C;
+  --rule: #CBC1A7;
+  --rule-soft: #DED6C0;
+  --rule-grid: #EDE6D1;
+  --clay: #B4453A;
+  --clay-deep: #8E332B;
+  --field: #2F6E4F;
+  --outfield: #D8E6C9;
+  --dirt: #D6AA83;
+  --on-ink: #FBF6E9;
+  --marker: #F2C14E;
+  --field-deep: #255740;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --ease-stamp: cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper-0);
+  color: var(--ink-1);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+  background-image:
+    linear-gradient(var(--rule-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 40px; }
+.eyebrow, .label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  color: var(--graphite);
+}
+h1, h2, h3 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--ink-0);
+  margin: 0;
+  text-wrap: balance;
+  line-height: 1.02;
+}
+h1 { font-size: clamp(40px, 7vw, 68px); font-weight: 700; }
+h2 { font-size: 28px; font-weight: 700; }
+h3 { font-size: 17px; font-weight: 700; letter-spacing: 0.04em; }
+p { margin: 0; max-width: 66ch; }
+.lede { font-size: 14px; color: var(--ink-2); }
+header { display: grid; gap: 12px; }
+.ink-pencil { display: inline-flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+.key { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.key i { display: inline-block; width: 26px; height: 0; border-top: 2.5px solid var(--ink-1); }
+.key i.pencil { border-top: 2px dashed var(--graphite); }
+
+/* ---------- spread ---------- */
+.spread { display: grid; grid-template-columns: minmax(0, 372px) minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (max-width: 820px) { .spread { grid-template-columns: minmax(0, 1fr); } }
+
+/* the replay card, as the app draws it (.pcard .pbp__replay) */
+.card {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 var(--rule-soft);
+  overflow: hidden;
+  max-width: 372px;
+  width: 100%;
+}
+.card__head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 8px 10px 6px; border-bottom: 1px solid var(--rule-soft);
+}
+.card__head b { font-family: var(--font-display); font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-0); }
+.scene { position: relative; display: block; width: 100%; }
+.scene svg { display: block; width: 100%; height: auto; }
+.bar {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px;
+  padding: 6px 10px; background: var(--ink-1); color: var(--on-ink);
+  font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.06em;
+}
+.bar .nm { font-weight: 700; font-size: 15px; }
+.bar .mph { font-family: var(--font-mono); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.bar .st, .bar .cl { font-size: 12px; opacity: 0.85; }
+.bar .cl { text-align: right; }
+.side { display: block; width: 100%; height: auto; background: var(--paper-3); border-bottom: 1px solid var(--rule-soft); }
+.readout {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
+  min-height: 62px; padding: 10px 10px 12px;
+}
+.fig { display: grid; gap: 0; will-change: transform, opacity; }
+.fig b { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--ink-0); font-variant-numeric: tabular-nums; }
+.fig b.wait { color: var(--graphite-soft); font-weight: 500; }
+.fig span { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--graphite); }
+.verdict {
+  margin-left: auto;
+  font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  font-size: 14px; color: var(--clay-deep);
+  border: 2px solid var(--clay); border-radius: 3px; padding: 1px 8px;
+  will-change: transform, opacity;
+}
+.verdict--hit { color: var(--field-deep); border-color: var(--field); }
+.controls { display: grid; gap: 10px; padding: 12px 10px 14px; border-top: 1px solid var(--rule-soft); background: var(--paper-0); }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.row .label { min-width: 54px; }
+button {
+  font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: 13px; color: var(--ink-1); background: var(--paper-3);
+  border: 1px solid var(--rule); border-radius: 3px; padding: 5px 10px; min-height: 44px; cursor: pointer;
+  transition: transform 120ms var(--ease-stamp), background-color 120ms ease;
+}
+button:active { transform: scale(0.97); }
+button[aria-pressed="true"] { background: var(--ink-1); color: var(--on-ink); border-color: var(--ink-1); }
+button.play { background: var(--ink-1); color: var(--on-ink); border-color: var(--ink-1); padding: 7px 14px; font-size: 14px; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--clay); outline-offset: 2px; }
+input[type="range"] { flex: 1; min-width: 120px; accent-color: var(--ink-1); }
+.note { font-size: 11px; color: var(--graphite); }
+
+/* beat sheet */
+.beats { display: grid; gap: 16px; min-width: 0; }
+.beat-svg-wrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--paper-3); border-radius: 4px; }
+.beat-svg-wrap svg { display: block; width: 100%; min-width: 520px; height: auto; }
+.beatlist { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.beatlist li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+.beatlist li > span:first-child { font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 14px; color: var(--ink-0); }
+.ms { font-variant-numeric: tabular-nums; color: var(--clay-deep); font-weight: 700; }
+
+/* sections */
+section { display: grid; gap: 16px; }
+.rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 14px; }
+.rule-card { background: var(--paper-2); border: 1px solid var(--rule); border-radius: 4px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.rule-card .src { font-size: 11px; color: var(--graphite); }
+.rule-card .src a { color: var(--ink-2); }
+.tag { display: inline-block; font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 0 5px; border-radius: 2px; vertical-align: 1px; }
+.tag.s { background: var(--ink-1); color: var(--on-ink); }
+.tag.i { border: 1px dashed var(--graphite); color: var(--graphite); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper-2); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 12px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+th { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; color: var(--graphite); font-weight: 600; background: var(--paper-0); }
+td.ink { color: var(--ink-0); font-weight: 700; }
+td.pencil { color: var(--graphite); font-style: italic; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px; }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.sources { font-size: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 6px 32px; margin: 0; padding-left: 20px; }
+.sources li { overflow-wrap: anywhere; }
+a { color: var(--ink-1); text-underline-offset: 2px; }
+hr { border: 0; border-top: 2px solid var(--ink-1); margin: 0; }
+@media (prefers-reduced-motion: reduce) { button { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Issue #1771 · design study for Part 1 and Part 2 · sample data</div>
+    <h1>Contact Replay</h1>
+    <p class="lede">The at-bat replay (PR #1521) ends when the pitch reaches the plate. This study adds the swing, the contact or the miss, and the ball after contact. It also adds the quality line. The scene uses the app's real camera (scene.js: 6 ft behind the plate, 4 ft high, focal length 410), the app's paper tokens, and the app's pitch colours. All numbers on this page are invented samples, not real games.</p>
+    <div class="ink-pencil">
+      <span class="key"><i></i> Ink: measured (pitch path, exit velocity, launch angle, distance)</span>
+      <span class="key"><i class="pencil"></i> Pencil: drawn (the swing, the apex, the bat before contact)</span>
+    </div>
+  </header>
+
+  <div class="spread">
+    <!-- ================= the card ================= -->
+    <div class="card" id="card">
+      <div class="card__head"><b id="batter">Replay</b><span class="label" id="tierLabel">Live tier</span></div>
+      <div class="scene"><svg id="scene" viewBox="0 0 336 312" role="img" aria-label="Behind-the-plate drawing of the pitch, the swing and the batted ball"></svg></div>
+      <svg class="side" id="side" viewBox="0 0 336 100" role="img" aria-label="Side view of the batted ball's flight"></svg>
+      <div class="bar" aria-live="off">
+        <span class="nm" id="barName">Four-seam</span><span class="mph" id="barMph">96 mph</span>
+        <span class="st" id="barStep">Pitch 5 of 5</span><span class="cl" id="barCall">In play, out</span>
+      </div>
+      <div class="readout" id="readout"></div>
+      <div class="controls">
+        <div class="row" role="group" aria-label="Sample at-bat">
+          <span class="label">Sample</span>
+          <span id="samples" class="row"></span>
+        </div>
+        <div class="row">
+          <button class="play" id="play" type="button">Play at-bat</button>
+          <button id="rest" type="button">Rest frame</button>
+          <button id="speed" type="button" aria-pressed="true">×3 slow</button>
+          <button id="tier" type="button" aria-pressed="false">Final tier</button>
+        </div>
+        <div class="row">
+          <label class="label" for="scrub">Scrub</label>
+          <input id="scrub" type="range" min="0" max="1000" value="1000" step="1">
+        </div>
+        <p class="note" id="rmNote" hidden>Your device asks for reduced motion. Play shows the rest frame, and the scrubber still steps through the beats.</p>
+      </div>
+    </div>
+
+    <!-- ================= beat sheet ================= -->
+    <div class="beats">
+      <div>
+        <div class="eyebrow">Beat sheet for this sample · live playhead</div>
+        <h2>One clock, eight beats</h2>
+      </div>
+      <div class="beat-svg-wrap"><svg id="beatsvg" viewBox="0 0 640 230" role="img" aria-label="Timeline of the replay beats"></svg></div>
+      <ul class="beatlist">
+        <li><span>Pitch</span><p>No change to PR #1521. The trail thickens as the ball comes closer, in the pitch's own colour. At ×3 the pitch takes about <span class="ms" data-b="pitch">1200 ms</span>.</p></li>
+        <li><span>Coil</span><p>Anticipation. The bat winds back a little before it fires, so the eye knows a swing is coming. Real 90 ms, shown <span class="ms" data-b="coil">270 ms</span>. Pencil.</p></li>
+        <li><span>Swing</span><p>The barrel gathers speed into the ball. This is the one place an ease-in is right: the app already uses <code>--ease-press</code> only for things that are thrown or pushed. Real 160 ms, with 4 smear frames behind the bat.</p></li>
+        <li><span>Hit-stop</span><p>On contact everything freezes for <span class="ms" data-b="stop">66 ms</span> (4 frames at 60 Hz). A whiff gets no freeze, so the missing beat itself says "miss".</p></li>
+        <li><span>Contact</span><p>One ring from 0.8× the ball, never wider than one zone cell, and 8 short ink ticks, the same tick idea as the big-play stamp. The ring's size and strength follow squared-up %, so a flush hit looks flush. One flash only.</p></li>
+        <li><span>Exit</span><p>The ball leaves on its measured launch angle and spray angle in navy ink, a new colour for a new object. Its trail is as wide as the ball at each point, like the pitch trail, so the departure reads. The scene follows it only until it leaves the frame. From behind the plate a grounder runs UP the screen toward the horizon, like a liner. So the measured trajectory (GROUND BALL) shows as a tag at contact, and the ball gets a shadow and a ground track while it flies.</p></li>
+        <li><span>Side view</span><p>A cut to a side view at one fixed scale (0 to 450 ft) for every at-bat. The pace matches the player page's Contact card: 500 ms per second of hang time, 700 to 2800 ms. The landing ring is that card's ring.</p></li>
+        <li><span>Quality line</span><p>Figures rise 4 px and fade in, <span class="ms">220 ms</span> each, <span class="ms">55 ms</span> apart (<code>--stagger-step</code>). The verdict lands last with the stamp-in curve, <span class="ms">380 ms</span>.</p></li>
+      </ul>
+    </div>
+  </div>
+
+  <hr>
+
+  <section>
+    <div>
+      <div class="eyebrow">What the motion skills say, applied to this graphic</div>
+      <h2>Ten rules</h2>
+    </div>
+    <p class="note"><span class="tag s">Source</span> means the source states it. <span class="tag i">Inference</span> means I applied it to this graphic; the source does not talk about baseball.</p>
+    <div class="rules" id="rules"></div>
+  </section>
+
+  <section>
+    <div>
+      <div class="eyebrow">Every mark, its data, and its pen</div>
+      <h2>Measured or drawn</h2>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Mark</th><th>Data</th><th>Ready</th><th>Pen</th></tr></thead>
+        <tbody>
+          <tr><td>Pitch path</td><td>MLB feed <code>pitchData</code> (PR #1521)</td><td>about 10 s</td><td class="ink">Ink, pitch colour</td></tr>
+          <tr><td>Bat before contact</td><td>none in any public source</td><td>never</td><td class="pencil">Pencil, always</td></tr>
+          <tr><td>Swing timing</td><td><code>batSpeed</code> in Savant <code>/gf</code>, else a default</td><td>median 162 s, p90 479 s</td><td class="pencil">Pencil</td></tr>
+          <tr><td>Bat at contact</td><td>CSV <code>attack_angle</code>, <code>attack_direction</code></td><td>after the game</td><td class="pencil">Pencil live, ink in the final tier</td></tr>
+          <tr><td>Exit path in the scene</td><td>MLB feed <code>hitData</code> launch speed, angle, coordinates</td><td>about 10 s</td><td class="ink">Navy ink</td></tr>
+          <tr><td>Side-view arc</td><td><code>hitData</code> speed, angle, distance; the arc between is a drag-and-lift fit (contactFlight.js)</td><td>about 10 s</td><td class="ink">Ink line, pencil apex label</td></tr>
+          <tr><td>xBA, barrel</td><td>Savant <code>/gf</code></td><td>median 45 to 51 s</td><td class="ink">Ink</td></tr>
+          <tr><td>Squared-up %</td><td>computed: EV ÷ (1.23 × bat speed + 0.2116 × pitch speed)</td><td>waits for bat speed</td><td class="ink">Ink, or "waits" in graphite</td></tr>
+          <tr><td>HR parks</td><td><code>/gf</code> <code>homeRunBallparks</code></td><td>about 1 min</td><td class="ink">Ink</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="two">
+    <div style="display:grid;gap:12px">
+      <h3>Left out on purpose</h3>
+      <ul class="plain">
+        <li><b>A batter figure.</b> A body would be a third kind of mark that is neither measured nor useful. The bat alone carries the swing.</li>
+        <li><b>A camera pan after a fly ball.</b> A pan rescales the scene during a transition, which Heer and Robertson warn against. The cut to a fixed-scale side view keeps one scale per view.</li>
+        <li><b>Numbers that count up.</b> Scorebook figures are written, not spun. A count-up also delays the one number the reader came for.</li>
+        <li><b>Bounce and confetti.</b> The app's curves settle with no overshoot. A home run gets a second landing ring, as on the player page, and nothing more.</li>
+        <li><b>Onion-skin dots on the pitch.</b> Some pitch tracers use them, but the app's thickening trail already reads well. The replay must not change the Now Pitching card's look.</li>
+      </ul>
+    </div>
+    <div style="display:grid;gap:12px">
+      <h3>Still open (from the issue)</h3>
+      <ul class="plain">
+        <li><b>The <code>/gf</code> spoiler call.</b> <code>/gf</code> returns the whole game. This design reads it only inside a revealed at-bat, but where it may be held is your call.</li>
+        <li><b>Live tier only, or both tiers?</b> Try the "Final tier" button: only the bat at contact changes from pencil to ink.</li>
+        <li><b>Card height.</b> The side-view strip keeps its space on every pitch, so the card does not change height mid-replay (ADR-0046: nothing moves while it plays).</li>
+        <li><b>MiLB.</b> No tracked flight means no replay, as today. A park with flights but no bat data gets the default swing.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h3>Sources</h3>
+    <ol class="sources">
+      <li>This repo: <code>.claude/skills/review-animations/STANDARDS.md</code>, <code>emil-design-eng</code>, <code>apple-design</code>, <code>docs/motion.md</code>, <code>src/tokens/effects.css</code>, <code>docs/design-inspiration.md</code> §9, ADR-0046.</li>
+      <li>This repo's code: <code>src/lib/pitcherCard/scene.js</code> (camera, pitch arc), <code>src/components/playbyplay/pitcherCard/PitchScene.jsx</code> (trail, rAF loop), <code>src/screens/player/next/modules/contact/contactFlight.js</code> (flight fit, pacing, landing rings).</li>
+      <li>Emil Kowalski, skills: <a href="https://github.com/emilkowalski/skills">github.com/emilkowalski/skills</a></li>
+      <li>Vercel, Web Interface Guidelines: <a href="https://github.com/vercel-labs/web-interface-guidelines">github.com/vercel-labs/web-interface-guidelines</a></li>
+      <li>Rauno Freiberg, interfaces: <a href="https://github.com/raunofreiberg/interfaces">github.com/raunofreiberg/interfaces</a></li>
+      <li>Motion AI kit and llms.txt: <a href="https://github.com/motiondivision/ai-kit">github.com/motiondivision/ai-kit</a>, <a href="https://motion.dev/llms.txt">motion.dev/llms.txt</a></li>
+      <li>Anthropic skills (frontend-design, algorithmic-art): <a href="https://github.com/anthropics/skills">github.com/anthropics/skills</a></li>
+      <li>Animation principles as skills (game-development, data-visualization, accessible-motion): <a href="https://github.com/dylantarre/animation-principles">github.com/dylantarre/animation-principles</a></li>
+      <li>Remotion skills: <a href="https://github.com/remotion-dev/skills">github.com/remotion-dev/skills</a></li>
+      <li>Josh Comeau, spring physics: <a href="https://joshwcomeau.com/animation/a-friendly-introduction-to-spring-physics/">joshwcomeau.com</a></li>
+      <li>Pitch trajectory explorer (onion-skin trail, swing-start marker at −150 ms): <a href="https://github.com/KUnzeHe/pitch-trajectory-explorer">github.com/KUnzeHe/pitch-trajectory-explorer</a></li>
+      <li>Baseball Savant bat tracking (squared-up, swing-path tilt over the last 40 ms): <a href="https://baseballsavant.mlb.com/leaderboard/bat-tracking">baseballsavant.mlb.com</a></li>
+      <li>Heer and Robertson, Animated Transitions in Statistical Data Graphics (2007): <a href="https://homes.cs.washington.edu/~jheer/files/2007-AnimatedTrans-InfoVis.pdf">PDF</a></li>
+      <li>Étienne-Jules Marey's chronophotographs are the model for the rest frame. That link is my own idea, not from a skill.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(() => {
+'use strict'
+// ---------------------------------------------------------------- tokens
+const C = {
+  ink: '#1B2A3A', ink0: '#0F1822', pencil: '#6B6558', pencilSoft: '#938C7C',
+  clay: '#B4453A', paper3: '#FFFDF6', sky: '#EDE6D1', grass: '#D8E6C9', dirt: '#D6AA83', seam: '#B4453A',
+}
+const NS = 'http://www.w3.org/2000/svg'
+const el = (tag, attrs = {}, parent) => {
+  const n = document.createElementNS(NS, tag)
+  for (const k in attrs) n.setAttribute(k, attrs[k])
+  if (parent) parent.appendChild(n)
+  return n
+}
+const f1 = (v) => (Math.round(v * 10) / 10).toString()
+const clamp01 = (x) => Math.min(1, Math.max(0, x))
+const lerp = (a, b, k) => a + (b - a) * k
+const V = {
+  add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+  sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+  mul: (a, k) => [a[0] * k, a[1] * k, a[2] * k],
+  dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+  len: (a) => Math.hypot(a[0], a[1], a[2]),
+  norm: (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l] },
+  lerp: (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)],
+}
+// cubic-bezier easing (for the readout and rings, scrubbable)
+function bezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by
+  const sx = (t) => ((ax * t + bx) * t + cx) * t
+  const sy = (t) => ((ay * t + by) * t + cy) * t
+  return (x) => {
+    x = clamp01(x); let t = x
+    for (let i = 0; i < 8; i++) { const d = sx(t) - x; const dx = (3 * ax * t + 2 * bx) * t + cx; if (Math.abs(d) < 1e-5 || !dx) break; t -= d / dx }
+    return sy(clamp01(t))
+  }
+}
+const easeStamp = bezier(0.2, 0.9, 0.3, 1)   // --ease-stamp
+const easeOut = bezier(0.16, 1, 0.3, 1)      // --ease-out
+
+// ---------------------------------------------------------------- camera (scene.js, byte for byte)
+const W = 336, H = 312, F = 410, CX = W / 2, CY = 26
+const proj = (x, y, z) => { const d = Math.max(0.4, y + 6); return [CX + (F * x) / d, CY - (F * (z - 4)) / d, (F * 0.242) / d] }
+const G = 32.17, Y0 = 54.2, YP = 17 / 12, Z0 = 5.8, ARM_X = -1.9
+const YC = 2.2 // contact, ft in front of the plate's back point (a design choice)
+
+// ---------------------------------------------------------------- samples (invented)
+const SAMPLES = [
+  { id: 'lineout', label: 'Lineout', batter: 'Sample hitter · R', pitch: 'Four-seam', color: '#FF6B5E', mph: 96.1, spot: [-0.15, 2.75], move: [15.7, 7.8, -1],
+    bats: 'R', outcome: 'play', ev: 104.8, la: 15, dist: 312, spray: -16, batSpeed: 75.1, liveBat: false, attack: 9, xba: 0.640, traj: 'Line drive',
+    call: 'In play, out', no: 5, of: 5, verdict: 'Hard-luck out', tone: 'out' },
+  { id: 'homer', label: 'Home run', batter: 'Sample hitter · L', pitch: 'Slider', color: '#4F8CFF', mph: 87.4, spot: [0.1, 2.3], move: [1.3, 3.8, 1],
+    bats: 'L', outcome: 'play', ev: 109.3, la: 28, dist: 421, spray: 14, batSpeed: 77.8, liveBat: true, attack: 14, xba: 0.880, barrel: true, parks: 27, traj: 'Fly ball',
+    call: 'In play, run(s)', no: 3, of: 3, verdict: 'Barrel', tone: 'hit' },
+  { id: 'grounder', label: 'Grounder', batter: 'Sample hitter · R', pitch: 'Sinker', color: '#FFA53A', mph: 94.2, spot: [-0.45, 1.85], move: [7.5, 15.1, -1],
+    bats: 'R', outcome: 'play', ev: 71.4, la: -5, dist: 148, spray: 9, batSpeed: 68.9, liveBat: true, attack: 3, xba: 0.180, traj: 'Ground ball',
+    call: 'In play, no out', no: 2, of: 2, verdict: 'Lucky hit', tone: 'hit' },
+  { id: 'whiff', label: 'Whiff', batter: 'Sample hitter · R', pitch: 'Sweeper', color: '#49C6F0', mph: 84.6, spot: [0.75, 2.0], move: [1.0, 13.5, 1],
+    bats: 'R', outcome: 'whiff', batSpeed: 72.4, liveBat: true, attack: 7, call: 'Swinging strike', no: 6, of: 6 },
+  { id: 'foul', label: 'Foul', batter: 'Sample hitter · R', pitch: 'Changeup', color: '#6EDC8C', mph: 86.0, spot: [-0.3, 1.9], move: [3.8, 14.2, -1],
+    bats: 'R', outcome: 'foul', batSpeed: 70.2, liveBat: true, attack: 11, call: 'Foul', no: 4, of: 7 },
+]
+
+// ---------------------------------------------------------------- physics
+function pitchModel(s) {
+  const hand = 1, X0 = ARM_X * hand
+  const [ivb, hb, side] = s.move, [sx, sz] = s.spot
+  const vy = s.mph * 1.4667 * 0.92
+  const T = (Y0 - YP) / vy
+  const ax = (hand * side * 2 * (hb / 12)) / (T * T)
+  const az = -G + (2 * (ivb / 12)) / (T * T)
+  const vx = (sx * hand - X0 - 0.5 * ax * T * T) / T
+  const vz = (sz - Z0 - 0.5 * az * T * T) / T
+  const at = (t) => [X0 + vx * t + 0.5 * ax * t * t, Y0 - vy * t, Z0 + vz * t + 0.5 * az * t * t]
+  return { at, T, tc: (Y0 - YC) / vy, tMitt: (Y0 + 0.8) / vy }
+}
+// contactFlight.js simFlight, started from the contact height
+function simFlight(ev, la, lift, z0) {
+  const RHO = 0.002284, A = 0.04585, MS = 0.009955, CD = 0.35, dt = 0.01
+  const v0 = ev * 1.46667, a = (la * Math.PI) / 180
+  let x = 0, z = z0, vx = v0 * Math.cos(a), vz = v0 * Math.sin(a), t = 0
+  const kd = (0.5 * RHO * A * CD) / MS, kl = (0.5 * RHO * A * lift) / MS
+  const pts = [[0, z0, 0]]
+  while (t < 14) {
+    const v = Math.hypot(vx, vz)
+    vx += (-kd * v * vx - kl * v * vz) * dt
+    vz += (-G - kd * v * vz + kl * v * vx) * dt
+    x += vx * dt; z += vz * dt; t += dt
+    pts.push([x, z, t])
+    if (z <= 0 && t > 0.2) { const p = pts[pts.length - 2]; const k = p[1] / (p[1] - z); pts[pts.length - 1] = [p[0] + (x - p[0]) * k, 0, p[2] + dt * k]; return { dist: pts[pts.length - 1][0], T: pts[pts.length - 1][2], pts } }
+  }
+  return { dist: x, T: t, pts }
+}
+function groundRoll(ev, la, dist, z0) {
+  const dt = 0.01; let x = 0, z = z0, vx = ev * 1.4667 * Math.cos((la * Math.PI) / 180), vz = ev * 1.4667 * Math.sin((la * Math.PI) / 180), t = 0
+  const pts = [[0, z0, 0]]
+  while (x < dist && t < 6) {
+    vz -= G * dt; vx *= 0.9985; x += vx * dt; z += vz * dt; t += dt
+    if (z < 0) { z = -z * 0.3; vz = -vz * 0.42; vx *= 0.86 }
+    pts.push([x, z, t])
+  }
+  return { dist: x, T: t, pts }
+}
+// a 2-D flight [x along the ground, z up, t] fitted to the measured distance
+function battedFlight(s, z0) {
+  if (s.la < 8) return groundRoll(s.ev, s.la, s.dist, z0)
+  let lo = 0, hi = 0.45
+  for (let i = 0; i < 18; i++) { const mid = (lo + hi) / 2; if (simFlight(s.ev, s.la, mid, z0).dist < s.dist) lo = mid; else hi = mid }
+  return simFlight(s.ev, s.la, (lo + hi) / 2, z0)
+}
+const sampleAt = (fl, t) => {
+  const p = fl.pts; if (t <= 0) return p[0]; if (t >= fl.T) return p[p.length - 1]
+  let i = Math.min(p.length - 2, Math.floor(t / 0.01)); while (i > 0 && p[i][2] > t) i--; while (i < p.length - 2 && p[i + 1][2] < t) i++
+  const a = p[i], b = p[i + 1], k = (t - a[2]) / (b[2] - a[2] || 1)
+  return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), t]
+}
+
+// ---------------------------------------------------------------- swing (a drawing)
+function swingModel(s, K) {
+  const side = s.bats === 'R' ? -1 : 1 // a right-handed batter stands left of the plate from behind
+  const miss = s.outcome === 'whiff' ? [0, 0, 0.42] : s.outcome === 'foul' ? [0, 0, 0.11] : [0, 0, 0]
+  const Kb = V.add(K, miss)
+  const Cn = [side * 2.25, YC - 0.15, Kb[2] + 0.75]
+  const u = V.norm(V.sub(Kb, Cn))
+  const a = ((s.attack ?? 10) * Math.PI) / 180
+  const v0 = [0, Math.cos(a), Math.sin(a)]
+  const v = V.norm(V.sub(v0, V.mul(u, V.dot(v0, u))))
+  const R = V.len(V.sub(Kb, Cn))
+  const plane = (th) => V.add(V.mul(u, Math.cos(th)), V.mul(v, Math.sin(th)))
+  const knobLoad = V.add(Cn, [side * 0.2, -0.35, 0.4])
+  const dirLoad = V.norm([side * 0.35, -0.45, 0.82])
+  const dirCoil = V.norm([side * 0.5, -0.7, 0.55])
+  const TH0 = (-125 * Math.PI) / 180, THE = (150 * Math.PI) / 180
+  const COIL = 0.09, SWING = 0.16, FOLLOW = 0.22
+  // the bat at real time dt from contact: { knob, end, inPlane }
+  function at(dt) {
+    let dir, knob, th = null
+    if (dt < -SWING) {
+      const k = dt < -SWING - COIL ? 0 : clamp01((dt + SWING + COIL) / COIL)
+      const e = k * k * (3 - 2 * k)
+      dir = V.norm(V.lerp(dirLoad, dirCoil, e)); knob = V.add(knobLoad, [0, -0.08 * e, 0])
+    } else if (dt <= 0) {
+      const q = (dt + SWING) / SWING
+      th = TH0 + (0 - TH0) * q * q // gathers speed into the ball
+      const k = clamp01(q / 0.4), e = k * k * (3 - 2 * k)
+      const pd = plane(th)
+      dir = V.norm(V.lerp(dirCoil, pd, e)); knob = V.lerp(V.add(knobLoad, [0, -0.08, 0]), V.add(Cn, V.mul(pd, R - 2.15)), e)
+    } else {
+      const q = clamp01(dt / FOLLOW)
+      th = THE * (1 - (1 - q) ** 3)
+      const pd = plane(th)
+      dir = pd; knob = V.add(Cn, V.mul(pd, R - 2.15))
+    }
+    return { knob, end: V.add(knob, V.mul(dir, 2.65)), th }
+  }
+  const sweet = (th) => V.add(Cn, V.mul(plane(th), R))
+  return { at, sweet, TH0, THE, COIL, SWING, FOLLOW, Kb }
+}
+
+// ---------------------------------------------------------------- build one replay
+function build(s, opts) {
+  const P = pitchModel(s)
+  const K = P.at(P.tc)
+  const SW = swingModel(s, K)
+  const S = opts.slow
+  const HS = s.outcome === 'play' ? 66 : s.outcome === 'foul' ? 33 : 0 // hit-stop, ms, not slowed
+  const sq = s.ev && s.batSpeed ? s.ev / (1.23 * s.batSpeed + 0.2116 * s.mph) : null
+  const contactMs = P.tc * S * 1000
+  let bb = null, exitReal = 0
+  if (s.outcome === 'play') {
+    const fl = battedFlight(s, K[2])
+    const phi = (s.spray * Math.PI) / 180
+    const pos = (t) => { const [x, z] = sampleAt(fl, t); return [K[0] + Math.sin(phi) * x, K[1] + Math.cos(phi) * x, z] }
+    exitReal = 0
+    for (let t = 0; t < 0.9; t += 0.005) { const [sx, sy, d] = proj(...pos(t)); exitReal = t; if (sy < -6 || sx < -6 || sx > W + 6 || d < 1.3) break }
+    bb = { fl, pos }
+  } else if (s.outcome === 'foul') {
+    const side = s.bats === 'R' ? -1 : 1
+    const v = V.mul(V.norm([-side * 0.25, -0.55, 0.8]), 72 * 1.4667)
+    const pos = (t) => [K[0] + v[0] * t, K[1] + v[1] * t, K[2] + v[2] * t - 0.5 * G * t * t]
+    for (let t = 0; t < 0.9; t += 0.005) { const [sx, sy] = proj(...pos(t)); exitReal = t; if (sy < -6 || sx < -6 || sx > W + 6) break }
+    bb = { pos }
+  }
+  const sceneEndReal = s.outcome === 'whiff' ? P.tMitt : P.tc + Math.max(exitReal, SW.FOLLOW)
+  const sceneEnd = sceneEndReal * S * 1000 + HS
+  const exitMs = contactMs + HS + exitReal * S * 1000
+  const side = s.outcome === 'play' ? { start: exitMs + 140, ms: Math.max(700, Math.min(2800, bb.fl.T * 500)) } : null
+  const landMs = side ? side.start + side.ms : sceneEnd
+  const readStart = (side ? landMs + 200 : sceneEnd + 120)
+  const figs = readoutFigs(s, sq, opts)
+  const verdictAt = readStart + figs.length * 55 + 110
+  const total = (s.verdict ? verdictAt + 380 : readStart + figs.length * 55 + 220) + 500
+  return { s, P, K, SW, S, HS, sq, contactMs, bb, exitMs, sceneEnd, side, landMs, readStart, figs, verdictAt, total }
+}
+function readoutFigs(s, sq, opts) {
+  const batKnown = opts.final || s.liveBat
+  const out = []
+  if (s.outcome === 'play') {
+    out.push([s.ev.toFixed(1), 'mph off the bat'])
+    out.push(batKnown && sq ? [Math.round(sq * 100) + '%', 'squared up'] : ['—', 'squared up · waits for bat speed', true])
+    out.push(['.' + Math.round(s.xba * 1000).toString().padStart(3, '0'), 'xBA'])
+    if (s.parks) out.push([s.parks + ' of 30', 'parks a home run'])
+  } else {
+    out.push(batKnown ? [s.batSpeed.toFixed(1), 'mph bat speed'] : ['—', 'bat speed · not posted yet', true])
+    if (s.outcome === 'whiff') out.push([`${s.move[1].toFixed(1)} in`, 'horizontal break'])
+  }
+  return out
+}
+
+// ---------------------------------------------------------------- the scene (static parts)
+const svg = document.getElementById('scene')
+function buildStage() {
+  svg.textContent = ''
+  el('rect', { x: 0, y: 0, width: W, height: H, fill: C.sky }, svg)
+  const hz = proj(0, 1e6, 4)[1]
+  el('rect', { x: 0, y: f1(hz), width: W, height: H, fill: C.grass }, svg)
+  const m = proj(0, 60.5, 0.83)
+  el('ellipse', { cx: CX, cy: f1(m[1]), rx: f1(proj(9, 60.5, 0.83)[0] - m[0]), ry: 4, fill: C.dirt, opacity: 0.75 }, svg)
+  const flat = (pts) => pts.map(([x, y]) => proj(x, y, 0).slice(0, 2).map(f1).join(',')).join(' ')
+  const ring = []
+  for (let i = 0; i < 96; i++) { const a = (i / 96) * 2 * Math.PI; const p = [13 * Math.cos(a), 0.7 + 13 * Math.sin(a)]; if (p[1] > -5) ring.push(p) }
+  el('polygon', { points: flat(ring), fill: C.dirt, opacity: 0.55 }, svg)
+  const X = 17 / 24
+  for (const sx of [-1, 1]) el('polygon', { points: flat([[sx * 1.2, 3], [sx * 3.2, 3], [sx * 3.2, -3], [sx * 1.2, -3]]), fill: 'none', stroke: C.paper3, 'stroke-width': 1 }, svg)
+  el('polygon', { points: flat([[-X, YP], [X, YP], [X, X], [0, 0], [-X, X]]), fill: C.paper3 }, svg)
+  const [bot, top] = [1.6, 3.5]
+  const face = (y) => { const a = proj(-X, y, top), b = proj(X, y, bot); return { x: a[0], y: a[1], w: b[0] - a[0], h: b[1] - a[1] } }
+  const fr = face(YP), bk = face(0)
+  for (const x of [-X, X]) { const a = proj(x, YP, bot), b = proj(x, YP, 0); el('line', { x1: f1(a[0]), y1: f1(a[1]), x2: f1(b[0]), y2: f1(b[1]), stroke: C.ink, 'stroke-dasharray': '1 2.5', opacity: 0.6 }, svg) }
+  el('rect', { x: f1(bk.x), y: f1(bk.y), width: f1(bk.w), height: f1(bk.h), fill: 'none', stroke: '#3C4A5A', opacity: 0.35 }, svg)
+  for (const [x1, y1, x2, y2] of [[fr.x, fr.y, bk.x, bk.y], [fr.x + fr.w, fr.y, bk.x + bk.w, bk.y], [fr.x, fr.y + fr.h, bk.x, bk.y + bk.h], [fr.x + fr.w, fr.y + fr.h, bk.x + bk.w, bk.y + bk.h]])
+    el('line', { x1: f1(x1), y1: f1(y1), x2: f1(x2), y2: f1(y2), stroke: '#3C4A5A', opacity: 0.35 }, svg)
+  el('rect', { x: f1(fr.x), y: f1(fr.y), width: f1(fr.w), height: f1(fr.h), fill: C.paper3, 'fill-opacity': 0.35, stroke: C.ink, 'stroke-width': 1.5 }, svg)
+  for (const k of [1, 2]) {
+    el('line', { x1: f1(fr.x + (fr.w * k) / 3), y1: f1(fr.y), x2: f1(fr.x + (fr.w * k) / 3), y2: f1(fr.y + fr.h), stroke: C.ink, 'stroke-width': 0.6, opacity: 0.3 }, svg)
+    el('line', { x1: f1(fr.x), y1: f1(fr.y + (fr.h * k) / 3), x2: f1(fr.x + fr.w), y2: f1(fr.y + (fr.h * k) / 3), stroke: C.ink, 'stroke-width': 0.6, opacity: 0.3 }, svg)
+  }
+  // dynamic layers, back to front
+  const L = {}
+  L.ghostBats = el('g', {}, svg)
+  L.swingArc = el('polyline', { fill: 'none', stroke: C.pencil, 'stroke-width': 1.5, 'stroke-dasharray': '3 3', 'stroke-linecap': 'round' }, svg)
+  L.trail = el('g', { style: 'filter: drop-shadow(0 0 0.7px rgba(15,24,34,0.9))' }, svg)
+  L.segs = Array.from({ length: 40 }, () => el('line', { 'stroke-linecap': 'round', visibility: 'hidden' }, L.trail))
+  L.track = el('polyline', { fill: 'none', stroke: C.ink, 'stroke-width': 1, 'stroke-dasharray': '1 3', 'stroke-linecap': 'round', opacity: 0.55 }, svg)
+  L.shadow = el('ellipse', { fill: C.ink0, opacity: 0.25 }, svg)
+  L.drop = el('line', { stroke: C.ink, 'stroke-width': 0.8, 'stroke-dasharray': '1 2' }, svg)
+  L.exitTrail = el('polyline', { fill: 'none', stroke: C.ink, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg)
+  L.exitG = el('g', { style: 'filter: drop-shadow(0 0 0.7px rgba(255,253,246,0.9))' }, svg)
+  L.exitSegs = Array.from({ length: 24 }, () => el('line', { stroke: C.ink, 'stroke-linecap': 'round', visibility: 'hidden' }, L.exitG))
+  L.bat = el('g', {}, svg)
+  L.batBody = el('polygon', {}, L.bat)
+  L.batCap = el('circle', {}, L.bat)
+  L.ball = el('circle', { fill: C.paper3, stroke: C.ink0, 'stroke-width': 1 }, svg)
+  L.seam1 = el('path', { fill: 'none', stroke: C.seam, 'stroke-width': 1 }, svg)
+  L.seam2 = el('path', { fill: 'none', stroke: C.seam, 'stroke-width': 1 }, svg)
+  L.ring = el('circle', { fill: 'none', stroke: C.ink0 }, svg)
+  L.ticks = el('g', { stroke: C.ink0, 'stroke-linecap': 'round' }, svg)
+  L.tickEls = Array.from({ length: 8 }, () => el('line', {}, L.ticks))
+  L.pop = el('circle', { fill: 'none', stroke: C.pencil, 'stroke-width': 1.2 }, svg)
+  L.attack = el('text', { 'font-family': 'JetBrains Mono, monospace', 'font-size': 9, fill: C.ink0 }, svg)
+  // the honesty tag, always on: what is ink and what is pencil
+  const tag = el('g', { transform: 'translate(8 300)' }, svg)
+  el('rect', { x: 0, y: -10, width: 118, height: 14, rx: 2, fill: C.paper3, opacity: 0.85 }, tag)
+  const t = el('text', { x: 5, y: 0, 'font-family': 'Barlow Condensed, Arial Narrow, sans-serif', 'font-size': 10, 'font-weight': 600, 'letter-spacing': '0.08em', fill: C.pencil }, tag)
+  t.textContent = 'SWING DRAWN · PATHS MEASURED'
+  // the measured trajectory (hitData.trajectory), ink, top right, from contact on
+  L.traj = el('g', {}, svg)
+  L.trajBg = el('rect', { y: 6, height: 15, rx: 2, fill: C.ink }, L.traj)
+  L.trajText = el('text', { y: 17, 'text-anchor': 'end', 'font-family': 'Barlow Condensed, Arial Narrow, sans-serif', 'font-size': 11, 'font-weight': 700, 'letter-spacing': '0.08em', fill: C.paper3 }, L.traj)
+  return L
+}
+
+// ---------------------------------------------------------------- side view (static parts)
+const side = document.getElementById('side')
+const SX = (ft) => 16 + ft * (304 / 450)
+const SZ = (ft) => 80 - ft * (304 / 450)
+function buildSide() {
+  side.textContent = ''
+  const L = {}
+  el('line', { x1: 8, y1: 80, x2: 328, y2: 80, stroke: C.ink, 'stroke-width': 1 }, side)
+  for (const ft of [100, 200, 300, 400]) {
+    el('line', { x1: f1(SX(ft)), y1: 80, x2: f1(SX(ft)), y2: 84, stroke: C.pencil, 'stroke-width': 1 }, side)
+    if (ft % 200) continue
+    const t = el('text', { x: f1(SX(ft)), y: 96, 'text-anchor': 'middle', 'font-family': 'JetBrains Mono, monospace', 'font-size': 10, fill: C.pencil }, side)
+    t.textContent = `${ft} ft`
+    if (ft === 400) L.tick400 = t
+  }
+  const lab = el('text', { x: 8, y: 13, 'font-family': 'Barlow Condensed, Arial Narrow, sans-serif', 'font-size': 11, 'font-weight': 600, 'letter-spacing': '0.08em', fill: C.pencil }, side)
+  lab.textContent = 'SIDE VIEW · GREEN POST IS THE FENCE'
+  L.fence = el('g', {}, side)
+  el('line', { x1: f1(SX(400)), y1: f1(SZ(10)), x2: f1(SX(400)), y2: 80, stroke: '#2F6E4F', 'stroke-width': 2 }, L.fence)
+  L.plate = el('rect', { x: 13, y: 79, width: 6, height: 2, fill: C.ink0 }, side)
+  L.trace = el('path', { fill: 'none', stroke: C.ink, 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, side)
+  L.apex = el('g', {}, side)
+  L.apexTick = el('line', { stroke: C.pencil, 'stroke-width': 1, 'stroke-dasharray': '2 2' }, L.apex)
+  L.apexText = el('text', { 'font-family': 'JetBrains Mono, monospace', 'font-size': 10, fill: C.pencil, 'text-anchor': 'middle' }, L.apex)
+  L.ball = el('circle', { r: 2.6, fill: C.paper3, stroke: C.ink0, 'stroke-width': 1 }, side)
+  L.ring = el('circle', { fill: 'none', stroke: C.ink0, 'stroke-width': 1.4 }, side)
+  L.ring2 = el('circle', { fill: 'none', stroke: C.ink0, 'stroke-width': 1 }, side)
+  L.sel = el('circle', { fill: 'none', stroke: C.ink0, 'stroke-width': 1.2 }, side)
+  L.dist = el('text', { 'font-family': 'JetBrains Mono, monospace', 'font-size': 11, 'font-weight': 700, fill: C.ink0 }, side)
+  L.empty = el('text', { x: 168, y: 50, 'text-anchor': 'middle', 'font-family': 'Barlow Condensed, Arial Narrow, sans-serif', 'font-size': 13, 'font-weight': 600, 'letter-spacing': '0.08em', fill: C.pencil }, side)
+  return L
+}
+
+// ---------------------------------------------------------------- draw at time tau (ms); every mark is a pure function of tau
+let L, SL, R
+const vis = (n, on) => n.setAttribute('visibility', on ? 'visible' : 'hidden')
+function batPolygon(b, color, opacity) {
+  const p0 = proj(...b.knob), p1 = proj(...b.end)
+  const dx = p1[0] - p0[0], dy = p1[1] - p0[1], l = Math.hypot(dx, dy) || 1
+  const nx = -dy / l, ny = dx / l
+  const wk = Math.max(0.8, p0[2] * 0.33), wb = Math.max(1.6, p1[2] * 0.95)
+  const at = (k, w) => [p0[0] + dx * k + nx * w / 2, p0[1] + dy * k + ny * w / 2, p0[0] + dx * k - nx * w / 2, p0[1] + dy * k - ny * w / 2]
+  const a = at(0, wk), m = at(0.42, wk * 1.15), q = at(0.72, wb), e = at(1, wb)
+  const pts = [[a[0], a[1]], [m[0], m[1]], [q[0], q[1]], [e[0], e[1]], [e[2], e[3]], [q[2], q[3]], [m[2], m[3]], [a[2], a[3]]]
+  return { points: pts.map((p) => p.map(f1).join(',')).join(' '), cap: [p1[0], p1[1], wb / 2], color, opacity }
+}
+function drawBat(node, cap, poly) {
+  node.setAttribute('points', poly.points); node.setAttribute('fill', poly.color); node.setAttribute('opacity', poly.opacity)
+  cap.setAttribute('cx', f1(poly.cap[0])); cap.setAttribute('cy', f1(poly.cap[1])); cap.setAttribute('r', f1(poly.cap[2]))
+  cap.setAttribute('fill', poly.color); cap.setAttribute('opacity', poly.opacity)
+}
+function drawBall(p) {
+  const [bx, by, d] = proj(...p), r = Math.max(0.6, d / 2)
+  vis(L.ball, true); vis(L.seam1, true); vis(L.seam2, true)
+  L.ball.setAttribute('cx', f1(bx)); L.ball.setAttribute('cy', f1(by)); L.ball.setAttribute('r', r.toFixed(2))
+  const seam = (sd) => `M${f1(bx + sd * r * 0.55)} ${f1(by - r * 0.75)} Q${f1(bx + sd * r * 0.1)} ${f1(by)} ${f1(bx + sd * r * 0.55)} ${f1(by + r * 0.75)}`
+  L.seam1.setAttribute('d', seam(-1)); L.seam2.setAttribute('d', seam(1))
+}
+function drawPitchTrail(tReal, color) {
+  const N = 40, T = R.P.T, pts = []
+  for (let i = 0; i <= N; i++) pts.push(proj(...R.P.at((Math.min(tReal, T) * i) / N)))
+  L.segs.forEach((seg, i) => {
+    const a = pts[i], b = pts[i + 1]
+    seg.setAttribute('visibility', tReal > 0 ? 'visible' : 'hidden')
+    seg.setAttribute('x1', f1(a[0])); seg.setAttribute('y1', f1(a[1])); seg.setAttribute('x2', f1(b[0])); seg.setAttribute('y2', f1(b[1]))
+    seg.setAttribute('stroke', color); seg.setAttribute('stroke-width', (b[2] * 0.62).toFixed(2))
+    seg.setAttribute('opacity', (0.25 + 0.6 * (i / N)).toFixed(2))
+  })
+}
+
+function render(tau, mode) {
+  const { s, P, SW, S, HS, contactMs } = R
+  const rest = mode === 'rest'
+  if (rest) tau = R.total
+  // the scene's own clock: frozen during the hit-stop
+  const contact = s.outcome !== 'whiff'
+  const sceneMs = contact && tau > contactMs ? Math.max(contactMs, tau - HS) : tau
+  const tReal = sceneMs / S / 1000
+  const dtC = tReal - P.tc
+  // pitch
+  const pitchEnd = contact ? P.tc : P.tMitt
+  drawPitchTrail(Math.min(tReal, contact ? P.tc : P.T), s.color)
+  if (!contact && tReal > P.T) {
+    // past the plate: the trail stays, the ball runs on to the mitt
+  }
+  // bat
+  L.ghostBats.textContent = ''
+  const batColor = C.pencil
+  const finalInk = OPTS.final
+  if (rest) {
+    // chronophotograph: the swing as a multiple exposure (Marey)
+    // three exposures: mid-swing, contact (full strength), follow-through
+    for (const d of [-0.05, 0.12]) {
+      const poly = batPolygon(SW.at(d), batColor, '0.22')
+      const g = el('polygon', { points: poly.points, fill: poly.color, opacity: poly.opacity }, L.ghostBats)
+      g.setAttribute('stroke', 'none')
+    }
+    drawBat(L.batBody, L.batCap, batPolygon(SW.at(0), finalInk ? C.ink : batColor, 0.95))
+  } else {
+    let batOp = 1
+    const followEndMs = (P.tc + SW.FOLLOW) * S * 1000 + HS
+    if (tau > followEndMs) batOp = 1 - clamp01((tau - followEndMs) / 400) * 0.75
+    const b = SW.at(dtC)
+    const atContact = contact ? Math.abs(tau - contactMs) <= HS + 1 && tau >= contactMs : Math.abs(dtC) < 0.004
+    drawBat(L.batBody, L.batCap, batPolygon(b, finalInk && atContact ? C.ink : batColor, batOp.toFixed(2)))
+    // smear frames: only while the barrel is fast
+    if (dtC > -SW.SWING + 0.04 && dtC < 0.09 && !(contact && tau >= contactMs && tau <= contactMs + HS)) {
+      const ops = [0.3, 0.2, 0.12, 0.06]
+      ops.forEach((op, k) => { const poly = batPolygon(SW.at(dtC - (k + 1) * 0.012), batColor, op); el('polygon', { points: poly.points, fill: poly.color, opacity: op }, L.ghostBats) })
+    }
+  }
+  // the barrel's path (a weapon trail), pencil, persists
+  const thNow = rest ? SW.THE * 0.55 : SW.at(dtC).th
+  if (thNow != null || (!rest && dtC > 0)) {
+    const th1 = thNow ?? SW.THE
+    const pts = []
+    for (let i = 0; i <= 28; i++) { const th = lerp(-1.6, th1, i / 28); pts.push(proj(...SW.sweet(th)).slice(0, 2).map(f1).join(',')) }
+    L.swingArc.setAttribute('points', pts.join(' ')); vis(L.swingArc, true)
+    L.swingArc.setAttribute('opacity', rest || dtC > SW.FOLLOW ? 0.75 : 0.9)
+  } else vis(L.swingArc, false)
+  // ball
+  let ballPos = null
+  if (tReal <= pitchEnd || !contact) ballPos = P.at(Math.min(tReal, pitchEnd))
+  else if (R.bb && dtC <= (R.exitMs - contactMs - HS) / S / 1000) ballPos = R.bb.pos(dtC)
+  if (rest) ballPos = contact ? null : P.at(P.tMitt)
+  if (ballPos) drawBall(ballPos); else { vis(L.ball, false); vis(L.seam1, false); vis(L.seam2, false) }
+  // exit trail (navy ink)
+  if (R.bb && dtC > 0) {
+    const tEnd = rest ? (R.exitMs - contactMs - HS) / S / 1000 : Math.min(dtC, (R.exitMs - contactMs - HS) / S / 1000)
+    const pts = []
+    for (let i = 0; i <= 24; i++) pts.push(proj(...R.bb.pos((tEnd * i) / 24)))
+    if (s.outcome === 'play') {
+      // like the pitch trail: each piece as wide as the ball there, the newest the darkest
+      vis(L.exitTrail, false)
+      L.exitSegs.forEach((seg, i) => {
+        const a = pts[i], b = pts[i + 1]
+        seg.setAttribute('x1', f1(a[0])); seg.setAttribute('y1', f1(a[1])); seg.setAttribute('x2', f1(b[0])); seg.setAttribute('y2', f1(b[1]))
+        seg.setAttribute('stroke-width', Math.max(1.2, b[2] * 0.55).toFixed(2))
+        seg.setAttribute('opacity', (rest ? 0.45 + 0.4 * (i / 24) : 0.3 + 0.65 * (i / 24)).toFixed(2))
+        vis(seg, true)
+      })
+    } else {
+      L.exitSegs.forEach((seg) => vis(seg, false))
+      L.exitTrail.setAttribute('points', pts.map((p) => p.slice(0, 2).map(f1).join(',')).join(' ')); vis(L.exitTrail, true)
+    }
+    L.exitTrail.setAttribute('stroke', s.outcome === 'foul' ? C.pencil : C.ink)
+    L.exitTrail.setAttribute('stroke-width', s.outcome === 'foul' ? 1.4 : 2.2)
+    L.exitTrail.setAttribute('stroke-dasharray', s.outcome === 'foul' ? '3 2' : 'none')
+    L.exitTrail.setAttribute('opacity', rest ? 0.75 : 0.9)
+  } else { vis(L.exitTrail, false); L.exitSegs.forEach((seg) => vis(seg, false)) }
+  // trajectory tag
+  if (s.traj && (rest || tau >= contactMs + HS)) {
+    L.trajText.textContent = s.traj.toUpperCase()
+    L.trajText.setAttribute('x', W - 14)
+    const w = L.trajText.getComputedTextLength() + 12
+    L.trajBg.setAttribute('x', f1(W - 8 - w)); L.trajBg.setAttribute('width', f1(w))
+    L.traj.setAttribute('opacity', rest ? 1 : clamp01((tau - contactMs - HS) / 220).toFixed(2)); vis(L.traj, true)
+  } else vis(L.traj, false)
+  // the batted ball's shadow and ground track (contactFlight.js draws the same pair), ink: spray and distance are measured
+  if (R.bb && s.outcome === 'play' && dtC > 0 && !rest) {
+    const tEnd = (R.exitMs - contactMs - HS) / S / 1000
+    const tNow = rest ? tEnd : Math.min(dtC, tEnd)
+    const pts = []
+    for (let i = 0; i <= 16; i++) { const p = R.bb.pos((tNow * i) / 16); pts.push(proj(p[0], p[1], 0).slice(0, 2).map(f1).join(',')) }
+    L.track.setAttribute('points', pts.join(' ')); vis(L.track, true)
+    if (ballPos && !rest) {
+      const g = proj(ballPos[0], ballPos[1], 0), b = proj(...ballPos)
+      L.shadow.setAttribute('cx', f1(g[0])); L.shadow.setAttribute('cy', f1(g[1])); L.shadow.setAttribute('rx', f1(g[2] * 0.5)); L.shadow.setAttribute('ry', f1(g[2] * 0.18)); vis(L.shadow, true)
+      L.drop.setAttribute('x1', f1(b[0])); L.drop.setAttribute('y1', f1(b[1])); L.drop.setAttribute('x2', f1(g[0])); L.drop.setAttribute('y2', f1(g[1]))
+      L.drop.setAttribute('opacity', Math.min(0.6, ballPos[2] / 12).toFixed(2)); vis(L.drop, ballPos[2] > 1)
+    } else { vis(L.shadow, false); vis(L.drop, false) }
+  } else { vis(L.track, false); vis(L.shadow, false); vis(L.drop, false) }
+  // contact ring and ticks
+  const Kp = proj(...R.K)
+  if (contact && (rest || tau >= contactMs)) {
+    const q = rest ? 1 : clamp01((tau - contactMs) / 260)
+    const e = easeOut(q)
+    const strength = s.outcome === 'foul' ? 0.35 : Math.min(1, R.sq ?? 0.8)
+    const r0 = Kp[2] * 0.4, r1 = Kp[2] * (0.6 + 0.5 * strength) // from 0.8x the ball; at most one zone cell
+    L.ring.setAttribute('cx', f1(Kp[0])); L.ring.setAttribute('cy', f1(Kp[1]))
+    L.ring.setAttribute('r', f1(rest ? r1 * 0.9 : lerp(r0, r1, e)))
+    L.ring.setAttribute('stroke-width', (1 + strength).toFixed(2))
+    L.ring.setAttribute('opacity', rest ? 0.25 : ((0.4 + 0.6 * strength) * (1 - q)).toFixed(2))
+    L.ring.setAttribute('stroke', s.outcome === 'foul' ? C.pencil : C.ink0)
+    vis(L.ring, true)
+    const showTicks = s.outcome === 'play' && !rest && q < 1
+    L.tickEls.forEach((t, i) => {
+      if (!showTicks) return vis(t, false)
+      const a = (i / 8) * Math.PI * 2 + 0.2
+      const ra = lerp(r0 + 2, r1 + 3, e), rb = ra + 2 + 2 * strength
+      t.setAttribute('x1', f1(Kp[0] + Math.cos(a) * ra)); t.setAttribute('y1', f1(Kp[1] + Math.sin(a) * ra))
+      t.setAttribute('x2', f1(Kp[0] + Math.cos(a) * rb)); t.setAttribute('y2', f1(Kp[1] + Math.sin(a) * rb))
+      t.setAttribute('stroke-width', 1.2); t.setAttribute('opacity', (1 - q).toFixed(2)); vis(t, true)
+    })
+  } else { vis(L.ring, false); L.tickEls.forEach((t) => vis(t, false)) }
+  // whiff: the pop at the mitt, pencil
+  if (!contact && (rest || tReal >= P.tMitt)) {
+    const mp = proj(...P.at(P.tMitt))
+    const q = rest ? 1 : clamp01((tau - P.tMitt * S * 1000) / 300)
+    L.pop.setAttribute('cx', f1(mp[0])); L.pop.setAttribute('cy', f1(mp[1])); L.pop.setAttribute('r', f1(mp[2] * (0.7 + 0.9 * easeOut(q))))
+    L.pop.setAttribute('opacity', rest ? 0.4 : (0.8 * (1 - q) + 0.2).toFixed(2)); vis(L.pop, true)
+  } else vis(L.pop, false)
+  // final tier: the measured attack angle labels the bat at contact
+  if (OPTS.final && (rest || (contact ? tau >= contactMs : dtC >= 0))) {
+    const bp = proj(...SW.at(0).end)
+    L.attack.setAttribute('x', f1(Math.min(W - 112, Math.max(4, bp[0] + (s.bats === 'R' ? 6 : -110)))))
+    L.attack.setAttribute('y', f1(Math.max(12, bp[1] - 8)))
+    L.attack.textContent = `attack +${s.attack}° · measured`
+    vis(L.attack, true)
+  } else vis(L.attack, false)
+
+  renderSide(tau, rest)
+  renderReadout(tau, rest)
+  renderBeats(rest ? R.total : tau)
+}
+
+function renderSide(tau, rest) {
+  const { s, side: sd, bb } = R
+  const hide = (n) => vis(n, false)
+  if (!sd) {
+    ;[SL.trace, SL.ball, SL.ring, SL.ring2, SL.sel, SL.dist, SL.apex].forEach(hide)
+    SL.empty.textContent = s.outcome === 'whiff' ? 'NO CONTACT' : 'FOUL · NO FLIGHT DRAWN'
+    vis(SL.empty, rest || tau >= R.sceneEnd); vis(SL.tick400, true)
+    return
+  }
+  hide(SL.empty)
+  const fl = bb.fl, scale = s.dist / fl.dist
+  const u = rest ? 1 : clamp01((tau - sd.start) / sd.ms)
+  const tF = u * fl.T
+  if (tau < sd.start && !rest) { [SL.trace, SL.ball, SL.ring, SL.ring2, SL.sel, SL.dist, SL.apex].forEach(hide); return }
+  // trace up to now
+  let d = ''
+  const step = Math.max(1, Math.floor(fl.pts.length / 90))
+  for (let i = 0; i < fl.pts.length; i += step) { const p = fl.pts[i]; if (p[2] > tF) break; d += (d ? 'L' : 'M') + f1(SX(p[0] * scale)) + ' ' + f1(SZ(p[1])) }
+  const cur = sampleAt(fl, tF)
+  d += (d ? 'L' : 'M') + f1(SX(cur[0] * scale)) + ' ' + f1(SZ(cur[1]))
+  SL.trace.setAttribute('d', d); vis(SL.trace, true)
+  const since = rest ? 5000 : tau - (sd.start + sd.ms)
+  SL.trace.setAttribute('opacity', since > 0 ? (0.95 - 0.35 * clamp01(since / 1400)).toFixed(2) : 0.95)
+  // apex, pencil, labelled as drawn
+  let apex = fl.pts[0]
+  for (const p of fl.pts) if (p[1] > apex[1]) apex = p
+  if (s.la >= 8 && (rest || tF >= apex[2])) {
+    const ax = SX(apex[0] * scale), ay = SZ(apex[1])
+    SL.apexTick.setAttribute('x1', f1(ax)); SL.apexTick.setAttribute('x2', f1(ax)); SL.apexTick.setAttribute('y1', f1(ay + 3)); SL.apexTick.setAttribute('y2', 80)
+    // a high apex would reach the title row, so its label goes under the arc instead
+    const under = ay < 34
+    SL.apexText.setAttribute('x', f1(under ? ax + 5 : ax)); SL.apexText.setAttribute('text-anchor', under ? 'start' : 'middle')
+    SL.apexText.setAttribute('y', f1(under ? ay + 16 : ay - 5))
+    SL.apexText.textContent = `apex ≈ ${Math.round(apex[1])} ft · drawn`
+    vis(SL.apex, true)
+  } else hide(SL.apex)
+  // ball in flight
+  if (!rest && u < 1) { SL.ball.setAttribute('cx', f1(SX(cur[0] * scale))); SL.ball.setAttribute('cy', f1(SZ(cur[1]))); vis(SL.ball, true) } else hide(SL.ball)
+  // landing: the Contact card's rings (contactFlight.js), and its resting selection ring
+  const lx = SX(s.dist), ly = 80
+  if (since >= 0) {
+    const lq = clamp01(since / 900), lq2 = clamp01((since - 140) / 1100), a = easeOut(clamp01(since / 260))
+    SL.ring.setAttribute('cx', f1(lx)); SL.ring.setAttribute('cy', ly); SL.ring.setAttribute('r', f1(3 + lq * 12)); SL.ring.setAttribute('opacity', since < 900 ? (0.9 * (1 - lq)).toFixed(2) : 0)
+    SL.ring2.setAttribute('cx', f1(lx)); SL.ring2.setAttribute('cy', ly); SL.ring2.setAttribute('r', f1(3 + lq2 * 22)); SL.ring2.setAttribute('opacity', s.parks && since < 1240 && since > 140 ? (0.7 * (1 - lq2)).toFixed(2) : 0)
+    SL.sel.setAttribute('cx', f1(lx)); SL.sel.setAttribute('cy', ly); SL.sel.setAttribute('r', f1(4.5 * (1 + 0.6 * (1 - a)))); SL.sel.setAttribute('opacity', Math.min(1, since / 160).toFixed(2))
+    // above the ring; left of the fence post when it lands near it, so it never sits on the post
+    // near the fence the distance takes the axis row in place of the 400 ft tick label
+    const nearEnd = lx > SX(370)
+    SL.dist.setAttribute('x', f1(nearEnd ? 332 : lx)); SL.dist.setAttribute('text-anchor', nearEnd ? 'end' : 'middle'); SL.dist.setAttribute('y', nearEnd ? 96 : 66); SL.dist.textContent = `${s.dist} ft`
+    vis(SL.tick400, !nearEnd)
+    SL.dist.setAttribute('opacity', Math.min(1, since / 220).toFixed(2))
+    ;[SL.ring, SL.ring2, SL.sel, SL.dist].forEach((n) => vis(n, true))
+  } else { [SL.ring, SL.ring2, SL.sel, SL.dist].forEach(hide); vis(SL.tick400, true) }
+}
+
+// ---------------------------------------------------------------- readout (scrubbable: no CSS transitions)
+const readout = document.getElementById('readout')
+let figEls = [], verdictEl = null
+function buildReadout() {
+  readout.textContent = ''
+  figEls = R.figs.map(([v, k, wait]) => {
+    const d = document.createElement('div'); d.className = 'fig'
+    const b = document.createElement('b'); b.textContent = v; if (wait) b.className = 'wait'
+    const sp = document.createElement('span'); sp.textContent = k
+    d.append(b, sp); readout.appendChild(d); return d
+  })
+  verdictEl = null
+  if (R.s.verdict) { verdictEl = document.createElement('div'); verdictEl.className = R.s.tone === 'hit' ? 'verdict verdict--hit' : 'verdict'; verdictEl.textContent = R.s.verdict; readout.appendChild(verdictEl) }
+}
+function renderReadout(tau, rest) {
+  figEls.forEach((d, i) => {
+    const q = rest ? 1 : clamp01((tau - R.readStart - i * 55) / 220)
+    const e = easeStamp(q)
+    d.style.opacity = e.toFixed(3)
+    d.style.transform = `translateY(${f1(4 * (1 - e))}px)`
+  })
+  if (verdictEl) {
+    const q = rest ? 1 : clamp01((tau - R.verdictAt) / 380)
+    const e = easeStamp(q)
+    verdictEl.style.opacity = Math.min(1, q * 3).toFixed(3)
+    verdictEl.style.transform = `scale(${(1.18 - 0.18 * e).toFixed(3)}) rotate(${(-7 + 4 * e).toFixed(2)}deg)`
+  }
+}
+
+// ---------------------------------------------------------------- beat sheet with a live playhead
+const beatsvg = document.getElementById('beatsvg')
+let playhead, beatScale
+function buildBeats() {
+  beatsvg.textContent = ''
+  const { s, P, SW, S, HS, contactMs } = R
+  const left = 92, right = 620, total = R.total
+  beatScale = (ms) => left + (ms / total) * (right - left)
+  const rows = []
+  const swingStart = (P.tc - SW.SWING) * S * 1000, coilStart = (P.tc - SW.SWING - SW.COIL) * S * 1000
+  rows.push(['Pitch', 0, s.outcome === 'whiff' ? P.tMitt * S * 1000 : contactMs, s.color])
+  rows.push(['Coil', coilStart, swingStart, C.pencilSoft])
+  rows.push(['Swing', swingStart, s.outcome === 'whiff' ? (P.tc + SW.FOLLOW) * S * 1000 : contactMs, C.pencil])
+  if (HS) rows.push(['Hit-stop', contactMs, contactMs + HS, C.clay])
+  if (s.outcome !== 'whiff') rows.push(['Contact', contactMs, contactMs + 260, C.ink0])
+  if (s.outcome !== 'whiff') rows.push(['Exit', contactMs + HS, R.exitMs, C.ink])
+  if (R.side) rows.push(['Side view', R.side.start, R.landMs + 900, C.ink])
+  rows.push(['Quality', R.readStart, R.s.verdict ? R.verdictAt + 380 : R.readStart + R.figs.length * 55 + 220, C.clay])
+  const rowH = 24
+  beatsvg.setAttribute('viewBox', `0 0 640 ${rows.length * rowH + 40}`)
+  for (let ms = 0; ms <= total; ms += 500) {
+    const x = beatScale(ms)
+    el('line', { x1: f1(x), y1: 6, x2: f1(x), y2: rows.length * rowH + 14, stroke: '#EDE6D1', 'stroke-width': ms % 1000 ? 0.6 : 1.2 }, beatsvg)
+    if (ms % 1000 === 0) { const t = el('text', { x: f1(x), y: rows.length * rowH + 28, 'text-anchor': 'middle', 'font-family': 'JetBrains Mono, monospace', 'font-size': 10, fill: C.pencil }, beatsvg); t.textContent = `${ms / 1000}s` }
+  }
+  rows.forEach(([name, a, b, color], i) => {
+    const y = 10 + i * rowH
+    const t = el('text', { x: 4, y: y + 12, 'font-family': 'Barlow Condensed, Arial Narrow, sans-serif', 'font-size': 13, 'font-weight': 700, 'letter-spacing': '0.05em', fill: C.ink0 }, beatsvg)
+    t.textContent = name.toUpperCase()
+    el('rect', { x: f1(beatScale(a)), y, width: f1(Math.max(2.5, beatScale(b) - beatScale(a))), height: 14, rx: 2, fill: color, opacity: 0.9 }, beatsvg)
+    const ms = el('text', { x: f1(Math.min(600, beatScale(b) + 5)), y: y + 11, 'font-family': 'JetBrains Mono, monospace', 'font-size': 9.5, fill: C.pencil }, beatsvg)
+    ms.textContent = `${Math.round(b - a)} ms`
+  })
+  playhead = el('line', { y1: 2, y2: rows.length * rowH + 16, stroke: C.clay, 'stroke-width': 1.5 }, beatsvg)
+  // fill the prose numbers
+  const set = (k, v) => document.querySelectorAll(`[data-b="${k}"]`).forEach((n) => (n.textContent = `${Math.round(v)} ms`))
+  set('pitch', s.outcome === 'whiff' ? P.tMitt * S * 1000 : contactMs)
+  set('coil', SW.COIL * S * 1000)
+  set('stop', HS || 66)
+}
+function renderBeats(tau) { if (playhead) { const x = f1(beatScale(Math.min(tau, R.total))); playhead.setAttribute('x1', x); playhead.setAttribute('x2', x) } }
+
+// ---------------------------------------------------------------- controls
+const OPTS = { slow: 3, final: false }
+let sample = SAMPLES[0], raf = 0, t0 = 0
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+const scrub = document.getElementById('scrub')
+if (reduce) document.getElementById('rmNote').hidden = false
+function load(keepRest = true) {
+  cancelAnimationFrame(raf); raf = 0
+  R = build(sample, OPTS)
+  L = buildStage(); SL = buildSide(); buildReadout(); buildBeats()
+  document.getElementById('scene').setAttribute('aria-label', describe(sample))
+  document.getElementById('batter').textContent = sample.batter
+  document.getElementById('barName').textContent = sample.pitch
+  document.getElementById('barMph').textContent = `${sample.mph.toFixed(1)} mph`
+  document.getElementById('barStep').textContent = `Pitch ${sample.no} of ${sample.of}`
+  document.getElementById('barCall').textContent = sample.call
+  document.getElementById('tierLabel').textContent = OPTS.final ? 'Final tier · after the game' : 'Live tier · about a minute'
+  scrub.max = Math.round(R.total)
+  if (keepRest) { scrub.value = scrub.max; render(R.total, 'rest') }
+}
+function describe(x) {
+  const pitch = `${x.pitch}, ${x.mph.toFixed(1)} mph.`
+  if (x.outcome === 'whiff') return `${pitch} Swing and miss.`
+  if (x.outcome === 'foul') return `${pitch} Fouled back.`
+  return `${pitch} ${x.traj}, ${x.ev.toFixed(1)} mph off the bat, ${x.dist} feet. ${x.call}.`
+}
+function play() {
+  cancelAnimationFrame(raf)
+  if (reduce) { render(R.total, 'rest'); scrub.value = scrub.max; return }
+  t0 = performance.now()
+  const tick = (now) => {
+    const tau = now - t0
+    render(tau)
+    scrub.value = Math.round(tau)
+    if (tau < R.total) raf = requestAnimationFrame(tick)
+    else { raf = 0; render(R.total, 'rest') }
+  }
+  raf = requestAnimationFrame(tick)
+}
+const samplesBox = document.getElementById('samples')
+SAMPLES.forEach((smp) => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = smp.label; b.setAttribute('aria-pressed', smp === sample)
+  b.addEventListener('click', () => { sample = smp; samplesBox.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b)); load(); play() })
+  samplesBox.appendChild(b)
+})
+document.getElementById('play').addEventListener('click', play)
+document.getElementById('rest').addEventListener('click', () => { cancelAnimationFrame(raf); raf = 0; scrub.value = scrub.max; render(R.total, 'rest') })
+const speedBtn = document.getElementById('speed')
+speedBtn.addEventListener('click', () => { OPTS.slow = OPTS.slow === 3 ? 1 : 3; speedBtn.textContent = OPTS.slow === 3 ? '×3 slow' : 'Real speed'; speedBtn.setAttribute('aria-pressed', OPTS.slow === 3); load(); play() })
+const tierBtn = document.getElementById('tier')
+tierBtn.addEventListener('click', () => { OPTS.final = !OPTS.final; tierBtn.setAttribute('aria-pressed', OPTS.final); load() })
+scrub.addEventListener('input', () => { cancelAnimationFrame(raf); raf = 0; const v = +scrub.value; v >= +scrub.max ? render(R.total, 'rest') : render(v) })
+// pause while off screen (Rauno; PitchScene does the same)
+new IntersectionObserver(([e]) => { if (!e.isIntersecting && raf) { cancelAnimationFrame(raf); raf = 0; render(R.total, 'rest'); scrub.value = scrub.max } }).observe(document.getElementById('card'))
+
+// ---------------------------------------------------------------- rules
+const RULES = [
+  ['Ink is measured, pencil is drawn', 'Every mark that comes from tracking is ink. Every mark this app invents is pencil, and a small tag in the scene says so. The final tier turns only the bat at contact to ink.', 'i', 'docs/design-inspiration.md §9 (Hawk-Eye: label every drawn value); the issue asks to label the swing as a drawing.'],
+  ['One clock; every mark is a pure function of it', 'The pitch, bat, ring, side view and readout all read one time value. Scrubbing, slow motion and the rest frame come free, and there is still no React state per frame.', 's', 'Remotion skills: "drive animations using useCurrentFrame() and interpolate()". PitchScene.jsx already works this way.'],
+  ['Anticipation before the swing', 'A short coil tells the eye a swing is coming, so the fast sweep is not a surprise.', 's', 'animation-principles (game-development): startup, active and recovery frames for an attack.'],
+  ['An ease-in, here only', 'A bat gathers speed into the ball. The app keeps exactly one ease-in, --ease-press, for things pushed or thrown. A swing is that kind of thing. All UI in the card still decelerates.', 'i', 'review-animations: "Never ease-in on UI"; src/tokens/effects.css on --ease-press.'],
+  ['Hit-stop: 4 frames', 'Freeze the scene for 66 ms at contact. The freeze is the impact. A whiff has none, and the gap reads as a miss.', 's', 'animation-principles (game-development): "Hit-stop (freeze frames) emphasizes impact, 2-5 frames typical."'],
+  ['Nothing comes from nothing', 'The contact ring grows from 0.8× the ball, never from zero. Its size and stroke follow squared-up %. It flashes once, well under 3 flashes a second.', 's', 'review-animations: never scale(0); Rauno: scale from about 0.8; accessible-motion: no more than 3 flashes a second.'],
+  ['A weapon trail for the barrel', 'The barrel\'s path stays on as a dashed pencil arc. A whiff shows clearly as an arc that passes over the ball.', 's', 'animation-principles: "Weapon trails persist after swing." Savant measures swing-path tilt over the last 40 ms.'],
+  ['One scale per view; cut, do not pan', 'The behind-the-plate camera loses a fly ball in about 0.15 s. Do not chase it. Cut to a side view whose 0 to 450 ft scale never changes.', 's', 'Heer and Robertson 2007: do not rescale an axis during a transition.'],
+  ['Stagger the quality line, keep it short', 'Each figure rises 4 px over 220 ms, 55 ms apart, so the eye reads them in order. The verdict is stamped last, on the app\'s stamp curve.', 's', 'emil-design-eng: stagger 30-80 ms, UI under 300 ms. The app tokens are --stagger-step and --dur-stamp-in.'],
+  ['The rest frame is complete without motion', 'Before a tap, and always under reduced motion, the card shows a multiple exposure: the swing at three moments with contact the strongest, the exit and the side view. Nothing moves, and nothing is missing.', 'i', 'review-animations and apple-design: reduced motion is gentler, not zero. docs/design-inspiration.md §9: "make the still end state complete without the animation."'],
+]
+const rulesBox = document.getElementById('rules')
+RULES.forEach(([h, p, kind, src], i) => {
+  const c = document.createElement('div'); c.className = 'rule-card'
+  c.innerHTML = `<div class="eyebrow">Rule ${i + 1} <span class="tag ${kind}">${kind === 's' ? 'Source' : 'Inference'}</span></div><h3></h3><p></p><div class="src"></div>`
+  c.querySelector('h3').textContent = h; c.querySelector('p').textContent = p; c.querySelector('.src').textContent = src
+  rulesBox.appendChild(c)
+})
+
+load()
+})()
+</script>
+
+</body></html>
