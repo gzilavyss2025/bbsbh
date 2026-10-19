@@ -48,7 +48,9 @@ export function swingScene(p, beats, tr) {
   const { swing, contact, hit, batSide } = p
   const trajectory = TRAJ[hit?.trajectory]?.[1]
   return {
-    SW: swingModel({ batSide, swing, K: contact.K, swingSec: swingSeconds(tr?.batSpeed) }),
+    SW: swingModel({ batSide, swing, K: contact.K, attackDeg: tr?.attackDeg ?? undefined, swingSec: swingSeconds(tr?.batSpeed) }),
+    measured: tr?.attackDeg != null, // phase C: the bat at contact is ink and says its angle
+    attackDeg: tr?.attackDeg ?? null,
     strength: ringStrength(swing === 'inplay' ? squaredUp(hit?.exitVelo, tr?.batSpeed, Number(p.mph)) : null),
     path: swing === 'inplay' ? battedPath(hit, contact.K) : swing === 'foul' ? foulPath(contact.K, batSide) : null,
     bunt: isBunt(hit),
@@ -71,10 +73,20 @@ export function batShape({ knob, end }) {
   return { points: [a[0], m[0], q[0], e[0], e[1], q[1], m[1], a[1]].map(xy).join(' '), cap: [p1[0], p1[1], wb / 2] }
 }
 
-export function setBat(poly, cap, b, opacity) {
+export function setBat(poly, cap, b, opacity, ink = false) {
   const { points, cap: [x, y, r] } = batShape(b)
-  put(poly, { points, opacity: opacity.toFixed(2), visibility: 'visible' })
-  if (cap) put(cap, { cx: f1(x), cy: f1(y), r: f1(r), opacity: opacity.toFixed(2), visibility: 'visible' })
+  const mark = { opacity: opacity.toFixed(2), visibility: 'visible', class: ink ? 'pscene__bat pscene__bat--ink' : 'pscene__bat' }
+  put(poly, { points, ...mark })
+  if (cap) put(cap, { cx: f1(x), cy: f1(y), r: f1(r), ...mark })
+}
+
+// Phase C (§9): `attack +9° · measured`, in ink above the barrel end, kept inside the scene.
+const LABEL_HALF = 66 // px: half the text's width at --fs-cell
+export function setAttackLabel(node, deg, end) {
+  const [x, y] = proj(...end)
+  const n = Math.round(deg)
+  node.textContent = `attack ${n < 0 ? '-' : '+'}${Math.abs(n)}° · measured`
+  put(node, { x: f1(clamp(x, LABEL_HALF + 4, SCENE_W - LABEL_HALF - 4)), y: f1(Math.max(14, y - 10)), visibility: 'visible' })
 }
 
 // The four smear bats trail the bat while it is fast; none during the freeze.
@@ -183,22 +195,25 @@ export function drawContact(mk, p, b, m, tau, slow, rest) {
   const tReal = sceneClock(b, tau) / (slow * 1000)
   const dtC = tReal - tc
   const th = SW.at(rest ? 0.12 : dtC).th
+  const ink = m.measured && !bunt && (rest || dtC >= 0) // the swing before contact stays pencil; a bunt is drawn, never ink
+  if (ink) setAttackLabel(mk.label, m.attackDeg, SW.at(0).end)
+  else vis(mk.label, false)
   if (!bunt) {
     if (rest) {
       // a multiple exposure: mid-swing and follow-through faint, the bat at contact strong
       ;[-0.05, 0.12].forEach((d, k) => setBat(mk.smear[k], null, SW.at(d), 0.22))
       hide(...mk.smear.slice(2))
-      setBat(mk.bat, mk.cap, SW.at(0), 0.95)
+      setBat(mk.bat, mk.cap, SW.at(0), 0.95, ink)
     } else {
       const fadeAt = (tc + FOLLOW) * slow * 1000 + b.freezeMs
-      setBat(mk.bat, mk.cap, SW.at(dtC), 1 - 0.75 * clamp((tau - fadeAt) / 400, 0, 1))
+      setBat(mk.bat, mk.cap, SW.at(dtC), 1 - 0.75 * clamp((tau - fadeAt) / 400, 0, 1), ink)
       setSmear(mk.smear, SW, dtC, tau >= b.contactMs && tau <= b.contactMs + b.freezeMs)
     }
     setBarrelPath(mk.arc, SW, th, rest || dtC > FOLLOW ? 0.75 : 0.9)
   } else {
     // a bunt holds the bat still across the zone, in pencil: no smear, no barrel path (§10)
     hide(mk.arc, ...mk.smear)
-    setBat(mk.bat, mk.cap, SW.at(0), 0.95)
+    setBat(mk.bat, mk.cap, SW.at(0), 0.95, ink)
   }
   // the batted ball: in flight until it leaves the scene
   const exitSec = path?.exitSec ?? 0 // a whiff has no batted ball

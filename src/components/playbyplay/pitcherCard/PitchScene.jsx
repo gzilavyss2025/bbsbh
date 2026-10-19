@@ -274,6 +274,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
             <rect ref={(el) => { mk.current.parts.rect = el }} y="6" height="15" rx="2" />
             <text ref={(el) => { mk.current.parts.text = el }} y="17" textAnchor="end" />
           </g>
+          <text ref={(el) => { mk.current.label = el }} className="pscene__attack" textAnchor="middle" visibility="hidden" />
           <text className="pscene__honest" x="8" y={H - 6}>SWING DRAWN · PATHS MEASURED</text>
         </>}
       </svg>
