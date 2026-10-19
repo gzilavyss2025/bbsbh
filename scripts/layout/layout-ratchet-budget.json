@@ -509,6 +509,11 @@
     "column": 1,
     "wrap": 3
   },
+  "src/styles/scout/pitches.css": {
+    "column": 3,
+    "wrap": 1,
+    "grid": 1
+  },
   "src/styles/scout/scout.css": {
     "column": 3,
     "wrap": 5,
@@ -523,13 +528,5 @@
   },
   "src/styles/workload/projection.css": {
     "column": 3
-  },
-  "src/styles/scout/edge.css": {
-    "column": 1
-  },
-  "src/styles/scout/pitches.css": {
-    "column": 3,
-    "wrap": 1,
-    "grid": 1
   }
 }
