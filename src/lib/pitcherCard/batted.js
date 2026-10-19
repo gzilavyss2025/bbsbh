@@ -104,7 +104,7 @@ export function foulPath(K, batSide) {
 }
 
 // The side view's scale (§7.1): 0 to 450 ft along the ground, the same scale up, from a baseline at y = 80.
-const SIDE_X = (ft) => 16 + (ft * 304) / 450
+export const SIDE_X = (ft) => 16 + (ft * 304) / 450
 const SIDE_Y = (ft) => 80 - (ft * 304) / 450
 
 // The same flight in the 336 x 100 strip: pos(t) = [x, y] in strip units, `apex` = { x, y, ft }
