@@ -1,0 +1,45 @@
+/* ============================================================
+   MATCHUP SCOUT, THE EDGE SECTION (#2319, ADR-0118) — screens/scout/edge/. The verdict.
+   Imported by ScoutPage.jsx only. Every selector is .scout__*.
+   ============================================================ */
+
+/* --- EDGE: the verdict --- */
+
+.scout__verdict {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+.scout__lean {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-title);
+  color: var(--text-heading);
+}
+.scout__leanname--hitter { color: var(--clay); }
+.scout__leanname--pitcher { color: var(--allstar-blue); }
+.scout__verdictline {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.scout__verdictline strong,
+.scout__callout strong {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.scout__verdictrule {
+  width: 100%;
+  margin: var(--space-1) 0;
+  border: 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}

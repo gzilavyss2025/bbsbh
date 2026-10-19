@@ -16,21 +16,20 @@ const skubal = { id: 669373, name: 'Tarik Skubal' }
 const judge = { id: 592450, name: 'Aaron Judge' }
 
 test('a Scout address round-trips through scoutPath and parseRoute', () => {
-  const path = scoutPath({ pitcher: skubal, hitter: judge, scope: 'post', pitch: 'SL', hand: 'L', metric: 'whiff', tab: 'zones', d: '2026-09-01' })
-  assert.equal(path, '/scout/tarik-skubal-669373/aaron-judge-592450?scope=post&pitch=SL&hand=L&metric=whiff&tab=zones&d=2026-09-01')
+  const path = scoutPath({ pitcher: skubal, hitter: judge, scope: 'post', pitch: 'SL', hand: 'L', metric: 'whiff', d: '2026-09-01' })
+  assert.equal(path, '/scout/tarik-skubal-669373/aaron-judge-592450?scope=post&pitch=SL&hand=L&metric=whiff&d=2026-09-01')
   assert.deepEqual(parseRoute(path), {
-    name: 'scout', pitcherId: '669373', hitterId: '592450', asOf: '2026-09-01', scope: 'post', pitch: 'SL', hand: 'L', metric: 'whiff', tab: 'zones',
+    name: 'scout', pitcherId: '669373', hitterId: '592450', asOf: '2026-09-01', scope: 'post', pitch: 'SL', hand: 'L', metric: 'whiff',
   })
-  assert.equal(parseRoute(scoutPath({ pitcher: skubal, hitter: judge, tab: 'meet' })).tab, 'meet')
+  assert.equal('tab' in parseRoute('/scout/a-1/b-2?tab=meet'), false)
 })
 
 test('defaults are never written, and an unknown value falls back', () => {
   assert.equal('view' in parseRoute('/scout/a-1/b-2?view=pitcher'), false)
-  assert.equal(scoutPath({ pitcher: skubal, hitter: judge, scope: 'all', tab: 'edge' }), '/scout/tarik-skubal-669373/aaron-judge-592450')
+  assert.equal(scoutPath({ pitcher: skubal, hitter: judge, scope: 'all' }), '/scout/tarik-skubal-669373/aaron-judge-592450')
   assert.equal(scoutPath({ pitcher: skubal }), '/scout')
-  const r = parseRoute('/scout/a-1/b-2?scope=spring&pitch=slider&hand=S&metric=ops&tab=box&d=2026-02-30')
-  assert.deepEqual([r.scope, r.pitch, r.hand, r.metric, r.tab, r.asOf], ['all', null, null, null, 'edge', null])
-  assert.equal(parseRoute('/scout/a-1/b-2').tab, 'edge')
+  const r = parseRoute('/scout/a-1/b-2?scope=spring&pitch=slider&hand=S&metric=ops&d=2026-02-30')
+  assert.deepEqual([r.scope, r.pitch, r.hand, r.metric, r.asOf], ['all', null, null, null, null])
   assert.equal(parseRoute('/scout').name, 'scout')
   assert.notEqual(parseRoute('/scout/only-one-1').name, 'scout')
 })

@@ -1,0 +1,146 @@
+/* ============================================================
+   MATCHUP SCOUT, THE PITCHES SECTION (#2319, ADR-0118) — screens/scout/pitches/. The ledger, one row per pitch.
+   Imported by ScoutPage.jsx only. Every selector is .scout__*.
+   ============================================================ */
+
+/* --- EDGE: the ledger, one row per pill, a dot plot on one scale --- */
+
+.scout__ledgerhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+.scout__ledgertitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.scout__ledgerkey {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.scout__keytick,
+.scout__keydot,
+.scout__keyusage {
+  display: inline-block;
+  margin-inline-start: var(--space-1);
+}
+.scout__keytick { width: 2px; height: 12px; background: var(--text-caption); }
+.scout__keydot { width: 10px; height: 10px; border-radius: var(--radius-pill); background: var(--text-heading); }
+.scout__keyusage { width: 14px; height: 3px; background: var(--arsenal-fastball); }
+
+.scout__ledger {
+  display: flex;
+  flex-direction: column;
+}
+.scout__lrow {
+  display: grid;
+  grid-template-columns: minmax(84px, 1fr) minmax(0, 2fr) minmax(88px, auto);
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-1h);
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  border-inline-start: 3px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.scout__lrow[aria-pressed='true'] {
+  border-inline-start-color: var(--accent-primary);
+  background: var(--surface-inset);
+}
+.scout__lrow:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.scout__lname {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.scout__lpitch {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.scout__lsub,
+.scout__lvs {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.scout__lplot {
+  position: relative;
+  height: 30px;
+}
+.scout__laxis {
+  position: absolute;
+  inset-inline: 0;
+  top: 11px;
+  height: 1px;
+  background: var(--border-rule);
+}
+.scout__lgap {
+  position: absolute;
+  top: 9px;
+  height: 5px;
+  opacity: 0.35;
+  background: var(--graphite-soft);
+}
+.scout__ltick {
+  position: absolute;
+  top: 3px;
+  width: 2px;
+  height: 17px;
+  margin-inline-start: -1px;
+  background: var(--text-caption);
+}
+.scout__ldot {
+  position: absolute;
+  top: 6px;
+  width: 11px;
+  height: 11px;
+  margin-inline-start: -5.5px;
+  border: 1.5px solid var(--surface-card);
+  border-radius: var(--radius-pill);
+  background: var(--graphite-soft);
+}
+.scout__lrow[data-tone='hitter'] .scout__lgap,
+.scout__lrow[data-tone='hitter'] .scout__ldot { background: var(--clay); }
+.scout__lrow[data-tone='pitcher'] .scout__lgap,
+.scout__lrow[data-tone='pitcher'] .scout__ldot { background: var(--allstar-blue); }
+.scout__lusage {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--arsenal-other);
+}
+.scout__lrow[data-family='fastball'] .scout__lusage { background: var(--arsenal-fastball); }
+.scout__lrow[data-family='breaking'] .scout__lusage { background: var(--arsenal-breaking); }
+.scout__lrow[data-family='offspeed'] .scout__lusage { background: var(--arsenal-offspeed); }
+.scout__ltag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: end;
+}
+.scout__lword {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.scout__lrow[data-tone='hitter'] .scout__lword { color: var(--clay); }
+.scout__lrow[data-tone='pitcher'] .scout__lword { color: var(--allstar-blue); }
