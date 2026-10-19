@@ -8,7 +8,7 @@ import { Pill } from '../../components/ui/control/Pill.jsx'
 // first: the speed in the modal (the page has none).
 //
 // `options` [[value, label], ...], `value`, `onChange` and `label` name that
-// one choice; the rest goes to PitchScene unchanged.
+// one choice, which is optional (the page has none); the rest goes to PitchScene unchanged.
 export function ScoutScene({ caption, label, options, value, onChange, ...scene }) {
   return (
     <div className="pcard scout__scene">
