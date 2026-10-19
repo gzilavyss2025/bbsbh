@@ -19,7 +19,10 @@ import { clubShortName, ladderGeometry, posLabel, seasonRange, traceOf } from '.
 // traced player's name becomes his PlayerLink, so the first tap traces and the
 // second opens his page; with a mouse the name is a link from the start, since
 // pointing has already traced.
-export function Ladder({ ladder, dayNight, away, home }) {
+//
+// `legend` (on by default) draws the line of colour samples and the tap hint
+// under the side names. The lineup page's fold card turns it off.
+export function Ladder({ ladder, dayNight, away, home, legend = true }) {
   const [node, setNode] = useState(null)
   const [width, setWidth] = useState(0)
   useEffect(() => {
@@ -70,27 +73,29 @@ export function Ladder({ ladder, dayNight, away, home }) {
         {sideName(away)}
         {!sideways && sideName(home)}
       </div>
-      <p className="ladder__legend">
-        {Object.values(ladder.players).some((p) => p.starting) && (
-          <span className="ladder__key">
-            <span className="ladder__mark" />
-            {dayNight === 'day' ? 'Starting today' : 'Starting tonight'}
-          </span>
-        )}
-        {club && (
-          <span className="ladder__key">
-            <span className="ladder__badge ladder__badge--key" />
-            Played for the club
-          </span>
-        )}
-        {farm && (
-          <span className="ladder__key">
-            <span className="ladder__badge ladder__badge--farm ladder__badge--key" />
-            Its farm system only
-          </span>
-        )}
-        <span className="ladder__key">{hoverCapable ? 'Point to trace, click to pin' : 'Tap a player or club to trace it'}</span>
-      </p>
+      {legend && (
+        <p className="ladder__legend">
+          {Object.values(ladder.players).some((p) => p.starting) && (
+            <span className="ladder__key">
+              <span className="ladder__mark" />
+              {dayNight === 'day' ? 'Starting today' : 'Starting tonight'}
+            </span>
+          )}
+          {club && (
+            <span className="ladder__key">
+              <span className="ladder__badge ladder__badge--key" />
+              Played for the club
+            </span>
+          )}
+          {farm && (
+            <span className="ladder__key">
+              <span className="ladder__badge ladder__badge--farm ladder__badge--key" />
+              Its farm system only
+            </span>
+          )}
+          <span className="ladder__key">{hoverCapable ? 'Point to trace, click to pin' : 'Tap a player or club to trace it'}</span>
+        </p>
+      )}
       <div
         ref={setNode}
         className={`ladder${sideways ? ' ladder--sideways' : ''}${trace ? ' ladder--tracing' : ''}`}
@@ -166,9 +171,10 @@ export function Ladder({ ladder, dayNight, away, home }) {
 
 // One player: his headshot at the end the line meets, then surname, position
 // (green when he starts) and, for a tie to tonight's own org, a badge with that
-// club's cap and years. The button always holds the headshot; it holds the name
-// too until the name becomes his link, so the button (and its focus) never
-// remounts.
+// club's cap, and its years when the Ladder is sideways (the vertical one has
+// no room; the button's label keeps them). The button always holds the
+// headshot; it holds the name too until the name becomes his link, so the
+// button (and its focus) never remounts.
 function PlayerNode({ p, side, box, cls, pinned, linked, onPin, onPoint }) {
   const f = p.former
   const formerLabel = f ? `, formerly ${f.teamName} ${yearSpan(f.seasons)}` : ''
@@ -180,7 +186,7 @@ function PlayerNode({ p, side, box, cls, pinned, linked, onPin, onPoint }) {
         {f && (
           <span className={`ladder__badge${f.farmOnly ? ' ladder__badge--farm' : ''}`}>
             <TeamLogo teamId={f.orgId} name={f.teamName} size={11} variant="cap" />
-            {seasonRange(f.seasons)}
+            <span className="ladder__badgeyears">{seasonRange(f.seasons)}</span>
           </span>
         )}
       </span>

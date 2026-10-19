@@ -1,6 +1,8 @@
 /* Former teammates as the LADDER (components/team/ladder/Ladder.jsx, #1352).
    layout.js computes every node's box in px from the card's measured width;
-   these rules dress the boxes. One svg under the nodes draws the lines. */
+   these rules dress the boxes. One svg under the nodes draws the lines.
+   Every rounded part reads --ladder-radius first, so a square host sets that
+   one property (the lineup page's fold card, lineup-next/field.css). */
 .ladder__sides {
   display: flex;
   justify-content: space-between;
@@ -29,7 +31,7 @@
 .ladder__mark {
   width: 12px;
   height: 12px;
-  border-radius: var(--radius-xs);
+  border-radius: var(--ladder-radius, var(--radius-xs));
   background: var(--accent-positive);
 }
 
@@ -135,7 +137,7 @@
   flex: none;
   width: 24px;
   height: 32px;
-  border-radius: var(--radius-xs);
+  border-radius: var(--ladder-radius, var(--radius-xs));
 }
 
 .shot.ladder__shot.shot--fallback {
@@ -202,10 +204,10 @@
   white-space: nowrap;
 }
 
-/* A starter: the position fills green (the legend names it). */
+/* A starter: the position fills green (the legend names it, where the host shows one). */
 .ladder__pos--starting {
   padding: 1px 3px;
-  border-radius: var(--radius-xs);
+  border-radius: var(--ladder-radius, var(--radius-xs));
   background: var(--accent-positive);
   color: var(--surface-card);
 }
@@ -217,9 +219,9 @@
   align-items: center;
   gap: 2px;
   height: 15px;
-  padding: 0 var(--space-1) 0 2px;
+  padding: 0 2px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
+  border-radius: var(--ladder-radius, var(--radius-pill));
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   color: var(--text-body);
@@ -228,7 +230,15 @@
 
 /* A sideways column is 54px or more; the badge's years must fit it. */
 .ladder--sideways .ladder__badge {
+  padding: 0 var(--space-1) 0 2px;
   font-size: 0.82em;
+}
+
+/* The vertical Ladder gives a player at most 132px (layout.js), and a full badge
+   with its years needs about 136px, so it ran off the card on a phone. There the
+   badge is the cap alone; the button's label keeps the years. */
+.ladder:not(.ladder--sideways) .ladder__badgeyears {
+  display: none;
 }
 
 .ladder__badge--farm {
@@ -248,7 +258,7 @@
   gap: var(--space-1);
   padding: 0 var(--space-1);
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
+  border-radius: var(--ladder-radius, var(--radius-sm));
   background: var(--surface-inset);
   font-size: var(--fs-cell);
 }
@@ -276,7 +286,7 @@
   right: var(--space-1);
   padding: 0 2px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-xs);
+  border-radius: var(--ladder-radius, var(--radius-xs));
   background: var(--surface-card);
   font-size: 0.75em;
 }
