@@ -64,7 +64,12 @@
   }
 }
 @media (min-width: 740px) and (min-height: 900px) {
+  /* The section stretches to its two grid rows and its content pins inside it: a
+     sticky grid item is bounded by the whole grid, so it ran down over Meetings. */
   #scout-pitches {
+    align-self: stretch;
+  }
+  #scout-pitches > * {
     position: sticky;
     top: calc(68px + var(--space-3)); /* under the jump bar, see BAR_H in ScoutPage.jsx */
   }
