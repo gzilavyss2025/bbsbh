@@ -1040,6 +1040,10 @@
       "class": "cutoff-gated",
       "why": "Per-cell season-series view model. The game matching `currentGamePk` NEVER carries a score even when the feed reports it Final — that game's result stays sealed on its own page. Every OTHER game is a genuinely different game."
     },
+    "gamestate/gameState.js": {
+      "class": "spoiler-free",
+      "why": "Split out of select.js (which re-exports it whole). Structural game state only: status, regulation length, final half, delays. Reads a linescore `runs` key's PRESENCE, never its value, so it keeps select.js's footing."
+    },
     "select.js": {
       "class": "spoiler-free",
       "why": "The spoiler-FREE selector module, and the contrast case for linescore.js/derive.js. selectLineup reads each player's own battingOrder rather than team.battingOrder, which would sprout PH rows late in a game. Its selectPrePitchChanges is the one caller-gated export here."
