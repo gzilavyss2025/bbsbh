@@ -5,7 +5,7 @@
 // Ported from .scratch/contact-replay/prototype.html `render`, `batPolygon` and `drawBat`.
 import { clamp } from '../math/number.js'
 import { easeOut } from '../motion/curves.js'
-import { battedPath, foulPath, isBunt } from './batted.js'
+import { SIDE_X, battedPath, foulPath, isBunt } from './batted.js'
 import { SCENE_W, proj } from './scene.js'
 import { FOLLOW, swingModel } from './swing.js'
 import { sceneClock } from './contactTimeline.js'
@@ -211,4 +211,26 @@ export function drawContact(mk, p, b, m, tau, slow, rest) {
   setTag(mk.tag, mk.parts.rect, mk.parts.text, since(b.freezeMs) >= 0 ? tag : '', clamp(since(b.freezeMs) / 220, 0, 1))
   const ball = whiff ? proj(...flight.at(Math.min(tReal, mt) / T)) : dtC > 0 ? (flying ? proj(...path.pos(dtC)) : null) : undefined
   return { progress: Math.min(tReal, whiff ? T : tc) / T, ball }
+}
+
+// The side view's two label rules (§7.1), pure so `npm test` can pin them. Strip units, 336 x 100.
+// An apex in the top 46 units would meet the title, so its label goes under the arc, right of the drop.
+export function apexLabel(ax, ay, ft) {
+  const under = ay < 46
+  return { x: under ? ax + 5 : ax, y: under ? ay + 16 : ay - 5, anchor: under ? 'start' : 'middle', text: `apex ≈ ${Math.round(ft)} ft · drawn` }
+}
+
+// A ball landing past 370 ft would put its distance on the fence post, so the label takes the axis row,
+// right-aligned, and the 400 ft tick label hides.
+export function distanceLabel(ft) {
+  const far = ft > 370
+  return { x: far ? 332 : SIDE_X(ft), y: far ? 96 : 66, anchor: far ? 'end' : 'middle', text: `${Math.round(ft)} ft`, hideTick400: far }
+}
+
+// The side view's aria-label (§12), built from the pitch like `sceneLabel`: it changes only with the pitch in view.
+export function sideLabel(p, path) {
+  if (!path) return `Side view: ${p.swing === 'whiff' ? 'no contact' : p.swing === 'foul' ? 'foul, no flight drawn' : 'no ball in flight'}.`
+  const ft = p.hit.distance != null ? `, ${Math.round(p.hit.distance)} feet` : ''
+  const apex = path.apex ? `, apex about ${Math.round(path.apex.ft)} feet (drawn)` : ''
+  return `Side view: ${(TRAJ[p.hit.trajectory]?.[0] ?? 'ball in play').toLowerCase()}${ft}${apex}.`
 }

@@ -41,7 +41,8 @@ const f1 = (v) => v.toFixed(1)
 // the contact and the batted ball (contactDraw.js). Its ball stops at the contact point, not the plate,
 // and `onLand` fires at contact. `onFrame(idx, tau, rest)` is a plain callback on EVERY draw: `tau` is ms
 // on the pitch's slot, `rest` true for the rest frame (the end state, and all of reduced motion).
-export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, onLand, onFrame, view = 'hitter', slow = SLOW, zone, atBat, play }) {
+// `under` is drawn between the scene and its bar (the side view, §5).
+export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, onLand, onFrame, under, view = 'hitter', slow = SLOW, zone, atBat, play }) {
   const ghostRefs = useRef([])
   const segRefs = useRef([])
   const ballRef = useRef(null)
@@ -264,6 +265,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
           <text className="pscene__honest" x="8" y={H - 6}>SWING DRAWN · PATHS MEASURED</text>
         </>}
       </svg>
+      {under}
       <div className="pscene__bar" style={replay ? undefined : { top: `${(BAR_TOP / SCENE_H) * 100}%` }}>
         <span ref={barNameRef} className="pscene__name" />
         <span ref={barMphRef} className="pscene__mph" />
