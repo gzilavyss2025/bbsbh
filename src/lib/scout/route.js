@@ -4,15 +4,14 @@
 // the same no-cycle rule postseason/recordsRoute.js follows.
 //
 // The query holds the page's choices, so a shared link opens the same view:
-// `?view=hitter` (the catcher's mirror, ADR-0093), `?scope=reg|post` (the
+// `?scope=reg|post` (the
 // head-to-head list's rounds; absent is All), `?pitch={code}` (one pitch
 // type; absent is All), `?hand=R|L` (the pitchers in the hitter's map;
 // absent is both), `?metric=whiff|swing|xwoba` (the hitter map's metric;
 // absent is the page's default), `?tab=zones|meet` (the panel under the
 // pitch pills, #1490; absent is edge), and `?d=` (the head-to-head cutoff,
-// ADR-0087). A value the page does not know falls back to its default,
+// ADR-0087). `?view=` is no longer read (ADR-0118). A value the page does not know falls back to its default,
 // never an error.
-const VIEWS = new Set(['pitcher', 'hitter'])
 const SCOPES = new Set(['reg', 'post', 'all'])
 const HANDS = new Set(['R', 'L'])
 const METRICS = new Set(['xwoba', 'whiff', 'swing'])
@@ -20,14 +19,12 @@ export const TABS = ['edge', 'zones', 'meet']
 
 export function parseScoutRoute(parts, q, { asOf, idFromSlug }) {
   if (parts[0] !== 'scout' || (parts.length !== 1 && parts.length !== 3)) return null
-  const view = q.get('view')
   const scope = q.get('scope')
   return {
     name: 'scout',
     pitcherId: parts.length === 3 ? idFromSlug(parts[1]) : null,
     hitterId: parts.length === 3 ? idFromSlug(parts[2]) : null,
     asOf,
-    view: VIEWS.has(view) ? view : null,
     scope: SCOPES.has(scope) ? scope : 'all',
     pitch: /^[A-Z]{2}$/.test(q.get('pitch') ?? '') ? q.get('pitch') : null,
     hand: HANDS.has(q.get('hand')) ? q.get('hand') : null,
