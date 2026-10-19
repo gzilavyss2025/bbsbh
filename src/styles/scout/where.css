@@ -3,7 +3,7 @@
    Imported by ScoutPage.jsx only. Every selector is .scout__*.
    ============================================================ */
 
-/* --- ZONES: whose map is whose, the "%" in a cell, the callout --- */
+/* --- ZONES: whose map is whose, the "%" in a cell --- */
 
 .scout__figcap {
   margin-block-end: var(--space-1);
@@ -17,15 +17,6 @@
    "24%" fit the same 27px cell (docs/scout-design.md A). */
 .scout__unit {
   font-size: 0.7em;
-}
-.scout__callout {
-  margin: 0;
-  padding: var(--space-2) var(--space-3);
-  border-inline-start: 3px solid var(--award-line);
-  background: var(--surface-card);
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-  color: var(--text-body);
 }
 
 /* --- the map panel (V04, V20) --- */
@@ -79,6 +70,11 @@
   text-anchor: start;
 }
 
+/* Locations: the share's ink tint reaches 40%, so the count under it is ink, not pencil grey (V16). */
+.scout__map--loc .scout__count {
+  fill: var(--text-heading);
+}
+
 /* --- the overlay map (ADR-0118) --- */
 
 /* The pitcher's share: an ink square sized by area (ScoutMap `shares`). */
@@ -116,5 +112,97 @@
 @media (min-width: 740px) {
   .scout__chipstrip {
     display: none;
+  }
+}
+
+/* --- the key's colour bar and the hot and cold tiles (V09) --- */
+
+/* layout-exempt: the bar over its three labels */
+.scout__keyscale {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.scout__keybar {
+  display: block;
+  width: 100%;
+  height: 16px; /* raw-value-exempt: the canvas's bar height */
+  border: var(--bw-hair) solid var(--text-heading);
+}
+.scout__keybar .scout__region {
+  stroke: none;
+}
+#root .scout__keyends {
+  display: flex; /* layout-exempt: the side names at the ends, "league" between */
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-body);
+}
+#root .scout__keyends * {
+  text-transform: none; /* caps-exempt: "Pivetta’s side", a name in the mono face */
+}
+
+/* Two tiles side by side. On a phone they follow the map panel; from 740px the page shows
+   them beside the scene (ScoutPage.jsx renders them in both places, one at a time). */
+/* layout-exempt: two equal tiles */
+.scout__spots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+/* layout-exempt: a tile's title, figure and regions in a column */
+.scout__spot {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--space-3);
+  border: var(--bw-heavy) solid var(--text-heading);
+  background: var(--surface-card);
+}
+.scout__spottitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+.scout__spot--hot .scout__spottitle { color: var(--award-ink); }
+.scout__spot--cold .scout__spottitle { color: var(--allstar-blue); }
+.scout__spotvalue {
+  font-family: var(--font-display);
+  font-size: var(--fs-num-xl);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+#root .scout__spotnames {
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  text-transform: none; /* caps-exempt: a list of region names and a range, "Heart: .385 to .604" */
+}
+.scout__spots--wide {
+  display: none;
+}
+@media (min-width: 740px) {
+  .scout__spots--narrow {
+    display: none;
+  }
+  /* The tiles at the left, the scene at the right (V19, the canvas's row under the map). */
+  /* layout-exempt: tiles and scene share a row, and stack when the column is narrow */
+  .scout__body .scout__stage {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  /* layout-exempt: the two tiles stack beside the scene */
+  .scout__spots--wide {
+    order: -1;
+    display: flex;
+    flex: 1 1 160px; /* raw-value-exempt: the canvas's tile column */
+    flex-direction: column;
+  }
+  .scout__stage .scout__scene {
+    flex: 2 1 320px; /* raw-value-exempt: the canvas's scene column */
+    max-width: none;
   }
 }

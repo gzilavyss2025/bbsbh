@@ -76,16 +76,6 @@
   }
 }
 
-/* --- the context chips: season and scope, the sample, the filter sheet --- */
-
-.scout__chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1h);
-  margin: 0;
-}
-
 /* --- the scene's control bar: what plays, and the View --- */
 
 .scout__scene .pscene {
@@ -134,7 +124,7 @@
 
 /* --- natural case for the Scout's sentences --- */
 
-/* The Edge notes, the Zones callout, the Meetings play text and notes are
+/* The Edge notes, the Meetings play text and notes are
    sentences, written to be read rather than skimmed (#1490). Natural case,
    under the ALL-CAPS INVARIANT's sanctioned exemption (01-base.css lists
    them): every heading, label, tab, chip, figure and pill around them stays
@@ -145,8 +135,6 @@
 #root .scout__pushnote,
 #root .scout__vfoot,
 #root .scout__vfoot *,
-#root .scout__callout,
-#root .scout__callout *,
 #root .scout__play,
 #root .scout__note {
   text-transform: none; /* caps-exempt: the Scout's generated sentences read as prose */

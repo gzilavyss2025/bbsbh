@@ -288,6 +288,7 @@ export const PAIRINGS = [
   { fg: 'allstar-blue', bg: 'surface-inset', min: TEXT, note: 'scout: pitcher-side word on a selected pitch row' },
   { fg: 'text-heading', bg: 'award-line', min: UI, note: 'scout: ink edge that holds the hitter-side bar on the pull track' },
   { fg: 'allstar-blue', bg: 'surface-inset', min: UI, note: 'scout: pitcher-side bar on the pull track' },
+  { fg: 'allstar-blue', bg: 'surface-card', min: UI, note: 'scout: pitcher-side bar under his name on the pair card' },
   // THE TEXT-ON-INK RUNGS (#1156): paper text on the dark fills it sits on.
   // The idlab bar mocks (a club-set bar) and .gamecard__atmark-ghost (a park
   // photo) have no token ground to pair.
