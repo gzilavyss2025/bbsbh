@@ -12,6 +12,17 @@
    hitter map's diverging scale, so the words and the maps read alike.
    ============================================================ */
 
+/* Square corners (#2319, slice F): every shared component under the Scout page
+   reads these tokens, so one override squares them. Pitch marks and map swatch
+   dots draw their own shapes and keep them. */
+.screen.scout {
+  --radius-xs: var(--radius-square);
+  --radius-sm: var(--radius-square);
+  --radius-md: var(--radius-square);
+  --radius-lg: var(--radius-square);
+  --radius-pill: var(--radius-square);
+}
+
 /* --- layout --- */
 
 .scout__stage,
