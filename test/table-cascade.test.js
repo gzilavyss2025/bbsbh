@@ -292,8 +292,6 @@ const T3 = [
     attrs: ['frame="bare"', 'density="tight"'],
     label: /label=\{`Batting, \$\{side\.teamName\}`\}/,
     apis: [
-      '../api/boxscore.js',
-      '../api/highlights.js',
       '../api/expresslane/eligibility.js',
       '../api/game.js',
       '../api/defense.js',

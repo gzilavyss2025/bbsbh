@@ -173,7 +173,7 @@
         "components/game/GameResultFace.jsx",
         "components/gamehud/StatBox.jsx",
         "components/inning/HalfInning.jsx",
-        "screens/BoxScore.jsx",
+        "screens/boxscore/InsightCards.jsx",
         "screens/boxscore/revealBoxScore.js",
         "screens/PostseasonSeriesPage.jsx",
         "screens/postseason-live/LiveSeriesPage.jsx"

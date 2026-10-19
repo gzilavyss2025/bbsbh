@@ -118,7 +118,7 @@ const BUDGETS = {
   // shared chrome out would move the section tabs into a 12th file in
   // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
   // trades a real limit for a nominal one.
-  'src/screens/BoxScore.jsx': 1200, // 1191
+  'src/screens/BoxScore.jsx': 900, // 824
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
   'src/lib/teams.js': 1240, // 1227
   'src/lib/route.js': 1000, // 970

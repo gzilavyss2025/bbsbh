@@ -939,7 +939,9 @@ const C4_SEAL = {
   'components/inning/PitchersSection.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/gamehud/HalfTally.jsx': { reveal: ['derive.js', 'linescore.js'], sealBoxes: 1, revealedThrough: 0 },
   'components/gamehud/BetweenInnings.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 3 },
-  'screens/BoxScore.jsx': { reveal: ['boxscore.js', 'challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  'screens/boxscore/InsightCards.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
+  'screens/boxscore/GameNotes.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
 }
 const SPOILER_MANIFEST = JSON.parse(readFileSync(join(SRC, 'api', 'spoiler-manifest.json'), 'utf8')).modules
 
@@ -1150,16 +1152,16 @@ test('C3: the animation lab draws the batting order on the same Card', () => {
 const C5 = [
   { css: '21-box-score.css', sel: '.gamestory', jsx: ['components/game/GameStoryCard.jsx'], ns: 'gamestory' },
   { css: '21-box-score.css', sel: '.bs__team', jsx: ['screens/BoxScore.jsx'], ns: 'bs__team' },
-  { css: '21-box-score.css', sel: '.bs__decisions', jsx: ['screens/BoxScore.jsx'], ns: 'bs__decisions', as: 'div' },
-  { css: '21-box-score.css', sel: '.bs__potg', jsx: ['screens/BoxScore.jsx'], ns: 'bs__potg', as: 'div' },
-  { css: '21-box-score.css', sel: '.bs__insights', jsx: ['screens/BoxScore.jsx'], ns: 'bs__insights' },
-  { css: '21-box-score.css', sel: '.bs__statcastCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__statcastCard' },
+  { css: '21-box-score.css', sel: '.bs__decisions', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'bs__decisions', as: 'div' },
+  { css: '21-box-score.css', sel: '.bs__potg', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'bs__potg', as: 'div' },
+  { css: '21-box-score.css', sel: '.bs__insights', jsx: ['screens/boxscore/InsightCards.jsx'], ns: 'bs__insights' },
+  { css: '21-box-score.css', sel: '.bs__statcastCard', jsx: ['screens/boxscore/InsightCards.jsx'], ns: 'bs__statcastCard' },
   // A note tile keeps its soft edge and inset shadow over the ledger frame
   // (Gary, 2026-09-29): that is its look, not a second frame.
-  { css: '21-box-score.css', sel: '.bs__noteCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__noteCard', frame: 'ledger', as: 'div', keep: ['box-shadow'] },
-  { css: '21a-box-score-stars.css', sel: '.bs__stars', jsx: ['screens/BoxScore.jsx'], ns: 'bs__stars', as: 'div' },
+  { css: '21-box-score.css', sel: '.bs__noteCard', jsx: ['screens/boxscore/InsightCards.jsx'], ns: 'bs__noteCard', frame: 'ledger', as: 'div', keep: ['box-shadow'] },
+  { css: '21a-box-score-stars.css', sel: '.bs__stars', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'bs__stars', as: 'div' },
   // Boxed only from 740px: its phone rules strip the frame (test below).
-  { css: '21a-box-score-stars.css', sel: '.stars3__card', jsx: ['screens/BoxScore.jsx'], ns: 'stars3__card', frame: 'ledger', as: 'li', phoneOnly: true },
+  { css: '21a-box-score-stars.css', sel: '.stars3__card', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'stars3__card', frame: 'ledger', as: 'li', phoneOnly: true },
   { css: '21b-box-score-tally.css', sel: '.bs__tally', jsx: ['screens/boxscore/InningTally.jsx'], ns: 'bs__tally', as: 'div' },
   // No band head to round, so the tile opts out of the Card's clip, which
   // cut the name link's focus ring in the tight award tiles (test below).
@@ -1172,7 +1174,7 @@ const C5 = [
     as: 'li',
     keep: ['overflow'],
   },
-  { css: '23-box-score-detail.css', sel: '.bs__info', jsx: ['screens/BoxScore.jsx'], ns: 'bs__info', as: 'div' },
+  { css: '23-box-score-detail.css', sel: '.bs__info', jsx: ['screens/boxscore/GameNotes.jsx'], ns: 'bs__info', as: 'div' },
   { css: '23-box-score-detail.css', sel: '.bs__totalsCard', jsx: ['screens/BoxScore.jsx'], ns: 'bs__totalsCard', as: 'div' },
   { css: '23-box-score-detail.css', sel: '.bs__board', jsx: ['screens/BoxScore.jsx'], ns: 'bs__board', as: 'div' },
   { css: '23-box-score-detail.css', sel: '.bs__fill', jsx: ['screens/BoxScore.jsx'], ns: 'bs__fill', as: 'div', keep: ['background'] },
@@ -1352,9 +1354,9 @@ test('C5: the coverage card wears the label head and returns null before the Car
 // The same for every box-score block that can be empty: an empty frame would
 // show that a star, a note or a decision exists.
 test('C5: every box-score block that can be empty returns null before its Card', () => {
-  const code = src('screens/BoxScore.jsx')
+  const code = src('screens/boxscore/InsightCards.jsx') + src('screens/boxscore/GameNotes.jsx')
   for (const name of ['StatcastLeadersCard', 'InsightsCard', 'Decisions', 'PlayOfTheGame', 'ThreeStars', 'GameInfo']) {
-    const from = code.indexOf(`\nfunction ${name}(`)
+    const from = code.indexOf(`\nexport function ${name}(`)
     assert.ok(from > 0, name)
     const next = code.indexOf('\nfunction ', from + 1)
     const body = code.slice(from, next === -1 ? undefined : next)
@@ -1409,7 +1411,9 @@ test('C5: the design lab draws the performer tile on the ledger frame', () => {
 // reads it holds. A frame move changes none of these. If this fails, the
 // slice moved a seal: stop and ask, never update the literal to match.
 const C5_SEAL = {
-  'screens/BoxScore.jsx': { reveal: ['boxscore.js', 'challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
+  'screens/boxscore/InsightCards.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
+  'screens/boxscore/GameNotes.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/game/GameStoryCard.jsx': { reveal: ['gameStory.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/boxscore/InningTally.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/player/PerformerCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
