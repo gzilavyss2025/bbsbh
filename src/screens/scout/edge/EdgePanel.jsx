@@ -30,11 +30,12 @@ export function EdgePanel({ data, board, sides, sel, stance }) {
       </Stack>
     )
   }
+  const once = `scout:${data.pitcher.id}:${data.hitter.id}`
   const crowd = stance === 'L' ? 'lefties' : 'righties'
   return (
     <Stack gap="loose">
-      <VerdictCard v={v} names={names} />
-      <Pushes v={v} names={names} crowd={crowd} />
+      <VerdictCard v={v} names={names} once={`${once}:verdict`} />
+      <Pushes v={v} names={names} crowd={crowd} once={`${once}:pushes`} />
       <Watch items={watchList({ board, sides, names, stance })} players={{ hitter: data.hitter, pitcher: data.pitcher }} />
     </Stack>
   )
