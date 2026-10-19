@@ -411,10 +411,6 @@
     "wrap": 4,
     "grid": 3
   },
-  "src/styles/designlab/nested.css": {
-    "column": 5,
-    "grid": 2
-  },
   "src/styles/designlab/report.css": {
     "column": 1,
     "grid": 3

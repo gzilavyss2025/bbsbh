@@ -89,13 +89,9 @@
   font-weight: var(--w-bold);
 }
 
-/* Flat to alive: the three leaders' photos take the stamped edge, the ledger sits on its own
-   stamped sheet, and the depth chart's figure is a display figure with a marker rule. */
+/* Flat to alive: the three leaders' photos take the stamped edge, and the depth chart's figure
+   is a display figure with a marker rule. The ledger sits bare on its card (#1775, case 4). */
 .tnext__farm .prospectshowcase__shotwrap {
-  border: var(--bw-heavy) solid var(--border-stamped);
-  box-shadow: var(--shadow-stamped-soft);
-}
-.tnext__farm .table:has(> .prospecttable) {
   border: var(--bw-heavy) solid var(--border-stamped);
   box-shadow: var(--shadow-stamped-soft);
 }

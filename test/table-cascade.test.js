@@ -491,7 +491,7 @@ test('T3: the seal stays where it was: no gate moved and no api/ import added', 
 // <Table> by its className; `frame` and `label` are the expected props.
 const T4 = [
   { css: '26-player-page.css', ns: 'ledger', jsx: 'components/player/Ledger.jsx', tag: 'className=\\{`ledger ', frame: 'bare', label: true, gradient: true },
-  { css: '31-wild-card.css', ns: 'prospecttable', jsx: 'screens/team/modules/minors/ProspectsCard.jsx', tag: 'className="ledger prospecttable"', frame: 'sheet', label: true },
+  { css: '31-wild-card.css', ns: 'prospecttable', jsx: 'screens/team/modules/minors/ProspectsCard.jsx', tag: 'className="ledger prospecttable"', frame: 'bare', label: true },
   { css: '67-awards-ledger.css', ns: 'awardtbl', jsx: 'components/player/AwardsLedger.jsx', tag: 'className="awardtbl"', frame: 'bare', label: false },
   { css: '78-offseason.css', ns: 'movedup__table', jsx: 'components/offseason/MovedUp.jsx', tag: 'className="movedup__table"', frame: 'bare', label: false, words: true },
   { css: '78-offseason.css', ns: 'seasonnote__table', jsx: 'components/offseason/YoungestRegulars.jsx', tag: 'className="seasonnote__table"', frame: 'bare', label: false, words: true },
@@ -610,9 +610,16 @@ test('T4: the seal pin: no moved ledger reads a reveal-only module or a seal', (
 })
 
 test('T4: the prospects table keeps the look it had in its Card: no extra sheet shadow', () => {
-  const body = rules(read('31-wild-card.css')).find(([sel]) => sel === '.table:has(> .prospecttable)')?.[1]
-  assert.ok(body, 'a rule reaches the Table wrap from .prospecttable')
-  assert.equal(decl(body, 'box-shadow'), 'none')
+  // It is frame="bare" now (#1775), so no override has to switch the sheet's
+  // shadow off: the wrap draws none, and no partial may give it one back.
+  const attrs = src('screens/team/modules/minors/ProspectsCard.jsx').match(/<Table\b([^>]*className="ledger prospecttable"[^>]*)>/)?.[1]
+  assert.match(attrs ?? '', /frame="bare"/)
+  assert.equal(decl(ruleBody(read('system/table.css'), '.table'), 'box-shadow'), undefined)
+  for (const sheet of ['31-wild-card.css', 'team-next/farm.css']) {
+    for (const [sel, body] of rules(read(sheet)).filter(([sel]) => sel.includes('.prospecttable)'))) {
+      assert.ok([undefined, 'none'].includes(decl(body, 'box-shadow')), `${sheet}: ${sel} gives the prospects wrap a shadow`)
+    }
+  }
 })
 
 // ---- slice T7: the standalone boards ----
