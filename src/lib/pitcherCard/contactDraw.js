@@ -51,7 +51,7 @@ export function swingScene(p, beats, tr) {
     SW: swingModel({ batSide, swing, K: contact.K, swingSec: swingSeconds(tr?.batSpeed) }),
     strength: ringStrength(swing === 'inplay' ? squaredUp(hit?.exitVelo, tr?.batSpeed, Number(p.mph)) : null),
     path: swing === 'inplay' ? battedPath(hit, contact.K) : swing === 'foul' ? foulPath(contact.K, batSide) : null,
-    bat: !isBunt(hit),
+    bunt: isBunt(hit),
     tag: trajectory && (hit.coordX == null ? `${trajectory} · DIRECTION DRAWN` : trajectory),
   }
 }
@@ -177,13 +177,13 @@ export const hideMarks = (mk) => Object.entries(mk).forEach(([k, v]) => k !== 'p
 // the refs; `b` the pitch's beats and `m` its swingScene. Returns the trail's `progress` (0 to 1 along
 // the measured path) and the ball: undefined = the pitch ball, null = none, else [x, y, d] in scene px.
 export function drawContact(mk, p, b, m, tau, slow, rest) {
-  const { SW, path, bat, tag } = m
+  const { SW, path, bunt, tag } = m
   const { swing, T, flight, contact: { K, tc, tMitt } } = p
   const [whiff, foul] = [swing === 'whiff', swing === 'foul']
   const tReal = sceneClock(b, tau) / (slow * 1000)
   const dtC = tReal - tc
   const th = SW.at(rest ? 0.12 : dtC).th
-  if (bat) {
+  if (!bunt) {
     if (rest) {
       // a multiple exposure: mid-swing and follow-through faint, the bat at contact strong
       ;[-0.05, 0.12].forEach((d, k) => setBat(mk.smear[k], null, SW.at(d), 0.22))
@@ -195,7 +195,11 @@ export function drawContact(mk, p, b, m, tau, slow, rest) {
       setSmear(mk.smear, SW, dtC, tau >= b.contactMs && tau <= b.contactMs + b.freezeMs)
     }
     setBarrelPath(mk.arc, SW, th, rest || dtC > FOLLOW ? 0.75 : 0.9)
-  } else hide(mk.bat, mk.cap, mk.arc, ...mk.smear)
+  } else {
+    // a bunt holds the bat still across the zone, in pencil: no smear, no barrel path (§10)
+    hide(mk.arc, ...mk.smear)
+    setBat(mk.bat, mk.cap, SW.at(0), 0.95)
+  }
   // the batted ball: in flight until it leaves the scene
   const exitSec = path?.exitSec ?? 0 // a whiff has no batted ball
   const flying = dtC > 0 && dtC <= exitSec

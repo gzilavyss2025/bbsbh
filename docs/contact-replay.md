@@ -321,6 +321,21 @@ One flash per contact. Never repeat it.
 **The whiff** runs the ball on along its path to `y = -0.8` ft (the catcher's
 mitt). A pencil ring there grows from 0.7 to 1.6 ball diameters over 300 ms.
 
+#### Tuned on real games (#2305)
+
+Checked 2026-10-19 in Chromium at 390 px, 12 pitches from gamePk 849810 (at-bats
+1, 2, 16, 20, 57) and 849812 (at-bats 36, 37, 38, 48, 57), frames 50 ms apart
+around contact. No value changed; each is pinned in `test/contact-models.test.js`
+or `test/contact-quality.test.js`.
+
+| Value | Result |
+| --- | --- |
+| Contact point `YC` 2.2 | Holds on screen: the barrel meets the ring on every ball in play and every foul. The screen cannot show the 0.2 to 0.9 ft gap measured in 6.1, so Gary still decides it. |
+| Swing centre 2.25 ft | Holds. The bat stays on its side of the plate, and only the load pose leaves the frame. The Statcast intercept is front to back, so it says nothing about this lateral value. |
+| Whiff 0.42 ft | Holds. At contact the bat axis is 21 px over the ball (barrel 11.5 px, ball 12.1 px) and the ball runs on under it to the mitt (849810 at-bat 2 pitch 7; 849812 at-bats 48 and 57). |
+| Foul 0.11 ft | Holds. The axis is 5.5 px over the ball, so the ball sits in the lower half of the barrel: a nick (849810 at-bat 2 pitch 6; 849812 at-bats 48 and 57). |
+| Ring strength 0.8 | Holds. Squared-up on balls in play with bat speed: median .86 (849810, 44 balls) and .82 (849812, 46 balls), p10 .76 and .67. The same pitch with and without bat speed (849810 at-bat 16 pitch 3, 94%) draws a ring of one ball diameter against 1.07. |
+
 ### 6.4 The batted ball in the scene
 
 - **Path.** Fit a 2-D flight (distance along the ground, height) to the
@@ -452,6 +467,10 @@ and 3.4% of balls in play. That is rare enough to mean something and common
 enough to show in a game. The `Lucky hit` rule is the less stable one:
 its count changes by 7 between the neighbouring cutoffs, from 12 to 19.
 
+**Stamps seen (#2345's rule, #2305's two games).** At `.500` and `.250`, from the
+Savant CSV of each game: 849810 has 48 balls in play, 5 `Hard-luck out` and 0
+`Lucky hit`; 849812 has 47, 4 and 2. The cutoffs did not change. Gary picks them.
+
 ## 8. Motion
 
 ### 8.1 One clock
@@ -559,7 +578,9 @@ buttons are the only way into the replay on a phone.
 - **Launch angle missing**: treat as a grounder for the drawing; no apex label.
 - **A bunt** (`hitData` with launch speed under 40 mph): draw the bat held
   still across the zone at contact, with no swing beats. Reason: a swing
-  drawing for a bunt is false.
+  drawing for a bunt is false. The bat is the contact pose of the swing
+  (`SW.at(0)`), drawn in pencil from release on: no smear bats, no barrel path.
+  Checked on gamePk 849810 (at-bats 20 and 57) and 849812 (at-bat 37).
 - **Popup and foul popup**: the side view clips the arc at the top of the strip
   and keeps the apex label under the arc.
 - **Home run beyond 450 ft**: the trace leaves the strip on the right; the

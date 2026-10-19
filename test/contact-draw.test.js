@@ -27,14 +27,14 @@ test('sceneLabel: pitch, then the ball, then the call; a whiff says swing and mi
   assert.equal(sceneLabel({ name: '1 · Sinker', mph: '—', hit: null, swing: null, call: '' }), 'Sinker.')
 })
 
-test('swingScene: null for a take, a bat for a swing, none for a bunt, a tag from the trajectory', () => {
+test('swingScene: null for a take, a swing for a hit, a bunt flagged, a tag from the trajectory', () => {
   const p = { swing: 'inplay', contact: { K }, hit, batSide: 'L' }
   assert.equal(swingScene({ ...p, swing: null }, { totalMs: 1 }), null)
   const s = swingScene(p, { contactMs: 900 })
-  assert.equal(s.bat, true)
+  assert.equal(s.bunt, false)
   assert.equal(s.tag, 'LINE DRIVE')
   assert.ok(s.path.exitSec > 0)
-  assert.equal(swingScene({ ...p, hit: { ...hit, exitVelo: 30 } }, { contactMs: 900 }).bat, false)
+  assert.equal(swingScene({ ...p, hit: { ...hit, exitVelo: 30 } }, { contactMs: 900 }).bunt, true)
   assert.equal(swingScene({ ...p, hit: { ...hit, coordX: null } }, { contactMs: 900 }).tag, 'LINE DRIVE · DIRECTION DRAWN')
   assert.equal(swingScene({ ...p, hit: null }, { contactMs: 900 }).tag, undefined)
 })
@@ -164,4 +164,21 @@ test('drawContact: a foul rests with a pencil ring and a dashed line, the ball g
   assert.equal(mk.line.a.visibility, 'visible')
   assert.equal(mk.smear[0].a.opacity, '0.22', 'the rest frame is a multiple exposure')
   assert.equal(mk.bat.a.opacity, '0.95')
+})
+
+test('drawContact: a bunt holds one pencil bat still at the contact pose, with no smear and no barrel path', () => {
+  const p = { ...turang.at(-2), swing: 'inplay', hit: { exitVelo: 30, launchAngle: -20, distance: 20, trajectory: 'ground_ball', coordX: null, coordY: null } }
+  const b = pitchBeats(p, 3)
+  const m = swingScene(p, b)
+  const [mk, held] = [marks(), marks()]
+  drawContact(mk, p, b, m, b.contactMs - 300, 3, false)
+  drawContact(held, p, b, m, b.contactMs + 200, 3, false)
+  for (const k of [mk, held]) {
+    assert.equal(k.bat.a.visibility, 'visible')
+    assert.equal(k.bat.a.opacity, '0.95')
+    assert.equal(k.arc.a.visibility, 'hidden')
+    assert.ok(k.smear.every((n) => n.a.visibility === 'hidden'))
+  }
+  assert.equal(mk.bat.a.points, held.bat.a.points, 'the bat does not move')
+  assert.equal(mk.bat.a.points, batShape(m.SW.at(0)).points)
 })
