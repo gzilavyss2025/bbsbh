@@ -7,7 +7,8 @@ research and the data facts are in issue #1771. Do not repeat that research.
 The design exists as a working prototype. Gary owns the link (a private
 claude.ai page): https://claude.ai/artifact/XQbzftrqC9xN6qgEuacNmg. It uses the
 app's real camera and tokens, with invented sample data. When this spec and the
-prototype do not agree, this spec wins.
+prototype do not agree, this spec wins. A copy of its source, for builders who
+cannot open the page: `.scratch/contact-replay/prototype.html`.
 
 ## 1. Overview
 
