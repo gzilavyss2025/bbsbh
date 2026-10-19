@@ -4,6 +4,7 @@
 **Date:** 2026-10-19
 **Issue:** none; Gary's interview of 2026-10-19
 **Amends:** ADR-0101 (section 1 and Alternative B), ADR-0049 (the openers), ADR-0035 (a note on the entry point)
+**Retires:** ADR-0110 (the pitcher Game Log guard for a game in progress today)
 **Relies on:** ADR-0002 (the `SealBox` render function), ADR-0034 ("The cutoff is opt-in now"), ADR-0116
 
 ## Context
@@ -13,6 +14,9 @@ an interview on 2026-10-19:
 
 - The seal protects games on the current slate day. A reader who clicks around the site
   has no expectation that results are hidden.
+- In Gary's words, the focus-mode flow through the innings is the one path that respects
+  "don't spoil the results": a reader clicks through it one step at a time. The seal
+  exists to protect that path. The pages around it are lookup pages.
 - A reader who opens an older game still wants the at-bat-by-at-bat reveal. Gary likes
   it ("like a video game"). The box score is different. A reader who looks up a finished
   game should not have to tap to see its box score.
@@ -23,19 +27,22 @@ of an old game needs a tap, and ADR-0049 remembers the tap.
 
 ## Decision
 
-**A box score opens with no tap when its game is Final and its schedule date is before
-the reader's current slate date. On the schedule date itself, and for a game that is
-not Final, the seal stays and works as before.**
+**A box score opens with no tap when its schedule date is before the reader's current
+slate date. On the schedule date itself, the seal stays and works as before.**
+
+A suspended game that has not resumed opens like any other past game (Gary, 2026-10-19).
+The rule reads the date and nothing else.
 
 ### 1. What changes
 
 | Surface | Before | After |
 | --- | --- | --- |
-| Box score, game is Final, schedule date before today | Sealed, one remembered tap | Open |
-| Box score, today's game, or any game not Final | Sealed, one remembered tap | No change |
+| Box score, schedule date before today | Sealed, one remembered tap | Open |
+| Box score, today's game | Sealed, one remembered tap | No change |
 | Half-inning pages (innings viewer) | Sealed, at-bat stepping | No change, for every date |
 | Scorecard, lineup page, Box Lines | As ADR-0047, ADR-0010, ADR-0069 | No change |
-| Slate card of a past date | Sealed score, tap to reveal | No change |
+| Slate card of a past date | No score; a "Box score ›" button (`GameCard.jsx`) | No change. The button now opens a box score with the score visible. |
+| Pitcher Game Log (player page) | Hides the score and decision of a game in progress today (ADR-0110) | Open. ADR-0110 is retired. |
 | Stats, standings, leader boards, player and team pages | Open | No change |
 
 The day boundary is the slate date. A game is "past" when its `officialDate`
@@ -52,10 +59,9 @@ forceRevealed={stamped || boxOpened || openByDate}
 onReveal={stamped || openByDate ? undefined : markBoxOpened}
 ```
 
-- `openByDate` comes from one pure function, `boxScoreOpensByDate(feed, now)`. It returns
-  `true` only when the feed is Final and `officialDate` is a real date before today.
-  A missing date, an unreadable date, or a feed that is not Final returns `false`. The
-  seal fails closed, as in ADR-0049.
+- `openByDate` comes from one pure function, `boxScoreOpensByDate(officialDate, now)`. It
+  returns `true` only when `officialDate` is a real date before today. A missing or
+  unreadable date returns `false`. The seal fails closed, as in ADR-0049.
 - **It persists nothing.** The `onReveal` line is the load-bearing line, as in ADR-0049:
   `SealBox` fires `onReveal` when the box becomes shown by a flag as well as by a tap.
   A bit written for a seal that nobody touched would stay open after the date
@@ -93,8 +99,7 @@ and fails closed.
   the slate cards keep their seals.
 - **Default-safe where it counts.** Today's games, the games a reader scores live, stay
   sealed. The default for a game on the current slate day is byte-identical to today.
-- **Fails closed.** A feed with no date, an unparsable date or a non-Final status
-  renders sealed.
+- **Fails closed.** A feed with no date, or an unparsable date, renders sealed.
 - **Consent is not a tap here.** This is a change in the rule, not a consented
   override. Gary decided it. A reader who scores a past game blind can still skip the
   box score tab. The at-bat reveal does not read the box score.
@@ -111,6 +116,11 @@ reader answers every time for each older game, and the answer is nearly always y
 Final means open. Rejected. Tonight's finished game is the one a reader may not have
 scored yet. The seal protects that reader, and a Final status says nothing about
 whether the reader has watched.
+
+### E. Also require Final
+
+A past-dated game that is not Final stays sealed. Rejected by Gary. A suspended game
+opens like any other past game. See the first consequence below for the risk.
 
 ### C. A later rollover, such as 6 AM
 
@@ -133,5 +143,11 @@ record a reveal the reader never made, and the bit would outlive the date rule.
 - The Scores Unlocked and reveal-all openers are gone (ADR-0116), so the box score has
   three render-only openers and one writer. The `onReveal` rule is the thing to keep: a
   fourth opener must ask whether it, too, must be excluded.
-- ADR-0110 (the pitcher Game Log hides a game in progress today) is not changed by this
-  ADR. See open question 2 in `.scratch/past-box-score/plan.md`.
+- **A resumed suspended game keeps its original schedule date.** On the day it resumes
+  and plays, its box score is open while the game is live. This follows from the date-only
+  rule. It is the cost of rejecting Alternative E.
+- **ADR-0110 is retired.** The player-page Game Log shows the score and decision of a game
+  in progress today. The guard is `fetchFinalScores` (`src/api/boxlines/fetch.js`), and
+  Box Lines on the lineup page (ADR-0069) uses the same function. Box Lines is not part of
+  this decision and must keep its guard. The change goes in the player-page caller, not in
+  the shared function.
