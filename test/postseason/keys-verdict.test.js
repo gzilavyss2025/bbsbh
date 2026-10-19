@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { keysVerdict } from '../../src/lib/postseason/keysVerdict.js'
+import { keysVerdict, nineKeysTeams } from '../../src/lib/postseason/keysVerdict.js'
 
 const rule = { limit: 3, firstSeason: 2000 }
 const sd = (failed) => ({ abbr: 'SD', failed })
@@ -55,4 +55,13 @@ test('both clubs past the limit', () => {
 
 test('the numbers come from the rule, not the sentence', () => {
   assert.match(keysVerdict(sd(1), mil(1), { limit: 2, firstSeason: 1995 }), /since 1995 failed more than 2\./)
+})
+
+test('nineKeysTeams: both clubs of the season\'s file, else null', () => {
+  const data = { keys: [{ id: 'runs' }], current: { season: 2026, teams: [{ teamId: 1 }, { teamId: 2 }] } }
+  assert.deepEqual(nineKeysTeams(data, [{ id: 1 }, { id: 2 }], 2026), [{ teamId: 1 }, { teamId: 2 }])
+  assert.equal(nineKeysTeams(data, [{ id: 1 }, { id: 3 }], 2026), null) // a club missing
+  assert.equal(nineKeysTeams(data, [{ id: 1 }, { id: 2 }], 2025), null) // another season's file
+  assert.equal(nineKeysTeams({ ...data, keys: [] }, [{ id: 1 }, { id: 2 }], 2026), null)
+  assert.equal(nineKeysTeams(null, [{ id: 1 }, { id: 2 }], 2026), null)
 })
