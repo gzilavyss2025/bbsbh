@@ -5,7 +5,7 @@ import { Choice } from '../../components/scout/Choice.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // THE SCOUT'S FILTER SHEET (#1490): Hand and Scope in one bottom sheet,
-// opened from the chip under the matchup. They used to sit in two rows, above
+// opened from the Filters row in the matchup card. They used to sit in two rows, above
 // and below the maps. Each tap applies at once and rewrites the address, the
 // same as every other choice on the page; Done only closes the sheet.
 //
@@ -15,7 +15,7 @@ import { Stack } from '../../components/ui/layout/Stack.jsx'
 export const HANDS = [[null, 'All'], ['R', 'vs R'], ['L', 'vs L']]
 export const SCOPES = [['reg', 'Regular'], ['post', 'Postseason'], ['all', 'All']]
 const HAND_CHIP = { R: 'vs RHP', L: 'vs LHP' }
-const SCOPE_CHIP = { reg: 'Regular', post: 'Postseason', all: 'All games' }
+const SCOPE_CHIP = { reg: 'Regular season', post: 'Postseason', all: 'All games' }
 
 // The chip's label: the current choices, summed up.
 export const filterSummary = ({ hand, scope, showHitter }) =>

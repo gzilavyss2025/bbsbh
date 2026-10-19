@@ -1,5 +1,5 @@
 import { MIN_COMMAND_PITCHES } from '../../../api/commandMap.js'
-import { METRICS, band, fmtValue } from '../../../lib/scout/metrics.js'
+import { METRICS, fmtValue } from '../../../lib/scout/metrics.js'
 import { regionLabel, sidesInOrder } from '../../../lib/zone/regions.js'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
@@ -8,7 +8,6 @@ import { Stack } from '../../../components/ui/layout/Stack.jsx'
 // same parts as the Design Lab prototype (screens/designlab/scout/).
 
 const pct = (x) => `${Math.round(x * 100)}`
-const toneOf = (b) => (b == null ? null : b < 0 ? `lo${-b}` : b > 0 ? `hi${b}` : 'mid')
 
 export function Swatch({ tone }) {
   return (
@@ -27,37 +26,36 @@ export function Sides({ view }) {
   )
 }
 
-// THE ANSWER: the expected value on the selected pitch (or the usage-weighed
+// THE ANSWER STRIP (V15): the expected value on the selected pitch (or the usage-weighed
 // line for All), read against the league's. Here it stays a figure; the Edge
-// tab's verdict writes the same figure out as a sentence (#1490, Gary's
-// mockup review; docs/scout-design.md E). `leftOut` names the pilled types
-// whose pitcher map is too thin to weigh, in place of a bare "72% of pitches".
-export function Answer({ metric, typeName, mph, value, league, leftOut }) {
+// section's verdict writes the same figure out as a sentence (#1490, Gary's
+// mockup review; docs/scout-design.md E). `sub` is the line under the title;
+// `leftOut` names the pilled types whose pitcher map is too thin to weigh.
+export function Answer({ metric, sub, value, league, leftOut }) {
   return (
     <div className="scout__answer">
-      <span className="scout__controllabel">
-        Expected {METRICS[metric].label} · {typeName}{mph ? ` · ${mph} mph` : ''}
+      <span className="scout__answertext">
+        <span className="scout__controllabel">Expected {METRICS[metric].label}</span>
+        <span className="scout__answersub">{sub}</span>
+        {leftOut?.length > 0 && value != null && (
+          <span className="scout__answersub">Leaves out {leftOut.map((t) => `${t.name} (${t.n})`).join(', ')}: too few for a map</span>
+        )}
       </span>
-      <span key={value} className="scout__answervalue">{fmtValue(metric, value)}</span>
-      {value != null && league != null && (
-        <span className="scout__answerleague">
-          <Swatch tone={toneOf(band(metric, value, league))} />
-          <span className="scout__cap">League {fmtValue(metric, league)}</span>
-        </span>
-      )}
-      {leftOut?.length > 0 && value != null && (
-        <span className="scout__cap">Leaves out {leftOut.map((t) => `${t.name} (${t.n})`).join(', ')}: too few for a map</span>
-      )}
+      <span className="scout__answernum">
+        <span key={value} className="scout__answervalue">{fmtValue(metric, value)}</span>
+        {value != null && league != null && <span className="scout__answersub">league {fmtValue(metric, league)}</span>}
+      </span>
     </div>
   )
 }
 
 // A tapped region's exact figures, from both maps (`hit` is the hitter's
-// regions, absent in Phase 1). It keeps its height when nothing is picked, so
-// a tap never moves the maps. `stance` is null when the two maps stand on
-// different sides (a switch hitter against the other hand): then the label
-// names the field side only (Gary, item 11).
-export function Readout({ picked, map, hit, metric, stance }) {
+// regions, absent in Phase 1), in a box under the map: "Pivetta 6% · 15 of 263
+// pitches", "Chourio .604 · 31 PA-ending pitches". It keeps its height when
+// nothing is picked, so a tap never moves the maps. `stance` is null when the
+// two maps stand on different sides (a switch hitter against the other hand):
+// then the label names the field side only (Gary, item 11).
+export function Readout({ picked, map, hit, metric, stance, names }) {
   if (!picked) return <p className="scout__readout"><span className="scout__cap">Tap a region for its numbers</span></p>
   const h = hit?.[picked]
   const under = h && h.value == null
@@ -66,26 +64,45 @@ export function Readout({ picked, map, hit, metric, stance }) {
     <p className="scout__readout" aria-live="polite">
       <span className="scout__readoutlabel">{regionLabel(picked, stance)}</span>
       <span className="scout__readoutfact">
-        <span className="scout__cap">Pitcher</span>
-        <span className="scout__readoutvalue">{map.thin ? '—' : `${pct(map.share[picked])}%`}</span>
-        <span className="scout__cap">{map.regionN[picked].toLocaleString()} of {map.n.toLocaleString()} pitches</span>
+        <b className="scout__who scout__who--pitcher">{names.pitcher}</b> {map.thin ? '—' : `${pct(map.share[picked])}%`} · {map.regionN[picked].toLocaleString()} of {map.n.toLocaleString()} pitches
       </span>
       {h && (
         <span className="scout__readoutfact">
-          <span className="scout__cap">Hitter</span>
-          <span className="scout__readoutvalue">{under ? '—' : fmtValue(metric, h.value)}</span>
-          <span className="scout__cap">{under ? `${h.n} of ${METRICS[metric].floor} ${unit}` : `${h.n.toLocaleString()} ${unit}`}</span>
+          <b className="scout__who scout__who--hitter">{names.hitter}</b> {under ? '—' : fmtValue(metric, h.value)} · {under ? `${h.n} of ${METRICS[metric].floor} ${unit}` : `${h.n.toLocaleString()} ${unit}`}
         </span>
       )}
     </p>
   )
 }
 
+// The hot and cold tiles (V09): the share of the pitcher's mix that goes into the
+// hitter's hottest spots and into his coldest, and which regions those are.
+// `spots` is callout.js `spotShares`. Null shows nothing.
+const TILES = [['hot', 'Into his hot spots'], ['cold', 'Into his cold spots']]
+export function SpotTiles({ spots, className }) {
+  if (!spots || !(spots.hot || spots.cold)) return null
+  return (
+    <div className={`scout__spots ${className}`}>
+      {TILES.filter(([k]) => spots[k]).map(([k, title]) => (
+        <div key={k} className={`scout__spot scout__spot--${k}`}>
+          <span className="scout__spottitle">{title}</span>
+          <span className="scout__spotvalue">{pct(spots[k].share)}%</span>
+          <span className="scout__spotnames">{spots[k].names.join('; ')}{spots[k].range[0] != null && `: ${spots[k].range.join(' to ')}`}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // The key: the pitcher's ramp, the hitter's diverging scale against the
-// league (when his map is on), and the hatch for a map or region under its
-// floor.
-export function Key({ metric, mode }) {
+// league as one bar (when his map is on), and the hatch for a map or region
+// under its floor. The bar's ends name the side that tone favors: below the
+// league is the pitcher's on xwOBA (est.), the hitter's on Whiff % (scout.css
+// flips the tones); Swing % favors neither.
+const ENDS = { xwoba: ['pitcher', 'hitter'], whiff: ['hitter', 'pitcher'] }
+export function Key({ metric, mode, names }) {
   const m = metric ? METRICS[metric] : null
+  const [lo, hi] = ENDS[metric]?.map((k) => `${names[k]}’s side`) ?? ['Below league', 'Above league']
   return (
     <Stack gap="tight" className={`scout__key ${mode === 'locations' ? '' : `scout__map--${metric}`}`.trim()} aria-label="Colour scale">
       {mode === 'both' ? (
@@ -101,11 +118,12 @@ export function Key({ metric, mode }) {
         </p>
       )}
       {m && mode !== 'locations' && (
-        <p className="scout__keyrow">
-          <span className="scout__keylabel">{m.label} vs league: below</span>
-          {['lo2', 'lo1', 'mid', 'hi1', 'hi2'].map((k) => <Swatch key={k} tone={k} />)}
-          <span className="scout__keylabel">above</span>
-        </p>
+        <div className="scout__keyscale">
+          <svg className="scout__keybar" viewBox="0 0 5 1" preserveAspectRatio="none" aria-hidden="true">
+            {['lo2', 'lo1', 'mid', 'hi1', 'hi2'].map((k, i) => <rect key={k} className={`scout__region scout__region--${k}`} x={i} width="1" height="1" />)}
+          </svg>
+          <span className="scout__keyends"><span>◀ {lo}</span><span>league</span><span>{hi} ▶</span></span>
+        </div>
       )}
       <p className="scout__keyrow">
         <span className="scout__swatch scout__swatch--hatch" />

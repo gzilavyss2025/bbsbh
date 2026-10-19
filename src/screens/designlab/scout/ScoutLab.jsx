@@ -1,4 +1,5 @@
 import '../../../styles/scout/scout.css'
+import '../../../styles/scout/pair.css'
 import { useCallback, useMemo, useState } from 'react'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { AsyncStatus } from '../../../components/ui/AsyncGate.jsx'
