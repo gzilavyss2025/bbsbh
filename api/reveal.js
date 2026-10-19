@@ -232,36 +232,44 @@ export default async function handler(req, res) {
   if (body == null) {
     return privateJson(res, { error: 'invalid body' }, 400)
   }
+  const out = await storeReveal(redis, userId, gamePk, body)
+  if (out.error) return privateJson(res, { error: out.error }, 400)
+  return privateJson(res, out)
+}
+
+// The POST half, split out so a fake Redis can drive it and the unit suite can
+// count its round trips. Returns the reply body, or `{ error }` for a 400.
+export async function storeReveal(redis, userId, gamePk, body) {
+  const key = `reveal:${userId}:${gamePk}`
+  const boxKey = `revealbox:${userId}:${gamePk}`
   const plan = plannedWrites(body)
   if (plan.error) {
-    return privateJson(res, { error: plan.error }, 400)
+    return { error: plan.error }
   }
   // The mark, when one was sent. `null` (a box-only POST) leaves the stored
   // integer exactly as it is — a reader who opened a box score has not scored a
   // half by hand, and writing a 0 would claim they had.
-  const next =
-    plan.mark === null ? null : Number(await redis.eval(RATCHET_SCRIPT, [key], [plan.mark]))
-  // Set-only, no ratchet script needed: the value is always 1, so a concurrent
-  // second write cannot disagree with the first.
-  if (plan.box) await redis.set(boxKey, 1)
-
-  // Remember that this user has a mark for this game. `reveal:{u}:{gamePk}` is
-  // the only per-user key family with no natural index, so without this set
-  // "erase my Tally data" (api/account.js) could only ever be best-effort —
-  // there is no way to enumerate them, and a SCAN across a shared store is not
-  // one. The set holds gamePks: an identity, never a mark and never a score,
-  // exactly the footing of the scorebook index below it.
   //
-  // Deliberately unbounded, unlike SCOREBOOK_MAX. A cap here would make the
-  // erase silently incomplete for whatever fell off it, which defeats the only
-  // reason the index exists; a set of integers bounded by how many games a
-  // human actually opens is small enough to leave alone. Failing to record one
-  // must never fail the ratchet, which is the write that matters.
-  try {
-    await redis.sadd(`reveal:index:${userId}`, gamePk)
-  } catch {
-    // Losing an index write costs completeness on a future erase, never a mark.
-  }
+  // Three independent writes, issued together: the ratchet, the box bit (set-only,
+  // the value is always 1, so a concurrent second write cannot disagree with the
+  // first), and the erase index. None reads another's result, so waiting on each
+  // in turn only added round trips to a request a reader makes mid-game.
+  //
+  // The index is why `reveal:{u}:{gamePk}` can be erased at all: it is the only
+  // per-user key family with no natural index, and a SCAN across a shared store
+  // is not one. It holds gamePks: an identity, never a mark and never a score,
+  // exactly the footing of the scorebook index below it. Deliberately unbounded,
+  // unlike SCOREBOOK_MAX: a cap would make the erase silently incomplete for
+  // whatever fell off it, and a set of integers bounded by how many games a human
+  // opens is small enough to leave alone. Failing to record one must never fail
+  // the ratchet, which is the write that matters; losing it costs completeness on
+  // a future erase, never a mark.
+  const [ratcheted] = await Promise.all([
+    plan.mark === null ? null : redis.eval(RATCHET_SCRIPT, [key], [plan.mark]),
+    plan.box ? redis.set(boxKey, 1) : null,
+    redis.sadd(`reveal:index:${userId}`, gamePk).catch(() => {}),
+  ])
+  const next = ratcheted === null ? null : Number(ratcheted)
 
   // Fold this game into the scorebook index when the client sent a valid
   // snapshot (older clients simply don't, and the entry is skipped — the
@@ -289,12 +297,16 @@ export default async function handler(req, res) {
       }
     } else {
       await redis.hset(bookKey, { [gamePk]: entry })
-      const all = (await redis.hgetall(bookKey)) || {}
-      const stale = Object.entries(all)
-        .sort(([, a], [, b]) => (b?.updatedAt ?? 0) - (a?.updatedAt ?? 0))
-        .slice(SCOREBOOK_MAX)
-        .map(([pk]) => pk)
-      if (stale.length) await redis.hdel(bookKey, ...stale)
+      // The full read is only needed to find WHAT to prune, so it waits until the
+      // cheap length check says something must go.
+      if ((await redis.hlen(bookKey)) > SCOREBOOK_MAX) {
+        const all = (await redis.hgetall(bookKey)) || {}
+        const stale = Object.entries(all)
+          .sort(([, a], [, b]) => (b?.updatedAt ?? 0) - (a?.updatedAt ?? 0))
+          .slice(SCOREBOOK_MAX)
+          .map(([pk]) => pk)
+        if (stale.length) await redis.hdel(bookKey, ...stale)
+      }
     }
   }
 
@@ -302,5 +314,5 @@ export default async function handler(req, res) {
   // when this POST carried no mark — a box-only write reports on what it wrote
   // and stays quiet about what it did not touch, rather than inventing a -1 the
   // client might merge.
-  return privateJson(res, { revealedThrough: next, boxRevealed: plan.box })
+  return { revealedThrough: next, boxRevealed: plan.box }
 }
