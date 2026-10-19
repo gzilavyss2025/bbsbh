@@ -75,8 +75,8 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
       )}
       {hasLeaders && (
         <>
-          <TeamLeaders pool={n.leaderPool} categories={LEDGER_HITTING} limit={5} title="Batting leaders" showTeamAbbr={false} injuredIds={n.injuredIds} />
-          <TeamLeaders pool={n.leaderPool} categories={LEDGER_PITCHING} limit={5} title="Pitching leaders" showTeamAbbr={false} injuredIds={n.injuredIds} />
+          <TeamLeaders pool={n.leaderPool} categories={LEDGER_HITTING} limit={5} title="Batting leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
+          <TeamLeaders pool={n.leaderPool} categories={LEDGER_PITCHING} limit={5} title="Pitching leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
         </>
       )}
       {hasLeaders && (

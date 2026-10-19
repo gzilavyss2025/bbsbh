@@ -78,14 +78,14 @@ function LeaderCategory({
   filtering,
   showTeamAbbr,
   injuredIds,
-  limit,
+  showCount,
 }) {
   const ranks = displayRanks(entries)
   // One club on the whole board (a team page) needs no mark; a mixed one (the postseason
   // boards) names rank 1's club, since showTeamAbbr is off there.
   const mixedClubs = new Set(entries.map((e) => e.displayTeamId ?? e.teamId)).size > 1
   return (
-    <LeaderList label={category.label} count={`Top ${limit}`} className="tlead__cat">
+    <LeaderList label={category.label} count="Top 10" className="tlead__cat" {...(showCount ? {} : { count: undefined })}>
       {entries.map((e, i) => {
         const teamId = e.displayTeamId ?? e.teamId
         const teamAbbr = e.displayTeamAbbr ?? e.teamAbbr
@@ -124,7 +124,8 @@ function LeaderCategory({
 }
 
 // `pool`: normalized PoolPlayer[]. `categories`: descriptor array to rank.
-// `limit`: how many players per category (10 on the leader pages, 5 on the team page). `title`: section
+// `limit`: how many players per category (10 on the leader pages, 5 on the team page).
+// `showCount`: the "Top 10" tag on each card; the team page turns it off, as it shows 5. `title`: section
 // heading (the broader leader pages pass their scope's title). `showLevel`:
 // badge each leader's level (org scope, a multi-level pool). `prospectSnapshot`:
 // fetchTopProspects() result to add prospect pills (any MiLB scope). `qualifier`:
@@ -162,6 +163,7 @@ export function TeamLeaders({
   filtering = false,
   showTeamAbbr = true,
   injuredIds = null,
+  showCount = true,
 }) {
   const ranked = useMemo(
     () => rankedCategories({ pool, categories, limit, qualifier, precomputed }),
@@ -188,7 +190,7 @@ export function TeamLeaders({
             filtering={filtering}
             showTeamAbbr={showTeamAbbr}
             injuredIds={injuredIds}
-            limit={limit}
+            showCount={showCount}
           />
         ))}
       </Grid>
