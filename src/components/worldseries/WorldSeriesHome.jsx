@@ -5,7 +5,6 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useWorldSeriesHome } from '../../hooks/postseason/useWorldSeriesHome.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
 import { worldSeriesMode } from '../../lib/postseason/worldseries/mode.js'
-import { nextGamePk } from '../../lib/postseason/worldseries/scouting.js'
 import { Grid } from '../ui/layout/Grid.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Bullpen } from './cards/Bullpen.jsx'
@@ -80,7 +79,7 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
       clubIds={clubIds}
       slateDate={slateDate}
       dayType={mode.dayType}
-      gamePk={nextGamePk(mode)}
+      gamePk={focusPk}
       plateUmpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
     />
   )

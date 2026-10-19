@@ -282,11 +282,16 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', badg
               aria-current={isCurrent ? 'location' : undefined}
               onClick={() => jump(t.key)}
             >
-              <span>{t.label}</span>{badges && ' '}
-              {!badges ? null : count != null ? (
-                <span className="jumpbar__count">{count}</span>
-              ) : (
-                <span className="jumpbar__count" aria-hidden="true">·</span>
+              <span>{t.label}</span>
+              {badges && (
+                <>
+                  {' '}
+                  {count != null ? (
+                    <span className="jumpbar__count">{count}</span>
+                  ) : (
+                    <span className="jumpbar__count" aria-hidden="true">·</span>
+                  )}
+                </>
               )}
             </button>
           )

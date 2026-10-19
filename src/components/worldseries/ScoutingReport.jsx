@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadCareerMatchups, starterMatchupsFor } from '../../api/careerMatchups.js'
 import { loadNineKeys } from '../../api/nineKeys.js'
 import { loadUmpire } from '../../api/umpires.js'
@@ -22,10 +23,9 @@ import { Stack } from '../ui/layout/Stack.jsx'
 //   clubIds       the two Series clubs
 //   slateDate     YYYY-MM-DD
 //   dayType       'off' | 'game' (mode.js)
-//   gamePk        the game the edges read: nextGamePk()
+//   gamePk        the game the edges read: the home's focus game (today's on a game day,
+//                 the next one on an off day), the same one the umpire is read for
 //   plateUmpire   { id, name } from fetchPlateUmpires, or null (game day)
-const BAR_H = 68 // the sticky jump bar's height, the scroll-margin of each card
-
 // Adding a card: one entry in scouting.js, one here.
 const CARD = {
   'nine-keys': ({ nineKeys, clubIds, season }) => <SeriesNineKeys data={nineKeys} clubs={clubIds.map((id) => ({ id }))} season={season} />,
@@ -36,20 +36,41 @@ const CARD = {
 export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, plateUmpire = null }) {
   const season = Number(slateDate.slice(0, 4))
   const { data: nineKeys } = useAsync(() => loadNineKeys(), [])
-  const { data: career } = useAsync(loadCareerMatchups, [])
+  const { data: career } = useAsync(() => loadCareerMatchups(), [])
   const { data: umpire } = useAsync(
     () => (plateUmpire?.id ? loadUmpire(plateUmpire.id, { seasonYear: season }).catch(() => null) : null),
     [plateUmpire?.id, season],
   )
-  const edges = matchupEdges(clubIds.map((id) => starterMatchupsFor(career, gamePk, id)))
+  const [clubA, clubB] = clubIds
+  const edges = useMemo(
+    () => matchupEdges([clubA, clubB].map((id) => starterMatchupsFor(career, gamePk, id))),
+    [career, gamePk, clubA, clubB],
+  )
   const [a, b] = clubIds.map((id) => nineKeys?.current?.teams?.find((t) => t.teamId === id))
   const hasNineKeys = Boolean(a && b && nineKeys.current.season === season && nineKeys.keys?.length)
   const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, edges, plateUmpire })
-  if (!cards.length) return null
+  // The sticky chrome over a card: the slate's own bar (the probe reads --slate-bar-h) plus this
+  // jump bar. One measured number feeds the bar's scroll offset and each card's scroll-margin.
+  const rootRef = useRef(null)
+  const [offset, setOffset] = useState(0)
+  const shown = cards.length > 0
+  useEffect(() => {
+    const root = rootRef.current
+    if (!shown || !root || typeof ResizeObserver === 'undefined') return undefined
+    const probe = root.querySelector('.ww-scout__probe')
+    const bar = root.querySelector('.jumpbar')
+    const read = () => setOffset(probe.offsetHeight + bar.offsetHeight)
+    const ro = new ResizeObserver(read)
+    ro.observe(probe)
+    ro.observe(bar)
+    return () => ro.disconnect()
+  }, [shown])
+  if (!shown) return null
   const ctx = { nineKeys, clubIds, season, edges, plateUmpire, umpire }
   const names = clubIds.map((id) => teamClubNameShort(id)).filter(Boolean).join(' and ')
   return (
-    <Stack gap="loose" className="ww-scout">
+    <Stack gap="loose" className="ww-scout" ref={rootRef} style={{ '--ww-scout-offset': `${offset}px` }}>
+      <span className="ww-scout__probe" aria-hidden="true" />
       <SectionHead look="band" house as="h2" note={names}>
         Scouting report
       </SectionHead>
@@ -58,7 +79,7 @@ export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, plateUmpir
         tabs={cards.map((c) => ({ key: `ww-scout-${c.id}`, label: c.label }))}
         ariaLabel="Scouting report cards"
         className="ww-scout__jump"
-        offset={BAR_H}
+        offset={offset}
         badges={false}
       />
       <Grid min={340} gap="loose">

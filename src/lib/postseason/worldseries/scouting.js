@@ -27,11 +27,3 @@ export function scoutingModel(input) {
     .sort((a, b) => a.rank[input.dayType] - b.rank[input.dayType])
     .map(({ id, label }) => ({ id, label }))
 }
-
-// The game the edges read: today's on a game day, the next dated game on an off day
-// (never an "if necessary" game, which has no gamePk). `series` is the bracket's World
-// Series row (mode.js). -> gamePk or null.
-export function nextGamePk({ series, dayType }) {
-  if (dayType === 'game') return series?.cutoffGame?.gamePk ?? null
-  return series?.upcoming?.find((g) => !g.ifNecessary)?.gamePk ?? null
-}

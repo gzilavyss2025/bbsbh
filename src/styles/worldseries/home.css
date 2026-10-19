@@ -559,13 +559,24 @@
   color: var(--text-caption);
 }
 
-/* The scouting report (#2316). The jump bar stays on screen as the page scrolls; each card
-   stops below it when a button scrolls to it. 68px is BAR_H in ScoutingReport.jsx. */
+/* The scouting report (#2316). The jump bar sticks UNDER the slate's own sticky bar
+   (--slate-bar-h, styles/slate/masthead.css). ScoutingReport measures the two bars' height
+   into --ww-scout-offset, which the scroll offset and each card's scroll-margin share. */
+.ww-scout {
+  position: relative;
+}
+.ww-scout__probe {
+  position: absolute;
+  width: 0;
+  height: var(--slate-bar-h);
+  visibility: hidden;
+  pointer-events: none;
+}
 .jumpbar.ww-scout__jump {
   position: sticky;
-  top: 0;
+  top: var(--slate-bar-h);
   z-index: var(--z-sticky);
 }
 .ww-scout__card {
-  scroll-margin-top: 68px;
+  scroll-margin-top: var(--ww-scout-offset, 0px);
 }
