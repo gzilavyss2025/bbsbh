@@ -108,7 +108,7 @@ function useBatTracking(pitches, gamePk, sportId, gameState, gameDate, atBatInde
       fetchAttackAngles(gamePk, sportId, gameState, gameDate),
     ]).then(([gf, csv]) => {
       if (!live) return
-      setBat(new Map(swings.map((p) => [p.playId, { ...gf.get(p.playId), ...csv.get(`${atBatIndex + 1}-${p.no}`) }])))
+      setBat(new Map(swings.map((p) => [p.playId, { ...gf.get(p.playId), ...(Number.isInteger(atBatIndex) && csv.get(`${atBatIndex + 1}-${p.no}`)) }])))
     })
     return () => { live = false }
   }, [pitches, gamePk, sportId, gameState, gameDate, atBatIndex])

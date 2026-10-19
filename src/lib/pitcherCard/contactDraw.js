@@ -86,7 +86,7 @@ export function setAttackLabel(node, deg, end) {
   const [x, y] = proj(...end)
   const n = Math.round(deg)
   node.textContent = `attack ${n < 0 ? '-' : '+'}${Math.abs(n)}° · measured`
-  put(node, { x: f1(clamp(x, LABEL_HALF + 4, SCENE_W - LABEL_HALF - 4)), y: f1(y - 10), visibility: 'visible' })
+  put(node, { x: f1(clamp(x, LABEL_HALF + 4, SCENE_W - LABEL_HALF - 4)), y: f1(Math.max(14, y - 10)), visibility: 'visible' })
 }
 
 // The four smear bats trail the bat while it is fast; none during the freeze.
@@ -195,7 +195,7 @@ export function drawContact(mk, p, b, m, tau, slow, rest) {
   const tReal = sceneClock(b, tau) / (slow * 1000)
   const dtC = tReal - tc
   const th = SW.at(rest ? 0.12 : dtC).th
-  const ink = m.measured && (rest || dtC >= 0) // the swing before contact stays pencil
+  const ink = m.measured && !bunt && (rest || dtC >= 0) // the swing before contact stays pencil; a bunt is drawn, never ink
   if (ink) setAttackLabel(mk.label, m.attackDeg, SW.at(0).end)
   else vis(mk.label, false)
   if (!bunt) {

@@ -66,3 +66,15 @@ test('an empty CSV leaves every bat pencil', async () => {
   assert.equal(swingScene(p, { contactMs: 1 }, { batSpeed: 70, attackDeg: null }).measured, false)
   assert.equal(swingScene(p, { contactMs: 1 }, { attackDeg: 17.2 }).measured, true)
 })
+
+// The CSV fill time is unknown (#2349): an empty or failed answer is not kept, so a later open asks again.
+// A filled answer is kept, so it is still one fetch per gamePk.
+test('an empty or failed CSV is not kept: a later open asks again; a filled one is kept', async () => {
+  const empty = await run(900007, 1, 'Final', '')
+  assert.equal(empty.calls, 1)
+  const filled = await run(900007, 1, 'Final', csv)
+  assert.equal(filled.calls, 1, 'the empty answer was not cached')
+  assert.ok(filled.out.size > 0)
+  const again = await run(900007, 1, 'Final', csv)
+  assert.equal(again.calls, 0, 'a filled answer is kept')
+})

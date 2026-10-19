@@ -207,3 +207,13 @@ test('drawContact: a measured attack angle draws the bat at contact in ink with 
   assert.doesNotMatch(plain.bat.a.class, /ink/)
   assert.equal(plain.label.a.visibility, 'hidden')
 })
+
+test('drawContact: a bunt stays pencil and says no attack angle, even with a measured one', () => {
+  const p = { ...turang.at(-2), swing: 'inplay', hit: { exitVelo: 30, launchAngle: -20, distance: 20, trajectory: 'ground_ball', coordX: null, coordY: null } }
+  const b = pitchBeats(p, 3)
+  const m = swingScene(p, b, { attackDeg: 9.4 })
+  const rest = marks()
+  drawContact(rest, p, b, m, b.totalMs, 3, true)
+  assert.doesNotMatch(rest.bat.a.class, /ink/)
+  assert.equal(rest.label.a.visibility, 'hidden')
+})

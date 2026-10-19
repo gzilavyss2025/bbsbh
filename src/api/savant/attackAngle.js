@@ -7,8 +7,8 @@
 //
 // OUTPUT: Map of '{at_bat_number}-{pitch_number}' -> { attackDeg, attackDir }, degrees. at_bat_number is the
 // feed's atBatIndex + 1. A pitch with no measured angle (a take) has no entry. Not a Final game, or not MLB
-// (sportId !== 1): an empty Map and no fetch. One fetch per gamePk per page load, never polled; a CSV that is
-// empty (not filled yet) or a failed fetch gives an empty Map, and the next page load asks again.
+// (sportId !== 1): an empty Map and no fetch. One fetch per gamePk per page load once it has rows, never polled; a CSV that is
+// empty (not filled yet) or a failed fetch gives an empty Map that is not kept, so a later open asks again.
 //
 // SPOILER CLASSIFICATION: reveal-only. The kept fields describe one swing; call it only from the replay,
 // inside the half's reveal.
@@ -55,5 +55,8 @@ export function fetchAttackAngles(gamePk, sportId, state, date) {
         .catch(() => new Map()),
     )
   }
-  return asked.get(gamePk)
+  const got = asked.get(gamePk)
+  // The fill time is unknown (#2349): an empty or failed answer is not kept, so a LATER open asks again (never a poll).
+  got.then((m) => m.size === 0 && asked.get(gamePk) === got && asked.delete(gamePk))
+  return got
 }
