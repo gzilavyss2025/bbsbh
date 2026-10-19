@@ -31,7 +31,7 @@ export function BracketRail({ bracket, cutoff, slateDate }) {
   return (
     <aside className="bracketrail" aria-label="Postseason bracket">
       <div className="bracketrail__head">
-        <h2 className="bracketrail__title">Postseason</h2>
+        <h2 className="t-label t-label--bold bracketrail__title">Postseason</h2>
         {cutoff && (
           <span className="bracketrail__note">
             {ahead ? 'As of today' : `Heading into ${humanDate(cutoff)}`}

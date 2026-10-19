@@ -192,7 +192,7 @@ function PlayingCareer({ playing }) {
       {lines.map((line) => (
         <div key={line.level} className="mgrpage__playline">
           {showLevels && (
-            <h3 className="mgrpage__playlevel">{line.level === 'mlb' ? 'Majors' : 'Minors'}</h3>
+            <h3 className="t-label mgrpage__playlevel">{line.level === 'mlb' ? 'Majors' : 'Minors'}</h3>
           )}
           <div className="mgrpage__statgrid">
             {playingTiles(line.splits, group).map((t) => (

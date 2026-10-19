@@ -248,7 +248,7 @@ function ScoreDetail({ kind, grade, quality, surprise, form }) {
   }[kind]
   return (
     <div id="team-score-detail" className="team-score__detail">
-      <p className="team-score__detail-title">{title}</p>
+      <p className="t-label t-label--bold team-score__detail-title">{title}</p>
       <dl>
         {kind === 'grade' && grade && (
           <>

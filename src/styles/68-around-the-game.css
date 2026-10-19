@@ -218,11 +218,6 @@
 
 .slab__label {
   margin: var(--space-2) 0 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 .slab__note {

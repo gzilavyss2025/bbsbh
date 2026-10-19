@@ -42,7 +42,7 @@ export function FooterDirectory({ groups, trail, onEverything }) {
 
   return (
     <nav className="sitefooter__more" aria-label="More pages">
-      <p className="sitefooter__more-label">More Baseball</p>
+      <p className="t-label t-label--bold sitefooter__more-label">More Baseball</p>
 
       <div className="navdir">
         {groups.map((group) => (

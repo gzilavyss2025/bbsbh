@@ -37,7 +37,7 @@ export function GameResultFace({ feed, boxScorePath, trailing = null }) {
       </div>
       <div className="flipback__linescore">
         <div className="flipback__lsHeader" aria-hidden="true">
-          <span className="flipback__lsTeamCol">
+          <span className="t-label t-label--bold flipback__lsTeamCol">
             {wentToExtras && `${totalInnings} innings`}
           </span>
           <span className="flipback__lsCol">R</span>

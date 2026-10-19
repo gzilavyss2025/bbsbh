@@ -33,7 +33,7 @@ export function ClubSection({ teams, club, onPickClub }) {
             viewport reads as a bug rather than as emphasis. The picker's own
             active state is what answers "which one is chosen" at this
             distance. */}
-        <p className="mytally__fieldlabel">Your club</p>
+        <p className="t-label mytally__fieldlabel">Your club</p>
         <p className="mytally__fieldnote caps-exempt">
           Pinned to the top of the slate, and the mark on your account button.
         </p>

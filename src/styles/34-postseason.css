@@ -285,13 +285,6 @@
   width: 100%;
   min-width: 0;
 }
-.pswscard__mvptag {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .pswscard__mvpname {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
