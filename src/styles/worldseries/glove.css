@@ -8,8 +8,9 @@
   color: var(--text-caption);
 }
 
-.ww-glove__group:first-child {
-  border-top: 0;
+.ww-glove__group:first-child,
+.ww-glove__group + .ww-tape__row {
+  border-top: 0; /* the group head draws the rule, not the row under it */
 }
 
 .ww-glove .ww-tape__val {

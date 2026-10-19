@@ -16,8 +16,9 @@ const real = (v) => Number.isFinite(v)
 const MIN_REAL = 4
 
 // (data from loadClubDefenseRunning, { clubA, clubB }) -> [{ key, group, label, unit, signed, a, b, lead }]
-// in a fixed order, or null when a club has no row or fewer than MIN_REAL measures have a real
-// value for BOTH clubs.
+// in a fixed order, one row per measure: `a` is clubA's figure, `b` clubB's, either null when it has
+// none. The whole card is null when a club has no row, or when fewer than MIN_REAL measures have a
+// real value for BOTH clubs. Above that, a measure with a null side stays in as a row and draws a gap.
 export function gloveLegsModel(data, { clubA, clubB }) {
   const pair = clubsFor(data, clubA, clubB)
   if (!pair) return null
@@ -26,4 +27,11 @@ export function gloveLegsModel(data, { clubA, clubB }) {
     return { ...m, unit: m.unit ?? '', signed: Boolean(m.signed), a, b, lead: leadSide(a, b) }
   })
   return rows.filter((r) => real(r.a) && real(r.b)).length >= MIN_REAL ? rows : null
+}
+
+// A figure as the card prints it: one decimal only when it has a fraction (so a float tail in the
+// file never shows), a "+" on a positive signed measure, a "%" on a percent.
+export function gloveFigure(r, v) {
+  const n = Number.isInteger(v) ? v : v.toFixed(1)
+  return `${r.signed && v > 0 ? '+' : ''}${n}${r.unit === '%' ? '%' : ''}`
 }

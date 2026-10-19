@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import '../../../styles/worldseries/glove.css'
+import { gloveFigure } from '../../../lib/postseason/worldseries/scouting/gloveLegs.js'
 import { teamClubNameShort } from '../../../lib/teams.js'
 import { TeamLogo } from '../../logo/TeamLogo.jsx'
 import { Card } from '../../ui/frame/Card.jsx'
@@ -10,12 +11,16 @@ import { Stack } from '../../ui/layout/Stack.jsx'
 // Tale of the tape rows. `rows` is gloveLegsModel's output (never null here). The club that leads a
 // measure wears the leader mark; a tie or a missing figure marks nobody and a missing one draws a
 // gap. Regular-season club totals: an open surface (ADR-0034), no score. Names no club.
-const shown = (r, v) => `${r.signed && v > 0 ? '+' : ''}${v}${r.unit === '%' ? '%' : ''}`
-
 function Val({ r, side }) {
   const v = r[side]
-  if (v == null) return <span aria-label="no figure">—</span>
-  return <span className={r.lead === side ? 'ww-best' : undefined}>{shown(r, v)}</span>
+  if (v == null) return <span>—<span className="sr-only"> no figure</span></span>
+  const leads = r.lead === side
+  return (
+    <span className={leads ? 'ww-best' : undefined}>
+      {gloveFigure(r, v)}
+      {leads && <span className="sr-only"> leads</span>}
+    </span>
+  )
 }
 
 export function GloveLegs({ rows, clubIds: [idA, idB] }) {

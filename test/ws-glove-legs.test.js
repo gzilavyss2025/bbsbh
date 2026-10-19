@@ -2,7 +2,7 @@
 // 4-of-6 rule that drops the card.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { gloveLegsModel } from '../src/lib/postseason/worldseries/scouting/gloveLegs.js'
+import { gloveFigure, gloveLegsModel } from '../src/lib/postseason/worldseries/scouting/gloveLegs.js'
 import { scoutingModel } from '../src/lib/postseason/worldseries/scouting/scouting.js'
 
 const club = (o = {}) => ({ oaa: 10, framingRuns: 2, sprintSpeed: 27, stolenBases: 100, stolenBaseSuccess: 78, extraBasesTaken: 40, ...o })
@@ -39,6 +39,25 @@ test('three real measures give no card, four give it', () => {
 test('no file or a missing club gives no card', () => {
   assert.equal(gloveLegsModel(null, { clubA: 158, clubB: 139 }), null)
   assert.equal(gloveLegsModel({ clubs: {} }, { clubA: 158, clubB: 139 }), null)
+})
+
+test('the club order follows clubA and clubB', () => {
+  const d = data(club({ oaa: 20 }), club({ oaa: 5 }))
+  const ab = gloveLegsModel(d, { clubA: 158, clubB: 139 })[0]
+  const ba = gloveLegsModel(d, { clubA: 139, clubB: 158 })[0]
+  assert.deepEqual([ab.a, ab.b, ab.lead], [20, 5, 'a'])
+  assert.deepEqual([ba.a, ba.b, ba.lead], [5, 20, 'b'])
+})
+
+test('figures round to one place only when they have a tail, and carry sign and unit', () => {
+  const [oaa, , speed, sb, pct] = gloveLegsModel(data(club(), club()), { clubA: 158, clubB: 139 })
+  assert.equal(gloveFigure(oaa, 12), '+12')
+  assert.equal(gloveFigure(oaa, -3), '-3')
+  assert.equal(gloveFigure(oaa, 3.4500000000000004), '+3.5')
+  assert.equal(gloveFigure(speed, 27.300000000000004), '27.3')
+  assert.equal(gloveFigure(sb, 148), '148')
+  assert.equal(gloveFigure(pct, 79.10000000000001), '79.1%')
+  assert.equal(gloveFigure(pct, 78), '78%')
 })
 
 test('same shape whatever the opponent', () => {
