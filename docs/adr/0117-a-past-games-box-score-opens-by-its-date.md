@@ -181,3 +181,23 @@ record a reveal the reader never made, and the bit would outlive the date rule.
   page is one entry point. Another is the World Series home, where
   `components/postseason/edges/MatchupEdges.jsx` links players with `PlayerLink` and #2316 plans
   to show it on game days. The same acceptance covers it.
+
+## Addendum (2026-10-19): the World Series Film room
+
+The World Series scouting report's Film room card (#2316) shows the past regular-season
+meetings of the two Series clubs. This addendum gives that view its footing.
+
+- **Scope.** Any Final regular-season game between the two Series clubs, shown on the World
+  Series home only (`api/postseason/meetings.js`, `lib/postseason/worldseries/scouting/meetings.js`).
+  A Series game is not a meeting.
+- **Reason.** Each game is dated before the slate date, so its box score is open under this ADR.
+  ADR-0087 already shows the past runs of the Series on the same page.
+- **Cutoff.** The day before the slate date. The request ends there, and `selectMeetings` drops any
+  row dated on or after the slate date. Today's game never feeds the card.
+- **The box-score link is plain.** The "Box score" door goes to the game's box-score route. It sets
+  no flag and writes no `bbsbh:boxreveal:*` key (Alternative D). The box score opens by its date.
+  The innings viewer of the same game stays sealed. The card imports no reveal-only module.
+- **Accepted risks.** (1) A live game after local midnight: the slate date is the earliest of the
+  UTC, local and Pacific date, so the risk is the one this ADR already accepts for the date rule.
+  (2) On a game day, a reader can tap through from the card to a player's Game Log, which shows
+  the result of tonight's game. This is the tap-through that the last consequence above accepts.
