@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { fillTokens, resolveCopy, sanitizeOverrides } from './registry.js'
+import { resolveCopy, sanitizeOverrides } from './registry.js'
 import { CopyContext } from './copyContext.js'
 
 // App-wide provider for admin-editable UI copy. The contract that matters:
@@ -78,8 +78,7 @@ export function CopyProvider({ children }) {
 
   const value = useMemo(() => {
     const resolved = resolveCopy(overrides)
-    const t = (id, tokens) =>
-      Object.prototype.hasOwnProperty.call(resolved, id) ? fillTokens(resolved[id], tokens) : ''
+    const t = (id) => (Object.prototype.hasOwnProperty.call(resolved, id) ? resolved[id] : '')
     return { t, resolved, applyOverrides }
   }, [overrides, applyOverrides])
 

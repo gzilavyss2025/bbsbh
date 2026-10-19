@@ -10,9 +10,7 @@ import test from 'node:test'
 import {
   FIELDS,
   FIELD_IDS,
-  TOKENS,
   defaultCopy,
-  fillTokens,
   resolveCopy,
   sanitizeOverrides,
 } from '../src/copy/registry.js'
@@ -385,58 +383,11 @@ test('resolveCopy layers valid overrides over defaults and ignores junk', () => 
   assert.equal(resolved['unknown.key'], undefined)
 })
 
-test('fillTokens substitutes {time} when provided', () => {
-  assert.equal(fillTokens('Scores until {time}', { time: '8:00 AM' }), 'Scores until 8:00 AM')
-})
-
-test('fillTokens strips {time} and tidies the gap when no time is given', () => {
-  // Trailing token -> no dangling space.
-  assert.equal(fillTokens('Scores until {time}'), 'Scores until')
-  assert.equal(fillTokens('Scores until {time}', {}), 'Scores until')
-  // Mid-sentence token -> collapsed, no double space, punctuation kept tight.
-  assert.equal(fillTokens('By {time} the app re-seals.'), 'By the app re-seals.')
-  assert.equal(fillTokens('reset at {time}, always'), 'reset at, always')
-})
-
-test('fillTokens uses function-form replacement so $-patterns in time are literal', () => {
-  assert.equal(fillTokens('at {time}', { time: '$& $`' }), 'at $& $`')
-})
-
-test('fillTokens leaves token-free text unchanged and handles non-strings', () => {
-  assert.equal(fillTokens('no token here', { time: '8:00 AM' }), 'no token here')
-  assert.equal(fillTokens(null), '')
-  assert.equal(fillTokens(undefined, { time: '8:00 AM' }), '')
-})
-
-// {inning} is the second honored token (registry TOKENS). It goes through the
-// SAME choke point as {time} rather than an ad hoc replace at the call site, so
-// an admin who drops it gets the gap tidied like every other field.
-test('fillTokens substitutes {inning} and tidies it away when absent', () => {
-  assert.equal(
-    fillTokens('Live · {inning} in progress', { inning: 'Top 7th' }),
-    'Live · Top 7th in progress',
-  )
-  assert.equal(fillTokens('Live · {inning} in progress'), 'Live · in progress')
-  assert.equal(fillTokens('now batting: {inning}', { inning: '$& $`' }), 'now batting: $& $`')
-})
-
-test('fillTokens fills both tokens together and honors each independently', () => {
-  assert.equal(
-    fillTokens('{inning}, sealing at {time}', { inning: 'Bottom 9th', time: '8:00 AM' }),
-    'Bottom 9th, sealing at 8:00 AM',
-  )
-  // One provided, one not: the missing one is stripped and tidied, the provided
-  // one is left exactly as given.
-  assert.equal(fillTokens('{inning} until {time}', { inning: 'Top 1st' }), 'Top 1st until')
-  assert.equal(fillTokens('{inning} until {time}', { time: '8:00 AM' }), 'until 8:00 AM')
-})
-
-// The closed-set guarantee: anything not in TOKENS is left alone, so editable
-// copy can never trigger a substitution the registry hasn't sanctioned.
-test('fillTokens ignores unregistered tokens entirely', () => {
-  assert.deepEqual([...TOKENS], ['time', 'inning'])
-  assert.equal(
-    fillTokens('the score is {score}', { score: '4-2', time: '8:00 AM' }),
-    'the score is {score}',
-  )
+// There is no substitution layer: a value renders exactly as typed, so editable
+// copy can never trigger an interpolation (the `{time}`/`{inning}` tokens went
+// with the Scores Unlocked group, #2308).
+test('a value with brace text resolves verbatim: nothing is substituted', () => {
+  const typed = 'Sealing at {time}, {inning}, the score is {score}'
+  const resolved = resolveCopy({ 'stampIn.title': typed })
+  assert.equal(resolved['stampIn.title'], typed)
 })

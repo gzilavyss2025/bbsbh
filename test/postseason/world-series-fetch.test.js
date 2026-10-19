@@ -41,7 +41,6 @@ test('club games and meetings stop the day before; none asks for a score', () =>
     if (!url.includes('standings')) assert.equal(p.get('endDate'), '2026-10-26', url)
     assert.ok(!/score|runs|linescore|seriesstatus|leaguerecord/i.test(p.get('fields').replace('runDifferential', '')), url)
   }
-  assert.equal(q(clubGamesUrl(2026, 119, SLATE, { live: true })).get('endDate'), SLATE)
 })
 
 test('standings carry no date: a postseason date answers with no records', () => {
@@ -66,8 +65,6 @@ test('cutoff: a club game on the slate date is dropped from the rows even if the
     const rows = await fetchClubGames(2026, 119, SLATE)
     assert.deepEqual(rows.map((r) => r.gamePk), [1])
     assert.deepEqual(rows[0], { gamePk: 1, date: '2026-10-24', gameType: 'W', gameNumber: 1, final: true, homeId: 141, awayId: 119, winnerId: 119 })
-    const live = await fetchClubGames(2026, 119, SLATE, { live: true })
-    assert.deepEqual(live.map((r) => r.gamePk), [1, 2])
   } finally {
     stub.restore()
   }
@@ -75,7 +72,7 @@ test('cutoff: a club game on the slate date is dropped from the rows even if the
 
 const box = (away, home) => ({ teams: { away: { team: { id: 119 }, teamStats: { batting: { runs: away } } }, home: { team: { id: 141 }, teamStats: { batting: { runs: home } } } } })
 
-test('cutoff: ledger runs are never requested for a game on the slate date, except under live', async () => {
+test('cutoff: ledger runs are never requested for a game on the slate date', async () => {
   const stub = stubFetch(() => box(5, 3))
   try {
     const games = [{ gamePk: 1, date: '2026-10-24' }, { gamePk: 2, date: SLATE }]
@@ -83,8 +80,6 @@ test('cutoff: ledger runs are never requested for a game on the slate date, exce
     assert.deepEqual(Object.keys(runs), ['1'])
     assert.equal(stub.calls.length, 1)
     assert.ok(stub.calls[0].includes('/game/1/boxscore'))
-    const live = await fetchSeriesRuns(games, SLATE, { live: true })
-    assert.deepEqual(Object.keys(live), ['1', '2'])
   } finally {
     stub.restore()
   }

@@ -1377,15 +1377,15 @@ test('C5: .playercard is gone, from stylesheets, markup, comments and e2e', () =
   assert.deepEqual(found, [])
 })
 
-// Two hosts draw the tile with no frame of their own: the innings view's
-// Statcast row (.halfcast) and the slate result card's performer slot. Their
-// two-class rules outrank .card, in partials that load after system/card.css.
-test('C5: the two hosts that draw the tile unframed still drop its frame', () => {
+// The innings view's Statcast row (.halfcast) draws the tile with no frame of
+// its own. Its two-class rule outranks .card, in a partial that loads after
+// system/card.css. (The slate result card's performer slot was the second host
+// until ADR-0116 removed it.)
+test('C5: the host that draws the tile unframed still drops its frame', () => {
   const imports = importOrder()
   const card = imports.indexOf('system/card.css')
   const hosts = [
     ['12-sealbox.css', '.halfcast .playerline', { border: 'none', 'border-radius': '0', background: 'none', padding: '0' }],
-    ['22-box-score-tables.css', '.flipback__perfcard .playerline', { border: 'none', background: 'none', padding: '0' }],
   ]
   for (const [rel, sel, want] of hosts) {
     const body = ruleBody(read(rel), sel)

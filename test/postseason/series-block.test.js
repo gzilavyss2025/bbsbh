@@ -70,12 +70,6 @@ test('sentinel: a game on the slate date and a later game never count', () => {
   assert.ok(!block.stats.batting.homeRuns.some((e) => e.id === 813025 || e.id === 813024))
 })
 
-test('sentinel: a live bracket that counts today’s game still gets no today in the block', () => {
-  const live = deriveBracket(skeleton(2025), results(2025), '2025-11-01', { live: true })
-  assert.ok(live.worldSeries.games.some((g) => g.gamePk === 813024))
-  assert.deepEqual(seriesBlock(live, 813024, dataFor(WS_2025)).gamePks, WS_2025.slice(0, 6))
-})
-
 test('sentinel: a suspended game counts on its resume date, not its officialDate', () => {
   const ws2008 = [243843, 243844, 243845, 243846, 243847]
   const b = (cutoff) => deriveBracket(skeleton(2008), results(2008), cutoff)

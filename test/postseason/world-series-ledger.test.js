@@ -25,7 +25,7 @@ const runsByGame = { ...run(1, 5, 3), ...run(2, 1, 4), ...run(3, 9, 8) }
 const base = { clubIds: [A, B], games, upcoming, runsByGame, slateDate: '2026-10-27' }
 const cellsOf = (m, clubId) => m.rows.find((r) => r.clubId === clubId).cells
 
-test('cutoff: a game Final on the slate date shows no runs and no number without live', () => {
+test('cutoff: a game Final on the slate date shows no runs and no number', () => {
   const m = ledgerModel(base)
   const json = JSON.stringify(m)
   assert.ok(!json.includes('"value":9') && !json.includes('"value":8'), 'today runs leaked')
@@ -33,7 +33,7 @@ test('cutoff: a game Final on the slate date shows no runs and no number without
   assert.deepEqual(cellsOf(m, B)[3], { kind: 'seal', lead: false })
 })
 
-test('cutoff: even a bracket that counted the slate-date game keeps it sealed without live', () => {
+test('cutoff: even a bracket that counted the slate-date game keeps it sealed', () => {
   const m = ledgerModel({ ...base, games: [...games, { gamePk: 3, gameNumber: 3, date: '2026-10-27', winnerId: A }], upcoming: upcoming.slice(1) })
   assert.ok(!JSON.stringify(m).includes('"value":9'))
 })
@@ -49,12 +49,6 @@ test('runs map by club id even when the home and away roles swap', () => {
   const m = ledgerModel({ ...base, runsByGame: swapped })
   assert.deepEqual(cellsOf(m, A)[0], { kind: 'runs', value: 7 })
   assert.deepEqual(cellsOf(m, B)[0], { kind: 'runs', value: 2 })
-})
-
-test('with live (Scores Unlocked), today shows its runs', () => {
-  const m = ledgerModel({ ...base, live: true })
-  assert.deepEqual(cellsOf(m, A)[3], { kind: 'runs', value: 9 })
-  assert.deepEqual(cellsOf(m, B)[3], { kind: 'runs', value: 8 })
 })
 
 test('a past game with no box score is empty, not 0', () => {

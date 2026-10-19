@@ -236,13 +236,7 @@ function StampInRow({ game, getSignals, stamped, seasonFull, onStamp }) {
         <div className="stampin__facewrap">
           <GameResultFace
             feed={signals.feed}
-            winProb={signals.winProb}
             boxScorePath={boxScorePath}
-            // The line and the decisions, nothing else. A season is up to 162
-            // rows and this page is read by scrolling it, so the play of the
-            // game — a photo and two lines each — costs more height than it
-            // earns here.
-            hidePlayOfGame
             trailing={
               <StampInButton
                 stamped={stamped}

@@ -86,7 +86,6 @@ const BUDGETS = {
   'src/styles/15-team-color-lab.css': 680, // 674
   'src/styles/17-identity-lab-workbench.css': 1196, // 1200
   'src/styles/21-box-score.css': 900, // 800
-  'src/styles/22-box-score-tables.css': 700, // 680
   'src/styles/28-team-hub.css': 900, // 859
   'src/styles/29-team-transactions.css': 800, // 950
   'src/styles/31-wild-card.css': 1200, // 1300
