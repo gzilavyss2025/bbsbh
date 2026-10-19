@@ -269,7 +269,7 @@ export const PAIRINGS = [
   // caption ink is the club records on the extra-innings line (N5).
   { fg: 'text-body', bg: '#EBE8DD', min: TEXT, note: 'notice info tone: label and sentence' },
   { fg: 'text-caption', bg: '#EBE8DD', min: TEXT, note: 'notice info tone: caption ink (the extras line\'s club records)' },
-  // THE MATCHUP SCOUT (#1490, styles/scout/panels.css and meetings.css). The
+  // THE MATCHUP SCOUT (#1490, styles/scout/edge.css, pitches.css and meet.css). The
   // Edge ledger's tags and the lean name: clay for the hitter's side, the
   // All-Star blue for the pitcher's. The Meetings pitch calls: clay for a
   // strike, field green for a ball, the All-Star blue for a ball in play. All

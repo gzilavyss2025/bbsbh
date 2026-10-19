@@ -1,7 +1,12 @@
 import '../../styles/scout/scout.css'
 import '../../styles/scout/panels.css'
-import '../../styles/scout/meetings.css'
+import '../../styles/scout/edge.css'
+import '../../styles/scout/pitches.css'
+import '../../styles/scout/where.css'
+import '../../styles/scout/meet.css'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { fetchHeadToHead } from '../../api/scout/headToHead.js'
+import { METRICS } from '../../lib/scout/metrics.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useNav } from '../../lib/nav.js'
@@ -15,6 +20,9 @@ import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Pill } from '../../components/ui/control/Pill.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { Notice } from '../../components/ui/state/Notice.jsx'
+import { Choice } from '../../components/scout/Choice.jsx'
+import { HubTabBar } from '../../components/chrome/HubTabBar.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Matchup } from '../../components/scout/Matchup.jsx'
 import { loadScout } from './loadScout.js'
 import { pitcherBoard } from './board.js'
@@ -22,6 +30,7 @@ import { hitterSide, metricsFor } from './hitterBoard.js'
 import { Pickers } from './Pickers.jsx'
 import { ScoutScene } from './ScoutScene.jsx'
 import { FilterSheet, filterSummary } from './FilterSheet.jsx'
+import { PitchRows } from './pitches/PitchRows.jsx'
 import { EdgePanel } from './edge/EdgePanel.jsx'
 import { ZonesPanel } from './zones/ZonesPanel.jsx'
 import { MeetingsPanel } from './meetings/MeetingsPanel.jsx'
@@ -29,18 +38,18 @@ import { MeetingsPanel } from './meetings/MeetingsPanel.jsx'
 // THE MATCHUP SCOUT (#1410, #1411, #1490; design docs/scout-design.md,
 // ADR-0093, ADR-0095, ADR-0099). Pick a pitcher and a hitter. Top to bottom:
 // the pair, the context chips (season and scope, the sample, the filter
-// sheet), the pitch scene in either view, the pitch pills, and three tabs:
-// EDGE (who the matchup favors, by pitch type and by location), ZONES (where
-// he throws and where the hitter does damage) and MEETINGS (every past plate
-// appearance, pitch by pitch). The scene, the pills and every tab share one
-// selection (`?pitch=`).
+// sheet), the pitch scene, then one scroll of four sections under a jump bar
+// (ADR-0118): EDGE (who the matchup favors, by pitch type and by location),
+// PITCHES (the pills and the ledger), WHERE (where he throws and where the
+// hitter does damage) and MEETINGS (every past plate appearance, pitch by
+// pitch). The scene and every section share one selection (`?pitch=`).
 //
 // AN OPEN SURFACE (ADR-0034): no SealBox, and none may be added. Everything
 // here is a season aggregate over final games, except the meetings, which
 // hold back every game dated on or after the cutoff (MeetingsPanel.jsx).
 //
 // THE ADDRESS HOLDS THE CHOICES (lib/scout/route.js): `?scope`,
-// `?pitch`, `?hand`, `?metric`, `?tab`, `?d`. A change replaces the address, so
+// `?pitch`, `?hand`, `?metric`, `?d`. A change replaces the address, so
 // Back leaves the page rather than undoing a tap. There is one view, the
 // hitter's (ADR-0118); an old `?view=` link opens the page and is ignored.
 //
@@ -55,11 +64,12 @@ import { MeetingsPanel } from './meetings/MeetingsPanel.jsx'
 // for every pitcher.
 
 const SCOPE_TAG = { reg: 'Regular season', post: 'Postseason', all: 'Regular season + postseason' }
-const TABS = [['edge', 'Edge', 'who it favors'], ['zones', 'Zones', 'where'], ['meet', 'Meetings', 'pitch by pitch']]
+// The sticky jump bar's height, as on the team page (TeamNextPage.jsx BAR_H).
+const BAR_H = 68
 const other = (h) => (h === 'R' ? 'L' : 'R')
 const noPicks = { pitcher: null, hitter: null }
 
-export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handParam, metric: metricParam, tab = 'edge' }) {
+export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handParam, metric: metricParam }) {
   useDocumentTitle('Matchup Scout')
   const navigate = useNav()
   const view = 'hitter'
@@ -120,7 +130,7 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
   // Every choice rewrites the address in place.
   const go = (patch, replace = true) => {
     const pair = data ? { pitcher: data.pitcher, hitter: data.hitter } : picks
-    navigate(scoutPath({ ...pair, scope, pitch: sel, hand: handParam, metric: metricParam, tab, d: asOf, ...patch }), { replace })
+    navigate(scoutPath({ ...pair, scope, pitch: sel, hand: handParam, metric: metricParam, d: asOf, ...patch }), { replace })
   }
   const setMetric = (k) => go({ metric: k === metrics[0] ? null : k })
   const selectPitch = (code) => {
@@ -137,6 +147,107 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
       go({ ...next, pitch: null, hand: null }, false)
     }
   }
+
+  // The meetings are read here, so the jump bar can count them.
+  const h2h = useAsync(
+    () => (data ? fetchHeadToHead(data.hitter.id, data.pitcher.id, cutoff) : Promise.resolve(null)),
+    [data, cutoff],
+  )
+  const pas = useMemo(
+    () => (h2h.data?.pas ?? []).filter((r) => scope === 'all' || (scope === 'reg') === (r.round === 'R')),
+    [h2h.data, scope],
+  )
+
+  const names = data ? { hitter: data.hitter.last, pitcher: data.pitcher.last } : null
+  // The section list: flip `show` to hide a section (slice 7b hides by this).
+  const sections = data
+    ? [
+        {
+          key: 'scout-edge',
+          label: 'Edge',
+          show: true,
+          node: <EdgePanel data={data} board={board} sides={sides} metric={metric} sel={sel} stance={stance} scope={scope} hand={hand} />,
+        },
+        {
+          key: 'scout-pitches',
+          label: 'Pitches',
+          count: board?.types.length,
+          show: true,
+          node: (
+            <>
+              {board && (
+                <div ref={pillRow} className="scout__control scout__control--scroll" role="group" aria-label="Pitch">
+                  <Pill role="control" fill="paper" pressed={sel === null} onClick={() => selectPitch(null)}>All</Pill>
+                  {board.types.map((t) => (
+                    <Pill
+                      key={t.code}
+                      role="control"
+                      fill="paper"
+                      className={`scout__pitchbtn${!sel && inFlight === t.code ? ' is-inflight' : ''}`}
+                      data-family={t.family}
+                      pressed={sel === t.code}
+                      onClick={() => selectPitch(t.code)}
+                    >
+                      {t.name} <span className="scout__pilln">{t.pct}%</span>
+                      <span className="scout__usage" style={{ '--usage': t.pct }} aria-hidden="true" />
+                    </Pill>
+                  ))}
+                </div>
+              )}
+              {!board && <EmptyState size="compact">No pitch mix posted for this pitcher</EmptyState>}
+              <PitchRows board={board} side={side} metric={metric} names={names} sel={sel} onSelect={selectPitch} />
+            </>
+          ),
+        },
+        {
+          key: 'scout-where',
+          label: 'Where',
+          show: true,
+          node: (
+            <>
+              {side && (
+                <Choice label="Metric" options={metrics.map((k) => [k, METRICS[k].label])} value={metric} onChange={setMetric} />
+              )}
+              <ZonesPanel
+                data={data}
+                board={board}
+                side={side}
+                xside={sides.xwoba ?? null}
+                map={map}
+                hmap={hmap}
+                sel={sel}
+                selType={selType}
+                view={view}
+                stance={stance}
+                hitterStance={hitterStance}
+                metric={metric}
+                picked={picked}
+                onPick={setPicked}
+              />
+            </>
+          ),
+        },
+        {
+          key: 'scout-meet',
+          label: 'Meetings',
+          count: h2h.loading ? undefined : pas.length,
+          show: true,
+          node: (
+            <MeetingsPanel
+              data={data}
+              board={board}
+              h2h={h2h}
+              pas={pas}
+              cutoff={cutoff}
+              asOf={asOf}
+              view={view}
+              stance={stance}
+              hitterStance={hitterStance}
+            />
+          ),
+        },
+      ].filter((x) => x.show)
+    : []
 
   const sceneCaption = `${selType ? selType.name : 'His mix, in turn'} · typical shape · ⅓ speed`
   const crowd = stance === 'L' ? 'lefties' : 'righties'
@@ -185,94 +296,22 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
                   caption={sceneCaption}
                 />
               ) : null}
-
-              {board && (
-                <div ref={pillRow} className="scout__control scout__control--scroll" role="group" aria-label="Pitch">
-                  <Pill role="control" fill="paper" pressed={sel === null} onClick={() => selectPitch(null)}>All</Pill>
-                  {board.types.map((t) => (
-                    <Pill
-                      key={t.code}
-                      role="control"
-                      fill="paper"
-                      className={`scout__pitchbtn${!sel && inFlight === t.code ? ' is-inflight' : ''}`}
-                      data-family={t.family}
-                      pressed={sel === t.code}
-                      onClick={() => selectPitch(t.code)}
-                    >
-                      {t.name} <span className="scout__pilln">{t.pct}%</span>
-                      <span className="scout__usage" style={{ '--usage': t.pct }} aria-hidden="true" />
-                    </Pill>
-                  ))}
-                </div>
-              )}
-              {!board && <EmptyState size="compact">No pitch mix posted for this pitcher</EmptyState>}
             </div>
 
             <div className="scout__main">
-              <div className="scout__tabs" role="tablist" aria-label="Scout">
-                {TABS.map(([k, label, sub]) => (
-                  <button
-                    key={k}
-                    type="button"
-                    role="tab"
-                    id={`scout-tab-${k}`}
-                    aria-selected={tab === k}
-                    aria-controls="scout-panel"
-                    className="scout__tab"
-                    onClick={() => go({ tab: k })}
-                  >
-                    <span className="scout__tabname">{label}</span>
-                    <span className="scout__tabsub">{sub}</span>
-                  </button>
-                ))}
-              </div>
-              <div id="scout-panel" role="tabpanel" aria-labelledby={`scout-tab-${tab}`}>
-                {tab === 'edge' && (
-                  <EdgePanel
-                    data={data}
-                    board={board}
-                    sides={sides}
-                    metric={metric}
-                    metrics={metrics}
-                    onMetric={setMetric}
-                    sel={sel}
-                    onSelect={selectPitch}
-                    stance={stance}
-                    scope={scope}
-                    hand={hand}
-                  />
-                )}
-                {tab === 'zones' && (
-                  <ZonesPanel
-                    data={data}
-                    board={board}
-                    side={side}
-                    xside={sides.xwoba ?? null}
-                    map={map}
-                    hmap={hmap}
-                    sel={sel}
-                    selType={selType}
-                    view={view}
-                    stance={stance}
-                    hitterStance={hitterStance}
-                    metric={metric}
-                    picked={picked}
-                    onPick={setPicked}
-                  />
-                )}
-                {tab === 'meet' && (
-                  <MeetingsPanel
-                    data={data}
-                    board={board}
-                    cutoff={cutoff}
-                    asOf={asOf}
-                    scope={scope}
-                    view={view}
-                    stance={stance}
-                    hitterStance={hitterStance}
-                  />
-                )}
-              </div>
+              <HubTabBar
+                variant="anchor"
+                tabs={sections.map((x) => ({ key: x.key, label: x.label, count: x.count }))}
+                ariaLabel="Scout sections"
+                className="scout__jump"
+                offset={BAR_H}
+                hold
+              />
+              {sections.map((x) => (
+                <Stack key={x.key} id={x.key} className="scout__section">
+                  {x.node}
+                </Stack>
+              ))}
             </div>
           </div>
 
