@@ -446,16 +446,15 @@
   }
 
   .levelladder__stop {
-    min-height: 84px; /* raw-value-exempt: the D1 desktop rung, spec'd */
+    padding-bottom: var(--space-3h);
   }
 
   .levelladder__name {
     font-size: var(--fs-title-sm);
   }
 
-  .levelladder__ballart {
-    width: 26px; /* raw-value-exempt: the desktop ball, spec'd */
-    height: 26px; /* raw-value-exempt: the desktop ball, spec'd */
+  .levelladder {
+    --ball-size: 26px; /* raw-value-exempt: the desktop ball, spec'd */
   }
 
   .slatedate__md {

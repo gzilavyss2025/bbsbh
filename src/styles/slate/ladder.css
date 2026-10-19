@@ -6,6 +6,13 @@
    Motion is motion/masthead.css. */
 
 .levelladder {
+  /* The rail's line, measured from the ladder's top: the ladder's padding,
+     the stop's, and half a node. The rail, every node and the ball centre on
+     it, each placed absolutely, so nothing else in a stop can move them. A
+     <button> centres its content in its min-height, which is what pushed the
+     nodes below the rail when they rode in the stop's flow. */
+  --rail-y: calc(var(--space-2) + var(--space-4) + var(--space-1h));
+  --ball-size: var(--space-6);
   position: relative;
   display: flex;
   padding: var(--space-2) 0 var(--space-1h);
@@ -14,11 +21,10 @@
 
 /* The rail runs from the centre of the first stop to the centre of the last
    farm stop (MLB to A). Every stop is the same width, so both ends are plain
-   fractions of the row. Its top is the node's centre: the ladder's padding,
-   the stop's, and half a node, less half the rail. */
+   fractions of the row. Its centre is the rail line (--rail-y above). */
 .levelladder__rail {
   position: absolute;
-  top: calc(var(--space-2) + var(--space-4) + var(--space-1h) - var(--bw-hair));
+  top: calc(var(--rail-y) - var(--bw-heavy) / 2);
   left: calc(100% / var(--stops, 5) / 2);
   width: calc(100% * (var(--farm, 5) - 1) / var(--stops, 5));
   height: var(--bw-heavy);
@@ -27,7 +33,7 @@
 
 .levelladder__ball {
   position: absolute;
-  top: calc(var(--space-2) + var(--space-4) + var(--space-1h) - var(--space-3));
+  top: calc(var(--rail-y) - var(--ball-size) / 2);
   left: 0;
   z-index: 2;
   display: flex;
@@ -43,8 +49,8 @@
 
 .levelladder__ballart {
   display: block;
-  width: var(--space-6);
-  height: var(--space-6);
+  width: var(--ball-size);
+  height: var(--ball-size);
   transform: rotate(calc(var(--at, 0) * 120deg));
 }
 
@@ -66,8 +72,9 @@
   flex: 1 1 0;
   min-width: 0;
   display: block;
-  min-height: 76px; /* raw-value-exempt: the D1 rung height, spec'd */
-  padding: var(--space-4) 0 0;
+  /* The node's room above the name: the stop's top gap, a node and the gap
+     under it. The bottom padding brings the stop to the spec's 76px. */
+  padding: calc(var(--space-4) + var(--space-3) + var(--space-1h)) 0 var(--space-2);
   border: 0;
   background: none;
   color: var(--text-heading);
@@ -91,11 +98,13 @@
 }
 
 .levelladder__node {
-  display: block;
+  position: absolute;
+  top: calc(var(--rail-y) - var(--space-2) - var(--space-3) / 2);
+  left: 50%;
   box-sizing: border-box;
   width: var(--space-3);
   height: var(--space-3);
-  margin: 0 auto var(--space-1h);
+  transform: translateX(-50%);
   border: var(--bw-heavy) solid var(--border-stamped);
   background: var(--surface-card);
 }
