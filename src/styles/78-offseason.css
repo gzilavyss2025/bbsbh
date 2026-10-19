@@ -996,14 +996,6 @@
   line-height: var(--lh-solid);
   color: var(--text-heading);
 }
-.seasonnote__vallabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 
 /* Where the scorebug sits on /fouls, and the whole reason this row is allowed
    on the slate: a date, and the game it opens — sealed, like any other. Drawn

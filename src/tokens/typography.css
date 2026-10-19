@@ -169,6 +169,9 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
+.t-label--bold {
+  font-weight: var(--w-bold);
+}
 .t-num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

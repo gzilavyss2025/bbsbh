@@ -253,26 +253,10 @@
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
 }
-.team-score__breakdown {
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-}
 .team-score__driver-group {
   display: grid;
   gap: var(--space-1h);
   padding: 0 var(--space-2h);
-}
-.team-score__driver-heading {
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
 }
 .team-score__drivers {
   display: grid;

@@ -206,7 +206,7 @@ export function AwardOrderEditor({ fields, values, onChange, onReset }) {
 function Stepper({ label, value, min = 1, max = 9, onSet }) {
   return (
     <span className="awardord__stepper">
-      <span className="awardord__steplabel">{label}</span>
+      <span className="t-label t-label--bold awardord__steplabel">{label}</span>
       <button
         type="button"
         className="awardord__step"

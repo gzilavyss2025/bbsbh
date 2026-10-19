@@ -76,7 +76,7 @@ export function SeriesPlayOfTheGame({ potg, gamePk, awayAbbr, homeAbbr }) {
                 {potg.batterName}
               </PlayerLink>
               {(potg.batterTeamAbbr || potg.batterPos) && (
-                <span className="psseries__potgMeta">
+                <span className="t-label t-label--bold psseries__potgMeta">
                   {[potg.batterTeamAbbr, potg.batterPos].filter(Boolean).join(' · ')}
                 </span>
               )}
