@@ -1,6 +1,7 @@
 // #2311 step 5: can Retrosheet 2023 plays be joined to MLBAM ids and to gamePk?
 import { readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs'
 import { csvObjects } from '../../src/lib/csv/parse.js'
+import { cachedGetJson } from '../../scripts/lib/statsapi.mjs'
 import { buildRetroBridge } from '../../scripts/lib/open-data/retro-bridge.mjs'
 const S = process.env.RETRO_DIR || '/tmp/retro'
 const TEAM = { ANA:108,ARI:109,ATL:144,BAL:110,BOS:111,CHA:145,CHN:112,CIN:113,CLE:114,COL:115,DET:116,HOU:117,KCA:118,LAN:119,MIA:146,MIL:158,MIN:142,NYA:147,NYN:121,OAK:133,PHI:143,PIT:134,SDN:135,SEA:136,SFN:137,SLN:138,TBA:139,TEX:140,TOR:141,WAS:120 }
@@ -9,9 +10,7 @@ const reg = readdirSync(`${S}/chad`).filter(f => f.startsWith('people-')).flatMa
 const bridge = buildRetroBridge(reg)
 console.log('register rows', bridge.rows, 'bridged', bridge.matched, 'conflicts', bridge.conflicts)
 // ---- schedule
-let sched
-if (existsSync('sched2023.json')) sched = JSON.parse(readFileSync('sched2023.json', 'utf8'))
-else { const r = await fetch('https://statsapi.mlb.com/api/v1/schedule?sportId=1&season=2023&gameType=R&startDate=2023-03-01&endDate=2023-11-01&hydrate=linescore'); sched = await r.json(); writeFileSync('sched2023.json', JSON.stringify(sched)) }
+const sched = await cachedGetJson('/api/v1/schedule?sportId=1&season=2023&gameType=R&startDate=2023-03-01&endDate=2023-11-01&hydrate=linescore')
 const sg = sched.dates.flatMap(d => d.games).filter(g => g.status.abstractGameState === 'Final')
 const byKey = new Map()
 for (const g of sg) byKey.set(`${g.teams.home.team.id}|${g.officialDate}|${g.doubleHeader === 'N' ? 1 : g.gameNumber}`, g)
