@@ -102,6 +102,7 @@ is one.
 | `innings.css` | #978, #983 | The live-edge dot's breath and the frontier seal's |
 | `scorecard-lens.css` | #724 (L7) | The phone lens (ADR-0092): the tear, the runner-move fade, the page turn, the two-cycle seal breath, the docked card's fade and the pitcher sheet's slide. The glide is beside it in JS |
 | `board-in.css` | M1 | The leader board's fade-in after a scope tap on `/leaders`: up 6 px and opacity, 180 ms (`--dur-board-in`), `--ease-out`. Its gate is a one-shot module flag, `lib/motion/boardIn.js`: `ScopeNav` arms it on a tap to another scope, and `TeamLeaders` spends it on its first render. A cold load, a Back, a poll and a force-reveal never play it. The resting look is `styles/leaders/board.css` |
+| `run-value-card.css` | #2295 | The team page's club run value card: the stamp-in on the card, tile, part buttons and rows, the league bars growing, the split bar's wipe, the mini bars growing, and a re-rank (rows that join stamp in on `rvrow--enter-a`/`-b`, rows that stay slide by a Web Animation in `ranks/runvalue/flip.js`, since React moves their nodes). The count-ups are a rAF loop on the text node (`useCountUp.js`). Gate: `useInViewOnce` (a tenth in view; the card is taller than a phone held sideways, so a third may never show), plus the band's `useViewOnce`. Not in `index.css`: the card imports it. Times are the `--*-rv-*` tokens in `effects.css`. Spec `.scratch/run-value-motion/handoff.md` |
 
 ### The scorecard lens (#724, L7)
 

@@ -20,10 +20,12 @@ import { Card } from './Card.jsx'
 //   stampIn  the tile drops into its shadow as it appears. Stagger a row with
 //            --stamp-delay in `style`.
 //   className  the caller's namespace, for its place in a row.
+//   children   anything the tile carries under its figures (the run value card's league
+//            strip, #2295). Most tiles pass none.
 //
 // Like Card, it computes and fetches nothing. The figure it shows is the
 // caller's, so a reveal gate stays where the caller put it.
-export function StatTile({ label, value, caption, rank, tone = 'plain', look = 'default', lead = false, stampIn = false, className = '', style }) {
+export function StatTile({ label, value, caption, rank, tone = 'plain', look = 'default', lead = false, stampIn = false, className = '', style, children }) {
   return (
     <Card
       as="div"
@@ -38,6 +40,7 @@ export function StatTile({ label, value, caption, rank, tone = 'plain', look = '
       <p className="stattile__value">{value}</p>
       {caption != null && caption !== '' && <p className="stattile__caption">{caption}</p>}
       {rank && <RankMark rank={rank.rank} of={rank.of} />}
+      {children}
     </Card>
   )
 }

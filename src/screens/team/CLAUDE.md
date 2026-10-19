@@ -35,7 +35,7 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
   through the cutoff-gated `rankOf`. `hasRecords` hides the card, its head and its count when no
   game counted at the cutoff.
 - **Ranks** (`next/ranks/`): batting and pitching ranks, leaders, run value and the ABS challenge
-  card, on `loadRanks`. The challenge card (`ChallengeBoard.jsx`, parts in `ranks/challenges/`) draws a face a player on a plot and a scrolling list; its model is `api/around-the-game/absClubCard.js`, and a face or photo opens the global hover card with the card's own figures (`playerHoverStore`'s `detail`). Absent for a club with no league id. A card that needs MLB data draws
+  card, on `loadRanks`. The challenge card (`ChallengeBoard.jsx`, parts in `ranks/challenges/`) draws a face a player on a plot and a scrolling list; its model is `api/around-the-game/absClubCard.js`, and a face or photo opens the global hover card with the card's own figures (`playerHoverStore`'s `detail`). Absent for a club with no league id. The run value card (`RunValueBoard.jsx`, parts in `ranks/runvalue/`) re-ranks its top six by a part on a tap; spec `.scratch/run-value-motion/handoff.md`. A card that needs MLB data draws
   nothing for a club below it.
 - **Games** (`next/games/`): the season schedule, Highlights, Photos and the grid of every
   decided game (`modules/TeamGames.jsx` `AllGames`). Every row has `won != null`, cut at `?d=`.

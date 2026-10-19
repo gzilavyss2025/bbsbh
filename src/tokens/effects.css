@@ -106,6 +106,24 @@
   --delay-arrive-label:  200ms;
   --delay-arrive-texture: 260ms;
 
+  /* The club run value card (#2295; motion/run-value-card.css). Its entrance is the stamp-in at
+     several sizes, in one order: the tile, the league bars one club at a time, the split bar's
+     wipe, the four part buttons, then the six rows, each row's mini bar a beat after its row. A
+     re-rank slides the rows that stay and stamps in the ones that join. A stagger is the step
+     times the item's index. */
+  --dur-rv-bar:      520ms;
+  --dur-rv-grow:     640ms;
+  --dur-rv-slide:    460ms;
+  --ease-rv-wipe:    cubic-bezier(0.6, 0, 0.2, 1);
+  --step-rv-stamp:   55ms;
+  --step-rv-league:  22ms;
+  --delay-rv-tile:   140ms;
+  --delay-rv-league: 360ms;
+  --delay-rv-split:  520ms;
+  --delay-rv-parts:  620ms;
+  --delay-rv-rows:   900ms;
+  --delay-rv-enter:  160ms;
+
   /* Sub-200ms press feedback (review-animations STANDARDS.md's "button press
      feedback" spec) for controls a touch heavier than the plain --dur-fast tap. */
   --dur-snappy: 160ms;

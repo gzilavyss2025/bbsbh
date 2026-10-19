@@ -182,26 +182,64 @@
   bottom: 3px;
 }
 
-.rvsplit__seg--up {
-  background: var(--accent-positive);
-}
-
+/* One colour per part, on every run value surface (#2295): the report board, the player card and
+   the club card. The four step clearly in lightness (field 42, mint 72, wash 90, ink 8), so batting
+   and pitching read apart without the legend. Running's wash is too pale to stand on the track
+   alone, so it keeps a hairline ink edge. A part given back is clay, whichever part it is. */
 .rvsplit__seg--down {
   background: var(--accent-negative);
 }
-
-/* The four components are told apart WITHIN a side by weight of ink, not by
-   four more colours: the pair above already says gained/given back, and a
-   second axis of colour on an 18px bar is a legend nobody reads. The legend
-   below names them in order, and the order is fixed (COMPONENTS), so the
-   segments are read positionally — which is how a stacked bar is read anyway. */
-.rvsplit__seg--fld,
-.rvsplit__seg--run {
-  opacity: 0.72;
+.rvsplit__seg--bat.rvsplit__seg--up {
+  background: var(--accent-positive);
+}
+.rvsplit__seg--fld.rvsplit__seg--up {
+  background: var(--accent-tint);
+}
+.rvsplit__seg--run.rvsplit__seg--up {
+  background: var(--surface-stamped-tint);
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--border-stamped);
+}
+.rvsplit__seg--pit.rvsplit__seg--up {
+  background: var(--surface-stamped-ink);
 }
 
-.rvsplit__seg--run {
-  opacity: 0.52;
+/* A picked part (the club card's buttons) draws in field green, whichever part it is, and the
+   others dim. A picked part given back stays clay. */
+.rvsplit__seg--on.rvsplit__seg--up {
+  background: var(--accent-positive);
+  box-shadow: none;
+}
+.rvsplit__seg--off {
+  opacity: 0.18;
+}
+
+/* Each part's swatch colour, for the legend's key and the club card's buttons. */
+.rvsplit__item--bat,
+.rvsplit__part--bat {
+  --part-ink: var(--accent-positive);
+}
+.rvsplit__item--fld,
+.rvsplit__part--fld {
+  --part-ink: var(--accent-tint);
+}
+.rvsplit__item--run,
+.rvsplit__part--run {
+  --part-ink: var(--surface-stamped-tint);
+}
+.rvsplit__item--pit,
+.rvsplit__part--pit {
+  --part-ink: var(--surface-stamped-ink);
+}
+.rvsplit__item dt::before,
+.rvsplit__swatch {
+  content: '';
+  display: inline-block;
+  width: var(--space-2h);
+  height: var(--space-2h);
+  margin-right: var(--space-1);
+  background: var(--part-ink);
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--border-stamped);
+  vertical-align: baseline;
 }
 
 .rvsplit__legend {
@@ -257,58 +295,6 @@
 
 .rvcard__door {
   margin-top: var(--space-2);
-}
-
-/* ---- the club card ----------------------------------------- */
-
-/* The club's own men under its four totals — a short list, not a board: the
-   whole roster is what /run-value's club filter is for, and the card's job is
-   to say who is carrying the season. */
-.rvclub__list {
-  list-style: none;
-  margin: var(--space-3) 0 0;
-  padding: 0;
-}
-
-.rvclub__row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1h) 0;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-
-.rvclub__row:first-child {
-  border-top: 0;
-}
-
-.rvclub__seat {
-  flex: none;
-  min-width: 1.6em;
-  font-family: var(--font-mono);
-  font-size: var(--fs-compact);
-  color: var(--text-caption);
-}
-
-.rvclub__name {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: var(--fs-small);
-}
-
-.rvclub__pos {
-  flex: none;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
-.rvclub__value {
-  flex: none;
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-md);
-  font-variant-numeric: tabular-nums;
 }
 
 /* ---- the four single-skill boards -------------------------- */

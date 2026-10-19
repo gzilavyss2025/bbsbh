@@ -116,7 +116,10 @@ export function splitScale(entries) {
   return { pos, neg }
 }
 
-export function RunValueSplit({ entry, scale }) {
+// The segments one entry draws on a track of `scale`: where zero sits, as a percentage across the
+// track, and each part's offset from zero and width. The split bar and the club card's mini bars
+// (#2295) both draw from this, so the clamping lives in one place.
+export function splitSegments(entry, scale) {
   const pos = scale?.pos ?? 0
   const neg = scale?.neg ?? 0
   const span = pos + neg
@@ -142,30 +145,69 @@ export function RunValueSplit({ entry, scale }) {
     else left += width
     segs.push({ key: c.key, positive: v >= 0, offset, width })
   }
+  return { zero, segs }
+}
+
+// The track alone. `selected` (a COMPONENTS key) marks that part's segments on and dims the rest;
+// the colours are 75-run-value.css's. `mini` is the club card's 8px row bar, and `flip` tags its
+// segments for that card's re-rank slide (ranks/runvalue/flip.js).
+export function RunValueTrack({ entry, scale, selected = null, mini = false, flip }) {
+  const { zero, segs } = splitSegments(entry, scale)
+  const pick = (key) => (selected == null ? '' : selected === key ? ' rvsplit__seg--on' : ' rvsplit__seg--off')
+  return (
+    <div className={`rvsplit__track${mini ? ' rvsplit__track--mini' : ''}`} aria-hidden="true" style={{ '--zero': `${zero}%` }}>
+      <span className="rvsplit__zero" style={{ left: `${zero}%` }} />
+      {segs.map((s) => (
+        <span
+          key={s.key}
+          data-flip={flip ? `seg:${flip}:${s.key}` : undefined}
+          className={`rvsplit__seg rvsplit__seg--${s.key} rvsplit__seg--${s.positive ? 'up' : 'down'}${pick(s.key)}`}
+          style={
+            s.positive
+              ? { left: `calc(${zero}% + ${s.offset}%)`, width: `${s.width}%` }
+              : { right: `calc(${100 - zero}% + ${s.offset}%)`, width: `${s.width}%` }
+          }
+        />
+      ))}
+    </div>
+  )
+}
+
+// With `onSelect` the legend is four toggle buttons (the club card, #2295): a tap picks a part, a
+// second tap on it hands back null, and `hint` is the line between the bar and the buttons. Without
+// it the legend is the plain list the report board and the player card draw.
+export function RunValueSplit({ entry, scale, selected = null, onSelect, hint }) {
   return (
     <div className="rvsplit">
-      <div className="rvsplit__track" aria-hidden="true">
-        <span className="rvsplit__zero" style={{ left: `${zero}%` }} />
-        {segs.map((s) => (
-          <span
-            key={s.key}
-            className={`rvsplit__seg rvsplit__seg--${s.key} rvsplit__seg--${s.positive ? 'up' : 'down'}`}
-            style={
-              s.positive
-                ? { left: `calc(${zero}% + ${s.offset}%)`, width: `${s.width}%` }
-                : { right: `calc(${100 - zero}% + ${s.offset}%)`, width: `${s.width}%` }
-            }
-          />
-        ))}
-      </div>
-      <dl className="rvsplit__legend">
-        {COMPONENTS.map((c) => (
-          <div key={c.key} className={`rvsplit__item rvsplit__item--${c.key}`}>
-            <dt>{c.label}</dt>
-            <dd className={`rv__num--${tone(entry?.[c.key])}`}>{signed(entry?.[c.key])}</dd>
-          </div>
-        ))}
-      </dl>
+      <RunValueTrack entry={entry} scale={scale} selected={selected} />
+      {onSelect && hint ? <p className="rvsplit__hint">{hint}</p> : null}
+      {onSelect ? (
+        <div className="rvsplit__parts" role="group" aria-label="Rank the club by one part">
+          {COMPONENTS.map((c) => (
+            <button
+              key={c.key}
+              type="button"
+              className={`rvsplit__part rvsplit__part--${c.key}`}
+              aria-pressed={selected === c.key}
+              aria-label={`${c.label} ${signed(entry?.[c.key])}`}
+              onClick={() => onSelect(selected === c.key ? null : c.key)}
+            >
+              <span className="rvsplit__swatch" aria-hidden="true" />
+              <span className="rvsplit__partname">{c.label}</span>
+              <span className={`rvsplit__partvalue rv__num--${tone(entry?.[c.key])}`}>{signed(entry?.[c.key])}</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <dl className="rvsplit__legend">
+          {COMPONENTS.map((c) => (
+            <div key={c.key} className={`rvsplit__item rvsplit__item--${c.key}`}>
+              <dt>{c.label}</dt>
+              <dd className={`rv__num--${tone(entry?.[c.key])}`}>{signed(entry?.[c.key])}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </div>
   )
 }
