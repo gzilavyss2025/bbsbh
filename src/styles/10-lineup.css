@@ -436,6 +436,24 @@ button.starter__careervs {
   height: 100%;
 }
 
+.defdiamond__field--park {
+  aspect-ratio: 620 / 510;
+  max-width: none;
+  overflow: hidden;
+  background: var(--bg-canvas);
+}
+.defdiamond__park {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+}
+/* On the park drawing a spot is centred on its coordinates, not hung below them. */
+.defdiamond__spot--park {
+  transform: translate(-50%, -50%);
+}
+
 .defdiamond__spot {
   position: absolute;
   transform: translateX(-50%);

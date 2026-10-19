@@ -14,6 +14,7 @@ import { Card } from '../ui/frame/Card.jsx'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
 import { StruckLine } from '../scoring/StruckLine.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
+import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 
 // The fielding team's defensive alignment ENTERING this half, drawn as the
 // scorebook diamond and captioned with the fielding side. Shows the state at
@@ -55,6 +56,10 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
   const [open, setOpen] = useState(true)
   const defense = defenseEntering(feed, fieldingSide, inning, half, revealedThrough)
   if (!defense || defense.length === 0) return null
+  // The park the game is played in, as it stood that day. Static geometry, no score. A venue
+  // with no layout on file keeps the generic field.
+  const venue = feed?.gameData?.venue
+  const layout = resolveBallparkLayout({ venueId: venue?.id, venueName: venue?.name, gameDate: feed?.gameData?.datetime?.officialDate })
   // The same curated bar/accent/text triad TeamInfo.jsx and BoxScore.jsx's own
   // .bs__defensecard already wear (headerTheme.js, ADR-0030) — this card is
   // the innings view's copy of that exact markup, so it reads for free off
@@ -92,7 +97,7 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
           </span>
         </button>
       )}
-      {(bare || open) && <DefenseDiamond defense={defense} />}
+      {(bare || open) && <DefenseDiamond defense={defense} layout={layout} label={`${venue?.name ?? 'Ballpark'} with the defense`} />}
     </Card>
   )
 })

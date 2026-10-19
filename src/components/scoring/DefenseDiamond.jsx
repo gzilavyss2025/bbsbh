@@ -4,6 +4,8 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { StruckLine } from './StruckLine.jsx'
 import { FieldBackdrop } from './field/FieldBackdrop.jsx'
+import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
+import { PLOT_VIEWBOX, plotPercent } from '../../lib/ballpark/ballparkGeometry.js'
 
 // A grass-and-clay field with each fielder's surname at his position.
 // Position names remain available to assistive technology. Fielders only —
@@ -35,6 +37,21 @@ const SPOTS = {
   C: { x: 50, y: 88, label: 'Catcher' },
 }
 
+// The same spots on the park's own drawing, in feet off home plate (1:1 with the SVG units of
+// lib/ballpark/ballparkGeometry.js). Used when a `layout` is passed: the fielders then stand
+// where they stand in the park the game is played in. Close to lineup/next's FieldCard, with the
+// corners and the catcher pulled in so a label never clips at the card's edge or covers a sign.
+const PARK_SPOTS = {
+  LF: { x: 156, y: 238 },
+  CF: { x: 310, y: 168 },
+  RF: { x: 464, y: 238 },
+  SS: { x: 222, y: 338 },
+  '2B': { x: 398, y: 338 },
+  '3B': { x: 188, y: 446 },
+  '1B': { x: 432, y: 446 },
+  C: { x: 310, y: 522 },
+}
+
 // Normalize either input shape to a { position -> [{ last, inning, replaced }] }
 // stack. The simple lineup form becomes a single, un-struck entry.
 //
@@ -60,7 +77,9 @@ function toStacks(defense) {
   return byPos
 }
 
-export function DefenseDiamond({ defense }) {
+// `layout` (optional) is one resolved park (lib/ballpark/layout/resolveLayout.js). With it the
+// fielders are drawn on that park's real outline; without it, the generic field above.
+export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with the defense' }) {
   const byPos = toStacks(defense)
   const hasFielder = Object.keys(SPOTS).some((pos) => byPos[pos])
   if (!hasFielder) return null
@@ -71,13 +90,23 @@ export function DefenseDiamond({ defense }) {
   // it is safe inside the box score's reveal render.
   return (
     <Card as="div" body="flush" className="defdiamond">
-      <div className="defdiamond__field">
-        <FieldBackdrop className="defdiamond__lines" />
+      {layout ? (
+        <div className="defdiamond__field defdiamond__field--park">
+          <BallparkDiagram layout={layout} viewBox={PLOT_VIEWBOX} className="defdiamond__park" label={label} />
+          {Object.entries(PARK_SPOTS).map(([pos, xy]) => {
+            const { left, top } = plotPercent(xy)
+            return <DefenseSpot key={pos} stack={byPos[pos]} spot={{ x: left, y: top, label: SPOTS[pos].label }} park />
+          })}
+        </div>
+      ) : (
+        <div className="defdiamond__field">
+          <FieldBackdrop className="defdiamond__lines" />
 
-        {Object.entries(SPOTS).map(([pos, spot]) => (
-          <DefenseSpot key={pos} stack={byPos[pos]} spot={spot} />
-        ))}
-      </div>
+          {Object.entries(SPOTS).map(([pos, spot]) => (
+            <DefenseSpot key={pos} stack={byPos[pos]} spot={spot} />
+          ))}
+        </div>
+      )}
 
       {byPos.DH && (
         <p className="defdiamond__dh">
@@ -95,10 +124,10 @@ export function DefenseDiamond({ defense }) {
 
 // One fielder's spot: the substitution stack (reliever above, replaced starter
 // struck through below). An unposted spot keeps its blank label.
-function DefenseSpot({ stack, spot }) {
+function DefenseSpot({ stack, spot, park = false }) {
   return (
     <span
-      className="defdiamond__spot"
+      className={`defdiamond__spot${park ? ' defdiamond__spot--park' : ''}`}
       style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
       role="group"
       aria-label={spot.label}
