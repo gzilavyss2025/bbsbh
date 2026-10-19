@@ -19,6 +19,13 @@
 // Park fit draws Milwaukee's field (Stats API venue id), so a game day shows it only there.
 export const MILWAUKEE_VENUE_ID = 32
 
+// The two Series clubs in the order Tale of the tape draws them (away, home). Every card follows it.
+// `sides` that do not name exactly the two clubs fall back to `clubIds`.
+export function clubOrder(clubIds, sides) {
+  const ok = Array.isArray(sides) && sides.length === 2 && sides.every((id) => clubIds.includes(id)) && sides[0] !== sides[1]
+  return ok ? sides : clubIds
+}
+
 const CARDS = [
   { id: 'nine-keys', label: 'Nine keys', rank: { off: 1 }, has: (i) => Boolean(i.nineKeys) },
   { id: 'glove-legs', label: 'Glove and legs', rank: { off: 2, game: 7 }, has: (i) => Boolean(i.gloveLegs) },

@@ -580,3 +580,7 @@
 .ww-scout__card {
   scroll-margin-top: var(--ww-scout-offset, 0px);
 }
+/* The Film room rail needs the whole row: one grid cell squeezes its three cards. */
+.ww-scout__card--wide {
+  grid-column: 1 / -1;
+}

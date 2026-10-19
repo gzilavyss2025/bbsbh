@@ -153,6 +153,12 @@
   gap: var(--space-1) var(--space-4);
 }
 
+.ww-film__doors .door {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+}
+
 @media (min-width: 740px) {
   /* layout-exempt: a fixed three across from 740px */
   .ww-film__list--rail {

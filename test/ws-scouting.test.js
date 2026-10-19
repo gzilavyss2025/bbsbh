@@ -2,7 +2,7 @@
 // in what order, and which are dropped for want of data.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { scoutingModel } from '../src/lib/postseason/worldseries/scouting/scouting.js'
+import { clubOrder, scoutingModel } from '../src/lib/postseason/worldseries/scouting/scouting.js'
 
 const FULL = { nineKeys: true, edges: [{ id: 1 }], plateUmpire: { id: 9, name: 'A. Ump' } }
 const ids = (m) => m.map((c) => c.id)
@@ -39,4 +39,14 @@ test('the model has one shape whatever the opponent', () => {
   const b = scoutingModel({ dayType: 'off', ...FULL, clubIds: [158, 114] })
   assert.deepEqual(a, b)
   assert.deepEqual(Object.keys(a[0]).sort(), ['id', 'label'])
+})
+
+test('every card draws the clubs in the order of the sides (away, home)', () => {
+  assert.deepEqual(clubOrder([158, 139], [139, 158]), [139, 158])
+  assert.deepEqual(clubOrder([158, 139], [158, 139]), [158, 139])
+})
+
+test('sides that do not name the two Series clubs fall back to clubIds', () => {
+  assert.deepEqual(clubOrder([158, 139], [158, 999]), [158, 139])
+  assert.deepEqual(clubOrder([158, 139], undefined), [158, 139])
 })

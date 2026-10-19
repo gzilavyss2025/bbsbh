@@ -13,7 +13,7 @@ import { matchupEdges } from '../../lib/postseason/primer/matchupEdges.js'
 import { gloveLegsModel } from '../../lib/postseason/worldseries/scouting/gloveLegs.js'
 import { parkFitModel } from '../../lib/postseason/worldseries/scouting/parkFit.js'
 import { platoonModel } from '../../lib/postseason/worldseries/scouting/platoon.js'
-import { MILWAUKEE_VENUE_ID, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
+import { MILWAUKEE_VENUE_ID, clubOrder, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
 import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { HubTabBar } from '../chrome/HubTabBar.jsx'
@@ -36,7 +36,7 @@ import { Stack } from '../ui/layout/Stack.jsx'
 // read is an open surface (ADR-0034); nothing here reads today's game.
 //
 //   clubIds       the two Series clubs
-//   sides         [away, home] of the focus game, the order Tale of the tape draws (default: clubIds)
+//   sides         [away, home] of the focus game, the order Tale of the tape draws and every card follows (default: clubIds)
 //   slateDate     YYYY-MM-DD
 //   dayType       'off' | 'game' (mode.js)
 //   gamePk        the game the edges read: the home's focus game (today's on a game day,
@@ -45,7 +45,7 @@ import { Stack } from '../ui/layout/Stack.jsx'
 //   game          the focus game's upcoming row (api/postseason/upcoming.js): venue and probables, or null
 // Adding a card: one entry in scouting.js, one here.
 const CARD = {
-  'nine-keys': ({ nineKeys, clubIds, season }) => <SeriesNineKeys data={nineKeys} clubs={clubIds.map((id) => ({ id }))} season={season} />,
+  'nine-keys': ({ nineKeys, sides, season }) => <SeriesNineKeys data={nineKeys} clubs={sides.map((id) => ({ id }))} season={season} />,
   'glove-legs': ({ gloveLegs, sides }) => <GloveLegs rows={gloveLegs} clubIds={sides} />,
   'matchup-edges': ({ edges }) => <MatchupEdges edges={edges} variant="faceoff" />,
   'film-room': ({ meetings, dayType, noteClub }) => <FilmRoom meetings={meetings} compact={dayType === 'game'} clubId={noteClub} />,
@@ -57,7 +57,7 @@ const CARD = {
   'umpire-edge': ({ plateUmpire, umpire }) => <UmpireEdge name={plateUmpire.name} lean={umpire?.lean ?? null} />,
 }
 
-export function ScoutingReport({ clubIds, sides = clubIds, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null }) {
+export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null }) {
   const season = Number(slateDate.slice(0, 4))
   const { data: nineKeys } = useAsync(() => loadNineKeys(), [])
   const { data: career } = useAsync(() => loadCareerMatchups(), [])
@@ -66,6 +66,8 @@ export function ScoutingReport({ clubIds, sides = clubIds, slateDate, dayType, g
     [plateUmpire?.id, season],
   )
   const [clubA, clubB] = clubIds
+  // Every card draws the clubs away then home, the Tale of the tape order.
+  const sides = clubOrder(clubIds, sidesProp)
   const { favoriteTeamId } = useFavoriteTeam()
   // Past regular-season meetings, cut off the day before the slate date (api/postseason/meetings.js).
   const { data: meetings } = useAsync((signal) => fetchMeetings({ clubA, clubB, slateDate }, { signal }), [clubA, clubB, slateDate])
@@ -76,10 +78,10 @@ export function ScoutingReport({ clubIds, sides = clubIds, slateDate, dayType, g
     [gamePk, noteClub, clubA, clubB, slateDate],
   )
   const edges = useMemo(
-    () => matchupEdges([clubA, clubB].map((id) => starterMatchupsFor(career, gamePk, id))),
-    [career, gamePk, clubA, clubB],
+    () => matchupEdges(sides.map((id) => starterMatchupsFor(career, gamePk, id))),
+    [career, gamePk, sides[0], sides[1]],
   )
-  const hasNineKeys = Boolean(nineKeysTeams(nineKeys, clubIds.map((id) => ({ id })), season))
+  const hasNineKeys = Boolean(nineKeysTeams(nineKeys, sides.map((id) => ({ id })), season))
   const { data: defense } = useAsync(() => loadClubDefenseRunning(), [])
   const gloveLegs = useMemo(() => gloveLegsModel(defense, { clubA: sides[0], clubB: sides[1] }), [defense, sides[0], sides[1]])
   // Platoon: regular-season OPS by pitcher hand; the tint follows the focus game's probables.
@@ -133,7 +135,7 @@ export function ScoutingReport({ clubIds, sides = clubIds, slateDate, dayType, g
       />
       <Grid min={340} gap="loose">
         {cards.map((c) => (
-          <div key={c.id} id={`ww-scout-${c.id}`} className="ww-scout__card">
+          <div key={c.id} id={`ww-scout-${c.id}`} className={c.id === 'film-room' ? 'ww-scout__card ww-scout__card--wide' : 'ww-scout__card'}>
             {CARD[c.id](ctx)}
           </div>
         ))}

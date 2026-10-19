@@ -11,7 +11,7 @@ import { Table } from '../../../ui/table/Table.jsx'
 export function ParkFit({ model, layout, clubIds }) {
   const names = clubIds.map((id) => teamClubNameShort(id))
   return (
-    <Card frame="stamped" label="Park fit" count={layout.name} className="ww-fit">
+    <Card frame="stamped" label="Park fit" labelAs="h3" count={layout.name} className="ww-fit">
       <BallparkDiagram layout={layout} className="ww-fit__field" label={`${layout.name} field, walls and distances`} />
       <Table frame="bare" className="ww-fit__table">
         <caption className="sr-only">Share of fly balls by direction</caption>
