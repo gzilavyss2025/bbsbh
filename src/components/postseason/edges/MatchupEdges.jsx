@@ -1,4 +1,5 @@
 import { pillSolidStyle } from '../../../lib/design/pillClass.js'
+import { Headshot } from '../../player/Headshot.jsx'
 import { PlayerLink } from '../../player/PlayerLink.jsx'
 import { Pill } from '../../ui/control/Pill.jsx'
 import { EdgeCard } from './EdgeCard.jsx'
@@ -17,8 +18,42 @@ const KIND = {
   pitcher: { word: 'Pitcher', style: pillSolidStyle({ ground: 'var(--clay-soft)', text: 'var(--clay-deep)' }) },
 }
 
-export function MatchupEdges({ edges }) {
+// One face-off side: photo, name, role pill. `flip` mirrors it for side B. The
+// whole side is one PlayerLink; with no id the Headshot draws its monogram.
+function Side({ id, name, kind, flip }) {
+  return (
+    <PlayerLink id={id} name={name} className={`seriesedges__side${flip ? ' seriesedges__side--b' : ''}`}>
+      <Headshot personId={id} name={name} className="seriesedges__shot" />
+      <span className="seriesedges__who2">
+        <span className="seriesedges__sidename">{name}</span>
+        <Pill fill="solid" style={KIND[kind].style}>
+          {KIND[kind].word}
+        </Pill>
+      </span>
+    </PlayerLink>
+  )
+}
+
+// variant "faceoff": both players per row (photo, name, role), the career line
+// under them. The default keeps the one-line row.
+export function MatchupEdges({ edges, variant }) {
   if (!edges?.length) return null
+  if (variant === 'faceoff') {
+    return (
+      <EdgeCard title="Matchup edges" note="Career vs today's starters" className="seriesedges__matchups">
+        <ul className="seriesedges__rows">
+          {edges.map((e) => (
+            <li key={e.id} className="seriesedges__row seriesedges__row--faceoff">
+              <Side id={e.id} name={e.name} kind={e.kind} />
+              <span className="seriesedges__vs">vs</span>
+              <Side id={e.vsId} name={e.vs} kind={e.kind === 'hitter' ? 'pitcher' : 'hitter'} flip />
+              <span className="seriesedges__line">{e.line}</span>
+            </li>
+          ))}
+        </ul>
+      </EdgeCard>
+    )
+  }
   return (
     <EdgeCard title="Matchup edges" note="Career vs today's starters" className="seriesedges__matchups">
       <ul className="seriesedges__rows">

@@ -50,6 +50,14 @@ test('no total bases, so no OPS: the line is "3-for-8, 1 HR · 9 PA"', () => {
   assert.equal(e.vs, 'Jack Flaherty')
 })
 
+test('an edge carries the opponent starter id as vsId, or null when the file has none', () => {
+  const [a] = matchupEdges([{ pitcher: { id: 641154, name: 'Jack Flaherty' }, batters: [row(1, 'Jesse Winker', 8, 3, 1, 9)] }])
+  assert.equal(a.vsId, 641154)
+  assert.deepEqual([a.kind, a.id, a.name, a.vs], ['hitter', 1, 'Jesse Winker', 'Jack Flaherty'])
+  const [b] = matchupEdges([{ pitcher: { name: 'Jack Flaherty' }, batters: [row(1, 'Jesse Winker', 8, 3, 1, 9)] }])
+  assert.equal(b.vsId, null)
+})
+
 test('wpSpark: one point per value, home chance up, flipped for the away club', () => {
   const home = wpSpark([50, 100, 0], { flip: false, w: 100, h: 20 })
   assert.equal(home.line, '0.0,10.0 50.0,0.0 100.0,20.0')
