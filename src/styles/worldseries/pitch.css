@@ -1,0 +1,77 @@
+/* ---------- pitch by pitch (scouting report, #2316) ---------- */
+
+/* layout-exempt: a link holding a photo and two lines; Cluster cannot render an anchor */
+.ww-pitch__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-4);
+  color: inherit;
+  text-decoration: none;
+}
+
+.ww-pitch__head .ww-pitch__shot {
+  flex: none;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+}
+
+/* layout-exempt: two stacked lines in a link */
+.ww-pitch__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ww-pitch__name {
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+}
+
+.ww-pitch__meta,
+.ww-pitch__cap,
+.ww-pitch__even {
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+.ww-pitch__cap {
+  caption-side: bottom;
+  text-align: left;
+  padding: var(--space-2) var(--space-4);
+}
+
+.ww-pitch__table td,
+.ww-pitch__table th {
+  font-variant-numeric: tabular-nums;
+}
+
+.ww-pitch__table th:first-child {
+  text-align: left;
+}
+
+.ww-pitch__pitch {
+  white-space: nowrap;
+}
+
+.ww-pitch__pitch svg {
+  margin-right: var(--space-2);
+  vertical-align: middle;
+}
+
+/* the share bar: a ruled track with an ink fill */
+.ww-pitch__bar {
+  display: inline-block;
+  width: 36px;
+  height: 6px;
+  margin-right: var(--space-2);
+  vertical-align: middle;
+  background: linear-gradient(to right, var(--text-heading) var(--uses, 0%), var(--surface-stamped-tint) var(--uses, 0%));
+}
+
+.ww-pitch__door {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  text-align: right;
+}

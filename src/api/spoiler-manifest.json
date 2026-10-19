@@ -1031,6 +1031,10 @@
       "class": "spoiler-free",
       "why": "The Matchup Scout's hitter-grid reader: a hitter's season sums per pitch type, pitcher hand and 5x5 cell (pitches, swings, whiffs, PA-ending pitches, the xwOBA (est.) numerator), over games already final, built by the nightly sweep before the day's games. A cell count is not a line and not a running score; same footing as commandMap.js. The Scout is an open surface (ADR-0034), so no SealBox and no cutoff."
     },
+    "scout/pitchByPitch.js": {
+      "class": "cutoff-gated",
+      "why": "The World Series Pitch by pitch card's reads (#2316): the starter named on the schedule, his season arsenal, the other club's hitter-grid and league sums (all over Final games, built before the day's games), and the club's postseason hitting splits, which end the day before the slate date in the request (fetchHotBatSplits). No score, line or result of a game on or after the slate date is read. An open surface (ADR-0034), so no SealBox."
+    },
     "search.js": {
       "class": "spoiler-free",
       "why": "The player/team directory search. Identity fields only."

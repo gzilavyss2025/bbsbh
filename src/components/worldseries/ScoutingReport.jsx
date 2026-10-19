@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadCareerMatchups, starterMatchupsFor } from '../../api/careerMatchups.js'
 import { loadNineKeys } from '../../api/nineKeys.js'
+import { loadPitchByPitch } from '../../api/scout/pitchByPitch.js'
 import { fetchMeetings } from '../../api/postseason/meetings.js'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -14,6 +15,7 @@ import { MatchupEdges } from '../postseason/edges/MatchupEdges.jsx'
 import { UmpireEdge } from '../postseason/edges/UmpireEdge.jsx'
 import { SeriesNineKeys } from '../postseason/SeriesNineKeys.jsx'
 import { FilmRoom } from './cards/FilmRoom.jsx'
+import { PitchByPitch } from './cards/PitchByPitch.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Grid } from '../ui/layout/Grid.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
@@ -35,10 +37,13 @@ const CARD = {
   'nine-keys': ({ nineKeys, clubIds, season }) => <SeriesNineKeys data={nineKeys} clubs={clubIds.map((id) => ({ id }))} season={season} />,
   'matchup-edges': ({ edges }) => <MatchupEdges edges={edges} variant="faceoff" />,
   'film-room': ({ meetings, dayType, noteClub }) => <FilmRoom meetings={meetings} compact={dayType === 'game'} clubId={noteClub} />,
+  'pitch-by-pitch': ({ pitchByPitch, noteClub, clubIds, gameNumber }) => (
+    <PitchByPitch data={pitchByPitch} clubId={noteClub} oppId={clubIds.find((id) => id !== noteClub)} gameNumber={gameNumber} />
+  ),
   'umpire-edge': ({ plateUmpire, umpire }) => <UmpireEdge name={plateUmpire.name} lean={umpire?.lean ?? null} />,
 }
 
-export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, plateUmpire = null }) {
+export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null }) {
   const season = Number(slateDate.slice(0, 4))
   const { data: nineKeys } = useAsync(() => loadNineKeys(), [])
   const { data: career } = useAsync(() => loadCareerMatchups(), [])
@@ -50,12 +55,18 @@ export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, plateUmpir
   const { favoriteTeamId } = useFavoriteTeam()
   // Past regular-season meetings, cut off the day before the slate date (api/postseason/meetings.js).
   const { data: meetings } = useAsync((signal) => fetchMeetings({ clubA, clubB, slateDate }, { signal }), [clubA, clubB, slateDate])
+  // The starter of the favorite club (the Brewers by default) against the other club's regulars.
+  const noteClub = clubIds.includes(favoriteTeamId) ? favoriteTeamId : clubA
+  const { data: pitchByPitch } = useAsync(
+    () => (gamePk ? loadPitchByPitch({ clubId: noteClub, oppId: clubIds.find((id) => id !== noteClub), gamePk, slateDate }) : null),
+    [gamePk, noteClub, clubA, clubB, slateDate],
+  )
   const edges = useMemo(
     () => matchupEdges([clubA, clubB].map((id) => starterMatchupsFor(career, gamePk, id))),
     [career, gamePk, clubA, clubB],
   )
   const hasNineKeys = Boolean(nineKeysTeams(nineKeys, clubIds.map((id) => ({ id })), season))
-  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, edges, plateUmpire, meetings })
+  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, edges, pitchByPitch, plateUmpire, meetings })
   // The sticky chrome over a card: the slate's own bar (the probe reads --slate-bar-h) plus this
   // jump bar. One measured number feeds the bar's scroll offset and each card's scroll-margin.
   const rootRef = useRef(null)
@@ -73,7 +84,7 @@ export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, plateUmpir
     return () => ro.disconnect()
   }, [shown])
   if (!shown) return null
-  const ctx = { noteClub: clubIds.includes(favoriteTeamId) ? favoriteTeamId : clubA, dayType, meetings, nineKeys, clubIds, season, edges, plateUmpire, umpire }
+  const ctx = { noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, clubIds, season, edges, plateUmpire, umpire }
   const names = clubIds.map((id) => teamClubNameShort(id)).filter(Boolean).join(' and ')
   return (
     <Stack gap="loose" className="ww-scout" ref={rootRef} style={{ '--ww-scout-offset': `${offset}px` }}>
