@@ -1,4 +1,4 @@
-// A club's schedule carries its postseason games (MLB only), each row tagged with its
+// A club's schedule carries its postseason games (MLB and the four full-season MiLB levels), each row tagged with its
 // game type. A caller that counts against a regular-season ledger filters on 'R' itself,
 // or passes `{ regularSeasonOnly: true }`.
 //
@@ -59,9 +59,25 @@ test('the default asks for every round and keeps each row’s game type', () =>
     },
   ))
 
-test('a minor-league club never asks for postseason rounds', () =>
+test('a minor-league club asks for postseason rounds too (Double-A Biloxi, 2026: L and W)', () =>
+  withSchedule(
+    [row(1, '2026-09-10', 'R', { final: true }), row(2, '2026-09-15', 'L', { final: true }), row(3, '2026-09-20', 'W', { final: true })],
+    async (calls) => {
+      const games = await fetchTeamSchedule(5015, 2026, 12)
+      assert.match(calls[0], /gameType=R,L,W&/)
+      assert.deepEqual(games.map((g) => [g.gameType, g.round]), [['R', ''], ['L', 'DS'], ['W', 'CS']])
+    },
+  ))
+
+test('an MLB postseason row keeps the MLB round name', () =>
+  withSchedule([row(2, '2026-10-03', 'L', { final: true }), row(3, '2026-10-20', 'W')], async () => {
+    const games = await fetchTeamSchedule(158, 2026, 1, '2026-10-21')
+    assert.deepEqual(games.map((g) => g.round), ['LCS', 'WS'])
+  }))
+
+test('a winter-league club still asks for the regular season only', () =>
   withSchedule([], async (calls) => {
-    await fetchTeamSchedule(250, 2026, 11)
+    await fetchTeamSchedule(1, 2026, 17)
     assert.match(calls[0], /gameType=R&/)
   }))
 

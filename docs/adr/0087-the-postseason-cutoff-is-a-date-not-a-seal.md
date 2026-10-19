@@ -224,3 +224,10 @@ reads a pass, and the home slate passes no `live` option to the bracket. The Wor
 Series home's seal on today's game is gone too; its hero and ledger show no score
 slot for today at all. The data layer's `{ live }` option stays, inert and false,
 as a follow-up to delete.
+
+## Addendum (2026-10-19): the club schedule holds MiLB rounds
+
+`fetchTeamSchedule` asks for postseason rounds at the four full-season minor-league levels
+(sportId 11-14) as well as MLB: `R,L,W` there, because the feeds hold no `F` or `D` (Triple-A
+holds `W` only). Rows carry a `round` name, DS and CS at MiLB. The date cutoff above applies
+unchanged. The postseason ledger files and `postseasonDoor` stay MLB only.
