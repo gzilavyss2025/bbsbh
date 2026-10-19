@@ -17,8 +17,7 @@
    floor": the region prints its count and no value.
 
    MOTION, at the end of this file, is one moment per tap: a pill tap tweens
-   the fills and inks in the figures that changed; a View tap turns the two
-   maps over, because the mirror IS the other side of the same card. Nothing
+   the fills and inks in the figures that changed; Nothing
    plays on a cold load, and nothing plays under prefers-reduced-motion.
    ============================================================ */
 
@@ -497,27 +496,10 @@ svg.scout__swatch {
   .scout__answervalue {
     animation: scout-ink var(--dur-med) var(--ease-out);
   }
-
-  /* A View tap turns the maps over. The maps remount with the new view
-     drawn, start turned 180° about their vertical axis (which IS the old
-     view's picture) and turn to face the reader. The flip tokens are the
-     FlipCard's. Keyed on the tap count, so a cold load never turns. */
-  .scout__board {
-    perspective: 1200px;
-  }
-  .scout__maps.is-turning {
-    animation: scout-turn var(--dur-flip) var(--ease-flip);
-  }
 }
 @keyframes scout-ink {
   from { opacity: 0.25; }
   to { opacity: 1; }
-}
-/* A half turn: the maps start edge-on and turn in already showing the new
-   view, so no mirrored digit is ever drawn (Gary, item 10). */
-@keyframes scout-turn {
-  from { transform: rotateY(-90deg); }
-  to { transform: none; }
 }
 
 /* The pair-failed Notice: the 12px the old .hint padding gave. */
