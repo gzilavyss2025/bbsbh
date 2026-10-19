@@ -504,7 +504,7 @@ const SCHEDULE_FIELDS = `${GAME_CARDS_FIELDS},lineups,awayPlayers,homePlayers,of
 const HEAD_TO_HEAD_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 const TEAM_SCHEDULE_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,gameType,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner,score,linescore,currentInning,scheduledInnings'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,gameType,doubleHeader,dayNight,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner,score,linescore,currentInning,scheduledInnings'
 
 // Every regular-season meeting between two clubs in one season, for the
 // footer's "find a past matchup" search. The schedule endpoint has no
@@ -692,6 +692,8 @@ export async function fetchTeamSchedule(
         gameType: g.gameType ?? 'R',
         round: roundNameAt(g.gameType, sportId),
         doubleHeader: g.doubleHeader ?? 'N',
+        // 'day' or 'night', the schedule's own field. No score in it, so the cutoff leaves it alone.
+        dayNight: g.dayNight ?? '',
         isHome,
         away: { abbreviation: teamAbbr(away) },
         home: { abbreviation: teamAbbr(home) },

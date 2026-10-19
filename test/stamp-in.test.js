@@ -194,7 +194,7 @@ test('the team page does not grow a band for it', () => {
   assert.ok(!src.includes('stamp-in'), 'Stamp In is a standalone page, not a band of the team page')
 })
 
-test('SeasonSchedule is the only file that links to the page', () => {
+test('SeasonGrid is the only file that links to the page', () => {
   // teamStampInPath is the one path builder for this route, so counting its
   // call sites counts the doors. Exactly two files may name it: the builder's
   // own home, and the single caller.
@@ -203,7 +203,7 @@ test('SeasonSchedule is the only file that links to the page', () => {
     .filter((file) => readFileSync(file, 'utf8').includes('teamStampInPath'))
     .map((file) => file.slice(src.length + 1).replace(/\\/g, '/'))
     .sort()
-  assert.deepEqual(named, ['lib/route.js', 'screens/team/modules/SeasonSchedule.jsx'])
+  assert.deepEqual(named, ['lib/route.js', 'screens/team/next/games/SeasonGrid.jsx'])
 })
 
 test('the page is not in the site menu, the footers, or the report list', () => {

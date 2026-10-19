@@ -71,25 +71,6 @@ const ALLOWLIST = {
   // The cover, its copy, the tear.
   '12-sealbox.css': ['.sealbox.cover', '.sealtear__face', '.cover__main'],
 
-  // The Last 10 Games home-game ticket, and the same home/away convention on
-  // the season strip. Finding 9's must-survive list — the hatched win-loss
-  // stamps are printed ON this kraft. contrastPairings.js pins the pair.
-  '29-team-transactions.css': [
-    '.last10__card--home .last10__stub',
-    '.last10__card--home .last10__foot',
-    '.last10__card--home .last10__cap',
-    '.last10__card--home .last10__daynum',
-    '.last10__card--home .last10__score',
-    '.last10__card--home .last10__score--final',
-    '.last10__card--home .last10__sep',
-    '.last10__card--home .last10__meta',
-    '.last10__card--home:hover .last10__stub',
-    '.last10__card--home:hover .last10__foot',
-    '.sstrip__cell--home',
-    '.sstrip__cell--home.sstrip__cell--win',
-    '.sstrip__cell--home.sstrip__cell--loss',
-  ],
-
   // Controls that lift a seal.
   '30-standings.css': ['.standings-reveal'],
   '31-wild-card.css': ['.duepill'],

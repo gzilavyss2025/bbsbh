@@ -147,8 +147,8 @@
     "grid": 1
   },
   "src/styles/29-team-transactions.css": {
-    "column": 4,
-    "wrap": 2,
+    "column": 1,
+    "wrap": 1,
     "grid": 1
   },
   "src/styles/30-standings.css": {
