@@ -27,15 +27,15 @@ export function simFlight(ev, la, lift, h0 = 3) {
   return { dist: x, T: t, pts }
 }
 
-// The model of one ball: T (s), sf (share of the ground covered) and sz (height, ft) at
-// K + 1 even steps, and ms (the flight on screen). A ball in the air with a speed, an
-// angle and a distance is fitted: the lift is bisected until the sim lands at the
-// distance. Anything else hops along the ground. `chord` is home to the landing point
-// in diagram feet, the stand-in for a missing distance.
 // True for a ball the model flies through the air: a lift of 8 degrees or more, with a speed and a
 // distance. Anything else hops, and the panel's in-flight label reads the same predicate.
 export const isAirFlight = (ball) => ball.launchAngle != null && ball.launchAngle >= 8 && ball.exitVelo != null && Boolean(ball.distance)
 
+// The model of one ball: T (s), sf (share of the ground covered) and sz (height, ft) at
+// K + 1 even steps, and ms (the flight on screen). A ball in the air with a speed, an
+// angle and a distance is fitted: the lift is bisected until the sim lands at the
+// distance. Anything else hops along the ground. `chord` is home to the landing point
+// in diagram feet, the stand-in for a missing distance. `h0` is the start height in ft (3 = today's fixed value).
 export function flightModel(ball, chord, h0 = 3) {
   const ev = ball.exitVelo, la = ball.launchAngle, dist = ball.distance || chord
   const sf = [], sz = []
@@ -75,4 +75,3 @@ export function flightModel(ball, chord, h0 = 3) {
   }
   return { T, sf, sz, ms: Math.max(700, Math.min(2800, T * 500)) }
 }
-
