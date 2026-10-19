@@ -1,0 +1,24 @@
+/* GLOVE AND LEGS (#2316). The rows reuse the Tale of the tape mirror (.ww-tape__*, home.css);
+   this sheet adds the group heads and the leader mark. The leader mark is --marker, never
+   bold and never --seal (ADR-0083). */
+.ww-glove__group {
+  padding: var(--space-2) 0 var(--space-1);
+  border-top: 1px solid var(--border-hairline);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+.ww-glove__group:first-child {
+  border-top: 0;
+}
+
+.ww-glove .ww-tape__val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.ww-glove .ww-best {
+  padding: 0 var(--space-2);
+  background: var(--surface-stamped-tint);
+  box-shadow: inset 0 calc(-1 * var(--space-1)) 0 color-mix(in srgb, var(--marker) 40%, transparent);
+}
