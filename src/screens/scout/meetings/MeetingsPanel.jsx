@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { totalsOf } from '../../../api/scout/headToHead.js'
 import { fetchVsPlayerTotal } from '../../../api/scout/vsPlayer.js'
+import { useInViewOnce } from '../../../hooks/scroll/useInViewOnce.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { rate3 } from '../../../api/person/shared.js'
 import { pitchFamily } from '../../../api/pitchArsenal.js'
@@ -13,6 +14,7 @@ import { callOf, gamesOf, inPlay, meetingFacts, mixRows, nameOf, meetingOrdinal,
 import { PitchModal } from './PitchModal.jsx'
 import { ContactFacts, Fact, fixed, xw } from './Facts.jsx'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
+import { Grid } from '../../../components/ui/layout/Grid.jsx'
 
 // THE MEETINGS TAB (#1490, was the head-to-head list of #1410): every past
 // plate appearance between the two, pitch by pitch. A facts row, the pitch
@@ -48,6 +50,7 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
   const games = useMemo(() => gamesOf(pas), [pas])
   const walk = useMemo(() => pitchWalk(games), [games])
   const [open, setOpen] = useState(null)
+  const [ref, phase] = useInViewOnce(`scout:${data.pitcher.id}:${data.hitter.id}:meetings`)
   const failed = !h2h.loading && h2h.data === null
   const names = { hitter: data.hitter.last, pitcher: data.pitcher.last }
   const crowd = stance === 'L' ? 'lefties' : 'righties'
@@ -111,11 +114,13 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
               <span>{monthDayYear(g.date)}</span>
               <Pill>{g.tag || (ROUND_TAG[g.round] ?? g.round)}</Pill>
             </p>
+            {/* Grid: three cards across on a desktop (about 300px each), one on a phone. */}
+            <Grid min={300} gap="base">
             {g.pas.map((pa) => {
               const list = pa.pitchList ?? []
               const last = list.at(-1)
               return (
-                <Stack gap="snug" as="article" key={pa.key} className="scout__pa">
+                <Stack gap="snug" as="article" key={pa.key} className="scout__pa" style={{ '--i': Math.min(pas.indexOf(pa), 6) }}>
                   <header className="scout__pahead">
                     <span className="scout__patitle">{pa.inning ? `${meetingOrdinal(pa.inning)} inning` : 'Plate appearance'}</span>
                     <span className="scout__pameta">
@@ -154,6 +159,7 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
                 </Stack>
               )
             })}
+            </Grid>
           </Stack>
         ))}
       </>
@@ -161,7 +167,7 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
   }
 
   return (
-    <section className="scout__panel" aria-label="Meetings">
+    <section className="scout__panel" aria-label="Meetings" ref={ref} data-motion={phase}>
       {body}
       {open != null && walk[open] && (
         <PitchModal

@@ -234,3 +234,23 @@
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
 }
+
+/* Desktop (slice 8): the verdict card beside "What pushes it"; the watch list
+   below, in two columns. */
+@media (min-width: 740px) {
+  /* layout-exempt: two cards side by side, the watch list across both */
+  #scout-edge > .stack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  .scout__watch {
+    grid-column: 1 / -1;
+  }
+  /* layout-exempt: the watch items run in two columns */
+  .scout__watchlist {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-6);
+  }
+}
