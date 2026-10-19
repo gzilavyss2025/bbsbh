@@ -75,3 +75,14 @@ test('no hold, or an ended hold, measures at once and clears the hold', () => {
   assert.deepEqual(holdStep(null, 900, 250), { measure: true, hold: null, retryIn: 0 })
   assert.deepEqual(holdStep({ until: 1000 }, 1001, 250), { measure: true, hold: null, retryIn: 0 })
 })
+
+test('currentSection: a tapped section wins a tie on the same top', () => {
+  const pair = [
+    { key: 'a', top: -300 },
+    { key: 'b', top: 10 },
+    { key: 'c', top: 10 },
+  ]
+  assert.equal(currentSection(pair, { line: 24 }), 'c')
+  assert.equal(currentSection(pair, { line: 24, prefer: 'b' }), 'b')
+  assert.equal(currentSection(pair, { line: 24, prefer: 'a' }), 'c')
+})

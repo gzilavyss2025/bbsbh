@@ -141,6 +141,7 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', badg
   const btnRefs = useRef(new Map())
   const holdRef = useRef(null)
   const spyRef = useRef(null)
+  const tapKeyRef = useRef(null) // the tapped key, kept until the reader moves
   const tapRef = useRef(null) // the tap's hold: { scrolled, ended, stop } or null
   // onLand can change each render; the hold reads the latest one.
   const onLandRef = useRef(onLand)
@@ -176,7 +177,7 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', badg
       const scroller = root ?? document.scrollingElement
       const height = root ? root.clientHeight : window.innerHeight
       const atEnd = scroller.scrollHeight > height && scroller.scrollTop + height >= scroller.scrollHeight - 2
-      const next = currentSection(sections, { line: offset + SLACK, atEnd })
+      const next = currentSection(sections, { line: offset + SLACK, atEnd, prefer: tapKeyRef.current })
       if (next) setCurrent(next)
     }
     const onScroll = () => {
@@ -193,6 +194,18 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', badg
       window.removeEventListener('resize', onScroll)
     }
   }, [keys, scrollRoot, offset])
+
+  // The reader's own move ends the tap's claim on a tied section. The tap's pointerdown
+  // comes before its click, which sets the key again.
+  useEffect(() => {
+    const onMove = () => {
+      tapKeyRef.current = null
+    }
+    for (const e of MOVES) window.addEventListener(e, onMove, { passive: true })
+    return () => {
+      for (const e of MOVES) window.removeEventListener(e, onMove)
+    }
+  }, [])
 
   // The bar's own width, so rule 1 runs again when a resize or a rotation makes it overflow.
   useEffect(() => {
@@ -245,6 +258,7 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', badg
     const el = document.getElementById(key)
     if (!el) return
     setCurrent(key)
+    tapKeyRef.current = key
     holdRef.current = holdFor()
     // A tap that scrolls nowhere fires no scroll event: ask the spy to measure once the hold ends.
     spyRef.current?.()
