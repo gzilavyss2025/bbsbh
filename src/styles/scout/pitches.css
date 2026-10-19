@@ -54,8 +54,10 @@
 .scout__rowall[aria-pressed='true'] .scout__pullvs { color: var(--text-on-ink-cream); }
 .scout__prow[aria-pressed='true'] {
   border-width: var(--bw-heavy);
+  padding: calc(var(--space-2) - 0.5px) calc(var(--space-3) - 0.5px); /* raw-value-exempt: gives back what the heavier border takes, so the row does not grow */
   box-shadow: var(--shadow-stamped);
 }
+.scout__prow[aria-pressed='true']:focus-visible { box-shadow: var(--shadow-stamped), var(--ring); } /* focus-ring-exempt: the ring joins the stamped shadow, so a picked row keeps both */
 .scout__rowall:focus-visible,
 .scout__prow:focus-visible { outline: none; box-shadow: var(--ring); }
 
