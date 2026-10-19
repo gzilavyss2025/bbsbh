@@ -56,7 +56,8 @@ Every link keeps `?d=` and `?s=` (the shell wraps the page in `LinkScope`). Open
 Motion plays once per page visit: every band reads `useViewOnce(team.id, band, ready)` (`hooks/motion/useViewOnce.js`, `docs/motion.md`).
 
 **The club schedule runs into October.** `fetchTeamSchedule` returns the postseason rounds at
-MLB, each row tagged `gameType`, so the Games band, Stamp In and the photo pages list them. A
+MLB and the four full-season MiLB levels (11-14), each row tagged `gameType` and a `round`
+name (MiLB's L and W read DS and CS; labels come from `g.round`, never `seriesAbbr`), so the Games band, Stamp In and the photo pages list them. A
 number that must reconcile with a regular-season ledger (the day-of-week record, the Records
 card's completeness check in `loadStandings`) filters on `gameType === 'R'` first. A postseason
 row dated after the page's own day is never returned (ADR-0087).

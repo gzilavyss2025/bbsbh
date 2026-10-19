@@ -9,6 +9,18 @@
    (scripts/check-dir-size.mjs, ADR-0038). */
 
 
+/* The height of the bar that sticks to the top of the slate: the phone's compact bar, or
+   the wide bar. Anything else that sticks on this page sits under it (--slate-bar-h is
+   read by the World Series scouting jump bar, in CSS and, through a probe, in JS). */
+:root {
+  --slate-bar-h: calc(60px + env(safe-area-inset-top)); /* raw-value-exempt: the D1 compact bar, spec'd */
+}
+@media (min-width: 740px) {
+  :root {
+    --slate-bar-h: 76px; /* raw-value-exempt: the D1 desktop bar, spec'd */
+  }
+}
+
 /* ---- the bar: brand left, the page's buttons right ---- */
 .slatemast__bar {
   display: flex;
@@ -353,7 +365,7 @@
   align-items: center;
   gap: var(--space-1h);
   box-sizing: border-box;
-  min-height: calc(60px + env(safe-area-inset-top)); /* raw-value-exempt: the D1 compact bar, spec'd */
+  min-height: var(--slate-bar-h);
   padding: env(safe-area-inset-top) var(--space-2) 0 var(--space-3);
   border-bottom: var(--bw-heavy) solid var(--border-stamped);
   background: var(--surface-card);
@@ -409,7 +421,7 @@
     position: sticky;
     top: 0;
     z-index: var(--z-sticky);
-    min-height: 76px; /* raw-value-exempt: the D1 desktop bar, spec'd */
+    min-height: var(--slate-bar-h);
     margin: 0 calc(-1 * var(--app-gutter));
     padding: 0 var(--app-gutter);
     border-bottom: var(--bw-heavy) solid transparent;

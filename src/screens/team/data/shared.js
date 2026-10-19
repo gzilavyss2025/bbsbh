@@ -445,6 +445,6 @@ export function ledgerIsComplete(ledger, schedule, cutoff) {
 }
 
 // The door to a club's postseason ledger (`/postseason-records?view=teams&team={id}`), carrying the
-// page's `?d=`. MLB only: the postseason files hold no minor-league club (ADR-0087).
+// page's `?d=`. MLB only: the postseason files hold no minor-league club, though the club's own schedule now lists its MiLB rounds (ADR-0087 addendum).
 export const postseasonDoor = (teamId, asOf, sportId) =>
   sportId === 1 ? postseasonRecordsPath({ view: 'teams', team: teamId, d: asOf }) : null

@@ -30,3 +30,12 @@ export function keysVerdict(a, b, { limit, firstSeason }) {
   const first = few.failed === 0 ? `${few.abbr} fails no keys.` : `${few.abbr} fails ${keys(few.failed)}.`
   return `${first} ${many.abbr} fails ${keys(many.failed)}. ${ruleSentence}`
 }
+
+// The two clubs' rows from the Nine Keys file, in the order asked, or null when the card has
+// nothing to draw: no file, another season's file, no keys, or a club with no row. The series
+// page's card and the World Series scouting jump bar both ask it, so they agree on "no data".
+//   data    loadNineKeys()'s shape; clubs  [{ id }, { id }]; season  the series' year
+export function nineKeysTeams(data, clubs, season) {
+  const [a, b] = clubs.map((c) => data?.current?.teams?.find((t) => t.teamId === c.id))
+  return a && b && data.current.season === season && data.keys?.length ? [a, b] : null
+}
