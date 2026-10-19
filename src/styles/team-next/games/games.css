@@ -2,7 +2,7 @@
    games/index.jsx imports this file. The schedule, Highlights and Photos are today's modules,
    skinned from here: the stamped edge and shadow of the player page's card, square corners, and
    the house band head, since a club colours its own hero and nothing else on this page
-   (ADR-0030). The grid is a real stamped Card with a name tab. Motion is the stamped card's
+   (ADR-0030). The season grid is a real stamped Card with a name tab. Motion is the stamped card's
    drop-in, once per page visit (.tnext__games--still on a return) and off under reduced motion. */
 
 /* The sheet cards of the old modules wear the stamped edge, through the card's own custom properties (card.css is the one stylesheet that frames a card). A data dot stays round. */
@@ -30,11 +30,6 @@
 }
 .tnext__games .sectionhead--club .sectionhead__note {
   color: var(--text-on-ink-dim);
-}
-
-/* The stamped body already pads the grid, so the grid drops its own top margin. */
-.tnext__gamescard .gamesgrid {
-  margin-top: 0;
 }
 
 /* Motion is once per page visit: a return shows the band at rest. */

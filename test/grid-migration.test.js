@@ -14,7 +14,6 @@ const GRID = {
 
 const MIGRATED = {
   idlab__erafields: { file: '17a-identity-lab-mark-panels.css', jsx: 'screens/identity-lab/editors/EraRow.jsx', min: '7rem', fit: true, keeps: ['min-width'] },
-  gamesgrid__grid: { dropped: true, jsx: 'screens/team/modules/TeamGames.jsx', min: '{100}' },
 }
 
 defineMigrationTests('grid', GRID, MIGRATED)

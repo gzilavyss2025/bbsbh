@@ -37,10 +37,10 @@ test('RosterList: no title=, the All Star star and the WAR pill keep a name', ()
   assert.ok(src.includes('aria-label={`Season WAR (MLB calc)'))
 })
 
-test('the schedule strip and ballpark card carry no title=; the empty cell buttons keep a name', () => {
-  const strip = jsx('screens/team/modules/SeasonSchedule.jsx')
-  assert.ok(!/\stitle=/.test(strip))
-  assert.equal(strip.match(/aria-label=\{`\$\{(it|g)\.apiDate\}/g).length, 2)
+test('the season grid and ballpark card carry no title=; every game link keeps a name', () => {
+  const grid = jsx('screens/team/next/games/SeasonGrid.jsx')
+  assert.ok(!/\stitle=/.test(grid))
+  assert.equal(grid.match(/aria-label=\{g\.label\}/g).length, 1)
   const park = jsx('screens/team/modules/ballpark/BallparkCard.jsx')
   // The only title= left are RankGroup's two props (a heading, not a tooltip).
   assert.equal(park.match(/\stitle=/g).length, 2)

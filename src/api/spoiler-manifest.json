@@ -1015,6 +1015,11 @@
         "screens/scorecard/ScorecardPage.jsx"
       ]
     },
+    "savant/gameFeed.js": {
+      "class": "reveal-only",
+      "why": "Contact replay phase B (#1771) — Savant /gf bat-tracking fields (batSpeed, xba, barrel, homeRunBallparks) for one game, stripped on parse. The /gf body carries the whole game's linescore, box score and play text, so the module fetches and parses in one scope, reads only team_home[] and team_away[], keeps five fields per row and lets the raw body go out of scope; no cache, ref or state holds it and nothing logs it. What survives still describes one batted ball, so it is callable only from the replay inside the half's reveal. MLB only: sportId other than 1 returns an empty Map and makes no fetch. Nothing imports it yet.",
+      "importers": []
+    },
     "scout/headToHead.js": {
       "class": "spoiler-free",
       "why": "Matchup Scout's pitcher-versus-hitter history from Savant's pitch-level CSV. Only games dated before the cutoff (today, or `?d=`): the request sends the day before it as an inclusive bound, so it never reads a live game. An open stat surface (ADR-0034). The service worker serves Savant NetworkOnly (ADR-0004)."

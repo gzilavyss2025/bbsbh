@@ -37,11 +37,12 @@ export const meetingOrdinal = (n) => (n == null ? '' : withSuffix(n))
 // A pitch's full name: the board's pill name, else pitchLabel's.
 export const nameOf = (code, board) => board?.types.find((t) => t.code === code)?.name ?? (code ? pitchLabel(code) : 'Pitch')
 
-// The play's text with the batter's name taken off the front: "grounds out,
-// shortstop Jose Iglesias to first baseman Luis Arraez."
-export function playText(description, hitterName) {
+// The play's text with the batter's full name cut down to his last name:
+// "Arraez grounds out, shortstop Jose Iglesias to first baseman Luis Arraez."
+// A line that does not open with his name ("Wild pitch.") stays as it is.
+export function playText(description, hitterName, hitterLast) {
   const d = (description ?? '').trim()
-  if (hitterName && d.startsWith(hitterName)) return d.slice(hitterName.length).trim()
+  if (hitterName && d.startsWith(hitterName)) return `${hitterLast || ''} ${d.slice(hitterName.length).trim()}`.trim()
   return d
 }
 

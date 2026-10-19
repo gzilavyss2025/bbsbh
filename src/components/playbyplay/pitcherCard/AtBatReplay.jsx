@@ -56,10 +56,10 @@ const DWELL_MS = 250
 // Keyed on the entry's CONTENT: a live game's poll rebuilds `pitchDetails`
 // every 15-60 s, and a new array would restart every replay on the page.
 export function useReplayPitches(entry) {
-  const { pitchDetails, basesBefore, basesAfter, live } = entry
-  const key = JSON.stringify([pitchDetails ?? [], basesBefore, basesAfter])
+  const { pitchDetails, basesBefore, basesAfter, batSide, live } = entry
+  const key = JSON.stringify([pitchDetails ?? [], basesBefore, basesAfter, batSide])
   const replay = useMemo(() => {
-    const pitches = live == null ? atBatScenePitches(pitchDetails) : []
+    const pitches = live == null ? atBatScenePitches(pitchDetails, undefined, batSide) : []
     return pitches.length > 0 ? { pitches, model: replaySteps(pitchDetails, pitches, basesBefore, basesAfter) } : null
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` is the entry's content
   }, [key, live])

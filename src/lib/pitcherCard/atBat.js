@@ -14,6 +14,7 @@
 import { pitchFamily, pitchLabel } from '../../api/pitchArsenal.js'
 import { pitchMark } from '../pitch/pitchTypes.js'
 import { realFlight } from './camera.js'
+import { contactPoint } from './contactTimeline.js'
 import { realScenePitch } from './scene.js'
 
 // Release distance used only when the feed sent no `extension`. The path still
@@ -31,7 +32,12 @@ function median(xs) {
 // PitchScene pitch (`code` is unique per pitch, because the scene keys its
 // ghost trails on it and two fastballs share a type code) plus `no` and `call`
 // for the caption. `view` is the scene's camera.
-export function atBatScenePitches(pitchDetails, view = 'hitter') {
+// `hit`, `playId`, `batSide` and `swing` ride along for the contact replay:
+// `swing` is the pitch's category when the batter swung (whiff, foul, in play),
+// null on a taken pitch, which gets no bat. `contact` is contactTimeline.js contactPoint, on a swing only.
+const SWINGS = new Set(['whiff', 'foul', 'inplay'])
+
+export function atBatScenePitches(pitchDetails, view = 'hitter', batSide = '') {
   const out = []
   for (const p of pitchDetails ?? []) {
     const flight = realFlight({ ...p, release: [0, p.releaseY ?? FALLBACK_RELEASE_Y, 0] })
@@ -48,7 +54,8 @@ export function atBatScenePitches(pitchDetails, view = 'hitter') {
       },
       view,
     )
-    out.push({ ...scene, no: p.no, call: p.callDesc })
+    const swing = SWINGS.has(p.cat) ? p.cat : null
+    out.push({ ...scene, no: p.no, call: p.callDesc, hit: p.hit, playId: p.playId, batSide, swing, ...(swing && { contact: contactPoint(flight) }) })
   }
   return out
 }
