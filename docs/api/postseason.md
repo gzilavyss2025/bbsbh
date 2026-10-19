@@ -408,3 +408,7 @@ and the slate model's `seriesStatus`/`leagueRecord` guard in
 ## World Series home reads (`worldSeriesHome.js`, #1906)
 
 One file, cutoff-gated (manifest entry). Every read ends the day before the slate date in the request and is filtered again on the rows. No option lets the slate date's own Finals count (the inert `live` option was removed, #2308). `fetchClubGames` rows: `{ gamePk, date, gameType, gameNumber, final, homeId, awayId, winnerId }`, no runs. `fetchSeriesRuns` folds box scores with `foldRunsByGame`. `fetchReelGames` drops a game dated on or after the slate date before any content read. `useWorldSeriesHome` (`src/hooks/postseason/`) returns the raw rows for the World Series selectors (slice 2).
+
+## World Series scouting meetings (`meetings.js`, #2316)
+
+`selectMeetings(rows, { clubA, clubB, slateDate })` (`src/lib/postseason/worldseries/meetings.js`, pure) keeps the Final regular-season games between the two clubs dated before the slate date, oldest first. `fetchMeetings({ clubA, clubB, slateDate })` reads the schedule, runs it, then reads each game's feed and returns `meetingCard` cards (the shape is in the file header; missing fields are `''`, `null`, `[]` or `{}`). The schedule request needs `startDate` with `endDate`: `endDate` alone answers HTTP 400. Cutoff-gated (manifest entry); `test/postseason/world-series-meetings.test.js`.
