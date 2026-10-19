@@ -23,7 +23,7 @@ const SOLID = [
   ['box-score/scoring-summary.css', '.scoresum__play + .scoresum__play'],
   ['pitcher-card/card.css', '.pcard__sec'],
   ['postseason/series-parts.css', '.psseries__flowreadout'],
-  ['scout/panels.css', '.scout__verdictrule'],
+  ['scout/edge.css', '.scout__verdictrule'],
   ['scout/scout.css', '.scout__readout'],
   ['10b-former-teammates.css', '.ladder__badge--farm'],
   ['76-workload-marks.css', '.daystrip__day--today'],

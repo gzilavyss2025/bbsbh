@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useAsync } from '../../../hooks/useAsync.js'
-import { fetchHeadToHead, totalsOf } from '../../../api/scout/headToHead.js'
+import { totalsOf } from '../../../api/scout/headToHead.js'
 import { rate3 } from '../../../api/person/shared.js'
 import { pitchFamily } from '../../../api/pitchArsenal.js'
 import { humanDateWithYear, monthDayYear } from '../../../lib/dates.js'
@@ -27,8 +26,8 @@ import { Stack } from '../../../components/ui/layout/Stack.jsx'
 // inclusive. `AsOfBanner` is the way to move it. The film lookup refuses the
 // same games (api/scout/playIds.js).
 //
-// Scope filters the plate appearances by round, and every figure here is
-// rebuilt from the same rows, so the facts and the list cannot disagree.
+// ScoutPage reads the head-to-head (so the jump bar can count it) and filters
+// the plate appearances by scope; every figure here is rebuilt from those same rows, so the facts and the list cannot disagree.
 function MixBar({ rows, pick }) {
   return (
     <span className="scout__mixbar">
@@ -44,12 +43,7 @@ function MixBar({ rows, pick }) {
   )
 }
 
-export function MeetingsPanel({ data, board, cutoff, asOf, scope, view, stance, hitterStance }) {
-  const h2h = useAsync(() => fetchHeadToHead(data.hitter.id, data.pitcher.id, cutoff), [data.hitter.id, data.pitcher.id, cutoff])
-  const pas = useMemo(
-    () => (h2h.data?.pas ?? []).filter((r) => scope === 'all' || (scope === 'reg') === (r.round === 'R')),
-    [h2h.data, scope],
-  )
+export function MeetingsPanel({ data, board, h2h, pas, cutoff, asOf, view, stance, hitterStance }) {
   const games = useMemo(() => gamesOf(pas), [pas])
   const walk = useMemo(() => pitchWalk(games), [games])
   const [open, setOpen] = useState(null)
