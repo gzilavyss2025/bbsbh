@@ -181,4 +181,12 @@ test('drawContact: a bunt holds one pencil bat still at the contact pose, with n
   }
   assert.equal(mk.bat.a.points, held.bat.a.points, 'the bat does not move')
   assert.equal(mk.bat.a.points, batShape(m.SW.at(0)).points)
+  // the round cap sits at the barrel end of the held bat, and the rest frame leaks no smear or barrel path
+  assert.equal(mk.cap.a.visibility, 'visible')
+  assert.equal(mk.cap.a.cx, held.cap.a.cx)
+  const rest = marks()
+  drawContact(rest, p, b, m, b.totalMs, 3, true)
+  assert.equal(rest.bat.a.points, mk.bat.a.points)
+  assert.equal(rest.arc.a.visibility, 'hidden')
+  assert.ok(rest.smear.every((n) => n.a.visibility === 'hidden'))
 })

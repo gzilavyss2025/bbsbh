@@ -41,7 +41,7 @@ export function sceneLabel(p) {
 }
 
 // What a swing pitch needs each frame, built once: the swing, the batted ball (null for a whiff and for
-// a ball with no exit speed), whether a bat is drawn (not on a bunt, §10) and the trajectory tag.
+// a ball with no exit speed), whether it is a bunt (a held-still pencil bat, no swing, §10) and the trajectory tag.
 // Null for a take, or a pitch with no contact point.
 export function swingScene(p, beats, tr) {
   if (beats.contactMs == null) return null
