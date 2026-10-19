@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { gamePath, teamStampInPath } from '../../../lib/route.js'
 import { useNav } from '../../../lib/nav.js'
-import { seriesAbbr } from '../../../api/boxlines/rows.js'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { SectionHead } from '../../../components/ui/frame/SectionHead.jsx'
@@ -25,10 +24,10 @@ function SeriesStrip({ games, allStarGame, refDate }) {
     const out = []
     for (const g of games) {
       const last = out[out.length - 1]
-      if (last && last.opponent.id === g.opponent.id && last.round === seriesAbbr(g.gameType)) {
+      if (last && last.opponent.id === g.opponent.id && last.round === g.round) {
         last.games.push(g)
       } else {
-        out.push({ opponent: g.opponent, round: seriesAbbr(g.gameType), games: [g] })
+        out.push({ opponent: g.opponent, round: g.round, games: [g] })
       }
     }
     return out
@@ -93,7 +92,7 @@ function SeriesStrip({ games, allStarGame, refDate }) {
                     type="button"
                     className={`sstrip__cell${g.isHome ? ' sstrip__cell--home' : ''}${resultClass}`}
                     onClick={() => openGame(g)}
-                    aria-label={`${g.apiDate} · ${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${seriesAbbr(g.gameType) ? ` · ${seriesAbbr(g.gameType)}` : ''}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
+                    aria-label={`${g.apiDate} · ${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.round ? ` · ${g.round}` : ''}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
                   />
                 )
               })}

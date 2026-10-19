@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import { extraInningsOf } from '../../../api/select.js'
-import { seriesAbbr } from '../../../api/boxlines/rows.js'
 import { gamePath } from '../../../lib/route.js'
 import { useNav } from '../../../lib/nav.js'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
@@ -34,7 +33,7 @@ function GameStubCard({ game: g }) {
   const winRuns = g.won ? g.runs : g.oppRuns
   const lossRuns = g.won ? g.oppRuns : g.runs
   const extraInnings = extraInningsOf(g.innings, g.scheduledInnings)
-  const gmTag = [seriesAbbr(g.gameType), g.doubleHeader !== 'N' ? `Gm ${g.gameNumber}` : '']
+  const gmTag = [g.round, g.doubleHeader !== 'N' ? `Gm ${g.gameNumber}` : '']
     .filter(Boolean)
     .join(' \u00b7 ')
   const scoreWords = hasScore

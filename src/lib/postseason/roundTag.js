@@ -85,6 +85,15 @@ export function roundName(gameType, league = '') {
   return round === 'LCS' ? `${league}CS` : `${league}${round}`
 }
 
+// A minor-league club plays a Division Series (L) and a Championship Series (W), which the
+// feed files under the same codes as MLB's LCS and World Series. At sportId 11-14 they read
+// DS and CS, so a Double-A title round never wears "WS". Triple-A's pennant round is W only.
+// `sportId` 1 (or none) keeps roundName's own table.
+export function roundNameAt(gameType, sportId, league = '') {
+  if (sportId >= 11 && sportId <= 14) return { L: 'DS', W: 'CS' }[gameType] ?? ''
+  return roundName(gameType, league)
+}
+
 // The tag a row wears: the round, with the league of the club it was played by. '' for a game
 // that is not a postseason round.
 export function roundTag(gameType, club, season) {
