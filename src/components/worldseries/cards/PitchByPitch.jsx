@@ -1,6 +1,7 @@
 import '../../../styles/worldseries/pitch.css'
 import { useRouteLink } from '../../../lib/nav.js'
 import { pillSolidStyle } from '../../../lib/design/pillClass.js'
+import { surnameOf } from '../../../lib/postseason/worldseries/scouting/filmRoom.js'
 import { teamAbbr, teamClubNameShort } from '../../../lib/teams.js'
 import { PitchMark } from '../../playbyplay/pitcherCard/PitchMark.jsx'
 import { Headshot } from '../../player/Headshot.jsx'
@@ -23,12 +24,13 @@ const EDGE = {
   arm: <Pill fill="ink">Arm</Pill>,
   bats: <Pill fill="solid" style={pillSolidStyle({ ground: 'var(--surface-stamped-tint)', text: 'var(--text-heading)' })}>Bats</Pill>,
   even: <span className="ww-pitch__even">Even</span>,
+  none: <span className="ww-pitch__even">—</span>,
 }
 
 export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
   const routeLink = useRouteLink()
   const { starter, rows, hitters } = data
-  const last = starter.name.split(' ').at(-1)
+  const last = surnameOf(starter.name)
   const meta = [starter.hand && `${starter.hand}HP`, teamClubNameShort(clubId), `${starter.projected ? 'projected' : 'probable'}${gameNumber ? ` Game ${gameNumber}` : ''} starter`]
   return (
     <Card frame="stamped" label="Pitch by pitch" count={`${last} vs ${teamAbbr({ id: oppId })}`} body="flush" className="ww-pitch">
@@ -41,7 +43,7 @@ export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
       </PlayerLink>
       <Table frame="bare" className="ww-pitch__table">
         <caption className="ww-pitch__cap">
-          xwOBA against each pitch. Club hitters, not the posted lineup: the {hitters} with the most postseason plate appearances.
+          xwOBA against each pitch. Club hitters, not the posted lineup ({hitters} hitters).
         </caption>
         <thead>
           <tr>
@@ -54,7 +56,7 @@ export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.code}>
+            <tr key={r.key}>
               <th scope="row" className="ww-pitch__pitch">
                 <PitchMark mark={r.mark} />
                 {r.name}
@@ -65,7 +67,7 @@ export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
               </td>
               <td>{fig(r.xwoba)}</td>
               <td>{fig(r.league)}</td>
-              <td>{EDGE[r.edge]}</td>
+              <td>{EDGE[r.edge ?? 'none']}</td>
             </tr>
           ))}
         </tbody>

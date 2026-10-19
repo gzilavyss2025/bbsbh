@@ -25,6 +25,9 @@ export function topHitters(splits, n = MAX_HITTERS) {
     .map((s) => s.id)
 }
 
+// 'away' | 'home': the seat `clubId` holds in an upcoming game, or null when it holds neither.
+export const seatOf = (game, clubId) => (game.awayId === clubId ? 'away' : game.homeId === clubId ? 'home' : null)
+
 // Whole numbers that sum to 100 (largest remainder).
 function shares(counts) {
   const total = sum(counts)
@@ -50,7 +53,8 @@ function xwobaOf(grids, code, hand) {
 
 // arsenal: [{ code, pitches }] (the pitcher's season row); hitters: the hitters' grids
 // (fetchHitterGridFor); league: fetchHitterLeague; hand: the pitcher's 'R' | 'L' | ''.
-// -> null | { rows: [{ code, name, mark, uses, xwoba, league, edge }] }, edge 'arm' | 'bats' | 'even'.
+// -> null | { hitters, rows: [{ key, code, name, mark, uses, xwoba, league, edge }] }, edge 'arm' | 'bats' | 'even',
+// or null for a row with no figure to call (a row of dashes is not "Even"). Null when no row has a figure.
 // The call is made on the printed (three-place) figures, so the pill never disagrees with them.
 export function pitchByPitchModel({ arsenal, hitters, league, hand }) {
   const grids = (hitters ?? []).filter(Boolean)
@@ -63,16 +67,17 @@ export function pitchByPitchModel({ arsenal, hitters, league, hand }) {
     const mark = pitchMark(p.code)
     const xwoba = third(xwobaOf(grids, p.code, hand || null))
     const lg = third(xwobaOf([league], p.code, hand || null))
-    const diff = xwoba == null || lg == null ? 0 : Math.round((xwoba - lg) * 1000) / 1000
+    const diff = xwoba == null || lg == null ? null : Math.round((xwoba - lg) * 1000) / 1000
     return {
+      key: `${mark.code}-${i}`,
       code: mark.code,
       name: mark.name,
       mark,
       uses: uses[i],
       xwoba,
       league: lg,
-      edge: diff < -EDGE_BAND ? 'arm' : diff > EDGE_BAND ? 'bats' : 'even',
+      edge: diff == null ? null : diff < -EDGE_BAND ? 'arm' : diff > EDGE_BAND ? 'bats' : 'even',
     }
   })
-  return rows.length ? { rows } : null
+  return rows.some((r) => r.xwoba != null) ? { hitters: grids.length, rows } : null
 }

@@ -2,7 +2,7 @@ import { fetchPitchArsenalFor } from '../pitchArsenal.js'
 import { fetchHitterGridFor, fetchHitterLeague } from './hitterGrid.js'
 import { projectFromLiveLogs } from '../rotation/liveStarters.js'
 import { fetchWorkload } from '../workload.js'
-import { pitchByPitchModel, topHitters } from '../../lib/postseason/worldseries/scouting/pitchByPitch.js'
+import { pitchByPitchModel, seatOf, topHitters } from '../../lib/postseason/worldseries/scouting/pitchByPitch.js'
 import { fetchHotBatSplits } from '../postseason/worldSeriesHome.js'
 import { fetchUpcomingSeriesGames } from '../postseason/upcoming.js'
 
@@ -16,7 +16,9 @@ export async function loadPitchByPitch({ clubId, oppId, gamePk, slateDate }) {
     const season = Number(slateDate.slice(0, 4))
     const game = (await fetchUpcomingSeriesGames([gamePk]))[gamePk]
     if (!game) return null
-    let arm = game.awayId === clubId ? game.away : game.home
+    const seat = seatOf(game, clubId)
+    if (!seat) return null
+    let arm = game[seat]
     let projected = false
     if (!arm) {
       const first = (await projectFromLiveLogs(await fetchWorkload(), clubId, game.date || slateDate))?.[0]
@@ -33,7 +35,7 @@ export async function loadPitchByPitch({ clubId, oppId, gamePk, slateDate }) {
     const hitters = await Promise.all(topHitters(splits).map((id) => fetchHitterGridFor(id, season)))
     const hand = entry?.throws ?? arm.hand ?? ''
     const model = pitchByPitchModel({ arsenal: entry?.mlb, hitters, league, hand })
-    return model && { starter: { id: arm.id, name: arm.name, hand, projected }, hitters: hitters.filter(Boolean).length, rows: model.rows }
+    return model && { starter: { id: arm.id, name: arm.name, hand, projected }, hitters: model.hitters, rows: model.rows }
   } catch {
     return null
   }
