@@ -156,13 +156,6 @@
 .printsheet__crew {
   margin-top: 1.5mm;
 }
-.printsheet__crewhead {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 
 /* A caption over a writing line — the sheet's one repeated primitive. A field
    with a value inks the line; a blank one is somewhere to write, which is what
@@ -338,13 +331,6 @@
   margin-top: 2mm;
   padding-top: 1.5mm;
   border-top: var(--bw-rule) solid var(--ps-rule);
-}
-.printsheet__mark {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 /* ============================================================

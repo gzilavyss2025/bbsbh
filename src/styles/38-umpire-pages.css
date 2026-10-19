@@ -189,14 +189,6 @@
 .umpage__row--hp {
   background: var(--surface-inset);
 }
-.umpage__role {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .umpage__date {
   font-size: var(--fs-small);
   color: var(--text-caption);

@@ -109,13 +109,6 @@
    only fills it in then) — same font/weight/color as the R/H/E labels beside
    it (.flipback__lsCol) so the two read as one header row, just left- rather
    than center-aligned to sit over the team names below it. */
-.flipback__lsTeamCol {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .flipback__lsCol {
   text-align: center;
   font-family: var(--font-display);

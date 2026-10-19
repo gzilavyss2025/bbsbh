@@ -74,7 +74,7 @@ export function ScorecardLab() {
       </p>
 
       <form className="sc-labload" onSubmit={load}>
-        <label className="sc-labload__label" htmlFor="sc-gamepk">
+        <label className="t-label sc-labload__label" htmlFor="sc-gamepk">
           gamePk
         </label>
         <input

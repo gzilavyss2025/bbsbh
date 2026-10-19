@@ -213,12 +213,6 @@
 
 .sitefooter__more-label {
   margin: 0 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
 }
 
 /* The list under that label is the shared site directory now — grouped
@@ -446,11 +440,6 @@
 
 .searchoverlay__grouptitle {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 .searchoverlay__clearrecent {

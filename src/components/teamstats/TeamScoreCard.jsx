@@ -160,7 +160,7 @@ export function TeamScoreCard({
 
       {showDrivers && (
         <div className="team-score__driver-group">
-          <span className="team-score__driver-heading">What built the grade</span>
+          <span className="t-label t-label--bold team-score__driver-heading">What built the grade</span>
           <div className="team-score__drivers" aria-label="Season Grade drivers">
             <ScoreRow
               label="Quality"
@@ -225,7 +225,7 @@ function GradeHero({ grade, summary, rank, league, teamId, isOpen, onToggle }) {
           <span className="team-score__grade-score">
             {scoreValue(summary)}<small>/10</small>
           </span>
-          <span className="team-score__breakdown">{isOpen ? 'Close breakdown' : 'See breakdown'}</span>
+          <span className="t-label t-label--bold team-score__breakdown">{isOpen ? 'Close breakdown' : 'See breakdown'}</span>
         </span>
       </button>
       {summary?.score != null && league.length > 0 && (
@@ -248,7 +248,7 @@ function ScoreDetail({ kind, grade, quality, surprise, form }) {
   }[kind]
   return (
     <div id="team-score-detail" className="team-score__detail">
-      <p className="team-score__detail-title">{title}</p>
+      <p className="t-label t-label--bold team-score__detail-title">{title}</p>
       <dl>
         {kind === 'grade' && grade && (
           <>

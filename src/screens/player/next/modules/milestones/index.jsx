@@ -36,7 +36,7 @@ export default function MilestonesModule({ bio, role, asOf, season, onEmpty, onC
   if (empty) return null
   return (
     <div className="milestones">
-      {view.group && <p className="milestones__group">{view.group}</p>}
+      {view.group && <p className="t-label milestones__group">{view.group}</p>}
       <ul className="milestones__list">
         {view.rows.map((r) => (
           <li key={r.key} className={`milestones__row${r.inked ? ' milestones__row--ink' : ''}`}>

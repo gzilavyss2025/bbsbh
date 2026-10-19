@@ -50,9 +50,11 @@ Phase A needs no new fetch. Start there.
 2. **Both tiers.** Phase C ships after phase B.
 3. **Tap size.** "Play at-bat" and the pitch chips use `Button size="tap"`
    (44 px), not `control` (section 9).
-4. **MLB now, AAA later.** Phases B and C fetch for MLB games only
+4. **MLB only for phases B and C.** They fetch for MLB games only
    (`sportId` 1). A MiLB game with tracked pitches still gets phase A from the
-   MLB feed. Checking AAA `/gf` bat data is a separate follow-up.
+   MLB feed. A check of AAA `/gf` on 2026-10-19 (issue #2304): it carries no
+   bat speed, no xBA and no home-run parks, so AAA stays on phase A
+   (`docs/data-enrichment.md` section 3).
 
 ## 3. Data contract
 

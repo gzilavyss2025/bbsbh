@@ -81,7 +81,7 @@ export function BallparkEditFields({ draft, defaultName }) {
 
   return (
     <div className="bpadmin">
-      <p className="bpadmin__title">Editing this ballpark</p>
+      <p className="t-label t-label--bold bpadmin__title">Editing this ballpark</p>
 
       <div className="bpadmin__field">
         <label className="bpadmin__label" htmlFor="bpadmin-name">

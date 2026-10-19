@@ -149,7 +149,7 @@ export function LongAtBats({ season }) {
 
                     <span className="seasonnote__val">
                       <span className="seasonnote__valn">{row.pitches}</span>
-                      <span className="seasonnote__vallabel">Pitches</span>
+                      <span className="t-label t-label--bold seasonnote__vallabel">Pitches</span>
                     </span>
 
                     <div className="seasonnote__who seasonnote__who--pitcher">

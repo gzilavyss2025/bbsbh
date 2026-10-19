@@ -157,7 +157,7 @@ function RecordSearchPanel() {
       </h3>
 
       <Stack gap="tight" className="lookupdeck__field">
-        <label htmlFor={`${uid}-query`} className="lookupdeck__label">
+        <label htmlFor={`${uid}-query`} className="t-label lookupdeck__label">
           Name
         </label>
         <input
@@ -173,7 +173,7 @@ function RecordSearchPanel() {
 
       <Cluster gap="base" className="lookupdeck__filters">
         <Stack gap="tight" className="lookupdeck__field lookupdeck__field--compact">
-          <label htmlFor={`${uid}-source`} className="lookupdeck__label">
+          <label htmlFor={`${uid}-source`} className="t-label lookupdeck__label">
             Source
           </label>
           <select
@@ -192,7 +192,7 @@ function RecordSearchPanel() {
           </select>
         </Stack>
         <Stack gap="tight" className="lookupdeck__field lookupdeck__field--compact">
-          <label htmlFor={`${uid}-team`} className="lookupdeck__label">
+          <label htmlFor={`${uid}-team`} className="t-label lookupdeck__label">
             Team
           </label>
           <select
@@ -211,7 +211,7 @@ function RecordSearchPanel() {
           </select>
         </Stack>
         <Stack gap="tight" className="lookupdeck__field lookupdeck__field--compact">
-          <label htmlFor={`${uid}-season`} className="lookupdeck__label">
+          <label htmlFor={`${uid}-season`} className="t-label lookupdeck__label">
             Season
           </label>
           <select
@@ -311,7 +311,7 @@ function PlayerSearchPanel({ selectedRow, onUseAsMatch, disabled }) {
       </h3>
 
       <Stack gap="tight" className="lookupdeck__field">
-        <label htmlFor={`${uid}-query`} className="lookupdeck__label">
+        <label htmlFor={`${uid}-query`} className="t-label lookupdeck__label">
           Player name
         </label>
         <input

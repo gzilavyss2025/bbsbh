@@ -90,12 +90,6 @@
 }
 .mgrpage__playlevel {
   margin: 0 0 6px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 .mgrpage__recordlist {

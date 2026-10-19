@@ -66,7 +66,7 @@ function Notice({ children }) {
 function Table({ table }) {
   return (
     <figure className="researchdiary__figure">
-      <figcaption className="researchdiary__figcap">{table.caption}</figcaption>
+      <figcaption className="t-label researchdiary__figcap">{table.caption}</figcaption>
       {/* Wide tables scroll inside their own box rather than pushing the page
           sideways — this is a phone-first app and some of these run four
           columns of long club names. */}

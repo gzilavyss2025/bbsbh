@@ -64,11 +64,6 @@
 
 .mytally__subtitle {
   margin: var(--space-1) 0 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 /* Held at a fixed height whether or not the club list has landed, so the page
@@ -183,11 +178,6 @@
 
 .mytally__fieldlabel {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 .mytally__fieldvalue {

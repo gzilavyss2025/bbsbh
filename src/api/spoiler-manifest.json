@@ -887,6 +887,10 @@
       "class": "cutoff-gated",
       "why": "The World Series home page's reads (#1906): hot-bat splits, each club's postseason games, bullpen and ledger box scores, standings, regular-season meetings, and the reel's clips and photos. Every read is bounded to games dated BEFORE the slate date, in the request (endDate is the day before) and again on the rows returned, so the slate date's own game never comes back; no option lets the slate date's Finals count (the inert `live` option was removed, #2308). Past games' runs, clip titles and photos are open by decision (ADR-0087: yesterday's results are not protected). fetchReelGames drops a game dated on or after the slate date before it requests any content, so today's clips and photos are never fetched. test/postseason/world-series-fetch.test.js pins the cutoff on the URLs and the rows."
     },
+    "postseason/meetings.js": {
+      "class": "cutoff-gated",
+      "why": "The World Series scouting report's regular-season meetings (#2316): per game, the score, decisions, plate umpire, both starters' lines and pitch mix, scoring plays and lineups. Open surface by decision (ADR-0087, ADR-0088, ADR-0117: a past game's box score opens by its date). Gated by DATE: the request ends the day before the slate date and selectMeetings drops any Final regular-season row dated on or after it, so the slate date's game, and every Series game, never get a feed read. Writes no bbsbh:boxreveal key. test/postseason/world-series-meetings.test.js pins the cutoff."
+    },
     "postseason/upcoming.js": {
       "class": "spoiler-free",
       "why": "The live series page's read of the games still to play: each one's park and announced probable pitchers, and those pitchers' throwing hand. A probable pitcher and a park are not results. The caller hands it only DATED upcoming gamePks (never today's game, never an if-necessary game, which has no gamePk), and the field list asks for no state, score, winner, linescore, seriesStatus or leagueRecord, so even a wrong pk brings back no result. test/postseason/upcoming-games.test.js pins that list."

@@ -110,7 +110,7 @@ export function ProfilePage() {
           <ClubSeal teamId={club} name={clubName} size={92} />
           <div className="mytally__identity">
             <h1 className="mytally__title">My Tally</h1>
-            <p className="mytally__subtitle">Profile &amp; settings.</p>
+            <p className="t-label mytally__subtitle">Profile &amp; settings.</p>
             {/* Held at a fixed height whether or not the club list has landed,
                 so the page never jumps as it resolves. */}
             <p className="mytally__club">{clubName || ' '}</p>
