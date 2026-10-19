@@ -52,6 +52,19 @@ export async function fetchCustomBoard(type, { season, selections, min = 25, att
   })
 }
 
+// Any Savant CSV leaderboard by full URL, with the same retry and fail-loud
+// habits as the two boards above. The caller owns the URL, so it owns the trap
+// that comes with it: check the columns it reads against a live response.
+export async function fetchSavantCsv(label, url, { attempts = 4 } = {}) {
+  return withRetry(label, attempts, async () => {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const rows = csvObjects(await res.text())
+    if (!rows.length) throw new Error('empty response')
+    return rows
+  })
+}
+
 // Savant's `pitch-arsenal-stats` leaderboard — a direct per-pitch-type join,
 // one row per (player_id, pitch_type), identical columns for both roles. Feeds
 // gen-savant-matchup.mjs's Family C (a hitter against one specific pitch).

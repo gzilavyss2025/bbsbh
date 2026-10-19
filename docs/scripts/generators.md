@@ -1183,6 +1183,16 @@ don't run these by hand.
   club roll-up are derived in `src/api/around-the-game/runValue.js`, the same
   split `gen-gate.mjs` keeps with `gate.js`. `docs/run-value.md` is the
   reconstruction and the check against a published board. Spoiler-free.
+- `gen-club-defense-running.mjs` → `public/data/club-defense-running.json` — six
+  regular-season measures per club, keyed by MLB team id, for the World Series
+  scouting report's "Glove and legs" card: `oaa`, `framingRuns`, `sprintSpeed`,
+  `stolenBases`, `stolenBaseSuccess`, `extraBasesTaken`. Four Baseball Savant CSV
+  boards plus statsapi team hitting stats (`gameType=R`). A measure whose source
+  fails is `null` for every club, never 0. Framing and baserunning are fetched
+  once per club because the `team=` filter gives a traded player's share to each
+  club. The roll-ups are pure, in `scripts/lib/club/defense-running.mjs`. Every
+  URL, column and live check: `docs/glove-and-legs-data.md`. Reader:
+  `src/api/clubDefenseRunning.js`. Spoiler-free.
 - `gen-savant-percentiles.mjs` → `public/data/savant-percentiles.json` — season
   Statcast percentile ranks per player (`bat`/`pit`), keyed by personId, from
   Baseball Savant's CORS-open percentile-rankings CSV. Savant does the percentile
