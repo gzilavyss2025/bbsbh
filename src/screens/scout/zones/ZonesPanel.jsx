@@ -15,12 +15,11 @@ import { zoneCallout } from './callout.js'
 // say whose map is whose, every share and rate prints its "%", and on All +
 // xwOBA (est.) a callout under the readout says what the two maps add up to.
 //
-// The maps mirror with the View (ADR-0093 decision 2), which now sits on the
-// scene's bar; `turns` keys the turn-over motion on a View tap (scout.css).
+// The maps draw the hitter's view only (ADR-0118).
 const lower = (s) => s.toLowerCase() // caps-js-exempt: a pitch name inside a caption
 
 
-export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, view, stance, hitterStance, metric, picked, onPick, turns }) {
+export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, view, stance, hitterStance, metric, picked, onPick }) {
   const crowd = stance === 'L' ? 'lefties' : 'righties'
   const names = { hitter: data.hitter.last, pitcher: data.pitcher.last }
   const typeName = selType ? selType.name : 'All pitches'
@@ -39,7 +38,7 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
         />
       )}
 
-      <div key={turns} className={`scout__maps${turns ? ' is-turning' : ''}`}>
+      <div className="scout__maps">
         <figure className="scout__fig">
           <figcaption className="scout__figcap">
             Where {names.pitcher} throws {selType ? `the ${lower(selType.name)} ` : ''}to {crowd} · % of pitches
