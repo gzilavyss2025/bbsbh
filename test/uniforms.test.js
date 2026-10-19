@@ -11,6 +11,7 @@ import {
   liveJerseyTreatment,
   liveTreatmentFor,
   uniformSummary,
+  homeSetOf,
   jerseyLabel,
   uniformFriendlyName,
   formatUniformName,
@@ -541,4 +542,23 @@ test('batterFigureUrls returns null for a null or malformed code', () => {
 test('batterFigureUrls draws any hand but "left" as the right-handed stance (the CDN has only those two folders)', () => {
   assert.equal(batterFigureUrls(SIDE, 'R').jersey, `${FIG}/2026/right/158_jersey_5_2026.png`)
   assert.equal(batterFigureUrls(SIDE, 'S').pants, `${FIG}/2026/right/158_pants_5_2026.png`)
+})
+
+test('homeSetOf picks the Home jersey and the pants of the same set, or null', () => {
+  const a = (piece, text, code) => ({ piece, text, code })
+  const catalog = {
+    158: [
+      a('P', 'Brewers City Connect 2.0 Pants', '158_pants_5_2026'),
+      a('J', 'Brewers City Connect 2.0 Jersey', '158_jersey_5_2026'),
+      a('P', 'Brewers Road Grey Pants', '158_pants_2_2026'),
+      a('P', 'Brewers Home Cream Pants', '158_pants_1_2026'),
+      a('J', 'Brewers Home Cream Jersey', '158_jersey_1_2026'),
+    ],
+    147: [a('J', 'Yankees Home Pinstripe Jersey', '147_jersey_1_2026')], // no pants
+  }
+  const set = homeSetOf(catalog, 158)
+  assert.deepEqual(set.map((x) => x.code), ['158_jersey_1_2026', '158_pants_1_2026'])
+  assert.equal(homeSetOf(catalog, 147), null)
+  assert.equal(homeSetOf(catalog, 999), null)
+  assert.equal(homeSetOf({}, null), null)
 })

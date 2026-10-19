@@ -121,6 +121,21 @@ export function batterFigureUrls(assets, hand = 'right') {
   return jersey && pants ? { jersey, pants } : null
 }
 
+// A club's HOME batting set from fetchTeamUniformCatalog's answer: the jersey
+// whose text says "Home", plus the pants whose text matches it ("Brewers Home
+// Cream Jersey" → "Brewers Home Cream Pants"). `[jersey, pants]` in the shape
+// batterFigureUrls reads, or null when the club has no such pair.
+export function homeSetOf(catalog, teamId) {
+  const assets = catalog?.[teamId] ?? []
+  const setName = (a) => a.text.replace(/\s*\b(Jersey|Pants)\s*$/i, '')
+  for (const jersey of assets) {
+    if (jersey.piece !== 'J' || !/\bHome\b/i.test(jersey.text)) continue
+    const pants = assets.find((a) => a.piece === 'P' && setName(a) === setName(jersey))
+    if (pants) return [jersey, pants]
+  }
+  return null
+}
+
 // A tight, at-a-glance uniform summary — "Away Alternate Navy Blue",
 // "Home White", "Road Grey" — synthesized from the full asset list the way
 // weather.js boils a forecast down to a scorebook line. The JERSEY is the
