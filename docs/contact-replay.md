@@ -209,6 +209,45 @@ plate's back point. The contact point `K` is the measured pitch path at
 `y = YC` (the `realFlight` of the pitch, `camera.js`). Contact time `tc` is the
 time the pitch reaches `y = YC`.
 
+#### Measured on real games
+
+Measured 2026-10-19 for #2345. No value in this spec changed.
+
+- **Games (9, all completed, sportId 1).** Postseason, 2026-10-12 to 2026-10-15:
+  849810, 849811, 849812, 849818, 849820. Regular season, 2026-09-27: 822679,
+  823408, 824705, 824948. The 849810 parse kept 295 of its 296 CSV rows.
+- **Query.** One request per game:
+  `https://baseballsavant.mlb.com/statcast_search/csv?all=true&type=details&player_type=batter&hfGT=R%7CF%7CD%7CL%7CW%7C&game_date_gt=<date>&game_date_lt=<date>&game_pk=<pk>`
+  (the pattern of `savantUrl` in `src/api/scout/headToHead.js`, with `game_pk`).
+  Script: `.scratch/contact-replay-tuning/measure.mjs`.
+- **Rule.** A swing with contact is a pitch whose `description` is
+  `hit_into_play`, `foul` or `foul_tip`. Rows with an empty
+  `intercept_ball_minus_batter_pos_y_inches` are left out of the figures.
+
+| Swings with contact | Swings | With intercept | Median | p10 | p90 |
+| --- | --- | --- | --- | --- | --- |
+| All | 995 | 970 | 28.7 in | 16.7 in | 41.6 in |
+| In play | 455 | 436 | 29.6 in | 19.3 in | 40.1 in |
+| Foul | 540 | 534 | 27.9 in | 14.7 in | 42.2 in |
+
+Savant defines the field as the distance between the bat/ball intercept point
+and the batter's center of mass, in the mound-to-plate direction
+(https://baseballsavant.mlb.com/csv-docs). That page does not state the sign.
+All but a few values are positive, so positive means toward the mound.
+
+**Conversion.** The median of 28.7 in is 2.39 ft in front of the batter's center
+of mass. *Inference:* the center of mass stands about 8.5 in (half the plate's
+17 in depth) in front of the plate's back point. This depth is an assumption,
+not a measurement. With it, the median contact is about 37.2 in, or 3.1 ft, in
+front of the back point. With a center of mass at the back point itself, it is
+2.39 ft.
+
+**Judgement: `YC = 2.2` looks off.** *Judgement:* 2.2 ft is below the measured
+median under both assumed depths (2.4 ft to 3.1 ft), so the bat meets the ball
+farther out front than the spec draws it. The gap is small (0.2 ft to 0.9 ft),
+and the spread (p10 to p90 is 1.4 ft to 3.5 ft before the depth offset) is wider
+than the gap. Gary decides the value.
+
 ### 6.2 The swing (pencil, always, until phase C)
 
 The bat is a straight tapered shape, 2.65 ft long. The barrel's sweet spot
@@ -380,6 +419,38 @@ rules are a first cut. Tune them on real games:
 A verdict needs xBA or the barrel flag, so it ships in phase B. The stamp is
 `--font-display`, `--w-bold`, `--fs-ui`, `--ls-label`, a 2 px border,
 `--radius-xs`, and a resting turn of -3°.
+
+#### Measured on real games
+
+Measured 2026-10-19 for #2345. No value in this spec changed.
+
+- **Games, dates and query.** The same nine games and the same CSV query as
+  section 6.1 (2026-09-27 to 2026-10-15). They give 18 team-games.
+- **Rule.** A ball in play is a row with `description` = `hit_into_play` and a
+  value in `estimated_ba_using_speedangle`. A hit is `events` in `single`,
+  `double`, `triple`, `home_run`. An out is any other ball in play. Errors
+  (`field_error`) and fielder's choice with no out (`fielders_choice`) are left
+  out: 2 rows. 10 balls in play had no xBA and are also left out.
+- **Count.** 443 balls in play: 144 hits and 299 outs (24.6 per team-game).
+
+| Cutoffs | `Hard-luck out` count | Of outs | Of balls in play | Per team-game | `Lucky hit` count | Of hits | Of balls in play | Per team-game |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| xBA ≥ .450 / < .200 | 35 | 11.7% | 7.9% | 1.94 | 12 | 8.3% | 2.7% | 0.67 |
+| **xBA ≥ .500 / < .250 (spec)** | **25** | **8.4%** | **5.6%** | **1.39** | **15** | **10.4%** | **3.4%** | **0.83** |
+| xBA ≥ .550 / < .300 | 20 | 6.7% | 4.5% | 1.11 | 19 | 13.2% | 4.3% | 1.06 |
+
+The rate per team-game is the count divided by 18. It is an average over the
+sample; no team-game was tallied on its own.
+
+**Sensitivity.** A move of .050 on the `Hard-luck out` cutoff changes its count
+by 40% up and 20% down. The same move on the `Lucky hit` cutoff changes its
+count by 20% down and 27% up.
+
+**Judgement: both rules hold up.** *Judgement:* at the spec cutoffs a team sees
+about 1.4 `Hard-luck out` stamps and 0.8 `Lucky hit` stamps in a game, on 5.6%
+and 3.4% of balls in play. That is rare enough to mean something and common
+enough to show in a game. The `Lucky hit` rule is the less stable one:
+its count changes by 7 between the neighbouring cutoffs, from 12 to 19.
 
 ## 8. Motion
 
