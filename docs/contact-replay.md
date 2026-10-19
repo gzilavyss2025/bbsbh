@@ -105,10 +105,12 @@ called strike) gets no bat. Do not draw a bat for a pitch the batter took.
 play text for halves the reader has not revealed. The rule (Gary, 2026-10-18):
 **nothing score-bearing survives the parse.**
 
-- A new module in `src/api/` (to be created) fetches `/gf` and parses it in the
+- A new module in `src/api/savant/` (to be created; `src/api/` itself is at its `check-dir-size` budget) fetches `/gf` and parses it in the
   same function. The parser reads ONLY `team_home[]` and `team_away[]`, and from
   each row ONLY `play_id`, `batSpeed`, `xba`, `is_barrel` and
-  `homeRunBallparks`. It returns a `Map` of `playId` to
+  `contextMetrics.homeRunBallparks` (nested, not a top-level field; `xba` is a
+  string such as `".820"`; checked on gamePk 849810,
+  `.scratch/contact-replay/facts.md`). It returns a `Map` of `playId` to
   `{ batSpeed, xba, barrel, hrParks }`. The raw response goes out of scope
   inside that function. No cache, ref or state holds the raw body.
 - Do not read `scoreboard`, `boxscore`, `des`, `events`, `result` or any other
@@ -157,8 +159,8 @@ Savant code.
 | File | Change |
 | --- | --- |
 | `src/api/playbyplay/pitchInfo.js` | Add `hit` and `playId` (section 3.1) |
-| new `/gf` module in `src/api/`, to be created (phase B) | Fetch and strip on parse (section 3.2), with its manifest entry |
-| new CSV module in `src/api/`, to be created (phase C) | Fetch and strip on parse (section 3.3), with its manifest entry |
+| new `/gf` module in `src/api/savant/`, to be created (phase B) | Fetch and strip on parse (section 3.2), with its manifest entry |
+| new CSV module in `src/api/savant/`, to be created (phase C) | Fetch and strip on parse (section 3.3), with its manifest entry |
 | `src/lib/pitcherCard/atBat.js` | Pass `hit`, the call class (swing, whiff, foul, in play) and the bat side to each scene pitch |
 | new `lib/pitcherCard/swing.js`, to be created | The swing model: pure math, no React. Section 6.2 |
 | new `lib/pitcherCard/batted.js`, to be created | The batted ball in the scene camera, and the side-view path. Section 6.4 |
