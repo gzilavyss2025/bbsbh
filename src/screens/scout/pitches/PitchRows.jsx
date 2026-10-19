@@ -1,3 +1,4 @@
+import { useInViewOnce } from '../../../hooks/scroll/useInViewOnce.js'
 import { fmtValue } from '../../../lib/scout/metrics.js'
 import { glyphD } from '../../../lib/pitch/pitchGlyph.js'
 import { pitchMark } from '../../../lib/pitch/pitchTypes.js'
@@ -36,13 +37,14 @@ function Pull({ label, metric, row, names }) {
 }
 
 export function PitchRows({ board, sides, names, sel, onSelect }) {
+  const [ref, phase] = useInViewOnce(`scout:${names?.pitcher}:${names?.hitter}:pitches`)
   const xw = sides.xwoba
   if (!board || !xw) return null
   const contact = ledgerRows(board.types, xw, 'xwoba')
   const whiff = sides.whiff ? ledgerRows(board.types, sides.whiff, 'whiff') : []
   const swing = sides.swing ? ledgerRows(board.types, sides.swing, 'swing') : []
   return (
-    <div className="scout__rows" role="group" aria-label="Pitch by pitch">
+    <div className="scout__rows" ref={ref} data-motion={phase} role="group" aria-label="Pitch by pitch">
       <div className="scout__rowshead" aria-hidden="true">
         <span className="scout__rowsp">◀ {names.pitcher}’s side</span>
         <span>League</span>
@@ -60,6 +62,8 @@ export function PitchRows({ board, sides, names, sel, onSelect }) {
             key={r.code}
             type="button"
             className="scout__prow"
+            data-code={r.code}
+            style={{ '--i': i }}
             aria-pressed={sel === r.code}
             onClick={() => onSelect(sel === r.code ? null : r.code)}
           >
