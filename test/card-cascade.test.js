@@ -927,6 +927,11 @@ test('C4: focus mode still drops the half sheet around a lone staged notice', ()
 // many SealBoxes and revealedThrough reads it holds, as measured on
 // origin/main. A frame move changes none of these. If this fails, the slice
 // moved a seal: stop and ask, never update the literal to match.
+// The BoxScore.jsx split (#2312) moved `api/boxscore.js` (via resolveCardPlayer)
+// into boxscore/InsightCards.jsx and added boxscore/GameNotes.jsx. The SealBox,
+// the revealedThrough reads and the render site stayed in BoxScore.jsx; Gary
+// approved re-pinning the two new files. The containment test below keeps
+// them reachable only from that render site.
 const C4_SEAL = {
   'components/inning/HalfInning.jsx': { reveal: ['boxscore.js', 'highlights.js', 'hitchart.js', 'playbyplay.js'], sealBoxes: 1, revealedThrough: 12 },
   'components/gamehud/StatBox.jsx': { reveal: ['boxscore.js', 'challenges.js', 'derive.js', 'linescore.js', 'umpireFavor.js'], sealBoxes: 2, revealedThrough: 0 },
@@ -1410,6 +1415,11 @@ test('C5: the design lab draws the performer tile on the ledger frame', () => {
 // sealed export is imported), and how many SealBoxes and revealedThrough
 // reads it holds. A frame move changes none of these. If this fails, the
 // slice moved a seal: stop and ask, never update the literal to match.
+// The BoxScore.jsx split (#2312) moved `api/boxscore.js` (via resolveCardPlayer)
+// into boxscore/InsightCards.jsx and added boxscore/GameNotes.jsx. The SealBox,
+// the revealedThrough reads and the render site stayed in BoxScore.jsx; Gary
+// approved re-pinning the two new files. The containment test below keeps
+// them reachable only from that render site.
 const C5_SEAL = {
   'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
   'screens/boxscore/InsightCards.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
@@ -2319,4 +2329,15 @@ test('H3: the between-innings button is still named by its fact', () => {
   assert.match(button, /betweeninnings__progress/)
   assert.match(button, /\{card\.text\}/)
   assert.doesNotMatch(button, /aria-label/)
+})
+
+// The new box-score files hold reveal-only reads, so they may be imported only by
+// BoxScore.jsx, whose single SealBox render function is what keeps them sealed.
+test('C5: InsightCards and GameNotes are imported only by BoxScore.jsx', () => {
+  const importers = (name) =>
+    files(SRC, ['.js', '.jsx'])
+      .filter((rel) => new RegExp(`from ['"][./\\w-]*boxscore/${name}\\.jsx['"]`).test(src(rel)))
+      .sort()
+  assert.deepEqual(importers('InsightCards'), ['screens/BoxScore.jsx'])
+  assert.deepEqual(importers('GameNotes'), ['screens/BoxScore.jsx'])
 })
