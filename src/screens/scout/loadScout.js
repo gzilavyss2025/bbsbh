@@ -6,6 +6,10 @@ import { currentSeasonOf } from '../../api/staticJson.js'
 import { fetchSavantMatchup } from '../../api/matchup/savant.js'
 import { fetchHitterGridFor, fetchHitterLeague } from '../../api/scout/hitterGrid.js'
 import { lastName } from '../../api/select.js'
+import { yearsPlayed } from '../../api/search.js'
+import { isMlbTeamId } from '../../lib/teams.js'
+import { rosterStatusView } from '../../lib/person/rosterStatus.js'
+import { baseballToday } from '../../lib/time/standingsDates.js'
 
 // EVERYTHING THE MATCHUP SCOUT DRAWS EXCEPT THE HEAD-TO-HEAD (#1410), in one
 // pass: both people (name, hands, club), the pitcher's mix and 5x5 command
@@ -31,15 +35,26 @@ export async function loadScout(pitcherId, hitterId) {
     season == null ? null : fetchHitterLeague(season),
   ])
   if (!pitcher || !hitter) return null
-  return { pitcher: personOf(pitcher), hitter: personOf(hitter), arsenal, command, season, savant, grid, league }
+  // A retired player, or one the season stores lack, has no scouting data
+  // (slice 7b): the page then shows only the meetings.
+  const pitcherIn = Boolean(arsenal?.pit?.[pitcherId])
+  const hitterIn = Boolean(grid || savant?.bat?.[hitterId])
+  return { pitcher: personOf(pitcher, pitcherIn), hitter: personOf(hitter, hitterIn), arsenal, command, season, savant, grid, league }
 }
 
-const personOf = (p) => ({
+// A retired player's club is his last stop, not `currentTeam` (often null).
+const personOf = (p, inStores) => ({
   id: p.id,
   name: p.fullName ?? '',
   // The surname the Edge tab's sentences use ("Lean Chourio").
   last: lastName(p) || (p.fullName ?? ''),
   throws: p.pitchHand?.code ?? '',
   bats: p.batSide?.code ?? '',
-  teamId: p.currentTeam?.id ?? null,
+  teamId: p.active === false
+    ? rosterStatusView(p, baseballToday(), { isMlbTeamId })?.lastTeam?.id ?? p.currentTeam?.id ?? null
+    : p.currentTeam?.id ?? null,
+  retired: p.active === false,
+  years: yearsPlayed(p),
+  lastYear: (p.lastPlayedDate ?? '').slice(0, 4),
+  inStores,
 })

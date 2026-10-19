@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { totalsOf } from '../../../api/scout/headToHead.js'
+import { fetchVsPlayerTotal } from '../../../api/scout/vsPlayer.js'
+import { useAsync } from '../../../hooks/useAsync.js'
 import { rate3 } from '../../../api/person/shared.js'
 import { pitchFamily } from '../../../api/pitchArsenal.js'
 import { humanDateWithYear, monthDayYear } from '../../../lib/dates.js'
@@ -49,11 +51,27 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
   const failed = !h2h.loading && h2h.data === null
   const names = { hitter: data.hitter.last, pitcher: data.pitcher.last }
   const crowd = stance === 'L' ? 'lefties' : 'righties'
+  // No pitch tracking before 2008 (slice 7b): Savant may still list the plate
+  // appearances, with no pitches. A pair with none tracked, and a player who
+  // left before then, gets the Stats API career line.
+  const early = !h2h.loading && h2h.data?.pas.every((pa) => !pa.pitches) && [data.hitter, data.pitcher].some((p) => p.lastYear && p.lastYear < '2008')
+  const total = useAsync(() => (early ? fetchVsPlayerTotal(data.hitter.id, data.pitcher.id) : Promise.resolve(null)), [early, data])
 
   let body
   if (h2h.loading) body = <AsyncStatus loading hasData={false} />
   else if (failed) body = <EmptyState>No head-to-head on file</EmptyState>
-  else if (pas.length === 0) body = <EmptyState>No meetings before {humanDateWithYear(cutoff)}</EmptyState>
+  else if (early && total.loading) body = <AsyncStatus loading hasData={false} />
+  else if (early && total.data) {
+    const t = total.data
+    body = (
+      <>
+        <p className="scout__note">Regular season · no pitch tracking before 2008</p>
+        <p className="scout__note">
+          {t.pa} PA · AVG/OBP/SLG {t.avg}/{t.obp}/{t.slg} · {t.hr} HR · {t.k} K · {t.bb} BB
+        </p>
+      </>
+    )
+  } else if (pas.length === 0) body = <EmptyState>No meetings before {humanDateWithYear(cutoff)}</EmptyState>
   else {
     const f = meetingFacts(pas)
     const t = totalsOf(pas)
