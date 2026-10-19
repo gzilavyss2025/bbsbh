@@ -5,7 +5,7 @@ import { Card } from '../ui/frame/Card.jsx'
 import { StruckLine } from './StruckLine.jsx'
 import { FieldBackdrop } from './field/FieldBackdrop.jsx'
 import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
-import { PLOT_VIEWBOX, plotPercent } from '../../lib/ballpark/ballparkGeometry.js'
+import { VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
 
 // A grass-and-clay field with each fielder's surname at his position.
 // Position names remain available to assistive technology. Fielders only —
@@ -43,14 +43,23 @@ const SPOTS = {
 // minus the pitcher; keep the two tables in step.
 const PARK_SPOTS = {
   LF: { x: 156, y: 238 },
-  CF: { x: 310, y: 168 },
+  CF: { x: 310, y: 182 },
   RF: { x: 464, y: 238 },
   SS: { x: 222, y: 338 },
   '2B': { x: 398, y: 338 },
   '3B': { x: 188, y: 446 },
   '1B': { x: 432, y: 446 },
-  C: { x: 310, y: 522 },
+  C: { x: 310, y: 512 },
 }
+
+// The park window for this card: ballparkGeometry.js's plot window with 22 more units of dead sky
+// cropped off the top, so the field and the fielders sit ~12px higher and nothing is lost at the
+// bottom. It is still a window onto the fixed viewBox, never a rescale. 72 keeps the CF distance
+// sign of the deepest park on file (415 ft, label near y 74).
+const PARK_TOP = 72
+const PARK_H = VIEWBOX.h - PARK_TOP
+const PARK_VIEWBOX = `0 ${PARK_TOP} ${VIEWBOX.w} ${PARK_H}`
+const parkPercent = ({ x, y }) => ({ left: (x / VIEWBOX.w) * 100, top: ((y - PARK_TOP) / PARK_H) * 100 })
 
 // Normalize either input shape to a { position -> [{ last, inning, replaced }] }
 // stack. The simple lineup form becomes a single, un-struck entry.
@@ -88,15 +97,27 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
   // renders. A host that makes it part of its own card reshapes it in CSS
   // (.opp, .bs__defensecard, .refpanel__body). The Card computes nothing, so
   // it is safe inside the box score's reveal render.
+  const park = Boolean(layout)
+  const dh = byPos.DH ? (
+    <p className={`defdiamond__dh${park ? ' defdiamond__dh--park' : ''}`}>
+      <span className="defdiamond__dhpos">DH</span>
+      <span className="defdiamond__dhstack">
+        {byPos.DH.map((e, i) => (
+          <DefenseName key={i} entry={e} />
+        ))}
+      </span>
+    </p>
+  ) : null
   return (
     <Card as="div" body="flush" className="defdiamond">
       {layout ? (
         <div className="defdiamond__field defdiamond__field--park">
-          <BallparkDiagram layout={layout} viewBox={PLOT_VIEWBOX} className="defdiamond__park" label={label} />
+          <BallparkDiagram layout={layout} viewBox={PARK_VIEWBOX} className="defdiamond__park" label={label} />
           {Object.entries(PARK_SPOTS).map(([pos, xy]) => {
-            const { left, top } = plotPercent(xy)
+            const { left, top } = parkPercent(xy)
             return <DefenseSpot key={pos} stack={byPos[pos]} spot={{ x: left, y: top, label: SPOTS[pos].label }} park />
           })}
+          {dh}
         </div>
       ) : (
         <div className="defdiamond__field">
@@ -107,17 +128,7 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
           ))}
         </div>
       )}
-
-      {byPos.DH && (
-        <p className="defdiamond__dh">
-          <span className="defdiamond__dhpos">DH</span>
-          <span className="defdiamond__dhstack">
-            {byPos.DH.map((e, i) => (
-              <DefenseName key={i} entry={e} />
-            ))}
-          </span>
-        </p>
-      )}
+      {!park && dh}
     </Card>
   )
 }

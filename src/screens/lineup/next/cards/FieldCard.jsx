@@ -11,7 +11,7 @@ import { ClubBar } from './ClubBar.jsx'
 // 1:1 with SVG units: lib/ballpark/ballparkGeometry.js). plotPercent maps them onto the
 // cropped plot window the card draws.
 const SPOT = {
-  CF: { x: 310, y: 168 },
+  CF: { x: 310, y: 182 },
   LF: { x: 156, y: 238 },
   RF: { x: 464, y: 238 },
   SS: { x: 222, y: 338 },
@@ -19,7 +19,7 @@ const SPOT = {
   '3B': { x: 188, y: 446 },
   '1B': { x: 432, y: 446 },
   P: { x: 310, y: 442 },
-  C: { x: 310, y: 522 },
+  C: { x: 310, y: 512 },
 }
 
 // The other club's defense, as names on the park the game is played in: surnames only, no

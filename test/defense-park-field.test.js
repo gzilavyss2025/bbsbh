@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { plotPercent } from '../src/lib/ballpark/ballparkGeometry.js'
+import { VIEWBOX } from '../src/lib/ballpark/ballparkGeometry.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const read = (rel) => readFileSync(join(SRC, rel), 'utf8')
@@ -18,11 +18,16 @@ test('DefenseSection resolves the venue layout and passes it to the diamond', ()
 })
 
 test('every park spot lands inside the plot window with room for its label', () => {
+  const src = read('components/scoring/DefenseDiamond.jsx')
+  const parkTop = Number(src.match(/const PARK_TOP = (\d+)/)[1])
+  const plotH = VIEWBOX.h - parkTop
+  assert.match(read('styles/10-lineup.css'), new RegExp(`aspect-ratio: ${VIEWBOX.w} / ${plotH};`))
   const block = read('components/scoring/DefenseDiamond.jsx').match(/const PARK_SPOTS = \{([\s\S]*?)\n\}/)[1]
   const spots = [...block.matchAll(/'?(\w+)'?: \{ x: (\d+), y: (\d+) \}/g)]
   assert.equal(spots.length, 8)
   for (const [, pos, x, y] of spots) {
-    const { left, top } = plotPercent({ x: Number(x), y: Number(y) })
+    const left = (Number(x) / VIEWBOX.w) * 100
+    const top = ((Number(y) - parkTop) / plotH) * 100
     assert.ok(left > 10 && left < 90, `${pos} left ${left}`)
     assert.ok(top > 5 && top < 95, `${pos} top ${top}`)
   }
