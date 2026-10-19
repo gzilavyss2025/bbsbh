@@ -7,9 +7,11 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import {
+  EASE_OUT,
   EASE_STAMP,
   EASE_UNFOLD,
   cubicBezier,
+  easeOut,
   easeOutQuart,
   easeStamp,
   easeUnfold,
@@ -32,6 +34,11 @@ const decl = (body, property) =>
 test('EASE_STAMP and EASE_UNFOLD are the --ease-stamp and --ease-unfold tokens', () => {
   assert.deepEqual(points('ease-stamp'), EASE_STAMP)
   assert.deepEqual(points('ease-unfold'), EASE_UNFOLD)
+})
+
+test('EASE_OUT is the --ease-out token', () => {
+  assert.deepEqual(points('ease-out'), EASE_OUT)
+  assert.equal(easeOut(0.5), cubicBezier(...EASE_OUT)(0.5))
 })
 
 test('cubicBezier moved: glide.js re-exports the one in lib/motion/curves.js', () => {

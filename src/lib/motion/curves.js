@@ -28,9 +28,12 @@ export function cubicBezier(x1, y1, x2, y2) {
 export const EASE_STAMP = [0.2, 0.9, 0.3, 1]
 // --ease-unfold: softer at the end. A menu that folds to a rail, a panel that opens.
 export const EASE_UNFOLD = [0.23, 1, 0.32, 1]
+// --ease-out: a hard start that settles slowly. The replay's landing beat.
+export const EASE_OUT = [0.16, 1, 0.3, 1]
 
 export const easeStamp = cubicBezier(...EASE_STAMP)
 export const easeUnfold = cubicBezier(...EASE_UNFOLD)
+export const easeOut = cubicBezier(...EASE_OUT)
 
 // The canvas's `eo` (ArsenalReveal) and `easeOut` (PitchFlight): a quartic
 // ease-out, clamped to [0, 1]. It has no token, because no CSS reads it.
