@@ -3,6 +3,7 @@ import { loadCareerMatchups, starterMatchupsFor } from '../../api/careerMatchups
 import { loadNineKeys } from '../../api/nineKeys.js'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import { nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { matchupEdges } from '../../lib/postseason/primer/matchupEdges.js'
 import { scoutingModel } from '../../lib/postseason/worldseries/scouting.js'
 import { teamClubNameShort } from '../../lib/teams.js'
@@ -46,8 +47,7 @@ export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, plateUmpir
     () => matchupEdges([clubA, clubB].map((id) => starterMatchupsFor(career, gamePk, id))),
     [career, gamePk, clubA, clubB],
   )
-  const [a, b] = clubIds.map((id) => nineKeys?.current?.teams?.find((t) => t.teamId === id))
-  const hasNineKeys = Boolean(a && b && nineKeys.current.season === season && nineKeys.keys?.length)
+  const hasNineKeys = Boolean(nineKeysTeams(nineKeys, clubIds.map((id) => ({ id })), season))
   const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, edges, plateUmpire })
   // The sticky chrome over a card: the slate's own bar (the probe reads --slate-bar-h) plus this
   // jump bar. One measured number feeds the bar's scroll offset and each card's scroll-margin.
@@ -84,9 +84,9 @@ export function ScoutingReport({ clubIds, slateDate, dayType, gamePk, plateUmpir
       />
       <Grid min={340} gap="loose">
         {cards.map((c) => (
-          <section key={c.id} id={`ww-scout-${c.id}`} className="ww-scout__card" aria-label={c.label}>
+          <div key={c.id} id={`ww-scout-${c.id}`} className="ww-scout__card">
             {CARD[c.id](ctx)}
-          </section>
+          </div>
         ))}
       </Grid>
     </Stack>

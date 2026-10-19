@@ -1,4 +1,4 @@
-import { keysVerdict } from '../../lib/postseason/keysVerdict.js'
+import { keysVerdict, nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { ordinal } from '../../lib/format.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { Door } from '../ui/control/Door.jsx'
@@ -23,9 +23,9 @@ import { useRouteLink } from '../../lib/nav.js'
 //   season  the series' season; the section shows only for that season's file
 export function SeriesNineKeys({ data, clubs, season }) {
   const routeLink = useRouteLink()
-  const current = data?.current
-  const [a, b] = clubs.map((c) => current?.teams?.find((t) => t.teamId === c.id))
-  if (!a || !b || current.season !== season || !data.keys?.length) return null
+  const teams = nineKeysTeams(data, clubs, season)
+  if (!teams) return null
+  const [a, b] = teams
   const bar = data.bar
   const failed = (t, key) => t.ranks?.[key] == null || t.ranks[key] > bar
   const abbr = (id) => teamAbbr({ id })
