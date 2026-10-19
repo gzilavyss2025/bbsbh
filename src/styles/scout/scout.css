@@ -192,6 +192,11 @@
   line-height: var(--lh-solid);
   color: var(--text-heading);
 }
+.scout__answerleague {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
 
 /* --- the Now Pitching scene keeps its card size on a wide screen --- */
 

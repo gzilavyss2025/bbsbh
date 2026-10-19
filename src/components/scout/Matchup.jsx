@@ -52,7 +52,7 @@ function Side({ role, person, note }) {
         </span>
         <span className="scout__hand">
           {note}
-          {person.teamId && <TeamLogo teamId={person.teamId} size={18} />}
+          {person.teamId != null && <TeamLogo teamId={person.teamId} size={18} />}
         </span>
         <span className="scout__sidebar" aria-hidden="true" />
       </div>
