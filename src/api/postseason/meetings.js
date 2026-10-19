@@ -18,16 +18,17 @@
 // matchup.pitcher.id, playEvents[].{isPitch, details.type.code}}}.
 // Missing fields fall back: text to '', numbers to null, lists to [], the pitch mix to {}.
 //
-// Card: { gamePk, date, venue, ump, decisions: { w, l, s },
+// Card: { gamePk, date, gameNumber, venue, ump, decisions: { w, l, s },
 //   away|home: { id, abbr, runs, hits, errors,
 //     starter: { id, name, hand, ip, h, er, bb, k, pitches, mix: { [pitchCode]: count } },
 //     lineup: [{ id, name, pos }] },
 //   scoring: [{ inning: 'T1' | 'B6', text }] }
 import { selectMeetings } from '../../lib/postseason/worldseries/scouting/meetings.js'
+import { teamAbbr } from '../../lib/teams.js'
 import { getJson } from '../statsapi.js'
 import { dayBefore, keptGames } from './fetch.js'
 
-const FIELDS = 'dates,date,games,gamePk,gameType,officialDate,status,abstractGameState,teams,away,home,team,id'
+const FIELDS = 'dates,date,games,gamePk,gameType,officialDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 
 export function meetingsUrl(clubA, clubB, slateDate) {
   return (
@@ -111,7 +112,12 @@ export async function fetchMeetings({ clubA, clubB, slateDate }, { signal } = {}
     selectMeetings(rows, { clubA, clubB, slateDate }).map(async (g) => {
       const feed = await getJson(`/api/v1.1/game/${g.gamePk}/feed/live`, { signal }).catch(() => null)
       const card = meetingCard(feed, g.gamePk)
-      return { ...card, date: card.date || g.officialDate }
+      // A thin or failed feed still names its clubs: they come from the schedule row.
+      const club = (s) => {
+        const id = card[s].id ?? g.teams[s].team.id
+        return { ...card[s], id, abbr: card[s].abbr || teamAbbr({ id }) }
+      }
+      return { ...card, date: card.date || g.officialDate, gameNumber: g.gameNumber ?? 1, away: club('away'), home: club('home') }
     }),
   )
 }

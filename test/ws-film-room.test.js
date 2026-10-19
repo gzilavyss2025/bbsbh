@@ -53,6 +53,25 @@ test('a pitch mix is sorted and its percents sum to 100', () => {
   assert.deepEqual(m.starters[0].mix, [])
 })
 
+test('a mix with a deficit of two or more still sums to 100', () => {
+  const mix = Object.fromEntries(['FF', 'SL', 'CH', 'CU', 'SI', 'FC', 'ST'].map((c) => [c, 1]))
+  const [m] = filmRoomModel([game('2026-08-04', side(139, 'TB', 1, mix), side(158, 'MIL', 3))], {})
+  assert.equal(m.starters[0].mix.reduce((n, p) => n + p.pct, 0), 100)
+})
+
+test('a suffix is not the surname, and no name gives no surname', () => {
+  const named = (name) => filmRoomModel([game('2026-08-04', { ...side(139, 'TB', 1), starter: { ...side(139, 'TB', 1).starter, name } }, side(158, 'MIL', 3))], {})[0].starters[0].surname
+  assert.equal(named('Luis Garcia Jr.'), 'Garcia')
+  assert.equal(named('Ken Griffey Sr.'), 'Griffey')
+  assert.equal(named('Nick Martinez'), 'Martinez')
+  assert.equal(named(''), '')
+})
+
+test('the game number rides on the meeting, default 1', () => {
+  assert.equal(filmRoomModel(M, {})[0].gameNumber, 1)
+  assert.equal(filmRoomModel([{ ...M[0], gameNumber: 2 }], {})[0].gameNumber, 2)
+})
+
 test('the starter reads club, hand and line', () => {
   const s = filmRoomModel(M, {})[0].starters[0]
   assert.equal(s.abbr, 'TB')

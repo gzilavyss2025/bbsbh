@@ -133,3 +133,23 @@ test('fetchMeetings: a failed schedule read is []', async () => {
     m.mock.restore()
   }
 })
+
+test('the schedule request asks for gameNumber, for a doubleheader\'s second game', () => {
+  const p = new URLSearchParams(meetingsUrl(158, 114, '2026-10-22').split('?')[1])
+  assert.match(p.get('fields'), /gameNumber/)
+})
+
+test('fetchMeetings: a game whose feed fails keeps its clubs and game number from the schedule', async () => {
+  const m = mock.method(globalThis, 'fetch', async (url) =>
+    String(url).includes('/schedule')
+      ? { ok: true, status: 200, json: async () => load('brewers-2026-schedule.json') }
+      : { ok: false, status: 500, json: async () => ({}) })
+  try {
+    const out = await fetchMeetings({ clubA: MIL, clubB: 114, slateDate: '2026-06-17' })
+    assert.equal(out.length, 1)
+    assert.deepEqual([out[0].away.id, out[0].away.abbr, out[0].home.id, out[0].home.abbr], [114, 'CLE', 158, 'MIL'])
+    assert.equal(out[0].gameNumber >= 1, true)
+  } finally {
+    m.mock.restore()
+  }
+})
