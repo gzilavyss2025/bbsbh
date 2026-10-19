@@ -3,14 +3,13 @@
    screens/scout/meetings/. A per-route partial beside scout.css, imported by
    ScoutPage.jsx only. Every selector is .scout__*.
 
-   Every number sits in a labelled box (.scout__fact): the value in mono, a
-   unit as a smaller inline <small>, a plain label under it. A pitch button
-   carries its family as a small dot, never a code. A call is coloured by
-   what it did: clay a strike, field green a ball, All-Star blue in play.
+   The pitch modal's numbers sit in labelled boxes (.scout__fact). The section's own facts are a 3 x 2
+   grid (.scout__mfacts). A pitch wears its pitchMark colour and shape (.scout__mark), as in the
+   Pitches section. A call is coloured by what it did: clay a strike, field green a ball, All-Star blue in play.
    The film is the Express Lane's own pane (expresslane/FilmPane.jsx).
    ============================================================ */
 
-/* --- the labelled number boxes --- */
+/* --- the labelled number boxes (the pitch modal's) --- */
 
 .scout__facts {
   display: grid;
@@ -28,7 +27,6 @@
   gap: 0;
   padding: var(--space-2) var(--space-1);
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
   background: var(--surface-card);
   text-align: center;
 }
@@ -44,11 +42,6 @@
   font-weight: var(--w-regular);
   color: var(--text-caption);
 }
-.scout__factsub {
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
-}
 .scout__factlabel {
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -57,44 +50,107 @@
   color: var(--text-caption);
 }
 
-/* --- the mix: the meetings against the season, full names in the key --- */
+/* --- the section: its title, the facts grid and the mix at the left, the games at the right --- */
 
+.scout__meethead {
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-heavy) solid var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+/* layout-exempt: the side column and the games sit side by side on a desktop (V25) */
+.scout__meet {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (min-width: 740px) {
+  .scout__meet {
+    grid-template-columns: minmax(340px, 1fr) minmax(0, 3fr);
+    gap: var(--space-8);
+  }
+  .scout__meethead {
+    font-size: var(--fs-h3);
+  }
+}
+
+/* The facts: one square 3 x 2 grid, a caps label over a bold value (V10). */
+.scout__dtlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.scout__dtvalue {
+  margin: 0;
+  color: var(--text-heading);
+}
+/* layout-exempt: a fixed 3 x 2 grid of facts */
+.scout__mfacts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border: var(--bw-heavy) solid var(--text-heading);
+  background: var(--surface-card);
+}
+.scout__mfacts > div {
+  min-width: 0;
+  padding: var(--space-2);
+  border-inline-end: var(--bw-hair) solid var(--border-hairline);
+  border-block-end: var(--bw-hair) solid var(--border-hairline);
+}
+.scout__mfacts .scout__dtvalue {
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+}
+
+/* --- the mix: what the hitter saw in the meetings against the season, in the Pitches section's marks --- */
+
+/* layout-exempt: a label column beside each bar */
 .scout__mix {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-1h) var(--space-2);
 }
-.scout__mixlabel {
+.scout__mixhead {
+  grid-column: 1 / -1;
+  margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-label);
+  font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  color: var(--text-caption);
+  color: var(--text-heading);
+}
+.scout__mixlabel {
+  font-size: var(--fs-cell);
+  color: var(--text-body);
 }
 .scout__mixbar {
   display: flex;
-  height: 18px;
+  height: 16px;
   overflow: hidden;
-  border-radius: var(--radius-xs);
+  border: var(--bw-hair) solid var(--text-heading);
   background: var(--border-hairline);
 }
 .scout__mixseg {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  color: var(--text-on-ink);
-  background: var(--arsenal-other);
+  background: var(--pitch);
+  border-inline-end: var(--bw-hair) solid var(--text-heading);
+}
+.scout__mixseg:last-child {
+  border-inline-end: 0;
 }
 .scout__mixkey,
 .scout__mixnote {
   grid-column: 1 / -1;
 }
+/* layout-exempt: the key wraps onto more lines on a narrow screen */
 .scout__mixkey {
   display: flex;
   flex-wrap: wrap;
@@ -102,70 +158,153 @@
   font-size: var(--fs-small);
   color: var(--text-body);
 }
-.scout__mixkeyitem::before {
-  content: '';
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin-inline-end: var(--space-1);
-  border-radius: var(--radius-xs);
-  background: var(--arsenal-other);
+.scout__mixkeyitem {
+  display: inline-flex;
+  align-items: center; /* layout-exempt: mark beside its name */
+  gap: var(--space-1);
 }
-.scout__mixseg[data-family='fastball'],
-.scout__mixkeyitem[data-family='fastball']::before { background: var(--arsenal-fastball); }
-.scout__mixseg[data-family='breaking'],
-.scout__mixkeyitem[data-family='breaking']::before { background: var(--arsenal-breaking); }
-.scout__mixseg[data-family='offspeed'],
-.scout__mixkeyitem[data-family='offspeed']::before { background: var(--arsenal-offspeed); }
-/* A second (third) pitch of one family wears paper stripes over the family's
-   colour, so a fastball and a cutter read apart in the bars and the key. The
-   label sits on the solid colour between the stripes' thin lines. */
-.scout__mixseg[data-shade='1'],
-.scout__mixkeyitem[data-shade='1']::before {
-  background-image: repeating-linear-gradient(45deg, color-mix(in srgb, var(--text-on-ink) 30%, transparent) 0 2px, transparent 2px 6px);
+/* A pitch's mark, as the Pitches section draws it: the shape in the pitch's colour with an ink outline. */
+.scout__mark {
+  flex: none;
 }
-.scout__mixseg[data-shade='2'],
-.scout__mixkeyitem[data-shade='2']::before {
-  background-image: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--text-on-ink) 30%, transparent) 0 2px, transparent 2px 6px);
+.scout__mark path {
+  fill: var(--pitch, var(--text-caption));
+  stroke: var(--text-heading);
+  stroke-width: 1.4; /* raw-value-exempt: outline width in the glyph's own units */
+  stroke-linejoin: round;
+}
+.scout__mark path[data-ring] {
+  fill: none;
 }
 
-/* --- the list: games, then one card per plate appearance --- */
+/* --- the games: a header per game, then one card per plate appearance --- */
 
 .scout__gamehead {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.scout__pa {
-  padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-}
-.scout__pahead {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
+  margin: 0;
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
 }
-.scout__patitle {
+.scout__gamelabel {
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* The card is a scorebook cell at the left (the inning, a diamond with the scoring mark, the
+   result) and the pitches, the contact line and the play at the right (V05). From 740px the cards
+   are narrow, so the cell moves to a row across the card's top. */
+.scout__pa {
+  border: var(--bw-heavy) solid var(--text-heading);
+  background: var(--surface-card);
+}
+/* layout-exempt: the scorebook cell beside the pitches */
+.scout__pagrid {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+}
+/* layout-exempt: the cell stacks its three parts */
+.scout__pacell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1h);
+  border-inline-end: var(--bw-hair) solid var(--border-hairline);
+}
+.scout__painn {
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.scout__painnx {
+  display: none;
+}
+.scout__padiamond {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+.scout__padiamond svg {
+  width: 100%;
+  height: 100%;
+}
+.scout__padiamond polygon {
+  fill: none;
+  stroke: var(--border-hairline);
+  stroke-width: 1.5; /* raw-value-exempt: outline width in the diamond's own units */
+}
+/* layout-exempt: the mark sits centred in the diamond */
+.scout__pamark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
   font-family: var(--font-display);
   font-size: var(--fs-h3);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
-.scout__pameta {
-  font-size: var(--fs-small);
-  color: var(--text-caption);
+.scout__paresult {
+  font-size: var(--fs-cell);
+  color: var(--text-body);
+  text-align: center;
+}
+.scout__pabody {
+  padding: var(--space-2);
+}
+@media (min-width: 740px) {
+  .scout__pagrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .scout__pacell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'diamond result' 'diamond inning';
+    align-content: center;
+    justify-items: start;
+    column-gap: var(--space-2h);
+    row-gap: 0;
+    border-inline-end: 0;
+    border-block-end: var(--bw-hair) solid var(--border-hairline);
+    padding: var(--space-2) var(--space-2h);
+  }
+  .scout__padiamond { grid-area: diamond; width: 44px; height: 44px; }
+  .scout__paresult {
+    grid-area: result;
+    align-self: end;
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--ls-caps);
+    color: var(--text-heading);
+  }
+  .scout__painn { grid-area: inning; align-self: start; }
+  .scout__painnx { display: inline; }
+}
+
+/* A plate appearance's contact numbers: one line of three (V05). */
+/* layout-exempt: a fixed three across */
+.scout__contact {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--fs-cell);
 }
 .scout__play {
   margin: 0;
-  font-size: var(--fs-small);
+  font-size: var(--fs-cell);
   line-height: var(--lh-prose);
   color: var(--text-body);
 }
@@ -173,6 +312,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 .scout__pbtn {
   display: grid;
@@ -182,7 +324,7 @@
   width: 100%;
   min-height: var(--control-min);
   padding: var(--space-1) var(--space-1h);
-  border: var(--bw-hair) solid var(--border-rule);
+  border: var(--bw-rule) solid var(--border-rule);
   background: var(--surface-card);
   color: inherit;
   font: inherit;
@@ -203,23 +345,11 @@
 }
 .scout__pbtnname {
   display: flex;
-  align-items: center; /* layout-exempt: dot beside the pitch name */
+  align-items: center; /* layout-exempt: mark beside the pitch name */
   gap: var(--space-1);
   font-size: var(--fs-cell);
   color: var(--text-heading);
 }
-/* The family dot before the name: the pitch's family, never its code. */
-.scout__pbtnname::before {
-  content: '';
-  flex: none;
-  width: 9px;
-  height: 9px;
-  border-radius: var(--radius-pill);
-  background: var(--arsenal-other);
-}
-.scout__pbtn[data-family='fastball'] .scout__pbtnname::before { background: var(--arsenal-fastball); }
-.scout__pbtn[data-family='breaking'] .scout__pbtnname::before { background: var(--arsenal-breaking); }
-.scout__pbtn[data-family='offspeed'] .scout__pbtnname::before { background: var(--arsenal-offspeed); }
 .scout__pbtnsub {
   display: block;
   font-size: var(--fs-cell);

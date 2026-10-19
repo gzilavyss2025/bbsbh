@@ -502,7 +502,6 @@
   },
   "src/styles/scout/meet.css": {
     "column": 3,
-    "wrap": 1,
     "grid": 4
   },
   "src/styles/scout/panels.css": {

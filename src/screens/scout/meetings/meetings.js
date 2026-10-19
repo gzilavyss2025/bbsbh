@@ -1,6 +1,7 @@
-import { pitchFamily, pitchLabel } from '../../../api/pitchArsenal.js'
+import { pitchLabel } from '../../../api/pitchArsenal.js'
 import { totalsOf } from '../../../api/scout/headToHead.js'
 import { ordinal as withSuffix } from '../../../lib/format.js'
+import { resultShort } from '../../../lib/scout/format.js'
 
 // THE MEETINGS TAB, PURE (#1490): every past meeting pitch by pitch, from the
 // head-to-head's `pitchList` (api/scout/headToHead.js). test/scout-meetings
@@ -74,22 +75,13 @@ export function mixRows(pas, board) {
   const total = [...seen.values()].reduce((a, b) => a + b, 0)
   const all = board?.all?.n ?? 0
   const codes = [...new Set([...(board?.types ?? []).map((t) => t.code), ...[...seen.keys()].sort((a, b) => seen.get(b) - seen.get(a))])]
-  // `shade` tells two pitches of one family apart (a fastball and a cutter
-  // share the family's green): 0 for the first, 1 for the next, and so on.
-  const families = new Map()
-  return codes.map((code) => {
-    const family = pitchFamily(code)
-    const shade = families.get(family) ?? 0
-    families.set(family, shade + 1)
-    return {
-      code,
-      name: nameOf(code, board),
-      family,
-      shade,
-      meet: total ? Math.round(((seen.get(code) ?? 0) / total) * 100) : 0,
-      season: all && board.byType[code] ? Math.round((board.byType[code].n / all) * 100) : 0,
-    }
-  })
+  // The page draws each row's colour and shape from pitchMark(code), like the Pitches section.
+  return codes.map((code) => ({
+    code,
+    name: nameOf(code, board),
+    meet: total ? Math.round(((seen.get(code) ?? 0) / total) * 100) : 0,
+    season: all && board.byType[code] ? Math.round((board.byType[code].n / all) * 100) : 0,
+  }))
 }
 
 // The note under the bars: each pitch he throws this season that the hitter
@@ -112,7 +104,7 @@ export function gamesOf(pas) {
   const by = new Map()
   for (const pa of pas) by.set(pa.gamePk, [...(by.get(pa.gamePk) ?? []), pa])
   return [...by.values()]
-    .map((list) => ({ gamePk: list[0].gamePk, date: list[0].date, round: list[0].round, tag: list[0].roundTag ?? '', pas: [...list].sort((a, b) => a.atBat - b.atBat) }))
+    .map((list) => ({ gamePk: list[0].gamePk, date: list[0].date, tag: list[0].roundTag ?? '', label: list[0].roundLabel ?? '', pas: [...list].sort((a, b) => a.atBat - b.atBat) }))
     .sort((a, b) => b.date.localeCompare(a.date) || b.gamePk - a.gamePk)
 }
 
@@ -121,3 +113,39 @@ export function gamesOf(pas) {
 export function pitchWalk(games) {
   return games.flatMap((g) => g.pas.flatMap((pa) => (pa.pitchList ?? []).map((p, i) => ({ pa, pitch: p, k: i + 1, of: pa.pitchList.length }))))
 }
+
+// THE SCOREBOOK CELL (#2319, V05). The mark in the diamond is the fielders the play text names,
+// in order ("shortstop X to first baseman Y" is 6-3), read from the first sentence only: a second
+// sentence ("Throwing error by shortstop X.") is another play. Savant's CSV has no fielder list
+// for the batter's own out, so the text is the source. A play that names no fielder, or a result
+// with no fielder's mark (a hit, a walk, a strikeout), shows resultShort's code instead.
+const POSITIONS = {
+  pitcher: 1, catcher: 2, 'first baseman': 3, 'second baseman': 4, 'third baseman': 5,
+  shortstop: 6, 'left fielder': 7, 'center fielder': 8, 'right fielder': 9,
+}
+const POSITION_RE = new RegExp(`\\b(${Object.keys(POSITIONS).join('|')})\\b`, 'gi')
+const FLIGHT = { fly_ball: 'F', line_drive: 'L', popup: 'P' }
+const CHAINED = new Set(['field_out', 'grounded_into_double_play', 'double_play'])
+
+export function scoringMark({ event, bbType, description }) {
+  const code = resultShort({ event, bbType })
+  const first = (description ?? '').split(/\.\s+(?=[A-Z])/)[0]
+  const at = [...first.matchAll(POSITION_RE)].map((m) => POSITIONS[m[1].toLowerCase()])
+  if (!at.length) return code
+  if (event === 'field_error') return `E${at[0]}`
+  if (event === 'sac_fly') return `SF${at[0]}`
+  if (event === 'force_out' || event?.startsWith('fielders_choice')) return 'FC'
+  if (!CHAINED.has(event)) return code
+  if (FLIGHT[bbType]) return `${FLIGHT[bbType]}${at[0]}`
+  return at.length === 1 ? `${at[0]}U` : at.join('-')
+}
+
+// The result in words, for the cell's caption: "Groundout", "Single", "Strikeout".
+const RESULTS = {
+  strikeout: 'Strikeout', strikeout_double_play: 'Strikeout', walk: 'Walk', intent_walk: 'Intentional walk', hit_by_pitch: 'Hit by pitch',
+  single: 'Single', double: 'Double', triple: 'Triple', home_run: 'Home run', sac_fly: 'Sac fly', sac_bunt: 'Sac bunt',
+  field_error: 'Error', grounded_into_double_play: 'Double play', double_play: 'Double play', force_out: 'Force out',
+  fielders_choice: 'Fielder’s choice', fielders_choice_out: 'Fielder’s choice',
+}
+const OUTS = { ground_ball: 'Groundout', fly_ball: 'Flyout', line_drive: 'Lineout', popup: 'Popout' }
+export const resultWord = ({ event, bbType }) => RESULTS[event] ?? OUTS[bbType] ?? 'Out'

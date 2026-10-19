@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { parseSavantRows, plateAppearances } from '../src/api/scout/headToHead.js'
 import {
-  callOf, gamesOf, meetingFacts, mixRows, nameOf, meetingOrdinal, pitchWalk, playText, unseenNote,
+  callOf, gamesOf, meetingFacts, mixRows, nameOf, meetingOrdinal, pitchWalk, playText, resultWord, scoringMark, unseenNote,
 } from '../src/screens/scout/meetings/meetings.js'
 
 const CSV = readFileSync(new URL('./fixtures/scout/chourio-pivetta.csv', import.meta.url), 'utf8')
@@ -40,8 +40,8 @@ test('the mix: the meeting against 2026 to righties, full names, and the pitch h
     ['Curveball', 17, 9],
   ])
   assert.ok(rows.every((r) => !/^[A-Z]{2}$/.test(r.name)))
-  // The cutter shares the fastball's family colour, so it takes the stripe.
-  assert.deepEqual(rows.map((r) => r.shade), [0, 0, 1, 1])
+  // Colour and shape come from pitchMark(code) on the page, so a row carries only its code (#2319, V06).
+  assert.deepEqual(rows.map((r) => r.code), ['FF', 'ST', 'FC', 'CU'])
   assert.equal(
     unseenNote(rows, { hitter: 'Chourio', pitcher: 'Pivetta' }, 'righties', ['2025']),
     'Chourio saw no cutters in 2025. Pivetta now throws it 17% of the time to righties.',
@@ -76,4 +76,32 @@ test('calls in words, ordinals, and the play text with the batter’s last name 
   assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22].map(meetingOrdinal), ['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '22nd'])
   assert.equal(playText(PAS.at(-1).description, 'Jackson Chourio', 'Chourio'), 'Chourio grounds out, shortstop Jose Iglesias to first baseman Luis Arraez.')
   assert.equal(playText('Wild pitch.', 'Jackson Chourio', 'Chourio'), 'Wild pitch.')
+})
+
+test('scoringMark: the fielders the play text names, in order; the result code when it names none (V05)', () => {
+  // The three real plate appearances: a 6-3 groundout, a lineout to center, a lineout to short
+  // whose text goes on to a throwing error (the error is a second sentence, not part of the mark).
+  assert.deepEqual(Object.fromEntries(PAS.map((pa) => [pa.inning, scoringMark(pa)])), { 1: '6-3', 3: 'L8', 5: 'L6' })
+  const mark = (event, bbType, description = '') => scoringMark({ event, bbType, description })
+  assert.equal(mark('field_out', 'fly_ball', 'A flies out to left fielder B.'), 'F7')
+  assert.equal(mark('field_out', 'popup', 'A pops out to second baseman B.'), 'P4')
+  assert.equal(mark('field_out', 'ground_ball', 'A grounds out to first baseman B.'), '3U')
+  assert.equal(mark('grounded_into_double_play', 'ground_ball', 'A grounds into a double play, shortstop B to second baseman C to first baseman D.'), '6-4-3')
+  assert.equal(mark('field_out', 'ground_ball', 'Bobby Witt Jr. grounds out, third baseman B to first baseman C.'), '5-3')
+  assert.equal(mark('field_error', 'ground_ball', 'A reaches on a fielding error by third baseman B.'), 'E5')
+  assert.equal(mark('force_out', 'ground_ball', 'A grounds into a force out, shortstop B to second baseman C.'), 'FC')
+  assert.equal(mark('sac_fly', 'fly_ball', 'A hits a sacrifice fly to center fielder B.'), 'SF8')
+  // A hit, a walk and a strikeout have no fielder's mark: the result code.
+  assert.equal(mark('single', 'line_drive', 'A singles on a line drive to right fielder B.'), '1B')
+  assert.equal(mark('strikeout'), 'K')
+  // An out whose text names no fielder falls back to the result code, never a blank.
+  assert.equal(mark('field_out', 'ground_ball', ''), 'GO')
+})
+
+test('resultWord: the result in words for the scorebook cell (V05)', () => {
+  assert.deepEqual(PAS.map(resultWord), ['Lineout', 'Lineout', 'Groundout'])
+  assert.deepEqual(
+    [['single'], ['strikeout'], ['home_run'], ['walk'], ['force_out'], ['field_out', 'fly_ball'], ['field_out', 'popup'], ['field_out']].map(([event, bbType]) => resultWord({ event, bbType })),
+    ['Single', 'Strikeout', 'Home run', 'Walk', 'Force out', 'Flyout', 'Popout', 'Out'],
+  )
 })
