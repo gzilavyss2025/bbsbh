@@ -31,7 +31,8 @@ Retire ADR-0110 on the player-page Game Log. Everything else is unchanged.
    - Watch them fail, then write the function.
 3. **Add the predicate.** `boxScoreOpensByDate` as a pure function beside the other date
    helpers in `src/lib/dates.js`. It takes the feed's `officialDate`
-   
+   (`feed.gameData.datetime.officialDate`) and an optional `now`, and returns true only for a real
+   date before the slate's today.
 4. **Wire the box score.** In `src/screens/BoxScore.jsx`: compute `openByDate` outside
    the seal (it is a structural status, not a score) and change the two `SealBox` props:
    `forceRevealed={stamped || boxOpened || openByDate}` and
@@ -70,7 +71,7 @@ Retire ADR-0110 on the player-page Game Log. Everything else is unchanged.
   `fetchFinalScores`. Add a test that Box Lines on the lineup page still end the day before
   the scored game.
 - **Scope of the change.** Changing the default in `fetchFinalScores` also opens the hitter
-  log and photos modules. Assumed fine; Gary has not confirmed.
+  log and photos modules. Gary confirmed this on 2026-10-19.
 - **Tap-through spoiler is accepted.** Tonight's starter's Game Log shows tonight's result.
   Gary chose this on 2026-10-19.
 - **A resumed suspended game is open while live.** Accepted by the date-only rule.

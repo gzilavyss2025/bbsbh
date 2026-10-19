@@ -158,7 +158,3 @@ record a reveal the reader never made, and the bit would outlive the date rule.
   starter's name reaches his player page, and the Game Log shows tonight's score and
   decision. ADR-0110 guarded this exact path. Gary chose to remove the guard knowing this
   (2026-10-19): the player page is a browse page, and the tap is the reader's own.
-- **A tap-through shows tonight's result.** A reader scoring tonight's game who taps the
-  starter's name reaches his player page, and the Game Log shows tonight's score and
-  decision. ADR-0110 guarded this exact path. Gary chose to remove the guard knowing this
-  (2026-10-19): the player page is a browse page, and the tap is the reader's own.
