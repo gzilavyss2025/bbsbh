@@ -140,7 +140,7 @@
 }
 .scout__mixseg {
   min-width: 0;
-  background: var(--pitch);
+  background: var(--pitch, var(--text-caption));
   border-inline-end: var(--bw-hair) solid var(--text-heading);
 }
 .scout__mixseg:last-child {
