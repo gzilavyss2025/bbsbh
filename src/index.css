@@ -135,6 +135,7 @@
 /* The full Now Pitching card (#1344) — a subdirectory, since src/styles is at
    its file ratchet (scripts/check-dir-size.mjs). */
 @import './styles/pitcher-card/card.css';
+@import './styles/pitcher-card/contact.css';
 @import './styles/pitcher-card/table.css';
 @import './styles/pitcher-card/arrival.css';
 @import './styles/14-strike-zone.css';
