@@ -347,7 +347,7 @@ export function SiteSearchModal({ onClose, pick = null }) {
           {groups.map((group) => (
             <Stack gap="tight" as="section" key={group.id} className="searchoverlay__group">
               <div className="searchoverlay__grouphead">
-                <h3 className="searchoverlay__grouptitle">{group.label}</h3>
+                <h3 className="t-label t-label--bold searchoverlay__grouptitle">{group.label}</h3>
                 {group.id === 'recent' && (
                   <button type="button" className="searchoverlay__clearrecent" onClick={clear}>
                     Clear

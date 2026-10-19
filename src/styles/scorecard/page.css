@@ -79,13 +79,6 @@
   gap: var(--space-2);
   margin: var(--space-3) 0;
 }
-.sc-labload__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .sc-labload__input {
   flex: 1;
   min-width: 120px;
@@ -209,13 +202,6 @@
   flex: 1;
   min-width: 150px;
 }
-.sc-field__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .sc-field__line {
   min-height: 16px;
   display: flex;
@@ -330,13 +316,6 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
-}
-.sc-firstpitch__mlabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 /* ---- The notation editor ---- */

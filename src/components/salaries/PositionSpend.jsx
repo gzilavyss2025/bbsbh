@@ -82,7 +82,7 @@ export function PositionSpend({ positions, note }) {
                 className={`posspend__chip${isLead ? ' posspend__chip--lead' : ''}`}
                 style={{ left: `${left}%`, top: `${top}%` }}
               >
-                <span className="posspend__pos">{entry.pos}</span>
+                <span className="t-label t-label--bold posspend__pos">{entry.pos}</span>
                 <span className="posspend__money">{moneyLabel(entry.total)}</span>
               </span>
             )

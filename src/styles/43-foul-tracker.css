@@ -636,14 +636,6 @@
   line-height: var(--lh-solid);
   color: var(--text-heading);
 }
-.sgh-vallabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 /* Most-Fouls-In-A-PA's "vs {pitcher}" line — hidden by DEFAULT (desktop),
    since the pitcher's own name/team now sits next to his headshot on the
    right (.storypa-row__who--pitcher) and repeating him here read as

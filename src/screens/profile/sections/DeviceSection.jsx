@@ -48,7 +48,7 @@ export function DeviceSection({
       </div>
 
       <div className="mytally__field">
-        <p className="mytally__fieldlabel">Motion</p>
+        <p className="t-label mytally__fieldlabel">Motion</p>
         <Cluster className="mytally__choices" role="group" aria-label="Motion">
           {MOTION_MODES.map((mode) => (
             <button

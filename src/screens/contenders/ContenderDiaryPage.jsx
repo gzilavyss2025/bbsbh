@@ -59,7 +59,7 @@ function Notice({ children }) {
 function Table({ table }) {
   return (
     <figure className="researchdiary__figure">
-      <figcaption className="researchdiary__figcap">{table.caption}</figcaption>
+      <figcaption className="t-label researchdiary__figcap">{table.caption}</figcaption>
       <div className="researchdiary__tablewrap">
         <table className="researchdiary__table">
           <thead>

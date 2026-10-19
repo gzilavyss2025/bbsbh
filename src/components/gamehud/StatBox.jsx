@@ -157,7 +157,7 @@ export function StatBox({
                   <div className="halfcast">
                     {cards.map(({ label, entry }) => (
                       <Stack gap="tight" className="halfcast__row" key={label}>
-                        <span className="halfcast__label">{label}</span>
+                        <span className="t-label t-label--bold halfcast__label">{label}</span>
                         <ul className="playerline__list">
                           <PerformerCard entry={entry} />
                         </ul>
@@ -442,7 +442,7 @@ function WorstCallCard({ data }) {
   return (
     <div className="wcall">
       <div className="wcall__top">
-        <span className="wcall__label">Worst call</span>
+        <span className="t-label t-label--bold wcall__label">Worst call</span>
       </div>
       <div className="wcall__body">
         <div className="wcall__diagram">
@@ -562,14 +562,14 @@ function FavorMeter({ net, awayId, homeId, awayFranchise, homeFranchise, totalMi
       </div>
       <div className="favormeter__caption" aria-hidden="true">
         {even ? (
-          <span className="favormeter__label">Missed calls have been even so far</span>
+          <span className="t-label t-label--bold favormeter__label">Missed calls have been even so far</span>
         ) : (
           <>
-            <span className="favormeter__label">Missed calls have added</span>
+            <span className="t-label t-label--bold favormeter__label">Missed calls have added</span>
             <strong className="favormeter__value">
               +{Math.abs(net).toFixed(1)} <span className="favormeter__unit">runs</span>
             </strong>
-            <span className="favormeter__label">for {towardAway ? awayFranchise : homeFranchise}</span>
+            <span className="t-label t-label--bold favormeter__label">for {towardAway ? awayFranchise : homeFranchise}</span>
           </>
         )}
       </div>

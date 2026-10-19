@@ -15,7 +15,7 @@ export function Slab({ value, label, note, tone }) {
   return (
     <div className={`slab${tone ? ` slab--${tone}` : ''}`}>
       <p className="slab__value">{value}</p>
-      <p className="slab__label">{label}</p>
+      <p className="t-label slab__label">{label}</p>
       {note ? <p className="slab__note">{note}</p> : null}
     </div>
   )

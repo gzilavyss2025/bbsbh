@@ -219,7 +219,7 @@ function SeriesMvp({ mvp }) {
         {hasPhoto && mvp.position && <span className="pswscard__pos">{mvp.position}</span>}
       </span>
       <span className="pswscard__mvpinfo">
-        <span className="pswscard__mvptag">Series MVP</span>
+        <span className="t-label t-label--bold pswscard__mvptag">Series MVP</span>
         <span className="pswscard__mvpname">
           {mvp.name}
           {!hasPhoto && mvp.position && <span className="pswscard__mvppos"> {mvp.position}</span>}

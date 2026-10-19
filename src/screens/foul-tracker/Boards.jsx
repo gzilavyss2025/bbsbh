@@ -327,7 +327,7 @@ export function FoulStoryBoard({ title, rows, value, bug, favoriteTeamId }) {
                 </div>
                 <span className="storypa-row__val">
                   <span className="sgh-val">{value(b)}</span>
-                  <span className="sgh-vallabel">Fouls</span>
+                  <span className="t-label t-label--bold sgh-vallabel">Fouls</span>
                 </span>
                 <div className="storypa-row__who storypa-row__who--pitcher">
                   <div className="sgh-top">

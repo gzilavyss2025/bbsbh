@@ -97,7 +97,7 @@ export function PlayOfTheGame({ play, highlight, awayAbbr, homeAbbr }) {
                 {play.batterName}
               </PlayerLink>
               {(play.batterTeamAbbr || play.batterPos) && (
-                <span className="bs__potgMeta">
+                <span className="t-label t-label--bold bs__potgMeta">
                   {[play.batterTeamAbbr, play.batterPos].filter(Boolean).join(' · ')}
                 </span>
               )}
@@ -182,7 +182,7 @@ export function ThreeStars({ stars }) {
               </span>
               <PlayerLink id={s.id} className="stars3__name">{s.name}</PlayerLink>
               {(s.teamName || s.pos) && (
-                <span className="stars3__meta">{[s.teamName, s.pos].filter(Boolean).join(' · ')}</span>
+                <span className="t-label t-label--bold stars3__meta">{[s.teamName, s.pos].filter(Boolean).join(' · ')}</span>
               )}
             </span>
             <span className="stars3__stat">{s.stat}</span>

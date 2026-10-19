@@ -366,14 +366,6 @@
   justify-content: space-between;
   align-items: center;
 }
-.wcall__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .wcall__body {
   display: grid;
   grid-template-columns: 124px 1fr;
@@ -614,14 +606,6 @@
   gap: 2px;
   text-align: center;
 }
-.favormeter__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .favormeter__value {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -728,14 +712,6 @@
 }
 .halfcast__row + .halfcast__row {
   border-top: var(--bw-hair) solid var(--border-rule);
-}
-.halfcast__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 .halfcast .playerline__list {
   margin: 0;

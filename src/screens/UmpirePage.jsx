@@ -291,7 +291,7 @@ export function UmpirePage({ id, seasonYear, vs }) {
                   key={`${g.gamePk}-${g.gameNumber}-${g.role}`}
                   className={`umpage__row ${isHpRow ? 'umpage__row--hp' : ''}`}
                 >
-                  <span className="umpage__role">{g.role}</span>
+                  <span className="t-label t-label--bold umpage__role">{g.role}</span>
                   <span className="umpage__date">{monthDayName(g.date)}</span>
                   <button
                     type="button"

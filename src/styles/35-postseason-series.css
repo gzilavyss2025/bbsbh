@@ -308,14 +308,6 @@
   text-transform: uppercase;
   color: var(--text-heading);
 }
-.psseries__potgMeta {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 /* Approved exception to the ALL-CAPS INVARIANT, same idiom as .bs__potgDesc —
    a play-by-play-style description reads as a natural sentence, not shouted
    chrome. The nested .psseries__potgWhen/.psseries__potgScore aren't

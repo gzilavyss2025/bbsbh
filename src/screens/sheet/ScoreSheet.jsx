@@ -82,7 +82,7 @@ function SheetHead({ model }) {
       </div>
 
       <div className="printsheet__crew">
-        <span className="printsheet__crewhead">Umpires</span>
+        <span className="t-label printsheet__crewhead">Umpires</span>
         {model.crew.map((u) => (
           <span key={u.role} className="ps-ump">
             <span className="ps-ump__role">{u.role}</span>
@@ -191,7 +191,7 @@ function SheetFoot() {
       <WriteIn label="SV" />
       <WriteIn label="Time" />
       <WriteIn label="Attendance" />
-      <span className="printsheet__mark">Tally Baseball</span>
+      <span className="t-label printsheet__mark">Tally Baseball</span>
     </footer>
   )
 }
