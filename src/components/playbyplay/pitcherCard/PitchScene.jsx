@@ -53,6 +53,8 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
   const barCallRef = useRef(null)
   const sceneRef = useRef(null)
   const mk = useRef({ smear: [], segs: [], ticks: [], parts: {} })
+  const frameRef = useRef(onFrame) // a ref: an inline callback must not restart the replay
+  frameRef.current = onFrame
 
   useEffect(() => {
     let shownIdx = -1
@@ -69,7 +71,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
       const done = rf ? rf.done : frame.done
       const idx = rf ? rf.idx : picked >= 0 ? picked : frame.idx
       const p = pitches[idx]
-      const sw = rf && (scenes[idx] ??= swingScene(p, beatsList[idx]))
+      const sw = rf && (idx in scenes ? scenes[idx] : (scenes[idx] = swingScene(p, beatsList[idx])))
       let { progress } = frame
       let ball
       if (sw) ({ progress, ball } = drawContact(mk.current, p, beatsList[idx], sw, rf.tau, slow, done))
@@ -122,7 +124,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         seg.setAttribute('opacity', i < whole ? (0.25 + 0.6 * (i / SEGMENTS)).toFixed(2) : '0.85')
       })
       const [bx, by, px] = ball ?? cur
-      const r = Math.max(0.6, px / 2)
+      const r = rf ? Math.max(0.6, px / 2) : px / 2
       if (rf) [ballRef, seam1Ref, seam2Ref].forEach((n) => n.current?.setAttribute('visibility', ball === null ? 'hidden' : 'visible'))
       ballRef.current?.setAttribute('cx', f1(bx))
       ballRef.current?.setAttribute('cy', f1(by))
@@ -132,7 +134,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         `${f1(bx + side * r * 0.55)} ${f1(by + r * 0.75)}`
       seam1Ref.current?.setAttribute('d', seam(-1))
       seam2Ref.current?.setAttribute('d', seam(1))
-      onFrame?.(idx, rf ? rf.tau : (elapsed ?? 0) * 1000, elapsed == null || Boolean(done))
+      frameRef.current?.(idx, rf ? rf.tau : (elapsed ?? 0) * 1000, elapsed == null || Boolean(done))
       return done
     }
 
@@ -165,7 +167,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
       stop()
       io.disconnect()
     }
-  }, [pitches, onActive, onLand, onFrame, slow, atBat, play])
+  }, [pitches, onActive, onLand, slow, atBat, play])
 
   const [rx, ry] = pitches[0]?.pts[0] ?? releasePoint(lefty, view)
   const hitterStage = useMemo(() => (zone ? stage(zone) : STAGE), [zone])
