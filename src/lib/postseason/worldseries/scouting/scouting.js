@@ -11,15 +11,17 @@
 //            5 Platoon, 6 Park fit, 7 Film room
 //   game day 1 Matchup edges, 2 Umpire edge, 3 Pitch by pitch, 4 Platoon, 5 Film room,
 //            6 Park fit (only at Milwaukee)
-// Built so far: Nine keys, Matchup edges, Umpire edge, Film room (full off day, compact on a
-// game day; the card reads the day type itself). Glove and legs, Pitch by pitch, Platoon and
-// Park fit keep their slots and are absent until built.
+// Built so far: Nine keys, Glove and legs (game day: last, rank 7, Gary 2026-10-19), Matchup edges,
+// Pitch by pitch, Umpire edge, Film room (full off day, compact on a game day; the card reads the
+// day type itself). Platoon and Park fit keep their slots and are absent until built.
 //
-// Input: { dayType, nineKeys, edges, plateUmpire, meetings }. No club id: the list is the same
+// Input: { dayType, nineKeys, gloveLegs, edges, pitchByPitch, plateUmpire, meetings }. No club id: the list is the same
 // for any opponent.
 const CARDS = [
   { id: 'nine-keys', label: 'Nine keys', rank: { off: 1 }, has: (i) => Boolean(i.nineKeys) },
+  { id: 'glove-legs', label: 'Glove and legs', rank: { off: 2, game: 7 }, has: (i) => Boolean(i.gloveLegs) },
   { id: 'matchup-edges', label: 'Matchup edges', rank: { off: 3, game: 1 }, has: (i) => Boolean(i.edges?.length) },
+  { id: 'pitch-by-pitch', label: 'Pitch by pitch', rank: { off: 4, game: 3 }, has: (i) => Boolean(i.pitchByPitch) },
   { id: 'umpire-edge', label: 'Umpire edge', rank: { game: 2 }, has: (i) => Boolean(i.plateUmpire?.name) },
   // Ranks 7 and 5 leave the unbuilt cards' slots in place. The jump-bar item reads "Film".
   { id: 'film-room', label: 'Film', rank: { off: 7, game: 5 }, has: (i) => Boolean(i.meetings?.length) },

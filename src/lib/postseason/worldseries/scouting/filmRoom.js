@@ -8,6 +8,9 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const SUFFIX = /^(jr|sr|ii|iii|iv)\.?$/i
 
+// 'Luis Garcia Jr.' -> 'Garcia'
+export const surnameOf = (name) => name.split(' ').filter((w) => !SUFFIX.test(w)).at(-1) ?? ''
+
 // 'Mon Aug 4' from 'YYYY-MM-DD'; '' for a date that is not one.
 function dayLabel(date) {
   const d = new Date(`${date}T00:00:00Z`)
@@ -44,7 +47,7 @@ function starterOf(side) {
     id: s.id,
     abbr: side.abbr,
     name: s.name,
-    surname: s.name.split(' ').filter((w) => !SUFFIX.test(w)).at(-1) ?? '',
+    surname: surnameOf(s.name),
     hand: s.hand ? `${s.hand}HP` : '',
     line,
     mix: mixPercents(s.mix),

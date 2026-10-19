@@ -77,9 +77,11 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
   const scouting = (
     <ScoutingReport
       clubIds={clubIds}
+      sides={[game?.awayId ?? clubIds[0], game?.homeId ?? clubIds[1]]}
       slateDate={slateDate}
       dayType={mode.dayType}
       gamePk={focusPk}
+      gameNumber={mode.gameNumber}
       plateUmpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
     />
   )
