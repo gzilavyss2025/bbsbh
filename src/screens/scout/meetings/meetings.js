@@ -125,18 +125,19 @@ const POSITIONS = {
 }
 const POSITION_RE = new RegExp(`\\b(${Object.keys(POSITIONS).join('|')})\\b`, 'gi')
 const FLIGHT = { fly_ball: 'F', line_drive: 'L', popup: 'P' }
-const CHAINED = new Set(['field_out', 'grounded_into_double_play', 'double_play'])
+const CHAINED = new Set(['field_out', 'force_out', 'grounded_into_double_play', 'double_play'])
+const DOUBLE = new Set(['grounded_into_double_play', 'double_play'])
 
 export function scoringMark({ event, bbType, description }) {
   const code = resultShort({ event, bbType })
-  const first = (description ?? '').split(/\.\s+(?=[A-Z])/)[0]
+  const first = (description ?? '').split(/(?<!\b[A-Z])\.\s+(?=[A-Z])/)[0]
   const at = [...first.matchAll(POSITION_RE)].map((m) => POSITIONS[m[1].toLowerCase()])
   if (!at.length) return code
   if (event === 'field_error') return `E${at[0]}`
   if (event === 'sac_fly') return `SF${at[0]}`
-  if (event === 'force_out' || event?.startsWith('fielders_choice')) return 'FC'
+  if (event?.startsWith('fielders_choice')) return 'FC'
   if (!CHAINED.has(event)) return code
-  if (FLIGHT[bbType]) return `${FLIGHT[bbType]}${at[0]}`
+  if (FLIGHT[bbType] && !DOUBLE.has(event)) return `${FLIGHT[bbType]}${at[0]}`
   return at.length === 1 ? `${at[0]}U` : at.join('-')
 }
 

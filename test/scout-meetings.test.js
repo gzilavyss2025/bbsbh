@@ -89,7 +89,10 @@ test('scoringMark: the fielders the play text names, in order; the result code w
   assert.equal(mark('grounded_into_double_play', 'ground_ball', 'A grounds into a double play, shortstop B to second baseman C to first baseman D.'), '6-4-3')
   assert.equal(mark('field_out', 'ground_ball', 'Bobby Witt Jr. grounds out, third baseman B to first baseman C.'), '5-3')
   assert.equal(mark('field_error', 'ground_ball', 'A reaches on a fielding error by third baseman B.'), 'E5')
-  assert.equal(mark('force_out', 'ground_ball', 'A grounds into a force out, shortstop B to second baseman C.'), 'FC')
+  assert.equal(mark('force_out', 'ground_ball', 'A grounds into a force out, shortstop B to second baseman C.'), '6-4')
+  assert.equal(mark('fielders_choice', 'ground_ball', 'A reaches on a fielder’s choice, shortstop B to second baseman C.'), 'FC')
+  assert.equal(mark('field_out', 'ground_ball', 'J. D. Martinez grounds out, shortstop B to first baseman C.'), '6-3')
+  assert.equal(mark('double_play', 'line_drive', 'A lines into a double play, shortstop B to first baseman C.'), '6-3')
   assert.equal(mark('sac_fly', 'fly_ball', 'A hits a sacrifice fly to center fielder B.'), 'SF8')
   // A hit, a walk and a strikeout have no fielder's mark: the result code.
   assert.equal(mark('single', 'line_drive', 'A singles on a line drive to right fielder B.'), '1B')
