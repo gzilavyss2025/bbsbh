@@ -514,7 +514,7 @@
   },
   "src/styles/scout/scout.css": {
     "column": 3,
-    "wrap": 5,
+    "wrap": 2,
     "grid": 5
   },
   "src/styles/situational-records/66a-detail.css": {

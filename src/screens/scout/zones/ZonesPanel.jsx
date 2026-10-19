@@ -9,32 +9,33 @@ import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { Choice } from '../../../components/scout/Choice.jsx'
 import { ScoutMap } from '../../../components/scout/ScoutMap.jsx'
 import { HitterLine } from '../HitterLine.jsx'
-import { Rich } from '../Rich.jsx'
 import { leftOut } from '../edge/edge.js'
-import { Answer, Key, Readout, Sides } from './MapParts.jsx'
-import { zoneCallout } from './callout.js'
+import { Answer, Key, Readout, Sides, SpotTiles } from './MapParts.jsx'
 
 // THE WHERE SECTION (#1490, ADR-0118): one 13-region map, with a Show control
 // (Both draws the hitter's result as the fill and the pitcher's share as an
 // ink square; Locations and Results draw each original map alone) and the
-// Metric control, then the expected value, the tap readout, the callout and
-// the key. Every share and rate prints its "%", and on All + xwOBA (est.) a
-// callout under the readout says what the two maps add up to.
+// Metric control, then the expected value; the readout and the key sit under
+// the map in its panel. Every share and rate prints its "%", and on All + xwOBA
+// (est.) two tiles under the panel say how much of the mix goes into the
+// hitter's hot spots and cold spots (`spots`; on a desktop the page shows them
+// beside the scene instead).
 //
 // The map draws the hitter's view only.
 const lower = (s) => s.toLowerCase() // caps-js-exempt: a pitch name inside a caption
 const SHOWS = [['both', 'Both'], ['locations', 'Locations'], ['results', 'Results']]
 
-export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, view, stance, hitterStance, metric, metrics, onMetric, onPitch, picked, onPick }) {
+export function ZonesPanel({ data, board, side, spots, map, hmap, sel, selType, view, stance, hitterStance, metric, metrics, onMetric, onPitch, picked, onPick }) {
   const [show, setShow] = useState('both')
   // With no hitter map there is only the pitcher's to draw.
   const mode = hmap ? show : 'locations'
-  const shown = mode === 'locations' ? map : hmap
+  // Locations: the share, and the pitch count under it.
+  const shown = mode === 'locations' && map
+    ? { ...map, cells: Object.fromEntries(Object.entries(map.cells).map(([r, c]) => [r, { ...c, count: map.regionN[r] }])) }
+    : mode === 'locations' ? null : hmap
   const crowd = stance === 'L' ? 'lefties' : 'righties'
   const names = { hitter: data.hitter.last, pitcher: data.pitcher.last }
   const typeName = selType ? selType.name : 'All pitches'
-  const callout = !sel && metric === 'xwoba' ? zoneCallout({ board, side: xside, stance, hitterStance, names }) : null
-  const pick = (r) => onPick((p) => (p === r ? null : r))
   return (
     <section className="scout__panel" aria-label="Zones">
       {board && (
@@ -50,8 +51,9 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
       {side && (
         <Answer
           metric={metric}
-          typeName={typeName}
-          mph={selType?.mph}
+          sub={sel
+            ? `${typeName}${selType.mph ? ` · ${selType.mph} mph` : ''} · on his spots`
+            : `${typeName}${side.overall.covered != null ? ` · ${Math.round(side.overall.covered * 100)}% of pitches mapped` : ''}`}
           value={sel ? hmap?.exp : side.overall.value}
           league={sel ? hmap?.league : side.overall.league}
           leftOut={sel ? null : leftOut(board)}
@@ -67,7 +69,7 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
         <figcaption className="scout__figcap">
           <span>
             {mode === 'locations'
-              ? `Where ${names.pitcher} throws ${selType ? `the ${lower(selType.name)} ` : ''}to ${crowd} · % of pitches`
+              ? `Where ${names.pitcher} throws${selType ? ` the ${lower(selType.name)}` : ''}`
               : `${mode === 'both' ? 'Both' : names.hitter} · ${METRICS[metric].label}`}
           </span>
           {shown && (
@@ -89,10 +91,10 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
               cells={shown.cells}
               unit={mode === 'locations' || metric !== 'xwoba' ? '%' : ''}
               shares={mode === 'both' && map && !map.thin && stance === hitterStance ? map.share : undefined}
-              className={mode === 'locations' ? '' : `scout__map--${metric}`}
+              className={mode === 'locations' ? 'scout__map--loc' : `scout__map--${metric}`}
               homeSet={data.homeSet}
               picked={picked}
-              onSelect={pick}
+              onSelect={onPick}
               label={`${typeName}: ${mode === 'locations' ? 'location share' : `hitter’s ${METRICS[metric].label}`} by region, ${view} view`}
             />
             <Sides view={view} />
@@ -100,7 +102,19 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
         ) : (
           <EmptyState size="compact">Not posted</EmptyState>
         )}
+        {map && (
+          <Readout
+            picked={picked}
+            map={map}
+            hit={hmap?.hit}
+            metric={metric}
+            stance={!side || stance === hitterStance ? stance : null}
+            names={names}
+          />
+        )}
+        <Key metric={side ? metric : null} mode={mode} names={names} />
       </figure>
+      <SpotTiles spots={spots} className="scout__spots--narrow" />
       {!side && !data.grid && board && (
         // No hitter map to join: his Savant line per pitch type instead.
         <figure className="scout__fig">
@@ -108,18 +122,6 @@ export function ZonesPanel({ data, board, side, xside, map, hmap, sel, selType, 
           <HitterLine line={arsenalFor(data.savant, data.hitter.id, 'batting')} types={board.types} code={sel} />
         </figure>
       )}
-
-      {map && (
-        <Readout
-          picked={picked}
-          map={map}
-          hit={hmap?.hit}
-          metric={metric}
-          stance={!side || stance === hitterStance ? stance : null}
-        />
-      )}
-      {callout && <p className="scout__callout"><Rich parts={callout} /></p>}
-      <Key metric={side ? metric : null} mode={mode} />
     </section>
   )
 }
