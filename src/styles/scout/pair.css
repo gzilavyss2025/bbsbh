@@ -1,0 +1,204 @@
+/* ============================================================
+   THE PAIR CARD — components/scout/Matchup.jsx (#2319, V01 and V22).
+   One stamped card: the name tab, two headshots, the hands, the Filters row.
+   Used by ScoutPage.jsx and the Design Lab prototype. Every selector is
+   .scout__*. The 740px cut is the house's wide step.
+   ============================================================ */
+
+/* --- the pair: one stamped card (V01 phone, V22 desktop) --- */
+
+.scout__pair {
+  position: relative;
+  margin-top: var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-stamped);
+}
+
+/* The ink name tab and Change pair ride the card's top edge. */
+.scout__pairtab {
+  position: absolute;
+  top: calc(-1 * var(--space-3h));
+  inset-inline-start: calc(-1 * var(--bw-heavy));
+  padding: var(--space-1) var(--space-2h);
+  background: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+  color: var(--text-on-ink);
+}
+.scout__change {
+  position: absolute;
+  top: calc(-1 * var(--space-4));
+  inset-inline-end: var(--space-2h);
+}
+
+/* layout-exempt: headshot and text side by side, the hitter's mirrored */
+.scout__pairrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-3h) var(--space-3h);
+}
+
+/* layout-exempt: headshot beside its text */
+.scout__side {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2h);
+  min-width: 0;
+}
+.scout__side[data-role='hitter'] {
+  flex-direction: row-reverse;
+  text-align: end;
+}
+/* layout-exempt: name, hand and side bar stacked */
+.scout__sidetext {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.scout__side[data-role='hitter'] .scout__sidetext {
+  align-items: flex-end;
+}
+
+/* Compound with .shot/.shot--fallback (both set by Headshot) so this outranks
+   the base .shot sizing, the convention every headshot host follows. Square,
+   on the sage wash, in an ink frame; the monogram is sized for it. */
+.shot.scout__shot {
+  flex: none;
+  box-sizing: border-box;
+  width: 56px;
+  height: 56px;
+  border: var(--bw-heavy) solid var(--text-heading);
+  border-radius: var(--radius-square);
+  background: var(--field-wash);
+}
+.shot.scout__shot.shot--fallback {
+  font-size: var(--fs-h2);
+}
+
+.scout__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+.scout__fullname {
+  display: none;
+}
+
+.scout__vs {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+/* layout-exempt: the hand beside the club's mark, mirrored for the hitter */
+.scout__hand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  font-size: var(--fs-cell);
+  color: var(--text-body);
+}
+.scout__side[data-role='hitter'] .scout__hand {
+  flex-direction: row-reverse;
+}
+
+/* The side bar: the pitcher's blue, the hitter's amber (ADR-0118). The ink edge holds the amber on
+   the card's paper, as on the pull track (amber alone is 2.4:1 there). */
+.scout__sidebar {
+  width: var(--space-12);
+  height: var(--space-1);
+  margin-top: var(--space-1h);
+  border: var(--bw-hair) solid var(--text-heading);
+  background: var(--allstar-blue);
+}
+.scout__side[data-role='hitter'] .scout__sidebar {
+  background: var(--award-line);
+}
+
+/* The foot: the Filters row, which opens the filter sheet. */
+/* layout-exempt: the Filters row and, wide, Change pair along the foot */
+.scout__pairfoot {
+  display: flex;
+  align-items: center;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+/* layout-exempt: label, summary and arrow in one row */
+.scout__filters {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--space-12);
+  padding: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  text-align: start;
+}
+.scout__filterslabel {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.scout__filtersarrow {
+  margin-inline-start: auto;
+  font-weight: var(--w-bold);
+}
+
+@media (min-width: 740px) {
+  /* The pair card, wide: the whole names, 96px faces, the Filters row and
+     Change pair side by side along the foot (V22). */
+  .shot.scout__shot {
+    width: 96px;
+    height: 96px;
+  }
+  .scout__pairrow {
+    gap: var(--space-6);
+    padding: var(--space-8) var(--space-6) var(--space-6);
+  }
+  .scout__side {
+    gap: var(--space-4);
+  }
+  .scout__lastname {
+    display: none;
+  }
+  .scout__fullname {
+    display: inline;
+  }
+  .scout__name {
+    font-size: var(--fs-display);
+  }
+  .scout__hand {
+    font-size: var(--fs-small);
+  }
+  .scout__sidebar {
+    width: var(--space-16);
+    height: var(--space-1h);
+  }
+  .scout__vs {
+    font-size: var(--fs-h2);
+  }
+  .scout__change {
+    position: static;
+    margin: var(--space-2) var(--space-4);
+  }
+}

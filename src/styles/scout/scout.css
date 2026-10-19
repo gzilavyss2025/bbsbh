@@ -52,58 +52,11 @@
     flex-wrap: wrap;
     gap: var(--space-4);
   }
-  /* The pair in one row, with 96px faces. */
-  .shot.scout__shot {
-    width: 96px;
-    height: 96px;
-  }
 }
 
 .scout__lab {
   padding: var(--space-2);
   border: var(--bw-hair) dashed var(--border-rule);
-}
-
-/* --- the pair: two house headshots, a name and a hand each --- */
-
-.scout__pairrow {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.scout__side {
-  align-items: center;
-  min-width: 0;
-  text-align: center;
-}
-
-/* Compound with .shot/.shot--fallback (both set by Headshot) so this outranks
-   the base .shot sizing, the convention every headshot host follows. The
-   monogram is sized for the md frame, not the player page's display size. */
-.shot.scout__shot {
-  width: var(--shot-md-w);
-  height: var(--shot-md-h);
-}
-.shot.scout__shot.shot--fallback {
-  font-size: var(--fs-h2);
-}
-
-.scout__name {
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  letter-spacing: var(--ls-title);
-  color: var(--text-heading);
-  overflow-wrap: anywhere;
-}
-
-.scout__hand,
-.scout__vs {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 /* --- controls --- */

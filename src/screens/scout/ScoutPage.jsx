@@ -1,4 +1,5 @@
 import '../../styles/scout/scout.css'
+import '../../styles/scout/pair.css'
 import '../../styles/scout/panels.css'
 import '../../styles/scout/edge.css'
 import '../../styles/scout/pitches.css'
@@ -17,7 +18,6 @@ import { scenePitches } from '../../lib/pitcherCard/scene.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
-import { Pill } from '../../components/ui/control/Pill.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { Notice } from '../../components/ui/state/Notice.jsx'
 import { HubTabBar } from '../../components/chrome/HubTabBar.jsx'
@@ -36,7 +36,7 @@ import { MeetingsPanel } from './meetings/MeetingsPanel.jsx'
 
 // THE MATCHUP SCOUT (#1410, #1411, #1490; design docs/scout-design.md,
 // ADR-0093, ADR-0095, ADR-0099). Pick a pitcher and a hitter. Top to bottom:
-// the pair, the context chips (season and scope, the sample, the filter
+// the pair card (names, hands, the Filters row that opens the filter
 // sheet), the pitch scene, then one scroll of four sections under a jump bar
 // (ADR-0118): EDGE (who the matchup favors, by pitch type and by location),
 // PITCHES (the pills and the ledger), WHERE (where he throws and where the
@@ -62,7 +62,6 @@ import { MeetingsPanel } from './meetings/MeetingsPanel.jsx'
 // value: with no hitter regions it would be his whole-type value, the same
 // for every pitcher.
 
-const SCOPE_TAG = { reg: 'Regular season', post: 'Postseason', all: 'Regular season + postseason' }
 // The sticky jump bar's height, as on the team page (TeamNextPage.jsx BAR_H).
 const BAR_H = 68
 const other = (h) => (h === 'R' ? 'L' : 'R')
@@ -225,7 +224,6 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
     : []
 
   const sceneCaption = `${selType ? selType.name : 'His mix, in turn'} · typical shape · ⅓ speed`
-  const crowd = stance === 'L' ? 'lefties' : 'righties'
 
   return (
     <div className="screen scout">
@@ -249,14 +247,12 @@ export function ScoutPage({ pitcherId, hitterId, asOf, scope, pitch, hand: handP
 
       {data && (
         <>
-          {!changing && <Matchup pitcher={data.pitcher} hitter={data.hitter} onChange={() => setChanging(true)} />}
-          <p className="scout__chips">
-            <Pill>{data.season ? `${data.season} · ` : ''}{SCOPE_TAG[scope]}</Pill>
-            {board && <Pill>{board.all.n.toLocaleString()} pitches to {crowd}</Pill>}
-            <Pill role="control" fill="paper" className="scout__filterchip" aria-haspopup="dialog" onClick={() => setFilters(true)}>
-              {filterSummary({ hand, scope, showHitter: Boolean(side) })} ▾
-            </Pill>
-          </p>
+          {!changing && <Matchup
+              pitcher={data.pitcher}
+              hitter={data.hitter}
+              onChange={() => setChanging(true)}
+              filters={{ summary: filterSummary({ hand, scope, showHitter: Boolean(side) }), onOpen: () => setFilters(true) }}
+            />}
 
           <div className="scout__body">
             <div className="scout__stage">
