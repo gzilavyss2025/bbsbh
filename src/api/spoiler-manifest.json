@@ -966,7 +966,7 @@
     },
     "slate/levelCounts.js": {
       "class": "spoiler-free",
-      "why": "How many games each level has on a date, for the D1 masthead's level ladder. One schedule call for sportIds 1,11,12,13,14, pruned by `fields=` to the gamePk and the away club's sport id, so no score, status or linescore is ever fetched. A count says how many games are on, never how one went."
+      "why": "How many games each level has on a date, for the D1 masthead's level ladder. One schedule call for sportIds 1,11,12,13,14, pruned by `fields=` to the gamePk and both clubs' sport ids, so no score, status or linescore is ever fetched. A count says how many games are on, never how one went."
     },
     "schedule.js": {
       "class": "spoiler-free",

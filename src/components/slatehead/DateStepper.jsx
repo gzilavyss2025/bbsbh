@@ -13,9 +13,8 @@ import { dateLines } from '../../lib/slate/ladder.js'
 // draws in place. The label is keyed on the date, so each step
 // mounts a fresh element and restarts its entrance.
 //
-// The app has no first or last date to stop at, so the arrows are never
-// disabled today; `min`/`max` are there for the day it does.
-export function DateStepper({ dateStr, isToday, onStep, onToday, variant = 'full', min = null, max = null }) {
+// The app has no first or last date to stop at, so the arrows never disable.
+export function DateStepper({ dateStr, isToday, onStep, onToday, variant = 'full' }) {
   const [stepped, setStepped] = useState(null)
   const [seenDate, setSeenDate] = useState(dateStr)
   if (dateStr !== seenDate) {
@@ -39,7 +38,6 @@ export function DateStepper({ dateStr, isToday, onStep, onToday, variant = 'full
         type="button"
         className="slatedate__arrow"
         aria-label="Previous day"
-        disabled={min != null && dateStr <= min}
         onClick={() => step(-1)}
       >
         <Chevron dir="prev" />
@@ -57,7 +55,7 @@ export function DateStepper({ dateStr, isToday, onStep, onToday, variant = 'full
         </span>
         {/* One tap back to today from a day you paged to — the old date
             banner's Today button, kept so a browsed-to day is never a
-            dead end on a minor level (the brand goes to MLB). */}
+            dead end; the brand reloads the page, this keeps the level. */}
         {!mini && !isToday && (
           <button type="button" className="slatedate__today" onClick={onToday}>
             Today
@@ -68,7 +66,6 @@ export function DateStepper({ dateStr, isToday, onStep, onToday, variant = 'full
         type="button"
         className="slatedate__arrow"
         aria-label="Next day"
-        disabled={max != null && dateStr >= max}
         onClick={() => step(1)}
       >
         <Chevron dir="next" />

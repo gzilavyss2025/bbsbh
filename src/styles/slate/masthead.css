@@ -128,11 +128,6 @@
   cursor: pointer;
 }
 
-.slatedate__arrow:disabled {
-  color: var(--border-rule);
-  cursor: default;
-}
-
 .slatedate__arrow:focus-visible,
 .slatedate__today:focus-visible {
   outline: var(--bw-heavy) solid var(--focus-ring);

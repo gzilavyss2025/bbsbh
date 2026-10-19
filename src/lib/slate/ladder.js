@@ -27,10 +27,13 @@ export function countText(counts, sportId) {
   return n > 0 ? String(n) : '—'
 }
 
-function ariaFor(full, counts, n) {
-  if (!counts || n == null) return full
-  if (n === 0) return `${full}, no games`
-  return `${full}, ${n} ${n === 1 ? 'game' : 'games'}`
+// The name leads with the printed label, so a voice-control user can say what
+// they see ("click AAA"; WCAG 2.5.3), then spells it out for a screen reader.
+function ariaFor(label, full, counts, n) {
+  const name = `${label}, ${full}`
+  if (!counts || n == null) return name
+  if (n === 0) return `${name}, no games`
+  return `${name}, ${n} ${n === 1 ? 'game' : 'games'}`
 }
 
 export function ladderStops({ levels, counts, sportId, winterGames = null }) {
@@ -44,15 +47,16 @@ export function ladderStops({ levels, counts, sportId, winterGames = null }) {
   return all.map((l) => {
     const isWinter = isWinterSport(l.sportId)
     const full = FULL_NAME[l.label] ?? l.label
+    const label = isWinter ? 'Winter' : l.label
     const n = merged?.[l.sportId]
     return {
       key: String(l.sportId),
       sportId: l.sportId,
       leagueId: l.leagueId ?? null,
-      label: isWinter ? 'Winter' : l.label,
+      label,
       fullName: full,
       count: countText(merged, l.sportId),
-      aria: ariaFor(full, merged, n),
+      aria: ariaFor(label, full, merged, n),
       empty: Boolean(merged) && !(n > 0),
       winter: isWinter,
       picked: l.sportId === sportId,

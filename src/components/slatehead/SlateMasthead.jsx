@@ -49,17 +49,21 @@ export function SlateMasthead({ stops, dateStr, isToday, wide, onLevel, onDate, 
     }
   }, [stamp])
 
-  // Compact once the card is wholly ABOVE the viewport — not when it is below
-  // it (a short window scrolled to the top never compacts).
+  // Compact once the card is wholly ABOVE the visible page — not when it is
+  // below it (a short window scrolled to the top never compacts). Wide, the
+  // sticky bar covers the page's top 76px, so the card counts as gone once it
+  // is under the bar, not only once it leaves the window: the date stepper is
+  // hidden behind the bar before then.
   useEffect(() => {
     const el = cardRef.current
     if (!el || typeof IntersectionObserver === 'undefined') return undefined
-    const obs = new IntersectionObserver(([entry]) =>
-      setCompact(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+    const obs = new IntersectionObserver(
+      ([entry]) => setCompact(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { rootMargin: wide ? '-76px 0px 0px 0px' : '0px' },
     )
     obs.observe(el)
     return () => obs.disconnect()
-  }, [])
+  }, [wide])
 
   const controls = (
     <CompactControls stops={stops} dateStr={dateStr} isToday={isToday} onLevel={onLevel} onDate={onDate} />

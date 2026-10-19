@@ -229,16 +229,11 @@ export function GameSelect({
   // games, three of which this app does not ship.
   const activeLeagueId = onWinter ? (winterBall.leagueId ?? leagueId ?? null) : null
   // The masthead's ladder draws WINTER last, after a dashed divider, off the
-  // farm system's rail (lib/slate/ladder.js; the D1 handoff, 2026-10-18). It
-  // used to sit second, right after MLB, on the old level rail.
+  // farm system's rail (lib/slate/ladder.js; the D1 handoff, 2026-10-18).
   const levels = useMemo(
     () =>
       winterBall.tabVisible
-        ? [
-            LEVELS[0],
-            { label: 'WINTER', sportId: WINTER_SPORT_ID, leagueId: winterBall.defaultLeagueId },
-            ...LEVELS.slice(1),
-          ]
+        ? [...LEVELS, { label: 'WINTER', sportId: WINTER_SPORT_ID, leagueId: winterBall.defaultLeagueId }]
         : LEVELS,
     [winterBall.tabVisible, winterBall.defaultLeagueId],
   )
@@ -252,8 +247,9 @@ export function GameSelect({
   const { loading, error, data } = slate
   // Each level's game count for the ladder: one score-free call for all five
   // (api/slate/levelCounts.js), and the winter's off the calendar useWinter
-  // already holds.
-  const levelCounts = useAsync(() => fetchLevelCounts(dateStr), [dateStr])
+  // already holds. Re-read on foreground, as the slate is, so a makeup added
+  // or a game dropped since the first read moves the count too.
+  const levelCounts = useAsync(() => fetchLevelCounts(dateStr), [dateStr], { refetchOnForeground: true })
   const stops = useMemo(
     () => ladderStops({ levels, counts: levelCounts.data, sportId, winterGames: winterBall.games }),
     [levels, levelCounts.data, sportId, winterBall.games],
@@ -442,8 +438,8 @@ export function GameSelect({
   const showOffDayBanner = needsResumeLookup && !isBreakWindow && !!resumeDate
 
   // A day you've paged BACK to (any date before today) gets the past-day
-  // treatment: each Final game's card opens its box score (sealed, as on every
-  // scoring surface) instead of the lineup flow. Today gets the SAME treatment
+  // treatment: each Final game's card adds a Box score button (sealed, as on
+  // every scoring surface) beside the lineup flow. Today gets the SAME treatment
   // once every one of its games has gone Final — at that point there's no more
   // live refreshing to do, so it's effectively already a "day you're looking
   // back on". Before that (any game still in Preview/Live), today keeps the

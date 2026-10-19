@@ -1,17 +1,22 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { DateStepper } from './DateStepper.jsx'
 
 // The masthead folded small, for when the ladder card has scrolled away: a
 // level chip that opens the level menu, and the one-line date stepper. The
 // phone's compact bar and the desktop bar's centre slot both draw this.
 //
-// The menu closes on a pick, on Escape (focus goes back to the chip), on a tap
-// outside it, and on scroll — a menu left hanging over a moving page reads as
-// stuck. Rows are menuitemradio, so the level on screen is announced checked.
+// The chip shows and hides a small panel of level buttons: a disclosure, not an
+// ARIA menu. A `menu` role promises arrow keys and a roving tabindex, and the
+// slate offers neither anywhere (the reason LevelNav is not a tablist either).
+// Each row is a toggle button like the ladder's stops, `aria-pressed` on the
+// level on screen. The panel closes on a pick, on Escape (focus goes back to
+// the chip), on a tap outside it, and on scroll — a panel left hanging over a
+// moving page reads as stuck. Hidden, it is `visibility: hidden`, so Tab skips it.
 export function CompactControls({ stops, dateStr, isToday, onLevel, onDate }) {
   const [open, setOpen] = useState(false)
   const chipRef = useRef(null)
   const menuRef = useRef(null)
+  const panelId = useId()
   // No stop is picked on a cold winter link until the calendar lands; the chip
   // then names no level rather than claiming MLB.
   const picked = stops.find((s) => s.picked)
@@ -28,7 +33,7 @@ export function CompactControls({ stops, dateStr, isToday, onLevel, onDate }) {
       close()
       chipRef.current?.focus()
     }
-    menuRef.current?.querySelector('[aria-checked="true"]')?.focus()
+    menuRef.current?.querySelector('[aria-pressed="true"]')?.focus()
     document.addEventListener('pointerdown', onDown)
     document.addEventListener('keydown', onKey)
     window.addEventListener('scroll', close, { passive: true })
@@ -46,9 +51,9 @@ export function CompactControls({ stops, dateStr, isToday, onLevel, onDate }) {
           ref={chipRef}
           type="button"
           className={`slatecompact__chip${open ? ' is-open' : ''}`}
-          aria-haspopup="menu"
           aria-expanded={open}
-          aria-label={picked ? `Level: ${picked.fullName}` : 'Level'}
+          aria-controls={panelId}
+          aria-label={picked ? `${picked.label}, ${picked.fullName}: change level` : 'Level'}
           onClick={() => setOpen((o) => !o)}
         >
           {picked?.label ?? 'Level'}
@@ -58,17 +63,17 @@ export function CompactControls({ stops, dateStr, isToday, onLevel, onDate }) {
         </button>
         <div
           ref={menuRef}
+          id={panelId}
           className={`slatemenu${open ? ' is-open' : ''}`}
-          role="menu"
+          role="group"
           aria-label="Level"
         >
           {stops.map((s) => (
             <button
               key={s.key}
               type="button"
-              role="menuitemradio"
-              aria-checked={s.picked}
-              tabIndex={open ? 0 : -1}
+              aria-pressed={s.picked}
+              aria-label={s.aria}
               className={`slatemenu__item${s.picked ? ' is-picked' : ''}`}
               onClick={() => {
                 setOpen(false)
