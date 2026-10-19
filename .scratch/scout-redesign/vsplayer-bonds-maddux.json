@@ -1,0 +1,81 @@
+{
+ "stats": [
+  {
+   "type": {
+    "displayName": "vsPlayerTotal"
+   },
+   "group": {
+    "displayName": "hitting"
+   },
+   "splits": [
+    {
+     "season": null,
+     "gameType": "R",
+     "stat": {
+      "plateAppearances": 154,
+      "atBats": 130,
+      "hits": 34,
+      "doubles": 3,
+      "triples": 1,
+      "homeRuns": 8,
+      "strikeOuts": 16,
+      "baseOnBalls": 23,
+      "hitByPitch": 0,
+      "sacFlies": 1,
+      "avg": ".262",
+      "obp": ".370",
+      "slg": ".485"
+     }
+    }
+   ]
+  },
+  {
+   "type": {
+    "displayName": "vsPlayer"
+   },
+   "group": {
+    "displayName": "hitting"
+   },
+   "splits": [
+    {
+     "season": "1986",
+     "gameType": "R",
+     "stat": {
+      "plateAppearances": 4,
+      "atBats": 3,
+      "hits": 0,
+      "doubles": 0,
+      "triples": 0,
+      "homeRuns": 0,
+      "strikeOuts": 1,
+      "baseOnBalls": 1,
+      "hitByPitch": 0,
+      "sacFlies": 0,
+      "avg": ".000",
+      "obp": ".250",
+      "slg": ".000"
+     }
+    },
+    {
+     "season": "1987",
+     "gameType": "R",
+     "stat": {
+      "plateAppearances": 10,
+      "atBats": 9,
+      "hits": 4,
+      "doubles": 1,
+      "triples": 0,
+      "homeRuns": 2,
+      "strikeOuts": 2,
+      "baseOnBalls": 1,
+      "hitByPitch": 0,
+      "sacFlies": 0,
+      "avg": ".444",
+      "obp": ".500",
+      "slg": "1.222"
+     }
+    }
+   ]
+  }
+ ]
+}
