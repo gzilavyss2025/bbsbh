@@ -161,6 +161,7 @@ export function pitchCardInfo(feed, play) {
       ax: num(co.aX),
       ay: num(co.aY),
       az: num(co.aZ),
+      breakH: num(pd.breaks?.breakHorizontal), // inches; the replay's whiff figure
       releaseY: num(pd.extension) == null ? null : 60.5 - pd.extension,
       // The count AFTER this pitch, off the pitch's own event (never its index:
       // an automatic call moves the count with no pitch). Null when the feed

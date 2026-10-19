@@ -56,7 +56,7 @@ export function atBatScenePitches(pitchDetails, view = 'hitter', batSide = '') {
       view,
     )
     const swing = SWINGS.has(p.cat) ? p.cat : null
-    out.push({ ...scene, no: p.no, call: p.callDesc, hit: p.hit, playId: p.playId, batSide, swing, ...(swing && { contact: contactPoint(flight), flight }) })
+    out.push({ ...scene, no: p.no, call: p.callDesc, hit: p.hit, playId: p.playId, breakH: p.breakH, batSide, swing, ...(swing && { contact: contactPoint(flight), flight }) })
   }
   return out
 }
