@@ -1,5 +1,10 @@
 # Plan: a past game's box score opens by its date
 
+**Status (2026-10-19):** built and verified, then saved as two patches in
+`.scratch/past-box-score/patches/` (README there). Apply A, then B. The steps below say what each
+patch holds. Still to do: apply the patches, check the routes in `verify.md` in Chromium, and open
+the implementation PR.
+
 Draft. ADR: `docs/adr/0117-a-past-games-box-score-opens-by-its-date.md`.
 Source: Gary's interview, 2026-10-19. No open PRs overlapped at the time of writing.
 

@@ -42,12 +42,15 @@ The rule reads the date and nothing else.
 | Half-inning pages (innings viewer) | Sealed, at-bat stepping | No change, for every date |
 | Scorecard, lineup page, Box Lines | As ADR-0047, ADR-0010, ADR-0069 | No change |
 | Slate card of a past date | No score; a "Box score ›" button (`GameCard.jsx`) | No change. The button now opens a box score with the score visible. |
-| Pitcher Game Log (player page) | Hides the score and decision of a game in progress today (ADR-0110) | Open. ADR-0110 is retired. |
+| Pitcher and hitter Game Log, photo rail, highlight clips (player page) | Hold back a game played today (ADR-0110) | Open. ADR-0110 is retired. |
 | Stats, standings, leader boards, player and team pages | Open | No change |
 
-The day boundary is the slate date. A game is "past" when its `officialDate`
-(`gameData.datetime.officialDate`) is earlier than `toApiDate(new Date())`, the same
-value that `GameSelect` calls today. The day changes when the slate's day changes.
+The day boundary is the slate's today, taken as the EARLIEST of the UTC, local and Pacific
+date (`slateToday` in `src/lib/dates.js`). That is the rule `pageDay` in `api/schedule.js`
+already uses (ADR-0087): after midnight in the East, a West-coast game is still on, and
+tonight's game must not open early. A game is "past" when its `officialDate`
+(`gameData.datetime.officialDate`) is a real date before that day. Gary chose this over the
+reader's local date on 2026-10-19.
 
 ### 2. How it is built
 
@@ -60,7 +63,7 @@ onReveal={stamped || openByDate ? undefined : markBoxOpened}
 ```
 
 - `openByDate` comes from one pure function, `boxScoreOpensByDate(officialDate, now)`. It
-  returns `true` only when `officialDate` is a real date before today. A missing or
+  returns `true` only when `officialDate` is a real date before `slateToday(now)`. A missing or
   unreadable date returns `false`. The seal fails closed, as in ADR-0049.
 - **It persists nothing.** The `onReveal` line is the load-bearing line, as in ADR-0049:
   `SealBox` fires `onReveal` when the box becomes shown by a flag as well as by a tap.
@@ -146,14 +149,17 @@ record a reveal the reader never made, and the bit would outlive the date rule.
 - **A resumed suspended game keeps its original schedule date.** On the day it resumes
   and plays, its box score is open while the game is live. This follows from the date-only
   rule. It is the cost of rejecting Alternative E.
-- **ADR-0110 is retired.** The player-page Game Log shows the score and decision of a game
-  in progress today. The guard is `fetchFinalScores` (`src/api/boxlines/fetch.js`), which
-  holds back every game on today's baseball date. Its callers are all player-page modules:
-  the pitcher log, the hitter log (`batlog`) and the photos module. The lineup page's Box
-  Lines (ADR-0069) do not use it. They use `fetchBoxLines`, whose cutoff is the date of the
-  game being scored, so the game on screen and every later game are never fetched. That gate
-  stays as it is, and retiring ADR-0110 does not touch it. The hitter log and the photos
-  module open with the pitcher log (Gary, 2026-10-19), because they share the guard.
+- **ADR-0110 is retired.** The player page shows a game played today once the schedule
+  reports it Final and scored. A game still on has no score and no decision, because
+  `boxLineRows` (`src/api/boxlines/rows.js`) keeps only a Final, scored game. That check is not
+  part of ADR-0110 and stays. The guard was in four places: `fetchFinalScores`
+  (`src/api/boxlines/fetch.js`), `photoGameRows` (`src/lib/dates.js`), `highlightsView`, and the
+  comments in the pitcher and hitter logs. The callers of `fetchFinalScores` are all player-page
+  modules: the pitcher log, the hitter log (`batlog`) and the photo rail. Gary confirmed on
+  2026-10-19 that all three open, and the highlight clips with them. The lineup page's Box Lines
+  (ADR-0069) do not use `fetchFinalScores`. They use `fetchBoxLines`, whose cutoff is the date of
+  the game being scored, so the game on screen and every later game are never fetched. That
+  gate stays as it is.
 - **A tap-through shows tonight's result.** A reader scoring tonight's game who taps the
   starter's name reaches his player page, and the Game Log shows tonight's score and
   decision. ADR-0110 guarded this exact path. Gary chose to remove the guard knowing this

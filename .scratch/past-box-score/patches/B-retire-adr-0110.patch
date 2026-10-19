@@ -1,0 +1,634 @@
+diff --git a/CONTEXT.md b/CONTEXT.md
+index c3436ffc..66fcbefd 100644
+--- a/CONTEXT.md
++++ b/CONTEXT.md
+@@ -151,7 +151,7 @@ _Avoid_: Logbook in any user-visible string
+ **Pitcher Game Log**:
+ A different thing with the same name: on a pitcher's player page, his games of a
+ season, starts and relief outings, one row per game, with the score, his decision, his
+-line and the pitch mix (#1851, ADR-0110). The stamp Game Log is the games that YOU
++line and the pitch mix (#1851, ADR-0110, retired by ADR-0117). The stamp Game Log is the games that YOU
+ stamped; the pitcher Game Log is the games that HE pitched. The code name is `pitchlog`.
+ _Avoid_: Start by start
+ 
+diff --git a/docs/adr/0110-the-pitcher-game-log-is-open-except-a-game-in-progress-today.md b/docs/adr/0110-the-pitcher-game-log-is-open-except-a-game-in-progress-today.md
+index 00b998fa..ce00a0bd 100644
+--- a/docs/adr/0110-the-pitcher-game-log-is-open-except-a-game-in-progress-today.md
++++ b/docs/adr/0110-the-pitcher-game-log-is-open-except-a-game-in-progress-today.md
+@@ -1,6 +1,6 @@
+ # The pitcher Game Log is open, except a game in progress today
+ 
+-**Status:** Accepted
++**Status:** Retired by ADR-0117 (2026-10-19). A game played today shows its score and decision once Final.
+ **Date:** 2026-10-13
+ **Issue:** #1851; parent #1878 (the player page redesign)
+ 
+diff --git a/docs/player-hub.md b/docs/player-hub.md
+index d26eff5d..396c8894 100644
+--- a/docs/player-hub.md
++++ b/docs/player-hub.md
+@@ -48,5 +48,6 @@ fetch two modules want in both modules, not in `context.js` or `core.js`.
+ Every module here is classified **spoiler-free** in `src/api/spoiler-manifest.json`.
+ The player page is an open surface (root `CLAUDE.md`'s spoiler scope): season and
+ career stats are not scores. Its one date rule, that every dated fetch is cut off the
+-day BEFORE a `?d=` link's game, is the page's own as-of contract, not a seal. Today's
+-game score never shows on the game logs (`fetchFinalScores`, ADR-0110).
++day BEFORE a `?d=` link's game, is the page's own as-of contract, not a seal. A game
++played today shows its score on the game logs once it is Final (`fetchFinalScores`, ADR-0117,
++which retired ADR-0110).
+diff --git a/src/api/boxlines/fetch.js b/src/api/boxlines/fetch.js
+index 05987e99..02edc00b 100644
+--- a/src/api/boxlines/fetch.js
++++ b/src/api/boxlines/fetch.js
+@@ -80,7 +80,6 @@
+ // failure so the sheet shows its retry state rather than an empty ledger.
+ import { getJson } from '../statsapi.js'
+ import { chunk } from '../../lib/math/number.js'
+-import { baseballToday } from '../../lib/time/standingsDates.js'
+ import { facetPlan } from './facets.js'
+ import {
+   boxLineRows,
+@@ -385,32 +384,30 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
+ // THE PLAYER PAGE'S GAME LOG SCORES (#1914): a Map gamePk -> its gated box
+ // line (`won`, `runs`, `oppRuns` are what the log reads) for the game-log
+ // splits handed in. The same schedule call as the join above, and the same
+-// gate, under the EARLIER of `cutoff` and the baseball today: a split on or
+-// after it is dropped BEFORE the call, so its gamePk is never asked about, and
+-// boxLineRows re-applies it and the Final check on what comes back. An empty
+-// map on any failure: the log then shows no score, as before.
++// gate under `cutoff`: a split on or after it is dropped BEFORE the call, so
++// its gamePk is never asked about, and boxLineRows re-applies it and the Final
++// check on what comes back. An empty map on any failure: the log then shows no
++// score, as before.
+ //
+-// TODAY IS HELD even with no cutoff (Gary, 2026-10-13). A link out of a game
+-// carries no `?d=` (ADR-0034's "The cutoff is opt-in now"), so a reader who
+-// taps a player while scoring tonight's game, or one from earlier today off a
+-// recording, or game 1 before he scores game 2, would read its final score at
+-// the top of the log. The row stays, with no score and no decision.
+-// `baseballToday` is US Pacific, the last zone to roll over, as in
+-// scout/playIds.js's `mayRead`.
++// NO CUTOFF IS THE OPEN CASE (ADR-0117, which retired ADR-0110). A game played
++// today shows its score once the schedule reports it Final and scored; a game
++// still on has no row, because boxLineRows keeps only a Final, scored game. The
++// player page is an open surface (ADR-0034), and a reader who taps the starter
++// of tonight's game may read its result there. That is accepted.
+ //
+ // A SUSPENDED GAME ENDS ON A LATER DAY than its split says. gamePk 777861 was
+ // suspended 2025-05-19 and finished 2025-05-21; its split and officialDate stay
+ // 05-19, and only the schedule record's `resumeDate` (on the first `dates`
+-// entry, the one fetchSchedule keeps for a suspended game) names 05-21. boxLineRows' gate drops a
+-// record whose resumeDate, as a Pacific day, is on or after `until`.
+-export async function fetchFinalScores(splits, group, cutoff = null, today = baseballToday()) {
+-  const until = cutoff && cutoff < today ? cutoff : today
++// entry, the one fetchSchedule keeps for a suspended game) names 05-21. With a
++// cutoff, boxLineRows' gate drops a record whose resumeDate, as a Pacific day,
++// is on or after it.
++export async function fetchFinalScores(splits, group, cutoff = null) {
+   const gameTypes = MLB_LOG_GAME_TYPES.split(',')
+-  const gated = matchingSplits(splits, { gameTypes }).filter((s) => s.date < until)
++  const gated = matchingSplits(splits, { gameTypes }).filter((s) => !cutoff || s.date < cutoff)
+   if (!gated.length) return new Map()
+   try {
+     const schedule = await fetchSchedule([...new Set(gated.map((s) => s.game.gamePk))])
+-    const rows = boxLineRows({ splits: gated, schedule, group, cutoff: until, gameTypes })
++    const rows = boxLineRows({ splits: gated, schedule, group, cutoff, gameTypes })
+     return new Map(rows.map((r) => [r.gamePk, r]))
+   } catch {
+     return new Map()
+diff --git a/src/api/person/gameLog.js b/src/api/person/gameLog.js
+index 0cd1d1a8..bf14278b 100644
+--- a/src/api/person/gameLog.js
++++ b/src/api/person/gameLog.js
+@@ -77,8 +77,8 @@ export function pitcherLine(st) {
+ //
+ // `scores` (optional) is boxlines/fetch.js's fetchFinalScores map, gamePk ->
+ // a row carrying { runs, oppRuns }, asked for over `loggedSplits` alone, so it
+-// can hold no game the cutoff turned away, nor one played today (fetch.js
+-// holds today's back). Without it a row carries no score.
++// can hold no game the cutoff turned away, and no game that is not Final yet.
++// Without it a row carries no score.
+ // A hitter's `result` is his club's (W, L, T); a pitcher's is his own decision
+ // (W, L, SV, or null), read off the gameLog stat, which carries it per game.
+ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false, scores = null } = {}) {
+diff --git a/src/lib/dates.js b/src/lib/dates.js
+index 540f54f8..52a4a895 100644
+--- a/src/lib/dates.js
++++ b/src/lib/dates.js
+@@ -15,14 +15,12 @@ export function isoToday() {
+   return new Date().toISOString().slice(0, 10)
+ }
+ 
+-// A player's this-season game-log rows for the photo rail, oldest first. Only
+-// games dated before the baseball day (US Pacific): a game tonight may still be
+-// in progress, and its photos can show the result. Not isoToday(): after 00:00
+-// UTC that is already tomorrow, and tonight's game would pass.
+-export function photoGameRows(games, now = new Date()) {
+-  const today = baseballToday(now)
++// A player's this-season game-log rows for the photo rail, oldest first. A game still being
++// played is held back by photosView's `finals` map (Final and scored only), not here
++// (ADR-0117, which retired ADR-0110).
++export function photoGameRows(games) {
+   return games
+-    .filter((s) => s.game?.gamePk && s.date && s.date < today)
++    .filter((s) => s.game?.gamePk && s.date)
+     .map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
+     .sort((a, b) => a.apiDate.localeCompare(b.apiDate))
+ }
+diff --git a/src/screens/player/next/modules/batlog/batlogView.js b/src/screens/player/next/modules/batlog/batlogView.js
+index 1a405c0b..7e9821ff 100644
+--- a/src/screens/player/next/modules/batlog/batlogView.js
++++ b/src/screens/player/next/modules/batlog/batlogView.js
+@@ -8,8 +8,8 @@ import { DASH, num, rate3 } from '../../../../../api/person/shared.js'
+ // The batter Game Log's rows (#1890, board "BatterGameLog"): one row per game of the season,
+ // newest first, matching the pitcher log (../pitchlog/pitchlogView.js).
+ // gameLogView gives the order, the date, the series tag and the club's score; withGameFouls joins
+-// the pitches seen, whiffs and fouls. THE GUARD: fetchFinalScores holds back every game on
+-// today's baseball date, and gameLogView gives no result to a row with no score.
++// the pitches seen, whiffs and fouls. A game played today shows its result once Final (ADR-0117);
++// a game still on has no score, and gameLogView gives no result to a row with no score.
+ 
+ // The columns, in the board's order; `card` is the place in LogTable's card look. index.jsx adds the
+ // cell renderers. The stat keys read the row by key, never by position.
+diff --git a/src/screens/player/next/modules/highlights/highlightsView.js b/src/screens/player/next/modules/highlights/highlightsView.js
+index 5b32cb63..f2059288 100644
+--- a/src/screens/player/next/modules/highlights/highlightsView.js
++++ b/src/screens/player/next/modules/highlights/highlightsView.js
+@@ -1,16 +1,14 @@
+ // The Highlights module's pure view (#2022): his clips for this season, newest first.
+ import { formatClipDuration } from '../../../../../api/highlights.js'
+-import { baseballToday } from '../../../../../lib/time/standingsDates.js'
+ import { plural } from '../../parts/foulsFormat.js'
+ 
+ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+ 
+-// A clip title names the play ("walk-off single"), so a game dated the baseball day never shows one (ADR-0110):
+-// the nightly file keeps Final games only, but a hand-dispatched run can put today's in. This filters; it adds no source.
+-export function highlightsView({ clips, playerId, season, now = new Date() }) {
+-  const today = baseballToday(now)
++// A clip title names the play ("walk-off single"). The page is open for a game played today
++// (ADR-0117, which retired ADR-0110), so no date filter is applied: the nightly file keeps Final games only.
++export function highlightsView({ clips, playerId, season }) {
+   return clips
+-    .filter((c) => c.playerId === playerId && c.date.slice(0, 4) === String(season) && c.date < today)
++    .filter((c) => c.playerId === playerId && c.date.slice(0, 4) === String(season))
+     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+     .map((c) => ({
+       clipId: c.clipId,
+diff --git a/src/screens/player/next/modules/photos/photosView.js b/src/screens/player/next/modules/photos/photosView.js
+index 66bf5734..7bb49453 100644
+--- a/src/screens/player/next/modules/photos/photosView.js
++++ b/src/screens/player/next/modules/photos/photosView.js
+@@ -1,8 +1,7 @@
+ // The Photos card's pure view (#2021). No React, no fetch.
+-// THE GUARD: a photo's headline can read the result (gamePhotos.js), so a game still being played
+-// never contributes one. photoGameRows holds back the baseball day (US Pacific); `finals` is
+-// fetchFinalScores' map, which also drops a game dated earlier that is not over (a suspended game
+-// that resumes today, extra innings past midnight Pacific).
++// A photo's headline can read the result (gamePhotos.js), so a game still being played never
++// contributes one: `finals` is fetchFinalScores' map, which holds only a Final, scored game. A game
++// played today shows its photos once it is over (ADR-0117, which retired ADR-0110).
+ import { monthDay, photoGameRows } from '../../../../../lib/dates.js'
+ 
+ // The walk reads his game log newest first; game 2 of a doubleheader before game 1.
+@@ -10,8 +9,8 @@ export const newestFirst = (splits) =>
+   [...splits].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '') || (b.game?.gameNumber ?? 1) - (a.game?.gameNumber ?? 1))
+ 
+ // The games whose photos may load, [{ gamePk, apiDate }], in the order given (photoGameRows' own order loses a doubleheader's).
+-export function photoGames(splits, finals, now = new Date()) {
+-  const ok = new Set(photoGameRows(splits, now).map((r) => r.gamePk))
++export function photoGames(splits, finals) {
++  const ok = new Set(photoGameRows(splits).map((r) => r.gamePk))
+   return splits.filter((s) => ok.has(s.game?.gamePk) && finals.has(s.game.gamePk)).map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
+ }
+ 
+diff --git a/src/screens/player/next/modules/pitchlog/StartDetail.jsx b/src/screens/player/next/modules/pitchlog/StartDetail.jsx
+index c6180641..78f35cd8 100644
+--- a/src/screens/player/next/modules/pitchlog/StartDetail.jsx
++++ b/src/screens/player/next/modules/pitchlog/StartDetail.jsx
+@@ -16,8 +16,7 @@ import { loadStart, resultOf, startDetail } from './gameDetail.js'
+ // The game detail view (#1851): one row of the Game Log, opened. A native modal <dialog>:
+ // showModal() makes the page behind it inert (the focus trap) and Escape fires `cancel`.
+ // The caller hands focus back to the row. The feed and the clips load only when it opens.
+-// Score and decision come from the row (ADR-0110), so a game in progress today shows neither,
+-// and no clip (gameDetail.js).
++// Score and decision come from the row, so a game still on shows neither, and no clip (gameDetail.js).
+ 
+ function Plays({ title, plays }) {
+   if (!plays.length) return null
+diff --git a/src/screens/player/next/modules/pitchlog/gameDetail.js b/src/screens/player/next/modules/pitchlog/gameDetail.js
+index eef1ed87..12a075d7 100644
+--- a/src/screens/player/next/modules/pitchlog/gameDetail.js
++++ b/src/screens/player/next/modules/pitchlog/gameDetail.js
+@@ -4,11 +4,11 @@ import { HIT_EVENT_TYPES, WHIFF_CODES, pitchCallCode } from '../../../../../api/
+ 
+ // The game detail view's data (#1851): his pitches, strikeouts and big plays from the game's
+ // feed, and the clips from its content items. Fetched only when the view opens.
+-// The score and the decision are NOT read here: they come from the log row (resultOf), so the
+-// ADR-0110 guard on that row covers this view too. Plays are open on this page (ADR-0110).
+-// THE GUARD ALSO HOLDS THE CLIPS: a headline says "in win" or "records the save", and a video
+-// carries the broadcast scorebug. A held row (row.result null: a game today, or a suspended game
+-// that resumes today) gets no clip of any kind, and its content is never fetched.
++// The score and the decision are NOT read here: they come from the log row (resultOf). Plays are
++// open on this page (ADR-0110, retired by ADR-0117).
++// A ROW WITH NO RESULT GETS NO CLIPS: a headline says "in win" or "records the save", and a video
++// carries the broadcast scorebug. A held row (row.result null: a game still on) gets no clip of any
++// kind, and its content is never fetched.
+ 
+ // Every path below verified live on gamePk 823787 (2026-10-13). `fields=` is name-based: a
+ // name missing here arrives undefined.
+diff --git a/src/screens/player/next/modules/pitchlog/index.jsx b/src/screens/player/next/modules/pitchlog/index.jsx
+index f7041be2..bfa7cc48 100644
+--- a/src/screens/player/next/modules/pitchlog/index.jsx
++++ b/src/screens/player/next/modules/pitchlog/index.jsx
+@@ -21,8 +21,7 @@ import { StartDetail } from './StartDetail.jsx'
+ // newest first, a totals row that follows the filter, and each game's pitch mix. A row opens the
+ // game detail view (StartDetail.jsx). "Load earlier season" adds one season back per press; the
+ // filter and the totals span every loaded season. Open surface
+-// (ADR-0034, ADR-0110): the score and decision show, except for a game on today's date
+-// (pitchlogView.js holds it).
++// (ADR-0034, ADR-0117): the score and decision show once a game is Final, today's included.
+ const SHOWN = 5
+ const SCOPES = [
+   ['all', 'All'],
+diff --git a/src/screens/player/next/modules/pitchlog/pitchlogView.js b/src/screens/player/next/modules/pitchlog/pitchlogView.js
+index 7a27b7d5..180faccf 100644
+--- a/src/screens/player/next/modules/pitchlog/pitchlogView.js
++++ b/src/screens/player/next/modules/pitchlog/pitchlogView.js
+@@ -8,12 +8,13 @@ import { ipToOuts, outsToIp } from '../../../../../lib/math/innings.js'
+ import { PITCH_TYPES } from '../../../../../lib/pitch/pitchTypes.js'
+ import { teamAbbr } from '../../../../../lib/teams.js'
+ 
+-// The pitcher Game Log's rows (#1851, ADR-0110): one row per game of the season, start or relief
++// The pitcher Game Log's rows (#1851, ADR-0110, retired by ADR-0117): one row per game of the season, start or relief
+ // (Gary, 2026-10-13), newest first.
+ // gameLogView (api/person/gameLog.js) gives the order, the date, the series tag, the score and the
+ // decision; this file adds the stat line, the opponent's id for the logo and the pitch mix.
+-// THE GUARD: fetchFinalScores holds back every game on today's baseball date, and gameLogView
+-// gives no decision to a row with no score, so a game in progress shows neither.
++// A game played today shows its score and decision once Final (ADR-0117). A game still on has no
++// score in `scores` (fetchFinalScores keeps only a Final, scored game), and gameLogView gives no
++// decision to a row with no score, so it shows neither.
+ 
+ const isStart = (s) => num(s.stat?.gamesStarted) > 0
+ // A pitch the table does not know goes last.
+diff --git a/test/boxlines-makeup.test.js b/test/boxlines-makeup.test.js
+index d3b9ae2c..08693c16 100644
+--- a/test/boxlines-makeup.test.js
++++ b/test/boxlines-makeup.test.js
+@@ -104,32 +104,32 @@ test('fetchFinalScores: a makeup under the same gamePk reads the score of the ga
+   }
+ })
+ 
+-test('fetchFinalScores: a makeup played TODAY holds its score and is never asked for', async () => {
++test('fetchFinalScores: a makeup played TODAY shows its score once Final (ADR-0117)', async () => {
+   const api = stub({ dates: makeup(900001, { from: '2026-10-12', to: '2026-10-13' }) })
+   try {
+-    const scores = await fetchFinalScores([split('2026-10-13', 900001)], 'hitting', null, '2026-10-13')
+-    assert.deepEqual(api.asked, [])
+-    assert.equal(scores.size, 0)
++    const scores = await fetchFinalScores([split('2026-10-13', 900001)], 'hitting', null)
++    assert.deepEqual(api.asked, [900001])
++    assert.equal(scores.size, 1)
+   } finally {
+     api.restore()
+   }
+ })
+ 
+-test("fetchFinalScores: a makeup played today stays held even when the split keeps the postponed day", async () => {
+-  // Not what statsapi does today (the split moves to the played day), but the
+-  // played record dated today must not slip past the gate if it ever did.
++test("fetchFinalScores: a makeup played today shows its score even when the split keeps the postponed day", async () => {
++  // Not what statsapi does today (the split moves to the played day).
++  // With no cutoff the played record is read as played.
+   const api = stub({ dates: makeup(900002, { from: '2026-10-12', to: '2026-10-13' }) })
+   try {
+-    const scores = await fetchFinalScores([split('2026-10-12', 900002)], 'hitting', null, '2026-10-13')
+-    assert.equal(scores.size, 0)
++    const scores = await fetchFinalScores([split('2026-10-12', 900002)], 'hitting', null)
++    assert.equal(scores.size, 1)
+   } finally {
+     api.restore()
+   }
+ })
+ 
+-test('fetchFinalScores: a suspended game, two scored records, still reads resumeDate off the first', async () => {
++test('fetchFinalScores: a suspended game, two scored records, shows its score with no cutoff', async () => {
+   // gamePk 777861's shape (live 2026-10-13): both records Final and scored;
+-  // only the first carries resumeDate. Ending today, it is held.
++  // only the first carries resumeDate. With no cutoff it is read as finished.
+   const rec = (date, extra) => ({
+     date,
+     games: [{ gamePk: 900003, officialDate: '2026-10-11', gameNumber: 1, status: { abstractGameState: 'Final', detailedState: 'Final' }, teams: teams(5, 6), venue, ...extra }],
+@@ -138,8 +138,8 @@ test('fetchFinalScores: a suspended game, two scored records, still reads resume
+     dates: [rec('2026-10-11', { resumeDate: '2026-10-13T17:10:00Z' }), rec('2026-10-13', { resumedFrom: '2026-10-11T23:40:00Z' })],
+   })
+   try {
+-    const scores = await fetchFinalScores([split('2026-10-11', 900003, 1)], 'hitting', null, '2026-10-13')
+-    assert.equal(scores.size, 0)
++    const scores = await fetchFinalScores([split('2026-10-11', 900003, 1)], 'hitting', null)
++    assert.equal(scores.size, 1)
+   } finally {
+     api.restore()
+   }
+diff --git a/test/game-log-order-score.test.js b/test/game-log-order-score.test.js
+index 85be6bd5..e7996c35 100644
+--- a/test/game-log-order-score.test.js
++++ b/test/game-log-order-score.test.js
+@@ -115,21 +115,21 @@ test('fetchFinalScores: nothing before the cutoff asks nothing', async () => {
+   }
+ })
+ 
+-test("fetchFinalScores: with no cutoff, today's games hold back their score and are never asked for", async () => {
++test("fetchFinalScores: with no cutoff, today's games are asked for and show their score once Final (ADR-0117)", async () => {
+   const api = stubSchedule()
+   try {
+     const splits = [row('2026-10-12', 201), row('2026-10-13', 202, 1), row('2026-10-13', 203, 2)]
+-    const scores = await fetchFinalScores(splits, 'hitting', null, '2026-10-13')
+-    assert.deepEqual(api.asked, [201])
+-    assert.deepEqual([...scores.keys()], [201])
++    const scores = await fetchFinalScores(splits, 'hitting', null)
++    assert.deepEqual(api.asked, [201, 202, 203])
++    assert.deepEqual([...scores.keys()].sort(), [201, 202, 203])
+     const view = gameLogView(splits, 'hitting', null, 8, { scores }).rows
+-    assert.deepEqual(view.map((r) => [r.gamePk, r.result, r.runs]), [[203, null, null], [202, null, null], [201, 'W', 6]])
++    assert.deepEqual(view.map((r) => [r.gamePk, r.result, r.runs]), [[203, 'W', 6], [202, 'W', 6], [201, 'W', 6]])
+   } finally {
+     api.restore()
+   }
+ })
+ 
+-test('fetchFinalScores: a suspended game that ends today holds its score, though its split keeps the first day', async () => {
++test('fetchFinalScores: a suspended game that ends today shows its score, though its split keeps the first day', async () => {
+   // Shaped like gamePk 777861: suspended 2025-05-19, finished 2025-05-21. The
+   // split and officialDate keep 05-19; only the schedule's resumeDate says 05-21.
+   const api = stubSchedule({
+@@ -137,17 +137,17 @@ test('fetchFinalScores: a suspended game that ends today holds its score, though
+     302: { officialDate: '2026-10-10', resumeDate: '2026-10-12T17:10:00Z' },
+   })
+   try {
+-    const scores = await fetchFinalScores([row('2026-10-11', 301), row('2026-10-10', 302)], 'hitting', null, '2026-10-13')
+-    assert.deepEqual([...scores.keys()], [302])
++    const scores = await fetchFinalScores([row('2026-10-11', 301), row('2026-10-10', 302)], 'hitting', null)
++    assert.deepEqual([...scores.keys()].sort(), [301, 302])
+   } finally {
+     api.restore()
+   }
+ })
+ 
+-test('fetchFinalScores: an earlier ?d= cutoff still rules over today', async () => {
++test('fetchFinalScores: a ?d= cutoff still turns its day and later days away', async () => {
+   const api = stubSchedule()
+   try {
+-    await fetchFinalScores([row('2026-05-22', 101), row('2026-06-01', 105)], 'hitting', '2026-05-23', '2026-10-13')
++    await fetchFinalScores([row('2026-05-22', 101), row('2026-06-01', 105)], 'hitting', '2026-05-23')
+     assert.deepEqual(api.asked, [101])
+   } finally {
+     api.restore()
+diff --git a/test/player-log-today.test.js b/test/player-log-today.test.js
+new file mode 100644
+index 00000000..c434b780
+--- /dev/null
++++ b/test/player-log-today.test.js
+@@ -0,0 +1,68 @@
++import assert from 'node:assert/strict'
++import test, { mock } from 'node:test'
++import { fetchFinalScores } from '../src/api/boxlines/fetch.js'
++import { pitchlogView } from '../src/screens/player/next/modules/pitchlog/pitchlogView.js'
++
++// ADR-0117 retires ADR-0110: the player page's logs and photos show a game played today once
++// the schedule reports it Final. A game still being played has no row, because rows.js keeps
++// only a game that is Final and scored. A cutoff (a `?d=` link) still turns the cutoff day away.
++
++const TODAY = '2026-10-13'
++
++const app = (date, pk, { gs = 1, w = 0 } = {}) => ({
++  date,
++  gameType: 'R',
++  isHome: true,
++  league: { id: 104 },
++  opponent: { id: 112, name: 'Chicago Cubs' },
++  game: { gamePk: pk, gameNumber: 1 },
++  stat: { gamesStarted: gs, wins: w, losses: 0, inningsPitched: '6.0', hits: 4, runs: 1, earnedRuns: 1, baseOnBalls: 1, strikeOuts: 5, homeRuns: 0, numberOfPitches: 90, strikes: 60 },
++})
++
++// A schedule stub: every gamePk asked for is Final 6-2, except `live`, which is in progress.
++function stub({ live = [] } = {}) {
++  const asked = []
++  const m = mock.method(globalThis, 'fetch', async (url) => {
++    const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
++    asked.push(...pks)
++    const games = pks.map((gamePk) => ({
++      gamePk,
++      status: { abstractGameState: live.includes(gamePk) ? 'Live' : 'Final' },
++      teams: { away: { score: 2, team: { id: 112 } }, home: { score: 6, team: { id: 158 } } },
++    }))
++    return { ok: true, status: 200, json: async () => ({ dates: [{ games }] }) }
++  })
++  return { asked, restore: () => m.mock.restore() }
++}
++
++// baseballToday() reads `new Date()`: pin it to 13:00 Pacific on TODAY.
++const pinToday = () => mock.timers.enable({ apis: ['Date'], now: new Date(`${TODAY}T20:00:00Z`) })
++
++test('a game still being played today has no score and no decision', async () => {
++  pinToday()
++  const api = stub({ live: [3] })
++  try {
++    const games = [app(TODAY, 3, { w: 1 })]
++    const scores = await fetchFinalScores(games, 'pitching', null)
++    assert.equal(scores.has(3), false)
++    const [row] = pitchlogView(games, { scores }).rows
++    assert.deepEqual([row.result, row.runs, row.dec], [null, null, null])
++  } finally {
++    api.restore()
++    mock.timers.reset()
++  }
++})
++
++test('a cutoff still turns the cutoff day and later days away', async () => {
++  pinToday()
++  const api = stub()
++  try {
++    const games = [app('2026-10-08', 1), app('2026-10-12', 2), app(TODAY, 3)]
++    const scores = await fetchFinalScores(games, 'pitching', '2026-10-12')
++    assert.deepEqual(api.asked, [1])
++    assert.deepEqual([...scores.keys()], [1])
++  } finally {
++    api.restore()
++    mock.timers.reset()
++  }
++})
+diff --git a/test/player-next-batlog.test.js b/test/player-next-batlog.test.js
+index c0c44b5a..3e58a455 100644
+--- a/test/player-next-batlog.test.js
++++ b/test/player-next-batlog.test.js
+@@ -69,7 +69,7 @@ test('pitches seen, whiffs and fouls join on the gamePk; the rest are the other
+ })
+ 
+ // The one guard (ADR-0034): a game on today's date shows no score and no result.
+-test('a game today, and a game before it: today shows no score and no result', async () => {
++test('a game today, and a game before it: both show their score and result once Final (ADR-0117)', async () => {
+   const asked = []
+   const m = mock.method(globalThis, 'fetch', async (url) => {
+     const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
+@@ -83,10 +83,10 @@ test('a game today, and a game before it: today shows no score and no result', a
+   })
+   try {
+     const games = [game('2026-10-08', 1), game('2026-10-13', 2)]
+-    const scores = await fetchFinalScores(games, 'hitting', null, '2026-10-13')
+-    assert.deepEqual(asked, [1])
++    const scores = await fetchFinalScores(games, 'hitting', null)
++    assert.deepEqual(asked, [1, 2])
+     const [today, before] = batlogView(games, { scores }).rows
+-    assert.deepEqual([today.result, today.runs, today.oppRuns], [null, null, null])
++    assert.deepEqual([today.result, today.runs, today.oppRuns], ['W', 6, 2])
+     assert.deepEqual([before.result, before.runs, before.oppRuns], ['W', 6, 2])
+   } finally {
+     m.mock.restore()
+diff --git a/test/player-next-highlights.test.js b/test/player-next-highlights.test.js
+index fb6f6dac..742e911e 100644
+--- a/test/player-next-highlights.test.js
++++ b/test/player-next-highlights.test.js
+@@ -4,9 +4,8 @@ import assert from 'node:assert/strict'
+ import { highlightsView, clipsTag } from '../src/screens/player/next/modules/highlights/highlightsView.js'
+ 
+ const clip = (clipId, date, o = {}) => ({ clipId, date, gamePk: 1, playerId: 668930, title: `t${clipId}`, duration: '00:00:30', poster: 'p', ...o })
+-const NOW = new Date('2026-10-13T20:00:00Z')
+ const ids = (v) => v.map((c) => c.clipId)
+-const view = (clips, now = NOW) => highlightsView({ clips, playerId: 668930, season: 2026, now })
++const view = (clips) => highlightsView({ clips, playerId: 668930, season: 2026 })
+ 
+ test('every kept clip, newest first, with a length and a short date', () => {
+   const clips = Array.from({ length: 8 }, (_, i) => clip(i + 1, `2026-09-${String(10 + i).padStart(2, '0')}`))
+@@ -16,13 +15,8 @@ test('every kept clip, newest first, with a length and a short date', () => {
+   assert.equal(v[0].when, 'Sep 17')
+ })
+ 
+-test('SPOILER: a clip dated the baseball day is dropped even when the file holds it', () => {
+-  assert.deepEqual(ids(view([clip(1, '2026-10-13'), clip(2, '2026-10-12')])), [2])
+-})
+-
+-test('SPOILER: the UTC flip: 01:30Z on the 14th is still the 13th in Pacific', () => {
+-  const v = view([clip(1, '2026-10-13'), clip(2, '2026-10-12')], new Date('2026-10-14T01:30:00Z'))
+-  assert.deepEqual(ids(v), [2])
++test('a clip dated today is kept: the page is open for a game played today (ADR-0117)', () => {
++  assert.deepEqual(ids(view([clip(1, '2026-10-13'), clip(2, '2026-10-12')])), [1, 2])
+ })
+ 
+ test("another player's and another season's clips are dropped", () => {
+diff --git a/test/player-next-photos.test.js b/test/player-next-photos.test.js
+index f905eedd..dd467cb8 100644
+--- a/test/player-next-photos.test.js
++++ b/test/player-next-photos.test.js
+@@ -8,28 +8,23 @@ const split = (gamePk, date, gameNumber = 1) => ({ date, gameType: 'R', game: {
+ // fetchFinalScores' map: only the games the schedule calls Final, scored, and not resuming today.
+ const finals = (...pks) => new Map(pks.map((pk) => [pk, {}]))
+ // 2026-10-14 at noon Pacific.
+-const NOON = new Date('2026-10-14T19:00:00Z')
+ 
+-test('a game on the baseball day contributes no photo, even when the schedule calls it final', () => {
+-  assert.deepEqual(photoGames([split(1, '2026-10-14'), split(2, '2026-10-13')], finals(1, 2), NOON), [
++test('a game played today contributes photos once the schedule calls it final (ADR-0117)', () => {
++  assert.deepEqual(photoGames([split(1, '2026-10-14'), split(2, '2026-10-13')], finals(1, 2)), [
++    { gamePk: 1, apiDate: '2026-10-14' },
+     { gamePk: 2, apiDate: '2026-10-13' },
+   ])
+ })
+ 
+-test('the UTC flip: past 00:00 UTC, last night is still the baseball day and stays out', () => {
+-  // 2026-10-14T01:30Z is 18:30 Pacific on 10-13: the 10-13 game may be in its sixth inning.
+-  assert.deepEqual(photoGames([split(1, '2026-10-13')], finals(1), new Date('2026-10-14T01:30:00Z')), [])
+-})
+-
+-test('a game dated before today that is not final (suspended, or past midnight) contributes no photo', () => {
+-  assert.deepEqual(photoGames([split(1, '2026-10-12'), split(2, '2026-10-13')], finals(1), NOON), [
++test('a game that is not final (still on, or suspended) contributes no photo', () => {
++  assert.deepEqual(photoGames([split(1, '2026-10-12'), split(2, '2026-10-13')], finals(1)), [
+     { gamePk: 1, apiDate: '2026-10-12' },
+   ])
+ })
+ 
+ test('a final game from the day before is kept; rows with no gamePk or no date are dropped; newest first', () => {
+   const rows = [split(1, '2026-10-11'), split(2, '2026-10-13'), split(null, '2026-10-12'), split(3, '')]
+-  assert.deepEqual(photoGames(newestFirst(rows), finals(1, 2, 3, null), NOON), [
++  assert.deepEqual(photoGames(newestFirst(rows), finals(1, 2, 3, null)), [
+     { gamePk: 2, apiDate: '2026-10-13' },
+     { gamePk: 1, apiDate: '2026-10-11' },
+   ])
+@@ -38,7 +33,7 @@ test('a final game from the day before is kept; rows with no gamePk or no date a
+ test('the walk reads the log newest first, game 2 of a doubleheader before game 1, and keeps that order', () => {
+   const rows = newestFirst([split(1, '2026-04-01'), split(4, '2026-09-27', 1), split(5, '2026-09-27', 2), split(3, '2026-06-15')])
+   assert.deepEqual(rows.map((s) => s.game.gamePk), [5, 4, 3, 1])
+-  assert.deepEqual(photoGames(rows, finals(1, 3, 4, 5), NOON).map((g) => g.gamePk), [5, 4, 3, 1])
++  assert.deepEqual(photoGames(rows, finals(1, 3, 4, 5)).map((g) => g.gamePk), [5, 4, 3, 1])
+ })
+ 
+ test('photos are merged by id: a photo two games carry shows once', () => {
+diff --git a/test/player-next-pitchlog.test.js b/test/player-next-pitchlog.test.js
+index 5bef4ec6..310d7e99 100644
+--- a/test/player-next-pitchlog.test.js
++++ b/test/player-next-pitchlog.test.js
+@@ -83,8 +83,9 @@ test('a start with no row in the per-start store has no mix bar', () => {
+   assert.equal(pitchlogView([app('2026-05-01', 1)]).rows[0].mix, null)
+ })
+ 
+-// The one guard (ADR-0110): a game still in progress today, start or relief, shows no final score and no decision.
+-test('a game in progress today: no score and no decision, though the split already says W or SV', async () => {
++// ADR-0117 retired ADR-0110's guard: a game played today, start or relief, shows its score and decision once Final.
++// (A game still on has no row: see test/player-log-today.test.js.)
++test('a game played today shows its score and decision, start or relief', async () => {
+   const asked = []
+   const m = mock.method(globalThis, 'fetch', async (url) => {
+     const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
+@@ -98,11 +99,11 @@ test('a game in progress today: no score and no decision, though the split alrea
+   })
+   try {
+     const games = [app('2026-10-08', 1, { w: 1 }), app('2026-10-13', 2, { w: 1 }), app('2026-10-13', 3, { gs: 0, saves: 1 })]
+-    const scores = await fetchFinalScores(games, 'pitching', null, '2026-10-13')
+-    assert.deepEqual(asked, [1])
++    const scores = await fetchFinalScores(games, 'pitching', null)
++    assert.deepEqual(asked, [1, 2, 3])
+     const [relief, today, before] = pitchlogView(games, { scores }).rows
+-    assert.deepEqual([relief.relief, relief.result, relief.runs, relief.dec], [true, null, null, null])
+-    assert.deepEqual([today.result, today.runs, today.oppRuns, today.dec], [null, null, null, null])
++    assert.deepEqual([relief.relief, relief.result, relief.runs, relief.dec], [true, 'W', 6, 'SV'])
++    assert.deepEqual([today.result, today.runs, today.oppRuns, today.dec], ['W', 6, 2, 'W'])
+     assert.deepEqual([before.result, before.runs, before.oppRuns, before.dec], ['W', 6, 2, 'W'])
+   } finally {
+     m.mock.restore()
+diff --git a/test/player-photos-day.test.js b/test/player-photos-day.test.js
+index 4c5d518e..0aa3a300 100644
+--- a/test/player-photos-day.test.js
++++ b/test/player-photos-day.test.js
+@@ -1,20 +1,21 @@
+-// The player page's photo rail keeps only games dated before the baseball day
+-// (US Pacific). After 00:00 UTC the UTC date is already tomorrow, so a game
+-// still in progress tonight must not slip into the rail and show its result.
++// The player page's photo rail keeps a row for every game with a gamePk and a date, oldest first
++// (ADR-0117, which retired ADR-0110). Whether a game is over is the `finals` map's call
++// (photosView.js), not this function's.
+ import assert from 'node:assert/strict'
+ import test from 'node:test'
+ import { photoGameRows } from '../src/lib/dates.js'
+ 
+ const row = (gamePk, date) => ({ game: { gamePk }, date })
+ 
+-test('at the UTC flip, tonight\'s game stays out and yesterday\'s stays in', () => {
+-  const now = new Date('2026-07-15T02:30:00Z') // still 2026-07-14 in baseball time
+-  const rows = photoGameRows([row(2, '2026-07-14'), row(1, '2026-07-13')], now)
+-  assert.deepEqual(rows, [{ gamePk: 1, apiDate: '2026-07-13' }])
++test('tonight\'s game stays in the rows; the Final check lives in fetchFinalScores', () => {
++  const rows = photoGameRows([row(2, '2026-07-14'), row(1, '2026-07-13')])
++  assert.deepEqual(rows, [
++    { gamePk: 1, apiDate: '2026-07-13' },
++    { gamePk: 2, apiDate: '2026-07-14' },
++  ])
+ })
+ 
+ test('rows are oldest first and skip a row with no gamePk or date', () => {
+-  const now = new Date('2026-07-20T18:00:00Z')
+-  const rows = photoGameRows([row(3, '2026-07-12'), row(4, '2026-07-02'), row(null, '2026-07-01'), row(5)], now)
++  const rows = photoGameRows([row(3, '2026-07-12'), row(4, '2026-07-02'), row(null, '2026-07-01'), row(5)])
+   assert.deepEqual(rows.map((r) => r.gamePk), [4, 3])
+ })
