@@ -46,9 +46,7 @@ export function GameVideoRow({ items }) {
     [items],
   )
   const hero = useHeroPhoto(items, condensed)
-  // The same photograph the home slate's revealed result card shows on ITS
-  // condensed-game print (GameResultFace's CondensedPrint) — a real still from
-  // this game instead of MLB's own poster for the cut, which is always the same
+  // A real still from this game instead of MLB's own poster for the cut, which is always the same
   // designed "CONDENSED GAME" card over the two clubs' marks and so reads as a
   // template rather than a picture of tonight. MLB's poster stays as the
   // fallback and as what shows until the pick lands, so this frame is never
@@ -82,16 +80,7 @@ export function GameVideoRow({ items }) {
   )
 }
 
-// This game's hero still, or null — the identical pick the nightly sweep
-// stores in the day index for the slate (scripts/lib/highlights.mjs feeds
-// pickHeroPhoto the very same `fetchHighlights` items this component already
-// holds), so the two surfaces cannot show different photographs of the same
-// game.
-//
-// COMPUTED HERE RATHER THAN READ FROM THE DAY INDEX, which is where the slate
-// gets it. That file is written the night AFTER the games, so it has nothing
-// for a game you just finished scoring — the exact moment the box score is
-// open. pickHeroPhoto resolves live off items already in memory: usually on the
+// This game's hero still, or null. pickHeroPhoto resolves live off items already in memory: usually on the
 // asset filename alone at no network cost, otherwise a couple of ~130-byte
 // Cloudinary shape probes (see its header). Null is ordinary — a MiLB park, or
 // a game MLB shot nothing usable at — and simply leaves MLB's own poster up.

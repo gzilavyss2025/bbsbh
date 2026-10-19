@@ -42,12 +42,10 @@ import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
 import {
-  sweepGame,
+  clipsForGame,
   fileByTeam,
   loadBlocklist,
   writeTeamFiles,
-  writeDayFiles,
-  dayIndexEntry,
   OUT_DIR,
 } from './lib/highlights.mjs'
 
@@ -76,11 +74,9 @@ for (const d of schedule.dates ?? []) {
 }
 
 const blocklist = await loadBlocklist()
-// One fetch per game, read two ways — per-play clips for the team files, the
-// condensed cut for the day index. See sweepGame.
 const swept = await mapConcurrent(targets, CONCURRENCY, async (t) => ({
   ...t,
-  ...(await sweepGame(t.gamePk, blocklist)),
+  clips: await clipsForGame(t.gamePk, blocklist),
 }))
 
 const generatedAt = new Date().toISOString()
@@ -90,21 +86,9 @@ const games = swept.filter((g) => g && g.clips.length)
 const byTeam = fileByTeam(games)
 const { added, teams } = await writeTeamFiles(byTeam, { generatedAt })
 
-// The day index is keyed independently of the team files: a game can have a
-// condensed cut and no surviving clips (or the reverse), and each side belongs
-// in its own file regardless of the other.
-const byDate = new Map()
-for (const g of swept) {
-  if (!g?.condensed || !g.date) continue
-  if (!byDate.has(g.date)) byDate.set(g.date, {})
-  byDate.get(g.date)[g.gamePk] = dayIndexEntry(g.condensed, g.heroPhoto)
-}
-const { days, entries } = await writeDayFiles(byDate, { generatedAt })
-
 const clipCount = games.reduce((n, g) => n + g.clips.length, 0)
 console.log(
   `wrote ${teams} team files under ${OUT_DIR} — ${clipCount} clips from ${games.length} clipped games ` +
     `(+${added} new game rows, ${targets.length} finals swept, ${startDate}..${endDate}` +
     `${blocklist.size ? `, ${blocklist.size} blocklisted` : ''})`,
 )
-console.log(`wrote ${days} day files under ${OUT_DIR}/day — ${entries} condensed games`)

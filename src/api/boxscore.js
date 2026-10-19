@@ -590,8 +590,8 @@ export function computePlayOfTheGame(winProb, feed) {
     inning: best.about?.inning ?? null,
     half: best.about?.isTopInning ? 'top' : 'bottom',
     // The join key to this play's video clip (see playIdForWinProbEntry).
-    // Nullable, and null on the pruned past-game path by design — the slate
-    // flip-card's .flipback__potg shows the description only, no Watch button.
+    // Nullable, and null on the pruned past-game path by design — the
+    // result card's description shows without a Watch button.
     playId,
     // Lets a caller on the pruned path find the clip on its own (the series pages).
     atBatIndex: best.about?.atBatIndex ?? null,

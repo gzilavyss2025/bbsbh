@@ -1,16 +1,10 @@
-// Presentation vocabulary shared by the slate's game cards, both faces — the
-// pill labels and colors, the doubleheader label, the plain score line, and the
-// twin-bill stack. Lives here, not inside a component, because several modules
-// need it and they would otherwise import each other: GameResultFace renders
-// PerformerCard, and PerformerCard needs scorePairsLine, which used to live in
-// GameResultFace — a real import cycle; GameResultFace also reached sideways
-// into GameCard for doubleHeaderLabel.
+// Presentation vocabulary shared by the slate's game cards — the doubleheader
+// label and the twin-bill stack. Lives here, not inside a component, because
+// several modules need it and they would otherwise import each other.
 //
-// Spoiler-free: nothing here reads a score. These are just the words and hues
-// a result card's pill maps onto. The list-reshaping functions at the bottom
-// do take schedule rows, but only their
-// identity, clock, and coarse abstract state — never a run, an inning, or a
-// linescore.
+// Spoiler-free: nothing here reads a score. The list-reshaping functions at the
+// bottom do take schedule rows, but only their identity, clock, and coarse
+// abstract state — never a run, an inning, or a linescore.
 
 import { humanDate } from './dates.js'
 
@@ -45,63 +39,6 @@ export function rescheduleLabel(game) {
 export function resumeLabel(game) {
   const d = game.resumeGameDate
   return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
-}
-
-// Pill category label per scenario, in the fixed order the pills render.
-export const SCENARIO_LABEL = {
-  dominant: 'Dominant Performance',
-  blowout: 'Blowout',
-  close: 'Close Game',
-  extras: 'Extra Innings',
-}
-
-// Each scenario's own accent color, reused BOTH as the whole card's border
-// tint (see GameResultFace's cardAccent + .flipback--accent in index.css) and
-// as its own pill's fill (.flipback__pill--scenario) — an existing design-
-// system token per scenario rather than a new hue, so the card palette stays
-// inside the app's established set:
-//   dominant → --field  (the app's own "positive" green)
-//   blowout  → --clay   (the app's own "alert/lopsided" red)
-//   close    → --marker (the "watch this" highlighter yellow)
-//   extras   → --allstar-blue (a distinct, unusual-occasion blue)
-// `text` is the ONE piece that can't just follow the same accent: filling a
-// pill solid with --marker and setting its own text to --marker too would be
-// invisible, and the WCAG-AA-legible foreground for a saturated dark fill
-// (field/clay/allstar-blue) is the opposite of what a light, bright fill
-// (marker) needs. Every pairing below is asserted by scripts/check-contrast.mjs
-// (run by `npm run lint`), so a later hex nudge can't quietly break one.
-// The crown outranks all four for the card border — see cardAccent's priority
-// order — but keeps its own amber pill treatment.
-export const SCENARIO_STYLE = {
-  dominant: { accent: 'var(--field)', text: 'var(--text-on-ink)' },
-  blowout: { accent: 'var(--clay)', text: 'var(--text-on-ink)' },
-  close: { accent: 'var(--marker)', text: 'var(--text-heading)' },
-  extras: { accent: 'var(--allstar-blue)', text: 'var(--text-on-ink)' },
-}
-
-// "MIL 5, STL 3" — comma-joined "ABBR score" pairs, in caller-supplied order.
-// Shared so every "final score, plain text" spot renders the same shape
-// instead of hand-rolling its own.
-export function scorePairsLine(pairs) {
-  return pairs.map(([abbr, score]) => `${abbr} ${score}`).join(', ')
-}
-
-// Whether GameResultFace will stack an extra PerformerCard block above its
-// Play of the Game text for this card — a performer takes that slot on a
-// Dominant Performance, or a Blowout/Extra-Innings card whose deterministic
-// playChoice landed on the performer variant. Pulled out of GameResultFace so
-// BoxScoreSkeleton (its card's "still fetching" placeholder) can make the
-// SAME call from the same cardMeta and reserve a matching placeholder shape
-// — a best-effort narrowing of the window where the real face pops in an
-// extra block after mounting, not a guarantee it never does (see
-// BoxScoreSkeleton.jsx's own header comment for why cardMeta can arrive
-// after this card's own reveal fetch already has).
-export function showsPerformerCard(cardMeta) {
-  const { scenario, playChoice, performer } = cardMeta ?? {}
-  return (
-    !!performer &&
-    (scenario === 'dominant' || ((scenario === 'blowout' || scenario === 'extras') && playChoice === 'performer'))
-  )
 }
 
 // The back-to-back twin bill, and why the slate shows it as one card until it

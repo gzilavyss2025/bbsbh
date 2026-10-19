@@ -208,21 +208,6 @@
     font-size: var(--fs-small);
   }
 
-  /* The result card's own Dominant Performance/Blowout/Extra-Innings
-     performer tile (.flipback__perfcard) has the same room problem as the
-     Top Performers rail above: it sits inside a full slate card, not the
-     narrow two-up grid the two-line stack was built for, so a stacked
-     "Jackson<br>Merrill" just wastes a line for no reason at this width.
-     Same override, same reasoning. */
-  .flipback__perfcard .playerline__name {
-    flex-direction: row;
-    align-items: baseline;
-    font-size: var(--fs-body);
-  }
-  .flipback__perfcard .playerline__namebreak {
-    display: none;
-  }
-
   /* ---- slate footer: the action grid stays compact rather than stretching
      each button full width. The cap holds the auto-fit cells to a tidy size
      (the base rule wraps them across as many rows as fit); 720px keeps the

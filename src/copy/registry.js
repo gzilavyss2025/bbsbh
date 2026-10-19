@@ -56,20 +56,9 @@ export const GROUPS = [
 // be (enforced client- AND server-side), whether it is multiline (a textarea
 // vs. a single-line input in the panel), and the shipped default text.
 //
-// TOKENS is the CLOSED set of interpolation tokens the runtime substitutes (see
-// fillTokens below). Each is optional in any value — the admin can move it, keep
-// it, or drop it, and a token with nothing to fill is stripped along with the
-// gap it leaves. Nothing outside this set is honored, so editable copy can never
-// smuggle in markup or arbitrary substitution.
-//
-//   {time}   — a concrete local clock time (e.g. "8:00 AM").
-//   {inning} — the half-inning label of the half ALREADY ON SCREEN (e.g.
-//              "Top 7th").
-//
-// No shipped field uses either token since the Scores Unlocked group was
-// removed (ADR-0116); the set stays closed and stays here, so a future field
-// that needs one inherits the guard below rather than inventing a path around
-// it.
+// NO INTERPOLATION. A value renders exactly as typed: there is no token or
+// substitution layer (the `{time}`/`{inning}` set served only the Scores Unlocked
+// group, removed in ADR-0116, and was deleted in #2308).
 //
 // SPOILER GUARD (do not relax): no field here may be rendered inside a
 // sealed/reveal-gated surface, and no field's VALUE may be derived from game
@@ -77,16 +66,11 @@ export const GROUPS = [
 // score. That covers the consent/chrome copy and, since ADR-0025's amendment,
 // the per-park notes: a ballpark is a building, the team hub's Overview is one
 // of the surfaces CLAUDE.md keeps deliberately outside the scoring flow, and a
-// sentence about the Green Monster cannot leak tonight's result. A token may
-// be added ONLY if its value is categorically incapable of carrying a score. The
-// two above qualify: a clock time is not game data at all, and `{inning}` is the
-// same structural half-inning label the innings chrome already prints for the
-// half the user is looking at — a position in the game, never a run. A run/score/result
-// token must NEVER be added, and no field may be interpolated with any other
-// game data. That is what keeps an admin-editable string incapable of leaking a
-// score. If this panel ever grows to govern other app copy, keep score-bearing
-// contexts out of the registry entirely — see ADR-0025.
-export const TOKENS = Object.freeze(['time', 'inning'])
+// sentence about the Green Monster cannot leak tonight's result. A run/score/
+// result value must NEVER be interpolated into a field, and no field may be
+// filled with any game data. That is what keeps an admin-editable string
+// incapable of leaking a score. If this panel ever grows to govern other app
+// copy, keep score-bearing contexts out of the registry entirely — see ADR-0025.
 
 // The ballpark notes: one free-text paragraph per park, shown on the team hub's
 // Overview between the built/roof/capacity facts and the outfield dimensions.
@@ -456,36 +440,4 @@ function stripControlChars(value, allowNewlines) {
 // `overrides` is sanitized here too, so callers can pass a raw cached blob.
 export function resolveCopy(overrides) {
   return { ...defaultCopy(), ...sanitizeOverrides(overrides) }
-}
-
-// Substitute the honored TOKENS into a resolved string. Missing or non-string
-// input yields ''. A value with no token is returned unchanged. A token the
-// caller has no value for is DROPPED along with the gap it leaves, so a string
-// like "Back at {time}" reads "Back at", not "Back at " (or "… at  today" for a
-// mid-sentence token). The tidy pass runs only
-// when something was actually stripped, so a fully-substituted string keeps the
-// admin's exact spacing.
-export function fillTokens(text, tokens = {}) {
-  if (typeof text !== 'string') return ''
-  let out = text
-  let stripped = false
-  for (const name of TOKENS) {
-    if (!out.includes(`{${name}}`)) continue
-    const pattern = new RegExp(`\\{${name}\\}`, 'g')
-    const value = tokens?.[name]
-    if (typeof value === 'string' && value) {
-      // Function-form replacement so a value containing `$&`/`$'` (special
-      // replacement patterns) can't expand — fillTokens is a generic exported util.
-      out = out.replace(pattern, () => value)
-    } else {
-      out = out.replace(pattern, '')
-      stripped = true
-    }
-  }
-  if (!stripped) return out
-  return out
-    .replace(/[ \t]{2,}/g, ' ')
-    .replace(/[ \t]+([.,!?;:])/g, '$1')
-    .replace(/[ \t]+$/gm, '')
-    .trim()
 }

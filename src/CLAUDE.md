@@ -62,13 +62,11 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel. T
 
 The wording of the spoiler-consent surfaces is admin-editable, not hard-coded.
 `src/copy/registry.js` is the closed source of truth (ids, defaults, length caps,
-`sanitizeOverrides`, and `TOKENS` — the closed `{time}`/`{inning}` substitution
-set, whose header records why a score-bearing token may never join it);
+`sanitizeOverrides`; no token substitution, and its header records why no
+game data may ever be interpolated into a field);
 `CopyProvider.jsx` + `copyContext.js` resolve
 `defaults ← localStorage cache ← live /api/copy` and expose
-`useCopy().t(id, tokens)`, always falling back to defaults. Every substitution
-goes through `fillTokens` — never an ad hoc `.replace` at a call site, which
-skips both the closed-set check and the drop-the-token-and-tidy-the-gap path.
+`useCopy().t(id)`, always falling back to defaults.
 The unlinked `/admin` route (`screens/AdminCopy.jsx`) is the Clerk-admin-gated
 editor (with version history). It stores UI text only — never a score — see
 ADR-0025 and the `api/` functions prose in the root `CLAUDE.md`. When

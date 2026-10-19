@@ -92,8 +92,7 @@
    sits in — but `#root *` sets uppercase on the link ELEMENT, which beats an
    inherited value, so a man's name shouts inside a natural-case sentence:
    "IVÁN HERRERA, the catcher, asked for the review". Naming the child is how
-   `#root .flipback__potg .plink` (22-box-score-tables.css) and
-   `.xl-deck__holdkey` already fix the same thing. */
+   `.xl-deck__holdkey` already fixes the same thing. */
 #root .rptprose .plink {
   text-transform: none; /* caps-exempt: the few real sentences left on a report page are paragraphs, not chrome labels — shouted caps make them much harder to scan, and the headings, column heads, chips and figures around them all stay uppercase */
 }

@@ -1304,17 +1304,6 @@ don't run these by hand.
   The NEXT season's file owns the winter (#1477): a season runs from the day after the previous
   `seasonEndDate`, and the default season turns to next year the day after this year's end.
 
-- `gen-highlights.mjs` also → `public/data/highlights/day/{MMDDYYYY}.json` — the
-  per-slate-date **condensed-game index**, `{gamePk: {title, duration, poster,
-  playbacks, heroPhoto}}`, ~8 KB for a 16-game day. One fetch per game
-  (`sweepGame` reads the content package three ways, not three requests),
-  MERGED into whatever the file already holds (`writeDayFiles`) so a partial
-  re-sweep stays additive. Read by the home slate's revealed result cards
-  (`fetchDayVideos`), which can't go live (`content` is 430 KB/game). Stores
-  the CONDENSED cut only, never the recap (score in its title). `heroPhoto`
-  (`{original, thumb} | null`, `pickHeroPhoto` via `dayIndexEntry`) is a real
-  still shown instead of MLB's "CONDENSED GAME" graphic — URLs only, no
-  caption, since the file is fetched whole for every game, revealed or not.
 - `gen-highlights.mjs` → `public/data/highlights/{teamId}.json` — one small file
   per MLB club holding its per-play video highlights, game by game, newest first.
   Feeds the Team hub's Games-tab rail and the player page's rail; the box score's
@@ -1738,16 +1727,14 @@ Re-run only to fold in a new season.
   itself. AVG/ERA carry a minimum-AB/IP qualifier (same idea as the live
   leader boards' floor) so a single pinch-hit or mop-up inning can't top a
   rate-stat board. App reads it via `src/api/postseasonLeaders.js`.
-- `gen-highlights-backfill.mjs` → `public/data/highlights/{teamId}.json` **and
-  the day index above** — the one-time historical sweep establishing the season
-  the nightly `gen-highlights.mjs` can't reach back to. Same relationship, and
-  same ~2,430-game cost, as `gen-rookies-backfill.mjs` below; `--since`/`--until`
-  chunk it. TWO OUTPUTS, TWO INDEPENDENT "done" sets (`ingestedGamePks` vs
-  `dayIndexedGamePks`) — a game can be filed in one and missing from the other,
-  so it sweeps if EITHER is. **`--days-only`** writes just the index: a full CLIP
-  backfill grows every team file to ~0.5 MB and the rails fetch a whole one to
-  render, so that is a page-weight call about a different surface. Per-game
-  logic is shared with the nightly job (`scripts/lib/highlights.mjs`).
+- `gen-highlights-backfill.mjs` → `public/data/highlights/{teamId}.json` — the
+  one-time historical sweep establishing the season the nightly
+  `gen-highlights.mjs` can't reach back to. Same relationship, and same
+  ~2,430-game cost, as `gen-rookies-backfill.mjs` below; `--since`/`--until`
+  chunk it. Per-game logic is shared with the nightly job
+  (`scripts/lib/highlights.mjs`). The per-date condensed-game index
+  (`highlights/day/`) it and the nightly job once also wrote was removed in
+  #2308: its only reader went with the slate's flip cards (ADR-0116).
 - `gen-rookies-backfill.mjs` → `public/data/rookies.json` — the one-time
   historical sweep that establishes every player's rookie window before
   `gen-rookies.mjs` (nightly, above) is ever live. Enumerates every MLB

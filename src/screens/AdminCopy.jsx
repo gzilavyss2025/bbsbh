@@ -4,7 +4,7 @@ import { useAuth, useUser } from '@clerk/clerk-react'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
-import { FIELDS, GROUPS, defaultCopy, fillTokens, sanitizeOverrides } from '../copy/registry.js'
+import { FIELDS, GROUPS, defaultCopy, sanitizeOverrides } from '../copy/registry.js'
 import { ConsentModal } from '../components/seal/ConsentModal.jsx'
 import { makePreviewResolver } from '../copy/previewResolver.js'
 import { AwardOrderEditor } from '../components/admin/AwardOrderEditor.jsx'
@@ -50,7 +50,7 @@ function Notice({ children }) {
 // A small non-interactive rendering of a consent modal, so the admin sees the
 // wording in context as they edit it.
 function ModalPreview({ values, ids }) {
-  const line = (id) => fillTokens(values[id] ?? '')
+  const line = (id) => values[id] ?? ''
   return (
     <div className="admincopy__preview" aria-hidden="true">
       <div className="admincopy__previewCard">

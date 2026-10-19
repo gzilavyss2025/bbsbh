@@ -118,7 +118,7 @@ function feederFor(team, wildcards) {
   })
 }
 
-function settle(series, counted, cutoff, live = false) {
+function settle(series, counted, cutoff) {
   const ids = series.slots.map((s) => s.club?.id ?? null)
   series.games = series._rows
     .filter((r) => counted.has(r.gamePk))
@@ -136,11 +136,9 @@ function settle(series, counted, cutoff, live = false) {
     series.eliminated = series.slots[1 - winIdx].club
   }
 
-  if (!series.decided || live) {
+  if (!series.decided) {
     const today = series._rows.find((r) => r.officialDate === cutoff || r.resumeGameDate === cutoff)
-    // `live` (the reader unlocked the day's scores) counts the cutoff day's own
-    // Finals, so a game that just ended still marks the series as playing today.
-    if (today && (live || !counted.has(today.gamePk))) {
+    if (today && !counted.has(today.gamePk)) {
       series.playsOnCutoff = true
       series.cutoffGame = { gamePk: today.gamePk, gameNumber: today.gameNumber }
     }
@@ -184,7 +182,7 @@ function upcomingGames(series) {
 // A display order only — the wiring above never reads it.
 const byLabel = (a, b) => a.label.localeCompare(b.label) || Number(a.key) - Number(b.key)
 
-export function deriveBracket(skeletonRows, resultRows, cutoffDate, { live = false } = {}) {
+export function deriveBracket(skeletonRows, resultRows, cutoffDate) {
   const rows = (skeletonRows ?? []).filter((r) => ROUND_BY_TYPE[r.gameType])
   if (!rows.length || !cutoffDate) return null
   const season = Number(rows[0].officialDate.slice(0, 4))
@@ -192,7 +190,7 @@ export function deriveBracket(skeletonRows, resultRows, cutoffDate, { live = fal
   // The results that count: Final, a winner, gone Final before the cutoff.
   const counted = new Map()
   for (const r of resultRows ?? []) {
-    if (r.final && r.winnerId && (live ? finalDate(r) <= cutoffDate : finalDate(r) < cutoffDate)) counted.set(r.gamePk, r.winnerId)
+    if (r.final && r.winnerId && finalDate(r) < cutoffDate) counted.set(r.gamePk, r.winnerId)
   }
 
   const groups = new Map()
@@ -214,7 +212,7 @@ export function deriveBracket(skeletonRows, resultRows, cutoffDate, { live = fal
       wc.slots = [emptySlot(), emptySlot()]
       wc.slots[0].club = clubOf(wc._game1.away)
       wc.slots[1].club = clubOf(wc._game1.home)
-      settle(wc, counted, cutoffDate, live)
+      settle(wc, counted, cutoffDate)
     }
     for (const ds of division) {
       ds.slots = [ds._game1.away, ds._game1.home].map((team) => {
@@ -225,7 +223,7 @@ export function deriveBracket(skeletonRows, resultRows, cutoffDate, { live = fal
         }
         return { ...emptySlot(), club: clubOf(team), bye: wildcard.length > 0 && isClub(team) }
       })
-      settle(ds, counted, cutoffDate, live)
+      settle(ds, counted, cutoffDate)
     }
     // A Wild Card series no Division Series names still takes its place.
     wildcard.sort((a, b) => {
@@ -233,7 +231,7 @@ export function deriveBracket(skeletonRows, resultRows, cutoffDate, { live = fal
       const ib = division.findIndex((d) => d.key === b.feeds)
       return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib) || Number(a.key) - Number(b.key)
     })
-    if (lcs) fedBy(lcs, division, counted, cutoffDate, live)
+    if (lcs) fedBy(lcs, division, counted, cutoffDate)
 
     leagues[league] = {
       wildcard,
@@ -244,7 +242,7 @@ export function deriveBracket(skeletonRows, resultRows, cutoffDate, { live = fal
   }
 
   const worldSeries = pick('worldseries')[0] ?? null
-  if (worldSeries) fedBy(worldSeries, [leagues.AL.lcs, leagues.NL.lcs].filter(Boolean), counted, cutoffDate, live)
+  if (worldSeries) fedBy(worldSeries, [leagues.AL.lcs, leagues.NL.lcs].filter(Boolean), counted, cutoffDate)
 
   const ordered = []
   for (const league of ['AL', 'NL']) {
@@ -286,7 +284,7 @@ const leagueRank = (s) => (s.league === 'AL' ? 0 : s.league === 'NL' ? 1 : 2)
 // An LCS or the World Series: one slot per feeder, in feeder order, filled
 // with that feeder's winner once it is decided. With no feeders (a format
 // with no round before this one), the skeleton's real clubs stand.
-function fedBy(series, feeders, counted, cutoff, live = false) {
+function fedBy(series, feeders, counted, cutoff) {
   if (feeders.length === 2) {
     series.slots = feeders.map((f) => {
       f.feeds = series.key
@@ -295,7 +293,7 @@ function fedBy(series, feeders, counted, cutoff, live = false) {
   } else {
     series.slots = [series._game1.away, series._game1.home].map((t) => ({ ...emptySlot(), club: clubOf(t) }))
   }
-  settle(series, counted, cutoff, live)
+  settle(series, counted, cutoff)
 }
 
 // The series a slate game belongs to, and that game's number in it.

@@ -106,8 +106,8 @@
     "wrap": 1
   },
   "src/styles/22-box-score-tables.css": {
-    "column": 10,
-    "wrap": 4,
+    "column": 9,
+    "wrap": 3,
     "grid": 3
   },
   "src/styles/23-box-score-detail.css": {
