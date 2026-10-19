@@ -132,8 +132,10 @@ export function BoxScore({
   // persists — one bit per gamePk, written only on a real tap.
   const { boxOpened, markBoxOpened } = useBoxScoreReveal(feed?.gamePk)
   // A THIRD OPENER (ADR-0117): the game's schedule date is before the slate's today. A date,
-  // not a score, so it is read outside the seal. It persists nothing.
-  const openByDate = boxScoreOpensByDate(feed?.gameData?.datetime?.officialDate)
+  // not a score, so it is read outside the seal. It persists nothing. Memoised on the date, so
+  // the clock passing midnight does not open a seal under a reader who is looking at it.
+  const officialDate = feed?.gameData?.datetime?.officialDate
+  const openByDate = useMemo(() => boxScoreOpensByDate(officialDate), [officialDate])
 
   return (
     <div className="boxscore">

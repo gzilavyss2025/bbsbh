@@ -116,6 +116,7 @@ test('fetchFinalScores: nothing before the cutoff asks nothing', async () => {
 })
 
 test("fetchFinalScores: with no cutoff, today's games are asked for and show their score once Final (ADR-0117)", async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
   const api = stubSchedule()
   try {
     const splits = [row('2026-10-12', 201), row('2026-10-13', 202, 1), row('2026-10-13', 203, 2)]
@@ -126,10 +127,12 @@ test("fetchFinalScores: with no cutoff, today's games are asked for and show the
     assert.deepEqual(view.map((r) => [r.gamePk, r.result, r.runs]), [[203, 'W', 6], [202, 'W', 6], [201, 'W', 6]])
   } finally {
     api.restore()
+    mock.timers.reset()
   }
 })
 
 test('fetchFinalScores: a suspended game that ends today shows its score, though its split keeps the first day', async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
   // Shaped like gamePk 777861: suspended 2025-05-19, finished 2025-05-21. The
   // split and officialDate keep 05-19; only the schedule's resumeDate says 05-21.
   const api = stubSchedule({
@@ -141,6 +144,7 @@ test('fetchFinalScores: a suspended game that ends today shows its score, though
     assert.deepEqual([...scores.keys()].sort(), [301, 302])
   } finally {
     api.restore()
+    mock.timers.reset()
   }
 })
 

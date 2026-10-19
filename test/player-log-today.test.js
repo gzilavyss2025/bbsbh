@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
 import { fetchFinalScores } from '../src/api/boxlines/fetch.js'
 import { pitchlogView } from '../src/screens/player/next/modules/pitchlog/pitchlogView.js'
+import { highlightsView } from '../src/screens/player/next/modules/highlights/highlightsView.js'
+import { photoGameRows } from '../src/lib/dates.js'
 
 // ADR-0117 retires ADR-0110: the player page's logs and photos show a game played today once
 // the schedule reports it Final. A game still being played has no row, because rows.js keeps
@@ -37,6 +39,38 @@ function stub({ live = [] } = {}) {
 
 // baseballToday() reads `new Date()`: pin it to 13:00 Pacific on TODAY.
 const pinToday = () => mock.timers.enable({ apis: ['Date'], now: new Date(`${TODAY}T20:00:00Z`) })
+
+test('a game played today shows its score and decision once it is Final', async () => {
+  pinToday()
+  const api = stub()
+  try {
+    const games = [app('2026-10-08', 1, { w: 1 }), app(TODAY, 2, { w: 1 })]
+    const scores = await fetchFinalScores(games, 'pitching', null)
+    assert.deepEqual(api.asked, [1, 2])
+    const [today, before] = pitchlogView(games, { scores }).rows
+    assert.deepEqual([today.result, today.runs, today.oppRuns, today.dec], ['W', 6, 2, 'W'])
+    assert.deepEqual([before.result, before.runs, before.oppRuns, before.dec], ['W', 6, 2, 'W'])
+  } finally {
+    api.restore()
+    mock.timers.reset()
+  }
+})
+
+test('the photo rail and the highlight clips keep a game dated today', async () => {
+  // The clock is pinned to TODAY: a far-future date would be "today or later" under the old rule too.
+  pinToday()
+  try {
+    const row = (gamePk, date) => ({ game: { gamePk }, date })
+    assert.deepEqual(photoGameRows([row(2, TODAY), row(1, '2026-10-12')]), [
+      { gamePk: 1, apiDate: '2026-10-12' },
+      { gamePk: 2, apiDate: TODAY },
+    ])
+    const clip = { clipId: 1, date: TODAY, gamePk: 2, playerId: 7, title: 't', duration: '00:00:30', poster: 'p' }
+    assert.deepEqual(highlightsView({ clips: [clip], playerId: 7, season: 2026 }).map((c) => c.clipId), [1])
+  } finally {
+    mock.timers.reset()
+  }
+})
 
 test('a game still being played today has no score and no decision', async () => {
   pinToday()

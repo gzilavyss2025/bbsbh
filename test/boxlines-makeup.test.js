@@ -105,6 +105,7 @@ test('fetchFinalScores: a makeup under the same gamePk reads the score of the ga
 })
 
 test('fetchFinalScores: a makeup played TODAY shows its score once Final (ADR-0117)', async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
   const api = stub({ dates: makeup(900001, { from: '2026-10-12', to: '2026-10-13' }) })
   try {
     const scores = await fetchFinalScores([split('2026-10-13', 900001)], 'hitting', null)
@@ -112,10 +113,12 @@ test('fetchFinalScores: a makeup played TODAY shows its score once Final (ADR-01
     assert.equal(scores.size, 1)
   } finally {
     api.restore()
+    mock.timers.reset()
   }
 })
 
 test("fetchFinalScores: a makeup played today shows its score even when the split keeps the postponed day", async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
   // Not what statsapi does today (the split moves to the played day).
   // With no cutoff the played record is read as played.
   const api = stub({ dates: makeup(900002, { from: '2026-10-12', to: '2026-10-13' }) })
@@ -124,10 +127,12 @@ test("fetchFinalScores: a makeup played today shows its score even when the spli
     assert.equal(scores.size, 1)
   } finally {
     api.restore()
+    mock.timers.reset()
   }
 })
 
 test('fetchFinalScores: a suspended game, two scored records, shows its score with no cutoff', async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
   // gamePk 777861's shape (live 2026-10-13): both records Final and scored;
   // only the first carries resumeDate. With no cutoff it is read as finished.
   const rec = (date, extra) => ({
@@ -142,6 +147,7 @@ test('fetchFinalScores: a suspended game, two scored records, shows its score wi
     assert.equal(scores.size, 1)
   } finally {
     api.restore()
+    mock.timers.reset()
   }
 })
 

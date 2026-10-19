@@ -7,7 +7,7 @@ import { photoGameRows } from '../src/lib/dates.js'
 
 const row = (gamePk, date) => ({ game: { gamePk }, date })
 
-test('tonight\'s game stays in the rows; the Final check lives in fetchFinalScores', () => {
+test('the rows keep a game whatever its date; the Final check lives in fetchFinalScores', () => {
   const rows = photoGameRows([row(2, '2026-07-14'), row(1, '2026-07-13')])
   assert.deepEqual(rows, [
     { gamePk: 1, apiDate: '2026-07-13' },

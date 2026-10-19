@@ -86,6 +86,7 @@ test('a start with no row in the per-start store has no mix bar', () => {
 // ADR-0117 retired ADR-0110's guard: a game played today, start or relief, shows its score and decision once Final.
 // (A game still on has no row: see test/player-log-today.test.js.)
 test('a game played today shows its score and decision, start or relief', async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
   const asked = []
   const m = mock.method(globalThis, 'fetch', async (url) => {
     const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
@@ -107,6 +108,7 @@ test('a game played today shows its score and decision, start or relief', async 
     assert.deepEqual([before.result, before.runs, before.oppRuns, before.dec], ['W', 6, 2, 'W'])
   } finally {
     m.mock.restore()
+    mock.timers.reset()
   }
 })
 

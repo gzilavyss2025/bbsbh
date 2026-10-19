@@ -8,8 +8,7 @@ import { BROADCAST_FIELDS, BROADCAST_HYDRATE, nationalName } from './broadcast.j
 import { getJson } from './statsapi.js'
 import { fetchStaticTeams } from './teams-static.js'
 import { postseasonThrough } from './scheduleGames.js'
-import { isoToday, toApiDate } from '../lib/dates.js'
-import { baseballToday } from '../lib/time/standingsDates.js'
+import { slateToday } from '../lib/dates.js'
 import { WINTER_LEAGUE_IDS, WINTER_SPORT_ID } from '../lib/winter/leagues.js'
 
 // Normalize a raw schedule game into the shape our cards need. Exported so
@@ -726,7 +725,7 @@ export function pageDay(resultsCutoff) {
     const [y, m, d] = resultsCutoff.split('-').map(Number)
     return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10)
   }
-  return [isoToday(), toApiDate(), baseballToday()].sort()[0]
+  return slateToday()
 }
 
 // recentDecidedGames / allDecidedGames / allStartedGames — the pure post-fetch

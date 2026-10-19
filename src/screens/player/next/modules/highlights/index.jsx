@@ -10,7 +10,7 @@ import { clipsTag, highlightsView } from './highlightsView.js'
 const SHOWN = 6
 
 // Highlights (#2022): his clips this season, newest six, and a door to the rest. Open surface (ADR-0034);
-// highlightsView drops a game dated the baseball day. A trade hides clips filed under his old club (accepted).
+// a game played today shows once Final (ADR-0117). A trade hides clips filed under his old club (accepted).
 export default function HighlightsModule({ bio, asOf, season, onEmpty, onCount }) {
   const live = !asOf && !!bio.debut && inMajors(bio)
   const { data, loading } = useAsync(() => (live ? fetchTeamHighlights(bio.team?.id) : Promise.resolve(null)), [live, bio.team?.id])

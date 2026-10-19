@@ -70,6 +70,7 @@ test('pitches seen, whiffs and fouls join on the gamePk; the rest are the other 
 
 // The one guard (ADR-0034): a game on today's date shows no score and no result.
 test('a game today, and a game before it: both show their score and result once Final (ADR-0117)', async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
   const asked = []
   const m = mock.method(globalThis, 'fetch', async (url) => {
     const pks = (String(url).match(/gamePks=([\d,]+)/)?.[1] ?? '').split(',').map(Number)
@@ -90,6 +91,7 @@ test('a game today, and a game before it: both show their score and result once 
     assert.deepEqual([before.result, before.runs, before.oppRuns], ['W', 6, 2])
   } finally {
     m.mock.restore()
+    mock.timers.reset()
   }
 })
 

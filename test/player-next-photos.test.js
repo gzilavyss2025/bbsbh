@@ -9,7 +9,7 @@ const split = (gamePk, date, gameNumber = 1) => ({ date, gameType: 'R', game: { 
 const finals = (...pks) => new Map(pks.map((pk) => [pk, {}]))
 // 2026-10-14 at noon Pacific.
 
-test('a game played today contributes photos once the schedule calls it final (ADR-0117)', () => {
+test('a game contributes photos once the schedule calls it final, whatever its date (ADR-0117)', () => {
   assert.deepEqual(photoGames([split(1, '2026-10-14'), split(2, '2026-10-13')], finals(1, 2)), [
     { gamePk: 1, apiDate: '2026-10-14' },
     { gamePk: 2, apiDate: '2026-10-13' },

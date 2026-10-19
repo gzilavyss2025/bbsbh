@@ -5,7 +5,9 @@ import { plural } from '../../parts/foulsFormat.js'
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 // A clip title names the play ("walk-off single"). The page is open for a game played today
-// (ADR-0117, which retired ADR-0110), so no date filter is applied: the nightly file keeps Final games only.
+// (ADR-0117, which retired ADR-0110), so no date filter is applied. gen-highlights.mjs sweeps
+// only games the schedule calls Final, whether it runs on the cron or by hand, so the file
+// holds no clip of a game still on.
 export function highlightsView({ clips, playerId, season }) {
   return clips
     .filter((c) => c.playerId === playerId && c.date.slice(0, 4) === String(season))
