@@ -111,7 +111,7 @@ export async function fetchStandingsFor(season, { signal } = {}) {
 export function meetingsUrl(season, teamId, opponentId, slateDate) {
   return (
     `/api/v1/schedule?sportId=1&teamId=${teamId}&opponentId=${opponentId}&gameType=R&season=${season}` +
-    `&endDate=${dayBefore(slateDate)}&fields=${CLUB_GAME_FIELDS}`
+    `&startDate=${season}-01-01&endDate=${dayBefore(slateDate)}&fields=${CLUB_GAME_FIELDS}`
   )
 }
 
