@@ -65,20 +65,6 @@ const lower = (s) => s.toLowerCase() // caps-js-exempt: a pitch name inside a se
 export const listOf = (items) =>
   items.length <= 1 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`
 
-// The metric the headline reads: xwOBA (est.) when the grid carries it, else
-// the first one that favors a side (Whiff %). Null when neither is on.
-export const leanMetric = (metrics) => ['xwoba', 'whiff'].find((m) => metrics.includes(m)) ?? null
-
-// THE HEADLINE: sum the usage of the types that favor each side. "Lean
-// {hitter}" when his sum beats the pitcher's and is at least 50; the same the
-// other way; else "Close to even".
-export function headline(rows) {
-  const hitter = pctOf(rows.filter((r) => r.who === 'hitter'))
-  const pitcher = pctOf(rows.filter((r) => r.who === 'pitcher'))
-  const lean = hitter > pitcher && hitter >= 50 ? 'hitter' : pitcher > hitter && pitcher >= 50 ? 'pitcher' : null
-  return { lean, hitter, pitcher }
-}
-
 // A sentence is a list of parts: a string, or { strong } for a figure the
 // panel sets in bold. The panel joins them; a test reads the text.
 export const textOf = (parts) => parts.map((p) => (typeof p === 'string' ? p : p.strong)).join('')
@@ -174,25 +160,25 @@ export function locationSentences(lens, metric, names, crowd) {
   return out
 }
 
-// THE WHOLE VERDICT. `sides` is { metric: hitterSide } for each metric the
-// grid carries; `board` the pitcher board; `names` { hitter, pitcher };
-// `stance` 'R' | 'L' (the crowd). Null with no hitter side (the Phase 1
-// state): the panel keeps the Savant line instead.
-export function verdict({ board, sides, names, stance }) {
-  const metric = leanMetric(Object.keys(sides).filter((m) => sides[m]))
-  if (!board || !metric) return null
+// THINGS TO WATCH (#2319): the sentences above, each given to the player it is
+// about. Pure, so a test pins the mapping. `sides.xwoba` null: nothing.
+// typeSentences writes [beats the league (if any hitter pitch)], then
+// [pitcher has the edge (if any pitcher pitch), or "No pitch favors"], then
+// "Too few"; the last two are not watch items, and neither is "Leaves out" (the
+// pushes note says it).
+export function watchList({ board, sides, names, stance }) {
+  if (!board || !sides.xwoba) return []
   const crowd = stance === 'L' ? 'lefties' : 'righties'
-  const rows = ledgerRows(board.types, sides[metric], metric)
-  const head = headline(rows)
-  const typeLines = typeSentences(rows, metric, names, crowd)
-  const whiff = metric === 'xwoba' && sides.whiff ? whiffSentence(ledgerRows(board.types, sides.whiff, 'whiff'), names) : null
-  const lens = locationLens(board, sides[metric])
-  return {
-    metric,
-    lean: head.lean,
-    leanName: head.lean ? names[head.lean] : null,
-    typeLines: whiff ? [...typeLines, whiff] : typeLines,
-    locationLines: locationSentences(lens, metric, names, crowd),
-  }
+  const rows = ledgerRows(board.types, sides.xwoba, 'xwoba')
+  const sentences = typeSentences(rows, 'xwoba', names, crowd)
+  const out = []
+  let i = 0
+  if (rows.some((r) => r.who === 'hitter')) out.push({ who: 'hitter', parts: sentences[i++] })
+  if (rows.some((r) => r.who === 'pitcher')) out.push({ who: 'pitcher', parts: sentences[i++] })
+  const whiff = sides.whiff && whiffSentence(ledgerRows(board.types, sides.whiff, 'whiff'), names)
+  if (whiff) out.push({ who: 'pitcher', parts: whiff })
+  const lens = locationLens(board, sides.xwoba)
+  const spots = locationSentences(lens, 'xwoba', names, crowd)[1]
+  if (spots) out.push({ who: lens.hot > lens.cold ? 'hitter' : 'pitcher', parts: spots })
+  return out
 }
-

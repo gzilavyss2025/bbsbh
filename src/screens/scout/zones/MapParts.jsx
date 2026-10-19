@@ -3,7 +3,7 @@ import { METRICS, band, fmtValue } from '../../../lib/scout/metrics.js'
 import { regionLabel, sidesInOrder } from '../../../lib/zone/regions.js'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
 
-// THE PARTS AROUND THE SCOUT'S TWO MAPS: the side labels under each, the
+// THE PARTS AROUND THE SCOUT'S MAP: the side labels under it, the
 // answer line above them, the readout for a tapped region, and the key. The
 // same parts as the Design Lab prototype (screens/designlab/scout/).
 
@@ -84,16 +84,23 @@ export function Readout({ picked, map, hit, metric, stance }) {
 // The key: the pitcher's ramp, the hitter's diverging scale against the
 // league (when his map is on), and the hatch for a map or region under its
 // floor.
-export function Key({ metric }) {
+export function Key({ metric, mode }) {
   const m = metric ? METRICS[metric] : null
   return (
-    <Stack gap="tight" className="scout__key" aria-label="Colour scale">
-      <p className="scout__keyrow">
-        <span className="scout__keylabel">Location share: less</span>
-        {[1, 2, 3, 4].map((k) => <Swatch key={k} tone={`s${k}`} />)}
-        <span className="scout__keylabel">more</span>
-      </p>
-      {m && (
+    <Stack gap="tight" className={`scout__key ${mode === 'locations' ? '' : `scout__map--${metric}`}`.trim()} aria-label="Colour scale">
+      {mode === 'both' ? (
+        <p className="scout__keyrow">
+          <svg className="scout__swatch" aria-hidden="true"><rect className="scout__share" x="4" y="4" width="6" height="6" /></svg>
+          <span className="scout__keylabel">Square: how often he throws there</span>
+        </p>
+      ) : mode !== 'results' && (
+        <p className="scout__keyrow">
+          <span className="scout__keylabel">Location share: less</span>
+          {[1, 2, 3, 4].map((k) => <Swatch key={k} tone={`s${k}`} />)}
+          <span className="scout__keylabel">more</span>
+        </p>
+      )}
+      {m && mode !== 'locations' && (
         <p className="scout__keyrow">
           <span className="scout__keylabel">{m.label} vs league: below</span>
           {['lo2', 'lo1', 'mid', 'hi1', 'hi2'].map((k) => <Swatch key={k} tone={k} />)}

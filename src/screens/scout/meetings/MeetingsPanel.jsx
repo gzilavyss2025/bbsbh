@@ -7,7 +7,6 @@ import { ROUND_TAG, resultShort } from '../../../lib/scout/format.js'
 import { Pill } from '../../../components/ui/control/Pill.jsx'
 import { AsyncStatus } from '../../../components/ui/AsyncGate.jsx'
 import { EmptyState } from '../../../components/ui/state/EmptyState.jsx'
-import { AsOfBanner } from '../../../components/seal/AsOfBanner.jsx'
 import { callOf, gamesOf, inPlay, meetingFacts, mixRows, nameOf, meetingOrdinal, pitchWalk, playText, unseenNote } from './meetings.js'
 import { PitchModal } from './PitchModal.jsx'
 import { ContactFacts, Fact, fixed, xw } from './Facts.jsx'
@@ -23,7 +22,7 @@ import { Stack } from '../../../components/ui/layout/Stack.jsx'
 // otherwise name tonight's meeting, so the request holds back every game
 // dated on or after `cutoff`: today, or `?d=` (ADR-0087, ADR-0088). The
 // module sends Savant the day before it, because Savant's bounds are
-// inclusive. `AsOfBanner` is the way to move it. The film lookup refuses the
+// inclusive. The film lookup refuses the
 // same games (api/scout/playIds.js).
 //
 // ScoutPage reads the head-to-head (so the jump bar can count it) and filters
@@ -43,7 +42,7 @@ function MixBar({ rows, pick }) {
   )
 }
 
-export function MeetingsPanel({ data, board, h2h, pas, cutoff, asOf, view, stance, hitterStance }) {
+export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hitterStance }) {
   const games = useMemo(() => gamesOf(pas), [pas])
   const walk = useMemo(() => pitchWalk(games), [games])
   const [open, setOpen] = useState(null)
@@ -121,8 +120,11 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, asOf, view, stanc
                             aria-label={`Pitch ${i + 1}: ${name}, ${fixed(p.mph, 1)} mph, ${call.word}`}
                             onClick={() => setOpen(walk.findIndex((w) => w.pa === pa && w.k === i + 1))}
                           >
-                            <span className="scout__pbtnname">{i + 1}. {name}</span>
-                            <span className="scout__pbtnsub">{fixed(p.mph, 1)} mph · {p.balls}-{p.strikes} count</span>
+                            <span className="scout__pbtnn">{i + 1}</span>
+                            <span>
+                              <span className="scout__pbtnname">{name} · {fixed(p.mph, 1)} mph</span>
+                              <span className="scout__pbtnsub">Count {p.balls}-{p.strikes}</span>
+                            </span>
                             <span className="scout__pbtncall" data-tone={call.tone}>{call.word}</span>
                           </button>
                         )
@@ -142,7 +144,6 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, asOf, view, stanc
 
   return (
     <section className="scout__panel" aria-label="Meetings">
-      <AsOfBanner asOf={asOf} />
       {body}
       {open != null && walk[open] && (
         <PitchModal

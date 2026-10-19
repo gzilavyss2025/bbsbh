@@ -10,16 +10,16 @@ const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const src = (rel) => readFileSync(join(SRC, rel), 'utf8')
 const IMPORT = /import \{ EmptyState \} from '(\.\.\/)+components\/ui\/state\/EmptyState\.jsx'/
 
-// #1490 moved the two maps into the Zones tab (screens/scout/zones/), so the
-// three chart slots are asserted there; the prompt and the error line stay on
+// #1490 moved the maps into screens/scout/zones/ and ADR-0118 made them one,
+// so the one chart slot is asserted there; the prompt and the error line stay on
 // the page itself.
-test('E8: the Scout page renders its prompt and three chart slots on EmptyState', () => {
+test('E8: the Scout page renders its prompt and its one chart slot on EmptyState', () => {
   const code = src('screens/scout/ScoutPage.jsx')
   const zones = src('screens/scout/zones/ZonesPanel.jsx')
   assert.match(code, IMPORT)
   assert.match(zones, IMPORT)
   assert.match(code, /\{!hasPair && <EmptyState>Pick a pitcher and a hitter<\/EmptyState>\}/)
-  assert.equal(zones.match(/<EmptyState size="compact">Not posted<\/EmptyState>/g)?.length, 3, 'three compact chart slots')
+  assert.equal(zones.match(/<EmptyState size="compact">Not posted<\/EmptyState>/g)?.length, 1, 'one compact chart slot (ADR-0118: one map)')
   for (const c of [code, zones]) assert.doesNotMatch(c, /scout__notposted/, 'the page no longer wears the class')
   assert.doesNotMatch(code, /<p className="hint">Pick a pitcher/)
   assert.match(code, /<Notice tone="error" className="scout__notice">Couldn’t load this pair/, 'the error line is an error Notice since N2 (#1132)')

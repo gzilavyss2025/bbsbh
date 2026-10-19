@@ -1,11 +1,10 @@
 import { useRef } from 'react'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
-import { METRICS } from '../../lib/scout/metrics.js'
 import { Button } from '../../components/ui/control/Button.jsx'
 import { Choice } from '../../components/scout/Choice.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 
-// THE SCOUT'S FILTER SHEET (#1490): Hand, Scope and Metric in one bottom sheet,
+// THE SCOUT'S FILTER SHEET (#1490): Hand and Scope in one bottom sheet,
 // opened from the chip under the matchup. They used to sit in two rows, above
 // and below the maps. Each tap applies at once and rewrites the address, the
 // same as every other choice on the page; Done only closes the sheet.
@@ -19,12 +18,12 @@ const HAND_CHIP = { R: 'vs RHP', L: 'vs LHP' }
 const SCOPE_CHIP = { reg: 'Regular', post: 'Postseason', all: 'All games' }
 
 // The chip's label: the current choices, summed up.
-export const filterSummary = ({ hand, scope, metric, showHitter }) =>
-  [showHitter ? HAND_CHIP[hand] ?? 'Both hands' : null, SCOPE_CHIP[scope], showHitter ? METRICS[metric].label : null]
+export const filterSummary = ({ hand, scope, showHitter }) =>
+  [showHitter ? HAND_CHIP[hand] ?? 'Both hands' : null, SCOPE_CHIP[scope]]
     .filter(Boolean)
     .join(' · ')
 
-export function FilterSheet({ onClose, showHitter, hand, onHand, switchHitter, scope, onScope, metric, metrics, onMetric }) {
+export function FilterSheet({ onClose, showHitter, hand, onHand, switchHitter, scope, onScope }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
   return (
@@ -36,9 +35,6 @@ export function FilterSheet({ onClose, showHitter, hand, onHand, switchHitter, s
             <Choice label="Hand" options={HANDS} value={hand} onChange={onHand} disabledKey={switchHitter ? null : undefined} />
           )}
           <Choice label="Scope" options={SCOPES} value={scope} onChange={onScope} />
-          {showHitter && (
-            <Choice label="Metric" options={metrics.map((k) => [k, METRICS[k].label])} value={metric} onChange={onMetric} />
-          )}
         </div>
         <div className="sheet__actions">
           <Button ref={closeRef} skin="ink" onClick={onClose}>Done</Button>
