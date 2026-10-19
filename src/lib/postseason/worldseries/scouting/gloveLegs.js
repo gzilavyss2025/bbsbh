@@ -13,6 +13,8 @@ const MEASURES = [
   { key: 'extraBasesTaken', group: 'Running', label: 'Extra bases taken', unit: '%' },
 ]
 const real = (v) => Number.isFinite(v)
+// One decimal, the way the card prints it, so the leader is picked on what is on screen. A -0 becomes 0.
+const round1 = (v) => Math.round(v * 10) / 10 || 0
 const MIN_REAL = 4
 
 // (data from loadClubDefenseRunning, { clubA, clubB }) -> [{ key, group, label, unit, signed, a, b, lead }]
@@ -23,7 +25,7 @@ export function gloveLegsModel(data, { clubA, clubB }) {
   const pair = clubsFor(data, clubA, clubB)
   if (!pair) return null
   const rows = MEASURES.map((m) => {
-    const [a, b] = pair.map((c) => (real(c[m.key]) ? c[m.key] : null))
+    const [a, b] = pair.map((c) => (real(c[m.key]) ? round1(c[m.key]) : null))
     return { ...m, unit: m.unit ?? '', signed: Boolean(m.signed), a, b, lead: leadSide(a, b) }
   })
   return rows.filter((r) => real(r.a) && real(r.b)).length >= MIN_REAL ? rows : null

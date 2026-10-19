@@ -60,6 +60,16 @@ test('figures round to one place only when they have a tail, and carry sign and 
   assert.equal(gloveFigure(pct, 78), '78%')
 })
 
+test('the leader is picked on the figures as printed: a tie on screen has no leader', () => {
+  const m = gloveLegsModel(data(club({ sprintSpeed: 27.31, oaa: 0.04 }), club({ sprintSpeed: 27.34, oaa: -0.04 })), { clubA: 158, clubB: 139 })
+  assert.equal(m[2].lead, null)
+  assert.equal(m[0].lead, null)
+  assert.equal(m[0].a, 0)
+  assert.equal(m[0].b, 0) // not -0: it must not print a sign
+  assert.equal(gloveFigure(m[0], m[0].b), '0')
+  assert.equal(gloveLegsModel(data(club({ sprintSpeed: 27.31 }), club({ sprintSpeed: 27.36 })), { clubA: 158, clubB: 139 })[2].lead, 'b')
+})
+
 test('same shape whatever the opponent', () => {
   const a = gloveLegsModel(data(club(), club()), { clubA: 158, clubB: 139 })
   const b = gloveLegsModel(data(club(), club(), club()), { clubA: 158, clubB: 114 })
