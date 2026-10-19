@@ -43,13 +43,6 @@
   min-width: 8rem;
 }
 
-.lookupdeck__label {
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-}
 
 .lookupdeck__input,
 .lookupdeck__select {

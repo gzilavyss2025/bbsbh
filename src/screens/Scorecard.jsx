@@ -168,7 +168,7 @@ function FitText({ children }) {
 function Field({ label, value = '', wide = false }) {
   return (
     <div className={`sc-field ${wide ? 'sc-field--wide' : ''}`}>
-      <span className="sc-field__label">{label}</span>
+      <span className="t-label sc-field__label">{label}</span>
       <span className="sc-field__line">{value}</span>
     </div>
   )
@@ -187,7 +187,7 @@ function ClockField({ label, time = '', stacked = false }) {
   const meridiem = /\bAM\b/i.test(time) ? 'AM' : /\bPM\b/i.test(time) ? 'PM' : null
   return (
     <div className="sc-firstpitch">
-      <span className="sc-field__label">{label}</span>
+      <span className="t-label sc-field__label">{label}</span>
       <span className="sc-firstpitch__row">
         <span className="sc-field__line sc-firstpitch__time">
           {time.replace(/\s*[AP]M\b/i, '')}
@@ -201,7 +201,7 @@ function ClockField({ label, time = '', stacked = false }) {
               <span
                 className={`sc-scoreby__ring ${meridiem === m ? 'sc-scoreby__ring--inked' : ''}`}
               />
-              <span className="sc-firstpitch__mlabel">{m}</span>
+              <span className="t-label sc-firstpitch__mlabel">{m}</span>
             </span>
           ))}
         </span>
@@ -277,7 +277,7 @@ function ScorecardHeader({ side, view }) {
         {/* The LOGO box: the batting club's mark once a game is loaded, the
             labeled empty box (a spot to sketch in) on the bare template. */}
         <div className="sc-logo">
-          <span className="sc-field__label">Logo</span>
+          <span className="t-label sc-field__label">Logo</span>
           <span className="sc-logo__box">
             {view?.teamId ? (
               <TeamLogo teamId={view.teamId} name={view.teamName} size={34} />
@@ -341,7 +341,7 @@ function ScorecardHeader({ side, view }) {
                 opposite number, GAME ENDED, is on that other page: the pair
                 brackets the sheet rather than crowding one band. */}
             <div className="sc-scoreby">
-              <span className="sc-field__label">Keeping score by</span>
+              <span className="t-label sc-field__label">Keeping score by</span>
               <ScoreByOption label="Attending the game" />
               <ScoreByOption label="Watching on screen" />
               <ScoreByOption />

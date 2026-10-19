@@ -173,13 +173,6 @@
   max-width: 320px;
 }
 
-.stampstrip__notelabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 
 .stampstrip__note input {
   min-height: 36px;

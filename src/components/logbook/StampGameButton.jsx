@@ -199,7 +199,7 @@ export function StampGameButton({ game }) {
               `updatedAt`, which is what StampsCloudSync diffs on, so a
               per-keystroke write would publish a request per character. */}
           <label className="stampstrip__note">
-            <span className="stampstrip__notelabel">Note</span>
+            <span className="t-label stampstrip__notelabel">Note</span>
             <input
               type="text"
               maxLength={MAX_NOTE_LENGTH}
