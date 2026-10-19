@@ -1,4 +1,6 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
+import { drawContact, hideMarks, sceneLabel, swingScene } from '../../../lib/pitcherCard/contactDraw.js'
+import { pitchBeats, replayFrame } from '../../../lib/pitcherCard/contactTimeline.js'
 import { BAR_TOP, REPLAY_H, SCENE_H, SCENE_W, SLOW, pitcherStage, releasePoint, sceneFrame, stage } from '../../../lib/pitcherCard/scene.js'
 
 const STAGE = stage()
@@ -33,7 +35,13 @@ const f1 = (v) => v.toFixed(1)
 // under reduced motion (the reader steps with `play` { no }); play starts on a tap.
 // `onLand(idx)` fires once when a pitch reaches the plate, `onActive(idx)` when
 // one is released. The effect restarts once per pick, never per frame.
-export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, onLand, view = 'hitter', slow = SLOW, zone, atBat, play }) {
+//
+// THE CONTACT REPLAY (docs/contact-replay.md, #1771): in the `atBat` look the loop runs on the
+// replay's own clock (contactTimeline.js `replayFrame`, in ms), and a swing pitch also draws the bat,
+// the contact and the batted ball (contactDraw.js). Its ball stops at the contact point, not the plate,
+// and `onLand` fires at contact. `onFrame(idx, tau, rest)` is a plain callback on EVERY draw: `tau` is ms
+// on the pitch's slot, `rest` true for the rest frame (the end state, and all of reduced motion).
+export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onActive, onLand, onFrame, view = 'hitter', slow = SLOW, zone, atBat, play }) {
   const ghostRefs = useRef([])
   const segRefs = useRef([])
   const ballRef = useRef(null)
@@ -44,6 +52,9 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
   const barStepRef = useRef(null)
   const barCallRef = useRef(null)
   const sceneRef = useRef(null)
+  const mk = useRef({ smear: [], segs: [], ticks: [], parts: {} })
+  const frameRef = useRef(onFrame) // a ref: an inline callback must not restart the replay
+  frameRef.current = onFrame
 
   useEffect(() => {
     let shownIdx = -1
@@ -52,11 +63,22 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
     // The at-bat replay rests on its last pitch until a tap plays it.
     const resting = atBat != null && (!play || (play.all && reduce))
     const picked = resting ? pitches.length - 1 : play?.no != null ? pitches.findIndex((q) => q.no === play.no) : -1
+    const beatsList = atBat != null ? pitches.map((p) => pitchBeats(p, slow)) : null
+    const scenes = []
     const draw = (elapsed) => {
-      const frame = picked >= 0 ? sceneFrame([pitches[picked]], elapsed, slow, true) : sceneFrame(pitches, elapsed, slow, atBat != null)
-      const { progress, done } = frame
-      const idx = picked >= 0 ? picked : frame.idx
+      const rf = beatsList && replayFrame(beatsList, elapsed == null ? null : elapsed * 1000, picked >= 0 ? picked : undefined)
+      const frame = rf || (picked >= 0 ? sceneFrame([pitches[picked]], elapsed, slow, true) : sceneFrame(pitches, elapsed, slow, false))
+      const done = rf ? rf.done : frame.done
+      const idx = rf ? rf.idx : picked >= 0 ? picked : frame.idx
       const p = pitches[idx]
+      const sw = rf && (idx in scenes ? scenes[idx] : (scenes[idx] = swingScene(p, beatsList[idx])))
+      let { progress } = frame
+      let ball
+      if (sw) ({ progress, ball } = drawContact(mk.current, p, beatsList[idx], sw, rf.tau, slow, done))
+      else if (rf) {
+        hideMarks(mk.current)
+        progress = Math.min(1, rf.tau / (p.T * slow * 1000))
+      }
       if (idx !== shownIdx) {
         shownIdx = idx
         ghostRefs.current.forEach((g, j) => {
@@ -68,9 +90,10 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         if (barMphRef.current) barMphRef.current.textContent = `${p.mph} mph`
         if (barStepRef.current) barStepRef.current.textContent = `Pitch ${p.no} of ${atBat}`
         if (barCallRef.current) barCallRef.current.textContent = p.call || '—'
+        if (rf) sceneRef.current?.setAttribute('aria-label', sceneLabel(p))
         onActive?.(idx)
       }
-      if (progress >= 1 && landedIdx !== idx) {
+      if ((sw ? rf.tau >= beatsList[idx].contactMs : progress >= 1) && landedIdx !== idx) {
         landedIdx = idx
         onLand?.(idx)
       }
@@ -100,8 +123,9 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         seg.setAttribute('stroke-width', (b[2] * 0.62).toFixed(2))
         seg.setAttribute('opacity', i < whole ? (0.25 + 0.6 * (i / SEGMENTS)).toFixed(2) : '0.85')
       })
-      const [bx, by, px] = cur
-      const r = px / 2
+      const [bx, by, px] = ball ?? cur
+      const r = rf ? Math.max(0.6, px / 2) : px / 2
+      if (rf) [ballRef, seam1Ref, seam2Ref].forEach((n) => n.current?.setAttribute('visibility', ball === null ? 'hidden' : 'visible'))
       ballRef.current?.setAttribute('cx', f1(bx))
       ballRef.current?.setAttribute('cy', f1(by))
       ballRef.current?.setAttribute('r', r.toFixed(2))
@@ -110,6 +134,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
         `${f1(bx + side * r * 0.55)} ${f1(by + r * 0.75)}`
       seam1Ref.current?.setAttribute('d', seam(-1))
       seam2Ref.current?.setAttribute('d', seam(1))
+      frameRef.current?.(idx, rf ? rf.tau : (elapsed ?? 0) * 1000, elapsed == null || Boolean(done))
       return done
     }
 
@@ -167,7 +192,7 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
       ref={sceneRef}
       className={replay ? 'pscene pscene--replay' : 'pscene'}
       role="img"
-      aria-label={`${view === 'pitcher' ? 'Centre-field' : 'Behind-the-plate'} drawing of ${name}’s pitches: ${pitches.map((p) => p.name).join(', ')}.`}
+      aria-label={replay ? undefined : `${view === 'pitcher' ? 'Centre-field' : 'Behind-the-plate'} drawing of ${name}’s pitches: ${pitches.map((p) => p.name).join(', ')}.`}
     >
       <svg viewBox={`0 0 ${SCENE_W} ${H}`} aria-hidden="true" focusable="false">
         {view === 'pitcher' ? <PitcherStage zone={zone} /> : <>
@@ -202,6 +227,10 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
             </g>
           )
         })}
+        {replay && <>
+          {[0, 1, 2, 3].map((i) => <polygon key={i} ref={(el) => { mk.current.smear[i] = el }} className="pscene__bat" visibility="hidden" />)}
+          <polyline ref={(el) => { mk.current.arc = el }} className="pscene__arc" visibility="hidden" />
+        </>}
         <g className="pscene__trail">
           {Array.from({ length: SEGMENTS }, (_, i) => (
             <line key={i} ref={(el) => {
@@ -209,10 +238,31 @@ export const PitchScene = memo(function PitchScene({ pitches, lefty, name, onAct
               }} visibility="hidden" />
           ))}
         </g>
+        {replay && <>
+          <polyline ref={(el) => { mk.current.track = el }} className="pscene__track" visibility="hidden" />
+          <ellipse ref={(el) => { mk.current.shadow = el }} className="pscene__shadow" visibility="hidden" />
+          <line ref={(el) => { mk.current.drop = el }} className="pscene__dropline" visibility="hidden" />
+          <g className="pscene__exit">
+            {Array.from({ length: 24 }, (_, i) => <line key={i} ref={(el) => { mk.current.segs[i] = el }} visibility="hidden" />)}
+          </g>
+          <polyline ref={(el) => { mk.current.line = el }} className="pscene__exitline" visibility="hidden" />
+          <polygon ref={(el) => { mk.current.bat = el }} className="pscene__bat" visibility="hidden" />
+          <circle ref={(el) => { mk.current.cap = el }} className="pscene__bat" visibility="hidden" />
+        </>}
         <circle className="pscene__release" cx={f1(rx)} cy={f1(ry)} r="2" />
         <circle ref={ballRef} className="pscene__ball" />
         <path ref={seam1Ref} className="pscene__seam" />
         <path ref={seam2Ref} className="pscene__seam" />
+        {replay && <>
+          <circle ref={(el) => { mk.current.ring = el }} className="pscene__flash" visibility="hidden" />
+          {Array.from({ length: 8 }, (_, i) => <line key={i} ref={(el) => { mk.current.ticks[i] = el }} className="pscene__tick" visibility="hidden" />)}
+          <circle ref={(el) => { mk.current.mitt = el }} className="pscene__mitt" visibility="hidden" />
+          <g ref={(el) => { mk.current.tag = el }} className="pscene__tag" visibility="hidden">
+            <rect ref={(el) => { mk.current.parts.rect = el }} y="6" height="15" rx="2" />
+            <text ref={(el) => { mk.current.parts.text = el }} y="17" textAnchor="end" />
+          </g>
+          <text className="pscene__honest" x="8" y={H - 6}>SWING DRAWN · PATHS MEASURED</text>
+        </>}
       </svg>
       <div className="pscene__bar" style={replay ? undefined : { top: `${(BAR_TOP / SCENE_H) * 100}%` }}>
         <span ref={barNameRef} className="pscene__name" />

@@ -82,7 +82,7 @@ function ReplayState({ model, at, onPlay }) {
           ))}
         </svg>
       )}
-      {!motionIsReduced() && <Button skin="ink" size="control" onClick={onPlay}>Play at-bat</Button>}
+      {!motionIsReduced() && <Button skin="ink" size="tap" onClick={onPlay}>Play at-bat</Button>}
     </div>
   )
 }

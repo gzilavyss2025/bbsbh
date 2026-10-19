@@ -124,6 +124,7 @@ test('pitchBeats: a whiff whose path never reaches the mitt still ends its scene
   const w = bySwing(1, 'whiff')
   const b = pitchBeats({ ...w, contact: { ...w.contact, tMitt: null } }, SLOW)
   assert.ok(b.contactMs < b.sceneEndMs && b.sceneEndMs < b.figsStartMs)
+  near(b.sceneEndMs, w.T * SLOW * 1000, 1e-6) // the plate, where contactDraw stops the ball and draws the mitt ring
 })
 
 test('replayFrame: a picked pitch past the end of the list plays the whole list instead of throwing', () => {

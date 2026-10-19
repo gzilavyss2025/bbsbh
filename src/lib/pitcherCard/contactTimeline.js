@@ -50,7 +50,7 @@ export function pitchBeats(pitch, slow, figCount = 1) {
   const path = swing === 'inplay' ? battedPath(hit, contact.K) : swing === 'foul' ? foulPath(contact.K, batSide) : null
   const exitSec = path?.exitSec ?? 0
   const contactMs = contact.tc * ms
-  const sceneEndMs = (swing === 'whiff' ? contact.tMitt ?? contact.tc + FOLLOW : contact.tc + Math.max(exitSec, FOLLOW)) * ms + freezeMs
+  const sceneEndMs = (swing === 'whiff' ? contact.tMitt ?? T : contact.tc + Math.max(exitSec, FOLLOW)) * ms + freezeMs
   const exitMs = contactMs + freezeMs + exitSec * ms
   const side = swing === 'inplay' && path
   const sideStartMs = side ? exitMs + SIDE_DELAY_MS : null
