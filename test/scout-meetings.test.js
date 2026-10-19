@@ -69,11 +69,11 @@ test('the walk counts the list, in the order it draws: 1 of 12 is the first pitc
   assert.deepEqual([walk[11].pa.inning, walk[11].k, walk[11].of, walk[11].pitch.call], [5, 4, 4, 'hit_into_play'])
 })
 
-test('calls in words, ordinals, and the play text without the batter’s name', () => {
+test('calls in words, ordinals, and the play text with the batter’s last name in front', () => {
   assert.deepEqual(callOf('swinging_strike_blocked'), { word: 'Swinging strike', tone: 'strike' })
   assert.deepEqual(callOf('hit_into_play'), { word: 'In play', tone: 'play' })
   assert.equal(callOf('some_new_call').word, 'Some new call')
   assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22].map(meetingOrdinal), ['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '22nd'])
-  assert.equal(playText(PAS.at(-1).description, 'Jackson Chourio'), 'grounds out, shortstop Jose Iglesias to first baseman Luis Arraez.')
-  assert.equal(playText('Wild pitch.', 'Jackson Chourio'), 'Wild pitch.')
+  assert.equal(playText(PAS.at(-1).description, 'Jackson Chourio', 'Chourio'), 'Chourio grounds out, shortstop Jose Iglesias to first baseman Luis Arraez.')
+  assert.equal(playText('Wild pitch.', 'Jackson Chourio', 'Chourio'), 'Wild pitch.')
 })
