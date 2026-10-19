@@ -114,7 +114,7 @@ opt-in now"). Three **opt-in, consented** departures lift the seal inside the sc
 overrides that persist nothing: **Stamp In** (`/team/{id}/stamp-in`), a club's played season shown so
 you can stamp it, gated on the PAGE (ADR-0042); and a game carrying your own **stamp** (ADR-0048). The
 third persists one bit per game, never the reveal mark: **a box score you tapped open stays open**, on
-every device you own (ADR-0049). A fourth is a call. There is no day pass and no slate-wide reveal:
+every device you own (ADR-0049). A past game's box score opens by its date alone, with no stored mark (ADR-0117). A fourth is a call. There is no day pass and no slate-wide reveal:
 both were removed (ADR-0116). `docs/adr/` has the *why* — read it.
 
 Inside that scope, two conventions enforce it structurally:

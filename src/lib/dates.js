@@ -27,6 +27,20 @@ export function photoGameRows(games, now = new Date()) {
     .sort((a, b) => a.apiDate.localeCompare(b.apiDate))
 }
 
+// The day a seal counts as "today": the EARLIEST of the UTC, local and Pacific date, as
+// pageDay (api/schedule.js, ADR-0087) reads it. After midnight in the East, or after 00:00
+// UTC, a late West-coast game is still on; the earliest date keeps it on today's side.
+export function slateToday(now = new Date()) {
+  return [now.toISOString().slice(0, 10), toApiDate(now), baseballToday(now)].sort()[0]
+}
+
+// Whether a game's box score opens with no tap (ADR-0117): its schedule date is a real date
+// before the slate's today. The date alone decides. Not the status: a suspended game opens too.
+// A missing or garbled date stays sealed.
+export function boxScoreOpensByDate(officialDate, now = new Date()) {
+  return isRealDate(officialDate) && officialDate < slateToday(now)
+}
+
 export function addDays(date, n) {
   const copy = new Date(date)
   copy.setDate(copy.getDate() + n)

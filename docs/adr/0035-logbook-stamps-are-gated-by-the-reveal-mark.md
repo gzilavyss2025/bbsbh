@@ -413,3 +413,9 @@ is untouched.
 The invariant that survives is the containment rule, exactly as this amendment's
 predecessor left it: a stamp is reachable only from inside a revealed box score,
 and renderable only where `check-stamp-surfaces` allows.
+
+## Note (2026-10-19) — the box score can open with no tap
+
+ADR-0117 opens a past game's box score by date. The stamp stays reachable only from inside
+a revealed box score, now also one opened by date, and renderable only where
+`check-stamp-surfaces` allows.

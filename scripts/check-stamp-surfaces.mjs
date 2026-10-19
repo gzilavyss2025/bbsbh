@@ -3,8 +3,9 @@
 //
 // A game stamp IS a final score — that is the artifact, not a side effect. It is
 // safe for exactly one reason: a stamp only ever exists for a game its owner
-// already finished revealing, which the server enforces on every mint. That
-// argument collapses the moment a stamp renders somewhere the user has NOT
+// already finished revealing. That was once a server check on every mint (ADR-0035's
+// second amendment retired it); the guard now is WHERE a stamp may render, and a box
+// score can also open by date (ADR-0117). That argument collapses the moment a stamp renders somewhere the user has NOT
 // revealed: a slate card, "pick up your pencil", any list of upcoming or
 // unopened games. Nothing in the type system stops that; this does.
 //
