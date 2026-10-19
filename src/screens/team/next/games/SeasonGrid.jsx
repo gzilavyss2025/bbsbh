@@ -7,7 +7,6 @@ import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 import { useNav, useRouteLink } from '../../../../lib/nav.js'
 import { teamStampInPath } from '../../../../lib/route.js'
-import { isMlbTeamId } from '../../../../lib/teams.js'
 import { GRID_DAYS, buildSeasonGrid, filterOptions, matchesFilter } from './seasonGrid.js'
 
 // THE SEASON GRID (the Games band): the whole schedule as one calendar, a week to a row, seven days across,
@@ -98,7 +97,7 @@ export function SeasonGrid({ teamId, asOf, sportId, schedule, allStarGame, refDa
                         aria-label={g.label}
                         {...link(g.path)}
                       >
-                        {g.opponentId && !g.doubled && isMlbTeamId(g.opponentId) ? (
+                        {g.logo ? (
                           <span className="sgrid__opp">
                             {!g.isHome && <span className="sgrid__at">@</span>}
                             <TeamLogo teamId={g.opponentId} name={g.opponentName} size={22} variant="mono" className="sgrid__logo" />

@@ -161,6 +161,9 @@ test('filters fade what they do not match and never touch the All-Star cell as a
 test('Day and Night filters come from the schedule\'s dayNight, and only when it is there', () => {
   const none = buildSeasonGrid([game('2026-04-10')], null, null)
   assert.equal(none.hasDayNight, false)
+  // One game without the field and the chips stay off: it would fade under both.
+  const partial = buildSeasonGrid([game('2026-04-10', { dayNight: 'day' }), game('2026-04-11')], null, null)
+  assert.equal(partial.hasDayNight, false)
   const grid = buildSeasonGrid([game('2026-04-10', { dayNight: 'day' }), game('2026-04-11', { dayNight: 'night' })], null, null)
   assert.equal(grid.hasDayNight, true)
   assert.deepEqual(filterOptions(grid).map((o) => o.value), ['all', 'home', 'away', 'wins', 'losses', 'day', 'night'])
@@ -173,4 +176,16 @@ test('a cell carries the opponent id and name for its mark', () => {
   const [g] = cells(buildSeasonGrid([game('2026-04-10')], null, null))
   assert.equal(g.opponentId, 147)
   assert.equal(g.opponentName, 'New York Yankees')
+})
+
+test('a cell draws the opponent\'s mark only for an MLB club in a whole-day cell', () => {
+  const [mlb] = cells(buildSeasonGrid([game('2026-04-10')], null, null))
+  assert.equal(mlb.logo, true)
+  // 234 is a minor-league club: no one-colour art, so it keeps its abbreviation.
+  const [milb] = cells(buildSeasonGrid([game('2026-04-10', { opponent: { id: 234, name: 'Durham Bulls', abbreviation: 'DUR' } })], null, null))
+  assert.equal(milb.logo, false)
+  const split = cells(buildSeasonGrid([game('2026-07-17', { gameNumber: 1 }), game('2026-07-17', { gameNumber: 2 })], null, null))
+  assert.ok(split.every((c) => c.logo === false))
+  const asg = { apiDate: '2026-07-14', away: { name: 'AL', abbreviation: 'AL' }, home: { name: 'NL', abbreviation: 'NL' } }
+  assert.equal(cells(buildSeasonGrid([game('2026-07-12')], asg, null)).find((c) => c.state === 'asg').logo, false)
 })

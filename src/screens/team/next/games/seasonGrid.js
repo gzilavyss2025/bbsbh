@@ -1,4 +1,5 @@
 import { gamePath } from '../../../../lib/route.js'
+import { isMlbTeamId } from '../../../../lib/teams.js'
 
 // The season grid's model (the Games band): the club's whole schedule laid out as weeks of seven
 // days. Pure and fed one list, so node can test it. `schedule` is `fetchTeamSchedule`'s rows,
@@ -54,6 +55,9 @@ function cellGame(g, refDate, doubled) {
     opponentId: g.opponent.id,
     opponentName: g.opponent.name,
     doubled,
+    // The one-colour mark names an MLB opponent in a whole-day cell. A split day has no room for it,
+    // and a club with no mono art keeps its abbreviation.
+    logo: !doubled && isMlbTeamId(g.opponent.id),
     // A split day has no room for both lines: each half prints its score, else its opponent.
     mark: doubled ? score || mark : mark,
     score: doubled ? '' : score,
@@ -71,6 +75,7 @@ function allStarCell(a) {
     dayNight: '',
     opponentId: null,
     opponentName: '',
+    logo: false,
     doubled: false,
     mark: 'ASG',
     score: '',
@@ -165,6 +170,7 @@ export function buildSeasonGrid(schedule, allStarGame, refDate) {
   if (firstPost >= 0) {
     weeks[firstPost].postLead = true
   }
-  const hasDayNight = [...dayCells.values()].some((list) => list.some((c) => c.dayNight))
+  // Day and Night chips need the field on every game: a game without it would fade under both.
+  const hasDayNight = schedule.every((g) => g.dayNight)
   return { weeks, hasPost: firstPost >= 0, hasDayNight, doubleHeaders: [...counts.values()].filter((n) => n > 1).length }
 }

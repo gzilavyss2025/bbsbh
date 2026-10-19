@@ -135,12 +135,17 @@
   font-size: var(--fs-cell);
   line-height: var(--lh-tight);
   text-decoration: none;
+  min-width: 0;
+  overflow: hidden;
 }
 .sgrid__mark {
   white-space: nowrap;
 }
 .sgrid__score {
+  max-width: 100%;
+  overflow: hidden;
   white-space: nowrap;
+  letter-spacing: var(--ls-tight-score);
 }
 /* The opponent is its one-colour mark, with an @ before it on the road. The mark is light art
    made for a dark surface, so on a paper or gold cell it is turned to ink. */
@@ -148,10 +153,24 @@
 .sgrid__opp {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-1);
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
+.sgrid__at {
+  flex: none;
+}
+/* The mark shrinks with its cell, so a narrow phone loses mark size, never the cell's edge. */
 .sgrid__logo {
   display: block;
+  flex: 0 1 22px;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  aspect-ratio: 1;
+  object-fit: contain;
 }
 .sgrid__game--l .sgrid__logo,
 .sgrid__game--next .sgrid__logo,
