@@ -4,15 +4,14 @@ import { fetchVsPlayerTotal } from '../../../api/scout/vsPlayer.js'
 import { useInViewOnce } from '../../../hooks/scroll/useInViewOnce.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { rate3 } from '../../../api/person/shared.js'
-import { pitchFamily } from '../../../api/pitchArsenal.js'
-import { humanDateWithYear, monthDayYear } from '../../../lib/dates.js'
-import { ROUND_TAG, resultShort } from '../../../lib/scout/format.js'
-import { Pill } from '../../../components/ui/control/Pill.jsx'
+import { humanDateWithYear, monthDayName } from '../../../lib/dates.js'
+import { glyphD } from '../../../lib/pitch/pitchGlyph.js'
+import { pitchMark } from '../../../lib/pitch/pitchTypes.js'
 import { AsyncStatus } from '../../../components/ui/AsyncGate.jsx'
 import { EmptyState } from '../../../components/ui/state/EmptyState.jsx'
-import { callOf, gamesOf, inPlay, meetingFacts, mixRows, nameOf, meetingOrdinal, pitchWalk, playText, unseenNote } from './meetings.js'
+import { callOf, gamesOf, inPlay, meetingFacts, mixRows, nameOf, meetingOrdinal, pitchWalk, playText, resultWord, scoringMark, unseenNote } from './meetings.js'
 import { PitchModal } from './PitchModal.jsx'
-import { ContactFacts, Fact, fixed, xw } from './Facts.jsx'
+import { ContactLine, MeetingFacts, fixed } from './Facts.jsx'
 import { Stack } from '../../../components/ui/layout/Stack.jsx'
 import { Grid } from '../../../components/ui/layout/Grid.jsx'
 
@@ -31,16 +30,26 @@ import { Grid } from '../../../components/ui/layout/Grid.jsx'
 //
 // ScoutPage reads the head-to-head (so the jump bar can count it) and filters
 // the plate appearances by scope; every figure here is rebuilt from those same rows, so the facts and the list cannot disagree.
-function MixBar({ rows, pick }) {
+//
+// Every pitch wears its pitchMark(code) colour and shape, as in the Pitches section (docs/pitch-types.md).
+// A pitch's mark: its shape in its colour, drawn the way the Pitches section's rows draw it.
+function Mark({ code }) {
+  const mark = pitchMark(code)
   return (
-    <span className="scout__mixbar">
-      {rows.filter((r) => pick(r) > 0).map((r) => (
-        <span key={r.code} className="scout__mixseg" data-family={r.family} data-shade={Math.min(r.shade, 2)} style={{ width: `${pick(r)}%` }}>
-          {/* "Fastball 58%" when wide, "17%" when narrow, nothing when tiny.
-              The warm grey "other" segment never takes a label: no ink on it
-              holds AA (lib/design/contrastPairings.js). */}
-          {r.family === 'other' ? '' : pick(r) >= 30 ? `${r.name} ${pick(r)}%` : pick(r) >= 9 ? `${pick(r)}%` : ''}
-        </span>
+    <svg className="scout__mark" width="12" height="12" viewBox="-11 -11 22 22" aria-hidden="true">
+      <path d={glyphD(mark.shape, 7)} style={{ '--pitch': mark.color }} data-ring={mark.ring || undefined} />
+    </svg>
+  )
+}
+
+// One bar: a segment per pitch in its mark's colour, no numbers inside. The shares are in the
+// sentence under the bars, and in the bar's own label for a screen reader.
+function MixBar({ rows, pick, label }) {
+  const shares = rows.filter((r) => pick(r) > 0)
+  return (
+    <span className="scout__mixbar" role="img" aria-label={`${label}: ${shares.map((r) => `${r.name} ${pick(r)}%`).join(', ')}`}>
+      {shares.map((r) => (
+        <span key={r.code} className="scout__mixseg" style={{ '--pitch': pitchMark(r.code).color, width: `${pick(r)}%` }} />
       ))}
     </span>
   )
@@ -81,87 +90,101 @@ export function MeetingsPanel({ data, board, h2h, pas, cutoff, view, stance, hit
     const mix = mixRows(pas, board)
     const years = [...new Set(pas.map((pa) => pa.date.slice(0, 4)))]
     const note = board ? unseenNote(mix, names, crowd, years) : null
+    const seen = mix.filter((r) => r.meet > 0)
+    const sentence = [seen.length > 0 && `${seen.map((r) => `${r.name} ${r.meet}%`).join(' · ')}.`, note].filter(Boolean).join(' ')
     body = (
       <>
-        <div className="scout__facts">
-          <Fact value={`${f.h}-for-${f.ab}`} sub={`${f.pa} PA`} label="Hits" />
-          <Fact value={f.pitches} label="Pitches" />
-          <Fact value={fixed(f.avgExit, 1)} unit="mph" label="Avg exit velocity" />
-          <Fact value={xw(f.xwobaContact)} label="xwOBA on contact" />
-        </div>
-        <p className="scout__note">
-          AVG/OBP/SLG {[t.avg, t.obp, t.slg].map(rate3).join('/')} · {t.hr} HR · {t.k} K · {t.bb} BB
-        </p>
-
-        {board && f.pitches > 0 && (
-          <div className="scout__mix">
-            <span className="scout__mixlabel">In the {games.length === 1 && pas.length > 0 ? 'meeting' : 'meetings'}</span>
-            <MixBar rows={mix} pick={(r) => r.meet} />
-            <span className="scout__mixlabel">{data.season} to {stance === 'L' ? 'LHH' : 'RHH'}</span>
-            <MixBar rows={mix} pick={(r) => r.season} />
-            <span className="scout__mixkey">
-              {mix.map((r) => (
-                <span key={r.code} className="scout__mixkeyitem" data-family={r.family} data-shade={Math.min(r.shade, 2)}>{r.name}</span>
-              ))}
-            </span>
-            {note && <p className="scout__note scout__mixnote">{note}</p>}
-          </div>
-        )}
-
-        {games.map((g) => (
-          <Stack gap="snug" key={g.gamePk} className="scout__game">
-            <p className="scout__gamehead">
-              <span>{monthDayYear(g.date)}</span>
-              <Pill>{g.tag || (ROUND_TAG[g.round] ?? g.round)}</Pill>
-            </p>
-            {/* Grid: three cards across on a desktop (about 300px each), one on a phone. */}
-            <Grid min={300} gap="base">
-            {g.pas.map((pa) => {
-              const list = pa.pitchList ?? []
-              const last = list.at(-1)
-              return (
-                <Stack gap="snug" as="article" key={pa.key} className="scout__pa" style={{ '--i': Math.min(pas.indexOf(pa), 6) }}>
-                  <header className="scout__pahead">
-                    <span className="scout__patitle">{pa.inning ? `${meetingOrdinal(pa.inning)} inning` : 'Plate appearance'}</span>
-                    <span className="scout__pameta">
-                      <Pill figure>{resultShort(pa)}</Pill> {list.length} {list.length === 1 ? 'pitch' : 'pitches'}
-                    </span>
-                  </header>
-                  {pa.description && <p className="scout__play">{playText(pa.description, data.hitter.name, data.hitter.last)}</p>}
-                  {last && inPlay(last) && <ContactFacts pitch={last} />}
-                  {list.length ? (
-                    <div className="scout__pitches">
-                      {list.map((p, i) => {
-                        const call = callOf(p.call)
-                        const name = nameOf(p.code, board)
-                        return (
-                          <button
-                            key={p.n ?? i}
-                            type="button"
-                            className="scout__pbtn"
-                            data-family={pitchFamily(p.code)}
-                            aria-label={`Pitch ${i + 1}: ${name}, ${fixed(p.mph, 1)} mph, ${call.word}`}
-                            onClick={() => setOpen(walk.findIndex((w) => w.pa === pa && w.k === i + 1))}
-                          >
-                            <span className="scout__pbtnn">{i + 1}</span>
-                            <span>
-                              <span className="scout__pbtnname">{name} · {fixed(p.mph, 1)} mph</span>
-                              <span className="scout__pbtnsub">Count {p.balls}-{p.strikes}</span>
-                            </span>
-                            <span className="scout__pbtncall" data-tone={call.tone}>{call.word}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  ) : (
-                    <p className="scout__note">No tracked pitches.</p>
-                  )}
-                </Stack>
-              )
-            })}
-            </Grid>
+        <h2 className="scout__meethead">Past meetings</h2>
+        <div className="scout__meet">
+          <Stack gap="base" className="scout__meetside">
+            <MeetingFacts
+              f={f}
+              kbb={`${t.k} · ${t.bb}`}
+              slash={[t.avg, t.obp, t.slg].map(rate3).join('/')}
+            />
+            {board && f.pitches > 0 && (
+              <div className="scout__mix">
+                <h3 className="scout__mixhead">What {names.hitter} saw</h3>
+                <span className="scout__mixlabel">Meetings</span>
+                <MixBar rows={mix} pick={(r) => r.meet} label="Meetings" />
+                <span className="scout__mixlabel">{data.season} to {stance === 'L' ? 'LHH' : 'RHH'}</span>
+                <MixBar rows={mix} pick={(r) => r.season} label={`${data.season} to ${crowd}`} />
+                <span className="scout__mixkey">
+                  {mix.map((r) => (
+                    <span key={r.code} className="scout__mixkeyitem"><Mark code={r.code} />{r.name}</span>
+                  ))}
+                </span>
+                {sentence && <p className="scout__note scout__mixnote">{sentence}</p>}
+              </div>
+            )}
           </Stack>
-        ))}
+
+          <Stack gap="base" className="scout__games">
+            {games.map((g) => (
+              <Stack gap="snug" key={g.gamePk} className="scout__game">
+                <p className="scout__gamehead">
+                  <span>{monthDayName(g.date)}, {g.date.slice(0, 4)}</span>
+                  <span className="scout__gamelabel">{g.tag || g.label} · {g.pas.length} PA</span>
+                </p>
+                {/* Grid: three cards across on a desktop (about 250px each), one on a phone. */}
+                <Grid min={250} gap="base" className="scout__pas">
+                  {g.pas.map((pa) => {
+                    const list = pa.pitchList ?? []
+                    const last = list.at(-1)
+                    return (
+                      <Stack gap="snug" as="article" key={pa.key} className="scout__pa" style={{ '--i': Math.min(pas.indexOf(pa), 6) }}>
+                        <div className="scout__pagrid">
+                        <div className="scout__pacell">
+                          <span className="scout__painn">
+                            {pa.inning ? meetingOrdinal(pa.inning) : 'PA'}
+                            {pa.inning && <span className="scout__painnx"> inning</span>}
+                          </span>
+                          <span className="scout__padiamond">
+                            <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><polygon points="24,4 44,24 24,44 4,24" /></svg>
+                            <span className="scout__pamark">{scoringMark(pa)}</span>
+                          </span>
+                          <span className="scout__paresult">{resultWord(pa)}</span>
+                        </div>
+                        <Stack gap="snug" className="scout__pabody">
+                          {list.length ? (
+                            <ol className="scout__pitches">
+                              {list.map((p, i) => {
+                                const call = callOf(p.call)
+                                const name = nameOf(p.code, board)
+                                return (
+                                  <li key={p.n ?? i}>
+                                    <button
+                                      type="button"
+                                      className="scout__pbtn"
+                                      aria-label={`Pitch ${i + 1}: ${name}, ${fixed(p.mph, 1)} mph, ${call.word}`}
+                                      onClick={() => setOpen(walk.findIndex((w) => w.pa === pa && w.k === i + 1))}
+                                    >
+                                      <span className="scout__pbtnn">{i + 1}</span>
+                                      <span>
+                                        <span className="scout__pbtnname"><Mark code={p.code} />{name} · {fixed(p.mph, 1)} mph</span>
+                                        <span className="scout__pbtnsub">Count {p.balls}-{p.strikes}</span>
+                                      </span>
+                                      <span className="scout__pbtncall" data-tone={call.tone}>{call.word}</span>
+                                    </button>
+                                  </li>
+                                )
+                              })}
+                            </ol>
+                          ) : (
+                            <p className="scout__note">No tracked pitches.</p>
+                          )}
+                          {last && inPlay(last) && <ContactLine pitch={last} />}
+                          {pa.description && <p className="scout__play">{playText(pa.description, data.hitter.name, data.hitter.last)}</p>}
+                        </Stack>
+                        </div>
+                      </Stack>
+                    )
+                  })}
+                </Grid>
+              </Stack>
+            ))}
+          </Stack>
+        </div>
       </>
     )
   }

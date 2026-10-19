@@ -99,7 +99,7 @@ test('a Scout meeting carries the tag its first plate appearance was given', () 
 test('every other site that prints a round asks this table', () => {
   const read = (p) => fs.readFileSync(new URL(`../src/${p}`, import.meta.url), 'utf8')
   assert.match(read('api/scout/headToHead.js'), /roundTag: roundTag\(r\.game_type, r\.home_team, r\.game_date\)/)
-  assert.match(read('screens/scout/meetings/MeetingsPanel.jsx'), /g\.tag \|\| \(ROUND_TAG\[g\.round\] \?\? g\.round\)/)
+  assert.match(read('screens/scout/meetings/MeetingsPanel.jsx'), /g\.tag \|\| g\.label/)
   assert.match(read('screens/UmpirePage.jsx'), /roundTag\(g\.gameType, g\.homeId, g\.date\)/)
   assert.match(read('api/seasonSeries.js'), /roundTag\(g\.gameType, viewingTeamId, g\.apiDate\)/)
   assert.match(read('screens/player/next/modules/mound/moundView.js'), /roundName\(a\.t, clubLeague\(a\.o, a\.d\)\)/)
