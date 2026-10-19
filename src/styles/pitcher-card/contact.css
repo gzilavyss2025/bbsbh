@@ -1,11 +1,25 @@
 /* The contact replay's resting looks (docs/contact-replay.md section 6, #1771). PitchScene sets
    the geometry, the opacities and the per-contact stroke widths through refs
    (lib/pitcherCard/contactDraw.js); this holds what does not move. INK IS MEASURED, PENCIL IS DRAWN:
-   pencil (--text-caption, graphite) is the swing, the foul and the mitt ring; ink (navy) is the ball's
+   pencil (--text-caption, graphite) is the swing (the bat at contact turns ink once Savant measured its attack angle, phase C), the foul and the mitt ring; ink (navy) is the ball's
    own measured path, the ring on a ball in play and the trajectory tag. */
 
 .pscene__bat {
   fill: var(--text-caption);
+}
+.pscene__bat--ink,
+.pscene__attack {
+  fill: var(--accent-primary); /* phase C: the measured attack angle is ink */
+}
+.pscene__attack {
+  font-family: var(--font-display);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  stroke: var(--surface-inset);
+  stroke-width: 3; /* raw-value-exempt: SVG stroke width in the scene's own units */
+  stroke-linejoin: round;
+  paint-order: stroke;
 }
 .pscene__arc,
 .pscene__exitline,
