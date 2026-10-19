@@ -56,7 +56,7 @@ Every one-shot in the package hangs off one of three gates (the leader board's f
 A CSS animation runs when its element mounts, or when the element gains the
 class carrying it. That is right for a change the reader just caused and wrong
 for a cold load, a return visit, a navigation, a poll, or a force-reveal (the
-Scores Unlocked pass, ADR-0026, or the reader's own stamp, ADR-0048) — all of
+reader's own stamp, ADR-0048, or a box score they opened before, ADR-0049) — all of
 which present the same already-changed DOM and would replay a gesture nobody
 made. A substitution from the third inning must render struck through, not draw
 itself again every time the page is opened.
@@ -95,12 +95,14 @@ is one.
 | Sheet | Issues | Holds |
 | --- | --- | --- |
 | `slate.css` | #976, #977, #978 | The `@` plates pulling into register on hover, the doubleheader sheet's riffle, and `@keyframes tally-breathe` + the LIVE pill's dot |
+| `slate/masthead.css` | D1 handoff (2026-10-18) | The slate masthead (`components/slatehead/`): the ladder ball's roll (`--dur-slow`, `--ease-stamp`) only under `.levelladder--rolling`, which `LevelLadder` sets only while the level on screen is the stop the reader tapped; the date's slide-in, only for a step taken in `DateStepper` (keyed per date); the compact bar, the level menu and the presses; the stamp-in once a session (`sessionStorage`). Back, a link and a poll play none of it. The resting look is `styles/slate/masthead.css` |
 | `lineup.css` | #979, #980 | The row's straightedge rule on hover, and the batting order's ink-in cascade |
 | `strike.css` | #981 | The drawn cross-out, all four sites |
 | `playbyplay.css` | #982 | The four-beat write-on |
 | `innings.css` | #978, #983 | The live-edge dot's breath and the frontier seal's |
 | `scorecard-lens.css` | #724 (L7) | The phone lens (ADR-0092): the tear, the runner-move fade, the page turn, the two-cycle seal breath, the docked card's fade and the pitcher sheet's slide. The glide is beside it in JS |
 | `board-in.css` | M1 | The leader board's fade-in after a scope tap on `/leaders`: up 6 px and opacity, 180 ms (`--dur-board-in`), `--ease-out`. Its gate is a one-shot module flag, `lib/motion/boardIn.js`: `ScopeNav` arms it on a tap to another scope, and `TeamLeaders` spends it on its first render. A cold load, a Back, a poll and a force-reveal never play it. The resting look is `styles/leaders/board.css` |
+| `run-value-card.css` | #2295 | The team page's club run value card: the stamp-in on the card, tile, part buttons and rows, the league bars growing, the split bar's wipe, the mini bars growing, and a re-rank (rows that join stamp in on `rvrow--enter-a`/`-b`, rows that stay slide by a Web Animation in `ranks/runvalue/flip.js`, since React moves their nodes). The count-ups are a rAF loop on the text node (`useCountUp.js`). Gate: `useInViewOnce` (a tenth in view; the card is taller than a phone held sideways, so a third may never show), plus the band's `useViewOnce`. Not in `index.css`: the card imports it. Times are the `--*-rv-*` tokens in `effects.css`. Spec `.scratch/run-value-motion/handoff.md` |
 
 ### The scorecard lens (#724, L7)
 
@@ -153,8 +155,8 @@ final, with no motion. The timing depends on the fetch alone, never on the game 
 `prefers-reduced-motion` no transition runs.
 
 **What the gate cannot see.** A fetch still has to finish after a page load, so a card on a freshly
-loaded page arrives the same way, once its data is in. The Scores Unlocked pass and a stamp change the
-seal, not the card, so they do not change this. `FinalizedLineCard` has no fetch of its own: it is
+loaded page arrives the same way, once its data is in. A stamp changes the seal, not the card, so it
+does not change this. `FinalizedLineCard` has no fetch of its own: it is
 drawn final unless a caller passes `open={false}` first.
 
 ## The at-bat replay's count and bases (#1858)
@@ -186,10 +188,10 @@ referenced where it stands in `styles/scorecard/box.css` rather than promoted �
 that file is in `index.css`'s core list, so the keyframe is always defined, and
 a keyframe resolves by name wherever it was declared. The frontier seal runs it,
 byte for byte what `.sc-ab__seal` runs — scoped to `.pagenav--innings`, because
-`.btn--reveal` is the kraft skin and not the frontier. The home slate wears it
-on "Reveal all results" and a live game's lineup page on "Catch up to live", and
-a bare `.btn--reveal` rule put a permanent breath on a spoiler action on the
-app's front door.
+`.btn--reveal` is the kraft skin and not the frontier. A live game's lineup page
+wears it on "Catch up to live" (the home slate wore it on "Reveal all results"
+until ADR-0116), and a bare `.btn--reveal` rule put a permanent breath on a
+spoiler action on the app's front door.
 
 They stayed two keyframes rather than one: a full tape cover reads at opacity
 alone, while a 6–9px dot needs the deeper fade and a little scale to register.

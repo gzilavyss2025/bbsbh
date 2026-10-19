@@ -72,40 +72,22 @@ A substitution, pitching change, or pinch-hitter logged before a
 half-inning's own first pitch — the same information a broadcast would
 announce before the half starts.
 
-**Scores Unlocked**:
-The app's single site-wide, opt-in switch that un-gates every score after an
-explicit consent tap — the whole slate, every surface inside a game, and a live
-game's view keeps pace with itself. Stored as an expiry timestamp (the next local
-8:00am) plus the DAY consented to — never a score — and it fails closed on
-anything stale, garbled, or past. At 8am the switch turns itself off so a new day
-starts sealed; the day you agreed to stays open (ADR-0026).
-_Avoid_: spoiler mode, unlock-all, Follow Live
-
 **Effective reveal** (render override):
-The render-time reveal mark the Scores Unlocked pass substitutes for
-`revealedThrough` (see `effectiveReveal`). It unseals the screen for viewing
-ONLY — it is never persisted, never ratcheted, and never crosses to another
-device; the real high-water mark it shadows is left untouched, so flipping the
-pass off drops straight back to it (ADR-0026).
+The render-time reveal mark a reader's own stamp on a game substitutes for
+`revealedThrough` (see `effectiveReveal`, ADR-0048). It unseals the screen for
+viewing ONLY — it is never persisted, never ratcheted, and never crosses to
+another device; the real high-water mark it shadows is left untouched, so
+unstamping the game drops straight back to it. (The Scores Unlocked day pass was
+a second input until ADR-0116 removed it.)
 _Avoid_: fake reveal, temporary reveal
 
-**Spoiled day**:
-A date the user explicitly agreed to see plainly. Recorded on consent
-(`bbsbh:spoiledDays`), it outlives the 8am reset — you already agreed, so
-pretending the next morning that the day might still be hand-scored would be a
-fiction. It is a set of DATES, never a reveal mark, so it can't touch what you
-scored by hand. Turning the switch off the same day takes the consent back, and
-the list mirrors across a signed-in user's devices as a per-day on/off state —
-so a withdrawal travels the same way a consent does (ADR-0026).
-_Avoid_: unlocked day, burned day
-
-**Live edge**:
-The furthest half-inning the actual game has reached so far — the half of the
-most recent completed play. Under Scores Unlocked it keeps a caught-up viewer on
-the newest half as it is played — NAVIGATION only, never a reveal. It reports
-only how far the GAME has progressed, never a score (`selectLiveEdge`,
-`src/api/liveEdge.js`).
-_Avoid_: current play, latest inning
+**Live half**:
+The half-inning the actual game is in right now, or — between halves — the one
+it just finished, read from the linescore's live state (`selectLiveHalf`,
+`src/api/liveEdge.js`, ADR-0055). It reports an inning number and which half,
+never a score, and decides only which button the innings bar or the lineup page
+draws ("Caught up", "Catch up to live").
+_Avoid_: current play, latest inning, live edge
 
 **Lens**:
 The live scorecard's phone mode (`/{date}/{matchup}/scorecard` at phone width,

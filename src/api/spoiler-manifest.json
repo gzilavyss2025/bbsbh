@@ -53,9 +53,10 @@
       "showing a game from last week has leaked that week. The `asOf` cutoff is the gate."
     ],
     "progress-only": [
-      "Reports how far the game has PROGRESSED and never a score, and only once the",
-      "user has consented (ADR-0026). Navigation, not reveal — nothing downstream",
-      "writes the reveal mark. A third classification in its own right; see liveEdge.js."
+      "Reports how far the game has PROGRESSED (an inning and a half) and never a",
+      "score. Callers use it to choose which button to draw, never to draw a value,",
+      "and nothing downstream writes the reveal mark from it. A third classification",
+      "in its own right; see liveEdge.js."
     ],
     "mixed": [
       "The boundary runs through the module. `revealOnlyExports` names the sealed half;",
@@ -169,7 +170,6 @@
       "why": "Every number in the full box-score line is score-revealing. `selectBoxscore` must run inside the box score's SealBox reveal.",
       "importers": [
         "api/boxscore/batterLine.js",
-        "api/dayHighlights.js",
         "components/game/GameResultFace.jsx",
         "components/gamehud/StatBox.jsx",
         "components/inning/HalfInning.jsx",
@@ -306,13 +306,6 @@
     "contractsHistory.js": {
       "class": "spoiler-free",
       "why": "Historical contract records joined to an admin identity override: who signed what, in which season, for how much. Carries no game, no linescore and no reveal state, so it sits in the same season-long identity class as its neighbours person/contracts.js and salaries.js (ADR-0034, ADR-0052 for the money pair, ADR-0067 for this module). No SealBox: the player page's Contract history card reads it on the history tab, an open surface, the same way that page's other money cards read theirs."
-    },
-    "dayHighlights.js": {
-      "class": "reveal-only",
-      "why": "Ranks a past day's Final games by how memorable they were — the ranking itself narrates outcomes. Only ever called from inside the slate's shared reveal.",
-      "importers": [
-        "hooks/useDayCardMeta.js"
-      ]
     },
     "defense.js": {
       "class": "caller-gated",
@@ -473,7 +466,7 @@
     },
     "liveEdge.js": {
       "class": "progress-only",
-      "why": "Reports only how far the game has progressed — a half-index, an inning number and which half — never a score. selectLiveEdge is gated on the Scores Unlocked pass and feeds NAVIGATION only (ADR-0026). selectLiveHalf/selectHalfInProgress/selectCatchUpTarget are ungated: they read the linescore live state (currentInning/inningState) to answer whether the half already on screen is still being played, which is what stops a live half committing itself early (ADR-0055). No caller renders the inning they name; both use it to choose which button to draw."
+      "why": "Reports only how far the game has progressed — a half-index, an inning number and which half — never a score. selectLiveHalf/selectCatchUpTarget are ungated: they read the linescore live state (currentInning/inningState) to answer whether the half already on screen is still being played, which is what stops a live half committing itself early (ADR-0055). No caller renders the inning they name; both use it to choose which button to draw."
     },
     "loadScorecard.js": {
       "class": "spoiler-free",
@@ -577,7 +570,6 @@
       "why": "Pure math, but its inputs are a player's box-score game line. Every caller is a reveal-only module by construction — don't wire it into a spoiler-free surface.",
       "importers": [
         "api/boxscore.js",
-        "api/dayHighlights.js",
         "api/logbookRetrospective.js"
       ]
     },
@@ -886,11 +878,11 @@
     },
     "postseason/fetch.js": {
       "class": "cutoff-gated",
-      "why": "The bracket's two statsapi reads, separate from fetchSchedule like fetchSlateScores. The results read asks only for dates BEFORE the cutoff (endDate is the day before) and only for `isWinner` and the game state: never runs, a score, a linescore, `seriesStatus` or `leagueRecord`, the last two being the state AFTER a game (trap 1). The skeleton read asks for every date but for no result field at all, not even the game state. The heading-into-the-date gate is the cutoff the caller passes; bracket.js applies it a second time."
+      "why": "The bracket's two statsapi reads, separate from fetchSchedule. The results read asks only for dates BEFORE the cutoff (endDate is the day before) and only for `isWinner` and the game state: never runs, a score, a linescore, `seriesStatus` or `leagueRecord`, the last two being the state AFTER a game (trap 1). The skeleton read asks for every date but for no result field at all, not even the game state. The heading-into-the-date gate is the cutoff the caller passes; bracket.js applies it a second time."
     },
     "postseason/worldSeriesHome.js": {
       "class": "cutoff-gated",
-      "why": "The World Series home page's reads (#1906): hot-bat splits, each club's postseason games, bullpen and ledger box scores, standings, regular-season meetings, and the reel's clips and photos. Every read is bounded to games dated BEFORE the slate date, in the request (endDate is the day before) and again on the rows returned, so the slate date's own game never comes back; the one exception is `live`, the reader's Scores Unlocked unlock, which counts the slate date's Finals as fetchPostseasonResults does (ADR-0026). Past games' runs, clip titles and photos are open by decision (ADR-0087: yesterday's results are not protected). fetchReelGames drops a game dated on or after the slate date before it requests any content, so today's clips and photos are never fetched. test/postseason/world-series-fetch.test.js pins the cutoff on the URLs and the rows."
+      "why": "The World Series home page's reads (#1906): hot-bat splits, each club's postseason games, bullpen and ledger box scores, standings, regular-season meetings, and the reel's clips and photos. Every read is bounded to games dated BEFORE the slate date, in the request (endDate is the day before) and again on the rows returned, so the slate date's own game never comes back; the one exception is the `live` option, which counts the slate date's Finals as fetchPostseasonResults does; it defaults to false and no caller has passed it since the Scores Unlocked pass was removed (ADR-0116). Past games' runs, clip titles and photos are open by decision (ADR-0087: yesterday's results are not protected). fetchReelGames drops a game dated on or after the slate date before it requests any content, so today's clips and photos are never fetched. test/postseason/world-series-fetch.test.js pins the cutoff on the URLs and the rows."
     },
     "postseason/upcoming.js": {
       "class": "spoiler-free",
@@ -971,6 +963,10 @@
     "savantPercentiles.js": {
       "class": "spoiler-free",
       "why": "Static savant-percentiles.json — completed-game season percentile ranks, same footing as war.js."
+    },
+    "slate/levelCounts.js": {
+      "class": "spoiler-free",
+      "why": "How many games each level has on a date, for the D1 masthead's level ladder. One schedule call for sportIds 1,11,12,13,14, pruned by `fields=` to the gamePk and both clubs' sport ids, so no score, status or linescore is ever fetched. A count says how many games are on, never how one went."
     },
     "schedule.js": {
       "class": "spoiler-free",

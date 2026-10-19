@@ -1,0 +1,467 @@
+/* ------------------------------------------------------- the D1 masthead
+   The top of the home slate: the brand bar, one stamped card holding the level
+   ladder and the date stepper, the club strip under it, and the compact bar
+   that stands in for the card once it has scrolled away. Components:
+   src/components/slatehead/. Spec: Gary's "Slate masthead D1" handoff,
+   2026-10-18. Motion is motion/slate/masthead.css; this file is the resting look.
+
+   A subdirectory because src/styles is a flat directory at its file ratchet
+   (scripts/check-dir-size.mjs, ADR-0038). */
+
+
+/* ---- the bar: brand left, the page's buttons right ---- */
+.slatemast__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: calc(var(--space-4) + env(safe-area-inset-top));
+}
+
+.slatemast__brand {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.slatemast__brand:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+
+.slatemast__centre {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.slatemast__actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: var(--space-1);
+}
+
+.slatemast__actions .slatemast__icon {
+  flex: none;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+}
+
+/* The lockup gives way before the buttons do: four 44px-class controls (the
+   account button among them, when Clerk is on) and the lockup must share one
+   row down to 320px, where the row is 288px wide. e2e/slate-header.spec.js. */
+@media (max-width: 420px) {
+  .slatemast__brand .tally-lockup__mark {
+    width: 30px; /* raw-value-exempt: the lockup on a narrow phone */
+    height: 30px; /* raw-value-exempt: the lockup on a narrow phone */
+  }
+
+  .slatemast__brand .tally-lockup__wordmark {
+    width: auto;
+    height: var(--space-6);
+  }
+}
+
+@media (max-width: 359px) {
+  .slatemast__brand .tally-lockup {
+    gap: var(--space-1);
+  }
+
+  .slatemast__brand .tally-lockup__mark {
+    width: 26px; /* raw-value-exempt: the lockup on the narrowest phone */
+    height: 26px; /* raw-value-exempt: the lockup on the narrowest phone */
+  }
+
+  .slatemast__brand .tally-lockup__wordmark {
+    height: var(--space-5);
+  }
+}
+
+/* A phone draws the Game Log button as its icon alone (the D1 spec); the word
+   stays in the accessibility tree as the button's name. */
+@media (max-width: 739px) {
+  .slatemast__actions .sitebar__logbooklabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ---- the card: ladder over date, stamped ---- */
+.slatemast__card {
+  margin: var(--space-4) 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-stamped);
+}
+
+/* The level ladder's own rules are slate/ladder.css (imported just before this
+   file, so the wide overrides below still win on order). */
+
+/* ---- the date stepper ---- */
+.slatedate {
+  display: flex;
+  align-items: center;
+  min-height: 76px; /* raw-value-exempt: the D1 date row height, spec'd */
+}
+
+.slatedate__arrow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px; /* raw-value-exempt: the D1 arrow, spec'd */
+  height: 52px; /* raw-value-exempt: the D1 arrow, spec'd */
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-heading);
+  cursor: pointer;
+}
+
+.slatedate__arrow:focus-visible,
+.slatedate__today:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+
+@media (hover: hover) {
+  .slatedate__arrow:not(:disabled):hover {
+    background: var(--surface-row-hover);
+  }
+}
+
+.slatedate__chevron {
+  width: 22px; /* raw-value-exempt: icon size, spec'd */
+  height: 22px; /* raw-value-exempt: icon size, spec'd */
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+}
+
+.slatedate__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+.slatedate__turn {
+  display: block;
+}
+
+.slatedate__dow {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-caption);
+}
+
+.slatedate__md {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-display-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-emphasis);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+
+.slatedate__today {
+  margin: var(--space-1) 0 var(--space-1h);
+  padding: var(--space-1) var(--space-2h);
+  border: var(--bw-hair) solid var(--border-stamped);
+  background: var(--surface-inset);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+
+.slatedate--mini {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--tap-min);
+}
+
+.slatedate--mini .slatedate__arrow {
+  width: var(--tap-min);
+  height: var(--tap-min);
+}
+
+.slatedate--mini .slatedate__chevron {
+  width: var(--space-4);
+  height: var(--space-4);
+  stroke-width: 2.8;
+}
+
+.slatedate__short {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+
+/* ---- the compact controls: level chip, its menu, the mini stepper ---- */
+.slatecompact {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  gap: var(--space-1h);
+  min-width: 0;
+}
+
+.slatecompact__level {
+  position: relative;
+  flex: none;
+}
+
+.slatecompact__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+  height: var(--tap-min);
+  padding: 0 var(--space-2h) 0 var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+
+.slatecompact__chip:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--bw-heavy);
+}
+
+.slatecompact__caret {
+  width: 14px; /* raw-value-exempt: icon size, spec'd */
+  height: 14px; /* raw-value-exempt: icon size, spec'd */
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+}
+
+.slatecompact__chip.is-open .slatecompact__caret {
+  transform: rotate(180deg);
+}
+
+.slatemenu {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  z-index: var(--z-overlay);
+  width: 240px; /* raw-value-exempt: the D1 level menu width, spec'd */
+  padding: var(--space-1) 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-stamped);
+  transform-origin: top left;
+  transform: scale(0.96);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.slatemenu.is-open {
+  transform: none;
+  opacity: 1;
+  visibility: visible;
+}
+
+.slatemenu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2h);
+  width: 100%;
+  height: var(--space-12);
+  padding: 0 var(--space-3h);
+  border: 0;
+  background: none;
+  color: var(--text-heading);
+  text-align: left;
+  cursor: pointer;
+}
+
+.slatemenu__item.is-picked,
+.slatemenu__item:active {
+  background: var(--surface-row-hover);
+}
+
+.slatemenu__item:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: calc(-1 * var(--bw-heavy));
+}
+
+@media (hover: hover) {
+  .slatemenu__item:hover {
+    background: var(--surface-row-hover);
+  }
+}
+
+.slatemenu__name {
+  flex: none;
+  width: 58px; /* raw-value-exempt: the menu's name column, spec'd */
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-label);
+}
+
+.slatemenu__full {
+  flex: 1 1 auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
+.slatemenu__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+
+/* ---- the phone's compact bar ---- */
+.slatemast__compactbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  box-sizing: border-box;
+  min-height: calc(60px + env(safe-area-inset-top)); /* raw-value-exempt: the D1 compact bar, spec'd */
+  padding: env(safe-area-inset-top) var(--space-2) 0 var(--space-3);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: 0 var(--stamped-offset) 0 var(--border-stamped);
+  transform: translateY(-110%);
+  visibility: hidden;
+}
+
+.slatemast__compactbar.is-on {
+  transform: none;
+  visibility: visible;
+}
+
+.slatemast__compactmark {
+  flex: none;
+}
+
+/* ---- the club strip as round chips (the old tray, restyled) ---- */
+.slatestrip .teamfilterstrip--chips {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.slatestrip .teamfilterstrip--chips .vsteam__strip {
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-1) var(--space-2);
+}
+
+.slatestrip .teamfilterstrip--chips .vsteam__team {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 50%; /* raw-value-exempt: a round club chip, a circle not a corner */
+  background: var(--surface-inset);
+  box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped);
+}
+
+.slatestrip .teamfilterstrip--chips .vsteam__team.is-marked {
+  background: var(--marker);
+}
+
+.slatestrip .teamfilterstrip--chips .vsteam__team .teamlogo {
+  width: 26px; /* raw-value-exempt: the logo inside a 44px chip, spec'd */
+  height: 26px; /* raw-value-exempt: the logo inside a 44px chip, spec'd */
+}
+
+/* ---- wide: the sticky bar, the card in one row ---- */
+@media (min-width: 740px) {
+  .slatemast__bar {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    min-height: 76px; /* raw-value-exempt: the D1 desktop bar, spec'd */
+    margin: 0 calc(-1 * var(--app-gutter));
+    padding: 0 var(--app-gutter);
+    border-bottom: var(--bw-heavy) solid transparent;
+    background: var(--bg-canvas);
+  }
+
+  .slatemast__bar.is-compact {
+    border-bottom-color: var(--border-stamped);
+    background: var(--surface-card);
+    box-shadow: 0 var(--stamped-offset) 0 var(--border-stamped);
+  }
+
+  .slatemast__centre .slatecompact {
+    flex: 0 1 420px; /* raw-value-exempt: the centre slot's width */
+  }
+
+  .slatemast__card {
+    display: flex;
+  }
+
+  .slatemast__card .levelladder {
+    flex: 1 1 auto;
+    border-bottom: 0;
+    border-right: var(--bw-heavy) solid var(--border-stamped);
+  }
+
+  .slatemast__card > .slatedate {
+    flex: 0 0 360px; /* raw-value-exempt: the D1 desktop date block */
+  }
+
+  .levelladder__stop {
+    padding-bottom: var(--space-3h);
+  }
+
+  .levelladder__name {
+    font-size: var(--fs-title-sm);
+  }
+
+  .levelladder {
+    --ball-size: 26px; /* raw-value-exempt: the desktop ball, spec'd */
+  }
+
+  .slatedate__md {
+    font-size: var(--fs-display-lg);
+  }
+
+  .slatemenu {
+    width: 260px; /* raw-value-exempt: the D1 level menu width, spec'd */
+  }
+
+  .slatestrip .teamfilterstrip--chips .vsteam__team {
+    width: var(--space-12);
+    height: var(--space-12);
+  }
+}

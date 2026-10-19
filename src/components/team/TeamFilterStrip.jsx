@@ -17,7 +17,8 @@ import { ALL_MLB_TEAM_IDS, leagueLogoUrl, teamFullName } from '../../lib/teams.j
 // strip scrolls AAA/AA/A+/A logos there without an MLB-only id map.
 // `showMlbPin` hides the pinned "MLB" reset button (and its divider) for a
 // caller like that banner, which has no "every team" state to reset to —
-// it's a straight navigation strip, not a filter.
+// it's a straight navigation strip, not a filter. `markedTeamId` is that
+// banner's favourite club: marked (filled with --marker), not picked.
 const CLUBS = ALL_MLB_TEAM_IDS
   .map((id) => ({ id, name: teamFullName(id) }))
   .sort((a, b) => a.name.localeCompare(b.name))
@@ -30,6 +31,7 @@ export function TeamFilterStrip({
   showMlbPin = true,
   showArrows = false,
   centerTeamId = null,
+  markedTeamId = null,
   className = '',
 }) {
   const stripRef = useRef(null)
@@ -115,7 +117,9 @@ export function TeamFilterStrip({
                 aria-label={t.name}
                 data-team-id={t.id}
                 ref={active ? activeRef : null}
-                className={`vsteam__team${active ? ' is-active' : ''}`}
+                className={`vsteam__team${active ? ' is-active' : ''}${
+                  t.id === markedTeamId ? ' is-marked' : ''
+                }`}
                 // The club itself rides along as a second argument: the two
                 // callers that NAVIGATE on a pick need its name for the
                 // address (route.js `entitySegment`), and the several that

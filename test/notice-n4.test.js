@@ -38,7 +38,6 @@ const decl = (body, property) =>
 // fails, the slice moved a seal: stop and ask, never update the literal to match.
 const N4_SEAL = {
   'components/boxlines/BoxLinesSheet.jsx': { reveal: [], gated: ['boxlines/fetch.js'], sealBoxes: 0, revealedThrough: 0 },
-  'components/game/PastGameFlipCard.jsx': { reveal: [], gated: [], sealBoxes: 0, revealedThrough: 0 },
   'components/ui/AsyncGate.jsx': { reveal: [], gated: [], sealBoxes: 0, revealedThrough: 0 },
   'screens/GameSelect.jsx': { reveal: [], gated: ['postseason/text.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/GameView.jsx': { reveal: [], gated: ['postseason/bracket.js', 'postseason/text.js'], sealBoxes: 0, revealedThrough: 0 },
@@ -135,17 +134,9 @@ test('AsyncStatus and AsyncGate(): the tests that decide WHEN a line shows, and 
     assert.ok(gate.includes(line), `AsyncGate keeps: ${line}`)
 })
 
-// ---- 3. the slate card back and Box Lines ----
-
-test('the slate card back draws its error on Notice, static (role=note), inside the same renderBack branch', () => {
-  const code = src('components/game/PastGameFlipCard.jsx')
-  assert.match(code, /^import \{ Notice \} from '\.\.\/ui\/state\/Notice\.jsx'$/m)
-  assert.doesNotMatch(code, /hint--error/)
-  assert.match(
-    code,
-    /if \(state\.loading\) \{\s*return <BoxScoreSkeleton cardMeta=\{cardMeta\} \/>\s*\}\s*if \(state\.error\) \{(?:\s*\/\/[^\n]*)*\s*return \(\s*<Notice tone="error" role="note">\s*Couldn&apos;t load this game\.\s*<\/Notice>\s*\)\s*\}\s*if \(!state\.data\) return null/,
-  )
-})
+// ---- 3. Box Lines ----
+// (The slate card back, the past-day flip card, was deleted with the reveal-all
+// chain in ADR-0116; its row in the seal pin and its Notice test went with it.)
 
 test('Box Lines draws its error on Notice with Try again as the action; the loading line keeps .boxlines__hint', () => {
   const code = src('components/boxlines/BoxLinesSheet.jsx')

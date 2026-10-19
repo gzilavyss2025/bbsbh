@@ -524,7 +524,7 @@ function FavorMeter({ net, awayId, homeId, awayFranchise, homeFranchise, totalMi
   // team with no known color pair.
   const stripe = !even ? teamStripeGradient(towardAway ? awayId : homeId) : null
   return (
-    <div className={`favormeter ${tier ? `favormeter--${tier}` : ''}`}>
+    <div className="favormeter">
       {tier && (
         <span className={`pill favormeter__tierpill favormeter__tierpill--${tier}`} aria-hidden="true">
           {FAVOR_TIERS[tier]}

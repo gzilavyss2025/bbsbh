@@ -12,10 +12,9 @@ import { LEVELS } from '../../lib/teams.js'
 // covering four leagues says which of them it means; `onChange` is handed both.
 export function LevelNav({ sportId, onChange, levels = LEVELS }) {
   return (
-    // `levelnav--six` is the WINTER months' rail. It is a hook for the topbar,
-    // which has room for five cells beside the wordmark on a narrow phone and
-    // not for six — see .topbar--slate:has(.levelnav--six) in
-    // styles/03-slate-header.css.
+    // `levelnav--six` is the WINTER months' rail: a styling hook for a caller
+    // that has room for five cells and not six. (The home slate's rail is the
+    // masthead's level ladder now, components/slatehead/.)
     <div
       className={`levelnav${levels.length > 5 ? ' levelnav--six' : ''}`}
       aria-label="Level"

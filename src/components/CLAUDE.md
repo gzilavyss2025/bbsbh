@@ -31,7 +31,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `bracket/` | `PostseasonBracket`, `FullBracket`, `BracketRail`, `BracketDock`, `BracketNow`, `SurvivorsBoard` | October's bracket on the home slate. `SeriesPrimer` (in `postseason/`) draws `SurvivorsBoard` and `BracketRail` when there is no primer. `BracketNow` is the primer's small bracket. Nothing here fetches a score outside `src/api/postseason/bracket.js`'s cutoff-gated reads (ADR-0087) |
 | `charts/` | `WinProbChart`, `HitChart`, `BallFlight`, `TargetCommand` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
 | `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `BackBtn` | Global site frame — header/footer/menu/search, not any one screen. Rules: `chrome/CLAUDE.md` |
-| `game/` | `GameCard`, `GameFinder`, `PastGameFlipCard`, `ContinueScoring`, `BoxScoreSkeleton` | The slate/game-selection layer — a game before you're inside its innings |
+| `game/` | `GameCard`, `GameFinder`, `GameResultFace`, `ContinueScoring`, `BoxScoreSkeleton` | The slate/game-selection layer — a game before you're inside its innings |
 | `gamehud/` | `RollingLine`, `HeaderBug`, `ConsoleBand`, `HalfTally`, `BetweenInnings` | Persistent live-game heads-up widgets shown while scoring |
 | `history/` | `BornNearPark`, `PeopleList` | History about people (ADR-0100): the preview's "Born near the park" line. Open surface, no SealBox |
 | `highlights/` | `HighlightClipCard` | Purely presentational video-clip cards — no fetching, no game-shape knowledge; the caller precomputes the caption and owns the `HighlightSheet` it opens |
@@ -51,8 +51,9 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `scout/` | `Matchup`, `ScoutMap`, `Choice` | The Matchup Scout's parts (`docs/scout-design.md`) |
 | `season/` | `SeasonPicker`, `SeasonStack` | The season views' shared parts (ADR-0086, #1202). **`SeasonPicker` is the one season picker**; a page that takes a season renders it, never a second one |
 | `seal/` | `ConsentModal`, `AsOfBanner` | Spoiler-consent surfaces that aren't `SealBox` itself |
+| `slatehead/` | `SlateMasthead`, `LevelLadder`, `DateStepper`, `CompactControls` | The top of the home slate (the D1 masthead): which level and which day. Draw-only; every move navigates (ADR-0056). The counts come from `api/slate/levelCounts.js`, score-free by its field list |
 | `situational/` | `SituationalBoard`, `SituationalIndex`, `TeamRecordsList` | The situational team-record boards: every club ranked on one split |
-| `sync/` | `RevealCloudSync`, `StampsCloudSync`, `SyncStatusProvider`, `OwnerGuards` | Headless multi-device cloud-sync components (ADR-0022/0026/0035/0036/0041/0049). `OwnerGuards` is app-wide on purpose |
+| `sync/` | `RevealCloudSync`, `StampsCloudSync`, `SyncStatusProvider`, `OwnerGuards` | Headless multi-device cloud-sync components (ADR-0022/0035/0036/0041/0049). `OwnerGuards` is app-wide on purpose |
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `OffDaySection` | Team-identity/navigation primitives |
 | `teamstats/` | `TeamLeaders`, `TeamScoreCard`, `BullpenBoard` | Team-level statistical cards |
 | `transactions/` | `TxStory`, `MoveRow`, `WireRail`, `WireDock` | Roster-move surfaces. Rules: `transactions/CLAUDE.md` |
@@ -76,7 +77,7 @@ just that the build passed.
 
 **Some components are named by literal path in a guard.** `check-stamp-surfaces.mjs`
 holds an allowlist keyed on `components/logbook/GameStamp.jsx` /
-`components/logbook/StampGameButton.jsx`, plus eight `FORBIDDEN_SURFACES` by
+`components/logbook/StampGameButton.jsx`, plus five `FORBIDDEN_SURFACES` by
 full path and `FORBIDDEN_ART_DIRS` (`screens/profile`, `components/profile`,
 `components/account`), and `check-report-pages.mjs` names `components/chrome/SiteMenu.jsx`,
 `SiteFooter.jsx`, `ReportFooter.jsx`. Moving any of those means editing the guard

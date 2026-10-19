@@ -4,15 +4,20 @@ import { test, expect } from './fixtures.js'
 // exact page its sender was reading: `/aaa/08152026` is Triple-A on that
 // Saturday, and the bare `/` is MLB today for everybody. `test/route.test.js`
 // pins the parse and the builder; these are the wiring a unit test cannot see
-// — the pills writing history entries, the day arrows carrying the league, and
-// a cold load of each address landing on the right pill.
+// — the ladder's stops writing history entries, the day arrows carrying the
+// league, and a cold load of each address landing on the right stop.
 //
 // The day arrows are used rather than the calendar, so every assertion stays
 // relative to whatever "today" is when the suite runs.
 
 const path = (page) => new URL(page.url()).pathname
-const pill = (page, name) => page.getByRole('button', { name, exact: true })
-const activePill = (page) => page.locator('.levelnav__btn.is-active')
+// A ladder stop's accessible name is its full level and count ("Triple-A, 16
+// games"), so a stop is found by its printed name instead.
+const pill = (page, name) =>
+  page
+    .locator('.slatemast__card .levelladder__stop')
+    .filter({ has: page.getByText(name, { exact: true }) })
+const activePill = (page) => page.locator('.slatemast__card .levelladder__stop.is-picked .levelladder__name')
 
 test.describe('the slate league is in the URL', () => {
   test('a cold load of each address opens on that league', async ({ page }) => {

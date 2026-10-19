@@ -42,8 +42,9 @@ function calendarFor(season) {
 // `sportId` and `leagueId` are what the URL asked for. The return is what the
 // slate should actually draw:
 //
-//   tabVisible   put WINTER on the rail, second, after MLB
+//   tabVisible   put the Winter stop on the masthead's ladder (last, after A)
 //   leagues      the picker's chips, in rail order, with this day's game counts
+//   games        this day's games across those leagues (the ladder's count)
 //   leagueId     the league to fetch and highlight — null off the winter tab
 //   ready        the calendar has landed, so the rail can stop guessing
 //
@@ -67,6 +68,9 @@ export function useWinter(dateStr, sportId, leagueId) {
       // the default rather than drawing an empty tab — a shared '/fall/12152025'
       // lands on whichever league is actually playing in December.
       leagueId: onWinter ? resolveWinterLeagueId(calendar, dateStr, leagueId) : null,
+      // This day's games across every shipped winter league: the masthead
+      // ladder's Winter count, read off the same calendar at no extra fetch.
+      games: leaguesOnDate(calendar, dateStr).reduce((n, l) => n + l.games, 0),
       // Where a bare tap on WINTER goes, when no league is named.
       defaultLeagueId: defaultWinterLeagueId(calendar, dateStr),
       sportId: WINTER_SPORT_ID,

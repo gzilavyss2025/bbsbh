@@ -22,7 +22,7 @@ is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
   per-test `spec`-style reporter when you actually want test names (e.g. finding
   which specific case is slow or silently skipped).
 - **Fixtures stay inline on purpose.** Several of the largest files
-  (`team-transactions.test.js`, `day-highlights.test.js`) embed real captured feed
+  (`team-transactions.test.js`, for one) embed real captured feed
   rows directly in the test body with comments explaining *why* each row matters
   (which bug it pins, which real gamePk/date it came from). That provenance is the
   point — moving the data into a bare `test/fixtures/*.json` would strip the

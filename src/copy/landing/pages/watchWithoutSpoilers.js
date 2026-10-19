@@ -22,7 +22,7 @@ export default {
     'how to avoid MLB scores',
   ],
   schema: ['Article', 'HowTo', 'FAQPage'],
-  updated: '2026-08-16',
+  updated: '2026-10-18',
   sections: [
     {
       id: 'answer',
@@ -114,8 +114,8 @@ export default {
       kind: 'prose',
       heading: 'When you want it spoiled',
       body: [
-        'Sometimes you do want the score. You fell asleep in the sixth and you are not going to finish. You are checking a result from three weeks ago. A friend asked. A tool that cannot be turned off is a tool people stop trusting, so there is a switch: Scores Unlocked, which unseals the scores for a day you choose to spoil.',
-        'It asks first. You say which day you are willing to see, and it opens that day. Nothing is unsealed on your behalf and nothing is unsealed by accident — the consent is the feature, not a formality attached to it. Days you have not agreed to spoil stay as they were.',
+        'Sometimes you do want the score. You fell asleep in the sixth and you are not going to finish. You are checking a result from three weeks ago. A friend asked. Then you tap the seal and it opens: one half-inning, or the whole box score at once. There is no switch that opens a whole day, so one game you want to see never spoils the others.',
+        'Nothing is unsealed on your behalf and nothing is unsealed by accident. A box score you open stays open on your own devices, and a game you stamp in your Game Log opens for you. Every other game stays as it was.',
       ],
     },
     {
@@ -133,7 +133,7 @@ export default {
         },
         {
           q: 'Can I turn the protection off?',
-          a: 'Yes. A site-wide switch called Scores Unlocked will unseal the scores for a day you name, and it asks you to confirm that day first. It is opt-in and it is reversible.',
+          a: 'Yes, one seal at a time. Tap any seal to open it: a half-inning, or the whole box score. Nothing opens a whole day at once, so a game you have not touched stays sealed.',
         },
         {
           q: 'Does it work on a phone?',

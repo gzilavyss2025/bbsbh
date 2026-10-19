@@ -1,6 +1,6 @@
 /* ============================================================
-   CONSENT MODAL — the shared spoiler-consent sheet (ConsentModal.jsx), used by
-   Scores Unlocked and Follow Live. Reuses .scrim/.sheet; these style its body.
+   CONSENT MODAL — the spoiler-consent sheet (ConsentModal.jsx), used by Stamp
+   In (ADR-0042). Reuses .scrim/.sheet; these style its body.
    ============================================================ */
 .consent__title {
   margin: 0 0 var(--space-3);
@@ -70,32 +70,6 @@
   text-transform: none; /* caps-exempt: admin edits + previews natural-case copy, not chrome */
 }
 
-
-/* Spoilers-off active strip — the "scores are showing" banner that sits under
-   the masthead on EVERY section of a game (both lineups, innings, box score), so
-   an unsealed screen always says why it is unsealed. Itself the off switch (same
-   "banner is the toggle" idea as .daystate__chip--live-on). Full-width so it
-   reads as a mode, not a chip. */
-.modestrip {
-  display: block;
-  width: 100%;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--seal-cover-ink);
-  background: var(--seal-cover);
-  border: none;
-  border-radius: var(--radius-square);
-  padding: var(--space-1) var(--space-2);
-  margin-bottom: var(--space-2);
-  cursor: pointer;
-}
-.modestrip:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
 
 /* ---------------------------------------------------------------------------
    ANIMATION LAB (src/screens/AnimationLab.jsx) — unlisted QA page cataloging

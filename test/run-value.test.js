@@ -18,6 +18,7 @@ import {
   ROLES,
   board,
   clubBoard,
+  clubLeaders,
   clubRunValue,
   componentBoard,
   isPitcher,
@@ -282,4 +283,68 @@ test('the club board ranks clubs and counts who it counted', () => {
 test('a player with no club at all is left out of the club board', () => {
   const data = { players: [player(50, 'Free Agent', { teamId: null, bat: 20 })] }
   assert.deepEqual(clubBoard(data), [])
+})
+
+// --------------------------------------------------------------------------
+// clubLeaders — the club card's top six, by the total or by one part (#2295).
+// The Brewers rows are the 2026 Savant figures the design canvas was drawn on
+// (issue #2295, "Run value card"), trimmed to the eighteen men it names.
+// --------------------------------------------------------------------------
+
+const BREWERS = clubRunValue(
+  {
+    players: [
+      [694819, 'Jacob Misiorowski', 0, 0, 0, 52.1],
+      [668930, 'Brice Turang', 23.9, 14.1, 0.5, 0],
+      [694192, 'Jackson Chourio', 21.1, 8.6, 0.8, 0],
+      [641343, 'Jake Bauers', 26.8, -7.4, 2.1, 0],
+      [656730, 'Trevor Megill', 0, 0, 0, 20.8],
+      [701656, 'Logan Henderson', 0, 0, 0, 16.1],
+      [683734, 'Andrew Vaughn', 13.7, -6.1, 0, -9.4],
+      [661388, 'William Contreras', 10.6, -3.2, -2.9, 0],
+      [596142, 'Gary Sánchez', 8.9, -3.9, 0, 0.2],
+      [687401, 'Joey Ortiz', -2.3, 13, -1.7, 0],
+      [669003, 'Garrett Mitchell', 5.3, 4, 3.1, 0],
+      [806198, 'Cooper Pratt', 3.4, 2.2, 2.7, 0],
+      [682641, 'Luis Matos', -2.1, 1.3, 0, 0],
+      [666152, 'David Hamilton', -12.1, -7.2, 4.4, 0],
+      [592885, 'Christian Yelich', -5.7, 0, 2.1, 0],
+      [682842, 'Abner Uribe', 0, 0, 0, 14.6],
+      [669084, 'DL Hall', 0, 0, 0, 12.6],
+      [694477, 'Chad Patrick', 0, 0, 0, 10.9],
+    ].map(([id, name, bat, fld, run, pit]) => player(id, name, { teamId: 158, bat, fld, run, pit })),
+  },
+  158,
+)
+const last = (rows) => rows.map((p) => p.name.split(' ').at(-1))
+
+test('clubLeaders by batting re-ranks the club on that part alone', () => {
+  assert.deepEqual(last(clubLeaders(BREWERS, 'bat')), ['Bauers', 'Turang', 'Chourio', 'Vaughn', 'Contreras', 'Sánchez'])
+})
+
+test('clubLeaders by running puts the best runner first, whatever his total', () => {
+  const rows = clubLeaders(BREWERS, 'run')
+  assert.equal(rows[0].name, 'David Hamilton')
+  assert.equal(signed(rows[0].total), '-15', 'his total is well under zero and does not move him')
+})
+
+test('clubLeaders with no part is the club order, six deep', () => {
+  assert.deepEqual(last(clubLeaders(BREWERS)), ['Misiorowski', 'Turang', 'Chourio', 'Bauers', 'Megill', 'Henderson'])
+})
+
+test('clubLeaders returns every man of a club with fewer than six', () => {
+  const club = clubRunValue({ players: [player(1, 'Only', { teamId: 158, bat: 3 }), player(2, 'Two', { teamId: 158, pit: 1 })] }, 158)
+  assert.equal(clubLeaders(club, 'pit').length, 2)
+})
+
+test('clubLeaders breaks a tie on the part by name', () => {
+  const club = clubRunValue(
+    { players: [player(1, 'Zed', { teamId: 158, fld: 4 }), player(2, 'Abe', { teamId: 158, fld: 4, bat: -9 })] },
+    158,
+  )
+  assert.deepEqual(clubLeaders(club, 'fld').map((p) => p.name), ['Abe', 'Zed'])
+})
+
+test('clubLeaders copes with no club at all', () => {
+  assert.deepEqual(clubLeaders(null, 'bat'), [])
 })

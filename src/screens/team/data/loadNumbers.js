@@ -231,6 +231,10 @@ export async function loadRanks(id, asOf, src = DIRECT) {
         club: clubRuns,
         rank: clubs.find((r) => r.teamId === id)?.rank ?? null,
         of: clubs.length,
+        // Every club, best to worst: the card's league strip (#2295).
+        league: clubs,
+        // The file's own date, for the card's source line.
+        generatedAt: runValueData?.generatedAt ?? null,
       }
     : null
 

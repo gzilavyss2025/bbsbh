@@ -216,3 +216,11 @@ does not change. The pure rules are in `src/lib/postseason/primer/`, and
 Decisions 1 to 4 do not change. The cutoff is a date (1). Yesterday's results
 are not protected (2). Nothing here uses a `SealBox` or a `--seal*` token (3).
 Nothing here reads `useScoresUnlocked()` or `spoilersOffFor()` (4).
+
+## Addendum (2026-10-18): Scores Unlocked is gone
+
+ADR-0116 removed the pass. Decision 4 and the 2026-09-30 addendum are moot: nothing
+reads a pass, and the home slate passes no `live` option to the bracket. The World
+Series home's seal on today's game is gone too; its hero and ledger show no score
+slot for today at all. The data layer's `{ live }` option stays, inert and false,
+as a follow-up to delete.

@@ -240,3 +240,9 @@ tab that made the change, the same echo `useStamps` uses.
   key and no other channel's, the prefix is exact, a blocked or hostile storage
   answers "nothing" rather than throwing, the owner tag round-trips, and the
   guard adopts only for a different account.
+
+## Addendum (2026-10-18) — two openers, not three
+
+ADR-0116 removed the Scores Unlocked pass. The box score's seal now reads
+`forceRevealed={stamped || boxOpened}` and `onReveal={stamped ? undefined : markBoxOpened}`.
+Only a real tap writes the bit, as before; the stamp is the one flag that withholds it.

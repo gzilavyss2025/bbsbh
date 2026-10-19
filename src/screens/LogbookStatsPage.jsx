@@ -44,9 +44,9 @@ import { LogbookMilestones } from './logbook/LogbookMilestones.jsx'
 // ===========================================================================
 // Identical to LogbookPage.jsx's, and it holds for exactly one reason: every
 // game this page reads is one of THIS user's own stamps, and a stamp only
-// exists for a game its owner already finished revealing — the server refuses
-// to mint one otherwise, against its own record of the reveal ratchet and the
-// spoiled-day consent map, never against a claim from the client.
+// exists for a game its owner already opened — the mint affordance renders only
+// inside the box score's reveal (ADR-0035's second amendment retired the old
+// server-side check against the reveal ratchet).
 //
 // That makes one rule absolute here: **nothing on this page may involve a game
 // the user has not stamped.** No "recent games you might stamp", no "this

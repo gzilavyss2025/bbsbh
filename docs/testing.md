@@ -205,9 +205,7 @@ and a pitcher (each with a contract card), `/salaries`, `/standings`,
 there.
 
 Every shot is of a **sealed** page. The game pages are shot with nothing
-revealed. The filter chips exist only after "Reveal all results", so that shot
-is the chip bar alone: the revealed cards, which hold the scores, are not in
-the image.
+revealed.
 
 **Zero tolerance.** `maxDiffPixels` and `threshold` are both 0
 (`pages.visual.js`), so one changed pixel is a change. Two servers on the same

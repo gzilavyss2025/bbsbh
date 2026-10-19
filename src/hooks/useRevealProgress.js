@@ -349,7 +349,7 @@ export function useRevealProgress(feed, regulation, actualCount) {
 // scoring frontier that the innings viewer, the scorecard's ink and the slate's
 // "pick up your pencil" strip all read. Folding the box score into that mark
 // would ratchet all three from a single tap on a different page — which is the
-// exact leak ADR-0026 and ADR-0048 both keep their overrides away from.
+// exact leak ADR-0048 keeps its override away from.
 const BOX_KEY = BOX_REVEAL_PREFIX
 function readBoxMark(storageKey) {
   if (!storageKey) return false

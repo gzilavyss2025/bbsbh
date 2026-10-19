@@ -1,6 +1,6 @@
-// My Tally's preference document — the FIFTH opt-in backend exception, riding
-// the same Clerk + Upstash stack as api/reveal.js (ADR-0022),
-// api/spoiled-days.js (ADR-0026) and api/stamps.js (ADR-0035). One Redis hash
+// My Tally's preference document — an opt-in backend exception, riding the
+// same Clerk + Upstash stack as api/reveal.js (ADR-0022) and api/stamps.js
+// (ADR-0035). One Redis hash
 // per Clerk userId, `prefs:{userId}`, one field per preference, each value
 // `{ value, updatedAt }`.
 //
@@ -27,8 +27,7 @@
 // WHY ONE FIELD PER POST. Absence has to keep meaning "no opinion". If this
 // took a whole document, a fresh device with an empty one would tell the server
 // to erase every setting the user has. Posting `{ field, value, updatedAt }`
-// says only what this device actually decided — the same rule, for the same
-// reason, as api/spoiled-days.js's per-day POST.
+// says only what this device actually decided.
 //
 // Unconfigured degrades exactly like its three siblings: with no Redis (or no
 // Clerk) the endpoint 501s and the client stays local-only. Sync has always
@@ -45,12 +44,12 @@ import { authenticateUser } from './_lib/auth.js'
 import { privateJson, readJsonBody } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
-// Node runtime, not edge — same reason as reveal.js/spoiled-days.js/stamps.js:
+// Node runtime, not edge — same reason as reveal.js/stamps.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
 
 // Re-validate whatever Redis hands back before it reaches a client, exactly as
-// spoiled-days.js and stamps.js do: a hand-edited or cross-version hash can only
+// stamps.js does: a hand-edited or cross-version hash can only
 // ever yield known fields with known-shape entries, never a surprise key the
 // client would then have to defend against.
 export function sanitizeStored(raw) {

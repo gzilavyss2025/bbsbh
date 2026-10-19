@@ -8,8 +8,7 @@
 // accumulates ONLY from half-innings at or under it, so nothing from a sealed
 // half ever reaches the DOM. The live scorecard page (its one product caller)
 // passes the user's own `revealedThrough` high-water mark, render-substituted
-// under the Scores Unlocked pass exactly as the innings viewer substitutes it
-// (ADR-0026). The DEV-only Scorecard Lab passes Infinity instead; it exists
+// on a stamped game exactly as the innings viewer substitutes it (ADR-0048). The DEV-only Scorecard Lab passes Infinity instead; it exists
 // to see the whole game laid out and is dropped from the production module
 // graph by App.jsx. A second product caller, the box score's own embedded
 // copy of this sheet, was retired once the game's top nav pointed at this

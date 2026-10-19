@@ -103,8 +103,7 @@
 }
 
 /* ---- Chips ────────────────────────────────────────────────────────────────
-   The same switch idiom the slate's day-state chips use (.daystate__chip): OFF
-   is ordinary chrome, because off is the common state and a card should not
+   A switch idiom: OFF is ordinary chrome, because off is the common state and a card should not
    shout about its defaults; ON takes either the ink fill (a filter you applied)
    or the kraft fill the app already reads as "you are in a mode". */
 

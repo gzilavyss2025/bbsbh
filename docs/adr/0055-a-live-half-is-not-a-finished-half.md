@@ -136,3 +136,9 @@ still needs.
 condition. Everything else there stands: the cursor is still a transient staging
 layer over `revealedThrough`, still keyed by half-index, still collapsing into a
 normal full commit — just not before the half exists.
+
+## Note (2026-10-18)
+
+ADR-0116 removed the Scores Unlocked pass and its plays-based `selectLiveEdge`.
+`selectLiveHalf` and `selectCatchUpTarget` stay in `src/api/liveEdge.js`, and the
+"Caught up" state on the action bar is unchanged.

@@ -19,8 +19,8 @@ export const PHONE_LENS_QUERY = '(max-width: 480px)'
 const FRAME_AT = 0.54
 
 // Lens mode is on only on a phone, only with a frontier to hold, and only while
-// a tap commits a reveal. Under Scores Unlocked or a stamp, `effectiveReveal`
-// gives `commitReveals` false or no `stepInfo` (ADR-0026, ADR-0048): the sheet
+// a tap commits a reveal. On a stamped game, `effectiveReveal` gives
+// `commitReveals` false and there is no `stepInfo` (ADR-0048): the sheet
 // is inked to the end, so there is nothing for the frame to hold. Ask that
 // answer; do not re-derive it here (G7).
 export function lensOn({ phone, stepInfo, commitReveals }) {

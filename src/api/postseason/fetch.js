@@ -1,7 +1,6 @@
 // The postseason bracket's two statsapi reads (#1224, slice 3). Both are
-// separate from fetchSchedule, the same way fetchSlateScores is (see the
-// header of ../schedule.js): the slate model never carries a result, and
-// nothing here goes through it.
+// separate from fetchSchedule (see the header of ../schedule.js): the slate
+// model never carries a result, and nothing here goes through it.
 //
 // THE SKELETON (skeletonUrl) is every postseason game of one season: clubs,
 // placeholders, dates, series numbers. It asks for NO result field — no

@@ -18,17 +18,16 @@ import { Stack } from '../ui/layout/Stack.jsx'
 //     their email address, both read as the app not knowing who they are —
 //     the task this program set out to avoid.
 //
-// The three benefit rows render FROM src/lib/account/syncClaims.js
+// The two benefit rows render FROM src/lib/account/syncClaims.js
 // (SYNCED_ITEMS), never hand-written, so this screen cannot promise a sync the
 // app does not actually run. INTRO_BENEFIT_LABELS only renames the DISPLAY
 // text for this warmer, onboarding-specific moment — the ids it reads
-// (reveal/spoiledDays/stamps) still have to exist in the ledger, so a claim
+// (reveal/stamps) still have to exist in the ledger, so a claim
 // here still traces back to a real wired channel; a renamed or removed id
 // simply drops its row rather than throwing.
-const INTRO_BENEFIT_IDS = ['reveal', 'spoiledDays', 'stamps']
+const INTRO_BENEFIT_IDS = ['reveal', 'stamps']
 const INTRO_BENEFIT_LABELS = {
   reveal: 'Game progress',
-  spoiledDays: 'Spoiler choices',
   stamps: 'Game Log',
 }
 

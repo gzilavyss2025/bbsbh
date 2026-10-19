@@ -2,9 +2,9 @@
 //
 //   DELETE /api/account -> { ok: true, erased: { prefs, spoiled, scorebook, reveal, stamps } }
 //
-// WHY THIS EXISTS. Four features store per-user state in Redis behind a Clerk
-// identity — the reveal mark (ADR-0022), the spoiled-day consent map
-// (ADR-0026), the Logbook (ADR-0035) and now the preference document. Deleting
+// WHY THIS EXISTS. Features store per-user state in Redis behind a Clerk
+// identity — the reveal mark (ADR-0022), the Logbook (ADR-0035) and the
+// preference document, and once the spoiled-day consent map. Deleting
 // a Clerk account does NOT cascade into any of them. Until this endpoint, the
 // only honest thing the app could have told a user asking to be forgotten was
 // "we can't". Now it can, and the copy on My Tally states the ordering plainly:
@@ -22,7 +22,8 @@
 // Everything keyed to the VERIFIED `sub` claim, and nothing else:
 //
 //   prefs:{u}                 the preference document
-//   spoiled:{u}               the day-consent map
+//   spoiled:{u}               the day-consent map — legacy, no writer since
+//                             ADR-0116, still erased so old data goes too
 //   scorebook:{u}             the "pick up your pencil" index
 //   stamps:{u}:{season}       every season shard, then stamps:{u}:seasons
 //   reveal:{u}:{gamePk}       every reveal mark, via reveal:index:{u}

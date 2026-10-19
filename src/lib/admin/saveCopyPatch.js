@@ -7,7 +7,7 @@
 // key the body omits. That is correct for the /admin panel, which holds every
 // field on screen and therefore always sends all of them. It is a loaded gun
 // for an editor holding six ballpark fields — posting just those six would
-// delete every Scores Unlocked and Stamp In override and all 29 other parks in
+// delete every Stamp In override and all 29 other parks in
 // one click, and the app would keep working perfectly, rendering shipped
 // defaults, so nothing would look broken until somebody noticed.
 //

@@ -1,5 +1,10 @@
 # Scores Unlocked — one consented day, never a persisted reveal
 
+> **RETIRED by [ADR-0116](0116-scores-unlocked-and-reveal-all-are-removed.md) (2026-10-18).**
+> The Scores Unlocked pass, its consent sheet, the spoiled-day record and its sync,
+> and Follow Live were removed end to end. This file stays as the record of why
+> they were built.
+
 ADR-0025 landed the copy store this consent surface uses. This is the departure
 itself: **Scores Unlocked**, the app's single site-wide, opt-in switch that
 un-gates every score after an explicit consent tap.

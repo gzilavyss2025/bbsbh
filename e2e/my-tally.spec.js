@@ -4,8 +4,8 @@ import { test, expect } from './fixtures.js'
 //
 // Everything asserted here is the SIGNED-OUT / Clerk-unconfigured face of the
 // page, which is the one a local dev server can actually produce: signing in
-// needs a Clerk-configured deploy, the same gap ADR-0026 records for
-// SpoiledDaysCloudSync. That is not a thin slice, though — it is the state the
+// needs a Clerk-configured deploy, the same gap ADR-0022 records for reveal
+// sync. That is not a thin slice, though — it is the state the
 // whole design is built on ("This device." is the exact phrase, PRD §1.1), and
 // it is the one where a regression would be silent.
 
@@ -27,22 +27,21 @@ test('My Tally opens on this device, with every setting usable and no account ga
   await expect(page.getByRole('heading', { name: 'Your ledger' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Sync & data' })).toBeVisible()
 
-  // Three counts, and every one of them is a count of the reader's own things.
-  await expect(page.locator('.mytally__ledgerrow')).toHaveCount(3)
+  // Two counts, and each is a count of the reader's own things. (A third, the
+  // days the reader unsealed, went with the Scores Unlocked pass, ADR-0116.)
+  await expect(page.locator('.mytally__ledgerrow')).toHaveCount(2)
 
   // One row per CHANNEL, not one per claim. `reveal` backs two claims —
   // "Reveal progress" and "Games in progress" — and rendering the ledger
   // directly produced two rows showing byte-identical state under two labels.
   // Signed out, every row says where the thing is.
   //
-  // FIVE rows, not the four PRD §5.2 tabulated: the multi-book shelf
-  // (ADR-0041) added a `books` channel, and this assertion was never updated
-  // with it. Add the row here when a channel is added to SYNC_CHANNELS —
-  // that list and this list are the same list.
-  await expect(page.locator('.syncreceipt__row')).toHaveCount(5)
+  // FOUR rows: the multi-book shelf (ADR-0041) added a `books` channel, and
+  // ADR-0116 removed the spoiled-day channel. Add or drop the row here when
+  // SYNC_CHANNELS changes — that list and this list are the same list.
+  await expect(page.locator('.syncreceipt__row')).toHaveCount(4)
   await expect(page.locator('.syncreceipt__label')).toHaveText([
     'Reveal progress',
-    'Days you unsealed',
     'Game Log',
     'Book covers',
     'Club and settings',
@@ -101,14 +100,14 @@ test('Keep Awake is a real switch and remembers its position', async ({ page }) 
   )
 })
 
-// Scores Unlocked is REPORTED here and never set here. There is deliberately no
-// "always show scores" control anywhere on this page — invariant P3, forbidden
-// by name — so this asserts the absence as much as the presence.
-test('Scores Unlocked shows its status without offering a standing opt-out', async ({ page }) => {
+// There is deliberately no "always show scores" control anywhere on this page —
+// invariant P3, forbidden by name. The Scores Unlocked status row that once sat
+// here went with the pass (ADR-0116), so this pins the absence of both.
+test('My Tally offers no way to show scores, standing or for a day', async ({ page }) => {
   await page.goto('/profile')
 
-  const section = page.locator('.mytally__section', { hasText: 'Scores Unlocked' })
-  await expect(section.getByText('Scores Unlocked')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Scorebook experience' })).toBeVisible()
+  await expect(page.getByText('Scores Unlocked')).toHaveCount(0)
   await expect(page.getByRole('button', { name: /always show scores/i })).toHaveCount(0)
   await expect(page.getByRole('switch', { name: /scores/i })).toHaveCount(0)
 })

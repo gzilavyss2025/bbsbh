@@ -115,8 +115,8 @@ existing split file covers it (`vs-team-splits`, the API's own `statSplits`, per
   and Tally ships four of them (ADR-0078). A bare `sportId=17` call is mostly
   the wrong league — on three sampled dates it answered 15 games across four
   leagues where `&leagueId=119` answered exactly the three AFL ones — so every
-  winter call carries a `leagueId`: `fetchSchedule`, `fetchTeams`,
-  `fetchSlateScores` and `fetchNextGameDate` all take one, and it is `null` for
+  winter call carries a `leagueId`: `fetchSchedule`, `fetchTeams` and
+  `fetchNextGameDate` all take one, and it is `null` for
   the five ordinary levels, which leaves their URLs unchanged. `fetchWinterCalendar(season)`
   takes none: it loops `WINTER_LEAGUE_IDS`. The one call that cannot be scoped at runtime is the club list, so
   it is not made at runtime: `gen-teams.mjs` fetches the four leagues by id at
@@ -134,7 +134,7 @@ one you need:
 | --- | --- |
 | `docs/api/live-game.md` | The live-feed modules: fetchers, `feed/live` selectors, the reveal-only derivations, the pre-pitch staging selectors, and the live leader boards. |
 | `docs/api/static-data.md` | The build-time-fetch readers — one entry per `public/data/*.json` file and the module that reads it. |
-| `docs/api/account-layer.md` | `src/lib/account/` — the per-user state that crosses a signed-in user's devices (ADR-0039, ADR-0026). |
+| `docs/api/account-layer.md` | `src/lib/account/` — the per-user state that crosses a signed-in user's devices (ADR-0039). |
 | `docs/api/postseason.md` | `postseason/` — the running postseason's bracket heading into a cutoff date: its two reads, the skeleton it may not trust, and the shape the UI reads. |
 
 `around-the-game/` holds the spoiler-FREE readers behind the Around the game pages: `around-the-game/CLAUDE.md`.

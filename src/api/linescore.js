@@ -61,8 +61,7 @@ export function revealStampFacts(feed) {
     if (typeof row?.away?.runs === 'number' || typeof row?.home?.runs === 'number') last = row
   }
   const innings = Number.isInteger(last?.num) ? last.num : 0
-  // The same test liveEdge.js's edgeFromLinescore makes: a home entry carrying
-  // an actual number means the bottom half was reached. A home club leading
+  // A home entry carrying an actual number means the bottom half was reached. A home club leading
   // after the top of the last inning never bats again.
   const homeBattedLast = typeof last?.home?.runs === 'number'
 

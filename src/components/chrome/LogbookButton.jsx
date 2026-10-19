@@ -34,7 +34,9 @@ export function LogbookButton({ className = '' }) {
       onClick={() => navigate('/logbook')}
     >
       <LogbookGlyph />
-      Game Log
+      {/* A span so a tight bar (the slate masthead on a phone) can hide the
+          word visually and keep it as the button's name. */}
+      <span className="sitebar__logbooklabel">Game Log</span>
     </button>
   )
 }

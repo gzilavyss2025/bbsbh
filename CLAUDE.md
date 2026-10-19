@@ -110,12 +110,12 @@ is never fetched-then-hidden, and never computed early. Everything else about ba
 season and career stats, player and team pages, leader boards, standings, the money pages (`/salaries`
 and a club's Money band, ADR-0052), and the standalone pages outside the scoring flow. A stat line
 is not a score, and gating one was the rule reaching past what it protects (ADR-0034, "The cutoff is
-opt-in now"). Four **opt-in, consented** departures lift the seal inside the scope. Three are *render*
-overrides that persist nothing: the site-wide **Scores Unlocked** switch, unsealing a day you agree to
-spoil (ADR-0026); **Stamp In** (`/team/{id}/stamp-in`), a club's played season shown so you can stamp
-it, gated on the PAGE (ADR-0042); and a game carrying your own **stamp** (ADR-0048). The fourth
-persists one bit per game, never the reveal mark: **a box score you tapped open stays open**, on every
-device you own (ADR-0049). A fifth is a call. `docs/adr/` has the *why* — read it.
+opt-in now"). Three **opt-in, consented** departures lift the seal inside the scope. Two are *render*
+overrides that persist nothing: **Stamp In** (`/team/{id}/stamp-in`), a club's played season shown so
+you can stamp it, gated on the PAGE (ADR-0042); and a game carrying your own **stamp** (ADR-0048). The
+third persists one bit per game, never the reveal mark: **a box score you tapped open stays open**, on
+every device you own (ADR-0049). A fourth is a call. There is no day pass and no slate-wide reveal:
+both were removed (ADR-0116). `docs/adr/` has the *why* — read it.
 
 Inside that scope, two conventions enforce it structurally:
 
@@ -145,11 +145,11 @@ directly. Each game's reveal high-water mark (`revealedThrough`) persists in
 so the spoiler rule still holds on return. A same-device tab picks up another tab's
 reveal through a `storage` listener in `useRevealProgress.js`.
 
-**Fourteen Vercel functions live in `api/`**, each inert when unconfigured;
-**thirteen never render or fetch a score.** **The fourteenth stores a score, by design**:
+**Thirteen Vercel functions live in `api/`**, each inert when unconfigured;
+**twelve never render or fetch a score.** **The thirteenth stores a score, by design**:
 the Game Log's stamps (`stamps.js`, `src/lib/stamps.js`), safe because of WHERE stamp art
 may render (`check-stamp-surfaces`), not a mint-time check (ADR-0035). The other
-thirteen, each with its ADR: `api/CLAUDE.md`.
+twelve, each with its ADR: `api/CLAUDE.md`.
 
 ## Conventions to follow
 

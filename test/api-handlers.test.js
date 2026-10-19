@@ -30,7 +30,6 @@ import revealHandler, {
   recentGamesView,
   sanitizeSnapshot,
 } from '../api/reveal.js'
-import spoiledDaysHandler from '../api/spoiled-days.js'
 import stampsHandler, { mint, mintRefusal, seasonRows, stampEntry } from '../api/stamps.js'
 import { MAX_STAMPS_PER_SEASON, applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
 import { nodeReq, nodeRes, call } from './helpers/node-http.js'
@@ -190,12 +189,6 @@ test('copy handler reads ?history=1 off the parsed path', async () => {
   assert.equal(out.status, 501)
 })
 
-test('spoiled-days handler survives a bare path', async () => {
-  const out = await call(spoiledDaysHandler, nodeReq('/api/spoiled-days'))
-  assert.equal(out.status, 501)
-  assert.deepEqual(out.json, { error: 'sync not configured' })
-})
-
 // --------------------------------------------------------------------------
 // Method + body handling under the Node shape
 // --------------------------------------------------------------------------
@@ -203,7 +196,6 @@ test('every handler rejects an unsupported method without throwing', async () =>
   for (const [name, handler, url] of [
     ['reveal', revealHandler, '/api/reveal?gamePk=1'],
     ['copy', copyHandler, '/api/copy'],
-    ['spoiled-days', spoiledDaysHandler, '/api/spoiled-days'],
     ['stamps', stampsHandler, '/api/stamps?season=2026'],
   ]) {
     const out = await call(handler, nodeReq(url, { method: 'PUT' }))
@@ -215,11 +207,11 @@ test('a POST body arrives via Vercel’s pre-parsed req.body', async () => {
   // Vercel's Node runtime parses a JSON body onto req.body — the handler must
   // read it there rather than calling req.json(), which does not exist.
   const out = await call(
-    spoiledDaysHandler,
-    nodeReq('/api/spoiled-days', {
+    stampsHandler,
+    nodeReq('/api/stamps', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: { day: '2026-07-25', state: 'on' },
+      body: { gamePk: 778241, mode: 'watched' },
     }),
   )
   // Unconfigured store short-circuits before the body is used; the point is
@@ -380,10 +372,10 @@ test('a tombstone from the endpoint removes the stamp on another device', () => 
 // --------------------------------------------------------------------------
 // The bug this closes: `POST /api/stamps` refused to mint unless the server
 // could read a `reveal:{userId}:{gamePk}` mark or a spoiled-day consent for the
-// game. The ordinary way to stamp — tapping the affordance inside the box
-// score's `SealBox` — writes NEITHER, because that SealBox deliberately
-// persists nothing (an `onReveal` there would let a box score opened under the
-// Scores Unlocked pass ratchet the whole game's `revealedThrough`). So the
+// game (the consent record is gone since ADR-0116). The ordinary way to stamp —
+// tapping the affordance inside the box score's `SealBox` — writes NEITHER,
+// because that SealBox deliberately persists no reveal mark (an `onReveal` there
+// that ratcheted `revealedThrough` would open the whole game). So the
 // normal flow 403'd, and nineteen real stamps could not be uploaded.
 //
 // `mint` takes its Redis client as a parameter, so the real path runs here
@@ -860,8 +852,8 @@ test('the season cap still refuses when the live stamps reach it', async () => {
   assert.equal(res.json.error, 'season full')
 })
 
-// One wrapper for the eight per-user handlers (account, ballpark-photo, books,
-// identity-logo, preferences, reveal, spoiled-days, stamps): a shared cache must
+// One wrapper for the seven per-user handlers (account, ballpark-photo, books,
+// identity-logo, preferences, reveal, stamps): a shared cache must
 // never hold their answers.
 test('privateJson answers JSON with private, no-store, status 200 by default', () => {
   const res = nodeRes()

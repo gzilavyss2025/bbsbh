@@ -1,13 +1,12 @@
 import { test, expect } from './fixtures.js'
 
-// Regression harness for the slate topbar's wrap behavior. The bug (seen on a
-// real 402px-wide iPhone once the account button joined the row): the actions
-// row's flex-wrap moved buttons one at a time, so a single icon — the account
-// avatar there, the menu button on a 375px phone even with Clerk off — dropped
-// to its own row as a floating orphan while the wordmark drifted vertically
-// centered across the doubled-height header. The fix groups search/menu/account
-// in the nowrap .topbar__iconcluster (they wrap below the level pills together
-// or not at all) and pins the wordmark to the first row.
+// Regression harness for the slate's brand bar (the D1 masthead,
+// components/slatehead/SlateMasthead.jsx). The bug this file was first written
+// for (seen on a real 402px-wide iPhone once the account button joined the
+// row): the header's buttons wrapped one at a time, so a single icon dropped to
+// its own row as a floating orphan. The D1 bar holds the lockup and the icon
+// buttons on ONE row at every phone width — the Game Log button draws as its
+// icon alone below 740px so the row fits at 320px.
 //
 // Viewport-independent CSS (same trick as e2e/invariants/): the widths under
 // test are set explicitly below, so only the mobile project needs to run it.
@@ -22,14 +21,10 @@ const WIDTHS = [430, 402, 390, 375, 360, 320]
 // can't assume. The layout contract under test is pure CSS driven by the extra
 // element's box, so stand in for AccountButton with the same wrapper/classes it
 // renders (a 28px Clerk UserButton trigger inside .account__btn — see
-// AccountButton.jsx) against the real stylesheet. Falls back to appending to
-// .topbar__slateactions so on a pre-fix tree (no cluster) the spec still
-// reproduces the orphan instead of erroring out.
+// AccountButton.jsx) against the real stylesheet.
 const INJECT_ACCOUNT_STANDIN = `
   (() => {
-    const host =
-      document.querySelector('.topbar__iconcluster') ||
-      document.querySelector('.topbar__slateactions')
+    const host = document.querySelector('.slatemast__actions')
     if (!host || host.querySelector('.account__btn')) return
     const el = document.createElement('div')
     el.className = 'account__btn'
@@ -45,78 +40,60 @@ const INJECT_ACCOUNT_STANDIN = `
   })()
 `
 
-async function headerBoxes(page) {
+async function barBoxes(page) {
   return page.evaluate(() => {
     const box = (sel) => {
       const el = document.querySelector(sel)
       if (!el) return null
       const r = el.getBoundingClientRect()
-      return { top: r.top, bottom: r.bottom, centerY: r.top + r.height / 2 }
+      return { left: r.left, right: r.right, centerY: r.top + r.height / 2 }
     }
     return {
-      home: box('.topbar--slate .topbar__home'),
-      levelnav: box('.topbar--slate .levelnav'),
-      search: box('.topbar--slate .sitebar__search'),
-      menu: box('.topbar--slate .sitebar__menu'),
-      acct: box('.topbar--slate .account__btn'),
+      brand: box('.slatemast__bar .slatemast__brand'),
+      search: box('.slatemast__bar .sitebar__search'),
+      log: box('.slatemast__bar .sitebar__logbook'),
+      menu: box('.slatemast__bar .sitebar__menu'),
+      acct: box('.slatemast__bar .account__btn'),
+      overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
     }
   })
 }
 
 // Two boxes sit on the same visual row when their vertical centers are within
-// half a condensed button height — a wrapped row starts a full 30px+ lower, so
-// the tolerance cleanly separates "same row" from "orphaned below".
+// half a button height — a wrapped row starts a full 44px lower.
 const SAME_ROW_TOLERANCE = 12
 
-test.describe('slate topbar wrap', () => {
+test.describe('slate brand bar', () => {
   test.skip(
     ({ isMobile }) => !isMobile,
     'viewport-independent CSS; widths are set explicitly below',
   )
 
-  test('icon buttons never orphan across rows', async ({ page }) => {
+  test('the lockup and every icon button share one row, inside the page', async ({ page }) => {
     await page.goto('/')
-    await page.waitForSelector('.topbar--slate .sitebar__menu')
+    await page.waitForSelector('.slatemast__bar .sitebar__menu')
     await page.evaluate(INJECT_ACCOUNT_STANDIN)
 
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 844 })
-      const b = await headerBoxes(page)
-      expect(b.search, `${width}px: search button`).toBeTruthy()
-      expect(b.menu, `${width}px: menu button`).toBeTruthy()
+      const b = await barBoxes(page)
       expect(b.acct, `${width}px: account stand-in`).toBeTruthy()
 
-      // The three icon buttons ride one row — all beside the level pills, or
-      // all wrapped below them together. Never a lone straggler.
       for (const [name, box] of [
+        ['search', b.search],
+        ['game log', b.log],
         ['menu', b.menu],
         ['account', b.acct],
       ]) {
         expect
           .soft(
-            Math.abs(box.centerY - b.search.centerY),
-            `${width}px: ${name} button left the search button's row`,
+            Math.abs(box.centerY - b.brand.centerY),
+            `${width}px: ${name} button left the lockup's row`,
           )
           .toBeLessThanOrEqual(SAME_ROW_TOLERANCE)
+        expect.soft(box.right, `${width}px: ${name} button ran off the page`).toBeLessThanOrEqual(width)
       }
-
-      // The wordmark anchors the first row (level pills), not the vertical
-      // center of a doubled-up header.
-      expect
-        .soft(
-          Math.abs(b.home.centerY - b.levelnav.centerY),
-          `${width}px: wordmark drifted off the level-pill row`,
-        )
-        .toBeLessThanOrEqual(SAME_ROW_TOLERANCE)
-
-      // And the icons never start above the pills' row (no reverse-orphan
-      // where the pills wrap instead).
-      expect
-        .soft(
-          b.search.centerY,
-          `${width}px: icons floated above the level pills`,
-        )
-        .toBeGreaterThanOrEqual(b.levelnav.top)
+      expect.soft(b.overflow, `${width}px: the page scrolls sideways`).toBe(false)
     }
   })
 })

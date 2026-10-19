@@ -285,22 +285,33 @@
 .umpfavor {
   padding-top: var(--space-2h);
 }
-/* .umpfavor__row: same idea as .bs__duo/.bs__col (BoxScore.jsx) — a column
-   on a phone (each card its own natural height), a real two-up grid at the
-   app's shared min-width:740px breakpoint (iPad/desktop) where the two cards
-   sit side by side AND match height — grid's default align-items: stretch
-   (unset here, so it applies) stretches the shorter card to the row's full
-   height instead of leaving the two top-aligned at their own heights. */
+/* .umpfavor__row: two cells on the stat card's own paper, split by a hairline
+   rule — not two boxes inside a box (#1775, case 1). A column on a phone, the
+   rule on top of the second cell; a two-up grid at the app's shared
+   min-width:740px breakpoint (iPad/desktop), the rule between the columns.
+   Grid's default align-items: stretch runs the rule the full row height. */
 .umpfavor__row {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  margin-top: 8px;
+}
+.umpfavor__row > * {
+  padding: var(--space-3) 0;
+}
+.umpfavor__row > * + * {
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 @media (min-width: 740px) {
   .umpfavor__row {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+  .umpfavor__row > :first-child {
+    padding-right: var(--space-3);
+  }
+  .umpfavor__row > * + * {
+    border-top: 0;
+    border-left: var(--bw-hair) solid var(--border-hairline);
+    padding-left: var(--space-3);
   }
   /* The innings view's stat card lives in the reference panel's narrow ARMS
      tab (`.focusrail`, ~300px — see reference.css's own narrow-rail block)
@@ -314,6 +325,13 @@
     display: flex;
     flex-direction: column;
   }
+  .innings__statbox .umpfavor__row > * {
+    padding-inline: 0;
+  }
+  .innings__statbox .umpfavor__row > * + * {
+    border-left: 0;
+    border-top: var(--bw-hair) solid var(--border-hairline);
+  }
   /* Stacked full-card-width, .wcall__body's 124px-diagram + 1fr-text grid
      otherwise stretches the text column across the whole card, stranding
      the diagram at the left edge with empty space beside it — cap its width
@@ -325,6 +343,8 @@
 }
 .umpfavor__title {
   display: block;
+  padding-bottom: var(--space-1h);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -334,18 +354,12 @@
 }
 
 /* The worst-call card: label, a fixed-scale zone diagram beside the call
-   pills, a batter/inning locator, and the before→after count blink. Same
-   card chrome as .favormeter (paper-2 fill, hairline border, inset shadow)
-   so it reads as its sibling. */
+   pills, a batter/inning locator, and the before→after count blink. A cell
+   of .umpfavor__row: no card chrome of its own (#1775). */
 .wcall {
   display: flex;
   flex-direction: column;
   gap: var(--space-1h);
-  padding: var(--space-2h);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
 }
 .wcall__top {
   display: flex;
@@ -504,9 +518,8 @@
    center toward whichever side missed calls have added value to, a
    plain-English caption underneath, and a routine/standout/outlier tier
    badge in the top-right corner (favorTier — see .favormeter__tierpill
-   below). The shared insight-tile treatment —
-   background/border/radius/shadow — so the cards read as one consistent row
-   rather than a tile next to a bare block. Away/home fill
+   below). A cell of .umpfavor__row, like .wcall: no card chrome and no tier
+   wash on the cell — the pill alone carries the tier (#1775). Away/home fill
    colors default to WinProbChart's own soft-clay/soft-navy pair — the same
    "which side" visual language already on this page — but the fill's own
    inline style usually overrides that with the favored club's real
@@ -516,31 +529,10 @@
   flex-direction: column;
   align-items: center;
   /* No-op at its own natural height; centers the track/caption when the
-     iPad/desktop .umpfavor__row grid stretches this card to match a taller
-     worst-call card beside it. */
+     iPad/desktop .umpfavor__row grid stretches this cell to match a taller
+     worst-call cell beside it. */
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-2h) var(--space-2);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
-}
-/* The whole card picks up a soft wash of its own tier color, not just the
-   pill — routine stays the plain card treatment above (nothing to escalate),
-   standout tints toward the medal-amber "honors" family, outlier toward the
-   highlighter "watch flag" marker, both via the same color-mix() pattern
-   already used elsewhere (e.g. .notice--event in system/notice.css, which
-   tints toward --marker the same way). It used to cite ".pin-card", a class that has
-   never had a rule in this repo — and the card census read that comment as a
-   selector and filed .pin-card as dead code to delete (#1127). */
-.favormeter--standout {
-  background: color-mix(in srgb, var(--award-line) 10%, var(--surface-card));
-  border-color: var(--award-line);
-}
-.favormeter--outlier {
-  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
-  border-color: color-mix(in srgb, var(--marker) 60%, var(--border-hairline));
 }
 /* The tier badge (favorTier) — routine/standout/outlier, escalating in
    visual weight rather than a single flat color: routine blends into the

@@ -364,13 +364,6 @@ export const PROTOTYPES = [
     note: 'Spec: docs/scout-design.md. Thirteen regions, the pitcher’s and hitter’s mirror, every control and every state, on an invented pair. The head-to-head fixture has a row dated today; the cutoff must hide it.',
   },
   {
-    id: 'nested-boxes',
-    title: 'Boxes inside cards (#1775)',
-    path: 'src/screens/designlab/nested/',
-    verdict: 'Prototype',
-    note: 'Four real cases, each before and after: a panel, a nested sheet, a well and a table. Invented data. Nothing ships; Gary picks which to flatten.',
-  },
-  {
     id: 'report-look',
     title: 'Report cards (#1776)',
     path: 'src/screens/designlab/report/',

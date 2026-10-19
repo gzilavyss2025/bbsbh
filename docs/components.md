@@ -38,7 +38,7 @@ The two stamped "due up" cards in the innings viewer, `DueUpNextCard` ("Due up n
 
 ## `sync/`
 
-`OwnerGuards` is the odd one: it makes no request at all — on the sign-in transition it asks, per channel and against that channel's OWN owner key, whether this device's reveal marks, box-score bits and spoiled-day consent belong to the account now signing in, and clears each that does not. App-wide on purpose, because all three are render overrides read synchronously as a scoring surface paints; its header says why a per-screen guard would decide too late. Stamps and books guard themselves inside their own pulls instead, correctly — their adopt replaces a document, which needs the remote
+`OwnerGuards` is the odd one: it makes no request at all — on the sign-in transition it asks, per channel and against that channel's OWN owner key, whether this device's reveal marks and box-score bits belong to the account now signing in, and clears each that does not. App-wide on purpose, because both open seals read synchronously as a scoring surface paints; its header says why a per-screen guard would decide too late. Stamps and books guard themselves inside their own pulls instead, correctly — their adopt replaces a document, which needs the remote
 
 ## `teamstats/`
 

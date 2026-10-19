@@ -13,7 +13,6 @@ import { useCopy } from '../../copy/copyContext.js'
 import {
   resolveTreatment,
   tileColorFor,
-  ScoreLine,
   PostponedBanner,
   PostseasonLine,
   ReadyPill,
@@ -32,13 +31,6 @@ export function GameCard({
   game,
   pinnedTeamId,
   prospectCount = 0,
-  // Pre-formatted { awayRuns, homeRuns, inning, label } for the "Scores
-  // Unlocked" day pass, or null
-  // (the default) — see api/schedule.js fetchSlateScores + lib/slateScoreLine.js.
-  // Null keeps this card byte-identical to today; the caller (GameSelect) passes
-  // a value only while the pass is on AND for today's slate. Every other caller
-  // (Top Games, All-Star Rosters) leaves it null.
-  liveLine = null,
   dateLabel = null,
   // `{ [gamePk]: { [teamId]: { code, text } } }` from a same-day batched
   // fetchGameJerseys call (see GameSelect.jsx) — today's slate only, so a
@@ -72,17 +64,9 @@ export function GameCard({
   const live = game.abstractState === 'Live'
   const status = selectGameStatus(game)
   // A postponed or cancelled game gets its own stamped treatment (see PostponedBanner) rather
-  // than the corner pill — and, critically, is never wrapped in the past-day
-  // flip card (see GameSelect), whose rotated back face made an absolutely-
-  // positioned corner pill leak through mirrored on iOS. There's also no result
-  // to reveal: the game didn't happen.
+  // than the corner pill. There's also no result to reveal: the game didn't
+  // happen.
   const postponed = status.isCalledOff
-  // One flag for what the Scores Unlocked line displaces while it's showing:
-  // the corner Final text, relocated into its center slot. Pre-game cards
-  // keep the corner text: no line renders before first pitch. (The readiness
-  // pips are a separate, Preview-only gate below — a game that has gone Live,
-  // suspended or not, already answered "is the scorebook ready".)
-  const hasScoreLine = !!liveLine && !postponed
   const stacked = !!stackedGame
   const dhLabel = doubleHeaderLabel(game, stacked)
   // A suspended game's card may carry today's independently-scheduled game
@@ -275,22 +259,6 @@ export function GameCard({
             </span>
           </div>
         )}
-        {/* Additive score line, present ONLY under an active Scores Unlocked
-            pass (liveLine non-null). It renders BELOW the matchup — the team
-            colors, cap/jersey marks, and names above are untouched — so a card
-            keeps its identity and just gains today's number. Each run total
-            sits under its own team column (the marks and names above already
-            say whose it is — no repeated abbreviations), penciled as a ledger
-            numeral over a scorebook totals rule; the game state (live half,
-            FINAL, F/10) always rides centered between them. On a final the
-            winner is inked bold and the loser fades to graphite; while live
-            both sides stay equal so the card's hierarchy doesn't repaint on
-            every lead change. Screen readers get the full sentence
-            (liveLine.label) instead of two bare digits. All tokens are
-            uppercase-safe (digits, TOP/BOT/…, FINAL, F/n), no exemption.
-            Suppressed for a game called off after it started (postponed) —
-            run totals stacked over a POSTPONED stamp would be noise. */}
-        {hasScoreLine && <ScoreLine liveLine={liveLine} />}
         {postponed && <PostponedBanner game={game} status={status} />}
         <div className="gamecard__meta">
           {/* Only shown in a cross-level list (All-Star Rosters — the caller
@@ -344,7 +312,7 @@ export function GameCard({
               <ReadyPill game={game} />
             )}
             {!postponed && national && <NationalTvIcon network={national} />}
-            <StatusText game={game} hasScoreLine={hasScoreLine} />
+            <StatusText game={game} />
           </span>
         </div>
       </button>

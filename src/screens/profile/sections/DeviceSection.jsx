@@ -4,8 +4,8 @@ import { Cluster } from '../../../components/ui/layout/Cluster.jsx'
 // Scorebook experience — how this app behaves while you are scoring.
 //
 // Keep Awake and the motion preference both live in the preference document, so
-// both follow a signed-in user between devices. Scores Unlocked does NOT, and
-// that is the section's one load-bearing distinction (see below).
+// both follow a signed-in user between devices. (The Scores Unlocked status row
+// that once sat here, the one device-local setting, was removed in ADR-0116.)
 
 // Each note says what the setting ACTUALLY does. `full` in particular does not
 // override an operating system that asks for reduced motion — the app follows
@@ -23,10 +23,6 @@ export function DeviceSection({
   onKeepAwake,
   motion,
   onMotion,
-  passActive,
-  passResetLabel,
-  onReseal,
-  spoiledDayCount,
 }) {
   return (
     <section className="mytally__section">
@@ -69,41 +65,6 @@ export function DeviceSection({
         <p className="mytally__fieldnote caps-exempt">{MOTION_COPY[motion]?.note ?? ''}</p>
       </div>
 
-      {/* ------------------------------------------------------------------
-          Scores Unlocked is reported here and never SET here.
-
-          It is a day-specific, explicitly consented, device-local render
-          override (ADR-0026). There is deliberately no "always show scores"
-          setting, no default-on preference, and nothing that pre-consents a
-          future day — that is invariant P3, forbidden by name. And the pass
-          expiry never syncs (P2): mirroring it would unseal a second device
-          the user never consented on, which is the single worst thing this
-          program could do.
-
-          What IS offered is the same-day withdrawal the switch itself offers,
-          because an accidental tap should stay recoverable from anywhere.
-          ------------------------------------------------------------------ */}
-      <div className="mytally__field">
-        <p className="mytally__fieldlabel">Scores Unlocked</p>
-        <p className="mytally__fieldvalue">{passActive ? 'On' : 'Off'}</p>
-        <p className="mytally__fieldnote caps-exempt">
-          {passActive
-            ? `Today’s games are showing plainly until ${passResetLabel}. This device only — it is never carried to another one.`
-            : 'Off. Every result stays sealed until you tap to reveal it. You agree to a single day at a time, on the day itself.'}
-        </p>
-        {passActive && (
-          <button type="button" className="mytally__inlinebtn" onClick={onReseal}>
-            Re-seal today
-          </button>
-        )}
-        {spoiledDayCount > 0 && (
-          <p className="mytally__fieldnote caps-exempt">
-            {spoiledDayCount === 1
-              ? 'One earlier day stays unsealed, because you agreed to it on the day.'
-              : `${spoiledDayCount} earlier days stay unsealed, because you agreed to each on the day.`}
-          </p>
-        )}
-      </div>
     </section>
   )
 }

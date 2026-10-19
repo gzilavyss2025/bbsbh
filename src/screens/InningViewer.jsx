@@ -12,8 +12,7 @@ import {
   halfIndex,
 } from '../api/select.js'
 import { selectHasFirstPitch } from '../api/playbyplay/firstPitch.js'
-import { selectLiveEdge, selectLiveHalf, shouldFollowLiveEdge } from '../api/liveEdge.js'
-import { useCopy } from '../copy/copyContext.js'
+import { selectLiveHalf } from '../api/liveEdge.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { clubPenCounts } from '../api/workload.js'
@@ -50,8 +49,8 @@ const RevealCloudSync = isClerkEnabled
   ? lazy(() => import('../components/sync/RevealCloudSync.jsx').then((m) => ({ default: m.RevealCloudSync })))
   : null
 
-// Stand-in for `revealTo` while the Scores Unlocked pass is on (see
-// effectiveReveal's `commitReveals`). Module-scope so its identity is stable
+// Stand-in for `revealTo` while this game is stamped (see effectiveReveal's
+// `commitReveals`). Module-scope so its identity is stable
 // across renders, and a real function rather than undefined because HalfInning
 // calls onReveal directly, not via `?.()` — the same reason InningPage.jsx keeps
 // its own `noop` for the page-turn preview.
@@ -119,11 +118,8 @@ export function InningViewer({
   managers,
   uniforms,
   scorebookWeather,
-  spoilersOff = false,
-  passActive = false,
   onSketch,
 }) {
-  const { t: copy } = useCopy()
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
@@ -147,38 +143,29 @@ export function InningViewer({
   const { revealedThrough, revealTo, mergeRevealedThrough, unlocked, getDerived, atBatCountFor, revealAtBat } =
     useRevealProgress(feed, regulation, actualCount)
 
-  // The site-wide spoilers-off pass (ADR-0026), resolved by GameView for THIS
-  // game's date and handed down: a render override that unseals every half
-  // without ever touching the persisted reveal mark. `revealedThrough` /
-  // `unlocked` above stay the real, ratcheted, cloud-synced values — they are
-  // what feeds useRevealProgress, RevealCloudSync, and localStorage, and they
-  // must never see the override (see effectiveReveal's contract). Everything
-  // that only *renders* reads the `render*` values below instead; with spoilers
-  // on they ARE the real values (identity), so the default spoiler-safe path is
-  // byte-for-byte unchanged.
+  // THE ONE OPENER (ADR-0048): the reader's own stamp on this game. A stamp is
+  // minted only from inside a revealed box score of a FINAL game and records "I
+  // was there", so re-sealing a game they stamped protects them from nothing.
+  // It is a render override that unseals every half without ever touching the
+  // persisted reveal mark. `revealedThrough` / `unlocked` above stay the real,
+  // ratcheted, cloud-synced values — they are what feeds useRevealProgress,
+  // RevealCloudSync, and localStorage, and they must never see the override
+  // (see effectiveReveal's contract). Everything that only *renders* reads the
+  // `render*` values below instead; for an unstamped game they ARE the real
+  // values (identity), so the default spoiler-safe path is byte-for-byte
+  // unchanged.
   //
   // `commitReveals` is the other half of that contract and must not be dropped:
   // a half rendering revealed mounts its SealBox force-revealed, and SealBox
   // fires onReveal on ANY transition to shown — flag included. Handing revealTo
   // straight down would therefore ratchet the REAL mark for every half viewed
-  // under the pass (and cloud-sync it). While unlocked we hand down a no-op
+  // on a stamped game (and cloud-sync it). While stamped we hand down a no-op
   // instead; there are no seals to tap, so there is no reveal to record.
-  // THE THIRD OPENER (ADR-0048): the reader's own stamp on this game. A stamp is
-  // minted only from inside a revealed box score of a FINAL game and records "I
-  // was there", so re-sealing a game they stamped protects them from nothing.
-  //
-  // Read HERE rather than handed down beside `spoilersOff`, because the two are
-  // different KINDS of fact. `spoilersOff` is a property of the DAY and needs
-  // GameView's `officialDate` to resolve; a stamp is a property of this one
-  // gamePk, which this screen already holds. Keeping them apart also keeps the
-  // day-pass chrome honest — a stamped game must never make the banner announce
-  // an unlocked day (see effectiveReveal, which takes them as two inputs).
   //
   // Why a latch rather than `isStamped` straight: useStampUnseal's own header.
   const stamped = useStampUnseal(feed?.gamePk)
 
   const { renderRevealedThrough, renderUnlocked, commitReveals } = effectiveReveal({
-    scoresUnlocked: spoilersOff,
     stamped,
     revealedThrough,
     unlocked,
@@ -327,48 +314,6 @@ export function InningViewer({
   // "nothing to show yet" rather than rendering the half just left behind.
   const [liveState, setLiveState] = useState(null)
   const curLiveState = liveState?.forIdx === curIdx ? liveState.data : null
-
-  // KEEPING UP WITH A LIVE GAME (ADR-0026). While the pass is running, a half
-  // turning over for real — the game moving forward while you're actually
-  // watching it — pulls the VIEW along with it. Catching yourself up by
-  // paging forward through halves you fell behind on is your own navigation
-  // and never gets overtaken by a further jump the moment you arrive; see
-  // `shouldFollowLiveEdge` (liveEdge.js) for why two refs (not just curIdx)
-  // are needed to tell those apart, and the git history on this effect for
-  // the "sends you all over" complaint it replaced.
-  //
-  // This is navigation ONLY. It deliberately does not — and must not — touch the
-  // reveal mark: there is nothing for a ratchet to advance, because under the
-  // pass every half already renders open via effectiveReveal. That's the whole
-  // reason this stopped being a second feature with its own consent. What you
-  // watch live is watched under a pass that writes nothing, so your hand-scored
-  // mark is exactly where you left it when the pass ends.
-  //
-  // replace:true so a long night never pollutes the Back button. Gated on
-  // `passActive` rather than `spoilersOff`: a day locked in from an earlier
-  // consent has no live game left to follow. Both refs reset on deactivation
-  // so turning Follow Live back on re-triggers the initial catch-up-to-live
-  // jump rather than reusing a stale reading.
-  const lastEdgeRef = useRef(null)
-  const lastSeenIdxRef = useRef(null)
-  useEffect(() => {
-    if (!passActive) {
-      lastEdgeRef.current = null
-      lastSeenIdxRef.current = null
-      return
-    }
-    const edge = selectLiveEdge(feed, passActive)
-    if (edge == null || selectIsFinal(feed)) return
-    const prevEdge = lastEdgeRef.current
-    const prevSeenIdx = lastSeenIdxRef.current
-    const follow = shouldFollowLiveEdge(edge, prevEdge, prevSeenIdx, curIdx)
-    lastEdgeRef.current = edge
-    lastSeenIdxRef.current = follow ? edge : curIdx
-    if (follow) {
-      onInning(Math.floor(edge / 2) + 1, edge % 2 === 0 ? 'top' : 'bottom', { replace: true })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [feed, passActive])
 
   // Builds one InningPage instance for a given half-index — shared by the
   // active (interactive) render and, mid-turn, the inert preview render.
@@ -530,34 +475,6 @@ export function InningViewer({
     focus.followLatest() // show the new at-bat even if the reader paged back
     revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (curStepInfo?.nextCap ?? curAtBatCount + 1))
   }
-
-  // "Caught up to live" (ADR-0026): with the pass running on a game in progress,
-  // the half being viewed IS the live frontier — everything played is open and
-  // there's no next half yet. In that state the floating bar's forward action
-  // ("Next ›" / the reveal split) would point at a half that hasn't happened, so
-  // we swap it for a calm live status instead. Uses the SAME consent-gated
-  // selectLiveEdge the follow effect does; false the instant the game goes Final
-  // (the box-score affordance takes over) or the user pages back off the
-  // frontier. Copy is admin-editable (scoresUnlocked.liveEdgeLabel); the
-  // {inning} token goes through the registry's own fillTokens — the single
-  // substitution choke point — rather than an ad hoc replace here, so an admin
-  // who drops the token gets the gap tidied like every other field. The value is
-  // the structural label of the half ALREADY on screen, never a score (see
-  // registry.js's TOKENS spoiler guard).
-  // Memoized like every other derivation on this page: it walks the whole
-  // play-by-play backwards, and Follow Live is exactly the state in which this
-  // component re-renders most often. The consent argument stays a dependency,
-  // so the selector is still called only under a running pass.
-  const liveEdgeIdx = useMemo(
-    () => (passActive ? selectLiveEdge(feed, passActive) : null),
-    [feed, passActive],
-  )
-  const atLiveEdge = liveEdgeIdx != null && curIdx >= liveEdgeIdx && !selectIsFinal(feed)
-  const liveEdgeLabel = atLiveEdge
-    ? copy('scoresUnlocked.liveEdgeLabel', {
-        inning: `${effHalf === 'top' ? 'Top' : 'Bottom'} ${ordinal(effInning)}`,
-      })
-    : ''
 
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
@@ -992,8 +909,6 @@ export function InningViewer({
             />
           )
         }
-        atLiveEdge={atLiveEdge}
-        liveEdgeLabel={liveEdgeLabel}
         currentSealed={currentSealed}
         halfLive={currentHalfLive}
         atHalfEdge={atHalfEdge}

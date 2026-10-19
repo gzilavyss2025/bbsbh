@@ -65,7 +65,9 @@ import { resolve, join } from 'node:path'
 // 120 -> 119: .gamestory__note went with the Coverage label head (#1346, H2c).
 // 119 -> 115: the old player tabs' cards went with the swap (#1898).
 // 113 -> 112: the old Records card's rules went with the team page swap (#1107).
-const BUDGET = 112
+// 112 -> 111: the slate's Reveal-all chip went with the reveal-all chain
+// (ADR-0116).
+const BUDGET = 111
 
 const stylesDir = resolve('src/styles')
 const sheets = []

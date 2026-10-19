@@ -1,0 +1,142 @@
+/* ---------------------------------------------------------------------------
+   THE CLUB RUN VALUE CARD'S MOTION (#2295; spec .scratch/run-value-motion/handoff.md,
+   "Animation and motion"). One idea, the stamp-in, at several sizes. The resting look is
+   team-next/run-value/card.css. Not in index.css: the team page's Ranks band is the one
+   surface that draws it, and RunValueBoard.jsx imports it.
+
+   Two gates. The ENTRANCE hangs off .rvclub--intro, which the card wears from the time it
+   first shows (useInViewOnce, a tenth in view) until the first tap; .rvclub--wait holds every
+   entrance frozen on its first frame while the card is still below the fold. A RE-RANK is a
+   change the reader caused, so it plays on every tap: a row that joins the board stamps in
+   (.rvrow--enter-a / -b, picked by the tap count's parity so the keyframe restarts), and a
+   row that stays slides, by a Web Animation (ranks/runvalue/flip.js). The two count-ups
+   are a requestAnimationFrame loop (ranks/runvalue/useCountUp.js), not CSS.
+
+   Reduced motion: none of it. The card shows its end state at once.
+   --------------------------------------------------------------------------- */
+
+@keyframes rv-row-a {
+  from {
+    opacity: 0;
+    transform: translate(var(--stamped-offset), var(--stamped-offset));
+  }
+  55% {
+    opacity: 1;
+  }
+}
+@keyframes rv-row-b {
+  from {
+    opacity: 0;
+    transform: translate(var(--stamped-offset), var(--stamped-offset));
+  }
+  55% {
+    opacity: 1;
+  }
+}
+@keyframes rv-grow-a {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes rv-grow-b {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes rv-bar-up {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes rv-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+/* ---- the entrance ---- */
+.rvclub--wait,
+.rvclub--wait * {
+  animation-play-state: paused !important;
+}
+.rvclub--intro .rvclub__lead {
+  animation: card-stamp-in var(--dur-stamp-in) var(--ease-stamp) var(--delay-rv-tile) backwards;
+}
+.rvclub--intro .rvleague__bar {
+  animation: rv-bar-up var(--dur-rv-bar) var(--ease-stamp) calc(var(--delay-rv-league) + var(--i, 0) * var(--step-rv-league)) backwards;
+}
+.rvclub--intro .rvsplit__track:not(.rvsplit__track--mini) {
+  animation: rv-wipe var(--dur-draw) var(--ease-rv-wipe) var(--delay-rv-split) backwards;
+}
+.rvclub--intro .rvsplit__part {
+  animation: rv-row-a var(--dur-stamp-in) var(--ease-stamp) var(--delay-rv-parts) backwards;
+}
+.rvclub--intro .rvsplit__part:nth-child(2) {
+  animation-delay: calc(var(--delay-rv-parts) + var(--step-rv-stamp));
+}
+.rvclub--intro .rvsplit__part:nth-child(3) {
+  animation-delay: calc(var(--delay-rv-parts) + var(--step-rv-stamp) * 2);
+}
+.rvclub--intro .rvsplit__part:nth-child(4) {
+  animation-delay: calc(var(--delay-rv-parts) + var(--step-rv-stamp) * 3);
+}
+.rvclub--intro .rvrow {
+  animation: rv-row-a var(--dur-stamp-in) var(--ease-stamp) calc(var(--delay-rv-rows) + var(--i, 0) * var(--step-rv-stamp)) backwards;
+}
+.rvclub--intro .rvrow .rvsplit__track--mini {
+  transform-origin: var(--zero, 50%) 50%;
+  animation: rv-grow-a var(--dur-rv-grow) var(--ease-rv-wipe) calc(var(--delay-rv-rows) + var(--delay-rv-tile) + var(--i, 0) * var(--step-rv-stamp)) backwards;
+}
+
+/* ---- a re-rank ---- */
+.rvrow--enter-a {
+  animation: rv-row-a var(--dur-stamp-in) var(--ease-stamp) calc(var(--delay-rv-enter) + var(--i, 0) * var(--step-rv-stamp)) backwards;
+}
+.rvrow--enter-b {
+  animation: rv-row-b var(--dur-stamp-in) var(--ease-stamp) calc(var(--delay-rv-enter) + var(--i, 0) * var(--step-rv-stamp)) backwards;
+}
+.rvrow--enter-a .rvsplit__track--mini,
+.rvrow--enter-b .rvsplit__track--mini {
+  transform-origin: var(--zero, 50%) 50%;
+}
+.rvrow--enter-a .rvsplit__track--mini {
+  animation: rv-grow-a var(--dur-rv-grow) var(--ease-rv-wipe) calc(var(--delay-rv-enter) + var(--delay-rv-tile) + var(--i, 0) * var(--step-rv-stamp)) backwards;
+}
+.rvrow--enter-b .rvsplit__track--mini {
+  animation: rv-grow-b var(--dur-rv-grow) var(--ease-rv-wipe) calc(var(--delay-rv-enter) + var(--delay-rv-tile) + var(--i, 0) * var(--step-rv-stamp)) backwards;
+}
+/* The club split bar never moves in the DOM, so a CSS transition carries its re-scale and dim. */
+.rvclub .rvsplit__track:not(.rvsplit__track--mini) .rvsplit__seg {
+  transition:
+    opacity var(--dur-med) ease,
+    background-color var(--dur-med) ease;
+}
+.rvsplit__part {
+  transition:
+    transform var(--dur-snappy) var(--ease-press),
+    box-shadow var(--dur-snappy) var(--ease-stamp),
+    background-color var(--dur-snappy) ease,
+    color var(--dur-snappy) ease;
+}
+.rvsplit__part:active {
+  transform: translate(var(--bw-heavy), var(--bw-heavy));
+}
+.rvlead {
+  transition: height var(--dur-rv-slide) var(--ease-stamp);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rvclub *,
+  .rvclub {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+:root[data-motion='reduced'] .rvclub *,
+:root[data-motion='reduced'] .rvclub {
+  animation: none !important;
+  transition: none !important;
+}

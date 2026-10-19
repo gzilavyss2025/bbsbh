@@ -21,99 +21,7 @@
     max-width: 960px;
   }
 
-  /* Pin the topbar (title, level toggle, search/menu icons) while the game
-     list scrolls beneath it — enough spare width here that a docked row
-     doesn't crowd the slate. The date stepper right below it is deliberately
-     left OUT: it's a per-day control, not a nav landmark worth nagging
-     "you're on {date}" through every scroll, and paging days already
-     reloads the slate under it anyway. Needs to stay opaque once a scrolled
-     card is actually passing underneath it, but a flat color patch read as
-     a hard-edged banner — so this is the same faint graph-paper grid body
-     itself is drawn on (01-base.css), not a solid fill, so the pinned row
-     reads as a continuation of the page rather than a plate laid over it. */
-  .topbar--slate {
-    position: sticky;
-    top: 0;
-    z-index: calc(var(--z-raised) + 1);
-    background-color: var(--bg-canvas);
-    background-image: linear-gradient(var(--border-grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border-grid) 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
-
-  /* Near-zero-height sticky sentinel GameSelect.jsx renders just above the
-     real header, purely so its own IntersectionObserver can tell when the
-     header has actually started sticking (see the JSX comment there). 1px,
-     not 0 — a genuinely zero-area target makes some browsers' intersection
-     ratio unreliable. top: -1px, not 0 — pinned flush at 0 it would stay
-     FULLY visible (ratio 1) for the entire time it's stuck, since nothing
-     ever pushes it out of the viewport; parked 1px above the viewport
-     instead, it reads as not-fully-intersecting for as long as it's stuck,
-     not just the single transitional frame `top: 0` would have caught. */
-  .topbar__stickysentinel {
-    position: sticky;
-    top: -1px;
-    height: 1px;
-    margin-bottom: -1px;
-  }
-
-  /* Only once a card is passing underneath the pinned header — not at rest
-     on a fresh page, where a permanent shadow would just read as a banner.
-     A gradient fade on a ::after, not box-shadow directly on the header:
-     box-shadow's blur bleeds equally left/right as well as down, and a
-     background never bleeds past its own box the way a blurred shadow does
-     — no clip-path needed to trim the sides, which matters here since the
-     search/menu buttons render their full-screen overlays as descendants of
-     this same header, and a clip-path on the header itself would cut into
-     those too. Same ink color the app's shadow tokens already use
-     (rgba(22,34,47,…), see --shadow-raised in tokens/effects.css). */
-  .topbar--slate.topbar--stuck::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    height: 16px;
-    background: linear-gradient(rgba(22, 34, 47, 0.16), transparent);
-    pointer-events: none;
-  }
-
-  /* ---- slate: the date stepper and the day-state row (Live Scores toggle
-     and/or Reveal All) already share .slatehead's row at every width (base
-     rule further up); a 3-column grid replaces the base flex space-between
-     here so the date stepper reads as truly centered once there's room to
-     spare — on a plain day with neither control, the outer 1fr columns still
-     balance evenly and the date stepper doesn't drift toward whichever side
-     a control would have occupied. */
-  .slatehead {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    column-gap: var(--space-3);
-  }
-
-  .datenav--row {
-    grid-column: 2;
-    max-width: 560px;
-  }
-
-  /* Rides in the grid's third column, right of the centered date stepper.
-     Both chips can be present at once (today, every game gone Final, pass
-     still off — see the JSX comment), so this stays a row that can hold
-     either or both rather than a single slot. */
-  .daystate {
-    grid-column: 3;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-  .daystate__chip--reveal {
-    display: inline-flex;
-    width: auto;
-    min-height: 28px;
-    margin-top: 0;
-    padding: 0 var(--space-3);
-    font-size: var(--fs-caption);
-  }
+  /* The slate's sticky bar is the D1 masthead's (styles/slate/masthead.css). */
 
   /* ---- the slate's two columns: the games, and the league's roster wire
      beside them (WireRail.jsx). The wire used to stand ABOVE this grid and, at
@@ -269,15 +177,7 @@
     gap: var(--space-3);
   }
 
-  /* "Reveal all games" rides inline in the header's .daystate row once
-     there's room for it (see the .daystate__chip--reveal override above);
-     the mobile floating bottom bar hides here since there's no long scroll
-     to reach for. */
-  .pagenav--revealall {
-    display: none;
-  }
-
-  /* Same split for the box score's Refresh control (not Final games, which
+  /* The box score's Refresh control (not Final games, which
      drop it entirely — see BoxScore.jsx): inline in the header once there's
      room, the mobile floating pill hides here. */
   .boxscore__headright .innings__refresh {

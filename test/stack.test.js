@@ -126,7 +126,7 @@ test('Stack and its helper import no api/ or stamp module', () => {
   }
 })
 
-// ---- 6. slices S14 to S18 (#1180) ----
+// ---- 6. slices S14 to S17 (#1180; S18 was the design-lab page that left with #1775) ----
 // Rules moved onto <Stack> keep their own padding, margin or frame, and nothing that
 // draws the column or the gap, in any stylesheet. Every JSX site of the class is a
 // <Stack> with the gap the old rule wrote (base is the default). The checks are in
@@ -174,11 +174,4 @@ const S17 = {
   scout__sheet: { file: 'scout/panels.css', gap: 'loose' },
 }
 
-// S18: the design lab's boxes-inside-cards page. Both rules are deleted whole.
-// `.nested__side` (6px) and `.nested` (32px) are off the steps and stay.
-const S18 = {
-  nested__case: { file: 'designlab/nested.css', gap: 'snug' },
-  nested__pair: { file: 'designlab/nested.css', gap: 'loose' },
-}
-
-for (const [slice, rows] of Object.entries({ S14, S15, S16, S17, S18 })) defineMigrationTests(`stack ${slice}`, STACK, rows)
+for (const [slice, rows] of Object.entries({ S14, S15, S16, S17 })) defineMigrationTests(`stack ${slice}`, STACK, rows)

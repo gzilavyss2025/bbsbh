@@ -157,8 +157,8 @@
 }
 /* Team-view pitch-type comparison (TeamPitchCategoryGroup, FoulTrackerPage.jsx)
    — the "significant gap between batters' and pitchers' own foul rates" row
-   highlight. Reuses the umpire favor-meter's own "outlier" amber wash
-   (.favormeter--outlier) rather than inventing a new accent, set per-<td>
+   highlight. A soft --marker wash, the highlighter "watch flag" the umpire
+   favor-meter's outlier pill also wears, not a new accent. Set per-<td>
    (not the <tr> itself) — same convention as .foulboard tr.is-me below. */
 .foulboard tr.foulboard__row--outlier td {
   background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));

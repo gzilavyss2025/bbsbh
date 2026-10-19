@@ -7,7 +7,8 @@ half of the four `api/` functions that authenticate a real end user.
 
 This is tier-3 reference (root `CLAUDE.md`'s doc tiers) — it loads when you are
 pointed at it, not on every session. See **ADR-0039** (the preference document, its
-invariants P1–P10) and **ADR-0026** (spoiled-days consent) for the *why*.
+invariants P1–P10) for the *why*. (The spoiled-day consent record of ADR-0026
+was removed in ADR-0116.)
 
 Siblings: `docs/api/live-game.md`, `docs/api/static-data.md`.
 
@@ -29,8 +30,8 @@ Siblings: `docs/api/live-game.md`, `docs/api/static-data.md`.
     Two devices changing two different preferences must both win — a whole-object
     write silently drops one of the user's own taps, which is exactly why this
     is not stored in Clerk's `unsafeMetadata`.
-  - **Absence means "no opinion", never "erase"** (same rule as
-    `spoiled-days.js`), and there is deliberately no tombstone: a preference
+  - **Absence means "no opinion", never "erase"**, and there is deliberately no
+    tombstone: a preference
     cannot be removed, only changed. `updatedAt: 0` is legal and meaningful — it
     is what a value migrated from a legacy key carries, so it loses to any real
     choice from any device.
@@ -48,7 +49,7 @@ Siblings: `docs/api/live-game.md`, `docs/api/static-data.md`.
   just calling it. Failure always degrades to in-session memory, never a crash
   and never a wrong answer.
 - **`syncStatus.js`** — the pure reducer behind the sync receipt. Four channels
-  (`reveal`, `spoiledDays`, `stamps`, `prefs`), and the distinction worth
+  (`reveal`, `stamps`, `books`, `prefs`), and the distinction worth
   protecting is `unavailable` (a 501 — a deploy with no store, a **supported**
   state) versus `error` (a real fault). Collapsing them would either cry wolf on
   a correct deployment or hide a broken one — the four-outcomes-into-one
@@ -57,9 +58,8 @@ Siblings: `docs/api/live-game.md`, `docs/api/static-data.md`.
   re-renders only what reads it.
 - **`syncClaims.js`** — the closed ledger of what account copy may CLAIM syncs.
   `test/sync-claims.test.js` fails when a claim names a module that does not
-  exist, so a promise cannot outrun the implementation. `scoresUnlocked` is on
-  the `NEVER_SYNCED` list with its reason: mirroring the pass expiry would
-  unseal a device the user never consented on (ADR-0026).
+  exist, so a promise cannot outrun the implementation. `NEVER_SYNCED` names
+  what stays on the device, each with its reason (recent searches today).
 - **`localData.js`** — `tallyKeysIn` / `countGamesInProgress` /
   `clearTallyDataIn` / `buildGameLogExport`. The **local** half of erase and
   export: `api/account.js` only ever clears the server, so the confirm sheet

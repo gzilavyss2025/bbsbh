@@ -10,8 +10,8 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // Headless — renders nothing, only runs the effects. Only ever mounted when
 // isClerkEnabled (see clerkConfig.js), so useAuth() always has a ClerkProvider
 // ancestor; App.jsx conditionally renders this component rather than
-// conditionally calling a hook, exactly as it does for SpoiledDaysCloudSync and
-// as InningViewer does for RevealCloudSync.
+// conditionally calling a hook, exactly as it does for BooksCloudSync and as
+// InningViewer does for RevealCloudSync.
 //
 // Sync model mirrors those two: localStorage (via useStamps) stays the instant,
 // offline-first source of truth, and this only adds a background merge on top.

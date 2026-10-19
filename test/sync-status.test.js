@@ -26,7 +26,7 @@ const report = (state, channel, phase, extra = {}) =>
   reduceSync(state, { channel, phase, at: 1000, ...extra })
 
 test('the channels are the things that cross devices', () => {
-  assert.deepEqual([...SYNC_CHANNELS], ['reveal', 'spoiledDays', 'stamps', 'books', 'prefs'])
+  assert.deepEqual([...SYNC_CHANNELS], ['reveal', 'stamps', 'books', 'prefs'])
 })
 
 test('a deploy with no account feature starts (and stays) off', () => {
@@ -123,7 +123,7 @@ test('rollupSync says off about nothing at all', () => {
 
 test('a channel that never reported inherits the account phase, so the rollup is not held down by silence', () => {
   let state = initialSyncState(true)
-  for (const channel of ['prefs', 'spoiledDays', 'stamps']) {
+  for (const channel of ['prefs', 'books', 'stamps']) {
     state = reduceSync(state, { channel, phase: 'synced', at: 5000 })
   }
   // The raw store cannot say "synced": `reveal` never spoke and still reads local.

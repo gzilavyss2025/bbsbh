@@ -8,7 +8,6 @@ import { FIELDS, GROUPS, defaultCopy, fillTokens, sanitizeOverrides } from '../c
 import { ConsentModal } from '../components/seal/ConsentModal.jsx'
 import { makePreviewResolver } from '../copy/previewResolver.js'
 import { AwardOrderEditor } from '../components/admin/AwardOrderEditor.jsx'
-import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 
 // The admin copy editor (route: /admin, unlinked). Lets the site owner tune the
 // wording — and the humor — of the spoiler-consent pop-ups without a deploy.
@@ -20,10 +19,6 @@ import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 // The store is never required: on a deploy with no Clerk / no copy store, this
 // page shows a "not configured" notice and the rest of the app runs on shipped
 // defaults exactly as before.
-
-// A sample reset time for the live previews — the real modal fills {time} with
-// the user's actual next-8am. Kept literal here so the preview is deterministic.
-const PREVIEW_TIME = '8:00 AM'
 
 function Shell({ onBack, children, title = 'Copy editor', returnTo = null }) {
   return (
@@ -55,7 +50,7 @@ function Notice({ children }) {
 // A small non-interactive rendering of a consent modal, so the admin sees the
 // wording in context as they edit it.
 function ModalPreview({ values, ids }) {
-  const line = (id) => fillTokens(values[id] ?? '', { time: PREVIEW_TIME })
+  const line = (id) => fillTokens(values[id] ?? '')
   return (
     <div className="admincopy__preview" aria-hidden="true">
       <div className="admincopy__previewCard">
@@ -80,8 +75,8 @@ function ModalPreview({ values, ids }) {
 // Split a group's fields into consecutive runs sharing a `subgroup`, preserving
 // registry order. The ballparks group is 30 parks x 4 fields; without this the
 // panel is 120 undifferentiated boxes and you cannot tell which note belongs to
-// which photo URL. A group whose fields declare no subgroup (Scores Unlocked)
-// comes back as one untitled run, so its markup is unchanged.
+// which photo URL. A group whose fields declare no subgroup (Stamp In) comes
+// back as one untitled run, so its markup is unchanged.
 function subgroups(fields) {
   const runs = []
   for (const f of fields) {
@@ -215,9 +210,6 @@ function Editor({ onDirty, focus }) {
   // preview renders the actual ConsentModal with a resolver built from the boxes
   // as they stand right now — unsaved edits included.
   const [preview, setPreview] = useState(null)
-  // A sample {time} for the preview, computed once — the real modal fills it
-  // with the viewer's own next-8am; this is a deterministic stand-in.
-  const sampleTime = useMemo(() => formatResetTime(nextResetAt()), [])
 
   // Adopt a stored override map as the new ground truth: fills the boxes and
   // resets the dirty baseline to match.
@@ -372,8 +364,7 @@ function Editor({ onDirty, focus }) {
     <div className="admincopy__body">
       <p className="admincopy__note">
         Edit the wording of the spoiler-consent moments. Blank a box or tap Reset to fall back to
-        the shipped default. Use <code>{'{time}'}</code> where the reset time should appear. Changes
-        go live for everyone within about a minute of saving.
+        the shipped default. Changes go live for everyone within about a minute of saving.
       </p>
 
       <div className="admincopy__savebar">
@@ -468,8 +459,7 @@ function Editor({ onDirty, focus }) {
       {preview && (
         <ConsentModal
           group={preview}
-          time={sampleTime}
-          resolveText={makePreviewResolver(preview, values, sampleTime)}
+          resolveText={makePreviewResolver(preview, values)}
           onConfirm={() => setPreview(null)}
           onDismiss={() => setPreview(null)}
         />

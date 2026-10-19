@@ -62,7 +62,7 @@ test('every claim reports through a real status channel', () => {
 test('the approved claims are exactly what the PRD scoped, plus preferences and book covers', () => {
   assert.deepEqual(
     SYNCED_ITEMS.map((i) => i.id),
-    ['reveal', 'spoiledDays', 'stamps', 'books', 'continuation', 'prefs'],
+    ['reveal', 'stamps', 'books', 'continuation', 'prefs'],
   )
 })
 
@@ -83,15 +83,6 @@ test('every claim has copy to render — an entry with no label is a silent gap'
       )
     }
   }
-})
-
-test('the Scores Unlocked pass is on the never-synced list, with a reason', () => {
-  // The hard invariant (ADR-0026): mirroring the pass expiry would unseal a
-  // second device the user never consented on. It is not unbuilt — it is
-  // refused.
-  const pass = NEVER_SYNCED.find((i) => i.id === 'scoresUnlocked')
-  assert.ok(pass, 'scoresUnlocked must be named as never-synced')
-  assert.ok(pass.why.length > 20, 'and the reason has to be written down')
 })
 
 test('every never-synced entry is nameable in copy, so the fineprint is rendered not remembered', () => {

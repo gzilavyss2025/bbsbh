@@ -284,8 +284,7 @@ export function RosterCard({ teamId, roster }) {
   )
 }
 
-// Same bordered-card/hairline-divided row list as the Team page's Current
-// Roster (.thub-roster/.thub-row): jersey
+// The hairline-divided row list of the Team page's roster (.thub-row): jersey
 // number, name, a position badge, and a trailing chevron affordance. Kept as
 // its own scoped `psseries__roster*` class family rather than importing
 // TeamPage's classes directly (same convention AllStarRostersPage's

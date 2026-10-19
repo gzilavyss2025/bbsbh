@@ -17,7 +17,6 @@ import { ipToOuts } from '../lib/math/innings.js'
 
 // Bill James Game Score from a pitching line: 40 + 2*outs + K - 2*H - 4*ER -
 // 2*(R-ER) - BB. An average start lands near 50; a gem in the 80s-90s.
-// (Shared with dayHighlights.js's elite-start signal so the two can't drift.)
 export function gameScore(s) {
   const outs = ipToOuts(s.inningsPitched)
   const r = s.runs ?? 0

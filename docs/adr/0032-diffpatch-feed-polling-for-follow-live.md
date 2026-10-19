@@ -1,5 +1,10 @@
 # diffPatch feed polling, scoped to Follow Live's tight cadence only
 
+> **RETIRED by [ADR-0116](0116-scores-unlocked-and-reveal-all-are-removed.md) (2026-10-18).**
+> The tight poll ran only under the Scores Unlocked pass, which was removed. A
+> live game polls the full feed every 60s; `fetchGameFeedDiff`, `mergeFeedDiff`
+> and `src/lib/jsonPatch.js` are gone.
+
 The MLB Stats API has an undocumented `diffPatch` mode
 (`/api/v1.1/game/{gamePk}/feed/live/diffPatch?startTimecode=...`): instead of
 returning the whole live feed, it returns an array of RFC 6902 JSON-Patch

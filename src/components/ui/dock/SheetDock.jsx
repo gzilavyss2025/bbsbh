@@ -214,8 +214,8 @@ export function SheetDock({
     window.addEventListener('resize', measure)
     window.addEventListener('orientationchange', measure)
     // The window is not the only thing that can change the rail's height, and
-    // the rail's height is the slate's FLOOR — a stale one puts a game card, or
-    // the Reveal all results bar, under the dock. A font swapping in, a count
+    // the rail's height is the slate's FLOOR — a stale one puts a game card under
+    // the dock. A font swapping in, a count
     // chip gaining a digit, or a club mark arriving all resize it without a
     // resize event, so watch the element itself rather than inferring it from
     // the viewport.

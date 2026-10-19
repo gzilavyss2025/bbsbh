@@ -45,7 +45,7 @@ const PRINCIPLES = [
   },
   {
     label: 'Yours to unseal',
-    text: 'Sometimes you do want the result. A site-wide Scores Unlocked switch opens a day you name, and it asks you to confirm that day first. It is opt-in, it is reversible, and nothing is unsealed on your behalf.',
+    text: 'Sometimes you do want the result. Tap any seal to open it: a half-inning, or the whole box score. A box score you open stays open on your own devices, and nothing is unsealed on your behalf.',
   },
 ]
 

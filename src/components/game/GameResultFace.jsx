@@ -23,8 +23,8 @@ import { Pill } from '../ui/control/Pill.jsx'
 import { pillSolidStyle } from '../../lib/design/pillClass.js'
 import { Door } from '../ui/control/Door.jsx'
 
-// The flip card's back face: what a past, Final game's card turns into once
-// revealed. Deliberately a SUMMARY, not the full box score — final R/H/E, the
+// A past, Final game's result card, once revealed (Stamp In and the postseason
+// series pages; it was the slate flip card's back face until ADR-0116). Deliberately a SUMMARY, not the full box score — final R/H/E, the
 // pitchers of record, and the game's single most memorable play — with a
 // link through to the complete page for anyone who wants more. `feed`/
 // `winProb` are only ever passed in once the game has been revealed, so
@@ -33,14 +33,13 @@ import { Door } from '../ui/control/Door.jsx'
 // its own, roomier Play of the Game treatment (the Postseason Series page's
 // per-game ledger entry builds a headshot-led version from the same
 // computePlayOfTheGame call) suppress this compact text-only one instead of
-// showing both — the flip card itself keeps rendering it by default.
+// showing both — every other caller keeps rendering it by default.
 //
-// `game`/`pinnedTeamId`/`cardMeta` are optional — only the slate's day-wide
-// pill redesign (GameSelect.jsx, via useDayCardMeta) passes them; the
-// Postseason Series page's per-game ledger entry doesn't, and simply gets no
-// pills row (same graceful-omission convention as `hidePlayOfGame` above).
-// `cardMeta` is one entry from dayHighlights.js's classifyGameCards — see
-// that module for what each field means.
+// `game`/`pinnedTeamId`/`cardMeta` are optional. The slate's day-wide pill
+// classification passed them until it was removed with the slate's reveal-all
+// (ADR-0116); today's callers pass none of them and simply get no pills row
+// (same graceful-omission convention as `hidePlayOfGame` above). `cardMeta`'s
+// fields are `{ scenario, performer, playChoice, isGameOfTheNight }`.
 //
 // `trailing` is an ALREADY-RENDERED node the host drops at the right-hand end
 // of the top row, beside Box score. The node arrives finished, so this file

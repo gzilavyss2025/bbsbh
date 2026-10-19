@@ -20,7 +20,6 @@
 
 /* Shared mono-figure helper (scores, jerseys, counts). */
 .stat__v,
-.datenav__label,
 .lineup__jersey,
 .roster__jersey {
   font-family: var(--font-mono);
