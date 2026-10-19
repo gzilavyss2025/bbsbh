@@ -170,20 +170,20 @@
   color: var(--text-body);
 }
 .scout__pitches {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--space-1h);
-}
-.scout__pbtn {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
+  gap: var(--space-1);
+}
+.scout__pbtn {
+  display: grid;
+  grid-template-columns: var(--space-4) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1h);
+  width: 100%;
   min-height: var(--control-min);
-  padding: var(--space-1h) var(--space-2);
+  padding: var(--space-1) var(--space-1h);
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-inset);
+  background: var(--surface-card);
   color: inherit;
   font: inherit;
   text-align: start;
@@ -196,19 +196,24 @@
   outline: none;
   box-shadow: var(--ring);
 }
-.scout__pbtnname {
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
+.scout__pbtnn {
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+.scout__pbtnname {
+  display: flex;
+  align-items: center; /* layout-exempt: dot beside the pitch name */
+  gap: var(--space-1);
+  font-size: var(--fs-cell);
   color: var(--text-heading);
 }
 /* The family dot before the name: the pitch's family, never its code. */
 .scout__pbtnname::before {
   content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-inline-end: var(--space-1);
+  flex: none;
+  width: 9px;
+  height: 9px;
   border-radius: var(--radius-pill);
   background: var(--arsenal-other);
 }
@@ -216,21 +221,31 @@
 .scout__pbtn[data-family='breaking'] .scout__pbtnname::before { background: var(--arsenal-breaking); }
 .scout__pbtn[data-family='offspeed'] .scout__pbtnname::before { background: var(--arsenal-offspeed); }
 .scout__pbtnsub {
-  font-family: var(--font-mono);
+  display: block;
   font-size: var(--fs-cell);
   color: var(--text-caption);
 }
+/* The call in words, as a tag: strike blue, ball paper, in play ink. */
 .scout__pbtncall,
 .scout__pmcall {
   font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
+.scout__pbtncall {
+  padding: var(--space-1) var(--space-1h);
+  background: var(--surface-inset);
+  color: var(--text-heading);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-emphasis);
+  white-space: nowrap;
+}
 [data-tone='strike'].scout__pbtncall,
+[data-tone='foul'].scout__pbtncall { background: var(--allstar-blue); color: var(--text-on-ink); }
+[data-tone='play'].scout__pbtncall { background: var(--accent-primary); color: var(--text-on-ink); }
 [data-tone='strike'].scout__pmcall { color: var(--clay); }
-[data-tone='ball'].scout__pbtncall,
 [data-tone='ball'].scout__pmcall { color: var(--field); }
-[data-tone='play'].scout__pbtncall,
 [data-tone='play'].scout__pmcall { color: var(--allstar-blue); }
 
 /* --- the pitch modal --- */

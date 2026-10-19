@@ -277,6 +277,7 @@ export const PAIRINGS = [
   // the warm grey "other" segment prints no label (the legend names it).
   { fg: 'clay', bg: 'surface-card', min: TEXT, note: 'scout: hitter-side tag, strike call' },
   { fg: 'allstar-blue', bg: 'surface-card', min: TEXT, note: 'scout: pitcher-side tag, in-play call' },
+  { fg: 'text-on-ink', bg: 'allstar-blue', min: TEXT, note: 'scout: meetings strike call tag' },
   { fg: 'field', bg: 'surface-card', min: TEXT, note: 'scout: ball call' },
   { fg: 'text-on-ink', bg: 'arsenal-fastball', min: TEXT, note: 'scout mix bar: fastball segment label' },
   { fg: 'text-on-ink', bg: 'arsenal-breaking', min: TEXT, note: 'scout mix bar: breaking segment label' },
