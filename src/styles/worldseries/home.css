@@ -580,6 +580,10 @@
 .ww-scout__card {
   scroll-margin-top: var(--ww-scout-offset, 0px);
 }
+/* Two cards in a row end at the same height: the card fills its grid cell. */
+.ww-scout__card > * {
+  height: 100%;
+}
 /* The Film room rail needs the whole row: one grid cell squeezes its three cards. */
 .ww-scout__card--wide {
   grid-column: 1 / -1;
