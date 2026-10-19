@@ -9,7 +9,7 @@ import { getJson } from './statsapi.js'
 import { fetchStaticTeams } from './teams-static.js'
 import { postseasonThrough } from './scheduleGames.js'
 import { slateToday } from '../lib/dates.js'
-import { roundNameAt } from '../lib/postseason/roundTag.js'
+import { isFullSeasonMilb, roundNameAt } from '../lib/postseason/roundTag.js'
 import { WINTER_LEAGUE_IDS, WINTER_SPORT_ID } from '../lib/winter/leagues.js'
 
 // Normalize a raw schedule game into the shape our cards need. Exported so
@@ -651,7 +651,7 @@ export async function fetchTodayPlateUmpireIds(dateStr, sportId = 1) {
 // levels (11-14) it holds the postseason rounds (F/D/L/W) as well as the regular
 // season, each row tagged with its `gameType` and a `round` name ('' for 'R';
 // MiLB's L and W read DS and CS), because October is when the games matter most.
-// MiLB feeds checked 2025-26: L and W only (Triple-A: W only). Winter ball stays 'R'. A postseason row dated after the page's own day is
+// MiLB asks for R,L,W only: the feeds checked 2025-26 hold no F or D (Triple-A: W only). Winter ball stays 'R'. A postseason row dated after the page's own day is
 // dropped, because an "if necessary" game's presence would say how the series
 // went (ADR-0087). A caller that must reconcile with a regular-season ledger
 // (the day-of-week record, the Records card's completeness check) filters on
@@ -665,10 +665,10 @@ export async function fetchTeamSchedule(
   { regularSeasonOnly = false } = {},
 ) {
   if (!teamId || !season) return []
-  const withPostseason = !regularSeasonOnly && (sportId === 1 || (sportId >= 11 && sportId <= 14))
+  const withPostseason = !regularSeasonOnly && (sportId === 1 || isFullSeasonMilb(sportId))
   try {
     const data = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=${withPostseason ? 'R,F,D,L,W' : 'R'}&hydrate=team,linescore&fields=${TEAM_SCHEDULE_FIELDS}`,
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=${withPostseason ? (sportId === 1 ? 'R,F,D,L,W' : 'R,L,W') : 'R'}&hydrate=team,linescore&fields=${TEAM_SCHEDULE_FIELDS}`,
     )
     const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
     const byPk = new Map()

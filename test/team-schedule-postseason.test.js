@@ -64,7 +64,7 @@ test('a minor-league club asks for postseason rounds too (Double-A Biloxi, 2026:
     [row(1, '2026-09-10', 'R', { final: true }), row(2, '2026-09-15', 'L', { final: true }), row(3, '2026-09-20', 'W', { final: true })],
     async (calls) => {
       const games = await fetchTeamSchedule(5015, 2026, 12)
-      assert.match(calls[0], /gameType=R,F,D,L,W&/)
+      assert.match(calls[0], /gameType=R,L,W&/)
       assert.deepEqual(games.map((g) => [g.gameType, g.round]), [['R', ''], ['L', 'DS'], ['W', 'CS']])
     },
   ))

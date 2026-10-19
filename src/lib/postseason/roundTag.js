@@ -89,8 +89,10 @@ export function roundName(gameType, league = '') {
 // feed files under the same codes as MLB's LCS and World Series. At sportId 11-14 they read
 // DS and CS, so a Double-A title round never wears "WS". Triple-A's pennant round is W only.
 // `sportId` 1 (or none) keeps roundName's own table.
+export const isFullSeasonMilb = (sportId) => sportId >= 11 && sportId <= 14
+
 export function roundNameAt(gameType, sportId, league = '') {
-  if (sportId >= 11 && sportId <= 14) return { L: 'DS', W: 'CS' }[gameType] ?? ''
+  if (isFullSeasonMilb(sportId)) return { L: 'DS', W: 'CS' }[gameType] ?? ''
   return roundName(gameType, league)
 }
 
