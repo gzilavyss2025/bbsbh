@@ -104,32 +104,37 @@ test('fetchFinalScores: a makeup under the same gamePk reads the score of the ga
   }
 })
 
-test('fetchFinalScores: a makeup played TODAY holds its score and is never asked for', async () => {
+test('fetchFinalScores: a makeup played TODAY shows its score once Final (ADR-0117)', async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
   const api = stub({ dates: makeup(900001, { from: '2026-10-12', to: '2026-10-13' }) })
   try {
-    const scores = await fetchFinalScores([split('2026-10-13', 900001)], 'hitting', null, '2026-10-13')
-    assert.deepEqual(api.asked, [])
-    assert.equal(scores.size, 0)
+    const scores = await fetchFinalScores([split('2026-10-13', 900001)], 'hitting', null)
+    assert.deepEqual(api.asked, [900001])
+    assert.equal(scores.size, 1)
   } finally {
     api.restore()
+    mock.timers.reset()
   }
 })
 
-test("fetchFinalScores: a makeup played today stays held even when the split keeps the postponed day", async () => {
-  // Not what statsapi does today (the split moves to the played day), but the
-  // played record dated today must not slip past the gate if it ever did.
+test("fetchFinalScores: a makeup played today shows its score even when the split keeps the postponed day", async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
+  // Not what statsapi does today (the split moves to the played day).
+  // With no cutoff the played record is read as played.
   const api = stub({ dates: makeup(900002, { from: '2026-10-12', to: '2026-10-13' }) })
   try {
-    const scores = await fetchFinalScores([split('2026-10-12', 900002)], 'hitting', null, '2026-10-13')
-    assert.equal(scores.size, 0)
+    const scores = await fetchFinalScores([split('2026-10-12', 900002)], 'hitting', null)
+    assert.equal(scores.size, 1)
   } finally {
     api.restore()
+    mock.timers.reset()
   }
 })
 
-test('fetchFinalScores: a suspended game, two scored records, still reads resumeDate off the first', async () => {
+test('fetchFinalScores: a suspended game, two scored records, shows its score with no cutoff', async () => {
+  mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-13T20:00:00Z') }) // 13:00 Pacific on 2026-10-13: the day the rows are dated
   // gamePk 777861's shape (live 2026-10-13): both records Final and scored;
-  // only the first carries resumeDate. Ending today, it is held.
+  // only the first carries resumeDate. With no cutoff it is read as finished.
   const rec = (date, extra) => ({
     date,
     games: [{ gamePk: 900003, officialDate: '2026-10-11', gameNumber: 1, status: { abstractGameState: 'Final', detailedState: 'Final' }, teams: teams(5, 6), venue, ...extra }],
@@ -138,10 +143,11 @@ test('fetchFinalScores: a suspended game, two scored records, still reads resume
     dates: [rec('2026-10-11', { resumeDate: '2026-10-13T17:10:00Z' }), rec('2026-10-13', { resumedFrom: '2026-10-11T23:40:00Z' })],
   })
   try {
-    const scores = await fetchFinalScores([split('2026-10-11', 900003, 1)], 'hitting', null, '2026-10-13')
-    assert.equal(scores.size, 0)
+    const scores = await fetchFinalScores([split('2026-10-11', 900003, 1)], 'hitting', null)
+    assert.equal(scores.size, 1)
   } finally {
     api.restore()
+    mock.timers.reset()
   }
 })
 

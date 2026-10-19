@@ -5,9 +5,10 @@ import { Card } from '../../ui/frame/Card.jsx'
 import { Stack } from '../../ui/layout/Stack.jsx'
 
 // PLAYED (phone, off day): one row per World Series game already played, with
-// its date and park, a Box door (the existing box score route, sealed there as
-// ever) and a Stamp door (the Game Log's stamp flow, ADR-0048). Wide puts the
-// Stamp doors in the header instead: one stamp action per game on the page.
+// its date and park, a Box door (the existing box score route: sealed on the
+// game's own date, open after it, ADR-0117) and a Stamp door (the Game Log's
+// stamp flow, ADR-0048). Wide puts the Stamp doors in the header instead: one
+// stamp action per game on the page.
 // rows: [{ gamePk, gameNumber, date, park, awayAbbr, homeAbbr }]. No score here.
 export function Played({ rows }) {
   const link = useRouteLink()

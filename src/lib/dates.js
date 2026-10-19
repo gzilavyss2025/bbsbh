@@ -15,16 +15,28 @@ export function isoToday() {
   return new Date().toISOString().slice(0, 10)
 }
 
-// A player's this-season game-log rows for the photo rail, oldest first. Only
-// games dated before the baseball day (US Pacific): a game tonight may still be
-// in progress, and its photos can show the result. Not isoToday(): after 00:00
-// UTC that is already tomorrow, and tonight's game would pass.
-export function photoGameRows(games, now = new Date()) {
-  const today = baseballToday(now)
+// A player's this-season game-log rows for the photo rail, oldest first. A game still being
+// played is held back by photosView's `finals` map (Final and scored only), not here
+// (ADR-0117, which retired ADR-0110).
+export function photoGameRows(games) {
   return games
-    .filter((s) => s.game?.gamePk && s.date && s.date < today)
+    .filter((s) => s.game?.gamePk && s.date)
     .map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
     .sort((a, b) => a.apiDate.localeCompare(b.apiDate))
+}
+
+// The day a seal counts as "today": the EARLIEST of the UTC, local and Pacific date, as
+// pageDay (api/schedule.js, ADR-0087) reads it. After midnight in the East, or after 00:00
+// UTC, a late West-coast game is still on; the earliest date keeps it on today's side.
+export function slateToday(now = new Date()) {
+  return [now.toISOString().slice(0, 10), toApiDate(now), baseballToday(now)].sort()[0]
+}
+
+// Whether a game's box score opens with no tap (ADR-0117): its schedule date is a real date
+// before the slate's today. The date alone decides. Not the status: a suspended game opens too.
+// A missing or garbled date stays sealed.
+export function boxScoreOpensByDate(officialDate, now = new Date()) {
+  return isRealDate(officialDate) && officialDate < slateToday(now)
 }
 
 export function addDays(date, n) {

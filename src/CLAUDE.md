@@ -160,7 +160,7 @@ must key on the `feed` object (ADR-0007).
   and localStorage) stays untouched. Its `commitReveals` is the other half of that
   and must not be dropped: `SealBox` fires `onReveal` on a force-revealed mount as
   well as a tap, so without it every half merely LOOKED at ratchets the real mark.
-  The Scores Unlocked day pass was a second departure until ADR-0116 removed it.
+  The box score's date opener, `boxScoreOpensByDate`, persists nothing (ADR-0117); the day pass went in ADR-0116.
 - **"Logbook" is the CODE name only — the UI says "Game Log."** Route
   (`/logbook`), modules, CSS classes, and storage keys all keep `logbook`; every
   user-visible string says Game Log. Renaming the route would break every shared

@@ -43,7 +43,7 @@ and off one it sits behind a labelled door.**
 | --- | --- | --- |
 | Title, teams, date, park | Open | They say who played (ADR-0080). The matchup is in the URL, so a seal on it would claim a protection the page cannot give. |
 | Lineups, umpires | Open | As on every game page. |
-| Score, line score, box score | Sealed | The box score's `SealBox` (ADR-0002). A tap writes `bbsbh:boxreveal:{gamePk}` (ADR-0049). |
+| Score, line score, box score | Sealed, except a box score whose game is dated before the slate's today, which opens (ADR-0117) | The box score's `SealBox` (ADR-0002). A tap writes `bbsbh:boxreveal:{gamePk}` (ADR-0049). |
 | Feat label | Sealed | It renders inside the box score's reveal function, beside the box. |
 | Half-inning pages | Sealed | As today, and only where the feed has plays. The "no play-by-play" notice shows only for a season before 1960 (D14): from 1960 on, a played game with no plays is almost always a forfeit, so a notice before the reveal hints at the result. |
 
@@ -146,3 +146,9 @@ address, and the address is how the app names a game (`gamePath` in
   change.
 - gzilavyss2025/bbsbh#1525 and gzilavyss2025/bbsbh#1527 inherit this seal unchanged.
   #1527 must deal on who played (ADR-0080), so it cannot use the feat index.
+
+## Amendment (2026-10-19) — the box score opens by date
+
+ADR-0117 amends section 1. A box score whose game is dated before the slate's today opens
+with no tap, and Alternative B ("open by age") stays rejected for every other surface. The
+half-inning pages still seal for any date. The feat label shows with the open box score.

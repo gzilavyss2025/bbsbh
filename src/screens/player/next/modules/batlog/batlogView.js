@@ -8,8 +8,8 @@ import { DASH, num, rate3 } from '../../../../../api/person/shared.js'
 // The batter Game Log's rows (#1890, board "BatterGameLog"): one row per game of the season,
 // newest first, matching the pitcher log (../pitchlog/pitchlogView.js).
 // gameLogView gives the order, the date, the series tag and the club's score; withGameFouls joins
-// the pitches seen, whiffs and fouls. THE GUARD: fetchFinalScores holds back every game on
-// today's baseball date, and gameLogView gives no result to a row with no score.
+// the pitches seen, whiffs and fouls. A game played today shows its result once Final (ADR-0117);
+// a game still on has no score, and gameLogView gives no result to a row with no score.
 
 // The columns, in the board's order; `card` is the place in LogTable's card look. index.jsx adds the
 // cell renderers. The stat keys read the row by key, never by position.

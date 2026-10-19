@@ -16,8 +16,7 @@ import { loadStart, resultOf, startDetail } from './gameDetail.js'
 // The game detail view (#1851): one row of the Game Log, opened. A native modal <dialog>:
 // showModal() makes the page behind it inert (the focus trap) and Escape fires `cancel`.
 // The caller hands focus back to the row. The feed and the clips load only when it opens.
-// Score and decision come from the row (ADR-0110), so a game in progress today shows neither,
-// and no clip (gameDetail.js).
+// Score and decision come from the row, so a game still on shows neither, and no clip (gameDetail.js).
 
 function Plays({ title, plays }) {
   if (!plays.length) return null

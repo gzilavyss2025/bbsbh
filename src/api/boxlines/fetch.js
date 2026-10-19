@@ -80,7 +80,6 @@
 // failure so the sheet shows its retry state rather than an empty ledger.
 import { getJson } from '../statsapi.js'
 import { chunk } from '../../lib/math/number.js'
-import { baseballToday } from '../../lib/time/standingsDates.js'
 import { facetPlan } from './facets.js'
 import {
   boxLineRows,
@@ -385,32 +384,30 @@ export async function fetchBoxLines({ personId, group, cutoff = null, facet = nu
 // THE PLAYER PAGE'S GAME LOG SCORES (#1914): a Map gamePk -> its gated box
 // line (`won`, `runs`, `oppRuns` are what the log reads) for the game-log
 // splits handed in. The same schedule call as the join above, and the same
-// gate, under the EARLIER of `cutoff` and the baseball today: a split on or
-// after it is dropped BEFORE the call, so its gamePk is never asked about, and
-// boxLineRows re-applies it and the Final check on what comes back. An empty
-// map on any failure: the log then shows no score, as before.
+// gate under `cutoff`: a split on or after it is dropped BEFORE the call, so
+// its gamePk is never asked about, and boxLineRows re-applies it and the Final
+// check on what comes back. An empty map on any failure: the log then shows no
+// score, as before.
 //
-// TODAY IS HELD even with no cutoff (Gary, 2026-10-13). A link out of a game
-// carries no `?d=` (ADR-0034's "The cutoff is opt-in now"), so a reader who
-// taps a player while scoring tonight's game, or one from earlier today off a
-// recording, or game 1 before he scores game 2, would read its final score at
-// the top of the log. The row stays, with no score and no decision.
-// `baseballToday` is US Pacific, the last zone to roll over, as in
-// scout/playIds.js's `mayRead`.
+// NO CUTOFF IS THE OPEN CASE (ADR-0117, which retired ADR-0110). A game played
+// today shows its score once the schedule reports it Final and scored; a game
+// still on has no row, because boxLineRows keeps only a Final, scored game. The
+// player page is an open surface (ADR-0034), and a reader who taps the starter
+// of tonight's game may read its result there. That is accepted.
 //
 // A SUSPENDED GAME ENDS ON A LATER DAY than its split says. gamePk 777861 was
 // suspended 2025-05-19 and finished 2025-05-21; its split and officialDate stay
 // 05-19, and only the schedule record's `resumeDate` (on the first `dates`
-// entry, the one fetchSchedule keeps for a suspended game) names 05-21. boxLineRows' gate drops a
-// record whose resumeDate, as a Pacific day, is on or after `until`.
-export async function fetchFinalScores(splits, group, cutoff = null, today = baseballToday()) {
-  const until = cutoff && cutoff < today ? cutoff : today
+// entry, the one fetchSchedule keeps for a suspended game) names 05-21. With a
+// cutoff, boxLineRows' gate drops a record whose resumeDate, as a Pacific day,
+// is on or after it.
+export async function fetchFinalScores(splits, group, cutoff = null) {
   const gameTypes = MLB_LOG_GAME_TYPES.split(',')
-  const gated = matchingSplits(splits, { gameTypes }).filter((s) => s.date < until)
+  const gated = matchingSplits(splits, { gameTypes }).filter((s) => !cutoff || s.date < cutoff)
   if (!gated.length) return new Map()
   try {
     const schedule = await fetchSchedule([...new Set(gated.map((s) => s.game.gamePk))])
-    const rows = boxLineRows({ splits: gated, schedule, group, cutoff: until, gameTypes })
+    const rows = boxLineRows({ splits: gated, schedule, group, cutoff, gameTypes })
     return new Map(rows.map((r) => [r.gamePk, r]))
   } catch {
     return new Map()

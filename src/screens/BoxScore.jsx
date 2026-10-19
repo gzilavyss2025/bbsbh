@@ -7,6 +7,7 @@ import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { selectGameSeason, selectOfficials, selectIsFinal, selectVenueRef } from '../api/select.js'
 import { stepToSection } from '../lib/route.js'
+import { boxScoreOpensByDate } from '../lib/dates.js'
 import { ordinal } from '../lib/format.js'
 import { umpireAccuracySummary } from '../api/umpires.js'
 import { selectChallengeState, gameHasAbs } from '../api/challenges.js'
@@ -130,6 +131,11 @@ export function BoxScore({
   // here or on another of their devices. Alone of the two openers below, it
   // persists — one bit per gamePk, written only on a real tap.
   const { boxOpened, markBoxOpened } = useBoxScoreReveal(feed?.gamePk)
+  // A THIRD OPENER (ADR-0117): the game's schedule date is before the slate's today. A date,
+  // not a score, so it is read outside the seal. It persists nothing. Memoised on the date, so
+  // the clock passing midnight does not open a seal under a reader who is looking at it.
+  const officialDate = feed?.gameData?.datetime?.officialDate
+  const openByDate = useMemo(() => boxScoreOpensByDate(officialDate), [officialDate])
 
   return (
     <div className="boxscore">
@@ -145,23 +151,22 @@ export function BoxScore({
         )}
       </div>
 
-      {/* TWO OPENERS, ONE INPUT. The reader's own stamp on this game
-          (ADR-0048), and their own record of having already lifted THIS seal
-          (ADR-0049). Both ride SealBox's existing `forceRevealed`, so the
-          render-function gate is untouched: children are invoked only in the
-          revealed branch (ADR-0001/0002); the flags choose WHICH branch
+      {/* THREE OPENERS, ONE INPUT. The reader's own stamp on this game (ADR-0048), their
+          own record of having already lifted THIS seal (ADR-0049), and the game's date
+          being before the slate's today (ADR-0117). All ride SealBox's existing
+          `forceRevealed`, so the render-function gate is untouched: children are invoked
+          only in the revealed branch (ADR-0001/0002); the flags choose WHICH branch
           renders, never what it computes.
-          ONLY THE SECOND WRITES ANYTHING, and the `onReveal` gate is the
-          load-bearing line: SealBox fires it whenever the box becomes shown, by
-          tap OR by flag (SealBox.jsx). Handing it over unconditionally would let
-          the stamp record a permanent mark for a seal nobody touched — and
-          ADR-0048's override must stay as reversible as the stamp behind it.
-          Under a stamp there is no seal, so there is no tap to record. (The
-          Scores Unlocked day pass was a third opener until ADR-0116.) */}
+          ONLY THE SECOND WRITES ANYTHING, and the `onReveal` gate is the load-bearing
+          line: SealBox fires it whenever the box becomes shown, by tap OR by flag
+          (SealBox.jsx). Handing it over unconditionally would let the stamp or the date
+          record a permanent mark for a seal nobody touched. Under either flag there is no
+          seal on screen, so there is no tap to record. (The Scores Unlocked day pass was
+          another opener until ADR-0116.) */}
       <SealBox
         label="Tap to reveal the box score"
-        forceRevealed={stamped || boxOpened}
-        onReveal={stamped ? undefined : markBoxOpened}
+        forceRevealed={stamped || boxOpened || openByDate}
+        onReveal={stamped || openByDate ? undefined : markBoxOpened}
         gamePk={feed?.gamePk}
       >
         {() => {

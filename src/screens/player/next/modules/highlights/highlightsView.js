@@ -1,16 +1,16 @@
 // The Highlights module's pure view (#2022): his clips for this season, newest first.
 import { formatClipDuration } from '../../../../../api/highlights.js'
-import { baseballToday } from '../../../../../lib/time/standingsDates.js'
 import { plural } from '../../parts/foulsFormat.js'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-// A clip title names the play ("walk-off single"), so a game dated the baseball day never shows one (ADR-0110):
-// the nightly file keeps Final games only, but a hand-dispatched run can put today's in. This filters; it adds no source.
-export function highlightsView({ clips, playerId, season, now = new Date() }) {
-  const today = baseballToday(now)
+// A clip title names the play ("walk-off single"). The page is open for a game played today
+// (ADR-0117, which retired ADR-0110), so no date filter is applied. gen-highlights.mjs sweeps
+// only games the schedule calls Final, whether it runs on the cron or by hand, so the file
+// holds no clip of a game still on.
+export function highlightsView({ clips, playerId, season }) {
   return clips
-    .filter((c) => c.playerId === playerId && c.date.slice(0, 4) === String(season) && c.date < today)
+    .filter((c) => c.playerId === playerId && c.date.slice(0, 4) === String(season))
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
     .map((c) => ({
       clipId: c.clipId,

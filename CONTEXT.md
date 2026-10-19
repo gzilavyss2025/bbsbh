@@ -81,6 +81,13 @@ unstamping the game drops straight back to it. (The Scores Unlocked day pass was
 a second input until ADR-0116 removed it.)
 _Avoid_: fake reveal, temporary reveal
 
+**Open by date** (box score):
+A box score whose game's schedule date is before the slate's today renders with no tap
+(`boxScoreOpensByDate`, ADR-0117). A render override like Effective reveal: it persists
+nothing and never reaches `revealedThrough`. Today's games and the innings viewer keep
+their seals.
+_Avoid_: unlocked, old-game pass
+
 **Live half**:
 The half-inning the actual game is in right now, or — between halves — the one
 it just finished, read from the linescore's live state (`selectLiveHalf`,
@@ -144,7 +151,7 @@ _Avoid_: Logbook in any user-visible string
 **Pitcher Game Log**:
 A different thing with the same name: on a pitcher's player page, his games of a
 season, starts and relief outings, one row per game, with the score, his decision, his
-line and the pitch mix (#1851, ADR-0110). The stamp Game Log is the games that YOU
+line and the pitch mix (#1851, ADR-0110, retired by ADR-0117). The stamp Game Log is the games that YOU
 stamped; the pitcher Game Log is the games that HE pitched. The code name is `pitchlog`.
 _Avoid_: Start by start
 

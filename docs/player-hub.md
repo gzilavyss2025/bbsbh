@@ -48,5 +48,6 @@ fetch two modules want in both modules, not in `context.js` or `core.js`.
 Every module here is classified **spoiler-free** in `src/api/spoiler-manifest.json`.
 The player page is an open surface (root `CLAUDE.md`'s spoiler scope): season and
 career stats are not scores. Its one date rule, that every dated fetch is cut off the
-day BEFORE a `?d=` link's game, is the page's own as-of contract, not a seal. Today's
-game score never shows on the game logs (`fetchFinalScores`, ADR-0110).
+day BEFORE a `?d=` link's game, is the page's own as-of contract, not a seal. A game
+played today shows its score on the game logs once it is Final (`fetchFinalScores`, ADR-0117,
+which retired ADR-0110).

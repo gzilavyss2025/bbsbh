@@ -4,11 +4,11 @@ import { HIT_EVENT_TYPES, WHIFF_CODES, pitchCallCode } from '../../../../../api/
 
 // The game detail view's data (#1851): his pitches, strikeouts and big plays from the game's
 // feed, and the clips from its content items. Fetched only when the view opens.
-// The score and the decision are NOT read here: they come from the log row (resultOf), so the
-// ADR-0110 guard on that row covers this view too. Plays are open on this page (ADR-0110).
-// THE GUARD ALSO HOLDS THE CLIPS: a headline says "in win" or "records the save", and a video
-// carries the broadcast scorebug. A held row (row.result null: a game today, or a suspended game
-// that resumes today) gets no clip of any kind, and its content is never fetched.
+// The score and the decision are NOT read here: they come from the log row (resultOf). Plays are
+// open on this page (ADR-0110, retired by ADR-0117).
+// A ROW WITH NO RESULT GETS NO CLIPS: a headline says "in win" or "records the save", and a video
+// carries the broadcast scorebug. A held row (row.result null: a game still on) gets no clip of any
+// kind, and its content is never fetched.
 
 // Every path below verified live on gamePk 823787 (2026-10-13). `fields=` is name-based: a
 // name missing here arrives undefined.

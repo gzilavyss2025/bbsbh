@@ -8,12 +8,13 @@ import { ipToOuts, outsToIp } from '../../../../../lib/math/innings.js'
 import { PITCH_TYPES } from '../../../../../lib/pitch/pitchTypes.js'
 import { teamAbbr } from '../../../../../lib/teams.js'
 
-// The pitcher Game Log's rows (#1851, ADR-0110): one row per game of the season, start or relief
+// The pitcher Game Log's rows (#1851, ADR-0110, retired by ADR-0117): one row per game of the season, start or relief
 // (Gary, 2026-10-13), newest first.
 // gameLogView (api/person/gameLog.js) gives the order, the date, the series tag, the score and the
 // decision; this file adds the stat line, the opponent's id for the logo and the pitch mix.
-// THE GUARD: fetchFinalScores holds back every game on today's baseball date, and gameLogView
-// gives no decision to a row with no score, so a game in progress shows neither.
+// A game played today shows its score and decision once Final (ADR-0117). A game still on has no
+// score in `scores` (fetchFinalScores keeps only a Final, scored game), and gameLogView gives no
+// decision to a row with no score, so it shows neither.
 
 const isStart = (s) => num(s.stat?.gamesStarted) > 0
 // A pitch the table does not know goes last.
