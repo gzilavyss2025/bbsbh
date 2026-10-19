@@ -9,6 +9,7 @@ import { Grid } from '../ui/layout/Grid.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { InjuredMark } from '../badges/InjuredMark.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
 import { displayRanks, rankedCategories, rowLook } from './leaderBoard.js'
@@ -20,9 +21,8 @@ import { displayRanks, rankedCategories, rowLook } from './leaderBoard.js'
 // (see api/teamLeaders.js), so one component serves /team/{id}/leaders, the league/level/org
 // boards and the postseason boards alike.
 //
-// It is no longer what the team HUB renders. The hub renders TeamLeadersLedger — same pool,
-// same computeLeaders, same descriptors, one row per category. This board stays where the
-// page's whole job IS leaders.
+// The team page's Ranks band renders it too, for its batting and pitching leaders: the top 5 of
+// each ledger category, one card per category.
 
 const DASH = '—'
 
@@ -77,13 +77,15 @@ function LeaderCategory({
   favoriteTeamId,
   filtering,
   showTeamAbbr,
+  injuredIds,
+  limit,
 }) {
   const ranks = displayRanks(entries)
   // One club on the whole board (a team page) needs no mark; a mixed one (the postseason
   // boards) names rank 1's club, since showTeamAbbr is off there.
   const mixedClubs = new Set(entries.map((e) => e.displayTeamId ?? e.teamId)).size > 1
   return (
-    <LeaderList label={category.label} count="Top 10" className="tlead__cat">
+    <LeaderList label={category.label} count={`Top ${limit}`} className="tlead__cat">
       {entries.map((e, i) => {
         const teamId = e.displayTeamId ?? e.teamId
         const teamAbbr = e.displayTeamAbbr ?? e.teamAbbr
@@ -105,9 +107,12 @@ function LeaderCategory({
               />
             }
             name={
-              <PlayerLink id={e.id} name={e.name} className="tlead__name">
-                {e.name || DASH}
-              </PlayerLink>
+              <>
+                <PlayerLink id={e.id} name={e.name} className="tlead__name">
+                  {e.name || DASH}
+                </PlayerLink>
+                <InjuredMark hurt={injuredIds?.has(e.id)} />
+              </>
             }
             sub={leaderSub({ entry: e, teamId, teamAbbr, showLevel, prospectSnapshot, showTeamAbbr, leadLogo: i === 0 && mixedClubs })}
             figure={e.display}
@@ -119,8 +124,7 @@ function LeaderCategory({
 }
 
 // `pool`: normalized PoolPlayer[]. `categories`: descriptor array to rank.
-// `limit`: how many players per category (10 on every page that renders this
-// board today). `title`: section
+// `limit`: how many players per category (10 on the leader pages, 5 on the team page). `title`: section
 // heading (the broader leader pages pass their scope's title). `showLevel`:
 // badge each leader's level (org scope, a multi-level pool). `prospectSnapshot`:
 // fetchTopProspects() result to add prospect pills (any MiLB scope). `qualifier`:
@@ -143,12 +147,8 @@ function LeaderCategory({
 // row is whose; the single-team pages (TeamLeadersPage, the postseason boards)
 // pass false since every row already shares the one team the page is about.
 //
-// This board carries NO header action and no IL mark. It had `onSeeAll`,
-// `secondaryAction` and `injuredIds` while the team hub rendered it; the hub
-// renders TeamLeadersLedger now, and the four pages left here are destinations
-// rather than doors, so nothing passed any of the three. They are gone rather
-// than kept warm — an unreachable prop reads as a supported feature to the next
-// reader, and the ledger is where a door or an IL mark actually belongs.
+// This board carries NO header action. `injuredIds` (a Set of player ids) draws the IL
+// mark after a name; only the team page's Ranks band passes it.
 export function TeamLeaders({
   pool,
   categories,
@@ -161,6 +161,7 @@ export function TeamLeaders({
   favoriteTeamId = null,
   filtering = false,
   showTeamAbbr = true,
+  injuredIds = null,
 }) {
   const ranked = useMemo(
     () => rankedCategories({ pool, categories, limit, qualifier, precomputed }),
@@ -186,6 +187,8 @@ export function TeamLeaders({
             favoriteTeamId={favoriteTeamId}
             filtering={filtering}
             showTeamAbbr={showTeamAbbr}
+            injuredIds={injuredIds}
+            limit={limit}
           />
         ))}
       </Grid>
