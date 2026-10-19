@@ -131,7 +131,7 @@ export function realScenePitch(flight, t, view = 'hitter') {
 }
 
 export const SLOW = 3 // slow motion ×3
-const HOLD = 0.9 // s at the plate
+export const HOLD = 0.9 // s at the plate
 
 // Which pitch is in flight and how far along it is, `elapsed` seconds after
 // the card mounted. Every pitch gets the same slot (the slowest flight ×3 plus
