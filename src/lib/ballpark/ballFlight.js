@@ -22,9 +22,9 @@
 // the bow IS the ball's own apex height in feet, laid on its side. A line drive
 // bends a little and a towering popup bends a lot because they really do.
 
-import { HOME, wallDistanceAt } from './ballparkGeometry.js'
+import { HOME, diagramInput, wallDistanceAt } from './ballparkGeometry.js'
 import { heightAt, measuredHeightAt } from './layout/fenceShape.js'
-import { simFlight } from './flightModel.js'
+import { fitLift, simFlight } from './flightModel.js'
 import { round1 } from '../math/number.js'
 
 // At or under this launch angle the ball is on the ground, drawn dead straight:
@@ -48,6 +48,10 @@ export const MAX_BOW_FT = 130
 export const isGrounded = (launchAngle, trajectory = null) =>
   trajectory === 'ground_ball' || launchAngle == null || launchAngle <= GROUND_BALL_MAX_ANGLE
 
+// range × tan(a) / 4: the peak of a flight with no drag, in the chord's units.
+// The bow's depth, and the side view's arc when there is no exit velocity.
+export const noDragApex = (chord, launchAngle) => (chord * Math.tan((Math.min(launchAngle, 89) * Math.PI) / 180)) / 4
+
 // How deep the curve departs from the straight home→landing chord, in the same
 // units (= feet). `launchAngle` is degrees off the ground, MLB's own sign
 // convention (negative = driven into the dirt). Returns 0 for anything on the
@@ -55,9 +59,7 @@ export const isGrounded = (launchAngle, trajectory = null) =>
 export function bowSagitta(chord, launchAngle, trajectory = null) {
   if (!(chord > 0)) return 0
   if (isGrounded(launchAngle, trajectory)) return 0
-  const angle = Math.min(launchAngle, 89)
-  const apex = (chord * Math.tan((angle * Math.PI) / 180)) / 4
-  return Math.min(apex, chord * MAX_BOW_FRACTION, MAX_BOW_FT)
+  return Math.min(noDragApex(chord, launchAngle), chord * MAX_BOW_FRACTION, MAX_BOW_FT)
 }
 
 // The flight path as an SVG `d`, plus the flags a caller needs to ink it.
@@ -135,40 +137,45 @@ export function ballBearing(landing, home = HOME) {
   return (Math.atan2(landing.x - home.x, home.y - landing.y) * 180) / Math.PI
 }
 
-// The wall on the ray at `deg`: feet out, feet high, and `label`, the measured
-// height when the ray falls on a measured point (else null: between points the
-// height is a straight-line estimate, and no label prints one). Null when the
-// layout has no heights or no wall on that ray.
+// The wall on the ray at `deg`: feet out, feet high, and `label`, the height
+// at a measured or posted point when the ray falls on one (else null: between
+// points the height is a straight-line estimate, and no label prints one). The
+// heights are the ones the plan view weights its fence with (diagramInput).
+// Null when the layout has no heights or no wall on that ray.
 export function wallOnLine(layout, deg) {
-  const heights = layout?.measurements?.measured?.height ?? layout?.measurements?.wall ?? null
+  if (!layout) return null
+  const { heights } = diagramInput(layout)
   if (!heights) return null
   const ft = wallDistanceAt(layout, deg)
   if (ft == null) return null
   return { ft: round1(ft), height: round1(heightAt(deg, heights)), label: measuredHeightAt(deg, heights) }
 }
 
-// [[x, z], ...] in feet, plate to landing. Modelled when there is a speed.
+// [[x, z], ...] in feet, plate to landing, x never decreasing. Modelled when
+// there is a speed.
 function airPoints(ball) {
   const { exitVelo: ev, launchAngle: la, distance: dist } = ball
   if (ev == null) {
-    const apex = Math.min((dist * Math.tan((Math.min(la, 89) * Math.PI) / 180)) / 4, MAX_BOW_FT)
+    const apex = Math.min(noDragApex(dist, la), MAX_BOW_FT)
     return Array.from({ length: ARC_SAMPLES + 1 }, (_, i) => {
       const u = i / ARC_SAMPLES
       return [dist * u, 4 * apex * u * (1 - u)]
     })
   }
-  let [lo, hi] = LIFT_RANGE
-  for (let i = 0; i < 24; i++) {
-    const mid = (lo + hi) / 2
-    if (simFlight(ev, la, mid, 3, ARC_CD).dist < dist) lo = mid
-    else hi = mid
-  }
-  const f = simFlight(ev, la, (lo + hi) / 2, 3, ARC_CD)
+  const [lo, hi] = LIFT_RANGE
+  const f = simFlight(ev, la, fitLift(ev, la, dist, { cd: ARC_CD, lo, hi, iters: 24 }), 3, ARC_CD)
   // Stretched to land on the measured distance exactly, where the lift range
-  // could not reach it. The start height is the bat's, 3 ft.
+  // could not reach it. The start height is the bat's, 3 ft. The sim's last
+  // sample is one step under the ground, past the landing, so it is dropped; so
+  // is any sample behind one before it (a lift at the top of its range can curl
+  // a steep ball back on itself).
   const k = dist / f.dist
   const step = Math.max(1, Math.floor(f.pts.length / ARC_SAMPLES))
-  const pts = f.pts.filter((_, i) => i % step === 0).map(([x, z]) => [x * k, Math.max(0, z)])
+  let far = -1
+  const pts = f.pts
+    .filter((_, i) => i % step === 0)
+    .map(([x, z]) => [x * k, Math.max(0, z)])
+    .filter(([x]) => x < dist && x >= far && ((far = x), true))
   pts.push([dist, 0])
   return pts
 }
@@ -183,34 +190,59 @@ export function heightOnArc(pts, x) {
   return 0
 }
 
+// 0 at u = 0, 1 at u = 1, level at both ends: a bend with no corner.
+const ease = (u) => u * u * (3 - 2 * u)
+
+// The arc bent to cross `wallFt` at `target` ft high. The bend starts at the
+// peak (or at the plate, for a wall the ball meets on its way up), is full at
+// the wall, and fades out to nothing at the landing. Up to the peak the arc is
+// untouched, so the peak the card prints stays the model's. A point is laid at
+// the wall itself, so the line crosses there at `target` and not between samples.
+function bendTo(pts, wallFt, target, dist) {
+  const z0 = heightOnArc(pts, wallFt)
+  const delta = target - z0
+  const top = pts.reduce((a, b) => (b[1] > a[1] ? b : a))[0]
+  const from = top < wallFt ? top : 0
+  const atWall = [...pts.filter(([x]) => x < wallFt), [wallFt, z0], ...pts.filter(([x]) => x > wallFt)]
+  return atWall.map(([x, z]) => {
+    if (x <= from) return [x, z]
+    if (x <= wallFt) return [x, z + delta * ease((x - from) / (wallFt - from))]
+    return [x, Math.max(0, z + delta * (1 - ease((x - wallFt) / (dist - wallFt))))]
+  })
+}
+
 // The side view of one ball. Returns null when there is none to draw.
-//   pts      [[x, z], ...] feet, rounded to 0.1
+//   pts      [[x, z], ...] feet, rounded to 0.1, x never decreasing
 //   peak     { x, z } feet, or null for a ball on the ground
 //   wall     wallOnLine's answer, or null
 //   grounded the ball never left the ground: one flat line
 //   atWall   a ball that did not leave the park, cut where it met the wall
 //   modelled the arc flew the drag model (false: the plain parabola)
 //
-// The two result rules, both only where the ball's distance is past the wall:
-// a home run is lifted to clear it; any other ball is held to the wall's height
-// and ends at the wall, because the feed says it stayed in.
+// THE TWO RESULT RULES bend the descent only (bendTo), never scale the whole
+// arc: a scale by the ratio at the wall printed a 342 ft peak for a home run
+// that reached the wall low, and flattened a ball caught at the wall.
+//   - A home run crosses the wall at least HOME_RUN_CLEAR_FT over its top. One
+//     that lands at or short of the drawn wall says that outline is wrong on
+//     this ray, not the ball: no wall is drawn.
+//   - Any other ball whose distance is past the wall meets the wall at or under
+//     its top and ends there, because the feed says it stayed in.
 export function elevationArc(ball, layout = null) {
   if (!hasElevationArc(ball)) return null
-  const wall = ball.x != null && ball.y != null ? wallOnLine(layout, ballBearing(ball)) : null
+  let wall = ball.x != null && ball.y != null ? wallOnLine(layout, ballBearing(ball)) : null
   const dist = ball.distance
   if (isGrounded(ball.launchAngle, ball.trajectory)) {
     return { pts: [[0, 0], [dist, 0]], peak: null, wall, grounded: true, atWall: false, modelled: false }
   }
   let pts = airPoints(ball)
   let atWall = false
+  if (wall && ball.homeRun && dist <= wall.ft) wall = null
   if (wall && dist > wall.ft) {
     const z = heightOnArc(pts, wall.ft)
-    if (ball.homeRun && z < wall.height + HOME_RUN_CLEAR_FT && z > 0) {
-      const k = (wall.height + HOME_RUN_CLEAR_FT) / z
-      pts = pts.map(([x, h]) => [x, h * k])
-    } else if (!ball.homeRun) {
-      const k = z > wall.height && z > 0 ? wall.height / z : 1
-      pts = pts.map(([x, h]) => [x, h * k])
+    if (ball.homeRun) {
+      if (z < wall.height + HOME_RUN_CLEAR_FT) pts = bendTo(pts, wall.ft, wall.height + HOME_RUN_CLEAR_FT, dist)
+    } else {
+      if (z > wall.height) pts = bendTo(pts, wall.ft, wall.height, dist)
       const met = heightOnArc(pts, wall.ft)
       pts = [...pts.filter(([x]) => x < wall.ft), [wall.ft, met]]
       atWall = true

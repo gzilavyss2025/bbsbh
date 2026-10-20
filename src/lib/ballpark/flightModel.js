@@ -28,6 +28,20 @@ export function simFlight(ev, la, lift, h0 = 3, cd = 0.35) {
   return { dist: x, T: t, pts }
 }
 
+// The lift that lands the sim at `dist` ft, bisected within [lo, hi] and clamped to
+// the nearer end when the range cannot reach it. Shared by the replay (below) and the
+// side view (ballFlight.js), which passes its own drag and range.
+export function fitLift(ev, la, dist, { h0 = 3, cd = 0.35, lo = 0, hi = 0.45, iters = 18 } = {}) {
+  if (dist <= simFlight(ev, la, lo, h0, cd).dist) return lo
+  if (dist >= simFlight(ev, la, hi, h0, cd).dist) return hi
+  for (let i = 0; i < iters; i++) {
+    const mid = (lo + hi) / 2
+    if (simFlight(ev, la, mid, h0, cd).dist < dist) lo = mid
+    else hi = mid
+  }
+  return (lo + hi) / 2
+}
+
 // True for a ball the model flies through the air: a lift of 8 degrees or more, with a speed and a
 // distance. Anything else hops, and the panel's in-flight label reads the same predicate.
 export const isAirFlight = (ball) => ball.launchAngle != null && ball.launchAngle >= 8 && ball.exitVelo != null && Boolean(ball.distance)
@@ -42,17 +56,7 @@ export function flightModel(ball, chord, h0 = 3) {
   const sf = [], sz = []
   let T
   if (isAirFlight(ball)) {
-    let lo = 0, hi = 0.45, s
-    if (dist <= simFlight(ev, la, lo, h0).dist) s = lo
-    else if (dist >= simFlight(ev, la, hi, h0).dist) s = hi
-    else {
-      for (let i = 0; i < 18; i++) {
-        const mid = (lo + hi) / 2
-        if (simFlight(ev, la, mid, h0).dist < dist) lo = mid
-        else hi = mid
-      }
-      s = (lo + hi) / 2
-    }
+    const s = fitLift(ev, la, dist, { h0 })
     const f = simFlight(ev, la, s, h0)
     T = f.T
     let j = 1

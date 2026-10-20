@@ -149,3 +149,51 @@ test('a ground ball draws flat, by trajectory or by angle', () => {
   const byAngle = elevationArc({ exitVelo: 95, launchAngle: 4, distance: 90, trajectory: null })
   assert.equal(byAngle.grounded, true)
 })
+
+// ---- Code-review fixes: a result rule bends the DESCENT only, never the peak ----
+
+const LF = { x: 60.1, y: 208.2 } // Fenway, about -40 degrees: the Monster
+const CF = { x: 310, y: 105 } // straightaway center
+
+const monotonic = (pts) => pts.every(([x], i) => i === 0 || x >= pts[i - 1][0])
+
+test('a home run reaching the wall low keeps its own peak (no 342 ft blow-up)', () => {
+  const ball = { ...LF, hit: true, homeRun: true, exitVelo: 95, launchAngle: 22, distance: 318, trajectory: 'fly_ball' }
+  const free = elevationArc({ ...ball, x: null, y: null })
+  const arc = elevationArc(ball, FENWAY)
+  assert.ok(heightOnArc(arc.pts, arc.wall.ft) >= arc.wall.height + HOME_RUN_CLEAR_FT - 0.2)
+  // The bend may lift the descent into a new, later top, but never by a factor:
+  // the old whole-arc scale printed 342 ft here, against the model's 41 ft.
+  assert.ok(arc.peak.z < free.peak.z * 1.5, `peak ${arc.peak.z}`)
+  // Everything up to the free arc's peak is untouched.
+  const upTo = free.pts.filter(([x]) => x <= free.peak.x)
+  assert.deepEqual(arc.pts.slice(0, upTo.length), upTo)
+  assert.deepEqual(arc.pts.at(-1), [318, 0])
+})
+
+test('a ball caught at the wall keeps its peak and meets the wall under its top', () => {
+  const ball = { ...CF, hit: false, homeRun: false, exitVelo: 104, launchAngle: 28, distance: 425, trajectory: 'fly_ball' }
+  const free = elevationArc({ ...ball, x: null, y: null })
+  const arc = elevationArc(ball, FENWAY)
+  assert.equal(arc.atWall, true)
+  assert.deepEqual(arc.peak, free.peak)
+  const [x, z] = arc.pts.at(-1)
+  assert.equal(x, arc.wall.ft)
+  assert.ok(z <= arc.wall.height + 0.05)
+})
+
+test('a home run that lands short of the drawn wall draws no wall', () => {
+  const arc = elevationArc({ ...LF, hit: true, homeRun: true, exitVelo: 95, launchAngle: 28, distance: 302, trajectory: 'fly_ball' }, FENWAY)
+  assert.equal(arc.wall, null)
+  assert.deepEqual(arc.pts.at(-1), [302, 0])
+})
+
+test('the arc never runs past its landing and back', () => {
+  for (let la = 12; la <= 70; la += 2) {
+    for (const [ev, dist] of [[95, 300], [105, 410], [80, 150]]) {
+      const arc = elevationArc({ exitVelo: ev, launchAngle: la, distance: dist, trajectory: 'fly_ball' })
+      assert.ok(monotonic(arc.pts), `la ${la} ev ${ev}`)
+      assert.deepEqual(arc.pts.at(-1), [dist, 0])
+    }
+  }
+})

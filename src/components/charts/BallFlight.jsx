@@ -260,8 +260,9 @@ export function BallFlight({ ball, batter, code = '' }) {
     const onKey = (e) => e.key === 'Escape' && setOpen(false)
     window.addEventListener('keydown', onKey)
     // The sheet takes focus and hands it back, the same contract every other
-    // dialog here keeps (StrikeZoneModal). The close button is the target
-    // because it is the only thing in the card a keyboard can act on.
+    // dialog here keeps (StrikeZoneModal). The close button is the target: it
+    // is the first thing in the card a keyboard can act on (the view toggle,
+    // when the ball has a side view, comes after it).
     const trigger = document.activeElement
     closeRef.current?.focus()
     return () => {
@@ -334,11 +335,12 @@ export function BallFlight({ ball, batter, code = '' }) {
       )}
       {open && (
         <ModalPortal>
-          {/* TAP ANYWHERE TO PUT IT AWAY — the scrim and the sheet alike. There
-              is nothing on this card to press, so a tap can only ever mean "I
-              am done reading it", and hunting for a corner ✕ on a phone is the
-              worse of the two. The ✕ stays for the pointer that expects one and
-              for a keyboard, which needs a real focus target. */}
+          {/* TAP ANYWHERE TO PUT IT AWAY — the scrim and the sheet alike. The
+              one control on the card is the view toggle, which stops its own
+              taps (FlightBody); any other tap can only mean "I am done reading
+              it", and hunting for a corner ✕ on a phone is the worse of the
+              two. The ✕ stays for the pointer that expects one and for a
+              keyboard, which needs a real focus target. */}
           <div className="scrim scrim--center" onClick={() => setOpen(false)}>
             <Card as="div" body="flush" className="bflight bflight--modal" role="dialog" aria-modal="true" aria-label={label}>
               <FlightBody

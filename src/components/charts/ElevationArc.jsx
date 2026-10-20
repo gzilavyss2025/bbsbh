@@ -1,4 +1,6 @@
+import { useMemo } from 'react'
 import { elevationArc } from '../../lib/ballpark/ballFlight.js'
+import { round1 as r1 } from '../../lib/math/number.js'
 
 // THE SIDE VIEW OF ONE BALL (#1875): its height against its distance from the
 // plate, with the park's wall standing on the ball's own line. The ball-flight
@@ -9,16 +11,17 @@ import { elevationArc } from '../../lib/ballpark/ballFlight.js'
 // inside its own half's SealBox reveal. lib/ballpark/ballFlight.js says what the
 // arc does and does not claim.
 //
-// ONE SCALE FOR EVERY BALL. The frame is fixed (0 to 480 ft out, 0 to 190 ft
-// up, the same feet per unit both ways), so a popup towers and a line drive
+// ONE SCALE FOR EVERY BALL. The frame is fixed (0 to 510 ft out, past any home
+// run on record, and 0 to 200 ft up, over a high popup; the same feet per unit
+// both ways), so a popup towers and a line drive
 // skims at their true proportions, and two balls in one half-inning compare at a
 // glance. Nothing rescales to fit the ball. The frame is in px at the sheet's
 // width, so the type tokens read at their own size.
 
-const X_MAX_FT = 480
-const Z_MAX_FT = 190
+const X_MAX_FT = 510
+const Z_MAX_FT = 200
 const PAD = { left: 30, right: 8, top: 16, bottom: 24 }
-const S = 0.579 // units per foot: (316 − 38) / 480
+const S = 0.545 // units per foot: (316 − 38) / 510
 const W = PAD.left + PAD.right + X_MAX_FT * S
 const H = PAD.top + PAD.bottom + Z_MAX_FT * S
 const BASE = PAD.top + Z_MAX_FT * S
@@ -28,10 +31,18 @@ const Z_TICKS = [50, 100, 150]
 
 const px = (ft) => PAD.left + Math.min(ft, X_MAX_FT) * S
 const py = (ft) => BASE - Math.min(ft, Z_MAX_FT) * S
-const r1 = (n) => Math.round(n * 10) / 10
+
+// What a screen reader hears. A ground ball's distance is the few feet before a
+// fielder got to it, which the facts strip drops too (BallFlight.jsx, carried).
+function arcLabel(arc, ball) {
+  if (arc.grounded) return 'Side view: on the ground'
+  const peak = `Side view: peak about ${Math.round(arc.peak.z)} feet`
+  return arc.atWall ? `${peak}, off the wall at ${Math.round(arc.wall.ft)} feet` : `${peak}, ${ball.distance} feet out`
+}
 
 export function ElevationPlot({ ball, park }) {
-  const arc = elevationArc(ball, park)
+  // About 25 drag sims to fit the lift: once per ball, not once per render.
+  const arc = useMemo(() => elevationArc(ball, park), [ball, park])
   if (!arc) return null
   const { pts, peak, wall, grounded } = arc
   const d = pts.map(([x, z], i) => `${i ? 'L' : 'M'} ${r1(px(x))} ${r1(py(z))}`).join(' ')
@@ -44,11 +55,7 @@ export function ElevationPlot({ ball, park }) {
         className="bflight__arcsvg"
         viewBox={`0 0 ${r1(W)} ${r1(H)}`}
         role="img"
-        aria-label={
-          grounded
-            ? `Side view: on the ground, ${ball.distance} feet`
-            : `Side view: peak about ${Math.round(peak.z)} feet, ${ball.distance} feet out`
-        }
+        aria-label={arcLabel(arc, ball)}
       >
         {Z_TICKS.map((z) => (
           <g key={z}>
@@ -65,7 +72,7 @@ export function ElevationPlot({ ball, park }) {
           </text>
         ))}
         {/* The wall on the ball's line, at the outline the plan view draws.
-            Its height prints only where Savant measured it. */}
+            Its height prints only at a measured or posted point. */}
         {wall && (
           <g>
             <line className="bflight__arcwall" x1={r1(px(wall.ft))} x2={r1(px(wall.ft))} y1={r1(BASE)} y2={r1(py(wall.height))} />
