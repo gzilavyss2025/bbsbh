@@ -102,12 +102,8 @@ export function meetingCard(feed, gamePk) {
 // The cards of the clubs' Final regular-season games before the slate date, oldest
 // first. [] on a failed schedule read; a game whose feed fails is the empty card.
 export async function fetchMeetings({ clubA, clubB, slateDate }, { signal } = {}) {
-  let rows
-  try {
-    rows = keptGames(await getJson(meetingsUrl(clubA, clubB, slateDate), { signal }))
-  } catch {
-    return []
-  }
+  // A failed schedule read throws, so the card reports a failure; an empty schedule is [].
+  const rows = keptGames(await getJson(meetingsUrl(clubA, clubB, slateDate), { signal }))
   return Promise.all(
     selectMeetings(rows, { clubA, clubB, slateDate }).map(async (g) => {
       const feed = await getJson(`/api/v1.1/game/${g.gamePk}/feed/live`, { signal }).catch(() => null)

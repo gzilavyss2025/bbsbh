@@ -125,10 +125,10 @@ test('fetchMeetings: reads the schedule, then only the meetings before the slate
   }
 })
 
-test('fetchMeetings: a failed schedule read is []', async () => {
+test('fetchMeetings: a failed schedule read throws, so the card can report it', async () => {
   const m = mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 404, json: async () => ({}) }))
   try {
-    assert.deepEqual(await fetchMeetings({ clubA: MIL, clubB: 114, slateDate: '2026-10-22' }), [])
+    await assert.rejects(fetchMeetings({ clubA: MIL, clubB: 114, slateDate: '2026-10-22' }), /404/)
   } finally {
     m.mock.restore()
   }

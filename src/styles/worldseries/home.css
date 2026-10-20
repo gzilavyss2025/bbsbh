@@ -577,6 +577,12 @@
   top: var(--slate-bar-h);
   z-index: var(--z-sticky);
 }
+.ww-scout__failed {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-compact);
+  color: var(--text-caption);
+}
 .ww-scout__card {
   scroll-margin-top: var(--ww-scout-offset, 0px);
 }
