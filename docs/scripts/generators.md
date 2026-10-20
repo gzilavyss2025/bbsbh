@@ -1887,6 +1887,26 @@ Re-run only to fold in a new season.
   re-run writes the same bytes. The pure halves are `scripts/lib/open-data/bio-shards.mjs`
   and `gazetteer.mjs`. Readers: `src/api/history/onThisDay.js`, `src/api/history/birthplaces.js`.
 
+- `gen-where-from-map.mjs` → `public/data/from/map/` (`us.json` and one `{ST}.json` for each
+  state), `scripts/data/from/county-zone.json` and `scripts/data/from/point-county.json` —
+  the map and the zones for "Where they're from" (#1526, `.scratch/where-theyre-from/SPEC.md`
+  §7.2 and §7.3). **Hand-run, NOT on a cron**: run it again only when Census publishes new
+  metro areas, or after `gen-bio-history.mjs` runs again (new birth coordinates). Nothing in it
+  downloads. Fetch `counties-albers-10m.json` and `counties-10m.json` from
+  `https://cdn.jsdelivr.net/npm/us-atlas@3.0.1/` with `lib/open-data/download.mjs`, each into
+  its own new, empty folder outside the repo, then run
+  `node scripts/gen-where-from-map.mjs <counties-albers-10m.json> <counties-10m.json>`.
+  The metro input is `scripts/data/from/metro-zones-2023.csv`: the Census July 2023 delineation
+  and the 2023 population estimates, kept as in-state metro areas of 500,000 or more, at most 6
+  to a state. Every other county goes to a compass zone (9 or more counties: 3 zones; 4 to 8: 2;
+  fewer: `Rest of {State}`). The run writes 51 outlines (50 states and DC), 245 zones and a zone
+  for each of the 3,142 counties. `point-county.json` holds each birthplace point of
+  `public/data/birthplaces/` that lies in a county (`d3-geo` `geoContains`). It took 2 seconds
+  and wrote 376 KB of map files (`us.json` 57 KB, the largest state file, Texas, 10 KB) and 192 KB of tables.
+  No clock: a run again on the same inputs writes the same bytes. `d3-geo`, `topojson-client`
+  and `topojson-simplify` are devDependencies, and only this script uses them. The pure half is
+  `scripts/lib/from/zones.mjs`. The reader comes with the picker page.
+
 - `gen-team-seasons.mjs` → `public/data/team-seasons.json` — one roster per MLB
   team-season, for "six degrees of teammates" (ADR-0100). Source: Retrosheet's
   `allplayers.csv` (inside `basiccsvs.zip`, 741 MB: run `unzip -l`, extract only that
