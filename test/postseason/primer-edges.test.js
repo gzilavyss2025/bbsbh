@@ -17,6 +17,18 @@ test('a hitter edge: 8 PA and .350, or 8 PA and 2 HR', () => {
   assert.ok(edges.every((e) => e.kind === 'hitter'))
 })
 
+test('a hitter edge needs 8 AB too: 8 PA but 6 AB at .500 is no edge', () => {
+  assert.equal(matchupEdges([side('A B', row(1, 'Walks', 6, 3, 0, 8))]).length, 0)
+})
+
+test('8 PA, 8 AB and .375 is an edge', () => {
+  assert.equal(matchupEdges([side('A B', row(1, 'Edge', 8, 3, 0, 8))]).length, 1)
+})
+
+test('2 HR on 6 AB is no edge: the 2-HR branch needs 8 AB too', () => {
+  assert.equal(matchupEdges([side('A B', row(1, 'Pop', 6, 2, 2, 8))]).length, 0)
+})
+
 test('exactly .350 counts (7-for-20)', () => {
   assert.equal(matchupEdges([side('A B', row(1, 'Edge', 20, 7))]).length, 1)
   assert.equal(matchupEdges([side('A B', row(1, 'Edge', 20, 6))]).length, 0)
