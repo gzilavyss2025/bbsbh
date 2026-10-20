@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { MIN_POOL, countedRows, hotColdFlags, mergeRoles, percentileOf, weightOf } from '../src/api/hotcold/rule.js'
+import { MIN_POOL, countedRows, hotColdFlags, mergeRoles, percentileOf, seasonsBeyond, weightOf } from '../src/api/hotcold/rule.js'
 import { foldSeason, pack } from '../src/api/hotcold/line.js'
-import { buildTails, lastCompletedSeason, quantile } from '../scripts/lib/season-checkpoints/tails.mjs'
+import { EXTREME_SHARE, buildExtremes, buildTails, lastCompletedSeason, quantile } from '../scripts/lib/season-checkpoints/tails.mjs'
 
 // The hot and cold callouts' rule (#1855, slice 1). The league tails here are synthetic:
 // each stat's 101 quantiles are a straight line centred on the NORMAL line below, so a
@@ -164,4 +164,48 @@ test('mergeRoles: a two-way player still gets two places, the most unusual first
   assert.deepEqual(out.map((x) => [x.role, x.key]), [['pitching', 'era'], ['hitting', 'hr']])
   // A tie goes to the role listed first.
   assert.deepEqual(mergeRoles({ hitting: [f('ops', 99)], pitching: [f('era', 1)] }).map((x) => x.role), ['hitting', 'pitching'])
+})
+
+test('seasonsBeyond: strictly further out, on the flag side, never his own season', () => {
+  const stats = { era: {
+    low: [[1.5, 10, 2018, 'A'], [1.9, 11, 2022, 'B'], [2.0, 7, 2026, 'Me'], [2.16, 12, 2019, 'Tie'], [2.3, 13, 2020, 'C']],
+    high: [[7.1, 14, 2021, 'D']],
+  } }
+  const flag = { key: 'era', value: 2.16, percentile: 1.9 }
+  // 2.16 ties "Tie" (not better), and his own 2026 line sits in the pool and is left out.
+  assert.deepEqual(seasonsBeyond(flag, stats, { id: 7, season: 2026 }).map((b) => b.name), ['A', 'B'])
+  // Someone else's 2026 counts.
+  assert.deepEqual(seasonsBeyond(flag, stats, { id: 99, season: 2026 }).map((b) => b.name), ['A', 'B', 'Me'])
+  // A high percentile reads the high side.
+  assert.deepEqual(seasonsBeyond({ key: 'era', value: 6.5, percentile: 99 }, stats, { id: 7, season: 2026 }).map((b) => b.name), ['D'])
+  assert.deepEqual(seasonsBeyond(flag, {}, { id: 7, season: 2026 }), [])
+})
+
+test('buildExtremes keeps the outer share of each side, most extreme first', () => {
+  const line = (h) => pack('hitting', { g: 10, pa: 40, ab: 40, h, d: 0, t: 0, hr: 0, bb: 0, hbp: 0, sf: 0, so: 0, sb: 0 })
+  const hitting = {}
+  for (let i = 0; i < 2 * MIN_POOL; i++) hitting[i + 1] = { n: `P${i + 1}`, c: [line(i % 20)], f: line(i % 20) }
+  const out = buildExtremes({ 2025: { hitting, pitching: {} } })
+  const keep = Math.ceil(2 * MIN_POOL * EXTREME_SHARE)
+  const avg = out.hitting[10].avg
+  assert.equal(avg.high.length, keep)
+  assert.equal(avg.low.length, keep)
+  assert.equal(avg.high[0][0], 19 / 40)
+  assert.equal(avg.low[0][0], 0)
+  assert.deepEqual(avg.high[0].slice(2), [2025, avg.high[0][3]])
+  // Home runs flag on the high side only, so only that side is kept.
+  assert.deepEqual(Object.keys(out.hitting[10].hr), ['high'])
+  // No season here reached a full season, so there is no 'full' pool.
+  assert.equal(out.hitting.full, undefined)
+})
+
+test('buildExtremes: the full pool is final lines of seasons that reached a full season', () => {
+  const at = (g, h) => pack('hitting', { g, pa: 4 * g, ab: 4 * g, h, d: 0, t: 0, hr: 0, bb: 0, hbp: 0, sf: 0, so: 0, sb: 0 })
+  const hitting = {}
+  // MIN_POOL full seasons (155 G), plus one short season (120 G) with the best average.
+  for (let i = 0; i < MIN_POOL; i++) hitting[i + 1] = { n: `P${i + 1}`, c: [], f: at(155, 100 + i) }
+  hitting.short = { n: 'Short', c: [], f: at(120, 400) }
+  const full = buildExtremes({ 2024: { hitting, pitching: {} } }).hitting.full
+  assert.equal(full.avg.high[0][3], `P${MIN_POOL}`)
+  assert.ok(!full.avg.high.some((r) => r[3] === 'Short'))
 })

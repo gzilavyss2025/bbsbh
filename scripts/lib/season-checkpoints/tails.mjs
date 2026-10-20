@@ -1,7 +1,7 @@
 // The pure half of gen-season-checkpoints.mjs (#1855): which seasons it pools, and the
 // league tails it derives from the raw checkpoint store. The line math itself is the
 // app's (`src/api/hotcold/line.js`).
-import { STATS, inPool, unpack } from '../../../src/api/hotcold/line.js'
+import { FULL_SEASON, STATS, inPool, sampleOf, unpack } from '../../../src/api/hotcold/line.js'
 import { MIN_POOL } from '../../../src/api/hotcold/rule.js'
 
 export const ROLES = ['hitting', 'pitching']
@@ -53,4 +53,58 @@ export function buildTails(rawBySeason) {
     }
   }
   return tails
+}
+
+// The share of each side of a checkpoint's pool that buildExtremes keeps. A flag sits in a
+// TAIL (2%) side, so every season further out than a flagged player is inside 3%.
+export const EXTREME_SHARE = 0.03
+
+const r4 = (x) => Math.round(x * 1e4) / 1e4
+
+// One pool's extremes: { [stat]: { high, low } }, the outer EXTREME_SHARE of each side, most
+// extreme first, as [value, id, season, name] rows. A stat that flags on one side only
+// (STATS `tails`) keeps that side only.
+function extremesOf(role, rows) {
+  const keep = Math.ceil(rows.length * EXTREME_SHARE)
+  const stats = {}
+  for (const stat of STATS[role]) {
+    const valued = rows
+      .map((r) => ({ ...r, v: stat.rate(r.line) }))
+      .filter((r) => r.v != null)
+      .sort((a, b) => a.v - b.v || a.season - b.season || a.id - b.id)
+    const row = (r) => [r4(r.v), r.id, r.season, r.name]
+    const sides = {}
+    if (!stat.tails || stat.tails.includes('high')) sides.high = valued.slice(-keep).reverse().map(row)
+    if (!stat.tails || stat.tails.includes('low')) sides.low = valued.slice(0, keep).map(row)
+    stats[stat.key] = sides
+  }
+  return stats
+}
+
+// { [season]: raw } -> { hitting: { [checkpoint | 'full']: { [stat]: { high, low } } }, pitching }.
+// Each checkpoint below FULL_SEASON pools the lines cut at it; 'full' is the FINAL lines of the seasons
+// that reached FULL_SEASON. The player page counts and lists, from these rows, the past
+// seasons further out than his: "Only 5 pitchers in the last 10 years had a better ERA".
+export function buildExtremes(rawBySeason) {
+  const out = {}
+  for (const role of ROLES) {
+    const pools = {}
+    for (const [season, raw] of Object.entries(rawBySeason)) {
+      for (const [id, player] of Object.entries(raw?.[role] ?? {})) {
+        const who = { id: Number(id), season: Number(season), name: player.n }
+        player.c.forEach((packed, i) => {
+          const line = unpack(role, packed)
+          const checkpoint = (i + 1) * 10
+          if (checkpoint < FULL_SEASON && inPool(role, line)) (pools[checkpoint] ??= []).push({ ...who, line })
+        })
+        const final = unpack(role, player.f)
+        if (sampleOf(role, final) >= FULL_SEASON && inPool(role, final)) (pools.full ??= []).push({ ...who, line: final })
+      }
+    }
+    out[role] = {}
+    for (const [key, rows] of Object.entries(pools)) {
+      if (rows.length >= MIN_POOL) out[role][key] = extremesOf(role, rows)
+    }
+  }
+  return out
 }

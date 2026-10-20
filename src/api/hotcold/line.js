@@ -14,6 +14,11 @@ import { num } from '../../lib/math/number.js'
 // A checkpoint every STEP games (hitters) or STEP innings (pitchers).
 export const STEP = 10
 
+// A full season, in the same unit: 150 games, or 150 innings (a starter's year; a reliever
+// never gets there). From this checkpoint on, a player is compared with past FINAL lines
+// that reached it, not with lines cut at the checkpoint (Gary, 2026-10-20).
+export const FULL_SEASON = 150
+
 // The cumulative line, as a flat array so the stored checkpoints stay small.
 export const HIT_FIELDS = ['g', 'pa', 'ab', 'h', 'd', 't', 'hr', 'bb', 'hbp', 'sf', 'so', 'sb']
 export const PITCH_FIELDS = ['g', 'outs', 'bf', 'h', 'hr', 'bb', 'hbp', 'so', 'er']

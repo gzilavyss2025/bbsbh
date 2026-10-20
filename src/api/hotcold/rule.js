@@ -128,3 +128,18 @@ export function mergeRoles(byRole) {
     .sort((a, b) => extremity(a) - extremity(b))
     .slice(0, MAX_FLAGS)
 }
+
+// The past seasons further out than a flag, from its extremes file (`extremes/{role}-
+// {checkpoint}.json`, gen-season-checkpoints.mjs): the stat's high side for a high
+// percentile, the low side for a low one. Strictly further out (a tie is not "better"),
+// and never the player's own season, which sits in the pool. Most extreme first, as
+// { value, id, season, name }. The file keeps the outer 3% and a flag sits in the 2% tail,
+// so every season past him is in it.
+export function seasonsBeyond(flag, stats, { id, season }) {
+  const high = flag.percentile >= 50
+  const rows = stats?.[flag.key]?.[high ? 'high' : 'low'] ?? []
+  const v = Math.round(flag.value * 1e4) / 1e4
+  return rows
+    .filter(([value, pid, s]) => (high ? value > v : value < v) && !(pid === id && s === season))
+    .map(([value, pid, s, name]) => ({ value, id: pid, season: s, name }))
+}

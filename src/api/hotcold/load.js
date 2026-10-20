@@ -5,13 +5,17 @@
 // Spoiler-free on an open surface (ADR-0034). The cutoff the caller passes is what holds
 // a game in progress back: rule.js counts only rows dated before it.
 import { fetchPersonStats } from '../person-fetch.js'
-import { staticJson } from '../staticJson.js'
-import { hotColdFlags, mergeRoles } from './rule.js'
+import { staticJson, staticJsonBy } from '../staticJson.js'
+import { FULL_SEASON } from './line.js'
+import { hotColdFlags, mergeRoles, seasonsBeyond } from './rule.js'
 
 const tailsFile = staticJson('/data/season-checkpoints/tails.json', { fallback: null })
+const extremesFile = staticJsonBy((key) => `/data/season-checkpoints/extremes/${key}.json`, { fallback: null })
 
 // { id, roles, season, sportId, cutoff } -> { flags, seasons }. `flags` is mergeRoles'
-// list (at most two); `seasons` is the pooled span ([2017, …, 2026]) the hint names.
+// list (at most two), each with `beyond`: the past seasons further out than his, from the
+// flag's extremes file: the lines cut at his checkpoint, or from FULL_SEASON on the final
+// lines of full seasons (null when that file fails; the card then says no number). `seasons` is the pooled span ([2017, …, 2026]) the hint counts.
 // A MiLB player, a missing tails file or a failed read answers no flags.
 export async function loadHotCold({ id, roles, season, sportId, cutoff }) {
   const none = { flags: [], seasons: [] }
@@ -24,5 +28,9 @@ export async function loadHotCold({ id, roles, season, sportId, cutoff }) {
   const byRole = Object.fromEntries(
     roles.map((role, i) => [role, hotColdFlags({ role, sportId, rows: logs[i], cutoff, tails })]),
   )
-  return { flags: mergeRoles(byRole), seasons: tails.seasons ?? [] }
+  const flags = await Promise.all(mergeRoles(byRole).map(async (f) => {
+    const file = await extremesFile(`${f.role}-${f.checkpoint >= FULL_SEASON ? 'full' : f.checkpoint}`)
+    return { ...f, beyond: file ? seasonsBeyond(f, file.stats, { id, season: Number(season) }) : null }
+  }))
+  return { flags, seasons: tails.seasons ?? [] }
 }

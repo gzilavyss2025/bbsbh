@@ -115,6 +115,7 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
             ))}
             <HotColdCard
               playerId={core.data.bio.id}
+              name={core.data.bio.fullName}
               roles={rolesOf(core.data.bio, blocks)}
               season={core.data.season}
               sportId={core.data.sportId ?? sportId ?? null}

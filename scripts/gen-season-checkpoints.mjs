@@ -10,7 +10,12 @@
 //   searches it for past players who were close at the same checkpoint.
 // - public/data/season-checkpoints/tails.json — what the page reads: for each role and
 //   checkpoint, the pool size and 101 quantiles of each stat in `STATS`, over the pooled
-//   seasons. About 60 KB.
+//   seasons. 124 KB.
+// - public/data/season-checkpoints/extremes/{role}-{checkpoint|full}.json — the outer 3% of
+//   each side of each stat at that checkpoint (`full`: the final lines of the seasons that
+//   reached FULL_SEASON), as [value, id, season, name] rows, so the page can
+//   say exactly how many past seasons were further out and list them. The page reads one
+//   file per callout, only when one shows.
 //
 // THE WINDOW is the last SEASONS completed regular seasons (Gary, 2026-10-20: ten). The
 // line math is imported from the app (`src/api/hotcold/line.js`), never copied, so the
@@ -32,11 +37,12 @@ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { chunk, mapConcurrent } from './lib/concurrency.mjs'
 import { foldSeason, pack } from '../src/api/hotcold/line.js'
-import { ROLES, buildTails, lastCompletedSeason } from './lib/season-checkpoints/tails.mjs'
+import { ROLES, buildExtremes, buildTails, lastCompletedSeason } from './lib/season-checkpoints/tails.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const rawDir = join(here, 'data', 'season-checkpoints')
-const outPath = join(here, '..', 'public', 'data', 'season-checkpoints', 'tails.json')
+const outDir = join(here, '..', 'public', 'data', 'season-checkpoints')
+const outPath = join(outDir, 'tails.json')
 
 const SEASONS = 10
 const BATCH = 25
@@ -96,7 +102,15 @@ async function main() {
     rawBySeason[season] = raw
   }
   await writeJsonAtomic(outPath, { generatedAt: new Date().toISOString(), seasons, ...buildTails(rawBySeason) })
-  console.log(`wrote ${outPath} (${seasons[0]}–${last})`)
+  const extremes = buildExtremes(rawBySeason)
+  let files = 0
+  for (const [role, byCheckpoint] of Object.entries(extremes)) {
+    for (const [checkpoint, stats] of Object.entries(byCheckpoint)) {
+      await writeJsonAtomic(join(outDir, 'extremes', `${role}-${checkpoint}.json`), { seasons, stats })
+      files++
+    }
+  }
+  console.log(`wrote ${outPath} and ${files} extremes files (${seasons[0]}–${last})`)
 }
 
 await main()

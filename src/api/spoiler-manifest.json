@@ -824,7 +824,7 @@
     },
     "hotcold/load.js": {
       "class": "spoiler-free",
-      "why": "The player page's hot and cold loader (#1855): reads the league tails file and the player's regular-season game log, then runs rule.js with the caller's cutoff (the page's ?d= date or slateToday()), so a game in progress today never counts. An open surface (ADR-0034)."
+      "why": "The player page's hot and cold loader (#1855): reads the league tails file, the player's regular-season game log and one extremes file per flag (past seasons' lines, no scores), then runs rule.js with the caller's cutoff (the page's ?d= date or slateToday()), so a game in progress today never counts. An open surface (ADR-0034)."
     },
     "hotcold/rule.js": {
       "class": "spoiler-free",

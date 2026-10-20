@@ -1306,5 +1306,9 @@ checkpoint over ten seasons, and answers at most two stats in the 2% tails, most
 first, one per group (AVG and OPS; ERA and WHIP). Rows dated on or after the cutoff do
 not count, so a game in progress today never does. MLB only. `hotcold/load.js` is the
 player page's loader: it reads the file through `staticJson`, fetches one game log per
-role, and merges a two-way player's flags into the same two places (`mergeRoles`). The
-card is `screens/player/next/top/HotCold.jsx`, with the cutoff `?d=` or `slateToday()`.
+role, and merges a two-way player's flags into the same two places (`mergeRoles`). For
+each flag it then reads one `extremes/{role}-{checkpoint|full}.json` (`staticJsonBy`) and
+`seasonsBeyond` lists the past seasons strictly further out, leaving out his own season.
+The card says that count ("Only 5 pitchers in the last 10 years had a better ERA over a
+full season") and opens the list behind a door. The card is
+`screens/player/next/top/HotCold.jsx`, with the cutoff `?d=` or `slateToday()`.
