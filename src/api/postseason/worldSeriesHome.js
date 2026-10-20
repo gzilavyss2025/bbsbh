@@ -153,6 +153,24 @@ export async function fetchReelGames(games, slateDate) {
   )
 }
 
+// The hero's play buttons: each game's /content clips, for past games only (the
+// same cutoff as fetchReelGames, without its photo reads). A failed read is a
+// game with no clips, so its button simply does not show.
+export async function fetchGameClips(games, slateDate) {
+  const past = (games ?? []).filter((g) => g.date < slateDate)
+  return Promise.all(
+    past.map(async (g) => {
+      try {
+        const content = await getJson(`/api/v1/game/${g.gamePk}/content`)
+        const items = content?.highlights?.highlights?.items
+        return { ...g, clips: Array.isArray(items) ? items : [] }
+      } catch {
+        return { ...g, clips: [] }
+      }
+    }),
+  )
+}
+
 // A pitcher's postseason game log this year, through the day before the slate
 // date (endDate in the request, and the rows filtered again): the Probables
 // card's bars and line. Each split gets `opponent.abbreviation`.

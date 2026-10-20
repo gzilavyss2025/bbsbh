@@ -22,9 +22,9 @@ import { ScoutingReport } from './ScoutingReport.jsx'
 // THE WORLD SERIES HOME (#1906). Rendered by GameSelect on every slate date in
 // the postseason window; it draws nothing unless the bracket says both clubs are
 // known and the Series is not decided heading into the slate date (mode.js).
-// It replaces the bracket fold and the series primer on those dates. Phone
-// (below 740px): the hero carries the schedule strip. Wide: the ledger table
-// carries it. Today's game shows no score at all until the slate date has
+// It replaces the bracket fold and the series primer on those dates. The hero
+// carries the calendar at every width; wide, the ledger table follows it with
+// the runs. Today's game shows no score at all until the slate date has
 // passed (ADR-0116 removed the seal and the day pass that lifted it).
 //
 // Cards, top to bottom. Game day: hero, [ledger], reel, probables, tape + hot
@@ -92,13 +92,13 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
     <Stack gap="section" className="ww">
       <Hero
         mode={mode}
-        model={model}
         game={game}
-        records={data?.standings ?? {}}
         slateDate={slateDate}
         wide={wide}
         played={played}
         umpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
+        splitsByClub={data?.hotBats ?? null}
+        clubGames={data?.clubGames ?? null}
       />
       {wide && <Ledger series={series} model={model} />}
       {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={lcsRound} />}

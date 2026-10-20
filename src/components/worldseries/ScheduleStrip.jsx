@@ -1,49 +1,42 @@
-import { Key } from '../ui/frame/Key.jsx'
-
-// The Series schedule as a strip: one cell per game and one hatched cell per
-// off day. Today is marked, the next game is inked, an if-necessary game has a
-// dashed edge. `columns` is ledgerModel's column list; nothing here reads a
-// result.
-const swatch = (kind) => <span className={`ww-swatch ww-swatch--${kind}`} aria-hidden="true" />
-
-const KEY = [
-  { label: 'Today', mark: swatch('today') },
-  { label: 'Next', mark: swatch('next') },
-  { label: 'Travel', mark: swatch('off') },
-  { label: 'If needed', mark: swatch('maybe') },
-]
-
-export function nextGameNumber(columns) {
-  return columns.find((c) => c.kind === 'game' && c.state === 'future' && !c.ifNecessary)?.gameNumber ?? null
+// The Series schedule as a calendar strip: one cell per game and one per off
+// day, each with its weekday and date. Today is marked, the next game is
+// inked, an if-needed game has a dashed edge, and an off day is a plain cell
+// with no word on it. `days` is calendarDays' list (lib/postseason/worldseries/
+// hero.js); nothing here reads a result. The words a sighted reader gets from
+// the marks are in each cell's hidden text, so there is no key.
+function spoken(d) {
+  const when = [d.weekday, d.day].filter(Boolean).join(' ')
+  const what = d.gameNumber != null ? `Game ${d.gameNumber}` : 'No game'
+  const flags = [d.today && 'today', d.next && 'next game', d.maybe && 'if needed'].filter(Boolean)
+  return [what, when, ...flags].filter(Boolean).join(', ')
 }
 
-export function ScheduleStrip({ columns }) {
-  const next = nextGameNumber(columns)
+export function ScheduleStrip({ days }) {
   return (
-    <div className="ww-strip">
-      <ol className="ww-strip__list" aria-label="Series schedule">
-        {columns.map((c) => {
-          if (c.kind === 'off') {
-            return (
-              <li key={`off-${c.afterGame}`} className={`ww-strip__cell ww-strip__cell--off${c.today ? ' ww-strip__cell--today' : ''}`}>
-                Off
-              </li>
-            )
-          }
-          const cls = [
-            'ww-strip__cell',
-            c.state === 'today' && 'ww-strip__cell--today',
-            c.gameNumber === next && 'ww-strip__cell--next',
-            c.ifNecessary && 'ww-strip__cell--maybe',
-          ]
-          return (
-            <li key={c.gameNumber} className={cls.filter(Boolean).join(' ')}>
-              G{c.gameNumber}
-            </li>
-          )
-        })}
-      </ol>
-      <Key items={KEY} className="ww-strip__key" />
-    </div>
+    <ol className="ww-cal" aria-label="Series schedule">
+      {days.map((d, i) => {
+        const cls = [
+          'ww-cal__day',
+          `ww-cal__day--${d.kind}`,
+          d.today && 'ww-cal__day--today',
+          d.next && 'ww-cal__day--next',
+          d.maybe && 'ww-cal__day--maybe',
+        ]
+        return (
+          <li key={d.key} className={cls.filter(Boolean).join(' ')} style={{ '--i': i }}>
+            <span className="sr-only">{spoken(d)}</span>
+            <span className="ww-cal__wk" aria-hidden="true">
+              {d.weekday}
+            </span>
+            <span className="ww-cal__date" aria-hidden="true">
+              {d.day ?? '—'}
+            </span>
+            <span className="ww-cal__game" aria-hidden="true">
+              {d.gameNumber != null ? `G${d.gameNumber}` : ''}
+            </span>
+          </li>
+        )
+      })}
+    </ol>
   )
 }
