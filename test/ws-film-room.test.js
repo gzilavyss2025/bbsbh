@@ -166,3 +166,12 @@ test('the W and SV pitchers are the winner\'s, the L pitcher the other club\'s, 
   const none = filmRoomModel([{ ...M[0], decisions: { w: '', l: '', s: '' } }], {})[0]
   assert.deepEqual(none.people, [])
 })
+
+test('an inning pair missing its home half pads that half with null, and a tie has no winner', () => {
+  const g = { ...M[0], innings: [[1, 0], [0, 2], [3]] }
+  const [m] = filmRoomModel([g], {})
+  assert.deepEqual(m.innings.map((r) => r.runs.length), [3, 3])
+  assert.deepEqual(m.innings[1].runs, [0, 2, null])
+  const tie = filmRoomModel([{ ...M[0], away: side(139, 'TB', 2), home: side(158, 'MIL', 2) }], {})[0]
+  assert.deepEqual(tie.rows.map((r) => r.win), [false, false])
+})

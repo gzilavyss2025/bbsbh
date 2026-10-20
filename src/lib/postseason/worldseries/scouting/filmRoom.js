@@ -81,6 +81,8 @@ export function filmRoomModel(meetings, { compact = false } = {}) {
     const sides = [m.away, m.home]
     const top = Math.max(...sides.map((s) => s.runs ?? -1))
     const { w, l, s } = m.decisions
+    // The one club that won, or null for a tie or a missing score.
+    const lead = sides.find((x) => x.runs === top && sides.filter((y) => y.runs === top).length === 1)
     const out = {
       gamePk: m.gamePk,
       date: m.date,
@@ -89,13 +91,12 @@ export function filmRoomModel(meetings, { compact = false } = {}) {
       ump: m.ump,
       awayAbbr: m.away.abbr,
       homeAbbr: m.home.abbr,
-      rows: sides.map((x) => ({ id: x.id, abbr: x.abbr, runs: x.runs, hits: x.hits, errors: x.errors, win: x.runs != null && x.runs === top && sides.filter((y) => y.runs === top).length === 1 })),
+      rows: sides.map((x) => ({ id: x.id, abbr: x.abbr, runs: x.runs, hits: x.hits, errors: x.errors, win: x.runs != null && x === lead })),
       innings: (m.innings ?? []).length ? sides.map((x, i) => ({ abbr: x.abbr, runs: m.innings.map((inn) => inn[i] ?? null) })) : [],
       people: [['W', w, 'w'], ['L', l, 'l'], ['SV', s, 's']]
         .filter(([, name]) => name)
         .map(([label, name, k]) => {
           // the win and the save are the winner's, the loss is the other club's
-          const lead = sides.find((x) => x.runs === top && sides.filter((y) => y.runs === top).length === 1)
           const club = lead ? (k === 'l' ? sides.find((x) => x !== lead) : lead) : null
           return { label, name, surname: surnameOf(name), id: m.decisionIds?.[k] ?? null, teamId: club?.id ?? null }
         }),

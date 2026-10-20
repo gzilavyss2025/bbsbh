@@ -53,9 +53,10 @@ function LineScore({ m }) {
               <TeamLogo teamId={r.id} name={r.abbr} size={20} />
               <span className="sr-only">{r.abbr}</span>
             </th>
-            {(m.innings[i]?.runs ?? []).map((v, j) => (
+            {(m.innings[i]?.runs ?? []).map((v, j, all) => (
               <td key={j} className={v > 0 ? 'ww-film__scored' : undefined}>
-                {v ?? 'X'}
+                {/* X means the home half never batted: only the last inning, only when the home club won. */}
+                {v ?? (i === 1 && j === all.length - 1 && r.win ? 'X' : NONE)}
               </td>
             ))}
             <td className={r.win ? 'ww-film__tot ww-film__tot--lead' : 'ww-film__tot'}>
@@ -90,19 +91,34 @@ function Pitching({ m }) {
         </tr>
       </thead>
       <tbody>
-        {m.starters.map((s) => (
-          <tr key={s.id}>
-            <th scope="row" className="ww-film__pname">
-              <Door {...link(playerPath(s.id))} className="ww-film__name">
-                {s.listName}
-              </Door>{' '}
-              <span className="ww-film__tag">{[s.abbr, s.hand].filter(Boolean).join(' | ')}</span>
-            </th>
-            {s.stats.map((c) => (
-              <td key={c.label}>{c.value ?? NONE}</td>
-            ))}
-          </tr>
-        ))}
+        {m.rows.map((r) => {
+          const s = m.starters.find((x) => x.abbr === r.abbr)
+          if (!s) {
+            return (
+              <tr key={r.abbr}>
+                <th scope="row" className="ww-film__pname">
+                  {r.abbr}
+                </th>
+                <td colSpan={labels.length} className="ww-film__missing">
+                  Starter not posted
+                </td>
+              </tr>
+            )
+          }
+          return (
+            <tr key={s.id}>
+              <th scope="row" className="ww-film__pname">
+                <Door {...link(playerPath(s.id))} className="ww-film__name">
+                  {s.listName}
+                </Door>{' '}
+                <span className="ww-film__tag">{[s.abbr, s.hand].filter(Boolean).join(' | ')}</span>
+              </th>
+              {s.stats.map((c) => (
+                <td key={c.label}>{c.value ?? NONE}</td>
+              ))}
+            </tr>
+          )
+        })}
       </tbody>
     </Table>
   )
@@ -178,7 +194,7 @@ export function FilmMeeting({ m }) {
                     </span>
                     <span className="ww-film__text">{p.text}</span>
                     {watch && (
-                      <IconButton label={`Watch the clip of the ${p.half === 'top' ? 'top' : 'bottom'} ${p.num} run`} mark="md" skin="ink" onClick={() => openClip(p, p.playId)}>
+                      <IconButton label={`Watch the clip of the ${p.half === 'top' ? 'top' : 'bottom'} ${p.num} play`} mark="md" skin="ink" onClick={() => openClip(p, p.playId)}>
                         ▶
                       </IconButton>
                     )}
@@ -202,7 +218,7 @@ export function FilmMeeting({ m }) {
             ))}
           </div>
         )}
-        {open && <HighlightSheet item={null} src={src} loading={loading} notice={notice} onClose={close} />}
+        {open && <HighlightSheet item={null} src={src} notice={loading ? 'Loading the clip…' : notice} onClose={close} />}
         <Door {...link(gamePath(m.date, m.awayAbbr, m.homeAbbr, 'boxscore', m.gameNumber))} className="ww-film__box">
           Box score
         </Door>

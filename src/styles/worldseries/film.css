@@ -129,6 +129,12 @@
   color: inherit;
 }
 
+.ww-film__grid--pit td.ww-film__missing {
+  text-align: left;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+
 .ww-film__tag {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
