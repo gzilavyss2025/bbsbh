@@ -1,0 +1,15 @@
+import { chromium } from 'playwright'
+const out = process.argv[2]
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const p = await b.newPage({ viewport: { width: 390, height: 900 }, deviceScaleFactor: 2 })
+p.on('pageerror', (e) => console.log('ERR', e.message))
+await p.goto('http://localhost:5173/.scratch/film-redesign/index.html?nointro', { waitUntil: 'networkidle' })
+await p.waitForSelector('.ww-film__plays', { timeout: 30000 })
+await p.waitForTimeout(800)
+console.log('watch buttons', await p.locator('.ww-film__plays button').count())
+await p.screenshot({ path: `${out}/w-off.png`, fullPage: true })
+await p.locator('.ww-film__plays button').first().click()
+await p.waitForTimeout(6000)
+console.log('video', await p.locator('video').count(), (await p.locator('.hlsheet, [role=dialog]').first().innerText().catch(() => '')).slice(0, 120))
+await p.screenshot({ path: `${out}/w-sheet.png` })
+await b.close()

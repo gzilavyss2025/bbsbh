@@ -74,7 +74,7 @@ function starterOf(side) {
 // { gamePk, date, gameNumber, day, ump, awayAbbr, homeAbbr, rows: [{ id, abbr, runs, hits, errors, win }],
 //   innings: [{ abbr, runs: [n | null] }] (one row per club, one cell per inning; [] with no linescore),
 //   decisions, starters: [{ id, abbr, name, surname, listName, hand, line, stats: [{ label, value }], mix: [{ code, pct }] }],
-//   scoring?: [{ inning, tag, half, num, text }], lineups? }  (the last two only when not `compact`)
+//   scoring?: [{ inning, tag, half, num, text, teamId (the club batting), playId (clip key or null) }], lineups? }  (the last two only when not `compact`)
 export function filmRoomModel(meetings, { compact = false } = {}) {
   return (meetings ?? []).map((m) => {
     const sides = [m.away, m.home]
@@ -94,7 +94,10 @@ export function filmRoomModel(meetings, { compact = false } = {}) {
       starters: sides.map(starterOf).filter(Boolean),
     }
     if (!compact) {
-      out.scoring = (m.scoring ?? []).map((p) => ({ ...p, ...inningTag(p.inning) }))
+      out.scoring = (m.scoring ?? []).map((p) => {
+        const t = inningTag(p.inning)
+        return { ...p, ...t, teamId: (t.half === 'top' ? m.away : m.home).id, playId: p.playId ?? null }
+      })
       out.lineups = sides.map((x) => ({ abbr: x.abbr, players: x.lineup }))
     }
     return out

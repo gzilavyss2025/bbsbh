@@ -2,9 +2,14 @@ import { useState } from 'react'
 import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { gamePath, playerPath } from '../../../../lib/route.js'
+import { TeamLogo } from '../../../logo/TeamLogo.jsx'
 import { PitchMark } from '../../../playbyplay/pitcherCard/PitchMark.jsx'
+import { HighlightSheet } from '../../../playbyplay/HighlightSheet.jsx'
+import { useWatchClip } from '../../../highlights/useWatchClip.js'
+import { watchClipSource } from '../../../highlights/watchClip.js'
 import { Button } from '../../../ui/control/Button.jsx'
 import { Door } from '../../../ui/control/Door.jsx'
+import { IconButton } from '../../../ui/control/IconButton.jsx'
 import { Card } from '../../../ui/frame/Card.jsx'
 import { Stack } from '../../../ui/layout/Stack.jsx'
 import { Table } from '../../../ui/table/Table.jsx'
@@ -44,7 +49,8 @@ function LineScore({ m }) {
         {m.rows.map((r, i) => (
           <tr key={r.abbr}>
             <th scope="row" className="ww-film__club">
-              {r.abbr}
+              <TeamLogo teamId={r.id} name={r.abbr} size={20} />
+              <span className="sr-only">{r.abbr}</span>
             </th>
             {(m.innings[i]?.runs ?? []).map((v, j) => (
               <td key={j} className={v > 0 ? 'ww-film__scored' : undefined}>
@@ -132,6 +138,7 @@ export function FilmMeeting({ m }) {
   const link = useRouteLink()
   const full = m.scoring !== undefined
   const [lineups, setLineups] = useState(false)
+  const { open, src, notice, loading, openClip, close } = useWatchClip()
   return (
     <Card frame="stamped" label={m.day} labelAs="h3" count={m.ump ? `HP ${m.ump}` : undefined} className="ww-film__card">
       <Stack gap="snug">
@@ -149,15 +156,24 @@ export function FilmMeeting({ m }) {
           <section aria-label="Scoring plays">
             <h4 className="ww-film__head">Scoring</h4>
             <ol className="ww-film__plays">
-              {m.scoring.map((p, i) => (
-                <li key={i}>
-                  <span className="ww-film__when">
-                    <span aria-hidden="true">{p.tag}</span>
-                    <span className="sr-only">{p.half === 'top' ? 'Top' : 'Bottom'} of inning {p.num}</span>
-                  </span>
-                  <span className="ww-film__text">{p.text}</span>
-                </li>
-              ))}
+              {m.scoring.map((p, i) => {
+                const watch = watchClipSource(null, p.playId)
+                return (
+                  <li key={i}>
+                    <TeamLogo teamId={p.teamId} name={p.half === 'top' ? m.awayAbbr : m.homeAbbr} size={22} />
+                    <span className="ww-film__when">
+                      <span aria-hidden="true">{p.tag}</span>
+                      <span className="sr-only">{p.half === 'top' ? 'Top' : 'Bottom'} of inning {p.num}</span>
+                    </span>
+                    <span className="ww-film__text">{p.text}</span>
+                    {watch && (
+                      <IconButton label={`Watch the clip of the ${p.half === 'top' ? 'top' : 'bottom'} ${p.num} run`} mark="md" skin="ink" onClick={() => openClip(p, p.playId)}>
+                        ▶
+                      </IconButton>
+                    )}
+                  </li>
+                )
+              })}
             </ol>
           </section>
         )}
@@ -175,6 +191,7 @@ export function FilmMeeting({ m }) {
             ))}
           </div>
         )}
+        {open && <HighlightSheet item={null} src={src} loading={loading} notice={notice} onClose={close} />}
         <Door {...link(gamePath(m.date, m.awayAbbr, m.homeAbbr, 'boxscore', m.gameNumber))} className="ww-film__box">
           Box score
         </Door>

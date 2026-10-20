@@ -143,8 +143,9 @@ test('a pitcher is listed surname first, a suffix last', () => {
 })
 
 test('a scoring play carries its arrow: up for the top half, down for the bottom', () => {
-  const g = { ...M[0], scoring: [{ inning: 'T1', text: 'a' }, { inning: 'B6', text: 'b' }, { inning: 'T10', text: 'c' }] }
+  const g = { ...M[0], scoring: [{ inning: 'T1', text: 'a', playId: 'p1' }, { inning: 'B6', text: 'b' }, { inning: 'T10', text: 'c' }] }
   const [m] = filmRoomModel([g], {})
+  assert.deepEqual(m.scoring.map((p) => [p.teamId, p.playId]), [[139, 'p1'], [158, null], [139, null]])
   assert.deepEqual(m.scoring.map((p) => [p.tag, p.half, p.num]), [['▲', 'top', '1'], ['▼', 'bottom', '6'], ['▲', 'top', '10']].map(([a, h, n]) => [a + n, h, n]))
   assert.equal(filmRoomModel([g], { compact: true })[0].scoring, undefined)
 })

@@ -23,7 +23,7 @@
 //     starter: { id, name, hand, ip, h, r, er, bb, k, pitches, mix: { [pitchCode]: count } },
 //     lineup: [{ id, name, pos }] },
 //   innings: [[awayRuns, homeRuns]] (null for a half never batted),
-//   scoring: [{ inning: 'T1' | 'B6', text }] }
+//   scoring: [{ inning: 'T1' | 'B6', text, playId }] }  (playId null without pitch events)
 import { selectMeetings } from '../../lib/postseason/worldseries/scouting/meetings.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { getJson } from '../statsapi.js'
@@ -37,6 +37,10 @@ export function meetingsUrl(clubA, clubB, slateDate) {
     `&season=${slateDate.slice(0, 4)}&startDate=${slateDate.slice(0, 4)}-01-01&endDate=${dayBefore(slateDate)}&fields=${FIELDS}`
   )
 }
+
+// The play's clip key: the plate appearance's last pitch (the join clipIndex.js and watchClip.js use).
+// Null where the feed lists no pitch events.
+const terminalPlayId = (play) => (play?.playEvents ?? []).filter((e) => e?.isPitch).at(-1)?.playId ?? null
 
 const num = (v) => (Number.isFinite(Number(v)) && v !== null && v !== '' ? Number(v) : null)
 
@@ -98,7 +102,7 @@ export function meetingCard(feed, gamePk) {
     scoring: (ld?.plays?.scoringPlays ?? [])
       .map((i) => plays[i])
       .filter(Boolean)
-      .map((p) => ({ inning: `${p.about?.isTopInning ? 'T' : 'B'}${p.about?.inning ?? ''}`, text: p.result?.description ?? '' })),
+      .map((p) => ({ inning: `${p.about?.isTopInning ? 'T' : 'B'}${p.about?.inning ?? ''}`, text: p.result?.description ?? '', playId: terminalPlayId(p) })),
   }
 }
 
