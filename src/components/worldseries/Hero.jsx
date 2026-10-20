@@ -1,7 +1,7 @@
 import { teamLocationName, teamClubNameShort } from '../../lib/teams.js'
 import { gamePath, logbookNewPath, umpirePath } from '../../lib/route.js'
 import { useRouteLink } from '../../lib/nav.js'
-import { timeOfDay } from '../../lib/dates.js'
+import { firstPitchText } from '../../lib/dates.js'
 import { Pips } from '../bracket/bracketParts.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Door } from '../ui/control/Door.jsx'
@@ -45,8 +45,7 @@ export function Hero({ mode, model, game, records, slateDate, wide, played = [],
       : gameNumber
         ? `Game ${gameNumber} next`
         : 'Off day'
-  const first = game?.gameDate ? timeOfDay(Date.parse(game.gameDate)) : ''
-  const venue = game ? [game.venue?.name, first || 'TBD'].filter(Boolean).join(' · ') : ''
+  const venue = game ? [game.venue?.name, firstPitchText(game.gameDate, game.startTimeTBD)].filter(Boolean).join(' · ') : ''
 
   const todayIdx = model.columns.findIndex((c) => c.kind === 'game' && c.state === 'today')
   const runsOf = (rowIdx) => {
