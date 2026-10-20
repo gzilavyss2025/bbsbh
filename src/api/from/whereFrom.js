@@ -13,9 +13,8 @@ export const fetchFromIndex = staticJson(`${BASE}/index.json`, { fallback: null 
 // The national outline: { viewBox, states: { GA: { d, b } } }.
 export const fetchFromMap = staticJson(`${BASE}/map/us.json`, { fallback: null })
 
-// One state's zones: { zones: [{ id, name, kind, d }] }.
-const stateMaps = staticJsonBy((st) => `${BASE}/map/${st}.json`, { fallback: null })
-export const fetchFromStateMap = (st) => stateMaps(String(st).toUpperCase())
+// One state's zones, by its upper-case code: { zones: [{ id, name, kind, d }] }.
+export const fetchFromStateMap = staticJsonBy((st) => `${BASE}/map/${st}.json`, { fallback: null })
 
 // Every place of one list, for search and the A to Z list: kind is 'college', 'high-school'
 // or 'hometown'. Rows are arrays (see src/lib/from/list.js lookupRows).

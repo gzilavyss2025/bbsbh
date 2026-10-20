@@ -23,7 +23,7 @@ test('each reader asks for its own file under /data/from/', async () => {
   })
   assert.deepEqual(await fetchFromIndex(), { counts: {} })
   assert.deepEqual(await fetchFromMap(), { states: {} })
-  assert.deepEqual(await fetchFromStateMap('ga'), { zones: [] }) // the state code is upper-cased
+  assert.deepEqual(await fetchFromStateMap('GA'), { zones: [] })
   assert.deepEqual(await fetchFromLookup('hometown'), [['PA', 'donora', 'Donora']])
   assert.deepEqual(await fetchFromPlaces('college', 'GA'), { places: [] })
   assert.deepEqual(asked, [
@@ -53,7 +53,7 @@ test('the committed files have the shapes the page reads', async () => {
   assert.ok(index.generatedAt && index.counts.college.TN > 0 && index.zoneCounts.hometown['ga-atlanta'] > 0)
   assert.ok(index.countries.length > 50 && Array.isArray(index.countries[0]))
   const row = read('lookup/college.json')[0]
-  assert.equal(row.length, 3)
+  assert.ok(row.length === 3 || row.length === 4) // [slug, name, state, city?]
   const place = read('college/TN.json').places.find((p) => p.slug === 'vanderbilt')
   assert.equal(place.state, 'TN')
   assert.ok(Array.isArray(place.players[0]) && place.players[0].length === 4)

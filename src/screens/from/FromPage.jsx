@@ -4,7 +4,7 @@ import '../../styles/from/map.css'
 import '../../styles/from/list.css'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
-import { useRouteLink } from '../../lib/nav.js'
+import { useNav, useRouteLink } from '../../lib/nav.js'
 import { fetchFromIndex, fetchFromLookup, fetchFromMap, fetchFromPlaces, fetchFromStateMap } from '../../api/from/whereFrom.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
@@ -20,7 +20,7 @@ import {
   stateName, unplacedNote,
 } from '../../lib/from/copy.js'
 import { lookupRows, placeLine, placesIn, rowPlace, searchRows, sortPlaces } from '../../lib/from/list.js'
-import { fromCountryPath, fromPath } from '../../lib/from/path.js'
+import { fromCountryPath, fromPath, withKeptParams } from '../../lib/from/path.js'
 import { FROM_LISTS } from '../../lib/from/route.js'
 import { STATE_NAMES } from '../../lib/from/states.js'
 import { PlaceList } from './PlaceList.jsx'
@@ -31,23 +31,38 @@ const STATE_OPTIONS = Object.entries(STATE_NAMES).sort(([, a], [, b]) => (a < b 
 
 // "Where they're from" (#1526): pick a college, a high school or a hometown, and see every big
 // leaguer from there. A standalone page outside the scoring flow, so it opens live (ADR-0034):
-// no SealBox, no reveal-only module. `list`, `state` and `zone` are only the OPENING state, from
-// the address; the page keeps its own picks and writes them back with replaceState so a shared
-// link opens the same view. It does not go through the router for that, because a route change
-// would remount the page and cut the map's zoom short.
+// no SealBox, no reveal-only module. `list`, `state` and `zone` are the address's; the page holds
+// its own picks and writes them back with a REPLACE navigation (every other query parameter and the
+// hash stay), so a shared link opens the same view. The page is not keyed on them, so a pick does
+// not remount it and the map's zoom runs; a link to a different view changes the props, and the
+// page follows (below).
 export function FromPage({ list: openList = 'college', state: openState = null, zone: openZone = null }) {
   useDocumentTitle(FROM_TITLE)
   const linkProps = useRouteLink()
+  const navigate = useNav()
   const [list, setList] = useState(FROM_LISTS.includes(openList) ? openList : 'college')
   const [st, setSt] = useState(openState)
   const [zone, setZone] = useState(openZone)
   const [query, setQuery] = useState('')
   const [shown, setShown] = useState(PAGE)
 
-  const remember = (next) => {
-    const merged = { list, state: st, zone, ...next }
-    window.history.replaceState(window.history.state, '', fromPath(merged))
+  // The address changed from outside (a menu link to /from while a state was picked): follow it.
+  // Our own picks change it too, but then it already matches what the page holds.
+  const [seen, setSeen] = useState([openList, openState, openZone].join('|'))
+  const address = [openList, openState, openZone].join('|')
+  if (seen !== address) {
+    setSeen(address)
+    if (openList !== list || openState !== st || openZone !== zone) {
+      setList(openList)
+      setSt(openState)
+      setZone(openZone)
+      setQuery('')
+      setShown(PAGE)
+    }
   }
+
+  const remember = (next) =>
+    navigate(withKeptParams(fromPath({ list, state: st, zone, ...next }), window.location.search, window.location.hash), { replace: true })
   const pickList = (value) => {
     setList(value)
     setShown(PAGE)
@@ -68,7 +83,9 @@ export function FromPage({ list: openList = 'college', state: openState = null, 
 
   const index = useAsync(() => fetchFromIndex(), [])
   const outline = useAsync(() => fetchFromMap(), [])
-  const lookup = useAsync(() => fetchFromLookup(list), [list])
+  // The lookup (up to 250 KB) serves search and the A to Z list, so a state's own list never loads it.
+  const needsLookup = Boolean(query.trim()) || !st
+  const lookup = useAsync(() => (needsLookup ? fetchFromLookup(list) : Promise.resolve([])), [list, needsLookup])
   const stateMap = useAsync(() => (st ? fetchFromStateMap(st) : Promise.resolve(null)), [st])
   const shard = useAsync(() => (st ? fetchFromPlaces(list, st) : Promise.resolve(null)), [list, st])
 
@@ -82,10 +99,8 @@ export function FromPage({ list: openList = 'college', state: openState = null, 
   // else every place A to Z.
   const view = useMemo(() => {
     const all = lookupRows(list, lookup.data)
-    if (query.trim()) {
-      const rows = searchRows(all, query)
-      return { rows: rows.map((r) => ({ key: `${r.state}/${r.slug}`, place: rowPlace(list, r), name: r.name, line: r.state ?? '' })), ready: !lookup.loading }
-    }
+    const toRow = (r) => ({ key: `${r.state}/${r.slug}`, place: rowPlace(list, r), name: r.name, line: placeLine(r) })
+    if (query.trim()) return { rows: searchRows(all, query).map(toRow), ready: !lookup.loading }
     if (st) {
       const places = shard.data ? sortPlaces(placesIn(shard.data.places, activeZone)) : []
       return {
@@ -93,7 +108,7 @@ export function FromPage({ list: openList = 'college', state: openState = null, 
         ready: !shard.loading,
       }
     }
-    return { rows: all.map((r) => ({ key: `${r.state}/${r.slug}`, place: rowPlace(list, r), name: r.name, line: r.state ?? '' })), ready: !lookup.loading }
+    return { rows: all.map(toRow), ready: !lookup.loading }
   }, [list, lookup.data, lookup.loading, query, st, shard.data, shard.loading, activeZone])
 
   const zoneName = zones.find((z) => z.id === activeZone)?.name

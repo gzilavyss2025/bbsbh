@@ -14,13 +14,14 @@ const ctx = (over = {}) => ({
   project: (lat, lon) => [Math.round(lon), Math.round(lat)],
   ...over,
 })
-const P = (name, extra = {}) => ({ name, firstSeason: 2000, ...extra })
+// A player with a debut year, as nearly all are; a test about a missing date says `debut: undefined`.
+const P = (name, extra = {}) => ({ name, firstSeason: 2000, debut: 2000, ...extra })
 const run = (players, over) => buildFrom(players, ctx(over))
 
 test('a player tuple is [id, name, pos, debutYear]; the debut falls back to the first season', () => {
   const { files } = run({
     1: P('Late Debut', { debut: 1988, firstSeason: 1987, pos: 'P', col: ['Vanderbilt'] }),
-    2: P('No Debut Date', { firstSeason: 1901, col: ['Vanderbilt'] }),
+    2: P('No Debut Date', { firstSeason: 1901, debut: undefined, col: ['Vanderbilt'] }),
     3: P('Same Year', { debut: 1988, pos: 'X', col: ['Vanderbilt'] }),
   })
   const place = files['college/TN.json'].places[0]
@@ -155,4 +156,26 @@ test('the index carries no clock, and the same cache builds the same files', () 
   assert.equal('generatedAt' in a.index, false)
   assert.equal(JSON.stringify(a.files), JSON.stringify(b.files))
   assert.deepEqual(Object.keys(a.index), ['counts', 'zoneCounts', 'countries', 'unplaced'])
+})
+
+test('a recent player with no debut date is held back; an old undated one stays', () => {
+  const { files, report } = run({
+    1: P('Prospect', { firstSeason: 2026, debut: undefined, col: ['Vanderbilt'] }),
+    2: P('Debuted', { firstSeason: 2026, debut: 2026, col: ['Vanderbilt'] }),
+    3: P('Negro Leagues', { firstSeason: 1938, debut: undefined, col: ['Vanderbilt'] }),
+  })
+  assert.deepEqual(files['college/TN.json'].places[0].players.map((p) => p[1]), ['Negro Leagues', 'Debuted'])
+  assert.equal(report.pending, 1)
+  assert.equal(report.players, 2)
+})
+
+test('a school lookup row carries its city as a 4th item when it has one', () => {
+  const { files } = run({
+    1: P('A', { col: ['Vanderbilt'] }),
+    2: P('B', { col: ['Nowhere Tech'] }),
+    3: P('C', { hs: [{ name: 'Lincoln', city: 'Springfield', state: 'IL' }] }),
+    4: P('D', { hs: [{ name: 'Lincoln', state: 'IN' }] }),
+  })
+  assert.deepEqual(files['lookup/college.json'], [['nowhere-tech', 'Nowhere Tech', null], ['vanderbilt', 'Vanderbilt', 'TN', 'Nashville']])
+  assert.deepEqual(files['lookup/high-school.json'], [['lincoln-il', 'Lincoln', 'IL', 'Springfield'], ['lincoln-in', 'Lincoln', 'IN']])
 })

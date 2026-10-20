@@ -5,10 +5,11 @@ import { slugify } from '../route.js'
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
 
 // The lookup files keep a row as an array to stay small. College and high school:
-// [slug, name, state | null]. Hometown: [state, citySlug, name]. -> [{ slug, name, state }].
+// [slug, name, state | null, city?]. Hometown: [state, citySlug, name].
+// -> [{ slug, name, state, city? }].
 export function lookupRows(list, rows) {
   if (!Array.isArray(rows)) return []
-  return rows.map((r) => (list === 'hometown' ? { slug: r[1], name: r[2], state: r[0] } : { slug: r[0], name: r[1], state: r[2] }))
+  return rows.map((r) => (list === 'hometown' ? { slug: r[1], name: r[2], state: r[0] } : { slug: r[0], name: r[1], state: r[2], city: r[3] }))
 }
 
 // The rows whose name holds the query, ignoring case, accents and punctuation ("st louis"

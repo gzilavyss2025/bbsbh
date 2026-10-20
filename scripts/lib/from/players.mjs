@@ -6,6 +6,14 @@
 // hydrate=education. /people?personIds=...&hydrate=education takes up to 200 ids and returns
 // the schools, the birthplace and the debut date.
 export const FIRST_SEASON = 1876
+// The National Association ran 1871-75 and MLB counts it, so a debut date can be older than the first
+// season list (1876). Nothing before 1800 is a real date.
+const MIN_DEBUT = 1800
+// A player with no mlbDebutDate is a big leaguer only if he is old: every undated player in the data
+// has a first season of 1947 or earlier (Negro Leagues, the 19th century). A recent one with no date
+// is on a 40-man roster and has not debuted, so he is held back until the date appears.
+export const UNDATED_UNTIL = 1960
+export const isPending = (row) => !row.debut && row.firstSeason > UNDATED_UNTIL
 export const BATCH = 200
 export const RECHECK_DAYS = 30
 const FIELDS =
@@ -19,7 +27,7 @@ const clean = (v) => (typeof v === 'string' ? v.trim() : '')
 export function slimPerson(p, firstSeason, prev = null) {
   const row = { name: clean(p.fullName), firstSeason: prev?.firstSeason ?? firstSeason }
   const debut = Number(String(p.mlbDebutDate ?? '').slice(0, 4))
-  if (debut >= FIRST_SEASON) row.debut = debut
+  if (debut >= MIN_DEBUT) row.debut = debut
   const pos = clean(p.primaryPosition?.abbreviation)
   if (pos) row.pos = pos
   const birth = {}
@@ -34,6 +42,17 @@ export function slimPerson(p, firstSeason, prev = null) {
   if (hs.length) row.hs = hs
   const col = (p.education?.colleges ?? []).map((c) => clean(c.name)).filter(Boolean)
   if (col.length) row.col = col
+  // A response that comes back thinner than the row it replaces (an unhydrated record) must not erase
+  // what is known: a debut date never goes away, and a record with no education key at all is
+  // unhydrated, not a man who never went to school.
+  if (prev) {
+    if (prev.debut && !row.debut) row.debut = prev.debut
+    if (prev.birth && !row.birth) row.birth = prev.birth
+    if (p.education === undefined) {
+      if (prev.hs) row.hs = prev.hs
+      if (prev.col) row.col = prev.col
+    }
+  }
   return Object.fromEntries(Object.entries(row).sort(([a], [b]) => (a < b ? -1 : 1)))
 }
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { mapConcurrent } from '../scripts/lib/concurrency.mjs'
-import { BATCH, fetchPeople, fetchSeasonIds, recheckSlice, slimPerson, sortedIds } from '../scripts/lib/from/players.mjs'
+import { BATCH, fetchPeople, fetchSeasonIds, isPending, recheckSlice, slimPerson, sortedIds } from '../scripts/lib/from/players.mjs'
 
 // The player cache of "Where they're from" (#1526, SPEC §6.4). The three people are a live
 // /people?hydrate=education response from 2026-10-20 (Yelich, Gray, Núñez).
@@ -79,4 +79,36 @@ test('fetchPeople asks for 200 ids at a time and stops on a failed batch', async
   assert.equal(got.requests, 3)
   assert.deepEqual(asked.sort((a, b) => b - a), [BATCH, BATCH, 50])
   await assert.rejects(fetchPeople(async () => { throw new Error('503') }, ids, mapConcurrent), /503/)
+})
+
+test('a National Association debut (1871) is kept, though the first season list is 1876', () => {
+  const row = slimPerson({ id: 110284, fullName: 'Cap Anson', mlbDebutDate: '1871-05-06' }, 1876)
+  assert.equal(row.debut, 1871)
+  assert.equal(row.firstSeason, 1876)
+  assert.equal(slimPerson({ id: 1, fullName: 'X', mlbDebutDate: '0001-01-01' }, 1900).debut, undefined)
+})
+
+test('a response thinner than the row it replaces does not erase it', () => {
+  const prev = { name: 'A', firstSeason: 2001, debut: 2001, pos: 'P', birth: { city: 'Troy', state: 'NY', country: 'USA' }, hs: [{ name: 'Troy High' }], col: ['Siena'] }
+  const thin = slimPerson({ id: 1, fullName: 'A' }, 2026, prev) // no education key, no birth, no debut date
+  assert.deepEqual([thin.debut, thin.birth, thin.hs, thin.col], [2001, prev.birth, prev.hs, prev.col])
+  // an education key that is present and empty is a real answer
+  const kept = slimPerson({ id: 1, fullName: 'A', education: {}, birthCity: 'Troy' }, 2026, prev)
+  assert.equal(kept.col, undefined)
+  assert.equal(kept.hs, undefined)
+  // a changed value wins
+  assert.equal(slimPerson({ id: 1, fullName: 'A', education: { colleges: [{ name: 'RPI' }] } }, 2026, prev).col[0], 'RPI')
+})
+
+test('a row built from a thin response has the same key order as a fresh one', () => {
+  const prev = { name: 'A', firstSeason: 2001, debut: 2001, birth: { city: 'Troy' }, col: ['Siena'] }
+  const merged = Object.keys(slimPerson({ id: 1, fullName: 'A' }, 2026, prev))
+  assert.deepEqual(merged, [...merged].sort())
+})
+
+test('isPending: a recent player with no debut date has not debuted; an old undated one is real', () => {
+  assert.equal(isPending({ firstSeason: 2026 }), true)
+  assert.equal(isPending({ firstSeason: 2026, debut: 2026 }), false)
+  assert.equal(isPending({ firstSeason: 1938 }), false) // Negro Leagues era, no date on file
+  assert.equal(isPending({ firstSeason: 1876 }), false)
 })

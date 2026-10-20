@@ -43,7 +43,6 @@ if (!albersPath || !countiesPath) {
   throw new Error('usage: gen-where-from-map.mjs <counties-albers-10m.json> <counties-10m.json>')
 }
 const readTopo = async (p) => JSON.parse(await readFile(p, 'utf8'))
-const sortKeys = (o) => Object.fromEntries(Object.keys(o).sort().map((k) => [k, o[k]]))
 
 const albers = simp.presimplify(await readTopo(albersPath))
 const national = simp.simplify(albers, NATIONAL)
@@ -116,7 +115,7 @@ for (const key of [...seen].sort()) {
 }
 
 await writeShards(MAP_DIR, [['us', { viewBox: VIEW, states }], ...stateEntries])
-await writeJsonAtomic(`${DATA_DIR}/county-zone.json`, sortKeys(countyZone))
+await writeJsonAtomic(`${DATA_DIR}/county-zone.json`, Object.fromEntries(Object.entries(countyZone).sort()))
 await writeJsonAtomic(`${DATA_DIR}/point-county.json`, pointCounty)
 
 const zoneCount = stateEntries.reduce((n, [, s]) => n + s.zones.length, 0)

@@ -11,16 +11,10 @@
 //   5. a hint      "(FL)" or "(Ohio)" narrows several hits to one; else the one four-year school.
 // A name that none of these settles is unmatched. The nightly run lists those with their
 // player counts so the overrides file can grow. The matcher never guesses.
-const STATE = {
-  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut',
-  DE: 'Delaware', DC: 'District of Columbia', FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois',
-  IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
-  MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana',
-  NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York',
-  NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania',
-  PR: 'Puerto Rico', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas',
-  UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
-}
+import { STATE_NAMES } from '../../../src/lib/from/states.js'
+
+// Puerto Rico is a country in the lists, but a college there is still a hint (SPEC D6).
+const STATE = { ...STATE_NAMES, PR: 'Puerto Rico' }
 const STATE_BY_NAME = Object.fromEntries(Object.entries(STATE).map(([k, v]) => [v.toLowerCase(), k]))
 
 // Short names MLB uses for a state's flagship, or for the school a bare name always means in

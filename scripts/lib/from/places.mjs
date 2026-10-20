@@ -3,6 +3,7 @@
 // back. A place is one school or one town, and holds its big leaguers as
 // [id, name, pos, debutYear] tuples, oldest debut first.
 import { slugify } from '../../../src/lib/route.js'
+import { isPending } from './players.mjs'
 import { STATE_NAMES } from './zones.mjs'
 
 const isState = (st) => Object.hasOwn(STATE_NAMES, st)
@@ -49,7 +50,8 @@ export function countryOf(birth) {
 // -> { files: { 'college/GA.json': body, ... }, index, report }. `index` has no clock: the
 // generator stamps generatedAt, so a rerun on the same cache differs in that one field.
 export function buildFrom(players, ctx) {
-  const ids = Object.keys(players)
+  // A recent player with no debut date has not reached the majors (SPEC §14, and see players.mjs).
+  const ids = Object.keys(players).filter((id) => !isPending(players[id]))
   const place = (key) => ctx.project(...key.split(',').map(Number))
 
   // --- US birth towns: a county and a map point for each, found from the players' coordinates.
@@ -75,7 +77,7 @@ export function buildFrom(players, ctx) {
   const pointOfTown = (town) => (townPoint.has(town) ? place(mode(townPoint.get(town))) : null)
 
   const files = {}
-  const report = { players: ids.length }
+  const report = { players: ids.length, pending: Object.keys(players).length - ids.length }
   const compact = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== null))
   const finish = (slug, name, extra, tuples) =>
     compact({ slug, name, ...extra, players: tuples.sort(byDebut) })
@@ -232,7 +234,8 @@ export function buildFrom(players, ctx) {
       if (state) counts[kind][state] = (counts[kind][state] ?? 0) + 1
       if (pl.zone) zoneCounts[kind][pl.zone] = (zoneCounts[kind][pl.zone] ?? 0) + 1
       if (kind === 'hometown') lookup.hometown.push([state, pl.slug, pl.name])
-      else lookup[kind].push([pl.slug, pl.name, state])
+      // The city (when known) is a 4th item, so a search can tell "Lincoln, Springfield, IL" from "Lincoln, Chicago, IL".
+      else lookup[kind].push(pl.city ? [pl.slug, pl.name, state, pl.city] : [pl.slug, pl.name, state])
     }
     for (const [bucket, places] of byState) files[`${kind}/${bucket}.json`] = { places: places.sort((a, b) => cmp(a.slug, b.slug)) }
     counts[kind] = sortedObject(counts[kind])

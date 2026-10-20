@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { fromCountryPath, fromPath, fromPlacePath } from '../src/lib/from/path.js'
+import { fromCountryPath, fromPath, fromPlacePath, withKeptParams } from '../src/lib/from/path.js'
 import { placeKey } from '../src/lib/from/route.js'
 import { parseRoute } from '../src/lib/route.js'
 
@@ -96,4 +96,11 @@ test('placeKey is one string for the whole address, different for every place', 
   assert.equal(new Set(keys).size, keys.length)
   assert.equal(placeKey(parseRoute('/from/pa/donora')), 'hometown/PA/donora')
   assert.equal(placeKey(parseRoute('/from/college/vanderbilt')), 'college/vanderbilt')
+})
+
+test('withKeptParams keeps every other query parameter and the hash, and replaces list and zone', () => {
+  assert.equal(withKeptParams('/from/ga', '?nointro', ''), '/from/ga?nointro=')
+  assert.equal(withKeptParams('/from/ga?zone=ga-atlanta&list=hometown', '?list=college&zone=x&nointro&utm=a', '#top'), '/from/ga?zone=ga-atlanta&list=hometown&nointro=&utm=a#top')
+  assert.equal(withKeptParams('/from', '', ''), '/from')
+  assert.equal(withKeptParams('/from', '?list=hometown&zone=ga-atlanta', ''), '/from') // only list and zone: nothing kept
 })

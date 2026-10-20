@@ -30,7 +30,10 @@ test('zoomTransform takes a factor, and no box is the whole country', () => {
 })
 
 test('lookupRows reads both lookup shapes', () => {
-  assert.deepEqual(lookupRows('college', [['vanderbilt', 'Vanderbilt', 'TN']]), [{ slug: 'vanderbilt', name: 'Vanderbilt', state: 'TN' }])
+  assert.deepEqual(lookupRows('college', [['vanderbilt', 'Vanderbilt', 'TN', 'Nashville'], ['x', 'X', null]]), [
+    { slug: 'vanderbilt', name: 'Vanderbilt', state: 'TN', city: 'Nashville' },
+    { slug: 'x', name: 'X', state: null, city: undefined },
+  ])
   assert.deepEqual(lookupRows('hometown', [['PA', 'donora', 'Donora']]), [{ slug: 'donora', name: 'Donora', state: 'PA' }])
   assert.deepEqual(lookupRows('college', null), [])
 })
@@ -107,10 +110,7 @@ test('no copy line has an exclamation mark, an emoji or the banned word', () => 
   }
 })
 
-test('the credit lines match the ones the generators carry, and the About page prints them', () => {
-  assert.equal(copy.IPEDS_CREDIT, IPEDS_CREDIT)
-  assert.equal(copy.CENSUS_CREDIT, CENSUS_CREDIT)
-  assert.equal(copy.GEONAMES_CREDIT, GEONAMES_CREDIT)
+test('the About page prints the two new credit lines, and each page foot lists its own', () => {
   const about = readFileSync(new URL('../src/screens/AboutPage.jsx', import.meta.url), 'utf8')
   assert.ok(about.includes(IPEDS_CREDIT), 'IPEDS on the About page')
   assert.ok(about.includes(CENSUS_CREDIT), 'Census on the About page')

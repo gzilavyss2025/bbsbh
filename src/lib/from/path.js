@@ -21,3 +21,13 @@ export function fromPlacePath(place) {
 }
 
 export const fromCountryPath = (slug) => `/from/country/${slug}`
+
+// A pick rewrites the address with fromPath, which knows only `list` and `zone`. Every other query
+// parameter the page was opened with (?nointro, a campaign tag) and the hash ride along unchanged.
+export function withKeptParams(path, search = '', hash = '') {
+  const [base, qs = ''] = path.split('?')
+  const q = new URLSearchParams(qs)
+  for (const [k, v] of new URLSearchParams(search)) if (k !== 'list' && k !== 'zone' && !q.has(k)) q.append(k, v)
+  const out = q.toString()
+  return `${base}${out ? `?${out}` : ''}${hash}`
+}

@@ -1,6 +1,7 @@
 // The words of the "Where they're from" pages (#1526, SPEC §3), written once. Sentence case
 // here; the stylesheet sets any capitals. No emoji, no exclamation marks. "Postseason", never
 // the banned word (check-word-choice).
+import { CENSUS_CREDIT, GEONAMES_CREDIT, IPEDS_CREDIT } from '../../../scripts/lib/open-data/credits.mjs'
 import { STATE_NAMES } from './states.js'
 
 export const FROM_TITLE = 'Where they’re from'
@@ -50,10 +51,6 @@ export const unplacedNote = (n) => `${n} colleges are not on the map yet. Search
 export const footnote = (list) =>
   `${isTown(list) ? 'Birthplaces' : 'Schools'} as the MLB Stats API lists them. A player who did not reach the majors is not listed.`
 
-// Printed in the page foot and on the About page. test/from-copy.test.js pins them against
-// scripts/lib/open-data/credits.mjs, where the generators read them.
-export const IPEDS_CREDIT = 'College locations from the U.S. Department of Education, National Center for Education Statistics, IPEDS.'
-export const CENSUS_CREDIT = 'Metro areas and populations from the U.S. Census Bureau.'
-export const GEONAMES_CREDIT = 'Birthplace locations from GeoNames (geonames.org), licensed under CC BY 4.0.'
-
+// The credit lines are written once, in credits.mjs, where the generators read them (ADR-0100).
+// test/from-lib.test.js checks that the About page prints them too.
 export const creditsFor = (list) => (isTown(list) ? [CENSUS_CREDIT, GEONAMES_CREDIT] : [IPEDS_CREDIT, CENSUS_CREDIT])

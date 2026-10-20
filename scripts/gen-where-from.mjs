@@ -8,8 +8,9 @@
 // one request), and re-checks the next 1/30 of all stored players (about 4 requests), so every
 // player is looked at again once in 30 nights. A player is never removed.
 //
-// Then the public files are rebuilt from the cache with sorted keys and no clock, except
-// index.json's generatedAt, so a night with no change writes the same bytes.
+// Then the public files are rebuilt from the cache with sorted keys and no clock. Two files change on
+// every night by design: index.json (its generatedAt, which the freshness guard reads) and cursor.json
+// (the re-check position). Every other file is the same bytes until a player changes.
 //
 //   node scripts/gen-where-from.mjs             the nightly run
 //   node scripts/gen-where-from.mjs --offline   rebuild the public files from the cache only
@@ -31,7 +32,7 @@ import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { buildCollegeMatcher } from './lib/from/college-match.mjs'
 import { packSchools, parseHd, unpackSchools } from './lib/from/ipeds.mjs'
 import { buildFrom } from './lib/from/places.mjs'
-import { fetchPeople, fetchSeasonIds, FIRST_SEASON, recheckSlice, slimPerson, sortedIds } from './lib/from/players.mjs'
+import { fetchPeople, fetchSeasonIds, FIRST_SEASON, isPending, recheckSlice, slimPerson, sortedIds } from './lib/from/players.mjs'
 import { albersUsa } from './lib/from/project.mjs'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
@@ -86,10 +87,12 @@ if (!args.includes('--offline')) {
     const listed = await fetchSeasonIds(getJson, season)
     requests += 1
     const fresh = listed.filter((id) => !(id in players))
-    // The rolling re-check, plus the new ids, in one pass.
+    // The rolling re-check, the new ids, and every player still waiting on a debut date (about 20 on a
+    // 40-man roster), in one pass: a call-up shows on the pages the next night, not within 30.
     const slice = recheckSlice(sortedIds(players), cursor)
     cursor = slice.cursor
-    const want = [...new Set([...fresh, ...slice.ids])]
+    const waiting = sortedIds(players).filter((id) => isPending(players[id]))
+    const want = [...new Set([...fresh, ...slice.ids, ...waiting])]
     const got = await fetchPeople(getJson, want, mapConcurrent)
     requests += got.requests
     fetched += got.people.length
@@ -140,7 +143,7 @@ await writeJsonAtomic(`${OUT}/index.json`, { generatedAt: new Date().toISOString
 // --- 4. The report ----------------------------------------------------------------------------
 const pct = (n, of) => `${((100 * n) / of).toFixed(1)}%`
 console.log(
-  `where-from: ${report.players} players (${fetched} fetched in ${requests} requests); ` +
+  `where-from: ${report.players} players (${fetched} fetched in ${requests} requests; ${report.pending} recent players with no debut date are held back); ` +
     `places: ${report.places.college} colleges, ${report.places['high-school']} high schools, ` +
     `${report.places.hometown} US towns, ${report.places.countries} countries`,
 )

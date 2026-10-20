@@ -420,9 +420,8 @@ export default function App() {
       />
     )
   } else if (route.name === 'from') {
-    // The picker writes its own picks back with replaceState (no route change), so the key holds
-    // only what a LINK can change: a new state from outside remounts with fresh state.
-    content = <FromPage key={`from${route.state ?? ''}`} list={route.list} state={route.state} zone={route.zone} />
+    // Not keyed: the picker holds its own picks and follows the address when a link changes it.
+    content = <FromPage list={route.list} state={route.state} zone={route.zone} />
   } else if (route.name === 'from-place') {
     // Keyed on the whole address, so a new place remounts with fresh state (the `photos` precedent).
     content = <FromPlacePage key={placeKey(route)} route={route} />

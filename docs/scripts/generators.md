@@ -1448,7 +1448,10 @@ don't run these by hand.
   season in play, then every player 200 at a time with `hydrate=education`: 23,619 players in
   270 requests and 14 seconds. **Every later night**: the season in play (1 request), the ids
   not in the cache (usually none), and the next 1/30 of the stored players (about 790 players,
-  4 requests), so each player is looked at again every 30 nights. A player is never removed.
+  4 requests), so each player is looked at again every 30 nights. A player is never removed. A recent player with no `mlbDebutDate` (a 40-man prospect) is held back from
+  every page until the date appears, and is fetched again every night; an old undated player (every one is
+  from 1947 or earlier) stays. A re-check that comes back thinner than the row it replaces (no education, no
+  birthplace) keeps the old fields.
   `scripts/data/from/cursor.json` holds the re-check position. The cache is one player a line,
   3.8 MB, so a night's diff stays small. A college name goes to one IPEDS school
   (`lib/from/college-match.mjs`, the IPEDS 2023 directory cut in `scripts/data/from/ipeds.json`);
