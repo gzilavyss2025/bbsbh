@@ -1,0 +1,6 @@
+[
+ {"label":"Brewers 1982","surface":true,"logo":"logo-mil.svg","logoH":0.44,"textL":0.235,"fold":2,"multiplyTex":0.18,"inkOpacity":1,"ry":8,"nickFont":"font-family:'Yellowtail';","nickScale":1.0,"lh":1.0,"city":"Milwaukee","nick":"Brewers","year":1982,"lg":"AL","fill":"#12284B","trim":"#FFC52F","ink":"#F1E7CC"},
+ {"label":"Dodgers 2025","surface":true,"logo":"logo-lad.svg","logoH":0.38,"textL":0.235,"fold":2,"multiplyTex":0.18,"inkOpacity":1,"ry":8,"nickFont":"font-family:'Yellowtail';","nickScale":1.0,"lh":1.0,"city":"Los Angeles","nick":"Dodgers","year":2025,"lg":"NL","fill":"#005A9C","trim":"#EF3E42","ink":"#FFFFFF"},
+ {"label":"Blue Jays 2025","surface":true,"logo":"logo-tor.svg","logoH":0.4,"textL":0.235,"fold":2,"multiplyTex":0.18,"inkOpacity":1,"ry":8,"nickFont":"font-family:'Yellowtail';","nickScale":1.05,"lh":1.0,"city":"Toronto","nick":"Blue Jays","year":2025,"lg":"AL","fill":"#134A8E","trim":"#E8291C","ink":"#F1E7CC"},
+ {"label":"Diamondbacks 2001","surface":true,"logo":"logo-ari.svg","logoH":0.4,"textL":0.235,"fold":2,"multiplyTex":0.18,"inkOpacity":1,"ry":8,"nickFont":"font-family:'Yellowtail';","nickScale":1.25,"lh":1.0,"city":"Arizona","nick":"Diamondbacks","year":2001,"lg":"NL","fill":"#A71930","trim":"#E3D4AD","ink":"#F1E7CC"}
+]
