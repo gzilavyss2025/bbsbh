@@ -19,9 +19,11 @@ const MIN_REAL = 4
 
 // (data from loadClubDefenseRunning, { clubA, clubB }) -> [{ key, group, label, unit, signed, a, b, lead }]
 // in a fixed order, one row per measure: `a` is clubA's figure, `b` clubB's, either null when it has
-// none. The whole card is null when a club has no row, or when fewer than MIN_REAL measures have a
+// none. The whole card is null when the file's season is not `season` (the slate year, when given), when a club has no row, or when fewer than MIN_REAL measures have a
 // real value for BOTH clubs. Above that, a measure with a null side stays in as a row and draws a gap.
-export function gloveLegsModel(data, { clubA, clubB }) {
+export function gloveLegsModel(data, { clubA, clubB, season = null }) {
+  // The file holds one season. On a slate date from another year its figures are not that year's.
+  if (season != null && data?.season != null && data.season !== season) return null
   const pair = clubsFor(data, clubA, clubB)
   if (!pair) return null
   const rows = MEASURES.map((m) => {

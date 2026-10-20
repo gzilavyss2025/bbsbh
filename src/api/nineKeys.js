@@ -19,6 +19,22 @@
 
 import { staticJson } from './staticJson.js'
 
+// `data === NINE_KEYS_FALLBACK` means the file did not load.
+export const NINE_KEYS_FALLBACK = {
+  generatedAt: null,
+  bar: 15,
+  limit: 3,
+  firstSeason: 2000,
+  keys: [],
+  distribution: {},
+  champions: [],
+  current: null,
+  thresholds: [],
+  ladder: [],
+  limitSupport: null,
+  placebo: null,
+}
+
 export const loadNineKeys = staticJson('/data/nine-keys.json', {
   shape: (d) => ({
     generatedAt: d.generatedAt ?? null,
@@ -34,20 +50,7 @@ export const loadNineKeys = staticJson('/data/nine-keys.json', {
     limitSupport: d.limitSupport ?? null,
     placebo: d.placebo ?? null,
   }),
-  fallback: {
-    generatedAt: null,
-    bar: 15,
-    limit: 3,
-    firstSeason: 2000,
-    keys: [],
-    distribution: {},
-    champions: [],
-    current: null,
-    thresholds: [],
-    ladder: [],
-    limitSupport: null,
-    placebo: null,
-  },
+  fallback: NINE_KEYS_FALLBACK,
 })
 
 // ---------------------------------------------------------------------------

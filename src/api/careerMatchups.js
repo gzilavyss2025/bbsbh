@@ -28,9 +28,12 @@
 
 import { staticJson } from './staticJson.js'
 
+// `data === CAREER_MATCHUPS_FALLBACK` means the file did not load.
+export const CAREER_MATCHUPS_FALLBACK = { matchups: {}, generatedAt: null }
+
 export const loadCareerMatchups = staticJson('/data/career-matchups.json', {
   shape: (d) => ({ matchups: d.matchups ?? {}, generatedAt: d.generatedAt ?? null }),
-  fallback: { matchups: {}, generatedAt: null },
+  fallback: CAREER_MATCHUPS_FALLBACK,
 })
 
 // One club's batters against the starter they're about to face, for the game
