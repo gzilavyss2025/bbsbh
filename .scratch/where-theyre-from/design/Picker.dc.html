@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Where they’re from · pick a place</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#f6efdc}
+a{color:#2f6e4f}a:hover{color:#255740}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid #2f6e4f;outline-offset:2px}
+button:disabled{cursor:default}
+.zoom{transition:transform 380ms cubic-bezier(0.2, 0.9, 0.3, 1)}
+@media (prefers-reduced-motion: reduce){.zoom{transition:none}}
+</style>
+</helmet>
+<div style="width: 390px; min-height: 1500px; box-sizing: border-box; padding: 16px 16px 40px; background: #f6efdc; color: #1b2a3a; font-family: 'JetBrains Mono', ui-monospace, monospace; display: flex; flex-direction: column; gap: 20px">
+
+  <header style="display: flex; flex-direction: column; gap: 8px; padding-top: 44px">
+    <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; letter-spacing: 0.05em; text-transform: uppercase; color: #0f1822">Where they’re from</h1>
+    <p style="margin: 0; font-size: 13px; line-height: 1.35; color: #3c4a5a">{{intro}}</p>
+  </header>
+
+  <div role="group" aria-label="Wall" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 2px solid #0f1822; box-shadow: 4px 4px 0 #0f1822">
+    <button type="button" aria-pressed="{{collegeOn}}" onClick="{{pickCollege}}" style="{{collegeStyle}}">College</button>
+    <button type="button" aria-pressed="{{highOn}}" onClick="{{pickHigh}}" style="{{highStyle}}">High school</button>
+    <button type="button" aria-pressed="{{homeOn}}" onClick="{{pickHome}}" style="{{homeStyle}}">Hometown</button>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <label for="school-q" style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #6b6558">{{findLabel}}</label>
+    <input id="school-q" type="search" value="{{query}}" onChange="{{onQuery}}" placeholder="{{findHint}}" style="box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 12px; background: #fffdf6; border: 2px solid #0f1822; border-radius: 0; color: #0f1822; font-family: 'JetBrains Mono', monospace; font-size: 15px">
+  </div>
+
+  <section aria-label="Pick a place" style="position: relative; margin-top: 14px; background: #fbf6e9; border: 2px solid #0f1822; box-shadow: 4px 4px 0 #0f1822">
+    <h2 style="position: absolute; top: -16px; left: 12px; margin: 0; padding: 6px 10px; background: #0f1822; color: #f1e7cc; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; line-height: 1; letter-spacing: 0.1em; text-transform: uppercase">{{mapTitle}}</h2>
+    <div style="padding: 26px 10px 12px; display: flex; flex-direction: column; gap: 12px">
+      <sc-if value="{{hasState}}" hint-placeholder-val="{{false}}">
+        <button type="button" onClick="{{clearState}}" style="align-self: flex-start; min-height: 44px; padding: 0 12px; background: #fbf6e9; border: 2px solid #0f1822; border-radius: 0; color: #0f1822; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.09em; text-transform: uppercase">Back to all states</button>
+      </sc-if>
+      <svg viewBox="0 0 975 610" aria-hidden="true" style="display: block; width: 100%; height: auto; overflow: hidden">
+        <g class="zoom" style="{{zoomStyle}}">
+          <sc-for list="{{shapes}}" as="s" hint-placeholder-count="51">
+            <path d="{{s.d}}" fill="{{s.fill}}" stroke="{{s.stroke}}" stroke-width="{{s.width}}" vector-effect="non-scaling-stroke" stroke-linejoin="round" onClick="{{s.pick}}" style="{{s.cursor}}"></path>
+          </sc-for>
+          <sc-for list="{{zoneShapes}}" as="z" hint-placeholder-count="0">
+            <path d="{{z.d}}" fill="{{z.fill}}" stroke="#0f1822" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" onClick="{{z.pick}}" style="{{z.cursor}}"></path>
+          </sc-for>
+        </g>
+      </svg>
+      <div style="display: flex; align-items: center; gap: 12px; font-size: 11px; color: #3c4a5a">
+        <span style="display: flex; align-items: center; gap: 4px"><span aria-hidden="true" style="width: 12px; height: 12px; background: #86be98; border: 1px solid #0f1822"></span>{{hasLegend}}</span>
+        <span style="display: flex; align-items: center; gap: 4px"><span aria-hidden="true" style="width: 12px; height: 12px; background: #0f1822"></span>Picked</span>
+      </div>
+      <sc-if value="{{hasZones}}" hint-placeholder-val="{{false}}">
+        <div role="group" aria-label="{{zoneGroupLabel}}" style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{zoneChips}}" as="c" hint-placeholder-count="6">
+            <button type="button" aria-pressed="{{c.pressed}}" disabled="{{c.off}}" onClick="{{c.pick}}" style="{{c.style}}">{{c.label}}<span style="font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 11px; letter-spacing: 0">{{c.count}}</span></button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{noZones}}" hint-placeholder-val="{{false}}">
+        <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #3c4a5a">Zones for {{stName}} are not drawn yet.</p>
+      </sc-if>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="school-st" style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #6b6558">State</label>
+        <select id="school-st" value="{{stValue}}" onChange="{{onState}}" style="box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 12px; background: #fffdf6; border: 2px solid #0f1822; border-radius: 0; color: #0f1822; font-family: 'JetBrains Mono', monospace; font-size: 15px">
+          <option value="">All states</option>
+          <sc-for list="{{stateOptions}}" as="o" hint-placeholder-count="8">
+            <option value="{{o.code}}">{{o.label}}</option>
+          </sc-for>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Places" style="position: relative; margin-top: 14px; background: #fbf6e9; border: 2px solid #0f1822; box-shadow: 4px 4px 0 #0f1822">
+    <h2 style="position: absolute; top: -16px; left: 12px; margin: 0; padding: 6px 10px; background: #0f1822; color: #f1e7cc; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; line-height: 1; letter-spacing: 0.1em; text-transform: uppercase; width: fit-content; max-width: calc(100% - 122px)">{{listTitle}}</h2>
+    <span style="position: absolute; top: -14px; right: 12px; padding: 4px 8px; background: #86be98; border: 2px solid #0f1822; color: #0f1822; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 13px; line-height: 1; letter-spacing: 0.05em; text-transform: uppercase">{{schoolCount}}</span>
+    <ul style="list-style: none; margin: 0; padding: 18px 0 0">
+      <sc-for list="{{schools}}" as="s" hint-placeholder-count="8">
+        <li style="border-top: 1px solid #ded6c0">
+          <a href="{{s.href}}" style="min-height: 44px; padding: 8px 12px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 2px; color: #0f1822; text-decoration: none">
+            <span style="font-size: 14px; font-weight: 500">{{s.name}}</span>
+            <span style="font-size: 11px; color: #3c4a5a">{{s.place}}</span>
+          </a>
+        </li>
+      </sc-for>
+    </ul>
+    <sc-if value="{{empty}}" hint-placeholder-val="{{false}}">
+      <p style="margin: 0; padding: 12px; border-top: 1px solid #ded6c0; font-size: 13px; color: #3c4a5a">{{emptyText}}</p>
+    </sc-if>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { level: 'college', query: '', st: null, zone: null, map: { states: {}, zones: {} } };
+  }
+  componentDidMount() {
+    var self = this;
+    fetch('/_blob/d298d30933f001391b8daba80f8ecd3c')
+      .then(function (r) { return r.json(); })
+      .then(function (map) { self.setState({ map: map }); })
+      .catch(function () {});
+  }
+  renderVals() {
+    var self = this;
+    var names = {AK:'Alaska',AL:'Alabama',AR:'Arkansas',AZ:'Arizona',CA:'California',CO:'Colorado',CT:'Connecticut',DC:'District of Columbia',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',IA:'Iowa',ID:'Idaho',IL:'Illinois',IN:'Indiana',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',MA:'Massachusetts',MD:'Maryland',ME:'Maine',MI:'Michigan',MN:'Minnesota',MO:'Missouri',MS:'Mississippi',MT:'Montana',NC:'North Carolina',ND:'North Dakota',NE:'Nebraska',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NV:'Nevada',NY:'New York',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VA:'Virginia',VT:'Vermont',WA:'Washington',WI:'Wisconsin',WV:'West Virginia',WY:'Wyoming'};
+    var zoneNames = { GA: [['north', 'North Georgia'], ['metro', 'Atlanta metro'], ['middle', 'Middle Georgia'], ['south', 'South Georgia'], ['coast', 'Coast']] };
+    var colleges = [
+      ['Arizona State', 'Tempe, Arizona', 'AZ'], ['Cal State Fullerton', 'Fullerton, California', 'CA'],
+      ['Florida', 'Gainesville, Florida', 'FL'], ['Georgia Tech', 'Atlanta, Georgia', 'GA', 'metro'],
+      ['LSU', 'Baton Rouge, Louisiana', 'LA'], ['Miami', 'Coral Gables, Florida', 'FL'],
+      ['Oregon State', 'Corvallis, Oregon', 'OR'], ['Rice', 'Houston, Texas', 'TX'],
+      ['Stanford', 'Stanford, California', 'CA'], ['Texas', 'Austin, Texas', 'TX'],
+      ['UCLA', 'Los Angeles, California', 'CA'], ['Vanderbilt', 'Nashville, Tennessee', 'TN']
+    ];
+    var highs = [
+      ['Allen Institute', 'Mobile, Alabama', 'AL'], ['Franklin County High School', 'Georgia', 'GA', 'north'],
+      ['Saint Mary’s', 'Baltimore, Maryland', 'MD'], ['Smyrna High School', 'Smyrna, Tennessee', 'TN'],
+      ['Westlake High School', 'Westlake Village, California', 'CA']
+    ];
+    var homes = [
+      ['Athens, Georgia', 'Brian McCann', 'GA', 'north'], ['Cairo, Georgia', 'Jackie Robinson', 'GA', 'south'],
+      ['Columbus, Georgia', 'Frank Thomas', 'GA', 'middle'], ['Dallas, Texas', 'Clayton Kershaw', 'TX'],
+      ['Donora, Pennsylvania', 'Stan Musial, Ken Griffey Sr., Ken Griffey Jr.', 'PA'], ['Kennesaw, Georgia', 'Dansby Swanson', 'GA', 'metro'],
+      ['Leesburg, Georgia', 'Buster Posey', 'GA', 'south'], ['Los Angeles, California', 'Tony Gwynn', 'CA'],
+      ['Martinez, California', 'Joe DiMaggio', 'CA'], ['Mobile, Alabama', 'Hank Aaron', 'AL'],
+      ['Narrows, Georgia', 'Ty Cobb', 'GA', 'north'], ['Smyrna, Tennessee', 'Sonny Gray', 'TN'],
+      ['Pequannock, New Jersey', 'Derek Jeter', 'NJ'], ['San Diego, California', 'Ted Williams', 'CA'],
+      ['Spavinaw, Oklahoma', 'Mickey Mantle', 'OK'], ['Thousand Oaks, California', 'Christian Yelich', 'CA'],
+      ['Vineland, New Jersey', 'Mike Trout', 'NJ'], ['Westfield, Alabama', 'Willie Mays', 'AL']
+    ];
+    var level = this.state.level;
+    var college = level === 'college', home = level === 'home';
+    var pool = college ? colleges : (home ? homes : highs);
+    var unit = home ? 'town' : 'school';
+    var st = this.state.st, zone = this.state.zone;
+    var map = this.state.map;
+    var perState = {}, perZone = {};
+    pool.forEach(function (s) {
+      perState[s[2]] = (perState[s[2]] || 0) + 1;
+      if (s[2] === st && s[3]) perZone[s[3]] = (perZone[s[3]] || 0) + 1;
+    });
+    var zoneData = st ? map.zones[st] : null;
+    var hasZones = !!(zoneData && zoneNames[st]);
+
+    var zoomStyle = 'transform: translate(0px, 0px) scale(1); transform-origin: 0 0';
+    if (st && map.states[st]) {
+      var b = map.states[st].b, w = b[2] - b[0], h = b[3] - b[1];
+      var k = Math.min(975 / w, 610 / h) * 0.86;
+      var tx = (975 - w * k) / 2 - b[0] * k, ty = (610 - h * k) / 2 - b[1] * k;
+      zoomStyle = 'transform: translate(' + tx.toFixed(1) + 'px, ' + ty.toFixed(1) + 'px) scale(' + k.toFixed(3) + '); transform-origin: 0 0';
+    }
+    function pickState(code) { self.setState({ st: code, zone: null }); }
+    var shapes = Object.keys(map.states).map(function (code) {
+      var n = perState[code] || 0, on = code === st;
+      var fill = on ? '#0f1822' : (n ? '#86be98' : '#f6efdc');
+      if (st && !on) fill = n ? '#86be98' : '#ede6d1';
+      return {
+        d: map.states[code].d, rank: on ? 2 : (n ? 1 : 0),
+        fill: fill,
+        stroke: n || on ? '#0f1822' : '#cbc1a7',
+        width: n || on ? 1.5 : 1,
+        cursor: n && !on ? 'cursor: pointer' : '',
+        pick: n && !on ? function () { pickState(code); } : undefined
+      };
+    }).sort(function (a, b) { return a.rank - b.rank; });
+
+    var zoneShapes = [], zoneChips = [];
+    if (hasZones) {
+      zoneNames[st].forEach(function (zn) {
+        var id = zn[0], n = perZone[id] || 0, on = id === zone;
+        zoneShapes.push({
+          d: zoneData[id].d,
+          fill: on ? '#0f1822' : (n ? '#86be98' : '#f6efdc'),
+          cursor: n ? 'cursor: pointer' : '',
+          pick: n ? function () { self.setState({ zone: on ? null : id }); } : undefined
+        });
+      });
+      var chip = 'min-height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 6px; border-radius: 0; cursor: pointer; font-family: \'Barlow Condensed\', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.09em; text-transform: uppercase; ';
+      var all = (perState[st] || 0);
+      zoneChips.push({ label: 'All ' + names[st], count: all, off: false, pressed: zone ? 'false' : 'true',
+        style: chip + (zone ? 'background: #fbf6e9; color: #0f1822; border: 2px solid #0f1822' : 'background: #0f1822; color: #fbf6e9; border: 2px solid #0f1822'),
+        pick: function () { self.setState({ zone: null }); } });
+      zoneNames[st].forEach(function (zn) {
+        var id = zn[0], n = perZone[id] || 0, on = id === zone;
+        zoneChips.push({ label: zn[1], count: n, off: !n, pressed: on ? 'true' : 'false',
+          style: chip + (on ? 'background: #0f1822; color: #fbf6e9; border: 2px solid #0f1822'
+            : n ? 'background: #fbf6e9; color: #0f1822; border: 2px solid #0f1822'
+            : 'background: #f6efdc; color: #6b6558; border: 2px solid #ded6c0'),
+          pick: function () { self.setState({ zone: on ? null : id }); } });
+      });
+    }
+
+    var stateOptions = Object.keys(perState).sort(function (a, b) { return names[a] < names[b] ? -1 : 1; })
+      .map(function (code) { return { code: code, label: names[code] + ' (' + perState[code] + ')' }; });
+    var q = this.state.query.trim().toLowerCase();
+    var schools = pool
+      .filter(function (s) { return (!st || s[2] === st) && (!zone || s[3] === zone) && (!q || s[0].toLowerCase().indexOf(q) !== -1); })
+      .map(function (s) { return { name: s[0], place: s[1], href: home ? 'HomeWall.dc.html' : 'Main.dc.html' }; });
+    var kind = college ? 'Colleges' : (home ? 'Hometowns' : 'High schools');
+    var zoneLabel = '';
+    if (hasZones && zone) zoneNames[st].forEach(function (zn) { if (zn[0] === zone) zoneLabel = zn[1]; });
+    var base = 'min-height: 44px; border: 0; border-radius: 0; cursor: pointer; font-family: \'Barlow Condensed\', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.09em; text-transform: uppercase; ';
+    var onS = base + 'background: #0f1822; color: #fbf6e9';
+    var offS = base + 'background: #fbf6e9; color: #0f1822';
+    function setLevel(l) { self.setState({ level: l, zone: null }); }
+    return {
+      shapes: shapes,
+      zoneShapes: zoneShapes,
+      zoneChips: zoneChips,
+      zoomStyle: zoomStyle,
+      hasState: !!st,
+      hasZones: hasZones,
+      noZones: !!st && !hasZones,
+      stName: st ? names[st] : '',
+      zoneGroupLabel: st ? 'Zones of ' + names[st] : 'Zones',
+      mapTitle: st ? names[st] : 'By state',
+      hasLegend: home ? 'Has a hometown' : 'Has a school',
+      clearState: function () { self.setState({ st: null, zone: null }); },
+      stateOptions: stateOptions,
+      stValue: st || '',
+      onState: function (e) { self.setState({ st: e.target.value || null, zone: null }); },
+      query: this.state.query,
+      onQuery: function (e) { self.setState({ query: e.target.value }); },
+      pickCollege: function () { setLevel('college'); },
+      pickHigh: function () { setLevel('high'); },
+      pickHome: function () { setLevel('home'); },
+      collegeOn: college ? 'true' : 'false',
+      highOn: level === 'high' ? 'true' : 'false',
+      homeOn: home ? 'true' : 'false',
+      collegeStyle: college ? onS : offS,
+      highStyle: level === 'high' ? onS : offS,
+      homeStyle: home ? onS : offS,
+      intro: home ? 'Pick a town. See every big leaguer born there.' : 'Pick a school. See every big leaguer who played there.',
+      findLabel: home ? 'Find a town' : 'Find a school',
+      findHint: home ? 'Donora' : 'Vanderbilt',
+      listTitle: kind + (st ? ' · ' + (zoneLabel || names[st]) : ''),
+      schoolCount: schools.length + ' ' + unit + (schools.length === 1 ? '' : 's'),
+      schools: schools,
+      empty: schools.length === 0,
+      emptyText: st && !perState[st]
+        ? (home ? 'No big leaguer born in ' + names[st] + ' yet.' : 'No ' + (college ? 'college' : 'high school') + ' in ' + names[st] + ' has a big leaguer yet.')
+        : 'No ' + unit + ' by that name has a big leaguer yet.'
+    };
+  }
+}
+</script>
+</body>
+</html>
