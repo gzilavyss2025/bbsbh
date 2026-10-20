@@ -3,8 +3,9 @@ import { keysVerdict, nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { ordinal } from '../../lib/format.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { Door } from '../ui/control/Door.jsx'
-import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { Cluster } from '../ui/layout/Cluster.jsx'
+import { Table } from '../ui/table/Table.jsx'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { useRouteLink } from '../../lib/nav.js'
@@ -22,7 +23,8 @@ import { useRouteLink } from '../../lib/nav.js'
 //   data    loadNineKeys()'s shape: { keys, bar, limit, firstSeason, current }
 //   clubs   [{ id }, { id }], the left club then the right club
 //   season  the series' season; the section shows only for that season's file
-export function SeriesNineKeys({ data, clubs, season }) {
+//   labelAs the name tab's heading element: 'h2' (a series page) or 'h3' (inside the scouting report)
+export function SeriesNineKeys({ data, clubs, season, labelAs = 'h2' }) {
   const routeLink = useRouteLink()
   const teams = nineKeysTeams(data, clubs, season)
   if (!teams) return null
@@ -39,11 +41,8 @@ export function SeriesNineKeys({ data, clubs, season }) {
   const at = (rank) => `${((Math.min(Math.max(rank, 1), 30) - 1) / 29) * 100}%`
   return (
     <section className="psseries__keyssection">
-      <SectionHead look="label" action={<Door {...routeLink('/nine-keys')}>Full report</Door>}>
-        Nine Keys
-      </SectionHead>
-      <Card as="div" body="flush" className="psseries__keys">
-        <table className="psseries__keystable">
+      <Card frame="stamped" label="Nine keys" labelAs={labelAs} as="div" className="psseries__keys">
+        <Table frame="bare" density="keep" className="psseries__keystable">
           <caption className="sr-only">
             Nine Keys ranks out of 30, {abbr(a.teamId)} and {abbr(b.teamId)}
           </caption>
@@ -82,13 +81,16 @@ export function SeriesNineKeys({ data, clubs, season }) {
               </tr>
             ))}
           </tbody>
-        </table>
-        <p className="psseries__keytally">
-          Failed · {abbr(a.teamId)} {a.failed?.length ?? 0} · {abbr(b.teamId)} {b.failed?.length ?? 0}
-          <InfoPopover label="What the failed-key count means" className="psseries__keyverdict">
-            {verdict}
-          </InfoPopover>
-        </p>
+        </Table>
+        <Cluster align="center" className="psseries__keyfoot">
+          <p className="psseries__keytally">
+            Failed · {abbr(a.teamId)} {a.failed?.length ?? 0} · {abbr(b.teamId)} {b.failed?.length ?? 0}
+            <InfoPopover label="What the failed-key count means" className="psseries__keyverdict">
+              {verdict}
+            </InfoPopover>
+          </p>
+          <Door {...routeLink('/nine-keys')}>Full report</Door>
+        </Cluster>
       </Card>
     </section>
   )
