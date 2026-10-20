@@ -14,8 +14,10 @@
 
 /* Square corners (#2319, slice F): every shared component under the Scout page
    reads these tokens, so one override squares them. Pitch marks and map swatch
-   dots draw their own shapes and keep them. */
-.screen.scout {
+   dots draw their own shapes and keep them. Set on <body>, not on .screen.scout, because
+   the filter sheet and the pitch modal portal out to <body> (ModalPortal.jsx); the innings
+   page does the same. */
+body:has(.screen.scout) {
   --radius-xs: var(--radius-square);
   --radius-sm: var(--radius-square);
   --radius-md: var(--radius-square);
