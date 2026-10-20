@@ -22,7 +22,7 @@ function FromLink({ path, children }) {
   if (!path) return children
   const props = linkProps(path)
   return (
-    <a className="plink" href={props.href} onClick={props.onClick}>
+    <a className="plink pnext__fromlink" href={props.href} onClick={props.onClick}>
       {children}
     </a>
   )
