@@ -79,5 +79,41 @@ All the tables are in the script's output. Re-run:
 
 - A pitch-quality layer (Stuff+ or PLV, plan item 5) or several seasons of hitter data
   could change this. Each needs a new data pull and its own backtest.
-- The World Series Pitch by pitch card reads the same kind of figure, pooled over nine
-  hitters. Pooling cuts the noise, but this test did not score a club-level figure.
+- The World Series Pitch by pitch card: see the next section.
+
+## The World Series Pitch by pitch card (club level)
+
+`card-backtest.mjs <dir> <hitters.json>` tests the card's own figure
+(`src/lib/postseason/worldseries/scouting/pitchByPitch.js`). For each club, it takes
+the nine regulars with the most PA before the split date, then pools them on one pitch
+type from one pitcher hand, both batter sides, and takes the gap to the league, rounded
+as the card rounds it. The outcome is the same nine hitters' gap on the same pitch and
+hand after the split date, against any pitcher. `hitters.json` is the statsapi season
+hitting list (`/api/v1/stats?stats=season&group=hitting&season=2026&sportId=1&playerPool=ALL&limit=3000`),
+used only to put each hitter on a club. Intervals: 500 bootstrap resamples by club.
+
+**Result: the card's figure has a weak, real signal once it has half a season or
+more. Its printed gap overstates the true edge about four to seven times (slope 0.14 to 0.23), and its
+call at the current band (.010) is close to a coin flip.**
+
+- **Slope** (how much of the card's gap shows up later; 1 = all of it, 0 = none).
+  Split A (three months of data): about 0 at every `MIN_PA` (0.02 [−0.16, 0.20] at
+  10). Split B (four months): 0.14 [0.01, 0.27] at `MIN_PA` 10, 0.22 [0.05, 0.39] at
+  60, 0.23 [0.04, 0.43] at 100. With the club's overall level taken out, the pitch
+  part alone is 0.16 at 10 and 0.29 [0.23, 0.47] at 60. So the pitch-specific part is
+  real at club level, unlike for one hitter.
+- **The call.** The share of "Arm" or "Bats" calls that point the same way later
+  (split B, weighted by later PA; 50% is a coin flip):
+
+  | `MIN_PA` | Band .010 | Band .020 | Band .030 | Band .050 |
+  |---|---|---|---|---|
+  | 10 (now) | 58% (77% of rows called) | 62% (57%) | 61% (41%) | 58% (21%) |
+  | 60 | 59% (73%) | 64% (50%) | 64% (33%) | 64% (11%) |
+  | 100 | 60% (72%) | 65% (48%) | 65% (31%) | 62% (9%) |
+
+  Split A is 52% to 60% across the table and 36% to 46% at band .050.
+- **`MIN_PA` 10 is not the limit in practice.** Nine regulars pool to a median of
+  137 PA on a pitch in split B, so most rows pass any threshold up to 100.
+- *Inference:* the card in the World Series reads the full regular season (about six
+  months), so its signal should be at least as good as split B. The test cannot show
+  that, because no later window is left to score.
