@@ -234,6 +234,20 @@ starters and the matchup edges do not show on a past date.
 - **No primer**: a day with two rounds on the slate, and a regular-season day. A
   Division Series day with one game per series now shows the primer.
 
+## Ball flight side view: a home run over the Monster, a double off it, a popup
+
+**2026-09-01 SEA @ BOS, at Fenway Park** — gamePk `824716`
+Route base: `/09012026/seabos/`
+
+The ball-flight card's "Elevation Arc" view (#1875). Open the half, tap the at-bat
+chip, tap the diamond, then tap "Elevation Arc".
+
+- `top2`, atBatIndex 13: Arozarena homers to left field (382 ft, 30°). The arc clears
+  the 37.3 ft Monster.
+- `top4`, atBatIndex 33: Raleigh doubles to left field. Statcast's distance (331 ft)
+  is past the wall (313 ft), so the arc ends at the Monster's face.
+- `top5`, atBatIndex 45: J. Rodríguez pops out (77°, 61 ft). Peak ≈155 ft.
+
 ## Categories not included (couldn't verify)
 
 Batting out of order and an overturned replay challenge were searched but

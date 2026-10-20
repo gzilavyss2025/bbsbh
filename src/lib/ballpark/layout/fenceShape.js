@@ -92,3 +92,11 @@ export function heightAt(deg, heights) {
   }
   return heights[ks[ks.length - 1][0]]
 }
+
+// The measured height at a bearing, or null between measured points: the only
+// heights a label may print. `tol` is how many degrees off a point still counts.
+export function measuredHeightAt(deg, heights, tol = 2) {
+  const ks = FIVE.every(([k]) => Number.isFinite(heights?.[k])) ? FIVE : THREE
+  const hit = ks.find(([, a]) => Math.abs(deg - a) <= tol)
+  return hit && Number.isFinite(heights?.[hit[0]]) ? heights[hit[0]] : null
+}

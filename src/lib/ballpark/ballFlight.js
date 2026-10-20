@@ -22,7 +22,9 @@
 // the bow IS the ball's own apex height in feet, laid on its side. A line drive
 // bends a little and a towering popup bends a lot because they really do.
 
-import { HOME } from './ballparkGeometry.js'
+import { HOME, wallDistanceAt } from './ballparkGeometry.js'
+import { heightAt, measuredHeightAt } from './layout/fenceShape.js'
+import { simFlight } from './flightModel.js'
 import { round1 } from '../math/number.js'
 
 // At or under this launch angle the ball is on the ground, drawn dead straight:
@@ -41,14 +43,18 @@ export const GROUND_BALL_MAX_ANGLE = 10
 export const MAX_BOW_FRACTION = 0.55
 export const MAX_BOW_FT = 130
 
+// On the ground: MLB's trajectory first, the angle as the fallback. Both views
+// ask this, so a ball cannot bow in one and run flat in the other.
+export const isGrounded = (launchAngle, trajectory = null) =>
+  trajectory === 'ground_ball' || launchAngle == null || launchAngle <= GROUND_BALL_MAX_ANGLE
+
 // How deep the curve departs from the straight home→landing chord, in the same
 // units (= feet). `launchAngle` is degrees off the ground, MLB's own sign
 // convention (negative = driven into the dirt). Returns 0 for anything on the
 // ground, which is what makes the path a straight line.
 export function bowSagitta(chord, launchAngle, trajectory = null) {
   if (!(chord > 0)) return 0
-  if (trajectory === 'ground_ball') return 0
-  if (launchAngle == null || launchAngle <= GROUND_BALL_MAX_ANGLE) return 0
+  if (isGrounded(launchAngle, trajectory)) return 0
   const angle = Math.min(launchAngle, 89)
   const apex = (chord * Math.tan((angle * Math.PI) / 180)) / 4
   return Math.min(apex, chord * MAX_BOW_FRACTION, MAX_BOW_FT)
@@ -91,5 +97,133 @@ export function ballFlightPath(landing, launchAngle, trajectory = null, home = H
     d: `M ${home.x} ${home.y} Q ${cx} ${cy} ${landing.x} ${landing.y}`,
     grounded: false,
     chord,
+  }
+}
+
+// ---- THE SIDE VIEW ("Elevation Arc", #1875) ----
+//
+// The same ball seen from the side: height against distance from the plate, in
+// feet, with the park's wall standing on the ball's own line. Like the bow, the
+// arc is A PICTURE OF THE HEIGHT, not the tracked path — the feed sends where
+// the ball went and how it left the bat, never its flight.
+//
+// WHY NOT THE BOW'S PARABOLA. range × tan(a) / 4 has no drag, so it is far too
+// low for a real fly ball: 58 ft for a 471 ft home run Statcast measured at a
+// 97 ft peak (Alan Nathan, "A Tale of Two Dingers"). Drawn against a wall, that
+// puts a home run into the fence. So a ball with an exit velocity flies the
+// replay's drag-and-lift model (flightModel.js) with the lift solved to land at
+// the measured distance. ARC_CD is the drag that model needs to agree with
+// Nathan's two measured balls: 93 ft and 56 ft against measured peaks of 97 and
+// 63. The replay's own 0.35 gives 138 ft for the first. Two balls are a sanity
+// check, not a validation. With no exit velocity the parabola is all there is.
+export const ARC_CD = 0.3
+const LIFT_RANGE = [-0.2, 0.45]
+const ARC_SAMPLES = 32
+
+// How far over the wall a home run is drawn at the least, in feet. THE DRAWING
+// MUST AGREE WITH THE RESULT: a modelled arc that clips the top of the wall
+// would draw a home run as a ball off the wall.
+export const HOME_RUN_CLEAR_FT = 4
+
+// The side view needs a launch angle and a distance. A park that tracks neither
+// (most MiLB) has no side view, and the card hides the toggle.
+export const hasElevationArc = (ball) => ball?.launchAngle != null && ball?.distance > 0
+
+// The ball's bearing in degrees off straightaway center, negative toward left
+// field: the frame fenceDistanceAt and heightAt read.
+export function ballBearing(landing, home = HOME) {
+  return (Math.atan2(landing.x - home.x, home.y - landing.y) * 180) / Math.PI
+}
+
+// The wall on the ray at `deg`: feet out, feet high, and `label`, the measured
+// height when the ray falls on a measured point (else null: between points the
+// height is a straight-line estimate, and no label prints one). Null when the
+// layout has no heights or no wall on that ray.
+export function wallOnLine(layout, deg) {
+  const heights = layout?.measurements?.measured?.height ?? layout?.measurements?.wall ?? null
+  if (!heights) return null
+  const ft = wallDistanceAt(layout, deg)
+  if (ft == null) return null
+  return { ft: round1(ft), height: round1(heightAt(deg, heights)), label: measuredHeightAt(deg, heights) }
+}
+
+// [[x, z], ...] in feet, plate to landing. Modelled when there is a speed.
+function airPoints(ball) {
+  const { exitVelo: ev, launchAngle: la, distance: dist } = ball
+  if (ev == null) {
+    const apex = Math.min((dist * Math.tan((Math.min(la, 89) * Math.PI) / 180)) / 4, MAX_BOW_FT)
+    return Array.from({ length: ARC_SAMPLES + 1 }, (_, i) => {
+      const u = i / ARC_SAMPLES
+      return [dist * u, 4 * apex * u * (1 - u)]
+    })
+  }
+  let [lo, hi] = LIFT_RANGE
+  for (let i = 0; i < 24; i++) {
+    const mid = (lo + hi) / 2
+    if (simFlight(ev, la, mid, 3, ARC_CD).dist < dist) lo = mid
+    else hi = mid
+  }
+  const f = simFlight(ev, la, (lo + hi) / 2, 3, ARC_CD)
+  // Stretched to land on the measured distance exactly, where the lift range
+  // could not reach it. The start height is the bat's, 3 ft.
+  const k = dist / f.dist
+  const step = Math.max(1, Math.floor(f.pts.length / ARC_SAMPLES))
+  const pts = f.pts.filter((_, i) => i % step === 0).map(([x, z]) => [x * k, Math.max(0, z)])
+  pts.push([dist, 0])
+  return pts
+}
+
+// Height of the arc at `x` ft, read off the polyline.
+export function heightOnArc(pts, x) {
+  for (let i = 1; i < pts.length; i++) {
+    const [x0, z0] = pts[i - 1]
+    const [x1, z1] = pts[i]
+    if (x <= x1) return x1 === x0 ? z1 : z0 + ((z1 - z0) * (x - x0)) / (x1 - x0)
+  }
+  return 0
+}
+
+// The side view of one ball. Returns null when there is none to draw.
+//   pts      [[x, z], ...] feet, rounded to 0.1
+//   peak     { x, z } feet, or null for a ball on the ground
+//   wall     wallOnLine's answer, or null
+//   grounded the ball never left the ground: one flat line
+//   atWall   a ball that did not leave the park, cut where it met the wall
+//   modelled the arc flew the drag model (false: the plain parabola)
+//
+// The two result rules, both only where the ball's distance is past the wall:
+// a home run is lifted to clear it; any other ball is held to the wall's height
+// and ends at the wall, because the feed says it stayed in.
+export function elevationArc(ball, layout = null) {
+  if (!hasElevationArc(ball)) return null
+  const wall = ball.x != null && ball.y != null ? wallOnLine(layout, ballBearing(ball)) : null
+  const dist = ball.distance
+  if (isGrounded(ball.launchAngle, ball.trajectory)) {
+    return { pts: [[0, 0], [dist, 0]], peak: null, wall, grounded: true, atWall: false, modelled: false }
+  }
+  let pts = airPoints(ball)
+  let atWall = false
+  if (wall && dist > wall.ft) {
+    const z = heightOnArc(pts, wall.ft)
+    if (ball.homeRun && z < wall.height + HOME_RUN_CLEAR_FT && z > 0) {
+      const k = (wall.height + HOME_RUN_CLEAR_FT) / z
+      pts = pts.map(([x, h]) => [x, h * k])
+    } else if (!ball.homeRun) {
+      const k = z > wall.height && z > 0 ? wall.height / z : 1
+      pts = pts.map(([x, h]) => [x, h * k])
+      const met = heightOnArc(pts, wall.ft)
+      pts = [...pts.filter(([x]) => x < wall.ft), [wall.ft, met]]
+      atWall = true
+    }
+  }
+  pts = pts.map(([x, z]) => [round1(x), round1(z)])
+  const top = pts.reduce((a, b) => (b[1] > a[1] ? b : a))
+  return {
+    pts,
+    peak: { x: top[0], z: top[1] },
+    wall,
+    grounded: false,
+    atWall,
+    modelled: ball.exitVelo != null,
   }
 }

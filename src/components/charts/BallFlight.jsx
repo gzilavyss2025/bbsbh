@@ -4,7 +4,9 @@ import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
-import { ballFlightPath } from '../../lib/ballpark/ballFlight.js'
+import { ballFlightPath, hasElevationArc } from '../../lib/ballpark/ballFlight.js'
+import { Segmented } from '../ui/control/Segmented.jsx'
+import { ElevationPlot } from './ElevationArc.jsx'
 import { hoverCardPosition } from '../../lib/playerHoverPosition.js'
 import { useMediaQuery, HOVER_CARD_QUERY } from '../../hooks/useMediaQuery.js'
 import { DEFAULT_HARD_HIT_MPH } from './HitChart.jsx'
@@ -167,7 +169,21 @@ function FlightFacts({ ball }) {
 // corner: floated over the head it sat on the rule underneath and crowded
 // whatever the result line ended with. The popover passes none, and the row
 // simply closes up.
+//
+// THE TWO VIEWS (#1875): the plan view above, or the side view (ElevationArc.jsx).
+// The toggle is on the SHEET only. The popover takes no pointer (see its CSS), so
+// a control there could never be pressed. A ball with no launch angle or no
+// distance has no side view, and the toggle is not drawn at all. The toggle sits
+// above the drawing, so it stays under the thumb when the drawing changes height.
+const VIEWS = [
+  { value: 'spray', label: 'Field Spray' },
+  { value: 'arc', label: 'Elevation Arc' },
+]
+
 function FlightBody({ ball, park, name, code, closeRef, onClose }) {
+  const [view, setView] = useState('spray')
+  const toggle = Boolean(onClose) && hasElevationArc(ball)
+  const side = toggle && view === 'arc'
   return (
     <>
       <div className="bflight__head">
@@ -190,7 +206,14 @@ function FlightBody({ ball, park, name, code, closeRef, onClose }) {
           </button>
         )}
       </div>
-      <FlightPlot ball={ball} park={park} />
+      {toggle && (
+        // The sheet is a dismiss target end to end; a press on the toggle is not
+        // "I am done reading", so it stops here.
+        <div className="bflight__views" onClick={(e) => e.stopPropagation()}>
+          <Segmented label="View of the flight" value={view} onChange={setView} options={VIEWS} fill />
+        </div>
+      )}
+      {side ? <ElevationPlot ball={ball} park={park} /> : <FlightPlot ball={ball} park={park} />}
       <FlightFacts ball={ball} />
     </>
   )

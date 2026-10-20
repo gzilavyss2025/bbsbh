@@ -805,6 +805,53 @@
   stop-color: var(--award-line);
 }
 
+/* ---- The side view (#1875, ElevationArc.jsx): light axis marks, the wall in heading ink ---- */
+
+.bflight__views,
+.bflight__arc {
+  margin: var(--space-2) 0 0;
+}
+
+.bflight__arcsvg {
+  display: block;
+  width: 100%;
+}
+
+.bflight__arcground {
+  stroke: var(--graphite);
+  stroke-width: 1.2;
+}
+
+.bflight__arcgrid {
+  stroke: var(--border-hairline);
+  stroke-dasharray: 3 4;
+}
+
+.bflight__arctick,
+.bflight__arcpeaklabel {
+  fill: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+
+.bflight__arcpeaklabel {
+  fill: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+
+.bflight__arcwall {
+  stroke: var(--text-heading);
+  stroke-width: 3;
+}
+
+.bflight .bflight__arcpath {
+  stroke-width: 2.5;
+}
+
+.bflight__arcpeak {
+  fill: var(--award-ink);
+}
+
 /* ---- The numbers ---- */
 
 .bflight__facts {

@@ -177,6 +177,17 @@ export function diagramInput(layout) {
   }
 }
 
+// Feet from home plate to the wall the drawing draws, on the ray at `deg` (0 =
+// straightaway center, negative toward left field): the same outline the plan
+// view inks, so the side view's wall (ballFlight.js) stands where this one is.
+// Null for a ray that misses the wall, or a layout with no wall to draw.
+export function wallDistanceAt(layout, deg) {
+  const { dist, heights, fence } = diagramInput(layout)
+  if (!fence && !dist) return null
+  const pts = wallPoints(dist, heights ?? UNKNOWN_HEIGHTS, fence)
+  return fenceDistanceAt(pts.map((p) => [p.x - HOME.x, HOME.y - p.y]), deg)
+}
+
 // The stroke weight for a wall whose heights are unknown (an older
 // configuration): an ordinary 8 ft. It is a drawing weight only; no label
 // prints it, and the wall tags are left off.

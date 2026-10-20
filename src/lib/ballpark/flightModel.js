@@ -4,8 +4,9 @@
 const K = 40 // samples per flight
 
 // One flight from h0 ft up (3 = the bat): x along the ground and z up, in feet, every 10ms, until it lands.
-export function simFlight(ev, la, lift, h0 = 3) {
-  const G = 32.174, RHO = 0.002284, A = 0.04585, MS = 0.009955, CD = 0.35, dt = 0.01
+// `cd` is the drag coefficient: 0.35 is the replay's; the side view passes its own (ballFlight.js).
+export function simFlight(ev, la, lift, h0 = 3, cd = 0.35) {
+  const G = 32.174, RHO = 0.002284, A = 0.04585, MS = 0.009955, CD = cd, dt = 0.01
   const v0 = ev * 1.46667
   const a = (la * Math.PI) / 180
   let x = 0, z = h0, vx = v0 * Math.cos(a), vz = v0 * Math.sin(a), t = 0
