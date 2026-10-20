@@ -32,8 +32,7 @@ const ALLOWED = {
     ['postseason/series-live.css', '.psseries__starter .projection'],
     ['postseason/primer-main.css', '.seriesribbon__game--ahead'], // a game still to play
     ['postseason/primer-main.css', '.seriesribbon__game--ifNecessary'], // a game that may not be played
-    ['worldseries/home.css', '.ww-strip__cell--maybe'], // the World Series strip: an if-necessary game that may not be played
-    ['worldseries/home.css', '.ww-swatch--maybe'], // the key's swatch for that same cell
+    ['worldseries/hero.css', '.ww-cal__day--maybe'], // the World Series calendar: an if-necessary game that may not be played
     ['worldseries/home.css', '.ww-ledger__maybe'], // the ledger's header for an if-necessary game
     ['player-next/history/moves.css', '.moves__noclub'], // a move whose club the feed does not name: a pencilled box, no mark
     ['team-next/games/season-grid.css', '.sgrid__game--todo'], // a game still to play: pencilled in the season grid

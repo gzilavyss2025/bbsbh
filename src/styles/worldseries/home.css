@@ -1,4 +1,5 @@
-/* The World Series home (#1906): the hero and the ledger table. Imported by
+/* The World Series home (#1906): the ledger table and the cards under the hero
+   (the hero is styles/worldseries/hero.css). Imported by
    components/worldseries/WorldSeriesHome.jsx, so it loads only on the slate in
    October. Every card is a stamped Card; this file lays out what is inside.
    Namespace `ww-`. 740px is the app's one wide step. Colour comes from tokens
@@ -9,105 +10,11 @@
   margin-bottom: var(--space-section);
 }
 
-/* ---------- hero ---------- */
-
-.ww-hero__headline {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-display-lg);
-  line-height: var(--lh-solid);
-  color: var(--text-heading);
-}
-
-.ww-hero__venue {
-  margin: var(--space-1) 0 var(--space-3);
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
-}
-
-.ww-hero__clubs {
-  list-style: none;
-  margin: 0 0 var(--space-3);
-  padding: 0;
-}
-
-.ww-hero__club {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.ww-hero__clubname {
-  flex: 1;
-  min-width: 0;
-}
-
-.ww-hero__short {
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  color: var(--text-heading);
-}
-
-.ww-hero__record {
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
-}
-
-.ww-hero__runs {
-  font-size: var(--fs-num-lg);
-  color: var(--text-heading);
-}
-
-.ww-hero__actions {
-  margin-top: var(--space-3);
-}
-
-/* ---------- schedule strip ---------- */
-
-.ww-strip__list {
-  list-style: none;
-  margin: 0 0 var(--space-2);
-  padding: 0;
-  display: flex;
-  gap: var(--space-1);
-}
-
-.ww-strip__cell {
-  flex: 1;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--border-stamped);
-  background: var(--surface-card);
-  font-size: var(--fs-cell);
-  color: var(--text-heading);
-}
-
-.ww-strip__cell--today {
-  background: var(--accent-tint);
-}
-
-.ww-strip__cell--next {
-  background: var(--surface-stamped-ink);
-  color: var(--text-on-ink);
-}
-
-.ww-strip__cell--maybe {
-  border-style: dashed;
-}
-
-.ww-strip__cell--off,
+/* The ledger's off-day column: hatched, and today's tinted. */
 .ww-ledger__off {
   background: repeating-linear-gradient(135deg, transparent 0 4px, var(--border-rule) 4px 5px);
 }
 
-.ww-strip__cell--off {
-  flex: 0.6;
-  color: var(--text-caption);
-}
-
-.ww-strip__cell--off.ww-strip__cell--today,
 .ww-ledger__off--today {
   background: var(--accent-tint);
 }
@@ -118,22 +25,6 @@
   height: 12px;
   border: 2px solid var(--border-stamped);
   background: var(--surface-card);
-}
-
-.ww-swatch--today {
-  background: var(--accent-tint);
-}
-
-.ww-swatch--next {
-  background: var(--surface-stamped-ink);
-}
-
-.ww-swatch--maybe {
-  border-style: dashed;
-}
-
-.ww-swatch--off {
-  background: repeating-linear-gradient(135deg, transparent 0 3px, var(--border-rule) 3px 4px);
 }
 
 /* ---------- ledger ---------- */
