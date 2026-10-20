@@ -400,8 +400,9 @@ ring; attack label (phase C); trajectory tag; honesty tag.
   a ball dot. After landing, the trace fades to 60% over 1400 ms.
 - **Apex.** For a launch angle of 8° or more: a dashed pencil drop from the
   apex and the label `apex ≈ 29 ft · drawn`. The apex comes from the fitted
-  model, so it is pencil. When the apex is in the top 46 units of the strip,
-  put the label under the arc, to the right of the drop, so it never meets the
+  model, so it is pencil. The label sits above the apex, centred and kept
+  inside the strip. The strip has a 30-unit band above the baseline's 80-unit
+  scale for the title and a tall apex, so the label never meets the arc or the
   title.
 - **Landing.** The Contact card's rings: one ring from 3 to 15 units over
   900 ms; a home run adds a second ring from 3 to 25 units, 140 ms later, over
@@ -596,7 +597,7 @@ buttons are the only way into the replay on a phone.
   (`SW.at(0)`), drawn in pencil from release on: no smear bats, no barrel path.
   Checked on gamePk 849810 (at-bats 20 and 57) and 849812 (at-bat 37).
 - **Popup and foul popup**: the side view clips the arc at the top of the strip
-  and keeps the apex label under the arc.
+  and keeps the apex label above the apex.
 - **Home run beyond 450 ft**: the trace leaves the strip on the right; the
   label stays in the axis row.
 - **Switch hitter**: the side comes from this plate appearance's `batSide`.

@@ -2,7 +2,7 @@
 import { createRequire } from 'node:module'
 const { chromium } = createRequire(import.meta.url)('playwright')
 const OUT = new URL('./shots/', import.meta.url).pathname
-const CASES = [['notes2-blast-chourio', '/10152026/millad/top1', 'Chourio'], ['notes2-blast-ohtani', '/10152026/millad/bottom2', 'Ohtani']]
+const CASES = [['notes3-blast-chourio', '/10152026/millad/top1', 'Chourio'], ['notes3-blast-ohtani', '/10152026/millad/bottom2', 'Ohtani']]
 const VIEWS = { phone: { width: 390, height: 844 } }
 const steps = {}
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })

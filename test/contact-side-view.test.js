@@ -4,15 +4,14 @@ import test from 'node:test'
 import { sideViewPath } from '../src/lib/pitcherCard/batted.js'
 import { apexLabel, distanceLabel } from '../src/lib/pitcherCard/contactDraw.js'
 
-test('apexLabel: an apex in the top 46 units puts the label under the arc, right of the drop', () => {
+test('apexLabel: the label sits above the apex, centred, and stays inside the strip', () => {
   const pop = sideViewPath({ exitVelo: 95, launchAngle: 60, distance: 200 }).apex
-  assert.ok(pop.y < 46)
-  const under = apexLabel(pop.x, pop.y, pop.ft)
-  assert.equal(under.anchor, 'start')
-  assert.equal(under.x, pop.x + 5)
-  assert.equal(under.y, pop.y + 16)
+  const high = apexLabel(pop.x, pop.y, pop.ft)
+  assert.deepEqual([high.anchor, high.y], ['middle', pop.y - 5])
   const low = apexLabel(100, 60, 29)
   assert.deepEqual([low.anchor, low.x, low.y, low.text], ['middle', 100, 55, 'apex ≈ 29 ft · drawn'])
+  assert.equal(apexLabel(10, 40, 50).x, 80) // an apex near the left edge keeps the label inside
+  assert.equal(apexLabel(330, 40, 50).x, 256)
 })
 
 test('distanceLabel: past 370 ft the label takes the axis row and the 400 ft tick label hides', () => {

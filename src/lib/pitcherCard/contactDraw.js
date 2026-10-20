@@ -235,9 +235,11 @@ export function drawContact(mk, p, b, m, tau, slow, rest) {
 
 // The side view's two label rules (§7.1), pure so `npm test` can pin them. Strip units, 336 x 100.
 // An apex in the top 46 units would meet the title, so its label goes under the arc, right of the drop.
+const APEX_HALF = 72 // units: about half the label's width
 export function apexLabel(ax, ay, ft) {
-  const under = ay < 46
-  return { x: under ? ax + 5 : ax, y: under ? ay + 16 : ay - 5, anchor: under ? 'start' : 'middle', text: `apex ≈ ${Math.round(ft)} ft · drawn` }
+  // Above the apex, centred and kept inside the strip. It used to go under the arc for a high apex, where
+  // the descending side ran through the text (design critique, #1771); the strip's top band has the room.
+  return { x: clamp(ax, 8 + APEX_HALF, 328 - APEX_HALF), y: ay - 5, anchor: 'middle', text: `apex ≈ ${Math.round(ft)} ft · drawn` }
 }
 
 // A ball landing past 370 ft would put its distance on the fence post, so the label takes the axis row,

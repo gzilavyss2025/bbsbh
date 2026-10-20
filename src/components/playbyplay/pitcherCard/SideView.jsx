@@ -107,8 +107,8 @@ export function SideView({ pitches, drawers }) {
   }, [pitches, sides, drawers])
 
   return (
-    <svg ref={(el) => { n.current.root = el }} className="pside" viewBox="0 -16 336 116" role="img">
-      <text className="pside__title" x="8" y="-3">SIDE VIEW · GREEN POST IS THE FENCE</text>
+    <svg ref={(el) => { n.current.root = el }} className="pside" viewBox="0 -30 336 130" role="img">
+      <text className="pside__title" x="8" y="-17">SIDE VIEW · GREEN POST IS THE FENCE</text>
       <line className="pside__ground" x1="8" y1="80" x2="328" y2="80" />
       {[100, 200, 300, 400].map((ft) => <line key={ft} className="pside__tick" x1={f1(SIDE_X(ft))} y1="80" x2={f1(SIDE_X(ft))} y2="84" />)}
       {[200, 400].map((ft) => <text key={ft} ref={ft === 400 ? (el) => { n.current.tick400 = el } : undefined} className="pside__axis" x={f1(SIDE_X(ft))} y="96" textAnchor="middle">{ft} ft</text>)}
