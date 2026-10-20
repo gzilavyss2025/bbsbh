@@ -25,3 +25,27 @@ export const fetchFromLookup = staticJsonBy((kind) => `${BASE}/lookup/${kind}.js
 // '_unplaced' is the colleges and schools with no state on the map.
 const placeShards = staticJsonBy((key) => `${BASE}/${key}.json`, { fallback: null })
 export const fetchFromPlaces = (kind, st) => placeShards(`${kind}/${st}`)
+
+// One country: { name, places: [{ slug, name, players }] }.
+export const fetchFromCountry = staticJsonBy((slug) => `${BASE}/country/${slug}.json`, { fallback: null })
+
+// One place for a place page, found from the address's own parts (src/lib/from/route.js):
+// { kind: 'college' | 'high-school', slug }, { kind: 'hometown', state, city } or
+// { kind: 'abroad', country, city }. -> { place, state, countryName } or null when no place is
+// listed there. A school looks its state up in the lookup file first: its slug does not hold one.
+export async function fetchFromPlace(route) {
+  const find = (places, slug) => places?.find((p) => p.slug === slug) ?? null
+  if (route.kind === 'abroad') {
+    const country = await fetchFromCountry(route.country)
+    const place = find(country?.places, route.city)
+    return place ? { place, state: null, countryName: country.name } : null
+  }
+  if (route.kind === 'hometown') {
+    const place = find((await fetchFromPlaces('hometown', route.state))?.places, route.city)
+    return place ? { place, state: route.state, countryName: null } : null
+  }
+  const row = (await fetchFromLookup(route.kind)).find((r) => r[0] === route.slug)
+  if (!row) return null
+  const place = find((await fetchFromPlaces(route.kind, row[2] ?? '_unplaced'))?.places, route.slug)
+  return place ? { place, state: row[2] ?? null, countryName: null } : null
+}

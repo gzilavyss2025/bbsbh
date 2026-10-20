@@ -156,6 +156,8 @@ const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'Leader
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
 const ScoutPage = lazyNamed(() => import('./screens/scout/ScoutPage.jsx'), 'ScoutPage')
 const FromPage = lazyNamed(() => import('./screens/from/FromPage.jsx'), 'FromPage')
+const FromPlacePage = lazyNamed(() => import('./screens/from/FromPlacePage.jsx'), 'FromPlacePage')
+const FromCountryPage = lazyNamed(() => import('./screens/from/FromCountryPage.jsx'), 'FromCountryPage')
 const UmpireRankingsPage = lazyNamed(
   () => import('./screens/UmpireRankingsPage.jsx'),
   'UmpireRankingsPage',
@@ -420,6 +422,11 @@ export default function App() {
     // The picker writes its own picks back with replaceState (no route change), so the key holds
     // only what a LINK can change: a new state from outside remounts with fresh state.
     content = <FromPage key={`from${route.state ?? ''}`} list={route.list} state={route.state} zone={route.zone} />
+  } else if (route.name === 'from-place') {
+    // Keyed on the whole address, so a new place remounts with fresh state (the `photos` precedent).
+    content = <FromPlacePage key={[route.kind, route.slug, route.state, route.city, route.country].join('/')} route={route} />
+  } else if (route.name === 'from-country') {
+    content = <FromCountryPage key={route.country} country={route.country} />
   } else if (route.name === 'umpire') {
     content = <UmpirePage id={route.id} seasonYear={route.seasonYear} vs={route.vs} />
   } else if (route.name === 'situational-records') {
