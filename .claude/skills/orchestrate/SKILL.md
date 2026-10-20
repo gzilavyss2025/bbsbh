@@ -229,6 +229,15 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
    To stop for a reason you cannot fix, send_message your parent AND end with a final
    line "NEEDS PARENT: <what you need>".
    ```
+   When many prompts serve one issue, add to the footer: "In the PR body write
+   `Part of #n`. Never write Fixes, Closes or Resolves." Only the last slice, with the
+   issue's "Done means" met, may close it. (2026-10-19: a prompt's PR said "Fixes #2316"
+   and its merge closed the umbrella issue before the work was done.)
+   **A feature behind a date or state gate** (for example `worldSeriesMode`, null
+   until the ALCS ends): before you tell children to build a stand-in page, try a past
+   date that satisfies the gate on the real route (2025 World Series: `/10262025`,
+   `/10272025`, with `?nointro`). Only the data that is keyed to the current season is
+   missing there. Children then check the real page, not a copy of it.
 4. **Start wave N+1 when every PR in wave N is green.** Subscribe to each PR and use the
    `send_later` checks from Budget. A row whose "depends on" says **merged** waits
    until that PR is on `main`: stack it (see "Stacking"), then start the row. If a
@@ -337,6 +346,9 @@ regular basis. Vercel allows 100 deployments a day, so a stack is cheap.
 - Skip a PR labeled `wip` or `do-not-merge`, a PR another session still pushes
   to, and a PR that waits on his choice. A green child PR whose session is idle and completed
   but still has `wip`: remove `wip` yourself, then stack it.
+- Before you merge any stack or PR, read each source PR body for a closing keyword
+  (Fixes, Closes, Resolves) that names an umbrella issue. Remove it or stop. After the
+  merge, read the issue state; reopen an issue that closed early and say so.
 - Pass the PR numbers to `/stack-prs`. With no list it stacks every open PR,
   other sessions' drafts included.
 - Build each stack on a new branch (`claude/stack-<date>-r<n>`). Never reuse a
