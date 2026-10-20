@@ -83,7 +83,7 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
   )
   const hasNineKeys = Boolean(nineKeysTeams(nineKeys, sides.map((id) => ({ id })), season))
   const { data: defense } = useAsync(() => loadClubDefenseRunning(), [])
-  const gloveLegs = useMemo(() => gloveLegsModel(defense, { clubA: sides[0], clubB: sides[1] }), [defense, sides[0], sides[1]])
+  const gloveLegs = useMemo(() => gloveLegsModel(defense, { clubA: sides[0], clubB: sides[1], season }), [defense, sides[0], sides[1], season])
   // Platoon: regular-season OPS by pitcher hand; the tint follows the focus game's probables.
   const { data: opsByClub } = useAsync(() => loadPlatoon({ clubIds, season }), [clubA, clubB, season])
   const platoon = useMemo(

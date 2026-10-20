@@ -84,3 +84,14 @@ test('scoutingModel shows Glove and legs on both day types when the data is ther
   assert.deepEqual(ids({ dayType: 'game', edges: [{}], meetings: [{}], gloveLegs: [{}] }), ['matchup-edges', 'film-room', 'glove-legs'])
   assert.deepEqual(ids({ dayType: 'game', gloveLegs: null }), [])
 })
+
+test('a file from another season than the slate year gives no card', () => {
+  const d = { season: 2026, ...data(club(), club()) }
+  assert.equal(gloveLegsModel(d, { clubA: 158, clubB: 139, season: 2025 }), null)
+  assert.equal(gloveLegsModel(d, { clubA: 158, clubB: 139, season: 2026 }).length, 6)
+})
+
+test('without a slate season the file season is not checked', () => {
+  const d = { season: 2026, ...data(club(), club()) }
+  assert.equal(gloveLegsModel(d, { clubA: 158, clubB: 139 }).length, 6)
+})
