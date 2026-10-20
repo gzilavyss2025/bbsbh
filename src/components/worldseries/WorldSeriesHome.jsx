@@ -3,6 +3,7 @@ import { fetchPlateUmpires } from '../../api/postseason/plateUmpire.js'
 import { fetchUpcomingSeriesGames } from '../../api/postseason/upcoming.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useWorldSeriesHome } from '../../hooks/postseason/useWorldSeriesHome.js'
+import { withFormatDates } from '../../lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
 import { worldSeriesMode } from '../../lib/postseason/worldseries/mode.js'
 import { Grid } from '../ui/layout/Grid.jsx'
@@ -22,9 +23,9 @@ import { ScoutingReport } from './ScoutingReport.jsx'
 // THE WORLD SERIES HOME (#1906). Rendered by GameSelect on every slate date in
 // the postseason window; it draws nothing unless the bracket says both clubs are
 // known and the Series is not decided heading into the slate date (mode.js).
-// It replaces the bracket fold and the series primer on those dates. Phone
-// (below 740px): the hero carries the schedule strip. Wide: the ledger table
-// carries it. Today's game shows no score at all until the slate date has
+// It replaces the bracket fold and the series primer on those dates. The hero
+// carries the calendar at every width; wide, the ledger table follows it with
+// the runs. Today's game shows no score at all until the slate date has
 // passed (ADR-0116 removed the seal and the day pass that lifted it).
 //
 // Cards, top to bottom. Game day: hero, [ledger], reel, probables, tape + hot
@@ -54,7 +55,8 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
   const model = ledgerModel({
     clubIds,
     games: series.games,
-    upcoming: series.upcoming,
+    // If-needed games dated from the Series format, as in the hero, so the two schedules agree.
+    upcoming: withFormatDates(series.games, series.upcoming, slateDate),
     runsByGame: data?.runsByGame ?? {},
     slateDate,
   })
@@ -92,13 +94,13 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
     <Stack gap="section" className="ww">
       <Hero
         mode={mode}
-        model={model}
         game={game}
-        records={data?.standings ?? {}}
         slateDate={slateDate}
         wide={wide}
         played={played}
         umpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
+        splitsByClub={data?.hotBats ?? null}
+        clubGames={data?.clubGames ?? null}
       />
       {wide && <Ledger series={series} model={model} />}
       {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={lcsRound} />}
