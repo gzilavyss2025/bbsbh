@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildFrom, countryOf } from '../scripts/lib/from/places.mjs'
+import { countryOf } from '../src/lib/from/identity.js'
+import { buildFrom } from '../scripts/lib/from/places.mjs'
 
 // Places, slugs and zones for "Where they're from" (#1526, SPEC §5.3, §6.3, §6.5, §6.6).
 // Small invented players, one trap each.

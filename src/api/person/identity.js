@@ -96,6 +96,26 @@ export function educationSummary(person) {
     .join(', ')
 }
 
+// The schools as structured rows, in the order educationSummary lists them (high schools, then
+// colleges): what the player page links to the Where they're from pages (#1526).
+export function schoolRows(person) {
+  const { highschools, colleges } = person?.education ?? {}
+  const rows = (list, kind) =>
+    (Array.isArray(list) ? list : []).map((s) => ({
+      kind,
+      name: (s?.name ?? '').trim(),
+      city: (s?.city ?? '').trim(),
+      state: (s?.state ?? '').trim(),
+    }))
+  return [...rows(highschools, 'high-school'), ...rows(colleges, 'college')].filter((s) => s.name)
+}
+
+// The birthplace fields as the API sends them, trimmed. birthplace() is the display string.
+export function birthRow(person) {
+  const text = (v) => String(v ?? '').trim()
+  return { city: text(person?.birthCity), state: text(person?.birthStateProvince), country: text(person?.birthCountry) }
+}
+
 export function personBio(person) {
   if (!person) return null
   return {
@@ -103,6 +123,8 @@ export function personBio(person) {
     fullName: person.fullName ?? '',
     nickname: personNickname(person),
     education: educationSummary(person),
+    schools: schoolRows(person),
+    birth: birthRow(person),
     number: person.primaryNumber ?? '',
     posAbbr: person.primaryPosition?.abbreviation ?? '',
     posName: person.primaryPosition?.name ?? '',

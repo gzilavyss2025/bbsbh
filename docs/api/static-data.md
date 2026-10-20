@@ -1143,7 +1143,7 @@ for each generator; the reader modules:
   `gen-where-from-map.mjs`, hand-run; #1526). `index.json` is the small file the picker loads at once:
   `{ generatedAt, counts, zoneCounts, countries, unplaced }`. `counts` is the number of places a state
   holds for each list (`college`, `high-school`, `hometown`), and `zoneCounts` the same for each zone.
-  `lookup/{college,high-school,hometown}.json` list every place for search: a school row is `[slug, name, state | null, city?]` (the city when known, so a search can tell two schools of one name apart), a hometown row `[state, citySlug, name]`. `college/{ST}.json`,
+  `lookup/{college,high-school,hometown}.json` list every place for search: a school row is `[slug, name, state | null, city?]` (the city when known, so a search can tell two schools of one name apart), a hometown row `[state, citySlug, name]`. `lookup/high-school-split.json` lists the school names (as `name-state` slugs) that two cities share, so a player page can name a high school's address (`fetchFromHsSplit`). `college/{ST}.json`,
   `high-school/{ST}.json` and `hometown/{ST}.json` hold a state's places (`college/_unplaced.json` and
   `high-school/_unplaced.json` the ones with no state on the map), each place
   `{ slug, name, city?, state?, zone?, pt?, players }`, a field left out when it is not known, and

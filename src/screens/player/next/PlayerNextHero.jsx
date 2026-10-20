@@ -13,6 +13,7 @@ import { HERO_STAMP_DELAY, ageFact, headerExtras } from './heroData.js'
 import { HeroActionPhoto } from './top/HeroActionPhoto.jsx'
 import { HeroBand } from './top/HeroBand.jsx'
 import { HeroStamp } from './top/HeroStamp.jsx'
+import { BornValue, SchoolsValue, useFromLinks } from './top/HeroFromLinks.jsx'
 import { HeroStrip } from './top/HeroStrip.jsx'
 import '../../../styles/player-next/top/header-extras.css'
 
@@ -53,6 +54,7 @@ function AgeFact({ fact, birthDate }) {
 export function PlayerNextHero({ core }) {
   const { bio, rosterStatus: status, heroRole } = core
   const x = headerExtras(core, useOvr(bio))
+  const from = useFromLinks(bio)
   const stamp = x?.ratings[0]
   const [open, setOpen] = useState(false)
   // The action photo: 'wait' until it loads, 'ready' once shown, 'gone' after a 404.
@@ -71,11 +73,11 @@ export function PlayerNextHero({ core }) {
     { key: 'bt', label: 'Bats / Throws', value: `${bio.bats || DASH} / ${bio.throws || DASH}` },
     { key: 'age', age: true },
     { key: 'hw', label: 'Height / Weight', value: bio.heightWeight },
-    { key: 'born', label: 'Born', value: bio.born },
+    { key: 'born', label: 'Born', value: from.born ? <BornValue links={from} text={bio.born} /> : bio.born },
     { key: 'debut', label: 'MLB debut', value: bio.debut ? debutLabel(bio.debut) : DASH },
     { key: 'draft', label: 'Draft', value: draftLabel(bio.draft, bio.signedYear) },
     x?.nickname && { key: 'nick', label: 'Nickname', value: `“${x.nickname}”` },
-    x?.education && { key: 'school', label: 'School', value: x.education },
+    x?.education && { key: 'school', label: 'School', value: from.schools.some((sc) => sc.path) ? <SchoolsValue links={from} /> : x.education },
   ].filter(Boolean)
   const role = bio.twoWay ? 'Two-way' : bio.isPitcher ? 'Pitcher' : 'Batter'
   return (

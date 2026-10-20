@@ -20,6 +20,10 @@ export const fetchFromStateMap = staticJsonBy((st) => `${BASE}/map/${st}.json`, 
 // or 'hometown'. Rows are arrays (see src/lib/from/list.js lookupRows).
 export const fetchFromLookup = staticJsonBy((kind) => `${BASE}/lookup/${kind}.json`, { fallback: [] })
 
+// The high-school names (with a state) that two cities share, as a list of slugs: the one fact a
+// player page needs to name a high school's address (src/lib/from/identity.js, schoolSlug).
+export const fetchFromHsSplit = staticJson(`${BASE}/lookup/high-school-split.json`, { fallback: null })
+
 // One state's places: { places: [{ slug, name, city?, state?, zone?, pt?, players }] }. A state of
 // '_unplaced' is the colleges and schools with no state on the map.
 const placeShards = staticJsonBy((key) => `${BASE}/${key}.json`, { fallback: null })
