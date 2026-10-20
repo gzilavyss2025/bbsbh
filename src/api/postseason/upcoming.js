@@ -6,7 +6,7 @@
 // necessary" game, which has no gamePk (bracket.js, docs/api/postseason.md).
 // Today's game is safe to name here only because of the field list below: it
 // carries no state, score, winner, linescore, `seriesStatus` or `leagueRecord`
-// (trap 1), so even a wrong pk could not bring one back. The page still never
+// (trap 1; `status` is asked for only to carry `startTimeTBD`), so even a wrong pk could not bring one back. The page still never
 // reads today's /boxscore or feed. test/postseason/upcoming-games.test.js pins
 // the list.
 //
@@ -20,7 +20,7 @@
 import { getJson } from '../statsapi.js'
 
 const GAME_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,venue,id,name,teams,away,home,team,id,probablePitcher,id,fullName'
+  'dates,games,gamePk,officialDate,gameDate,status,startTimeTBD,venue,id,name,teams,away,home,team,id,probablePitcher,id,fullName'
 
 export function upcomingUrl(gamePks) {
   return `/api/v1/schedule?gamePks=${gamePks.join(',')}&hydrate=probablePitcher,venue&fields=${GAME_FIELDS}`
@@ -35,7 +35,7 @@ const arm = (side) =>
     ? { id: side.probablePitcher.id, name: side.probablePitcher.fullName ?? '', hand: '' }
     : null
 
-// The shaped read: { [gamePk]: { date, venue: { id, name }, away: arm|null, home: arm|null } }.
+// The shaped read: { [gamePk]: { date, gameDate, startTimeTBD, venue: { id, name }, away: arm|null, home: arm|null } }.
 export function shapeUpcoming(data, hands = {}) {
   const out = {}
   for (const d of data?.dates ?? []) {
@@ -44,6 +44,7 @@ export function shapeUpcoming(data, hands = {}) {
       out[g.gamePk] = {
         date: g.officialDate ?? '',
         gameDate: g.gameDate ?? '',
+        startTimeTBD: g.status?.startTimeTBD === true,
         awayId: g.teams?.away?.team?.id ?? null,
         homeId: g.teams?.home?.team?.id ?? null,
         venue: { id: g.venue?.id ?? null, name: g.venue?.name ?? '' },
