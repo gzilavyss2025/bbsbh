@@ -48,3 +48,35 @@
   font-size: var(--fs-cell);
   line-height: var(--lh-loose);
 }
+/* A name in a leader row. The link is a button, and a button drops the row's tracking, so
+   it takes the row's face and tracking (--ls-label, the leader row's) back: every name,
+   linked or his own, reads the same. A long name
+   shrinks a step at a time to fit (FitName in HotCold.jsx), and at the last step wraps. */
+.pnext-hc__fit .plink {
+  font: inherit;
+  letter-spacing: var(--ls-label);
+}
+.pnext-hc__fit[data-fit='field'] {
+  font-size: var(--fs-field);
+}
+.pnext-hc__fit[data-fit='ui'],
+.pnext-hc__fit[data-fit='wrap'] {
+  font-size: var(--fs-ui);
+}
+.pnext-hc__fit[data-fit='wrap'] {
+  white-space: normal;
+}
+/* A very narrow row (a 320px phone leaves the list about 240px) drops the headshot and
+   tightens its sides, so a long surname fits; the rank and the figure still carry the row. */
+.pnext-hc__list {
+  container-type: inline-size;
+}
+@container (max-width: 280px) {
+  .pnext-hc__list .leaderrow {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding-inline: var(--space-2);
+  }
+  .pnext-hc__list .leaderrow__mark {
+    display: none;
+  }
+}

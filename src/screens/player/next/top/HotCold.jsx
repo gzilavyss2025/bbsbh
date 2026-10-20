@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId, useLayoutEffect, useRef, useState } from 'react'
 import { loadHotCold } from '../../../../api/hotcold/load.js'
 import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
@@ -11,6 +11,33 @@ import { slateToday } from '../../../../lib/dates.js'
 import { leaderListClassName } from '../../../../lib/design/report/classes.js'
 import { PREVIEW, hotColdView, toneTag } from './hotColdView.js'
 import '../../../../styles/player-next/top/hot-cold.css'
+
+// The steps a long name takes to fit: 18px, 16px, 14px, then 14px on two lines (a 320px
+// phone leaves the name column about 80px).
+export const FIT_STEPS = ['', 'field', 'ui', 'wrap']
+
+// A name that shrinks to fit its leader row (Gary, 2026-10-20): while the row's name box
+// overflows, the next step is tried; the last wraps the name onto a second line, so only a
+// single word too long for the column still meets the box's ellipsis. Measured again whenever the row's width changes. The step is a data attribute, so
+// hot-cold.css owns the sizes.
+function FitName({ children }) {
+  const ref = useRef(null)
+  useLayoutEffect(() => {
+    const el = ref.current
+    const box = el?.parentElement
+    if (!box) return undefined
+    const fit = () => {
+      let step = 0
+      el.dataset.fit = FIT_STEPS[step]
+      while (box.scrollWidth > box.clientWidth && step < FIT_STEPS.length - 1) el.dataset.fit = FIT_STEPS[++step]
+    }
+    fit()
+    const watch = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit)
+    watch?.observe(box)
+    return () => watch?.disconnect()
+  }, [children])
+  return <span ref={ref} className="pnext-hc__fit">{children}</span>
+}
 
 // ONE callout (#1855, design B): the sentence as the headline, his figure and sample under
 // it, then the seasons behind the count as leader rows (ADR-0112): rank, headshot, name,
@@ -35,7 +62,7 @@ export function HotColdCallout({ callout, selfId }) {
               rank={r.rank}
               state={r.self ? 'mine' : undefined}
               mark={<Headshot personId={r.self ? selfId : r.id} name={r.name} className="pnext-hc__shot" />}
-              name={r.self ? r.name : <PlayerLink id={r.id} name={r.name}>{r.name}</PlayerLink>}
+              name={<FitName>{r.self ? r.name : <PlayerLink id={r.id} name={r.name}>{r.name}</PlayerLink>}</FitName>}
               sub={r.sub}
               figure={r.value}
             />
