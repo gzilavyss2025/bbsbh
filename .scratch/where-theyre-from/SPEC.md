@@ -84,7 +84,7 @@ invariant). Never call `.toUpperCase()` on rendered text (`check-name-casing`).
 | Change link | `Change school` / `Change town` |
 | Footnote, school | `Schools as the MLB Stats API lists them. A player who did not reach the majors is not listed.` |
 | Footnote, hometown | `Birthplaces as the MLB Stats API lists them. A player who did not reach the majors is not listed.` |
-| Credit line | IPEDS / Census / GeoNames credit lines from `scripts/lib/open-data/credits.mjs` (§7.5) |
+| Credit line | IPEDS / Census / GeoNames credit lines from `scripts/lib/open-data/credits.mjs` (§14) |
 
 House rules: no emoji, no exclamation marks, numbers are plain (`103-59`, `.636`),
 ranks read `78 of 89`, never `#78`; say "postseason", never the banned word
@@ -332,8 +332,7 @@ sorted by debut year then name, to keep shards small.
 Measured sizes: `map/us.json` 91 KB at county simplification 0.5 — use simplification
 2 for the national outline (about 26 KB, *measured* on the canvas build); the largest
 `map/{ST}.json` is Texas at 12 KB; Georgia is 6 KB (`data/sample-shards/GA.json`).
-The place shards are not yet measured (*estimate*: under 400 KB for the biggest
-state). Do not precache any of them; `/data/*.json` already uses the NetworkFirst
+The largest place shard is `high-school/CA.json` at 137 KB (*measured*, §14). Do not precache any of them; `/data/*.json` already uses the NetworkFirst
 cache (`vite.config.js:540-546`). Ship geometry as JSON, never `.svg` files, which
 `vite.config.js:475` would precache.
 
@@ -442,14 +441,12 @@ name. Every player links to his page with `PlayerLink` / `playerPath(id, { name 
 ### 7.5 Credits and licences
 
 - IPEDS: US Department of Education, National Center for Education Statistics — a
-  US government work (public domain). *Credit text unverified;* add a line to
-  `scripts/lib/open-data/credits.mjs`.
+  US government work (public domain). Credit line: §14.
 - Census delineations and population estimates: US Census Bureau, public domain.
 - `us-atlas`: ISC licence (Mike Bostock); the data is Census 2017 cartographic
   boundaries.
 - Birth coordinates: the existing birthplaces credit (Retrosheet, Chadwick, GeoNames
-  CC BY 4.0) carries through. Show the credit lines in the page footer, as other
-  open-data pages do (*look up which page does it today before you copy it*).
+  CC BY 4.0) carries through. Credit lines: §14.
 
 ## 8. Client data layer
 
@@ -630,12 +627,26 @@ screenshots with the exact routes (root `CLAUDE.md`, "Cloud sessions").
 | Only Georgia has zones | Every state |
 | Artboard file names `Main`, `Wide`, `HomeWall` | Not used in code |
 
-## 14. Not verified
+## 14. Resolved after review (2026-10-20)
 
-- The IPEDS credit wording, and which page shows open-data credits today.
-- The size of the place shards.
-- Whether the 380 players without `mlbDebutDate` are real big leaguers (a sample:
-  Darby O'Brien, Jack Taylor, Charlie Hancock — 19th-century players).
+- **Credits:** open-data credit lines live in `scripts/lib/open-data/credits.mjs`
+  and the About page prints them (`src/screens/AboutPage.jsx:18-19`; a test pins the
+  GeoNames line, `test/on-this-day.test.js`). Add two constants there and print them
+  on the About page and in the `/from` footer:
+  `IPEDS_CREDIT = 'College locations from the U.S. Department of Education, National Center for Education Statistics, IPEDS.'`
+  and
+  `CENSUS_CREDIT = 'Metro areas and populations from the U.S. Census Bureau.'`
+  (Both are US government works; neither source requires exact wording.)
+- **Place shard sizes (*measured* on the sweep, tuple format of §6.6):** the largest
+  `hometown/{ST}.json` is California at 118 KB (Pennsylvania 94 KB, Texas 73 KB),
+  1.2 MB across all states; the largest `high-school/{ST}.json` is California at
+  137 KB (Texas 64 KB, Florida 58 KB), 0.9 MB in all. Colleges are smaller (9,170
+  records against 10,371 high-school ones). No shard needs splitting.
+- **The 380 players with no `mlbDebutDate` are real big leaguers.** Sample, with MLB
+  career games from the API: Darby O'Brien (b. 1863) 709, Jack Taylor (b. 1873) 310
+  pitching, Eufemio Abreu (b. 1901, a Negro Leagues player MLB now counts) 265. Keep
+  them; their debut year is `firstSeason` (§6.4). A record with no first name
+  (`819396 Gerhart`, 1 game) also appears: show the name as the API gives it.
 
 ## 15. Files in this package
 
