@@ -1,0 +1,48 @@
+/* ============================================================
+   THE PLACE LIST — screens/from/PlaceList.jsx (#1526)
+   A name, a line under it, and a figure at the right. Each row
+   is a link, 44px tall at the least.
+   ============================================================ */
+
+.fromlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fromlist__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  color: var(--text-body);
+  text-decoration: none;
+}
+
+.fromlist__row:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.fromlist__text {
+  min-width: 0;
+}
+
+.fromlist__name {
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+}
+
+.fromlist__line {
+  color: var(--text-caption);
+}
+
+.fromlist__count {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}

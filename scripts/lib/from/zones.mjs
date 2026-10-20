@@ -10,6 +10,7 @@
 //     state's longer axis. 9+ counties -> 3 zones, 4-8 -> 2, 1-3 -> "Rest of {State}".
 import { parseCsv } from '../csv.mjs'
 import { slugify } from '../../../src/lib/route.js'
+import { STATE_NAMES } from '../../../src/lib/from/states.js'
 
 export const STATE_FIPS = {
   '01': 'AL', '02': 'AK', '04': 'AZ', '05': 'AR', '06': 'CA', '08': 'CO', '09': 'CT', '10': 'DE',
@@ -21,17 +22,7 @@ export const STATE_FIPS = {
   '54': 'WV', '55': 'WI', '56': 'WY',
 }
 
-export const STATE_NAMES = {
-  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado',
-  CT: 'Connecticut', DE: 'Delaware', DC: 'District of Columbia', FL: 'Florida', GA: 'Georgia',
-  HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky',
-  LA: 'Louisiana', ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota',
-  MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire',
-  NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota',
-  OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island',
-  SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
-  VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
-}
+export { STATE_NAMES }
 
 // `{st}-{slug}` with the word "metro" dropped: ga-atlanta, ga-northern-georgia.
 export const zoneId = (st, name) => `${st.toLowerCase()}-${slugify(name.replace(/ metro$/, ''))}`

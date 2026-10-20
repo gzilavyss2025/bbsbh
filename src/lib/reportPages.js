@@ -142,6 +142,7 @@ export const PAGE_GROUPS = [
     id: 'history',
     label: 'History',
     pages: [
+      { label: 'Where they’re from', path: '/from' },
       { label: 'Awards History', path: '/awards' },
       { label: 'Postseason History', path: '/postseason-history' },
       // Beside Postseason History because it reads the same 26 brackets from

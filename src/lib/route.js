@@ -50,6 +50,8 @@
 //   '/fouls' '/umpires' '/abs-challenges' '/umpire/{name-id}'
 //     + '/{year|all}?vs={year}'         -> + { seasonYear, vs }  (a season view; seasons/route.js)
 //   '/scout', '/scout/{pitcher}/{hitter}' -> { name: 'scout', ... }  (Matchup Scout; scout/route.js)
+//   '/from', '/from/{st}', '/from/college/{slug}', '/from/high-school/{slug}', '/from/{st}/{city}', '/from/country/{country}[/{city}]'
+//                                       -> { name: 'from' | 'from-place' | 'from-country', ... }  (Where they're from; from/route.js)
 //   '/situational-records'              -> { name: 'situational-records', asOf, sportId, metric, half, month }
 //                                          (one situational record, every club at one level, ranked.
 //                                           '?metric=' and '?half=' set the page's OPENING state only,
@@ -126,6 +128,7 @@
 
 import { REPORT_ROUTES } from './reportPages.js'
 import { parseRecordsRoute } from './postseason/recordsRoute.js'
+import { parseFromRoute } from './from/route.js'
 import { parseScoutRoute } from './scout/route.js'
 import { parseSeasonRoute, seasonPath } from './seasons/route.js'
 import { SPORT_IDS, teamFullName } from './teams.js'
@@ -530,6 +533,8 @@ export function parseRoute(url) {
   }
   const scout = parseScoutRoute(parts, q, { asOf, idFromSlug })
   if (scout) return scout
+  const from = parseFromRoute(parts, q) // above the generic 3-segment game branch below
+  if (from) return from
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')

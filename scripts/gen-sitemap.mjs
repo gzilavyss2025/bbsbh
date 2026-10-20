@@ -102,6 +102,7 @@ const APP_ROUTES = [
   // /first-scorebook, /photos) stay out on purpose — they are yours, not the site's.
   { path: '/run-value', priority: '0.5', changefreq: 'daily' },
   { path: '/scout', priority: '0.4', changefreq: 'daily' },
+  { path: '/from', priority: '0.4', changefreq: 'weekly' },
   { path: '/abs-challenges', priority: '0.5', changefreq: 'daily' },
   { path: '/nine-keys', priority: '0.4', changefreq: 'yearly' },
   { path: '/run-differential', priority: '0.4', changefreq: 'monthly' },
