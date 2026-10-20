@@ -1,0 +1,1458 @@
+[
+ {
+  "name": "Missouri State",
+  "players": 27,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "State College of Florida",
+  "players": 19,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Saint Mary's (CA)",
+  "players": 18,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Penn State Erie",
+  "players": 16,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Southern",
+  "players": 15,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Columbia",
+  "players": 13,
+  "rule": "ambiguous",
+  "candidates": [
+   "112561 Columbia College (CA)",
+   "177065 Columbia College (MO)",
+   "190150 Columbia University in the City of New York (NY)",
+   "217934 Columbia College (SC)",
+   "455983 Columbia College (VA)"
+  ]
+ },
+ {
+  "name": "Cornell",
+  "players": 12,
+  "rule": "ambiguous",
+  "candidates": [
+   "153162 Cornell College (IA)",
+   "190415 Cornell University (NY)"
+  ]
+ },
+ {
+  "name": "Cal Poly Pomona",
+  "players": 12,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "College of Idaho",
+  "players": 10,
+  "rule": "ambiguous",
+  "candidates": [
+   "142285 University of Idaho (ID)",
+   "142294 The College of Idaho (ID)"
+  ]
+ },
+ {
+  "name": "West Chester",
+  "players": 10,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Pacific",
+  "players": 10,
+  "rule": "ambiguous",
+  "candidates": [
+   "120883 University of the Pacific (CA)",
+   "209612 Pacific University (OR)",
+   "422695 Pacific College (CA)"
+  ]
+ },
+ {
+  "name": "Gulf Coast CC",
+  "players": 9,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Indain River CC",
+  "players": 9,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "The Citadel",
+  "players": 8,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Charlotte",
+  "players": 8,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Southwestern",
+  "players": 7,
+  "rule": "ambiguous",
+  "candidates": [
+   "123800 Southwestern College (CA)",
+   "155900 Southwestern College (KS)",
+   "188207 Southwestern College (NM)",
+   "207865 Southwestern Oklahoma State University (OK)",
+   "228343 Southwestern University (TX)"
+  ]
+ },
+ {
+  "name": "North Florida",
+  "players": 7,
+  "rule": "ambiguous",
+  "candidates": [
+   "136145 North Florida College (FL)",
+   "136172 University of North Florida (FL)"
+  ]
+ },
+ {
+  "name": "CC of Southern Nevada",
+  "players": 7,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "LIU Brooklyn",
+  "players": 6,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Blinn College",
+  "players": 6,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Bloomsburg",
+  "players": 5,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "El Camino CC",
+  "players": 5,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Allegany CC (MD)",
+  "players": 5,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Parsons College",
+  "players": 5,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Texas - Pan American",
+  "players": 5,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Concordia (NY)",
+  "players": 5,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Connors State Junior College",
+  "players": 5,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "SUNY Stony Brook",
+  "players": 5,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Dixie State",
+  "players": 5,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Kutztown",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Saint Mary's (TX)",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Catholic University",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Providence",
+  "players": 4,
+  "rule": "ambiguous",
+  "candidates": [
+   "180258 University of Providence (MT)",
+   "217402 Providence College (RI)"
+  ]
+ },
+ {
+  "name": "Colorado State",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Interamerican University of Puerto Rico",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Georgia Perimeter College",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Hartford",
+  "players": 4,
+  "rule": "ambiguous",
+  "candidates": [
+   "129525 University of Hartford (CT)",
+   "130590 Trinity College (CT)"
+  ]
+ },
+ {
+  "name": "St. Louis CC-Meramec",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "UNC Greensboro",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Riverside CC",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Sam Houston",
+  "players": 4,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Rochester",
+  "players": 3,
+  "rule": "ambiguous",
+  "candidates": [
+   "170967 Rochester University (MI)",
+   "195030 University of Rochester (NY)"
+  ]
+ },
+ {
+  "name": "Slippery Rock",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Cumberland",
+  "players": 3,
+  "rule": "ambiguous",
+  "candidates": [
+   "156541 University of the Cumberlands (KY)",
+   "219949 Cumberland University (TN)"
+  ]
+ },
+ {
+  "name": "Mansfield University of Pennsylvania",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Concordia (MN)",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Fairleigh Dickinson",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "California University of Pennsylvania",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Neosho CC",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Mankato State",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Monmouth",
+  "players": 3,
+  "rule": "ambiguous",
+  "candidates": [
+   "147341 Monmouth College (IL)",
+   "185572 Monmouth University (NJ)"
+  ]
+ },
+ {
+  "name": "UNC Pembroke",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Trinidad State Junior College",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Jefferson Davis CC",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Wallace State CC",
+  "players": 3,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Sacred Heart",
+  "players": 3,
+  "rule": "ambiguous",
+  "candidates": [
+   "130253 Sacred Heart University (CT)",
+   "172033 Sacred Heart Major Seminary (MI)"
+  ]
+ },
+ {
+  "name": "St. John's",
+  "players": 3,
+  "rule": "ambiguous",
+  "candidates": [
+   "163976 St. John's College (MD)",
+   "245652 St. John's College (NM)"
+  ]
+ },
+ {
+  "name": "Missouri S&T",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "U.S. Naval Academy",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "SUNY Farmingdale",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Clarkson",
+  "players": 2,
+  "rule": "ambiguous",
+  "candidates": [
+   "180832 Clarkson College (NE)",
+   "190044 Clarkson University (NY)"
+  ]
+ },
+ {
+  "name": "Upsala",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "North Carolina A&T",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "C.W. Post",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Humboldt State",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Northeast Missouri State",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Florida Junior College",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Sacramento CC",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "University of Southwest Louisiana",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "MacMurray",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "CC of Rhode Island",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Rancho Santiago College",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Union",
+  "players": 2,
+  "rule": "ambiguous",
+  "candidates": [
+   "157863 Union College (KY)",
+   "196866 Union College (NY)",
+   "206279 Union Institute & University (OH)",
+   "221971 Union University (TN)"
+  ]
+ },
+ {
+  "name": "Hanyang University",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Manuel Fajardo",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Kwantlen Polytechnic",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Armstrong Atlantic State",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Tohoku Fukushi University",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Utah State University Eastern",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Korea University",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "MCC-Maple Woods",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "British Columbia",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Taipei Physical Education College",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "The Master's College",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Tokai University",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Osaka University of Health and Sport Sciences",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Indian River CC",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Waseda University",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "SUNY Binghamton",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "McLennan JC",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Embry-Riddle University",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Fresno CC",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Millersville",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "St. Joseph's",
+  "players": 2,
+  "rule": "ambiguous",
+  "candidates": [
+   "161518 Saint Joseph's College of Maine (ME)",
+   "215770 Saint Joseph's University (PA)"
+  ]
+ },
+ {
+  "name": "Washington-St. Louis",
+  "players": 2,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Hobart",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Carlisle Indian Industrial School",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Westbrook College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Dixon College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Sacred Heart College",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "130253 Sacred Heart University (CT)",
+   "172033 Sacred Heart Major Seminary (MI)"
+  ]
+ },
+ {
+  "name": "Rock Hill College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Lock Haven University of Pennsylvania",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Parker College (MN)",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Burnetta College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Cooper Medical College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Canterbury College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "National Cherokee Male Seminary",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Weaver College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Hahnemann University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Meridian Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Palmer College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "U.S. Military Academy",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Western University",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "128391 Western Colorado University (CO)",
+   "130776 Western Connecticut State University (CT)",
+   "178387 Missouri Western State University (MO)",
+   "200004 Western Carolina University (NC)",
+   "208035 Western Oklahoma State College (OK)"
+  ]
+ },
+ {
+  "name": "Durham State Normal School for Negroes",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "St. Viator College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Wesley College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Virginia Normal & Industrial Institute",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Goddard Seminary",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Mount Morris College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Wetsern Nebraska CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Rutherford College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "El Centro Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Salem International",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Saint Joseph's College (IN)",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Concordia",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Mount Vernon Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Puerto Rico University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Albertson College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Detroit Institute of Technology",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Booker T. Washington Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "University of Panama",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Pontificia Universidad Catolica de Puerto Rico",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "West Hills College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Mount Vernon",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Dean Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Louisiana College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Wilbur Wright College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Seattle Community College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Manatee Community College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Plano Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Mesa State",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Clarion University of Pennsylvania",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "University of LaVerne",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "MCC-Longview",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Southern illinois",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Mount San Antonio College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "LeMoyne College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "City University of New York",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "190035 CUNY System Office (NY)",
+   "190567 CUNY City College (NY)"
+  ]
+ },
+ {
+  "name": "LeMoyne-Owen",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Santa Ana Community College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Middlesex County College (NJ)",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Lassen College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Universidad Autonoma Benito Ju��rez de Oaxaca",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Cuyahoga CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "The Apprentice School",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Seminole Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "University of Puerto Rico",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Harry S Truman College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Paducah CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Australian Technical",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Vincennes University Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Universidad de Holguin",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Ritsumeikan University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Eastfield College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Southwest Missouri State University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Universidad Organizacion y Metodo",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Hendry Ford CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Pontificia Universidad Catolica Madre y Maestra",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Sungkyunkwan",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Lambuth",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Cochise Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Universidad Nacional Autonoma de Nicaragua",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Universidad Tecnologica de Panama",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Edinboro University of Pennsylvania",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Matanzas",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Delaware Technical CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Norwalk CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Mercy College",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "193016 Mercy University (NY)",
+   "203960 Mercy College of Ohio (OH)"
+  ]
+ },
+ {
+  "name": "Universidad del Zulia",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Inha University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Kansai Gakuin University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Aoyama Gakuin University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Espa Julio Trigo Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Tokyo Keizai University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Pierce College",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "117706 Los Angeles Pierce College (CA)",
+   "182795 Franklin Pierce University (NH)",
+   "235237 Pierce College District (WA)"
+  ]
+ },
+ {
+  "name": "St. Johns River State JC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Santa Barbara CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Rikkyo University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Asia University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Wheaton (MA)",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "College of the Canyons Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Nippon Sport Science University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Senshu University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Meiji University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Universidad Autonoma de Sinaloa",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "National Chayi",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Takushoku University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Yokohama College of Commerce",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Indiana Wesleyan",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Komazawa University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Southeastern",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "137564 Southeastern University (FL)",
+   "160612 Southeastern Louisiana University (LA)"
+  ]
+ },
+ {
+  "name": "Koga Kenko Iryo Semmon Gakko",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Mesabi Range College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Centenary College of New Jersey",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Chinese Culture University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Baker",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "154688 Baker University (KS)",
+   "168847 Baker College (MI)"
+  ]
+ },
+ {
+  "name": "Regis",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "127918 Regis University (CO)",
+   "167598 Regis College (MA)"
+  ]
+ },
+ {
+  "name": "Huertas Junior College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Lethbridge College",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Dankook University",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Bellevue",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "180814 Bellevue University (NE)",
+   "234669 Bellevue College (WA)"
+  ]
+ },
+ {
+  "name": "JC of Central Florida",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Embry-Riddle",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Lousiana State",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Metropolitan CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "St. Johns River JC. FL",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Universidad Autonoma de Santo Domingo",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "College Ahuntsic",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "MIssissippi",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "176017 University of Mississippi (MS)",
+   "176053 Mississippi College (MS)"
+  ]
+ },
+ {
+  "name": "P.J. Education (PR) HS",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Dyersburg CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Colorado St U Pueblo",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Air Force",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Texas-Pan American",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Aurora U",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Caldwell Tech CC",
+  "players": 1,
+  "rule": "none",
+  "candidates": []
+ },
+ {
+  "name": "Quincy",
+  "players": 1,
+  "rule": "ambiguous",
+  "candidates": [
+   "148131 Quincy University (IL)",
+   "167525 Quincy College (MA)"
+  ]
+ }
+]

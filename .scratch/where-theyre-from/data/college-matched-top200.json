@@ -1,0 +1,1802 @@
+[
+ {
+  "name": "Arizona State",
+  "players": 117,
+  "rule": "flagship",
+  "unitid": "104151",
+  "ipeds": "Arizona State University Campus Immersion",
+  "state": "AZ",
+  "county": "04013"
+ },
+ {
+  "name": "Texas",
+  "players": 116,
+  "rule": "flagship",
+  "unitid": "228778",
+  "ipeds": "The University of Texas at Austin",
+  "state": "TX",
+  "county": "48453"
+ },
+ {
+  "name": "Southern California",
+  "players": 111,
+  "rule": "flagship",
+  "unitid": "123961",
+  "ipeds": "University of Southern California",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "UCLA",
+  "players": 103,
+  "rule": "flagship",
+  "unitid": "110662",
+  "ipeds": "University of California-Los Angeles",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "Stanford",
+  "players": 102,
+  "rule": "exact",
+  "unitid": "243744",
+  "ipeds": "Stanford University",
+  "state": "CA",
+  "county": "06085"
+ },
+ {
+  "name": "Louisiana State",
+  "players": 96,
+  "rule": "flagship",
+  "unitid": "159391",
+  "ipeds": "Louisiana State University and Agricultural & Mechanical College",
+  "state": "LA",
+  "county": "22033"
+ },
+ {
+  "name": "Arizona",
+  "players": 92,
+  "rule": "flagship",
+  "unitid": "104179",
+  "ipeds": "University of Arizona",
+  "state": "AZ",
+  "county": "04019"
+ },
+ {
+  "name": "Michigan",
+  "players": 88,
+  "rule": "flagship",
+  "unitid": "170976",
+  "ipeds": "University of Michigan-Ann Arbor",
+  "state": "MI",
+  "county": "26161"
+ },
+ {
+  "name": "Florida",
+  "players": 86,
+  "rule": "flagship",
+  "unitid": "134130",
+  "ipeds": "University of Florida",
+  "state": "FL",
+  "county": "12001"
+ },
+ {
+  "name": "Oklahoma",
+  "players": 82,
+  "rule": "flagship",
+  "unitid": "207500",
+  "ipeds": "University of Oklahoma-Norman Campus",
+  "state": "OK",
+  "county": "40027"
+ },
+ {
+  "name": "Florida State",
+  "players": 81,
+  "rule": "expansion",
+  "unitid": "134097",
+  "ipeds": "Florida State University",
+  "state": "FL",
+  "county": "12073"
+ },
+ {
+  "name": "Cal State Fullerton",
+  "players": 80,
+  "rule": "flagship",
+  "unitid": "110565",
+  "ipeds": "California State University-Fullerton",
+  "state": "CA",
+  "county": "06059"
+ },
+ {
+  "name": "Illinois",
+  "players": 76,
+  "rule": "flagship",
+  "unitid": "145637",
+  "ipeds": "University of Illinois Urbana-Champaign",
+  "state": "IL",
+  "county": "17019"
+ },
+ {
+  "name": "California",
+  "players": 75,
+  "rule": "flagship",
+  "unitid": "110635",
+  "ipeds": "University of California-Berkeley",
+  "state": "CA",
+  "county": "06001"
+ },
+ {
+  "name": "Notre Dame",
+  "players": 72,
+  "rule": "flagship",
+  "unitid": "152080",
+  "ipeds": "University of Notre Dame",
+  "state": "IN",
+  "county": "18141"
+ },
+ {
+  "name": "Texas A&M",
+  "players": 72,
+  "rule": "flagship",
+  "unitid": "228723",
+  "ipeds": "Texas A & M University-College Station",
+  "state": "TX",
+  "county": "48041"
+ },
+ {
+  "name": "Oklahoma State",
+  "players": 70,
+  "rule": "expansion",
+  "unitid": "207388",
+  "ipeds": "Oklahoma State University-Main Campus",
+  "state": "OK",
+  "county": "40119"
+ },
+ {
+  "name": "Clemson",
+  "players": 68,
+  "rule": "exact",
+  "unitid": "217882",
+  "ipeds": "Clemson University",
+  "state": "SC",
+  "county": "45077"
+ },
+ {
+  "name": "Georgia Tech",
+  "players": 67,
+  "rule": "flagship",
+  "unitid": "139755",
+  "ipeds": "Georgia Institute of Technology-Main Campus",
+  "state": "GA",
+  "county": "13121"
+ },
+ {
+  "name": "North Carolina",
+  "players": 66,
+  "rule": "flagship",
+  "unitid": "199120",
+  "ipeds": "University of North Carolina at Chapel Hill",
+  "state": "NC",
+  "county": "37135"
+ },
+ {
+  "name": "Alabama",
+  "players": 66,
+  "rule": "flagship",
+  "unitid": "100751",
+  "ipeds": "The University of Alabama",
+  "state": "AL",
+  "county": "01125"
+ },
+ {
+  "name": "Holy Cross",
+  "players": 64,
+  "rule": "flagship",
+  "unitid": "166124",
+  "ipeds": "College of the Holy Cross",
+  "state": "MA",
+  "county": "25027"
+ },
+ {
+  "name": "Mississippi State",
+  "players": 63,
+  "rule": "expansion",
+  "unitid": "176080",
+  "ipeds": "Mississippi State University",
+  "state": "MS",
+  "county": "28105"
+ },
+ {
+  "name": "Tennessee",
+  "players": 61,
+  "rule": "flagship",
+  "unitid": "221759",
+  "ipeds": "The University of Tennessee-Knoxville",
+  "state": "TN",
+  "county": "47093"
+ },
+ {
+  "name": "Auburn",
+  "players": 61,
+  "rule": "exact",
+  "unitid": "100858",
+  "ipeds": "Auburn University",
+  "state": "AL",
+  "county": "01081"
+ },
+ {
+  "name": "Long Beach State",
+  "players": 59,
+  "rule": "flagship",
+  "unitid": "110583",
+  "ipeds": "California State University-Long Beach",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "South Carolina",
+  "players": 58,
+  "rule": "flagship",
+  "unitid": "218663",
+  "ipeds": "University of South Carolina-Columbia",
+  "state": "SC",
+  "county": "45079"
+ },
+ {
+  "name": "Virginia",
+  "players": 57,
+  "rule": "flagship",
+  "unitid": "234076",
+  "ipeds": "University of Virginia-Main Campus",
+  "state": "VA",
+  "county": "51003"
+ },
+ {
+  "name": "Arkansas",
+  "players": 57,
+  "rule": "flagship",
+  "unitid": "106397",
+  "ipeds": "University of Arkansas",
+  "state": "AR",
+  "county": "05143"
+ },
+ {
+  "name": "Ohio State",
+  "players": 53,
+  "rule": "flagship",
+  "unitid": "204796",
+  "ipeds": "Ohio State University-Main Campus",
+  "state": "OH",
+  "county": "39049"
+ },
+ {
+  "name": "Mississippi",
+  "players": 53,
+  "rule": "flagship",
+  "unitid": "176017",
+  "ipeds": "University of Mississippi",
+  "state": "MS",
+  "county": "28071"
+ },
+ {
+  "name": "Miami (FL)",
+  "players": 53,
+  "rule": "flagship",
+  "unitid": "135726",
+  "ipeds": "University of Miami",
+  "state": "FL",
+  "county": "12086"
+ },
+ {
+  "name": "Vanderbilt",
+  "players": 51,
+  "rule": "exact",
+  "unitid": "221999",
+  "ipeds": "Vanderbilt University",
+  "state": "TN",
+  "county": "47037"
+ },
+ {
+  "name": "Santa Clara",
+  "players": 51,
+  "rule": "exact",
+  "unitid": "122931",
+  "ipeds": "Santa Clara University",
+  "state": "CA",
+  "county": "06085"
+ },
+ {
+  "name": "San Diego State",
+  "players": 51,
+  "rule": "expansion",
+  "unitid": "122409",
+  "ipeds": "San Diego State University",
+  "state": "CA",
+  "county": "06073"
+ },
+ {
+  "name": "Fresno State",
+  "players": 50,
+  "rule": "flagship",
+  "unitid": "110556",
+  "ipeds": "California State University-Fresno",
+  "state": "CA",
+  "county": "06019"
+ },
+ {
+  "name": "Miami Dade CC",
+  "players": 50,
+  "rule": "expansion",
+  "unitid": "135717",
+  "ipeds": "Miami Dade College",
+  "state": "FL",
+  "county": "12086"
+ },
+ {
+  "name": "Missouri",
+  "players": 48,
+  "rule": "flagship",
+  "unitid": "178396",
+  "ipeds": "University of Missouri-Columbia",
+  "state": "MO",
+  "county": "29019"
+ },
+ {
+  "name": "Wake Forest",
+  "players": 47,
+  "rule": "exact",
+  "unitid": "199847",
+  "ipeds": "Wake Forest University",
+  "state": "NC",
+  "county": "37067"
+ },
+ {
+  "name": "Kentucky",
+  "players": 47,
+  "rule": "flagship",
+  "unitid": "157085",
+  "ipeds": "University of Kentucky",
+  "state": "KY",
+  "county": "21067"
+ },
+ {
+  "name": "Nebraska",
+  "players": 47,
+  "rule": "flagship",
+  "unitid": "181464",
+  "ipeds": "University of Nebraska-Lincoln",
+  "state": "NE",
+  "county": "31109"
+ },
+ {
+  "name": "Minnesota",
+  "players": 46,
+  "rule": "flagship",
+  "unitid": "174066",
+  "ipeds": "University of Minnesota-Twin Cities",
+  "state": "MN",
+  "county": "27053"
+ },
+ {
+  "name": "Georgia",
+  "players": 45,
+  "rule": "flagship",
+  "unitid": "139959",
+  "ipeds": "University of Georgia",
+  "state": "GA",
+  "county": "13059"
+ },
+ {
+  "name": "Wichita State",
+  "players": 45,
+  "rule": "expansion",
+  "unitid": "156125",
+  "ipeds": "Wichita State University",
+  "state": "KS",
+  "county": "20173"
+ },
+ {
+  "name": "Duke",
+  "players": 45,
+  "rule": "exact",
+  "unitid": "198419",
+  "ipeds": "Duke University",
+  "state": "NC",
+  "county": "37063"
+ },
+ {
+  "name": "Oregon State",
+  "players": 45,
+  "rule": "expansion",
+  "unitid": "209542",
+  "ipeds": "Oregon State University",
+  "state": "OR",
+  "county": "41003"
+ },
+ {
+  "name": "Texas Tech",
+  "players": 45,
+  "rule": "exact",
+  "unitid": "229115",
+  "ipeds": "Texas Tech University",
+  "state": "TX",
+  "county": "48303"
+ },
+ {
+  "name": "Pennsylvania",
+  "players": 44,
+  "rule": "exact",
+  "unitid": "215062",
+  "ipeds": "University of Pennsylvania",
+  "state": "PA",
+  "county": "42101"
+ },
+ {
+  "name": "Fordham",
+  "players": 44,
+  "rule": "exact",
+  "unitid": "191241",
+  "ipeds": "Fordham University",
+  "state": "NY",
+  "county": "36005"
+ },
+ {
+  "name": "Texas Christian",
+  "players": 44,
+  "rule": "exact",
+  "unitid": "228875",
+  "ipeds": "Texas Christian University",
+  "state": "TX",
+  "county": "48439"
+ },
+ {
+  "name": "Baylor",
+  "players": 44,
+  "rule": "exact",
+  "unitid": "223232",
+  "ipeds": "Baylor University",
+  "state": "TX",
+  "county": "48309"
+ },
+ {
+  "name": "North Carolina State",
+  "players": 43,
+  "rule": "flagship",
+  "unitid": "199193",
+  "ipeds": "North Carolina State University at Raleigh",
+  "state": "NC",
+  "county": "37183"
+ },
+ {
+  "name": "Rice",
+  "players": 43,
+  "rule": "exact",
+  "unitid": "227757",
+  "ipeds": "Rice University",
+  "state": "TX",
+  "county": "48201"
+ },
+ {
+  "name": "Villanova",
+  "players": 42,
+  "rule": "exact",
+  "unitid": "216597",
+  "ipeds": "Villanova University",
+  "state": "PA",
+  "county": "42045"
+ },
+ {
+  "name": "St. Mary's (CA)",
+  "players": 39,
+  "rule": "flagship",
+  "unitid": "123554",
+  "ipeds": "Saint Mary's College of California",
+  "state": "CA",
+  "county": "06013"
+ },
+ {
+  "name": "Michigan State",
+  "players": 39,
+  "rule": "expansion",
+  "unitid": "171100",
+  "ipeds": "Michigan State University",
+  "state": "MI",
+  "county": "26065"
+ },
+ {
+  "name": "Houston",
+  "players": 39,
+  "rule": "exact",
+  "unitid": "225511",
+  "ipeds": "University of Houston",
+  "state": "TX",
+  "county": "48201"
+ },
+ {
+  "name": "Indiana",
+  "players": 38,
+  "rule": "flagship",
+  "unitid": "151351",
+  "ipeds": "Indiana University-Bloomington",
+  "state": "IN",
+  "county": "18105"
+ },
+ {
+  "name": "Maryland",
+  "players": 36,
+  "rule": "flagship",
+  "unitid": "163286",
+  "ipeds": "University of Maryland-College Park",
+  "state": "MD",
+  "county": "24033"
+ },
+ {
+  "name": "Oregon",
+  "players": 36,
+  "rule": "flagship",
+  "unitid": "209551",
+  "ipeds": "University of Oregon",
+  "state": "OR",
+  "county": "41039"
+ },
+ {
+  "name": "Washington State",
+  "players": 36,
+  "rule": "flagship",
+  "unitid": "236939",
+  "ipeds": "Washington State University",
+  "state": "WA",
+  "county": "53075"
+ },
+ {
+  "name": "Pepperdine",
+  "players": 36,
+  "rule": "exact",
+  "unitid": "121150",
+  "ipeds": "Pepperdine University",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "Iowa",
+  "players": 35,
+  "rule": "flagship",
+  "unitid": "153658",
+  "ipeds": "University of Iowa",
+  "state": "IA",
+  "county": "19103"
+ },
+ {
+  "name": "Georgetown",
+  "players": 35,
+  "rule": "flagship",
+  "unitid": "131496",
+  "ipeds": "Georgetown University",
+  "state": "DC",
+  "county": "11001"
+ },
+ {
+  "name": "Seton Hall",
+  "players": 34,
+  "rule": "exact",
+  "unitid": "186584",
+  "ipeds": "Seton Hall University",
+  "state": "NJ",
+  "county": "34013"
+ },
+ {
+  "name": "Tulane",
+  "players": 33,
+  "rule": "exact",
+  "unitid": "160755",
+  "ipeds": "Tulane University of Louisiana",
+  "state": "LA",
+  "county": "22071"
+ },
+ {
+  "name": "Boston College",
+  "players": 32,
+  "rule": "flagship",
+  "unitid": "164924",
+  "ipeds": "Boston College",
+  "state": "MA",
+  "county": "25017"
+ },
+ {
+  "name": "Western Michigan",
+  "players": 32,
+  "rule": "exact",
+  "unitid": "172699",
+  "ipeds": "Western Michigan University",
+  "state": "MI",
+  "county": "26077"
+ },
+ {
+  "name": "Dartmouth",
+  "players": 30,
+  "rule": "exact",
+  "unitid": "182670",
+  "ipeds": "Dartmouth College",
+  "state": "NH",
+  "county": "33009"
+ },
+ {
+  "name": "West Virginia",
+  "players": 30,
+  "rule": "flagship",
+  "unitid": "238032",
+  "ipeds": "West Virginia University",
+  "state": "WV",
+  "county": "54061"
+ },
+ {
+  "name": "Brigham Young",
+  "players": 30,
+  "rule": "exact",
+  "unitid": "230038",
+  "ipeds": "Brigham Young University",
+  "state": "UT",
+  "county": "49049"
+ },
+ {
+  "name": "Wisconsin",
+  "players": 29,
+  "rule": "flagship",
+  "unitid": "240444",
+  "ipeds": "University of Wisconsin-Madison",
+  "state": "WI",
+  "county": "55025"
+ },
+ {
+  "name": "Washington",
+  "players": 29,
+  "rule": "flagship",
+  "unitid": "236948",
+  "ipeds": "University of Washington-Seattle Campus",
+  "state": "WA",
+  "county": "53033"
+ },
+ {
+  "name": "Loyola Marymount",
+  "players": 29,
+  "rule": "exact",
+  "unitid": "117946",
+  "ipeds": "Loyola Marymount University",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "Gonzaga",
+  "players": 29,
+  "rule": "exact",
+  "unitid": "235316",
+  "ipeds": "Gonzaga University",
+  "state": "WA",
+  "county": "53063"
+ },
+ {
+  "name": "Louisville",
+  "players": 29,
+  "rule": "exact",
+  "unitid": "157289",
+  "ipeds": "University of Louisville",
+  "state": "KY",
+  "county": "21111"
+ },
+ {
+  "name": "Kent State",
+  "players": 29,
+  "rule": "flagship",
+  "unitid": "203517",
+  "ipeds": "Kent State University at Kent",
+  "state": "OH",
+  "county": "39133"
+ },
+ {
+  "name": "Indiana State",
+  "players": 28,
+  "rule": "expansion",
+  "unitid": "151324",
+  "ipeds": "Indiana State University",
+  "state": "IN",
+  "county": "18167"
+ },
+ {
+  "name": "South Alabama",
+  "players": 28,
+  "rule": "exact",
+  "unitid": "102094",
+  "ipeds": "University of South Alabama",
+  "state": "AL",
+  "county": "01097"
+ },
+ {
+  "name": "Kansas",
+  "players": 27,
+  "rule": "flagship",
+  "unitid": "155317",
+  "ipeds": "University of Kansas",
+  "state": "KS",
+  "county": "20045"
+ },
+ {
+  "name": "Princeton",
+  "players": 26,
+  "rule": "exact",
+  "unitid": "186131",
+  "ipeds": "Princeton University",
+  "state": "NJ",
+  "county": "34021"
+ },
+ {
+  "name": "Creighton",
+  "players": 26,
+  "rule": "exact",
+  "unitid": "181002",
+  "ipeds": "Creighton University",
+  "state": "NE",
+  "county": "31055"
+ },
+ {
+  "name": "East Carolina",
+  "players": 26,
+  "rule": "exact",
+  "unitid": "198464",
+  "ipeds": "East Carolina University",
+  "state": "NC",
+  "county": "37147"
+ },
+ {
+  "name": "San Diego",
+  "players": 26,
+  "rule": "exact",
+  "unitid": "122436",
+  "ipeds": "University of San Diego",
+  "state": "CA",
+  "county": "06073"
+ },
+ {
+  "name": "Brown",
+  "players": 25,
+  "rule": "exact",
+  "unitid": "217156",
+  "ipeds": "Brown University",
+  "state": "RI",
+  "county": "44007"
+ },
+ {
+  "name": "Pittsburgh",
+  "players": 25,
+  "rule": "flagship",
+  "unitid": "215293",
+  "ipeds": "University of Pittsburgh-Pittsburgh Campus",
+  "state": "PA",
+  "county": "42003"
+ },
+ {
+  "name": "St. John's (NY)",
+  "players": 25,
+  "rule": "flagship",
+  "unitid": "195809",
+  "ipeds": "St. John's University-New York",
+  "state": "NY",
+  "county": "36081"
+ },
+ {
+  "name": "Miami (OH)",
+  "players": 25,
+  "rule": "flagship",
+  "unitid": "204024",
+  "ipeds": "Miami University-Oxford",
+  "state": "OH",
+  "county": "39017"
+ },
+ {
+  "name": "UC Santa Barbara",
+  "players": 25,
+  "rule": "expansion",
+  "unitid": "110705",
+  "ipeds": "University of California-Santa Barbara",
+  "state": "CA",
+  "county": "06083"
+ },
+ {
+  "name": "Southern Mississippi",
+  "players": 25,
+  "rule": "exact",
+  "unitid": "176372",
+  "ipeds": "University of Southern Mississippi",
+  "state": "MS",
+  "county": "28035"
+ },
+ {
+  "name": "South Florida",
+  "players": 25,
+  "rule": "exact",
+  "unitid": "137351",
+  "ipeds": "University of South Florida",
+  "state": "FL",
+  "county": "12057"
+ },
+ {
+  "name": "Northwestern",
+  "players": 24,
+  "rule": "flagship",
+  "unitid": "147767",
+  "ipeds": "Northwestern University",
+  "state": "IL",
+  "county": "17031"
+ },
+ {
+  "name": "Ohio",
+  "players": 24,
+  "rule": "flagship",
+  "unitid": "204857",
+  "ipeds": "Ohio University-Main Campus",
+  "state": "OH",
+  "county": "39009"
+ },
+ {
+  "name": "Cincinnati",
+  "players": 24,
+  "rule": "exact",
+  "unitid": "201885",
+  "ipeds": "University of Cincinnati-Main Campus",
+  "state": "OH",
+  "county": "39061"
+ },
+ {
+  "name": "Virginia Tech",
+  "players": 24,
+  "rule": "flagship",
+  "unitid": "233921",
+  "ipeds": "Virginia Polytechnic Institute and State University",
+  "state": "VA",
+  "county": "51121"
+ },
+ {
+  "name": "Southern Illinois",
+  "players": 24,
+  "rule": "flagship",
+  "unitid": "149222",
+  "ipeds": "Southern Illinois University-Carbondale",
+  "state": "IL",
+  "county": "17077"
+ },
+ {
+  "name": "Manhattan College",
+  "players": 23,
+  "rule": "expansion",
+  "unitid": "192703",
+  "ipeds": "Manhattan College",
+  "state": "NY",
+  "county": "36005"
+ },
+ {
+  "name": "Rutgers",
+  "players": 23,
+  "rule": "flagship",
+  "unitid": "186380",
+  "ipeds": "Rutgers University-New Brunswick",
+  "state": "NJ",
+  "county": "34023"
+ },
+ {
+  "name": "Maine",
+  "players": 23,
+  "rule": "flagship",
+  "unitid": "161253",
+  "ipeds": "University of Maine",
+  "state": "ME",
+  "county": "23019"
+ },
+ {
+  "name": "San Francisco",
+  "players": 23,
+  "rule": "flagship",
+  "unitid": "122612",
+  "ipeds": "University of San Francisco",
+  "state": "CA",
+  "county": "06075"
+ },
+ {
+  "name": "Sacramento City College",
+  "players": 23,
+  "rule": "expansion",
+  "unitid": "122180",
+  "ipeds": "Sacramento City College",
+  "state": "CA",
+  "county": "06067"
+ },
+ {
+  "name": "Oral Roberts",
+  "players": 23,
+  "rule": "exact",
+  "unitid": "207582",
+  "ipeds": "Oral Roberts University",
+  "state": "OK",
+  "county": "40143"
+ },
+ {
+  "name": "Yale",
+  "players": 22,
+  "rule": "exact",
+  "unitid": "130794",
+  "ipeds": "Yale University",
+  "state": "CT",
+  "county": "09170"
+ },
+ {
+  "name": "Cal Poly San Luis Obispo",
+  "players": 22,
+  "rule": "flagship",
+  "unitid": "110422",
+  "ipeds": "California Polytechnic State University-San Luis Obispo",
+  "state": "CA",
+  "county": "06079"
+ },
+ {
+  "name": "Ball State",
+  "players": 22,
+  "rule": "expansion",
+  "unitid": "150136",
+  "ipeds": "Ball State University",
+  "state": "IN",
+  "county": "18035"
+ },
+ {
+  "name": "Memphis",
+  "players": 22,
+  "rule": "exact",
+  "unitid": "220862",
+  "ipeds": "University of Memphis",
+  "state": "TN",
+  "county": "47157"
+ },
+ {
+  "name": "Syracuse",
+  "players": 21,
+  "rule": "exact",
+  "unitid": "196413",
+  "ipeds": "Syracuse University",
+  "state": "NY",
+  "county": "36067"
+ },
+ {
+  "name": "Dallas Baptist",
+  "players": 21,
+  "rule": "exact",
+  "unitid": "224226",
+  "ipeds": "Dallas Baptist University",
+  "state": "TX",
+  "county": "48113"
+ },
+ {
+  "name": "Central Florida",
+  "players": 21,
+  "rule": "flagship",
+  "unitid": "132903",
+  "ipeds": "University of Central Florida",
+  "state": "FL",
+  "county": "12095"
+ },
+ {
+  "name": "Illinois State",
+  "players": 20,
+  "rule": "expansion",
+  "unitid": "145813",
+  "ipeds": "Illinois State University",
+  "state": "IL",
+  "county": "17113"
+ },
+ {
+  "name": "Connecticut",
+  "players": 20,
+  "rule": "flagship",
+  "unitid": "129020",
+  "ipeds": "University of Connecticut",
+  "state": "CT",
+  "county": "09110"
+ },
+ {
+  "name": "UC Riverside",
+  "players": 20,
+  "rule": "expansion",
+  "unitid": "110671",
+  "ipeds": "University of California-Riverside",
+  "state": "CA",
+  "county": "06065"
+ },
+ {
+  "name": "Harvard",
+  "players": 19,
+  "rule": "exact",
+  "unitid": "166027",
+  "ipeds": "Harvard University",
+  "state": "MA",
+  "county": "25017"
+ },
+ {
+  "name": "Purdue",
+  "players": 19,
+  "rule": "exact",
+  "unitid": "243780",
+  "ipeds": "Purdue University-Main Campus",
+  "state": "IN",
+  "county": "18157"
+ },
+ {
+  "name": "Bowling Green State",
+  "players": 19,
+  "rule": "expansion",
+  "unitid": "201441",
+  "ipeds": "Bowling Green State University-Main Campus",
+  "state": "OH",
+  "county": "39173"
+ },
+ {
+  "name": "Nevada - Las Vegas",
+  "players": 19,
+  "rule": "exact",
+  "unitid": "182281",
+  "ipeds": "University of Nevada-Las Vegas",
+  "state": "NV",
+  "county": "32003"
+ },
+ {
+  "name": "Lewis-Clark State",
+  "players": 19,
+  "rule": "exact",
+  "unitid": "142328",
+  "ipeds": "Lewis-Clark State College",
+  "state": "ID",
+  "county": "16069"
+ },
+ {
+  "name": "Louisiana Tech",
+  "players": 18,
+  "rule": "exact",
+  "unitid": "159647",
+  "ipeds": "Louisiana Tech University",
+  "state": "LA",
+  "county": "22061"
+ },
+ {
+  "name": "Massachusetts",
+  "players": 18,
+  "rule": "flagship",
+  "unitid": "166629",
+  "ipeds": "University of Massachusetts-Amherst",
+  "state": "MA",
+  "county": "25015"
+ },
+ {
+  "name": "Richmond",
+  "players": 18,
+  "rule": "exact",
+  "unitid": "233374",
+  "ipeds": "University of Richmond",
+  "state": "VA",
+  "county": "51760"
+ },
+ {
+  "name": "San Jose State",
+  "players": 18,
+  "rule": "expansion",
+  "unitid": "122755",
+  "ipeds": "San Jose State University",
+  "state": "CA",
+  "county": "06085"
+ },
+ {
+  "name": "Florida International",
+  "players": 18,
+  "rule": "exact",
+  "unitid": "133951",
+  "ipeds": "Florida International University",
+  "state": "FL",
+  "county": "12086"
+ },
+ {
+  "name": "Bucknell",
+  "players": 17,
+  "rule": "exact",
+  "unitid": "211291",
+  "ipeds": "Bucknell University",
+  "state": "PA",
+  "county": "42119"
+ },
+ {
+  "name": "Delaware",
+  "players": 17,
+  "rule": "flagship",
+  "unitid": "130943",
+  "ipeds": "University of Delaware",
+  "state": "DE",
+  "county": "10003"
+ },
+ {
+  "name": "Kansas State",
+  "players": 17,
+  "rule": "expansion",
+  "unitid": "155399",
+  "ipeds": "Kansas State University",
+  "state": "KS",
+  "county": "20161"
+ },
+ {
+  "name": "Utah",
+  "players": 17,
+  "rule": "flagship",
+  "unitid": "230764",
+  "ipeds": "University of Utah",
+  "state": "UT",
+  "county": "49035"
+ },
+ {
+  "name": "Central Michigan",
+  "players": 17,
+  "rule": "exact",
+  "unitid": "169248",
+  "ipeds": "Central Michigan University",
+  "state": "MI",
+  "county": "26073"
+ },
+ {
+  "name": "Grand Canyon",
+  "players": 17,
+  "rule": "exact",
+  "unitid": "104717",
+  "ipeds": "Grand Canyon University",
+  "state": "AZ",
+  "county": "04013"
+ },
+ {
+  "name": "Hawaii",
+  "players": 17,
+  "rule": "flagship",
+  "unitid": "141574",
+  "ipeds": "University of Hawaii at Manoa",
+  "state": "HI",
+  "county": "15003"
+ },
+ {
+  "name": "Eastern Michigan",
+  "players": 16,
+  "rule": "exact",
+  "unitid": "169798",
+  "ipeds": "Eastern Michigan University",
+  "state": "MI",
+  "county": "26161"
+ },
+ {
+  "name": "Iowa State",
+  "players": 16,
+  "rule": "expansion",
+  "unitid": "153603",
+  "ipeds": "Iowa State University",
+  "state": "IA",
+  "county": "19169"
+ },
+ {
+  "name": "Georgia Southern",
+  "players": 16,
+  "rule": "exact",
+  "unitid": "139931",
+  "ipeds": "Georgia Southern University",
+  "state": "GA",
+  "county": "13031"
+ },
+ {
+  "name": "Old Dominion",
+  "players": 16,
+  "rule": "exact",
+  "unitid": "232982",
+  "ipeds": "Old Dominion University",
+  "state": "VA",
+  "county": "51710"
+ },
+ {
+  "name": "Nevada - Reno",
+  "players": 16,
+  "rule": "exact",
+  "unitid": "182290",
+  "ipeds": "University of Nevada-Reno",
+  "state": "NV",
+  "county": "32031"
+ },
+ {
+  "name": "Chipola Junior College",
+  "players": 16,
+  "rule": "exact",
+  "unitid": "133021",
+  "ipeds": "Chipola College",
+  "state": "FL",
+  "county": "12063"
+ },
+ {
+  "name": "Florida Atlantic",
+  "players": 16,
+  "rule": "exact",
+  "unitid": "133669",
+  "ipeds": "Florida Atlantic University",
+  "state": "FL",
+  "county": "12099"
+ },
+ {
+  "name": "Niagara",
+  "players": 15,
+  "rule": "exact",
+  "unitid": "193973",
+  "ipeds": "Niagara University",
+  "state": "NY",
+  "county": "36063"
+ },
+ {
+  "name": "Xavier",
+  "players": 15,
+  "rule": "exact",
+  "unitid": "206622",
+  "ipeds": "Xavier University",
+  "state": "OH",
+  "county": "39061"
+ },
+ {
+  "name": "Sam Houston State",
+  "players": 15,
+  "rule": "expansion",
+  "unitid": "227881",
+  "ipeds": "Sam Houston State University",
+  "state": "TX",
+  "county": "48471"
+ },
+ {
+  "name": "Bradley",
+  "players": 15,
+  "rule": "exact",
+  "unitid": "143358",
+  "ipeds": "Bradley University",
+  "state": "IL",
+  "county": "17143"
+ },
+ {
+  "name": "Cal State Northridge",
+  "players": 15,
+  "rule": "expansion",
+  "unitid": "110608",
+  "ipeds": "California State University-Northridge",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "James Madison",
+  "players": 15,
+  "rule": "exact",
+  "unitid": "232423",
+  "ipeds": "James Madison University",
+  "state": "VA",
+  "county": "51660"
+ },
+ {
+  "name": "Coastal Carolina",
+  "players": 15,
+  "rule": "exact",
+  "unitid": "218724",
+  "ipeds": "Coastal Carolina University",
+  "state": "SC",
+  "county": "45051"
+ },
+ {
+  "name": "Virginia Commonwealth",
+  "players": 15,
+  "rule": "exact",
+  "unitid": "234030",
+  "ipeds": "Virginia Commonwealth University",
+  "state": "VA",
+  "county": "51760"
+ },
+ {
+  "name": "Miami",
+  "players": 15,
+  "rule": "exact",
+  "unitid": "135726",
+  "ipeds": "University of Miami",
+  "state": "FL",
+  "county": "12086"
+ },
+ {
+  "name": "Lehigh",
+  "players": 14,
+  "rule": "exact",
+  "unitid": "213543",
+  "ipeds": "Lehigh University",
+  "state": "PA",
+  "county": "42095"
+ },
+ {
+  "name": "Toledo",
+  "players": 14,
+  "rule": "exact",
+  "unitid": "206084",
+  "ipeds": "University of Toledo",
+  "state": "OH",
+  "county": "39095"
+ },
+ {
+  "name": "Troy",
+  "players": 14,
+  "rule": "exact",
+  "unitid": "102368",
+  "ipeds": "Troy University",
+  "state": "AL",
+  "county": "01109"
+ },
+ {
+  "name": "Western Carolina",
+  "players": 14,
+  "rule": "exact",
+  "unitid": "200004",
+  "ipeds": "Western Carolina University",
+  "state": "NC",
+  "county": "37099"
+ },
+ {
+  "name": "Cal State LA",
+  "players": 14,
+  "rule": "exact",
+  "unitid": "110592",
+  "ipeds": "California State University-Los Angeles",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "Florida Southern",
+  "players": 14,
+  "rule": "exact",
+  "unitid": "134079",
+  "ipeds": "Florida Southern College",
+  "state": "FL",
+  "county": "12105"
+ },
+ {
+  "name": "Eastern Illinois",
+  "players": 13,
+  "rule": "exact",
+  "unitid": "144892",
+  "ipeds": "Eastern Illinois University",
+  "state": "IL",
+  "county": "17029"
+ },
+ {
+  "name": "Middle Tennessee State",
+  "players": 13,
+  "rule": "expansion",
+  "unitid": "220978",
+  "ipeds": "Middle Tennessee State University",
+  "state": "TN",
+  "county": "47149"
+ },
+ {
+  "name": "Portland",
+  "players": 13,
+  "rule": "exact",
+  "unitid": "209825",
+  "ipeds": "University of Portland",
+  "state": "OR",
+  "county": "41051"
+ },
+ {
+  "name": "Stetson",
+  "players": 13,
+  "rule": "exact",
+  "unitid": "137546",
+  "ipeds": "Stetson University",
+  "state": "FL",
+  "county": "12127"
+ },
+ {
+  "name": "Grambling State",
+  "players": 13,
+  "rule": "expansion",
+  "unitid": "159009",
+  "ipeds": "Grambling State University",
+  "state": "LA",
+  "county": "22061"
+ },
+ {
+  "name": "Sacramento State",
+  "players": 13,
+  "rule": "exact",
+  "unitid": "110617",
+  "ipeds": "California State University-Sacramento",
+  "state": "CA",
+  "county": "06067"
+ },
+ {
+  "name": "UNC Wilmington",
+  "players": 13,
+  "rule": "exact",
+  "unitid": "199218",
+  "ipeds": "University of North Carolina Wilmington",
+  "state": "NC",
+  "county": "37129"
+ },
+ {
+  "name": "New Mexico",
+  "players": 13,
+  "rule": "flagship",
+  "unitid": "187985",
+  "ipeds": "University of New Mexico-Main Campus",
+  "state": "NM",
+  "county": "35001"
+ },
+ {
+  "name": "UC Irvine",
+  "players": 13,
+  "rule": "expansion",
+  "unitid": "110653",
+  "ipeds": "University of California-Irvine",
+  "state": "CA",
+  "county": "06059"
+ },
+ {
+  "name": "Middle Georgia State",
+  "players": 13,
+  "rule": "expansion",
+  "unitid": "482158",
+  "ipeds": "Middle Georgia State University",
+  "state": "GA",
+  "county": "13021"
+ },
+ {
+  "name": "McNeese State",
+  "players": 13,
+  "rule": "expansion",
+  "unitid": "159717",
+  "ipeds": "McNeese State University",
+  "state": "LA",
+  "county": "22019"
+ },
+ {
+  "name": "Saint Louis University",
+  "players": 12,
+  "rule": "expansion",
+  "unitid": "179159",
+  "ipeds": "Saint Louis University",
+  "state": "MO",
+  "county": "29510"
+ },
+ {
+  "name": "Davidson",
+  "players": 12,
+  "rule": "exact",
+  "unitid": "198385",
+  "ipeds": "Davidson College",
+  "state": "NC",
+  "county": "37119"
+ },
+ {
+  "name": "Marshall",
+  "players": 12,
+  "rule": "exact",
+  "unitid": "237525",
+  "ipeds": "Marshall University",
+  "state": "WV",
+  "county": "54011"
+ },
+ {
+  "name": "Louisiana - Lafayette",
+  "players": 12,
+  "rule": "exact",
+  "unitid": "160658",
+  "ipeds": "University of Louisiana at Lafayette",
+  "state": "LA",
+  "county": "22055"
+ },
+ {
+  "name": "Morehead State",
+  "players": 12,
+  "rule": "expansion",
+  "unitid": "157386",
+  "ipeds": "Morehead State University",
+  "state": "KY",
+  "county": "21205"
+ },
+ {
+  "name": "Riverside City College",
+  "players": 12,
+  "rule": "expansion",
+  "unitid": "121901",
+  "ipeds": "Riverside City College",
+  "state": "CA",
+  "county": "06065"
+ },
+ {
+  "name": "Chabot College",
+  "players": 12,
+  "rule": "expansion",
+  "unitid": "111920",
+  "ipeds": "Chabot College",
+  "state": "CA",
+  "county": "06001"
+ },
+ {
+  "name": "New Orleans",
+  "players": 12,
+  "rule": "exact",
+  "unitid": "159939",
+  "ipeds": "University of New Orleans",
+  "state": "LA",
+  "county": "22071"
+ },
+ {
+  "name": "Texas-Arlington",
+  "players": 12,
+  "rule": "exact",
+  "unitid": "228769",
+  "ipeds": "The University of Texas at Arlington",
+  "state": "TX",
+  "county": "48439"
+ },
+ {
+  "name": "Washington University in St. Louis",
+  "players": 11,
+  "rule": "exact",
+  "unitid": "179867",
+  "ipeds": "Washington University in St Louis",
+  "state": "MO",
+  "county": "29189"
+ },
+ {
+  "name": "Colgate",
+  "players": 11,
+  "rule": "exact",
+  "unitid": "190099",
+  "ipeds": "Colgate University",
+  "state": "NY",
+  "county": "36053"
+ },
+ {
+  "name": "Eastern Kentucky",
+  "players": 11,
+  "rule": "exact",
+  "unitid": "156620",
+  "ipeds": "Eastern Kentucky University",
+  "state": "KY",
+  "county": "21151"
+ },
+ {
+  "name": "Elon",
+  "players": 11,
+  "rule": "exact",
+  "unitid": "198516",
+  "ipeds": "Elon University",
+  "state": "NC",
+  "county": "37001"
+ },
+ {
+  "name": "Campbell",
+  "players": 11,
+  "rule": "exact",
+  "unitid": "198136",
+  "ipeds": "Campbell University",
+  "state": "NC",
+  "county": "37085"
+ },
+ {
+  "name": "Fresno City College",
+  "players": 11,
+  "rule": "expansion",
+  "unitid": "114789",
+  "ipeds": "Fresno City College",
+  "state": "CA",
+  "county": "06019"
+ },
+ {
+  "name": "Los Angeles Valley College",
+  "players": 11,
+  "rule": "expansion",
+  "unitid": "117733",
+  "ipeds": "Los Angeles Valley College",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "Grossmont College",
+  "players": 11,
+  "rule": "expansion",
+  "unitid": "115296",
+  "ipeds": "Grossmont College",
+  "state": "CA",
+  "county": "06073"
+ },
+ {
+  "name": "New Haven",
+  "players": 11,
+  "rule": "exact",
+  "unitid": "129941",
+  "ipeds": "University of New Haven",
+  "state": "CT",
+  "county": "09170"
+ },
+ {
+  "name": "Texas State",
+  "players": 11,
+  "rule": "expansion",
+  "unitid": "228459",
+  "ipeds": "Texas State University",
+  "state": "TX",
+  "county": "48209"
+ },
+ {
+  "name": "Cerritos College",
+  "players": 11,
+  "rule": "expansion",
+  "unitid": "111887",
+  "ipeds": "Cerritos College",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "San Jacinto College",
+  "players": 11,
+  "rule": "exact",
+  "unitid": "227979",
+  "ipeds": "San Jacinto Community College",
+  "state": "TX",
+  "county": "48201"
+ },
+ {
+  "name": "Orange Coast CC",
+  "players": 11,
+  "rule": "expansion",
+  "unitid": "120342",
+  "ipeds": "Orange Coast College",
+  "state": "CA",
+  "county": "06059"
+ },
+ {
+  "name": "Lamar",
+  "players": 11,
+  "rule": "exact",
+  "unitid": "226091",
+  "ipeds": "Lamar University",
+  "state": "TX",
+  "county": "48245"
+ },
+ {
+  "name": "Washington and Lee",
+  "players": 10,
+  "rule": "exact",
+  "unitid": "234207",
+  "ipeds": "Washington and Lee University",
+  "state": "VA",
+  "county": "51678"
+ },
+ {
+  "name": "Vermont",
+  "players": 10,
+  "rule": "flagship",
+  "unitid": "231174",
+  "ipeds": "University of Vermont",
+  "state": "VT",
+  "county": "50007"
+ },
+ {
+  "name": "Amherst",
+  "players": 10,
+  "rule": "exact",
+  "unitid": "164465",
+  "ipeds": "Amherst College",
+  "state": "MA",
+  "county": "25015"
+ },
+ {
+  "name": "Mercer University",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "140447",
+  "ipeds": "Mercer University",
+  "state": "GA",
+  "county": "13021"
+ },
+ {
+  "name": "Lafayette College",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "213385",
+  "ipeds": "Lafayette College",
+  "state": "PA",
+  "county": "42095"
+ },
+ {
+  "name": "Guilford College",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "198613",
+  "ipeds": "Guilford College",
+  "state": "NC",
+  "county": "37081"
+ },
+ {
+  "name": "Southeast Missouri State",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "179557",
+  "ipeds": "Southeast Missouri State University",
+  "state": "MO",
+  "county": "29031"
+ },
+ {
+  "name": "Temple University",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "216339",
+  "ipeds": "Temple University",
+  "state": "PA",
+  "county": "42101"
+ },
+ {
+  "name": "Southeastern Louisiana",
+  "players": 10,
+  "rule": "exact",
+  "unitid": "160612",
+  "ipeds": "Southeastern Louisiana University",
+  "state": "LA",
+  "county": "22105"
+ },
+ {
+  "name": "William & Mary",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "231624",
+  "ipeds": "William & Mary",
+  "state": "VA",
+  "county": "51830"
+ },
+ {
+  "name": "Los Angeles Pierce College",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "117706",
+  "ipeds": "Los Angeles Pierce College",
+  "state": "CA",
+  "county": "06037"
+ },
+ {
+  "name": "New Mexico State",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "188030",
+  "ipeds": "New Mexico State University-Main Campus",
+  "state": "NM",
+  "county": "35013"
+ },
+ {
+  "name": "Tampa",
+  "players": 10,
+  "rule": "exact",
+  "unitid": "137847",
+  "ipeds": "The University of Tampa",
+  "state": "FL",
+  "county": "12057"
+ },
+ {
+  "name": "Delta State",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "175616",
+  "ipeds": "Delta State University",
+  "state": "MS",
+  "county": "28011"
+ },
+ {
+  "name": "Jackson State CC",
+  "players": 10,
+  "rule": "expansion",
+  "unitid": "220400",
+  "ipeds": "Jackson State Community College",
+  "state": "TN",
+  "county": "47113"
+ }
+]
