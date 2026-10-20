@@ -818,6 +818,14 @@
       "class": "spoiler-free",
       "why": "The poster's hitter season lines, ending the day BEFORE the game (ADR-0088). One byDateRange read per lineup, regular season only, so it holds no game in progress and no earlier October game. Season aggregates on an open surface (ADR-0034)."
     },
+    "hotcold/line.js": {
+      "class": "spoiler-free",
+      "why": "The hot and cold callouts' line math (#1855): folds a regular-season game log into a cumulative line and its 10-game (10-inning) checkpoints, and the rate of each tested stat. Shared with gen-season-checkpoints.mjs. Season aggregates on an open surface (ADR-0034); holding back today's games is rule.js's job."
+    },
+    "hotcold/rule.js": {
+      "class": "spoiler-free",
+      "why": "The hot and cold callouts' rule (#1855): up to two season stats in the league's 2% tails at the same checkpoint. Pure, over a player's game log; it drops every row dated on or after the cutoff, so a game still in progress today never counts. An open surface (ADR-0034): a stat line is not a score."
+    },
     "player/history.js": {
       "class": "spoiler-free",
       "why": "The player hub's History tab loader — awards, innings by position, the Firsts card, path/team history and the transaction timeline. Career-shaped facts, each honouring the page's own asOf cutoff. The Firsts card links out to box scores, which stay sealed on their own pages; it renders no score itself."

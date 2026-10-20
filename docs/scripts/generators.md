@@ -1514,6 +1514,20 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `gen-season-checkpoints.mjs` → `public/data/season-checkpoints/tails.json` (shipped)
+  and `scripts/data/season-checkpoints/{season}.json` (raw, not shipped) — the player
+  page's hot and cold callouts (#1855). The raw store keeps each MLB player-season's
+  cumulative regular-season line at every 10 games (hitters) or 10 innings (pitchers),
+  plus his final line. The tails file keeps, for each checkpoint, the pool size and 101
+  quantiles of each tested stat over the last ten completed seasons (Gary, 2026-10-20).
+  A checkpoint with fewer than `MIN_POOL` (100) lines is left out. The line math is the
+  app's `src/api/hotcold/line.js`; the window and the tails are
+  `lib/season-checkpoints/tails.mjs`. **Hand-run, NOT on a cron**: re-run once after
+  each regular season ends. A season already on file is not fetched again (`--refresh`
+  refetches; `--last=YYYY` names the last season). statsapi's `/people?personIds=…`
+  hydrates 25 game logs a call, so a season is about 65 calls and the first ten-season
+  backfill was about 650 calls in about one minute. Output: 3.8 MB raw, 124 KB tails
+  (39 KB gzipped).
 - `ballpark/import-field-layouts.mjs` → `src/lib/ballpark/layout/fields.js` — each
   MLB park's measured distances, wall heights, deepest point and fair area (Baseball
   Savant's Dimensions table), plus its current fence outline, extracted from MLB's

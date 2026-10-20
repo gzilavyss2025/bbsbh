@@ -1295,3 +1295,14 @@ line for this season. It never uses `stats=career` (ADR-0088). `fetchWorldSeries
 returns his starts before `date`. The live series page draws the line as the "All-time World
 Series" row (World Series only); `ReferencePanel.jsx` feeds the counts to the `wsStarterStart`
 note ("His first World Series start", 5th, 10th). A failed read counts as 0 starts.
+
+## `hotcold/rule.js`
+
+Reads nothing itself: the caller hands it `public/data/season-checkpoints/tails.json`
+(`gen-season-checkpoints.mjs`, hand-run once a season) and the player's regular-season
+game log. `hotColdFlags` places his line at the checkpoint his sample reached (10, 20, …
+games for a hitter, innings for a pitcher) among the league's lines at the same
+checkpoint over ten seasons, and answers at most two stats in the 2% tails, most unusual
+first, one per group (AVG and OPS; ERA and WHIP). Rows dated on or after the cutoff do
+not count, so a game in progress today never does. MLB only. The player-page card that
+reads the file is #1855 slice 2.
