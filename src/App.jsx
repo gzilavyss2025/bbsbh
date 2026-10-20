@@ -11,6 +11,7 @@ import { PlayerHoverCard } from './components/player/PlayerHoverCard.jsx'
 import { HeadshotLogPanel } from './components/headshot-log/HeadshotLogPanel.jsx'
 import { useMotionPreference } from './hooks/preferences/useMotionPreference.js'
 import { useIdentityVersion } from './lib/identity/useIdentityVersion.js'
+import { placeKey } from './lib/from/route.js'
 import {
   parseRoute,
   gamePath,
@@ -424,7 +425,7 @@ export default function App() {
     content = <FromPage key={`from${route.state ?? ''}`} list={route.list} state={route.state} zone={route.zone} />
   } else if (route.name === 'from-place') {
     // Keyed on the whole address, so a new place remounts with fresh state (the `photos` precedent).
-    content = <FromPlacePage key={[route.kind, route.slug, route.state, route.city, route.country].join('/')} route={route} />
+    content = <FromPlacePage key={placeKey(route)} route={route} />
   } else if (route.name === 'from-country') {
     content = <FromCountryPage key={route.country} country={route.country} />
   } else if (route.name === 'umpire') {

@@ -25,7 +25,7 @@ export function FromCountryPage({ country }) {
   const picker = linkProps(fromPath({ list: 'hometown' }))
   const rows = (data?.places ?? [])
     .map((p) => ({ key: p.slug, place: { kind: 'abroad', country, slug: p.slug }, name: p.name, count: p.players.length }))
-    .sort((a, b) => b.count - a.count || (a.name < b.name ? -1 : 1))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
 
   return (
     <div className="screen">
@@ -35,7 +35,7 @@ export function FromCountryPage({ country }) {
           <h1 className="fromp__title">{FROM_TITLE}</h1>
           <p className="fromp__intro">{data ? `Every town in ${data.name} where a big leaguer was born.` : 'Every big leaguer born outside the US.'}</p>
         </header>
-        <AsyncStatus loading={found.loading} error={found.error} hasData={Boolean(data)} errorMessage="Couldn’t load this country. Try again." onRetry={found.reload} />
+        <AsyncStatus loading={found.loading} error={found.error} hasData={Boolean(data)} errorMessage="Couldn’t load this country. Check your connection, then reload the page." />
         {!found.loading && !found.error && !data && (
           <EmptyState action={<Door href={picker.href} onClick={picker.onClick}>Back to the picker</Door>}>{placeMissing}</EmptyState>
         )}

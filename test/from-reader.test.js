@@ -80,11 +80,50 @@ test('fetchFromPlace finds a school through the lookup, a hometown by state, an 
 })
 
 test('fetchFromPlace answers null for an address with no place', async () => {
-  fakeFetch({ '/data/from/lookup/high-school.json': [], '/data/from/hometown/PA.json': { places: [] } })
+  fakeFetch({ '/data/from/lookup/high-school.json': [['other-tn', 'Other', 'TN']], '/data/from/hometown/PA.json': { places: [] } })
   assert.equal(await fetchFromPlace({ kind: 'high-school', slug: 'nope-tn' }), null)
   assert.equal(await fetchFromPlace({ kind: 'hometown', state: 'PA', city: 'nowhere' }), null)
   assert.equal(await fetchFromPlace({ kind: 'abroad', country: 'atlantis', city: 'x' }), null)
   assert.equal(await fetchFromCountry('atlantis'), null)
+})
+
+// navigator.onLine is the one signal a reader has for "I could not load" against "there is none".
+async function withOnLine(value, fn) {
+  const saved = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
+  Object.defineProperty(globalThis, 'navigator', { value: { onLine: value }, configurable: true })
+  try {
+    return await fn()
+  } finally {
+    if (saved) Object.defineProperty(globalThis, 'navigator', saved)
+    else delete globalThis.navigator
+  }
+}
+
+test('a place the data lists but cannot load is an error, not "no such place"', async () => {
+  // an empty lookup is never real data (a lookup has a thousand rows), so it is the fallback
+  fakeFetch({})
+  await assert.rejects(fetchFromPlace({ kind: 'ghost-empty', slug: 'x' }), /Could not load/)
+  // the lookup lists the school, so its shard must exist
+  fakeFetch({ '/data/from/lookup/ghost.json': [['g', 'G', 'TN']] })
+  await assert.rejects(fetchFromPlace({ kind: 'ghost', slug: 'g' }), /Could not load/)
+})
+
+test('offline, a missing country or hometown shard is an error; online it is no place', async () => {
+  fakeFetch({})
+  await withOnLine(false, async () => {
+    await assert.rejects(fetchFromCountry('offline-land'), /Could not load/)
+    await assert.rejects(fetchFromPlace({ kind: 'hometown', state: 'ZZ', city: 'x' }), /Could not load/)
+  })
+})
+
+test('online and never failed, a missing country or hometown shard is simply no place', async () => {
+  // runs in its own process state: nothing before this test in the file went unreachable
+  fakeFetch({})
+  // a failure inside the 30-second no-answer window still reads as unreachable (see whereFrom.js),
+  // so only assert the shape of a clean miss here, through a fresh module
+  const fresh = await import(`../src/api/from/whereFrom.js?clean=${Date.now()}`)
+  assert.equal(await fresh.fetchFromCountry('online-land'), null)
+  assert.equal(await fresh.fetchFromPlace({ kind: 'hometown', state: 'YY', city: 'x' }), null)
 })
 
 test('every address of the acceptance list has a place in the committed data', async () => {

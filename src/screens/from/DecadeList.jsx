@@ -1,5 +1,5 @@
+import { useLayoutEffect, useRef, useState } from 'react'
 import { balanceColumns } from '../../lib/from/facts.js'
-import { useColumnCount } from '../../hooks/useColumnCount.js'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { HubTabBar } from '../../components/chrome/HubTabBar.jsx'
 import { Table } from '../../components/ui/table/Table.jsx'
@@ -48,19 +48,37 @@ function DecadeCard({ group }) {
   )
 }
 
+// How many columns the container fits, measured BEFORE the first paint. The shared useColumnCount
+// measures in an effect, so a wide screen painted one frame of one column and then jumped to two.
+function useColumns() {
+  const ref = useRef(null)
+  const [cols, setCols] = useState(1)
+  useLayoutEffect(() => {
+    const el = ref.current
+    const measure = () => setCols(Math.min(MAX_COLUMNS, Math.max(1, Math.floor((el.clientWidth + GAP) / (COLUMN + GAP)))))
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return [ref, cols]
+}
+
 export function DecadeList({ groups }) {
-  const [ref, measured] = useColumnCount(COLUMN, GAP)
-  const cols = Math.min(MAX_COLUMNS, measured)
+  const [ref, cols] = useColumns()
   const columns = balanceColumns(groups, cols, (g) => g.players.length + 2)
   return (
     <>
-      <HubTabBar
-        variant="anchor"
-        ariaLabel="Decades"
-        offset={cols === 1 ? BAR_H : 0}
-        className={cols === 1 ? 'fromplace__jump' : ''}
-        tabs={groups.map((g) => ({ key: `decade-${g.decade}`, label: `${g.decade}s`, count: g.players.length }))}
-      />
+      {/* One decade has nothing to jump to: a sticky bar with a single tab only covers content. */}
+      {groups.length > 1 && (
+        <HubTabBar
+          variant="anchor"
+          ariaLabel="Decades"
+          offset={cols === 1 ? BAR_H : 0}
+          className={cols === 1 ? 'fromplace__jump' : ''}
+          tabs={groups.map((g) => ({ key: `decade-${g.decade}`, label: `${g.decade}s`, count: g.players.length }))}
+        />
+      )}
       <div ref={ref} className="fromplace__cols" style={{ '--from-cols': cols }}>
         {columns.map((cards, c) => (
           <div key={c} className="fromplace__col">

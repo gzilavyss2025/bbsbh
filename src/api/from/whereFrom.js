@@ -26,8 +26,27 @@ export const fetchFromLookup = staticJsonBy((kind) => `${BASE}/lookup/${kind}.js
 const placeShards = staticJsonBy((key) => `${BASE}/${key}.json`, { fallback: null })
 export const fetchFromPlaces = (kind, st) => placeShards(`${kind}/${st}`)
 
-// One country: { name, places: [{ slug, name, players }] }.
-export const fetchFromCountry = staticJsonBy((slug) => `${BASE}/country/${slug}.json`, { fallback: null })
+// A missing file answers with the reader's fallback, and so does a dropped connection, so a
+// caller cannot tell "no such place" from "could not load". A place the data lists must exist, and
+// an offline device is not a missing place: those two throw, so a page can say it could not load.
+// staticJson will not ask for an unanswered URL again for 30 seconds (NO_ANSWER_MS), so for that
+// long after one failure a reader's fallback may still be a failure, even back online. A full reload
+// clears it, and that is what the page tells the reader to do.
+const NO_ANSWER_MS = 30_000
+let failedAt = -Infinity
+const unreachableNow = () => globalThis.navigator?.onLine === false || Date.now() - failedAt < NO_ANSWER_MS
+const unreachable = () => {
+  failedAt = Date.now()
+  return new Error('Could not load Where they’re from data')
+}
+
+// One country: { name, places: [{ slug, name, players }] }, or null when there is none.
+const countryFiles = staticJsonBy((slug) => `${BASE}/country/${slug}.json`, { fallback: null })
+export async function fetchFromCountry(slug) {
+  const country = await countryFiles(slug)
+  if (!country && unreachableNow()) throw unreachable()
+  return country
+}
 
 // One place for a place page, found from the address's own parts (src/lib/from/route.js):
 // { kind: 'college' | 'high-school', slug }, { kind: 'hometown', state, city } or
@@ -41,11 +60,17 @@ export async function fetchFromPlace(route) {
     return place ? { place, state: null, countryName: country.name } : null
   }
   if (route.kind === 'hometown') {
-    const place = find((await fetchFromPlaces('hometown', route.state))?.places, route.city)
+    const shard = await fetchFromPlaces('hometown', route.state)
+    if (!shard && unreachableNow()) throw unreachable()
+    const place = find(shard?.places, route.city)
     return place ? { place, state: route.state, countryName: null } : null
   }
-  const row = (await fetchFromLookup(route.kind)).find((r) => r[0] === route.slug)
+  const lookup = await fetchFromLookup(route.kind)
+  if (!lookup.length) throw unreachable() // a lookup is never empty, so [] is the fallback
+  const row = lookup.find((r) => r[0] === route.slug)
   if (!row) return null
-  const place = find((await fetchFromPlaces(route.kind, row[2] ?? '_unplaced'))?.places, route.slug)
+  const shard = await fetchFromPlaces(route.kind, row[2] ?? '_unplaced')
+  if (!shard) throw unreachable() // the lookup lists this school, so its shard must exist
+  const place = find(shard.places, route.slug)
   return place ? { place, state: row[2] ?? null, countryName: null } : null
 }
