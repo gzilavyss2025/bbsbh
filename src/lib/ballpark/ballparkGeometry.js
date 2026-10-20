@@ -67,6 +67,8 @@ const f = (n) => Math.round(n * 100) / 100
 
 // Feet (home-origin, y toward center) → SVG point.
 const toSvg = (xFt, yFt) => ({ x: HOME.x + xFt, y: HOME.y - yFt })
+// SVG points → [x, y] feet, the frame fenceDistanceAt reads.
+const toFeet = (pts) => pts.map((p) => [p.x - HOME.x, HOME.y - p.y])
 
 // The ordered wall as SVG points carrying each point's bearing + local wall
 // height. From the clipped outline when present, else the five posted distances.
@@ -154,7 +156,7 @@ function skinFanPath(moundFt, rFt) {
 // Where the fence crosses the ray from home at `deg`, as an SVG point; the
 // deepest point when the ray misses (it cannot for a fence pinned at both poles).
 function fencePointAt(pts, deg) {
-  const ft = fenceDistanceAt(pts.map((p) => [p.x - HOME.x, HOME.y - p.y]), deg)
+  const ft = fenceDistanceAt(toFeet(pts), deg)
   if (ft == null) return pts.reduce((a, b) => (b.y < a.y ? b : a))
   const rad = (deg * Math.PI) / 180
   return toSvg(ft * Math.sin(rad), ft * Math.cos(rad))
@@ -175,6 +177,17 @@ export function diagramInput(layout) {
     surface: layout.geometry.surface ?? null,
     trackInner: layout.geometry.trackInner ?? null,
   }
+}
+
+// Feet from home plate to the wall the drawing draws, on the ray at `deg` (0 =
+// straightaway center, negative toward left field): the same outline the plan
+// view inks, so the side view's wall (ballFlight.js) stands where this one is.
+// Null for a ray that misses the wall, or a layout with no wall to draw.
+export function wallDistanceAt(layout, deg) {
+  const { dist, heights, fence } = diagramInput(layout)
+  if (!fence && !dist) return null
+  const pts = wallPoints(dist, heights ?? UNKNOWN_HEIGHTS, fence)
+  return fenceDistanceAt(toFeet(pts), deg)
 }
 
 // The stroke weight for a wall whose heights are unknown (an older

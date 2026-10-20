@@ -645,7 +645,7 @@
      onto the next one, which re-anchors the card, instead of having to steer
      around it. Anything clickable added in here turns this back on and owes the
      trigger-to-card gap a safe polygon, not a plain grace period. The SHEET is
-     the opposite and must stay so: its whole surface is a dismiss target. */
+     the opposite: its surface is a dismiss target, all but its view toggle. */
   pointer-events: none;
 }
 
@@ -803,6 +803,53 @@
 
 .bflight__heat-to {
   stop-color: var(--award-line);
+}
+
+/* ---- The side view (#1875, ElevationArc.jsx): light axis marks, the wall in heading ink ---- */
+
+.bflight__views,
+.bflight__arc {
+  margin: var(--space-2) 0 0;
+}
+
+.bflight__arcsvg {
+  display: block;
+  width: 100%;
+}
+
+.bflight__arcground {
+  stroke: var(--graphite);
+  stroke-width: 1.2;
+}
+
+.bflight__arcgrid {
+  stroke: var(--border-hairline);
+  stroke-dasharray: 3 4;
+}
+
+.bflight__arctick,
+.bflight__arcpeaklabel {
+  fill: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+
+.bflight__arcpeaklabel {
+  fill: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+
+.bflight__arcwall {
+  stroke: var(--text-heading);
+  stroke-width: 3;
+}
+
+.bflight .bflight__arcpath {
+  stroke-width: 2.5;
+}
+
+.bflight__arcpeak {
+  fill: var(--award-ink);
 }
 
 /* ---- The numbers ---- */
