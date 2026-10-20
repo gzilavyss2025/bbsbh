@@ -1914,6 +1914,21 @@ Re-run only to fold in a new season.
   (8.3% of players on the 2026-10-07 run). No clock: a
   re-run writes the same bytes. The pure halves are `scripts/lib/open-data/bio-shards.mjs`
   and `gazetteer.mjs`. Readers: `src/api/history/onThisDay.js`, `src/api/history/birthplaces.js`.
+- `gen-umpire-history.mjs` → `public/data/umpire-history/{NN}.json` — each umpire's games at
+  each position per season, and each club's wins and losses with him at home plate, for the
+  seasons before `umpires/` (issue 1565). Source: the Stats API schedule with officials, one
+  call a season (`gameType=R,F,D,L,W`; the All-Star Game is left out). It starts at 2000: a
+  home-plate umpire is listed for 98.6% of 2000's games and every game from 2001, but for
+  only 61-88% of 1990s games (measured 2026-10-20). **Hand-run, NOT on a cron**: the seasons
+  are closed. Run it again only to change the range:
+  `node scripts/gen-umpire-history.mjs [--from=2000] [--through=2022]` (`--through`
+  defaults to the season before `umpires/seasons.json`'s first, and the run fails if the
+  two would overlap). A full rebuild of its folder; no clock, so a re-run writes the same
+  bytes. One shard per `shardKey100(umpireId)`: `{ firstSeason, throughSeason, umpires: {
+  [id]: { name, seasons: [[season, HP, 1B, 2B, 3B, LF, RF]], record: { [teamId]: [w, l] } } } }`.
+  A tie is a game worked, in no record. 2000-2022: 198 umpires, 88 shards, 128 KB, the
+  largest 3.9 KB. The pure half is `scripts/lib/umpire/history.mjs`. Reader:
+  `src/api/history/umpireHistory.js`.
 
 - `gen-where-from-map.mjs` → `public/data/from/map/` (`us.json` and one `{ST}.json` for each
   state), `scripts/data/from/county-zone.json` and `scripts/data/from/point-county.json` —
