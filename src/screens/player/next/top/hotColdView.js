@@ -1,15 +1,18 @@
 // The words of one hot or cold callout (#1855), from a flag of api/hotcold/rule.js. Pure.
 //
-//   kicker  "Hot start" | "Cold stretch" | "Hot season" — tone, then the sample's weight
-//   figure  the stat, set large: "9 HR", ".168 AVG", "2.16 ERA"
-//   rest    the sample it is over: "in 40 games (0.23 a game)", "through 52.1 innings"
-//   hint    where it sits: "Better than 99% of 3,422 MLB lines at 40 games, 2017–26"
+//   kicker  the sample's weight: "Early start" | "Stretch" | "Full season" (the card's
+//           count tag says hot or cold, see toneTag)
+//   figure  the stat, alone on its line: "9 HR", ".168 AVG", "2.16 ERA"
+//   rest    the sample it is over: "In 40 games (0.23 a game)", "Through 52.1 innings"
+//   hint    where it sits, at the checkpoint the league was read at: "Better than 99% of
+//           3,422 MLB seasons through 40 games, 2017–26"
 import { rate3 } from '../../../../api/person/shared.js'
 import { outsToIp } from '../../../../lib/math/innings.js'
 
 const pct = (v) => `${(v * 100).toFixed(1)}%`
 const two = (v) => v.toFixed(2)
-const WEIGHT = { early: 'start', firm: 'stretch', real: 'season' }
+const WEIGHT = { early: 'Early start', firm: 'Stretch', real: 'Full season' }
+const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1)
 
 // [figure, rest] for each stat, from the flag's value and his counted line.
 const WORDS = {
@@ -46,13 +49,19 @@ export function hotColdView(flag, { seasons = [], twoWay = false } = {}) {
   const [figure, rest] = WORDS[pitching ? 'pitching' : 'hitting'][flag.key](flag, flag.line, n)
   const unit = pitching ? 'innings' : 'games'
   const span = seasons.length ? `, ${seasons[0]}–${String(seasons[seasons.length - 1]).slice(2)}` : ''
-  const kicker = `${flag.tone === 'hot' ? 'Hot' : 'Cold'} ${WEIGHT[flag.weight]}`
+  const kicker = WEIGHT[flag.weight]
   return {
     key: `${flag.role}:${flag.key}`,
     tone: flag.tone,
     kicker: twoWay ? `${kicker} · ${pitching ? 'pitching' : 'hitting'}` : kicker,
     figure,
-    rest,
-    hint: `${pastWord(flag.tone, flag.percentile)} of ${flag.pool.toLocaleString('en-US')} MLB lines at ${flag.checkpoint} ${unit}${span}`,
+    rest: cap(rest),
+    hint: `${pastWord(flag.tone, flag.percentile)} of ${flag.pool.toLocaleString('en-US')} MLB seasons through ${flag.checkpoint} ${unit}${span}`,
   }
+}
+
+// The card's count tag: "1 hot", "2 cold", "1 hot · 1 cold".
+export function toneTag(flags) {
+  const n = (tone) => flags.filter((f) => f.tone === tone).length
+  return [['hot', n('hot')], ['cold', n('cold')]].filter(([, k]) => k).map(([t, k]) => `${k} ${t}`).join(' · ')
 }

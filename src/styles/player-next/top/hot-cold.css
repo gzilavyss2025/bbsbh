@@ -1,7 +1,7 @@
-/* Hot and cold callouts (#1855): the "Standing out" card under Overview extras. One
-   callout is an accent rule down its left edge (field green hot, clay cold), a kicker,
-   the stat set large in the display face the stat tiles use, and a mono hint. The words say the tone;
-   the rule only marks it. */
+/* Hot and cold callouts (#1855): the "Standing out" card under the tiles. One callout is an
+   accent rule down its left edge (field green hot, clay cold), a kicker, the stat alone on
+   its line in the display face the stat tiles use, then the sample and a mono hint. The
+   words say the tone; the rule only marks it. */
 .pnext-hc__item {
   padding-left: var(--space-3);
   border-left: var(--bw-heavy) solid var(--accent-positive);
@@ -28,7 +28,9 @@
   line-height: var(--lh-prose);
 }
 .pnext-hc__figure {
+  margin: 0;
   color: var(--text-heading);
+  line-height: var(--lh-title);
   font-family: var(--font-display);
   font-size: var(--fs-title-lg);
   font-variant-numeric: tabular-nums;

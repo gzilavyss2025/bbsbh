@@ -113,7 +113,6 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
                 label={blocks.length > 1 ? b.title : undefined}
               />
             ))}
-            <OverviewExtras blocks={blocks} lit={lit} onLight={setLit} season={core.data.season} playerId={core.data.bio.id} cutoff={asOf} />
             <HotColdCard
               playerId={core.data.bio.id}
               roles={rolesOf(core.data.bio, blocks)}
@@ -121,6 +120,7 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
               sportId={core.data.sportId ?? sportId ?? null}
               asOf={asOf}
             />
+            <OverviewExtras blocks={blocks} lit={lit} onLight={setLit} season={core.data.season} playerId={core.data.bio.id} cutoff={asOf} />
           </Stack>
           <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" hold onLand={onLand} />
           {sections
