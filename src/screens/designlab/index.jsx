@@ -16,6 +16,7 @@ import { ReportLook } from './report/ReportLook.jsx'
 import { JumpBarLab } from './jumpbar/JumpBarLab.jsx'
 import { StampedParts } from './stamped/StampedParts.jsx'
 import { ReportParts } from './report/ReportParts.jsx'
+import { PennantParts } from './pennants/PennantParts.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import '../../styles/designlab/lab.css'
 
@@ -43,9 +44,9 @@ import '../../styles/designlab/lab.css'
 // added a 33rd card. If an entry looks wrong here, write it down in the
 // inventory; do not patch it with a lab-only override.
 //
-// NO LIVE GAME DATA. No feed, no gamePk, no score, no stamp art. Every prop and
-// every specimen is invented, like animation-lab and between-innings-lab, so
-// the page is safe to ship and safe to reach in a production build.
+// NO LIVE GAME DATA. No feed, no gamePk, no score, no stamp art. Specimens use
+// fixed examples or invented data, so the page is safe to ship and safe to
+// reach in a production build.
 export function DesignLab() {
   useDocumentTitle('Design Lab')
 
@@ -72,6 +73,7 @@ export function DesignLab() {
             hub's jump bar is a ruled box for the same reason (#1131). */}
         <Button size="control" className="dlab__jumplink" href="#tokens">Tokens</Button>
         <Button size="control" className="dlab__jumplink" href="#components">Components</Button>
+        <Button size="control" className="dlab__jumplink" href="#pennants">Pennants</Button>
         <Button size="control" className="dlab__jumplink" href="#cards">Cards</Button>
         <Button size="control" className="dlab__jumplink" href="#pills">Pills</Button>
         <Button size="control" className="dlab__jumplink" href="#prototypes">Prototypes</Button>
@@ -116,6 +118,14 @@ export function DesignLab() {
         <GridHalf />
         <ComponentHalf />
         <MenuRailHalf />
+      </Band>
+
+      <Band
+        id="pennants"
+        title="League pennants"
+        lede="The shared championship pennant, rendered across clubs, seasons and page contexts. Every example uses the same component."
+      >
+        <PennantParts />
       </Band>
 
       <Band

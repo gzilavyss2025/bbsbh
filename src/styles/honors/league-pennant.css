@@ -1,0 +1,12 @@
+/* League honor artwork owns its SVG coordinates, not the page's type scale.
+   Flat print only: no shadow, bevel, hardware, texture, or animation. */
+.leaguehonor {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  flex: none;
+}
+
+#root .leaguehonor__script {
+  text-transform: none; /* caps-exempt: brush-script artwork keeps its supplied case. */
+}
