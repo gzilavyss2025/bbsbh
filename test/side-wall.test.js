@@ -24,6 +24,13 @@ test('wallAlong: the line to line walls are shorter and closer than center', () 
   assert.ok(lf.height < 7.5 && rf.height < 7.5)
 })
 
+test('wallAlong: a minor-league outline (estimated, or none) is not this park\'s wall', () => {
+  const norfolk = resolveBallparkLayout({ venueId: 2781, gameDate: '2026-09-15' }) // Harbor Park: an estimated outline
+  assert.equal(norfolk.quality.fence, 'estimated')
+  assert.equal(wallAlong(norfolk, at(300, 0)), null)
+  assert.equal(wallAlong({ ...dodger, quality: { ...dodger.quality, fence: 'dimensions-only' } }, at(300, 0)), null)
+})
+
 test('wallAlong: null with no layout, no coordinate, foul territory or behind the plate', () => {
   assert.equal(wallAlong(null, at(300, 0)), null)
   assert.equal(wallAlong(dodger, { coordX: null, coordY: 100 }), null)

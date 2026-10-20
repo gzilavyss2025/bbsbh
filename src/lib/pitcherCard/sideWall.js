@@ -42,8 +42,11 @@ function fenceDistance(points, angle) {
 }
 
 // The wall along a ball's line: { ft, height } (height null when the park has none on file), or null when
-// there is no layout, no landing coordinate, or the line falls outside the fair lines.
+// there is no layout, no landing coordinate, or the line falls outside the fair lines. Only an AUDITED outline
+// counts: a minor-league park's outline is checked against the posted signs alone ('estimated', or no outline at
+// all), and the post is labelled this park's wall, so it falls back to the generic fence (rendered on 816008, Norfolk).
 export function wallAlong(layout, hit) {
+  if (layout?.quality?.fence !== 'audited') return null
   const pts = layout?.geometry?.fence
   if (!pts || pts.length < 2 || hit?.coordX == null || hit?.coordY == null) return null
   const fx = (hit.coordX - HIT_COORD_ORIGIN.x) * HIT_COORD_FT_PER_UNIT

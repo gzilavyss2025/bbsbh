@@ -8,6 +8,13 @@ const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromi
 for (const [name, pk, date, matchup, half, batter, pitch] of CASES) {
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })).newPage()
   page.on('pageerror', (e) => console.log('PAGEERROR', e.message))
+  if (process.env.NOCOORD) { // render the no-landing-coordinate fallback: strip every hitData.coordinates from the feed (an edited feed, not a real one)
+    await page.route(/feed\/live/, async (route) => {
+      const res = await route.fetch(); const body = await res.json()
+      for (const pl of body.liveData?.plays?.allPlays ?? []) for (const e of pl.playEvents ?? []) if (e.hitData) delete e.hitData.coordinates
+      await route.fulfill({ response: res, json: body })
+    })
+  }
   await page.addInitScript((k) => localStorage.setItem(`bbsbh:reveal:${k}`, '40'), pk)
   await page.goto(`http://localhost:5173/${date}/${matchup}/${half}?nointro`)
   await page.getByRole('button', { name: /Replay the pitches|next at-bat/i }).first().waitFor({ timeout: 30000 })

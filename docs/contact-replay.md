@@ -396,7 +396,9 @@ ring; attack label (phase C); trajectory tag; honesty tag.
   wall along the ball's line: its distance from the layout's fence outline
   (`resolveBallparkLayout`, as it stood that day), its height from the measured
   wall heights (else the posted ones), and the title reads `SIDE VIEW · GREEN POST
-  IS THIS PARK’S WALL HERE`. The `400 ft` tick label hides then. Otherwise the
+  IS THIS PARK’S WALL HERE`. The `400 ft` tick label hides then. Only an audited outline
+  counts (every MLB park); a minor-league park's outline is checked against the posted signs only, so
+  it keeps the generic post (rendered: Gwinnett, no layout; Norfolk, estimated). Otherwise the
   post is a generic 400 ft, 10 ft fence and the title reads `SIDE VIEW · GREEN POST
   IS THE FENCE`. Say which in the card's (i) note. Code: `lib/pitcherCard/sideWall.js`.
 - **Flight.** It starts 140 ms after the ball leaves the scene. It lasts
