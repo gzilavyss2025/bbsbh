@@ -391,9 +391,14 @@ ring; attack label (phase C); trajectory tag; honesty tag.
   uses the same scale, from a baseline at y = 80. One scale for every at-bat.
   Never rescale it (Heer and Robertson, `docs/design-inspiration.md` §9).
 - **Fixed marks.** A baseline in ink. Ticks at 100, 200, 300 and 400 ft; labels
-  only at 200 and 400 (`200 ft`). A green fence post at 400 ft, 10 ft tall,
-  `--field`. The title reads `SIDE VIEW · GREEN POST IS THE FENCE`. The post is
-  a generic fence, not this park's wall. Say so in the card's (i) note.
+  only at 200 and 400 (`200 ft`). A green fence post, `--field`. When the park's
+  layout and the ball's landing coordinate are known, the post is that park's
+  wall along the ball's line: its distance from the layout's fence outline
+  (`resolveBallparkLayout`, as it stood that day), its height from the measured
+  wall heights (else the posted ones), and the title reads `SIDE VIEW · GREEN POST
+  IS THIS PARK’S WALL HERE`. The `400 ft` tick label hides then. Otherwise the
+  post is a generic 400 ft, 10 ft fence and the title reads `SIDE VIEW · GREEN POST
+  IS THE FENCE`. Say which in the card's (i) note. Code: `lib/pitcherCard/sideWall.js`.
 - **Flight.** It starts 140 ms after the ball leaves the scene. It lasts
   `clamp(T * 500, 700, 2800)` ms, where `T` is the hang time in seconds: the
   same pace as the Contact card (`contactFlight.js`). The trace draws on behind
@@ -685,5 +690,4 @@ the route with `?nointro` and the gamePk.
   nothing more.
 - Any change to how the Now Pitching card draws pitches.
 - (Shipped as section 7.3: the pencil notes.)
-- The real park's wall in the side view (a later pass could read it from
-  `src/lib/ballpark/`).
+- (Shipped in section 7.1: the real park's wall along each ball's line.)

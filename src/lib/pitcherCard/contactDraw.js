@@ -244,8 +244,8 @@ export function apexLabel(ax, ay, ft) {
 
 // A ball landing past 370 ft would put its distance on the fence post, so the label takes the axis row,
 // right-aligned, and the 400 ft tick label hides.
-export function distanceLabel(ft) {
-  const far = ft > 370
+export function distanceLabel(ft, wallFt = 400) {
+  const far = ft > 370 || Math.abs(ft - wallFt) < 30 // the park's own post can stand anywhere, so near it counts too
   return { x: far ? 332 : SIDE_X(ft), y: far ? 96 : 66, anchor: far ? 'end' : 'middle', text: `${Math.round(ft)} ft`, hideTick400: far }
 }
 

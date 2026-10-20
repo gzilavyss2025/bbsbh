@@ -3,6 +3,7 @@ import { SIDE_X } from '../../../lib/pitcherCard/batted.js'
 import { apexLabel, distanceLabel, sideLabel, sidePathFor } from '../../../lib/pitcherCard/contactDraw.js'
 import { pitchBeats } from '../../../lib/pitcherCard/contactTimeline.js'
 import { SLOW } from '../../../lib/pitcherCard/scene.js'
+import { wallAlong } from '../../../lib/pitcherCard/sideWall.js'
 import { clamp } from '../../../lib/math/number.js'
 import { easeOut } from '../../../lib/motion/curves.js'
 
@@ -15,7 +16,7 @@ const q01 = (v) => clamp(v, 0, 1)
 const TRACE_STEPS = 60
 const EMPTY = { whiff: 'NO CONTACT', foul: 'FOUL · NO FLIGHT DRAWN', inplay: 'NO TRACKING FOR THIS BALL' }
 
-export function SideView({ pitches, drawers }) {
+export function SideView({ pitches, drawers, layout }) {
   const n = useRef({})
   const sides = useMemo(() => pitches.map((p) => { const beats = pitchBeats(p, SLOW); return { beats, path: sidePathFor(p, beats) } }), [pitches])
 
@@ -32,7 +33,14 @@ export function SideView({ pitches, drawers }) {
         r.root.setAttribute('aria-label', sideLabel(p, path))
         r.empty.textContent = p.swing ? EMPTY[p.swing] : ''
       }
-      vis(r.tick400, true)
+      // The park's wall along THIS ball's line, else the generic 400 ft post (no layout, or no landing coordinate).
+      const wall = wallAlong(layout, p.hit)
+      const wx = SIDE_X(wall?.ft ?? 400)
+      r.fence.setAttribute('x1', f1(wx))
+      r.fence.setAttribute('x2', f1(wx))
+      r.fence.setAttribute('y1', f1(80 - ((wall?.height ?? 10) * 304) / 450))
+      r.title.textContent = wall ? 'SIDE VIEW · GREEN POST IS THIS PARK’S WALL HERE' : 'SIDE VIEW · GREEN POST IS THE FENCE'
+      vis(r.tick400, !wall)
       if (!path) {
         marks.forEach((m) => vis(m, false))
         vis(r.empty, rest || tau >= (beats.sceneEndMs ?? 0)) // no contact point, no scene end: say so at once
@@ -92,27 +100,27 @@ export function SideView({ pitches, drawers }) {
       put(r.ring, 3 + l1 * 12, t < 900 ? 0.9 * (1 - l1) : 0)
       put(r.ring2, 3 + l2 * 22, p.hr && t > 140 && t < 1240 ? 0.7 * (1 - l2) : 0)
       put(r.sel, 4.5 * (1 + 0.6 * (1 - easeOut(q01(t / 260)))), Math.min(1, t / 160))
-      const dl = distanceLabel(ft)
+      const dl = distanceLabel(ft, wall?.ft)
       r.dist.setAttribute('x', f1(dl.x))
       r.dist.setAttribute('y', dl.y)
       r.dist.setAttribute('text-anchor', dl.anchor)
       r.dist.setAttribute('opacity', Math.min(1, t / 220).toFixed(2))
       r.dist.textContent = dl.text
       vis(r.dist, true)
-      vis(r.tick400, !dl.hideTick400)
+      vis(r.tick400, !wall && !dl.hideTick400)
     }
     const set = drawers.current
     set.add(draw)
     return () => set.delete(draw)
-  }, [pitches, sides, drawers])
+  }, [pitches, sides, drawers, layout])
 
   return (
     <svg ref={(el) => { n.current.root = el }} className="pside" viewBox="0 -30 336 130" role="img">
-      <text className="pside__title" x="8" y="-17">SIDE VIEW · GREEN POST IS THE FENCE</text>
+      <text ref={(el) => { n.current.title = el }} className="pside__title" x="8" y="-17">SIDE VIEW · GREEN POST IS THE FENCE</text>
       <line className="pside__ground" x1="8" y1="80" x2="328" y2="80" />
       {[100, 200, 300, 400].map((ft) => <line key={ft} className="pside__tick" x1={f1(SIDE_X(ft))} y1="80" x2={f1(SIDE_X(ft))} y2="84" />)}
       {[200, 400].map((ft) => <text key={ft} ref={ft === 400 ? (el) => { n.current.tick400 = el } : undefined} className="pside__axis" x={f1(SIDE_X(ft))} y="96" textAnchor="middle">{ft} ft</text>)}
-      <line className="pside__fence" x1={f1(SIDE_X(400))} y1={f1(80 - (10 * 304) / 450)} x2={f1(SIDE_X(400))} y2="80" />
+      <line ref={(el) => { n.current.fence = el }} className="pside__fence" x1={f1(SIDE_X(400))} y1={f1(80 - (10 * 304) / 450)} x2={f1(SIDE_X(400))} y2="80" />
       <rect className="pside__plate" x="13" y="79" width="6" height="2" />
       <path ref={(el) => { n.current.trace = el }} className="pside__trace" visibility="hidden" />
       <g ref={(el) => { n.current.apex = el }} visibility="hidden">

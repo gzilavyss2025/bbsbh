@@ -20,6 +20,8 @@ test('distanceLabel: past 370 ft the label takes the axis row and the 400 ft tic
   const mid = distanceLabel(312)
   assert.deepEqual([mid.anchor, mid.y, mid.hideTick400, mid.text], ['middle', 66, false, '312 ft'])
   assert.equal(distanceLabel(370).hideTick400, false)
+  assert.equal(distanceLabel(325, 330).y, 96) // next to the park's own post at 330 ft the label also takes the axis row
+  assert.equal(distanceLabel(250, 330).y, 66)
 })
 
 // A pitch with no contact point has beats of { totalMs } only: no side path to draw (it was NaN geometry).
