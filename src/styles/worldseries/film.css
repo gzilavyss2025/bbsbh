@@ -31,10 +31,17 @@
   color: var(--text-heading);
 }
 
-/* The line score: equal inning boxes, then R H E on a darker fill, as the box score's board. */
+/* The line score: a narrow club column, then equal inning boxes and R H E sharing the rest. */
+.ww-film__grid--line {
+  table-layout: fixed;
+}
+
+.ww-film__grid--line th.ww-film__club {
+  width: 36px;
+}
+
 .ww-film__grid--line :where(th, td):not(.ww-film__club) {
   text-align: center;
-  width: 2ch;
 }
 
 .ww-film__grid--line .ww-film__tot {
