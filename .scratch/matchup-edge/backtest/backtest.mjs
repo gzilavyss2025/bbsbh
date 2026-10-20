@@ -100,14 +100,17 @@ function pitcherRows(m, pitcher, hand, side) {
   })
 }
 
-function predict(m, rows, batter, hand, side, kx, kw, loc) {
+// own = { x, w }: the hitter's own shrunk season level as a ratio to the league (1 = shrink each
+// pitch to the league, as matchup-model.mjs does; the "hier" variant shrinks to the hitter instead).
+function predict(m, rows, batter, hand, side, kx, kw, loc, own = { x: 1, w: 1 }) {
   let ex = 0, sx = 0, ew = 0, sw = 0, base = 0
   for (const r of rows) {
     const h = m.hit.get(`${batter}:${r.c}:${hand}:${side}`) ?? blank()
-    const hx = (h.x + kx * r.lgx) / (h.pa + kx || 1)
-    const hw = (h.wh + kw * r.lgw) / (h.sw + kw || 1)
-    const pa = h.pa + kx ? hx : r.lgx
-    const pw = h.sw + kw ? hw : r.lgw
+    const px = r.lgx * own.x, pw0 = r.lgw * own.w
+    const hx = (h.x + kx * px) / (h.pa + kx || 1)
+    const hw = (h.wh + kw * pw0) / (h.sw + kw || 1)
+    const pa = h.pa + kx ? hx : px
+    const pw = h.sw + kw ? hw : pw0
     ex += r.wx * pa * (loc ? r.xf : 1); sx += r.wx; base += r.wx * r.lgx
     ew += r.ww * pw * (loc ? r.wf : 1); sw += r.ww
   }
@@ -190,6 +193,11 @@ for (const sp of SPLITS) {
     return (h.wh + k * (L.wh / L.sw)) / (h.sw + k || 1) || L.wh / L.sw
   }
 
+  const ownOf = (r) => {
+    const L = m.lgAll.get(`${r.hand}:${r.side}`)
+    return { x: season(r, 120) / (L.x / L.pa), w: seasonW(r, 75) / (L.wh / L.sw) }
+  }
+
   // -- xwOBA: tune K for each predictor on within-pitcher MSE.
   const table = []
   for (const k of KS_X) {
@@ -198,30 +206,33 @@ for (const sp of SPLITS) {
       const mo = predict(m, r.rows, r.batter, r.hand, r.side, k, 75, false)
       const ml = predict(m, r.rows, r.batter, r.hand, r.side, k, 75, true)
       r.mix = mo.x; r.loc = ml.x; r.lg = mo.mixLg
+      r.hier = predict(m, r.rows, r.batter, r.hand, r.side, k, 75, false, ownOf(r)).x
     }
-    demean(pas, ['y', 'season', 'mix', 'loc', 'lg'])
+    demean(pas, ['y', 'season', 'mix', 'loc', 'lg', 'hier'])
     const base = mse(pas.map((r) => ({ y: r.d_y, p: 0 })), 'p')
     const skill = (k2) => 1e4 * (1 - mse(pas.map((r) => ({ y: r.d_y, p: r[`d_${k2}`] })), 'p') / base)
-    table.push({ k, season: skill('season'), mix: skill('mix'), loc: skill('loc') })
+    table.push({ k, season: skill('season'), mix: skill('mix'), loc: skill('loc'), hier: skill('hier') })
   }
   console.log('xwOBA, within-pitcher skill (MSE cut vs "every hitter the same", in units of 0.01%; higher is better)')
-  console.log('K_X    season-line   model-no-loc   model+loc')
-  for (const t of table) console.log(String(t.k).padEnd(6), t.season.toFixed(2).padStart(11), t.mix.toFixed(2).padStart(14), t.loc.toFixed(2).padStart(11))
+  console.log('K_X    season-line   model-no-loc   model+loc   hier (pitch shrunk to own line)')
+  for (const t of table) console.log(String(t.k).padEnd(6), t.season.toFixed(2).padStart(11), t.mix.toFixed(2).padStart(14), t.loc.toFixed(2).padStart(11), t.hier.toFixed(2).padStart(10))
   results[sp.name] = { table }
 
   // -- The incremental test at the K picked in split A (or this split's best when this is A).
   const pick = (col) => (results.A.table.reduce((b, t) => (t[col] > b[col] ? t : b))).k
-  const kS = pick('season'), kM = pick('mix'), kL = pick('loc')
+  const kS = pick('season'), kM = pick('mix'), kL = pick('loc'), kH = pick('hier')
   for (const r of pas) {
     r.season = season(r, kS)
     r.mix = predict(m, r.rows, r.batter, r.hand, r.side, kM, 75, false).x
     r.loc = predict(m, r.rows, r.batter, r.hand, r.side, kL, 75, true).x
     r.mixPart = r.mix - r.season
     r.locPart = r.loc - r.season
+    r.hier = predict(m, r.rows, r.batter, r.hand, r.side, kH, 75, false, ownOf(r)).x
+    r.hierPart = r.hier - r.season
   }
-  demean(pas, ['y', 'season', 'mix', 'loc', 'mixPart', 'locPart'])
-  console.log(`K picked on split A: season-line ${kS}, model-no-loc ${kM}, model+loc ${kL}`)
-  for (const [name, col, part] of [['model-no-loc', 'mix', 'mixPart'], ['model+loc', 'loc', 'locPart']]) {
+  demean(pas, ['y', 'season', 'mix', 'loc', 'mixPart', 'locPart', 'hier', 'hierPart'])
+  console.log(`K picked on split A: season-line ${kS}, model-no-loc ${kM}, model+loc ${kL}, hier ${kH}`)
+  for (const [name, col, part] of [['model-no-loc', 'mix', 'mixPart'], ['model+loc', 'loc', 'locPart'], ['hier', 'hier', 'hierPart']]) {
     const [bS, bP] = ols2(pas, 'd_y', 'd_season', `d_${part}`)
     const ci = boot(pas, (rs) => ols2(rs, 'd_y', 'd_season', `d_${part}`)[1])
     const dc = corr(pas, 'd_y', `d_${col}`) - corr(pas, 'd_y', 'd_season')
@@ -244,14 +255,15 @@ for (const sp of SPLITS) {
       r.season = seasonW(r, k)
       r.mix = predict(m, r.rows, r.batter, r.hand, r.side, 60, k, false).w
       r.loc = predict(m, r.rows, r.batter, r.hand, r.side, 60, k, true).w
+      r.hier = predict(m, r.rows, r.batter, r.hand, r.side, 60, k, false, ownOf(r)).w
     }
-    demean(swings, ['y', 'season', 'mix', 'loc'])
+    demean(swings, ['y', 'season', 'mix', 'loc', 'hier'])
     const base = mse(swings.map((r) => ({ y: r.d_y, p: 0 })), 'p')
     const skill = (k2) => 1e4 * (1 - mse(swings.map((r) => ({ y: r.d_y, p: r[`d_${k2}`] })), 'p') / base)
-    wt.push({ k, season: skill('season'), mix: skill('mix'), loc: skill('loc') })
+    wt.push({ k, season: skill('season'), mix: skill('mix'), loc: skill('loc'), hier: skill('hier') })
   }
   console.log('whiff per swing, within-pitcher skill (same units)')
-  console.log('K_W    season-line   model-no-loc   model+loc')
-  for (const t of wt) console.log(String(t.k).padEnd(6), t.season.toFixed(2).padStart(11), t.mix.toFixed(2).padStart(14), t.loc.toFixed(2).padStart(11))
+  console.log('K_W    season-line   model-no-loc   model+loc   hier')
+  for (const t of wt) console.log(String(t.k).padEnd(6), t.season.toFixed(2).padStart(11), t.mix.toFixed(2).padStart(14), t.loc.toFixed(2).padStart(11), t.hier.toFixed(2).padStart(10))
   results[sp.name].whiff = wt
 }
