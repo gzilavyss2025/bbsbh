@@ -1251,6 +1251,10 @@
     "callout-notes/worldSeries/odds.js": {
       "class": "spoiler-free",
       "why": "The wsSeriesOdds notes (entering-tense). The Series state heading in comes from the callouts bundle's series block, which holds only games Final before the slate date (ADR-0087); the history it quotes is cut strictly before that date by lib/worldSeries/lastBefore.js. It reads no linescore, no feed and no reveal mark, so it clears the pre-half strip and Between Innings without a gate of its own."
+    },
+    "from/whereFrom.js": {
+      "class": "spoiler-free",
+      "why": "Static from/*.json: schools, birthplaces and map shapes. Where a man went to school or was born says nothing about a game. Open surface (ADR-0034); no SealBox."
     }
   }
 }

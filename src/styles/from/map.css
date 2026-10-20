@@ -1,0 +1,88 @@
+/* ============================================================
+   THE US MAP — screens/from/UsMap.jsx (#1526, SPEC §9.3)
+   One inline svg. A state "has entries" in the heavy ink edge,
+   because the mint fill alone is only 1.86:1 against the paper
+   (WCAG 1.4.11 asks 3:1). Zoom is a transform on one group.
+   ============================================================ */
+
+.fromap {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.fromap__world {
+  transform-origin: 0 0;
+  transition: transform var(--dur-stamp-in) var(--ease-stamp);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fromap__world {
+    transition: none;
+  }
+}
+
+:root[data-motion='reduced'] .fromap__world {
+  transition: none;
+}
+
+.fromap__shape {
+  cursor: pointer;
+  stroke-linejoin: round;
+}
+
+.fromap__shape--has {
+  fill: var(--accent-tint);
+  stroke: var(--border-stamped);
+  stroke-width: var(--bw-rule);
+}
+
+.fromap__shape--none {
+  fill: var(--bg-canvas);
+  stroke: var(--border-rule);
+  stroke-width: var(--bw-hair);
+}
+
+.fromap__shape--picked {
+  fill: var(--surface-stamped-ink);
+  stroke: var(--border-stamped);
+  stroke-width: var(--bw-rule);
+}
+
+.fromap__shape--outside {
+  fill: var(--border-grid);
+  stroke: var(--border-rule);
+  stroke-width: var(--bw-hair);
+}
+
+/* The zoomed state's own ground, under its zones. */
+.fromap__shape--here {
+  fill: var(--surface-card);
+  stroke: var(--border-stamped);
+  stroke-width: var(--bw-rule);
+  cursor: default;
+}
+
+.fromap__legend {
+  margin: var(--space-2) 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+}
+
+.fromap__swatch {
+  display: inline-block;
+  width: var(--space-3);
+  height: var(--space-3);
+  margin-right: var(--space-1);
+  vertical-align: -2px;
+  border: var(--bw-rule) solid var(--border-stamped);
+}
+
+.fromap__swatch--has {
+  background: var(--accent-tint);
+}
+
+.fromap__swatch--picked {
+  background: var(--surface-stamped-ink);
+}
