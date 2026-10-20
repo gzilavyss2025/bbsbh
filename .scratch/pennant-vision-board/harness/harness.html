@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Felt pennant print test</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Graduate&family=Anton&family=Yellowtail&display=swap">
+<style>
+  body { margin: 0; background: #F6EFDC; font-family: 'Barlow Condensed', sans-serif; }
+  .sheet { display: grid; grid-template-columns: repeat(2, 560px); gap: 24px 32px; padding: 28px; }
+  .label { font: 700 15px 'Barlow Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #3C4A5A; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Screen print on felt: the fibres push the ink edge around, and the ink
+         misses the low spots between fibres. -->
+    <filter id="print" x="-4%" y="-12%" width="108%" height="124%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="4" result="fine"/>
+      <feDisplacementMap in="SourceGraphic" in2="fine" scale="PRINT_RAG" xChannelSelector="R" yChannelSelector="G" result="ragged0"/>
+      <feGaussianBlur in="ragged0" stdDeviation="0" result="ragged"/>
+      <feTurbulence type="fractalNoise" baseFrequency="PRINT_FREQ" numOctaves="3" seed="11" result="blot"/>
+      <feColorMatrix in="blot" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  PRINT_A 0 0 0 PRINT_B" result="holes"/>
+      <feComposite in="ragged" in2="holes" operator="in"/>
+    </filter>
+    <filter id="cloth" x="-6%" y="-20%" width="112%" height="140%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="CLOTH_FREQ" numOctaves="1" seed="2" result="wave"/>
+      <feDisplacementMap in="SourceGraphic" in2="wave" scale="CLOTH_WAVE" xChannelSelector="R" yChannelSelector="G" result="waved"/>
+      <feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="1" seed="5" result="grain"/>
+      <feDisplacementMap in="waved" in2="grain" scale="CLOTH_GRAIN" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="surface" x="-10%" y="-25%" width="120%" height="150%" color-interpolation-filters="sRGB">
+      <feImage href="felt.png" x="0" y="0" width="384" height="384" preserveAspectRatio="none" result="tex0"/>
+      <feTile in="tex0" result="tex"/>
+      <feGaussianBlur in="tex" stdDeviation="SB" result="texSoft"/>
+      <feDisplacementMap in="SourceGraphic" in2="texSoft" scale="SD" xChannelSelector="R" yChannelSelector="R" result="conformed"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.003 0.006" numOctaves="1" seed="2" result="wave"/>
+      <feDisplacementMap in="conformed" in2="wave" scale="SW" xChannelSelector="R" yChannelSelector="G" result="waved"/>
+      <feImage id="fibreImg" href="fibre-6.png" x="0" y="0" width="384" height="384" preserveAspectRatio="none" result="fm0"/>
+      <feTile in="fm0" result="fibreMask"/>
+      <feComposite in="waved" in2="fibreMask" operator="in"/>
+    </filter>
+  </defs>
+</svg>
+<div class="sheet" id="sheet"></div>
+<script>
+const TEX = 'felt.png';
+const params = new URLSearchParams(location.search);
+const variants = JSON.parse(decodeURIComponent(params.get('v') || '[]'));
+
+function pennant(o) {
+  const w = o.w || 500, s = w / 460, h = Math.round(w * 0.4), sw = Math.round(w * 0.085);
+  const bodyL = sw - 2, bw = w - bodyL, r = n => Math.round(n * 10) / 10;
+  const clip = `path('M0 0 C ${r(bw*.4)} ${r(h*.235)}, ${r(bw*.76)} ${r(h*.42)}, ${r(bw)} ${r(h*.54)} C ${r(bw*.76)} ${r(h*.67)}, ${r(bw*.4)} ${r(h*.845)}, 0 ${h} Z')`;
+  const len = o.nick.length;
+  const nickSize = r(w * (o.nickScale || 1) * (len <= 7 ? .108 : len <= 9 ? .09 : .066));
+  const sh = Math.max(1, Math.round(2.5 * s));
+  const textFilter = o.surface ? 'filter:url(#surface);' : o.cloth ? 'filter:url(#cloth);' : o.print ? 'filter:url(#print);' : '';
+  const textShadow = o.outline ? `-webkit-text-stroke:${o.outline}px ${o.trim};paint-order:stroke fill;` : o.noShadow ? '' : `text-shadow:${sh}px ${sh}px 0 ${o.trim};`;
+  const persp = Math.round(w * 1.6), droop = r(Math.atan((h * .04) / bw) * 180 / Math.PI);
+  const nickFont = o.nickFont || "font-family:'Barlow Condensed';font-weight:800;text-transform:uppercase;";
+  const smallFont = o.smallFont || "font-family:'Barlow Condensed';font-weight:700;";
+  return `
+  <div style="position:relative;width:${w + 40}px;height:${h + 40}px;">
+   <div style="position:absolute;left:14px;top:14px;width:${w}px;height:${h}px;transform:rotate(-2deg);transform-origin:0 50%;filter:drop-shadow(1px 2px 1px rgba(15,24,34,.3)) drop-shadow(4px 9px 10px rgba(15,24,34,.22));">
+    <div style="position:absolute;left:${bodyL}px;top:0;width:${bw}px;height:${h}px;clip-path:${clip};background-color:${o.fill};overflow:hidden;">
+      ${o.logo ? `<img src="${o.logo}" alt="" style="position:absolute;left:${Math.round(w*.03)}px;top:50%;height:${Math.round(h*(o.logoH||.5))}px;padding:6px;margin-left:-6px;transform:translateY(-50%) rotate(-3deg);opacity:${o.inkOpacity ?? .9};${textFilter}">` : ''}
+      <div style="position:absolute;left:${o.logo ? Math.round(w*(o.textL||.2)) : Math.round(w*.045)}px;top:50%;transform:translateY(-50%) ${o.flat ? '' : `perspective(${persp}px) rotateY(${o.ry ?? 16}deg)`} rotate(${droop}deg);transform-origin:0 50%;display:flex;flex-direction:column;gap:${Math.round(2*s)}px;padding:6px 10px;margin-left:-10px;color:${o.ink};opacity:${o.inkOpacity ?? .9};${textFilter}">
+        <span style="${smallFont}font-size:${r(w*.03)}px;letter-spacing:.18em;text-transform:uppercase;">${o.city}</span>
+        <span style="${nickFont}font-size:${nickSize}px;line-height:${o.lh || .9};letter-spacing:.01em;${textShadow}">${o.nick}</span>
+        <span style="${smallFont}font-size:${r(w*.034)}px;letter-spacing:.12em;text-transform:uppercase;">${o.year} · ${o.lg} champions</span>
+      </div>
+      <img src="${TEX}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:soft-light;">
+      <img src="${TEX}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:soft-light;opacity:.55;transform:scaleX(-1);">
+      ${o.multiplyTex ? `<img src="${TEX}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;opacity:${o.multiplyTex};transform:scaleY(-1);">` : ''}
+      <div style="position:absolute;inset:0;mix-blend-mode:${o.foldBlend||'normal'};background:linear-gradient(98deg,rgba(0,0,0,${.16*(o.fold||1)}) 0%,rgba(255,255,255,${.07*(o.fold||1)}) 14%,rgba(255,255,255,0) 30%,rgba(0,0,0,${.07*(o.fold||1)}) 44%,rgba(255,255,255,${.06*(o.fold||1)}) 62%,rgba(0,0,0,${.14*(o.fold||1)}) 100%);"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 35%,rgba(0,0,0,0) 65%,rgba(0,0,0,.12) 100%);"></div>
+    </div>
+    <div style="position:absolute;left:0;top:0;width:${sw}px;height:${h}px;background-color:${o.trim};overflow:hidden;border-radius:2px 0 0 2px;">
+      <img src="${TEX}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:soft-light;">
+      <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.22) 0%,rgba(255,255,255,.16) 34%,rgba(255,255,255,.04) 58%,rgba(0,0,0,.26) 100%);"></div>
+      <div style="position:absolute;top:${Math.round(5*s)}px;bottom:${Math.round(5*s)}px;right:${Math.round(6*s)}px;border-left:${Math.round(2*s)}px dashed ${o.ink};"></div>
+    </div>
+    <div style="position:absolute;left:${sw-1}px;top:0;width:2px;height:${h}px;background:rgba(15,24,34,.35);"></div>
+   </div>
+  </div>`;
+}
+
+const sheet = document.getElementById('sheet');
+const f = document.querySelector('#print');
+const P = Object.assign({ rag: 2.4, freq: .55, a: -2.4, b: 1.95 }, JSON.parse(decodeURIComponent(params.get('p') || '{}')));
+f.querySelector('feDisplacementMap').setAttribute('scale', P.rag);
+f.querySelector('feGaussianBlur').setAttribute('stdDeviation', P.blur || 0);
+f.querySelectorAll('feTurbulence')[1].setAttribute('baseFrequency', P.freq);
+f.querySelector('feColorMatrix').setAttribute('values', `0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  ${P.a} 0 0 0 ${P.b}`);
+const sf = document.querySelector('#surface');
+sf.querySelectorAll('feGaussianBlur')[0].setAttribute('stdDeviation', P.sb ?? 1);
+document.querySelector('#fibreImg').setAttribute('href', `fibre-${P.pct ?? 6}.png`);
+sf.querySelectorAll('feDisplacementMap')[0].setAttribute('scale', P.sd ?? 3);
+sf.querySelectorAll('feDisplacementMap')[1].setAttribute('scale', P.sw ?? 9);
+
+const c = document.querySelector('#cloth');
+c.querySelector('feTurbulence').setAttribute('baseFrequency', P.cfreq || '0.012 0.035');
+c.querySelectorAll('feDisplacementMap')[0].setAttribute('scale', P.cwave ?? 7);
+c.querySelectorAll('feDisplacementMap')[1].setAttribute('scale', P.cgrain ?? 0.9);
+for (const v of variants) {
+  sheet.insertAdjacentHTML('beforeend', `<div><div class="label">${v.label}</div>${pennant(v)}</div>`);
+}
+</script>
+</body>
+</html>
