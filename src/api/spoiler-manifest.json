@@ -822,6 +822,10 @@
       "class": "spoiler-free",
       "why": "The hot and cold callouts' line math (#1855): folds a regular-season game log into a cumulative line and its 10-game (10-inning) checkpoints, and the rate of each tested stat. Shared with gen-season-checkpoints.mjs. Season aggregates on an open surface (ADR-0034); holding back today's games is rule.js's job."
     },
+    "hotcold/load.js": {
+      "class": "spoiler-free",
+      "why": "The player page's hot and cold loader (#1855): reads the league tails file and the player's regular-season game log, then runs rule.js with the caller's cutoff (the page's ?d= date or slateToday()), so a game in progress today never counts. An open surface (ADR-0034)."
+    },
     "hotcold/rule.js": {
       "class": "spoiler-free",
       "why": "The hot and cold callouts' rule (#1855): up to two season stats in the league's 2% tails at the same checkpoint. Pure, over a player's game log; it drops every row dated on or after the cutoff, so a game still in progress today never counts. An open surface (ADR-0034): a stat line is not a score."

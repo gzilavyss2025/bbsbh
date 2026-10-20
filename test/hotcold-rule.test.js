@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { MIN_POOL, countedRows, hotColdFlags, percentileOf, weightOf } from '../src/api/hotcold/rule.js'
+import { MIN_POOL, countedRows, hotColdFlags, mergeRoles, percentileOf, weightOf } from '../src/api/hotcold/rule.js'
 import { foldSeason, pack } from '../src/api/hotcold/line.js'
 import { buildTails, lastCompletedSeason, quantile } from '../scripts/lib/season-checkpoints/tails.mjs'
 
@@ -156,4 +156,12 @@ test('quantile and the season window', () => {
   assert.equal(lastCompletedSeason('2026-10-20', row), 2026)
   assert.equal(lastCompletedSeason('2026-09-20', row), 2025)
   assert.equal(lastCompletedSeason('2026-09-20', null), 2025)
+})
+
+test('mergeRoles: a two-way player still gets two places, the most unusual first', () => {
+  const f = (key, percentile) => ({ key, percentile })
+  const out = mergeRoles({ hitting: [f('ops', 97), f('hr', 99.5)], pitching: [f('era', 0.2)] })
+  assert.deepEqual(out.map((x) => [x.role, x.key]), [['pitching', 'era'], ['hitting', 'hr']])
+  // A tie goes to the role listed first.
+  assert.deepEqual(mergeRoles({ hitting: [f('ops', 99)], pitching: [f('era', 1)] }).map((x) => x.role), ['hitting', 'pitching'])
 })

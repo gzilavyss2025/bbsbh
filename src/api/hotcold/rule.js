@@ -69,8 +69,8 @@ export function countedRows(rows, cutoff) {
 }
 
 // { role: 'hitting'|'pitching', sportId, rows, cutoff, tails } -> up to MAX_FLAGS of
-// { key, label, tone: 'hot'|'cold', value, percentile, checkpoint, sample, weight, pool }.
-// `sample` is games (hitters) or whole innings (pitchers); `percentile` is 0..100, high
+// { key, label, tone: 'hot'|'cold', value, percentile, checkpoint, sample, weight, pool, line }.
+// `line` is his counted season line (line.js's fields), for the counts a callout prints. `sample` is games (hitters) or whole innings (pitchers); `percentile` is 0..100, high
 // meaning a high value of the stat (a high K% is a high percentile for both roles).
 export function hotColdFlags({ role, sportId, rows, cutoff, tails }) {
   if (sportId !== 1 || !STATS[role] || !tails?.[role]) return []
@@ -112,8 +112,19 @@ export function hotColdFlags({ role, sportId, rows, cutoff, tails }) {
     if (seen.has(flag.group)) continue
     seen.add(flag.group)
     const { key, label, tone, value, percentile, checkpoint, sample, weight, pool } = flag
-    out.push({ key, label, tone, value, percentile, checkpoint, sample, weight, pool })
+    out.push({ key, label, tone, value, percentile, checkpoint, sample, weight, pool, line: final })
     if (out.length === MAX_FLAGS) break
   }
   return out
+}
+
+// A two-way player's flags, one list per role, merged into the page's MAX_FLAGS places:
+// most unusual first, and on a tie the role listed first. Each flag gains its `role`.
+export function mergeRoles(byRole) {
+  const extremity = (f) => Math.min(f.percentile, 100 - f.percentile)
+  // flatMap keeps the role order and sort is stable, so a tie stays with the first role.
+  return Object.entries(byRole)
+    .flatMap(([role, flags]) => flags.map((f) => ({ ...f, role })))
+    .sort((a, b) => extremity(a) - extremity(b))
+    .slice(0, MAX_FLAGS)
 }

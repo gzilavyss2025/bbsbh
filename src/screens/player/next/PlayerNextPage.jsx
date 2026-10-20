@@ -19,6 +19,7 @@ import { PlayerNextHero } from './PlayerNextHero.jsx'
 import { PlayerNextTiles } from './PlayerNextTiles.jsx'
 import { Slot } from './Slot.jsx'
 import { OverviewExtras } from './top/OverviewExtras.jsx'
+import { HotColdCard } from './top/HotCold.jsx'
 import { jumpSections, rolesOf, seedEmpty, shownSections, slotInstances } from './sections.js'
 import '../../../styles/player-next/page.css'
 
@@ -113,6 +114,13 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
               />
             ))}
             <OverviewExtras blocks={blocks} lit={lit} onLight={setLit} season={core.data.season} playerId={core.data.bio.id} cutoff={asOf} />
+            <HotColdCard
+              playerId={core.data.bio.id}
+              roles={rolesOf(core.data.bio, blocks)}
+              season={core.data.season}
+              sportId={core.data.sportId ?? sportId ?? null}
+              asOf={asOf}
+            />
           </Stack>
           <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" hold onLand={onLand} />
           {sections

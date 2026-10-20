@@ -1304,5 +1304,7 @@ game log. `hotColdFlags` places his line at the checkpoint his sample reached (1
 games for a hitter, innings for a pitcher) among the league's lines at the same
 checkpoint over ten seasons, and answers at most two stats in the 2% tails, most unusual
 first, one per group (AVG and OPS; ERA and WHIP). Rows dated on or after the cutoff do
-not count, so a game in progress today never does. MLB only. The player-page card that
-reads the file is #1855 slice 2.
+not count, so a game in progress today never does. MLB only. `hotcold/load.js` is the
+player page's loader: it reads the file through `staticJson`, fetches one game log per
+role, and merges a two-way player's flags into the same two places (`mergeRoles`). The
+card is `screens/player/next/top/HotCold.jsx`, with the cutoff `?d=` or `slateToday()`.
