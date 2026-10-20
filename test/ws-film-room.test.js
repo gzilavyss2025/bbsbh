@@ -2,7 +2,7 @@
 // rule that no meeting dated on or after the slate date reaches it.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { filmRoomModel, filmRoomNote } from '../src/lib/postseason/worldseries/scouting/filmRoom.js'
+import { filmRoomModel, filmRoomNote, listNameOf } from '../src/lib/postseason/worldseries/scouting/filmRoom.js'
 import { selectMeetings } from '../src/lib/postseason/worldseries/scouting/meetings.js'
 import { scoutingModel } from '../src/lib/postseason/worldseries/scouting/scouting.js'
 
@@ -12,7 +12,7 @@ const side = (id, abbr, runs, mix = {}) => ({
   runs,
   hits: 8,
   errors: 0,
-  starter: { id: id * 10, name: `${abbr} Starter`, hand: 'R', ip: '6.0', h: 5, er: 2, bb: 1, k: 7, pitches: 90, mix },
+  starter: { id: id * 10, name: `${abbr} Starter`, hand: 'R', ip: '6.0', h: 5, r: 3, er: 2, bb: 1, k: 7, pitches: 90, mix },
   lineup: [{ id: 1, name: 'A Hitter', pos: 'CF' }],
 })
 const game = (date, away, home) => ({
@@ -126,4 +126,52 @@ test('Film sits last on an off day and after Matchup edges and the umpire on a g
   const full = { nineKeys: true, edges: [{ id: 1 }], plateUmpire: { id: 9, name: 'U' }, meetings: M }
   assert.deepEqual(scoutingModel({ dayType: 'off', ...full }).map((c) => c.id), ['nine-keys', 'matchup-edges', 'film-room'])
   assert.deepEqual(scoutingModel({ dayType: 'game', ...full }).map((c) => c.id), ['matchup-edges', 'umpire-edge', 'film-room'])
+})
+
+test('the starter line also comes as seven cells, a missing figure kept as null', () => {
+  const a = side(139, 'TB', 1)
+  const m = filmRoomModel([game('2026-08-04', { ...a, starter: { ...a.starter, bb: null } }, side(158, 'MIL', 3))], {})[0]
+  assert.deepEqual(m.starters[0].stats.map((c) => c.label), ['IP', 'H', 'R', 'ER', 'BB', 'K', 'P'])
+  assert.deepEqual(m.starters[0].stats.map((c) => c.value), ['6.0', 5, 3, 2, null, 7, 90])
+})
+
+test('a pitcher is listed surname first, a suffix last', () => {
+  assert.equal(listNameOf('Nick Martinez'), 'Martinez, Nick')
+  assert.equal(listNameOf('Luis Garcia Jr.'), 'Garcia, Luis')
+  assert.equal(listNameOf('Cher'), 'Cher')
+  assert.equal(listNameOf(''), '')
+})
+
+test('a scoring play carries its arrow: up for the top half, down for the bottom', () => {
+  const g = { ...M[0], scoring: [{ inning: 'T1', text: 'a', playId: 'p1' }, { inning: 'B6', text: 'b' }, { inning: 'T10', text: 'c' }] }
+  const [m] = filmRoomModel([g], {})
+  assert.deepEqual(m.scoring.map((p) => [p.teamId, p.playId]), [[139, 'p1'], [158, null], [139, null]])
+  assert.deepEqual(m.scoring.map((p) => [p.tag, p.half, p.num]), [['▲', 'top', '1'], ['▼', 'bottom', '6'], ['▲', 'top', '10']].map(([a, h, n]) => [a + n, h, n]))
+  assert.equal(filmRoomModel([g], { compact: true })[0].scoring, undefined)
+})
+
+test('the line score is one row of inning runs a club, a half never batted staying null', () => {
+  const g = { ...M[0], innings: [[1, 0], [0, 2], [3, null]] }
+  const [m] = filmRoomModel([g], {})
+  assert.deepEqual(m.innings, [{ abbr: 'TB', runs: [1, 0, 3] }, { abbr: 'MIL', runs: [0, 2, null] }])
+  assert.deepEqual(filmRoomModel([M[0]], {})[0].innings, [])
+})
+
+test('the W and SV pitchers are the winner\'s, the L pitcher the other club\'s, each with a person id', () => {
+  const g = { ...M[0], decisions: { w: 'A', l: 'B', s: 'C' }, decisionIds: { w: 1, l: 2, s: 3 } }
+  const [m] = filmRoomModel([g], {})
+  assert.deepEqual(m.people.map((p) => [p.label, p.id, p.teamId]), [['W', 1, 158], ['L', 2, 139], ['SV', 3, 158]])
+  const jr = filmRoomModel([{ ...M[0], decisions: { w: 'Luis Garcia Jr.', l: '', s: '' }, decisionIds: { w: 9 } }], {})[0]
+  assert.equal(jr.people[0].surname, 'Garcia')
+  const none = filmRoomModel([{ ...M[0], decisions: { w: '', l: '', s: '' } }], {})[0]
+  assert.deepEqual(none.people, [])
+})
+
+test('an inning pair missing its home half pads that half with null, and a tie has no winner', () => {
+  const g = { ...M[0], innings: [[1, 0], [0, 2], [3]] }
+  const [m] = filmRoomModel([g], {})
+  assert.deepEqual(m.innings.map((r) => r.runs.length), [3, 3])
+  assert.deepEqual(m.innings[1].runs, [0, 2, null])
+  const tie = filmRoomModel([{ ...M[0], away: side(139, 'TB', 2), home: side(158, 'MIL', 2) }], {})[0]
+  assert.deepEqual(tie.rows.map((r) => r.win), [false, false])
 })

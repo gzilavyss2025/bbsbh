@@ -8,21 +8,22 @@
 // feed read. Nothing here writes a `bbsbh:boxreveal:*` key.
 //
 // Field paths checked against live statsapi on 2026-10-19, gamePks 823775, 823774, 823772
-// (CLE @ MIL) and 823809, 823807, 823806 (TB @ MIL): gameData.{datetime.officialDate,
+// (CLE @ MIL) and 823809, 823807, 823806 (TB @ MIL), and the linescore innings and pitching runs on 823809: gameData.{datetime.officialDate,
 // venue.name, teams.*.{id,abbreviation}, players.ID*.{boxscoreName,pitchHand.code}};
-// liveData.{linescore.teams.*.{runs,hits,errors}, decisions.{winner,loser,save}.fullName,
+// liveData.{linescore.{teams.*.{runs,hits,errors}, innings[].{away,home}.runs}, decisions.{winner,loser,save}.{id,fullName},
 // boxscore.officials[officialType 'Home Plate'].official.fullName, boxscore.teams.*.
 // {pitchers[0], battingOrder, players.ID*.{person, position.abbreviation,
-// stats.pitching.{inningsPitched,hits,earnedRuns,baseOnBalls,strikeOuts,numberOfPitches}}},
+// stats.pitching.{inningsPitched,hits,runs,earnedRuns,baseOnBalls,strikeOuts,numberOfPitches}}},
 // plays.{scoringPlays (indexes), allPlays[].{about.{inning,isTopInning}, result.description,
 // matchup.pitcher.id, playEvents[].{isPitch, details.type.code}}}.
 // Missing fields fall back: text to '', numbers to null, lists to [], the pitch mix to {}.
 //
-// Card: { gamePk, date, gameNumber, venue, ump, decisions: { w, l, s },
+// Card: { gamePk, date, gameNumber, venue, ump, decisions: { w, l, s }, decisionIds: { w, l, s } (person ids or null),
 //   away|home: { id, abbr, runs, hits, errors,
-//     starter: { id, name, hand, ip, h, er, bb, k, pitches, mix: { [pitchCode]: count } },
+//     starter: { id, name, hand, ip, h, r, er, bb, k, pitches, mix: { [pitchCode]: count } },
 //     lineup: [{ id, name, pos }] },
-//   scoring: [{ inning: 'T1' | 'B6', text }] }
+//   innings: [[awayRuns, homeRuns]] (null for a half never batted),
+//   scoring: [{ inning: 'T1' | 'B6', text, playId }] }  (playId null without pitch events)
 import { selectMeetings } from '../../lib/postseason/worldseries/scouting/meetings.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { getJson } from '../statsapi.js'
@@ -36,6 +37,10 @@ export function meetingsUrl(clubA, clubB, slateDate) {
     `&season=${slateDate.slice(0, 4)}&startDate=${slateDate.slice(0, 4)}-01-01&endDate=${dayBefore(slateDate)}&fields=${FIELDS}`
   )
 }
+
+// The play's clip key: the plate appearance's last pitch (the join clipIndex.js and watchClip.js use).
+// Null where the feed lists no pitch events.
+const terminalPlayId = (play) => (play?.playEvents ?? []).filter((e) => e?.isPitch).at(-1)?.playId ?? null
 
 const num = (v) => (Number.isFinite(Number(v)) && v !== null && v !== '' ? Number(v) : null)
 
@@ -65,6 +70,7 @@ function side(feed, s) {
       hand: gd?.players?.[`ID${sp}`]?.pitchHand?.code ?? '',
       ip: st?.inningsPitched ?? null,
       h: num(st?.hits),
+      r: num(st?.runs),
       er: num(st?.earnedRuns),
       bb: num(st?.baseOnBalls),
       k: num(st?.strikeOuts),
@@ -90,12 +96,14 @@ export function meetingCard(feed, gamePk) {
     venue: gd?.venue?.name ?? '',
     ump: (ld?.boxscore?.officials ?? []).find((o) => o.officialType === 'Home Plate')?.official?.fullName ?? '',
     decisions: { w: dec?.winner?.fullName ?? '', l: dec?.loser?.fullName ?? '', s: dec?.save?.fullName ?? '' },
+    decisionIds: { w: dec?.winner?.id ?? null, l: dec?.loser?.id ?? null, s: dec?.save?.id ?? null },
     away: side(feed, 'away'),
     home: side(feed, 'home'),
+    innings: (ld?.linescore?.innings ?? []).map((i) => [num(i.away?.runs), num(i.home?.runs)]),
     scoring: (ld?.plays?.scoringPlays ?? [])
       .map((i) => plays[i])
       .filter(Boolean)
-      .map((p) => ({ inning: `${p.about?.isTopInning ? 'T' : 'B'}${p.about?.inning ?? ''}`, text: p.result?.description ?? '' })),
+      .map((p) => ({ inning: `${p.about?.isTopInning ? 'T' : 'B'}${p.about?.inning ?? ''}`, text: p.result?.description ?? '', playId: terminalPlayId(p) })),
   }
 }
 

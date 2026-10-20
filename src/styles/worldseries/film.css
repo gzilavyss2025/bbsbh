@@ -1,6 +1,6 @@
 /* ---------- film room (scouting report, #2316) ---------- */
 
-/* layout-exempt: one column of cards; the rail and the wide three-across override it */
+/* layout-exempt: one column of cards; two across from 740px */
 .ww-film__list {
   list-style: none;
   margin: 0;
@@ -11,91 +11,152 @@
   padding-top: var(--space-3);
 }
 
-.ww-film__list--rail {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: var(--space-2);
-}
-
-.ww-film__list--rail .ww-film__slot {
-  flex: 0 0 82%;
-  scroll-snap-align: start;
-}
-
-.ww-film__list:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.ww-film__score {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+/* The cards' tables are the box score's: Table draws the head row and the hairlines, these set the columns. */
+.ww-film__grid {
   font-size: var(--fs-small);
 }
 
-.ww-film__score th {
+.ww-film__grid th.ww-film__club,
+.ww-film__grid th.ww-film__pname {
   text-align: left;
+  white-space: normal;
+}
+
+.ww-film__grid th.ww-film__club .teamlogo {
+  display: block;
+}
+
+.ww-film__grid tbody th {
   font-family: var(--font-display);
   color: var(--text-heading);
 }
 
-.ww-film__score td {
-  text-align: right;
-  color: var(--text-body);
+/* The line score: a narrow club column, then equal inning boxes and R H E sharing the rest. */
+.ww-film__grid--line {
+  table-layout: fixed;
 }
 
-.ww-film__runs {
-  font-size: var(--fs-h3);
+.ww-film__grid--line th.ww-film__club {
+  width: 36px;
+}
+
+.ww-film__grid--line :where(th, td):not(.ww-film__club) {
+  text-align: center;
+}
+
+.ww-film__grid--line .ww-film__tot {
+  background: var(--bg-page);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+.ww-film__grid--line thead .ww-film__tot {
+  font-weight: inherit;
+  color: var(--text-caption);
 }
 
 /* The winner's runs: the leader fill, never bold. */
-.ww-film__runs--lead {
+.ww-film__grid--line .ww-film__tot--lead {
   background: var(--surface-stamped-tint);
 }
 
-.ww-film__dec,
-.ww-film__line,
-.ww-film__mix {
+/* The pitching columns: the name takes the room, the seven figures share the rest equally. */
+.ww-film__grid--pit {
+  table-layout: fixed;
+}
+
+.ww-film__grid--pit th.ww-film__club,
+.ww-film__grid--pit th.ww-film__pname {
+  width: 42%;
+}
+
+.ww-film__grid--pit td,
+.ww-film__grid--pit thead th:not(.ww-film__club) {
+  text-align: center;
+}
+
+/* An inning with runs reads like the board's: the accent, in bold. */
+.ww-film__scored {
+  font-weight: var(--w-bold);
+  color: var(--accent-negative);
+}
+
+/* layout-exempt: the W, L and SV pitchers in three equal columns, left aligned */
+.ww-film__people {
+  list-style: none;
   margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+}
+
+/* layout-exempt: a photo, then the label, then the name, stacked */
+.ww-film__people li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* The stamped notification card's photo (ADR-0113, .change__shot--stamped): square, a heavy ink edge on cream. */
+.shot.ww-film__shot {
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--paper-cream);
+}
+
+.shot.ww-film__shot img {
+  filter: none;
+}
+
+.ww-film__pname2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+
+/* The pitcher's name is a door to his page, set as plain ink like the box score's names. */
+.ww-film__name {
+  padding-inline: 0;
+  min-height: 0;
+  font-size: var(--fs-small);
+  color: inherit;
+}
+
+.ww-film__grid--pit td.ww-film__missing {
+  text-align: left;
   font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
-/* layout-exempt: a fixed photo-and-text pair; the bar and the mix span both */
-.ww-film__starter {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-1) var(--space-2);
-  align-items: center;
-}
-
-/* layout-exempt: a name over its pitching line, beside a 36px photo */
-.ww-film__who {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.ww-film__name {
-  font-family: var(--font-display);
-  font-size: var(--fs-small);
-  color: var(--text-heading);
-  overflow: hidden;
-  text-overflow: ellipsis;
+.ww-film__tag {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
   white-space: nowrap;
 }
 
-.shot.ww-film__shot {
-  width: 36px;
-  height: 48px;
+/* layout-exempt: one row a starter, each a name, a bar, and the legend under both */
+.ww-film__mixes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
 }
 
-.ww-film__bar,
-.ww-film__mix {
-  grid-column: 1 / -1;
+/* layout-exempt: a name beside the bar, the legend spanning both */
+.ww-film__mixrow {
+  display: grid;
+  grid-template-columns: 7ch 1fr;
+  gap: var(--space-1) var(--space-2);
+  align-items: center;
 }
 
 .ww-film__bar {
@@ -108,62 +169,76 @@
   flex-basis: 0;
 }
 
-/* layout-exempt: a wrapping row of pitch marks */
+/* layout-exempt: one row of the three biggest pitch marks, under the bar */
 .ww-film__mix {
+  grid-column: 2;
   list-style: none;
+  margin: 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-2);
+  justify-content: space-between;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
 }
 
-.ww-film__details summary {
-  min-height: var(--tap-min);
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-family: var(--font-display);
-  color: var(--text-heading);
-}
-
-.ww-film__details summary::after {
-  content: '+';
-  margin-left: auto;
-}
-
-.ww-film__details[open] summary::after {
-  content: '−';
-}
-
-.ww-film__details ul {
+/* The scoring list's head matches a table head row. */
+.ww-film__head {
   margin: 0;
-  padding-left: var(--space-4);
+  padding: var(--space-1) 2px;
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: inherit;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.ww-film__plays {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   font-size: var(--fs-small);
 }
 
-.ww-film__details p {
+/* layout-exempt: the club mark, the arrow and inning, the sentence, and the clip button */
+.ww-film__plays li {
+  display: grid;
+  grid-template-columns: auto 4ch 1fr auto;
+  align-items: start;
+  gap: var(--space-2);
+  padding: var(--space-1) 2px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.ww-film__when {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+/* MLB's play description is a sentence, not shouted chrome: the same approved exception as .scoresum__desc. */
+#root .ww-film__text {
+  font-family: var(--font-body);
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+  text-transform: none; /* caps-exempt: sentence case for MLB's scoring-play description only */
+}
+
+.ww-film__lineups p {
   margin: 0 0 var(--space-1);
   font-size: var(--fs-small);
 }
 
-/* layout-exempt: a wrapping row of doors */
-.ww-film__doors {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
-}
-
-.ww-film__doors .door {
+.ww-film__box {
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
 }
 
 @media (min-width: 740px) {
-  /* layout-exempt: a fixed three across from 740px */
-  .ww-film__list--rail {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    overflow: visible;
+  /* layout-exempt: a fixed two across from 740px */
+  .ww-film__list {
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
   }
 }

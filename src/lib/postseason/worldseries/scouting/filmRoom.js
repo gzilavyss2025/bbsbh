@@ -11,6 +11,19 @@ const SUFFIX = /^(jr|sr|ii|iii|iv)\.?$/i
 // 'Luis Garcia Jr.' -> 'Garcia'
 export const surnameOf = (name) => name.split(' ').filter((w) => !SUFFIX.test(w)).at(-1) ?? ''
 
+// 'Luis Garcia Jr.' -> 'Garcia, Luis'; a one-word name stays as it is.
+export function listNameOf(name) {
+  const words = name.split(' ').filter((w) => !SUFFIX.test(w))
+  return words.length < 2 ? (words[0] ?? '') : `${words.at(-1)}, ${words.slice(0, -1).join(' ')}`
+}
+
+// 'T1' -> { tag: '▲1', half: 'top', num: '1' }, 'B6' -> { tag: '▼6', ... }: the arrow the box score's scoring
+// summary uses (▲ top, ▼ bottom).
+function inningTag(inning) {
+  const top = inning.startsWith('T')
+  return { tag: `${top ? '▲' : '▼'}${inning.slice(1)}`, half: top ? 'top' : 'bottom', num: inning.slice(1) }
+}
+
 // 'Mon Aug 4' from 'YYYY-MM-DD'; '' for a date that is not one.
 function dayLabel(date) {
   const d = new Date(`${date}T00:00:00Z`)
@@ -48,21 +61,28 @@ function starterOf(side) {
     abbr: side.abbr,
     name: s.name,
     surname: surnameOf(s.name),
+    listName: listNameOf(s.name),
     hand: s.hand ? `${s.hand}HP` : '',
     line,
+    // The same line as seven cells (a missing figure stays a cell, so the two arms line up).
+    stats: [['IP', s.ip], ['H', s.h], ['R', s.r], ['ER', s.er], ['BB', s.bb], ['K', s.k], ['P', s.pitches]].map(([label, value]) => ({ label, value: value ?? null })),
     mix: mixPercents(s.mix),
   }
 }
 
 // -> one entry per meeting, oldest first (the order handed in):
 // { gamePk, date, gameNumber, day, ump, awayAbbr, homeAbbr, rows: [{ id, abbr, runs, hits, errors, win }],
-//   decisions, starters: [{ id, abbr, name, surname, hand, line, mix: [{ code, pct }] }],
-//   scoring?, lineups? }  (the last two only when not `compact`)
+//   innings: [{ abbr, runs: [n | null] }] (one row per club, one cell per inning; [] with no linescore),
+//   people: [{ label: 'W' | 'L' | 'SV', name, surname, id (or null), teamId (or null) }],
+//   decisions, starters: [{ id, abbr, name, surname, listName, hand, line, stats: [{ label, value }], mix: [{ code, pct }] }],
+//   scoring?: [{ inning, tag, half, num, text, teamId (the club batting), playId (clip key or null) }], lineups? }  (the last two only when not `compact`)
 export function filmRoomModel(meetings, { compact = false } = {}) {
   return (meetings ?? []).map((m) => {
     const sides = [m.away, m.home]
     const top = Math.max(...sides.map((s) => s.runs ?? -1))
     const { w, l, s } = m.decisions
+    // The one club that won, or null for a tie or a missing score.
+    const lead = sides.find((x) => x.runs === top && sides.filter((y) => y.runs === top).length === 1)
     const out = {
       gamePk: m.gamePk,
       date: m.date,
@@ -71,12 +91,23 @@ export function filmRoomModel(meetings, { compact = false } = {}) {
       ump: m.ump,
       awayAbbr: m.away.abbr,
       homeAbbr: m.home.abbr,
-      rows: sides.map((x) => ({ id: x.id, abbr: x.abbr, runs: x.runs, hits: x.hits, errors: x.errors, win: x.runs != null && x.runs === top && sides.filter((y) => y.runs === top).length === 1 })),
+      rows: sides.map((x) => ({ id: x.id, abbr: x.abbr, runs: x.runs, hits: x.hits, errors: x.errors, win: x.runs != null && x === lead })),
+      innings: (m.innings ?? []).length ? sides.map((x, i) => ({ abbr: x.abbr, runs: m.innings.map((inn) => inn[i] ?? null) })) : [],
+      people: [['W', w, 'w'], ['L', l, 'l'], ['SV', s, 's']]
+        .filter(([, name]) => name)
+        .map(([label, name, k]) => {
+          // the win and the save are the winner's, the loss is the other club's
+          const club = lead ? (k === 'l' ? sides.find((x) => x !== lead) : lead) : null
+          return { label, name, surname: surnameOf(name), id: m.decisionIds?.[k] ?? null, teamId: club?.id ?? null }
+        }),
       decisions: [w && `W ${w}`, l && `L ${l}`, s && `SV ${s}`].filter(Boolean).join(' · '),
       starters: sides.map(starterOf).filter(Boolean),
     }
     if (!compact) {
-      out.scoring = m.scoring
+      out.scoring = (m.scoring ?? []).map((p) => {
+        const t = inningTag(p.inning)
+        return { ...p, ...t, teamId: (t.half === 'top' ? m.away : m.home).id, playId: p.playId ?? null }
+      })
       out.lineups = sides.map((x) => ({ abbr: x.abbr, players: x.lineup }))
     }
     return out
