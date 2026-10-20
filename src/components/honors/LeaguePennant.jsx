@@ -82,9 +82,8 @@ export function LeaguePennant({
         >{model.season}</text>
         {!compact && (
           <g fill="var(--pennant-ink)" textAnchor="middle" fontFamily="var(--font-display)" fontWeight="700" fontSize="31" letterSpacing="2">
-            <text x="160" y="373">{leagueLabel}</text>
-            <text x="160" y="408">LEAGUE</text>
-            <text x="160" y="443">CHAMPIONS</text>
+            <text x="160" y="383">{leagueLabel} LEAGUE</text>
+            <text x="160" y="428">CHAMPIONS</text>
           </g>
         )}
       </g>

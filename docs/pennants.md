@@ -26,7 +26,7 @@ import { LeaguePennant } from '../components/honors/LeaguePennant.jsx'
 
 Select `compact` explicitly for a narrow list. Width alone does not select it.
 Pass the league for that season: Milwaukee's 1982 pennant belongs to the AL.
-Full art includes the club header, mark, year, and three-line league title.
+Full art includes the club header, mark, year, and a two-line league title ("American League" on one line, then "Champions").
 Compact art keeps the mark and year.
 
 ```jsx
