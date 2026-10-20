@@ -16,3 +16,111 @@
   background: var(--surface-inset);
   border-top: var(--bw-hair) solid var(--border-rule);
 }
+
+/* The scorecard's roster box (RosterBox.jsx): the Lineup and Pitching staff cards. One ruled
+   table on the bright inset, a heavy ink edge, an ink head row, the position and the number in
+   their own cells, a break row per group and a foot row that sums WAR. The Table part owns the
+   cells' padding, the figure face and the scroll; this block owns the frame and the rules. */
+.rosterbox {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-inset);
+}
+.rosterbox thead th {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  letter-spacing: var(--ls-label);
+}
+.rosterbox tbody :is(th, td) {
+  border-top-color: var(--border-rule);
+  vertical-align: middle;
+}
+.rosterbox tbody td + td {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+.rosterbox :is(th, td).rosterbox__lead {
+  inline-size: var(--space-10);
+  text-align: center;
+}
+/* The role chip is taller than a line of text: no block padding here keeps a bullpen row as
+   tall as a rotation row. */
+.rosterbox td.rosterbox__lead {
+  padding-block: 0;
+}
+.rosterbox td.rosterbox__lead {
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.rosterbox td.rosterbox__num {
+  color: var(--clay);
+}
+.rosterbox :is(th, td).rosterbox__name {
+  inline-size: 100%;
+  text-align: left;
+}
+.rosterbox td.rosterbox__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+/* The marks after a name: the star, the IL cross, the prospect and rookie pills. */
+.rosterbox__name > * + * {
+  margin-inline-start: var(--space-1);
+}
+/* The Season view's line under an arm's name: the small attribute line recipe. */
+.rosterbox__name > .rosterbox__line {
+  display: block;
+  margin-inline-start: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.rosterbox__war--down {
+  color: var(--accent-negative-hover);
+}
+.rosterbox tbody .rosterbox__break th {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--text-caption);
+}
+.rosterbox tbody .rosterbox__foot :is(th, td) {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.rosterbox tbody .rosterbox__foot th {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--text-muted);
+}
+/* At wide the diamond sits beside the lineup table, centred on its height. */
+.rosterbox-pair__diamond {
+  align-self: center;
+}
+/* The pen week's strip keeps its three figures on one row, even on a phone: a third cell
+   wrapped alone and left an empty fill beside it. */
+/* layout-exempt: three fixed figures, the strip's own auto-fit would wrap one */
+.rosterbox-week .statstrip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+/* The Season view's staff runs to twenty-odd arms, so its table can stand twice the pen week's
+   height. At wide the week rides down beside it, clear of the jump bar, so the column beside a
+   long table is never left empty. In one column (a phone) a sticky cell has no room to move. */
+.rosterbox-pair > .rosterbox-week {
+  position: sticky;
+  top: calc(var(--space-16) + var(--space-6));
+  align-self: start;
+}
