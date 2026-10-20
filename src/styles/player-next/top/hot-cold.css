@@ -45,7 +45,7 @@
   margin: var(--space-1) 0 0;
   color: var(--text-caption);
   font-family: var(--font-mono);
-  font-size: var(--fs-cell);
+  font-size: var(--fs-small);
   line-height: var(--lh-loose);
 }
 /* A name in a leader row. The link is a button, and a button drops the row's tracking, so

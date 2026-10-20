@@ -36,13 +36,15 @@
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { readJsonOr, writeJsonAtomic } from './lib/io.js'
+import { readJsonOr, writeJsonAtomic, writeShards } from './lib/io.js'
+import { parseArgs } from './lib/args.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { chunk, mapConcurrent } from './lib/concurrency.mjs'
 import { foldSeason, pack } from '../src/api/hotcold/line.js'
 import { ROLES, buildExtremes, buildTails, lastCompletedSeason } from './lib/season-checkpoints/tails.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
+const args = parseArgs(process.argv.slice(2))
 const rawDir = join(here, 'data', 'season-checkpoints')
 const outDir = join(here, '..', 'public', 'data', 'season-checkpoints')
 const outPath = join(outDir, 'tails.json')
@@ -85,8 +87,7 @@ async function fetchRole(role, season) {
 }
 
 async function lastSeason() {
-  const arg = process.argv.find((a) => a.startsWith('--last='))
-  if (arg) return Number(arg.slice(7))
+  if (args.last) return Number(args.last)
   const todayIso = new Date().toISOString().slice(0, 10)
   const json = await getJson(
     `/api/v1/seasons?sportId=1&season=${todayIso.slice(0, 4)}&fields=seasons,seasonId,regularSeasonEndDate`,
@@ -95,7 +96,7 @@ async function lastSeason() {
 }
 
 async function main() {
-  const refresh = process.argv.includes('--refresh')
+  const refresh = args.refresh === true
   const last = await lastSeason()
   const seasons = Array.from({ length: SEASONS }, (_, i) => last - SEASONS + 1 + i)
   const rawBySeason = {}
@@ -112,14 +113,10 @@ async function main() {
   }
   const teams = Object.fromEntries(seasons.map((s) => [s, rawBySeason[s]?.teams ?? {}]))
   await writeJsonAtomic(outPath, { generatedAt: new Date().toISOString(), seasons, teams, ...buildTails(rawBySeason) })
-  const extremes = buildExtremes(rawBySeason)
-  let files = 0
-  for (const [role, byCheckpoint] of Object.entries(extremes)) {
-    for (const [checkpoint, stats] of Object.entries(byCheckpoint)) {
-      await writeJsonAtomic(join(outDir, 'extremes', `${role}-${checkpoint}.json`), { seasons, stats })
-      files++
-    }
-  }
+  // One write that also sweeps a file no pool fills any more.
+  const extremes = Object.entries(buildExtremes(rawBySeason)).flatMap(([role, byKey]) =>
+    Object.entries(byKey).map(([key, stats]) => [`${role}-${key}`, { seasons, stats }]))
+  const { written: files } = await writeShards(join(outDir, 'extremes'), extremes)
   console.log(`wrote ${outPath} and ${files} extremes files (${seasons[0]}–${last})`)
 }
 

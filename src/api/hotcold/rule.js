@@ -18,7 +18,7 @@
 // or `slateToday()` when there is none.
 //
 // MLB only: the league pool is MLB, so a MiLB player answers [].
-import { STATS, checkpointOf, foldSeason, inPool, sampleOf } from './line.js'
+import { FULL_SEASON, STATS, STEP, checkpointOf, foldSeason, inPool, sampleOf } from './line.js'
 
 // The tail, in percent, on each side.
 export const TAIL = 2
@@ -51,10 +51,34 @@ export function percentileOf(v, q) {
   return (lo - 1 + (v - q[lo - 1]) / (q[lo] - q[lo - 1])) * scale
 }
 
-// The league table for a checkpoint: that one, or the deepest one below it that the
-// pool fills (a 160-game season reads the 150-game table when 160 is thin).
+// The share of the league at or below `v`, and at or above it, in percent. Between two
+// quantiles both are the interpolated percentile. On a tie with quantiles they are the
+// FAR edges of the tie: a value shared by the 0th to 4th quantiles (0.00 ERA at 10 innings)
+// has at least 4% of the league at or below it, so it is no 2% tail, however the middle of
+// the tie reads. The tail test reads these; the ranking reads percentileOf.
+export function tailShares(v, q) {
+  const p = percentileOf(v, q)
+  if (p == null) return null
+  const last = q.length - 1
+  let lo = 0
+  while (lo <= last && q[lo] < v) lo++
+  let hi = lo
+  while (hi <= last && q[hi] === v) hi++
+  if (hi === lo) return { atOrBelow: p, atOrAbove: 100 - p }
+  const scale = 100 / last
+  return { atOrBelow: (hi - 1) * scale, atOrAbove: 100 - lo * scale }
+}
+
+// The league table for a checkpoint. From FULL_SEASON on it is the `full` table (the FINAL
+// lines of the seasons that reached a full season), the same pool the card counts and lists
+// from. Below it, that checkpoint's table, or the deepest one under it that the pool fills.
+// `checkpoint` stays his own, so the card says "over a full season".
 function tableFor(byCheckpoint, checkpoint) {
-  for (let c = checkpoint; c > 0; c -= 10) {
+  if (checkpoint >= FULL_SEASON) {
+    const t = byCheckpoint?.full
+    return t && t.n >= MIN_POOL ? { ...t, checkpoint } : null
+  }
+  for (let c = checkpoint; c > 0; c -= STEP) {
     const t = byCheckpoint?.[c]
     if (t && t.n >= MIN_POOL) return { checkpoint: c, ...t }
   }
@@ -87,7 +111,8 @@ export function hotColdFlags({ role, sportId, rows, cutoff, tails }) {
     const value = stat.rate(final)
     const percentile = percentileOf(value, table.q?.[stat.key])
     if (percentile == null) return
-    const side = percentile <= TAIL ? 'low' : percentile >= 100 - TAIL ? 'high' : null
+    const shares = tailShares(value, table.q[stat.key])
+    const side = shares.atOrBelow <= TAIL ? 'low' : shares.atOrAbove <= TAIL ? 'high' : null
     if (!side || (stat.tails && !stat.tails.includes(side))) return
     flags.push({
       key: stat.key,
@@ -112,8 +137,8 @@ export function hotColdFlags({ role, sportId, rows, cutoff, tails }) {
   for (const flag of flags) {
     if (seen.has(flag.group)) continue
     seen.add(flag.group)
-    const { key, label, tone, value, percentile, checkpoint, sample, weight, pool } = flag
-    out.push({ key, label, tone, value, percentile, checkpoint, sample, weight, pool, line: final, team })
+    const { key, label, tone, value, percentile, extremity, checkpoint, sample, weight, pool } = flag
+    out.push({ key, label, tone, value, percentile, extremity, checkpoint, sample, weight, pool, line: final, team })
     if (out.length === MAX_FLAGS) break
   }
   return out
@@ -122,11 +147,10 @@ export function hotColdFlags({ role, sportId, rows, cutoff, tails }) {
 // A two-way player's flags, one list per role, merged into the page's MAX_FLAGS places:
 // most unusual first, and on a tie the role listed first. Each flag gains its `role`.
 export function mergeRoles(byRole) {
-  const extremity = (f) => Math.min(f.percentile, 100 - f.percentile)
   // flatMap keeps the role order and sort is stable, so a tie stays with the first role.
   return Object.entries(byRole)
     .flatMap(([role, flags]) => flags.map((f) => ({ ...f, role })))
-    .sort((a, b) => extremity(a) - extremity(b))
+    .sort((a, b) => a.extremity - b.extremity)
     .slice(0, MAX_FLAGS)
 }
 
@@ -135,13 +159,16 @@ export function mergeRoles(byRole) {
 // percentile, the low side for a low one. Strictly further out (a tie is not "better"),
 // and never the player's own season, which sits in the pool. Most extreme first, as
 // { value, id, season, name, team }. The file keeps the outer 3% and a flag sits in the 2% tail,
-// so every season past him is in it. Rows are [value, id, season, name, team].
+// so every season past him is in it; when every kept row is past him anyway, the count is
+// unknown and the answer is null. Rows are [value, id, season, name, team].
 export function seasonsBeyond(flag, stats, { id, season }) {
   const high = flag.percentile >= 50
   const rows = stats?.[flag.key]?.[high ? 'high' : 'low'] ?? []
   const v = Math.round(flag.value * 1e4) / 1e4
-  return rows
-    .filter(([value, pid, s]) => (high ? value > v : value < v) && !(pid === id && s === season))
-    .map(([value, pid, s, name, team]) => ({ value, id: pid, season: s, name, team: team ?? null }))
+  const others = rows.filter(([, pid, s]) => !(pid === id && s === season))
+  const beyond = others.filter(([value]) => (high ? value > v : value < v))
+  // Every kept row is past him: the file was cut before the count ended, so it is unknown.
+  if (beyond.length && beyond.length === others.length) return null
+  return beyond.map(([value, pid, s, name, team]) => ({ value, id: pid, season: s, name, team: team ?? null }))
 }
 

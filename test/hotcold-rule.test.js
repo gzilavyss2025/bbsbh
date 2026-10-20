@@ -159,7 +159,7 @@ test('quantile and the season window', () => {
 })
 
 test('mergeRoles: a two-way player still gets two places, the most unusual first', () => {
-  const f = (key, percentile) => ({ key, percentile })
+  const f = (key, percentile) => ({ key, percentile, extremity: Math.min(percentile, 100 - percentile) })
   const out = mergeRoles({ hitting: [f('ops', 97), f('hr', 99.5)], pitching: [f('era', 0.2)] })
   assert.deepEqual(out.map((x) => [x.role, x.key]), [['pitching', 'era'], ['hitting', 'hr']])
   // A tie goes to the role listed first.
@@ -169,7 +169,7 @@ test('mergeRoles: a two-way player still gets two places, the most unusual first
 test('seasonsBeyond: strictly further out, on the flag side, never his own season', () => {
   const stats = { era: {
     low: [[1.5, 10, 2018, 'A', 'Mets'], [1.9, 11, 2022, 'B', null], [2.0, 7, 2026, 'Me', 'Braves'], [2.16, 12, 2019, 'Tie', 'Dodgers'], [2.3, 13, 2020, 'C', 'Rays']],
-    high: [[7.1, 14, 2021, 'D']],
+    high: [[7.1, 14, 2021, 'D', null], [6.0, 15, 2023, 'E', null]],
   } }
   const flag = { key: 'era', value: 2.16, percentile: 1.9 }
   // 2.16 ties "Tie" (not better), and his own 2026 line sits in the pool and is left out.
@@ -222,4 +222,50 @@ test('foldSeason names the club he played the most games for, at each checkpoint
   assert.equal(teams[10], 135)
   // At 20 games it is 10 and 10: the later club wins the tie.
   assert.equal(teams[20], 147)
+})
+
+test('a small crowd at the floor never flags: a reliever with 10 scoreless innings', () => {
+  // The real pitching tails at 10 IP: the 0th to 4th ERA quantiles are 0.00 (about 4% of
+  // 6,305 lines). 0.00 is in a crowd bigger than the 2% tail, so it is no tail at all.
+  const era = [0, 0, 0, 0, 0, ...lin(0.69, 12).slice(5)]
+  const tails = { pitching: { 10: { n: 6305, q: { ...PITCH_Q, era } } } }
+  // Ordinary walk, strikeout and home-run rates, so ERA is the only stat that could flag.
+  const reliever = Array.from({ length: 10 }, (_, i) => ({
+    date: day(i), gameType: 'R',
+    stat: { gamesPlayed: 1, inningsPitched: '1.0', battersFaced: 4, hits: 1, baseOnBalls: i < 3 ? 1 : 0, strikeOuts: 1, earnedRuns: 0, homeRuns: i < 2 ? 1 : 0 },
+  }))
+  const out = hotColdFlags({ role: 'pitching', sportId: 1, rows: reliever, cutoff: '2026-10-20', tails })
+  assert.ok(!out.some((f) => f.key === 'era'), JSON.stringify(out.map((f) => f.key)))
+})
+
+test('from a full season on, the flag is ranked among full seasons (the same pool it is counted in)', () => {
+  // The 160-inning table says 2.16 is ordinary; the full-season table (final lines) says
+  // it is a 2% tail. The rule reads the full table.
+  const tails = { pitching: { ...table(PITCH_Q), 160: { n: 500, q: PITCH_Q }, full: { n: 600, q: { ...PITCH_Q, era: lin(2.17, 7) } } } }
+  const starts = Array.from({ length: 27 }, (_, i) => start(i, { inningsPitched: '6.0', earnedRuns: i % 7 === 0 ? 2 : 1 }))
+  const out = hotColdFlags({ role: 'pitching', sportId: 1, rows: starts, cutoff: '2026-12-31', tails })
+  const era = out.find((f) => f.key === 'era')
+  assert.ok(era, 'flags against the full-season pool')
+  assert.equal(era.pool, 600)
+  assert.equal(era.checkpoint, 160)
+})
+
+test('seasonsBeyond answers null when every kept row is past him (the count would be cut off)', () => {
+  const stats = { era: { low: [[1.5, 10, 2018, 'A', null], [1.9, 11, 2022, 'B', null]] } }
+  assert.equal(seasonsBeyond({ key: 'era', value: 2.0, percentile: 1 }, stats, { id: 7, season: 2026 }), null)
+})
+
+test('buildTails: a full-season table from final lines, and no checkpoint table from 150 on', () => {
+  const at = (g, h) => pack('hitting', { g, pa: 4 * g, ab: 4 * g, h, d: 0, t: 0, hr: 0, bb: 0, hbp: 0, sf: 0, so: 0, sb: 0 })
+  const hitting = {}
+  // MIN_POOL seasons that reach 155 games; c holds a line at every 10 games up to 150.
+  for (let i = 0; i < MIN_POOL; i++) {
+    hitting[i + 1] = { n: `P${i + 1}`, c: Array.from({ length: 15 }, (_, k) => at((k + 1) * 10, (k + 1) * 10)), f: at(155, 200 + i) }
+  }
+  const tails = buildTails({ 2024: { hitting, pitching: {} } })
+  assert.equal(tails.hitting[140].n, MIN_POOL)
+  assert.equal(tails.hitting[150], undefined)
+  assert.equal(tails.hitting.full.n, MIN_POOL)
+  // The full table reads final lines (200+ hits in 620 AB), not the 150-game cut (.250).
+  assert.equal(tails.hitting.full.q.avg[0], Math.round((200 / 620) * 1e4) / 1e4)
 })

@@ -22,11 +22,12 @@ const extremesFile = staticJsonBy((key) => `/data/season-checkpoints/extremes/${
 export async function loadHotCold({ id, roles, season, sportId, cutoff }) {
   const none = { flags: [], seasons: [] }
   if (sportId !== 1 || !roles?.length) return none
-  const tails = await tailsFile()
+  // The tails file and the game logs load together.
+  const [tails, ...logs] = await Promise.all([
+    tailsFile(),
+    ...roles.map((role) => fetchPersonStats(id, { type: 'gameLog', group: role, season, gameType: 'R' })),
+  ])
   if (!tails) return none
-  const logs = await Promise.all(
-    roles.map((role) => fetchPersonStats(id, { type: 'gameLog', group: role, season, gameType: 'R' })),
-  )
   const byRole = Object.fromEntries(
     roles.map((role, i) => [role, hotColdFlags({ role, sportId, rows: logs[i], cutoff, tails })]),
   )
