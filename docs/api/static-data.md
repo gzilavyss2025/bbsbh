@@ -1139,6 +1139,18 @@ for each generator; the reader modules:
   `{ people: [], credit: [] }`. The caller passes `parkPoint(venue.location)`
   (`src/lib/history/pick.js`), from the feed's `defaultCoordinates`. `birthplaceCell` is
   the one definition the generator also uses. Spoiler-free.
+- `public/data/from/` — the files behind "Where they're from" (`gen-where-from.mjs`, nightly, and
+  `gen-where-from-map.mjs`, hand-run; #1526). `index.json` is the small file the picker loads at once:
+  `{ generatedAt, counts, zoneCounts, countries, unplaced }`. `counts` is the number of places a state
+  holds for each list (`college`, `high-school`, `hometown`), and `zoneCounts` the same for each zone.
+  `lookup/{college,high-school,hometown}.json` list every place for search. `college/{ST}.json`,
+  `high-school/{ST}.json` and `hometown/{ST}.json` hold a state's places (`college/_unplaced.json` and
+  `high-school/_unplaced.json` the ones with no state on the map), each place
+  `{ slug, name, city?, state?, zone?, pt?, players }`, a field left out when it is not known, and
+  `players` as `[id, name, pos, debutYear]` tuples, oldest debut first. `pt` is `[x, y]` on the
+  975 by 610 map. `country/{slug}.json` holds `{ name, places }`. `map/us.json` holds the state outlines
+  and `map/{ST}.json` the zones. Spoiler-free: a school or a birthplace says nothing about a game
+  (ADR-0034). The reader module arrives with the picker page.
 - `teamSeasons.js` — who played for each MLB team-season, from
   `public/data/team-seasons.json` (`gen-team-seasons.mjs`, hand-run, ADR-0100).
   `loadTeamSeasons()` returns `{ credit, throughSeason, players, teamSeasons }`:

@@ -599,6 +599,16 @@ jobs:
         id: schedule-shape
         continue-on-error: true
         run: node scripts/gen-schedule-shape.mjs
+      # "Where they're from" (#1526): every big leaguer's schools and birthplace, grouped into
+      # places. The first run sweeps every season (about 270 requests); later nights fetch the
+      # new players and re-check 1/30 of the cache (about 5 requests). It reads the committed
+      # map tables (gen-where-from-map.mjs, hand-run) and public/data/birthplaces/ from disk, so
+      # it needs no `if:` on another step. Writes scripts/data/from/ and public/data/from/, both
+      # staged by "Commit if changed".
+      - name: Where they're from
+        id: where-from
+        continue-on-error: true
+        run: node scripts/gen-where-from.mjs
       - name: Warm preview cache
         id: warm-previews
         continue-on-error: true
@@ -741,6 +751,7 @@ jobs:
           steps.team-records.outcome == 'failure' ||
           steps.postseason-records.outcome == 'failure' ||
           steps.schedule-shape.outcome == 'failure' ||
+          steps.where-from.outcome == 'failure' ||
           steps.warm-previews.outcome == 'failure' ||
           steps.compress-logos.outcome == 'failure' ||
           steps.nine-keys.outcome == 'failure' ||

@@ -1440,6 +1440,31 @@ don't run these by hand.
   (`packProspectTrend`, `src/api/prospectTrend.js`; shape in `docs/api/static-data.md`).
   App reads it via `src/api/prospectTrend.js`.
 
+- `gen-where-from.mjs` → `public/data/from/` (`index.json`, `lookup/`, `college/`, `high-school/`,
+  `hometown/`, `country/`) and the cache `scripts/data/from/players.json` — the places behind
+  "Where they're from" (#1526, `.scratch/where-theyre-from/SPEC.md`): every big leaguer who ever
+  played, grouped by college, high school, birth town and birth country. It reads the Stats API
+  only through `lib/statsapi.mjs`. **First run**: one season list per year from 1876 to the
+  season in play, then every player 200 at a time with `hydrate=education`: 23,619 players in
+  270 requests and 14 seconds. **Every later night**: the season in play (1 request), the ids
+  not in the cache (usually none), and the next 1/30 of the stored players (about 790 players,
+  4 requests), so each player is looked at again every 30 nights. A player is never removed.
+  `scripts/data/from/cursor.json` holds the re-check position. The cache is one player a line,
+  3.8 MB, so a night's diff stays small. A college name goes to one IPEDS school
+  (`lib/from/college-match.mjs`, the IPEDS 2023 directory cut in `scripts/data/from/ipeds.json`);
+  the run prints the names it could not place (96.8% of college records are placed) and
+  `scripts/data/from/college-overrides.json` takes a line for each (`unitid` when certain, `null`
+  when not: the college then stays off the map but is still found by search). Zones come from
+  `county-zone.json` and `point-county.json` (`gen-where-from-map.mjs`, hand-run) and
+  `public/data/birthplaces/`; the dot on each place is `lib/from/project.mjs`, a port of
+  `geoAlbersUsa` that needs no `d3-geo`. `index.json` carries `generatedAt` and is the only file
+  that changes on a night with no new data. `node scripts/gen-where-from.mjs --offline` rebuilds
+  the public files from the cache with no request. `--ipeds <HD csv>` is the hand-run yearly
+  refresh of the school list: download `https://nces.ed.gov/ipeds/datacenter/data/HD2023.zip`
+  with `lib/open-data/download.mjs` into an empty folder outside the repo, unzip, pass
+  `HD2023.csv`. The pure halves are `scripts/lib/from/` (`players.mjs`, `places.mjs`,
+  `college-match.mjs`, `ipeds.mjs`, `project.mjs`).
+
 ## Own-cadence generators (not the nightly batch)
 
 - `warm-previews.mjs` — NOT a data generator (writes no `public/data/*` file,
