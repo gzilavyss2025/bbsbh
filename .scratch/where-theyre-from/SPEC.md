@@ -14,8 +14,8 @@ depend on it.
 
 ## 0. How to use this package
 
-- Build it as **four PRs**, in order (§12). Each PR is small enough for one session.
-  A Sonnet session at high effort can build each one from this spec.
+- Build it as **four stacked PRs in one unattended session** (§12, §12.1). A Sonnet
+  session at high effort can build it from this spec.
 - Read these first: this file, then `design/` (the canvas artboards, for look only),
   then the repo files named in §9–§11.
 - The scripts in `prototype/` work. They are drafts for the real generators, not
@@ -614,6 +614,45 @@ with a failing test.
 
 For each UI PR, render the routes in the preinstalled Chromium and send Gary the
 screenshots with the exact routes (root `CLAUDE.md`, "Cloud sessions").
+
+### 12.1 Running unattended (decided by Gary, 2026-10-20)
+
+**One session builds all four PRs, stacked, with no stop for a merge.** Gary lands
+them together with one `/stack-prs` at the end.
+
+- **Start after #2423 has merged**, so this spec is on `main`. If it has not, read
+  the spec from `origin/claude/where-theyre-from-spec` and cut PR 1 from `main` all
+  the same.
+- **Branches:** `claude/where-from-1-map` from `origin/main`; `claude/where-from-2-data`
+  from branch 1; `claude/where-from-3-picker` from branch 2; `claude/where-from-4-places`
+  from branch 3. A later fix to an earlier PR is committed on that PR's branch and then
+  merged forward into each later branch (`git merge`, never a rebase or a force-push).
+- **Every PR targets `main`, not the previous branch.** CI (`lint-and-build`) runs only on
+  PRs into `main` (`.github/workflows/ci.yml:12`), so a PR based on another branch would
+  get no CI. PR 2's diff therefore also shows PR 1's commits. Say so at the top of each
+  body: `Stacked on #<previous>. Review only the commits after <sha>.` and give the
+  `Part of #1526` line (`Closes #1526` on PR 4 only). `/stack-prs` merges each PR head in
+  turn with `--no-ff`; a head that already holds an earlier one merges cleanly.
+- **Open each PR as a draft, and remove `wip` when its CI is green.** `/stack-prs` skips
+  a PR that still has `wip` (`.claude/skills/stack-prs/SKILL.md:35`). Never merge.
+- **Never stop to ask.** Where this spec does not decide something, choose the option
+  that keeps to the repo's rules and write a `[DECISION: …]` line in that PR's body
+  (root `CLAUDE.md`).
+- **College overrides:** set a name to a `unitid` only when the IPEDS school is certain
+  (the same name and the right state, or a well-known short form). When in doubt, set it
+  to `null`: the college is then not on the map, but it is still in search and still
+  counted. **Never guess.** List every `null` you set, with its player count, in PR 2's
+  body for Gary to check later.
+- **Network:** the session needs `statsapi.mlb.com`, `nces.ed.gov`, `www2.census.gov` and
+  `cdn.jsdelivr.net`. All four answered from this environment on 2026-10-20. If one is
+  blocked, use the copies under `.scratch/where-theyre-from/data/` where they exist (the
+  metro-zone CSV), and say what was missing in the PR body.
+- **Context:** commit and push at the end of each PR before you start the next one, so a
+  context compaction loses nothing. Re-read this file (§12 and the section the next PR
+  needs) at the start of each PR.
+- **Done:** four draft PRs, each with CI green and no `wip` label, each body with its
+  route screenshots sent to Gary, its `[DECISION]` lines and its checks from §12. Then
+  tell Gary they are ready for `/stack-prs`.
 
 ## 13. Where the canvas differs from this spec
 
