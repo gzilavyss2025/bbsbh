@@ -288,3 +288,40 @@
   min-width: 1.4em;
   text-align: center;
 }
+
+/* Career chart + the favorite club's record with him behind the plate (#1565). */
+.umcareer {
+  margin-bottom: var(--space-3);
+}
+.umcareer__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 56px;
+  border-bottom: 1px solid var(--border-rule);
+}
+.umcareer__bar {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--text-body);
+}
+.umcareer__axis {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+.umcareer__split {
+  height: 10px;
+  margin-top: var(--space-3);
+  background: var(--border-rule);
+}
+.umcareer__wins {
+  display: block;
+  height: 100%;
+  background: var(--text-body);
+}
+.umcareer__caption {
+  margin: var(--space-1) 0 0;
+}
