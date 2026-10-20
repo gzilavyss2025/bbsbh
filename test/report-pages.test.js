@@ -37,6 +37,8 @@ const PATHS_BEFORE_GROUPING = [
   '/salaries',
   // Added with the page itself (#1410): one pitcher against one hitter.
   '/scout',
+  // Added with the page itself (#1526): every big leaguer by school and hometown.
+  '/from',
   '/fouls',
   '/prospects',
   '/rehab',

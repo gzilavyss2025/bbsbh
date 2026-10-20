@@ -11,6 +11,7 @@ import { PlayerHoverCard } from './components/player/PlayerHoverCard.jsx'
 import { HeadshotLogPanel } from './components/headshot-log/HeadshotLogPanel.jsx'
 import { useMotionPreference } from './hooks/preferences/useMotionPreference.js'
 import { useIdentityVersion } from './lib/identity/useIdentityVersion.js'
+import { placeKey } from './lib/from/route.js'
 import {
   parseRoute,
   gamePath,
@@ -155,6 +156,9 @@ const TeamTransactionsPage = lazyNamed(
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
 const ScoutPage = lazyNamed(() => import('./screens/scout/ScoutPage.jsx'), 'ScoutPage')
+const FromPage = lazyNamed(() => import('./screens/from/FromPage.jsx'), 'FromPage')
+const FromPlacePage = lazyNamed(() => import('./screens/from/FromPlacePage.jsx'), 'FromPlacePage')
+const FromCountryPage = lazyNamed(() => import('./screens/from/FromCountryPage.jsx'), 'FromCountryPage')
 const UmpireRankingsPage = lazyNamed(
   () => import('./screens/UmpireRankingsPage.jsx'),
   'UmpireRankingsPage',
@@ -415,6 +419,14 @@ export default function App() {
         tab={route.tab}
       />
     )
+  } else if (route.name === 'from') {
+    // Not keyed: the picker holds its own picks and follows the address when a link changes it.
+    content = <FromPage list={route.list} state={route.state} zone={route.zone} />
+  } else if (route.name === 'from-place') {
+    // Keyed on the whole address, so a new place remounts with fresh state (the `photos` precedent).
+    content = <FromPlacePage key={placeKey(route)} route={route} />
+  } else if (route.name === 'from-country') {
+    content = <FromCountryPage key={route.country} country={route.country} />
   } else if (route.name === 'umpire') {
     content = <UmpirePage id={route.id} seasonYear={route.seasonYear} vs={route.vs} />
   } else if (route.name === 'situational-records') {

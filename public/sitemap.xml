@@ -131,6 +131,11 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://tallybb.com/from</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://tallybb.com/abs-challenges</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>

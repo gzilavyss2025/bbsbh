@@ -1,0 +1,153 @@
+/* ============================================================
+   A PLACE OF "WHERE THEY'RE FROM" — screens/from/FromPlacePage.jsx
+   (#1526, SPEC §9.5). The hero, the sticky decade bar and one
+   stamped card to a decade. Imported by the screen alone.
+   Open surface (ADR-0034): names and years, never a score.
+   ============================================================ */
+
+/* The hero: tiles, the name and the locator, over the fact strip. A phone stacks them; from 740px
+   the tiles sit side by side, then the name, then the locator, in one row. */
+.fromhero {
+  margin-top: var(--space-3h);
+}
+
+.fromhero__grid {
+  padding: var(--space-3);
+}
+
+/* layout-exempt: the two tiles are always two across; the Grid part auto-fits. */
+.fromhero__tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.fromhero__text {
+  margin-top: var(--space-3);
+}
+
+.fromhero__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-display-md);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.fromhero__sub {
+  margin: var(--space-1) 0 var(--space-2);
+}
+
+.fromhero__map {
+  margin-top: var(--space-3);
+}
+
+/* The locator: the state on card paper in an ink edge, the others faint. */
+.fromloc {
+  margin: 0;
+}
+
+.fromloc__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.fromloc__other {
+  fill: var(--border-grid);
+  stroke: var(--border-rule);
+  stroke-width: var(--bw-hair);
+}
+
+.fromloc__state {
+  fill: var(--surface-card);
+  stroke: var(--border-stamped);
+  stroke-width: var(--bw-rule);
+}
+
+.fromloc__ring {
+  fill: var(--surface-card);
+}
+
+.fromloc__dot {
+  fill: var(--surface-stamped-ink);
+}
+
+/* The jump bar stays on screen as the page scrolls, so the mark that follows the reader is always
+   visible. 68px is the bar's height: keep it in step with BAR_H in DecadeList.jsx. */
+.jumpbar.fromplace__jump {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.fromdec {
+  margin-top: var(--space-3h);
+  scroll-margin-top: 68px;
+}
+
+/* layout-exempt: the page picks the column count (1 or 2, in --from-cols) and balances the cards itself. */
+.fromplace__cols {
+  display: grid;
+  grid-template-columns: repeat(var(--from-cols, 1), minmax(0, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.fromplace__col {
+  min-width: 0;
+}
+
+/* A card's table runs to the card's edge; the name is a link, the rest is mono figures. The
+   header row starts below the card's name tab and count tag, which hang over its top edge. */
+.fromdec__table {
+  width: 100%;
+}
+
+.fromdec__table thead th {
+  padding-top: var(--space-4);
+  text-align: right;
+}
+
+.fromdec__table thead th:first-child {
+  text-align: left;
+}
+
+.fromdec__name {
+  text-align: left;
+  font-weight: var(--w-semibold);
+}
+
+.fromdec__pos,
+.fromdec__year {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+@media (min-width: 740px) {
+  /* layout-exempt: tiles, name and locator in named areas, a fixed 220px map column. */
+  .fromhero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 220px;
+    grid-template-areas: 'tiles text map';
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .fromhero__tiles {
+    grid-area: tiles;
+  }
+
+  .fromhero__text {
+    grid-area: text;
+    margin-top: 0;
+  }
+
+  .fromhero__map {
+    grid-area: map;
+    margin-top: 0;
+  }
+}

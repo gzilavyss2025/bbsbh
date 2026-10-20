@@ -1139,6 +1139,18 @@ for each generator; the reader modules:
   `{ people: [], credit: [] }`. The caller passes `parkPoint(venue.location)`
   (`src/lib/history/pick.js`), from the feed's `defaultCoordinates`. `birthplaceCell` is
   the one definition the generator also uses. Spoiler-free.
+- `public/data/from/` — the files behind "Where they're from" (`gen-where-from.mjs`, nightly, and
+  `gen-where-from-map.mjs`, hand-run; #1526). `index.json` is the small file the picker loads at once:
+  `{ generatedAt, counts, zoneCounts, countries, unplaced }`. `counts` is the number of places a state
+  holds for each list (`college`, `high-school`, `hometown`), and `zoneCounts` the same for each zone.
+  `lookup/{college,high-school,hometown}.json` list every place for search: a school row is `[slug, name, state | null, city?]` (the city when known, so a search can tell two schools of one name apart), a hometown row `[state, citySlug, name]`. `college/{ST}.json`,
+  `high-school/{ST}.json` and `hometown/{ST}.json` hold a state's places (`college/_unplaced.json` and
+  `high-school/_unplaced.json` the ones with no state on the map), each place
+  `{ slug, name, city?, state?, zone?, pt?, players }`, a field left out when it is not known, and
+  `players` as `[id, name, pos, debutYear]` tuples, oldest debut first. `pt` is `[x, y]` on the
+  975 by 610 map. `country/{slug}.json` holds `{ name, places }`. `map/us.json` holds the state outlines
+  and `map/{ST}.json` the zones. Spoiler-free: a school or a birthplace says nothing about a game
+  (ADR-0034). Reader: `src/api/from/whereFrom.js`: `fetchFromIndex()`, `fetchFromMap()`, `fetchFromStateMap(st)`, `fetchFromLookup(kind)`, `fetchFromPlaces(kind, st)`, `fetchFromCountry(slug)` and `fetchFromPlace(route)` (one place for a place page, from the parsed address), each memoized through `staticJson` / `staticJsonBy`; a missing file answers with `null` (`[]` for a lookup). `fetchFromPlace` and `fetchFromCountry` throw when the device is offline, when a school's shard is missing, or within 30 seconds of a failed load (`staticJson` will not retry an unanswered URL sooner), so a page says it could not load and never says there is no such place. The pure helpers (search, zoom, copy, routes) are in `src/lib/from/`; the picker is `src/screens/from/FromPage.jsx` and a place is `src/screens/from/FromPlacePage.jsx` (`docs/where-theyre-from.md`).
 - `teamSeasons.js` — who played for each MLB team-season, from
   `public/data/team-seasons.json` (`gen-team-seasons.mjs`, hand-run, ADR-0100).
   `loadTeamSeasons()` returns `{ credit, throughSeason, players, teamSeasons }`:

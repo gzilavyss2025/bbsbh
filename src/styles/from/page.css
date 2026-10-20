@@ -1,0 +1,109 @@
+/* ============================================================
+   WHERE THEY'RE FROM — /from (screens/from/FromPage.jsx), #1526
+   The picker's page: heading, the list toggle, the map card and
+   the list card. Imported by the screen alone, not by
+   src/index.css, so no other route pays for it. Open surface
+   (ADR-0034): schools and birthplaces, never a score.
+   ============================================================ */
+
+.fromp__head {
+  padding: var(--space-3) 0 0;
+}
+
+.fromp__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-display-md);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.fromp__intro {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+}
+
+/* The map card and the column of controls and lists: stacked on a phone, side by side from
+   740px, where the right column is a fixed 340px and the list scrolls inside its card. */
+/* layout-exempt: a fixed two-column board with a 340px side column; the Grid part only auto-fits. */
+.fromp__board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-section);
+  align-items: start;
+}
+
+.fromp__field {
+  min-width: 0;
+}
+
+.fromp__select,
+.fromp__search {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+}
+
+.fromp__select:focus-visible,
+.fromp__search:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.fromp__search::placeholder {
+  color: var(--graphite-soft);
+}
+
+.fromp__note {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+}
+
+.fromp__empty {
+  margin: 0;
+  padding: var(--space-4) var(--space-3);
+  color: var(--text-muted);
+}
+
+.fromp__more {
+  padding: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+/* The foot: the footnote, then the credit lines, in the quiet small-caption voice. */
+.fromp__foot {
+  color: var(--text-muted);
+}
+
+.fromp__foot p {
+  margin: 0 0 var(--space-1);
+}
+
+/* The country list is 60-odd rows, so it scrolls in its card on a phone too. */
+.fromp__scroll--short {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+@media (min-width: 740px) {
+  .fromp__board {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+
+  /* The list scrolls inside its card instead of stretching the page. The scroll is on an inner
+     box, because the card's name tab sits across its top edge and a scrolling card would clip it. */
+  .fromp__scroll {
+    max-height: 520px;
+    overflow-y: auto;
+  }
+}
