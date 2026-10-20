@@ -134,6 +134,8 @@ export function UmpirePage({ id, seasonYear, vs }) {
         <BackBtn onClick={back} />
         {picker}
         <EmptyState>No games on file for this umpire in {view.label}.</EmptyState>
+        {/* Career figures do not follow the season view. */}
+        <UmpireCareer id={id} />
       </div>
     )
   }

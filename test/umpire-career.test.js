@@ -117,3 +117,13 @@ test('the season in progress is marked partial, no other', () => {
   const over = umpireCareer({ ...base, now: new Date(2026, 11, 20), history: [], record: null, rows })
   assert.deepEqual(over.seasons.map((s) => s.partial), [false, false])
 })
+
+test('a row with a missing score counts in no record', () => {
+  const c = umpireCareer({
+    ...base,
+    history: [],
+    record: null,
+    rows: [row('2024-04-02', 'HP'), row('2024-04-03', 'HP', { hs: null }), row('2024-04-04', 'HP', { as: null })],
+  })
+  assert.deepEqual([c.record.wins, c.record.losses], [1, 0])
+})

@@ -36,7 +36,7 @@ export function umpireCareer({ history = [], record = null, rows = [], teamId, c
   let wins = record?.wins ?? 0
   let losses = record?.losses ?? 0
   for (const g of games) {
-    if (g.role !== 'HP' || g.awayScore === g.homeScore) continue
+    if (g.role !== 'HP' || g.awayScore == null || g.homeScore == null || g.awayScore === g.homeScore) continue
     const home = g.homeId === teamId
     if (!home && g.awayId !== teamId) continue
     if ((g.homeScore > g.awayScore) === home) wins++

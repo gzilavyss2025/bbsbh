@@ -1,5 +1,5 @@
 import { careerSeasons, recordWith } from '../../api/history/umpireHistory.js'
-import { loadUmpire } from '../../api/umpires.js'
+import { loadUmpireGames } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { umpireCareer } from '../../lib/umpire/career.js'
@@ -13,15 +13,15 @@ import { Meter } from '../ui/frame/Meter.jsx'
 export function UmpireCareer({ id }) {
   const { favoriteTeamId } = useFavoriteTeam()
   const { data } = useAsync(async () => {
-    const [history, record, all] = await Promise.all([
+    const [history, record, rows] = await Promise.all([
       careerSeasons(id),
       recordWith(id, favoriteTeamId),
-      loadUmpire(id, { seasonYear: 'all' }),
+      loadUmpireGames(id),
     ])
     return umpireCareer({
       history,
       record,
-      rows: all?.games ?? [],
+      rows,
       teamId: favoriteTeamId,
       clubName: teamClubName(favoriteTeamId) ?? 'The club',
     })
