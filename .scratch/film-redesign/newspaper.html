@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Film room, newspaper mockup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,700&display=swap">
+<style>
+:root{--paper:#f9f7f1;--ink:#111;--soft:#6b665c;--band:#efece3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 14px/1.25 "Source Sans 3","Segoe UI",Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums}
+main{padding:16px;max-width:740px}
+.mast{border-top:3px solid var(--ink);border-bottom:1px solid var(--ink);padding:4px 0;display:flex;justify-content:space-between;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;margin-bottom:14px}
+.mast span:last-child{color:var(--soft)}
+article{margin-bottom:26px}
+h2{font-size:20px;line-height:1.1;margin:0 0 2px;font-weight:700}
+.sub{font-size:12px;color:var(--soft);margin:0 0 4px;text-transform:uppercase;letter-spacing:.06em}
+.line{width:100%;border-collapse:collapse;border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);font-weight:700;letter-spacing:.04em}
+.line td{padding:2px 0}.line td:first-child{letter-spacing:0;width:3.2em}
+.line .tot{text-align:right;letter-spacing:.12em;white-space:pre}
+.wl{margin:4px 0 8px;font-size:13px}
+table.p{width:100%;border-collapse:collapse;margin:0 0 4px}
+table.p caption{text-align:left;font-weight:700;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:1px 0}
+table.p th{font-weight:700;text-align:right;padding:1px 0 1px 8px}table.p th:first-child{text-align:left}
+table.p td{text-align:right;padding:1px 0 1px 8px}table.p td:first-child{text-align:left;padding-left:0}
+table.p tbody tr:nth-child(even){background:var(--band)}
+.note{font-size:13px;margin:3px 0 10px}.note b{font-weight:700}
+.mixbar{display:flex;height:6px;margin:3px 0 0;border:1px solid var(--ink)}
+.mixbar i{display:block;flex-basis:0;border-right:1px solid var(--paper)}
+.mixbar i:nth-child(odd){background:var(--ink)}.mixbar i:nth-child(even){background:#9a958a}
+.lu{font-size:13px;margin:0 0 3px}
+.door{font-weight:700;font-size:13px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--ink)}
+</style></head><body><main id="m"></main>
+<script type="module">
+import meetings from './meetings.json' with { type: 'json' }
+const V = new URLSearchParams(location.search).get('v') || 'a'
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+const day=d=>{const x=new Date(d+'T00:00:00Z');return `${DAYS[x.getUTCDay()]}, ${MON[x.getUTCMonth()]} ${x.getUTCDate()}`}
+const sur=n=>n.split(' ').filter(w=>!/^(jr|sr|ii|iii)\.?$/i.test(w)).at(-1)
+const pad=(a,n)=>a.map(v=>String(v).padStart(n,' ')).join(' ')
+const mixPct=mix=>{const e=Object.entries(mix||{}),t=e.reduce((n,[,c])=>n+c,0);return e.map(([k,c])=>[k,Math.round(c*100/t)]).sort((a,b)=>b[1]-a[1])}
+function lineScore(g){
+  const rows=[g.away,g.home].map((s,i)=>{
+    const inn=g.innings.map(x=>x[i]).map(v=>v==null?'x':v)
+    const grp=[inn.slice(0,3),inn.slice(3,6),inn.slice(6)].map(a=>a.join('')).filter(Boolean).join(' ')
+    return `<tr><td>${s.abbr}</td><td class="tot">${grp} — ${s.runs} ${s.hits} ${s.errors}</td></tr>`}).join('')
+  return `<table class="line">${rows}</table>`
+}
+function pitching(g){
+  const rows=[g.away,g.home].map(s=>s.starter).filter(Boolean).map(p=>`<tr><td>${sur(p.name)} <span style="color:var(--soft)">${p.hand}</span></td><td>${p.ip}</td><td>${p.h}</td><td>${p.r}</td><td>${p.er}</td><td>${p.bb}</td><td>${p.k}</td><td>${p.pitches}</td></tr>`).join('')
+  return `<table class="p"><caption>Starting pitchers</caption><thead><tr><th></th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>P</th></tr></thead><tbody>${rows}</tbody></table>`
+}
+function mix(g){
+  return [g.away,g.home].filter(s=>s.starter).map(s=>{
+    const m=mixPct(s.starter.mix)
+    const bar=V==='b'?`<div class="mixbar">${m.map(([k,p])=>`<i style="flex-grow:${p}"></i>`).join('')}</div>`:''
+    return `<p class="note" style="margin-bottom:${V==='b'?8:3}px"><b>${sur(s.starter.name)} threw:</b> ${m.map(([k,p])=>`${k} ${p}`).join(', ')}.${bar}</p>`}).join('')
+}
+const html=meetings.map(g=>{
+  const w=g.away.runs>g.home.runs?g.away:g.home,l=w===g.away?g.home:g.away
+  const d=g.decisions
+  return `<article>
+  <p class="sub">${day(g.date)} · HP ${g.ump}</p>
+  <h2>${w.abbr} ${w.runs}, ${l.abbr} ${l.runs}</h2>
+  ${lineScore(g)}
+  <p class="wl"><b>W:</b> ${d.w} · <b>L:</b> ${d.l}${d.s?` · <b>SV:</b> ${d.s}`:''}</p>
+  ${pitching(g)}${mix(g)}
+  ${g.scoring?.length?`<p class="note"><b>Scoring:</b> ${g.scoring.map(p=>`${p.inning} ${p.text.replace(/\.$/,'')}`).join('. ')}.</p>`:''}
+  <p class="lu"><b>${g.away.abbr}:</b> ${g.away.lineup.map(p=>`${sur(p.name.replace(/,.*/,''))} ${p.pos.toLowerCase()}`).join(', ')}.</p>
+  <p class="lu"><b>${g.home.abbr}:</b> ${g.home.lineup.map(p=>`${sur(p.name.replace(/,.*/,''))} ${p.pos.toLowerCase()}`).join(', ')}.</p>
+  <p><a class="door" href="#">Full box score ›</a></p></article>`}).join('')
+document.getElementById('m').innerHTML=`<div class="mast"><span>Film room</span><span>Brewers 2-1</span></div>`+html
+</script></body></html>
