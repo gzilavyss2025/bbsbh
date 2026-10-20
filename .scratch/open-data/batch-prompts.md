@@ -1046,50 +1046,66 @@ Rules
 
 ## Prompt 11 of 17 — Sonnet 5.5, effort medium
 
-**Umpire career chart and "record with this umpire" (umpire page only).** Gary settled the placement: both parts go on the umpire page, which is an open surface, and nothing goes on the game page. That removes the spoiler-rule question, so this is a chart and a line that follow a settled direction. Sonnet at medium. A later game-page placement is a separate prompt, and that prompt starts at Opus high (rung 7).
+**Umpire career chart and "record with this umpire" (umpire page only).** Rewritten 2026-10-20 after prompt 10 changed source (issue #1565, PR #2431). Gary settled the placement: both parts go on the umpire page, which is an open surface. Nothing goes on the game page. He also settled the span (2026-10-20): both parts cover every season from 2000 through the current one. This replaces the old rule "no mixing with the current season, ever".
 
 ```text
 Use the ponytail skill at level full. Reuse what the repo already has before you write anything new. (Ponytail never overrides the spoiler rule, test-first or check-dir-size.)
 
-Task: show the data from prompt 10 on the umpire page ONLY.
-  (a) A career chart of games behind the plate by season, for seasons Tally's own files do
-      not cover.
-  (b) A "record with this umpire" line: how the user's favorite club has done when this
-      umpire worked home plate, through the last complete Retrosheet season.
-Settled by Gary (2026-10-06): nothing goes on the game page, its umpire card
+Task: on the umpire page ONLY, show
+  (a) a career chart: games behind the plate (HP) by season, 2000 through the current season;
+  (b) a "record with this umpire" line: the user's favorite club's wins and losses in the
+      games this umpire worked at home plate, 2000 through the current season.
+Settled by Gary: nothing goes on the game page, its umpire card
 (src/components/umpire/UmpiresCard.jsx) or the game preview. The umpire page is an open
-surface, so add no SealBox. If you think the line belongs on the game page too, say so in
-the PR body and do not build it.
+surface, so add no SealBox (ADR-0034). If you think the line belongs on the game page too,
+say so in the PR body and do not build it.
+Settled by Gary (2026-10-20): both (a) and (b) join BOTH stores below into one span, the
+current season included.
 
-Context
-- Prompt 10 must be merged first: public/data/umpire-history/ and src/api/umpireHistory.js
-  (`careerSeasons`, `recordWith`, and `throughSeason` in each file). If not, stop and say so.
-- Read the spoiler section of CLAUDE.md. It explains why a season or career record on an
-  open page is not a score (ADR-0034, "The cutoff is opt-in now").
-- The history ends at a past season (`throughSeason`). It never contains today's game. The
-  line must say "through {season}" and must never add live games. Settled rule: no mixing with
-  the current season, ever.
-- Page: src/screens/UmpirePage.jsx. The favorite club comes from
+Context (checked 2026-10-20)
+- Two stores, no overlap:
+  1. 2000-2022: public/data/umpire-history/{NN}.json, reader src/api/history/umpireHistory.js
+     (PR #2431). careerSeasons(umpireId) -> [{ season, games, byRole: { HP, 1B, 2B, 3B, LF,
+     RF } }], oldest first, [] when missing. recordWith(umpireId, teamId) -> { wins, losses,
+     throughSeason } or null. MLB only (sportId 1), regular season + postseason, no
+     All-Star Game. A tie is a game worked and in no record.
+  2. 2023 on: public/data/umpires/{season}/{id}.json, reader src/api/umpires.js.
+     loadUmpire(id, { seasonYear: 'all' }) joins every season's game rows (`games`); each
+     row has role ('HP', '1B', ...), level ('MLB' or 'AAA'), gameType, awayId, homeId,
+     awayScore, homeScore (src/lib/umpire/rows.js unpacks them). These files also hold AAA
+     games and the All-Star Game (gameType 'A'). To match store 1, count only level 'MLB'
+     and leave out gameType 'A'. Rebuilt nightly from Final games only, so a live game is
+     never in them.
+- Put the join in ONE pure helper with tests. Do not change either store or the generators.
+- The page: src/screens/UmpirePage.jsx. The favorite club comes from
   src/hooks/preferences/useFavoriteTeam.js (the Brewers, 158, are only the default). When
-  the favorite club has 0 games with this umpire, show no line.
+  the favorite club has 0 decided games with this umpire at home plate, show no line.
+- The page already has season views (`?season=`, UmpireSeasonCompare). Both (a) and (b)
+  are career figures: show them the same on every season view. Say in the PR what you did.
 - Wireframes: a bar strip by season under the umpire's name; a bar split into wins and
-  losses with a caption "Brewers with Name behind the plate, through 2025".
+  losses with a caption such as "Brewers with Name behind the plate, 2000-2026". Use the
+  real first and last season of his games, not 2000.
+- An umpire who started in 2023 or later has no history row; the chart then shows only the
+  seasons in store 2.
 
 Before you start (read and look; no edits yet)
 1. Read CLAUDE.md, every nested CLAUDE.md in the folders you will touch,
    docs/agents/writing-style.md, and the files this prompt names.
 2. Run `git fetch origin`. List open PRs with the GitHub tools (the cloud has no
-   `gh` CLI). Work on the branch your session was given. If it has none, make
-   `claude/<slug>` from current origin/main. Run
-   `git merge-base --is-ancestor origin/main HEAD`: if it fails, merge origin/main.
-   Check status and diffs before you edit. Other agents may work at once: never
-   reset, stash or reformat their work.
+   `gh` CLI). If PR #2431 is not merged, base your branch on
+   origin/claude/umpire-history-api and say in your PR that it stacks on #2431.
+   Otherwise cut it from current origin/main. Check status and diffs before you edit.
+   Other agents may work at once: never reset, stash or reformat their work.
 
 Steps
-1. Pure helper for the bar widths and the caption text, with tests, including a club with 0
-   games and a club with one game.
-2. Chart component for (a). Use tokens only. Check it at 390px with an umpire who has 30 years.
-3. The record line for (b), under the chart on the umpire page.
+1. Pure helper (src/lib/umpire/): join the two stores into [{ season, plate }] and
+   { wins, losses, firstSeason, lastSeason }, plus the bar widths and the caption text.
+   Tests: an umpire in both stores, one in store 1 only, one in store 2 only, AAA rows and
+   an All-Star row left out, a tie, a club with 0 games, a club with one game.
+2. Chart component for (a) in src/components/umpire/. Use tokens only. Check it at 390px
+   with an umpire who has 25+ seasons, for example Hunter Wendelstedt (427537): every
+   season 2000-2022 in store 1, and in store 2 for 2025.
+3. The record line for (b), under the chart.
 
 Tests first
 Write the tests before the code. Watch them FAIL. Then build until they pass.
@@ -1098,43 +1114,37 @@ its tests land in the same PR.
 
 Verify
 - `npm run lint; echo "exit=$?"` in the foreground, then `npm test`, then
-  `npm run build`. All green. If a CI job is cancelled with no runner and no
-  steps, it is not the PR: re-run it once and say so.
-- Start the first free reserved dev server (`npm run dev`, or dev:2 to dev:5;
-  `ss` is not installed, so probe each port with curl). Load every changed route
-  at 390px and 900px, ALWAYS with ?nointro. Headless Chromium cannot reach
-  statsapi.mlb.com through the proxy: relay those calls through Node with
-  page.route, and launch with executablePath '/opt/pw-browsers/chromium'. Use
-  your own folder under the scratchpad. Say "not seen" for anything you could not
-  load. Keep the dev server running. Do not run `npm run e2e` or `npm run visual`
-  unless Gary asks.
+  `npm run build`. All green.
+- Start `npm run dev`. Load every changed route at 390px and 900px, ALWAYS with
+  ?nointro. Headless Chromium cannot reach statsapi.mlb.com through the proxy: relay
+  those calls through Node with page.route, and launch with executablePath
+  '/opt/pw-browsers/chromium'. Use your own folder under the scratchpad. Send Gary a
+  screenshot (SendUserFile) with the exact route. Say "not seen" for anything you could
+  not load. Do not run `npm run e2e` or `npm run visual` unless Gary asks.
 
 Review, commit, PR
 - Run the ponytail-review skill on your diff and apply the cuts. Then run
   /code-review (medium) and fix what it finds.
-- Commit to your assigned branch and push. Open a DRAFT PR that mirrors
-  .github/pull_request_template.md. Put the base SHA, the files touched and how
-  you verified in the body. Write "not applicable (cloud)" for the worktree and
-  the local URL. Subscribe to the PR's activity.
-- Do not push to main. Do not merge: Gary merges. Wait for the `lint-and-build`
-  check. If it fails, follow the steward skill.
+- Commit and push. Open a DRAFT PR that mirrors .github/pull_request_template.md, with
+  "Part of #1565" (or "Closes #1565" if this finishes it). Put the base SHA, the files
+  touched and how you verified in the body. Write "not applicable (cloud)" for the
+  worktree and the local URL. Subscribe to the PR's activity.
+- Do not push to main. Do not merge. Wait for the `lint-and-build` check. If it fails,
+  follow the steward skill.
 
 Handoff
-1. Final message: the PR link, the umpire ids you checked (one with a 30-year career, one
-   with no record for the favorite club), and what you did not see.
+1. Final message: the PR link, the umpire ids you checked (one long career, one with no
+   record for the favorite club, one who started in 2023 or later), the screenshot, and
+   what you did not see.
 
 Rules
 - Follow docs/agents/writing-style.md (ASD-STE100) and the house word list
   ("postseason", never the other word). Keep sentences short.
 - Ratchet budgets (check-dir-size, check-file-size, check-raw-values): if you
   touch one, merge origin/main and re-measure right before you push.
-- A new generator goes in docs/scripts/generators.md under its cadence, and says
-  what runs it. A new reader goes in docs/api/static-data.md. A new module in
-  src/api/ needs an entry in src/api/spoiler-manifest.json before it lints. A new
-  ADR takes the next free number (check origin/main and open PRs;
-  scripts/check-adr-numbers.mjs).
 - If a command fails twice for the same reason, stop and report it. Do not widen
   the PR.
+- An unattended session writes [DECISION: ...] lines for any choice Gary has not settled.
 ```
 
 ## Prompt 12a of 17 — Sonnet 5.5, effort medium
