@@ -616,6 +616,10 @@
       "class": "spoiler-free",
       "why": "Static birthplaces/{cell}.json: players grouped by the map point of their birth city, from Retrosheet's biographical files placed with GeoNames (ADR-0100, ADR-0106). Where a man was born says nothing about a game. Open surface (ADR-0034); no SealBox."
     },
+    "history/umpireHistory.js": {
+      "class": "spoiler-free",
+      "why": "Static umpire-history/{NN}.json: an umpire's games at each position and each club's record with him at home plate, for closed seasons before umpires.js's first (2000 to 2022). Every game ended seasons ago, so a career line is not a score. Open surface (ADR-0034); no SealBox."
+    },
     "gamerecord/played.js": {
       "class": "spoiler-free",
       "why": "Whether a game was played, whether its record is closed (played or a forfeit), and whether an old played game holds no play-by-play. Reads `detailedState`, the season and a play COUNT, never a score (ADR-0101). Split out of select.js, which is at its file-size budget."

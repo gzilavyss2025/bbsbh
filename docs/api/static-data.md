@@ -1144,6 +1144,14 @@ for each generator; the reader modules:
   `{ people: [], credit: [] }`. The caller passes `parkPoint(venue.location)`
   (`src/lib/history/pick.js`), from the feed's `defaultCoordinates`. `birthplaceCell` is
   the one definition the generator also uses. Spoiler-free.
+- `history/umpireHistory.js` — an umpire's seasons before Tally's own umpire files
+  (`umpires.js`, from 2023), from `public/data/umpire-history/{NN}.json`
+  (`gen-umpire-history.mjs`, hand-run, issue 1565), sharded on `shardKey100(umpireId)`.
+  `careerSeasons(umpireId)` returns `[{ season, games, byRole: { HP, 1B, 2B, 3B, LF, RF } }]`,
+  oldest first, `[]` when missing. `recordWith(umpireId, teamId)` returns `{ wins, losses,
+  throughSeason }` for the club's games with the umpire at home plate, or `null` when it has
+  none. The files cover 2000 to the season before `umpires/`'s first, and never a season
+  `umpires/` holds. Spoiler-free: closed seasons.
 - `public/data/from/` — the files behind "Where they're from" (`gen-where-from.mjs`, nightly, and
   `gen-where-from-map.mjs`, hand-run; #1526). `index.json` is the small file the picker loads at once:
   `{ generatedAt, counts, zoneCounts, countries, unplaced }`. `counts` is the number of places a state
