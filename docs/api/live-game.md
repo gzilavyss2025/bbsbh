@@ -593,7 +593,11 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   put no ball in play, and null again at a park with no coordinates — the
   diamond then simply offers no handle. The path itself is pure geometry a tier
   down in `src/lib/ballpark/ballFlight.js`, whose bow depth is the ball's own
-  apex height in feet (`test/ball-flight.test.js`).
+  apex height in feet (`test/ball-flight.test.js`). The sheet's second view, the
+  side view (`components/charts/ElevationArc.jsx`, #1875), reads the same ball
+  through `elevationArc` in that module: a drag-and-lift arc landed on the
+  measured distance, with the wall on the ball's line, and two result rules (a
+  home run clears the wall; any other ball ends at it) (`test/elevation-arc.test.js`).
   Constants shared across the reveal-only modules (`NON_PA_EVENT_TYPES`,
   `WHIFF_CODES`, `pitchCallCode`) live in `playbyplay.js`: baserunning-only
   top-level plays are NOT plate appearances for PA/BF counts, but their pitches

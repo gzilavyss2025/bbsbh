@@ -4,7 +4,9 @@ import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
-import { ballFlightPath } from '../../lib/ballpark/ballFlight.js'
+import { ballFlightPath, hasElevationArc } from '../../lib/ballpark/ballFlight.js'
+import { Segmented } from '../ui/control/Segmented.jsx'
+import { ElevationPlot } from './ElevationArc.jsx'
 import { hoverCardPosition } from '../../lib/playerHoverPosition.js'
 import { useMediaQuery, HOVER_CARD_QUERY } from '../../hooks/useMediaQuery.js'
 import { DEFAULT_HARD_HIT_MPH } from './HitChart.jsx'
@@ -167,7 +169,21 @@ function FlightFacts({ ball }) {
 // corner: floated over the head it sat on the rule underneath and crowded
 // whatever the result line ended with. The popover passes none, and the row
 // simply closes up.
+//
+// THE TWO VIEWS (#1875): the plan view above, or the side view (ElevationArc.jsx).
+// The toggle is on the SHEET only. The popover takes no pointer (see its CSS), so
+// a control there could never be pressed. A ball with no launch angle or no
+// distance has no side view, and the toggle is not drawn at all. The toggle sits
+// above the drawing, so it stays under the thumb when the drawing changes height.
+const VIEWS = [
+  { value: 'spray', label: 'Field Spray' },
+  { value: 'arc', label: 'Elevation Arc' },
+]
+
 function FlightBody({ ball, park, name, code, closeRef, onClose }) {
+  const [view, setView] = useState('spray')
+  const toggle = Boolean(onClose) && hasElevationArc(ball)
+  const side = toggle && view === 'arc'
   return (
     <>
       <div className="bflight__head">
@@ -190,7 +206,14 @@ function FlightBody({ ball, park, name, code, closeRef, onClose }) {
           </button>
         )}
       </div>
-      <FlightPlot ball={ball} park={park} />
+      {toggle && (
+        // The sheet is a dismiss target end to end; a press on the toggle is not
+        // "I am done reading", so it stops here.
+        <div className="bflight__views" onClick={(e) => e.stopPropagation()}>
+          <Segmented label="View of the flight" value={view} onChange={setView} options={VIEWS} fill />
+        </div>
+      )}
+      {side ? <ElevationPlot ball={ball} park={park} /> : <FlightPlot ball={ball} park={park} />}
       <FlightFacts ball={ball} />
     </>
   )
@@ -237,8 +260,9 @@ export function BallFlight({ ball, batter, code = '' }) {
     const onKey = (e) => e.key === 'Escape' && setOpen(false)
     window.addEventListener('keydown', onKey)
     // The sheet takes focus and hands it back, the same contract every other
-    // dialog here keeps (StrikeZoneModal). The close button is the target
-    // because it is the only thing in the card a keyboard can act on.
+    // dialog here keeps (StrikeZoneModal). The close button is the target: it
+    // is the first thing in the card a keyboard can act on (the view toggle,
+    // when the ball has a side view, comes after it).
     const trigger = document.activeElement
     closeRef.current?.focus()
     return () => {
@@ -311,11 +335,12 @@ export function BallFlight({ ball, batter, code = '' }) {
       )}
       {open && (
         <ModalPortal>
-          {/* TAP ANYWHERE TO PUT IT AWAY — the scrim and the sheet alike. There
-              is nothing on this card to press, so a tap can only ever mean "I
-              am done reading it", and hunting for a corner ✕ on a phone is the
-              worse of the two. The ✕ stays for the pointer that expects one and
-              for a keyboard, which needs a real focus target. */}
+          {/* TAP ANYWHERE TO PUT IT AWAY — the scrim and the sheet alike. The
+              one control on the card is the view toggle, which stops its own
+              taps (FlightBody); any other tap can only mean "I am done reading
+              it", and hunting for a corner ✕ on a phone is the worse of the
+              two. The ✕ stays for the pointer that expects one and for a
+              keyboard, which needs a real focus target. */}
           <div className="scrim scrim--center" onClick={() => setOpen(false)}>
             <Card as="div" body="flush" className="bflight bflight--modal" role="dialog" aria-modal="true" aria-label={label}>
               <FlightBody

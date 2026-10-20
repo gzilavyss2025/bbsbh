@@ -24,9 +24,9 @@ export function shapePlatoon(data) {
   return ops
 }
 
-// -> { [clubId]: { R, L } }. A failed read leaves the club out, which drops the card.
+// -> { [clubId]: { R, L } }. A club with no splits is left out; a failed read throws.
 export async function loadPlatoon({ clubIds, season }) {
-  const rows = await Promise.all(clubIds.map((id) => getJson(platoonUrl(id, season)).then(shapePlatoon).catch(() => null)))
+  const rows = await Promise.all(clubIds.map((id) => getJson(platoonUrl(id, season)).then(shapePlatoon)))
   return Object.fromEntries(clubIds.map((id, i) => [id, rows[i]]).filter(([, r]) => r))
 }
 
@@ -36,13 +36,9 @@ export async function loadParkFit({ clubIds, slateDate }) {
   const season = Number(slateDate.slice(0, 4))
   const rows = await Promise.all(
     clubIds.map(async (clubId) => {
-      try {
-        const ids = topHitters(await fetchHotBatSplits(season, clubId, slateDate))
-        const datas = await Promise.all(ids.map((id) => fetchSprayFor(id, { seasonYear: season, contact: true })))
-        return [clubId, datas.flatMap((d, i) => decodeSprayBalls(d?.bat?.[ids[i]], season))]
-      } catch {
-        return [clubId, []]
-      }
+      const ids = topHitters(await fetchHotBatSplits(season, clubId, slateDate))
+      const datas = await Promise.all(ids.map((id) => fetchSprayFor(id, { seasonYear: season, contact: true })))
+      return [clubId, datas.flatMap((d, i) => decodeSprayBalls(d?.bat?.[ids[i]], season))]
     }),
   )
   return Object.fromEntries(rows)

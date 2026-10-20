@@ -2,7 +2,8 @@
 // +y toward CF), shared by the renderer and the tests (#1859). Pure math.
 
 const DEG = 180 / Math.PI
-const bearing = ([x, y]) => Math.atan2(x, y) * DEG
+// The bearing of a feet-frame point from home: 0 = straightaway center, negative toward LF.
+export const bearing = ([x, y]) => Math.atan2(x, y) * DEG
 
 // Where segment a→b crosses the ray from home at `deg`, or null.
 function crossRay(a, b, deg) {
@@ -82,8 +83,11 @@ export function fenceProblems(points) {
 // measurement: it sets the stroke weight, and no label shows it.
 const FIVE = [['lf', -45], ['lc', -18], ['cf', 0], ['rc', 18], ['rf', 45]]
 const THREE = [['lf', -45], ['cf', 0], ['rf', 45]]
+// Which points a height set has: Savant's five, else line/CF/line. One choice for the
+// stroke weight and the label, so the two cannot pick different sets.
+const pointsFor = (heights) => (FIVE.every(([k]) => Number.isFinite(heights?.[k])) ? FIVE : THREE)
 export function heightAt(deg, heights) {
-  const ks = FIVE.every(([k]) => Number.isFinite(heights?.[k])) ? FIVE : THREE
+  const ks = pointsFor(heights)
   const a = Math.max(-45, Math.min(45, deg))
   for (let i = 0; i < ks.length - 1; i++) {
     const [k0, a0] = ks[i]
@@ -91,4 +95,11 @@ export function heightAt(deg, heights) {
     if (a <= a1) return heights[k0] + (heights[k1] - heights[k0]) * ((a - a0) / (a1 - a0))
   }
   return heights[ks[ks.length - 1][0]]
+}
+
+// The measured height at a bearing, or null between measured points: the only
+// heights a label may print. `tol` is how many degrees off a point still counts.
+export function measuredHeightAt(deg, heights, tol = 2) {
+  const hit = pointsFor(heights).find(([, a]) => Math.abs(deg - a) <= tol)
+  return hit && Number.isFinite(heights?.[hit[0]]) ? heights[hit[0]] : null
 }

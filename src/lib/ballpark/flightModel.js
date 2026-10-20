@@ -4,12 +4,13 @@
 const K = 40 // samples per flight
 
 // One flight from h0 ft up (3 = the bat): x along the ground and z up, in feet, every 10ms, until it lands.
-export function simFlight(ev, la, lift, h0 = 3) {
-  const G = 32.174, RHO = 0.002284, A = 0.04585, MS = 0.009955, CD = 0.35, dt = 0.01
+// `cd` is the drag coefficient: 0.35 is the replay's; the side view passes its own (ballFlight.js).
+export function simFlight(ev, la, lift, h0 = 3, cd = 0.35) {
+  const G = 32.174, RHO = 0.002284, A = 0.04585, MS = 0.009955, dt = 0.01
   const v0 = ev * 1.46667
   const a = (la * Math.PI) / 180
   let x = 0, z = h0, vx = v0 * Math.cos(a), vz = v0 * Math.sin(a), t = 0
-  const kd = (0.5 * RHO * A * CD) / MS
+  const kd = (0.5 * RHO * A * cd) / MS
   const kl = (0.5 * RHO * A * lift) / MS
   const pts = [[0, h0, 0]]
   while (t < 14) {
@@ -27,6 +28,24 @@ export function simFlight(ev, la, lift, h0 = 3) {
   return { dist: x, T: t, pts }
 }
 
+// The lift that lands the sim at `dist` ft, bisected within [lo, hi] and clamped to
+// the nearer end when the range cannot reach it, with the flight it gives (the same
+// h0 and cd, so a caller cannot fly it again with different ones). Shared by the
+// replay (below) and the side view (ballFlight.js), which passes its own drag and range.
+export function fitLift(ev, la, dist, { h0 = 3, cd = 0.35, lo = 0, hi = 0.45, iters = 18 } = {}) {
+  const low = simFlight(ev, la, lo, h0, cd)
+  if (dist <= low.dist) return { lift: lo, flight: low }
+  const high = simFlight(ev, la, hi, h0, cd)
+  if (dist >= high.dist) return { lift: hi, flight: high }
+  for (let i = 0; i < iters; i++) {
+    const mid = (lo + hi) / 2
+    if (simFlight(ev, la, mid, h0, cd).dist < dist) lo = mid
+    else hi = mid
+  }
+  const lift = (lo + hi) / 2
+  return { lift, flight: simFlight(ev, la, lift, h0, cd) }
+}
+
 // True for a ball the model flies through the air: a lift of 8 degrees or more, with a speed and a
 // distance. Anything else hops, and the panel's in-flight label reads the same predicate.
 export const isAirFlight = (ball) => ball.launchAngle != null && ball.launchAngle >= 8 && ball.exitVelo != null && Boolean(ball.distance)
@@ -41,18 +60,7 @@ export function flightModel(ball, chord, h0 = 3) {
   const sf = [], sz = []
   let T
   if (isAirFlight(ball)) {
-    let lo = 0, hi = 0.45, s
-    if (dist <= simFlight(ev, la, lo, h0).dist) s = lo
-    else if (dist >= simFlight(ev, la, hi, h0).dist) s = hi
-    else {
-      for (let i = 0; i < 18; i++) {
-        const mid = (lo + hi) / 2
-        if (simFlight(ev, la, mid, h0).dist < dist) lo = mid
-        else hi = mid
-      }
-      s = (lo + hi) / 2
-    }
-    const f = simFlight(ev, la, s, h0)
+    const { flight: f } = fitLift(ev, la, dist, { h0 })
     T = f.T
     let j = 1
     for (let i = 0; i <= K; i++) {
