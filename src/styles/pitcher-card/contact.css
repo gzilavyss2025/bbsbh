@@ -212,6 +212,10 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
+.pqual__blast {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
 .pqual__stamp {
   margin-left: auto;
   padding: 0 var(--space-1h);

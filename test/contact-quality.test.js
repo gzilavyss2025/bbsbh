@@ -48,9 +48,9 @@ test('swing duration: 0.16 s x 72 / bat speed, clamped to 0.14-0.18 s', () => {
 
 test('in play, MLB: all figures, the HR parks, and the waiting figure before bat speed', () => {
   const full = qualityFigures(inplay, tr({ xba: 0.96, hrParks: 30 }), { eventType: 'home_run', mlb: true })
-  assert.deepEqual(full.figs.map((f) => f.label), ['mph off the bat', 'squared up', 'xBA', 'parks a home run'])
+  assert.deepEqual(full.figs.map((f) => f.label), ['mph off the bat', 'squared up', 'xBA', 'HR parks'])
   assert.equal(full.figs[2].num, '.960')
-  assert.equal(full.figs[3].num, '30 of 30')
+  assert.equal(full.figs[3].num, '30/30')
   const wait = qualityFigures(inplay, undefined, { eventType: 'single', mlb: true })
   assert.deepEqual(wait.figs[1], { num: '—', label: 'squared up · waits for bat speed', wait: true })
 })

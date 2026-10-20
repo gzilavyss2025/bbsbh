@@ -80,13 +80,13 @@ export function setBat(poly, cap, b, opacity, ink = false) {
   if (cap) put(cap, { cx: f1(x), cy: f1(y), r: f1(r), ...mark })
 }
 
-// Phase C (§9): `attack +9° · measured`, in ink above the barrel end, kept inside the scene.
+// Phase C (§9): `attack +9° · measured`, in ink in a fixed slot at the scene's top left. It used to ride above
+// the barrel end, which is the contact point, so it sat on the bat and the zone (design critique, #1771).
 const LABEL_HALF = 66 // px: half the text's width at --fs-cell
-export function setAttackLabel(node, deg, end) {
-  const [x, y] = proj(...end)
+export function setAttackLabel(node, deg) {
   const n = Math.round(deg)
   node.textContent = `attack ${n < 0 ? '-' : '+'}${Math.abs(n)}° · measured`
-  put(node, { x: f1(clamp(x, LABEL_HALF + 4, SCENE_W - LABEL_HALF - 4)), y: f1(Math.max(14, y - 10)), visibility: 'visible' })
+  put(node, { x: LABEL_HALF + 8, y: 20, visibility: 'visible' })
 }
 
 // The four smear bats trail the bat while it is fast; none during the freeze.
@@ -196,7 +196,7 @@ export function drawContact(mk, p, b, m, tau, slow, rest) {
   const dtC = tReal - tc
   const th = SW.at(rest ? 0.12 : dtC).th
   const ink = m.measured && !bunt && (rest || dtC >= 0) // the swing before contact stays pencil; a bunt is drawn, never ink
-  if (ink) setAttackLabel(mk.label, m.attackDeg, SW.at(0).end)
+  if (ink) setAttackLabel(mk.label, m.attackDeg)
   else vis(mk.label, false)
   if (!bunt) {
     if (rest) {

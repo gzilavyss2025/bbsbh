@@ -67,7 +67,7 @@ export function qualityFigures(p, tr, { eventType, mlb, norm }) {
       const su = squaredUp(p.hit.exitVelo, tr?.batSpeed, Number(p.mph))
       figs.push(su == null ? { num: '—', label: 'squared up · waits for bat speed', wait: true } : { num: pct(su), label: 'squared up' })
       if (tr?.xba != null) figs.push({ num: tr.xba.toFixed(3).replace(/^0/, ''), label: 'xBA' })
-      if (eventType === 'home_run' && tr?.hrParks != null) figs.push({ num: `${tr.hrParks} of ${PARKS}`, label: 'parks a home run' })
+      if (eventType === 'home_run' && tr?.hrParks != null) figs.push({ num: `${tr.hrParks}/${PARKS}`, label: 'HR parks' })
     }
     return { figs, verdict: mlb ? verdictFor(eventType, tr) : null, notes: mlb ? swingNotes(p, tr, { norm }) : [] }
   }

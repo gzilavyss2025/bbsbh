@@ -58,7 +58,11 @@ export function QualityLine({ pitches, drawers, at, bat, mlb, eventType, norm })
           </div>
         ))}
       </Cluster>
-      {notes.length > 0 && <span className="pqual__note">{notes.join(' · ')}</span>}
+      {notes.length > 0 && (
+        <span className="pqual__note">
+          {notes.map((t, i) => <span key={t}>{i > 0 && ' · '}{t === 'Blast' ? <b className="pqual__blast">{t}</b> : t}</span>)}
+        </span>
+      )}
       {verdict && <span ref={stamp} className={`pqual__stamp pqual__stamp--${verdict === 'Hard-luck out' ? 'out' : 'good'}`}>{verdict}</span>}
     </Cluster>
   )

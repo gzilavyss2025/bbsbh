@@ -420,7 +420,7 @@ verdict wraps to its own line, right-aligned.
 
 | Outcome | Figures, in order |
 | --- | --- |
-| In play | exit velocity (`mph off the bat`), squared-up %, xBA, and for a home run `27 of 30` (`parks a home run`) |
+| In play | exit velocity (`mph off the bat`), squared-up %, xBA, and for a home run `27/30` (`HR parks`, short so the row keeps two lines on a phone) |
 | Whiff | bat speed (`mph bat speed`), horizontal break (`horizontal break`) |
 | Foul | bat speed |
 
@@ -571,7 +571,7 @@ pitch shows that pitch's rest frame with no motion.
 | Card | Scrolled off screen | Clock stops; it resumes from the same `tau` |
 | Card | Leaves the rail (wide) | Pick drops; it shows the rest frame when it comes back |
 | Quality line | Pitch with no swing | Empty, but its height stays |
-| Phase C attack label | After contact | `attack +9° · measured` in ink, `--fs-cell`, next to the barrel end |
+| Phase C attack label | After contact | `attack +9° · measured` in ink, `--fs-cell`, in a fixed slot at the scene top left (it sat on the bat when it rode the barrel end) |
 
 The controls are 44 px tall (`size="tap"`), not the `control` size. These
 buttons are the only way into the replay on a phone.
