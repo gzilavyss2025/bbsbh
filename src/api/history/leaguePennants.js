@@ -17,3 +17,6 @@ export function pennantsList(file, teamId) {
 export async function pennantsFor(teamId) {
   return pennantsList(await load(), teamId)
 }
+
+// The whole file, for a caller that matches many clubs at once (a player's seasons).
+export const pennantFile = load

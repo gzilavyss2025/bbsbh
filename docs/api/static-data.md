@@ -1043,7 +1043,7 @@ for each generator; the reader modules:
   (hand-run `gen-league-pennants.mjs`). `pennantsFor(teamId)` returns the rows newest first,
   each with the club's name, label and abbreviation of that season. It starts in 1903, so
   the early pennants are not in it. The team page's About band draws them (`PennantWall`).
-  A club with none, a MiLB id, or a missing file reads `[]`.
+  A club with none, a MiLB id, or a missing file reads `[]`. `pennantFile()` returns the whole file; the player page's Team history matches a player's seasons against it.
 - `franchiseHistory.js` — a club's names, leagues and ballparks by season, from
   `public/data/franchise-history/{teamId}.json` (hand-run
   `gen-franchise-history.mjs`). `franchiseFor(teamId)` returns the spans and the park lines (`parkHistory`, grouped by venue id)

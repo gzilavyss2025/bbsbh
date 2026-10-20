@@ -1,6 +1,7 @@
 # src/components/honors — team-season honors
 
-`LeaguePennant.jsx` exports the named `LeaguePennant` component.
+`LeaguePennant.jsx` exports the named `LeaguePennant` component. `PennantRow.jsx` is the shared swipe row
+(compact on a phone, full on a wide screen) the team and player pages use.
 Usage, props, design references, and edit locations: [docs/pennants.md](../../../docs/pennants.md).
 
 - Draw-only. The caller selects verified honors and supplies the season's league.
