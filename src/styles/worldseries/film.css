@@ -95,7 +95,7 @@
   height: 48px;
 }
 
-/* The pitching line as six cells: a label over a mono figure. */
+/* layout-exempt: the pitching line as six cells, a fixed count */
 .ww-film__stats {
   grid-column: 1 / -1;
   margin: 0;
@@ -104,6 +104,7 @@
   border-block: 1px solid var(--border-stamped);
 }
 
+/* layout-exempt: a label over its figure */
 .ww-film__stats div {
   display: flex;
   flex-direction: column;
