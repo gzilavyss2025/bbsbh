@@ -3,6 +3,7 @@
    carries hidden text "leads", so colour is not the only cue. Every figure sits in a pill of one
    width, so the marks line up down the columns. */
 .ww-glove__table {
+  table-layout: fixed;
   width: 100%;
   font-size: var(--fs-cell);
 }
@@ -12,16 +13,25 @@
   padding: var(--space-2) var(--space-1);
 }
 
-/* layout-exempt: a two-end row, club A at the start and club B at the end, as the figures run */
-.ww-glove__heads {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-2);
+/* The column heads: each club's logo and name over its figures. The fixed layout takes its three
+   widths from this row, so the grid is the same on every row and every width. */
+.ww-glove__table thead th {
   padding: var(--space-2);
+  border-block-end: 1px solid var(--border-hairline);
+}
+
+/* The club names are wider than a figure column: they run on into the empty Measure head. */
+.ww-glove__table thead .ww-glove__val {
+  overflow: visible;
+}
+
+.ww-glove__val--b .ww-glove__club {
+  justify-content: flex-end;
 }
 
 .ww-glove__club {
   display: flex;
+  white-space: nowrap;
   align-items: center;
   gap: var(--space-2);
   font-family: var(--font-display);
@@ -31,6 +41,7 @@
 
 .ww-glove__label {
   overflow-wrap: anywhere;
+  white-space: normal;
   font-weight: inherit;
   text-align: center;
   color: var(--text-caption);
@@ -51,7 +62,7 @@
 }
 
 .ww-glove__val {
-  inline-size: 7ch;
+  inline-size: 9ch;
 }
 
 .ww-glove__group th {

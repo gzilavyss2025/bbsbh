@@ -95,3 +95,13 @@ test('without a slate season the file season is not checked', () => {
   const d = { season: 2026, ...data(club(), club()) }
   assert.equal(gloveLegsModel(d, { clubA: 158, clubB: 139 }).length, 6)
 })
+
+// The suite has no JSX loader, so the column heads are pinned by reading the source (as
+// ws-no-figure-and-jump-follow.test.js does).
+test('GloveLegs names its columns: a thead with a club head each side and a hidden Measure head', async () => {
+  const { readFileSync } = await import('node:fs')
+  const s = readFileSync(new URL('../src/components/worldseries/cards/scouting/GloveLegs.jsx', import.meta.url), 'utf8')
+  assert.match(s, /<thead>[\s\S]*<th scope="col"[^>]*>\s*<Club id=\{clubIds\[0\]\} \/>[\s\S]*<span className="sr-only">Measure<\/span>[\s\S]*<Club id=\{clubIds\[1\]\} \/>[\s\S]*<\/thead>/)
+  assert.match(s, /<Card frame="stamped" label="Glove and legs" labelAs="h3" count="Regular season"/)
+  assert.doesNotMatch(s, /SectionHead/)
+})
