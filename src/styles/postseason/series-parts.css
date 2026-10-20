@@ -334,18 +334,19 @@ button.psseries__ldoor::after {
 }
 
 /* ---- Nine Keys ------------------------------------------------------------ */
-.psseries__keys {
-  padding: var(--space-2) var(--space-3) var(--space-3);
+/* The stamped Card draws the frame, the name tab and the padding; the Table
+   draws the grid. This block sets the fixed layout and the cells' own look. */
+.psseries__keys > .card__body {
+  padding-inline: var(--space-3);
 }
 .psseries__keystable {
-  width: 100%;
-  border-collapse: collapse;
   table-layout: fixed;
 }
 .psseries__keystable thead th,
 .psseries__keyscale {
   padding: var(--space-1) 0 var(--space-1h);
   border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: transparent;
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -355,12 +356,12 @@ button.psseries__ldoor::after {
 }
 /* Column widths: the key label, the two clubs' ranks side by side, then the track. */
 .psseries__keystable thead th:first-child {
-  width: 92px;
+  width: 84px;
   text-align: left;
 }
 .psseries__keystable thead th:nth-child(2),
 .psseries__keystable thead th:nth-child(3) {
-  width: 52px;
+  width: 46px;
 }
 /* The two club heads carry the same logo as their track mark, a legend. */
 .psseries__keyhead {
@@ -388,7 +389,7 @@ button.psseries__ldoor::after {
 .psseries__keyrow:first-child > * {
   border-top: none;
 }
-.psseries__keylabel {
+.psseries__keystable .psseries__keylabel {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -399,7 +400,7 @@ button.psseries__ldoor::after {
   color: var(--text-heading);
   text-align: left;
 }
-.psseries__keyrank {
+.psseries__keystable .psseries__keyrank {
   position: relative;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -412,10 +413,10 @@ button.psseries__ldoor::after {
 /* A failed key: clay ink, struck through with a pencil stroke (the Nine Keys
    page's .ninekeys__cell--fail idiom). The hidden "(failed)" word says it for
    a screen reader. */
-.psseries__keyrank--fail {
+.psseries__keystable .psseries__keyrank--fail {
   color: var(--accent-negative);
 }
-.psseries__keyrank--fail::after {
+.psseries__keystable .psseries__keyrank--fail::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -467,11 +468,31 @@ button.psseries__ldoor::after {
 .psseries__keydot--home {
   z-index: 1;
 }
+/* The foot under the table (a Cluster): the tally and its verdict at the left,
+   the door to the full report at the right. It wraps on a narrow card; the door
+   keeps its 44px tap target. */
+.psseries__keyfoot {
+  justify-content: space-between;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+/* Both controls in the foot reach 44px: the door by height, the (i) by a
+   hidden hit area around its 18px circle. */
+.psseries__keyfoot .door {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.psseries__keyverdict .infopop__btn {
+  position: relative;
+}
+.psseries__keyverdict .infopop__btn::after {
+  content: '';
+  position: absolute;
+  inset: -13px;
+}
 /* The tally and the verdict under the table. */
 .psseries__keytally {
   margin: 0;
-  padding: var(--space-2h) 0 var(--space-1);
-  border-top: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
@@ -480,7 +501,7 @@ button.psseries__ldoor::after {
 }
 /* The verdict sits behind an (i) after the tally. The popover is made for the
    navy bars, so on paper it takes ink colors, and its tip spans the card. */
-.psseries__keytally {
+.psseries__keyfoot {
   position: relative;
 }
 .psseries__keyverdict {
@@ -511,6 +532,12 @@ button.psseries__ldoor::after {
 }
 .psseries__keyverdict .infopop__tip::before {
   display: none;
+}
+
+/* Inside the scouting report the grid's gap spaces the cards, so the section
+   adds no margin of its own. */
+.ww-scout__card .psseries__keyssection {
+  margin: 0;
 }
 
 /* Wide, the table gives the key names and the ranks more room, so a card the
