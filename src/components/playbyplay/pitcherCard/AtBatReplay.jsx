@@ -117,16 +117,17 @@ function useBatTracking(pitches, gamePk, sportId, gameState, gameDate, atBatInde
   return bat
 }
 
-// His season bat speed, for the two-strike note (§7.3): a static file, so no spoiler; MiLB has none.
+// His season bat speed, for the two-strike note (§7.3): a static file, so no spoiler; MiLB has none. The file is
+// held and the batter's figure read from it at render, so a new batter never wears the last one's norm.
 function useSeasonBatSpeed(batterId, sportId) {
-  const [norm, setNorm] = useState(null)
+  const [pct, setPct] = useState(null)
   useEffect(() => {
-    if (sportId !== 1 || batterId == null) return
+    if (sportId !== 1) return
     let live = true
-    fetchSavantPercentiles().then((d) => live && setNorm(savantRawFor(d, batterId, 'batting')?.batSpeed ?? null)).catch(() => {})
+    fetchSavantPercentiles().then((d) => live && setPct(d)).catch(() => {})
     return () => { live = false }
-  }, [batterId, sportId])
-  return norm
+  }, [sportId])
+  return sportId === 1 && batterId != null ? savantRawFor(pct, batterId, 'batting')?.batSpeed ?? null : null
 }
 
 function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, gamePk, sportId, eventType, gameState, gameDate, atBatIndex, batterId, venue, children }) {

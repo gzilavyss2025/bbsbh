@@ -134,3 +134,15 @@ test('scene pitches know the two-strike count from the pitch before', () => {
   const out = atBatScenePitches([d(1, 1), d(2, 2), d(3, 2)])
   assert.deepEqual(out.map((x) => x.twoStrikes), [false, false, true].slice(0, out.length))
 })
+
+// The two-strike note's norm is read per batter from the held file (AtBatReplay's useSeasonBatSpeed derives it at
+// render), so a new batter never wears the last one's figure, and nothing before the file loads.
+import { savantRawFor } from '../src/api/savantPercentiles.js'
+
+test('season bat speed: per batter, null before the file loads and for a batter not in it', () => {
+  const file = { rawBat: { 1: { batSpeed: 72 }, 2: { batSpeed: 69.5 } } }
+  assert.equal(savantRawFor(file, 1, 'batting')?.batSpeed, 72)
+  assert.equal(savantRawFor(file, 2, 'batting')?.batSpeed, 69.5)
+  assert.equal(savantRawFor(file, 3, 'batting')?.batSpeed ?? null, null)
+  assert.equal(savantRawFor(null, 1, 'batting')?.batSpeed ?? null, null)
+})
