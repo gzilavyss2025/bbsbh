@@ -7,12 +7,13 @@ import { useRouteLink } from '../../../../lib/nav.js'
 import { postseasonDoor } from '../../data/shared.js'
 import { BallparkCard } from '../../modules/ballpark/BallparkCard.jsx'
 import { FranchiseHistory } from '../../modules/ballpark/FranchiseHistory.jsx'
+import { PennantWall } from '../../modules/ballpark/PennantWall.jsx'
 import { useBandData } from '../useBandData.js'
 import { aboutCount, loadAbout } from './loadAbout.js'
 import '../../../../styles/team-next/about.css'
 
 // About: what this club is. The ballpark (with the manager in its fact strip), the franchise
-// history (MLB), the jerseys and (MiLB) Made The Show, each a stamped card with a name tab.
+// history and league pennants (MLB), the jerseys and (MiLB) Made The Show, each a stamped card with a name tab.
 // Everything here is open (ADR-0034) and moves with nothing but the jerseys, which follow `?d=`.
 // Motion plays once per page visit (docs/motion.md, "The one-shot gate").
 const stamp = (still, i) => (still ? {} : { stampIn: true, style: { '--stamp-delay': `${i * 90}ms` } })
@@ -35,6 +36,7 @@ export default function About({ team, asOf, onReady, onCount }) {
     <Stack gap="section" className="tnext__about">
       <BallparkCard team={team} attendance={d.attendance} manager={d.manager} cardProps={card('Ballpark', i++)} />
       {d.franchise && <FranchiseHistory {...d.franchise} cardProps={card('Franchise history', i++)} />}
+      {d.pennants?.length > 0 && <PennantWall pennants={d.pennants} cardProps={card('Pennants', i++)} />}
       {door && <Door className="tnext__about-door" {...linkProps(door)}>Postseason history</Door>}
       {jerseyCombos.length > 0 && (
         <JerseyCombos combos={jerseyCombos} teamId={team.id} teamName={team.name} cardProps={card('Logos & jerseys', i++, 'record by jersey')} />

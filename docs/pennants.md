@@ -26,7 +26,7 @@ import { LeaguePennant } from '../components/honors/LeaguePennant.jsx'
 
 Select `compact` explicitly for a narrow list. Width alone does not select it.
 Pass the league for that season: Milwaukee's 1982 pennant belongs to the AL.
-Full art includes the club header, mark, year, and three-line league title.
+Full art includes the club header, mark, year, and a two-line league title ("American League" on one line, then "Champions").
 Compact art keeps the mark and year.
 
 ```jsx
@@ -103,6 +103,13 @@ There was [no 1994 postseason](https://www.mlb.com/postseason/history/1994), so 
 create a 1994 championship honor. Division titles and LCS appearances do not qualify.
 Invalid leagues, non-integer years, years before AL 1901 or NL 1876, years above
 9999, and 1994 render nothing. These input checks do not verify a winner.
+
+Two pages draw rows of pennants through `components/honors/PennantRow.jsx` (compact on a
+phone, full on a wide screen). The team page's **Pennants** card lists a club's league titles
+(`src/api/history/leaguePennants.js`, from `public/data/league-pennants.json`, 1903 on). The
+player page's **Team history** card has a **Pennant seasons** band: one pennant for each season
+he played MLB games for a club that won its league that year (`teams/pennantsView.js`). A club he
+only sat on the roster of does not count, and a dated page leaves out its own season.
 
 The component does not fetch winner or roster data. It cannot verify a championship.
 On player pages, the caller must establish the player's qualifying team-season
