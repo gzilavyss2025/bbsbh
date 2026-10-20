@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { LIST_MAX, finishView, hintWords, hotColdView, listView, sampleWords, toneTag } from '../src/screens/player/next/top/hotColdView.js'
+import { LIST_MAX, ONLY_UP_TO, finishView, hintWords, hotColdView, listView, sampleWords, toneTag } from '../src/screens/player/next/top/hotColdView.js'
 
 // The words of a hot or cold callout on the player page (#1855): design B, the sentence as
 // the headline, said the way a person would say it, with an exact count (Gary, 2026-10-20).
@@ -86,7 +86,6 @@ test('mid-season, each row says where its season ended, and his says now (design
   assert.deepEqual(list.rows.map((r) => r.unit), ['ended .403', 'ended .361', 'ended .322', 'now'])
   // A cold start "bounces back" when it ends nearer the middle: A and B did, C did not.
   assert.equal(list.finish.sentence, '2 of 3 bounced back by the end of the season.')
-  assert.equal(list.finish.median, '.361')
 })
 
 test('a full-season list has no finish line: its values are the finish', () => {
@@ -96,10 +95,9 @@ test('a full-season list has no finish line: its values are the finish', () => {
 })
 
 test('finishView: a hot start "cools off" when it ends lower', () => {
-  const fmt = (v) => v.toFixed(2)
-  const beyond = [{ value: 1.0, finalValue: 2.5 }, { value: 1.2, finalValue: 1.1 }]
+  const beyond = [{ value: 1.0, finalValue: 2.5, finalSample: 120 }, { value: 1.2, finalValue: 1.1, finalSample: 120 }]
   // A low ERA is a low percentile: cooling off is ending HIGHER.
-  assert.equal(finishView({ tone: 'hot', percentile: 1, beyond }, fmt).sentence, '1 of 2 cooled off by the end of the season.')
+  assert.equal(finishView({ tone: 'hot', percentile: 1, checkpoint: 30, beyond }).sentence, '1 of 2 cooled off by the end of the season.')
 })
 
 test('the door names what it opens: all of a short list, the top LIST_MAX of a long one', () => {
@@ -108,16 +106,35 @@ test('the door names what it opens: all of a short list, the top LIST_MAX of a l
 })
 
 test('a home-run pace reads short enough for a leader row: "1/7 PA", "ended 1/10"', () => {
-  const beyond = [{ value: 1 / 7, id: 1, season: 2022, name: 'A', team: null, finalValue: 1 / 10, finalSample: 47 }]
+  const beyond = [{ value: 1 / 7, id: 1, season: 2022, name: 'A', team: null, finalValue: 1 / 10, finalSample: 147 }]
   const list = listView(flag({ checkpoint: 30, beyond }), { name: 'Me', season: 2026 })
   assert.equal(list.rows[0].value, '1/7 PA')
   assert.equal(list.rows[0].unit, 'ended 1/10')
 })
 
-test('"Only" stays for a count up to 10 and drops above it (Gary, 2026-10-20)', () => {
+test('"Only" stays for a count up to ONLY_UP_TO and drops above it (Gary, 2026-10-20)', () => {
   const base = { tone: 'hot', who: 'hitters', noun: 'home-run pace', sample: 'through 30 games', years: ' in the last 10 years' }
   const many = (n, repeat = false) => Array.from({ length: n }, (_, i) => ({ id: repeat && i === 1 ? 0 : i }))
-  assert.equal(hintWords({ ...base, beyond: many(10) }), 'Only 10 hitters in the last 10 years had a better home-run pace through 30 games.')
-  assert.equal(hintWords({ ...base, beyond: many(11) }), '11 hitters in the last 10 years had a better home-run pace through 30 games.')
+  assert.equal(hintWords({ ...base, beyond: many(ONLY_UP_TO) }), `Only ${ONLY_UP_TO} hitters in the last 10 years had a better home-run pace through 30 games.`)
+  assert.equal(hintWords({ ...base, beyond: many(ONLY_UP_TO + 1) }), `${ONLY_UP_TO + 1} hitters in the last 10 years had a better home-run pace through 30 games.`)
   assert.equal(hintWords({ ...base, beyond: many(50, true) }), '50 times in the last 10 years has a hitter had a better home-run pace through 30 games.')
+})
+
+test('a zero pace reads "0 HR", on the row and on its "ended" line', () => {
+  const beyond = [{ value: 0, id: 1, season: 2017, name: 'A', team: null, finalValue: 0, finalSample: 80 }]
+  const list = listView(flag({ role: 'pitching', key: 'hr', tone: 'hot', value: 0.01, percentile: 1, checkpoint: 30, beyond }), { name: 'Me', season: 2026 })
+  assert.equal(list.rows[0].value, '0 HR')
+  assert.equal(list.rows[0].unit, 'ended 0 HR')
+})
+
+test('a season cut short after the checkpoint has no finish and is not counted', () => {
+  // A ended at 32 games (injured two games after the checkpoint): no "ended", and the line
+  // counts only B, the season that went on 30 or more games past it.
+  const beyond = [
+    { value: 0.15, id: 1, season: 2019, name: 'A', team: null, finalValue: 0.15, finalSample: 32 },
+    { value: 0.16, id: 2, season: 2021, name: 'B', team: null, finalValue: 0.24, finalSample: 140 },
+  ]
+  const list = listView(flag({ key: 'avg', tone: 'cold', value: 0.17, percentile: 1, checkpoint: 30, beyond }), { name: 'Me', season: 2026 })
+  assert.deepEqual(list.rows.map((r) => r.unit), [null, 'ended .240', 'now'])
+  assert.equal(list.finish.sentence, '1 of 1 bounced back by the end of the season.')
 })
