@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { loadCareerMatchups, starterMatchupsFor } from '../../api/careerMatchups.js'
-import { loadClubDefenseRunning } from '../../api/clubDefenseRunning.js'
-import { loadNineKeys } from '../../api/nineKeys.js'
+import { CAREER_MATCHUPS_FALLBACK, loadCareerMatchups, starterMatchupsFor } from '../../api/careerMatchups.js'
+import { CLUB_DEFENSE_FALLBACK, loadClubDefenseRunning } from '../../api/clubDefenseRunning.js'
+import { NINE_KEYS_FALLBACK, loadNineKeys } from '../../api/nineKeys.js'
 import { loadPitchByPitch } from '../../api/scout/pitchByPitch.js'
 import { loadParkFit, loadPlatoon } from '../../api/scout/seriesFit.js'
 import { fetchMeetings } from '../../api/postseason/meetings.js'
@@ -10,6 +10,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { matchupEdges } from '../../lib/postseason/primer/matchupEdges.js'
+import { failedCards, failedLine } from '../../lib/postseason/worldseries/scouting/failedCards.js'
 import { gloveLegsModel } from '../../lib/postseason/worldseries/scouting/gloveLegs.js'
 import { parkFitModel } from '../../lib/postseason/worldseries/scouting/parkFit.js'
 import { platoonModel } from '../../lib/postseason/worldseries/scouting/platoon.js'
@@ -59,10 +60,10 @@ const CARD = {
 
 export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null }) {
   const season = Number(slateDate.slice(0, 4))
-  const { data: nineKeys } = useAsync(() => loadNineKeys(), [])
-  const { data: career } = useAsync(() => loadCareerMatchups(), [])
-  const { data: umpire } = useAsync(
-    () => (plateUmpire?.id ? loadUmpire(plateUmpire.id, { seasonYear: season }).catch(() => null) : null),
+  const { data: nineKeys, error: nineKeysError } = useAsync(() => loadNineKeys(), [])
+  const { data: career, error: careerError } = useAsync(() => loadCareerMatchups(), [])
+  const { data: umpire, error: umpireError } = useAsync(
+    () => (plateUmpire?.id ? loadUmpire(plateUmpire.id, { seasonYear: season }) : null),
     [plateUmpire?.id, season],
   )
   const [clubA, clubB] = clubIds
@@ -70,10 +71,10 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
   const sides = clubOrder(clubIds, sidesProp)
   const { favoriteTeamId } = useFavoriteTeam()
   // Past regular-season meetings, cut off the day before the slate date (api/postseason/meetings.js).
-  const { data: meetings } = useAsync((signal) => fetchMeetings({ clubA, clubB, slateDate }, { signal }), [clubA, clubB, slateDate])
+  const { data: meetings, error: meetingsError } = useAsync((signal) => fetchMeetings({ clubA, clubB, slateDate }, { signal }), [clubA, clubB, slateDate])
   // The starter of the favorite club (the Brewers by default) against the other club's regulars.
   const noteClub = clubIds.includes(favoriteTeamId) ? favoriteTeamId : clubA
-  const { data: pitchByPitch } = useAsync(
+  const { data: pitchByPitch, error: pitchError } = useAsync(
     () => (gamePk ? loadPitchByPitch({ clubId: noteClub, oppId: clubIds.find((id) => id !== noteClub), gamePk, slateDate }) : null),
     [gamePk, noteClub, clubA, clubB, slateDate],
   )
@@ -82,10 +83,10 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
     [career, gamePk, sides[0], sides[1]],
   )
   const hasNineKeys = Boolean(nineKeysTeams(nineKeys, sides.map((id) => ({ id })), season))
-  const { data: defense } = useAsync(() => loadClubDefenseRunning(), [])
+  const { data: defense, error: defenseError } = useAsync(() => loadClubDefenseRunning(), [])
   const gloveLegs = useMemo(() => gloveLegsModel(defense, { clubA: sides[0], clubB: sides[1], season }), [defense, sides[0], sides[1], season])
   // Platoon: regular-season OPS by pitcher hand; the tint follows the focus game's probables.
-  const { data: opsByClub } = useAsync(() => loadPlatoon({ clubIds, season }), [clubA, clubB, season])
+  const { data: opsByClub, error: platoonError } = useAsync(() => loadPlatoon({ clubIds, season }), [clubA, clubB, season])
   const platoon = useMemo(
     () => platoonModel(opsByClub, { clubA: sides[0], clubB: sides[1], game, gameNumber }),
     [opsByClub, sides[0], sides[1], game, gameNumber],
@@ -97,9 +98,22 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
   const venueId = game?.venue?.id ?? null
   const parkLayout = useMemo(() => resolveBallparkLayout({ venueId: MILWAUKEE_VENUE_ID, gameDate: slateDate }), [slateDate])
   const wantPark = Boolean(parkLayout) && (dayType !== 'game' || venueId === MILWAUKEE_VENUE_ID)
-  const { data: balls } = useAsync(() => (wantPark ? loadParkFit({ clubIds, slateDate }) : null), [clubA, clubB, slateDate, wantPark])
+  const { data: balls, error: parkError } = useAsync(() => (wantPark ? loadParkFit({ clubIds, slateDate }) : null), [clubA, clubB, slateDate, wantPark])
   const parkFit = useMemo(() => (wantPark ? parkFitModel(balls, { clubA: sides[0], clubB: sides[1] }) : null), [balls, wantPark, sides[0], sides[1]])
   const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, pitchByPitch, plateUmpire, meetings, platoon, parkFit, venueId })
+  // A failed read is not an empty one: name the cards whose load failed (the card itself still drops).
+  const failed = failedLine(
+    failedCards([
+      { label: 'Nine keys', failed: nineKeys === NINE_KEYS_FALLBACK || nineKeysError },
+      { label: 'Glove and legs', failed: defense === CLUB_DEFENSE_FALLBACK || defenseError },
+      { label: 'Matchup edges', failed: career === CAREER_MATCHUPS_FALLBACK || careerError },
+      { label: 'Pitch by pitch', error: pitchError },
+      { label: 'Platoon', error: platoonError },
+      { label: 'Park fit', error: parkError },
+      { label: 'Film room', error: meetingsError },
+      { label: 'Umpire edge', error: umpireError },
+    ]),
+  )
   // The sticky chrome over a card: the slate's own bar (the probe reads --slate-bar-h) plus this
   // jump bar. One measured number feeds the bar's scroll offset and each card's scroll-margin.
   const rootRef = useRef(null)
@@ -116,7 +130,9 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
     ro.observe(bar)
     return () => ro.disconnect()
   }, [shown])
-  if (!shown) return null
+  if (!shown && !failed) return null
+  // Every card dropped but a read failed: the band and the line, so a failure is not read as an empty season.
+  if (!shown) return <Stack gap="loose" className="ww-scout"><SectionHead look="band" house as="h2">Scouting report</SectionHead><p className="ww-scout__failed" role="status">{failed}</p></Stack>
   const ctx = { noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, gloveLegs, sides, clubIds, season, edges, plateUmpire, umpire, platoon, parkFit, parkLayout }
   const names = clubIds.map((id) => teamClubNameShort(id)).filter(Boolean).join(' and ')
   return (
@@ -133,6 +149,7 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
         offset={offset}
         badges={false}
       />
+      {failed && <p className="ww-scout__failed" role="status">{failed}</p>}
       <Grid min={340} gap="loose">
         {cards.map((c) => (
           <div key={c.id} id={`ww-scout-${c.id}`} className={c.id === 'film-room' ? 'ww-scout__card ww-scout__card--wide' : 'ww-scout__card'}>

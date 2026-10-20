@@ -13,6 +13,9 @@
 
 import { staticJson } from './staticJson.js'
 
+// The object a failed read returns: `data === CLUB_DEFENSE_FALLBACK` means the file did not load.
+export const CLUB_DEFENSE_FALLBACK = { generatedAt: null, season: null, asOf: null, clubs: {} }
+
 export const loadClubDefenseRunning = staticJson('/data/club-defense-running.json', {
   shape: (d) => ({
     generatedAt: d.generatedAt ?? null,
@@ -20,7 +23,7 @@ export const loadClubDefenseRunning = staticJson('/data/club-defense-running.jso
     asOf: d.asOf ?? null,
     clubs: d.clubs ?? {},
   }),
-  fallback: { generatedAt: null, season: null, asOf: null, clubs: {} },
+  fallback: CLUB_DEFENSE_FALLBACK,
 })
 
 // The two clubs' rows, in the order asked, or null when either has none.
