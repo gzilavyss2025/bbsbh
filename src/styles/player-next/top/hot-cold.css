@@ -1,24 +1,32 @@
 /* Hot and cold callouts (#1855): the "Standing out" card under the tiles. One callout is an
-   accent rule down its left edge (field green hot, clay cold), a kicker, the stat alone on
-   its line in the display face the stat tiles use, then the sample and a mono hint. The
-   words say the tone; the rule only marks it. */
+   accent rule down its left edge, a kicker, the stat alone on its line in the display face
+   the stat tiles use, then the sample and a mono hint. The words say the tone; the rule
+   only marks it.
+   The colours are TEMPERATURE, not good and bad (Gary, 2026-10-20): hot is clay red, cold is
+   All-Star blue, two fixed tokens and no scale between them. The app's good/bad accents
+   (green, clay) read backwards here, since a cold stat in red reads as hot. Both pass AA on
+   the card paper (clay 5.05:1, blue 7.67:1). */
+.pnext-hc {
+  --hc-hot: var(--clay);
+  --hc-cold: var(--allstar-blue);
+}
 .pnext-hc__item {
   padding-left: var(--space-3);
-  border-left: var(--bw-heavy) solid var(--accent-positive);
+  border-left: var(--bw-heavy) solid var(--hc-hot);
 }
 .pnext-hc__item--cold {
-  border-left-color: var(--accent-negative);
+  border-left-color: var(--hc-cold);
 }
 .pnext-hc__kicker {
   margin: 0;
-  color: var(--accent-positive);
+  color: var(--hc-hot);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
 }
 .pnext-hc__item--cold .pnext-hc__kicker {
-  color: var(--accent-negative);
+  color: var(--hc-cold);
 }
 .pnext-hc__line {
   margin: 0;
