@@ -406,14 +406,16 @@ ring; attack label (phase C); trajectory tag; honesty tag.
 - **Apex.** For a launch angle of 8° or more: a dashed pencil drop from the
   apex and the label `apex ≈ 29 ft · drawn`. The apex comes from the fitted
   model, so it is pencil. The label sits above the apex, centred and kept
-  inside the strip. The strip has a 30-unit band above the baseline's 80-unit
-  scale for the title and a tall apex, so the label never meets the arc or the
-  title.
+  inside the strip. The strip has a 48-unit band above the baseline's 80-unit
+  scale for the title and a tall apex (a 150 ft pop-up is about 100 units high),
+  and the label never rises above the title's row. An apex above about 195 ft
+  leaves the strip, as the next case says.
 - **Landing.** The Contact card's rings: one ring from 3 to 15 units over
   900 ms; a home run adds a second ring from 3 to 25 units, 140 ms later, over
   1100 ms. A resting circle stays (radius 4.5).
-- **Distance label.** `312 ft`, bold, above the landing point. When the ball
-  lands past 370 ft, put the label in the axis row, right-aligned, and hide the
+- **Distance label.** `312 ft`, bold, to the right of the landing point on the ground line (the arc comes down from the left, so a label above it was crossed by the arc). When the ball
+  lands past 370 ft, or less than 80 ft short of the post (or within 30 ft past it),
+  put the label in the axis row, right-aligned, and hide the
   `400 ft` tick label. It must never sit on the fence post.
 - **No contact.** The strip shows only its fixed marks and one centred word:
   `NO CONTACT` (whiff) or `FOUL · NO FLIGHT DRAWN` (foul) in `--text-caption`.

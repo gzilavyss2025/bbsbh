@@ -235,18 +235,22 @@ export function drawContact(mk, p, b, m, tau, slow, rest) {
 
 // The side view's two label rules (§7.1), pure so `npm test` can pin them. Strip units, 336 x 100.
 // An apex in the top 46 units would meet the title, so its label goes under the arc, right of the drop.
+const APEX_TOP = -26 // the label never rises into the title row (a 150 ft pop-up's apex sits at about -22)
 const APEX_HALF = 72 // units: about half the label's width
 export function apexLabel(ax, ay, ft) {
   // Above the apex, centred and kept inside the strip. It used to go under the arc for a high apex, where
   // the descending side ran through the text (design critique, #1771); the strip's top band has the room.
-  return { x: clamp(ax, 8 + APEX_HALF, 328 - APEX_HALF), y: ay - 5, anchor: 'middle', text: `apex ≈ ${Math.round(ft)} ft · drawn` }
+  return { x: clamp(ax, 8 + APEX_HALF, 328 - APEX_HALF), y: Math.max(ay - 5, APEX_TOP), anchor: 'middle', text: `apex ≈ ${Math.round(ft)} ft · drawn` }
 }
 
 // A ball landing past 370 ft would put its distance on the fence post, so the label takes the axis row,
 // right-aligned, and the 400 ft tick label hides.
 export function distanceLabel(ft, wallFt = 400) {
-  const far = ft > 370 || Math.abs(ft - wallFt) < 30 // the park's own post can stand anywhere, so near it counts too
-  return { x: far ? 332 : SIDE_X(ft), y: far ? 96 : 66, anchor: far ? 'end' : 'middle', text: `${Math.round(ft)} ft`, hideTick400: far }
+  // The park's own post can stand anywhere, so near it counts too (a label to the right of the landing would run into it).
+  const far = ft > 370 || Math.abs(ft - wallFt) < 30 || (ft < wallFt && wallFt - ft < 80)
+  // Else it sits to the RIGHT of the landing, on the ground line: the ball comes down from the left, so a label
+  // centred above the landing had the descending arc running through it (a steep pop-up, design review, #1771).
+  return { x: far ? 332 : SIDE_X(ft) + 8, y: far ? 96 : 74, anchor: far ? 'end' : 'start', text: `${Math.round(ft)} ft`, hideTick400: far }
 }
 
 // The side view's aria-label (§12), built from the pitch like `sceneLabel`: it changes only with the pitch in view.

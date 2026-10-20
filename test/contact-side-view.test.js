@@ -2,12 +2,14 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { sideViewPath } from '../src/lib/pitcherCard/batted.js'
+import { SIDE_X } from '../src/lib/pitcherCard/batted.js'
 import { apexLabel, distanceLabel } from '../src/lib/pitcherCard/contactDraw.js'
 
 test('apexLabel: the label sits above the apex, centred, and stays inside the strip', () => {
   const pop = sideViewPath({ exitVelo: 95, launchAngle: 60, distance: 200 }).apex
   const high = apexLabel(pop.x, pop.y, pop.ft)
-  assert.deepEqual([high.anchor, high.y], ['middle', pop.y - 5])
+  assert.deepEqual([high.anchor, high.y], ['middle', Math.max(pop.y - 5, -26)])
+  assert.equal(apexLabel(100, -40, 200).y, -26) // a very high apex keeps the label under the title
   const low = apexLabel(100, 60, 29)
   assert.deepEqual([low.anchor, low.x, low.y, low.text], ['middle', 100, 55, 'apex ≈ 29 ft · drawn'])
   assert.equal(apexLabel(10, 40, 50).x, 80) // an apex near the left edge keeps the label inside
@@ -18,10 +20,13 @@ test('distanceLabel: past 370 ft the label takes the axis row and the 400 ft tic
   const homer = distanceLabel(428) // at-bat 16, gamePk 849810
   assert.deepEqual([homer.anchor, homer.x, homer.y, homer.hideTick400, homer.text], ['end', 332, 96, true, '428 ft'])
   const mid = distanceLabel(312)
-  assert.deepEqual([mid.anchor, mid.y, mid.hideTick400, mid.text], ['middle', 66, false, '312 ft'])
-  assert.equal(distanceLabel(370).hideTick400, false)
+  assert.deepEqual([mid.anchor, mid.y, mid.hideTick400, mid.text], ['start', 74, false, '312 ft'])
+  assert.ok(mid.x > SIDE_X(312)) // right of the landing: the arc comes down from the left
+  assert.equal(distanceLabel(319).hideTick400, false)
+  assert.equal(distanceLabel(321).hideTick400, true) // within 80 ft short of the generic 400 ft post
   assert.equal(distanceLabel(325, 330).y, 96) // next to the park's own post at 330 ft the label also takes the axis row
-  assert.equal(distanceLabel(250, 330).y, 66)
+  assert.equal(distanceLabel(261, 330).y, 96) // within 80 ft short of the post: the label would reach it
+  assert.equal(distanceLabel(200, 330).y, 74)
 })
 
 // A pitch with no contact point has beats of { totalMs } only: no side path to draw (it was NaN geometry).
