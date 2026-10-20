@@ -8,7 +8,6 @@ test('the read asks for park and probables and for no result field at all', () =
   assert.match(url, /hydrate=probablePitcher,venue/)
   const fields = new URL(`https://x${url}`).searchParams.get('fields').split(',')
   for (const banned of [
-    'status',
     'abstractGameState',
     'score',
     'isWinner',
@@ -19,6 +18,18 @@ test('the read asks for park and probables and for no result field at all', () =
   ]) {
     assert.equal(fields.includes(banned), false, `${banned} must not be requested`)
   }
+  // `status` is allowed only to carry startTimeTBD: a status object that holds
+  // nothing else cannot name a state.
+  const at = fields.indexOf('status')
+  assert.equal(fields[at + 1], 'startTimeTBD')
+  assert.notEqual(fields[at + 2], 'codedGameState')
+})
+
+test('the shape carries startTimeTBD as a boolean, false when absent', () => {
+  const game = (status) => ({ dates: [{ games: [{ gamePk: 1, officialDate: '2026-10-24', gameDate: '2026-10-24T00:00:00Z', status }] }] })
+  assert.equal(shapeUpcoming(game({ startTimeTBD: true }))[1].startTimeTBD, true)
+  assert.equal(shapeUpcoming(game({ startTimeTBD: false }))[1].startTimeTBD, false)
+  assert.equal(shapeUpcoming(game(undefined))[1].startTimeTBD, false)
 })
 
 test('the hands read names ids and the hand code only', () => {
@@ -50,6 +61,7 @@ test('a side with no probable is null, and a hand is attached when known', () =>
   assert.deepEqual(shaped[849830], {
     date: '2026-10-03',
     gameDate: '',
+    startTimeTBD: false,
     awayId: 135,
     homeId: 158,
     venue: { id: 32, name: 'American Family Field' },

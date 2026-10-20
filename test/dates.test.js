@@ -5,7 +5,7 @@
 // to get off-by-one on.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { isWithinDays, monthDayName, isoToday, timeOfDay, isFriday, isRealDate, asOfBounds, clampAsOfDate } from '../src/lib/dates.js'
+import { isWithinDays, monthDayName, isoToday, timeOfDay, firstPitchText, isFriday, isRealDate, asOfBounds, clampAsOfDate } from '../src/lib/dates.js'
 
 const TODAY = new Date(2026, 6, 22) // July 22, 2026
 
@@ -131,4 +131,10 @@ test('monthDayName answers an empty string for a missing or garbled date', () =>
 test('isoToday is today as a UTC YYYY-MM-DD', () => {
   assert.match(isoToday(), /^\d{4}-\d{2}-\d{2}$/)
   assert.equal(isoToday(), new Date().toISOString().slice(0, 10))
+})
+
+test('firstPitchText prints TBD for a TBD game even with a nominal gameDate', () => {
+  assert.equal(firstPitchText('2026-10-24T00:00:00Z', true), 'TBD')
+  assert.equal(firstPitchText('', false), 'TBD')
+  assert.notEqual(firstPitchText('2026-10-24T00:00:00Z', false), 'TBD')
 })

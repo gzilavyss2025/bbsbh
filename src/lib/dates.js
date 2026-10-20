@@ -217,3 +217,10 @@ export function timeOfDay(epochMs) {
     minute: '2-digit',
   })
 }
+
+// A scheduled first pitch for a card line: "TBD" when the feed flags the start
+// as TBD (its gameDate is then a nominal placeholder) or has no gameDate.
+export function firstPitchText(gameDate, startTimeTBD = false) {
+  if (startTimeTBD || !gameDate) return 'TBD'
+  return timeOfDay(Date.parse(gameDate)) || 'TBD'
+}

@@ -14,10 +14,14 @@
 // full on an off day and compact on a game day (the card reads the day type itself). Park fit shows on
 // an off day, and on a game day only when tonight's park is Milwaukee (it draws Milwaukee's field).
 //
-// Input: { dayType, nineKeys, gloveLegs, edges, pitchByPitch, plateUmpire, meetings, platoon, parkFit,
+// Matchup edges stays with a row for the game but no edge (edgesState.js: 'none'); it drops with no row.
+//
+// Input: { dayType, nineKeys, gloveLegs, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit,
 // venueId }. No club id: the list is the same for any opponent.
 // Park fit draws Milwaukee's field (Stats API venue id), so a game day shows it only there.
 export const MILWAUKEE_VENUE_ID = 32
+
+import { edgesState } from './edgesState.js'
 
 // The two Series clubs in the order Tale of the tape draws them (away, home). Every card follows it.
 // `sides` that do not name exactly the two clubs fall back to `clubIds`.
@@ -29,7 +33,7 @@ export function clubOrder(clubIds, sides) {
 const CARDS = [
   { id: 'nine-keys', label: 'Nine keys', rank: { off: 1 }, has: (i) => Boolean(i.nineKeys) },
   { id: 'glove-legs', label: 'Glove and legs', rank: { off: 2, game: 7 }, has: (i) => Boolean(i.gloveLegs) },
-  { id: 'matchup-edges', label: 'Matchup edges', rank: { off: 3, game: 1 }, has: (i) => Boolean(i.edges?.length) },
+  { id: 'matchup-edges', label: 'Matchup edges', rank: { off: 3, game: 1 }, has: (i) => edgesState({ edges: i.edges, hasRow: i.edgesRow }) !== 'absent' },
   { id: 'pitch-by-pitch', label: 'Pitch by pitch', rank: { off: 4, game: 3 }, has: (i) => Boolean(i.pitchByPitch) },
   { id: 'umpire-edge', label: 'Umpire edge', rank: { game: 2 }, has: (i) => Boolean(i.plateUmpire?.name) },
   { id: 'platoon', label: 'Platoon', rank: { off: 5, game: 4 }, has: (i) => Boolean(i.platoon) },

@@ -109,6 +109,8 @@ test('notes: shortened up only at two strikes and 5 mph under his own norm', () 
   const w = { swing: 'whiff', twoStrikes: true }
   assert.deepEqual(swingNotes(w, { batSpeed: 66 }, { norm: 71 }), ['Shortened up with two strikes'])
   assert.deepEqual(swingNotes(w, { batSpeed: 66.5 }, { norm: 71 }), [])
+  assert.deepEqual(swingNotes(w, { batSpeed: 56 }, { norm: 71 }), ['Shortened up with two strikes']) // 15 under: the edge
+  assert.deepEqual(swingNotes(w, { batSpeed: 46.9 }, { norm: 70 }), []) // a check swing or a bunt try is not a shortened swing
   assert.deepEqual(swingNotes({ swing: 'whiff' }, { batSpeed: 60 }, { norm: 71 }), [])
   assert.deepEqual(swingNotes(w, { batSpeed: 60 }, {}), [])
 })
@@ -131,4 +133,16 @@ test('scene pitches know the two-strike count from the pitch before', () => {
   const d = (no, strikes) => ({ no, strikes, balls: 0, typeCode: 'FF', mph: 95, cat: 'whiff' })
   const out = atBatScenePitches([d(1, 1), d(2, 2), d(3, 2)])
   assert.deepEqual(out.map((x) => x.twoStrikes), [false, false, true].slice(0, out.length))
+})
+
+// The two-strike note's norm is read per batter from the held file (AtBatReplay's useSeasonBatSpeed derives it at
+// render), so a new batter never wears the last one's figure, and nothing before the file loads.
+import { savantRawFor } from '../src/api/savantPercentiles.js'
+
+test('season bat speed: per batter, null before the file loads and for a batter not in it', () => {
+  const file = { rawBat: { 1: { batSpeed: 72 }, 2: { batSpeed: 69.5 } } }
+  assert.equal(savantRawFor(file, 1, 'batting')?.batSpeed, 72)
+  assert.equal(savantRawFor(file, 2, 'batting')?.batSpeed, 69.5)
+  assert.equal(savantRawFor(file, 3, 'batting')?.batSpeed ?? null, null)
+  assert.equal(savantRawFor(null, 1, 'batting')?.batSpeed ?? null, null)
 })

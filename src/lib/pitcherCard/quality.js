@@ -10,6 +10,7 @@ export const LUCKY_XBA = 0.25 // a hit below this
 export const BLAST_SUM = 164 // Savant's blast: squared-up % + bat speed (mph) at or above this
 export const FAST_SWING_MPH = 75 // Savant's "fast swing"
 export const SHORTEN_MPH = 5 // two strikes: this far under his own season bat speed (the league gap is only ~2)
+export const SHORTEN_MAX_MPH = 15 // ...but not further: a swing that slow is a check swing or a bunt try, not a shortened one (849810 and 849815: 17 swings from 1.5 to 56 mph, then none under 59.5)
 export const TOPPED_GAP = -20 // launch angle minus attack angle, at or under this: driven down
 export const UNDER_GAP = 45 // at or over this: the bat went under the ball (2026-10-13 and 14: the 10th and 90th percentiles are -23 and 45)
 
@@ -47,7 +48,7 @@ export function swingNotes(p, tr, { norm } = {}) {
   const su = p.swing === 'inplay' ? squaredUp(p.hit?.exitVelo, bs, Number(p.mph)) : null
   if (su != null && Math.min(1, su) * 100 + bs >= BLAST_SUM) notes.push('Blast')
   else if (bs >= FAST_SWING_MPH) notes.push('Fast swing')
-  if (p.twoStrikes && norm != null && bs <= norm - SHORTEN_MPH) notes.push('Shortened up with two strikes')
+  if (p.twoStrikes && norm != null && bs <= norm - SHORTEN_MPH && bs >= norm - SHORTEN_MAX_MPH) notes.push('Shortened up with two strikes')
   const gap = p.swing === 'inplay' && tr.attackDeg != null && p.hit?.launchAngle != null ? p.hit.launchAngle - tr.attackDeg : null
   if (gap != null && gap <= TOPPED_GAP) notes.push('Topped it')
   else if (gap != null && gap >= UNDER_GAP) notes.push('Got under it')

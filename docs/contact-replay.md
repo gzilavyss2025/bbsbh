@@ -133,16 +133,19 @@ Join on `game_pk` + `at_bat_number` (= `atBatIndex + 1`) + `pitch_number`. Read
 `post_bat_score`, so strip on parse here too: keep only the join keys and the
 two angles.
 
-- **Fill time: not measured yet, and not a gate.** How long after the final
-  out the CSV first has rows for a game is still unknown. Gary removed it as a
-  gate on 2026-10-19: the rules below work for any fill time (the bat stays
-  pencil until rows exist). Issue #2349 measures it at the next MLB game and
-  writes the result here and in `docs/peer-sites.md`, "Data notes".
+- **Fill time: not a gate.** Gary removed it as a gate on 2026-10-19: the
+  rules below work for any fill time (the bat stays pencil until rows exist).
+  Measured in #2349: see the last bullet of this section.
 - Fetch only for a game whose status is Final, MLB only. Use the existing CSV
   fetch in `src/api/scout/headToHead.js` as the pattern.
 - One fetch per gamePk per page load. If the CSV has no rows yet, the bat stays
   pencil, and the next page load tries again. Never poll.
 - Classify the module `reveal-only` in `spoiler-manifest.json`.
+- **Measured fill time (#2349, 2026-10-20):** for gamePk 849815 the CSV first had
+  rows 4 h 13 min to 4 h 35 min after the final out (03:03:39 UTC; first rows at the
+  07:39 UTC poll, 0 rows at 07:17), 114 of 115 swings with `attack_angle`; one game,
+  poll error up to 22 min. So the bat stays pencil for hours after a game; details in
+  `docs/peer-sites.md`, "Data notes".
 
 ### 3.4 Squared-up %
 
@@ -218,7 +221,7 @@ Never a stamp: the stamp stays for Hard-luck, Lucky and Barrel. Constants in `qu
 | --- | --- |
 | `Blast` | in play, `min(1, squared up) * 100 + bat speed >= 164` (MLB glossary, "bat tracking blasts") |
 | `Fast swing` | any swing at 75 mph or more that is not a Blast (Savant's "fast swing") |
-| `Shortened up with two strikes` | two strikes before the pitch, and bat speed 5 mph or more under his season bat speed (`savant-percentiles.json` `rawBat.batSpeed`). The league gap is only about 2 mph, so the cutoff is large on purpose |
+| `Shortened up with two strikes` | two strikes before the pitch, and bat speed 5 to 15 mph under his season bat speed (a slower swing is a check swing or a bunt try, not a shortened one) (`savant-percentiles.json` `rawBat.batSpeed`). The league gap is only about 2 mph, so the cutoff is large on purpose |
 | `Topped it` / `Got under it` | in play, launch angle minus `attack_angle` at or under -20 / at or over 45. Final tier only (needs the CSV). Not a Savant metric. On 91 balls in play (2026-10-13 and 14) the 10th and 90th percentiles of the gap are -23 and 45; the median is 14 |
 
 A missing bat speed gives no note. MiLB gives none.
@@ -391,9 +394,16 @@ ring; attack label (phase C); trajectory tag; honesty tag.
   uses the same scale, from a baseline at y = 80. One scale for every at-bat.
   Never rescale it (Heer and Robertson, `docs/design-inspiration.md` §9).
 - **Fixed marks.** A baseline in ink. Ticks at 100, 200, 300 and 400 ft; labels
-  only at 200 and 400 (`200 ft`). A green fence post at 400 ft, 10 ft tall,
-  `--field`. The title reads `SIDE VIEW · GREEN POST IS THE FENCE`. The post is
-  a generic fence, not this park's wall. Say so in the card's (i) note.
+  only at 200 and 400 (`200 ft`). A green fence post, `--field`. When the park's
+  layout and the ball's landing coordinate are known, the post is that park's
+  wall along the ball's line: its distance from the layout's fence outline
+  (`resolveBallparkLayout`, as it stood that day), its height from the measured
+  wall heights (else the posted ones), and the title reads `SIDE VIEW · GREEN POST
+  IS THIS PARK’S WALL HERE`. The `400 ft` tick label hides then. Only an audited outline
+  counts (every MLB park); a minor-league park's outline is checked against the posted signs only, so
+  it keeps the generic post (rendered: Gwinnett, no layout; Norfolk, estimated). Otherwise the
+  post is a generic 400 ft, 10 ft fence and the title reads `SIDE VIEW · GREEN POST
+  IS THE FENCE`. Say which in the card's (i) note. Code: `lib/pitcherCard/sideWall.js`.
 - **Flight.** It starts 140 ms after the ball leaves the scene. It lasts
   `clamp(T * 500, 700, 2800)` ms, where `T` is the hang time in seconds: the
   same pace as the Contact card (`contactFlight.js`). The trace draws on behind
@@ -401,14 +411,16 @@ ring; attack label (phase C); trajectory tag; honesty tag.
 - **Apex.** For a launch angle of 8° or more: a dashed pencil drop from the
   apex and the label `apex ≈ 29 ft · drawn`. The apex comes from the fitted
   model, so it is pencil. The label sits above the apex, centred and kept
-  inside the strip. The strip has a 30-unit band above the baseline's 80-unit
-  scale for the title and a tall apex, so the label never meets the arc or the
-  title.
+  inside the strip. The strip has a 48-unit band above the baseline's 80-unit
+  scale for the title and a tall apex (a 150 ft pop-up is about 100 units high),
+  and the label never rises above the title's row. An apex above about 195 ft
+  leaves the strip, as the next case says.
 - **Landing.** The Contact card's rings: one ring from 3 to 15 units over
   900 ms; a home run adds a second ring from 3 to 25 units, 140 ms later, over
   1100 ms. A resting circle stays (radius 4.5).
-- **Distance label.** `312 ft`, bold, above the landing point. When the ball
-  lands past 370 ft, put the label in the axis row, right-aligned, and hide the
+- **Distance label.** `312 ft`, bold, to the right of the landing point on the ground line (the arc comes down from the left, so a label above it was crossed by the arc). When the ball
+  lands past 370 ft, or less than 80 ft short of the post (or within 30 ft past it),
+  put the label in the axis row, right-aligned, and hide the
   `400 ft` tick label. It must never sit on the fence post.
 - **No contact.** The strip shows only its fixed marks and one centred word:
   `NO CONTACT` (whiff) or `FOUL · NO FLIGHT DRAWN` (foul) in `--text-caption`.
@@ -685,5 +697,4 @@ the route with `?nointro` and the gamePk.
   nothing more.
 - Any change to how the Now Pitching card draws pitches.
 - (Shipped as section 7.3: the pencil notes.)
-- The real park's wall in the side view (a later pass could read it from
-  `src/lib/ballpark/`).
+- (Shipped in section 7.1: the real park's wall along each ball's line.)
