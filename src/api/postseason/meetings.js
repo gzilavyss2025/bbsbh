@@ -10,7 +10,7 @@
 // Field paths checked against live statsapi on 2026-10-19, gamePks 823775, 823774, 823772
 // (CLE @ MIL) and 823809, 823807, 823806 (TB @ MIL), and the linescore innings and pitching runs on 823809: gameData.{datetime.officialDate,
 // venue.name, teams.*.{id,abbreviation}, players.ID*.{boxscoreName,pitchHand.code}};
-// liveData.{linescore.{teams.*.{runs,hits,errors}, innings[].{away,home}.runs}, decisions.{winner,loser,save}.fullName,
+// liveData.{linescore.{teams.*.{runs,hits,errors}, innings[].{away,home}.runs}, decisions.{winner,loser,save}.{id,fullName},
 // boxscore.officials[officialType 'Home Plate'].official.fullName, boxscore.teams.*.
 // {pitchers[0], battingOrder, players.ID*.{person, position.abbreviation,
 // stats.pitching.{inningsPitched,hits,runs,earnedRuns,baseOnBalls,strikeOuts,numberOfPitches}}},
@@ -18,7 +18,7 @@
 // matchup.pitcher.id, playEvents[].{isPitch, details.type.code}}}.
 // Missing fields fall back: text to '', numbers to null, lists to [], the pitch mix to {}.
 //
-// Card: { gamePk, date, gameNumber, venue, ump, decisions: { w, l, s },
+// Card: { gamePk, date, gameNumber, venue, ump, decisions: { w, l, s }, decisionIds: { w, l, s } (person ids or null),
 //   away|home: { id, abbr, runs, hits, errors,
 //     starter: { id, name, hand, ip, h, r, er, bb, k, pitches, mix: { [pitchCode]: count } },
 //     lineup: [{ id, name, pos }] },
@@ -96,6 +96,7 @@ export function meetingCard(feed, gamePk) {
     venue: gd?.venue?.name ?? '',
     ump: (ld?.boxscore?.officials ?? []).find((o) => o.officialType === 'Home Plate')?.official?.fullName ?? '',
     decisions: { w: dec?.winner?.fullName ?? '', l: dec?.loser?.fullName ?? '', s: dec?.save?.fullName ?? '' },
+    decisionIds: { w: dec?.winner?.id ?? null, l: dec?.loser?.id ?? null, s: dec?.save?.id ?? null },
     away: side(feed, 'away'),
     home: side(feed, 'home'),
     innings: (ld?.linescore?.innings ?? []).map((i) => [num(i.away?.runs), num(i.home?.runs)]),

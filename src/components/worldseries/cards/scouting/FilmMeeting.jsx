@@ -3,6 +3,7 @@ import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { gamePath, playerPath } from '../../../../lib/route.js'
 import { TeamLogo } from '../../../logo/TeamLogo.jsx'
+import { Headshot } from '../../../player/Headshot.jsx'
 import { PitchMark } from '../../../playbyplay/pitcherCard/PitchMark.jsx'
 import { HighlightSheet } from '../../../playbyplay/HighlightSheet.jsx'
 import { useWatchClip } from '../../../highlights/useWatchClip.js'
@@ -143,7 +144,17 @@ export function FilmMeeting({ m }) {
     <Card frame="stamped" label={m.day} labelAs="h3" count={m.ump ? `HP ${m.ump}` : undefined} className="ww-film__card">
       <Stack gap="snug">
         <LineScore m={m} />
-        {m.decisions && <p className="ww-film__dec">{m.decisions}</p>}
+        {m.people.length > 0 && (
+          <ul className="ww-film__people">
+            {m.people.map((p) => (
+              <li key={p.label}>
+                {p.id != null && <Headshot personId={p.id} name={p.name} teamId={p.teamId} className="ww-film__shot" />}
+                <span className="t-label">{p.label}</span>
+                <span className="ww-film__pname2">{p.name}</span>
+              </li>
+            ))}
+          </ul>
+        )}
         {full && m.starters.length > 0 && <Pitching m={m} />}
         {full && m.starters.some((s) => s.mix.length > 0) && (
           <ul className="ww-film__mixes">

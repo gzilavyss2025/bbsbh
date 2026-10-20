@@ -81,10 +81,36 @@
   color: var(--accent-negative);
 }
 
-.ww-film__dec {
+/* layout-exempt: the W, L and SV pitchers in three equal columns, left aligned */
+.ww-film__people {
+  list-style: none;
   margin: 0;
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+}
+
+/* layout-exempt: a photo, then the label, then the name, stacked */
+.ww-film__people li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.shot.ww-film__shot {
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+}
+
+.ww-film__pname2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
 }
 
 /* The pitcher's name is a door to his page, set as plain ink like the box score's names. */

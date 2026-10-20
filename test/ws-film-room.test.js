@@ -156,3 +156,11 @@ test('the line score is one row of inning runs a club, a half never batted stayi
   assert.deepEqual(m.innings, [{ abbr: 'TB', runs: [1, 0, 3] }, { abbr: 'MIL', runs: [0, 2, null] }])
   assert.deepEqual(filmRoomModel([M[0]], {})[0].innings, [])
 })
+
+test('the W and SV pitchers are the winner\'s, the L pitcher the other club\'s, each with a person id', () => {
+  const g = { ...M[0], decisions: { w: 'A', l: 'B', s: 'C' }, decisionIds: { w: 1, l: 2, s: 3 } }
+  const [m] = filmRoomModel([g], {})
+  assert.deepEqual(m.people.map((p) => [p.label, p.id, p.teamId]), [['W', 1, 158], ['L', 2, 139], ['SV', 3, 158]])
+  const none = filmRoomModel([{ ...M[0], decisions: { w: '', l: '', s: '' } }], {})[0]
+  assert.deepEqual(none.people, [])
+})
