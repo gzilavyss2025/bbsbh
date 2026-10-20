@@ -6,10 +6,14 @@
 //
 // Pure, no fetch. Spoiler-free: past seasons, and a career line is not a score (ADR-0034).
 
-// -> { seasons: [{ season, plate, share }], record: { wins, losses, winShare } | null, caption }
+const MIN_CHART_SEASONS = 3 // a bar strip of one or two seasons says nothing
+const MIN_BAR_GAMES = 5 // a split of fewer decided games reads as a verdict
+
+// -> { seasons: [{ season, plate, share, partial }], showChart, peakText,
+//      record: { wins, losses, winShare, showBar } | null, label }
 // `history` is careerSeasons(); `record` is recordWith() or null; `rows` are the
-// 'all' view's game rows.
-export function umpireCareer({ history = [], record = null, rows = [], teamId, name, clubName }) {
+// 'all' view's game rows. `partial` marks the season still being played.
+export function umpireCareer({ history = [], record = null, rows = [], teamId, clubName, now = new Date() }) {
   const games = rows.filter((g) => (g.level ?? 'MLB') === 'MLB' && g.gameType !== 'A')
   const plate = new Map()
   for (const h of history) if (h.games > 0) plate.set(h.season, h.byRole.HP ?? 0)
@@ -18,13 +22,15 @@ export function umpireCareer({ history = [], record = null, rows = [], teamId, n
     plate.set(s, (plate.get(s) ?? 0) + (g.role === 'HP' ? 1 : 0))
   }
   const years = [...plate.keys()]
-  if (!years.length) return { seasons: [], record: null, caption: '' }
+  if (!years.length) return { seasons: [], showChart: false, peakText: '', record: null, label: '' }
   const first = Math.min(...years)
   const last = Math.max(...years)
-  const max = Math.max(0, ...plate.values())
+  const max = Math.max(...plate.values())
+  // Playing runs through October's postseason; November starts the winter.
+  const live = now.getMonth() < 10 ? now.getFullYear() : null
   const seasons = Array.from({ length: last - first + 1 }, (_, i) => {
     const n = plate.get(first + i) ?? 0
-    return { season: first + i, plate: n, share: max ? n / max : 0 }
+    return { season: first + i, plate: n, share: max ? n / max : 0, partial: first + i === live }
   })
 
   let wins = record?.wins ?? 0
@@ -36,10 +42,17 @@ export function umpireCareer({ history = [], record = null, rows = [], teamId, n
     if ((g.homeScore > g.awayScore) === home) wins++
     else losses++
   }
-  const span = first === last ? `${first}` : `${first}-${last}`
+  const peak = seasons.reduce((a, b) => (b.plate > a.plate ? b : a))
+  const latest = seasons.at(-1)
+  const peakText =
+    peak.season === latest.season
+      ? `${latest.plate} in ${latest.season}, the most`
+      : `${peak.plate} most (${peak.season}) · ${latest.plate} in ${latest.season}`
   return {
     seasons,
-    record: wins + losses ? { wins, losses, winShare: wins / (wins + losses) } : null,
-    caption: `${clubName} with ${name} behind the plate, ${span}`,
+    showChart: seasons.length >= MIN_CHART_SEASONS,
+    peakText,
+    record: wins + losses ? { wins, losses, winShare: wins / (wins + losses), showBar: wins + losses >= MIN_BAR_GAMES } : null,
+    label: `${clubName} · ${first === last ? first : `${first}–${last}`}`,
   }
 }

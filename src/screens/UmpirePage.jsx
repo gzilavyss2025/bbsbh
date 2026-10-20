@@ -177,11 +177,11 @@ export function UmpirePage({ id, seasonYear, vs }) {
       )}
       {view.vs != null && <UmpireSeasonCompare now={data} then={then} year={view.shown} vsYear={view.vs} />}
 
-      <UmpireCareer id={id} name={data.name} />
       <PostseasonPlateLine post={data.accuracyPost?.season} />
       <div className="umpage__toprow">
         <div className="umpage__tendcol">
           <UmpireTendencies umpire={data} label={seasonRangeLabel(data.accuracySeasons)} />
+          <UmpireCareer id={id} />
         </div>
         <div className="umpage__sidecol">
           {teams.length > 0 && (

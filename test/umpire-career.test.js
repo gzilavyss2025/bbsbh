@@ -10,7 +10,7 @@ const hist = (season, HP, other = 0) => ({ season, games: HP + other, byRole: { 
 const row = (date, role, { away = 158, home = 112, as = 3, hs = 2, level = 'MLB', gameType = 'R' } = {}) => ({
   date, role, level, gameType, awayId: away, homeId: home, awayScore: as, homeScore: hs,
 })
-const base = { name: 'Al Plate', clubName: 'Brewers', teamId: 158 }
+const base = { clubName: 'Brewers', teamId: 158 }
 
 test('both stores: one span, gaps filled with zero, record summed', () => {
   const c = umpireCareer({
@@ -23,14 +23,14 @@ test('both stores: one span, gaps filled with zero, record summed', () => {
   assert.equal(c.seasons[0].share, 1)
   assert.equal(c.seasons[2].share, 0)
   assert.deepEqual([c.record.wins, c.record.losses], [41, 51])
-  assert.equal(c.caption, 'Brewers with Al Plate behind the plate, 2021-2024')
+  assert.equal(c.label, 'Brewers · 2021–2024')
 })
 
 test('store 1 only', () => {
   const c = umpireCareer({ ...base, history: [hist(2000, 10), hist(2001, 20)], record: { wins: 3, losses: 4 }, rows: [] })
   assert.deepEqual(c.seasons.map((s) => s.season), [2000, 2001])
   assert.deepEqual([c.record.wins, c.record.losses], [3, 4])
-  assert.equal(c.caption, 'Brewers with Al Plate behind the plate, 2000-2001')
+  assert.equal(c.label, 'Brewers · 2000–2001')
 })
 
 test('store 2 only: starts in 2023, no history row', () => {
@@ -81,12 +81,39 @@ test('a club with one game', () => {
   const c = umpireCareer({ ...base, history: [], record: null, rows: [row('2024-05-01', 'HP', { as: 0, hs: 1 })] })
   assert.deepEqual([c.record.wins, c.record.losses], [0, 1])
   assert.equal(c.record.winShare, 0)
-  assert.equal(c.caption, 'Brewers with Al Plate behind the plate, 2024')
+  assert.equal(c.label, 'Brewers · 2024')
 })
 
 test('no data at all', () => {
   const c = umpireCareer({ ...base, history: [], record: null, rows: [] })
   assert.deepEqual(c.seasons, [])
   assert.equal(c.record, null)
-  assert.equal(c.caption, '')
+  assert.equal(c.label, '')
+})
+
+const lateNow = new Date(2030, 0, 15) // every season in these cases is over
+
+test('peak and latest season text', () => {
+  const c = umpireCareer({ ...base, now: lateNow, history: [hist(2000, 36), hist(2001, 20), hist(2002, 30)], record: null, rows: [] })
+  assert.equal(c.peakText, '36 most (2000) · 30 in 2002')
+  const top = umpireCareer({ ...base, now: lateNow, history: [hist(2000, 20), hist(2001, 30)], record: null, rows: [] })
+  assert.equal(top.peakText, '30 in 2001, the most')
+})
+
+test('the chart needs 3 seasons; the record bar needs 5 decided games', () => {
+  const two = umpireCareer({ ...base, now: lateNow, history: [hist(2000, 5), hist(2001, 6)], record: { wins: 4, losses: 1 }, rows: [] })
+  assert.equal(two.showChart, false)
+  assert.equal(two.record.showBar, true)
+  const three = umpireCareer({ ...base, now: lateNow, history: [hist(2000, 5), hist(2001, 6), hist(2002, 6)], record: { wins: 3, losses: 1 }, rows: [] })
+  assert.equal(three.showChart, true)
+  assert.equal(three.record.showBar, false)
+  assert.deepEqual([three.record.wins, three.record.losses], [3, 1])
+})
+
+test('the season in progress is marked partial, no other', () => {
+  const rows = [row('2026-05-01', 'HP'), row('2025-05-01', 'HP')]
+  const live = umpireCareer({ ...base, now: new Date(2026, 9, 20), history: [], record: null, rows })
+  assert.deepEqual(live.seasons.map((s) => s.partial), [false, true])
+  const over = umpireCareer({ ...base, now: new Date(2026, 11, 20), history: [], record: null, rows })
+  assert.deepEqual(over.seasons.map((s) => s.partial), [false, false])
 })
