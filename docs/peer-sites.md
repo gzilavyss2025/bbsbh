@@ -111,5 +111,19 @@ These notes say where the numbers behind the ideas above come from.
   So xBA is close to live, about 40 s after the MLB feed. Bat speed often comes
   minutes later. The swing-path fields (attack angle, tilt, intercept) exist
   only in the CSV, so a live game cannot use them. Earlier checks found the CSV
-  complete the next morning. When it first fills (at the final out, or later)
-  is not measured. The lags carry up to 20 s of poll error.
+  complete the next morning. The fill time after the final out is measured in
+  the next note. The lags carry up to 20 s of poll error.
+- **CSV fill time after the final out: measured on 2026-10-20 (#2349).**
+  One game, so one sample. Game: gamePk 849815 (CLE @ TB, game date 2026-10-19,
+  MLB). Final-out time: 03:03:39 UTC (the last play's `about.endTime` in
+  `feed/live`). A poll every 20 minutes (a few 22 to 24 minutes apart) with the
+  app's phase C query (`statcastUrl` in `src/api/savant/attackAngle.js`: the
+  game date and `game_pk`; every row's `game_pk` matched). Polls at 03:12,
+  03:34, 03:55, 04:16, 04:38, 05:00, 05:22, 05:43, 06:08, 06:30, 06:54 and
+  07:17 UTC all returned 0 rows. The poll at 07:39:04 UTC was the first with rows:
+  260 rows, of which 115 were swings, fouls or balls in play, and 114 of those
+  had both `bat_speed` and `attack_angle`. So the CSV first filled between 4 h 13 min and
+  4 h 35 min after the final out. Error: up to 22 minutes, the poll gap. It was
+  not filled when the game ended or in the first four hours. (A CSV for an
+  earlier completed game, 849810 on 2026-10-15, had 296 rows, all matching, 135 with
+  both fields; that is the earlier "complete the next morning" check.)

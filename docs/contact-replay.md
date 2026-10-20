@@ -133,16 +133,19 @@ Join on `game_pk` + `at_bat_number` (= `atBatIndex + 1`) + `pitch_number`. Read
 `post_bat_score`, so strip on parse here too: keep only the join keys and the
 two angles.
 
-- **Fill time: not measured yet, and not a gate.** How long after the final
-  out the CSV first has rows for a game is still unknown. Gary removed it as a
-  gate on 2026-10-19: the rules below work for any fill time (the bat stays
-  pencil until rows exist). Issue #2349 measures it at the next MLB game and
-  writes the result here and in `docs/peer-sites.md`, "Data notes".
+- **Fill time: not a gate.** Gary removed it as a gate on 2026-10-19: the
+  rules below work for any fill time (the bat stays pencil until rows exist).
+  Measured in #2349: see the last bullet of this section.
 - Fetch only for a game whose status is Final, MLB only. Use the existing CSV
   fetch in `src/api/scout/headToHead.js` as the pattern.
 - One fetch per gamePk per page load. If the CSV has no rows yet, the bat stays
   pencil, and the next page load tries again. Never poll.
 - Classify the module `reveal-only` in `spoiler-manifest.json`.
+- **Measured fill time (#2349, 2026-10-20):** for gamePk 849815 the CSV first had
+  rows 4 h 13 min to 4 h 35 min after the final out (03:03:39 UTC; first rows at the
+  07:39 UTC poll, 0 rows at 07:17), 114 of 115 swings with `attack_angle`; one game,
+  poll error up to 22 min. So the bat stays pencil for hours after a game; details in
+  `docs/peer-sites.md`, "Data notes".
 
 ### 3.4 Squared-up %
 
