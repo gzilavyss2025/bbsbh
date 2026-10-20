@@ -6,6 +6,7 @@ import { SideView } from './SideView.jsx'
 import { Button } from '../../ui/control/Button.jsx'
 import { PitchList, StrikeZone, ZoneSheet } from '../../scoring/StrikeZone.jsx'
 import { HOVER_CARD_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery.js'
+import { resolveBallparkLayout } from '../../../lib/ballpark/layout/resolveLayout.js'
 import { fetchSavantPercentiles, savantRawFor } from '../../../api/savantPercentiles.js'
 import { fetchAttackAngles } from '../../../api/savant/attackAngle.js'
 import { fetchAtBatTracking } from '../../../api/savant/gameFeed.js'
@@ -128,7 +129,7 @@ function useSeasonBatSpeed(batterId, sportId) {
   return norm
 }
 
-function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, gamePk, sportId, eventType, gameState, gameDate, atBatIndex, batterId, children }) {
+function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, gamePk, sportId, eventType, gameState, gameDate, atBatIndex, batterId, venue, children }) {
   const zone = useMemo(() => atBatZone(pitchDetails), [pitchDetails])
   // The pitch in view and whether it has landed. State changes twice a pitch,
   // never per frame; the scene's own drawing stays in refs.
@@ -136,6 +137,7 @@ function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, gamePk, spor
   const { pitches, model } = replay
   const bat = useBatTracking(pitches, gamePk, sportId, gameState, gameDate, atBatIndex)
   const norm = useSeasonBatSpeed(batterId, sportId)
+  const layout = useMemo(() => resolveBallparkLayout({ venueId: venue?.id, venueName: venue?.name, gameDate }), [venue?.id, venue?.name, gameDate]) // the park as it stood that day: static, no score
   const drawers = useRef(new Set()) // SideView and QualityLine draw from PitchScene's one clock
   const onActive = useCallback((idx) => setAt({ no: pitches[idx].no, landed: false }), [pitches])
   const onLand = useCallback((idx) => setAt({ no: pitches[idx].no, landed: true }), [pitches])
@@ -152,7 +154,7 @@ function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, gamePk, spor
         onLand={onLand}
         onFrame={(i, t, r) => drawers.current.forEach((d) => d(i, t, r))}
         bat={bat}
-        under={<SideView pitches={pitches} drawers={drawers} />}
+        under={<SideView pitches={pitches} drawers={drawers} layout={layout} />}
       />
       {model && <ReplayState model={model} at={at} onPlay={onPlay} />}
       {children}
@@ -164,7 +166,7 @@ function ReplayScene({ replay, pitchDetails, pitcher, play, onPlay, gamePk, spor
 // Wide: the card's zone cell, its pitch list's number dots the picks (hover
 // picks too, only with a real mouse). The scene goes to the rail while this
 // card owns it: `id` is the at-bat, `last` says it is the last one on screen.
-export function ReplayCell({ pitchDetails, batSide, pitcher, replay, id, last, gamePk, sportId, eventType, gameState, gameDate, atBatIndex, batterId }) {
+export function ReplayCell({ pitchDetails, batSide, pitcher, replay, id, last, gamePk, sportId, eventType, gameState, gameDate, atBatIndex, batterId, venue }) {
   const { slot, inCard, owner, setOwner } = useContext(RailContext)
   const [play, setPlay] = useState(null)
   const mouse = useMediaQuery(HOVER_CARD_QUERY)
@@ -204,7 +206,7 @@ export function ReplayCell({ pitchDetails, batSide, pitcher, replay, id, last, g
         }
       : undefined,
   }
-  const scene = inRail && slot && <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => playAll(id)} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={atBatIndex} batterId={batterId} />
+  const scene = inRail && slot && <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => playAll(id)} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={atBatIndex} batterId={batterId} venue={venue} />
   return (
     <>
       <PitchList pitchDetails={pitchDetails} pick={pick} />
@@ -216,11 +218,11 @@ export function ReplayCell({ pitchDetails, batSide, pitcher, replay, id, last, g
 }
 
 // Phone: the scene in a sheet like the zone's, with one numbered chip per pitch.
-export function ReplaySheet({ pitchDetails, replay, batter, pitcher, onClose, gamePk, sportId, eventType, gameState, gameDate, atBatIndex, batterId }) {
+export function ReplaySheet({ pitchDetails, replay, batter, pitcher, onClose, gamePk, sportId, eventType, gameState, gameDate, atBatIndex, batterId, venue }) {
   const [play, setPlay] = useState(null)
   return (
     <ZoneSheet note="Replay" batter={batter} pitcher={pitcher?.last} onClose={onClose}>
-      <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => setPlay({ all: true })} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={atBatIndex} batterId={batterId}>
+      <ReplayScene replay={replay} pitchDetails={pitchDetails} pitcher={pitcher} play={play} onPlay={() => setPlay({ all: true })} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={atBatIndex} batterId={batterId} venue={venue}>
         <Segmented
           label="Play a pitch"
           className="pbp__replaypicks"
