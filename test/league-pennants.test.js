@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { pennantsOfSeason, groupByTeam } from '../scripts/lib/club/league-pennants.mjs'
-import { pennantsList } from '../src/api/history/leaguePennants.js'
+import { pennantsBefore, pennantsList } from '../src/api/history/leaguePennants.js'
 
 const side = (id, name, franchiseName, abbreviation, leagueId) => ({
   team: { id, name, franchiseName, abbreviation, league: { id: leagueId } },
@@ -51,4 +51,10 @@ test('pennantsList reads a club newest first and gives [] for a club with none',
 test('a World Series still to be played already names the two pennant winners', () => {
   const game = { gameType: 'W', status: { abstractGameState: 'Preview' }, teams: { away: side(139, 'Tampa Bay Rays', 'Tampa Bay', 'TB', 103), home: side(158, 'Milwaukee Brewers', 'Milwaukee', 'MIL', 104) } }
   assert.deepEqual(pennantsOfSeason(2026, [{ games: [game] }]).map((p) => p.teamId), [139, 158])
+})
+
+test('a dated team page leaves out the pennant of its own season and later ones', () => {
+  const rows = [{ season: 2026 }, { season: 2016 }, { season: 1982 }]
+  assert.deepEqual(pennantsBefore(rows, 2016).map((p) => p.season), [1982])
+  assert.deepEqual(pennantsBefore(rows, undefined).map((p) => p.season), [2026, 2016, 1982])
 })

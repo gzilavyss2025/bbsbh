@@ -14,6 +14,10 @@ export function pennantsList(file, teamId) {
   return (file?.teams?.[teamId] ?? []).map((p) => ({ ...p, teamId: Number(teamId) })).sort((a, b) => b.season - a.season)
 }
 
+// Pure: on a dated page (`asOfSeason`) the page's own season and later ones are left out,
+// because that pennant may not be won yet. The player page's band follows the same rule.
+export const pennantsBefore = (rows, asOfSeason) => (asOfSeason ? rows.filter((p) => p.season < asOfSeason) : rows)
+
 export async function pennantsFor(teamId) {
   return pennantsList(await load(), teamId)
 }
