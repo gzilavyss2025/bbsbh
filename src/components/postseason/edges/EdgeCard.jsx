@@ -3,13 +3,13 @@ import { Card } from '../../ui/frame/Card.jsx'
 
 // One of "Today's edges": a label head on a hairline, then a card of paper
 // under it (the same pairing SeriesStarters and SeriesTotals use).
-export function EdgeCard({ title, note, className, children }) {
+export function EdgeCard({ title, note, className, frame, children }) {
   return (
     <section>
       <SectionHead look="label" note={note}>
         {title}
       </SectionHead>
-      <Card as="div" className={className}>
+      <Card as="div" frame={frame} className={className}>
         {children}
       </Card>
     </section>
