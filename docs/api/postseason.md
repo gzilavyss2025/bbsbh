@@ -407,7 +407,7 @@ and the slate model's `seriesStatus`/`leagueRecord` guard in
 
 ## World Series home reads (`worldSeriesHome.js`, #1906)
 
-One file, cutoff-gated (manifest entry). Every read ends the day before the slate date in the request and is filtered again on the rows. No option lets the slate date's own Finals count (the inert `live` option was removed, #2308). `fetchClubGames` rows: `{ gamePk, date, gameType, gameNumber, final, homeId, awayId, winnerId }`, no runs. `fetchSeriesRuns` folds box scores with `foldRunsByGame`. `fetchReelGames` drops a game dated on or after the slate date before any content read. `useWorldSeriesHome` (`src/hooks/postseason/`) returns the raw rows for the World Series selectors (slice 2).
+One file, cutoff-gated (manifest entry). Every read ends the day before the slate date in the request and is filtered again on the rows. No option lets the slate date's own Finals count (the inert `live` option was removed, #2308). `fetchClubGames` rows: `{ gamePk, date, gameType, gameNumber, final, homeId, awayId, winnerId }`, no runs. `fetchSeriesRuns` folds box scores with `foldRunsByGame`. `fetchReelGames` drops a game dated on or after the slate date before any content read. `fetchGameClips` (the hero's play buttons) does the same and reads no photos. `useWorldSeriesHome` (`src/hooks/postseason/`) returns the raw rows for the World Series selectors (slice 2).
 
 ## World Series scouting meetings (`meetings.js`, #2316)
 

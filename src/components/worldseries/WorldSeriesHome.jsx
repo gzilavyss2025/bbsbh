@@ -3,6 +3,7 @@ import { fetchPlateUmpires } from '../../api/postseason/plateUmpire.js'
 import { fetchUpcomingSeriesGames } from '../../api/postseason/upcoming.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useWorldSeriesHome } from '../../hooks/postseason/useWorldSeriesHome.js'
+import { withFormatDates } from '../../lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
 import { worldSeriesMode } from '../../lib/postseason/worldseries/mode.js'
 import { Grid } from '../ui/layout/Grid.jsx'
@@ -54,7 +55,8 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
   const model = ledgerModel({
     clubIds,
     games: series.games,
-    upcoming: series.upcoming,
+    // If-needed games dated from the Series format, as in the hero, so the two schedules agree.
+    upcoming: withFormatDates(series.games, series.upcoming, slateDate),
     runsByGame: data?.runsByGame ?? {},
     slateDate,
   })

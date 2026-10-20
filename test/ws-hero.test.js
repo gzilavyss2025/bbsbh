@@ -72,7 +72,18 @@ test('an if-needed game with no date gets the format\'s date: the next day, two 
   const played = [{ gameNumber: 4, date: '2026-10-27' }]
   assert.deepEqual(withFormatDates(played, HIDDEN.slice(4)).map((g) => g.date), ['2026-10-28', '2026-10-30', '2026-10-31'])
   // With no date before it, a game stays undated.
-  assert.equal(withFormatDates([], [{ gameNumber: 6, date: null }])[0].date, null)
+  assert.equal(withFormatDates([], [{ gameNumber: 6, date: null, ifNecessary: true }])[0].date, null)
+})
+
+test('only an if-needed game is dated from the format, and never on or before the slate date', () => {
+  // Game 3 is not if-needed but its row is missing (bracket.js hides it): it stays undated.
+  const played = [{ gameNumber: 2, date: '2026-10-24' }]
+  const g3 = withFormatDates(played, [{ gameNumber: 3, date: null, ifNecessary: false }], '2026-10-26')
+  assert.equal(g3[0].date, null)
+  // An if-needed Game 5 the format would put on the slate date (Game 4 two days ago) stays
+  // undated, and so does the chain after it: a projection is never today or in the past.
+  const late = withFormatDates([{ gameNumber: 4, date: '2026-10-27' }], HIDDEN.slice(4), '2026-10-28')
+  assert.deepEqual(late.map((g) => g.date), [null, null, null])
 })
 
 test('with format dates the calendar has every game dated and the off day before Game 6', () => {
@@ -151,6 +162,16 @@ test('clips are read from each club\'s last three games before the slate date, a
   // 139's last three before the 20th (2, 3, 4), then 158's (5; 4 already read). Game 9 is not past.
   assert.deepEqual(pks, [2, 3, 4, 5])
   assert.deepEqual(clipSources(undefined, [139], '2026-10-20'), [])
+  // The order of the clubs does not change the list, so the fetch key does not change when
+  // the hero flips from the bracket's order to away and home.
+  assert.deepEqual(clipSources(clubGames, [158, 139], '2026-10-20').map((g) => g.gamePk), [2, 3, 4, 5])
+})
+
+test('a pitching clip that names the hitter is not his highlight', () => {
+  const games = [{ gamePk: 1, date: '2026-10-17', gameNumber: 1, clips: [clip('k-of-diaz', 650490, ['highlight', 'pitching']), clip('diaz-double', 650490)] }]
+  assert.equal(playerClip(games, 650490)?.id, 'diaz-double')
+  const onlyPitching = [{ ...games[0], clips: [clip('k-of-diaz', 650490, ['highlight', 'pitching'])] }]
+  assert.equal(playerClip(onlyPitching, 650490), null)
 })
 
 test('a clip that is not a play highlight, or no clip at all, gives no button', () => {

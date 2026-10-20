@@ -22,21 +22,24 @@ const dayAfter = (date) => {
 const OFF_AFTER = new Set([2, 5])
 
 // bracket.js hides an if-needed game's date and gamePk: the live schedule keeping or dropping
-// that row can tell how the Series ended. The hero still dates every cell [DECISION: Gary,
-// 2026-10-20, "Fix this. Override."], from the FORMAT, never from that row: an undated game
-// gets the day after the game before it, or two days after Game 2 or Game 5. Nothing here reads
-// the hidden row, so the bracket's guard holds. A real date is never replaced; a date that could
-// not be worked out (no dated game before it) stays null. Marks the worked-out ones `projected`.
+// that row can tell how the Series ended. The home page still dates those cells [DECISION: Gary,
+// 2026-10-20, "Fix this. Override."], from the FORMAT, never from that row: an undated if-needed
+// game gets the day after the game before it, or two days after Game 2 or Game 5. Nothing here
+// reads the hidden row, so the bracket's guard holds. Only an if-needed game is dated this way (a
+// game that is certain but has no row stays undated), and only to a day after the slate date: a
+// projection on or before it would mark a game today or past that the schedule never put there.
+// A real date is never replaced. Marks the worked-out ones `projected`.
 // `games` are the played games ({ gameNumber, date }), `upcoming` the bracket's list.
-export function withFormatDates(games, upcoming) {
+export function withFormatDates(games, upcoming, slateDate = '') {
   const dateOf = new Map([...(games ?? []), ...(upcoming ?? [])].filter((g) => g.date).map((g) => [g.gameNumber, g.date]))
   return [...(upcoming ?? [])]
     .sort((a, b) => a.gameNumber - b.gameNumber)
     .map((g) => {
-      if (g.date) return g
+      if (g.date || !g.ifNecessary) return g
       const prev = dateOf.get(g.gameNumber - 1)
       if (!prev) return g
       const date = OFF_AFTER.has(g.gameNumber - 1) ? dayAfter(dayAfter(prev)) : dayAfter(prev)
+      if (date <= slateDate) return g
       dateOf.set(g.gameNumber, date)
       return { ...g, date, projected: true }
     })
@@ -113,7 +116,8 @@ export function slabPlayer(splits, { clubId, season, started }) {
 
 // The games whose clips the play buttons read: each club's last `perClub` postseason games
 // before the slate date, from fetchClubGames' rows, once each (a Series game is both clubs').
-// Few on purpose: every game is one /content read on page load.
+// Few on purpose: every game is one /content read on page load. Sorted by gamePk, so the list
+// (and the fetch key built from it) is the same whichever club comes first.
 export function clipSources(clubGames, clubIds, slateDate, { perClub = 3 } = {}) {
   const seen = new Set()
   const out = []
@@ -126,19 +130,20 @@ export function clipSources(clubGames, clubIds, slateDate, { perClub = 3 } = {})
       out.push({ gamePk: g.gamePk, date: g.date, gameNumber: g.gameNumber ?? 1 })
     }
   }
-  return out
+  return out.sort((a, b) => a.gamePk - b.gamePk)
 }
 
 // The player's clip from the newest game that has one: a play highlight tagged with his id.
 // `games` are [{ date, gameNumber, clips }], all dated before the slate date (the fetch drops
-// the rest). A recap or a condensed game carries no player id, so it never matches.
+// the rest). A recap or a condensed game carries no player id, so it never matches. A pitching
+// clip can name the hitter too (a strikeout of him), so it never counts as his highlight.
 export function playerClip(games, playerId) {
   if (!playerId) return null
   const newest = [...(games ?? [])].sort((a, b) => b.date.localeCompare(a.date) || b.gameNumber - a.gameNumber)
   for (const g of newest) {
     const hit = (g.clips ?? []).find((c) => {
       const k = classifyHighlight(c)
-      return k.playerId === playerId && isEligibleForPositiveFilter(k)
+      return k.playerId === playerId && k.category !== 'pitching' && isEligibleForPositiveFilter(k)
     })
     if (hit) return hit
   }

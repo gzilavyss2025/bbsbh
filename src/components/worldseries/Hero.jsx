@@ -156,13 +156,15 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
   const { columns } = ledgerModel({
     clubIds: series.slots.map((s) => s.club.id),
     games: series.games,
-    upcoming: withFormatDates(series.games, series.upcoming),
+    upcoming: withFormatDates(series.games, series.upcoming, slateDate),
     slateDate,
   })
   const days = calendarDays(columns, slateDate)
   const nextDay = days.find((d) => (gameDay ? d.today && d.kind === 'game' : d.gameNumber === gameNumber))
   const path = (section) => (game?.awayId ? gamePath(slateDate, abbr[game.awayId], abbr[game.homeId], section) : null)
-  const nextPath = gameNumber ? path(gameDay ? 'lineup1' : 'preview') : null
+  // A game day's door needs no game number (a resumed game can lack one); a preview names its game.
+  const nextPath = gameDay ? path('lineup1') : gameNumber ? path('preview') : null
+  const nextName = gameDay ? (gameNumber ? `Game ${gameNumber} lineups` : 'Lineups') : `Game ${gameNumber} preview`
   const when = [nextDay?.date && `${nextDay.weekday} ${monthDayShort(nextDay.date)}`, game && firstPitchText(game.gameDate, game.startTimeTBD)]
   const innings = gameDay ? path('top1') : null
   // Wide off day: one Stamp door per played game here (the phone has them in Played).
@@ -195,7 +197,7 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
         {nextPath && (
           <Door {...link(nextPath)} className="ww-hero__next">
             <span className="ww-hero__nexttext">
-              <span className="ww-hero__nextname">{`Game ${gameNumber} ${gameDay ? 'lineups' : 'preview'}`}</span>
+              <span className="ww-hero__nextname">{nextName}</span>
               {when.some(Boolean) && <span className="ww-hero__nextwhen">{when.filter(Boolean).join(' · ')}</span>}
             </span>
           </Door>
