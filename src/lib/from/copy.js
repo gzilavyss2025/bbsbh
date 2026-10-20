@@ -20,7 +20,7 @@ export const placeIntro = (list) =>
 
 export const changeLink = (list) => (isTown(list) ? 'Change town' : 'Change school')
 
-export const placeMissing = 'No place is listed at this address.'
+export const placeMissing = 'No big leaguer is listed from this place.'
 
 export const searchField = (list) =>
   isTown(list)

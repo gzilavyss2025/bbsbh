@@ -3,15 +3,12 @@
 // back. A place is one school or one town, and holds its big leaguers as
 // [id, name, pos, debutYear] tuples, oldest debut first.
 import { slugify } from '../../../src/lib/route.js'
+import { countryOf, schoolBase, schoolSlug } from '../../../src/lib/from/identity.js'
 import { isPending } from './players.mjs'
 import { STATE_NAMES } from './zones.mjs'
 
 const isState = (st) => Object.hasOwn(STATE_NAMES, st)
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
-
-// A country the API writes as a code, when the code is certain. Puerto Rico also comes back as
-// birthCountry "USA" with state "PR"; countryOf() folds that in.
-const COUNTRY_CODE = { MEX: 'Mexico', CUB: 'Cuba', PUR: 'Puerto Rico', VEN: 'Venezuela', DOM: 'Dominican Republic' }
 
 // The commonest spelling; a tie goes to the first in alphabetical order, so a rerun agrees.
 function mode(counts) {
@@ -30,14 +27,6 @@ const byDebut = (a, b) => a[3] - b[3] || cmp(a[1], b[1]) || a[0] - b[0]
 // county is a wrong GeoNames match (a Dublin, Ohio placed in Indianapolis), so it is ignored for
 // both the zone and the map dot: a place with no good point has no zone and no dot.
 const inState = (zone, state) => Boolean(zone) && zone.startsWith(`${state.toLowerCase()}-`)
-
-// -> 'USA' | another country's name | null. A US birth in Puerto Rico is Puerto Rico (D6).
-export function countryOf(birth) {
-  if (!birth?.country) return null
-  const country = COUNTRY_CODE[birth.country] ?? birth.country
-  if (country === 'USA' && birth.state?.toUpperCase() === 'PR') return 'Puerto Rico'
-  return country
-}
 
 // ctx: {
 //   matchCollege(name) -> { unitid | null, rule, candidates? },
@@ -135,13 +124,12 @@ export function buildFrom(players, ctx) {
   }
   const cityKeys = new Map() // base slug -> distinct city slugs
   for (const r of records) {
-    r.base = slugify(`${r.name} ${r.st}`)
+    r.base = schoolBase(r.name, r.st)
     if (r.city) (cityKeys.get(r.base) ?? cityKeys.set(r.base, new Set()).get(r.base)).add(slugify(r.city))
   }
   const schools = new Map() // final slug -> { names, cities, states, ids }
   for (const r of records) {
-    const split = r.city && cityKeys.get(r.base).size > 1
-    const slug = split ? slugify(`${r.name} ${r.city} ${r.st}`) : slugify(r.st ? r.base : `${r.name} ${r.city}`)
+    const slug = schoolSlug({ name: r.name, city: r.city, state: r.st }, cityKeys.get(r.base)?.size > 1)
     if (!slug) continue
     if (!schools.has(slug)) schools.set(slug, { names: new Map(), cities: new Map(), st: r.st, players: new Map() })
     const s = schools.get(slug)
@@ -245,6 +233,11 @@ export function buildFrom(players, ctx) {
   lookup['high-school'].sort((a, b) => cmp(a[0], b[0]))
   lookup.hometown.sort((a, b) => cmp(a[0], b[0]) || cmp(a[1], b[1]))
   for (const [kind, rows] of Object.entries(lookup)) files[`lookup/${kind}.json`] = rows
+  // The school names (with a state) shared by two cities. A player page links a high school with
+  // this: schoolSlug() needs to know whether the short slug or the city slug is the school's.
+  files['lookup/high-school-split.json'] = [
+    ...new Set(records.filter((r) => r.st && r.city && cityKeys.get(r.base).size > 1).map((r) => r.base)),
+  ].sort()
 
   const countryRows = []
   for (const [cs, c] of countries) {

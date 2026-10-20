@@ -60,6 +60,18 @@ dot where the place is) and the fact strip. Below it is one stamped card to a de
 - A place with no point (a college the IPEDS match could not place, or a town whose birth point fell in
   another state) shows no dot. A place with no state, and any place abroad, shows no locator.
 
+## Links from the player page
+
+The hero's `Born` and `School` cells link to "who else is from there" (`src/screens/player/next/top/HeroFromLinks.jsx`).
+`src/lib/from/playerLinks.js` turns the player's birthplace and schools into place addresses, with the
+same slug rules the generator uses (`src/lib/from/identity.js` is the one copy). A college and a town need
+nothing else. A high school with a state needs `public/data/from/lookup/high-school-split.json`, the school
+names that two cities share, because those take the city into their slug; until that small file loads
+(or if it cannot), the school stays plain text. A birthplace or school with no city or an unknown state has
+no page and stays plain text. `test/from-player-links.test.js` checks that every link every player in the
+cache would get leads to a place that exists. A minor leaguer's school or town with no big leaguer from it
+opens the page's "No big leaguer is listed from this place." line.
+
 ## Zones
 
 A zone is a Census metro area (in-state population of 500,000 or more, at most 6 to a state), or a
