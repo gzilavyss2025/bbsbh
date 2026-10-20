@@ -127,3 +127,10 @@ test('Film sits last on an off day and after Matchup edges and the umpire on a g
   assert.deepEqual(scoutingModel({ dayType: 'off', ...full }).map((c) => c.id), ['nine-keys', 'matchup-edges', 'film-room'])
   assert.deepEqual(scoutingModel({ dayType: 'game', ...full }).map((c) => c.id), ['matchup-edges', 'umpire-edge', 'film-room'])
 })
+
+test('the starter line also comes as six cells, a missing figure kept as null', () => {
+  const a = side(139, 'TB', 1)
+  const m = filmRoomModel([game('2026-08-04', { ...a, starter: { ...a.starter, bb: null } }, side(158, 'MIL', 3))], {})[0]
+  assert.deepEqual(m.starters[0].stats.map((c) => c.label), ['IP', 'H', 'ER', 'BB', 'K', 'P'])
+  assert.deepEqual(m.starters[0].stats.map((c) => c.value), ['6.0', 5, 2, null, 7, 90])
+})

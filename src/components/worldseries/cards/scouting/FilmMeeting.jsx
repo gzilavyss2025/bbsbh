@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { gamePath, playerPath } from '../../../../lib/route.js'
 import { PitchMark } from '../../../playbyplay/pitcherCard/PitchMark.jsx'
 import { Headshot } from '../../../player/Headshot.jsx'
+import { Button } from '../../../ui/control/Button.jsx'
 import { Door } from '../../../ui/control/Door.jsx'
 import { Card } from '../../../ui/frame/Card.jsx'
 import { Stack } from '../../../ui/layout/Stack.jsx'
@@ -14,14 +16,30 @@ const NONE = (
   </>
 )
 
+// The legend names the three biggest pitches; the bar draws them all, and a screen reader hears the rest.
+const LEGEND = 3
+
 function Starter({ s, teamId }) {
+  const link = useRouteLink()
+  const named = s.mix.slice(0, LEGEND)
+  const rest = s.mix.slice(LEGEND)
   return (
     <div className="ww-film__starter">
       <Headshot personId={s.id} name={s.name} teamId={teamId} className="ww-film__shot" />
       <div className="ww-film__who">
-        <span className="ww-film__name">{[s.abbr, s.name, s.hand].filter(Boolean).join(' · ')}</span>
-        <span className="ww-film__line">{s.line}</span>
+        <Door {...link(playerPath(s.id))} className="ww-film__name">
+          {s.name}
+        </Door>
+        <span className="t-label ww-film__meta">{[s.abbr, s.hand].filter(Boolean).join(' · ')}</span>
       </div>
+      <dl className="ww-film__stats">
+        {s.stats.map((c) => (
+          <div key={c.label}>
+            <dt>{c.label}</dt>
+            <dd>{c.value ?? NONE}</dd>
+          </div>
+        ))}
+      </dl>
       {s.mix.length > 0 && (
         <>
           <div className="ww-film__bar" aria-hidden="true">
@@ -30,11 +48,12 @@ function Starter({ s, teamId }) {
             ))}
           </div>
           <ul className="ww-film__mix">
-            {s.mix.map((p) => (
+            {named.map((p) => (
               <li key={p.code}>
                 <PitchMark mark={pitchMark(p.code)} size={12} /> {p.code} {p.pct}%
               </li>
             ))}
+            {rest.length > 0 && <li className="sr-only">{rest.map((p) => `${p.code} ${p.pct}%`).join(', ')}</li>}
           </ul>
         </>
       )}
@@ -48,6 +67,7 @@ function Starter({ s, teamId }) {
 export function FilmMeeting({ m }) {
   const link = useRouteLink()
   const full = m.scoring !== undefined
+  const [open, setOpen] = useState(null)
   return (
     <Card frame="stamped" label={m.day} labelAs="h3" count={m.ump ? `HP ${m.ump}` : undefined} className="ww-film__card">
       <Stack gap="snug">
@@ -68,32 +88,39 @@ export function FilmMeeting({ m }) {
         </table>
         {m.decisions && <p className="ww-film__dec">{m.decisions}</p>}
         {full && m.starters.map((s) => <Starter key={s.id} s={s} teamId={m.rows.find((r) => r.abbr === s.abbr)?.id} />)}
-        {full && m.scoring.length > 0 && (
-          <details className="ww-film__details">
-            <summary>Scoring plays</summary>
-            <ul>
-              {m.scoring.map((p, i) => (
-                <li key={i}>
-                  <b>{p.inning}</b> {p.text}
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
         {full && (
-          <details className="ww-film__details">
-            <summary>Lineups</summary>
+          <div className="ww-film__more">
+            {m.scoring.length > 0 && (
+              <Button size="control" pressed={open === 'scoring'} onClick={() => setOpen(open === 'scoring' ? null : 'scoring')}>
+                Scoring plays
+              </Button>
+            )}
+            <Button size="control" pressed={open === 'lineups'} onClick={() => setOpen(open === 'lineups' ? null : 'lineups')}>
+              Lineups
+            </Button>
+          </div>
+        )}
+        {full && open === 'scoring' && (
+          <ul className="ww-film__panel">
+            {m.scoring.map((p, i) => (
+              <li key={i}>
+                <b>{p.inning}</b> {p.text}
+              </li>
+            ))}
+          </ul>
+        )}
+        {full && open === 'lineups' && (
+          <div className="ww-film__panel">
             {m.lineups.map((l) => (
               <p key={l.abbr}>
                 <b>{l.abbr}</b> {l.players.map((p) => `${p.name} ${p.pos}`.trim()).join(', ')}
               </p>
             ))}
-          </details>
+          </div>
         )}
-        <div className="ww-film__doors">
-          <Door {...link(gamePath(m.date, m.awayAbbr, m.homeAbbr, 'boxscore', m.gameNumber))}>Box score</Door>
-          {full && m.starters.map((s) => <Door key={s.id} {...link(playerPath(s.id))}>{`Scout ${s.surname || 'starter'}`}</Door>)}
-        </div>
+        <Door {...link(gamePath(m.date, m.awayAbbr, m.homeAbbr, 'boxscore', m.gameNumber))} className="ww-film__box">
+          Box score
+        </Door>
       </Stack>
     </Card>
   )

@@ -50,13 +50,15 @@ function starterOf(side) {
     surname: surnameOf(s.name),
     hand: s.hand ? `${s.hand}HP` : '',
     line,
+    // The same line as six cells (a missing figure stays a cell, so the two arms line up).
+    stats: [['IP', s.ip], ['H', s.h], ['ER', s.er], ['BB', s.bb], ['K', s.k], ['P', s.pitches]].map(([label, value]) => ({ label, value: value ?? null })),
     mix: mixPercents(s.mix),
   }
 }
 
 // -> one entry per meeting, oldest first (the order handed in):
 // { gamePk, date, gameNumber, day, ump, awayAbbr, homeAbbr, rows: [{ id, abbr, runs, hits, errors, win }],
-//   decisions, starters: [{ id, abbr, name, surname, hand, line, mix: [{ code, pct }] }],
+//   decisions, starters: [{ id, abbr, name, surname, hand, line, stats: [{ label, value }], mix: [{ code, pct }] }],
 //   scoring?, lineups? }  (the last two only when not `compact`)
 export function filmRoomModel(meetings, { compact = false } = {}) {
   return (meetings ?? []).map((m) => {

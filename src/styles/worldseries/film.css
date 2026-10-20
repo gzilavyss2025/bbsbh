@@ -56,15 +56,13 @@
   background: var(--surface-stamped-tint);
 }
 
-.ww-film__dec,
-.ww-film__line,
-.ww-film__mix {
+.ww-film__dec {
   margin: 0;
   font-size: var(--fs-cell);
   color: var(--text-caption);
 }
 
-/* layout-exempt: a fixed photo-and-text pair; the bar and the mix span both */
+/* layout-exempt: a fixed photo-and-text pair; the stats, bar and mix span both */
 .ww-film__starter {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -72,7 +70,7 @@
   align-items: center;
 }
 
-/* layout-exempt: a name over its pitching line, beside a 36px photo */
+/* layout-exempt: the name over its club and hand, beside a 36px photo */
 .ww-film__who {
   display: flex;
   flex-direction: column;
@@ -80,17 +78,51 @@
 }
 
 .ww-film__name {
-  font-family: var(--font-display);
+  padding-inline: 0;
+  min-height: 0;
   font-size: var(--fs-small);
-  color: var(--text-heading);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.ww-film__meta {
+  margin: 0;
+}
+
 .shot.ww-film__shot {
   width: 36px;
   height: 48px;
+}
+
+/* The pitching line as six cells: a label over a mono figure. */
+.ww-film__stats {
+  grid-column: 1 / -1;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border-block: 1px solid var(--border-stamped);
+}
+
+.ww-film__stats div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-1) 0;
+}
+
+.ww-film__stats dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+
+.ww-film__stats dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  color: var(--text-heading);
 }
 
 .ww-film__bar,
@@ -108,52 +140,39 @@
   flex-basis: 0;
 }
 
-/* layout-exempt: a wrapping row of pitch marks */
+/* layout-exempt: one row of the three biggest pitch marks */
 .ww-film__mix {
   list-style: none;
+  margin: 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-2);
+  justify-content: space-between;
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
 }
 
-.ww-film__details summary {
-  min-height: var(--tap-min);
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-family: var(--font-display);
-  color: var(--text-heading);
+/* layout-exempt: the two disclosure buttons split one row */
+.ww-film__more {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
 }
 
-.ww-film__details summary::after {
-  content: '+';
-  margin-left: auto;
-}
-
-.ww-film__details[open] summary::after {
-  content: '−';
-}
-
-.ww-film__details ul {
+.ww-film__panel {
   margin: 0;
   padding-left: var(--space-4);
   font-size: var(--fs-small);
 }
 
-.ww-film__details p {
+div.ww-film__panel {
+  padding-left: 0;
+}
+
+.ww-film__panel p {
   margin: 0 0 var(--space-1);
-  font-size: var(--fs-small);
 }
 
-/* layout-exempt: a wrapping row of doors */
-.ww-film__doors {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
-}
-
-.ww-film__doors .door {
+.ww-film__box {
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
