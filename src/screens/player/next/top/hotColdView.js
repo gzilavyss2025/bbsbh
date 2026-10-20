@@ -5,7 +5,8 @@
 //             the last 10 years had a better ERA over a full season."
 //   line      his figure and sample: "2.16 ERA · Through 162.2 innings"
 //   list      those seasons, ranked, with his own in its place (listView); the card shows
-//             the top PREVIEW and a door opens the rest
+//             the top PREVIEW and a door opens the rest. Mid-season, each row also says
+//             where that season ended, and one line sums it up (finishView, #1855 slice 3)
 import { rate3 } from '../../../../api/person/shared.js'
 import { outsToIp } from '../../../../lib/math/innings.js'
 import { EARLY_UNDER } from '../../../../api/hotcold/rule.js'
@@ -66,11 +67,14 @@ export function hintWords({ beyond, tone, who, noun, sample, years }) {
 }
 
 // One value in a list row, in the stat's own terms.
-const per = (v, unit) => (v > 0 ? `1 per ${Math.round(1 / v)} ${unit}` : `0 per ${unit}`)
+// A pace is short ("1/7 PA", one home run every 7 plate appearances), so a leader row keeps
+// room for the name; its "ended" line drops the unit the figure above already names.
+const per = (v, unit) => (v > 0 ? `1/${Math.round(1 / v)} ${unit}` : `0/${unit}`)
 const LIST_VALUE = {
   hitting: { ops: rate3, avg: rate3, hr: (v) => per(v, 'PA'), so: pct, bb: pct, sb: (v) => `${two(v)} a game` },
-  pitching: { era: two, whip: two, so: pct, bb: pct, hr: (v) => per(v, 'batters') },
+  pitching: { era: two, whip: two, so: pct, bb: pct, hr: (v) => per(v, 'BF') },
 }
+const bare = (text) => text.replace(/ (PA|BF)$/, '')
 
 // The rows the card shows before its door, and the rows an open list shows before it says
 // "and N more".
@@ -80,17 +84,40 @@ export const LIST_MAX = 25
 // A row's small line: "2022 · Padres", or the season alone when the club is not known.
 const sub = (season, team) => (team ? `${season} · ${team}` : String(season))
 
-// The seasons further out than his, ranked, then his own: { rows, more }, each row
-// { rank, id, name, sub, value, self }. Null when the list is unknown or empty, so there is
+// The seasons further out than his, ranked, then his own: { rows, more, finish, door }, each row
+// { rank, id, name, sub, value, unit, self }. Null when the list is unknown or empty, so there is
 // nothing to show.
 export function listView(flag, { name, season }) {
   if (!flag.beyond?.length) return null
   const fmt = LIST_VALUE[flag.role === 'pitching' ? 'pitching' : 'hitting'][flag.key]
-  const rows = flag.beyond.slice(0, LIST_MAX).map((b, i) => (
-    { rank: i + 1, id: b.id, name: b.name, sub: sub(b.season, b.team), value: fmt(b.value), self: false }
-  ))
-  const self = { rank: flag.beyond.length + 1, id: null, name, sub: sub(season, flag.teamName), value: fmt(flag.value), self: true }
-  return { rows: [...rows, self], more: Math.max(0, flag.beyond.length - LIST_MAX) }
+  const finish = finishView(flag, fmt)
+  // Where each season ended (#1855 slice 3, design A), under its figure: "ended .403". His
+  // own row says "now". A full-season list has no finish line: its values are the finish.
+  const rows = flag.beyond.slice(0, LIST_MAX).map((b, i) => ({
+    rank: i + 1, id: b.id, name: b.name, sub: sub(b.season, b.team), value: fmt(b.value), self: false,
+    unit: finish && b.finalValue != null ? `ended ${bare(fmt(b.finalValue))}` : null,
+  }))
+  const self = { rank: flag.beyond.length + 1, id: null, name, sub: sub(season, flag.teamName), value: fmt(flag.value), self: true, unit: finish ? 'now' : null }
+  const more = Math.max(0, flag.beyond.length - LIST_MAX)
+  // The door says what it opens: every row of a short list, the top LIST_MAX of a long one.
+  const door = more ? `See the top ${LIST_MAX}` : `See all ${rows.length + 1}`
+  return { rows: [...rows, self], more, finish, door }
+}
+
+// How the seasons further out than his ended (#1855 slice 3), or null when the list has no
+// finishes (a full-season list: its values are the finish). `moved` counts the seasons
+// whose final value sits closer to the league's middle than their value at the checkpoint
+// ("cooled off" from a hot start, "bounced back" from a cold one); `median` is the median
+// final value, formatted. The card shows `sentence` under the list.
+export function finishView(flag, fmt) {
+  const done = (flag.beyond ?? []).filter((b) => b.finalValue != null)
+  if (!done.length) return null
+  const toward = flag.percentile >= 50 ? (b) => b.finalValue < b.value : (b) => b.finalValue > b.value
+  const sorted = done.map((b) => b.finalValue).sort((a, b) => a - b)
+  const mid = sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+  const moved = done.filter(toward).length
+  const verb = flag.tone === 'hot' ? 'cooled off' : 'bounced back'
+  return { n: done.length, moved, median: fmt(mid), sentence: `${moved} of ${done.length} ${verb} by the end of the season.` }
 }
 
 // One flag -> { key, tone, headline, line, list }. `seasons` is the pooled seasons from the

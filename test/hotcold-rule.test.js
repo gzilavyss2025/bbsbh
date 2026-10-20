@@ -193,7 +193,8 @@ test('buildExtremes keeps the outer share of each side, most extreme first', () 
   assert.equal(avg.high[0][0], 19 / 40)
   assert.equal(avg.low[0][0], 0)
   // A row is [value, id, season, name, team], the team named as it was that season.
-  assert.deepEqual(avg.high[0].slice(2), [2025, avg.high[0][3], 'Padres'])
+  // A checkpoint row also says where that season ended: [finalValue, finalSample].
+  assert.deepEqual(avg.high[0].slice(2), [2025, avg.high[0][3], 'Padres', 19 / 40, 10])
   // Home runs flag on the high side only, so only that side is kept.
   assert.deepEqual(Object.keys(out.hitting[10].hr), ['high'])
   // No season here reached a full season, so there is no 'full' pool.
@@ -208,6 +209,8 @@ test('buildExtremes: the full pool is final lines of seasons that reached a full
   hitting.short = { n: 'Short', c: [], f: at(120, 400) }
   const full = buildExtremes({ 2024: { hitting, pitching: {} } }).hitting.full
   assert.equal(full.avg.high[0][3], `P${MIN_POOL}`)
+  // A full-season row is the finish already: no finish fields.
+  assert.equal(full.avg.high[0].length, 5)
   assert.ok(!full.avg.high.some((r) => r[3] === 'Short'))
 })
 
@@ -268,4 +271,10 @@ test('buildTails: a full-season table from final lines, and no checkpoint table 
   assert.equal(tails.hitting.full.n, MIN_POOL)
   // The full table reads final lines (200+ hits in 620 AB), not the 150-game cut (.250).
   assert.equal(tails.hitting.full.q.avg[0], Math.round((200 / 620) * 1e4) / 1e4)
+})
+
+test('seasonsBeyond carries where each season ended, when the file has it', () => {
+  const stats = { avg: { low: [[0.15, 1, 2019, 'A', 'Mets', 0.231, 152], [0.16, 2, 2021, 'B', null], [0.3, 3, 2022, 'C', null]] } }
+  const out = seasonsBeyond({ key: 'avg', value: 0.17, percentile: 1 }, stats, { id: 9, season: 2026 })
+  assert.deepEqual(out.map((b) => [b.name, b.finalValue, b.finalSample]), [['A', 0.231, 152], ['B', null, null]])
 })

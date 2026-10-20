@@ -1531,7 +1531,7 @@ Re-run only to fold in a new season.
   840 KB, at most 66 KB each): the outer 3% of each side of each stat, as
   `[value, id, season, name, team]` rows (team: the club's nickname that season), so the card can say exactly how many past seasons were
   further out and list them. Checkpoints from 150 (`FULL_SEASON`) use one `full` pool: the
-  FINAL lines of the seasons that reached 150 games or innings.
+  FINAL lines of the seasons that reached 150 games or innings. A checkpoint file's rows also carry `[finalValue, finalSample]`, where that season ended, for the card's "ended .403" (#1855 slice 3).
 - `ballpark/import-field-layouts.mjs` → `src/lib/ballpark/layout/fields.js` — each
   MLB park's measured distances, wall heights, deepest point and fair area (Baseball
   Savant's Dimensions table), plus its current fence outline, extracted from MLB's
