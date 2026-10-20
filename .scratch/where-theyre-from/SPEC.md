@@ -593,7 +593,7 @@ with a failing test.
    `scripts/lib/from/college-match.mjs` (the §7.1 rules, the flagship table),
    `scripts/lib/from/places.mjs` (identity, slugs, merges, facts input),
    `scripts/data/from/college-overrides.json` (start from `data/college-unmatched.json`;
-   resolve at least the top 50 by hand, set the rest as found), the first sweep's
+   resolve at least the top 50 by the §12.1 rule: certain → `unitid`, unsure → `null`), the first sweep's
    committed output, the workflow step, catalog and static-data docs, tests for the
    matcher and the identity rules using `fixtures/`. *Done when:* the run reports its
    match rate (≥ 93%) and unmatched list, a second run with no API change writes
