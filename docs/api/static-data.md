@@ -1310,5 +1310,6 @@ role, and merges a two-way player's flags into the same two places (`mergeRoles`
 each flag it then reads one `extremes/{role}-{checkpoint|full}.json` (`staticJsonBy`) and
 `seasonsBeyond` lists the past seasons strictly further out, leaving out his own season.
 The card says that count ("Only 5 pitchers in the last 10 years had a better ERA over a
-full season") and opens the list behind a door. The card is
+full season") and lists those seasons with the club each played for, named as it was that
+season (`teams` in the tails file names his own). The card is
 `screens/player/next/top/HotCold.jsx`, with the cutoff `?d=` or `slateToday()`.

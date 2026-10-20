@@ -1,13 +1,11 @@
 // The words of one hot or cold callout (#1855), from a flag of api/hotcold/rule.js. Pure.
+// The card leads with the sentence (Gary, 2026-10-20, design B):
 //
-//   kicker  the sample's weight: "Early start" | "Stretch" | "Full season" (the card's
-//           count tag says hot or cold, see toneTag)
-//   figure  the stat, alone on its line: "9 HR", ".168 AVG", "2.16 ERA"
-//   rest    the sample it is over: "In 40 games (0.23 a game)", "Through 52.1 innings"
-//   hint    where it sits, said the way a person would say it and counted exactly
-//           (Gary, 2026-10-20): "Only 5 pitchers in the last 10 years had a better ERA
-//           over a full season."
-//   list    those seasons, ranked, with his own in its place (listView)
+//   headline  said the way a person would say it, counted exactly: "Only 7 pitchers in
+//             the last 10 years had a better ERA over a full season."
+//   line      his figure and sample: "2.16 ERA · Through 162.2 innings"
+//   list      those seasons, ranked, with his own in its place (listView); the card shows
+//             the top PREVIEW and a door opens the rest
 import { rate3 } from '../../../../api/person/shared.js'
 import { outsToIp } from '../../../../lib/math/innings.js'
 import { EARLY_UNDER } from '../../../../api/hotcold/rule.js'
@@ -15,7 +13,6 @@ import { FULL_SEASON } from '../../../../api/hotcold/line.js'
 
 const pct = (v) => `${(v * 100).toFixed(1)}%`
 const two = (v) => v.toFixed(2)
-const WEIGHT = { early: 'Early start', firm: 'Stretch', real: 'Full season' }
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1)
 
 // [figure, rest] for each stat, from the flag's value and his counted line.
@@ -75,27 +72,30 @@ const LIST_VALUE = {
   pitching: { era: two, whip: two, so: pct, bb: pct, hr: (v) => per(v, 'batters') },
 }
 
-// The rows a list shows before it says "and N more".
+// The rows the card shows before its door, and the rows an open list shows before it says
+// "and N more".
+export const PREVIEW = 3
 export const LIST_MAX = 25
 
+// A row's small line: "2022 · Padres", or the season alone when the club is not known.
+const sub = (season, team) => (team ? `${season} · ${team}` : String(season))
+
 // The seasons further out than his, ranked, then his own: { rows, more }, each row
-// { rank, id, name, season, value, self }. Null when the list is unknown or empty, so there
-// is nothing to open.
+// { rank, id, name, sub, value, self }. Null when the list is unknown or empty, so there is
+// nothing to show.
 export function listView(flag, { name, season }) {
   if (!flag.beyond?.length) return null
   const fmt = LIST_VALUE[flag.role === 'pitching' ? 'pitching' : 'hitting'][flag.key]
   const rows = flag.beyond.slice(0, LIST_MAX).map((b, i) => (
-    { rank: i + 1, id: b.id, name: b.name, season: b.season, value: fmt(b.value), self: false }
+    { rank: i + 1, id: b.id, name: b.name, sub: sub(b.season, b.team), value: fmt(b.value), self: false }
   ))
-  return {
-    rows: [...rows, { rank: flag.beyond.length + 1, id: null, name, season, value: fmt(flag.value), self: true }],
-    more: Math.max(0, flag.beyond.length - LIST_MAX),
-  }
+  const self = { rank: flag.beyond.length + 1, id: null, name, sub: sub(season, flag.teamName), value: fmt(flag.value), self: true }
+  return { rows: [...rows, self], more: Math.max(0, flag.beyond.length - LIST_MAX) }
 }
 
-// One flag -> { key, tone, kicker, figure, rest, hint, count, list }. `seasons` is the pooled
-// seasons from the tails file (the hint counts them); `twoWay` names the role in the kicker;
-// `name` and `season` are his, for his own row in the list.
+// One flag -> { key, tone, headline, line, list }. `seasons` is the pooled seasons from the
+// tails file (the headline counts them); `twoWay` names the role on the line; `name` and
+// `season` are his, for his own row.
 export function hotColdView(flag, { seasons = [], twoWay = false, name = '', season = null } = {}) {
   const pitching = flag.role === 'pitching'
   const n = pitching ? outsToIp(flag.line.outs) : flag.line.g
@@ -104,15 +104,12 @@ export function hotColdView(flag, { seasons = [], twoWay = false, name = '', sea
   const years = seasons.length ? ` in the last ${seasons.length} years` : ''
   const who = pitching ? 'pitchers' : 'hitters'
   const noun = NOUN[pitching ? 'pitching' : 'hitting'][flag.key]
-  const kicker = WEIGHT[flag.weight]
+  const role = twoWay ? `${pitching ? 'Pitching' : 'Hitting'} · ` : ''
   return {
     key: `${flag.role}:${flag.key}`,
     tone: flag.tone,
-    kicker: twoWay ? `${kicker} · ${pitching ? 'pitching' : 'hitting'}` : kicker,
-    figure,
-    rest: cap(rest),
-    hint: hintWords({ beyond: flag.beyond, tone: flag.tone, who, noun, sample: sampleWords(flag.checkpoint, unit), years }),
-    count: flag.beyond?.length ?? null,
+    headline: hintWords({ beyond: flag.beyond, tone: flag.tone, who, noun, sample: sampleWords(flag.checkpoint, unit), years }),
+    line: `${role}${figure} · ${cap(rest)}`,
     list: listView(flag, { name, season }),
   }
 }

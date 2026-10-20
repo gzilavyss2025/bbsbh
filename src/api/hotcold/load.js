@@ -15,7 +15,9 @@ const extremesFile = staticJsonBy((key) => `/data/season-checkpoints/extremes/${
 // { id, roles, season, sportId, cutoff } -> { flags, seasons }. `flags` is mergeRoles'
 // list (at most two), each with `beyond`: the past seasons further out than his, from the
 // flag's extremes file: the lines cut at his checkpoint, or from FULL_SEASON on the final
-// lines of full seasons (null when that file fails; the card then says no number). `seasons` is the pooled span ([2017, …, 2026]) the hint counts.
+// lines of full seasons (null when that file fails; the card then says no number), and
+// `teamName`, his club's nickname from the tails file's season teams (null for a season
+// outside the pool). `seasons` is the pooled span ([2017, …, 2026]) the hint counts.
 // A MiLB player, a missing tails file or a failed read answers no flags.
 export async function loadHotCold({ id, roles, season, sportId, cutoff }) {
   const none = { flags: [], seasons: [] }
@@ -30,7 +32,8 @@ export async function loadHotCold({ id, roles, season, sportId, cutoff }) {
   )
   const flags = await Promise.all(mergeRoles(byRole).map(async (f) => {
     const file = await extremesFile(`${f.role}-${f.checkpoint >= FULL_SEASON ? 'full' : f.checkpoint}`)
-    return { ...f, beyond: file ? seasonsBeyond(f, file.stats, { id, season: Number(season) }) : null }
+    const beyond = file ? seasonsBeyond(f, file.stats, { id, season: Number(season) }) : null
+    return { ...f, beyond, teamName: tails.teams?.[season]?.[f.team] ?? null }
   }))
   return { flags, seasons: tails.seasons ?? [] }
 }

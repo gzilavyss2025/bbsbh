@@ -73,22 +73,35 @@ const inOrder = (rows) =>
       String(a.date).localeCompare(String(b.date)) ||
       (a.game?.gameNumber ?? 0) - (b.game?.gameNumber ?? 0))
 
-// Fold a season's rows into { final, checkpoints }: `final` is the whole line, and
-// `checkpoints` maps each checkpoint (10, 20, …) to the line at the first game that
-// reached it. A pitcher who jumps from 9 to 21 innings in one start fills 10 and 20
-// with the same line.
+// Fold a season's rows into { final, checkpoints, team, teams }: `final` is the whole line,
+// and `checkpoints` maps each checkpoint (10, 20, …) to the line at the first game that
+// reached it. A pitcher who jumps from 9 to 21 innings in one start fills 10 and 20 with the
+// same line. `team` is the club he played the most games for (the later one on a tie), and
+// `teams` is the same at each checkpoint, so a traded player is named with the club he was
+// on for most of that stretch.
 export function foldSeason(role, rows) {
   const { fields, add, sample } = ROLE[role]
   const line = blank(fields)
   const checkpoints = {}
+  const teams = {}
+  const games = new Map()
+  let team = null
   for (const row of inOrder(rows)) {
     add(line, row.stat)
+    const id = row.team?.id
+    if (id) {
+      games.set(id, (games.get(id) ?? 0) + 1)
+      if (team == null || games.get(id) >= games.get(team)) team = id
+    }
     const top = checkpointOf(sample(line))
     for (let c = STEP; top != null && c <= top; c += STEP) {
-      if (!checkpoints[c]) checkpoints[c] = { ...line }
+      if (!checkpoints[c]) {
+        checkpoints[c] = { ...line }
+        teams[c] = team
+      }
     }
   }
-  return { final: line, checkpoints }
+  return { final: line, checkpoints, team, teams }
 }
 
 // --- The stats the rule tests -----------------------------------------------------------

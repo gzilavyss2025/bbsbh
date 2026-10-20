@@ -62,7 +62,8 @@ export const EXTREME_SHARE = 0.03
 const r4 = (x) => Math.round(x * 1e4) / 1e4
 
 // One pool's extremes: { [stat]: { high, low } }, the outer EXTREME_SHARE of each side, most
-// extreme first, as [value, id, season, name] rows. A stat that flags on one side only
+// extreme first, as [value, id, season, name, team] rows (team: the club's nickname that
+// season, or null). A stat that flags on one side only
 // (STATS `tails`) keeps that side only.
 function extremesOf(role, rows) {
   const keep = Math.ceil(rows.length * EXTREME_SHARE)
@@ -72,7 +73,7 @@ function extremesOf(role, rows) {
       .map((r) => ({ ...r, v: stat.rate(r.line) }))
       .filter((r) => r.v != null)
       .sort((a, b) => a.v - b.v || a.season - b.season || a.id - b.id)
-    const row = (r) => [r4(r.v), r.id, r.season, r.name]
+    const row = (r) => [r4(r.v), r.id, r.season, r.name, r.team]
     const sides = {}
     if (!stat.tails || stat.tails.includes('high')) sides.high = valued.slice(-keep).reverse().map(row)
     if (!stat.tails || stat.tails.includes('low')) sides.low = valued.slice(0, keep).map(row)
@@ -92,13 +93,14 @@ export function buildExtremes(rawBySeason) {
     for (const [season, raw] of Object.entries(rawBySeason)) {
       for (const [id, player] of Object.entries(raw?.[role] ?? {})) {
         const who = { id: Number(id), season: Number(season), name: player.n }
+        const club = (teamId) => raw.teams?.[teamId] ?? null
         player.c.forEach((packed, i) => {
           const line = unpack(role, packed)
           const checkpoint = (i + 1) * 10
-          if (checkpoint < FULL_SEASON && inPool(role, line)) (pools[checkpoint] ??= []).push({ ...who, line })
+          if (checkpoint < FULL_SEASON && inPool(role, line)) (pools[checkpoint] ??= []).push({ ...who, team: club(player.ct?.[i]), line })
         })
         const final = unpack(role, player.f)
-        if (sampleOf(role, final) >= FULL_SEASON && inPool(role, final)) (pools.full ??= []).push({ ...who, line: final })
+        if (sampleOf(role, final) >= FULL_SEASON && inPool(role, final)) (pools.full ??= []).push({ ...who, team: club(player.t), line: final })
       }
     }
     out[role] = {}

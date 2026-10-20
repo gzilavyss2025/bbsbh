@@ -1,11 +1,11 @@
-/* Hot and cold callouts (#1855): the "Standing out" card under the tiles. One callout is an
-   accent rule down its left edge, a kicker, the stat alone on its line in the display face
-   the stat tiles use, then the sample and a mono hint. The words say the tone; the rule
-   only marks it.
+/* Hot and cold callouts (#1855, design B): the "Standing out" card under the tiles. One
+   callout is an accent rule down its left edge, the sentence as its headline in the display
+   face, a mono line with his figure and sample, then the seasons behind the count as the
+   system's leader rows (system/report/leader.css), his own row marked. The words say the
+   tone; the rule only marks it.
    The colours are TEMPERATURE, not good and bad (Gary, 2026-10-20): hot is clay red, cold is
-   All-Star blue, two fixed tokens and no scale between them. The app's good/bad accents
-   (green, clay) read backwards here, since a cold stat in red reads as hot. Both pass AA on
-   the card paper (clay 5.05:1, blue 7.67:1). */
+   All-Star blue, two fixed tokens and no scale between them. Both pass AA on the card paper
+   (clay 5.05:1, blue 7.67:1). */
 .pnext-hc {
   --hc-hot: var(--clay);
   --hc-cold: var(--allstar-blue);
@@ -17,73 +17,34 @@
 .pnext-hc__item--cold {
   border-left-color: var(--hc-cold);
 }
-.pnext-hc__kicker {
+.pnext-hc__headline {
   margin: 0;
-  color: var(--hc-hot);
+  color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: var(--fs-label);
+  font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-}
-.pnext-hc__item--cold .pnext-hc__kicker {
-  color: var(--hc-cold);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-snug);
 }
 .pnext-hc__line {
-  margin: 0;
+  margin: var(--space-1) 0 0;
   color: var(--text-body);
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   line-height: var(--lh-prose);
 }
-.pnext-hc__figure {
-  margin: 0;
-  color: var(--text-heading);
-  line-height: var(--lh-title);
-  font-family: var(--font-display);
-  font-size: var(--fs-title-lg);
-  font-variant-numeric: tabular-nums;
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-title);
+.pnext-hc__list {
+  margin-top: var(--space-2);
 }
-.pnext-hc__hint {
-  margin: 0;
+/* The headshot fills the leader row's 36px mark slot. */
+.shot.pnext-hc__shot {
+  width: 100%;
+  height: 100%;
+}
+.pnext-hc__note {
+  margin: var(--space-1) 0 0;
   color: var(--text-caption);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   line-height: var(--lh-loose);
-}
-/* The seasons behind the count: rank, name and season, value. His own row is marked in
-   the tone's colour and bold; the others link out. */
-.pnext-hc__list {
-  margin: var(--space-2) 0 0;
-  padding: 0;
-  list-style: none;
-}
-/* layout-exempt: a three-column row (rank, who, value) that keeps the values in one column */
-.pnext-hc__row {
-  display: grid;
-  grid-template-columns: var(--space-6) minmax(0, 1fr) auto;
-  gap: var(--space-2);
-  padding: var(--space-1) 0;
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  line-height: var(--lh-ui);
-}
-.pnext-hc__rank,
-.pnext-hc__val {
-  color: var(--text-caption);
-  font-variant-numeric: tabular-nums;
-}
-.pnext-hc__val {
-  text-align: right;
-}
-.pnext-hc__row--self {
-  font-weight: var(--w-bold);
-}
-.pnext-hc__item--hot .pnext-hc__row--self .pnext-hc__who {
-  color: var(--hc-hot);
-}
-.pnext-hc__item--cold .pnext-hc__row--self .pnext-hc__who {
-  color: var(--hc-cold);
 }

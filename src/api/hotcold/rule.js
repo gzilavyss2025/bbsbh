@@ -69,12 +69,13 @@ export function countedRows(rows, cutoff) {
 }
 
 // { role: 'hitting'|'pitching', sportId, rows, cutoff, tails } -> up to MAX_FLAGS of
-// { key, label, tone: 'hot'|'cold', value, percentile, checkpoint, sample, weight, pool, line }.
-// `line` is his counted season line (line.js's fields), for the counts a callout prints. `sample` is games (hitters) or whole innings (pitchers); `percentile` is 0..100, high
+// { key, label, tone: 'hot'|'cold', value, percentile, checkpoint, sample, weight, pool, line, team }.
+// `line` is his counted season line (line.js's fields), for the counts a callout prints;
+// `team` is the club id he played the most counted games for. `sample` is games (hitters) or whole innings (pitchers); `percentile` is 0..100, high
 // meaning a high value of the stat (a high K% is a high percentile for both roles).
 export function hotColdFlags({ role, sportId, rows, cutoff, tails }) {
   if (sportId !== 1 || !STATS[role] || !tails?.[role]) return []
-  const { final } = foldSeason(role, countedRows(rows, cutoff))
+  const { final, team } = foldSeason(role, countedRows(rows, cutoff))
   const sample = sampleOf(role, final)
   const checkpoint = checkpointOf(sample)
   if (checkpoint == null || !inPool(role, final)) return []
@@ -112,7 +113,7 @@ export function hotColdFlags({ role, sportId, rows, cutoff, tails }) {
     if (seen.has(flag.group)) continue
     seen.add(flag.group)
     const { key, label, tone, value, percentile, checkpoint, sample, weight, pool } = flag
-    out.push({ key, label, tone, value, percentile, checkpoint, sample, weight, pool, line: final })
+    out.push({ key, label, tone, value, percentile, checkpoint, sample, weight, pool, line: final, team })
     if (out.length === MAX_FLAGS) break
   }
   return out
@@ -133,13 +134,14 @@ export function mergeRoles(byRole) {
 // {checkpoint}.json`, gen-season-checkpoints.mjs): the stat's high side for a high
 // percentile, the low side for a low one. Strictly further out (a tie is not "better"),
 // and never the player's own season, which sits in the pool. Most extreme first, as
-// { value, id, season, name }. The file keeps the outer 3% and a flag sits in the 2% tail,
-// so every season past him is in it.
+// { value, id, season, name, team }. The file keeps the outer 3% and a flag sits in the 2% tail,
+// so every season past him is in it. Rows are [value, id, season, name, team].
 export function seasonsBeyond(flag, stats, { id, season }) {
   const high = flag.percentile >= 50
   const rows = stats?.[flag.key]?.[high ? 'high' : 'low'] ?? []
   const v = Math.round(flag.value * 1e4) / 1e4
   return rows
     .filter(([value, pid, s]) => (high ? value > v : value < v) && !(pid === id && s === season))
-    .map(([value, pid, s, name]) => ({ value, id: pid, season: s, name }))
+    .map(([value, pid, s, name, team]) => ({ value, id: pid, season: s, name, team: team ?? null }))
 }
+

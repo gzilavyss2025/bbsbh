@@ -4,16 +4,19 @@
 //
 // Two outputs:
 // - scripts/data/season-checkpoints/{season}.json — the raw store, one file per season:
-//   { season, hitting: { [id]: { n: name, f: final, c: [line at 10, 20, …] } }, pitching }
+//   { season, teams: { [teamId]: nickname that season },
+//     hitting: { [id]: { n: name, f: final, c: [line at 10, 20, …], t: club, ct: [club at 10, …] } },
+//     pitching }
 //   with each line packed in `src/api/hotcold/line.js`'s field order. Not shipped: it is
 //   the input the tails are derived from, and the history-line slice (#1855 slice 3)
 //   searches it for past players who were close at the same checkpoint.
 // - public/data/season-checkpoints/tails.json — what the page reads: for each role and
 //   checkpoint, the pool size and 101 quantiles of each stat in `STATS`, over the pooled
-//   seasons. 124 KB.
+//   seasons, plus `teams` ({ [season]: { [teamId]: nickname } }) for the card's own row.
+//   About 135 KB.
 // - public/data/season-checkpoints/extremes/{role}-{checkpoint|full}.json — the outer 3% of
 //   each side of each stat at that checkpoint (`full`: the final lines of the seasons that
-//   reached FULL_SEASON), as [value, id, season, name] rows, so the page can
+//   reached FULL_SEASON), as [value, id, season, name, team] rows, so the page can
 //   say exactly how many past seasons were further out and list them. The page reads one
 //   file per callout, only when one shows.
 //
@@ -47,6 +50,12 @@ const outPath = join(outDir, 'tails.json')
 const SEASONS = 10
 const BATCH = 25
 
+// { [teamId]: nickname } as the club was named THAT season ("Indians" in 2019).
+async function teamNames(season) {
+  const json = await getJson(`/api/v1/teams?sportId=1&season=${season}&fields=teams,id,teamName`)
+  return Object.fromEntries((json.teams ?? []).map((t) => [t.id, t.teamName]))
+}
+
 async function playerIds(role, season) {
   const json = await getJson(
     `/api/v1/stats?stats=season&group=${role}&season=${season}&sportId=1&gameType=R&playerPool=ALL&limit=5000`,
@@ -66,9 +75,9 @@ async function fetchRole(role, season) {
     for (const person of json.people ?? []) {
       const rows = (person.stats ?? []).find((s) => s.group?.displayName === role)?.splits ?? []
       if (!rows.length) continue
-      const { final, checkpoints } = foldSeason(role, rows)
-      const c = Object.keys(checkpoints).map(Number).sort((a, b) => a - b).map((k) => pack(role, checkpoints[k]))
-      out[person.id] = { n: person.fullName, f: pack(role, final), c }
+      const { final, checkpoints, team, teams } = foldSeason(role, rows)
+      const keys = Object.keys(checkpoints).map(Number).sort((a, b) => a - b)
+      out[person.id] = { n: person.fullName, f: pack(role, final), c: keys.map((k) => pack(role, checkpoints[k])), t: team, ct: keys.map((k) => teams[k]) }
     }
   }, { strict: true })
   console.log(`${season} ${role}: ${ids.length} players, ${Object.keys(out).length} with a game log`)
@@ -96,12 +105,13 @@ async function main() {
       rawBySeason[season] = await readJsonOr(path, null)
       continue
     }
-    const raw = { season }
+    const raw = { season, teams: await teamNames(season) }
     for (const role of ROLES) raw[role] = await fetchRole(role, season)
     await writeJsonAtomic(path, raw)
     rawBySeason[season] = raw
   }
-  await writeJsonAtomic(outPath, { generatedAt: new Date().toISOString(), seasons, ...buildTails(rawBySeason) })
+  const teams = Object.fromEntries(seasons.map((s) => [s, rawBySeason[s]?.teams ?? {}]))
+  await writeJsonAtomic(outPath, { generatedAt: new Date().toISOString(), seasons, teams, ...buildTails(rawBySeason) })
   const extremes = buildExtremes(rawBySeason)
   let files = 0
   for (const [role, byCheckpoint] of Object.entries(extremes)) {
