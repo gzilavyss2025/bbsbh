@@ -1549,6 +1549,18 @@ Re-run only to fold in a new season.
   edge from the same SVG, each only when plausible (`checkLayers`). About 160
   requests in all. Coverage report and the method for
   adding a park: `docs/ballpark-layouts.md` (#1859).
+- `gen-league-pennants.mjs` → `public/data/league-pennants.json` — every league pennant
+  by club, 1903 to the current season, as `{ through, teams: { teamId: [{ season,
+  league, name, club, abbr }] } }`. Run by hand once the LCS end each year:
+  `node scripts/gen-league-pennants.mjs [--through 2026]`. About 123 calls
+  (`/schedule/postseason/series?season=Y&hydrate=team`, one a season). Pure half:
+  `scripts/lib/club/league-pennants.mjs`. Reader: `src/api/history/leaguePennants.js`. **A pennant is a
+  World Series berth**, so the two clubs of the W series are the two champions; there is no
+  LCS read. The feed lists a Series once both LCS are decided, so the current season's two
+  pennants appear before a Series game is played. The name, club label (`franchiseName`) and abbreviation are the ones the feed
+  gave for THAT season. The feed has no Series in 1904 or 1994, so the file has no pennant
+  for either, and it starts in 1903: the 1901-02 AL and the NL before 1903 are missing. A
+  club in no AL or NL league stops the run. The Mariners have none.
 - `gen-franchise-history.mjs` → `public/data/franchise-history/{teamId}.json`
   — each of the 30 clubs' name, league and ballpark by season, 1901 to the last
   complete season, as spans (the Brewers' file starts with the 1969 Seattle Pilots).

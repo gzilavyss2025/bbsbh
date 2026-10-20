@@ -1,6 +1,7 @@
 # src/components/honors — team-season honors
 
-`LeaguePennant.jsx` exports the named `LeaguePennant` component.
+`LeaguePennant.jsx` exports the named `LeaguePennant` component. `PennantRow.jsx` is the shared swipe row
+(compact on a phone, full on a wide screen) the team and player pages use.
 Usage, props, design references, and edit locations: [docs/pennants.md](../../../docs/pennants.md).
 
 - Draw-only. The caller selects verified honors and supplies the season's league.
@@ -19,6 +20,8 @@ Usage, props, design references, and edit locations: [docs/pennants.md](../../..
   No physical hardware, folds, perspective, cast shadows, bevels, or animation.
 - `variant` is explicit. Full draws header, mark, year, and league text; compact
   draws mark and year. Width does not choose a variant.
+  The full league title is two lines: "AMERICAN LEAGUE" or "NATIONAL LEAGUE" on one line, then
+  "CHAMPIONS". Keep the league name on one line.
 - `LeaguePennant.jsx` owns text positions, sizes, and font imports. Bungee draws
   the year; Barlow Condensed draws league text. CSS owns responsive sizing and script casing.
 - `palette` accepts six-digit hex only. The model corrects ink/year to 4.5:1 contrast.

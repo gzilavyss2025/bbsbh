@@ -1,5 +1,6 @@
 // Team history (#2019, the contract is in ../../CLAUDE.md): a season ledger of club badges. A farm
-// club's badge flips to its parent org for that season. Replaces the tbd module's timeline card.
+// club's badge flips to its parent org for that season. A band under the ledger shows a pennant for
+// each season he played for a club that won its league (pennantsView.js). Replaces the tbd module's timeline card.
 // Open surface (ADR-0034): no seal, no gate. A pre-debut player has no card (his Path card leads).
 import { useEffect, useState } from 'react'
 import '../../../../../styles/player-next/history/teams.css'
@@ -8,12 +9,15 @@ import { fetchPersonStats, fetchPositions, fetchTransactions } from '../../../..
 import { resolveCareerOrgs } from '../../../../../api/careerTimeline.js'
 import { dayBefore, yearByYearFor } from '../../../../../api/player/context.js'
 import { familyBand } from '../../../../../api/person/family/family.js'
+import { pennantFile } from '../../../../../api/history/leaguePennants.js'
 import { fetchTeam } from '../../../../../api/team.js'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { FlipCard } from '../../../../../components/ui/FlipCard.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { teamAbbr } from '../../../../../lib/teams.js'
 import { FamilyBand } from './FamilyBand.jsx'
+import { PennantBand } from './PennantBand.jsx'
+import { playerPennants } from './pennantsView.js'
 import { relativeLine, teamsView } from './teamsView.js'
 
 const nicknames = async (ids) => {
@@ -37,10 +41,11 @@ async function withLines(band) {
 
 async function loadTeams(bio, group, asOf) {
   if (!bio.debut) return null
-  const [{ mlbYbySplits, milbYbySplits }, txns, band] = await Promise.all([
+  const [{ mlbYbySplits, milbYbySplits }, txns, band, pennants] = await Promise.all([
     yearByYearFor({ id: bio.id, bio }, group),
     fetchTransactions(bio.id, asOf ? dayBefore(asOf) : undefined),
     familyBand(bio.id),
+    pennantFile(),
   ])
   const splits = [...mlbYbySplits, ...milbYbySplits]
   const ledger = teamSeasonsView(splits, group, Number(bio.debut.slice(0, 4)), await resolveCareerOrgs(splits))
@@ -49,7 +54,7 @@ async function loadTeams(bio, group, asOf) {
     nicknames(ledger.seasons.flatMap((s) => (s.stints ?? []).flatMap((x) => [x.teamId, x.orgId]))),
     band && withLines(band),
   ])
-  return { id: bio.id, ledger, splits, trades: txns.filter((t) => t.typeCode === 'TR'), nick, family }
+  return { id: bio.id, ledger, splits, mlbSplits: mlbYbySplits, pennants, trades: txns.filter((t) => t.typeCode === 'TR'), nick, family }
 }
 
 function Face({ teamId, name, sub, cur, flips }) {
@@ -148,6 +153,7 @@ export default function TeamsModule({ bio, asOf, season, onEmpty, onCount }) {
           <Row key={r.years} r={r} />
         ))}
       </ol>
+      <PennantBand pennants={playerPennants(data.pennants, data.mlbSplits, asOf ? Number(asOf.slice(0, 4)) : undefined)} />
       {data.family && <FamilyBand {...data.family} />}
     </div>
   )

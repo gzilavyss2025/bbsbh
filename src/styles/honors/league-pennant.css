@@ -10,3 +10,24 @@
 #root .leaguehonor__script {
   text-transform: none; /* caps-exempt: brush-script artwork keeps its supplied case. */
 }
+
+/* A swipe row of pennants (PennantRow.jsx), inside its own box so a page never scrolls sideways.
+   Each pennant keeps its own club colours (the art's). */
+.pennantrow {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-1);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.pennantrow::-webkit-scrollbar {
+  display: none;
+}
+.pennantrow__slide {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
