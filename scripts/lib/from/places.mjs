@@ -10,7 +10,7 @@ const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
 
 // A country the API writes as a code, when the code is certain. Puerto Rico also comes back as
 // birthCountry "USA" with state "PR"; countryOf() folds that in.
-const COUNTRY_CODE = { MEX: 'Mexico', CUB: 'Cuba', PUR: 'Puerto Rico' }
+const COUNTRY_CODE = { MEX: 'Mexico', CUB: 'Cuba', PUR: 'Puerto Rico', VEN: 'Venezuela', DOM: 'Dominican Republic' }
 
 // The commonest spelling; a tie goes to the first in alphabetical order, so a rerun agrees.
 function mode(counts) {
@@ -24,6 +24,11 @@ const sortedObject = (o) => Object.fromEntries(Object.keys(o).sort().map((k) => 
 const debutYear = (p) => p.debut ?? p.firstSeason
 const tupleOf = (id, p) => [Number(id), p.name, p.pos ?? '', debutYear(p)]
 const byDebut = (a, b) => a[3] - b[3] || cmp(a[1], b[1]) || a[0] - b[0]
+
+// A zone id starts with its state (`ga-atlanta`). A birth coordinate that lands in another state's
+// county is a wrong GeoNames match (a Dublin, Ohio placed in Indianapolis), so it is ignored for
+// both the zone and the map dot: a place with no good point has no zone and no dot.
+const inState = (zone, state) => Boolean(zone) && zone.startsWith(`${state.toLowerCase()}-`)
 
 // -> 'USA' | another country's name | null. A US birth in Puerto Rico is Puerto Rico (D6).
 export function countryOf(birth) {
@@ -57,11 +62,11 @@ export function buildFrom(players, ctx) {
     const st = b?.state?.toUpperCase()
     if (countryOf(b) !== 'USA' || !isState(st) || !slugify(b.city)) continue
     const point = ctx.birthPoint(id)
-    if (!point) continue
+    const county = point && ctx.pointCounty[point]
+    if (!county || !inState(ctx.countyZone[county], st)) continue
     const town = `${st}|${slugify(b.city)}`
     tally(townPoint.has(town) ? townPoint.get(town) : townPoint.set(town, new Map()).get(town), point)
-    const county = ctx.pointCounty[point]
-    if (county) tally(townCounty.has(town) ? townCounty.get(town) : townCounty.set(town, new Map()).get(town), county)
+    tally(townCounty.has(town) ? townCounty.get(town) : townCounty.set(town, new Map()).get(town), county)
   }
   const zoneOfTown = (town) => {
     const county = townCounty.has(town) ? mode(townCounty.get(town)) : null
@@ -105,7 +110,7 @@ export function buildFrom(players, ctx) {
       place: finish(slug, name, {
         city: school?.city || undefined,
         state: state ?? undefined,
-        zone: state && school.county ? ctx.countyZone[school.county] : undefined,
+        zone: state && school.county && inState(ctx.countyZone[school.county], state) ? ctx.countyZone[school.county] : undefined,
         pt: state && school.lat != null && school.lon != null ? ctx.project(school.lat, school.lon) : undefined,
       }, c.players),
     })
@@ -199,10 +204,10 @@ export function buildFrom(players, ctx) {
     const points = new Map()
     for (const id of t.ids) {
       const point = ctx.birthPoint(id)
-      if (!point) continue
+      const county = point && ctx.pointCounty[point]
+      if (!county || !inState(ctx.countyZone[county], t.st)) continue
       tally(points, point)
-      const county = ctx.pointCounty[point]
-      if (county && ctx.countyZone[county]) tally(zones, ctx.countyZone[county])
+      tally(zones, ctx.countyZone[county])
     }
     hometownPlaces.push({
       state: t.st,

@@ -103,11 +103,27 @@ test('hometowns merge St.Louis and St. Louis, take their zone from the birth coo
   assert.deepEqual(index.zoneCounts.hometown, { 'ga-atlanta': 1 })
 })
 
+test('a birth point in another state\'s county is a wrong match: no zone, no dot', () => {
+  // Dublin, OH geocoded into an Indianapolis county (Indiana), as happens with GeoNames
+  const wrong = { countyZone: { 18097: 'in-indianapolis' }, pointCounty: { '39.77,-86.16': '18097' }, birthPoint: () => '39.77,-86.16' }
+  const { files } = run({
+    1: P('A', { birth: { city: 'Dublin', state: 'OH', country: 'USA' }, hs: [{ name: 'Coffman', city: 'Dublin', state: 'OH' }] }),
+  }, wrong)
+  const town = files['hometown/OH.json'].places[0]
+  assert.equal(town.zone, undefined)
+  assert.equal(town.pt, undefined)
+  const hs = files['high-school/OH.json'].places[0]
+  assert.equal(hs.zone, undefined)
+  assert.equal(hs.pt, undefined)
+})
+
 test('Puerto Rico is one country however the API spells it', () => {
   assert.equal(countryOf({ country: 'Puerto Rico' }), 'Puerto Rico')
   assert.equal(countryOf({ country: 'USA', state: 'PR' }), 'Puerto Rico')
   assert.equal(countryOf({ country: 'PUR' }), 'Puerto Rico')
   assert.equal(countryOf({ country: 'MEX' }), 'Mexico')
+  assert.equal(countryOf({ country: 'VEN' }), 'Venezuela')
+  assert.equal(countryOf({ country: 'DOM' }), 'Dominican Republic')
   assert.equal(countryOf({ country: 'USA', state: 'GA' }), 'USA')
   assert.equal(countryOf({ state: 'GA' }), null)
   const { files, index } = run({
