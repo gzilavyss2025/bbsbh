@@ -494,6 +494,12 @@ function accuracyFor(rec, rows, level = 'MLB') {
 //
 // `strict` is for the umpire's own season view (#1482): a year the accuracy
 // store lacks has his games and no accuracy, never the latest season's.
+// Just his game rows across every season on file, [] when he has none. The
+// career card needs no accuracy, so it skips loadUmpire's accuracy reads.
+export async function loadUmpireGames(id) {
+  return (await load(id, 'all'))?.games ?? []
+}
+
 export async function loadUmpire(id, { seasonYear, strict } = {}) {
   const [u, summary, rows, idxMlb, idxAaa] = await Promise.all([
     load(id, seasonYear, strict),

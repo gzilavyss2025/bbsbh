@@ -34,6 +34,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `game/` | `GameCard`, `GameFinder`, `GameResultFace`, `ContinueScoring`, `BoxScoreSkeleton` | The slate/game-selection layer — a game before you're inside its innings |
 | `gamehud/` | `RollingLine`, `HeaderBug`, `ConsoleBand`, `HalfTally`, `BetweenInnings` | Persistent live-game heads-up widgets shown while scoring |
 | `history/` | `BornNearPark`, `PeopleList` | History about people (ADR-0100): the preview's "Born near the park" line. Open surface, no SealBox |
+| `honors/` | `LeaguePennant` | Flat league-champion artwork for team and player pages. Draw-only; callers supply verified season honors. Rules: `honors/CLAUDE.md` |
 | `highlights/` | `HighlightClipCard` | Purely presentational video-clip cards — no fetching, no game-shape knowledge; the caller precomputes the caption and owns the `HighlightSheet` it opens |
 | `inning/` | `HalfInning`, `PitchersSection`, `RosterPanel`, `MarginNotes`, and `focus/` | The innings-viewer shell around the at-bat feed — one layout for every half (ADR-0043's unify amendment), built by `focus/` |
 | `logbook/` | `GameStamp`, `StampGameButton`, `StampInButton`, `StampSheet` | The Logbook stamp (ADR-0035) and its shelves. `check-stamp-surfaces.mjs` names these by path. Rules: `logbook/CLAUDE.md` |
