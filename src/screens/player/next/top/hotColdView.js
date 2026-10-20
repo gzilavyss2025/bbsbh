@@ -55,6 +55,8 @@ export function sampleWords(checkpoint, unit) {
 // player-seasons: when no player is in the list twice it says "Only 5 pitchers", and when
 // one is, "Only 5 times … has a pitcher", so the count stays true. With no list (its file
 // failed to load) it says "Among the best … in the last 10 years", with no number.
+export const ONLY_UP_TO = 10
+
 export function hintWords({ beyond, tone, who, noun, sample, years }) {
   const side = tone === 'hot' ? 'better' : 'worse'
   const one = who.slice(0, -1)
@@ -62,8 +64,10 @@ export function hintWords({ beyond, tone, who, noun, sample, years }) {
   const c = beyond.length
   if (c === 0) return `No ${one}${years} had a ${side} ${noun} ${sample}.`
   const players = new Set(beyond.map((b) => b.id)).size
-  if (players === c) return `Only ${c} ${c === 1 ? one : who}${years} had a ${side} ${noun} ${sample}.`
-  return `Only ${c} times${years} has a ${one} had a ${side} ${noun} ${sample}.`
+  // "Only" fits a small count; above ONLY_UP_TO it drops (Gary, 2026-10-20): "50 times …".
+  const only = c <= ONLY_UP_TO ? 'Only ' : ''
+  if (players === c) return `${only}${c} ${c === 1 ? one : who}${years} had a ${side} ${noun} ${sample}.`
+  return `${only}${c} times${years} has a ${one} had a ${side} ${noun} ${sample}.`
 }
 
 // One value in a list row, in the stat's own terms.

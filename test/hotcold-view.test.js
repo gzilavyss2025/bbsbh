@@ -113,3 +113,11 @@ test('a home-run pace reads short enough for a leader row: "1/7 PA", "ended 1/10
   assert.equal(list.rows[0].value, '1/7 PA')
   assert.equal(list.rows[0].unit, 'ended 1/10')
 })
+
+test('"Only" stays for a count up to 10 and drops above it (Gary, 2026-10-20)', () => {
+  const base = { tone: 'hot', who: 'hitters', noun: 'home-run pace', sample: 'through 30 games', years: ' in the last 10 years' }
+  const many = (n, repeat = false) => Array.from({ length: n }, (_, i) => ({ id: repeat && i === 1 ? 0 : i }))
+  assert.equal(hintWords({ ...base, beyond: many(10) }), 'Only 10 hitters in the last 10 years had a better home-run pace through 30 games.')
+  assert.equal(hintWords({ ...base, beyond: many(11) }), '11 hitters in the last 10 years had a better home-run pace through 30 games.')
+  assert.equal(hintWords({ ...base, beyond: many(50, true) }), '50 times in the last 10 years has a hitter had a better home-run pace through 30 games.')
+})
