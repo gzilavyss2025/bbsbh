@@ -23,8 +23,8 @@
 // bends a little and a towering popup bends a lot because they really do.
 
 import { HOME, diagramInput, wallDistanceAt } from './ballparkGeometry.js'
-import { heightAt, measuredHeightAt } from './layout/fenceShape.js'
-import { fitLift, simFlight } from './flightModel.js'
+import { bearing, heightAt, measuredHeightAt } from './layout/fenceShape.js'
+import { fitLift } from './flightModel.js'
 import { round1 } from '../math/number.js'
 
 // At or under this launch angle the ball is on the ground, drawn dead straight:
@@ -45,12 +45,12 @@ export const MAX_BOW_FT = 130
 
 // On the ground: MLB's trajectory first, the angle as the fallback. Both views
 // ask this, so a ball cannot bow in one and run flat in the other.
-export const isGrounded = (launchAngle, trajectory = null) =>
+const isGrounded = (launchAngle, trajectory = null) =>
   trajectory === 'ground_ball' || launchAngle == null || launchAngle <= GROUND_BALL_MAX_ANGLE
 
 // range × tan(a) / 4: the peak of a flight with no drag, in the chord's units.
 // The bow's depth, and the side view's arc when there is no exit velocity.
-export const noDragApex = (chord, launchAngle) => (chord * Math.tan((Math.min(launchAngle, 89) * Math.PI) / 180)) / 4
+const noDragApex = (chord, launchAngle) => (chord * Math.tan((Math.min(launchAngle, 89) * Math.PI) / 180)) / 4
 
 // How deep the curve departs from the straight home→landing chord, in the same
 // units (= feet). `launchAngle` is degrees off the ground, MLB's own sign
@@ -118,7 +118,7 @@ export function ballFlightPath(landing, launchAngle, trajectory = null, home = H
 // Nathan's two measured balls: 93 ft and 56 ft against measured peaks of 97 and
 // 63. The replay's own 0.35 gives 138 ft for the first. Two balls are a sanity
 // check, not a validation. With no exit velocity the parabola is all there is.
-export const ARC_CD = 0.3
+const ARC_CD = 0.3
 const LIFT_RANGE = [-0.2, 0.45]
 const ARC_SAMPLES = 32
 
@@ -134,7 +134,7 @@ export const hasElevationArc = (ball) => ball?.launchAngle != null && ball?.dist
 // The ball's bearing in degrees off straightaway center, negative toward left
 // field: the frame fenceDistanceAt and heightAt read.
 export function ballBearing(landing, home = HOME) {
-  return (Math.atan2(landing.x - home.x, home.y - landing.y) * 180) / Math.PI
+  return bearing([landing.x - home.x, home.y - landing.y])
 }
 
 // The wall on the ray at `deg`: feet out, feet high, and `label`, the height
@@ -162,8 +162,9 @@ function airPoints(ball) {
       return [dist * u, 4 * apex * u * (1 - u)]
     })
   }
+  // Twelve halvings fit the lift to about 1e-4; the stretch below takes up the rest.
   const [lo, hi] = LIFT_RANGE
-  const f = simFlight(ev, la, fitLift(ev, la, dist, { cd: ARC_CD, lo, hi, iters: 24 }), 3, ARC_CD)
+  const { flight: f } = fitLift(ev, la, dist, { cd: ARC_CD, lo, hi, iters: 12 })
   // Stretched to land on the measured distance exactly, where the lift range
   // could not reach it. The start height is the bat's, 3 ft. The sim's last
   // sample is one step under the ground, past the landing, so it is dropped; so
@@ -171,11 +172,11 @@ function airPoints(ball) {
   // a steep ball back on itself).
   const k = dist / f.dist
   const step = Math.max(1, Math.floor(f.pts.length / ARC_SAMPLES))
-  let far = -1
-  const pts = f.pts
-    .filter((_, i) => i % step === 0)
-    .map(([x, z]) => [x * k, Math.max(0, z)])
-    .filter(([x]) => x < dist && x >= far && ((far = x), true))
+  const pts = []
+  for (let i = 0; i < f.pts.length; i += step) {
+    const x = f.pts[i][0] * k
+    if (x < dist && (!pts.length || x >= pts.at(-1)[0])) pts.push([x, Math.max(0, f.pts[i][1])])
+  }
   pts.push([dist, 0])
   return pts
 }
@@ -193,18 +194,23 @@ export function heightOnArc(pts, x) {
 // 0 at u = 0, 1 at u = 1, level at both ends: a bend with no corner.
 const ease = (u) => u * u * (3 - 2 * u)
 
+// The highest point of an arc, [x, z].
+const topOf = (pts) => pts.reduce((a, b) => (b[1] > a[1] ? b : a))
+
+// The arc with a point laid at `x`, so a line drawn through it crosses there
+// exactly, not somewhere between two samples.
+const withKnot = (pts, x) => [...pts.filter((p) => p[0] < x), [x, heightOnArc(pts, x)], ...pts.filter((p) => p[0] > x)]
+
 // The arc bent to cross `wallFt` at `target` ft high. The bend starts at the
 // peak (or at the plate, for a wall the ball meets on its way up), is full at
 // the wall, and fades out to nothing at the landing. Up to the peak the arc is
-// untouched, so the peak the card prints stays the model's. A point is laid at
-// the wall itself, so the line crosses there at `target` and not between samples.
+// untouched, so the peak the card prints stays the model's. `pts` carries a
+// knot at the wall (withKnot), so the line crosses there at `target`.
 function bendTo(pts, wallFt, target, dist) {
-  const z0 = heightOnArc(pts, wallFt)
-  const delta = target - z0
-  const top = pts.reduce((a, b) => (b[1] > a[1] ? b : a))[0]
+  const delta = target - heightOnArc(pts, wallFt)
+  const top = topOf(pts)[0]
   const from = top < wallFt ? top : 0
-  const atWall = [...pts.filter(([x]) => x < wallFt), [wallFt, z0], ...pts.filter(([x]) => x > wallFt)]
-  return atWall.map(([x, z]) => {
+  return pts.map(([x, z]) => {
     if (x <= from) return [x, z]
     if (x <= wallFt) return [x, z + delta * ease((x - from) / (wallFt - from))]
     return [x, Math.max(0, z + delta * (1 - ease((x - wallFt) / (dist - wallFt))))]
@@ -238,18 +244,18 @@ export function elevationArc(ball, layout = null) {
   let atWall = false
   if (wall && ball.homeRun && dist <= wall.ft) wall = null
   if (wall && dist > wall.ft) {
+    pts = withKnot(pts, wall.ft)
     const z = heightOnArc(pts, wall.ft)
     if (ball.homeRun) {
       if (z < wall.height + HOME_RUN_CLEAR_FT) pts = bendTo(pts, wall.ft, wall.height + HOME_RUN_CLEAR_FT, dist)
     } else {
       if (z > wall.height) pts = bendTo(pts, wall.ft, wall.height, dist)
-      const met = heightOnArc(pts, wall.ft)
-      pts = [...pts.filter(([x]) => x < wall.ft), [wall.ft, met]]
+      pts = pts.filter(([x]) => x <= wall.ft)
       atWall = true
     }
   }
   pts = pts.map(([x, z]) => [round1(x), round1(z)])
-  const top = pts.reduce((a, b) => (b[1] > a[1] ? b : a))
+  const top = topOf(pts)
   return {
     pts,
     peak: { x: top[0], z: top[1] },
