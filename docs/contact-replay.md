@@ -221,7 +221,7 @@ Never a stamp: the stamp stays for Hard-luck, Lucky and Barrel. Constants in `qu
 | --- | --- |
 | `Blast` | in play, `min(1, squared up) * 100 + bat speed >= 164` (MLB glossary, "bat tracking blasts") |
 | `Fast swing` | any swing at 75 mph or more that is not a Blast (Savant's "fast swing") |
-| `Shortened up with two strikes` | two strikes before the pitch, and bat speed 5 mph or more under his season bat speed (`savant-percentiles.json` `rawBat.batSpeed`). The league gap is only about 2 mph, so the cutoff is large on purpose |
+| `Shortened up with two strikes` | two strikes before the pitch, and bat speed 5 to 15 mph under his season bat speed (a slower swing is a check swing or a bunt try, not a shortened one) (`savant-percentiles.json` `rawBat.batSpeed`). The league gap is only about 2 mph, so the cutoff is large on purpose |
 | `Topped it` / `Got under it` | in play, launch angle minus `attack_angle` at or under -20 / at or over 45. Final tier only (needs the CSV). Not a Savant metric. On 91 balls in play (2026-10-13 and 14) the 10th and 90th percentiles of the gap are -23 and 45; the median is 14 |
 
 A missing bat speed gives no note. MiLB gives none.

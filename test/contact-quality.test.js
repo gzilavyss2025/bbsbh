@@ -109,6 +109,8 @@ test('notes: shortened up only at two strikes and 5 mph under his own norm', () 
   const w = { swing: 'whiff', twoStrikes: true }
   assert.deepEqual(swingNotes(w, { batSpeed: 66 }, { norm: 71 }), ['Shortened up with two strikes'])
   assert.deepEqual(swingNotes(w, { batSpeed: 66.5 }, { norm: 71 }), [])
+  assert.deepEqual(swingNotes(w, { batSpeed: 56 }, { norm: 71 }), ['Shortened up with two strikes']) // 15 under: the edge
+  assert.deepEqual(swingNotes(w, { batSpeed: 46.9 }, { norm: 70 }), []) // a check swing or a bunt try is not a shortened swing
   assert.deepEqual(swingNotes({ swing: 'whiff' }, { batSpeed: 60 }, { norm: 71 }), [])
   assert.deepEqual(swingNotes(w, { batSpeed: 60 }, {}), [])
 })
