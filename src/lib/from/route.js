@@ -48,3 +48,7 @@ export function parseFromRoute(parts, q) {
   }
   return bare
 }
+
+// The whole address of a place route, as one string: App.jsx keys the page on it so a new place
+// remounts with fresh state, and the page uses it for its once-per-visit motion.
+export const placeKey = (route) => [route.kind, route.slug, route.state, route.city, route.country].filter(Boolean).join('/')

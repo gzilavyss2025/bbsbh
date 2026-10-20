@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { fromCountryPath, fromPath, fromPlacePath } from '../src/lib/from/path.js'
+import { placeKey } from '../src/lib/from/route.js'
 import { parseRoute } from '../src/lib/route.js'
 
 // The "Where they're from" addresses (#1526, SPEC §4): one test per row of the route table.
@@ -87,4 +88,12 @@ test('/from does not disturb the other routes', () => {
   assert.equal(parseRoute('/scout').name, 'scout')
   assert.equal(parseRoute('/standings').name, 'standings')
   assert.equal(parseRoute('/10222026/milaz/lineup1').name, 'game')
+})
+
+test('placeKey is one string for the whole address, different for every place', () => {
+  const keys = ['/from/college/vanderbilt', '/from/high-school/smyrna-tn', '/from/pa/donora', '/from/ga/donora', '/from/country/cuba/havana']
+    .map((p) => placeKey(parseRoute(p)))
+  assert.equal(new Set(keys).size, keys.length)
+  assert.equal(placeKey(parseRoute('/from/pa/donora')), 'hometown/PA/donora')
+  assert.equal(placeKey(parseRoute('/from/college/vanderbilt')), 'college/vanderbilt')
 })

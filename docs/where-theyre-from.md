@@ -17,6 +17,10 @@ branch.
 |---|---|
 | `/from`, `/from/{st}` | the picker, `src/screens/from/FromPage.jsx` |
 | `/from?list=hometown`, `/from/{st}?zone={zone id}&list=...` | the picker, opened on that list, state and zone |
+| `/from/college/{slug}`, `/from/high-school/{slug}` | one school, `FromPlacePage.jsx` |
+| `/from/{st}/{city}` | one US town, `FromPlacePage.jsx` |
+| `/from/country/{country}` | one country's towns, `FromCountryPage.jsx` |
+| `/from/country/{country}/{city}` | one town abroad, `FromPlacePage.jsx` |
 
 `?list=` is `college`, `high-school` or `hometown`. `?zone=` is a zone id, `{st}-{slug}` (`ga-atlanta`).
 Both set the page's opening state only. The page keeps its own picks and writes them back with
@@ -39,6 +43,22 @@ page and cut the map's zoom short.
 `public/data/from/`, written by two generators: `gen-where-from.mjs` (nightly) and
 `gen-where-from-map.mjs` (hand-run). The files and their shapes are in `docs/api/static-data.md`, the
 generators in `docs/scripts/generators.md`. The reader is `src/api/from/whereFrom.js`.
+
+## A place
+
+`FromPlacePage.jsx` loads one place (`fetchFromPlace` in `src/api/from/whereFrom.js`: a school looks its
+state up in the lookup file first). The hero (`PlaceHero.jsx`) has two tiles, the name, a "Change"
+door back to the picker, a locator map (`Locator.jsx`, the same `map/us.json` at a zoom of 0.6, with a
+dot where the place is) and the fact strip. Below it is one stamped card to a decade, the newest first
+(`DecadeList.jsx`), each a table of Player, Pos and Debut with a link to the player's page.
+
+- The numbers come from `src/lib/from/facts.js` (SPEC §7.4). The second tile is the busiest decade, or
+  the span when every decade has exactly one player.
+- A phone shows one column under a sticky jump bar. From about 740px the cards sit in two columns, each in
+  the column with fewer rows so far, and the bar is not sticky (it wraps to two rows and would cover the
+  card it jumps to).
+- A place with no point (a college the IPEDS match could not place, or a town whose birth point fell in
+  another state) shows no dot. A place with no state, and any place abroad, shows no locator.
 
 ## Zones
 

@@ -12,6 +12,15 @@ const isTown = (list) => list === 'hometown'
 export const pickerIntro = (list) =>
   isTown(list) ? 'Pick a town. See every big leaguer born there.' : 'Pick a school. See every big leaguer who played there.'
 
+export const placeIntro = (list) =>
+  isTown(list)
+    ? 'Every big leaguer born in one town, by the decade of the MLB debut.'
+    : 'Every big leaguer who played at one school, by the decade of the MLB debut.'
+
+export const changeLink = (list) => (isTown(list) ? 'Change town' : 'Change school')
+
+export const placeMissing = 'No place is listed at this address.'
+
 export const searchField = (list) =>
   isTown(list)
     ? { label: 'Find a town', placeholder: 'Donora' }
