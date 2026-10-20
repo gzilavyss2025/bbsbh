@@ -1150,7 +1150,7 @@ for each generator; the reader modules:
   `players` as `[id, name, pos, debutYear]` tuples, oldest debut first. `pt` is `[x, y]` on the
   975 by 610 map. `country/{slug}.json` holds `{ name, places }`. `map/us.json` holds the state outlines
   and `map/{ST}.json` the zones. Spoiler-free: a school or a birthplace says nothing about a game
-  (ADR-0034). The reader module arrives with the picker page.
+  (ADR-0034). Reader: `src/api/from/whereFrom.js`: `fetchFromIndex()`, `fetchFromMap()`, `fetchFromStateMap(st)`, `fetchFromLookup(kind)` and `fetchFromPlaces(kind, st)`, each memoized through `staticJson` / `staticJsonBy`; a missing file answers with `null` (`[]` for a lookup). The pure helpers (search, zoom, copy, routes) are in `src/lib/from/`; the picker is `src/screens/from/FromPage.jsx`.
 - `teamSeasons.js` — who played for each MLB team-season, from
   `public/data/team-seasons.json` (`gen-team-seasons.mjs`, hand-run, ADR-0100).
   `loadTeamSeasons()` returns `{ credit, throughSeason, players, teamSeasons }`:
