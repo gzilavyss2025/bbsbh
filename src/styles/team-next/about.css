@@ -43,3 +43,24 @@
 .tnext__about-door {
   align-self: flex-end;
 }
+
+/* The pennant wall: a swipe row of compact league pennants, newest first, inside its own box
+   so the page never scrolls sideways. Each pennant keeps its own club colours (the art's). */
+.pennantwall__track {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-1);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.pennantwall__track::-webkit-scrollbar {
+  display: none;
+}
+.pennantwall__slide {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
