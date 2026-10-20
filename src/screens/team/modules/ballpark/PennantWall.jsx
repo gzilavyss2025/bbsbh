@@ -1,7 +1,9 @@
 import { LeaguePennant } from '../../../../components/honors/LeaguePennant.jsx'
+import { WIDE_QUERY, useMediaQuery } from '../../../../hooks/useMediaQuery.js'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 
-// A club's league pennants, newest first, in a swipe row under the Franchise history card.
+// A club's league pennants, newest first, in a swipe row: compact on a phone (mark and
+// year, a short row), full on a wide screen (club, mark, year and league title) under the Franchise history card.
 // Each pennant is drawn with the name, club label and abbreviation of ITS year (the 1955
 // Brooklyn Dodgers), from the verified rows in src/api/leaguePennants.js. The art decides
 // the mark: a covered era keeps its abbreviation, any other season takes the one-color
@@ -10,6 +12,7 @@ import { Card } from '../../../../components/ui/frame/Card.jsx'
 //
 // `cardProps`: the one-scroll page's stamped frame and name tab (props for Card).
 export function PennantWall({ pennants, cardProps }) {
+  const wide = useMediaQuery(WIDE_QUERY)
   if (!pennants?.length) return null
   return (
     <Card {...cardProps} count={`${pennants.length} since 1903`} className="pennantwall">
@@ -23,8 +26,8 @@ export function PennantWall({ pennants, cardProps }) {
               teamName={p.name}
               clubLabel={p.club}
               abbreviation={p.abbr}
-              variant="compact"
-              width={84}
+              variant={wide ? 'full' : 'compact'}
+              width={wide ? 150 : 64}
             />
           </li>
         ))}
