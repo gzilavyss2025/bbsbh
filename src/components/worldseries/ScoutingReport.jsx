@@ -46,7 +46,7 @@ import { Stack } from '../ui/layout/Stack.jsx'
 //   game          the focus game's upcoming row (api/postseason/upcoming.js): venue and probables, or null
 // Adding a card: one entry in scouting.js, one here.
 const CARD = {
-  'nine-keys': ({ nineKeys, sides, season }) => <SeriesNineKeys data={nineKeys} clubs={sides.map((id) => ({ id }))} season={season} />,
+  'nine-keys': ({ nineKeys, sides, season }) => <SeriesNineKeys data={nineKeys} clubs={sides.map((id) => ({ id }))} season={season} labelAs="h3" />,
   'glove-legs': ({ gloveLegs, sides }) => <GloveLegs rows={gloveLegs} clubIds={sides} />,
   'matchup-edges': ({ edges }) => <MatchupEdges edges={edges} variant="faceoff" />,
   'film-room': ({ meetings, dayType, noteClub }) => <FilmRoom meetings={meetings} compact={dayType === 'game'} clubId={noteClub} />,
