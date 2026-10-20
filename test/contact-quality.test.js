@@ -48,9 +48,9 @@ test('swing duration: 0.16 s x 72 / bat speed, clamped to 0.14-0.18 s', () => {
 
 test('in play, MLB: all figures, the HR parks, and the waiting figure before bat speed', () => {
   const full = qualityFigures(inplay, tr({ xba: 0.96, hrParks: 30 }), { eventType: 'home_run', mlb: true })
-  assert.deepEqual(full.figs.map((f) => f.label), ['mph off the bat', 'squared up', 'xBA', 'parks a home run'])
+  assert.deepEqual(full.figs.map((f) => f.label), ['mph off the bat', 'squared up', 'xBA', 'HR parks'])
   assert.equal(full.figs[2].num, '.960')
-  assert.equal(full.figs[3].num, '30 of 30')
+  assert.equal(full.figs[3].num, '30/30')
   const wait = qualityFigures(inplay, undefined, { eventType: 'single', mlb: true })
   assert.deepEqual(wait.figs[1], { num: '—', label: 'squared up · waits for bat speed', wait: true })
 })
@@ -88,4 +88,47 @@ test('a row with a null bat speed shows the waiting figure and the default ring'
   const { figs } = qualityFigures(inplay, tr({ batSpeed: null }), { eventType: 'single', mlb: true })
   assert.deepEqual(figs[1], { num: '—', label: 'squared up · waits for bat speed', wait: true })
   assert.equal(ringStrength(squaredUp(100, null, 90)), 0.8)
+})
+
+// #1771 later pass (docs/contact-replay.md §7.3): the pencil notes.
+import { BLAST_SUM, swingNotes } from '../src/lib/pitcherCard/quality.js'
+import { atBatScenePitches } from '../src/lib/pitcherCard/atBat.js'
+
+test('notes: Blast at squared-up % + bat speed >= 164, else Fast swing at 75 mph', () => {
+  assert.equal(BLAST_SUM, 164)
+  const p = { swing: 'inplay', mph: '90.0', hit: { exitVelo: 85 } }
+  assert.deepEqual(swingNotes({ ...p, hit: { exitVelo: 111 } }, { batSpeed: 78 }), ['Blast']) // 111 / (1.23*78+19.04) ~ 98% + 78
+  assert.deepEqual(swingNotes(p, { batSpeed: 76 }), ['Fast swing']) // ~76% + 76
+  assert.deepEqual(swingNotes(p, { batSpeed: 70 }), [])
+  assert.deepEqual(swingNotes({ swing: 'whiff' }, { batSpeed: 76 }), ['Fast swing'])
+  assert.deepEqual(swingNotes(p, { batSpeed: null }), []) // waiting is no note
+  assert.deepEqual(swingNotes(p, undefined), [])
+})
+
+test('notes: shortened up only at two strikes and 5 mph under his own norm', () => {
+  const w = { swing: 'whiff', twoStrikes: true }
+  assert.deepEqual(swingNotes(w, { batSpeed: 66 }, { norm: 71 }), ['Shortened up with two strikes'])
+  assert.deepEqual(swingNotes(w, { batSpeed: 66.5 }, { norm: 71 }), [])
+  assert.deepEqual(swingNotes({ swing: 'whiff' }, { batSpeed: 60 }, { norm: 71 }), [])
+  assert.deepEqual(swingNotes(w, { batSpeed: 60 }, {}), [])
+})
+
+test('notes: topped and under come from launch minus attack angle, final tier only', () => {
+  const p = (launchAngle) => ({ swing: 'inplay', mph: '90.0', hit: { exitVelo: 80, launchAngle } })
+  assert.deepEqual(swingNotes(p(-12), { batSpeed: 65, attackDeg: 10 }), ['Topped it']) // -22
+  assert.deepEqual(swingNotes(p(55), { batSpeed: 65, attackDeg: 8 }), ['Got under it']) // 47
+  assert.deepEqual(swingNotes(p(20), { batSpeed: 65, attackDeg: 10 }), [])
+  assert.deepEqual(swingNotes(p(-30), { batSpeed: 65 }), []) // no CSV row: pencil, no note
+})
+
+test('qualityFigures carries the notes; MiLB none', () => {
+  const p = { swing: 'whiff', twoStrikes: false }
+  assert.deepEqual(qualityFigures(p, { batSpeed: 77 }, { eventType: 'strikeout', mlb: true }).notes, ['Fast swing'])
+  assert.deepEqual(qualityFigures(p, { batSpeed: 77 }, { eventType: 'strikeout', mlb: false }).notes, [])
+})
+
+test('scene pitches know the two-strike count from the pitch before', () => {
+  const d = (no, strikes) => ({ no, strikes, balls: 0, typeCode: 'FF', mph: 95, cat: 'whiff' })
+  const out = atBatScenePitches([d(1, 1), d(2, 2), d(3, 2)])
+  assert.deepEqual(out.map((x) => x.twoStrikes), [false, false, true].slice(0, out.length))
 })

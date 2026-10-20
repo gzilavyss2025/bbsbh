@@ -209,6 +209,20 @@ plate's back point. The contact point `K` is the measured pitch path at
 `y = YC` (the `realFlight` of the pitch, `camera.js`). Contact time `tc` is the
 time the pitch reaches `y = YC`.
 
+### 7.3 Pencil notes (#1771 later pass)
+
+A short note at the end of the figure row, in `--font-display` label type, `--text-caption`.
+Never a stamp: the stamp stays for Hard-luck, Lucky and Barrel. Constants in `quality.js`.
+
+| Note | Rule |
+| --- | --- |
+| `Blast` | in play, `min(1, squared up) * 100 + bat speed >= 164` (MLB glossary, "bat tracking blasts") |
+| `Fast swing` | any swing at 75 mph or more that is not a Blast (Savant's "fast swing") |
+| `Shortened up with two strikes` | two strikes before the pitch, and bat speed 5 mph or more under his season bat speed (`savant-percentiles.json` `rawBat.batSpeed`). The league gap is only about 2 mph, so the cutoff is large on purpose |
+| `Topped it` / `Got under it` | in play, launch angle minus `attack_angle` at or under -20 / at or over 45. Final tier only (needs the CSV). Not a Savant metric. On 91 balls in play (2026-10-13 and 14) the 10th and 90th percentiles of the gap are -23 and 45; the median is 14 |
+
+A missing bat speed gives no note. MiLB gives none.
+
 #### Measured on real games
 
 Measured 2026-10-19 for #2345. No value in this spec changed.
@@ -386,8 +400,9 @@ ring; attack label (phase C); trajectory tag; honesty tag.
   a ball dot. After landing, the trace fades to 60% over 1400 ms.
 - **Apex.** For a launch angle of 8° or more: a dashed pencil drop from the
   apex and the label `apex ≈ 29 ft · drawn`. The apex comes from the fitted
-  model, so it is pencil. When the apex is in the top 46 units of the strip,
-  put the label under the arc, to the right of the drop, so it never meets the
+  model, so it is pencil. The label sits above the apex, centred and kept
+  inside the strip. The strip has a 30-unit band above the baseline's 80-unit
+  scale for the title and a tall apex, so the label never meets the arc or the
   title.
 - **Landing.** The Contact card's rings: one ring from 3 to 15 units over
   900 ms; a home run adds a second ring from 3 to 25 units, 140 ms later, over
@@ -406,7 +421,7 @@ verdict wraps to its own line, right-aligned.
 
 | Outcome | Figures, in order |
 | --- | --- |
-| In play | exit velocity (`mph off the bat`), squared-up %, xBA, and for a home run `27 of 30` (`parks a home run`) |
+| In play | exit velocity (`mph off the bat`), squared-up %, xBA, and for a home run `27/30` (`HR parks`, short so the row keeps two lines on a phone) |
 | Whiff | bat speed (`mph bat speed`), horizontal break (`horizontal break`) |
 | Foul | bat speed |
 
@@ -557,7 +572,7 @@ pitch shows that pitch's rest frame with no motion.
 | Card | Scrolled off screen | Clock stops; it resumes from the same `tau` |
 | Card | Leaves the rail (wide) | Pick drops; it shows the rest frame when it comes back |
 | Quality line | Pitch with no swing | Empty, but its height stays |
-| Phase C attack label | After contact | `attack +9° · measured` in ink, `--fs-cell`, next to the barrel end |
+| Phase C attack label | After contact | `attack +9° · measured` in ink, `--fs-cell`, in a fixed slot at the scene top left (it sat on the bat when it rode the barrel end) |
 
 The controls are 44 px tall (`size="tap"`), not the `control` size. These
 buttons are the only way into the replay on a phone.
@@ -582,7 +597,7 @@ buttons are the only way into the replay on a phone.
   (`SW.at(0)`), drawn in pencil from release on: no smear bats, no barrel path.
   Checked on gamePk 849810 (at-bats 20 and 57) and 849812 (at-bat 37).
 - **Popup and foul popup**: the side view clips the arc at the top of the strip
-  and keeps the apex label under the arc.
+  and keeps the apex label above the apex.
 - **Home run beyond 450 ft**: the trace leaves the strip on the right; the
   label stays in the axis row.
 - **Switch hitter**: the side comes from this plate appearance's `batSide`.
@@ -669,8 +684,6 @@ the route with `?nointro` and the gamePk.
 - Bounce, overshoot and confetti. A home run gets the second landing ring and
   nothing more.
 - Any change to how the Now Pitching card draws pitches.
-- Three more quality-line signals from issue #1771: fast swing or blast,
-  two-strike shortening, and "topped it" or "got under it". Gary kept them on
-  the issue as a later pass (2026-10-18). The quality line stays short.
+- (Shipped as section 7.3: the pencil notes.)
 - The real park's wall in the side view (a later pass could read it from
   `src/lib/ballpark/`).

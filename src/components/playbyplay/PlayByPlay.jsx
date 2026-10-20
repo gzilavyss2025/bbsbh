@@ -762,7 +762,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
       {hasZone && (
         <Card as="div" frame="ledger" body="flush" className="pbp__zonecell">
           {replay && wide ? (
-            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} replay={replay} id={entry.atBatIndex} last={replayLast} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={entry.atBatIndex} />
+            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} replay={replay} id={entry.atBatIndex} last={replayLast} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={entry.atBatIndex} batterId={entry.batterId} />
           ) : (
             <>
               <PitchList pitchDetails={pitchDetails} />
@@ -772,7 +772,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
         </Card>
       )}
       {replayOpen && replay && !wide && (
-        <ReplaySheet pitchDetails={pitchDetails} replay={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={entry.atBatIndex} />
+        <ReplaySheet pitchDetails={pitchDetails} replay={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={entry.atBatIndex} batterId={entry.batterId} />
       )}
       {zoneOpen && hasZone && (
         <StrikeZoneModal

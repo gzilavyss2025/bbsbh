@@ -15,13 +15,13 @@ const STAMP_MS = 380 // --dur-stamp-in
 // The text is React's, so data arriving re-renders the rest frame and nothing else; the fade-in
 // draws through refs from the replay's one clock, like SideView. Plain text in the DOM, in reading
 // order, no live region (§12). Its min-height keeps the space on every pitch (ADR-0046).
-export function QualityLine({ pitches, drawers, at, bat, mlb, eventType }) {
+export function QualityLine({ pitches, drawers, at, bat, mlb, eventType, norm }) {
   const row = useRef(null)
   const stamp = useRef(null)
   const idx = at ? Math.max(0, pitches.findIndex((p) => p.no === at.no)) : pitches.length - 1 // the replay rests on its last pitch
-  const { figs, verdict } = useMemo(
-    () => qualityFigures(pitches[idx], bat?.get(pitches[idx].playId), { eventType, mlb }),
-    [pitches, idx, bat, eventType, mlb],
+  const { figs, verdict, notes } = useMemo(
+    () => qualityFigures(pitches[idx], bat?.get(pitches[idx].playId), { eventType, mlb, norm }),
+    [pitches, idx, bat, eventType, mlb, norm],
   )
   const beats = useMemo(() => pitches.map((p) => pitchBeats(p, SLOW, figs.length)), [pitches, figs.length])
   const frame = useRef([idx, 0, true]) // the last frame drawn, redrawn when the text changes
@@ -58,6 +58,11 @@ export function QualityLine({ pitches, drawers, at, bat, mlb, eventType }) {
           </div>
         ))}
       </Cluster>
+      {notes.length > 0 && (
+        <span className="pqual__note">
+          {notes.map((t, i) => <span key={t}>{i > 0 && ' · '}{t === 'Blast' ? <b className="pqual__blast">{t}</b> : t}</span>)}
+        </span>
+      )}
       {verdict && <span ref={stamp} className={`pqual__stamp pqual__stamp--${verdict === 'Hard-luck out' ? 'out' : 'good'}`}>{verdict}</span>}
     </Cluster>
   )
