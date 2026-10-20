@@ -18,6 +18,7 @@ import { monthDayName } from '../lib/dates.js'
 import { seasonRangeLabel } from '../lib/seasons/view.js'
 import { useSeasonData } from '../hooks/seasons/useSeasonData.js'
 import { SeasonPicker } from '../components/season/SeasonPicker.jsx'
+import { UmpireCareer } from '../components/umpire/UmpireCareer.jsx'
 import { UmpireSeasonCompare } from '../components/umpire/UmpireSeasonCompare.jsx'
 import { Cluster } from '../components/ui/layout/Cluster.jsx'
 import { roundTag } from '../lib/postseason/roundTag.js'
@@ -180,6 +181,7 @@ export function UmpirePage({ id, seasonYear, vs }) {
       <div className="umpage__toprow">
         <div className="umpage__tendcol">
           <UmpireTendencies umpire={data} label={seasonRangeLabel(data.accuracySeasons)} />
+          <UmpireCareer id={id} />
         </div>
         <div className="umpage__sidecol">
           {teams.length > 0 && (
