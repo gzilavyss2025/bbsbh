@@ -22,10 +22,10 @@ suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul
 
 ## The top cards
 
-`top/` holds the hero's parts and one page-level card, none of them slots: `HeroBand` (the status rows, the first child of the hero card, #2008);
+`top/` holds the hero's parts and two page-level cards, none of them slots: `HeroBand` (the status rows, the first child of the hero card, #2008);
 `HeroStamp` and `HeroStrip` (#2009: the OVR stamp at the right end of the hero row, a button that opens the ratings strip at the hero's foot, folded on load; the hero's extras are `headerExtras` in `../heroData.js`; the nickname and school are cells in the two-column fact table, #1863);
 `HeroActionPhoto` (#1863: an action photo as a faded wash behind the hero row, `lib/headshot/actionPhoto.js`; shown only after it loads, removed on a 404, so a retired or MiLB player keeps the plain hero; `vertical` only, no spoiler gate, the player page is an open surface);
-`OverviewExtras` (rank chips, postseason, other levels), a stamped Card under the tiles that hides when it has none. The banner text is `../statusBanners.js`.
+`HotCold` (#1855): the "Standing out" card under the tiles, at most two season stats in the league's 2% tails at the same sample (`api/hotcold/`); hidden when none, and today's games never count. Design B: each callout leads with the sentence ("Only 7 pitchers in the last 10 years had a better ERA over a full season.") and lists those seasons as `LeaderRow`s (headshot, "2022 · Padres"), the top three shown and a `Door` for the rest. `HotColdCallout` is the one callout, so a restyle is one place. `OverviewExtras` (rank chips, postseason, other levels), a stamped Card under it that hides when it has none. The banner text is `../statusBanners.js`.
 
 ## The module contract
 

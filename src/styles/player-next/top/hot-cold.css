@@ -1,0 +1,82 @@
+/* Hot and cold callouts (#1855, design B): the "Standing out" card under the tiles. One
+   callout is an accent rule down its left edge, the sentence as its headline in the display
+   face, a mono line with his figure and sample, then the seasons behind the count as the
+   system's leader rows (system/report/leader.css), his own row marked. The words say the
+   tone; the rule only marks it.
+   The colours are TEMPERATURE, not good and bad (Gary, 2026-10-20): hot is clay red, cold is
+   All-Star blue, two fixed tokens and no scale between them. Both pass AA on the card paper
+   (clay 5.05:1, blue 7.67:1). */
+.pnext-hc {
+  --hc-hot: var(--clay);
+  --hc-cold: var(--allstar-blue);
+}
+.pnext-hc__item {
+  padding-left: var(--space-3);
+  border-left: var(--bw-heavy) solid var(--hc-hot);
+}
+.pnext-hc__item--cold {
+  border-left-color: var(--hc-cold);
+}
+.pnext-hc__headline {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-snug);
+}
+.pnext-hc__line {
+  margin: var(--space-1) 0 0;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+.pnext-hc__list {
+  margin-top: var(--space-2);
+}
+/* The headshot fills the leader row's 36px mark slot. */
+.shot.pnext-hc__shot {
+  width: 100%;
+  height: 100%;
+}
+.pnext-hc__note {
+  margin: var(--space-1) 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  line-height: var(--lh-loose);
+}
+/* A name in a leader row. The link is a button, and a button drops the row's tracking, so
+   it takes the row's face and tracking (--ls-label, the leader row's) back: every name,
+   linked or his own, reads the same. A long name
+   shrinks a step at a time to fit (FitName in HotCold.jsx), and at the last step wraps. */
+.pnext-hc__fit .plink {
+  font: inherit;
+  letter-spacing: var(--ls-label);
+}
+.pnext-hc__fit[data-fit='field'] {
+  font-size: var(--fs-field);
+}
+.pnext-hc__fit[data-fit='ui'],
+.pnext-hc__fit[data-fit='wrap'] {
+  font-size: var(--fs-ui);
+}
+.pnext-hc__fit[data-fit='wrap'] {
+  white-space: normal;
+}
+/* A very narrow row (a 320px phone leaves the list about 240px) drops the headshot and
+   tightens its sides, so a long surname fits; the rank and the figure still carry the row. */
+.pnext-hc__list {
+  container-type: inline-size;
+}
+@container (max-width: 280px) {
+  .pnext-hc__list .leaderrow {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding-inline: var(--space-2);
+  }
+  .pnext-hc__list .leaderrow__mark {
+    display: none;
+  }
+}
