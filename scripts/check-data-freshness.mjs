@@ -74,6 +74,7 @@ export const EXCEPT = {
   'ovr-history/': 'nightly with gen-ovr.mjs (#1722); the shards carry no clock (a row is dated by the inputs it was built from), so there is no stamp to age',
   'world-series/': 'hand-run after each World Series (gen-world-series.mjs, gen-world-series-events.mjs); a finished Series never changes and the files carry no clock',
   'milb-seasons/': 'hand-run once a year (gen-milb-seasons.mjs, #1719); a finished minor-league season never changes',
+  'season-checkpoints/': 'hand-run once a year after the regular season (gen-season-checkpoints.mjs, #1855); the tails pool finished seasons only',
   // Frozen ON PURPOSE, which is the one shape this guard cannot tell from a
   // dead generator. A level's pool is a list of games from a season that is
   // over, so it is checked once and then only re-joined against the prospect
