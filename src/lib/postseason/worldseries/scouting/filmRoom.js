@@ -73,7 +73,7 @@ function starterOf(side) {
 // -> one entry per meeting, oldest first (the order handed in):
 // { gamePk, date, gameNumber, day, ump, awayAbbr, homeAbbr, rows: [{ id, abbr, runs, hits, errors, win }],
 //   innings: [{ abbr, runs: [n | null] }] (one row per club, one cell per inning; [] with no linescore),
-//   people: [{ label: 'W' | 'L' | 'SV', name, id (or null), teamId (or null) }],
+//   people: [{ label: 'W' | 'L' | 'SV', name, surname, id (or null), teamId (or null) }],
 //   decisions, starters: [{ id, abbr, name, surname, listName, hand, line, stats: [{ label, value }], mix: [{ code, pct }] }],
 //   scoring?: [{ inning, tag, half, num, text, teamId (the club batting), playId (clip key or null) }], lineups? }  (the last two only when not `compact`)
 export function filmRoomModel(meetings, { compact = false } = {}) {
@@ -97,7 +97,7 @@ export function filmRoomModel(meetings, { compact = false } = {}) {
           // the win and the save are the winner's, the loss is the other club's
           const lead = sides.find((x) => x.runs === top && sides.filter((y) => y.runs === top).length === 1)
           const club = lead ? (k === 'l' ? sides.find((x) => x !== lead) : lead) : null
-          return { label, name, id: m.decisionIds?.[k] ?? null, teamId: club?.id ?? null }
+          return { label, name, surname: surnameOf(name), id: m.decisionIds?.[k] ?? null, teamId: club?.id ?? null }
         }),
       decisions: [w && `W ${w}`, l && `L ${l}`, s && `SV ${s}`].filter(Boolean).join(' · '),
       starters: sides.map(starterOf).filter(Boolean),

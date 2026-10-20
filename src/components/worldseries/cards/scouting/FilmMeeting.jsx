@@ -148,9 +148,9 @@ export function FilmMeeting({ m }) {
           <ul className="ww-film__people">
             {m.people.map((p) => (
               <li key={p.label}>
-                {p.id != null && <Headshot personId={p.id} name={p.name} teamId={p.teamId} className="ww-film__shot" />}
+                {p.id != null && <Headshot personId={p.id} name={p.name} teamId={p.teamId} tint={false} className="ww-film__shot" />}
                 <span className="t-label">{p.label}</span>
-                <span className="ww-film__pname2">{p.name}</span>
+                <span className="ww-film__pname2">{p.surname || p.name}</span>
               </li>
             ))}
           </ul>

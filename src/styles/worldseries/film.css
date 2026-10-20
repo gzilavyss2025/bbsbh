@@ -101,9 +101,17 @@
   min-width: 0;
 }
 
+/* The stamped notification card's photo (ADR-0113, .change__shot--stamped): square, a heavy ink edge on cream. */
 .shot.ww-film__shot {
   width: var(--shot-sm-w);
   height: var(--shot-sm-h);
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--paper-cream);
+}
+
+.shot.ww-film__shot img {
+  filter: none;
 }
 
 .ww-film__pname2 {

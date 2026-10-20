@@ -161,6 +161,8 @@ test('the W and SV pitchers are the winner\'s, the L pitcher the other club\'s, 
   const g = { ...M[0], decisions: { w: 'A', l: 'B', s: 'C' }, decisionIds: { w: 1, l: 2, s: 3 } }
   const [m] = filmRoomModel([g], {})
   assert.deepEqual(m.people.map((p) => [p.label, p.id, p.teamId]), [['W', 1, 158], ['L', 2, 139], ['SV', 3, 158]])
+  const jr = filmRoomModel([{ ...M[0], decisions: { w: 'Luis Garcia Jr.', l: '', s: '' }, decisionIds: { w: 9 } }], {})[0]
+  assert.equal(jr.people[0].surname, 'Garcia')
   const none = filmRoomModel([{ ...M[0], decisions: { w: '', l: '', s: '' } }], {})[0]
   assert.deepEqual(none.people, [])
 })
