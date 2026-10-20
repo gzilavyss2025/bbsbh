@@ -1,0 +1,113 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "people": [
+  {
+   "id": 671096,
+   "fullName": "Andrew Abbott",
+   "link": "/api/v1/people/671096",
+   "firstName": "Andrew",
+   "lastName": "Abbott",
+   "primaryNumber": "41",
+   "birthDate": "1999-06-01",
+   "currentAge": 27,
+   "birthCity": "Lynchburg",
+   "birthStateProvince": "VA",
+   "birthCountry": "USA",
+   "height": "6' 0\"",
+   "weight": 192,
+   "active": true,
+   "currentTeam": {
+    "id": 113,
+    "link": "/api/v1/teams/113"
+   },
+   "primaryPosition": {
+    "code": "1",
+    "name": "Pitcher",
+    "type": "Pitcher",
+    "abbreviation": "P"
+   },
+   "useName": "Andrew",
+   "useLastName": "Abbott",
+   "middleName": "Cole",
+   "boxscoreName": "Abbott, A",
+   "gender": "M",
+   "isPlayer": true,
+   "isVerified": true,
+   "draftYear": 2021,
+   "mlbDebutDate": "2023-06-05",
+   "batSide": {
+    "code": "L",
+    "description": "Left"
+   },
+   "pitchHand": {
+    "code": "L",
+    "description": "Left"
+   },
+   "nameFirstLast": "Andrew Abbott",
+   "nameSlug": "andrew-abbott-671096",
+   "firstLastName": "Andrew Abbott",
+   "lastFirstName": "Abbott, Andrew",
+   "lastInitName": "Abbott, A",
+   "initLastName": "A Abbott",
+   "fullFMLName": "Andrew Cole Abbott",
+   "fullLFMName": "Abbott, Andrew Cole",
+   "strikeZoneTop": 3.37,
+   "strikeZoneBottom": 1.54
+  },
+  {
+   "id": 690953,
+   "fullName": "Mick Abel",
+   "link": "/api/v1/people/690953",
+   "firstName": "McLean",
+   "lastName": "Abel",
+   "primaryNumber": "20",
+   "birthDate": "2001-08-18",
+   "currentAge": 25,
+   "birthCity": "Portland",
+   "birthStateProvince": "OR",
+   "birthCountry": "USA",
+   "height": "6' 5\"",
+   "weight": 190,
+   "active": true,
+   "currentTeam": {
+    "id": 142,
+    "name": "Minnesota Twins",
+    "link": "/api/v1/teams/142"
+   },
+   "primaryPosition": {
+    "code": "1",
+    "name": "Pitcher",
+    "type": "Pitcher",
+    "abbreviation": "P"
+   },
+   "useName": "Mick",
+   "useLastName": "Abel",
+   "middleName": "Stine",
+   "boxscoreName": "Abel",
+   "gender": "M",
+   "isPlayer": true,
+   "isVerified": true,
+   "draftYear": 2020,
+   "pronunciation": "AY-bull",
+   "mlbDebutDate": "2025-05-18",
+   "batSide": {
+    "code": "R",
+    "description": "Right"
+   },
+   "pitchHand": {
+    "code": "R",
+    "description": "Right"
+   },
+   "nameFirstLast": "Mick Abel",
+   "nameSlug": "mick-abel-690953",
+   "firstLastName": "Mick Abel",
+   "lastFirstName": "Abel, Mick",
+   "lastInitName": "Abel, M",
+   "initLastName": "M Abel",
+   "fullFMLName": "McLean Stine Abel",
+   "fullLFMName": "Abel, McLean Stine",
+   "strikeZoneTop": 3.433,
+   "strikeZoneBottom": 1.733
+  }
+ ]
+}

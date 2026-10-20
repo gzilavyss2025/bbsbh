@@ -1,0 +1,188 @@
+{
+    "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+    "people": [
+        {
+            "id": 592885,
+            "fullName": "Christian Yelich",
+            "link": "/api/v1/people/592885",
+            "firstName": "Christian",
+            "lastName": "Yelich",
+            "primaryNumber": "22",
+            "birthDate": "1991-12-05",
+            "currentAge": 34,
+            "birthCity": "Thousand Oaks",
+            "birthStateProvince": "CA",
+            "birthCountry": "USA",
+            "height": "6' 4\"",
+            "weight": 220,
+            "active": true,
+            "primaryPosition": {
+                "code": "10",
+                "name": "Designated Hitter",
+                "type": "Hitter",
+                "abbreviation": "DH"
+            },
+            "useName": "Christian",
+            "useLastName": "Yelich",
+            "middleName": "Stephen",
+            "boxscoreName": "Yelich",
+            "nickName": "Yeli",
+            "gender": "M",
+            "isPlayer": true,
+            "isVerified": true,
+            "draftYear": 2010,
+            "pronunciation": "YELL-itch",
+            "education": {
+                "highschools": [
+                    {
+                        "name": "Westlake",
+                        "city": "Westlake Village",
+                        "state": "CA"
+                    }
+                ]
+            },
+            "mlbDebutDate": "2013-07-23",
+            "batSide": {
+                "code": "L",
+                "description": "Left"
+            },
+            "pitchHand": {
+                "code": "R",
+                "description": "Right"
+            },
+            "nameFirstLast": "Christian Yelich",
+            "nameSlug": "christian-yelich-592885",
+            "firstLastName": "Christian Yelich",
+            "lastFirstName": "Yelich, Christian",
+            "lastInitName": "Yelich, C",
+            "initLastName": "C Yelich",
+            "fullFMLName": "Christian Stephen Yelich",
+            "fullLFMName": "Yelich, Christian Stephen",
+            "strikeZoneTop": 3.37,
+            "strikeZoneBottom": 1.7
+        },
+        {
+            "id": 543243,
+            "fullName": "Sonny Gray",
+            "link": "/api/v1/people/543243",
+            "firstName": "Sonny",
+            "lastName": "Gray",
+            "primaryNumber": "54",
+            "birthDate": "1989-11-07",
+            "currentAge": 36,
+            "birthCity": "Smyrna",
+            "birthStateProvince": "TN",
+            "birthCountry": "USA",
+            "height": "5' 10\"",
+            "weight": 190,
+            "active": true,
+            "primaryPosition": {
+                "code": "1",
+                "name": "Pitcher",
+                "type": "Pitcher",
+                "abbreviation": "P"
+            },
+            "useName": "Sonny",
+            "useLastName": "Gray",
+            "middleName": "Douglas",
+            "boxscoreName": "Gray, S",
+            "nickName": "Pickles",
+            "gender": "M",
+            "isPlayer": true,
+            "isVerified": true,
+            "draftYear": 2011,
+            "education": {
+                "highschools": [
+                    {
+                        "name": "Smyrna",
+                        "state": "TN"
+                    }
+                ],
+                "colleges": [
+                    {
+                        "name": "Vanderbilt"
+                    }
+                ]
+            },
+            "mlbDebutDate": "2013-07-10",
+            "batSide": {
+                "code": "R",
+                "description": "Right"
+            },
+            "pitchHand": {
+                "code": "R",
+                "description": "Right"
+            },
+            "nameFirstLast": "Sonny Gray",
+            "nameSlug": "sonny-gray-543243",
+            "firstLastName": "Sonny Gray",
+            "lastFirstName": "Gray, Sonny",
+            "lastInitName": "Gray, S",
+            "initLastName": "S Gray",
+            "fullFMLName": "Sonny Douglas Gray",
+            "fullLFMName": "Gray, Sonny Douglas",
+            "strikeZoneTop": 3.38,
+            "strikeZoneBottom": 1.57
+        },
+        {
+            "id": 456488,
+            "fullName": "Eduardo N\u00fa\u00f1ez",
+            "link": "/api/v1/people/456488",
+            "firstName": "Eduardo",
+            "lastName": "N\u00fa\u00f1ez",
+            "primaryNumber": "26",
+            "birthDate": "1987-06-15",
+            "currentAge": 39,
+            "birthCity": "Santo Domingo",
+            "birthCountry": "Dominican Republic",
+            "height": "6' 0\"",
+            "weight": 195,
+            "active": false,
+            "primaryPosition": {
+                "code": "6",
+                "name": "Shortstop",
+                "type": "Infielder",
+                "abbreviation": "SS"
+            },
+            "useName": "Eduardo",
+            "useLastName": "N\u00fa\u00f1ez",
+            "middleName": "Michelle",
+            "boxscoreName": "N\u00fa\u00f1ez, E",
+            "nickName": "Nunie",
+            "gender": "M",
+            "nameMatrilineal": "Mendez",
+            "isPlayer": true,
+            "isVerified": true,
+            "pronunciation": "ed-wardo NOON-yez",
+            "lastPlayedDate": "2020-07-26",
+            "education": {
+                "highschools": [
+                    {
+                        "name": "American Military Academy",
+                        "city": "San Juan",
+                        "state": "PR"
+                    }
+                ]
+            },
+            "mlbDebutDate": "2010-08-19",
+            "batSide": {
+                "code": "R",
+                "description": "Right"
+            },
+            "pitchHand": {
+                "code": "R",
+                "description": "Right"
+            },
+            "nameFirstLast": "Eduardo N\u00fa\u00f1ez",
+            "nameSlug": "eduardo-nunez-456488",
+            "firstLastName": "Eduardo N\u00fa\u00f1ez",
+            "lastFirstName": "N\u00fa\u00f1ez, Eduardo",
+            "lastInitName": "N\u00fa\u00f1ez, E",
+            "initLastName": "E N\u00fa\u00f1ez",
+            "fullFMLName": "Eduardo Michelle N\u00fa\u00f1ez",
+            "fullLFMName": "N\u00fa\u00f1ez, Eduardo Michelle",
+            "strikeZoneTop": 3.21,
+            "strikeZoneBottom": 1.62
+        }
+    ]
+}

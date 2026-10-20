@@ -369,7 +369,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               windowed={windowed}
               beatKey={beatKey}
               writing={writingUpTo.has(i)}
-              replayLast={i === lastAtBat} gamePk={feed?.gamePk} sportId={sportId} gameState={feed?.gameData?.status?.abstractGameState}
+              replayLast={i === lastAtBat} gamePk={feed?.gamePk} sportId={sportId} gameState={feed?.gameData?.status?.abstractGameState} venue={feed?.gameData?.venue}
             />
           )
         } else if (entry.eventType === 'pitching_substitution') {
@@ -549,7 +549,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 // have one home (see that file's TUNING note).
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
-function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false, replayLast = false, gamePk, sportId, gameState }) {
+function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx, highlight, filmEligible = true, windowed = false, beatKey = null, writing = false, replayLast = false, gamePk, sportId, gameState, venue }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live, eventType } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   // The at-bat replay (AtBatReplay.jsx), in one place at a time: inside the
@@ -762,7 +762,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
       {hasZone && (
         <Card as="div" frame="ledger" body="flush" className="pbp__zonecell">
           {replay && wide ? (
-            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} replay={replay} id={entry.atBatIndex} last={replayLast} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={entry.atBatIndex} batterId={entry.batterId} />
+            <ReplayCell pitchDetails={pitchDetails} batSide={batSide} pitcher={pitcher} replay={replay} id={entry.atBatIndex} last={replayLast} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={entry.atBatIndex} batterId={entry.batterId} venue={venue} />
           ) : (
             <>
               <PitchList pitchDetails={pitchDetails} />
@@ -772,7 +772,7 @@ function AtBatCard({ entry, gameDate, battingTeamId, pitchingTeamId, calloutCtx,
         </Card>
       )}
       {replayOpen && replay && !wide && (
-        <ReplaySheet pitchDetails={pitchDetails} replay={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={entry.atBatIndex} batterId={entry.batterId} />
+        <ReplaySheet pitchDetails={pitchDetails} replay={replay} batter={batter} pitcher={pitcher} onClose={() => setReplayOpen(false)} gamePk={gamePk} sportId={sportId} eventType={eventType} gameState={gameState} gameDate={gameDate} atBatIndex={entry.atBatIndex} batterId={entry.batterId} venue={venue} />
       )}
       {zoneOpen && hasZone && (
         <StrikeZoneModal

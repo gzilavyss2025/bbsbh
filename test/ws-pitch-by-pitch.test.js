@@ -60,10 +60,24 @@ test('xwOBA is pooled over the hitters and set against the league', () => {
 test('the edge call: Arm below, Bats above, Even inside the band', () => {
   const lg = { FF: [1000, 300], SL: [1000, 300], CH: [1000, 300] }
   const hit = (x) => [100, x] // x / 100 = hitters' xwOBA
-  const m = run({ FF: hit(28.9), SL: hit(31.1), CH: hit(29.5) }, lg)
+  const m = run({ FF: hit(27.9), SL: hit(32.1), CH: hit(29.5) }, lg)
   assert.equal(edgeOf(m, 'FF'), 'arm')
   assert.equal(edgeOf(m, 'SL'), 'bats')
   assert.equal(edgeOf(m, 'CH'), 'even')
+})
+
+test('the band is .020: a .015 gap reads Even and a .025 gap reads Arm or Bats', () => {
+  const lg = { FF: [1000, 300], SL: [1000, 300], CH: [1000, 300], KN: [1000, 300] }
+  const arsenal4 = [...arsenal, { code: 'KN', pitches: 100 }]
+  const m = pitchByPitchModel({
+    arsenal: arsenal4, hand: 'R', league: grid(lg),
+    hitters: [grid({ FF: [100, 28.5], SL: [100, 31.5], CH: [100, 27.5], KN: [100, 32.5] })],
+  })
+  assert.equal(EDGE_BAND, 0.02)
+  assert.equal(edgeOf(m, 'FF'), 'even')
+  assert.equal(edgeOf(m, 'SL'), 'even')
+  assert.equal(edgeOf(m, 'CH'), 'arm')
+  assert.equal(edgeOf(m, 'KN'), 'bats')
 })
 
 test('the band is strict at the boundary', () => {

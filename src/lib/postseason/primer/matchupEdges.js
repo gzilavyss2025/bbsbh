@@ -4,8 +4,11 @@
 // per club. The rows hold ab, h, hr, bb, hbp, k and pa and no total bases, so
 // the line prints no OPS.
 //
-// PLACEHOLDER THRESHOLDS. Gary tunes these in the PR.
+// The hitter AB floor is chosen (Gary, 2026-10-20, from the threshold report: the average uses AB,
+// and 16% of hitter flags rested on fewer than 8 AB). The other numbers are PLACEHOLDER THRESHOLDS.
+// Gary tunes them in the PR.
 export const HITTER_MIN_PA = 8 // a hitter edge needs this many PA …
+export const HITTER_MIN_AB = 8 // … and this many AB (the average and the 2-HR branch both use them) …
 export const HITTER_MIN_AVG = 0.35 // … and this average, or
 export const HITTER_MIN_HR = 2 // … this many home runs
 export const PITCHER_MIN_AB = 10 // a pitcher edge needs this many AB …
@@ -35,7 +38,7 @@ export function matchupEdges(sides) {
     for (const r of side?.batters ?? []) {
       const a = avg(r)
       const edge = { id: r.id, name: r.name, vs: side.pitcher?.name ?? '', vsId: side.pitcher?.id ?? null, line: matchupEdgeLine(r) }
-      if (r.pa >= HITTER_MIN_PA && (a >= HITTER_MIN_AVG || r.hr >= HITTER_MIN_HR)) hitters.push({ a, pa: r.pa, edge: { kind: 'hitter', ...edge } })
+      if (r.pa >= HITTER_MIN_PA && r.ab >= HITTER_MIN_AB && (a >= HITTER_MIN_AVG || r.hr >= HITTER_MIN_HR)) hitters.push({ a, pa: r.pa, edge: { kind: 'hitter', ...edge } })
       else if (a != null && r.ab >= PITCHER_MIN_AB && a <= PITCHER_MAX_AVG) pitchers.push({ a, ab: r.ab, edge: { kind: 'pitcher', ...edge } })
     }
   }

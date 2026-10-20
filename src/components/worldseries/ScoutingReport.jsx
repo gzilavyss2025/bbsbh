@@ -9,6 +9,7 @@ import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
+import { edgesState } from '../../lib/postseason/worldseries/scouting/edgesState.js'
 import { matchupEdges } from '../../lib/postseason/primer/matchupEdges.js'
 import { failedCards, failedLine } from '../../lib/postseason/worldseries/scouting/failedCards.js'
 import { gloveLegsModel } from '../../lib/postseason/worldseries/scouting/gloveLegs.js'
@@ -18,6 +19,7 @@ import { MILWAUKEE_VENUE_ID, clubOrder, scoutingModel } from '../../lib/postseas
 import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { HubTabBar } from '../chrome/HubTabBar.jsx'
+import { EdgeCard } from '../postseason/edges/EdgeCard.jsx'
 import { MatchupEdges } from '../postseason/edges/MatchupEdges.jsx'
 import { UmpireEdge } from '../postseason/edges/UmpireEdge.jsx'
 import { SeriesNineKeys } from '../postseason/SeriesNineKeys.jsx'
@@ -48,7 +50,14 @@ import { Stack } from '../ui/layout/Stack.jsx'
 const CARD = {
   'nine-keys': ({ nineKeys, sides, season }) => <SeriesNineKeys data={nineKeys} clubs={sides.map((id) => ({ id }))} season={season} labelAs="h3" />,
   'glove-legs': ({ gloveLegs, sides }) => <GloveLegs rows={gloveLegs} clubIds={sides} />,
-  'matchup-edges': ({ edges }) => <MatchupEdges edges={edges} variant="faceoff" />,
+  'matchup-edges': ({ edges, edgesState: state }) =>
+    state === 'none' ? (
+      <EdgeCard title="Matchup edges" note="Career vs today's starters" className="seriesedges__matchups">
+        <p className="ww-fit__note">No standout matchups for this game.</p>
+      </EdgeCard>
+    ) : (
+      <MatchupEdges edges={edges} variant="faceoff" />
+    ),
   'film-room': ({ meetings, dayType, noteClub }) => <FilmRoom meetings={meetings} compact={dayType === 'game'} clubId={noteClub} />,
   'pitch-by-pitch': ({ pitchByPitch, noteClub, clubIds, gameNumber }) => (
     <PitchByPitch data={pitchByPitch} clubId={noteClub} oppId={clubIds.find((id) => id !== noteClub)} gameNumber={gameNumber} />
@@ -82,6 +91,8 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
     () => matchupEdges(sides.map((id) => starterMatchupsFor(career, gamePk, id))),
     [career, gamePk, sides[0], sides[1]],
   )
+  // A row for the game in either club's side, even when no hitter clears a threshold.
+  const edgesRow = sides.some((id) => starterMatchupsFor(career, gamePk, id))
   const hasNineKeys = Boolean(nineKeysTeams(nineKeys, sides.map((id) => ({ id })), season))
   const { data: defense, error: defenseError } = useAsync(() => loadClubDefenseRunning(), [])
   const gloveLegs = useMemo(() => gloveLegsModel(defense, { clubA: sides[0], clubB: sides[1], season }), [defense, sides[0], sides[1], season])
@@ -100,7 +111,7 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
   const wantPark = Boolean(parkLayout) && (dayType !== 'game' || venueId === MILWAUKEE_VENUE_ID)
   const { data: balls, error: parkError } = useAsync(() => (wantPark ? loadParkFit({ clubIds, slateDate }) : null), [clubA, clubB, slateDate, wantPark])
   const parkFit = useMemo(() => (wantPark ? parkFitModel(balls, { clubA: sides[0], clubB: sides[1] }) : null), [balls, wantPark, sides[0], sides[1]])
-  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, pitchByPitch, plateUmpire, meetings, platoon, parkFit, venueId })
+  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit, venueId })
   // A failed read is not an empty one: name the cards whose load failed (the card itself still drops).
   const failed = failedLine(
     failedCards([
@@ -133,7 +144,7 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
   if (!shown && !failed) return null
   // Every card dropped but a read failed: the band and the line, so a failure is not read as an empty season.
   if (!shown) return <Stack gap="loose" className="ww-scout"><SectionHead look="band" house as="h2">Scouting report</SectionHead><p className="ww-scout__failed" role="status">{failed}</p></Stack>
-  const ctx = { noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, gloveLegs, sides, clubIds, season, edges, plateUmpire, umpire, platoon, parkFit, parkLayout }
+  const ctx = { noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, gloveLegs, sides, clubIds, season, edges, edgesState: edgesState({ edges, hasRow: edgesRow }), plateUmpire, umpire, platoon, parkFit, parkLayout }
   const names = clubIds.map((id) => teamClubNameShort(id)).filter(Boolean).join(' and ')
   return (
     <Stack gap="loose" className="ww-scout" ref={rootRef} style={{ '--ww-scout-offset': `${offset}px` }}>

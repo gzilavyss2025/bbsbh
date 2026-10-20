@@ -30,7 +30,8 @@ count badges (Gary, 2026-10-19).
 - Glove and legs shows on both day types when at least 4 of its 6 measures are real for both clubs.
 - Park fit always draws Milwaukee's field. The other club's park is not on file, so Games 3 to 5 show it only at Milwaukee.
 - Club order on every card follows the Tale of the tape (`sides`).
-- The thresholds in Pitch by pitch and Matchup edges are placeholders. Gary tunes them.
+- Chosen by Gary (2026-10-20, from the threshold report): Pitch by pitch `EDGE_BAND` = .020; Matchup edges hitter rule = 8 PA and 8 AB, then .350 or better or 2+ HR. The AB floor also changes the series primer's `MatchupEdges` card.
+- Still placeholders, which Gary tunes: Pitch by pitch `MIN_PA` (10), `MIN_USE` (.05), `MAX_HITTERS` (9); the Matchup edges pitcher rule and caps.
 - `worldSeriesMode` returns null until the ALCS ends, so check the page with an untracked harness until then.
 
 Per-module notes: `docs/api/postseason.md`, "World Series scouting reads". The component
