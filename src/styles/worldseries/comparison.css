@@ -50,7 +50,6 @@
 
 .ww-comparison__table thead th {
   height: var(--space-16);
-  padding: 0;
   border-top: var(--bw-hair) solid var(--border-rule);
   border-bottom: var(--bw-heavy) solid var(--border-stamped);
   background: transparent;
@@ -75,17 +74,12 @@
   color: var(--text-heading);
 }
 
-.ww-comparison__clubname > span {
-  display: block;
-}
-
-.ww-comparison__clubname .ww-comparison__city {
+.ww-comparison__city {
   display: none;
 }
 
 .ww-comparison__row > * {
   height: var(--space-8);
-  padding: 0;
   vertical-align: middle;
 }
 
@@ -127,7 +121,7 @@
   color: var(--accent-negative-hover);
 }
 
-.ww-comparison__figure sup,
+.ww-comparison__asterisk,
 .ww-comparison__ordinal,
 .ww-comparison__unit {
   font-family: var(--font-display);
@@ -135,9 +129,8 @@
   letter-spacing: var(--ls-none);
 }
 
-.ww-comparison__figure sup {
+.ww-comparison__asterisk {
   margin-left: 2px;
-  vertical-align: baseline;
 }
 
 .ww-comparison__unit {
@@ -162,43 +155,11 @@
 }
 
 .ww-comparison__tally .infopop {
-  position: static;
   margin-left: var(--space-1);
-  vertical-align: middle;
-}
-
-.ww-comparison__tally .infopop__btn {
-  --btn-edge: var(--text-caption);
-  --btn-ink: var(--text-heading);
-  --btn-edge-hover: var(--text-heading);
-}
-
-.ww-comparison__tally .infopop__btn:hover {
-  color: var(--text-heading);
-}
-
-.ww-comparison__tally .infopop__btn:focus-visible {
-  color: var(--text-heading);
-  outline: var(--bw-heavy) solid var(--focus-ring);
-  outline-offset: var(--bw-heavy);
 }
 
 .ww-comparison__tally .infopop__tip {
-  top: auto;
-  bottom: calc(100% + var(--space-1h));
-  left: 0;
-  right: 0;
-  width: auto;
-  max-width: none;
-  font-family: var(--font-body);
   font-size: var(--fs-small);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-text);
-  color: var(--text-body);
-}
-
-.ww-comparison__tally .infopop__tip::before {
-  display: none;
 }
 
 .ww-comparison__legend {
@@ -235,8 +196,10 @@
   .ww-comparison__clubname {
     text-align: start;
   }
-  .ww-comparison__clubname .ww-comparison__city {
+  .ww-comparison__clubname > span {
     display: block;
+  }
+  .ww-comparison__clubname .ww-comparison__city {
     margin-bottom: var(--space-1);
   }
 }

@@ -13,7 +13,7 @@ import { Table } from '../../../ui/table/Table.jsx'
 export function ComparisonLedger({ title, note, clubIds, measureLabel, footer, className = '', children }) {
   const titleId = useId()
   return (
-    <Card frame="stamped" body="flush" className={`ww-comparison ${className}`} aria-labelledby={titleId}>
+    <Card frame="stamped" body="flush" className={`ww-comparison ${className}`.trim()} aria-labelledby={titleId}>
       <Stack as="header" gap="tight" className="ww-comparison__head">
         <Cluster align="center" className="ww-comparison__titleline">
           <h3 id={titleId} className="ww-comparison__title">{title}</h3>
@@ -53,18 +53,23 @@ export function ComparisonLedger({ title, note, clubIds, measureLabel, footer, c
   )
 }
 
+// A missing figure: the dash, and "no figure" for a screen reader.
+export const NO_FIGURE = <span>—<span className="sr-only"> no figure</span></span>
+
 export function ComparisonFigure({ lead = false, failed = false, children }) {
+  const cls = ['ww-comparison__figure', lead && 'ww-comparison__figure--lead', failed && 'ww-comparison__figure--failed']
   return (
-    <span className={`ww-comparison__figure${lead ? ' ww-comparison__figure--lead' : ''}${failed ? ' ww-comparison__figure--failed' : ''}`}>
+    <span className={cls.filter(Boolean).join(' ')}>
       {children}
-      {failed && <><sup aria-hidden="true">*</sup><span className="sr-only"> (failed)</span></>}
+      {failed && <><span className="ww-comparison__asterisk" aria-hidden="true">*</span><span className="sr-only"> (failed)</span></>}
       {lead && <span className="sr-only"> (leads)</span>}
     </span>
   )
 }
 
-export function ComparisonLegend({ bar }) {
-  const items = [{ label: bar == null ? 'Highlighted figure leads' : 'Better rank', mark: <span className="ww-comparison__mark" aria-hidden="true" /> }]
+// `lead` names what the amber mark means; `bar` adds the failed-rank item.
+export function ComparisonLegend({ lead, bar }) {
+  const items = [{ label: lead, mark: <span className="ww-comparison__mark" aria-hidden="true" /> }]
   if (bar != null) items.push({ label: `Outside top ${bar}`, mark: <span className="ww-comparison__failuremark" aria-hidden="true">*</span> })
   return <Key items={items} className="ww-comparison__legend" />
 }

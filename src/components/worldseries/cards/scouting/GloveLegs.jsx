@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import '../../../../styles/worldseries/glove.css'
 import { gloveFigure } from '../../../../lib/postseason/worldseries/scouting/gloveLegs.js'
-import { ComparisonFigure, ComparisonLedger, ComparisonLegend } from './ComparisonLedger.jsx'
+import { ComparisonFigure, ComparisonLedger, ComparisonLegend, NO_FIGURE } from './ComparisonLedger.jsx'
 
 // GLOVE AND LEGS (#2316): defense and baserunning of the two Series clubs, side by side, on the
 // Tale of the tape rows. `rows` is gloveLegsModel's output (never null here). The club that leads a
@@ -9,7 +9,7 @@ import { ComparisonFigure, ComparisonLedger, ComparisonLegend } from './Comparis
 // gap. Regular-season club totals: an open surface (ADR-0034), no score. Names no club.
 function Val({ r, side }) {
   const v = r[side]
-  if (v == null) return <span>—<span className="sr-only"> no figure</span></span>
+  if (v == null) return NO_FIGURE
   const leads = r.lead === side
   return (
     <ComparisonFigure lead={leads}>
@@ -26,7 +26,7 @@ export function GloveLegs({ rows, clubIds }) {
       clubIds={clubIds}
       measureLabel="Measure"
       className="ww-glove"
-      footer={<ComparisonLegend />}
+      footer={<ComparisonLegend lead="Highlighted figure leads" />}
     >
       {rows.map((r, i) => (
         <Fragment key={r.key}>

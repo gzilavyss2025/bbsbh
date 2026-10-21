@@ -23,8 +23,7 @@ import { useRouteLink } from '../../lib/nav.js'
 //   data    loadNineKeys()'s shape: { keys, bar, limit, firstSeason, current }
 //   clubs   [{ id }, { id }], the left club then the right club
 //   season  the series' season; the section shows only for that season's file
-//   labelAs the name tab's heading element: 'h2' (a series page) or 'h3' (inside the scouting report)
-export function SeriesNineKeys({ data, clubs, season, labelAs = 'h2' }) {
+export function SeriesNineKeys({ data, clubs, season }) {
   const routeLink = useRouteLink()
   const teams = nineKeysTeams(data, clubs, season)
   if (!teams) return null
@@ -41,7 +40,7 @@ export function SeriesNineKeys({ data, clubs, season, labelAs = 'h2' }) {
   const at = (rank) => `${((Math.min(Math.max(rank, 1), 30) - 1) / 29) * 100}%`
   return (
     <section className="psseries__keyssection">
-      <Card frame="stamped" label="Nine keys" labelAs={labelAs} as="div" className="psseries__keys">
+      <Card frame="stamped" label="Nine keys" labelAs="h2" as="div" className="psseries__keys">
         <Table frame="bare" density="keep" className="psseries__keystable">
           <caption className="sr-only">
             Nine Keys ranks out of 30, {abbr(a.teamId)} and {abbr(b.teamId)}
@@ -85,7 +84,7 @@ export function SeriesNineKeys({ data, clubs, season, labelAs = 'h2' }) {
         <Cluster align="center" className="psseries__keyfoot">
           <p className="psseries__keytally">
             Failed · {abbr(a.teamId)} {a.failed?.length ?? 0} · {abbr(b.teamId)} {b.failed?.length ?? 0}
-            <InfoPopover label="What the failed-key count means" className="psseries__keyverdict">
+            <InfoPopover label="What the failed-key count means" className="psseries__keyverdict infopop--paper">
               {verdict}
             </InfoPopover>
           </p>

@@ -5,7 +5,6 @@
 
 .ww-glove__group th {
   height: calc(var(--space-5) - var(--bw-heavy));
-  padding: 0;
   border: 0;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
   vertical-align: bottom;

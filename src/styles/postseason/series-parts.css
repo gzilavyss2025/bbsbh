@@ -499,45 +499,13 @@ button.psseries__ldoor::after {
   letter-spacing: var(--ls-label);
   color: var(--text-heading);
 }
-/* The verdict sits behind an (i) after the tally. The popover is made for the
-   navy bars, so on paper it takes ink colors, and its tip spans the card. */
+/* The verdict sits behind an (i) after the tally (InfoPopover's paper
+   modifier); its tip spans the card. */
 .psseries__keyfoot {
   position: relative;
 }
 .psseries__keyverdict {
-  position: static;
   margin-left: var(--space-1h);
-  vertical-align: middle;
-}
-.psseries__keyverdict .infopop__btn {
-  --btn-edge: var(--text-caption);
-  --btn-ink: var(--text-heading);
-  --btn-edge-hover: var(--text-heading);
-}
-.psseries__keyverdict .infopop__btn:hover,
-.psseries__keyverdict .infopop__btn:focus-visible {
-  color: var(--text-heading);
-}
-.psseries__keyverdict .infopop__tip {
-  top: auto;
-  bottom: calc(100% + var(--space-1h));
-  left: 0;
-  right: 0;
-  width: auto;
-  max-width: none;
-  font-family: var(--font-body);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-text);
-  color: var(--text-body);
-}
-.psseries__keyverdict .infopop__tip::before {
-  display: none;
-}
-
-/* Inside the scouting report the grid's gap spaces the cards, so the section
-   adds no margin of its own. */
-.ww-scout__card .psseries__keyssection {
-  margin: 0;
 }
 
 /* Wide, the table gives the key names and the ranks more room, so a card the

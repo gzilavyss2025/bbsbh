@@ -8,7 +8,8 @@ import { IconButton } from './control/IconButton.jsx'
 // closes on Escape and outside-click, and its motion is CSS-only so
 // prefers-reduced-motion is honoured in the stylesheet.
 //
-// Used in the navy section mastheads on the lineup pages (BullpenBoard).
+// Used in the navy section mastheads on the lineup pages (BullpenBoard). On a
+// paper card, pass className="infopop--paper" (the Nine keys footers).
 // `label` is the button's accessible name; `children` is the tip.
 export function InfoPopover({ label, children, className = '' }) {
   const [open, setOpen] = useState(false)
