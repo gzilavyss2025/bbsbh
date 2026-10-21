@@ -311,6 +311,10 @@
       "class": "spoiler-free",
       "why": "The classics deck: MLB games from 1960 on, dealt to score by hand. Both its requests carry a `fields=` list (CLASSICS_FIELDS) that names only ids, names, dates, the venue and status.detailedState, so the response holds no `score`, `isWinner` or `leagueRecord` and the module never asks for `hydrate=linescore`. It imports no reveal-only module and no notable-index reader; a game is dealt on who played, never on what happened (ADR-0080)."
     },
+    "classics/reason.js": {
+      "class": "spoiler-free",
+      "why": "The classic card's facts: the two clubs, the park and a leadoff line for one dealt game. Its one request carries a `fields=` list (CLASSIC_FIELDS) that names only ids, names, the venue and the starting lineups, so the response holds no `score`, `isWinner` or `leagueRecord`, and it never asks for `hydrate=linescore` or the feed. The line is true before the first pitch (ADR-0080)."
+    },
     "clubDefenseRunning.js": {
       "class": "spoiler-free",
       "why": "Static club-defense-running.json reader: six regular-season measures per club (outs above average, framing runs, sprint speed, stolen bases, stolen-base success, extra bases taken). Season totals on an open surface (ADR-0034); no game, no inning, no score."
