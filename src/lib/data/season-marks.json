@@ -410,6 +410,24 @@
         "onBar": "#FFFFFF"
       }
     ],
+    "342": [
+      {
+        "from": 1985,
+        "to": 2002,
+        "name": "Calgary Cannons",
+        "abbr": "CAL",
+        "file": "342-1985-2002.png"
+      }
+    ],
+    "402": [
+      {
+        "from": 1997,
+        "to": 2013,
+        "name": "Akron Aeros",
+        "abbr": "AKR",
+        "file": "402-1997-2013.png"
+      }
+    ],
     "431": [
       {
         "from": 2009,
@@ -417,6 +435,15 @@
         "name": "Gwinnett Braves",
         "abbr": "GWN",
         "file": null
+      }
+    ],
+    "478": [
+      {
+        "from": 1988,
+        "to": 1993,
+        "name": "Augusta Pirates",
+        "abbr": "AUG",
+        "file": "478-1988-1993.png"
       }
     ],
     "538": [
