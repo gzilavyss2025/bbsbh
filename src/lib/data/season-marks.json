@@ -410,6 +410,15 @@
         "onBar": "#FFFFFF"
       }
     ],
+    "233": [
+      {
+        "from": 1985,
+        "to": 1993,
+        "name": "Charleston Rainbows",
+        "abbr": "CHS",
+        "file": "233-1985-1993.png"
+      }
+    ],
     "342": [
       {
         "from": 1985,
@@ -426,6 +435,24 @@
         "name": "Akron Aeros",
         "abbr": "AKR",
         "file": "402-1997-2013.png"
+      }
+    ],
+    "418": [
+      {
+        "from": 1993,
+        "to": 2024,
+        "name": "Bowie Baysox",
+        "abbr": "BOW",
+        "file": "418-1993-2024.png"
+      }
+    ],
+    "423": [
+      {
+        "from": 1985,
+        "to": 1994,
+        "name": "Bakersfield Dodgers",
+        "abbr": "BAK",
+        "file": "423-1985-1994.png"
       }
     ],
     "431": [
@@ -446,6 +473,42 @@
         "file": "478-1988-1993.png"
       }
     ],
+    "492": [
+      {
+        "from": 1985,
+        "to": 1992,
+        "name": "Cedar Rapids Reds",
+        "abbr": "CR",
+        "file": "492-1985-1992.png"
+      }
+    ],
+    "494": [
+      {
+        "from": 1985,
+        "to": 1987,
+        "name": "Charlotte O's",
+        "abbr": "CLT",
+        "file": "494-1985-1987.png"
+      }
+    ],
+    "500": [
+      {
+        "from": 1994,
+        "to": 2004,
+        "name": "Clinton Lumber Kings",
+        "abbr": "CLI",
+        "file": "500-1994-2004.png"
+      }
+    ],
+    "505": [
+      {
+        "from": 1992,
+        "to": 2016,
+        "name": "Binghamton Mets",
+        "abbr": "BNG",
+        "file": "505-1992-2016.svg"
+      }
+    ],
     "538": [
       {
         "from": 1997,
@@ -455,6 +518,15 @@
         "file": null
       }
     ],
+    "554": [
+      {
+        "from": 1995,
+        "to": 2021,
+        "name": "Beloit Snappers",
+        "abbr": "BEL",
+        "file": "554-1995-2021.png"
+      }
+    ],
     "559": [
       {
         "from": 1985,
@@ -462,6 +534,33 @@
         "name": "Huntsville Stars",
         "abbr": "HVL",
         "file": null
+      }
+    ],
+    "566": [
+      {
+        "from": 1985,
+        "to": 2003,
+        "name": "Clearwater Phillies",
+        "abbr": "CLR",
+        "file": "566-1985-2003.svg"
+      }
+    ],
+    "3701": [
+      {
+        "from": 1985,
+        "to": 1987,
+        "name": "Fort Myers Royals",
+        "abbr": "FTM",
+        "file": "3701-1985-1987.png"
+      }
+    ],
+    "3705": [
+      {
+        "from": 1993,
+        "to": 2004,
+        "name": "Capital City Bombers",
+        "abbr": "CAP",
+        "file": "3705-1993-2004.png"
       }
     ]
   }

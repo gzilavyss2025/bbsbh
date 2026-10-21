@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import SEASON_MARKS from '../../../lib/data/season-marks.json' with { type: 'json' }
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../../../lib/teams.js'
 import { ClubRail } from '../ClubRail.jsx'
+import { Button } from '../../../components/ui/control/Button.jsx'
 import { Segmented } from '../../../components/ui/control/Segmented.jsx'
+import { fetchMilbHistory } from '../../../api/milbHistory.js'
 import { MILB_COLOR_LAB_LEVELS } from '../../../lib/milbColors.js'
 import { EraRow } from '../editors/EraRow.jsx'
 import { useAffiliates } from './milb.jsx'
@@ -28,12 +30,87 @@ const MLB_TEAMS = [...ALL_MLB_TEAM_IDS]
 const LEVELS = [
   { value: 'mlb', label: 'MLB' },
   ...MILB_COLOR_LAB_LEVELS.map((l) => ({ value: String(l.sportId), label: l.label })),
+  { value: 'former', label: 'Former' },
 ]
+
+const lastEraName = (id) => SEASON_MARKS.clubs?.[String(id)]?.at(-1)?.name ?? null
+
+// The clubs the level rails cannot list, because affiliates.json holds only
+// today's clubs: a club that has since folded (Clinton, Bakersfield) or whose
+// id never reached the file. Listed from milb-history.json's inactive clubs,
+// every club that already has an era, and any id typed into the add box. An
+// id with no name on file reads "Club {id}" until its first era names it.
+function useFormerClubs(addedIds) {
+  const [base, setBase] = useState(null)
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([
+      fetch('/data/affiliates.json').then((res) => (res.ok ? res.json() : null)).catch(() => null),
+      fetchMilbHistory(),
+    ]).then(([aff, hist]) => {
+      if (cancelled) return
+      const active = new Set(Object.values(aff?.byOrgId ?? {}).flat().map((a) => a.id))
+      const names = new Map()
+      for (const [id, club] of Object.entries(hist.clubs ?? {})) {
+        if (club.active === false) names.set(Number(id), club.currentName)
+      }
+      setBase({ active, names })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  return useMemo(() => {
+    if (!base) return null
+    const mlb = new Set(ALL_MLB_TEAM_IDS)
+    const ids = new Set([...base.names.keys(), ...addedIds])
+    for (const key of Object.keys(SEASON_MARKS.clubs ?? {})) {
+      const id = Number(key)
+      if (!mlb.has(id) && !base.active.has(id)) ids.add(id)
+    }
+    return [...ids]
+      .map((id) => ({ id, name: base.names.get(id) ?? lastEraName(id) ?? `Club ${id}` }))
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [base, addedIds])
+}
+
+// A club that is in no list yet: type its id (candidates.md names each one).
+function AddClub({ onAdd }) {
+  const [text, setText] = useState('')
+  const id = Number(text)
+  return (
+    <form
+      className="idlab__addclub idlab__erafields"
+      onSubmit={(event) => {
+        event.preventDefault()
+        if (!Number.isInteger(id) || id <= 0) return
+        onAdd(id)
+        setText('')
+      }}
+    >
+      <input
+        type="number"
+        inputMode="numeric"
+        aria-label="Club id"
+        placeholder="Club id"
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+      />
+      <Button size="control" type="submit">Add club</Button>
+    </form>
+  )
+}
 
 function ErasBody() {
   const [level, setLevel] = useState('mlb')
-  const affiliates = useAffiliates(level === 'mlb' ? null : Number(level))
-  const TEAMS = level === 'mlb' ? MLB_TEAMS : affiliates ?? []
+  const [added, setAdded] = useState(() => new Set())
+  const levelId = /^\d+$/.test(level) ? Number(level) : null
+  const affiliates = useAffiliates(levelId)
+  const former = useFormerClubs(added)
+  const TEAMS = useMemo(
+    () => (level === 'mlb' ? MLB_TEAMS : level === 'former' ? former ?? [] : affiliates ?? []),
+    [level, former, affiliates],
+  )
   const [teamId, setTeamId] = useState(MLB_TEAMS[0].id)
   // Bumped after an upload so the browser re-requests a file whose URL did not change.
   const [bust, setBust] = useState(0)
@@ -60,8 +137,15 @@ function ErasBody() {
     return () => window.removeEventListener('keydown', onKey)
   }, [teamId, TEAMS])
 
+  const addClub = (id) => {
+    setAdded((prev) => new Set(prev).add(id))
+    setTeamId(id)
+  }
   const levelPicker = (
-    <Segmented label="Level" value={level} onChange={(v) => { setLevel(v); setTeamId(null) }} options={LEVELS} />
+    <>
+      <Segmented label="Level" value={level} onChange={(v) => { setLevel(v); setTeamId(null) }} options={LEVELS} />
+      {level === 'former' && <AddClub onAdd={addClub} />}
+    </>
   )
   if (!team) {
     return (
