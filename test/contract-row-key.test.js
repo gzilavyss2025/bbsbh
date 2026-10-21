@@ -27,6 +27,7 @@ import { fileURLToPath } from 'node:url'
 import { parseCsv } from '../scripts/lib/csv.mjs'
 import {
   CONTRACT_SOURCES,
+  CROSSWALK_DIR,
   KEY_COLUMNS,
   contractRowKeys,
   rowSortValue,
@@ -38,6 +39,7 @@ const CSV_DIR = join(__dirname, '..', 'scripts', 'data', 'contracts')
 const OUT_DIR = join(__dirname, '..', 'public', 'data', 'contracts-history')
 
 const csv = (source) => parseCsv(readFileSync(join(CSV_DIR, `${source}.csv`), 'utf8'))
+const readCrosswalk = (source) => JSON.parse(readFileSync(join(CROSSWALK_DIR, `${source}.json`), 'utf8'))
 const json = (...parts) => JSON.parse(readFileSync(join(OUT_DIR, ...parts), 'utf8'))
 
 const ROWS = Object.fromEntries(CONTRACT_SOURCES.map((source) => [source, csv(source)]))
@@ -49,7 +51,7 @@ const KEYS = Object.fromEntries(
 
 test('the crosswalk holds exactly one row per source CSV row', () => {
   for (const source of CONTRACT_SOURCES) {
-    const crosswalk = json('identity', `${source}.json`)
+    const crosswalk = readCrosswalk(source)
     assert.equal(
       crosswalk.length,
       ROWS[source].length,
@@ -60,7 +62,7 @@ test('the crosswalk holds exactly one row per source CSV row', () => {
 
 test('every crosswalk rowKey is the key its own CSV row mints', () => {
   for (const source of CONTRACT_SOURCES) {
-    const crosswalk = json('identity', `${source}.json`)
+    const crosswalk = readCrosswalk(source)
     assert.deepEqual(
       crosswalk.map((row) => row.rowKey),
       KEYS[source],
@@ -146,7 +148,7 @@ test('two men who share a name and a season take two keys', () => {
     assert.equal(both.length, 2)
     assert.notEqual(both[0].key, both[1].key)
     // And the crosswalk sends the two keys to two different men.
-    const crosswalk = new Map(json('identity', 'salaries.json').map((r) => [r.rowKey, r]))
+    const crosswalk = new Map(readCrosswalk('salaries').map((r) => [r.rowKey, r]))
     const ids = both.map(({ key }) => crosswalk.get(key)?.mlbId)
     assert.ok(ids.every((id) => id != null), `${player} ${year}: a row resolved to no id`)
     assert.notEqual(ids[0], ids[1], `${player} ${year}: both rows resolved to the same man`)
