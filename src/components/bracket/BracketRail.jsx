@@ -40,7 +40,7 @@ export function BracketRail({ bracket, cutoff, slateDate }) {
       </div>
       {bracket && (
         <div className="pbkt bracketrail__body">
-          <FullBracket bracket={bracket} cutoff={cutoff} historyIds={historyIds} />
+          <FullBracket bracket={bracket} cutoff={cutoff} historyIds={historyIds} rail />
         </div>
       )}
     </aside>
