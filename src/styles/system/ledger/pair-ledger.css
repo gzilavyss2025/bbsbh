@@ -1,0 +1,215 @@
+/* PAIR LEDGER (#2455, Design A): matching side heads, measure-first rows and leader
+   strokes. Card and Table own the frame and grid; this namespace owns their contents.
+   components/ui/table/PairLedger.jsx draws it. It names no team, unit or threshold.
+   Row rules hook on tbody children through :where(), so a caller's namespace wins on
+   order. A group row is th[scope="colgroup"]. *
+/* layout-exempt: the Card's custom header, Table and footer form one column */
+.pair-ledger {
+  container: pair-ledger / inline-size;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-inline: var(--space-4);
+}
+
+.pair-ledger__head {
+  padding-block: var(--space-4) var(--space-3);
+}
+
+.pair-ledger__titleline {
+  justify-content: space-between;
+}
+
+.pair-ledger__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+
+.pair-ledger__period {
+  white-space: nowrap;
+}
+
+.pair-ledger__note {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-title);
+  color: var(--text-caption);
+}
+
+.pair-ledger__table {
+  table-layout: fixed;
+}
+
+.pair-ledger__sidecol {
+  width: 84px;
+}
+
+.pair-ledger__table thead th {
+  height: var(--space-16);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  background: transparent;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.pair-ledger__table .pair-ledger__measure {
+  text-align: start;
+  letter-spacing: var(--ls-label);
+}
+
+/* layout-exempt: the crest sits above its name in a narrow table column */
+.pair-ledger__side {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-none);
+  color: var(--text-heading);
+}
+
+.pair-ledger__kicker {
+  display: none;
+}
+
+.pair-ledger__table :where(tbody tr) > * {
+  height: var(--space-8);
+  vertical-align: middle;
+}
+
+.pair-ledger__table :where(tbody tr):first-child > * {
+  border-top: 0;
+}
+
+.pair-ledger__table tbody th[scope="row"] {
+  white-space: normal;
+  text-align: start;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.pair-ledger__table tbody td {
+  text-align: center;
+  font-size: var(--fs-num-md);
+}
+
+/* A group row inside the body ("Defense", "Running"): one th across, a quiet label. */
+.pair-ledger__table tbody th[scope="colgroup"] {
+  height: calc(var(--space-5) - var(--bw-heavy));
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  vertical-align: bottom;
+  text-align: start;
+  white-space: normal;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.pair-ledger__table tbody tr:has(> th[scope="colgroup"]) + tr > * {
+  border-top: 0;
+}
+
+.pair-ledger__figure {
+  display: inline-block;
+  padding: 2px var(--space-1h);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-compact);
+  white-space: nowrap;
+}
+
+.pair-ledger__figure--lead {
+  background: linear-gradient(transparent 72%, var(--marker) 72%);
+}
+
+.pair-ledger__figure--failed,
+.pair-ledger__failmark {
+  color: var(--accent-negative-hover);
+}
+
+.pair-ledger__asterisk,
+.pair-ledger__affix {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-none);
+}
+
+.pair-ledger__asterisk {
+  margin-left: 2px;
+}
+
+.pair-ledger__foot {
+  position: relative;
+  min-height: var(--space-16);
+  margin-top: auto;
+  padding-block: var(--space-3);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  justify-content: center;
+}
+
+.pair-ledger__legend {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-title);
+  color: var(--text-caption);
+}
+
+.pair-ledger__leadmark {
+  display: inline-block;
+  width: var(--space-5);
+  height: var(--space-2);
+  background: var(--marker);
+}
+
+@media (min-width: 740px) {
+  .pair-ledger {
+    padding-inline: var(--space-5);
+  }
+  .pair-ledger__title {
+    font-size: var(--fs-h1);
+  }
+}
+
+/* A wide card (not a wide screen) lays the logo beside the name, so two cards in a
+   narrow column keep the stacked head. */
+@container pair-ledger (min-width: 36rem) {
+  .pair-ledger__sidecol {
+    width: 144px;
+  }
+  .pair-ledger__side {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    font-size: var(--fs-title-sm);
+  }
+  .pair-ledger__side > :not(.pair-ledger__sidename) {
+    flex: none;
+  }
+  .pair-ledger__sidename {
+    min-width: 0;
+    text-align: start;
+  }
+  .pair-ledger__sidename > span {
+    display: block;
+  }
+  .pair-ledger__sidename .pair-ledger__kicker {
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+}
