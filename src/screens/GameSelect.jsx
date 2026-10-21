@@ -49,7 +49,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import {
   reorderLiveGames,
   reorderNationalBroadcasts,
-  reorderSeriesGame,
+  splitSeriesGame,
   stackDoubleHeaders,
   stackSuspendedContinuation,
 } from '../lib/resultCards.js'
@@ -466,11 +466,14 @@ export function GameSelect({
   const gamesForDisplay = useMemo(() => {
     const pinned = (g) => isPinned(g, favoriteTeamId, favoriteAffiliateIds)
     const liveFirst = reorderLiveGames(sorted, pinned)
-    const ordered = reorderNationalBroadcasts(liveFirst, nationalBroadcasts, pinned)
-    // On a World Series day the Series game leads, ahead of the favorite (the
-    // bracket names it; MLB level only, since MiLB slates never hold it).
-    return sportId === SPORT_IDS.MLB ? reorderSeriesGame(ordered, seriesGamePk) : ordered
-  }, [sorted, nationalBroadcasts, favoriteTeamId, favoriteAffiliateIds, sportId, seriesGamePk])
+    return reorderNationalBroadcasts(liveFirst, nationalBroadcasts, pinned)
+  }, [sorted, nationalBroadcasts, favoriteTeamId, favoriteAffiliateIds])
+  // On a World Series day the Series game's card leaves the list and opens the
+  // page, above the hero (the bracket names it; MLB only, MiLB never holds it).
+  const { lead: seriesGame, rest: listGames } = splitSeriesGame(
+    gamesForDisplay,
+    sportId === SPORT_IDS.MLB ? seriesGamePk : null,
+  )
 
   // "N prospects on this roster" badge — MiLB games only (the slate's level
   // toggle is single-select, so gating this fetch on sportId covers every
@@ -496,6 +499,38 @@ export function GameSelect({
     const ids = new Set((prospects.data?.players ?? []).map((p) => p.playerId))
     return countProspectsByTeam(rosterIds.data ?? {}, ids)
   }, [rosterIds.data, prospects.data])
+
+  const renderCard = (g, idx) => {
+    const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
+      ? favoriteTeamId
+      : null
+    const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
+    // The first cards' marks are the slate's largest above-the-fold
+    // images — its LCP candidate — so they skip TeamLogo's default
+    // lazy loading (which would defer exactly the images the first
+    // paint is waiting on). Two cards ≈ one phone viewport.
+    const eager = idx < 2
+    const isPastFinal = showPastDayTreatment && selectHasResult(g)
+    // A past Final and a Suspended game (a paused checkpoint) both offer the box score.
+    const isSuspended = selectGameStatus(g).isSuspended
+    const postseasonLine = postseasonBracket.bracket ? cardLines(g, postseasonBracket.bracket) : null
+    return (
+      <li key={`${g.sportId}-${g.gamePk}`}>
+        <GameCard
+          game={g}
+          pinnedTeamId={pinnedTeamId}
+          prospectCount={pCount}
+          liveJerseys={liveJerseys.data}
+          national={nationalBroadcasts[g.gamePk]}
+          eager={eager}
+          postseasonLine={postseasonLine}
+          stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
+          onSelect={() => onPick(g, dateStr)}
+          onBoxScore={isPastFinal || isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
+        />
+      </li>
+    )
+  }
 
   return (
     <div
@@ -597,6 +632,12 @@ export function GameSelect({
             }
           />
 
+          {seriesGame && (
+            <ul className="gamelist" aria-label="World Series game">
+              {renderCard(seriesGame, 0)}
+            </ul>
+          )}
+
           {inPostseasonWindow && <WorldSeriesHome bracket={postseasonBracket.bracket} slateDate={dateStr} wide={wide} />}
 
           {/* The postseason bracket (#1224, slice 5) — above the cards, every
@@ -644,37 +685,7 @@ export function GameSelect({
                   <DerbyCard />
                 </li>
               )}
-              {gamesForDisplay.map((g, idx) => {
-                const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
-                  ? favoriteTeamId
-                  : null
-                const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
-                // The first cards' marks are the slate's largest above-the-fold
-                // images — its LCP candidate — so they skip TeamLogo's default
-                // lazy loading (which would defer exactly the images the first
-                // paint is waiting on). Two cards ≈ one phone viewport.
-                const eager = idx < 2
-                const isPastFinal = showPastDayTreatment && selectHasResult(g)
-                // A past Final and a Suspended game (a paused checkpoint) both offer the box score.
-                const isSuspended = selectGameStatus(g).isSuspended
-                const postseasonLine = postseasonBracket.bracket ? cardLines(g, postseasonBracket.bracket) : null
-                return (
-                  <li key={`${g.sportId}-${g.gamePk}`}>
-                    <GameCard
-                      game={g}
-                      pinnedTeamId={pinnedTeamId}
-                      prospectCount={pCount}
-                      liveJerseys={liveJerseys.data}
-                      national={nationalBroadcasts[g.gamePk]}
-                      eager={eager}
-                      postseasonLine={postseasonLine}
-                      stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
-                      onSelect={() => onPick(g, dateStr)}
-                      onBoxScore={isPastFinal || isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
-                    />
-                  </li>
-                )
-              })}
+              {listGames.map(renderCard)}
             </ul>
 
             {/* Any idle club, the whole-league All-Star case included. In the

@@ -3,7 +3,7 @@
 // to every slate.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { reorderLiveGames, reorderNationalBroadcasts, reorderSeriesGame } from '../src/lib/resultCards.js'
+import { reorderLiveGames, reorderNationalBroadcasts, splitSeriesGame } from '../src/lib/resultCards.js'
 
 const pks = (games) => games.map((g) => g.gamePk)
 
@@ -94,15 +94,19 @@ test('the slate tiers compose: favorite, then live, then national scheduled, the
   assert.deepEqual(pks(reorderNationalBroadcasts(liveFirst, national, isPinned)), [1, 3, 5, 4, 2, 6])
 })
 
-// The World Series game leads the slate, ahead of the pinned favorite.
-test('reorderSeriesGame: the Series game moves to the front, the rest keep their order', () => {
+// The World Series game leaves the list so the page can open with its card.
+test('splitSeriesGame: the Series game is the lead, the rest keep their order', () => {
   const games = slateWithState([1], [2, 'Live'], [3], [4])
-  assert.deepEqual(pks(reorderSeriesGame(games, 3)), [3, 1, 2, 4])
+  const { lead, rest } = splitSeriesGame(games, 3)
+  assert.equal(lead.gamePk, 3)
+  assert.deepEqual(pks(rest), [1, 2, 4])
 })
 
-test('reorderSeriesGame: no pk, or a pk not on the slate, changes nothing', () => {
+test('splitSeriesGame: no pk, or a pk not on the slate, changes nothing', () => {
   const games = slateWithState([1], [2])
-  assert.equal(reorderSeriesGame(games, null), games)
-  assert.equal(reorderSeriesGame(games, 99), games)
-  assert.equal(reorderSeriesGame(games, 1), games)
+  for (const pk of [null, 99]) {
+    const { lead, rest } = splitSeriesGame(games, pk)
+    assert.equal(lead, null)
+    assert.equal(rest, games)
+  }
 })
