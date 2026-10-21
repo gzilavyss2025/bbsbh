@@ -125,3 +125,12 @@ carry the line today: 80 of 120 High-A games have a national-board name in them.
 - An older season's pool watches its prospects graduate off the board. Measured
   on Triple-A 2025, 50 of 120 games have no fact left at all, and those show the
   game with no reason line rather than an invented one.
+
+## Addendum (2026-10-21): the rule now covers MLB history
+
+The classics deck (`src/api/classics/deck.js`, issue #1525) deals MLB games from 1960
+on, to score by hand. The same rule governs it: a game is dealt on who played, never
+on what happened. The deck reads the plain schedule through a `fields=` list that
+holds no score, never the notable index (ADR-0101, section 4), and never
+`hydrate=linescore`. A classic opens sealed under `revealedThrough`, and its box score
+stays open by date (ADR-0117, unchanged). Detail: `docs/api/classics.md`.
