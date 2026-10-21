@@ -46,7 +46,7 @@ function KeyGlyph({ broken }) {
 }
 
 // One club, one season: a rank in every key's column, then the tally.
-function GridRow({ row, keys, bar, limit, lead, meta, floor }) {
+function GridRow({ row, keys, limit, lead, meta, floor }) {
   const failed = row.failed?.length ?? 0
   const out = failed > limit
   const className = [
@@ -67,7 +67,7 @@ function GridRow({ row, keys, bar, limit, lead, meta, floor }) {
       </th>
       {keys.map((key) => {
         const rank = row.ranks?.[key.id]
-        const fails = rank == null || rank > bar
+        const fails = row.failed?.includes(key.id) ?? false
         return (
           <td
             key={key.id}
@@ -213,7 +213,6 @@ export function NineKeysPage() {
                     key={team.teamId}
                     row={team}
                     keys={keys}
-                    bar={bar}
                     limit={limit}
                     lead={
                       <TeamLink id={team.teamId} name={team.name}>
@@ -240,7 +239,6 @@ export function NineKeysPage() {
                   key={champion.year}
                   row={champion}
                   keys={keys}
-                  bar={bar}
                   limit={limit}
                   floor={(champion.failed?.length ?? 0) === limit}
                   lead={
