@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { readStampsOwner, useStamps, writeStampsOwner } from '../../hooks/useStamps.js'
-import { stampsToPublish } from '../../lib/stamps.js'
+import { remoteStampsFromExport, stampsToPublish } from '../../lib/stamps.js'
 import { mergeStrategyFor } from '../../lib/account/preferences.js'
 import { phaseForResponse, reasonForResponse, syncOutcome } from '../../lib/account/syncStatus.js'
 import { useRefetchOnFocus } from '../../hooks/sync/useRefetchOnFocus.js'
@@ -96,30 +96,10 @@ export function StampsCloudSync() {
         report('stamps', phaseForResponse(res.status), { reason: reasonForResponse(res.status) })
         return
       }
-      const data = await res.json()
-      if (!Array.isArray(data?.stamps)) return
-      // The endpoint returns a list joined against the shared facts cache;
-      // the local store is keyed by gamePk and holds no facts, so drop the
-      // `game` blob on the way in. (The Logbook resolves facts itself — see
-      // src/api/logbook.js — so nothing is lost by not keeping them.)
-      const remote = {}
-      for (const entry of data.stamps) {
-        if (entry?.gamePk == null) continue
-        remote[entry.gamePk] = {
-          // Whatever the row says. A pre-fix deploy sends no `state` at all
-          // and every row it sends is live, so the fallback is 'on'.
-          state: entry.state === 'off' ? 'off' : 'on',
-          mode: entry.mode,
-          stampedAt: entry.stampedAt,
-          updatedAt: entry.updatedAt,
-          note: entry.note,
-          date: entry.date,
-          // Where it sits in the passport book. Built field by field here,
-          // so anything not listed is dropped on the way in — a placement
-          // left off this object would arrive as "unplaced" and empty the
-          // book on every sign-in.
-          placement: entry.placement ?? null,
-        }
+      const remote = remoteStampsFromExport(true, await res.json())
+      if (!remote) {
+        report('stamps', 'error', { reason: 'network' })
+        return
       }
       // Baseline BEFORE the merge: the publish effect below fires on the state
       // change the merge causes, and it must already be comparing against what

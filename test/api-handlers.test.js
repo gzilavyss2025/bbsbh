@@ -30,8 +30,20 @@ import revealHandler, {
   recentGamesView,
   sanitizeSnapshot,
 } from '../api/reveal.js'
-import stampsHandler, { mint, mintRefusal, seasonRows, stampEntry } from '../api/stamps.js'
-import { MAX_STAMPS_PER_SEASON, applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
+import stampsHandler, {
+  MINT_LIMIT_PER_MIN,
+  handleStampsGet,
+  mint,
+  mintRefusal,
+  seasonRows,
+  stampEntry,
+} from '../api/stamps.js'
+import {
+  MAX_STAMPS_PER_SEASON,
+  applyRemoteStamps,
+  isStamped,
+  remoteStampsFromExport,
+} from '../src/lib/stamps.js'
 import { nodeReq, nodeRes, call } from './helpers/node-http.js'
 
 // --------------------------------------------------------------------------
@@ -409,6 +421,11 @@ function fakeRedis(seed = {}) {
     async set(key, value) {
       store[key] = value
     },
+    async incr(key) {
+      store[key] = (Number(store[key]) || 0) + 1
+      return store[key]
+    },
+    async expire() {},
   }
 }
 
@@ -869,4 +886,46 @@ test('privateJson keeps the status it is given', () => {
   privateJson(res, { error: 'nope' }, 401)
   assert.equal(res.statusCode, 401)
   assert.equal(res.headers['cache-control'], 'private, no-store')
+})
+
+// #2444: each new gamePk costs an upstream statsapi fetch, so uncached mints are
+// rate limited per user. A cached game costs nothing and is never counted.
+test('an over-limit mint that needs an upstream fetch is refused with 429', async () => {
+  const redis = fakeRedis({ 'stamps:rate:u1': MINT_LIMIT_PER_MIN })
+  const res = nodeRes()
+  await mint(mintReq({ gamePk: 778241 }), res, redis, 'u1')
+  assert.equal(res.statusCode, 429)
+})
+
+test('a cached game still mints when the user is over the limit', async () => {
+  const redis = fakeRedis({
+    'game:final:778241': FINAL_GAME,
+    'stamps:rate:u1': MINT_LIMIT_PER_MIN,
+  })
+  const res = nodeRes()
+  await mint(mintReq({ gamePk: 778241 }), res, redis, 'u1')
+  assert.equal(res.statusCode, 201)
+})
+
+// #2445: a Redis read failure is a 5xx, never an empty 200 the client would
+// merge as "the server has no stamps".
+test('a Redis read failure returns 503, not an empty 200', async () => {
+  for (const q of ['season=2026', 'seasons=1', 'export=1']) {
+    const redis = fakeRedis()
+    redis.hgetall = redis.smembers = async () => {
+      throw new Error('redis down')
+    }
+    const res = nodeRes()
+    await handleStampsGet(nodeReq(`/api/stamps?${q}`), res, redis, 'u1')
+    assert.equal(res.statusCode, 503, q)
+  }
+})
+
+test('a failed export never reaches the local stamps', () => {
+  assert.equal(remoteStampsFromExport(false, { stamps: [] }), null)
+  assert.equal(remoteStampsFromExport(true, {}), null)
+  const ok = remoteStampsFromExport(true, {
+    stamps: [{ gamePk: 1, state: 'off', updatedAt: 5 }],
+  })
+  assert.equal(ok[1].state, 'off')
 })
