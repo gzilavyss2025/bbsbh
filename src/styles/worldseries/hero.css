@@ -105,6 +105,7 @@
 }
 
 .ww-hero__slab {
+  --ww-slab-fade-direction: to right;
   position: relative;
   isolation: isolate;
   min-width: 0;
@@ -118,6 +119,7 @@
 }
 
 .ww-hero__slab--home {
+  --ww-slab-fade-direction: to left;
   margin-left: calc(-1 * var(--space-4));
   clip-path: polygon(calc(var(--space-6) + var(--versus) * var(--space-2)) 0, 100% 0, 100% 100%, 0 100%);
 }
@@ -137,15 +139,25 @@
   background:
     repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
     repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
-  mask-image: linear-gradient(100deg, var(--ripple-mask), transparent 70%);
+  mask-image: linear-gradient(var(--ww-slab-fade-direction), var(--ripple-mask), transparent 70%);
 }
 
 .ww-hero__slab::after {
   z-index: 3;
   background: linear-gradient(160deg, var(--sheen-light), transparent 50%, var(--sheen-dark));
+  mask-image: linear-gradient(var(--ww-slab-fade-direction), var(--ripple-mask) 50%, transparent calc(100% - var(--space-8)));
 }
 
 .ww-hero__wash {
+  --ww-wash-mask:
+    linear-gradient(to top, transparent, var(--ripple-mask) 60%),
+    linear-gradient(
+      var(--ww-wash-direction, to right),
+      transparent,
+      var(--ripple-mask) 16%,
+      var(--ripple-mask) calc(100% - var(--ww-wash-shift) - 28%),
+      transparent calc(100% - var(--ww-wash-shift) - var(--space-2))
+    );
   position: absolute;
   inset: 0;
   width: 100%;
@@ -154,7 +166,13 @@
   object-position: var(--ww-wash-focus);
   opacity: 0;
   filter: grayscale(1);
-  mask-image: linear-gradient(to top, transparent, var(--ripple-mask) 60%);
+  /* Feather both exposed edges in photo coordinates, including the part
+     clipped at the middle after the image's inward offset. Intersect with
+     the bottom fade; only the action photo is masked, never the headshot. */
+  -webkit-mask-image: var(--ww-wash-mask);
+  -webkit-mask-composite: source-in;
+  mask-image: var(--ww-wash-mask);
+  mask-composite: intersect;
 }
 
 .ww-hero__wash.is-ready { opacity: 0.3; }
@@ -163,7 +181,11 @@
    image that already fills its box by width. Keep the action inside the
    headshot's inner shoulder, with its head preserved at the top. */
 .ww-hero__slab--away .ww-hero__wash { left: var(--ww-wash-shift); right: auto; }
-.ww-hero__slab--home .ww-hero__wash { right: var(--ww-wash-shift); left: auto; }
+.ww-hero__slab--home .ww-hero__wash {
+  --ww-wash-direction: to left;
+  right: var(--ww-wash-shift);
+  left: auto;
+}
 
 .shot.ww-hero__cut {
   position: absolute;
