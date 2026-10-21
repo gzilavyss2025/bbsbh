@@ -49,6 +49,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import {
   reorderLiveGames,
   reorderNationalBroadcasts,
+  reorderSeriesGame,
   stackDoubleHeaders,
   stackSuspendedContinuation,
 } from '../lib/resultCards.js'
@@ -142,7 +143,9 @@ export function GameSelect({
   const inPostseasonWindow =
     sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
   const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null)
-  const wsMode = Boolean(worldSeriesMode(postseasonBracket.bracket)) // the World Series hero replaces the fold and primer (#1906)
+  const wsModeInfo = worldSeriesMode(postseasonBracket.bracket)
+  const wsMode = Boolean(wsModeInfo) // the World Series hero replaces the fold and primer (#1906)
+  const seriesGamePk = wsModeInfo?.dayType === 'game' ? wsModeInfo.series.cutoffGame?.gamePk ?? null : null
   // The bracket stands in for the off-day banner and the empty-slate line
   // only when it can draw. A failed read falls back to the plain slate, never
   // to a blank page.
@@ -463,8 +466,11 @@ export function GameSelect({
   const gamesForDisplay = useMemo(() => {
     const pinned = (g) => isPinned(g, favoriteTeamId, favoriteAffiliateIds)
     const liveFirst = reorderLiveGames(sorted, pinned)
-    return reorderNationalBroadcasts(liveFirst, nationalBroadcasts, pinned)
-  }, [sorted, nationalBroadcasts, favoriteTeamId, favoriteAffiliateIds])
+    const ordered = reorderNationalBroadcasts(liveFirst, nationalBroadcasts, pinned)
+    // On a World Series day the Series game leads, ahead of the favorite (the
+    // bracket names it; MLB level only, since MiLB slates never hold it).
+    return sportId === SPORT_IDS.MLB ? reorderSeriesGame(ordered, seriesGamePk) : ordered
+  }, [sorted, nationalBroadcasts, favoriteTeamId, favoriteAffiliateIds, sportId, seriesGamePk])
 
   // "N prospects on this roster" badge — MiLB games only (the slate's level
   // toggle is single-select, so gating this fetch on sportId covers every

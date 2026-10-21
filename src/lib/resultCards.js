@@ -256,3 +256,15 @@ export function reorderNationalBroadcasts(games, nationalByGamePk, isPinned = ()
   const others = scheduled.filter((g) => !nationalByGamePk[g.gamePk])
   return [...games.slice(0, from), ...national, ...others, ...games.slice(end)]
 }
+
+// Lifts the World Series game to the front of the slate, ahead even of the
+// favorite team's own game: on a Series day it is the one game the whole page
+// is about. `gamePk` comes from the bracket (`worldSeries.cutoffGame`), never
+// from a score, so this reads nothing sealed. A pk that is not on this slate
+// (another level, another day) leaves the order untouched.
+export function reorderSeriesGame(games, gamePk) {
+  if (!gamePk) return games
+  const idx = games.findIndex((g) => g.gamePk === gamePk)
+  if (idx <= 0) return games
+  return [games[idx], ...games.slice(0, idx), ...games.slice(idx + 1)]
+}
