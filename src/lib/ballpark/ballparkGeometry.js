@@ -192,6 +192,16 @@ export function wallDistanceAt(layout, deg) {
   return fenceDistanceAt(toFeet(pts), deg)
 }
 
+// The wall's height in feet on the ray at `deg`, from the heights that weight the stroke
+// (Savant's five when measured, else the three posted; layout/fenceShape.js heightAt).
+// Null for a layout with no heights on file: unlike the drawing's 8 ft stroke weight below,
+// a figure built on this must not invent one.
+export function wallHeightAt(layout, deg) {
+  const { heights } = diagramInput(layout)
+  const h = heights ? heightAt(deg, heights) : null
+  return Number.isFinite(h) ? h : null
+}
+
 // The stroke weight for a wall whose heights are unknown (an older
 // configuration): an ordinary 8 ft. It is a drawing weight only; no label
 // prints it, and the wall tags are left off.

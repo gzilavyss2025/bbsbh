@@ -1,5 +1,5 @@
 import { directionOf, sprayAngle } from '../../../../api/spray.js'
-import { wallDistanceAt } from '../../../ballpark/ballparkGeometry.js'
+import { wallDistanceAt, wallHeightAt } from '../../../ballpark/ballparkGeometry.js'
 import { resolveBallparkLayout } from '../../../ballpark/layout/resolveLayout.js'
 import { shares } from './pitchByPitch.js'
 
@@ -12,8 +12,10 @@ const FLY_MIN = 25
 const FLY_MAX = 50
 // Under this many fly balls a share is an anecdote, so the club (and the card) draws nothing.
 export const MIN_FLY = 30
-// Under this many fly balls in one direction, its carry figure is a dash. PLACEHOLDER: Gary tunes it.
-export const MIN_CARRY = 10
+// Under this many fly balls in one direction, its carry figure is a dash. Chosen by Gary, 2026-10-21: a
+// rate over fewer is too noisy (about 11 points either way at 20 balls, 16 at 10). Both Series clubs have
+// more than 100 in every direction, so today it changes nothing.
+export const MIN_CARRY = 20
 
 const ROWS = [
   { key: 'pull', label: 'Pull' },
@@ -42,9 +44,16 @@ export function flyShares(balls) {
 
 // (balls, layout) -> { pull, center, oppo }: the whole-number share of the club's fly balls in that
 // direction that carry past `layout`'s wall, or null under MIN_CARRY balls. AN ESTIMATE, and the card
-// says so: a ball counts when its distance is more than the wall's distance on its own angle, so wall
-// height, wind and air are ignored. A ball with no distance is left out, and so is one outside the
-// foul poles (no wall stands there).
+// says so. A ball counts when its distance is more than the wall's distance on its own angle PLUS the
+// wall's height there: a ball coming down at about 45 degrees (an assumption) needs about a foot of
+// carry for each foot of wall. Wind and air are ignored. A park with no heights on file asks for the
+// distance alone. A ball with no distance is left out, and so is one outside the foul poles (no wall
+// stands there).
+//
+// WHY THE HEIGHT (2026-10-21). On the balls each club hit at its OWN park, where the real result is
+// known (2026 regular season: the Rays' 308 at Tropicana, the Brewers' 300 at American Family), distance
+// alone agreed with "was it a home run" on 94.5% and 96.3% of balls and read 20.5% and 23.7% against
+// real rates of 14.9% and 20.0%. With the height it agrees on 97.7% and 98.7% and reads 17.2% and 20.0%.
 export function carryRates(balls, layout) {
   const t = { pull: [0, 0], center: [0, 0], oppo: [0, 0] } // [carried, counted]
   for (const b of balls ?? []) {
@@ -55,7 +64,7 @@ export function carryRates(balls, layout) {
     const wall = wallDistanceAt(layout, angle)
     if (wall == null) continue
     t[third][1]++
-    if (b.distance > wall) t[third][0]++
+    if (b.distance > wall + (wallHeightAt(layout, angle) ?? 0)) t[third][0]++
   }
   const rate = ([carried, counted]) => (counted >= MIN_CARRY ? Math.round((100 * carried) / counted) : null)
   return { pull: rate(t.pull), center: rate(t.center), oppo: rate(t.oppo) }

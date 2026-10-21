@@ -113,7 +113,7 @@ export function ParkFit({ model, parks, clubIds }) {
               </tbody>
             </Table>
             <p className="ww-fit__note">
-              Estimate: a fly ball counts when it travels farther than the wall on its own angle. Wall height is ignored.
+              {"Estimate: a fly ball counts when its distance is more than the wall's distance plus its height, on the ball's own angle."}
             </p>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { carryRates, fitParks, flyShares, parkFitModel, MIN_CARRY, MIN_FLY } fro
 import { scoutingModel } from '../src/lib/postseason/worldseries/scouting/scouting.js'
 import { HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
 import { resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.js'
-import { wallDistanceAt } from '../src/lib/ballpark/ballparkGeometry.js'
+import { wallDistanceAt, wallHeightAt } from '../src/lib/ballpark/ballparkGeometry.js'
 
 const { x: ox, y: oy } = HIT_COORD_ORIGIN
 // A ball at `deg` off dead centre (negative: left field), hit from `side`, at launch angle `la`.
@@ -24,9 +24,17 @@ const many = (n, b) => Array.from({ length: n }, () => b)
 const DAY = '2026-10-22'
 const MIL = resolveBallparkLayout({ venueId: 32, gameDate: DAY })
 const TB = resolveBallparkLayout({ venueId: 12, gameDate: DAY })
-// A fly ball at `deg` that travelled `ft` feet, and `n` of them `by` feet past (negative: short of) `layout`'s wall there.
+// A fly ball at `deg` that travelled `ft` feet. What a ball must travel to carry is the wall's distance plus
+// the wall's height there (no height on file: the distance alone).
 const hit = (deg, ft, side = 'R') => ({ ...ball(deg, side), distance: ft })
-const pastWall = (layout, deg, by, n = MIN_CARRY) => many(n, hit(deg, wallDistanceAt(layout, deg) + by))
+const needs = (layout, deg) => wallDistanceAt(layout, deg) + (wallHeightAt(layout, deg) ?? 0)
+// `n` balls `by` feet past (negative: short of) what `layout` asks of a ball at `deg`.
+const pastWall = (layout, deg, by, n = MIN_CARRY) => many(n, hit(deg, needs(layout, deg) + by))
+// A park drawn from five posted distances and one posted wall height, so a case does not depend on real park data.
+const flat = (h) => ({
+  measurements: { dist: { lf: 330, lc: 365, cf: 400, rc: 365, rf: 330 }, wall: h == null ? null : { lf: h, cf: h, rf: h }, measured: null },
+  geometry: { fence: null, cfMarkerAngle: 0 },
+})
 
 test('a right-handed hitter pulls to left field, a left-handed one to right', () => {
   const s = flyShares([...many(15, ball(-30, 'R')), ...many(15, ball(30, 'L')), ...many(15, ball(0)), ...many(15, ball(30, 'R'))])
@@ -89,8 +97,8 @@ test('Park fit comes right after Platoon off day, and after Film room on a game 
   assert.ok(g.indexOf('park-fit') > g.indexOf('film-room'))
 })
 
-test('a fly ball carries when it travels farther than the wall on its own angle', () => {
-  // Half the balls land 5 feet past American Family's wall at dead center, half 5 feet short of it.
+test('a fly ball carries when it travels farther than the wall and its height on its own angle', () => {
+  // Half the balls land 5 feet past what American Family's wall asks at dead center, half 5 feet short of it.
   const r = carryRates([...pastWall(MIL, 0, 5), ...pastWall(MIL, 0, -5)], MIL)
   assert.equal(r.center, 50)
   assert.equal(r.pull, null, 'no ball in a direction is a dash, not 0%')
@@ -98,13 +106,45 @@ test('a fly ball carries when it travels farther than the wall on its own angle'
 })
 
 test('the same fly balls carry in one park and not in the other', () => {
-  // Ten degrees toward left, Tropicana's wall stands well behind American Family's.
+  // Ten degrees toward left, Tropicana's wall (and its top) stands well behind American Family's.
   const deg = -10
-  const [near, deep] = [wallDistanceAt(MIL, deg), wallDistanceAt(TB, deg)]
+  const [near, deep] = [needs(MIL, deg), needs(TB, deg)]
   assert.ok(deep - near > 10, `Tropicana ${deep} ft, American Family ${near} ft`)
   const balls = many(MIN_CARRY, hit(deg, (near + deep) / 2))
   assert.equal(carryRates(balls, MIL).center, 100)
   assert.equal(carryRates(balls, TB).center, 0)
+})
+
+test('a ball past the wall but under its top does not carry: the wall height counts', () => {
+  const h = wallHeightAt(MIL, 0)
+  assert.ok(h > 3, `American Family's center wall is ${h} ft`)
+  const wall = wallDistanceAt(MIL, 0)
+  const rate = (ft) => carryRates(many(MIN_CARRY, hit(0, ft)), MIL).center
+  assert.equal(rate(wall + h / 2), 0, 'past the wall sign, but the ball would meet the wall')
+  assert.equal(rate(wall + h + 1), 100)
+})
+
+test('the same ball clears a low wall and not a tall one', () => {
+  // Two parks with the same distances, walls of 8 and 37 feet (a Monster), and a ball 20 feet past the center sign.
+  const balls = many(MIN_CARRY, hit(0, 420))
+  assert.equal(carryRates(balls, flat(8)).center, 100)
+  assert.equal(carryRates(balls, flat(37)).center, 0)
+})
+
+test('a park with no wall heights on file asks for the distance alone', () => {
+  assert.equal(wallHeightAt(flat(null), 0), null)
+  assert.equal(carryRates(many(MIN_CARRY, hit(0, 401)), flat(null)).center, 100)
+  assert.equal(carryRates(many(MIN_CARRY, hit(0, 399)), flat(null)).center, 0)
+})
+
+test('wallHeightAt reads the heights the drawing uses: Savant\'s measured five, else the posted three', () => {
+  assert.equal(wallHeightAt(MIL, 0), MIL.measurements.measured.height.cf)
+  assert.equal(wallHeightAt(flat(8), 0), 8)
+  assert.equal(wallHeightAt(flat(8), -45), 8)
+})
+
+test('the carry floor is 20 balls (Gary, 2026-10-21)', () => {
+  assert.equal(MIN_CARRY, 20)
 })
 
 test('a direction under the floor has no carry figure; a ball with no distance or foul of the poles is not counted', () => {
