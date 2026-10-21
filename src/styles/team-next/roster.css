@@ -16,3 +16,114 @@
   background: var(--surface-inset);
   border-top: var(--bw-hair) solid var(--border-rule);
 }
+
+/* The scorecard's roster box (RosterBox.jsx): the Lineup and Pitching staff cards. One ruled
+   table on the bright inset, a heavy ink edge, an ink head row, the position and the number in
+   their own cells, a break row per group and a foot row that sums WAR. The Table part owns the
+   cells' padding, the figure face and the scroll; this block owns the frame and the rules. */
+.rosterbox {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-inset);
+}
+.rosterbox thead th {
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  letter-spacing: var(--ls-label);
+}
+.rosterbox tbody :is(th, td) {
+  border-top-color: var(--border-rule);
+  vertical-align: middle;
+}
+.rosterbox tbody td + td {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+.rosterbox :is(th, td).rosterbox__lead {
+  inline-size: var(--space-10);
+  text-align: center;
+}
+/* The role chip is taller than a line of text: no block padding here keeps a bullpen row as
+   tall as a rotation row. */
+.rosterbox td.rosterbox__lead {
+  padding-block: 0;
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.rosterbox td.rosterbox__num {
+  color: var(--clay);
+}
+.rosterbox :is(th, td).rosterbox__name {
+  inline-size: 100%;
+  text-align: left;
+}
+.rosterbox td.rosterbox__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+/* The marks after a name: the star, the IL cross, the prospect and rookie pills. */
+.rosterbox__name > * + * {
+  margin-inline-start: var(--space-1);
+}
+.rosterbox__war--down {
+  color: var(--accent-negative-hover);
+}
+/* The block's small labels, one recipe: the break rows, the foot and the park note under the
+   diamond. Each rule below keeps only its own ground, ink and place. The Season view's line
+   under an arm's name is the shared .t-label (tokens/typography.css). */
+:is(.rosterbox__break th, .rosterbox__foot th, .rosterbox-pair__note) {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-align: left;
+}
+.rosterbox__name > .rosterbox__line {
+  display: block;
+  margin-inline-start: 0;
+}
+.rosterbox tbody .rosterbox__break th {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-page);
+  color: var(--text-caption);
+}
+.rosterbox .rosterbox__foot :is(th, td) {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+.rosterbox .rosterbox__foot th {
+  color: var(--text-muted);
+}
+/* At wide the diamond sits beside the lineup table, centred on its height. */
+.rosterbox-pair__diamond {
+  align-self: center;
+}
+/* The park's accuracy note sits in the drawing's bottom-left corner, where the diamond's crop
+   puts the catcher. A stopgap for that collision in the shared DefenseDiamond: here the note
+   moves under the drawing as a caption, with the same words. */
+.rosterbox-pair__diamond .bpdiagram__note {
+  display: none;
+}
+.rosterbox-pair__note {
+  margin: var(--space-2) 0 0;
+  color: var(--text-caption);
+}
+/* The pen week's strip keeps its three figures on one row, even on a phone: a third cell
+   wrapped alone and left an empty fill beside it. */
+/* layout-exempt: three fixed figures, the strip's own auto-fit would wrap one */
+.rosterbox-week .statstrip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+/* The Season view's staff runs to twenty-odd arms, so its table can stand twice the pen week's
+   height. At wide the week rides down beside it, clear of the jump bar, so the column beside a
+   long table is never left empty. In one column (a phone) a sticky cell has no room to move. */
+.rosterbox-pair > .rosterbox-week {
+  position: sticky;
+  top: calc(68px + var(--space-3)); /* the sticky jump bar's height, see BAR_H in TeamNextPage.jsx */
+  align-self: start;
+}

@@ -8,25 +8,34 @@ import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { Door } from '../../../../components/ui/control/Door.jsx'
 import { Segmented } from '../../../../components/ui/control/Segmented.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
+import { Grid } from '../../../../components/ui/layout/Grid.jsx'
+import { StatStrip, StatCell } from '../../../../components/ui/frame/StatStrip.jsx'
 import { DefenseDiamond } from '../../../../components/scoring/DefenseDiamond.jsx'
+import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { StaffGrid } from '../../../../components/workload/StaffGrid.jsx'
+import { splitDisplayName } from '../../../../api/person.js'
 import { loadRoster } from '../../data/loadRoster.js'
-import { lineupDefenseFrom } from '../../data/shared.js'
+import { lineupDefenseFrom, seasonOf } from '../../data/shared.js'
+import { monthDayShort } from '../../../../lib/dates.js'
 import { RosterList } from '../../modules/RosterList.jsx'
 import { SHARED } from '../once.js'
 import { useBandData } from '../useBandData.js'
 import { rosterCount, transactionsDoor } from './rosterData.js'
 import { CoachingStaff } from './CoachingStaff.jsx'
+import { RosterBox } from './RosterBox.jsx'
+import { benchRows, lineupRows, metaById, penRows, penWeekFigures, rotationRows } from './boxRows.js'
 import '../../../../styles/team-next/roster.css'
 
 // Roster band (#1107, row 6c): the old Roster tab's data (loadRoster, through SHARED, so no new
 // request) on stamped cards with a name tab. Open surface (ADR-0034): nothing here is sealed.
 // Lineup and its bench are one card; the whole staff (starters, bullpen, the seven-day pen grid)
 // is one card; then the 40-man and the injured list, and a door to the transactions ledger.
-// [DECISION: the staff card holds starters and bullpen side by side at wide, stacked on a phone,
-// the layout the old projection card had; the pen grid sits under them in the same card.]
+// The Lineup and Pitching staff cards are the scorecard's roster box (RosterBox.jsx, direction D
+// of the 2026-10 restyle): one ruled table each, so they do not read as the 40-man list under
+// them. At wide the lineup table sits beside the diamond, and the staff table beside the pen
+// week; on a phone each stacks. Grid `fit` lets a lone table (a farm club has no pen week) take
+// the full width, so no half of a card stands empty.
 const DASH = '—'
-const rows = (list, injuredIds) => list.map((p) => ({ ...p, hurt: injuredIds.has(p.id) }))
 const Sub = ({ title, children }) => (
   <section className="roster-sub">
     <h4 className="roster-sub__title">{title}</h4>
@@ -36,10 +45,26 @@ const Sub = ({ title, children }) => (
 
 // The pen's seven days, off the nightly file the old Bullpen health card read (same request).
 // MLB only and self-hiding: a farm club is absent from the file.
+// The strip under it reads StaffGrid's own rows: who pitched the day before the file's last
+// day (named by its date, since the file can be older than today), the week's pitches, and the
+// arm with the most.
 function PenWeek({ teamId }) {
   const { data } = useAsync(fetchWorkload, [])
-  const grid = useMemo(() => (data?.asOf ? staffGridFor(data, Number(teamId), data.asOf) : null), [data, teamId])
-  return grid?.length ? <Sub title="Bullpen, last seven days"><StaffGrid rows={grid} /></Sub> : null
+  const { grid, fig } = useMemo(() => {
+    const rows = data?.asOf ? staffGridFor(data, Number(teamId), data.asOf) : null
+    return { grid: rows, fig: penWeekFigures(rows) }
+  }, [data, teamId])
+  if (!fig) return null
+  return (
+    <Stack gap="base" className="rosterbox-week">
+      <Sub title="Bullpen, last seven days"><StaffGrid rows={grid} /></Sub>
+      <StatStrip>
+        <StatCell lead label={fig.day ? `Pitched ${monthDayShort(fig.day)}` : 'Pitched'} value={fig.pitched} note={`of ${fig.arms} arms`} />
+        <StatCell label="Seven days" value={fig.total} note="pitches" />
+        <StatCell label="Most work" value={fig.busiest ? fig.busiest.last7dayPitches : '—'} note={fig.busiest ? splitDisplayName(fig.busiest.name).last : ''} />
+      </StatStrip>
+    </Stack>
+  )
 }
 
 export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) {
@@ -53,6 +78,17 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
   const d = roster.data
   const door = transactionsDoor(team.id, asOf, sportId)
   const injuredIds = useMemo(() => new Set((d?.injured ?? []).map((p) => p.id)), [d])
+  // The lineup stands on the club's own park, as it stood on the page's day (`?d=`) or today.
+  // `team.venue` is the club's park NOW, so a `?d=` in an earlier season (a club since moved)
+  // keeps the plain diamond rather than draw this year's park under that year's nine. A venue
+  // with no layout on file falls back to the plain diamond too.
+  const venueId = team.venue?.id
+  const venueName = team.venue?.name
+  const thisSeason = !asOf || seasonOf(asOf, sportId) === seasonOf(null, sportId)
+  const park = useMemo(
+    () => (thisSeason && (venueId || venueName) ? resolveBallparkLayout({ venueId, venueName, gameDate: asOf ?? undefined }) : null),
+    [thisSeason, venueId, venueName, asOf],
+  )
   let delay = 0
   const card = () => ({ stampIn: true, style: { '--stamp-delay': `${(delay += 55)}ms` } })
 
@@ -63,6 +99,12 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
     const subs = recent ? d.recentSubstitutes : d.substitutes
     const sp = recent ? d.recentStartingPitchers : d.startingPitchers
     const pen = recent ? d.recentBullpen : d.bullpen
+    const meta = metaById(d)
+    const showWar = d.sportId === 1
+    const nine = lineupRows(lineup, meta)
+    const bench = benchRows(subs, meta, injuredIds)
+    const rotation = rotationRows(sp, injuredIds)
+    const bullpen = penRows(pen, injuredIds, d.pitchers)
     const toggle = hasRecent && (
       <Segmented
         label="Roster projection basis"
@@ -78,22 +120,38 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
           <Card frame="stamped" label="Lineup" labelAs="h3" count={recent ? 'current' : 'season'} {...card()}>
             <Stack gap="section">
               {toggle}
-              <div className="roster-super__row">
-                {lineup.length > 0 && <div className="roster-super__col"><DefenseDiamond defense={lineup} /></div>}
-                {subs.length > 0 && <div className="roster-super__col"><Sub title="Top substitutes"><RosterList season={d.season} showProspect={d.isMilb} rows={rows(subs, injuredIds)} /></Sub></div>}
-              </div>
+              <Grid min="20rem" gap="loose" fit className="rosterbox-pair">
+                {lineup.length > 0 && (
+                  <div className="rosterbox-pair__diamond">
+                    <DefenseDiamond defense={lineup} layout={park} label={`${venueName ?? 'Ballpark'} with the lineup`} />
+                    {park?.accuracyNote && <p className="rosterbox-pair__note">{park.accuracyNote}</p>}
+                  </div>
+                )}
+                <RosterBox
+                  label="Lineup and top substitutes"
+                  lead="Pos"
+                  season={d.season}
+                  showWar={showWar}
+                  showProspect={d.isMilb}
+                  groups={[{ sum: 'Lineup', rows: nine }, { title: 'Top substitutes', sum: 'bench', rows: bench }]}
+                />
+              </Grid>
             </Stack>
           </Card>
         )}
         {(sp.length > 0 || pen.length > 0) && (
           <Card frame="stamped" label="Pitching staff" labelAs="h3" count={`${sp.length + pen.length} arms`} {...card()}>
-            <Stack gap="section">
-              <div className="roster-super__row">
-                {sp.length > 0 && <div className="roster-super__col"><Sub title="Starting pitchers"><RosterList season={d.season} showProspect={d.isMilb} rows={rows(sp, injuredIds)} /></Sub></div>}
-                {pen.length > 0 && <div className="roster-super__col"><Sub title="Bullpen"><RosterList season={d.season} showProspect={d.isMilb} rows={rows(pen, injuredIds)} /></Sub></div>}
-              </div>
+            <Grid min="20rem" gap="loose" fit className="rosterbox-pair">
+              <RosterBox
+                label="Rotation and bullpen"
+                lead="Role"
+                season={d.season}
+                showWar={showWar}
+                showProspect={d.isMilb}
+                groups={[{ title: 'Rotation', sum: 'Rotation', rows: rotation }, { title: 'Bullpen', sum: 'bullpen', role: true, rows: bullpen }]}
+              />
               <PenWeek teamId={team.id} />
-            </Stack>
+            </Grid>
           </Card>
         )}
         {/* Keyed so a new club or day starts a fresh card; it arrives on its own read, so it takes no stagger step. */}
