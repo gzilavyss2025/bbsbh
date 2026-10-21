@@ -2,10 +2,9 @@ import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram
 import { DefenseDiamond } from '../../../../components/scoring/DefenseDiamond.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
-import { PLOT_VIEWBOX, plotPercent } from '../../../../lib/ballpark/ballparkGeometry.js'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { headerThemeClass, headerThemeStyle } from '../../../../lib/headerTheme.js'
-import { DEFENSE_SPOTS } from '../../../../lib/ballpark/layout/defenseWindow.js'
+import { DEFENSE_SPOTS, defenseWindow } from '../../../../lib/ballpark/layout/defenseWindow.js'
 import { ClubBar } from './ClubBar.jsx'
 
 // The other club's defense, as names on the park the game is played in: surnames only, no
@@ -17,6 +16,7 @@ export function FieldCard({ data, theme, masthead }) {
   const layout = resolveBallparkLayout({ venueId: info.venueId, venueName: info.venue, gameDate: info.officialDate })
   const by = Object.fromEntries(oppDefense.map((d) => [d.position, d]))
   if (oppPitcher) by.P = { id: oppPitcher.id, last: oppPitcher.last ?? oppPitcher.name.split(' ').pop(), name: oppPitcher.name }
+  const win = layout ? defenseWindow(layout) : null
   const dh = by.DH
   const posted = oppDefense.length > 0
   return (
@@ -30,10 +30,10 @@ export function FieldCard({ data, theme, masthead }) {
       {!posted && closed ? (
         <p className="roster__notice">The defensive alignment is not in the record for this game.</p>
       ) : layout ? (
-        <div className="lfld__field">
-          <BallparkDiagram layout={layout} viewBox={PLOT_VIEWBOX} className="lfld__park" label={`${info.venue} with the defense`} />
+        <div className="lfld__field" style={{ aspectRatio: win.aspectRatio }}>
+          <BallparkDiagram layout={layout} viewBox={win.viewBox} className="lfld__park" label={`${info.venue} with the defense`} />
           {Object.entries(DEFENSE_SPOTS).map(([pos, xy]) => {
-            const { left, top } = plotPercent(xy)
+            const { left, top } = win.percent(xy)
             const who = by[pos]
             return (
               <span key={pos} className="lfld__node" style={{ left: `${left}%`, top: `${top}%` }} role="group" aria-label={pos}>

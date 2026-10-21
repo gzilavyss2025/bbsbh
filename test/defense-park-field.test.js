@@ -18,25 +18,25 @@ test('every park: spots sit inside the window, and no distance sign is cropped',
   for (const layout of allBallparkLayouts()) {
     const w = defenseWindow(layout)
     const top = topOf(w)
-    assert.ok(top >= PLOT_SKY_CROP && top <= 72, `crop ${top}`)
+    // Each park's own trim (parkWindow.js, Gary 2026-10-21): no longer capped at 72.
+    assert.ok(top >= 0 && top < VIEWBOX.h / 2, `crop ${top}`)
     for (const [pos, xy] of Object.entries(DEFENSE_SPOTS)) {
       const { left, top: t } = w.percent(xy)
       assert.ok(left > 10 && left < 90, `${pos} left ${left}`)
       assert.ok(t > 5 && t < 95, `${pos} top ${t}`)
     }
     for (const l of buildFieldGeometry(diagramInput(layout)).labels) {
-      // (an old configuration whose sign the shared plot window already cuts is not this card's doing)
-      assert.ok(top === PLOT_SKY_CROP || l.y - 10 >= top, `sign at y ${l.y} cut by a window starting at ${top}`)
+      assert.ok(l.y - 10 >= top, `sign at y ${l.y} cut by a window starting at ${top}`)
     }
   }
 })
 
-test('Dodger Stadium gets the full crop, a deep-sign park keeps the shared window', () => {
+test('Dodger Stadium trims past the old 72 cap; a deep-sign park keeps its sign in view', () => {
   const dodgers = defenseWindow(resolveBallparkLayout({ venueId: 22, gameDate: '2026-10-15' }))
-  assert.equal(topOf(dodgers), 72)
-  assert.equal(dodgers.aspectRatio, `${VIEWBOX.w} / ${VIEWBOX.h - 72}`)
+  assert.ok(topOf(dodgers) > 72, `Dodger Stadium starts at ${topOf(dodgers)}`)
+  assert.equal(dodgers.aspectRatio, `${VIEWBOX.w} / ${VIEWBOX.h - topOf(dodgers)}`)
   const comerica = defenseWindow(resolveBallparkLayout({ venueId: 2394, gameDate: '2026-10-15' }))
-  assert.ok(topOf(comerica) < 72)
+  assert.ok(topOf(comerica) < topOf(dodgers))
 })
 
 test('both cards read the one spot table', () => {

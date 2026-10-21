@@ -11,7 +11,7 @@ import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { Loader } from '../../../../../components/ui/Loader.jsx'
 import { resolveBallparkLayout } from '../../../../../lib/ballpark/layout/resolveLayout.js'
-import { batterView, inMinors, PARK_VIEWBOX, pitcherView, scopeOptions, spotAt, TAG_SIDE } from './inningsView.js'
+import { batterView, inMinors, innWindow, pitcherView, scopeOptions, spotAt, TAG_SIDE } from './inningsView.js'
 import '../../../../../styles/player-next/both/innings.css'
 
 const POSITION_NAME = {
@@ -48,8 +48,8 @@ async function loadPark(bio, asOf) {
   return venue ? resolveBallparkLayout({ venueId: venue.id, venueName: venue.name, gameDate: asOf ?? undefined }) : null
 }
 
-function Ring({ pos, size, top, innings, label, park }) {
-  const at = spotAt(pos, park)
+function Ring({ pos, size, top, innings, label, win }) {
+  const at = spotAt(pos, win)
   return (
     <span
       className={`pnext-inn__ring${top ? ' pnext-inn__ring--top' : ''}`}
@@ -69,11 +69,11 @@ function Ring({ pos, size, top, innings, label, park }) {
   )
 }
 
-function Marks({ view, role, scopeWord, park }) {
+function Marks({ view, role, scopeWord, win }) {
   if (role === 'pitching') {
     return (
       <>
-        <Ring pos="P" park={park} size={view.size} top label={`Pitcher, ${scopeWord}: ${view.starter} innings as a starter, ${view.reliever} as a reliever`} />
+        <Ring pos="P" win={win} size={view.size} top label={`Pitcher, ${scopeWord}: ${view.starter} innings as a starter, ${view.reliever} as a reliever`} />
         <span className="pnext-inn__badge pnext-inn__badge--l"><b>Starter</b>{view.starter} IP</span>
         <span className="pnext-inn__badge pnext-inn__badge--r"><b>Reliever</b>{view.reliever} IP</span>
       </>
@@ -82,12 +82,12 @@ function Marks({ view, role, scopeWord, park }) {
   return (
     <>
       {view.idle.map((pos) => (
-        <span key={pos} className="pnext-inn__idle" style={{ left: `${spotAt(pos, park).x}%`, top: `${spotAt(pos, park).y}%` }} role="img" aria-label={`${POSITION_NAME[pos]}, no innings logged`}>
+        <span key={pos} className="pnext-inn__idle" style={{ left: `${spotAt(pos, win).x}%`, top: `${spotAt(pos, win).y}%` }} role="img" aria-label={`${POSITION_NAME[pos]}, no innings logged`}>
           {pos}
         </span>
       ))}
       {view.rings.map((r) => (
-        <Ring key={r.pos} {...r} park={park} label={`${POSITION_NAME[r.pos]}, ${scopeWord}: ${r.innings} innings, ${Math.round(r.share * 100)} percent of his field innings`} />
+        <Ring key={r.pos} {...r} win={win} label={`${POSITION_NAME[r.pos]}, ${scopeWord}: ${r.innings} innings, ${Math.round(r.share * 100)} percent of his field innings`} />
       ))}
       {view.dh > 0 && <span className="pnext-inn__badge pnext-inn__badge--r"><b>DH</b>{view.dh} G</span>}
     </>
@@ -102,6 +102,7 @@ export default function InningsModule({ bio, role, asOf, season, onEmpty, onCoun
   const [scope, setScope] = useState('season')
   const [views, setViews] = useState({})
   const [park, setPark] = useState()
+  const win = park ? innWindow(park) : null // the board's window onto this park (inningsView.js)
   const picked = useRef(false)
 
   // The club's park: undefined while it loads, null for none.
@@ -157,11 +158,11 @@ export default function InningsModule({ bio, role, asOf, season, onEmpty, onCoun
           options={scopes.map((s) => ({ value: s.key, label: s.label }))}
         />
       )}
-      <div className={`pnext-inn__park${park === null ? ' pnext-inn__park--field' : ''}`}>
-        {park && <BallparkDiagram layout={park} className="pnext-inn__art" viewBox={PARK_VIEWBOX} label={`${park.name} field`} />}
+      <div className={`pnext-inn__park${park === null ? ' pnext-inn__park--field' : ''}`} style={win ? { aspectRatio: win.aspectRatio } : undefined}>
+        {park && <BallparkDiagram layout={park} className="pnext-inn__art" viewBox={win.viewBox} label={`${park.name} field`} />}
         {park === null && <FieldBackdrop className="pnext-inn__art" />}
         {(park === undefined || !(scope in views)) && <Loader size="inline" className="pnext-inn__loading" />}
-        {view && park !== undefined && <Marks view={view} role={role} scopeWord={scopeWord} park={park} />}
+        {view && park !== undefined && <Marks view={view} role={role} scopeWord={scopeWord} win={win} />}
         {scope in views && !view && <p className="hint pnext-inn__none">No innings logged.</p>}
       </div>
     </Stack>
