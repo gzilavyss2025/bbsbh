@@ -166,6 +166,7 @@
   /* Look A (#1776): no card inside the sheet. The grade sits on the sheet and a
      hairline rule closes it. */
   border: 0;
+  border-top: var(--bw-rule) solid var(--navy);
   border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 /* Keeps a bottom margin when this is the card's last child, so the outer
@@ -178,9 +179,10 @@
 }
 .team-score__grade-button {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  /* Look C (#1776): the score sits in the left margin, the verdict beside it. */
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-3);
-  align-items: end;
+  align-items: start;
   width: 100%;
   min-height: var(--tap-min);
   padding: 0;
@@ -232,7 +234,7 @@
   line-height: var(--lh-snug);
 }
 .team-score__grade-result {
-  align-items: flex-end;
+  align-items: flex-start;
   gap: var(--space-1);
 }
 .team-score__grade-score {

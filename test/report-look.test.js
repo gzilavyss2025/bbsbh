@@ -35,9 +35,9 @@ test('the grade is split by a hairline rule, the driver by a hairline above it',
   assert.match(ruleBody(team, '.team-score__row--driver'), /border-top:\s*var\(--bw-hair\) solid var\(--border-rule\)/)
 })
 
-test('the chip pair is underlined tabs, and the chosen tab is underlined in ink', () => {
+test('the chip pair is underlined tabs, and the chosen tab is underlined in marker ink', () => {
   assert.match(ruleBody(chal, '.chal__view'), /border-bottom:\s*var\(--bw-heavy\) solid transparent/)
-  assert.match(ruleBody(chal, '.chal__view.is-on'), /border-bottom-color:\s*var\(--navy\)/)
+  assert.match(ruleBody(chal, '.chal__view.is-on'), /border-bottom-color:\s*var\(--marker\)/)
 })
 
 test('an open grade or driver shows it with its rule, not with a wash', () => {
@@ -49,4 +49,27 @@ test('an open grade or driver shows it with its rule, not with a wash', () => {
 test('the rank strip fades to the sheet, because the inset tile is gone', () => {
   assert.match(ruleBody(team, '.rankstrip__fade--l'), /var\(--surface-card\)/)
   assert.match(ruleBody(team, '.rankstrip__fade--r'), /var\(--surface-card\)/)
+})
+
+// ---- Look C: the margin numeral (#1776) -----------------------------------
+const card = readFileSync(join(STYLES, '..', 'components', 'teamstats', 'TeamScoreCard.jsx'), 'utf8')
+
+test('the grade result comes before the verdict copy in the markup, with no CSS order trick', () => {
+  const at = (needle) => card.indexOf(needle)
+  assert.ok(at('team-score__grade-result') > 0)
+  assert.ok(at('team-score__grade-result') < at('team-score__grade-copy'))
+  assert.doesNotMatch(team, /team-score__grade[^{]*\{[^}]*order:\s*-1/)
+})
+
+test('the grade puts the result in the left column and keeps the numeral size tokens', () => {
+  assert.match(ruleBody(team, '.team-score__grade-button'), /grid-template-columns:\s*auto minmax\(0, 1fr\)/)
+  assert.match(ruleBody(team, '.team-score__grade'), /border-top:\s*var\(--bw-rule\) solid var\(--navy\)/)
+  assert.match(ruleBody(team, '.team-score__grade-score'), /font-size:\s*var\(--fs-score-lg\)/)
+})
+
+test('the chart is graphite, and --marker marks only the one labelled dot', () => {
+  assert.match(ruleBody(chal, '.chal .scatter__line'), /stroke:\s*var\(--graphite\)/)
+  assert.match(ruleBody(chal, '.chal .scatter__dot'), /background:\s*var\(--graphite\)/)
+  assert.match(ruleBody(chal, '.chal .scatter__dot--mark'), /background:\s*var\(--marker\)/)
+  assert.doesNotMatch(ruleBody(team, '.team-score__grade-score'), /marker/)
 })

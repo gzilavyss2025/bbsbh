@@ -216,16 +216,16 @@ function GradeHero({ grade, summary, rank, league, teamId, isOpen, onToggle }) {
         aria-expanded={isOpen}
         aria-controls={isOpen ? 'team-score-detail' : undefined}
       >
-        <span className="team-score__grade-copy">
-          <span className="team-score__grade-kicker">Season Grade</span>
-          <strong>{grade ? seasonStoryline(grade, teamId) : 'Not yet graded'}</strong>
-        </span>
         <span className="team-score__grade-result">
           {rank && <span className="team-score__rank">{rankText(rank.rank)} of {rank.of}</span>}
           <span className="team-score__grade-score">
             {scoreValue(summary)}<small>/10</small>
           </span>
           <span className="t-label t-label--bold team-score__breakdown">{isOpen ? 'Close breakdown' : 'See breakdown'}</span>
+        </span>
+        <span className="team-score__grade-copy">
+          <span className="team-score__grade-kicker">Season Grade</span>
+          <strong>{grade ? seasonStoryline(grade, teamId) : 'Not yet graded'}</strong>
         </span>
       </button>
       {summary?.score != null && league.length > 0 && (

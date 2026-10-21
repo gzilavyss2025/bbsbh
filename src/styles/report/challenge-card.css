@@ -80,7 +80,7 @@
 }
 
 .chal__view.is-on {
-  border-bottom-color: var(--navy);
+  border-bottom-color: var(--marker);
   color: var(--text-heading);
   font-weight: var(--w-bold);
 }
@@ -144,4 +144,19 @@
   font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-caption);
+}
+
+/* ---- the chart in graphite (Look C, #1776) ------------------ */
+
+/* Pencil ink for the dots and the league line. --marker marks the chosen tab
+   and the one labelled dot, and nothing else. Scoped to .chal because the
+   broadcast bar draws the same scatter parts. */
+.chal .scatter__line {
+  stroke: var(--graphite);
+}
+.chal .scatter__dot {
+  background: var(--graphite);
+}
+.chal .scatter__dot--mark {
+  background: var(--marker);
 }
