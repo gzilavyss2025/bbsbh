@@ -51,15 +51,16 @@ export const CONTRACT_SOURCES = Object.keys(KEY_COLUMNS)
 // The folder that holds the four crosswalk files, one `{sourceFile}.json` per
 // entry of CONTRACT_SOURCES. Every generator, the migration script and the test
 // read the crosswalk through this one constant, so the folder can move in one
-// place. pending.json is not a crosswalk file: the admin review page fetches
-// it, so it keeps its own path under public/ (see gen-contracts-identity.mjs).
+// place. The folder sits outside public/ because no page fetches these files.
+// pending.json is not a crosswalk file: the admin review page fetches it, so it
+// keeps its own path under public/ (see gen-contracts-identity.mjs).
 export const CROSSWALK_DIR = join(
   dirname(fileURLToPath(import.meta.url)),
   '..',
   '..',
-  'public',
+  'scripts',
   'data',
-  'contracts-history',
+  'contracts',
   'identity',
 )
 

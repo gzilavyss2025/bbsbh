@@ -2,7 +2,7 @@
 
 `scripts/research-db.mjs` is the first thing a research spike opens. It is a
 local DuckDB layer over the JSON panels that earlier spikes wrote under
-`.scratch/` and `public/data/`. It copies no data. It never runs in the app, in
+`.scratch/`, `scripts/data/` and `public/data/`. It copies no data. It never runs in the app, in
 CI or on Vercel. The JSON files stay the source of truth (ADR-0065).
 
 ## The rule
@@ -120,10 +120,10 @@ These read `contracts-history` for dollars and the WAR files for value. The payr
 
 | View | Source | Grain | Answers |
 | --- | --- | --- | --- |
-| `public_contracts_history_identity_arbitration` | `public/data/contracts-history/identity/arbitration.json` | One arbitration case (`rowKey`) | Which MLB player was each arbitration row? `mlbId` and `confidence`. |
-| `public_contracts_history_identity_extensions` | `public/data/contracts-history/identity/extensions.json` | One extension (`rowKey`) | Which MLB player signed each extension? |
-| `public_contracts_history_identity_free_agency` | `public/data/contracts-history/identity/free_agency.json` | One free-agent signing (`rowKey`) | Which MLB player signed each free-agent deal? |
-| `public_contracts_history_identity_salaries` | `public/data/contracts-history/identity/salaries.json` | One salary line (`rowKey`) | Which MLB player drew each salary line? The biggest table: 27,349 rows. |
+| `scripts_data_contracts_identity_arbitration` | `scripts/data/contracts/identity/arbitration.json` | One arbitration case (`rowKey`) | Which MLB player was each arbitration row? `mlbId` and `confidence`. |
+| `scripts_data_contracts_identity_extensions` | `scripts/data/contracts/identity/extensions.json` | One extension (`rowKey`) | Which MLB player signed each extension? |
+| `scripts_data_contracts_identity_free_agency` | `scripts/data/contracts/identity/free_agency.json` | One free-agent signing (`rowKey`) | Which MLB player signed each free-agent deal? |
+| `scripts_data_contracts_identity_salaries` | `scripts/data/contracts/identity/salaries.json` | One salary line (`rowKey`) | Which MLB player drew each salary line? The biggest table: 27,349 rows. |
 | `public_contracts_history_terms` | `public/data/contracts-history/terms/*.json` | One contract row (`key` = `rowKey`) | What were the dollars, years and options of each deal? `terms` holds them; text values are JSON. |
 | `public_contracts_history_season_players` | `public/data/contracts-history/season-players/*.json` | One player-season candidate | Who was on an MLB roster in a season? The pool the identity match draws from. |
 | `public_contracts_history_player` | `public/data/contracts-history/player/*.json` | 1 row per shard, 100 rows | The same deals grouped by player. Deferred: see the note below the catalog. |

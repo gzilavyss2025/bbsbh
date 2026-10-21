@@ -27,7 +27,7 @@ that could be scored. Anything this spike says about "who wins" describes
 older, smaller extensions more than it describes today's market.
 
 Ten more rows have no resolved player id in
-`public/data/contracts-history/identity/extensions.json` (of 999, 968 exact,
+`scripts/data/contracts/identity/extensions.json` (of 999, 968 exact,
 21 fuzzy, 10 unresolved) and are dropped. Sixteen fuzzy-confidence matches
 stay in the scored set — a small, known source of noise, not excluded,
 because ADR-0066's crosswalk is the only identity join this program uses and

@@ -31,7 +31,7 @@ BEFORE it — the "platform year." `scripts/gen-contracts-identity.mjs`'s own
 arbitration branch says this in code: `lookupSeason = season - 1 // roster
 lookup at the season the "prior year" columns describe` (ADR-0066).
 
-The identity crosswalk (`public/data/contracts-history/identity/arbitration.json`)
+The identity crosswalk (`scripts/data/contracts/identity/arbitration.json`)
 also carries a `matchedSeason` field, and it is tempting to treat that as the
 platform year — do not. `matchedSeason` records which season's ROSTER the
 name resolver matched the row's claimed club against, purely to confirm the
