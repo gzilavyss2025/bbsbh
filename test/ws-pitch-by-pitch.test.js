@@ -2,7 +2,7 @@
 // the arsenal and the hitters' grids into table rows, and the card's slot in the list.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { EDGE_BAND, pitchByPitchModel, seatOf, topHitters } from '../src/lib/postseason/worldseries/scouting/pitchByPitch.js'
+import { EDGE_BAND, pitchByPitchModel, seatOf, shares, topHitters } from '../src/lib/postseason/worldseries/scouting/pitchByPitch.js'
 import { surnameOf } from '../src/lib/postseason/worldseries/scouting/filmRoom.js'
 import { scoutingModel } from '../src/lib/postseason/worldseries/scouting/scouting.js'
 
@@ -38,6 +38,14 @@ test('uses still sum to 100 when the shares do not round clean', () => {
   const a = [{ code: 'FF', pitches: 1 }, { code: 'SL', pitches: 1 }, { code: 'CH', pitches: 1 }]
   const m = pitchByPitchModel({ arsenal: a, hitters: [grid({ FF: [100, 30] })], league: grid({ FF: [1000, 300] }), hand: 'R' })
   assert.equal(m.rows.reduce((s, r) => s + r.uses, 0), 100)
+})
+
+test('shares add up to 100 when the rounding is short by more than one point', () => {
+  // The Brewers' fly balls on the Park fit card (115, 246, 280): 17.9, 38.4 and 43.7 floor to 98,
+  // so two shares take a point. The card showed 18, 38, 43, which adds to 99.
+  assert.deepEqual(shares([115, 246, 280]), [18, 38, 44])
+  // Seven equal parts: 14.29 each floors to 98, so two of them take the extra point.
+  assert.equal(shares(new Array(7).fill(1)).reduce((a, b) => a + b, 0), 100)
 })
 
 test('a pitch under the use floor is left out and the rest still sum to 100', () => {

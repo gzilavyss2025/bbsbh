@@ -36,7 +36,9 @@ export function shares(counts) {
   const exact = counts.map((c) => (c / total) * 100)
   const out = exact.map(Math.floor)
   const order = exact.map((x, i) => [x - out[i], i]).sort((a, b) => b[0] - a[0])
-  for (let k = 0; k < 100 - sum(out); k++) out[order[k][1]]++
+  // The shortfall is read once: `out` grows as each share takes its point, so a bound that re-reads it stops early.
+  const short = 100 - sum(out)
+  for (let k = 0; k < short; k++) out[order[k][1]]++
   return out
 }
 
