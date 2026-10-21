@@ -9,6 +9,24 @@ The code is the source of truth for the order: the `CARDS` list in
 `src/lib/postseason/worldseries/scouting/scouting.js`. This page records the intent. The
 design spec is `.scratch/ws-scouting/handoff.md`.
 
+## Two-team scouting ledgers
+
+The home page's Nine keys and Glove and legs use Design A, selected on 2026-10-21:
+matching internal titles, regular-season labels, club heads, and measure → first club →
+second club columns. Figures use mono type; an amber underline marks the better figure.
+Nine keys marks a failed rank in clay with an asterisk, without striking through the rank.
+Its threshold and verdict come from the data file. Ties and missing figures mark no leader.
+Glove and legs keeps the Defense and Running groups and all six measures and their units.
+
+`cards/scouting/ComparisonLedger.jsx` draws both cards with the existing Card, Table,
+Key and layout parts. The home-only `NineKeys.jsx` leaves the series pages' `SeriesNineKeys`
+view unchanged. `styles/worldseries/comparison.css` holds the shared presentation;
+`glove.css` only sets the group and measure heights. The failed-key explanation remains
+available by tap or keyboard, and Full report still opens `/nine-keys`.
+
+Issue [#2455](https://github.com/gzilavyss2025/bbsbh/issues/2455) tracks making this the
+documented standard for future two-team analysis. This first pair does not close that issue.
+
 ## Card order
 
 A card with no data drops, and its jump-bar button drops with it. The jump bar shows no

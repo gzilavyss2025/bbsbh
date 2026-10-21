@@ -428,4 +428,34 @@
     transition: none;
   }
 }
+/* On paper (the Nine keys footers): the button takes ink colours, and the tip
+   opens upward across the card's nearest positioned box, with no pointer tab. */
+.infopop--paper {
+  position: static;
+  vertical-align: middle;
+}
+.infopop--paper .infopop__btn {
+  --btn-edge: var(--text-caption);
+  --btn-ink: var(--text-heading);
+  --btn-edge-hover: var(--text-heading);
+}
+.infopop--paper .infopop__btn:hover,
+.infopop--paper .infopop__btn:focus-visible {
+  color: var(--text-heading);
+}
+.infopop--paper .infopop__tip {
+  top: auto;
+  bottom: calc(100% + var(--space-1h));
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: none;
+  font-family: var(--font-body);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-text);
+  color: var(--text-body);
+}
+.infopop--paper .infopop__tip::before {
+  display: none;
+}
 

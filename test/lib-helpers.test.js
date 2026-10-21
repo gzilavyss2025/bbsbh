@@ -4,7 +4,7 @@
 // machine's sign convention).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { ordinal } from '../src/lib/format.js'
+import { ordinal, ordinalSuffix } from '../src/lib/format.js'
 import { rankText } from '../src/api/person/teamPage.js'
 import { meetingOrdinal } from '../src/screens/scout/meetings/meetings.js'
 import { nameFromChildren } from '../src/lib/nav.js'
@@ -24,6 +24,12 @@ import {
 // --------------------------------------------------------------------------
 // format.ordinal — the 11/12/13 vs 21/22/23 suffix rule
 // --------------------------------------------------------------------------
+test('ordinalSuffix is the suffix alone', () => {
+  assert.equal(ordinalSuffix(1), 'st')
+  assert.equal(ordinalSuffix(12), 'th')
+  assert.equal(ordinalSuffix(23), 'rd')
+})
+
 test('ordinal suffixes the ones digit except the 11–13 teens', () => {
   assert.equal(ordinal(1), '1st')
   assert.equal(ordinal(2), '2nd')
