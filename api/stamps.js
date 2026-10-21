@@ -371,12 +371,9 @@ export async function mint(req, res, redis, userId) {
 
   const season = seasonFromDate(game.date)
   const key = stampsKey(userId, season)
-  let existing = null
-  try {
-    existing = normalizeStamp(await redis.hget(key, String(gamePk)))
-  } catch {
-    existing = null
-  }
+  // A read failure throws to the handler's 503: it must not read as "no stamp",
+  // or the mint would overwrite a stamp it could not see (#2332).
+  const existing = normalizeStamp(await redis.hget(key, String(gamePk)))
 
   const now = Date.now()
   const reviving = !existing || existing.state === 'off'
@@ -500,7 +497,13 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') return handleStampsGet(req, res, redis, userId)
 
-  if (req.method === 'POST') return mint(req, res, redis, userId)
+  if (req.method === 'POST') {
+    try {
+      return await mint(req, res, redis, userId)
+    } catch {
+      return privateJson(res, { error: 'could not load stamps' }, 503)
+    }
+  }
 
   const gamePk = toGamePk(searchParams.get('gamePk'))
   if (gamePk == null) return privateJson(res, { error: 'gamePk required' }, 400)
