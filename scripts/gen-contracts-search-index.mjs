@@ -28,18 +28,18 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { stat } from 'node:fs/promises'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
+import { CROSSWALK_DIR } from './lib/contract-row-key.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const identityDir = join(here, '..', 'public', 'data', 'contracts-history', 'identity')
 const outPath = join(here, '..', 'public', 'data', 'contracts-history', 'search-index.json')
 
 const SOURCES = ['extensions', 'arbitration', 'free_agency', 'salaries']
 
 async function loadIdentity(sourceFile) {
-  const rows = await readJsonOr(join(identityDir, `${sourceFile}.json`), null)
+  const rows = await readJsonOr(join(CROSSWALK_DIR, `${sourceFile}.json`), null)
   if (!rows) {
     throw new Error(
-      `Missing ${sourceFile}.json in ${identityDir} -- run scripts/gen-contracts-identity.mjs first`,
+      `Missing ${sourceFile}.json in ${CROSSWALK_DIR} -- run scripts/gen-contracts-identity.mjs first`,
     )
   }
   return rows
