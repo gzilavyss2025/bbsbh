@@ -960,3 +960,14 @@ test('mint answers 503 on a Redis read failure instead of minting over a stamp (
   assert.equal(res.statusCode, 503)
   assert.deepEqual(redis.hashes, {}, 'no stamp is written')
 })
+
+test('mint answers 503 when the season-cap read fails instead of counting zero stamps (#2332)', async () => {
+  const redis = fakeRedis({ 'game:final:778241': FINAL_GAME })
+  redis.hgetall = async () => {
+    throw new Error('redis down')
+  }
+  const res = nodeRes()
+  await mint(mintReq({ gamePk: 778241, mode: 'watched' }), res, redis, 'u1')
+  assert.equal(res.statusCode, 503)
+  assert.deepEqual(redis.hashes, {}, 'no stamp is written')
+})
