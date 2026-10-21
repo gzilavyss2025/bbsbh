@@ -8,7 +8,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Table } from '../components/ui/table/Table.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
-import { ordinal } from '../lib/format.js'
+import { ordinalSuffix } from '../lib/format.js'
 
 // Nine Keys (/nine-keys) — a Lichtman-style screen pointed at a baseball
 // season. Nine true-or-false keys, each asking whether a club finished in the
@@ -79,7 +79,7 @@ function GridRow({ row, keys, bar, limit, lead, meta, floor }) {
               ) : (
                 <>
                   {rank}
-                  <sup className="ninekeys__ord">{ordinal(rank).slice(String(rank).length)}</sup>
+                  <sup className="ninekeys__ord">{ordinalSuffix(rank)}</sup>
                 </>
               )}
             </span>

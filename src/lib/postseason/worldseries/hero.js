@@ -2,15 +2,23 @@
 //
 //   calendarDays  the Series as day cells, from ledgerModel's `columns`. Nothing here reads a
 //                 result: a cell knows its date, its game number and its state, never a run.
+//   monthsOf      the calendar head's month label, from those cells.
 //   slabPlayer    the hitter drawn on a club's slab, from the hot-bat splits (fetchHotBatSplits,
 //                 which end the day before the slate date).
 //   playerClip    that hitter's newest play clip, from past games' /content items.
 import { classifyHighlight, isEligibleForPositiveFilter } from '../../../api/highlights.js'
+import { gamePath } from '../../route.js'
 
 // 'Fri' and 23 from '2026-10-23'. Noon UTC keeps the date on its own day in every zone.
 const at = (date) => new Date(`${date}T12:00:00Z`)
 const weekdayOf = (date) => (date ? at(date).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' }) : '')
 const dayOf = (date) => (date ? Number(date.slice(8, 10)) : null)
+const monthOf = (date) => at(date).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' })
+
+// 'October / November': the months the calendar's dated cells fall in, each once, in order.
+export function monthsOf(days) {
+  return [...new Set(days.filter((d) => d.date).map((d) => monthOf(d.date)))].join(' / ')
+}
 const dayAfter = (date) => {
   if (!date) return null
   const d = at(date)
@@ -43,6 +51,13 @@ export function withFormatDates(games, upcoming, slateDate = '') {
       dateOf.set(g.gameNumber, date)
       return { ...g, date, projected: true }
     })
+}
+
+// The path to a section of the focus game. A game is filed under its OWN date, which is not the
+// slate date on an off day (Game 1's preview opened on today's slate found no game).
+export function nextGamePath(game, slateDate, abbr, section) {
+  if (!game?.awayId) return null
+  return gamePath(game.date || slateDate, abbr[game.awayId], abbr[game.homeId], section)
 }
 
 // The next game: the first future game that is not "if needed".

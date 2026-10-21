@@ -1,7 +1,7 @@
 import { prospectTrendById, prospectCardFor, confidenceLabel, movementState } from '../../../../../api/prospectTrend.js'
 import { tenureFact } from '../../../../../api/levelTenure.js'
 import { outsToIp } from '../../../../../lib/math/innings.js'
-import { ordinal } from '../../../../../lib/format.js'
+import { ordinal, ordinalSuffix } from '../../../../../lib/format.js'
 import { SPORT_LABEL } from '../../../../../lib/teams.js'
 import { inMinors } from '../innings/inningsView.js'
 
@@ -48,7 +48,7 @@ export function prospectView(snapshot, tenureSnap, bio, asOf) {
     ...base,
     pct: view.percentile,
     ordinal: ordinal(view.percentile),
-    suffix: ordinal(view.percentile).slice(String(view.percentile).length),
+    suffix: ordinalSuffix(view.percentile),
     standing: view.standing,
     tierLabel: view.tierLabel,
     comparison: `Compared with ${view.populationSize} qualified ${level} ${GROUP_WORD[metric]} with at least ${amount(metric, view.floor)}`,

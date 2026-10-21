@@ -1,11 +1,7 @@
 import { Fragment } from 'react'
 import '../../../../styles/worldseries/glove.css'
 import { gloveFigure } from '../../../../lib/postseason/worldseries/scouting/gloveLegs.js'
-import { teamClubNameShort } from '../../../../lib/teams.js'
-import { TeamLogo } from '../../../logo/TeamLogo.jsx'
-import { Card } from '../../../ui/frame/Card.jsx'
-import { Pill } from '../../../ui/control/Pill.jsx'
-import { Table } from '../../../ui/table/Table.jsx'
+import { ComparisonFigure, ComparisonLedger, ComparisonLegend, NO_FIGURE } from './ComparisonLedger.jsx'
 
 // GLOVE AND LEGS (#2316): defense and baserunning of the two Series clubs, side by side, on the
 // Tale of the tape rows. `rows` is gloveLegsModel's output (never null here). The club that leads a
@@ -13,60 +9,42 @@ import { Table } from '../../../ui/table/Table.jsx'
 // gap. Regular-season club totals: an open surface (ADR-0034), no score. Names no club.
 function Val({ r, side }) {
   const v = r[side]
-  if (v == null) return <span>—<span className="sr-only"> no figure</span></span>
+  if (v == null) return NO_FIGURE
   const leads = r.lead === side
   return (
-    <Pill figure mark fill={leads ? 'marker' : 'outline'} className="ww-glove__fig">
+    <ComparisonFigure lead={leads}>
       {gloveFigure(r, v)}
-      {leads && <span className="sr-only"> leads</span>}
-    </Pill>
-  )
-}
-
-function Club({ id }) {
-  return (
-    <span className="ww-glove__club">
-      <TeamLogo teamId={id} name={teamClubNameShort(id)} size={28} />
-      {teamClubNameShort(id)}
-    </span>
+    </ComparisonFigure>
   )
 }
 
 export function GloveLegs({ rows, clubIds }) {
   return (
-    <Card frame="stamped" label="Glove and legs" labelAs="h3" count="Regular season" body="flush" className="ww-glove">
-      <Table frame="bare" density="keep" className="ww-glove__table">
-        <thead>
-          <tr>
-            <th scope="col" className="ww-glove__val">
-              <Club id={clubIds[0]} />
+    <ComparisonLedger
+      title="Glove and legs"
+      note="Defense and baserunning · higher is better"
+      clubIds={clubIds}
+      measureLabel="Measure"
+      className="ww-glove"
+      footer={<ComparisonLegend lead="Highlighted figure leads" />}
+    >
+      {rows.map((r, i) => (
+        <Fragment key={r.key}>
+          {rows[i - 1]?.group !== r.group && (
+            <tr className="ww-glove__group">
+              <th scope="colgroup" colSpan={3}>{r.group}</th>
+            </tr>
+          )}
+          <tr className="ww-comparison__row">
+            <th scope="row">
+              {r.label}
+              {r.unit === 'ft/s' && <span className="ww-comparison__unit"> (ft/s)</span>}
             </th>
-            <th scope="col" className="ww-glove__label"><span className="sr-only">Measure</span></th>
-            <th scope="col" className="ww-glove__val ww-glove__val--b">
-              <Club id={clubIds[1]} />
-            </th>
+            <td><Val r={r} side="a" /></td>
+            <td><Val r={r} side="b" /></td>
           </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, i) => (
-            <Fragment key={r.key}>
-              {rows[i - 1]?.group !== r.group && (
-                <tr className="ww-glove__group">
-                  <th scope="colgroup" colSpan={3}>{r.group}</th>
-                </tr>
-              )}
-              <tr>
-                <td className="ww-glove__val"><Val r={r} side="a" /></td>
-                <th scope="row" className="ww-glove__label">
-                  {r.label}
-                  {r.unit === 'ft/s' && ' (ft/s)'}
-                </th>
-                <td className="ww-glove__val ww-glove__val--b"><Val r={r} side="b" /></td>
-              </tr>
-            </Fragment>
-          ))}
-        </tbody>
-      </Table>
-    </Card>
+        </Fragment>
+      ))}
+    </ComparisonLedger>
   )
 }

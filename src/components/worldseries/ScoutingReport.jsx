@@ -22,7 +22,7 @@ import { HubTabBar } from '../chrome/HubTabBar.jsx'
 import { EdgeCard } from '../postseason/edges/EdgeCard.jsx'
 import { MatchupEdges } from '../postseason/edges/MatchupEdges.jsx'
 import { UmpireEdge } from '../postseason/edges/UmpireEdge.jsx'
-import { SeriesNineKeys } from '../postseason/SeriesNineKeys.jsx'
+import { NineKeys } from './cards/scouting/NineKeys.jsx'
 import { FilmRoom } from './cards/scouting/FilmRoom.jsx'
 import { GloveLegs } from './cards/scouting/GloveLegs.jsx'
 import { ParkFit } from './cards/scouting/ParkFit.jsx'
@@ -48,7 +48,7 @@ import { Stack } from '../ui/layout/Stack.jsx'
 //   game          the focus game's upcoming row (api/postseason/upcoming.js): venue and probables, or null
 // Adding a card: one entry in scouting.js, one here.
 const CARD = {
-  'nine-keys': ({ nineKeys, sides, season }) => <SeriesNineKeys data={nineKeys} clubs={sides.map((id) => ({ id }))} season={season} labelAs="h3" />,
+  'nine-keys': ({ nineKeys, sides, season }) => <NineKeys data={nineKeys} clubIds={sides} season={season} />,
   'glove-legs': ({ gloveLegs, sides }) => <GloveLegs rows={gloveLegs} clubIds={sides} />,
   'matchup-edges': ({ edges, edgesState: state }) =>
     state === 'none' ? (

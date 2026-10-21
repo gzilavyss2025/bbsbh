@@ -1,75 +1,22 @@
-/* GLOVE AND LEGS (#2316). A Table of three columns: club A figure, measure, club B figure. The
-   figure is a Pill mark; the leader's is fill="marker" (--marker, never --seal: ADR-0083) and
-   carries hidden text "leads", so colour is not the only cue. Every figure sits in a pill of one
-   width, so the marks line up down the columns. */
-.ww-glove__table {
-  table-layout: fixed;
-  width: 100%;
-  font-size: var(--fs-cell);
-}
-
-.ww-glove__table th,
-.ww-glove__table td {
-  padding: var(--space-2) var(--space-1);
-}
-
-/* The column heads: each club's logo and name over its figures. The fixed layout takes its three
-   widths from this row, so the grid is the same on every row and every width. */
-.ww-glove__table thead th {
-  padding: var(--space-2);
-  border-block-end: 1px solid var(--border-hairline);
-}
-
-/* The club names are wider than a figure column: they run on into the empty Measure head. */
-.ww-glove__table thead .ww-glove__val {
-  overflow: visible;
-}
-
-.ww-glove__val--b .ww-glove__club {
-  justify-content: flex-end;
-}
-
-.ww-glove__club {
-  display: flex;
-  white-space: nowrap;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  color: var(--text-heading);
-}
-
-.ww-glove__label {
-  overflow-wrap: anywhere;
-  white-space: normal;
-  font-weight: inherit;
-  text-align: center;
-  color: var(--text-caption);
-}
-
-.ww-glove__val {
-  text-align: start;
-  font-variant-numeric: tabular-nums;
-}
-
-.ww-glove__val--b {
-  text-align: end;
-}
-
-.ww-glove .ww-glove__fig {
-  inline-size: 6.5ch;
-  justify-content: center;
-}
-
-.ww-glove__val {
-  inline-size: 9ch;
+/* Six measures and two group labels share the nine-rank table's height. */
+.ww-glove .ww-comparison__row > * {
+  height: calc(var(--space-10) + var(--bw-heavy));
 }
 
 .ww-glove__group th {
-  padding-block: var(--space-2) var(--space-1);
-  border-top: 1px solid var(--border-hairline);
-  font-size: var(--fs-cell);
-  font-weight: inherit;
+  height: calc(var(--space-5) - var(--bw-heavy));
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  vertical-align: bottom;
   text-align: start;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-label);
   color: var(--text-caption);
+}
+
+.ww-glove__group + .ww-comparison__row > * {
+  border-top: 0;
 }
