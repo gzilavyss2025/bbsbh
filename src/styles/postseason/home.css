@@ -15,8 +15,9 @@
 
 /* ---------- the rail (wide, from BRACKET_RAIL_QUERY up) ---------- */
 
-/* 358 is FullBracket's own tree width (TREE_W), so the tree fits the column
-   exactly. The shell widens to match: the games column keeps the 928px it has
+/* 358 is the rail's width: FullBracket's TREE_W for the plain tree. In the
+   rail's stamped cards (below) the tree is RAIL_TREE_W, 358 less each card's
+   edge and padding. The shell widens to match: the games column keeps the 928px it has
    beside the wire rail, and 928 + 24 + 358 = 1310. */
 .screen--slate.screen--bracketrail {
   max-width: 1310px;
@@ -50,6 +51,69 @@
    the head above already spaces it. */
 .bracketrail__body.pbkt {
   margin: 0;
+}
+
+/* THE RAIL'S BRACKET, in the World Series design (FullBracket `rail`): each
+   league and the Series is a stamped card named on its ink tab; a series box is
+   a square, ink-edged ticket with the leader's row on the tint. Club marks stay, small;
+   the league mark and round plate are gone. The card is 358px: its 2px edge and 12px
+   padding leave the tree's 330px (FullBracket's RAIL_TREE_W). */
+.pbkt-full--rail {
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+}
+.pbkt-league__body {
+  padding: 0 var(--space-3) var(--space-3);
+}
+.pbkt-full--rail .pbkt-colheads {
+  margin-top: 0;
+}
+.pbkt-full--rail .pbkt-colhead {
+  white-space: nowrap;
+}
+/* The lane's last note line is the tree's own height, so the card needs no more. */
+.pbkt-full--rail .pbkt-tree {
+  margin-bottom: 0;
+}
+.pbkt-full--rail .pbkt-box:not(.pbkt-box--bold) {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+}
+.pbkt-full--rail .pbkt-box--done:not(.pbkt-box--bold) {
+  border-color: var(--border-stamped-soft);
+}
+/* A row sits over its box, so its fill stops inside the box's edge. */
+.pbkt-full--rail .pbkt-trow {
+  border: var(--bw-heavy) solid transparent;
+  background-clip: padding-box;
+}
+.pbkt-full--rail .pbkt-trow--won {
+  background-color: var(--surface-stamped-tint);
+}
+.pbkt-wslink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.pbkt-wscard .pbkt-row {
+  min-height: 32px;
+}
+.pbkt-wscard .pbkt-row + .pbkt-row {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.pbkt-wscard .pbkt-row--won {
+  background: var(--surface-stamped-tint);
+}
+.pbkt-wscard .pbkt-box__note {
+  margin: var(--space-1) 0 0;
+}
+.pbkt-wscard--bold .pbkt-box__note {
+  display: inline-block;
+  background: var(--marker);
+  color: var(--text-heading);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-xs);
+  letter-spacing: var(--ls-caps);
 }
 
 /* ---------- the dock (phone) ---------- */
