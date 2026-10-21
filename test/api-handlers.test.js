@@ -950,16 +950,13 @@ test('unmint lets a Redis read failure through instead of answering ok (#2445)',
   await assert.rejects(unmint(nodeRes(), redis, 'u1', 778241), /redis down/)
 })
 
-test('mint lets a Redis read failure through instead of minting over a stamp (#2332)', async () => {
+test('mint answers 503 on a Redis read failure instead of minting over a stamp (#2332)', async () => {
   const redis = fakeRedis({ 'game:final:778241': FINAL_GAME })
   redis.hget = async () => {
     throw new Error('redis down')
   }
   const res = nodeRes()
-  await assert.rejects(
-    mint(mintReq({ gamePk: 778241, mode: 'watched' }), res, redis, 'u1'),
-    /redis down/,
-  )
-  assert.equal(res.statusCode, 0, 'no stamp answer is sent')
+  await mint(mintReq({ gamePk: 778241, mode: 'watched' }), res, redis, 'u1')
+  assert.equal(res.statusCode, 503)
   assert.deepEqual(redis.hashes, {}, 'no stamp is written')
 })

@@ -34,7 +34,9 @@ export function ClassicCard({ seed = 0, era = null, teamId = null, kicker = 'A c
   const { data, loading } = useAsync(async () => {
     const dealt = await rollClassic({ seed, step, era, teamId, isStarted: (pk) => readRevealMarkFor(pk) >= 0 })
     if (!dealt) return null
-    return { ...dealt, facts: await fetchClassicFacts(dealt.game.pk).catch(() => null) }
+    // No facts is a card with abbreviations and no park or reason line, not no card.
+    const bare = { away: { id: null, name: dealt.game.away.abbr }, home: { id: null, name: dealt.game.home.abbr }, venue: '', reason: null }
+    return { ...dealt, facts: (await fetchClassicFacts(dealt.game.pk).catch(() => null)) ?? bare }
   }, [seed, step, era, teamId])
 
   if (!data?.facts) {
