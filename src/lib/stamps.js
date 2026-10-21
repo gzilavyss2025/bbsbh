@@ -28,7 +28,7 @@
 // when signed in, from statsapi when not — so localStorage stays exactly as
 // non-score-bearing as `bbsbh:reveal:{gamePk}` already is.
 
-export const STAMPS_KEY = 'bbsbh:stamps'
+export const STAMPS_KEY = "bbsbh:stamps";
 
 // WHOSE COLLECTION IS IT — the shared-device guard.
 //
@@ -50,17 +50,17 @@ export const STAMPS_KEY = 'bbsbh:stamps'
 // Its own key, not the preferences one: the two documents sync independently,
 // and a device that merged settings but never reached the stamps endpoint must
 // not be recorded as holding this user's stamps.
-export const STAMPS_OWNER_KEY = 'bbsbh:stampsOwner'
+export const STAMPS_OWNER_KEY = "bbsbh:stampsOwner";
 
 // A full MLB season is 2,430 games. 500 is generous for any real human and
 // bounds a hostile client; see `seasonIsFull` for why the cap REFUSES rather
 // than prunes.
-export const MAX_STAMPS_PER_SEASON = 500
+export const MAX_STAMPS_PER_SEASON = 500;
 
 // Long enough for a real memory ("Dad's first game at County Stadium"), short
 // enough that the stamp art can render it and a hostile client can't use the
 // Logbook as free storage.
-export const MAX_NOTE_LENGTH = 140
+export const MAX_NOTE_LENGTH = 140;
 
 // How you took the game in. Deliberately two, not three: "attended" was scoped
 // and cut for v1 (see the PRD's open questions) because it wants its own mark on
@@ -68,49 +68,50 @@ export const MAX_NOTE_LENGTH = 140
 // half-drawn overprint is not. A stamp with an unknown mode normalizes to
 // 'watched' rather than being dropped — the mode is flavour, the stamp is the
 // keepsake.
-export const STAMP_MODES = ['watched', 'followed']
-export const DEFAULT_STAMP_MODE = 'watched'
+export const STAMP_MODES = ["watched", "followed"];
+export const DEFAULT_STAMP_MODE = "watched";
 
 export function isStampMode(value) {
-  return STAMP_MODES.includes(value)
+  return STAMP_MODES.includes(value);
 }
 
 // 'on' | 'off' — the same state-map vocabulary as books.js, and for the same
 // reason. See `applyRemoteStamps`.
 export function isStampState(value) {
-  return value === 'on' || value === 'off'
+  return value === "on" || value === "off";
 }
 
-const DAY_RE = /^\d{4}-\d{2}-\d{2}$/
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // The one date shape the whole app shares (toApiDate in dates.js, the feed's
 // officialDate). Anything else is not a day this app can be looking at.
 export function isDayString(value) {
-  return typeof value === 'string' && DAY_RE.test(value)
+  return typeof value === "string" && DAY_RE.test(value);
 }
 
 // A gamePk as a positive integer, from either a number or the string a Redis
 // hash field / URL query hands back. Null for anything else, so a caller can
 // never end up keyed on 'NaN' or an empty string.
 export function toGamePk(value) {
-  if (typeof value === 'number') return Number.isInteger(value) && value > 0 ? value : null
-  if (typeof value !== 'string' || !/^\d+$/.test(value)) return null
-  const n = Number(value)
-  return Number.isInteger(n) && n > 0 ? n : null
+  if (typeof value === "number")
+    return Number.isInteger(value) && value > 0 ? value : null;
+  if (typeof value !== "string" || !/^\d+$/.test(value)) return null;
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : null;
 }
 
 // Seasons this app could plausibly be storing. Bounds the season shard key so a
 // hostile client can't spray Redis with `stamps:{user}:{anything}`.
 export function isSeasonNumber(value) {
-  return Number.isInteger(value) && value >= 1876 && value <= 2200
+  return Number.isInteger(value) && value >= 1876 && value <= 2200;
 }
 
 // Which season shard a game belongs in. Derived from the game's own date rather
 // than stored separately, so the two can't drift.
 export function seasonFromDate(date) {
-  if (!isDayString(date)) return null
-  const season = Number(date.slice(0, 4))
-  return isSeasonNumber(season) ? season : null
+  if (!isDayString(date)) return null;
+  const season = Number(date.slice(0, 4));
+  return isSeasonNumber(season) ? season : null;
 }
 
 // Notes are user-authored and round-trip through Redis, so they get the same
@@ -119,10 +120,10 @@ export function seasonFromDate(date) {
 // collapse runs of whitespace, then cap. Never null — an unusable note becomes
 // '', which is the same as not having one.
 export function sanitizeNote(value) {
-  if (typeof value !== 'string') return ''
+  if (typeof value !== "string") return "";
   // eslint-disable-next-line no-control-regex
-  const flat = value.replace(/[\u0000-\u001f\u007f]/g, ' ')
-  return flat.replace(/\s+/g, ' ').trim().slice(0, MAX_NOTE_LENGTH)
+  const flat = value.replace(/[\u0000-\u001f\u007f]/g, " ");
+  return flat.replace(/\s+/g, " ").trim().slice(0, MAX_NOTE_LENGTH);
 }
 
 // ---------------------------------------------------------------------------
@@ -145,40 +146,43 @@ export function sanitizeNote(value) {
 // `DEFAULT_BOOK_ID` is restated here for the identical reason: it is
 // src/lib/books.js's constant, and this module must not import that one
 // either.
-export const MAX_PLACEMENT_PAGE = 60
-export const MAX_PLACEMENT_TILT = 7
-export const DEFAULT_BOOK_ID = 'default'
+export const MAX_PLACEMENT_PAGE = 60;
+export const MAX_PLACEMENT_TILT = 7;
+export const DEFAULT_BOOK_ID = "default";
 
 export function normalizePlacement(raw) {
-  if (!raw || typeof raw !== 'object') return null
-  const page = Number(raw.page)
-  if (!Number.isInteger(page) || page < 1 || page > MAX_PLACEMENT_PAGE) return null
-  const x = Number(raw.x)
-  const y = Number(raw.y)
-  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
-  const rawTilt = Number(raw.tilt)
+  if (!raw || typeof raw !== "object") return null;
+  const page = Number(raw.page);
+  if (!Number.isInteger(page) || page < 1 || page > MAX_PLACEMENT_PAGE)
+    return null;
+  const x = Number(raw.x);
+  const y = Number(raw.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  const rawTilt = Number(raw.tilt);
   const tilt = Number.isFinite(rawTilt)
     ? Math.max(-MAX_PLACEMENT_TILT, Math.min(MAX_PLACEMENT_TILT, rawTilt))
-    : 0
-  const clamp01 = (n) => Math.max(0, Math.min(1, n))
+    : 0;
+  const clamp01 = (n) => Math.max(0, Math.min(1, n));
   // Rounded so a placement round-tripping through JSON and two devices can't
   // drift by a float epsilon and read as a change worth republishing.
-  const round = (n) => Math.round(n * 10000) / 10000
+  const round = (n) => Math.round(n * 10000) / 10000;
   // A book that predates this feature has no bookId on its placements, and
   // an out-of-range or foreign one is not this app's problem to validate here
   // (src/lib/books.js owns whether a book actually exists) — either way a
   // placement always names SOME book, so every stamp has a shelf to live on.
   const bookId =
-    typeof raw.bookId === 'string' && raw.bookId.length > 0 && raw.bookId.length <= 64
+    typeof raw.bookId === "string" &&
+    raw.bookId.length > 0 &&
+    raw.bookId.length <= 64
       ? raw.bookId
-      : DEFAULT_BOOK_ID
+      : DEFAULT_BOOK_ID;
   return {
     bookId,
     page,
     x: round(clamp01(x)),
     y: round(clamp01(y)),
     tilt: Math.round(tilt * 100) / 100,
-  }
+  };
 }
 
 // Whether two placements are the same spot — used by the sync diff, which must
@@ -187,8 +191,14 @@ export function normalizePlacement(raw) {
 // stamp to another book's page is a real change worth syncing, even if the
 // page/x/y/tilt it lands on happen to match where it sat before.
 export function samePlacement(a, b) {
-  if (!a || !b) return !a && !b
-  return a.bookId === b.bookId && a.page === b.page && a.x === b.x && a.y === b.y && a.tilt === b.tilt
+  if (!a || !b) return !a && !b;
+  return (
+    a.bookId === b.bookId &&
+    a.page === b.page &&
+    a.x === b.x &&
+    a.y === b.y &&
+    a.tilt === b.tilt
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -205,13 +215,16 @@ export function samePlacement(a, b) {
 // INCLUDING an un-stamp; a single field could not do both, because an un-stamp
 // would either lose the keepsake's date or fail to propagate.
 export function normalizeStamp(raw) {
-  if (!raw || typeof raw !== 'object') return null
-  const state = isStampState(raw.state) ? raw.state : 'on'
-  const date = isDayString(raw.date) ? raw.date : ''
-  const stampedAt = Number.isInteger(raw.stampedAt) && raw.stampedAt > 0 ? raw.stampedAt : 0
+  if (!raw || typeof raw !== "object") return null;
+  const state = isStampState(raw.state) ? raw.state : "on";
+  const date = isDayString(raw.date) ? raw.date : "";
+  const stampedAt =
+    Number.isInteger(raw.stampedAt) && raw.stampedAt > 0 ? raw.stampedAt : 0;
   const updatedAt =
-    Number.isInteger(raw.updatedAt) && raw.updatedAt > 0 ? raw.updatedAt : stampedAt
-  if (!stampedAt) return null
+    Number.isInteger(raw.updatedAt) && raw.updatedAt > 0
+      ? raw.updatedAt
+      : stampedAt;
+  if (!stampedAt) return null;
   return {
     state,
     mode: isStampMode(raw.mode) ? raw.mode : DEFAULT_STAMP_MODE,
@@ -224,7 +237,7 @@ export function normalizeStamp(raw) {
     // placement degrades to null (back to the tray) rather than invalidating
     // the record: the keepsake outranks its position on a page.
     placement: normalizePlacement(raw.placement),
-  }
+  };
 }
 
 // Valid entries only, keyed by gamePk. Over-cap seasons keep the newest
@@ -232,67 +245,78 @@ export function normalizeStamp(raw) {
 // refuses at the cap rather than pruning (a keepsake must never vanish on its
 // own); it exists only so a hand-written oversized value is still bounded.
 function normalizeAll(map) {
-  if (!map || typeof map !== 'object' || Array.isArray(map)) return {}
-  const bySeason = new Map()
+  if (!map || typeof map !== "object" || Array.isArray(map)) return {};
+  const bySeason = new Map();
   for (const [key, value] of Object.entries(map)) {
-    const gamePk = toGamePk(key)
-    if (gamePk == null) continue
-    const entry = normalizeStamp(value)
-    if (!entry) continue
-    const season = seasonFromDate(entry.date) ?? 0
-    if (!bySeason.has(season)) bySeason.set(season, [])
-    bySeason.get(season).push([gamePk, entry])
+    const gamePk = toGamePk(key);
+    if (gamePk == null) continue;
+    const entry = normalizeStamp(value);
+    if (!entry) continue;
+    const season = seasonFromDate(entry.date) ?? 0;
+    if (!bySeason.has(season)) bySeason.set(season, []);
+    bySeason.get(season).push([gamePk, entry]);
   }
-  const out = {}
+  const out = {};
   for (const entries of bySeason.values()) {
     entries
       .sort((a, b) => b[1].stampedAt - a[1].stampedAt)
       .slice(0, MAX_STAMPS_PER_SEASON)
       .forEach(([gamePk, entry]) => {
-        out[gamePk] = entry
-      })
+        out[gamePk] = entry;
+      });
   }
-  return out
+  return out;
 }
 
 // Parse the raw localStorage value. Never throws — malformed JSON, an array, a
 // stray number all collapse to {} ("no stamps"), which loses a collection but
 // can never invent one. Same fail-empty posture as parseBooks.
 export function parseStamps(raw) {
-  if (raw == null) return {}
+  if (raw == null) return {};
   try {
-    return normalizeAll(JSON.parse(raw))
+    return normalizeAll(JSON.parse(raw));
   } catch {
-    return {}
+    return {};
   }
 }
 
 // The value to hand localStorage. Normalizes on the way out too, so nothing the
 // reader above would reject can be written by this app.
 export function serializeStamps(map) {
-  return JSON.stringify(normalizeAll(map))
+  return JSON.stringify(normalizeAll(map));
 }
 
 // The live stamp for a game, or null. Tombstoned ('off') entries answer null —
 // callers ask "is this stamped", and a tombstone means it is not.
 export function stampFor(map, gamePk) {
-  const pk = toGamePk(gamePk)
-  if (pk == null) return null
-  const entry = map?.[pk]
-  return entry && entry.state === 'on' ? entry : null
+  const pk = toGamePk(gamePk);
+  if (pk == null) return null;
+  const entry = map?.[pk];
+  return entry && entry.state === "on" ? entry : null;
 }
 
 export function isStamped(map, gamePk) {
-  return stampFor(map, gamePk) != null
+  return stampFor(map, gamePk) != null;
 }
 
 // Every live stamp in a season, newest game first.
 export function stampsForSeason(map, season) {
   return Object.entries(map || {})
     .map(([pk, entry]) => [toGamePk(pk), entry])
-    .filter(([pk, entry]) => pk != null && entry?.state === 'on' && seasonFromDate(entry.date) === season)
-    .sort((a, b) => (b[1].date > a[1].date ? 1 : b[1].date < a[1].date ? -1 : b[1].stampedAt - a[1].stampedAt))
-    .map(([gamePk, entry]) => ({ gamePk, ...entry }))
+    .filter(
+      ([pk, entry]) =>
+        pk != null &&
+        entry?.state === "on" &&
+        seasonFromDate(entry.date) === season,
+    )
+    .sort((a, b) =>
+      b[1].date > a[1].date
+        ? 1
+        : b[1].date < a[1].date
+          ? -1
+          : b[1].stampedAt - a[1].stampedAt,
+    )
+    .map(([gamePk, entry]) => ({ gamePk, ...entry }));
 }
 
 // Every live stamp, across every season, OLDEST game first — the order a
@@ -302,29 +326,33 @@ export function stampsForSeason(map, season) {
 export function allStamps(map) {
   return Object.entries(map || {})
     .map(([pk, entry]) => [toGamePk(pk), entry])
-    .filter(([pk, entry]) => pk != null && entry?.state === 'on')
+    .filter(([pk, entry]) => pk != null && entry?.state === "on")
     .sort((a, b) =>
-      a[1].date < b[1].date ? -1 : a[1].date > b[1].date ? 1 : a[1].stampedAt - b[1].stampedAt,
+      a[1].date < b[1].date
+        ? -1
+        : a[1].date > b[1].date
+          ? 1
+          : a[1].stampedAt - b[1].stampedAt,
     )
-    .map(([gamePk, entry]) => ({ gamePk, ...entry }))
+    .map(([gamePk, entry]) => ({ gamePk, ...entry }));
 }
 
 // { season: count } over live stamps only — the Logbook's season nav.
 export function seasonCounts(map) {
-  const out = {}
+  const out = {};
   for (const entry of Object.values(map || {})) {
-    if (entry?.state !== 'on') continue
-    const season = seasonFromDate(entry.date)
-    if (season == null) continue
-    out[season] = (out[season] ?? 0) + 1
+    if (entry?.state !== "on") continue;
+    const season = seasonFromDate(entry.date);
+    if (season == null) continue;
+    out[season] = (out[season] ?? 0) + 1;
   }
-  return out
+  return out;
 }
 
 // At the cap, `addStamp` is a no-op — so a caller has to be able to say WHY
 // rather than showing a button that silently does nothing.
 export function seasonIsFull(map, season) {
-  return (seasonCounts(map)[season] ?? 0) >= MAX_STAMPS_PER_SEASON
+  return (seasonCounts(map)[season] ?? 0) >= MAX_STAMPS_PER_SEASON;
 }
 
 // Stamp a game. Returns a NEW map; the input is never mutated.
@@ -338,20 +366,25 @@ export function seasonIsFull(map, season) {
 // caller at all means the user tapped the mint affordance inside a revealed box
 // score; the only server-side refusal left is "that game isn't Final yet"
 // (`mintRefusal`, api/stamps.js).
-export function addStamp(map, gamePk, { mode, note, date, now, placement } = {}) {
-  const current = normalizeAll(map)
-  const pk = toGamePk(gamePk)
-  const at = Number.isInteger(now) && now > 0 ? now : 0
-  if (pk == null || !isDayString(date) || !at) return current
-  const season = seasonFromDate(date)
-  const existing = current[pk]
-  const reviving = !existing || existing.state === 'off'
-  if (reviving && season != null && seasonIsFull(current, season)) return current
-  const asked = normalizePlacement(placement)
+export function addStamp(
+  map,
+  gamePk,
+  { mode, note, date, now, placement } = {},
+) {
+  const current = normalizeAll(map);
+  const pk = toGamePk(gamePk);
+  const at = Number.isInteger(now) && now > 0 ? now : 0;
+  if (pk == null || !isDayString(date) || !at) return current;
+  const season = seasonFromDate(date);
+  const existing = current[pk];
+  const reviving = !existing || existing.state === "off";
+  if (reviving && season != null && seasonIsFull(current, season))
+    return current;
+  const asked = normalizePlacement(placement);
   return {
     ...current,
     [pk]: {
-      state: 'on',
+      state: "on",
       mode: isStampMode(mode) ? mode : DEFAULT_STAMP_MODE,
       stampedAt: reviving ? at : existing.stampedAt,
       updatedAt: at,
@@ -363,7 +396,7 @@ export function addStamp(map, gamePk, { mode, note, date, now, placement } = {})
       // where it used to sit is not where this keepsake belongs.
       placement: asked ?? (reviving ? null : existing.placement),
     },
-  }
+  };
 }
 
 // Place a stamp in the book (or move one already placed). A no-op for a game
@@ -373,26 +406,27 @@ export function addStamp(map, gamePk, { mode, note, date, now, placement } = {})
 // exactly the same last-write-wins path every other change takes. Deliberately
 // NOT a separate sync channel: the book is part of the collection.
 export function placeStamp(map, gamePk, placement, { now } = {}) {
-  const current = normalizeAll(map)
-  const pk = toGamePk(gamePk)
-  const at = Number.isInteger(now) && now > 0 ? now : 0
-  const existing = pk == null ? null : current[pk]
-  if (!existing || existing.state !== 'on' || !at) return current
-  const next = normalizePlacement(placement)
-  if (!next) return current
-  if (samePlacement(existing.placement, next)) return current
-  return { ...current, [pk]: { ...existing, placement: next, updatedAt: at } }
+  const current = normalizeAll(map);
+  const pk = toGamePk(gamePk);
+  const at = Number.isInteger(now) && now > 0 ? now : 0;
+  const existing = pk == null ? null : current[pk];
+  if (!existing || existing.state !== "on" || !at) return current;
+  const next = normalizePlacement(placement);
+  if (!next) return current;
+  if (samePlacement(existing.placement, next)) return current;
+  return { ...current, [pk]: { ...existing, placement: next, updatedAt: at } };
 }
 
 // Take a placed stamp back off the page — the "re-stamp the page" half of the
 // placement flow. The stamp itself survives; it returns to the tray.
 export function unplaceStamp(map, gamePk, { now } = {}) {
-  const current = normalizeAll(map)
-  const pk = toGamePk(gamePk)
-  const at = Number.isInteger(now) && now > 0 ? now : 0
-  const existing = pk == null ? null : current[pk]
-  if (!existing || existing.state !== 'on' || !at || !existing.placement) return current
-  return { ...current, [pk]: { ...existing, placement: null, updatedAt: at } }
+  const current = normalizeAll(map);
+  const pk = toGamePk(gamePk);
+  const at = Number.isInteger(now) && now > 0 ? now : 0;
+  const existing = pk == null ? null : current[pk];
+  if (!existing || existing.state !== "on" || !at || !existing.placement)
+    return current;
+  return { ...current, [pk]: { ...existing, placement: null, updatedAt: at } };
 }
 
 // Apply a whole batch of placements at once — the book's "place them all for
@@ -400,23 +434,23 @@ export function unplaceStamp(map, gamePk, { now } = {}) {
 // place forty keepsakes by hand. Takes the `[{ gamePk, placement }]` shape
 // `autoLayout` (src/lib/passportLayout.js) returns.
 export function placeStamps(map, placements, { now } = {}) {
-  let out = normalizeAll(map)
+  let out = normalizeAll(map);
   for (const { gamePk, placement } of placements ?? []) {
-    out = placeStamp(out, gamePk, placement, { now })
+    out = placeStamp(out, gamePk, placement, { now });
   }
-  return out
+  return out;
 }
 
 // Un-stamp. Writes an explicit 'off' tombstone rather than deleting the key —
 // see `applyRemoteStamps` for why deletion would resurrect the stamp on the
 // next sync. A game that was never stamped stays absent (nothing to take back).
 export function removeStamp(map, gamePk, { now } = {}) {
-  const current = normalizeAll(map)
-  const pk = toGamePk(gamePk)
-  const at = Number.isInteger(now) && now > 0 ? now : 0
-  const existing = pk == null ? null : current[pk]
-  if (!existing || !at) return current
-  return { ...current, [pk]: { ...existing, state: 'off', updatedAt: at } }
+  const current = normalizeAll(map);
+  const pk = toGamePk(gamePk);
+  const at = Number.isInteger(now) && now > 0 ? now : 0;
+  const existing = pk == null ? null : current[pk];
+  if (!existing || !at) return current;
+  return { ...current, [pk]: { ...existing, state: "off", updatedAt: at } };
 }
 
 // ---------------------------------------------------------------------------
@@ -444,28 +478,34 @@ export function removeStamp(map, gamePk, { now } = {}) {
 //
 // Contrast `applyRemoteStamps`, which is the ordinary same-owner path.
 export function adoptRemoteStamps(remote) {
-  return normalizeAll(remote && typeof remote === 'object' && !Array.isArray(remote) ? remote : {})
+  return normalizeAll(
+    remote && typeof remote === "object" && !Array.isArray(remote)
+      ? remote
+      : {},
+  );
 }
 
 export function applyRemoteStamps(local, remote) {
-  const out = normalizeAll(local)
-  if (!remote || typeof remote !== 'object' || Array.isArray(remote)) return out
+  const out = normalizeAll(local);
+  if (!remote || typeof remote !== "object" || Array.isArray(remote))
+    return out;
   for (const [key, value] of Object.entries(remote)) {
-    const pk = toGamePk(key)
-    if (pk == null) continue
-    const incoming = normalizeStamp(value)
-    if (!incoming) continue
-    const existing = out[pk]
-    if (!existing || incoming.updatedAt >= existing.updatedAt) out[pk] = incoming
+    const pk = toGamePk(key);
+    if (pk == null) continue;
+    const incoming = normalizeStamp(value);
+    if (!incoming) continue;
+    const existing = out[pk];
+    if (!existing || incoming.updatedAt >= existing.updatedAt)
+      out[pk] = incoming;
   }
-  return normalizeAll(out)
+  return normalizeAll(out);
 }
 
 // Are these the same record? Every field a device can change, compared. Used by
 // the sync diff below so a record that merely round-tripped through JSON isn't
 // republished.
 export function sameStampRecord(a, b) {
-  if (!a || !b) return !a && !b
+  if (!a || !b) return !a && !b;
   return (
     a.state === b.state &&
     a.mode === b.mode &&
@@ -473,7 +513,7 @@ export function sameStampRecord(a, b) {
     a.stampedAt === b.stampedAt &&
     a.updatedAt === b.updatedAt &&
     samePlacement(a.placement, b.placement)
-  )
+  );
 }
 
 // Which of this device's stamps the OTHER side doesn't have, or has an older
@@ -510,14 +550,38 @@ export function sameStampRecord(a, b) {
 // A remote record that is NEWER is deliberately absent: `applyRemoteStamps` has
 // already taken it, and re-publishing it would just echo the server to itself.
 export function stampsToPublish(local, remote) {
-  const mine = normalizeAll(local)
-  const theirs = normalizeAll(remote)
-  const out = []
+  const mine = normalizeAll(local);
+  const theirs = normalizeAll(remote);
+  const out = [];
   for (const [key, entry] of Object.entries(mine)) {
-    const before = theirs[key]
-    if (before && before.updatedAt > entry.updatedAt) continue
-    if (sameStampRecord(before, entry)) continue
-    out.push(Number(key))
+    const before = theirs[key];
+    if (before && before.updatedAt > entry.updatedAt) continue;
+    if (sameStampRecord(before, entry)) continue;
+    out.push(Number(key));
   }
-  return out.sort((a, b) => a - b)
+  return out.sort((a, b) => a - b);
+}
+
+// The `?export=1` reply as a local-shaped `{ gamePk: entry }` map, or null when
+// the reply is an error or malformed. null means "the server said nothing":
+// callers must not merge, adopt or publish against it, or an outage would read
+// as "the server has no stamps" (#2445). Drops the `game` facts blob.
+export function remoteStampsFromExport(ok, data) {
+  if (!ok || !Array.isArray(data?.stamps)) return null;
+  const remote = {};
+  for (const entry of data.stamps) {
+    if (entry?.gamePk == null) continue;
+    remote[entry.gamePk] = {
+      // A pre-fix deploy sends no `state`; every row it sends is live.
+      state: entry.state === "off" ? "off" : "on",
+      mode: entry.mode,
+      stampedAt: entry.stampedAt,
+      updatedAt: entry.updatedAt,
+      note: entry.note,
+      date: entry.date,
+      // Built field by field: a placement left off would empty the book on sign-in.
+      placement: entry.placement ?? null,
+    };
+  }
+  return remote;
 }
