@@ -10,7 +10,7 @@
 //     cut at the two foul lines with segment intersections (layout/fenceShape.js);
 //   • otherwise a five-point outline through the posted LF/LC/CF/RC/RF distances,
 //     with the gaps at ±22.5° — a drawing choice, since a posted gap sign has no
-//     published bearing. The layout's accuracy note says so.
+//     published bearing. The layout's `quality.fence` ('dimensions-only') records it.
 //
 // The CF distance label sits where the CF sign stands: straightaway center, or
 // the angle the layout audit found the posted number at (`cfAngle`, Fenway's
@@ -37,9 +37,11 @@ export const HOME = { x: 310, y: 505 }
 // on — the hit chart, the flight card the play-by-play diamond opens — crops
 // the dead sky off the top so the field fills the card. It is a WINDOW onto the
 // fixed viewBox above and never a rescale, so a mark's coordinates mean the same
-// thing cropped or not. Stated once, here, because two consumers positioning
-// HTML over the SVG in percentages of this box would otherwise drift apart. Set
-// the crop to 0 to go back to the full frame.
+// thing cropped or not. The crop is the same for every park on purpose: marks from
+// different parks stay comparable. The park CARDS (lib/ballpark/layout/parkWindow.js) crop
+// to their own park instead. Stated once, here, because two consumers positioning HTML over
+// the SVG in percentages of this box would otherwise drift apart. Set the crop to 0 to go
+// back to the full frame.
 export const PLOT_SKY_CROP = 50
 export const PLOT_VIEWBOX = `0 ${PLOT_SKY_CROP} ${VIEWBOX.w} ${VIEWBOX.h - PLOT_SKY_CROP}`
 
@@ -264,18 +266,28 @@ export function buildFieldGeometry({
 
   const labelAt = (p, t) => ({ ...offsetFromHome(p, 16), t })
   const tagAt = (p, h) => ({ ...offsetFromHome(p, -12), h })
+  // Only values on file are printed: an older wall may know its CF and not
+  // its lines, and its heights not at all.
+  const labels = [labelAt(lf, dist.lf), labelAt(cf, dist.cf), labelAt(rf, dist.rf)].filter((l) => Number.isFinite(l.t))
+  // The highest ink on the drawing: a distance sign's upper half, or the wall's outer edge.
+  // A card crops the frame's empty sky down to it (layout/parkWindow.js).
+  const top = Math.min(...labels.map((l) => l.y - LABEL_HALF), ...pts.map((p) => p.y - wallStroke(p.h) / 2))
 
   return {
     fair, track, fenceSegs, foul, skin, grassDiamond, foulLineL, foulLineR,
     baselineDirtL, baselineDirtR,
     bases: [b1, b2, b3], mound,
     moundDirtR: MOUND_DIRT_FT, homeDirtR: HOME_DIRT_FT, baselineDirtW: BASELINE_DIRT_FT,
-    // Only values on file are printed: an older wall may know its CF and not
-    // its lines, and its heights not at all.
-    labels: [labelAt(lf, dist.lf), labelAt(cf, dist.cf), labelAt(rf, dist.rf)].filter((l) => Number.isFinite(l.t)),
+    labels,
+    top,
     wallTags: wall ? [tagAt(lf, wall.lf), tagAt(cf, wall.cf), tagAt(rf, wall.rf)].filter((w) => Number.isFinite(w.h)) : [],
   }
 }
+
+// Half a distance sign's height: .bpdiagram__dist is set at --fs-title-sm (18px, 18 units in
+// this frame) and centred on its point. test/park-window.test.js reads the token and holds this
+// to it, so a bigger sign cannot slip out of a cropped window.
+export const LABEL_HALF = 10
 
 // Fence stroke width from wall height: a 5' wall is a hairline, the 37' Monster
 // is unmistakably a wall.

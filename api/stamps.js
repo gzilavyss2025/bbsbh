@@ -159,10 +159,28 @@ export async function fetchGameFinal(gamePk) {
   }
 }
 
+// Each uncached gamePk costs one upstream statsapi fetch (#2444), so those are
+// counted per user per minute. Cached games are free. A counter failure lets the
+// mint through: the limit protects statsapi, it is not an access check.
+export const MINT_LIMIT_PER_MIN = 30
+
+async function overMintLimit(redis, userId) {
+  try {
+    const key = `stamps:rate:${userId}`
+    const n = await redis.incr(key)
+    // NX sets the window only when the key has none, so a key left without a TTL (EXPIRE
+    // failed after INCR) heals on the next mint instead of blocking this user for good.
+    await redis.expire(key, 60, 'NX')
+    return n > MINT_LIMIT_PER_MIN
+  } catch {
+    return false
+  }
+}
+
 // Cache-then-fetch. A Final game's score never changes, so the cached blob has
 // no TTL and the first stamper pays for everyone. Only Final blobs are written —
 // caching a live game would freeze a score that is still moving.
-async function resolveGameFinal(redis, gamePk) {
+async function resolveGameFinal(redis, gamePk, userId) {
   const key = `game:final:${gamePk}`
   let cached = null
   try {
@@ -172,6 +190,7 @@ async function resolveGameFinal(redis, gamePk) {
   }
   if (cached && typeof cached === 'object' && cached.status === 'Final') return cached
 
+  if (await overMintLimit(redis, userId)) return { rateLimited: true }
   const fetched = await fetchGameFinal(gamePk)
   if (fetched?.status === 'Final' && seasonFromDate(fetched.date) != null) {
     try {
@@ -199,15 +218,13 @@ function sanitizeStored(raw) {
 }
 
 async function readSeasons(redis, userId) {
-  try {
-    const raw = await redis.smembers(seasonsKey(userId))
-    return (Array.isArray(raw) ? raw : [])
-      .map((s) => Number(s))
-      .filter(isSeasonNumber)
-      .sort((a, b) => b - a)
-  } catch {
-    return []
-  }
+  // A read failure throws: the handler turns it into a 503, never an empty list
+  // the client would merge as "the server has no stamps" (#2445).
+  const raw = await redis.smembers(seasonsKey(userId))
+  return (Array.isArray(raw) ? raw : [])
+    .map((s) => Number(s))
+    .filter(isSeasonNumber)
+    .sort((a, b) => b - a)
 }
 
 // The user hash as response rows, joined against the shared facts cache.
@@ -269,12 +286,7 @@ export function seasonRows(stored, facts, { includeRemoved = false } = {}) {
 }
 
 async function readSeason(redis, userId, season, { includeRemoved = false } = {}) {
-  let stored
-  try {
-    stored = sanitizeStored(await redis.hgetall(stampsKey(userId, season)))
-  } catch {
-    return []
-  }
+  const stored = sanitizeStored(await redis.hgetall(stampsKey(userId, season)))
   // Only live stamps have facts to join, so only they are looked up — a season
   // of tombstones costs no mget at all.
   const live = Object.keys(stored).filter((gamePk) => stored[gamePk].state === 'on')
@@ -352,7 +364,8 @@ export async function mint(req, res, redis, userId) {
   const gamePk = toGamePk(body.gamePk)
   if (gamePk == null) return privateJson(res, { error: 'gamePk required' }, 400)
 
-  const game = await resolveGameFinal(redis, gamePk)
+  const game = await resolveGameFinal(redis, gamePk, userId)
+  if (game?.rateLimited) return privateJson(res, { error: 'too many stamps, try again soon' }, 429)
   const refusal = mintRefusal(game)
   if (refusal) return privateJson(res, { error: refusal.error }, refusal.status)
 
@@ -405,7 +418,7 @@ export async function mint(req, res, redis, userId) {
 // Un-stamp. Reversible, deliberately NOT ratcheted — the one place the Logbook
 // differs in character from revealedThrough. Writes a tombstone rather than
 // deleting the field, so the removal survives a merge from another device.
-async function unmint(res, redis, userId, gamePk) {
+export async function unmint(res, redis, userId, gamePk) {
   const game = await (async () => {
     try {
       return await redis.get(`game:final:${gamePk}`)
@@ -425,12 +438,8 @@ async function unmint(res, redis, userId, gamePk) {
   const now = Date.now()
   for (const season of seasons) {
     const key = stampsKey(userId, season)
-    let existing = null
-    try {
-      existing = normalizeStamp(await redis.hget(key, String(gamePk)))
-    } catch {
-      existing = null
-    }
+    // A read failure throws to the handler's 503: it must not read as "no stamp" (#2445).
+    const existing = normalizeStamp(await redis.hget(key, String(gamePk)))
     if (!existing) continue
     await redis.hset(key, { [gamePk]: { ...existing, state: 'off', updatedAt: now } })
     return privateJson(res, { ok: true })
@@ -439,21 +448,10 @@ async function unmint(res, redis, userId, gamePk) {
   return privateJson(res, { ok: true })
 }
 
-export default async function handler(req, res) {
-  if (!['GET', 'POST', 'DELETE'].includes(req.method)) {
-    return privateJson(res, { error: 'method not allowed' }, 405)
-  }
-
+// Exported for the unit suite. A thrown Redis read is a 503 (#2445).
+export async function handleStampsGet(req, res, redis, userId) {
   const { searchParams } = requestUrl(req)
-
-  const redis = getRedis()
-  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
-
-  const auth = await authenticateUser(req)
-  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
-  const userId = auth.userId
-
-  if (req.method === 'GET') {
+  try {
     // The cheap nav payload.
     if (searchParams.get('seasons') === '1') {
       const seasons = await readSeasons(redis, userId)
@@ -481,11 +479,34 @@ export default async function handler(req, res) {
     const season = Number(searchParams.get('season'))
     if (!isSeasonNumber(season)) return privateJson(res, { error: 'season required' }, 400)
     return privateJson(res, { season, stamps: await readSeason(redis, userId, season) })
+  } catch {
+    return privateJson(res, { error: 'could not load stamps' }, 503)
   }
+}
+
+export default async function handler(req, res) {
+  if (!['GET', 'POST', 'DELETE'].includes(req.method)) {
+    return privateJson(res, { error: 'method not allowed' }, 405)
+  }
+
+  const { searchParams } = requestUrl(req)
+
+  const redis = getRedis()
+  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
+
+  const auth = await authenticateUser(req)
+  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
+  const userId = auth.userId
+
+  if (req.method === 'GET') return handleStampsGet(req, res, redis, userId)
 
   if (req.method === 'POST') return mint(req, res, redis, userId)
 
   const gamePk = toGamePk(searchParams.get('gamePk'))
   if (gamePk == null) return privateJson(res, { error: 'gamePk required' }, 400)
-  return unmint(res, redis, userId, gamePk)
+  try {
+    return await unmint(res, redis, userId, gamePk)
+  } catch {
+    return privateJson(res, { error: 'could not load stamps' }, 503)
+  }
 }

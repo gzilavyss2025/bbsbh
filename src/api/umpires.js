@@ -1,6 +1,7 @@
 import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 import { readSeasonShard, seasonFolderOf, seasonStaticJson, staticJsonBy } from './staticJson.js'
 import { joinGameRows } from '../lib/seasons/combine.js'
+import { historyName } from './history/umpireHistory.js'
 import { unpackUmpireShard } from '../lib/umpire/rows.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
@@ -494,11 +495,11 @@ function accuracyFor(rec, rows, level = 'MLB') {
 //
 // `strict` is for the umpire's own season view (#1482): a year the accuracy
 // store lacks has his games and no accuracy, never the latest season's.
-// Just his game rows across every season on file, [] when he has none. The
-// career card needs no accuracy, so it skips loadUmpire's accuracy reads.
+// His game rows, every season on file; [] when none.
 export async function loadUmpireGames(id) {
   return (await load(id, 'all'))?.games ?? []
 }
+export const umpireName = async (id) => (await historyName(id)) ?? (await load(id, 'all'))?.name ?? null
 
 export async function loadUmpire(id, { seasonYear, strict } = {}) {
   const [u, summary, rows, idxMlb, idxAaa] = await Promise.all([

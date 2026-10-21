@@ -99,9 +99,10 @@
 .rosterbox .rosterbox__foot th {
   color: var(--text-muted);
 }
-/* At wide the diamond sits beside the lineup table, centred on its height. */
+/* At wide the diamond sits beside the lineup table, level with its top: centred on the table's
+   height, it left a band of empty paper above center field (Gary, 2026-10-21). */
 .rosterbox-pair__diamond {
-  align-self: center;
+  align-self: start;
 }
 /* The pen week's strip keeps its three figures on one row, even on a phone: a third cell
    wrapped alone and left an empty fill beside it. */
