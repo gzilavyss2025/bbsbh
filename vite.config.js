@@ -596,6 +596,8 @@ export default defineConfig({
               // `index` arm is kept so a future reader is covered rather than
               // silently uncached; it simply never fires right now.
               /^\/data\/trade-deadline\/(?:index|\d{4})\.json$/.test(url.pathname) ||
+              // Standing out (#2453): one file per season, read only by /outliers.
+              /^\/data\/outliers\/\d{4}\.json$/.test(url.pathname) ||
               // The feat index (ADR-0101): three whole files, read only after a box score's reveal.
               /^\/data\/notable\/(?:nohitters|cycles|tripleplays)\.json$/.test(url.pathname),
             handler: 'NetworkFirst',

@@ -1326,3 +1326,26 @@ The card says that count ("Only 5 pitchers in the last 10 years had a better ERA
 full season") and lists those seasons with the club each played for, named as it was that
 season (`teams` in the tails file names his own). Mid-season, each row also says where that season ended (`finalValue`), when it went on at least 30 games or innings past the checkpoint (`FINISH_MIN`), and `finishView` sums it up: "20 of 26 bounced back by the end of the season." The card is
 `screens/player/next/top/HotCold.jsx`, with the cutoff `?d=` or `slateToday()`.
+
+## `hotcold/outliers.js`
+
+The league-wide "Standing out" report at `/outliers` (#2453). It reads
+`public/data/outliers/{season}.json` through `staticJsonBy`, one file per season, and
+answers "who is flagged as of a cutoff". A file entry is dated by its game and holds the
+callouts after that game. `flagsAsOf(file, cutoff)` takes each player's latest entry dated
+**before** the cutoff, the same rule as `rule.js`, so the slider's date is the page's `?d=`.
+An entry `[date, 0]` is a closing marker: the first game after a flagged run with no flag.
+Without it, a flag would show for ever. `groupFlags` groups by role and callout type.
+`cutoffSpan` gives the slider's range: the first game date to the day after the last, never
+past today, so a game in progress never counts. A season with no file shows the empty state.
+Spoiler-free on an open surface (ADR-0034): no seal and no gate.
+
+The file holds only what a collapsed row prints (key, tone, value, percentile, sample,
+weight, player id, name, role). An open row calls `loadHotCold` with the slider's cutoff and
+passes the flag to `hotColdView`, so the callout text and the past-seasons line come from the
+player page's own code. That costs one game-log call when a row opens.
+
+**The pool includes the season shown.** `tails.json` pools ten seasons, and the season on the
+page is one of them, so a player is partly compared with his own season. The page keeps it in:
+the player page does the same, so a row and its page always agree. A pool without the season
+would flag rows that the page then denies. The page says so in one line.

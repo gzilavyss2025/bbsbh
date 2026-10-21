@@ -842,6 +842,10 @@
       "class": "spoiler-free",
       "why": "The player page's hot and cold loader (#1855): reads the league tails file, the player's regular-season game log and one extremes file per flag (past seasons' lines, no scores), then runs rule.js with the caller's cutoff (the page's ?d= date or slateToday()), so a game in progress today never counts. An open surface (ADR-0034)."
     },
+    "hotcold/outliers.js": {
+      "class": "spoiler-free",
+      "why": "The league-wide Standing out report (#2453): reads public/data/outliers/{season}.json, one file per season of every MLB player's hot and cold callouts after each game date. A cutoff takes a player's latest entry dated before it, so a game on or after the cutoff never counts; the page keeps the cutoff at or before today. Season aggregates on an open surface (ADR-0034); no SealBox."
+    },
     "hotcold/rule.js": {
       "class": "spoiler-free",
       "why": "The hot and cold callouts' rule (#1855): up to two season stats in the league's 2% tails at the same checkpoint. Pure, over a player's game log; it drops every row dated on or after the cutoff, so a game still in progress today never counts. An open surface (ADR-0034): a stat line is not a score."
