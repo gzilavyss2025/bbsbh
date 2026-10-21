@@ -19,23 +19,22 @@ import { SeriesMark } from '../postseason/SeriesMark.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { Door } from '../ui/control/Door.jsx'
 import { Card } from '../ui/frame/Card.jsx'
+import { Key } from '../ui/frame/Key.jsx'
 import { Cluster } from '../ui/layout/Cluster.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { ScheduleStrip } from './ScheduleStrip.jsx'
 
-// THE HERO: the "Overview" card that leads the World Series home (the versus
-// design, Gary 2026-10-20). Top: both clubs' marks with their pips (the state
-// heading INTO the slate date, ADR-0087) and the Series mark between. Then the
-// split: one ink slab per club, meeting on a slanted seam, each with a hitter
-// (slabPlayer) over his washed action photo. Then each hitter's line and play
-// button, the clubs' wordmarks, the calendar, and one door to the next game.
+// Championship Matchup: the approved World Series overview. The next game's
+// date is the centre of the stage, between two player layers; the calendar
+// leads into its one preview/lineups door. Names, images, figures and clips
+// follow slabPlayer's selected identity, never text baked into the artwork.
 //
 // No score: the hero builds its own ledger columns with no runs handed in, so
 // it holds no run at all and a game day has no score slot (ADR-0116). An
 // if-needed game's date comes from the Series format (withFormatDates), never
 // from the schedule row bracket.js hides. Clips come only from games dated before the slate date
-// (fetchGameClips). The split opens on hover or on a press of the door, as the
-// slate card's tiles do (gamecard/versus.css); the arrival plays once a session.
+// (fetchGameClips). The slate card's split/scale and the existing one-session
+// arrival are reused; the next-game door remains usable throughout.
 const ARRIVED_KEY = 'bbsbh:ws-hero-arrived'
 
 function firstThisSession() {
@@ -83,31 +82,16 @@ function Slab({ side, clubId, player }) {
 function Who({ side, player, clip, onPlay }) {
   if (!player) return <div />
   const ops = Number.isFinite(Number.parseFloat(player.ops)) ? player.ops : '—'
-  const figures = (
-    <span className="ww-hero__figs">
-      <span className="ww-hero__ops">{`${ops} OPS`}</span>
-      <span className="ww-hero__pa">{[player.pos, `${player.pa} PA`].filter(Boolean).join(' · ')}</span>
-    </span>
-  )
-  const play = clip && (
-    <Button skin="ink" icon="▶" aria-label={`Play a ${player.name} postseason highlight`} className="ww-hero__play" onClick={onPlay} />
-  )
+  const pa = Number.isFinite(player.pa) ? `${player.pa} PA` : '— PA'
   return (
-    <Stack gap="snug" className={`ww-hero__who ww-hero__who--${side}`}>
+    <Stack gap="tight" className={`ww-hero__who ww-hero__who--${side}`}>
       <span className="ww-hero__name">{player.name}</span>
-      <Cluster gap="snug" className="ww-hero__line">
-        {side === 'away' ? (
-          <>
-            {play}
-            {figures}
-          </>
-        ) : (
-          <>
-            {figures}
-            {play}
-          </>
-        )}
-      </Cluster>
+      <span className="ww-hero__figs">{`${ops} OPS · ${pa}`}</span>
+      {clip && (
+        <Button skin="ghost" icon="▸" aria-label={`Watch highlight: ${player.name}, postseason`} className="ww-hero__play" onClick={onPlay}>
+          Watch highlight
+        </Button>
+      )}
     </Stack>
   )
 }
@@ -117,7 +101,8 @@ function ClubHead({ side, slot, winsNeeded }) {
   const name = teamClubNameShort(club.id) ?? club.name
   return (
     <Stack gap="snug" className={`ww-hero__club ww-hero__club--${side}`}>
-      <TeamLogo teamId={club.id} name={name} size={40} />
+      <TeamLogo teamId={club.id} name={name} variant="mono" size={40} eager />
+      <span className="ww-hero__clubname">{name}</span>
       <Pips winsNeeded={winsNeeded} wins={slot.wins} size="lg" />
       <span className="sr-only">{`${name}: ${slot.wins} of ${winsNeeded} wins`}</span>
     </Stack>
@@ -159,13 +144,14 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
     upcoming: withFormatDates(series.games, series.upcoming, slateDate),
     slateDate,
   })
-  const days = calendarDays(columns, slateDate)
+  const days = calendarDays(columns, slateDate).map((day) => gameDay ? { ...day, next: day.today && day.kind === 'game' } : day)
   const nextDay = days.find((d) => (gameDay ? d.today && d.kind === 'game' : d.gameNumber === gameNumber))
   const path = (section) => nextGamePath(game, slateDate, abbr, section)
   // A game day's door needs no game number (a resumed game can lack one); a preview names its game.
   const nextPath = gameDay ? path('lineup1') : gameNumber ? path('preview') : null
   const nextName = gameDay ? (gameNumber ? `Game ${gameNumber} lineups` : 'Lineups') : `Game ${gameNumber} preview`
   const when = [nextDay?.date && `${nextDay.weekday} ${monthDayShort(nextDay.date)}`, game && firstPitchText(game.gameDate, game.startTimeTBD)]
+  const months = [...new Set(days.filter((d) => d.date).map((d) => new Date(`${d.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' })))].join(' / ')
   const innings = gameDay ? path('top1') : null
   // Wide off day: one Stamp door per played game here (the phone has them in Played).
   const stamps = wide && !gameDay ? played : []
@@ -174,31 +160,47 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
   return (
     <Card frame="stamped" label="Overview" stampIn={arrive} className={`ww-hero${arrive ? ' ww-hero--arrive' : ''}`}>
       <Stack gap="base">
-        <div className="ww-hero__top">
-          <ClubHead side="away" slot={slotOf[order[0]]} winsNeeded={series.winsNeeded} />
-          {mark ? (
-            <SeriesMark mark={mark} height={40} plate className="ww-hero__mark" />
-          ) : (
-            <span className="ww-hero__words">World Series</span>
-          )}
-          <ClubHead side="home" slot={slotOf[order[1]]} winsNeeded={series.winsNeeded} />
-        </div>
-        <div className="ww-hero__pair">
-          <div className="ww-hero__split">
-            <Slab side="away" clubId={order[0]} player={players[0]} />
-            <Slab side="home" clubId={order[1]} player={players[1]} />
+        <div className="ww-hero__matchup">
+          <div className="ww-hero__stage">
+            <div className="ww-hero__split">
+              <Slab side="away" clubId={order[0]} player={players[0]} />
+              <Slab side="home" clubId={order[1]} player={players[1]} />
+            </div>
+            <div className="ww-hero__top">
+              <ClubHead side="away" slot={slotOf[order[0]]} winsNeeded={series.winsNeeded} />
+              <Stack gap="snug" className="ww-hero__crest">
+                {mark ? <SeriesMark mark={mark} height={48} className="ww-hero__mark" /> : <span className="ww-hero__words">World Series</span>}
+                <span className="ww-hero__format">Best of seven</span>
+              </Stack>
+              <ClubHead side="home" slot={slotOf[order[1]]} winsNeeded={series.winsNeeded} />
+            </div>
+            <Stack gap="snug" className="ww-hero__focus">
+              <span className="ww-hero__game">{gameNumber ? `Game ${gameNumber}` : 'World Series'}</span>
+              {when[0] && <span className="ww-hero__date">{when[0]}</span>}
+              {when[1] && <span className="ww-hero__time">{when[1]}</span>}
+            </Stack>
           </div>
-          <Who side="away" player={players[0]} clip={clips[0]} onPlay={() => setOpen(clips[0])} />
-          <Who side="home" player={players[1]} clip={clips[1]} onPlay={() => setOpen(clips[1])} />
-          <TeamLogo teamId={order[0]} name={teamClubNameShort(order[0]) ?? ''} variant="wordmark" size={20} className="ww-hero__word ww-hero__word--away" />
-          <TeamLogo teamId={order[1]} name={teamClubNameShort(order[1]) ?? ''} variant="wordmark" size={20} className="ww-hero__word ww-hero__word--home" />
+          <Stack gap="snug" className="ww-hero__spotlight">
+            <Cluster gap="snug" className="ww-hero__spotlightlabel">Postseason spotlight</Cluster>
+            <div className="ww-hero__pair">
+              <Who side="away" player={players[0]} clip={clips[0]} onPlay={() => setOpen(clips[0])} />
+              <Who side="home" player={players[1]} clip={clips[1]} onPlay={() => setOpen(clips[1])} />
+            </div>
+          </Stack>
         </div>
-        <ScheduleStrip days={days} />
+        <Stack gap="snug">
+          <Cluster gap="base" align="baseline" className="ww-hero__schedulehead">
+            <span className="ww-hero__month">{months}</span>
+            <span className="ww-hero__schedulelabel">Series schedule</span>
+            {days.some((d) => d.maybe) && <Key className="ww-hero__key" items={[{ label: 'If needed', mark: <span className="ww-hero__maybeswatch" aria-hidden="true" /> }]} />}
+          </Cluster>
+          <ScheduleStrip days={days} />
+        </Stack>
         {nextPath && (
           <Door {...link(nextPath)} className="ww-hero__next">
             <span className="ww-hero__nexttext">
               <span className="ww-hero__nextname">{nextName}</span>
-              {when.some(Boolean) && <span className="ww-hero__nextwhen">{when.filter(Boolean).join(' · ')}</span>}
+              <span className="ww-hero__nextwhen">{[`${teamClubNameShort(order[0])} at ${teamClubNameShort(order[1])}`, ...when].filter(Boolean).join(' · ')}</span>
             </span>
           </Door>
         )}

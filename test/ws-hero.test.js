@@ -112,6 +112,16 @@ test('before the Series starts, the slab shows the chosen player for each club',
   assert.deepEqual([bauers.id, bauers.pos, bauers.pa, bauers.ops], [641343, '1B', 34, '.864'])
 })
 
+test('a pre-Series pick reads its current name and figures from the split row', () => {
+  const refreshed = RAYS.map((s) => (s.player.id === 650490 ? split(650490, 'Yandy Díaz Hernández', 46, '.940', '1B') : s))
+  const player = slabPlayer(refreshed, { clubId: 139, season: 2026, started: false })
+  assert.equal(player.id, 650490)
+  assert.equal(player.name, 'Yandy Díaz Hernández')
+  assert.equal(player.pos, '1B')
+  assert.equal(player.pa, 46)
+  assert.equal(player.ops, '.940')
+})
+
 test('once a Series game is played, the slab shows the best OPS among hitters with 25 or more PA', () => {
   assert.equal(slabPlayer(RAYS, { clubId: 139, season: 2026, started: true })?.name, 'Yandy Díaz')
   assert.equal(slabPlayer(BREWERS, { clubId: 158, season: 2026, started: true })?.name, 'William Contreras')
@@ -129,6 +139,16 @@ test('with nobody at 25 PA the most PA wins, and no splits means no player', () 
   assert.equal(slabPlayer(undefined, { clubId: 139, season: 2026, started: false }), null)
 })
 
+test('incomplete splits cannot hold a pre-Series pick or replace a player with a missing identity', () => {
+  const incomplete = [
+    { player: { id: 641343, fullName: 'Jake Bauers' } },
+    { player: { fullName: 'Missing identity' }, stat: { plateAppearances: 60, ops: '2.000' } },
+    split(661388, 'William Contreras', 35, '1.157', 'C'),
+  ]
+  assert.equal(slabPlayer(incomplete, { clubId: 158, season: 2026, started: false })?.id, 661388)
+  assert.equal(slabPlayer(incomplete.slice(0, 2), { clubId: 158, season: 2026, started: false }), null)
+})
+
 test('an OPS tie goes to the hitter with more PA, and "-.--" never qualifies', () => {
   const tie = [split(1, 'A', 30, '.900'), split(2, 'B', 40, '.900'), split(3, 'C', 50, '-.--')]
   assert.equal(slabPlayer(tie, { clubId: 999, season: 2026, started: true })?.name, 'B')
@@ -140,6 +160,22 @@ const clip = (id, playerId, taxonomy = ['highlight', 'hitting']) => ({
     ...(playerId ? [{ type: 'player_id', value: String(playerId) }] : []),
     ...taxonomy.map((value) => ({ type: 'taxonomy', value })),
   ],
+})
+
+test('a new OPS leader changes the featured identity and the highlight attached to it', () => {
+  const options = { clubId: 158, season: 2026, started: true }
+  const games = [{ date: '2026-10-23', gameNumber: 1, clips: [clip('contreras-double', 661388), clip('bauers-homer', 641343)] }]
+  const before = slabPlayer(BREWERS, options)
+  assert.equal(before.id, 661388)
+  assert.equal(playerClip(games, before.id)?.id, 'contreras-double')
+
+  const updated = BREWERS.map((s) => (s.player.id === 641343 ? split(641343, 'Jake Bauers', 39, '1.200', '1B') : s))
+  const after = slabPlayer(updated, options)
+  assert.equal(after.id, 641343)
+  assert.equal(after.name, 'Jake Bauers')
+  assert.equal(after.ops, '1.200')
+  assert.equal(playerClip(games, after.id)?.id, 'bauers-homer')
+  assert.equal(playerClip([], after.id), null)
 })
 
 test('the play button gets the player\'s clip from the newest game that has one', () => {

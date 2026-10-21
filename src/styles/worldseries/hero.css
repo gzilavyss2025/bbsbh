@@ -1,106 +1,128 @@
-/* The World Series hero, "Overview" (components/worldseries/Hero.jsx, the versus design
-   Gary chose 2026-10-20). Imported by Hero.jsx. Namespace `ww-hero` and `ww-cal`.
-
-   Resting look first, then THE SPLIT's switch, then the one-shot ARRIVAL. The switch is the
-   slate card's own idea (gamecard/versus.css): one custom property, --versus, goes to 1 on a
-   hover where the pointer can hover, or on a press or focus of the next-game door, and the
-   seam opens. The arrival plays once a session (Hero.jsx's sessionStorage gate), after the
-   card's own stamp-in (Card stampIn, motion/stamp-in.css). Both are off under reduced motion,
-   and the card at rest is complete without either. */
-
+/* Championship Matchup: the World Series overview's stage, player lower thirds,
+   calendar and one next-game door. Existing slate split/scale and Hero arrival
+   keyframes are reused, once per session, with no idle loop. */
 .ww-hero {
   --versus: 0;
-  --ww-split-h: 170px;
+  --ww-stage-h: calc(var(--space-16) * 4 + var(--space-8));
+  --ww-wash-shift: 28%;
+  --ww-wash-focus: center top;
 }
 
-@media (min-width: 740px) {
-  .ww-hero {
-    --ww-split-h: 240px;
-  }
+.ww-hero__matchup {
+  border: var(--bw-heavy) solid var(--border-stamped);
 }
 
-/* ---------- the top row: both clubs and the Series mark ---------- */
+.ww-hero__stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: var(--ww-stage-h);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
 
-/* layout-exempt: three fixed slots, the mark centred between two club stacks */
+/* layout-exempt: three authored slots keep the Series mark between both clubs */
 .ww-hero__top {
+  position: relative;
+  z-index: 3;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--sheen-light);
+  background: var(--surface-stamped-ink);
 }
 
-.ww-hero__club--away {
-  align-items: flex-start;
-  --i: 0;
+.ww-hero__club,
+.ww-hero__crest {
+  min-width: 0;
+  align-items: center;
+  text-align: center;
 }
 
-.ww-hero__club--home {
-  align-items: flex-end;
-  --i: 2;
-}
+.ww-hero__club--away { --i: 0; }
+.ww-hero__crest { --i: 1; }
+.ww-hero__club--home { --i: 2; }
 
-.ww-hero__mark,
+.ww-hero__clubname,
+.ww-hero__format,
 .ww-hero__words {
-  --i: 1;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-label);
 }
 
-/* The bracket's pips push themselves right (margin-left: auto); here they sit under the logo. */
+.ww-hero__format {
+  color: var(--text-on-ink-soft);
+}
+
 .ww-hero__club .pbkt-pips {
   margin-left: 0;
+  color: var(--text-on-ink-cream);
 }
 
-/* No Series art on file for the season (seriesMarks.js): the words, on the same navy plate. */
-.ww-hero__words {
-  padding: var(--space-1h) var(--space-2h);
-  border-radius: var(--radius-sm);
-  background: var(--accent-primary);
-  color: var(--text-on-ink);
+.ww-hero__club .pbkt-pip { border-color: currentColor; }
+.ww-hero__club .pbkt-pip--on { background: currentColor; }
+
+.ww-hero__focus {
+  position: relative;
+  z-index: 3;
+  align-items: center;
+  width: 40%;
+  margin: 0 auto;
+  padding: var(--space-10) 0 var(--space-6);
+  text-align: center;
+}
+
+.ww-hero__game {
   font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-display-lg);
+  font-weight: var(--w-black);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-tight-display);
 }
 
-/* ---------- the split: two ink slabs on a slanted seam ---------- */
-
-/* layout-exempt: the split spans both columns; each hitter's line and wordmark sit under his slab */
-.ww-hero__pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2h) var(--space-3h);
+.ww-hero__date,
+.ww-hero__time {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: var(--lh-compact);
+  font-variant-numeric: tabular-nums;
 }
 
-/* layout-exempt: two slabs side by side; each pulls into the other's column to close the seam */
+.ww-hero__time { color: var(--text-on-ink-soft); }
+
+/* layout-exempt: two overlapping image layers frame the readable centre */
 .ww-hero__split {
-  --cut: calc(var(--space-6) + var(--versus) * var(--space-3h));
-  grid-column: 1 / -1;
+  position: absolute;
+  inset: calc(var(--space-16) + var(--space-10)) 0 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  height: var(--ww-split-h);
-  overflow: hidden;
-  border: var(--bw-heavy) solid var(--border-stamped);
-  background: var(--surface-card);
+  pointer-events: none;
 }
 
 .ww-hero__slab {
   position: relative;
-  overflow: hidden;
   isolation: isolate;
+  min-width: 0;
+  overflow: hidden;
   background: var(--surface-stamped-ink);
 }
 
 .ww-hero__slab--away {
-  margin-right: calc(-1 * var(--space-2));
-  clip-path: polygon(0 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%);
+  margin-right: calc(-1 * var(--space-4));
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--space-6) - var(--versus) * var(--space-2)) 100%, 0 100%);
 }
 
 .ww-hero__slab--home {
-  margin-left: calc(-1 * var(--space-2));
-  clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%);
+  margin-left: calc(-1 * var(--space-4));
+  clip-path: polygon(calc(var(--space-6) + var(--versus) * var(--space-2)) 0, 100% 0, 100% 100%, 0 100%);
 }
 
-/* The slate tile's texture: ripple rings from two corners under the hitter, a sheen over all.
-   The --ripple-* and --sheen-* tokens are the band's (system/section-head.css). */
+/* The slate's ripple and sheen, subdued behind real player imagery. */
 .ww-hero__slab::before,
 .ww-hero__slab::after {
   content: '';
@@ -111,175 +133,197 @@
 
 .ww-hero__slab::before {
   z-index: 1;
+  opacity: 0.4;
   background:
     repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
     repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
-  mask-image: linear-gradient(100deg, var(--ripple-mask) 0%, transparent 50%, var(--ripple-mask) 100%);
+  mask-image: linear-gradient(100deg, var(--ripple-mask), transparent 70%);
 }
 
 .ww-hero__slab::after {
   z-index: 3;
-  background: linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%);
+  background: linear-gradient(160deg, var(--sheen-light), transparent 50%, var(--sheen-dark));
 }
 
-/* The hitter's action photo (actionPhotoUrl, the player page's), washed in black and white
-   and faded out toward the bottom so the cutout stands in front. Hidden until it loads. */
 .ww-hero__wash {
   position: absolute;
   inset: 0;
-  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: var(--ww-wash-focus);
   opacity: 0;
   filter: grayscale(1);
-  mask-image: linear-gradient(to top, transparent 0, var(--ripple-mask) 55%);
+  mask-image: linear-gradient(to top, transparent, var(--ripple-mask) 60%);
 }
 
-.ww-hero__wash.is-ready {
-  opacity: 0.38;
-}
+.ww-hero__wash.is-ready { opacity: 0.3; }
 
-/* The cutout. MLB's silo is cropped at the shoulders, so it is pinned to the slab's OUTER edge
-   (the crop runs off the slab) and stops short of the seam, where its inner shoulder fades. */
+/* Offset the portrait photo itself: object-position-x cannot shift a cover
+   image that already fills its box by width. Keep the action inside the
+   headshot's inner shoulder, with its head preserved at the top. */
+.ww-hero__slab--away .ww-hero__wash { left: var(--ww-wash-shift); right: auto; }
+.ww-hero__slab--home .ww-hero__wash { right: var(--ww-wash-shift); left: auto; }
+
 .shot.ww-hero__cut {
   position: absolute;
   z-index: 2;
   bottom: 0;
-  width: min(calc(100% - var(--space-8)), var(--ww-split-h));
+  width: 100%;
   height: auto;
   aspect-ratio: 1;
   border: 0;
   border-radius: 0;
   background: transparent;
-  scale: calc(1 + var(--versus) * 0.08);
+  scale: calc(1 + var(--versus) * 0.035);
 }
 
-.shot.ww-hero__cut img {
-  filter: none;
-}
+.shot.ww-hero__cut img { filter: none; }
 
 .ww-hero__slab--away .ww-hero__cut {
-  left: 0;
+  left: calc(-1 * var(--space-3));
   transform-origin: bottom left;
-  translate: calc(var(--versus) * -1 * var(--space-1h)) 0;
-  mask-image: linear-gradient(to left, transparent 0, var(--ripple-mask) 20%);
+  mask-image: linear-gradient(to left, transparent, var(--ripple-mask) 30%);
 }
 
 .ww-hero__slab--home .ww-hero__cut {
-  right: 0;
+  right: calc(-1 * var(--space-3));
   transform-origin: bottom right;
-  translate: calc(var(--versus) * var(--space-1h)) 0;
-  mask-image: linear-gradient(to right, transparent 0, var(--ripple-mask) 20%);
+  mask-image: linear-gradient(to right, transparent, var(--ripple-mask) 30%);
 }
 
-/* No hitter (no splits yet, or none at all): the club's knockout mark, centred. */
 .ww-hero__mono {
   position: absolute;
   inset: 0;
-  z-index: 2;
   margin: auto;
+  opacity: 0.35;
 }
 
-/* ---------- each hitter's line ---------- */
-
-.ww-hero__who {
-  min-width: 0;
-  padding-bottom: var(--space-2);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
+/* Player names stay live text and wrap for any selected player. */
+.ww-hero__spotlight {
+  padding: var(--space-2h) var(--space-3);
+  background: var(--surface-card);
 }
 
-.ww-hero__who--away {
-  --i: 3;
+.ww-hero__spotlightlabel {
+  justify-content: center;
+  flex-wrap: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
 }
 
-.ww-hero__who--home {
-  --i: 4;
-  align-items: flex-end;
-  text-align: right;
+.ww-hero__spotlightlabel::before,
+.ww-hero__spotlightlabel::after {
+  content: '';
+  flex: 1;
+  height: var(--bw-hair);
+  background: var(--border-hairline);
 }
 
-.ww-hero__who--home .ww-hero__line {
-  justify-content: flex-end;
+/* layout-exempt: a fixed pair of lower thirds belongs to the two player layers */
+.ww-hero__pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
 }
+
+.ww-hero__who { min-width: 0; --i: 3; }
+.ww-hero__who--home { --i: 4; }
 
 .ww-hero__name {
   font-family: var(--font-display);
-  font-size: var(--fs-h3);
+  font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
   line-height: var(--lh-tight);
-  letter-spacing: var(--ls-emphasis);
+  letter-spacing: var(--ls-title);
+  overflow-wrap: anywhere;
   color: var(--text-heading);
 }
 
-.ww-hero__line {
-  flex-wrap: nowrap;
-  align-items: center;
-}
-
-/* The play button is a page action, so it is a plain ink .btn: square, no stamp. */
-.btn.ww-hero__play {
-  flex: none;
-  width: var(--tap-min);
-  padding: 0;
-  border-radius: 0;
-}
-
-/* layout-exempt: two lines, OPS over position and PA, in a span */
 .ww-hero__figs {
-  display: grid;
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
   line-height: var(--lh-compact);
+  color: var(--text-body);
 }
 
-.ww-hero__ops {
+.btn.ww-hero__play {
+  justify-content: flex-start;
+  align-self: flex-start;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-title);
   color: var(--text-heading);
 }
 
-.ww-hero__pa {
+.ww-hero__play .btn__icon {
+  padding: var(--space-1h) var(--space-2);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+
+.ww-hero__schedulehead { row-gap: var(--space-1); }
+
+.ww-hero__month {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+}
+
+.ww-hero__schedulelabel,
+.ww-hero__key {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-title);
   color: var(--text-caption);
 }
 
-.ww-hero__word--away {
-  justify-self: start;
-  --i: 3;
+.ww-hero__key { margin: 0 0 0 auto; }
+.ww-hero__maybeswatch {
+  display: inline-block;
+  width: var(--space-3);
+  height: var(--space-3);
+  border: var(--bw-hair) dashed var(--border-stamped);
 }
 
-.ww-hero__word--home {
-  justify-self: end;
-  --i: 4;
-}
-
-/* ---------- the calendar ---------- */
-
-/* layout-exempt: one equal column per day, in one row */
+/* layout-exempt: five chronological day cells per row on a phone, all days wide */
 .ww-cal {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--space-1);
 }
 
-/* layout-exempt: weekday, date and game number stacked in one cell */
+/* layout-exempt: weekday, date, game and visible state share one calendar cell */
 .ww-cal__day {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-1h) 0;
+  padding: var(--space-1h) 0 0;
   border: var(--bw-hair) solid var(--border-stamped);
   background: var(--surface-card);
   color: var(--text-heading);
 }
 
-.ww-cal__wk {
+.ww-cal__wk,
+.ww-cal__game,
+.ww-cal__flag {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
+  line-height: var(--lh-ui);
   letter-spacing: var(--ls-title);
 }
 
@@ -290,51 +334,36 @@
   line-height: var(--lh-ui);
 }
 
-.ww-cal__game {
+.ww-cal__game { min-height: 1lh; }
+.ww-cal__flag {
+  align-self: stretch;
   min-height: 1lh;
-  font-family: var(--font-display);
-  font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-ui);
+  margin-top: var(--space-1);
+  text-align: center;
 }
 
-/* An off day: a plain cell, no word. */
 .ww-cal__day--off {
   border-color: var(--border-stamped-soft);
   background: var(--bg-page);
   color: var(--text-caption);
 }
 
-.ww-cal__day--today {
-  background: var(--marker);
-  color: var(--text-heading);
-}
+.ww-cal__day--today { background: var(--marker); color: var(--text-heading); }
+.ww-cal__day--next { background: var(--surface-stamped-ink); color: var(--text-on-ink-cream); }
+.ww-cal__day--today .ww-cal__flag,
+.ww-cal__day--next .ww-cal__flag { border-top: var(--bw-hair) solid currentColor; }
+.ww-cal__day--next .ww-cal__flag { color: var(--marker); }
+.ww-cal__day--maybe { border-style: dashed; }
 
-/* Today before Game 1 stands a little apart: the days between are not Series days. */
-.ww-cal__day--today:not(.ww-cal__day--game, .ww-cal__day--off) {
-  margin-right: var(--space-2);
-}
-
-.ww-cal__day--next {
-  background: var(--surface-stamped-ink);
-  color: var(--text-on-ink-cream);
-}
-
-.ww-cal__day--maybe {
-  border-style: dashed;
-}
-
-/* ---------- the doors ---------- */
-
-/* The next game: the card's one big door, inked and stamped. Door writes the › itself. */
 .door.ww-hero__next {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
   min-height: calc(var(--tap-min) + var(--space-4));
-  padding: var(--space-2h) var(--space-3h);
+  padding: var(--space-3) var(--space-3h);
   border: var(--bw-heavy) solid var(--border-stamped);
+  border-left: var(--space-2) solid var(--marker);
   background: var(--surface-stamped-ink);
   box-shadow: var(--shadow-stamped);
   color: var(--text-on-ink-cream);
@@ -343,148 +372,64 @@
   line-height: var(--lh-solid);
 }
 
-/* layout-exempt: the door's name over its date and first pitch */
-.ww-hero__nexttext {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
+/* layout-exempt: the primary door's label and its date are one text block */
+.ww-hero__nexttext { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
 .ww-hero__nextwhen {
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   font-weight: var(--w-medium);
+  line-height: var(--lh-compact);
   letter-spacing: var(--ls-none);
-  color: var(--text-on-ink-dim);
+  color: var(--text-on-ink-soft);
+}
+.ww-hero__doors .door { display: inline-flex; align-items: center; min-height: var(--tap-min); font-size: var(--fs-ui); }
+
+@media (min-width: 740px) {
+  .ww-hero { --ww-stage-h: calc(var(--space-16) * 5); }
+  .ww-hero__top { width: 46%; margin: 0 auto; background: transparent; border-bottom: 0; }
+  .ww-hero__split { inset: 0; }
+  .shot.ww-hero__cut { width: var(--ww-stage-h); }
+  .ww-hero__focus { padding-top: var(--space-5); }
+  .ww-hero__game { font-size: var(--fs-hero-2xl); }
+  .ww-hero__date { font-size: var(--fs-ui); }
+  .ww-hero__time { font-size: var(--fs-ui); }
+  .ww-hero__spotlight { padding: var(--space-3) var(--space-5); }
+  .ww-hero__name { font-size: var(--fs-card-name); }
+  .ww-hero__who--home { align-items: flex-end; text-align: right; }
+  .ww-hero__who--home .ww-hero__play { align-self: flex-end; }
+  .ww-cal { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
 }
 
-.ww-hero__doors .door {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--tap-min);
-  font-size: var(--fs-ui);
-}
-
-/* ---------- THE SPLIT (the slate card's --versus switch) ---------- */
-
+/* The existing Hero/slate interaction, limited to pointers that actually hover. */
 @media (prefers-reduced-motion: no-preference) {
   @media (hover: hover) and (pointer: fine) {
-    .ww-hero:hover {
-      --versus: 1;
-    }
+    .ww-hero:hover { --versus: 1; }
   }
-  .ww-hero:has(.ww-hero__next:focus-visible, .ww-hero__next:active) {
-    --versus: 1;
-  }
-
-  .ww-hero__slab {
-    transition: clip-path var(--dur-med) var(--ease-stamp);
-  }
-  .ww-hero__cut {
-    transition:
-      scale var(--dur-med) var(--ease-stamp),
-      translate var(--dur-med) var(--ease-stamp);
-  }
-  .ww-hero__wash {
-    transition: opacity var(--dur-arrive-texture) var(--ease-out);
-  }
-  .door.ww-hero__next {
-    transition:
-      translate var(--dur-fast) var(--ease-stamp),
-      box-shadow var(--dur-fast) var(--ease-stamp);
-  }
-  .door.ww-hero__next:active {
-    translate: var(--bw-heavy) var(--bw-heavy);
-    box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped);
-  }
+  .ww-hero:has(.ww-hero__next:focus-visible, .ww-hero__next:active) { --versus: 1; }
+  .ww-hero__slab { transition: clip-path var(--dur-med) var(--ease-stamp); }
+  .ww-hero__cut { transition: scale var(--dur-med) var(--ease-stamp); }
+  .ww-hero__wash { transition: opacity var(--dur-arrive-texture) var(--ease-out); }
+  .door.ww-hero__next { transition: translate var(--dur-fast) var(--ease-stamp), box-shadow var(--dur-fast) var(--ease-stamp); }
+  .door.ww-hero__next:active { translate: var(--bw-heavy) var(--bw-heavy); box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--border-stamped); }
 }
 
-/* ---------- THE ARRIVAL (once a session) ----------
-   After the card's stamp-in: the slabs close onto the seam, the hitters rise in, the photo
-   pushes in from 6% larger, the marks and lines stamp in, then the calendar inks across and
-   lands on today and the next game. All in steps of --stagger-step (55ms); about 1.3s. */
-
-@keyframes ww-hero-from-left {
-  from {
-    opacity: 0;
-    translate: calc(-1 * var(--space-10)) 0;
-  }
-}
-
-@keyframes ww-hero-from-right {
-  from {
-    opacity: 0;
-    translate: var(--space-10) 0;
-  }
-}
-
-@keyframes ww-hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(var(--space-3));
-  }
-}
-
-@keyframes ww-hero-push {
-  from {
-    transform: scale(1.06);
-  }
-}
-
-@keyframes ww-hero-pop {
-  from {
-    opacity: 0;
-    transform: translateY(var(--space-1h)) scale(0.96);
-  }
-}
-
-@keyframes ww-hero-cell {
-  from {
-    opacity: 0;
-    transform: translateY(var(--space-1));
-  }
-}
-
-@keyframes ww-hero-mark {
-  from {
-    background: var(--surface-card);
-  }
-}
-
-@keyframes ww-hero-ink {
-  from {
-    background: var(--surface-card);
-    color: var(--text-heading);
-  }
-}
+/* Existing one-session arrival, re-timed to land on the next game in ~1 s. */
+@keyframes ww-hero-from-left { from { opacity: 0; translate: calc(-1 * var(--space-10)) 0; } }
+@keyframes ww-hero-from-right { from { opacity: 0; translate: var(--space-10) 0; } }
+@keyframes ww-hero-rise { from { opacity: 0; transform: translateY(var(--space-3)); } }
+@keyframes ww-hero-push { from { transform: scale(1.06); } }
+@keyframes ww-hero-pop { from { opacity: 0; transform: translateY(var(--space-1h)) scale(0.96); } }
+@keyframes ww-hero-cell { from { opacity: 0; transform: translateY(var(--space-1)); } }
+@keyframes ww-hero-mark { from { background: var(--surface-card); } }
+@keyframes ww-hero-ink { from { background: var(--surface-card); color: var(--text-heading); } }
 
 @media (prefers-reduced-motion: no-preference) {
-  .ww-hero--arrive .ww-hero__slab--away {
-    animation: ww-hero-from-left var(--dur-arrive) var(--ease-stamp) var(--stagger-step) both;
-  }
-  .ww-hero--arrive .ww-hero__slab--home {
-    animation: ww-hero-from-right var(--dur-arrive) var(--ease-stamp) var(--stagger-step) both;
-  }
-  .ww-hero--arrive .ww-hero__cut {
-    animation: ww-hero-rise var(--dur-arrive) var(--ease-stamp) calc(var(--stagger-step) * 4) both;
-  }
-  .ww-hero--arrive .ww-hero__wash {
-    animation: ww-hero-push calc(var(--dur-draw) + var(--dur-slow)) var(--ease-out) calc(var(--stagger-step) * 4) both;
-  }
-  .ww-hero--arrive :is(.ww-hero__club, .ww-hero__mark, .ww-hero__words, .ww-hero__who, .ww-hero__word) {
-    animation: ww-hero-pop var(--dur-arrive) var(--ease-stamp) calc(var(--stagger-step) * (5 + var(--i, 0))) both;
-  }
-  .ww-hero--arrive .ww-cal__day {
-    animation: ww-hero-cell var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * (7 + var(--i, 0))) both;
-  }
-  .ww-hero--arrive .ww-cal__day--today {
-    animation:
-      ww-hero-cell var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * (7 + var(--i, 0))) both,
-      ww-hero-mark var(--dur-med) var(--ease-stamp) calc(var(--stagger-step) * 17) both;
-  }
-  .ww-hero--arrive .ww-cal__day--next {
-    animation:
-      ww-hero-cell var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * (7 + var(--i, 0))) both,
-      ww-hero-ink var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * 18) both;
-  }
+  .ww-hero--arrive .ww-hero__slab--away { animation: ww-hero-from-left var(--dur-arrive) var(--ease-stamp) var(--stagger-step) both; }
+  .ww-hero--arrive .ww-hero__slab--home { animation: ww-hero-from-right var(--dur-arrive) var(--ease-stamp) var(--stagger-step) both; }
+  .ww-hero--arrive .ww-hero__cut { animation: ww-hero-rise var(--dur-arrive) var(--ease-stamp) calc(var(--stagger-step) * 2) both; }
+  .ww-hero--arrive .ww-hero__wash { animation: ww-hero-push var(--dur-grow) var(--ease-out) calc(var(--stagger-step) * 2) both; }
+  .ww-hero--arrive :is(.ww-hero__club, .ww-hero__crest, .ww-hero__focus, .ww-hero__who) { animation: ww-hero-pop var(--dur-arrive) var(--ease-stamp) calc(var(--stagger-step) * (2 + var(--i, 0))) both; }
+  .ww-hero--arrive .ww-cal__day { animation: ww-hero-cell var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * (4 + var(--i, 0))) both; }
+  .ww-hero--arrive .ww-cal__day--today { animation: ww-hero-cell var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * (4 + var(--i, 0))) both, ww-hero-mark var(--dur-med) var(--ease-stamp) calc(var(--stagger-step) * 9) both; }
+  .ww-hero--arrive .ww-cal__day--next { animation: ww-hero-cell var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * (4 + var(--i, 0))) both, ww-hero-ink var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * 10) both; }
 }

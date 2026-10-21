@@ -2,8 +2,8 @@
 // day, each with its weekday and date. Today is marked, the next game is
 // inked, an if-needed game has a dashed edge, and an off day is a plain cell
 // with no word on it. `days` is calendarDays' list (lib/postseason/worldseries/
-// hero.js); nothing here reads a result. The words a sighted reader gets from
-// the marks are in each cell's hidden text, so there is no key.
+// hero.js); nothing here reads a result. Today/Next are visible as well as
+// spoken; conditional games keep their dashed edge and the hero's small key.
 function spoken(d) {
   const when = [d.weekday, d.day].filter(Boolean).join(' ')
   const what = d.gameNumber != null ? `Game ${d.gameNumber}` : 'No game'
@@ -23,7 +23,7 @@ export function ScheduleStrip({ days }) {
           d.maybe && 'ww-cal__day--maybe',
         ]
         return (
-          <li key={d.key} className={cls.filter(Boolean).join(' ')} style={{ '--i': i }}>
+          <li key={d.key} className={cls.filter(Boolean).join(' ')} style={{ '--i': i }} aria-current={d.today ? 'date' : undefined}>
             <span className="sr-only">{spoken(d)}</span>
             <span className="ww-cal__wk" aria-hidden="true">
               {d.weekday}
@@ -34,6 +34,7 @@ export function ScheduleStrip({ days }) {
             <span className="ww-cal__game" aria-hidden="true">
               {d.gameNumber != null ? `G${d.gameNumber}` : ''}
             </span>
+            <span className="ww-cal__flag" aria-hidden="true">{d.today ? 'Today' : d.next ? 'Next' : ''}</span>
           </li>
         )
       })}
