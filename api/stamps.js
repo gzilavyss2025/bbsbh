@@ -393,12 +393,13 @@ export async function mint(req, res, redis, userId) {
     // field, so `hlen` charges the season for every stamp ever removed — stamp
     // and un-stamp one game enough times and the shelf reads as full while it
     // is empty.
-    let count = 0
+    // A failed read answers 503 here too: it must not count as zero stamps (#2332).
+    let count
     try {
       const stored = sanitizeStored(await redis.hgetall(key))
       count = Object.values(stored).filter((entry) => entry.state === 'on').length
     } catch {
-      count = 0
+      return privateJson(res, { error: 'could not load stamps' }, 503)
     }
     if (count >= MAX_STAMPS_PER_SEASON) {
       return privateJson(res, { error: 'season full', limit: MAX_STAMPS_PER_SEASON }, 409)

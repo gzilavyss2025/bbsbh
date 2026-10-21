@@ -465,7 +465,6 @@ audit of statsapi is `docs/MLB_STATS_API.md`.
 | Pure generator halves | `scripts/lib/abs/` — `rows`, `bank`, `chances`, `ranout`, `streaks`, `momentum`, `exposure`, `export` |
 | Season board reader | `src/api/around-the-game/absChallenges.js` |
 | Denominator reader | `src/api/around-the-game/absExposure.js` — the league histograms AND the team hub's per-club board |
-| Team hub card | `src/screens/team/modules/TeamChallengeCard.jsx`, `src/styles/report/challenge-card.css` |
 | Page and its sections | `src/screens/around-the-game/AbsChallengesPage.jsx`, `src/screens/around-the-game/abs/` |
 | Chart primitives | `src/components/around-the-game/BroadcastBar.jsx`, `src/styles/report/charts.css` |
 | Tests | `test/abs-challenges.test.js`, `test/abs-exposure.test.js`, `test/abs-scope.test.js` |

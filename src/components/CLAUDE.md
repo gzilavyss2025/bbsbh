@@ -56,7 +56,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `situational/` | `SituationalBoard`, `SituationalIndex`, `TeamRecordsList` | The situational team-record boards: every club ranked on one split |
 | `sync/` | `RevealCloudSync`, `StampsCloudSync`, `SyncStatusProvider`, `OwnerGuards` | Headless multi-device cloud-sync components (ADR-0022/0035/0036/0041/0049). `OwnerGuards` is app-wide on purpose |
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `OffDaySection` | Team-identity/navigation primitives |
-| `teamstats/` | `TeamLeaders`, `TeamScoreCard`, `BullpenBoard` | Team-level statistical cards |
+| `teamstats/` | `TeamLeaders`, `BullpenBoard` | Team-level statistical cards |
 | `transactions/` | `TxStory`, `MoveRow`, `WireRail`, `WireDock` | Roster-move surfaces. Rules: `transactions/CLAUDE.md` |
 | `umpire/` | `UmpireAccuracyModal`, `UmpireLink`, `UmpireTendencies`, `UmpiresCard` | Umpire-specific surfaces |
 | `winter/` | `LeaguePicker` | The WINTER tab's league picker: four leagues share one rail tab (ADR-0078) |

@@ -683,13 +683,6 @@ const T7 = [
     want: [{ frame: 'bare', sticky: true, label: true }],
     gone: ['ctr__scroll'],
   },
-  {
-    css: 'report/challenge-card.css',
-    ns: 'chal__board',
-    jsx: 'screens/team/modules/TeamChallengeCard.jsx',
-    want: [{ frame: 'bare', label: false }],
-    gone: [],
-  },
 ]
 
 const tableTags = (code, ns) => [...code.matchAll(/<Table\b([^>]*)>/g)].map((m) => m[1]).filter((a) => new RegExp(String.raw`className="${ns}(?![a-z0-9_-])`).test(a))
@@ -775,15 +768,12 @@ test('T7: a moved board keeps its own margin, layout and bleed', () => {
   assert.equal(decl(body(fouls, '.foulboard-block .metric__body > .table:last-child'), 'margin-bottom'), 'calc(-1 * var(--space-4))')
   assert.equal(ruleBody(fouls, '.foulboard-block .ledger-wrap'), null, 'the old bleed rule is gone')
   assert.equal(decl(body(read('70-contracts-grid.css'), '.ctr__table'), 'min-width'), '560px')
-  assert.equal(decl(body(read('report/challenge-card.css'), '.chal__board'), 'margin'), 'var(--space-3) 0 0')
   const trrank = read('situational-records/66a-detail.css')
   assert.equal(decl(body(trrank, '.trrank__tablewrap .table'), 'box-shadow'), 'none', 'the raised shadow is the old wrapper\'s, so the Table wrap draws none inside it')
   assert.equal(decl(body(trrank, '.trrank__tablewrap .trrank td'), 'height'), '44px')
 })
 
 test('T7: a text cell says it is words, not figures', () => {
-  const css = read('report/challenge-card.css')
-  assert.equal(decl(ruleBody(css, '.chal__board th.chal__who') ?? '', 'white-space'), 'normal', 'a player name may wrap')
   assert.equal(decl(rules(read('70-contracts-grid.css')).find(([sel]) => sel === '.ctr__name')?.[1] ?? '', 'font-family'), 'var(--font-body)', 'a player name is not a mono figure')
   assert.equal(decl(rules(read('70-contracts-grid.css')).find(([sel]) => sel === '.ctr__name')?.[1] ?? '', 'font-variant-numeric'), 'normal', 'the terms line is words with digits, not tabular figures')
 })

@@ -44,7 +44,6 @@ const KNOWN_UNDEFINED = new Set([
   '--width',
   '--pct',
   '--tier', // ovr/card.css — the row's tier colour, set per row by OvrBars.jsx
-  '--rankstrip-track-width', // 28-team-hub.css
 ])
 import test from 'node:test'
 import assert from 'node:assert/strict'
