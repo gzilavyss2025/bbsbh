@@ -11,6 +11,7 @@ import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 import { Grid } from '../../../../components/ui/layout/Grid.jsx'
 import { StatStrip, StatCell } from '../../../../components/ui/frame/StatStrip.jsx'
 import { DefenseDiamond } from '../../../../components/scoring/DefenseDiamond.jsx'
+import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { StaffGrid } from '../../../../components/workload/StaffGrid.jsx'
 import { splitDisplayName } from '../../../../api/person.js'
 import { loadRoster } from '../../data/loadRoster.js'
@@ -73,6 +74,14 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
   const d = roster.data
   const door = transactionsDoor(team.id, asOf, sportId)
   const injuredIds = useMemo(() => new Set((d?.injured ?? []).map((p) => p.id)), [d])
+  // The lineup stands on the club's own park, as it stood on the page's day (`?d=`) or today.
+  // A venue with no layout on file falls back to the plain diamond.
+  const venueId = team.venue?.id
+  const venueName = team.venue?.name
+  const park = useMemo(
+    () => (venueId || venueName ? resolveBallparkLayout({ venueId, venueName, gameDate: asOf ?? undefined }) : null),
+    [venueId, venueName, asOf],
+  )
   let delay = 0
   const card = () => ({ stampIn: true, style: { '--stamp-delay': `${(delay += 55)}ms` } })
 
@@ -105,7 +114,12 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
             <Stack gap="section">
               {toggle}
               <Grid min="20rem" gap="loose" fit className="rosterbox-pair">
-                {lineup.length > 0 && <div className="rosterbox-pair__diamond"><DefenseDiamond defense={lineup} /></div>}
+                {lineup.length > 0 && (
+                  <div className="rosterbox-pair__diamond">
+                    <DefenseDiamond defense={lineup} layout={park} label={`${venueName ?? 'Ballpark'} with the lineup`} />
+                    {park?.accuracyNote && <p className="rosterbox-pair__note">{park.accuracyNote}</p>}
+                  </div>
+                )}
                 <RosterBox
                   label="Lineup and top substitutes"
                   lead="Pos"

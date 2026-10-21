@@ -110,6 +110,19 @@
 .rosterbox-pair__diamond {
   align-self: center;
 }
+/* The park's accuracy note sits in the drawing's bottom-left corner, where the diamond's crop
+   puts the catcher. Here it moves under the drawing as a caption, with the same words. */
+.rosterbox-pair__diamond .bpdiagram__note {
+  display: none;
+}
+.rosterbox-pair__note {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
 /* The pen week's strip keeps its three figures on one row, even on a phone: a third cell
    wrapped alone and left an empty fill beside it. */
 /* layout-exempt: three fixed figures, the strip's own auto-fit would wrap one */
