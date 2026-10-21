@@ -13,11 +13,6 @@
   border-radius: 0;
 }
 
-/* A flush card keeps its first row clear of the name tab that hangs over its edge. */
-.stnd__card {
-  padding-top: var(--space-3);
-}
-
 /* THE WRAPPED CARDS: the module's own frame and head go; the stamped card names it. A module that
    drew nothing (Records with an incomplete ledger, Last Time on a quiet day) leaves no empty card. */
 .stnd__wrap > .tstats {

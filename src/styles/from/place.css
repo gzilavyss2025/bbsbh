@@ -99,14 +99,12 @@
   min-width: 0;
 }
 
-/* A card's table runs to the card's edge; the name is a link, the rest is mono figures. The
-   header row starts below the card's name tab and count tag, which hang over its top edge. */
+/* A card's table runs to the card's edge; the name is a link, the rest is mono figures. */
 .fromdec__table {
   width: 100%;
 }
 
 .fromdec__table thead th {
-  padding-top: var(--space-4);
   text-align: right;
 }
 

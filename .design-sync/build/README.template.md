@@ -15,7 +15,7 @@ Every value here is copied from the repo (`src/tokens/*.css`, `src/styles/system
 
 | Part | Classes |
 | --- | --- |
-| Stamped card | `card card--stamped` + `card--named` (name tab) + `card--tint` or `card--ink` + `card--stamp-in`; inside: `card__name` (an `h2`, the card heading), `card__count`, `card__body` |
+| Stamped card | `card card--stamped` + `card--named` (name tab) + `card--flush` (a named card with no `card__body`: it clears the tab) + `card--tint` or `card--ink` + `card--stamp-in`; inside: `card__name` (an `h2`, the card heading), `card__count`, `card__body` |
 | Stat tile | `card card--stamped stattile` + tone; inside: `stattile__label`, `stattile__value`, `stattile__caption`, `rankmark`. Add `stattile--compact` for a tile about 40% smaller (it is in the app too): value 28px on a phone and 32px from 740px, label 12px (unchanged) |
 | Fact strip | `dl.factgrid.factgrid--strip` of `div.fact` with `dt.fact__label` and `dd.fact__value`, flush inside a stamped card |
 | Jump bar | `nav.jumpbar` > `div.cluster.cluster--snug.jumpbar__row` > `button.jumpbar__item` (+ `is-current`) with `span.jumpbar__count` |
