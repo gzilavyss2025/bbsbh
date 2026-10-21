@@ -118,7 +118,7 @@ w('Headings', 'SectionHead', page('Headings', 'Section Head',
 // ---- Table
 w('Data', 'Table', page('Data', 'Table',
 ``,
-`<section class="card card--stamped card--named" style="padding-top: var(--space-4)" aria-labelledby="t1">
+`<section class="card card--stamped card--named card--flush" aria-labelledby="t1">
   <h2 id="t1" class="card__name">Record</h2>
   <div class="table table--bare table--row table--sticky" role="region" tabindex="0" aria-label="Brewers record splits">
     <table class="table__grid">
@@ -153,7 +153,7 @@ w('Report', 'StatBandAndStrip', page('Report', 'Stat Band And Strip',
 
 w('Report', 'LeaderList', page('Report', 'Leader List',
 `  .pv-list { max-width: 440px; }`,
-`<section class="card card--stamped card--named pv-list" aria-labelledby="l1">
+`<section class="card card--stamped card--named card--flush pv-list" aria-labelledby="l1">
   <h3 id="l1" class="card__name">Payroll leaders</h3>
   <span class="card__count">30 clubs</span>
   <ol class="leaders">

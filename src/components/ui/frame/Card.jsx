@@ -55,11 +55,11 @@ export function Card({
 }) {
   const labelId = useId()
   const named = label != null && label !== false
-  const cls = cardClassName({ frame, as: Tag, accent, tone, named, flush: body === 'flush', stampIn, className })
+  const bodyClass = cardBodyClassName(body)
+  const cls = cardClassName({ frame, as: Tag, accent, tone, named, flush: !bodyClass, stampIn, className })
   cardHead(Tag, head)
   if (named && head != null && head !== false) throw new Error('Card: a name tab and a head are two titles; pass one')
   if (count != null && frame !== 'stamped') throw new Error('Card: a count tag is for frame="stamped"')
-  const bodyClass = cardBodyClassName(body)
   const accentStyle = cardAccentStyle(accent)
   const BodyTag = isInteractive(Tag) ? 'span' : 'div'
   return (

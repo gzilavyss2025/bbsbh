@@ -91,7 +91,7 @@ export function StampedParts() {
         ))}
       </Grid>
 
-      <Card frame="stamped" body="flush" label="Firsts" count={`${FIRSTS.length} firsts`} labelAs="h4" stampIn className="stamplab__named">
+      <Card frame="stamped" body="flush" label="Firsts" count={`${FIRSTS.length} firsts`} labelAs="h4" stampIn>
         <ul className="stamplab__rows">
           {FIRSTS.map(([label, date]) => (
             <li key={label} className="stamplab__row">
@@ -102,7 +102,7 @@ export function StampedParts() {
         </ul>
       </Card>
 
-      <Card frame="stamped" label="Name tab only" labelAs="h4" stampIn className="stamplab__named">
+      <Card frame="stamped" label="Name tab only" labelAs="h4" stampIn>
         <p className="stamplab__copy">
           A stamped card with a padded body. The name tab is the card&rsquo;s heading, so a screen reader names the
           card by it.
