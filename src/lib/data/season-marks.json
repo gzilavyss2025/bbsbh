@@ -409,6 +409,33 @@
         "accent": "#FED141",
         "onBar": "#FFFFFF"
       }
+    ],
+    "431": [
+      {
+        "from": 2009,
+        "to": 2017,
+        "name": "Gwinnett Braves",
+        "abbr": "GWN",
+        "file": null
+      }
+    ],
+    "538": [
+      {
+        "from": 1997,
+        "to": 2015,
+        "name": "New Britain Rock Cats",
+        "abbr": "NBR",
+        "file": null
+      }
+    ],
+    "559": [
+      {
+        "from": 1985,
+        "to": 2014,
+        "name": "Huntsville Stars",
+        "abbr": "HVL",
+        "file": null
+      }
     ]
   }
 }
