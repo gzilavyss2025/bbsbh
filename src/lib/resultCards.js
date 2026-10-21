@@ -256,3 +256,12 @@ export function reorderNationalBroadcasts(games, nationalByGamePk, isPinned = ()
   const others = scheduled.filter((g) => !nationalByGamePk[g.gamePk])
   return [...games.slice(0, from), ...national, ...others, ...games.slice(end)]
 }
+
+// Splits the World Series game off the slate so the page can open with its
+// card, above the hero. `gamePk` comes from the bracket (`worldSeries.cutoffGame`),
+// never from a score, so this reads nothing sealed. A pk that is not on this
+// slate (another level, another day) leaves `lead` null and `rest` the input.
+export function splitSeriesGame(games, gamePk) {
+  const lead = gamePk ? games.find((g) => g.gamePk === gamePk) ?? null : null
+  return { lead, rest: lead ? games.filter((g) => g !== lead) : games }
+}

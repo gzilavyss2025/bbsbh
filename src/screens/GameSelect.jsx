@@ -49,6 +49,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import {
   reorderLiveGames,
   reorderNationalBroadcasts,
+  splitSeriesGame,
   stackDoubleHeaders,
   stackSuspendedContinuation,
 } from '../lib/resultCards.js'
@@ -142,7 +143,9 @@ export function GameSelect({
   const inPostseasonWindow =
     sportId === SPORT_IDS.MLB && bracketSeason >= 2022 && isPostseasonWindow(dateStr, bracketSeasonMeta.data)
   const postseasonBracket = usePostseasonBracket(inPostseasonWindow ? dateStr : null)
-  const wsMode = Boolean(worldSeriesMode(postseasonBracket.bracket)) // the World Series hero replaces the fold and primer (#1906)
+  const wsModeInfo = worldSeriesMode(postseasonBracket.bracket)
+  const wsMode = Boolean(wsModeInfo) // the World Series hero replaces the fold and primer (#1906)
+  const seriesGamePk = wsModeInfo?.dayType === 'game' ? wsModeInfo.series.cutoffGame?.gamePk ?? null : null
   // The bracket stands in for the off-day banner and the empty-slate line
   // only when it can draw. A failed read falls back to the plain slate, never
   // to a blank page.
@@ -465,6 +468,12 @@ export function GameSelect({
     const liveFirst = reorderLiveGames(sorted, pinned)
     return reorderNationalBroadcasts(liveFirst, nationalBroadcasts, pinned)
   }, [sorted, nationalBroadcasts, favoriteTeamId, favoriteAffiliateIds])
+  // On a World Series day the Series game's card leaves the list and opens the
+  // page, above the hero (the bracket names it; MLB only, MiLB never holds it).
+  const { lead: seriesGame, rest: listGames } = splitSeriesGame(
+    gamesForDisplay,
+    sportId === SPORT_IDS.MLB ? seriesGamePk : null,
+  )
 
   // "N prospects on this roster" badge — MiLB games only (the slate's level
   // toggle is single-select, so gating this fetch on sportId covers every
@@ -490,6 +499,38 @@ export function GameSelect({
     const ids = new Set((prospects.data?.players ?? []).map((p) => p.playerId))
     return countProspectsByTeam(rosterIds.data ?? {}, ids)
   }, [rosterIds.data, prospects.data])
+
+  const renderCard = (g, idx) => {
+    const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
+      ? favoriteTeamId
+      : null
+    const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
+    // The first cards' marks are the slate's largest above-the-fold
+    // images — its LCP candidate — so they skip TeamLogo's default
+    // lazy loading (which would defer exactly the images the first
+    // paint is waiting on). Two cards ≈ one phone viewport.
+    const eager = idx < 2
+    const isPastFinal = showPastDayTreatment && selectHasResult(g)
+    // A past Final and a Suspended game (a paused checkpoint) both offer the box score.
+    const isSuspended = selectGameStatus(g).isSuspended
+    const postseasonLine = postseasonBracket.bracket ? cardLines(g, postseasonBracket.bracket) : null
+    return (
+      <li key={`${g.sportId}-${g.gamePk}`}>
+        <GameCard
+          game={g}
+          pinnedTeamId={pinnedTeamId}
+          prospectCount={pCount}
+          liveJerseys={liveJerseys.data}
+          national={nationalBroadcasts[g.gamePk]}
+          eager={eager}
+          postseasonLine={postseasonLine}
+          stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
+          onSelect={() => onPick(g, dateStr)}
+          onBoxScore={isPastFinal || isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
+        />
+      </li>
+    )
+  }
 
   return (
     <div
@@ -591,6 +632,12 @@ export function GameSelect({
             }
           />
 
+          {seriesGame && (
+            <ul className="gamelist" aria-label="World Series game">
+              {renderCard(seriesGame, 0)}
+            </ul>
+          )}
+
           {inPostseasonWindow && <WorldSeriesHome bracket={postseasonBracket.bracket} slateDate={dateStr} wide={wide} />}
 
           {/* The postseason bracket (#1224, slice 5) — above the cards, every
@@ -638,37 +685,7 @@ export function GameSelect({
                   <DerbyCard />
                 </li>
               )}
-              {gamesForDisplay.map((g, idx) => {
-                const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
-                  ? favoriteTeamId
-                  : null
-                const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
-                // The first cards' marks are the slate's largest above-the-fold
-                // images — its LCP candidate — so they skip TeamLogo's default
-                // lazy loading (which would defer exactly the images the first
-                // paint is waiting on). Two cards ≈ one phone viewport.
-                const eager = idx < 2
-                const isPastFinal = showPastDayTreatment && selectHasResult(g)
-                // A past Final and a Suspended game (a paused checkpoint) both offer the box score.
-                const isSuspended = selectGameStatus(g).isSuspended
-                const postseasonLine = postseasonBracket.bracket ? cardLines(g, postseasonBracket.bracket) : null
-                return (
-                  <li key={`${g.sportId}-${g.gamePk}`}>
-                    <GameCard
-                      game={g}
-                      pinnedTeamId={pinnedTeamId}
-                      prospectCount={pCount}
-                      liveJerseys={liveJerseys.data}
-                      national={nationalBroadcasts[g.gamePk]}
-                      eager={eager}
-                      postseasonLine={postseasonLine}
-                      stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
-                      onSelect={() => onPick(g, dateStr)}
-                      onBoxScore={isPastFinal || isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
-                    />
-                  </li>
-                )
-              })}
+              {listGames.map(renderCard)}
             </ul>
 
             {/* Any idle club, the whole-league All-Star case included. In the
