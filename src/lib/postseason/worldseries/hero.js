@@ -6,6 +6,7 @@
 //                 which end the day before the slate date).
 //   playerClip    that hitter's newest play clip, from past games' /content items.
 import { classifyHighlight, isEligibleForPositiveFilter } from '../../../api/highlights.js'
+import { gamePath } from '../../route.js'
 
 // 'Fri' and 23 from '2026-10-23'. Noon UTC keeps the date on its own day in every zone.
 const at = (date) => new Date(`${date}T12:00:00Z`)
@@ -43,6 +44,13 @@ export function withFormatDates(games, upcoming, slateDate = '') {
       dateOf.set(g.gameNumber, date)
       return { ...g, date, projected: true }
     })
+}
+
+// The path to a section of the focus game. A game is filed under its OWN date, which is not the
+// slate date on an off day (Game 1's preview opened on today's slate found no game).
+export function nextGamePath(game, slateDate, abbr, section) {
+  if (!game?.awayId) return null
+  return gamePath(game.date || slateDate, abbr[game.awayId], abbr[game.homeId], section)
 }
 
 // The next game: the first future game that is not "if needed".

@@ -7,9 +7,9 @@ import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
-import { calendarDays, clipSources, playerClip, slabPlayer, withFormatDates } from '../../lib/postseason/worldseries/hero.js'
+import { calendarDays, clipSources, nextGamePath, playerClip, slabPlayer, withFormatDates } from '../../lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
-import { gamePath, logbookNewPath, umpirePath } from '../../lib/route.js'
+import { logbookNewPath, umpirePath } from '../../lib/route.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { Pips } from '../bracket/bracketParts.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
@@ -161,7 +161,7 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
   })
   const days = calendarDays(columns, slateDate)
   const nextDay = days.find((d) => (gameDay ? d.today && d.kind === 'game' : d.gameNumber === gameNumber))
-  const path = (section) => (game?.awayId ? gamePath(slateDate, abbr[game.awayId], abbr[game.homeId], section) : null)
+  const path = (section) => nextGamePath(game, slateDate, abbr, section)
   // A game day's door needs no game number (a resumed game can lack one); a preview names its game.
   const nextPath = gameDay ? path('lineup1') : gameNumber ? path('preview') : null
   const nextName = gameDay ? (gameNumber ? `Game ${gameNumber} lineups` : 'Lineups') : `Game ${gameNumber} preview`

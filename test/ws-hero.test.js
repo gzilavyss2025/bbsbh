@@ -2,7 +2,7 @@
 // each club's slab, and the clip behind a slab's play button.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { calendarDays, clipSources, playerClip, slabPlayer, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
+import { calendarDays, clipSources, nextGamePath, playerClip, slabPlayer, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../src/lib/postseason/worldseries/ledger.js'
 
 // The 2026 Series as the bracket gives it before Game 1: seven dated games, three if needed.
@@ -179,4 +179,16 @@ test('a clip that is not a play highlight, or no clip at all, gives no button', 
   assert.equal(playerClip(games, 650490), null)
   assert.equal(playerClip([], 650490), null)
   assert.equal(playerClip(games, null), null)
+})
+
+test('the next-game door is dated by the game, not by the slate date', () => {
+  const abbr = { 139: 'TB', 158: 'MIL' }
+  const game = { awayId: 139, homeId: 158, date: '2026-10-23' }
+  // An off day: Game 1 is days away, so the preview lives on Game 1's own date.
+  assert.equal(nextGamePath(game, '2026-10-21', abbr, 'preview'), '/10232026/tbmil/preview')
+  // A game day: the game's date is the slate date.
+  assert.equal(nextGamePath({ ...game, date: '2026-10-21' }, '2026-10-21', abbr, 'lineup1'), '/10212026/tbmil/lineup1')
+  // A row with no date falls back to the slate date; no game, no path.
+  assert.equal(nextGamePath({ awayId: 139, homeId: 158 }, '2026-10-21', abbr, 'preview'), '/10212026/tbmil/preview')
+  assert.equal(nextGamePath(null, '2026-10-21', abbr, 'preview'), null)
 })
