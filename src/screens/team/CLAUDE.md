@@ -37,6 +37,7 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
 - **Ranks** (`next/ranks/`): batting and pitching ranks, leaders, run value and the ABS challenge
   card, on `loadRanks`. The challenge card (`ChallengeBoard.jsx`, parts in `ranks/challenges/`) draws a face a player on a plot and a scrolling list; its model is `api/around-the-game/absClubCard.js`, and a face or photo opens the global hover card with the card's own figures (`playerHoverStore`'s `detail`). Absent for a club with no league id. The run value card (`RunValueBoard.jsx`, parts in `ranks/runvalue/`) re-ranks its top six by a part on a tap; spec `.scratch/run-value-motion/handoff.md`. A card that needs MLB data draws
   nothing for a club below it.
+  A Regular / Postseason switch sits over the leaders once the club has a postseason game with a result (`loadPostseasonLeaders`, #1437; the stats read is `gameType=P`, only after that gate). The rank cells stay regular season.
 - **Games** (`next/games/`): the **season grid** (`SeasonGrid.jsx`, model `seasonGrid.js`, ADR-0119),
   then Highlights and Photos. One stamped card of weeks, a week to a row. A decided game links to
   its box score, one to play to its lineup. The gold Postseason band exists only when a game has

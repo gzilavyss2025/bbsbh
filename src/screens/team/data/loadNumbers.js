@@ -156,6 +156,19 @@ export async function loadStandings(id, asOf, src = DIRECT) {
   }
 }
 
+// The club's postseason leaders pool (#1437), or null until the club has a postseason game with
+// a result (`won` is null past ?d=, so the cutoff holds). Reuses the schedule the page already
+// bought; the stats reads go out only after that gate, never in July.
+export async function loadPostseasonLeaders(id, asOf, src = DIRECT) {
+  const scope = await numbersScope(id, asOf)
+  if (!scope) return null
+  const { sportId, season, standingsDate } = scope
+  const schedule = await src.fetchTeamSchedule(id, season, sportId, standingsDate)
+  if (!schedule.some((g) => g.gameType !== 'R' && g.won != null)) return null
+  const fetchStats = (teamId, group, yr) => src.fetchTeamSeasonStats(teamId, group, yr, 'P')
+  return { pool: await loadCombinedPoolForTeams([{ id }], season, { withHand: true, fetchStats }) }
+}
+
 export async function loadRanks(id, asOf, src = DIRECT) {
   const scope = await numbersScope(id, asOf)
   if (!scope) return null

@@ -1,14 +1,17 @@
+import { useState } from 'react'
 import { LEDGER_HITTING, LEDGER_PITCHING } from '../../../../api/teamLeaders.js'
 import { AsyncStatus } from '../../../../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../../../../components/teamstats/TeamLeaders.jsx'
 import { Door } from '../../../../components/ui/control/Door.jsx'
+import { Segmented } from '../../../../components/ui/control/Segmented.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { StatTile } from '../../../../components/ui/frame/StatTile.jsx'
+import { useAsync } from '../../../../hooks/useAsync.js'
 import { useViewOnce } from '../../../../hooks/motion/useViewOnce.js'
 import { useNav } from '../../../../lib/nav.js'
 import { orgLeadersPath, teamLeadersPath } from '../../../../lib/route.js'
 import { teamClubName } from '../../../../lib/teams.js'
-import { loadRanks } from '../../data/loadNumbers.js'
+import { loadRanks, loadPostseasonLeaders } from '../../data/loadNumbers.js'
 import { parentOrgIdOf } from '../../data/shared.js'
 import { SHARED } from '../once.js'
 import { useBandData } from '../useBandData.js'
@@ -54,6 +57,13 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
   const numbers = useBandData(() => loadRanks(team.id, asOf, SHARED), [team.id, asOf], { onReady, onCount, count })
   const n = numbers.data
 
+  // Regular / Postseason leaders (#1437). The switch exists once the club has a postseason game
+  // with a result; regular season stays the default and its figures are the pool above.
+  const post = useAsync(() => loadPostseasonLeaders(team.id, asOf, SHARED), [team.id, asOf]).data
+  const [scope, setScope] = useState('R')
+  const showPost = scope === 'P' && post
+  const pool = showPost ? post.pool : n?.leaderPool
+
   // Motion plays once per page visit; a return shows the band at rest.
   const still = useViewOnce(team.id, 'team-ranks')
 
@@ -73,10 +83,19 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
       {n && (
         <ChallengeBoard data={n.absExposureClubs} teamId={team.id} level={n.absExposureLevel} still={still} />
       )}
+      {hasLeaders && post && (
+        <Segmented
+          label="Leaders scope"
+          value={scope}
+          onChange={setScope}
+          options={[{ value: 'R', label: 'Regular season' }, { value: 'P', label: 'Postseason' }]}
+        />
+      )}
+      {showPost && !pool.length && <p className="rnk__empty">No postseason games yet.</p>}
       {hasLeaders && (
         <>
-          <TeamLeaders pool={n.leaderPool} categories={LEDGER_HITTING} limit={5} title="Batting leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
-          <TeamLeaders pool={n.leaderPool} categories={LEDGER_PITCHING} limit={5} title="Pitching leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
+          <TeamLeaders pool={pool} categories={LEDGER_HITTING} limit={5} title="Batting leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
+          <TeamLeaders pool={pool} categories={LEDGER_PITCHING} limit={5} title="Pitching leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
         </>
       )}
       {hasLeaders && (
