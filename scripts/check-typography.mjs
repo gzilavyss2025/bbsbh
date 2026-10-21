@@ -121,7 +121,7 @@ const SPACING_RESIDUE = {
   // design (#1344), where the extra pixel balances the mono figure's descent
   // against the 3px colour bar at the top. No token carries 7px.
   'pitcher-card/card.css': { 7: 1 },
-  'report/charts.css': { 36: 3 },
+  'report/charts.css': { 36: 2 },
   'scorecard/footer.css': { 72: 1 },
 }
 
@@ -134,7 +134,7 @@ const SPACING_RESIDUE = {
 // that says the nudge stopped being a correction and became the house spacing.
 // It only moves down: if the count falls a full band below, tighten it, so this
 // number can never become a record of a codebase that no longer exists.
-const NUDGE_CEILING = 325
+const NUDGE_CEILING = 300
 const NUDGE_BAND = 25
 
 // A live copy of the ledger, drawn down as each listed literal is found.

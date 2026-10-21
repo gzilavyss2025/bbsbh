@@ -554,7 +554,6 @@ test('the team hub keeps its space between cards, from the hub and not from Card
 const C1 = [
   { css: 'leaders/board.css', sel: '.tlead__cat', jsx: 'components/teamstats/TeamLeaders.jsx', ns: 'tlead__cat', card: 'LeaderList' },
   { css: '28-team-hub.css', sel: '.jerseydeck__card', jsx: 'components/logo/JerseyCombos.jsx', ns: 'jerseydeck__card', keep: ['background'] },
-  { css: '28-team-hub.css', sel: '.team-score', jsx: 'components/teamstats/TeamScoreCard.jsx', ns: 'team-score' },
   { css: '29-team-transactions.css', sel: '.txstory', jsx: 'components/transactions/TxStory.jsx', ns: 'txstory' },
   { css: '31-wild-card.css', sel: '.tstats', jsx: 'screens/team/modules/TeamStatsCard.jsx', ns: 'tstats' },
   { css: '31-wild-card.css', sel: '.thub-affiliate', jsx: 'screens/team/modules/minors/AffiliatesCard.jsx', ns: 'thub-affiliate' },
@@ -2243,7 +2242,6 @@ const H3_RENAMED = [
   ['umptend__sub', 'umptend__note'],
   ['boxlines__kicker', 'boxlines__note'],
   ['scorebookstory__kicker', 'scorebookstory__note'],
-  ['tscoremodal__kicker', 'tscoremodal__note'],
   ['bcast__eyebrow', 'bcast__note'],
   ['guidelink__eyebrow', 'guidelink__note'],
   ['hitchart__eyebrow', 'hitchart__note'],
@@ -2264,8 +2262,6 @@ const H3_RENAMED = [
   ['dlab__note', 'dlabentry__note'],
   // batch B, step two: the page-level lede takes the freed name
   ['dlab__lede', 'dlab__note'],
-  // after #1339: a section title inside a modal body, not the head's second line
-  ['tscoremodal__subkicker', 'tscoremodal__sectiontitle'],
   // #1132 slice T2: not second lines. Both were held as "subtotal" names; `bs__sub` is a
   // SUBSTITUTE batter's row and `ledger__sub` the ledger's second label column.
   ['bs__sub', 'bs__row--substitute'],

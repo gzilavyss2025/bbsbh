@@ -128,14 +128,6 @@
   background: var(--surface-card);
   color: var(--text-heading);
 }
-.team-hub.is-themed .team-score__howlink,
-.team-hub.is-themed .team-score__howsep {
-  color: var(--bar-text, var(--text-caption));
-  opacity: 0.85;
-}
-.team-hub.is-themed .team-score__howlink {
-  border-bottom-color: color-mix(in srgb, var(--bar-text, var(--text-caption)) 40%, transparent);
-}
 
 /* The fact card is a Card (sheet, flush body; #1113, slice C2), and this rule
    keeps only its margin. The rules between the facts are the gap-rule trick:

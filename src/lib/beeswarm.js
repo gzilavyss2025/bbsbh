@@ -15,8 +15,7 @@
 // small cluster only nudges slightly off-center and a big one fans out
 // symmetrically rather than stacking one-sided.
 //
-// Shared by TeamScoreCard's league-distribution rail and GameScoreCard's
-// season-distribution rail — any future rail plotting a scored pool should
+// Used by GameScoreCard's season-distribution rail — any future rail plotting a scored pool should
 // reuse this rather than reinventing the packing.
 const MIN_GAP_PCT = 1.6
 const ROW_STEP_PX = 5

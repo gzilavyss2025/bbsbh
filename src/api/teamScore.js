@@ -36,21 +36,9 @@ export function leagueSeasonGradesFor(teamData, surpriseData, season, cutoff) {
   return rows
 }
 
-// Where a team's own score sits among the league rows above (1 = best).
-// Null if the team isn't in the pool (e.g. too few games played yet). Ties
-// share a rank (competition ranking) — the convention everywhere except
-// Season Grade and Current Form, which use leagueRankNoTies below instead.
-export function leagueRank(rows, teamId) {
-  const mine = rows.find((r) => r.teamId === teamId)
-  if (!mine) return null
-  return { rank: 1 + rows.filter((r) => r.score > mine.score).length, of: rows.length }
-}
-
 // A strict, gapless 1..N ranking with a deterministic tiebreaker chain, for
-// the two metrics (Season Grade, Current Form) that show a rank pill AND a
-// strip of rank-numbered team chips — a shared score (both are rounded to
-// one decimal, so ties are common) would otherwise print two teams at the
-// same rank in both places. Falls through the rounded score to each row's
+// Season Grade, where a shared score (rounded to one decimal, so ties are
+// common) would otherwise print two teams at the same rank. Falls through the rounded score to each row's
 // `tiebreak` array (a finer-grained underlying signal that rounded to the
 // same score, e.g. weightedWinsAbove500) and finally to teamId, so it always
 // resolves to a total order — no two teams can tie all the way down.
@@ -65,16 +53,8 @@ function compareRowsNoTies(a, b) {
   return a.teamId - b.teamId
 }
 
-export function leagueRankNoTies(rows, teamId) {
-  const mine = rows.find((r) => r.teamId === teamId)
-  if (!mine) return null
-  return { rank: 1 + rows.filter((r) => compareRowsNoTies(r, mine) < 0).length, of: rows.length }
-}
-
 // Best-to-worst rows with a strict, gapless rank attached (see
-// leagueRankNoTies) — what the rank-chip strip iterates to print each team's
-// number, so a chip's number can never disagree with the "Nth of 30" pill
-// computed above for the same pool.
+// compareRowsNoTies).
 export function rankedNoTies(rows) {
   return [...rows].sort(compareRowsNoTies).map((r, i) => ({ ...r, rank: i + 1 }))
 }
