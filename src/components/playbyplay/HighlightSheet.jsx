@@ -99,8 +99,8 @@ export function HighlightSheet({ item, src = null, notice = '', title: fallbackT
                   simply gets no save button. */}
               {mp4 && <SaveClipButton url={mp4} title={label} filename={filename} />}
               <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
-            ✕
-          </IconButton>
+                ✕
+              </IconButton>
             </div>
           </div>
 

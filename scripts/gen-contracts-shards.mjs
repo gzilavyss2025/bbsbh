@@ -27,7 +27,7 @@
 //     neither field. Bare terms would leave an appended row with no season,
 //     unable to take part in the reader's season-sorted list at all.
 //
-// WHY the terms live in the CSVs and only in the CSVs: identity/*.json is a
+// WHY the terms live in the CSVs and only in the CSVs: the crosswalk files are a
 // crosswalk, deliberately carrying no money at all. This script is the only
 // place the two halves meet.
 //
@@ -231,7 +231,7 @@ async function main() {
   }
   if (orphans.length > 0) {
     console.log(`  WARNING: ${orphans.length} CSV rows have no crosswalk entry (e.g. ${orphans.slice(0, 3).join(', ')})`)
-    console.log('  -- the CSVs and identity/*.json disagree on row count; re-run gen-contracts-identity.mjs')
+    console.log('  -- the CSVs and the crosswalk files disagree on row count; re-run gen-contracts-identity.mjs')
   }
 
   console.log(

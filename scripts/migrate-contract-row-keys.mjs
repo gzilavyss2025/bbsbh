@@ -124,7 +124,7 @@ async function loadSources() {
     // reader can join.
     const crosswalk = await readJsonOr(join(CROSSWALK_DIR, `${source}.json`), null)
     if (!crosswalk) {
-      throw new Error(`Missing identity/${source}.json -- run scripts/gen-contracts-identity.mjs first`)
+      throw new Error(`Missing ${CROSSWALK_DIR}/${source}.json -- run scripts/gen-contracts-identity.mjs first`)
     }
     sources[source] = {
       rows,

@@ -729,9 +729,6 @@
   padding: 2px var(--space-1);
 }
 
-/* Tapping anywhere on the sheet already dismisses it (BallFlight.jsx); this is
-   the affordance for a pointer that expects a corner control, and the real
-   focus target a keyboard needs. */
 .bflight .bflight__field {
   display: block;
   width: 100%;

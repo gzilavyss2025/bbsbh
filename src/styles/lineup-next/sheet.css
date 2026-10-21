@@ -29,11 +29,11 @@
   letter-spacing: var(--ls-xwide);
   text-transform: uppercase;
 }
-.lsheet__close {
+.lsheet__bar .lsheet__close {
   --btn-ink: currentColor;
   --btn-fill-hover: transparent;
 }
-.lsheet__close:focus-visible {
+.lsheet__bar .lsheet__close:focus-visible {
   outline-color: var(--focus-ring-band);
 }
 .lsheet__body {

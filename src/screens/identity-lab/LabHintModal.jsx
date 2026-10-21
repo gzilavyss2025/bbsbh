@@ -19,8 +19,8 @@ export function LabHintModal({ title, hint, onClose }) {
         <div className="idlabhint__head">
           <span className="idlabhint__title">{title}</span>
           <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
-              ✕
-            </IconButton>
+            ✕
+          </IconButton>
         </div>
         <p className="idlabhint__body">{hint}</p>
       </div>

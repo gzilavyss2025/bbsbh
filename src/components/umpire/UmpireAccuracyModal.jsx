@@ -86,8 +86,8 @@ export function UmpireAccuracyModal({ id, seasonYear, onClose }) {
             )}
           </div>
           <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
-              ✕
-            </IconButton>
+            ✕
+          </IconButton>
         </div>
 
         {data && !season && (
