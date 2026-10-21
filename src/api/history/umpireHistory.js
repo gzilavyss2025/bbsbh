@@ -20,6 +20,11 @@ const entryOf = async (umpireId) => {
   return { shard, entry: shard?.umpires?.[umpireId] ?? null }
 }
 
+// -> the umpire's name, or null when the history holds no such umpire.
+export async function historyName(umpireId) {
+  return (await entryOf(umpireId)).entry?.name ?? null
+}
+
 // -> [{ season, games, byRole: { HP, 1B, 2B, 3B, LF, RF } }], oldest first; [] when missing.
 export async function careerSeasons(umpireId) {
   const { entry } = await entryOf(umpireId)

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { loadUmpire } from '../api/umpires.js'
+import { loadUmpire, umpireName } from '../api/umpires.js'
+import { useAsync } from '../hooks/useAsync.js'
 import { PostseasonPlateLine } from '../components/umpire/PostseasonPlateLine.jsx'
 import { UmpireTendencies } from '../components/umpire/UmpireTendencies.jsx'
 import { gamePath, umpirePath } from '../lib/route.js'
@@ -119,20 +120,28 @@ export function UmpirePage({ id, seasonYear, vs }) {
   const [hpOnly, setHpOnly] = useState(false)
   const [showAllVenues, setShowAllVenues] = useState(false)
   const [showAllRecords, setShowAllRecords] = useState(false)
-  useDocumentTitle(data?.name || null)
+  // A season he did not work: keep the picker, so the reader can pick another.
+  // That includes a bare /umpire/{id} for a man with no current-season games:
+  // his backfilled seasons are one tap away (#1202).
+  const noGames = !loading && !error && !data && (seasonYear != null || view.seasons?.length > 1)
+  // `data` is null on that view, so his name comes from the history store or his newest shard (#2441).
+  const { data: emptyName } = useAsync(async () => (noGames ? umpireName(id) : null), [noGames, id])
+  useDocumentTitle(data?.name || emptyName || null)
 
   const back = () => window.history.back()
   const pathFor = (season) => umpirePath(id, data?.name, season)
   const picker = <SeasonPicker view={view} pathFor={pathFor} />
-  // A season he did not work: keep the picker, so the reader can pick another.
-  // That includes a bare /umpire/{id} for a man with no current-season games:
-  // his backfilled seasons are one tap away (#1202).
-  if (!loading && !error && !data && (seasonYear != null || view.seasons?.length > 1)) {
+  if (noGames) {
     return (
       <div className="screen umpire">
         <SiteHeader />
         <BackBtn onClick={back} />
         {picker}
+        {emptyName && (
+          <header className="topbar">
+            <h1 className="topbar__title">{emptyName}</h1>
+          </header>
+        )}
         <EmptyState>No games on file for this umpire in {view.label}.</EmptyState>
         {/* Career figures do not follow the season view. */}
         <UmpireCareer id={id} />

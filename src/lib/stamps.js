@@ -521,3 +521,27 @@ export function stampsToPublish(local, remote) {
   }
   return out.sort((a, b) => a - b)
 }
+
+// The `?export=1` reply as a local-shaped `{ gamePk: entry }` map, or null when
+// the reply is an error or malformed. null means "the server said nothing":
+// callers must not merge, adopt or publish against it, or an outage would read
+// as "the server has no stamps" (#2445). Drops the `game` facts blob.
+export function remoteStampsFromExport(data) {
+  if (!Array.isArray(data?.stamps)) return null
+  const remote = {}
+  for (const entry of data.stamps) {
+    if (entry?.gamePk == null) continue
+    remote[entry.gamePk] = {
+      // A pre-fix deploy sends no `state`; every row it sends is live.
+      state: entry.state === 'off' ? 'off' : 'on',
+      mode: entry.mode,
+      stampedAt: entry.stampedAt,
+      updatedAt: entry.updatedAt,
+      note: entry.note,
+      date: entry.date,
+      // Built field by field: a placement left off would empty the book on sign-in.
+      placement: entry.placement ?? null,
+    }
+  }
+  return remote
+}

@@ -1,7 +1,8 @@
 // The innings card's pure view (src/screens/player/next/modules/innings/inningsView.js).
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { batterView, pitcherView, ringSize, scopeOptions, spotAt } from '../src/screens/player/next/modules/innings/inningsView.js'
+import { batterView, innWindow, pitcherView, ringSize, scopeOptions, spotAt } from '../src/screens/player/next/modules/innings/inningsView.js'
+import { resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.js'
 
 // Brice Turang, 2026 season, MLB Stats API (the board's sample).
 const turang = { positions: [{ pos: '2B', innings: '1311.2' }, { pos: 'SS', innings: '12.0' }], dh: null }
@@ -51,8 +52,10 @@ test('scopes: Season always; MLB career after a debut; MiLB career for a player 
 })
 
 test('a ring stands at its position in the park\'s own feet, cropped like the board; no park uses the shared field\'s spots', () => {
-  const park = { name: 'Any Park' }
-  assert.deepEqual(spotAt('CF', park), { x: 50, y: ((235 - 74) / 490) * 100 })
-  assert.deepEqual(spotAt('C', park), { x: 50, y: ((527 - 74) / 490) * 100 })
+  // The board's window is this park's own (innWindow): x 30 to 590, the sky trimmed to its signs.
+  const win = innWindow(resolveBallparkLayout({ venueId: 32, gameDate: '2026-07-01' }))
+  const [, top, , h] = win.viewBox.split(' ').map(Number)
+  assert.deepEqual(spotAt('CF', win), { x: 50, y: ((235 - top) / h) * 100 })
+  assert.deepEqual(spotAt('C', win), { x: 50, y: ((527 - top) / h) * 100 })
   assert.deepEqual(spotAt('CF', null), { x: 50, y: 12 })
 })
