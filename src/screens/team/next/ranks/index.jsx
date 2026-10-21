@@ -59,10 +59,13 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
 
   // Regular / Postseason leaders (#1437). The switch exists once the club has a postseason game
   // with a result; regular season stays the default and its figures are the pool above.
-  const post = useAsync(() => loadPostseasonLeaders(team.id, asOf, SHARED), [team.id, asOf]).data
+  // useAsync keeps the last result while a rerun loads, so a result from another club is ignored.
+  const loaded = useAsync(() => loadPostseasonLeaders(team.id, asOf, SHARED), [team.id, asOf]).data
+  const post = loaded?.teamId === team.id ? loaded : null
   const [scope, setScope] = useState('R')
   const showPost = scope === 'P' && post
   const pool = showPost ? post.pool : n?.leaderPool
+  const emptyPost = showPost && !pool.length
 
   // Motion plays once per page visit; a return shows the band at rest.
   const still = useViewOnce(team.id, 'team-ranks')
@@ -91,8 +94,8 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
           options={[{ value: 'R', label: 'Regular season' }, { value: 'P', label: 'Postseason' }]}
         />
       )}
-      {showPost && !pool.length && <p className="rnk__empty">No postseason games yet.</p>}
-      {hasLeaders && (
+      {emptyPost && <p className="rnk__empty">No postseason stats yet.</p>}
+      {hasLeaders && !emptyPost && (
         <>
           <TeamLeaders pool={pool} categories={LEDGER_HITTING} limit={5} title="Batting leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
           <TeamLeaders pool={pool} categories={LEDGER_PITCHING} limit={5} title="Pitching leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />

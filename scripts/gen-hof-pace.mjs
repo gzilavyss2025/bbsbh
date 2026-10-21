@@ -44,5 +44,7 @@ for (let i = 0; i < ids.length; i += 50) {
   }
 }
 
+// A short run (a failed batch, a changed shape) must not replace the committed file.
+if (players.length < 250) throw new Error(`only ${players.length} players, expected about 283: not writing`)
 writeFileSync(out, JSON.stringify({ generatedAt: new Date().toISOString(), players }))
 console.log(`${players.length} players (${players.filter((p) => !p.pitcher).length} hitters) → ${out}`)
