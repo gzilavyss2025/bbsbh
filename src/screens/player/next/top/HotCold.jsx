@@ -41,7 +41,9 @@ function FitName({ children }) {
 
 // ONE callout (#1855, design B): the sentence as the headline, his figure and sample under
 // it, then the seasons behind the count as leader rows (ADR-0112): rank, headshot, name,
-// "2022 · Padres", figure. His own row is marked ('mine'). The top PREVIEW show; a door
+// "2022 · Padres", figure, and mid-season where that season ended ("ended .403", #1855
+// slice 3, design A) with one line under the list that sums it up. His own row is marked
+// ('mine'). The top PREVIEW show; a door
 // opens the rest. The look lives here and in hot-cold.css only, so a restyle is one place.
 // Tone is said in words (the card's "1 hot" tag, "better" / "worse") and marked by the
 // accent rule; colour never carries it alone.
@@ -65,14 +67,16 @@ export function HotColdCallout({ callout, selfId }) {
               name={<FitName>{r.self ? r.name : <PlayerLink id={r.id} name={r.name}>{r.name}</PlayerLink>}</FitName>}
               sub={r.sub}
               figure={r.value}
+              unit={r.unit}
             />
           ))}
         </ol>
       )}
       {open && callout.list?.more > 0 && <p className="pnext-hc__note">{`And ${callout.list.more} more.`}</p>}
+      {callout.list?.finish && <p className="pnext-hc__note">{callout.list.finish.sentence}</p>}
       {(open || shown.length < rows.length) && (
         <Door layout="block" aria-expanded={open} aria-controls={listId} onClick={() => setOpen(!open)}>
-          {open ? 'Show fewer' : `See all ${rows.length}`}
+          {open ? 'Show fewer' : callout.list.door}
         </Door>
       )}
     </div>

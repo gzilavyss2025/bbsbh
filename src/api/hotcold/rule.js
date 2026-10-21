@@ -160,7 +160,8 @@ export function mergeRoles(byRole) {
 // and never the player's own season, which sits in the pool. Most extreme first, as
 // { value, id, season, name, team }. The file keeps the outer 3% and a flag sits in the 2% tail,
 // so every season past him is in it; when every kept row is past him anyway, the count is
-// unknown and the answer is null. Rows are [value, id, season, name, team].
+// unknown and the answer is null. Rows are [value, id, season, name, team, finalValue?,
+// finalSample?]; the last two (checkpoint files only) say where that season ended.
 export function seasonsBeyond(flag, stats, { id, season }) {
   const high = flag.percentile >= 50
   const rows = stats?.[flag.key]?.[high ? 'high' : 'low'] ?? []
@@ -169,6 +170,8 @@ export function seasonsBeyond(flag, stats, { id, season }) {
   const beyond = others.filter(([value]) => (high ? value > v : value < v))
   // Every kept row is past him: the file was cut before the count ended, so it is unknown.
   if (beyond.length && beyond.length === others.length) return null
-  return beyond.map(([value, pid, s, name, team]) => ({ value, id: pid, season: s, name, team: team ?? null }))
+  return beyond.map(([value, pid, s, name, team, finalValue, finalSample]) => (
+    { value, id: pid, season: s, name, team: team ?? null, finalValue: finalValue ?? null, finalSample: finalSample ?? null }
+  ))
 }
 

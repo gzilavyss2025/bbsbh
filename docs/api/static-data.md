@@ -1324,5 +1324,5 @@ each flag it then reads one `extremes/{role}-{checkpoint|full}.json` (`staticJso
 `seasonsBeyond` lists the past seasons strictly further out, leaving out his own season.
 The card says that count ("Only 5 pitchers in the last 10 years had a better ERA over a
 full season") and lists those seasons with the club each played for, named as it was that
-season (`teams` in the tails file names his own). The card is
+season (`teams` in the tails file names his own). Mid-season, each row also says where that season ended (`finalValue`), when it went on at least 30 games or innings past the checkpoint (`FINISH_MIN`), and `finishView` sums it up: "20 of 26 bounced back by the end of the season." The card is
 `screens/player/next/top/HotCold.jsx`, with the cutoff `?d=` or `slateToday()`.
