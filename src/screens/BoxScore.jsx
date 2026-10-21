@@ -70,7 +70,7 @@ function managerValue(mgr) {
 // when the feed didn't post a number.
 function NumPos({ num, pos }) {
   return (
-    <span className="bs__pos">
+    <span className="t-label t-label--nocaps bs__pos">
       {num !== '' && num != null && (
         <>
           <span className="bs__unum">{num}</span>
@@ -588,7 +588,7 @@ function TeamBlock({ side, theme }) {
                 <span className="bs__player">
                   <PlayerLink id={p.id} className="bs__pname">{p.name}</PlayerLink>
                   {p.num !== '' && p.num != null && (
-                    <span className="bs__pos">
+                    <span className="t-label t-label--nocaps bs__pos">
                       <span className="bs__unum">{p.num}</span>
                     </span>
                   )}

@@ -172,6 +172,12 @@
 .t-label--bold {
   font-weight: var(--w-bold);
 }
+/* A label that states no case, as a rule with no `text-transform` did. Under
+   `#root *` it still draws caps; outside `#root` it follows its parent. This is
+   `inherit`, not `none`: `check-caps.mjs` bans `none`. */
+.t-label--nocaps {
+  text-transform: inherit;
+}
 .t-num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

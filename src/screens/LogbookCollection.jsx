@@ -379,7 +379,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                       ) : (
                         <span>{monthDay(entry.date)}</span>
                       )}
-                      <small>Place {monthDay(entry.date)}</small>
+                      <small className="t-label t-label--nocaps">Place {monthDay(entry.date)}</small>
                     </button>
                   </li>
                 ))}
