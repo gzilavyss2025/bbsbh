@@ -6,7 +6,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { readRevealMarkFor } from '../../hooks/useRevealProgress.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { humanDateWithYear } from '../../lib/dates.js'
-import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { Club } from '../offseason/PickedGame.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { Cluster } from '../ui/layout/Cluster.jsx'
 
@@ -83,16 +83,5 @@ export function ClassicCard({ seed = 0, era = null, teamId = null, kicker = 'A c
         </Cluster>
       </Card>
     </section>
-  )
-}
-
-function Club({ club }) {
-  return (
-    <span className="pgame__club">
-      <TeamLogo teamId={club.id} name={club.name} size={56} />
-      <span className="pgame__lines">
-        <span className="pgame__name">{club.name}</span>
-      </span>
-    </span>
   )
 }

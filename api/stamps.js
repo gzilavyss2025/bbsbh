@@ -378,7 +378,7 @@ export async function mint(req, res, redis, userId) {
   try {
     existing = normalizeStamp(await redis.hget(key, String(gamePk)))
   } catch {
-    return privateJson(res, { error: 'could not read the stamp' }, 503)
+    return privateJson(res, { error: 'could not load stamps' }, 503)
   }
 
   const now = Date.now()

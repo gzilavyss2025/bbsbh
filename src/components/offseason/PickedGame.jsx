@@ -122,7 +122,7 @@ export function PickedGame({ sportId, season, dateStr }) {
 // reader knows the Brewers long before they know the Timber Rattlers — and
 // because it is the only thing on the card a reader can use to recognise a
 // league they have never followed.
-function Club({ club }) {
+export function Club({ club }) {
   return (
     <span className="pgame__club">
       <TeamLogo teamId={club.id} name={club.name} size={56} />
