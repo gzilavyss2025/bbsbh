@@ -371,11 +371,14 @@ export async function mint(req, res, redis, userId) {
 
   const season = seasonFromDate(game.date)
   const key = stampsKey(userId, season)
-  let existing = null
+  // A read failure answers 503: it must not read as "no stamp", or the mint would
+  // overwrite a stamp it could not see (#2332). Only this read answers so; a failed
+  // write or an upstream game fetch is not a stamp read.
+  let existing
   try {
     existing = normalizeStamp(await redis.hget(key, String(gamePk)))
   } catch {
-    existing = null
+    return privateJson(res, { error: 'could not load stamps' }, 503)
   }
 
   const now = Date.now()
