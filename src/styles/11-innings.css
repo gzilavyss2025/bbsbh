@@ -100,12 +100,6 @@
   margin: 0;
 }
 
-.brewsheet__close:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-  border-radius: var(--radius-sm);
-}
-
 .brewsheet__status {
   margin: 14px 0 4px;
   font-size: var(--fs-ui);

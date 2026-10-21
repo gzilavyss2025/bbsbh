@@ -11,7 +11,7 @@
    WHAT IT OWNS: the frame (edge, radius, ground, shadow), the clip that makes
    a band head follow the corners, the padded body, and the interactive state.
    WHAT IT DOES NOT OWN: the space above and below a card (the parent's,
-   #1180), the layout inside it (the namespace's), and an accent that only one
+   #1180, except a named card's tab clearance below), the layout inside it (the namespace's), and an accent that only one
    block wears (the namespace's too). A namespace rule loads later, so it wins
    on order at equal specificity.
 
@@ -85,7 +85,11 @@
   display: block;
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
-/* A card with a name tab: the body clears the tab that hangs into it. */
+/* A named card clears its tab, which hangs --space-3h above it (stamped/stamped.css). */
+.card--named {
+  margin-top: var(--space-3h);
+}
+/* The body clears the tab that hangs into it. */
 .card--named > .card__body {
   padding-top: var(--space-6);
 }

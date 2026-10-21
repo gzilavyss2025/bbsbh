@@ -9,6 +9,7 @@ import { Pill } from '../ui/control/Pill.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { monthDayName } from '../../lib/dates.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 const HP_GAMES_LIMIT = 5
 
@@ -84,9 +85,9 @@ export function UmpireAccuracyModal({ id, seasonYear, onClose }) {
               </>
             )}
           </div>
-          <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">
+          <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
             ✕
-          </button>
+          </IconButton>
         </div>
 
         {data && !season && (

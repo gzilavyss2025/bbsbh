@@ -1,10 +1,6 @@
 /* ==== THE ABOUT BAND OF THE ONE-SCROLL TEAM PAGE (#1107, row 6f) ====
-   Stamped cards with name tabs, stacked. Each tab hangs --space-3h above its card, so the
-   gap between cards is a band gap plus that tab. No club colour here (it is the hero's alone). */
-.tnext__about {
-  padding-top: var(--space-3h);
-  row-gap: calc(var(--space-section) + var(--space-3h));
-}
+   Stamped cards with name tabs, stacked. Each card clears its own tab (system/card.css).
+   No club colour here (it is the hero's alone). */
 
 /* The park's fact strip: never wider than its cells, and the last cell takes the row's
    remainder, so no grey hole shows. Three across at most; the strip's wide step is six. */

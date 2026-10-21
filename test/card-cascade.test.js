@@ -339,6 +339,35 @@ test('card.css draws the frame in exactly one rule, .card', () => {
   }
 })
 
+// A name tab hangs --space-3h above its card (stamped.css). A stack or grid gap of
+// --space-4 then left the tab touching the card above, under its shadow. So the
+// named card clears its own tab, on every page, not one parent at a time.
+test('a named card clears the tab that hangs above it', () => {
+  const tab = ruleBody(read('system/stamped/stamped.css'), '.card__name')
+  assert.equal(decl(tab, 'top'), 'calc(-1 * var(--space-3h))')
+  const named = ruleBody(read('system/card.css'), '.card--named')
+  assert.ok(named, 'a .card--named rule')
+  assert.equal(decl(named, 'margin-top'), 'var(--space-3h)', 'the margin matches the hang of the tab')
+})
+
+// The team hub zeroes the margin of a card its Stack spaces. A named card is the exception:
+// zeroed, its tab sat under the shadow of the card above (the roster cards touched at 0px).
+test('the team hub leaves a named card its tab clearance', () => {
+  const css = read('09-team-info.css')
+  assert.ok(ruleBody(css, '.team-hub .stack > .card:not(.card--named)'), 'the hub zeroes only cards without a name tab')
+  assert.equal(ruleBody(css, '.team-hub .stack > .card'), null, 'no rule zeroes every card in a hub Stack')
+})
+
+// A flush body has no padded top, so its first part clears the tab itself. The
+// Pitch by pitch head is a PlayerLink (.plink), whose padding reset sits in the
+// core sheet and loaded after the head's own rule: the head had no padding and
+// the photo ran into the tab. The compound selector wins in any load order.
+test('the Pitch by pitch head clears the name tab, whatever the load order', () => {
+  const head = ruleBody(read('worldseries/pitch.css'), '.plink.ww-pitch__head')
+  assert.ok(head, 'a .plink.ww-pitch__head rule')
+  assert.equal(decl(head, 'padding'), 'var(--space-6) var(--space-4) var(--space-3)')
+})
+
 test('no other stylesheet frames a card', () => {
   const found = files(STYLES, ['.css'])
     .filter((rel) => rel !== 'system/card.css')

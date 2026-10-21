@@ -371,13 +371,6 @@
   flex-direction: column;
   gap: 2px;
 }
-.sc-editsheet__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .sc-editsheet__input {
   width: 100%;
   padding: var(--space-2);

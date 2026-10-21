@@ -16,10 +16,11 @@
 .tlead {
   margin-top: var(--space-1);
 }
-/* A category is a Card. margin-top: 0 overrides .team-hub's per-card spacing rule
-   (09-team-info.css): these sit in a Grid, which has its own gap. */
+/* A category is a Card. It overrides .team-hub's per-card spacing rule
+   (09-team-info.css): these sit in a Grid, which has its own gap. The margin
+   only clears the name tab, as on every named card (system/card.css). */
 .tlead__cat {
-  margin-top: 0;
+  margin-top: var(--space-3h);
 }
 
 /* The rank column is as wide as the mark, so "T10" fits the pill and every mark lines up. */

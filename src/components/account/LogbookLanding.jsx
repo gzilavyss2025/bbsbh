@@ -3,6 +3,7 @@ import { SiteHeader } from '../chrome/SiteHeader.jsx'
 import { ReportFooter } from '../chrome/ReportFooter.jsx'
 import { usePromptDismiss } from '../../hooks/preferences/usePromptDismiss.js'
 import { useStamps } from '../../hooks/useStamps.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 const STEPS = [
   {
@@ -119,14 +120,9 @@ function DeviceScopeNote() {
   return (
     <p className="logbooklanding__devicenote caps-exempt">
       This book lives on this device. An account carries it to the others.
-      <button
-        type="button"
-        className="strip-dismiss logbooklanding__devicenotedismiss"
-        onClick={dismiss}
-        aria-label="Dismiss this note"
-      >
+      <IconButton onClick={dismiss} label="Dismiss this note">
         ✕
-      </button>
+      </IconButton>
     </p>
   )
 }

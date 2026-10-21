@@ -295,15 +295,6 @@
   flex: 0 0 auto;
 }
 
-/* There is no global :focus-visible rule, so a control without this falls back
-   to the UA default ring. Its sibling dismiss buttons added alongside it
-   (.logbooklanding__devicenotedismiss, .mergestrip__dismiss) both carry one;
-   this was the only one that did not. */
-.continuebar__dismiss:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
-
 .continuebar--pitch {
   display: flex;
   align-items: center;

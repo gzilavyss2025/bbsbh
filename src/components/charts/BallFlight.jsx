@@ -10,6 +10,7 @@ import { ElevationPlot } from './ElevationArc.jsx'
 import { hoverCardPosition } from '../../lib/playerHoverPosition.js'
 import { useMediaQuery, HOVER_CARD_QUERY } from '../../hooks/useMediaQuery.js'
 import { DEFAULT_HARD_HIT_MPH } from './HitChart.jsx'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // WHERE THIS ONE BALL WENT. The play-by-play's base diamond is the handle: point
 // at it on a desktop and the flight opens beside the card; tap it on a phone and
@@ -195,15 +196,9 @@ function FlightBody({ ball, park, name, code, closeRef, onClose }) {
           </span>
         </span>
         {onClose && (
-          <button
-            ref={closeRef}
-            type="button"
-            className="bflight__close"
-            onClick={onClose}
-            aria-label="Close"
-          >
+          <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
             ✕
-          </button>
+          </IconButton>
         )}
       </div>
       {toggle && (

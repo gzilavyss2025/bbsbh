@@ -27,7 +27,7 @@
 //     neither field. Bare terms would leave an appended row with no season,
 //     unable to take part in the reader's season-sorted list at all.
 //
-// WHY the terms live in the CSVs and only in the CSVs: identity/*.json is a
+// WHY the terms live in the CSVs and only in the CSVs: the crosswalk files are a
 // crosswalk, deliberately carrying no money at all. This script is the only
 // place the two halves meet.
 //
@@ -62,11 +62,10 @@ import { readFile } from 'node:fs/promises'
 import { parseCsv } from './lib/csv.mjs'
 import { readJsonOr, writeShards } from './lib/io.js'
 import { shardKey100, termsBucketKey, TERMS_BUCKET_COUNT } from '../src/lib/shardKey.js'
-import { contractRowKeys, rowSortValue } from './lib/contract-row-key.mjs'
+import { CROSSWALK_DIR, contractRowKeys, rowSortValue } from './lib/contract-row-key.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const sourceDir = join(here, 'data', 'contracts')
-const identityDir = join(here, '..', 'public', 'data', 'contracts-history', 'identity')
 const playerDir = join(here, '..', 'public', 'data', 'contracts-history', 'player')
 const termsDir = join(here, '..', 'public', 'data', 'contracts-history', 'terms')
 
@@ -124,10 +123,10 @@ function compareRows(a, b) {
 }
 
 async function loadIdentity(sourceFile) {
-  const rows = await readJsonOr(join(identityDir, `${sourceFile}.json`), null)
+  const rows = await readJsonOr(join(CROSSWALK_DIR, `${sourceFile}.json`), null)
   if (!rows) {
     throw new Error(
-      `Missing ${sourceFile}.json in ${identityDir} -- run scripts/gen-contracts-identity.mjs first`,
+      `Missing ${sourceFile}.json in ${CROSSWALK_DIR} -- run scripts/gen-contracts-identity.mjs first`,
     )
   }
   return new Map(rows.map((row) => [row.rowKey, row]))
@@ -232,7 +231,7 @@ async function main() {
   }
   if (orphans.length > 0) {
     console.log(`  WARNING: ${orphans.length} CSV rows have no crosswalk entry (e.g. ${orphans.slice(0, 3).join(', ')})`)
-    console.log('  -- the CSVs and identity/*.json disagree on row count; re-run gen-contracts-identity.mjs')
+    console.log('  -- the CSVs and the crosswalk files disagree on row count; re-run gen-contracts-identity.mjs')
   }
 
   console.log(

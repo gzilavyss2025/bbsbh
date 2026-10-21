@@ -38,13 +38,14 @@ import { readFile } from 'node:fs/promises'
 import { parseCsv } from './lib/csv.mjs'
 import { resolveClubCode } from '../src/lib/contracts/clubCodes.js'
 import { matchRow, normalizeName } from './lib/contract-identity-match.mjs'
-import { contractRowKeys } from './lib/contract-row-key.mjs'
+import { CROSSWALK_DIR, contractRowKeys } from './lib/contract-row-key.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const sourceDir = join(here, 'data', 'contracts')
 const poolDir = join(here, '..', 'public', 'data', 'contracts-history', 'season-players')
-const outDir = join(here, '..', 'public', 'data', 'contracts-history', 'identity')
+// pending.json stays under public/: the admin review page fetches it.
+const pendingPath = join(here, '..', 'public', 'data', 'contracts-history', 'identity', 'pending.json')
 
 const poolCache = new Map()
 async function loadPool(season) {
@@ -282,10 +283,10 @@ async function main() {
   // extensions, arbitration and pending stay indented: they are small and a human
   // reads them in git diffs and the review queue. free_agency and salaries are
   // written compact (-24%); keep them compact, or every regeneration re-bloats them.
-  await writeJsonAtomic(join(outDir, 'extensions.json'), extensions, 2)
-  await writeJsonAtomic(join(outDir, 'arbitration.json'), arbitration, 2)
-  await writeJsonAtomic(join(outDir, 'free_agency.json'), freeAgency)
-  await writeJsonAtomic(join(outDir, 'salaries.json'), salaries)
+  await writeJsonAtomic(join(CROSSWALK_DIR, 'extensions.json'), extensions, 2)
+  await writeJsonAtomic(join(CROSSWALK_DIR, 'arbitration.json'), arbitration, 2)
+  await writeJsonAtomic(join(CROSSWALK_DIR, 'free_agency.json'), freeAgency)
+  await writeJsonAtomic(join(CROSSWALK_DIR, 'salaries.json'), salaries)
 
   // A separate, much smaller file for the /admin/contracts review queue
   // (PR2): every non-exact row across all four files, so the review page
@@ -294,7 +295,7 @@ async function main() {
   const pending = [extensions, arbitration, freeAgency, salaries]
     .flat()
     .filter((row) => row.confidence !== 'exact')
-  await writeJsonAtomic(join(outDir, 'pending.json'), pending, 2)
+  await writeJsonAtomic(pendingPath, pending, 2)
   console.log(`Wrote pending.json: ${pending.length} rows needing review`)
 
   console.log('\nMatch-rate report:')

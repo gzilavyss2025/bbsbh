@@ -423,21 +423,6 @@
 .scout__pmcall {
   margin: 0;
 }
-.scout__pmclose {
-  flex: none;
-  min-width: var(--control-min);
-  min-height: var(--control-min);
-  border: 0;
-  background: none;
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  cursor: pointer;
-}
-.scout__pmclose:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-  border-radius: var(--radius-sm);
-}
 .scout__pm .scout__scene {
   max-width: none;
 }

@@ -236,10 +236,6 @@
     flex-basis: calc(50% - var(--space-section) / 2);
   }
 }
-/* A section slot: a stamped Card whose name tab hangs above it. */
-.pnext__slot {
-  margin-top: var(--space-3h);
-}
 
 /* A slot holds its measured height (sections.js `minH`) until its module shows content, so a
    slot that loads above the reader does not push the page. Slot.jsx sets the two numbers. */

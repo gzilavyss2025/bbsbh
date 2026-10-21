@@ -68,7 +68,7 @@ export function NewBookPage({ createBook, placing = null, onCreated, onCancel })
       </p>
 
       <Stack gap="tight" as="label" className="bookmgmt__field">
-        <span>Title</span>
+        <span className="t-label t-label--nocaps">Title</span>
         <input
           type="text"
           maxLength={MAX_BOOK_TITLE_LENGTH}
@@ -78,7 +78,7 @@ export function NewBookPage({ createBook, placing = null, onCreated, onCancel })
         />
       </Stack>
       <Stack gap="tight" as="label" className="bookmgmt__field">
-        <span>Subtitle</span>
+        <span className="t-label t-label--nocaps">Subtitle</span>
         <input
           type="text"
           maxLength={MAX_BOOK_SUBTITLE_LENGTH}

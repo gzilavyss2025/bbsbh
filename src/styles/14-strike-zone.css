@@ -320,18 +320,6 @@
   font-size: var(--fs-caption);
   color: var(--text-muted);
 }
-.szmodal__close {
-  flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-inset);
-  color: var(--text-muted);
-  font-size: var(--fs-body);
-  line-height: var(--lh-solid);
-  cursor: pointer;
-}
 /* Phone modal: zone on top, the pitch list full-width beneath it — side by
    side is too tight at phone width and clips the list's velo/result column. */
 .szmodal__body {
@@ -383,7 +371,7 @@
 
 /* ── Umpire accuracy modal ───────────────────────────────────────────────────
    Opened from the lineup Umpires card's accuracy rank. Centered card (reuses
-   .scrim--center + .szmodal__close), showing the rank, the zone map, and the
+   .scrim--center), showing the rank, the zone map, and the
    umpire's last five plate games linking to their box scores. */
 .umpmodal {
   background: var(--surface-card);
