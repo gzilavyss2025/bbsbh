@@ -14,6 +14,17 @@
   container-type: inline-size;
   --ring: max(40px, 11cqw);
 }
+/* The park's accuracy note, under the art (BallparkDiagram's, passed note={false}). Quiet, as
+   on the park card: never a label. */
+.pnext-inn__note {
+  max-width: 460px; /* the art's own width, above */
+  margin: 0 auto;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  text-align: center;
+  color: var(--text-muted);
+}
 .pnext-inn__park--field {
   aspect-ratio: 4 / 3;
   max-width: 340px;

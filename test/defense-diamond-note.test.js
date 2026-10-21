@@ -3,8 +3,9 @@
 // edge. The two cards that lay HTML name tags over the park (DefenseDiamond, and the lineup
 // page's FieldCard) put the catcher's tag and the DH corner tag on that same strip, so on a
 // MiLB park the note ran under them and was clipped at the right (the innings page's Field tab,
-// the lineup page's Defensive alignment, the team page's Roster band). Both cards now keep the
-// note out of the drawing and print it as a quiet caption under the field.
+// the lineup page's Defensive alignment, the team page's Roster band). The player page's innings
+// art does the same with its position rings. Each keeps the note out of the drawing and prints
+// it as a quiet caption under the field.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -31,6 +32,9 @@ test('BallparkDiagram can leave its note out, and prints it by default', () => {
 const CARDS = [
   ['components/scoring/DefenseDiamond.jsx', 'defdiamond__note'],
   ['screens/lineup/next/cards/FieldCard.jsx', 'lfld__note'],
+  // The player page's innings art: its window starts at x=30, past the note's x=12, so the
+  // note lost its first letters, and it ran under the catcher's ring and the DH tag.
+  ['screens/player/next/modules/innings/index.jsx', 'pnext-inn__note'],
 ]
 for (const [file, caption] of CARDS) {
   test(`${file} keeps the note out of the drawing and prints it as a caption`, () => {
@@ -41,7 +45,7 @@ for (const [file, caption] of CARDS) {
 }
 
 test("the caption stays quiet, as the park card's note does: never a shouted label", () => {
-  for (const [css, sel] of [['scoring/defense-diamond.css', '.defdiamond__note'], ['lineup-next/field.css', '.lfld__note']]) {
+  for (const [css, sel] of [['scoring/defense-diamond.css', '.defdiamond__note'], ['lineup-next/field.css', '.lfld__note'], ['player-next/both/innings.css', '.pnext-inn__note']]) {
     const body = ruleBody(stripComments(src(join('styles', css))), sel)
     assert.ok(body, `${sel} has a rule`)
     assert.doesNotMatch(body, /text-transform:\s*uppercase/)

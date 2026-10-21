@@ -104,8 +104,9 @@ export function BallparkDiagram({
       ))}
       {/* How sure the wall is, when it is not a checked outline: one long line
           along the bottom edge, which is empty paper on a bare park. A caller that
-          lays HTML tags over that strip (the defense diamond and the lineup page's
-          FieldCard put the catcher and the DH there) passes note={false} and
+          lays HTML tags over that strip (the defense diamond, the lineup page's
+          FieldCard and the player page's innings art put the catcher and the DH
+          there) passes note={false} and
           prints layout.accuracyNote itself, under the field. */}
       {note && layout.accuracyNote && (
         <text className="bpdiagram__note" x="12" y={VIEWBOX.h - 12}>

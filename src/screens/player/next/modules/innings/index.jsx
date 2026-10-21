@@ -158,12 +158,15 @@ export default function InningsModule({ bio, role, asOf, season, onEmpty, onCoun
         />
       )}
       <div className={`pnext-inn__park${park === null ? ' pnext-inn__park--field' : ''}`}>
-        {park && <BallparkDiagram layout={park} className="pnext-inn__art" viewBox={PARK_VIEWBOX} label={`${park.name} field`} />}
+        {park && <BallparkDiagram layout={park} className="pnext-inn__art" viewBox={PARK_VIEWBOX} label={`${park.name} field`} note={false} />}
         {park === null && <FieldBackdrop className="pnext-inn__art" />}
         {(park === undefined || !(scope in views)) && <Loader size="inline" className="pnext-inn__loading" />}
         {view && park !== undefined && <Marks view={view} role={role} scopeWord={scopeWord} park={park} />}
         {scope in views && !view && <p className="hint pnext-inn__none">No innings logged.</p>}
       </div>
+      {/* The park's accuracy note, under the art: the art's window starts past the note's left
+          end, and its line ran under the catcher's ring and the DH tag. */}
+      {park?.accuracyNote && <p className="pnext-inn__note">{park.accuracyNote}</p>}
     </Stack>
   )
 }
