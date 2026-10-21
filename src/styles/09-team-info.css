@@ -81,9 +81,10 @@
 /* A card that is a direct child of a Stack is spaced by that Stack (the Roster
    tab, #1180), whatever margin its namespace carries: .roster-super sets its
    own 16px, which the All-Star rosters page relies on. Three classes beat
-   both. The rules above stay for the other tabs: Overview, Games, Numbers
+   both. A named card keeps the margin that clears its tab (system/card.css).
+   The rules above stay for the other tabs: Overview, Games, Numbers
    and Minors hold blocks a Stack would move. */
-.team-hub .stack > .card {
+.team-hub .stack > .card:not(.card--named) {
   margin-top: 0;
 }
 

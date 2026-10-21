@@ -17,7 +17,7 @@ to reach for from anywhere. At the top level: `Loader`, `SectionMasthead`, `Copy
   `SectionMasthead` is its thin band wrapper), and `Card`, the one box a section sits on:
   `frame` sheet, ledger or stamped (the player redesign, #1882: `label` name tab, `count`
   tag, `tone` plain, tint or ink, `stampIn`), `head` a SectionHead, `body` padded or flush,
-  `className` the block's namespace. It owns no margin. `StatTile` is a stamped Card with
+  `className` the block's namespace. It owns no margin, except a named card's tab clearance. `StatTile` is a stamped Card with
   a label, a number, a caption and an optional `RankMark` ("2 of 68" for a rate stat, "6th" for a counting stat, #1856); `FactGrid look="strip"` is the fact strip. The report parts (ADR-0112): `StatTile look="band"`
   and `StatStrip`/`StatCell` (the big-number row), `LeaderList`/`LeaderRow`, `ResultCard`
   (a finished game on a history page only), `Meter`, `Key` and `CornerBadge`. Styles: `styles/system/report/`.

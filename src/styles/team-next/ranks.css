@@ -32,14 +32,6 @@
   width: 100%;
 }
 
-/* The leader cards wear a name tab that rises above the card's edge, so the grid's 12px gap
-   leaves each tab touching the card above it. This band gives them a full step, and the first
-   one room under the board's heading. */
-.rnk .tlead > .grid {
-  gap: var(--space-6);
-  margin-top: var(--space-3);
-}
-
 /* The two leader doors and a card's door sit on the right, as on the old tabs. */
 /* layout-exempt: two doors in one right-aligned row */
 .rnk__empty {
