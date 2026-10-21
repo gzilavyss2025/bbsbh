@@ -62,10 +62,9 @@ const MOUND_DIRT_FT = 9 // dirt circle around the pitching rubber
 const HOME_DIRT_FT = 13 // dirt circle around home plate
 const BASELINE_DIRT_FT = 6 // width of the dirt running-lane strip along each baseline
 
+import { round2 as f } from '../math/number.js'
 import { fenceDistanceAt } from './layout/fenceAudit.js'
 import { clipToFoulLines, heightAt } from './layout/fenceShape.js'
-
-const f = (n) => Math.round(n * 100) / 100
 
 // Feet (home-origin, y toward center) → SVG point.
 const toSvg = (xFt, yFt) => ({ x: HOME.x + xFt, y: HOME.y - yFt })
@@ -181,23 +180,38 @@ export function diagramInput(layout) {
   }
 }
 
+// The wall the drawing draws, built once per layout and kept (a layout is one cached object, as in
+// layout/parkWindow.js geometryOf): the Park fit card casts a few thousand rays against two walls,
+// and rebuilding the outline for each ray was about 95% of its time.
+// -> { feet: the outline in the frame fenceDistanceAt reads, or null with no wall to draw, heights }
+const walls = new WeakMap()
+function wallOf(layout) {
+  let w = walls.get(layout)
+  if (!w) {
+    const { dist, heights, fence } = diagramInput(layout)
+    const feet = !fence && !dist ? null : toFeet(wallPoints(dist, heights ?? UNKNOWN_HEIGHTS, fence))
+    walls.set(layout, (w = { feet, heights }))
+  }
+  return w
+}
+
 // Feet from home plate to the wall the drawing draws, on the ray at `deg` (0 =
 // straightaway center, negative toward left field): the same outline the plan
 // view inks, so the side view's wall (ballFlight.js) stands where this one is.
 // Null for a ray that misses the wall, or a layout with no wall to draw.
 export function wallDistanceAt(layout, deg) {
-  const { dist, heights, fence } = diagramInput(layout)
-  if (!fence && !dist) return null
-  const pts = wallPoints(dist, heights ?? UNKNOWN_HEIGHTS, fence)
-  return fenceDistanceAt(toFeet(pts), deg)
+  const { feet } = wallOf(layout)
+  return feet ? fenceDistanceAt(feet, deg) : null
 }
 
 // The wall's height in feet on the ray at `deg`, from the heights that weight the stroke
 // (Savant's five when measured, else the three posted; layout/fenceShape.js heightAt).
 // Null for a layout with no heights on file: unlike the drawing's 8 ft stroke weight below,
-// a figure built on this must not invent one.
+// a figure built on this must not invent one. ballFlight.js wallOnLine reads the same heights
+// for the side view, but rounds them to 0.1 ft and drops the whole wall when none are on file;
+// a ball-by-ball count needs the exact height, and the distance without it.
 export function wallHeightAt(layout, deg) {
-  const { heights } = diagramInput(layout)
+  const { heights } = wallOf(layout)
   const h = heights ? heightAt(deg, heights) : null
   return Number.isFinite(h) ? h : null
 }
@@ -274,11 +288,13 @@ export function buildFieldGeometry({
   const baselineDirtL = `M ${f(HOME.x)} ${f(HOME.y)} L ${f(b1.x)} ${f(b1.y)}`
   const baselineDirtR = `M ${f(HOME.x)} ${f(HOME.y)} L ${f(b3.x)} ${f(b3.y)}`
 
-  const labelAt = (p, t) => ({ ...offsetFromHome(p, 16), t })
+  // A sign knows its `slot`, so a caller that needs to tell them apart (the two-park overlay) need not
+  // repeat the filter below to find out which ones survived.
+  const labelAt = (p, t, slot) => ({ ...offsetFromHome(p, 16), t, slot })
   const tagAt = (p, h) => ({ ...offsetFromHome(p, -12), h })
   // Only values on file are printed: an older wall may know its CF and not
   // its lines, and its heights not at all.
-  const labels = [labelAt(lf, dist.lf), labelAt(cf, dist.cf), labelAt(rf, dist.rf)].filter((l) => Number.isFinite(l.t))
+  const labels = [labelAt(lf, dist.lf, 'lf'), labelAt(cf, dist.cf, 'cf'), labelAt(rf, dist.rf, 'rf')].filter((l) => Number.isFinite(l.t))
   // The highest ink on the drawing: a distance sign's upper half, or the wall's outer edge.
   // A card crops the frame's empty sky down to it (layout/parkWindow.js).
   const top = Math.min(...labels.map((l) => l.y - LABEL_HALF), ...pts.map((p) => p.y - wallStroke(p.h) / 2))

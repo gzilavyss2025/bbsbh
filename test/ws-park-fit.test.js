@@ -1,9 +1,9 @@
 // The "Park fit" card's model (#2316): the pull, centre and opposite-field share of each club's fly
 // balls, from the spray store, and how many carry past each Series park's wall. Plus the card's
-// rule: it shows on every day type that has data, at either park.
+// rule: it shows on every day type that has data, at either park. Plus which park the card shows (parkView).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { carryRates, fitParks, flyShares, parkFitModel, MIN_CARRY, MIN_FLY } from '../src/lib/postseason/worldseries/scouting/parkFit.js'
+import { carryRates, fitParks, flyShares, parkFitModel, parkView, MIN_CARRY, MIN_FLY } from '../src/lib/postseason/worldseries/scouting/parkFit.js'
 import { scoutingModel } from '../src/lib/postseason/worldseries/scouting/scouting.js'
 import { HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
 import { resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.js'
@@ -200,4 +200,32 @@ test('fitParks: a club keeps its ink when away and home turn over, and when only
   assert.deepEqual(inks([139, 158]), { 139: 0, 158: 1 })
   assert.deepEqual(inks([158, 139]), { 139: 0, 158: 1 }, 'the order of sides does not move the ink')
   assert.deepEqual(inks([158, 139], { 139: 999999, 158: 32 }), { 158: 1 }, 'the other park is missing: the ink stays')
+})
+
+test('parkView: two parks open on both; a pick shows one park alone, and the carry block keeps the last pick', () => {
+  const two = [{ clubId: 139 }, { clubId: 158 }]
+  const start = parkView(two, 'both', null)
+  assert.deepEqual([start.show, start.both, start.one, start.at], ['both', true, false, 0])
+  assert.deepEqual(start.lit.map((p) => p.on), [true, true])
+  const second = parkView(two, 158, 158)
+  assert.deepEqual([second.show, second.both, second.at], [158, false, 1])
+  assert.deepEqual(second.lit.map((p) => [p.clubId, p.on]), [[139, false], [158, true]])
+  // Back to both: the carry block stays on the park it last showed while it folds away.
+  assert.equal(parkView(two, 'both', 158).at, 1)
+})
+
+test('parkView: one park shows alone with nothing to pick; a pick whose park is gone reads as both', () => {
+  const one = parkView([{ clubId: 158 }], 'both', null)
+  assert.deepEqual([one.show, one.one, one.both, one.at], [158, true, false, 0])
+  assert.deepEqual(one.lit.map((p) => p.on), [true])
+  // The pair resolved again without the picked club: both parks, and the carry block falls back to the first.
+  const gone = parkView([{ clubId: 158 }, { clubId: 160 }], 139, 139)
+  assert.deepEqual([gone.show, gone.both, gone.at], ['both', true, 0])
+  assert.deepEqual(gone.lit.map((p) => p.on), [true, true])
+})
+
+test('parkView keeps each park\'s own fields beside its on flag', () => {
+  const parks = fitParks({ sides: [139, 158], venueByClub: { 139: 12, 158: 32 }, slateDate: DAY })
+  const { lit } = parkView(parks, 139, 139)
+  assert.deepEqual(lit.map((p) => [p.clubId, p.ink, p.layout.venueId, p.on]), [[139, 0, 12, true], [158, 1, 32, false]])
 })

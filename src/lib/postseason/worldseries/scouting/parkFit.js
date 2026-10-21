@@ -1,6 +1,7 @@
 import { directionOf, sprayAngle } from '../../../../api/spray.js'
 import { wallDistanceAt, wallHeightAt } from '../../../ballpark/ballparkGeometry.js'
 import { resolveBallparkLayout } from '../../../ballpark/layout/resolveLayout.js'
+import { pctOf } from '../../../math/number.js'
 import { shares } from './pitchByPitch.js'
 
 // PARK FIT (#2316): where each Series club's fly balls go, as pull, centre and opposite-field
@@ -26,14 +27,22 @@ const ROWS = [
 // A regular's Triple-A balls are not the club's regular season, so only the majors count.
 const isFly = (b) => b.level === 'mlb' && b.launchAngle >= FLY_MIN && b.launchAngle <= FLY_MAX
 
+// The fly balls that have a direction: { b, angle, third }, `angle` the ball's bearing off dead centre
+// and `third` 'pull', 'center' or 'oppo'. Both figures below count the same balls.
+function* flies(balls) {
+  for (const b of balls ?? []) {
+    if (!isFly(b)) continue
+    const angle = sprayAngle(b.x, b.y)
+    const third = directionOf(angle, b.side)
+    if (third) yield { b, angle, third }
+  }
+}
+
 // (balls) -> null | { n, pull, center, oppo } whole-number shares that add up to 100.
 export function flyShares(balls) {
   const count = { pull: 0, center: 0, oppo: 0 }
   let n = 0
-  for (const b of balls ?? []) {
-    if (!isFly(b)) continue
-    const third = directionOf(sprayAngle(b.x, b.y), b.side)
-    if (!third) continue
+  for (const { third } of flies(balls)) {
     count[third]++
     n++
   }
@@ -56,17 +65,14 @@ export function flyShares(balls) {
 // real rates of 14.9% and 20.0%. With the height it agrees on 97.7% and 98.7% and reads 17.2% and 20.0%.
 export function carryRates(balls, layout) {
   const t = { pull: [0, 0], center: [0, 0], oppo: [0, 0] } // [carried, counted]
-  for (const b of balls ?? []) {
-    if (!isFly(b) || b.distance == null) continue
-    const angle = sprayAngle(b.x, b.y)
-    const third = directionOf(angle, b.side)
-    if (!third) continue
+  for (const { b, angle, third } of flies(balls)) {
+    if (b.distance == null) continue
     const wall = wallDistanceAt(layout, angle)
     if (wall == null) continue
     t[third][1]++
     if (b.distance > wall + (wallHeightAt(layout, angle) ?? 0)) t[third][0]++
   }
-  const rate = ([carried, counted]) => (counted >= MIN_CARRY ? Math.round((100 * carried) / counted) : null)
+  const rate = ([carried, counted]) => (counted >= MIN_CARRY ? pctOf(carried, counted) : null)
   return { pull: rate(t.pull), center: rate(t.center), oppo: rate(t.oppo) }
 }
 
@@ -104,4 +110,25 @@ export function fitParks({ sides, venueByClub, game, slateDate }) {
     parks.push({ clubId, layout, ink: clubId === first ? 0 : 1 })
   }
   return parks
+}
+
+// Which park the card shows, from the control's value. `pick` is 'both' or a club id, and `last` is the
+// club id the control last picked (null before any pick). One park has no control, so it shows alone. A pick
+// whose park is gone (the pair resolved again) reads as both.
+// -> { one, show, both, at, lit }
+//   show  'both', or the club id of the park shown alone
+//   at    the index in `parks` of the park under the carry block: the one shown, or with both shown the
+//         last one picked, so the block does not change under its own fold
+//   lit   `parks`, each with `on`: whether the map and the key draw it now
+export function parkView(parks, pick, last) {
+  const one = parks.length === 1
+  const show = one ? parks[0].clubId : parks.some((p) => p.clubId === pick) ? pick : 'both'
+  const both = show === 'both'
+  return {
+    one,
+    show,
+    both,
+    at: Math.max(0, parks.findIndex((p) => p.clubId === (both ? last : show))),
+    lit: parks.map((p) => ({ ...p, on: both || p.clubId === show })),
+  }
 }

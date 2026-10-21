@@ -11,7 +11,7 @@ import { currentSection } from '../src/lib/jumpbar/spy.js'
 const src = (p) => readFileSync(new URL(`../src/${p}`, import.meta.url), 'utf8')
 const NONE_MARKUP = /—<span className="sr-only"> no figure<\/span>/
 
-test('PitchByPitch, FilmMeeting and the comparison ledgers say "no figure" beside the dash', () => {
+test('PitchByPitch, FilmMeeting, ParkFit and the comparison ledgers say "no figure" beside the dash', () => {
   for (const f of ['PitchByPitch', 'FilmMeeting']) {
     assert.match(src(`components/worldseries/cards/scouting/${f}.jsx`), NONE_MARKUP, f)
   }
@@ -21,6 +21,8 @@ test('PitchByPitch, FilmMeeting and the comparison ledgers say "no figure" besid
   // GloveLegs and NineKeys draw the ledger's one NO_FIGURE for a null figure.
   assert.match(src('components/worldseries/cards/scouting/GloveLegs.jsx'), /if \(v == null\) return NO_FIGURE/)
   assert.match(src('components/worldseries/cards/scouting/NineKeys.jsx'), /rank == null \? NO_FIGURE :/)
+  // ParkFit draws it for a direction under the carry floor.
+  assert.match(src('components/worldseries/cards/scouting/ParkFit.jsx'), /v == null \? NO_FIGURE :/)
 })
 
 test('PitchByPitch draws the no-figure dash for a null figure, never a number', () => {
