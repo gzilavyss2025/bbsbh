@@ -7,7 +7,7 @@ import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
-import { calendarDays, clipSources, nextGamePath, playerClip, slabPlayer, withFormatDates } from '../../lib/postseason/worldseries/hero.js'
+import { calendarDays, clipSources, monthsOf, nextGamePath, playerClip, slabPlayer, withFormatDates } from '../../lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
 import { logbookNewPath, umpirePath } from '../../lib/route.js'
 import { teamClubNameShort } from '../../lib/teams.js'
@@ -82,11 +82,10 @@ function Slab({ side, clubId, player }) {
 function Who({ side, player, clip, onPlay }) {
   if (!player) return <div />
   const ops = Number.isFinite(Number.parseFloat(player.ops)) ? player.ops : '—'
-  const pa = Number.isFinite(player.pa) ? `${player.pa} PA` : '— PA'
   return (
     <Stack gap="tight" className={`ww-hero__who ww-hero__who--${side}`}>
       <span className="ww-hero__name">{player.name}</span>
-      <span className="ww-hero__figs">{`${ops} OPS · ${pa}`}</span>
+      <span className="ww-hero__figs">{`${ops} OPS · ${player.pa} PA`}</span>
       {clip && (
         <Button skin="ghost" icon="▸" aria-label={`Watch highlight: ${player.name}, postseason`} className="ww-hero__play" onClick={onPlay}>
           Watch highlight
@@ -144,14 +143,15 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
     upcoming: withFormatDates(series.games, series.upcoming, slateDate),
     slateDate,
   })
-  const days = calendarDays(columns, slateDate).map((day) => gameDay ? { ...day, next: day.today && day.kind === 'game' } : day)
-  const nextDay = days.find((d) => (gameDay ? d.today && d.kind === 'game' : d.gameNumber === gameNumber))
+  // A game day's Next is today's game, the one the lineups door opens.
+  const days = calendarDays(columns, slateDate).map((day) => (gameDay ? { ...day, next: day.today && day.kind === 'game' } : day))
+  const nextDay = days.find((d) => (gameDay ? d.next : d.gameNumber === gameNumber))
   const path = (section) => nextGamePath(game, slateDate, abbr, section)
   // A game day's door needs no game number (a resumed game can lack one); a preview names its game.
   const nextPath = gameDay ? path('lineup1') : gameNumber ? path('preview') : null
   const nextName = gameDay ? (gameNumber ? `Game ${gameNumber} lineups` : 'Lineups') : `Game ${gameNumber} preview`
   const when = [nextDay?.date && `${nextDay.weekday} ${monthDayShort(nextDay.date)}`, game && firstPitchText(game.gameDate, game.startTimeTBD)]
-  const months = [...new Set(days.filter((d) => d.date).map((d) => new Date(`${d.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' })))].join(' / ')
+  const months = monthsOf(days)
   const innings = gameDay ? path('top1') : null
   // Wide off day: one Stamp door per played game here (the phone has them in Played).
   const stamps = wide && !gameDay ? played : []
@@ -169,7 +169,7 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
             <div className="ww-hero__top">
               <ClubHead side="away" slot={slotOf[order[0]]} winsNeeded={series.winsNeeded} />
               <Stack gap="snug" className="ww-hero__crest">
-                {mark ? <SeriesMark mark={mark} height={48} className="ww-hero__mark" /> : <span className="ww-hero__words">World Series</span>}
+                {mark ? <SeriesMark mark={mark} height={48} /> : <span className="ww-hero__words">World Series</span>}
                 <span className="ww-hero__format">Best of seven</span>
               </Stack>
               <ClubHead side="home" slot={slotOf[order[1]]} winsNeeded={series.winsNeeded} />
@@ -189,7 +189,7 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
           </Stack>
         </div>
         <Stack gap="snug">
-          <Cluster gap="base" align="baseline" className="ww-hero__schedulehead">
+          <Cluster gap="base" rowGap="tight" align="baseline">
             <span className="ww-hero__month">{months}</span>
             <span className="ww-hero__schedulelabel">Series schedule</span>
             {days.some((d) => d.maybe) && <Key className="ww-hero__key" items={[{ label: 'If needed', mark: <span className="ww-hero__maybeswatch" aria-hidden="true" /> }]} />}

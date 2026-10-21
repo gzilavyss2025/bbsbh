@@ -5,7 +5,6 @@
   --versus: 0;
   --ww-stage-h: calc(var(--space-16) * 4 + var(--space-8));
   --ww-wash-shift: 28%;
-  --ww-wash-focus: center top;
 }
 
 .ww-hero__matchup {
@@ -98,6 +97,7 @@
 /* layout-exempt: two overlapping image layers frame the readable centre */
 .ww-hero__split {
   position: absolute;
+  --cut: calc(var(--space-6) + var(--versus) * var(--space-2));
   inset: calc(var(--space-16) + var(--space-10)) 0 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -115,13 +115,13 @@
 
 .ww-hero__slab--away {
   margin-right: calc(-1 * var(--space-4));
-  clip-path: polygon(0 0, 100% 0, calc(100% - var(--space-6) - var(--versus) * var(--space-2)) 100%, 0 100%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%);
 }
 
 .ww-hero__slab--home {
   --ww-slab-fade-direction: to left;
   margin-left: calc(-1 * var(--space-4));
-  clip-path: polygon(calc(var(--space-6) + var(--versus) * var(--space-2)) 0, 100% 0, 100% 100%, 0 100%);
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%);
 }
 
 /* The slate's ripple and sheen, subdued behind real player imagery. */
@@ -152,7 +152,7 @@
   --ww-wash-mask:
     linear-gradient(to top, transparent, var(--ripple-mask) 60%),
     linear-gradient(
-      var(--ww-wash-direction, to right),
+      var(--ww-slab-fade-direction),
       transparent,
       var(--ripple-mask) 16%,
       var(--ripple-mask) calc(100% - var(--ww-wash-shift) - 28%),
@@ -163,7 +163,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: var(--ww-wash-focus);
+  object-position: center top;
   opacity: 0;
   filter: grayscale(1);
   /* Feather both exposed edges in photo coordinates, including the part
@@ -181,11 +181,7 @@
    image that already fills its box by width. Keep the action inside the
    headshot's inner shoulder, with its head preserved at the top. */
 .ww-hero__slab--away .ww-hero__wash { left: var(--ww-wash-shift); right: auto; }
-.ww-hero__slab--home .ww-hero__wash {
-  --ww-wash-direction: to left;
-  right: var(--ww-wash-shift);
-  left: auto;
-}
+.ww-hero__slab--home .ww-hero__wash { right: var(--ww-wash-shift); left: auto; }
 
 .shot.ww-hero__cut {
   position: absolute;
@@ -279,11 +275,9 @@
   gap: var(--space-2);
   padding: 0;
   border: 0;
-  border-radius: 0;
-  font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-title);
-  color: var(--text-heading);
+  --btn-ink: var(--text-heading);
 }
 
 .ww-hero__play .btn__icon {
@@ -291,8 +285,6 @@
   background: var(--surface-stamped-ink);
   color: var(--text-on-ink-cream);
 }
-
-.ww-hero__schedulehead { row-gap: var(--space-1); }
 
 .ww-hero__month {
   font-family: var(--font-display);
@@ -356,10 +348,10 @@
   line-height: var(--lh-ui);
 }
 
-.ww-cal__game { min-height: 1lh; }
+.ww-cal__game,
+.ww-cal__flag { min-height: 1lh; }
 .ww-cal__flag {
   align-self: stretch;
-  min-height: 1lh;
   margin-top: var(--space-1);
   text-align: center;
 }
@@ -413,8 +405,7 @@
   .shot.ww-hero__cut { width: var(--ww-stage-h); }
   .ww-hero__focus { padding-top: var(--space-5); }
   .ww-hero__game { font-size: var(--fs-hero-2xl); }
-  .ww-hero__date { font-size: var(--fs-ui); }
-  .ww-hero__time { font-size: var(--fs-ui); }
+  .ww-hero__date, .ww-hero__time { font-size: var(--fs-ui); }
   .ww-hero__spotlight { padding: var(--space-3) var(--space-5); }
   .ww-hero__name { font-size: var(--fs-card-name); }
   .ww-hero__who--home { align-items: flex-end; text-align: right; }
