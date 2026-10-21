@@ -218,7 +218,7 @@ card/pill block (verdicts: `.scratch/design-system/inventory.md`).
 **One control, one door:** a button acts on this page and is `.btn`
 (`styles/system/button.css`, `ui/control/Button.jsx` — `size` tap/control, `skin`
 outline/ink/ghost/danger/seal, selected is `aria-pressed`; `Segmented` joins them); a door opens more and is
-`.door` (`system/door.css`). A player-page filter is `.pnext-pick` (`player-next/page.css`). No third. The bare close X and dismiss are `.sheet-close` / `.strip-dismiss` (`system/dismiss/`), plain chrome and not a control.
+`.door` (`system/door.css`). A player-page filter is `.pnext-pick` (`player-next/page.css`). No third. A close ✕ is `IconButton` (ghost) and a text dismiss is `Button` ghost; there is no bare close class.
 
 `src/index.css` holds only imports; the partial order and the guards that walk it: `src/styles/CLAUDE.md`.
 

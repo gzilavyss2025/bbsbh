@@ -3,6 +3,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Table } from '../ui/table/Table.jsx'
 import { favoriteAccentColor } from '../../lib/teams.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // Rounding straight to 1 decimal would show "100.0%" for anything from
 // 99.95% up to a true 2000/2000 — indistinguishable from actual certainty.
@@ -41,9 +42,9 @@ export function PostseasonOddsModal({ divisionName, rows, onClose }) {
       >
         <div className="gsmodal__head">
           <h2 className="sheet__title">Postseason Odds</h2>
-          <button ref={closeRef} type="button" className="sheet-close gsmodal__close" onClick={onClose} aria-label="Close">
+          <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
             ✕
-          </button>
+          </IconButton>
         </div>
         <p className="psoddsmodal__note">{divisionName}</p>
 

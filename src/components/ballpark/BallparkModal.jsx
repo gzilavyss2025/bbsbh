@@ -5,6 +5,7 @@ import { rankedDimensions } from '../../lib/ballpark/ballparkData.js'
 import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { Stack } from '../ui/layout/Stack.jsx'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // The Ballpark sheet: a to-scale ink sketch of the field (BallparkDiagram) over a
 // facts strip (built / roof / capacity) and the park's outfield distances + wall
@@ -43,9 +44,9 @@ export function BallparkModal({ venue, venueId, gameDate, onClose }) {
       <div className="sheet bpsheet" role="dialog" aria-modal="true" aria-label={name}>
         <div className="bpsheet__head">
           <h2 className="sheet__title">{name}</h2>
-          <button ref={closeRef} className="sheet-close bpsheet__close" onClick={onClose} aria-label="Close">
+          <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
             ✕
-          </button>
+          </IconButton>
         </div>
 
         {layout && <BallparkDiagram layout={layout} />}

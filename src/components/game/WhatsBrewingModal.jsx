@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Loader } from '../ui/Loader.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // What's Brewing — a bottom-sheet modal that surfaces the narrative blurbs from
 // a club's pre-game Game Notes PDF (Brewers: Hulk Logan, Don't Pitch to Mitch, …)
@@ -49,9 +50,9 @@ export function WhatsBrewingModal({ notes, teamId, title = 'Game Notes', onClose
       >
         <div className="brewsheet__head">
           <h2 className="sheet__title">{title}</h2>
-          <button ref={closeRef} className="sheet-close brewsheet__close" onClick={onClose} aria-label="Close">
+          <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
             ✕
-          </button>
+          </IconButton>
         </div>
 
         {loading ? (

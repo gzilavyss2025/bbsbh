@@ -238,12 +238,6 @@
   margin: 0;
 }
 
-.bpsheet__close:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-  border-radius: var(--radius-sm);
-}
-
 /* The field drawing. viewBox is 620×560; it scales to the sheet width. */
 .bpdiagram {
   display: block;
@@ -458,8 +452,8 @@
 .psodds-pill {
   flex: none;
 }
-/* Same bottom-sheet head/close chrome as .gsmodal__head/.gsmodal__close
-   (.sheet, both reused as-is) — only the subtitle and table below the head
+/* Same bottom-sheet head chrome as .gsmodal__head
+   (.sheet, reused as-is) — only the subtitle and table below the head
    are specific to this modal. */
 .psoddsmodal {
   max-height: 86vh;

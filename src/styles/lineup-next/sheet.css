@@ -30,17 +30,11 @@
   text-transform: uppercase;
 }
 .lsheet__close {
-  width: var(--tap-min);
-  height: var(--tap-min);
-  border: var(--bw-heavy) solid currentColor;
-  background: none;
-  color: inherit;
-  font-size: var(--fs-h3);
-  cursor: pointer;
+  --btn-ink: currentColor;
+  --btn-fill-hover: transparent;
 }
 .lsheet__close:focus-visible {
-  outline: 2px solid var(--focus-ring-band);
-  outline-offset: 2px;
+  outline-color: var(--focus-ring-band);
 }
 .lsheet__body {
   --lsheet-pad: var(--space-3h);

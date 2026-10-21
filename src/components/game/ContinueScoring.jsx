@@ -7,6 +7,7 @@ import { gamePath } from '../../lib/route.js'
 import { humanDate } from '../../lib/dates.js'
 import { countGamesInProgress } from '../../lib/account/localData.js'
 import { browserStorage } from '../../lib/account/preferencesStorage.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // How many games in progress on THIS device earns the signed-out pitch below
 // (PRD §6.2 row 3, `third-game`).
@@ -104,14 +105,9 @@ export function ContinueScoring() {
             Sign in
           </button>
         </SignInButton>
-        <button
-          type="button"
-          className="strip-dismiss continuebar__dismiss"
-          onClick={dismissPitch}
-          aria-label="Dismiss this suggestion"
-        >
+        <IconButton onClick={dismissPitch} label="Dismiss this suggestion">
           ✕
-        </button>
+        </IconButton>
       </div>
     </section>
   )
