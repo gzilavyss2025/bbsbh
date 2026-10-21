@@ -1,3 +1,4 @@
+import { ROUND_TAG } from '../../../lib/scout/format.js'
 import { bullpenGrid } from '../../../lib/postseason/worldseries/bullpen.js'
 import { teamClubNameShort } from '../../../lib/teams.js'
 import { TeamLogo } from '../../logo/TeamLogo.jsx'
@@ -5,12 +6,24 @@ import { Card } from '../../ui/frame/Card.jsx'
 import { Grid } from '../../ui/layout/Grid.jsx'
 import { Table } from '../../ui/table/Table.jsx'
 
-// BULLPEN: per club, the top relievers by October pitches, one column per
-// postseason game (the last six, numbered 1 to 6), an ink cell with the pitch
-// count when he pitched, and a Tot column. Box scores of games dated before the
-// slate date only (bullpenGrid re-applies the cutoff).
-function Club({ clubId, boxscores, slateDate, relievers }) {
-  const grid = bullpenGrid(boxscores, clubId, { slateDate, relievers })
+// BULLPEN: per club, every pitcher who relieved in the postseason, one column
+// per postseason game this year (numbered from 1, grouped under its round), an
+// ink cell with the pitch count when he pitched, and a Tot column. The table
+// scrolls sideways on a phone, name column fixed. Box scores of games dated
+// before the slate date only (bullpenGrid re-applies the cutoff).
+
+// Consecutive games of one round: [{ label, span }].
+function rounds(games) {
+  const out = []
+  for (const g of games) {
+    const label = ROUND_TAG[g.gameType] ?? ''
+    if (out.at(-1)?.label === label) out.at(-1).span += 1
+    else out.push({ label, span: 1 })
+  }
+  return out
+}
+
+function Club({ clubId, grid }) {
   if (grid.rows.length === 0) return null
   const club = teamClubNameShort(clubId)
   return (
@@ -19,8 +32,17 @@ function Club({ clubId, boxscores, slateDate, relievers }) {
         <TeamLogo teamId={clubId} name={club} size={24} />
         {club}
       </div>
-      <Table frame="bare" density="keep" className="ww-bulltable" label={`${club} bullpen pitches by game`}>
+      <Table frame="bare" density="keep" sticky className="ww-bulltable" label={`${club} bullpen pitches by game`}>
         <thead>
+          <tr>
+            <td />
+            {rounds(grid.games).map((r, i) => (
+              <th key={i} scope="colgroup" colSpan={r.span} className="ww-bulltable__round">
+                {r.label}
+              </th>
+            ))}
+            <td />
+          </tr>
           <tr>
             <th scope="col">Pitcher</th>
             {grid.games.map((g, i) => (
@@ -51,15 +73,15 @@ function Club({ clubId, boxscores, slateDate, relievers }) {
   )
 }
 
-export function Bullpen({ clubIds, boxscoresByClub, slateDate, wide }) {
-  const sides = clubIds.map((id) => (
-    <Club key={id} clubId={id} boxscores={boxscoresByClub?.[id]} slateDate={slateDate} relievers={wide ? 4 : 3} />
-  ))
-  if (clubIds.every((id) => bullpenGrid(boxscoresByClub?.[id], id, { slateDate }).rows.length === 0)) return null
+export function Bullpen({ clubIds, boxscoresByClub, slateDate }) {
+  const grids = clubIds.map((id) => bullpenGrid(boxscoresByClub?.[id], id, { slateDate }))
+  if (grids.every((g) => g.rows.length === 0)) return null
   return (
     <Card frame="stamped" label="Bullpen" count="Pitches per Oct game" className="ww-bullpen">
       <Grid min={300} gap="base">
-        {sides}
+        {clubIds.map((id, i) => (
+          <Club key={id} clubId={id} grid={grids[i]} />
+        ))}
       </Grid>
     </Card>
   )

@@ -75,12 +75,12 @@ export async function fetchClubGames(season, teamId, slateDate, { signal } = {})
     .sort((a, b) => a.date.localeCompare(b.date) || a.gamePk - b.gamePk)
 }
 
-// The bullpen grid's input: box scores of the club's last `limit` Final games
-// before the slate date. A box score that fails to load is left out.
-export async function fetchClubBoxscores(games, slateDate, { limit = 6, getBox = fetchGameBoxscore } = {}) {
-  const recent = (games ?? []).filter((g) => g.final && g.date < slateDate).slice(-limit)
-  const boxes = await Promise.all(recent.map((g) => getBox(g.gamePk)))
-  return recent.map((g, i) => ({ gamePk: g.gamePk, date: g.date, boxscore: boxes[i] })).filter((g) => g.boxscore)
+// The bullpen grid's input: box scores of every Final postseason game the club
+// played before the slate date. A box score that fails to load is left out.
+export async function fetchClubBoxscores(games, slateDate, { getBox = fetchGameBoxscore } = {}) {
+  const played = (games ?? []).filter((g) => g.final && g.date < slateDate)
+  const boxes = await Promise.all(played.map((g) => getBox(g.gamePk)))
+  return played.map((g, i) => ({ gamePk: g.gamePk, date: g.date, gameType: g.gameType, boxscore: boxes[i] })).filter((g) => g.boxscore)
 }
 
 // The ledger's runs, folded by club id. Only games that count (dated before the slate date).

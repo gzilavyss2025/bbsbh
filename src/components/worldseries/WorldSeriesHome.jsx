@@ -88,7 +88,7 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
       plateUmpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
     />
   )
-  const bullpen = data && <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={slateDate} wide={wide} />
+  const bullpen = data && <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={slateDate} />
 
   return (
     <Stack gap="section" className="ww">

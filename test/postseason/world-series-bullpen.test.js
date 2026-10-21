@@ -43,17 +43,21 @@ test('a starter in one game who relieves in another counts only the relief outin
   assert.deepEqual(g.rows.find((r) => r.id === 1).cells, [null, 12])
 })
 
-test('top N by total, ties by name; at most 6 games, the latest six, oldest first', () => {
+test('every reliever from every postseason game, most pitches first, ties by name', () => {
   const ids = [10, 11, 12, 13]
-  const games = Array.from({ length: 8 }, (_, i) =>
+  const games = Array.from({ length: 14 }, (_, i) =>
     box(i + 1, `2026-10-${String(10 + i).padStart(2, '0')}`, 'home', [[1, 90], ...ids.map((id) => [id, id === 13 ? 1 : (id - 9) * 5])]),
   )
-  const g = bullpenGrid(games, CLUB, { slateDate: SLATE })
-  assert.equal(g.games.length, 6)
-  assert.deepEqual(g.games.map((x) => x.gamePk), [3, 4, 5, 6, 7, 8])
-  assert.deepEqual(g.rows.map((r) => r.id), [12, 11, 10])
-  assert.equal(g.rows[0].total, 90)
-  assert.equal(bullpenGrid(games, CLUB, { slateDate: SLATE, relievers: 4 }).rows.length, 4)
+  const g = bullpenGrid(games, CLUB, { slateDate: '2026-11-01' })
+  assert.equal(g.games.length, 14)
+  assert.deepEqual(g.games.map((x) => x.gamePk), games.map((x) => x.gamePk))
+  assert.deepEqual(g.rows.map((r) => r.id), [12, 11, 10, 13])
+  assert.equal(g.rows[0].total, 14 * 15)
+})
+
+test('gameType rides along on each column', () => {
+  const games = [{ ...box(1, '2026-10-10', 'home', [[1, 90]]), gameType: 'D' }, { ...box(2, '2026-10-15', 'home', [[2, 80]]), gameType: 'L' }]
+  assert.deepEqual(bullpenGrid(games, CLUB, { slateDate: SLATE }).games.map((x) => x.gameType), ['D', 'L'])
 })
 
 test('a game the club did not play (no matching side) is skipped', () => {
