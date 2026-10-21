@@ -1,9 +1,10 @@
-// The park's accuracy note ("Wall from MLB's drawing of this park, …") and the defense
-// diamond. BallparkDiagram prints the note in its bottom-left corner, which is empty paper on
-// a whole park. DefenseDiamond crops the park to the defense (defenseWindow.js), and the crop
-// puts the catcher's label on that same corner, so on a MiLB park the two ran into each other
-// (the team page's Roster band, the innings page's Defensive alignment). The diamond now keeps
-// the note out of the drawing and prints it as a caption under the field.
+// The park's accuracy note ("Wall from MLB's drawing of this park, …") under a park with
+// fielders on it. BallparkDiagram prints the note as one long line along the drawing's bottom
+// edge. The two cards that lay HTML name tags over the park (DefenseDiamond, and the lineup
+// page's FieldCard) put the catcher's tag and the DH corner tag on that same strip, so on a
+// MiLB park the note ran under them and was clipped at the right (the innings page's Field tab,
+// the lineup page's Defensive alignment, the team page's Roster band). Both cards now keep the
+// note out of the drawing and print it as a quiet caption under the field.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -27,10 +28,25 @@ test('BallparkDiagram can leave its note out, and prints it by default', () => {
   assert.match(diagram, /\{note && layout\.accuracyNote && \(/)
 })
 
-test('DefenseDiamond keeps the note out of its cropped drawing and prints it as a caption', () => {
-  const diamond = src('components/scoring/DefenseDiamond.jsx')
-  assert.match(diamond, /<BallparkDiagram[^>]*note=\{false\}/)
-  assert.match(diamond, /className="defdiamond__note"/)
+const CARDS = [
+  ['components/scoring/DefenseDiamond.jsx', 'defdiamond__note'],
+  ['screens/lineup/next/cards/FieldCard.jsx', 'lfld__note'],
+]
+for (const [file, caption] of CARDS) {
+  test(`${file} keeps the note out of the drawing and prints it as a caption`, () => {
+    const jsx = src(file)
+    assert.match(jsx, /<BallparkDiagram[^>]*\snote=\{false\}/s)
+    assert.match(jsx, new RegExp(`className="${caption}"[^>]*>\\{[^}]*accuracyNote\\}`))
+  })
+}
+
+test("the caption stays quiet, as the park card's note does: never a shouted label", () => {
+  for (const [css, sel] of [['scoring/defense-diamond.css', '.defdiamond__note'], ['lineup-next/field.css', '.lfld__note']]) {
+    const body = ruleBody(stripComments(src(join('styles', css))), sel)
+    assert.ok(body, `${sel} has a rule`)
+    assert.doesNotMatch(body, /text-transform:\s*uppercase/)
+    assert.match(body, /color:\s*var\(--text-muted\)/)
+  }
 })
 
 test('no host hides the drawing note any more', () => {

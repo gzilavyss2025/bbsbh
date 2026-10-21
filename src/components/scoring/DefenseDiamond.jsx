@@ -106,8 +106,8 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
         </div>
       )}
       {!park && dh}
-      {/* The park's accuracy note, under the field: inside the cropped drawing it sat on the
-          catcher's label. */}
+      {/* The park's accuracy note, under the field: in the drawing its long bottom line ran
+          under the catcher and DH tags. */}
       {park && layout.accuracyNote && <p className="defdiamond__note">{layout.accuracyNote}</p>}
     </Card>
   )

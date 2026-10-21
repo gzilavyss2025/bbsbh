@@ -160,15 +160,15 @@
   border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 /* The park's accuracy note (BallparkDiagram's, passed note={false} here): a caption under the
-   field, since the diamond's crop puts the catcher on the corner the drawing prints it in. */
+   field, since in the drawing its long bottom line ran under the catcher and DH tags. Quiet, as
+   on the park card (57-ballpark-card.css): never a label. */
 .defdiamond__note {
   margin: var(--space-2) 0 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
   text-align: center;
-  text-transform: uppercase;
-  color: var(--text-caption);
+  color: var(--text-muted);
 }
 /* On the park the DH is a corner tag, as on the lineup page (.lfld__dh). */
 .defdiamond__dh--park {
