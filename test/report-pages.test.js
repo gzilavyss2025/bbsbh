@@ -49,6 +49,8 @@ const PATHS_BEFORE_GROUPING = [
   // The season run value board, filed under League Leaders — the same
   // season-to-date question read on one scale of runs.
   '/run-value',
+  // The league-wide Standing out report (#2453), filed under League Leaders.
+  '/outliers',
   '/awards',
   '/postseason-history',
   // The Nine Keys report, beside the bracket page: nine true-or-false keys

@@ -2,21 +2,3 @@
 .ww-glove .ww-comparison__row > * {
   height: calc(var(--space-10) + var(--bw-heavy));
 }
-
-.ww-glove__group th {
-  height: calc(var(--space-5) - var(--bw-heavy));
-  border: 0;
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-  vertical-align: bottom;
-  text-align: start;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-solid);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
-.ww-glove__group + .ww-comparison__row > * {
-  border-top: 0;
-}

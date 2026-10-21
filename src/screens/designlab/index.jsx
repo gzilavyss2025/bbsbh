@@ -16,6 +16,7 @@ import { ReportLook } from './report/ReportLook.jsx'
 import { JumpBarLab } from './jumpbar/JumpBarLab.jsx'
 import { StampedParts } from './stamped/StampedParts.jsx'
 import { ReportParts } from './report/ReportParts.jsx'
+import { PairLedgerLab } from './ledger/PairLedgerLab.jsx'
 import { PennantParts } from './pennants/PennantParts.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
 import '../../styles/designlab/lab.css'
@@ -74,6 +75,7 @@ export function DesignLab() {
         <Button size="control" className="dlab__jumplink" href="#tokens">Tokens</Button>
         <Button size="control" className="dlab__jumplink" href="#components">Components</Button>
         <Button size="control" className="dlab__jumplink" href="#pennants">Pennants</Button>
+        <Button size="control" className="dlab__jumplink" href="#ledgers">Ledgers</Button>
         <Button size="control" className="dlab__jumplink" href="#cards">Cards</Button>
         <Button size="control" className="dlab__jumplink" href="#pills">Pills</Button>
         <Button size="control" className="dlab__jumplink" href="#prototypes">Prototypes</Button>
@@ -126,6 +128,14 @@ export function DesignLab() {
         lede="The shared championship pennant, rendered across clubs, seasons and page contexts. Every example uses the same component."
       >
         <PennantParts />
+      </Band>
+
+      <Band
+        id="ledgers"
+        title="Two-team ledger (#2455)"
+        lede="Design A, the default for a two-team analysis table: measure, then team A, then team B. The real PairLedger on invented figures, with a tie, a missing figure, a failed-but-leading rank, a negative figure, long names and sides that are not clubs. Check at 390, 740 and 1180 px."
+      >
+        <PairLedgerLab />
       </Band>
 
       <Band

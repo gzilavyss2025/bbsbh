@@ -96,6 +96,7 @@
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
 //   '/leaders/org/{orgId}'              -> { name: 'leaders', scope: 'org', orgId, asOf, sportId }
+//   '/outliers'                         -> { name: 'outliers', asOf }  (league-wide Standing out; ?d= is the slider's cutoff)
 //   '/{MMDDYYYY}/{matchup}/{section}'   -> { name: 'game', date, matchup, section }
 //
 // Leader-page `scope` is one of mlb/al/nl (league), aaa/aa/aplus/a (level), or
@@ -562,6 +563,7 @@ export function parseRoute(url) {
   // record is never score-revealing, same footing as umpires above.
   if (parts.length === 2 && parts[0] === 'manager')
     return { name: 'manager', id: idFromSlug(parts[1]) }
+  if (parts.length === 1 && parts[0] === 'outliers') return { name: 'outliers', asOf }
   if (parts.length === 1 && parts[0] === 'leaders')
     return { name: 'leaders', scope: 'mlb', asOf, sportId }
   if (parts.length === 2 && parts[0] === 'leaders')
@@ -971,6 +973,10 @@ export function teamPhotosPath(id, opts = {}) {
 // chip on the home slate's wire.
 export function teamTransactionsPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/transactions${linkQuery(opts)}`
+}
+// The league-wide Standing out page; `d` is the slider's cutoff, none for the latest night.
+export function outliersPath(opts = {}) {
+  return `/outliers${linkQuery(opts)}`
 }
 // The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
 // every other league/level scope carries its key. Org leaders take a club id.

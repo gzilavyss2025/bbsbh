@@ -50,6 +50,9 @@ export const PAGE_GROUPS = [
       // question, narrowed to the six-team postseason field.
       { label: 'Postseason Race', path: '/postseason-race' },
       { label: 'League Leaders', path: '/leaders' },
+      // The same season-to-date read, asked as "who is out of the ordinary": every hot or
+      // cold callout in the league, with a date slider (#2453).
+      { label: 'Standing Out', path: '/outliers' },
       // Directly under League Leaders because it is the same gesture asked a
       // different way: that board ranks each skill in its own units, this one
       // puts all four of them — bat, glove, legs, arm — on one scale of runs

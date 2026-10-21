@@ -37,7 +37,7 @@ const WORDS = {
 
 // The stat in the sentence, singular: "a better ERA", "a worse batting average". Singular
 // on purpose: the page's caps turn a plural "ERAs" into "ERAS".
-const NOUN = {
+export const NOUN = {
   hitting: { ops: 'OPS', avg: 'batting average', hr: 'home-run pace', so: 'strikeout rate', bb: 'walk rate', sb: 'stolen-base pace' },
   pitching: { era: 'ERA', whip: 'WHIP', so: 'strikeout rate', bb: 'walk rate', hr: 'home-run rate' },
 }
@@ -75,7 +75,7 @@ export function hintWords({ beyond, tone, who, noun, sample, years }) {
 // leader row keeps room for the name; its "ended" line drops the unit the figure above
 // already names.
 const per = (v, unit) => (v > 0 ? `1/${Math.round(1 / v)} ${unit}` : '0 HR')
-const LIST_VALUE = {
+export const LIST_VALUE = {
   hitting: { ops: rate3, avg: rate3, hr: (v) => per(v, 'PA'), so: pct, bb: pct, sb: (v) => `${two(v)} a game` },
   pitching: { era: two, whip: two, so: pct, bb: pct, hr: (v) => per(v, 'BF') },
 }

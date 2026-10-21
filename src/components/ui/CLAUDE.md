@@ -26,6 +26,11 @@ to reach for from anywhere. At the top level: `Loader`, `SectionMasthead`, `Copy
   `sticky` first column, `label` makes the scroll region a Tab stop, `className` the
   block's namespace on the `<table>`. It owns no margin, takes `children`, and fetches and
   gates nothing, so a reveal gate stays where the caller put it.
+  `table/PairLedger.jsx` (#2455, Design A) is the default for a two-team analysis table:
+  a stamped Card, one title and note, then measure, side A, side B on every row; an amber
+  underline for the row leader (`pairLead`, `lib/design/ledger/`) and a clay asterisk for a
+  failure the model decides. It names no team or threshold. When to use it:
+  `docs/design-system-pair-ledger.md`.
 - **`state/`** — `EmptyState` (#1132), the one "nothing here" block: a dashed inset, no
   ground, graphite copy; `label`, `note` and one `action` only when given; `size` block or
   compact; `className` the namespace. It owns no margin, and the caller's test decides

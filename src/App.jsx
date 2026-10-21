@@ -154,6 +154,7 @@ const TeamTransactionsPage = lazyNamed(
   'TeamTransactionsPage',
 )
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
+const OutliersPage = lazyNamed(() => import('./screens/outliers/OutliersPage.jsx'), 'OutliersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
 const ScoutPage = lazyNamed(() => import('./screens/scout/ScoutPage.jsx'), 'ScoutPage')
 const FromPage = lazyNamed(() => import('./screens/from/FromPage.jsx'), 'FromPage')
@@ -399,6 +400,8 @@ export default function App() {
     content = <AboutPage onBack={() => go('/')} />
   } else if (route.name === 'postseason-series') {
     content = <SeriesRoute seriesId={route.seriesId} asOf={route.asOf} />
+  } else if (route.name === 'outliers') {
+    content = <OutliersPage asOf={route.asOf} />
   } else if (route.name === 'trade-deadline-season') {
     content = <TradeDeadlineSeasonPage season={route.season} />
   } else if (route.name === 'admin') {

@@ -1,0 +1,204 @@
+/* The league-wide "Standing out" page (#2453): a date slider, then every flag grouped by
+   callout type. A row is one button; an open row shows the player page's own callout
+   (hot-cold.css). Tone is said by the group's accent rule AND by the title's words
+   ("Best", "Worst"); colour never carries it alone. Hot is clay, cold is All-Star blue,
+   the same two tokens as the card. */
+.outl__slider {
+  padding: var(--space-3) var(--space-4);
+}
+.outl__asof {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+}
+.outl__range {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: var(--space-6);
+  margin: var(--space-2) 0 0;
+  background: transparent;
+  cursor: pointer;
+}
+.outl__range::-webkit-slider-runnable-track {
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--border-rule);
+}
+.outl__range::-moz-range-track {
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--border-rule);
+}
+.outl__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--space-6);
+  height: var(--space-6);
+  margin-top: calc(-1 * var(--space-2));
+  border: var(--space-1) solid var(--accent-primary);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.outl__range::-moz-range-thumb {
+  width: var(--space-6);
+  height: var(--space-6);
+  border: var(--space-1) solid var(--accent-primary);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.outl__range:focus-visible {
+  outline: none;
+}
+.outl__range:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--ring);
+}
+.outl__range:focus-visible::-moz-range-thumb {
+  box-shadow: var(--ring);
+}
+.outl__ends {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.outl__note {
+  margin: var(--space-2) var(--space-4);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+.outl__slider .outl__note {
+  margin-inline: 0;
+}
+.outl__summary {
+  margin: var(--space-2) var(--space-4);
+}
+.outl__summary .outl__note {
+  margin-inline: 0;
+}
+/* layout-exempt: a wrapping run of type labels, one gap each way */
+.outl__types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-2) 0 0;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-compact);
+}
+.outl__role-title {
+  margin: var(--space-4) var(--space-4) var(--space-1);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+}
+.outl__group {
+  margin: var(--space-3) var(--space-4);
+  padding-left: var(--space-3);
+  border-left: var(--bw-heavy) solid var(--clay);
+}
+.outl__group--cold {
+  border-left-color: var(--allstar-blue);
+}
+.outl__title {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-snug);
+}
+.outl__count {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.outl__rows {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.outl__row {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+/* layout-exempt: a fixed four across, one column per figure of the row */
+.outl__head {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: baseline;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--space-8);
+  padding: var(--space-2) 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-body);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.outl__head[aria-expanded='true'] {
+  background: var(--surface-row-selected);
+}
+.outl__head:focus-visible,
+.outl__name:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.outl__who {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.outl__weight,
+.outl__sample,
+.outl__value {
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+}
+.outl__value {
+  color: var(--text-heading);
+  font-size: var(--fs-small);
+}
+.outl__detail {
+  padding: var(--space-2) 0 var(--space-3);
+}
+.outl__detail .outl__note {
+  margin-inline: 0;
+}
+/* layout-exempt: a wrapping run of name buttons, one gap each way */
+.outl__names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+.outl__name {
+  min-height: var(--space-6);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-link);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  cursor: pointer;
+}

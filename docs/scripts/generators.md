@@ -1532,6 +1532,19 @@ Re-run only to fold in a new season.
   `[value, id, season, name, team]` rows (team: the club's nickname that season), so the card can say exactly how many past seasons were
   further out and list them. Checkpoints from 150 (`FULL_SEASON`) use one `full` pool: the
   FINAL lines of the seasons that reached 150 games or innings. A checkpoint file's rows also carry `[finalValue, finalSample]`, where that season ended, for the card's "ended .403" (#1855 slice 3).
+- `gen-outliers.mjs` → `public/data/outliers/{season}.json` and `public/data/outliers/index.json`
+  (the folder's `generatedAt` stamp) — the league-wide "Standing out" page (#2453). **Nightly.**
+  It fetches the season's regular-season game logs (the season leaderboard names the players;
+  `/people?personIds=…` hydrates 25 logs a call, four calls at once: about 70 calls and 6
+  seconds for a full season). For each player and each game date it runs `hotColdFlags`
+  (`src/api/hotcold/rule.js`, never copied) with the cutoff set to the next day, so that
+  day's game counts and no later game does. That walk is `lib/outliers/walk.mjs`. The file
+  keeps flagged days only, plus a closing marker `[date, 0]` for the first unflagged game
+  after a flagged run. Shape and reader: `docs/api/static-data.md`, `hotcold/outliers.js`.
+  Size for 2026: 358 KB raw, 65 KB gzipped, 428 of 1,619 players flagged. A season with no
+  game logs writes nothing. It reads `season-checkpoints/tails.json`, so the league pool is the
+  hand-run `gen-season-checkpoints.mjs`'s. The `scripts` budget in `check-dir-size.mjs` rose to
+  139 for this file, which the issue and the workflow name by path.
 - `ballpark/import-field-layouts.mjs` → `src/lib/ballpark/layout/fields.js` — each
   MLB park's measured distances, wall heights, deepest point and fair area (Baseball
   Savant's Dimensions table), plus its current fence outline, extracted from MLB's
