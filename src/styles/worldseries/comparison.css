@@ -1,127 +1,12 @@
-/* Scouting ledgers: matching club heads, measure-first rows and leader strokes.
-   Card and Table own the frame and grid; this namespace owns their contents. */
-/* layout-exempt: the Card's custom header, Table and footer form one column */
-.ww-comparison {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  padding-inline: var(--space-4);
-}
-
-.ww-comparison__head {
-  padding-block: var(--space-4) var(--space-3);
-}
-
-.ww-comparison__titleline,
+/* Home scouting cards: the few parts NineKeys.jsx and GloveLegs.jsx still name.
+   The ledger itself (frame, heads, rows, figures, legend) is the shared
+   PairLedger, styles/system/ledger/pair-ledger.css (#2455). These names stay until
+   NineKeys.jsx moves to PairAffix and the pair-ledger footer parts (it is held by
+   PR #2464). `ww-comparison__row` is only a hook for glove.css. */
 .ww-comparison__footline {
   justify-content: space-between;
 }
 
-.ww-comparison__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-title-lg);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-title);
-  letter-spacing: var(--ls-title);
-  color: var(--text-heading);
-}
-
-.ww-comparison__season {
-  white-space: nowrap;
-}
-
-.ww-comparison__note {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  line-height: var(--lh-compact);
-  letter-spacing: var(--ls-title);
-  color: var(--text-caption);
-}
-
-.ww-comparison__table {
-  table-layout: fixed;
-}
-
-.ww-comparison__teamcol {
-  width: 84px;
-}
-
-.ww-comparison__table thead th {
-  height: var(--space-16);
-  border-top: var(--bw-hair) solid var(--border-rule);
-  border-bottom: var(--bw-heavy) solid var(--border-stamped);
-  background: transparent;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.ww-comparison__table .ww-comparison__measure {
-  text-align: start;
-  letter-spacing: var(--ls-label);
-}
-
-/* layout-exempt: the crest sits above its name in a narrow table column */
-.ww-comparison__club {
-  flex-direction: column;
-  flex-wrap: nowrap;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-h3);
-  line-height: var(--lh-solid);
-  letter-spacing: var(--ls-none);
-  color: var(--text-heading);
-}
-
-.ww-comparison__city {
-  display: none;
-}
-
-.ww-comparison__row > * {
-  height: var(--space-8);
-  vertical-align: middle;
-}
-
-.ww-comparison__row:first-child > * {
-  border-top: 0;
-}
-
-.ww-comparison__row th {
-  white-space: normal;
-  text-align: start;
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-compact);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-heading);
-}
-
-.ww-comparison__row td {
-  text-align: center;
-  font-size: var(--fs-num-md);
-}
-
-.ww-comparison__figure {
-  display: inline-block;
-  padding: 2px var(--space-1h);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  line-height: var(--lh-compact);
-  white-space: nowrap;
-}
-
-.ww-comparison__figure--lead {
-  background: linear-gradient(transparent 72%, var(--marker) 72%);
-}
-
-.ww-comparison__figure--failed,
-.ww-comparison__failuremark {
-  color: var(--accent-negative-hover);
-}
-
-.ww-comparison__asterisk,
 .ww-comparison__ordinal,
 .ww-comparison__unit {
   font-family: var(--font-display);
@@ -129,22 +14,9 @@
   letter-spacing: var(--ls-none);
 }
 
-.ww-comparison__asterisk {
-  margin-left: 2px;
-}
-
 .ww-comparison__unit {
   white-space: nowrap;
   color: var(--text-caption);
-}
-
-.ww-comparison__foot {
-  position: relative;
-  min-height: var(--space-16);
-  margin-top: auto;
-  padding-block: var(--space-3);
-  border-top: var(--bw-heavy) solid var(--border-stamped);
-  justify-content: center;
 }
 
 .ww-comparison__tally {
@@ -162,44 +34,3 @@
   font-size: var(--fs-small);
 }
 
-.ww-comparison__legend {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-title);
-  color: var(--text-caption);
-}
-
-.ww-comparison__mark {
-  display: inline-block;
-  width: var(--space-5);
-  height: var(--space-2);
-  background: var(--marker);
-}
-
-@media (min-width: 740px) {
-  .ww-comparison {
-    padding-inline: var(--space-5);
-  }
-  .ww-comparison__title {
-    font-size: var(--fs-h1);
-  }
-}
-
-@media (min-width: 1024px) {
-  .ww-comparison__teamcol {
-    width: 96px;
-  }
-  .ww-comparison__club {
-    flex-direction: row;
-    font-size: var(--fs-title-sm);
-  }
-  .ww-comparison__clubname {
-    text-align: start;
-  }
-  .ww-comparison__clubname > span {
-    display: block;
-  }
-  .ww-comparison__clubname .ww-comparison__city {
-    margin-bottom: var(--space-1);
-  }
-}

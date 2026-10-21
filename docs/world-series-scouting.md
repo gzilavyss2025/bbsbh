@@ -18,14 +18,16 @@ Nine keys marks a failed rank in clay with an asterisk, without striking through
 Its threshold and verdict come from the data file. Ties and missing figures mark no leader.
 Glove and legs keeps the Defense and Running groups and all six measures and their units.
 
-`cards/scouting/ComparisonLedger.jsx` draws both cards with the existing Card, Table,
-Key and layout parts. The home-only `NineKeys.jsx` leaves the series pages' `SeriesNineKeys`
-view unchanged. `styles/worldseries/comparison.css` holds the shared presentation;
+`cards/scouting/ComparisonLedger.jsx` draws both cards through `PairLedger`, which uses the
+existing Card, Table, Key and layout parts. The home-only `NineKeys.jsx` leaves the series pages' `SeriesNineKeys`
+view unchanged. `styles/system/ledger/pair-ledger.css` holds the shared presentation;
 `glove.css` only sets the group and measure heights. The failed-key explanation remains
 available by tap or keyboard, and Full report still opens `/nine-keys`.
 
-Issue [#2455](https://github.com/gzilavyss2025/bbsbh/issues/2455) tracks making this the
-documented standard for future two-team analysis. This first pair does not close that issue.
+The shared layout is now the `PairLedger` primitive (`ui/table/PairLedger.jsx`);
+`ComparisonLedger.jsx` only turns two club ids into its sides. The standard, its edge
+cases and the audit of other two-team cards are in `docs/design-system-pair-ledger.md`
+(issue [#2455](https://github.com/gzilavyss2025/bbsbh/issues/2455)).
 
 ## Card order
 
