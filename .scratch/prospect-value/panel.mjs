@@ -29,6 +29,7 @@ import { buildCohort } from '../prospect-traits/lib.mjs'
 import { parseCsv } from '../../scripts/lib/csv.mjs'
 import { resolveRole } from '../../src/lib/contracts/positions.js'
 import { parseMoneyCell } from '../../src/lib/contracts/parseMoney.js'
+import { CROSSWALK_DIR } from '../../scripts/lib/contract-row-key.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const repo = join(here, '..', '..')
@@ -124,7 +125,7 @@ function computeWindow(debutYear) {
 //   - rowKey is a POSITIONAL index. The crosswalk array is aligned to the CSV
 //     by position; the alignment is asserted here rather than trusted.
 const salaryRows = parseCsv(await readFile(join(repo, 'scripts/data/contracts/salaries.csv'), 'utf8'))
-const salaryXw = await j(join(repo, 'public/data/contracts-history/identity/salaries.json'))
+const salaryXw = await j(join(CROSSWALK_DIR, 'salaries.json'))
 if (salaryXw.length !== salaryRows.length) throw new Error('crosswalk length does not match salaries.csv')
 for (let i = 0; i < salaryRows.length; i++) {
   const x = salaryXw[i]
