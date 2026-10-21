@@ -33,6 +33,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { CROSSWALK_DIR } from '../../scripts/lib/contract-row-key.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = join(__dirname, '..', '..')
@@ -77,7 +78,7 @@ function warFor(personId, season) {
 const MAX_WAR_SEASON = Math.max(...readJson(join(warHistoryDir, '00.json')).seasons)
 
 // ------------------------------------------------------------- identity
-const identity = readJson(join(REPO_ROOT, 'public/data/contracts-history/identity/free_agency.json'))
+const identity = readJson(join(CROSSWALK_DIR, 'free_agency.json'))
 
 // ------------------------------------------------------------- CSV
 const csvText = readFileSync(join(REPO_ROOT, 'scripts/data/contracts/free_agency.csv'), 'utf8')

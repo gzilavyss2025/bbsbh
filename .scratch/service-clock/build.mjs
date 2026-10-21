@@ -12,6 +12,7 @@ import { writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { j, local, here, repo, readCsv, loadCalendar, dayDiff, parseMls } from './lib.mjs'
+import { CROSSWALK_DIR } from '../../scripts/lib/contract-row-key.mjs'
 
 // The thirty MLB clubs. A wire row naming any other team id names a minor
 // league affiliate, which is how a recall is told from a reassignment.
@@ -132,7 +133,7 @@ if (existsSync(bioPath)) {
 // 2018-05-20, which banks 135 days). So the row that says what a debut season
 // bought is the row for the FOLLOWING season.
 const salaries = await readCsv('scripts/data/contracts/salaries.csv')
-const identity = await j(join(repo, 'public/data/contracts-history/identity/salaries.json'))
+const identity = await j(join(CROSSWALK_DIR, 'salaries.json'))
 const idByRowKey = new Map()
 for (const e of identity) if (e.mlbId != null) idByRowKey.set(e.rowKey, e.mlbId)
 

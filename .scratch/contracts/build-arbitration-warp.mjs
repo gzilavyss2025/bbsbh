@@ -48,6 +48,7 @@ import { parseCsv } from '../../scripts/lib/csv.mjs'
 import { parseMoneyCell } from '../../src/lib/contracts/parseMoney.js'
 import { normalizePosition } from '../../src/lib/contracts/positions.js'
 import { resolveClubCode } from '../../src/lib/contracts/clubCodes.js'
+import { CROSSWALK_DIR } from '../../scripts/lib/contract-row-key.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = join(__dirname, '..', '..')
@@ -59,7 +60,7 @@ const rows = parseCsv(csvText)
 
 const identity = JSON.parse(
   readFileSync(
-    join(REPO_ROOT, 'public', 'data', 'contracts-history', 'identity', 'arbitration.json'),
+    join(CROSSWALK_DIR, 'arbitration.json'),
     'utf8',
   ),
 )
