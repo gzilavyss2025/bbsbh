@@ -29,7 +29,6 @@ export function SeriesNineKeys({ data, clubs, season }) {
   if (!teams) return null
   const [a, b] = teams
   const bar = data.bar
-  const failed = (t, key) => t.ranks?.[key] == null || t.ranks[key] > bar
   const abbr = (id) => teamAbbr({ id })
   const verdict = keysVerdict(
     { abbr: abbr(a.teamId), failed: a.failed?.length ?? 0 },
@@ -68,8 +67,8 @@ export function SeriesNineKeys({ data, clubs, season }) {
                 <th scope="row" className="psseries__keylabel" title={k.note}>
                   {k.label}
                 </th>
-                <Rank rank={a.ranks?.[k.id]} fail={failed(a, k.id)} />
-                <Rank rank={b.ranks?.[k.id]} fail={failed(b, k.id)} />
+                <Rank rank={a.ranks?.[k.id]} fail={a.failed?.includes(k.id)} />
+                <Rank rank={b.ranks?.[k.id]} fail={b.failed?.includes(k.id)} />
                 <td className="psseries__keytrack" aria-hidden="true">
                   <span className="psseries__keyline">
                     <span className="psseries__keybar" style={{ left: at(bar) }} />
@@ -106,10 +105,9 @@ function KeyDot({ rank, teamId, side, at }) {
 }
 
 function Rank({ rank, fail }) {
-  if (rank == null) return <td className="psseries__keyrank psseries__keyrank--fail">—</td>
   return (
     <td className={`psseries__keyrank${fail ? ' psseries__keyrank--fail' : ''}`}>
-      {ordinal(rank)}
+      {rank == null ? '—' : ordinal(rank)}
       {fail && <span className="sr-only"> (failed)</span>}
     </td>
   )

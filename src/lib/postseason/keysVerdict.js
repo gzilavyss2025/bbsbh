@@ -39,3 +39,8 @@ export function nineKeysTeams(data, clubs, season) {
   const [a, b] = clubs.map((c) => data?.current?.teams?.find((t) => t.teamId === c.id))
   return a && b && data.current.season === season && data.keys?.length ? [a, b] : null
 }
+
+// Did a club fail this key? A rank worse than `bar` fails, and so does a missing rank.
+// scripts/gen-nine-keys.mjs writes each club's `failed` list by this rule. The views read
+// that list, not this, so a row's mark and the "Failed keys" tally can never disagree.
+export const isFailedKey = (rank, bar) => rank == null || rank > bar

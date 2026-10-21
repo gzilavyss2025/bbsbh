@@ -41,11 +41,9 @@ export function NineKeys({ data, clubIds, season }) {
             <th scope="row">{key.label}</th>
             {ranks.map((rank, i) => (
               <td key={clubIds[i]}>
-                {rank == null ? NO_FIGURE : (
-                  <ComparisonFigure lead={lead === (i === 0 ? 'a' : 'b')} failed={rank > data.bar}>
-                    {rank}<span className="ww-comparison__ordinal">{ordinalSuffix(rank)}</span>
-                  </ComparisonFigure>
-                )}
+                <ComparisonFigure lead={lead === (i === 0 ? 'a' : 'b')} failed={teams[i].failed?.includes(key.id)}>
+                  {rank == null ? NO_FIGURE : <>{rank}<span className="ww-comparison__ordinal">{ordinalSuffix(rank)}</span></>}
+                </ComparisonFigure>
               </td>
             ))}
           </tr>
