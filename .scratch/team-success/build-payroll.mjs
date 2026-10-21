@@ -13,7 +13,7 @@
 // build-roster-age.mjs pulled it with a `teamId` filter, a player traded in
 // mid-season appears once per club, each row carrying only that club's share
 // of his playing time -- which is exactly what an attribution needs.
-// public/data/contracts-history/identity/salaries.json is the row-for-row MLB
+// scripts/data/contracts/identity/salaries.json is the row-for-row MLB
 // id crosswalk that links the two (ADR-0066).
 //
 // THE RULE. Each salary row is attributed across the clubs the man played for
@@ -82,7 +82,7 @@ const readJson = (p) => JSON.parse(read(p))
 // --------------------------------------------------------------- the inputs
 
 const salaryRows = parseCsv(read('scripts/data/contracts/salaries.csv'))
-const identity = readJson('public/data/contracts-history/identity/salaries.json')
+const identity = readJson('scripts/data/contracts/identity/salaries.json')
 
 if (identity.length !== salaryRows.length) {
   throw new Error(`identity holds ${identity.length} rows against ${salaryRows.length} salary rows`)
@@ -447,7 +447,7 @@ const panel = {
   generatedAt,
   source:
     'scripts/data/contracts/salaries.csv joined to .scratch/team-success/roster-age-cache.json ' +
-    'through public/data/contracts-history/identity/salaries.json',
+    'through scripts/data/contracts/identity/salaries.json',
   method:
     'Each salary row is attributed across the clubs the player appeared for that season, pro rata ' +
     "by PA + (league PA per inning) * IP at each club. See this builder's header for the four " +

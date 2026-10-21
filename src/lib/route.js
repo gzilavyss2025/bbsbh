@@ -21,6 +21,7 @@
 //   '/awards'                           -> { name: 'awards-history' }
 //   '/postseason-history'               -> { name: 'postseason-history' }
 //   '/nine-keys'                        -> { name: 'nine-keys' }
+//   '/classics'                         -> { name: 'classics' }  (Score a classic: one old MLB game, dealt on who played, #1525)
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason-race[/{year}]'         -> { name: 'postseason-race', ... } (parseSeasonRoute)
 //   '/postseason-records'               -> { name: 'postseason-records', asOf, season, view, team, category, metric, sort, order }
@@ -337,6 +338,7 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'postseason-history')
     return { name: 'postseason-history' }
   if (parts.length === 1 && parts[0] === 'nine-keys') return { name: 'nine-keys' }
+  if (parts.length === 1 && parts[0] === 'classics') return { name: 'classics' }
   if (parts.length === 1 && parts[0] === 'postseason-leaders')
     return { name: 'postseason-leaders' }
   if (parts.length === 1 && parts[0] === 'trade-deadline')

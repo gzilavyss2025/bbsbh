@@ -1,7 +1,9 @@
 import { fetchSprayFor, decodeSprayBalls } from '../spray.js'
 import { getJson } from '../statsapi.js'
+import { fetchStaticTeams } from '../teams-static.js'
 import { fetchHotBatSplits } from '../postseason/worldSeriesHome.js'
 import { topHitters } from '../../lib/postseason/worldseries/scouting/pitchByPitch.js'
+import { SPORT_IDS } from '../../lib/teams.js'
 
 // The reads behind the World Series scouting cards Platoon and Park fit (#2316, slice 2).
 // OPEN SURFACE (ADR-0034), no score. Platoon reads the regular-season totals, which are over before
@@ -28,6 +30,15 @@ export function shapePlatoon(data) {
 export async function loadPlatoon({ clubIds, season }) {
   const rows = await Promise.all(clubIds.map((id) => getJson(platoonUrl(id, season)).then(shapePlatoon)))
   return Object.fromEntries(clubIds.map((id, i) => [id, rows[i]]).filter(([, r]) => r))
+}
+
+// -> { [clubId]: venueId }: each club's home park from the static teams file (public/data/teams.json,
+// its MLB bucket), for the Park fit card's two walls. A club the file does not list is left out; a file with
+// no MLB clubs throws, so the card names the failed read instead of drawing nothing.
+export async function loadHomeVenues(clubIds) {
+  const mlb = (await fetchStaticTeams())?.bySportId?.[SPORT_IDS.MLB] ?? []
+  if (!mlb.length) throw new Error('teams.json lists no MLB clubs')
+  return Object.fromEntries(clubIds.map((id) => [id, mlb.find((t) => t.id === id)?.venueId]).filter(([, v]) => v != null))
 }
 
 // -> { [clubId]: balls[] }: the regular-season balls in play of the club's regulars (its hitters

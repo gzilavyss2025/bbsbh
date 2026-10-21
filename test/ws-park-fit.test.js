@@ -1,10 +1,13 @@
 // The "Park fit" card's model (#2316): the pull, centre and opposite-field share of each club's fly
-// balls, from the spray store. Plus the card's rule: Milwaukee only, always off day, game day at home.
+// balls, from the spray store, and how many carry past each Series park's wall. Plus the card's
+// rule: it shows on every day type that has data, at either park.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { flyShares, parkFitModel, MIN_FLY } from '../src/lib/postseason/worldseries/scouting/parkFit.js'
+import { carryRates, fitParks, flyShares, parkFitModel, MIN_CARRY, MIN_FLY } from '../src/lib/postseason/worldseries/scouting/parkFit.js'
 import { scoutingModel } from '../src/lib/postseason/worldseries/scouting/scouting.js'
 import { HIT_COORD_ORIGIN } from '../src/lib/ballpark/hitProjection.js'
+import { resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.js'
+import { wallDistanceAt } from '../src/lib/ballpark/ballparkGeometry.js'
 
 const { x: ox, y: oy } = HIT_COORD_ORIGIN
 // A ball at `deg` off dead centre (negative: left field), hit from `side`, at launch angle `la`.
@@ -16,6 +19,14 @@ const ball = (deg, side = 'R', la = 30, level = 'mlb') => ({
   level,
 })
 const many = (n, b) => Array.from({ length: n }, () => b)
+
+// The two Series parks on the slate date: American Family Field (venue 32) and Tropicana Field (venue 12).
+const DAY = '2026-10-22'
+const MIL = resolveBallparkLayout({ venueId: 32, gameDate: DAY })
+const TB = resolveBallparkLayout({ venueId: 12, gameDate: DAY })
+// A fly ball at `deg` that travelled `ft` feet, and `n` of them `by` feet past (negative: short of) `layout`'s wall there.
+const hit = (deg, ft, side = 'R') => ({ ...ball(deg, side), distance: ft })
+const pastWall = (layout, deg, by, n = MIN_CARRY) => many(n, hit(deg, wallDistanceAt(layout, deg) + by))
 
 test('a right-handed hitter pulls to left field, a left-handed one to right', () => {
   const s = flyShares([...many(15, ball(-30, 'R')), ...many(15, ball(30, 'L')), ...many(15, ball(0)), ...many(15, ball(30, 'R'))])
@@ -61,20 +72,92 @@ test('no card when either club has no usable sample', () => {
   assert.equal(parkFitModel(null, { clubA: 139, clubB: 158 }), null)
 })
 
-test('Park fit: every off day; a game day only at Milwaukee (venue 32)', () => {
-  const all = { parkFit: { rows: [] } }
+test('Park fit: on an off day and on a game day, at either park, and only with data', () => {
   const ids = (i) => scoutingModel(i).map((c) => c.id)
-  assert.ok(ids({ dayType: 'off', ...all, venueId: 12 }).includes('park-fit'))
-  assert.ok(ids({ dayType: 'game', ...all, venueId: 32 }).includes('park-fit'))
-  assert.ok(!ids({ dayType: 'game', ...all, venueId: 12 }).includes('park-fit'))
-  assert.ok(!ids({ dayType: 'game', ...all, venueId: null }).includes('park-fit'))
+  // The card draws both clubs' parks now, so tonight's venue no longer decides it.
+  assert.ok(ids({ dayType: 'off', parkFit: { rows: [] } }).includes('park-fit'))
+  assert.ok(ids({ dayType: 'game', parkFit: { rows: [] } }).includes('park-fit'))
+  assert.ok(!ids({ dayType: 'game', parkFit: null }).includes('park-fit'))
   assert.ok(!ids({ dayType: 'off', parkFit: null }).includes('park-fit'))
 })
 
 test('Park fit comes right after Platoon off day, and after Film room on a game day', () => {
-  const all = { nineKeys: true, gloveLegs: [1], edges: [1], pitchByPitch: {}, plateUmpire: { name: 'A' }, meetings: [1], platoon: [1], parkFit: {}, venueId: 32 }
+  const all = { nineKeys: true, gloveLegs: [1], edges: [1], pitchByPitch: {}, plateUmpire: { name: 'A' }, meetings: [1], platoon: [1], parkFit: {} }
   const off = scoutingModel({ dayType: 'off', ...all }).map((c) => c.id)
   assert.equal(off.indexOf('park-fit'), off.indexOf('platoon') + 1)
   const g = scoutingModel({ dayType: 'game', ...all }).map((c) => c.id)
   assert.ok(g.indexOf('park-fit') > g.indexOf('film-room'))
+})
+
+test('a fly ball carries when it travels farther than the wall on its own angle', () => {
+  // Half the balls land 5 feet past American Family's wall at dead center, half 5 feet short of it.
+  const r = carryRates([...pastWall(MIL, 0, 5), ...pastWall(MIL, 0, -5)], MIL)
+  assert.equal(r.center, 50)
+  assert.equal(r.pull, null, 'no ball in a direction is a dash, not 0%')
+  assert.equal(r.oppo, null)
+})
+
+test('the same fly balls carry in one park and not in the other', () => {
+  // Ten degrees toward left, Tropicana's wall stands well behind American Family's.
+  const deg = -10
+  const [near, deep] = [wallDistanceAt(MIL, deg), wallDistanceAt(TB, deg)]
+  assert.ok(deep - near > 10, `Tropicana ${deep} ft, American Family ${near} ft`)
+  const balls = many(MIN_CARRY, hit(deg, (near + deep) / 2))
+  assert.equal(carryRates(balls, MIL).center, 100)
+  assert.equal(carryRates(balls, TB).center, 0)
+})
+
+test('a direction under the floor has no carry figure; a ball with no distance or foul of the poles is not counted', () => {
+  const few = pastWall(MIL, 0, 5, MIN_CARRY - 1)
+  assert.equal(carryRates(few, MIL).center, null)
+  assert.equal(carryRates([...few, { ...ball(0), distance: null }], MIL).center, null, 'no distance, not counted')
+  // 60 degrees off center is foul of the pole: no wall to clear, so no carry and no count.
+  assert.equal(carryRates([...few, hit(0, 999), hit(-60, 999)], MIL).pull, null)
+  assert.equal(carryRates(pastWall(MIL, 0, 5), MIL).center, 100)
+  // Only fly balls in the majors count, as for the shares.
+  assert.equal(carryRates(many(MIN_CARRY, { ...hit(0, 999), level: 'aaa' }), MIL).center, null)
+  assert.equal(carryRates(many(MIN_CARRY, { ...hit(0, 999), launchAngle: 10 }), MIL).center, null)
+})
+
+test('a left-handed hitter pulls toward right: the carry directions read the same way as the shares', () => {
+  // 30 degrees toward right is the pull side of a lefty and the opposite side of a righty.
+  const lefty = carryRates(pastWall(MIL, 30, 5).map((b) => ({ ...b, side: 'L' })), MIL)
+  const righty = carryRates(pastWall(MIL, 30, 5), MIL)
+  assert.equal(lefty.pull, 100)
+  assert.equal(righty.oppo, 100)
+})
+
+test('the model has one carry block per layout, a rate per club in the given order', () => {
+  const balls = { 139: many(40, hit(0, 600)), 158: many(40, hit(0, 100)) }
+  const m = parkFitModel(balls, { clubA: 139, clubB: 158, layouts: [TB, MIL] })
+  assert.equal(m.carry.length, 2)
+  for (const block of m.carry) {
+    assert.deepEqual(block.map((r) => r.key), ['pull', 'center', 'oppo'])
+    assert.deepEqual(block[1].rates, [100, 0], 'the long balls carry in both parks, the short ones in neither')
+    assert.deepEqual(block[0].rates, [null, null])
+  }
+  assert.deepEqual(parkFitModel(balls, { clubA: 139, clubB: 158 }).carry, [], 'no layouts, no carry blocks')
+})
+
+test('fitParks: one park per club in the given order; the focus game wins for its host; no club is named', () => {
+  const venues = { 139: 12, 158: 32 }
+  const ids = (sides, extra = {}) =>
+    fitParks({ sides, venueByClub: venues, slateDate: DAY, ...extra }).map((p) => p.layout.venueId)
+  assert.deepEqual(ids([139, 158]), [12, 32])
+  assert.deepEqual(ids([158, 139]), [32, 12])
+  assert.deepEqual(fitParks({ sides: [139, 158], venueByClub: venues, slateDate: DAY }).map((p) => p.clubId), [139, 158])
+  // A game moved to another park draws the park it is played in (venue 14, Rogers Centre, is on file).
+  assert.deepEqual(ids([139, 158], { game: { homeId: 158, venue: { id: 14 } } }), [12, 14])
+  // A club whose park has no layout is left out, and a park two clubs share is drawn once.
+  assert.deepEqual(ids([139, 158], { venueByClub: { 139: 999999, 158: 32 } }), [32])
+  assert.deepEqual(ids([139, 158], { venueByClub: { 139: 32, 158: 32 } }), [32])
+  assert.deepEqual(ids([139, 158], { venueByClub: null }), [])
+})
+
+test('fitParks: a club keeps its ink when away and home turn over, and when only one park resolves', () => {
+  const inks = (sides, venueByClub = { 139: 12, 158: 32 }) =>
+    Object.fromEntries(fitParks({ sides, venueByClub, slateDate: DAY }).map((p) => [p.clubId, p.ink]))
+  assert.deepEqual(inks([139, 158]), { 139: 0, 158: 1 })
+  assert.deepEqual(inks([158, 139]), { 139: 0, 158: 1 }, 'the order of sides does not move the ink')
+  assert.deepEqual(inks([158, 139], { 139: 999999, 158: 32 }), { 158: 1 }, 'the other park is missing: the ink stays')
 })

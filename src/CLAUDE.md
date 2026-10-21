@@ -38,7 +38,7 @@ Anchored on `/` (today's MLB slate; a league prefix and/or `/{MMDDYYYY}` name
 any other — `/aaa`, `/aa/08152026`, both defaulting by absence, ADR-0056, and
 `GameSelect` navigates them) and `/{MMDDYYYY}/{matchup}/{section}` (a deep-linkable
 game section), plus many standalone pages (`/logos`, `/leaders`, `/standings`,
-player/team/umpire/manager, postseason, …). A person/club page is `{slug}-{id}`
+player/team/umpire/manager, postseason, …). `/classics` (Score a classic, #1525) deals one old MLB game from `ClassicCard`; era and club chips are page state, not address. A person/club page is `{slug}-{id}`
 (ADR-0057); `route.js`'s `parseRoute` header lists every route name, in order. A game's
 `matchup` is the away+home team abbreviations lowercased (`milaz`; game 2 of a doubleheader
 appends `-2`, game 1 stays bare so old links keep working) and `section` is
