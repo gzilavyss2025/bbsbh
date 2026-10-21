@@ -332,7 +332,6 @@ function WorldSeriesBand({ bracket, cutoff, historyIds, rail }) {
   const ws = bracket.worldSeries
   if (!ws) return null
   const champion = bracket.champion
-  const wsMark = seriesMark({ season: bracket.season, round: 'worldseries' })
   const href = ws.id ? seriesHref(ws, cutoff, historyIds) : null
   const Wrapper = href ? 'a' : 'div'
   const wrapperProps = href ? linkProps(href) : { role: 'group' }
@@ -367,7 +366,7 @@ function WorldSeriesBand({ bracket, cutoff, historyIds, rail }) {
           tone="tint"
           label={champion ? champion.name : 'World Series'}
           labelAs="h3"
-          count={champion ? `Won it in ${ws.gamesPlayed}` : 'Best of 7'}
+          count={champion ? `World champions · in ${ws.gamesPlayed}` : 'Best of 7'}
           className={`pbkt-wscard${isDecidingGame(ws) ? ' pbkt-wscard--bold' : ''}`}
         >
           {rows}
@@ -376,6 +375,7 @@ function WorldSeriesBand({ bracket, cutoff, historyIds, rail }) {
       </Wrapper>
     )
   }
+  const wsMark = seriesMark({ season: bracket.season, round: 'worldseries' })
   return (
     <Wrapper
       className={`pbkt-ws${champion ? ' pbkt-ws--champ' : ''}${isDecidingGame(ws) ? ' pbkt-ws--bold' : ''}`}

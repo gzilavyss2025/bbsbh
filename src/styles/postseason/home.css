@@ -15,8 +15,9 @@
 
 /* ---------- the rail (wide, from BRACKET_RAIL_QUERY up) ---------- */
 
-/* 358 is FullBracket's own tree width (TREE_W), so the tree fits the column
-   exactly. The shell widens to match: the games column keeps the 928px it has
+/* 358 is the rail's width: FullBracket's TREE_W for the plain tree. In the
+   rail's stamped cards (below) the tree is RAIL_TREE_W, 358 less each card's
+   edge and padding. The shell widens to match: the games column keeps the 928px it has
    beside the wire rail, and 928 + 24 + 358 = 1310. */
 .screen--slate.screen--bracketrail {
   max-width: 1310px;
@@ -74,15 +75,12 @@
 .pbkt-full--rail .pbkt-tree {
   margin-bottom: 0;
 }
-.pbkt-full--rail .pbkt-box {
+.pbkt-full--rail .pbkt-box:not(.pbkt-box--bold) {
   border: var(--bw-heavy) solid var(--border-stamped);
   border-radius: 0;
 }
-.pbkt-full--rail .pbkt-box--done {
+.pbkt-full--rail .pbkt-box--done:not(.pbkt-box--bold) {
   border-color: var(--border-stamped-soft);
-}
-.pbkt-full--rail .pbkt-box--bold {
-  border: 3px double var(--accent-primary);
 }
 /* A row sits over its box, so its fill stops inside the box's edge. */
 .pbkt-full--rail .pbkt-trow {
