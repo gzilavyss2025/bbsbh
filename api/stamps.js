@@ -168,8 +168,9 @@ async function overMintLimit(redis, userId) {
   try {
     const key = `stamps:rate:${userId}`
     const n = await redis.incr(key)
-    // A key left without a TTL (EXPIRE failed after INCR) would block this user for good.
-    if (n === 1 || (await redis.ttl(key)) < 0) await redis.expire(key, 60)
+    // NX sets the window only when the key has none, so a key left without a TTL (EXPIRE
+    // failed after INCR) heals on the next mint instead of blocking this user for good.
+    await redis.expire(key, 60, 'NX')
     return n > MINT_LIMIT_PER_MIN
   } catch {
     return false

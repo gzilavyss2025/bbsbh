@@ -426,11 +426,10 @@ function fakeRedis(seed = {}) {
       store[key] = (Number(store[key]) || 0) + 1
       return store[key]
     },
-    async expire(key) {
-      this.ttls[key] = 60
-    },
-    async ttl(key) {
-      return this.ttls[key] ?? -1
+    async expire(key, seconds, option) {
+      if (option === 'NX' && key in this.ttls) return 0
+      this.ttls[key] = seconds
+      return 1
     },
     ttls: {},
   }

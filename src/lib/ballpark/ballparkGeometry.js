@@ -37,9 +37,11 @@ export const HOME = { x: 310, y: 505 }
 // on — the hit chart, the flight card the play-by-play diamond opens — crops
 // the dead sky off the top so the field fills the card. It is a WINDOW onto the
 // fixed viewBox above and never a rescale, so a mark's coordinates mean the same
-// thing cropped or not. Stated once, here, because two consumers positioning
-// HTML over the SVG in percentages of this box would otherwise drift apart. Set
-// the crop to 0 to go back to the full frame.
+// thing cropped or not. The crop is the same for every park on purpose: marks from
+// different parks stay comparable. The park CARDS (lib/ballpark/layout/parkWindow.js) crop
+// to their own park instead. Stated once, here, because two consumers positioning HTML over
+// the SVG in percentages of this box would otherwise drift apart. Set the crop to 0 to go
+// back to the full frame.
 export const PLOT_SKY_CROP = 50
 export const PLOT_VIEWBOX = `0 ${PLOT_SKY_CROP} ${VIEWBOX.w} ${VIEWBOX.h - PLOT_SKY_CROP}`
 

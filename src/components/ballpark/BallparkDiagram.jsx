@@ -1,5 +1,5 @@
-import { buildFieldGeometry, diagramInput, wallStroke, HOME } from '../../lib/ballpark/ballparkGeometry.js'
-import { parkWindow } from '../../lib/ballpark/layout/parkWindow.js'
+import { wallStroke, HOME } from '../../lib/ballpark/ballparkGeometry.js'
+import { geometryOf, parkWindow } from '../../lib/ballpark/layout/parkWindow.js'
 
 // The scorebook's ballpark drawing: an ink-on-manila sketch of the full field —
 // infield diamond, outfield grass, the warning track hugging the fence, and the
@@ -26,11 +26,11 @@ export function BallparkDiagram({
   label = 'Ballpark field dimensions diagram',
   children = null,
 }) {
-  const g = buildFieldGeometry(diagramInput(layout))
+  const g = geometryOf(layout)
   return (
     <svg
       className={`bpdiagram ${className}`}
-      viewBox={viewBox ?? parkWindow(layout, { geometry: g }).viewBox}
+      viewBox={viewBox ?? parkWindow(layout).viewBox}
       role="img"
       aria-label={label}
     >

@@ -8,12 +8,20 @@ import { buildFieldGeometry, diagramInput, VIEWBOX } from '../ballparkGeometry.j
 
 export const SKY_PAD = 4 // the paper left above the highest mark
 
+// The drawing's geometry, built once per layout: a card builds it for its window and
+// BallparkDiagram builds it again to draw, and both ask for the same layout object.
+const geometries = new WeakMap()
+export function geometryOf(layout) {
+  let g = geometries.get(layout)
+  if (!g) geometries.set(layout, (g = buildFieldGeometry(diagramInput(layout))))
+  return g
+}
+
 // The window. `x` and `w` narrow it at the sides for a card that wants that (the player page's
-// innings art); the default is the full frame's width. `geometry` is the drawing's own, for a
-// caller that has built it already (BallparkDiagram). `percent` places an HTML label over the
-// window, as a share of its box.
+// innings art); the default is the full frame's width. `percent` places an HTML label over the
+// window, as a share of its box. `geometry` stands in for the layout's own (the unit test hands one in).
 export function parkWindow(layout, { x = 0, w = VIEWBOX.w, geometry } = {}) {
-  const g = geometry ?? buildFieldGeometry(diagramInput(layout))
+  const g = geometry ?? geometryOf(layout)
   const top = Number.isFinite(g.top) ? Math.max(0, Math.floor(g.top - SKY_PAD)) : 0 // a bad top shows the full frame
   const h = VIEWBOX.h - top
   return {
