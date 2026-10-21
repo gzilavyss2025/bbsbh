@@ -89,7 +89,7 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
     <Card as="div" body="flush" className="defdiamond">
       {layout ? (
         <div className="defdiamond__field defdiamond__field--park" style={{ aspectRatio: win.aspectRatio }}>
-          <BallparkDiagram layout={layout} viewBox={win.viewBox} className="defdiamond__park" label={label} />
+          <BallparkDiagram layout={layout} viewBox={win.viewBox} className="defdiamond__park" label={label} note={false} />
           {Object.entries(SPOTS).map(([pos, spot]) => {
             const { left, top } = win.percent(DEFENSE_SPOTS[pos])
             return <DefenseSpot key={pos} stack={byPos[pos]} spot={{ x: left, y: top, label: spot.label }} park />
@@ -106,6 +106,9 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
         </div>
       )}
       {!park && dh}
+      {/* The park's accuracy note, under the field: in the drawing its long bottom line ran
+          under the catcher and DH tags. */}
+      {park && layout.accuracyNote && <p className="defdiamond__note">{layout.accuracyNote}</p>}
     </Card>
   )
 }

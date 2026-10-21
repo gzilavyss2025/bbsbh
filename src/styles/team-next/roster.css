@@ -73,10 +73,10 @@
 .rosterbox__war--down {
   color: var(--accent-negative-hover);
 }
-/* The block's small labels, one recipe: the break rows, the foot and the park note under the
-   diamond. Each rule below keeps only its own ground, ink and place. The Season view's line
-   under an arm's name is the shared .t-label (tokens/typography.css). */
-:is(.rosterbox__break th, .rosterbox__foot th, .rosterbox-pair__note) {
+/* The block's small labels, one recipe: the break rows and the foot. Each rule below keeps
+   only its own ground, ink and place. The Season view's line under an arm's name is the shared
+   .t-label (tokens/typography.css). */
+:is(.rosterbox__break th, .rosterbox__foot th) {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -102,16 +102,6 @@
 /* At wide the diamond sits beside the lineup table, centred on its height. */
 .rosterbox-pair__diamond {
   align-self: center;
-}
-/* The park's accuracy note sits in the drawing's bottom-left corner, where the diamond's crop
-   puts the catcher. A stopgap for that collision in the shared DefenseDiamond: here the note
-   moves under the drawing as a caption, with the same words. */
-.rosterbox-pair__diamond .bpdiagram__note {
-  display: none;
-}
-.rosterbox-pair__note {
-  margin: var(--space-2) 0 0;
-  color: var(--text-caption);
 }
 /* The pen week's strip keeps its three figures on one row, even on a phone: a third cell
    wrapped alone and left an empty fill beside it. */

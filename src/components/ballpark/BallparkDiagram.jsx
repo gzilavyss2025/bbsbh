@@ -23,6 +23,7 @@ export function BallparkDiagram({
   className = '',
   viewBox = `0 0 ${VIEWBOX.w} ${VIEWBOX.h}`,
   label = 'Ballpark field dimensions diagram',
+  note = true,
   children = null,
 }) {
   const g = buildFieldGeometry(diagramInput(layout))
@@ -101,9 +102,12 @@ export function BallparkDiagram({
           {w.h}′
         </text>
       ))}
-      {/* How sure the wall is, when it is not a checked outline. Bottom-left is
-          empty paper in every park, and no caller crops it. */}
-      {layout.accuracyNote && (
+      {/* How sure the wall is, when it is not a checked outline: one long line
+          along the bottom edge, which is empty paper on a bare park. A caller that
+          lays HTML tags over that strip (the defense diamond and the lineup page's
+          FieldCard put the catcher and the DH there) passes note={false} and
+          prints layout.accuracyNote itself, under the field. */}
+      {note && layout.accuracyNote && (
         <text className="bpdiagram__note" x="12" y={VIEWBOX.h - 12}>
           {layout.accuracyNote}
         </text>

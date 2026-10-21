@@ -124,6 +124,8 @@
 /* The Uniform fact's shirt button and batter-figure sheet (#1852); a subfolder, since 09 is at its line cap and src/styles at its file cap. */
 @import './styles/team-info/uniform-figure.css';
 @import './styles/10-lineup.css';
+/* The defense diamond (DefenseDiamond.jsx), split from 10-lineup at its line cap; same cascade slot. */
+@import './styles/scoring/defense-diamond.css';
 @import './styles/10b-former-teammates.css';
 @import './styles/workload/projection.css';
 @import './styles/11-innings.css';
