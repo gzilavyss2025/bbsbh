@@ -5,7 +5,8 @@ import { Card } from '../ui/frame/Card.jsx'
 import { StruckLine } from './StruckLine.jsx'
 import { FieldBackdrop } from './field/FieldBackdrop.jsx'
 import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
-import { DEFENSE_SPOTS, defenseWindow } from '../../lib/ballpark/layout/defenseWindow.js'
+import { DEFENSE_SPOTS } from '../../lib/ballpark/layout/defenseWindow.js'
+import { parkWindow } from '../../lib/ballpark/layout/parkWindow.js'
 
 // A grass-and-clay field with each fielder's surname at his position.
 // Position names remain available to assistive technology. Fielders only —
@@ -74,7 +75,7 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
   // (.opp, .bs__defensecard, .refpanel__body). The Card computes nothing, so
   // it is safe inside the box score's reveal render.
   const park = Boolean(layout)
-  const win = layout ? defenseWindow(layout) : null
+  const win = layout ? parkWindow(layout) : null
   const dh = byPos.DH ? (
     <p className={`defdiamond__dh${park ? ' defdiamond__dh--park' : ''}`}>
       <span className="defdiamond__dhpos">DH</span>
@@ -89,7 +90,7 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
     <Card as="div" body="flush" className="defdiamond">
       {layout ? (
         <div className="defdiamond__field defdiamond__field--park" style={{ aspectRatio: win.aspectRatio }}>
-          <BallparkDiagram layout={layout} viewBox={win.viewBox} className="defdiamond__park" label={label} note={false} />
+          <BallparkDiagram layout={layout} viewBox={win.viewBox} className="defdiamond__park" label={label} />
           {Object.entries(SPOTS).map(([pos, spot]) => {
             const { left, top } = win.percent(DEFENSE_SPOTS[pos])
             return <DefenseSpot key={pos} stack={byPos[pos]} spot={{ x: left, y: top, label: spot.label }} park />
@@ -106,9 +107,6 @@ export function DefenseDiamond({ defense, layout = null, label = 'Ballpark with 
         </div>
       )}
       {!park && dh}
-      {/* The park's accuracy note, under the field: in the drawing its long bottom line ran
-          under the catcher and DH tags. */}
-      {park && layout.accuracyNote && <p className="defdiamond__note">{layout.accuracyNote}</p>}
     </Card>
   )
 }

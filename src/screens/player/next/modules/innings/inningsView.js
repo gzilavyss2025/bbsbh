@@ -2,6 +2,7 @@
 // The data shapers (fieldingView, starterRelieverView) stay in src/api/person.js; this
 // turns their output into what the board draws.
 import { ipToOuts, outsToIp } from '../../../../../lib/math/innings.js'
+import { parkWindow } from '../../../../../lib/ballpark/layout/parkWindow.js'
 
 // Same anchors as PositionInnings, in percent of FieldBackdrop's box (the card's art for a
 // player whose club has no park on file).
@@ -17,18 +18,21 @@ const FIELD_SPOTS = {
   P: { x: 50, y: 64.4 },
 }
 // The board's anchors in the park diagram's own space, where home is (310, 505) and one unit is
-// one foot, so a ring stands where the position does in any park. The crop is the board's.
+// one foot, so a ring stands where the position does in any park. The crop is innWindow's.
 const PARK_SPOTS = {
   P: [310, 444], C: [310, 527], '1B': [374, 442], '2B': [362, 386], '3B': [246, 442], SS: [258, 386],
   LF: [185, 300], CF: [310, 235], RF: [435, 300],
 }
-export const PARK_VIEWBOX = '30 74 560 490'
+// The board's window onto the park: its own sides (x 30 to 590, the poles with a little paper)
+// and the park's own sky trim (parkWindow.js), so a shallow park leaves no empty band on top.
+export const innWindow = (park) => parkWindow(park, { x: 30, w: 560 })
 
-// A spot as { x, y } percent of the art's box.
-export const spotAt = (pos, park) => {
-  if (!park) return FIELD_SPOTS[pos]
+// A spot as { x, y } percent of the art's box: the window's for a park, the shared field's else.
+export const spotAt = (pos, win) => {
+  if (!win) return FIELD_SPOTS[pos]
   const [x, y] = PARK_SPOTS[pos]
-  return { x: ((x - 30) / 560) * 100, y: ((y - 74) / 490) * 100 }
+  const at = win.percent({ x, y })
+  return { x: at.left, y: at.top }
 }
 
 export const FIELD_ORDER = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF']

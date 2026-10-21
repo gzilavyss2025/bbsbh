@@ -1,4 +1,5 @@
-import { buildFieldGeometry, diagramInput, wallStroke, VIEWBOX, HOME } from '../../lib/ballpark/ballparkGeometry.js'
+import { buildFieldGeometry, diagramInput, wallStroke, HOME } from '../../lib/ballpark/ballparkGeometry.js'
+import { parkWindow } from '../../lib/ballpark/layout/parkWindow.js'
 
 // The scorebook's ballpark drawing: an ink-on-manila sketch of the full field —
 // infield diamond, outfield grass, the warning track hugging the fence, and the
@@ -11,26 +12,25 @@ import { buildFieldGeometry, diagramInput, wallStroke, VIEWBOX, HOME } from '../
 const f = (n) => Math.round(n * 100) / 100
 
 // `viewBox` and `label` exist for the hit chart, which reuses this drawing as a
-// plot ground rather than as a dimensions diagram: it crops the dead sky off
-// the top so the field fills its card, and it is not "a ballpark diagram" to a
-// screen reader — it is a spray chart. Both default to what every other caller
-// already gets, so nothing else moves.
+// plot ground rather than as a dimensions diagram: it crops the shared plot
+// window, and it is not "a ballpark diagram" to a screen reader — it is a spray
+// chart. Left out, the window is this park's own (layout/parkWindow.js): the
+// frame with the empty sky above its highest mark cut off, never a rescale.
 // `layout` is one resolved configuration (lib/ballpark/layout/resolveLayout.js):
 // every card that draws a park passes the same object for the same game, so
 // the same date draws the same wall everywhere (#1859).
 export function BallparkDiagram({
   layout,
   className = '',
-  viewBox = `0 0 ${VIEWBOX.w} ${VIEWBOX.h}`,
+  viewBox,
   label = 'Ballpark field dimensions diagram',
-  note = true,
   children = null,
 }) {
   const g = buildFieldGeometry(diagramInput(layout))
   return (
     <svg
       className={`bpdiagram ${className}`}
-      viewBox={viewBox}
+      viewBox={viewBox ?? parkWindow(layout, { geometry: g }).viewBox}
       role="img"
       aria-label={label}
     >
@@ -102,16 +102,6 @@ export function BallparkDiagram({
           {w.h}′
         </text>
       ))}
-      {/* How sure the wall is, when it is not a checked outline: one long line
-          along the bottom edge, which is empty paper on a bare park. A caller that
-          lays HTML tags over that strip (the defense diamond and the lineup page's
-          FieldCard put the catcher and the DH there) passes note={false} and
-          prints layout.accuracyNote itself, under the field. */}
-      {note && layout.accuracyNote && (
-        <text className="bpdiagram__note" x="12" y={VIEWBOX.h - 12}>
-          {layout.accuracyNote}
-        </text>
-      )}
       {/* An overlay drawn LAST, so a caller's own marks sit on top of the park
           rather than under the fence. Plain children, not a render function:
           a render function in this codebase means a spoiler gate (SealBox),

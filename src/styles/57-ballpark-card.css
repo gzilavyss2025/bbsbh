@@ -137,9 +137,3 @@
   }
 }
 
-/* The layout's accuracy note (#1859): bottom-left, quiet, never a label. */
-.bpdiagram__note {
-  fill: var(--text-muted);
-  font-size: var(--fs-ui);
-  text-anchor: start;
-}
