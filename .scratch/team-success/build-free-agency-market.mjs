@@ -1,7 +1,7 @@
 // Spike: does the free-agent market pay for what it gets?
 //
 // Builds one row per free_agency.csv signing (5,598 rows, 1991-2026), joined to:
-//   - the ADR-0066 identity crosswalk (public/data/contracts-history/identity/
+//   - the ADR-0066 identity crosswalk (scripts/data/contracts/identity/
 //     free_agency.json) for mlbId -- reused as-is, never re-derived (W0's own
 //     rule: a second name-match join over this data would not agree with the
 //     one every other contracts surface already trusts).

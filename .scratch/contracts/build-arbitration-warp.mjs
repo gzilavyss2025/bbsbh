@@ -5,7 +5,7 @@
 // Builds ONE panel, one row per scripts/data/contracts/arbitration.csv row
 // (2,420 cases, 2018-2026 — nine seasons, arbitration.csv's whole window,
 // docs/contracts-data-caveats.md), joined to:
-//   - the case's resolved mlbId, via public/data/contracts-history/identity/
+//   - the case's resolved mlbId, via scripts/data/contracts/identity/
 //     arbitration.json (rowKey = `arbitration#<csv row index>`, same index
 //     scripts/lib/csv.mjs's parseCsv produces — confirmed against
 //     scripts/gen-contracts-identity.mjs, which reads the CSV with the same
