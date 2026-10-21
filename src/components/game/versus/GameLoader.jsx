@@ -12,6 +12,8 @@ import { goHome } from '../../../lib/home.js'
 const REDUCED_QUERY = '(prefers-reduced-motion: reduce)'
 // A little over --dur-med, the length of the fade-out in loader.css.
 const FADE_MS = 240
+// The least time the colour layer stays up: the growth (--dur-slow, 360ms) plus a beat to read it.
+const MIN_MS = 1500
 
 // `settled`: already full-screen, no growth. For a fallback that can follow the
 // first loader, so the handoff does not replay the animation. `leaving`: fading out.
@@ -54,18 +56,26 @@ export function GameLoader({ game, treatment, settled = false, leaving = false }
   )
 }
 
-// Shows the loader while `active`, then keeps it mounted for one short fade
-// once `active` drops, so the game's page replaces it softly, not with a cut.
+// Shows the loader for at least MIN_MS from mount, and while `active` after that. Then it
+// stays mounted for one short fade, so the game's page replaces it softly, not with a cut.
+// The floor holds even when the game is already in hand: a cut after a few hundred ms read
+// as a glitch, not as an arrival.
 export function GameLoaderHold({ active, ...props }) {
   const layer = useVersusLayer(props.game)
-  const [shown, setShown] = useState(active)
+  const [shown, setShown] = useState(true)
+  const [minDone, setMinDone] = useState(false)
   if (active && !shown) setShown(true)
   useEffect(() => {
-    if (active || !shown) return undefined
+    const timer = setTimeout(() => setMinDone(true), MIN_MS)
+    return () => clearTimeout(timer)
+  }, [])
+  const leaving = !active && minDone
+  useEffect(() => {
+    if (!leaving || !shown) return undefined
     const timer = setTimeout(() => setShown(false), FADE_MS)
     return () => clearTimeout(timer)
-  }, [active, shown])
+  }, [leaving, shown])
   // No colour layer, nothing to fade: the scoreboard shows while loading and goes at once.
   if (!layer) return active ? <Loader /> : null
-  return shown ? <GameLoader {...props} leaving={!active} /> : null
+  return shown ? <GameLoader {...props} leaving={leaving} /> : null
 }
