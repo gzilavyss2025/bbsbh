@@ -11,6 +11,9 @@
 // (#1626). Each era with art records its source, licence and restriction, so
 // a file's status stays checkable (the lab's Eras tab writes them).
 //
+// An era may carry `like`, an MLB team id: a minor-league club that took an MLB
+// club's nickname wears that club's mark (see likeUrl below).
+//
 // Colours follow the same rule. Club colours changed over time, so today's
 // never carry back. A covered era wears NEUTRAL chrome (no club tint on its
 // tile, no club bar) until someone sets the era's own triad in the lab's Eras
@@ -20,27 +23,50 @@
 // it on the bars (seasonTile, seasonTheme).
 
 import { barMarkTone } from '../headerTheme.js'
+import { teamLogoUrl } from '../teams.js'
 import SEASON_MARKS_JSON from '../data/season-marks.json' with { type: 'json' }
 
 const FOLDER = '/logos/historical'
 
+function eraAt(clubs, teamId, year) {
+  return clubs?.[String(teamId)]?.find((e) => year >= e.from && year <= e.to) ?? null
+}
+
+// The mark an era that carries `like` wears: the MLB club it shares a nickname
+// with (the Binghamton Mets, the Reading Phillies), as that club wore it in the
+// era's FIRST season, so an era that spans two MLB marks takes the older one. The
+// MLB club's own era art if it has one; its current mark when no era is recorded
+// there (the same "no era means unchanged" the MLB club's own pages assume); and
+// null when the table records an era for it but has no art, because today's mark
+// is known to be wrong there and the era draws its abbreviation instead.
+function likeUrl(clubs, era, logoFor) {
+  const host = eraAt(clubs, era.like, era.from)
+  if (host) return host.file ? `${FOLDER}/${host.file}` : null
+  return logoFor(era.like)
+}
+
 // The era covering (teamId, season), as { url, name, abbr }, or null for "draw
 // the current mark". `url` is null for an era with no art on file. `season` is
 // a year or an official date ("1956-10-08"), so a game screen passes its date.
-export function seasonMark(teamId, season) {
+// An era's own art always wins over a `like` link. Takes the table as an argument so the unit
+// suite can run it on a small one; `seasonMark` below is the app's.
+export function seasonMarkIn(clubs, teamId, season, logoFor = teamLogoUrl) {
   const year = Number(String(season ?? '').slice(0, 4))
   if (!teamId || !Number.isFinite(year)) return null
-  const eras = SEASON_MARKS_JSON.clubs?.[String(teamId)]
-  const era = eras?.find((e) => year >= e.from && year <= e.to)
+  const era = eraAt(clubs, teamId, year)
   if (!era) return null
   return {
-    url: era.file ? `${FOLDER}/${era.file}` : null,
+    url: era.file ? `${FOLDER}/${era.file}` : era.like ? likeUrl(clubs, era, logoFor) : null,
     name: era.name,
     abbr: era.abbr ?? null,
     bar: era.bar ?? null,
     accent: era.accent ?? null,
     onBar: era.onBar ?? null,
   }
+}
+
+export function seasonMark(teamId, season) {
+  return seasonMarkIn(SEASON_MARKS_JSON.clubs, teamId, season)
 }
 
 // The era's header triad in headerThemeFor's shape, or null when the era has

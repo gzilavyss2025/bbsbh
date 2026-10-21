@@ -3,6 +3,8 @@ import { Card } from '../../../components/ui/frame/Card.jsx'
 import { Grid } from '../../../components/ui/layout/Grid.jsx'
 import { contrastRatio, readableTextColor } from '../../../lib/contrast.js'
 import { trimAndClear } from '../../../lib/image/imageTrim.js'
+import { ALL_MLB_TEAM_IDS, teamFullName } from '../../../lib/teams.js'
+import { seasonMark } from '../../../lib/identity/seasonMarks.js'
 import { HexField } from '../HexField.jsx'
 import { saveEraRow, uploadEraArt } from '../saveStores.js'
 import { UmpireCall } from './HeaderPreview.jsx'
@@ -15,7 +17,12 @@ import { UmpireCall } from './HeaderPreview.jsx'
 // hot-reloads off the landed value, so there is no draft store here, only the
 // form's own fields. Drop an SVG or PNG onto the mark box, or pick one, and it
 // becomes the era's mark; a PNG is trimmed and its white cleared first. Nothing is fetched from anywhere: you bring the file.
-const EMPTY = { from: '', to: '', name: '', abbr: '', source: '', bar: '', accent: '', onBar: '' }
+const EMPTY = { from: '', to: '', name: '', abbr: '', like: '', source: '', bar: '', accent: '', onBar: '' }
+
+// The MLB clubs an era can borrow its mark from, by name.
+const MLB_CHOICES = [...ALL_MLB_TEAM_IDS]
+  .map((id) => ({ id, name: teamFullName(id) }))
+  .sort((a, b) => a.name.localeCompare(b.name))
 const HEX = /^#[0-9a-f]{6}$/i
 
 // A dropped PNG, with its white background cleared and its edges
@@ -46,6 +53,7 @@ function formOf(era) {
         to: era.to,
         name: era.name,
         abbr: era.abbr ?? '',
+        like: era.like ? String(era.like) : '',
         source: era.source ?? '',
         bar: era.bar ?? '',
         accent: era.accent ?? '',
@@ -72,6 +80,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
       return next
     })
   const triad = HEX.test(form.bar) && HEX.test(form.onBar)
+  const likedUrl = era?.like ? seasonMark(teamId, era.from)?.url : null
   const dirty = JSON.stringify(form) !== JSON.stringify(formOf(era))
 
   async function run(task) {
@@ -94,7 +103,7 @@ export function EraRow({ teamId, era, bust, onArt }) {
         action: 'save',
         teamId,
         replaceFrom: era?.from ?? null,
-        era: { from: Number(form.from), to: Number(form.to), name: form.name, abbr, source: form.source, bar: form.bar, accent: form.accent, onBar: form.onBar },
+        era: { from: Number(form.from), to: Number(form.to), name: form.name, abbr, like: form.like ? Number(form.like) : null, source: form.source, bar: form.bar, accent: form.accent, onBar: form.onBar },
       }),
     )
     if (result) {
@@ -144,6 +153,8 @@ export function EraRow({ teamId, era, bust, onArt }) {
         >
           {era.file ? (
             <img src={`/logos/historical/${era.file}?v=${bust}`} alt={`${era.name} mark, ${era.from}-${era.to}`} />
+          ) : likedUrl ? (
+            <img src={likedUrl} alt={`${era.name} mark, ${era.from}-${era.to}, borrowed from an MLB club`} />
           ) : (
             <span className="idlab__eraabbr">{era.abbr}</span>
           )}
@@ -165,6 +176,17 @@ export function EraRow({ teamId, era, bust, onArt }) {
         <label>
           Abbreviation
           <input type="text" value={form.abbr} onChange={set('abbr')} maxLength={4} />
+        </label>
+        <label>
+          Wears MLB club&rsquo;s mark
+          <select value={form.like} onChange={set('like')}>
+            <option value="">None</option>
+            {MLB_CHOICES.map((club) => (
+              <option key={club.id} value={club.id}>
+                {club.name}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="idlab__erawide">
           Source and licence

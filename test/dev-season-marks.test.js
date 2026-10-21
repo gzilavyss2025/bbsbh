@@ -104,3 +104,15 @@ test('era art is told apart by its bytes: a PNG by its signature, an SVG by its 
   assert.match(describeEraArt(Buffer.from('<svg><script>x()</script></svg>')).problem, /script/)
   assert.match(describeEraArt(Buffer.alloc(2 * 1024 * 1024, 1)).problem, /too large/)
 })
+
+test('like names the MLB club whose mark an era wears; null clears it; a non-MLB id is refused', () => {
+  const set = applyEraSave(store(), { teamId: 119, era: era(1914, 1933, { like: 121 }) })
+  assert.equal(set.store.clubs[119].find((e) => e.from === 1914).like, 121)
+  const kept = applyEraSave(set.store, { teamId: 119, replaceFrom: 1914, era: era(1914, 1933) })
+  assert.equal(kept.store.clubs[119].find((e) => e.from === 1914).like, 121, 'an edit that omits like keeps it')
+  const cleared = applyEraSave(set.store, { teamId: 119, replaceFrom: 1914, era: era(1914, 1933, { like: null }) })
+  assert.equal('like' in cleared.store.clubs[119].find((e) => e.from === 1914), false)
+  const bad = applyEraSave(store(), { teamId: 119, era: era(1914, 1933, { like: 505 }) })
+  assert.match(bad.problem, /MLB team id/)
+  assert.equal(bad.status, 400)
+})

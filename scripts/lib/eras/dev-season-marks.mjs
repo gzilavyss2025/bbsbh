@@ -25,6 +25,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { contrastRatio } from '../../../src/lib/contrast.js'
+import { isMlbTeamId } from '../../../src/lib/teams.js'
 import { describeMarkRejection } from '../dev-custom-marks.mjs'
 
 const REPO_ROOT = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)))
@@ -65,6 +66,7 @@ function describeEraProblem(teamId, era) {
   if (typeof era.name !== 'string' || !era.name.trim() || era.name.length > 80) return 'give the era a name (80 characters at most)'
   if (typeof era.abbr !== 'string' || !/^[A-Z]{2,4}$/.test(era.abbr)) return 'the abbreviation is 2 to 4 capital letters'
   if (era.source != null && (typeof era.source !== 'string' || era.source.length > 300)) return 'the source note is 300 characters at most'
+  if (era.like && !isMlbTeamId(Number(era.like))) return 'like must be an MLB team id'
   return describeColourProblem(era)
 }
 
@@ -106,6 +108,11 @@ export function applyEraSave(store, { teamId, era, replaceFrom = null }) {
   if (kept == null) next.file = null
   if (era.source != null) next.source = era.source.trim()
   if (next.source === '') delete next.source
+  // `like`: the MLB club whose mark this era wears. Absent leaves it alone, a falsy value clears it.
+  if (era.like !== undefined) {
+    if (era.like) next.like = Number(era.like)
+    else delete next.like
+  }
   for (const k of COLOUR_FIELDS) {
     if (era[k] === undefined) continue
     if (era[k]) next[k] = era[k].toUpperCase()

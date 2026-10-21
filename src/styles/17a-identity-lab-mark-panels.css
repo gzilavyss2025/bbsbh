@@ -126,7 +126,8 @@
   min-width: 0;
 }
 
-.idlab__erafields input {
+.idlab__erafields input,
+.idlab__erafields select {
   /* component-reuse-exempt: a text input, not a card: it matches .idlab__recolorname */
   box-sizing: border-box;
   width: 100%;
@@ -163,4 +164,15 @@
   align-items: center;
   font-size: var(--fs-cell);
   color: var(--text-muted);
+}
+
+/* Eras, Former level: the box that adds a club by its team id. */
+.idlab__addclub {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.idlab__addclub input {
+  flex: 0 0 9rem;
 }
