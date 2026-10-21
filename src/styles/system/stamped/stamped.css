@@ -18,8 +18,8 @@
      .factgrid--strip  the fact strip under the hero: three columns on a
                    phone, six from the wide step (FactGrid look="strip").
 
-   The space AROUND each part is the parent's: a name tab hangs
-   --space-3h above its card, so the parent leaves room for it.
+   The space AROUND each part is the parent's, except one: a name tab hangs
+   --space-3h above its card, and the card clears it (.card--named, card.css).
    --------------------------------------------------------------------------- */
 
 .card__name {

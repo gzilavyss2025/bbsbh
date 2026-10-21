@@ -3,8 +3,8 @@ import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, isInteract
 
 // THE CARD — the one box of paper a section sits on (#1113). Drawn once, in
 // styles/system/card.css. It is the box, never what is in it: the space
-// around it belongs to the parent, and the layout inside it to the block's
-// own namespace.
+// around it belongs to the parent (a named card clears its own tab), and
+// the layout inside it to the block's own namespace.
 //
 //   frame   'sheet' (the default): the md radius with the card shadow.
 //           'ledger': the sm radius with no shadow (#1113 Q1).
