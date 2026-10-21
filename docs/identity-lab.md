@@ -54,7 +54,10 @@ library under a name.
 
 The **Eras** tab owns `src/lib/data/season-marks.json` and `public/logos/historical/`
 (#1591). Eras hang off the club's CURRENT franchise id, so the Brooklyn Dodgers sit under
-the Dodgers. Per era you set the first and last season, a name, a 2–4 letter period
+the Dodgers. A level switch above the rail (MLB, Triple-A, Double-A, High-A, Single-A) lists
+the MiLB clubs from `affiliates.json`, because minor-league clubs rename and move often (the
+Gwinnett Braves became the Stripers in 2018 under id 431): file the old name under the club's
+CURRENT id. Per era you set the first and last season, a name, a 2–4 letter period
 abbreviation and a source/licence note, then drop an SVG on the mark box. An era with no SVG
 draws its abbreviation in a serif face, never today's mark (ADR-0078).
 

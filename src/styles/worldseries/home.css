@@ -344,6 +344,12 @@
   border: 1px solid var(--border-hairline);
 }
 
+.ww-bulltable__round {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+}
+
 .ww-bulltable__name {
   text-align: left;
   white-space: nowrap;
