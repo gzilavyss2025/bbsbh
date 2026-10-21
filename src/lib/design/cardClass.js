@@ -27,6 +27,8 @@
 //            lead stat tile) or event (the one yellow of every notification
 //            card, ADR-0113).
 //   named    the card wears a name tab on its top edge, so its body clears it.
+//   flush    the body is flush (body="flush"). A named flush card has no padded
+//            body to clear the tab, so card--flush lets the card clear it.
 //   stampIn  the card drops into its shadow as it appears (motion/stamp-in.css).
 export const FRAMES = ['sheet', 'ledger', 'stamped']
 export const TONES = ['plain', 'tint', 'soft', 'ink', 'event']
@@ -35,7 +37,7 @@ export const CARD_TAGS = ['section', 'div', 'article', 'li', 'aside', 'a', 'butt
 const INTERACTIVE = ['a', 'button']
 
 export function cardClassName({
-  frame = 'sheet', as = 'section', accent, tone, named = false, stampIn = false, className = '',
+  frame = 'sheet', as = 'section', accent, tone, named = false, flush = false, stampIn = false, className = '',
 } = {}) {
   if (!FRAMES.includes(frame)) throw new Error(`Card: unknown frame "${frame}" (${FRAMES.join(', ')})`)
   cardTag(as)
@@ -50,6 +52,7 @@ export function cardClassName({
   const parts = ['card', `card--${frame}`]
   if (tone && tone !== 'plain') parts.push(`card--${tone}`)
   if (named) parts.push('card--named')
+  if (named && flush) parts.push('card--flush')
   if (stampIn) parts.push('card--stamp-in')
   if (interactive) parts.push('card--interactive')
   if (className) parts.push(className)

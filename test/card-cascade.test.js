@@ -350,6 +350,15 @@ test('a named card clears the tab that hangs above it', () => {
   assert.equal(decl(named, 'margin-top'), 'var(--space-3h)', 'the margin matches the hang of the tab')
 })
 
+// A flush body has no padded top, so the tab, which reaches 10px into the card,
+// sat on the first row: on the team page the leaders' first row touched it, and five
+// blocks each cleared it by hand with a different value. The card clears it once.
+test('a named flush card clears the tab inside its own edge', () => {
+  const flush = ruleBody(read('system/card.css'), '.card--named.card--flush')
+  assert.ok(flush, 'a .card--named.card--flush rule')
+  assert.equal(decl(flush, 'padding-top'), 'var(--space-4)')
+})
+
 // The team hub zeroes the margin of a card its Stack spaces. A named card is the exception:
 // zeroed, its tab sat under the shadow of the card above (the roster cards touched at 0px).
 test('the team hub leaves a named card its tab clearance', () => {
@@ -358,14 +367,13 @@ test('the team hub leaves a named card its tab clearance', () => {
   assert.equal(ruleBody(css, '.team-hub .stack > .card'), null, 'no rule zeroes every card in a hub Stack')
 })
 
-// A flush body has no padded top, so its first part clears the tab itself. The
-// Pitch by pitch head is a PlayerLink (.plink), whose padding reset sits in the
-// core sheet and loaded after the head's own rule: the head had no padding and
-// the photo ran into the tab. The compound selector wins in any load order.
-test('the Pitch by pitch head clears the name tab, whatever the load order', () => {
+// The Pitch by pitch head is a PlayerLink (.plink), whose padding reset sits in the
+// core sheet and loaded after the head's own rule: the head had no padding and the
+// photo ran into the tab. The compound selector wins in any load order.
+test('the Pitch by pitch head keeps its padding, whatever the load order', () => {
   const head = ruleBody(read('worldseries/pitch.css'), '.plink.ww-pitch__head')
   assert.ok(head, 'a .plink.ww-pitch__head rule')
-  assert.equal(decl(head, 'padding'), 'var(--space-6) var(--space-4) var(--space-3)')
+  assert.equal(decl(head, 'padding'), 'var(--space-3) var(--space-4)')
 })
 
 test('no other stylesheet frames a card', () => {
@@ -479,6 +487,14 @@ test('the stamped frame takes a tone, a name tab and the stamp-in; no other fram
   assert.throws(() => cardClassName({ frame: 'ledger', named: true }), /frame="stamped"/)
   assert.throws(() => cardClassName({ stampIn: true }), /frame="stamped"/)
   assert.throws(() => cardClassName({ frame: 'stamped', as: 'a', named: true }), /no name tab/)
+})
+
+test('a named card with a flush body says so; an unnamed flush card does not', () => {
+  assert.equal(
+    cardClassName({ frame: 'stamped', named: true, flush: true, className: 'ww-pitch' }),
+    'card card--stamped card--named card--flush ww-pitch',
+  )
+  assert.equal(cardClassName({ frame: 'stamped', flush: true }), 'card card--stamped')
 })
 
 test('a link or button card takes no head: it holds phrasing content only', () => {

@@ -23,7 +23,8 @@ import { cardAccentStyle, cardBodyClassName, cardClassName, cardHead, isInteract
 //           phrasing content only.
 //   body    'padded' (the default) wraps the children in .card__body.
 //           'flush' renders them bare: the table, list or grid runs to the
-//           card's edge and owns its own rules.
+//           card's edge and owns its own rules. A named flush card still
+//           clears its tab (card--flush, system/card.css).
 //   as      the element: 'section' (the default), 'div', 'article', 'li',
 //           'aside', or 'a' / 'button' for a card that is the tap target.
 //   className  the block's NAMESPACE ("chal", "depthchart"), for its inner
@@ -54,7 +55,7 @@ export function Card({
 }) {
   const labelId = useId()
   const named = label != null && label !== false
-  const cls = cardClassName({ frame, as: Tag, accent, tone, named, stampIn, className })
+  const cls = cardClassName({ frame, as: Tag, accent, tone, named, flush: body === 'flush', stampIn, className })
   cardHead(Tag, head)
   if (named && head != null && head !== false) throw new Error('Card: a name tab and a head are two titles; pass one')
   if (count != null && frame !== 'stamped') throw new Error('Card: a count tag is for frame="stamped"')

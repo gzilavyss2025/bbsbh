@@ -93,6 +93,11 @@
 .card--named > .card__body {
   padding-top: var(--space-6);
 }
+/* A flush body has no padded top, so the card clears the tab itself. The
+   first row then keeps its own inset, as on a card with no tab. */
+.card--named.card--flush {
+  padding-top: var(--space-4);
+}
 
 /* THE INTERACTIVE CARD: the whole card is the tap target (as="a" or
    "button"). It drops the anchor's underline and the button's own face, and

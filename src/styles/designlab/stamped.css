@@ -10,11 +10,6 @@
 .stamplab {
   width: 100%;
 }
-/* A name tab hangs --space-3h above its card, so the card leaves room. */
-.stamplab__named {
-  margin-top: var(--space-4);
-}
-
 .stamplab__who {
   padding: var(--space-3h);
 }
@@ -44,7 +39,7 @@
 
 .stamplab__rows {
   margin: 0;
-  padding: var(--space-3h) 0 0;
+  padding: 0;
   list-style: none;
 }
 .stamplab__row {
