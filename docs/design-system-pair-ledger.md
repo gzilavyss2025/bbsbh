@@ -92,7 +92,7 @@ own issue and the owner's approval.
 | `scouting/Platoon.jsx` | Candidate | Rows could be the pitcher hand, columns the two clubs. The tint for the hand a club faces next is a third mark and must stay distinct from the leader. |
 | `postseason/SeriesNineKeys.jsx` (series page) | Keep | The rank track shows position among 30. A ledger drops it. |
 | `worldseries/cards/Tape.jsx` | Keep | Mirrored bars carry magnitude and the away/home order. |
-| `scouting/ParkFit.jsx` | Keep | A field diagram over shares. It shows no leader by design. |
+| `scouting/ParkFit.jsx` | Keep | Two parks' walls over shares, and under one park a carry block. It shows no leader by design. |
 | `scouting/PitchByPitch.jsx` | Keep | One starter against the other club's hitters. It is not symmetric. |
 | `cards/Probables.jsx`, `postseason/SeriesStarters.jsx` | Keep | Different pitchers per side with outing bars. The measures are not shared rows. |
 | `cards/Bullpen.jsx`, `cards/HomeRoad.jsx`, `cards/HotBats.jsx` | Keep | Per-club lists of different people or games. |

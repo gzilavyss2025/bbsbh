@@ -1,6 +1,7 @@
 /* PLATOON and PARK FIT (#2316). Platoon reuses the glove sheet's leader mark; the cell a club faces
    in the next game takes the stamped tint. The leader mark is never colour alone: it is an
-   underline shape plus hidden text. Dim captions use --text-caption. */
+   underline shape plus hidden text. Dim captions use --text-caption. The last section is the Park
+   fit card's two-park overlay (2026-10-21). */
 .ww-platoon__head {
   margin: 0 0 var(--space-2);
   font-family: var(--font-display);
@@ -76,4 +77,156 @@
   margin: var(--space-2) 0 0;
   font-size: var(--fs-cell);
   color: var(--text-caption);
+}
+
+/* THE TWO-PARK OVERLAY (2026-10-21). The card has two inks: the first park wears the wall's own navy,
+   the second the clay that the infield dirt already borrows (--accent-negative). An ink never carries the
+   meaning alone: the key names each park, the signs print the numbers, and a park that is off fades and
+   draws its wall back. Resting looks are plain rules; every transition sits under no-preference, below. */
+.ww-fit {
+  --fence-a: var(--accent-primary);
+  --fence-b: var(--accent-negative);
+}
+
+.ww-fence__wall[data-ink='1'] .ww-fence__seg {
+  stroke: var(--fence-b);
+}
+
+.ww-fence__signs[data-ink='1'] :is(.ww-fence__dist, .ww-fence__wallh) {
+  fill: var(--fence-b);
+}
+
+/* A wall segment is a dashed stroke whose one dash is the whole segment (pathLength is 1). Pushed out by
+   1.1 it sits in the gap, and no round cap is left on the path. */
+.ww-fence__seg {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 0;
+}
+
+.ww-fence__wall[data-on='false'] .ww-fence__seg {
+  stroke-dashoffset: 1.1;
+}
+
+.ww-fence__ground[data-on='false'],
+.ww-fence__lines[data-on='false'],
+.ww-fence__signs[data-on='false'] {
+  opacity: 0;
+}
+
+/* Two walls need the whole frame: the warning track and the wall heights wait for one park alone. */
+.ww-fence[data-view='both'] :is(.ww-fence__track, .ww-fence__wallh) {
+  opacity: 0;
+}
+
+/* A sign that would overlap the other park's steps inside its wall (fenceOverlay.js), in the two-park view. */
+.ww-fence[data-view='both'] .ww-fence__dist[data-moved='true'] {
+  transform: translate(calc(var(--dx, 0) * 1px), calc(var(--dy, 0) * 1px));
+}
+
+/* The key: a line sample in the park's ink, then its name. A park that is off dims. */
+.ww-fence__key {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-cell);
+}
+
+.ww-fence__swatch {
+  display: inline-block;
+  width: var(--space-4);
+  border-top: var(--bw-heavy) solid var(--fence-a);
+}
+
+.ww-fence__swatch[data-ink='1'] {
+  border-top-color: var(--fence-b);
+}
+
+.ww-fence__swatch[data-on='false'],
+.ww-fence__keyname[data-on='false'] {
+  opacity: 0.45;
+}
+
+.ww-fit__pick {
+  margin: 0 0 var(--space-3);
+}
+
+/* Three stops share one row. On the narrowest phone a roomy button would wrap "Tampa Bay", so this one
+   keeps each name on a line and trims its side padding (three classes: it must out-rank the segmented sheet). */
+.ww-fit .ww-fit__pick .segmented__btn {
+  padding-inline: var(--space-2);
+  white-space: nowrap;
+}
+
+/* The carry block folds open under one park and folds away under both (grid rows 0fr to 1fr). Its
+   content stays mounted, so the fold has something to close on. */
+/* layout-exempt: a one-row grid that folds open, 0fr to 1fr */
+.ww-fit__carry {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+
+.ww-fit__carry[data-open='true'] {
+  grid-template-rows: 1fr;
+}
+
+.ww-fit__carryin {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.ww-fit__carry[data-open='true'] > .ww-fit__carryin {
+  opacity: 1;
+}
+
+.ww-fit__table--carry {
+  margin-top: var(--space-3);
+}
+
+@keyframes ww-fit-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ww-fence {
+    --fence-step: 8ms;
+  }
+
+  .ww-fence :is(.ww-fence__ground, .ww-fence__lines, .ww-fence__signs, .ww-fence__track, .ww-fence__wallh) {
+    transition: opacity var(--dur-med) var(--ease-out);
+  }
+
+  .ww-fence__dist {
+    transition: transform var(--dur-med) var(--ease-out);
+  }
+
+  /* Out: the wall draws back toward the left-field pole at a steady pace. In: it inks in from the
+     left-field pole, one segment after the next. */
+  .ww-fence__seg {
+    transition: stroke-dashoffset var(--dur-med) linear;
+  }
+
+  .ww-fence__wall[data-on='true'] .ww-fence__seg {
+    transition: stroke-dashoffset var(--dur-med) var(--ease-out) calc(var(--i, 0) * var(--fence-step));
+  }
+
+  .ww-fence__swatch,
+  .ww-fence__keyname,
+  .ww-fit__carryin {
+    transition: opacity var(--dur-med) var(--ease-out);
+  }
+
+  .ww-fit__carry {
+    transition: grid-template-rows var(--dur-unfold) var(--ease-unfold);
+  }
+
+  /* A new park under the carry block: its figures fade in. */
+  .ww-fit__table--carry {
+    animation: ww-fit-in var(--dur-med) var(--ease-out);
+  }
+}
+
+/* The in-app reduced setting zeroes durations but not delays (01-base.css). */
+:root[data-motion='reduced'] .ww-fence__seg {
+  transition-delay: 0s !important;
 }

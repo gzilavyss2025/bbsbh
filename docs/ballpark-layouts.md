@@ -287,6 +287,7 @@ date, so the same game draws the same wall on every card:
 | Lineup page Ballpark sheet (`TeamInfo.jsx` → `BallparkModal`) | `selectGameInfo(feed).venueId` | `selectGameInfo(feed).officialDate` |
 | All-Star page Ballpark sheet | the game card's `venue.id` | the game card's date, else mid-July of the year |
 | Team hub Ballpark card | `team.venue.id` | none: today's wall |
+| World Series Park fit card (`FenceOverlay.jsx`, two walls over one infield) | each Series club's `venueId` in `teams.json`; the focus game's `venue.id` wins for the club that hosts it | the slate date |
 
 The Ballpark sheet's facts and league ranks stay today's park. When the
 drawing is an older wall, the sheet's foot says so.

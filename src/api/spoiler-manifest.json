@@ -1087,7 +1087,7 @@
     },
     "scout/seriesFit.js": {
       "class": "cutoff-gated",
-      "why": "The World Series Platoon and Park fit cards' reads (#2316): a club's regular-season OPS by pitcher hand from the team statSplits (the regular season is over before the Series starts), and the spray store's balls in play for the club's regulars (all from games already Final, built before the day's games) picked by postseason PA through fetchHotBatSplits, which ends the day before the slate date in the request. No score, line or result of a game on or after the slate date is read. An open surface (ADR-0034), so no SealBox."
+      "why": "The World Series Platoon and Park fit cards' reads (#2316): a club's regular-season OPS by pitcher hand from the team statSplits (the regular season is over before the Series starts), and the spray store's balls in play for the club's regulars (all from games already Final, built before the day's games) picked by postseason PA through fetchHotBatSplits, which ends the day before the slate date in the request. No score, line or result of a game on or after the slate date is read. It also reads each club's home venue id from the static teams file (no game). An open surface (ADR-0034), so no SealBox."
     },
     "search.js": {
       "class": "spoiler-free",
