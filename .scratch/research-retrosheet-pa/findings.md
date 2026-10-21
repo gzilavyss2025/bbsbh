@@ -10,9 +10,11 @@ I could not check here. Sizes use "MB" for 1,000,000 bytes and "gz" for `gzip -9
 ## The answer in brief
 
 1. **Size.** The 8,647,152 plate-appearance (PA) rows of 1961 to 2014 weigh
-   **37.3 MB gz** (395.8 MB raw JSON) with the columns the filters need **and** the raw
-   pitch string. Without the pitch string they weigh 28.5 MB gz. The game index
-   (112,902 games) adds **0.92 MB gz**. The cost is 4.3 bytes gz per PA.
+   **46.3 MB gz** (537.5 MB raw JSON) with the 17 columns Gary chose for version 1
+   (the 11 filter columns, hands, score margin, lineup place, hit value, RBI) **and**
+   the raw pitch string. With only the 11 filter columns and the pitch string they
+   weigh 37.3 MB gz; without the pitch string, 28.5 MB gz. The game index
+   (112,902 games) adds **0.92 MB gz**. The version 1 cost is 5.4 bytes gz per PA.
 2. **Pitch strings.** Two eras. **1961 to 1987:** 4% of PAs have a pitch string
    (0.1% to 16.3% a season). **1988 to 2014:** 89.6% to 100% a season, 98.4% over the
    27 seasons. Where a string exists it is sound: 99.998% of strings end the way the
@@ -55,10 +57,8 @@ I could not check here. Sizes use "MB" for 1,000,000 bytes and "gz" for `gzip -9
   pitch, before the pitch that put the ball in play. They do not say "the PA was in
   this count at some point". That needs the pitch string *(inference, from the data
   shape; 1961 line 3 `BBBB` stored as 3-0)*.
-- **Not committed.** The build script (about 250 lines) stays in the session's scratch
-  folder, as the task asked for one file. [DECISION: Commit the script as
-  `.scratch/research-retrosheet-pa/measure.mjs` in this PR, so the numbers can be rerun.
-  Recommended: yes. The scripts of #2482 went in the same way.]
+- **Script.** `measure.mjs` in this folder is the build script (about 250 lines). It
+  reads the folder layout of the Reproduce section and writes `measure.json`.
 - **Two bugs found and fixed while measuring** (both would have changed the answer):
   `cwevent` does not number `NP` (substitution) lines, so raw play lines drift from
   event numbers after the first substitution. And the 1984 to 1987 files leave the
@@ -73,7 +73,7 @@ Month shards, `gzip -9`, summed over 371 files. 8,647,152 PAs, 112,902 games.
 |---|---|---|---|---|
 | `min` | 11, no pitch string | 350.2 MB | **28.5 MB** | 3.30 |
 | **`min+pseq`** | 12, with the raw pitch string | 395.8 MB | **37.3 MB** | **4.32** |
-| `rich+pseq` | 18, adds hands, score margin, lineup place, hit value, RBI | 537.5 MB | 46.3 MB | 5.36 |
+| **`rich+pseq` (version 1)** | 18, adds hands, score margin, lineup place, hit value, RBI | 537.5 MB | **46.3 MB** | **5.36** |
 
 The pitch string adds **8.8 MB gz** (31% on top of `min`). Written to parallel files it
 weighs 8.56 MB gz, and the core columns 28.55 MB gz. The sum, 37.1 MB, is less than 1%
@@ -221,7 +221,7 @@ play ends in `X` or `Y`). The check does not use the count field.
 
 ## 3. Storage hosts
 
-Files here: 371 PA shards, 54 game indexes, a few small index files. About 40 MB gz,
+Files here: 371 PA shards, 54 game indexes, a few small index files. About 47 MB gz with the version 1 columns plus 73 park files (35 to 43 MB more),
 about 430 files in version 1. Gary's rule: outside git, fetched on demand by the PWA.
 
 **What the repo already does.** `api/ballpark-photo.js` and `api/identity.js` write to a
@@ -251,7 +251,7 @@ Sources, in table order:
 
 **Vercel Blob on Hobby, with our numbers**
 
-- **Storage.** Version 1 is about 40 MB gz of 1 GB (4%) *if the host stores what I
+- **Storage.** Version 1 is about 47 MB gz of 1 GB (5%), or about 90 MB with park files *if the host stores what I
   upload*. The existing photo and logo blobs share the 1 GB. Their size is not measured.
 - **Uploads.** About 430 files is 430 of 2,000 advanced operations in a month, and
   the 900 a minute rate cap is not near. *(Inference: the doc says an upload counts as
@@ -268,12 +268,13 @@ Sources, in table order:
   across stores does not change costs, so a second store probably does not isolate
   the limit.)*
 - **Not documented, test first:** whether the Blob CDN compresses JSON for a browser,
-  and whether it answers `Range` requests. [DECISION: Before any build, upload one 1 MB
-  JSON file to a throwaway path of the existing store and read `content-encoding`,
-  `access-control-allow-origin` and `accept-ranges` with `curl -sI -H 'Origin: ...'
-  -H 'Accept-Encoding: gzip, br'`. Recommended: yes. The result sets whether files ship
-  as plain `.json` or as pre-gzipped bytes that the page unpacks with
-  `DecompressionStream`.]
+  and whether it answers `Range` requests. The test is one throwaway 1 MB JSON upload,
+  then `curl -sI -H 'Origin: https://example.com' -H 'Accept-Encoding: gzip, br'` on its URL,
+  reading `content-encoding`, `access-control-allow-origin` and `accept-ranges`, then a delete.
+  **Status: not run.** This environment has no Blob token (no `BLOB_*` or `VERCEL_*`
+  variable is set). The result sets whether files ship as plain `.json` or as
+  pre-gzipped bytes that the page unpacks with `DecompressionStream`.
+  [DECISION: Run the header test from a session that holds the store's read-write token, or paste the token's environment variable name into the session. Recommended: run it before any build. Nothing else in this file depends on the answer except the user's download size.]
 - **Versioned paths.** Put a version in the path (`retro/v1/...`). The 1961 to 2014
   data is frozen, so set a long `cacheControlMaxAge`. A rebuild writes `v2` and the
   manifest points to it. This avoids the stale-cache trap that `api/ballpark-photo.js`
@@ -282,7 +283,7 @@ Sources, in table order:
 **Cloudflare R2.** The best free transfer (egress $0, 10 million reads a month) and no
 per-upload cap that matters (1 million Class A ops). It costs a new vendor, a bucket, a
 custom domain for caching and CORS, and a second secret for the hand-run upload. Our
-40 MB sits inside the free 10 GB, and the person files (about 140 MB) would too.
+47 MB sits inside the free 10 GB, and the person files (about 140 MB) would too.
 *(Inference: pick R2 if Blob transfer nears 10 GB, or if
 person files are wanted. The layout in section 4 does not depend on the host.)*
 
@@ -356,11 +357,11 @@ A month shard lets the scan stop within one month. A season file would read abou
 retro/v1/manifest.json              versions, season list, shard list (rows, bytes), coverage per season
 retro/v1/games/{season}.json        game index, 14 to 23 KB gz each, 54 files
 retro/v1/parks.json                 Retrosheet park code -> MLBAM venue id, name, first and last season
-retro/v1/pa/{season}/{mm}.json      core columns (min), rows in date order, 371 files
+retro/v1/pa/{season}/{mm}.json      17 core columns (the 11 filter columns plus the 6 extras), rows in date order, 371 files
 retro/v1/pitches/{season}/{mm}.json pitch string per row, same row order as the core file, 371 files
 retro/v1/idx/batters.json           person -> shard numbers, 88 KB gz
 retro/v1/idx/pitchers.json          person -> shard numbers, 53 KB gz
-retro/v1/by-park/{code}.json        optional, 73 files, 35 MB gz
+retro/v1/by-park/{code}.json        73 files, 35 MB gz measured with 12 columns; about 43 MB with 18 (inference, +24%)
 ```
 
 - **A row's key** is `gamePk` plus `ab`. A later pitch store joins on that pair (the
@@ -405,17 +406,23 @@ retro/v1/by-park/{code}.json        optional, 73 files, 35 MB gz
   a 37 MB read, or cap the range.
 - Gray out the count and pitch-sequence chips for a season under the share in section 2.
 
-## Decisions for Gary
+## Decided (Gary, 2026-10-21, relayed by the parent session)
 
-[DECISION: Host for version 1. Recommended: Vercel Blob (public store, versioned paths `retro/v1/...`), after the one-file header test in section 3. Alternative: Cloudflare R2 behind a custom domain, if you want free egress and a separate quota from the ballpark photos.]
+1. **Host:** Vercel Blob, public store, versioned paths `retro/v1/...`.
+2. **Sharding:** month files (371), with the pitch string in a parallel file.
+3. **Columns:** the 11 filter columns plus the pitch string **and** the extras: batter
+   and pitcher hand, score margin, lineup place, hit value, RBI. Measured size of that
+   row set, 18 columns with the pitch string: **46.3 MB gz**, 537.5 MB raw (table in
+   section 1). The core files (17 columns, no pitch string) are about 37.8 MB gz and the
+   pitch files 8.56 MB gz *(inference: 46.33 minus 8.56; the 17-column core was not
+   gzipped alone)*. Section 4 tables list the 12-column sizes because the layout
+   experiments ran on them.
+4. **Park files:** yes, build them (73 files). Club-by-season and person files stay out of version 1.
+5. **Script:** committed as `measure.mjs` in this folder.
+6. **Header test:** yes, run it (1 MB JSON, throwaway path in the existing store, then delete).
 
-[DECISION: Shard rows by season and month (371 files) with the pitch string in a parallel file. Recommended. Alternatives: pitch string in the same file (one file less per shard, 23% more bytes on every read); one file per season (54 files, 6 times the bytes per read).]
-
-[DECISION: Which columns go in version 1. Recommended: the 11 filter columns plus the pitch string (37.3 MB gz). Adding batter and pitcher hand, score margin, lineup place, hit value and RBI costs 9.0 MB gz more (46.3 MB). Hands and score margin are in the TruMedia and Stathead lists of #2234.]
-
-[DECISION: Also build park files (73 files, 35 MB gz). Recommended: yes. Club-by-season files (1,416 files) and person files (13,112 files): not in version 1; add them only after a timed query shows a need.]
-
-[DECISION: Commit the measurement script into this PR (see Method). Recommended: yes.]
+**Still open:** the header test did not run, because no Blob token is in this environment.
+See the DECISION line in section 3. No data files were built or uploaded.
 
 ## What this research did not measure
 
