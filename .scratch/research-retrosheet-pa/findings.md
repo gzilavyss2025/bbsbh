@@ -274,7 +274,7 @@ Sources, in table order:
   **Status: not run.** This environment has no Blob token (no `BLOB_*` or `VERCEL_*`
   variable is set). The result sets whether files ship as plain `.json` or as
   pre-gzipped bytes that the page unpacks with `DecompressionStream`.
-  [DECISION: Run the header test from a session that holds the store's read-write token, or paste the token's environment variable name into the session. Recommended: run it before any build. Nothing else in this file depends on the answer except the user's download size.]
+  **Deferred: the build child runs this test first, with a token set up then.**
 - **Versioned paths.** Put a version in the path (`retro/v1/...`). The 1961 to 2014
   data is frozen, so set a long `cacheControlMaxAge`. A rebuild writes `v2` and the
   manifest points to it. This avoids the stale-cache trap that `api/ballpark-photo.js`
@@ -421,8 +421,8 @@ retro/v1/by-park/{code}.json        73 files, 35 MB gz measured with 12 columns;
 5. **Script:** committed as `measure.mjs` in this folder.
 6. **Header test:** yes, run it (1 MB JSON, throwaway path in the existing store, then delete).
 
-**Still open:** the header test did not run, because no Blob token is in this environment.
-See the DECISION line in section 3. No data files were built or uploaded.
+**Deferred:** the header test did not run, because no Blob token is in this environment.
+Section 3 says the build child runs it first. No data files were built or uploaded.
 
 ## What this research did not measure
 
