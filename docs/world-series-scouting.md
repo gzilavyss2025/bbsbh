@@ -42,13 +42,13 @@ count badges (Gary, 2026-10-19).
 | Umpire edge | not shown | 2 (once the crew posts) | `umpires/` |
 | Pitch by pitch | 4 | 3 | `hitter-grid`, `pitch-arsenal` |
 | Platoon | 5 | 4 | team `statSplits` |
-| Park fit | 6 | 6, only at Milwaukee (venue 32) | `spray` store |
+| Park fit | 6 | 6 | `spray` store, `teams.json` home venues, `lib/ballpark` walls |
 | Film room | 7 | 5 | `fetchMeetings` |
 
 ## Rules
 
 - Glove and legs shows on both day types when at least 4 of its 6 measures are real for both clubs.
-- Park fit always draws Milwaukee's field. The other club's park is not on file, so Games 3 to 5 show it only at Milwaukee.
+- Park fit draws both clubs' home parks over each other (2026-10-21), on both day types. Each park is the club's `venueId` in `teams.json`; the focus game's own venue wins for the club that hosts it. A control picks Both or one park. Under one park the table adds "Carry past wall": the share of each club's regulars' fly balls, by direction, that travel farther than that park's wall on their own angle. It is an estimate: wall height is ignored, and a direction with fewer than `MIN_CARRY` balls shows a dash. A park with no layout drops out; with none, the card drops. The earlier rule (Milwaukee only, because the Rays' park was thought to be off file) was wrong: Tropicana Field is venue 12 and has an audited wall.
 - Club order on every card follows the Tale of the tape (`sides`).
 - Chosen by Gary (2026-10-20, from the threshold report): Pitch by pitch `EDGE_BAND` = .020; Matchup edges hitter rule = 8 PA and 8 AB, then .350 or better or 2+ HR. The AB floor also changes the series primer's `MatchupEdges` card.
 - Still placeholders, which Gary tunes: Pitch by pitch `MIN_PA` (10), `MIN_USE` (.05), `MAX_HITTERS` (9); the Matchup edges pitcher rule and caps.

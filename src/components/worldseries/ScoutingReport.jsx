@@ -3,7 +3,7 @@ import { CAREER_MATCHUPS_FALLBACK, loadCareerMatchups, starterMatchupsFor } from
 import { CLUB_DEFENSE_FALLBACK, loadClubDefenseRunning } from '../../api/clubDefenseRunning.js'
 import { NINE_KEYS_FALLBACK, loadNineKeys } from '../../api/nineKeys.js'
 import { loadPitchByPitch } from '../../api/scout/pitchByPitch.js'
-import { loadParkFit, loadPlatoon } from '../../api/scout/seriesFit.js'
+import { loadHomeVenues, loadParkFit, loadPlatoon } from '../../api/scout/seriesFit.js'
 import { fetchMeetings } from '../../api/postseason/meetings.js'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -13,10 +13,9 @@ import { edgesState } from '../../lib/postseason/worldseries/scouting/edgesState
 import { matchupEdges } from '../../lib/postseason/primer/matchupEdges.js'
 import { failedCards, failedLine } from '../../lib/postseason/worldseries/scouting/failedCards.js'
 import { gloveLegsModel } from '../../lib/postseason/worldseries/scouting/gloveLegs.js'
-import { parkFitModel } from '../../lib/postseason/worldseries/scouting/parkFit.js'
+import { fitParks, parkFitModel } from '../../lib/postseason/worldseries/scouting/parkFit.js'
 import { platoonModel } from '../../lib/postseason/worldseries/scouting/platoon.js'
-import { MILWAUKEE_VENUE_ID, clubOrder, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
-import { resolveBallparkLayout } from '../../lib/ballpark/layout/resolveLayout.js'
+import { clubOrder, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { HubTabBar } from '../chrome/HubTabBar.jsx'
 import { EdgeCard } from '../postseason/edges/EdgeCard.jsx'
@@ -63,7 +62,7 @@ const CARD = {
     <PitchByPitch data={pitchByPitch} clubId={noteClub} oppId={clubIds.find((id) => id !== noteClub)} gameNumber={gameNumber} />
   ),
   platoon: ({ platoon }) => <Platoon blocks={platoon} />,
-  'park-fit': ({ parkFit, parkLayout, sides }) => <ParkFit model={parkFit} layout={parkLayout} clubIds={sides} />,
+  'park-fit': ({ parkFit, parks, sides }) => <ParkFit model={parkFit} parks={parks} clubIds={sides} />,
   'umpire-edge': ({ plateUmpire, umpire }) => <UmpireEdge name={plateUmpire.name} lean={umpire?.lean ?? null} />,
 }
 
@@ -102,16 +101,21 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
     () => platoonModel(opsByClub, { clubA: sides[0], clubB: sides[1], game, gameNumber }),
     [opsByClub, sides[0], sides[1], game, gameNumber],
   )
-  // Park fit: always Milwaukee's field (the park of Games 1, 2, 6 and 7; the other club's park is not
-  // on file for Games 3 to 5). On a game day the card shows only when tonight's park is Milwaukee, and
-  // the spray read waits for that answer. The loaders key on the stable clubIds (their data is keyed by
-  // club id); only the models read `sides`, which WorldSeriesHome reorders once the park resolves.
-  const venueId = game?.venue?.id ?? null
-  const parkLayout = useMemo(() => resolveBallparkLayout({ venueId: MILWAUKEE_VENUE_ID, gameDate: slateDate }), [slateDate])
-  const wantPark = Boolean(parkLayout) && (dayType !== 'game' || venueId === MILWAUKEE_VENUE_ID)
-  const { data: balls, error: parkError } = useAsync(() => (wantPark ? loadParkFit({ clubIds, slateDate }) : null), [clubA, clubB, slateDate, wantPark])
-  const parkFit = useMemo(() => (wantPark ? parkFitModel(balls, { clubA: sides[0], clubB: sides[1] }) : null), [balls, wantPark, sides[0], sides[1]])
-  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit, venueId })
+  // Park fit: both clubs' home parks, overlaid (fitParks), on every day type. The loaders key on the
+  // stable clubIds (their data is keyed by club id); only the models read `sides`, which WorldSeriesHome
+  // reorders once the park resolves. A park with no layout drops out; with none, the card drops.
+  const [sideA, sideB] = sides
+  const { data: venueByClub, error: venueError } = useAsync(() => loadHomeVenues(clubIds), [clubA, clubB])
+  const parks = useMemo(
+    () => (venueByClub ? fitParks({ sides: [sideA, sideB], venueByClub, game, slateDate }) : []),
+    [venueByClub, sideA, sideB, game, slateDate],
+  )
+  const { data: balls, error: parkError } = useAsync(() => loadParkFit({ clubIds, slateDate }), [clubA, clubB, slateDate])
+  const parkFit = useMemo(
+    () => (parks.length ? parkFitModel(balls, { clubA: sideA, clubB: sideB, layouts: parks.map((p) => p.layout) }) : null),
+    [balls, parks, sideA, sideB],
+  )
+  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit })
   // A failed read is not an empty one: name the cards whose load failed (the card itself still drops).
   const failed = failedLine(
     failedCards([
@@ -120,7 +124,7 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
       { label: 'Matchup edges', failed: career === CAREER_MATCHUPS_FALLBACK || careerError },
       { label: 'Pitch by pitch', error: pitchError },
       { label: 'Platoon', error: platoonError },
-      { label: 'Park fit', error: parkError },
+      { label: 'Park fit', error: parkError ?? venueError },
       { label: 'Film room', error: meetingsError },
       { label: 'Umpire edge', error: umpireError },
     ]),
@@ -144,7 +148,7 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
   if (!shown && !failed) return null
   // Every card dropped but a read failed: the band and the line, so a failure is not read as an empty season.
   if (!shown) return <Stack gap="loose" className="ww-scout"><SectionHead look="band" house as="h2">Scouting report</SectionHead><p className="ww-scout__failed" role="status">{failed}</p></Stack>
-  const ctx = { noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, gloveLegs, sides, clubIds, season, edges, edgesState: edgesState({ edges, hasRow: edgesRow }), plateUmpire, umpire, platoon, parkFit, parkLayout }
+  const ctx = { noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, gloveLegs, sides, clubIds, season, edges, edgesState: edgesState({ edges, hasRow: edgesRow }), plateUmpire, umpire, platoon, parkFit, parks }
   const names = clubIds.map((id) => teamClubNameShort(id)).filter(Boolean).join(' and ')
   return (
     <Stack gap="loose" className="ww-scout" ref={rootRef} style={{ '--ww-scout-offset': `${offset}px` }}>
