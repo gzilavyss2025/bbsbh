@@ -1,7 +1,7 @@
 # Score a classic game: draft spec
 
 Issues: gzilavyss2025/bbsbh#1525 (score a classic game) and gzilavyss2025/bbsbh#1527
-(classic of the day on a day with no games). Written 2026-10-21 in a shape session. This
+(classic of the day on a day with no games). Written 2026-10-21 in a shape session. Updated the same day with Gary's answers (section 10). This
 spec builds nothing. A note marked **(inference)** is my reading, not a measured value.
 A number with no mark is my own measurement in this session, against the live MLB Stats API.
 
@@ -41,11 +41,10 @@ this device has started (`readRevealMarkFor`).
 
 ## 3. What blocks the idea
 
-1. **The BOX tab spoils a classic.** ADR-0117 opens every past-dated box score with no
-   tap. A classic is always past-dated. So the final score is one tap away on every
-   page of the game, in the tab row. ADR-0117 saw this ("a reader who scores it can
-   avoid that tab"). For a feature whose whole point is the reveal, that is a weak
-   protection **(inference)**. This is the only spoiler-rule change in this spec.
+1. **The BOX tab shows a classic's score.** ADR-0117 opens every past-dated box score with
+   no tap. A classic is always past-dated, so its final score is one tap away in the tab
+   row. **Gary decided on 2026-10-21 to keep ADR-0117 as it is (S0).** A reader who scores
+   a classic does not open the BOX tab. The half-inning pages stay sealed.
 2. **No way to pick.** See section 2.
 3. **"From today's date" fails in winter.** I read the schedule for every season from
    1960 to 2025 (66 calls). Games fall on 232 calendar dates, from Mar 18 to Nov 5.
@@ -68,178 +67,150 @@ Smaller gaps that do not block (out of scope, section 8): modern headshots (Char
 Moore's row shows Paul Molitor's current photo), modern logos for old clubs, an MLB.tv
 link on a 1980 game, no umpires before about 1990.
 
-## 4. The options
+## 4. The options, and what Gary chose
 
 Mockups are in `mockups/`, 390 px wide, rendered with `?nointro` in the preinstalled
 Chromium against the dev server and the live API. **What is mocked:** each red
 "MOCKUP" strip names it. The cards, the year strip, the `/classics` pages, the sealed
 BOX tab and the seal card are DOM that I injected. The slates, the game pages and every
 game row are real API data. The e2e mock (anchor 823035) has no 1960-2025 game, so I
-did not use it.
+did not use it. The mockups of the options Gary did not choose stay in the folder as a
+record.
 
-### Picking a game (#1525)
+| Question | Options shown | Gary's answer (2026-10-21) |
+| --- | --- | --- |
+| How a reader picks a classic | F1 year strip on the slate (`20-flow1-slate-by-year.png`); F2 club-and-season list (`21-flow2-classics-page-list.png`); F3 a dealt card on `/classics` (`22-flow3-classics-deal.png`) | **F3**, the dealt card |
+| The box score of a classic | S0 no change (`00-today-boxscore.png`); S1 a sealed BOX tab (`30-seal-S1-box-tab-sealed.png`); S2 the one-tap seal again (`31-seal-S2-box-score-tap-seal.png`) | **S0**, no change to ADR-0117 |
+| Postseason rows in a list | Only for F2 | Not needed (F2 is not built) |
+| How the off-day card picks | By club (`10-offday-card-A-favorite-club.png`); by date, then club (`11-offday-card-B-date-then-club.png`) | **A random roll from the whole classics pool.** Not tied to the date or the club. |
+| The card on a club's in-season off day | `12-offday-card-C-club-off-day.png` | **Offseason only.** In season is later work. |
+| Names | — | **"Score a classic"** for the page and the button. **"A classic to score"** for the card. |
 
-| | Flow | Screenshot | For | Against |
-| --- | --- | --- | --- | --- |
-| F1 | The slate travels by year: "‹ 1974 · Oct 21 · 1975 · 1976 ›" under the date. | `20-flow1-slate-by-year.png` | Smallest. Uses the slate as it is. | Needs a date first. An old slate shows 20+ "Off day" club cards (current clubs). Useless on 134 winter dates. |
-| F2 | `/classics`: pick a club (favorite first), a season, regular or postseason, then a game from a list. | `21-flow2-classics-page-list.png` | The reader chooses the exact game ("the 1982 World Series"). | A postseason list shows how long each series went (ALCS 5, WS 7). That is a result of the earlier games **(inference: a series length reads as a result)**. |
-| F3 | `/classics` deals one game: era chips, club chips, "Deal another". | `22-flow3-classics-deal.png` | Same card as #1527. No list to leak. Follows `PickedGame`. | The reader cannot ask for one exact game. |
-
-**Recommended: F3 first, then F2's regular-season list later.** F3 shares its card and
-its data with #1527.
-
-### The seal on the box score (#1525)
-
-| | Option | Screenshot | Rule |
-| --- | --- | --- | --- |
-| S0 | No change. | `00-today-boxscore.png` | ADR-0117 as it is. The score is one tap away. |
-| S1 | The BOX tab shows "Box · sealed" in kraft and opens by itself after the last half. | `30-seal-S1-box-tab-sealed.png` | Needs the game's last half, which is a length read from the linescore (reveal-only). More code. |
-| S2 | **Recommended.** A past game that this device has started (or dealt as a classic) seals its box score again with the old one-tap seal. | `31-seal-S2-box-score-tap-seal.png` | `openByDate` becomes false when `readRevealMarkFor(pk) >= 0` or the `bbsbh:classic:{pk}` bit is set. The tap writes `bbsbh:boxreveal:{pk}` as ADR-0049 does. |
-
-S2 only adds a seal. It fails closed: a missing or unreadable mark leaves ADR-0117 as it
-is. The `bbsbh:classic:{pk}` bit is written by "Score it ›", so the box score is sealed
-before the first half too. A shared link carries no bit, so the receiver gets
-ADR-0117's open box score. That direction is safe for the sender and the same as today
-for the receiver.
-
-### The classic of the day card (#1527)
-
-| | Card | Screenshot | How it picks |
-| --- | --- | --- | --- |
-| C-A | "A classic to score · Brewers · 1980" above Transactions on the winter slate. | `10-offday-card-A-favorite-club.png` | Favorite club, any season 1960 to last season, seeded by the date. |
-| C-B | Same card. Its kicker says "No game was ever played on Dec 15". | `11-offday-card-B-date-then-club.png` | **Both:** this calendar date in a seeded year when the date has games; else the favorite club. |
-| C-C | "Brewers off today · on this date" above the Off-day grid in season. | `12-offday-card-C-club-off-day.png` | The favorite club's games on this calendar date. In season only. |
-
-**Recommended: C-B.** It keeps Gary's "from today's date" where history has a game, and
-it still fills the 134 empty winter dates. C-C can follow later. It is a second home.
+What the build looks like: the `/classics` page is `22-flow3-classics-deal.png`, titled
+"Score a classic". The off-day card is `10-offday-card-A-favorite-club.png` with the
+kicker "A classic to score" and a game from any club and any era.
 
 ## 5. How a game is chosen, and which eras are eligible
 
-- **Eligible:** a game with `gameType` R, F, D, L or W, `officialDate` from 1960-01-01 to
-  the end of the last finished season, `detailedState` "Final", and both clubs in the AL
-  or the NL that season. Leave out "Forfeit", "Postponed", "Cancelled", spring training
-  (S), exhibitions (E) and the All-Star Game (A). The current season stays on the slate.
-- **Chosen by:** date first, then the favorite club (C-B). The seed is
-  `seedFrom('{MMDDYYYY}|classic')`, as `PickedGame` seeds `{date}|{sportId}`. "Deal
-  another" steps the deck. A game with a reveal mark on this device shows "Pick up
-  where you left off", not a fresh deal.
+- **Eligible (the classics pool):** a game with `gameType` R, F, D, L or W,
+  `officialDate` from 1960-01-01 to the end of the last finished season, `detailedState`
+  "Final", and both clubs in the AL or the NL that season. Leave out "Forfeit",
+  "Postponed", "Cancelled", spring training (S), exhibitions (E) and the All-Star Game
+  (A). The current season stays on the slate.
+- **On `/classics`:** the reader filters by era (60s to 20s) and by club ("Any club" or
+  one club, with the favorite club first). The deal is a seeded roll inside the filter.
+  "Deal another" steps the deck.
+- **On the off-day card:** a random roll from the whole pool, with no era or club
+  filter and no link to the date. To make two tabs on the same day agree, the roll uses
+  a seed from the slate date, as `PickedGame` does (`seedFrom('{date}|classic')`).
+  "Deal another" rolls again. **(inference: Gary said "randomized"; the date seed only
+  keeps one day's tabs in step, and it does not pick a game from that date.)**
+- **How a roll works with no pool file:** pick a seeded season (1960 to last season),
+  read that season's AL and NL clubs (`teams?sportId=1&season=Y`), pick a seeded club,
+  read that club's season schedule with the score-free `fields=` list (block 5, about
+  57 KB), and pick a seeded game that passes the eligibility rule. Two small calls per
+  deal. A club filter skips the club step. **(inference: a roll by season, then club,
+  then game does not weight every game the same; the difference is small and I did not
+  measure it.)**
+- **A game this device has started** (`readRevealMarkFor(pk) >= 0`) shows "Pick up
+  where you left off", not a fresh deal. This follows `PickedGame`.
 - **Never chosen by** a result, a feat, a score or a length (ADR-0080). The notable index
   is not read.
-- **Reason line:** careers and the calendar only. Sources: `schedule?hydrate=lineups`
+- **Reason line:** careers and the calendar only. Source: `schedule?hydrate=lineups`
   (starting lineups) and the club's first season. Examples: "Paul Molitor leads off.",
   "The Brewers' first season in Milwaukee." The mockups' "LaPoint vs Halicki" came from
-  the feed. A build must not use the feed for it (block 6).
+  the feed. A build must not read the feed for it (block 6).
 - **No play-by-play check in a generator.** 6 of 6 sampled games per season from 1960
   to 2010 had plays (#1525). The game page already handles a feed with no plays
-  (ADR-0101, D14). A client-side deal costs 1 schedule call (about 57 KB for a club
-  season) **(inference: a whole-league date is smaller; I did not measure it)**.
+  (ADR-0101, D14).
 
 ## 6. Slices
 
-Each slice is at most 5 files. Model per slice: Sonnet 5.5 or Haiku 5.5, unless the
-slice changes the spoiler rule.
+Each slice is at most 5 files. **No slice changes the spoiler rule now.** Gary chose
+S0, so the re-seal slice and its ADR-0117 amendment are gone. No slice needs Opus. If a
+later change adds a seal or an opener, that slice moves to Opus 5.5.
 
-### Slice 1. A started past game seals its box score (S2)
+### Slice 1. The deck: a score-free classics reader
 
-- Files: `src/lib/dates.js` (`boxScoreOpensByDate` gains a `started` input, or a new
-  pure helper beside it), `src/screens/BoxScore.jsx` (passes the mark and the classic
-  bit), `test/` (one unit file for the helper), `docs/adr/0117-…md` (addendum),
-  `src/CLAUDE.md` (one line, if the opener list there names `openByDate`).
-- Pattern: ADR-0117 section 2 (`openByDate` as a render-only flag; `onReveal` rule) and
-  ADR-0049 (the tap bit).
-- Done test: a node test proves the helper returns `false` for a past date when the mark
-  is `>= 0` or the classic bit is set, and `true` when neither is set. The test fails
-  before the change. In Chromium, `/10011980/milcal/boxscore?nointro` after one revealed
-  half shows the seal, and with a cleared `localStorage` shows the open box score.
-- Model: **Opus 5.5.** It changes the spoiler rule's openers.
-
-### Slice 2. The deck: a score-free classic schedule reader
-
-- Files: `src/api/classics/deck.js` (fetch with the `fields=` list in block 5, filter
-  per section 5, seeded pick), `src/api/spoiler-manifest.json` (class `spoiler-free`,
-  with a `why` that names the `fields=` list), `test/classics-deck.test.js`,
-  `docs/api/classics.md`.
+- Files: `src/api/classics/deck.js` (the two fetches with the `fields=` list in block 5,
+  the eligibility filter, the seeded roll with optional era and club filters),
+  `src/api/spoiler-manifest.json` (class `spoiler-free`, with a `why` that names the
+  `fields=` list), `test/classics-deck.test.js`, `docs/api/classics.md`,
+  `docs/adr/0080-…md` (an addendum: the dealt-game rule now covers MLB history).
 - Pattern: `src/api/milbPool.js` (`seedFrom`, `pickGame`, `isStarted`) and its manifest
   entry.
 - Done test: a node test feeds a fixture schedule (copied from the 1982 Brewers
   response) and proves: forfeits and postponements drop; a pre-1960 row drops; the same
-  seed deals the same game; the request URL holds `fields=` and no `hydrate=linescore`.
-  `npm run lint` passes the manifest check.
+  seed deals the same game; an era filter keeps only that decade; the request URL holds
+  `fields=` and no `hydrate=linescore`. `npm run lint` passes the manifest check.
 - Model: Sonnet 5.5.
 
-### Slice 3. The classic card
+### Slice 2. The classic card
 
 - Files: `src/components/classics/ClassicCard.jsx`, its CSS file under `src/styles/`,
-  `src/api/classics/reason.js` (careers-only line from `hydrate=lineups`),
+  `src/api/classics/reason.js` (the careers-only line from `hydrate=lineups`),
   `test/classics-reason.test.js`, the manifest entry for `reason.js`.
 - Pattern: `src/components/offseason/PickedGame.jsx` (card, "Deal another", started
-  check, link to `lineup1`), and `reasonLine` in `src/api/milbPool.js`.
+  check, link to `lineup1`) and `reasonLine` in `src/api/milbPool.js`.
 - Done test: the reason test proves the line names only lineup and season facts. In
-  Chromium the card renders inside a temporary host at 390 px like
-  `22-flow3-classics-deal.png`. "Score it ›" writes `bbsbh:classic:{pk}` and opens
-  `/{MMDDYYYY}/{matchup}/lineup1`.
+  Chromium the card renders at 390 px like `22-flow3-classics-deal.png`, and "Score a
+  classic" opens `/{MMDDYYYY}/{matchup}/lineup1`.
 - Model: Sonnet 5.5.
 
-### Slice 4. The `/classics` page (F3)
+### Slice 3. The `/classics` page, "Score a classic"
 
 - Files: `src/lib/route.js` (a `classics` route; check `parseRoute` for collisions),
   `src/App.jsx` (mount), `src/screens/classics/ClassicsPage.jsx` (era and club chips
   around `ClassicCard`), the route test in `test/`, `src/CLAUDE.md` (one routing line).
 - Pattern: a standalone page such as `/notable` (ADR-0101 s.3), and the chip rows of the
   leader boards **(inference: I did not open the leader-board chip code)**.
-- Done test: the route test parses `/classics`. In Chromium,
-  `/classics?nointro` matches `22-flow3-classics-deal.png`, and "Deal another" changes
-  the game.
+- Done test: the route test parses `/classics`. In Chromium, `/classics?nointro`
+  matches `22-flow3-classics-deal.png`, and "Deal another" changes the game.
 - Model: Sonnet 5.5.
 
-### Slice 5. Classic of the day on the empty slate (#1527, C-B)
+### Slice 4. "A classic to score" on the offseason slate (#1527)
 
 - Files: `src/components/offseason/OffseasonLead.jsx` (mount the card above
-  Transactions), `src/api/classics/deck.js` (a `byDateThenClub` deal),
-  `test/classics-deck.test.js` (new cases), `src/components/offseason/CLAUDE.md` (one
-  line). The in-season empty day (`showOffDayBanner` in `GameSelect.jsx`) is a sixth
-  file, so it is slice 6 if Gary wants it.
-- Pattern: `OffseasonSlot` / `LevelOffseason` mount `PickedGame` the same way.
-- Done test: a node test proves Dec 15 falls back to the favorite club and Oct 21 deals a
-  game dated Oct 21. In Chromium, `/12152026?nointro` matches
-  `11-offday-card-B-date-then-club.png`.
-- Model: Haiku 5.5 after slices 2 and 3 land (it wires two existing parts).
+  Transactions, MLB only), `src/api/classics/deck.js` (a `rollAny` with no filter and a
+  date seed), `test/classics-deck.test.js` (new cases),
+  `src/components/offseason/CLAUDE.md` (one line).
+- Pattern: `OffseasonSlot` and `LevelOffseason` mount `PickedGame` the same way.
+- Done test: a node test proves the same date gives the same roll and two dates can give
+  different clubs and eras. In Chromium, `/12152026?nointro` shows the card above
+  Transactions, as in `10-offday-card-A-favorite-club.png`, with the kicker "A classic
+  to score". An in-season date with games shows no card.
+- Model: Haiku 5.5, after slices 1 and 2 land (it wires two existing parts).
 
 ## 7. ADRs
 
-- **New ADR (with slice 1):** "A classic is dealt on who played, and a game you started
-  seals its box score." It amends ADR-0117 (one more condition on `openByDate`) and
-  extends ADR-0080 (the dealt-game rule) from the MiLB pool to MLB history.
-- Read before building: ADR-0001, 0002 (the seal), 0049 (the tap bit), 0080 (dealing),
-  0101 (old games, D14), 0116 (no slate-wide reveal), 0117 (open by date).
+- **ADR-0080 addendum (slice 1):** a classic is dealt on who played, never on what
+  happened. The rule that governs the MiLB pool now also covers MLB games from 1960.
+- **No change to ADR-0117** (Gary, 2026-10-21). A classic's box score opens by its date.
+- Read before building: ADR-0001, 0002 (the seal), 0080 (dealing), 0101 (old games,
+  D14), 0116 (no slate-wide reveal), 0117 (open by date).
 
 ## 8. Spoiler-rule impact
 
-- The half-inning pages, the scorecard and the lineup page need no change. They already
-  seal an old game through `revealedThrough` and the reveal-only modules.
-- Slice 1 adds a seal to a surface ADR-0117 opened. It adds no opener. It persists one
-  bit per game that says "I am scoring this", never a score.
+- **None to the rule.** The half-inning pages, the scorecard and the lineup page already
+  seal an old game through `revealedThrough` and the reveal-only modules. They need no
+  change.
+- **Accepted by Gary:** the BOX tab of a classic shows the final score with no tap
+  (ADR-0117, S0). The reader who scores avoids that tab.
 - The deck and the card fetch no score field (block 5). They import no reveal-only
-  module and no notable-index reader.
+  module and no notable-index reader. The manifest's `spoiler-free` class and its `why`
+  make that a lint fact.
 - A postseason game's title ("World Series, Game 6") stays open, as ADR-0101 keeps the
-  title open. F2's series lists are the open question (D3).
+  title open.
 
 ## 9. Out of scope
 
 Retrosheet and pre-1960 games; the YouTube full-game pairing; era-correct logos and
 headshots; umpires before about 1990; the MLB.tv link on an old game; a generator or a
-static pool file; Negro league games (D6 of the old-games plan); the current season.
+static pool file; Negro league games (D6 of the old-games plan); the current season;
+a club-and-season list (F2); the card on a club's in-season off day; any re-seal of a
+classic's box score.
 
-## 10. Questions for Gary
+## 10. Decisions
 
-[DECISION: How does a reader pick a classic? Recommended: F3, a dealt card on `/classics` (`22-flow3-classics-deal.png`). Other options: F2, a club-and-season list (`21-flow2-classics-page-list.png`); F1, a year strip on the slate (`20-flow1-slate-by-year.png`).]
-
-[DECISION: Does a classic you are scoring seal its box score again? Recommended: S2, yes, the old one-tap seal once you start or deal the game (`31-seal-S2-box-score-tap-seal.png`). Other options: S1, a sealed BOX tab that opens after the last half (`30-seal-S1-box-tab-sealed.png`); S0, no change, the box score stays open by date (`00-today-boxscore.png`).]
-
-[DECISION: If F2 is built, may a postseason list show every game of a series (so "WS 7" shows the series went seven)? Recommended: no, regular season only in F2. Other option: yes, show them all.]
-
-[DECISION: How does the off-day card pick its game? Recommended: "both", this date when history has a game, else your favorite club (`11-offday-card-B-date-then-club.png`). Other options: favorite club only (`10-offday-card-A-favorite-club.png`); this date only, which leaves 134 winter dates empty.]
-
-[DECISION: Also show the card on your club's in-season off day? Recommended: not now, later (`12-offday-card-C-club-off-day.png`). Other option: yes, in slice 6.]
-
-[DECISION: The name of the page and the card. Recommended: "Score a classic" and "A classic to score". Other words: "From the vault", "Classic of the day".]
+Gary answered every question on 2026-10-21 (relayed by the parent session). Section 4
+has the table. No decision is open.
