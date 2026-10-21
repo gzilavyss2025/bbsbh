@@ -68,11 +68,13 @@ export async function fetchLevelDateRangeStats(sportId, group, season, startDate
 // org's combined board is assembled from just its affiliates (not the whole
 // minors). A club's roster churns but its season stat list keeps everyone who
 // logged time there, which is exactly the org-production total we want. Degrades to [].
-export async function fetchTeamSeasonStats(teamId, group, season) {
+// `gameType` ('P' = the postseason, checked live 2026-10-21: the same split shape, empty for a
+// club with no postseason games) narrows it; unset reads the regular season as before.
+export async function fetchTeamSeasonStats(teamId, group, season, gameType = '') {
   if (!teamId || !season) return []
   try {
     const data = await getJson(
-      `/api/v1/stats?stats=season&group=${group}&season=${season}&teamId=${teamId}&playerPool=all&limit=5000`,
+      `/api/v1/stats?stats=season&group=${group}&season=${season}&teamId=${teamId}&playerPool=all&limit=5000${gameType ? `&gameType=${gameType}` : ''}`,
     )
     return data.stats?.[0]?.splits ?? []
   } catch {

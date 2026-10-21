@@ -79,7 +79,7 @@ const BUDGETS = {
   // package.json and the docs name them by path (docs/scripts/generators.md).
   // Each generator's pure half lives in scripts/lib/ (ADR-0100, ADR-0111 for the
   // open-data and pitch-start generators), so the script itself stays a thin runner.
-  scripts: 137, // +gen-league-pennants.mjs (team and player pennants), +gen-season-checkpoints.mjs (#1855), +gen-umpire-history.mjs (#1565), +gen-club-defense-running.mjs (#2316), +gen-world-series.mjs and gen-world-series-events.mjs (#2235): the contract names these paths; +gen-where-from-map.mjs and gen-where-from.mjs (#1526)
+  scripts: 138, // +gen-hof-pace.mjs (#1857; package.json and the docs name it by path), +gen-league-pennants.mjs (team and player pennants), +gen-season-checkpoints.mjs (#1855), +gen-umpire-history.mjs (#1565), +gen-club-defense-running.mjs (#2316), +gen-world-series.mjs and gen-world-series-events.mjs (#2235): the contract names these paths; +gen-where-from-map.mjs and gen-where-from.mjs (#1526)
   'src/lib': 53,
   // Testable helpers the generators import (scripts/CLAUDE.md's convention,
   // lib/roster.mjs is the worked example). They run nothing on import and share

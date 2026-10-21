@@ -109,3 +109,30 @@ test('loadJerseys at an affiliate reads the standings split and no uniforms', as
   })
   assert.ok(!seen.some((u) => u.includes('/uniforms/')))
 })
+
+// #1437: the Ranks band's postseason leaders. The pool is asked for only once the club has a
+// postseason game with a result (a row's `won` is null past the ?d= cutoff), and it asks for
+// gameType P; the regular-season pool is the one loadRanks already reads.
+test('loadPostseasonLeaders asks for gameType P once a postseason game has a result', async () => {
+  const { loadPostseasonLeaders } = await import('../src/screens/team/data/loadNumbers.js')
+  const asked = []
+  const split = { player: { id: 9, fullName: 'Post Season' }, team: { id: 158 }, stat: { homeRuns: 3, plateAppearances: 10 } }
+  const src = {
+    fetchTeamSchedule: async () => [{ gameType: 'R', won: true }, { gameType: 'D', won: false }],
+    fetchTeamSeasonStats: async (...args) => (asked.push(args), args[1] === 'hitting' ? [split] : []),
+  }
+  const out = await loadPostseasonLeaders(158, null, src)
+  assert.ok(asked.length > 0 && asked.every((a) => a[3] === 'P'))
+  assert.deepEqual(out.pool.map((p) => p.id), [9])
+})
+
+test('loadPostseasonLeaders is null, and reads no stats, for a club with no postseason result', async () => {
+  const { loadPostseasonLeaders } = await import('../src/screens/team/data/loadNumbers.js')
+  let statsReads = 0
+  const src = {
+    fetchTeamSchedule: async () => [{ gameType: 'R', won: true }, { gameType: 'D', won: null }],
+    fetchTeamSeasonStats: async () => (statsReads++, []),
+  }
+  assert.equal(await loadPostseasonLeaders(158, null, src), null)
+  assert.equal(statsReads, 0)
+})

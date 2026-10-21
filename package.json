@@ -32,6 +32,7 @@
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-exclude=\"scripts/**\" \"test/**/*.test.js\"",
     "e2e": "playwright test",
     "visual": "playwright test -c playwright.visual.config.js",
+    "gen:hof-pace": "node scripts/gen-hof-pace.mjs",
     "gen:sitemap": "node scripts/gen-sitemap.mjs"
   },
   "dependencies": {
