@@ -159,9 +159,10 @@ The importer also reads the home park of every MiLB club in
 
 A minor-league outline is `estimated`, never `audited`: the art is stylized
 (Principal Park is a flat-topped box) and the only check is three posted
-signs. Its drawing says "Wall from MLB's drawing of this park, checked against
-its posted distances". A park with no passing outline but five posted signs
-draws the straight five-point wall with its own note. Minor-league walls have
+signs. Its drawing prints no note: the old "Wall from MLB's drawing of this park,
+checked against its posted distances" told the reader nothing, so it went
+(2026-10-21). A park with no passing outline but five posted signs draws the
+straight five-point wall with its note. Minor-league walls have
 no known heights, so no height is printed.
 
 On the screens, a drawable minor-league park gets the drawing on the team

@@ -264,13 +264,15 @@ test('every configuration builds a drawing, and prints only values it knows', ()
 
 // ── Minor-league parks (slice 3) ───────────────────────────────────────────
 
-test('a minor-league park with a checked outline draws it, labelled an estimate', () => {
+test('a minor-league park with a checked outline draws it, an estimate with no note', () => {
   // Principal Park (Iowa Cubs, venue 2844): posted 335 / 400 / 335.
   const l = resolveBallparkLayout({ venueId: 2844, gameDate: '2026-06-01' })
   assert.equal(l.configurationId, 'milb-2844')
   assert.equal(l.quality.fence, 'estimated')
   assert.equal(l.provenance.fence.kind, 'milb')
-  assert.match(l.accuracyNote, /posted distances/)
+  // Gary, 2026-10-21: the "Wall from MLB's drawing of this park" note told the reader nothing,
+  // so a checked minor-league outline prints none. The quality stays 'estimated'.
+  assert.equal(l.accuracyNote, null)
   assert.equal(l.measurements.wall, null, 'no wall heights are known')
   // By name too: the feed's venue name resolves the same record.
   assert.equal(layout({ venueName: 'Principal Park', gameDate: '2026-06-01' }), 'milb-2844')

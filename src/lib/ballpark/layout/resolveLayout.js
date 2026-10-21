@@ -55,12 +55,13 @@ const covers = (c, day) => (c.from == null || c.from <= day) && (c.to == null ||
 
 // The short note a diagram prints when its wall is not a checked outline, so a
 // straight five-point sketch never passes for the real fence. A checked
-// Gameday outline needs none.
+// Gameday outline needs none, and neither does a minor-league outline traced
+// from MLB's drawing and checked against its signs: its note ("Wall from MLB's
+// drawing of this park, ...") told the reader nothing (Gary, 2026-10-21).
 function accuracyNote(quality, kind) {
   if (quality === 'dimensions-only') return 'Wall drawn straight between the posted distances'
   if (quality === 'estimated' && kind !== 'milb') return 'Wall shape is approximate'
   if (kind === 'seed') return 'Wall traced from a 2018 drawing'
-  if (kind === 'milb') return "Wall from MLB's drawing of this park, checked against its posted distances"
   return null
 }
 

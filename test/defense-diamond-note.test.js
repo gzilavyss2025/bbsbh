@@ -1,4 +1,4 @@
-// The park's accuracy note ("Wall from MLB's drawing of this park, …") under a park with
+// The park's accuracy note ("Wall drawn straight between the posted distances", …) under a park with
 // fielders on it. BallparkDiagram prints the note as one long line along the drawing's bottom
 // edge. The two cards that lay HTML name tags over the park (DefenseDiamond, and the lineup
 // page's FieldCard) put the catcher's tag and the DH corner tag on that same strip, so on a
@@ -17,10 +17,10 @@ import { resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const src = (rel) => readFileSync(join(SRC, rel), 'utf8')
 
-test('a MiLB park carries an accuracy note (the case that collided)', () => {
-  // First Horizon Park, Nashville: its wall comes from MLB's drawing, so it has a note.
-  const layout = resolveBallparkLayout({ venueName: 'First Horizon Park', gameDate: '2026-08-01' })
-  assert.ok(layout?.accuracyNote, 'expected a note for a MiLB park')
+test('a park drawn from its posted distances still carries a note, so the captions stay', () => {
+  // Fifth Third Field, Toledo: no usable outline, so a straight five-point wall and its note.
+  const layout = resolveBallparkLayout({ venueId: 2767, gameDate: '2026-06-01' })
+  assert.match(layout?.accuracyNote ?? '', /straight between the posted distances/)
 })
 
 test('BallparkDiagram can leave its note out, and prints it by default', () => {
