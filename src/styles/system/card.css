@@ -85,7 +85,14 @@
   display: block;
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
-/* A card with a name tab: the body clears the tab that hangs into it. */
+/* A card with a name tab: the tab hangs --space-3h above the card
+   (stamped/stamped.css). The card clears it, so a stack or grid gap stays
+   clear space on every page. A block that sets its own margin loads later and
+   wins on order. */
+.card--named {
+  margin-top: var(--space-3h);
+}
+/* The body clears the tab that hangs into it. */
 .card--named > .card__body {
   padding-top: var(--space-6);
 }
