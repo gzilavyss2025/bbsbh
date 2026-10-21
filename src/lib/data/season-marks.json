@@ -1,6 +1,15 @@
 {
   "_hint": "Per-season club marks (#1591). Keyed by the CURRENT franchise team id. Each era is { from, to, name, abbr, file, cite, source, license, restriction, bar, accent, onBar }. Only eras whose mark differs from today's are listed. file null = covered, no art yet (TeamLogo draws abbr in a serif face, #1626). A covered era wears neutral chrome unless it carries its own header triad (bar, accent, onBar; onBar must clear WCAG AA on bar). Written by the identity lab's Eras tab (scripts/lib/eras/dev-season-marks.mjs); do not run scripts/season-marks/fetch.mjs, it rebuilds this file from a seed. Files live in public/logos/historical/.",
   "clubs": {
+    "104": [
+      {
+        "from": 1998,
+        "to": 2010,
+        "name": "West Tennessee Diamond Jaxx",
+        "abbr": "WTN",
+        "file": "104-1998-2010.png"
+      }
+    ],
     "108": [
       {
         "from": 1961,
@@ -428,6 +437,24 @@
         "file": "342-1985-2002.png"
       }
     ],
+    "400": [
+      {
+        "from": 2001,
+        "to": 2018,
+        "name": "Las Vegas 51s",
+        "abbr": "LV",
+        "file": "400-2001-2018.png"
+      }
+    ],
+    "401": [
+      {
+        "from": 1996,
+        "to": 2002,
+        "name": "San Bernardino Stampede",
+        "abbr": "SB",
+        "file": "401-1996-2002.png"
+      }
+    ],
     "402": [
       {
         "from": 1997,
@@ -455,13 +482,79 @@
         "file": "423-1985-1994.png"
       }
     ],
+    "427": [
+      {
+        "from": 2001,
+        "to": 2020,
+        "name": "Lakewood BlueClaws",
+        "abbr": "LWD",
+        "file": "427-2001-2020.png"
+      }
+    ],
+    "428": [
+      {
+        "from": 2005,
+        "to": 2005,
+        "name": "Greenville Bombers",
+        "abbr": "GVL",
+        "file": "428-2005-2005.png"
+      }
+    ],
     "431": [
+      {
+        "from": 1985,
+        "to": 2008,
+        "name": "Richmond Braves",
+        "abbr": "RIC",
+        "file": "431-1985-2008.png"
+      },
       {
         "from": 2009,
         "to": 2017,
         "name": "Gwinnett Braves",
         "abbr": "GWN",
-        "file": null
+        "file": "431-2009-2017.png"
+      }
+    ],
+    "436": [
+      {
+        "from": 1989,
+        "to": 1998,
+        "name": "Prince William Cannons",
+        "abbr": "PW",
+        "file": "436-1989-1998.svg"
+      },
+      {
+        "from": 1999,
+        "to": 2004,
+        "name": "Potomac Cannons",
+        "abbr": "POT",
+        "file": "436-1999-2004.svg"
+      }
+    ],
+    "456": [
+      {
+        "from": 1995,
+        "to": 2002,
+        "name": "Michigan Battle Cats",
+        "abbr": "MIC",
+        "file": "456-1995-2002.png"
+      }
+    ],
+    "477": [
+      {
+        "from": 1985,
+        "to": 1993,
+        "name": "Greensboro Hornets",
+        "abbr": "GBO",
+        "file": "477-1985-1993.png"
+      },
+      {
+        "from": 1994,
+        "to": 2004,
+        "name": "Greensboro Bats",
+        "abbr": "GBO",
+        "file": "477-1994-2004.png"
       }
     ],
     "478": [
@@ -471,6 +564,49 @@
         "name": "Augusta Pirates",
         "abbr": "AUG",
         "file": "478-1988-1993.png"
+      }
+    ],
+    "481": [
+      {
+        "from": 1995,
+        "to": 2024,
+        "name": "Lynchburg Hillcats",
+        "abbr": "LYN",
+        "file": "481-1995-2024.png"
+      }
+    ],
+    "482": [
+      {
+        "from": 1991,
+        "to": 1999,
+        "name": "Jackson Generals",
+        "abbr": "JAC",
+        "file": "482-1991-1999.png"
+      },
+      {
+        "from": 2000,
+        "to": 2004,
+        "name": "Round Rock Express",
+        "abbr": "RR",
+        "file": "482-2000-2004.png"
+      }
+    ],
+    "485": [
+      {
+        "from": 1987,
+        "to": 2011,
+        "name": "Kinston Indians",
+        "abbr": "KIN",
+        "file": "485-1987-2011.png"
+      }
+    ],
+    "487": [
+      {
+        "from": 2001,
+        "to": 2019,
+        "name": "Kannapolis Intimidators",
+        "abbr": "KAN",
+        "file": "487-2001-2019.png"
       }
     ],
     "492": [
@@ -500,6 +636,15 @@
         "file": "500-1994-2004.png"
       }
     ],
+    "503": [
+      {
+        "from": 1994,
+        "to": 2016,
+        "name": "Brevard County Manatees",
+        "abbr": "BRV",
+        "file": "503-1994-2016.png"
+      }
+    ],
     "505": [
       {
         "from": 1992,
@@ -509,13 +654,40 @@
         "file": "505-1992-2016.svg"
       }
     ],
+    "509": [
+      {
+        "from": 1992,
+        "to": 2019,
+        "name": "Fort Myers Miracle",
+        "abbr": "FTM",
+        "file": "509-1992-2019.png"
+      }
+    ],
+    "514": [
+      {
+        "from": 1995,
+        "to": 2005,
+        "name": "Norwich Navigators",
+        "abbr": "NOR",
+        "file": "514-1995-2005.png"
+      }
+    ],
     "538": [
       {
         "from": 1997,
         "to": 2015,
         "name": "New Britain Rock Cats",
         "abbr": "NBR",
-        "file": null
+        "file": "538-1997-2015.png"
+      }
+    ],
+    "553": [
+      {
+        "from": 2000,
+        "to": 2024,
+        "name": "Tennessee Smokies",
+        "abbr": "TNS",
+        "file": "553-2000-2024.svg"
       }
     ],
     "554": [
@@ -536,6 +708,15 @@
         "file": null
       }
     ],
+    "564": [
+      {
+        "from": 1991,
+        "to": 2016,
+        "name": "Jacksonville Suns",
+        "abbr": "JAX",
+        "file": "564-1991-2016.png"
+      }
+    ],
     "566": [
       {
         "from": 1985,
@@ -543,6 +724,24 @@
         "name": "Clearwater Phillies",
         "abbr": "CLR",
         "file": "566-1985-2003.svg"
+      }
+    ],
+    "570": [
+      {
+        "from": 1985,
+        "to": 2006,
+        "name": "Lakeland Tigers",
+        "abbr": "LAK",
+        "file": "570-1985-2006.png"
+      }
+    ],
+    "584": [
+      {
+        "from": 1993,
+        "to": 2008,
+        "name": "Fort Wayne Wizards",
+        "abbr": "FW",
+        "file": "584-1993-2008.png"
       }
     ],
     "3701": [
@@ -561,6 +760,15 @@
         "name": "Capital City Bombers",
         "abbr": "CAP",
         "file": "3705-1993-2004.png"
+      }
+    ],
+    "3712": [
+      {
+        "from": 2017,
+        "to": 2018,
+        "name": "Buies Creek Astros",
+        "abbr": "BC",
+        "file": "3712-2017-2018.png"
       }
     ]
   }

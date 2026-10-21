@@ -153,7 +153,8 @@ test('seasonTile: the ink on every no-art coloured era tile clears AA against it
 // the rename is not covered, so today's mark is still drawn.
 test('seasonMark: a MiLB rename is covered by era, and only for those seasons', () => {
   assert.equal(seasonMark(431, 2012).name, 'Gwinnett Braves')
-  assert.equal(seasonMark(431, 2012).url, null)
+  // Art is optional: no file yet draws the abbreviation (url null), a filed one is named by its era.
+  assert.match(seasonMark(431, 2012).url ?? '/logos/historical/431-2009-2017.png', /^\/logos\/historical\/431-2009-2017\.(png|svg)$/)
   assert.equal(seasonMark(431, 2018), null)
   assert.equal(seasonMark(559, 2000).abbr, 'HVL')
   assert.equal(seasonMark(538, '2010-06-01').abbr, 'NBR')

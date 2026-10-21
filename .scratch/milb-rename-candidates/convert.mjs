@@ -57,5 +57,11 @@ const { data, info } = await img.raw().toBuffer({ resolveWithObject: true })
 if (process.argv.includes('--clear-bg')) clearFlatBackground(data, info.width, info.height)
 const out = trimAndClear({ data, width: info.width, height: info.height })
 if (!out) throw new Error('nothing left after clearing the background')
-await sharp(Buffer.from(out.data), { raw: { width: out.width, height: out.height, channels: 4 } }).png().toFile(output)
+// Keep the repo small: nothing taller or wider than MAX_SIDE (never enlarged). The Eras
+// route takes 1 MB at most; a lossy source can need MAX_SIDE=500 to fit.
+const MAX_SIDE = Number(process.env.MAX_SIDE ?? 800)
+await sharp(Buffer.from(out.data), { raw: { width: out.width, height: out.height, channels: 4 } })
+  .resize(MAX_SIDE, MAX_SIDE, { fit: 'inside', withoutEnlargement: true })
+  .png()
+  .toFile(output)
 console.log(`${input}: ${info.width}x${info.height} -> ${out.width}x${out.height}`)
