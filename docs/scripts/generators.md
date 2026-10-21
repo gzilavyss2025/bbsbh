@@ -1648,6 +1648,7 @@ Re-run only to fold in a new season.
   team-less `numTeams > 1` roll-up row is used instead of the stints. Negro League seasons come back
   as MLB. Rows are dense from the first age (an age with no season repeats the one before). Hitters
   `[h, hr]`, pitchers `[w, so, outs, sv]`. No WAR here: the card reads it from `war-history/`.
+  The pure half (age cumulation, the roll-up rule) is `lib/hof/pace.mjs`, tested by `test/hof-pace.test.js`.
   About 83 KB, 31 KB gzipped. Checked by hand: Mays through age 24 is 547 H, 116 HR in both the
   file and the summed API rows (1948 Birmingham included).
 - `gen-savant-history.mjs` → `public/data/savant-history/{NN}.json` (player-keyed,

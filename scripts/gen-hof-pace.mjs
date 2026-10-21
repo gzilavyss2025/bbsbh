@@ -17,15 +17,10 @@
 import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { paceLine } from './lib/hof/pace.mjs'
 import { getJson } from './lib/statsapi.mjs'
 
 const out = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data', 'hof-pace.json')
-const n = (v) => Number(v) || 0
-const outs = (ip) => {
-  const [w, f = 0] = String(ip ?? 0).split('.')
-  return n(w) * 3 + n(f)
-}
-
 const { awards } = await getJson('/api/v1/awards/MLBHOF/recipients')
 const pool = new Map()
 for (const a of awards) {
@@ -44,29 +39,8 @@ for (let i = 0; i < ids.length; i += 50) {
     const pitcher = pool.get(person.id).primaryPosition?.abbreviation === 'P'
     const group = pitcher ? 'pitching' : 'hitting'
     const splits = person.stats?.find((s) => s.group?.displayName === group)?.splits ?? []
-    // age -> one row: the multi-team total if present, else the single row
-    const byAge = new Map()
-    for (const s of splits) {
-      if (s.sport?.id !== 1 || s.gameType !== 'R' || s.stat?.age == null) continue
-      const cur = byAge.get(s.season)
-      if (!cur || n(s.numTeams) > n(cur.numTeams)) byAge.set(s.season, s)
-    }
-    if (!byAge.size) continue
-    const seasons = new Map([...byAge.values()].map((s) => [s.stat.age, s.stat]))
-    const ages = [...seasons.keys()]
-    const first = Math.min(...ages)
-    const rows = []
-    let cum = pitcher ? [0, 0, 0, 0] : [0, 0]
-    for (let age = first; age <= Math.max(...ages); age++) {
-      const st = seasons.get(age)
-      if (st) {
-        cum = pitcher
-          ? [cum[0] + n(st.wins), cum[1] + n(st.strikeOuts), cum[2] + outs(st.inningsPitched), cum[3] + n(st.saves)]
-          : [cum[0] + n(st.hits), cum[1] + n(st.homeRuns)]
-      }
-      rows.push(cum)
-    }
-    players.push({ id: person.id, name: person.fullName, pitcher, first, rows })
+    const line = paceLine(splits, pitcher)
+    if (line) players.push({ id: person.id, name: person.fullName, pitcher, ...line })
   }
 }
 
