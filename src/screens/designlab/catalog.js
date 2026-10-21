@@ -179,14 +179,6 @@ export const CARDS = [
   },
 
   {
-    cls: 'chal',
-    partial: 'report/challenge-card.css',
-    consumers: 1,
-    group: 'namespace',
-    verdict: 'Already correct',
-    note: 'Renders as `<Card className="chal">`: a canonical card plus a box-less namespace. The Card component generalises this pattern (#1113).',
-  },
-  {
     cls: 'rvcard',
     partial: '75-run-value.css',
     consumers: 2,
@@ -362,13 +354,6 @@ export const PROTOTYPES = [
     path: 'src/screens/designlab/scout/',
     verdict: 'Prototype',
     note: 'Spec: docs/scout-design.md. Thirteen regions, the pitcher’s and hitter’s mirror, every control and every state, on an invented pair. The head-to-head fixture has a row dated today; the cutoff must hide it.',
-  },
-  {
-    id: 'report-look',
-    title: 'Report cards (#1776)',
-    path: 'src/screens/designlab/report/',
-    verdict: 'Prototype',
-    note: 'The Season Report and “Who challenges” as they are on frame="sheet", then three candidate looks on the same two real components. Invented data. No new Card frame; Gary picks, or stays on sheet.',
   },
   {
     id: 'jump-bar',

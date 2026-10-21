@@ -27,7 +27,6 @@ import '../../styles/43-foul-tracker.css'
 import '../../styles/47-trade-deadline.css'
 import '../../styles/48-logbook.css'
 import '../../styles/75-run-value.css'
-import '../../styles/report/challenge-card.css'
 
 // No stamp art anywhere on this page. `.stampcard` is the COLLECTION page's
 // container, not the stamp itself: it draws a bordered sheet and nothing more.
@@ -63,7 +62,6 @@ function NamespaceSpecimen({ cls, host }) {
 // the host is the real frame and not a copy of it.
 const CARD_HOST = 'card card--sheet'
 const HOSTS = {
-  chal: CARD_HOST,
   rvcard: CARD_HOST,
   ballparkcard: CARD_HOST,
   horizoncard: CARD_HOST,

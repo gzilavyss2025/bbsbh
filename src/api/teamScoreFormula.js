@@ -136,7 +136,7 @@ export function qualityScoreFromGames({
 }
 
 // Current Form's own entry point — bakes in the looser prior/tanh scale
-// above so gen-team-score.mjs's precompute and TeamScoreCard's explainer
+// above so gen-team-score.mjs's precompute and the Team score page's
 // ceiling/floor can't drift apart from using different constants.
 // `lateSwingAdjustment` (see lateGameAdjustment below) is optional so the
 // illustrative ceiling/floor anchors can keep calling this with plain

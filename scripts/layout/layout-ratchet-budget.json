@@ -139,8 +139,7 @@
     "grid": 2
   },
   "src/styles/28-team-hub.css": {
-    "column": 3,
-    "grid": 8
+    "column": 1
   },
   "src/styles/28a-team-hub-hero.css": {
     "wrap": 1,
@@ -207,8 +206,7 @@
     "grid": 1
   },
   "src/styles/40-game-modals.css": {
-    "column": 2,
-    "grid": 1
+    "column": 1
   },
   "src/styles/42-first-scorebook.css": {
     "column": 9,
@@ -409,10 +407,6 @@
   "src/styles/designlab/lab.css": {
     "column": 8,
     "wrap": 4,
-    "grid": 3
-  },
-  "src/styles/designlab/report.css": {
-    "column": 1,
     "grid": 3
   },
   "src/styles/focus/atbat.css": {

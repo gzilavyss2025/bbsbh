@@ -1,8 +1,7 @@
 /* THE ABS CHALLENGES CARD (screens/team/next/ranks/ChallengeBoard.jsx and its
    challenges/ folder), the version with a face on the chart.
 
-   IN report/ BESIDE challenge-card.css, which the Design Lab's old
-   TeamChallengeCard still reads (its `.chal__*` rules stay as they are). The
+   IN report/, in the sheets the Ranks band loads. The
    rules here are new blocks, named for their job (ADR-0084): `chalboard` is the
    card's own layout, `chalplot` the chart, `challist` the scrolling list.
    Imported by the card, not by index.css: the Ranks band is a lazy route.

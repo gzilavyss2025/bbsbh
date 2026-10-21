@@ -12,7 +12,6 @@ import { PillSystemHalf } from './pills.jsx'
 import { ClusterHalf, GridHalf, StackHalf } from './layout.jsx'
 import { CARDS, PILLS, PROTOTYPES } from './catalog.js'
 import { ScoutLab } from './scout/ScoutLab.jsx'
-import { ReportLook } from './report/ReportLook.jsx'
 import { JumpBarLab } from './jumpbar/JumpBarLab.jsx'
 import { StampedParts } from './stamped/StampedParts.jsx'
 import { ReportParts } from './report/ReportParts.jsx'
@@ -163,7 +162,6 @@ export function DesignLab() {
         {PROTOTYPES.map((p) => (
           <Entry key={p.id} title={p.title} path={p.path} verdict={p.verdict} tone="hold" note={p.note} wide>
             {p.id === 'scout' && <ScoutLab />}
-            {p.id === 'report-look' && <ReportLook />}
             {p.id === 'jump-bar' && <JumpBarLab />}
             {p.id === 'stamped-parts' && <StampedParts />}
             {p.id === 'report-parts' && <ReportParts />}
