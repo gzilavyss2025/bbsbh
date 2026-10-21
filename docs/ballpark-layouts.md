@@ -129,7 +129,8 @@ a 2018 trace shows is an inference from its depth; each record's `note` says so.
   onward. A game from an earlier season at the same park resolves to nothing.
 - **Gap bearings of the five-point fallback.** A park with no outline draws
   its posted gap signs at ±22.5°. No source gives the bearing of a posted gap
-  sign, so the accuracy note says the wall is drawn straight between them.
+  sign, so the wall is drawn straight between them (`quality.fence` reads
+  `dimensions-only`).
 
 ## Minor-league parks (slice 3)
 
@@ -159,10 +160,8 @@ The importer also reads the home park of every MiLB club in
 
 A minor-league outline is `estimated`, never `audited`: the art is stylized
 (Principal Park is a flat-topped box) and the only check is three posted
-signs. Its drawing prints no note: the old "Wall from MLB's drawing of this park,
-checked against its posted distances" told the reader nothing, so it went
-(2026-10-21). A park with no passing outline but five posted signs draws the
-straight five-point wall with its note. Minor-league walls have
+signs. A park with no passing outline but five posted signs draws the
+straight five-point wall. Minor-league walls have
 no known heights, so no height is printed.
 
 On the screens, a drawable minor-league park gets the drawing on the team
@@ -296,5 +295,6 @@ The renderer cuts each outline at the foul lines with segment intersections
 (`layout/fenceShape.js`), and the tests check every stored outline for point
 order, foul ground and crossings. The stroke weight follows Savant's five
 measured heights where the park has them. Only measured or posted heights are
-printed. A wall that is not a checked outline carries a one-line accuracy note
-in the drawing's corner.
+printed. No drawing prints an accuracy note: the four notes ("Wall shape is
+approximate" and the rest) went on 2026-10-21 (the owner's call). A layout still
+records how sure its wall is in `quality` and `provenance`.

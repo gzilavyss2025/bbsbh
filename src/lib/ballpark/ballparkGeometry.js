@@ -10,7 +10,7 @@
 //     cut at the two foul lines with segment intersections (layout/fenceShape.js);
 //   • otherwise a five-point outline through the posted LF/LC/CF/RC/RF distances,
 //     with the gaps at ±22.5° — a drawing choice, since a posted gap sign has no
-//     published bearing. The layout's accuracy note says so.
+//     published bearing. The layout's `quality.fence` ('dimensions-only') records it.
 //
 // The CF distance label sits where the CF sign stands: straightaway center, or
 // the angle the layout audit found the posted number at (`cfAngle`, Fenway's

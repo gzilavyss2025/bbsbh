@@ -79,17 +79,6 @@
   text-transform: uppercase;
 }
 
-/* The park's accuracy note, under the field (BallparkDiagram's, passed note={false}): in the
-   drawing its long bottom line ran under the DH and catcher tags. Quiet, never a label. */
-.lfld__note {
-  margin: 0;
-  padding: var(--space-2) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-ui);
-  color: var(--text-muted);
-}
 
 /* THE FOLDED CARDS (Former teammates, Bullpen): the head is one wide button. */
 .lfold__title {

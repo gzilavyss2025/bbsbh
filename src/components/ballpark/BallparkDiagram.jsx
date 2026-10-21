@@ -23,7 +23,6 @@ export function BallparkDiagram({
   className = '',
   viewBox = `0 0 ${VIEWBOX.w} ${VIEWBOX.h}`,
   label = 'Ballpark field dimensions diagram',
-  note = true,
   children = null,
 }) {
   const g = buildFieldGeometry(diagramInput(layout))
@@ -102,17 +101,6 @@ export function BallparkDiagram({
           {w.h}′
         </text>
       ))}
-      {/* How sure the wall is, when it is not a checked outline: one long line
-          along the bottom edge, which is empty paper on a bare park. A caller that
-          lays HTML tags over that strip (the defense diamond, the lineup page's
-          FieldCard and the player page's innings art put the catcher and the DH
-          there) passes note={false} and
-          prints layout.accuracyNote itself, under the field. */}
-      {note && layout.accuracyNote && (
-        <text className="bpdiagram__note" x="12" y={VIEWBOX.h - 12}>
-          {layout.accuracyNote}
-        </text>
-      )}
       {/* An overlay drawn LAST, so a caller's own marks sit on top of the park
           rather than under the fence. Plain children, not a render function:
           a render function in this codebase means a spoiler gate (SealBox),

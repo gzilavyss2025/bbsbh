@@ -30,31 +30,27 @@ export function FieldCard({ data, theme, masthead }) {
       {!posted && closed ? (
         <p className="roster__notice">The defensive alignment is not in the record for this game.</p>
       ) : layout ? (
-        <>
-          <div className="lfld__field">
-            <BallparkDiagram layout={layout} viewBox={PLOT_VIEWBOX} className="lfld__park" label={`${info.venue} with the defense`} note={false} />
-            {Object.entries(DEFENSE_SPOTS).map(([pos, xy]) => {
-              const { left, top } = plotPercent(xy)
-              const who = by[pos]
-              return (
-                <span key={pos} className="lfld__node" style={{ left: `${left}%`, top: `${top}%` }} role="group" aria-label={pos}>
-                  <span className={`lfld__name${who ? '' : ' lfld__name--tbd'}`}>
-                    {who ? who.id ? <PlayerLink id={who.id} name={who.name ?? data.nameOf(who.id)}>{who.last}</PlayerLink> : who.last : '—'}
-                  </span>
+        <div className="lfld__field">
+          <BallparkDiagram layout={layout} viewBox={PLOT_VIEWBOX} className="lfld__park" label={`${info.venue} with the defense`} />
+          {Object.entries(DEFENSE_SPOTS).map(([pos, xy]) => {
+            const { left, top } = plotPercent(xy)
+            const who = by[pos]
+            return (
+              <span key={pos} className="lfld__node" style={{ left: `${left}%`, top: `${top}%` }} role="group" aria-label={pos}>
+                <span className={`lfld__name${who ? '' : ' lfld__name--tbd'}`}>
+                  {who ? who.id ? <PlayerLink id={who.id} name={who.name ?? data.nameOf(who.id)}>{who.last}</PlayerLink> : who.last : '—'}
                 </span>
-              )
-            })}
-            {dh && (
-              <p className="lfld__dh">
-                <span>DH</span>
-                {dh.last}
-              </p>
-            )}
-            {!posted && <p className="lfld__hint">Alignment sets when the lineup posts.</p>}
-          </div>
-          {/* The park's accuracy note, under the field: in the drawing it ran under the DH and catcher tags. */}
-          {layout.accuracyNote && <p className="lfld__note">{layout.accuracyNote}</p>}
-        </>
+              </span>
+            )
+          })}
+          {dh && (
+            <p className="lfld__dh">
+              <span>DH</span>
+              {dh.last}
+            </p>
+          )}
+          {!posted && <p className="lfld__hint">Alignment sets when the lineup posts.</p>}
+        </div>
       ) : (
         <DefenseDiamond defense={oppDefense} />
       )}

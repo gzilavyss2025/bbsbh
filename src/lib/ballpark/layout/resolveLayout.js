@@ -53,18 +53,6 @@ function dayOf(gameDate) {
 
 const covers = (c, day) => (c.from == null || c.from <= day) && (c.to == null || day <= c.to)
 
-// The short note a diagram prints when its wall is not a checked outline, so a
-// straight five-point sketch never passes for the real fence. A checked
-// Gameday outline needs none, and neither does a minor-league outline traced
-// from MLB's drawing and checked against its signs: its note ("Wall from MLB's
-// drawing of this park, ...") told the reader nothing (Gary, 2026-10-21).
-function accuracyNote(quality, kind) {
-  if (quality === 'dimensions-only') return 'Wall drawn straight between the posted distances'
-  if (quality === 'estimated' && kind !== 'milb') return 'Wall shape is approximate'
-  if (kind === 'seed') return 'Wall traced from a 2018 drawing'
-  return null
-}
-
 // The venue's current park name, for an older record with no name of its own.
 function currentName(venueId) {
   const cur = CONFIGURATIONS.find((cfg) => cfg.venueId === venueId && cfg.park)
@@ -101,7 +89,6 @@ function build(c) {
       infield: 'regulation',
     },
     audit: fence.audit,
-    accuracyNote: accuracyNote(fence.quality, fence.source?.kind),
     provenance: {
       fence: fence.source?.kind === 'seed' ? { kind: 'seed', ...SEED, key: c.seedKey } : fence.source,
       sources: c.sources ?? [],

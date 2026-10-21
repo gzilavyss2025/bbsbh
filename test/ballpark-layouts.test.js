@@ -234,11 +234,12 @@ test("wall height follows Savant's five measured heights when present", () => {
   assert.ok(Number.isFinite(diagramInput(fenway).heights.lc))
 })
 
-test('a drawing that is not a checked outline says so', () => {
-  const note = (q) => resolveBallparkLayout(q).accuracyNote
-  assert.equal(note({ venueId: 3, gameDate: '2026-07-01' }), null, 'a checked Gameday outline needs no note')
-  assert.match(note({ venueId: 2394, gameDate: '2026-07-01' }), /posted distances/)
-  assert.match(note({ venueId: 2394, gameDate: '2022-07-01' }), /2018 drawing/)
+test('a drawing that is not a checked outline records its quality, and prints no note', () => {
+  // Gary, 2026-10-21: the on-screen notes went (test/ballpark-no-note.test.js); the quality stays.
+  const fence = (q) => resolveBallparkLayout(q).quality.fence
+  assert.equal(fence({ venueId: 3, gameDate: '2026-07-01' }), 'audited')
+  assert.equal(fence({ venueId: 2394, gameDate: '2026-07-01' }), 'dimensions-only')
+  assert.equal(resolveBallparkLayout({ venueId: 2394, gameDate: '2022-07-01' }).provenance.fence.kind, 'seed')
   // An older record with no name of its own takes the park's current name.
   assert.equal(resolveBallparkLayout({ venueId: 2394, gameDate: '2022-07-01' }).name, 'Comerica Park')
 })
@@ -270,9 +271,6 @@ test('a minor-league park with a checked outline draws it, an estimate with no n
   assert.equal(l.configurationId, 'milb-2844')
   assert.equal(l.quality.fence, 'estimated')
   assert.equal(l.provenance.fence.kind, 'milb')
-  // Gary, 2026-10-21: the "Wall from MLB's drawing of this park" note told the reader nothing,
-  // so a checked minor-league outline prints none. The quality stays 'estimated'.
-  assert.equal(l.accuracyNote, null)
   assert.equal(l.measurements.wall, null, 'no wall heights are known')
   // By name too: the feed's venue name resolves the same record.
   assert.equal(layout({ venueName: 'Principal Park', gameDate: '2026-06-01' }), 'milb-2844')
@@ -283,7 +281,6 @@ test('a minor-league park with no usable outline draws its five posted distances
   const l = resolveBallparkLayout({ venueId: 2767, gameDate: '2026-06-01' })
   assert.equal(l.quality.fence, 'dimensions-only')
   assert.equal(l.geometry.fence, null)
-  assert.match(l.accuracyNote, /straight between the posted distances/)
 })
 
 test('a minor-league park resolves only from the imported season on', () => {
@@ -348,7 +345,7 @@ test('each layer has its own quality: a checked fence does not check its foul gr
     assert.equal(l.quality.track, 'stylized')
   }
   // Estimates of a drawing carry no on-screen note (the owner's call).
-  assert.equal(brewers.accuracyNote, null)
+  assert.equal('accuracyNote' in brewers, false)
 })
 
 test("the drawing uses the park's own foul ground and track when it has them", () => {
