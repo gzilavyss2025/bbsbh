@@ -424,7 +424,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
 // The affiliate list for one level, out of the same precomputed
 // public/data/affiliates.json the slate's level toggle reads. `null` while it
 // loads, so the body can say so instead of rendering an empty grid.
-function useAffiliates(sportId) {
+export function useAffiliates(sportId) {
   const [teams, setTeams] = useState(null)
   useEffect(() => {
     let cancelled = false

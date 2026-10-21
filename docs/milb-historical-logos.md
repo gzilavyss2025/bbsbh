@@ -1,4 +1,17 @@
-# Historical MiLB team logos — asset manifest
+# Historical MiLB team logos — what is still needed
+
+> **Superseded workflow (2026-10-21).** Upload each logo in the dev-only Team Identity Lab,
+> **Eras** tab (`/identity-lab?nointro`, `npm run dev`): pick a level, pick the club (filed under
+> its CURRENT id), add or open the era, and drop the file on the mark box. It writes
+> `public/logos/historical/` and `src/lib/data/season-marks.json`; `TeamLogo` reads them through
+> `seasonMark`. `docs/identity-lab.md` has the routes. The `nameHistory` / `logo` filename scheme
+> and the "Wiring it in" section below are the old plan; nothing reads them.
+
+Eras already filed with no art yet (the list of what to find): Huntsville Stars (id 559, 1985–2014),
+New Britain Rock Cats (id 538, 1997–2015), Gwinnett Braves (id 431, 2009–2017). Add any
+other renamed or relocated club in the Eras tab.
+
+---
 
 `src/lib/teams.js`'s `teamLogoUrl()` pulls every current club's mark live from
 the mlbstatic CDN (`https://www.mlbstatic.com/team-logos/{teamId}.svg`), keyed

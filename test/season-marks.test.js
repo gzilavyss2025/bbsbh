@@ -147,3 +147,14 @@ test('seasonTile: the ink on every no-art coloured era tile clears AA against it
   assert.ok(n >= 3, 'the CAL, MON and SEA eras are covered')
   assert.ok(!seasonTile(119, 1905, { tint: '#FFFFFF' }).ink)
 })
+
+// MiLB clubs rename under one statsapi id (the Gwinnett Braves became the
+// Stripers in 2018, id 431). The era hangs off the current id; a season after
+// the rename is not covered, so today's mark is still drawn.
+test('seasonMark: a MiLB rename is covered by era, and only for those seasons', () => {
+  assert.equal(seasonMark(431, 2012).name, 'Gwinnett Braves')
+  assert.equal(seasonMark(431, 2012).url, null)
+  assert.equal(seasonMark(431, 2018), null)
+  assert.equal(seasonMark(559, 2000).abbr, 'HVL')
+  assert.equal(seasonMark(538, '2010-06-01').abbr, 'NBR')
+})
