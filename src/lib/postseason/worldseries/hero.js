@@ -2,6 +2,7 @@
 //
 //   calendarDays  the Series as day cells, from ledgerModel's `columns`. Nothing here reads a
 //                 result: a cell knows its date, its game number and its state, never a run.
+//   monthsOf      the calendar head's month label, from those cells.
 //   slabPlayer    the hitter drawn on a club's slab, from the hot-bat splits (fetchHotBatSplits,
 //                 which end the day before the slate date).
 //   playerClip    that hitter's newest play clip, from past games' /content items.
@@ -12,6 +13,12 @@ import { gamePath } from '../../route.js'
 const at = (date) => new Date(`${date}T12:00:00Z`)
 const weekdayOf = (date) => (date ? at(date).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' }) : '')
 const dayOf = (date) => (date ? Number(date.slice(8, 10)) : null)
+const monthOf = (date) => at(date).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' })
+
+// 'October / November': the months the calendar's dated cells fall in, each once, in order.
+export function monthsOf(days) {
+  return [...new Set(days.filter((d) => d.date).map((d) => monthOf(d.date)))].join(' / ')
+}
 const dayAfter = (date) => {
   if (!date) return null
   const d = at(date)

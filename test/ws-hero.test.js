@@ -2,7 +2,7 @@
 // each club's slab, and the clip behind a slab's play button.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { calendarDays, clipSources, nextGamePath, playerClip, slabPlayer, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
+import { calendarDays, clipSources, monthsOf, nextGamePath, playerClip, slabPlayer, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../src/lib/postseason/worldseries/ledger.js'
 
 // The 2026 Series as the bracket gives it before Game 1: seven dated games, three if needed.
@@ -227,4 +227,11 @@ test('the next-game door is dated by the game, not by the slate date', () => {
   // A row with no date falls back to the slate date; no game, no path.
   assert.equal(nextGamePath({ awayId: 139, homeId: 158 }, '2026-10-21', abbr, 'preview'), '/10212026/tbmil/preview')
   assert.equal(nextGamePath(null, '2026-10-21', abbr, 'preview'), null)
+})
+
+test('monthsOf: the calendar head names each month once, in order, and skips undated cells', () => {
+  const days = [{ date: '2026-10-30' }, { date: '2026-10-31' }, { date: null }, { date: '2026-11-01' }]
+  assert.equal(monthsOf(days), 'October / November')
+  assert.equal(monthsOf([{ date: '2026-10-24' }]), 'October')
+  assert.equal(monthsOf([]), '')
 })
