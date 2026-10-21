@@ -96,7 +96,7 @@ export function StampsCloudSync() {
         report('stamps', phaseForResponse(res.status), { reason: reasonForResponse(res.status) })
         return
       }
-      const remote = remoteStampsFromExport(true, await res.json())
+      const remote = remoteStampsFromExport(await res.json())
       if (!remote) {
         report('stamps', 'error', { reason: 'network' })
         return

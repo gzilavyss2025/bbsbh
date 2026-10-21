@@ -168,7 +168,8 @@ async function overMintLimit(redis, userId) {
   try {
     const key = `stamps:rate:${userId}`
     const n = await redis.incr(key)
-    if (n === 1) await redis.expire(key, 60)
+    // A key left without a TTL (EXPIRE failed after INCR) would block this user for good.
+    if (n === 1 || (await redis.ttl(key)) < 0) await redis.expire(key, 60)
     return n > MINT_LIMIT_PER_MIN
   } catch {
     return false
@@ -416,7 +417,7 @@ export async function mint(req, res, redis, userId) {
 // Un-stamp. Reversible, deliberately NOT ratcheted — the one place the Logbook
 // differs in character from revealedThrough. Writes a tombstone rather than
 // deleting the field, so the removal survives a merge from another device.
-async function unmint(res, redis, userId, gamePk) {
+export async function unmint(res, redis, userId, gamePk) {
   const game = await (async () => {
     try {
       return await redis.get(`game:final:${gamePk}`)
@@ -436,12 +437,8 @@ async function unmint(res, redis, userId, gamePk) {
   const now = Date.now()
   for (const season of seasons) {
     const key = stampsKey(userId, season)
-    let existing = null
-    try {
-      existing = normalizeStamp(await redis.hget(key, String(gamePk)))
-    } catch {
-      existing = null
-    }
+    // A read failure throws to the handler's 503: it must not read as "no stamp" (#2445).
+    const existing = normalizeStamp(await redis.hget(key, String(gamePk)))
     if (!existing) continue
     await redis.hset(key, { [gamePk]: { ...existing, state: 'off', updatedAt: now } })
     return privateJson(res, { ok: true })

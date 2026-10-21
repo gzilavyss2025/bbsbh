@@ -74,3 +74,9 @@ test('every park card reads the one window', () => {
   // The player page's innings art, at its own width.
   assert.match(read('screens/player/next/modules/innings/inningsView.js'), /parkWindow\(park, \{ x: 30, w: 560 \}\)/)
 })
+
+test('a layout with no finite top shows the full frame, never a NaN viewBox', () => {
+  const layout = allBallparkLayouts().find((l) => l.quality.fence !== 'missing')
+  const w = parkWindow(layout, { geometry: { top: NaN } })
+  assert.equal(w.viewBox, `0 0 ${VIEWBOX.w} ${VIEWBOX.h}`)
+})

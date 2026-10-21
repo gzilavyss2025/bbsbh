@@ -34,6 +34,7 @@ import stampsHandler, {
   MINT_LIMIT_PER_MIN,
   handleStampsGet,
   mint,
+  unmint,
   mintRefusal,
   seasonRows,
   stampEntry,
@@ -425,7 +426,13 @@ function fakeRedis(seed = {}) {
       store[key] = (Number(store[key]) || 0) + 1
       return store[key]
     },
-    async expire() {},
+    async expire(key) {
+      this.ttls[key] = 60
+    },
+    async ttl(key) {
+      return this.ttls[key] ?? -1
+    },
+    ttls: {},
   }
 }
 
@@ -922,10 +929,24 @@ test('a Redis read failure returns 503, not an empty 200', async () => {
 })
 
 test('a failed export never reaches the local stamps', () => {
-  assert.equal(remoteStampsFromExport(false, { stamps: [] }), null)
-  assert.equal(remoteStampsFromExport(true, {}), null)
-  const ok = remoteStampsFromExport(true, {
+  assert.equal(remoteStampsFromExport(null), null)
+  assert.equal(remoteStampsFromExport({}), null)
+  const ok = remoteStampsFromExport({
     stamps: [{ gamePk: 1, state: 'off', updatedAt: 5 }],
   })
   assert.equal(ok[1].state, 'off')
+})
+
+test('a rate key left without a TTL gets one, so a failed EXPIRE cannot block a user for good', async () => {
+  const redis = fakeRedis({ 'stamps:rate:u1': 5 })
+  await mint(mintReq({ gamePk: 778241 }), nodeRes(), redis, 'u1')
+  assert.equal(redis.ttls['stamps:rate:u1'], 60)
+})
+
+test('unmint lets a Redis read failure through instead of answering ok (#2445)', async () => {
+  const redis = fakeRedis({ 'game:final:778241': FINAL_GAME })
+  redis.hget = async () => {
+    throw new Error('redis down')
+  }
+  await assert.rejects(unmint(nodeRes(), redis, 'u1', 778241), /redis down/)
 })

@@ -526,8 +526,8 @@ export function stampsToPublish(local, remote) {
 // the reply is an error or malformed. null means "the server said nothing":
 // callers must not merge, adopt or publish against it, or an outage would read
 // as "the server has no stamps" (#2445). Drops the `game` facts blob.
-export function remoteStampsFromExport(ok, data) {
-  if (!ok || !Array.isArray(data?.stamps)) return null
+export function remoteStampsFromExport(data) {
+  if (!Array.isArray(data?.stamps)) return null
   const remote = {}
   for (const entry of data.stamps) {
     if (entry?.gamePk == null) continue

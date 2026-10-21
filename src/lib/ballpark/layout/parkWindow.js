@@ -14,7 +14,7 @@ export const SKY_PAD = 4 // the paper left above the highest mark
 // window, as a share of its box.
 export function parkWindow(layout, { x = 0, w = VIEWBOX.w, geometry } = {}) {
   const g = geometry ?? buildFieldGeometry(diagramInput(layout))
-  const top = Math.max(0, Math.floor(g.top - SKY_PAD))
+  const top = Number.isFinite(g.top) ? Math.max(0, Math.floor(g.top - SKY_PAD)) : 0 // a bad top shows the full frame
   const h = VIEWBOX.h - top
   return {
     viewBox: `${x} ${top} ${w} ${h}`,
