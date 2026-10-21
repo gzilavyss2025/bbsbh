@@ -219,7 +219,7 @@ spike does not attempt it.
   exact one. Not large enough to move the headline, but not zero.
 - This spike never re-derives player identity, WAR, or the free-agency
   guarantee/AAV parsing — it reuses `src/lib/contracts/parseMoney.js`,
-  `public/data/contracts-history/identity/*.json`, and
+  `scripts/data/contracts/identity/*.json`, and
   `public/data/war-history/*.json` exactly as W0 and the WAR generator built
   them. A defect discovered later in any of those three feeds this spike's
   numbers directly.

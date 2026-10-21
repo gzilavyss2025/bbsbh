@@ -1,13 +1,14 @@
 // Flattens the four crosswalk files scripts/gen-contracts-identity.mjs wrote
-// into ONE lookup list over every historical contract row:
+// to scripts/data/contracts/identity/ into ONE lookup list over every
+// historical contract row:
 //
 //   public/data/contracts-history/search-index.json
 //     [ { rowKey, sourceFile, rawName, season, rawTeamCode, mlbId,
 //         confidence }, ... ]
 //
 // Seven fields, and specifically NOT `candidates` -- the near-miss candidate
-// list is what makes identity/salaries.json 8 MB on its own, and it is only
-// ever read by the /admin review queue, which already has pending.json. A
+// list is what makes the crosswalk salaries.json 8 MB on its own, and it is
+// only ever read by the /admin review queue, which already has pending.json. A
 // name search wants the name, the year, the club and the id it resolved to.
 //
 // The array is FLAT and in crosswalk order (extensions, arbitration,

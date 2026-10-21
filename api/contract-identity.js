@@ -8,14 +8,12 @@
 // This endpoint stores ONLY the override map — a rowKey's corrected mlbId,
 // or a `dismissed` flag for a row confirmed genuinely unresolvable (a free
 // agent who signed and never played, for instance). The base crosswalk rows
-// themselves (public/data/contracts-history/identity/*.json,
-// scripts/gen-contracts-identity.mjs) are already public static files; this
-// is deliberately NOT a re-serving of them, both because they are already
-// CDN-cacheable as static assets and because reading four JSON files
-// (salaries.json alone is ~27k rows) inside a serverless function on every
-// request would be needless work a static fetch already does better. The
-// admin review page fetches the base rows and this override map separately
-// and merges them client-side.
+// (scripts/data/contracts/identity/*.json, written by
+// scripts/gen-contracts-identity.mjs) are not public static files, and this
+// function does not read or serve them: no page needs them. The admin review
+// page fetches the review queue (public/data/contracts-history/identity/
+// pending.json) and this override map separately and merges them
+// client-side.
 //
 // THE SAME THREE GUARANTEES AS api/identity.js:
 //   1. A CLOSED shape. Both the GET's returned map and a PATCH's accepted
