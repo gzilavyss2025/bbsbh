@@ -938,14 +938,6 @@
   outline-offset: 2px;
 }
 
-.logbook__traystamp small {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
 /* The placement bar, and the options bar a tapped stamp opens. One slot above
    the book, one bar at a time, and the same look because they are the same
    conversation — "this keepsake, and where it goes". Sticky so the confirm

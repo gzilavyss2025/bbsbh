@@ -83,7 +83,7 @@ function Tally({ items }) {
       {items.map(({ key, value, label }) => (
         <div key={key}>
           <strong>{value}</strong>
-          <span>{label}</span>
+          <span className="t-label t-label--nocaps">{label}</span>
         </div>
       ))}
     </div>
@@ -306,7 +306,7 @@ export function LogbookStatsPage({ bookId = null }) {
         />
         <div className="logbookstats__splits">
           <Card as="div" frame="ledger" body="flush" className="logbookstats__split">
-            <span>Home vs. road</span>
+            <span className="t-label t-label--nocaps">Home vs. road</span>
             <strong>
               {homeRoad.homeWins}–{homeRoad.awayWins}
               {homeRoad.ties ? `–${homeRoad.ties}` : ''}
@@ -316,7 +316,7 @@ export function LogbookStatsPage({ bookId = null }) {
             <small>Home clubs’ record in the games you logged</small>
           </Card>
           <Card as="div" frame="ledger" body="flush" className="logbookstats__split">
-            <span>How you took them in</span>
+            <span className="t-label t-label--nocaps">How you took them in</span>
             <strong>
               {stats.modes.watched}–{stats.modes.followed}
             </strong>
@@ -367,7 +367,7 @@ export function LogbookStatsPage({ bookId = null }) {
                   size={34}
                 />
                 <strong>{stats.longestWinStreak.length}</strong>
-                <span>
+                <span className="t-label t-label--nocaps">
                   straight {stats.longestWinStreak.abbreviation} wins
                 </span>
                 <small>
@@ -383,7 +383,7 @@ export function LogbookStatsPage({ bookId = null }) {
                   size={34}
                 />
                 <strong>{stats.longestLossStreak.length}</strong>
-                <span>
+                <span className="t-label t-label--nocaps">
                   straight {stats.longestLossStreak.abbreviation} losses
                 </span>
                 <small>
@@ -423,7 +423,7 @@ export function LogbookStatsPage({ bookId = null }) {
         <SectionHead eyebrow="Seen the most" title="Matchups and ballparks" />
         <div className="logbookstats__pair">
           <div className="logbookstats__table">
-            <div className="logbookstats__tablehead">
+            <div className="t-label t-label--nocaps logbookstats__tablehead">
               <span>Matchup</span>
               <span>G</span>
             </div>
@@ -441,7 +441,7 @@ export function LogbookStatsPage({ bookId = null }) {
             ))}
           </div>
           <div className="logbookstats__table">
-            <div className="logbookstats__tablehead">
+            <div className="t-label t-label--nocaps logbookstats__tablehead">
               <span>Ballpark</span>
               <span>G</span>
             </div>
@@ -461,7 +461,7 @@ export function LogbookStatsPage({ bookId = null }) {
         <section className="logbookstats__section">
           <SectionHead eyebrow="Season by season" title="How the book fills" />
           <div className="logbookstats__table logbookstats__table--duo">
-            <div className="logbookstats__tablehead">
+            <div className="t-label t-label--nocaps logbookstats__tablehead">
               <span>Season</span>
               <span>G</span>
             </div>

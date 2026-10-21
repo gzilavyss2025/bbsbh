@@ -59,7 +59,7 @@ export function ScorecardCellEditor({ card, note, onSave, onClear, onClose }) {
           </p>
           <div className="sc-editsheet__grid">
             <label className="sc-editsheet__field">
-              <span className="sc-editsheet__label">Outcome</span>
+              <span className="t-label t-label--nocaps sc-editsheet__label">Outcome</span>
               <input
                 ref={firstRef}
                 className="sc-editsheet__input"
@@ -69,7 +69,7 @@ export function ScorecardCellEditor({ card, note, onSave, onClear, onClose }) {
               />
             </label>
             <label className="sc-editsheet__field">
-              <span className="sc-editsheet__label">RBI</span>
+              <span className="t-label t-label--nocaps sc-editsheet__label">RBI</span>
               <input
                 className="sc-editsheet__input"
                 value={rbi}
@@ -79,7 +79,7 @@ export function ScorecardCellEditor({ card, note, onSave, onClear, onClose }) {
               />
             </label>
             <label className="sc-editsheet__field">
-              <span className="sc-editsheet__label">Diamond center</span>
+              <span className="t-label t-label--nocaps sc-editsheet__label">Diamond center</span>
               <input
                 className="sc-editsheet__input"
                 value={center}
