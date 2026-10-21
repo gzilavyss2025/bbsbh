@@ -54,8 +54,8 @@
 
 /* THE RAIL'S BRACKET, in the World Series design (FullBracket `rail`): each
    league and the Series is a stamped card named on its ink tab; a series box is
-   a square, ink-edged ticket with the leader's row on the tint. No club marks
-   (the abbreviation is the name). The card is 358px: its 2px edge and 12px
+   a square, ink-edged ticket with the leader's row on the tint. Club marks stay, small;
+   the league mark and round plate are gone. The card is 358px: its 2px edge and 12px
    padding leave the tree's 330px (FullBracket's RAIL_TREE_W). */
 .pbkt-full--rail {
   gap: var(--space-6);
@@ -92,13 +92,6 @@
 .pbkt-full--rail .pbkt-trow--won {
   background-color: var(--surface-stamped-tint);
 }
-.pbkt-trow__bye {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
 .pbkt-wslink {
   display: block;
   color: inherit;

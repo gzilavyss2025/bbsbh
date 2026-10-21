@@ -32,13 +32,12 @@ const R = 26 // one club row
 const BOX = R * 2 // a two-row box, border drawn outside
 const GAP = 14
 const TREE_W = 358
-// THE RAIL'S TREE (the desktop home, in the World Series design): no club marks,
-// so the columns are narrower, and each Wild Card box sits level with the
-// Division box it feeds. The tree is the 358px rail less the stamped card's edge
+// THE RAIL'S TREE (the desktop home, in the World Series design): small club
+// marks, and each Wild Card box sits level with the Division box it feeds. The tree is the 358px rail less the stamped card's edge
 // and padding (styles/postseason/home.css).
 const RAIL_TREE_W = 330
 const RAIL_LANE = BOX + 32 // a lane: its boxes, then the note line under them
-const RAIL_FLOOR = { wc: 84, ds: 112, lcs: 100 }
+const RAIL_FLOOR = { wc: 90, ds: 100, lcs: 110 }
 
 // Column widths: every box keeps its pips, finished or not, so each column has
 // a floor that holds a mark, an abbreviation and its round's pips (2/3/4). The
@@ -69,7 +68,7 @@ function Elbow({ x1, y1, x2, y2, inked }) {
   return <path d={`M${x1} ${y1} H${mx} V${y2} H${x2}`} className={inked ? 'pbkt-ink' : 'pbkt-pencil'} />
 }
 
-function BoxRow({ slot, series, bracket, x, y, w, rail, bye }) {
+function BoxRow({ slot, series, bracket, x, y, w, rail }) {
   const style = { left: x, top: y, width: w, height: R }
   if (!slot.club) {
     const feeder = feederSeries(bracket, slot.from)
@@ -84,9 +83,8 @@ function BoxRow({ slot, series, bracket, x, y, w, rail, bye }) {
   const isWon = series.decided && series.winner.id === slot.club.id
   return (
     <div className={`pbkt-trow${isOut ? ' pbkt-trow--out' : isWon ? ' pbkt-trow--won' : ''}`} style={style}>
-      {!rail && <ClubMark club={slot.club} eliminated={isOut} size={16} />}
+      <ClubMark club={slot.club} eliminated={isOut} size={rail ? 14 : 16} />
       <span className="pbkt-trow__abbr">{slot.club.abbreviation}</span>
-      {bye && <span className="pbkt-trow__bye">Bye</span>}
       <Pips winsNeeded={series.winsNeeded} wins={slot.wins} />
     </div>
   )
@@ -123,7 +121,7 @@ function BoxNote({ series, x, y, w }) {
 // One series box: two club rows and a note — the same box before, during and
 // after its round, so a finished series still shows how long it went. Every
 // series taps through with slice 3's `seriesHref`.
-function SeriesBox({ series, bracket, cutoff, historyIds, x, y, w, note, rail, byeSlot = -1 }) {
+function SeriesBox({ series, bracket, cutoff, historyIds, x, y, w, note, rail }) {
   const linkProps = useRouteLink()
   const href = series.id ? seriesHref(series, cutoff, historyIds) : null
   const Wrapper = href ? 'a' : 'div'
@@ -142,8 +140,8 @@ function SeriesBox({ series, bracket, cutoff, historyIds, x, y, w, note, rail, b
         aria-label={label}
         {...wrapperProps}
       />
-      <BoxRow slot={series.slots[0]} series={series} bracket={bracket} x={x} y={y} w={w} rail={rail} bye={byeSlot === 0} />
-      <BoxRow slot={series.slots[1]} series={series} bracket={bracket} x={x} y={y + R} w={w} rail={rail} bye={byeSlot === 1} />
+      <BoxRow slot={series.slots[0]} series={series} bracket={bracket} x={x} y={y} w={w} rail={rail} />
+      <BoxRow slot={series.slots[1]} series={series} bracket={bracket} x={x} y={y + R} w={w} rail={rail} />
       {note}
     </>
   )
@@ -270,7 +268,6 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
               y={dsY(h)}
               w={c.ds}
               rail={rail}
-              byeSlot={rail && !wcPast ? bye : -1}
               note={
                 <BoxNote
                   series={ds}
@@ -349,7 +346,7 @@ function WorldSeriesBand({ bracket, cutoff, historyIds, rail }) {
       <div key={i} className={`pbkt-row${isOut ? ' pbkt-row--out' : isWon ? ' pbkt-row--won' : ''}`}>
         {slot.club ? (
           <>
-            {!rail && <ClubMark club={slot.club} eliminated={isOut} size={20} />}
+            <ClubMark club={slot.club} eliminated={isOut} size={20} />
             <span className="pbkt-row__abbr">{slot.club.name}</span>
             <Pips winsNeeded={ws.winsNeeded} wins={slot.wins} />
           </>
@@ -361,7 +358,7 @@ function WorldSeriesBand({ bracket, cutoff, historyIds, rail }) {
   })
   const note = wsNoteText(ws)
   // The rail's Series is a stamped, tinted card named on the ink tab, the World
-  // Series page's frame: no marks, no navy band, no trophy. The whole card taps through.
+  // Series page's frame: no navy band, no trophy. The whole card taps through.
   if (rail) {
     return (
       <Wrapper className="pbkt-wslink" aria-label={label} {...wrapperProps}>
