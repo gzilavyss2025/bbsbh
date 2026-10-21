@@ -57,3 +57,16 @@ test('pitchers use outs and pitcher comps only', () => {
   assert.equal(v.value, 91)
   assert.deepEqual(v.comps.map((c) => c.id), [9])
 })
+
+test('a season with no age is skipped, not read as age 0', () => {
+  const noAge = [season(2020, 20, 5), season(2021, 21, 10), { season: '2022', stat: { homeRuns: 4 } }]
+  const v = hofPaceView({ players, splits: noAge, group: 'hitting', stat: 'hr' })
+  assert.equal(v.age, 21)
+  assert.equal(v.value, 15)
+})
+
+test('under a cutoff, seasons after the cutoff season are dropped', () => {
+  const v = hofPaceView({ players, splits: base, group: 'hitting', stat: 'hr', cutoff: { season: 2021, stat: { homeRuns: 2 } } })
+  assert.equal(v.age, 21)
+  assert.equal(v.value, 7)
+})

@@ -57,13 +57,14 @@ export async function rollClassic({
   isStarted = null,
   fetchJson = getJson,
 } = {}) {
+  const decade = Number(era) || null
   const seasons = []
-  for (let y = FIRST_SEASON; y <= lastSeason; y++) if (!era || Math.floor(y / 10) * 10 === era) seasons.push(y)
+  for (let y = FIRST_SEASON; y <= lastSeason; y++) if (!decade || Math.floor(y / 10) * 10 === decade) seasons.push(y)
   const order = pickOrder(seasons, seed)
   for (const season of order) {
     const clubs = (await fetchJson(teamsUrl(season)))?.teams ?? []
     const abbr = new Map(clubs.map((t) => [t.id, t.abbreviation]))
-    const club = teamId ?? clubs[Math.floor(seededUnit(seed, season) * clubs.length)]?.id
+    const club = teamId ?? clubs[Math.floor(seedFrom(`${seed}|${season}|club`) / 4294967296 * clubs.length)]?.id
     if (!abbr.has(club)) continue
     const rows = (await fetchJson(scheduleUrl(club, season)))?.dates?.flatMap((d) => d.games) ?? []
     const dealt = pickGame(classicsFrom(rows, abbr), { seed: seedFrom(`${seed}|${season}`), step, isStarted })
@@ -72,6 +73,7 @@ export async function rollClassic({
   return null
 }
 
-const seededUnit = (seed, season) => seedFrom(`${seed}|${season}|club`) / 4294967296
+// The season order and the club pick use separate hashes. One shared hash would sort
+// the lowest value first and so pick club 0 for almost every seed.
 const pickOrder = (seasons, seed) =>
-  seasons.map((y) => [seededUnit(seed, y), y]).sort((a, b) => a[0] - b[0]).map((p) => p[1])
+  seasons.map((y) => [seedFrom(`${seed}|${y}|order`), y]).sort((a, b) => a[0] - b[0]).map((p) => p[1])

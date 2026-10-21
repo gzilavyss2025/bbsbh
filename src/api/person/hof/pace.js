@@ -21,17 +21,22 @@ const STATS = {
 // aggregateSplits counts a traded season once, as the career register does:
 // stints summed, the roll-up dropped).
 // `cutoff` ({ season, stat }) is the `?d=` date-cut season line: it replaces
-// that season's live row, keeping the row's age; stat null drops the season.
+// that season's live row, keeping the row's age; stat null drops the season. Seasons
+// after `cutoff.season` are dropped, and a row with no age is skipped.
 // Never `stats=career`, which is always live (see mlbCareerThroughCutoff).
 // Null when there is no card: under two seasons, or a start after age 30.
 export function hofPaceView({ players, splits, group, stat, cutoff = null, count = 3 }) {
   const [, col, read] = STATS[stat]
   const bySeason = new Map()
   for (const s of splits ?? []) bySeason.set(s.season, [...(bySeason.get(s.season) ?? []), s])
-  const seasons = [...bySeason].map(([season, rows]) => {
-    const live = Number(cutoff?.season) === Number(season) ? cutoff.stat : aggregateSplits(rows, group)
-    return { age: Math.max(...rows.map((r) => num(r.stat?.age))), stat: live }
-  })
+  const seasons = [...bySeason]
+    .filter(([season]) => !cutoff || Number(season) <= Number(cutoff.season))
+    .map(([season, rows]) => [season, rows.filter((r) => r.stat?.age != null)])
+    .filter(([, rows]) => rows.length)
+    .map(([season, rows]) => {
+      const live = Number(cutoff?.season) === Number(season) ? cutoff.stat : aggregateSplits(rows, group)
+      return { age: Math.max(...rows.map((r) => num(r.stat.age))), stat: live }
+    })
   const played = seasons.filter((s) => s.stat).sort((a, b) => a.age - b.age)
   if (played.length < 2 || played[0].age > 30) return null
   const age = played.at(-1).age

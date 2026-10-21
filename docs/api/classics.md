@@ -23,7 +23,7 @@ The module never sets `hydrate=`. `test/classics-deck.test.js` pins both.
 
 - `rollClassic({ seed, step, era, teamId, lastSeason, isStarted, fetchJson })` — walks
   the seasons in a seeded order until one deals a game. `era` is a decade (`1980`),
-  `teamId` a club. Returns `{ game, started, total, season }` or `null`. `game` has
+  `teamId` a club. Returns `{ game, started, total, season }` (`total` is the size of the one club-season dealt from, about 162 games, not the whole deck) or `null`. `game` has
   `{ pk, date, away: { abbr }, home: { abbr }, g }`, the shape `poolGamePath` reads.
 - `classicsFrom(rows, abbr)` — the eligibility filter. Keeps `gameType` R, F, D, L or
   W, `officialDate` from 1960-01-01, `detailedState` exactly "Final" (forfeits,

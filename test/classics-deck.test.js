@@ -71,3 +71,15 @@ test('a club filter deals that club only', async () => {
   const r = await rollClassic({ seed: 5, teamId: 158, lastSeason: 1982, fetchJson: fakeFetch([]) })
   assert.ok([r.game.away.abbr, r.game.home.abbr].includes('MIL'))
 })
+
+test('rollClassic spreads the club pick across seeds and accepts a string era', async () => {
+  const clubs = Array.from({ length: 26 }, (_, i) => ({ id: 100 + i, abbreviation: `C${i}` }))
+  const asked = new Set()
+  const fetchJson = async (url) => {
+    if (url.includes('/teams?')) return { teams: clubs }
+    asked.add(Number(url.match(/teamId=(\d+)/)[1]))
+    return { dates: [] }
+  }
+  for (let seed = 0; seed < 40; seed++) await rollClassic({ seed, era: '1980', lastSeason: 1989, fetchJson })
+  assert.ok(asked.size > 8, `only ${asked.size} clubs asked`)
+})
