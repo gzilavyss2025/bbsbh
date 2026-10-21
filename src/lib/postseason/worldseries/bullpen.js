@@ -20,19 +20,18 @@ export function bullpenGrid(games, clubId, { slateDate } = {}) {
     const teams = g.boxscore?.teams
     const side = teams?.away?.team?.id === clubId ? 'away' : teams?.home?.team?.id === clubId ? 'home' : null
     if (!side) continue
-    played.push({ gamePk: g.gamePk, date: g.date, gameType: g.gameType ?? null, boxscore: g.boxscore, side })
+    played.push({ gamePk: g.gamePk, date: g.date, gameType: g.gameType, boxscore: g.boxscore, side })
   }
   played.sort((a, b) => a.date.localeCompare(b.date) || a.gamePk - b.gamePk)
-  const shown = played
 
   const pitchers = new Map()
-  shown.forEach((g, col) => {
+  played.forEach((g, col) => {
     const ids = g.boxscore.teams[g.side].pitchers ?? []
     ids.slice(1).forEach((id) => {
       const p = g.boxscore.teams[g.side].players?.[`ID${id}`]
       const n = p?.stats?.pitching?.numberOfPitches
       if (typeof n !== 'number') return
-      if (!pitchers.has(id)) pitchers.set(id, { id, name: p?.person?.fullName ?? '', cells: Array(shown.length).fill(null), total: 0 })
+      if (!pitchers.has(id)) pitchers.set(id, { id, name: p?.person?.fullName ?? '', cells: Array(played.length).fill(null), total: 0 })
       const row = pitchers.get(id)
       row.cells[col] = n
       row.total += n
@@ -40,5 +39,5 @@ export function bullpenGrid(games, clubId, { slateDate } = {}) {
   })
 
   const rows = [...pitchers.values()].sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
-  return { games: shown.map(({ gamePk, date, gameType }) => ({ gamePk, date, gameType })), rows }
+  return { games: played.map(({ gamePk, date, gameType }) => ({ gamePk, date, gameType })), rows }
 }
