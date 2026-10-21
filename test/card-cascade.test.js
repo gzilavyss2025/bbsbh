@@ -350,6 +350,14 @@ test('a named card clears the tab that hangs above it', () => {
   assert.equal(decl(named, 'margin-top'), 'var(--space-3h)', 'the margin matches the hang of the tab')
 })
 
+// The team hub zeroes the margin of a card its Stack spaces. A named card is the exception:
+// zeroed, its tab sat under the shadow of the card above (the roster cards touched at 0px).
+test('the team hub leaves a named card its tab clearance', () => {
+  const css = read('09-team-info.css')
+  assert.ok(ruleBody(css, '.team-hub .stack > .card:not(.card--named)'), 'the hub zeroes only cards without a name tab')
+  assert.equal(ruleBody(css, '.team-hub .stack > .card'), null, 'no rule zeroes every card in a hub Stack')
+})
+
 // A flush body has no padded top, so its first part clears the tab itself. The
 // Pitch by pitch head is a PlayerLink (.plink), whose padding reset sits in the
 // core sheet and loaded after the head's own rule: the head had no padding and
