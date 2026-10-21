@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { ModalPortal } from '../../../../components/ui/ModalPortal.jsx'
 import { useDialogFocus } from '../../../../hooks/dialog/useDialogFocus.js'
+import { IconButton } from '../../../../components/ui/control/IconButton.jsx'
 
 // The frame of the page's sheets (crest, ballpark, umpire): the app's bottom sheet under a
 // scrim, with a house band at the top (navy, never a club's colours: these sheets name no
@@ -16,9 +17,9 @@ export function SheetFrame({ title, label, onClose, children }) {
       <div className="sheet lsheet" role="dialog" aria-modal="true" aria-label={label ?? title}>
         <div className="lsheet__bar sectionhead--band sectionhead--house">
           <h2 className="lsheet__bartitle">{title}</h2>
-          <button ref={closeRef} type="button" className="lsheet__close" aria-label="Close" onClick={onClose}>
+          <IconButton ref={closeRef} mark="md" className="lsheet__close" onClick={onClose} label="Close">
             ✕
-          </button>
+          </IconButton>
         </div>
         <div className="lsheet__body">{children}</div>
       </div>

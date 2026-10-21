@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { hasSeenMergeReceipt, markMergeReceiptSeen } from '../../lib/account/mergeReceiptFlag.js'
+import { Button } from '../ui/control/Button.jsx'
 
 // The post-sign-in merge receipt — shown once per (device, account), the first
 // time this device's things become an account's things.
@@ -44,16 +45,15 @@ export function MergeReceipt({ userId, lines = [] }) {
       <p className="mergereceipt__note caps-exempt">
         Nothing you had revealed changed. Everything here was already yours.
       </p>
-      <button
-        type="button"
-        className="mergereceipt__dismiss"
+      <Button
+        skin="ghost"
         onClick={() => {
           markMergeReceiptSeen(userId)
           setDismissed(true)
         }}
       >
         Got it
-      </button>
+      </Button>
     </aside>
   )
 }

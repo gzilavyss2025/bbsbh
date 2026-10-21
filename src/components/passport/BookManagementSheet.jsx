@@ -93,7 +93,7 @@ export function BookManagementSheet({
   return (
     <Stack gap="loose" className="bookmgmt" role="group" aria-label="Settings for this book">
       <Stack gap="tight" as="label" className="bookmgmt__field">
-        <span>Title</span>
+        <span className="t-label t-label--nocaps">Title</span>
         <input
           type="text"
           maxLength={MAX_BOOK_TITLE_LENGTH}
@@ -107,7 +107,7 @@ export function BookManagementSheet({
         />
       </Stack>
       <Stack gap="tight" as="label" className="bookmgmt__field">
-        <span>Subtitle</span>
+        <span className="t-label t-label--nocaps">Subtitle</span>
         <input
           type="text"
           maxLength={MAX_BOOK_SUBTITLE_LENGTH}

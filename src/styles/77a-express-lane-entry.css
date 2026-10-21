@@ -306,15 +306,6 @@
   letter-spacing: var(--ls-caps);
   color: var(--album-foil);
 }
-.xl-expand__close {
-  appearance: none;
-  background: none;
-  border: 0;
-  font: inherit;
-  color: var(--album-foil-soft);
-  cursor: pointer;
-  padding: var(--space-1h) 2px;
-}
 .xl-expand__list {
   list-style: none;
   margin: 0;

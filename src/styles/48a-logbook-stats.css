@@ -59,14 +59,6 @@
   color: var(--text-heading);
 }
 
-.logbookstats__tally span {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
 .logbookstats__section {
   margin-bottom: var(--space-6);
 }
@@ -115,14 +107,6 @@
   padding: var(--space-3);
 }
 
-.logbookstats__splits span {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
 .logbookstats__splits strong {
   font-family: var(--font-mono);
   font-size: var(--fs-h2);
@@ -162,14 +146,6 @@
   color: var(--text-heading);
 }
 
-.logbookstats__streaks span {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
 .logbookstats__streaks small {
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -192,14 +168,6 @@
   gap: var(--space-2);
   padding: var(--space-2) 0;
   border-bottom: var(--bw-hair) solid var(--border-rule);
-}
-
-.logbookstats__tablehead {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 .logbookstats__tablehead span:not(:first-child),

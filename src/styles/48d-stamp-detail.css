@@ -27,12 +27,6 @@
   margin: 0;
 }
 
-.stampdetail__close:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-  border-radius: var(--radius-sm);
-}
-
 /* The case: the same dark album board the panes sit on, so a stamp pulled out
    for a closer look reads as lifted off the same board rather than dropped
    onto a new surface. */

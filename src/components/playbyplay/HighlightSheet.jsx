@@ -3,6 +3,7 @@ import { highlightPlaybacks } from '../../api/highlights.js'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { SaveClipButton } from '../highlights/SaveClipButton.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // The video-highlight player: opened from any "Watch" button in the app — a
 // revealed play (PlayByPlay.jsx), the box score's Play of the Game and video
@@ -97,9 +98,9 @@ export function HighlightSheet({ item, src = null, notice = '', title: fallbackT
                   not a file anything can save. A clip with no MP4 rendition
                   simply gets no save button. */}
               {mp4 && <SaveClipButton url={mp4} title={label} filename={filename} />}
-              <button ref={closeRef} className="sheet-close hlsheet__close" onClick={onClose} aria-label="Close">
+              <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
                 ✕
-              </button>
+              </IconButton>
             </div>
           </div>
 

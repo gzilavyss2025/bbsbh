@@ -1,13 +1,14 @@
 // Flattens the four crosswalk files scripts/gen-contracts-identity.mjs wrote
-// into ONE lookup list over every historical contract row:
+// to scripts/data/contracts/identity/ into ONE lookup list over every
+// historical contract row:
 //
 //   public/data/contracts-history/search-index.json
 //     [ { rowKey, sourceFile, rawName, season, rawTeamCode, mlbId,
 //         confidence }, ... ]
 //
 // Seven fields, and specifically NOT `candidates` -- the near-miss candidate
-// list is what makes identity/salaries.json 8 MB on its own, and it is only
-// ever read by the /admin review queue, which already has pending.json. A
+// list is what makes the crosswalk salaries.json 8 MB on its own, and it is
+// only ever read by the /admin review queue, which already has pending.json. A
 // name search wants the name, the year, the club and the id it resolved to.
 //
 // The array is FLAT and in crosswalk order (extensions, arbitration,
@@ -28,18 +29,18 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { stat } from 'node:fs/promises'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
+import { CROSSWALK_DIR } from './lib/contract-row-key.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const identityDir = join(here, '..', 'public', 'data', 'contracts-history', 'identity')
 const outPath = join(here, '..', 'public', 'data', 'contracts-history', 'search-index.json')
 
 const SOURCES = ['extensions', 'arbitration', 'free_agency', 'salaries']
 
 async function loadIdentity(sourceFile) {
-  const rows = await readJsonOr(join(identityDir, `${sourceFile}.json`), null)
+  const rows = await readJsonOr(join(CROSSWALK_DIR, `${sourceFile}.json`), null)
   if (!rows) {
     throw new Error(
-      `Missing ${sourceFile}.json in ${identityDir} -- run scripts/gen-contracts-identity.mjs first`,
+      `Missing ${sourceFile}.json in ${CROSSWALK_DIR} -- run scripts/gen-contracts-identity.mjs first`,
     )
   }
   return rows

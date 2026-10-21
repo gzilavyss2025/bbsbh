@@ -5,6 +5,7 @@ import { useCopy } from '../../copy/copyContext.js'
 import { humanDateWithYear } from '../../lib/dates.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // A bigger read of one filled slot on the stamp sheet (StampSheet.jsx) — the
 // club or ballpark's own print, held under a soft, slowly-drifting spotlight
@@ -45,9 +46,9 @@ export function StampDetailModal({ kind, slot, onClose }) {
       <div className="sheet stampdetail" role="dialog" aria-modal="true" aria-label={title}>
         <div className="stampdetail__head">
           <h2 className="sheet__title">{title}</h2>
-          <button ref={closeRef} className="sheet-close stampdetail__close" onClick={onClose} aria-label="Close">
+          <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
             ✕
-          </button>
+          </IconButton>
         </div>
 
         <div className="stampdetail__case">

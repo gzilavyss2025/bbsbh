@@ -7,6 +7,7 @@ import { groundBoxes } from '../../lib/zone/ground.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { batterFigureUrls } from '../../api/uniforms.js'
 import { BattingUniformContext } from '../logo/uniformContexts.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet) against THIS batter's own zone
@@ -378,9 +379,9 @@ export function ZoneSheet({ note, batter, pitcher, onClose, children }) {
               <span className="szmodal__name">{name || 'At-bat'}</span>
               {pitcher ? <span className="szmodal__vs">vs {pitcher}</span> : null}
             </div>
-            <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">
+            <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
               ✕
-            </button>
+            </IconButton>
           </div>
           <div className="szmodal__body">{children}</div>
         </div>
