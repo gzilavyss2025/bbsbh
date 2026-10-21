@@ -76,12 +76,17 @@ test('isFailedKey: a rank outside the bar, or no rank at all, fails', () => {
   assert.equal(isFailedKey(undefined, 10), true)
 })
 
-// Both views draw their row marks from isFailedKey, not a local rank-vs-bar test of their own.
-test('both Nine Keys views mark rows with isFailedKey', () => {
+// Every Nine Keys view marks a row from the club's own `failed` list, the list its tally
+// counts, and never judges a rank against the bar itself.
+test('every Nine Keys view marks rows from the failed list', () => {
   const src = (p) => readFileSync(new URL(`../../src/${p}`, import.meta.url), 'utf8')
-  for (const p of ['components/worldseries/cards/scouting/NineKeys.jsx', 'components/postseason/SeriesNineKeys.jsx']) {
+  for (const p of [
+    'components/worldseries/cards/scouting/NineKeys.jsx',
+    'components/postseason/SeriesNineKeys.jsx',
+    'screens/NineKeysPage.jsx',
+  ]) {
     const code = src(p)
-    assert.match(code, /isFailedKey\(/, p)
-    assert.doesNotMatch(code, /rank\s*>\s*(data\.)?bar|ranks\[key\]\s*>\s*bar/, p)
+    assert.match(code, /\.failed\?\.includes\(/, p)
+    assert.doesNotMatch(code, /isFailedKey|>\s*(data\.)?bar\b|rank == null \|\|/, p)
   }
 })

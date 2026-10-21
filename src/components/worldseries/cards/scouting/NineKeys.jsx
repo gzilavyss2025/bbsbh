@@ -1,4 +1,4 @@
-import { isFailedKey, keysVerdict, nineKeysTeams } from '../../../../lib/postseason/keysVerdict.js'
+import { keysVerdict, nineKeysTeams } from '../../../../lib/postseason/keysVerdict.js'
 import { ordinalSuffix } from '../../../../lib/format.js'
 import { teamAbbr } from '../../../../lib/teams.js'
 import { useRouteLink } from '../../../../lib/nav.js'
@@ -41,7 +41,7 @@ export function NineKeys({ data, clubIds, season }) {
             <th scope="row">{key.label}</th>
             {ranks.map((rank, i) => (
               <td key={clubIds[i]}>
-                <ComparisonFigure lead={lead === (i === 0 ? 'a' : 'b')} failed={isFailedKey(rank, data.bar)}>
+                <ComparisonFigure lead={lead === (i === 0 ? 'a' : 'b')} failed={teams[i].failed?.includes(key.id)}>
                   {rank == null ? NO_FIGURE : <>{rank}<span className="ww-comparison__ordinal">{ordinalSuffix(rank)}</span></>}
                 </ComparisonFigure>
               </td>
