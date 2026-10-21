@@ -1,13 +1,13 @@
 /* ---------- pitch by pitch (scouting report, #2316) ---------- */
 
-/* Flush body: the head clears the name tab. Compound, to beat .plink's padding reset in any load order. */
+/* Compound, to beat .plink's padding reset in any load order. */
 /* layout-exempt: a link holding a photo and two lines; Cluster cannot render an anchor */
 .plink.ww-pitch__head {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   min-height: var(--tap-min);
-  padding: var(--space-6) var(--space-4) var(--space-3);
+  padding: var(--space-3) var(--space-4);
   color: inherit;
   text-decoration: none;
 }

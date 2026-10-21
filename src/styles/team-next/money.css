@@ -49,9 +49,6 @@
 
 /* THE GRID CARD: same. On a phone the pinned player column was 168px of 390; it takes less
    now and the seasons get the rest. Age stays (the footer rows span two columns). */
-.tnext__grid {
-  padding-top: var(--space-4); /* clears the name tab and the count tag that hang over the edge */
-}
 .tnext__grid .ctr__card {
   margin: 0;
   border: 0;
