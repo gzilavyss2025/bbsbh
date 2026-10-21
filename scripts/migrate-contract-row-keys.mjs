@@ -64,6 +64,7 @@ import { readJsonOr } from './lib/io.js'
 import {
   CONTENT_ROW_KEY_RE,
   CONTRACT_SOURCES,
+  CROSSWALK_DIR,
   LEGACY_ROW_KEY_RE,
   contractRowKeys,
 } from './lib/contract-row-key.mjs'
@@ -72,7 +73,6 @@ import { getRedis, redisConfigFromEnv } from '../api/_lib/redis.js'
 const here = dirname(fileURLToPath(import.meta.url))
 const sourceDir = join(here, 'data', 'contracts')
 const poolDir = join(here, '..', 'public', 'data', 'contracts-history', 'season-players')
-const identityDir = join(here, '..', 'public', 'data', 'contracts-history', 'identity')
 
 const OVERRIDES_KEY = 'contracts:identity:overrides'
 const DEFAULT_BASE = 'https://www.tallybb.com'
@@ -122,7 +122,7 @@ async function loadSources() {
     // files are stale relative to the CSVs, that shows up here as a key in no
     // crosswalk file, and the migration stops rather than writing keys no
     // reader can join.
-    const crosswalk = await readJsonOr(join(identityDir, `${source}.json`), null)
+    const crosswalk = await readJsonOr(join(CROSSWALK_DIR, `${source}.json`), null)
     if (!crosswalk) {
       throw new Error(`Missing identity/${source}.json -- run scripts/gen-contracts-identity.mjs first`)
     }
