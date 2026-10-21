@@ -5,6 +5,7 @@ import { profilePath } from '../../lib/route.js'
 import { hasSeenMergeReceipt, markMergeReceiptSeen } from '../../lib/account/mergeReceiptFlag.js'
 import { normalizeSilentChannels, rollupSync } from '../../lib/account/syncStatus.js'
 import { useSyncStatusState } from '../sync/SyncStatusProvider.jsx'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // A one-line pointer to the merge receipt card that already lives on
 // /profile (components/profile/MergeReceipt.jsx, PRD §5.3) — for the case the
@@ -52,17 +53,15 @@ export function MergeReceiptStrip() {
       >
         Account sync complete. View details in My Tally ›
       </button>
-      <button
-        type="button"
-        className="strip-dismiss mergestrip__dismiss"
+      <IconButton
         onClick={() => {
           markMergeReceiptSeen(user?.id)
           setDismissedThisSession(true)
         }}
-        aria-label="Dismiss this note"
+        label="Dismiss this note"
       >
         ✕
-      </button>
+      </IconButton>
     </div>
   )
 }

@@ -681,8 +681,7 @@
   cursor: pointer;
 }
 
-.mergestrip__link:focus-visible,
-.mergestrip__dismiss:focus-visible {
+.mergestrip__link:focus-visible {
   outline: none;
   box-shadow: var(--ring);
 }

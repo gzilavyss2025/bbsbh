@@ -22,6 +22,7 @@
 // appearance the scorer has ALREADY reached, never one ahead of the cursor.
 // The caller enforces that by only ever passing a card at or behind the
 // cursor; nothing here can widen it, because it renders what it is handed.
+import { Button } from '../../components/ui/control/Button.jsx'
 
 const CALL_LABEL = {
   B: 'Ball',
@@ -76,9 +77,9 @@ export function PitchExpand({ card, rows = [], onClose }) {
       <div className="xl-expand__panel">
         <header className="xl-expand__head">
           <h2 className="xl-expand__title">{name}</h2>
-          <button type="button" className="xl-expand__close" onClick={onClose}>
+          <Button skin="ghost" size="control" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </header>
 
         {pitches.length ? (

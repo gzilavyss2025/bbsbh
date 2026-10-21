@@ -77,11 +77,6 @@
   font-size: var(--fs-caption);
 }
 
-.logbooklanding__devicenotedismiss:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
-
 .logbooklanding__actions {
   display: flex;
   flex-direction: column;

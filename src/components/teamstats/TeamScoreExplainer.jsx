@@ -3,6 +3,7 @@ import { currentFormScoreFromGames, CURRENT_FORM_GAMES } from '../../api/teamSco
 import { HOME_WIN_PROBABILITY } from '../../api/seasonScoreFormula.js'
 import { record, signed, scoreValue, rate3 } from './TeamScoreCard.jsx'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { IconButton } from '../ui/control/IconButton.jsx'
 
 // Illustrative anchors for the "How this is calculated" modal — run through
 // the same formula the app scores real teams with (see teamScoreFormula.js),
@@ -29,7 +30,9 @@ export function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
       <div className="sheet tscoremodal" role="dialog" aria-modal="true" aria-label="How the Season Grade is calculated">
         <div className="tscoremodal__head">
           <p className="tscoremodal__note">How We Score It</p>
-          <button ref={closeRef} type="button" className="sheet-close gsmodal__close" onClick={onClose} aria-label="Close">✕</button>
+          <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
+            ✕
+          </IconButton>
         </div>
         <h2 className="sheet__title tscoremodal__title">
           How good have they been — and how much have they exceeded the assignment?

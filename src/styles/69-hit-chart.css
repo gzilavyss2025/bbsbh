@@ -732,19 +732,6 @@
 /* Tapping anywhere on the sheet already dismisses it (BallFlight.jsx); this is
    the affordance for a pointer that expects a corner control, and the real
    focus target a keyboard needs. */
-.bflight__close {
-  flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-inset);
-  color: var(--text-muted);
-  font-size: var(--fs-small);
-  line-height: var(--lh-solid);
-  cursor: pointer;
-}
-
 .bflight .bflight__field {
   display: block;
   width: 100%;

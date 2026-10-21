@@ -13,6 +13,7 @@ import { ScoutScene } from '../ScoutScene.jsx'
 import { ContactFacts, Fact, fixed } from './Facts.jsx'
 import { PitchZone } from './PitchZone.jsx'
 import { callOf, inPlay, nameOf, meetingOrdinal, playText } from './meetings.js'
+import { IconButton } from '../../../components/ui/control/IconButton.jsx'
 
 // THE PITCH MODAL (#1490, "like the express lane"): one pitch of a past
 // meeting. Its REAL flight in the page's scene and view (camera.js
@@ -80,7 +81,7 @@ export function PitchModal({ walk, index, onIndex, onClose, board, data, view, s
               {call.word}{isLast && pa.event ? ` · ${pa.event.replace(/_/g, ' ')}` : ''}
             </p>
           </div>
-          <button ref={closeRef} type="button" className="scout__pmclose" onClick={onClose} aria-label="Close">✕</button>
+          <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">✕</IconButton>
         </header>
 
         {scene.length > 0 ? (

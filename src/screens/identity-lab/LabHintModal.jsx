@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
+import { IconButton } from '../../components/ui/control/IconButton.jsx'
 
 // The per-dimension "what is this page" explainer, popped from an info button
 // beside the title instead of sitting in the page flow permanently — the
@@ -17,9 +18,9 @@ export function LabHintModal({ title, hint, onClose }) {
       <div className="idlabhint" role="dialog" aria-modal="true" aria-label={`About ${title}`}>
         <div className="idlabhint__head">
           <span className="idlabhint__title">{title}</span>
-          <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
+          <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
+              ✕
+            </IconButton>
         </div>
         <p className="idlabhint__body">{hint}</p>
       </div>
