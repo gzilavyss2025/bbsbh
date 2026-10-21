@@ -80,7 +80,7 @@ function AddClub({ onAdd }) {
   const id = Number(text)
   return (
     <form
-      className="idlab__addclub idlab__erafields"
+      className="idlab__addclub"
       onSubmit={(event) => {
         event.preventDefault()
         if (!Number.isInteger(id) || id <= 0) return
@@ -89,6 +89,7 @@ function AddClub({ onAdd }) {
       }}
     >
       <input
+        className="idlab__recolorname"
         type="number"
         inputMode="numeric"
         aria-label="Club id"

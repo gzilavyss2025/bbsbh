@@ -173,5 +173,5 @@
 }
 
 .idlab__addclub input {
-  width: 9rem;
+  flex: 0 0 9rem;
 }
