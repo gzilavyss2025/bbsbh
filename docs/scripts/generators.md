@@ -1863,7 +1863,10 @@ Re-run only to fold in a new season.
   join that puts real dollar terms behind a real player id. Reads the four
   historical contract CSVs (`scripts/data/contracts/*.csv`) and the row-to-player
   crosswalk `gen-contracts-identity.mjs` wrote to
-  `public/data/contracts-history/identity/`, keyed on `rowKey`
+  `scripts/data/contracts/identity/` (outside `public/`, because no page fetches
+  those four files; `pending.json` stays in
+  `public/data/contracts-history/identity/`, because the admin page fetches it),
+  keyed on `rowKey`
   (`${sourceFile}#${contentHash}`, minted by `scripts/lib/contract-row-key.mjs`
   from the row's own identifying cells — never its position in the file, ADR-0069).
   **RUN `gen-contracts-identity.mjs` FIRST** —
@@ -1908,7 +1911,7 @@ Re-run only to fold in a new season.
   `rawTeamCode`, `mlbId`, `confidence`. A projection of
   `gen-contracts-identity.mjs`'s output and nothing more, so **run that first**.
   Specifically NOT the `candidates` near-miss list, which is what makes
-  `identity/salaries.json` 8 MB on its own and is only ever read by
+  the crosswalk's `salaries.json` 8 MB on its own and is only ever read by
   `/admin/contracts` — which has `pending.json` for it. An `ambiguous` or
   `unresolved` row is still listed, with `mlbId` null: the contract is real and
   has to stay findable by the name the source printed, and `confidence` is what
