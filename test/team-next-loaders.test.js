@@ -124,7 +124,6 @@ test('loadPostseasonLeaders asks for gameType P once a postseason game has a res
   const out = await loadPostseasonLeaders(158, null, src)
   assert.ok(asked.length > 0 && asked.every((a) => a[3] === 'P'))
   assert.deepEqual(out.pool.map((p) => p.id), [9])
-  assert.equal(out.teamId, 158) // the page drops a result that belongs to another club
 })
 
 test('loadPostseasonLeaders is null, and reads no stats, for a club with no postseason result', async () => {

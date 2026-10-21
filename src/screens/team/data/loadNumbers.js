@@ -166,7 +166,7 @@ export async function loadPostseasonLeaders(id, asOf, src = DIRECT) {
   const schedule = await src.fetchTeamSchedule(id, season, sportId, standingsDate)
   if (!schedule.some((g) => g.gameType !== 'R' && g.won != null)) return null
   const fetchStats = (teamId, group, yr) => src.fetchTeamSeasonStats(teamId, group, yr, 'P')
-  return { teamId: id, pool: await loadCombinedPoolForTeams([{ id }], season, { withHand: true, fetchStats }) }
+  return { pool: await loadCombinedPoolForTeams([{ id }], season, { withHand: true, fetchStats }) }
 }
 
 export async function loadRanks(id, asOf, src = DIRECT) {

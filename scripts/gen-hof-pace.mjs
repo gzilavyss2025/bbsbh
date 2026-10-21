@@ -17,6 +17,7 @@
 import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { chunk } from './lib/concurrency.mjs'
 import { paceLine } from './lib/hof/pace.mjs'
 import { getJson } from './lib/statsapi.mjs'
 
@@ -30,10 +31,9 @@ for (const a of awards) {
 const ids = [...pool.keys()]
 
 const players = []
-for (let i = 0; i < ids.length; i += 50) {
-  const batch = ids.slice(i, i + 50).join(',')
+for (const batch of chunk(ids, 50)) {
   const { people } = await getJson(
-    `/api/v1/people?personIds=${batch}&hydrate=stats(group=[hitting,pitching],type=[yearByYear],sportId=1)`,
+    `/api/v1/people?personIds=${batch.join(',')}&hydrate=stats(group=[hitting,pitching],type=[yearByYear],sportId=1)`,
   )
   for (const person of people) {
     const pitcher = pool.get(person.id).primaryPosition?.abbreviation === 'P'

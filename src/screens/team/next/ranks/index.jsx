@@ -59,9 +59,7 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
 
   // Regular / Postseason leaders (#1437). The switch exists once the club has a postseason game
   // with a result; regular season stays the default and its figures are the pool above.
-  // useAsync keeps the last result while a rerun loads, so a result from another club is ignored.
-  const loaded = useAsync(() => loadPostseasonLeaders(team.id, asOf, SHARED), [team.id, asOf]).data
-  const post = loaded?.teamId === team.id ? loaded : null
+  const post = useAsync(() => loadPostseasonLeaders(team.id, asOf, SHARED), [team.id, asOf]).data
   const [scope, setScope] = useState('R')
   const showPost = scope === 'P' && post
   const pool = showPost ? post.pool : n?.leaderPool

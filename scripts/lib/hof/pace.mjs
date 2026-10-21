@@ -1,10 +1,7 @@
 // Pure half of scripts/gen-hof-pace.mjs: one player's year-by-year splits in,
 // the cumulative-by-age line out. Hitters [h, hr]; pitchers [w, so, outs, sv].
-const n = (v) => Number(v) || 0
-const outs = (ip) => {
-  const [w, f = 0] = String(ip ?? 0).split('.')
-  return n(w) * 3 + n(f)
-}
+import { ipToOuts } from '../../../src/lib/math/innings.js'
+import { num as n } from '../../../src/lib/math/number.js'
 
 // Returns { first, rows } (rows[i] is the line at age first + i, dense: an age
 // with no MLB season repeats the one before) or null when there is no MLB season.
@@ -26,7 +23,7 @@ export function paceLine(splits, pitcher) {
     const st = byAge.get(age)
     if (st) {
       cum = pitcher
-        ? [cum[0] + n(st.wins), cum[1] + n(st.strikeOuts), cum[2] + outs(st.inningsPitched), cum[3] + n(st.saves)]
+        ? [cum[0] + n(st.wins), cum[1] + n(st.strikeOuts), cum[2] + ipToOuts(st.inningsPitched), cum[3] + n(st.saves)]
         : [cum[0] + n(st.hits), cum[1] + n(st.homeRuns)]
     }
     rows.push(cum)
