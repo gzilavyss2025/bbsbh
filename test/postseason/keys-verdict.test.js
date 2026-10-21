@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFileSync } from 'node:fs'
 import { isFailedKey, keysVerdict, nineKeysTeams } from '../../src/lib/postseason/keysVerdict.js'
 
 const rule = { limit: 3, firstSeason: 2000 }
@@ -73,4 +74,14 @@ test('isFailedKey: a rank outside the bar, or no rank at all, fails', () => {
   assert.equal(isFailedKey(11, 10), true)
   assert.equal(isFailedKey(null, 10), true)
   assert.equal(isFailedKey(undefined, 10), true)
+})
+
+// Both views draw their row marks from isFailedKey, not a local rank-vs-bar test of their own.
+test('both Nine Keys views mark rows with isFailedKey', () => {
+  const src = (p) => readFileSync(new URL(`../../src/${p}`, import.meta.url), 'utf8')
+  for (const p of ['components/worldseries/cards/scouting/NineKeys.jsx', 'components/postseason/SeriesNineKeys.jsx']) {
+    const code = src(p)
+    assert.match(code, /isFailedKey\(/, p)
+    assert.doesNotMatch(code, /rank\s*>\s*(data\.)?bar|ranks\[key\]\s*>\s*bar/, p)
+  }
 })
