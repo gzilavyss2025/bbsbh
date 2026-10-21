@@ -45,8 +45,6 @@
    tall as a rotation row. */
 .rosterbox td.rosterbox__lead {
   padding-block: 0;
-}
-.rosterbox td.rosterbox__lead {
   background: var(--surface-card);
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -72,26 +70,27 @@
 .rosterbox__name > * + * {
   margin-inline-start: var(--space-1);
 }
-/* The Season view's line under an arm's name: the small attribute line recipe. */
-.rosterbox__name > .rosterbox__line {
-  display: block;
-  margin-inline-start: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .rosterbox__war--down {
   color: var(--accent-negative-hover);
 }
-.rosterbox tbody .rosterbox__break th {
-  border-top: var(--bw-heavy) solid var(--border-stamped);
-  background: var(--bg-page);
+/* The block's small labels, one recipe: the break rows, the foot, the Season view's line
+   under an arm's name, and the park note under the diamond. Each rule below keeps only its
+   own ground, ink and place. */
+:is(.rosterbox__break th, .rosterbox__foot th, .rosterbox__line, .rosterbox-pair__note) {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   text-align: left;
+}
+.rosterbox__name > .rosterbox__line {
+  display: block;
+  margin-inline-start: 0;
+  color: var(--text-caption);
+}
+.rosterbox tbody .rosterbox__break th {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-page);
   color: var(--text-caption);
 }
 .rosterbox tbody .rosterbox__foot :is(th, td) {
@@ -99,11 +98,6 @@
   background: var(--surface-card);
 }
 .rosterbox tbody .rosterbox__foot th {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  text-align: left;
   color: var(--text-muted);
 }
 /* At wide the diamond sits beside the lineup table, centred on its height. */
@@ -111,16 +105,13 @@
   align-self: center;
 }
 /* The park's accuracy note sits in the drawing's bottom-left corner, where the diamond's crop
-   puts the catcher. Here it moves under the drawing as a caption, with the same words. */
+   puts the catcher. A stopgap for that collision in the shared DefenseDiamond: here the note
+   moves under the drawing as a caption, with the same words. */
 .rosterbox-pair__diamond .bpdiagram__note {
   display: none;
 }
 .rosterbox-pair__note {
   margin: var(--space-2) 0 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
   color: var(--text-caption);
 }
 /* The pen week's strip keeps its three figures on one row, even on a phone: a third cell
@@ -134,6 +125,6 @@
    long table is never left empty. In one column (a phone) a sticky cell has no room to move. */
 .rosterbox-pair > .rosterbox-week {
   position: sticky;
-  top: calc(var(--space-16) + var(--space-6));
+  top: calc(68px + var(--space-3)); /* the sticky jump bar's height, see BAR_H in TeamNextPage.jsx */
   align-self: start;
 }

@@ -1,7 +1,7 @@
 // The pure shapes behind the roster box (RosterBox.jsx): rows for the Lineup and Pitching
 // staff cards, from loadRoster's lists only. No request. Every missing field falls back to
 // '', null or a dash, so a MiLB club (no WAR, thin feeds) still draws.
-const DASH = '—'
+export const DASH = '—'
 
 export const warText = (war) => (war == null ? DASH : war.toFixed(1))
 
@@ -36,6 +36,7 @@ const rowOf = (p, m, hurt, lead) => ({
   rookie: Boolean(p.rookie ?? m.rookie),
   hurt,
   lead,
+  line: seasonLineOf(p),
 })
 
 // The nine, in the diamond's order, each led by his position.
@@ -44,10 +45,14 @@ export const lineupRows = (lineup, meta) =>
 
 // The top substitutes, each led by his roster position.
 export const benchRows = (subs, meta, injuredIds) =>
-  subs.map((p) => rowOf(p, meta.get(p.id) ?? {}, injuredIds.has(p.id), p.pos || meta.get(p.id)?.pos || DASH))
+  subs.map((p) => {
+    const m = meta.get(p.id) ?? {}
+    return rowOf(p, m, injuredIds.has(p.id), p.pos || m.pos || DASH)
+  })
 
 // A pitcher's season line, for the small line under his name: "30 G · 174.2 IP · 3.12 ERA".
-// Only the Season view's lists carry it; a Current-view row, or an arm with no outing, has ''.
+// Only the Season view's pitcher lists carry it; a hitter, a Current-view row, or an arm with
+// no outing has ''.
 // A line, not columns: seven columns overran a phone and the half-width table at 820.
 export function seasonLineOf(p) {
   if (!p.appearances) return ''
@@ -55,16 +60,12 @@ export function seasonLineOf(p) {
 }
 
 // The rotation, led by its slot (1 to n, in the loader's order).
-export const rotationRows = (sp, injuredIds) =>
-  sp.map((p, i) => ({ ...rowOf(p, {}, injuredIds.has(p.id), String(i + 1)), line: seasonLineOf(p) }))
+export const rotationRows = (sp, injuredIds) => sp.map((p, i) => rowOf(p, {}, injuredIds.has(p.id), String(i + 1)))
 
 // The bullpen, led by its role: CL when the 40-man reads him as the closer, else RP.
 export function penRows(pen, injuredIds, pitchers) {
   const roleById = new Map((pitchers ?? []).map((p) => [p.id, p.role]))
-  return pen.map((p) => ({
-    ...rowOf(p, {}, injuredIds.has(p.id), roleById.get(p.id) === 'CL' ? 'CL' : 'RP'),
-    line: seasonLineOf(p),
-  }))
+  return pen.map((p) => rowOf(p, {}, injuredIds.has(p.id), roleById.get(p.id) === 'CL' ? 'CL' : 'RP'))
 }
 
 // The pen week's three figures, off StaffGrid's own rows: arms that pitched yesterday,

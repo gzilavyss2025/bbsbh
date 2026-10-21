@@ -22,7 +22,7 @@ import { useBandData } from '../useBandData.js'
 import { rosterCount, transactionsDoor } from './rosterData.js'
 import { CoachingStaff } from './CoachingStaff.jsx'
 import { RosterBox } from './RosterBox.jsx'
-import { benchRows, lineupRows, metaById, penRows, penWeekFigures, rotationRows, warSum } from './boxRows.js'
+import { benchRows, lineupRows, metaById, penRows, penWeekFigures, rotationRows } from './boxRows.js'
 import '../../../../styles/team-next/roster.css'
 
 // Roster band (#1107, row 6c): the old Roster tab's data (loadRoster, through SHARED, so no new
@@ -48,8 +48,10 @@ const Sub = ({ title, children }) => (
 // and the arm with the most.
 function PenWeek({ teamId }) {
   const { data } = useAsync(fetchWorkload, [])
-  const grid = useMemo(() => (data?.asOf ? staffGridFor(data, Number(teamId), data.asOf) : null), [data, teamId])
-  const fig = penWeekFigures(grid)
+  const { grid, fig } = useMemo(() => {
+    const rows = data?.asOf ? staffGridFor(data, Number(teamId), data.asOf) : null
+    return { grid: rows, fig: penWeekFigures(rows) }
+  }, [data, teamId])
   if (!fig) return null
   return (
     <Stack gap="base" className="rosterbox-week">
@@ -126,8 +128,7 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
                   season={d.season}
                   showWar={showWar}
                   showProspect={d.isMilb}
-                  groups={[{ rows: nine }, { title: 'Top substitutes', rows: bench }]}
-                  foot={`Lineup ${warSum(nine).toFixed(1)} · bench ${warSum(bench).toFixed(1)}`}
+                  groups={[{ sum: 'Lineup', rows: nine }, { title: 'Top substitutes', sum: 'bench', rows: bench }]}
                 />
               </Grid>
             </Stack>
@@ -142,8 +143,7 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
                 season={d.season}
                 showWar={showWar}
                 showProspect={d.isMilb}
-                groups={[{ title: 'Rotation', rows: rotation }, { title: 'Bullpen', role: true, rows: bullpen }]}
-                foot={`Rotation ${warSum(rotation).toFixed(1)} · bullpen ${warSum(bullpen).toFixed(1)}`}
+                groups={[{ title: 'Rotation', sum: 'Rotation', rows: rotation }, { title: 'Bullpen', sum: 'bullpen', role: true, rows: bullpen }]}
               />
               <PenWeek teamId={team.id} />
             </Grid>

@@ -38,7 +38,7 @@ test('a lineup spot takes its number, WAR and marks from the roster lists', () =
     pitchers: [{ id: 7, jersey: '24', war: 9 }],
   }
   const [row] = lineupRows([{ id: 7, name: 'William Contreras', position: 'C', hurt: true }], metaById(d))
-  assert.deepEqual(row, { id: 7, name: 'William Contreras', jersey: '24', war: 3, allStar: true, prospect: null, rookie: false, hurt: true, lead: 'C' })
+  assert.deepEqual(row, { id: 7, name: 'William Contreras', jersey: '24', war: 3, allStar: true, prospect: null, rookie: false, hurt: true, lead: 'C', line: '' })
 })
 
 test('a lineup spot missing from every list still draws, with no number and no WAR', () => {
