@@ -67,9 +67,10 @@
 .chal__view {
   flex: 1;
   padding: var(--space-1h) var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
+  /* Look A (#1776): underlined tabs, not a chip pair. */
+  border: 0;
+  border-bottom: var(--bw-heavy) solid transparent;
+  background: none;
   color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -79,8 +80,7 @@
 }
 
 .chal__view.is-on {
-  background: color-mix(in srgb, var(--marker) 16%, var(--surface-card));
-  border-color: var(--accent-primary);
+  border-bottom-color: var(--navy);
   color: var(--text-heading);
   font-weight: var(--w-bold);
 }

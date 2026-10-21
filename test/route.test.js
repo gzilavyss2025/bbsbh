@@ -225,6 +225,7 @@ test('single-segment named routes resolve to their route name', () => {
     '/game-notes-debug': 'game-notes-debug',
     '/first-scorebook': 'first-scorebook',
     '/photos': 'photos',
+    '/classics': 'classics',
   }
   for (const [path, name] of Object.entries(cases)) {
     assert.equal(parseRoute(path).name, name, path)

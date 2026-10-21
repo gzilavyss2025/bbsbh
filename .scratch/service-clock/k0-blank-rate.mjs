@@ -15,7 +15,9 @@
 //
 // Output: .scratch/service-clock/k0-blank-rate.json
 import { writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { j, local, readCsv, loadCalendar, dayDiff, parseMls, propTest, pct, fmt } from './lib.mjs'
+import { CROSSWALK_DIR } from '../../scripts/lib/contract-row-key.mjs'
 
 const out = {}
 const say = (s) => process.stdout.write(s + '\n')
@@ -55,7 +57,7 @@ say(`2010-2026: ${postRows} rows, ${postBlank} blank (${pct(postBlank / postRows
 say('')
 
 // --- the join: salary row -> mlbId -> debut date -----------------------------
-const identity = await j('public/data/contracts-history/identity/salaries.json'.replace(/^/, '../../'))
+const identity = await j(join(CROSSWALK_DIR, 'salaries.json'))
 const idByRowKey = new Map()
 for (const e of identity) if (e.mlbId != null) idByRowKey.set(e.rowKey, e.mlbId)
 

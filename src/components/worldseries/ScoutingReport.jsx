@@ -110,10 +110,15 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
     () => (venueByClub ? fitParks({ sides: [sideA, sideB], venueByClub, game, slateDate }) : []),
     [venueByClub, sideA, sideB, game, slateDate],
   )
-  const { data: balls, error: parkError } = useAsync(() => loadParkFit({ clubIds, slateDate }), [clubA, clubB, slateDate])
+  // The spray read is the heavy one: skip it when no park has a layout (the card drops anyway).
+  const hasParks = parks.length > 0
+  const { data: balls, error: parkError } = useAsync(
+    () => (hasParks ? loadParkFit({ clubIds, slateDate }) : null),
+    [clubA, clubB, slateDate, hasParks],
+  )
   const parkFit = useMemo(
-    () => (parks.length ? parkFitModel(balls, { clubA: sideA, clubB: sideB, layouts: parks.map((p) => p.layout) }) : null),
-    [balls, parks, sideA, sideB],
+    () => (hasParks ? parkFitModel(balls, { clubA: sideA, clubB: sideB, layouts: parks.map((p) => p.layout) }) : null),
+    [balls, parks, hasParks, sideA, sideB],
   )
   const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit })
   // A failed read is not an empty one: name the cards whose load failed (the card itself still drops).

@@ -5,7 +5,7 @@
 // Builds ONE panel, one row per scripts/data/contracts/arbitration.csv row
 // (2,420 cases, 2018-2026 — nine seasons, arbitration.csv's whole window,
 // docs/contracts-data-caveats.md), joined to:
-//   - the case's resolved mlbId, via public/data/contracts-history/identity/
+//   - the case's resolved mlbId, via scripts/data/contracts/identity/
 //     arbitration.json (rowKey = `arbitration#<csv row index>`, same index
 //     scripts/lib/csv.mjs's parseCsv produces — confirmed against
 //     scripts/gen-contracts-identity.mjs, which reads the CSV with the same
@@ -48,6 +48,7 @@ import { parseCsv } from '../../scripts/lib/csv.mjs'
 import { parseMoneyCell } from '../../src/lib/contracts/parseMoney.js'
 import { normalizePosition } from '../../src/lib/contracts/positions.js'
 import { resolveClubCode } from '../../src/lib/contracts/clubCodes.js'
+import { CROSSWALK_DIR } from '../../scripts/lib/contract-row-key.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = join(__dirname, '..', '..')
@@ -59,7 +60,7 @@ const rows = parseCsv(csvText)
 
 const identity = JSON.parse(
   readFileSync(
-    join(REPO_ROOT, 'public', 'data', 'contracts-history', 'identity', 'arbitration.json'),
+    join(CROSSWALK_DIR, 'arbitration.json'),
     'utf8',
   ),
 )

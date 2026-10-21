@@ -101,6 +101,7 @@ const PostseasonHistoryPage = lazyNamed(
   'PostseasonHistoryPage',
 )
 const NineKeysPage = lazyNamed(() => import('./screens/NineKeysPage.jsx'), 'NineKeysPage')
+const ClassicsPage = lazyNamed(() => import('./screens/classics/ClassicsPage.jsx'), 'ClassicsPage')
 const PostseasonLeadersPage = lazyNamed(
   () => import('./screens/PostseasonLeadersPage.jsx'),
   'PostseasonLeadersPage',
@@ -290,6 +291,7 @@ const BARE_ROUTES = {
   'awards-history': AwardsHistoryPage,
   'postseason-history': PostseasonHistoryPage,
   'nine-keys': NineKeysPage,
+  classics: ClassicsPage,
   'postseason-leaders': PostseasonLeadersPage,
   'postseason-race': PostseasonRacePage,
   'all-star-rosters': AllStarRostersPage,

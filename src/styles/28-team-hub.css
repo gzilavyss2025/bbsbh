@@ -161,14 +161,12 @@
 }
 .team-score__grade {
   min-width: 0;
-  margin: 0 10px;
-  padding: var(--space-3) var(--space-3) 2px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--marker) 16%, transparent), transparent 58%),
-    var(--surface-inset);
-  box-shadow: var(--inset-cell);
+  margin: 0 var(--space-3);
+  padding: var(--space-3) 0 2px;
+  /* Look A (#1776): no card inside the sheet. The grade sits on the sheet and a
+     hairline rule closes it. */
+  border: 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
 }
 /* Keeps a bottom margin when this is the card's last child, so the outer
    border doesn't sit flush against whatever follows. */
@@ -176,7 +174,7 @@
   margin-bottom: 10px;
 }
 .team-score__grade.is-active {
-  border-color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
 }
 .team-score__grade-button {
   display: grid;
@@ -270,15 +268,13 @@
 }
 .team-score__row--driver {
   min-width: 0;
-  padding: var(--space-2);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--surface-inset) 62%, var(--surface-card));
-  transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease;
+  padding: var(--space-2) 0 0;
+  border: 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  transition: border-color var(--dur-fast) ease;
 }
 .team-score__row--driver.is-active {
-  border-color: var(--accent-primary);
-  background: color-mix(in srgb, var(--marker) 16%, var(--surface-inset));
+  border-top-color: var(--accent-primary);
 }
 .team-score__row--driver .team-score__rowtop {
   display: grid;
@@ -663,17 +659,11 @@
 }
 .rankstrip__fade--l {
   left: 0;
-  background: linear-gradient(to right, var(--surface-inset), transparent);
+  background: linear-gradient(to right, var(--surface-card), transparent);
 }
 .rankstrip__fade--r {
   right: 0;
-  background: linear-gradient(to left, var(--surface-inset), transparent);
-}
-.rankstrip--compact .rankstrip__fade--l {
-  background: linear-gradient(to right, color-mix(in srgb, var(--surface-inset) 90%, var(--surface-card)), transparent);
-}
-.rankstrip--compact .rankstrip__fade--r {
-  background: linear-gradient(to left, color-mix(in srgb, var(--surface-inset) 90%, var(--surface-card)), transparent);
+  background: linear-gradient(to left, var(--surface-card), transparent);
 }
 .rankstrip__fade.is-visible {
   opacity: 1;

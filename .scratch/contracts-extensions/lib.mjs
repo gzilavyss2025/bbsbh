@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url'
 import { parseCsv } from '../../scripts/lib/csv.mjs'
 import { parseMoneyCell } from '../../src/lib/contracts/parseMoney.js'
 import { shardKey100 } from '../../src/lib/shardKey.js'
+import { CROSSWALK_DIR } from '../../scripts/lib/contract-row-key.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = join(HERE, '..', '..')
@@ -23,7 +24,7 @@ export function loadCsv(name) {
 
 export function loadIdentity(name) {
   return JSON.parse(
-    readFileSync(join(REPO_ROOT, 'public/data/contracts-history/identity', `${name}.json`), 'utf8'),
+    readFileSync(join(CROSSWALK_DIR, `${name}.json`), 'utf8'),
   )
 }
 
