@@ -609,6 +609,14 @@ jobs:
         id: where-from
         continue-on-error: true
         run: node scripts/gen-where-from.mjs
+      # Standing out (#2453): every MLB player's hot and cold callouts after each game date
+      # of the season, for /outliers. About 70 statsapi calls. It reads the committed
+      # season-checkpoints/tails.json, so it needs no `if:` on another step. Writes
+      # public/data/outliers/{season}.json, staged by "Commit if changed".
+      - name: Standing out
+        id: outliers
+        continue-on-error: true
+        run: node scripts/gen-outliers.mjs
       - name: Warm preview cache
         id: warm-previews
         continue-on-error: true
@@ -752,6 +760,7 @@ jobs:
           steps.postseason-records.outcome == 'failure' ||
           steps.schedule-shape.outcome == 'failure' ||
           steps.where-from.outcome == 'failure' ||
+          steps.outliers.outcome == 'failure' ||
           steps.warm-previews.outcome == 'failure' ||
           steps.compress-logos.outcome == 'failure' ||
           steps.nine-keys.outcome == 'failure' ||

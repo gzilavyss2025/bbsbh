@@ -7,9 +7,9 @@ import { ALL_CATEGORIES } from '../api/teamLeaders.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
-import { useNav } from '../lib/nav.js'
+import { useNav, useRouteLink } from '../lib/nav.js'
 import { LinkScope } from '../lib/nav.jsx'
-import { leadersPath } from '../lib/route.js'
+import { leadersPath, outliersPath } from '../lib/route.js'
 import { armBoardIn, disarmBoardIn } from '../lib/motion/boardIn.js'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
@@ -18,6 +18,7 @@ import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
+import { Door } from '../components/ui/control/Door.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { isoToday } from '../lib/dates.js'
@@ -77,6 +78,7 @@ function ScopeNav({ scope, asOf, sportId, navigate }) {
 
 export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
   const navigate = useNav()
+  const routeLink = useRouteLink()
   const { favoriteTeamId } = useFavoriteTeam()
   const [filterTeamId, setFilterTeamId] = useState(null)
   const { loading, error, data } = useAsync(
@@ -132,6 +134,9 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
         </header>
 
         <ScopeNav scope={scope} asOf={asOf} sportId={sportId} navigate={navigate} />
+        {scope === 'mlb' && (
+          <Door {...routeLink(outliersPath({ d: asOf }))}>Who is standing out, hot and cold</Door>
+        )}
 
         {!isOrg && (
           <TeamFilterStrip
