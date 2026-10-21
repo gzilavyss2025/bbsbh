@@ -1,11 +1,10 @@
-import { Fragment } from 'react'
 import { InjuredMark } from '../../../../components/badges/InjuredMark.jsx'
 import { ProspectPill } from '../../../../components/badges/ProspectPill.jsx'
 import { RookiePill } from '../../../../components/badges/RookiePill.jsx'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { Table } from '../../../../components/ui/table/Table.jsx'
-import { DASH, warText, warLeaderId, warSum } from './boxRows.js'
+import { DASH, footText, warIsDown, warLeaderId, warSum, warText } from './boxRows.js'
 
 // The roster box of a paper scorecard (direction D, Gary's pick): one ruled table with an ink
 // head row. Each row is a lead cell (a position, a rotation slot or a role), the number, the
@@ -21,7 +20,7 @@ import { DASH, warText, warLeaderId, warSum } from './boxRows.js'
 export function RosterBox({ label, lead, groups, showWar, showProspect, season }) {
   const rows = groups.flatMap((g) => g.rows)
   const leader = showWar ? warLeaderId(rows) : null
-  const foot = groups.map((g) => `${g.sum} ${warSum(g.rows).toFixed(1)}`).join(' · ')
+  const foot = showWar ? footText(groups) : null
   return (
     <Table frame="bare" label={label} className="rosterbox">
       <thead>
@@ -32,46 +31,46 @@ export function RosterBox({ label, lead, groups, showWar, showProspect, season }
           {showWar && <th scope="col">WAR</th>}
         </tr>
       </thead>
-      <tbody>
-        {groups.map((g) => (
-          <Fragment key={g.title ?? 'rows'}>
-            {g.title && g.rows.length > 0 && (
-              <tr className="rosterbox__break">
-                <th scope="colgroup" colSpan={showWar ? 4 : 3}>{g.title}</th>
-              </tr>
-            )}
-            {g.rows.map((r) => (
-              <tr key={`${g.title ?? ''}-${r.id}`}>
-                <td className="rosterbox__lead">{g.role ? <Pill mark fill={r.lead === 'CL' ? 'ink' : 'outline'}>{r.lead}</Pill> : r.lead}</td>
-                <td className="rosterbox__num">{r.jersey || DASH}</td>
-                <td className="rosterbox__name">
-                  <PlayerLink id={r.id} name={r.name}>{r.name}</PlayerLink>
-                  {r.allStar && <span role="img" aria-label={`${season} All Star`}>★</span>}
-                  <InjuredMark hurt={r.hurt} />
-                  {showProspect && <ProspectPill {...r.prospect} />}
-                  <RookiePill active={r.rookie} />
-                  {r.line && <span className="rosterbox__line">{r.line}</span>}
+      {groups.map((g) => (
+        <tbody key={g.title ?? 'rows'}>
+          {g.title && g.rows.length > 0 && (
+            <tr className="rosterbox__break">
+              <th scope="rowgroup" colSpan={showWar ? 4 : 3}>{g.title}</th>
+            </tr>
+          )}
+          {g.rows.map((r) => (
+            <tr key={r.id}>
+              <td className="rosterbox__lead">{g.role ? <Pill mark fill={r.lead === 'CL' ? 'ink' : 'outline'}>{r.lead}</Pill> : r.lead}</td>
+              <td className="rosterbox__num">{r.jersey || DASH}</td>
+              <td className="rosterbox__name">
+                <PlayerLink id={r.id} name={r.name}>{r.name}</PlayerLink>
+                {r.allStar && <span role="img" aria-label={`${season} All Star`}>★</span>}
+                <InjuredMark hurt={r.hurt} />
+                {showProspect && <ProspectPill {...r.prospect} />}
+                <RookiePill active={r.rookie} />
+                {r.line && <span className="t-label rosterbox__line">{r.line}</span>}
+              </td>
+              {showWar && (
+                <td>
+                  {r.id === leader ? (
+                    <Pill mark figure fill="marker">{warText(r.war)}</Pill>
+                  ) : (
+                    <span className={warIsDown(r.war) ? 'rosterbox__war--down' : undefined}>{warText(r.war)}</span>
+                  )}
                 </td>
-                {showWar && (
-                  <td>
-                    {r.id === leader ? (
-                      <Pill mark figure fill="marker">{warText(r.war)}</Pill>
-                    ) : (
-                      <span className={r.war < 0 ? 'rosterbox__war--down' : undefined}>{warText(r.war)}</span>
-                    )}
-                  </td>
-                )}
-              </tr>
-            ))}
-          </Fragment>
-        ))}
-        {showWar && (
+              )}
+            </tr>
+          ))}
+        </tbody>
+      ))}
+      {foot && (
+        <tfoot>
           <tr className="rosterbox__foot">
             <th scope="row" colSpan={3}>{foot}</th>
-            <td>{warSum(rows).toFixed(1)}</td>
+            <td>{warText(warSum(rows))}</td>
           </tr>
-        )}
-      </tbody>
+        </tfoot>
+      )}
     </Table>
   )
 }

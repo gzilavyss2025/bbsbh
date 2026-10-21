@@ -73,10 +73,10 @@
 .rosterbox__war--down {
   color: var(--accent-negative-hover);
 }
-/* The block's small labels, one recipe: the break rows, the foot, the Season view's line
-   under an arm's name, and the park note under the diamond. Each rule below keeps only its
-   own ground, ink and place. */
-:is(.rosterbox__break th, .rosterbox__foot th, .rosterbox__line, .rosterbox-pair__note) {
+/* The block's small labels, one recipe: the break rows, the foot and the park note under the
+   diamond. Each rule below keeps only its own ground, ink and place. The Season view's line
+   under an arm's name is the shared .t-label (tokens/typography.css). */
+:is(.rosterbox__break th, .rosterbox__foot th, .rosterbox-pair__note) {
   font-family: var(--font-display);
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
@@ -86,18 +86,17 @@
 .rosterbox__name > .rosterbox__line {
   display: block;
   margin-inline-start: 0;
-  color: var(--text-caption);
 }
 .rosterbox tbody .rosterbox__break th {
   border-top: var(--bw-heavy) solid var(--border-stamped);
   background: var(--bg-page);
   color: var(--text-caption);
 }
-.rosterbox tbody .rosterbox__foot :is(th, td) {
+.rosterbox .rosterbox__foot :is(th, td) {
   border-top: var(--bw-heavy) solid var(--border-stamped);
   background: var(--surface-card);
 }
-.rosterbox tbody .rosterbox__foot th {
+.rosterbox .rosterbox__foot th {
   color: var(--text-muted);
 }
 /* At wide the diamond sits beside the lineup table, centred on its height. */

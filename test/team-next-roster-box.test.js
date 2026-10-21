@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   benchRows,
+  footText,
   lineupRows,
   metaById,
   penRows,
@@ -92,4 +93,33 @@ test('a quiet pen week has no busiest arm, and no grid has no figures', () => {
   assert.equal(fig.busiest, null)
   assert.equal(penWeekFigures(null), null)
   assert.equal(penWeekFigures([]), null)
+})
+
+test('a lineup regular on the IL still takes his number from the injured list', () => {
+  const meta = metaById({ position: [], injured: [{ id: 12, name: 'Cooper Pratt', jersey: '12', pos: 'SS' }] })
+  const [row] = lineupRows([{ id: 12, name: 'Cooper Pratt', position: 'SS', hurt: true }], meta)
+  assert.equal(row.jersey, '12')
+})
+
+test('a WAR that rounds to zero reads 0.0, never -0.0', () => {
+  assert.equal(warText(-0.04), '0.0')
+  assert.equal(warText(-0.06), '-0.1')
+})
+
+test('a closer missing from the active roster is still CL by his saves', () => {
+  const [row] = penRows([{ id: 29, name: 'Trevor Megill', saves: 25 }], none, [])
+  assert.equal(row.lead, 'CL')
+  const [setup] = penRows([{ id: 26, name: 'Aaron Ashby', saves: 2 }], none, [])
+  assert.equal(setup.lead, 'RP')
+})
+
+test('the foot sums each group, and is absent when no row has a WAR', () => {
+  const groups = [{ sum: 'Lineup', rows: [{ war: 1.5 }, { war: 2 }] }, { sum: 'bench', rows: [{ war: -0.5 }] }]
+  assert.equal(footText(groups), 'Lineup 3.5 · bench -0.5')
+  assert.equal(footText([{ sum: 'Lineup', rows: [{ war: null }, { war: null }] }]), null)
+})
+
+test('the pen week names the day it counts as yesterday', () => {
+  const grid = [{ name: 'A', last7dayPitches: 10, cells: [{ date: '2026-10-19', pitches: 10 }, { date: '2026-10-20', today: true }] }]
+  assert.equal(penWeekFigures(grid).day, '2026-10-19')
 })

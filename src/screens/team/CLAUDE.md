@@ -44,7 +44,9 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
   `fetchTeamSchedule`, cut at `?d=`: the grid reads `won`, `runs` and `oppRuns` and never `Final`.
 - **Roster** (`next/roster/`): lineup and bench, the staff (starters, bullpen, the seven-day pen
   grid), the coaching staff (`CoachingStaff.jsx`, a swipe row that reads its own `fetchCoachingStaff`), the 40-man,
-  the injured list, and a door to the transactions ledger.
+  the injured list, and a door to the transactions ledger. The lineup and staff cards are one
+  ruled table each (`RosterBox.jsx`, rows from `boxRows.js`), never the 40-man's `RosterList` row;
+  the diamond stands on the club's own park (`team.venue`) in the current season.
 - **Farm** (`next/farm/`): `MinorsBody`, the affiliation history, affiliates, Horizon, prospects
   and the depth chart. Absent for a club with no parent org (a MiLB club or winter ball).
 - **Money** (`next/money/`): payroll, contract grid, the cliff and the source line. MLB only.

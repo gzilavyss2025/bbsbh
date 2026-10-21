@@ -15,7 +15,8 @@ import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLa
 import { StaffGrid } from '../../../../components/workload/StaffGrid.jsx'
 import { splitDisplayName } from '../../../../api/person.js'
 import { loadRoster } from '../../data/loadRoster.js'
-import { lineupDefenseFrom } from '../../data/shared.js'
+import { lineupDefenseFrom, seasonOf } from '../../data/shared.js'
+import { monthDayShort } from '../../../../lib/dates.js'
 import { RosterList } from '../../modules/RosterList.jsx'
 import { SHARED } from '../once.js'
 import { useBandData } from '../useBandData.js'
@@ -44,8 +45,9 @@ const Sub = ({ title, children }) => (
 
 // The pen's seven days, off the nightly file the old Bullpen health card read (same request).
 // MLB only and self-hiding: a farm club is absent from the file.
-// The strip under it reads StaffGrid's own rows: who pitched yesterday, the week's pitches,
-// and the arm with the most.
+// The strip under it reads StaffGrid's own rows: who pitched the day before the file's last
+// day (named by its date, since the file can be older than today), the week's pitches, and the
+// arm with the most.
 function PenWeek({ teamId }) {
   const { data } = useAsync(fetchWorkload, [])
   const { grid, fig } = useMemo(() => {
@@ -57,7 +59,7 @@ function PenWeek({ teamId }) {
     <Stack gap="base" className="rosterbox-week">
       <Sub title="Bullpen, last seven days"><StaffGrid rows={grid} /></Sub>
       <StatStrip>
-        <StatCell lead label="Yesterday" value={fig.pitched} note={`of ${fig.arms} pitched`} />
+        <StatCell lead label={fig.day ? `Pitched ${monthDayShort(fig.day)}` : 'Pitched'} value={fig.pitched} note={`of ${fig.arms} arms`} />
         <StatCell label="Seven days" value={fig.total} note="pitches" />
         <StatCell label="Most work" value={fig.busiest ? fig.busiest.last7dayPitches : '—'} note={fig.busiest ? splitDisplayName(fig.busiest.name).last : ''} />
       </StatStrip>
@@ -77,12 +79,15 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
   const door = transactionsDoor(team.id, asOf, sportId)
   const injuredIds = useMemo(() => new Set((d?.injured ?? []).map((p) => p.id)), [d])
   // The lineup stands on the club's own park, as it stood on the page's day (`?d=`) or today.
-  // A venue with no layout on file falls back to the plain diamond.
+  // `team.venue` is the club's park NOW, so a `?d=` in an earlier season (a club since moved)
+  // keeps the plain diamond rather than draw this year's park under that year's nine. A venue
+  // with no layout on file falls back to the plain diamond too.
   const venueId = team.venue?.id
   const venueName = team.venue?.name
+  const thisSeason = !asOf || seasonOf(asOf, sportId) === seasonOf(null, sportId)
   const park = useMemo(
-    () => (venueId || venueName ? resolveBallparkLayout({ venueId, venueName, gameDate: asOf ?? undefined }) : null),
-    [venueId, venueName, asOf],
+    () => (thisSeason && (venueId || venueName) ? resolveBallparkLayout({ venueId, venueName, gameDate: asOf ?? undefined }) : null),
+    [thisSeason, venueId, venueName, asOf],
   )
   let delay = 0
   const card = () => ({ stampIn: true, style: { '--stamp-delay': `${(delay += 55)}ms` } })
