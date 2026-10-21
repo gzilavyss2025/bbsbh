@@ -1000,7 +1000,7 @@ const C3 = [
     head: true,
   },
   { css: '10-lineup.css', sel: '.teammate', jsx: ['components/team/FormerTeammates.jsx'], ns: 'teammate', as: 'li' },
-  { css: '10-lineup.css', sel: '.defdiamond', jsx: ['components/scoring/DefenseDiamond.jsx'], ns: 'defdiamond', as: 'div' },
+  { css: 'scoring/defense-diamond.css', sel: '.defdiamond', jsx: ['components/scoring/DefenseDiamond.jsx'], ns: 'defdiamond', as: 'div' },
   {
     css: '09-team-info.css',
     sel: '.umps__list',
@@ -1127,7 +1127,7 @@ test('C3: each block keeps its own space and layout, from a rule that loads afte
   assert.equal(decl(mate, 'margin-bottom'), 'var(--space-3)')
   assert.equal(decl(mate, 'break-inside'), 'avoid', 'a teammate tile never splits across the masonry columns')
   assert.equal(decl(mate, 'display'), 'grid')
-  assert.equal(decl(ruleBody(lineup, '.defdiamond'), 'padding'), 'var(--space-3) var(--space-2h) var(--space-2)')
+  assert.equal(decl(ruleBody(read('scoring/defense-diamond.css'), '.defdiamond'), 'padding'), 'var(--space-3) var(--space-2h) var(--space-2)')
 })
 
 // The animation lab draws the lineup strip with the real recipe, so it wraps

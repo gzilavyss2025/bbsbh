@@ -40,8 +40,8 @@
     "grid": 2
   },
   "src/styles/10-lineup.css": {
-    "column": 4,
-    "wrap": 2,
+    "column": 3,
+    "wrap": 1,
     "grid": 3
   },
   "src/styles/10b-former-teammates.css": {
@@ -499,6 +499,10 @@
     "column": 9,
     "wrap": 2,
     "grid": 2
+  },
+  "src/styles/scoring/defense-diamond.css": {
+    "column": 1,
+    "wrap": 1
   },
   "src/styles/scout/meet.css": {
     "column": 3,

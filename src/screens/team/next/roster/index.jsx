@@ -124,7 +124,6 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
                 {lineup.length > 0 && (
                   <div className="rosterbox-pair__diamond">
                     <DefenseDiamond defense={lineup} layout={park} label={`${venueName ?? 'Ballpark'} with the lineup`} />
-                    {park?.accuracyNote && <p className="rosterbox-pair__note">{park.accuracyNote}</p>}
                   </div>
                 )}
                 <RosterBox
