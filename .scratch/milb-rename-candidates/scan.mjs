@@ -5,6 +5,7 @@
 // Candidates only: years come from the feed and are not source-checked. An era
 // is filed under the club's CURRENT id (the Eras tab at /identity-lab).
 import { readFile, writeFile } from 'node:fs/promises'
+import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const FIRST = Number(process.argv[2] ?? 1985)
 const LAST = new Date().getFullYear()
@@ -13,15 +14,12 @@ const here = new URL('.', import.meta.url)
 const filed = JSON.parse(await readFile(new URL('../../src/lib/data/season-marks.json', import.meta.url))).clubs
 
 async function teams(sportId, season) {
-  for (let i = 0; i < 3; i++) {
-    try {
-      const res = await fetch(`https://statsapi.mlb.com/api/v1/teams?sportId=${sportId}&season=${season}`)
-      if (res.ok) return (await res.json()).teams ?? []
-    } catch {}
-    await new Promise((r) => setTimeout(r, 500 * (i + 1)))
+  try {
+    return (await getJson(`/api/v1/teams?sportId=${sportId}&season=${season}`)).teams ?? []
+  } catch (err) {
+    console.error(`gave up on ${sportId} ${season}: ${err.message}`)
+    return []
   }
-  console.error(`gave up on ${sportId} ${season}`)
-  return []
 }
 
 const byId = new Map() // id -> { years: Map(season -> {name, level}) }
