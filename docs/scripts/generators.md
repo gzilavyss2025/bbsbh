@@ -1638,6 +1638,18 @@ Re-run only to fold in a new season.
   group only, for seasons from `FLD_START_SEASON` (2023). Older seasons were not
   checked. Adds about 0.8 KB per shard (1.5 KB at most). A pitcher has no `fld` row
   unless he batted. `src/api/war.js` reads them with `fldByYearFor` / `paByYearFor`.
+- `gen-hof-pace.mjs` → `public/data/hof-pace.json` (`npm run gen:hof-pace`) — every Hall of
+  Fame player's CUMULATIVE career line by age, for the player page's "Hall of Fame pace" card
+  (#1857, `.scratch/hof-pace/spec.md`). **Hand-run, once a year after the late-July induction**
+  (the pool is the award's recipients, so a new class is missing until then). Pool: `awards/MLBHOF/recipients`
+  minus position `X` (managers, executives, umpires) and minus anyone with no MLB (`sportId=1`)
+  line: 283 players, 197 hitters. Lines come from `people?hydrate=stats(type=[yearByYear])`, 50 ids
+  a request. Matches on `stat.age` (June 30 rule), not season count. A traded season counts once: the
+  team-less `numTeams > 1` roll-up row is used instead of the stints. Negro League seasons come back
+  as MLB. Rows are dense from the first age (an age with no season repeats the one before). Hitters
+  `[h, hr]`, pitchers `[w, so, outs, sv]`. No WAR here: the card reads it from `war-history/`.
+  About 83 KB, 31 KB gzipped. Checked by hand: Mays through age 24 is 547 H, 116 HR in both the
+  file and the summed API rows (1948 Birmingham included).
 - `gen-savant-history.mjs` → `public/data/savant-history/{NN}.json` (player-keyed,
   bucketed on `personId % 100` via `shardKey100`) — Savant `percentile-rankings`
   percentiles for the last three COMPLETED seasons (**2023-2025**), hitters and
