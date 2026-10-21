@@ -9,10 +9,10 @@
 // first day AFTER a flagged run with no flag is a CLOSING MARKER [date, 0]. Without it the
 // reader, which answers with a player's latest entry before the cutoff, would show the old
 // flag for ever. A player's state changes only on a day he plays, so game dates are enough.
-import { packFlag } from '../../../src/api/hotcold/outliers.js'
+import { nextDay, packFlag } from '../../../src/api/hotcold/outliers.js'
 import { hotColdFlags } from '../../../src/api/hotcold/rule.js'
 
-export const nextDay = (d) => new Date(Date.parse(d) + 864e5).toISOString().slice(0, 10)
+export { nextDay }
 
 // { role, rows, tails } -> [[date, [packed flag, ...]], [date, 0], ...] in date order.
 export function walkPlayer({ role, rows, tails }) {

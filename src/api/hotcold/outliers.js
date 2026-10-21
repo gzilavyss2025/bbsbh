@@ -27,15 +27,16 @@ export const packFlag = (f) => [
   WEIGHT_CODE[f.weight],
 ]
 
-const season = staticJsonBy((year) => `/data/outliers/${year}.json`, { fallback: null })
-
 // The season's file, or null (no file yet in the offseason, or a failed read).
-export const loadOutliersFile = (year) => season(year)
+export const loadOutliersFile = staticJsonBy((year) => `/data/outliers/${year}.json`, { fallback: null })
+
+// The ISO date after `d`.
+export const nextDay = (d) => new Date(Date.parse(d) + 864e5).toISOString().slice(0, 10)
 
 // The slider's span, as cutoff dates: the first game date (nothing counted yet) to the day
 // after the last game date. `today` caps it, so tonight's games never count.
 export function cutoffSpan(file, today) {
-  const last = new Date(Date.parse(file.last) + 864e5).toISOString().slice(0, 10)
+  const last = nextDay(file.last)
   return { min: file.first, max: last < today ? last : today }
 }
 

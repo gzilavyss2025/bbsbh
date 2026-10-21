@@ -31,7 +31,7 @@ export const typeCounts = (groups) =>
   }))
 
 // The slider's dates, one a day from `min` to `max` (both ISO dates).
-export function daysBetween(min, max) {
+export function dayList(min, max) {
   const out = []
   for (let t = Date.parse(min); t <= Date.parse(max); t += 864e5) out.push(new Date(t).toISOString().slice(0, 10))
   return out

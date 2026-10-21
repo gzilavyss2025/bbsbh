@@ -974,12 +974,12 @@ export function teamPhotosPath(id, opts = {}) {
 export function teamTransactionsPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/transactions${linkQuery(opts)}`
 }
-// The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
-// every other league/level scope carries its key. Org leaders take a club id.
 // The league-wide Standing out page; `d` is the slider's cutoff, none for the latest night.
 export function outliersPath(opts = {}) {
   return `/outliers${linkQuery(opts)}`
 }
+// The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
+// every other league/level scope carries its key. Org leaders take a club id.
 export function leadersPath(scope = 'mlb', opts = {}) {
   return `${scope === 'mlb' ? '/leaders' : `/leaders/${scope}`}${linkQuery(opts)}`
 }

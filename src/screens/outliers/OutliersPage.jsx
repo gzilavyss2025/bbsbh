@@ -13,7 +13,7 @@ import { useNav } from '../../lib/nav.js'
 import { LinkScope } from '../../lib/nav.jsx'
 import { outliersPath } from '../../lib/route.js'
 import { OutlierGroup } from './OutlierGroup.jsx'
-import { daysBetween, typeCounts } from './outliersView.js'
+import { dayList, typeCounts } from './outliersView.js'
 
 const ROLES = [
   { role: 'hitting', title: 'Hitters' },
@@ -41,14 +41,15 @@ export function OutliersPage({ asOf = null }) {
   const [all, setAll] = useState({}) // group id -> show every row
 
   const span = file ? cutoffSpan(file, today) : null
-  const days = useMemo(() => (span ? daysBetween(span.min, span.max) : []), [span?.min, span?.max])
+  const days = useMemo(() => (span ? dayList(span.min, span.max) : []), [span?.min, span?.max])
   const cutoff = span ? (asOf && asOf >= span.min ? (asOf > span.max ? span.max : asOf) : span.max) : null
   const groups = useMemo(() => (file ? groupFlags(flagsAsOf(file, cutoff)) : null), [file, cutoff])
   const openId = open?.cutoff === cutoff ? open.id : null
 
   const go = (d) => navigate(outliersPath({ d: d === span.max && !asOf ? null : d }), { replace: true })
   const index = Math.max(0, days.indexOf(cutoff))
-  const counts = groups ? ROLES.flatMap((r) => typeCounts(groups[r.role])) : []
+  const byRole = groups ? Object.fromEntries(ROLES.map((r) => [r.role, typeCounts(groups[r.role])])) : {}
+  const counts = Object.values(byRole).flat()
   const flagCount = counts.reduce((n, c) => n + c.count, 0)
 
   return (
@@ -105,7 +106,7 @@ export function OutliersPage({ asOf = null }) {
                   {ROLES.map(({ role, title }) => groups[role].length > 0 && (
                     <p key={role} className="outl__types">
                       <strong>{title}</strong>
-                      {typeCounts(groups[role]).map((c) => (
+                      {byRole[role].map((c) => (
                         <span key={c.id} className="outl__type">{`${c.short} ${c.count}`}</span>
                       ))}
                     </p>
