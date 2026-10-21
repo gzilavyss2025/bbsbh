@@ -4,7 +4,8 @@ import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { headerThemeClass, headerThemeStyle } from '../../../../lib/headerTheme.js'
-import { DEFENSE_SPOTS, defenseWindow } from '../../../../lib/ballpark/layout/defenseWindow.js'
+import { DEFENSE_SPOTS } from '../../../../lib/ballpark/layout/defenseWindow.js'
+import { parkWindow } from '../../../../lib/ballpark/layout/parkWindow.js'
 import { ClubBar } from './ClubBar.jsx'
 
 // The other club's defense, as names on the park the game is played in: surnames only, no
@@ -16,7 +17,7 @@ export function FieldCard({ data, theme, masthead }) {
   const layout = resolveBallparkLayout({ venueId: info.venueId, venueName: info.venue, gameDate: info.officialDate })
   const by = Object.fromEntries(oppDefense.map((d) => [d.position, d]))
   if (oppPitcher) by.P = { id: oppPitcher.id, last: oppPitcher.last ?? oppPitcher.name.split(' ').pop(), name: oppPitcher.name }
-  const win = layout ? defenseWindow(layout) : null
+  const win = layout ? parkWindow(layout) : null
   const dh = by.DH
   const posted = oppDefense.length > 0
   return (

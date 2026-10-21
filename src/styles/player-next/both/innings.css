@@ -7,7 +7,7 @@
 }
 .pnext-inn__park {
   position: relative;
-  aspect-ratio: 560 / 490;
+  aspect-ratio: 560 / 490; /* while the park loads; a drawn park sets its own window's, inline */
   width: 100%;
   max-width: 460px;
   margin: 0 auto;

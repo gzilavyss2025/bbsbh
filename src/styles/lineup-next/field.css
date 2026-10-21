@@ -3,8 +3,7 @@
    ink is kept barely visible, so the names carry the card. */
 
 .lfld__field {
-  position: relative;
-  aspect-ratio: 620 / 510;
+  position: relative; /* its aspect-ratio is the park's own window, set inline (FieldCard.jsx) */
   overflow: hidden;
   background: var(--bg-canvas);
 }

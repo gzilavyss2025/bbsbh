@@ -30,7 +30,7 @@ export function BallparkDiagram({
   return (
     <svg
       className={`bpdiagram ${className}`}
-      viewBox={viewBox ?? parkWindow(layout).viewBox}
+      viewBox={viewBox ?? parkWindow(layout, { geometry: g }).viewBox}
       role="img"
       aria-label={label}
     >

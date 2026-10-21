@@ -8,38 +8,34 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { parkWindow, skyTop, SKY_PAD } from '../src/lib/ballpark/layout/parkWindow.js'
+import { parkWindow, SKY_PAD } from '../src/lib/ballpark/layout/parkWindow.js'
 import { allBallparkLayouts, resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.js'
-import { buildFieldGeometry, diagramInput, VIEWBOX, wallStroke } from '../src/lib/ballpark/ballparkGeometry.js'
+import { buildFieldGeometry, diagramInput, LABEL_HALF, VIEWBOX } from '../src/lib/ballpark/ballparkGeometry.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
 const read = (rel) => readFileSync(join(SRC, rel), 'utf8')
-const SIGN_HALF = 10
 const topOf = (w) => Number(w.viewBox.split(' ')[1])
 
-// The highest mark the drawing makes: a distance sign's upper half, or the wall's outer edge.
-function highestMark(layout) {
-  const g = buildFieldGeometry(diagramInput(layout))
-  const ys = g.labels.map((l) => l.y - SIGN_HALF)
-  for (const s of g.fenceSegs) {
-    for (const m of s.d.matchAll(/[ML]\s*-?[\d.]+\s+(-?[\d.]+)/g)) ys.push(Number(m[1]) - wallStroke(s.h) / 2)
-  }
-  return Math.min(...ys)
-}
+test('a distance sign fits the half-height the window allows it', () => {
+  // .bpdiagram__dist is set at --fs-title-sm; one CSS px is one unit of the drawing's frame.
+  const px = Number(read('tokens/typography.css').match(/--fs-title-sm:\s*(\d+)px/)[1])
+  assert.match(read('styles/39-manager-page.css'), /\.bpdiagram__dist \{[^}]*font-size: var\(--fs-title-sm\)/)
+  assert.ok(LABEL_HALF >= px / 2, `LABEL_HALF ${LABEL_HALF} under half of ${px}`)
+})
 
 test('every park: the window starts just above its highest mark, so nothing is cut and no sky is left', () => {
   for (const layout of allBallparkLayouts()) {
     if (layout.quality.fence === 'missing') continue
+    const g = buildFieldGeometry(diagramInput(layout))
     const top = topOf(parkWindow(layout))
-    const mark = highestMark(layout)
-    assert.ok(top <= mark, `${layout.configurationId}: window ${top} cuts a mark at ${mark}`)
-    assert.ok(mark - top <= SKY_PAD + 1, `${layout.configurationId}: ${mark - top} units of sky left`)
+    for (const l of g.labels) assert.ok(l.y - LABEL_HALF >= top, `${layout.configurationId}: sign at ${l.y} cut at ${top}`)
+    assert.ok(g.top >= top, `${layout.configurationId}: the wall's top ${g.top} cut at ${top}`)
+    assert.ok(g.top - top <= SKY_PAD + 1, `${layout.configurationId}: ${g.top - top} units of sky left`)
   }
 })
 
 test('the window never rescales: a foot is still a unit, and the bottom of the frame stays', () => {
-  const brewers = resolveBallparkLayout({ venueId: 32, gameDate: '2026-07-01' })
-  const w = parkWindow(brewers)
+  const w = parkWindow(resolveBallparkLayout({ venueId: 32, gameDate: '2026-07-01' }))
   const [x, y, width, height] = w.viewBox.split(' ').map(Number)
   assert.equal(x, 0)
   assert.equal(width, VIEWBOX.w)
@@ -49,31 +45,32 @@ test('the window never rescales: a foot is still a unit, and the bottom of the f
   assert.deepEqual(w.percent({ x: VIEWBOX.w, y: VIEWBOX.h }), { left: 100, top: 100 })
 })
 
-test('a narrower window keeps its sides and still trims the sky', () => {
+test('a narrower window keeps its sides and the same trim; a built geometry gives the same window', () => {
   const brewers = resolveBallparkLayout({ venueId: 32, gameDate: '2026-07-01' })
+  const full = parkWindow(brewers)
   const w = parkWindow(brewers, { x: 30, w: 560 })
   const [x, y, width] = w.viewBox.split(' ').map(Number)
   assert.equal(x, 30)
   assert.equal(width, 560)
-  assert.equal(y, skyTop(brewers))
+  assert.equal(y, topOf(full))
   assert.deepEqual(w.percent({ x: 30, y }), { left: 0, top: 0 })
+  assert.equal(parkWindow(brewers, { geometry: buildFieldGeometry(diagramInput(brewers)) }).viewBox, full.viewBox)
 })
 
 test('a deep park still stands taller than a shallow one', () => {
   // Same scale: the deeper wall needs more frame, so its window starts higher.
-  const deep = skyTop(resolveBallparkLayout({ venueId: 2392, gameDate: '2026-07-01' })) // Daikin Park
-  const shallow = skyTop(resolveBallparkLayout({ venueId: 32, gameDate: '2026-07-01' })) // American Family Field
+  const deep = topOf(parkWindow(resolveBallparkLayout({ venueId: 2392, gameDate: '2026-07-01' }))) // Daikin Park
+  const shallow = topOf(parkWindow(resolveBallparkLayout({ venueId: 32, gameDate: '2026-07-01' }))) // American Family Field
   assert.ok(deep < shallow, `deep ${deep} vs shallow ${shallow}`)
 })
 
 test('every park card reads the one window', () => {
   // The drawing's own default (the ballpark card, the park sheet, the modal, Park Fit).
-  assert.match(read('components/ballpark/BallparkDiagram.jsx'), /parkWindow\(layout\)/)
-  // The two defense cards, through defenseWindow.
-  assert.match(read('lib/ballpark/layout/defenseWindow.js'), /parkWindow\(layout\)/)
-  assert.match(read('screens/lineup/next/cards/FieldCard.jsx'), /defenseWindow\(layout\)/)
-  assert.doesNotMatch(read('screens/lineup/next/cards/FieldCard.jsx'), /PLOT_VIEWBOX/)
+  assert.match(read('components/ballpark/BallparkDiagram.jsx'), /viewBox \?\? parkWindow\(/)
+  for (const card of ['components/scoring/DefenseDiamond.jsx', 'screens/lineup/next/cards/FieldCard.jsx']) {
+    assert.match(read(card), /parkWindow\(layout\)/, card)
+    assert.doesNotMatch(read(card), /PLOT_VIEWBOX/, card)
+  }
   // The player page's innings art, at its own width.
-  assert.match(read('screens/player/next/modules/innings/inningsView.js'), /parkWindow\(/)
-  assert.doesNotMatch(read('screens/player/next/modules/innings/inningsView.js'), /PARK_VIEWBOX = /)
+  assert.match(read('screens/player/next/modules/innings/inningsView.js'), /parkWindow\(park, \{ x: 30, w: 560 \}\)/)
 })
