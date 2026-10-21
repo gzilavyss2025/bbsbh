@@ -1,7 +1,7 @@
 // Spike: does the free-agent market pay for what it gets?
 //
 // Builds one row per free_agency.csv signing (5,598 rows, 1991-2026), joined to:
-//   - the ADR-0066 identity crosswalk (public/data/contracts-history/identity/
+//   - the ADR-0066 identity crosswalk (scripts/data/contracts/identity/
 //     free_agency.json) for mlbId -- reused as-is, never re-derived (W0's own
 //     rule: a second name-match join over this data would not agree with the
 //     one every other contracts surface already trusts).
@@ -33,6 +33,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { CROSSWALK_DIR } from '../../scripts/lib/contract-row-key.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = join(__dirname, '..', '..')
@@ -77,7 +78,7 @@ function warFor(personId, season) {
 const MAX_WAR_SEASON = Math.max(...readJson(join(warHistoryDir, '00.json')).seasons)
 
 // ------------------------------------------------------------- identity
-const identity = readJson(join(REPO_ROOT, 'public/data/contracts-history/identity/free_agency.json'))
+const identity = readJson(join(CROSSWALK_DIR, 'free_agency.json'))
 
 // ------------------------------------------------------------- CSV
 const csvText = readFileSync(join(REPO_ROOT, 'scripts/data/contracts/free_agency.csv'), 'utf8')
