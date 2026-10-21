@@ -118,8 +118,9 @@
   opacity: 0;
 }
 
-/* A sign that would overlap the other park's steps inside its wall (fenceOverlay.js), in the two-park view. */
-.ww-fence[data-view='both'] .ww-fence__dist[data-moved='true'] {
+/* In the two-park view a sign takes its move (fenceOverlay.js): none for most, and for a sign that would
+   overlap the other park's, a step inside its wall. */
+.ww-fence[data-view='both'] .ww-fence__dist {
   transform: translate(calc(var(--dx, 0) * 1px), calc(var(--dy, 0) * 1px));
 }
 
@@ -141,7 +142,7 @@
 
 .ww-fence__swatch[data-on='false'],
 .ww-fence__keyname[data-on='false'] {
-  opacity: 0.45;
+  opacity: var(--opacity-disabled);
 }
 
 .ww-fit__pick {
@@ -188,11 +189,15 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* Each wall segment starts a fifteenth of --dur-fast (8ms) after the one before it. */
   .ww-fence {
-    --fence-step: 8ms;
+    --fence-step: calc(var(--dur-fast) / 15);
   }
 
-  .ww-fence :is(.ww-fence__ground, .ww-fence__lines, .ww-fence__signs, .ww-fence__track, .ww-fence__wallh) {
+  .ww-fence :is(.ww-fence__ground, .ww-fence__lines, .ww-fence__signs, .ww-fence__track, .ww-fence__wallh),
+  .ww-fence__swatch,
+  .ww-fence__keyname,
+  .ww-fit__carryin {
     transition: opacity var(--dur-med) var(--ease-out);
   }
 
@@ -208,12 +213,6 @@
 
   .ww-fence__wall[data-on='true'] .ww-fence__seg {
     transition: stroke-dashoffset var(--dur-med) var(--ease-out) calc(var(--i, 0) * var(--fence-step));
-  }
-
-  .ww-fence__swatch,
-  .ww-fence__keyname,
-  .ww-fit__carryin {
-    transition: opacity var(--dur-med) var(--ease-out);
   }
 
   .ww-fit__carry {

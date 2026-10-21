@@ -2,7 +2,7 @@
 // both parks at once: one window, and which distance signs step aside for each other.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { overlayLabels, overlayWindow } from '../src/lib/postseason/worldseries/scouting/fenceOverlay.js'
+import { overlayLabels, overlayWindow, SIGN_H, SIGN_W } from '../src/lib/postseason/worldseries/scouting/fenceOverlay.js'
 import { geometryOf, parkWindow } from '../src/lib/ballpark/layout/parkWindow.js'
 import { resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.js'
 
@@ -67,7 +67,7 @@ test('after the move no two signs overlap, for the two Series parks', () => {
   const [a, b] = overlayLabels([TB, MIL])
   for (const k of ['lf', 'cf', 'rf']) {
     const [p, q] = [at(slot(a, k)), at(slot(b, k))]
-    assert.ok(Math.abs(p.x - q.x) >= 46 || Math.abs(p.y - q.y) >= 22, `${k}: ${JSON.stringify([p, q])}`)
+    assert.ok(Math.abs(p.x - q.x) >= SIGN_W || Math.abs(p.y - q.y) >= SIGN_H, `${k}: ${JSON.stringify([p, q])}`)
   }
   // Tropicana's line signs stand nearer home and step in. The center signs do not meet: American Family's
   // stands at 8 degrees (its CF marker angle), Tropicana's at dead center, 58 units apart.

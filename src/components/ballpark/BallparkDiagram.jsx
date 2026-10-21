@@ -1,5 +1,6 @@
 import { wallStroke } from '../../lib/ballpark/ballparkGeometry.js'
 import { geometryOf, parkWindow } from '../../lib/ballpark/layout/parkWindow.js'
+import { round2 } from '../../lib/math/number.js'
 import { InfieldBags, InfieldDirt } from './BallparkInfield.jsx'
 
 // The scorebook's ballpark drawing: an ink-on-manila sketch of the full field —
@@ -9,8 +10,6 @@ import { InfieldBags, InfieldDirt } from './BallparkInfield.jsx'
 // polygon, else a straight five-point outline; either way it's drawn thicker where
 // the wall is taller. Geometry (and the fixed-scale reasoning) lives in
 // lib/ballpark/ballparkGeometry.js; this file just paints it. Pure and spoiler-free.
-
-const f = (n) => Math.round(n * 100) / 100
 
 // `viewBox` and `label` exist for the hit chart, which reuses this drawing as a
 // plot ground rather than as a dimensions diagram: it crops the shared plot
@@ -54,14 +53,14 @@ export function BallparkDiagram({
 
       {/* Distance labels outside the fence */}
       {g.labels.map((l, i) => (
-        <text key={i} className="bpdiagram__dist" x={f(l.x)} y={f(l.y)}>
+        <text key={i} className="bpdiagram__dist" x={round2(l.x)} y={round2(l.y)}>
           {l.t}′
         </text>
       ))}
 
       {/* Wall-height tags inside the fence */}
       {g.wallTags.map((w, i) => (
-        <text key={i} className="bpdiagram__wallh" x={f(w.x)} y={f(w.y)}>
+        <text key={i} className="bpdiagram__wallh" x={round2(w.x)} y={round2(w.y)}>
           {w.h}′
         </text>
       ))}

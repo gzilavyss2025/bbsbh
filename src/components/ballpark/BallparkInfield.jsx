@@ -1,11 +1,10 @@
 import { HOME } from '../../lib/ballpark/ballparkGeometry.js'
+import { round2 } from '../../lib/math/number.js'
 
 // The regulation infield, the same in every park (no source measures one; the geometry builds it from
 // constants). BallparkDiagram draws it under one fence, and the World Series Park fit overlay draws it
 // once under two, so it lives here. `g` is one park's geometry (layout/parkWindow.js geometryOf), read
 // only for the infield fields. Pure and spoiler-free.
-
-const f = (n) => Math.round(n * 100) / 100
 
 // A dirt "skin" fanning out from home past the bases (capped by the 95'-off-the-mound arc), grass cut
 // into the middle of it, dirt circles at the mound/home plate, and dirt running lanes on the
@@ -25,8 +24,8 @@ export function InfieldDirt({ g }) {
         className="bpdiagram__dirt bpdiagram__baseline"
         style={{ strokeWidth: g.baselineDirtW }}
       />
-      <circle className="bpdiagram__dirt" cx={f(g.mound.x)} cy={f(g.mound.y)} r={g.moundDirtR} />
-      <circle className="bpdiagram__dirt" cx={f(HOME.x)} cy={f(HOME.y)} r={g.homeDirtR} />
+      <circle className="bpdiagram__dirt" cx={round2(g.mound.x)} cy={round2(g.mound.y)} r={g.moundDirtR} />
+      <circle className="bpdiagram__dirt" cx={round2(HOME.x)} cy={round2(HOME.y)} r={g.homeDirtR} />
     </>
   )
 }
@@ -39,17 +38,17 @@ export function InfieldBags({ g }) {
         <rect
           key={i}
           className="bpdiagram__base"
-          x={f(b.x - 4)}
-          y={f(b.y - 4)}
+          x={round2(b.x - 4)}
+          y={round2(b.y - 4)}
           width="8"
           height="8"
-          transform={`rotate(45 ${f(b.x)} ${f(b.y)})`}
+          transform={`rotate(45 ${round2(b.x)} ${round2(b.y)})`}
         />
       ))}
       <rect
         className="bpdiagram__base"
-        x={f(g.mound.x - 4)}
-        y={f(g.mound.y - 1.5)}
+        x={round2(g.mound.x - 4)}
+        y={round2(g.mound.y - 1.5)}
         width="8"
         height="3"
       />
