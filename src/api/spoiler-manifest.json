@@ -307,6 +307,10 @@
       "class": "spoiler-free",
       "why": "Historical contract records joined to an admin identity override: who signed what, in which season, for how much. Carries no game, no linescore and no reveal state, so it sits in the same season-long identity class as its neighbours person/contracts.js and salaries.js (ADR-0034, ADR-0052 for the money pair, ADR-0067 for this module). No SealBox: the player page's Contract history card reads it on the history tab, an open surface, the same way that page's other money cards read theirs."
     },
+    "classics/deck.js": {
+      "class": "spoiler-free",
+      "why": "The classics deck: MLB games from 1960 on, dealt to score by hand. Both its requests carry a `fields=` list (CLASSICS_FIELDS) that names only ids, names, dates, the venue and status.detailedState, so the response holds no `score`, `isWinner` or `leagueRecord` and the module never asks for `hydrate=linescore`. It imports no reveal-only module and no notable-index reader; a game is dealt on who played, never on what happened (ADR-0080)."
+    },
     "clubDefenseRunning.js": {
       "class": "spoiler-free",
       "why": "Static club-defense-running.json reader: six regular-season measures per club (outs above average, framing runs, sprint speed, stolen bases, stolen-base success, extra bases taken). Season totals on an open surface (ADR-0034); no game, no inning, no score."
