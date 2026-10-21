@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { keysVerdict, nineKeysTeams } from '../../src/lib/postseason/keysVerdict.js'
+import { isFailedKey, keysVerdict, nineKeysTeams } from '../../src/lib/postseason/keysVerdict.js'
 
 const rule = { limit: 3, firstSeason: 2000 }
 const sd = (failed) => ({ abbr: 'SD', failed })
@@ -64,4 +64,13 @@ test('nineKeysTeams: both clubs of the season\'s file, else null', () => {
   assert.equal(nineKeysTeams(data, [{ id: 1 }, { id: 2 }], 2025), null) // another season's file
   assert.equal(nineKeysTeams({ ...data, keys: [] }, [{ id: 1 }, { id: 2 }], 2026), null)
   assert.equal(nineKeysTeams(null, [{ id: 1 }, { id: 2 }], 2026), null)
+})
+
+// The row mark and the footer tally must agree: the generator counts a missing rank as failed.
+test('isFailedKey: a rank outside the bar, or no rank at all, fails', () => {
+  assert.equal(isFailedKey(10, 10), false)
+  assert.equal(isFailedKey(1, 10), false)
+  assert.equal(isFailedKey(11, 10), true)
+  assert.equal(isFailedKey(null, 10), true)
+  assert.equal(isFailedKey(undefined, 10), true)
 })

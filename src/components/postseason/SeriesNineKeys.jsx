@@ -1,5 +1,5 @@
 import '../../styles/postseason/series-parts.css'
-import { keysVerdict, nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
+import { isFailedKey, keysVerdict, nineKeysTeams } from '../../lib/postseason/keysVerdict.js'
 import { ordinal } from '../../lib/format.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { Door } from '../ui/control/Door.jsx'
@@ -29,7 +29,7 @@ export function SeriesNineKeys({ data, clubs, season }) {
   if (!teams) return null
   const [a, b] = teams
   const bar = data.bar
-  const failed = (t, key) => t.ranks?.[key] == null || t.ranks[key] > bar
+  const failed = (t, key) => isFailedKey(t.ranks?.[key], bar)
   const abbr = (id) => teamAbbr({ id })
   const verdict = keysVerdict(
     { abbr: abbr(a.teamId), failed: a.failed?.length ?? 0 },

@@ -87,6 +87,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { shapeWildCard } from '../src/api/standings.js'
+import { isFailedKey } from '../src/lib/postseason/keysVerdict.js'
 import { getJson } from './lib/statsapi.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -253,7 +254,7 @@ export function scoreSeason(clubs) {
   const scored = new Map()
   for (const club of clubs) {
     const r = ranks.get(club.teamId) ?? {}
-    const failed = KEYS.filter((k) => r[k.id] == null || r[k.id] > BAR).map((k) => k.id)
+    const failed = KEYS.filter((k) => isFailedKey(r[k.id], BAR)).map((k) => k.id)
     scored.set(club.teamId, { ranks: r, failed })
   }
   return scored
