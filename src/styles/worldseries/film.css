@@ -7,8 +7,6 @@
   padding: 0;
   display: grid;
   gap: var(--space-4);
-  /* room for each card's name tab, which sits on the top edge */
-  padding-top: var(--space-3);
 }
 
 /* The cards' tables are the box score's: Table draws the head row and the hairlines, these set the columns. */

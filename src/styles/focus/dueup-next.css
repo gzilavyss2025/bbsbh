@@ -1,8 +1,8 @@
 /* The stamped due-up card (DueUpBatters.jsx), drawn for both due-up previews:
    DueUpNextCard (the other team's next half, stacked below the at-bat on both
    breakpoints) and UpNextBatters (`.upnext`, the half's own batters before it
-   starts). Each caller owns its margin, since the name tab hangs above the
-   card: `.dueupnext` here, `.upnext` in 12-sealbox.css. */
+   starts). Each caller owns the gap above it (the card clears its own name
+   tab, system/card.css): `.dueupnext` here, `.upnext` in 12-sealbox.css. */
 .dueupnext {
   margin-top: var(--space-4);
 }

@@ -1,9 +1,6 @@
 /* ---------- pitch by pitch (scouting report, #2316) ---------- */
 
-/* The card's body is flush, so the head clears the name tab itself, as a
-   padded body does (.card--named > .card__body, system/card.css). Compound, to
-   beat .plink's own padding reset (26-player-page.css), which is in the core
-   sheet and so can load after this one. */
+/* Flush body: the head clears the name tab. Compound, to beat .plink's padding reset in any load order. */
 /* layout-exempt: a link holding a photo and two lines; Cluster cannot render an anchor */
 .plink.ww-pitch__head {
   display: flex;
