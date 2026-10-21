@@ -98,10 +98,14 @@ test('without a slate season the file season is not checked', () => {
 
 // The suite has no JSX loader, so the column heads are pinned by reading the source (as
 // ws-no-figure-and-jump-follow.test.js does).
-test('GloveLegs names its columns: a thead with a club head each side and a hidden Measure head', async () => {
+test('GloveLegs names its columns: measure first, then the clubs in the supplied order', async () => {
   const { readFileSync } = await import('node:fs')
   const s = readFileSync(new URL('../src/components/worldseries/cards/scouting/GloveLegs.jsx', import.meta.url), 'utf8')
-  assert.match(s, /<thead>[\s\S]*<th scope="col"[^>]*>\s*<Club id=\{clubIds\[0\]\} \/>[\s\S]*<span className="sr-only">Measure<\/span>[\s\S]*<Club id=\{clubIds\[1\]\} \/>[\s\S]*<\/thead>/)
-  assert.match(s, /<Card frame="stamped" label="Glove and legs" labelAs="h3" count="Regular season"/)
+  const ledger = readFileSync(new URL('../src/components/worldseries/cards/scouting/ComparisonLedger.jsx', import.meta.url), 'utf8')
+  assert.match(s, /<ComparisonLedger[\s\S]*title="Glove and legs"[\s\S]*clubIds=\{clubIds\}[\s\S]*measureLabel="Measure"/)
+  assert.match(ledger, /<thead>[\s\S]*<th scope="col"[^>]*>\{measureLabel\}<\/th>[\s\S]*\{clubIds\.map\(\(id\) => \([\s\S]*<th scope="col" key=\{id\}>[\s\S]*<TeamLogo teamId=\{id\}/)
+  assert.match(ledger, /<Card frame="stamped" body="flush"/)
+  assert.match(ledger, /<h3 id=\{titleId\}[^>]*>\{title\}<\/h3>[\s\S]*Regular season/)
+  assert.match(s, /<th scope="row">[\s\S]*\{r\.label\}[\s\S]*<td><Val r=\{r\} side="a" \/><\/td>[\s\S]*<td><Val r=\{r\} side="b" \/><\/td>/)
   assert.doesNotMatch(s, /SectionHead/)
 })
