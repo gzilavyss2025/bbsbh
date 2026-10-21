@@ -660,6 +660,10 @@
       "class": "spoiler-free",
       "why": "Milestone definitions and projection math. Career totals."
     },
+    "person/hof/pace.js": {
+      "class": "spoiler-free",
+      "why": "Nearest Hall of Famers at the same age. Career counting totals against a static historical file. Fetches nothing."
+    },
     "person/positionInnings.js": {
       "class": "spoiler-free",
       "why": "Season innings-by-position shaping."
