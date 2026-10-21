@@ -69,7 +69,7 @@ export function OutlierGroup({ group, openId, onOpen, all, onAll, cutoff, season
                 type="button"
                 className="outl__head"
                 aria-expanded={open}
-                aria-controls={`${base}-${flag.id}`}
+                aria-controls={open ? `${base}-${flag.id}` : undefined}
                 onClick={() => onOpen(open ? null : rowId(flag))}
               >
                 <span className="outl__who">{flag.name}</span>

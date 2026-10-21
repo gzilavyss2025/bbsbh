@@ -42,11 +42,16 @@ for (const role of ['hitting', 'pitching']) {
 
 const dates = logs.flatMap((l) => l.rows.map((r) => r.date)).filter(Boolean).sort()
 if (!dates.length) {
-  console.log(`no ${season} game logs yet: not writing`)
+  // Keep the folder's stamp fresh: check-data-freshness fails on a stamp older than a day.
+  await writeJsonAtomic(join(root, 'public/data/outliers/index.json'), { generatedAt: new Date().toISOString(), season })
+  console.log(`no ${season} game logs yet: not writing the season file`)
   process.exit(0)
 }
-// A short run (a failed batch) must not replace the committed file.
-if (logs.length < 300) throw new Error(`only ${logs.length} player logs, expected over 1,000: not writing`)
+// A short run (a failed batch) must not replace the committed file: each role needs its own floor.
+for (const role of ['hitting', 'pitching']) {
+  const n = logs.filter((l) => l.role === role).length
+  if (n < 300) throw new Error(`only ${n} ${role} logs, expected over 600: not writing`)
+}
 
 const players = []
 for (const l of logs) {

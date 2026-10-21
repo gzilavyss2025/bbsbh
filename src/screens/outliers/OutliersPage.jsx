@@ -49,7 +49,7 @@ export function OutliersPage({ asOf = null }) {
   const go = (d) => navigate(outliersPath({ d: d === span.max && !asOf ? null : d }), { replace: true })
   const index = Math.max(0, days.indexOf(cutoff))
   const counts = groups ? ROLES.flatMap((r) => typeCounts(groups[r.role])) : []
-  const players = counts.reduce((n, c) => n + c.count, 0)
+  const flagCount = counts.reduce((n, c) => n + c.count, 0)
 
   return (
     <LinkScope asOf={asOf}>
@@ -96,12 +96,12 @@ export function OutliersPage({ asOf = null }) {
               <p className="outl__note">Counts games dated before this day.</p>
             </div>
 
-            {players === 0 ? (
+            {flagCount === 0 ? (
               <EmptyState>No player stands out on this date.</EmptyState>
             ) : (
               <>
                 <div className="outl__summary">
-                  <p className="outl__note">{`${counts.length} callout types, ${players} flags:`}</p>
+                  <p className="outl__note">{`${counts.length} callout types, ${flagCount} flags:`}</p>
                   {ROLES.map(({ role, title }) => groups[role].length > 0 && (
                     <p key={role} className="outl__types">
                       <strong>{title}</strong>

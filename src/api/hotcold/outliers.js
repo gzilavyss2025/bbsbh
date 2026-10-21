@@ -20,7 +20,8 @@ const ROLE = { h: 'hitting', p: 'pitching' }
 export const packFlag = (f) => [
   f.key,
   f.tone === 'hot' ? 1 : 0,
-  Number(f.value.toFixed(4)),
+  // A home-run pace prints as 1/N, so it keeps six digits and reads as the open row's does.
+  Number(f.key === 'hr' ? f.value.toPrecision(6) : f.value.toFixed(4)),
   Math.round(f.percentile * 10) / 10,
   f.sample,
   WEIGHT_CODE[f.weight],

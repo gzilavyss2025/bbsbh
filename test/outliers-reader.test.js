@@ -45,3 +45,8 @@ test('packFlag keeps what a row prints', () => {
   const f = { key: 'ops', tone: 'cold', value: 0.123456, percentile: 1.04, sample: 12, weight: 'early' }
   assert.deepEqual(packFlag(f), ['ops', 0, 0.1235, 1, 12, 'e'])
 })
+
+test('a packed pace value keeps enough digits for its 1/N figure', () => {
+  const flag = { key: 'hr', tone: 'cold', value: 1 / 300, percentile: 1.2, sample: 300, weight: 'real' }
+  assert.equal(Math.round(1 / packFlag(flag)[2]), 300)
+})
