@@ -9,20 +9,21 @@
 //   gamePk 813032: there is no top-level `players`)
 //
 // A reliever is a pitcher who did not start that game: `pitchers[0]` is the
-// starter. Columns are the club's last `columns` games, oldest first. Rows are
-// the top `relievers` by pitches summed over those columns (so the "Tot" cell
-// equals what the row shows). A game the club did not play is skipped.
-export function bullpenGrid(games, clubId, { slateDate, relievers = 3, columns = 6 } = {}) {
+// starter. Columns are every postseason game the club played before the slate
+// date, oldest first (`gameType` rides along so the card can mark the rounds).
+// Rows are every pitcher who relieved in any of them, most pitches first. A game
+// the club did not play is skipped.
+export function bullpenGrid(games, clubId, { slateDate } = {}) {
   const played = []
   for (const g of games ?? []) {
     if (!(g.date < slateDate)) continue
     const teams = g.boxscore?.teams
     const side = teams?.away?.team?.id === clubId ? 'away' : teams?.home?.team?.id === clubId ? 'home' : null
     if (!side) continue
-    played.push({ gamePk: g.gamePk, date: g.date, boxscore: g.boxscore, side })
+    played.push({ gamePk: g.gamePk, date: g.date, gameType: g.gameType ?? null, boxscore: g.boxscore, side })
   }
   played.sort((a, b) => a.date.localeCompare(b.date) || a.gamePk - b.gamePk)
-  const shown = played.slice(-columns)
+  const shown = played
 
   const pitchers = new Map()
   shown.forEach((g, col) => {
@@ -30,7 +31,7 @@ export function bullpenGrid(games, clubId, { slateDate, relievers = 3, columns =
     ids.slice(1).forEach((id) => {
       const p = g.boxscore.teams[g.side].players?.[`ID${id}`]
       const n = p?.stats?.pitching?.numberOfPitches
-      if (!(n > 0)) return
+      if (typeof n !== 'number') return
       if (!pitchers.has(id)) pitchers.set(id, { id, name: p?.person?.fullName ?? '', cells: Array(shown.length).fill(null), total: 0 })
       const row = pitchers.get(id)
       row.cells[col] = n
@@ -38,8 +39,6 @@ export function bullpenGrid(games, clubId, { slateDate, relievers = 3, columns =
     })
   })
 
-  const rows = [...pitchers.values()]
-    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
-    .slice(0, relievers)
-  return { games: shown.map(({ gamePk, date }) => ({ gamePk, date })), rows }
+  const rows = [...pitchers.values()].sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
+  return { games: shown.map(({ gamePk, date, gameType }) => ({ gamePk, date, gameType })), rows }
 }
