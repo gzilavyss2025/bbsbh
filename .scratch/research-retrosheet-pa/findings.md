@@ -221,7 +221,7 @@ play ends in `X` or `Y`). The check does not use the count field.
 
 ## 3. Storage hosts
 
-Files here: 371 PA shards, 54 game indexes, a few small index files. About 47 MB gz with the version 1 columns plus 73 park files (35 to 43 MB more),
+Files here: 371 PA shards, 54 game indexes, a few small index files. About 47 MB gz for the version 1 columns, and 73 park files add about 43 MB,
 about 430 files in version 1. Gary's rule: outside git, fetched on demand by the PWA.
 
 **What the repo already does.** `api/ballpark-photo.js` and `api/identity.js` write to a
