@@ -1,19 +1,11 @@
-import { useCallback, useEffect, useRef } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import {
-  readStampsOwner,
-  useStamps,
-  writeStampsOwner,
-} from "../../hooks/useStamps.js";
-import { remoteStampsFromExport, stampsToPublish } from "../../lib/stamps.js";
-import { mergeStrategyFor } from "../../lib/account/preferences.js";
-import {
-  phaseForResponse,
-  reasonForResponse,
-  syncOutcome,
-} from "../../lib/account/syncStatus.js";
-import { useRefetchOnFocus } from "../../hooks/sync/useRefetchOnFocus.js";
-import { useSyncReport } from "./SyncStatusProvider.jsx";
+import { useCallback, useEffect, useRef } from 'react'
+import { useAuth } from '@clerk/clerk-react'
+import { readStampsOwner, useStamps, writeStampsOwner } from '../../hooks/useStamps.js'
+import { remoteStampsFromExport, stampsToPublish } from '../../lib/stamps.js'
+import { mergeStrategyFor } from '../../lib/account/preferences.js'
+import { phaseForResponse, reasonForResponse, syncOutcome } from '../../lib/account/syncStatus.js'
+import { useRefetchOnFocus } from '../../hooks/sync/useRefetchOnFocus.js'
+import { useSyncReport } from './SyncStatusProvider.jsx'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
 // isClerkEnabled (see clerkConfig.js), so useAuth() always has a ClerkProvider
@@ -75,89 +67,87 @@ import { useSyncReport } from "./SyncStatusProvider.jsx";
 // ADR-0022's total production failure hid for weeks, and what My Tally's sync
 // receipt exists to make visible.
 export function StampsCloudSync() {
-  const { isSignedIn, userId, getToken } = useAuth();
-  const { stamps, mergeRemoteStamps, adoptRemoteStamps } = useStamps();
-  const report = useSyncReport();
+  const { isSignedIn, userId, getToken } = useAuth()
+  const { stamps, mergeRemoteStamps, adoptRemoteStamps } = useStamps()
+  const report = useSyncReport()
 
   // What the server held as of the last successful pull. Starts null for "we
   // have not heard from the server yet", which suppresses publishing entirely —
   // publishing against an unknown remote would either echo the whole collection
   // back or, worse, act on a guess.
-  const known = useRef(null);
+  const known = useRef(null)
   // One pull at a time. Two overlapping pulls would race to set `known`, and
   // the loser could leave a stale baseline behind.
-  const pulling = useRef(false);
+  const pulling = useRef(false)
 
   const pull = useCallback(async () => {
-    if (pulling.current) return;
-    pulling.current = true;
-    report("stamps", "pulling");
+    if (pulling.current) return
+    pulling.current = true
+    report('stamps', 'pulling')
     try {
-      const token = await getToken();
+      const token = await getToken()
       // The whole collection in one call rather than a season at a time: the
       // merge has to see every season anyway to be correct, and the export
       // route already returns exactly that.
-      const res = await fetch("/api/stamps?export=1", {
+      const res = await fetch('/api/stamps?export=1', {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      })
       if (!res.ok) {
-        report("stamps", phaseForResponse(res.status), {
-          reason: reasonForResponse(res.status),
-        });
-        return;
+        report('stamps', phaseForResponse(res.status), { reason: reasonForResponse(res.status) })
+        return
       }
-      const remote = remoteStampsFromExport(true, await res.json());
+      const remote = remoteStampsFromExport(true, await res.json())
       if (!remote) {
-        report("stamps", "error", { reason: "network" });
-        return;
+        report('stamps', 'error', { reason: 'network' })
+        return
       }
       // Baseline BEFORE the merge: the publish effect below fires on the state
       // change the merge causes, and it must already be comparing against what
       // the server actually has.
-      known.current = remote;
-      if (mergeStrategyFor(readStampsOwner(), userId) === "adopt") {
+      known.current = remote
+      if (mergeStrategyFor(readStampsOwner(), userId) === 'adopt') {
         // A different account's stamps are sitting on this device. None of them
         // are this user's to publish — or to unseal games with — so the remote
         // collection replaces them outright instead of merging.
-        adoptRemoteStamps(remote);
+        adoptRemoteStamps(remote)
       } else {
-        mergeRemoteStamps(remote);
+        mergeRemoteStamps(remote)
       }
       // This device's collection now belongs to this account either way, which
       // is what makes the NEXT user's sign-in an `adopt`.
-      writeStampsOwner(userId);
-      report("stamps", "synced");
+      writeStampsOwner(userId)
+      report('stamps', 'synced')
     } catch {
       // Offline / unauthorized / store not configured on this deploy — local
       // state stands, which is the whole offline-first contract. `known` keeps
       // its previous value, so nothing publishes against a guess.
-      report("stamps", "error", { reason: "network" });
+      report('stamps', 'error', { reason: 'network' })
     } finally {
-      pulling.current = false;
+      pulling.current = false
     }
-  }, [getToken, userId, mergeRemoteStamps, adoptRemoteStamps, report]);
+  }, [getToken, userId, mergeRemoteStamps, adoptRemoteStamps, report])
 
   useEffect(() => {
     if (!isSignedIn) {
       // Signing out forgets what we knew about the server. The next sign-in —
       // possibly as a DIFFERENT user — must not publish this device's stamps
       // against the previous account's baseline.
-      known.current = null;
-      report("stamps", "local");
-      return;
+      known.current = null
+      report('stamps', 'local')
+      return
     }
-    pull();
-  }, [isSignedIn, pull, report]);
+    pull()
+  }, [isSignedIn, pull, report])
 
   // Re-pull when this device comes back to the foreground (another device may
   // have stamped a game meanwhile).
-  useRefetchOnFocus(isSignedIn, pull);
+  useRefetchOnFocus(isSignedIn, pull)
 
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!isSignedIn) return
     // Nothing has been heard from the server yet, so there is no baseline to
     // compare against. The pull above supplies one and this effect re-runs.
-    if (known.current === null) return;
+    if (known.current === null) return
 
     // What this device holds that the server doesn't, or holds a newer version
     // of. Whole-record comparison, so editing a note, switching
@@ -169,28 +159,29 @@ export function StampsCloudSync() {
     // explicit 'off' tombstone travels as a removal.
     // An adopted collection is not this device's to publish. The owner tag is
     // rewritten by the pull, so this only holds for the window before it lands.
-    if (mergeStrategyFor(readStampsOwner(), userId) === "adopt") return;
+    if (mergeStrategyFor(readStampsOwner(), userId) === 'adopt') return
 
     const changed = stampsToPublish(stamps, known.current)
       .map((gamePk) => [gamePk, stamps[gamePk]])
-      .filter(([, entry]) => entry);
-    if (changed.length === 0) return;
+      .filter(([, entry]) => entry)
+    if (changed.length === 0) return
 
     // Assume these land. A publish that fails leaves the server without them,
     // and the next pull's comparison finds them again — self-healing, where a
     // pessimistic baseline would republish the whole collection on every render.
-    const published = { ...known.current };
-    for (const [gamePk, entry] of changed) published[gamePk] = entry;
-    known.current = published;
-    (async () => {
-      let token;
+    const published = { ...known.current }
+    for (const [gamePk, entry] of changed) published[gamePk] = entry
+    known.current = published
+
+    ;(async () => {
+      let token
       try {
-        token = await getToken();
+        token = await getToken()
       } catch {
-        report("stamps", "error", { reason: "auth" });
-        return;
+        report('stamps', 'error', { reason: 'auth' })
+        return
       }
-      const auth = { Authorization: `Bearer ${token}` };
+      const auth = { Authorization: `Bearer ${token}` }
 
       // Every reply is collected and JUDGED. Reporting `synced` unconditionally
       // at the end — which this did — meant a publish that landed nothing still
@@ -202,35 +193,35 @@ export function StampsCloudSync() {
       const outcomes = await Promise.all(
         changed.map(async ([gamePk, entry]) => {
           try {
-            if (entry.state === "off") {
+            if (entry.state === 'off') {
               const res = await fetch(`/api/stamps?gamePk=${gamePk}`, {
-                method: "DELETE",
+                method: 'DELETE',
                 headers: auth,
-              });
-              return res.ok ? null : res.status;
+              })
+              return res.ok ? null : res.status
             }
-            const res = await fetch("/api/stamps", {
-              method: "POST",
-              headers: { ...auth, "content-type": "application/json" },
+            const res = await fetch('/api/stamps', {
+              method: 'POST',
+              headers: { ...auth, 'content-type': 'application/json' },
               body: JSON.stringify({
                 gamePk,
                 mode: entry.mode,
                 note: entry.note,
                 placement: entry.placement ?? null,
               }),
-            });
-            return res.ok ? null : res.status;
+            })
+            return res.ok ? null : res.status
           } catch {
             // A failed publish costs this device nothing — its own local state
             // is already correct, and the next change (or another device's next
             // sign-in fetch) reconciles. It must still be REPORTED.
-            return undefined;
+            return undefined
           }
         }),
-      );
-      report("stamps", ...syncOutcome(outcomes));
-    })();
-  }, [isSignedIn, userId, getToken, stamps, report]);
+      )
+      report('stamps', ...syncOutcome(outcomes))
+    })()
+  }, [isSignedIn, userId, getToken, stamps, report])
 
-  return null;
+  return null
 }
