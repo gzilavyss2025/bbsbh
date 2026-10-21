@@ -69,6 +69,17 @@ not overlap, because `seasonMark` takes the first match. An edit keeps the field
 does not show (the art file, a fetched licence). Markup passes the same gate as the custom
 marks: it must be an SVG and carry nothing executable.
 
+An era may carry `like`, an MLB team id (the **Wears MLB club's mark** select): a minor-league
+club that took an MLB nickname (the Binghamton Mets, the Reading Phillies) draws that club's mark as
+of the era's FIRST season, so an era that spans two MLB marks takes the older one. The era's own art
+wins over `like`. The MLB club's era art is used when it has one; its current mark when no era is
+recorded for it (the same "unchanged" assumption its own pages make); and the era's abbreviation when
+the table records an MLB era with no art, because today's mark is known to be wrong there (the
+California Angels, the 1976-89 White Sox). Not set for a nickname the MLB club no longer has (the
+Expos, the Indians, the Devil Rays), where today's mark is another club's, nor for a club whose
+feed parent is a different org (the Tacoma Tigers were the A's). The lookup is `seasonMarkIn` in
+`src/lib/identity/seasonMarks.js`.
+
 An era may also carry a header triad, `bar`, `accent` and `onBar`, set with the same hex fields
 and SAFE/OUT chip as a club's bars. A bar needs its `onBar`, and `onBar` must clear WCAG AA
 against it: the dev save refuses a pair that fails, `scripts/check-contrast.mjs` re-checks the

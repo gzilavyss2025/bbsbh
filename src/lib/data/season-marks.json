@@ -1,6 +1,16 @@
 {
   "_hint": "Per-season club marks (#1591). Keyed by the CURRENT franchise team id. Each era is { from, to, name, abbr, file, cite, source, license, restriction, bar, accent, onBar }. Only eras whose mark differs from today's are listed. file null = covered, no art yet (TeamLogo draws abbr in a serif face, #1626). A covered era wears neutral chrome unless it carries its own header triad (bar, accent, onBar; onBar must clear WCAG AA on bar). Written by the identity lab's Eras tab (scripts/lib/eras/dev-season-marks.mjs); do not run scripts/season-marks/fetch.mjs, it rebuilds this file from a seed. Files live in public/logos/historical/.",
   "clubs": {
+    "103": [
+      {
+        "from": 1986,
+        "to": 1993,
+        "name": "Palm Springs Angels",
+        "abbr": "PS",
+        "file": null,
+        "like": 108
+      }
+    ],
     "104": [
       {
         "from": 1998,
@@ -428,6 +438,36 @@
         "file": "233-1985-1993.png"
       }
     ],
+    "237": [
+      {
+        "from": 1985,
+        "to": 1998,
+        "name": "Midland Angels",
+        "abbr": "MID",
+        "file": null,
+        "like": 108
+      }
+    ],
+    "238": [
+      {
+        "from": 2015,
+        "to": 2023,
+        "name": "Oklahoma City Dodgers",
+        "abbr": "OKC",
+        "file": null,
+        "like": 119
+      }
+    ],
+    "249": [
+      {
+        "from": 1985,
+        "to": 1988,
+        "name": "Columbus Astros",
+        "abbr": "COL",
+        "file": null,
+        "like": 117
+      }
+    ],
     "342": [
       {
         "from": 1985,
@@ -464,6 +504,16 @@
         "file": "402-1997-2013.png"
       }
     ],
+    "414": [
+      {
+        "from": 2009,
+        "to": 2025,
+        "name": "Salem Red Sox",
+        "abbr": "SAL",
+        "file": null,
+        "like": 111
+      }
+    ],
     "418": [
       {
         "from": 1993,
@@ -473,13 +523,40 @@
         "file": "418-1993-2024.png"
       }
     ],
+    "420": [
+      {
+        "from": 1985,
+        "to": 1985,
+        "name": "Burlington Rangers",
+        "abbr": "BUR",
+        "file": null,
+        "like": 140
+      },
+      {
+        "from": 1988,
+        "to": 1990,
+        "name": "Burlington Braves",
+        "abbr": "BUR",
+        "file": null,
+        "like": 144
+      },
+      {
+        "from": 1991,
+        "to": 1992,
+        "name": "Burlington Astros",
+        "abbr": "BUR",
+        "file": null,
+        "like": 117
+      }
+    ],
     "423": [
       {
         "from": 1985,
         "to": 1994,
         "name": "Bakersfield Dodgers",
         "abbr": "BAK",
-        "file": "423-1985-1994.png"
+        "file": "423-1985-1994.png",
+        "like": 119
       }
     ],
     "427": [
@@ -506,17 +583,45 @@
         "to": 2008,
         "name": "Richmond Braves",
         "abbr": "RIC",
-        "file": "431-1985-2008.png"
+        "file": "431-1985-2008.png",
+        "like": 144
       },
       {
         "from": 2009,
         "to": 2017,
         "name": "Gwinnett Braves",
         "abbr": "GWN",
-        "file": "431-2009-2017.png"
+        "file": "431-2009-2017.png",
+        "like": 144
+      }
+    ],
+    "432": [
+      {
+        "from": 2003,
+        "to": 2023,
+        "name": "Rome Braves",
+        "abbr": "ROM",
+        "file": null,
+        "like": 144
       }
     ],
     "436": [
+      {
+        "from": 1985,
+        "to": 1986,
+        "name": "Prince William Pirates",
+        "abbr": "PW",
+        "file": null,
+        "like": 134
+      },
+      {
+        "from": 1987,
+        "to": 1988,
+        "name": "Prince William Yankees",
+        "abbr": "PW",
+        "file": null,
+        "like": 147
+      },
       {
         "from": 1989,
         "to": 1998,
@@ -530,6 +635,24 @@
         "name": "Potomac Cannons",
         "abbr": "POT",
         "file": "436-1999-2004.svg"
+      },
+      {
+        "from": 2005,
+        "to": 2019,
+        "name": "Potomac Nationals",
+        "abbr": "POT",
+        "file": null,
+        "like": 120
+      }
+    ],
+    "450": [
+      {
+        "from": 1993,
+        "to": 2014,
+        "name": "Daytona Cubs",
+        "abbr": "DAY",
+        "file": null,
+        "like": 112
       }
     ],
     "456": [
@@ -539,6 +662,24 @@
         "name": "Michigan Battle Cats",
         "abbr": "MIC",
         "file": "456-1995-2002.png"
+      },
+      {
+        "from": 2003,
+        "to": 2004,
+        "name": "Battle Creek Yankees",
+        "abbr": "BC",
+        "file": null,
+        "like": 147
+      }
+    ],
+    "457": [
+      {
+        "from": 1985,
+        "to": 2006,
+        "name": "Vero Beach Dodgers",
+        "abbr": "VER",
+        "file": null,
+        "like": 119
       }
     ],
     "477": [
@@ -563,10 +704,27 @@
         "to": 1993,
         "name": "Augusta Pirates",
         "abbr": "AUG",
-        "file": "478-1988-1993.png"
+        "file": "478-1988-1993.png",
+        "like": 134
       }
     ],
     "481": [
+      {
+        "from": 1985,
+        "to": 1987,
+        "name": "Lynchburg Mets",
+        "abbr": "LYN",
+        "file": null,
+        "like": 121
+      },
+      {
+        "from": 1988,
+        "to": 1994,
+        "name": "Lynchburg Red Sox",
+        "abbr": "LYN",
+        "file": null,
+        "like": 111
+      },
       {
         "from": 1995,
         "to": 2024,
@@ -576,6 +734,14 @@
       }
     ],
     "482": [
+      {
+        "from": 1985,
+        "to": 1990,
+        "name": "Jackson Mets",
+        "abbr": "JAC",
+        "file": null,
+        "like": 121
+      },
       {
         "from": 1991,
         "to": 1999,
@@ -593,6 +759,14 @@
     ],
     "485": [
       {
+        "from": 1985,
+        "to": 1985,
+        "name": "Kinston Blue Jays",
+        "abbr": "KIN",
+        "file": null,
+        "like": 141
+      },
+      {
         "from": 1987,
         "to": 2011,
         "name": "Kinston Indians",
@@ -601,6 +775,14 @@
       }
     ],
     "487": [
+      {
+        "from": 1995,
+        "to": 1995,
+        "name": "Piedmont Phillies",
+        "abbr": "PIE",
+        "file": null,
+        "like": 143
+      },
       {
         "from": 2001,
         "to": 2019,
@@ -615,7 +797,8 @@
         "to": 1992,
         "name": "Cedar Rapids Reds",
         "abbr": "CR",
-        "file": "492-1985-1992.png"
+        "file": "492-1985-1992.png",
+        "like": 113
       }
     ],
     "494": [
@@ -624,10 +807,19 @@
         "to": 1987,
         "name": "Charlotte O's",
         "abbr": "CLT",
-        "file": "494-1985-1987.png"
+        "file": "494-1985-1987.png",
+        "like": 110
       }
     ],
     "500": [
+      {
+        "from": 1985,
+        "to": 1993,
+        "name": "Clinton Giants",
+        "abbr": "CLI",
+        "file": null,
+        "like": 137
+      },
       {
         "from": 1994,
         "to": 2004,
@@ -651,7 +843,8 @@
         "to": 2016,
         "name": "Binghamton Mets",
         "abbr": "BNG",
-        "file": "505-1992-2016.svg"
+        "file": "505-1992-2016.svg",
+        "like": 121
       }
     ],
     "509": [
@@ -663,6 +856,16 @@
         "file": "509-1992-2019.png"
       }
     ],
+    "510": [
+      {
+        "from": 1985,
+        "to": 1987,
+        "name": "San Antonio Dodgers",
+        "abbr": "SA",
+        "file": null,
+        "like": 119
+      }
+    ],
     "514": [
       {
         "from": 1995,
@@ -672,7 +875,73 @@
         "file": "514-1995-2005.png"
       }
     ],
+    "516": [
+      {
+        "from": 1993,
+        "to": 1994,
+        "name": "Central Valley Rockies",
+        "abbr": "CV",
+        "file": null,
+        "like": 115
+      }
+    ],
+    "522": [
+      {
+        "from": 1985,
+        "to": 2012,
+        "name": "Reading Phillies",
+        "abbr": "REA",
+        "file": null,
+        "like": 143
+      }
+    ],
+    "531": [
+      {
+        "from": 2007,
+        "to": 2012,
+        "name": "Scranton/Wilkes-Barre Yankees",
+        "abbr": "SWB",
+        "file": null,
+        "like": 147
+      }
+    ],
+    "533": [
+      {
+        "from": 1985,
+        "to": 2020,
+        "name": "Pawtucket Red Sox",
+        "abbr": "PAW",
+        "file": null,
+        "like": 111
+      }
+    ],
+    "535": [
+      {
+        "from": 1989,
+        "to": 1993,
+        "name": "Sarasota White Sox",
+        "abbr": "SAR",
+        "file": null,
+        "like": 145
+      },
+      {
+        "from": 1994,
+        "to": 2004,
+        "name": "Sarasota Red Sox",
+        "abbr": "SAR",
+        "file": null,
+        "like": 111
+      }
+    ],
     "538": [
+      {
+        "from": 1985,
+        "to": 1994,
+        "name": "New Britain Red Sox",
+        "abbr": "NBR",
+        "file": null,
+        "like": 111
+      },
       {
         "from": 1997,
         "to": 2015,
@@ -681,7 +950,53 @@
         "file": "538-1997-2015.png"
       }
     ],
+    "541": [
+      {
+        "from": 1985,
+        "to": 1998,
+        "name": "Omaha Royals",
+        "abbr": "OMA",
+        "file": null,
+        "like": 118
+      },
+      {
+        "from": 2002,
+        "to": 2010,
+        "name": "Omaha Royals",
+        "abbr": "OMA",
+        "file": null,
+        "like": 118
+      }
+    ],
+    "543": [
+      {
+        "from": 1985,
+        "to": 1995,
+        "name": "Savannah Cardinals",
+        "abbr": "SAV",
+        "file": null,
+        "like": 138
+      }
+    ],
+    "550": [
+      {
+        "from": 1988,
+        "to": 1993,
+        "name": "South Bend White Sox",
+        "abbr": "SB",
+        "file": null,
+        "like": 145
+      }
+    ],
     "553": [
+      {
+        "from": 1985,
+        "to": 1992,
+        "name": "Knoxville Blue Jays",
+        "abbr": "KNO",
+        "file": null,
+        "like": 141
+      },
       {
         "from": 2000,
         "to": 2024,
@@ -691,6 +1006,14 @@
       }
     ],
     "554": [
+      {
+        "from": 1985,
+        "to": 1994,
+        "name": "Beloit Brewers",
+        "abbr": "BEL",
+        "file": null,
+        "like": 158
+      },
       {
         "from": 1995,
         "to": 2021,
@@ -717,13 +1040,24 @@
         "file": "564-1991-2016.png"
       }
     ],
+    "565": [
+      {
+        "from": 1985,
+        "to": 1991,
+        "name": "Quad City Angels",
+        "abbr": "QC",
+        "file": null,
+        "like": 108
+      }
+    ],
     "566": [
       {
         "from": 1985,
         "to": 2003,
         "name": "Clearwater Phillies",
         "abbr": "CLR",
-        "file": "566-1985-2003.svg"
+        "file": "566-1985-2003.svg",
+        "like": 143
       }
     ],
     "570": [
@@ -732,7 +1066,8 @@
         "to": 2006,
         "name": "Lakeland Tigers",
         "abbr": "LAK",
-        "file": "570-1985-2006.png"
+        "file": "570-1985-2006.png",
+        "like": 116
       }
     ],
     "584": [
@@ -744,16 +1079,35 @@
         "file": "584-1993-2008.png"
       }
     ],
+    "587": [
+      {
+        "from": 1994,
+        "to": 2017,
+        "name": "Tampa Yankees",
+        "abbr": "TAM",
+        "file": null,
+        "like": 147
+      }
+    ],
     "3701": [
       {
         "from": 1985,
         "to": 1987,
         "name": "Fort Myers Royals",
         "abbr": "FTM",
-        "file": "3701-1985-1987.png"
+        "file": "3701-1985-1987.png",
+        "like": 118
       }
     ],
     "3705": [
+      {
+        "from": 1985,
+        "to": 1992,
+        "name": "Columbia Mets",
+        "abbr": "COL",
+        "file": null,
+        "like": 121
+      },
       {
         "from": 1993,
         "to": 2004,
@@ -762,13 +1116,178 @@
         "file": "3705-1993-2004.png"
       }
     ],
+    "3711": [
+      {
+        "from": 1985,
+        "to": 1990,
+        "name": "Sumter Braves",
+        "abbr": "SUM",
+        "file": null,
+        "like": 144
+      }
+    ],
     "3712": [
       {
         "from": 2017,
         "to": 2018,
         "name": "Buies Creek Astros",
         "abbr": "BC",
-        "file": "3712-2017-2018.png"
+        "file": "3712-2017-2018.png",
+        "like": 117
+      }
+    ],
+    "3713": [
+      {
+        "from": 1985,
+        "to": 1992,
+        "name": "Fort Lauderdale Yankees",
+        "abbr": "FTL",
+        "file": null,
+        "like": 147
+      }
+    ],
+    "3715": [
+      {
+        "from": 1986,
+        "to": 1986,
+        "name": "Gastonia Tigers",
+        "abbr": "GAS",
+        "file": null,
+        "like": 116
+      }
+    ],
+    "3720": [
+      {
+        "from": 1985,
+        "to": 1985,
+        "name": "Glens Falls White Sox",
+        "abbr": "GF",
+        "file": null,
+        "like": 145
+      },
+      {
+        "from": 1986,
+        "to": 1988,
+        "name": "Glens Falls Tigers",
+        "abbr": "GF",
+        "file": null,
+        "like": 116
+      }
+    ],
+    "3722": [
+      {
+        "from": 1985,
+        "to": 1993,
+        "name": "Springfield Cardinals",
+        "abbr": "SPR",
+        "file": null,
+        "like": 138
+      }
+    ],
+    "3729": [
+      {
+        "from": 1985,
+        "to": 1986,
+        "name": "Florence Blue Jays",
+        "abbr": "FLO",
+        "file": null,
+        "like": 141
+      },
+      {
+        "from": 1987,
+        "to": 1990,
+        "name": "Myrtle Beach Blue Jays",
+        "abbr": "MB",
+        "file": null,
+        "like": 141
+      }
+    ],
+    "3733": [
+      {
+        "from": 1985,
+        "to": 1989,
+        "name": "Orlando Twins",
+        "abbr": "ORL",
+        "file": null,
+        "like": 142
+      },
+      {
+        "from": 1993,
+        "to": 1996,
+        "name": "Orlando Cubs",
+        "abbr": "ORL",
+        "file": null,
+        "like": 112
+      }
+    ],
+    "3734": [
+      {
+        "from": 1985,
+        "to": 1994,
+        "name": "Osceola Astros",
+        "abbr": "OSC",
+        "file": null,
+        "like": 117
+      }
+    ],
+    "3735": [
+      {
+        "from": 1985,
+        "to": 1987,
+        "name": "Macon Pirates",
+        "abbr": "MAC",
+        "file": null,
+        "like": 134
+      }
+    ],
+    "3736": [
+      {
+        "from": 1986,
+        "to": 1987,
+        "name": "Peninsula White Sox",
+        "abbr": "PEN",
+        "file": null,
+        "like": 145
+      }
+    ],
+    "3737": [
+      {
+        "from": 1985,
+        "to": 1985,
+        "name": "Phoenix Giants",
+        "abbr": "PHO",
+        "file": null,
+        "like": 137
+      }
+    ],
+    "3746": [
+      {
+        "from": 1993,
+        "to": 1994,
+        "name": "Rockford Royals",
+        "abbr": "ROC",
+        "file": null,
+        "like": 118
+      }
+    ],
+    "3752": [
+      {
+        "from": 1985,
+        "to": 1996,
+        "name": "St. Petersburg Cardinals",
+        "abbr": "STP",
+        "file": null,
+        "like": 138
+      }
+    ],
+    "3754": [
+      {
+        "from": 1985,
+        "to": 1987,
+        "name": "Vermont Reds",
+        "abbr": "VER",
+        "file": null,
+        "like": 113
       }
     ]
   }

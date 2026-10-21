@@ -126,7 +126,8 @@
   min-width: 0;
 }
 
-.idlab__erafields input {
+.idlab__erafields input,
+.idlab__erafields select {
   /* component-reuse-exempt: a text input, not a card: it matches .idlab__recolorname */
   box-sizing: border-box;
   width: 100%;

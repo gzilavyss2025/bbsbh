@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { seasonMark, seasonTile, seasonTheme, seasonMasthead, eraTheme, PERIOD_THEME } from '../src/lib/identity/seasonMarks.js'
+import { seasonMark, seasonMarkIn, seasonTile, seasonTheme, seasonMasthead, eraTheme, PERIOD_THEME } from '../src/lib/identity/seasonMarks.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../src/lib/headerTheme.js'
 import SEASON_MARKS from '../src/lib/data/season-marks.json' with { type: 'json' }
 
@@ -158,4 +158,45 @@ test('seasonMark: a MiLB rename is covered by era, and only for those seasons', 
   assert.equal(seasonMark(431, 2018), null)
   assert.equal(seasonMark(559, 2000).abbr, 'HVL')
   assert.equal(seasonMark(538, '2010-06-01').abbr, 'NBR')
+})
+
+// A minor-league era that took an MLB nickname (`like`: the MLB team id) wears that
+// club's mark as of the era's FIRST season. Run on a small table with a stub for
+// "today's mark", so no real club's data decides the result.
+const today = (id) => `today/${id}.svg`
+const wears = (clubs, id, year) => seasonMarkIn(clubs, id, year, today)?.url
+const minor = (extra = {}) => ({ from: 1992, to: 2016, name: 'Binghamton Mets', abbr: 'BNG', file: null, like: 121, ...extra })
+
+test('seasonMarkIn: a linked era with no MLB era recorded wears the MLB club\'s current mark', () => {
+  assert.equal(wears({ 505: [minor()] }, 505, 2000), 'today/121.svg')
+})
+
+test('seasonMarkIn: a linked era takes the MLB club\'s era art as of the era\'s first season', () => {
+  const clubs = {
+    505: [minor()],
+    121: [
+      { from: 1962, to: 1991, name: 'Old Mets', abbr: 'NYM', file: '121-1962-1991.svg' },
+      { from: 1992, to: 1999, name: 'Newer Mets', abbr: 'NYM', file: '121-1992-1999.svg' },
+    ],
+  }
+  assert.equal(wears(clubs, 505, 2000), '/logos/historical/121-1992-1999.svg')
+  // The era runs 1992-2016 but starts inside the first mark, so it keeps the older one.
+  const early = { ...clubs, 505: [minor({ from: 1980, to: 2016 })] }
+  assert.equal(wears(early, 505, 2000), '/logos/historical/121-1962-1991.svg')
+})
+
+test('seasonMarkIn: an MLB era recorded with no art keeps the abbreviation, not today\'s mark', () => {
+  const clubs = {
+    103: [minor({ like: 108, from: 1990, to: 1993, name: 'Palm Springs Angels' })],
+    108: [{ from: 1989, to: 1992, name: 'California Angels', abbr: 'CAL', file: null }],
+  }
+  assert.equal(wears(clubs, 103, 1991), null)
+})
+
+test('seasonMarkIn: the era\'s own art wins over a link', () => {
+  assert.equal(wears({ 505: [minor({ file: '505-1992-2016.svg' })] }, 505, 2000), '/logos/historical/505-1992-2016.svg')
+})
+
+test('seasonMarkIn: a season outside the era is not covered', () => {
+  assert.equal(seasonMarkIn({ 505: [minor()] }, 505, 2017, today), null)
 })

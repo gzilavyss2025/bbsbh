@@ -158,7 +158,7 @@ function ErasBody() {
   }
 
   const eras = SEASON_MARKS.clubs?.[String(team.id)] ?? []
-  const withArt = eras.filter((e) => e.file).length
+  const withArt = eras.filter((e) => e.file || e.like).length
 
   return (
     <>
