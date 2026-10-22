@@ -3,8 +3,7 @@ import { useEffect, useRef } from 'react'
 // Holds the Screen Wake Lock (https://w3c.github.io/screen-wake-lock/) for as
 // long as `active` is true — keeps the phone's screen from sleeping between
 // batters during a live game, propping it up like a real scorebook. Purely a
-// display-power effect, never touches any game data, so it carries none of
-// the spoiler concerns the rest of this app is built around.
+// display-power effect; it never touches any game data.
 //
 // Two browser realities this works around:
 // - The lock is released automatically whenever the tab/PWA backgrounds (the

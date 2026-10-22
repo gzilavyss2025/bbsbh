@@ -318,7 +318,7 @@ export function useGameData(game, activeStep = null) {
 
   // Season-context call-outs for the play-by-play — the leader / streak /
   // situational-record notes, precomputed nightly to a static per-game file (see
-  // api/callouts.js). Spoiler-free season aggregates (no seal), same feed-derived tier
+  // api/callouts.js). Season aggregates (no seal), same feed-derived tier
   // as prospect badges. Covers MLB and the four full-season MiLB levels alike
   // (the set carries every level's slate since the phase-3 generator; a MiLB
   // gamePk on an older date simply resolves to no bundle). Keyed on gamePk,
@@ -371,7 +371,7 @@ export function useGameData(game, activeStep = null) {
   // Career vs-opponent lines (see api/vsTeamSplits.js) — the same static data
   // the player page's SPLITS VS TEAM card reads, reused here for the
   // "Turang is a career .303 against the Pirates" call-out (see
-  // buildCallouts's vsTeamCareerLine). Season aggregates, spoiler-free, so it
+  // buildCallouts's vsTeamCareerLine). Season aggregates, so it
   // rides the same deferred tier as prospects/former-teammates. Only the TWO
   // clubs playing are read — the dataset is sharded by club, so a game costs
   // two small same-origin reads instead of the whole league's 3.2 MB.
@@ -413,7 +413,7 @@ export function useGameData(game, activeStep = null) {
   )
   const runExpectancyData = runExpectancy.data ?? null
 
-  // Rolling pitcher workload (gen-workload.mjs) — spoiler-free completed-
+  // Rolling pitcher workload (gen-workload.mjs) — completed-
   // appearance aggregates feeding the bullpen availability board (TeamInfo)
   // and the Pitchers table's laboring baseline (pitcherHealth.js). MLB-only
   // at source, same deferred tier as rookies.
@@ -445,7 +445,7 @@ export function useGameData(game, activeStep = null) {
   // lib/headerTheme.js — ADR-0030). Both want the same answer to "what is this
   // club wearing", so it is resolved once here rather than twice.
   //
-  // Spoiler-free by construction: a uniform choice, not a game state — same
+  // A uniform choice, not a game state — same
   // footing as uniformBrief/jerseys.json above.
   const jerseysQuery = useAsync(
     () => (enrichmentReady ? fetchJerseysData() : Promise.resolve(null)),
