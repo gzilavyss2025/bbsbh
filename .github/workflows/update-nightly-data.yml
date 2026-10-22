@@ -432,6 +432,14 @@ jobs:
         id: comeback-wins
         continue-on-error: true
         run: node scripts/gen-comeback-wins.mjs
+      # This year's award winners, folded into the Awards History file as MLB
+      # announces them (#2510). --nightly does nothing outside October to February
+      # and writes only when a row changed, so most nights are no commit. Staged by
+      # the `git add -A -- public …` below like every other bucket set.
+      - name: Awards history
+        id: awards-history
+        continue-on-error: true
+        run: node scripts/gen-awards-history.mjs --nightly
       # Every ABS challenge of the season, MLB and Triple-A, for
       # /abs-challenges. Append-only over newly-played games, so the trailing
       # window is all it ever needs; the one-time season backfill is
@@ -746,6 +754,7 @@ jobs:
           steps.salaries.outcome == 'failure' ||
           steps.prospect-trend.outcome == 'failure' ||
           steps.comeback-wins.outcome == 'failure' ||
+          steps.awards-history.outcome == 'failure' ||
           steps.abs-challenges.outcome == 'failure' ||
           steps.jerseys.outcome == 'failure' ||
           steps.pitch-arsenal.outcome == 'failure' ||

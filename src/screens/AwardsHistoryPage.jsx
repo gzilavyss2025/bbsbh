@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { loadAwardsHistory } from '../api/awardsHistory.js'
+import { loadAwardsHistory, loadSeasonAwards, awardsSeasonInPlay } from '../api/awardsHistory.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
@@ -7,10 +7,12 @@ import { Headshot } from '../components/player/Headshot.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
-import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
+import { Notice } from '../components/ui/state/Notice.jsx'
+import { Door } from '../components/ui/control/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
 import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
@@ -263,6 +265,88 @@ function AwardYearPlain({ label, recipients, favoriteTeamId }) {
   )
 }
 
+// One award's cell in the "This season" block: its winners once MLB has announced
+// them, else a plain note. A 404 is "pending"; anything else is an error. A roster of
+// more than one (Silver Slugger, Gold Glove, the All-MLB teams) sits behind its own
+// door, so a sibling league's "Not announced yet" or "Couldn't load." stays in view.
+function SeasonAwardCell({ award, favoriteTeamId }) {
+  const [open, setOpen] = useState(false)
+  if (award.status === 'announced') {
+    const count = award.recipients.length
+    if (count > 1 && !open) {
+      return (
+        <Door layout="block" onClick={() => setOpen(true)}>
+          {`Show ${count} winners`}
+        </Door>
+      )
+    }
+    const { isDense, cardsClass } = cardsClassFor(award.recipients)
+    return (
+      <ul className={`awardhistory__cards ${cardsClass}`}>
+        {award.recipients.map((r) => (
+          <AwardCard key={`${r.playerId}-${r.position}`} r={r} favoriteTeamId={favoriteTeamId} dense={isDense} />
+        ))}
+      </ul>
+    )
+  }
+  return award.status === 'error' ? (
+    <Notice tone="error" size="compact">Couldn’t load.</Notice>
+  ) : (
+    <EmptyState size="compact">Not announced yet</EmptyState>
+  )
+}
+
+// One announced family's cells, in the league-banner shape of AwardYearSplit; a
+// league-less award is a plain row.
+function SeasonFamilyBody({ family, favoriteTeamId }) {
+  if (family.awards.some((a) => a.league)) {
+    return (
+      <div className="awardhistory__familysplit">
+        {family.awards.map((a) => (
+          <LeagueRows
+            key={a.id}
+            league={a.league}
+            rows={[<SeasonAwardCell key="cell" award={a} favoriteTeamId={favoriteTeamId} />]}
+          />
+        ))}
+      </div>
+    )
+  }
+  return family.awards.map((a) => <SeasonAwardCell key={a.id} award={a} favoriteTeamId={favoriteTeamId} />)
+}
+
+// This season's winners, read live as MLB announces them (loadSeasonAwards).
+// Same league-banner shape as AwardYearSplit; a league-less award is a plain row,
+// the awards not announced yet are named in one line after the announced ones, and a
+// season with nothing announced at all is one empty state.
+function ThisSeason({ season, favoriteTeamId }) {
+  const { loading, data } = useAsync(() => loadSeasonAwards(season), [season])
+  const isWaiting = (f) => f.awards.every((a) => a.status === 'pending')
+  const announced = (data ?? []).filter((f) => !isWaiting(f))
+  const waiting = (data ?? []).filter(isWaiting)
+  return (
+    <Card frame="stamped" label={`${season} so far`} className="awardhistory__award">
+      {loading && <EmptyState size="compact" role="status">Checking {season} winners…</EmptyState>}
+      {!!data && announced.length === 0 && (
+        <EmptyState size="compact">No {season} winners announced yet</EmptyState>
+      )}
+      <Stack gap="loose">
+        {announced.map((family) => (
+          <div className="awardhistory__yearaward" key={family.key}>
+            <h4 className="awardhistory__yearawardlabel">{family.label}</h4>
+            <SeasonFamilyBody family={family} favoriteTeamId={favoriteTeamId} />
+          </div>
+        ))}
+        {announced.length > 0 && waiting.length > 0 && (
+          <EmptyState size="compact" label="Not announced yet">
+            {waiting.map((f) => f.label).join(' · ')}
+          </EmptyState>
+        )}
+      </Stack>
+    </Card>
+  )
+}
+
 function AllMlbColumn({ label, recipients, favoriteTeamId }) {
   return (
     <div className="awardhistory__allmlbcol">
@@ -323,6 +407,7 @@ export function AwardsHistoryPage() {
   const { loading, error, data } = useAsync(() => loadAwardsHistory(), [])
   const { favoriteTeamId } = useFavoriteTeam()
   const [view, setView] = useState('award')
+  const season = awardsSeasonInPlay()
   const families = useMemo(() => data?.families ?? [], [data])
   const updated = monthDayName(data?.generatedAt)
 
@@ -344,7 +429,7 @@ export function AwardsHistoryPage() {
   const hasAllMlb = allMlbYears.length > 0
 
   return (
-    <div className="screen">
+    <div className="screen awardhistory">
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Awards History</h1>
@@ -376,17 +461,18 @@ export function AwardsHistoryPage() {
         emptyMessage="No award history is available right now."
       />
 
-      {families.length > 0 && (
-        <>
-          <div className={`awardhistory__list${view === 'award' ? ' awardhistory__list--zebra' : ''}`}>
+      {(season || families.length > 0) && (
+        <Stack gap="loose">
+          {season && <ThisSeason season={season} favoriteTeamId={favoriteTeamId} />}
+          {families.length > 0 && (
+          <Stack gap="loose" className={`awardhistory__list${view === 'award' ? ' awardhistory__list--zebra' : ''}`}>
             {view === 'award' &&
               hardware.map((family) => {
                 const years = Object.keys(family.years)
                   .map(Number)
                   .sort((a, b) => b - a)
                 return (
-                  <section className="awardhistory__award" key={family.key}>
-                    <SectionHead look="label">{family.label}</SectionHead>
+                  <Card frame="stamped" label={family.label} className="awardhistory__award" key={family.key}>
                     {isLeagueSplit(family) ? (
                       <AwardFamilySplit years={years} yearsData={family.years} favoriteTeamId={favoriteTeamId} />
                     ) : (
@@ -401,13 +487,12 @@ export function AwardsHistoryPage() {
                         ))}
                       </Stack>
                     )}
-                  </section>
+                  </Card>
                 )
               })}
 
             {view === 'award' && hasAllMlb && (
-              <section className="awardhistory__award" key="all-mlb-teams">
-                <SectionHead look="label">All-MLB Teams</SectionHead>
+              <Card frame="stamped" label="All-MLB Teams" className="awardhistory__award" key="all-mlb-teams">
                 <Stack gap="loose" className="awardhistory__years">
                   {allMlbYears.map((year) => (
                     <AllMlbYear
@@ -419,13 +504,12 @@ export function AwardsHistoryPage() {
                     />
                   ))}
                 </Stack>
-              </section>
+              </Card>
             )}
 
             {view === 'year' &&
               byYear.map(({ year, awards }) => (
-                <section className="awardhistory__award" key={year}>
-                  <SectionHead look="label">{String(year)}</SectionHead>
+                <Card frame="stamped" label={String(year)} className="awardhistory__award" key={year}>
                   <Stack gap="loose" className="awardhistory__years">
                     {awards.map((a) =>
                       a.recipients.some((r) => r.league) ? (
@@ -457,12 +541,13 @@ export function AwardsHistoryPage() {
                       </div>
                     )}
                   </Stack>
-                </section>
+                </Card>
               ))}
-          </div>
-          {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
-        </>
+          </Stack>
+          )}
+        </Stack>
       )}
+      {families.length > 0 && updated && <p className="hint prospects__caption">Updated {updated}.</p>}
 
       <ReportFooter />
     </div>
