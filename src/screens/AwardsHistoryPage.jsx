@@ -13,6 +13,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 import { Notice } from '../components/ui/state/Notice.jsx'
+import { Door } from '../components/ui/control/Door.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
 import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
@@ -287,39 +288,64 @@ function SeasonAwardCell({ award, favoriteTeamId }) {
   )
 }
 
+// One announced family's cells. One with a long roster (Silver Slugger, Gold Glove, the All-MLB teams) sits
+// behind a door so the block stays short, while the one- and two-winner awards stay open.
+const FOLD_OVER = 2
+
+function SeasonFamilyBody({ family, favoriteTeamId }) {
+  const [open, setOpen] = useState(false)
+  const winners = family.awards.reduce((n, a) => n + a.recipients.length, 0)
+  if (winners > FOLD_OVER && !open) {
+    return (
+      <Door layout="block" onClick={() => setOpen(true)}>
+        {`Show ${winners} winners`}
+      </Door>
+    )
+  }
+  if (family.awards.some((a) => a.league)) {
+    return (
+      <div className="awardhistory__familysplit">
+        {family.awards.map((a) => (
+          <LeagueRows
+            key={a.id}
+            league={a.league}
+            rows={[<SeasonAwardCell key="cell" award={a} favoriteTeamId={favoriteTeamId} />]}
+          />
+        ))}
+      </div>
+    )
+  }
+  return family.awards.map((a) => <SeasonAwardCell key={a.id} award={a} favoriteTeamId={favoriteTeamId} />)
+}
+
 // This season's winners, read live as MLB announces them (loadSeasonAwards).
 // Same league-banner shape as AwardYearSplit; a league-less award is a plain row,
-// a family with nothing announced collapses to one "Not announced yet" line, and a
-// season with nothing announced at all to one empty state.
+// the awards not announced yet are named in one line after the announced ones, and a
+// season with nothing announced at all is one empty state.
 function ThisSeason({ season, favoriteTeamId }) {
   const { loading, data } = useAsync(() => loadSeasonAwards(season), [season])
-  const nothingYet = !!data && data.every((f) => f.awards.every((a) => a.status === 'pending'))
+  const isWaiting = (f) => f.awards.every((a) => a.status === 'pending')
+  const announced = (data ?? []).filter((f) => !isWaiting(f))
+  const waiting = (data ?? []).filter(isWaiting)
   return (
     <section className="awardhistory__award" aria-labelledby="awardhistory-thisseason">
       <SectionHead look="label" titleId="awardhistory-thisseason">{`${season} so far`}</SectionHead>
       {loading && <EmptyState size="compact" role="status">Checking {season} winners…</EmptyState>}
-      {nothingYet && <EmptyState size="compact">No {season} winners announced yet</EmptyState>}
+      {!!data && announced.length === 0 && (
+        <EmptyState size="compact">No {season} winners announced yet</EmptyState>
+      )}
       <Stack gap="loose">
-        {(nothingYet ? [] : data ?? []).map((family) => (
+        {announced.map((family) => (
           <div className="awardhistory__yearaward" key={family.key}>
             <h4 className="awardhistory__yearawardlabel">{family.label}</h4>
-            {family.awards.every((a) => a.status === 'pending') ? (
-              <SeasonAwardCell award={family.awards[0]} />
-            ) : family.awards.some((a) => a.league) ? (
-              <div className="awardhistory__familysplit">
-                {family.awards.map((a) => (
-                  <LeagueRows
-                    key={a.id}
-                    league={a.league}
-                    rows={[<SeasonAwardCell key="cell" award={a} favoriteTeamId={favoriteTeamId} />]}
-                  />
-                ))}
-              </div>
-            ) : (
-              family.awards.map((a) => <SeasonAwardCell key={a.id} award={a} favoriteTeamId={favoriteTeamId} />)
-            )}
+            <SeasonFamilyBody family={family} favoriteTeamId={favoriteTeamId} />
           </div>
         ))}
+        {announced.length > 0 && waiting.length > 0 && (
+          <EmptyState size="compact" label="Not announced yet">
+            {waiting.map((f) => f.label).join(' · ')}
+          </EmptyState>
+        )}
       </Stack>
     </section>
   )
