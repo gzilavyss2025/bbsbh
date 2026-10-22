@@ -196,7 +196,9 @@ on touch has no hover. Four consequences:
   `.outl__name`, and the sign-in widget's `.tally-cl-link`). A door in a ruled box
   (`.wirerail__door`, `.oseason__door`, `.srecord__door`, `.seasonnote__when`), a back
   or cancel button, and the info glyph keep their shape and take ink. A hover that
-  turned green draws the dotted rule instead.
+  turned green draws the dotted rule instead. The static guides at `/learn` follow too
+  (`public/learn.css`, ADR-0053): a prose link is ink with the dotted rule, solid on
+  hover. Their call-to-action button keeps its green fill, as a button does.
 - Green stays where it means "good": a win, a positive delta, an "add" chip, a position
   label, and the focus ring. `--accent-link` has no text consumer now. It colours a
   control's hover fill and a selected cell, and its name is a follow-up rename.

@@ -131,3 +131,20 @@ test('no link-like rule draws its text in green', () => {
   }
   assert.deepEqual(found, [], 'link-like rules that read green (draw them in ink, or list them in ALLOWED with a reason)')
 })
+
+// The static guides at /learn have their own stylesheet (public/learn.css, ADR-0053). A prose
+// link there is ink with the dotted rule too, and goes solid on hover. The call-to-action
+// button keeps its green fill: it is a button, and the focus ring stays green.
+test('a link in the landing guides is ink, not green', () => {
+  const learn = readFileSync(join(STYLES, '..', '..', 'public', 'learn.css'), 'utf8')
+  const bodies = (selector) => rulesOf(learn).filter((r) => r.selectors.includes(selector)).map((r) => r.body)
+  const base = bodies('a').join(';')
+  assert.match(base, /color:\s*var\(--ink-0\)/, 'a link draws in ink')
+  assert.match(base, /text-decoration:\s*underline dotted/, 'a link carries the dotted rule')
+  assert.match(bodies('a:hover').join(';'), /text-decoration-style:\s*solid/, 'a hovered link goes solid')
+  for (const selector of ['a', 'a:hover', '.basics__rail a:hover']) {
+    for (const body of bodies(selector)) {
+      for (const c of colours(body)) assert.doesNotMatch(c, GREEN, `${selector} reads green`)
+    }
+  }
+})
