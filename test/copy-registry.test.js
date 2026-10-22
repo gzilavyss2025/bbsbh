@@ -4,7 +4,7 @@
 // only ever set a KNOWN id to an in-budget string, everything resolves to a
 // renderable default, and the closed set of honored tokens substitutes
 // correctly. If any of these loosen, untrusted copy could inject an unknown key
-// or an oversized value into a consent modal.
+// or an oversized value into the page.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
@@ -27,8 +27,7 @@ test('every field has a string default within its own maxLength', () => {
 })
 
 // The non-empty rule is REAL but it belongs to the fields the app renders
-// unconditionally: a consent modal with a blank title or a blank accept button
-// is a broken, unusable consent moment, so those defaults may never be empty.
+// unconditionally: a label or note that is always drawn may never ship blank.
 // The ballpark notes are the deliberate other case — BallparkCard renders the
 // paragraph only `&& note`, so an empty default means "no note yet", which is
 // the correct shipped state for a park nobody has written about. Same story
@@ -311,37 +310,37 @@ test('sanitizeOverrides drops unknown ids', () => {
 })
 
 test('sanitizeOverrides keeps a known id with an in-budget string', () => {
-  const out = sanitizeOverrides({ 'stampIn.title': 'Show me everything?' })
-  assert.deepEqual(out, { 'stampIn.title': 'Show me everything?' })
+  const out = sanitizeOverrides({ 'offseason.leadNote': 'Show me everything?' })
+  assert.deepEqual(out, { 'offseason.leadNote': 'Show me everything?' })
 })
 
 test('sanitizeOverrides drops a value over the field maxLength', () => {
-  const field = FIELDS.find((f) => f.id === 'stampIn.title')
+  const field = FIELDS.find((f) => f.id === 'offseason.leadNote')
   const tooLong = 'x'.repeat(field.maxLength + 1)
-  assert.deepEqual(sanitizeOverrides({ 'stampIn.title': tooLong }), {})
+  assert.deepEqual(sanitizeOverrides({ 'offseason.leadNote': tooLong }), {})
 })
 
 test('sanitizeOverrides keeps a value exactly at the maxLength boundary', () => {
-  const field = FIELDS.find((f) => f.id === 'stampIn.title')
+  const field = FIELDS.find((f) => f.id === 'offseason.leadNote')
   const exact = 'x'.repeat(field.maxLength)
-  assert.deepEqual(sanitizeOverrides({ 'stampIn.title': exact }), {
-    'stampIn.title': exact,
+  assert.deepEqual(sanitizeOverrides({ 'offseason.leadNote': exact }), {
+    'offseason.leadNote': exact,
   })
 })
 
 test('sanitizeOverrides drops non-string and empty/whitespace values', () => {
   const out = sanitizeOverrides({
-    'stampIn.title': 42,
-    'stampIn.body': '',
-    'stampIn.resetNote': '   ',
-    'stampIn.dismiss': null,
+    'offseason.leadNote': 42,
+    'offseason.calendar': '',
+    'offseason.springLabel': '   ',
+    'offseason.openerLabel': null,
   })
   assert.deepEqual(out, {})
 })
 
 test('sanitizeOverrides trims trailing whitespace but keeps leading', () => {
-  const out = sanitizeOverrides({ 'stampIn.dismiss': '  Back to games   ' })
-  assert.equal(out['stampIn.dismiss'], '  Back to games')
+  const out = sanitizeOverrides({ 'offseason.openerLabel': '  Back to games   ' })
+  assert.equal(out['offseason.openerLabel'], '  Back to games')
 })
 
 // A copy store written before ADR-0116 may still hold scoresUnlocked.* fields.
@@ -359,26 +358,26 @@ test('sanitizeOverrides tolerates garbage input without throwing', () => {
 
 test('sanitizeOverrides strips bidi-override and control characters', () => {
   // A right-to-left override (U+202E) embedded in a button label must not survive.
-  const out = sanitizeOverrides({ 'stampIn.confirm': 'Show ‮scores' })
-  assert.equal(out['stampIn.confirm'], 'Show scores')
+  const out = sanitizeOverrides({ 'offseason.springLabel': 'Show ‮scores' })
+  assert.equal(out['offseason.springLabel'], 'Show scores')
 })
 
 test('sanitizeOverrides drops newlines in a single-line field but keeps them multiline', () => {
-  // stampIn.confirm is single-line; stampIn.body is multiline.
-  const single = sanitizeOverrides({ 'stampIn.confirm': 'Show\nscores' })
-  assert.equal(single['stampIn.confirm'], 'Showscores')
-  const multi = sanitizeOverrides({ 'stampIn.body': 'line one\nline two' })
-  assert.equal(multi['stampIn.body'], 'line one\nline two')
+  // offseason.springLabel is single-line; offseason.calendar is multiline.
+  const single = sanitizeOverrides({ 'offseason.springLabel': 'Show\nscores' })
+  assert.equal(single['offseason.springLabel'], 'Showscores')
+  const multi = sanitizeOverrides({ 'offseason.calendar': 'line one\nline two' })
+  assert.equal(multi['offseason.calendar'], 'line one\nline two')
 })
 
 test('resolveCopy layers valid overrides over defaults and ignores junk', () => {
   const resolved = resolveCopy({
-    'stampIn.title': 'Custom title',
+    'offseason.leadNote': 'Custom title',
     'unknown.key': 'ignored',
   })
-  assert.equal(resolved['stampIn.title'], 'Custom title')
+  assert.equal(resolved['offseason.leadNote'], 'Custom title')
   // An untouched field still resolves to its default.
-  const untouched = FIELDS.find((f) => f.id !== 'stampIn.title')
+  const untouched = FIELDS.find((f) => f.id !== 'offseason.leadNote')
   assert.equal(resolved[untouched.id], untouched.default)
   assert.equal(resolved['unknown.key'], undefined)
 })
@@ -388,6 +387,6 @@ test('resolveCopy layers valid overrides over defaults and ignores junk', () => 
 // with the Scores Unlocked group, #2308).
 test('a value with brace text resolves verbatim: nothing is substituted', () => {
   const typed = 'Sealing at {time}, {inning}, the score is {score}'
-  const resolved = resolveCopy({ 'stampIn.title': typed })
-  assert.equal(resolved['stampIn.title'], typed)
+  const resolved = resolveCopy({ 'offseason.leadNote': typed })
+  assert.equal(resolved['offseason.leadNote'], typed)
 })

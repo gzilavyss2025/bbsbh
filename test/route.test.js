@@ -52,6 +52,7 @@ import {
   bookPath,
   bookStatsPath,
   profilePath,
+  notablePath,
   postseasonLivePath,
   seriesPageFor,
   seriesHref,
@@ -886,6 +887,13 @@ test('/profile is My Tally, and its path builder round-trips', () => {
   assert.deepEqual(parseRoute('/profile'), { name: 'profile' })
   assert.equal(profilePath(), '/profile')
   assert.deepEqual(parseRoute(profilePath()), { name: 'profile' })
+})
+
+test('/notable is the Notable games shelf, and its path builder round-trips', () => {
+  assert.deepEqual(parseRoute('/notable'), { name: 'notable' })
+  assert.equal(notablePath(), '/notable')
+  assert.deepEqual(parseRoute(notablePath()), { name: 'notable' })
+  assert.notEqual(parseRoute('/notable/x').name, 'notable')
 })
 
 // The neighbours it sits among in the ordered single-segment list. None of them

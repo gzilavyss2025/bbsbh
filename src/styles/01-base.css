@@ -78,14 +78,9 @@
        card's title, ranked names and figures all stay shouted; this line has to
        be read rather than skimmed, because it is what stops the ranking above
        it being taken for a catcher's own skill)
-     - the spoiler-consent modal's explainer prose — `.consent__body`,
-       `.consent__changes`, `.consent__reset`, `.consent__humor` (the title +
-       buttons stay uppercase, same shouted-heading/natural-case-body split
-       as the Team Score modal above)
-     - the copy editor's natural-case fields + preview — `.admincopy__note`,
-       `.admincopy__help`, `.admincopy__input`, `.admincopy__historyWhen`,
-       `.admincopy__previewBody/__previewHumor/__previewReset` (the admin types
-       and previews sentence-case copy; labels + preview title stay uppercase)
+     - the copy editor's natural-case fields — `.admincopy__note`,
+       `.admincopy__help`, `.admincopy__input`, `.admincopy__historyWhen`
+       (the admin types sentence-case copy; labels stay uppercase)
      - the Identity Lab's about-this-lab explainer prose — `.idlabhint__body`
        (the modal title stays uppercase)
      - the Trade Deadline card's cutline prose — `.trade__cutline` (the

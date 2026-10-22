@@ -336,16 +336,18 @@ for each generator; the reader modules:
   `test/long-at-bats.test.js` asserts that of the committed files by vocabulary
   rather than by trust. Both readers carry the file's `season` for the same reason
   `milbPool.js` does.
-- `notable/notable.js` — the box score's feat label, from `public/data/notable/`
+- `notable/notable.js` — the feat index behind the box score's feat label, the callout's "last time" lines and the `/notable` shelf, from `public/data/notable/`
   (`nohitters.json`, `cycles.json`, `tripleplays.json`; `gen-notable.mjs`, row keys in
   `ALLOWED_KEYS`, `scripts/lib/notable/merge.mjs`). `fetchNotable()` loads the three files
   through `staticJson` and returns them keyed by kind; a file that fails to load is `null`.
   `featsForGame(docs, gamePk)` is pure and returns that game's label lines, no-hitters first:
   `No-hitter: {pitcher}`, or `Combined no-hitter: {pitchers}` for more than one, with
   `(shortened)`, `(lost)` or both when the row says so; `Cycle: {player}`; `Triple play:
-  {club in the field}`. **Reveal-only** (ADR-0101): a feat names the result. Its one
-  importer is `screens/boxscore/FeatLabel.jsx`, which mounts inside the box score's
-  `SealBox` reveal render, so the files are fetched only after the reveal. The three files
+  {club in the field}`. **Reveal-only** (ADR-0101): a feat names the result. Its
+  readers inside a seal are `screens/boxscore/FeatLabel.jsx`, which mounts inside the box score's
+  `SealBox` reveal render, and the callout hook, so those fetch only after the reveal. The open
+  reader is the `/notable` shelf (`lib/notable/shelf.js`), which lists only games whose box score
+  opens by date (ADR-0117). `test/notable-shelf.test.js` covers it. The three files
   are about 300 KB raw and 34 KB gzipped (2026-10-06). Not precached; `vite.config.js` caches them
   NetworkFirst in `bbsbh-record-shards`, so a box score opened offline keeps its label.
   `test/notable-feats.test.js`.

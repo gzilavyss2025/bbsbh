@@ -1733,12 +1733,18 @@ Re-run only to fold in a new season.
   Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB
   First/Second Team, plus the World Series MVP and the two LCS MVPs) over the last 5
   seasons, grouped by award then by season. The postseason MVPs carry no stat line, since
-  the page's line is regular season. Hand-run, not a cron. Loops
+  the page's line is regular season. Hand-run for the full five seasons. **`--nightly`** is
+  the cron step ("Awards history" in `update-nightly-data.yml`, #2510): it exits at once
+  outside October to February (`awardsSeasonInPlay`), and inside it refreshes only the
+  season in play (`lib/time/season-in-play.mjs`) and carries the rest forward
+  (`lib/awards/history-merge.mjs`). It writes only when a row changed, so a quiet night is no
+  commit; that is why the freshness guard lists the file under EXCEPT. Loops
   `MAJOR_AWARDS`' ids (imported straight from `src/api/person.js`, not duplicated, so
   this page can't drift from what the player page's own Awards section counts as
   hardware) × season through `GET /api/v1/awards/{awardId}/recipients?season=YYYY`.
-  The in-progress current season simply comes back empty per award until decided —
-  no special-casing needed. App reads it via `src/api/awardsHistory.js`.
+  An award not yet decided answers HTTP 404, which the generator reads as no recipients.
+  App reads it via `src/api/awardsHistory.js`, which also reads the season in play live
+  for the "so far" block on the page.
 - `gen-all-star-rosters.mjs` → `public/data/all-star-rosters.json` — every MLB
   All-Star Game roster, year over year back to 1933. Loops
   `GET /api/v1/awards/{ALAS,NLAS}/recipients?sportId=1&season=YYYY` — the same

@@ -1,0 +1,163 @@
+/* Series MVP card (SeriesMvpCard.jsx): the World Series Hero's idiom on the series page.
+   A navy stage with the player's cut-out and a grayscale action wash on the right, the
+   medal-amber tag, name and club on the left, and a cream strip of his series line below.
+   One short arrival, no idle loop; reduced motion draws the resting state. */
+.psseries__mvp {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+
+/* layout-exempt: the name block and the photo overlap on one stage */
+.psseries__mvpstage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  min-height: calc(var(--space-16) * 2 + var(--space-6));
+}
+
+.psseries__mvpstage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
+  mask-image: linear-gradient(to left, var(--ripple-mask), transparent 70%);
+}
+
+.psseries__mvpphoto {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 55%;
+}
+
+.psseries__mvpwash {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  opacity: 0;
+  filter: grayscale(1);
+  -webkit-mask-image: linear-gradient(to right, transparent, var(--ripple-mask) 40%);
+  mask-image: linear-gradient(to right, transparent, var(--ripple-mask) 40%);
+}
+.psseries__mvpwash.is-ready { opacity: 0.3; }
+
+.shot.psseries__mvpcut {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  mask-image: linear-gradient(to right, transparent, var(--ripple-mask) 35%);
+}
+.shot.psseries__mvpcut img { filter: none; }
+
+/* No photo on file: the club's mono mark, centred in the photo's place at the Hero's 0.35. */
+.psseries__mvpmark {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0.35;
+}
+
+/* layout-exempt: tag, name and club stack on the stage's left */
+.psseries__mvpwho {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  min-width: 0;
+  max-width: 62%;
+  padding: var(--space-4) var(--space-3);
+}
+
+.psseries__mvptag {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--award-line);
+}
+
+.psseries__mvpwho a.psseries__mvpname {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-title);
+  overflow-wrap: anywhere;
+  color: var(--text-on-ink-cream);
+}
+
+.psseries__mvpclub {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink-soft);
+}
+
+/* layout-exempt: five series figures share the strip in equal cells */
+.psseries__mvpstats {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  margin: 0;
+  border-top: var(--bw-hair) solid var(--sheen-light);
+  background: var(--surface-stamped-ink);
+}
+
+/* layout-exempt: label stacked over figure */
+.psseries__mvpstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2h) var(--space-1);
+}
+.psseries__mvpstat + .psseries__mvpstat { border-left: var(--bw-hair) solid var(--sheen-light); }
+
+.psseries__mvpstat dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-on-ink-soft);
+}
+.psseries__mvpstat dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-ink-cream);
+}
+
+@keyframes psseries-mvp-rise { from { opacity: 0; transform: translateY(var(--space-3)); } }
+@keyframes psseries-mvp-cell { from { opacity: 0; transform: translateY(var(--space-1)); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .psseries__mvpcut { animation: psseries-mvp-rise var(--dur-arrive) var(--ease-stamp) var(--stagger-step) both; }
+  .psseries__mvpwho { animation: psseries-mvp-rise var(--dur-arrive) var(--ease-stamp) both; }
+  .psseries__mvpstat { animation: psseries-mvp-cell var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * (2 + var(--i, 0))) both; }
+}

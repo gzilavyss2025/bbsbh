@@ -335,25 +335,6 @@
   }
 }
 
-/* "Due up" pill — marks the one lineup-card slot leading off a team's own
-   next half (see LineupSection, EnteringReference.jsx). Same amber seal chip
-   as .standings-reveal rather than the neutral rookie/prospect palette, so it
-   reads as a live, time-sensitive marker rather than a standing badge. */
-.duepill {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  padding: 2px var(--space-1h);
-  border-radius: var(--radius-pill);
-  background: var(--seal-cover);
-  color: var(--seal-cover-ink);
-  border: var(--bw-hair) solid var(--seal-deep);
-}
-
 /* MLB-debut pill — an icon-only capsule beside the prospect, rookie and
    milestone pills: no text, since the shield mark alone carries the meaning
    next to a name. Held out of Pill (#1131): it is the shell for an icon, with

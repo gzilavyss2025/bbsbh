@@ -22,6 +22,7 @@
 //   '/postseason-history'               -> { name: 'postseason-history' }
 //   '/nine-keys'                        -> { name: 'nine-keys' }
 //   '/classics'                         -> { name: 'classics' }  (Score a classic: one old MLB game, dealt on who played, #1525)
+//   '/notable'                          -> { name: 'notable' }  (Notable games: no-hitters, cycles, triple plays, #2508)
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason-race[/{year}]'         -> { name: 'postseason-race', ... } (parseSeasonRoute)
 //   '/postseason-records'               -> { name: 'postseason-records', asOf, season, view, team, category, metric, sort, order }
@@ -339,6 +340,7 @@ export function parseRoute(url) {
     return { name: 'postseason-history' }
   if (parts.length === 1 && parts[0] === 'nine-keys') return { name: 'nine-keys' }
   if (parts.length === 1 && parts[0] === 'classics') return { name: 'classics' }
+  if (parts.length === 1 && parts[0] === 'notable') return { name: 'notable' }
   if (parts.length === 1 && parts[0] === 'postseason-leaders')
     return { name: 'postseason-leaders' }
   if (parts.length === 1 && parts[0] === 'trade-deadline')
@@ -347,7 +349,7 @@ export function parseRoute(url) {
     return { name: 'all-star-rosters' }
   if (parts.length === 1 && parts[0] === 'all-star-legacy')
     return { name: 'all-star-legacy' }
-  // Admin copy editor — the site owner tunes consent-pop-up wording here. Not
+  // Admin copy editor — the site owner tunes the editable copy here. Not
   // linked from anywhere in the app; reachable by URL and gated to a Clerk
   // admin (see AdminCopy.jsx + api/copy.js). Parsed regardless so a stray
   // production visit renders the (locked) panel rather than falling through to
@@ -942,6 +944,10 @@ export function logbookPlacePath(gamePk) {
 export function profilePath() {
   return '/profile'
 }
+// Notable games, the shelf of no-hitters, cycles and triple plays (#2508). A fixed address.
+export function notablePath() {
+  return '/notable'
+}
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/leaders${linkQuery(opts)}`
 }
@@ -957,9 +963,7 @@ export function teamTabPath(id, tab, opts = {}) {
 // Stamp In — the club's played season, one stamp per game you watched
 // (ADR-0042). Built in exactly one place, the Schedule card's button on the
 // Games tab, and carried through linkQuery like every other team link so a
-// dated visit stays dated across the hop. Do not build a second entry point:
-// the page's consent gate is the address's own, and every other surface in the
-// app is sealed by default.
+// dated visit stays dated across the hop. Do not build a second entry point.
 export function teamStampInPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/stamp-in${linkQuery(opts)}`
 }

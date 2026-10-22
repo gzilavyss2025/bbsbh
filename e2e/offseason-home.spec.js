@@ -238,8 +238,6 @@ test('the level page offers a checked game, and says why', async ({ page }) => {
   const listBox = await page.locator('.movedup').boundingBox()
   expect(cardBox.y).toBeLessThan(listBox.y)
 
-  // The promise, on kraft tape, because the game it opens is sealed.
-  await expect(card.locator('.pgame__seal')).toHaveText('Score sealed')
   // The fact the pool was built to establish, and the only claim on this card
   // that a schedule row could not have made.
   await expect(card.locator('.pgame__meta')).toContainText('Lineups posted')

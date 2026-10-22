@@ -36,8 +36,8 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 //
 // THE SEAL IS THE ORDINARY ONE. This links to the game's first lineup page at
 // the same address the slate's own cards build, so the game opens sealed under
-// the same `revealedThrough` mark as any other. Nothing here reveals, consents
-// or persists; the card's only state is which game of the deck is face up.
+// the same `revealedThrough` mark as any other. Nothing here reveals or
+// persists; the card's only state is which game of the deck is face up.
 export function PickedGame({ sportId, season, dateStr }) {
   const { data } = useAsync(() => fetchMilbPool(sportId), [sportId])
   const [step, setStep] = useState(0)
@@ -52,8 +52,7 @@ export function PickedGame({ sportId, season, dateStr }) {
         seed,
         step,
         // A game with a reveal mark on it is one this device has already
-        // opened. Offering it as a fresh sealed game would be a promise broken
-        // on the first tap.
+        // opened. Offering it as a fresh game would open it part-way through.
         isStarted: (pk) => readRevealMarkFor(pk) >= 0,
       }),
     [data, seed, step],
@@ -65,7 +64,7 @@ export function PickedGame({ sportId, season, dateStr }) {
   // check, and the same silence, as the promotions list beneath.
   if (!picked || data?.season !== season) return null
 
-  const { game, started } = picked
+  const { game } = picked
   const label = SPORT_LABEL[sportId] ?? ''
   const reason = reasonLine(game.why)
 
@@ -80,11 +79,6 @@ export function PickedGame({ sportId, season, dateStr }) {
           </span>
           <Club club={game.home} />
         </div>
-
-        {/* What the reader is being promised, in the words the app uses for it
-            everywhere else. A game carrying this device's own progress cannot
-            promise it, and says the true thing instead. */}
-        <p className="pgame__seal">{started ? 'Your progress applies' : 'Score sealed'}</p>
 
         {reason && <p className="pgame__why">{reason}</p>}
 

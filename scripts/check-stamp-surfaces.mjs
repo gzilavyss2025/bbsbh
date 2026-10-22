@@ -155,17 +155,16 @@ const FORBIDDEN_ART_IDENTIFIERS = ['GameStamp', 'StampGameButton']
 // components/logbook, and StampInPage.jsx is one screen among the team hub's.
 //
 // Stamp In (/team/{id}/stamp-in, ADR-0042) is the page that lists a club's
-// whole played season with every result showing, behind a one-time consent, so
-// a reader can press a stamp for each game they watched. It legitimately mints
-// stamps — that is the feature — so it MUST be able to call `useStamps`. It
-// must never DRAW one: this is the app's densest score surface, and a stamp
-// there would put 162 finished keepsakes on a page whose whole safety argument
-// is the consent that got you in, not the collection you already hold. The
-// count-versus-art line FORBIDDEN_ART_DIRS draws for My Tally is the same line
-// drawn here, one file at a time.
+// whole played season with every result showing, so a reader can press a stamp
+// for each game they watched. It opens with no consent step (#2523). It
+// legitimately mints stamps — that is the feature — so it MUST be able to call
+// `useStamps`. It must never DRAW one: a stamp is a final score, and 162
+// finished keepsakes on this page would be a different artifact from the
+// results it lists. The count-versus-art line FORBIDDEN_ART_DIRS draws for My
+// Tally is the same line drawn here, one file at a time.
 //
 // Adding a name here STRENGTHENS the guard. Removing one, or moving a file off
-// this list, is a spoiler-rule decision — read ADR-0035 and ADR-0042 first.
+// this list, is a stamp-containment decision — read ADR-0035 and ADR-0042 first.
 const FORBIDDEN_ART_FILES = [
   'screens/team/StampInPage.jsx',
   'components/logbook/StampInButton.jsx',

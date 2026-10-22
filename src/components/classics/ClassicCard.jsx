@@ -15,8 +15,7 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 // The deck (api/classics/deck.js) deals on who played, never on what happened
 // (ADR-0080), and neither it nor the facts call below can carry a score: both
 // requests name a `fields=` list with no score key in it. This card therefore
-// shows two clubs, a date and a park, and a seal strip that is true because
-// nothing here knows the result.
+// shows two clubs, a date and a park, because nothing here knows the result.
 //
 // THE SEAL IS THE ORDINARY ONE. The button opens the game's first lineup page
 // at the address the slate's own cards build, so the game is sealed under the
@@ -57,7 +56,6 @@ export function ClassicCard({ seed = 0, era = null, teamId = null, kicker = 'A c
           <Club club={facts.home} />
         </div>
 
-        <p className="pgame__seal">{started ? 'Your progress applies' : 'Score sealed'}</p>
         {facts.reason && <p className="pgame__why">{facts.reason}</p>}
 
         <p className="pgame__meta">

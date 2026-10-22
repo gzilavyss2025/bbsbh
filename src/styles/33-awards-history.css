@@ -27,8 +27,20 @@
    repeating per season. The "By Year" view does the same per award instead
    of per season (AwardYearSplit) — a league banner never repeats down the
    page in either view. */
-.awardhistory__award {
-  margin-top: var(--space-2);
+/* Square corners (the Scout page's #2319 pattern): every shared part under this
+   page reads these tokens, so one override squares them. Set on <body>, not on
+   .screen, because a sheet or popover portals out to <body> (ModalPortal.jsx). */
+body:has(.screen.awardhistory) {
+  --radius-xs: var(--radius-square);
+  --radius-sm: var(--radius-square);
+  --radius-md: var(--radius-square);
+  --radius-lg: var(--radius-square);
+  --radius-pill: var(--radius-square);
+}
+/* One stamped card per award (or per year); the body is trimmed so a two-up grid
+   of winners keeps its width. */
+.awardhistory__award > .card__body {
+  padding-inline: var(--space-2h);
 }
 /* Year rail (left) + content (right). Only ever has one child when the year
    isn't shown (the "By Year" view already names it in a SectionTitle) — the
@@ -400,4 +412,3 @@
     max-width: 1200px;
   }
 }
-

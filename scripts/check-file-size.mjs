@@ -78,7 +78,7 @@ const BUDGETS = {
   // an ordered @import sequence and cannot nest), so a new rule cannot go in a new
   // flat file. Split a sheet by moving a component's rules into a subdirectory
   // (src/styles/system/, focus/, report/) before you raise a number here.
-  'src/styles/78-offseason.css': 1200, // 1151
+  'src/styles/78-offseason.css': 1100, // 1082
   'src/styles/06-loader-and-cards.css': 800, // 900
   'src/styles/08-site-shell.css': 800, // 900
   'src/styles/12-sealbox.css': 1600, // 1536
@@ -86,8 +86,8 @@ const BUDGETS = {
   'src/styles/15-team-color-lab.css': 680, // 674
   'src/styles/17-identity-lab-workbench.css': 1196, // 1200
   'src/styles/21-box-score.css': 900, // 800
-  'src/styles/31-wild-card.css': 1200, // 1300
-  'src/styles/35-postseason-series.css': 800, // 693
+  'src/styles/31-wild-card.css': 1100, // 1092
+  'src/styles/35-postseason-series.css': 700, // 658
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877
   'src/styles/49-passport-book.css': 1100, // 1036

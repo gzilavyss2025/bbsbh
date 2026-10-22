@@ -103,34 +103,6 @@
   border-color: var(--accent-primary);
   color: var(--text-on-ink);
 }
-/* Reveal-today reads as a strip of kraft seal tape you peel — same amber as
-   SealBox, but a compact inline chip rather than a full-width block. */
-.standings-reveal {
-  flex: 0 0 auto;
-  min-height: 28px;
-  padding: 0 var(--space-2h);
-  border-radius: var(--radius-sm);
-  border: var(--bw-hair) solid var(--seal-deep);
-  background: var(--seal-cover);
-  color: var(--seal-cover-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.standings-reveal:active {
-  transform: scale(0.97);
-}
-.standings-reveal.is-on {
-  background: var(--surface-card);
-  border-color: var(--border-rule);
-  color: var(--text-caption);
-  font-weight: var(--w-semibold);
-}
 /* Keep the last-good standings on screen, dimmed, while a new date loads. */
 .standings-body.is-refreshing {
   opacity: 0.5;
