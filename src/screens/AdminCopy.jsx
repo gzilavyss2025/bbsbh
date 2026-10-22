@@ -5,12 +5,10 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { FIELDS, GROUPS, defaultCopy, sanitizeOverrides } from '../copy/registry.js'
-import { ConsentModal } from '../components/seal/ConsentModal.jsx'
-import { makePreviewResolver } from '../copy/previewResolver.js'
 import { AwardOrderEditor } from '../components/admin/AwardOrderEditor.jsx'
 
 // The admin copy editor (route: /admin, unlinked). Lets the site owner tune the
-// wording — and the humor — of the spoiler-consent pop-ups without a deploy.
+// wording of the site's editable text without a deploy.
 // Reads/writes the global copy store via /api/copy. Access is gated twice: this
 // UI only unlocks for a signed-in Clerk user whose publicMetadata.role is
 // 'admin', and the API independently enforces a server-side allowlist — so this
@@ -47,35 +45,10 @@ function Notice({ children }) {
   return <p className="admincopy__notice">{children}</p>
 }
 
-// A small non-interactive rendering of a consent modal, so the admin sees the
-// wording in context as they edit it.
-function ModalPreview({ values, ids }) {
-  const line = (id) => values[id] ?? ''
-  return (
-    <div className="admincopy__preview" aria-hidden="true">
-      <div className="admincopy__previewCard">
-        <h4 className="admincopy__previewTitle">{line(ids.title)}</h4>
-        <p className="admincopy__previewBody">{line(ids.body)}</p>
-        {line(ids.humorLine) && <p className="admincopy__previewHumor">{line(ids.humorLine)}</p>}
-        {line(ids.changesNote) && <p className="admincopy__previewBody">{line(ids.changesNote)}</p>}
-        <p className="admincopy__previewReset">{line(ids.resetNote)}</p>
-        <div className="admincopy__previewButtons">
-          <span className="admincopy__previewBtn admincopy__previewBtn--dismiss">
-            {line(ids.dismiss)}
-          </span>
-          <span className="admincopy__previewBtn admincopy__previewBtn--confirm">
-            {line(ids.confirm)}
-          </span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // Split a group's fields into consecutive runs sharing a `subgroup`, preserving
 // registry order. The ballparks group is 30 parks x 4 fields; without this the
 // panel is 120 undifferentiated boxes and you cannot tell which note belongs to
-// which photo URL. A group whose fields declare no subgroup (Stamp In) comes
+// which photo URL. A group whose fields declare no subgroup comes
 // back as one untitled run, so its markup is unchanged.
 function subgroups(fields) {
   const runs = []
@@ -206,11 +179,6 @@ function Editor({ onDirty, focus }) {
   const [status, setStatus] = useState({ state: 'loading', message: 'Loading current copy…' })
   // null = history not loaded yet; [] = loaded, empty; [...] = entries.
   const [history, setHistory] = useState(null)
-  // Which group's REAL ConsentModal is being previewed (group id), or null. The
-  // preview renders the actual ConsentModal with a resolver built from the boxes
-  // as they stand right now — unsaved edits included.
-  const [preview, setPreview] = useState(null)
-
   // Adopt a stored override map as the new ground truth: fills the boxes and
   // resets the dirty baseline to match.
   const adoptStored = useCallback(
@@ -363,7 +331,7 @@ function Editor({ onDirty, focus }) {
   return (
     <div className="admincopy__body">
       <p className="admincopy__note">
-        Edit the wording of the spoiler-consent moments. Blank a box or tap Reset to fall back to
+        Edit the wording of the editable text. Blank a box or tap Reset to fall back to
         the shipped default. Changes go live for everyone within about a minute of saving.
       </p>
 
@@ -394,11 +362,6 @@ function Editor({ onDirty, focus }) {
         const groupFields = FIELDS.filter(
           (f) => f.group === group.id && (!focus || f.id.startsWith(`${focus}.`)),
         )
-        const ids = Object.fromEntries(groupFields.map((f) => [f.id.split('.')[1], f.id]))
-        // Only a group that composes ONE modal can be staged as one. The
-        // ballpark notes are 30 independent paragraphs on a plain page, so they
-        // render as a bare field list — no preview pane, no "View real modal".
-        const stageable = group.preview === 'consentModal'
         // Award weight is the one group that is not copy: an ordering plus two
         // numbers. It stores the same bounded registry values every other
         // group does — and reads back into a plain text box if this ever
@@ -409,15 +372,6 @@ function Editor({ onDirty, focus }) {
           <section key={group.id} className="admincopy__group" aria-label={group.label}>
             <div className="admincopy__groupHead">
               <h2 className="admincopy__groupTitle">{group.label}</h2>
-              {stageable && (
-                <button
-                  type="button"
-                  className="admincopy__previewOpen"
-                  onClick={() => setPreview(group.id)}
-                >
-                  View real modal
-                </button>
-              )}
             </div>
             {custom ? (
               <AwardOrderEditor
@@ -427,7 +381,7 @@ function Editor({ onDirty, focus }) {
                 onReset={onReset}
               />
             ) : (
-            <div className={stageable ? 'admincopy__groupGrid' : 'admincopy__groupGrid admincopy__groupGrid--plain'}>
+            <div className="admincopy__groupGrid admincopy__groupGrid--plain">
               <div className="admincopy__fields">
                 {subgroups(groupFields).map(({ title, fields }) => (
                   <div key={title ?? '_'} className="admincopy__subgroup">
@@ -444,26 +398,11 @@ function Editor({ onDirty, focus }) {
                   </div>
                 ))}
               </div>
-              {stageable && <ModalPreview values={values} ids={ids} />}
             </div>
             )}
           </section>
         )
       })}
-
-      {/* The actual ConsentModal, rendered with a resolver built from the live
-          box values (unsaved edits included) — a pixel-accurate rehearsal of
-          what users will see, distinct from the always-on inline ModalPreview.
-          Confirm/dismiss are no-ops here: previewing must never fire a real
-          toggle or persist anything, it only closes. */}
-      {preview && (
-        <ConsentModal
-          group={preview}
-          resolveText={makePreviewResolver(preview, values)}
-          onConfirm={() => setPreview(null)}
-          onDismiss={() => setPreview(null)}
-        />
-      )}
     </div>
   )
 }

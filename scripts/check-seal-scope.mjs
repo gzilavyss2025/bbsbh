@@ -11,9 +11,8 @@
 //
 // "A reveal is possible" means one of:
 //   - the cover itself, its copy, and the tear it splits into;
-//   - a control that LIFTS a seal — the reveal button, the consent to open a
-//     season of results (Stamp In, ADR-0042), the scorecard's face-down
-//     at-bat;
+//   - a control that LIFTS a seal — the reveal button, the scorecard's
+//     face-down at-bat;
 //   - the Game Log's mint strip, which is the one action that leaves something
 //     behind on the far side of a seal (ADR-0035);
 //   - the surfaces finding 9 of the design critique put on its must-survive
@@ -72,7 +71,6 @@ const ALLOWLIST = {
   '12-sealbox.css': ['.sealbox.cover', '.sealtear__face', '.cover__main'],
 
   // Controls that lift a seal.
-  '46-consent-modal.css': ['.consent__btn--confirm'],
   // The lens's tear (#724 L7) wears the same face on its two flying halves.
   'scorecard/box.css': ['.sc-ab__seal', '.sc-ab__sealtext', '.sc-lens__tearface', '.sc-lens__teartext'],
   // The lens bar's Unwrap button (ADR-0092): it lifts the same seal the frame

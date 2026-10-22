@@ -38,7 +38,7 @@ const PHOTO_URL =
 // looking) and a numeric-LOOKING string (the reason the flag is there).
 const STORED = {
   'ballpark.fenwayparkPhoto': PHOTO_URL,
-  'stampIn.confirm': '42',
+  'offseason.springLabel': '42',
 }
 
 // What the REST API puts on the wire for HGETALL: field/value flattened in
@@ -109,7 +109,7 @@ test('a numeric-looking override stays the exact STRING it was saved as', async 
 
   // Not 42. Dropping `automaticDeserialization: false` to fix the pairing would
   // turn this into a number and sanitizeOverrides would silently discard it.
-  assert.strictEqual(res.json.copy['stampIn.confirm'], '42')
+  assert.strictEqual(res.json.copy['offseason.springLabel'], '42')
 })
 
 test('an empty copy store still reads as no overrides, not an error', async () => {

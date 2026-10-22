@@ -11,20 +11,13 @@ import { useNav } from '../../lib/nav.js'
 import { humanDate } from '../../lib/dates.js'
 import { gamePath, teamTabPath } from '../../lib/route.js'
 import { DEFAULT_STAMP_MODE, seasonFromDate } from '../../lib/stamps.js'
-import {
-  STAMP_IN_CONSENT_KEY,
-  hasStampInConsent,
-  parseStampInConsent,
-  serializeStampInConsent,
-  stampInGames,
-} from '../../lib/stampIn.js'
+import { stampInGames } from '../../lib/stampIn.js'
 import { teamClubName } from '../../lib/teams.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { EmptyState } from '../../components/ui/state/EmptyState.jsx'
 import { Notice } from '../../components/ui/state/Notice.jsx'
-import { ConsentModal } from '../../components/seal/ConsentModal.jsx'
 import { GameResultFace } from '../../components/game/GameResultFace.jsx'
 import { BoxScoreSkeleton } from '../../components/game/BoxScoreSkeleton.jsx'
 import { StampInButton } from '../../components/logbook/StampInButton.jsx'
@@ -33,33 +26,23 @@ import { loadStampIn } from './data/loadStampIn.js'
 // ===========================================================================
 // Stamp In — a club's played season, every result showing (ADR-0042)
 // ===========================================================================
-// The one place in this app that lays a whole season of final scores out in
-// front of you before you have opened any of those games. That is a departure
-// from the spoiler rule, and it is legitimate for one reason and one only:
-// **you asked for it, at this address, by name.** The consent below is the
-// whole argument, so read ADR-0042 before touching it.
+// Lays a whole season of final scores out in front of you before you have
+// opened any of those games, so a stamp can be pressed for each one you
+// watched. It opens straight away: a club's results are on the team page
+// already (the Games band's season grid), so the page asks nothing first. It
+// used to ask for a one-time consent; that step went with #2523 (supersedes
+// ADR-0042's consent, not its render-only rule).
 //
-// TWO RULES THIS FILE MUST KEEP.
-//
-// 1. NOTHING RENDERS, AND NOTHING IS FETCHED, BEFORE CONSENT. The season is a
-//    separate component mounted only once the answer is yes — so an
-//    unconsented visit has no result in the DOM and has not even asked
-//    statsapi for one. Not fetched-then-hidden; not fetched at all.
-//
-// 2. IT IS RENDER-ONLY, exactly in ADR-0026's sense. This page never writes
-//    `bbsbh:reveal:{gamePk}` and never advances `revealedThrough` for any
-//    game. It touches `useRevealProgress` nowhere, mounts no `SealBox`, and
-//    passes no `onReveal` to anything. An accidental write here would silently
-//    unseal these games on every OTHER screen — the slate, the innings viewer,
-//    the box score — and on every one of the reader's other devices. That is
-//    the failure this whole page has to be trusted not to cause.
-//
-// The consent is stored on this device (`bbsbh:stampIn`), never synced. It is
-// a fact about one browser, the same footing as `bbsbh:intro`.
+// ONE RULE THIS FILE MUST KEEP. IT IS RENDER-ONLY. This page never writes
+// `bbsbh:reveal:{gamePk}` and never advances `revealedThrough` for any
+// game. It touches `useRevealProgress` nowhere, mounts no `SealBox`, and
+// passes no `onReveal` to anything. An accidental write here would silently
+// unseal these games on every OTHER screen — the slate, the innings viewer,
+// the box score — and on every one of the reader's other devices. That is
+// the failure this whole page has to be trusted not to cause.
 export function StampInPage({ id, asOf, sportId }) {
   const teamId = Number(id)
   const navigate = useNav()
-  const [consent, setConsent] = useState(readConsent)
   useDocumentTitle('Stamp In')
 
   // The one way out, and back to the only door in: the Games tab's Schedule
@@ -69,26 +52,11 @@ export function StampInPage({ id, asOf, sportId }) {
     navigate(teamTabPath(id, 'games', { d: asOf, s: sportId }))
   }, [navigate, id, asOf, sportId])
 
-  const accept = useCallback(() => {
-    writeConsent()
-    setConsent(true)
-  }, [])
-
-  if (!consent) {
-    return (
-      <div className="screen stampin">
-        <SiteHeader />
-        <BackBtn onClick={backToGames} />
-        <ConsentModal group="stampIn" onConfirm={accept} onDismiss={backToGames} />
-      </div>
-    )
-  }
-
   return <StampInSeason teamId={teamId} asOf={asOf} onBack={backToGames} />
 }
 
 // ---------------------------------------------------------------------------
-// The consented season
+// The season
 // ---------------------------------------------------------------------------
 function StampInSeason({ teamId, asOf, onBack }) {
   const data = useAsync(() => loadStampIn(teamId, asOf), [teamId, asOf])
@@ -293,29 +261,5 @@ function pump() {
       inFlight -= 1
       pump()
     })
-  }
-}
-
-// ---------------------------------------------------------------------------
-// The consent record's storage I/O
-// ---------------------------------------------------------------------------
-// Kept here rather than in a hook of its own: the rules are pure and tested in
-// src/lib/stampIn.js, and this is the only screen that ever reads or writes
-// them. Both directions degrade quietly — a browser with storage disabled
-// simply asks again next visit, which errs toward asking, never toward
-// showing.
-function readConsent() {
-  try {
-    return hasStampInConsent(parseStampInConsent(window.localStorage.getItem(STAMP_IN_CONSENT_KEY)))
-  } catch {
-    return false
-  }
-}
-
-function writeConsent() {
-  try {
-    window.localStorage.setItem(STAMP_IN_CONSENT_KEY, serializeStampInConsent(Date.now()))
-  } catch {
-    // Private mode / storage disabled — the page still opens for this visit.
   }
 }

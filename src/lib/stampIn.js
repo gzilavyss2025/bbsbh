@@ -3,53 +3,13 @@
 // this file is the part nothing can get wrong quietly.
 //
 // The page lists a club's whole played season with every result showing, so a
-// reader can press a stamp for each game they watched. That is a deliberate,
-// consented departure from the spoiler rule and it is scoped to this one
-// address — read docs/adr/0042-stamp-in-is-a-consented-season-of-results.md
-// before changing anything here.
+// reader can press a stamp for each game they watched. It opens with no
+// consent step (#2523; ADR-0042 records the old one).
 //
-// WHAT THIS MODULE MAY NEVER GROW: a reveal mark. The page is render-only, in
-// the exact sense ADR-0026 gave that word (that ADR is retired; the sense
-// stands) — it never writes
-// `bbsbh:reveal:{gamePk}` and never advances `revealedThrough` for any game.
-// Nothing in this file, or in the screen over it, may reach the reveal ratchet.
-
-// The one-time consent, kept on this device only. A record, not a mark: it
-// says "I agreed to see this page", never anything about a game, and it never
-// touches the reveal mark.
-export const STAMP_IN_CONSENT_KEY = 'bbsbh:stampIn'
-
-// Parse the stored consent, or null. FAILS CLOSED on everything: bad JSON, an
-// array, a bare string, a missing flag, and — deliberately — a `consented`
-// that is merely truthy rather than literally `true`. The cost of reading this
-// wrong is a season of final scores drawn for someone who never agreed to
-// them, so nothing here is generous about what it accepts.
-export function parseStampInConsent(raw) {
-  if (raw == null) return null
-  let parsed
-  try {
-    parsed = JSON.parse(raw)
-  } catch {
-    return null
-  }
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
-  if (parsed.consented !== true) return null
-  return {
-    consented: true,
-    at: Number.isInteger(parsed.at) && parsed.at >= 0 ? parsed.at : 0,
-  }
-}
-
-export function serializeStampInConsent(now = Date.now()) {
-  return JSON.stringify({
-    consented: true,
-    at: Number.isInteger(now) && now >= 0 ? now : 0,
-  })
-}
-
-export function hasStampInConsent(state) {
-  return Boolean(state && state.consented === true)
-}
+// WHAT THIS MODULE MAY NEVER GROW: a reveal mark. The page is render-only — it
+// never writes `bbsbh:reveal:{gamePk}` and never advances `revealedThrough` for
+// any game. Nothing in this file, or in the screen over it, may reach the
+// reveal ratchet.
 
 // A game counts as PLAYED once it carries a result — which is `won` on an
 // ordinary decided game, and both clubs' run totals on the rare final that
