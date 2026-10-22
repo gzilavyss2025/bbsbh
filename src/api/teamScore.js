@@ -36,9 +36,10 @@ export function leagueSeasonGradesFor(teamData, surpriseData, season, cutoff) {
   return rows
 }
 
-// A strict, gapless 1..N ranking with a deterministic tiebreaker chain, for
-// Season Grade, where a shared score (rounded to one decimal, so ties are
-// common) would otherwise print two teams at the same rank. Falls through the rounded score to each row's
+// A strict, gapless 1..N ranking with a deterministic tiebreaker chain. Its one
+// caller is gradeTiersByTeamId below: a shared Season Grade (rounded to one
+// decimal, so ties are common) would otherwise leave input order to decide which
+// third a team lands in. Falls through the rounded score to each row's
 // `tiebreak` array (a finer-grained underlying signal that rounded to the
 // same score, e.g. weightedWinsAbove500) and finally to teamId, so it always
 // resolves to a total order — no two teams can tie all the way down.

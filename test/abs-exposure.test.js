@@ -19,8 +19,6 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   binPosition,
-  clubChallengeBoard,
-  clubRowsFor,
   exposureClubLevelFor,
   fetchAbsExposureClubs,
   exposureBoard,
@@ -31,6 +29,7 @@ import {
   MIN_CATCHER_INNINGS,
   MIN_PLATE_APPEARANCES,
 } from '../src/api/around-the-game/absExposure.js'
+import { challengeCard } from '../src/api/around-the-game/absClubCard.js'
 
 // One row of the sweep, with the shape gen-abs-challenges.mjs --exposure
 // writes. `per1000Pitches` and `per9Caught` are precomputed in the file, so the
@@ -275,11 +274,11 @@ test('exposureFor: a level the sweep has not reached is null, not an empty list'
 })
 
 // --------------------------------------------------------------------------
-// clubChallengeBoard — the team hub's card, off the per-club file.
+// The per-club file, as the team page's challenge card reads it.
 // --------------------------------------------------------------------------
-// A different file from everything above: one row per player per CLUB, so the
-// card can attribute a traded man to the club he was with at the time. Its rows
-// ship counts and denominators and no rates, so the reader divides.
+// One row per player per CLUB, so the card can attribute a traded man to the
+// club he was with at the time. Its rows ship counts and denominators and no
+// rates, so the reader divides (absClubCard.js, tested in abs-club-card.test.js).
 
 const clubRow = (over) => ({
   playerId: 1,
@@ -290,92 +289,6 @@ const clubRow = (over) => ({
   asBatter: 6,
   asCatcher: 0,
   ...over,
-})
-
-const clubs = (byTeam) => ({ levels: { MLB: { byTeam } } })
-
-test('clubChallengeBoard: the club rate is over EVERY man, the dots over the qualifiers', () => {
-  // Two regulars and a September call-up who never argued. The rate counts all
-  // three, because "this club challenges once every N times up" is a fact about
-  // the club; the board draws the two who clear the floor.
-  const data = clubs({
-    100: [
-      clubRow({ playerId: 1, asBatter: 6, pitches: 1000, plateAppearances: 250 }),
-      clubRow({ playerId: 2, asBatter: 4, pitches: 1000, plateAppearances: 250 }),
-      clubRow({ playerId: 3, asBatter: 0, pitches: 1000, plateAppearances: 20 }),
-    ],
-  })
-  const board = clubChallengeBoard(data, 100, 'batter')
-  // 10 challenges over 3,000 pitches, the call-up included.
-  assert.equal(board.rate, (10 / 3000) * 1000)
-  assert.equal(board.roster, 3)
-  assert.deepEqual(board.players.map((p) => p.playerId), [1, 2])
-})
-
-test('clubChallengeBoard: the rank and the figure come off the same arithmetic', () => {
-  // A figure a reader sees and a rank computed another way is how a card ends
-  // up saying "4.53, 3rd of 30". Ties share the better rank.
-  const data = clubs({
-    100: [clubRow({ asBatter: 2, pitches: 1000 })],
-    101: [clubRow({ playerId: 2, asBatter: 6, pitches: 1000 })],
-    102: [clubRow({ playerId: 3, asBatter: 6, pitches: 1000 })],
-  })
-  assert.equal(clubChallengeBoard(data, 100, 'batter').rank, 3)
-  assert.equal(clubChallengeBoard(data, 101, 'batter').rank, 1)
-  assert.equal(clubChallengeBoard(data, 102, 'batter').rank, 1)
-  assert.equal(clubChallengeBoard(data, 100, 'batter').of, 3)
-})
-
-test('clubChallengeBoard: the league line is read off the same file, not fetched', () => {
-  // The card draws a diagonal at the LEAGUE rate. Reaching for the 418 KB
-  // league list to print it would undo the whole reason this file exists.
-  const data = clubs({
-    100: [clubRow({ asBatter: 2, pitches: 1000 })],
-    101: [clubRow({ playerId: 2, asBatter: 8, pitches: 1000 })],
-  })
-  assert.equal(clubChallengeBoard(data, 100, 'batter').league, (10 / 2000) * 1000)
-})
-
-test('clubChallengeBoard: a catcher board reads innings caught, and its own floor', () => {
-  const data = clubs({
-    100: [
-      clubRow({ playerId: 1, asCatcher: 100, catcherInnings: 900, pitches: 800, plateAppearances: 210 }),
-      // A second catcher who barely caught: in the club rate, out of the board.
-      clubRow({ playerId: 2, asCatcher: 1, catcherInnings: 9, pitches: 40, plateAppearances: 10 }),
-    ],
-  })
-  const board = clubChallengeBoard(data, 100, 'catcher')
-  assert.equal(board.rate, (101 / 909) * 9)
-  assert.deepEqual(board.players.map((p) => p.playerId), [1])
-  assert.equal(board.players[0].rate, (100 / 900) * 9)
-  assert.equal(board.kind.floor, MIN_CATCHER_INNINGS)
-})
-
-test('clubChallengeBoard: the men under the league line are counted, and the top one named', () => {
-  const data = clubs({
-    100: [
-      clubRow({ playerId: 1, asBatter: 1, pitches: 1000 }),
-      clubRow({ playerId: 2, name: 'The Loud One', asBatter: 30, pitches: 1000 }),
-      clubRow({ playerId: 3, asBatter: 2, pitches: 1000 }),
-    ],
-  })
-  const board = clubChallengeBoard(data, 100, 'batter')
-  // League is 11 per thousand here, so two of the three are under it.
-  assert.equal(board.below, 2)
-  assert.equal(board.leader.name, 'The Loud One')
-  // And the board is ordered by exposure, which is the x axis of the scatter.
-  assert.deepEqual(board.players.map((p) => p.playerId), [1, 2, 3])
-})
-
-test('clubChallengeBoard: a club below Triple-A draws nothing, not an empty card', () => {
-  const data = clubs({ 100: [clubRow({})] })
-  assert.equal(clubChallengeBoard(data, 5015, 'batter'), null)
-  assert.equal(clubChallengeBoard(null, 100, 'batter'), null)
-  assert.equal(clubRowsFor(data, 5015), null)
-  assert.equal(clubRowsFor(data, 100).length, 1)
-  // A file holds the one level it is named for, so asking it for the other is
-  // asking for nothing — never a silent fall-through to the level it does hold.
-  assert.equal(clubRowsFor(data, 100, 'AAA'), null)
 })
 
 // --------------------------------------------------------------------------
@@ -399,7 +312,7 @@ test('fetchAbsExposureClubs: no level means no fetch, and resolves null rather t
   assert.equal(await fetchAbsExposureClubs('AA'), null)
 })
 
-test('clubChallengeBoard: a Triple-A club is ranked inside Triple-A', () => {
+test('challengeCard: a Triple-A club is ranked inside Triple-A', () => {
   // The rank is "of thirty" at either level, never a club measured against a
   // level it does not play in. The file is one level, so this is structural —
   // the test pins that the level key travels all the way through.
@@ -407,14 +320,17 @@ test('clubChallengeBoard: a Triple-A club is ranked inside Triple-A', () => {
     400: [clubRow({ playerId: 1, pitches: 1000, asBatter: 12 })],
     401: [clubRow({ playerId: 2, pitches: 1000, asBatter: 4 })],
   } } } }
-  const board = clubChallengeBoard(aaa, 400, 'batter', 'AAA')
-  assert.equal(board.rank, 1)
-  assert.equal(board.of, 2)
-  assert.equal(board.players.length, 1)
+  const batter = challengeCard(aaa, 400, 'AAA').batter
+  assert.deepEqual(batter.rank, { rank: 1, of: 2 })
+  assert.equal(batter.plotted.length, 1)
   // League is the file's own two clubs, not MLB's.
-  assert.equal(board.league, (16 / 2000) * 1000)
+  assert.equal(batter.league.calls, 16)
+  assert.equal(batter.league.exposure, 2000)
   // And the same club read at the default level is absent, not mis-ranked.
-  assert.equal(clubChallengeBoard(aaa, 400, 'batter'), null)
+  assert.equal(challengeCard(aaa, 400), null)
+  // A file holds the one level it is named for, so asking it for the other is
+  // asking for nothing — never a silent fall-through to the level it does hold.
+  assert.equal(challengeCard(aaa, 400, 'MLB'), null)
 })
 
 // A season store (ADR-0086): the folder of the season abs/seasons.json names,
@@ -436,11 +352,13 @@ test('the shipped club files hold one level each, and every club draws', async (
     const teamIds = Object.keys(data.levels[level].byTeam)
     assert.equal(teamIds.length, 30, `${level} is not thirty clubs`)
     for (const teamId of teamIds) {
+      const card = challengeCard(data, Number(teamId), level)
+      assert.ok(card, `${level}/${teamId} has no card`)
       for (const kind of ['batter', 'catcher']) {
-        const board = clubChallengeBoard(data, Number(teamId), kind, level)
-        assert.ok(board, `${level}/${teamId}/${kind} has no board`)
-        assert.ok(board.rate > 0, `${level}/${teamId}/${kind} has no rate`)
-        assert.ok(board.players.length > 0, `${level}/${teamId}/${kind} draws no dots`)
+        const job = card[kind]
+        assert.ok(job.club.calls > 0, `${level}/${teamId}/${kind} has no reviews`)
+        assert.ok(job.rank, `${level}/${teamId}/${kind} has no rank`)
+        assert.ok(job.plotted.length > 0, `${level}/${teamId}/${kind} plots no one`)
       }
     }
   }

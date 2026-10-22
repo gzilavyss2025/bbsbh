@@ -864,13 +864,13 @@ for each generator; the reader modules:
   appearances, pitches seen and innings caught over completed games.
   IT READS A SECOND FILE TOO: `public/data/abs/{season}/abs-exposure-clubs-{level}.json`,
   the same sweep cut by `team_id` instead of folded across clubs, behind the
-  team hub's challenge card (`clubChallengeBoard`). 93 KB for MLB and 128 KB for
-  Triple-A against the folded list's 418, fetched by one club's Numbers tab and
+  team page's challenge card (`challengeCard` in `absClubCard.js`, below). 93 KB for MLB and 128 KB for
+  Triple-A against the folded list's 418, fetched by one club's team page and
   by nothing else, because the fold that makes a 200-plate-appearance floor
   correct on a SEASON is the same fold that drops the club a traded man played
-  for. It ships counts and denominators and no rates: the reader divides with
-  the same `EXPOSURE_KINDS` the league board uses, so a club's figure and the
-  league's cannot come apart. ONE FILE PER LEVEL, read through `staticJsonBy`
+  for. It ships counts and denominators and no rates: the card divides with
+  its own `JOBS` table in `absClubCard.js`, whose floors are the league board's
+  `MIN_PLATE_APPEARANCES` and `MIN_CATCHER_INNINGS`. ONE FILE PER LEVEL, read through `staticJsonBy`
   and memoized per level, so a major-league club's page never carries Triple-A's
   rows; `exposureClubLevelFor` turns the hub's sportId into the level, and null
   below Triple-A means no fetch and no card. Two things it knows that the folded
