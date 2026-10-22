@@ -3,36 +3,31 @@
 Fetch wrappers and selectors around the public MLB Stats API, split by topic (all
 share `statsapi.js`'s `getJson`; a shared header there notes the gamePk field
 paths were verified against). The always-loaded root `CLAUDE.md` carries only the
-spoiler-rule summary that governs these modules; `../CLAUDE.md` covers how they're
-consumed by the screens.
+sealing-rule summary; `../CLAUDE.md` covers how the screens consume these modules.
 
 **This file is the RULE, not the catalog.** It loads in full whenever anyone works
 in this directory, so it holds only what you need before touching any module here.
 The per-module notes live in `docs/api/` and load when you're pointed at them —
 see "Where the per-module notes live" at the bottom.
 
-## The spoiler rule, applied here
+## The sealing rule, applied here
+
+It covers the four scoring surfaces only (root `CLAUDE.md`). Most modules here feed open
+surfaces and need no seal; do not add a `SealBox` to one of those (ADR-0034).
 
 `linescore.js`, `derive.js` and `hitchart.js` are **reveal-only** modules — callable only from
 inside a `SealBox`'s reveal render function, never at render top-level or in an
 eager `useMemo` (ADR-0001). `highlights.js`'s join (`highlightsByPlayId`) is
-reveal-only in the same sense — a video clip's title/description narrate the
-play's outcome, so the map is built inside `HalfInning`'s `SealBox` reveal
-function, never at `InningViewer`'s top level; the
-fetch itself (`fetchHighlights`) is safe eagerly with respect to spoilers,
-same as `game.js`'s `fetchWinProbability` — a raw fetch result produces no DOM
-on its own — but `useGameData` still waits to fire either until its consuming
-surface is actually opened (`useEverActive`), since "safe" here only ever meant
-spoiler-safe, not free.
-`select.js` is spoiler-**free**. In between sit
-**caller-gated pre-pitch selectors** (`selectPrePitchChanges` in `select.js`,
-`defenseEntering` in `defense.js`, `lineupEntering` in `battingorder.js`),
-spoiler-free only when restricted to the half the user has reached
-(`halfIndex <= revealedThrough + 1`). `hitchart.js`'s clamp looks like theirs but
-stops one half earlier — `<= revealedThrough`, no `+ 1` — because a batted ball
-IS the result, not the staging for one (ADR-0051). See the root `CLAUDE.md`
-spoiler section and `docs/adr/` (0001, 0003, 0005–0007, 0009, 0010, 0051) before
-touching any of these.
+reveal-only in the same sense: a clip's title narrates the play, so the map is built
+inside `HalfInning`'s `SealBox` reveal function. The fetches themselves (`fetchHighlights`,
+`fetchWinProbability`) are safe eagerly, since a raw fetch result produces no DOM;
+`useGameData` still waits for the consuming surface to open (`useEverActive`).
+`select.js` is spoiler-**free**. In between sit **caller-gated pre-pitch selectors**
+(`selectPrePitchChanges` in `select.js`, `defenseEntering` in `defense.js`,
+`lineupEntering` in `battingorder.js`), free only when restricted to the half the user
+has reached (`halfIndex <= revealedThrough + 1`). `hitchart.js`'s clamp stops one half
+earlier — `<= revealedThrough`, no `+ 1` — because a batted ball IS the result (ADR-0051).
+Before touching any of these, read `docs/adr/` (0001, 0003, 0005–0007, 0009, 0010, 0051).
 
 **The classification is also machine-readable.** `spoiler-manifest.json` in this
 directory carries one entry per module — its class (`reveal-only`, `reveal-gated`,
@@ -41,19 +36,10 @@ and for the gated classes an `importers` allowlist.
 `scripts/check-spoiler-manifest.mjs` (run by `npm run lint`) fails if a module here
 has no entry, if an entry names a file that no longer exists, or if a gated module
 gains an importer that isn't on its list. **A new module in this directory does not
-lint until it is classified** — that is the point. It cannot prove a reveal-only call
-sits inside a `SealBox` reveal (ADR-0002's render-function shape is what does that);
-what it buys is that a spoiler audit is a diff against that file rather than a
-re-trace of the whole graph. The motivating case is in the manifest's own header:
-`loadScorecard.js`'s header claimed for months that the module read only spoiler-free
-data while importing `revealInning`/`revealTotals` two lines below it. Prose can be
-wrong; this cannot be wrong silently. Start from the manifest, not from a grep: it
-answers "what is this and who may import it" in one line, and `docs/api/` answers
-"how does it work". A module's own header is the third step, not the first.
-
-**This classification is about the SCORING surfaces only** (root `CLAUDE.md` has the
-scope). Most modules here feed OPEN surfaces and correctly need no seal. Do not add a
-`SealBox` to one of those: that is the mistake ADR-0034 undid.
+lint until it is classified.** It cannot prove a reveal-only call sits inside a
+`SealBox` reveal (ADR-0002's render-function shape does that); it makes an audit a diff
+against that file. Start from the manifest, not from a grep: it answers "what is this
+and who may import it", and `docs/api/` answers "how does it work".
 
 ## The build-time-fetch pattern
 

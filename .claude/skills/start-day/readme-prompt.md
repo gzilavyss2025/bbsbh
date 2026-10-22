@@ -15,7 +15,7 @@ of nightly-generator output in July 2026 (see `update-nightly-data.yml`'s header
 
 Rewrite README.md in this repo so it faithfully reflects what the app does today.
 
-This is Tally Baseball (repository name: bbsbh), a spoiler-safe, read-only
+This is Tally Baseball (repository name: bbsbh), a read-only
 second-screen PWA for scoring baseball by hand. README.md is written for END
 USERS (not developers) in a warm, plain, second-person voice. Read the current
 README.md first and preserve that voice, structure, and its section headings
@@ -30,11 +30,11 @@ To learn the current feature set, read the source — especially:
 
 Describe features in user terms, not implementation terms.
 
-THE SPOILER RULE IS THE POINT OF THE APP — keep it central: a score-revealing
-value is never in the page until the user taps to reveal it, everything re-seals
-on navigation, and even tab titles and game cards stay score-free. See
-CLAUDE.md's "spoiler rule" section for the exact invariant, but do not copy dev
-jargon into the README.
+On the scoring surfaces (slate score cells, lineup pages, innings viewer, box
+score) a score-revealing value is never in the page until the user taps to
+reveal it. Mention that in one short passage; do not make it the theme of the
+README, and do not say other pages hide anything. See CLAUDE.md's "spoiler rule"
+section for the exact invariant, but do not copy dev jargon into the README.
 
 Make only the edits needed to match reality: add features that now exist, remove
 any the app no longer has, and correct anything stale. Do NOT churn wording for

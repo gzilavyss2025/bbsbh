@@ -65,26 +65,6 @@ function claims(label, re, actual, fix) {
 
 // ---------------------------------------------------------------- the counts
 
-const apiEndpoints = readdirSync(join(ROOT, 'api')).filter((f) => f.endsWith('.js'))
-claims(
-  'the api/ function count',
-  /\*\*(\w+) Vercel functions live in `api\//i,
-  apiEndpoints.length,
-  `api/*.js currently holds: ${apiEndpoints.join(', ')}.`,
-)
-claims(
-  'the score-free endpoint count',
-  /\*\*(\w+) never render or fetch a score/i,
-  apiEndpoints.length - 1,
-  'One endpoint (stamps.js) stores a score by design; the rest must not.',
-)
-claims(
-  'the which-endpoint-stores-a-score ordinal',
-  /\*\*The (\w+) stores a score, by design\*\*/i,
-  apiEndpoints.length,
-  'Stamps is described last, so its ordinal is the total.',
-)
-
 const bands = readFileSync(join(ROOT, 'src/screens/team/next/bands.js'), 'utf8')
 claims('the team page band count', /(\w+)-band page/i, (bands.match(/\bkey: '/g) ?? []).length, 'See BANDS in next/bands.js.')
 
@@ -179,4 +159,4 @@ if (problems.length) {
   process.exit(1)
 }
 
-console.log(`✓ CLAUDE.md's checkable facts hold — ${apiEndpoints.length} api/ endpoints, ${seen.size} cited paths, ADR refs all resolve.`)
+console.log(`✓ CLAUDE.md's checkable facts hold — ${seen.size} cited paths, ADR refs all resolve.`)

@@ -32,8 +32,17 @@ Type size, weight, leading, and tracking must use the semantic roles in
 text is split BY JOB: `--fs-label` 12px display labels, `--fs-cell` 11px mono figures,
 `--fs-small` 13px running copy; `--fs-caption` is short body-face text only, and
 `scripts/check-caption-budget.mjs` only ever lets its count shrink.
-A small attribute line under a name (position, hand, club, school) is the `.t-label` recipe, as in `.phcard__meta`: display face, semibold, `--fs-compact`, `--ls-label`, `--text-caption`.
+A small attribute line under a name (position, hand, club, school) is the `.t-label` recipe, as in `.phcard__meta`: display face, semibold, `--fs-compact`, `--ls-label`, `--text-caption`. Use one such line under a name, never a second.
+**Cut taglines, helper text, and secondary labels. If a screen needs them to make sense, fix the layout.** Explanation the reader must opt into goes in `InfoPopover` (`ui/InfoPopover.jsx`), never shown by default, and it must open by tap (the app is iPhone-first). Keep: column and stat headers, accessibility text, the cue on a sealed cell or consent step, and a short "not posted yet" for missing data. A size, colour, or space no token gives you is a design call: stop and ask Gary (an unattended session writes a `[DECISION: ...]` line).
 A label that draws bold wears `t-label t-label--bold`; one that states no case wears `t-label t-label--nocaps`. Do not copy the recipe into a partial.
+
+**Taste: tokens fix values, not layout.** For a new screen, propose a composition (hierarchy,
+pacing, one moment of motion), not only a restyle, and recommend one direction. Benchmarks Gary
+likes, so copy the craft and not the content: the World Series `Hero` ("Overview",
+`components/worldseries/Hero.jsx`: the date between player layers, win pips, short arrival
+motion), and the pitch-arsenal cards on the player page (`screens/player/next/modules/arsenal/`:
+`ArsenalCard`, `FlightCard`, `FlightScene`, `PitchGlyph`). Before you call UI done, run the
+`apple-design` and `design:design-critique` skills; use `emil-design-eng` for motion and polish.
 
 Focus rings use `var(--focus-ring)`/`var(--ring)`, on a band `--focus-ring-band` +
 `--ring-band` (`check-focus-ring.mjs`). Text-on-background pairings hold WCAG AA

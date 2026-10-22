@@ -50,7 +50,8 @@ per call, your recommendation first and marked "(Recommended)".
    - **The retry prompt.** Complete, in a code block, built like a `design-brief` prompt:
      goal and route, what stays, the direction, tokens and screens to copy, only the rules
      that apply, how to check, what done means, when to stop and ask. Name the exact thing
-     that went wrong the first time so the agent does not repeat it.
+     that went wrong the first time so the agent does not repeat it. For a new layout, have
+     the agent show a wireframe as an Artifact first, so Gary can give feedback before the build.
    - **Model and effort.** From the ladder in `write-prompt` step 5, one line of reason.
      Change the rung only when the cause table says so.
 5. **Offer, never do.** If the cause was a repo rule that no doc states, offer to add one

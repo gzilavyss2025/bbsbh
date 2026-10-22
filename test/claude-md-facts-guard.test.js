@@ -16,8 +16,7 @@ const SCRIPT = path.join(fileURLToPath(new URL('.', import.meta.url)), '../scrip
 
 const ROOT_MD = `# CLAUDE.md
 
-**Two Vercel functions live in \`api/\`**, each inert; **one never render or fetch a score.**
-**The second stores a score, by design**. A one-band page.
+A one-band page.
 
 - **Nested \`CLAUDE.md\`** files:
   - \`src/\` — the app.
@@ -31,8 +30,6 @@ function run(extra) {
     copyFileSync(SCRIPT, path.join(dir, 'scripts/check-claude-md-facts.mjs'))
     const files = {
       'CLAUDE.md': ROOT_MD,
-      'api/a.js': '',
-      'api/b.js': '',
       'src/CLAUDE.md': '# src\n',
       'src/screens/team/next/bands.js': "export const BANDS = [{ key: 'standings' }]\n",
       ...extra,
