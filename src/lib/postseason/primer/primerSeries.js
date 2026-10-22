@@ -11,9 +11,6 @@ import { seriesPlayingToday } from '../bracketDisplay.js'
 export function primerSeriesFor(bracket, slateDate, slateGamePks) {
   const list = seriesPlayingToday(bracket, slateDate)
   if (!list.length || new Set(list.map((s) => s.round)).size > 1) return []
-  // Defence in depth: the bracket never counts a cutoff-date game (ADR-0087), so
-  // this cannot fire today; it keeps a counted game from ever reaching the primer.
-  if (list.some((s) => s.games.some((g) => g.gamePk === s.cutoffGame.gamePk))) return []
   const count = new Map(list.map((s) => [s.key, 0]))
   for (const pk of slateGamePks ?? []) {
     const key = bracket.gameIndex[pk]?.key
