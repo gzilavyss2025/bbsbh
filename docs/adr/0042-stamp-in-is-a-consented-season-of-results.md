@@ -203,3 +203,9 @@ here can never acquire one.
 ADR-0116 removed the Scores Unlocked pass. Stamp In is now the one surface that asks
 for consent through `ConsentModal`, and its "render-only, in ADR-0026's exact sense"
 rule still holds: the sense is the same, the pass that first used it is gone.
+
+## Note (2026-10-22)
+
+ADR-0120 removed the consent step (#2537). `/team/{id}/stamp-in` opens straight to the
+season, and `ConsentModal` and its copy group are gone. The render-only rule (§3) and the
+containment rule (§4) still hold.

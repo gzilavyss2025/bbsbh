@@ -231,3 +231,7 @@ as a follow-up to delete.
 (sportId 11-14) as well as MLB: `R,L,W` there, because the feeds hold no `F` or `D` (Triple-A
 holds `W` only). Rows carry a `round` name, DS and CS at MiLB. The date cutoff above applies
 unchanged. The postseason ledger files and `postseasonDoor` stay MLB only.
+
+## Note (2026-10-22)
+
+ADR-0120: the cutoff here is a date footing, not a seal. The behavior is unchanged.
