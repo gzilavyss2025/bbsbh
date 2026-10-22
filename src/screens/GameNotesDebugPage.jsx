@@ -36,6 +36,10 @@ export function GameNotesDebugPage() {
     [],
   )
 
+  // '—' means this club has no layout; a dash while the chunk loads, or after it
+  // failed, would read the same.
+  const layoutOf = (id) => (layouts.loading ? '…' : layouts.error ? 'error' : layouts.data?.[id] || '—')
+
   const teams = ALL_MLB_TEAM_IDS.map((id) => ({
     id,
     name: teamFullName(id),
@@ -97,7 +101,7 @@ export function GameNotesDebugPage() {
                     <TeamLogo teamId={t.id} name={t.name} size={22} />
                     {t.name}
                   </td>
-                  <td>{t.calibrated ? layouts.data?.[t.id] || '—' : 'not calibrated'}</td>
+                  <td>{t.calibrated ? layoutOf(t.id) : 'not calibrated'}</td>
                   <td>{notes?.date ?? '—'}</td>
                   <td>
                     {notes?.url ? (
