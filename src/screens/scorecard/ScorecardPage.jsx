@@ -192,8 +192,8 @@ export function ScorecardPage({ feed, managers, uniformBrief, onReload, loading,
   // over.
   // THE PHONE LENS (ADR-0092): on a phone, with a frontier to hold and taps that
   // commit, the sheet opens zoomed under a fixed frame over the next sealed box.
-  // [Sheet] leaves it for this visit only (state, never stored); under Scores
-  // Unlocked or a stamp there is no frontier, so the lens is off (G7).
+  // [Sheet] leaves it for this visit only (state, never stored); under a stamp
+  // there is no frontier, so the lens is off (G7).
   // In the lens, `side` follows the frontier (G20): entering the lens turns to
   // the frontier's page, the flip handoff turns it after that, and the manual
   // Top/Bottom control waits in the whole-sheet view.

@@ -91,7 +91,7 @@ export function FavoriteTeamModal({ favoriteTeamId, onSave, onClose }) {
   }, [step])
 
   // Escape + Tab are handled ON the dialog, not on `window`, and `aria-modal`
-  // is enforced rather than merely declared — the rule ConsentModal.jsx states.
+  // is enforced rather than merely declared.
   //
   // A window listener was actively harmful here: step 2 renders Clerk's
   // <SignUpButton mode="modal">, which opens a Clerk portal ON TOP of this

@@ -28,9 +28,9 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 // from the Clerk-gated section above, so this sheet renders identically whether
 // or not this deploy configures an account.
 //
-// Safety-by-default, same posture as ConsentModal: the CANCEL button is
-// rendered first and takes initial focus, so an inattentive Enter or tap keeps
-// your data. Nothing here is undoable.
+// Safety-by-default: the CANCEL button is rendered first and takes initial
+// focus, so an inattentive Enter or tap keeps your data. Nothing here is
+// undoable.
 
 const COPY = {
   device: {
@@ -65,7 +65,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
   }, [])
 
   // Focus trap + Escape, handled ON the dialog so aria-modal="true" is a
-  // promise rather than a label. Same shape as ConsentModal.
+  // promise rather than a label.
   const onKeyDown = (e) => {
     if (e.key === 'Escape') {
       e.stopPropagation()
@@ -158,8 +158,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
             // handler and Tab trap are both bound to the dialog element, so from
             // <body> neither one can fire: Escape stops working and Tab walks
             // straight out into the page behind the scrim, breaking the
-            // aria-modal promise. ConsentModal, which this is modelled on, never
-            // disables its buttons for exactly this reason.
+            // aria-modal promise.
             aria-disabled={state === 'working'}
             onClick={() => state !== 'working' && onClose()}
           >

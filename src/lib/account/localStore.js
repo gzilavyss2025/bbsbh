@@ -1,8 +1,8 @@
 import { readOwnerIn, writeOwnerIn } from './deviceOwner.js'
 
-// The localStorage plumbing the local-first stores (stamps, books, the Scores
-// Unlocked pass and its consent days, preferences) each hand-wrote: a guarded
-// read, a guarded write, and the same-tab `storage` echo.
+// The localStorage plumbing the local-first stores (stamps, books, preferences)
+// each hand-wrote: a guarded read, a guarded write, and the same-tab `storage`
+// echo.
 //
 // Every access here can throw — Safari private mode, a profile that blocks
 // storage, a quota error — and the contract in every case is the one those
