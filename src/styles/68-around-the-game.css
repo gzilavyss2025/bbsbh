@@ -680,7 +680,7 @@
 }
 
 /* THE ONE CAPS-EXEMPT SURFACE HERE — the shouted-heading / natural-case-body
-   split the Team Score modal already uses (ALL-CAPS INVARIANT, 01-base.css).
+   split 01-base.css's ALL-CAPS INVARIANT records for its prose exemptions.
    The h2 stays chrome; four hundred words of method prose set in capitals is
    not read, it is skipped, and this is the part a sceptic should finish.
    `#root` PREFIX REQUIRED: the invariant is `#root *` (1,0,1), so a bare

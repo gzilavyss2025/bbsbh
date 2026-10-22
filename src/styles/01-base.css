@@ -90,7 +90,7 @@
        name above it, `.betweeninnings__who`, stays uppercase)
      - the research diary's body copy — `.researchdiary .caps-exempt` (the one
        long-form reading page in the app; headings, labels, table headers and
-       badges all stay shouted, same split as the Team Score modal above)
+       badges all stay shouted)
      - Express Lane's sentences — the entry step's lede, section notes and
        consent (`.xl-entry__note`, `.xl-entry__hint`, `.xl-entry__consent`, in
        77a); the film band's messages `.xl-film__msg` and the pre-roll's
