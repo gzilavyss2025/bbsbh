@@ -203,16 +203,16 @@
      src/lib/design/contrastPairings.js. */
   --accent-primary-hover:  var(--ink-2);
   --accent-negative-hover: var(--clay-deep);
-  /* The green STATE of a control: the hover fill on the arrows of the photo
-     strips and clip rails, the current-game cell, the prospect board's hover bar,
-     a focus outline. NO TEXT reads it. A link is ink with a dotted rule
-     (system/door.css), because this green is also "positive" and the focus ring,
-     so a green link read as a good number. `test/link-ink.test.js` fails on a
-     link-like rule that reads it. The name dates from when it coloured links; a
-     rename is a follow-up, because the Claude Design project reads it.
+  /* The green a control takes UNDER A POINTER: the hover fill and border on the arrows
+     of the photo strips and clip rails, a thumbnail's hover border, the hover wash on
+     a season-series cell, the prospect board's hover bar, the Box Lines door's hover
+     outline. NO TEXT reads it, and `test/link-ink.test.js` fails on a rule that reads
+     it outside :hover. A link is ink with a dotted rule (system/door.css), because
+     this green is also "positive" and the focus ring, so a green link read as a good
+     number. It was `--accent-link` until 2026-10-22, when it stopped colouring links.
      Field green clears AA on all four papers — worst on the darkest of them at
-     5.28:1 (--accent-link on --bg-canvas), asserted in check-contrast.mjs. */
-  --accent-link:      var(--field);
+     5.28:1 (--accent-hover on --bg-canvas), asserted in check-contrast.mjs. */
+  --accent-hover:     var(--field);
 
   /* A soft green fill under ink text (#1883): the count badge on the current
      jump-bar button (HubTabBar's anchor variant) and the player page's

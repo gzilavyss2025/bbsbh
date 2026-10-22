@@ -175,13 +175,13 @@ goes with it.
 leaves the card for the box score, so by the rule above it is a door. It was
 an ink button trimmed to a seventh height (about 24px). It is now
 `<Door>` inline, "Box score ›" in ink with a dotted rule (it drew in green
-`--accent-link` until the door moved to ink), and an anchor with the
+until the door moved to ink), and an anchor with the
 client router's click, so a middle-click opens the box score in a new tab.
 The postseason ledger and Stamp In quieted the ink box to a secondary button;
 a door is already quiet, so those two overrides are gone.
 
 **Is a door green? No (Gary, 2026-10-22).** A door draws in ink with a dotted rule.
-It drew in `--accent-link`, which is field green, the colour the app also uses for
+It drew in field green (the token was `--accent-link`), the colour the app also uses for
 "positive" and for the focus ring, so a "See all ›" read as a good number. The dotted
 rule is the one `.plink` shows on hover. It rests visible on a door, because a reader
 on touch has no hover. Four consequences:
@@ -200,9 +200,11 @@ on touch has no hover. Four consequences:
   (`public/learn.css`, ADR-0053): a prose link is ink with the dotted rule, solid on
   hover. Their call-to-action button keeps its green fill, as a button does.
 - Green stays where it means "good": a win, a positive delta, an "add" chip, a position
-  label, and the focus ring. `--accent-link` has no text consumer now. It colours a
-  control's hover fill and a selected cell, and its name is a follow-up rename.
-  `test/link-ink.test.js` pins the list above, and fails on a new link-like rule
+  label, and the focus ring. The token that coloured links, `--accent-link`, is
+  `--accent-hover` now (2026-10-22): the green a control takes under a pointer, such as the
+  arrows' hover fill, a thumbnail's border, a cell's wash, a hover bar and the Box Lines
+  door's outline. It colours no text, and the test fails on a rule that reads it outside
+  `:hover`. `test/link-ink.test.js` pins the list above, and fails on a new link-like rule
   (a name with `door`, `seeall`, `viewall`, `gamelink`, `__back`, `__cancel`,
   `__clear` or `-link`) that reads green.
 

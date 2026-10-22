@@ -87,8 +87,8 @@
   cursor: pointer;
 }
 .seasonseries__nav:hover {
-  background: var(--accent-link);
-  border-color: var(--accent-link);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
   color: var(--text-on-ink);
 }
 .seasonseries__nav:focus-visible {
@@ -137,7 +137,7 @@
   cursor: pointer;
 }
 .seasonseries__cell:hover {
-  background: color-mix(in srgb, var(--accent-link) 10%, transparent);
+  background: color-mix(in srgb, var(--accent-hover) 10%, transparent);
 }
 .seasonseries__cell:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -160,7 +160,7 @@
   background: var(--surface-inset);
 }
 .seasonseries__cell--otherpark:hover {
-  background: color-mix(in srgb, var(--accent-link) 10%, var(--surface-inset));
+  background: color-mix(in srgb, var(--accent-hover) 10%, var(--surface-inset));
 }
 /* A POSTSEASON game in the strip: the same card, dressed in navy ink so the
    games that mattered most read apart from the regular season at a glance,
@@ -301,8 +301,8 @@
   cursor: pointer;
 }
 .photostrip__nav:hover {
-  background: var(--accent-link);
-  border-color: var(--accent-link);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
   color: var(--text-on-ink);
 }
 .photostrip__nav:focus-visible {
@@ -351,7 +351,7 @@
   display: block;
 }
 .photostrip__thumb:hover {
-  border-color: var(--accent-link);
+  border-color: var(--accent-hover);
 }
 .photostrip__thumb:focus-visible {
   outline: 2px solid var(--focus-ring);

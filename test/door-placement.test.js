@@ -83,7 +83,7 @@ test('an inline door is ink with a dotted rule, and reads no green', () => {
     const body = ruleBody(css, selector)
     assert.ok(body, `${selector} should have a base rule`)
     assert.match(body, /color:\s*var\(--text-heading\)/, `${selector} draws in ink`)
-    assert.doesNotMatch(body, /accent-link|--field|accent-positive/, `${selector} reads no green`)
+    assert.doesNotMatch(body, /accent-hover|--field|accent-positive/, `${selector} reads no green`)
   }
   const inline = ruleBody(css, '.door--inline')
   assert.match(inline, /text-decoration:\s*underline dotted/, 'the inline door carries a dotted rule')

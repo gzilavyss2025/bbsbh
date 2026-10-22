@@ -138,7 +138,7 @@ for (const [label, store] of [['MLB', MLB_TREATMENT_TUNING], ['MiLB', MILB_TREAT
 // first place. A comment that lies about a RATIO is the same failure with a
 // number attached, and it is harder to catch because it looks measured. Four
 // wrong ones were found by hand while reviewing that ADR's own PR — and the
-// fourth, --accent-link's "5.14:1 at worst", had been sitting in colors.css
+// fourth, --accent-link's (now --accent-hover) "5.14:1 at worst", had been sitting in colors.css
 // since 2026-08-19, cited and trusted, with every threshold check passing.
 //
 // THE FORM: `10.5:1 (--text-heading on --marker)`. Naming the pair is what

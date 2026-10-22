@@ -58,7 +58,7 @@
 @media (hover: hover) and (pointer: fine) {
   .prospectboard tbody tr:not(.is-selected):hover {
     background: var(--bg-page);
-    box-shadow: inset 4px 0 0 var(--accent-link);
+    box-shadow: inset 4px 0 0 var(--accent-hover);
   }
 }
 .prospectboard__rank {

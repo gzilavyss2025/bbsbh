@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join, relative } from 'node:path'
 
 const STYLES = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'styles')
-const GREEN = /var\(--(accent-link|accent-positive|field|field-deep)\)/
+const GREEN = /var\(--(accent-hover|accent-positive|field|field-deep)\)/
 
 // Comments come out first: a long prose block glues itself to the declaration after it.
 function stripComments(css) {
@@ -147,4 +147,27 @@ test('a link in the landing guides is ink, not green', () => {
       for (const c of colours(body)) assert.doesNotMatch(c, GREEN, `${selector} reads green`)
     }
   }
+})
+
+// The token that used to be --accent-link. Every rule left that read it is a :hover rule (the
+// arrows on the photo strips and clip rails, a thumbnail's border, a cell's wash, the prospect
+// board's bar, the Box Lines door's outline), so the name says that: the green a control takes
+// under a pointer. It colours no text. This keeps the name true, and keeps the old one gone.
+test('--accent-hover is read only by hover rules, and --accent-link is gone', () => {
+  let reads = 0
+  const outside = []
+  for (const path of cssFiles(STYLES)) {
+    const css = readFileSync(path, 'utf8')
+    assert.doesNotMatch(stripComments(css), /--accent-link/, `${relative(STYLES, path)} still names --accent-link`)
+    for (const { selectors, body } of rulesOf(css)) {
+      if (!/var\(--accent-hover\)/.test(body)) continue
+      reads += 1
+      for (const selector of selectors) if (!selector.includes(':hover')) outside.push(`${relative(STYLES, path)}: ${selector}`)
+    }
+  }
+  assert.ok(reads > 0, '--accent-hover should be read by the hover rules')
+  assert.deepEqual(outside, [], 'a rule that is not a :hover rule reads --accent-hover (use the token that names its job)')
+  const tokens = stripComments(readFileSync(join(STYLES, '..', 'tokens', 'colors.css'), 'utf8'))
+  assert.match(tokens, /--accent-hover:\s*var\(--field\)/, 'colors.css defines --accent-hover')
+  assert.doesNotMatch(tokens, /--accent-link/, 'colors.css no longer defines --accent-link')
 })

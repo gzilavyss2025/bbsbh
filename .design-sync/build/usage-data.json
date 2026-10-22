@@ -58,7 +58,7 @@
   "accent-primary": "The app own primary. Jump bars and tab bars stay on the app colours, never a club colour (ADR-0030).",
   "accent-positive": "Positive, on-base.",
   "accent-negative": "Negative, outs, alerts.",
-  "accent-link": "The green state of a control: the hover fill on strip and rail arrows, the current-game cell. Never link text: a link is ink with a dotted rule. 5.3:1 worst case on paper.",
+  "accent-hover": "The green a control takes under a pointer: the hover fill on strip and rail arrows, a thumbnail's border, a cell's wash. Never link text: a link is ink with a dotted rule. 5.3:1 worst case on paper.",
   "accent-tint": "Count badge on the current jump-bar item; the position pill. ink-0 text on it is 8.4:1.",
   "focus-ring": "Focus outline, 2px solid with 2px offset. 5.3:1 on paper-0, so it clears the 3:1 bar for a focus ring on paper. On a coloured band use text-on-ink with an ink halo.",
   "band-rule": "Underline of an unthemed band.",

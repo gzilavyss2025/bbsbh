@@ -8,9 +8,10 @@
    with that. ADR-0084 clause 3 names `__door` for exactly this shape, and this
    file is the base rule that owns the word.
 
-   INK, NOT GREEN. A door used to draw in --accent-link, which is field green:
-   the colour the app also uses for "positive" and for the focus ring, so a
-   "See all ›" read as a good number. The dotted rule is the one `.plink` shows
+   INK, NOT GREEN. A door used to draw in field green (the token was
+   --accent-link, now --accent-hover and read only by hover rules): the colour
+   the app also uses for "positive" and for the focus ring, so a "See all ›"
+   read as a good number. The dotted rule is the one `.plink` shows
    on hover (26-player-page.css). It sits at rest here because a door must read
    as a link on touch, where there is no hover. A PLAYER NAME is not a door: it
    is a `PlayerLink`, which rests as plain text.
