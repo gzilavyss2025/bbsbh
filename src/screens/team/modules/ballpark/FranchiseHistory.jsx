@@ -4,7 +4,7 @@ import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 
 // The club's history under the Ballpark card, one module: a strip of names,
-// leagues and parks by season, then a line for each park. Spoiler-free and open
+// leagues and parks by season, then a line for each park. Open
 // (names and parks, no game). The data starts in 1901, so a park line says
 // "seasons in this data", never "opened" (src/api/franchiseHistory.js).
 // MLB only: a MiLB id has no file, `spans` is empty, and nothing renders.

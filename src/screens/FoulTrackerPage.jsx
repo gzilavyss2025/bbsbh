@@ -26,7 +26,7 @@ import { SeasonAverageCard, ByInning, ByPitchType, TeamBoard } from './foul-trac
 // league leaders (total, per game, single-game highs), two-strike "spoiling",
 // pitcher foul magnets, the by-inning foul curve with its starter-vs-bullpen
 // split, and foul rate by pitch type. Everything reads the nightly
-// gen-fouls.mjs precompute (completed games only — spoiler-free, no SealBox;
+// gen-fouls.mjs precompute (completed games only, no SealBox;
 // see src/api/fouls.js). MLB only; the page says so rather than pretending
 // MiLB coverage exists.
 //

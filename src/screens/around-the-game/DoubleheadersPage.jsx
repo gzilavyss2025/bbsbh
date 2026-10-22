@@ -38,7 +38,7 @@ import { YearRange } from '../../components/around-the-game/YearRange.jsx'
 // picks: the same board, over whatever years they want to ask about, recomputed
 // as the handles move (api/around-the-game/doubleheaders.js).
 //
-// SPOILER-FREE. Nothing here is a score. Every figure is a season-level
+// COMPLETED GAMES ONLY. Every figure is a season-level
 // aggregate over Final games — the same footing as the comeback-rate card and
 // the team-record boards — and no individual game's runs reach this page.
 

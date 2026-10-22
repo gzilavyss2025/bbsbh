@@ -29,7 +29,7 @@ import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 // Same underlying content as the lineup page's BallparkModal, laid out inline
 // rather than behind a tap: this IS the full detail view here, not a preview.
 //
-// Spoiler-safe and free the whole way down. Park geometry carries no score, the
+// No game data the whole way down. Park geometry carries no score, the
 // photo is a building, and the note is admin-typed prose about that building —
 // nothing here is derived from a game. `team.venue.name` comes from the weekly
 // static snapshot (gen-teams.mjs), so there is no live fetch either. Renders
@@ -39,7 +39,7 @@ import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 // `attendance` (season avg/high/low/total, sellouts and three league ranks,
 // MLB only) is the one piece
 // of this card built from completed games rather than hand-authored geometry —
-// still spoiler-free (a season aggregate over Final games, same footing as
+// still open (a season aggregate over Final games, same footing as
 // WAR), precomputed by the nightly gen-attendance.mjs (src/api/attendance.js).
 // null for MiLB or a club with no home games ingested yet; the Facts rows
 // simply don't render.

@@ -78,7 +78,7 @@ import { SeasonPicker } from '../../components/season/SeasonPicker.jsx'
 // in — the masthead, the level chips, the slab row, the three fetches and the
 // source line.
 //
-// SPOILER-FREE. A challenge is a ball-strike judgment, not a run
+// NO SCORE. A challenge is a ball-strike judgment, not a run
 // (api/around-the-game/absChallenges.js). Nothing on this page reads a score,
 // and no game's result can be read back out of it.
 //
