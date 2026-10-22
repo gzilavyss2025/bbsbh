@@ -18,7 +18,7 @@ import { Card } from '../ui/frame/Card.jsx'
 // clubs' runs, the winner inked, because the game went Final before the cutoff
 // (ribbonNodes.js decides that; a game on or after the cutoff is a `today`,
 // `ahead` or `ifNecessary` box and never reads a score). No SealBox, no --seal
-// token, no Scores Unlocked. Draws no travel or off-day words.
+// token. Draws no travel or off-day words.
 //
 //   series  a bracket series (primerSeriesFor), for the head
 //   nodes   ribbonNodes(series, { scoresByPk })
