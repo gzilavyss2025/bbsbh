@@ -381,7 +381,7 @@ function Editor({ onDirty, focus }) {
                 onReset={onReset}
               />
             ) : (
-            <div className="admincopy__groupGrid admincopy__groupGrid--plain">
+            <div className="admincopy__groupGrid">
               <div className="admincopy__fields">
                 {subgroups(groupFields).map(({ title, fields }) => (
                   <div key={title ?? '_'} className="admincopy__subgroup">

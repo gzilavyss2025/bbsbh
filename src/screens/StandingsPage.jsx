@@ -13,7 +13,7 @@ import {
   DASH,
 } from '../api/standings.js'
 import { favoriteAccentColor } from '../lib/teams.js'
-import { buildJumps, labelDate, shiftDays, WILD_CARD_ERA_FROM } from '../lib/time/standingsDates.js'
+import { buildJumps, labelDate, shiftDays, stepStandingsDate, WILD_CARD_ERA_FROM } from '../lib/time/standingsDates.js'
 import { seasonPath } from '../lib/seasons/route.js'
 import { useRouteLink } from '../lib/nav.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
@@ -191,9 +191,7 @@ export function StandingsPage({ seasonYear }) {
   // Step one day backward/forward from whatever date is currently shown.
   // Forward is capped at yesterday; today's games are the "Live" jump.
   function stepDay(delta) {
-    const base = view.date ?? yesterday
-    const next = shiftDays(base, delta)
-    setStepDate(next > yesterday ? yesterday : next)
+    setStepDate(stepStandingsDate({ viewDate: view.date, today, yesterday, delta }))
     setSelKey('step')
   }
 
@@ -223,8 +221,8 @@ export function StandingsPage({ seasonYear }) {
   // Season Grade column: a SEPARATE, independent fetch of two already-nightly
   // static files (never statsapi) — a slow/failed grade file must never block
   // the primary standings table. Cutoff pinned to at most yesterday even in
-  // Live mode: the nightly snapshots have no "today" entry to leak anyway, so
-  // this makes the safety argument provable rather than incidental.
+  // Live mode: the nightly snapshots have no "today" entry, so a later cutoff
+  // would find nothing new.
   const { data: scoreFiles } = useAsync(() => Promise.all([fetchTeamScores(), fetchSeasonScores()]), [])
   // The nightly grade snapshots stop when the season does, so a December
   // cutoff would find none of them. Final reads the season's own last day off
@@ -250,8 +248,7 @@ export function StandingsPage({ seasonYear }) {
 
   // Rank-movement trend: a second, independent standings fetch a week before
   // whatever date is currently effectively shown (`view.date`, or `today` in
-  // Live mode) — always strictly OLDER than the primary fetch's own date, so
-  // it is always strictly older than what's on screen.
+  // Live mode), so its ranks are always from before what's on screen.
   // Null in the winter: a week before a final standing is a date inside a
   // finished season, and a rank that "moved" since then is a movement nobody
   // is watching for. The glyph simply does not appear.

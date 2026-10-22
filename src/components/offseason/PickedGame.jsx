@@ -36,8 +36,8 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 //
 // THE SEAL IS THE ORDINARY ONE. This links to the game's first lineup page at
 // the same address the slate's own cards build, so the game opens sealed under
-// the same `revealedThrough` mark as any other. Nothing here reveals, consents
-// or persists; the card's only state is which game of the deck is face up.
+// the same `revealedThrough` mark as any other. Nothing here reveals or
+// persists; the card's only state is which game of the deck is face up.
 export function PickedGame({ sportId, season, dateStr }) {
   const { data } = useAsync(() => fetchMilbPool(sportId), [sportId])
   const [step, setStep] = useState(0)
@@ -52,8 +52,7 @@ export function PickedGame({ sportId, season, dateStr }) {
         seed,
         step,
         // A game with a reveal mark on it is one this device has already
-        // opened. Offering it as a fresh sealed game would be a promise broken
-        // on the first tap.
+        // opened. Offering it as a fresh game would open it part-way through.
         isStarted: (pk) => readRevealMarkFor(pk) >= 0,
       }),
     [data, seed, step],

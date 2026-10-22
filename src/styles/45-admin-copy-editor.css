@@ -189,19 +189,6 @@
   opacity: 0.4;
   text-decoration: none;
 }
-@media (min-width: 720px) {
-  .admincopy__groupGrid {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
-  /* A group with no modal to stage (the ballpark notes) has no second column to
-     give half the width to — the fields take the whole row instead. */
-  .admincopy__groupGrid--plain {
-    grid-template-columns: 1fr;
-  }
-}
-
-
 /* Per-park blocks inside the Ballparks group — 30 parks x 4 fields is 120
    boxes, and without a heading per park you cannot tell which note belongs to
    which photo URL. Groups whose fields declare no subgroup render one untitled

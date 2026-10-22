@@ -3,7 +3,7 @@
 // that page folds a day of games into, or out of, the table it labels.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { baseballToday, buildJumps, labelDate, shiftDays } from '../src/lib/time/standingsDates.js'
+import { baseballToday, buildJumps, labelDate, shiftDays, stepStandingsDate } from '../src/lib/time/standingsDates.js'
 
 test('day math never drifts across a month, a year or a daylight-saving edge', () => {
   assert.equal(shiftDays('2026-07-07', -1), '2026-07-06')
@@ -116,4 +116,18 @@ test('a page with its own first season gets its own list and floor', () => {
 
 test('the wild-card board starts with the 12-team format', () => {
   assert.equal(WILD_CARD_ERA_FROM, 2022)
+})
+
+test('Back from the live view lands on yesterday, not the day before', () => {
+  // Live has no date of its own: it is through today. One step back is
+  // "through yesterday"; reading it from yesterday instead skipped a day.
+  const args = { viewDate: null, today: '2026-07-07', yesterday: '2026-07-06' }
+  assert.equal(stepStandingsDate({ ...args, delta: -1 }), '2026-07-06')
+})
+
+test('stepping from a dated view moves one day and Forward stops at yesterday', () => {
+  const args = { today: '2026-07-07', yesterday: '2026-07-06' }
+  assert.equal(stepStandingsDate({ ...args, viewDate: '2026-07-06', delta: -1 }), '2026-07-05')
+  assert.equal(stepStandingsDate({ ...args, viewDate: '2026-07-04', delta: 1 }), '2026-07-05')
+  assert.equal(stepStandingsDate({ ...args, viewDate: '2026-07-06', delta: 1 }), '2026-07-06')
 })
