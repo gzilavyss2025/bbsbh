@@ -15,7 +15,7 @@
   "rule": "Faded pencil grid rule; text-on-ink-dim (10.0:1 on ink-0).",
   "rule-soft": "Hairline rule between facts and table rows; text-on-ink-soft (12.3:1 on ink-0). The canvas hairline is the same value.",
   "rule-grid": "Graph-paper grid lines; blends into the canvas.",
-  "field": "Outfield green: positive, links, focus ring. 5.3:1 on paper-0, 5.6:1 on paper-2.",
+  "field": "Outfield green: positive, the hover colour of a control, focus ring. Never link text: a link is ink. 5.3:1 on paper-0, 5.6:1 on paper-2.",
   "field-deep": "Deeper green for win textures.",
   "field-soft": "Soft green wash.",
   "field-mint": "Light outfield green that carries ink text: the count badge on the current jump-bar button and the position pill. Read it through accent-tint. 8.4:1 with ink-0.",
