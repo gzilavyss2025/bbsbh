@@ -146,9 +146,10 @@ export const PAIRINGS = [
   // later nudge to either accent has less margin here than anywhere else.
   { fg: 'text-on-ink', bg: 'accent-positive', min: TEXT, note: 'standings clinch mark' },
   { fg: 'text-on-ink', bg: 'accent-negative', min: TEXT, note: 'standings eliminated mark' },
-  // Link / text-button ink, on each of the three grounds it lands on: the app
-  // canvas, a page, and a raised card. Held to the full text bar because these
-  // run SMALL — "See all ›" and the "more" affordance are --fs-label caps (#1128).
+  // Green link text (--accent-link), on each of the three grounds it lands on: the
+  // app canvas, a page, and a raised card. A door is ink now (--text-heading), so
+  // these cover the links that still read the token. Held to the full text bar
+  // because these run SMALL — --fs-label caps (#1128).
   { fg: 'accent-link', bg: 'bg-canvas', min: TEXT, note: 'link text on app canvas' },
   { fg: 'accent-link', bg: 'bg-page', min: TEXT, note: 'link text on page' },
   { fg: 'accent-link', bg: 'surface-card', min: TEXT, note: 'link text on raised card' },

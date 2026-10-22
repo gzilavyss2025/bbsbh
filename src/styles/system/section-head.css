@@ -63,6 +63,12 @@
   display: inline-flex;
   align-items: center;
 }
+/* A door in a band draws in the band's own ink. The band's ink is checked against its
+   ground (check-contrast); the door's page ink is not, and it vanishes on a navy or
+   club-coloured band. */
+.sectionhead--band .door--inline {
+  color: inherit;
+}
 
 /* THE MARK. The club's mono knockout art (ADR-0031), last in the row. A crop
    of "bar" stretches it to the band's true top and bottom edges: an explicit

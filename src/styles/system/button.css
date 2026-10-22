@@ -4,7 +4,7 @@
 
    A button acts on the page you are standing on. That is the whole difference
    from a DOOR (system/door.css), which leaves the page or opens more of a list:
-   a door is a link in --accent-link, a button is a ruled box in ink. A door
+   a door is ink text with a dotted rule, a button is a ruled box in ink. A door
    never wears a button skin, because the skin is how a reader knows what a tap
    will do.
 

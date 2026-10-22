@@ -174,10 +174,26 @@ goes with it.
 **Is the slate card's Box score a door? Yes (#1174, Gary, 2026-09-28).** It
 leaves the card for the box score, so by the rule above it is a door. It was
 an ink button trimmed to a seventh height (about 24px). It is now
-`<Door>` inline, "Box score ›" in `--accent-link`, and an anchor with the
+`<Door>` inline, "Box score ›" in ink with a dotted rule (it drew in green
+`--accent-link` until the door moved to ink), and an anchor with the
 client router's click, so a middle-click opens the box score in a new tab.
 The postseason ledger and Stamp In quieted the ink box to a secondary button;
 a door is already quiet, so those two overrides are gone.
+
+**Is a door green? No (Gary, 2026-10-22).** A door draws in ink with a dotted rule.
+It drew in `--accent-link`, which is field green, the colour the app also uses for
+"positive" and for the focus ring, so a "See all ›" read as a good number. The dotted
+rule is the one `.plink` shows on hover. It rests visible on a door, because a reader
+on touch has no hover. Three consequences:
+
+- A player's name is not a door. It is a `PlayerLink`, ink at rest. The Film room drew
+  its two starters as doors, and its rule to set them in plain ink lost a specificity
+  tie with `.door--inline`, so they drew in green at label size.
+- A door in a band takes the band's ink (`.sectionhead--band .door--inline`). The
+  band's ink is checked against its ground; the door's page ink would not be.
+- Other green link text still reads `--accent-link` (`.foulcard__door`, `.lsp__seeall`,
+  `.pcard__gamelink`, `.outl__name` and a few more). Those are not doors, and they
+  are a follow-up, not part of this decision.
 
 **Why `.mytally__rowbtn` is held.** It is an action ROW, not a button: a
 caps title over a sentence of body type, left-aligned, 66px tall because the

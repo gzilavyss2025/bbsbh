@@ -119,12 +119,14 @@
   overflow-wrap: anywhere;
 }
 
-/* The pitcher's name is a door to his page, set as plain ink like the box score's names. */
-.ww-film__name {
-  padding-inline: 0;
-  min-height: 0;
+/* The pitcher's name is a player link, set in ink like the W, L and SV names above it (.ww-film__pname2).
+   Compound, to beat .plink's `font: inherit` and `color: inherit` reset: a lone class ties with it and loses. */
+.plink.ww-film__name {
+  font-family: var(--font-display);
   font-size: var(--fs-small);
-  color: inherit;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
 }
 
 .ww-film__grid--pit td.ww-film__missing {
