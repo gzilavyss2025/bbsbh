@@ -3,7 +3,17 @@ import { readFileSync, readdirSync } from 'node:fs'
 import test from 'node:test'
 import { birthRow, personBio, schoolRows } from '../src/api/person/identity.js'
 import { countryOf, schoolBase, schoolSlug } from '../src/lib/from/identity.js'
-import { playerFromLinks } from '../src/lib/from/playerLinks.js'
+import { playerFromLinks, schoolLabel } from '../src/lib/from/playerLinks.js'
+
+test('schoolLabel adds HS to a bare high-school name only', () => {
+  const hs = (name) => schoolLabel({ kind: 'high-school', name })
+  assert.equal(hs('Wheeler'), 'Wheeler HS')
+  assert.equal(hs('Wheeler High School'), 'Wheeler High School')
+  assert.equal(hs('Montverde Academy'), 'Montverde Academy')
+  assert.equal(hs('Rickards HS'), 'Rickards HS')
+  assert.equal(hs('Home School'), 'Home School')
+  assert.equal(schoolLabel({ kind: 'college', name: 'Mississippi State' }), 'Mississippi State')
+})
 
 // The player page's links to "who else is from there" (#1526).
 const fixture = (n) => JSON.parse(readFileSync(new URL(`./fixtures/player-bio/${n}.json`, import.meta.url), 'utf8'))
