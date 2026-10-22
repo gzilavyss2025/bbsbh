@@ -23,6 +23,32 @@ const groups = (club) => {
     pitchers: all.filter((p) => p.pos === 'P').sort((a, b) => a.name.localeCompare(b.name)),
   }
 }
+// Position groups (Gary): catchers, infielders, outfielders, DH and two-way, starters, relievers.
+// A starter has a postseason start, or (no postseason line) most regular-season games as a starter.
+const isStarter = (p) => {
+  const po = p.s?.P?.pitching
+  if (po) return po.gamesStarted > 0
+  const rs = p.s?.R?.pitching
+  return !!rs && rs.gamesStarted * 2 > rs.gamesPlayed
+}
+const sections = (club) => {
+  const g = groups(club)
+  const pos = (set) => g.hitters.filter((p) => set.includes(p.pos))
+  const sp = g.pitchers.filter(isStarter)
+  return {
+    hg: [
+      { key: 'c', title: 'Catchers', kind: 'h', players: pos(['C']), open: false },
+      { key: 'inf', title: 'Infielders', kind: 'h', players: pos(['1B', '2B', '3B', 'SS']), open: true },
+      { key: 'of', title: 'Outfielders', kind: 'h', players: pos(['LF', 'CF', 'RF']), open: false },
+      { key: 'dh', title: 'DH and two-way', kind: 'h', players: pos(['DH', 'TWP']), open: false },
+    ],
+    pg: [
+      { key: 'sp', title: 'Starting pitchers', kind: 'p', players: sp, open: true },
+      { key: 'rp', title: 'Relievers', kind: 'p', players: g.pitchers.filter((p) => !sp.includes(p)), open: false },
+    ],
+  }
+}
+const ghead = (gr) => `<button type="button" class="btn btn--ghost rc-gbtn" aria-expanded="${gr.open}"><span>${gr.title}</span><b class="rc-num">${gr.players.length}</b><span class="rc-chev" aria-hidden="true">${gr.open ? '▴' : '▾'}</span></button>`
 const find = (club, id) => DATA[club].find((p) => p.id === id)
 const dash = (v) => (v == null || v === '' || /^[-.]+$/.test(String(v)) ? '—' : String(v))
 const SETS = [
@@ -86,6 +112,9 @@ body{margin:0}
 .rc .segmented__btn .segmented__count{color:inherit;opacity:.7}
 .rc-shot{display:block;flex:none;width:var(--s);height:var(--s);overflow:hidden;background:var(--surface-inset);border:var(--bw-hair) solid var(--border-hairline)}
 .rc-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
+.rc-gbtn{display:flex;width:100%;justify-content:flex-start;gap:var(--space-2);padding:0 var(--space-1h);border-bottom:var(--bw-hair) solid var(--border-hairline);color:var(--text-heading)}
+.rc-gbtn b{font-weight:var(--w-medium);color:var(--text-muted)}
+.rc-gbtn .rc-chev{margin-left:auto}
 .rc-gh{margin:0;font-family:var(--font-display);font-size:var(--fs-label);letter-spacing:var(--ls-xwide);text-transform:uppercase;color:var(--text-muted)}
 .rc-gh b{font-family:var(--font-mono);font-weight:var(--w-medium);margin-left:var(--space-1h)}
 .rc-note{margin:0;font-size:var(--fs-small);line-height:var(--lh-ui);color:var(--text-caption)}
@@ -118,10 +147,11 @@ function rowA(p, open, set) {
 function pageA({ declared = true } = {}) {
   const g = groups(119)
   const open = new Set([518692, 808967])
-  const list = (title, ps) => `<section class="rc-a__group" aria-label="${title}"><h4 class="rc-gh">${title}<b>${ps.length}</b></h4><ul class="rc-list">${ps.map((p) => rowA(p, open.has(p.id), 'P')).join('')}</ul></section>`
+  const sec = sections(119)
+  const list = (gr) => `<section class="rc-a__group" aria-label="${gr.title}">${ghead(gr)}${gr.open ? `<ul class="rc-list">${gr.players.map((p) => rowA(p, open.has(p.id), 'P')).join('')}</ul>` : ''}</section>`
   const body = declared
-    ? `<div class="rc-a__cols">${list('Hitters', g.hitters)}${list('Pitchers', g.pitchers)}</div>`
-    : `<p class="rc-note rc-a__undeclared">The Dodgers have not named their Series roster yet. Clubs name 26 players by the morning of Game 1. This is their current roster.</p><div class="rc-a__cols">${list('Hitters', g.hitters.slice(0, 5))}${list('Pitchers', g.pitchers.slice(0, 5))}</div>`
+    ? `<div class="rc-a__cols"><div class="rc-a__col">${sec.hg.map(list).join('')}</div><div class="rc-a__col">${sec.pg.map(list).join('')}</div></div>`
+    : `<p class="rc-note rc-a__undeclared">The Dodgers have not named their Series roster yet. Clubs name 26 players by the morning of Game 1. This is their current roster.</p><div class="rc-a__cols"><div class="rc-a__col">${sec.hg.map(list).join('')}</div><div class="rc-a__col">${sec.pg.map(list).join('')}</div></div>`
   const inner = `<div class="stack stack--base rc">
     ${tabs({ at: 119 })}
     <div class="rc-a__bar">${setToggle('P')}</div>
@@ -131,6 +161,7 @@ function pageA({ declared = true } = {}) {
 .rc-a__bar{position:sticky;top:var(--space-1);z-index:var(--z-sticky)}
 .rc-a__cols{display:grid;gap:var(--space-5);align-items:start}
 @media (min-width:740px){.rc-a__cols{grid-template-columns:1fr 1fr;gap:var(--space-8)}}
+.rc-a__col{display:flex;flex-direction:column;gap:var(--space-2)}
 .rc-a__group{display:flex;flex-direction:column;gap:var(--space-2)}
 .rc-list{list-style:none;margin:0;padding:0;border-top:var(--bw-hair) solid var(--border-hairline)}
 .rc-a__item{border-bottom:var(--bw-hair) solid var(--border-hairline)}
@@ -153,10 +184,11 @@ function pageB({ view = 'detail' } = {}) {
   const f = line(sel, 'P')
   const li = (p) => `<li><button type="button" class="btn btn--ghost rc-row rc-b__row" ${p.id === sel.id ? 'aria-current="true"' : ''}>
       <span class="rc-jersey">${dash(p.jersey)}</span>${shot(p)}<span class="rc-name">${p.name}</span><span class="rc-pos">${p.pos}</span></button></li>`
-  const group = (title, ps) => `<li class="rc-b__grp"><h4 class="rc-gh">${title}<b>${ps.length}</b></h4><ul class="rc-list">${ps.map(li).join('')}</ul></li>`
+  const sec = sections(119)
+  const group = (gr) => `<li class="rc-b__grp">${ghead(gr)}${gr.open ? `<ul class="rc-list">${gr.players.map(li).join('')}</ul>` : ''}</li>`
   const listPane = `<nav class="rc-b__list" aria-label="Dodgers roster">
       <div class="rc-b__clubs">${tabs({ at: 119, short: true, count: false })}</div>
-      <ul class="rc-b__scroll" style="list-style:none;margin:0;padding:0">${group('Hitters', g.hitters)}${group('Pitchers', g.pitchers)}</ul>
+      <ul class="rc-b__scroll" style="list-style:none;margin:0;padding:0">${[...sec.hg, ...sec.pg].map(group).join('')}</ul>
     </nav>`
   const detail = `<article class="rc-b__detail" aria-label="${sel.name}">
       <button type="button" class="btn btn--ghost rc-b__back">‹ Roster</button>
@@ -173,7 +205,7 @@ function pageB({ view = 'detail' } = {}) {
   return head('Roster · B', `
 .rc-b{display:grid;gap:var(--space-4)}
 .rc-b__clubs{margin-bottom:var(--space-2)}
-.rc-b__scroll>li+li{margin-top:var(--space-4)}
+.rc-b__scroll>li+li{margin-top:var(--space-1)}
 .rc-b__list{display:flex;flex-direction:column}
 .rc-b__detail{display:flex;flex-direction:column;gap:var(--space-3);align-items:stretch}
 .rc-b__detail>.door{align-self:flex-start}
@@ -203,7 +235,8 @@ function pageC() {
   const f = line(sel, 'P')
   const tile = (p) => `<li><button type="button" class="btn rc-tile${p.id === sel.id ? ' is-on' : ''}" ${p.id === sel.id ? 'aria-current="true"' : ''}>
       ${shot(p, 64)}<span class="rc-tile__no">${dash(p.jersey)}</span><span class="rc-tile__name">${p.name}</span><span class="rc-pos">${p.pos}</span></button></li>`
-  const grp = (title, ps) => `<section aria-label="${title}" class="rc-c__grp"><h4 class="rc-gh">${title}<b>${ps.length}</b></h4><ul class="rc-c__grid">${ps.map(tile).join('')}</ul></section>`
+  const sec = sections(119)
+  const grp = (gr) => `<section aria-label="${gr.title}" class="rc-c__grp">${ghead(gr)}${gr.open ? `<ul class="rc-c__grid">${gr.players.map(tile).join('')}</ul>` : ''}</section>`
   const sheet = `<aside class="rc-c__sheet" role="dialog" aria-label="${sel.name}">
       <span class="rc-c__grab" aria-hidden="true"></span>
       <header class="rc-c__sh">
@@ -217,7 +250,7 @@ function pageC() {
       ${door(sel)}
     </aside>`
   const inner = `<div class="rc rc-c">
-      <div class="stack stack--base rc-c__main">${tabs({ at: 119 })}${grp('Hitters', g.hitters)}${grp('Pitchers', g.pitchers)}</div>
+      <div class="stack stack--base rc-c__main">${tabs({ at: 119 })}${[...sec.hg, ...sec.pg].map(grp).join('')}</div>
       <div class="rc-c__scrim"></div>${sheet}
     </div>`
   return head('Roster · C', `
@@ -251,7 +284,10 @@ function pageC() {
 function pageD() {
   const g = groups(119)
   const sel = find(119, 518692)
-  const tbl = (title, ps, kind) => {
+  const sec = sections(119)
+  const tbl = (gr) => {
+    const title = gr.title, ps = gr.players, kind = gr.kind
+    if (!gr.open) return `<section class="rc-d__grp" aria-label="${title}">${ghead(gr)}</section>`
     const cs = kind === 'h'
       ? [['G', 'gamesPlayed'], ['PA', 'plateAppearances'], ['AVG', 'avg'], ['OBP', 'obp'], ['SLG', 'slg'], ['OPS', 'ops'], ['HR', 'homeRuns'], ['RBI', 'rbi']]
       : [['G', 'gamesPlayed'], ['IP', 'inningsPitched'], ['ERA', 'era'], ['WHIP', 'whip'], ['SO', 'strikeOuts'], ['BB', 'baseOnBalls'], ['W-L', 'wl'], ['SV', 'saves']]
@@ -261,7 +297,7 @@ function pageD() {
       const f = line(p, 'P')
       return `<tr${p.id === sel.id ? ' aria-selected="true" class="is-on"' : ''}><th scope="row"><button type="button" class="btn btn--ghost rc-d__who"><span class="rc-jersey">${dash(p.jersey)}</span>${shot(p, 32)}<span class="rc-name">${p.name}</span><span class="rc-pos">${p.pos}</span></button></th>${cs.map(([, k]) => `<td class="rc-num">${f(k)}</td>`).join('')}</tr>`
     }).join('')
-    return `<section class="rc-d__grp" aria-label="${title}"><h4 class="rc-gh">${title}<b>${ps.length}</b></h4><div class="${wrap}"${reg}><table class="${grid}"><thead><tr><th scope="col">Player</th>${cs.map(([l]) => `<th scope="col">${l}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></section>`
+    return `<section class="rc-d__grp" aria-label="${title}">${ghead(gr)}<div class="${wrap}"${reg}><table class="${grid}"><thead><tr><th scope="col">Player</th>${cs.map(([l]) => `<th scope="col">${l}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></section>`
   }
   const f = line(sel, 'P')
   const dock = `<aside class="rc-d__dock" aria-label="${sel.name}, full line">
@@ -274,7 +310,7 @@ function pageD() {
   const inner = `<div class="rc stack stack--base">
       ${tabs({ at: 119 })}
       ${setToggle('P')}
-      ${tbl('Hitters', g.hitters, 'h')}${tbl('Pitchers', g.pitchers, 'p')}
+      ${[...sec.hg, ...sec.pg].map(tbl).join('')}
       ${dock}
     </div>`
   return head('Roster · D', `

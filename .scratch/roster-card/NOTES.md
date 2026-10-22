@@ -12,6 +12,12 @@ Markup comes from `cardClassName`, `tableParts`, `segmentedMarkup`; CSS from `/s
 | C | Photo tile grid | `Segmented` fill | tile: photo, big jersey, name, pos | sheet inside the card: bottom sheet (phone), right drawer (wide) | in the sheet head |
 | D | Two stat tables (hitters, pitchers), sticky name column | `Segmented` fill | table row: photo 32, name; stats are the columns | docked "full line" panel at the foot of the card (the extra fields) | above the tables; it changes the columns |
 
+## Position groups (Gary's ask after the first round)
+Sections replace the Hitters/Pitchers headings: Catchers, Infielders, Outfielders, DH and two-way, Starting pitchers, Relievers.
+Each heading is a tappable `.btn.btn--ghost` with a count and chevron; the mocks open Infielders and Starting pitchers.
+Starter rule (my inference, unconfirmed with Gary): a postseason start, else more than half of regular-season games started.
+By that rule Roki Sasaki is a reliever and Kershaw too. Catchers and DH/two-way sections are my addition; Gary named five groups.
+
 ## Found
 - "Regular season" does not fit one line in a 3-way `Segmented` at 390 with default type. The mocks use `--fs-label` and `--ls-none` below 480px. Unconfirmed: whether the guards accept that override.
 - A tappable list row is drawn as `.btn.btn--ghost` re-laid as a row (no third control). Unconfirmed against the control guard.
