@@ -37,20 +37,29 @@ const ROLES = [
   { value: 'either', label: 'Either' },
 ]
 
+// The slot at the row's left: the people it is about, stacked (a combined no-hitter fans out
+// up to three), or for a triple play, which names no one, the club that turned it. The slot is
+// one width for every row, so the text beside it starts at the same edge.
 function Faces({ row }) {
-  if (row.players.length === 0) return null
   return (
-    <span className="notable__faces">
-      {row.players.slice(0, MAX_FACES).map((p) => (
-        <Headshot key={p.id} personId={p.id} name={p.name} teamId={row.doerId} className="notable__shot" />
-      ))}
+    <span className="notable__faces" aria-hidden="true">
+      {row.players.length > 0 ? (
+        row.players
+          .slice(0, MAX_FACES)
+          .map((p) => <Headshot key={p.id} personId={p.id} name={p.name} teamId={row.doerId} className="notable__shot" />)
+      ) : (
+        <span className="notable__shot notable__crest">
+          <TeamLogo teamId={row.doerId} name="" size={28} />
+        </span>
+      )}
     </span>
   )
 }
 
-function Side({ side }) {
+// The club that did it carries the marker underline; a row with no known side marks neither.
+function Side({ side, did }) {
   return (
-    <Cluster as="span" gap="snug" align="center" className="notable__side">
+    <Cluster as="span" gap="snug" align="center" className={`notable__side${did ? ' notable__side--did' : ''}`}>
       <TeamLogo teamId={side.id} name={side.name || side.abbr} size={18} />
       <span className="notable__club">{side.abbr || side.name || 'Club not on file'}</span>
       <span className="notable__runs">{side.runs ?? '–'}</span>
@@ -59,26 +68,33 @@ function Side({ side }) {
 }
 
 function Row({ row, linkProps }) {
+  const did = (side) => row.doerId != null && side.id === row.doerId
   const body = (
     <>
       <Faces row={row} />
       <Stack gap="tight" className="notable__body">
-      <span className="notable__when t-label">
-        {humanDateWithYear(row.date)}
-        {row.gameNumber > 1 && <span className="t-label t-label--bold"> Game {row.gameNumber}</span>}
-      </span>
-      <Cluster as="span" gap="base" rowGap="tight" className="notable__score">
-        <Side side={row.away} />
-        <Side side={row.home} />
-      </Cluster>
-      <span className="notable__feat">{row.feat}</span>
+        <span className="notable__when t-label">
+          {humanDateWithYear(row.date)}
+          {row.gameNumber > 1 && <span className="t-label t-label--bold"> Game {row.gameNumber}</span>}
+        </span>
+        <Cluster as="span" gap="base" rowGap="tight" className="notable__score">
+          <Side side={row.away} did={did(row.away)} />
+          <Side side={row.home} did={did(row.home)} />
+        </Cluster>
+        <span className="notable__feat">{row.feat}</span>
       </Stack>
+      {row.href && (
+        <span className="notable__go" aria-hidden="true">
+          ›
+        </span>
+      )}
     </>
   )
   return (
     <li>
       {row.href ? (
         <a className="notable__row" {...linkProps(row.href)}>
+          <span className="sr-only">Box score: </span>
           {body}
         </a>
       ) : (
