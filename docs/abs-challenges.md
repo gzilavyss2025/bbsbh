@@ -367,13 +367,10 @@ first thirty days against its last thirty, 55.2% against 78.3%. Of the 126
 Triple-A men absent in September, 62 were in the majors instead. The number is
 a fact about how a farm system works. It is not a reason the chart would lie.
 
-**What is left is a build, and one file decision.** ADR-0076 holds: the rows
-and the surface land together, so `EXPOSURE_CLUB_LEVELS` in
-`scripts/lib/abs/export.mjs` is still `['MLB']` until a Triple-A surface reads
-them. Adding the level takes `abs-exposure-clubs.json` from 93 KB to about
-222 KB, and that file is fetched by one club's hub tab — so a major-league club
-would download the Triple-A half for nothing. Split it per level, or accept the
-weight; do not ship the level without settling which.
+**What was left, and how it came out.** ADR-0076 held: the rows and the surface
+landed together, and `EXPOSURE_CLUB_LEVELS` in `scripts/lib/abs/export-clubs.mjs`
+is now `['MLB', 'AAA']`. The file decision went to one file per level, as argued
+above, so a major-league club does not download Triple-A's 128 KB for nothing.
 
 **The figures above are cut per club, not per season.** §5's board floors a
 man's folded season — 377 Triple-A men and 352 major-league men clear it — and

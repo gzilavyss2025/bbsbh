@@ -273,7 +273,7 @@ const fetchClubsFile = staticJsonBy((key) => `/data/abs/${key}.json`)
 // THE LEVELS THIS CARD DRAWS, keyed by the sportId a team hub already knows.
 // The ABS rig itself stops here — AA and below run neither the system nor the
 // rule (scripts/gen-abs-challenges.mjs), so an affiliate below Triple-A gets no
-// level, no fetch and no card, which is the shape TeamRunValueCard takes too.
+// level, no fetch and no card, which is the shape RunValueBoard takes too.
 const CLUB_LEVEL_BY_SPORT = { 1: 'MLB', 11: 'AAA' }
 
 export function exposureClubLevelFor(sportId) {
