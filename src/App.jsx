@@ -20,6 +20,10 @@ import {
   apiDateToUrl,
 } from './lib/route.js'
 
+// The on-device headshot log button (issue #1446) is switched off. The panel and
+// src/lib/headshot/log.js stay in the tree; flip this to true to show it again.
+const SHOW_HEADSHOT_LOG = false
+
 function lazyNamed(loader, name) {
   return lazy(() => loader().then((module) => ({ default: module[name] })))
 }
@@ -554,7 +558,7 @@ export default function App() {
           can carry dozens of PlayerLinks, and this is the only component that
           re-renders when the hovered player changes. */}
       <PlayerHoverCard />
-      <HeadshotLogPanel />
+      {SHOW_HEADSHOT_LOG && <HeadshotLogPanel />}
       {/* Mounted unconditionally — it touches no Clerk API of its own, and the
           sync receipt has to be able to say "this deploy has no account
           feature" rather than rendering nothing. It is an external store, so
