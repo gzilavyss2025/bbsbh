@@ -32,6 +32,8 @@ function Wash({ personId }) {
 // Hero's idiom: the player's cut-out and action wash on the right, the award tag, name and
 // club on the left, his line from THIS series in a strip along the bottom.
 export function SeriesMvpCard({ mvp, lines }) {
+  // No face on file (a retired player): the club's mono mark stands in, as on the Hero's empty slab.
+  const [noPhoto, setNoPhoto] = useState(false)
   const stats = mvpStatLine(lines, mvp.playerId)
   const club = mvp.teamId ? teamClubNameShort(mvp.teamId) : null
   return (
@@ -39,7 +41,10 @@ export function SeriesMvpCard({ mvp, lines }) {
       <div className="psseries__mvpstage">
         <div className="psseries__mvpphoto" aria-hidden="true">
           <Wash personId={mvp.playerId} />
-          <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback className="psseries__mvpcut" />
+          <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback onFallback={() => setNoPhoto(true)} className="psseries__mvpcut" />
+          {noPhoto && mvp.teamId && (
+            <TeamLogo teamId={mvp.teamId} name={club ?? ''} variant="mono" size={88} className="psseries__mvpmark" />
+          )}
         </div>
         <div className="psseries__mvpwho">
           <span className="psseries__mvptag">Series MVP</span>

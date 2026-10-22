@@ -65,6 +65,14 @@
 }
 .shot.psseries__mvpcut img { filter: none; }
 
+/* No photo on file: the club's mono mark, centred in the photo's place at the Hero's 0.35. */
+.psseries__mvpmark {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0.35;
+}
+
 /* layout-exempt: tag, name and club stack on the stage's left */
 .psseries__mvpwho {
   position: relative;
