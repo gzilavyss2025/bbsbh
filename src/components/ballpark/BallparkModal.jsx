@@ -18,7 +18,7 @@ import { IconButton } from '../ui/control/IconButton.jsx'
 // minor-league park the registry can draw opens with the drawing alone: it has
 // no facts on file and no league to rank it in.
 //
-// Spoiler-safe: everything here is static park geometry (src/lib/ballpark/ballparkData.js),
+// Everything here is static park geometry (src/lib/ballpark/ballparkData.js),
 // no score, so it sits outside any seal like the rest of the lineup page. Same
 // dialog contract as WhatsBrewingModal — dismiss via backdrop, close button, or
 // Escape; focus moves into the sheet on open and back to the trigger on close.

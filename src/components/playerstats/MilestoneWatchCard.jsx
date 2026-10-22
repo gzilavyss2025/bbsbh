@@ -10,7 +10,7 @@ import { Card } from '../ui/frame/Card.jsx'
 // milestone within reach, from the nightly league-wide precompute
 // (api/milestones.js / scripts/gen-milestones.mjs), which scales the
 // projection by how often the player actually plays rather than assuming
-// every team game. `milestones` is the page's own live, spoiler-cutoff-safe
+// every team game. `milestones` is the page's own live, as-of-aware
 // progress data (person.js's milestoneWatchView) — always shown; the
 // projection is an ADDITIONAL annotation, shown only on a bare current-day
 // view (`asOf` unset). The precompute is generated against TODAY's pace and

@@ -51,7 +51,7 @@ function cardTile(teamId, isMlb, treatment, side) {
 //
 // Touch drag is native (overflow-x + momentum scrolling); useDragScroll adds
 // click-and-drag panning for a mouse so the strip works the same on desktop.
-// Spoiler-free: uniform choices plus a record the standings already show, and
+// Uniform choices plus a record the standings already show, and
 // where a jersey was worn in October its postseason record on a second line.
 
 // A W-L record as "45–30" (en dash), or an em dash when the club hasn't been

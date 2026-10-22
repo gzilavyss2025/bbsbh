@@ -4,9 +4,8 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { MoveItems, dateline, flattenDays, takeStories } from './MoveRow.jsx'
 
 // THE WIRE RAIL — the wide surface's presentation of the league's roster moves
-// (issue #772). Spoiler-free: a roster move and its date carry no score, so
-// there is no SealBox here and none is wanted (see
-// api/transactions/leagueFeed.js).
+// (issue #772). A roster move and its date carry no score, so there is no
+// SealBox here and none is wanted (see api/transactions/leagueFeed.js).
 //
 // It replaces LeagueMovesCard, which put this same feed ABOVE the game list.
 // That card was measured on a real 1440x900 window and it ran from y=183 to

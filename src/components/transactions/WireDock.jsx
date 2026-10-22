@@ -16,9 +16,8 @@ import { SheetDock } from '../ui/dock/SheetDock.jsx'
 // WireRail.jsx beside the games instead — ADR-0062. Sideways is not on offer
 // at 390pt, which is why this file still exists.)
 //
-// Spoiler safety needs no argument here and gets none: a roster move carries no
-// score (api/transactions/leagueFeed.js is spoiler-free), so there is no
-// SealBox in this file and none is wanted.
+// A roster move carries no score (api/transactions/leagueFeed.js), so there is
+// no SealBox in this file and none is wanted.
 
 export function WireDock({ endDate, sportId, onPresence, singleDay = false }) {
   const { data } = useAsync(

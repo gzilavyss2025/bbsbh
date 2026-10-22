@@ -7,8 +7,7 @@ import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 
 // A large grayscale team mark blown up for pencil-sketching, shown when the
 // user taps a logo on a team page. Same tonal treatment as the printable Logo
-// Sheet, just one club at a time and on demand. Carries no score, so it's
-// spoiler-safe like the rest of the team pages. Dismiss by tapping the backdrop,
+// Sheet, just one club at a time and on demand. Carries no score. Dismiss by tapping the backdrop,
 // the close button, or Escape.
 //
 // The segmented control flips between a club's distinct marks — cap, base,

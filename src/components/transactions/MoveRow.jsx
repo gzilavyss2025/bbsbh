@@ -22,9 +22,9 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // have changed on one surface and not the other, and nothing would have
 // caught it.
 //
-// Everything below is spoiler-free by construction — a roster move and its date
-// carry no score (see api/transactions/leagueFeed.js) — so nothing here is
-// wrapped in a SealBox and none is wanted.
+// A roster move and its date carry no score (see
+// api/transactions/leagueFeed.js), so nothing below is wrapped in a SealBox and
+// none is wanted.
 
 // A story's rail runs one to three faces. Two is the whole in-and-out of a
 // move and covers 33 of 35 stories in a measured window outright; the two

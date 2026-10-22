@@ -11,7 +11,7 @@ import { Pill } from '../ui/control/Pill.jsx'
 // Purely presentational over a facts list — the group split lives in
 // person.js's advancedPitchingView / advancedHittingView, each shaped from
 // one live statsapi request (person-fetch.js's fetchPitchingAdvanced /
-// fetchHittingAdvanced). Full-season aggregates — same spoiler footing as
+// fetchHittingAdvanced). Full-season aggregates, like
 // the vs-L/R season splits, and labeled so. MLB-only at the source; MiLB
 // players get no card. Each stat's own explainer sits behind a tap-to-open
 // "i" glyph next to its label rather than one fixed caveat paragraph under
