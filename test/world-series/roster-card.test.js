@@ -147,3 +147,25 @@ test('stat line: a missing figure is a dash; no stat is null', () => {
   const arm = statLine({ gamesPlayed: 1, inningsPitched: '6.0', wins: 1, losses: 0, era: '1.50' }, 'pitching')
   assert.deepEqual(arm.cells.map((c) => [c.label, c.value]).slice(0, 5), [['ERA', '1.50'], ['WHIP', '—'], ['IP', '6.0'], ['SO', '—'], ['W-L', '1-0']])
 })
+
+import { fitTransform, visibleBox } from '../../src/lib/postseason/worldseries/scouting/markFit.js'
+
+function grid(w, h, rect) {
+  const d = new Uint8ClampedArray(w * h * 4)
+  for (let y = rect.y0; y < rect.y1; y++) for (let x = rect.x0; x < rect.x1; x++) d[(y * w + x) * 4 + 3] = 255
+  return d
+}
+
+test('markFit: the visible box of a padded mark fills its square', () => {
+  const box = visibleBox(grid(10, 10, { x0: 3, y0: 4, x1: 7, y1: 6 }), 10, 10)
+  assert.deepEqual(box, { x0: 0.3, y0: 0.4, x1: 0.7, y1: 0.6 })
+  // Longest side 0.4 -> scale 2.5; the box is already centred.
+  assert.equal(fitTransform(box), 'scale(2.5) translate(0%, 0%)')
+})
+
+test('markFit: an off-centre mark is moved to the centre; an empty one is left alone', () => {
+  const box = visibleBox(grid(10, 10, { x0: 0, y0: 0, x1: 5, y1: 5 }), 10, 10)
+  assert.equal(fitTransform(box), 'scale(2) translate(25%, 25%)')
+  assert.equal(visibleBox(new Uint8ClampedArray(400), 10, 10), null)
+  assert.equal(fitTransform(null), null)
+})

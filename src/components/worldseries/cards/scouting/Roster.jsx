@@ -2,11 +2,11 @@ import '../../../../styles/worldseries/roster.css'
 import { useState } from 'react'
 import { loadRosterLine } from '../../../../api/scout/rosterStats.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
+import { headerThemeFor, headerThemeStyle } from '../../../../lib/headerTheme.js'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { lineGroups, rosterSections, statLine } from '../../../../lib/postseason/worldseries/scouting/roster.js'
 import { playerPath } from '../../../../lib/route.js'
 import { teamClubNameShort } from '../../../../lib/teams.js'
-import { TeamLogo } from '../../../logo/TeamLogo.jsx'
 import { Headshot } from '../../../player/Headshot.jsx'
 import { Button } from '../../../ui/control/Button.jsx'
 import { Door } from '../../../ui/control/Door.jsx'
@@ -15,6 +15,7 @@ import { Card } from '../../../ui/frame/Card.jsx'
 import { StatCell, StatStrip } from '../../../ui/frame/StatStrip.jsx'
 import { Grid } from '../../../ui/layout/Grid.jsx'
 import { Stack } from '../../../ui/layout/Stack.jsx'
+import { ClubMark } from './ClubMark.jsx'
 
 // ROSTER (#2316, direction A "Inline expand", Gary 2026-10-22): each Series club's roster by position
 // group, hitters left and pitchers right (one column on a phone). A tap on a row opens that player's
@@ -122,11 +123,13 @@ export function Roster({ rosters, clubIds, slateDate }) {
             value: id,
             label: (
               <>
-                <TeamLogo teamId={id} name={teamClubNameShort(id)} size={26} className="ww-roster__logo" />
+                <ClubMark teamId={id} name={teamClubNameShort(id)} selected={id === club} />
                 {teamClubNameShort(id)}
               </>
             ),
             count: size(id),
+            // The club's own bar colours (Identity Lab, main jersey): the selected tab wears them.
+            style: headerThemeStyle(headerThemeFor(id, 'main')),
           }))}
         />
         <Segmented fill label="Stat set" value={set} onChange={setSet} className="ww-roster__sets" options={SETS} />

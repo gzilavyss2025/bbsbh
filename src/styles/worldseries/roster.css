@@ -2,17 +2,34 @@
    stat-set toggle are Segmented; group heads and player rows are ghost block Buttons (the disclosure
    row: its › turns when open). No new token. */
 
-/* The club mark sits on a paper chip so it reads on the selected (ink) fill too. */
+/* The club mark sits straight on the tab: full colour on the paper tab, the one-ink knockout on the
+   selected club's bar (inked by --mark-filter, set per tab from the Identity Lab triad). */
 .ww-roster .ww-roster__logo {
   display: block;
   flex: none;
-  box-sizing: content-box;
-  padding: var(--space-1);
-  border-radius: var(--radius-xs);
-  background: var(--surface-card);
+}
+.ww-roster .ww-roster__mark {
+  display: block;
+  flex: none;
+}
+.ww-roster .ww-roster__mark-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.ww-roster .ww-roster__logo--bar {
+  filter: var(--mark-filter, none);
 }
 .ww-roster .ww-roster__clubs .segmented__btn {
   gap: var(--space-2);
+}
+/* The selected club tab wears that club's bar (--bar-fill / --bar-text, set per tab from the
+   Identity Lab triad). A club with no triad keeps the ink fill. */
+.ww-roster .ww-roster__clubs .segmented__btn[aria-pressed='true'] {
+  background: var(--bar-fill, var(--text-heading));
+  border-color: var(--bar-fill, var(--border-stamped));
+  color: var(--bar-text, var(--text-on-ink));
 }
 
 /* "Regular season" keeps one line in a three-way row on a phone: label type, no tracking. */
