@@ -112,3 +112,16 @@ test('fill shares the row; the count is mono; no literal sizes', () => {
   assert.doesNotMatch(css, /\b(34|44)px\b/)
   assert.doesNotMatch(css, /--control-min/)
 })
+
+test('an option style reaches its button, so a caller can theme one tab', () => {
+  const html = renderToStaticMarkup(
+    segmentedMarkup(createElement, {
+      label: 'Club',
+      value: 'a',
+      onChange() {},
+      options: [{ value: 'a', label: 'A', style: { '--bar-fill': '#005A9C' } }, { value: 'b', label: 'B' }],
+    }),
+  )
+  assert.match(html, /style="--bar-fill:#005A9C"/)
+  assert.equal(html.match(/style=/g).length, 1)
+})

@@ -50,3 +50,14 @@ test('sides that do not name the two Series clubs fall back to clubIds', () => {
   assert.deepEqual(clubOrder([158, 139], [158, 999]), [158, 139])
   assert.deepEqual(clubOrder([158, 139], undefined), [158, 139])
 })
+
+test('Roster follows Glove and legs: rank 3 on an off day, last (8) on a game day', () => {
+  const all = { ...FULL, gloveLegs: [{}], roster: true, pitchByPitch: {}, platoon: [{}], parkFit: {}, meetings: [{}] }
+  assert.deepEqual(ids(scoutingModel({ dayType: 'off', ...all })), [
+    'nine-keys', 'glove-legs', 'roster', 'matchup-edges', 'pitch-by-pitch', 'platoon', 'park-fit', 'film-room',
+  ])
+  assert.deepEqual(ids(scoutingModel({ dayType: 'game', ...all })), [
+    'matchup-edges', 'umpire-edge', 'pitch-by-pitch', 'platoon', 'film-room', 'park-fit', 'glove-legs', 'roster',
+  ])
+  assert.ok(!ids(scoutingModel({ dayType: 'off', ...all, roster: false })).includes('roster'))
+})
