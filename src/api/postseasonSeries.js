@@ -314,6 +314,8 @@ export function foldSeriesStats(boxscores, whiffFeeds) {
     batting: rankBatting(batting),
     pitching: rankPitching(pitching),
     rosters: buildRosters(rosterByTeam),
+    // Every player's summed series line, by id (the Series MVP card reads one).
+    lines: { batting: Object.fromEntries(batting), pitching: Object.fromEntries(pitching) },
     // Team sums from the same box scores (seriesTotals.js), plus the whiff
     // counts off each counted game's pitch calls.
     totals: foldTeamTotals(boxscores, foldWhiffs(whiffFeeds)),
