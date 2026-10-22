@@ -7,7 +7,6 @@ import { Headshot } from '../components/player/Headshot.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
-import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
@@ -328,8 +327,7 @@ function ThisSeason({ season, favoriteTeamId }) {
   const announced = (data ?? []).filter((f) => !isWaiting(f))
   const waiting = (data ?? []).filter(isWaiting)
   return (
-    <section className="awardhistory__award" aria-labelledby="awardhistory-thisseason">
-      <SectionHead look="label" titleId="awardhistory-thisseason">{`${season} so far`}</SectionHead>
+    <Card frame="stamped" label={`${season} so far`} className="awardhistory__award">
       {loading && <EmptyState size="compact" role="status">Checking {season} winners…</EmptyState>}
       {!!data && announced.length === 0 && (
         <EmptyState size="compact">No {season} winners announced yet</EmptyState>
@@ -347,7 +345,7 @@ function ThisSeason({ season, favoriteTeamId }) {
           </EmptyState>
         )}
       </Stack>
-    </section>
+    </Card>
   )
 }
 
@@ -433,7 +431,7 @@ export function AwardsHistoryPage() {
   const hasAllMlb = allMlbYears.length > 0
 
   return (
-    <div className="screen">
+    <div className="screen awardhistory">
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Awards History</h1>
@@ -469,15 +467,14 @@ export function AwardsHistoryPage() {
 
       {families.length > 0 && (
         <>
-          <div className={`awardhistory__list${view === 'award' ? ' awardhistory__list--zebra' : ''}`}>
+          <Stack gap="loose" className={`awardhistory__list${view === 'award' ? ' awardhistory__list--zebra' : ''}`}>
             {view === 'award' &&
               hardware.map((family) => {
                 const years = Object.keys(family.years)
                   .map(Number)
                   .sort((a, b) => b - a)
                 return (
-                  <section className="awardhistory__award" key={family.key}>
-                    <SectionHead look="label">{family.label}</SectionHead>
+                  <Card frame="stamped" label={family.label} className="awardhistory__award" key={family.key}>
                     {isLeagueSplit(family) ? (
                       <AwardFamilySplit years={years} yearsData={family.years} favoriteTeamId={favoriteTeamId} />
                     ) : (
@@ -492,13 +489,12 @@ export function AwardsHistoryPage() {
                         ))}
                       </Stack>
                     )}
-                  </section>
+                  </Card>
                 )
               })}
 
             {view === 'award' && hasAllMlb && (
-              <section className="awardhistory__award" key="all-mlb-teams">
-                <SectionHead look="label">All-MLB Teams</SectionHead>
+              <Card frame="stamped" label="All-MLB Teams" className="awardhistory__award" key="all-mlb-teams">
                 <Stack gap="loose" className="awardhistory__years">
                   {allMlbYears.map((year) => (
                     <AllMlbYear
@@ -510,13 +506,12 @@ export function AwardsHistoryPage() {
                     />
                   ))}
                 </Stack>
-              </section>
+              </Card>
             )}
 
             {view === 'year' &&
               byYear.map(({ year, awards }) => (
-                <section className="awardhistory__award" key={year}>
-                  <SectionHead look="label">{String(year)}</SectionHead>
+                <Card frame="stamped" label={String(year)} className="awardhistory__award" key={year}>
                   <Stack gap="loose" className="awardhistory__years">
                     {awards.map((a) =>
                       a.recipients.some((r) => r.league) ? (
@@ -548,9 +543,9 @@ export function AwardsHistoryPage() {
                       </div>
                     )}
                   </Stack>
-                </section>
+                </Card>
               ))}
-          </div>
+          </Stack>
           {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
         </>
       )}
