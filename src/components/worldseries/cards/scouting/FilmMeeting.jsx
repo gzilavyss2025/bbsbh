@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'
 import { useRouteLink } from '../../../../lib/nav.js'
-import { gamePath, playerPath } from '../../../../lib/route.js'
+import { gamePath } from '../../../../lib/route.js'
 import { TeamLogo } from '../../../logo/TeamLogo.jsx'
 import { Headshot } from '../../../player/Headshot.jsx'
+import { PlayerLink } from '../../../player/PlayerLink.jsx'
 import { PitchMark } from '../../../playbyplay/pitcherCard/PitchMark.jsx'
 import { HighlightSheet } from '../../../playbyplay/HighlightSheet.jsx'
 import { useWatchClip } from '../../../highlights/useWatchClip.js'
@@ -72,9 +73,8 @@ function LineScore({ m }) {
   )
 }
 
-// The two starters, one row each, the box score's pitching columns. The name is the door to the player page.
+// The two starters, one row each, the box score's pitching columns. The name is a link to the player page.
 function Pitching({ m }) {
-  const link = useRouteLink()
   const labels = m.starters[0].stats.map((c) => c.label)
   return (
     <Table frame="bare" density="tight" className="ww-film__grid ww-film__grid--pit">
@@ -108,9 +108,8 @@ function Pitching({ m }) {
           return (
             <tr key={s.id}>
               <th scope="row" className="ww-film__pname">
-                <Door {...link(playerPath(s.id))} className="ww-film__name">
-                  {s.listName}
-                </Door>{' '}
+                {/* The card prints "Last, First", like the box score; the address is spoken order (ADR-0057). */}
+                <PlayerLink id={s.id} name={s.name} className="ww-film__name">{s.listName}</PlayerLink>{' '}
                 <span className="ww-film__tag">{[s.abbr, s.hand].filter(Boolean).join(' | ')}</span>
               </th>
               {s.stats.map((c) => (

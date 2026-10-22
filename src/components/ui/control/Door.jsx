@@ -1,8 +1,8 @@
 // THE DOOR — the app's one "there is more behind this" control (#1130). "See
 // all ›" under a preview card, "Full roster ›" closing a pregame lineup, "Show
 // 12 more" at the foot of a list. It is not a button: a button acts on the page
-// you are standing on, a door leaves it, and it is drawn in --accent-link
-// rather than in a control's ink to say so. Fourteen blocks drew this from
+// you are standing on, a door leaves it, and it is drawn as ink text with a
+// dotted rule, not a ruled box, to say so. Fourteen blocks drew this from
 // scratch before the collapse; the dress now lives in one place
 // (styles/system/door.css) so a tweak to the hit target reaches every one.
 //

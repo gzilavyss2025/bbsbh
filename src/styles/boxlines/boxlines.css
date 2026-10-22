@@ -411,7 +411,7 @@ a.boxline__link:focus-visible {
    already answers with inset paper. */
 @media (hover: hover) and (pointer: fine) {
   .boxlines__door:hover {
-    outline: var(--bw-heavy) solid var(--accent-link);
+    outline: var(--bw-heavy) solid var(--accent-hover);
     outline-offset: 3px;
     border-radius: var(--radius-sm);
   }

@@ -58,8 +58,3 @@
 :root[data-motion='reduced'] .tnext__games .card--sheet {
   animation: none !important;
 }
-
-/* A door in the house band reads on the navy: light ink, not the link colour. */
-.tnext__games .sectionhead--band .door {
-  color: var(--text-on-ink);
-}

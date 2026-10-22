@@ -85,7 +85,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--accent-link);
+  color: var(--text-heading);
 }
 .oseason__door:hover,
 .oseason__door:active {
@@ -813,7 +813,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--accent-link);
+  color: var(--text-heading);
   text-decoration: none;
 }
 .srecord__door:hover,
@@ -1016,7 +1016,7 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--accent-link);
+  color: var(--text-heading);
   text-decoration: none;
 }
 .seasonnote__when:hover,

@@ -146,16 +146,18 @@ export const PAIRINGS = [
   // later nudge to either accent has less margin here than anywhere else.
   { fg: 'text-on-ink', bg: 'accent-positive', min: TEXT, note: 'standings clinch mark' },
   { fg: 'text-on-ink', bg: 'accent-negative', min: TEXT, note: 'standings eliminated mark' },
-  // Link / text-button ink, on each of the three grounds it lands on: the app
-  // canvas, a page, and a raised card. Held to the full text bar because these
-  // run SMALL — "See all ›" and the "more" affordance are --fs-label caps (#1128).
-  { fg: 'accent-link', bg: 'bg-canvas', min: TEXT, note: 'link text on app canvas' },
-  { fg: 'accent-link', bg: 'bg-page', min: TEXT, note: 'link text on page' },
-  { fg: 'accent-link', bg: 'surface-card', min: TEXT, note: 'link text on raised card' },
+  // The green hover colour (--accent-hover, once --accent-link) on each of the three grounds
+  // it lands on: the app canvas, a page, and a raised card. No text reads it (a link is ink,
+  // see system/door.css), but it draws borders, washes and outlines on these grounds. It
+  // stays at the full text bar, the strict end: a green that clears 4.5:1 clears the 3:1
+  // an outline needs.
+  { fg: 'accent-hover', bg: 'bg-canvas', min: TEXT, note: 'green hover colour on app canvas' },
+  { fg: 'accent-hover', bg: 'bg-page', min: TEXT, note: 'green hover colour on page' },
+  { fg: 'accent-hover', bg: 'surface-card', min: TEXT, note: 'green hover colour on raised card' },
   // The run value board's diverging pair, on each of the two grounds it lands
   // on: the board rows sit on --bg-page, the two cards on --surface-card. The
   // POSITIVE half is already covered three lines up (--accent-positive and
-  // --accent-link are both --field), so only the clay half is new — and it is
+  // --accent-hover are both --field), so only the clay half is new — and it is
   // the one worth pinning, since a red that reads fine on the manila canvas is
   // the classic thing to lose when a paper token is retuned.
   { fg: 'accent-negative', bg: 'bg-page', min: TEXT, note: 'run value, runs given back, on a board row' },

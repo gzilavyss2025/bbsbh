@@ -297,7 +297,7 @@
   border-radius: 999px;
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
-  color: var(--accent-link);
+  color: var(--text-heading);
   cursor: pointer;
 }
 .fact__infoglyph:hover {

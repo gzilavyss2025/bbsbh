@@ -33,8 +33,11 @@
   font-weight: var(--w-semibold);
 }
 .gnotes__pdf a {
-  color: var(--accent-link);
+  color: var(--text-heading);
   font-weight: var(--w-semibold);
+  text-decoration: underline dotted;
+  text-decoration-thickness: var(--bw-hair);
+  text-underline-offset: 3px;
 }
 
 /* The "Show more" button under a long table: one page of rows at a time. */

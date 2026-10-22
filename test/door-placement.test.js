@@ -71,3 +71,30 @@ test('a door keeps only placement, never dress, beside the shared rule', () => {
     }
   }
 })
+
+// What the shared rule draws. A door is ink with a dotted rule, the same rule a
+// player-name link shows on hover (`.plink`), so it still reads as a link on
+// touch, where there is no hover. It was field green, the colour the app also
+// uses for "positive" and for the focus ring, which made a "See all ›" read as
+// a good number. This pins the decision from the stylesheet text.
+test('an inline door is ink with a dotted rule, and reads no green', () => {
+  const css = read('system/door.css')
+  for (const selector of ['.door--inline', '.door__label']) {
+    const body = ruleBody(css, selector)
+    assert.ok(body, `${selector} should have a base rule`)
+    assert.match(body, /color:\s*var\(--text-heading\)/, `${selector} draws in ink`)
+    assert.doesNotMatch(body, /accent-hover|--field|accent-positive/, `${selector} reads no green`)
+  }
+  const inline = ruleBody(css, '.door--inline')
+  assert.match(inline, /text-decoration:\s*underline dotted/, 'the inline door carries a dotted rule')
+})
+
+// A door in a band takes the band's own ink. The band's ink is checked against its
+// ground (`check-contrast`); the door's page ink is not, and it vanishes on a navy
+// or club-coloured band. The team page's Games band had a one-off for this; the
+// design lab shows the same door in a themed band without it.
+test('a door in a band inherits the band ink', () => {
+  const body = ruleBody(read('system/section-head.css'), '.sectionhead--band .door--inline')
+  assert.ok(body, 'a band should have a door rule')
+  assert.match(body, /color:\s*inherit/, 'the door draws in the band ink')
+})

@@ -49,8 +49,8 @@ export const clerkAppearance = {
     navbarButton: 'tally-cl-navbtn',
     pageScrollBox: 'tally-cl-page',
     profileSectionTitleText: 'tally-cl-sectiontitle',
-    profileSectionPrimaryButton: 'tally-cl-link',
-    formButtonReset: 'tally-cl-link',
+    profileSectionPrimaryButton: 'tally-cl-textbtn',
+    formButtonReset: 'tally-cl-textbtn',
   },
 }
 

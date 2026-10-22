@@ -70,7 +70,7 @@
    green — the same border-color hover the photo tiles
    beside it use, so the two rails read as one family. */
 .hlclip:hover {
-  border-color: var(--accent-link);
+  border-color: var(--accent-hover);
   box-shadow: var(--shadow-raised);
   transform: translateY(-1px);
 }
@@ -261,8 +261,8 @@
   cursor: pointer;
 }
 .cliprail__nav:hover:not(:disabled) {
-  background: var(--accent-link);
-  border-color: var(--accent-link);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
   color: var(--text-on-ink);
 }
 .cliprail__nav:focus-visible {

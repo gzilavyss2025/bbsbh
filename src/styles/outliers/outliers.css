@@ -197,8 +197,11 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--accent-link);
+  color: var(--text-heading);
   font-family: var(--font-body);
   font-size: var(--fs-small);
+  text-decoration: underline dotted;
+  text-decoration-thickness: var(--bw-hair);
+  text-underline-offset: 3px;
   cursor: pointer;
 }

@@ -125,12 +125,14 @@
 .lsp__seeall,
 .plink.lsp__seeall {
   margin-left: auto;
-  color: var(--field);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  text-decoration: none;
+  text-decoration: underline dotted;
+  text-decoration-thickness: var(--bw-hair);
+  text-underline-offset: 3px;
   text-transform: uppercase;
 }
 /* layout-exempt: five boxed figures, a fixed row */

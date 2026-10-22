@@ -168,7 +168,16 @@
   font-family: var(--font-body) !important;
 }
 .tally-cl-link {
-  color: var(--accent-positive) !important;
+  color: var(--text-heading) !important;
+  font-weight: var(--w-semibold) !important;
+  text-decoration: underline dotted !important;
+  text-decoration-thickness: var(--bw-hair) !important;
+  text-underline-offset: 3px !important;
+}
+/* The two Clerk BUTTONS that read as text (a profile section's action, a form's reset): ink, and
+   no dotted rule. Only the footer link above is a link. */
+.tally-cl-textbtn {
+  color: var(--text-heading) !important;
   font-weight: var(--w-semibold) !important;
 }
 .tally-cl-menuitem {
