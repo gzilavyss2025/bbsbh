@@ -572,9 +572,11 @@
     },
     "notable/notable.js": {
       "class": "reveal-only",
-      "why": "The feat index (no-hitters, cycles, triple plays): a feat names the result, so it is read only inside the box score's SealBox reveal (ADR-0101).",
+      "why": "The feat index (no-hitters, cycles, triple plays): a feat names the result, so it is read only inside the box score's SealBox reveal (ADR-0101). The other readers are the open /notable shelf (#2508), a results page behind a labelled door (ADR-0081); lib/notable/shelf.js drops any game dated on or after the slate's today.",
       "importers": [
         "hooks/callouts/useLastTime.js",
+        "lib/notable/shelf.js",
+        "screens/notable/NotablePage.jsx",
         "screens/boxscore/FeatLabel.jsx"
       ]
     },

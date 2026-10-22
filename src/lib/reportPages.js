@@ -148,6 +148,8 @@ export const PAGE_GROUPS = [
       { label: 'Where they’re from', path: '/from' },
       { label: 'Awards History', path: '/awards' },
       { label: 'Postseason History', path: '/postseason-history' },
+      // A shelf of results (final scores), like Postseason History beside it.
+      { label: 'Notable Games', path: '/notable' },
       // Beside Postseason History because it reads the same 26 brackets from
       // the other end: that page shows what happened each October, this one
       // asks what every champion had in common before October started.

@@ -22,6 +22,7 @@
 //   '/postseason-history'               -> { name: 'postseason-history' }
 //   '/nine-keys'                        -> { name: 'nine-keys' }
 //   '/classics'                         -> { name: 'classics' }  (Score a classic: one old MLB game, dealt on who played, #1525)
+//   '/notable'                          -> { name: 'notable' }  (Notable games: no-hitters, cycles, triple plays, #2508)
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason-race[/{year}]'         -> { name: 'postseason-race', ... } (parseSeasonRoute)
 //   '/postseason-records'               -> { name: 'postseason-records', asOf, season, view, team, category, metric, sort, order }
@@ -339,6 +340,7 @@ export function parseRoute(url) {
     return { name: 'postseason-history' }
   if (parts.length === 1 && parts[0] === 'nine-keys') return { name: 'nine-keys' }
   if (parts.length === 1 && parts[0] === 'classics') return { name: 'classics' }
+  if (parts.length === 1 && parts[0] === 'notable') return { name: 'notable' }
   if (parts.length === 1 && parts[0] === 'postseason-leaders')
     return { name: 'postseason-leaders' }
   if (parts.length === 1 && parts[0] === 'trade-deadline')
@@ -941,6 +943,10 @@ export function logbookPlacePath(gamePk) {
 // never changes even if the destination is renamed again.
 export function profilePath() {
   return '/profile'
+}
+// Notable games, the shelf of no-hitters, cycles and triple plays (#2508). A fixed address.
+export function notablePath() {
+  return '/notable'
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/leaders${linkQuery(opts)}`
