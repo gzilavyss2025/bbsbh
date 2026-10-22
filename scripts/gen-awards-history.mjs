@@ -6,13 +6,16 @@
 // (trophyCaseView in src/api/person.js) — that's "what has THIS player won",
 // this is "who won THIS award, over the years".
 //
-// A season's award winners are decided once (announced Nov of that year) and
-// never change, so this is a HAND-RUN regenerate (like gen-milb-history.mjs /
-// gen-war-history.mjs), NOT a cron — re-run it once a year to fold in the
-// season that just ended. No need to special-case the still-in-progress
-// current season: the recipients endpoint simply comes back empty for an
-// award not yet decided, and that season/award pair is dropped, same as any
-// other empty result.
+// A season's award winners are decided once and never change. A full run (no
+// flag) rebuilds the last five seasons by hand. `--nightly` is the cron's mode
+// (update-nightly-data.yml): it does NOTHING outside the awards window (October to
+// February, awardsSeasonInPlay) and inside it refreshes only the season in play,
+// carrying the others forward from the committed file (lib/awards/history-merge.mjs),
+// so the winners MLB announces from mid-October to December reach the history view
+// within a night (#2510). It writes only when the rows changed, so a quiet night is
+// no commit and no deploy. The still-in-progress season needs no special case: the
+// recipients endpoint answers 404 for an award not yet decided, which would end
+// the run, so a 404 is read as "no recipients" below, same as any empty result.
 //
 // Imports MAJOR_AWARDS straight from src/api/person.js (rather than keeping a
 // separate copy, unlike the deliberate small duplication in e.g.
@@ -37,11 +40,15 @@
 // Run by hand: node scripts/gen-awards-history.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { readFile } from 'node:fs/promises'
 import { MAJOR_AWARDS, isPostseasonAward } from '../src/api/person.js'
+import { awardsSeasonInPlay } from '../src/api/awardsHistory.js'
 import { teamFullName } from '../src/lib/teams.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
+import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
+import { mergeSeasons } from './lib/awards/history-merge.mjs'
 
 // Hardware only, no All-Star selections — MAJOR_AWARDS carries ALAS/NLAS too
 // (the Trophy Case's own All-Star tier), but this page is scoped to trophies/
@@ -53,8 +60,17 @@ const HARDWARE_AWARDS = Object.fromEntries(
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'awards-history.json')
 const SEASON_COUNT = 5
-const CURRENT_SEASON = new Date().getUTCFullYear()
-const seasons = Array.from({ length: SEASON_COUNT }, (_, i) => CURRENT_SEASON - i)
+const NIGHTLY = process.argv.includes('--nightly')
+if (NIGHTLY && awardsSeasonInPlay(new Date()) == null) {
+  console.log('outside the awards window (October to February) — nothing to do')
+  process.exit(0)
+}
+const CURRENT_SEASON = await fetchSeasonInPlay()
+const windowSeasons = Array.from({ length: SEASON_COUNT }, (_, i) => CURRENT_SEASON - i)
+// A nightly run needs the committed file to carry the other seasons forward; with
+// none (a fresh checkout) it falls back to the full run.
+const prev = NIGHTLY ? await readFile(out, 'utf8').then(JSON.parse, () => null) : null
+const seasons = prev ? [CURRENT_SEASON] : windowSeasons
 
 // Run an async mapper across items with a small concurrency cap, results in
 // order (be polite to statsapi). Mirrors gen-milestones.mjs's helper.
@@ -94,7 +110,11 @@ const awardIds = Object.keys(HARDWARE_AWARDS)
 const jobs = awardIds.flatMap((awardId) => seasons.map((season) => ({ awardId, season })))
 
 const results = await mapConcurrent(jobs, 8, async ({ awardId, season }) => {
-  const data = await getJson(`/api/v1/awards/${awardId}/recipients?season=${season}`)
+  // 404 = not announced yet (see src/api/awardsHistory.js); anything else throws.
+  const data = await getJson(`/api/v1/awards/${awardId}/recipients?season=${season}`).catch((err) => {
+    if (err?.status === 404) return { awards: [] }
+    throw err
+  })
   const recipients = (data.awards ?? [])
     .filter((a) => a.player?.id)
     .map((a) => ({
@@ -187,5 +207,12 @@ const familiesOut = familyOrder
   .map((label) => families.get(label))
   .filter((f) => Object.keys(f.years).length > 0)
 
-await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), seasons, families: familiesOut })
-console.log(`wrote ${out} (${familiesOut.length} awards, seasons ${seasons[seasons.length - 1]}–${seasons[0]})`)
+const finalFamilies = prev
+  ? mergeSeasons({ prev: prev.families ?? [], fresh: familiesOut, refreshed: seasons, keep: windowSeasons, order: familyOrder })
+  : familiesOut
+if (prev && JSON.stringify(finalFamilies) === JSON.stringify(prev.families) && JSON.stringify(windowSeasons) === JSON.stringify(prev.seasons)) {
+  console.log(`awards-history.json unchanged (${CURRENT_SEASON})`)
+} else {
+  await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), seasons: windowSeasons, families: finalFamilies })
+  console.log(`wrote ${out} (${finalFamilies.length} awards, seasons ${windowSeasons[windowSeasons.length - 1]}–${windowSeasons[0]})`)
+}
