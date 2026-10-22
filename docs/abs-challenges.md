@@ -303,8 +303,11 @@ name on a dot would have paid for the file this one exists to avoid.
 
 **This subsection is the first card's design.** #2494 removed that card. Its
 successor, `ChallengeBoard`, has a toggle between hitting and catching, with a
-plot and a list for the job chosen (`src/screens/team/CLAUDE.md`). What the data
-argues, here and in the Triple-A table below, holds for both.
+plot and a list for the job chosen (`src/screens/team/CLAUDE.md`). Two claims
+below no longer hold for it: catchers get the plot too, not a table, and the
+list is not the only way to a player page (a picked face opens a name tab that
+links there). The league's line, a diagonal for reviews called, is still drawn.
+What the data argues, here and in the Triple-A table below, holds for both.
 
 One dot a man, pitches seen across against reviews called up, with the league's
 rate drawn as the diagonal a man would sit on if he argued at exactly the
