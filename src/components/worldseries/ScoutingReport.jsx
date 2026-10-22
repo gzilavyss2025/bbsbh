@@ -3,8 +3,10 @@ import { CAREER_MATCHUPS_FALLBACK, loadCareerMatchups, starterMatchupsFor } from
 import { CLUB_DEFENSE_FALLBACK, loadClubDefenseRunning } from '../../api/clubDefenseRunning.js'
 import { NINE_KEYS_FALLBACK, loadNineKeys } from '../../api/nineKeys.js'
 import { loadPitchByPitch } from '../../api/scout/pitchByPitch.js'
+import { loadSeriesRosters } from '../../api/scout/rosterStats.js'
 import { loadHomeVenues, loadParkFit, loadPlatoon } from '../../api/scout/seriesFit.js'
 import { fetchMeetings } from '../../api/postseason/meetings.js'
+import { rosterReadDate } from '../../api/postseason/roster.js'
 import { loadUmpire } from '../../api/umpires.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -27,6 +29,7 @@ import { GloveLegs } from './cards/scouting/GloveLegs.jsx'
 import { ParkFit } from './cards/scouting/ParkFit.jsx'
 import { PitchByPitch } from './cards/scouting/PitchByPitch.jsx'
 import { Platoon } from './cards/scouting/Platoon.jsx'
+import { Roster } from './cards/scouting/Roster.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Grid } from '../ui/layout/Grid.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
@@ -45,10 +48,12 @@ import { Stack } from '../ui/layout/Stack.jsx'
 //                 the next one on an off day), the same one the umpire is read for
 //   plateUmpire   { id, name } from fetchPlateUmpires, or null (game day)
 //   game          the focus game's upcoming row (api/postseason/upcoming.js): venue and probables, or null
+//   series        the bracket's World Series ({ games, playsOnCutoff }): the Roster card reads its rosters on its dates
 // Adding a card: one entry in scouting.js, one here.
 const CARD = {
   'nine-keys': ({ nineKeys, sides, season }) => <NineKeys data={nineKeys} clubIds={sides} season={season} />,
   'glove-legs': ({ gloveLegs, sides }) => <GloveLegs rows={gloveLegs} clubIds={sides} />,
+  roster: ({ rosters, sides, slateDate }) => <Roster rosters={rosters} clubIds={sides} slateDate={slateDate} />,
   'matchup-edges': ({ edges, edgesState: state }) =>
     state === 'none' ? (
       <EdgeCard title="Matchup edges" note="Career vs today's starters" className="seriesedges__matchups">
@@ -66,7 +71,10 @@ const CARD = {
   'umpire-edge': ({ plateUmpire, umpire }) => <UmpireEdge name={plateUmpire.name} lean={umpire?.lean ?? null} />,
 }
 
-export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null }) {
+// Cards that take the whole row.
+const WIDE = ['film-room', 'roster']
+
+export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null, series = null }) {
   const season = Number(slateDate.slice(0, 4))
   const { data: nineKeys, error: nineKeysError } = useAsync(() => loadNineKeys(), [])
   const { data: career, error: careerError } = useAsync(() => loadCareerMatchups(), [])
@@ -120,12 +128,20 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
     () => (hasParks ? parkFitModel(balls, { clubA: sideA, clubB: sideB, layouts: parks.map((p) => p.layout) }) : null),
     [balls, parks, hasParks, sideA, sideB],
   )
-  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit })
+  // Roster: each club's Series roster (the current one before the club names it), starters marked.
+  const { data: rosters, error: rosterError } = useAsync(
+    () => (series ? loadSeriesRosters(clubIds, series, slateDate) : null),
+    // The read date is what the series decides (it plays today or not); the object itself is not stable.
+    [clubA, clubB, rosterReadDate(series, slateDate), series?.games?.length, slateDate],
+  )
+  const hasRoster = Boolean(rosters && Object.keys(rosters).length)
+  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, roster: hasRoster, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit })
   // A failed read is not an empty one: name the cards whose load failed (the card itself still drops).
   const failed = failedLine(
     failedCards([
       { label: 'Nine keys', failed: nineKeys === NINE_KEYS_FALLBACK || nineKeysError },
       { label: 'Glove and legs', failed: defense === CLUB_DEFENSE_FALLBACK || defenseError },
+      { label: 'Roster', error: rosterError },
       { label: 'Matchup edges', failed: career === CAREER_MATCHUPS_FALLBACK || careerError },
       { label: 'Pitch by pitch', error: pitchError },
       { label: 'Platoon', error: platoonError },
@@ -153,7 +169,7 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
   if (!shown && !failed) return null
   // Every card dropped but a read failed: the band and the line, so a failure is not read as an empty season.
   if (!shown) return <Stack gap="loose" className="ww-scout"><SectionHead look="band" house as="h2">Scouting report</SectionHead><p className="ww-scout__failed" role="status">{failed}</p></Stack>
-  const ctx = { noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, gloveLegs, sides, clubIds, season, edges, edgesState: edgesState({ edges, hasRow: edgesRow }), plateUmpire, umpire, platoon, parkFit, parks }
+  const ctx = { rosters, slateDate, noteClub, gameNumber, pitchByPitch, dayType, meetings, nineKeys, gloveLegs, sides, clubIds, season, edges, edgesState: edgesState({ edges, hasRow: edgesRow }), plateUmpire, umpire, platoon, parkFit, parks }
   const names = clubIds.map((id) => teamClubNameShort(id)).filter(Boolean).join(' and ')
   return (
     <Stack gap="loose" className="ww-scout" ref={rootRef} style={{ '--ww-scout-offset': `${offset}px` }}>
@@ -172,7 +188,7 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
       {failed && <p className="ww-scout__failed" role="status">{failed}</p>}
       <Grid min={340} gap="loose">
         {cards.map((c) => (
-          <div key={c.id} id={`ww-scout-${c.id}`} className={c.id === 'film-room' ? 'ww-scout__card ww-scout__card--wide' : 'ww-scout__card'}>
+          <div key={c.id} id={`ww-scout-${c.id}`} className={WIDE.includes(c.id) ? 'ww-scout__card ww-scout__card--wide' : 'ww-scout__card'}>
             {CARD[c.id](ctx)}
           </div>
         ))}
