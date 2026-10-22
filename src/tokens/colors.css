@@ -203,13 +203,13 @@
      src/lib/design/contrastPairings.js. */
   --accent-primary-hover:  var(--ink-2);
   --accent-negative-hover: var(--clay-deep);
-  /* Green link text that is NOT a door, and the hover fill on the arrows of the
-     photo strips and clip rails. A DOOR ("See all ›") is ink with a dotted rule
-     now (system/door.css): this green is also "positive" and the focus ring, so
-     a green link read as a good number. History: four rules across three
-     partials asked for this token before it was defined, so `color:
-     var(--accent-link)` was invalid at computed-value time and each one
-     silently inherited its parent's ink instead.
+  /* The green STATE of a control: the hover fill on the arrows of the photo
+     strips and clip rails, the current-game cell, the prospect board's hover bar,
+     a focus outline. NO TEXT reads it. A link is ink with a dotted rule
+     (system/door.css), because this green is also "positive" and the focus ring,
+     so a green link read as a good number. `test/link-ink.test.js` fails on a
+     link-like rule that reads it. The name dates from when it coloured links; a
+     rename is a follow-up, because the Claude Design project reads it.
      Field green clears AA on all four papers — worst on the darkest of them at
      5.28:1 (--accent-link on --bg-canvas), asserted in check-contrast.mjs. */
   --accent-link:      var(--field);

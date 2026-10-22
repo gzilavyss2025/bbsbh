@@ -146,13 +146,13 @@ export const PAIRINGS = [
   // later nudge to either accent has less margin here than anywhere else.
   { fg: 'text-on-ink', bg: 'accent-positive', min: TEXT, note: 'standings clinch mark' },
   { fg: 'text-on-ink', bg: 'accent-negative', min: TEXT, note: 'standings eliminated mark' },
-  // Green link text (--accent-link), on each of the three grounds it lands on: the
-  // app canvas, a page, and a raised card. A door is ink now (--text-heading), so
-  // these cover the links that still read the token. Held to the full text bar
-  // because these run SMALL — --fs-label caps (#1128).
-  { fg: 'accent-link', bg: 'bg-canvas', min: TEXT, note: 'link text on app canvas' },
-  { fg: 'accent-link', bg: 'bg-page', min: TEXT, note: 'link text on page' },
-  { fg: 'accent-link', bg: 'surface-card', min: TEXT, note: 'link text on raised card' },
+  // The green state colour (--accent-link) on each of the three grounds it lands on: the
+  // app canvas, a page, and a raised card. No link text reads it now (a link is ink, see
+  // system/door.css), but it still draws outlines and cells on these grounds. It stays at
+  // the full text bar, the strict end: a green that clears 4.5:1 clears the 3:1 an outline needs.
+  { fg: 'accent-link', bg: 'bg-canvas', min: TEXT, note: 'green state colour on app canvas' },
+  { fg: 'accent-link', bg: 'bg-page', min: TEXT, note: 'green state colour on page' },
+  { fg: 'accent-link', bg: 'surface-card', min: TEXT, note: 'green state colour on raised card' },
   // The run value board's diverging pair, on each of the two grounds it lands
   // on: the board rows sit on --bg-page, the two cards on --surface-card. The
   // POSITIVE half is already covered three lines up (--accent-positive and

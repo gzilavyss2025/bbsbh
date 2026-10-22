@@ -131,7 +131,7 @@
     font-weight: var(--w-bold);
     letter-spacing: var(--ls-label);
     text-transform: uppercase;
-    color: var(--accent-link);
+    color: var(--text-heading);
   }
   .wirerail__door:hover,
   .wirerail__door:active {

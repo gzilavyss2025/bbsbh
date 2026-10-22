@@ -273,9 +273,6 @@
 }
 
 /* ---- Leader boards: the leader's figure is the door ----------------------- */
-.psseries__lboard .sectionhead__note {
-  color: var(--accent-link);
-}
 /* With doors, the name and the figure share ONE baseline (the club mark
    stays centred on the name), and the runner-up line gets a little more air
    so the figure's dotted rule never touches it. */
@@ -313,7 +310,7 @@ button.psseries__ldoor .psseries__lval {
   font-size: var(--fs-num-lg);
   font-weight: var(--w-semibold);
   line-height: var(--lh-solid);
-  color: var(--accent-link);
+  color: inherit;
 }
 /* A 44 x 44 hit area that moves no pixel of the line: it reaches up into the
    row's top padding and only a few pixels down toward the runner-up line. */

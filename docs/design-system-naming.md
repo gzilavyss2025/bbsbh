@@ -184,16 +184,25 @@ a door is already quiet, so those two overrides are gone.
 It drew in `--accent-link`, which is field green, the colour the app also uses for
 "positive" and for the focus ring, so a "See all ›" read as a good number. The dotted
 rule is the one `.plink` shows on hover. It rests visible on a door, because a reader
-on touch has no hover. Three consequences:
+on touch has no hover. Four consequences:
 
 - A player's name is not a door. It is a `PlayerLink`, ink at rest. The Film room drew
   its two starters as doors, and its rule to set them in plain ink lost a specificity
   tie with `.door--inline`, so they drew in green at label size.
 - A door in a band takes the band's ink (`.sectionhead--band .door--inline`). The
   band's ink is checked against its ground; the door's page ink would not be.
-- Other green link text still reads `--accent-link` (`.foulcard__door`, `.lsp__seeall`,
-  `.pcard__gamelink`, `.outl__name` and a few more). Those are not doors, and they
-  are a follow-up, not part of this decision.
+- The links beside the door follow it, not green. A text link is ink with the same
+  dotted rule (`.lsp__seeall`, `.foulcard__door`, `.pcard__gamelink`, `.gnotes__pdf a`,
+  `.outl__name`, and the sign-in widget's `.tally-cl-link`). A door in a ruled box
+  (`.wirerail__door`, `.oseason__door`, `.srecord__door`, `.seasonnote__when`), a back
+  or cancel button, and the info glyph keep their shape and take ink. A hover that
+  turned green draws the dotted rule instead.
+- Green stays where it means "good": a win, a positive delta, an "add" chip, a position
+  label, and the focus ring. `--accent-link` has no text consumer now. It colours a
+  control's hover fill and a selected cell, and its name is a follow-up rename.
+  `test/link-ink.test.js` pins the list above, and fails on a new link-like rule
+  (a name with `door`, `seeall`, `viewall`, `gamelink`, `__back`, `__cancel`,
+  `__clear` or `-link`) that reads green.
 
 **Why `.mytally__rowbtn` is held.** It is an action ROW, not a button: a
 caps title over a sentence of body type, left-aligned, 66px tall because the

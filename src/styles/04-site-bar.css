@@ -168,8 +168,11 @@
   font-family: var(--font-body) !important;
 }
 .tally-cl-link {
-  color: var(--accent-positive) !important;
+  color: var(--text-heading) !important;
   font-weight: var(--w-semibold) !important;
+  text-decoration: underline dotted !important;
+  text-decoration-thickness: var(--bw-hair) !important;
+  text-underline-offset: 3px !important;
 }
 .tally-cl-menuitem {
   font-family: var(--font-body) !important;

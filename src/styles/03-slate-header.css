@@ -114,7 +114,7 @@
 .topbar__back {
   background: none;
   border: none;
-  color: var(--field);
+  color: var(--text-heading);
   font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   padding: var(--space-2) 2px;

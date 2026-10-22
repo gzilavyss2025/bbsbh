@@ -153,7 +153,7 @@ button.boxlines-entry {
   }
 
   .boxlines__list .boxlines-entry:hover .boxlines-entry__chev {
-    color: var(--accent-link);
+    color: var(--text-heading);
   }
 }
 
