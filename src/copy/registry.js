@@ -17,16 +17,13 @@
 //     ever set a KNOWN key to a bounded string — never inject a new key.
 //
 // Why a registry and not scattered string literals: the whole point of the
-// admin panel (see the ADR) is that the site owner can tune the wording — and
-// especially the humor — of the spoiler-consent moments as the site matures,
-// without a code change, a deploy, or an AI agent. That is only safe if the set
-// of editable strings is closed and every value is bounded; this file is that
-// closed set.
+// admin panel (see the ADR) is that the site owner can tune the wording of the
+// editable surfaces (GROUPS below) as the site matures, without a code change,
+// a deploy, or an AI agent. That is only safe if the set of editable strings is
+// closed and every value is bounded; this file is that closed set.
 //
 // Voice: the app is a paper scorebook. Copy is plain-spoken, a little dry, a
-// little fond of the bit. Keep score-consent copy HONEST above all — it is the
-// one place a user trades away the spoiler protection the whole app exists to
-// provide, so the trade must be stated plainly even while having fun with it.
+// little fond of the bit.
 
 import { landingFields } from './landing/fields.js'
 import { awardFields } from './awardFields.js'
@@ -57,7 +54,7 @@ export const GROUPS = [
 // SPOILER GUARD (do not relax): no field here may be rendered inside a
 // sealed/reveal-gated surface, and no field's VALUE may be derived from game
 // data — an admin types every one of them by hand, about a subject that has no
-// score. That covers the consent/chrome copy and, since ADR-0025's amendment,
+// score. That covers the chrome copy and, since ADR-0025's amendment,
 // the per-park notes: a ballpark is a building, the team hub's Overview is one
 // of the surfaces CLAUDE.md keeps deliberately outside the scoring flow, and a
 // sentence about the Green Monster cannot leak tonight's result. A run/score/
@@ -342,10 +339,10 @@ export function mergeOverrides(current, patch) {
 }
 
 // Remove control and bidirectional-override characters before a value is
-// stored or rendered. This matters most in the consent modals, where the
-// decline vs. accept buttons must be visually unmistakable: a stray or
-// maliciously-pasted U+202E (right-to-left override) or similar could reorder
-// or disguise button text. React already escapes markup, so this is purely
+// stored or rendered. This matters most for short labels and buttons, which
+// must be visually unmistakable: a stray or maliciously-pasted U+202E
+// (right-to-left override) or similar could reorder or disguise the text.
+// React already escapes markup, so this is purely
 // about invisible/reordering characters, not XSS. Newlines are allowed only in
 // multiline fields (single-line labels/buttons never legitimately contain one);
 // tabs and every C0/C1 control and bidi-format char are always dropped.
