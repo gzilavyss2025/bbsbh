@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  LAZY_LIBRARIES,
   entryFiles,
   eagerChunks,
   lazyProblems,
+  looseBudgets,
   lowered,
   overBudget,
   precacheUrls,
@@ -39,69 +41,76 @@ test('precacheUrls lists each url once and ignores a url: outside the manifest',
 
 const files = (obj) => new Map(Object.entries(obj))
 
+// Made-up markers, so these cases test the rule and not the current library text.
+const LIBS = { Clerk: ['clerk-a', 'clerk-b'], pdf: ['pdf-a'] }
+const lazyFiles = { 'assets/dist.js': 'clerk-a clerk-b', 'assets/pdf.js': 'pdf-a' }
+
+test('markers only in lazy chunks are clean', () => {
+  const eager = new Set(['assets/index.js'])
+  assert.deepEqual(lazyProblems(eager, files({ 'assets/index.js': 'app code', ...lazyFiles }), LIBS), [])
+})
+
 test('library text in the entry fails and names the library and the file', () => {
-  const problems = lazyProblems(
-    new Set(['assets/index.js']),
-    files({ 'assets/index.js': 'x;"clerk-js-script";y', 'assets/dist.js': 'Clerk: Ensure that', 'assets/pdf.js': 'UnknownErrorException' }),
-  )
+  const problems = lazyProblems(new Set(['assets/index.js']), files({ 'assets/index.js': 'x;pdf-a;y', ...lazyFiles }), LIBS)
   assert.equal(problems.length, 1)
-  assert.match(problems[0], /Clerk.*first load.*assets\/index\.js/)
+  assert.match(problems[0], /pdf is in the first load.*assets\/index\.js/)
 })
 
 test('library text in a chunk the entry imports statically fails too', () => {
-  const problems = lazyProblems(
-    new Set(['assets/index.js', 'assets/shared.js']),
-    files({ 'assets/index.js': '', 'assets/shared.js': 'UnknownErrorException', 'assets/dist.js': 'Clerk: Ensure that', 'assets/pdf.js': 'PDFWorker.fromPort' }),
-  )
+  const eager = new Set(['assets/index.js', 'assets/shared.js'])
+  const problems = lazyProblems(eager, files({ 'assets/index.js': '', 'assets/shared.js': 'clerk-b', ...lazyFiles }), LIBS)
   assert.equal(problems.length, 1)
-  assert.match(problems[0], /pdf\.js.*assets\/shared\.js/)
+  assert.match(problems[0], /Clerk.*assets\/shared\.js/)
+})
+
+test('a library moved wholesale into the entry is one first-load problem, not a stale marker per marker', () => {
+  const problems = lazyProblems(new Set(['assets/index.js']), files({ 'assets/index.js': 'clerk-a clerk-b', 'assets/pdf.js': 'pdf-a' }), LIBS)
+  assert.equal(problems.length, 1)
+  assert.match(problems[0], /Clerk is in the first load/)
+})
+
+test('a marker no chunk holds fails by name, even when the library has another marker that is found', () => {
+  const problems = lazyProblems(new Set(['assets/index.js']), files({ 'assets/index.js': '', 'assets/dist.js': 'clerk-a', 'assets/pdf.js': 'pdf-a' }), LIBS)
+  assert.equal(problems.length, 1)
+  assert.match(problems[0], /no chunk holds "clerk-b"/)
 })
 
 test('the app destructuring ClerkProvider in the entry is not library text', () => {
+  // The real markers: every one sits in the lazy chunk, none in the entry.
+  const everyMarker = Object.values(LAZY_LIBRARIES).flat().join(' ')
   const problems = lazyProblems(
     new Set(['assets/index.js']),
-    files({
-      'assets/index.js': 'let[{ClerkProvider:e}]=await import("./dist.js")',
-      'assets/dist.js': 'Clerk: Ensure that ClerkProvider',
-      'assets/pdf.js': 'PDFWorker.fromPort',
-    }),
+    files({ 'assets/index.js': 'let[{ClerkProvider:e}]=await import("./dist.js")', 'assets/dist.js': everyMarker }),
   )
   assert.deepEqual(problems, [])
 })
 
-test('a library with no marker in any chunk fails, so the check cannot pass by finding nothing', () => {
-  const problems = lazyProblems(new Set(['assets/index.js']), files({ 'assets/index.js': '', 'assets/pdf.js': 'PDFWorker.fromPort' }))
-  assert.equal(problems.length, 1)
-  assert.match(problems[0], /Clerk.*finding nothing/)
-})
-
-test('a library moved wholesale into the entry reports the first load only, not a stale marker', () => {
-  const problems = lazyProblems(
-    new Set(['assets/index.js']),
-    files({ 'assets/index.js': 'Clerk: Ensure that', 'assets/pdf.js': 'PDFWorker.fromPort' }),
-  )
-  assert.equal(problems.length, 1)
-  assert.match(problems[0], /Clerk.*first load/)
-})
-
-const budget = { entryJsGzipKB: 100, entryCssGzipKB: 50, precacheKiB: 1000 }
+const budget = { firstLoadJsGzipKB: 100, entryCssGzipKB: 50, precacheKiB: 1000 }
 
 test('a size over its budget fails and a size at its budget passes', () => {
-  assert.deepEqual(overBudget({ entryJsGzipKB: 100, entryCssGzipKB: 50, precacheKiB: 1000 }, budget), [])
-  const problems = overBudget({ entryJsGzipKB: 100.1, entryCssGzipKB: 50, precacheKiB: 1000 }, budget)
+  assert.deepEqual(overBudget({ firstLoadJsGzipKB: 100, entryCssGzipKB: 50, precacheKiB: 1000 }, budget), [])
+  const problems = overBudget({ firstLoadJsGzipKB: 100.1, entryCssGzipKB: 50, precacheKiB: 1000 }, budget)
   assert.equal(problems.length, 1)
-  assert.match(problems[0], /entry JS.*100\.1 kB.*100 kB/)
+  assert.match(problems[0], /first-load JS.*100\.1 kB.*100 kB/)
 })
 
 test('a metric missing from the budget file fails', () => {
-  const problems = overBudget({ entryJsGzipKB: 1, entryCssGzipKB: 1, precacheKiB: 1 }, { entryJsGzipKB: 100, entryCssGzipKB: 50 })
+  const problems = overBudget({ firstLoadJsGzipKB: 1, entryCssGzipKB: 1, precacheKiB: 1 }, { firstLoadJsGzipKB: 100, entryCssGzipKB: 50 })
   assert.equal(problems.length, 1)
   assert.match(problems[0], /precacheKiB/)
 })
 
+test('a budget more than 6% above the build is stale and fails; one within the band passes', () => {
+  const measured = { firstLoadJsGzipKB: 100, entryCssGzipKB: 50, precacheKiB: 1000 }
+  assert.deepEqual(looseBudgets(measured, { firstLoadJsGzipKB: 103, entryCssGzipKB: 53, precacheKiB: 1050 }), [])
+  const problems = looseBudgets(measured, { firstLoadJsGzipKB: 115, entryCssGzipKB: 50, precacheKiB: 1000 })
+  assert.equal(problems.length, 1)
+  assert.match(problems[0], /first-load JS.*100 kB.*budget of 115 kB.*--write/)
+})
+
 test('--write sets each budget 3% over today, rounded up, and never raises one', () => {
   assert.deepEqual(
-    lowered({ entryJsGzipKB: 80, entryCssGzipKB: 49, precacheKiB: 900 }, budget),
-    { entryJsGzipKB: 83, entryCssGzipKB: 50, precacheKiB: 927 },
+    lowered({ firstLoadJsGzipKB: 80, entryCssGzipKB: 49, precacheKiB: 900 }, budget),
+    { firstLoadJsGzipKB: 83, entryCssGzipKB: 50, precacheKiB: 927 },
   )
 })

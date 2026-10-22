@@ -119,7 +119,7 @@ Guard catalog (one entry per guard): `docs/scripts/tooling.md`.
   count. Growth fails, and a shrink must tighten the entry in the same commit
   (`check-dir-size`, `check-file-size`, `check-caption-budget`, `check-raw-values`,
   `check-component-reuse`, `check-claude-md`, `layout/check-layout-ratchet`, and
-  `bundle/check-bundle-size`, which keeps 3% headroom and only ever lowers). A stale allowlist entry fails too, the same ratchet rule
+  `bundle/check-bundle-size`, which keeps 3% headroom and fails past 6%). A stale allowlist entry fails too, the same ratchet rule
   `check-dir-size.mjs` uses.
 - **Rebase onto `main` and re-measure before you merge a change to a budget.** A count
   taken on a branch that sits behind `main` goes stale.
