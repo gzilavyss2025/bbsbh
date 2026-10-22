@@ -2,7 +2,7 @@ import { Fragment } from 'react'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { fetchFromHsSplit } from '../../../../api/from/whereFrom.js'
-import { playerFromLinks } from '../../../../lib/from/playerLinks.js'
+import { playerFromLinks, schoolLabel } from '../../../../lib/from/playerLinks.js'
 
 // The hero's Born and School cells as links to "who else is from there" (#1526): the town's
 // or the school's page on the Where they're from pages. An open surface (ADR-0034): a school
@@ -32,12 +32,12 @@ export function BornValue({ links, text }) {
   return <FromLink path={links.born}>{text}</FromLink>
 }
 
-// "Smyrna, Vanderbilt": each school its own link (a school with no address stays plain text).
+// "Smyrna HS, Vanderbilt": each school its own link (a school with no address stays plain text).
 export function SchoolsValue({ links }) {
   return links.schools.map((s, i) => (
     <Fragment key={`${s.kind}/${s.name}`}>
       {i > 0 && ', '}
-      <FromLink path={s.path}>{s.name}</FromLink>
+      <FromLink path={s.path}>{schoolLabel(s)}</FromLink>
     </Fragment>
   ))
 }

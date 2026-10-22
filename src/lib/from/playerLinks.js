@@ -17,6 +17,14 @@ export function playerFromLinks({ birth, schools }, split = null) {
   return { born: bornPath(birth), schools: schools.map((s) => ({ ...s, path: schoolPath(s, split) })) }
 }
 
+// A school's name as the player page prints it: a high school gets a trailing "HS" ("Wheeler HS")
+// so it does not read as a town. A name that already says what it is ("Wheeler High School",
+// "Montverde Academy", "Rickards HS") or is no school at all ("Home school", "GED") stays as is.
+const SAYS_SCHOOL = /\b(high|school|schools|hs|academy|prep|preparatory|institute|college|collegiate|ged|homeschool(ed)?|home)\b/i
+export function schoolLabel({ kind, name }) {
+  return kind === 'high-school' && !SAYS_SCHOOL.test(name) ? `${name} HS` : name
+}
+
 function bornPath(birth) {
   const country = countryOf(birth)
   const city = slugify(birth?.city)
