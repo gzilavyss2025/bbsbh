@@ -11,7 +11,7 @@
    one row per metric, and the league-average rule running straight down the
    middle of the track column like the margin line on a scorebook page. Navy
    ink on manila and nothing else — no seal amber, that ink means "score
-   cover" (CLAUDE.md's spoiler rule) and this is spoiler-free season data.
+   cover" and this is open season data.
 
    All scale math is lib/percentileStrip.js; the only arithmetic here is the
    dot inset (see .pctstrip__dot), which depends on the rendered dot size and

@@ -143,8 +143,8 @@
 }
 
 /* ------------------------------------------------------- All-Star game result
-   card (AllStarGameResult) — this page's one deliberate exception to the
-   "never print a score" spoiler invariant; see ADR-0019. Three regions:
+   card (AllStarGameResult) — this page prints a score plainly, on purpose
+   (ADR-0019). Three regions:
    date+score+box-score-button (left), MVP headshot/line/stat (middle), host
    ballpark (right). Wraps to a stacked read on narrow widths. */
 .allstargame {

@@ -123,8 +123,7 @@
 
 /* Four facts about the app, set like a box-score totals row. Every number
    here is a fixed property of the product, never a value read from a game —
-   this page fetches nothing, and that is what keeps a figures strip safe on a
-   surface the spoiler rule otherwise governs. */
+   this page fetches nothing. */
 .aboutfigs {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
