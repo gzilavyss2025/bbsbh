@@ -1,11 +1,8 @@
 import '../../styles/worldseries/home.css'
-import { fetchPlateUmpires } from '../../api/postseason/plateUmpire.js'
-import { fetchUpcomingSeriesGames } from '../../api/postseason/upcoming.js'
-import { useAsync } from '../../hooks/useAsync.js'
-import { useWorldSeriesHome } from '../../hooks/postseason/useWorldSeriesHome.js'
+import { useWorldSeriesView } from '../../hooks/postseason/useWorldSeriesView.js'
 import { withFormatDates } from '../../lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
-import { worldSeriesMode } from '../../lib/postseason/worldseries/mode.js'
+import { lcsRoundOf, worldSeriesMode } from '../../lib/postseason/worldseries/mode.js'
 import { Grid } from '../ui/layout/Grid.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Bullpen } from './cards/Bullpen.jsx'
@@ -34,24 +31,9 @@ import { ScoutingReport } from './ScoutingReport.jsx'
 // home and road + bullpen (side by side wide).
 export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
   const mode = worldSeriesMode(bracket)
-  const series = mode?.series ?? null
-  const clubIds = series ? series.slots.map((s) => s.club.id) : null
-  const { data } = useWorldSeriesHome({ clubIds, games: series?.games, slateDate })
-  const focus = series?.upcoming.find((g) => g.gameNumber === mode.gameNumber) ?? null
-  const focusPk = focus?.gamePk ?? null
-  const playedPks = (series?.games ?? []).map((g) => g.gamePk)
-  const parkKey = [focusPk, ...playedPks].join(',')
-  const parks = useAsync(() => fetchUpcomingSeriesGames([focusPk, ...playedPks]), [parkKey])
-  // Tonight's plate umpire, once posted (an assignment, not a result). Game day only.
-  const dayType = mode?.dayType
-  const umpires = useAsync(() => (dayType === 'game' ? fetchPlateUmpires(slateDate) : Promise.resolve({})), [dayType, slateDate])
+  const { series, clubIds, data, focusPk, game, umpire, parkOf, played } = useWorldSeriesView(mode, slateDate)
   if (!mode) return null
 
-  // "NLCS" / "ALCS": the league whose LCS the club played in, from the bracket.
-  const lcsRound = (id) => {
-    const lg = ['AL', 'NL'].find((l) => bracket.leagues?.[l]?.lcs?.slots.some((s) => s.club?.id === id))
-    return lg ? `${lg}CS` : ''
-  }
   const model = ledgerModel({
     clubIds,
     games: series.games,
@@ -60,21 +42,7 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
     runsByGame: data?.runsByGame ?? {},
     slateDate,
   })
-  const parkOf = parks.data ?? {}
-  const game = focusPk ? parkOf[focusPk] ?? null : null
   const gameDay = mode.dayType === 'game'
-  const abbr = Object.fromEntries(series.slots.map((s) => [s.club.id, s.club.abbreviation]))
-  // Home and away come from the clubs' own schedule rows, so a failed park read
-  // cannot leave the Box door with an empty matchup.
-  const rowOf = Object.fromEntries(Object.values(data?.clubGames ?? {}).flat().map((r) => [r.gamePk, r]))
-  const played = series.games.map((g) => ({
-    gamePk: g.gamePk,
-    gameNumber: g.gameNumber,
-    date: g.date,
-    park: parkOf[g.gamePk]?.venue?.name ?? '',
-    awayAbbr: abbr[rowOf[g.gamePk]?.awayId] ?? '',
-    homeAbbr: abbr[rowOf[g.gamePk]?.homeId] ?? '',
-  }))
   const lastPlayed = series.games.at(-1)
   const scouting = (
     <ScoutingReport
@@ -85,7 +53,7 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
       gamePk={focusPk}
       gameNumber={mode.gameNumber}
       game={game}
-      plateUmpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
+      plateUmpire={umpire}
       series={series}
     />
   )
@@ -99,12 +67,12 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
         slateDate={slateDate}
         wide={wide}
         played={played}
-        umpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
+        umpire={umpire}
         splitsByClub={data?.hotBats ?? null}
         clubGames={data?.clubGames ?? null}
       />
       {wide && <Ledger series={series} model={model} />}
-      {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={lcsRound} />}
+      {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={(id) => lcsRoundOf(bracket, id)} />}
       {gameDay ? (
         <>
           <Probables game={game} season={Number(slateDate.slice(0, 4))} slateDate={slateDate} />
