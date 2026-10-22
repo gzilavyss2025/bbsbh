@@ -12,8 +12,8 @@ import { PartOfSeason } from '../season/PartOfSeason.jsx'
 // The player page's foul-ball card — his season foul line from the nightly
 // gen-fouls.mjs sweep, batter or pitcher flavored to match the stat block
 // it sits in. Self-fetching like MilestoneWatchCard. Current-day only: the
-// precompute can't be cut to a historical `asOf`, so a spoiler-scoped page
-// (linked from a sealed game) hides it — same rule the Milestone Watch
+// precompute can't be cut to a historical `asOf`, so an as-of page
+// (linked from a game) hides it — same rule the Milestone Watch
 // projection follows. Null data (MiLB, file missing, no line) → no card.
 //
 // A season view (#1202): `seasonYear` (a year or 'all') and `label` (the years

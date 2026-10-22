@@ -1,6 +1,6 @@
 import { useNav } from '../../lib/nav.js'
 
-// A plain, spoiler-safe link to a game's (sealed) box score — used by the
+// A plain link to a game's (sealed) box score — used by the
 // player page's game log rows, its MLB-debut fact, and the vs-team split
 // rows. Mirrors PlayerLink/TeamLink: no underline at rest, renders plain
 // children when no path could be resolved.

@@ -1,7 +1,7 @@
 
 // Gameday's batter figure for tonight's uniform (#1852): the pants image under
 // the jersey image, same canvas, in a box of fixed width and height so nothing
-// shifts while they load. Spoiler-free static art
+// shifts while they load. Static art
 // (docs/uniforms-and-logos.md, "Batter figure images"). `crossOrigin` lets the
 // service worker's CacheFirst rule store the response. `urls` is
 // `batterFigureUrls`' result, which the caller has already checked for null.

@@ -25,7 +25,7 @@ import { ordinal } from '../../lib/format.js'
 // read through staticJson, so the report page, the club card and this one share
 // a single request per session however many of them a reader opens.
 //
-// NO `asOf` GATE, unlike FoulCard. That card hides on a spoiler-scoped page
+// NO `asOf` GATE, unlike FoulCard. That card hides on an as-of page
 // because its figures run to the current day; this file is last night's sweep
 // and carries nothing from today's games at all, which is the same footing
 // StatcastPercentiles has always had on this shelf (ADR-0034 — a stat line is

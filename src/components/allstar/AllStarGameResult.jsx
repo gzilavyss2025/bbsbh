@@ -17,13 +17,12 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 // BallparkModal the live lineup page's game facts use, when the park's on
 // file — same plain/dotted-on-hover convention as PlayerLink/TeamLink's
 // `.plink`, not a solid underline) sits right-aligned. This is a
-// DELIBERATE, narrow exception to the "never print a score" spoiler
-// invariant: see
+// DELIBERATE, narrow case of printing a score plainly: see
 // docs/adr/0019-all-star-rosters-shows-final-scores.md for why that's safe
 // here specifically (roster membership already carries no individual game's
-// stakes, and an All-Star Game is exhibition). Every other game surface in
-// the app still renders through the ordinary SealBox/reveal-only path,
-// including the box score this card links to.
+// stakes, and an All-Star Game is exhibition). The scoring surfaces still
+// render through the ordinary SealBox/reveal-only path, including the box
+// score this card links to.
 //
 // teamId 159/160 are the fixed AL/NL All-Star pseudo-clubs (not real MLB
 // clubs) — TeamLogo already degrades to a plain monogram if no mark exists

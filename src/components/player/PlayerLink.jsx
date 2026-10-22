@@ -59,9 +59,8 @@ export function usePlayerLink(id, displayName) {
 }
 
 // Wraps a player's name (already rendered as children) in a plain, no-underline
-// button that navigates to their page. SPOILER-SAFE for the reason that
-// matters: it injects no stat or score into the DOM at the link site — the
-// player page fetches its own. It carries only the id plus whatever
+// button that navigates to their page. It injects no stat or score into the DOM
+// at the link site — the player page fetches its own. It carries only the id plus whatever
 // `LinkScope` holds, which off a game is the level hint alone; a link out of a
 // game no longer stamps an as-of cutoff (ADR-0034's amendment), so a player
 // page opened from a lineup card shows current stats, same as from search.

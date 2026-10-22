@@ -17,7 +17,7 @@ import { Card } from '../ui/frame/Card.jsx'
 // target. Anything that needs explaining goes in the aria-label or in
 // .scratch/umpire-tendencies/PRD.md, never onto the card.
 //
-// SPOILER FOOTING: none needed, on the same basis as the accuracy rank already
+// NO GATE NEEDED, on the same basis as the accuracy rank already
 // shipped on the lineup page (see api/umpires.js). Every figure here is a
 // season aggregate over FINAL games of ball/strike JUDGMENTS and their run
 // value — never a run, hit, or result. Note umpires.json's game rows do carry

@@ -16,8 +16,8 @@ import { Table } from '../ui/table/Table.jsx'
 // The thing that is true of a level the day after its season ends: some of the
 // people you watched are not there any more, and that is the good outcome. A
 // promotion is the only result in the minor leagues that a scorer is meant to
-// care about more than a score, and it is the one result the spoiler rule has
-// no quarrel with — a season's level path is a fact about a CAREER, like the
+// care about more than a score, and it is a result with
+// nothing to seal — a season's level path is a fact about a CAREER, like the
 // picked-game card's reason line, not a fact about a game.
 //
 // NO NEW FETCH, TWICE OVER. minors-leaders.json is on the wire once a day for
