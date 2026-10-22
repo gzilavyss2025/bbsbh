@@ -40,8 +40,8 @@ export function SeriesMvpCard({ mvp, lines }) {
     <section className="psseries__mvp" aria-label="Series MVP">
       <div className="psseries__mvpstage">
         <div className="psseries__mvpphoto" aria-hidden="true">
-          <Wash personId={mvp.playerId} />
-          <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback onFallback={() => setNoPhoto(true)} className="psseries__mvpcut" />
+          <Wash key={mvp.playerId} personId={mvp.playerId} />
+          <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback onFallback={(kind) => setNoPhoto(kind != null)} className="psseries__mvpcut" />
           {noPhoto && mvp.teamId && (
             <TeamLogo teamId={mvp.teamId} name={club ?? ''} variant="mono" size={88} className="psseries__mvpmark" />
           )}

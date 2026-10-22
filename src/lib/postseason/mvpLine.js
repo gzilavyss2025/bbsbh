@@ -1,6 +1,6 @@
 // The Series MVP's own stat line, from the per-player series sums
-// (postseasonSeries.js `lines`). One line per player: a pitcher's when he threw
-// 3+ innings (or barely batted), else his batting line; [] when unknown. Pure arithmetic.
+// (postseasonSeries.js `lines`). One line per player: a pitcher's when his outs recorded
+// outnumber his at-bats, else his batting line; [] when unknown. Pure arithmetic.
 import { outsToIp } from '../math/innings.js'
 
 const rate3 = (v) => v.toFixed(3).replace(/^0(?=\.)/, '')
@@ -26,5 +26,5 @@ export function mvpStatLine(lines, playerId) {
         ['SO', String(pit.strikeOuts)],
       ]
     : []
-  return pit && (!bat || pit.outs >= 9 || bat.atBats < 6) ? pitching : batting
+  return pit && (!bat || pit.outs > bat.atBats) ? pitching : batting
 }

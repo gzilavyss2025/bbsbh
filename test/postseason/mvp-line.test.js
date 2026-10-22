@@ -21,3 +21,15 @@ test('pitcher: pitching first, outs as innings', () => {
 test('unknown player: both empty', () => {
   assert.deepEqual(mvpStatLine({ batting: {}, pitching: {} }, 9), [])
 })
+
+test('closer with a few DH at-bats stays a pitcher', () => {
+  const closer = { outs: 8, wins: 0, losses: 0, saves: 3, earnedRuns: 0, strikeOuts: 6 }
+  const first = mvpStatLine({ batting: { 3: { ...bat, atBats: 6 } }, pitching: { 3: closer } }, 3)
+  assert.equal(first[0][0], 'IP')
+})
+
+test('hitter who pitched one inning stays a hitter', () => {
+  const mop = { outs: 3, wins: 0, losses: 0, saves: 0, earnedRuns: 1, strikeOuts: 0 }
+  const first = mvpStatLine({ batting: { 4: { ...bat, atBats: 5 } }, pitching: { 4: mop } }, 4)
+  assert.equal(first[0][0], 'AVG')
+})
