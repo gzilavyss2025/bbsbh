@@ -2,7 +2,7 @@
 // (Automated Ball-Strike) Challenge System, from the static file
 // scripts/gen-abs-challenges.mjs sweeps each night.
 //
-// SPOILER-FREE. A challenge is a ball-strike judgment, not a run: it says a
+// NO SCORE. A challenge is a ball-strike judgment, not a run: it says a
 // pitch was on the other side of the line, never who scored or who won. The
 // season figures cover Final games only, so nothing here can leak tonight's
 // result — the same footing as umpires.js's accuracy aggregates and

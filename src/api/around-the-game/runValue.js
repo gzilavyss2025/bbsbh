@@ -14,7 +14,7 @@
 // header. So this says how much a player DID, not how much it happened to be
 // worth to his club's record on the night.
 //
-// SPOILER-FREE. A season aggregate over completed games, off a nightly file:
+// COMPLETED GAMES ONLY. A season aggregate off a nightly file:
 // the same footing as war.js, absChallenges.js and the rest of the open
 // surfaces (ADR-0034). No per-game result can be read back out of a season
 // total, and nothing here is fetched on a scoring surface.

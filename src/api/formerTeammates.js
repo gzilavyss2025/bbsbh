@@ -9,7 +9,7 @@
 // opponent's parent org, even without ever sharing a roster with tonight's
 // players.
 //
-// Building it is expensive and can't be done spoiler-cheaply on a page load:
+// Building it is expensive and can't be done cheaply on a page load:
 // reducing each player's career to its (teamId, season) set needs year-by-year
 // stats across MLB and every MiLB level (one request per level), so a single
 // matchup is hundreds of requests. Past-season career history is immutable, so

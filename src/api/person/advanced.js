@@ -1,6 +1,6 @@
 // Pitch arsenal, advanced pitching/hitting cards, and batted-ball profile —
 // Statcast-derived rate stats behind the season tiles. See ../person.js's
-// header for the module's overall spoiler footing.
+// header for the module's overall as-of footing.
 
 import { DASH, num, rate2, rate3, propPct, fixed2, roundInt } from './shared.js'
 
@@ -40,8 +40,8 @@ export function arsenalView(splits) {
 // ---------------------------------------------------------------------------
 // Advanced pitching card — the run-prevention rates behind the headline tiles,
 // from person-fetch's fetchPitchingAdvanced bundle (standard season +
-// seasonAdvanced + sabermetrics, one request). Full-season aggregates, same
-// spoiler footing as the vs-L/R season splits: no single game's line is
+// seasonAdvanced + sabermetrics, one request). Full-season aggregates, like the
+// vs-L/R season splits: no single game's line is
 // derivable from a season rate, and the card is labeled "full season" (the
 // page's asOf caveat covers it alongside the splits). MLB-only at the source
 // (the sabermetrics/seasonAdvanced types return nothing for MiLB) — degrades
@@ -131,7 +131,7 @@ export function advancedPitchingView(bundle, { post = false } = {}) {
 // ---------------------------------------------------------------------------
 // Advanced hitting card — the plate-discipline/power rates behind the hitter
 // tiles, from person-fetch's fetchHittingAdvanced bundle (standard season +
-// seasonAdvanced + sabermetrics, one request). Same shape and spoiler footing
+// seasonAdvanced + sabermetrics, one request). Same shape and footing
 // as advancedPitchingView (AdvancedStatsCard.jsx renders both, generically,
 // off `facts`): full-season aggregates, labeled "full season" by the UI.
 // MLB-only at the source — degrades to null and the card doesn't render.

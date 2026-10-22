@@ -6,9 +6,9 @@
 // scripts/gen-postseason-history.mjs builds it — a hand-run regenerate, not
 // a cron, since a finished postseason's results are immutable. Same
 // build-time-fetch pattern as awardsHistory.js/milbHistory.js. A past
-// series' final score carries no LIVE game's spoiler risk — same footing as
+// series' final score carries no LIVE game's result — same footing as
 // the (ungated) Awards History/WAR/Milestone Watch pages — so this file
-// needs no spoiler cutoff or SealBox.
+// needs no as-of cutoff or SealBox.
 //
 // Degrades to an empty list before the file exists or on any failure — a
 // friendly empty state, not a broken page. Cached in-memory for the session

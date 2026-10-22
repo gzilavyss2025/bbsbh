@@ -117,8 +117,8 @@ export async function fetchPersonStats(
 // fetchPersonStats's `stats[0]` read would truncate, hence a dedicated
 // fetcher): the standard season line (opponents' AVG + gamesStarted),
 // seasonAdvanced (K%/BB% per PA, quality starts, batted-ball outs/hits), and
-// sabermetrics (FIP, ERA−). All are live full-season aggregates — same
-// spoiler footing as the vs-L/R season splits (see advancedPitchingView).
+// sabermetrics (FIP, ERA−). All are live full-season aggregates — like
+// the vs-L/R season splits (see advancedPitchingView).
 // MLB-only at the source; degrades to null per type, and the card then
 // simply doesn't render. `gameType: 'P'` reads the postseason: no sabermetrics
 // come back for it (checked live 2026-10-07), so that entry is null.
@@ -214,7 +214,7 @@ export async function fetchMilbCareer(personId, group) {
 // ---------------------------------------------------------------------------
 // Position innings — fielding innings per position (the "where he's played"
 // diamond) and starter-vs-reliever IP. Both are aggregates, not tonight's line,
-// so — like the vs-L/R splits — they're spoiler-free and NOT date-cut: a
+// so — like the vs-L/R splits — they're NOT date-cut: a
 // season scope is the whole season, a career scope the whole career. `season`
 // omitted => career.
 // ---------------------------------------------------------------------------
@@ -407,7 +407,7 @@ export async function findFirstPitcherFaced(personId, gamePk, events) {
 // Each object carries `id` (a stable AL*/NL* code), `name`, `season`, a real
 // `date`, and (usually) `team` — the timeline filters to the majors and pins a
 // row per award to its date (see transactionTimelineView). Roster/award data
-// carries no score, so it's spoiler-free like the rest of the page. Degrades to
+// carries no score, so it needs no gate, like the rest of the page. Degrades to
 // [] off MLB / on failure.
 export async function fetchPlayerAwards(personId) {
   if (!personId) return []
@@ -442,10 +442,10 @@ export async function fetchTradeCohort(teamId, date) {
 // affiliate-to-affiliate assignment up the farm system. The `/transactions`
 // endpoint is player-scoped by a date WINDOW rather than "all history", so bind
 // it wide-open on the low end and cap the high end at `endDate` — the caller
-// passes the same "entering today" cutoff the stats use, so the timeline never
-// surfaces a move that hadn't happened yet as of the game being scored.
-// Roster moves carry no score (see docs/data-enrichment.md), so this is
-// spoiler-free like the rest of the player page. Returns the RAW rows (shaping
+// passes the same as-of cutoff the stats use (today, with no `?d=`), so a dated
+// view never surfaces a move that hadn't happened yet as of that date.
+// Roster moves carry no score (see docs/data-enrichment.md), so this needs
+// no gate, like the rest of the player page. Returns the RAW rows (shaping
 // + curation live in person.js's transactionTimelineView); degrades to [] on
 // failure or off-MLB. MiLB moves come back without needing a sportId (verified).
 export async function fetchTransactions(personId, endDate) {
@@ -465,7 +465,7 @@ export async function fetchTransactions(personId, endDate) {
 // posts this days before it files the activation transaction that would
 // clear an IL/rehab flag, so it's the one live signal that can outrun
 // `detectInjuredList`/`detectRehabAssignment` (person.js); see loadPlayer.js's
-// `startingToday`. Spoiler-free; degrades to false on any failure/off day.
+// `startingToday`. Degrades to false on any failure/off day.
 export async function isProbableStarterToday(teamId, personId, date) {
   if (!teamId || !personId || !date) return false
   try {
@@ -487,7 +487,7 @@ export async function isProbableStarterToday(teamId, personId, date) {
 }
 
 // Player ids selected to this season's All-Star Game. Roster membership isn't
-// score-revealing, so this is spoiler-safe to show year-round (unlike the game
+// score-revealing, so this is safe to show year-round (unlike the game
 // itself, which stays sealed like any other).
 //
 // Source is the official All-Star SELECTIONS — the awards-recipients endpoint

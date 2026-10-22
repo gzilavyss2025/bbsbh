@@ -2,7 +2,7 @@
 // rehab assignment, league-wide — read from a static same-origin file
 // (public/data/rehab.json) rather than computed live.
 //
-// Building the list is expensive and can't be done spoiler-cheaply on a page
+// Building the list is expensive and can't be done cheaply on a page
 // load: the transaction feed says who STARTS a rehab but not reliably when one
 // ENDS, so each candidate has to be verified against his game log and his club's
 // schedule (a few statsapi calls apiece) to drop stints that have really

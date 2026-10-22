@@ -15,7 +15,7 @@
 // `seasons[y].post.byTeamId`, same row shape. It never enters the rates, the rank
 // or the league baseline above, which stay regular season.
 //
-// Spoiler-free: a season aggregate over FINAL games carries no live-game score
+// A season aggregate over FINAL games carries no live-game score
 // (same footing as WAR / team-score aggregates), so no SealBox — only the live
 // per-play win prob in the innings view is sealed. Degrades to null with no file.
 

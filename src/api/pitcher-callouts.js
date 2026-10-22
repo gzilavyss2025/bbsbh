@@ -12,7 +12,7 @@
 // regardless of how interesting it is.
 //
 // Every SEASON-AGGREGATE fact here (see gen-callouts.mjs's starterRecords) is
-// as spoiler-free as the WHIP/AVG-against a leader card would show — it needs
+// like the WHIP/AVG-against a leader card would show — it needs
 // no SealBox. Two shapes:
 //
 //   - "Entering tonight" facts (home/away split, CG/shutout total, scoreless-
@@ -117,7 +117,7 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
     })
 
   // Consecutive-days work, from the workload precompute (completed
-  // appearances only — spoiler-free): the 3-straight-days pattern is the
+  // appearances only): the 3-straight-days pattern is the
   // sharpest documented fatigue signal (velo down ~1.5 mph), so it leads.
   // Suppresses the plain back-to-back fallback below (the ERA-split version
   // still shows — a different fact worth keeping).
@@ -186,7 +186,7 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
 
   // Leverage — opponents' line with his club ahead vs trailing/tied, when the
   // gap is a real story in either direction (the "does he pitch better with
-  // the lead?" split). Season aggregate, spoiler-free like everything here.
+  // the lead?" split). Season aggregate, like everything here.
   const ahead = rec.leverage?.ahead
   const contrast = rec.leverage?.behind ?? rec.leverage?.tied
   if (ahead?.avg && contrast?.avg) {

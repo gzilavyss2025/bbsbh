@@ -1,11 +1,12 @@
-// Pure, spoiler-aware shaping of the /people responses into the view model the
+// Pure, cutoff-aware shaping of the /people responses into the view model the
 // player & team pages render. No fetching here (that's mlb.js) — every function
 // takes raw API pieces and returns display-ready data, degrading to null/'—'
 // for the fields MiLB feeds omit, per the app's "degrade, don't assume" rule.
 //
-// Spoiler note: these builders NEVER touch the live game feed. The player page
-// fetches its own stats cut off at the day before the game date ("entering
-// today"), so nothing here can leak the game being scored. The full-season
+// As-of note: these builders NEVER touch the live game feed. The player page
+// fetches its own stats, current by default. When the address carries an `?d=`
+// as-of date (nothing stamps one on any more, ADR-0034's amendment, but a shared
+// link can), the date-cut fetches end the day before it. The full-season
 // figures that can't be date-cut by the API — the current-season register row,
 // the vs-L/R splits, and the promoted other-level tiles (see
 // otherLevelSeasonBlocks) — are labeled as such by the UI, not frozen; each is

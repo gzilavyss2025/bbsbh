@@ -4,7 +4,7 @@ import { staticJsonBy } from './staticJson.js'
 // from public/data/franchise-history/{teamId}.json (hand-run
 // scripts/gen-franchise-history.mjs, 1901 to `through`, MLB's own /teams feed).
 // Relocated clubs keep one team id, so the Brewers' file starts with the 1969
-// Seattle Pilots. Spoiler-free: names and parks, no game.
+// Seattle Pilots. Names and parks, no game.
 //
 // The data starts in 1901, so a park's first season is the first IN THIS DATA,
 // never the year it opened. MLB clubs only: a MiLB id has no file and reads [].

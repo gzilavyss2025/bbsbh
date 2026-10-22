@@ -4,7 +4,7 @@ import { staticJson } from '../staticJson.js'
 // scripts/gen-league-pennants.mjs): one row per World Series berth (the current season's once both LCS are decided), 1903 to the current
 // season, with the name, club label and abbreviation of THAT year. The
 // file starts in 1903, so the 1901-02 AL and the early NL pennants are not in it.
-// Spoiler-free: finished seasons, no game. A club with none, a MiLB id, or a
+// Finished seasons, no game. A club with none, a MiLB id, or a
 // missing file reads [].
 
 const load = staticJson('/data/league-pennants.json', { fallback: { through: null, teams: {} } })

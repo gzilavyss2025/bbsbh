@@ -3,7 +3,7 @@ import { staticJson } from '../staticJson.js'
 // A player's PROSPECT RANKING HISTORY -- the years he sat on a top-prospect
 // list, and where (issue #1111). Reads public/data/prospect-rank-history.json,
 // which scripts/gen-prospect-rank-history.mjs builds by hand from the research
-// pull in .scratch/top-prospects-history/. Spoiler-free: a ranking is a scout's
+// pull in .scratch/top-prospects-history/. A ranking is a scout's
 // opinion of a man, not a fact about a game, so the player page shows it open
 // (ADR-0034). No SealBox, no reveal-only import.
 //

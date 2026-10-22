@@ -5,8 +5,7 @@ import { staticJsonBy } from '../staticJson.js'
 // public/data/birthplaces/{cell}.json, built BY HAND by scripts/gen-bio-history.mjs
 // (ADR-0100, ADR-0106). The app never fetches Retrosheet or GeoNames.
 //
-// SPOILER FOOTING: spoiler-FREE. Where a man was born says nothing about a game
-// (ADR-0034); an open surface may show it with no SealBox.
+// NO GAME DATA. Where a man was born says nothing about a game (ADR-0034).
 //
 // "NEAR" IS MAP DISTANCE: a birth city within NEAR_MILES of a point, straight line.
 // A park in a suburb finds the city next door, and a name spelled two ways

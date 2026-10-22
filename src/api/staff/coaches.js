@@ -1,7 +1,7 @@
 import { getJson } from '../statsapi.js'
 
 // A club's coaching staff for one season — the team page's Coaching staff card.
-// Spoiler-free: who is on a staff says nothing about a score (open surface, ADR-0034).
+// Who is on a staff says nothing about a score (open surface, ADR-0034).
 //
 // `/api/v1/teams/{id}/coaches` is the endpoint fetchManager (game.js) reads for the manager.
 // It returns one row per JERSEY NUMBER a person wore, not one per job (verified live,

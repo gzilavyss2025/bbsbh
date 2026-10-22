@@ -1,6 +1,6 @@
 // Milestone watch — forward-looking countdown to a round career-total
 // milestone, the complement to Firsts (gameLog.js, which looks backward). See
-// ../person.js's header for the module's overall spoiler footing.
+// ../person.js's header for the module's overall as-of footing.
 
 import { num } from './shared.js'
 import { aggregateSplits } from './stats.js'
@@ -197,7 +197,7 @@ export function milestoneRarityRank(stat, threshold) {
   return MILESTONE_RARITY[stat]?.[threshold] ?? 999
 }
 
-// The MLB career total AS OF the page's spoiler cutoff — every full season
+// The MLB career total AS OF the page's cutoff — every full season
 // strictly before `currentSeason` (immutable, already fetched via
 // `mlbSplits`) summed with the date-cut current-season stat (`tileStat`),
 // rather than the API's own `stats=career` type (see `careerSplits` in

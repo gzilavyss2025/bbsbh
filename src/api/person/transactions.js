@@ -1,5 +1,5 @@
 // Transaction timeline — the career roster-move ledger at the foot of the
-// player page. See ../person.js's header for the module's overall spoiler
+// player page. See ../person.js's header for the module's overall as-of
 // footing. Career honors used to live here too; they now have their own
 // module and their own section (./awards.js, AwardsLedger.jsx).
 //
@@ -44,7 +44,7 @@
 // caller-supplied enrichment before the sort. Degrades to null when nothing
 // survives.
 //
-// Spoiler footing: unchanged. An IL row carries a date, a club and an injury
+// As-of footing: unchanged. An IL row carries a date, a club and an injury
 // ("Right elbow inflammation.") — never game state — and `push` already drops
 // anything after the caller's `endDate` cutoff, so a game-scoped view can't see
 // a placement that hasn't happened yet. No seal, no ADR exception.
@@ -204,7 +204,7 @@ export function signedFallback(transactions) {
 // tradeKey to the other players in that swap (for the in-description links),
 // `draft` is the shaped draft record, and `rookieUntil` is the date (from
 // public/data/rookies.json) he exceeded the rookie limit, if ever. Rows dated
-// after `endDate` (the spoiler cutoff) are dropped. Newest first. Awards no
+// after `endDate` (the as-of cutoff) are dropped. Newest first. Awards no
 // longer ride this timeline — see ./awards.js, which feeds the player page's
 // dedicated Awards section.
 export function transactionTimelineView(

@@ -3,7 +3,7 @@
 // The arsenal card says what a pitcher throws and how hard. This says where he
 // puts it, which is the same shape of hole a hitter's spray map fills.
 //
-// SPOILER FOOTING — spoiler-FREE, and it needs no SealBox. Every number here is
+// NO SCORE, and it needs no SealBox. Every number here is
 // a season aggregate over games already final: a count of pitches in a cell,
 // and what those pitches earned. Nothing is a running score, a line, or a
 // result of a game in progress — the same footing as the pitch arsenal it is

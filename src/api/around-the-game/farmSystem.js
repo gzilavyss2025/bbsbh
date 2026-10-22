@@ -43,7 +43,7 @@
 // as presets so a reader who disagrees can re-run it their way — which is the
 // honest form for a composite whose weights are a judgement call.
 //
-// SPOILER-FREE. Minor-league season records and published prospect rankings
+// COMPLETED GAMES ONLY. Minor-league season records and published prospect rankings
 // are aggregates over completed games in another league (ADR-0034: a stat line
 // is not a score). Nothing here touches tonight's game.
 

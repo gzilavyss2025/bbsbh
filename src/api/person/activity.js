@@ -1,7 +1,7 @@
 // Current-activity views: rehab-assignment detection, injured-list detection
 // and stints, promoted other-level tiles, and buildBlock — the orchestrator
 // that assembles one stat block (tiles + career + splits + logs). See
-// ../person.js's header for the module's overall spoiler footing.
+// ../person.js's header for the module's overall as-of footing.
 
 import { SPORT_LABEL } from '../../lib/teams.js'
 import {
@@ -27,7 +27,7 @@ import { careerRegisterView, levelSeasonStat, LEVEL_ORDER_DESC } from './careerR
 // live: "sent RHP Coleman Crow on a rehab assignment to Nashville Sounds") and
 // ends when he returns to the majors — a recall, an activation off the MLB
 // injured list, a real option down, a move off the 40-man roster, or any
-// non-rehab reassignment. The feed is already capped at the spoiler cutoff, so
+// non-rehab reassignment. The feed is already capped at the as-of cutoff, so
 // a game-scoped view reflects his status AS OF that game (a big leaguer only,
 // so it's gated on debutYear). Returns the rehab club { id, name } or null —
 // the caller shows a banner and pins his current-activity sections to MLB,
@@ -48,7 +48,7 @@ export function detectRehabAssignment(transactions, debutYear, asOf) {
 }
 
 // Injured-list stint detection — the same most-recent-open-stint shape as the
-// rehab detector, over the same (already spoiler-capped) transactions feed. A
+// rehab detector, over the same (already capped at the as-of cutoff) transactions feed. A
 // placement is an SC row reading "…placed/transferred … on/to the N-day injured
 // list"; it closes on a later SC "activated … from the … injured list", a
 // return to the active roster — recall (CU), option (OPT), contract selection
@@ -101,7 +101,7 @@ function isIlEndingTxn(t) {
 // count ('7'|'10'|'15'|'60') is parsed from the placement description (for a
 // transfer, the list he moved TO — transferDestinationDays below); a placement
 // with no day count (a plain / full-season "injured list") yields days:null and a
-// generic label. Score-safe: transactions are already capped at the spoiler
+// generic label. Transactions are already capped at the as-of
 // cutoff by the caller, so this reflects IL status AS OF the game being viewed.
 //
 // An IL stint never carries ACROSS a season boundary — a season-ending (typically
@@ -362,7 +362,7 @@ export function ilStintRow(s, levelByTeamId) {
 
 // The league-wide counterpart to detectRehabAssignment — every big leaguer
 // currently on a rehab assignment, for the standalone Rehab Assignments page —
-// no longer lives here: that list can't be built spoiler-cheaply on a page load
+// no longer lives here: that list can't be built cheaply on a page load
 // (each stint has to be verified against the player's game log to drop ones that
 // have really ended), so it's precomputed on a cron into public/data/rehab.json.
 // See scripts/gen-rehab.mjs (which imports the transaction tests and the 30-day

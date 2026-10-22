@@ -1,6 +1,6 @@
-// Game log — the back-of-the-card ledger, spoiler-safe by date cutoff — plus
+// Game log — the back-of-the-card ledger, cut off by date — plus
 // Firsts, the first career instances of a handful of milestones. See
-// ../person.js's header for the module's overall spoiler footing.
+// ../person.js's header for the module's overall as-of footing.
 
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { monthDay } from '../../lib/dates.js'
@@ -10,7 +10,7 @@ import { LEAGUE_BY_ID } from '../../lib/postseason/seriesMarks.js'
 import { DASH, NBSP, num } from './shared.js'
 
 // ---------------------------------------------------------------------------
-// Game log — the back-of-the-card ledger, spoiler-safe by date cutoff
+// Game log — the back-of-the-card ledger, cut off by date
 // ---------------------------------------------------------------------------
 
 // Short, correct opponent label from the full name (abbreviation is blank in
@@ -68,12 +68,12 @@ export function pitcherLine(st) {
   return parts.join(', ')
 }
 
-// Rows are filtered to games BEFORE `cutoff` (YYYY-MM-DD) — the day the game
-// being scored starts — then shown newest first. That cutoff is the whole
-// spoiler defense: the log can never surface tonight's line or anything after
-// it. `cutoff` null (context-free cold link) shows the most recent games. Each
-// row carries a single broadcast-style stat `line` (see hitterLine/pitcherLine)
-// rather than a grid of columns.
+// Rows are filtered to games BEFORE `cutoff` (YYYY-MM-DD) — the as-of date, when
+// the address carries a `?d=` — then shown newest first. That cutoff is what
+// keeps the log from surfacing a game on or after it. `cutoff` null (the usual
+// live view, with no `?d=`) shows the most recent games. Each row carries a
+// single broadcast-style stat `line` (see hitterLine/pitcherLine) rather than a
+// grid of columns.
 //
 // `scores` (optional) is boxlines/fetch.js's fetchFinalScores map, gamePk ->
 // a row carrying { runs, oppRuns }, asked for over `loggedSplits` alone, so it

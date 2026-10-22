@@ -13,8 +13,7 @@
 // the measurements cited below regenerate from
 // .scratch/home-transactions/probe-coverage.mjs and probe-bare-activation.mjs.
 //
-// Spoiler note: roster moves and their dates carry no score, so nothing here
-// is reveal-only — as spoiler-free as its parent module.
+// Roster moves and their dates carry no score, so nothing here is reveal-only.
 
 import { mentionsInjuredList } from '../rehab-policy.js'
 

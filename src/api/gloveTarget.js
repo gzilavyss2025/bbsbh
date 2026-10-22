@@ -18,7 +18,7 @@ import { staticJsonBy } from './staticJson.js'
 // above it, which already plots where a pitcher's pitches go. The full argument,
 // and the sampling that follows from it, is in scripts/gen-command-zone.mjs.
 //
-// SPOILER FOOTING — spoiler-FREE, no SealBox, same as targetCommand.js and
+// NO SCORE, no SealBox, same as targetCommand.js and
 // commandMap.js beside it: a season's worth of offsets in inches, over games
 // already final, carrying no line and no per-game result. The dots are
 // deliberately unordered and undated — nothing here can be read back to a

@@ -13,8 +13,7 @@
 // renders an emphasized segment as an all-caps, bold, linked player name and
 // a teamId segment as a club link; everything else is plain prose.
 //
-// Spoiler note: roster moves and their dates carry no score, so nothing here
-// is reveal-only — as spoiler-free as its parent module.
+// Roster moves and their dates carry no score, so nothing here is reveal-only.
 
 import {
   OUTSIDE_ARRIVAL_CODES,

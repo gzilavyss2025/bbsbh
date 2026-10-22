@@ -1,6 +1,6 @@
 // Pure formatting helpers shared across the person/ modules. No fetching, no
-// spoiler-sensitive data — see ../person.js's header for the module's overall
-// spoiler footing.
+// game data — see ../person.js's header for the module's overall as-of
+// footing.
 
 export const DASH = '—'
 // Non-breaking space (U+00A0) — joins the count and label inside a game-log

@@ -1,6 +1,6 @@
 // Player identity + roster status — is he actually ON a club, or does
 // `currentTeam` just have nowhere else to point? See ../person.js's header
-// for the module's overall spoiler footing.
+// for the module's overall as-of footing.
 
 import { birthplace } from '../../lib/person/birthplace.js'
 import { rosterStatusView as rosterStatus } from '../../lib/person/rosterStatus.js'
