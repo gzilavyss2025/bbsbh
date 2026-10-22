@@ -222,6 +222,8 @@ export function PostseasonSeriesPage({ seriesId }) {
         </div>
       </Card>
 
+      {mvp && <SeriesMvpCard mvp={mvp} lines={stats.lines} />}
+
       <SeriesFlow
         series={flowBuckets}
         gameSignals={gameSignals}
@@ -306,7 +308,6 @@ export function PostseasonSeriesPage({ seriesId }) {
               )
             })}
           </div>
-          {mvp && <SeriesMvpCard mvp={mvp} lines={stats.lines} />}
         </Card>
       </section>
 
