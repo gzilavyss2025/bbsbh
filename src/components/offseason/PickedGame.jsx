@@ -65,7 +65,7 @@ export function PickedGame({ sportId, season, dateStr }) {
   // check, and the same silence, as the promotions list beneath.
   if (!picked || data?.season !== season) return null
 
-  const { game, started } = picked
+  const { game } = picked
   const label = SPORT_LABEL[sportId] ?? ''
   const reason = reasonLine(game.why)
 
@@ -80,11 +80,6 @@ export function PickedGame({ sportId, season, dateStr }) {
           </span>
           <Club club={game.home} />
         </div>
-
-        {/* What the reader is being promised, in the words the app uses for it
-            everywhere else. A game carrying this device's own progress cannot
-            promise it, and says the true thing instead. */}
-        <p className="pgame__seal">{started ? 'Your progress applies' : 'Score sealed'}</p>
 
         {reason && <p className="pgame__why">{reason}</p>}
 

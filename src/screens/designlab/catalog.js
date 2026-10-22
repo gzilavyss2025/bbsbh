@@ -291,14 +291,6 @@ export const PILLS = [
     pill: { className: 'prospect__tag' },
   },
   {
-    cls: 'duepill',
-    partial: '31-wild-card.css',
-    consumers: 1,
-    group: 'tone',
-    verdict: 'Merge — tone seal',
-    fill: '--seal-cover / --seal-cover-ink / --seal-deep — one of the 21 partials ADR-0083 leaves on kraft, because the due-up pill IS a reveal surface',
-  },
-  {
     cls: 'mastheadpill',
     partial: '10-lineup.css',
     consumers: 4,
