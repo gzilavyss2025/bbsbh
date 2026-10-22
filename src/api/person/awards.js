@@ -13,12 +13,12 @@
 // ordering the site owner edits (/admin -> Award weight), not an allowlist an
 // agent has to grow. An award nobody has ranked sorts LAST, never first.
 //
-// NO GAME DATA HERE. An award is a season-level fact about a career, on a
+// NO GAME DATA. An award is a season-level fact about a career, on a
 // page CLAUDE.md keeps deliberately outside the scoring flow (ADR-0034), and
 // nothing here reads a linescore, a box score or a play. The one date rule it
-// does honour is `endDate`: the same "entering today" cutoff every other
-// dated section of the player page respects, so a game-scoped view of a player
-// cannot show an award he had not won yet on that date.
+// does honour is `endDate`: the same as-of cutoff every other dated section
+// of the player page respects, so a dated view (`?d=`) of a player cannot show
+// an award he had not won yet on that date.
 
 import { MONTH_ABBR } from './shared.js'
 import { isMlbTeamId } from '../../lib/teams.js'

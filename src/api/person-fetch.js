@@ -442,8 +442,8 @@ export async function fetchTradeCohort(teamId, date) {
 // affiliate-to-affiliate assignment up the farm system. The `/transactions`
 // endpoint is player-scoped by a date WINDOW rather than "all history", so bind
 // it wide-open on the low end and cap the high end at `endDate` — the caller
-// passes the same "entering today" cutoff the stats use, so the timeline never
-// surfaces a move that hadn't happened yet as of the game being scored.
+// passes the same as-of cutoff the stats use (today, with no `?d=`), so a dated
+// view never surfaces a move that hadn't happened yet as of that date.
 // Roster moves carry no score (see docs/data-enrichment.md), so this needs
 // no gate, like the rest of the player page. Returns the RAW rows (shaping
 // + curation live in person.js's transactionTimelineView); degrades to [] on

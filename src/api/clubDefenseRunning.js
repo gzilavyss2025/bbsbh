@@ -6,7 +6,7 @@
 // scripts/gen-club-defense-running.mjs builds it nightly. A measure with no
 // source is null, never 0.
 //
-// NO SCORE DATA HERE. Regular-season totals for a club: the same footing
+// NO GAME DATA. Regular-season totals for a club: the same footing
 // as Standings and League Leaders, open live since ADR-0034. No game, no score.
 //
 // Degrades to an empty file before it exists or on any failure.

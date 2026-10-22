@@ -1,5 +1,5 @@
 // Team page helpers. See ../person.js's header for the module's overall
-// spoiler footing.
+// as-of footing.
 
 import { num, DASH } from './shared.js'
 import { pitcherRole } from './identity.js'

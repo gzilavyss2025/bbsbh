@@ -68,12 +68,12 @@ export function pitcherLine(st) {
   return parts.join(', ')
 }
 
-// Rows are filtered to games BEFORE `cutoff` (YYYY-MM-DD) — the day the game
-// being scored starts — then shown newest first. That cutoff is what keeps
-// the log from surfacing tonight's line or anything after
-// it. `cutoff` null (context-free cold link) shows the most recent games. Each
-// row carries a single broadcast-style stat `line` (see hitterLine/pitcherLine)
-// rather than a grid of columns.
+// Rows are filtered to games BEFORE `cutoff` (YYYY-MM-DD) — the as-of date, when
+// the address carries a `?d=` — then shown newest first. That cutoff is what
+// keeps the log from surfacing a game on or after it. `cutoff` null (the usual
+// live view, with no `?d=`) shows the most recent games. Each row carries a
+// single broadcast-style stat `line` (see hitterLine/pitcherLine) rather than a
+// grid of columns.
 //
 // `scores` (optional) is boxlines/fetch.js's fetchFinalScores map, gamePk ->
 // a row carrying { runs, oppRuns }, asked for over `loggedSplits` alone, so it

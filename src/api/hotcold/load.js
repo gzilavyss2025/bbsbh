@@ -2,7 +2,7 @@
 // (`public/data/season-checkpoints/tails.json`, hand-run by gen-season-checkpoints.mjs)
 // and the player's regular-season game log for each role, then runs rule.js.
 //
-// On an open surface (ADR-0034). The cutoff the caller passes is what holds
+// Open surface (ADR-0034): no seal. The cutoff the caller passes is what holds
 // a game in progress back: rule.js counts only rows dated before it.
 import { fetchPersonStats } from '../person-fetch.js'
 import { staticJson, staticJsonBy } from '../staticJson.js'

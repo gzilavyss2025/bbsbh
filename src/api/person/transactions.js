@@ -44,7 +44,7 @@
 // caller-supplied enrichment before the sort. Degrades to null when nothing
 // survives.
 //
-// Footing: unchanged. An IL row carries a date, a club and an injury
+// As-of footing: unchanged. An IL row carries a date, a club and an injury
 // ("Right elbow inflammation.") — never game state — and `push` already drops
 // anything after the caller's `endDate` cutoff, so a game-scoped view can't see
 // a placement that hasn't happened yet. No seal, no ADR exception.

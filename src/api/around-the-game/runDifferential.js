@@ -1,6 +1,6 @@
 // The reader behind /run-differential — "the run differential report".
 //
-// NO SCORE, on the same footing as around-the-game/doubleheaders.js. Every
+// COMPLETED GAMES ONLY, on the same footing as around-the-game/doubleheaders.js. Every
 // figure here is a season aggregate over finished games, plus completed
 // postseason series from seasons that are over. Nothing in this module can name
 // what happened in any one game, and the page it feeds prints records, run

@@ -168,7 +168,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   const cur = Number(currentSeason)
   // Guarantee a stint for the current season at the player's current level even
   // if the year-by-year fetch hasn't caught up — its row uses the date-cut
-  // currentStat, so it can't move mid-game.
+  // currentStat, cut at the caller's endDate.
   if (currentStat && currentSportId) {
     if (!bySeason.has(cur)) bySeason.set(cur, new Map())
     if (!bySeason.get(cur).has(currentSportId)) bySeason.get(cur).set(currentSportId, [])
@@ -179,8 +179,8 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // dedupes them).
   //
   // The current level's current season is the exception: it must read from the
-  // caller's DATE-CUT splits, never the live year-by-year rows, so it can't move
-  // mid-game. Those splits carry the same per-club shape, so the split below
+  // caller's DATE-CUT splits, never the live year-by-year rows, so a dated view
+  // never looks past its date. Those splits carry the same per-club shape, so the split below
   // stays uniform. If that fetch came back empty, the season collapses to the
   // ONE date-cut aggregate the caller also hands in — still date-cut, so still
   // safe, but a single line; it keeps the year-by-year rows' club ids so the

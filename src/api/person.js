@@ -6,8 +6,7 @@
 // As-of note: these builders NEVER touch the live game feed. The player page
 // fetches its own stats, current by default. When the address carries an `?d=`
 // as-of date (nothing stamps one on any more, ADR-0034's amendment, but a shared
-// link can), the fetches are cut off at the day before it, so nothing here shows
-// a game on or after that date. The full-season
+// link can), the date-cut fetches end the day before it. The full-season
 // figures that can't be date-cut by the API — the current-season register row,
 // the vs-L/R splits, and the promoted other-level tiles (see
 // otherLevelSeasonBlocks) — are labeled as such by the UI, not frozen; each is

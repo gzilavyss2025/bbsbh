@@ -135,8 +135,8 @@ export function playerContext(id, asOf) {
 // which level his career-shaped sections are pinned to, which stat groups he
 // has, and the day every dated fetch is cut off at. Two requests.
 async function buildPlayerContext(id, asOf) {
-  // The as-of cutoff for every date-bound fetch — "entering today" for a
-  // game-scoped view, else the live current day. The transaction feed is capped
+  // The as-of cutoff for every date-bound fetch — the day before `?d=` for a
+  // dated view, else the live current day. The transaction feed is capped
   // by it too, because a live rehab assignment has to be detected before any
   // stat block is built.
   const endDate = asOf ? dayBefore(asOf) : isoToday()

@@ -84,7 +84,7 @@ export function postPitchesOf(data, personId) {
 // ONE START'S PITCH MIX (#1915): `{ code: n }` for one pitcher in one game, from
 // public/data/pitch-arsenal-starts/{season}/{NN}.json (his %100 bucket, a season store). Its
 // own shard set: the buckets above are at their size ceiling. A completed-game aggregate like
-// the rest of this file, so it is spoiler-free (ADR-0034), but it is per GAME: call it from an open
+// the rest of this file, so it needs no seal (ADR-0034), but it is per GAME: call it from an open
 // surface (the player page), never from a scoring surface for a game being watched. Null for a game with no row: the
 // files fill with the re-walk, and a missing file, season or game all read the same.
 const startsShard = staticJsonBy((key) => `/data/pitch-arsenal-starts/${key}.json`)
