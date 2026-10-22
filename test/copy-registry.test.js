@@ -4,7 +4,7 @@
 // only ever set a KNOWN id to an in-budget string, everything resolves to a
 // renderable default, and the closed set of honored tokens substitutes
 // correctly. If any of these loosen, untrusted copy could inject an unknown key
-// or an oversized value into a consent modal.
+// or an oversized value into the page.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
@@ -27,8 +27,7 @@ test('every field has a string default within its own maxLength', () => {
 })
 
 // The non-empty rule is REAL but it belongs to the fields the app renders
-// unconditionally: a consent modal with a blank title or a blank accept button
-// is a broken, unusable consent moment, so those defaults may never be empty.
+// unconditionally: a label or note that is always drawn may never ship blank.
 // The ballpark notes are the deliberate other case — BallparkCard renders the
 // paragraph only `&& note`, so an empty default means "no note yet", which is
 // the correct shipped state for a park nobody has written about. Same story
