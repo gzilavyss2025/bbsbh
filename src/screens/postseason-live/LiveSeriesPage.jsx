@@ -2,7 +2,8 @@ import '../../styles/35-postseason-series.css'
 import '../../styles/postseason/series-parts.css'
 import '../../styles/postseason/series-abs.css'
 import '../../styles/postseason/series-live.css'
-import { useMemo } from 'react'
+import '../../styles/worldseries/home.css'
+import { useMemo, useState } from 'react'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
 import { bestOfLine, cardLines, recordLine, roundTitle } from '../../api/postseason/text.js'
 import { fetchUpcomingSeriesGames } from '../../api/postseason/upcoming.js'
@@ -11,11 +12,16 @@ import { formerTeammatePairs, loadFormerTeammates } from '../../api/formerTeamma
 import { fetchSeriesRoster, rosterReadDate } from '../../api/postseason/roster.js'
 import { BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postseasonSeries.js'
 import { fetchSchedule } from '../../api/schedule.js'
+import { fetchMeetings } from '../../api/postseason/meetings.js'
 import { computePlayOfTheGame } from '../../api/boxscore.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { EMPTY_LOG, useSeriesLog } from '../../hooks/postseason/useSeriesLog.js'
+import { useWorldSeriesView } from '../../hooks/postseason/useWorldSeriesView.js'
+import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
+import { seriesGroups } from '../../lib/postseason/worldseries/groups.js'
+import { lcsRoundOf, seriesMode } from '../../lib/postseason/worldseries/mode.js'
 import { dayShape } from '../../lib/postseason/dayShape.js'
 import { recordAfterGame } from '../../lib/postseason/primer/recordAfter.js'
 import { gamePath } from '../../lib/route.js'
@@ -42,6 +48,18 @@ import { SeriesNineKeys } from '../../components/postseason/SeriesNineKeys.jsx'
 import { SeriesAbsReport } from '../../components/postseason/SeriesAbsReport.jsx'
 import { SeasonSeriesStrip } from '../../components/teamstats/SeasonSeriesStrip.jsx'
 import { FormerTeammates } from '../../components/team/FormerTeammates.jsx'
+import { Hero } from '../../components/worldseries/Hero.jsx'
+import { Reel } from '../../components/worldseries/Reel.jsx'
+import { ScoutingReport } from '../../components/worldseries/ScoutingReport.jsx'
+import { GroupJump, Group } from '../../components/worldseries/GroupJump.jsx'
+import { Bullpen } from '../../components/worldseries/cards/Bullpen.jsx'
+import { HomeRoad } from '../../components/worldseries/cards/HomeRoad.jsx'
+import { HotBats } from '../../components/worldseries/cards/HotBats.jsx'
+import { Tape } from '../../components/worldseries/cards/Tape.jsx'
+import { Trip } from '../../components/worldseries/cards/Trip.jsx'
+import { FilmRoom } from '../../components/worldseries/cards/scouting/FilmRoom.jsx'
+import { Grid } from '../../components/ui/layout/Grid.jsx'
+import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
 import { SeriesMark } from '../../components/postseason/SeriesMark.jsx'
 
@@ -138,6 +156,19 @@ export function LiveSeriesPage({ seriesId, asOf }) {
     [log],
   )
 
+  // The World Series gets the home page's pieces in jump-bar groups; every other round keeps the
+  // original order. A decided Series keeps its banner (its headline names the winner).
+  const mode = series?.round === 'worldseries' ? seriesMode(series) : null
+  const wide = useMediaQuery(WIDE_QUERY)
+  const view = useWorldSeriesView(mode, cutoff)
+  const [scoutShown, setScoutShown] = useState(false)
+  const [clubA, clubB] = view.clubIds ?? []
+  // The clubs' regular-season meetings, read to the day before the cutoff (the Scouting band's own read).
+  const { data: meetings } = useAsync(
+    (signal) => (mode ? fetchMeetings({ clubA, clubB, slateDate: cutoff }, { signal }) : Promise.resolve(null)),
+    [mode ? 1 : 0, clubA, clubB, cutoff],
+  )
+
   useDocumentTitle(series ? `${bracket.season} ${series.name}` : null)
 
   const bracketGate = AsyncGate({
@@ -197,23 +228,17 @@ export function LiveSeriesPage({ seriesId, asOf }) {
       opponentOf: (id) => clubs.find((c) => c.id !== id)?.id ?? null,
     }
 
-  return (
-    <div className="screen psseries pslive">
-      <SiteHeader />
-      <BackBtn onClick={back} />
-
-      <header className="topbar">
-        <h1 className="topbar__title">{series.name}</h1>
-      </header>
-
-      {/* The result hero, reusing the finished page's exact banner/ledger
+  // Every section is a value, so the World Series layout (groups) and every other round
+  // (the original order) draw the same parts.
+      /* The result hero, reusing the finished page's exact banner/ledger
           classes (.psseries__result etc.) — but the headline is recordLine's
           state ("Series tied 1–1", "CHC leads 2–1", or a decided
           series' own "TOR won 3–1": trap 7 means a decided 2026 series
           still opens here) rather than a clinch declaration, since this page
           may render before there IS one. Each club's win trace is the same
           inked-cell ledger idiom (.psseries__cell--won); winner/loser tinting
-          applies only once the series actually is decided. */}
+          applies only once the series actually is decided. */
+  const resultBanner = (
       <Card body="flush" className="psseries__result">
         <div className="psseries__banner">
           <h2 className="psseries__headline">{results.length === 0 ? bestOfLine(series) : recordLine(series)}</h2>
@@ -254,11 +279,11 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           })}
         </div>
       </Card>
-
-      {/* Today's game — the home slate's own card, never scored. It is handed
-          no score line, and no feed or box-score fetch ever runs for this
-          gamePk on this page (root CLAUDE.md's spoiler rule). */}
-      {today && todayGame && (
+  )
+  const pair = clubs.length === 2
+  // Today's game — the home slate's own card, never scored. It is handed no score line, and no
+  // feed or box-score fetch ever runs for this gamePk on this page (root CLAUDE.md's spoiler rule).
+  const todayEl = today && todayGame && (
         <section className="psseries__today">
           <SectionHead look="label" note={todayWords}>
             Today
@@ -279,9 +304,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             }
           />
         </section>
-      )}
-
-      {!series.decided && nextDetail && (
+      )
+  const startersEl = !series.decided && nextDetail && (
         <SeriesStarters
           head={today ? 'Starting pitchers' : 'Next game'}
           note={[`Game ${nextRow.gameNumber}`, today ? nextDetail.venue.name : monthDayName(nextDetail.date)]
@@ -292,8 +316,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           cutoff={cutoff}
           worldSeries={series.round === 'worldseries'}
         />
-      )}
-
+      )
+  const stillEl = (
       <StillToPlay
         games={upcoming}
         details={details}
@@ -301,8 +325,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
         showArms={showArms}
         formatDate={monthDayName}
       />
-
-      {results.length > 0 && clubs.length === 2 && (
+  )
+  const flowEl = results.length > 0 && clubs.length === 2 && (
         <SeriesFlow
           series={buckets}
           gameSignals={gameSignals}
@@ -310,9 +334,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           clubs={clubs}
           defaultId={clubs.some((c) => c.id === favoriteTeamId) ? favoriteTeamId : clubs[1].id}
         />
-      )}
-
-      {results.length > 0 && (
+      )
+  const gamesEl = results.length > 0 && (
         <section className="psseries__games">
           <SectionHead look="label">Game by game</SectionHead>
           <Card as="div" body="flush" className="psseries__log">
@@ -361,16 +384,17 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             </div>
           </Card>
         </section>
-      )}
-
+  )
+  const noticesEl = (
+    <>
       {logLoading && !stats && results.length > 0 && <p className="hint">Loading the series so far…</p>}
       {logError && !stats && results.length > 0 && (
         <Notice tone="error" className="pslive__notice">Couldn’t load this series’ leaders and rosters.</Notice>
       )}
-
-      {stats?.totals && clubs.length === 2 && <SeriesTotals totals={stats.totals} clubs={clubs} />}
-
-      {(hasBatting || hasPitching) && (
+    </>
+  )
+  const totalsEl = stats?.totals && clubs.length === 2 && <SeriesTotals totals={stats.totals} clubs={clubs} />
+  const leadersEl = (hasBatting || hasPitching) && (
         <div className="psseries__leaders">
           {hasBatting && (
             <SeriesLeaderBoard
@@ -389,10 +413,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             />
           )}
         </div>
-      )}
-
-      {clubs.length === 2 && (
-        <>
+      )
+  const stripEl = pair && (
           <SeasonSeriesStrip
             viewingTeamId={clubs[1].id}
             opponentId={clubs[0].id}
@@ -403,13 +425,19 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             look="label"
             title="Regular season"
           />
+  )
+  const nineEl = pair && (
           <SeriesNineKeys data={nineKeys} clubs={clubs} season={bracket.season} />
+  )
+  const absEl = pair && (
           <SeriesAbsReport
             season={bracket.season}
             clubIds={clubs.map((c) => c.id)}
             gamePks={games.map((g) => g.gamePk)}
             cutoff={cutoff}
           />
+  )
+  const matesEl = pair && (
           <FormerTeammates
             pairs={teammatePairs}
             startingIds={startingIds}
@@ -417,9 +445,9 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             away={{ id: clubs[0].id, teamName: teamClubNameShort(clubs[0].id) }}
             home={{ id: clubs[1].id, teamName: teamClubNameShort(clubs[1].id) }}
           />
-        </>
-      )}
-
+  )
+  const rostersEl = (
+    <>
       {rosterCards.some(({ roster }) => roster.declared === false) && (
         <p className="hint">
           Each club names its postseason roster on the morning of Game 1. Until then, this is its current roster.
@@ -431,6 +459,140 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             <RosterCard key={club.id} teamId={club.id} roster={roster} />
           ))}
         </div>
+      )}
+    </>
+  )
+  // WORLD SERIES LAYOUT: the hero on top, then the groups behind one jump bar. A group with no data
+  // is not drawn and has no button. The rest of the page keeps its sections; the Scouting report
+  // drops its own bar, Nine keys (this page has SeriesNineKeys) and Film room / Roster (drawn
+  // under Compare and Rosters), and Today never shows a score (the cards read past games only).
+  const { data: wsData, game, focusPk, umpire, parkOf, played } = view
+  const lastPlayed = series.games.at(-1)
+  const noteClub = view.clubIds?.includes(favoriteTeamId) ? favoriteTeamId : clubA
+  const groups = seriesGroups({
+    now: Boolean(todayEl || startersEl || upcoming.length),
+    series: results.length > 0,
+    scout: scoutShown,
+    compare: pair,
+    rosters: rosterCards.length > 0,
+  })
+  const has = (key) => groups.some((g) => g.key === key)
+  const grouped = mode && (
+    <>
+      {series.decided ? (
+        resultBanner
+      ) : (
+        <Hero
+          mode={mode}
+          game={game}
+          slateDate={cutoff}
+          wide={wide}
+          played={played}
+          umpire={umpire}
+          splitsByClub={wsData?.hotBats ?? null}
+          clubGames={wsData?.clubGames ?? null}
+        />
+      )}
+      <GroupJump groups={groups} />
+      {has('now') && (
+        <Group id="now" label="Now">
+          {todayEl}
+          {startersEl}
+          {stillEl}
+        </Group>
+      )}
+      {has('series') && (
+        <Group id="series" label="Series">
+          {flowEl}
+          {gamesEl}
+          {wsData && <Reel series={series} slateDate={cutoff} clubGames={wsData.clubGames} lcsRound={(id) => lcsRoundOf(bracket, id)} />}
+          {noticesEl}
+          {totalsEl}
+          {leadersEl}
+        </Group>
+      )}
+      {/* Always mounted: the report tells us (onShown) whether it has any card to draw. */}
+      <div hidden={!scoutShown}>
+        <Group id="scout" label="Scout" bare>
+          <ScoutingReport
+            clubIds={view.clubIds}
+            sides={[game?.awayId ?? clubA, game?.homeId ?? clubB]}
+            slateDate={cutoff}
+            dayType={mode.dayType}
+            gamePk={focusPk}
+            gameNumber={mode.gameNumber}
+            game={game}
+            plateUmpire={umpire}
+            series={null}
+            omit={['nine-keys', 'film-room']}
+            jumpBar={false}
+            onShown={setScoutShown}
+          />
+        </Group>
+      </div>
+      {has('compare') && (
+        <Group id="compare" label="Compare">
+          <Stack gap="loose">
+            {wsData && (
+              <Grid min={340} gap="loose">
+                <Tape awayId={game?.awayId ?? clubA} homeId={game?.homeId ?? clubB} data={wsData} slateDate={cutoff} />
+                <HotBats clubIds={view.clubIds} splitsByClub={wsData.hotBats} />
+              </Grid>
+            )}
+            <Trip
+              fromVenueId={lastPlayed ? parkOf[lastPlayed.gamePk]?.venue?.id : null}
+              toVenueId={game?.venue?.id}
+              firstPitch={game?.gameDate}
+              wide={wide}
+            />
+            {wsData && (
+              <Grid min={340} gap="loose">
+                <HomeRoad clubIds={view.clubIds} clubGames={wsData.clubGames} slateDate={cutoff} />
+                <Bullpen clubIds={view.clubIds} boxscoresByClub={wsData.boxscores} slateDate={cutoff} />
+              </Grid>
+            )}
+          </Stack>
+          {stripEl}
+          {meetings?.length > 0 && <FilmRoom meetings={meetings} compact={mode.dayType === 'game'} clubId={noteClub} />}
+          {nineEl}
+          {absEl}
+          {matesEl}
+        </Group>
+      )}
+      {has('rosters') && (
+        <Group id="rosters" label="Rosters">
+          {rostersEl}
+        </Group>
+      )}
+    </>
+  )
+
+  return (
+    <div className="screen psseries pslive">
+      <SiteHeader />
+      <BackBtn onClick={back} />
+
+      <header className="topbar">
+        <h1 className="topbar__title">{series.name}</h1>
+      </header>
+
+      {grouped || (
+        <>
+          {resultBanner}
+          {todayEl}
+          {startersEl}
+          {stillEl}
+          {flowEl}
+          {gamesEl}
+          {noticesEl}
+          {totalsEl}
+          {leadersEl}
+          {stripEl}
+          {nineEl}
+          {absEl}
+          {matesEl}
+          {rostersEl}
+        </>
       )}
     </div>
   )

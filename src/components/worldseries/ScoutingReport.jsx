@@ -49,6 +49,9 @@ import { Stack } from '../ui/layout/Stack.jsx'
 //   plateUmpire   { id, name } from fetchPlateUmpires, or null (game day)
 //   game          the focus game's upcoming row (api/postseason/upcoming.js): venue and probables, or null
 //   series        the bracket's World Series ({ games, playsOnCutoff }): the Roster card reads its rosters on its dates
+//   omit          card ids to leave out (the live series page draws those elsewhere), default none
+//   jumpBar       false leaves out the band's own sticky bar (the live series page has one bar for its groups)
+//   onShown       called with whether the report draws anything (cards or a failed-load line)
 // Adding a card: one entry in scouting.js, one here.
 const CARD = {
   'nine-keys': ({ nineKeys, sides, season }) => <NineKeys data={nineKeys} clubIds={sides} season={season} />,
@@ -74,7 +77,7 @@ const CARD = {
 // Cards that take the whole row.
 const WIDE = ['film-room', 'roster']
 
-export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null, series = null }) {
+export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null, series = null, omit = [], jumpBar = true, onShown }) {
   const season = Number(slateDate.slice(0, 4))
   const { data: nineKeys, error: nineKeysError } = useAsync(() => loadNineKeys(), [])
   const { data: career, error: careerError } = useAsync(() => loadCareerMatchups(), [])
@@ -135,20 +138,22 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
     [clubA, clubB, rosterReadDate(series, slateDate), series?.games?.length, slateDate],
   )
   const hasRoster = Boolean(rosters && Object.keys(rosters).length)
-  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, roster: hasRoster, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit })
+  const cards = scoutingModel({ dayType, nineKeys: hasNineKeys, gloveLegs, roster: hasRoster, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit }).filter((c) => !omit.includes(c.id))
   // A failed read is not an empty one: name the cards whose load failed (the card itself still drops).
   const failed = failedLine(
-    failedCards([
-      { label: 'Nine keys', failed: nineKeys === NINE_KEYS_FALLBACK || nineKeysError },
-      { label: 'Glove and legs', failed: defense === CLUB_DEFENSE_FALLBACK || defenseError },
-      { label: 'Roster', error: rosterError },
-      { label: 'Matchup edges', failed: career === CAREER_MATCHUPS_FALLBACK || careerError },
-      { label: 'Pitch by pitch', error: pitchError },
-      { label: 'Platoon', error: platoonError },
-      { label: 'Park fit', error: parkError ?? venueError },
-      { label: 'Film room', error: meetingsError },
-      { label: 'Umpire edge', error: umpireError },
-    ]),
+    failedCards(
+      [
+        { label: 'Nine keys', failed: nineKeys === NINE_KEYS_FALLBACK || nineKeysError, id: 'nine-keys' },
+        { label: 'Glove and legs', failed: defense === CLUB_DEFENSE_FALLBACK || defenseError },
+        { label: 'Roster', error: rosterError },
+        { label: 'Matchup edges', failed: career === CAREER_MATCHUPS_FALLBACK || careerError },
+        { label: 'Pitch by pitch', error: pitchError },
+        { label: 'Platoon', error: platoonError },
+        { label: 'Park fit', error: parkError ?? venueError },
+        { label: 'Film room', error: meetingsError, id: 'film-room' },
+        { label: 'Umpire edge', error: umpireError },
+      ].filter((r) => !omit.includes(r.id)),
+    ),
   )
   // The sticky chrome over a card: the slate's own bar (the probe reads --slate-bar-h) plus this
   // jump bar. One measured number feeds the bar's scroll offset and each card's scroll-margin.
@@ -160,12 +165,16 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
     if (!shown || !root || typeof ResizeObserver === 'undefined') return undefined
     const probe = root.querySelector('.ww-scout__probe')
     const bar = root.querySelector('.jumpbar')
-    const read = () => setOffset(probe.offsetHeight + bar.offsetHeight)
+    const read = () => setOffset(probe.offsetHeight + (bar?.offsetHeight ?? 0))
     const ro = new ResizeObserver(read)
     ro.observe(probe)
-    ro.observe(bar)
+    if (bar) ro.observe(bar)
     return () => ro.disconnect()
   }, [shown])
+  const drawn = shown || Boolean(failed)
+  useEffect(() => {
+    onShown?.(drawn)
+  }, [drawn, onShown])
   if (!shown && !failed) return null
   // Every card dropped but a read failed: the band and the line, so a failure is not read as an empty season.
   if (!shown) return <Stack gap="loose" className="ww-scout"><SectionHead look="band" house as="h2">Scouting report</SectionHead><p className="ww-scout__failed" role="status">{failed}</p></Stack>
@@ -177,14 +186,16 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
       <SectionHead look="band" house as="h2" note={names}>
         Scouting report
       </SectionHead>
-      <HubTabBar
-        variant="anchor"
-        tabs={cards.map((c) => ({ key: `ww-scout-${c.id}`, label: c.label }))}
-        ariaLabel="Scouting report cards"
-        className="ww-scout__jump"
-        offset={offset}
-        badges={false}
-      />
+      {jumpBar && (
+        <HubTabBar
+          variant="anchor"
+          tabs={cards.map((c) => ({ key: `ww-scout-${c.id}`, label: c.label }))}
+          ariaLabel="Scouting report cards"
+          className="ww-scout__jump"
+          offset={offset}
+          badges={false}
+        />
+      )}
       {failed && <p className="ww-scout__failed" role="status">{failed}</p>}
       <Grid min={340} gap="loose">
         {cards.map((c) => (

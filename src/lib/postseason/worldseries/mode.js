@@ -16,7 +16,13 @@
 
 export function worldSeriesMode(bracket) {
   const ws = bracket?.worldSeries
-  if (!ws || ws.decided) return null
+  return ws?.decided ? null : seriesMode(ws)
+}
+
+// The same shape for one World Series object, with no `decided` gate: the series page shows a
+// decided Series too (a decided one has no games ahead, so it reads as an off day with no game).
+export function seriesMode(ws) {
+  if (!ws) return null
   const slots = ws.slots ?? []
   if (slots.length !== 2 || !slots.every((s) => s?.club)) return null
 
@@ -25,4 +31,10 @@ export function worldSeriesMode(bracket) {
   }
   const next = (ws.upcoming ?? []).find((g) => !g.ifNecessary)
   return { series: ws, dayType: 'off', gameNumber: next?.gameNumber ?? null }
+}
+
+// "NLCS" / "ALCS": the league whose LCS the club played in, from the bracket ('' if none).
+export function lcsRoundOf(bracket, clubId) {
+  const lg = ['AL', 'NL'].find((l) => bracket.leagues?.[l]?.lcs?.slots.some((s) => s.club?.id === clubId))
+  return lg ? `${lg}CS` : ''
 }
