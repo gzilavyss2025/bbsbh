@@ -1,5 +1,5 @@
 // The OVR card as data (docs/ovr-rating.md, "The card"). Pure: a rating and a history in,
-// what the tile and the menu draw out. No React, no fetch. Spoiler-free, like the rating.
+// what the tile and the menu draw out. No React, no fetch.
 import { clamp } from '../math/number.js'
 import { SPORT_LABEL } from '../teams.js'
 import { easeOut } from '../scorecard/glide.js'

@@ -106,7 +106,7 @@ export const PAGE_GROUPS = [
     // rain in April, two games in August — and the page is about what that
     // condition DOES to a club, which is the same question the other four ask
     // about crowds, clock, pipeline and workload. It is a season aggregate
-    // over finished games, so it spoils nothing; if a first-click test says
+    // over finished games; if a first-click test says
     // readers look for it under History instead, move it rather than
     // duplicating it.
     //
