@@ -8,8 +8,8 @@ const history = {
   teamA: { teamId: 119, wins: 4 },
   teamB: { teamId: 141, wins: 3 },
   games: [
-    { gameNumber: 1, date: '2025-10-24', gamePk: 11, awayTeamId: 141, homeTeamId: 119 },
-    { gameNumber: 7, date: '2025-11-01', gamePk: 17, awayTeamId: 141, homeTeamId: 119 },
+    { gameNumber: 1, date: '2025-10-24', gamePk: 11, awayTeamId: 119, homeTeamId: 141 },
+    { gameNumber: 7, date: '2025-11-01', gamePk: 17, awayTeamId: 119, homeTeamId: 141 },
   ],
 }
 

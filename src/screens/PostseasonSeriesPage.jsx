@@ -136,7 +136,7 @@ export function PostseasonSeriesPage({ seriesId }) {
   const [clubA, clubB] = view.clubIds ?? []
   const { data: meetings } = useAsync(
     (signal) => (ws ? fetchMeetings({ clubA, clubB, slateDate: ws.cutoff }, { signal }) : Promise.resolve(null)),
-    [ws ? 1 : 0, clubA, clubB],
+    [ws ? 1 : 0, clubA, clubB, ws?.cutoff],
   )
   const homeIdByPk = useMemo(() => Object.fromEntries((games ?? []).map((g) => [g.gamePk, g.homeTeamId])), [games])
 
@@ -355,10 +355,10 @@ export function PostseasonSeriesPage({ seriesId }) {
   const nineEl = <SeriesNineKeys data={nineKeys} clubs={clubs} season={year} />
   const absEl = <SeriesAbsReport season={year} clubIds={clubs.map((c) => c.id)} gamePks={games.map((g) => g.gamePk)} />
   const rostersEl = (
-      <div className="psseries__rosters">
-        <RosterCard teamId={winner.teamId} roster={stats.rosters[winner.teamId]} />
-        <RosterCard teamId={loser.teamId} roster={stats.rosters[loser.teamId]} />
-      </div>
+    <div className="psseries__rosters">
+      <RosterCard teamId={winner.teamId} roster={stats.rosters[winner.teamId]} />
+      <RosterCard teamId={loser.teamId} roster={stats.rosters[loser.teamId]} />
+    </div>
   )
 
   // WORLD SERIES: the same jump-bar groups as the live page (layout C). The banner, trophy and MVP

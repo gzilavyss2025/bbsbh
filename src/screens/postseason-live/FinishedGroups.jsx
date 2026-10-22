@@ -9,6 +9,9 @@ import { FilmRoom } from '../../components/worldseries/cards/scouting/FilmRoom.j
 import { Grid } from '../../components/ui/layout/Grid.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 
+// No LCS names: a finished Series has games, so the Reel's "Road here" chips never draw.
+const NO_LCS = () => ''
+
 // The finished World Series page's jump-bar groups (layout C, as on LiveSeriesPage): Series, Scout,
 // Compare, Rosters. No Now group and no Hero: a finished Series has no next game. `view` is
 // useWorldSeriesView's result for the history mode; `cutoff` is the day after the last game, so
@@ -24,7 +27,7 @@ export function FinishedGroups({ groups, parts, view, mode, cutoff, meetings, no
         <Group id="series" label="Series">
           {parts.flow}
           {parts.games}
-          {data && <Reel series={series} slateDate={cutoff} clubGames={data.clubGames} lcsRound={() => ''} />}
+          {data && <Reel series={series} slateDate={cutoff} clubGames={data.clubGames} lcsRound={NO_LCS} />}
           {parts.totals}
           {parts.leaders}
         </Group>
