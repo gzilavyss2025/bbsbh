@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T06:56:24.706Z",
+  "generatedAt": "2026-10-22T06:55:32.464Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -667,7 +667,7 @@
     {
       "rank": 57,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -5667,7 +5667,7 @@
       "position": "RHP",
       "levelRaw": "ALL (3)",
       "statLine": "83.1 IP, 4.97 ERA, 94 SO",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
@@ -6279,7 +6279,7 @@
       "position": "LHP",
       "levelRaw": "ALL (2)",
       "statLine": "79.0 IP, 2.96 ERA, 135 SO",
-      "age": 19,
+      "age": 20,
       "topRank": null
     },
     {
@@ -7011,7 +7011,7 @@
       "position": "OF",
       "levelRaw": "ALL (2)",
       "statLine": ".284, 10 HR, 81 RBI",
-      "age": 22,
+      "age": 23,
       "topRank": null
     },
     {
@@ -7413,7 +7413,7 @@
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -9375,7 +9375,7 @@
       "position": "RHP",
       "levelRaw": "ALL (3)",
       "statLine": "52.0 IP, 2.94 ERA, 61 SO",
-      "age": 23,
+      "age": 24,
       "topRank": null
     },
     {
@@ -9441,7 +9441,7 @@
     {
       "orgRank": 20,
       "playerId": 691548,
-      "name": "Rolddy Munoz",
+      "name": "Rolddy Muñoz",
       "teamId": 144,
       "team": "atl",
       "position": "RHP",
