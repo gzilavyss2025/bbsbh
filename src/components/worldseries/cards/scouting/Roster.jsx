@@ -1,5 +1,5 @@
 import '../../../../styles/worldseries/roster.css'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { loadRosterLine } from '../../../../api/scout/rosterStats.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { headerThemeFor, headerThemeStyle } from '../../../../lib/headerTheme.js'
@@ -33,14 +33,13 @@ const EMPTY = { P: 'No postseason games yet', R: 'No regular-season games yet', 
 const OPEN = ['infielders', 'starters']
 const GROUP_NAME = { hitting: 'Hitting', pitching: 'Pitching' }
 
-function Line({ player, set, slateDate }) {
+function Line({ id, player, set, slateDate }) {
   const groups = lineGroups(player.position)
   const { data, error } = useAsync(() => loadRosterLine(player.id, { set, groups, slateDate }), [player.id, set, slateDate, player.position])
   const link = useRouteLink()
   const lines = data ? groups.map((g) => ({ g, line: statLine(data[g], g) })).filter((x) => x.line) : []
-  const label = SETS.find((s) => s.value === set).label
   return (
-    <Stack gap="snug" className="ww-roster__panel" role="region" aria-label={`${player.name}, ${label}`}>
+    <Stack gap="snug" className="ww-roster__panel" id={id}>
       {error ? (
         <p className="ww-roster__note" role="status">Could not load this line.</p>
       ) : !data ? (
@@ -68,9 +67,10 @@ function Line({ player, set, slateDate }) {
 
 function Row({ player, clubId, set, slateDate }) {
   const [open, setOpen] = useState(false)
+  const panelId = useId()
   return (
     <li className={open ? 'ww-roster__item ww-roster__item--open' : 'ww-roster__item'}>
-      <Button skin="ghost" block icon="›" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="ww-roster__row">
+      <Button skin="ghost" block icon="›" aria-expanded={open} aria-controls={open ? panelId : undefined} onClick={() => setOpen((o) => !o)} className="ww-roster__row">
         <span className="ww-roster__line">
           <span className="ww-roster__num ww-roster__jersey">{player.jersey}</span>
           <Headshot personId={player.id} name={player.name} teamId={clubId} className="ww-roster__shot" />
@@ -78,7 +78,7 @@ function Row({ player, clubId, set, slateDate }) {
           <span className="ww-roster__pos">{player.position}</span>
         </span>
       </Button>
-      {open && <Line player={player} set={set} slateDate={slateDate} />}
+      {open && <Line id={panelId} player={player} set={set} slateDate={slateDate} />}
     </li>
   )
 }

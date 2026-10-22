@@ -81,11 +81,12 @@ export async function loadPitcherRoles(teamId, slateDate) {
 }
 
 // Both Series clubs' rosters: { [teamId]: { positionPlayers, pitchers, declared, starters } }.
-// A club with no roster is left out; a failed read throws.
+// A club with no roster is left out; a failed roster read throws. A failed starter read only sorts
+// every pitcher as a reliever: the roster still shows.
 export async function loadSeriesRosters(clubIds, series, slateDate) {
   const each = await Promise.all(
     clubIds.map(async (id) => {
-      const [roster, starters] = await Promise.all([fetchSeriesRoster(id, series, slateDate), loadPitcherRoles(id, slateDate)])
+      const [roster, starters] = await Promise.all([fetchSeriesRoster(id, series, slateDate), loadPitcherRoles(id, slateDate).catch(() => new Set())])
       return roster && [id, { ...roster, starters }]
     }),
   )

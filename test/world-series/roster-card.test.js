@@ -2,7 +2,7 @@
 // the starter rule, and the position-group sections.
 import test, { mock } from 'node:test'
 import assert from 'node:assert/strict'
-import { loadRosterLine, loadPitcherRoles, resetRosterReads } from '../../src/api/scout/rosterStats.js'
+import { loadRosterLine, loadPitcherRoles, loadSeriesRosters, resetRosterReads } from '../../src/api/scout/rosterStats.js'
 import { isStarter, rosterSections, statLine } from '../../src/lib/postseason/worldseries/scouting/roster.js'
 
 const SLATE = '2025-10-24'
@@ -168,4 +168,20 @@ test('markFit: an off-centre mark is moved to the centre; an empty one is left a
   assert.equal(fitTransform(box), 'scale(2) translate(25%, 25%)')
   assert.equal(visibleBox(new Uint8ClampedArray(400), 10, 10), null)
   assert.equal(fitTransform(null), null)
+})
+
+test('a failed starter read keeps the roster: every pitcher is a reliever, the card stays', async () => {
+  resetRosterReads()
+  const m = mock.method(globalThis, 'fetch', async (url) => {
+    if (String(url).includes('byDateRange')) return { ok: false, status: 500, json: async () => ({}) }
+    const row = (id, name, pos) => ({ person: { id, fullName: name }, jerseyNumber: '1', position: { abbreviation: pos } })
+    return { ok: true, status: 200, json: async () => ({ roster: [row(1, 'A Hitter', 'SS'), row(2, 'A Pitcher', 'P')] }) }
+  })
+  try {
+    const out = await loadSeriesRosters([119], { games: [{ date: SLATE }], playsOnCutoff: false }, SLATE)
+    assert.equal(out[119].pitchers.length, 1)
+    assert.equal(out[119].starters.size, 0)
+  } finally {
+    m.mock.restore()
+  }
 })
