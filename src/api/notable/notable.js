@@ -6,10 +6,14 @@
 // hits. So the one importer, screens/boxscore/FeatLabel.jsx, mounts inside the box
 // score's SealBox reveal render, and these files are fetched only after the reveal.
 // A missing file degrades to no line.
+//
+// The second importer is the open shelf, screens/notable/NotablePage.jsx (/notable, #2508): an open
+// results page behind a labelled door (ADR-0081). It lists only games dated before the slate's
+// today (lib/notable/shelf.js), so no row names a result the seal is still holding.
 
 import { staticJson } from '../staticJson.js'
 
-const KINDS = ['nohitters', 'cycles', 'tripleplays']
+export const KINDS = ['nohitters', 'cycles', 'tripleplays']
 const loaders = KINDS.map((kind) => staticJson(`/data/notable/${kind}.json`))
 
 // All three docs, keyed by kind. A file that fails to load is null.
@@ -34,7 +38,10 @@ const LINE = {
   tripleplays: (row) => line('Triple play', row[row.side]?.name),
 }
 
+// The label line for one row of one kind.
+export const featLine = (kind, row) => LINE[kind](row)
+
 // The label lines for one game, no-hitters first. Empty for a game with no feat.
 export function featsForGame(docs, gamePk) {
-  return KINDS.flatMap((kind) => (docs?.[kind]?.rows ?? []).filter((row) => row.gamePk === gamePk).map(LINE[kind]))
+  return KINDS.flatMap((kind) => (docs?.[kind]?.rows ?? []).filter((row) => row.gamePk === gamePk).map((row) => LINE[kind](row)))
 }

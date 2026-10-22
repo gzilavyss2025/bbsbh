@@ -99,6 +99,11 @@ export function SeasonRecord({ sportId, season, dateStr }) {
               <a className="srecord__door" {...linkProps('/postseason-history')}>
                 The postseason
               </a>
+              {/* The shelf prints final scores, so this door carries ADR-0081's label whether or not the row has a champion on its face (#2508). */}
+              <a className="srecord__door" {...linkProps('/notable')}>
+                Notable games
+                <span className="srecord__out">Opening this shows results.</span>
+              </a>
             </>
           ) : (
             <>

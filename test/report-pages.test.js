@@ -53,6 +53,7 @@ const PATHS_BEFORE_GROUPING = [
   '/outliers',
   '/awards',
   '/postseason-history',
+  '/notable',
   // The Nine Keys report, beside the bracket page: nine true-or-false keys
   // every champion since 2000 is scored against, and the clubs holding a
   // postseason place scored the same way.
