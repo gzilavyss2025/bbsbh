@@ -1,3 +1,6 @@
+import { addDays, toApiDate } from '../../dates.js'
+import { teamAbbr } from '../../teams.js'
+
 // World Series mode for the home page (#1906, slice 1). Pure: it reads the
 // bracket `usePostseasonBracket(cutoff)` returns and answers one question,
 // "is the slate date a World Series date, and which kind of day?".
@@ -30,6 +33,17 @@ export function seriesMode(ws) {
   }
   const next = (ws.upcoming ?? []).find((g) => !g.ifNecessary)
   return { series: ws, dayType: 'off', gameNumber: next?.gameNumber ?? null }
+}
+
+// The same shape for one postseason-history.json series (the finished page). Every game is
+// Final, so nothing is ahead: it reads as an off day with no game. `cutoff` is the day AFTER the
+// last game, so every read ends on the Series' last day. Null with no games.
+export function historySeriesMode(h) {
+  const games = (h.games ?? []).map((g) => ({ gamePk: g.gamePk, gameNumber: g.gameNumber, date: g.date }))
+  if (!games.length) return null
+  const slots = [h.teamA, h.teamB].map((t) => ({ club: { id: t.teamId, abbreviation: teamAbbr({ id: t.teamId }) }, wins: t.wins }))
+  const mode = seriesMode({ slots, games, upcoming: [], playsOnCutoff: false })
+  return { mode, cutoff: toApiDate(addDays(new Date(`${games.at(-1).date}T12:00:00`), 1)) }
 }
 
 // "NLCS" / "ALCS": the league whose LCS the club played in, from the bracket ('' if none).

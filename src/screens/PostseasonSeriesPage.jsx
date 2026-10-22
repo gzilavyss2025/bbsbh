@@ -1,7 +1,9 @@
 import '../styles/35-postseason-series.css'
 import '../styles/postseason/series-parts.css'
 import '../styles/postseason/series-abs.css'
-import { useMemo } from 'react'
+import '../styles/postseason/series-live.css'
+import '../styles/worldseries/home.css'
+import { useMemo, useState } from 'react'
 import { loadPostseasonHistory } from '../api/postseasonHistory.js'
 import {
   loadSeriesStats,
@@ -37,6 +39,11 @@ import { SeriesAbsReport } from '../components/postseason/SeriesAbsReport.jsx'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
 import { historyFlowBuckets } from '../lib/postseason/seriesFlow.js'
 import { addDays, monthDayName, toApiDate } from '../lib/dates.js'
+import { seriesGroups } from '../lib/postseason/worldseries/groups.js'
+import { historySeriesMode } from '../lib/postseason/worldseries/mode.js'
+import { useWorldSeriesView } from '../hooks/postseason/useWorldSeriesView.js'
+import { fetchMeetings } from '../api/postseason/meetings.js'
+import { FinishedGroups } from './postseason-live/FinishedGroups.jsx'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
 import { seriesMarkForHistory } from '../lib/postseason/seriesMarks.js'
 
@@ -122,6 +129,15 @@ export function PostseasonSeriesPage({ seriesId }) {
   const { favoriteTeamId } = useFavoriteTeam()
   const games = data?.series?.games
   const flowBuckets = useMemo(() => historyFlowBuckets(games), [games])
+  // World Series only: the mode shape built from the history series, and the pieces' shared reads.
+  const ws = useMemo(() => (data?.series?.isWorldSeries ? historySeriesMode(data.series) : null), [data])
+  const view = useWorldSeriesView(ws?.mode ?? null, ws?.cutoff ?? '')
+  const [scoutShown, setScoutShown] = useState(false)
+  const [clubA, clubB] = view.clubIds ?? []
+  const { data: meetings } = useAsync(
+    (signal) => (ws ? fetchMeetings({ clubA, clubB, slateDate: ws.cutoff }, { signal }) : Promise.resolve(null)),
+    [ws ? 1 : 0, clubA, clubB, ws?.cutoff],
+  )
   const homeIdByPk = useMemo(() => Object.fromEntries((games ?? []).map((g) => [g.gamePk, g.homeTeamId])), [games])
 
   useDocumentTitle(data?.series ? `${data.series.year} ${data.series.label}` : null)
@@ -152,25 +168,15 @@ export function PostseasonSeriesPage({ seriesId }) {
       opponentOf: (id) => (id === teamA.teamId ? teamB.teamId : teamA.teamId),
     }
 
-  return (
-    <div className="screen psseries">
-      <SiteHeader />
-      <BackBtn onClick={back} />
-
-      <header className="topbar">
-        <h1 className="topbar__title">
-          {year} {label}
-        </h1>
-      </header>
-
-      {/* The series-result hero: a navy pennant band declaring the outcome
+  /* The series-result hero: a navy pennant band declaring the outcome
           ("Brewers win in 5" — the clincher count IS games.length, since the
           history file only ever stores games actually played), over a
           scorebook ledger — one row per club, per-game win cells (an inked
           cell = that club took that game, so the row scans like a series
           linescore), and the series-wins total as the big right-hand figure.
           The World Series trophy folds into the band instead of floating
-          above the card. */}
+          above the card. */
+  const bannerEl = (
       <Card body="flush" className="psseries__result">
         <div className="psseries__banner">
           <h2 className="psseries__headline">
@@ -221,9 +227,9 @@ export function PostseasonSeriesPage({ seriesId }) {
           })}
         </div>
       </Card>
-
-      {mvp && <SeriesMvpCard mvp={mvp} lines={stats.lines} />}
-
+  )
+  const mvpEl = mvp && <SeriesMvpCard mvp={mvp} lines={stats.lines} />
+  const flowEl = (
       <SeriesFlow
         series={flowBuckets}
         gameSignals={gameSignals}
@@ -231,8 +237,9 @@ export function PostseasonSeriesPage({ seriesId }) {
         clubs={clubs}
         defaultId={[teamA.teamId, teamB.teamId].includes(favoriteTeamId) ? favoriteTeamId : teamB.teamId}
       />
+  )
 
-      {/* Game-by-game log — the series as ONE continuous scorebook ledger
+      /* Game-by-game log — the series as ONE continuous scorebook ledger
           rather than a stack of separate captioned cards: a double clay
           margin rule down the left (the red margin line every paper ledger
           carries), each game an entry indexed by the same inked number-cell
@@ -252,7 +259,8 @@ export function PostseasonSeriesPage({ seriesId }) {
           (LCS/World Series only — earlier rounds carry no official MVP, and
           the band simply doesn't render) closes the log as a medal-amber
           award line under the clinching entry, the same --award-line trim
-          the banner's seam wears. */}
+          the banner's seam wears. */
+  const gamesEl = (
       <section className="psseries__games">
         <SectionHead look="label">Game by game</SectionHead>
         <Card as="div" body="flush" className="psseries__log">
@@ -310,10 +318,9 @@ export function PostseasonSeriesPage({ seriesId }) {
           </div>
         </Card>
       </section>
-
-      <SeriesTotals totals={stats.totals} clubs={clubs} />
-
-      {(hasBatting || hasPitching) && (
+  )
+  const totalsEl = <SeriesTotals totals={stats.totals} clubs={clubs} />
+  const leadersEl = (hasBatting || hasPitching) && (
         <div className="psseries__leaders">
           {hasBatting && (
             <SeriesLeaderBoard
@@ -332,8 +339,8 @@ export function PostseasonSeriesPage({ seriesId }) {
             />
           )}
         </div>
-      )}
-
+  )
+  const stripEl = (
       <SeasonSeriesStrip
         viewingTeamId={teamB.teamId}
         opponentId={teamA.teamId}
@@ -344,13 +351,63 @@ export function PostseasonSeriesPage({ seriesId }) {
         look="label"
         title="Regular season"
       />
-      <SeriesNineKeys data={nineKeys} clubs={clubs} season={year} />
-      <SeriesAbsReport season={year} clubIds={clubs.map((c) => c.id)} gamePks={games.map((g) => g.gamePk)} />
+  )
+  const nineEl = <SeriesNineKeys data={nineKeys} clubs={clubs} season={year} />
+  const absEl = <SeriesAbsReport season={year} clubIds={clubs.map((c) => c.id)} gamePks={games.map((g) => g.gamePk)} />
+  const rostersEl = (
+    <div className="psseries__rosters">
+      <RosterCard teamId={winner.teamId} roster={stats.rosters[winner.teamId]} />
+      <RosterCard teamId={loser.teamId} roster={stats.rosters[loser.teamId]} />
+    </div>
+  )
 
-      <div className="psseries__rosters">
-        <RosterCard teamId={winner.teamId} roster={stats.rosters[winner.teamId]} />
-        <RosterCard teamId={loser.teamId} roster={stats.rosters[loser.teamId]} />
-      </div>
+  // WORLD SERIES: the same jump-bar groups as the live page (layout C). The banner, trophy and MVP
+  // stay on top: Hero draws nothing for a decided Series. A group with no data is not drawn.
+  const groups = seriesGroups({
+    series: true,
+    scout: scoutShown,
+    compare: true,
+    rosters: Boolean(stats.rosters[winner.teamId] || stats.rosters[loser.teamId]),
+  })
+  const grouped = ws && (
+    <FinishedGroups
+      groups={groups}
+      parts={{ flow: flowEl, games: gamesEl, totals: totalsEl, leaders: leadersEl, strip: stripEl, nine: nineEl, abs: absEl, rosters: rostersEl }}
+      view={view}
+      mode={ws.mode}
+      cutoff={ws.cutoff}
+      meetings={meetings}
+      noteClub={[clubA, clubB].includes(favoriteTeamId) ? favoriteTeamId : clubA}
+      scoutShown={scoutShown}
+      onScout={setScoutShown}
+    />
+  )
+
+  return (
+    <div className={`screen psseries${ws ? ' psseries--ws' : ''}`}>
+      <SiteHeader />
+      <BackBtn onClick={back} />
+
+      <header className="topbar">
+        <h1 className="topbar__title">
+          {year} {label}
+        </h1>
+      </header>
+
+      {bannerEl}
+      {mvpEl}
+      {grouped || (
+        <>
+          {flowEl}
+          {gamesEl}
+          {totalsEl}
+          {leadersEl}
+          {stripEl}
+          {nineEl}
+          {absEl}
+          {rostersEl}
+        </>
+      )}
     </div>
   )
 }
