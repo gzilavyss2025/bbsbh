@@ -6,7 +6,7 @@
 //
 //   1. A PARTIAL SAVE MUST NOT DELETE THE REST. POST /api/copy takes the full
 //      override map and hdels every key the body omits. An editor that holds six
-//      fields and posts six fields would wipe the consent copy and 29 other
+//      fields and posts six fields would wipe the offseason copy and 29 other
 //      parks, and the app would keep rendering perfectly on shipped defaults —
 //      nothing would look broken. mergeOverrides is the only thing standing
 //      between those two outcomes.

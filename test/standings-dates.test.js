@@ -1,7 +1,6 @@
 // THE STANDINGS PAGE'S DATE ARITHMETIC — split out of StandingsPage.jsx with
 // the file (ADR-0038), and pinned here because a date that is one day out on
-// that page is a spoiler rather than a cosmetic bug: "entering today" is the
-// whole reason the page is safe to open in September.
+// that page folds a day of games into, or out of, the table it labels.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { baseballToday, buildJumps, labelDate, shiftDays } from '../src/lib/time/standingsDates.js'
