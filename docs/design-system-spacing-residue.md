@@ -142,7 +142,7 @@ Each pair is indistinguishable apart from being a hair tighter.
 ### The caveats that belong in that PR
 
 - **The pill family moves app-wide.** `31-wild-card.css` holds
-  `.rankchip`, `.prospectpill`, `.milestonepill`, `.rookiepill`, `.duepill` and
+  `.rankchip`, `.prospectpill`, `.milestonepill`, `.rookiepill` and
   `.debutpill`, all at `padding: 2px 7px`, and they render far outside the wild
   card page. 7px to 6px narrows every one of them by 2px. Shoot a pill-dense
   surface, not only the three here.

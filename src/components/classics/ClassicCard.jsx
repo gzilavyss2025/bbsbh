@@ -57,7 +57,6 @@ export function ClassicCard({ seed = 0, era = null, teamId = null, kicker = 'A c
           <Club club={facts.home} />
         </div>
 
-        <p className="pgame__seal">{started ? 'Your progress applies' : 'Score sealed'}</p>
         {facts.reason && <p className="pgame__why">{facts.reason}</p>}
 
         <p className="pgame__meta">

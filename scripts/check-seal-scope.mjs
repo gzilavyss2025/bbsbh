@@ -11,9 +11,9 @@
 //
 // "A reveal is possible" means one of:
 //   - the cover itself, its copy, and the tear it splits into;
-//   - a control that LIFTS a seal — the reveal button, the standings reveal
-//     chip, the consent to open a season of results (Stamp In, ADR-0042),
-//     the scorecard's face-down at-bat, the due-up pill;
+//   - a control that LIFTS a seal — the reveal button, the consent to open a
+//     season of results (Stamp In, ADR-0042), the scorecard's face-down
+//     at-bat;
 //   - the Game Log's mint strip, which is the one action that leaves something
 //     behind on the far side of a seal (ADR-0035);
 //   - the surfaces finding 9 of the design critique put on its must-survive
@@ -72,18 +72,12 @@ const ALLOWLIST = {
   '12-sealbox.css': ['.sealbox.cover', '.sealtear__face', '.cover__main'],
 
   // Controls that lift a seal.
-  '30-standings.css': ['.standings-reveal'],
-  '31-wild-card.css': ['.duepill'],
   '46-consent-modal.css': ['.consent__btn--confirm'],
   // The lens's tear (#724 L7) wears the same face on its two flying halves.
   'scorecard/box.css': ['.sc-ab__seal', '.sc-ab__sealtext', '.sc-lens__tearface', '.sc-lens__teartext'],
   // The lens bar's Unwrap button (ADR-0092): it lifts the same seal the frame
   // holds, through the same tap. The turn button beside it is navy.
   'scorecard/lens-bar.css': ['.sc-lensbar__unwrap', '.sc-lensbar__unwraptext'],
-
-  // "Score sealed" on the offseason notebook's picked game — the label that
-  // says a result is still behind a cover.
-  '78-offseason.css': ['.pgame__seal'],
 }
 
 // Outside src/styles/, a component may name --seal only if it is one of these.

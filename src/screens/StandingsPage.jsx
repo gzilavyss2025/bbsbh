@@ -104,9 +104,8 @@ const NO_ROWS = []
 // Screen: league-wide standings, both leagues × three divisions, with home/away
 // splits, runs for/against, run differential, expected (Pythagorean) W-L,
 // Season Grade, division magic number/clinch, streak, last-ten, and a
-// rank-movement trend glyph riding on GB. Spoiler-safe by default — the view
-// opens "entering today" (through yesterday) and today's live standings are an
-// explicit, one-tap reveal. The historical quick-jumps scrub back to earlier
+// rank-movement trend glyph riding on GB. The view opens live (today's games
+// included); "Entering today" (through yesterday) is one tap away. The historical quick-jumps scrub back to earlier
 // dates this season. A season picker reaches every earlier year back to 1998:
 // a past season is a finished record, so it opens final with no date controls.
 export function StandingsPage({ seasonYear }) {
@@ -162,10 +161,10 @@ export function StandingsPage({ seasonYear }) {
   const isWide = useMediaQuery(WIDE_QUERY)
   const [expandedCols, setExpandedCols] = useState(false)
 
-  // Selected date key: 'entering' (default, through yesterday), 'live' (opt-in,
-  // includes today), 'step' (the bottom day-stepper is driving), or a jump key
+  // Selected date key: 'live' (default, includes today), 'entering' (through
+  // yesterday), 'step' (the bottom day-stepper is driving), or a jump key
   // ('30d' / 'm5' …).
-  const [selKey, setSelKey] = useState('entering')
+  const [selKey, setSelKey] = useState('live')
   // Explicit date the bottom Back/Forward stepper has scrubbed to. Only
   // meaningful while selKey === 'step'; cleared whenever another control picks
   // a date so the two mechanisms never fight over which date is authoritative.
@@ -190,8 +189,7 @@ export function StandingsPage({ seasonYear }) {
   }, [final, season, selKey, stepDate, yesterday, jumps])
 
   // Step one day backward/forward from whatever date is currently shown.
-  // Forward is capped at yesterday — the day-stepper never leaks into today's
-  // live games; that's still the separate, explicit "Reveal" opt-in above.
+  // Forward is capped at yesterday; today's games are the "Live" jump.
   function stepDay(delta) {
     const base = view.date ?? yesterday
     const next = shiftDays(base, delta)
@@ -253,7 +251,7 @@ export function StandingsPage({ seasonYear }) {
   // Rank-movement trend: a second, independent standings fetch a week before
   // whatever date is currently effectively shown (`view.date`, or `today` in
   // Live mode) — always strictly OLDER than the primary fetch's own date, so
-  // it can never be less spoiler-safe than what's already on screen.
+  // it is always strictly older than what's on screen.
   // Null in the winter: a week before a final standing is a date inside a
   // finished season, and a rank that "moved" since then is a movement nobody
   // is watching for. The glyph simply does not appear.
@@ -316,27 +314,6 @@ export function StandingsPage({ seasonYear }) {
             <span className="standings-ctrl__mode">{view.mode}</span>
             <span className="standings-ctrl__detail">{view.detail}</span>
           </div>
-
-          {!final && selKey === 'entering' && (
-            <button
-              type="button"
-              className="standings-reveal"
-              aria-label="Reveal today’s live standings"
-              onClick={() => pick('live')}
-            >
-              Reveal live
-            </button>
-          )}
-          {selKey === 'live' && (
-            <button
-              type="button"
-              className="standings-reveal is-on"
-              aria-label="Reseal — hide today’s live standings"
-              onClick={() => pick('entering')}
-            >
-              Live · reseal
-            </button>
-          )}
         </div>
 
         {/* Every date control on this page is hidden in the winter — the
@@ -350,6 +327,14 @@ export function StandingsPage({ seasonYear }) {
             role="group"
             aria-label="Standings date"
           >
+            <button
+              type="button"
+              aria-pressed={selKey === 'live'}
+              className={`standings-jump ${selKey === 'live' ? 'is-active' : ''}`}
+              onClick={() => pick('live')}
+            >
+              Live
+            </button>
             <button
               type="button"
               aria-pressed={selKey === 'entering'}
