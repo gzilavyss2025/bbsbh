@@ -17,7 +17,7 @@ marked "(Recommended)". If the task already answers a question, skip it.
    (`git fetch`) and read: the screen file in `src/screens/`, the CSS partial it uses, the
    nearest nested `CLAUDE.md`, and the components it renders. Write down:
    - which tokens and components it already uses;
-   - whether it is a scoring surface (the spoiler rule applies) or an open page;
+   - whether it is one of the four scoring surfaces (slate score cells, lineup pages, innings viewer, box score; the spoiler rule applies) or an open page (no spoiler thought);
    - any rule in `references/design-rules.md` the page already follows.
 2. **Ask the first batch.** Four questions in one call:
    - *What kind of change?* Restyle (same layout), re-layout (same data), new content and
@@ -37,6 +37,8 @@ marked "(Recommended)". If the task already answers a question, skip it.
    - A full redesign: a plan prompt, then one build prompt per slice. A slice touches about
      5 files at most.
    - Add a polish prompt only when Gary asks for one.
+   - For a new or redesigned screen, the first prompt asks for a wireframe shown as an
+     Artifact. Gary iterates on it and gives direct feedback before any build prompt runs.
 5. **Write each prompt.** Each prompt stands alone, in this order:
    - The goal in one sentence, and the route.
    - What stays the same (from step 3).
@@ -57,7 +59,7 @@ marked "(Recommended)". If the task already answers a question, skip it.
      does not fetch.
 6. **Pick model and effort.** Use the ladder in step 5 of the `write-prompt` skill. Use
    its design rungs: explore directions on Sonnet 5.5 medium, build from a settled
-   direction on Sonnet 5.5 high, a design decision or a spoiler-adjacent page on Opus 5.5
+   direction on Sonnet 5.5 high, a design decision or a scoring-surface page on Opus 5.5
    high. Give one line of reason for each.
 7. **Grade the prompts.** Always run the `write-prompt` skill on the prompts you wrote, before
    you show them. It checks each repo claim (routes, paths, line numbers, class names, who uses

@@ -1,14 +1,14 @@
 # Tally Baseball
 
-**A spoiler-safe second screen for people who keep score by hand.**
+**A second screen for people who keep score by hand.**
 
 [tallybb.com](https://tallybb.com) · installable PWA · no sign-in
 needed
 
 Tally Baseball sits next to your paper scorebook. It looks up the game in front
 of you and shows what you need to fill the book in: lineups, uniform numbers,
-umpires, the bullpen, and the bench. Every number that can give the game away
-stays sealed until you tap to reveal it.
+umpires, the bullpen, and the bench. On the screens you score from, the numbers
+that give the game away stay sealed until you tap to reveal them.
 
 The app does not score the game for you. You do that on paper. This is the
 lookup tool beside the book — and, when the game ends, a compact baseball

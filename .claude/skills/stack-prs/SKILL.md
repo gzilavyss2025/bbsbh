@@ -90,7 +90,7 @@ did, and end with a short list of what needs him.
    subagents, open the cited file and line of each finding before you accept it
    (`docs/development.md`, "Long runs"). Then check these four things by
    hand, because the generic review does not know them:
-   - **The spoiler rule.** A reveal-only module (`linescore.js`, `derive.js`,
+   - **The spoiler rule (four scoring surfaces only).** A reveal-only module (`linescore.js`, `derive.js`,
      `hitchart.js`) called outside a `SealBox` reveal render function. A
      score-revealing value fetched, computed, or rendered early. See CLAUDE.md,
      "The spoiler rule".

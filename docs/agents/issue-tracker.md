@@ -34,8 +34,9 @@ follows this section.
   2. **Why.** Who uses it, when, and where the idea came from.
   3. **Decisions.** One line each: what, who decided, and the date.
   4. **Where it lives.** Files and patterns to copy.
-  5. **Spoiler-rule check.** Scoring surface or open surface? What is revealed, and when?
-     Name the ADRs. Write "No impact" when that is true.
+  5. **Spoiler-rule check.** Does it touch one of the four scoring surfaces (slate score
+     cells, lineup pages, innings viewer, box score)? If so, say what is revealed, and when,
+     and name the ADRs. Otherwise write "No impact" and stop.
   6. **Done means.** Lines that a test or a screenshot can check. Name the route and the
      `gamePk`. For a visible change, include the 390 px screenshot with `?nointro`.
   7. **Not decided.** Questions that need an answer before or during the build.

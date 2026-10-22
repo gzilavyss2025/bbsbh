@@ -1,6 +1,6 @@
 # bbsbh
 
-A spoiler-safe second-screen companion for scoring baseball by hand: it shows
+A second-screen companion for scoring baseball by hand: it shows
 live game data pulled from the MLB Stats API, but on the surfaces you score from
 it keeps every score-revealing fact hidden until the user deliberately reveals
 it, one half-inning at a time.

@@ -18,8 +18,8 @@ Written 2026-07-11 from a survey of the codebase, `docs/data-enrichment.md`
   callouts, vs-team splits, former teammates, game notes, buzz, weather,
   broadcast, umpire game logs, day highlights, win probability, pitch
   arsenal, "firsts" milestones);
-- respects the spoiler rule (`CLAUDE.md`, `CONTEXT.md`, `docs/adr/`) — each
-  section notes where its data sits on the spoiler spectrum.
+- respects the spoiler rule where it applies (`CLAUDE.md`, `CONTEXT.md`) — only the four
+  scoring surfaces are governed; the "Spoiler notes" below are history, not a required step.
 
 **How to use this doc:** each proposal ends with a self-contained prompt to
 paste into a fresh Claude (Opus or Sonnet) planning session in this repo.
