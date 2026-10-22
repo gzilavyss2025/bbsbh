@@ -1,3 +1,4 @@
+import { addDays, toApiDate } from '../../dates.js'
 import { teamAbbr } from '../../teams.js'
 
 // World Series mode for the home page (#1906, slice 1). Pure: it reads the
@@ -43,8 +44,7 @@ export function historySeriesMode(h) {
   if (!games.length) return null
   const slots = [h.teamA, h.teamB].map((t) => ({ club: { id: t.teamId, abbreviation: teamAbbr({ id: t.teamId }) }, wins: t.wins }))
   const mode = seriesMode({ slots, games, upcoming: [], playsOnCutoff: false })
-  const [y, m, d] = games.at(-1).date.split('-').map(Number)
-  return { mode, cutoff: new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10) }
+  return { mode, cutoff: toApiDate(addDays(new Date(`${games.at(-1).date}T12:00:00`), 1)) }
 }
 
 // "NLCS" / "ALCS": the league whose LCS the club played in, from the bracket ('' if none).

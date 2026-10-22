@@ -377,7 +377,7 @@ export function PostseasonSeriesPage({ seriesId }) {
       mode={ws.mode}
       cutoff={ws.cutoff}
       meetings={meetings}
-      noteClub={view.clubIds.includes(favoriteTeamId) ? favoriteTeamId : view.clubIds[0]}
+      noteClub={[clubA, clubB].includes(favoriteTeamId) ? favoriteTeamId : clubA}
       scoutShown={scoutShown}
       onScout={setScoutShown}
     />
