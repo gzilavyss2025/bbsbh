@@ -86,6 +86,7 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
       gameNumber={mode.gameNumber}
       game={game}
       plateUmpire={focusPk ? umpires.data?.[focusPk] ?? null : null}
+      series={series}
     />
   )
   const bullpen = data && <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={slateDate} />

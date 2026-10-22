@@ -6,17 +6,18 @@
 // here and its renderer in components/worldseries/ScoutingReport.jsx.
 //
 // The built order, so a later card slots in by its rank:
-//   off day  1 Nine keys, 2 Glove and legs, 3 Matchup edges, 4 Pitch by pitch,
-//            5 Platoon, 6 Park fit, 7 Film room
+//   off day  1 Nine keys, 2 Glove and legs, 3 Roster, 4 Matchup edges, 5 Pitch by pitch,
+//            6 Platoon, 7 Park fit, 8 Film room
 //   game day 1 Matchup edges, 2 Umpire edge, 3 Pitch by pitch, 4 Platoon, 5 Film room,
-//            6 Park fit
-// Built: all of them. Glove and legs sits last on a game day (rank 7, Gary 2026-10-19); Film room is
+//            6 Park fit, 7 Glove and legs, 8 Roster
+// Built: all of them. Glove and legs sits last but Roster on a game day (rank 7, Gary 2026-10-19);
+// Roster follows Glove and legs on both day types (direction A, 2026-10-22). Film room is
 // full on an off day and compact on a game day (the card reads the day type itself). Park fit shows on
 // both day types: it draws both clubs' parks (2026-10-21), so tonight's venue does not decide it.
 //
 // Matchup edges stays with a row for the game but no edge (edgesState.js: 'none'); it drops with no row.
 //
-// Input: { dayType, nineKeys, gloveLegs, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit }.
+// Input: { dayType, nineKeys, gloveLegs, roster, edges, edgesRow, pitchByPitch, plateUmpire, meetings, platoon, parkFit }.
 // No club id: the list is the same for any opponent.
 
 import { edgesState } from './edgesState.js'
@@ -31,13 +32,15 @@ export function clubOrder(clubIds, sides) {
 const CARDS = [
   { id: 'nine-keys', label: 'Nine keys', rank: { off: 1 }, has: (i) => Boolean(i.nineKeys) },
   { id: 'glove-legs', label: 'Glove and legs', rank: { off: 2, game: 7 }, has: (i) => Boolean(i.gloveLegs) },
-  { id: 'matchup-edges', label: 'Matchup edges', rank: { off: 3, game: 1 }, has: (i) => edgesState({ edges: i.edges, hasRow: i.edgesRow }) !== 'absent' },
-  { id: 'pitch-by-pitch', label: 'Pitch by pitch', rank: { off: 4, game: 3 }, has: (i) => Boolean(i.pitchByPitch) },
+  // The Series rosters by position group (direction A). `roster` is true once a roster loaded.
+  { id: 'roster', label: 'Roster', rank: { off: 3, game: 8 }, has: (i) => Boolean(i.roster) },
+  { id: 'matchup-edges', label: 'Matchup edges', rank: { off: 4, game: 1 }, has: (i) => edgesState({ edges: i.edges, hasRow: i.edgesRow }) !== 'absent' },
+  { id: 'pitch-by-pitch', label: 'Pitch by pitch', rank: { off: 5, game: 3 }, has: (i) => Boolean(i.pitchByPitch) },
   { id: 'umpire-edge', label: 'Umpire edge', rank: { game: 2 }, has: (i) => Boolean(i.plateUmpire?.name) },
-  { id: 'platoon', label: 'Platoon', rank: { off: 5, game: 4 }, has: (i) => Boolean(i.platoon) },
-  { id: 'park-fit', label: 'Park fit', rank: { off: 6, game: 6 }, has: (i) => Boolean(i.parkFit) },
+  { id: 'platoon', label: 'Platoon', rank: { off: 6, game: 4 }, has: (i) => Boolean(i.platoon) },
+  { id: 'park-fit', label: 'Park fit', rank: { off: 7, game: 6 }, has: (i) => Boolean(i.parkFit) },
   // The jump-bar item reads "Film".
-  { id: 'film-room', label: 'Film', rank: { off: 7, game: 5 }, has: (i) => Boolean(i.meetings?.length) },
+  { id: 'film-room', label: 'Film', rank: { off: 8, game: 5 }, has: (i) => Boolean(i.meetings?.length) },
 ]
 
 // -> [{ id, label }] in page order.

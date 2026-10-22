@@ -1,0 +1,144 @@
+/* ROSTER (#2316, direction A): components/worldseries/cards/scouting/Roster.jsx. Club tabs and the
+   stat-set toggle are Segmented; group heads and player rows are ghost block Buttons (the disclosure
+   row: its › turns when open). No new token. */
+
+/* The club mark sits straight on the tab: full colour on the paper tab, the one-ink knockout on the
+   selected club's bar (inked by --mark-filter, set per tab from the Identity Lab triad). */
+.ww-roster .ww-roster__logo {
+  display: block;
+  flex: none;
+}
+.ww-roster .ww-roster__mark {
+  display: block;
+  flex: none;
+}
+.ww-roster .ww-roster__mark-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.ww-roster .ww-roster__logo--bar {
+  filter: var(--mark-filter, none);
+}
+.ww-roster .ww-roster__clubs .segmented__btn {
+  gap: var(--space-2);
+}
+/* The selected club tab wears that club's bar (--bar-fill / --bar-text, set per tab from the
+   Identity Lab triad). A club with no triad keeps the ink fill. */
+.ww-roster .ww-roster__clubs .segmented__btn[aria-pressed='true'] {
+  background: var(--bar-fill, var(--text-heading));
+  border-color: var(--bar-fill, var(--border-stamped));
+  color: var(--bar-text, var(--text-on-ink));
+}
+
+/* "Regular season" keeps one line in a three-way row on a phone: label type, no tracking. */
+@media (max-width: 480px) {
+  .ww-roster .ww-roster__sets .segmented__btn {
+    padding: 0 var(--space-1h);
+    font-size: var(--fs-label);
+    letter-spacing: var(--ls-none);
+  }
+}
+
+.ww-roster__row {
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+/* A group header is a stamped bar you can see to tap. Open or shut shows in the fill, with no
+   chevron and no count: shut is paper-inset, open is the ink fill, as a selected Segmented tab. */
+.ww-roster .ww-roster__head {
+  --btn-fill: var(--surface-inset);
+  --btn-edge: var(--border-stamped);
+  --btn-ink: var(--text-heading);
+  --btn-fill-hover: var(--surface-inset);
+  --btn-edge-hover: var(--border-stamped);
+  justify-content: flex-start;
+  margin-bottom: var(--space-1);
+}
+.ww-roster .ww-roster__head[aria-expanded='true'] {
+  --btn-fill: var(--text-heading);
+  --btn-ink: var(--text-on-ink);
+}
+.ww-roster__num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.ww-roster__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ww-roster__item--open {
+  background: var(--surface-row-selected);
+  box-shadow: inset var(--bw-heavy) 0 0 var(--text-heading);
+}
+.ww-roster .ww-roster__row {
+  padding-block: var(--space-1);
+}
+/* layout-exempt: a row's four fixed slots, jersey, photo, name and position */
+.ww-roster__line {
+  display: grid;
+  grid-template-columns: 3ch var(--space-8) minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+}
+.ww-roster__jersey {
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  text-align: right;
+}
+.ww-roster .shot.ww-roster__shot {
+  width: var(--space-8);
+  height: auto;
+  aspect-ratio: 3 / 4;
+  border-radius: 0;
+}
+.ww-roster__name {
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  letter-spacing: var(--ls-none);
+}
+.ww-roster__pos {
+  color: var(--text-muted);
+  font-size: var(--fs-label);
+}
+
+/* Narrow side padding on the card and on the open line (Gary, 2026-10-22): the stat box runs
+   almost the full width of the row. */
+.ww-roster.card > .card__body {
+  padding-inline: var(--space-2);
+}
+.ww-roster__panel {
+  padding: var(--space-2) var(--space-1) var(--space-3);
+}
+.ww-roster__panel .ww-roster__door {
+  align-self: flex-start;
+}
+/* layout-exempt: three figures a row at every width. A column is 320 to 420px wide in the app's
+   frame, too narrow for the mock's six across. */
+.ww-roster .ww-roster__strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.ww-roster .ww-roster__strip .statcell__value {
+  font-size: var(--fs-title-md);
+}
+.ww-roster__kind {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+}
+.ww-roster__note {
+  margin: 0;
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+}
+.ww-roster__undeclared {
+  padding: var(--space-3);
+  border-left: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-inset);
+}

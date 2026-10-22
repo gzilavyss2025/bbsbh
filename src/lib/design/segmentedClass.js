@@ -23,6 +23,7 @@ export function segmentedOptions(options = [], value) {
     label: o.label,
     count: o.count ?? null,
     disabled: Boolean(o.disabled),
+    style: o.style,
     pressed: Object.is(o.value, value),
   }))
 }
@@ -41,6 +42,7 @@ export function segmentedMarkup(h, { label, value, onChange, options, fill = fal
           type: 'button',
           className: btn,
           disabled: o.disabled || undefined,
+          style: o.style,
           onClick: () => onChange?.(o.value),
           ...buttonAria({ pressed: o.pressed }),
         },
