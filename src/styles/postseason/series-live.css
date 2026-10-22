@@ -373,3 +373,10 @@
     height: 40px;
   }
 }
+
+/* ---- World Series layout: the jump bar and its groups (LiveSeriesPage, components/worldseries/GroupJump.jsx).
+   The page's sections space themselves; a group and the bar over them take one section gap above. */
+.pslive .ww-group,
+.pslive .jumpbar.ww-scout__jump {
+  margin-top: var(--space-section);
+}
