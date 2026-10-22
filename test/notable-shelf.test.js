@@ -2,7 +2,7 @@
 // trimmed copy of a committed public/data/notable/ row.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { shelfRows } from '../src/lib/notable/shelf.js'
+import { filterByClub, shelfRows } from '../src/lib/notable/shelf.js'
 
 const club = (id, abbr, name, runs) => ({ id, abbr, name, runs })
 const NOW = new Date('2026-10-22T18:00:00Z')
@@ -62,4 +62,38 @@ test('each kind prints its own feat line', () => {
   const nh = { ...buxton, pitchers: [{ id: 1, name: 'A' }, { id: 2, name: 'B' }], shortened: true }
   assert.equal(shelfRows('nohitters', { rows: [nh] }, NOW)[0].feat, 'Combined no-hitter (shortened): A, B')
   assert.equal(shelfRows('tripleplays', { rows: [buxton] }, NOW)[0].feat, 'Triple play: Minnesota Twins')
+})
+
+test('a row carries who did it and who it was done against, and the people to show', () => {
+  const [cycle] = shelfRows('cycles', { rows: [buxton] }, NOW)
+  assert.equal(cycle.doerId, 142)
+  assert.equal(cycle.foeId, 134)
+  assert.deepEqual(cycle.players, [{ id: 621439, name: 'Byron Buxton' }])
+  const nh = { ...buxton, side: 'away', pitchers: [{ id: 1, name: 'A' }, { id: null, name: 'B' }, { id: 3, name: '' }] }
+  const [hitless] = shelfRows('nohitters', { rows: [nh] }, NOW)
+  assert.equal(hitless.doerId, 134)
+  assert.deepEqual(hitless.players.map((p) => p.id), [1, 3])
+  assert.deepEqual(shelfRows('tripleplays', { rows: [buxton] }, NOW)[0].players, [])
+})
+
+test('the club filter: did it, done to them, either, and no club', () => {
+  const twinsDid = { ...buxton, gamePk: 1, officialDate: '2025-07-12' }
+  const twinsVictim = { ...buxton, gamePk: 2, officialDate: '2025-07-11', side: 'away' }
+  const other = { ...bleday, gamePk: 3 }
+  const rows = shelfRows('cycles', { rows: [twinsDid, twinsVictim, other] }, NOW)
+  const pks = (list) => list.map((r) => r.key.split('-')[0]).sort()
+  assert.deepEqual(pks(filterByClub(rows, null, 'did')), ['1', '2', '3'])
+  assert.deepEqual(pks(filterByClub(rows, 142, 'did')), ['1'])
+  assert.deepEqual(pks(filterByClub(rows, 142, 'against')), ['2'])
+  assert.deepEqual(pks(filterByClub(rows, 142, 'either')), ['1', '2'])
+  assert.deepEqual(filterByClub(rows, 999, 'either'), [])
+})
+
+test('a row with no side has no doer and no foe, and matches only either', () => {
+  const sideless = { ...buxton, side: undefined }
+  const rows = shelfRows('cycles', { rows: [sideless] }, NOW)
+  assert.equal(rows[0].doerId, null)
+  assert.equal(rows[0].foeId, null)
+  assert.equal(filterByClub(rows, 142, 'did').length, 0)
+  assert.equal(filterByClub(rows, 142, 'either').length, 1)
 })

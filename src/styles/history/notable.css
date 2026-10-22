@@ -7,7 +7,6 @@
   border-top: 1px solid var(--border-hairline);
 }
 .notable__row {
-  display: block;
   min-height: var(--tap-min);
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border-hairline);
@@ -33,4 +32,28 @@ a.notable__row:active {
   font-family: var(--font-body);
   font-size: var(--fs-small);
   color: var(--text-caption);
+}
+/* Row: the faces, then the text. Plain flex, no wrap, so a long feat line wraps inside its
+   own column and never pushes the faces onto a second line. */
+.notable__row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+.notable__faces {
+  display: flex;
+  flex: none;
+  gap: var(--space-1);
+}
+.notable__body {
+  flex: 1;
+  min-width: 0;
+}
+.shot.notable__shot {
+  display: block;
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--border-rule);
 }

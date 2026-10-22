@@ -5,9 +5,11 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { humanDateWithYear } from '../../lib/dates.js'
-import { shelfRows } from '../../lib/notable/shelf.js'
+import { filterByClub, shelfRows } from '../../lib/notable/shelf.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
+import { Headshot } from '../../components/player/Headshot.jsx'
+import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { Door } from '../../components/ui/control/Door.jsx'
@@ -27,6 +29,24 @@ const TABS = {
   tripleplays: 'Triple plays',
 }
 const PAGE = 25
+// A combined no-hitter can name a dozen arms; the faces stop at three, the names stay in the line.
+const MAX_FACES = 3
+const ROLES = [
+  { value: 'did', label: 'Did it' },
+  { value: 'against', label: 'Done to them' },
+  { value: 'either', label: 'Either' },
+]
+
+function Faces({ row }) {
+  if (row.players.length === 0) return null
+  return (
+    <span className="notable__faces">
+      {row.players.slice(0, MAX_FACES).map((p) => (
+        <Headshot key={p.id} personId={p.id} name={p.name} teamId={row.doerId} className="notable__shot" />
+      ))}
+    </span>
+  )
+}
 
 function Side({ side }) {
   return (
@@ -40,7 +60,9 @@ function Side({ side }) {
 
 function Row({ row, linkProps }) {
   const body = (
-    <Stack gap="tight">
+    <>
+      <Faces row={row} />
+      <Stack gap="tight" className="notable__body">
       <span className="notable__when t-label">
         {humanDateWithYear(row.date)}
         {row.gameNumber > 1 && <span className="t-label t-label--bold"> Game {row.gameNumber}</span>}
@@ -50,7 +72,8 @@ function Row({ row, linkProps }) {
         <Side side={row.home} />
       </Cluster>
       <span className="notable__feat">{row.feat}</span>
-    </Stack>
+      </Stack>
+    </>
   )
   return (
     <li>
@@ -71,7 +94,10 @@ export function NotablePage() {
   const { loading, error, data } = useAsync(() => fetchNotable(), [])
   const [kind, setKind] = useState(KINDS[0])
   const [shown, setShown] = useState(PAGE)
-  const rows = useMemo(() => shelfRows(kind, data?.[kind]), [kind, data])
+  const [clubId, setClubId] = useState(null)
+  const [role, setRole] = useState('did')
+  const all = useMemo(() => shelfRows(kind, data?.[kind]), [kind, data])
+  const rows = useMemo(() => filterByClub(all, clubId, role), [all, clubId, role])
   const loaded = data && KINDS.some((k) => data[k])
 
   return (
@@ -94,6 +120,26 @@ export function NotablePage() {
           }}
           options={KINDS.map((k) => ({ value: k, label: TABS[k] }))}
         />
+        <TeamFilterStrip
+          selectedTeamId={clubId}
+          onSelect={(id) => {
+            setClubId(id)
+            setShown(PAGE)
+          }}
+          ariaLabel="Club"
+        />
+        {clubId != null && (
+          <Segmented
+            fill
+            label="Club's part"
+            value={role}
+            onChange={(next) => {
+              setRole(next)
+              setShown(PAGE)
+            }}
+            options={ROLES}
+          />
+        )}
         <AsyncStatus
           loading={loading}
           error={error}
@@ -101,7 +147,9 @@ export function NotablePage() {
           errorMessage="Couldn’t load Notable games. Try again."
           emptyMessage="Notable games are not available right now."
         />
-        {loaded && rows.length === 0 && <p className="hint">None on file.</p>}
+        {loaded && rows.length === 0 && (
+          <p className="hint">{clubId != null ? 'None on file for this club.' : 'None on file.'}</p>
+        )}
         {rows.length > 0 && (
           <ol className="notable__list">
             {rows.slice(0, shown).map((row) => (
