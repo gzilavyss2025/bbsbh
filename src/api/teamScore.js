@@ -56,7 +56,7 @@ function compareRowsNoTies(a, b) {
 
 // Best-to-worst rows with a strict, gapless rank attached (see
 // compareRowsNoTies).
-export function rankedNoTies(rows) {
+function rankedNoTies(rows) {
   return [...rows].sort(compareRowsNoTies).map((r, i) => ({ ...r, rank: i + 1 }))
 }
 
