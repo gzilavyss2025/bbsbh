@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roster · B</title>
+<link rel="stylesheet" href="/src/index.css">
+<link rel="stylesheet" href="/src/styles/worldseries/home.css">
+<style>
+body{margin:0}
+.mock{max-width:1272px;margin:0 auto;padding:var(--space-4)}
+.rc-logo{display:block;flex:none;background:var(--paper-2);padding:var(--space-1);box-sizing:content-box;border-radius:var(--radius-xs)}
+.rc-tab{font-family:var(--font-display);text-transform:uppercase;letter-spacing:var(--ls-label)}
+.rc .segmented__btn{gap:var(--space-2)}
+.rc .segmented__btn .segmented__count{color:inherit;opacity:.7}
+.rc-shot{display:block;flex:none;width:var(--s);height:var(--s);overflow:hidden;background:var(--surface-inset);border:var(--bw-hair) solid var(--border-hairline)}
+.rc-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
+.rc-gh{margin:0;font-family:var(--font-display);font-size:var(--fs-label);letter-spacing:var(--ls-xwide);text-transform:uppercase;color:var(--text-muted)}
+.rc-gh b{font-family:var(--font-mono);font-weight:var(--w-medium);margin-left:var(--space-1h)}
+.rc-note{margin:0;font-size:var(--fs-small);line-height:var(--lh-ui);color:var(--text-caption)}
+.rc-num{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.rc-jersey{font-family:var(--font-mono);font-variant-numeric:tabular-nums;color:var(--text-muted);font-size:var(--fs-small);min-width:2.2ch;text-align:right}
+.rc-pos{font-family:var(--font-display);text-transform:uppercase;letter-spacing:var(--ls-label);font-size:var(--fs-label);color:var(--text-muted)}
+.rc-name{font-size:var(--fs-body);color:var(--text-heading)}
+.rc .statstrip{grid-template-columns:repeat(3,minmax(0,1fr))}
+.rc .statcell__value{font-size:var(--fs-title-lg)}
+@media (max-width:480px){.rc .segmented--lean .segmented__btn{font-size:var(--fs-label);letter-spacing:var(--ls-none);padding:0 var(--space-1h)}}
+@media (min-width:740px){.mock{padding:var(--space-6)} .rc .statstrip{grid-template-columns:repeat(6,minmax(0,1fr))} .rc .statcell__value{font-size:var(--fs-hero-sm)}}
+
+.rc-b{display:grid;gap:var(--space-4)}
+.rc-b__clubs{margin-bottom:var(--space-2)}
+.rc-b__scroll>li+li{margin-top:var(--space-4)}
+.rc-b__list{display:flex;flex-direction:column}
+.rc-b__detail{display:flex;flex-direction:column;gap:var(--space-3);align-items:stretch}
+.rc-b__detail>.door{align-self:flex-start}
+.rc-b__who{display:flex;gap:var(--space-3);align-items:center}
+.rc-b__name{margin:0;font-family:var(--font-display);font-size:var(--fs-title-lg);text-transform:uppercase;letter-spacing:var(--ls-title);color:var(--text-heading);line-height:var(--lh-tight)}
+.rc-b__back{align-self:flex-start;padding-left:0}
+.rc-row{display:grid;grid-template-columns:3ch 36px 1fr auto;gap:var(--space-3);width:100%;justify-content:stretch;text-align:left;text-transform:none;font-family:var(--font-body);letter-spacing:var(--ls-none);padding:0 var(--space-1h);min-height:var(--tap-min)}
+.rc-list{list-style:none;margin:0;padding:0;border-top:var(--bw-hair) solid var(--border-hairline)}
+.rc-b__row{border-bottom:var(--bw-hair) solid var(--border-hairline)}
+.rc-b__row[aria-current=true]{background:var(--surface-row-selected);box-shadow:inset 3px 0 0 var(--text-heading)}
+.rc-b__detail{display:none}
+@media (min-width:740px){
+  .rc-b{grid-template-columns:minmax(260px,340px) 1fr;gap:0;align-items:start}
+  .rc-b__list,.rc-b__detail{display:flex!important}
+  .rc-b__scroll{max-height:480px;overflow:auto;padding-right:var(--space-2)}
+  .rc-b__detail{padding-left:var(--space-6);border-left:var(--bw-rule) solid var(--border-rule);min-height:480px}
+  .rc-b__back{display:none}
+  .rc-b__name{font-size:var(--fs-hero-sm)}
+}
+
+</style></head><body><main class="mock"><div class="ww-scout"><div class="ww-scout__card ww-scout__card--wide"><section class="card card--stamped card--named ww-roster rc-card" ><h3 class="card__name">Roster</h3><span class="card__count">Series · 26 a club</span><div class="card__body"><div class="rc rc-b"><nav class="rc-b__list" aria-label="Dodgers roster">
+      <div class="rc-b__clubs"><link rel="preload" as="image" href="https://www.mlbstatic.com/team-logos/119.svg"/><link rel="preload" as="image" href="https://www.mlbstatic.com/team-logos/141.svg"/><div role="group" aria-label="Club" class="segmented segmented--fill"><button type="button" class="btn segmented__btn" aria-pressed="true"><img src="https://www.mlbstatic.com/team-logos/119.svg" width="26" height="26" alt="" class="rc-logo"/><span class="rc-tab">LAD</span></button><button type="button" class="btn segmented__btn" aria-pressed="false"><img src="https://www.mlbstatic.com/team-logos/141.svg" width="26" height="26" alt="" class="rc-logo"/><span class="rc-tab">TOR</span></button></div></div>
+      <ul class="rc-b__scroll" style="list-style:none;margin:0;padding:0"><li class="rc-b__grp"><h4 class="rc-gh">Hitters<b>14</b></h4><ul class="rc-list"><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">47</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/666163/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Ben Rortvedt</span><span class="rc-pos">C</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">16</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/669257/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Will Smith</span><span class="rc-pos">C</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">8</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/571771/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Enrique Hernández</span><span class="rc-pos">1B</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" aria-current="true">
+      <span class="rc-jersey">5</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/518692/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Freddie Freeman</span><span class="rc-pos">1B</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">6</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/808975/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Hyeseong Kim</span><span class="rc-pos">2B</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">72</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/500743/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Miguel Rojas</span><span class="rc-pos">2B</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">25</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/669242/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Tommy Edman</span><span class="rc-pos">2B</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">13</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/571970/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Max Muncy</span><span class="rc-pos">3B</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">50</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/605141/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Mookie Betts</span><span class="rc-pos">SS</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">44</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/681624/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Andy Pages</span><span class="rc-pos">CF</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">75</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/681909/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Justin Dean</span><span class="rc-pos">CF</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">12</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/669743/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Alex Call</span><span class="rc-pos">RF</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">37</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/606192/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Teoscar Hernández</span><span class="rc-pos">RF</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">17</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/660271/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Shohei Ohtani</span><span class="rc-pos">TWP</span></button></li></ul></li><li class="rc-b__grp"><h4 class="rc-gh">Pitchers<b>12</b></h4><ul class="rc-list"><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">51</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/681911/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Alex Vesia</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">43</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/607455/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Anthony Banda</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">78</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/676508/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Ben Casparius</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">7</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/605483/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Blake Snell</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">49</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/595014/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Blake Treinen</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">22</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/477132/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Clayton Kershaw</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">80</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/686218/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Emmet Sheehan</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">86</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/676263/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Jack Dreyer</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">70</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/680736/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Justin Wrobleski</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">11</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/808963/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Roki Sasaki</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">31</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/607192/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Tyler Glasnow</span><span class="rc-pos">P</span></button></li><li><button type="button" class="btn btn--ghost rc-row rc-b__row" >
+      <span class="rc-jersey">18</span><span class="rc-shot" style="--s:36px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/808967/headshot/silo/current" alt="" loading="eager"></span><span class="rc-name">Yoshinobu Yamamoto</span><span class="rc-pos">P</span></button></li></ul></li></ul>
+    </nav><article class="rc-b__detail" aria-label="Freddie Freeman">
+      <button type="button" class="btn btn--ghost rc-b__back">‹ Roster</button>
+      <header class="rc-b__who">
+        <span class="rc-shot" style="--s:88px"><img src="https://img.mlbstatic.com/mlb-photos/image/upload/w_320,q_auto:best/v1/people/518692/headshot/silo/current" alt="" loading="eager"></span>
+        <div><h4 class="rc-b__name">Freddie Freeman</h4><p class="rc-note rc-num">#5 · 1B · Dodgers</p></div>
+      </header>
+      <div role="group" aria-label="Stat set" class="segmented segmented--fill segmented--lean "><button type="button" class="btn segmented__btn" aria-pressed="true">Postseason</button><button type="button" class="btn segmented__btn" aria-pressed="false">Regular season</button><button type="button" class="btn segmented__btn" aria-pressed="false">Career</button></div>
+      <p class="rc-gh">Postseason so far</p>
+      <div class="card card--stamped statstrip "><div class="statcell"><span class="statcell__label">AVG</span><span class="statcell__value">.200</span></div><div class="statcell"><span class="statcell__label">OBP</span><span class="statcell__value">.300</span></div><div class="statcell"><span class="statcell__label">SLG</span><span class="statcell__value">.371</span></div><div class="statcell statcell--lead"><span class="statcell__label">OPS</span><span class="statcell__value">.671</span></div><div class="statcell"><span class="statcell__label">HR</span><span class="statcell__value">1</span></div><div class="statcell"><span class="statcell__label">RBI</span><span class="statcell__value">1</span></div></div>
+      <p class="rc-note rc-num">G 9 · PA 40 · H 7 · 2B 3 · BB 4 · SO 11 · SB 0 · R 4</p>
+      <a class="door door--inline" href="#player-518692">Player page ›</a>
+    </article></div></div></section></div></div></main></body></html>
