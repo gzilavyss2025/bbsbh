@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { hasWhatsBrewing, whatsBrewingTitle } from '../api/whatsBrewingClubs.js'
-import { whatsBrewingLayout } from '../api/whatsBrewing.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
@@ -26,11 +25,21 @@ export function GameNotesDebugPage() {
   useDocumentTitle('Game Notes debug')
   const [openTeamId, setOpenTeamId] = useState(null)
 
+  // The layout column needs whatsBrewing.js, the pdf.js parser. WhatsBrewingModal
+  // imports it with import(), so this must too: one static import here and the
+  // build can no longer split it into its own chunk (INEFFECTIVE_DYNAMIC_IMPORT).
+  const layouts = useAsync(
+    () =>
+      import('../api/whatsBrewing.js').then((m) =>
+        Object.fromEntries(ALL_MLB_TEAM_IDS.map((id) => [id, m.whatsBrewingLayout(id)])),
+      ),
+    [],
+  )
+
   const teams = ALL_MLB_TEAM_IDS.map((id) => ({
     id,
     name: teamFullName(id),
     calibrated: hasWhatsBrewing(id),
-    layout: whatsBrewingLayout(id),
   })).sort((a, b) => {
     if (a.calibrated !== b.calibrated) return a.calibrated ? -1 : 1
     return a.name.localeCompare(b.name)
@@ -88,7 +97,7 @@ export function GameNotesDebugPage() {
                     <TeamLogo teamId={t.id} name={t.name} size={22} />
                     {t.name}
                   </td>
-                  <td>{t.calibrated ? t.layout || '—' : 'not calibrated'}</td>
+                  <td>{t.calibrated ? layouts.data?.[t.id] || '—' : 'not calibrated'}</td>
                   <td>{notes?.date ?? '—'}</td>
                   <td>
                     {notes?.url ? (
