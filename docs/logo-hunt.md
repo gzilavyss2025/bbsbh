@@ -21,6 +21,8 @@ cautions, and both are my inference, not facts from the source:
 - A row's status comes from overlapping years only. The table's own splits can differ from
   this list, so check the club in the Eras tab before you hunt.
 
+Each club's heading links to its SportsLogos.net page, which shows every era to compare against.
+
 Each club's last row is today's mark. The CDN already serves it, so it is not listed. Rows that
 already have art are not listed either; the count is under each club. Eras before 1901 are left out.
 Boston and Milwaukee Braves and St. Louis Browns years are not researched (SportsLogos.net files
@@ -28,11 +30,15 @@ them on other pages); only what the table already holds appears for them.
 
 ### Arizona Diamondbacks (id 109)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/50/Arizona-Diamondbacks-Logos/)
+
 - [ ] 1998–2006 — not filed
 - [ ] 2007–2011 — not filed
 - [ ] 2012–2023 — not filed
 
 ### Athletics (id 133)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/6921/Athletics-Logos/)
 
 - [ ] 1921–1923 — filed, partly has art
 - [ ] 1924–1927 — filed, no art
@@ -50,6 +56,8 @@ them on other pages); only what the table already holds appears for them.
 
 ### Atlanta Braves (id 144)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/51/Atlanta-Braves-Logos/)
+
 - [ ] 1901–1945 Boston Braves — filed, no art
 - [ ] 1946–1952 Boston Braves — filed, no art
 - [ ] 1953–1965 Milwaukee Braves — filed, no art
@@ -60,6 +68,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 2018–2021 — not filed
 
 ### Baltimore Orioles (id 110)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/52/Baltimore-Orioles-Logos/)
 
 - [ ] 1954–1965 — not filed
 - [ ] 1966–1969 — not filed
@@ -72,6 +82,8 @@ them on other pages); only what the table already holds appears for them.
 
 ### Boston Red Sox (id 111)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/53/Boston-Red-Sox-Logos/)
+
 - [ ] 1908 — not filed
 - [ ] 1909–1911 — not filed
 - [ ] 1912–1923 — not filed
@@ -81,6 +93,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 1976–2008 — not filed
 
 ### Chicago Cubs (id 112)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/54/Chicago-Cubs-Logos/)
 
 - [ ] 1903–1905 — not filed
 - [ ] 1906 — not filed
@@ -99,6 +113,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 1957–1978 — not filed
 
 ### Chicago White Sox (id 145)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/55/Chicago-White-Sox-Logos/)
 
 - [ ] 1901–1902 — not filed
 - [ ] 1903 — not filed
@@ -121,6 +137,8 @@ them on other pages); only what the table already holds appears for them.
 
 ### Cincinnati Reds (id 113)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/56/Cincinnati-Reds-Logos/)
+
 - [ ] 1901–1904 — not filed
 - [ ] 1905 — not filed
 - [ ] 1906–1907 — not filed
@@ -137,6 +155,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 1999–2012 — not filed
 
 ### Cleveland Guardians (id 114)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/6804/Cleveland-Guardians-Logos/)
 
 - [ ] 1901–1904 — not filed
 - [ ] 1905 — not filed
@@ -159,9 +179,13 @@ them on other pages); only what the table already holds appears for them.
 
 ### Colorado Rockies (id 115)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/58/Colorado-Rockies-Logos/)
+
 - [ ] 1993–2016 — not filed
 
 ### Detroit Tigers (id 116)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/59/Detroit-Tigers-Logos/)
 
 - [ ] 1901–1902 — not filed
 - [ ] 1903 — not filed
@@ -188,6 +212,8 @@ them on other pages); only what the table already holds appears for them.
 
 ### Houston Astros (id 117)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/4929/Houston-Astros-Logos/)
+
 - [ ] 1962–1964 — not filed
 - [ ] 1965–1976 — not filed
 - [ ] 1977–1993 — not filed
@@ -197,6 +223,8 @@ them on other pages); only what the table already holds appears for them.
 
 ### Kansas City Royals (id 118)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/62/Kansas-City-Royals-Logos/)
+
 - [ ] 1969–1978 — not filed
 - [ ] 1979–1985 — not filed
 - [ ] 1986–1992 — not filed
@@ -205,6 +233,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 2019–2025 — not filed
 
 ### Los Angeles Angels (id 108)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/6521/Los-Angeles-Angels-Logos/)
 
 - [ ] 1961–1964 — filed, no art
 - [ ] 1965–1970 — filed, no art
@@ -218,6 +248,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 2005–2015 — not filed
 
 ### Los Angeles Dodgers (id 119)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/63/Los-Angeles-Dodgers-Logos/)
 
 - [ ] 1901 — filed, no art
 - [ ] 1902–1908 — filed, no art
@@ -238,11 +270,15 @@ them on other pages); only what the table already holds appears for them.
 
 ### Miami Marlins (id 146)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/3637/Miami-Marlins-Logos/)
+
 - [ ] 1993–2011 — not filed
 - [ ] 2012–2016 — not filed
 - [ ] 2017–2018 — not filed
 
 ### Milwaukee Brewers (id 158)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/64/Milwaukee-Brewers-Logos/)
 
 - [ ] 1969 — filed, no art
 - [ ] 1970–1977 — not filed
@@ -253,6 +289,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 2018–2019 — not filed
 
 ### Minnesota Twins (id 142)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/65/Minnesota-Twins-Logos/)
 
 - [ ] 1901–1904 — filed, no art
 - [ ] 1905–1935 — filed, no art
@@ -270,11 +308,15 @@ them on other pages); only what the table already holds appears for them.
 
 ### New York Mets (id 121)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/67/New-York-Mets-Logos/)
+
 - [ ] 1962–1980 — not filed
 - [ ] 1981–1992 — not filed
 - [ ] 1993–1998 — not filed
 
 ### New York Yankees (id 147)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/68/New-York-Yankees-Logos/)
 
 - [ ] 1913–1914 — not filed
 - [ ] 1915–1935 — not filed
@@ -282,6 +324,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 1946–1967 — not filed
 
 ### Philadelphia Phillies (id 143)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/70/Philadelphia-Phillies-Logos/)
 
 - [ ] 1901–1909 — not filed
 - [ ] 1910 — not filed
@@ -300,6 +344,8 @@ them on other pages); only what the table already holds appears for them.
 
 ### Pittsburgh Pirates (id 134)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/71/Pittsburgh-Pirates-Logos/)
+
 - [ ] 1901–1907 — not filed
 - [ ] 1908–1909 — not filed
 - [ ] 1910–1914 — not filed
@@ -315,6 +361,8 @@ them on other pages); only what the table already holds appears for them.
 
 ### San Diego Padres (id 135)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/73/San-Diego-Padres-Logos/)
+
 - [ ] 1969–1984 — not filed
 - [ ] 1985 — not filed
 - [ ] 1986–1989 — not filed
@@ -327,6 +375,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 2015–2019 — not filed
 
 ### San Francisco Giants (id 137)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/74/San-Francisco-Giants-Logos/)
 
 - [ ] 1901–1907 — filed, no art
 - [ ] 1908 — filed, no art
@@ -354,11 +404,15 @@ them on other pages); only what the table already holds appears for them.
 
 ### Seattle Mariners (id 136)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/75/Seattle-Mariners-Logos/)
+
 - [ ] 1977–1980 — not filed
 - [ ] 1981–1986 — not filed
 - [ ] 1987–1992 — not filed
 
 ### St. Louis Cardinals (id 138)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/72/St-Louis-Cardinals-Logos/)
 
 - [ ] 1901–1919 — not filed
 - [ ] 1920–1921 — not filed
@@ -371,11 +425,15 @@ them on other pages); only what the table already holds appears for them.
 
 ### Tampa Bay Rays (id 139)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/2535/Tampa-Bay-Rays-Logos/)
+
 - [ ] 1998–2000 — not filed
 - [ ] 2001–2007 — not filed
 - [ ] 2008–2018 — not filed
 
 ### Texas Rangers (id 140)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/77/Texas-Rangers-Logos/)
 
 - [ ] 1961–1971 — filed, no art
 - [ ] 1972–1980 — not filed
@@ -387,6 +445,8 @@ them on other pages); only what the table already holds appears for them.
 
 ### Toronto Blue Jays (id 141)
 
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/78/Toronto-Blue-Jays-Logos/)
+
 - [ ] 1977–1993 — not filed
 - [ ] 1994–1996 — not filed
 - [ ] 1997–2002 — not filed
@@ -395,6 +455,8 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 2012–2019 — not filed
 
 ### Washington Nationals (id 120)
+
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/578/Washington-Nationals-Logos/)
 
 - [ ] 1969–1991 — not filed
 - [ ] 1992–2004 — filed, no art
