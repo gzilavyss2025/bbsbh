@@ -7,11 +7,10 @@ no bucket grows past 12 files.
 
 ## `SealBox.jsx` stays at the top level, on purpose
 
-It is the core spoiler invariant (ADR-0002), cited by literal path from the root
+It is the sealing contract for the scoring surfaces (ADR-0002), cited by literal path from the root
 `CLAUDE.md`, `src/CLAUDE.md`, and the ADR itself. Leaving it where it is costs no
-edit to the line-capped root file — and once every other component sits
-in a bucket, being **the one unbucketed file** is the loudest available signal
-about what it is. Do not tidy it into a folder.
+edit to the line-capped root file, and being **the one unbucketed file**
+marks what it is. Do not tidy it into a folder.
 
 ## The buckets
 

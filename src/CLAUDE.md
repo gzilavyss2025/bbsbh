@@ -1,11 +1,11 @@
 # src — the app shell
 
 React 19 + Vite SPA, phone-first. This file covers screens, routing, fetching, the
-design system, and the UI half of the spoiler rule. Folder rules sit in nested files
+design system, and the UI half of the sealing rule. Folder rules sit in nested files
 (root `CLAUDE.md` lists them). The data layer is `src/api/CLAUDE.md`. Club identity —
 colours, logo treatments, the `src/lib/data/*.json` stores — is `src/lib/CLAUDE.md`;
 its two editors are the dev-only lab (`docs/identity-lab.md`) and the team hub's gear
-(`docs/identity-overrides.md`). Root `CLAUDE.md` has the spoiler rule and the map.
+(`docs/identity-overrides.md`). Root `CLAUDE.md` has the sealing rule and the map.
 
 ## Screens (`src/screens/`)
 
@@ -60,7 +60,7 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel. T
 
 ## Admin-editable copy (`src/copy/`)
 
-The wording of the spoiler-consent surfaces is admin-editable, not hard-coded.
+The wording of the consent surfaces is admin-editable, not hard-coded.
 `src/copy/registry.js` is the closed source of truth (ids, defaults, length caps,
 `sanitizeOverrides`; no token substitution, and its header records why no
 game data may ever be interpolated into a field);
@@ -84,17 +84,14 @@ Refresh, never across games/dates.
 
 ## UI-side spoiler enforcement
 
-The spoiler rule governs the **scoring surfaces** (root `CLAUDE.md`): the slate's
-score cells, the two lineup pages, the innings viewer, the box score. It is
-enforced structurally in the components below — read the linked ADRs before
-refactoring. Nothing on an open surface (player and team pages, leader boards,
-standings) is gated here, and **adding a gate there is a regression, not a
-hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
+The spoiler rule covers the four **scoring surfaces** only (root `CLAUDE.md`): the slate's
+score cells, the two lineup pages, the innings viewer, the box score. It is enforced
+structurally in the components below. Everything else opens live and is not gated here;
+do not add a gate to it (ADR-0034).
 
-Three gotchas each caused a real spoiler bug and are now ADRs: roster-card
-membership and position labels (ADR-0005); per-inning `errors` being a *fielding*
-stat, not a score (ADR-0006); and `useRef` caches of reveal-only derivations that
-must key on the `feed` object (ADR-0007).
+Three gotchas, each from a real bug (ADRs): roster-card membership and position labels
+(ADR-0005); per-inning `errors` is a *fielding* stat, not a score (ADR-0006); and `useRef`
+caches of reveal-only derivations must key on the `feed` object (ADR-0007).
 
 - **`src/components/SealBox.jsx`** takes `children` as a render function, invoked
   only once revealed; reveal is one-directional, and re-sealing on inning

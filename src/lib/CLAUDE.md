@@ -243,22 +243,20 @@ Two things worth knowing before changing any of it:
   is NOT the filter-whitening ADR-0031 forbids — see ADR-0030's last section for
   why an already-flat silhouette is the one safe case.
 
-## The rule that must not drift
+## The theming rule
 
-**Theming's only inputs are `(teamId, treatment)`.** Identity, never state. The
-tempting future violation is obvious — "tint the page by whoever's leading" —
-and it *would* be a spoiler (root `CLAUDE.md`). Nothing in this directory may
+**Theming's only inputs are `(teamId, treatment)`.** Identity, never state. Do not
+"tint the page by whoever's leading": on a scoring surface that would reveal the
+score (root `CLAUDE.md`). Nothing in this directory may
 read a score, an inning, or a win probability to decide a colour. ADR-0030
 records the reasoning; `test/header-theme.test.js` asserts it structurally, so
 wiring a feed into `headerTheme.js` fails a test rather than a review.
 
-**`stampInk.js` is the single, contained exception**, and knowing exactly why
-is what keeps it from becoming a precedent. It reads one thing about a game —
-who won — to ink a Logbook stamp. The rule above is about surfaces the user has
-NOT revealed; a stamp exists only for a game its owner already finished
-revealing (ADR-0035), and it prints that game's final score in numerals, so the
-ink is not telling anyone anything. It is safe because of WHERE it can render,
-not because of what it computes: its callers are `GameStamp.jsx` and the lab's `StampPlacementEditor.jsx`, and
+**`stampInk.js` is the single, contained exception.** It reads one thing about a game —
+who won — to ink a Logbook stamp. A stamp exists only for a game its owner already
+finished revealing (ADR-0035) and prints that game's final score, so the ink tells
+no one anything new. It is safe because of WHERE it can render, not because of what
+it computes: its callers are `GameStamp.jsx` and the lab's `StampPlacementEditor.jsx`, and
 that component's import sites are an allowlist enforced by
-`scripts/check-stamp-surfaces.mjs`. **Importing it anywhere else is a spoiler
-bug**, not a style choice.
+`scripts/check-stamp-surfaces.mjs`. **Importing it anywhere else is a bug**,
+not a style choice.

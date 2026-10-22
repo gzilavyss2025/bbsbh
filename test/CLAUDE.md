@@ -7,7 +7,7 @@ most files keep their fixtures inline (see "Fixtures" below for why).
 ## Finding a test
 
 There is no index table. Test files are named after the module they cover: run
-`ls test/` or `git grep -l "<module>" test/` to find coverage. The spoiler invariant
+`ls test/` or `git grep -l "<module>" test/` to find coverage. The sealing contract
 is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
 `docs/testing.md`).
 

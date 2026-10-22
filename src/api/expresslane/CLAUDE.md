@@ -1,6 +1,6 @@
 # src/api/expresslane — the Express Lane rail and clip index
 
-The spoiler line in `expresslane/` runs BETWEEN its files rather than around them.
+The sealing line in `expresslane/` runs BETWEEN its files rather than around them.
 `rail.js` is reveal-only: it is the ordered, complete event list for one half-inning, and
 its `description` / `result` / `pitch` fields narrate the play. `runners.js` is reveal-only
 too: it names the runner boxes the scoring deck shows beside the batter's, and every
