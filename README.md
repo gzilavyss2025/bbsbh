@@ -24,22 +24,22 @@ in the page, waiting to flash. The app does not fetch it or compute it until you
 ask. When an inning re-seals, the number goes away again. The browser tab title
 and the game cards stay score-free too.
 
-That rule covers the scoring path: the day's slate, the two team pages, the
-innings viewer, and the box score. Everything else about baseball opens live —
-season and career stats, player and team pages, leaderboards, and standings. A
-stat line is not a score.
+That rule covers four scoring surfaces: the slate's score cells, the two lineup
+pages, the innings viewer, and the box score. Everything else about baseball
+opens live — season and career stats, player and team pages, leaderboards, and
+standings. A stat line is not a score.
 
-The postseason bracket is the one place a result shows without a tap, so it
-follows its own rule. The bracket, the series line on each slate card, and the
-series pages show each series as it stood heading into the day on screen. A game
-counts only after it went final on an earlier day. Last night's results are
-visible; tonight's never are.
+The postseason bracket, the series line on each slate card, and the series pages
+show each series as it stood heading into the day on screen. A game counts only
+after it went final on an earlier day. Last night's results are visible;
+tonight's never are.
 
-Two opt-in doors lift the seal, and you have to ask for each one:
+Two doors show results you did not tap to reveal, and you choose each one:
 
 - **Stamp In** (`/team/{id}/stamp-in`) — one club's played season with every
-  result showing, so you can stamp the games you watched. Nothing on the page
-  loads until you agree to see it.
+  result showing, so you can stamp the games you watched. It opens straight to
+  the season. It never marks a game as scored, so your reveals stay where they
+  were.
 - **Express Lane** — scoring a game you missed from its own pitch clips. The
   broadcast burns the score into every frame, so there is no way to watch a
   pitch without seeing where the game stood at it. The page says so, and plays
@@ -167,8 +167,8 @@ page, and a player's Analytics tab carry a season picker. Choose one season,
 all seasons combined, or one season set against another. Each choice is its own
 address, so you can share it.
 
-**Standings** open *through yesterday*, so today's games cannot spoil you. One
-tap brings in today. You can also scrub back to any earlier date.
+**Standings** open live, with today's games in. One tap shows them *through
+yesterday*, and you can scrub back to any earlier date.
 
 **Search** any player or team by name from the footer. "Find a past matchup"
 takes two clubs and a season, then lists every game they played. Each one opens
@@ -298,8 +298,8 @@ change, also load the route you changed in a browser.
 
 ### How the spoiler rule is enforced
 
-The promise at the top of this file is structural. It does not depend on a
-convention that people remember:
+The promise at the top of this file is structural on the four scoring surfaces.
+It does not depend on a convention that people remember:
 
 - **Reveal-only modules** (`src/api/linescore.js`, `src/api/derive.js`) may run
   only inside a reveal render function. `src/api/select.js` is spoiler-free and
