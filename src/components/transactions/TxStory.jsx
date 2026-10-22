@@ -14,8 +14,8 @@ import { Card } from '../ui/frame/Card.jsx'
 // The tone maps and the cutline renderer come from MoveRow.jsx, which is where
 // every roster-move surface reads them — see its header.
 //
-// Spoiler-free by construction: a roster move and its date carry no score
-// (api/transactions/leagueFeed.js), so there is no SealBox here.
+// A roster move and its date carry no score (api/transactions/leagueFeed.js),
+// so there is no SealBox here.
 
 // Above this many headshots the rail stops floating and lays out as a
 // full-measure strip instead (.photorail--strip). The number is a measurement,
@@ -30,8 +30,8 @@ import { Card } from '../ui/frame/Card.jsx'
 const RAIL_FLOAT_MAX = 3
 
 // One rail slot: kicker banner (In/Out/Up/Down/Up-Down/IL-N) over a headshot,
-// a surname caption below that links to the player's page (same spoiler-safe
-// PlayerLink treatment used everywhere else in the app).
+// a surname caption below that links to the player's page (the same PlayerLink
+// treatment used everywhere else in the app).
 //
 // `tintTeamId` is the MLB parent org for every slot, prospects included, so
 // `isMlb` must come from the slot itself — Headshot's teamId-derived default

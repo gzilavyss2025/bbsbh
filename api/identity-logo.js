@@ -24,9 +24,9 @@
 // nothing the site renders, so Cancel is genuinely a cancel — and the identity
 // store keeps ONE writer and one validation choke point.
 //
-// SPOILER RULE. A logo is identity, never state (src/lib/CLAUDE.md's "rule
-// that must not drift"): the payload is opaque bytes an admin chose, keyed on
-// (teamId, slot), and nothing here reads a feed or can be derived from one.
+// IDENTITY, NEVER STATE (src/lib/CLAUDE.md's "The theming rule"): the
+// payload is opaque bytes an admin chose, keyed on (teamId, slot), and nothing
+// here reads a feed or can be derived from one.
 //
 // UNCONFIGURED DEGRADES GRACEFULLY: no BLOB_READ_WRITE_TOKEN answers 501 and
 // the drawer falls back to its paste-a-URL field, which always works.

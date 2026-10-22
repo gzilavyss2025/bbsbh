@@ -12,7 +12,7 @@ import { staticJson } from './staticJson.js'
 // 2026 the middle pitch misses by 9.9in, running from about 9.2in on a sinker
 // to 11.0in on a curveball.
 //
-// SPOILER FOOTING — spoiler-FREE, and it needs no SealBox. Every figure is a
+// NO SCORE, and it needs no SealBox. Every figure is a
 // season median over games already final: a distance in inches, carrying no
 // line, no running score and no per-game granularity at all. Same footing as
 // the Statcast percentiles this renders beside and as commandMap.js. The player

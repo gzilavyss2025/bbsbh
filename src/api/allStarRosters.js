@@ -17,7 +17,7 @@
 // (schedule.js), so a franchise rename never goes stale in this file.
 //
 // Roster membership carries no individual game's score — same footing as
-// Awards History/League Leaders/WAR — so this file needs no spoiler cutoff.
+// Awards History/League Leaders/WAR — so this file needs no as-of cutoff.
 // `scores[season]` is `{ al, nl }`, the game's final score straight off the
 // schedule row the generator already fetches for `games` — see ADR-0019 for
 // why this page (uniquely) shows a final score plainly. `mvps[season]` is

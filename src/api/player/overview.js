@@ -54,7 +54,7 @@ export async function loadPlayerOverview(id, asOf) {
     fetchWarData(),
     fetchWarHistory(id),
     // A contract ledger is a season's book, not a day's, and Cot's carries no
-    // history to date it against — so a spoiler-cutoff view skips the fetch and
+    // history to date it against — so an as-of view skips the fetch and
     // the card simply doesn't render.
     asOf ? Promise.resolve(null) : fetchPlayerContract(id),
     currentActivitySportId === 1 ? fetchSavantPercentiles() : Promise.resolve(null),
@@ -74,8 +74,8 @@ export async function loadPlayerOverview(id, asOf) {
           // The promoted other-level rows and Milestone Watch's cutoff-safe
           // career total both read these; nothing else on this tab does.
           yearByYearFor(ctx, group),
-          // League ranks — live current ranks with no as-of history, so a
-          // spoiler-cutoff view skips them (same rule as FoulCard).
+          // League ranks — live current ranks with no as-of history, so an
+          // as-of view skips them (same rule as FoulCard).
           currentActivitySportId === 1 && !cutoff
             ? fetchPersonStats(id, { type: 'rankings', group, season, sportId: 1 })
             : Promise.resolve([]),
@@ -120,7 +120,7 @@ export async function loadPlayerOverview(id, asOf) {
         // Same attach-after-buildBlock pattern the old loader used: the rank
         // strip and the two previews ride the block rather than widening a
         // pure shaper's signature.
-        // Live to-date figure: not under a spoiler cutoff, which shows an earlier span.
+        // Live to-date figure: not under an as-of cutoff, which shows an earlier span.
         if (tileSportId === 1 && !cutoff) block.tiles = withLeagueFigure(block.tiles, group, leagueFigure)
         block.postseason = postseasonTilesView(postseasonSplits, group, block.role, season)
         block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : hittingRanksView(rankSplits)

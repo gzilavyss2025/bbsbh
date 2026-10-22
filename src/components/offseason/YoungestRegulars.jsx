@@ -40,8 +40,8 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 // League's six clubs. The note picks one and says which; the picker is three
 // buttons and no fetch, because the level's file carries all three.
 //
-// SPOILER-FREE without qualification: a date of birth and a season total. No
-// game is named here at all.
+// NO GAME DATA: a date of birth and a season total. No game is named here at
+// all.
 const LEAD_ROWS = 3
 
 export function YoungestRegulars({ sportId, season }) {

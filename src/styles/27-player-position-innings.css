@@ -236,7 +236,7 @@
 }
 
 /* ---- as-of banner — neutral graphite strip (not a status tape like the
-   banners above) flagging that this page's link carried a spoiler-safe date
+   banners above) flagging that this page's link carried an as-of date
    cutoff (see lib/route.js `?d=&s=`). "Go live" drops the cutoff without
    hand-editing the URL. ---- */
 .asof-banner {

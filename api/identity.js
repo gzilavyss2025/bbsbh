@@ -7,11 +7,10 @@
 //   PATCH /api/identity   -> { identity: { ... } }              (admin only)
 //   POST  /api/identity   -> the same, for a client that cannot send PATCH
 //
-// IDENTITY IS NEVER STATE, so none of this touches the spoiler rule. Every id
-// here is keyed on `(teamId, treatment)` and holds a colour or a number
-// (src/lib/identity/fields.js); nothing in it can be derived from a score, an
-// inning, or a win probability, and src/lib/CLAUDE.md's "rule that must not
-// drift" is untouched — see ADR-0050.
+// IDENTITY IS NEVER STATE. Every id here is keyed on `(teamId, treatment)` and
+// holds a colour or a number (src/lib/identity/fields.js); nothing in it can be
+// derived from a score, an inning, or a win probability, and src/lib/CLAUDE.md's
+// "The theming rule" is untouched — see ADR-0050.
 //
 // THREE THINGS KEEP THIS SAFE TO EXPOSE:
 //

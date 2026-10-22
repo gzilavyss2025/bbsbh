@@ -1029,7 +1029,7 @@ const TEAM_COLORS = byTeam(MLB_TEAM_COLORS_STORE, (e) => e.accent)
 // blue). A club with no entry simply has no documented color beyond the pair
 // plus accent — 14 of 30 have one today.
 //
-// Decorative and lab-facing only; no spoiler-facing surface reads it. Held as
+// Decorative and lab-facing only; no scoring surface reads it. Held as
 // data in mlb-team-colors.json (ADR-0029) rather than as a JS literal so this
 // research survives an edit in the Team Identity Lab instead of being a table
 // the lab can only read and then silently drop.

@@ -4,16 +4,14 @@
 // Series, the LCS or the World Series), with one game per series. Any other day
 // (two rounds on the slate, a doubleheader, a resumed game, a game the bracket
 // does not know) returns [], and the page stays as it is. The primer shows only
-// the state heading into the cutoff. Every primer part starts here, so this one
-// check keeps today's result out of all of them.
+// the state heading into the cutoff: the bracket never counts the cutoff-date
+// game (ADR-0087; test/postseason/bracket-cutoff.test.js pins it), and every
+// primer part starts here, so today's result stays out of all of them.
 import { seriesPlayingToday } from '../bracketDisplay.js'
 
 export function primerSeriesFor(bracket, slateDate, slateGamePks) {
   const list = seriesPlayingToday(bracket, slateDate)
   if (!list.length || new Set(list.map((s) => s.round)).size > 1) return []
-  // Defence in depth: the bracket never counts a cutoff-date game (ADR-0087), so
-  // this cannot fire today; it keeps a counted game from ever reaching the primer.
-  if (list.some((s) => s.games.some((g) => g.gamePk === s.cutoffGame.gamePk))) return []
   const count = new Map(list.map((s) => [s.key, 0]))
   for (const pk of slateGamePks ?? []) {
     const key = bracket.gameIndex[pk]?.key

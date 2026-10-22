@@ -25,7 +25,7 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 // exactly that check, and it is the difference between "170 of 173,710" and a
 // sentence that would be false.
 //
-// AND IT SPOILS NOTHING, which took deciding rather than assuming. A row names
+// AND IT NAMES NO RESULT, which took deciding rather than assuming. A row names
 // a batter, a pitcher, a date and a pitch count. It does NOT name the at-bat's
 // result, its inning, or anything about the game around it — because a
 // twelve-pitch at-bat is a LENGTH, and a length is true of the at-bat whoever

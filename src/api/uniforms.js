@@ -1,7 +1,7 @@
 // What each club is actually wearing tonight, from the dedicated
 // /api/v1/uniforms/game endpoint — the live feed carries zero uniform data
-// (see docs/uniforms-and-logos.md for the verified findings). Spoiler-FREE:
-// the assignment reveals nothing about the score and never changes once
+// (see docs/uniforms-and-logos.md for the verified findings). The
+// assignment reveals nothing about the score and never changes once
 // posted. It IS empty until around first pitch, and MiLB games return
 // nothing, so this degrades to null and callers show the usual "—".
 
@@ -62,7 +62,7 @@ const GAME_UNIFORM_BATCH = 100
 // `{ [gamePk]: { [teamId]: { code, text } } }`, one entry per side with a
 // posted jersey; a game with no posted assignment (MiLB, or not yet posted)
 // simply has no key, so a caller joining against it counts only games it can
-// actually attribute to a jersey. Spoiler-free: a uniform choice, not a game
+// actually attribute to a jersey. A uniform choice, not a game
 // state — same footing as fetchGameUniforms above.
 export async function fetchGameJerseys(gamePks, options) {
   const out = {}
@@ -106,8 +106,8 @@ export function liveTreatmentFor(gameJerseys, gamePk, teamId, clubName) {
 
 // Gameday's rendered batter figure for a posted side: jersey and pants are
 // separate images on one canvas (stack pants under jersey). Null unless BOTH
-// pieces have a well-formed code — a torso without legs looks broken. Spoiler-
-// free static art (docs/uniforms-and-logos.md, "Batter figure images").
+// pieces have a well-formed code — a torso without legs looks broken. Static
+// art (docs/uniforms-and-logos.md, "Batter figure images").
 const FIGURE_BASE = 'https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/batters'
 export function batterFigureUrls(assets, hand = 'right') {
   const stance = hand === 'left' ? 'left' : 'right' // the CDN's only two folders

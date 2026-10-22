@@ -251,3 +251,41 @@ test('trap 6: a future row whose ifNecessary flag flipped does not change the br
   const flipped = skeleton(2025).map((row) => (row.gamePk === 813046 ? { ...row, ifNecessary: 'N' } : row))
   assert.deepEqual(deriveBracket(flipped, results(2025), cutoff), bracket2025(cutoff))
 })
+
+// ---------------------------------------------------------------------------
+// The invariant the series primer leans on
+// ---------------------------------------------------------------------------
+// `primerSeriesFor` used to carry a guard against a series counting its own
+// cutoff-date game. It was removed as unreachable (#2555), so this is the place
+// the claim is held: on every cutoff of the real seasons below, the game a
+// series plays on the cutoff is never among the games it counts. The seasons are
+// the awkward ones: the 2008 World Series (Game 5 suspended, resumed on the
+// cutoff date, listed twice) and the 2022 ALDS (postponed games listed twice).
+
+const days = (from, to) => {
+  const out = []
+  for (let t = Date.parse(from); t <= Date.parse(to); t += 864e5) out.push(new Date(t).toISOString().slice(0, 10))
+  return out
+}
+
+test('no series counts the game it plays on the cutoff date', () => {
+  const seasons = [
+    [2025, days('2025-09-30', '2025-11-03')],
+    [2022, days('2022-10-06', '2022-11-06')],
+    [2008, days('2008-10-01', '2008-11-01')],
+  ]
+  let withCutoffGame = 0
+  for (const [year, cutoffs] of seasons) {
+    for (const cutoff of cutoffs) {
+      for (const s of deriveBracket(skeleton(year), results(year), cutoff).series) {
+        if (!s.cutoffGame) continue
+        withCutoffGame++
+        assert.ok(
+          !s.games.some((g) => g.gamePk === s.cutoffGame.gamePk),
+          `${cutoff}: ${s.key} counts its own cutoff game ${s.cutoffGame.gamePk}`,
+        )
+      }
+    }
+  }
+  assert.ok(withCutoffGame > 50, 'the sweep reached real cutoff games, not an empty loop')
+})

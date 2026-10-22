@@ -278,7 +278,7 @@ const UniformNamesPage = import.meta.env.DEV
   ? lazyNamed(() => import('./screens/UniformNamesPage.jsx'), 'UniformNamesPage')
   : null
 
-// The current URL, path + query — player/team links carry a `?d=&s=` spoiler
+// The current URL, path + query — player/team links carry a `?d=&s=` as-of
 // cutoff, so the query is part of route identity, not just the path.
 function currentUrl() {
   return window.location.pathname + window.location.search

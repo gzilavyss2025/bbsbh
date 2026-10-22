@@ -2,7 +2,7 @@ import { useNav, nameFromChildren } from '../../lib/nav.js'
 import { umpirePath } from '../../lib/route.js'
 
 // Wraps an umpire's name (already rendered as children) in a plain,
-// no-underline button. Unlike PlayerLink there's no spoiler-cutoff hint to
+// no-underline button. Unlike PlayerLink there's no as-of hint to
 // carry — umpire assignments/dates are never score-revealing, so the target
 // just fetches its own season data. When `id` is missing (selectOfficials
 // occasionally lacks one), renders the children as plain text so the row keeps

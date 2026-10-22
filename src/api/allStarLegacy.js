@@ -14,7 +14,7 @@
 // reuses for both sections.
 //
 // Selection membership carries no individual game's score (same footing as
-// Awards History/League Leaders/WAR), so none of this needs spoiler gating.
+// Awards History/League Leaders/WAR), so none of this needs gating.
 
 const SECTIONS = ['starters', 'bullpen', 'substitutes']
 

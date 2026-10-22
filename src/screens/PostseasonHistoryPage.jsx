@@ -394,7 +394,7 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
 // scripts/gen-postseason-history.mjs, a hand-run
 // precompute (a finished postseason's results are immutable, same footing
 // as war-history.json/awards-history.json) — no SealBox needed, same as
-// those pages: a past series' score carries no LIVE game's spoiler risk.
+// those pages: a past series' score is not a live game's.
 export function PostseasonHistoryPage() {
   useDocumentTitle('Postseason History')
   const { loading, error, data } = useAsync(() => loadPostseasonHistory(), [])

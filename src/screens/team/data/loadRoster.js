@@ -213,8 +213,7 @@ export async function loadRoster(id, asOf, src = DIRECT) {
     .slice(0, 6)
 
   // Injured List — every injured player on the club's 40-man view, tagged
-  // with which IL. Spoiler-free — roster membership reveals nothing about
-  // the score.
+  // with which IL.
   const injured = injuredListFrom(ilRoster, firstLast)
   const currentInjuredIds = new Set(injured.map((p) => p.id))
 

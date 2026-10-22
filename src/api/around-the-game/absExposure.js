@@ -10,7 +10,7 @@
 // the season board would put 418 KB behind every figure on that page. So they
 // ship beside it and the one section that needs them reads them here.
 //
-// SPOILER-FREE. Plate appearances, pitches seen and innings caught, over
+// NO SCORE. Plate appearances, pitches seen and innings caught, over
 // completed games, per player. None of it is a score and no game's result can
 // be read back out of a season total.
 //

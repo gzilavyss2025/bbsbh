@@ -6,9 +6,9 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 // strip on a shared 0–100 axis (PercentileStrip.jsx). Savant computes the
 // percentiles AND their own qualification floor (see api/savantPercentiles.js)
 // — this is a pure presentational read of whatever it hands back. Season
-// aggregates are spoiler-free and, unlike SplitsVsTeam's last-game row, carry
+// aggregates, unlike SplitsVsTeam's last-game row, carry
 // no single-game granularity to gate against the page's asOf cutoff — see
-// .scratch/savant-percentiles/plan.md §4 for the full spoiler audit.
+// .scratch/savant-percentiles/plan.md §4 for the full audit.
 //
 // Renders nothing when there's no data at all (MiLB player, or under Savant's
 // sample floor for all but a couple of metrics) — no empty state, same as

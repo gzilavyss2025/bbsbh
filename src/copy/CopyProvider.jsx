@@ -9,7 +9,7 @@ import { CopyContext } from './copyContext.js'
 // network is down, the store is unconfigured, or the cache is garbage, the app
 // paints shipped defaults — the same graceful-degrade guarantee the rest of
 // the account/content layer keeps. Nothing here is score-bearing, so a stale value is a
-// cosmetic wording lag, never a spoiler. The consumer hook lives in
+// cosmetic wording lag. The consumer hook lives in
 // copyContext.js.
 
 const CACHE_KEY = 'bbsbh:copyOverrides'

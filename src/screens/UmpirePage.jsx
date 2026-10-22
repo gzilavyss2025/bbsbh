@@ -101,7 +101,7 @@ function hpTeamRecords(games) {
 // An umpire's page: every MLB game he's worked this season, most recent
 // first, with a toggle to show only the games he had behind the plate. Game
 // dates and who-worked-what carry no score, so — unlike the player/team pages
-// this mirrors — there's no spoiler cutoff to thread through: the page just
+// this mirrors — there's no as-of cutoff to thread through: the page just
 // shows the umpire's whole season.
 //
 // A season view (#1202): `seasonYear` and `vs` come from the address. The

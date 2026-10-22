@@ -1,5 +1,5 @@
 // Stat aggregation, season tiles, vs-L/R + situational splits, and league rank
-// chips. See ../person.js's header for the module's overall spoiler footing.
+// chips. See ../person.js's header for the module's overall as-of footing.
 
 import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
 import { rateText } from '../../lib/math/leagueAverages.js'
@@ -304,7 +304,7 @@ export function splitReads(rows, all, group) {
 // ---------------------------------------------------------------------------
 // Situational splits — a curated slice of the API's sitCodes menu, same
 // splitSide shape and ledger columns as the vs-L/R card so the two read as one
-// family. Full-season figures, same spoiler footing as splitsView.
+// family. Full-season figures, same footing as splitsView.
 //
 // The six rows are TWO families, not one list: where the runners are (a fact
 // about the inning) and who is ahead in the count (a fact about the at-bat).
@@ -370,7 +370,7 @@ export function situationalSplitsView(splits, group, { minRows = 4 } = {}) {
 // his own league for each standard stat. Curated to the headline stats and
 // gated to top-10 ranks: "1st in NL ERA" is a fact worth a chip; "38th in
 // wins" is not. Live full-season ranks with no as-of history, so the strip
-// is current-day only (loadPlayer skips the fetch under a spoiler cutoff,
+// is current-day only (loadPlayer skips the fetch under an as-of cutoff,
 // same rule as FoulCard/Recent workload).
 // ---------------------------------------------------------------------------
 

@@ -30,8 +30,7 @@
 // (product decision 4). A rolling-window feed fed from a nightly precompute is
 // up to a day behind.
 //
-// Spoiler note: roster moves and their dates carry no score, so nothing here
-// is reveal-only — as spoiler-free as the pipeline it calls.
+// Roster moves and their dates carry no score, so nothing here is reveal-only.
 
 import { txnDate } from '../rehab-policy.js'
 import {

@@ -31,8 +31,7 @@
 // (`${orgId}-${date}-${type}-${anchor}`), so a day the file already holds and
 // a day the wire just filed cannot disagree about what happened.
 //
-// Spoiler note: a roster move and its date carry no score, so nothing here is
-// reveal-only — as spoiler-free as the two pipelines it joins.
+// A roster move and its date carry no score, so nothing here is reveal-only.
 
 import { getJson } from '../statsapi.js'
 import { toApiDate } from '../../lib/dates.js'

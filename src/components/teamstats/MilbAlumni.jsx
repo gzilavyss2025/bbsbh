@@ -11,9 +11,8 @@ import { isMlbTeamId } from '../../lib/teams.js'
 // and Games tabs already hold. A farm club has no such record anywhere else in
 // the app — the whole point of Altoona is who passed through it.
 //
-// Not spoiler-adjacent. Career WAR and a jersey number are stat lines, not a
-// score, and the rule's scope explicitly opens season and career numbers
-// (ADR-0034). Nothing here is fetched from a game feed.
+// Career WAR and a jersey number are stat lines, not a score (ADR-0034).
+// Nothing here is fetched from a game feed.
 //
 // Laid out as a baseball card: the portrait framed on the left, the type stack
 // left-aligned beside it. The portrait is bigger than the Team Leaders card's

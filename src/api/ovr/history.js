@@ -1,7 +1,7 @@
 // Pure readers of one player's OVR history (docs/ovr-rating.md, "Rating changes over
 // time"). A snapshot is { date: 'YYYY-MM-DD', ovr, bars, seeded }. `seeded` marks a
 // prospect-trend percentile that stands in for a rating until a real snapshot exists.
-// Spoiler-free: season rating figures, no game result (ADR-0034).
+// Season rating figures, no game result (ADR-0034).
 
 const epochDay = (date) => Date.parse(date) / 864e5
 const byDate = (a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)

@@ -27,9 +27,8 @@ import { Pill } from '../ui/control/Pill.jsx'
 // Fixed rather than searchable on purpose — this is a rehearsal of the effect,
 // not a player browser, and the effect is the same for everyone.
 //
-// SPOILER FOOTING. /people/{id}/awards carries seasons and dates, never a
-// score, and this page is not a scoring surface; the fetch degrades to [] on
-// failure and the list still works without it.
+// NO SCORE HERE. /people/{id}/awards carries seasons and dates, never a score;
+// the fetch degrades to [] on failure and the list still works without it.
 const SAMPLE = { id: 545361, name: 'Mike Trout', line: 'CF · Angels' }
 
 const TIER_LABEL = {

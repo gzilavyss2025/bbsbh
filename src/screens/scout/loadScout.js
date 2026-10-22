@@ -17,8 +17,8 @@ import { baseballToday } from '../../lib/time/standingsDates.js'
 // shards from the nightly season stores (whole buckets, so the board can read
 // `post` beside `pit`, ADR-0094), the hitter's grid and the league's from the
 // same season store (ADR-0096), and the hitter's per-pitch line from the
-// Savant board, which the page shows while his grid is not posted. All spoiler-free season aggregates over final
-// games, on an open page (ADR-0034). The head-to-head is its own request
+// Savant board, which the page shows while his grid is not posted. All season
+// aggregates over final games, on an open page (ADR-0034). The head-to-head is its own request
 // (api/scout/headToHead.js): it fails on its own, and the page says so.
 //
 // Null when either person cannot be fetched (a bad id in a hand-typed link).

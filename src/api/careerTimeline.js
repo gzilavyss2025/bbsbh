@@ -5,7 +5,7 @@
 // is careerTimelineView in person/careerRegister.js.
 //
 // Split out of person-fetch.js when that file hit its size budget; nothing
-// here reads a live game feed, so it carries the same spoiler-free footing as
+// here reads a live game feed, so it carries the same footing as
 // the rest of the player-page fetchers.
 
 import { teamLogoUrl } from '../lib/teams.js'

@@ -1,7 +1,7 @@
 // The reader behind the two pages scripts/gen-gate.mjs feeds — /attendance
 // ("The Gate") and /pace-of-play ("The Clock"). One static file, two boards.
 //
-// SPOILER-FREE. A crowd count and a clock reading say nothing about who won.
+// NO SCORE. A crowd count and a clock reading say nothing about who won.
 // Same footing as the weather string and the umpire crew, both of which this
 // app has always shown live before a pitch is thrown. Nothing here reads a
 // run, an inning or a result, so no SealBox and no reveal gate.

@@ -2,7 +2,7 @@
 // rehab assignment, league-wide — read from a static same-origin file
 // (public/data/rehab.json) rather than computed live.
 //
-// Building the list is expensive and can't be done spoiler-cheaply on a page
+// Building the list is expensive and can't be done cheaply on a page
 // load: the transaction feed says who STARTS a rehab but not reliably when one
 // ENDS, so each candidate has to be verified against his game log and his club's
 // schedule (a few statsapi calls apiece) to drop stints that have really
@@ -11,7 +11,7 @@
 // a cron and commits the shaped result (see .github/workflows/update-nightly-data.yml);
 // this module just reads it. Same build-time-fetch pattern as war.js (see
 // docs/data-enrichment.md §5). Roster moves + game *dates* carry no score, so
-// the file is spoiler-free like the rest of the roster surfaces.
+// the file needs no gate, like the rest of the roster surfaces.
 //
 // Degrades to an empty list before the file exists or on any failure — a
 // friendly empty state, not a broken page. Cached in-memory for the session

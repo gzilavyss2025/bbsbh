@@ -155,12 +155,12 @@ function RosterLeagues({ roster, effectiveTeamId, filtering }) {
 }
 
 // One season: the roster (above) plus, when the game itself resolved, the
-// AllStarGameResult card — this page's one deliberate exception to the
-// spoiler rule's "never print a score" invariant (see that component's
-// header comment + docs/adr/0019). `card` (from fetchGameCardsByPk) supplies
-// the date + the real club abbreviations the box-score link needs; the score
-// itself comes straight from the static file (data.scores[year]), so the
-// card still renders even in the rare case `card` hasn't resolved yet.
+// AllStarGameResult card — this page prints a score plainly, on
+// purpose (see that component's header comment + docs/adr/0019). `card` (from
+// fetchGameCardsByPk) supplies the date + the real club abbreviations the
+// box-score link needs; the score itself comes straight from the static file
+// (data.scores[year]), so the card still renders even in the rare case `card`
+// hasn't resolved yet.
 function RosterYear({ year, roster, score, mvp, venue, card, navigate, effectiveTeamId, filtering }) {
   return (
     <Card body="flush" className="allstarrosters__year">

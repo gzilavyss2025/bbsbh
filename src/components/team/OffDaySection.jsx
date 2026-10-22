@@ -10,7 +10,7 @@ import { Grid } from '../ui/layout/Grid.jsx'
 // The clubs NOT playing on the slate's date, shown below the games as small
 // gameday-styled cards — same framed, overscaled logo tile the slate matchup
 // cards use (see .gamecard__logobox), scaled down. Tapping a card opens that
-// team's page with NO spoiler cutoff: teamPath's `d`/`s` hint exists to
+// team's page with NO as-of cutoff: teamPath's `d`/`s` hint exists to
 // protect a game you followed the link from, but a club on this list has no
 // game on `dateStr` — there's nothing here for a cutoff to protect, so
 // passing one anyway just shows a "stats frozen" banner over nothing. Any

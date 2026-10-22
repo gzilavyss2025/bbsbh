@@ -8,7 +8,7 @@
 // season ends; the current-season half moves with the standings, so the file
 // is regenerated alongside the other nightly data rather than by hand.
 //
-// NO SPOILER SURFACE HERE. Every number is a season-long rank or a finished
+// NO SCORE. Every number is a season-long rank or a finished
 // season's result — the same footing as Standings, League Leaders and
 // Postseason History, which all open live (see CLAUDE.md's scope note). It
 // reads no live game and carries no per-game score, so it needs no cutoff

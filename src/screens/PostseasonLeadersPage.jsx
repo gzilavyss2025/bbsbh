@@ -109,8 +109,8 @@ function MvpAwardsBoard({ entries, favoriteTeamId }) {
 // player-keyed leaderboard shows a headshot + team logo, not a bespoke rank
 // list — but a plain rank list for the franchise/MVP boards, which are
 // TEAM-keyed and single-category (no featured-card treatment fits there).
-// Every number is a season(s)-old counting/rate stat carrying no LIVE game's
-// spoiler risk (same footing as Awards History/WAR) — no SealBox needed.
+// Every number is a season(s)-old counting/rate stat, not a live game's (same
+// footing as Awards History/WAR) — no SealBox needed.
 export function PostseasonLeadersPage() {
   useDocumentTitle('Postseason Leaders')
   const { favoriteTeamId } = useFavoriteTeam()

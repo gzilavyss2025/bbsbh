@@ -21,7 +21,7 @@
 // leave it; it ships the threshold it used (`selloutFill`) alongside, so the
 // card can label the number rather than hard-code a second copy of it.
 //
-// Spoiler-free: a season aggregate over FINAL games' attendance carries no
+// A season aggregate over FINAL games' attendance carries no
 // live-game score (same footing as WAR / comeback-wins), so no SealBox.
 // Degrades to null with no file, or for any club with no home games ingested
 // yet (early season, or MiLB — the generator is MLB only).

@@ -10,7 +10,7 @@
 // (#2510). This module just reads it. Same build-time-fetch pattern as milestones.js/rehab.js (see
 // docs/data-enrichment.md §5). Historical award winners carry no individual
 // game's score — same footing as the (ungated) League Leaders/WAR/Milestone
-// Watch pages — so this file needs no spoiler cutoff.
+// Watch pages — so this file needs no as-of cutoff.
 //
 // The season in play is also read live — see "this season" below. That half is not
 // cached: an award announced mid-session should show on the next visit.

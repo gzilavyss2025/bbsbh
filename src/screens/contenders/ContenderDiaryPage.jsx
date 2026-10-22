@@ -30,8 +30,7 @@ import {
 //
 // NOTHING HERE IS SCORE-BEARING. Every number on this page is a season
 // count, a bracket rung, or a roster statistic — no game, no linescore, no
-// reveal state. The spoiler rule has no surface to hold onto here, same as
-// the prospect diary.
+// reveal state, same as the prospect diary.
 
 function Shell({ children }) {
   useDocumentTitle('Contender diary')

@@ -6,7 +6,7 @@
 // seasons of league game logs with these functions; `rule.js` folds one player's log
 // with the SAME functions, so "through 40 games" means one thing on both sides.
 //
-// Spoiler-free: season aggregates on an open surface (ADR-0034). The rule, not this
+// Season aggregates on an open surface (ADR-0034). The rule, not this
 // file, holds back a game still being played (see rule.js).
 import { ipToOuts } from '../../lib/math/innings.js'
 import { num } from '../../lib/math/number.js'

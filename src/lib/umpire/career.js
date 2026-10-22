@@ -4,7 +4,7 @@
 // The rows also hold Triple-A games and the All-Star Game; the history does not,
 // so both are left out here. A tie is a game worked and in no record.
 //
-// Pure, no fetch. Spoiler-free: past seasons, and a career line is not a score (ADR-0034).
+// Pure, no fetch. Past seasons only, and a career line is not a score (ADR-0034).
 
 const MIN_CHART_SEASONS = 3 // a bar strip of one or two seasons says nothing
 const MIN_BAR_GAMES = 5 // a split of fewer decided games reads as a verdict

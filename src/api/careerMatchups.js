@@ -3,7 +3,7 @@
 // pitcher, at any level the two have shared — read from a static same-origin
 // file (public/data/career-matchups.json) rather than computed live.
 //
-// Building it can't be done spoiler-cheaply on a page load. Checking one
+// Building it can't be done cheaply on a page load. Checking one
 // batter/pitcher pair's history needs one statsapi call per level they might
 // have crossed paths at (the API takes exactly one sportId per call), so a
 // lineup against one starter is a couple of dozen calls. It's also

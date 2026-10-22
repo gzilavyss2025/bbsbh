@@ -29,9 +29,9 @@
 // the owner is editing IS the preview (there must be no second layout only the
 // owner sees) and dropped on Cancel. Nothing ever writes `preview` anywhere.
 //
-// THE SPOILER RULE IS UNTOUCHED. Every id here names `(teamId, treatment)` and a
-// colour, a nudge or a scale. Identity, never state — src/lib/CLAUDE.md's "rule
-// that must not drift" is not weakened by making that identity editable.
+// IDENTITY, NEVER STATE. Every id here names `(teamId, treatment)` and a colour,
+// a nudge or a scale. src/lib/CLAUDE.md's "The theming rule" is not
+// weakened by making that identity editable.
 
 import { applyIdentityOverrides } from './apply.js'
 import { sanitizeIdentityOverrides } from './fields.js'

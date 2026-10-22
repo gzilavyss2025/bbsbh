@@ -3,7 +3,7 @@
 // scripts/gen-abs-challenges.mjs writes (abs-challenges-post-games.json, one
 // entry a postseason game, roles already added per player).
 //
-// SPOILER-FREE. A challenge record is a ball-strike judgment, not a score. The
+// NO SCORE. A challenge record is a ball-strike judgment, not a score. The
 // card counts only games Final BEFORE the page's cutoff date, the rule the rest
 // of the page keeps (ADR-0034, ADR-0087), so it can show nothing from a game
 // the viewer has not reached. No SealBox. Its sibling absChallenges.js reads the

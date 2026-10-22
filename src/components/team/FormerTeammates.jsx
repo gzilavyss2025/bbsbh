@@ -11,8 +11,8 @@ import { Ladder } from './ladder/Ladder.jsx'
 import { posLabel, seasonRange } from './ladder/layout.js'
 
 // The lineup page's FORMER TEAMMATES card and its ORG TIES fallback.
-// Spoiler-free: rosters and team-season history carry no score, so both
-// render openly like the opposing-pitcher line.
+// Rosters and team-season history carry no score, so both render openly like
+// the opposing-pitcher line.
 
 // The card as the Ladder (#1352, see teammateLadder): away players, the clubs
 // they shared, home players, a line per pair. Every player and every club shows

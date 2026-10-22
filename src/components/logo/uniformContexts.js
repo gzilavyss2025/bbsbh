@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-// Posted uniform assets, handed down without drilling (spoiler-free static
+// Posted uniform assets, handed down without drilling (static
 // data; the same assignment UniformFigure draws on the lineup page).
 // `GameUniformsContext`: both clubs' assets for this game ({ away, home }, each
 // null/absent until posted), published by GameView. `BattingUniformContext`:

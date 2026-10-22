@@ -5,8 +5,8 @@ import { staticJsonBy } from '../staticJson.js'
 // scripts/gen-bio-history.mjs builds BY HAND from Retrosheet's biographical files
 // (ADR-0100). The app never fetches Retrosheet or the Chadwick register.
 //
-// SPOILER FOOTING: spoiler-FREE. A birthday or a debut date from history says
-// nothing about a game, so an open surface may show it with no SealBox (ADR-0034).
+// NO GAME DATA. A birthday or a debut date from history says nothing about a
+// game (ADR-0034).
 //
 // ONE FILE PER DAY (366): a month's file was up to 415 KB, because debuts bunch in April
 // and September; a day's is at most 21 KB.

@@ -6,7 +6,7 @@
    ============================================================ */
 
 /* The plain, no-underline name/team link — the whole navigation affordance.
-   Rest state is indistinguishable from surrounding text (the spoiler-safe look);
+   Rest state is indistinguishable from surrounding text;
    a dotted underline appears only on hover / keyboard focus. */
 .plink {
   appearance: none;

@@ -2,7 +2,7 @@
 // position) and the starter/reliever IP pair. Innings ("2039.2" = 2039 ⅔) sum
 // through the same outs math as pitching IP, so a career scope adds correctly
 // across levels. See api/positionInnings scope loader for the fetch side, and
-// ../person.js's header for this module's overall spoiler footing.
+// ../person.js's header for this module's overall as-of footing.
 
 import { ipToOuts, outsToIp } from '../../lib/math/innings.js'
 import { num } from './shared.js'

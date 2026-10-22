@@ -2,7 +2,7 @@
 // picked-game card from (issue #1077), read from a static same-origin file —
 // public/data/milb-pool/{sportId}.json, one per level.
 //
-// SPOILER-FREE, AND THE FILE IS WHY. The card's whole job is to offer a game
+// NO RESULT, AND THE FILE IS WHY. The card's whole job is to offer a game
 // from a season that is over, which is the one place a static file could hand a
 // page a result without anyone noticing. So the generator stores no score, no
 // run total, no winner and no inning count (scripts/gen-milb-pool.mjs says what

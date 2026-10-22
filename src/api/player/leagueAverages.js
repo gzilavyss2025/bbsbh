@@ -3,7 +3,7 @@ import { getJson } from '../statsapi.js'
 import { leagueAveragesOf } from '../../lib/math/leagueAverages.js'
 
 // League batting average and ERA for one MLB season. Season rates, not scores:
-// spoiler-free, open data, no SealBox. Seasons up to the last complete one come
+// open data, no SealBox. Seasons up to the last complete one come
 // from public/data/league-averages.json (scripts/gen-league-averages.mjs, hand-run).
 // The season after that is still in play, so it is fetched live, ONE request for
 // both groups, and kept in memory for the session. It is "to date": the caller

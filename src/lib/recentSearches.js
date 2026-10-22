@@ -4,14 +4,12 @@
 // dependency-free so the parse rules can be pinned by the unit suite
 // (test/recent-searches.test.js), same shape as stamps.js.
 //
-// Spoiler-safe by construction, and the reason is worth writing down rather
-// than assuming: an entry holds a person/club id, a display name, and the
-// subtitle already shown on that search row (position, club, level) — the
-// identity-only fields `api/search.js` is limited to. It holds no score, no
-// date, and no game, so no amount of it can leak a result. Anything the reader
-// cannot recognize as exactly that shape is dropped rather than stored, which
-// is also what keeps a hand-edited or half-written localStorage value from
-// reaching the render path.
+// Identity only, by construction: an entry holds a person/club id, a display
+// name, and the subtitle already shown on that search row (position, club,
+// level) — the identity-only fields `api/search.js` is limited to. It holds no
+// score, no date, and no game. Anything the reader cannot recognize as exactly
+// that shape is dropped rather than stored, which is also what keeps a
+// hand-edited or half-written localStorage value from reaching the render path.
 
 export const RECENT_SEARCHES_KEY = 'bbsbh:search:recent'
 

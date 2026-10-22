@@ -3,8 +3,8 @@
 // This is a PURE function of (page, options) — no fetch, no Redis, no clock, no
 // game data. `api/page.js` does the I/O (read the overrides, resolve the page)
 // and hands the result here. That split is what makes the whole thing testable
-// in `test/landing-pages.test.js`, and it is why the spoiler invariant is
-// checkable at all: a renderer that cannot reach the feed cannot leak a score.
+// in `test/landing-pages.test.js`, and it is why "no game data on a landing
+// page" is checkable at all: a renderer that cannot reach the feed cannot print a score.
 //
 // WHY A STANDALONE DOCUMENT, not the app shell with content injected. Three
 // reasons, in order of weight:

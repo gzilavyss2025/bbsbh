@@ -170,8 +170,7 @@ export function standingsRowsFor(standings, team, id) {
 const IL_ORDER = { 7: 0, 10: 1, 15: 2, 60: 3, IL: 4 }
 
 // Every injured player on the club's 40-man view, each tagged with which IL
-// (10/15/60-day; MiLB shows 7/60/full-season). Spoiler-free — roster membership
-// reveals nothing about the score. Degrades to [] when no IL is posted.
+// (10/15/60-day; MiLB shows 7/60/full-season). Degrades to [] when no IL is posted.
 export function injuredListFrom(ilRoster, nameOf) {
   return ilRoster
     .filter((r) => /^D\d+$/.test(r.status?.code ?? '') || r.status?.code === 'ILF')

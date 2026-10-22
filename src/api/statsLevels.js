@@ -16,7 +16,7 @@
 // counts. Rate stats (AVG/OBP/ERA/WHIP/…) are RECOMPUTED from the summed
 // components, never averaged.
 //
-// Still spoiler-free: season aggregates only, same stance as the rest of the
+// Still season aggregates only, same stance as the rest of the
 // leader pages. There is no rollup shortcut — statsapi's sportId=21 ("Minors")
 // carries no stats and comma-joined sportIds return nothing — so the fan-out
 // (one call per level or per club, per group) and this combine are the whole job.

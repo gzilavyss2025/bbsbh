@@ -2,7 +2,7 @@ import { getJson } from '../statsapi.js'
 import { ordinal } from '../../lib/format.js'
 import { RANK_STATS, rankedSplits, topRank } from '../person/stats.js'
 
-// League rank for the player page (#1856). Season rankings, not scores: spoiler-free,
+// League rank for the player page (#1856). Season rankings, not scores:
 // open data, no SealBox (ADR-0034).
 //
 //   N  the player's own rank, from stats=rankings (fetchPersonStats type 'rankings',
@@ -71,7 +71,7 @@ function poolsFor(season, leagueId) {
 
 // The marks for a player, from the rankings splits the page already holds. One request
 // for the pool, shared by both groups and cached per season and league; none for a
-// player with no rankings (MiLB, or a spoiler cutoff, where the caller passes none).
+// player with no rankings (MiLB, or an as-of view, where the caller passes none).
 // `playerId` stays in the call shape the page uses; the pool no longer needs it.
 export async function fetchRankMarks(playerId, group, rankSplits, season) {
   // A traded player gets no mark (rankMarks), so he costs no pool request either.

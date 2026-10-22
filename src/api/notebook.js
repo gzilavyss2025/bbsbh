@@ -9,7 +9,7 @@
 // the obvious note there cannot be written honestly at a single level (the
 // promotion bias, recorded in scripts/gen-youngest-regulars.mjs).
 //
-// SPOILER-FREE, AND THE FILES ARE WHY.
+// NO RESULT, AND THE FILES ARE WHY.
 //
 // The age note is a season aggregate and a date of birth. Those have opened
 // live since ADR-0034, and there is no game in the file at all.

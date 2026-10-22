@@ -6,8 +6,8 @@ import { staticJsonBy } from '../../staticJson.js'
 // builds BY HAND, sharded on `shardKey100(mlbamId)`. The app never fetches
 // Retrosheet or the Chadwick register.
 //
-// SPOILER FOOTING: spoiler-FREE. Who a man's father or brother is says nothing
-// about a game, so an open surface may show it with no SealBox (ADR-0034).
+// NO GAME DATA. Who a man's father or brother is says nothing about a game
+// (ADR-0034).
 //
 // THE SHARD: { credit: [line, ...], players: { [mlbamId]: [{ relation, personId, name }] } }.
 // `relation` says what the OTHER man is to this player (his Father, his Son).

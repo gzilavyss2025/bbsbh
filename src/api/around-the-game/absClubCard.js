@@ -1,6 +1,6 @@
 // THE ABS CHALLENGES CARD'S MODEL — one club, two jobs (hitting, catching), and
 // the figures the card draws from the per-club file (abs-exposure-clubs-*.json,
-// ADR-0076). Pure and spoiler-free: season totals over completed games, no game
+// ADR-0076). Pure: season totals over completed games, no game
 // can be read back out of them.
 //
 // WHAT THE CARD SHOWS, AND WHERE EACH FIGURE COMES FROM

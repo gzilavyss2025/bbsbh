@@ -35,8 +35,7 @@ const DASH = '—'
 // the dot — is aria-hidden, because the rank it draws is printed beside it.
 //
 // The seal amber is deliberately not used anywhere in here — that ink is
-// reserved for score covers (CLAUDE.md's spoiler rule), and this is
-// spoiler-free season aggregate data.
+// reserved for score covers, and this is open season aggregate data.
 // No axis caption and no footnote: the strip carries its own reading. The
 // league-average rule is drawn as a pencilled reference line, every dot sits
 // visibly left or right of it, and each row prints its own rank in figures.
