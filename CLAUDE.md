@@ -68,6 +68,10 @@ watching may ask with `AskUserQuestion`, one question at a time. A child or unat
 session writes `[DECISION: ...]` lines instead. Detail: `docs/development.md`, "Cloud
 sessions".
 
+**Long runs:** keep going unless blocked or about to do something destructive, keep a
+checklist file, end with `Blocked on me` / `Changed` / `Found`, and mark what you could
+not confirm. Detail: `docs/development.md`, "Long runs".
+
 **Local sessions** (a worktree, reserved dev ports, a localhost URL in the handoff, the
 fresh-context checklist): `docs/development.md`, "Local sessions only".
 

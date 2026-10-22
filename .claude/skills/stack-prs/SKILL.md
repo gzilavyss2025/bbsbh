@@ -86,7 +86,9 @@ did, and end with a short list of what needs him.
    (`subscribe_pr_activity`).
 6. **Review the stack, then fix.** This is the only review the source PRs get.
    Run the `code-review` skill on the stack PR at `high` effort, then the
-   `ponytail-review` skill on the same diff. Then check these four things by
+   `ponytail-review` skill on the same diff. If you split the review across
+   subagents, open the cited file and line of each finding before you accept it
+   (`docs/development.md`, "Long runs"). Then check these four things by
    hand, because the generic review does not know them:
    - **The spoiler rule.** A reveal-only module (`linescore.js`, `derive.js`,
      `hitchart.js`) called outside a `SealBox` reveal render function. A

@@ -78,6 +78,42 @@ sessions that share one machine. In the cloud, these rules change:
 - **Branch cleanup (maintainer, one time).** Merged `claude/*` branches pile up on
   GitHub. Enable "Automatically delete head branches" in the repository settings.
 
+## Long runs (any session that works for many steps)
+
+These rules keep a long or unattended run moving and make its result easy to check.
+They add to "Cloud sessions" above and do not replace any rule in it.
+
+- **Keep going.** When a step does not need the maintainer, do the next step. Put a
+  status note in the same message as the next action; do not stop to report or to
+  offer a choice that does not block the work. Stop and ask only when you cannot go
+  on without an answer, or before a destructive step: deleting data, force-pushing,
+  or changing anything outside this repo. Permission prompts for destructive commands
+  stay on. An unwatched session writes `[DECISION: ...]` and stops (see "Questions").
+- **Write the finish line first.** A task has a "Done means" line: a test, a route, or
+  a visible result. If the prompt has none, write one in your first message.
+- **Keep a checklist in a file.** For a run of more than about five steps, keep
+  `TASKS.md` in your scratchpad directory. Tick each item when it is done and add what
+  you find. Context is summarized on a long run and a file is not. Read the file, not
+  the scrollback, to see progress. Do not commit it. Copy it to `.scratch/<slug>/` only
+  when a later session will continue the work.
+- **End with three headings.** Close the final message (and the PR description) with
+  `Blocked on me`, `Changed`, `Found`. Put `Blocked on me` first. Write "none" for an
+  empty one. A `NEEDS PARENT:` line (see `orchestrate`) goes under `Blocked on me`.
+- **Mark what you could not confirm.** In research and in any claim about the MLB
+  feed, say what you checked and where. Mark each claim you could not check against a
+  real response (a gamePk from `docs/test-games.md`, a file you read) as "unconfirmed".
+- **Split a big audit across subagents, and check each report.** Give each unit its
+  own subagent. A report is a claim: before you accept it, open the cited file and
+  line, or run the cited command. End with one table: unit, result, evidence. A child
+  session that `orchestrate` starts does not start subagents; this rule is for a
+  session that works alone, or for the parent.
+- **Review for blockers before a person looks.** Review your own diff against
+  `origin/main` and list only problems you would block the merge for. For each one, give
+  the file and line, why it is wrong, and how to show it fails. Fix them, then push.
+  Style and polish are not blockers.
+- **A follow-up during a run is normal.** The maintainer can type while you work. Read
+  it after the current tool calls and fold it in without restarting.
+
 ## Testing the app: always append `?nointro`
 
 On a fresh or cleared `localStorage`, the first-visit welcome modal
