@@ -189,7 +189,7 @@ const knownLocation = (t) => (t.locationName === 'United States' ? '' : clean(t.
 //
 // NO RECORD, and that is a decision rather than an omission. A club's W-L moves
 // every game, which is why the modules that read it (standings.js, teamScore.js,
-// teamRecords.js, seasonSeries.js) take an `asOf`. Nothing here has a reader to
+// teamRecords.js, seasonSeries.js) take a date cutoff. Nothing here has a reader to
 // ask, so it does not print one. The identity below never moves during a game.
 export function teamCrawl(t, { id, name, level, league, tab, ballpark = clean(t.venue?.name || '') }) {
   const segment = entitySegment(id, name)

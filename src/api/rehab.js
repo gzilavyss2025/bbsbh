@@ -11,7 +11,7 @@
 // a cron and commits the shaped result (see .github/workflows/update-nightly-data.yml);
 // this module just reads it. Same build-time-fetch pattern as war.js (see
 // docs/data-enrichment.md §5). Roster moves + game *dates* carry no score, so
-// the file is spoiler-free like the rest of the roster surfaces.
+// the file needs no gate, like the rest of the roster surfaces.
 //
 // Degrades to an empty list before the file exists or on any failure — a
 // friendly empty state, not a broken page. Cached in-memory for the session

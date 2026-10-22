@@ -135,10 +135,10 @@ export function useGameData(game, activeStep = null) {
     }
   }, [game.gamePk, hasActiveFeed])
 
-  // The date a name-link inside this game should cut its stats off at: the
-  // game's official date. Falls back to the scheduled date before the feed
-  // lands. Feeds every PlayerLink/TeamLink below (via LinkScope) so a player
-  // page opened from a sealed game shows "entering today", never tonight's line.
+  // The game's official date. Falls back to the scheduled date before the feed
+  // lands. The masthead and the series link read it; name-links no longer stamp
+  // it onto player and team pages as a cutoff (ADR-0034's amendment, GameView),
+  // so those open live.
   const officialDate =
     feed?.gameData?.datetime?.officialDate || (game.gameDate || '').slice(0, 10) || null
 

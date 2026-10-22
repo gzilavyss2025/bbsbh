@@ -24,7 +24,7 @@
 // nothing the site renders, so Cancel is genuinely a cancel — and the identity
 // store keeps ONE writer and one validation choke point.
 //
-// IDENTITY, NEVER STATE (src/lib/CLAUDE.md's "rule that must not drift"): the
+// IDENTITY, NEVER STATE (src/lib/CLAUDE.md's "The theming rule"): the
 // payload is opaque bytes an admin chose, keyed on (teamId, slot), and nothing
 // here reads a feed or can be derived from one.
 //

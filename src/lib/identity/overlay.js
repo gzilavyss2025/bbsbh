@@ -30,7 +30,7 @@
 // owner sees) and dropped on Cancel. Nothing ever writes `preview` anywhere.
 //
 // IDENTITY, NEVER STATE. Every id here names `(teamId, treatment)` and a colour,
-// a nudge or a scale. src/lib/CLAUDE.md's "rule that must not drift" is not
+// a nudge or a scale. src/lib/CLAUDE.md's "The theming rule" is not
 // weakened by making that identity editable.
 
 import { applyIdentityOverrides } from './apply.js'

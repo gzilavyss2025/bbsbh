@@ -39,7 +39,7 @@ import { BarCell } from '../../components/around-the-game/BroadcastBar.jsx'
 // rankings and affiliate winning, and the page RE-MEASURES that on the data in
 // front of the reader rather than only citing it.
 //
-// COMPLETED GAMES ONLY. Minor-league records and published prospect ranks are
+// NO SCORE. Minor-league records and published prospect ranks are
 // aggregates over completed games in another league (ADR-0034).
 
 const pct3 = (n) => (n == null ? '—' : n.toFixed(3).replace(/^0/, ''))

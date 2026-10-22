@@ -11,7 +11,7 @@
 // replace the marker block. Any failure — statsapi down, card unresolved — falls
 // through to the static default card, so a shared link can never break.
 //
-// It also writes a READABLE BODY for the routes outside the scoring surfaces (ADR-0059). The
+// It also writes a READABLE BODY for the player and club routes (ADR-0059). The
 // head has carried a real card since ADR-0012, but the body underneath it was
 // `<div id="root"></div>`, and the crawlers behind AI assistants run no
 // JavaScript — so a player page was a blank div with a good meta description.

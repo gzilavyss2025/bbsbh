@@ -10,7 +10,7 @@
 // IDENTITY IS NEVER STATE. Every id here is keyed on `(teamId, treatment)` and
 // holds a colour or a number (src/lib/identity/fields.js); nothing in it can be
 // derived from a score, an inning, or a win probability, and src/lib/CLAUDE.md's
-// "rule that must not drift" is untouched — see ADR-0050.
+// "The theming rule" is untouched — see ADR-0050.
 //
 // THREE THINGS KEEP THIS SAFE TO EXPOSE:
 //
