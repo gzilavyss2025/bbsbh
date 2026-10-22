@@ -9,8 +9,7 @@ import { teamAbbr } from '../../teams.js'
 // the Series is not decided. The bracket already applies the cutoff (ADR-0087):
 // a game on the slate date never counts, so the answer holds all day. The day
 // after the clincher `decided` is true, mode is off, and the existing champion
-// band takes over. The `live` flag (Scores Unlocked) is the bracket's, not
-// this function's.
+// band takes over.
 //
 // DAY TYPE. A game day is a date the bracket marks `playsOnCutoff`; every
 // other mode-on date is an off day. `gameNumber` is the cutoff game's number

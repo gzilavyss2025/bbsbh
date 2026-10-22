@@ -4,9 +4,8 @@
 //
 // The counted games are the bracket's own (deriveBracket, ADR-0087): Final with
 // a winner before the cutoff, on the resume date for a suspended game. The
-// date filter below repeats that rule, so a live bracket that counts today's
-// game still writes nothing from it. "If necessary" and later games are not in
-// the block at all.
+// date filter below repeats that rule, so the block never holds the slate
+// date's own game. "If necessary" and later games are not in the block at all.
 //
 // dataByPk: { [gamePk]: { box, feed, winProb } }, the raw /boxscore, the
 // feed/live read with WHIFF_FEED_FIELDS plus the venue, and /winProbability.

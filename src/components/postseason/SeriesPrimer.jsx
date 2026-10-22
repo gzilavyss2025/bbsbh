@@ -30,8 +30,7 @@ import { SeriesTotals } from './SeriesTotals.jsx'
 // exactly two reads, and each is safe by its field list: fetchUpcomingSeriesGames
 // (park and probables, pinned by test/postseason/upcoming-games.test.js) and
 // fetchPlateUmpires (the umpire, pinned by plate-umpire.test.js). Change either
-// list only with its test. No
-// SealBox, no Scores Unlocked.
+// list only with its test. No SealBox.
 export function SeriesPrimer({ part, primer }) {
   const { series, bracket, cutoff, slateDate, favoriteTeamId } = primer
   if (part === 'main') {

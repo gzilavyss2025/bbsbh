@@ -1,8 +1,8 @@
 /* ============================================================
    ADMIN COPY EDITOR — the unlinked /admin panel where the site owner tunes
-   the spoiler-consent wording (see src/screens/AdminCopy.jsx). Owner-only, so
-   the styling is functional rather than expressive; it reuses the semantic
-   tokens like every other surface.
+   the editable wording (see src/copy/registry.js and
+   src/screens/AdminCopy.jsx). Owner-only, so the styling is functional rather
+   than expressive; it reuses the semantic tokens like every other surface.
    ============================================================ */
 .admincopy__body {
   padding-bottom: var(--space-6);

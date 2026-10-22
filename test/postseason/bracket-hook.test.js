@@ -1,7 +1,8 @@
 // usePostseasonBracket, the one door the UI slices use (#1227). Two rules the
 // hook itself must keep, and a render cannot show: the cutoff never passes
-// today, and Scores Unlocked does not apply (Gary's decision, 2026-09-28) —
-// the bracket code never reads the switch and writes nothing to storage.
+// today, and the bracket code writes nothing to storage. The Scores Unlocked
+// pass is gone (ADR-0116); the names the tests below ban are its retired
+// symbols, kept so none of them comes back into the bracket or series pages.
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
