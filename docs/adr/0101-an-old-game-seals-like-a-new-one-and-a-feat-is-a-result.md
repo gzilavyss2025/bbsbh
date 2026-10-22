@@ -93,9 +93,10 @@ sealed, under this ADR.
 ## As built
 
 - **The reader.** `src/api/notable/notable.js` reads the three `public/data/notable/` files.
-  `spoiler-manifest.json` classes it `reveal-only`, with one importer:
-  `screens/boxscore/FeatLabel.jsx`. The shelf and the callout builder join that list when
-  they ship (section 4).
+  `spoiler-manifest.json` classes it `reveal-only`. The importers inside a seal are
+  `screens/boxscore/FeatLabel.jsx` and `hooks/callouts/useLastTime.js`. The shelf joined the list
+  when it shipped (#2508): `screens/notable/NotablePage.jsx` and `lib/notable/shelf.js`, the one
+  open reader (see "The shelf").
 - **The label.** `FeatLabel.jsx` mounts in `BoxScoreBody`, below the Game Log stamp at the
   top of the opened sheet. `BoxScoreBody` renders only inside the box score's `SealBox`
   reveal render, so the label is absent from the DOM while the box score is sealed.
@@ -104,6 +105,11 @@ sealed, under this ADR.
   `reveal-only`, with one importer, `hooks/callouts/useLastTime.js`. That hook fetches the files only
   for a play card that completes a triple play or a cycle, and inside the box score's Insights card
   for a no-hitter. `docs/callouts.md` has the families and the league threshold.
+- **The shelf.** `/notable` (`screens/notable/NotablePage.jsx`, rows from `lib/notable/shelf.js`)
+  is an open results page behind a labelled door (ADR-0081). A row shows the final score and
+  opens its box score. The shelf lists exactly the rows for which `boxScoreOpensByDate` is true
+  (ADR-0117), so no row prints a score whose box score is still sealed. Because it is the one
+  reader outside a seal, `test/notable-shelf.test.js` checks that rule over the committed files.
 - **The fetch.** The component fetches the files when it mounts, so nothing about a feat is
   fetched, held or rendered before the reveal. No seal input changed, and the label persists
   nothing. Under the day pass, a stamp or a remembered tap it shows, because the box score

@@ -4,7 +4,7 @@ import { fetchNotable, KINDS } from '../../api/notable/notable.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useRouteLink } from '../../lib/nav.js'
-import { humanDateWithYear } from '../../lib/dates.js'
+import { humanDateWithYear, slateToday } from '../../lib/dates.js'
 import { filterByClub, shelfRows } from '../../lib/notable/shelf.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
@@ -92,8 +92,7 @@ function Row({ row, linkProps }) {
   return (
     <li>
       {row.href ? (
-        <a className="notable__row" {...linkProps(row.href)}>
-          <span className="sr-only">Box score: </span>
+        <a className="notable__row" aria-label={row.label} {...linkProps(row.href)}>
           {body}
         </a>
       ) : (
@@ -111,9 +110,11 @@ export function NotablePage() {
   const [shown, setShown] = useState(PAGE)
   const [clubId, setClubId] = useState(null)
   const [role, setRole] = useState('did')
-  const all = useMemo(() => shelfRows(kind, data?.[kind]), [kind, data])
+  // The cutoff is the slate's day at render, so a page left open past midnight moves with it.
+  const today = slateToday()
+  const doc = data?.[kind] ?? null
+  const all = useMemo(() => shelfRows(kind, doc, new Date()), [kind, doc, today])
   const rows = useMemo(() => filterByClub(all, clubId, role), [all, clubId, role])
-  const loaded = data && KINDS.some((k) => data[k])
 
   return (
     <div className="screen">
@@ -157,12 +158,12 @@ export function NotablePage() {
         )}
         <AsyncStatus
           loading={loading}
-          error={error}
-          hasData={Boolean(loaded)}
+          error={error || (data && !doc)}
+          hasData={Boolean(doc)}
           errorMessage="Couldn’t load Notable games. Try again."
           emptyMessage="Notable games are not available right now."
         />
-        {loaded && rows.length === 0 && (
+        {doc && rows.length === 0 && (
           <p className="hint">{clubId != null ? 'None on file for this club.' : 'None on file.'}</p>
         )}
         {rows.length > 0 && (

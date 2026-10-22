@@ -1,4 +1,4 @@
-import { isRealDate, slateToday } from '../dates.js'
+import { boxScoreOpensByDate } from '../dates.js'
 import { gamePath } from '../route.js'
 import { featLine } from '../../api/notable/notable.js'
 
@@ -7,9 +7,10 @@ import { featLine } from '../../api/notable/notable.js'
 //
 // SPOILER FOOTING. The shelf is an open page that shows final scores, behind a labelled
 // door (ADR-0081). A row opens a box score, and a box score opens with no tap only for a
-// game dated before the slate's today (ADR-0117). So a row dated today or later is left off:
-// its score would be on the shelf while its box score is still sealed. A row with no real
-// date is left off for the same reason; the date is the only evidence it is past.
+// game dated before the slate's today (ADR-0117). So the shelf lists exactly the rows whose
+// box score opens by date, through `boxScoreOpensByDate` itself and not a copy of its rule:
+// a row dated today or later, or with no real date, is left off, because its score would be
+// on the shelf while its box score is still sealed.
 //
 // THIN DATA (.scratch/old-games/plan.md, section 3). A name the feed left out prints no
 // name; a club with no abbreviation or no id still prints its row but cannot build a game
@@ -32,10 +33,23 @@ const sideId = (row, side) => (side === 'home' || side === 'away' ? row[side]?.i
 
 const runs = (side) => (Number.isInteger(side?.runs) ? side.runs : null)
 
+// "July 12, 2025", the same in every locale and time zone: the date is a calendar day.
+const spokenDate = (apiDate) =>
+  new Date(`${apiDate}T12:00:00Z`).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'long', day: 'numeric', year: 'numeric' })
+
+// What a screen reader says for a row: the day, who played where, the score, the feat, and which
+// club did it (the marker underline is only a drawing).
+function spokenLabel(row, number, feat) {
+  const club = (side) => side?.name || side?.abbr || 'a club'
+  const score = Number.isInteger(row.away?.runs) && Number.isInteger(row.home?.runs) ? `, ${row.away.runs} to ${row.home.runs}` : ''
+  const doer = row.side === 'home' || row.side === 'away' ? ` ${club(row[row.side])} did it.` : ''
+  const game = number > 1 ? `, game ${number}` : ''
+  return `Box score, ${spokenDate(row.officialDate)}${game}: ${club(row.away)} at ${club(row.home)}${score}. ${feat}.${doer}`
+}
+
 export function shelfRows(kind, doc, now = new Date()) {
-  const today = slateToday(now)
   return (doc?.rows ?? [])
-    .filter((row) => row && isRealDate(row.officialDate) && row.officialDate < today)
+    .filter((row) => row && boxScoreOpensByDate(row.officialDate, now))
     .sort(
       (a, b) =>
         b.officialDate.localeCompare(a.officialDate) ||
@@ -45,13 +59,15 @@ export function shelfRows(kind, doc, now = new Date()) {
     .map((row) => {
       const { away, home } = row
       const number = row.gameNumber > 1 ? row.gameNumber : 1
+      const feat = featLine(kind, row)
       return {
         key: `${row.gamePk}-${kind}`,
         date: row.officialDate,
         gameNumber: number,
         away: { id: away?.id ?? null, abbr: away?.abbr ?? '', name: away?.name ?? '', runs: runs(away) },
         home: { id: home?.id ?? null, abbr: home?.abbr ?? '', name: home?.name ?? '', runs: runs(home) },
-        feat: featLine(kind, row),
+        feat,
+        label: spokenLabel(row, number, feat),
         players: people(kind, row),
         doerId: sideId(row, row.side),
         foeId: sideId(row, row.side === 'home' ? 'away' : row.side === 'away' ? 'home' : null),

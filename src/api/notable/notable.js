@@ -3,13 +3,16 @@
 // scripts/lib/notable/merge.mjs).
 //
 // REVEAL-ONLY (ADR-0101). A feat names the result: "No-hitter" says one club had no
-// hits. So the one importer, screens/boxscore/FeatLabel.jsx, mounts inside the box
-// score's SealBox reveal render, and these files are fetched only after the reveal.
-// A missing file degrades to no line.
+// hits. Two readers sit inside a seal: screens/boxscore/FeatLabel.jsx mounts inside the box
+// score's SealBox reveal render, and hooks/callouts/useLastTime.js feeds the revealed play card
+// and the Final roll-up, so these files are fetched only after the reveal. A missing file
+// degrades to no line.
 //
-// The second importer is the open shelf, screens/notable/NotablePage.jsx (/notable, #2508): an open
-// results page behind a labelled door (ADR-0081). It lists only games dated before the slate's
-// today (lib/notable/shelf.js), so no row names a result the seal is still holding.
+// The open reader is the shelf (#2508): screens/notable/NotablePage.jsx (/notable) through
+// lib/notable/shelf.js, an open results page behind a labelled door (ADR-0081). It sits outside
+// any seal on purpose (ADR-0101, section 4), so it lists only games whose box score opens by
+// date (boxScoreOpensByDate, ADR-0117), and test/notable-shelf.test.js checks that over the
+// committed files.
 
 import { staticJson } from '../staticJson.js'
 

@@ -1,7 +1,9 @@
 // shelfRows (src/lib/notable/shelf.js): the /notable shelf's rows. Offline; each row is a
 // trimmed copy of a committed public/data/notable/ row.
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { boxScoreOpensByDate } from '../src/lib/dates.js'
 import { filterByClub, shelfRows } from '../src/lib/notable/shelf.js'
 
 const club = (id, abbr, name, runs) => ({ id, abbr, name, runs })
@@ -97,3 +99,28 @@ test('a row with no side has no doer and no foe, and matches only either', () =>
   assert.equal(filterByClub(rows, 142, 'did').length, 0)
   assert.equal(filterByClub(rows, 142, 'either').length, 1)
 })
+
+test('a row speaks its day, clubs, score, feat and who did it', () => {
+  const [row] = shelfRows('cycles', { rows: [buxton] }, NOW)
+  assert.equal(
+    row.label,
+    'Box score, July 12, 2025: Pittsburgh Pirates at Minnesota Twins, 4 to 12. Cycle: Byron Buxton. Minnesota Twins did it.',
+  )
+  const g2 = { ...buxton, officialDate: '1904-09-26', gameNumber: 2, side: undefined, away: club(134, 'PIT', '', null) }
+  assert.equal(shelfRows('cycles', { rows: [g2] }, NOW)[0].label, 'Box score, September 26, 1904, game 2: PIT at Minnesota Twins. Cycle: Byron Buxton.')
+})
+
+// The backstop for the shelf's spoiler footing (ADR-0117): over the committed files, at three
+// "today"s, every row it lists is a row whose box score opens by date, and the day itself is out.
+for (const kind of ['nohitters', 'cycles', 'tripleplays']) {
+  test(`${kind}: the shelf lists only games whose box score opens by date`, () => {
+    const doc = JSON.parse(readFileSync(new URL(`../public/data/notable/${kind}.json`, import.meta.url), 'utf8'))
+    for (const day of ['1950-06-15', '2020-09-27', '2026-10-22']) {
+      const at = new Date(`${day}T18:00:00Z`)
+      const rows = shelfRows(kind, doc, at)
+      assert.ok(rows.every((r) => boxScoreOpensByDate(r.date, at)), `${kind} at ${day}`)
+      assert.ok(rows.every((r) => r.date < day), `${kind} at ${day}: nothing on or after the day`)
+    }
+    assert.ok(shelfRows(kind, doc, new Date('2026-10-22T18:00:00Z')).length > 50, 'the shelf is not empty')
+  })
+}
