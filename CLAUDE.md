@@ -12,10 +12,9 @@ React 19 + Vite, phone-first (iPhone), installable PWA with Vercel backend.
 
 ## Maintaining these docs
 
-This file loads into every session and stays loaded for the whole session. Its size
-is a fixed token cost per session. **Keep it lean**: stay under **200 lines**.
-`scripts/check-claude-md.mjs` enforces this cap, a character cap, and a cap on every
-nested file; `npm run lint` runs the check in CI. Detail lives in three tiers, most
+This file loads into every session, so its size is a fixed token cost. **Keep it
+lean**: stay under **200 lines**. `scripts/check-claude-md.mjs` caps it, its characters,
+and every nested file; `npm run lint` runs the check. Detail lives in three tiers, most
 specific first:
 
 - **Nested `CLAUDE.md`** files. One loads the first time Claude reads a file in its
@@ -40,10 +39,9 @@ specific first:
   the *why* behind decisions.
 - **`CONTEXT.md`** — the domain glossary the spoiler and architecture prose relies on.
 
-When you want to add detail here, add it to the right tier instead and leave a
-one-line pointer. If the leanness check fails, move content out. Do not raise the
-cap. After structural work, check whether the nested `CLAUDE.md` or `docs/adr/`
-entry you touched also needs an update. A stale tier is worse than none.
+Add detail to the right tier and leave a one-line pointer here. If the leanness check
+fails, move content out; do not raise the cap. After structural work, update the nested
+`CLAUDE.md` or `docs/adr/` entry you touched.
 
 ## Workflow & deployment
 
@@ -75,8 +73,8 @@ sessions".
 checklist file, end with `Blocked on me` / `Changed` / `Found`, and mark what you could
 not confirm. Detail: `docs/development.md`, "Long runs".
 
-**Local sessions** (a worktree, reserved dev ports, a localhost URL in the handoff, the
-fresh-context checklist): `docs/development.md`, "Local sessions only".
+**Local sessions** (worktree, reserved dev ports `dev:2` to `dev:5`): `docs/development.md`,
+"Local sessions only".
 
 ## Commands
 
@@ -90,9 +88,6 @@ npm test           # node:test unit suite (pure logic; CI-gated)
 npm run test:coverage  # same, with a per-file coverage report
 npm run e2e        # playwright — ONLY when Gary asks (hook-enforced, see docs/testing.md)
 ```
-
-Local sessions that share a machine use reserved dev ports (`dev:2` to `dev:5`);
-`docs/development.md` and `vite.config.js` explain them.
 
 `scripts/gen-*.mjs` are the data generators (WAR, rehab, umpires, callouts, and more);
 `docs/scripts/generators.md` catalogs them. The `npm test` suite does not replace the
@@ -145,8 +140,8 @@ reveal through a `storage` listener in `useRevealProgress.js`.
 ## Conventions to follow
 
 - **Make the best decision for UX, DX, and AX.** User experience, developer experience, and
-  agent experience: serve all three. When they conflict, UX wins. Keep the change minimal and
-  the tests green.
+  agent experience: serve all three. When they conflict, UX and AX win over DX. Keep the
+  change minimal and the tests green.
 - **Build the smallest version that works.** No new abstraction, option, or component the
   request does not need. A small idea you spot goes under `Found` in your report; a big one
   becomes a `needs-triage` issue. Ask Gary only when you are blocked.
@@ -180,8 +175,6 @@ reveal through a `storage` listener in `useRevealProgress.js`.
   `ready-for-human` / `wontfix`, used as-is. See `docs/agents/triage-labels.md`.
 - **Domain docs** — single-context: one `CONTEXT.md` + `docs/adr/`. See
   `docs/agents/domain.md`.
-- **Design system sync** — the "Tally Baseball" project in claude.ai/design is built from this repo
-  by `.design-sync/build/`; rebuild and upload steps are in `docs/design-sync.md`.
-- **Peer sites** — when Gary asks what other baseball sites do that is cool, start from
-  `docs/peer-sites.md` and add to it.
+- **On request** — design-system sync to claude.ai/design: `docs/design-sync.md`. What other
+  baseball sites do: start from `docs/peer-sites.md` and add to it.
 - **Word list** — `check-word-choice` enforces the house word list: say "postseason", never "playoffs". <!-- word-choice-exempt: states the rule -->

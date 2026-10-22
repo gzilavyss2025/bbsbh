@@ -29,23 +29,19 @@ GitHub closes the issue when the stack merges.
 ## Spoiler-safety
 
 <!--
-The core invariant, with its scope: on the SCORING surfaces (the slate's score
-cells, the lineup pages, the innings viewer, the box score) a score-revealing
-value never exists in the DOM until the user reveals it. Open surfaces — season
-and career stats, player and team pages, leader boards, standings — are not
-gated, and gating one is a regression rather than a hardening. See the "spoiler
-rule" section of CLAUDE.md + docs/adr/.
+Only the four SCORING surfaces are sealed: the slate's score cells, the lineup pages,
+the innings viewer, and the box score. Everything else opens live. See the "spoiler
+rule" section of CLAUDE.md. Skip this section if the change touches none of them.
 -->
 
-- [ ] This change doesn't touch any sealed/reveal-gated game surface, **or**
-- [ ] It does, and no score-revealing value reaches the DOM before reveal — reveal-only modules (`linescore.js`/`derive.js`) stay caller-gated, pre-pitch selectors stay bounded to `revealedThrough`, and extra innings stay locked. Relevant ADR(s): <!-- e.g. ADR-0001 -->
+- [ ] This change doesn't touch a scoring surface, **or**
+- [ ] It does, and no score-revealing value reaches the DOM before reveal. Relevant ADR(s): <!-- e.g. ADR-0001 -->
 
 ## Verification
 
 <!--
 `npm test` is CI-gated (`lint-and-build` runs lint, `npm test` and build). Also verify by exercising the real flow.
-Cloud sessions verify in the container with the preinstalled Chromium and send the
-maintainer a screenshot. If the live feed is out of reach, say what you mocked
+Cloud sessions verify in the container with the preinstalled Chromium. If the live feed is out of reach, say what you mocked
 (`e2e/fixtures/mock-api.js` for a spec pinned to the anchor game, a regenerated data
 file, etc.). `.claude/skills/run/SKILL.md` has the live-data setup. Don't
 troubleshoot an unreachable-network failure by re-running headed/`--debug`.
@@ -53,7 +49,7 @@ troubleshoot an unreachable-network failure by re-running headed/`--debug`.
 
 - [ ] `npm run lint` passes, and the tests that cover the changed files pass (run locally)
 - [ ] CI `lint-and-build` is green (the full `npm test` and `npm run build` run there, not locally)
-- [ ] Exercised the affected flow in `npm run dev` against a live or recent game, and sent a screenshot — <!-- route, gamePk, what was mocked -->
+- [ ] Exercised the affected flow in `npm run dev` against a live or recent game — <!-- route, gamePk, what was mocked -->
 <!-- Run `npm run e2e` only when Gary asks for it. -->
 
 ## Files touched
