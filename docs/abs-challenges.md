@@ -15,7 +15,7 @@ never tested against one**, and two of the seven below only became interesting
 after the caveat was applied.
 
 Read it before changing `scripts/gen-abs-challenges.mjs`, the boards on
-`/abs-challenges`, or the challenge card on a club's Numbers tab. The generator's own rules are documented at the top of that
+`/abs-challenges`, or the challenge card in the Ranks band of a club's team page. The generator's own rules are documented at the top of that
 file and in `scripts/lib/abs/`; the readers' rules are at the top of
 `src/api/around-the-game/absChallenges.js` and `absExposure.js`.
 
@@ -264,7 +264,8 @@ Twelve of the thirteen Brewers hitters who clear the floor sit **under** the
 line the league's own rate would put them on, and the thirteenth is Gary
 Sánchez — the most eager hitter in the league, 32 reviews in 1,085 pitches.
 
-**The card lives on the team hub's Numbers tab**, beside the run value card,
+**The card lives in the Ranks band of the team page**
+(`src/screens/team/next/ranks/ChallengeBoard.jsx`), beside the run value board,
 at both levels that run the rig. A club below Triple-A has no ABS data at all,
 so its page is unchanged the way it is for run value.
 
@@ -299,6 +300,11 @@ for, so asking it for the other returns nothing rather than falling through.
 name on a dot would have paid for the file this one exists to avoid.
 
 ### A scatter for the hitters, a table for the catchers
+
+**This subsection is the first card's design.** #2494 removed that card. Its
+successor, `ChallengeBoard`, has a toggle between hitting and catching, with a
+plot and a list for the job chosen (`src/screens/team/CLAUDE.md`). What the data
+argues, here and in the Triple-A table below, holds for both.
 
 One dot a man, pitches seen across against reviews called up, with the league's
 rate drawn as the diagonal a man would sit on if he argued at exactly the
@@ -351,7 +357,7 @@ draw a catcher table too — 75 catchers clear 200 innings, a median of two a
 club, and no club has none.
 
 **And the club's own rate, the number the card leads with and is ranked on, is
-not floored at all.** `clubRate` runs over every man with a denominator. The
+not floored at all.** The card's club rate (`totals` in `absClubCard.js`) runs over every man with a denominator. The
 floor decides who gets a dot, never what the club's figure is, so the headline
 and the rank are complete at Triple-A whatever the scatter shows.
 

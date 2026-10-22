@@ -7,8 +7,8 @@
 /* Three stars of the game — WPA leaders under the decisions. Card matches
    the decisions block above it. One markup for all three entries
    (.stars3__card) so they read as a single family of cards; the top mover
-   gets a `--hero` modifier layered on top (an inset gradient panel, modeled
-   on the Team Score card's .team-score__grade) for extra weight, not a
+   gets a `--hero` modifier layered on top (an inset gradient panel)
+   for extra weight, not a
    different shape. Below 740px the cards stack as rows (phone width can't
    fit three side by side); from 740px up they lay out in one horizontal
    row — see the media query at the bottom of this block. The sheet and

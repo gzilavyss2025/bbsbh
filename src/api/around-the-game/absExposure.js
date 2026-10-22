@@ -251,21 +251,21 @@ export function exposureBoard(level, key) {
 }
 
 // ---------------------------------------------------------------------------
-// THE PER-CLUB CUT — the team hub's challenge card, and a THIRD file.
+// THE PER-CLUB CUT — the team page's challenge card, and a THIRD file.
 // ---------------------------------------------------------------------------
 //
 // The list above is folded across clubs, which is right for a season floor and
 // wrong for a club board: a man traded in July would be counted in full against
 // whichever club holds him now. `abs-exposure-clubs.json` is the same sweep cut
 // by `team_id` instead (scripts/lib/abs/export.mjs), 95 KB against the folded
-// file's 418, fetched by ONE club's hub tab and by nothing else — ADR-0076
+// file's 418, fetched by ONE club's team page and by nothing else — ADR-0076
 // applied a second time.
 //
 // It ships COUNTS AND DENOMINATORS AND NO RATES, because a rate prints as
-// eleven significant figures and the arithmetic is one line. That line is
-// `EXPOSURE_KINDS` above, so the card and the league board divide identically.
+// eleven significant figures and the arithmetic is one line. The card does that
+// division itself, in absClubCard.js.
 
-// ONE FILE A LEVEL, memoized per level, because a club's hub tab reads one and
+// ONE FILE A LEVEL, memoized per level, because a club's team page reads one and
 // the two together are 222 KB. gen-abs-challenges.mjs writes the level
 // lowercased into the name; that spelling is the contract between the two.
 const fetchClubsFile = staticJsonBy((key) => `/data/abs/${key}.json`)
@@ -286,86 +286,4 @@ export async function fetchAbsExposureClubs(level, { seasonYear } = {}) {
   if (!level || !Object.values(CLUB_LEVEL_BY_SPORT).includes(level)) return null
   const season = await seasonFolderOf('abs', seasonYear)
   return season == null ? null : fetchClubsFile(`${season}/abs-exposure-clubs-${level.toLowerCase()}`)
-}
-
-// The level names the FILE as well as the key inside it, and a file holds the
-// one level it is named for — so `level` here is never a filter across levels,
-// only the key the writer used. Default MLB, which is what every caller that
-// predates Triple-A passed implicitly.
-export function clubRowsFor(data, teamId, level = 'MLB') {
-  return data?.levels?.[level]?.byTeam?.[String(teamId)] ?? null
-}
-
-// One club's rate for one kind, over EVERY man on it who had a denominator —
-// the same construction as the league figure, and deliberately not the
-// floored population the board below draws. "This club challenges once every N
-// times up" is a fact about the club, and a floor applied to it would report
-// the habits of its regulars as the whole roster's.
-function clubRate(rows, kind) {
-  let calls = 0
-  let exposure = 0
-  for (const r of rows ?? []) {
-    if (!((r[kind.rateOn] ?? 0) > 0)) continue
-    calls += r[kind.calls] ?? 0
-    exposure += r[kind.rateOn]
-  }
-  return exposure > 0 ? (calls / exposure) * kind.ratePer : null
-}
-
-// THE CARD, for one club and one kind.
-//
-// `rank` is among every club in the file, counted on the same rate — so the
-// figure a reader sees and the figure they are ranked on cannot come apart.
-// Ties share the better rank, the way every other board in this app does it.
-//
-// `players` is the men who clear the LEAGUE BOARD'S floor, reused rather than
-// invented: a man with forty pitches who never argued is not a habit, and a
-// card with its own private floor would be a second answer to a question the
-// league page has already answered. The count that cleared it is printed.
-//
-// Null for a club the file has no rows for, which is every affiliate — the
-// card then draws nothing, the way TeamRunValueCard does for a club Savant
-// runs no board for.
-export function clubChallengeBoard(data, teamId, key, level = 'MLB') {
-  const kind = exposureKind(key)
-  const mine = clubRowsFor(data, teamId, level)
-  if (!mine) return null
-
-  // Every club in the file, on the same rate, so the figure a reader sees and
-  // the figure they are ranked on cannot come apart.
-  const clubs = Object.values(data?.levels?.[level]?.byTeam ?? {})
-  const rates = clubs.map((rows) => clubRate(rows, kind)).filter((r) => r != null)
-  const rate = clubRate(mine, kind)
-  const ahead = rate == null ? null : rates.filter((r) => r > rate).length
-
-  // The league figure off the same file, so the card never fetches the 418 KB
-  // league list to print the line its own dots are measured against.
-  const league = clubRate(clubs.flat(), kind)
-
-  const players = mine
-    .filter((r) => (r[kind.floorOn] ?? 0) >= kind.floor && (r[kind.rateOn] ?? 0) > 0)
-    .map((r) => ({
-      playerId: r.playerId,
-      name: r.name,
-      exposure: r[kind.rateOn],
-      calls: r[kind.calls] ?? 0,
-      rate: ((r[kind.calls] ?? 0) / r[kind.rateOn]) * kind.ratePer,
-    }))
-    .sort((a, b) => b.exposure - a.exposure)
-
-  return {
-    key: kind.key,
-    kind,
-    rate,
-    league,
-    rank: ahead == null ? null : ahead + 1,
-    of: rates.length,
-    players,
-    roster: mine.filter((r) => (r[kind.rateOn] ?? 0) > 0).length,
-    // The one dot worth a direct label, and the count the sentence needs: a
-    // club whose hitters nearly all sit under the league line is the card's
-    // whole finding, and it has to be read off the drawn population.
-    leader: players.reduce((best, p) => (best && best.rate >= p.rate ? best : p), null),
-    below: league == null ? 0 : players.filter((p) => p.rate < league).length,
-  }
 }
