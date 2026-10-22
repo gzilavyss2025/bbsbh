@@ -384,6 +384,9 @@
   font-size: var(--fs-title-lg);
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
+  /* A card, not a label: the shared door rule's dotted line would run under its title, its date
+     line and its chevron. */
+  text-decoration: none;
 }
 
 /* layout-exempt: the primary door's label and its date are one text block */

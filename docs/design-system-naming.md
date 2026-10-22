@@ -193,9 +193,10 @@ on touch has no hover. Four consequences:
   band's ink is checked against its ground; the door's page ink would not be.
 - The links beside the door follow it, not green. A text link is ink with the same
   dotted rule (`.lsp__seeall`, `.foulcard__door`, `.pcard__gamelink`, `.gnotes__pdf a`,
-  `.outl__name`, and the sign-in widget's `.tally-cl-link`). A door in a ruled box
+  `.outl__name`, and the sign-in widget's footer link `.tally-cl-link`). A door in a ruled box
   (`.wirerail__door`, `.oseason__door`, `.srecord__door`, `.seasonnote__when`), a back
-  or cancel button, and the info glyph keep their shape and take ink. A hover that
+  or cancel button, the sign-in widget's two text buttons (`.tally-cl-textbtn`) and the
+  info glyph keep their shape and take ink. A hover that
   turned green draws the dotted rule instead. The static guides at `/learn` follow too
   (`public/learn.css`, ADR-0053): a prose link is ink with the dotted rule, solid on
   hover. Their call-to-action button keeps its green fill, as a button does.

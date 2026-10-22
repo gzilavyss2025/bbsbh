@@ -68,6 +68,8 @@ const TEXT_CONTROLS = [
   ['08-site-shell.css', '.searchoverlay__cancel'],
   ['08-site-shell.css', '.searchoverlay__clearrecent'],
   ['09-team-info.css', '.fact__infoglyph'],
+  ['04-site-bar.css', '.tally-cl-textbtn'],
+  ['postseason/series-parts.css', '.psseries__ldoormark'],
 ]
 
 test('a text link is ink with a dotted rule', () => {
@@ -94,7 +96,6 @@ test('a link in a hover state or a leader board does not turn green', () => {
   const cases = [
     ['44-pre-game-cards.css', '.photostrip__viewall:hover'],
     ['boxlines/listdoor.css', '.boxlines__list .boxlines-entry:hover .boxlines-entry__chev'],
-    ['postseason/series-parts.css', '.psseries__lboard .sectionhead__note'],
     ['postseason/series-parts.css', '.psseries__ldoormark'],
   ]
   for (const [file, selector] of cases) {
@@ -142,6 +143,7 @@ test('a link in the landing guides is ink, not green', () => {
   assert.match(base, /color:\s*var\(--ink-0\)/, 'a link draws in ink')
   assert.match(base, /text-decoration:\s*underline dotted/, 'a link carries the dotted rule')
   assert.match(bodies('a:hover').join(';'), /text-decoration-style:\s*solid/, 'a hovered link goes solid')
+  assert.match(bodies('a:hover').join(';'), /text-decoration-thickness:\s*2px/, 'a hovered link goes heavier, so the rail reads it')
   for (const selector of ['a', 'a:hover', '.basics__rail a:hover']) {
     for (const body of bodies(selector)) {
       for (const c of colours(body)) assert.doesNotMatch(c, GREEN, `${selector} reads green`)
@@ -170,4 +172,40 @@ test('--accent-hover is read only by hover rules, and --accent-link is gone', ()
   const tokens = stripComments(readFileSync(join(STYLES, '..', 'tokens', 'colors.css'), 'utf8'))
   assert.match(tokens, /--accent-hover:\s*var\(--field\)/, 'colors.css defines --accent-hover')
   assert.doesNotMatch(tokens, /--accent-link/, 'colors.css no longer defines --accent-link')
+})
+
+// A door that is a CARD (the World Series hero's next-game card) restates what the shared rule
+// draws for a line of text. The dotted rule belongs under a label, not under a card's title, its
+// date line and its chevron, so the card says `text-decoration: none` for itself.
+test('a card-shaped door draws no dotted rule', () => {
+  const bodies = bodiesFor('worldseries/hero.css', '.door.ww-hero__next')
+  assert.ok(bodies.length, '.door.ww-hero__next should have a rule')
+  assert.ok(bodies.some((b) => /text-decoration:\s*none/.test(b)), 'the hero card turns the dotted rule off')
+})
+
+// One rule colours a door in a band: section-head.css, from the band's own ink. A page that keeps
+// a colour of its own (the team page's Games band did) ends up disagreeing with it.
+test('only the shared rule colours a door in a band', () => {
+  const found = []
+  for (const path of cssFiles(STYLES)) {
+    for (const { selectors, body } of rulesOf(readFileSync(path, 'utf8'))) {
+      if (!colours(body).length) continue
+      for (const selector of selectors) {
+        if (/sectionhead--band/.test(selector) && /\.door\b/.test(selector)) found.push(`${relative(STYLES, path)}: ${selector}`)
+      }
+    }
+  }
+  assert.deepEqual(found, ['system/section-head.css: .sectionhead--band .door--inline'])
+})
+
+// The two Clerk buttons are not links. They share the sign-in widget's ink, and only the footer
+// link carries the dotted rule.
+test('the sign-in widget keeps the dotted rule for its link, not its buttons', () => {
+  const clerk = readFileSync(join(STYLES, '..', 'lib', 'clerkAppearance.js'), 'utf8')
+  assert.match(clerk, /footerActionLink:\s*'tally-cl-link'/)
+  assert.match(clerk, /profileSectionPrimaryButton:\s*'tally-cl-textbtn'/)
+  assert.match(clerk, /formButtonReset:\s*'tally-cl-textbtn'/)
+  const button = bodiesFor('04-site-bar.css', '.tally-cl-textbtn').join(';')
+  assert.ok(button, '.tally-cl-textbtn should have a rule')
+  assert.doesNotMatch(button, /underline/, 'a button does not draw the dotted rule')
 })

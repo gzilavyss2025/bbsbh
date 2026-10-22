@@ -310,7 +310,7 @@ button.psseries__ldoor .psseries__lval {
   font-size: var(--fs-num-lg);
   font-weight: var(--w-semibold);
   line-height: var(--lh-solid);
-  color: inherit;
+  color: var(--text-heading);
 }
 /* A 44 x 44 hit area that moves no pixel of the line: it reaches up into the
    row's top padding and only a few pixels down toward the runner-up line. */

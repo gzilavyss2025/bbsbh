@@ -239,6 +239,7 @@ a {
 
 a:hover {
   text-decoration-style: solid;
+  text-decoration-thickness: 2px;
 }
 
 a:focus-visible {
