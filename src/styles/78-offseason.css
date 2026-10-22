@@ -337,25 +337,6 @@
   color: var(--graphite-soft);
 }
 
-/* The promise, on a strip of kraft tape — the one colour in the app that means
-   "sealed", drawn the way the app draws a seal everywhere else rather than as a
-   tinted line of type. Seal ink ON the kraft base is the pairing the contrast
-   guard already pins (src/lib/design/contrastPairings.js); the amber as TEXT on
-   paper is not, and at 11px it would not hold 4.5:1. */
-.pgame__seal {
-  display: inline-block;
-  margin: var(--space-4) 0 0;
-  padding: 3px var(--space-2);
-  border-radius: var(--radius-xs);
-  background: var(--seal-cover);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--seal-cover-ink);
-}
-
 /* Why this game — a sentence about the careers in it, never about what
    happened in it (PickedGame.jsx says why that distinction is the whole card).
    Natural case because it is prose, in the body face for the same reason. */

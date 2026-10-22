@@ -7,8 +7,8 @@
 // reads as, and which historical dates the quick-jumps offer.
 //
 // Every function here is exported for test/standings-dates.test.js. A date that
-// looks one day out on this page is a spoiler, not a cosmetic bug: "entering
-// today" is the whole reason the page is safe to open in September.
+// is one day out on this page folds a day of games into, or out of, the table
+// it labels.
 
 import { offseasonPhase } from './seasonPhase.js'
 
@@ -17,6 +17,14 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 // would only ever show empty pre-season standings, so the quick-jumps start at
 // April.
 const FIRST_SEASON_MONTH = 4
+
+// The date one Back/Forward press lands on. The live view has no date of its
+// own (it runs through today), so it steps from `today`: Back is yesterday, not
+// the day before. Forward stops at yesterday; today's games are the Live view.
+export function stepStandingsDate({ viewDate, today, yesterday, delta }) {
+  const next = shiftDays(viewDate ?? today, delta)
+  return next > yesterday ? yesterday : next
+}
 
 // The baseball "today" in US Pacific — the last US zone to roll over — so
 // "entering today" reliably excludes tonight's whole slate (even a late

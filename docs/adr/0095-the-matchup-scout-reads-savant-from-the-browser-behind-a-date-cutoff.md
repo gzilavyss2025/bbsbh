@@ -101,3 +101,7 @@ My Tally (ADR-0039). The view toggle itself is ADR-0093.
   pitch detail, and a double count across its splits. Rejected; a cross-check.
 - **A seal on the list.** It would put a reveal surface on an open page, the
   regression ADR-0034 undid. The cutoff closes the leak without one.
+
+## Note (2026-10-22)
+
+ADR-0120: the cutoff here is a date footing, not a seal. The behavior is unchanged.

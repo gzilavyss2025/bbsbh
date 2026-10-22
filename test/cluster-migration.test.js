@@ -46,7 +46,6 @@ const MIGRATED = {
   // C6: four rows, one file each. Each keeps its own margin-top, if it had one.
   stampsheet__levels: { file: '48c-stamp-sheet.css', gap: 'snug', sites: 1 },
   mytally__choices: { file: '54-my-tally.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
-  consent__actions: { file: '46-consent-modal.css', gap: 'snug', sites: 1, keeps: ['margin-top'] },
   staffgrid__summary: { file: '76-workload-marks.css', gap: 'snug', sites: 1, align: 'center' },
   // C7: four rows, five JSX sites in five files. The erase sheet keeps its own margin-top.
   pshistory__seasonhead: { file: '33-awards-history.css', gap: 'base', sites: 1, align: 'center' },

@@ -1,77 +1,18 @@
 // Unit coverage for the Stamp In page's pure rules (src/lib/stampIn.js).
 //
-// Three things are pinned here, and each one is load-bearing for a page that
-// prints a whole season of final scores (ADR-0042):
+// Two things are pinned here, for a page that prints a whole season of final
+// scores (ADR-0042):
 //
-//   1. The CONSENT predicate. It decides whether the season is drawn at all,
-//      so it must fail CLOSED on anything stale, garbled or hand-edited —
-//      the same posture parseRevealMark takes for the reveal mark.
-//   2. The GAME list. Only games already played may appear (a scheduled game
+//   1. The GAME list. Only games already played may appear (a scheduled game
 //      has no result and nothing to stamp), newest first.
-//   3. The BUTTON's state. Stamped, ready to press, or refused because the
+//   2. The BUTTON's state. Stamped, ready to press, or refused because the
 //      season shard is full — the refusal is surfaced, never swallowed.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import {
-  STAMP_IN_CONSENT_KEY,
-  hasStampInConsent,
-  parseStampInConsent,
-  serializeStampInConsent,
-  stampButtonState,
-  stampInGames,
-} from '../src/lib/stampIn.js'
-
-// --------------------------------------------------------------------------
-// The consent record
-// --------------------------------------------------------------------------
-test('the consent key follows the house bbsbh: naming', () => {
-  assert.equal(STAMP_IN_CONSENT_KEY, 'bbsbh:stampIn')
-})
-
-test('a consent record round-trips through serialize/parse', () => {
-  const state = parseStampInConsent(serializeStampInConsent(1754600000000))
-  assert.deepEqual(state, { consented: true, at: 1754600000000 })
-  assert.equal(hasStampInConsent(state), true)
-})
-
-test('consent fails closed on anything malformed', () => {
-  for (const raw of [
-    null,
-    undefined,
-    '',
-    'not json',
-    '[]',
-    '"yes"',
-    '123',
-    '{}',
-    '{"consented":false}',
-    '{"consented":"true"}',
-    '{"consented":1}',
-  ]) {
-    assert.equal(parseStampInConsent(raw), null, JSON.stringify(raw))
-    assert.equal(hasStampInConsent(parseStampInConsent(raw)), false, JSON.stringify(raw))
-  }
-})
-
-test('a nonsense timestamp keeps the consent but zeroes the clock', () => {
-  assert.deepEqual(parseStampInConsent('{"consented":true,"at":-5}'), {
-    consented: true,
-    at: 0,
-  })
-  assert.deepEqual(parseStampInConsent('{"consented":true,"at":"soon"}'), {
-    consented: true,
-    at: 0,
-  })
-})
-
-test('hasStampInConsent answers false for any non-record', () => {
-  for (const value of [null, undefined, {}, { consented: false }, 'true', 0]) {
-    assert.equal(hasStampInConsent(value), false)
-  }
-})
+import { stampButtonState, stampInGames } from '../src/lib/stampIn.js'
 
 // --------------------------------------------------------------------------
 // The season list

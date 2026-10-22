@@ -466,8 +466,8 @@ collection, the moment the change ships.
 
 There is one more surface that MINTS a stamp without being part of the Game
 Log's own routes — **Stamp In**, `/team/{id}/stamp-in` (ADR-0042). It lists a
-club's played season with every result showing, behind a one-time per-device
-consent, so a reader can press a stamp for each game they watched instead of
+club's played season with every result showing (the one-time consent went in
+#2523), so a reader can press a stamp for each game they watched instead of
 opening every box score in turn. Three properties keep it honest and all three
 are enforced: it is **render-only** (it never writes `bbsbh:reveal:{gamePk}` or
 advances `revealedThrough`), it has **exactly one entry point** (the Schedule

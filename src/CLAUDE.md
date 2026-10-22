@@ -60,7 +60,7 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel. T
 
 ## Admin-editable copy (`src/copy/`)
 
-The wording of the consent surfaces is admin-editable, not hard-coded.
+The wording of the admin-editable surfaces is not hard-coded.
 `src/copy/registry.js` is the closed source of truth (ids, defaults, length caps,
 `sanitizeOverrides`; no token substitution, and its header records why no
 game data may ever be interpolated into a field);
@@ -70,7 +70,7 @@ game data may ever be interpolated into a field);
 The unlinked `/admin` route (`screens/AdminCopy.jsx`) is the Clerk-admin-gated
 editor (with version history). It stores UI text only — never a score — see
 ADR-0025 and the `api/` functions prose in the root `CLAUDE.md`. When
-adding a new consent string, add a registry field; never inline the literal in a
+adding a new editable string, add a registry field; never inline the literal in a
 component.
 
 ## Fetching (`src/hooks/useAsync.js`)

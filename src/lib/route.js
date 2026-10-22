@@ -347,7 +347,7 @@ export function parseRoute(url) {
     return { name: 'all-star-rosters' }
   if (parts.length === 1 && parts[0] === 'all-star-legacy')
     return { name: 'all-star-legacy' }
-  // Admin copy editor — the site owner tunes consent-pop-up wording here. Not
+  // Admin copy editor — the site owner tunes the editable copy here. Not
   // linked from anywhere in the app; reachable by URL and gated to a Clerk
   // admin (see AdminCopy.jsx + api/copy.js). Parsed regardless so a stray
   // production visit renders the (locked) panel rather than falling through to
@@ -957,9 +957,7 @@ export function teamTabPath(id, tab, opts = {}) {
 // Stamp In — the club's played season, one stamp per game you watched
 // (ADR-0042). Built in exactly one place, the Schedule card's button on the
 // Games tab, and carried through linkQuery like every other team link so a
-// dated visit stays dated across the hop. Do not build a second entry point:
-// the page's consent gate is the address's own, and every other surface in the
-// app is sealed by default.
+// dated visit stays dated across the hop. Do not build a second entry point.
 export function teamStampInPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/stamp-in${linkQuery(opts)}`
 }
