@@ -265,10 +265,21 @@ function AwardYearPlain({ label, recipients, favoriteTeamId }) {
   )
 }
 
-// One award's cell in the "This season" block: its winners once MLB has
-// announced them, else a plain note. A 404 is "pending"; anything else is an error.
+// One award's cell in the "This season" block: its winners once MLB has announced
+// them, else a plain note. A 404 is "pending"; anything else is an error. A roster of
+// more than one (Silver Slugger, Gold Glove, the All-MLB teams) sits behind its own
+// door, so a sibling league's "Not announced yet" or "Couldn't load." stays in view.
 function SeasonAwardCell({ award, favoriteTeamId }) {
+  const [open, setOpen] = useState(false)
   if (award.status === 'announced') {
+    const count = award.recipients.length
+    if (count > 1 && !open) {
+      return (
+        <Door layout="block" onClick={() => setOpen(true)}>
+          {`Show ${count} winners`}
+        </Door>
+      )
+    }
     const { isDense, cardsClass } = cardsClassFor(award.recipients)
     return (
       <ul className={`awardhistory__cards ${cardsClass}`}>
@@ -278,29 +289,16 @@ function SeasonAwardCell({ award, favoriteTeamId }) {
       </ul>
     )
   }
-  return (
-    award.status === 'error' ? (
-      <Notice tone="error" size="compact">Couldn’t load.</Notice>
-    ) : (
-      <EmptyState size="compact">Not announced yet</EmptyState>
-    )
+  return award.status === 'error' ? (
+    <Notice tone="error" size="compact">Couldn’t load.</Notice>
+  ) : (
+    <EmptyState size="compact">Not announced yet</EmptyState>
   )
 }
 
-// One announced family's cells. One with a long roster (Silver Slugger, Gold Glove, the All-MLB teams) sits
-// behind a door so the block stays short, while the one- and two-winner awards stay open.
-const FOLD_OVER = 2
-
+// One announced family's cells, in the league-banner shape of AwardYearSplit; a
+// league-less award is a plain row.
 function SeasonFamilyBody({ family, favoriteTeamId }) {
-  const [open, setOpen] = useState(false)
-  const winners = family.awards.reduce((n, a) => n + a.recipients.length, 0)
-  if (winners > FOLD_OVER && !open) {
-    return (
-      <Door layout="block" onClick={() => setOpen(true)}>
-        {`Show ${winners} winners`}
-      </Door>
-    )
-  }
   if (family.awards.some((a) => a.league)) {
     return (
       <div className="awardhistory__familysplit">
@@ -463,10 +461,10 @@ export function AwardsHistoryPage() {
         emptyMessage="No award history is available right now."
       />
 
-      {season && <ThisSeason season={season} favoriteTeamId={favoriteTeamId} />}
-
-      {families.length > 0 && (
-        <>
+      {(season || families.length > 0) && (
+        <Stack gap="loose">
+          {season && <ThisSeason season={season} favoriteTeamId={favoriteTeamId} />}
+          {families.length > 0 && (
           <Stack gap="loose" className={`awardhistory__list${view === 'award' ? ' awardhistory__list--zebra' : ''}`}>
             {view === 'award' &&
               hardware.map((family) => {
@@ -546,9 +544,10 @@ export function AwardsHistoryPage() {
                 </Card>
               ))}
           </Stack>
-          {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
-        </>
+          )}
+        </Stack>
       )}
+      {families.length > 0 && updated && <p className="hint prospects__caption">Updated {updated}.</p>}
 
       <ReportFooter />
     </div>

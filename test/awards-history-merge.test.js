@@ -6,17 +6,18 @@ const fam = (key, years) => ({ key, label: key, years })
 const rec = (playerId) => [{ playerId }]
 const base = { order: ['MVP', 'Cy Young'], keep: [2026, 2025, 2024] }
 
-test('a refreshed season replaces its old rows; other seasons carry forward', () => {
+test('fresh rows replace the family-year; other seasons carry forward', () => {
   const prev = [fam('MVP', { 2025: rec(1), 2026: rec(2) })]
   const fresh = [fam('MVP', { 2026: rec(3) })]
   const out = mergeSeasons({ ...base, prev, fresh, refreshed: [2026] })
   assert.deepEqual(out, [fam('MVP', { 2025: rec(1), 2026: rec(3) })])
 })
 
-test('a refreshed season that came back empty is dropped, not left stale', () => {
+test('an empty answer keeps the committed rows: a night can add winners, never wipe them', () => {
   const prev = [fam('MVP', { 2025: rec(1), 2026: rec(2) })]
-  const out = mergeSeasons({ ...base, prev, fresh: [], refreshed: [2026] })
-  assert.deepEqual(out, [fam('MVP', { 2025: rec(1) })])
+  assert.deepEqual(mergeSeasons({ ...base, prev, fresh: [], refreshed: [2026] }), prev)
+  const emptyYear = [fam('MVP', { 2026: [] })]
+  assert.deepEqual(mergeSeasons({ ...base, prev, fresh: emptyYear, refreshed: [2026] }), prev)
 })
 
 test('seasons outside the rolling window fall off; an empty family is dropped', () => {

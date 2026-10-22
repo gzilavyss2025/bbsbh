@@ -17,10 +17,10 @@
 // recipients endpoint answers 404 for an award not yet decided, which would end
 // the run, so a 404 is read as "no recipients" below, same as any empty result.
 //
-// Imports MAJOR_AWARDS straight from src/api/person.js (rather than keeping a
-// separate copy, unlike the deliberate small duplication in e.g.
-// gen-rehab.mjs) so this page can't drift from what the player page's own
-// Trophy Case counts as hardware.
+// Imports the award list (MAJOR_AWARDS, via SEASON_AWARDS) and the recipient row
+// from src/api (rather than keeping a separate copy, unlike the deliberate small
+// duplication in e.g. gen-rehab.mjs) so this page can't drift from what the player
+// page's own Trophy Case counts as hardware, or from the live "so far" block.
 //
 // Source: GET /api/v1/awards/{awardId}/recipients?season=YYYY (no sportId
 // needed — unlike the All-Star recipients call in person-fetch.js's
@@ -41,21 +41,17 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readFile } from 'node:fs/promises'
-import { MAJOR_AWARDS, isPostseasonAward } from '../src/api/person.js'
-import { awardsSeasonInPlay } from '../src/api/awardsHistory.js'
-import { teamFullName } from '../src/lib/teams.js'
+import { isPostseasonAward } from '../src/api/person.js'
+import { awardsSeasonInPlay, recipientsOf, SEASON_AWARDS } from '../src/api/awardsHistory.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 import { mergeSeasons } from './lib/awards/history-merge.mjs'
 
-// Hardware only, no All-Star selections — MAJOR_AWARDS carries ALAS/NLAS too
-// (the Trophy Case's own All-Star tier), but this page is scoped to trophies/
-// honors a player WINS, not a roster he's named to.
-const HARDWARE_AWARDS = Object.fromEntries(
-  Object.entries(MAJOR_AWARDS).filter(([id]) => id !== 'ALAS' && id !== 'NLAS'),
-)
+// Hardware only, no All-Star selections — SEASON_AWARDS (src/api/awardsHistory.js, the
+// same list the page's live "so far" block reads) is MAJOR_AWARDS minus ALAS/NLAS.
+const HARDWARE_AWARDS = Object.fromEntries(SEASON_AWARDS)
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'awards-history.json')
@@ -68,19 +64,10 @@ if (NIGHTLY && awardsSeasonInPlay(new Date()) == null) {
 const CURRENT_SEASON = await fetchSeasonInPlay()
 const windowSeasons = Array.from({ length: SEASON_COUNT }, (_, i) => CURRENT_SEASON - i)
 // A nightly run needs the committed file to carry the other seasons forward; with
-// none (a fresh checkout) it falls back to the full run.
-const prev = NIGHTLY ? await readFile(out, 'utf8').then(JSON.parse, () => null) : null
+// none (missing, unparseable, or no families) it falls back to the full run.
+const committed = NIGHTLY ? await readFile(out, 'utf8').then(JSON.parse, () => null) : null
+const prev = committed?.families?.length ? committed : null
 const seasons = prev ? [CURRENT_SEASON] : windowSeasons
-
-// Run an async mapper across items with a small concurrency cap, results in
-// order (be polite to statsapi). Mirrors gen-milestones.mjs's helper.
-// AL*/NL*-prefixed ids split by league; the MLB-wide ones (MLBRC,
-// MLBAFIRST/MLBSECOND) carry no league split.
-function leagueOf(awardId) {
-  if (awardId.startsWith('AL')) return 'AL'
-  if (awardId.startsWith('NL')) return 'NL'
-  return null
-}
 
 // Silver Slugger + Gold Glove hand out one winner per fielding position, but
 // the API's own `primaryPosition.abbreviation` is inconsistent about WHICH
@@ -115,19 +102,9 @@ const results = await mapConcurrent(jobs, 8, async ({ awardId, season }) => {
     if (err?.status === 404) return { awards: [] }
     throw err
   })
-  const recipients = (data.awards ?? [])
-    .filter((a) => a.player?.id)
-    .map((a) => ({
-      league: leagueOf(awardId),
-      playerId: a.player.id,
-      name: a.player.nameFirstLast || '',
-      teamId: a.team?.id ?? null,
-      // The recipients endpoint's `team` object carries only an id/link, no
-      // name — resolve it from the app's own static id->name table so the
-      // page never has to render a blank team label next to the logo.
-      teamName: teamFullName(a.team?.id) || '',
-      position: a.player.primaryPosition?.abbreviation || '',
-    }))
+  // The recipient row (league, team name from the static id->name table, position) is
+  // src/api/awardsHistory.js's, shared with the page's live block.
+  const recipients = recipientsOf(awardId, data)
   return { awardId, season, recipients }
 })
 
@@ -208,7 +185,7 @@ const familiesOut = familyOrder
   .filter((f) => Object.keys(f.years).length > 0)
 
 const finalFamilies = prev
-  ? mergeSeasons({ prev: prev.families ?? [], fresh: familiesOut, refreshed: seasons, keep: windowSeasons, order: familyOrder })
+  ? mergeSeasons({ prev: prev.families, fresh: familiesOut, keep: windowSeasons, order: familyOrder })
   : familiesOut
 if (prev && JSON.stringify(finalFamilies) === JSON.stringify(prev.families) && JSON.stringify(windowSeasons) === JSON.stringify(prev.seasons)) {
   console.log(`awards-history.json unchanged (${CURRENT_SEASON})`)

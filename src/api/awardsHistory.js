@@ -5,18 +5,19 @@
 // static same-origin file (public/data/awards-history.json) rather than
 // computed live.
 //
-// scripts/gen-awards-history.mjs builds it — a hand-run regenerate, not a
-// cron, since a completed season's award winners are immutable. This module
-// just reads it. Same build-time-fetch pattern as milestones.js/rehab.js (see
+// scripts/gen-awards-history.mjs builds it: a hand-run full regenerate, plus a
+// `--nightly` run from October to February that folds in the season in play
+// (#2510). This module just reads it. Same build-time-fetch pattern as milestones.js/rehab.js (see
 // docs/data-enrichment.md §5). Historical award winners carry no individual
 // game's score — same footing as the (ungated) League Leaders/WAR/Milestone
 // Watch pages — so this file needs no spoiler cutoff.
 //
-// The current season is read live instead — see "this season" below.
+// The season in play is also read live — see "this season" below. That half is not
+// cached: an award announced mid-session should show on the next visit.
 //
 // Degrades to an empty list before the file exists or on any failure — a
-// friendly empty state, not a broken page. Cached in-memory for the session
-// since the file only changes on a hand-run regenerate.
+// friendly empty state, not a broken page. The file read is cached in memory for
+// the session (staticJson); a new night's file arrives on the next load.
 
 import { staticJson } from './staticJson.js'
 import { getJson } from './statsapi.js'
@@ -42,7 +43,7 @@ export const loadAwardsHistory = staticJson('/data/awards-history.json', {
 // open-surface footing as the static history: an award is not a game result.
 
 // Hardware only, no All-Star selections — the same filter gen-awards-history.mjs applies.
-const SEASON_AWARDS = Object.entries(MAJOR_AWARDS).filter(([id]) => id !== 'ALAS' && id !== 'NLAS')
+export const SEASON_AWARDS = Object.entries(MAJOR_AWARDS).filter(([id]) => id !== 'ALAS' && id !== 'NLAS')
 
 // The awards run from the LCS MVPs in mid-October to the last honors in December.
 // Inference: January and February still belong to the season just ended (the
@@ -55,13 +56,13 @@ export function awardsSeasonInPlay(now = new Date()) {
   return null
 }
 
-function leagueOf(awardId) {
+export function leagueOf(awardId) {
   if (awardId.startsWith('AL')) return 'AL'
   if (awardId.startsWith('NL')) return 'NL'
   return null
 }
 
-function recipientsOf(awardId, data) {
+export function recipientsOf(awardId, data) {
   return (data.awards ?? [])
     .filter((a) => a.player?.id)
     .map((a) => ({
