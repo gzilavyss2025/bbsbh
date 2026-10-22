@@ -384,13 +384,15 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             </div>
           </Card>
         </section>
-      )
-  const noticesEl = <>
+  )
+  const noticesEl = (
+    <>
       {logLoading && !stats && results.length > 0 && <p className="hint">Loading the series so far…</p>}
       {logError && !stats && results.length > 0 && (
         <Notice tone="error" className="pslive__notice">Couldn’t load this series’ leaders and rosters.</Notice>
       )}
-</>
+    </>
+  )
   const totalsEl = stats?.totals && clubs.length === 2 && <SeriesTotals totals={stats.totals} clubs={clubs} />
   const leadersEl = (hasBatting || hasPitching) && (
         <div className="psseries__leaders">
@@ -444,7 +446,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             home={{ id: clubs[1].id, teamName: teamClubNameShort(clubs[1].id) }}
           />
   )
-  const rostersEl = <>
+  const rostersEl = (
+    <>
       {rosterCards.some(({ roster }) => roster.declared === false) && (
         <p className="hint">
           Each club names its postseason roster on the morning of Game 1. Until then, this is its current roster.
@@ -457,7 +460,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           ))}
         </div>
       )}
-</>
+    </>
+  )
   // WORLD SERIES LAYOUT: the hero on top, then the groups behind one jump bar. A group with no data
   // is not drawn and has no button. The rest of the page keeps its sections; the Scouting report
   // drops its own bar, Nine keys (this page has SeriesNineKeys) and Film room / Roster (drawn
