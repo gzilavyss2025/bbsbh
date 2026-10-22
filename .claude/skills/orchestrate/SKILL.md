@@ -177,6 +177,9 @@ Write "Part of #n" only when the issue has more slices after this one. Subscribe
 to the PR and drive it to green. When the work is done and CI is green, remove the
 `wip` label (docs/development.md, "Draft PRs").
 Never merge. Never push to main.
+Keep going when a step needs no answer (docs/development.md, "Long runs"). End the
+final message and the PR body with three headings: Blocked on me, Changed, Found.
+Mark any claim you could not check as "unconfirmed".
 Stop if: the issue is unclear, a design choice is open, the change needs more
 than 5 files, a test would need to be weakened, or CI fails twice for a reason
 you cannot fix. To stop, send_message your parent AND end with a final line

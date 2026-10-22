@@ -27,6 +27,10 @@ the build), then show the same check passing.
 Do not run `npm run e2e`. A hook blocks it unless Gary asks for it in the session.
 If a spec needs a change, edit it and say in the PR that it has not run.
 
+Then review your own diff against `origin/main`. List only problems you would block
+the merge for: file and line, why it is wrong, how to show it fails. Fix them before
+you push (`docs/development.md`, "Long runs").
+
 ## CI red
 
 - Never skip, delete, or loosen a test to get green. Fix the code, or stop and ask.
