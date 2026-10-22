@@ -360,53 +360,6 @@
     border-left: var(--bw-hair) solid var(--border-hairline);
   }
 }
-/* Series MVP — closes the log as a medal-amber award line under the clinching
-   entry (LCS/World Series only; the band simply doesn't render for rounds
-   with no official MVP). Award tokens, not kraft seal amber: this is an
-   honor, same --award-line family as the banner's championship seam — and
-   nothing here should read as sealed/hidden. */
-.psseries__mvp {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2h) var(--space-3) var(--space-2h) 50px;
-  border-top: var(--bw-heavy) solid var(--award-line);
-  background: var(--award-soft);
-}
-/* Compound with .shot/.shot--fallback (both always set by Headshot) so this
-   outranks the base .shot sizing, same convention as .tlead__shot. */
-.shot.psseries__mvpshot {
-  flex: none;
-  width: var(--shot-2xs-w);
-  height: var(--shot-2xs-h);
-  border-radius: var(--radius-sm);
-  border: var(--bw-hair) solid var(--award-line);
-  overflow: hidden;
-}
-.shot.psseries__mvpshot.shot--fallback {
-  font-size: var(--fs-title-sm);
-}
-.psseries__mvpinfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.psseries__mvptag {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--award-ink);
-}
-.psseries__mvpname {
-  font-family: var(--font-body);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-body);
-  color: var(--text-heading);
-}
-
 /* Series leader agate (SeriesLeaderBoard/SeriesLeaderLine in
    PostseasonSeriesPage.jsx). Bespoke to this page — NOT the shared .tlead
    featured-card board, since every name here comes from the two clubs that

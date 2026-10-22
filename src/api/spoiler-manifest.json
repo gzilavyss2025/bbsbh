@@ -129,7 +129,7 @@
     },
     "awardsHistory.js": {
       "class": "spoiler-free",
-      "why": "Static awards-history.json reader — who won what, by season."
+      "why": "Static awards-history.json reader — who won what, by season — plus the live current-season awards/recipients read (an award is not a game result)."
     },
     "battingorder.js": {
       "class": "caller-gated",

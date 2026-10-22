@@ -87,7 +87,7 @@ const BUDGETS = {
   'src/styles/17-identity-lab-workbench.css': 1196, // 1200
   'src/styles/21-box-score.css': 900, // 800
   'src/styles/31-wild-card.css': 1100, // 1092
-  'src/styles/35-postseason-series.css': 800, // 693
+  'src/styles/35-postseason-series.css': 700, // 658
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877
   'src/styles/49-passport-book.css': 1100, // 1036

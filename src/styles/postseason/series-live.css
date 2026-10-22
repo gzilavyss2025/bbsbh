@@ -40,7 +40,7 @@
   min-width: 0;
 }
 /* Compound with .shot (always set by Headshot) to outrank the base and the
-   wide .shot sizing, same convention as .psseries__mvpshot. */
+   wide .shot sizing, same convention as .tlead__shot. */
 .shot.psseries__startershot {
   flex: none;
   width: var(--shot-xs-w);

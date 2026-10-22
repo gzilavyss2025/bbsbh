@@ -111,7 +111,7 @@ const SPACING_RESIDUE = {
   '30-standings.css': { 56: 1 },
   '31-wild-card.css': { 18: 5 },
   '34-postseason.css': { 56: 1 },
-  '35-postseason-series.css': { 50: 2 },
+  '35-postseason-series.css': { 50: 1 },
   '42-first-scorebook.css': { 28: 2, 30: 1, 36: 1, 42: 1, 52: 1, 62: 1, 84: 1 },
   '63-print-sheet.css': { 72: 1 },
   '69-pitch-arsenal.css': { 18: 1 },

@@ -21,8 +21,6 @@ import { gamePath } from '../lib/route.js'
 import { teamClubNameShort } from '../lib/teams.js'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
-import { Headshot } from '../components/player/Headshot.jsx'
-import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
@@ -32,6 +30,7 @@ import { Card } from '../components/ui/frame/Card.jsx'
 import { Notice } from '../components/ui/state/Notice.jsx'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../components/postseason/SeriesParts.jsx'
 import { SeriesFlow } from '../components/postseason/SeriesFlow.jsx'
+import { SeriesMvpCard } from '../components/postseason/SeriesMvpCard.jsx'
 import { SeriesTotals } from '../components/postseason/SeriesTotals.jsx'
 import { SeriesNineKeys } from '../components/postseason/SeriesNineKeys.jsx'
 import { SeriesAbsReport } from '../components/postseason/SeriesAbsReport.jsx'
@@ -223,6 +222,8 @@ export function PostseasonSeriesPage({ seriesId }) {
         </div>
       </Card>
 
+      {mvp && <SeriesMvpCard mvp={mvp} lines={stats.lines} />}
+
       <SeriesFlow
         series={flowBuckets}
         gameSignals={gameSignals}
@@ -307,17 +308,6 @@ export function PostseasonSeriesPage({ seriesId }) {
               )
             })}
           </div>
-          {mvp && (
-            <div className="psseries__mvp">
-              <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} className="psseries__mvpshot" />
-              <div className="psseries__mvpinfo">
-                <span className="psseries__mvptag">Series MVP</span>
-                <PlayerLink id={mvp.playerId} className="psseries__mvpname">
-                  {mvp.name}
-                </PlayerLink>
-              </div>
-            </div>
-          )}
         </Card>
       </section>
 
