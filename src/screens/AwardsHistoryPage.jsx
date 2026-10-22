@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { loadAwardsHistory } from '../api/awardsHistory.js'
+import { loadAwardsHistory, loadSeasonAwards, awardsSeasonInPlay } from '../api/awardsHistory.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
@@ -263,6 +263,61 @@ function AwardYearPlain({ label, recipients, favoriteTeamId }) {
   )
 }
 
+// One award's cell in the "This season" block: its winners once MLB has
+// announced them, else a plain note. A 404 is "pending"; anything else is an error.
+function SeasonAwardCell({ award, favoriteTeamId }) {
+  if (award.status === 'announced') {
+    const { isDense, cardsClass } = cardsClassFor(award.recipients)
+    return (
+      <ul className={`awardhistory__cards ${cardsClass}`}>
+        {award.recipients.map((r) => (
+          <AwardCard key={`${r.playerId}-${r.position}`} r={r} favoriteTeamId={favoriteTeamId} dense={isDense} />
+        ))}
+      </ul>
+    )
+  }
+  return (
+    <p className="hint awardhistory__pending">
+      {award.status === 'error' ? 'Couldn’t load.' : 'Not announced yet'}
+    </p>
+  )
+}
+
+// This season's winners, read live as MLB announces them (loadSeasonAwards).
+// Same league-banner shape as AwardYearSplit; a league-less award is a plain row,
+// and a family with nothing announced collapses to one "Not announced yet" line.
+function ThisSeason({ season, favoriteTeamId }) {
+  const { loading, data } = useAsync(() => loadSeasonAwards(season), [season])
+  if (loading) return <p className="hint prospects__caption">Checking {season} winners…</p>
+  return (
+    <section className="awardhistory__award awardhistory__thisseason">
+      <SectionHead look="label">{`${season} so far`}</SectionHead>
+      <Stack gap="loose">
+        {(data ?? []).map((family) => (
+          <div className="awardhistory__yearaward" key={family.key}>
+            <h4 className="awardhistory__yearawardlabel">{family.label}</h4>
+            {family.awards.every((a) => a.status === 'pending') ? (
+              <SeasonAwardCell award={family.awards[0]} />
+            ) : family.awards.some((a) => a.league) ? (
+              <div className="awardhistory__familysplit">
+                {family.awards.map((a) => (
+                  <LeagueRows
+                    key={a.id}
+                    league={a.league}
+                    rows={[<SeasonAwardCell key="cell" award={a} favoriteTeamId={favoriteTeamId} />]}
+                  />
+                ))}
+              </div>
+            ) : (
+              family.awards.map((a) => <SeasonAwardCell key={a.id} award={a} favoriteTeamId={favoriteTeamId} />)
+            )}
+          </div>
+        ))}
+      </Stack>
+    </section>
+  )
+}
+
 function AllMlbColumn({ label, recipients, favoriteTeamId }) {
   return (
     <div className="awardhistory__allmlbcol">
@@ -323,6 +378,7 @@ export function AwardsHistoryPage() {
   const { loading, error, data } = useAsync(() => loadAwardsHistory(), [])
   const { favoriteTeamId } = useFavoriteTeam()
   const [view, setView] = useState('award')
+  const season = awardsSeasonInPlay()
   const families = useMemo(() => data?.families ?? [], [data])
   const updated = monthDayName(data?.generatedAt)
 
@@ -375,6 +431,8 @@ export function AwardsHistoryPage() {
         errorMessage="Couldn’t load Awards History. Try again."
         emptyMessage="No award history is available right now."
       />
+
+      {season && <ThisSeason season={season} favoriteTeamId={favoriteTeamId} />}
 
       {families.length > 0 && (
         <>

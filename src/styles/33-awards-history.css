@@ -401,3 +401,10 @@
   }
 }
 
+
+/* "This season" block (ThisSeason in AwardsHistoryPage.jsx): an award MLB has not
+   announced yet is a quiet one-line note where its cards will go. */
+.awardhistory__pending {
+  margin: 0;
+  padding: var(--space-1) 2px;
+}
