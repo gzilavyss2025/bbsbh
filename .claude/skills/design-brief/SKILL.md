@@ -51,7 +51,8 @@ marked "(Recommended)". If the task already answers a question, skip it.
      direction prompt proposes each layout as a phone plus wide pair. iPad is touch: nothing
      may need hover.
    - How to check: the dev-server route with `?nointro`, a screenshot at each width, and what
-     to look at. The agent hands Gary the local link (a cloud agent sends the screenshots).
+     to look at. The agent checks its own screenshots (`.claude/skills/run/shot.mjs` in the
+     cloud) and sends them to Gary only when he asks.
    - Done means: the guards in `npm run lint` pass, `npm test` passes, the page looks right
      at about 390 px, and the PR targets `main` from a task branch. The agent never pushes
      to `main`.
