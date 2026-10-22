@@ -27,10 +27,10 @@
 //
 // NOTHING HERE RENDERS A GAME. There is a player builder and a club builder and
 // no third one, so a game route reaches nothing in this file at all. A club's or
-// a person's identity is spoiler-free and opens live everywhere else in this
-// app; a game route is inside the spoiler scope, and the schedule payload that
-// would answer one carries `teams.away.score` and `isWinner` in the same object
-// as the matchup. ADR-0059 argues why that is a body worth NOT having.
+// a person's identity opens live everywhere in this app; a game route is a
+// scoring surface, and the schedule payload that would answer one carries
+// `teams.away.score` and `isWinner` in the same object as the matchup. ADR-0059
+// argues why that is a body worth NOT having.
 //
 // WHERE THE MARKUP GOES, and why it is not inside #root. React clears its
 // container on mount, so markup placed in `#root` would be thrown away when the
@@ -187,11 +187,10 @@ const knownLocation = (t) => (t.locationName === 'United States' ? '' : clean(t.
 
 // A club's readable body: identity, where it plays, and its other door.
 //
-// NO RECORD, and that is a decision rather than an omission. A club's W-L is
-// what the cutoff-gated modules in src/api/spoiler-manifest.json handle
-// (standings.js, teamScore.js, teamRecords.js, seasonSeries.js) — a number that
-// takes an `asOf` for a reason. Nothing here has a reader to ask, so it does not
-// print one. The identity below never moves during a game.
+// NO RECORD, and that is a decision rather than an omission. A club's W-L moves
+// every game, which is why the modules that read it (standings.js, teamScore.js,
+// teamRecords.js, seasonSeries.js) take an `asOf`. Nothing here has a reader to
+// ask, so it does not print one. The identity below never moves during a game.
 export function teamCrawl(t, { id, name, level, league, tab, ballpark = clean(t.venue?.name || '') }) {
   const segment = entitySegment(id, name)
   const division = clean(t.division?.name || '')

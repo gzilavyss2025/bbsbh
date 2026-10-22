@@ -11,7 +11,7 @@
 // replace the marker block. Any failure — statsapi down, card unresolved — falls
 // through to the static default card, so a shared link can never break.
 //
-// It also writes a READABLE BODY for the spoiler-free routes (ADR-0059). The
+// It also writes a READABLE BODY for the routes outside the scoring surfaces (ADR-0059). The
 // head has carried a real card since ADR-0012, but the body underneath it was
 // `<div id="root"></div>`, and the crawlers behind AI assistants run no
 // JavaScript — so a player page was a blank div with a good meta description.
@@ -21,7 +21,7 @@
 //
 // GAME ROUTES GET NO BODY, by construction rather than by care: gameCard returns
 // no `crawl` object, so there is nothing here to render and no branch to get
-// wrong. A game route is inside the spoiler scope, and the schedule payload that
+// wrong. A game route is a scoring surface, and the schedule payload that
 // would answer one carries `teams.away.score` and `isWinner` in the same object
 // as the matchup. ADR-0059 argues it.
 
@@ -52,7 +52,7 @@ function esc(s) {
 }
 
 // The public URL the user actually shared, rebuilt from the rewrite params —
-// clean of the ?route=… internals (and of any spoiler-cutoff ?d/?s hints).
+// clean of the ?route=… internals (and of any as-of ?d/?s hints).
 //
 // ALWAYS ON SITE_URL, never on the request's own origin. Three hostnames serve
 // this same function — tallybb.com, www.tallybb.com and bbsbh.vercel.app — plus
