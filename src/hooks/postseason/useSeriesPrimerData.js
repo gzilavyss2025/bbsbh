@@ -9,9 +9,9 @@ import { useSeriesLog } from './useSeriesLog.js'
 // today's game first, the live read for what it lacks (primerGames.js has the
 // rules). -> { games, stats, source: 'shard' | 'live' | 'mixed', loading, error }.
 //
-// `series` is a bracket Series read WITHOUT { live: true }, so `series.games` is
-// only what went Final before the cutoff. The shard is read for today's game,
-// never for a counted one; no SealBox, no Scores Unlocked read.
+// `series` is a bracket Series, so `series.games` is only what went Final
+// before the cutoff. The shard is read for today's game, never for a counted
+// one; no SealBox.
 export function useSeriesPrimerData(series, cutoff) {
   const counted = series?.games ?? []
   const todayPk = series?.cutoffGame?.gamePk ?? null

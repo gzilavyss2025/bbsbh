@@ -5,7 +5,7 @@
 // The bracket handed in is already heading into its cutoff date (ADR-0087):
 // a club goes out on the board the morning after it loses, never during the
 // game, and today's games never move it. Nothing here reads a date of its own
-// beyond the slate's, and nothing reads Scores Unlocked.
+// beyond the slate's.
 
 const ROUND_ORDER = ['wildcard', 'division', 'lcs', 'worldseries']
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
