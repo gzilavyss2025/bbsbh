@@ -735,8 +735,7 @@
   font-size: var(--fs-compact);
   color: var(--text-muted);
   /* Balances the wrap across lines (a long-tenured All-Star's year list
-     otherwise stranded just "2025, 2026" alone on a near-empty last line) —
-     same convention as .tscoremodal__title. */
+     otherwise stranded just "2025, 2026" alone on a near-empty last line). */
   text-wrap: balance;
 }
 /* "Show all" — a block Door, the same one /all-star-rosters closes its list

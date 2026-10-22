@@ -54,8 +54,7 @@
        `.favteamsheet__pitch`
      - the broadcast report pages' method notes — `.method p` (the "how this
        was counted" prose closing each of the four pages under
-       `src/screens/around-the-game/`; the `.method h2` heading above it stays shouted,
-       same split as the Team Score modal below)
+       `src/screens/around-the-game/`; the `.method h2` heading above it stays shouted)
      - the report pages' few surviving sentences — `.rptprose` and the name links
        riding inside them, `.rptprose .plink` (report/chrome.css),
        worn by the caveat lines on `/abs-challenges` that a board cannot carry,
@@ -65,12 +64,8 @@
        because it is middot-separated fields, not a paragraph
      - the About page body copy — `.aboutpage .caps-exempt`
      - the signed-out Game Log pitch — `.logbooklanding .caps-exempt`
-     - the Team Score modal's headline + explainer paragraphs —
-       `.tscoremodal__title`, `.tscoremodal__body p` (+ inline children) —
-       the figures table and section titles stay shouted
      - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
-       (the blurb title above it stays uppercase, same shouted-heading/
-       natural-case-body split as the Team Score modal above)
+       (the blurb title above it stays uppercase)
      - `.gamestory__headline` (a real MLB.com headline reads as a natural sentence)
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
@@ -95,7 +90,7 @@
        name above it, `.betweeninnings__who`, stays uppercase)
      - the research diary's body copy — `.researchdiary .caps-exempt` (the one
        long-form reading page in the app; headings, labels, table headers and
-       badges all stay shouted, same split as the Team Score modal above)
+       badges all stay shouted)
      - Express Lane's sentences — the entry step's lede, section notes and
        consent (`.xl-entry__note`, `.xl-entry__hint`, `.xl-entry__consent`, in
        77a); the film band's messages `.xl-film__msg` and the pre-roll's

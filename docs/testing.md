@@ -222,6 +222,46 @@ why beside it.
 **Why it is not in CI.** It needs two dev servers and the live network, and it
 takes about seven minutes.
 
+## Bundle size — `npm run check:bundle` (CI-gated)
+
+Size only drifts up, and the build stays green while it does. After `npm run build`,
+`scripts/bundle/check-bundle-size.mjs` (CI runs it after `check:sw-learn`) checks two
+things in `dist/`. Locally: `npm run build && npm run check:bundle`.
+
+1. **Three budgets**, in `scripts/bundle/bundle-size-budget.json`: the JS of the whole
+   first load (the entry plus every chunk it imports statically) and the entry CSS (gzip,
+   kB), and the service-worker precache (KiB, the files a first install downloads). Each
+   sits 3% above its size when it was last set, so ordinary drift does not break an
+   unrelated PR. The numbers are the script's own gzip (zlib default), which Vite's build
+   log differs from by about 1%: compare against what the check prints.
+   A budget that sits more than 6% above the build fails too, so a shrink has to tighten
+   it in its own PR (the ratchet rule in `scripts/CLAUDE.md`).
+2. **Two libraries stay out of the first load**: Clerk (~110 KB raw, about 31 KB gz; the
+   dynamic-import rule in `src/components/CLAUDE.md`) and pdf.js. The check looks for
+   strings the library's own code carries (`LAZY_LIBRARIES` in the script), never an app
+   name: the entry holds the app's `{ ClerkProvider }` destructure on purpose.
+
+**Reading a failure.** The check prints the three sizes, then the ten biggest chunks,
+each tagged `first load` or `lazy`.
+
+- *"… over its budget"*: something grew. Look at the chunk table for the new or fatter
+  chunk. A size jump with `first load` beside a chunk that should be lazy usually means a
+  static `import` where an `import()` belongs.
+- *"… is in the first load"*: a static import pulled Clerk or pdf.js into the entry. Make
+  it dynamic again; the message names the chunk.
+- *"no chunk holds …"*: not a size problem. A library upgrade reworded a marker string,
+  so that marker checks nothing. Replace it in `LAZY_LIBRARIES` with a literal string
+  from the library's built chunk (`grep` `dist/assets/` to confirm it is there).
+- *"… more than 6% under its budget"*: the build shrank. Run
+  `npm run check:bundle -- --write` and commit the lower numbers.
+
+**Changing a budget.** Fix the growth first. A budget goes up only as a deliberate
+decision, edited by hand in the JSON with the reason in the PR description, never as a
+reflex to get green. After a shrink, lower it with `npm run check:bundle -- --write`:
+it sets each budget to 3% over today, never raises one, and refuses while anything fails.
+Rebase onto `main` and re-measure before you merge a change to a budget (the rule in
+`scripts/CLAUDE.md`): a number taken behind `main` goes stale.
+
 ## Making the tests actually bite
 
 A test only has impact if a failure *stops* something. The chain here:

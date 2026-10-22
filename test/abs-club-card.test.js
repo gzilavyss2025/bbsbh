@@ -175,3 +175,31 @@ test('resultsStrip counts every review and draws the latest forty', () => {
   assert.equal(cut.wrong, 10)
   assert.equal(cut.total, 50)
 })
+
+test('clubs on the same share are ranked together, and the next club skips the shared rank', () => {
+  // Ties share the better rank, the way every other board in this app does it.
+  const data = file({
+    1: [man({ playerId: 10, pitches: 1000, asBatter: 6 })],
+    2: [man({ playerId: 20, pitches: 1000, asBatter: 6 })],
+    3: [man({ playerId: 30, pitches: 1000, asBatter: 2 })],
+  })
+  assert.deepEqual(challengeCard(data, 1).batter.rank, { rank: 1, of: 3 })
+  assert.deepEqual(challengeCard(data, 2).batter.rank, { rank: 1, of: 3 })
+  assert.deepEqual(challengeCard(data, 3).batter.rank, { rank: 3, of: 3 })
+})
+
+test('a part-time catcher is in the club figure and the list, but not on the plot', () => {
+  // The club figure is a fact about the club, so the man behind the plate for nine
+  // innings counts in it; the plot draws only the catchers who cleared the floor.
+  const data = file({
+    1: [
+      man({ playerId: 30, name: 'Regular', catcherInnings: 900, asBatter: 0, asCatcher: 100 }),
+      man({ playerId: 31, name: 'Fill-in', catcherInnings: 9, asBatter: 0, asCatcher: 1 }),
+    ],
+  })
+  const c = challengeCard(data, 1).catcher
+  assert.equal(c.club.calls, 101)
+  assert.equal(c.club.exposure, 909)
+  assert.deepEqual(c.rows.map((r) => r.name), ['Regular', 'Fill-in'])
+  assert.deepEqual(c.plotted.map((r) => r.name), ['Regular'])
+})

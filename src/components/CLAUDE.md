@@ -70,10 +70,10 @@ UI, ADR-0036/0041).
 
 **The Clerk-gated components must stay dynamically imported.** `AccountButton`,
 `AccountPitch`, `LogbookAccountGate`, `ContinueScoring`, and every `*CloudSync` component are
-reached through `import()` so `@clerk/clerk-react` (~110 KB gz) stays out of the
+reached through `import()` so `@clerk/clerk-react` (~110 KB raw, about 31 KB gz) stays out of the
 entry chunk. Moving them is fine; converting one of those specifiers to a static
-import is not, and it would still build cleanly — so check the built output, not
-just that the build passed.
+import is not, and it would still build cleanly. CI checks the built output:
+`npm run build && npm run check:bundle` fails when Clerk text reaches the first load.
 
 **Some components are named by literal path in a guard.** `check-stamp-surfaces.mjs`
 holds an allowlist keyed on `components/logbook/GameStamp.jsx` /

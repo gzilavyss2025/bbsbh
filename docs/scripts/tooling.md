@@ -135,6 +135,12 @@ list says what each guard checks.
   halves of the same question — the endpoint that WRITES curated art must never
   ship, the art itself always must. Layer 4 of ADR-0029; run it as
   `npm run build && npm run check:dist-dev`.
+- `bundle/check-bundle-size.mjs` — post-build (not part of `npm run lint`): fails when the
+  first-load JS, the entry CSS or the service-worker precache passes, or sits well under,
+  its budget in `bundle/bundle-size-budget.json`, or when Clerk or pdf.js text is in the
+  first load. In `scripts/bundle/` because `scripts/` is at its `check-dir-size` budget;
+  tested in `test/bundle-size-guard.test.js`; how to read it: `docs/testing.md`, "Bundle
+  size". Run as `npm run build && npm run check:bundle`.
 - `check-report-pages.mjs` — fails if `SiteMenu.jsx` (the hamburger menu) or
   `SiteFooter.jsx` (the slate's "More Baseball" list) stops importing the shared
   `REPORT_PAGES` array from `src/lib/reportPages.js` — the guard against those two

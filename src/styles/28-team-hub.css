@@ -150,7 +150,9 @@
 
 /* The league-distribution rail: every other team as a small dot at its own
    score, ours as the larger marker — rank made visual instead of just a
-   number to read. */
+   number to read. Kept after the Team Score card was removed (#2494):
+   ComebackCard and the wild-card depth rails (31-wild-card.css) draw these
+   .team-score__* classes now. */
 .team-score__track {
   position: relative;
   height: 44px;

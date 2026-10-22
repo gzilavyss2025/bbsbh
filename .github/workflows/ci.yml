@@ -44,3 +44,8 @@ jobs:
       # still lets the server-rendered guides at /learn reach the network,
       # instead of answering them from the precached app shell.
       - run: npm run check:sw-learn
+      # Also needs the artifact: fails when the first-load JS, the entry CSS or the
+      # precache passes (or sits well under) scripts/bundle/bundle-size-budget.json,
+      # or when Clerk or pdf.js text lands in the first load. Prints the ten biggest
+      # chunks. See docs/testing.md, "Bundle size".
+      - run: npm run check:bundle

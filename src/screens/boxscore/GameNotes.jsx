@@ -161,8 +161,8 @@ export function PlayOfTheGame({ play, highlight, awayAbbr, homeAbbr }) {
 // isn't available (most MiLB parks). One card markup for all entries (0-3
 // of them — a candidate can be missing, not just WPA-unavailable) so the
 // row reads as one family of cards at any width; the top mover gets a
-// `--hero` modifier for extra weight (the inset gradient panel, borrowed
-// from .team-score__grade) since it's still the single most important line
+// `--hero` modifier for extra weight (the inset gradient panel) since it's
+// still the single most important line
 // on the card. On phone that pairs with a bigger typeface; from the
 // horizontal-row breakpoint up, every card shares one photo size and one
 // type scale (see 21a-box-score-stars.css) so the panel alone carries the

@@ -206,8 +206,8 @@
   min-height: 2.5em;
 }
 /* Natural case: a clip title is a play sentence ("Brice Turang's RBI
-   single"), the same species as .pbp__desc and .tscoremodal__title,
-   and it borrows their sanctioned exception to the ALL-CAPS invariant
+   single"), the same species as .pbp__desc,
+   and it borrows its sanctioned exception to the ALL-CAPS invariant
    (`#root *` would otherwise win over the class rule directly). */
 #root .hlclip__title {
   text-transform: none; /* caps-exempt: highlight titles read as real play sentences, same exception as .pbp__desc */
