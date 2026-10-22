@@ -1,8 +1,9 @@
 // Admin-editable copy store — a second narrow, authenticated backend exception
 // alongside multi-device reveal sync (api/reveal.js). It stores nothing but UI
-// text: the wording of the spoiler-consent pop-ups and banners, so the site
-// owner can tune them (and the humor) as the site matures without a code change
-// or a deploy. See the ADR and src/copy/registry.js for the closed set of keys.
+// text: the wording of the guides, the offseason home, the award order, and the
+// per-park notes, so the site owner can tune them (and the humor) as the site
+// matures without a code change or a deploy. See the ADR and src/copy/registry.js
+// for the closed set of keys.
 //
 // GET  /api/copy            -> { copy: { id: text, ... } }   (public, cacheable)
 // POST /api/copy            -> { copy: { ... } }             (admin only)

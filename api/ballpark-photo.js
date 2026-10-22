@@ -24,12 +24,10 @@
 // writer and one validation choke point (sanitizeOverrides), rather than
 // growing a second path that can set a field.
 //
-// SPOILER RULE. Nothing here is score-bearing and nothing can become so. A
-// ballpark is a building; the team hub's Overview is deliberately outside the
-// scoring flow (CLAUDE.md); and the payload is opaque bytes that an admin
-// chose, never anything derived from a game feed. This is the same standing the
-// per-park copy fields already have — see the SPOILER GUARD note in
-// src/copy/registry.js, which governs the fields this endpoint feeds.
+// NOT SCORE-BEARING. The payload is opaque bytes an admin chose, never anything
+// derived from a game feed: the same standing the per-park copy fields have (see
+// the SPOILER GUARD note in src/copy/registry.js, which governs the fields this
+// endpoint feeds).
 //
 // UNCONFIGURED DEGRADES GRACEFULLY, like every other exception: with no
 // BLOB_READ_WRITE_TOKEN this returns 501 and the client hides the drop zone,
