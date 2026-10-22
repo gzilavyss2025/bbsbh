@@ -11,6 +11,8 @@ import { SectionHead } from '../components/ui/frame/SectionHead.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
+import { EmptyState } from '../components/ui/state/EmptyState.jsx'
+import { Notice } from '../components/ui/state/Notice.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
 import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
@@ -277,23 +279,28 @@ function SeasonAwardCell({ award, favoriteTeamId }) {
     )
   }
   return (
-    <p className="hint awardhistory__pending">
-      {award.status === 'error' ? 'Couldn’t load.' : 'Not announced yet'}
-    </p>
+    award.status === 'error' ? (
+      <Notice tone="error" size="compact">Couldn’t load.</Notice>
+    ) : (
+      <EmptyState size="compact">Not announced yet</EmptyState>
+    )
   )
 }
 
 // This season's winners, read live as MLB announces them (loadSeasonAwards).
 // Same league-banner shape as AwardYearSplit; a league-less award is a plain row,
-// and a family with nothing announced collapses to one "Not announced yet" line.
+// a family with nothing announced collapses to one "Not announced yet" line, and a
+// season with nothing announced at all to one empty state.
 function ThisSeason({ season, favoriteTeamId }) {
   const { loading, data } = useAsync(() => loadSeasonAwards(season), [season])
-  if (loading) return <p className="hint prospects__caption">Checking {season} winners…</p>
+  const nothingYet = !!data && data.every((f) => f.awards.every((a) => a.status === 'pending'))
   return (
-    <section className="awardhistory__award awardhistory__thisseason">
-      <SectionHead look="label">{`${season} so far`}</SectionHead>
+    <section className="awardhistory__award" aria-labelledby="awardhistory-thisseason">
+      <SectionHead look="label" titleId="awardhistory-thisseason">{`${season} so far`}</SectionHead>
+      {loading && <EmptyState size="compact" role="status">Checking {season} winners…</EmptyState>}
+      {nothingYet && <EmptyState size="compact">No {season} winners announced yet</EmptyState>}
       <Stack gap="loose">
-        {(data ?? []).map((family) => (
+        {(nothingYet ? [] : data ?? []).map((family) => (
           <div className="awardhistory__yearaward" key={family.key}>
             <h4 className="awardhistory__yearawardlabel">{family.label}</h4>
             {family.awards.every((a) => a.status === 'pending') ? (
