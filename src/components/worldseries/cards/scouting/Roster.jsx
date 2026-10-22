@@ -87,8 +87,8 @@ function Group({ section, clubId, set, slateDate }) {
   const [open, setOpen] = useState(OPEN.includes(section.id))
   return (
     <section aria-label={section.label}>
-      <Button skin="ghost" block icon="›" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="ww-roster__head">
-        {section.label} <span className="ww-roster__num ww-roster__count">{section.players.length}</span>
+      <Button block aria-expanded={open} onClick={() => setOpen((o) => !o)} className="ww-roster__head">
+        {section.label}
       </Button>
       {open && (
         <ul className="ww-roster__list">

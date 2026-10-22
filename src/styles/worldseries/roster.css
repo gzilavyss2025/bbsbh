@@ -41,17 +41,27 @@
   }
 }
 
-.ww-roster__head,
 .ww-roster__row {
   border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+/* A group header is a stamped bar you can see to tap. Open or shut shows in the fill, with no
+   chevron and no count: shut is paper-inset, open is the ink fill, as a selected Segmented tab. */
+.ww-roster .ww-roster__head {
+  --btn-fill: var(--surface-inset);
+  --btn-edge: var(--border-stamped);
+  --btn-ink: var(--text-heading);
+  --btn-fill-hover: var(--surface-inset);
+  --btn-edge-hover: var(--border-stamped);
+  justify-content: flex-start;
+  margin-bottom: var(--space-1);
+}
+.ww-roster .ww-roster__head[aria-expanded='true'] {
+  --btn-fill: var(--text-heading);
+  --btn-ink: var(--text-on-ink);
 }
 .ww-roster__num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-}
-.ww-roster__count {
-  margin-left: var(--space-1h);
-  color: var(--text-muted);
 }
 
 .ww-roster__list {
