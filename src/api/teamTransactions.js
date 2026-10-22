@@ -14,8 +14,7 @@
 // in one story together. transactions/league.js is a second caller of that
 // pipeline, running it once per owning club over the whole league.
 //
-// Spoiler note: roster moves and their dates carry no score, so nothing here
-// is reveal-only — this module is as spoiler-free as rehab.js/rookies.js.
+// Roster moves and their dates carry no score, so nothing here is reveal-only.
 
 import { txnDate } from './rehab-policy.js'
 import { buildCutline, resolvePosition, surnameOf } from './transactions/cutline.js'

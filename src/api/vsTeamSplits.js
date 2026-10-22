@@ -26,7 +26,7 @@
 // merged result keeps the ORIGINAL whole-file shape, so every pure consumer
 // below and in callout-notes/vsTeamNote.js is unchanged.
 //
-// Spoiler note: the player page is a spoiler-FREE surface (it shows open game
+// Note: the player page is an open surface (it shows open game
 // logs and season splits), so career-vs-club totals belong here just like the
 // "Season splits" card. The one score-revealing element is the last-game line —
 // a specific past game's result — so the card gates it against the page's `asOf`

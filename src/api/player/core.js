@@ -44,7 +44,7 @@ export async function loadPlayerCore(id, asOf) {
     // real current year — never the (possibly past) season a game link is
     // scoped to, so viewing an old game never shows a stale "20XX All-Star"
     // banner. The register's own per-season stars are the Stats tab's, since
-    // that is where the register renders. Spoiler-safe.
+    // that is where the register renders.
     careerSportId === 1 ? fetchAllStarRosterIds(currentYear) : Promise.resolve(null),
     // "Last played in 2022" — only the unrostered can show it, so only they pay
     // for the tables it is read off.

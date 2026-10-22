@@ -1,5 +1,5 @@
-// Site-wide search — the footer's player/team/matchup lookups. All
-// spoiler-free: search surfaces identity and schedule only, never a score.
+// Site-wide search — the footer's player/team/matchup lookups. It
+// surfaces identity and schedule only, never a score.
 
 import { SEARCHABLE_SPORT_IDS } from '../lib/teams.js'
 import { getJson } from './statsapi.js'

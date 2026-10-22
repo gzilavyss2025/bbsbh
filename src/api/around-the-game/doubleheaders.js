@@ -1,6 +1,6 @@
 // The reader behind /doubleheaders — "the doubleheader report".
 //
-// SPOILER-FREE, on the same footing as api/comebackWins.js: every figure here
+// NO SCORE, on the same footing as api/comebackWins.js: every figure here
 // is a season-level aggregate over games statsapi has already called Final. A
 // club's record in doubleheader games is a season total, not a score, and
 // nothing in this module can name what happened in any one game — the page it

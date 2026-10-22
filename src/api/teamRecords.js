@@ -16,7 +16,7 @@
 //      its own cutoff-gated schedule fetch.
 //   2. Answer the pre-break / post-break lever without a second dataset.
 //
-// SPOILER-FREE, on the same footing as WAR, the team-score aggregates and
+// NO SCORE, on the same footing as WAR, the team-score aggregates and
 // comeback-wins: a season ledger of FINAL games carries no live-game score, and
 // the team hub is an open surface by rule (ADR-0034 — "the cutoff is opt-in
 // now"; gating an open surface is the regression, not the hardening). The file

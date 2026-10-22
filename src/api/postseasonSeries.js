@@ -9,7 +9,7 @@
 // precomputing it would be over-engineering. Every game in
 // postseason-history.json is already Final (gen-postseason-history.mjs skips
 // any season whose postseason hasn't finished), so this carries no live-game
-// spoiler risk and needs no SealBox, same footing as postseasonLeaders.js.
+// result and needs no SealBox, same footing as postseasonLeaders.js.
 //
 // Field reads mirror scripts/gen-postseason-leaders.mjs's ingestGame (verified
 // live there against gamePk 263172) — summed over just this series' games

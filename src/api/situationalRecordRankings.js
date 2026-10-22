@@ -19,7 +19,7 @@
 // level per day per lever. Every shard is memoized by staticJsonBy, so paging
 // between splits, halves and levels re-downloads nothing.
 //
-// SPOILER-FREE, for exactly the reasons teamRecords.js gives — same files, same
+// NO SCORE, for exactly the reasons teamRecords.js gives — same files, same
 // season-aggregate-over-Final-games footing, and no live game can be in them.
 
 import { fetchStaticTeams } from './teams-static.js'

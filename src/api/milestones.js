@@ -11,7 +11,7 @@
 // this module just reads it. Same build-time-fetch pattern as rehab.js/war.js
 // (see docs/data-enrichment.md §5). Counting-stat totals and projections carry
 // no individual game's score — same footing as the (ungated) League Leaders
-// and WAR pages — so this file needs no spoiler cutoff.
+// and WAR pages — so this file needs no as-of cutoff.
 //
 // Degrades to an empty list before the file exists or on any failure — a
 // friendly empty state, not a broken page. Cached in-memory for the session

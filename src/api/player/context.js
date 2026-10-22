@@ -135,7 +135,7 @@ export function playerContext(id, asOf) {
 // which level his career-shaped sections are pinned to, which stat groups he
 // has, and the day every dated fetch is cut off at. Two requests.
 async function buildPlayerContext(id, asOf) {
-  // The spoiler cutoff for every date-bound fetch — "entering today" for a
+  // The as-of cutoff for every date-bound fetch — "entering today" for a
   // game-scoped view, else the live current day. The transaction feed is capped
   // by it too, because a live rehab assignment has to be detected before any
   // stat block is built.
@@ -159,7 +159,7 @@ async function buildPlayerContext(id, asOf) {
   // who has reached the majors falls back to MLB. A never-debuted minor leaguer
   // keeps his last level: it's still the right one for his MiLB register.
   const liveSportId = rosterStatus && bio.debut ? 1 : personSportId(person)
-  // IL status from the same spoiler-capped feed.
+  // IL status from the same capped feed.
   const il = detectInjuredList(txns, endDate)
   const onIL = Boolean(il)
   // A rehab assignment is by definition an IL rehab, so it's gated on onIL: a

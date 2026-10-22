@@ -1,4 +1,4 @@
-// SPOILER FOOTING: spoiler-FREE.
+// NO GAME DATA.
 // Readers for "Where they're from" (#1526): schools, birthplaces and map shapes, from the static
 // public/data/from/ files that gen-where-from.mjs (nightly) and gen-where-from-map.mjs (hand-run)
 // write. Where a man went to school, or was born, says nothing about a game. Open surface

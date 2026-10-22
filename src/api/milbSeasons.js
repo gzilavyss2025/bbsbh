@@ -9,7 +9,7 @@ import { staticJsonBy } from './staticJson.js'
 // A row is the season TOTAL at one level: { season, sport, group, n, v, pct }.
 // `n` is plate appearances (hitting) or outs (pitching). `v` is OPS or ERA, null when
 // the feed printed a dash. `pct` is the percentile of `v` in that level-season, null
-// under the playing-time floor (40 PA, 30 outs). Spoiler-free: season totals only.
+// under the playing-time floor (40 PA, 30 outs). Season totals only.
 // Degrades to [] when the shard or the player is missing.
 
 // The career blend's weight for one minor-league row (docs/ovr-rating.md, "Career

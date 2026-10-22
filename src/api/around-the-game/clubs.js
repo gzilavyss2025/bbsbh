@@ -10,7 +10,7 @@
 // So each page joins here instead. Same static file, same session memo, one
 // shape: a Map from teamId to the fields a report row needs.
 //
-// SPOILER-FREE — names, abbreviations and division labels, nothing more.
+// NO SCORE — names, abbreviations and division labels, nothing more.
 
 import { fetchStaticTeams } from '../teams-static.js'
 

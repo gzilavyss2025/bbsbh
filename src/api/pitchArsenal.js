@@ -10,9 +10,9 @@ import { combineArsenalEntries } from '../lib/seasons/combine.js'
 // API, so the generator sweeps completed games' play-by-play; this module
 // just reads the shaped file and derives view models.
 //
-// Spoiler note: this is a COMPLETED-GAME season aggregate — pitch counts from
+// Note: this is a COMPLETED-GAME season aggregate — pitch counts from
 // games already Final — so it carries no live game's score, on the same
-// footing as war.js / savantPercentiles.js. Spoiler-FREE, no SealBox needed;
+// footing as war.js / savantPercentiles.js. No SealBox needed;
 // renders pregame on TeamInfo's OpposingStarterCard.
 //
 // MLB + AAA only (`mlb`/`aaa` keys) — AA and below carry no Hawk-Eye
@@ -270,7 +270,7 @@ export function arsenalSidesView(data, personId, isMlb) {
 // scripts/gen-pitch-arsenal.mjs's sweep and already ride the same shard file
 // the mix does (`century` / `maxVelo`, per pitch type) — this is a sum over
 // the types he actually threw, not a second fetch. Same completed-game
-// season-aggregate spoiler footing as the rest of this module.
+// season-aggregate footing as the rest of this module.
 //
 // Same level rule as pitchArsenalFor: MLB and AAA are separate bodies of work
 // and are never pooled. Null when the file hasn't loaded, when he isn't in
@@ -393,7 +393,7 @@ export const MIN_LOOK_SHIFT = 0.02
 // split is now the FILE: the caller picks a level by picking a pool file, and
 // this function ranks whatever it is handed.
 //
-// Spoiler footing is unchanged from the rest of this module: a completed-game
+// Footing is unchanged from the rest of this module: a completed-game
 // season aggregate, no SealBox. Returns [] whenever it can't answer — file not
 // loaded, subject not in it, or subject under the similarity floor — so the
 // card simply doesn't render.

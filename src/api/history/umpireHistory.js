@@ -6,7 +6,7 @@ import { shardKey100 } from '../../lib/shardKey.js'
 // builds BY HAND from the Stats API schedule, 2000 to the season before the first one
 // umpires.js holds. The files never hold a season umpires.js covers.
 //
-// SPOILER FOOTING: spoiler-FREE. Every game here is a past season's, ended long ago;
+// NO LIVE GAMES. Every game here is a past season's, ended long ago;
 // a career line is not a score (ADR-0034).
 //
 // THE SHARD: { firstSeason, throughSeason, umpires: { id: { name, seasons, record } } }.

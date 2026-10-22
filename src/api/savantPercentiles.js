@@ -58,7 +58,7 @@ export function medianRatesFor(data, group) {
 // minor-league board, so `bat` is one MLB pool and there is no second peer
 // group to keep it away from.
 //
-// Spoiler footing is unchanged from the rest of this module: season aggregates
+// Footing is unchanged from the rest of this module: season aggregates
 // off a nightly file, no SealBox. Returns [] whenever it can't answer — file
 // not loaded, or subject not in it — so the card simply doesn't render.
 export function similarHittersFor(data, personId, opts) {

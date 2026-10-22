@@ -2,7 +2,7 @@
 // Top Substitutes / Starting Pitchers / Bullpen shape the team page
 // builds from season-cumulative stats,
 // but keyed off actual starts/appearances in the club's last N COMPLETED
-// games instead. Spoiler-free: every game this reads is already Final, same
+// games instead. Every game this reads is already Final, same
 // footing as postseasonSeries.js (which this fetcher is modeled on) — no
 // SealBox needed.
 import { getJson } from './statsapi.js'

@@ -10,8 +10,8 @@
 // .claude/plans (session-local) informed this; see root CLAUDE.md's
 // build-time-fetch pattern for the general shape.
 //
-// Spoiler note: completed trades and their dates carry no score, so nothing
-// here is reveal-only — this module is as spoiler-free as teamTransactions.js.
+// Completed trades and their dates carry no score, so nothing here is
+// reveal-only.
 
 import { txnDate } from './rehab-policy.js'
 import { rate3 } from './person/shared.js'

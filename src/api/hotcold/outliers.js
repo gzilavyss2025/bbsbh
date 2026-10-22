@@ -2,7 +2,7 @@
 // `public/data/outliers/{season}.json` (scripts/gen-outliers.mjs, nightly). Answers "who
 // was flagged as of a cutoff", for the /outliers page and its date slider.
 //
-// Spoiler-free on an open surface (ADR-0034). A file entry is dated by its game, and holds
+// On an open surface (ADR-0034). A file entry is dated by its game, and holds
 // the callouts AFTER that game. A cutoff `D` takes a player's latest entry dated BEFORE
 // `D`, the same rule as rule.js: no game on or after the cutoff counts. The caller keeps
 // the cutoff at or before today, so a game in progress is never in a list.

@@ -8,8 +8,7 @@
 // three days" fed from a file built at 3 a.m. is up to a day behind, which is
 // the one thing this surface cannot be.
 //
-// Spoiler note: a roster move and its date carry no score, so nothing here is
-// reveal-only — as spoiler-free as the pass it calls (see league.js).
+// A roster move and its date carry no score, so nothing here is reveal-only.
 //
 // THE WINDOW IS NOT THE FETCH. Everything below turns on that:
 //

@@ -4,7 +4,7 @@ import { getJson } from '../statsapi.js'
 // so a pair that met earlier gets the Stats API career line instead. Read ONLY
 // the `vsPlayerTotal` entry. The `vsPlayer` entries (one per season) list each
 // plate appearance a second time, so a sum doubles it (headToHead.js).
-// Spoiler-free: a career line of finished seasons on an open page (ADR-0034).
+// A career line of finished seasons on an open page (ADR-0034).
 export function parseVsPlayerTotal(json) {
   const s = json?.stats?.find((x) => x.type?.displayName === 'vsPlayerTotal')?.splits?.[0]?.stat
   if (!s) return null

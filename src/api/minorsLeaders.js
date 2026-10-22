@@ -7,8 +7,8 @@
 // to combine — far too heavy for a phone page load. So scripts/gen-minors-
 // leaders.mjs precomputes it on a daily cron (see
 // .github/workflows/update-nightly-data.yml) and this module just reads it.
-// Same build-time-fetch pattern as war.js / rehab.js; still spoiler-free (season
-// aggregates only).
+// Same build-time-fetch pattern as war.js / rehab.js; still season
+// aggregates only.
 //
 // The file stores PRE-RANKED top rows per category ({ leaders: { catKey:
 // entries[] } }, each entry already in computeLeaders' output shape), not the raw
@@ -39,8 +39,8 @@ const RANK = new Map(MILB_LEVELS.map((level, i) => [level.sportId, i]))
 
 // WHO MOVED UP, at one level — the minor levels' offseason page, issue #1077.
 //
-// A promotion is a fact about a SEASON, not about a game, so it spoils nothing
-// and needs no seal — the same reason the picked-game card's reason line is
+// A promotion is a fact about a SEASON, not about a game, so it needs no
+// seal — the same reason the picked-game card's reason line is
 // allowed to count careers. It is also, deliberately, no new fetch: the board is
 // on the wire once a day whether this page asks for it or not.
 //

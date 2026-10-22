@@ -1,6 +1,6 @@
 // Career register — the unified MLB + MiLB stat table. Level progression and
 // the career timeline live in ./career/progression.js. See ../person.js's
-// header for the module's overall spoiler footing.
+// header for the module's overall as-of footing.
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { txnDate, transactionTeamRanks } from '../rehab-policy.js'
 import { DASH, num } from './shared.js'
@@ -168,7 +168,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   const cur = Number(currentSeason)
   // Guarantee a stint for the current season at the player's current level even
   // if the year-by-year fetch hasn't caught up — its row uses the date-cut
-  // currentStat, so it can't move mid-game (the spoiler defense).
+  // currentStat, so it can't move mid-game.
   if (currentStat && currentSportId) {
     if (!bySeason.has(cur)) bySeason.set(cur, new Map())
     if (!bySeason.get(cur).has(currentSportId)) bySeason.get(cur).set(currentSportId, [])

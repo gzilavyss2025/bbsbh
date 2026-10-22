@@ -1,7 +1,7 @@
 // THE HITTER GRID's reader (#1411 Part B, ADR-0096): what a hitter did with each
 // pitch, by where it was, for the Matchup Scout's hitter map.
 //
-// SPOILER FOOTING — spoiler-FREE, no SealBox. Season sums over Final games,
+// NO SCORE, no SealBox. Season sums over Final games,
 // written by the nightly gen-pitch-arsenal.mjs before the day's games: the
 // same footing as the pitch-command shards beside it. The Scout is an open
 // surface (ADR-0034).

@@ -10,8 +10,8 @@
 // cross-game aggregation case it exists for); the team/award leaders are
 // computed straight from postseason-history.json, no extra fetch. Every
 // number here is a season(s)-old counting/rate stat with no LIVE game's
-// spoiler risk (same footing as Awards History/WAR), so this file needs no
-// spoiler cutoff or SealBox.
+// result (same footing as Awards History/WAR), so this file needs no
+// as-of cutoff or SealBox.
 //
 // Batting/pitching entries are pre-shaped into TeamLeaders' `precomputed`
 // category-map contract ({ id, name, teamId, display, value } per category

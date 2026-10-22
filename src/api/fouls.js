@@ -8,10 +8,10 @@ import { combineFoulShards } from '../lib/seasons/combine.js'
 // not pre-totaled anywhere in the API, so the generator sweeps completed games'
 // play-by-play; this module just reads the shaped file and derives view models.
 //
-// Spoiler note: this is a COMPLETED-GAME season aggregate — counts of fouls hit
+// Note: this is a COMPLETED-GAME season aggregate — counts of fouls hit
 // across games already Final — so it carries no live game's score, on the same
 // footing as war.js / League Leaders (a foul count is not a run, hit, or out).
-// It's spoiler-FREE and needs no SealBox; it can render pregame on TeamInfo /
+// It needs no SealBox; it can render pregame on TeamInfo /
 // PlayerPage. Degrades to null on any failure — a missing card, not a crash.
 //
 // Cached in-memory for the session (the files change once a day).

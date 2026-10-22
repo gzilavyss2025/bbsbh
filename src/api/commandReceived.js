@@ -17,7 +17,7 @@ import { staticJson } from './staticJson.js'
 // each game's defensive substitutions (api/catcherOfRecord.js) in the nightly
 // precompute (scripts/gen-command-received.mjs).
 //
-// SPOILER FOOTING — spoiler-FREE, no SealBox. A season median distance per
+// NO SCORE, no SealBox. A season median distance per
 // pitcher, over games already final: no line, no running score, no per-game
 // granularity. The substitution replay that BUILT it is spoiler-adjacent and
 // stays caller-gated where it lives (catcherOfRecord.js); what survives into

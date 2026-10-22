@@ -3,7 +3,7 @@ import { staticJson, staticJsonBy } from './staticJson.js'
 // The two salary files scripts/fever/gen-salaries.mjs writes: one ledger per
 // club (/team/{id}/contracts) and one league rollup (/salaries).
 //
-// SPOILER-FREE, and the reason is the scope half of the rule rather than a
+// NO SCORE, and the reason is the scope of the rule rather than a
 // carve-out. A salary is not a score — it is season-long identity context, the
 // same class of fact as a stat line, a roster spot or a standings row, and
 // ADR-0034 is explicit that gating those was the rule reaching past what it

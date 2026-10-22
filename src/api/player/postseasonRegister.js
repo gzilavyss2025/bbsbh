@@ -13,7 +13,7 @@
 // back with gameType 'P' too, which is why this does not ask per round
 // (docs/MLB_STATS_API.md, the gameType table).
 //
-// SPOILER FOOTING. A stat line is not a score (ADR-0034): the page is open. A dated
+// AS-OF FOOTING. A stat line is not a score (ADR-0034): the page is open. A dated
 // page (`asOf`) still must not look ahead, and a yearByYear row for the as-of year
 // may hold October games after the date, so that season and every later one drop
 // out. The API career line then includes games past the date, so the footer is

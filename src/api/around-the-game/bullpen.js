@@ -16,7 +16,7 @@
 // ledger and must not be read as one — a club's total relief innings since
 // March is a different question that this file cannot answer.
 //
-// SPOILER-FREE, inherited unchanged from workload.js: everything here is
+// NO SCORE, inherited unchanged from workload.js: everything here is
 // backward-looking over completed appearances, and the as-of date excludes the
 // current day, so no in-progress line can leak. No SealBox.
 

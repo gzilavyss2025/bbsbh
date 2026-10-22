@@ -13,7 +13,7 @@
 // ordering the site owner edits (/admin -> Award weight), not an allowlist an
 // agent has to grow. An award nobody has ranked sorts LAST, never first.
 //
-// NOT A SPOILER SURFACE. An award is a season-level fact about a career, on a
+// NO GAME DATA HERE. An award is a season-level fact about a career, on a
 // page CLAUDE.md keeps deliberately outside the scoring flow (ADR-0034), and
 // nothing here reads a linescore, a box score or a play. The one date rule it
 // does honour is `endDate`: the same "entering today" cutoff every other
