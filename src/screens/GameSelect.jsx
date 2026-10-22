@@ -541,8 +541,7 @@ export function GameSelect({
       {/* The D1 masthead: the brand bar, the ladder card (level + day) and,
           on a phone, the compact bar that replaces the card on scroll. Every
           move navigates (ADR-0056). The brand reloads this level's slate for today (a
-          full page load — see lib/home.js). The pass's Live scores switch
-          and Reveal all are no longer drawn here (the D1 handoff). */}
+          full page load — see lib/home.js). */}
       <SlateMasthead
         stops={stops}
         dateStr={dateStr}

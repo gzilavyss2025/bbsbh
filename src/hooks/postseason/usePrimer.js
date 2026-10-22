@@ -10,8 +10,9 @@ const NO_GAMES = []
 // same answer. SeriesPrimer.jsx draws it.
 //
 //   enabled     false below BRACKET_RAIL_QUERY: nothing is read
-//   postseason  usePostseasonBracket's answer: the bracket and its `cutoff`, which
-//               never counts the cutoff date's own games (ADR-0087)
+//   postseason  usePostseasonBracket's answer: the bracket, which never counts the
+//               cutoff date's own games, and its `cutoff` (ADR-0087, 2026-10-08
+//               addendum)
 //   games       the day's raw MLB slate, so a stacked doubleheader game counts
 //
 // -> { bracket, cutoff, slateDate, isToday, favoriteTeamId } always (what the

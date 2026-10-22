@@ -28,9 +28,9 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 // from the Clerk-gated section above, so this sheet renders identically whether
 // or not this deploy configures an account.
 //
-// Safety-by-default: the CANCEL button is
-// rendered first and takes initial focus, so an inattentive Enter or tap keeps
-// your data. Nothing here is undoable.
+// Safety-by-default: the CANCEL button is rendered first and takes initial
+// focus, so an inattentive Enter or tap keeps your data. Nothing here is
+// undoable.
 
 const COPY = {
   device: {
