@@ -113,7 +113,7 @@ export function boardCompare({ vs, mode, format, value, prevOf }) {
 }
 
 // The Analytics tab's line under the picker: the cards the season moves, in
-// page order. Foul balls and the Spray map hide on a spoiler-scoped `asOf`
+// page order. Foul balls and the Spray map hide on an `asOf`
 // page, the Spray map is a hitter's, and the two Pitches cards a pitcher's.
 // Null when the picker moves no card.
 const COUNT_WORDS = ['', 'one card', 'two cards', 'three cards', 'four cards']

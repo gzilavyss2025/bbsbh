@@ -91,7 +91,7 @@
 //                                          (professional photos across the season's decided games,
 //                                           unsealed like '/photos'. NOT a tab — the Photos rail's own door.)
 //   '/team/{id}/transactions'           -> { name: 'team-transactions', id, asOf, sportId }
-//                                          (the club's roster moves, whole season, spoiler-free.
+//                                          (the club's roster moves, whole season.
 //                                           NOT a tab — where the home slate's wire sends a reader.)
 //   '/team/{id}/{anything else}'        -> { name: 'team', id, asOf, sportId }
 //                                          (an unknown tab lands on the club's page, never a game — #1164)
@@ -496,7 +496,7 @@ export function parseRoute(url) {
       placing: toGamePkParam(q.get('place')),
     }
   }
-  // High-res game photo finder — unsealed, see root CLAUDE.md's spoiler section.
+  // High-res game photo finder — an open page, no seal.
   if (parts.length === 1 && parts[0] === 'photos') return { name: 'photos' }
   // Same page, deep-linked straight to one game's gallery (e.g. from the box
   // score) — skips the club/season picker instead of adding a distinct route name.
@@ -561,10 +561,10 @@ export function parseRoute(url) {
       ? { name: 'trade-deadline-season', season }
       : { name: 'trade-deadline-season', season: LATEST_TRADE_DEADLINE_SEASON }
   }
-  // Umpires carry no spoiler-cutoff hint: assignments/dates are never
-  // score-revealing, so unlike player/team links there's no `?d=`/`?s=` to parse.
-  // Managers carry no spoiler-cutoff hint either — a coaching career/awards
-  // record is never score-revealing, same footing as umpires above.
+  // Umpires carry no as-of hint: assignments/dates are never score-revealing,
+  // so unlike player/team links there's no `?d=`/`?s=` to parse. Managers carry
+  // none either — a coaching career/awards record is never score-revealing, same
+  // footing as umpires above.
   if (parts.length === 2 && parts[0] === 'manager')
     return { name: 'manager', id: idFromSlug(parts[1]) }
   if (parts.length === 1 && parts[0] === 'outliers') return { name: 'outliers', asOf }
@@ -974,9 +974,9 @@ export function teamStampInPath(id, opts = {}) {
 export function teamPhotosPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/photos${linkQuery(opts)}`
 }
-// A club's roster moves for the whole season (spoiler-free — a move carries no
-// score). Built in two places: the club's own Transactions deck, and every club
-// chip on the home slate's wire.
+// A club's roster moves for the whole season (a move carries no score). Built
+// in two places: the club's own Transactions deck, and every club chip on the
+// home slate's wire.
 export function teamTransactionsPath(id, opts = {}) {
   return `/team/${teamSegment(id, opts.name)}/transactions${linkQuery(opts)}`
 }

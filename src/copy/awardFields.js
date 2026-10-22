@@ -22,10 +22,10 @@ export function awardFields() {
   // but the stored value stays a plain newline-separated string, so the box is
   // still readable and repairable by hand if that UI ever breaks.
   //
-  // SPOILER FOOTING, unchanged. An award is a season-level career fact on a
-  // page deliberately outside the scoring flow (ADR-0034); none of these three
-  // values is derived from game data, and none is rendered inside a sealed
-  // surface. The guard at the top of this file still holds.
+  // NOT DERIVED FROM GAME DATA, unchanged. An award is a season-level career
+  // fact; none of these three values is derived from game data, and none is
+  // rendered inside a sealed surface. The guard at the top of this file still
+  // holds.
   {
     id: 'awards.order',
     group: 'awards',
