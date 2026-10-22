@@ -25,7 +25,7 @@ import { isoToday } from '../lib/dates.js'
 
 // The league / level / org leaderboards, reusing the same TeamLeaders component
 // + descriptors as the team page — only the POOL changes (see api/leaders.js).
-// Spoiler-free: season aggregates, no seals (same stance as TeamLeadersPage).
+// Season aggregates, no seals (same stance as TeamLeadersPage).
 //
 // For a MiLB scope the prospect snapshot is loaded so each ranked farmhand gets
 // his prospect pill; for the org scope the club identity is loaded for the
@@ -50,7 +50,7 @@ async function loadLeaders(scope, orgId, asOf) {
 }
 
 // The MLB/AL/NL/AAA/AA/A+/A switcher — reuses the slate level-toggle look
-// (`.levelnav`). Each button deep-links to its scope, carrying the spoiler
+// (`.levelnav`). Each button deep-links to its scope, carrying the as-of
 // cutoff. On the org scope none is active (it isn't one of these fixed scopes),
 // but the switcher still lets the user jump back out to a league/level.
 function ScopeNav({ scope, asOf, sportId, navigate }) {

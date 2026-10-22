@@ -39,7 +39,7 @@ import { Card } from '../../components/ui/frame/Card.jsx'
 // appeared this season. So this is a board about the CURRENT staff and says
 // so; it is not a season ledger of relief innings and must not be read as one.
 //
-// SPOILER-FREE, inherited from workload.js: completed appearances only, and
+// NO SCORE, inherited from workload.js: completed appearances only, and
 // the as-of date excludes today, so no in-progress line can leak.
 
 // THE RULE, DRAWN. The staff grid above draws cells and rails — what each arm

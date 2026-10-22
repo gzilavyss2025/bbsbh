@@ -44,7 +44,7 @@ import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastB
 // zero-based bar draws thirty identical bars and hides the only thing worth
 // seeing. The floor is the league's own fastest club.
 //
-// SPOILER-FREE. A clock reading carries no result (api/around-the-game/gate.js).
+// A clock reading carries no result (api/around-the-game/gate.js).
 
 
 // EVERY DURATION ON THIS PAGE CARRIES ITS UNIT. A column of "2:49" is only

@@ -33,7 +33,7 @@ import {
 //
 // NOTHING HERE IS SCORE-BEARING. Every number on this page is a minor-league
 // duration, a career total, or a count of players. No game, no linescore, no
-// reveal state — the spoiler rule has no surface to hold onto here.
+// reveal state.
 
 function Shell({ children }) {
   useDocumentTitle('Research diary')

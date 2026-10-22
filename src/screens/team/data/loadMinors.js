@@ -258,7 +258,7 @@ export async function loadMinors(id, asOf, src = DIRECT) {
   // Milestones: this org's own rehab-assignment stints, from the same
   // league-wide snapshot RehabPage reads — a rehabbing player is a real
   // fact about a game he's about to appear in, not a score, so it stays
-  // spoiler-free like the rest of this tab.
+  // open like the rest of this tab.
   const milestones = orgId ? (rehabSnapshot.players ?? []).filter((p) => p.orgId === orgId) : []
   const horizon = { promotionWatch: promotionWatchFrom(prospects), milestones }
   const depthChart = buildDepthChart(prospects)

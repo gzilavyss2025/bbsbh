@@ -23,7 +23,7 @@ const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 // Ball/strike judgment counts carry no score, so — like the per-umpire page —
 // this needs no SealBox. A row for an umpire slated behind the plate TODAY
 // gets a highlight + chip (fetchTodayPlateUmpireIds) — a schedule assignment,
-// same spoiler-free footing as the rest of this page.
+// like the rest of this page.
 //
 // A season view (#1202): `seasonYear` and `vs` come from the address. The
 // highlight is TODAY's plate, so it lights a row whatever season is shown.

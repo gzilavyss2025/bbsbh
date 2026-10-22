@@ -43,8 +43,8 @@ import { loadTransactions } from './data/loadTransactions.js'
 // The CARD is the same card either way (TxStory.jsx), so a move a reader
 // recognises from the club page looks the same here.
 //
-// Spoiler-free: a roster move and its date carry no score, so there is no
-// SealBox on this page and none is wanted (api/transactions/clubFeed.js).
+// A roster move and its date carry no score, so there is no SealBox on this
+// page and none is wanted (api/transactions/clubFeed.js).
 // `asOf` scopes which moves load, exactly as it does for the deck, and is never
 // displayed — a dated visit stays dated across the hop, and skips the live
 // window for the same reason the deck does.

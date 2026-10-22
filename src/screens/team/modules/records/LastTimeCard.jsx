@@ -29,7 +29,7 @@ import { Card } from '../../../../components/ui/frame/Card.jsx'
 //   - A run that is this club's normal. Colorado has thrown five shutouts in
 //     three seasons, so 109 games without one is not news about Colorado.
 //
-// Spoiler: the same footing as the Records card beside it. The shard holds
+// Cutoff: the same as the Records card beside it. The shard holds
 // only Final games from a cron that runs before the day's games, `cutoff` is
 // the same day-before cutoff every dated card on this tab honours, and it is
 // applied before anything is counted (ADR-0034 — the hub is an open surface).

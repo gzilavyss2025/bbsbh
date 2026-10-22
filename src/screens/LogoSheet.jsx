@@ -12,8 +12,7 @@ import { Grid } from '../components/ui/layout/Grid.jsx'
 
 // A browsable reference sheet of every club's logo at a level, independent of
 // any day's schedule. Tapping a tile opens the same sketch modal used
-// elsewhere in the app, with its 3-way variant picker. Carries no scores, so
-// it's spoiler-safe like the rest of the app.
+// elsewhere in the app, with its 3-way variant picker. Carries no scores.
 export function LogoSheet({ onBack }) {
   useDocumentTitle('Logo Sheet')
   const [sportId, setSportId] = useState(SPORT_IDS.MLB)

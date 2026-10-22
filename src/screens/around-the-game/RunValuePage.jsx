@@ -53,7 +53,7 @@ import { PlayerNameplate, RunCell } from '../../components/around-the-game/RunVa
 // season / through-date / population the meta row used to hold. Anything longer
 // belongs in this comment or in docs/, not on the page.
 //
-// SPOILER-FREE. A season aggregate off a nightly file, over completed games —
+// A season aggregate off a nightly file, over completed games —
 // the same footing as every other open season board (ADR-0034).
 //
 // It wears the broadcast masthead but is filed under "This season" beside

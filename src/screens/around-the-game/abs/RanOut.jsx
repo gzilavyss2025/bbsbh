@@ -41,11 +41,10 @@ import { commas, inches, pct1 } from './format.js'
 // about, and was not necessarily silent for the whole night. The caption says
 // so, because the stronger reading is the one a reader will take by default.
 //
-// SPOILER-FREE, and this is the section on the page that sits closest to the
-// line: it names a club, an opponent, a date, an inning, the call and how far
-// off the edge the pitch was. None of those is a score, no row carries one, and
-// test/abs-challenges.test.js asserts the exact key set on the night row rather
-// than scanning it for a bad word.
+// NO SCORE. It names a club, an opponent, a date, an inning, the call and how
+// far off the edge the pitch was. None of those is a score, no row carries one,
+// and test/abs-challenges.test.js asserts the exact key set on the night row
+// rather than scanning it for a bad word.
 //
 // IT READS THE `summary` IT IS HANDED and never the file, so the page's MLB /
 // Triple-A chip switches this board for free. The one fetch it does make is the

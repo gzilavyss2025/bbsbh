@@ -36,7 +36,7 @@ import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastB
 // curve as a summer either arrives or does not, weekend against weekday, and
 // which visiting club a park fills up for.
 //
-// SPOILER-FREE. A crowd count is not a score (api/around-the-game/gate.js).
+// A crowd count is not a score (api/around-the-game/gate.js).
 
 const pct1 = (n) => (n == null ? '—' : `${n.toFixed(1)}%`)
 
