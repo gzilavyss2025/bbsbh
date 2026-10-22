@@ -129,15 +129,6 @@
   color: var(--text-heading);
   margin: 0;
 }
-.admincopy__previewOpen {
-  flex: none;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  color: var(--text-body);
-  background: none;
-  border: none;
-  text-decoration: underline;
-}
 .admincopy__groupGrid {
   display: grid;
   gap: var(--space-4);
@@ -198,60 +189,6 @@
   opacity: 0.4;
   text-decoration: none;
 }
-.admincopy__preview {
-  padding: var(--space-3);
-  background: var(--bg-canvas);
-  border: var(--bw-hair) dashed var(--border-rule);
-  border-radius: var(--radius-md);
-}
-.admincopy__previewCard {
-  background: var(--surface-card);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-}
-.admincopy__previewTitle {
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  margin: 0 0 var(--space-2);
-}
-.admincopy__previewBody,
-.admincopy__previewHumor,
-.admincopy__previewReset {
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-body);
-  color: var(--text-body);
-  margin: 0 0 var(--space-2);
-}
-.admincopy__previewHumor {
-  color: var(--text-muted);
-  font-style: italic;
-}
-.admincopy__previewReset {
-  color: var(--text-muted);
-}
-.admincopy__previewButtons {
-  display: flex;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-}
-.admincopy__previewBtn {
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2) var(--space-3);
-}
-.admincopy__previewBtn--dismiss {
-  color: var(--text-body);
-  border: var(--bw-hair) solid var(--border-rule);
-}
-.admincopy__previewBtn--confirm {
-  color: var(--text-on-ink);
-  background: var(--accent-primary);
-}
 @media (min-width: 720px) {
   .admincopy__groupGrid {
     grid-template-columns: 1fr 1fr;
@@ -261,10 +198,6 @@
      give half the width to — the fields take the whole row instead. */
   .admincopy__groupGrid--plain {
     grid-template-columns: 1fr;
-  }
-  .admincopy__preview {
-    position: sticky;
-    top: var(--space-6);
   }
 }
 
