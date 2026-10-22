@@ -21,19 +21,17 @@ a.notable__row:active {
   background: var(--bg-canvas);
 }
 
-/* The slot: one face wide plus two 20px steps, so a three-arm no-hitter fans out inside it and
-   a one-face row leaves the same gap. Each later face lies under the one before. */
-.notable__faces {
-  display: flex;
+/* The slot: one face wide on every row, so the text beside it starts at one edge. A combined
+   no-hitter's other arms are a +N tag on the face. */
+.notable__face {
+  position: relative;
   flex: none;
   align-self: flex-start;
-  width: calc(var(--shot-xs-w) + 2 * var(--space-5));
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
 }
-.shot.notable__shot,
-.notable__crest.notable__shot {
+.shot.notable__shot {
   display: block;
-  flex: none;
-  position: relative;
   width: var(--shot-xs-w);
   height: var(--shot-xs-h);
   border: var(--bw-heavy) solid var(--border-stamped);
@@ -41,20 +39,27 @@ a.notable__row:active {
   background: var(--surface-inset);
   overflow: hidden;
 }
-.notable__shot + .notable__shot {
-  margin-left: calc(var(--space-5) - var(--shot-xs-w));
-}
-.notable__shot:nth-child(1) {
-  z-index: 3;
-}
-.notable__shot:nth-child(2) {
-  z-index: 2;
-}
-/* A triple play names no one: the club that turned it, in the same frame. */
+/* A triple play names no one: the club that turned it, centred in the same frame. Its own
+   rule, since .shot.notable__shot above is the more specific one. */
 .notable__crest {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-inset);
+}
+.notable__more {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 1px var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--bg-canvas);
+  background: var(--border-stamped);
 }
 
 .notable__body {
@@ -85,7 +90,8 @@ a.notable__row:active {
 .notable__go {
   flex: none;
   font-family: var(--font-display);
-  font-size: var(--fs-title);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-solid);
   color: var(--text-caption);
 }
 
@@ -95,7 +101,7 @@ a.notable__row:active {
   /* layout-exempt: three named columns that line up from row to row */
   .notable__body {
     display: grid;
-    grid-template-columns: 11rem 16rem 1fr;
+    grid-template-columns: 9rem 14rem 1fr;
     align-items: center;
     column-gap: var(--space-4);
   }

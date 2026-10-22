@@ -29,29 +29,28 @@ const TABS = {
   tripleplays: 'Triple plays',
 }
 const PAGE = 25
-// A combined no-hitter can name a dozen arms; the faces stop at three, the names stay in the line.
-const MAX_FACES = 3
 const ROLES = [
   { value: 'did', label: 'Did it' },
   { value: 'against', label: 'Done to them' },
   { value: 'either', label: 'Either' },
 ]
 
-// The slot at the row's left: the people it is about, stacked (a combined no-hitter fans out
-// up to three), or for a triple play, which names no one, the club that turned it. The slot is
-// one width for every row, so the text beside it starts at the same edge.
-function Faces({ row }) {
+// The slot at the row's left, one face wide on every row so the text beside it starts at the same
+// edge: the person the row is about (the first arm of a combined no-hitter, with a +N tag; every
+// name is in the line beside it), or for a triple play, which names no one, the club that turned it.
+function Face({ row }) {
+  const [lead] = row.players
+  const more = row.players.length - 1
   return (
-    <span className="notable__faces" aria-hidden="true">
-      {row.players.length > 0 ? (
-        row.players
-          .slice(0, MAX_FACES)
-          .map((p) => <Headshot key={p.id} personId={p.id} name={p.name} teamId={row.doerId} className="notable__shot" />)
+    <span className="notable__face" aria-hidden="true">
+      {lead ? (
+        <Headshot personId={lead.id} name={lead.name} teamId={row.doerId} className="notable__shot" />
       ) : (
         <span className="notable__shot notable__crest">
           <TeamLogo teamId={row.doerId} name="" size={28} />
         </span>
       )}
+      {more > 0 && <span className="notable__more">+{more}</span>}
     </span>
   )
 }
@@ -71,7 +70,7 @@ function Row({ row, linkProps }) {
   const did = (side) => row.doerId != null && side.id === row.doerId
   const body = (
     <>
-      <Faces row={row} />
+      <Face row={row} />
       <Stack gap="tight" className="notable__body">
         <span className="notable__when t-label">
           {humanDateWithYear(row.date)}
