@@ -25,8 +25,9 @@ Each club's heading links to its SportsLogos.net page, which shows every era to 
 
 Each club's last row is today's mark. The CDN already serves it, so it is not listed. Rows that
 already have art are not listed either; the count is under each club. Eras before 1901 are left out.
-Boston and Milwaukee Braves and St. Louis Browns years are not researched (SportsLogos.net files
-them on other pages); only what the table already holds appears for them.
+The Braves list includes the Boston and Milwaukee years, and the Orioles list includes the St. Louis
+Browns years. SportsLogos.net has no Boston Braves page entry for 1901-1911 or 1936-1940, so those
+years show no row.
 
 ### Arizona Diamondbacks (id 109)
 
@@ -56,11 +57,17 @@ them on other pages); only what the table already holds appears for them.
 
 ### Atlanta Braves (id 144)
 
-[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/51/Atlanta-Braves-Logos/)
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/51/Atlanta-Braves-Logos/) · [Boston Braves](https://www.sportslogos.net/logos/list_by_team/81/Boston-Braves-Logos/) · [Milwaukee Braves](https://www.sportslogos.net/logos/list_by_team/84/Milwaukee-Braves-Logos/)
 
-- [ ] 1901–1945 Boston Braves — filed, no art
-- [ ] 1946–1952 Boston Braves — filed, no art
-- [ ] 1953–1965 Milwaukee Braves — filed, no art
+- [ ] 1912–1915 Boston Braves — filed, no art
+- [ ] 1916–1920 Boston Braves — filed, no art
+- [ ] 1921–1924 Boston Braves — filed, no art
+- [ ] 1925–1928 Boston Braves — filed, no art
+- [ ] 1929–1935 Boston Braves — filed, no art
+- [ ] 1941–1944 Boston Braves — filed, no art
+- [ ] 1945–1952 Boston Braves — filed, no art
+- [ ] 1953–1955 Milwaukee Braves — filed, no art
+- [ ] 1956–1965 Milwaukee Braves — filed, no art
 - [ ] 1966–1967 — not filed
 - [ ] 1968–1984 — not filed
 - [ ] 1985–1986 — not filed
@@ -69,8 +76,18 @@ them on other pages); only what the table already holds appears for them.
 
 ### Baltimore Orioles (id 110)
 
-[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/52/Baltimore-Orioles-Logos/)
+[All logos on SportsLogos.net](https://www.sportslogos.net/logos/list_by_team/52/Baltimore-Orioles-Logos/) · [St. Louis Browns](https://www.sportslogos.net/logos/list_by_team/88/St-Louis-Browns-Logos/)
 
+- [ ] 1902 St. Louis Browns — not filed
+- [ ] 1903–1904 St. Louis Browns — not filed
+- [ ] 1905 St. Louis Browns — not filed
+- [ ] 1906–1907 St. Louis Browns — not filed
+- [ ] 1908–1910 St. Louis Browns — not filed
+- [ ] 1911–1914 St. Louis Browns — not filed
+- [ ] 1915 St. Louis Browns — not filed
+- [ ] 1916–1935 St. Louis Browns — not filed
+- [ ] 1936–1951 St. Louis Browns — not filed
+- [ ] 1952–1953 St. Louis Browns — not filed
 - [ ] 1954–1965 — not filed
 - [ ] 1966–1969 — not filed
 - [ ] 1970–1991 — not filed
@@ -462,7 +479,7 @@ them on other pages); only what the table already holds appears for them.
 - [ ] 1992–2004 — filed, no art
 - [ ] 2005–2010 — not filed
 
-Rows to find: 280.
+Rows to find: 296.
 
 ## Part 2. Minor-league eras filed with no art
 
