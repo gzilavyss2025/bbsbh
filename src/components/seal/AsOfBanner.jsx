@@ -95,7 +95,7 @@ export function AsOfBanner({ asOf, sportId = null }) {
       {/* A past season (`?y=`) is read as the year's last day, so its banner
           names the season rather than a Dec 31 cutoff nobody picked. */}
       <span className="asof-banner__text">
-        {isYearView(asOf) ? `Season ${asOf.slice(0, 4)}` : `Stats entering ${humanDate(asOf)}`}
+        {isYearView(asOf) ? `${asOf.slice(0, 4)} Season` : `Stats entering ${humanDate(asOf)}`}
       </span>
       <button type="button" className="asof-banner__cancel" onClick={openEditor}>
         Change date
