@@ -8,7 +8,7 @@ import { matchupKey } from '../formerTeammates.js'
 // `top` is up to 12 ids, best first, for the card. Retired players count. MLB clubs only: a MiLB
 // pair has no file and reads empty. History by club and season, no game, so it is open.
 
-const EMPTY = { credit: [], throughSeason: null, teams: [], top: [], rows: [] }
+const empty = () => ({ credit: [], throughSeason: null, teams: [], top: [], rows: [] })
 
 const load = staticJsonBy((key) => `/data/played-for-both/${key}.json`, { fallback: null })
 
@@ -16,9 +16,9 @@ const load = staticJsonBy((key) => `/data/played-for-both/${key}.json`, { fallba
 //      top: [{ id, name, seasons }], rows: [{ id, name, seasons }] }
 // with `seasons` = { [teamId]: [season, ...] }. The same answer for either club order.
 export async function playedForBoth(teamIdA, teamIdB) {
-  if (!teamIdA || !teamIdB) return EMPTY
+  if (!teamIdA || !teamIdB) return empty()
   const shard = await load(matchupKey(teamIdA, teamIdB))
-  if (!shard?.teams?.length) return EMPTY
+  if (!shard?.teams?.length) return empty()
   const [lo, hi] = shard.teams
   const rows = (shard.rows ?? []).map(([id, name, withLo, withHi]) => ({ id, name, seasons: { [lo]: withLo, [hi]: withHi } }))
   const byId = new Map(rows.map((r) => [r.id, r]))

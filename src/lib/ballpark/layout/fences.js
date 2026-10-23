@@ -36,16 +36,17 @@ export function threePointWall(posted) {
   if (Number.isFinite(lc) && Number.isFinite(rc)) return null
   const bow = (lf + rf) / 2 - cf // radius at +-45 degrees, relative to center
   const tilt = (rf - lf) / 2
-  // One posted gap sign (at t = -0.5 or +0.5, i.e. +-22.5 degrees) bends the
-  // parabola with a cubic that is zero at the three signs: t(t^2-1) is -0.375 at
-  // t = 0.5 and +0.375 at t = -0.5. Both gaps posted is the five-point wall's job.
+  // One posted gap sign (at t = -0.5 or +0.5, i.e. +-22.5 degrees) bends the parabola with a
+  // quartic that is zero at the three signs AND at the other gap, so the unposted gap stays on the
+  // parabola: t(t^2-1)(t+gapT) is -0.375 at the posted gap. Both gaps posted is the five-point
+  // wall's job.
   const gapT = Number.isFinite(lc) ? -0.5 : Number.isFinite(rc) ? 0.5 : null
   const gap = gapT === null ? 0 : (Number.isFinite(lc) ? lc : rc) - (cf + bow * gapT * gapT + tilt * gapT)
-  const bend = gapT === null ? 0 : gap / (gapT * (gapT * gapT - 1))
+  const bend = gap / -0.375
   const points = []
   for (let deg = -45; deg <= 45 + 1e-9; deg += WALL_STEP_DEG) {
     const t = deg / 45
-    const r = cf + bow * t * t + tilt * t + bend * t * (t * t - 1)
+    const r = cf + bow * t * t + tilt * t + bend * t * (t * t - 1) * (t + (gapT ?? 0))
     const rad = (deg * Math.PI) / 180
     points.push([Math.round(r * Math.sin(rad) * 10) / 10, Math.round(r * Math.cos(rad) * 10) / 10])
   }

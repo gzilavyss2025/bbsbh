@@ -33,7 +33,8 @@ export function AsOfBanner({ asOf, sportId = null }) {
   const { min, max } = asOfBounds()
 
   const openEditor = () => {
-    setPending(asOf || '')
+    // A past season's year-end date is outside the picker's range: start that one blank.
+    setPending(isYearView(asOf) ? '' : asOf || '')
     setEditing(true)
   }
   const cancelEditor = () => setEditing(false)
