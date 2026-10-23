@@ -4,7 +4,7 @@ import { faceoffRoles } from '../../../lib/postseason/primer/matchupEdges.js'
 import { Headshot } from '../../player/Headshot.jsx'
 import { PlayerLink } from '../../player/PlayerLink.jsx'
 import { Pill } from '../../ui/control/Pill.jsx'
-import { EdgeCard } from './EdgeCard.jsx'
+import { Card } from '../../ui/frame/Card.jsx'
 
 // MATCHUP EDGES (one of "Today's edges"): the hitters with a big career line
 // against today's starter, and the batter the starter has owned. The rows come
@@ -13,11 +13,21 @@ import { EdgeCard } from './EdgeCard.jsx'
 // when no row clears a threshold.
 //
 //   edges  matchupEdges(...): [{ kind: 'hitter' | 'pitcher', id, name, vs, line }]
+// The card is stamped and named on its ink tab, as the World Series home's cards are;
+// the scouting report's "no standout matchups" line wears it too.
 // A hitter edge is the field's green, a pitcher edge the clay: a soft ground with
 // a deep ink, and the word says which.
 const KIND = {
   hitter: { word: 'Hitter', style: pillSolidStyle({ ground: 'var(--field-soft)', text: 'var(--field-deep)' }) },
   pitcher: { word: 'Pitcher', style: pillSolidStyle({ ground: 'var(--clay-soft)', text: 'var(--clay-deep)' }) },
+}
+
+export function MatchupCard({ children }) {
+  return (
+    <Card frame="stamped" label="Matchup edges" labelAs="h3" count="Career vs starters" className="seriesedges__matchups">
+      {children}
+    </Card>
+  )
 }
 
 // One face-off side: photo, name, role pill. `flip` mirrors it for side B. The
@@ -44,7 +54,7 @@ export function MatchupEdges({ edges, variant }) {
   if (!edges?.length) return null
   if (variant === 'faceoff') {
     return (
-      <EdgeCard title="Matchup edges" note="Career vs today's starters" className="seriesedges__matchups">
+      <MatchupCard>
         <ul className="seriesedges__rows">
           {edges.map((e) => {
             const { a, b } = faceoffRoles(e)
@@ -58,11 +68,11 @@ export function MatchupEdges({ edges, variant }) {
             )
           })}
         </ul>
-      </EdgeCard>
+      </MatchupCard>
     )
   }
   return (
-    <EdgeCard title="Matchup edges" note="Career vs today's starters" className="seriesedges__matchups">
+    <MatchupCard>
       <ul className="seriesedges__rows">
         {edges.map((e) => (
           <li key={e.id} className="seriesedges__row">
@@ -79,6 +89,6 @@ export function MatchupEdges({ edges, variant }) {
           </li>
         ))}
       </ul>
-    </EdgeCard>
+    </MatchupCard>
   )
 }

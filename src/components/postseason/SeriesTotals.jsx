@@ -16,54 +16,68 @@ import { Card } from '../ui/frame/Card.jsx'
 //
 //   totals   loadSeriesStats's `totals`, { [clubId]: { batting, pitching, games } }
 //   clubs    [{ id }, { id }], the left club then the right club
-export function SeriesTotals({ totals, clubs }) {
+//   stamped  the home rail's look: a stamped card named on its ink tab, in place
+//            of the label head over a sheet card. The series pages keep the
+//            default, whose layout rules (series-live.css) key on its parts.
+export function SeriesTotals({ totals, clubs, stamped = false }) {
   const [left, right] = clubs
   const groups = totalsRows(totals, left?.id, right?.id)
   if (!groups.length) return null
   const games = totals[left.id]?.games ?? 0
   const name = (id) => teamAbbr({ id })
+  const note = `${games} ${games === 1 ? 'game' : 'games'}`
+  const table = (
+    <table className="psseries__totalstable">
+      <caption className="sr-only">
+        Series totals, {games} {games === 1 ? 'game' : 'games'}, {name(left.id)} and {name(right.id)}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col" className="psseries__totalsclub">
+            <TeamLogo teamId={left.id} name={name(left.id)} size={22} />
+            <span>{name(left.id)}</span>
+          </th>
+          <td />
+          <th scope="col" className="psseries__totalsclub psseries__totalsclub--right">
+            <span>{name(right.id)}</span>
+            <TeamLogo teamId={right.id} name={name(right.id)} size={22} />
+          </th>
+        </tr>
+      </thead>
+      {groups.map((g) => (
+        <tbody key={g.group}>
+          <tr className="psseries__totalsgroup">
+            <th scope="colgroup" colSpan={3}>
+              {g.group}
+            </th>
+          </tr>
+          {g.rows.map((r) => (
+            <tr key={`${g.group}-${r.code}`} className="psseries__totalsrow">
+              <Value value={r.a} lead={r.better === 'a'} />
+              <th scope="row" className="psseries__totalskey">
+                <abbr title={r.label}>{r.code}</abbr>
+              </th>
+              <Value value={r.b} lead={r.better === 'b'} />
+            </tr>
+          ))}
+        </tbody>
+      ))}
+    </table>
+  )
+  if (stamped) {
+    return (
+      <Card frame="stamped" body="flush" label="Series totals" count={note} className="psseries__totals psseries__totals--stamped">
+        {table}
+      </Card>
+    )
+  }
   return (
     <section className="psseries__totalssection">
-      <SectionHead look="label" note={`${games} ${games === 1 ? 'game' : 'games'}`}>
+      <SectionHead look="label" note={note}>
         Series totals
       </SectionHead>
       <Card as="div" body="flush" className="psseries__totals">
-        <table className="psseries__totalstable">
-          <caption className="sr-only">
-            Series totals, {games} {games === 1 ? 'game' : 'games'}, {name(left.id)} and {name(right.id)}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col" className="psseries__totalsclub">
-                <TeamLogo teamId={left.id} name={name(left.id)} size={22} />
-                <span>{name(left.id)}</span>
-              </th>
-              <td />
-              <th scope="col" className="psseries__totalsclub psseries__totalsclub--right">
-                <span>{name(right.id)}</span>
-                <TeamLogo teamId={right.id} name={name(right.id)} size={22} />
-              </th>
-            </tr>
-          </thead>
-          {groups.map((g) => (
-            <tbody key={g.group}>
-              <tr className="psseries__totalsgroup">
-                <th scope="colgroup" colSpan={3}>
-                  {g.group}
-                </th>
-              </tr>
-              {g.rows.map((r) => (
-                <tr key={`${g.group}-${r.code}`} className="psseries__totalsrow">
-                  <Value value={r.a} lead={r.better === 'a'} />
-                  <th scope="row" className="psseries__totalskey">
-                    <abbr title={r.label}>{r.code}</abbr>
-                  </th>
-                  <Value value={r.b} lead={r.better === 'b'} />
-                </tr>
-              ))}
-            </tbody>
-          ))}
-        </table>
+        {table}
       </Card>
     </section>
   )

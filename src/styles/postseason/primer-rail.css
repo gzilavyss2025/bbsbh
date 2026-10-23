@@ -99,3 +99,33 @@
   flex: none;
   align-self: center;
 }
+
+/* ---------- the rail's stamped cards ---------- */
+/* Each card hangs its name tab above its edge, so a card after another needs more
+   air than the sheet cards had. */
+.bracketrail > .card--stamped + .card--stamped {
+  margin-top: var(--space-8);
+}
+
+/* Series totals: the table runs inside the stamped edge, padded as the bracket's body is. */
+.psseries__totals--stamped {
+  padding-inline: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+
+/* Series leaders: the two blocks share one card. A block's title is a label row on the
+   tint, and the second block opens under an ink rule. .tledg's own rules (the team hub's
+   ledger) keep their ink band; this card turns it into a quiet row. */
+.tledg--series {
+  margin-top: var(--space-3h);
+}
+.tledg--series .tledg__blocks {
+  gap: 0;
+}
+.tledg--series .tledg__block + .tledg__block {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+.tledg--series .tledg__block-title {
+  background: var(--surface-stamped-tint);
+  color: var(--text-heading);
+}

@@ -1,4 +1,6 @@
 import '../../styles/worldseries/home.css'
+import { fetchSchedule } from '../../api/schedule.js'
+import { useAsync } from '../../hooks/useAsync.js'
 import { useWorldSeriesView } from '../../hooks/postseason/useWorldSeriesView.js'
 import { withFormatDates } from '../../lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
@@ -29,10 +31,28 @@ import { ScoutingReport } from './ScoutingReport.jsx'
 // bats, bullpen; the scouting report follows probables. Off day: hero, [ledger], reel,
 // scouting report, [played on a phone], the trip,
 // home and road + bullpen (side by side wide).
-export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
+//
+// The hero ends on the slate's own card for the next game (`renderCard` builds it, `seriesGame` is
+// today's, already on the slate). On an off day the slate holds no game, so the card is fetched
+// from the game's own date: the next game's card, though it is not today's. Without `renderCard`
+// (no slate to borrow it from) the hero keeps its door.
+export function WorldSeriesHome({ bracket, slateDate, wide = false, seriesGame = null, renderCard = null }) {
   const mode = worldSeriesMode(bracket)
   const { series, clubIds, data, focusPk, game, umpire, parkOf, played } = useWorldSeriesView(mode, slateDate)
+  const offDayPk = renderCard && mode?.dayType !== 'game' ? focusPk : null
+  const offDayDate = game?.date || null
+  const offDay = useAsync(
+    () => (offDayPk && offDayDate ? fetchSchedule(offDayDate).then((games) => games.find((g) => g.gamePk === offDayPk) ?? null) : Promise.resolve(null)),
+    [offDayPk, offDayDate],
+  )
   if (!mode) return null
+  const cardGame = mode.dayType === 'game' ? seriesGame : offDay.data
+  const gameCard =
+    renderCard && cardGame ? (
+      <ul className="gamelist" aria-label={`Game ${mode.gameNumber ?? ''}`.trim()}>
+        {renderCard(cardGame, 0, cardGame.officialDate)}
+      </ul>
+    ) : null
 
   const model = ledgerModel({
     clubIds,
@@ -70,6 +90,8 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false }) {
         umpire={umpire}
         splitsByClub={data?.hotBats ?? null}
         clubGames={data?.clubGames ?? null}
+        gameCard={gameCard}
+        gameCardPending={Boolean(renderCard) && offDay.loading}
       />
       {wide && <Ledger series={series} model={model} />}
       {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={(id) => lcsRoundOf(bracket, id)} />}

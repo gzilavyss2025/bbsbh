@@ -115,7 +115,7 @@ function Rail({ primer: { series, data, bracket, cutoff } }) {
   return (
     <aside className="bracketrail" aria-label="The series so far">
       <BracketNow bracket={bracket} cutoff={cutoff} round={series.round} />
-      {stats?.totals && <SeriesTotals totals={stats.totals} clubs={series.slots.map((slot) => slot.club)} />}
+      {stats?.totals && <SeriesTotals totals={stats.totals} clubs={series.slots.map((slot) => slot.club)} stamped />}
       {stats && <SeriesLeadersLedger batting={stats.batting} pitching={stats.pitching} games={data.games.length} />}
     </aside>
   )
