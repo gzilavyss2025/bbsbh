@@ -387,7 +387,7 @@
 [data-tone='foul'].scout__pbtncall { background: var(--allstar-blue); color: var(--text-on-ink); }
 [data-tone='play'].scout__pbtncall { background: var(--accent-primary); color: var(--text-on-ink); }
 [data-tone='strike'].scout__pmcall { color: var(--clay); }
-[data-tone='ball'].scout__pmcall { color: var(--field); }
+[data-tone='ball'].scout__pmcall { color: var(--accent-ball); }
 [data-tone='play'].scout__pmcall { color: var(--allstar-blue); }
 
 /* --- the pitch modal --- */

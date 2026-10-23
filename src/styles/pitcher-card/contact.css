@@ -133,7 +133,7 @@
   stroke-dasharray: 2 2; /* raw-value-exempt: SVG dash in the scene's own units */
 }
 .pside__fence {
-  stroke: var(--field);
+  stroke: var(--accent-positive);
   stroke-width: 2; /* raw-value-exempt: SVG stroke width in the scene's own units */
 }
 .pside__plate {
@@ -232,8 +232,8 @@
   border-color: var(--clay);
 }
 .pqual__stamp--good {
-  color: var(--field-deep);
-  border-color: var(--field);
+  color: var(--accent-positive-deep);
+  border-color: var(--accent-positive);
 }
 #root .pqual__num {
   text-transform: none; /* caps-exempt: a figure like `20 of 30` reads as written; `#root` out-ranks `#root *` (01-base.css) */

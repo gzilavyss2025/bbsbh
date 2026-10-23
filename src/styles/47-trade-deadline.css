@@ -248,9 +248,9 @@
    TeamTransactionsCard tints a trade's "in" rail slot with. */
 .trade__considerationicon--cash {
   border-style: solid;
-  border-color: var(--field-deep);
+  border-color: var(--accent-positive-deep);
   background: var(--field-soft);
-  color: var(--field-deep);
+  color: var(--accent-positive-deep);
 }
 .trade__considerationlink {
   cursor: default;

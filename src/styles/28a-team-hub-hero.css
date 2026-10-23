@@ -211,7 +211,7 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-size: var(--fs-label);
-  color: color-mix(in srgb, var(--ink, var(--field-deep)) 85%, transparent);
+  color: color-mix(in srgb, var(--ink, var(--accent-fallback-deep)) 85%, transparent);
   font-weight: var(--w-bold);
 }
 .team-hub__rec em {

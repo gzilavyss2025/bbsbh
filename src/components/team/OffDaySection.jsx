@@ -71,7 +71,7 @@ function OffDayCard({ team, pinned, onOpen }) {
   // The club's own primary, for the pointer-only hover state (the frame, the
   // rule under the mascot). teamPrimaryColor covers MiLB too, through
   // brandColors' affiliate-then-parent chain, and returns null for an
-  // unaffiliated id — the CSS then falls back to --field, so every tile still
+  // unaffiliated id — the CSS then falls back to --accent-fallback, so every tile still
   // answers the pointer even where no brand pair is known. Separate from
   // --pin-accent above: that one is the favorite highlight, always on, and a
   // club is not its own favorite just because you hovered it.

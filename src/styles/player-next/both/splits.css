@@ -102,7 +102,7 @@
   border: var(--bw-heavy) solid var(--border-stamped);
 }
 .splitsmod__sw.is-pos {
-  background: var(--field);
+  background: var(--accent-positive);
 }
 .splitsmod__sw.is-neg,
 .splitsmod__fill.is-neg {
@@ -120,7 +120,7 @@
 .splitsmod__flag {
   flex: none;
   display: block;
-  color: var(--field-deep);
+  color: var(--accent-positive-deep);
 }
 .splitsmod__flag.is-weak {
   color: var(--clay-deep);
@@ -352,7 +352,7 @@
   background: var(--text-body);
 }
 .splitsmod__fill.is-pos {
-  background: var(--field);
+  background: var(--accent-positive);
 }
 .splitsmod__tick {
   position: absolute;

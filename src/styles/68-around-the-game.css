@@ -253,7 +253,7 @@
 }
 
 .barcell--cool .barcell__fill {
-  background: var(--field);
+  background: var(--accent-positive);
   opacity: 0.2;
 }
 
@@ -369,7 +369,7 @@
 }
 
 .statusmeter__seg--fresh {
-  background: var(--field);
+  background: var(--accent-positive);
 }
 
 .statusmeter__seg--limited {
@@ -588,7 +588,7 @@
 }
 
 .pillars__seg--production {
-  background: var(--field);
+  background: var(--accent-positive);
   opacity: 0.8;
 }
 
@@ -627,7 +627,7 @@
 }
 
 .pillar-key__swatch--production {
-  background: var(--field);
+  background: var(--accent-positive);
 }
 
 .pillar-key__swatch--youth {
@@ -637,7 +637,7 @@
 /* The Pen's legend reads the same three inks as its own meter, so the key and
    the bar can never disagree about which colour means "likely down". */
 .pillar-key__swatch--fresh {
-  background: var(--field);
+  background: var(--accent-positive);
 }
 
 .pillar-key__swatch--limited {

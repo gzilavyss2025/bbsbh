@@ -193,6 +193,20 @@
   --accent-primary:   var(--navy);
   --accent-positive:  var(--field);
   --accent-negative:  var(--clay);
+  /* The deeper green for the same job as --accent-positive where it must carry on a
+     soft ground or fill a mark: status-chip text and border (add, hit), a win stamp's
+     hatch, a loader. ADR-0121: a partial reads this name, never --field-deep. */
+  --accent-positive-deep: var(--field-deep);
+  /* The accent a surface takes when no club colour is set: the fallback in
+     var(--pin-accent, ...), var(--fav-accent, ...) and var(--offday-accent, ...). */
+  --accent-fallback:      var(--field);
+  --accent-fallback-deep: var(--field-deep);
+  /* A ball call in the scout's pitch list (MLB's feed colours a ball green). */
+  --accent-ball:          var(--field);
+  /* Green drawn as turf, not as a verdict: the pregame scoreboard's grass and the
+     wcall field ink. Same value as --accent-positive, a different job. */
+  --draw-turf:            var(--field);
+  --draw-turf-deep:       var(--field-deep);
   /* A ball in play, in the strike zone's dots and the pitch list beside it: MLB's feed colours
      a pitch green (ball), red (strike) or blue (in play). Blue is not otherwise in the palette. */
   --accent-inplay:    var(--allstar-blue);

@@ -41,7 +41,7 @@
 }
 .sgrid__swatch--w {
   background: var(--accent-positive);
-  border-color: var(--field-deep);
+  border-color: var(--accent-positive-deep);
 }
 .sgrid__swatch--l {
   background: var(--surface-inset);
@@ -178,7 +178,7 @@
   filter: brightness(0);
 }
 .sgrid__game--w {
-  border-color: var(--field-deep);
+  border-color: var(--accent-positive-deep);
   background: var(--accent-positive);
   color: var(--text-on-ink-bright);
 }

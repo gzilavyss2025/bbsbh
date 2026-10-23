@@ -235,7 +235,7 @@
   background: rgb(181 130 74 / 0.14);
 }
 .xl__chip--scored {
-  border-left: 3px solid var(--field);
+  border-left: 3px solid var(--accent-positive);
 }
 /* The extra-innings automatic runner. He took no plate appearance, so there is
    no play of his to go back to — the chip is a marker beside the boxes on the

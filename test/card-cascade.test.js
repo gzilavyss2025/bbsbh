@@ -2039,7 +2039,7 @@ test('C6c: the off-day tile is a Card button that keeps its club accent and its 
   assert.match(code, /offday__logobox--pinstripe/)
   for (const part of ['logobox', 'name', 'loc', 'mascot', 'pin']) assert.ok(code.includes(`offday__${part}`), `offday__${part}`)
   const css = read('06b-offday-cards.css')
-  assert.ok(css.includes('var(--offday-accent, var(--field))'), 'the hover tint keeps its accent')
+  assert.ok(css.includes('var(--offday-accent, var(--accent-fallback))'), 'the hover tint keeps its accent')
   assert.ok(ruleBody(css, '.offday__tile--pinned'), 'the pinned state')
   assert.ok(ruleBody(css, '.offday__logobox.offday__logobox--pinstripe'), 'the pinstripe box')
   // The Card owns the tap target's face and its focus ring.

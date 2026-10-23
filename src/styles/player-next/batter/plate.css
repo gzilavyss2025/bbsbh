@@ -100,7 +100,7 @@
 }
 .fplate__cell[data-band='4'],
 .fplate__swatch[data-band='4'] {
-  background: var(--field);
+  background: var(--accent-positive);
   color: var(--text-on-ink);
 }
 

@@ -244,7 +244,7 @@
   box-shadow: inset 0 0 0 var(--bw-heavy) var(--clay);
 }
 .psboard__slot--champion .psboard__line {
-  color: var(--field);
+  color: var(--accent-positive);
   font-weight: var(--w-bold);
 }
 

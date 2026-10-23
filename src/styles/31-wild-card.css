@@ -113,7 +113,7 @@
   text-align: right;
 }
 .tstatrow__r--good {
-  color: var(--field-deep);
+  color: var(--accent-positive-deep);
 }
 .tstatrow__r--bad {
   color: var(--clay-deep);
@@ -210,7 +210,7 @@
   color: var(--text-heading);
 }
 .cbk__rate--over {
-  color: var(--field-deep);
+  color: var(--accent-positive-deep);
 }
 .cbk__of {
   font-weight: var(--w-regular);
@@ -223,7 +223,7 @@
 .cbk__badge {
   --pill-fill: var(--field-soft);
   --pill-edge: transparent;
-  --pill-ink: var(--field-deep);
+  --pill-ink: var(--accent-positive-deep);
   padding-block: 1px;
   margin-left: 7px;
 }
@@ -300,7 +300,7 @@
    button skin — so the pill's rules still draw every part. */
 .rank__tag--good {
   --pill-fill: var(--field-soft);
-  --pill-ink: var(--field-deep);
+  --pill-ink: var(--accent-positive-deep);
   --pill-edge: transparent;
 }
 .rank__tag--bad {
@@ -410,7 +410,7 @@
 }
 .thub-pos {
   font-family: var(--font-display);
-  color: var(--field);
+  color: var(--accent-positive);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
@@ -430,7 +430,7 @@
   padding: 2px var(--space-1h);
   border-radius: var(--radius-xs);
   background: var(--field-soft);
-  color: var(--field-deep);
+  color: var(--accent-positive-deep);
 }
 .rolechip--rp {
   background: var(--bg-page);

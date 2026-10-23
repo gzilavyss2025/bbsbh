@@ -122,10 +122,10 @@
 }
 /* Favorite team's off-day card — same per-club accent tint as .gamecard--pinned. */
 .offday__tile--pinned {
-  border-color: color-mix(in srgb, var(--pin-accent, var(--field)) 45%, var(--border-rule));
+  border-color: color-mix(in srgb, var(--pin-accent, var(--accent-fallback)) 45%, var(--border-rule));
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
+    color-mix(in srgb, var(--pin-accent, var(--accent-fallback)) 16%, var(--surface-card)),
     var(--surface-card) 70%
   );
 }
@@ -134,7 +134,7 @@
   top: 4px;
   right: 6px;
   font-size: var(--fs-caption);
-  color: var(--pin-accent, var(--field));
+  color: var(--pin-accent, var(--accent-fallback));
 }
 
 .offday__tile {
@@ -188,10 +188,10 @@
   inset: 0;
   border-radius: var(--radius-md);
   background:
-    linear-gradient(180deg, var(--offday-accent, var(--field)) 0 4px, transparent 4px),
+    linear-gradient(180deg, var(--offday-accent, var(--accent-fallback)) 0 4px, transparent 4px),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--offday-accent, var(--field)) 24%, transparent),
+      color-mix(in srgb, var(--offday-accent, var(--accent-fallback)) 24%, transparent),
       transparent 52%
     );
   opacity: 0;
@@ -215,7 +215,7 @@
   /* A trace of ink under the club's own color, so a pale primary (a cream or
      gold MiLB mark) still draws a rule you can see against manila paper. A
      navy or a red is unchanged at this ratio. */
-  background: color-mix(in srgb, var(--offday-accent, var(--field)) 88%, var(--ink-0));
+  background: color-mix(in srgb, var(--offday-accent, var(--accent-fallback)) 88%, var(--ink-0));
   border-radius: 1px;
   transform: scaleX(0);
   transform-origin: center;
@@ -226,7 +226,7 @@
 @media (hover: hover) and (pointer: fine) {
   .offday__tile:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--offday-accent, var(--field)) 55%, var(--border-rule));
+    border-color: color-mix(in srgb, var(--offday-accent, var(--accent-fallback)) 55%, var(--border-rule));
     box-shadow: var(--shadow-raised);
   }
   .offday__tile:hover::before {
@@ -244,7 +244,7 @@
    tab through the off-day grid should show the club the same way the pointer
    does, not just a ring around a tile that otherwise sits flat. */
 .offday__tile:focus-visible {
-  border-color: color-mix(in srgb, var(--offday-accent, var(--field)) 55%, var(--border-rule));
+  border-color: color-mix(in srgb, var(--offday-accent, var(--accent-fallback)) 55%, var(--border-rule));
 }
 .offday__tile:focus-visible::before {
   opacity: 1;

@@ -55,7 +55,7 @@
 }
 .pnext-inn__arc {
   fill: none;
-  stroke: var(--field);
+  stroke: var(--accent-positive);
   stroke-width: 10;
 }
 .pnext-inn__rim {

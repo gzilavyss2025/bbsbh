@@ -91,7 +91,7 @@
 /* The throwing hand in the lineup card's green, as on .change__hand. */
 .psseries__starterhand {
   font-weight: var(--w-bold);
-  color: var(--field);
+  color: var(--accent-positive);
 }
 .psseries__startermark {
   flex: none;
@@ -232,7 +232,7 @@
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
-  color: var(--field);
+  color: var(--accent-positive);
 }
 .psseries__arm--tba {
   font-family: var(--font-display);
