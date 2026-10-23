@@ -30,7 +30,7 @@
 // `coordinates`, `location` and `trajectory` were present on every level in a
 // 24-game sample of 2026-07-10 (docs/data-enrichment.md, section 1). What AA,
 // High-A and most Single-A parks lack is `launchSpeed` and `totalDistance`.
-// So the chart draws there, with no exit velocity. Every per-ball Statcast
+// So the data is there; the card shows where the venue has a ballpark layout (#2612), with no exit velocity. Every per-ball Statcast
 // field is null-guarded, and a park that sent no coordinates (rare) yields an
 // empty array from `selectBattedBalls`.
 
