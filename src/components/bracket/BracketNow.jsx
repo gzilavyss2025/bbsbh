@@ -4,7 +4,8 @@
 // boxes and two elbow connectors. On a Wild Card or Division Series day the
 // round's series (AL first, then NL) feed the boxes of the next round, one
 // connector each. Connectors are pencil and dashed until a series is decided,
-// then ink. The earlier rounds live behind "Full bracket ›", which
+// then ink. It is a stamped card named on its ink tab, as FullBracket's rail
+// cards are; a decided series' winner sits on the tint. The earlier rounds live behind "Full bracket ›", which
 // opens FullBracket in the app's centered .scrim/.sheet (no SheetDock: that is
 // the phone's bottom dock, and this column only shows from BRACKET_RAIL_QUERY).
 //
@@ -20,16 +21,15 @@ import { useRef, useState } from 'react'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { bracketNow, roundFeed } from '../../lib/postseason/primer/bracketNow.js'
 import { Card } from '../ui/frame/Card.jsx'
-import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Door } from '../ui/control/Door.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
 import { BlankSlot, ClubMark, Pips } from './bracketParts.jsx'
 import { FullBracket } from './FullBracket.jsx'
 import { useBracketHistoryIds } from './PostseasonBracket.jsx'
 
-// The rail is 358px; the card's body padding (16px a side) and border leave 324.
-const W = 324
-const BOX_W = 128
+// The rail is 358px; the stamped card's 2px edge and the body's 12px padding leave 330.
+const W = 330
+const BOX_W = 136
 const BOX_H = 86
 const GAP = 12
 const TO_X = W - BOX_W
@@ -50,7 +50,7 @@ function Box({ box, x, y, feeders }) {
       <span className="pbnow__name">{box.name}</span>
       {box.rows.map((row, i) =>
         row.club ? (
-          <div key={row.club.id} className={`pbnow__row${row.eliminated ? ' pbnow__row--out' : ''}`}>
+          <div key={row.club.id} className={`pbnow__row${row.eliminated ? ' pbnow__row--out' : box.decided && !row.eliminated ? ' pbnow__row--won' : ''}`}>
             <ClubMark club={row.club} eliminated={row.eliminated} size={16} />
             <span className="pbnow__abbr">{row.club.abbreviation}</span>
             <Pips winsNeeded={box.winsNeeded} wins={row.wins} />
@@ -89,7 +89,7 @@ function FullBracketSheet({ bracket, cutoff, onClose }) {
   )
 }
 
-// The boxes and connectors for one round: { nodes, links, height, note }. A node
+// The boxes and connectors for one round: { nodes, links, height }. A node
 // is { box, x, y, feeders }; a link is { y1, y2, inked } from the left column
 // (x = BOX_W) to the right (x = TO_X).
 function layoutNow(bracket, round) {
@@ -110,9 +110,6 @@ function layoutNow(bracket, round) {
       ],
       links: feed.links.map((l) => ({ y1: fromY[l.from] + BOX_H / 2, y2: toY[l.to] + BOX_H / 2, inked: l.inked })),
       height: fromY.at(-1) + BOX_H,
-      note: round === 'wildcard'
-        ? 'The Wild Card series feed the Division Series. Other rounds are in the full bracket.'
-        : 'The Division Series feed the LCS. Other rounds are in the full bracket.',
     }
   }
   const now = bracketNow(bracket)
@@ -128,7 +125,6 @@ function layoutNow(bracket, round) {
     ],
     links: now.links.map((l, i) => ({ y1: i * (BOX_H + GAP) + BOX_H / 2, y2: wsY + BOX_H / 2, inked: l.inked })),
     height,
-    note: 'The two LCS feed the World Series. Earlier rounds are in the full bracket.',
   }
 }
 
@@ -138,37 +134,28 @@ export function BracketNow({ bracket, cutoff, round }) {
   if (!now) return null
   return (
     <>
-      <Card
-        aria-label="Postseason bracket, current round"
-        head={
-          <SectionHead
-            look="label"
-            as="h2"
-            action={
-              <Door onClick={() => setOpen(true)} aria-haspopup="dialog">
-                Full bracket
-              </Door>
-            }
-          >
-            Postseason
-          </SectionHead>
-        }
-      >
-        <div className="pbnow__tree" style={{ width: W, height: now.height }}>
-          <svg className="pbkt-lines" width={W} height={now.height} aria-hidden="true">
-            {now.links.map((link, i) => (
-              <path
-                key={i}
-                d={`M${BOX_W} ${link.y1} H${(BOX_W + TO_X) / 2} V${link.y2} H${TO_X}`}
-                className={link.inked ? 'pbkt-ink' : 'pbkt-pencil pbkt-dash'}
-              />
+      <Card frame="stamped" body="flush" label="Postseason" className="pbnow">
+        <div className="pbnow__body">
+          <div className="pbnow__tree" style={{ width: W, height: now.height }}>
+            <svg className="pbkt-lines" width={W} height={now.height} aria-hidden="true">
+              {now.links.map((link, i) => (
+                <path
+                  key={i}
+                  d={`M${BOX_W} ${link.y1} H${(BOX_W + TO_X) / 2} V${link.y2} H${TO_X}`}
+                  className={link.inked ? 'pbkt-ink' : 'pbkt-pencil pbkt-dash'}
+                />
+              ))}
+            </svg>
+            {now.nodes.map((node, i) => (
+              <Box key={i} {...node} />
             ))}
-          </svg>
-          {now.nodes.map((node, i) => (
-            <Box key={i} {...node} />
-          ))}
+          </div>
+          <div className="pbnow__more">
+            <Door onClick={() => setOpen(true)} aria-haspopup="dialog">
+              Full bracket
+            </Door>
+          </div>
         </div>
-        <p className="pbnow__note">{now.note}</p>
       </Card>
       {open && <FullBracketSheet bracket={bracket} cutoff={cutoff} onClose={() => setOpen(false)} />}
     </>

@@ -2,11 +2,15 @@
    bracket (components/bracket/BracketNow.jsx) and the leaders ledger
    (components/postseason/SeriesLeadersLedger.jsx). Component-imported, not in
    src/index.css: it loads only where the primer draws. The rail is 358px wide
-   and the card's body padding leaves 324px, which BracketNow's geometry is
+   and the stamped card's edge and body padding leave 330px, which BracketNow's geometry is
    built on. Connectors reuse 80-postseason-bracket.css's .pbkt-ink and .pbkt-pencil;
    the ledger reuses the core sheet's .tledg* rules. */
 
 /* ---------- the small bracket ---------- */
+/* The stamped card's flush body: 12px a side, as .pbkt-league__body (home.css). */
+.pbnow__body {
+  padding: 0 var(--space-3) var(--space-3);
+}
 .pbnow__tree {
   position: relative;
   max-width: 100%;
@@ -20,8 +24,8 @@
   overflow: hidden;
   padding: var(--space-1) var(--space-2);
   background: var(--surface-card);
-  border: var(--bw-hair) solid var(--accent-primary);
-  border-radius: var(--radius-xs);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
 }
 /* A box that plays today wears the clay ring, as the artifact's ribbon does. */
 .pbnow__box--today {
@@ -44,6 +48,12 @@
   align-items: center;
   gap: var(--space-1h);
   min-height: 22px;
+  /* A winner's row runs to the box's inner edge on the tint. */
+  margin-inline: calc(-1 * var(--space-2));
+  padding-inline: var(--space-2);
+}
+.pbnow__row--won {
+  background: var(--surface-stamped-tint);
 }
 .pbnow__row .pbkt-pips {
   margin-left: auto;
@@ -60,11 +70,9 @@
   text-decoration: line-through;
   text-decoration-thickness: 1px;
 }
-.pbnow__note {
-  margin: var(--space-2) 0 0;
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
-  text-align: center;
+.pbnow__more {
+  margin-top: var(--space-2);
+  text-align: right;
 }
 
 /* The full-bracket sheet. .sheet docks to the bottom edge with square lower
