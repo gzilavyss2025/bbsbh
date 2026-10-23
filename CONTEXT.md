@@ -103,9 +103,13 @@ screen (the seat), and the sheet scrolls under it after each tap. Near the top
 of the order, where no box can reach the seat, the frame rides on the box. A bottom bar says the
 last opened play in words and holds Unwrap, the same reveal as the seal. It is
 not a reveal path of its own, and it is off under a force-reveal.
-_Avoid_: zoom mode, focus mode (the innings viewer's windowed mode)
+_Avoid_: zoom mode, focus mode (the old name for Gameday's windowed mode, not the Lens)
 
 ### Game structure
+
+**Gameday**:
+The screen of a game's half-inning pages (`top{n}` and `bottom{n}`), the tab after the two lineups: the scorebug masthead, the due-up band, the play-by-play and the reference tabs, one half at a time. The tab reads "Gameday". Code and ADRs may still say "the innings viewer" (`InningViewer`) or, for its windowed mode, "focus mode" (ADR-0043). Addresses do not change.
+_Avoid_: focus mode, innings tab
 
 **Half-inning**:
 The atomic unit of reveal granularity — a top or bottom of one inning.

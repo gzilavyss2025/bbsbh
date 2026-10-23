@@ -192,7 +192,7 @@ export function AnimationLab() {
       </Entry>
 
       <Entry
-        title="Focus mode — the half-close tally"
+        title="Gameday — the half-close tally"
         note={
           <>
             The console band&rsquo;s finished-half tally
@@ -217,7 +217,7 @@ export function AnimationLab() {
       </Entry>
 
       <Entry
-        title="Focus mode — the denotation ink-set"
+        title="Gameday — the denotation ink-set"
         note={
           <>
             The at-bat card&rsquo;s scorebook denotation holds blank for a CONSTANT 180ms

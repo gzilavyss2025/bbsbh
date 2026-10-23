@@ -142,11 +142,11 @@ export function GameView({ game, section, onSection }) {
   useWakeLock(keepAwake && isLive)
 
 
-  // Where "Innings" returns to: the last half-inning page the user was on, so
+  // Where "Gameday" returns to: the last half-inning page the user was on, so
   // hopping out to a lineup or the box score and back doesn't lose your place
   // mid-game. Structural only (a section name), never a score.
   // State, not a ref: the value is read during render (to build the nav's
-  // "Innings" tab target), and a ref must never be read outside an event
+  // "Gameday" tab target), and a ref must never be read outside an event
   // handler/effect — reading one during render isn't reactive and can tear
   // under concurrent rendering. The update itself is computed during render
   // (React's documented "adjust state while rendering" escape hatch) rather
