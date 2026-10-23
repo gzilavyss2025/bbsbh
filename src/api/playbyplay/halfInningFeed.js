@@ -550,7 +550,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         ...scorebookCode(play, batterRunner),
         // Where this ball in play came down, or null for a plate appearance
         // that never put one there (a strikeout, a walk) and for a park that
-        // tracked no coordinates. The diamond on the card opens it as a flight
+        // sent no coordinates (rare, even in MiLB). The diamond on the card opens it as a flight
         // over the field; `venue` rides along because the drawing is a
         // PARTICULAR park's, and the card that reads this is handed the ball
         // and nothing else.

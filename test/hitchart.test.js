@@ -22,7 +22,8 @@
 // projection: it holds 58 `hitData` blocks and not one `coordinates` pair, its
 // trimmer having kept only launchSpeed and totalDistance. That makes it the
 // right fixture for the opposite half of the contract — hitData present,
-// coordinates absent, chart empty — which is exactly how a MiLB park behaves.
+// coordinates absent, chart empty — a shape a park could send (rare; MiLB parks
+// send coordinates, docs/data-enrichment.md).
 //
 // THE SCALE PIN. HIT_COORD_FT_PER_UNIT is empirical: MLB documents neither the
 // coordinate origin nor its units, so the only honest check is that a plotted
@@ -276,7 +277,7 @@ test('throughHalfIndex clamps the chart to the halves the reader has opened', ()
 
 test('a feed with no hit coordinates charts nothing instead of crashing', () => {
   // game-823035.trimmed.json carries 58 hitData blocks and not one coordinate
-  // pair — the same shape most MiLB parks send.
+  // pair — a shape a park could send, though MiLB parks do send coordinates.
   assert.equal(selectBattedBalls(COORDLESS_FEED).length, 0)
   // The hand-built mini feed carries no hitData at all.
   assert.equal(selectBattedBalls(buildFeed()).length, 0)
@@ -367,12 +368,28 @@ test('a plate appearance with no ball in play has no flight', () => {
   assert.equal(selectPlayBattedBall({ playEvents: [{ details: { isStrike: true } }] }), null)
   assert.equal(selectPlayBattedBall({}), null)
   assert.equal(selectPlayBattedBall(null), null)
-  // And a park that tracked the swing but not where the ball landed — the MiLB
-  // case, where the diamond simply offers no handle.
+  // And a park that tracked the swing but not where the ball landed — rare, the
+  // diamond simply offers no handle.
   assert.equal(
     selectPlayBattedBall({ playEvents: [{ hitData: { launchSpeed: 88.1, totalDistance: 210 } }] }),
     null,
   )
+})
+
+test('a MiLB-shaped hitData (coordinates and trajectory, no exit velocity) still has a flight', () => {
+  // AA, High-A and most Single-A parks send coordinates, location and
+  // trajectory but no launchSpeed or totalDistance (2026-07-10 sample).
+  const ball = selectPlayBattedBall({
+    result: { eventType: 'field_out', event: 'Groundout' },
+    playEvents: [
+      { hitData: { trajectory: 'ground_ball', location: '6', coordinates: { coordX: 90.5, coordY: 150.25 } } },
+    ],
+  })
+  assert.ok(ball)
+  assert.equal(ball.trajectory, 'ground_ball')
+  assert.equal(ball.exitVelo, null)
+  assert.equal(ball.distance, null)
+  assert.deepEqual({ x: ball.x, y: ball.y }, hitCoordToSvg(90.5, 150.25))
 })
 
 test('the flight reads the LAST tracked ball on the play, not the first', () => {
