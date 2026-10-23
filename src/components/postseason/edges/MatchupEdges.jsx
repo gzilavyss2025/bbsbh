@@ -4,7 +4,7 @@ import { faceoffRoles } from '../../../lib/postseason/primer/matchupEdges.js'
 import { Headshot } from '../../player/Headshot.jsx'
 import { PlayerLink } from '../../player/PlayerLink.jsx'
 import { Pill } from '../../ui/control/Pill.jsx'
-import { Card } from '../../ui/frame/Card.jsx'
+import { EdgeCard } from './EdgeCard.jsx'
 
 // MATCHUP EDGES (one of "Today's edges"): the hitters with a big career line
 // against today's starter, and the batter the starter has owned. The rows come
@@ -18,16 +18,6 @@ import { Card } from '../../ui/frame/Card.jsx'
 const KIND = {
   hitter: { word: 'Hitter', style: pillSolidStyle({ ground: 'var(--field-soft)', text: 'var(--field-deep)' }) },
   pitcher: { word: 'Pitcher', style: pillSolidStyle({ ground: 'var(--clay-soft)', text: 'var(--clay-deep)' }) },
-}
-
-// The card is stamped and named on its ink tab, as the World Series home's cards are; the scouting
-// report's "no standout matchups" line wears it too.
-export function MatchupCard({ children }) {
-  return (
-    <Card frame="stamped" label="Matchup edges" labelAs="h3" count="Career vs starters" className="seriesedges__matchups">
-      {children}
-    </Card>
-  )
 }
 
 // One face-off side: photo, name, role pill. `flip` mirrors it for side B. The
@@ -54,7 +44,7 @@ export function MatchupEdges({ edges, variant }) {
   if (!edges?.length) return null
   const faceoff = variant === 'faceoff'
   return (
-    <MatchupCard>
+    <EdgeCard title="Matchup edges" note="Career vs starters" className="seriesedges__matchups">
       <ul className="seriesedges__rows">
         {edges.map((e) => {
           const { a, b } = faceoff ? faceoffRoles(e) : {}
@@ -81,6 +71,6 @@ export function MatchupEdges({ edges, variant }) {
           )
         })}
       </ul>
-    </MatchupCard>
+    </EdgeCard>
   )
 }

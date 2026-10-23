@@ -20,7 +20,8 @@ import { platoonModel } from '../../lib/postseason/worldseries/scouting/platoon.
 import { clubOrder, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { HubTabBar } from '../chrome/HubTabBar.jsx'
-import { MatchupCard, MatchupEdges } from '../postseason/edges/MatchupEdges.jsx'
+import { EdgeCard } from '../postseason/edges/EdgeCard.jsx'
+import { MatchupEdges } from '../postseason/edges/MatchupEdges.jsx'
 import { UmpireEdge } from '../postseason/edges/UmpireEdge.jsx'
 import { NineKeys } from './cards/scouting/NineKeys.jsx'
 import { FilmRoom } from './cards/scouting/FilmRoom.jsx'
@@ -58,9 +59,9 @@ const CARD = {
   roster: ({ rosters, sides, slateDate }) => <Roster rosters={rosters} clubIds={sides} slateDate={slateDate} />,
   'matchup-edges': ({ edges, edgesState: state }) =>
     state === 'none' ? (
-      <MatchupCard>
+      <EdgeCard title="Matchup edges" note="Career vs starters" className="seriesedges__matchups">
         <p className="ww-fit__note">No standout matchups for this game.</p>
-      </MatchupCard>
+      </EdgeCard>
     ) : (
       <MatchupEdges edges={edges} variant="faceoff" />
     ),

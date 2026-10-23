@@ -15,7 +15,7 @@ import { EdgeCard } from './EdgeCard.jsx'
 export function UmpireEdge({ name, lean }) {
   if (!name) return null
   return (
-    <EdgeCard title="Home plate umpire" frame="stamped" className="seriesedges__umpire">
+    <EdgeCard title="Home plate umpire" className="seriesedges__umpire">
       <p className="seriesedges__who">{name}</p>
       {lean && (
         <>
