@@ -42,6 +42,7 @@ const GUARDS = [
   'check-comment-citations',
   'check-fixture-freshness',
   'layout/check-z-index',
+  'layout/check-css-vars',
   'layout/check-media-widths',
   'layout/check-layout-ratchet',
   'layout/check-card-fill',

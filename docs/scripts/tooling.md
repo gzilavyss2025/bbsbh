@@ -183,6 +183,10 @@ list says what each guard checks.
   (ADR-0083). Rank and flag emphasis takes `--marker`.
 - `check-learn-css.mjs` — `public/learn.css` redeclares a few colours from
   `src/tokens/colors.css`, because the `/learn` guides have no bundle. This fails on drift.
+- `layout/check-css-vars.mjs` — every `var(--x)` with no fallback must name a property that something
+  defines: a `--x:` declaration in `src/` CSS, or a `'--x'` literal in `src/` JS. It reads
+  `src/**/*.css`, the `css` of `.design-sync/captures/*.json`, and `public/learn.css` (own
+  declarations only). A rename that misses a read fails here instead of drawing in an inherited colour.
 - `check-missing-imports.mjs` — the inverse of `check-dead-exports.mjs`: fails a named
   import whose target does not export that name. Only `vite build` used to catch it.
 - `check-line-endings.mjs` — the LF invariant: nothing enters the index with CRLF. It is the
