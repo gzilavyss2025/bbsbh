@@ -61,6 +61,7 @@ export const EXCEPT = {
   'xba-table/': 'built with the xwoba-table by the same run (gen-xwoba-table.mjs, ADR-0097); a table holds for a month',
   'contracts-history/': 'hand-run from committed CSVs (ADR-0066)',
   'team-seasons.json': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the file carries no clock',
+  'franchise-hof/': 'hand-run after each induction (scripts/franchise/gen-franchise-hof.mjs, #2597); the files carry no clock',
   'umpire-history/': 'hand-run from the Stats API schedule (issue 1565); closed seasons, and the files carry no clock',
   'played-for-both/': 'hand-run from team-seasons.json, war-history and the Chadwick register (gen-played-for-both.mjs, ADR-0100, #2579); history, and the files carry no clock',
   'franchise-ledger/': 'hand-run (gen-franchise-ledger.mjs, #2595); finished seasons never change and the files carry no clock',

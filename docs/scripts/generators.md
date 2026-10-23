@@ -1938,6 +1938,14 @@ Re-run only to fold in a new season.
   The same run also writes `public/data/xba-table/{season}.json` from
   `estimated_ba_using_speedangle`, after a per-ball check against Savant (`XBA_GATE`: mean
   gap at most 0.008, at most 2% above 0.05, none above 0.5); a failed check writes no xBA table.
+- `gen-franchise-hof.mjs` (in `scripts/franchise/`) → `public/data/franchise-hof/{teamId}.json` — each of the
+  30 MLB clubs' Hall of Famers: "inducted as" the club (the plaque, from `awards/MLBHOF/recipients`) and
+  "also played here" with the seasons (`people/{id}` `yearByYear`, about 355 calls paced six at a
+  time) (#2597). **Hand-run** after each induction (late July):
+  `node scripts/franchise/gen-franchise-hof.mjs`. Strict: a failed call aborts. A recipient with no
+  `team` or no playing stats (an executive, a Negro Leagues pioneer) never stops the run. Keyed by the
+  current team id. 55 KB in all. The files carry no clock, so a re-run on the same feeds writes the same
+  bytes. The pure half is `scripts/lib/franchise/hof.mjs`. Reader: `src/api/history/franchiseHof.js`.
 - `gen-family-ties.mjs` → `public/data/family-ties/{NN}.json` — family links between
   players, from Retrosheet's `relatives.csv`, joined to MLBAM ids through the Chadwick
   register (ADR-0100). **Hand-run, NOT on a cron**: re-run only after Retrosheet
