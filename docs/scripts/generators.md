@@ -2015,6 +2015,16 @@ Re-run only to fold in a new season.
   and `topojson-simplify` are devDependencies, and only this script uses them. The pure half is
   `scripts/lib/from/zones.mjs`. The reader comes with the picker page.
 
+- `gen-franchise-leaders.mjs` (in `scripts/franchise/`) → `public/data/franchise-leaders/{teamId}.json` — each of
+  the 30 MLB clubs' career and single-season leaders in 26 categories, regular season, the feed's top
+  ten with ties kept (#2596). **Hand-run**, after the regular season ends:
+  `node scripts/franchise/gen-franchise-leaders.mjs [--through 2026]`. The feed cannot be cut by
+  season, so a run made mid-season holds that season so far; `--through` records the season the run
+  was made after (default: this year from October on). About 1,560 calls to `stats/leaders`
+  (`statType=career|statsSingleSeason`, paced six at a time, strict: a failed call aborts); not
+  `teams/{id}/leaders`, which ignores `statType`. Keyed by the current team id. 1.1 MB in all. The files
+  carry no clock, so a re-run on the same feed writes the same bytes. The pure half is
+  `scripts/lib/franchise/leaders.mjs`. Reader: `src/api/history/franchiseLeaders.js`.
 - `gen-team-seasons.mjs` → `public/data/team-seasons.json` — one roster per MLB
   team-season, for "six degrees of teammates" (ADR-0100). Source: Retrosheet's
   `allplayers.csv` (inside `basiccsvs.zip`, 741 MB: run `unzip -l`, extract only that

@@ -70,6 +70,7 @@ export const EXCEPT = {
   'savant-history/': 'hand-run once a year (gen-savant-history.mjs, #1717); finished seasons, and the shards carry no clock',
   'league-pennants.json': 'hand-run once a year after the World Series (gen-league-pennants.mjs); a finished season never changes and the file carries no clock',
   'franchise-history/': 'hand-run; a season adds one span at most, and the files carry no clock',
+  'franchise-leaders/': 'hand-run after the regular season (scripts/franchise/gen-franchise-leaders.mjs, #2596); the files carry no clock',
   'prospect-rank-history.json': 'hand-run; the 2005-2024 rankings are frozen and the file carries no clock (#1111)',
   'run-expectancy-eras/': 'hand-run, one decade at a time (gen-run-expectancy.mjs --era-aggregate); history',
   'league-averages.json': 'hand-run; a finished season never changes and the file carries no clock',
