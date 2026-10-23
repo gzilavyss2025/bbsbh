@@ -192,7 +192,10 @@ for (const [id, sportId] of milbVenues) {
     // No Gameday SVG for this park (a 403): posted distances only.
   }
   const five = Object.values(posted).every(Number.isFinite)
-  if (!fence && !five) continue // nothing to draw: the app keeps "not on file"
+  // Left line, center and right line are enough: the app draws a smooth wall
+  // through them (`threePointWall`, #2612). Anything less is "not on file".
+  const three = [posted.lf, posted.cf, posted.rf].every(Number.isFinite)
+  if (!fence && !five && !three) continue
   const names = [...new Set([v?.name, ...(milbNames.get(id) ?? [])].filter(Boolean))]
   if (names.length > 1) console.log(`  renamed: ${names.join(' -> ')}`)
   milb[id] = {

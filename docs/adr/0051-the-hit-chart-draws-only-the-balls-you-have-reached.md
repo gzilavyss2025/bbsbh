@@ -101,6 +101,7 @@ came from the 2026-07-05 pitch-tracking sample, which measured `launchSpeed` and
 High-A and A, six each) found `hitData.coordinates` on every ball in play at every
 level, with `location` and `trajectory` on 96 to 100%. What AA, High-A and most A
 parks lack is `launchSpeed` and `totalDistance`. The data is there, so the card can draw at those
-games with no exit velocity. It still hides at a venue the ballpark drawing does
-not carry (checked: AA Altoona draws; High-A Vancouver and A Delmarva do not, #2612). The coverage table is in `docs/data-enrichment.md`, section 1. The
+games with no exit velocity. It hides at a venue the ballpark drawing does
+not carry (on 2026-10-23: Hops Ballpark only; #2612 added a smooth wall for the
+41 parks that post a left line, center and right line). The coverage table is in `docs/data-enrichment.md`, section 1. The
 decision above stands; only the stated reach of the missing-data case changes.
