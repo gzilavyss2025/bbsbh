@@ -277,7 +277,7 @@ test('the carry-over mark tags mirror the runner-out notation', () => {
   assert.equal(interruptedCode('caught_stealing_2b'), 'CS →')
   assert.equal(interruptedCode('caught_stealing_home'), 'CS →')
   assert.equal(interruptedCode('pickoff_1b'), 'PK →')
-  assert.equal(interruptedCode('pickoff_caught_stealing_2b'), 'PK →')
+  assert.equal(interruptedCode('pickoff_caught_stealing_2b'), 'PKCS →')
   assert.equal(interruptedCode('stolen_base_home'), 'SB →')
   assert.equal(interruptedCode('wild_pitch'), 'WP →')
   assert.equal(interruptedCode('passed_ball'), 'PB →')
