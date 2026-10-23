@@ -255,6 +255,9 @@ export async function loadRanks(id, asOf, src = DIRECT) {
     team,
     batting,
     pitching,
+    // The clubs the rank cells were computed against: "rank of N" (24 in 1969, 30 now). MiLB
+    // has no rank cells, so no count.
+    clubCount: league.hitting.length || league.pitching.length || null,
     leaderPool,
     runValue,
     // Handed through whole rather than sliced here: the card ranks this club
