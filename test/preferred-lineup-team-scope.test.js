@@ -94,3 +94,16 @@ test('preferredLineupFrom leaves a position empty when every candidate on file h
   const lineup = preferredLineupFrom([marte], 118)
   assert.equal(lineup.find((p) => p.position === 'RF'), undefined)
 })
+
+// A finished season counts everyone who played for the club, traded or not (#2592): Villar
+// started 64 games at 2B for the 2018 Brewers before the August trade, and Pérez has fewer.
+// The live rule stays the default, so a current season never credits a player who has left.
+test('preferredLineupFrom with countDeparted credits a player traded during the season', () => {
+  const villar = rosterRow(6, 'Jonathan Villar', '2B', 'TR', [fieldingSplit(158, '2B', 64)])
+  const perez = rosterRow(7, 'Hernán Pérez', '2B', 'A', [fieldingSplit(158, '2B', 30)])
+  const second = (opts) => preferredLineupFrom([villar, perez], 158, opts).find((p) => p.position === '2B')
+  assert.equal(second({ countDeparted: true })?.id, 6)
+  assert.equal(second({ countDeparted: true })?.gs, 64)
+  assert.equal(second()?.id, 7)
+  assert.equal(second({ countDeparted: false })?.id, 7)
+})

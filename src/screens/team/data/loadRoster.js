@@ -185,7 +185,8 @@ export async function loadRoster(id, asOf, src = DIRECT) {
   // seasonRoster (not fullRoster — see the fetch above). Shared with the
   // Overview's lineup preview so both show the same nine; see
   // preferredLineupFrom for how a spot is decided.
-  const preferredLineup = preferredLineupFrom(seasonRoster, id)
+  // A season already over counts the players who left during it (preferredLineupFrom).
+  const preferredLineup = preferredLineupFrom(seasonRoster, id, { countDeparted: season < seasonOf(null, sportId) })
 
   // Top Substitutes — position players who didn't win a diamond spot, ranked
   // by games played, capped at 6.
