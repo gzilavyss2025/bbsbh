@@ -52,7 +52,7 @@ this report showed Yankee Stadium and Oracle Park 12–18 ft too deep.
 | `audited` | An outline that passed its audit: Gameday against Savant, or a 2018 trace against the posted CF (within 10 ft). |
 | `estimated` | A 2018 trace that misses the posted CF. None is drawn today. |
 | `dimensions-only` | No usable outline. The renderer draws straight runs through the five posted distances. |
-| `estimated` (three-point) | A minor-league park that posts only its two lines and center. The wall is one smooth parabola through the three signs (`threePointWall` in `fences.js`); the gaps are interpolated, not sourced. It has no audit. |
+| `estimated` (three-point) | A minor-league park that posts only its two lines and center (or one gap sign too). The wall is one smooth curve through the posted signs (`threePointWall` in `fences.js`); the unposted gaps are interpolated, not sourced. It has no audit. |
 | `missing` | Not even five posted distances. |
 
 No outline is `verified` by a person yet. That level is for a future check
