@@ -67,6 +67,14 @@ list says what each guard checks.
   <reason>` in a comment on its own line before the rule. A merge race between two PRs that
   lower the same entry is accepted (#1831): the stack run catches it. Lives in `scripts/layout/` for the
   `check-dir-size` budget.
+- `layout/check-card-fill.mjs` — a rule that sets `height`, `min-height`, `block-size` or
+  `min-block-size` to `100%` (or a `calc()` of it) on a selector ending in `> *` or in a
+  `.card` / `.card--*` class is rejected. A named stamped card clears its name tab with a 14px top
+  margin, which a percent height ignores, so the card ran 14px past its cell into the next card's
+  tab (the scouting cards, #2587). A parent that wants a card to fill its cell becomes a flex column
+  and gives the child `flex: 1`. A real exception takes `card-fill-exempt: <reason>` in a comment on
+  the line before the rule. The rendered check for the same bug is `e2e/tab-clearance.spec.js`
+  (geometry: `e2e/lib/tabClearance.js`, `test/tab-clearance.test.js`). Lives in `scripts/layout/`.
 - `check-strike-links.mjs` — every rule that draws a `line-through` must name
   `.plink` in its selector list, because a player name is a `<button
   class="plink">` and neither inherits an ancestor's decoration nor keeps its

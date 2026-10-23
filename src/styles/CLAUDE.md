@@ -83,6 +83,9 @@ reason. The guards are catalogued in `docs/scripts/tooling.md`.
 - **`layout-exempt: <reason>`** (`layout/check-layout-ratchet.mjs`). New layout uses `Stack`,
   `Cluster` or `Grid`. A hand-written column, wrap or grid rule takes this marker on the line
   before it, or the ratchet fails (ADR-0108).
+- **`card-fill-exempt: <reason>`** (`layout/check-card-fill.mjs`). A rule that sizes a child or a card to
+  `100%` of its parent's height ignores a named card's tab margin and runs it into the next card. Fill a cell with a
+  flex column and `flex: 1`; a real exception takes the marker on the line before the rule.
 - **`z-index-exempt: <reason>`** and **`breakpoint-exempt: <reason>`**: see "Layers and screen
   widths" below.
 
