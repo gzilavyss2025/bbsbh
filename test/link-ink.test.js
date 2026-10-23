@@ -78,7 +78,25 @@ test('a text link is ink with a dotted rule', () => {
     assert.ok(bodies.length, `${selector} should have a rule in ${file}`)
     const own = bodies.join(';')
     assert.match(own, /color:\s*var\(--text-heading\)/, `${selector} draws in ink`)
-    assert.match(own, /text-decoration:\s*underline dotted/, `${selector} carries the dotted rule`)
+    if (!SHARED_RULE.includes(selector)) assert.match(own, /text-decoration:\s*underline dotted/, `${selector} carries the dotted rule`)
+  }
+})
+
+// #2528: the dotted rule is drawn in one place. A class listed here owns no copy of it.
+const SHARED_RULE = [
+  '.door--inline', '.door__label', '.plink.lsp__seeall', '.plink.foulcard__door', '.pcard__gamelink', '.gnotes__pdf a',
+]
+test('the dotted link rule has one source in system/door.css', () => {
+  const shared = rulesOf(readCss('system/door.css')).find((r) => SHARED_RULE.every((s) => r.selectors.includes(s)))
+  assert.ok(shared, 'door.css has one rule naming every collapsed link')
+  assert.match(shared.body, /text-decoration:\s*underline dotted/)
+  assert.match(shared.body, /text-decoration-thickness:\s*var\(--bw-hair\)/)
+  assert.match(shared.body, /text-underline-offset:\s*3px/)
+  for (const [file, selector] of [
+    ['lineup-next/starter.css', '.plink.lsp__seeall'], ['26-player-page.css', '.plink.foulcard__door'],
+    ['pitcher-card/card.css', '.pcard__gamelink'], ['report/game-notes.css', '.gnotes__pdf a'],
+  ]) {
+    for (const body of bodiesFor(file, selector)) assert.doesNotMatch(body, /text-underline-offset/, `${selector} keeps its own copy`)
   }
 })
 

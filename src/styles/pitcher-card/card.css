@@ -329,9 +329,6 @@
 }
 .pcard__gamelink {
   color: var(--text-heading);
-  text-decoration: underline dotted;
-  text-decoration-thickness: var(--bw-hair);
-  text-underline-offset: 3px;
 }
 
 /* ---- The at-bat replay (AtBatReplay.jsx) ------------------------------------
