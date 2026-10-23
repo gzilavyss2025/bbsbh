@@ -73,7 +73,8 @@ list says what each guard checks.
   margin, which a percent height ignores, so the card ran 14px past its cell into the next card's
   tab (the scouting cards, #2587). A parent that wants a card to fill its cell becomes a flex column
   and gives the child `flex: 1`. A real exception takes `card-fill-exempt: <reason>` in a comment on
-  the line before the rule. The rendered check for the same bug is `e2e/tab-clearance.spec.js`
+  the line before the rule. It is a heuristic for one cause; the rendered check, which is authoritative, is
+  `e2e/tab-clearance.spec.js`
   (geometry: `e2e/lib/tabClearance.js`, `test/tab-clearance.test.js`). Lives in `scripts/layout/`.
 - `check-strike-links.mjs` — every rule that draws a `line-through` must name
   `.plink` in its selector list, because a player name is a `<button

@@ -21,7 +21,7 @@ import { relative } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import postcss from 'postcss'
 import { ROOT, toPosix, walk } from '../lib/walk.mjs'
-import { markedBefore } from './check-layout-ratchet.mjs'
+import { isKeyframes, markedBefore } from './check-layout-ratchet.mjs'
 
 const EXEMPT = /card-fill-exempt\s*:\s*\S/
 const SIZE_PROPS = /^(?:min-)?(?:height|block-size)$/i
@@ -31,13 +31,10 @@ const STATE = String.raw`(?::{1,2}[\w-]+(?:\([^)]*\))?)*`
 const ANY_CHILD = new RegExp(String.raw`>\s*\*${STATE}\s*$`)
 const CARD_CLASS = new RegExp(String.raw`\.card(?:--[\w-]+)?(?![\w-])${STATE}\s*$`)
 
-const isKeyframes = (rule) => {
-  for (let p = rule.parent; p; p = p.parent) if (p.type === 'atrule' && /keyframes$/i.test(p.name)) return true
-  return false
-}
-
 // -> [{ line, selector, decl }] for every unexempt rule in `css` that fills a card slot.
 export function findCardFill(css) {
+  // Almost no file sets a 100% height, so most are not worth a parse.
+  if (!/100%/.test(css)) return []
   const found = []
   postcss.parse(css).walkRules((rule) => {
     if (isKeyframes(rule) || markedBefore(rule, EXEMPT)) return
@@ -52,7 +49,7 @@ export function findCardFill(css) {
   return found
 }
 
-export function styleFiles() {
+function styleFiles() {
   return [
     ...walk(`${ROOT}/src/styles`, { exts: ['.css'] }),
     ...walk(`${ROOT}/src/tokens`, { exts: ['.css'] }),

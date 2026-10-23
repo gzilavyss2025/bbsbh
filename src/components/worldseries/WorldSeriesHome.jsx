@@ -1,5 +1,5 @@
 import '../../styles/worldseries/home.css'
-import { fetchSchedule } from '../../api/schedule.js'
+import { fetchScheduleGame } from '../../api/schedule.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useWorldSeriesView } from '../../hooks/postseason/useWorldSeriesView.js'
 import { withFormatDates } from '../../lib/postseason/worldseries/hero.js'
@@ -39,11 +39,12 @@ import { ScoutingReport } from './ScoutingReport.jsx'
 export function WorldSeriesHome({ bracket, slateDate, wide = false, seriesGame = null, renderCard = null }) {
   const mode = worldSeriesMode(bracket)
   const { series, clubIds, data, focusPk, game, umpire, parkOf, played } = useWorldSeriesView(mode, slateDate)
-  const offDayPk = renderCard && mode?.dayType !== 'game' ? focusPk : null
-  const offDayDate = game?.date || null
+  // The next game's pk and date come from the bracket, so the card's read starts with the page
+  // and does not wait on the park read behind `game`.
+  const offDayGame = renderCard && mode?.dayType !== 'game' ? mode?.series.upcoming.find((g) => g.gameNumber === mode.gameNumber) : null
   const offDay = useAsync(
-    () => (offDayPk && offDayDate ? fetchSchedule(offDayDate).then((games) => games.find((g) => g.gamePk === offDayPk) ?? null) : Promise.resolve(null)),
-    [offDayPk, offDayDate],
+    () => (offDayGame?.gamePk && offDayGame.date ? fetchScheduleGame(offDayGame.date, offDayGame.gamePk) : Promise.resolve(null)),
+    [offDayGame?.gamePk, offDayGame?.date],
   )
   if (!mode) return null
   const cardGame = mode.dayType === 'game' ? seriesGame : offDay.data
@@ -91,7 +92,7 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false, seriesGame =
         splitsByClub={data?.hotBats ?? null}
         clubGames={data?.clubGames ?? null}
         gameCard={gameCard}
-        gameCardPending={Boolean(renderCard) && offDay.loading}
+        gameCardPending={Boolean(offDayGame?.gamePk) && offDay.loading}
       />
       {wide && <Ledger series={series} model={model} />}
       {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={(id) => lcsRoundOf(bracket, id)} />}

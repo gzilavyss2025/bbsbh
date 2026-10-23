@@ -13,8 +13,6 @@ import { Card } from '../../ui/frame/Card.jsx'
 // when no row clears a threshold.
 //
 //   edges  matchupEdges(...): [{ kind: 'hitter' | 'pitcher', id, name, vs, line }]
-// The card is stamped and named on its ink tab, as the World Series home's cards are;
-// the scouting report's "no standout matchups" line wears it too.
 // A hitter edge is the field's green, a pitcher edge the clay: a soft ground with
 // a deep ink, and the word says which.
 const KIND = {
@@ -22,6 +20,8 @@ const KIND = {
   pitcher: { word: 'Pitcher', style: pillSolidStyle({ ground: 'var(--clay-soft)', text: 'var(--clay-deep)' }) },
 }
 
+// The card is stamped and named on its ink tab, as the World Series home's cards are; the scouting
+// report's "no standout matchups" line wears it too.
 export function MatchupCard({ children }) {
   return (
     <Card frame="stamped" label="Matchup edges" labelAs="h3" count="Career vs starters" className="seriesedges__matchups">
@@ -52,42 +52,34 @@ function Side({ id, name, role, edge, flip }) {
 // under them. The default keeps the one-line row.
 export function MatchupEdges({ edges, variant }) {
   if (!edges?.length) return null
-  if (variant === 'faceoff') {
-    return (
-      <MatchupCard>
-        <ul className="seriesedges__rows">
-          {edges.map((e) => {
-            const { a, b } = faceoffRoles(e)
-            return (
-              <li key={e.id} className="seriesedges__row seriesedges__row--faceoff">
-                <Side id={e.id} name={e.name} role={a.role} edge={a.edge} />
-                <span className="seriesedges__vs">vs</span>
-                <Side id={e.vsId} name={e.vs} role={b.role} edge={b.edge} flip />
-                <span className="seriesedges__line">{e.line}</span>
-              </li>
-            )
-          })}
-        </ul>
-      </MatchupCard>
-    )
-  }
+  const faceoff = variant === 'faceoff'
   return (
     <MatchupCard>
       <ul className="seriesedges__rows">
-        {edges.map((e) => (
-          <li key={e.id} className="seriesedges__row">
-            <Pill fill="solid" style={KIND[e.kind].style}>
-              {KIND[e.kind].word}
-            </Pill>
-            <span>
-              <PlayerLink id={e.id} className="seriesedges__name">
-                {e.name}
-              </PlayerLink>{' '}
-              vs {e.vs}
+        {edges.map((e) => {
+          const { a, b } = faceoff ? faceoffRoles(e) : {}
+          return faceoff ? (
+            <li key={e.id} className="seriesedges__row seriesedges__row--faceoff">
+              <Side id={e.id} name={e.name} role={a.role} edge={a.edge} />
+              <span className="seriesedges__vs">vs</span>
+              <Side id={e.vsId} name={e.vs} role={b.role} edge={b.edge} flip />
               <span className="seriesedges__line">{e.line}</span>
-            </span>
-          </li>
-        ))}
+            </li>
+          ) : (
+            <li key={e.id} className="seriesedges__row">
+              <Pill fill="solid" style={KIND[e.kind].style}>
+                {KIND[e.kind].word}
+              </Pill>
+              <span>
+                <PlayerLink id={e.id} className="seriesedges__name">
+                  {e.name}
+                </PlayerLink>{' '}
+                vs {e.vs}
+                <span className="seriesedges__line">{e.line}</span>
+              </span>
+            </li>
+          )
+        })}
       </ul>
     </MatchupCard>
   )

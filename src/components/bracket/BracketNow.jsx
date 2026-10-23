@@ -50,7 +50,7 @@ function Box({ box, x, y, feeders }) {
       <span className="pbnow__name">{box.name}</span>
       {box.rows.map((row, i) =>
         row.club ? (
-          <div key={row.club.id} className={`pbnow__row${row.eliminated ? ' pbnow__row--out' : box.decided && !row.eliminated ? ' pbnow__row--won' : ''}`}>
+          <div key={row.club.id} className={`pbnow__row${row.eliminated ? ' pbnow__row--out' : box.decided ? ' pbnow__row--won' : ''}`}>
             <ClubMark club={row.club} eliminated={row.eliminated} size={16} />
             <span className="pbnow__abbr">{row.club.abbreviation}</span>
             <Pips winsNeeded={box.winsNeeded} wins={row.wins} />
@@ -134,7 +134,7 @@ export function BracketNow({ bracket, cutoff, round }) {
   if (!now) return null
   return (
     <>
-      <Card frame="stamped" body="flush" label="Postseason" className="pbnow">
+      <Card frame="stamped" body="flush" label="Postseason">
         <div className="pbnow__body">
           <div className="pbnow__tree" style={{ width: W, height: now.height }}>
             <svg className="pbkt-lines" width={W} height={now.height} aria-hidden="true">

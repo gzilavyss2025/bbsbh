@@ -29,7 +29,7 @@ export function SeriesTotals({ totals, clubs, stamped = false }) {
   const table = (
     <table className="psseries__totalstable">
       <caption className="sr-only">
-        Series totals, {games} {games === 1 ? 'game' : 'games'}, {name(left.id)} and {name(right.id)}
+        Series totals, {note}, {name(left.id)} and {name(right.id)}
       </caption>
       <thead>
         <tr>
@@ -66,7 +66,7 @@ export function SeriesTotals({ totals, clubs, stamped = false }) {
   )
   if (stamped) {
     return (
-      <Card frame="stamped" body="flush" label="Series totals" count={note} className="psseries__totals psseries__totals--stamped">
+      <Card frame="stamped" body="flush" label="Series totals" count={note} className="psseries__totals">
         {table}
       </Card>
     )

@@ -36,7 +36,7 @@ const BUDGET_FILE = new URL('./layout-ratchet-budget.json', import.meta.url)
 const KINDS = ['column', 'wrap', 'grid']
 const EXEMPT = /layout-exempt\s*:\s*\S/
 
-const isKeyframes = (rule) => {
+export const isKeyframes = (rule) => {
   for (let p = rule.parent; p; p = p.parent) if (p.type === 'atrule' && /keyframes$/i.test(p.name)) return true
   return false
 }

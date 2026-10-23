@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { findCardFill, styleFiles } from '../scripts/layout/check-card-fill.mjs'
-import { readFileSync } from 'node:fs'
+import { findCardFill } from '../scripts/layout/check-card-fill.mjs'
 
 // The matcher behind the card-fill guard. It is pure: every case is a CSS string.
 
@@ -50,10 +49,4 @@ test('an exempt marker with no reason, or one further up, does not count', () =>
 
 test('a keyframes step is not a layout', () => {
   assert.equal(findCardFill('@keyframes k { 0% { height: 100% } }').length, 0)
-})
-
-test('no stylesheet in the repo sizes a card to 100% of its parent', () => {
-  for (const file of styleFiles()) {
-    assert.deepEqual(findCardFill(readFileSync(file, 'utf8')), [], file)
-  }
 })

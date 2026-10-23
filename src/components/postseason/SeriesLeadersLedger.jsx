@@ -42,7 +42,7 @@ export function SeriesLeadersLedger({ batting, pitching, games = 0 }) {
   if (blocks.length === 0) return null
 
   return (
-    <Card frame="stamped" body="flush" label="Series leaders" count={games ? `${games} played` : undefined} className="tledg tledg--series">
+    <Card frame="stamped" body="flush" label="Series leaders" count={games ? `${games} played` : undefined} className="tledg">
       <div className="tledg__blocks">
         {blocks.map((block) => (
           <div key={block.key} className="tledg__block">
