@@ -66,6 +66,7 @@ const CHECKED_ROOT = 'src'
 // one that belongs in a PR description if this list needs to grow.
 const ALLOWLIST = {
   'src/api/milbHistory.js#historicalClubName': 'Deliberately staged ahead of its first caller — the function\'s own header comment says "Not yet wired into any screen (no historical logo art exists yet)"; it is exposed for a future pass, not forgotten.',
+  'src/api/history/franchiseHof.js#hallOfFamersFor': 'Staged ahead of its first caller on purpose: #2597 is data first ("No screen in this issue"); the franchise page (#2586) reads it. Only test/franchise-hof.test.js uses it today.',
   'src/lib/milbColors.js#MILB_COLORS': 'Re-exported on purpose ("so every existing MiLB caller ... still has one import for \'MiLB colors\'") even though every current caller happens to import it from brandColors.js instead. Kept open as the intended single entry point.',
   'src/lib/milbColors.js#MILB_RESEARCHED_PAIRS': 'Same re-export as MILB_COLORS above, same file, same rationale.',
   'src/lib/wpa/wpaBandColors.js#WPA_PLOT_SIZE': 'Declared "exported so Team Identity Lab\'s WPA preview can render its tile pattern at TRUE size" — the lab does not currently read it (comment may be ahead of the wiring), flagged for a maintainer to confirm rather than deleted blind.',

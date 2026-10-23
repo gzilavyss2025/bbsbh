@@ -380,6 +380,10 @@
       "class": "spoiler-free",
       "why": "Static league-pennants.json: a club's World Series berths by season, 1903 to the current season. Pennants already won, no game."
     },
+    "history/franchiseHof.js": {
+      "class": "spoiler-free",
+      "why": "Static franchise-hof shards: a club's Hall of Famers, inducted as the club and also played there, with the seasons. History, no game."
+    },
     "fouls.js": {
       "class": "spoiler-free",
       "why": "Static fouls/{season}/fouls.json season aggregates over completed games, same footing as WAR. The LIVE per-half foul counters are in derive.js instead. The by-count cells and a batter's per-game [pitches, fouls, whiffs] (`fetchBatterGameFouls`) are the same sweep: counts of pitches in games already Final."

@@ -372,6 +372,13 @@ for each generator; the reader modules:
   the generator resolves against the CURRENT 30 teams' home parks — an older
   or relocated venue falls back to name-only). Kept OUT of the PWA precache
   (~650 KB) and fetched at runtime, like the `war-history/` shards.
+- `history/franchiseHof.js` — a club's Hall of Famers, from `public/data/franchise-hof/{teamId}.json`
+  (hand-run `scripts/franchise/gen-franchise-hof.mjs`, #2597). `hallOfFamersFor(teamId)` returns
+  `{ inductedAs: [{ id, name, year }], alsoPlayed: [{ id, name, year, seasons }] }`: the club on the
+  plaque (`awards/MLBHOF/recipients`) and everyone else who played for it, with his seasons there
+  (`yearByYear`). `year` is the induction year. A player is in a club's `inductedAs` or its
+  `alsoPlayed`, never both. Keyed by the current team id. MLB only; a MiLB id reads empty. No screen
+  reads it yet.
 - `milbHistory.js` — historical MiLB affiliate/franchise data, from
   `public/data/milb-history.json`. Script-generated (`gen-milb-history.mjs`) but
   **not on a cron** — affiliate history is near-immutable, so it's a hand-run
