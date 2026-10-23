@@ -26,11 +26,13 @@
 // constants. They are re-exported here so this module's own API, its callers
 // and test/hitchart.test.js are unchanged. See that file's header.
 //
-// MiLB DEGRADES, IT DOESN'T CRASH. Most minor-league parks send no `hitData`
-// at all (docs/data-enrichment.md's MiLB table), so `selectBattedBalls` simply
-// returns an empty array there; every per-ball Statcast field is null-guarded
-// on top of that, because a park can track a ball's landing spot and still
-// report no exit velocity, launch angle or trajectory.
+// MiLB DEGRADES, IT DOESN'T CRASH. Minor-league parks DO send `hitData`:
+// `coordinates`, `location` and `trajectory` were present on every level in a
+// 24-game sample of 2026-07-10 (docs/data-enrichment.md, section 1). What AA,
+// High-A and most Single-A parks lack is `launchSpeed` and `totalDistance`.
+// So the data is there; the card shows where the venue has a ballpark layout (all but one park since #2612), with no exit velocity. Every per-ball Statcast
+// field is null-guarded, and a park that sent no coordinates (rare) yields an
+// empty array from `selectBattedBalls`.
 
 import {
   HARD_HIT_MPH,
@@ -155,8 +157,8 @@ export function selectBattedBalls(feed, { teamId = null, throughHalfIndex = null
 // either way, since the feed lists a play's events in the order they happened.
 //
 // Returns null for a play that never put a ball in play (a strikeout, a walk)
-// and for one at a park that tracked no coordinates — a MiLB game, where the
-// card simply never offers itself.
+// and for one at a park that sent no coordinates (rare, even in MiLB), where
+// the card offers no handle.
 export function selectPlayBattedBall(play) {
   const events = play?.playEvents ?? []
   for (let i = events.length - 1; i >= 0; i--) {

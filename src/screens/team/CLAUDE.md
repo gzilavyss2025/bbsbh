@@ -6,7 +6,7 @@ anchor jump bar (`bar` prop), one `Band` per `BANDS` entry (`next/bands.js`), an
 mounts its folder (`next/<band>/index.jsx`) only when near (`useNearView`), so nothing loads
 before it is. **A band edits only its own folder**, never `bands.js`, `Band.jsx` or the page.
 Module props: `{ team, asOf, sportId, onReady, onCount }`; call `useBandData` for the two reports.
-Absent bands come from `hiddenTeamSections(team)` (`data/shared.js`; the league test comes first).
+Absent bands come from `hiddenTeamSections(team, { pastSeason })` (`data/shared.js`; the league test comes first). A past season hides Money, and Farm keeps only Affiliates (`loadMinors` returns no prospects).
 `/team/{id}/leaders`, `stamp-in`, `photos` and `transactions` are separate pages, not bands.
 
 **Each band loads only its own data.** One `data/load{Band}.js` per band, never a shared
@@ -57,7 +57,7 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
 - **Foot** (`next/foot/`): not a band, no jump-bar button. The level's other clubs with the
   Affiliate chip, and the Game Notes card. It adds no request.
 
-Every link keeps `?d=` and `?s=` (the shell wraps the page in `LinkScope`). Open surface
+Every link keeps `?d=` and `?s=` (the shell wraps the page in `LinkScope`). `?y=2018` is a past season: the as-of `2018-12-31` with no date labels (`isYearView`, `lib/dates.js`); `?d=` wins when both are present. Open surface
 (ADR-0034, "The cutoff is opt-in now"): nothing here is sealed, and adding a gate is a regression.
 Motion plays once per page visit: every band reads `useViewOnce(team.id, band, ready)` (`hooks/motion/useViewOnce.js`, `docs/motion.md`).
 

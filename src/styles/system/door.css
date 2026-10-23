@@ -72,6 +72,22 @@
   opacity: 0.7;
 }
 
+.door--inline,
+.door__label,
+.plink.lsp__seeall,
+.plink.foulcard__door,
+.pcard__gamelink,
+.outl__name,
+.gnotes__pdf a {
+  /* THE DOTTED LINK RULE (#2528): the one place a link's dotted rule is drawn. An anchor
+     and a <button> draw it alike, because it is set here. The compound `.plink.` selectors
+     out-rank .plink's `text-decoration: none` reset (26-player-page.css). Each class keeps
+     only its own placement and type. */
+  text-decoration: underline dotted;
+  text-decoration-thickness: var(--bw-hair);
+  text-underline-offset: 3px;
+}
+
 .door--inline {
   border: none;
   background: none;
@@ -82,10 +98,6 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
-  /* An anchor and a <button> draw the rule alike, because it is set here. */
-  text-decoration: underline dotted;
-  text-decoration-thickness: var(--bw-hair);
-  text-underline-offset: 3px;
 }
 
 /* The label at the far end of a door that is a whole ROW of its own: the Box
@@ -98,10 +110,34 @@
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
-  text-decoration: underline dotted;
-  text-decoration-thickness: var(--bw-hair);
-  text-underline-offset: 3px;
   white-space: nowrap;
+}
+
+/* --boxed (#2613): a door that is a small ruled box in the caps display voice, the rail's and the
+   offseason page's "N more" and the page-out buttons. Quieter than a button: no fill at rest, a
+   wash on hover. A host seats it (width, margin, padding, grid area) and may fill it. No chevron:
+   the box is the affordance. */
+.door--boxed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  text-decoration: none;
+}
+.door--boxed:hover:not(:disabled),
+.door--boxed:active:not(:disabled) {
+  background: var(--surface-inset);
 }
 
 .door--block {

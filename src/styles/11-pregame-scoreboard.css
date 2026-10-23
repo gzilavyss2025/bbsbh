@@ -14,12 +14,12 @@
   position: relative;
   margin-top: var(--space-8);
   padding: var(--space-8) var(--space-4) var(--space-5);
-  border: var(--bw-heavy) solid var(--field);
+  border: var(--bw-heavy) solid var(--draw-turf);
   border-radius: var(--radius-xs);
-  background-color: var(--field-deep);
+  background-color: var(--draw-turf-deep);
   background-image:
-    linear-gradient(color-mix(in srgb, var(--field) 24%, transparent) var(--bw-hair), transparent var(--bw-hair)),
-    linear-gradient(90deg, color-mix(in srgb, var(--field) 18%, transparent) var(--bw-hair), transparent var(--bw-hair));
+    linear-gradient(color-mix(in srgb, var(--draw-turf) 24%, transparent) var(--bw-hair), transparent var(--bw-hair)),
+    linear-gradient(90deg, color-mix(in srgb, var(--draw-turf) 18%, transparent) var(--bw-hair), transparent var(--bw-hair));
   background-size: 100% 22px, 28px 100%;
   color: var(--surface-inset);
   box-shadow: var(--shadow-raised), var(--inset-cell);
@@ -52,7 +52,7 @@
   height: var(--space-10);
   border: var(--bw-heavy) solid var(--surface-inset);
   border-radius: var(--radius-pill);
-  background: var(--field-deep);
+  background: var(--draw-turf-deep);
   transform: translateX(-50%);
   box-shadow: var(--shadow-card);
 }
@@ -134,11 +134,11 @@
   display: grid;
   place-items: center;
   min-height: 86px;
-  border: var(--bw-heavy) solid color-mix(in srgb, var(--field-deep) 72%, var(--text-heading));
+  border: var(--bw-heavy) solid color-mix(in srgb, var(--draw-turf-deep) 72%, var(--text-heading));
   border-radius: var(--radius-xs);
   background:
-    linear-gradient(transparent 49%, color-mix(in srgb, var(--field-deep) 78%, var(--text-heading)) 49% 52%, transparent 52%),
-    linear-gradient(var(--field), var(--field-deep));
+    linear-gradient(transparent 49%, color-mix(in srgb, var(--draw-turf-deep) 78%, var(--text-heading)) 49% 52%, transparent 52%),
+    linear-gradient(var(--draw-turf), var(--draw-turf-deep));
   color: var(--surface-inset);
   font-family: var(--font-mono);
   font-size: var(--fs-hero-xl);
@@ -175,9 +175,9 @@
   place-items: center;
   min-height: 86px;
   margin: 0;
-  border: var(--bw-heavy) solid color-mix(in srgb, var(--field-deep) 72%, var(--text-heading));
+  border: var(--bw-heavy) solid color-mix(in srgb, var(--draw-turf-deep) 72%, var(--text-heading));
   border-radius: var(--radius-xs);
-  background: linear-gradient(var(--field), var(--field-deep));
+  background: linear-gradient(var(--draw-turf), var(--draw-turf-deep));
   color: var(--surface-inset);
   font-family: var(--font-display);
   font-size: var(--fs-h2);

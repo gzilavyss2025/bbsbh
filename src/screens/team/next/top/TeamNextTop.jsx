@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { franchiseFor, nameForSeason } from '../../../../api/franchiseHistory.js'
 import { pageDay } from '../../../../api/schedule.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { ordinal } from '../../../../lib/format.js'
@@ -7,7 +8,7 @@ import { SPORT_LABEL } from '../../../../lib/teams.js'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
-import { cutoffFor, divisionRecordFor } from '../../data/shared.js'
+import { cutoffFor, divisionRecordFor, seasonOf } from '../../data/shared.js'
 import { SHARED } from '../once.js'
 import { ClubGrid } from './ClubGrid.jsx'
 import { DaysRail } from './DaysRail.jsx'
@@ -32,6 +33,12 @@ export function TeamNextTop({ team, standings, season, asOf }) {
   const sportId = team.sport?.id ?? 1
   const mlb = sportId === 1
   const cutoff = cutoffFor(asOf)
+  // A past season wears the club's name and mark of that year (1969: the Seattle Pilots), from the
+  // franchise spans; the team id is the same. MLB only, since a MiLB id has no spans (#2590).
+  const past = season < seasonOf(null, sportId)
+  const historyRead = useAsync(() => (past && mlb ? franchiseFor(team.id) : Promise.resolve(null)), [team.id, past, mlb])
+  // Until the spans arrive a past MLB season prints no name, so today's name never flashes first.
+  const clubName = past && mlb && historyRead.loading ? '\u00a0' : (past && nameForSeason(historyRead.data?.spans, season)) || team.name
   const line = useMemo(() => clubLine(standings, team), [standings, team])
   const schedule = useAsync(() => SHARED.fetchTeamSchedule(team.id, season, sportId, cutoff), [team.id, season, sportId, cutoff]).data
   const series = useMemo(() => schedule && formSeries(schedule), [schedule])
@@ -64,10 +71,10 @@ export function TeamNextTop({ team, standings, season, asOf }) {
       <Card as="div" frame="stamped" body="flush" stampIn className="tnext__hero" style={{ '--stamp-delay': HERO_DELAY }} count={`${season} · ${SPORT_LABEL[sportId] ?? ''}`}>
         <div className="sectionhead--band tnext__head">
           <div className="tnext__plate">
-            <TeamLogo teamId={team.id} name="" variant="mono" size={40} />
+            <TeamLogo teamId={team.id} name="" variant="mono" size={40} season={past ? season : null} />
           </div>
           <div className="tnext__club">
-            <h1 className="tnext__name">{team.name}</h1>
+            <h1 className="tnext__name">{clubName}</h1>
             <p className="tnext__sub">{[line?.divisionName, season].filter(Boolean).join(' · ')}</p>
           </div>
           {line?.flag && <span className="tnext__flag">{line.flag.letter} · {line.flag.word}</span>}

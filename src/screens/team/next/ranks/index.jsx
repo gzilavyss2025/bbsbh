@@ -28,9 +28,9 @@ const count = (n) => rankCount(n) || undefined
 
 // One rank cell per stat on the compact tile; the rank reads "3rd" under the figure. The best five
 // take the marker (never the seal). A cell with no rank draws no mark.
-function RankBoard({ title, stats, still }) {
+function RankBoard({ title, stats, clubCount, still }) {
   return (
-    <Card frame="stamped" label={title} labelAs="h3" count="rank of 30" stampIn={!still} className="rnk__card">
+    <Card frame="stamped" label={title} labelAs="h3" count={clubCount ? `rank of ${clubCount}` : undefined} stampIn={!still} className="rnk__card">
       <div className="rnk__grid">
         {stats.map((s, i) => {
           const rank = parseInt(s.rank, 10)
@@ -78,8 +78,8 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
     <div className={`tnext__square rnk${still ? ' rnk--still' : ''}`}>
       <AsyncStatus loading={numbers.loading} error={numbers.error} hasData={n != null} errorMessage="Couldn’t load team ranks. Try again." />
       {any && <h2 className="tnext__bandhead">Ranks</h2>}
-      {n?.batting && <RankBoard title="Team batting" stats={n.batting} still={still} />}
-      {n?.pitching && <RankBoard title="Team pitching" stats={n.pitching} still={still} />}
+      {n?.batting && <RankBoard title="Team batting" stats={n.batting} clubCount={n.clubCount} still={still} />}
+      {n?.pitching && <RankBoard title="Team pitching" stats={n.pitching} clubCount={n.clubCount} still={still} />}
       {n && <RunValueBoard data={n.runValue} clubName={clubName} asOf={asOf} sportId={sportId} still={still} />}
       {n && (
         <ChallengeBoard data={n.absExposureClubs} teamId={team.id} level={n.absExposureLevel} still={still} />

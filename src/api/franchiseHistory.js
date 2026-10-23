@@ -21,6 +21,17 @@ export async function franchiseFor(teamId) {
   return { spans, through: d.through, parks: parkHistory(spans, d.mates ?? {}) }
 }
 
+// Pure: the name the club carried in `season`, from the span that season falls in. A season after
+// the last span (the file ends the season before today's) uses the last span's name; before the
+// data, or in a gap, null (the caller keeps the club's current name).
+export function nameForSeason(spans, season) {
+  const list = spans ?? []
+  const hit = list.find((s) => s.from <= season && season <= s.to)
+  if (hit) return hit.name
+  const last = list[list.length - 1]
+  return last && season > last.to ? last.name : null
+}
+
 // Pure: group spans by venue, oldest first. `runs` are the club's stints there
 // as [from, to] pairs (a park left and returned to has two). `mates` is the
 // file's { venueId: [{ teamId, name, from, to }] }, the other clubs there in the
@@ -39,4 +50,12 @@ export function parkHistory(spans, mates) {
   return [...byVenue.values()]
     .map((p) => ({ ...p, mates: mates[p.venueId] ?? [] }))
     .sort((a, b) => a.runs[0][0] - b.runs[0][0])
+}
+
+// Pure: the park a club used in `season`, as { id, name } from the span that season falls in, or
+// null (no span holds it, or the span has no park). The name is the park's CURRENT name, so a
+// renamed park reads as today's; the API names it for the season (fetchSeasonVenue).
+export function venueForSeason(spans, season) {
+  const span = (spans ?? []).find((s) => s.from <= season && season <= s.to)
+  return span?.venueId == null ? null : { id: span.venueId, name: span.venueName }
 }

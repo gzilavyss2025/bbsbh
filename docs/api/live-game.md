@@ -580,8 +580,9 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   module — not even for four constants. `throughHalfIndex`
   clamps to `halfIndex <= revealedThrough`, one half tighter than the pre-pitch
   selectors, because a batted ball is the result rather than the staging for one
-  (ADR-0051). A park that sends no `hitData` yields an empty array and the card
-  renders nothing.
+  (ADR-0051). A park that sends no `hitData` coordinates (rare: minor-league parks
+  send them at every level, see `docs/data-enrichment.md`) yields an empty array
+  and the card renders nothing.
   `selectPlayBattedBall(play)` is the same answer for ONE play, for the ball
   flight the play-by-play diamond opens (`components/charts/BallFlight.jsx`):
   the same projection and the same Statcast fields, plus the two result flags

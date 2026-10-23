@@ -95,7 +95,7 @@ const CONSIDERATION_ICONS = {
 // (plus a detail line, e.g. a draft pick's CBA pick number, when known)
 // alongside it, same as PlayerRow. Cash alone gets a green tint — the
 // app's established positive/acquired color (TeamTransactionsCard's trade
-// -> --field convention) — since unlike the others it's an unambiguous,
+// -> --accent-positive convention) — since unlike the others it's an unambiguous,
 // already-in-hand gain rather than a still-unresolved promise.
 function ConsiderationRow({ consideration }) {
   const tone = consideration.type === 'cash' ? 'cash' : null

@@ -293,8 +293,12 @@ const ORG_DEPARTURE_STATUSES = new Set(['RL', 'TR', 'CL', 'FA'])
 //
 // Shared by the Roster tab's projection and the Overview's lineup preview, which
 // must show the same nine.
-export function preferredLineupFrom(fullRoster, teamId) {
-  const eligible = fullRoster.filter((r) => !ORG_DEPARTURE_STATUSES.has(r.status?.code))
+//
+// `countDeparted` is for a FINISHED season: the departure rule protects a live roster from
+// crediting a player the club just let go, and in a past year it drops a regular who was
+// traded in August (2018's Villar, 64 starts at 2B). There everyone who played counts.
+export function preferredLineupFrom(fullRoster, teamId, { countDeparted = false } = {}) {
+  const eligible = countDeparted ? fullRoster : fullRoster.filter((r) => !ORG_DEPARTURE_STATUSES.has(r.status?.code))
   const gsAt = (r, pos) =>
     Number(
       rosterFieldingSplits(r, teamId).find((s) => s.position?.abbreviation === pos)?.stat?.gamesStarted,
@@ -405,8 +409,10 @@ export function parentOrgIdOf(team) {
 // sport test: /team/11 is `sport.id: 1` with a league that has no id, and a sport-first
 // early return waved it through (#1143). Standings and About are never hidden; Games and
 // Roster are not either, since every club plays a schedule and keeps a roster.
-export function hiddenTeamSections(team) {
+// `pastSeason` (the page's season is over, #2593): Money is a current-only ledger, so it is absent.
+export function hiddenTeamSections(team, { pastSeason = false } = {}) {
   const hidden = new Set()
+  if (pastSeason) hidden.add('money')
   if (!team.league?.id) hidden.add('ranks')
   if ((team.sport?.id ?? 1) !== 1) {
     hidden.add('money') // Cot's covers the major leagues only

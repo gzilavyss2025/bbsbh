@@ -418,8 +418,8 @@
    .tier__tag itself draws nothing. */
 .tier__tag--elite {
   --pill-fill: var(--field-soft);
-  --pill-edge: var(--field);
-  --pill-ink: var(--field-deep);
+  --pill-edge: var(--accent-positive);
+  --pill-ink: var(--accent-positive);
 }
 .tier__tag--good {
   --pill-fill: var(--award-soft);
@@ -456,7 +456,7 @@
   color: #fff;
 }
 .umptier__glyph--elite {
-  background: var(--field-deep);
+  background: var(--accent-positive-deep);
 }
 .umptier__glyph--good {
   background: var(--award-ink);

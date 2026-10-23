@@ -52,6 +52,7 @@ this report showed Yankee Stadium and Oracle Park 12–18 ft too deep.
 | `audited` | An outline that passed its audit: Gameday against Savant, or a 2018 trace against the posted CF (within 10 ft). |
 | `estimated` | A 2018 trace that misses the posted CF. None is drawn today. |
 | `dimensions-only` | No usable outline. The renderer draws straight runs through the five posted distances. |
+| `estimated` (three-point) | A minor-league park that posts only its two lines and center. The wall is one smooth parabola through the three signs (`threePointWall` in `fences.js`); the gaps are interpolated, not sourced. It has no audit. |
 | `missing` | Not even five posted distances. |
 
 No outline is `verified` by a person yet. That level is for a future check
@@ -121,10 +122,11 @@ a 2018 trace shows is an inference from its depth; each record's `note` says so.
 - **New outlines needed:** Comerica Park, Rogers Centre, Kauffman Stadium (all
   three SVGs show an earlier wall), and Sutter Health Park. A re-import picks
   up a corrected SVG on its own.
-- **MiLB parks without a drawing (43 of 119).** These have no Gameday SVG (a
-  403) or an SVG with no foul-line template, and fewer than five posted
-  distances. They stay "not on file". A hand trace is the way to add one (see
-  "Adding a park" below).
+- **MiLB parks without a drawing (1 of 119).** Hops Ballpark (7256) has no
+  Gameday SVG and posts no distance. It stays "not on file". Since #2612, 41
+  parks that post a left line, center and right line (and no gaps) draw a
+  smooth three-point wall, quality `estimated`, with the gaps interpolated. A
+  hand trace is the way to improve one (see "Adding a park" below).
 - **MiLB date history.** A minor-league record covers the imported season
   onward. A game from an earlier season at the same park resolves to nothing.
 - **Gap bearings of the five-point fallback.** A park with no outline draws

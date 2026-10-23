@@ -278,8 +278,8 @@ export const PILLS = [
     consumers: 1,
     group: 'tone',
     verdict: 'Merged — Pill (#1131)',
-    fill: 'Now <Pill ink="--field">. No class of its own.',
-    pill: { ink: '--field' },
+    fill: 'Now <Pill ink="--accent-positive">. No class of its own.',
+    pill: { ink: '--accent-positive' },
   },
   {
     cls: 'prospectpill',

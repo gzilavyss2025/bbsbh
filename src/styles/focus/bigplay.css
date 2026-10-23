@@ -40,7 +40,7 @@
   padding: var(--space-2) var(--space-4);
   border: 3px solid currentColor;
   border-radius: var(--radius-sm);
-  color: var(--field-deep);
+  color: var(--accent-positive);
   background: var(--surface-card);
   font-family: var(--font-display);
   text-transform: uppercase;
@@ -79,7 +79,7 @@
   grid-area: 1 / 1;
   width: 9rem;
   aspect-ratio: 1;
-  border: 3px solid var(--field-deep);
+  border: 3px solid var(--accent-positive-deep);
   border-radius: 50%;
   opacity: 0;
   animation: bigplay-ring var(--bigplay-ring-ms) var(--ease-out) var(--bigplay-after) both;
@@ -97,7 +97,7 @@
   grid-area: 1 / 1;
   width: 3px;
   height: 1.1rem;
-  background: var(--field-deep);
+  background: var(--accent-positive-deep);
   border-radius: 2px;
   rotate: calc(var(--i, 0) * 22.5deg);
   opacity: 0;

@@ -18,13 +18,13 @@ const PATH = 'src/components/ui/control/Pill.jsx'
 const TAG_INKS = {
   outline: [
     { ink: undefined, label: 'Top 100', logo: true },
-    { ink: '--field', label: 'Rookie' },
+    { ink: '--accent-positive', label: 'Rookie' },
     { ink: '--accent-primary', label: '12 shy of 300 HR' },
     { ink: '--clay', label: 'IL-60' },
   ],
   paper: [
     { ink: undefined, label: 'Signed' },
-    { ink: '--field', label: 'Rookie' },
+    { ink: '--accent-positive', label: 'Rookie' },
   ],
   ink: [{ label: '1st of 30' }],
   seal: [{ label: 'Due up' }],
@@ -121,7 +121,7 @@ export function PillSystemHalf() {
         title="Pill"
         path={PATH}
         wide
-        note="Rows are fills, columns are roles. A tag has no states — it is a span, never focusable. A control is rest, selected (aria-pressed) and disabled; point at, press and Tab to a Rest control to see hover, pressed and focus. Selected is ink plus a tick, the button's contract. Tags show the inks they are really passed: no ink, --field, --accent-primary, --clay. Seal is the due-up marker and a control that lifts a seal, nothing else (ADR-0083)."
+        note="Rows are fills, columns are roles. A tag has no states — it is a span, never focusable. A control is rest, selected (aria-pressed) and disabled; point at, press and Tab to a Rest control to see hover, pressed and focus. Selected is ink plus a tick, the button's contract. Tags show the inks they are really passed: no ink, --accent-positive, --accent-primary, --clay. Seal is the due-up marker and a control that lifts a seal, nothing else (ADR-0083)."
       >
         <table className="dlab__matrix">
           <thead>
@@ -154,7 +154,7 @@ export function PillSystemHalf() {
         note="Left to right: a pill tag (≈20px), a pill control (34px), a button control (34px), a button at tap (44px), an inline door. The pill control and the button control share a height on purpose — both are a switch inside a card — and are told apart by the capsule. The tag never shares a height with anything a thumb can press."
       >
         <div className="dlab__row dlab__row--middle">
-          <Pill ink="--field">Rookie</Pill>
+          <Pill ink="--accent-positive">Rookie</Pill>
           <Pill role="control" pressed={false}>
             MLB only
           </Pill>
@@ -215,7 +215,7 @@ export function PillSystemHalf() {
                   </div>
                   <div className="dlab__row dlab__row--middle">
                     <span>Jacob Misiorowski</span>
-                    <Pill ink="--field">Rookie</Pill>
+                    <Pill ink="--accent-positive">Rookie</Pill>
                     <Pill>
                       <img src={leagueLogoUrl()} alt="" width="12" height="12" />
                       Top 100 · 8

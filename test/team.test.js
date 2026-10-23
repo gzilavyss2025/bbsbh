@@ -15,6 +15,7 @@ import {
   fetchAffiliates,
   fetchComplexAffiliates,
   fetchStandings,
+  fetchSeasonVenue,
   fetchLeagueStandings,
   fetchLeagueTeamStats,
 } from '../src/api/team.js'
@@ -384,6 +385,37 @@ test('fetchComplexAffiliates degrades to [] on failure', async () => {
 })
 
 // --------------------------------------------------------------------------
+// fetchSeasonVenue — the park a club used in one season (#2591)
+// --------------------------------------------------------------------------
+test('fetchSeasonVenue is the park the API names for that season', async () => {
+  const { restore } = stubFetch({
+    'https://statsapi.mlb.com/api/v1/teams/158?season=2018': {
+      json: { teams: [{ id: 158, venue: { id: 32, name: 'Miller Park', link: '/api/v1/venues/32' } }] },
+    },
+  })
+  try {
+    assert.deepEqual(await fetchSeasonVenue(158, 2018), { id: 32, name: 'Miller Park' })
+  } finally {
+    restore()
+  }
+})
+
+test('fetchSeasonVenue is null with no id or season, no venue on the team, or a failed read', async () => {
+  assert.equal(await fetchSeasonVenue(null, 2018), null)
+  assert.equal(await fetchSeasonVenue(158, null), null)
+  const { restore } = stubFetch({
+    'https://statsapi.mlb.com/api/v1/teams/1?season=1900': { json: { teams: [{ id: 1 }] } },
+    'https://statsapi.mlb.com/api/v1/teams/2?season=1900': { fail: true },
+  })
+  try {
+    assert.equal(await fetchSeasonVenue(1, 1900), null)
+    assert.equal(await fetchSeasonVenue(2, 1900), null)
+  } finally {
+    restore()
+  }
+})
+
+// --------------------------------------------------------------------------
 // fetchStandings — dated responses are cached (immutable fact about a past
 // day); a falsy date always refetches (today's still-moving standings).
 // --------------------------------------------------------------------------
@@ -416,6 +448,43 @@ test('fetchStandings folds in an optional hydrate param and degrades to [] on fa
   })
   try {
     assert.deepEqual(await fetchStandings(104, 2027, '2027-05-01', 'division'), [])
+  } finally {
+    restore()
+  }
+})
+
+// A date after a finished season's last day returns no records (2018-12-30 on 2026-10-23), so
+// a past season retries without the date and gets the final table (#2589).
+test('fetchStandings retries a finished season without the date when the dated call is empty', async () => {
+  const base = 'https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=2018&standingsTypes=regularSeason'
+  const { calls, restore } = stubFetch({
+    [`${base}&date=2018-12-30&hydrate=division`]: { json: { records: [] } },
+    [`${base}&hydrate=division`]: { json: { records: [{ division: { id: 205 } }] } },
+  })
+  try {
+    assert.deepEqual(await fetchStandings(104, 2018, '2018-12-30', 'division'), [{ division: { id: 205 } }])
+    // Cached under the dated key: a repeat asks nothing.
+    await fetchStandings(104, 2018, '2018-12-30', 'division')
+    assert.equal(calls.length, 2)
+  } finally {
+    restore()
+  }
+})
+
+test('fetchStandings does not retry a call with records, a current season, or a date before opening day', async () => {
+  const year = new Date().getFullYear()
+  const base = (season) => `https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=${season}&standingsTypes=regularSeason`
+  const { calls, restore } = stubFetch({
+    [`${base(2018)}&date=2018-09-30`]: { json: { records: [{ division: { id: 205 } }] } },
+    [`${base(year)}&date=${year}-09-01`]: { json: { records: [] } },
+    // Before opening day a past season is empty too, and that answer is the true one.
+    [`${base(2018)}&date=2018-03-28`]: { json: { records: [] } },
+  })
+  try {
+    assert.equal((await fetchStandings(104, 2018, '2018-09-30')).length, 1)
+    assert.deepEqual(await fetchStandings(104, year, `${year}-09-01`), [])
+    assert.deepEqual(await fetchStandings(104, 2018, '2018-03-28'), [])
+    assert.equal(calls.length, 3)
   } finally {
     restore()
   }

@@ -51,7 +51,7 @@
   color: var(--accent-negative);
 }
 .admincopy__status--saved {
-  color: var(--field);
+  color: var(--accent-positive);
 }
 .admincopy__history-open {
   font-family: var(--font-body);
@@ -252,7 +252,7 @@
 }
 .awardord__step:hover:not(:disabled) {
   background: var(--field-soft);
-  border-color: var(--field);
+  border-color: var(--accent-hover);
 }
 .awardord__step:disabled {
   opacity: 0.4;
@@ -362,8 +362,8 @@
 }
 .awardord__mv:hover:not(:disabled) {
   background: var(--field-soft);
-  border-color: var(--field);
-  color: var(--field-deep);
+  border-color: var(--accent-hover);
+  color: var(--accent-positive);
 }
 .awardord__mv:disabled {
   opacity: 0.35;

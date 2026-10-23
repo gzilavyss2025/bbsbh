@@ -165,7 +165,7 @@ export function GameCard({
     : null
   // --pin-accent drives the pinned border/gradient + star (see index.css) and is
   // left unset when not pinned or the team has no known color, so the CSS
-  // var(--pin-accent, var(--field)) fallback takes over. Same idea for the park
+  // var(--pin-accent, var(--accent-fallback)) fallback takes over. Same idea for the park
   // properties: absent means the backdrop rule paints nothing (or, for
   // --park-tint, paints the plain untinted wash).
   const style = {

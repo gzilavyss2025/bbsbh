@@ -372,6 +372,13 @@ for each generator; the reader modules:
   the generator resolves against the CURRENT 30 teams' home parks — an older
   or relocated venue falls back to name-only). Kept OUT of the PWA precache
   (~650 KB) and fetched at runtime, like the `war-history/` shards.
+- `history/franchiseHof.js` — a club's Hall of Famers, from `public/data/franchise-hof/{teamId}.json`
+  (hand-run `scripts/franchise/gen-franchise-hof.mjs`, #2597). `hallOfFamersFor(teamId)` returns
+  `{ inductedAs: [{ id, name, year }], alsoPlayed: [{ id, name, year, seasons }] }`: the club on the
+  plaque (`awards/MLBHOF/recipients`) and everyone else who played for it, with his seasons there
+  (`yearByYear`). `year` is the induction year. A player is in a club's `inductedAs` or its
+  `alsoPlayed`, never both. Keyed by the current team id. MLB only; a MiLB id reads empty. No screen
+  reads it yet.
 - `milbHistory.js` — historical MiLB affiliate/franchise data, from
   `public/data/milb-history.json`. Script-generated (`gen-milb-history.mjs`) but
   **not on a cron** — affiliate history is near-immutable, so it's a hand-run
@@ -1046,12 +1053,27 @@ for each generator; the reader modules:
   each with the club's name, label and abbreviation of that season. It starts in 1903, so
   the early pennants are not in it. The team page's About band draws them (`PennantWall`).
   A club with none, a MiLB id, or a missing file reads `[]`. `pennantFile()` returns the whole file; the player page's Team history matches a player's seasons against it.
+- `history/franchiseLeaders.js` — a club's all-time leaders, from
+  `public/data/franchise-leaders/{teamId}.json` (hand-run `scripts/franchise/gen-franchise-leaders.mjs`,
+  #2596). `franchiseLeaders(teamId)` returns `{ through, career, season }`: 26 categories (15 hitting,
+  11 pitching), each a list of `{ rank, id, name, value }` (single-season rows add `season`), the
+  feed's top ten with ties kept. `value` is the feed's own string. Keys are the feed's category
+  names, except the pitcher's strikeouts, `pitchingStrikeouts`. Regular season only. Keyed by the
+  current team id, so 158 holds the 1969 Pilots. Rate stats are the feed's qualified lists. MLB only;
+  a MiLB id reads empty. No screen reads it yet.
 - `franchiseHistory.js` — a club's names, leagues and ballparks by season, from
   `public/data/franchise-history/{teamId}.json` (hand-run
   `gen-franchise-history.mjs`). `franchiseFor(teamId)` returns the spans and the park lines (`parkHistory`, grouped by venue id)
   that the Overview's `FranchiseHistory` module draws under the Ballpark card.
   The data starts in 1901, so a park's first season is the first IN THIS DATA,
   never its opening year. A MiLB id has no file and reads empty.
+- `history/franchiseLedger.js` — a club's season ledger, from `public/data/franchise-ledger/{teamId}.json`
+  (hand-run `gen-franchise-ledger.mjs`, #2595). `franchiseLedger(teamId)` returns `{ through, rows }`,
+  oldest first. A row: `season`, `name`, `league` (the franchise-history span's), `w`, `l`, `gb`,
+  `divisionRank` (null before 1969), `leagueRank`, `rs`, `ra`, `managers` (`{ id, name, w?, l? }`;
+  empty before 1969, and a shared season's carry no w/l), `postseason` (`{ round, won }` or null:
+  the highest round the club reached) and `note` ("split season" 1981, "strike" 1994, "60-game
+  season" 2020). Keyed by the current team id. MLB only; a MiLB id reads empty. No screen reads it yet.
 - `managers.js` — a coach's full career, from the `personId % 100` shards in
   `public/data/manager-history/`, behind `/manager/{id}`. Every job row, not
   just the managerial ones. A club-season shared by two managers carries

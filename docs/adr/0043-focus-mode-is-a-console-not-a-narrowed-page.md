@@ -466,3 +466,11 @@ lost "Next at-bat". Issue #1539 asked for the live loop on every half.
 
 `stacked ⇒ revealed` still holds: the only way into stacked is `summaryOpen`,
 which `focusWindowed` ignores while the half is sealed.
+
+## Amendment, 2026-10-23: the screen is now called Gameday
+
+This ADR says "focus mode" and "the innings viewer". Since #2567 (part of #2566) the screen is
+called **Gameday**: the "Innings" tab reads "Gameday", and `CONTEXT.md` has the entry. Nothing
+here changes: the decision above stands, and the file, the code (`InningViewer`, `useFocusMode`,
+`src/styles/focus/`) and the addresses keep their names. Read "focus mode" in this ADR as
+Gameday's windowed mode.

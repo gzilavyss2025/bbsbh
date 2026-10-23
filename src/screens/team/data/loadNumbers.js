@@ -32,7 +32,8 @@ const DASH = '—'
 function statRank(rows, teamId, key, label, lowerBetter) {
   const mine = rows.find((r) => r.teamId === teamId)
   const r = rankTeam(rows, teamId, key, lowerBetter)
-  const tone = r ? (r.rank <= 5 ? 'good' : r.rank >= 20 ? 'bad' : '') : ''
+  // The bottom third of however many clubs were ranked (20th of 30, 16th of 24).
+  const tone = r ? (r.rank <= 5 ? 'good' : r.rank >= Math.ceil((r.of * 2) / 3) ? 'bad' : '') : ''
   const extreme = r ? (r.rank <= 5 ? 'best' : r.rank > r.of - 5 ? 'worst' : '') : ''
   return { k: label, v: mine?.stat?.[key] ?? DASH, rank: r ? rankText(r.rank) : DASH, tone, extreme }
 }
@@ -255,6 +256,9 @@ export async function loadRanks(id, asOf, src = DIRECT) {
     team,
     batting,
     pitching,
+    // The clubs the rank cells were computed against: "rank of N" (24 in 1969, 30 now). MiLB
+    // has no rank cells, so no count.
+    clubCount: league.hitting.length || league.pitching.length || null,
     leaderPool,
     runValue,
     // Handed through whole rather than sliced here: the card ranks this club

@@ -55,8 +55,8 @@
   letter-spacing: var(--ls-wide);
 }
 .moves__row--add .moves__chip {
-  color: var(--field-deep);
-  border-color: var(--field);
+  color: var(--accent-positive);
+  border-color: var(--accent-positive);
 }
 .moves__row--out .moves__chip,
 .moves__row--il .moves__chip {

@@ -188,10 +188,10 @@
   gap: var(--space-1h);
 }
 .foulboard tr.is-me td {
-  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-fallback)) 10%, transparent);
 }
 .foulboard tr.is-me .team {
-  color: var(--fav-accent, var(--field-deep));
+  color: var(--fav-accent, var(--accent-fallback-deep));
 }
 .foulboard__team {
   font-family: var(--font-mono);
@@ -263,8 +263,8 @@
 /* Same favorite-team tint as .sgh-row.is-me — a fan's team jumps out on the
    hero card the same way it does on every other row on this page. */
 .foulboard__hero.is-me {
-  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
-  box-shadow: inset 3px 0 0 var(--fav-accent, var(--field)), var(--shadow-card);
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-fallback)) 10%, transparent);
+  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-fallback)), var(--shadow-card);
 }
 .foulboard__herotop {
   display: flex;
@@ -384,7 +384,7 @@
 .foulavg__fill {
   display: block;
   height: 100%;
-  background: var(--field);
+  background: var(--accent-positive);
   border-radius: var(--radius-pill);
 }
 
@@ -436,7 +436,7 @@
   color: var(--text-body);
 }
 .scorebug__team--his b {
-  color: var(--field-deep);
+  color: var(--accent-positive);
 }
 .scorebug__inning {
   margin-left: auto;
@@ -483,8 +483,8 @@
 }
 .scorebug__result--positive {
   --pill-fill: var(--field-soft);
-  --pill-edge: color-mix(in srgb, var(--field) 35%, var(--border-rule));
-  --pill-ink: var(--field-deep);
+  --pill-edge: color-mix(in srgb, var(--accent-positive) 35%, var(--border-rule));
+  --pill-ink: var(--accent-positive);
 }
 .scorebug__result--negative {
   --pill-fill: var(--clay-soft);
@@ -534,10 +534,10 @@
    inline from favoriteAccentColor()) — a fan's team tints the same way in
    this list as it does in every ledger table on the page. */
 .sgh-row.is-me {
-  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-fallback)) 10%, transparent);
 }
 .sgh-row.is-me .sgh-name {
-  color: var(--fav-accent, var(--field-deep));
+  color: var(--fav-accent, var(--accent-fallback-deep));
 }
 .shot.sgh-shot {
   width: var(--shot-sm-w);
@@ -763,7 +763,7 @@
   padding: 3px var(--space-1h) 2px;
   border: 2px double var(--text-on-ink);
   border-radius: 3px;
-  background: var(--field);
+  background: var(--accent-positive);
   box-shadow: var(--shadow-card);
   transform: rotate(-4deg);
   pointer-events: none;
@@ -774,7 +774,7 @@ button.gamehigh-matchup {
 }
 button.gamehigh-matchup:hover,
 button.gamehigh-matchup:active {
-  border-color: var(--field);
+  border-color: var(--accent-positive);
   background: var(--surface-inset);
 }
 .gamehigh-matchup__score {

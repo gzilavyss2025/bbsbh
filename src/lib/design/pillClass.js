@@ -37,7 +37,7 @@ export function pillClassName({ fill = 'outline', role = 'tag', figure = false, 
 
 // THE INK. There is no tone prop: a pill's meaning is its copy ("Rookie",
 // "Top 100", "12 shy of 300 HR") plus one colour token the caller passes by
-// NAME — `ink="--field"` — which becomes --pill-ink. On an outline pill the ink
+// NAME — `ink="--accent-positive"` — which becomes --pill-ink. On an outline pill the ink
 // draws the edge and the text; on a paper pill it draws the text. Ink and seal
 // are fills that already carry their own ink, so a passed one there is refused
 // rather than painted over a navy or kraft ground it was never checked against.
@@ -59,7 +59,7 @@ const REFUSED = [
 
 export function pillInkStyle({ fill = 'outline', ink } = {}) {
   if (ink === undefined) return undefined
-  if (!TOKEN.test(ink)) throw new Error(`Pill: ink must be a token name like "--field", not "${ink}"`)
+  if (!TOKEN.test(ink)) throw new Error(`Pill: ink must be a token name like "--accent-positive", not "${ink}"`)
   for (const [re, why] of REFUSED) if (re.test(ink)) throw new Error(`Pill: ink "${ink}" refused — ${why}`)
   if (fill === 'ink' || fill === 'seal' || fill === 'marker' || fill === 'solid') {
     throw new Error(`Pill: fill="${fill}" carries its own ink; ink is for outline and paper`)

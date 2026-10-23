@@ -138,7 +138,7 @@
    type (see TYPE_TONE in MoveRow.jsx, shared with the wire) rather than per
    row. A story the pipeline typed `roster-move` gets NO pill at all — see that
    constant for why a label on a third of the rows is not a label. */
-.txstory__type--add { color: var(--field-deep); }
+.txstory__type--add { color: var(--accent-positive); }
 .txstory__type--out { color: var(--clay-deep); }
 .txstory__type--move { color: var(--text-muted); }
 
@@ -359,11 +359,11 @@
    Mixed into --surface-card, not transparent: the sheet under it is that card,
    and a pinned club cell must be opaque, so one tint serves both. */
 .clubtable tr.is-me td {
-  --table-pin: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card));
+  --table-pin: color-mix(in srgb, var(--fav-accent, var(--accent-fallback)) 10%, var(--surface-card));
   background: var(--table-pin);
 }
 .clubtable tr.is-me .team {
-  color: var(--fav-accent, var(--field-deep));
+  color: var(--fav-accent, var(--accent-fallback-deep));
 }
 .clubtable td.standings__diff--positive {
   color: var(--accent-positive);

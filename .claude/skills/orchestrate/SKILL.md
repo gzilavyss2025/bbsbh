@@ -120,7 +120,7 @@ Each record has `session_status` and `external_metadata.post_turn_summary`
 
 For `needs-info` issues, `needs-triage` enhancements, and any issue that says
 "redesign" or "rebuild" without saying what the page looks like. Examples at the
-time of writing: #1391, #1389, #1510.
+time of writing: #1391, #1510.
 
 Start one Opus session per issue, titled `orch: #n shape`. Tell it to:
 

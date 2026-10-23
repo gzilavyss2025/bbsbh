@@ -168,7 +168,17 @@ function namedImportsOf(file) {
   // several lines, and anchored at the start of a line so prose never matches.
   // The brace group carries the named bindings; a clause with no braces
   // (default or namespace) contributes nothing this guard can check.
-  const re = /^[ \t]*(?:import|export)\s+([^;'"]*?)\s*from\s*['"]([^'"]+)['"]/gm
+  //
+  // THE CLAUSE HAS A SHAPE, NOT A LENGTH. This repo writes no semicolons, so
+  // nothing else ends a statement; a clause allowed to run on (`[^;'"]*?`) read
+  // `export function camera() { ... }` and the `export { a } from 'x'` below it
+  // as ONE statement. The function body's destructuring commas then became bare
+  // names reported as missing (#2602: camera.js's `T, F, cx, cy`), and the same
+  // swallow hid a genuinely missing name in the re-export. So the clause is only
+  // what an import can hold: an optional default name, then one brace group with
+  // no nesting, or `*` / `* as ns`, or a bare default name.
+  const re =
+    /^[ \t]*(?:import|export)\s+((?:[\w$]+\s*,\s*)?(?:\{[^{}]*\}|\*(?:\s+as\s+[\w$]+)?|[\w$]+))\s*from\s*['"]([^'"]+)['"]/gm
   let m
   while ((m = re.exec(text))) {
     const clause = m[1]

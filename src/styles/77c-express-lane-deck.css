@@ -129,9 +129,9 @@
   font-weight: var(--w-bold);
 }
 .xl-deck__runner--scored .xl-deck__paper {
-  border-color: var(--field);
+  border-color: var(--accent-positive);
   box-shadow:
-    0 0 0 1px var(--field),
+    0 0 0 1px var(--accent-positive),
     0 2px 6px rgb(0 0 0 / 0.35);
 }
 .xl-deck__runner--out .xl-deck__paper {

@@ -12,7 +12,7 @@ import { LinkScope } from '../../lib/nav.jsx'
 import { useNav, useRouteLink } from '../../lib/nav.js'
 import { identityVersion } from '../../lib/identity/overlay.js'
 import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../../lib/headerTheme.js'
-import { humanDate } from '../../lib/dates.js'
+import { humanDate, isYearView } from '../../lib/dates.js'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { TeamLink } from '../../components/team/TeamLink.jsx'
@@ -231,7 +231,7 @@ export function TeamHubShell({
                 {record.rank && record.div && (
                   <span className="team-hub__div">{rankText(record.rank)} · {record.div}</span>
                 )}
-                {asOf && <em>· entering {humanDate(asOf)}</em>}
+                {asOf && !isYearView(asOf) && <em>· entering {humanDate(asOf)}</em>}
               </p>
             )}
             {manager && (
@@ -315,7 +315,7 @@ export function TeamHubShell({
             wrong: "View as of a date" invites the reader to date a page that
             will not date. Dating the ledger for real would need Cot's contract
             HISTORY, which the feed does not carry. */}
-        {datable && <AsOfBanner asOf={asOf} sportId={sportId} />}
+        {datable && !isYearView(asOf) && <AsOfBanner asOf={asOf} sportId={sportId} />}
       </div>
     </LinkScope>
   )

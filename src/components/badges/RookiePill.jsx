@@ -9,7 +9,7 @@ import { Pill } from '../ui/control/Pill.jsx'
 export function RookiePill({ active }) {
   if (!active) return null
   return (
-    <Pill ink="--field" title="Rookie">
+    <Pill ink="--accent-positive" title="Rookie">
       <span className="rookie__full">ROOKIE</span>
       <span className="rookie__short">R</span>
     </Pill>

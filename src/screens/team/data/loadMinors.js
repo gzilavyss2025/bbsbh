@@ -126,6 +126,9 @@ export async function loadMinors(id, asOf, src = DIRECT) {
   const sportId = team.sport?.id ?? 1
   const isMilb = sportId !== 1
   const season = seasonOf(asOf, sportId)
+  // A season already over: the prospect board, Horizon and depth chart know only today's org, so
+  // none of them loads (#2593). Affiliates are read by season and stay.
+  const pastSeason = season < seasonOf(null, sportId)
   // The MLB parent's own id — same value whether this page IS the parent or
   // one of its affiliates (the parent org rides along on a MiLB team's /teams
   // response). Every prospect belongs to the org, not to one specific
@@ -175,7 +178,7 @@ export async function loadMinors(id, asOf, src = DIRECT) {
   if (orgId) {
     affiliateById.set(orgId, { id: orgId, sportId: 1, name: isMilb ? team.parentOrgName : team.name })
   }
-  const orgProspectRows = orgId ? orgProspectsForTeam(prospectsSnapshot.orgProspects, orgId) : []
+  const orgProspectRows = orgId && !pastSeason ? orgProspectsForTeam(prospectsSnapshot.orgProspects, orgId) : []
   // This org's combined season stats pool (combineToPool, statsLevels.js) —
   // two jobs share it. Roster membership (above) still misses anyone not on
   // ANY org 40-man roster right now (released, a stint between assignments,
@@ -259,13 +262,14 @@ export async function loadMinors(id, asOf, src = DIRECT) {
   // league-wide snapshot RehabPage reads — a rehabbing player is a real
   // fact about a game he's about to appear in, not a score, so it stays
   // open like the rest of this tab.
-  const milestones = orgId ? (rehabSnapshot.players ?? []).filter((p) => p.orgId === orgId) : []
+  const milestones = orgId && !pastSeason ? (rehabSnapshot.players ?? []).filter((p) => p.orgId === orgId) : []
   const horizon = { promotionWatch: promotionWatchFrom(prospects), milestones }
   const depthChart = buildDepthChart(prospects)
 
   return {
     team,
     season,
+    pastSeason,
     sportId,
     isMilb,
     orgId,

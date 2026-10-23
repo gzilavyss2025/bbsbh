@@ -22,8 +22,8 @@ import { auditFence, fenceDistanceAt, CF_TOLERANCE_FT } from '../src/lib/ballpar
 import { BALLPARKS, ballparkFor } from '../src/lib/ballpark/ballparkData.js'
 import { WALLS } from '../src/lib/ballpark/ballparkFields.js'
 import { buildFieldGeometry, diagramInput, HOME } from '../src/lib/ballpark/ballparkGeometry.js'
-import { clipToFoulLines, fenceProblems, heightAt } from '../src/lib/ballpark/layout/fenceShape.js'
-import { FIELDS } from '../src/lib/ballpark/layout/fences.js'
+import { bearing, clipToFoulLines, fenceProblems, heightAt } from '../src/lib/ballpark/layout/fenceShape.js'
+import { FIELDS, threePointWall } from '../src/lib/ballpark/layout/fences.js'
 import { checkLayers } from '../scripts/lib/ballpark/field-svg.mjs'
 
 const layout = (q) => resolveBallparkLayout(q)?.configurationId ?? null
@@ -70,7 +70,10 @@ test('a relocated club does not take its old park with it', () => {
 })
 
 test('a venue with no record resolves to null, so callers say "not on file"', () => {
-  // The Rays' 2025 season at George M. Steinbrenner Field (venue 2523).
+  // Hops Ballpark (venue 7256) posts no distance at all, so nothing can be drawn.
+  assert.equal(resolveBallparkLayout({ venueId: 7256, gameDate: '2026-05-01' }), null)
+  // The Rays' 2025 season at Steinbrenner Field (venue 2523): a minor-league
+  // record covers the imported season onward, so an older game gets nothing.
   assert.equal(resolveBallparkLayout({ venueId: 2523, gameDate: '2025-05-01' }), null)
   // A park no source covers, by name.
   assert.equal(resolveBallparkLayout({ venueName: 'Nowhere Field' }), null)
@@ -78,7 +81,7 @@ test('a venue with no record resolves to null, so callers say "not on file"', ()
   assert.equal(layout({ venueName: 'Louisville Slugger Field' }), 'milb-2724')
   assert.equal(resolveBallparkLayout({}), null)
   // A venue id wins over a name: a neutral site is its own venue.
-  assert.equal(resolveBallparkLayout({ venueId: 2523, venueName: 'Tropicana Field' }), null)
+  assert.equal(resolveBallparkLayout({ venueId: 7256, venueName: 'Tropicana Field' }), null)
 })
 
 test('every configuration id is unique and no two records of a venue overlap', () => {
@@ -109,9 +112,11 @@ test('every seed reference exists and every trace is used once at most', () => {
 test('every drawn outline passed its audit', () => {
   for (const l of allBallparkLayouts()) {
     if (!l.geometry.fence) continue
-    assert.ok(l.audit.pass, l.configurationId)
     // A minor-league outline is checked only against posted signs: an estimate.
+    // A three-point wall has no audit at all: its gaps are interpolated.
     const kind = l.provenance.fence?.kind
+    if (l.audit) assert.ok(l.audit.pass, l.configurationId)
+    else assert.equal(kind, 'milb', `${l.configurationId}: only a three-point wall goes unaudited`)
     assert.equal(l.quality.fence, kind === 'milb' ? 'estimated' : 'audited', l.configurationId)
   }
 })
@@ -289,10 +294,40 @@ test('a minor-league park resolves only from the imported season on', () => {
 })
 
 test('a minor-league venue with nothing to draw stays "not on file"', () => {
+  // Hops Ballpark (venue 7256): no Gameday drawing and no posted distance.
+  assert.equal(resolveBallparkLayout({ venueId: 7256, gameDate: '2026-06-01' }), null)
+})
+
+test('a park that posts only its lines and center draws a smooth estimated wall (#2612)', () => {
   // Roger Dean Chevrolet Stadium (venue 2520) hosts two clubs; it resolves by
-  // venue, so both clubs get the same answer: no outline, no five posted signs.
-  assert.equal(resolveBallparkLayout({ venueId: 2520, gameDate: '2026-06-01' }), null)
-  assert.equal(resolveBallparkLayout({ venueName: 'Roger Dean Chevrolet Stadium', gameDate: '2026-06-01' }), null)
+  // venue, so both clubs get the same answer. It posts 335 / 400 / 375 and no gaps.
+  for (const q of [{ venueId: 2520 }, { venueName: 'Roger Dean Chevrolet Stadium' }]) {
+    const l = resolveBallparkLayout({ ...q, gameDate: '2026-06-01' })
+    assert.equal(l.configurationId, 'milb-2520')
+    assert.equal(l.quality.fence, 'estimated')
+    assert.equal(l.audit, null)
+    assert.equal(l.provenance.fence.kind, 'milb')
+    assert.ok(l.geometry.fence.length > 20, 'a curve, not a few straight runs')
+  }
+})
+
+test('threePointWall hits the three signs, ends on the foul lines and has no kink', () => {
+  const posted = { lf: 335, lc: null, cf: 400, rc: null, rf: 375 }
+  const wall = threePointWall(posted)
+  const radius = (p) => Math.hypot(p[0], p[1])
+  assert.ok(Math.abs(radius(wall[0]) - 335) < 0.5)
+  assert.ok(Math.abs(radius(wall.at(-1)) - 375) < 0.5)
+  assert.ok(Math.abs(radius(wall[Math.floor(wall.length / 2)]) - 400) < 0.5)
+  assert.ok(Math.abs(bearing(wall[0]) + 45) < 0.1)
+  assert.ok(Math.abs(bearing(wall.at(-1)) - 45) < 0.1)
+  assert.deepEqual(fenceProblems(clipToFoulLines(wall)), [])
+  // Smooth: the second difference of the radius never swings sign or jumps.
+  const r = wall.map(radius)
+  const d2 = r.slice(2).map((v, i) => v - 2 * r[i + 1] + r[i])
+  assert.ok(d2.every((v) => Math.abs(v - d2[0]) < 0.5), 'one steady curvature')
+  // Five posted signs, or fewer than three, are not this fallback's job.
+  assert.equal(threePointWall({ lf: 330, lc: 375, cf: 400, rc: 375, rf: 330 }), null)
+  assert.equal(threePointWall({ lf: 330, lc: null, cf: null, rc: null, rf: 330 }), null)
 })
 
 test('every stored minor-league outline fits its posted signs and is a valid fence', () => {
@@ -300,7 +335,8 @@ test('every stored minor-league outline fits its posted signs and is a valid fen
   assert.ok(venues.length > 50, 'the import covers the minor-league parks')
   for (const [id, v] of venues) {
     if (!v.fence) {
-      assert.ok(Object.values(v.posted).every(Number.isFinite), `${id}: kept only for its five posted distances`)
+      const { lf, cf, rf } = v.posted
+      assert.ok(Object.values(v.posted).every(Number.isFinite) || [lf, cf, rf].every(Number.isFinite), `${id}: kept only for its posted distances`)
       continue
     }
     assert.ok(v.audit.pass, id)

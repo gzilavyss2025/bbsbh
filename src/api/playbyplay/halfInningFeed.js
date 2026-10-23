@@ -38,6 +38,7 @@ import { scorebookCode } from './scorebookCode.js'
 import { selectPlayBattedBall } from '../hitchart.js'
 import {
   interruptedCode,
+  pickoffCaughtStealingBase,
   legAdvanceCode,
   NATURAL_BASE,
   playErrorCredit,
@@ -550,7 +551,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         ...scorebookCode(play, batterRunner),
         // Where this ball in play came down, or null for a plate appearance
         // that never put one there (a strikeout, a walk) and for a park that
-        // tracked no coordinates. The diamond on the card opens it as a flight
+        // sent no coordinates (rare, even in MiLB). The diamond on the card opens it as a flight
         // over the field; `venue` rides along because the drawing is a
         // PARTICULAR park's, and the card that reads this is handed the ball
         // and nothing else.
@@ -760,7 +761,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         if (origin == null) continue // no known origin card — nothing to attach to
         entries[origin].outNumber = r.movement.outNumber
         // Where and how he was cut down, for the diamond's tick + out code.
-        entries[origin].outAt = BASE_NUM[r.movement.outBase] ?? null
+        entries[origin].outAt =
+          pickoffCaughtStealingBase(r.details?.eventType) ?? BASE_NUM[r.movement.outBase] ?? null
         entries[origin].outCode = runnerOutCode(play, r)
       }
     }
@@ -837,7 +839,12 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         if (base <= (progress.get(canon) ?? 0)) continue
         const rEt = r.details?.eventType
         const code = legAdvanceCode(play, r)
-        const slot = rEt && NO_SLOT_CREDIT_EVENT_TYPES.has(rEt) ? null : batterSlot
+        // A leg born on a mid-at-bat action event (a steal, then an error on
+        // the same throw) is the runner's doing, not the batter's: playIndex
+        // points at a non-pitch playEvent. An error on the batted ball points
+        // at the pitch and still credits him.
+        const midAtBat = play.playEvents?.[r.details?.playIndex]?.isPitch === false
+        const slot = (rEt && NO_SLOT_CREDIT_EVENT_TYPES.has(rEt)) || midAtBat ? null : batterSlot
         progress.set(canon, base)
         // A run (base 4) records whether it was earned — false only when the
         // feed explicitly says so, so a clean run is never mistakenly circled.

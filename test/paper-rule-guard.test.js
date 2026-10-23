@@ -26,7 +26,7 @@ function run(css) {
   }
 }
 
-const TOKENS = ['--paper-0', '--paper-1', '--paper-2', '--paper-3', '--paper-9', '--rule', '--rule-soft', '--rule-grid']
+const TOKENS = ['--field', '--field-deep', '--paper-0', '--paper-1', '--paper-2', '--paper-3', '--paper-9', '--rule', '--rule-soft', '--rule-grid']
 
 test('a read of each primitive fails and names the token', () => {
   for (const t of TOKENS) {

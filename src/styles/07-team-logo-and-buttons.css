@@ -241,12 +241,12 @@
 .gamecard__readypill--complete {
   padding: 1px var(--space-2);
   border-radius: 0;
-  border: var(--bw-heavy) solid var(--field-deep);
+  border: var(--bw-heavy) solid var(--accent-positive-deep);
   background: var(--field-soft);
   font-family: var(--font-display);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
-  color: var(--field-deep);
+  color: var(--accent-positive);
 }
 
 .gamecard__readypill-pips {
@@ -274,8 +274,8 @@
 }
 
 .pip--on rect {
-  fill: var(--field);
-  stroke: var(--field-deep);
+  fill: var(--accent-positive);
+  stroke: var(--accent-positive-deep);
 }
 .pip--on .pip__tick {
   opacity: 1;

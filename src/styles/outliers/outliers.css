@@ -200,8 +200,5 @@
   color: var(--text-heading);
   font-family: var(--font-body);
   font-size: var(--fs-small);
-  text-decoration: underline dotted;
-  text-decoration-thickness: var(--bw-hair);
-  text-underline-offset: 3px;
   cursor: pointer;
 }

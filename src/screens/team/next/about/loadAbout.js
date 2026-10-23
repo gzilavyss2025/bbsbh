@@ -1,6 +1,6 @@
-import { fetchMilbAlumni } from '../../../../api/team.js'
+import { fetchMilbAlumni, fetchSeasonVenue } from '../../../../api/team.js'
 import { fetchAttendance, attendanceRatesFor } from '../../../../api/attendance.js'
-import { franchiseFor } from '../../../../api/franchiseHistory.js'
+import { franchiseFor, venueForSeason } from '../../../../api/franchiseHistory.js'
 import { pennantsBefore, pennantsFor } from '../../../../api/history/leaguePennants.js'
 import { loadJerseys } from '../../data/loadNumbers.js'
 import { seasonOf } from '../../data/shared.js'
@@ -15,7 +15,8 @@ const NO_JERSEYS = { jerseyCombos: [], homeRecord: { wins: 0, losses: 0 }, awayR
 export async function loadAbout(team, asOf) {
   const isMilb = (team.sport?.id ?? 1) !== 1
   const season = seasonOf(asOf, team.sport?.id ?? 1)
-  const [milbAlumni, attendanceData, franchise, pennants, manager, jerseys] = await Promise.all([
+  const past = season < seasonOf(null, team.sport?.id ?? 1)
+  const [milbAlumni, attendanceData, franchise, pennants, manager, jerseys, seasonVenue] = await Promise.all([
     isMilb ? fetchMilbAlumni(team.id) : Promise.resolve({ minGames: null, players: [] }),
     isMilb ? Promise.resolve(null) : fetchAttendance(),
     isMilb ? Promise.resolve(null) : franchiseFor(team.id),
@@ -23,6 +24,7 @@ export async function loadAbout(team, asOf) {
     SHARED.fetchManager(team.id, season),
     // One failed jersey read must not blank the ballpark and franchise cards.
     loadJerseys(team, asOf, SHARED).catch(() => NO_JERSEYS),
+    past ? fetchSeasonVenue(team.id, season) : Promise.resolve(null),
   ])
   return {
     milbAlumni,
@@ -30,10 +32,14 @@ export async function loadAbout(team, asOf) {
     pennants: pennantsBefore(pennants, asOf ? Number(asOf.slice(0, 4)) : undefined),
     manager,
     jerseys,
+    // The park of a past season, as the API names it for that year, else the franchise spans'. Null
+    // when neither knows: the card then shows no park, never today's. Undefined (this season) keeps
+    // the club's current park.
+    venue: past ? seasonVenue ?? venueForSeason(franchise?.spans, season) : undefined,
     attendance: isMilb ? null : attendanceRatesFor(attendanceData, team.id, season),
   }
 }
 
 // The jump-bar badge: the cards the band drew. The ballpark draws for any club with a venue.
 export const aboutCount = (d, team) =>
-  [team.venue?.name, d.franchise?.spans?.length, d.pennants?.length, d.jerseys.jerseyCombos.length || d.jerseys.homeRecord, d.milbAlumni?.players?.length].filter(Boolean).length
+  [(d.venue === undefined ? team.venue : d.venue)?.name, d.franchise?.spans?.length, d.pennants?.length, d.jerseys.jerseyCombos.length || d.jerseys.homeRecord, d.milbAlumni?.players?.length].filter(Boolean).length

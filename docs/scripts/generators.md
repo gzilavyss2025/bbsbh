@@ -1938,6 +1938,14 @@ Re-run only to fold in a new season.
   The same run also writes `public/data/xba-table/{season}.json` from
   `estimated_ba_using_speedangle`, after a per-ball check against Savant (`XBA_GATE`: mean
   gap at most 0.008, at most 2% above 0.05, none above 0.5); a failed check writes no xBA table.
+- `gen-franchise-hof.mjs` (in `scripts/franchise/`) → `public/data/franchise-hof/{teamId}.json` — each of the
+  30 MLB clubs' Hall of Famers: "inducted as" the club (the plaque, from `awards/MLBHOF/recipients`) and
+  "also played here" with the seasons (`people/{id}` `yearByYear`, about 355 calls paced six at a
+  time) (#2597). **Hand-run** after each induction (late July):
+  `node scripts/franchise/gen-franchise-hof.mjs`. Strict: a failed call aborts. A recipient with no
+  `team` or no playing stats (an executive, a Negro Leagues pioneer) never stops the run. Keyed by the
+  current team id. 55 KB in all. The files carry no clock, so a re-run on the same feeds writes the same
+  bytes. The pure half is `scripts/lib/franchise/hof.mjs`. Reader: `src/api/history/franchiseHof.js`.
 - `gen-family-ties.mjs` → `public/data/family-ties/{NN}.json` — family links between
   players, from Retrosheet's `relatives.csv`, joined to MLBAM ids through the Chadwick
   register (ADR-0100). **Hand-run, NOT on a cron**: re-run only after Retrosheet
@@ -2015,6 +2023,16 @@ Re-run only to fold in a new season.
   and `topojson-simplify` are devDependencies, and only this script uses them. The pure half is
   `scripts/lib/from/zones.mjs`. The reader comes with the picker page.
 
+- `gen-franchise-leaders.mjs` (in `scripts/franchise/`) → `public/data/franchise-leaders/{teamId}.json` — each of
+  the 30 MLB clubs' career and single-season leaders in 26 categories, regular season, the feed's top
+  ten with ties kept (#2596). **Hand-run**, after the regular season ends:
+  `node scripts/franchise/gen-franchise-leaders.mjs [--through 2026]`. The feed cannot be cut by
+  season, so a run made mid-season holds that season so far; `--through` records the season the run
+  was made after (default: this year from October on). About 1,560 calls to `stats/leaders`
+  (`statType=career|statsSingleSeason`, paced six at a time, strict: a failed call aborts); not
+  `teams/{id}/leaders`, which ignores `statType`. Keyed by the current team id. 1.1 MB in all. The files
+  carry no clock, so a re-run on the same feed writes the same bytes. The pure half is
+  `scripts/lib/franchise/leaders.mjs`. Reader: `src/api/history/franchiseLeaders.js`.
 - `gen-team-seasons.mjs` → `public/data/team-seasons.json` — one roster per MLB
   team-season, for "six degrees of teammates" (ADR-0100). Source: Retrosheet's
   `allplayers.csv` (inside `basiccsvs.zip`, 741 MB: run `unzip -l`, extract only that
@@ -2033,6 +2051,30 @@ Re-run only to fold in a new season.
   (the newest nickname for the code: Brooklyn 1897 reads "Dodgers 1897"). 816 KB, 248 KB gzipped. No clock: a re-run writes
   the same bytes. The pure half is `scripts/lib/open-data/team-seasons.mjs`. Reader:
   `src/api/teamSeasons.js`.
+- `gen-played-for-both.mjs` → `public/data/played-for-both/{a}-{b}.json` — for each of the 435
+  pairs of MLB clubs (ids ascending), every player with an MLB game for each, for the lineup
+  page's "Played for both" card (#2579, ADR-0100). Reads `public/data/team-seasons.json` and
+  `public/data/war-history/`, plus the register's names. **Hand-run, NOT on a cron**: re-run after
+  `gen-team-seasons.mjs` has a new season. Nothing in it downloads: fetch the 16 register
+  `people-*.csv` files, each into its own new, empty folder OUTSIDE the repo, then run
+  `node scripts/gen-played-for-both.mjs <people-*.csv ...>` (`--out <dir>` writes elsewhere).
+  Shape: `{ credit, throughSeason, teams: [a, b], top: [up to 12 ids, best score first],
+  rows: [[id, "First Last", [seasons with a], [seasons with b]]] }`, rows most recent first. A
+  franchise keeps its teamId, so every old Retrosheet code counts for the current club
+  (`CLUB_CODES`); the Federal League and the 1897-1899 NL clubs are dropped. The score for `top` is
+  career WAR (all bat and pit seasons) times `0.4 + 0.6 * 0.9^(throughSeason - last season with
+  either club)`. Measured 2026-10-23: 3.2 MB in all, the smallest list 46 players, the largest 327
+  (113-138, 18 KB). No clock: a re-run writes the same bytes. The pure half is
+  `scripts/lib/open-data/played-for-both.mjs`. The reader is slice 2 of #2579.
+- `gen-franchise-ledger.mjs` → `public/data/franchise-ledger/{teamId}.json` — one row per season for each of
+  the 30 MLB clubs, 1901 to the last complete season (#2595): name and league, W-L, games back,
+  division and league rank, runs for and against, managers, the postseason result, a note for 1981,
+  1994 and 2020. **Hand-run**: `node scripts/gen-franchise-ledger.mjs [--through 2025]`; re-run only
+  to fold in a new season. Reads `standings` and `schedule/postseason` once a season (about 250
+  calls, strict: a failed call aborts), `franchise-history/`, `manager-history/` and one batch of
+  `people` calls for the managers' names. Keyed by the current team id. The files carry no clock, so
+  a re-run with no new season writes the same bytes. 636 KB in all (the largest, 147, 28 KB). The
+  pure half is `scripts/lib/franchise/ledger.mjs`. Reader: `src/api/history/franchiseLedger.js`.
 - `gen-pitch-starts.mjs` → `public/data/pitch-arsenal-starts/{season}/{NN}.json` and `{NN}.mph.json` — the per-start
   pitch mix for a season before 2026, MLB only (ADR-0111). Run by hand, one season at a time:
   `node scripts/gen-pitch-starts.mjs --season=YYYY` (required), then the same command with `--verify`. It

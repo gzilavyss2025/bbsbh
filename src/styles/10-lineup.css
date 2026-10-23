@@ -118,7 +118,7 @@
 .lineup__pos,
 .roster__pos {
   font-family: var(--font-display);
-  color: var(--field);
+  color: var(--accent-positive);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);

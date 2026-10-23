@@ -106,7 +106,7 @@
 .target__fill {
   position: absolute;
   inset: 0 auto 0 0;
-  background: color-mix(in srgb, var(--field) 70%, transparent);
+  background: color-mix(in srgb, var(--accent-positive) 70%, transparent);
   border-radius: var(--radius-pill);
 }
 .target__tick {
