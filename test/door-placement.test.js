@@ -85,8 +85,10 @@ test('an inline door is ink with a dotted rule, and reads no green', () => {
     assert.match(body, /color:\s*var\(--text-heading\)/, `${selector} draws in ink`)
     assert.doesNotMatch(body, /accent-hover|--field|accent-positive/, `${selector} reads no green`)
   }
-  const inline = ruleBody(css, '.door--inline')
-  assert.match(inline, /text-decoration:\s*underline dotted/, 'the inline door carries a dotted rule')
+  // The dotted rule itself is the one shared link rule (#2528); the inline door is named in it.
+  const shared = ruleBody(css, '.gnotes__pdf a') // the last selector of the grouped rule
+  assert.ok(shared, 'the shared link rule names the inline door')
+  assert.match(shared, /text-decoration:\s*underline dotted/, 'the inline door carries a dotted rule')
 })
 
 // A door in a band takes the band's own ink. The band's ink is checked against its

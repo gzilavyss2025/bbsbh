@@ -509,7 +509,4 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
-  text-decoration: underline dotted;
-  text-decoration-thickness: var(--bw-hair);
-  text-underline-offset: 3px;
 }

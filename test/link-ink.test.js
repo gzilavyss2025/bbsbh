@@ -53,8 +53,10 @@ const TEXT_LINKS = [
   ['outliers/outliers.css', '.outl__name'],
   ['04-site-bar.css', '.tally-cl-link'],
 ]
-// A door in a ruled box: the box stays, the text is ink.
-const BOXED_DOORS = [
+// A door in a ruled box: the box stays, the text is ink. The ink comes from one rule (#2613).
+const BOXED_DOORS = [['system/door.css', '.door--boxed']]
+// Placement only: the four hosts that seat a boxed door draw no colour of their own.
+const BOXED_HOSTS = [
   ['25-wide-layout.css', '.wirerail__door'],
   ['78-offseason.css', '.oseason__door'],
   ['78-offseason.css', '.srecord__door'],
@@ -78,7 +80,26 @@ test('a text link is ink with a dotted rule', () => {
     assert.ok(bodies.length, `${selector} should have a rule in ${file}`)
     const own = bodies.join(';')
     assert.match(own, /color:\s*var\(--text-heading\)/, `${selector} draws in ink`)
-    assert.match(own, /text-decoration:\s*underline dotted/, `${selector} carries the dotted rule`)
+    if (!SHARED_RULE.includes(selector)) assert.match(own, /text-decoration:\s*underline dotted/, `${selector} carries the dotted rule`)
+  }
+})
+
+// #2528: the dotted rule is drawn in one place. A class listed here owns no copy of it.
+const SHARED_RULE = [
+  '.door--inline', '.door__label', '.plink.lsp__seeall', '.plink.foulcard__door', '.pcard__gamelink', '.outl__name', '.gnotes__pdf a',
+]
+test('the dotted link rule has one source in system/door.css', () => {
+  const shared = rulesOf(readCss('system/door.css')).find((r) => SHARED_RULE.every((s) => r.selectors.includes(s)))
+  assert.ok(shared, 'door.css has one rule naming every collapsed link')
+  assert.match(shared.body, /text-decoration:\s*underline dotted/)
+  assert.match(shared.body, /text-decoration-thickness:\s*var\(--bw-hair\)/)
+  assert.match(shared.body, /text-underline-offset:\s*3px/)
+  for (const [file, selector] of [
+    ['lineup-next/starter.css', '.plink.lsp__seeall'], ['26-player-page.css', '.plink.foulcard__door'],
+    ['pitcher-card/card.css', '.pcard__gamelink'], ['report/game-notes.css', '.gnotes__pdf a'],
+    ['outliers/outliers.css', '.outl__name'],
+  ]) {
+    for (const body of bodiesFor(file, selector)) assert.doesNotMatch(body, /text-underline-offset/, `${selector} keeps its own copy`)
   }
 })
 
@@ -89,6 +110,16 @@ test('a boxed door and a text control are ink', () => {
     const cs = bodies.flatMap(colours)
     assert.ok(cs.some((c) => /var\(--text-heading\)/.test(c)), `${selector} draws in ink`)
     for (const c of cs) assert.doesNotMatch(c, GREEN, `${selector} reads green`)
+  }
+})
+
+test('a boxed door host keeps placement, never ink or type', () => {
+  for (const [file, selector] of BOXED_HOSTS) {
+    const bodies = bodiesFor(file, selector)
+    assert.ok(bodies.length, `${selector} should have a rule in ${file}`)
+    for (const body of bodies) {
+      assert.doesNotMatch(body, /(^|[;\s])color:|font-(family|size|weight)|letter-spacing|border:|border-radius|min-height/, `${selector} restates the boxed door's dress`)
+    }
   }
 })
 

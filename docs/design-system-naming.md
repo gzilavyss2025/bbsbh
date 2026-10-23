@@ -203,6 +203,14 @@ on touch has no hover. Four consequences:
   turned green draws the dotted rule instead. The static guides at `/learn` follow too
   (`public/learn.css`, ADR-0053): a prose link is ink with the dotted rule, solid on
   hover. Their call-to-action button keeps its green fill, as a button does.
+- **One source for the dotted rule (#2528).** `system/door.css` has one grouped rule that
+  draws it (`text-decoration: underline dotted`, hair thickness, 3px offset) for
+  `.door--inline`, `.door__label`, `.lsp__seeall`, `.foulcard__door`, `.pcard__gamelink`,
+  `.outl__name` and `.gnotes__pdf a`; each keeps only its placement and type. A door in a
+  ruled box wears `.door--boxed` (#2613) and its four hosts keep placement. Three copies stay
+  on purpose: `.tally-cl-link` (it fights Clerk's own styles, so it needs `!important`),
+  `.photostrip__viewall:hover` (the rule shows on hover only, and no door rests with it off),
+  and `public/learn.css` (outside the bundle, so it keeps its own single copy).
 - Green stays where it means "good": a win, a positive delta, an "add" chip, a position
   label, and the focus ring. The token that coloured links, `--accent-link`, is
   `--accent-hover` now (2026-10-22): the green a control takes under a pointer, such as the
