@@ -1182,7 +1182,7 @@ test('T8: the Table pins the club column; the namespace keeps only its width and
   }
   assert.equal(decl(t8Rule('30-standings.css', '.clubtable--full .team'), 'min-width'), '116px', 'the pinned club column keeps its width')
   // The favorite row is opaque under the pin: one tint, mixed into the card, paints every cell of the row.
-  assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), '--table-pin'), 'color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card))')
+  assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), '--table-pin'), 'color-mix(in srgb, var(--fav-accent, var(--accent-fallback)) 10%, var(--surface-card))')
   assert.equal(decl(t8Rule('29-team-transactions.css', '.clubtable tr.is-me td'), 'background'), 'var(--table-pin)')
   // The wild card group row spans the board; its one cell is the first, so it keeps its page ground under the pin.
   assert.equal(decl(t8Rule('31-wild-card.css', '.wc-grouphead td'), '--table-pin'), 'var(--bg-page)')
@@ -1195,7 +1195,7 @@ test('T8: the club table keeps its name cell, its tones and the board\'s column 
   assert.equal(decl(cell, 'font-family'), 'var(--font-body)', 'a club name is words, not a mono figure')
   assert.equal(decl(cell, 'text-transform'), 'uppercase')
   assert.equal(decl(t8Rule(core, '.clubtable td.team > *'), 'display'), 'flex', 'the logo and the name sit in a row')
-  assert.equal(decl(t8Rule(core, '.clubtable tr.is-me .team'), 'color'), 'var(--fav-accent, var(--field-deep))')
+  assert.equal(decl(t8Rule(core, '.clubtable tr.is-me .team'), 'color'), 'var(--fav-accent, var(--accent-fallback-deep))')
   assert.equal(decl(t8Rule(core, '.clubtable td.standings__diff--positive'), 'color'), 'var(--accent-positive)')
   assert.equal(decl(t8Rule(core, '.clubtable td.standings__diff--negative'), 'color'), 'var(--accent-negative)')
   assert.equal(decl(t8Rule(core, '.clubtable td.is-clinched'), 'font-weight'), 'var(--w-semibold)')

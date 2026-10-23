@@ -49,7 +49,7 @@
 }
 
 .pendots__dot--fresh {
-  background: var(--field);
+  background: var(--accent-positive);
 }
 
 /* Half-filled, so it is not read as a paler green at a glance or in
@@ -103,9 +103,9 @@
 }
 
 .daystrip__day--light {
-  color: var(--field-deep);
+  color: var(--accent-positive-deep);
   background: var(--field-soft);
-  border-color: var(--field);
+  border-color: var(--accent-positive);
 }
 
 .daystrip__day--moderate {
@@ -167,7 +167,7 @@
 
 .daystrip-key__swatch--light {
   background: var(--field-soft);
-  border-color: var(--field);
+  border-color: var(--accent-positive);
 }
 
 .daystrip-key__swatch--moderate {
@@ -271,7 +271,7 @@
   inset-inline-start: 0;
   top: 2px;
   height: 5px;
-  background: var(--field-deep);
+  background: var(--accent-positive-deep);
 }
 
 .bullets__row--tripped .bullets__bar {

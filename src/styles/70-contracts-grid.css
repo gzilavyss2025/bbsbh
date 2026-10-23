@@ -40,7 +40,7 @@
   border-top: 3px solid var(--border-rule);
 }
 .ctr__tile--good {
-  border-top-color: var(--field);
+  border-top-color: var(--accent-positive);
 }
 .ctr__tilelabel {
   display: block;

@@ -107,7 +107,7 @@
 .prospect__fill {
   position: absolute;
   inset: 0 auto 0 0;
-  background: var(--field);
+  background: var(--accent-positive);
   border-right: 2px solid var(--text-heading);
 }
 

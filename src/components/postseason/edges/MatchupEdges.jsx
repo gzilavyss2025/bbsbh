@@ -16,7 +16,7 @@ import { Card } from '../../ui/frame/Card.jsx'
 // A hitter edge is the field's green, a pitcher edge the clay: a soft ground with
 // a deep ink, and the word says which.
 const KIND = {
-  hitter: { word: 'Hitter', style: pillSolidStyle({ ground: 'var(--field-soft)', text: 'var(--field-deep)' }) },
+  hitter: { word: 'Hitter', style: pillSolidStyle({ ground: 'var(--field-soft)', text: 'var(--accent-positive-deep)' }) },
   pitcher: { word: 'Pitcher', style: pillSolidStyle({ ground: 'var(--clay-soft)', text: 'var(--clay-deep)' }) },
 }
 

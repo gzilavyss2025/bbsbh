@@ -24,11 +24,11 @@
      board); the rest size to a two-digit number. */
   grid-template-columns: auto minmax(82px, auto) repeat(3, auto);
   overflow: hidden;
-  border: 2px solid var(--field-deep);
+  border: 2px solid var(--accent-positive-deep);
   /* Every grid cell is a real element (each row runs the full five
      columns), so this only shows through the 1px cell borders — kept at the
      deep field tone that grounds the whole plate. */
-  background: var(--field-deep);
+  background: var(--accent-positive-deep);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-ink) 28%, transparent);
 }
 
@@ -67,7 +67,7 @@
    old single-row header, now spanning three of the five columns. */
 .loader__colhead {
   padding: 0 var(--space-1h);
-  background: var(--field);
+  background: var(--accent-positive);
   color: var(--text-on-ink);
 }
 
@@ -83,18 +83,18 @@
 .loader__team {
   place-items: center start;
   padding: 0 var(--space-1h);
-  background: var(--field-deep);
+  background: var(--accent-positive-deep);
   color: var(--text-on-ink);
 }
 
 .loader__score {
-  background: var(--field-deep);
+  background: var(--accent-positive-deep);
   color: var(--text-on-ink);
 }
 
 .loader__plate-window {
   overflow: hidden;
-  background: var(--field-deep);
+  background: var(--accent-positive-deep);
   color: var(--text-on-ink);
 }
 
@@ -103,7 +103,7 @@
    linescore, with no border-right of its own (the container edge closes it). */
 .loader__blank {
   border-right: 0;
-  background: var(--field-deep);
+  background: var(--accent-positive-deep);
 }
 
 .loader__plate {
@@ -487,7 +487,7 @@
   background: var(--surface-card);
   font-size: var(--fs-small);
   line-height: var(--lh-solid);
-  color: var(--pin-accent, var(--field));
+  color: var(--pin-accent, var(--accent-fallback));
 }
 
 /* ★'s glyph box is bounding-box-centered by the flex centering above, but a
@@ -610,7 +610,7 @@
 .gamecard--pinned {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
+    color-mix(in srgb, var(--pin-accent, var(--accent-fallback)) 16%, var(--surface-card)),
     var(--surface-card) 70%
   );
 }

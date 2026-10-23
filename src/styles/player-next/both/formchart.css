@@ -195,7 +195,7 @@
   border-left: var(--bw-heavy) solid var(--border-stamped);
 }
 .fstretch__seg[data-i='0'] {
-  background: var(--field);
+  background: var(--accent-positive);
   color: var(--text-on-ink);
 }
 .fstretch__seg[data-i='1'] {

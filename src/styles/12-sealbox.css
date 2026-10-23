@@ -405,7 +405,7 @@
   stroke-width: 1.6;
 }
 .wcall__ink--clay { stroke: var(--clay); fill: var(--clay); }
-.wcall__ink--field { stroke: var(--field); fill: var(--field); }
+.wcall__ink--field { stroke: var(--draw-turf); fill: var(--draw-turf); }
 .wcall__edgeword {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -439,7 +439,7 @@
 .wcall__pill--right {
   --pill-fill: var(--field-soft);
   --pill-edge: transparent;
-  --pill-ink: var(--field);
+  --pill-ink: var(--accent-positive);
 }
 .wcall__arrow {
   color: var(--graphite-soft);
@@ -1521,7 +1521,7 @@
 }
 
 .stat--run .stat__v {
-  color: var(--field-deep);
+  color: var(--accent-positive-deep);
 }
 
 .stat__k {
