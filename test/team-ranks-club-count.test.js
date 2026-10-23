@@ -20,7 +20,10 @@ globalThis.fetch = async (url) => {
     const splits = Array.from({ length: clubs }, (_, i) => ({ team: { id: i === mineAt ? 158 : i === 0 ? 900 : 158 + i }, stat: { runs: 700 - i, era: `${3 + i / 100}` } }))
     body = { stats: [{ splits }] }
   }
-  const ok = !u.startsWith('/data/') || u.endsWith('/data/teams.json')
+  if (u.endsWith('/data/run-value.json')) {
+    body = { season: new Date().getFullYear(), generatedAt: '2026-01-01', players: [{ teamId: 158, name: 'A Player', bat: 5, fld: 1, run: 0, pit: 0 }] }
+  }
+  const ok = !u.startsWith('/data/') || u.endsWith('/data/teams.json') || u.endsWith('/data/run-value.json')
   return { ok, status: ok ? 200 : 404, headers: new Headers(), json: async () => body, text: async () => JSON.stringify(body) }
 }
 
@@ -48,4 +51,12 @@ test('a rank in the bottom third reads bad whatever the club count', async () =>
   const r30 = await loadRanks(158, '2018-12-31')
   assert.equal(r30.batting.find((s) => s.k === 'Runs').tone, '')
   mineAt = 0
+})
+
+// Savant's run values are this season's file: a past season's page must not draw them (#2593).
+test('loadRanks draws no run value card for a past season, and one for the current season', async () => {
+  const past = await loadRanks(158, '2018-12-31')
+  assert.equal(past.runValue, null)
+  const now = await loadRanks(158)
+  assert.equal(now.runValue?.club.teamId, 158)
 })
