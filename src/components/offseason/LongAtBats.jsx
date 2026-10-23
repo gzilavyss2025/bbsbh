@@ -165,7 +165,7 @@ export function LongAtBats({ season }) {
                   {/* The game, at its first lineup page — the same address the
                       slate's own cards build, so it arrives sealed. */}
                   {atBatGamePath(row) && (
-                    <a className="seasonnote__when" {...linkProps(atBatGamePath(row))}>
+                    <a className="door door--boxed seasonnote__when" {...linkProps(atBatGamePath(row))}>
                       {monthDayShort(row.date)}
                       <span className="sr-only"> — open this game</span>
                       <span aria-hidden="true">›</span>
@@ -186,7 +186,7 @@ export function LongAtBats({ season }) {
           {(hidden > 0 || visible > LEAD_ROWS) && (
             <button
               type="button"
-              className="oseason__door"
+              className="door door--boxed oseason__door"
               // The visible words are inside the accessible name, which is what
               // WCAG 2.5.3 asks of a control whose label says more than its
               // text does.

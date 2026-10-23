@@ -83,7 +83,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           {(hidden > 0 || expanded) && (
             <button
               type="button"
-              className="oseason__door"
+              className="door door--boxed oseason__door"
               aria-expanded={expanded}
               onClick={() => setExpanded((open) => !open)}
             >

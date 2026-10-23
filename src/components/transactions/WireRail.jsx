@@ -195,7 +195,7 @@ export function WireRail({ endDate, sportId, onPresence, fitTo, singleDay = fals
       {(hidden > 0 || expanded) && (
         <button
           type="button"
-          className="wirerail__door"
+          className="door door--boxed wirerail__door"
           aria-expanded={expanded}
           onClick={() => setExpanded((open) => !open)}
         >

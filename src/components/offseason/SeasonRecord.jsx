@@ -93,21 +93,21 @@ export function SeasonRecord({ sportId, season, dateStr }) {
         <Cluster gap="base" className="srecord__doors">
           {inward ? (
             <>
-              <a className="srecord__door" {...linkProps('/standings')}>
+              <a className="door door--boxed srecord__door" {...linkProps('/standings')}>
                 Final standings
               </a>
-              <a className="srecord__door" {...linkProps('/postseason-history')}>
+              <a className="door door--boxed srecord__door" {...linkProps('/postseason-history')}>
                 The postseason
               </a>
               {/* The shelf prints final scores. Like the other doors it wears the row's own label, "Opening this shows results.", when the row is labelled (#2508). */}
-              <a className="srecord__door" {...linkProps('/notable')}>
+              <a className="door door--boxed srecord__door" {...linkProps('/notable')}>
                 Notable games
               </a>
             </>
           ) : (
             <>
               <a
-                className="srecord__door"
+                className="door door--boxed srecord__door"
                 href={MILB_STANDINGS}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -119,7 +119,7 @@ export function SeasonRecord({ sportId, season, dateStr }) {
                 <span className="sr-only">opens MiLB.com</span>
               </a>
               <a
-                className="srecord__door"
+                className="door door--boxed srecord__door"
                 href={MILB_POSTSEASON}
                 target="_blank"
                 rel="noopener noreferrer"

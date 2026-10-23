@@ -70,26 +70,8 @@
    page's action is reading the wire, not opening more of it. */
 .oseason__door {
   display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
-  min-height: var(--tap-min);
   margin-top: var(--space-3);
-  padding: 0 var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: none;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-heading);
-}
-.oseason__door:hover,
-.oseason__door:active {
-  background: var(--surface-inset);
 }
 
 /* The wire is silent while it loads and on a failure — a habit that suits a
@@ -782,24 +764,7 @@
    rather than a filled control — the action on this page is the game card
    above, and this row is a way out of the winter, not the point of it. */
 .srecord__door {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--tap-min);
   padding: 0 var(--space-4);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-heading);
-  text-decoration: none;
-}
-.srecord__door:hover,
-.srecord__door:active {
-  background: var(--surface-inset);
 }
 /* The mark that says a link leaves Tally. The words beside it say so too, for
    a reader who cannot see it (SeasonRecord.jsx carries the sr-only text). */
@@ -984,24 +949,12 @@
 .seasonnote__when {
   grid-area: when;
   justify-self: center;
-  display: inline-flex;
-  align-items: center;
   gap: var(--space-1h);
-  min-height: var(--tap-min);
-  padding: 0 var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
+  /* An inset chip at rest, a card wash on hover: the one boxed door that is filled. */
   background: var(--surface-inset);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-heading);
-  text-decoration: none;
 }
-.seasonnote__when:hover,
-.seasonnote__when:active {
+.seasonnote__when:hover:not(:disabled),
+.seasonnote__when:active:not(:disabled) {
   background: var(--surface-card);
 }
 
