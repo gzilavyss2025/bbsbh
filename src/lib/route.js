@@ -135,6 +135,7 @@ import { parseFromRoute } from './from/route.js'
 import { parseScoutRoute } from './scout/route.js'
 import { parseSeasonRoute, seasonPath } from './seasons/route.js'
 import { SPORT_IDS, teamFullName } from './teams.js'
+import { isYearView, yearAsOf } from './dates.js'
 import {
   WINTER_LEAGUES,
   WINTER_SPORT_ID,
@@ -295,7 +296,8 @@ export function parseRoute(url) {
   // Same stance the bare-date slate below already takes: a hand-mangled date
   // falls through to the live page rather than erroring on it.
   const raw = q.get('d')
-  const asOf = isRealDate(raw) ? raw : null
+  // `?y=2018` is a past season: the same as-of as `?d=2018-12-31`. A real `?d=` wins (#2588).
+  const asOf = isRealDate(raw) ? raw : yearAsOf(q.get('y'))
   const sportId = q.get('s') ? Number(q.get('s')) : null
   if (parts.length === 0) return { name: 'home' }
   // A bare 8-digit date is the slate paged to that day ('/07172026') — the
@@ -798,7 +800,8 @@ export function gamePath(apiDate, awayAbbr, homeAbbr, section, gameNumber = 1) {
 // below already produces, so a hand-built one can't drift from theirs.
 export function linkQuery({ d, s } = {}) {
   const q = new URLSearchParams()
-  if (d) q.set('d', d)
+  // A past season's last day is the address `?y=2018` (#2588), the way parseRoute reads it back.
+  if (d) isYearView(d) ? q.set('y', d.slice(0, 4)) : q.set('d', d)
   if (s) q.set('s', String(s))
   const qs = q.toString()
   return qs ? `?${qs}` : ''

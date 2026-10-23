@@ -5,7 +5,7 @@ import { PostseasonOddsModal } from '../../../../components/teamstats/Postseason
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { Table } from '../../../../components/ui/table/Table.jsx'
-import { humanDate } from '../../../../lib/dates.js'
+import { humanDate, isYearView } from '../../../../lib/dates.js'
 import { gbText } from './standingsData.js'
 
 // The division table on a stamped card (#1107, row 5b). Same rows as StandingsCard. At 390 the
@@ -22,7 +22,7 @@ export function DivisionCard({ team, standings, asOf, odds, stampIn, style }) {
         frame="stamped"
         body="flush"
         label={name}
-        count={asOf ? `entering ${humanDate(asOf)}` : `${standings.length} clubs`}
+        count={asOf && !isYearView(asOf) ? `entering ${humanDate(asOf)}` : `${standings.length} clubs`}
         stampIn={stampIn}
         className="stnd__card"
         style={style}
