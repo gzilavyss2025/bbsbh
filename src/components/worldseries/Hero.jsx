@@ -34,7 +34,7 @@ import { ScheduleStrip } from './ScheduleStrip.jsx'
 // if-needed game's date comes from the Series format (withFormatDates), never
 // from the schedule row bracket.js hides. Clips come only from games dated before the slate date
 // (fetchGameClips). The slate card's split/scale and the existing one-session
-// arrival are reused; the next-game door remains usable throughout.
+// arrival are reused; the next-game card (or, on a page with no slate, its door) remains usable throughout.
 const ARRIVED_KEY = 'bbsbh:ws-hero-arrived'
 
 function firstThisSession() {
@@ -108,7 +108,7 @@ function ClubHead({ side, slot, winsNeeded }) {
   )
 }
 
-export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, splitsByClub = null, clubGames = null }) {
+export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, splitsByClub = null, clubGames = null, gameCard = null, gameCardPending = false }) {
   const link = useRouteLink()
   const { series, dayType, gameNumber } = mode
   const gameDay = dayType === 'game'
@@ -196,7 +196,10 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
           </Cluster>
           <ScheduleStrip days={days} />
         </Stack>
-        {nextPath && (
+        {/* The slate's own card for the next game replaces the door when the page hands one in
+            (WorldSeriesHome); a page with no slate keeps the door. */}
+        {gameCard}
+        {!gameCard && !gameCardPending && nextPath && (
           <Door {...link(nextPath)} className="ww-hero__next">
             <span className="ww-hero__nexttext">
               <span className="ww-hero__nextname">{nextName}</span>

@@ -145,6 +145,14 @@ export async function fetchSchedule(
   return games.map((g) => normalizeGame(g, sportId))
 }
 
+// One game's slate row, by date and gamePk: the schedule the slate draws, narrowed to a game. Null when
+// that day's schedule does not hold it. The World Series home and the live series page both ask this
+// for a game that is not on the slate they are standing on.
+export async function fetchScheduleGame(dateStr, gamePk, sportId = 1) {
+  const games = await fetchSchedule(dateStr, sportId)
+  return games.find((g) => g.gamePk === gamePk) ?? null
+}
+
 // THE WINTER CALENDAR — one season of dated games per shipped league, which is
 // everything the WINTER tab needs to decide it exists (issue #1055).
 //

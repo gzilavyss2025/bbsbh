@@ -36,20 +36,22 @@ const BUDGET_FILE = new URL('./layout-ratchet-budget.json', import.meta.url)
 const KINDS = ['column', 'wrap', 'grid']
 const EXEMPT = /layout-exempt\s*:\s*\S/
 
-const isKeyframes = (rule) => {
+export const isKeyframes = (rule) => {
   for (let p = rule.parent; p; p = p.parent) if (p.type === 'atrule' && /keyframes$/i.test(p.name)) return true
   return false
 }
 
 // A marker comment is "right before" a rule when it ends on the line above and
-// starts its own line, so it cannot trail the previous rule.
-const exempt = (rule) => {
+// starts its own line, so it cannot trail the previous rule. Exported for
+// check-card-fill.mjs, which reads its own marker the same way.
+export const markedBefore = (rule, marker) => {
   const c = rule.prev()
-  if (c?.type !== 'comment' || !EXEMPT.test(c.text)) return false
+  if (c?.type !== 'comment' || !marker.test(c.text)) return false
   if (c.source.end.line < rule.source.start.line - 1) return false
   const before = c.prev()
   return !(before && before.source.end.line === c.source.start.line)
 }
+const exempt = (rule) => markedBefore(rule, EXEMPT)
 
 export function countLayout(css) {
   const n = { column: 0, wrap: 0, grid: 0 }

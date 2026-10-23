@@ -44,6 +44,7 @@ const GUARDS = [
   'layout/check-z-index',
   'layout/check-media-widths',
   'layout/check-layout-ratchet',
+  'layout/check-card-fill',
 ]
 
 const COMMANDS = [

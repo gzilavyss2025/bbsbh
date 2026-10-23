@@ -86,6 +86,12 @@ which the unit suite can't reach because `SealBox` is a `.jsx` component. When
 Gary asks for them, run them against a live or recent game;
 `docs/test-games.md` lists gamePks with rare events.
 
+`e2e/tab-clearance.spec.js` is the one layout check here: on the slate and five static pages, at
+the phone, iPad and desktop widths, no name tab may sit within 8px of the card above it (its
+shadow counts). It catches a card that overruns its cell or loses its tab margin, whatever the
+cause; the lint guard `scripts/layout/check-card-fill.mjs` stops the one cause found so far. The
+geometry is `e2e/lib/tabClearance.js`, pinned by `test/tab-clearance.test.js`.
+
 Specs pinned to the anchor game (823035) can skip live network entirely via
 `e2e/fixtures/mock-api.js` — a captured real feed/schedule/logo/headshot,
 falling back to a Node-`fetch` relay (works in sandboxes where Chromium's own

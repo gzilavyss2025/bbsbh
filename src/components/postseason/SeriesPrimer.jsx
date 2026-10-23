@@ -12,6 +12,7 @@ import { BracketRail } from '../bracket/BracketRail.jsx'
 import { SurvivorsBoard } from '../bracket/SurvivorsBoard.jsx'
 import { SeasonSeriesStrip } from '../teamstats/SeasonSeriesStrip.jsx'
 import { Pill } from '../ui/control/Pill.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 import { Notice } from '../ui/state/Notice.jsx'
 import { SeriesEdges } from './edges/SeriesEdges.jsx'
 import { SeriesMark } from './SeriesMark.jsx'
@@ -113,10 +114,10 @@ function Main({ primer: { list, series, game, setPick, data, bracket, cutoff, sl
 function Rail({ primer: { series, data, bracket, cutoff } }) {
   const { stats } = data
   return (
-    <aside className="bracketrail" aria-label="The series so far">
+    <Stack as="aside" gap="section" className="bracketrail" aria-label="The series so far">
       <BracketNow bracket={bracket} cutoff={cutoff} round={series.round} />
-      {stats?.totals && <SeriesTotals totals={stats.totals} clubs={series.slots.map((slot) => slot.club)} />}
+      {stats?.totals && <SeriesTotals totals={stats.totals} clubs={series.slots.map((slot) => slot.club)} stamped />}
       {stats && <SeriesLeadersLedger batting={stats.batting} pitching={stats.pitching} games={data.games.length} />}
-    </aside>
+    </Stack>
   )
 }

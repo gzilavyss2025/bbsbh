@@ -468,8 +468,8 @@ export function GameSelect({
     const liveFirst = reorderLiveGames(sorted, pinned)
     return reorderNationalBroadcasts(liveFirst, nationalBroadcasts, pinned)
   }, [sorted, nationalBroadcasts, favoriteTeamId, favoriteAffiliateIds])
-  // On a World Series day the Series game's card leaves the list and opens the
-  // page, above the hero (the bracket names it; MLB only, MiLB never holds it).
+  // On a World Series day the Series game's card leaves the list and ends the
+  // hero, in place of its lineups door (the bracket names it; MLB only, MiLB never holds it).
   const { lead: seriesGame, rest: listGames } = splitSeriesGame(
     gamesForDisplay,
     sportId === SPORT_IDS.MLB ? seriesGamePk : null,
@@ -500,7 +500,9 @@ export function GameSelect({
     return countProspectsByTeam(rosterIds.data ?? {}, ids)
   }, [rosterIds.data, prospects.data])
 
-  const renderCard = (g, idx) => {
+  // `pickDate` is the day the card opens: the slate's, except the World Series hero's card for a
+  // game on a later day (an off day shows the next game).
+  const renderCard = (g, idx, pickDate = dateStr) => {
     const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
       ? favoriteTeamId
       : null
@@ -525,8 +527,8 @@ export function GameSelect({
           eager={eager}
           postseasonLine={postseasonLine}
           stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
-          onSelect={() => onPick(g, dateStr)}
-          onBoxScore={isPastFinal || isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
+          onSelect={() => onPick(g, pickDate)}
+          onBoxScore={isPastFinal || isSuspended ? () => onPick(g, pickDate, 'boxscore') : null}
         />
       </li>
     )
@@ -631,13 +633,15 @@ export function GameSelect({
             }
           />
 
-          {seriesGame && (
-            <ul className="gamelist" aria-label="World Series game">
-              {renderCard(seriesGame, 0)}
-            </ul>
+          {inPostseasonWindow && (
+            <WorldSeriesHome
+              bracket={postseasonBracket.bracket}
+              slateDate={dateStr}
+              wide={wide}
+              seriesGame={seriesGame}
+              renderCard={renderCard}
+            />
           )}
-
-          {inPostseasonWindow && <WorldSeriesHome bracket={postseasonBracket.bracket} slateDate={dateStr} wide={wide} />}
 
           {/* The postseason bracket (#1224, slice 5) — above the cards, every
               date in the window, off days included. On an off day this is

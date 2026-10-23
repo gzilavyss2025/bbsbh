@@ -11,7 +11,7 @@ import { loadNineKeys } from '../../api/nineKeys.js'
 import { formerTeammatePairs, loadFormerTeammates } from '../../api/formerTeammates.js'
 import { fetchSeriesRoster, rosterReadDate } from '../../api/postseason/roster.js'
 import { BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postseasonSeries.js'
-import { fetchSchedule } from '../../api/schedule.js'
+import { fetchScheduleGame } from '../../api/schedule.js'
 import { fetchMeetings } from '../../api/postseason/meetings.js'
 import { computePlayOfTheGame } from '../../api/boxscore.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -106,7 +106,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   const { data: todayGame } = useAsync(
     () =>
       todayPk
-        ? fetchSchedule(cutoffInput).then((rows) => rows.find((g) => g.gamePk === todayPk) ?? null)
+        ? fetchScheduleGame(cutoffInput, todayPk)
         : Promise.resolve(null),
     [todayPk, cutoffInput],
   )

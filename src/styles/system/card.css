@@ -85,7 +85,8 @@
   display: block;
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
-/* A named card clears its tab, which hangs --space-3h above it (stamped/stamped.css). */
+/* A named card clears its tab, which hangs --space-3h above it (stamped/stamped.css). The
+   margin is part of its slot, so no parent may size a card by percent (check-card-fill.mjs). */
 .card--named {
   margin-top: var(--space-3h);
 }

@@ -10,46 +10,28 @@
 }
 
 /* ---------------------------------------------------------------------------
-   TEAM LEADERS, LEDGER FORM (`.tledg`) — what the team HUB renders instead of
-   the `.tlead` card board (styles/leaders/board.css): two ink-banded
-   blocks, BATTING over PITCHING, one ruled row per category. See TeamLeadersLedger.jsx for why the hub stopped
-   rendering cards. Deliberately a PARALLEL class family rather than a modifier
-   on `.tlead`: they share a data source, not a box model, and a shared root would
-   mean every `.tlead__*` rule needs a "but not in the ledger" clause.
+   SERIES LEADERS, LEDGER FORM (`.tledg`) — what the home rail's Series leaders
+   card draws (SeriesLeadersLedger.jsx; the team hub once drew it too, which is
+   why the name stays): one stamped card, BATTING over PITCHING, one ruled row
+   per category. A parallel class family to `.tlead` (styles/leaders/board.css):
+   they share a data source, not a box model.
 
-   A printed ledger, so: an inked block header (the pair --text-on-ink on
-   --accent-primary is asserted in check-contrast.mjs), hairline rules between
-   rows, no card of its own per category, and the whole thing carried by the
-   scorebook's mono figures on the right edge.
+   A printed ledger: a label row on the tint opens each block, the second block
+   opens under an ink rule, hairline rules between rows, and the scorebook's
+   mono figures carry the right edge.
    --------------------------------------------------------------------------- */
-.tledg {
-  margin-top: 4px;
-}
-/* The header's right slot — "See all ›" plus the hub's optional
-   "Org leaders ›". */
-.tledg__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
 .tledg__blocks {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2h);
 }
-/* Each block is a Card (sheet, flush body; #1113), which draws the frame and
-   clips the header band's square top corners to its radius. margin-top: 0
-   overrides .team-hub's per-card spacing rule (09-team-info.css) — these sit
-   in .tledg__blocks, a flex column with its own gap, not stacked sections. */
-.tledg__block {
-  margin-top: 0;
-  padding-bottom: var(--space-1);
+.tledg__block + .tledg__block {
+  border-top: var(--bw-heavy) solid var(--border-stamped);
 }
 .tledg__block-title {
   margin: 0;
   padding: var(--space-1h) var(--space-3);
-  background: var(--accent-primary);
-  color: var(--text-on-ink);
+  background: var(--surface-stamped-tint);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);

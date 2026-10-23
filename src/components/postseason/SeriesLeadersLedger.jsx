@@ -5,7 +5,6 @@ import { teamAbbr } from '../../lib/teams.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Card } from '../ui/frame/Card.jsx'
-import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { Table } from '../ui/table/Table.jsx'
 
 // SERIES LEADERS, LEDGER FORM — the primer's right column (ADR-0087,
@@ -13,6 +12,9 @@ import { Table } from '../ui/table/Table.jsx'
 // fed by a series instead of a club: two blocks, Batting then Pitching, each a
 // Table of Category, Leader, Stat. It reuses that ledger's `.tledg*` rules (in
 // the core sheet), so the two read as one table; only the club tile is new.
+//
+// It is one stamped card named on its ink tab, the two blocks inside it under a
+// label row each.
 //
 // A category with three or fewer players lists all of them, high to low; with
 // more it lists the leader only (lib/postseason/primer/leaderRows.js). A
@@ -40,13 +42,10 @@ export function SeriesLeadersLedger({ batting, pitching, games = 0 }) {
   if (blocks.length === 0) return null
 
   return (
-    <section className="tledg">
-      <SectionHead look="label" note={games ? `${games} played` : undefined}>
-        Series leaders
-      </SectionHead>
+    <Card frame="stamped" body="flush" label="Series leaders" count={games ? `${games} played` : undefined} className="tledg">
       <div className="tledg__blocks">
         {blocks.map((block) => (
-          <Card key={block.key} body="flush" className="tledg__block">
+          <div key={block.key} className="tledg__block">
             <h4 className="tledg__block-title">{block.label}</h4>
             <Table frame="bare" density="row" className="tledg__rows">
               <thead>
@@ -77,9 +76,9 @@ export function SeriesLeadersLedger({ batting, pitching, games = 0 }) {
                 ))}
               </tbody>
             </Table>
-          </Card>
+          </div>
         ))}
       </div>
-    </section>
+    </Card>
   )
 }
