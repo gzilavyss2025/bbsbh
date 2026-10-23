@@ -5,6 +5,7 @@ import { useWorldSeriesView } from '../../hooks/postseason/useWorldSeriesView.js
 import { withFormatDates } from '../../lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
 import { lcsRoundOf, worldSeriesMode } from '../../lib/postseason/worldseries/mode.js'
+import { BracketNow } from '../bracket/BracketNow.jsx'
 import { Grid } from '../ui/layout/Grid.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Bullpen } from './cards/Bullpen.jsx'
@@ -32,11 +33,15 @@ import { ScoutingReport } from './ScoutingReport.jsx'
 // scouting report, [played on a phone], the trip,
 // home and road + bullpen (side by side wide).
 //
+// Wide, the top row is the hero beside a column of the postseason bracket and the next card that
+// fits 358px (Probables on a game day, The trip on an off day), and every card under it runs the
+// page's full width. Under 1000px the column drops below the hero as a row of its own.
+//
 // The hero ends on the slate's own card for the next game (`renderCard` builds it, `seriesGame` is
 // today's, already on the slate). On an off day the slate holds no game, so the card is fetched
 // from the game's own date: the next game's card, though it is not today's. Without `renderCard`
 // (no slate to borrow it from) the hero keeps its door.
-export function WorldSeriesHome({ bracket, slateDate, wide = false, seriesGame = null, renderCard = null }) {
+export function WorldSeriesHome({ bracket, cutoff = null, slateDate, wide = false, seriesGame = null, renderCard = null }) {
   const mode = worldSeriesMode(bracket)
   const { series, clubIds, data, focusPk, game, umpire, parkOf, played } = useWorldSeriesView(mode, slateDate)
   // The next game's pk and date come from the bracket, so the card's read starts with the page
@@ -80,28 +85,54 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false, seriesGame =
   )
   const bullpen = data && <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={slateDate} />
 
+  // The card that rides beside the hero when wide. Probables and The trip each draw nothing when
+  // they have nothing to say, so the column may be the bracket alone.
+  const probables = <Probables game={game} season={Number(slateDate.slice(0, 4))} slateDate={slateDate} />
+  const trip = (
+    <Trip
+      fromVenueId={lastPlayed ? parkOf[lastPlayed.gamePk]?.venue?.id : null}
+      toVenueId={game?.venue?.id}
+      firstPitch={game?.gameDate}
+      wide={wide}
+    />
+  )
+  const beside = wide && bracket
+  const hero = (
+    <Hero
+      mode={mode}
+      game={game}
+      slateDate={slateDate}
+      wide={wide}
+      played={played}
+      umpire={umpire}
+      splitsByClub={data?.hotBats ?? null}
+      clubGames={data?.clubGames ?? null}
+      gameCard={gameCard}
+      gameCardPending={Boolean(offDayGame?.gamePk) && offDay.loading}
+    />
+  )
+
   return (
     <Stack gap="section" className="ww">
-      <Hero
-        mode={mode}
-        game={game}
-        slateDate={slateDate}
-        wide={wide}
-        played={played}
-        umpire={umpire}
-        splitsByClub={data?.hotBats ?? null}
-        clubGames={data?.clubGames ?? null}
-        gameCard={gameCard}
-        gameCardPending={Boolean(offDayGame?.gamePk) && offDay.loading}
-      />
+      {beside ? (
+        <div className="ww-top">
+          {hero}
+          <Grid min={358} gap="loose" className="ww-top__side">
+            <BracketNow bracket={bracket} cutoff={cutoff} round={series.round} />
+            {gameDay ? probables : trip}
+          </Grid>
+        </div>
+      ) : (
+        hero
+      )}
       {wide && <Ledger series={series} model={model} />}
       {data && <Reel series={series} slateDate={slateDate} clubGames={data.clubGames} lcsRound={(id) => lcsRoundOf(bracket, id)} />}
       {gameDay ? (
         <>
-          <Probables game={game} season={Number(slateDate.slice(0, 4))} slateDate={slateDate} />
+          {!beside && probables}
           {scouting}
           {data && (
-            <Grid min={340} gap="loose">
+            <Grid min={340} gap="loose" fit>
               <Tape awayId={game?.awayId ?? clubIds[0]} homeId={game?.homeId ?? clubIds[1]} data={data} slateDate={slateDate} />
               <HotBats clubIds={clubIds} splitsByClub={data.hotBats} />
             </Grid>
@@ -112,14 +143,9 @@ export function WorldSeriesHome({ bracket, slateDate, wide = false, seriesGame =
         <>
           {scouting}
           {!wide && <Played rows={played} />}
-          <Trip
-            fromVenueId={lastPlayed ? parkOf[lastPlayed.gamePk]?.venue?.id : null}
-            toVenueId={game?.venue?.id}
-            firstPitch={game?.gameDate}
-            wide={wide}
-          />
+          {!beside && trip}
           {data && (
-            <Grid min={340} gap="loose">
+            <Grid min={340} gap="loose" fit>
               <HomeRoad clubIds={clubIds} clubGames={data.clubGames} slateDate={slateDate} />
               {bullpen}
             </Grid>
