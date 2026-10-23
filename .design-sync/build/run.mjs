@@ -1,6 +1,9 @@
 // Rebuilds the Tally Baseball design system into a folder, from this repo.
 //   node .design-sync/build/run.mjs [--out <dir>] [--capture]
 // --out      where to write (default: ds-bundle in the repo root, which .gitignore skips).
+// --manifest after the build, write .design-sync/sync-manifest.json (the hashes of what the project
+//            holds). Do it after an upload and commit it. Without it the build only reports what
+//            differs from the committed manifest, which is the list to upload.
 // --capture  first re-capture the seven player cards from a running dev server on localhost:5173
 //            (npm run dev). Without it the committed captures in .design-sync/captures/ are used.
 // Needs `npm install` first: it copies fonts from node_modules/@fontsource and, for --capture, uses playwright.
@@ -26,3 +29,9 @@ for (const step of steps) {
   }
 }
 console.log(`design-sync: built into ${out}`)
+const manifest = spawnSync(
+  process.execPath,
+  [path.join(root, '.design-sync/build/manifest.mjs'), out, ...(args.includes('--manifest') ? ['--write'] : [])],
+  { cwd: root, stdio: 'inherit' },
+)
+if (manifest.status !== 0) process.exit(manifest.status || 1)

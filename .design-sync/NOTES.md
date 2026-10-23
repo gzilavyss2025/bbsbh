@@ -5,7 +5,7 @@ Read `docs/design-sync.md` first. This file holds what a re-sync must know.
 - **Do not run the stock converter** (`package-build.mjs`). This repo is an app, not a package: it has no `dist/` entry
   and no component exports. `config.json` carries `pkg`, `globalName` and `shape` only so the tool accepts it.
   The real build is `node .design-sync/build/run.mjs`.
-- **The project has no `_ds_sync.json`.** A re-sync has no anchor, so treat every file as changed. Upload in full.
+- **The project has no `_ds_sync.json`.** The anchor is the repo's own `.design-sync/sync-manifest.json`: the build prints the files that differ from it (`docs/design-sync.md`, "What changed since the last upload"). It is the hashes of a build, not proof of what the project holds; when in doubt, upload in full.
 - **Upload order:** write `_ds_needs_recompile`, then the files, then `_ds_needs_recompile` again. The design tool
   re-indexes on that file and writes `_ds_manifest.json` and `_adherence.oxlintrc.json` itself. Never write those two.
 - **The preview cards are the only components.** The manifest lists zero components on purpose.
