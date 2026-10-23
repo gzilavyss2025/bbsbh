@@ -103,7 +103,7 @@
 }
 
 .daystrip__day--light {
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
   background: var(--field-soft);
   border-color: var(--accent-positive);
 }

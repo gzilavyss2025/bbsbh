@@ -112,7 +112,7 @@
 
 /* Base hits inked green, reached-on-error red — the rest stay ink. */
 .pbp__code--hit {
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
 }
 
 .pbp__code--error {
@@ -123,7 +123,7 @@
    — no leading space in the text, which used to stack into a visibly wide gap.
    "RBI" downsizes below as the count's unit (`.favormeter__unit` convention). */
 .pbp__code__rbi {
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
   background: var(--field-soft);
   border-radius: var(--radius-pill);
   padding: 1px var(--space-1h);

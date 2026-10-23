@@ -250,7 +250,7 @@
   border-style: solid;
   border-color: var(--accent-positive-deep);
   background: var(--field-soft);
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
 }
 .trade__considerationlink {
   cursor: default;

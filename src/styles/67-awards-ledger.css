@@ -105,7 +105,7 @@
 .tier-allStar.awardidx__ct { color: var(--allstar-blue-deep); }
 .tier-press.awardblk__rule { background: var(--accent-positive); }
 .tier-press.awardblk__count,
-.tier-press.awardidx__ct { color: var(--accent-positive-deep); }
+.tier-press.awardidx__ct { color: var(--accent-positive); }
 .tier-inSeason.awardblk__rule,
 .tier-other.awardblk__rule { background: var(--graphite-soft); }
 .tier-inSeason.awardblk__count,
