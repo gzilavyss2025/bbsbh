@@ -421,6 +421,43 @@ test('fetchStandings folds in an optional hydrate param and degrades to [] on fa
   }
 })
 
+// A date after a finished season's last day returns no records (2018-12-30 on 2026-10-23), so
+// a past season retries without the date and gets the final table (#2589).
+test('fetchStandings retries a finished season without the date when the dated call is empty', async () => {
+  const base = 'https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=2018&standingsTypes=regularSeason'
+  const { calls, restore } = stubFetch({
+    [`${base}&date=2018-12-30&hydrate=division`]: { json: { records: [] } },
+    [`${base}&hydrate=division`]: { json: { records: [{ division: { id: 205 } }] } },
+  })
+  try {
+    assert.deepEqual(await fetchStandings(104, 2018, '2018-12-30', 'division'), [{ division: { id: 205 } }])
+    // Cached under the dated key: a repeat asks nothing.
+    await fetchStandings(104, 2018, '2018-12-30', 'division')
+    assert.equal(calls.length, 2)
+  } finally {
+    restore()
+  }
+})
+
+test('fetchStandings does not retry a call with records, a current season, or a date before opening day', async () => {
+  const year = new Date().getFullYear()
+  const base = (season) => `https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=${season}&standingsTypes=regularSeason`
+  const { calls, restore } = stubFetch({
+    [`${base(2018)}&date=2018-09-30`]: { json: { records: [{ division: { id: 205 } }] } },
+    [`${base(year)}&date=${year}-09-01`]: { json: { records: [] } },
+    // Before opening day a past season is empty too, and that answer is the true one.
+    [`${base(2018)}&date=2018-03-28`]: { json: { records: [] } },
+  })
+  try {
+    assert.equal((await fetchStandings(104, 2018, '2018-09-30')).length, 1)
+    assert.deepEqual(await fetchStandings(104, year, `${year}-09-01`), [])
+    assert.deepEqual(await fetchStandings(104, 2018, '2018-03-28'), [])
+    assert.equal(calls.length, 3)
+  } finally {
+    restore()
+  }
+})
+
 // --------------------------------------------------------------------------
 // fetchLeagueStandings — fans out AL (103) + NL (104) in parallel
 // --------------------------------------------------------------------------
