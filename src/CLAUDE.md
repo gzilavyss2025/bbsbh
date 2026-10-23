@@ -144,7 +144,7 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   the batter you just charted, not a preface to the next. The exception is a stoppage
   between pitches (`midAtBat`), or any steal/pickoff, which leads its own step and window (ADR-0016's amendment). A step therefore ends
   mid-play, which is why the pinch-runner pencil-in keys on its notice's index rather
-  than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`.
+  than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`. Notation (#2575): a pickoff caught stealing is `PKCS 1-3`, out on the path to the stolen base; an error right after a steal credits no batter slot.
 - **The console** (ADR-0043): the scorebug is the page's masthead now (`screens/gameview/InningsHeader.jsx`, `components/gamehud/HeaderBug.jsx`; the plain split band before first pitch, still gated by `ScorebugMount`'s clamp), then the due-up/tally band, wrapping trail, tabbed
   reference, `RollingLine` demoted but NEVER removed — every half, live or
   historical. Only the play-by-play varies: **windowed** (one at-bat, every half

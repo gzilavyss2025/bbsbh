@@ -75,6 +75,19 @@ export function legAdvanceCode(play, r) {
   return advanceCode(play)
 }
 
+// A pickoff reads PK; one that catches a runner stealing reads PKCS (option B,
+// #2575) and its out is drawn on the path to the base he was stealing — the
+// feed's own outBase says the base he left ('1B'), so read the target off the
+// event type (pickoff_caught_stealing_2b). Null for any other event.
+const PKCS_BASE = { '2b': 2, '3b': 3, home: 4 }
+function pickoffTag(et) {
+  return et.startsWith('pickoff_caught_stealing') ? 'PKCS' : 'PK'
+}
+export function pickoffCaughtStealingBase(eventType) {
+  const m = /^pickoff_caught_stealing_(.+)$/.exec(eventType ?? '')
+  return m ? (PKCS_BASE[m[1]] ?? null) : null
+}
+
 // The scorer's mark penciled above an INTERRUPTED at-bat's diamond: the
 // shorthand for the baserunning event that ended the half plus the
 // carry-over arrow ("CS →", "PK →") — the paper-scorebook convention of
@@ -85,7 +98,7 @@ export function interruptedCode(eventType) {
   const et = eventType ?? ''
   let tag = ''
   if (et.startsWith('caught_stealing')) tag = 'CS'
-  else if (et.startsWith('pickoff')) tag = 'PK' // includes pickoff_caught_stealing
+  else if (et.startsWith('pickoff')) tag = pickoffTag(et)
   else if (et.startsWith('stolen_base')) tag = 'SB'
   else if (et === 'wild_pitch') tag = 'WP'
   else if (et === 'passed_ball') tag = 'PB'
@@ -180,7 +193,7 @@ export function runnerOutCode(play, runnerEntry) {
     .join('-')
   let tag = ''
   if (et.startsWith('caught_stealing')) tag = 'CS'
-  else if (et.startsWith('pickoff')) tag = 'PK' // includes pickoff_caught_stealing
+  else if (et.startsWith('pickoff')) tag = pickoffTag(et)
   else if (DOUBLE_PLAY_EVENTS.has(et)) tag = 'DP'
   // Verified against gamePk 778442's top of the 2nd (Jacob Wilson grounds
   // into a 5-4-3 triple play): each of the two runners retired beyond the

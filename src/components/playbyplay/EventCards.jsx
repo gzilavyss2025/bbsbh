@@ -50,7 +50,7 @@ const EVENT_ICONS = {
 //
 // A pickoff is PK, not PO, and the tags here must keep matching the two places
 // in api/playbyplay.js that write the same event onto a diamond —
-// runnerOutCode's out notation ("PK 1-3") and interruptedCode's carry-over
+// runnerOutCode's out notation ("PK 1-3", "PKCS 1-3") and interruptedCode's carry-over
 // mark ("PK →"). Two spellings for one event on the same page reads as two
 // different events, and "PO" is doubly wrong here: it's already this app's
 // mark for a POP OUT (loadScorecard.js's classifyOut), besides being the
@@ -59,7 +59,7 @@ export const EVENT_CODES = {
   stolen_base_2b: 'SB', stolen_base_3b: 'SB', stolen_base_home: 'SB',
   caught_stealing_2b: 'CS', caught_stealing_3b: 'CS', caught_stealing_home: 'CS',
   pickoff_1b: 'PK', pickoff_2b: 'PK', pickoff_3b: 'PK',
-  pickoff_caught_stealing_2b: 'PK', pickoff_caught_stealing_3b: 'PK', pickoff_caught_stealing_home: 'PK',
+  pickoff_caught_stealing_2b: 'PKCS', pickoff_caught_stealing_3b: 'PKCS', pickoff_caught_stealing_home: 'PKCS',
   wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
   // Not observed as a standalone top-level play in either sampled game (both
   // always nested inside a real plate appearance) — included for the same
@@ -72,7 +72,7 @@ export const EVENT_CODES = {
 // The name tab of an EventCard (ADR-0113), by its shorthand code. The code
 // stays in the row; the tab is the card's heading.
 export const EVENT_NAMES = {
-  SB: 'Stolen base', CS: 'Caught stealing', PK: 'Pickoff', WP: 'Wild pitch', PB: 'Passed ball',
+  SB: 'Stolen base', CS: 'Caught stealing', PK: 'Pickoff', PKCS: 'Pickoff, caught stealing', WP: 'Wild pitch', PB: 'Passed ball',
   BK: 'Balk', RP: 'Runner placed', DI: 'Defensive indifference',
 }
 
