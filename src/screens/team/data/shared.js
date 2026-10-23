@@ -293,8 +293,12 @@ const ORG_DEPARTURE_STATUSES = new Set(['RL', 'TR', 'CL', 'FA'])
 //
 // Shared by the Roster tab's projection and the Overview's lineup preview, which
 // must show the same nine.
-export function preferredLineupFrom(fullRoster, teamId) {
-  const eligible = fullRoster.filter((r) => !ORG_DEPARTURE_STATUSES.has(r.status?.code))
+//
+// `countDeparted` is for a FINISHED season: the departure rule protects a live roster from
+// crediting a player the club just let go, and in a past year it drops a regular who was
+// traded in August (2018's Villar, 64 starts at 2B). There everyone who played counts.
+export function preferredLineupFrom(fullRoster, teamId, { countDeparted = false } = {}) {
+  const eligible = countDeparted ? fullRoster : fullRoster.filter((r) => !ORG_DEPARTURE_STATUSES.has(r.status?.code))
   const gsAt = (r, pos) =>
     Number(
       rosterFieldingSplits(r, teamId).find((s) => s.position?.abbreviation === pos)?.stat?.gamesStarted,

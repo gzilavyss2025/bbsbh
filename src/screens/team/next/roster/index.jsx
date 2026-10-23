@@ -73,7 +73,7 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
   const linkProps = useRouteLink()
   // Motion plays once per page visit; a return shows the cards at rest.
   const still = useViewOnce(team.id, 'team-roster')
-  const [seasonFor, setSeasonFor] = useState(null) // the club whose Season view was picked
+  const [pick, setPick] = useState(null) // { id, view }: the club whose tab the reader picked, and which
 
   const d = roster.data
   const door = transactionsDoor(team.id, asOf, sportId)
@@ -94,7 +94,10 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
 
   const body = d && (() => {
     const hasRecent = d.recentPreferredLineup.length + d.recentSubstitutes.length + d.recentStartingPitchers.length + d.recentBullpen.length > 0
-    const recent = hasRecent && seasonFor !== team.id
+    // The lineup card opens on today's nine for the current season, and on the season's own for a
+    // past one (its "current" is only a last game, from a year that is over).
+    const view = pick?.id === team.id ? pick.view : thisSeason ? 'current' : 'season'
+    const recent = hasRecent && view === 'current'
     const lineup = lineupDefenseFrom(recent ? d.recentPreferredLineup : d.preferredLineup, injuredIds)
     const subs = recent ? d.recentSubstitutes : d.substitutes
     const sp = recent ? d.recentStartingPitchers : d.startingPitchers
@@ -109,15 +112,19 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
       <Segmented
         label="Roster projection basis"
         value={recent ? 'current' : 'season'}
-        onChange={(v) => setSeasonFor(v === 'season' ? team.id : null)}
-        options={[{ value: 'current', label: 'Current' }, { value: 'season', label: 'Season' }]}
+        onChange={(v) => setPick({ id: team.id, view: v })}
+        options={
+          thisSeason
+            ? [{ value: 'current', label: 'Current' }, { value: 'season', label: 'Season' }]
+            : [{ value: 'season', label: 'Season' }, { value: 'current', label: 'Last game' }]
+        }
         className="tnext__roster-toggle"
       />
     )
     return (
       <>
         {(lineup.length > 0 || subs.length > 0) && (
-          <Card frame="stamped" label="Lineup" labelAs="h3" count={recent ? 'current' : 'season'} {...card()}>
+          <Card frame="stamped" label="Lineup" labelAs="h3" count={recent ? (thisSeason ? 'current' : 'last game') : 'season'} {...card()}>
             <Stack gap="section">
               {toggle}
               <Grid min="20rem" gap="loose" fit className="rosterbox-pair">
