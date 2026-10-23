@@ -2033,6 +2033,21 @@ Re-run only to fold in a new season.
   (the newest nickname for the code: Brooklyn 1897 reads "Dodgers 1897"). 816 KB, 248 KB gzipped. No clock: a re-run writes
   the same bytes. The pure half is `scripts/lib/open-data/team-seasons.mjs`. Reader:
   `src/api/teamSeasons.js`.
+- `gen-played-for-both.mjs` → `public/data/played-for-both/{a}-{b}.json` — for each of the 435
+  pairs of MLB clubs (ids ascending), every player with an MLB game for each, for the lineup
+  page's "Played for both" card (#2579, ADR-0100). Reads `public/data/team-seasons.json` and
+  `public/data/war-history/`, plus the register's names. **Hand-run, NOT on a cron**: re-run after
+  `gen-team-seasons.mjs` has a new season. Nothing in it downloads: fetch the 16 register
+  `people-*.csv` files, each into its own new, empty folder OUTSIDE the repo, then run
+  `node scripts/gen-played-for-both.mjs <people-*.csv ...>` (`--out <dir>` writes elsewhere).
+  Shape: `{ credit, throughSeason, teams: [a, b], top: [up to 12 ids, best score first],
+  rows: [[id, "First Last", [seasons with a], [seasons with b]]] }`, rows most recent first. A
+  franchise keeps its teamId, so every old Retrosheet code counts for the current club
+  (`CLUB_CODES`); the Federal League and the 1897-1899 NL clubs are dropped. The score for `top` is
+  career WAR (all bat and pit seasons) times `0.4 + 0.6 * 0.9^(throughSeason - last season with
+  either club)`. Measured 2026-10-23: 3.2 MB in all, the smallest list 46 players, the largest 327
+  (113-138, 18 KB). No clock: a re-run writes the same bytes. The pure half is
+  `scripts/lib/open-data/played-for-both.mjs`. The reader is slice 2 of #2579.
 - `gen-pitch-starts.mjs` → `public/data/pitch-arsenal-starts/{season}/{NN}.json` and `{NN}.mph.json` — the per-start
   pitch mix for a season before 2026, MLB only (ADR-0111). Run by hand, one season at a time:
   `node scripts/gen-pitch-starts.mjs --season=YYYY` (required), then the same command with `--verify`. It
