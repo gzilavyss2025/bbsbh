@@ -23,7 +23,8 @@ export { FIELDS }
 // minor-league park that posts those three and not the gaps (41 of 119 in the
 // 2026 import, #2612). No source gives the gaps, so they are INTERPOLATED: the
 // wall's radius is the one parabola in bearing through the three signs, which
-// bows outward toward center and never kinks. The gap distances it draws are a
+// bows outward toward center and never kinks (a single posted gap sign bends it
+// through that sign too). The gap distances it draws are otherwise a
 // guess, which is why the quality is 'estimated' and not 'audited'. Home is
 // (0,0), +x toward right field, +y toward center; every 2.5 degrees from the
 // left-field line (-45) to the right-field line (45), so it ends on both lines.
@@ -35,10 +36,16 @@ export function threePointWall(posted) {
   if (Number.isFinite(lc) && Number.isFinite(rc)) return null
   const bow = (lf + rf) / 2 - cf // radius at +-45 degrees, relative to center
   const tilt = (rf - lf) / 2
+  // One posted gap sign (at t = -0.5 or +0.5, i.e. +-22.5 degrees) bends the
+  // parabola with a cubic that is zero at the three signs: t(t^2-1) is -0.375 at
+  // t = 0.5 and +0.375 at t = -0.5. Both gaps posted is the five-point wall's job.
+  const gapT = Number.isFinite(lc) ? -0.5 : Number.isFinite(rc) ? 0.5 : null
+  const gap = gapT === null ? 0 : (Number.isFinite(lc) ? lc : rc) - (cf + bow * gapT * gapT + tilt * gapT)
+  const bend = gapT === null ? 0 : gap / (gapT * (gapT * gapT - 1))
   const points = []
   for (let deg = -45; deg <= 45 + 1e-9; deg += WALL_STEP_DEG) {
     const t = deg / 45
-    const r = cf + bow * t * t + tilt * t
+    const r = cf + bow * t * t + tilt * t + bend * t * (t * t - 1)
     const rad = (deg * Math.PI) / 180
     points.push([Math.round(r * Math.sin(rad) * 10) / 10, Math.round(r * Math.cos(rad) * 10) / 10])
   }
