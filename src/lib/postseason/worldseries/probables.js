@@ -2,10 +2,10 @@
 //
 //   outings: gameLog splits { date, isHome, opponent:{id,abbreviation?},
 //            stat:{ inningsPitched:'5.1', earnedRuns, strikeOuts, baseOnBalls,
-//            numberOfPitches, gamesStarted } }
+//            gamesStarted } }
 //
 // SPOILER FOOTING (ADR-0088). Only outings dated BEFORE `slateDate` count, so
-// the slate date's own start never reaches a bar or a total, whatever the
+// the slate date's own start never reaches a total, whatever the
 // caller passes. Postseason, this year.
 
 const before = (outings, slateDate) =>
@@ -42,16 +42,4 @@ export function pitcherLine(outings, slateDate) {
     k,
     bb,
   }
-}
-
-// One bar per outing, oldest first: the latest is ink, a start is slate, relief is striped.
-export function pitchBars(outings, slateDate, { max = 6 } = {}) {
-  const rows = before(outings, slateDate).slice(-max)
-  return rows.map((o, i) => ({
-    pitches: Number(o.stat?.numberOfPitches) || 0,
-    kind: i === rows.length - 1 ? 'latest' : Number(o.stat?.gamesStarted) > 0 ? 'start' : 'relief',
-    date: o.date,
-    opp: o.opponent?.abbreviation ?? '',
-    away: o.isHome === false,
-  }))
 }

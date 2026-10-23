@@ -2,7 +2,7 @@
 // each club's slab, and the clip behind a slab's play button.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { calendarDays, clipSources, monthsOf, nextGamePath, playerClip, slabPlayer, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
+import { PRE_SERIES_PICKS, calendarDays, monthsOf, nextGamePath, slabPlayer, slabPlayers, spotlightAt, spotlightCount, spotlightRoster, storedClip, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../src/lib/postseason/worldseries/ledger.js'
 
 // The 2026 Series as the bracket gives it before Game 1: seven dated games, three if needed.
@@ -154,67 +154,71 @@ test('an OPS tie goes to the hitter with more PA, and "-.--" never qualifies', (
   assert.equal(slabPlayer(tie, { clubId: 999, season: 2026, started: true })?.name, 'B')
 })
 
-const clip = (id, playerId, taxonomy = ['highlight', 'hitting']) => ({
-  id,
-  keywordsAll: [
-    ...(playerId ? [{ type: 'player_id', value: String(playerId) }] : []),
-    ...taxonomy.map((value) => ({ type: 'taxonomy', value })),
-  ],
-})
+// A stored highlight row (public/data/highlights/{teamId}.json): the generator already filtered it.
+const clip = (clipId, playerId, category = 'hitting') => ({ clipId, playerId, category, title: clipId })
+const file = (...games) => ({ games: games.map(([gamePk, date, ...clips]) => ({ gamePk, date, clips })) })
+const post = new Set([1, 2, 3, 4])
+const NOW = { slateDate: '2026-10-23', gamePks: post }
+const hitter = (id) => ({ id, kind: 'hitter' })
+const pitcher = (id) => ({ id, kind: 'pitcher' })
 
 test('a new OPS leader changes the featured identity and the highlight attached to it', () => {
   const options = { clubId: 158, season: 2026, started: true }
-  const games = [{ date: '2026-10-23', gameNumber: 1, clips: [clip('contreras-double', 661388), clip('bauers-homer', 641343)] }]
+  const files = [file([1, '2026-10-22', clip('contreras-double', 661388), clip('bauers-homer', 641343)])]
   const before = slabPlayer(BREWERS, options)
   assert.equal(before.id, 661388)
-  assert.equal(playerClip(games, before.id)?.id, 'contreras-double')
+  assert.equal(storedClip(files, before, NOW)?.clipId, 'contreras-double')
 
   const updated = BREWERS.map((s) => (s.player.id === 641343 ? split(641343, 'Jake Bauers', 39, '1.200', '1B') : s))
   const after = slabPlayer(updated, options)
   assert.equal(after.id, 641343)
   assert.equal(after.name, 'Jake Bauers')
   assert.equal(after.ops, '1.200')
-  assert.equal(playerClip(games, after.id)?.id, 'bauers-homer')
-  assert.equal(playerClip([], after.id), null)
+  assert.equal(storedClip(files, after, NOW)?.clipId, 'bauers-homer')
+  assert.equal(storedClip([], after, NOW), null)
 })
 
 test('the play button gets the player\'s clip from the newest game that has one', () => {
-  const games = [
-    { gamePk: 1, date: '2026-10-14', gameNumber: 3, clips: [clip('old-homer', 650490)] },
-    { gamePk: 2, date: '2026-10-17', gameNumber: 6, clips: [clip('recap', null), clip('new-double', 650490), clip('other', 691406)] },
-    { gamePk: 3, date: '2026-10-16', gameNumber: 5, clips: [clip('mid', 650490)] },
+  const files = [
+    file([1, '2026-10-14', clip('old-homer', 650490)], [2, '2026-10-17', clip('recap', null), clip('new-double', 650490), clip('other', 691406)]),
+    file([3, '2026-10-16', clip('mid', 650490)]),
   ]
-  assert.equal(playerClip(games, 650490)?.id, 'new-double')
-  assert.equal(playerClip(games, 691406)?.id, 'other')
+  assert.equal(storedClip(files, hitter(650490), NOW)?.clipId, 'new-double')
+  assert.equal(storedClip(files, hitter(691406), NOW)?.clipId, 'other')
+  // The clip carries its game, for the sheet and the caption.
+  assert.deepEqual([storedClip(files, hitter(650490), NOW).gamePk, storedClip(files, hitter(650490), NOW).date], [2, '2026-10-17'])
 })
 
-test('clips are read from each club\'s last three games before the slate date, a shared game once', () => {
-  const row = (gamePk, date) => ({ gamePk, date, gameNumber: 1 })
-  const clubGames = {
-    139: [row(1, '2026-10-12'), row(2, '2026-10-14'), row(3, '2026-10-16'), row(4, '2026-10-17'), row(9, '2026-10-23')],
-    158: [row(5, '2026-10-15'), row(4, '2026-10-17')],
-  }
-  const pks = clipSources(clubGames, [139, 158], '2026-10-20').map((g) => g.gamePk)
-  // 139's last three before the 20th (2, 3, 4), then 158's (5; 4 already read). Game 9 is not past.
-  assert.deepEqual(pks, [2, 3, 4, 5])
-  assert.deepEqual(clipSources(undefined, [139], '2026-10-20'), [])
-  // The order of the clubs does not change the list, so the fetch key does not change when
-  // the hero flips from the bracket's order to away and home.
-  assert.deepEqual(clipSources(clubGames, [158, 139], '2026-10-20').map((g) => g.gamePk), [2, 3, 4, 5])
+test('a Series postseason clip wins; with none, the newest from earlier in the season', () => {
+  const files = [file([9, '2026-10-20', clip('regular-season', 650490)], [4, '2026-10-22', clip('ccs', 650490)], [8, '2026-10-21', clip('later-regular', 650490)])]
+  assert.equal(storedClip(files, hitter(650490), NOW)?.clipId, 'ccs')
+  // A newer non-Series clip does not beat a Series one.
+  assert.equal(storedClip([file([9, '2026-10-22', clip('regular-season', 650490)], [4, '2026-10-12', clip('ccs', 650490)])], hitter(650490), NOW)?.clipId, 'ccs')
+  // A player with no Series clip gets his newest season one.
+  assert.equal(storedClip([file([9, '2026-09-01', clip('sept', 7)], [8, '2026-09-20', clip('later-sept', 7)])], hitter(7), NOW)?.clipId, 'later-sept')
+  // The Series games are not known yet: the newest season clip stands in.
+  assert.equal(storedClip(files, hitter(650490), { slateDate: '2026-10-23', gamePks: new Set() })?.clipId, 'ccs')
 })
 
-test('a pitching clip that names the hitter is not his highlight', () => {
-  const games = [{ gamePk: 1, date: '2026-10-17', gameNumber: 1, clips: [clip('k-of-diaz', 650490, ['highlight', 'pitching']), clip('diaz-double', 650490)] }]
-  assert.equal(playerClip(games, 650490)?.id, 'diaz-double')
-  const onlyPitching = [{ ...games[0], clips: [clip('k-of-diaz', 650490, ['highlight', 'pitching'])] }]
-  assert.equal(playerClip(onlyPitching, 650490), null)
+test('a clip dated on or after the slate date is never used', () => {
+  const files = [file([4, '2026-10-22', clip('yesterday', 650490)], [3, '2026-10-23', clip('today', 650490)], [5, '2026-10-24', clip('tomorrow', 650490)])]
+  assert.equal(storedClip(files, hitter(650490), NOW)?.clipId, 'yesterday')
+  assert.equal(storedClip(files, hitter(650490), { slateDate: '2026-10-22', gamePks: post }), null)
 })
 
-test('a clip that is not a play highlight, or no clip at all, gives no button', () => {
-  const games = [{ gamePk: 1, date: '2026-10-17', gameNumber: 1, clips: [clip('interview', 650490, ['interview'])] }]
-  assert.equal(playerClip(games, 650490), null)
-  assert.equal(playerClip([], 650490), null)
-  assert.equal(playerClip(games, null), null)
+test('a hitter gets a hitting clip and a pitcher a pitching one', () => {
+  const files = [file([1, '2026-10-17', clip('k-of-diaz', 650490, 'pitching'), clip('diaz-double', 650490)], [2, '2026-10-18', clip('save', 100, 'pitching'), clip('bat', 100)])]
+  assert.equal(storedClip(files, hitter(650490), NOW)?.clipId, 'diaz-double')
+  assert.equal(storedClip([file([1, '2026-10-17', clip('k-of-diaz', 650490, 'pitching')])], hitter(650490), NOW), null)
+  assert.equal(storedClip(files, pitcher(100), NOW)?.clipId, 'save')
+  assert.equal(storedClip([file([1, '2026-10-17', clip('bat', 100)])], pitcher(100), NOW), null)
+})
+
+test('no clip, no player, or no files gives no button', () => {
+  assert.equal(storedClip([file([1, '2026-10-17', clip('other', 7)])], hitter(650490), NOW), null)
+  assert.equal(storedClip([], hitter(650490), NOW), null)
+  assert.equal(storedClip(undefined, hitter(650490), NOW), null)
+  assert.equal(storedClip([file([1, '2026-10-17', clip('x', 650490)])], null, NOW), null)
 })
 
 test('the next-game door is dated by the game, not by the slate date', () => {
@@ -234,4 +238,90 @@ test('monthsOf: the calendar head names each month once, in order, and skips und
   assert.equal(monthsOf(days), 'October / November')
   assert.equal(monthsOf([{ date: '2026-10-24' }]), 'October')
   assert.equal(monthsOf([]), '')
+})
+
+test('the slab list starts with the pre-Series pick, then the OPS regulars, then the rest by PA', () => {
+  const rows = [split(1, 'Few', 9, '1.500'), split(2, 'Low', 40, '.700'), split(3, 'High', 30, '.950'), split(4, 'Mid', 60, '.800'), split(5, 'Pick', 12, '.500')]
+  const lists = (started) => slabPlayers(rows, { clubId: 7, season: 2026, started }).map((r) => r.name)
+  assert.deepEqual(lists(true), ['High', 'Mid', 'Low', 'Pick'])
+  PRE_SERIES_PICKS[2026][7] = 5
+  try {
+    assert.deepEqual(lists(false), ['Pick', 'High', 'Mid', 'Low'])
+    assert.deepEqual(lists(true), ['High', 'Mid', 'Low', 'Pick'])
+  } finally {
+    delete PRE_SERIES_PICKS[2026][7]
+  }
+})
+
+test('the slab list is capped, holds nobody twice, and matches slabPlayer at its head', () => {
+  assert.equal(slabPlayers(BREWERS, { clubId: 158, season: 2026, started: false }, 2).length, 2)
+  for (const [splits, clubId] of [[RAYS, 139], [BREWERS, 158]]) {
+    const list = slabPlayers(splits, { clubId, season: 2026, started: false })
+    assert.ok(list.length <= 4)
+    assert.equal(new Set(list.map((r) => r.id)).size, list.length)
+    assert.deepEqual(list[0], slabPlayer(splits, { clubId, season: 2026, started: false }))
+  }
+  assert.deepEqual(slabPlayers(undefined, { clubId: 1, season: 2026, started: true }), [])
+})
+
+test('a tap steps both clubs, and a shorter list wraps on its own', () => {
+  const lists = [[{ id: 1 }, { id: 2 }, { id: 3 }], [{ id: 10 }]]
+  assert.equal(spotlightCount(lists), 3)
+  assert.deepEqual(spotlightAt(lists, 0).map((p) => p.id), [1, 10])
+  assert.deepEqual(spotlightAt(lists, 2).map((p) => p.id), [3, 10])
+  assert.deepEqual(spotlightAt([[], [{ id: 10 }]], 1), [null, { id: 10 }])
+  assert.equal(spotlightCount([[], []]), 0)
+})
+
+// A club's roster: two hitters with October lines, a bench bat and a reliever with none, and a
+// starter with one.
+const person = (id, name, position, jersey) => ({ id, name, position, jersey })
+const POOL = {
+  roster: {
+    positionPlayers: [person(1, 'Top Bat', 'RF', '10'), person(2, 'Few PA', '1B', '11'), person(3, 'Bench Bat', 'C', '12'), person(4, 'Rookie', 'SS', '13')],
+    pitchers: [person(5, 'Starter', 'P', '20'), person(6, 'Closer', 'P', '21'), person(7, 'Mop Up', 'P', '22')],
+  },
+  hitP: [split(1, 'Top Bat', 30, '.950'), split(2, 'Few PA', 8, '1.500')],
+  hitR: [split(3, 'Bench Bat', 300, '.700')],
+  pitP: [{ player: { id: 5 }, stat: { inningsPitched: '12.1', era: '2.19' } }],
+  pitR: [{ player: { id: 6 }, stat: { inningsPitched: '60.0', era: '2.85' } }],
+}
+
+test('the whole roster is walked: hitters, then pitchers, then those with no October line', () => {
+  const list = spotlightRoster(POOL, { clubId: 7, season: 2026, started: true })
+  // Top Bat is the only regular; Few PA has a line but under MIN_PA; Starter is the one pitcher with October innings;
+  // then the rest of the hitters by regular-season PA (the rookie, with none, last), then the rest of the pitchers by
+  // regular-season innings (the mop-up man, with none, last).
+  assert.deepEqual(list.map((p) => p.name), ['Top Bat', 'Few PA', 'Starter', 'Bench Bat', 'Rookie', 'Closer', 'Mop Up'])
+  assert.deepEqual(list.map((p) => p.kind), ['hitter', 'hitter', 'pitcher', 'hitter', 'hitter', 'pitcher', 'pitcher'])
+})
+
+test('each player gets his October line, else his season line marked, else "No stats yet"', () => {
+  const figs = Object.fromEntries(spotlightRoster(POOL, { clubId: 7, season: 2026, started: true }).map((p) => [p.name, p.figs]))
+  assert.equal(figs['Top Bat'], '.950 OPS · 30 PA')
+  assert.equal(figs.Starter, '2.19 ERA · 12.1 IP')
+  assert.equal(figs['Bench Bat'], '.700 OPS · 300 PA · Season')
+  assert.equal(figs.Closer, '2.85 ERA · 60.0 IP · Season')
+  assert.equal(figs.Rookie, 'No stats yet')
+})
+
+test('the pre-Series pick leads until a game is played, and a long roster is cut at 26', () => {
+  PRE_SERIES_PICKS[2026][7] = 3
+  try {
+    assert.equal(spotlightRoster(POOL, { clubId: 7, season: 2026, started: false })[0].name, 'Bench Bat')
+    assert.equal(spotlightRoster(POOL, { clubId: 7, season: 2026, started: true })[0].name, 'Top Bat')
+  } finally {
+    delete PRE_SERIES_PICKS[2026][7]
+  }
+  const big = { roster: { positionPlayers: Array.from({ length: 40 }, (_, i) => person(100 + i, `P${i}`, 'LF', String(i))), pitchers: [] } }
+  assert.equal(spotlightRoster(big, { clubId: 7, season: 2026, started: true }).length, 26)
+})
+
+test('without a roster there is no list, and a split with no PA or innings is left out', () => {
+  assert.deepEqual(spotlightRoster({ roster: null }, { clubId: 7, season: 2026, started: true }), [])
+  assert.deepEqual(spotlightRoster(undefined, { clubId: 7, season: 2026, started: true }), [])
+  const idle = { roster: POOL.roster, hitP: [split(4, 'Rookie', 0, '.000')], pitP: [{ player: { id: 7 }, stat: { inningsPitched: '0.0', era: '-.--' } }] }
+  const figs = Object.fromEntries(spotlightRoster(idle, { clubId: 7, season: 2026, started: true }).map((p) => [p.name, p.figs]))
+  assert.equal(figs.Rookie, 'No stats yet')
+  assert.equal(figs['Mop Up'], 'No stats yet')
 })

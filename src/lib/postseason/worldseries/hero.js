@@ -5,8 +5,8 @@
 //   monthsOf      the calendar head's month label, from those cells.
 //   slabPlayer    the hitter drawn on a club's slab, from the hot-bat splits (fetchHotBatSplits,
 //                 which end the day before the slate date).
-//   playerClip    that hitter's newest play clip, from past games' /content items.
-import { classifyHighlight, isEligibleForPositiveFilter } from '../../../api/highlights.js'
+//   spotlightRoster  a club's whole roster in the order a tap on the art walks it, with a stat line each.
+//   storedClip    a player's newest play highlight, from the clubs' stored highlight files.
 import { gamePath } from '../../route.js'
 
 // 'Fri' and 23 from '2026-10-23'. Noon UTC keeps the date on its own day in every zone.
@@ -104,63 +104,120 @@ export function calendarDays(columns, slateDate) {
 export const PRE_SERIES_PICKS = { 2026: { 139: 650490, 158: 641343 } }
 export const MIN_PA = 25
 
-const shape = (s) => ({
-  id: s.player?.id ?? null,
-  name: s.player?.fullName ?? '',
-  pos: s.position?.abbreviation ?? '',
-  pa: Number(s.stat?.plateAppearances) || 0,
-  ops: s.stat?.ops ?? '',
-})
 const opsOf = (row) => Number.parseFloat(row.ops)
-
-// -> { id, name, pos, pa, ops } or null. `started`: a Series game has been played before the
-// slate date. The rule: the best OPS among hitters with MIN_PA or more (a tie goes to more PA);
-// with nobody at MIN_PA, the most PA. "-.--" parses to NaN and never wins on OPS.
-export function slabPlayer(splits, { clubId, season, started }) {
-  const rows = (splits ?? []).map(shape).filter((r) => r.id && r.pa > 0)
-  if (!rows.length) return null
-  const chosen = started ? null : PRE_SERIES_PICKS[Number(season)]?.[clubId]
-  const pick = chosen && rows.find((r) => r.id === chosen)
-  if (pick) return pick
-  const regulars = rows.filter((r) => r.pa >= MIN_PA && Number.isFinite(opsOf(r)))
-  if (regulars.length) {
-    return regulars.reduce((best, r) => (opsOf(r) > opsOf(best) || (opsOf(r) === opsOf(best) && r.pa > best.pa) ? r : best))
+const hitFigs = (r) => `${Number.isFinite(opsOf(r)) ? r.ops : '—'} OPS · ${r.pa} PA`
+const shape = (s) => {
+  const row = {
+    id: s.player?.id ?? null,
+    name: s.player?.fullName ?? '',
+    pos: s.position?.abbreviation ?? '',
+    pa: Number(s.stat?.plateAppearances) || 0,
+    ops: s.stat?.ops ?? '',
+    kind: 'hitter',
   }
-  return rows.reduce((best, r) => (r.pa > best.pa ? r : best))
+  return { ...row, figs: hitFigs(row) }
 }
 
-// The games whose clips the play buttons read: each club's last `perClub` postseason games
-// before the slate date, from fetchClubGames' rows, once each (a Series game is both clubs').
-// Few on purpose: every game is one /content read on page load. Sorted by gamePk, so the list
-// (and the fetch key built from it) is the same whichever club comes first.
-export function clipSources(clubGames, clubIds, slateDate, { perClub = 3 } = {}) {
-  const seen = new Set()
-  const out = []
-  for (const id of clubIds ?? []) {
-    const rows = (clubGames?.[id] ?? []).filter((g) => g.gamePk && g.date && g.date < slateDate)
-    const last = [...rows].sort((a, b) => a.date.localeCompare(b.date)).slice(-perClub)
-    for (const g of last) {
-      if (seen.has(g.gamePk)) continue
-      seen.add(g.gamePk)
-      out.push({ gamePk: g.gamePk, date: g.date, gameNumber: g.gameNumber ?? 1 })
+// How many hitters the slab cycles through from the hot-bat splits alone, until the roster has loaded.
+export const SPOTLIGHT_SIZE = 4
+
+const byOps = (a, b) => opsOf(b) - opsOf(a) || b.pa - a.pa
+
+// -> [{ id, name, pos, pa, ops }], best first, at most `limit`; [] with no splits. `started`: a
+// Series game has been played before the slate date. First comes the pre-Series pick (until a
+// game is played), then the hitters with MIN_PA or more by OPS (a tie goes to more PA; "-.--"
+// parses to NaN and never qualifies), then everyone else by PA.
+export function slabPlayers(splits, { clubId, season, started }, limit = SPOTLIGHT_SIZE) {
+  const rows = (splits ?? []).map(shape).filter((r) => r.id && r.pa > 0)
+  const chosen = started ? null : PRE_SERIES_PICKS[Number(season)]?.[clubId]
+  const regulars = rows.filter((r) => r.pa >= MIN_PA && Number.isFinite(opsOf(r))).sort(byOps)
+  const rest = rows.filter((r) => !regulars.includes(r)).sort((a, b) => b.pa - a.pa)
+  return [...new Set([rows.find((r) => r.id === chosen), ...regulars, ...rest])].filter(Boolean).slice(0, limit)
+}
+
+// The one hitter the slab shows first: the head of `slabPlayers`, or null.
+export const slabPlayer = (splits, opts) => slabPlayers(splits, opts, 1)[0] ?? null
+
+// A tap on the art steps both slabs to the next hitter on each club's list. A club with a shorter
+// list wraps on its own, so both slabs show someone while either club has someone to show.
+export const spotlightCount = (lists) => Math.max(0, ...lists.map((l) => l.length))
+export const spotlightAt = (lists, step) => lists.map((l) => (l.length ? l[step % l.length] : null))
+
+// The whole roster, for the tap to walk. A club names 26 for the Series (POSTSEASON_ROSTER_SIZE in
+// api/postseason/roster.js); before it does, the current roster can run longer, so the list is cut at 26.
+export const SPOTLIGHT_ROSTER_SIZE = 26
+
+// "62.1" innings is 187 outs: thirds, so two lines sort by what they threw.
+const outsOf = (ip) => {
+  const [whole, third = '0'] = String(ip ?? '').split('.')
+  const n = Number(whole) * 3 + Number(third)
+  return Number.isFinite(n) ? n : 0
+}
+const pitchRow = (s) => ({ id: s.player?.id ?? null, ip: s.stat?.inningsPitched ?? '', era: s.stat?.era ?? '', outs: outsOf(s.stat?.inningsPitched) })
+const pitchFigs = (r) => `${Number.isFinite(Number.parseFloat(r.era)) ? r.era : '—'} ERA · ${r.ip} IP`
+const byId = (rows) => new Map(rows.filter((r) => r.id).map((r) => [r.id, r]))
+
+// -> [{ id, name, pos, kind, figs }], at most `limit`, for one club. `pool` is
+// api/postseason/spotlightPool.js's { roster, hitR, pitP, pitR } plus `hitP`, the postseason hitting
+// splits the home already reads; [] without a roster (the caller falls back to slabPlayers).
+// Order: the pre-Series pick (until a game is played); postseason hitters by OPS (MIN_PA or more
+// first), then by PA; postseason pitchers by innings; then everyone with no October line, hitters
+// by regular-season PA and pitchers by innings, the unused last, by jersey. A player with no
+// postseason line shows his regular-season one, marked "Season"; with neither, "No stats yet".
+export function spotlightRoster(pool, { clubId, season, started }, limit = SPOTLIGHT_ROSTER_SIZE) {
+  const people = [...(pool?.roster?.positionPlayers ?? []), ...(pool?.roster?.pitchers ?? [])].filter((p) => p.id)
+  const hitP = byId((pool?.hitP ?? []).map(shape).filter((r) => r.pa > 0))
+  const hitR = byId((pool?.hitR ?? []).map(shape).filter((r) => r.pa > 0))
+  const pitP = byId((pool?.pitP ?? []).map(pitchRow).filter((r) => r.outs > 0))
+  const pitR = byId((pool?.pitR ?? []).map(pitchRow).filter((r) => r.outs > 0))
+  const chosen = started ? null : PRE_SERIES_PICKS[Number(season)]?.[clubId]
+  return people
+    .map((p) => {
+      const pitcher = p.position === 'P'
+      const post = (pitcher ? pitP : hitP).get(p.id)
+      const row = post ?? (pitcher ? pitR : hitR).get(p.id)
+      const amount = pitcher ? (row?.outs ?? 0) : (row?.pa ?? 0)
+      const regular = !pitcher && post && post.pa >= MIN_PA && Number.isFinite(opsOf(post))
+      const tier = p.id === chosen ? 0 : regular ? 1 : post ? (pitcher ? 3 : 2) : pitcher ? 5 : 4
+      return {
+        entry: {
+          id: p.id,
+          name: p.name,
+          pos: p.position,
+          kind: pitcher ? 'pitcher' : 'hitter',
+          figs: row ? `${pitcher ? pitchFigs(row) : hitFigs(row)}${post ? '' : ' · Season'}` : 'No stats yet',
+        },
+        tier,
+        ops: tier === 1 ? opsOf(post) : 0,
+        amount,
+        jersey: Number(p.jersey) || 99,
+      }
+    })
+    .sort((a, b) => a.tier - b.tier || b.ops - a.ops || b.amount - a.amount || a.jersey - b.jersey || a.entry.name.localeCompare(b.entry.name))
+    .slice(0, limit)
+    .map((r) => r.entry)
+}
+
+// A player's highlight, from the clubs' stored files (public/data/highlights/{teamId}.json, the
+// nightly gen-highlights.mjs; src/api/gamehighlights.js reads them). `files` are those files'
+// answers. A hitter's is any play clip crediting him that is not a pitching one (a strikeout of him
+// credits the pitcher); a pitcher's is a pitching one. The newest from a game in `gamePks` (the
+// Series clubs' postseason games) wins; a player with none there gets his newest from earlier in
+// the season, so a bench bat or a reliever who has not played in October still has one to watch.
+// Only games dated before the slate date count. Null for none.
+export function storedClip(files, player, { slateDate, gamePks }) {
+  if (!player?.id) return null
+  let postseason = null
+  let season = null
+  for (const file of files ?? []) {
+    for (const game of file?.games ?? []) {
+      if (!(game.date < slateDate)) continue
+      const clip = (game.clips ?? []).find((c) => c.playerId === player.id && (c.category === 'pitching') === (player.kind === 'pitcher'))
+      if (!clip) continue
+      const found = { ...clip, gamePk: game.gamePk, date: game.date }
+      if (gamePks?.has(game.gamePk) && (!postseason || found.date > postseason.date)) postseason = found
+      if (!season || found.date > season.date) season = found
     }
   }
-  return out.sort((a, b) => a.gamePk - b.gamePk)
-}
-
-// The player's clip from the newest game that has one: a play highlight tagged with his id.
-// `games` are [{ date, gameNumber, clips }], all dated before the slate date (the fetch drops
-// the rest). A recap or a condensed game carries no player id, so it never matches. A pitching
-// clip can name the hitter too (a strikeout of him), so it never counts as his highlight.
-export function playerClip(games, playerId) {
-  if (!playerId) return null
-  const newest = [...(games ?? [])].sort((a, b) => b.date.localeCompare(a.date) || b.gameNumber - a.gameNumber)
-  for (const g of newest) {
-    const hit = (g.clips ?? []).find((c) => {
-      const k = classifyHighlight(c)
-      return k.playerId === playerId && k.category !== 'pitching' && isEligibleForPositiveFilter(k)
-    })
-    if (hit) return hit
-  }
-  return null
+  return postseason ?? season
 }
