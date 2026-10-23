@@ -582,8 +582,8 @@ export default defineConfig({
               // files, the league file beside the buckets. Each season adds its
               // own URLs, so it belongs here, uncounted, not in the rule above.
               /^\/data\/(?:fouls|abs|pitch-arsenal|pitch-arsenal-pool|pitch-arsenal-starts|pitch-command|hitter-grid)\/(?:seasons|\d{4}\/[^/]+)\.json$/.test(url.pathname) ||
-              // One file per MATCHUP, keyed by the two team ids ascending.
-              /^\/data\/former-teammates\/\d+-\d+\.json$/.test(url.pathname) ||
+              // One file per MATCHUP, keyed by the two team ids ascending (former teammates; played for both).
+              /^\/data\/(?:former-teammates|played-for-both)\/\d+-\d+\.json$/.test(url.pathname) ||
               // One video-highlight file per club.
               /^\/data\/highlights\/\d+\.json$/.test(url.pathname) ||
               // Team Transactions: one club, one season.

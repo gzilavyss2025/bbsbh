@@ -315,7 +315,7 @@ export function TeamHubShell({
             wrong: "View as of a date" invites the reader to date a page that
             will not date. Dating the ledger for real would need Cot's contract
             HISTORY, which the feed does not carry. */}
-        {datable && !isYearView(asOf) && <AsOfBanner asOf={asOf} sportId={sportId} />}
+        {datable && <AsOfBanner asOf={asOf} sportId={sportId} />}
       </div>
     </LinkScope>
   )

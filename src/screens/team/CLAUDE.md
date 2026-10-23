@@ -35,7 +35,7 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
   through the cutoff-gated `rankOf`. `hasRecords` hides the card, its head and its count when no
   game counted at the cutoff.
 - **Ranks** (`next/ranks/`): batting and pitching ranks, leaders, run value and the ABS challenge
-  card, on `loadRanks`. The challenge card (`ChallengeBoard.jsx`, parts in `ranks/challenges/`) draws a face a player on a plot and a scrolling list; its model is `api/around-the-game/absClubCard.js`, and a face or photo opens the global hover card with the card's own figures (`playerHoverStore`'s `detail`). Absent for a club with no league id. The run value card (`RunValueBoard.jsx`, parts in `ranks/runvalue/`) re-ranks its top six by a part on a tap; spec `.scratch/run-value-motion/handoff.md`. A card that needs MLB data draws
+  card, on `loadRanks`. The challenge card (`ChallengeBoard.jsx`, parts in `ranks/challenges/`) draws a face a player on a plot and a scrolling list; its model is `api/around-the-game/absClubCard.js`, and a face or photo opens the global hover card with the card's own figures (`playerHoverStore`'s `detail`). Absent for a club with no league id. The run value card (`RunValueBoard.jsx`, parts in `ranks/runvalue/`; none unless the file holds the page's season) re-ranks its top six by a part on a tap; spec `.scratch/run-value-motion/handoff.md`. A card that needs MLB data draws
   nothing for a club below it.
   A Regular / Postseason switch sits over the leaders once the club has a postseason game with a result (`loadPostseasonLeaders`, #1437; the stats read is `gameType=P`, only after that gate). The rank cells stay regular season.
 - **Games** (`next/games/`): the **season grid** (`SeasonGrid.jsx`, model `seasonGrid.js`, ADR-0119),
@@ -57,7 +57,7 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
 - **Foot** (`next/foot/`): not a band, no jump-bar button. The level's other clubs with the
   Affiliate chip, and the Game Notes card. It adds no request.
 
-Every link keeps `?d=` and `?s=` (the shell wraps the page in `LinkScope`). `?y=2018` is a past season: the as-of `2018-12-31` with no date labels (`isYearView`, `lib/dates.js`); `?d=` wins when both are present. Open surface
+Every link keeps `?d=` and `?s=` (the shell wraps the page in `LinkScope`). `?y=2018` is a past season: the as-of `2018-12-31` with no date labels (`isYearView`, `lib/dates.js`); the banner reads "Season 2018" with Show current; `?d=` wins when both are present. Open surface
 (ADR-0034, "The cutoff is opt-in now"): nothing here is sealed, and adding a gate is a regression.
 Motion plays once per page visit: every band reads `useViewOnce(team.id, band, ready)` (`hooks/motion/useViewOnce.js`, `docs/motion.md`).
 

@@ -330,6 +330,33 @@ test('threePointWall hits the three signs, ends on the foul lines and has no kin
   assert.equal(threePointWall({ lf: 330, lc: null, cf: null, rc: null, rf: 330 }), null)
 })
 
+test('threePointWall bends through a single posted gap sign', () => {
+  const radius = (p) => Math.hypot(p[0], p[1])
+  const nearBearing = (wall, deg) => wall.reduce((a, p) => (Math.abs(bearing(p) - deg) < Math.abs(bearing(a) - deg) ? p : a))
+  const flat = threePointWall({ lf: 335, lc: null, cf: 400, rc: null, rf: 375 })
+  for (const [posted, deg, ft] of [
+    [{ lf: 335, lc: 390, cf: 400, rc: null, rf: 375 }, -22.5, 390],
+    [{ lf: 335, lc: null, cf: 400, rc: 360, rf: 375 }, 22.5, 360],
+  ]) {
+    const wall = threePointWall(posted)
+    assert.ok(Math.abs(radius(nearBearing(wall, deg)) - ft) < 0.5, `hits the ${deg} degree sign`)
+    assert.ok(Math.abs(radius(nearBearing(wall, deg)) - radius(nearBearing(flat, deg))) > 3, 'not the flat estimate')
+    assert.ok(Math.abs(radius(wall[0]) - 335) < 0.5 && Math.abs(radius(wall.at(-1)) - 375) < 0.5)
+    assert.ok(Math.abs(radius(wall[Math.floor(wall.length / 2)]) - 400) < 0.5)
+    assert.deepEqual(fenceProblems(clipToFoulLines(wall)), [])
+  }
+})
+
+test('threePointWall leaves the unposted gap on the parabola, even for a deep posted gap', () => {
+  const radius = (p) => Math.hypot(p[0], p[1])
+  const at = (wall, deg) => radius(wall.reduce((a, p) => (Math.abs(bearing(p) - deg) < Math.abs(bearing(a) - deg) ? p : a)))
+  // 330 / 400 / 330 gives 382.5 ft at both gaps; a 345 ft left-center sign is a deep dent.
+  const wall = threePointWall({ lf: 330, lc: 345, cf: 400, rc: null, rf: 330 })
+  assert.ok(Math.abs(at(wall, -22.5) - 345) < 0.5, 'hits the posted gap')
+  assert.ok(Math.abs(at(wall, 22.5) - 382.5) < 1, 'the other gap stays on the parabola, not pushed past center')
+  assert.deepEqual(fenceProblems(clipToFoulLines(wall)), [])
+})
+
 test('every stored minor-league outline fits its posted signs and is a valid fence', () => {
   const venues = Object.entries(FIELDS.milb.venues)
   assert.ok(venues.length > 50, 'the import covers the minor-league parks')

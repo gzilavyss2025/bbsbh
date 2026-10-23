@@ -238,7 +238,9 @@ export async function loadRanks(id, asOf, src = DIRECT) {
   // api/around-the-game/runValue.js). Null when the club has nobody in the
   // file at all, which is every MiLB affiliate and, in the first days of a
   // season, possibly a real club too.
-  const clubRuns = clubRunValue(runValueData, id)
+  // The file is one season's board: a page for any other season draws no card (its `season` is the
+  // file's own, so January, before the nightly roll-over, still reads right).
+  const clubRuns = runValueData?.season === season ? clubRunValue(runValueData, id) : null
   const clubs = clubRuns ? clubBoard(runValueData) : []
   const runValue = clubRuns
     ? {
