@@ -17,6 +17,7 @@ Needs Node 22 (global `WebSocket` and `fetch`) and, for the browser check, `npm 
 ```bash
 cd .scratch/live-push-spike
 node selftest.mjs                          # offline: redaction and the patch applier, against a finished game
+node replay-check.mjs 870064 60            # recent patches of one game, checked against snapshots
 node capture.mjs --gamePk=849805           # live: socket, push-triggered diffPatch, summary
 node browser-check.mjs --gamePk=849805     # does a browser (with an Origin header) get in?
 ```
@@ -37,6 +38,8 @@ serves for the same timecode), `--noDiff` (socket only), `--out=<dir>`.
 | `patch.mjs` | Immutable RFC 6902 applier. Always returns a new root object (ADR-0007). |
 | `selftest.mjs` | Offline checks: no value leaks through `shape`, and real patches merge to the served snapshot. |
 | `capture.mjs` | The live capture. |
+| `replay-check.mjs` | Replays recent patches of a game and checks every merge against the served snapshot. |
+| `own-stamp-check.mjs` | Checks that a plain full feed matches the snapshot for its own timestamp. |
 | `browser-check.mjs` | Opens the socket from a page in headless Chromium and reports the handshake and the close. |
 | `findings.md` | The write-up. |
 

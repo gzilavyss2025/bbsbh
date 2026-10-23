@@ -76,6 +76,7 @@ const stats = {
   ageSec: { patch: [], fallback: [] },
   coalesced: [],
   verify: { runs: 0, equal: 0, mismatch: 0, mismatchAt: {} },
+  fallbackStampIsStart: 0,
 }
 
 // ---- feed state ---------------------------------------------------------------
@@ -176,13 +177,16 @@ async function oneUpdate(coalesced) {
     return
   }
   if (body && body.gamePk === gamePk && body.metaData) {
-    // diffPatch answered with a whole feed: the start timecode was too old.
+    // diffPatch answered with a whole feed. Do NOT keep it: its metaData.timeStamp
+    // is the START stamp while its content is not the state at that stamp (found
+    // replaying 870064: the body differs from the snapshot for its own stamp). A
+    // patch built on it applied to the wrong base ("bad index"). A plain
+    // /feed/live is consistent with its own stamp (12 of 12 checks), so refetch it.
     stats.diff.fallback++
     stats.ageSec.fallback.push(ageSec)
-    stats.gz.fullLatest = gz
-    ev('diff', { outcome: 'fallback', ageSec, ms, gz })
-    doc = body
-    return
+    if (body.metaData.timeStamp === lastTs) stats.fallbackStampIsStart++
+    ev('diff', { outcome: 'fallback', ageSec, ms, gz, stampIsStart: body.metaData.timeStamp === lastTs })
+    return resync('fallback')
   }
   stats.diff.odd++
   ev('diff', { outcome: 'odd-shape', ageSec, ms })
@@ -286,7 +290,11 @@ function connect() {
       ev('ack', { bytes })
       return
     }
-    const key = JSON.stringify(json === undefined ? `<non-json ${bytes} bytes>` : shape(json))
+    // Group by structure: array lengths and string lengths vary push to push.
+    const key = JSON.stringify(json === undefined ? '<non-json>' : shape(json))
+      .replace(/"\d+ x"/g, '"n x"')
+      .replace(/<array \d+>/g, '<array>')
+      .replace(/<str \d+>/g, '<str>')
     stats.pushes++
     stats.pushBytes += bytes
     stats.pushTimes.push(since())
