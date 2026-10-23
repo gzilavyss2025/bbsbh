@@ -6,7 +6,7 @@ anchor jump bar (`bar` prop), one `Band` per `BANDS` entry (`next/bands.js`), an
 mounts its folder (`next/<band>/index.jsx`) only when near (`useNearView`), so nothing loads
 before it is. **A band edits only its own folder**, never `bands.js`, `Band.jsx` or the page.
 Module props: `{ team, asOf, sportId, onReady, onCount }`; call `useBandData` for the two reports.
-Absent bands come from `hiddenTeamSections(team)` (`data/shared.js`; the league test comes first).
+Absent bands come from `hiddenTeamSections(team, { pastSeason })` (`data/shared.js`; the league test comes first). A past season hides Money, and Farm keeps only Affiliates (`loadMinors` returns no prospects).
 `/team/{id}/leaders`, `stamp-in`, `photos` and `transactions` are separate pages, not bands.
 
 **Each band loads only its own data.** One `data/load{Band}.js` per band, never a shared

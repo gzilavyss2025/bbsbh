@@ -405,8 +405,10 @@ export function parentOrgIdOf(team) {
 // sport test: /team/11 is `sport.id: 1` with a league that has no id, and a sport-first
 // early return waved it through (#1143). Standings and About are never hidden; Games and
 // Roster are not either, since every club plays a schedule and keeps a roster.
-export function hiddenTeamSections(team) {
+// `pastSeason` (the page's season is over, #2593): Money is a current-only ledger, so it is absent.
+export function hiddenTeamSections(team, { pastSeason = false } = {}) {
   const hidden = new Set()
+  if (pastSeason) hidden.add('money')
   if (!team.league?.id) hidden.add('ranks')
   if ((team.sport?.id ?? 1) !== 1) {
     hidden.add('money') // Cot's covers the major leagues only

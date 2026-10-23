@@ -9,7 +9,10 @@ import '../../../../styles/team-next/farm.css'
 // Farm: the Minors cards (MinorsBody) on their own loader, re-skinned to the
 // stamped card by farm.css (row 6d, #1107). The badge is the prospect count, as the old band
 // had it. Motion plays once per page visit (docs/motion.md, "The one-shot gate").
-const count = (m) => m.prospects.length
+// A past season draws the Affiliates card (and a MiLB club's affiliation history) and nothing that
+// knows only today, so its badge counts the cards drawn rather than prospects (#2593).
+const count = (m) =>
+  m.pastSeason ? Number(m.affiliateCards.length > 0) + Number(m.isMilb && m.affiliationHistory.length > 0) : m.prospects.length
 export default function Farm({ team, asOf, onReady, onCount }) {
   const minors = useBandData(() => loadMinors(team.id, asOf, SHARED), [team.id, asOf], { onReady, onCount, count })
   const still = useViewOnce(team.id, 'team-farm')

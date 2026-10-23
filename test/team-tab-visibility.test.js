@@ -59,6 +59,15 @@ test('an MLB club with a league keeps all seven bands', () => {
   assert.deepEqual(hiddenTeamSections({ sport: { id: 1 }, league: { id: 103 }, parentOrgId: null }), new Set())
 })
 
+// A past season (#2593): Money is a current-only ledger (ADR-0052), so it is absent too.
+test('a past season hides Money; a current one is unchanged', () => {
+  const mlb = { sport: { id: 1 }, league: { id: 103 }, parentOrgId: null }
+  assert.deepEqual(hiddenTeamSections(mlb, { pastSeason: true }), new Set(['money']))
+  assert.deepEqual(hiddenTeamSections(mlb, { pastSeason: false }), new Set())
+  assert.deepEqual(hiddenTeamSections(mlb, {}), new Set())
+  assert.deepEqual(hiddenTeamSections({ sport: { id: 1 }, league: {} }, { pastSeason: true }), new Set(['ranks', 'money']))
+})
+
 test('an affiliate loses Money, and Farm only when it has no parent org', () => {
   assert.deepEqual(hiddenTeamSections({ sport: { id: 11 }, league: { id: 117 }, parentOrgId: 158 }), new Set(['money']))
   assert.deepEqual(
