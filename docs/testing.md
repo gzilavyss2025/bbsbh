@@ -131,6 +131,18 @@ guarantee at the **data layer** deterministically in CI, so a regression in the
 reveal-only selectors is caught automatically even though the browser specs
 aren't.
 
+## Rendered-style audits — `scripts/audit/` (by hand, not CI-gated)
+
+Three Playwright scripts that read what a page really paints, which CSS cannot say. Run each
+against `npm run preview`; the shared flags are `--routes /a,/b` (default: every route in
+`e2e/visual/routes.js`), `--widths 390,1024` and `--base URL`. Each prints one line per finding.
+
+- `find-by-text.mjs --text "Film room"`: use when grep cannot say which class paints some text. Prints its computed style and class chain.
+- `clickable-colors.mjs [--color "rgb(…)"]`: use when moving links or buttons off a colour. Groups clickable text by computed colour and class.
+- `rendered-contrast.mjs --selector "a, button" [--min 4.5]`: use for the contrast of elements as drawn, on the background behind each one. `scripts/check-contrast.mjs` only checks declared token pairs. An ancestor with a gradient or image reads "image" and its ratio is a guess.
+
+`?nointro` is added to every URL, and each page is scrolled in 1000px steps so lazy bands mount.
+
 ## Screenshot suite — `npm run visual` (not CI-gated)
 
 A design-system change moves many pages at once: one edit to `Pill`, `Card` or a
