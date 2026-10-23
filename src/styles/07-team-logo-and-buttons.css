@@ -246,7 +246,7 @@
   font-family: var(--font-display);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
 }
 
 .gamecard__readypill-pips {

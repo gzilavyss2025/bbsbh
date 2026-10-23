@@ -368,7 +368,7 @@
   color: var(--graphite);
 }
 .txntl__chip--add {
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
   border-color: var(--accent-positive);
   background: var(--field-soft);
 }

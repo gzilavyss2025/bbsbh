@@ -436,7 +436,7 @@
   color: var(--text-body);
 }
 .scorebug__team--his b {
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
 }
 .scorebug__inning {
   margin-left: auto;
@@ -484,7 +484,7 @@
 .scorebug__result--positive {
   --pill-fill: var(--field-soft);
   --pill-edge: color-mix(in srgb, var(--accent-positive) 35%, var(--border-rule));
-  --pill-ink: var(--accent-positive-deep);
+  --pill-ink: var(--accent-positive);
 }
 .scorebug__result--negative {
   --pill-fill: var(--clay-soft);

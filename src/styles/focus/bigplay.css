@@ -40,7 +40,7 @@
   padding: var(--space-2) var(--space-4);
   border: 3px solid currentColor;
   border-radius: var(--radius-sm);
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
   background: var(--surface-card);
   font-family: var(--font-display);
   text-transform: uppercase;

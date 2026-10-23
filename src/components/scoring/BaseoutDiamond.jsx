@@ -1,6 +1,6 @@
 // A "which bases are occupied" diamond for compact game-state widgets (the
 // Foul Tracker's PA-highs scorebug). Deliberately its OWN component rather
-// than a second use of a brand-style glyph: bright --field green and
+// than a second use of a brand-style glyph: bright --accent-positive green and
 // rotated-square base dots read as a logo/sticker when dropped into a dense
 // data widget, not as scorekeeping notation. (The app did carry such a mark,
 // DiamondGlyph — deleted as dead code once TallyBrand took over the identity

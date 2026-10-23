@@ -419,7 +419,7 @@
 .tier__tag--elite {
   --pill-fill: var(--field-soft);
   --pill-edge: var(--accent-positive);
-  --pill-ink: var(--accent-positive-deep);
+  --pill-ink: var(--accent-positive);
 }
 .tier__tag--good {
   --pill-fill: var(--award-soft);

@@ -445,7 +445,7 @@
   color: var(--graphite);
 }
 /* The team card's own three-tone map, so a move reads the same on both. */
-.wire__type--add { color: var(--accent-positive-deep); }
+.wire__type--add { color: var(--accent-positive); }
 .wire__type--out { color: var(--clay-deep); }
 .wire__type--move { color: var(--text-muted); }
 

@@ -21,7 +21,7 @@ export const clerkAppearance = {
     colorInputBackground: '#FFFDF6', // --paper-3 / --surface-inset
     colorInputText: '#1B2A3A', // --ink-1
     colorDanger: '#B4453A', // --clay / --accent-negative
-    colorSuccess: '#2F6E4F', // --field / --accent-positive
+    colorSuccess: '#2F6E4F', // --accent-positive
     colorWarning: '#B5824A', // --seal (kraft amber)
     colorNeutral: '#1B2A3A', // --ink-1 — Clerk mixes its grays from this
     fontFamily: '"IBM Plex Sans", system-ui, sans-serif', // --font-body

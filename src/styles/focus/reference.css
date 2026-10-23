@@ -77,7 +77,7 @@
    text itself (K, 6-3, BB) is the distinction, and colour is reserved for the
    two outcomes worth spotting at a glance. */
 .trailcell--hit .trailcell__code {
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
 }
 
 .trailcell--error .trailcell__code {

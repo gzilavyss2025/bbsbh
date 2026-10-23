@@ -138,7 +138,7 @@
    type (see TYPE_TONE in MoveRow.jsx, shared with the wire) rather than per
    row. A story the pipeline typed `roster-move` gets NO pill at all — see that
    constant for why a label on a third of the rows is not a label. */
-.txstory__type--add { color: var(--accent-positive-deep); }
+.txstory__type--add { color: var(--accent-positive); }
 .txstory__type--out { color: var(--clay-deep); }
 .txstory__type--move { color: var(--text-muted); }
 

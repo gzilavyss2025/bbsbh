@@ -120,7 +120,7 @@
 .splitsmod__flag {
   flex: none;
   display: block;
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
 }
 .splitsmod__flag.is-weak {
   color: var(--clay-deep);

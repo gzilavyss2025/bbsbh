@@ -232,7 +232,7 @@
   border-color: var(--clay);
 }
 .pqual__stamp--good {
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
   border-color: var(--accent-positive);
 }
 #root .pqual__num {

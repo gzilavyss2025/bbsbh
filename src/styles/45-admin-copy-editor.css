@@ -363,7 +363,7 @@
 .awardord__mv:hover:not(:disabled) {
   background: var(--field-soft);
   border-color: var(--accent-hover);
-  color: var(--accent-positive-deep);
+  color: var(--accent-positive);
 }
 .awardord__mv:disabled {
   opacity: 0.35;
