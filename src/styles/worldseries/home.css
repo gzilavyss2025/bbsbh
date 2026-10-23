@@ -22,10 +22,6 @@
 .ww-top__side {
   align-items: start;
 }
-/* The cards keep their own heights: a bracket stretched to Probables' height is a card of empty paper. */
-.ww-top__side {
-  align-items: start;
-}
 @media (min-width: 1000px) {
   .ww-top {
     grid-template-columns: minmax(0, 1fr) 358px;

@@ -2,7 +2,7 @@
 // each club's slab, and the clip behind a slab's play button.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { PRE_SERIES_PICKS, calendarDays, monthsOf, nextGamePath, slabPlayer, slabPlayers, spotlightAt, spotlightCount, spotlightRoster, storedClip, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
+import { PRE_SERIES_PICKS, calendarDays, monthsOf, nextGamePath, slabPlayers, spotlightAt, spotlightCount, spotlightRoster, storedClip, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../src/lib/postseason/worldseries/ledger.js'
 
 // The 2026 Series as the bracket gives it before Game 1: seven dated games, three if needed.
@@ -93,6 +93,8 @@ test('with format dates the calendar has every game dated and the off day before
   assert.deepEqual(days.filter((d) => d.kind === 'off').map((d) => d.date), ['2026-10-25', '2026-10-29'])
 })
 
+// The first hitter on a club's slab, or null.
+const slabPlayer = (splits, opts) => slabPlayers(splits, opts, 1)[0] ?? null
 const split = (id, name, pa, ops, pos = 'RF') => ({ player: { id, fullName: name }, position: { abbreviation: pos }, stat: { plateAppearances: pa, ops } })
 const RAYS = [
   split(650490, 'Yandy Díaz', 41, '.905', 'DH'),
@@ -324,4 +326,28 @@ test('without a roster there is no list, and a split with no PA or innings is le
   const figs = Object.fromEntries(spotlightRoster(idle, { clubId: 7, season: 2026, started: true }).map((p) => [p.name, p.figs]))
   assert.equal(figs.Rookie, 'No stats yet')
   assert.equal(figs['Mop Up'], 'No stats yet')
+})
+
+test('the hot-bat list that shows before the roster loads is the front of the roster list', () => {
+  // So the pool landing does not change the pair on screen: both orders agree on the hitters they share.
+  const roster = { positionPlayers: [...RAYS, ...BREWERS].map((s) => person(s.player.id, s.player.fullName, 'RF', '1')), pitchers: [] }
+  for (const [splits, clubId] of [[RAYS, 139], [BREWERS, 158]]) {
+    const options = { clubId, season: 2026, started: false }
+    const early = slabPlayers(splits, options).map((p) => p.id)
+    const full = spotlightRoster({ roster, hitP: splits }, options).map((p) => p.id)
+    assert.deepEqual(full.slice(0, early.length), early)
+  }
+})
+
+test('a two-way player is a hitter, unless only his pitching has a line', () => {
+  const roster = { positionPlayers: [person(9, 'Two Way', 'TWP', '17'), person(8, 'Both Ways', 'TWP', '18')], pitchers: [] }
+  const pool = {
+    roster,
+    hitP: [split(8, 'Both Ways', 30, '.800')],
+    pitP: [{ player: { id: 9 }, stat: { inningsPitched: '6.0', era: '1.50' } }, { player: { id: 8 }, stat: { inningsPitched: '2.0', era: '0.00' } }],
+  }
+  const list = spotlightRoster(pool, { clubId: 7, season: 2026, started: true })
+  const by = Object.fromEntries(list.map((p) => [p.name, p]))
+  assert.deepEqual([by['Both Ways'].kind, by['Both Ways'].figs], ['hitter', '.800 OPS · 30 PA'])
+  assert.deepEqual([by['Two Way'].kind, by['Two Way'].figs], ['pitcher', '1.50 ERA · 6.0 IP'])
 })

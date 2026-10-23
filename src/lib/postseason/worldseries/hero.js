@@ -3,8 +3,9 @@
 //   calendarDays  the Series as day cells, from ledgerModel's `columns`. Nothing here reads a
 //                 result: a cell knows its date, its game number and its state, never a run.
 //   monthsOf      the calendar head's month label, from those cells.
-//   slabPlayer    the hitter drawn on a club's slab, from the hot-bat splits (fetchHotBatSplits,
-//                 which end the day before the slate date).
+//   slabPlayers   the hitters drawn on a club's slab, best first, from the hot-bat splits
+//                 (fetchHotBatSplits, which end the day before the slate date).
+//   spotlightAt   the pair a tap shows; spotlightCount, how many pairs there are.
 //   spotlightRoster  a club's whole roster in the order a tap on the art walks it, with a stat line each.
 //   storedClip    a player's newest play highlight, from the clubs' stored highlight files.
 import { gamePath } from '../../route.js'
@@ -135,9 +136,6 @@ export function slabPlayers(splits, { clubId, season, started }, limit = SPOTLIG
   return [...new Set([rows.find((r) => r.id === chosen), ...regulars, ...rest])].filter(Boolean).slice(0, limit)
 }
 
-// The one hitter the slab shows first: the head of `slabPlayers`, or null.
-export const slabPlayer = (splits, opts) => slabPlayers(splits, opts, 1)[0] ?? null
-
 // A tap on the art steps both slabs to the next hitter on each club's list. A club with a shorter
 // list wraps on its own, so both slabs show someone while either club has someone to show.
 export const spotlightCount = (lists) => Math.max(0, ...lists.map((l) => l.length))
@@ -173,7 +171,9 @@ export function spotlightRoster(pool, { clubId, season, started }, limit = SPOTL
   const chosen = started ? null : PRE_SERIES_PICKS[Number(season)]?.[clubId]
   return people
     .map((p) => {
-      const pitcher = p.position === 'P'
+      // A two-way player is read as a hitter, unless only his pitching has a line.
+      const twoWayPitcher = p.position === 'TWP' && !hitP.has(p.id) && !hitR.has(p.id) && (pitP.has(p.id) || pitR.has(p.id))
+      const pitcher = p.position === 'P' || twoWayPitcher
       const post = (pitcher ? pitP : hitP).get(p.id)
       const row = post ?? (pitcher ? pitR : hitR).get(p.id)
       const amount = pitcher ? (row?.outs ?? 0) : (row?.pa ?? 0)
@@ -200,7 +200,8 @@ export function spotlightRoster(pool, { clubId, season, started }, limit = SPOTL
 
 // A player's highlight, from the clubs' stored files (public/data/highlights/{teamId}.json, the
 // nightly gen-highlights.mjs; src/api/gamehighlights.js reads them). `files` are those files'
-// answers. A hitter's is any play clip crediting him that is not a pitching one (a strikeout of him
+// answers, which hold only clips that already passed the generator's positive-play, non-abs and
+// blocklist filters (scripts/lib/highlights.mjs). A hitter's is any play clip crediting him that is not a pitching one (a strikeout of him
 // credits the pitcher); a pitcher's is a pitching one. The newest from a game in `gamePks` (the
 // Series clubs' postseason games) wins; a player with none there gets his newest from earlier in
 // the season, so a bench bat or a reliever who has not played in October still has one to watch.
