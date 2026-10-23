@@ -49,6 +49,7 @@ export const EXCEPT = {
   'all-star-rosters.json': 'hand-run once per All-Star break',
   'awards-history.json': 'nightly only from October to February, and only when an award row changed (gen-awards-history.mjs --nightly, #2510); a stamp would age all spring',
   'first-scorebook.json': 'hand-run retrospective of one scored game',
+  'hof-pace.json': 'hand-run once a year after the late-July induction (gen-hof-pace.mjs, #1857)',
   'postseason-history.json': 'hand-run; only October adds to it',
   'postseason-leaders.json': 'hand-run; only October adds to it',
   'run-expectancy.json': 'hand-run; the 24-state table is recomputed per season',
