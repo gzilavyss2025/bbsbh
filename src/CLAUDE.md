@@ -11,7 +11,7 @@ its two editors are the dev-only lab (`docs/identity-lab.md`) and the team hub's
 
 `GameSelect` (slate) → `GameView` (site-home bar + away@home
 masthead of uniform-treatment tiles — the `TeamTreatmentMark` square the slate card
-shows — each opening the sketch modal) → `LineupNextPage` (×2) → `InningViewer`.
+shows — each opening the sketch modal) → `LineupNextPage` (×2) → `InningViewer` (the **Gameday** tab; `CONTEXT.md`).
 `LogoSheet` is a printable grayscale logo sheet, off the slate header. The **Matchup Scout** (`/scout`, `screens/scout/`) is one pitcher against one hitter: spec `docs/scout-design.md`, its one-scroll redesign with one verdict and one view ADR-0118 (supersedes the view toggle ADR-0093 and the second camera ADR-0099), its Savant cutoff ADR-0095. An empty slate gets a second page state (`src/components/offseason/`): `src/components/offseason/CLAUDE.md`.
 
 The lineup page's club bars are **themed** to the jersey that
