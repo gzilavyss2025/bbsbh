@@ -9,6 +9,7 @@
 //   'estimated'       a minor-league outline from MLB's older Gameday art, checked
 //                     only against the posted signs (no measured survey exists);
 //                     or a 2018 trace that misses the posted CF;
+//                     or a smooth wall through three posted signs (`threePointWall`);
 //   'dimensions-only' no outline, five posted distances;
 //   'missing'         not even those.
 
@@ -17,6 +18,32 @@ import { WALLS } from '../ballparkFields.js'
 import { auditFence } from './fenceAudit.js'
 
 export { FIELDS }
+
+// A smooth wall through a park's left-line, center and right-line signs, for a
+// minor-league park that posts those three and not the gaps (41 of 119 in the
+// 2026 import, #2612). No source gives the gaps, so they are INTERPOLATED: the
+// wall's radius is the one parabola in bearing through the three signs, which
+// bows outward toward center and never kinks. The gap distances it draws are a
+// guess, which is why the quality is 'estimated' and not 'audited'. Home is
+// (0,0), +x toward right field, +y toward center; every 2.5 degrees from the
+// left-field line (-45) to the right-field line (45), so it ends on both lines.
+const WALL_STEP_DEG = 2.5
+export function threePointWall(posted) {
+  const { lf, lc, cf, rc, rf } = posted ?? {}
+  if (![lf, cf, rf].every(Number.isFinite)) return null
+  // With both gap signs the five-point wall is the better record; leave it.
+  if (Number.isFinite(lc) && Number.isFinite(rc)) return null
+  const bow = (lf + rf) / 2 - cf // radius at +-45 degrees, relative to center
+  const tilt = (rf - lf) / 2
+  const points = []
+  for (let deg = -45; deg <= 45 + 1e-9; deg += WALL_STEP_DEG) {
+    const t = deg / 45
+    const r = cf + bow * t * t + tilt * t
+    const rad = (deg * Math.PI) / 180
+    points.push([Math.round(r * Math.sin(rad) * 10) / 10, Math.round(r * Math.cos(rad) * 10) / 10])
+  }
+  return points
+}
 
 // The minor-league parks the importer could draw, as configurations shaped
 // like ./configurations.js's. No dated history exists for them, so each
@@ -31,7 +58,7 @@ export const MILB_CONFIGURATIONS = Object.entries(FIELDS.milb?.venues ?? {}).map
   names: v.names ?? (v.name ? [v.name] : []),
   from: `${FIELDS.season}-01-01`,
   to: null,
-  fence: v.fence ? 'milb' : null,
+  fence: v.fence || threePointWall(v.posted) ? 'milb' : null,
   dist: v.posted,
   wall: null,
   sources: [FIELDS.milb.sources.posted.replace('{venueId}', id)],
@@ -71,7 +98,7 @@ export function fenceFor(config, dist) {
     }
   } else if (config.fence === 'milb') {
     const v = FIELDS.milb.venues[config.venueId]
-    points = v.fence
+    points = v.fence ?? threePointWall(v.posted)
     audit = v.audit
     source = { kind: 'milb', season: FIELDS.season, url: FIELDS.milb.sources.fence.replace('{venueId}', config.venueId) }
   } else if (config.fence === 'seed') {

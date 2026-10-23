@@ -92,3 +92,16 @@ Three further calls fall out of the data rather than the rule:
    MLB has never documented the coordinate space. The pinning test is the whole
    defence; loosening it to make a future feed change pass would give the
    dots back their ability to drift silently.
+
+## Amendment (2026-10-23): minor-league parks do send coordinates
+
+The "No `hitData` (most parks below Triple-A send none)" claim above is wrong. It
+came from the 2026-07-05 pitch-tracking sample, which measured `launchSpeed` and
+`distance` only. A sample of 24 finished games at 24 venues on 2026-07-10 (AAA, AA,
+High-A and A, six each) found `hitData.coordinates` on every ball in play at every
+level, with `location` and `trajectory` on 96 to 100%. What AA, High-A and most A
+parks lack is `launchSpeed` and `totalDistance`. The data is there, so the card can draw at those
+games with no exit velocity. It hides at a venue the ballpark drawing does
+not carry (on 2026-10-23: Hops Ballpark only; #2612 added a smooth wall for the
+41 parks that post a left line, center and right line). The coverage table is in `docs/data-enrichment.md`, section 1. The
+decision above stands; only the stated reach of the missing-data case changes.

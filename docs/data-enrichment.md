@@ -28,7 +28,17 @@ Zero new endpoints needed for per-pitch/per-batted-ball enrichment. Exact paths,
 | Single-A (14), Florida State League | 100% (302/302, 274/274) | yes | 
 | Single-A, Carolina & California League | **none** (0/285, 0/279) | none |
 
-So availability is **park-based, not level-based**: AAA parks all have Hawk-Eye; at Single-A only the FSL (spring-training stadiums) does. Code must treat every `pitchData`/`hitData` numeric as optional (matches existing CLAUDE.md degradation convention). `src/api/derive.js` already reads playEvents; max-EV / top-velo / longest-hit derivations belong in that same reveal-only module — hitData/pitchData describe outcomes of plays (a 110 EV single reveals a hit), so **anything from playEvents is spoiler-bearing and must stay behind SealBox/`revealedThrough`**. Pitch velocity alone technically doesn't reveal score, but it's attached to plays past the reveal mark, so keep it reveal-gated like the existing pitch/whiff counts.
+**Batted-ball location is a different story (sampled 2026-07-10: 24 finished games at 24 venues, six per level, sportIds 11–14).** The table above covers the tracked-park fields only. `hitData.coordinates`, `location` and `trajectory` are sent at every level:
+| Level | `coordinates` | `location` | `trajectory` | `launchSpeed`/`totalDistance` |
+|---|---|---|---|---|
+| AAA (11) | 100% | 98–100% | 100% | 89–100% |
+| AA (12) | 100% | 96–100% | 100% | 0% |
+| High-A (13) | 100% | 98–100% | 100% | 0% |
+| A (14) | 100% | 98–100% | 98–100% | 2 of 6 games (both Florida State League); 0% in the other 4 |
+
+Exceptions are small (`location` missing on 2 of 52 balls in gamePk 818245; `trajectory` on 1 of 54 in 820715). `location` also takes two-digit gap values such as `"78"`. At AA 818913 and High-A 850966 the points are varied and agree with `location`; inference: untracked parks chart them by hand, and their accuracy is unchecked. Rookie ball (16) and winter leagues were not sampled. So `selectBattedBalls` returns balls for MiLB games, just without exit velocity; the card still needs a ballpark layout for the venue (all MiLB home parks but Hops Ballpark have one since #2612).
+
+So availability of the **tracked** fields is **park-based, not level-based**: AAA parks all have Hawk-Eye; at Single-A only the FSL (spring-training stadiums) does. Code must treat every `pitchData`/`hitData` numeric as optional (matches existing CLAUDE.md degradation convention). `src/api/derive.js` already reads playEvents; max-EV / top-velo / longest-hit derivations belong in that same reveal-only module — hitData/pitchData describe outcomes of plays (a 110 EV single reveals a hit), so **anything from playEvents is spoiler-bearing and must stay behind SealBox/`revealedThrough`**. Pitch velocity alone technically doesn't reveal score, but it's attached to plays past the reveal mark, so keep it reveal-gated like the existing pitch/whiff counts.
 
 ## 2. statsapi.mlb.com spoiler-SAFE pregame staging endpoints
 
