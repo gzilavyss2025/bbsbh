@@ -40,3 +40,11 @@ export function parkHistory(spans, mates) {
     .map((p) => ({ ...p, mates: mates[p.venueId] ?? [] }))
     .sort((a, b) => a.runs[0][0] - b.runs[0][0])
 }
+
+// Pure: the park a club used in `season`, as { id, name } from the span that season falls in, or
+// null (no span holds it, or the span has no park). The name is the park's CURRENT name, so a
+// renamed park reads as today's; the API names it for the season (fetchSeasonVenue).
+export function venueForSeason(spans, season) {
+  const span = (spans ?? []).find((s) => s.from <= season && season <= s.to)
+  return span?.venueId == null ? null : { id: span.venueId, name: span.venueName }
+}

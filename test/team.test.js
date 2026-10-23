@@ -15,6 +15,7 @@ import {
   fetchAffiliates,
   fetchComplexAffiliates,
   fetchStandings,
+  fetchSeasonVenue,
   fetchLeagueStandings,
   fetchLeagueTeamStats,
 } from '../src/api/team.js'
@@ -378,6 +379,37 @@ test('fetchComplexAffiliates degrades to [] on failure', async () => {
   })
   try {
     assert.deepEqual(await fetchComplexAffiliates(999, 2026), [])
+  } finally {
+    restore()
+  }
+})
+
+// --------------------------------------------------------------------------
+// fetchSeasonVenue — the park a club used in one season (#2591)
+// --------------------------------------------------------------------------
+test('fetchSeasonVenue is the park the API names for that season', async () => {
+  const { restore } = stubFetch({
+    'https://statsapi.mlb.com/api/v1/teams/158?season=2018': {
+      json: { teams: [{ id: 158, venue: { id: 32, name: 'Miller Park', link: '/api/v1/venues/32' } }] },
+    },
+  })
+  try {
+    assert.deepEqual(await fetchSeasonVenue(158, 2018), { id: 32, name: 'Miller Park' })
+  } finally {
+    restore()
+  }
+})
+
+test('fetchSeasonVenue is null with no id or season, no venue on the team, or a failed read', async () => {
+  assert.equal(await fetchSeasonVenue(null, 2018), null)
+  assert.equal(await fetchSeasonVenue(158, null), null)
+  const { restore } = stubFetch({
+    'https://statsapi.mlb.com/api/v1/teams/1?season=1900': { json: { teams: [{ id: 1 }] } },
+    'https://statsapi.mlb.com/api/v1/teams/2?season=1900': { fail: true },
+  })
+  try {
+    assert.equal(await fetchSeasonVenue(1, 1900), null)
+    assert.equal(await fetchSeasonVenue(2, 1900), null)
   } finally {
     restore()
   }

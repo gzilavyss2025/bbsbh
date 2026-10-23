@@ -215,12 +215,15 @@ function AttendanceFacts({ attendance, skipAvg }) {
 // `cardProps` is the one-scroll page's stamped frame and name tab (props for Card). With it the
 // card is laid out for that page: the park's facts and the manager in a strip under the photo
 // and name, and a plain empty state for a park with nothing drawn. `manager` shows only there.
-export function BallparkCard({ team, attendance, cardProps, manager }) {
+export function BallparkCard({ team, venue: venueProp, layoutDate, attendance, cardProps, manager }) {
   const { t } = useCopy()
-  const venueName = team.venue?.name
-  const park = venueName ? rankedDimensions(venueName, team.venue?.id) : null
-  // The team's home park today: no date, so the current configuration (#1859).
-  const layout = venueName ? resolveBallparkLayout({ venueId: team.venue?.id, venueName }) : null
+  // `venue` is the park of a past season (null: none known, and the card draws nothing rather than
+  // today's park); undefined is the club's park now (#2591).
+  const venue = venueProp === undefined ? team.venue : venueProp
+  const venueName = venue?.name
+  const park = venueName ? rankedDimensions(venueName, venue?.id) : null
+  // The park as it stands: no date, so the current configuration (#1859). A past season passes its day.
+  const layout = venueName ? resolveBallparkLayout({ venueId: venue?.id, venueName, gameDate: layoutDate }) : null
 
   // The park's CANONICAL name, never the raw feed string, when we have one —
   // so a renamed MLB venue resolves through its alias to the one shared
@@ -232,7 +235,7 @@ export function BallparkCard({ team, attendance, cardProps, manager }) {
   const name = park ? park.name : venueName
   // Computed before the early return below so the hooks under it always run —
   // a park with no venue name at all still has to call them, in the same order.
-  const key = name ? parkKey(venueName, team.venue?.id) : ''
+  const key = name ? parkKey(venueName, venue?.id) : ''
   // No useMemo on either of these. React Compiler memoizes them, and a manual
   // useMemo keyed on `key` made it bail out of optimizing this component
   // entirely ("existing memoization could not be preserved") — which is a worse
@@ -269,7 +272,10 @@ export function BallparkCard({ team, attendance, cardProps, manager }) {
   // local object URL standing in for an image not yet uploaded). One render
   // path either way, so there is no second layout only the owner ever sees.
   const shown = withoutBrokenArt(draft.shown, brokenArt)
-  const title = resolveParkName(name, { name: shown.name, wordmark: shown.wordmark })
+  // A past season prints the name the park had that year (Miller Park, not today's American Family
+  // Field), with no wordmark or admin name: both are today's branding. Photo and facts stay the park's.
+  const title =
+    venueProp === undefined ? resolveParkName(name, { name: shown.name, wordmark: shown.wordmark }) : { text: venueName, wordmark: null }
   // The bundled photo, or the owner's replacement, with the crop and credit
   // that belong to whichever won. All of these come from the copy store already
   // pattern-validated (registry.js), so nothing here needs re-checking — except
