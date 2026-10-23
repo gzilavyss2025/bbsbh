@@ -177,6 +177,8 @@ export async function loadRanks(id, asOf, src = DIRECT) {
   // Null below Triple-A, which is what keeps the challenge card off a level
   // that runs no ABS rig — and keeps its file off that page's fetch list.
   const absExposureLevel = exposureClubLevelFor(sportId)
+  // The run value file is this season's board, so a past season draws no card and reads no file.
+  const pastSeason = season < seasonOf(null, sportId)
 
   const [
     league,
@@ -197,7 +199,7 @@ export async function loadRanks(id, asOf, src = DIRECT) {
   ] = await Promise.all([
     sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
     loadCombinedPoolForTeams([{ id }], season, { withHand: true, fetchStats: src.fetchTeamSeasonStats }),
-    sportId === 1 ? fetchRunValue() : Promise.resolve(null),
+    sportId === 1 && !pastSeason ? fetchRunValue() : Promise.resolve(null),
     fetchAbsExposureClubs(absExposureLevel),
     src.fetchTeamIL(id, season),
   ])
