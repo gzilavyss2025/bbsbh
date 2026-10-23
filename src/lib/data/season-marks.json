@@ -93,6 +93,24 @@
         "restriction": "trademarked"
       }
     ],
+    "109": [
+      {
+        "from": 1998,
+        "to": 2006,
+        "name": "Arizona Diamondbacks",
+        "abbr": "ARI",
+        "file": "109-1998-2006.png",
+        "source": "Gary's Drive folder 'eras logos'"
+      },
+      {
+        "from": 2007,
+        "to": 2023,
+        "name": "Arizona Diamondbacks",
+        "abbr": "ARI",
+        "file": "109-2007-2023.png",
+        "source": "Gary's Drive folder 'eras logos'"
+      }
+    ],
     "119": [
       {
         "from": 1901,
@@ -401,6 +419,14 @@
         "source": "https://commons.wikimedia.org/wiki/File%3AMilwaukee_Braves_Cap_Logo.svg",
         "license": "Public domain",
         "restriction": "trademarked"
+      },
+      {
+        "from": 1972,
+        "to": 1980,
+        "name": "Atlanta Braves",
+        "abbr": "ATL",
+        "file": "144-1972-1980.png",
+        "source": "Gary's Drive folder 'eras logos'"
       }
     ],
     "145": [
@@ -427,6 +453,30 @@
         "bar": "#012169",
         "accent": "#FED141",
         "onBar": "#FFFFFF"
+      },
+      {
+        "from": 1978,
+        "to": 1993,
+        "name": "Milwaukee Brewers",
+        "abbr": "MIL",
+        "file": "158-1978-1993.png",
+        "source": "Gary's Drive folder 'eras logos'"
+      },
+      {
+        "from": 1994,
+        "to": 1999,
+        "name": "Milwaukee Brewers",
+        "abbr": "MIL",
+        "file": "158-1994-1999.png",
+        "source": "Gary's Drive folder 'eras logos'"
+      },
+      {
+        "from": 2000,
+        "to": 2019,
+        "name": "Milwaukee Brewers",
+        "abbr": "MIL",
+        "file": "158-2000-2019.png",
+        "source": "Gary's Drive folder 'eras logos'"
       }
     ],
     "233": [

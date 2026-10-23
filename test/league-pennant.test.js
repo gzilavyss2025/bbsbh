@@ -6,7 +6,11 @@ import { contrastRatio } from '../src/lib/contrast.js'
 test('the season league is explicit, including the Brewers American League pennant', () => {
   const model = pennantModel({ teamId: 158, season: 1982, league: 'AL' })
   assert.equal(model.label, '1982 Milwaukee Brewers, American League champions')
-  assert.match(model.logoUrl, /\/logos\/mono\/158\.svg\?v=/)
+  // 1982 is a covered Brewers era (the 1978-93 glove), so the pennant wears the
+  // period abbreviation rather than today's knockout mark.
+  assert.equal(model.logoUrl, null)
+  assert.equal(model.abbreviation, 'MIL')
+  assert.match(pennantModel({ teamId: 147, season: 1978, league: 'AL' }).logoUrl, /\/logos\/mono\/147\.svg\?v=/)
   assert.equal(pennantModel({ teamId: 158, season: 1982 }), null)
 })
 
