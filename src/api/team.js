@@ -40,6 +40,19 @@ export async function fetchTeam(teamId) {
   }
 }
 
+// The park a club used in one season, as the API names it for that year (`teams/{id}?season=`:
+// 158 is "Miller Park" in 2018, "Sick's Stadium" in 1969). Any level. Null with no id or season, no
+// park on the team, or a failed read: the caller then never falls back to today's park.
+export async function fetchSeasonVenue(teamId, season) {
+  if (!teamId || !season) return null
+  try {
+    const venue = (await getJson(`/api/v1/teams/${teamId}?season=${season}`)).teams?.[0]?.venue
+    return venue?.id ? { id: venue.id, name: venue.name } : null
+  } catch {
+    return null
+  }
+}
+
 // Session cache for fetchTeamRoster, keyed by `${teamId}:${season}`. Heavier
 // (full roster + hydrated season pitching stats) and fresher-sensitive than
 // the bare fetchTeamRosterIds call below — pitching lines drift daily — so

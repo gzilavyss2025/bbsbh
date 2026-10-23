@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { collapseSeasons, venueMates } from '../scripts/lib/franchise-history.mjs'
-import { parkHistory } from '../src/api/franchiseHistory.js'
+import { parkHistory, venueForSeason } from '../src/api/franchiseHistory.js'
 
 // A hand-made 1968-1999 club: a rename (1969 Pilots -> 1970 Brewers), a league move
 // (1998 AL -> NL) and a park move (1996, venue 23 -> 99). 1968 has no row, and
@@ -91,4 +91,24 @@ test('parkHistory: a park left and returned to keeps two runs, not one long rang
     [9, [[1923, 1973], [1976, 2008]]],
     [25, [[1974, 1975]]],
   ])
+})
+
+// The Brewers' real spans (public/data/franchise-history/158.json): the 1969 Pilots, then two parks.
+const BREWERS = [
+  { from: 1969, to: 1969, name: 'Seattle Pilots', venueId: 3144, venueName: "Sick's Stadium", venueNames: ["Sick's Stadium"] },
+  { from: 1970, to: 2000, name: 'Milwaukee Brewers', venueId: 23, venueName: 'Milwaukee County Stadium', venueNames: ['Milwaukee County Stadium'] },
+  { from: 2001, to: 2025, name: 'Milwaukee Brewers', venueId: 32, venueName: 'American Family Field', venueNames: ['Miller Park', 'American Family Field'] },
+]
+
+test('venueForSeason: the park of the span a season falls in (#2591)', () => {
+  assert.deepEqual(venueForSeason(BREWERS, 1969), { id: 3144, name: "Sick's Stadium" })
+  assert.deepEqual(venueForSeason(BREWERS, 1985), { id: 23, name: 'Milwaukee County Stadium' })
+  assert.equal(venueForSeason(BREWERS, 2018)?.id, 32)
+})
+
+test('venueForSeason: null for a season no span holds, no spans, or a span with no park', () => {
+  assert.equal(venueForSeason(BREWERS, 1968), null)
+  assert.equal(venueForSeason([], 2018), null)
+  assert.equal(venueForSeason(undefined, 2018), null)
+  assert.equal(venueForSeason([{ from: 2000, to: 2005, venueId: null }], 2003), null)
 })
