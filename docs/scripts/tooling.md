@@ -181,6 +181,9 @@ list says what each guard checks.
   strengthens the guard; removing one is a spoiler-rule decision.
 - `check-seal-scope.mjs` — `var(--seal*)` may appear only where a reveal is possible
   (ADR-0083). Rank and flag emphasis takes `--marker`.
+- `scripts/docs/check-design-sync.mjs` — the design-sync build (`.design-sync/build/run.mjs`) must succeed and
+  write the same files twice, into temp folders. A token with no usage line in `usage-data.json` fails it
+  and is named. Never uploads, never writes into the repo (#2527).
 - `check-learn-css.mjs` — `public/learn.css` redeclares a few colours from
   `src/tokens/colors.css`, because the `/learn` guides have no bundle. This fails on drift.
 - `layout/check-css-vars.mjs` — every `var(--x)` with no fallback must name a property that something

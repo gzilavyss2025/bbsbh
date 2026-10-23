@@ -46,9 +46,29 @@ real batter (592885) and one real pitcher (642547) and saves each card's markup 
 the CSS rules that match inside it. The figures in the cards are those players' figures on
 the day of capture.
 
+## What changed since the last upload
+
+The build hashes every file it writes. `.design-sync/sync-manifest.json` holds the hashes of what
+the project holds. Each build prints the files that differ from it: those are the ones to upload,
+and the ones it lists as removed are the ones to delete. After an upload, run the build once more
+with `--manifest` and commit the file, so the next person sees only what changed since.
+
+```bash
+node .design-sync/build/run.mjs --out ds-bundle             # prints new, changed and removed files
+node .design-sync/build/run.mjs --out ds-bundle --manifest  # after the upload: write the manifest
+```
+
+The first manifest is the build of the commit that added it. It records that build, not what the
+project was found to hold: if the project is behind, upload in full once and write it again.
+
+`npm run lint` runs `scripts/docs/check-design-sync.mjs`: the build must succeed (a token with no
+usage line in `usage-data.json` stops it and names the token) and two builds must hash the same.
+It writes nothing into the repo and never uploads: an upload needs a person's login.
+
 ## Upload
 
-Use the `/design-sync` skill, or the `DesignSync` tool by hand:
+A cloud session has no `/design-sync` skill. It uploads with the `DesignSync` tool, by hand, when
+the maintainer asks. A local session may use the skill or the tool:
 
 1. `list_files` on the project.
 2. `finalize_plan` with `localDir` set to the build folder. Writes: `README.md`, `styles.css`,
