@@ -19,7 +19,7 @@ import { buttonAria } from '../../../lib/design/buttonClass.js'
 //          band), 'ink' (navy, paper text), 'marker' (the highlighter, for the
 //          one pill that leads) or 'seal' (kraft — ONLY a sealed thing,
 //          ADR-0083).
-//   ink    a colour token by NAME, '--field', for an outline or paper pill.
+//   ink    a colour token by NAME, '--accent-positive', for an outline or paper pill.
 //          This is where a pill's meaning goes: the copy says what it is, the
 //          ink says which kind. There is no tone prop. See lib/design/pillClass.js
 //          for the three token families it refuses, and why.
