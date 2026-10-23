@@ -63,6 +63,7 @@ export const EXCEPT = {
   'team-seasons.json': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the file carries no clock',
   'umpire-history/': 'hand-run from the Stats API schedule (issue 1565); closed seasons, and the files carry no clock',
   'played-for-both/': 'hand-run from team-seasons.json, war-history and the Chadwick register (gen-played-for-both.mjs, ADR-0100, #2579); history, and the files carry no clock',
+  'franchise-ledger/': 'hand-run (gen-franchise-ledger.mjs, #2595); finished seasons never change and the files carry no clock',
   'family-ties/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'on-this-day/': 'hand-run from Retrosheet and the Chadwick register (ADR-0100); history, and the files carry no clock',
   'birthplaces/': 'hand-run from Retrosheet, the Chadwick register and GeoNames (ADR-0100, ADR-0106); history, and the files carry no clock',
