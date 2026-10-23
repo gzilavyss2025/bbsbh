@@ -483,9 +483,16 @@
 .ww-scout__card {
   scroll-margin-top: var(--ww-scout-offset, 0px);
 }
-/* Two cards in a row end at the same height: the card fills its grid cell. */
+/* Two cards in a row end at the same height: the card fills its grid cell. A flex column
+   does it, not height: 100%: a named card carries a top margin for its tab, and 100% plus
+   that margin ran the card 14px past its cell, into the row below's tab. */
+/* layout-exempt: one child fills the cell below the card's tab clearance */
+.ww-scout__card {
+  display: flex;
+  flex-direction: column;
+}
 .ww-scout__card > * {
-  height: 100%;
+  flex: 1;
 }
 /* The Film room rail needs the whole row: one grid cell squeezes its three cards. */
 .ww-scout__card--wide {
