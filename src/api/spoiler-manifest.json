@@ -376,6 +376,10 @@
       "class": "spoiler-free",
       "why": "Static franchise-history shards: a club's names, leagues and ballparks by season, 1901 to the last complete season. Names and parks only, no game."
     },
+    "history/playedForBoth.js": {
+      "class": "spoiler-free",
+      "why": "Static played-for-both shards: who appeared in an MLB game for each of two clubs, with the seasons for each. Career history by club and season, no game."
+    },
     "history/franchiseLedger.js": {
       "class": "spoiler-free",
       "why": "Static franchise-ledger shards: a club's record, rank, runs, managers and postseason result by season, 1901 to the last complete season. Finished seasons only, no game."

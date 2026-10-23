@@ -1074,6 +1074,13 @@ for each generator; the reader modules:
   empty before 1969, and a shared season's carry no w/l), `postseason` (`{ round, won }` or null:
   the highest round the club reached) and `note` ("split season" 1981, "strike" 1994, "60-game
   season" 2020). Keyed by the current team id. MLB only; a MiLB id reads empty. No screen reads it yet.
+- `history/playedForBoth.js` — everyone who appeared in an MLB game for each of two clubs, from
+  `public/data/played-for-both/{a}-{b}.json` (hand-run `gen-played-for-both.mjs`, #2579), ids
+  ascending like `former-teammates`. `playedForBoth(teamIdA, teamIdB)` returns `{ credit,
+  throughSeason, teams, top, rows }`; a row is `{ id, name, seasons: { [teamId]: [season, ...] } }`,
+  most recent first, and `top` is up to 12 rows, best first. The same answer for either club order.
+  Empty for a MiLB pair or a 404. Runtime-cached in `vite.config.js`, never precached. No screen
+  reads it yet (the card is slice 3, which waits for a wireframe).
 - `managers.js` — a coach's full career, from the `personId % 100` shards in
   `public/data/manager-history/`, behind `/manager/{id}`. Every job row, not
   just the managerial ones. A club-season shared by two managers carries
