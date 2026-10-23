@@ -176,6 +176,22 @@ export function isRealDate(apiDate) {
   return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === d
 }
 
+// A past season by year (`?y=2018`, #2588): the season's last day as an as-of, so the whole
+// season counts and no date is on screen. A year is a past season when it is 4 digits, at
+// least 1876 (the first National League season) and before the current year; anything else
+// is null (the live page). `now` is for tests.
+const FIRST_SEASON = 1876
+const pastYear = (y, now) => /^\d{4}$/.test(y) && Number(y) >= FIRST_SEASON && Number(y) < now.getFullYear()
+export function yearAsOf(raw, now = new Date()) {
+  return pastYear(raw ?? '', now) ? `${raw}-12-31` : null
+}
+// Whether an as-of is a past season's last day, the one yearAsOf makes: its labels read as a
+// whole season ("entering Dec 31" is wrong there) and its links write `?y=`.
+export function isYearView(asOf, now = new Date()) {
+  const m = /^(\d{4})-12-31$/.exec(asOf ?? '')
+  return Boolean(m) && pastYear(m[1], now)
+}
+
 // The as-of date control's valid range: never later than today, never
 // earlier than January 1st of today's year. That floor is a stand-in for
 // "the season opener" rather than the real thing — every level (MLB, four

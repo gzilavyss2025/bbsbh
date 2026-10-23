@@ -10,6 +10,7 @@
 // is who supplies `d`, not what `d` means.
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { isYearView } from '../src/lib/dates.js'
 import { SEASONS } from '../src/api/tradeDeadline.js'
 import {
   gameNotesPath,
@@ -1310,4 +1311,42 @@ test('each tab lands on its band', () => {
     contracts: 'money',
     minors: 'farm',
   })
+})
+
+// `?y=2018` is the address of a past season: the same as-of as `?d=2018-12-31`, with no date
+// labels (#2588). `?d=` wins when both are present; a year that is not a past season is ignored.
+test('?y= opens a past season as the year-end as-of', () => {
+  assert.equal(parseRoute('/team/158?y=2018').asOf, '2018-12-31')
+  assert.equal(parseRoute('/team/158?y=2018').asOf, parseRoute('/team/158?d=2018-12-31').asOf)
+  assert.equal(parseRoute('/team/158?y=1876').asOf, '1876-12-31')
+  assert.equal(parseRoute('/team/158/leaders?y=2018').asOf, '2018-12-31')
+})
+
+test('?y= of this year, a later year, junk or a year before 1876 reads as the live page', () => {
+  const now = new Date().getFullYear()
+  for (const y of [now, now + 1, 'abc', '1800', '1875', '20188', '201', '']) {
+    assert.equal(parseRoute(`/team/158?y=${y}`).asOf, null, `?y=${y}`)
+  }
+  assert.equal(parseRoute(`/team/158?y=${now - 1}`).asOf, `${now - 1}-12-31`)
+})
+
+test('?d= wins over ?y=; a bad ?d= falls through to ?y=', () => {
+  assert.equal(parseRoute('/team/158?y=2018&d=2018-06-01').asOf, '2018-06-01')
+  assert.equal(parseRoute('/team/158?y=2018&d=2018-02-30').asOf, '2018-12-31')
+})
+
+test('linkQuery writes a past year-end back as ?y= and keeps every other date as ?d=', () => {
+  assert.equal(linkQuery({ d: '2018-12-31' }), '?y=2018')
+  assert.equal(linkQuery({ d: '2018-12-31', s: 11 }), '?y=2018&s=11')
+  assert.equal(linkQuery({ d: '2018-06-01' }), '?d=2018-06-01')
+  assert.equal(linkQuery({ d: `${new Date().getFullYear()}-12-31` }), `?d=${new Date().getFullYear()}-12-31`)
+  assert.equal(teamPath(158, { d: '2018-12-31' }).endsWith('?y=2018'), true)
+})
+
+test('isYearView is a Dec 31 as-of in a past year', () => {
+  assert.equal(isYearView('2018-12-31'), true)
+  assert.equal(isYearView('2018-12-30'), false)
+  assert.equal(isYearView('2018-06-01'), false)
+  assert.equal(isYearView(`${new Date().getFullYear()}-12-31`), false)
+  assert.equal(isYearView(null), false)
 })
