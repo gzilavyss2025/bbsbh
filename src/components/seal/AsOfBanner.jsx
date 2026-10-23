@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { humanDate, asOfBounds, clampAsOfDate } from '../../lib/dates.js'
+import { humanDate, asOfBounds, clampAsOfDate, isYearView } from '../../lib/dates.js'
 import { useNav } from '../../lib/nav.js'
 import { linkQuery } from '../../lib/route.js'
 
@@ -91,7 +91,11 @@ export function AsOfBanner({ asOf, sportId = null }) {
       {/* "entering" is not a flourish — every loader cuts at `dayBefore(asOf)`,
           so these are the numbers this player or club carried INTO that day,
           with nothing from the day itself folded in. */}
-      <span className="asof-banner__text">Stats entering {humanDate(asOf)}</span>
+      {/* A past season (`?y=`) is read as the year's last day, so its banner
+          names the season rather than a Dec 31 cutoff nobody picked. */}
+      <span className="asof-banner__text">
+        {isYearView(asOf) ? `Season ${asOf.slice(0, 4)}` : `Stats entering ${humanDate(asOf)}`}
+      </span>
       <button type="button" className="asof-banner__cancel" onClick={openEditor}>
         Change date
       </button>

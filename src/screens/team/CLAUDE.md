@@ -57,7 +57,7 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
 - **Foot** (`next/foot/`): not a band, no jump-bar button. The level's other clubs with the
   Affiliate chip, and the Game Notes card. It adds no request.
 
-Every link keeps `?d=` and `?s=` (the shell wraps the page in `LinkScope`). `?y=2018` is a past season: the as-of `2018-12-31` with no date labels (`isYearView`, `lib/dates.js`); `?d=` wins when both are present. Open surface
+Every link keeps `?d=` and `?s=` (the shell wraps the page in `LinkScope`). `?y=2018` is a past season: the as-of `2018-12-31` with no date labels (`isYearView`, `lib/dates.js`); the banner reads "Season 2018" with Show current; `?d=` wins when both are present. Open surface
 (ADR-0034, "The cutoff is opt-in now"): nothing here is sealed, and adding a gate is a regression.
 Motion plays once per page visit: every band reads `useViewOnce(team.id, band, ready)` (`hooks/motion/useViewOnce.js`, `docs/motion.md`).
 
