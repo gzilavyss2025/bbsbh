@@ -65,6 +65,7 @@ const CHECKED_ROOT = 'src'
 // name -> reason, keyed as "relative/path.js#exportName". Each reason is the
 // one that belongs in a PR description if this list needs to grow.
 const ALLOWLIST = {
+  'src/api/history/franchiseLedger.js#franchiseLedger': 'Staged ahead of its first caller on purpose: #2595 is data first ("No screen in this issue"); the franchise page (#2586) reads it. Only test/franchise-ledger.test.js uses it today.',
   'src/api/milbHistory.js#historicalClubName': 'Deliberately staged ahead of its first caller — the function\'s own header comment says "Not yet wired into any screen (no historical logo art exists yet)"; it is exposed for a future pass, not forgotten.',
   'src/lib/milbColors.js#MILB_COLORS': 'Re-exported on purpose ("so every existing MiLB caller ... still has one import for \'MiLB colors\'") even though every current caller happens to import it from brandColors.js instead. Kept open as the intended single entry point.',
   'src/lib/milbColors.js#MILB_RESEARCHED_PAIRS': 'Same re-export as MILB_COLORS above, same file, same rationale.',

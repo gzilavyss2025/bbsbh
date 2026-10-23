@@ -1052,6 +1052,13 @@ for each generator; the reader modules:
   that the Overview's `FranchiseHistory` module draws under the Ballpark card.
   The data starts in 1901, so a park's first season is the first IN THIS DATA,
   never its opening year. A MiLB id has no file and reads empty.
+- `history/franchiseLedger.js` — a club's season ledger, from `public/data/franchise-ledger/{teamId}.json`
+  (hand-run `gen-franchise-ledger.mjs`, #2595). `franchiseLedger(teamId)` returns `{ through, rows }`,
+  oldest first. A row: `season`, `name`, `league` (the franchise-history span's), `w`, `l`, `gb`,
+  `divisionRank` (null before 1969), `leagueRank`, `rs`, `ra`, `managers` (`{ id, name, w?, l? }`;
+  empty before 1969, and a shared season's carry no w/l), `postseason` (`{ round, won }` or null:
+  the highest round the club reached) and `note` ("split season" 1981, "strike" 1994, "60-game
+  season" 2020). Keyed by the current team id. MLB only; a MiLB id reads empty. No screen reads it yet.
 - `managers.js` — a coach's full career, from the `personId % 100` shards in
   `public/data/manager-history/`, behind `/manager/{id}`. Every job row, not
   just the managerial ones. A club-season shared by two managers carries

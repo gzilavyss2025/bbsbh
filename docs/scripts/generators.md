@@ -2033,6 +2033,15 @@ Re-run only to fold in a new season.
   (the newest nickname for the code: Brooklyn 1897 reads "Dodgers 1897"). 816 KB, 248 KB gzipped. No clock: a re-run writes
   the same bytes. The pure half is `scripts/lib/open-data/team-seasons.mjs`. Reader:
   `src/api/teamSeasons.js`.
+- `gen-franchise-ledger.mjs` → `public/data/franchise-ledger/{teamId}.json` — one row per season for each of
+  the 30 MLB clubs, 1901 to the last complete season (#2595): name and league, W-L, games back,
+  division and league rank, runs for and against, managers, the postseason result, a note for 1981,
+  1994 and 2020. **Hand-run**: `node scripts/gen-franchise-ledger.mjs [--through 2025]`; re-run only
+  to fold in a new season. Reads `standings` and `schedule/postseason` once a season (about 250
+  calls, strict: a failed call aborts), `franchise-history/`, `manager-history/` and one batch of
+  `people` calls for the managers' names. Keyed by the current team id. The files carry no clock, so
+  a re-run with no new season writes the same bytes. 636 KB in all (the largest, 147, 28 KB). The
+  pure half is `scripts/lib/franchise/ledger.mjs`. Reader: `src/api/history/franchiseLedger.js`.
 - `gen-pitch-starts.mjs` → `public/data/pitch-arsenal-starts/{season}/{NN}.json` and `{NN}.mph.json` — the per-start
   pitch mix for a season before 2026, MLB only (ADR-0111). Run by hand, one season at a time:
   `node scripts/gen-pitch-starts.mjs --season=YYYY` (required), then the same command with `--verify`. It

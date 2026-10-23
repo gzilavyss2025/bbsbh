@@ -376,6 +376,10 @@
       "class": "spoiler-free",
       "why": "Static franchise-history shards: a club's names, leagues and ballparks by season, 1901 to the last complete season. Names and parks only, no game."
     },
+    "history/franchiseLedger.js": {
+      "class": "spoiler-free",
+      "why": "Static franchise-ledger shards: a club's record, rank, runs, managers and postseason result by season, 1901 to the last complete season. Finished seasons only, no game."
+    },
     "history/leaguePennants.js": {
       "class": "spoiler-free",
       "why": "Static league-pennants.json: a club's World Series berths by season, 1903 to the current season. Pennants already won, no game."
