@@ -33,6 +33,11 @@
 .tnext__plate img {
   filter: var(--mark-filter, none);
 }
+/* A past season's mark is the era's abbreviation, not art: it wears the band's own text colour,
+   the one the club name beside it reads (the serif default is dark ink, unreadable on the band). */
+.tnext__plate .teamlogo--serif {
+  color: var(--band-text);
+}
 .tnext__club {
   flex: 1 1 auto;
   min-width: 0;
