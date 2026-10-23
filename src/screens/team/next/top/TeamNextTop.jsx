@@ -36,8 +36,9 @@ export function TeamNextTop({ team, standings, season, asOf }) {
   // A past season wears the club's name and mark of that year (1969: the Seattle Pilots), from the
   // franchise spans; the team id is the same. MLB only, since a MiLB id has no spans (#2590).
   const past = season < seasonOf(null, sportId)
-  const history = useAsync(() => (past && mlb ? franchiseFor(team.id) : Promise.resolve(null)), [team.id, past, mlb]).data
-  const clubName = (past && nameForSeason(history?.spans, season)) || team.name
+  const historyRead = useAsync(() => (past && mlb ? franchiseFor(team.id) : Promise.resolve(null)), [team.id, past, mlb])
+  // Until the spans arrive a past MLB season prints no name, so today's name never flashes first.
+  const clubName = past && mlb && historyRead.loading ? '\u00a0' : (past && nameForSeason(historyRead.data?.spans, season)) || team.name
   const line = useMemo(() => clubLine(standings, team), [standings, team])
   const schedule = useAsync(() => SHARED.fetchTeamSchedule(team.id, season, sportId, cutoff), [team.id, season, sportId, cutoff]).data
   const series = useMemo(() => schedule && formSeries(schedule), [schedule])

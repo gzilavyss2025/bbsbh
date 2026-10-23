@@ -3,7 +3,7 @@
 // year, W-L, games back, division and league rank, runs for and against, the managers, the
 // postseason result and a note for an odd season (1981, 1994, 2020). Keyed by the CURRENT team
 // id, which a club keeps across a move (158 is the Pilots and the Brewers). Reader:
-// src/api/franchiseLedger.js. The pure half: script./lib/franchise/ledger.mjs.
+// src/api/history/franchiseLedger.js. The pure half: scripts/lib/franchise/ledger.mjs.
 //
 // Sources (all but the last are read off disk):
 //   standings?leagueId=103,104&season=Y&standingsTypes=regularSeason  one call a season

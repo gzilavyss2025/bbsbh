@@ -75,14 +75,15 @@ export function legAdvanceCode(play, r) {
   return advanceCode(play)
 }
 
-// A pickoff reads PK; one that catches a runner stealing reads PKCS (option B,
-// #2575) and its out is drawn on the path to the base he was stealing — the
-// feed's own outBase says the base he left ('1B'), so read the target off the
-// event type (pickoff_caught_stealing_2b). Null for any other event.
-const PKCS_BASE = { '2b': 2, '3b': 3, home: 4 }
+// A pickoff reads PK; one that catches a runner stealing reads PKCS (option B, #2575).
 function pickoffTag(et) {
   return et.startsWith('pickoff_caught_stealing') ? 'PKCS' : 'PK'
 }
+
+// The base a caught-stealing pickoff's out is drawn on: the path to the base he was stealing. The
+// feed's own outBase says the base he left ('1B'), so read the target off the event type
+// (pickoff_caught_stealing_2b). Null for any other event.
+const PKCS_BASE = { '2b': 2, '3b': 3, home: 4 }
 export function pickoffCaughtStealingBase(eventType) {
   const m = /^pickoff_caught_stealing_(.+)$/.exec(eventType ?? '')
   return m ? (PKCS_BASE[m[1]] ?? null) : null
