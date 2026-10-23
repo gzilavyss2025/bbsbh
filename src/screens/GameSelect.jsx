@@ -636,6 +636,7 @@ export function GameSelect({
           {inPostseasonWindow && (
             <WorldSeriesHome
               bracket={postseasonBracket.bracket}
+              cutoff={postseasonBracket.cutoff}
               slateDate={dateStr}
               wide={wide}
               seriesGame={seriesGame}
@@ -647,7 +648,7 @@ export function GameSelect({
               date in the window, off days included. On an off day this is
               the only thing here besides the chrome above (Gary's decision,
               2026-09-28: "the bracket is the whole page"). */}
-          {inPostseasonWindow && !bracketInRail && !bracketInDock && (
+          {inPostseasonWindow && !bracketInRail && !bracketInDock && !(wsMode && wide) && (
             <PostseasonBracket
               bracket={postseasonBracket.bracket}
               cutoff={postseasonBracket.cutoff}
@@ -725,8 +726,9 @@ export function GameSelect({
           />
         )}
 
-        {/* October's copy of that column: the bracket, or the primer's. */}
-        {bracketInRail && <SeriesPrimer part="rail" primer={primer} />}
+        {/* October's copy of that column: the bracket, or the primer's. A World Series day draws its own
+            bracket beside the hero (WorldSeriesHome), so the page runs the full width under it. */}
+        {bracketInRail && !wsMode && <SeriesPrimer part="rail" primer={primer} />}
 
         {/* The slot the wire left; `railed` reserves it (WinterRail.jsx). */}
         {wide && winter && (

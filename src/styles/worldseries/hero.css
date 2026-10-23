@@ -449,3 +449,51 @@
   .ww-hero--arrive .ww-cal__day--today { animation: ww-hero-cell var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * (4 + var(--i, 0))) both, ww-hero-mark var(--dur-med) var(--ease-stamp) calc(var(--stagger-step) * 9) both; }
   .ww-hero--arrive .ww-cal__day--next { animation: ww-hero-cell var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * (4 + var(--i, 0))) both, ww-hero-ink var(--dur-arrive-fade) var(--ease-stamp) calc(var(--stagger-step) * 10) both; }
 }
+
+/* TAPPING THE ART steps both slabs to the next hitters (Hero.jsx). The whole stage is the button,
+   so a thumb needs no aim; the dots say there is more. */
+.ww-hero__flip {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.ww-hero__flip:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: calc(-1 * var(--space-1));
+}
+/* The place in the roster, "3 / 26", over the foot of the art. */
+.ww-hero__pager {
+  position: absolute;
+  z-index: var(--z-raised);
+  bottom: var(--space-2);
+  left: 50%;
+  translate: -50% 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-ink-soft);
+  pointer-events: none;
+}
+
+@keyframes ww-hero-flip-left { from { opacity: 0; translate: calc(-1 * var(--space-10)) 0; } }
+@keyframes ww-hero-flip-right { from { opacity: 0; translate: var(--space-10) 0; } }
+@keyframes ww-hero-flip-who { from { opacity: 0; translate: 0 var(--space-1h); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Out: the slabs leave toward their own edges and the spotlight drops away. FLIP_OUT_MS in Hero.jsx. */
+  .ww-hero[data-flip='out'] :is(.ww-hero__slab, .ww-hero__who) {
+    opacity: 0;
+    transition: translate var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+  }
+  .ww-hero[data-flip='out'] .ww-hero__slab--away { translate: calc(-1 * var(--space-10)) 0; }
+  .ww-hero[data-flip='out'] .ww-hero__slab--home { translate: var(--space-10) 0; }
+  .ww-hero[data-flip='out'] .ww-hero__who { translate: 0 var(--space-1h); }
+  /* In: the next hitters arrive from the same edges. FLIP_IN_MS in Hero.jsx. */
+  .ww-hero[data-flip='in'] .ww-hero__slab--away { animation: ww-hero-flip-left var(--dur-arrive) var(--ease-stamp) both; }
+  .ww-hero[data-flip='in'] .ww-hero__slab--home { animation: ww-hero-flip-right var(--dur-arrive) var(--ease-stamp) both; }
+  .ww-hero[data-flip='in'] .ww-hero__who { animation: ww-hero-flip-who var(--dur-arrive-fade) var(--ease-stamp) both; }
+}

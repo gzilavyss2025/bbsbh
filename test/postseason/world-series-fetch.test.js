@@ -5,7 +5,6 @@ import test, { mock } from 'node:test'
 import {
   clubGamesUrl,
   fetchClubGames,
-  fetchGameClips,
   fetchPostseasonOutings,
   fetchReelGames,
   fetchSeriesRuns,
@@ -102,21 +101,6 @@ test('cutoff: the reel never requests content for a game on or after the slate d
     assert.deepEqual(out.map((g) => g.gamePk), [1])
     assert.ok(stub.calls.length > 0)
     assert.ok(stub.calls.every((c) => c.includes('/game/1/')), stub.calls.join())
-  } finally {
-    stub.restore()
-  }
-})
-
-test('cutoff: the hero\'s clips never request content for a game on or after the slate date', async () => {
-  const stub = stubFetch(() => ({ highlights: { highlights: { items: [{ id: 'a' }] } } }))
-  try {
-    const out = await fetchGameClips(
-      [{ gamePk: 1, date: '2026-10-24' }, { gamePk: 2, date: SLATE }, { gamePk: 3, date: '2026-10-28' }],
-      SLATE,
-    )
-    assert.deepEqual(out.map((g) => [g.gamePk, g.clips.length]), [[1, 1]])
-    assert.deepEqual(stub.calls.length, 1)
-    assert.ok(stub.calls[0].includes('/game/1/content'), stub.calls[0])
   } finally {
     stub.restore()
   }

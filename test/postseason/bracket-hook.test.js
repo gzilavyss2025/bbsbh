@@ -25,9 +25,10 @@ test('the hook is a function the UI can call', () => {
 
 test('the bracket code never reads Scores Unlocked and never touches storage', () => {
   const files = [
-    ...readdirSync(new URL('../../src/api/postseason/', import.meta.url)).map(
-      (f) => new URL(`../../src/api/postseason/${f}`, import.meta.url),
-    ),
+    // Every file under the folder, subfolders included (worldseries/ holds the hero's reads).
+    ...readdirSync(new URL('../../src/api/postseason/', import.meta.url), { recursive: true })
+      .filter((f) => f.endsWith('.js'))
+      .map((f) => new URL(`../../src/api/postseason/${f}`, import.meta.url)),
     new URL('../../src/hooks/postseason/usePostseasonBracket.js', import.meta.url),
     ...readdirSync(new URL('../../src/lib/postseason/primer/', import.meta.url)).map(
       (f) => new URL(`../../src/lib/postseason/primer/${f}`, import.meta.url),

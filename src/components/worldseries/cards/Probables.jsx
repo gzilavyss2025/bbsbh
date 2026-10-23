@@ -3,27 +3,18 @@ import { fetchWorkload } from '../../../api/workload.js'
 import { projectFromLiveLogs } from '../../../api/rotation/liveStarters.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { leadSide } from '../../../lib/postseason/worldseries/hotBats.js'
-import { pitchBars, pitcherLine } from '../../../lib/postseason/worldseries/probables.js'
+import { pitcherLine } from '../../../lib/postseason/worldseries/probables.js'
 import { teamClubNameShort } from '../../../lib/teams.js'
 import { TeamLogo } from '../../logo/TeamLogo.jsx'
+import { Headshot } from '../../player/Headshot.jsx'
 import { Card } from '../../ui/frame/Card.jsx'
-import { Key } from '../../ui/frame/Key.jsx'
 import { StatCell, StatStrip } from '../../ui/frame/StatStrip.jsx'
 import { Grid } from '../../ui/layout/Grid.jsx'
 
-// PROBABLES: each club's starter for the next game, his postseason line (IP,
-// ERA, K, BB) and a bar per postseason outing. A starter MLB has not named is
+// PROBABLES: each club's starter for the next game, his headshot and his postseason line (IP,
+// ERA, K, BB). A starter MLB has not named is
 // the projected one (ADR-0089, the same rule as the series page) and the card
 // says "Projected". Every figure ends the day before the slate date.
-const MAX_PITCHES = 120
-const swatch = (kind) => <span className={`ww-swatch ww-swatch--${kind}`} aria-hidden="true" />
-const KEY = [
-  { label: 'Start', mark: swatch('start') },
-  { label: 'Latest', mark: swatch('latest') },
-  { label: 'Relief', mark: swatch('relief') },
-  { label: 'Pitches', mark: <span className="ww-swatch ww-swatch--count" aria-hidden="true">#</span> },
-]
-
 async function loadSide(clubId, arm, game, season, slateDate) {
   let who = arm?.id ? { id: arm.id, name: arm.name, hand: arm.hand, projected: false } : null
   if (!who) {
@@ -33,25 +24,7 @@ async function loadSide(clubId, arm, game, season, slateDate) {
   }
   if (!who) return { clubId, who: null }
   const outings = await fetchPostseasonOutings(who.id, season, slateDate)
-  return { clubId, who, line: pitcherLine(outings, slateDate), bars: pitchBars(outings, slateDate) }
-}
-
-function Bars({ bars }) {
-  const peak = Math.max(MAX_PITCHES, ...bars.map((b) => b.pitches))
-  return (
-    <ol className="ww-bars">
-      {bars.map((b, i) => (
-        <li key={i} className="ww-bars__item">
-          <span className="ww-bars__count">{b.pitches}</span>
-          <span className={`ww-bars__bar ww-bars__bar--${b.kind}`} style={{ height: `${(b.pitches / peak) * 100}%` }} />
-          <span className="ww-bars__label">
-            {b.date.slice(5).replace('-', '/')} {b.away ? '@' : ''}
-            {b.opp}
-          </span>
-        </li>
-      ))}
-    </ol>
-  )
+  return { clubId, who, line: pitcherLine(outings, slateDate) }
 }
 
 const TILES = [
@@ -62,7 +35,7 @@ const TILES = [
 ]
 
 function Side({ side, other }) {
-  const { clubId, who, line, bars } = side
+  const { clubId, who, line } = side
   const club = teamClubNameShort(clubId)
   return (
     <section className="ww-prob" aria-label={`${club} starter`}>
@@ -74,13 +47,15 @@ function Side({ side, other }) {
       {who && line && (
         <>
           <p className="ww-prob__line">{`Oct · ${line.gs} GS${line.relief ? `, ${line.relief} relief` : ''}`}</p>
-          <StatStrip>
-            {TILES.map(([label, show, num, lowerWins]) => {
-              const lead = other?.line?.games && line.games ? leadSide(num(line), num(other.line), { lowerWins }) : null
-              return <StatCell key={label} label={label} value={show(line)} className={lead ? 'ww-best' : ''} />
-            })}
-          </StatStrip>
-          {bars.length > 0 && <Bars bars={bars} />}
+          <div className="ww-prob__body">
+            <Headshot personId={who.id} name={who.name} teamId={clubId} className="ww-prob__shot" />
+            <StatStrip>
+              {TILES.map(([label, show, num, lowerWins]) => {
+                const lead = other?.line?.games && line.games ? leadSide(num(line), num(other.line), { lowerWins }) : null
+                return <StatCell key={label} label={label} value={show(line)} className={lead ? 'ww-best' : ''} />
+              })}
+            </StatStrip>
+          </div>
         </>
       )}
     </section>
@@ -106,7 +81,6 @@ export function Probables({ game, season, slateDate }) {
         <Side side={data[0]} other={data[1]} />
         <Side side={data[1]} other={data[0]} />
       </Grid>
-      <Key items={KEY} className="ww-probables__key" />
     </Card>
   )
 }

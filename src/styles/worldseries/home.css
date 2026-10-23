@@ -10,6 +10,24 @@
   margin-bottom: var(--space-section);
 }
 
+/* The top row (WorldSeriesHome): the hero, then the column that rides beside it. Under 1000px the
+   column is a row of its own under the hero, as many 358px cards across as fit. */
+/* layout-exempt: the hero beside a fixed-width column, two named slots */
+.ww-top {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+/* The cards keep their own heights: a bracket stretched to Probables' height is a card of empty paper. */
+.ww-top__side {
+  align-items: start;
+}
+@media (min-width: 1000px) {
+  .ww-top {
+    grid-template-columns: minmax(0, 1fr) 358px;
+  }
+}
+
 /* The ledger's off-day column: hatched, and today's tinted. */
 .ww-ledger__off {
   background: repeating-linear-gradient(135deg, transparent 0 4px, var(--border-rule) 4px 5px);
@@ -192,56 +210,23 @@
   margin: 0 0 var(--space-2);
 }
 
-.ww-bars {
-  list-style: none;
-  margin: var(--space-3) 0 0;
-  padding: 0;
+/* The starter's headshot beside his four figures. */
+.ww-prob__body {
   display: flex;
-  align-items: flex-end;
-  gap: var(--space-2);
-  height: 96px;
+  align-items: flex-start;
+  gap: var(--space-3);
 }
-
-/* layout-exempt: a bar's count, bar and label stacked bottom-up */
-.ww-bars__item {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: stretch;
-  text-align: center;
+.shot.ww-prob__shot {
+  flex: none;
+  width: calc(var(--space-16) + var(--space-8));
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
 }
-
-.ww-bars__bar {
-  display: block;
-  min-height: 2px;
-  border: 2px solid var(--border-stamped);
-}
-
-.ww-bars__count,
-.ww-bars__label {
-  font-size: var(--fs-cell);
-  color: var(--text-heading);
-}
-
-.ww-bars__bar--latest,
-.ww-swatch--latest {
-  background: var(--surface-stamped-ink);
-}
-
-.ww-bars__bar--start,
-.ww-swatch--start {
-  background: var(--border-stamped-soft);
-}
-
-.ww-bars__bar--relief,
-.ww-swatch--relief {
-  background: repeating-linear-gradient(135deg, transparent 0 3px, var(--border-stamped) 3px 4px);
-}
-
-.ww-probables__key {
-  margin-top: var(--space-3);
+/* layout-exempt: the four figures stay a 2 by 2 block beside the photo, not one column */
+.ww-prob__body .statstrip {
+  flex: 1 1 0;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 /* tape */

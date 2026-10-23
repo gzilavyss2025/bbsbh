@@ -1,17 +1,11 @@
-import { SectionHead } from '../../ui/frame/SectionHead.jsx'
 import { Card } from '../../ui/frame/Card.jsx'
 
-// One of "Today's edges": a label head on a hairline, then a card of paper
-// under it (the same pairing SeriesStarters and SeriesTotals use).
-export function EdgeCard({ title, note, className, frame, children }) {
+// One of the series' edge cards (Today's edges, the scouting report): a stamped card named on its
+// ink tab, as the World Series home's cards are. `note` is the tag across the top-right edge.
+export function EdgeCard({ title, note, className, children }) {
   return (
-    <section>
-      <SectionHead look="label" note={note}>
-        {title}
-      </SectionHead>
-      <Card as="div" frame={frame} className={className}>
-        {children}
-      </Card>
-    </section>
+    <Card frame="stamped" label={title} labelAs="h3" count={note} className={className}>
+      {children}
+    </Card>
   )
 }
