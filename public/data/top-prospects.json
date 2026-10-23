@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-23T06:56:26.108Z",
+  "generatedAt": "2026-10-23T12:29:02.821Z",
   "source": "https://www.mlb.com/prospects/stats/top-prospects",
   "orgSource": "https://www.mlb.com/prospects/stats/top-prospects?type=all&minPA=1",
   "count": 96,
@@ -667,7 +667,7 @@
     {
       "rank": 57,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -7413,7 +7413,7 @@
     {
       "orgRank": 3,
       "playerId": 695491,
-      "name": "Joshua Báez",
+      "name": "Joshua Baez",
       "teamId": 138,
       "team": "stl",
       "position": "LF",
@@ -9441,7 +9441,7 @@
     {
       "orgRank": 20,
       "playerId": 691548,
-      "name": "Rolddy Munoz",
+      "name": "Rolddy Muñoz",
       "teamId": 144,
       "team": "atl",
       "position": "RHP",
