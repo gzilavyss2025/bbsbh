@@ -334,12 +334,18 @@ export async function fetchStandings(leagueId, season, date, hydrate) {
   const cacheKey = date ? `${leagueId}:${season}:${date}:${hydrate ?? ''}` : null
   if (cacheKey && standingsCache.has(cacheKey)) return standingsCache.get(cacheKey)
   try {
-    const dateParam = date ? `&date=${date}` : ''
     const hydrateParam = hydrate ? `&hydrate=${hydrate}` : ''
-    const data = await getJson(
-      `/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason${dateParam}${hydrateParam}`,
-    )
-    const records = data.records ?? []
+    const ask = async (dateParam) =>
+      (await getJson(
+        `/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason${dateParam}${hydrateParam}`,
+      )).records ?? []
+    let records = await ask(date ? `&date=${date}` : '')
+    // A `date` after a finished season's last day returns nothing (2018-12-30 does), so a past
+    // season asks again with no date and gets its final table. A date before opening day returns
+    // nothing too, and there the empty answer is the true one: only July on counts as after the
+    // end. A current season that returns nothing really has none: no retry.
+    const late = Number(date?.slice(5, 7)) >= 7
+    if (date && late && !records.length && season < new Date().getFullYear()) records = await ask('')
     if (cacheKey) standingsCache.set(cacheKey, records)
     return records
   } catch {
