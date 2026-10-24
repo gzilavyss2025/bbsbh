@@ -36,6 +36,15 @@ const maxMs = Number(args.maxMinutes || 480) * 60_000
 const minGapMs = Number(args.minGapMs || 1500)
 const verifyEvery = Number(args.verifyEvery || 10)
 const doDiff = args.noDiff !== 'true'
+// --endAtPush: ask diffPatch for an explicit endTimecode, the newest stamp a push carried,
+// instead of "up to now". Tests whether stored-to-stored patches avoid the live-edge
+// inconsistencies seen with an open end.
+const endAtPush = args.endAtPush === 'true'
+// --diag: on a verification mismatch, write STRUCTURE to diag.jsonl (counts and path names, never
+// values). Do not use it on a game somebody is watching: a path can say which play changed.
+const diag = args.diag === 'true'
+const TIMECODE = /^\d{8}_\d{6}$/
+let pushStamp = ''
 
 // The socket is not a fetch, so the shared client's retry policy does not apply to it.
 // Its address comes from the client's own base, on the sibling "ws." host.
@@ -70,12 +79,13 @@ const stats = {
   pushBytes: 0,
   shapes: {},
   pushTimes: [],
-  diff: { patch: 0, empty: 0, fallback: 0, odd: 0, httpError: 0, applyError: 0 },
+  diff: { patch: 0, empty: 0, fallback: 0, odd: 0, httpError: 0, applyError: 0, upToDate: 0, endMatch: 0, endMiss: 0 },
   ops: { total: 0, byType: {}, byPrefix: {} },
   gz: { patchTotal: 0, fullLatest: 0, fullAtVerify: [] },
   ageSec: { patch: [], fallback: [] },
   coalesced: [],
-  verify: { runs: 0, equal: 0, mismatch: 0, mismatchAt: {} },
+  verify: { runs: 0, equal: 0, mismatch: 0, inconclusive: 0, mismatchAt: {} },
+  fallbackStampIsStart: 0,
 }
 
 // ---- feed state ---------------------------------------------------------------
@@ -124,10 +134,16 @@ async function oneUpdate(coalesced) {
   const lastTs = doc?.metaData?.timeStamp
   if (!lastTs) return resync('no-timestamp')
   const ageSec = (Date.now() - timecodeMs(lastTs)) / 1000
+  const end = endAtPush && pushStamp ? pushStamp : ''
+  if (end && end <= lastTs) {
+    stats.diff.upToDate++
+    ev('diff', { outcome: 'up-to-date' })
+    return
+  }
   const started = Date.now()
   let body
   try {
-    body = await get(`/api/v1.1/game/${gamePk}/feed/live/diffPatch?language=en&startTimecode=${lastTs}`)
+    body = await get(`/api/v1.1/game/${gamePk}/feed/live/diffPatch?language=en&startTimecode=${lastTs}${end ? `&endTimecode=${end}` : ''}`)
   } catch (e) {
     const ms = Date.now() - started
     if (e instanceof SyntaxError) {
@@ -167,6 +183,7 @@ async function oneUpdate(coalesced) {
       return resync('apply-error')
     }
     stats.diff.patch++
+    if (end) stats.diff[next.metaData.timeStamp === end ? 'endMatch' : 'endMiss']++
     stats.ops.total += ops
     stats.gz.patchTotal += gz
     stats.ageSec.patch.push(ageSec)
@@ -176,13 +193,16 @@ async function oneUpdate(coalesced) {
     return
   }
   if (body && body.gamePk === gamePk && body.metaData) {
-    // diffPatch answered with a whole feed: the start timecode was too old.
+    // diffPatch answered with a whole feed. Do NOT keep it: its metaData.timeStamp
+    // is the START stamp while its content is not the state at that stamp (found
+    // replaying 870064: the body differs from the snapshot for its own stamp). A
+    // patch built on it applied to the wrong base ("bad index"). A plain
+    // /feed/live is consistent with its own stamp (12 of 12 checks), so refetch it.
     stats.diff.fallback++
     stats.ageSec.fallback.push(ageSec)
-    stats.gz.fullLatest = gz
-    ev('diff', { outcome: 'fallback', ageSec, ms, gz })
-    doc = body
-    return
+    if (body.metaData.timeStamp === lastTs) stats.fallbackStampIsStart++
+    ev('diff', { outcome: 'fallback', ageSec, ms, gz, stampIsStart: body.metaData.timeStamp === lastTs })
+    return resync('fallback')
   }
   stats.diff.odd++
   ev('diff', { outcome: 'odd-shape', ageSec, ms })
@@ -195,12 +215,34 @@ async function verify() {
   try {
     const want = await get(`/api/v1.1/game/${gamePk}/feed/live?timecode=${ts}`)
     stats.gz.fullAtVerify.push(gzOf(want))
+    // The server serves the closest EARLIER stored snapshot when none exists for the stamp
+    // we ask for (seen: our stamp 001801, served 001800). Different stamps prove nothing.
+    if (want.metaData?.timeStamp !== ts) {
+      stats.verify.inconclusive++
+      return
+    }
     stats.verify.runs++
     if (isDeepStrictEqual(doc, want)) stats.verify.equal++
     else {
       stats.verify.mismatch++
       for (const p of diffPaths(doc, want)) stats.verify.mismatchAt[p] = (stats.verify.mismatchAt[p] || 0) + 1
       ev('verify', { equal: false })
+      if (diag) {
+        const n = (f, o) => { try { return f(o) } catch { return null } }
+        const plays = (o) => o.liveData.plays.allPlays.length
+        const events = (o) => o.liveData.plays.allPlays.reduce((a, p) => a + p.playEvents.length, 0)
+        const idx = (o) => o.liveData.plays.currentPlay.about.atBatIndex
+        const deep = []
+        // At each differing leaf: its path and what each side holds (absent, null, a type), never the value.
+        const kind = (v) => (v === undefined ? 'absent' : v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v)
+        const walk = (a, b, path, depth) => {
+          if (deep.length >= 16 || isDeepStrictEqual(a, b)) return
+          if (depth === 0 || a === null || b === null || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return void deep.push(`${path} | doc ${kind(a)} | snapshot ${kind(b)}`)
+          for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) walk(a[k], b[k], `${path}/${k}`, depth - 1)
+        }
+        walk(doc, want, '', 9)
+        appendFileSync(`${outDir}/diag.jsonl`, JSON.stringify({ t: since(), docStamp: doc.metaData.timeStamp, wantStamp: want.metaData.timeStamp, plays: [n(plays, doc), n(plays, want)], playEvents: [n(events, doc), n(events, want)], currentAtBat: [n(idx, doc), n(idx, want)], paths: deep }) + '\n')
+      }
     }
   } catch {
     // a failed verification fetch is not a result
@@ -286,10 +328,15 @@ function connect() {
       ev('ack', { bytes })
       return
     }
-    const key = JSON.stringify(json === undefined ? `<non-json ${bytes} bytes>` : shape(json))
+    // Group by structure: array lengths and string lengths vary push to push.
+    const key = JSON.stringify(json === undefined ? '<non-json>' : shape(json))
+      .replace(/"\d+ x"/g, '"n x"')
+      .replace(/<array \d+>/g, '<array>')
+      .replace(/<str \d+>/g, '<str>')
     stats.pushes++
     stats.pushBytes += bytes
     stats.pushTimes.push(since())
+    if (typeof json?.timeStamp === 'string' && TIMECODE.test(json.timeStamp) && json.timeStamp > pushStamp) pushStamp = json.timeStamp
     stats.shapes[key] = (stats.shapes[key] || 0) + 1
     if (!seenShapes.has(key)) {
       seenShapes.set(key, seenShapes.size + 1)
@@ -299,30 +346,52 @@ function connect() {
     if (stats.pushes % 25 === 0) say(`pushes ${stats.pushes}`)
     onPush()
   }
-  ws.onerror = () => ev('socket-error')
-  ws.onclose = async (e) => {
+  // A failed connection can fire "error" and never "close" (seen: a reconnect after a 1006 died
+  // this way, and with nothing left on the event loop Node exited silently). So an error with no
+  // close within 3 s counts as a close. `gone` makes sure the close is handled once.
+  const sock = ws
+  let gone = false
+  const onGone = async (code, rawReason, clean) => {
+    if (gone) return
+    gone = true
     clearInterval(keepalive)
-    stats.closes[e.code] = (stats.closes[e.code] || 0) + 1
-    // Print the reason text only for the two codes whose meaning is known.
-    const reason = e.code === 4200 || e.code === 4400 ? String(e.reason).slice(0, 80) : `${String(e.reason).length} chars`
-    ev('close', { code: e.code, clean: e.wasClean })
-    say(`socket closed: code ${e.code} (${reason})`)
+    stats.closes[code] = (stats.closes[code] || 0) + 1
+    // Print the reason text for server-sent codes (never game data). 1005 and 1006 carry none.
+    const reason = code === 1005 || code === 1006 ? 'none' : String(rawReason).slice(0, 80)
+    ev('close', { code, clean })
+    say(`socket closed: code ${code} (${reason})`)
     if (finished) return
     if (since() > maxMs) return finish('max-minutes')
-    if (e.code === 4200) return finish('game-final')
+    if (code === 4200) return finish('game-final')
     const st = await gameState()
     ev('state', { abstract: st.abstract, detail: st.detail })
     if (st.abstract === 'Final') return finish('state-final')
-    if (e.code === 4400) {
+    if (code === 4400) {
       say(`game state: ${st.abstract} (${st.detail}); retrying in 30 s`)
       return setTimeout(connect, 30_000)
     }
     attempts++
-    if (attempts > 8) return finish('too-many-failures')
+    if (attempts > 500) return finish('too-many-failures')
     const wait = Math.min(60_000, 2000 * 2 ** (attempts - 1))
     say(`reconnecting in ${wait / 1000} s (attempt ${attempts})`)
     setTimeout(connect, wait)
   }
+  ws.onerror = () => {
+    ev('socket-error')
+    setTimeout(() => sock.readyState !== 1 && onGone(1006, '', false), 3000)
+  }
+  ws.onclose = (e) => onGone(e.code, e.reason, e.wasClean)
+  // A connection can hang in CONNECTING with neither "open" nor "error" (seen on the busiest game).
+  setTimeout(() => {
+    if (sock.readyState !== 0) return
+    ev('connect-timeout')
+    try {
+      sock.close()
+    } catch {
+      // already closing
+    }
+    onGone(1006, '', false)
+  }, 20_000)
 }
 
 // ---- summary ------------------------------------------------------------------
@@ -408,7 +477,7 @@ setInterval(() => {
   const beat = `pushes ${stats.pushes}, diffs patch ${d.patch} empty ${d.empty} fallback ${d.fallback}, connects ${stats.connects}`
   if (beat !== lastBeat || ++quietBeats % 10 === 0) say(beat)
   lastBeat = beat
-}, 60_000).unref()
+}, 60_000) // not unref'd: only finish() ends the process
 
-say(`capturing gamePk ${gamePk}${doDiff ? '' : ' (socket only, no diff fetches)'}; output in ${outDir}`)
+say(`capturing gamePk ${gamePk}${doDiff ? '' : ' (socket only, no diff fetches)'}${endAtPush ? ' (end at push stamp)' : ''}; output in ${outDir}`)
 connect()
