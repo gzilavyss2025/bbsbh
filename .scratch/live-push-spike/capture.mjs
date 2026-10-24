@@ -233,12 +233,14 @@ async function verify() {
         const events = (o) => o.liveData.plays.allPlays.reduce((a, p) => a + p.playEvents.length, 0)
         const idx = (o) => o.liveData.plays.currentPlay.about.atBatIndex
         const deep = []
+        // At each differing leaf: its path and what each side holds (absent, null, a type), never the value.
+        const kind = (v) => (v === undefined ? 'absent' : v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v)
         const walk = (a, b, path, depth) => {
           if (deep.length >= 16 || isDeepStrictEqual(a, b)) return
-          if (depth === 0 || a === null || b === null || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return void deep.push(path)
+          if (depth === 0 || a === null || b === null || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return void deep.push(`${path} | doc ${kind(a)} | snapshot ${kind(b)}`)
           for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) walk(a[k], b[k], `${path}/${k}`, depth - 1)
         }
-        walk(doc, want, '', 5)
+        walk(doc, want, '', 9)
         appendFileSync(`${outDir}/diag.jsonl`, JSON.stringify({ t: since(), docStamp: doc.metaData.timeStamp, wantStamp: want.metaData.timeStamp, plays: [n(plays, doc), n(plays, want)], playEvents: [n(events, doc), n(events, want)], currentAtBat: [n(idx, doc), n(idx, want)], paths: deep }) + '\n')
       }
     }
