@@ -36,6 +36,15 @@ const maxMs = Number(args.maxMinutes || 480) * 60_000
 const minGapMs = Number(args.minGapMs || 1500)
 const verifyEvery = Number(args.verifyEvery || 10)
 const doDiff = args.noDiff !== 'true'
+// --endAtPush: ask diffPatch for an explicit endTimecode, the newest stamp a push carried,
+// instead of "up to now". Tests whether stored-to-stored patches avoid the live-edge
+// inconsistencies seen with an open end.
+const endAtPush = args.endAtPush === 'true'
+// --diag: on a verification mismatch, write STRUCTURE to diag.jsonl (counts and path names, never
+// values). Do not use it on a game somebody is watching: a path can say which play changed.
+const diag = args.diag === 'true'
+const TIMECODE = /^\d{8}_\d{6}$/
+let pushStamp = ''
 
 // The socket is not a fetch, so the shared client's retry policy does not apply to it.
 // Its address comes from the client's own base, on the sibling "ws." host.
@@ -70,12 +79,12 @@ const stats = {
   pushBytes: 0,
   shapes: {},
   pushTimes: [],
-  diff: { patch: 0, empty: 0, fallback: 0, odd: 0, httpError: 0, applyError: 0 },
+  diff: { patch: 0, empty: 0, fallback: 0, odd: 0, httpError: 0, applyError: 0, upToDate: 0, endMatch: 0, endMiss: 0 },
   ops: { total: 0, byType: {}, byPrefix: {} },
   gz: { patchTotal: 0, fullLatest: 0, fullAtVerify: [] },
   ageSec: { patch: [], fallback: [] },
   coalesced: [],
-  verify: { runs: 0, equal: 0, mismatch: 0, mismatchAt: {} },
+  verify: { runs: 0, equal: 0, mismatch: 0, inconclusive: 0, mismatchAt: {} },
   fallbackStampIsStart: 0,
 }
 
@@ -125,10 +134,16 @@ async function oneUpdate(coalesced) {
   const lastTs = doc?.metaData?.timeStamp
   if (!lastTs) return resync('no-timestamp')
   const ageSec = (Date.now() - timecodeMs(lastTs)) / 1000
+  const end = endAtPush && pushStamp ? pushStamp : ''
+  if (end && end <= lastTs) {
+    stats.diff.upToDate++
+    ev('diff', { outcome: 'up-to-date' })
+    return
+  }
   const started = Date.now()
   let body
   try {
-    body = await get(`/api/v1.1/game/${gamePk}/feed/live/diffPatch?language=en&startTimecode=${lastTs}`)
+    body = await get(`/api/v1.1/game/${gamePk}/feed/live/diffPatch?language=en&startTimecode=${lastTs}${end ? `&endTimecode=${end}` : ''}`)
   } catch (e) {
     const ms = Date.now() - started
     if (e instanceof SyntaxError) {
@@ -168,6 +183,7 @@ async function oneUpdate(coalesced) {
       return resync('apply-error')
     }
     stats.diff.patch++
+    if (end) stats.diff[next.metaData.timeStamp === end ? 'endMatch' : 'endMiss']++
     stats.ops.total += ops
     stats.gz.patchTotal += gz
     stats.ageSec.patch.push(ageSec)
@@ -199,12 +215,32 @@ async function verify() {
   try {
     const want = await get(`/api/v1.1/game/${gamePk}/feed/live?timecode=${ts}`)
     stats.gz.fullAtVerify.push(gzOf(want))
+    // The server serves the closest EARLIER stored snapshot when none exists for the stamp
+    // we ask for (seen: our stamp 001801, served 001800). Different stamps prove nothing.
+    if (want.metaData?.timeStamp !== ts) {
+      stats.verify.inconclusive++
+      return
+    }
     stats.verify.runs++
     if (isDeepStrictEqual(doc, want)) stats.verify.equal++
     else {
       stats.verify.mismatch++
       for (const p of diffPaths(doc, want)) stats.verify.mismatchAt[p] = (stats.verify.mismatchAt[p] || 0) + 1
       ev('verify', { equal: false })
+      if (diag) {
+        const n = (f, o) => { try { return f(o) } catch { return null } }
+        const plays = (o) => o.liveData.plays.allPlays.length
+        const events = (o) => o.liveData.plays.allPlays.reduce((a, p) => a + p.playEvents.length, 0)
+        const idx = (o) => o.liveData.plays.currentPlay.about.atBatIndex
+        const deep = []
+        const walk = (a, b, path, depth) => {
+          if (deep.length >= 16 || isDeepStrictEqual(a, b)) return
+          if (depth === 0 || a === null || b === null || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return void deep.push(path)
+          for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) walk(a[k], b[k], `${path}/${k}`, depth - 1)
+        }
+        walk(doc, want, '', 5)
+        appendFileSync(`${outDir}/diag.jsonl`, JSON.stringify({ t: since(), docStamp: doc.metaData.timeStamp, wantStamp: want.metaData.timeStamp, plays: [n(plays, doc), n(plays, want)], playEvents: [n(events, doc), n(events, want)], currentAtBat: [n(idx, doc), n(idx, want)], paths: deep }) + '\n')
+      }
     }
   } catch {
     // a failed verification fetch is not a result
@@ -298,6 +334,7 @@ function connect() {
     stats.pushes++
     stats.pushBytes += bytes
     stats.pushTimes.push(since())
+    if (typeof json?.timeStamp === 'string' && TIMECODE.test(json.timeStamp) && json.timeStamp > pushStamp) pushStamp = json.timeStamp
     stats.shapes[key] = (stats.shapes[key] || 0) + 1
     if (!seenShapes.has(key)) {
       seenShapes.set(key, seenShapes.size + 1)
@@ -311,8 +348,8 @@ function connect() {
   ws.onclose = async (e) => {
     clearInterval(keepalive)
     stats.closes[e.code] = (stats.closes[e.code] || 0) + 1
-    // Print the reason text only for the two codes whose meaning is known.
-    const reason = e.code === 4200 || e.code === 4400 ? String(e.reason).slice(0, 80) : `${String(e.reason).length} chars`
+    // Print the reason text for server-sent codes (never game data). 1005 and 1006 carry none.
+    const reason = e.code === 1005 || e.code === 1006 ? 'none' : String(e.reason).slice(0, 80)
     ev('close', { code: e.code, clean: e.wasClean })
     say(`socket closed: code ${e.code} (${reason})`)
     if (finished) return
@@ -418,5 +455,5 @@ setInterval(() => {
   lastBeat = beat
 }, 60_000).unref()
 
-say(`capturing gamePk ${gamePk}${doDiff ? '' : ' (socket only, no diff fetches)'}; output in ${outDir}`)
+say(`capturing gamePk ${gamePk}${doDiff ? '' : ' (socket only, no diff fetches)'}${endAtPush ? ' (end at push stamp)' : ''}; output in ${outDir}`)
 connect()
