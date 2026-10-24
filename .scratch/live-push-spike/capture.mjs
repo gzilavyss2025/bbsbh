@@ -344,30 +344,52 @@ function connect() {
     if (stats.pushes % 25 === 0) say(`pushes ${stats.pushes}`)
     onPush()
   }
-  ws.onerror = () => ev('socket-error')
-  ws.onclose = async (e) => {
+  // A failed connection can fire "error" and never "close" (seen: a reconnect after a 1006 died
+  // this way, and with nothing left on the event loop Node exited silently). So an error with no
+  // close within 3 s counts as a close. `gone` makes sure the close is handled once.
+  const sock = ws
+  let gone = false
+  const onGone = async (code, rawReason, clean) => {
+    if (gone) return
+    gone = true
     clearInterval(keepalive)
-    stats.closes[e.code] = (stats.closes[e.code] || 0) + 1
+    stats.closes[code] = (stats.closes[code] || 0) + 1
     // Print the reason text for server-sent codes (never game data). 1005 and 1006 carry none.
-    const reason = e.code === 1005 || e.code === 1006 ? 'none' : String(e.reason).slice(0, 80)
-    ev('close', { code: e.code, clean: e.wasClean })
-    say(`socket closed: code ${e.code} (${reason})`)
+    const reason = code === 1005 || code === 1006 ? 'none' : String(rawReason).slice(0, 80)
+    ev('close', { code, clean })
+    say(`socket closed: code ${code} (${reason})`)
     if (finished) return
     if (since() > maxMs) return finish('max-minutes')
-    if (e.code === 4200) return finish('game-final')
+    if (code === 4200) return finish('game-final')
     const st = await gameState()
     ev('state', { abstract: st.abstract, detail: st.detail })
     if (st.abstract === 'Final') return finish('state-final')
-    if (e.code === 4400) {
+    if (code === 4400) {
       say(`game state: ${st.abstract} (${st.detail}); retrying in 30 s`)
       return setTimeout(connect, 30_000)
     }
     attempts++
-    if (attempts > 8) return finish('too-many-failures')
+    if (attempts > 500) return finish('too-many-failures')
     const wait = Math.min(60_000, 2000 * 2 ** (attempts - 1))
     say(`reconnecting in ${wait / 1000} s (attempt ${attempts})`)
     setTimeout(connect, wait)
   }
+  ws.onerror = () => {
+    ev('socket-error')
+    setTimeout(() => sock.readyState !== 1 && onGone(1006, '', false), 3000)
+  }
+  ws.onclose = (e) => onGone(e.code, e.reason, e.wasClean)
+  // A connection can hang in CONNECTING with neither "open" nor "error" (seen on the busiest game).
+  setTimeout(() => {
+    if (sock.readyState !== 0) return
+    ev('connect-timeout')
+    try {
+      sock.close()
+    } catch {
+      // already closing
+    }
+    onGone(1006, '', false)
+  }, 20_000)
 }
 
 // ---- summary ------------------------------------------------------------------
@@ -453,7 +475,7 @@ setInterval(() => {
   const beat = `pushes ${stats.pushes}, diffs patch ${d.patch} empty ${d.empty} fallback ${d.fallback}, connects ${stats.connects}`
   if (beat !== lastBeat || ++quietBeats % 10 === 0) say(beat)
   lastBeat = beat
-}, 60_000).unref()
+}, 60_000) // not unref'd: only finish() ends the process
 
 say(`capturing gamePk ${gamePk}${doDiff ? '' : ' (socket only, no diff fetches)'}${endAtPush ? ' (end at push stamp)' : ''}; output in ${outDir}`)
 connect()
