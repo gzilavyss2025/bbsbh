@@ -16,6 +16,8 @@
 //   777747  BOS@MIL 2025-05-27 — Yelich's walk-off grand slam, bottom 10th.
 //   778442  ATH@COL 2025-04-05 — a 5-4-3 triple play, top 2nd (ab 9).
 //   778501  CHC@ATH 2025-03-31 — Carson Kelly's cycle.
+//   824716  SEA@BOS — the Field tab's defense: changes before a half and a
+//           pitching change trailing an at-bat (bottom 9th, Muñoz).
 // Each carries `winProbability` (the separate endpoint, trimmed) when MLB serves it.
 import { writeFileSync } from 'node:fs'
 import { getJson } from '../../scripts/lib/statsapi.mjs'

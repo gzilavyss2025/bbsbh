@@ -439,6 +439,11 @@
       "why": "Gameday's day lines (#2606): the batter's and the pitcher's line for today as of the reader's step. A line names results ('2-for-3'). Built from computeHalfInningFeed's cards WITH the step cap and sliced at it, and from computePitcherLines' own step clamp, so step k never sees step k+1; a half past revealedThrough + 1 answers null. No screen imports it yet; the fresh Gameday stage (#2568) will call it inside a SealBox reveal render function.",
       "importers": []
     },
+    "gameday/defense.js": {
+      "class": "reveal-only",
+      "why": "Gameday's Field tab (#2566): the fielding side's alignment and pitcher as of the reader's step. A substitution can telegraph a sealed blowout. The side's starters, then its earlier fielding halves whole and the reader's half from computeHalfInningFeed built with the step cap and sliced at it, so a change counts only once its own entry is on screen (ADR-0016); a half past revealedThrough + 1 answers null. No screen imports it yet.",
+      "importers": []
+    },
     "gameday/moments/moments.js": {
       "class": "reveal-only",
       "why": "Gameday's moments engine (#2608): scores one revealed play (walk-off, grand slam, triple play, cycle, odds swing, milestone, Statcast extreme) and names the result. Answers null for a play not on screen (gameday/stepCut.js); every detector reads only this play and the ones before it, and the odds swing is winprob.js' own path clamped to this play. Returns data and decides no timing (ADR-0046). No screen imports it yet.",
@@ -459,6 +464,7 @@
       "importers": [
         "api/gameday/checkpoint.js",
         "api/gameday/dayLine.js",
+        "api/gameday/defense.js",
         "api/gameday/moments/moments.js",
         "api/gameday/reviews.js"
       ]
@@ -798,6 +804,7 @@
         "api/dueup.js",
         "api/expresslane/runners.js",
         "api/gameday/checkpoint.js",
+        "api/gameday/defense.js",
         "api/gameday/stepCut.js",
         "api/pitchers.js",
         "api/scorecardGame.js",
