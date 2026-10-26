@@ -71,7 +71,7 @@ determine payload size and therefore mobile performance:
 | Endpoint | URL | Required | Notable params | Status |
 |---|---|---|---|---|
 | `game` | `/v1.1/game/{gamePk}/feed/live` | `gamePk` | `timecode`, `hydrate`, `fields` | confirmed |
-| `game_diff` | `/v1.1/game/{gamePk}/feed/live/diffPatch` | `gamePk`, `startTimecode`+`endTimecode` | — | confirmed |
+| `game_diff` | `/v1.1/game/{gamePk}/feed/live/diffPatch` | `gamePk`, `startTimecode`+`endTimecode` | — | confirmed, not used (ADR-0122) |
 | `game_timestamps` | `/{ver}/game/{gamePk}/feed/live/timestamps` | `gamePk` | — | unused |
 | `game_playByPlay` | `/{ver}/game/{gamePk}/playByPlay` | `gamePk` | `timecode`, `fields` | confirmed |
 | `game_boxscore` | `/{ver}/game/{gamePk}/boxscore` | `gamePk` | `timecode`, `fields` | confirmed |
@@ -88,16 +88,50 @@ Notes:
 - **`game_color` is dead.** It returns HTTP 404 for every `gamePk` tested, on both `v1` and
   `v1.1`. MLB appears to have removed it. No code in this app calls it, so nothing breaks —
   but treat the row as historical, not callable.
-- **`game_diff` degrades on purpose.** With both `startTimecode` and `endTimecode` close
-  together, it returns the documented array of diff patches. This app calls it with only
-  `startTimecode` (a gap over 200 seconds); the live API then falls back to a full, non-array
-  feed object instead of a diff array. `src/api/game.js` already documents this fallback and
-  handles both shapes. This is an intentional workaround, not a doc error.
-- **`game_timestamps` + `diffPatch` are still the two most under-used features here.**
+- **`game_diff` degrades, and the app does not call it.** With both `startTimecode` and `endTimecode`
+  close together it returns an array of `{diff: [...]}` patches. Without an end, or when it cannot build one, it
+  returns a whole feed object instead, and that happens at fresh start stamps too (see the next section). The app
+  stopped calling it when Scores Unlocked was removed (ADR-0116) and does not plan to bring it back (ADR-0122).
+- **`game_timestamps` is the useful half.**
   `game_timestamps` returns every snapshot timestamp for a game; passing one as `timecode` to
   `feed/live` returns the game *as of that moment*. Wiki note, unverified in this audit: if
   you only want current win probability per team, use `game_contextMetrics` rather than
   `game_winProbability`.
+
+### The push socket and `diffPatch` at the live edge (measured 2026-10-23; ADR-0122)
+
+The app uses neither. A spike (#2578) measured both on World Series Game 1 (about three hours of play) and on two
+winter-league games. Both are unofficial and undocumented. The wire facts come from a community Go client
+(`mlblive`, `cmd/websocket.go`) and from our own captures.
+
+- **The socket** is `wss://ws.statsapi.mlb.com/api/v1/game/push/subscribe/gameday/{gamePk}`. Node sends no `Origin`. A
+  browser sends one and was accepted (HTTP 101, four of six attempts). The two failures had no handshake response at
+  all, so they look like network failures and not an origin block. The client sends the text `Gameday5` every 10 s. The
+  server never echoes it.
+- **Close codes.** A finished game opens, then closes at once with `4400` ("Game is not available for subscription at
+  this time."). A scheduled game opens and stays open, silent. `4200` means final (community client). Under load the
+  server closes with `1013` and "Service overloaded; retry later." During Game 1, new connections stopped opening for
+  about 15 minutes, and reconnecting with backoff recovered them. Established sockets also drop with `1006` every 15 to
+  50 minutes.
+- **A push frame** is one JSON text frame of 212 to 289 bytes with the keys `timeStamp` (a timecode), `gamePk` (a
+  string), `updateId`, `wait`, `logicalEvents[]`, `gameEvents[]`, `changeEvent{type}` and `isDelay`. In play, the median
+  gap between pushes was 17 to 20 s (2.6 a minute). Winter-league games push the same way.
+- **`diffPatch` returns patches or a whole feed.** Patches are small (a median of 1.2 to 2.1 KB gzip, against a full feed
+  of 24 to 63 KB in the games measured). After each push it answered with a whole feed for 19% of requests on Game 1
+  (48% with a 60 s minimum gap, and 1% in one quiet game). A fallback does not follow the age of the start stamp. The
+  fallback body's `metaData.timeStamp` is often the request's start stamp, and the body can differ from the snapshot for
+  its own stamp, so it is not safe as the base for the next patch.
+- **A stamp names one second, not one state.** `feed/live?timecode=T` serves the closest earlier stored snapshot when
+  none exists for `T`. A plain `/feed/live` equalled the snapshot for its own stamp in play (12 of 12) and not after the
+  game ended (0 of 4: the final status was in the feed and not in the snapshot). A merged feed differed from the snapshot
+  for the same stamp in 12 of 50 checks on Game 1 (24%), and one divergence stayed wrong across nine checks while six
+  more plays were patched cleanly. A merge can be wrong without an apply error.
+- **Replay overstates the live saving.** On stored timecode pairs, 54 of 54 and 51 of 51 patches merged exactly. The
+  earlier spike, which replayed stored pairs, saw 3.5% fallbacks at a 15 s cadence. Live requests, from a stamp to "now",
+  behave differently (inference: not tested directly).
+- **Result.** Fetching after each push, with fallbacks and reconnects counted, used 3.4 times fewer bytes than a 15 s
+  full-feed poll, and slightly more than a 60 s poll (a ratio of 0.9). The full numbers are in the #2578 comments.
+  The scripts and the write-up are in history: `git show 7b20c78c:.scratch/live-push-spike/findings.md`.
 
 ---
 

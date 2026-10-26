@@ -294,7 +294,7 @@ These ship in the app. A spike reads them as a source of record. Their row count
 
 Every JSON file below is tracked, and none is a view. `node scripts/research-db.mjs --uncovered` prints any tracked file that is in neither list. A skip is not a verdict on the file: register it the day a question needs it.
 
-- **Design and probe output, no research question.** `.scratch/design-system/`, `.scratch/abs-reports/design/`, `.scratch/homefeed/canvas/`, `.scratch/offseason-design/`, `.scratch/team-one-scroll/canvas/`, `.scratch/live-feed-diffpatch/`. These are UI measurement sheets, page mock-up canvases and one-off byte-count probes; three probe files are under 1 KB.
+- **Design and probe output, no research question.** `.scratch/design-system/`, `.scratch/abs-reports/design/`, `.scratch/homefeed/canvas/`, `.scratch/offseason-design/`, `.scratch/team-one-scroll/canvas/`. These are UI measurement sheets, page mock-up canvases and one-off byte-count probes; three probe files are under 1 KB.
 - **Empty.** `.scratch/level-benchmarks/org-gaps.json` is an empty array.
 - **Raw fetch cache.** `.scratch/team-success/first-club-gamelog-cache.json` holds 6 MB of game logs keyed `{group}-{playerId}-{year}`. `team_success_first_club_cache__results` holds the answer it was built for.
 - **Copy of another panel, or a queue.** `public/data/contracts-history/identity/pending.json` is a review queue of fuzzy matches (the same `rowKey` values are in the identity views). `public/data/contracts-history/search-index.json` is a 5.8 MB slim copy of the identity rows for the app's search. `public/data/trade-deadline/index.json` lists the season files.

@@ -4,6 +4,11 @@
 > The tight poll ran only under the Scores Unlocked pass, which was removed. A
 > live game polls the full feed every 60s; `fetchGameFeedDiff`, `mergeFeedDiff`
 > and `src/lib/jsonPatch.js` are gone.
+>
+> **See also [ADR-0122](0122-the-live-feed-stays-a-full-poll.md) (2026-10-26).** A live
+> measurement of push-triggered `diffPatch` found the replay numbers below overstated the saving.
+> `.scratch/live-feed-diffpatch/findings.md`, named below, was deleted in #2641; its numbers are
+> in this ADR and `git show 47cd3f46:.scratch/live-feed-diffpatch/findings.md`.
 
 The MLB Stats API has an undocumented `diffPatch` mode
 (`/api/v1.1/game/{gamePk}/feed/live/diffPatch?startTimecode=...`): instead of
