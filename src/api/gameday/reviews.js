@@ -37,7 +37,7 @@
 
 import { isAbsChallenge, gameHasAbs, START_CHALLENGES } from '../challenges.js'
 import { halfIndex, selectRegulationInnings } from '../select.js'
-import { stepCutAtBatIndex } from './stepCut.js'
+import { stepCutAtBatIndex, safeStep } from './stepCut.js'
 
 // MLB's /api/v1/reviewReasons, fetched 2026-10-26.
 const REASONS = {
@@ -111,7 +111,7 @@ export function reviewsAtStep(feed, { inning, half, step = null, revealedThrough
   if (!inning || !half) return null
   const here = halfIndex(inning, half)
   if (here > (revealedThrough ?? -1) + 1) return null
-  const cut = stepCutAtBatIndex(feed, inning, half, step)
+  const cut = stepCutAtBatIndex(feed, inning, half, safeStep(step, here, revealedThrough))
   const regulation = selectRegulationInnings(feed)
   const hasBank = gameHasAbs(feed)
   const bank = {

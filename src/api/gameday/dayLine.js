@@ -39,7 +39,7 @@
 import { computePitcherLines } from '../pitchers.js'
 import { halfIndex } from '../select.js'
 import { NON_AB_EVENTS } from '../scorecard/notation.js'
-import { visibleAtBatCards, stepCutAtBatIndex } from './stepCut.js'
+import { visibleAtBatCards, stepCutAtBatIndex, safeStep } from './stepCut.js'
 
 // Every at-bat card the reader may see, oldest first: whole earlier halves of
 // this batting side, then the current half up to `step`.
@@ -55,7 +55,9 @@ function visibleCards(feed, inning, half, step) {
 // { id, pa, ab, h, hr, bb, k, hbp, rbi, r }.
 export function batterDayLine(feed, batterId, { inning, half, step = null, revealedThrough }) {
   if (batterId == null || !inning || !half) return null
-  if (halfIndex(inning, half) > (revealedThrough ?? -1) + 1) return null
+  const here = halfIndex(inning, half)
+  if (here > (revealedThrough ?? -1) + 1) return null
+  step = safeStep(step, here, revealedThrough)
   const line = { id: batterId, pa: 0, ab: 0, h: 0, hr: 0, bb: 0, k: 0, hbp: 0, rbi: 0, r: 0 }
   for (const card of visibleCards(feed, inning, half, step)) {
     if (card.batterId !== batterId) continue
@@ -82,6 +84,7 @@ export function pitcherDayLine(feed, pitcherId, { inning, half, step = null, rev
   if (pitcherId == null || !inning || !half) return null
   const here = halfIndex(inning, half)
   if (here > (revealedThrough ?? -1) + 1) return null
+  step = safeStep(step, here, revealedThrough)
   // -1 admits nothing from this half: the line is the earlier halves' alone.
   const cut = stepCutAtBatIndex(feed, inning, half, step)
   const lines = computePitcherLines(feed, here - 1, { stepHalfIndex: here, throughAtBatIndex: cut })

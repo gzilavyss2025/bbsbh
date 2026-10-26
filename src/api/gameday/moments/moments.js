@@ -37,7 +37,7 @@ import { detectPlayFeat } from '../../callout-notes/lastTime.js'
 import { magnitudeOf, clampScore } from '../../callout-notes/shared.js'
 import { selectWinProbPath } from '../../winprob.js'
 import { halfIndex, selectRegulationInnings } from '../../select.js'
-import { stepCutAtBatIndex } from '../stepCut.js'
+import { stepCutAtBatIndex, safeStep } from '../stepCut.js'
 import { STATCAST, ODDS_SWING } from './thresholds.js'
 
 export const CUTOFFS = { quiet: 60, normal: 35, lots: 0 }
@@ -95,9 +95,11 @@ function rareMoments(feed, plays, i, battingSide) {
     typeof away === 'number' &&
     home > away
   ) {
-    const prev = plays[i - 1]?.result
-    const homeBefore = typeof prev?.homeScore === 'number' ? prev.homeScore : 0
-    const awayBefore = typeof prev?.awayScore === 'number' ? prev.awayScore : 0
+    // The score before this play: the last earlier play that carries one. No
+    // such play at all means the game opened here, at 0-0.
+    const prev = plays.slice(0, i).findLast((p) => typeof p?.result?.homeScore === 'number' && typeof p?.result?.awayScore === 'number')?.result
+    const homeBefore = prev ? prev.homeScore : 0
+    const awayBefore = prev ? prev.awayScore : 0
     if (homeBefore <= awayBefore) out.push(moment('rare', 'walkOff', 0, { batter, home, away }))
   }
   const feat = detectPlayFeat(feed, play.about?.atBatIndex, battingSide)
@@ -173,7 +175,7 @@ export function momentsForPlay(
   const play = plays[i]
   const h = halfIndex(play.about?.inning, play.about?.halfInning)
   if (h > here) return null
-  if (h === here && atBatIndex > stepCutAtBatIndex(feed, inning, half, step)) return null
+  if (h === here && atBatIndex > stepCutAtBatIndex(feed, inning, half, safeStep(step, here, revealedThrough))) return null
   const battingSide = play.about?.halfInning === 'top' ? 'away' : 'home'
   const odds = Array.isArray(winProb) ? oddsMoment(winProb, play) : null
   return [

@@ -94,7 +94,7 @@ test('the cut-offs: Quiet over Normal over Lots', () => {
 test('a play that is not on screen answers null', () => {
   // Reader in the bottom 10th of 777747 at step 2: the placed runner and ab74.
   assert.equal(momentsForPlay(g777747, 77, { inning: 10, half: 'bottom', step: 2, revealedThrough: 18 }), null)
-  assert.ok(momentsForPlay(g777747, 77, { inning: 10, half: 'bottom', step: null, revealedThrough: 18 }).length > 0)
+  assert.ok(momentsForPlay(g777747, 77, { inning: 10, half: 'bottom', step: null, revealedThrough: 19 }).length > 0)
   // A play in a later half than the reader's.
   assert.equal(momentsForPlay(g777747, 77, { inning: 9, half: 'bottom', revealedThrough: 18 }), null)
   // A half past revealedThrough + 1.
@@ -117,4 +117,26 @@ test('missing data never throws', () => {
   const bare = structuredClone(g778442)
   for (const p of bare.liveData.plays.allPlays) p.playEvents = []
   assert.doesNotThrow(() => at(bare, 51))
+})
+
+test('a null step on the half being stepped reads as step 0', () => {
+  assert.equal(momentsForPlay(g777747, 77, { inning: 10, half: 'bottom', step: null, revealedThrough: 18 }), null)
+})
+
+test('the walk-off reads the score before it from the last play that carries one', () => {
+  const gap = structuredClone(g777747)
+  const plays = gap.liveData.plays.allPlays
+  const i = plays.findIndex((p) => p.about.atBatIndex === 77)
+  // The play just before has no score fields: the tie before the slam still counts.
+  delete plays[i - 1].result.homeScore
+  delete plays[i - 1].result.awayScore
+  assert.ok(families(at(gap, 77)).includes('walkOff'))
+  // A home run that only adds to a lead in the last inning is no walk-off.
+  const ahead = structuredClone(g777747)
+  const p2 = ahead.liveData.plays.allPlays
+  for (const p of p2.slice(0, i)) if (p.result) { p.result.homeScore = 9; p.result.awayScore = 1 }
+  // ...even when the play just before carries no score: read back past it.
+  delete p2[i - 1].result.homeScore
+  delete p2[i - 1].result.awayScore
+  assert.equal(families(at(ahead, 77)).includes('walkOff'), false)
 })

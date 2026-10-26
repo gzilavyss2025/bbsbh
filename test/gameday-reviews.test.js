@@ -118,3 +118,8 @@ test('the module never reads gameData.absChallenges', () => {
     .join('\n')
   assert.equal(/absChallenges/.test(code), false)
 })
+
+test('a null step on the half being stepped reads as step 0', () => {
+  const r = reviewsAtStep(g823036, { inning: 2, half: 'top', step: null, revealedThrough: 1 })
+  assert.equal(r.reviews.length, 0)
+})

@@ -10,6 +10,12 @@ import { computeHalfInningFeed } from '../playbyplay.js'
 
 export const battingSideOf = (half) => (half === 'top' ? 'away' : 'home')
 
+// Fail closed: `step` null means "the whole half", which is true only for a
+// committed half. For the half past `revealedThrough` (the one being stepped),
+// a null step reads as 0, never as the whole half. `here` is the half's index.
+export const safeStep = (step, here, revealedThrough) =>
+  step == null && here > (revealedThrough ?? -1) ? 0 : step
+
 // The at-bat cards of (inning, half) up to `step`, oldest first.
 export function visibleAtBatCards(feed, inning, half, step) {
   const cards = computeHalfInningFeed(feed, inning, half, battingSideOf(half), step)

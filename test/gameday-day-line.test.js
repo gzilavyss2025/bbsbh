@@ -41,7 +41,7 @@ test('earlier halves count: the batter keeps his day', () => {
 
 test('the last step of the half and a committed half (step null) agree', () => {
   const last = batterDayLine(feed, 592885, { ...TOP3, step: 4 })
-  const whole = batterDayLine(feed, 592885, { ...TOP3, step: null })
+  const whole = batterDayLine(feed, 592885, { ...TOP3, step: null, revealedThrough: 4 })
   assert.deepEqual(last, whole)
 })
 
@@ -92,4 +92,13 @@ test('a feed with no pitch data does not throw', () => {
   for (const p of bare.liveData.plays.allPlays) delete p.playEvents
   assert.doesNotThrow(() => batterDayLine(bare, 592885, { ...TOP3, step: 3 }))
   assert.doesNotThrow(() => pitcherDayLine(bare, 690928, { ...TOP3, step: 3 }))
+})
+
+test('a null step on the half being stepped reads as step 0, never the whole half', () => {
+  // Top 3 is half 4; revealedThrough 3 means it is not committed yet.
+  assert.equal(batterDayLine(feed, 806198, { ...TOP3, step: null }), null)
+  assert.deepEqual(
+    pitcherDayLine(feed, 690928, { ...TOP3, step: null }),
+    pitcherDayLine(feed, 690928, { ...TOP3, step: 0 }),
+  )
 })
