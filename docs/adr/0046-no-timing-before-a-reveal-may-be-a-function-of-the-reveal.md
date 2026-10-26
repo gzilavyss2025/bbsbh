@@ -233,3 +233,5 @@ the `postHalf` case. No code changed to produce this; the existing gate
 already answered the new case correctly, because a page load was never a
 reveal for it to time in the first place. `bookIsClosed`/the bar's label
 (Section 3) are unaffected either way — that predicate was never about timing.
+
+**2026-10-26:** ADR-0123 applies this rule inside an at-bat: the advance control reads the same before a pitch, an event and the result, and nothing counts the taps left.

@@ -253,3 +253,20 @@ test('a runner placed on a base before the man ahead of him is listed leaving it
   assert.equal(h.inheritedCount, 1) // 80 on 2B
   assert.equal(h.resolutionAtBatIndex, 59) // he scores on the reliever's first batter
 })
+
+// ---------------------------------------------------------------- the span
+// A starter pulled mid-count on the first batter of a new half threw in that
+// half, though the play's matchup names his reliever. His span must reach it,
+// or the stepped half's first step shows his whole-game box-score line (#2645
+// review): here 99 pitches, which include this half's.
+test('a pitcher pulled mid-at-bat on a half\'s first batter is not "whole outing revealed"', () => {
+  const plays = [
+    play({ inning: 6, half: 'top', pitcherId: 500, atBatIndex: 50, outs: 3, events: [pitchEvent()] }),
+    play({ inning: 7, half: 'top', pitcherId: 501, atBatIndex: 60, outs: 0, events: [pitchEvent(), pitchEvent(), subEvent(501), pitchEvent()] }),
+  ]
+  const feed = makeFeed(plays, { homePitcherIds: [500, 501] })
+  feed.liveData.boxscore.teams.home.players.ID500.stats.pitching = { numberOfPitches: 99 }
+  // Top 7 is being stepped; nothing of it is on screen yet.
+  const line = pitcherLineAt(feed, 'home', 500, 59, halfIndex(7, 'top'))
+  assert.equal(line.pitches, 1)
+})

@@ -144,8 +144,11 @@ games.
 
 `expresslane/` holds the Express Lane rail and clip index: `expresslane/CLAUDE.md`.
 
+`gameday/` holds the Gameday rebuild's data modules (#2566), all reveal-only and clamped to
+the reader's step: `gameday/CLAUDE.md`.
+
 The subdirectories with their own CLAUDE.md are `around-the-game/`, `boxlines/`,
-`expresslane/`, and `transactions/`. `person/`, `playbyplay/`, and `callout-notes/` carry
+`expresslane/`, `gameday/`, and `transactions/`. `person/`, `playbyplay/`, and `callout-notes/` carry
 their notes in each file's own header plus a barrel file that explains the split
 (`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it states the
 directory's shared footing. `boxscore/`, `gamerecord/` (played, closed, no plays; ADR-0101), `matchup/`, `notable/` (the feat index: the feat label, the callout and the `/notable` shelf), `player/`, `postseason/`

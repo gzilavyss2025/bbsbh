@@ -53,6 +53,7 @@ export function computePitcherLines(
 
   let curHalf = null
   let outsBefore = 0
+  const onMound = {} // pitching side -> the pitcher of that side's last play
   for (const p of plays) {
     const inn = p?.about?.inning
     const half = p?.about?.halfInning
@@ -64,6 +65,19 @@ export function computePitcherLines(
     if (pid) {
       if (lastIdx[pid] == null || i > lastIdx[pid]) lastIdx[pid] = i
     }
+    // `matchup.pitcher` names the pitcher who FINISHED the at-bat. One pulled
+    // in the middle of it threw here too, so his span reaches this half, or a
+    // starter pulled mid-count on the first batter of a new half would read
+    // "whole outing revealed" and show his box-score line, with this half's
+    // pitches in it, before the half is (#2645 review). Walk the events: each
+    // `pitching_substitution` puts its own `player.id` on the mound.
+    const pSide = half === 'top' ? 'home' : 'away'
+    let current = onMound[pSide] ?? pid
+    for (const e of p.playEvents ?? []) {
+      if (e?.details?.eventType === 'pitching_substitution' && e.player?.id != null) current = e.player.id
+      else if (e?.isPitch && current != null && (lastIdx[current] == null || i > lastIdx[current])) lastIdx[current] = i
+    }
+    if (pid) onMound[pSide] = pid
 
     if (i > revealedThrough) {
       // Not committed yet — only in if it's the half being stepped through

@@ -115,7 +115,9 @@ export function gameHasAbs(feed) {
 // Triple-A at the 24 of 24 they already reached, since neither emits MZ.
 const ABS_REVIEW_TYPES = new Set(['MJ', 'MZ'])
 
-function isAbsChallenge(review) {
+// Exported for api/gameday/reviews.js, which takes ABS challenges from
+// challengesForPlay below and must leave them out of its own walk.
+export function isAbsChallenge(review) {
   return Boolean(
     review && review.challengeTeamId != null && ABS_REVIEW_TYPES.has(review.reviewType),
   )
@@ -185,6 +187,11 @@ export function challengesForPlay(feed, play) {
       isHeuristic,
       playerId: review.player?.id ?? null,
       playerName: review.player?.fullName ?? '',
+      // For api/gameday/reviews.js, which builds its ABS records from this
+      // function rather than a second walk: the reason code and whether the
+      // review is still under way (its `outcome` is not known yet).
+      reviewType: review.reviewType ?? null,
+      inProgress: review.inProgress === true,
     }
   }
 
