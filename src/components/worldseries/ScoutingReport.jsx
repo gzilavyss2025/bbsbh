@@ -17,12 +17,13 @@ import { failedCards, failedLine } from '../../lib/postseason/worldseries/scouti
 import { gloveLegsModel } from '../../lib/postseason/worldseries/scouting/gloveLegs.js'
 import { fitParks, parkFitModel } from '../../lib/postseason/worldseries/scouting/parkFit.js'
 import { platoonModel } from '../../lib/postseason/worldseries/scouting/platoon.js'
-import { clubOrder, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
+import { WIDE_CARDS, cardRuns, clubOrder, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { HubTabBar } from '../chrome/HubTabBar.jsx'
 import { EdgeCard } from '../postseason/edges/EdgeCard.jsx'
 import { MatchupEdges } from '../postseason/edges/MatchupEdges.jsx'
 import { UmpireEdge } from '../postseason/edges/UmpireEdge.jsx'
+import { Flow } from './Flow.jsx'
 import { NineKeys } from './cards/scouting/NineKeys.jsx'
 import { FilmRoom } from './cards/scouting/FilmRoom.jsx'
 import { GloveLegs } from './cards/scouting/GloveLegs.jsx'
@@ -31,7 +32,6 @@ import { PitchByPitch } from './cards/scouting/PitchByPitch.jsx'
 import { Platoon } from './cards/scouting/Platoon.jsx'
 import { Roster } from './cards/scouting/Roster.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
-import { Grid } from '../ui/layout/Grid.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 
 // THE SCOUTING REPORT (#2316, slice 1): a navy band head, a sticky jump bar, and the
@@ -73,9 +73,6 @@ const CARD = {
   'park-fit': ({ parkFit, parks, sides }) => <ParkFit model={parkFit} parks={parks} clubIds={sides} />,
   'umpire-edge': ({ plateUmpire, umpire }) => <UmpireEdge name={plateUmpire.name} lean={umpire?.lean ?? null} />,
 }
-
-// Cards that take the whole row.
-const WIDE = ['film-room', 'roster']
 
 export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null, series = null, omit = [], jumpBar = true, onShown }) {
   const season = Number(slateDate.slice(0, 4))
@@ -197,13 +194,15 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
         />
       )}
       {failed && <p className="ww-scout__failed" role="status">{failed}</p>}
-      <Grid min={340} gap="loose">
-        {cards.map((c) => (
-          <div key={c.id} id={`ww-scout-${c.id}`} className={WIDE.includes(c.id) ? 'ww-scout__card ww-scout__card--wide' : 'ww-scout__card'}>
+      {cardRuns(cards).map((run) => {
+        const items = run.map((c) => (
+          <div key={c.id} id={`ww-scout-${c.id}`} className="ww-scout__card">
             {CARD[c.id](ctx)}
           </div>
-        ))}
-      </Grid>
+        ))
+        // A wide card is its own row; the cards between two of them flow in balanced columns.
+        return WIDE_CARDS.includes(run[0].id) ? items : <Flow key={run[0].id}>{items}</Flow>
+      })}
     </Stack>
   )
 }

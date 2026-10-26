@@ -23,6 +23,7 @@ export function GloveLegs({ rows, clubIds }) {
     <ComparisonLedger
       title="Glove and legs"
       note="Defense and baserunning · higher is better"
+      noteAs="info"
       clubIds={clubIds}
       measureLabel="Measure"
       className="ww-glove"

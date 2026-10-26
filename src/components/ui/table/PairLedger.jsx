@@ -2,6 +2,7 @@ import { useId } from 'react'
 import '../../../styles/system/ledger/pair-ledger.css'
 import { Card } from '../frame/Card.jsx'
 import { Key } from '../frame/Key.jsx'
+import { InfoPopover } from '../InfoPopover.jsx'
 import { Cluster } from '../layout/Cluster.jsx'
 import { Stack } from '../layout/Stack.jsx'
 import { Table } from './Table.jsx'
@@ -14,6 +15,9 @@ import { Table } from './Table.jsx'
 //
 //   title, note  the card's one title and a line saying what is measured and
 //                which way is better ("League ranks · lower is better")
+//   noteAs       'line' (the default) draws the note under the title; 'info' folds it
+//                behind an (i) beside the title, opening by tap (the World Series
+//                cards, whose headers stay one line)
 //   period       quiet metadata beside the title ("Regular season")
 //   sides        exactly two { key, label, kicker, mark }: `label` names the
 //                column, `kicker` is a small line above it (a city) shown on wide
@@ -29,17 +33,22 @@ import { Table } from './Table.jsx'
 // threshold. Each side's figure, the leader and any failure come from the model
 // that owns the rule (see lib/design/ledger/pairLead.js for the leader). It fetches
 // nothing and imports no api/ module, so it may render inside a SealBox reveal.
-export function PairLedger({ title, note, period, sides, measureLabel, footer, className = '', children }) {
+export function PairLedger({ title, note, noteAs = 'line', period, sides, measureLabel, footer, className = '', children }) {
   const titleId = useId()
   if (!Array.isArray(sides) || sides.length !== 2) throw new Error('PairLedger: sides is exactly two')
   return (
     <Card frame="stamped" body="flush" className={`pair-ledger ${className}`.trim()} aria-labelledby={titleId}>
       <Stack as="header" gap="tight" className="pair-ledger__head">
-        <Cluster align="center" className="pair-ledger__titleline">
+        <Cluster align="center" className={`pair-ledger__titleline${noteAs === 'info' ? ' infopop-row' : ''}`}>
           <h3 id={titleId} className="pair-ledger__title">{title}</h3>
           {period && <span className="t-label pair-ledger__period">{period}</span>}
+          {noteAs === 'info' && (
+            <InfoPopover label={`About ${title}`} className="infopop--paper infopop--down">
+              {note}
+            </InfoPopover>
+          )}
         </Cluster>
-        <p className="pair-ledger__note">{note}</p>
+        {noteAs !== 'info' && <p className="pair-ledger__note">{note}</p>}
       </Stack>
       <Table frame="bare" density="keep" className="pair-ledger__table">
         <caption className="sr-only">

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { HubTabBar } from '../chrome/HubTabBar.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { Stack } from '../ui/layout/Stack.jsx'
 
 // THE SERIES PAGE'S JUMP BAR (layout C): one sticky bar over the page's groups, each button
 // scrolling to the section `ww-group-{key}`. It sticks under the slate's own bar like the
@@ -38,8 +39,9 @@ export function GroupJump({ groups }) {
   )
 }
 
-// One group: a navy head, then its parts. `id` is the jump bar's `key`. `bare` leaves the head
-// out when the parts bring their own band (the Scouting report's).
+// One group: a navy head, then its parts in a loose Stack, so every block is one section gap from
+// the next (a named card adds its own tab clearance). `id` is the jump bar's `key`. `bare` leaves
+// the head out when the parts bring their own band (the Scouting report's).
 export function Group({ id, label, bare = false, children }) {
   return (
     <section id={`ww-group-${id}`} className="ww-group">
@@ -48,7 +50,9 @@ export function Group({ id, label, bare = false, children }) {
           {label}
         </SectionHead>
       )}
-      {children}
+      <Stack gap="loose" className="ww-group__body">
+        {children}
+      </Stack>
     </section>
   )
 }

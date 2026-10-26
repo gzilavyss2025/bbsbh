@@ -49,3 +49,19 @@ export function scoutingModel(input) {
     .sort((a, b) => a.rank[input.dayType] - b.rank[input.dayType])
     .map(({ id, label }) => ({ id, label }))
 }
+
+// The cards that take the whole row (the Film room rail, the Roster): every other card flows with
+// its neighbours in balanced columns.
+export const WIDE_CARDS = ['film-room', 'roster']
+
+// The card list cut into runs: each wide card alone, the cards between two of them together.
+// Order is kept, and every card lands in exactly one run.
+export function cardRuns(cards) {
+  const runs = []
+  for (const c of cards) {
+    const last = runs.at(-1)
+    if (last && !WIDE_CARDS.includes(c.id) && !WIDE_CARDS.includes(last[0].id)) last.push(c)
+    else runs.push([c])
+  }
+  return runs
+}

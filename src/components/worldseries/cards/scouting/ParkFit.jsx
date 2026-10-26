@@ -5,6 +5,7 @@ import { teamClubNameShort, teamLocationName } from '../../../../lib/teams.js'
 import { Segmented } from '../../../ui/control/Segmented.jsx'
 import { Card } from '../../../ui/frame/Card.jsx'
 import { Key } from '../../../ui/frame/Key.jsx'
+import { InfoPopover } from '../../../ui/InfoPopover.jsx'
 import { NO_FIGURE } from '../../../ui/table/PairLedger.jsx'
 import { Table } from '../../../ui/table/Table.jsx'
 import { FenceOverlay } from './FenceOverlay.jsx'
@@ -113,7 +114,11 @@ export function ParkFit({ model, parks, clubIds }) {
           </p>
         </div>
       </div>
-      <p className="ww-fit__note">{`Regular season, the regulars' fly balls: ${names.map((n, i) => `${n} ${model.counts[i]}`).join(', ')}.`}</p>
+      <div className="ww-fit__foot infopop-row">
+        <InfoPopover label="About these figures" className="infopop--paper">
+          {`Regular season, the regulars' fly balls: ${names.map((n, i) => `${n} ${model.counts[i]}`).join(', ')}.`}
+        </InfoPopover>
+      </div>
     </Card>
   )
 }

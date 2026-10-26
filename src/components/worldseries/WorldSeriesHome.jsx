@@ -1,4 +1,5 @@
 import '../../styles/worldseries/home.css'
+import '../../styles/worldseries/square.css'
 import { fetchScheduleGame } from '../../api/schedule.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useWorldSeriesView } from '../../hooks/postseason/useWorldSeriesView.js'
@@ -15,6 +16,7 @@ import { Played } from './cards/Played.jsx'
 import { Probables } from './cards/Probables.jsx'
 import { Tape } from './cards/Tape.jsx'
 import { Trip } from './cards/Trip.jsx'
+import { Flow } from './Flow.jsx'
 import { Hero } from './Hero.jsx'
 import { Ledger } from './Ledger.jsx'
 import { Reel } from './Reel.jsx'
@@ -132,10 +134,10 @@ export function WorldSeriesHome({ bracket, cutoff = null, slateDate, wide = fals
           {!beside && probables}
           {scouting}
           {data && (
-            <Grid min={340} gap="loose" fit>
+            <Flow>
               <Tape awayId={game?.awayId ?? clubIds[0]} homeId={game?.homeId ?? clubIds[1]} data={data} slateDate={slateDate} />
               <HotBats clubIds={clubIds} splitsByClub={data.hotBats} />
-            </Grid>
+            </Flow>
           )}
           {bullpen}
         </>
@@ -145,11 +147,11 @@ export function WorldSeriesHome({ bracket, cutoff = null, slateDate, wide = fals
           {!wide && <Played rows={played} />}
           {!beside && trip}
           {data && (
-            <Grid min={340} gap="loose" fit>
+            <Flow>
               <HomeRoad clubIds={clubIds} clubGames={data.clubGames} slateDate={slateDate} />
-              {bullpen}
-            </Grid>
+            </Flow>
           )}
+          {bullpen}
         </>
       )}
     </Stack>

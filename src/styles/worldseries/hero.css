@@ -245,13 +245,26 @@
 .ww-hero__pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+  grid-template-rows: repeat(3, auto);
+  gap: var(--space-1) var(--space-4);
 }
 
-.ww-hero__who { min-width: 0; --i: 3; }
+/* The two lower thirds share three rows (name, figures, button), so a name that wraps to a second
+   line in one column does not push that column's figures and button out of line with the other.
+   Names sit at the foot of their row, against the figures they head. */
+/* layout-exempt: each lower third borrows the pair's rows so the two read across */
+.ww-hero__pair > .ww-hero__who {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  justify-items: start;
+  min-width: 0;
+  --i: 3;
+}
 .ww-hero__who--home { --i: 4; }
 
 .ww-hero__name {
+  align-self: end;
   font-family: var(--font-display);
   font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
@@ -271,7 +284,8 @@
 
 .btn.ww-hero__play {
   justify-content: flex-start;
-  align-self: flex-start;
+  justify-self: start;
+  align-self: start;
   gap: var(--space-2);
   padding: 0;
   border: 0;
@@ -411,8 +425,8 @@
   .ww-hero__date, .ww-hero__time { font-size: var(--fs-ui); }
   .ww-hero__spotlight { padding: var(--space-3) var(--space-5); }
   .ww-hero__name { font-size: var(--fs-card-name); }
-  .ww-hero__who--home { align-items: flex-end; text-align: right; }
-  .ww-hero__who--home .ww-hero__play { align-self: flex-end; }
+  .ww-hero__pair > .ww-hero__who--home { justify-items: end; text-align: right; }
+  .ww-hero__who--home .ww-hero__play { justify-self: end; }
   .ww-cal { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
 }
 
