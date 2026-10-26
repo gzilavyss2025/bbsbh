@@ -9,6 +9,7 @@ sessions Gary watched. The build starts from this file.
   is round 2 as locked). Gary's picks: its `db`, collection `feedback` (`ArtifactData`, `list`).
 - **Decisions on record:** the #2568 comment "Design round 1: Gary's locked choices (2026-10-26)",
   and the #2580 comment that drops the 3D spike.
+- **Build plan:** `docs/gameday-build.md` (13 prompts, in waves).
 - **Round 2 prompt:** `round2-prompt.md`. **Round 2 record:** "Round 2: what Gary locked" below, and
   the #2568 comment text in `round2/issue-comment-2568.md` (posted by hand if this session could not).
 - Delete this folder in the PR that ships the last Gameday slice, with `.scratch/at-bat-console/`

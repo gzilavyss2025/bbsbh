@@ -15,6 +15,7 @@ Artifact (private to Gary): https://claude.ai/artifact/KQnaidLRwyBnVJYXrg9AYa
 - `tools/extract2.mjs`, `facts2.mjs`, `zones.mjs`, `preview2.sh`: new data tools. `extract.mjs` takes an optional list of at-bat indexes. The shot tools launch `/opt/pw-browsers/chromium`.
 - `README.md`: round 2 decisions, findings, what is open, and the round 2 source.
 - `.gitignore`: `round2/preview.html`.
+- `docs/gameday-build.md`: the build run plan and 13 prompts, from the locked design (written with `write-prompt`).
 
 ## Spoiler-safety
 
@@ -29,6 +30,7 @@ Artifact (private to Gary): https://claude.ai/artifact/KQnaidLRwyBnVJYXrg9AYa
 ## Files touched
 
 - `.gitignore`
+- `docs/gameday-build.md`
 - `.scratch/gameday-design/README.md`
 - `.scratch/gameday-design/round2/*`
 - `.scratch/gameday-design/tools/extract.mjs`, `extract2.mjs`, `facts2.mjs`, `zones.mjs`, `preview2.sh`, `pageshot.mjs`, `shoot.mjs`, `frames.mjs`
