@@ -5,7 +5,13 @@
 // A message becomes its SHAPE: key names and value types, never the values.
 // The one value allowed through is a timecode such as 20261024_001530.
 
-const TIMECODE = /^\d{8}_\d{6}$/
+export const TIMECODE = /^\d{8}_\d{6}$/
+
+// 20261024_001530 -> milliseconds since the epoch (timecodes are UTC). NaN if it is not a timecode.
+export function timecodeMs(tc) {
+  const m = /^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/.exec(tc || '')
+  return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : NaN
+}
 
 export function shape(v, depth = 4) {
   if (v === null) return '<null>'

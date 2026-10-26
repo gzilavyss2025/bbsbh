@@ -4,11 +4,12 @@
 // 2. patch.mjs is immutable and merges REAL patches from a finished game into
 //    exactly the snapshot MLB serves for the same timecode.
 import assert from 'node:assert/strict'
+import { parseArgs } from '../../scripts/lib/args.mjs'
 import { getJson } from '../../scripts/lib/statsapi.mjs'
 import { applyPatch } from './patch.mjs'
 import { shape, pathPrefix, classify } from './shape.mjs'
 
-const args = Object.fromEntries(process.argv.slice(2).map((a) => a.replace(/^--/, '').split('=')))
+const args = parseArgs(process.argv.slice(2))
 const gamePk = Number(args.gamePk || 823035)
 const BASE = '/api/v1.1/game'
 

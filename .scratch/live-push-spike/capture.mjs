@@ -4,8 +4,14 @@
 // a cron. Node 22 (global WebSocket and fetch).
 //
 //   node capture.mjs --gamePk=849805
-//   options: --maxMinutes=480  --minGapMs=1500  --verifyEvery=10  --noDiff
-//            --out=<dir>  (default ./out/<gamePk>-<start>)
+//   options: --out=<dir>        output folder (default ./out/<gamePk>-<start>)
+//            --maxMinutes=480   stop after this long, connected or not
+//            --minGapMs=1500    fewest ms between two diff fetches; pushes inside it coalesce
+//            --verifyEvery=10   compare every Nth merge with the snapshot served for its stamp
+//            --endAtPush        ask diffPatch for an explicit end timecode, the newest push stamp
+//            --diag             on a verification mismatch, write structure to diag.jsonl (never use on
+//                               a game somebody is watching: a path can say which play changed)
+//            --noDiff           socket only, no diff fetches
 //
 // SPOILER RULE. This script prints no score, no play and no result. It prints
 // counts, bytes, timings, state words, and message SHAPES (key names and value
@@ -14,36 +20,31 @@
 // Wire facts used here come from a community Go client, not from MLB docs
 // (mlblive cmd/websocket.go): keepalive is the text "Gameday5" every 10 s,
 // close code 4200 = game final, 4400 = game not available for subscription.
+//
+// What summary.json holds: counts and BYTES. The ratios against a fixed poll are computed by
+// analyze.mjs from events.jsonl, because the cost of a fallback is the failed diff plus the full
+// feed fetched after it, and that needs the event log.
 import { gzipSync } from 'node:zlib'
 import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { isDeepStrictEqual } from 'node:util'
+import { parseArgs } from '../../scripts/lib/args.mjs'
 import { getJson, StatsapiError, statsapiUrl } from '../../scripts/lib/statsapi.mjs'
 import { applyPatch } from './patch.mjs'
-import { classify, pathPrefix, shape } from './shape.mjs'
+import { classify, pathPrefix, shape, TIMECODE, timecodeMs } from './shape.mjs'
 
-const args = Object.fromEntries(
-  process.argv.slice(2).map((a) => {
-    const [k, v = 'true'] = a.replace(/^--/, '').split('=')
-    return [k, v]
-  }),
-)
+const args = parseArgs(process.argv.slice(2))
+const flag = (v) => v === true || v === 'true'
 const gamePk = Number(args.gamePk)
 if (!Number.isInteger(gamePk)) {
-  console.error('usage: node capture.mjs --gamePk=849805 [--maxMinutes=480] [--minGapMs=1500] [--verifyEvery=10] [--noDiff] [--out=dir]')
+  console.error('usage: node capture.mjs --gamePk=849805 [--out=dir] [--maxMinutes=480] [--minGapMs=1500] [--verifyEvery=10] [--endAtPush] [--diag] [--noDiff]')
   process.exit(2)
 }
 const maxMs = Number(args.maxMinutes || 480) * 60_000
 const minGapMs = Number(args.minGapMs || 1500)
 const verifyEvery = Number(args.verifyEvery || 10)
-const doDiff = args.noDiff !== 'true'
-// --endAtPush: ask diffPatch for an explicit endTimecode, the newest stamp a push carried,
-// instead of "up to now". Tests whether stored-to-stored patches avoid the live-edge
-// inconsistencies seen with an open end.
-const endAtPush = args.endAtPush === 'true'
-// --diag: on a verification mismatch, write STRUCTURE to diag.jsonl (counts and path names, never
-// values). Do not use it on a game somebody is watching: a path can say which play changed.
-const diag = args.diag === 'true'
-const TIMECODE = /^\d{8}_\d{6}$/
+const doDiff = !flag(args.noDiff)
+const endAtPush = flag(args.endAtPush)
+const diag = flag(args.diag)
 let pushStamp = ''
 
 // The socket is not a fetch, so the shared client's retry policy does not apply to it.
@@ -79,23 +80,28 @@ const stats = {
   pushBytes: 0,
   shapes: {},
   pushTimes: [],
-  diff: { patch: 0, empty: 0, fallback: 0, odd: 0, httpError: 0, applyError: 0, upToDate: 0, endMatch: 0, endMiss: 0 },
+  diff: { patch: 0, empty: 0, fallback: 0, odd: 0, httpError: 0, applyError: 0, stale: 0, upToDate: 0, endMatch: 0, endMiss: 0 },
   ops: { total: 0, byType: {}, byPrefix: {} },
-  gz: { patchTotal: 0, fullLatest: 0, fullAtVerify: [] },
+  // Bytes (gzip). The ratio against a poll lives in analyze.mjs.
+  gz: { diffTotal: 0, fullTotal: 0, fullLatest: 0, fullAtVerify: [] },
   ageSec: { patch: [], fallback: [] },
   coalesced: [],
-  verify: { runs: 0, equal: 0, mismatch: 0, inconclusive: 0, mismatchAt: {} },
+  // mismatch = a divergence found; the merged feed is then replaced by the snapshot (repaired), so one
+  // divergence is counted once.
+  verify: { runs: 0, equal: 0, mismatch: 0, repaired: 0, inconclusive: 0, mismatchAt: {} },
   fallbackStampIsStart: 0,
 }
 
 // ---- feed state ---------------------------------------------------------------
 let doc = null // the merged feed, replaced (never mutated) on every update
+// Bumped whenever `doc` is replaced from outside an update (a resync or a repair). An update or a
+// verification that started before the bump knows its base went stale and drops its result.
+let gen = 0
 let syncing = false
 
 async function fetchFull() {
   const feed = await get(`/api/v1.1/game/${gamePk}/feed/live`)
   if (feed.gamePk !== gamePk) throw new Error('wrong game in full feed')
-  stats.gz.fullLatest = gzOf(feed)
   return feed
 }
 
@@ -103,20 +109,21 @@ async function resync(why) {
   if (syncing) return
   syncing = true
   try {
-    doc = await fetchFull()
-    ev('full', { why, gz: stats.gz.fullLatest })
+    const feed = await fetchFull()
+    const gz = gzOf(feed)
+    doc = feed
+    gen++
+    stats.gz.fullLatest = gz
+    stats.gz.fullTotal += gz
+    ev('full', { why, gz })
   } catch (e) {
-    doc = null
+    // Keep the old feed: a failed refetch must not stop all later updates.
     ev('full-error', { why, name: e.name })
     say(`full feed fetch failed (${why})`)
+    if (!doc) setTimeout(() => resync('retry').then(pump), 5000)
   } finally {
     syncing = false
   }
-}
-
-const timecodeMs = (tc) => {
-  const m = /^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/.exec(tc || '')
-  return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : NaN
 }
 
 function diffPaths(a, b) {
@@ -131,7 +138,9 @@ function diffPaths(a, b) {
 }
 
 async function oneUpdate(coalesced) {
-  const lastTs = doc?.metaData?.timeStamp
+  const base = doc
+  const g = gen
+  const lastTs = base?.metaData?.timeStamp
   if (!lastTs) return resync('no-timestamp')
   const ageSec = (Date.now() - timecodeMs(lastTs)) / 1000
   const end = endAtPush && pushStamp ? pushStamp : ''
@@ -156,15 +165,23 @@ async function oneUpdate(coalesced) {
     return resync(e instanceof StatsapiError ? `http-${e.status}` : 'network-error')
   }
   const ms = Date.now() - started
-  stats.coalesced.push(coalesced)
   const gz = gzOf(body)
+  stats.gz.diffTotal += gz
+  if (gen !== g) {
+    // A resync (a reconnect's) installed a newer feed while this request was in flight. The patch was
+    // built for the old base, so it is dropped. Its bytes still count as cost.
+    stats.diff.stale++
+    ev('diff', { outcome: 'stale-drop', ageSec, ms, gz })
+    return
+  }
+  stats.coalesced.push(coalesced)
   if (Array.isArray(body) && body.every((x) => Array.isArray(x?.diff))) {
     if (body.length === 0) {
       stats.diff.empty++
       ev('diff', { outcome: 'empty', ageSec, ms, gz })
       return
     }
-    let next = doc
+    let next = base
     let ops = 0
     try {
       for (const item of body) {
@@ -185,7 +202,6 @@ async function oneUpdate(coalesced) {
     stats.diff.patch++
     if (end) stats.diff[next.metaData.timeStamp === end ? 'endMatch' : 'endMiss']++
     stats.ops.total += ops
-    stats.gz.patchTotal += gz
     stats.ageSec.patch.push(ageSec)
     ev('diff', { outcome: 'patch', ageSec, ms, gz, objects: body.length, ops, fullGz: stats.gz.fullLatest })
     doc = next
@@ -194,10 +210,11 @@ async function oneUpdate(coalesced) {
   }
   if (body && body.gamePk === gamePk && body.metaData) {
     // diffPatch answered with a whole feed. Do NOT keep it: its metaData.timeStamp
-    // is the START stamp while its content is not the state at that stamp (found
+    // is often the START stamp while its content is not the state at that stamp (found
     // replaying 870064: the body differs from the snapshot for its own stamp). A
     // patch built on it applied to the wrong base ("bad index"). A plain
     // /feed/live is consistent with its own stamp (12 of 12 checks), so refetch it.
+    // That refetch is a measured cost of the design, not a choice made to flatter it.
     stats.diff.fallback++
     stats.ageSec.fallback.push(ageSec)
     if (body.metaData.timeStamp === lastTs) stats.fallbackStampIsStart++
@@ -209,12 +226,16 @@ async function oneUpdate(coalesced) {
   return resync('odd-shape')
 }
 
-// Compare the merged feed with the snapshot MLB serves for the same timecode.
+// Compare the merged feed with the snapshot MLB serves for the same timecode. A divergence is
+// counted once and then repaired with the snapshot, so later checks do not count it again.
 async function verify() {
-  const ts = doc.metaData.timeStamp
+  const merged = doc
+  const g = gen
+  const ts = merged.metaData.timeStamp
   try {
     const want = await get(`/api/v1.1/game/${gamePk}/feed/live?timecode=${ts}`)
     stats.gz.fullAtVerify.push(gzOf(want))
+    if (gen !== g) return // a resync replaced the feed meanwhile: nothing to compare
     // The server serves the closest EARLIER stored snapshot when none exists for the stamp
     // we ask for (seen: our stamp 001801, served 001800). Different stamps prove nothing.
     if (want.metaData?.timeStamp !== ts) {
@@ -222,31 +243,47 @@ async function verify() {
       return
     }
     stats.verify.runs++
-    if (isDeepStrictEqual(doc, want)) stats.verify.equal++
-    else {
-      stats.verify.mismatch++
-      for (const p of diffPaths(doc, want)) stats.verify.mismatchAt[p] = (stats.verify.mismatchAt[p] || 0) + 1
-      ev('verify', { equal: false })
-      if (diag) {
-        const n = (f, o) => { try { return f(o) } catch { return null } }
-        const plays = (o) => o.liveData.plays.allPlays.length
-        const events = (o) => o.liveData.plays.allPlays.reduce((a, p) => a + p.playEvents.length, 0)
-        const idx = (o) => o.liveData.plays.currentPlay.about.atBatIndex
-        const deep = []
-        // At each differing leaf: its path and what each side holds (absent, null, a type), never the value.
-        const kind = (v) => (v === undefined ? 'absent' : v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v)
-        const walk = (a, b, path, depth) => {
-          if (deep.length >= 16 || isDeepStrictEqual(a, b)) return
-          if (depth === 0 || a === null || b === null || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return void deep.push(`${path} | doc ${kind(a)} | snapshot ${kind(b)}`)
-          for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) walk(a[k], b[k], `${path}/${k}`, depth - 1)
-        }
-        walk(doc, want, '', 9)
-        appendFileSync(`${outDir}/diag.jsonl`, JSON.stringify({ t: since(), docStamp: doc.metaData.timeStamp, wantStamp: want.metaData.timeStamp, plays: [n(plays, doc), n(plays, want)], playEvents: [n(events, doc), n(events, want)], currentAtBat: [n(idx, doc), n(idx, want)], paths: deep }) + '\n')
-      }
+    if (isDeepStrictEqual(merged, want)) {
+      stats.verify.equal++
+      return
     }
+    stats.verify.mismatch++
+    for (const p of diffPaths(merged, want)) stats.verify.mismatchAt[p] = (stats.verify.mismatchAt[p] || 0) + 1
+    ev('verify', { equal: false })
+    if (diag) writeDiag(merged, want)
+    doc = want
+    gen++
+    stats.verify.repaired++
+    ev('repair')
   } catch {
     // a failed verification fetch is not a result
   }
+}
+
+function writeDiag(merged, want) {
+  const n = (f, o) => {
+    try {
+      return f(o)
+    } catch {
+      return null
+    }
+  }
+  const plays = (o) => o.liveData.plays.allPlays.length
+  const events = (o) => o.liveData.plays.allPlays.reduce((a, p) => a + p.playEvents.length, 0)
+  const idx = (o) => o.liveData.plays.currentPlay.about.atBatIndex
+  const deep = []
+  // At each differing leaf: its path and what each side holds (absent, null, a type), never the value.
+  const kind = (v) => (v === undefined ? 'absent' : v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v)
+  const walk = (a, b, path, depth) => {
+    if (deep.length >= 16 || isDeepStrictEqual(a, b)) return
+    if (depth === 0 || a === null || b === null || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) {
+      return void deep.push(`${path} | doc ${kind(a)} | snapshot ${kind(b)}`)
+    }
+    for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) walk(a[k], b[k], `${path}/${k}`, depth - 1)
+  }
+  walk(merged, want, '', 9)
+  const line = { t: since(), docStamp: merged.metaData.timeStamp, wantStamp: want.metaData.timeStamp, plays: [n(plays, merged), n(plays, want)], playEvents: [n(events, merged), n(events, want)], currentAtBat: [n(idx, merged), n(idx, want)], paths: deep }
+  appendFileSync(`${outDir}/diag.jsonl`, JSON.stringify(line) + '\n')
 }
 
 // ---- push -> fetch scheduler --------------------------------------------------
@@ -263,7 +300,12 @@ function onPush() {
 }
 
 async function pump() {
-  if (!doDiff || inflight || !dirty || !doc) return
+  if (!doDiff || inflight || !dirty) return
+  if (!doc) {
+    // No feed yet (the first fetch is pending or failed): fetch one, then come back.
+    if (!syncing) resync('no-doc').then(pump)
+    return
+  }
   const wait = lastFetchStart + minGapMs - Date.now()
   if (wait > 0) {
     timer ||= setTimeout(() => {
@@ -309,17 +351,34 @@ const seenShapes = new Map()
 
 function connect() {
   stats.connects++
-  const opened = Date.now()
-  ws = new WebSocket(WS_URL) // Node sends no Origin header
-  ws.binaryType = 'arraybuffer'
-  ws.onopen = () => {
-    attempts = 0
-    ev('open', { ms: Date.now() - opened })
-    say(`socket open after ${Date.now() - opened} ms`)
-    keepalive = setInterval(() => ws.readyState === 1 && ws.send('Gameday5'), 10_000)
+  const began = Date.now()
+  const sock = new WebSocket(WS_URL) // Node sends no Origin header
+  ws = sock
+  sock.binaryType = 'arraybuffer'
+  let gone = false
+  let openedAt = 0
+  let ka = null
+  // Events from a socket that was given up on (or replaced) must not touch the shared state.
+  const current = () => ws === sock && !gone
+
+  sock.onopen = () => {
+    if (!current()) {
+      try {
+        sock.close()
+      } catch {
+        // already closing
+      }
+      return
+    }
+    openedAt = Date.now()
+    ev('open', { ms: openedAt - began })
+    say(`socket open after ${openedAt - began} ms`)
+    ka = keepalive = setInterval(() => sock.readyState === 1 && sock.send('Gameday5'), 10_000)
     if (doDiff) resync('open').then(pump)
   }
-  ws.onmessage = (m) => {
+
+  sock.onmessage = (m) => {
+    if (!current()) return
     const text = typeof m.data === 'string' ? m.data : Buffer.from(m.data).toString('utf8')
     const bytes = Buffer.byteLength(text)
     const { json, ack } = classify(text)
@@ -328,8 +387,9 @@ function connect() {
       ev('ack', { bytes })
       return
     }
-    // Group by structure: array lengths and string lengths vary push to push.
+    // Group by structure: the stamp, array lengths and string lengths vary push to push.
     const key = JSON.stringify(json === undefined ? '<non-json>' : shape(json))
+      .replace(/\d{8}_\d{6}/g, '<timecode>')
       .replace(/"\d+ x"/g, '"n x"')
       .replace(/<array \d+>/g, '<array>')
       .replace(/<str \d+>/g, '<str>')
@@ -346,18 +406,25 @@ function connect() {
     if (stats.pushes % 25 === 0) say(`pushes ${stats.pushes}`)
     onPush()
   }
+
   // A failed connection can fire "error" and never "close" (seen: a reconnect after a 1006 died
   // this way, and with nothing left on the event loop Node exited silently). So an error with no
   // close within 3 s counts as a close. `gone` makes sure the close is handled once.
-  const sock = ws
-  let gone = false
   const onGone = async (code, rawReason, clean) => {
     if (gone) return
     gone = true
-    clearInterval(keepalive)
+    clearInterval(ka)
+    sock.onopen = sock.onmessage = sock.onerror = sock.onclose = null
+    try {
+      sock.close()
+    } catch {
+      // already closed
+    }
     stats.closes[code] = (stats.closes[code] || 0) + 1
-    // Print the reason text for server-sent codes (never game data). 1005 and 1006 carry none.
-    const reason = code === 1005 || code === 1006 ? 'none' : String(rawReason).slice(0, 80)
+    // Print the reason text only for the codes whose meaning is known (the file's own rule: no raw
+    // server text on the console). Any other code prints a length.
+    const known = code === 1013 || code === 4200 || code === 4400
+    const reason = known ? String(rawReason).slice(0, 80) : `${String(rawReason).length} chars`
     ev('close', { code, clean })
     say(`socket closed: code ${code} (${reason})`)
     if (finished) return
@@ -370,26 +437,24 @@ function connect() {
       say(`game state: ${st.abstract} (${st.detail}); retrying in 30 s`)
       return setTimeout(connect, 30_000)
     }
+    // The backoff resets only after a socket stayed up for a minute. A server that accepts and at once
+    // closes (1013 "Service overloaded") must not be retried every 2 s.
+    if (openedAt && Date.now() - openedAt >= 60_000) attempts = 0
     attempts++
     if (attempts > 500) return finish('too-many-failures')
-    const wait = Math.min(60_000, 2000 * 2 ** (attempts - 1))
+    const wait = Math.max(code === 1013 ? 30_000 : 0, Math.min(60_000, 2000 * 2 ** (attempts - 1)))
     say(`reconnecting in ${wait / 1000} s (attempt ${attempts})`)
     setTimeout(connect, wait)
   }
-  ws.onerror = () => {
+  sock.onerror = () => {
     ev('socket-error')
-    setTimeout(() => sock.readyState !== 1 && onGone(1006, '', false), 3000)
+    setTimeout(() => !gone && sock.readyState !== 1 && onGone(1006, '', false), 3000)
   }
-  ws.onclose = (e) => onGone(e.code, e.reason, e.wasClean)
+  sock.onclose = (e) => onGone(e.code, e.reason, e.wasClean)
   // A connection can hang in CONNECTING with neither "open" nor "error" (seen on the busiest game).
   setTimeout(() => {
-    if (sock.readyState !== 0) return
+    if (gone || sock.readyState !== 0) return
     ev('connect-timeout')
-    try {
-      sock.close()
-    } catch {
-      // already closing
-    }
     onGone(1006, '', false)
   }, 20_000)
 }
@@ -405,26 +470,8 @@ const dist = (arr) => ({ n: arr.length, min: pct(arr, 0), p50: pct(arr, 50), p95
 function summary(reason) {
   const gaps = stats.pushTimes.slice(1).map((t, i) => t - stats.pushTimes[i])
   const durationMs = since()
-  const timers = {}
-  for (const c of [15, 60]) {
-    // What a fixed timer would have done over the same stretch: ticks, and the
-    // ticks that saw no push since the previous tick (a wasted request).
-    let ticks = 0
-    let idle = 0
-    let i = 0
-    for (let t = c * 1000; t <= durationMs; t += c * 1000) {
-      ticks++
-      let any = false
-      while (i < stats.pushTimes.length && stats.pushTimes[i] <= t) {
-        any = true
-        i++
-      }
-      if (!any) idle++
-    }
-    timers[`${c}s`] = { ticks, idleTicks: idle }
-  }
-  const patches = stats.diff.patch
-  const fullRef = stats.gz.fullAtVerify.length ? pct(stats.gz.fullAtVerify, 50) : stats.gz.fullLatest
+  const d = stats.diff
+  const fetches = d.patch + d.empty + d.fallback + d.applyError + d.httpError + d.odd + d.stale
   return {
     finishedBecause: reason,
     durationMin: Math.round(durationMs / 600) / 100,
@@ -442,9 +489,9 @@ function summary(reason) {
     ),
     ageSec: { patch: dist(stats.ageSec.patch), fallback: dist(stats.ageSec.fallback) },
     coalesced: dist(stats.coalesced),
-    gzReduction: patches && fullRef ? Math.round(((fullRef * patches) / stats.gz.patchTotal) * 10) / 10 : null,
-    fallbackRate: patches + stats.diff.fallback ? Math.round((stats.diff.fallback / (patches + stats.diff.fallback)) * 1000) / 10 : null,
-    timers,
+    // One definition, the same as analyze.mjs: over every diff request. Bytes are in stats.gz.
+    fetches,
+    fallbackPct: fetches ? Math.round((d.fallback / fetches) * 1000) / 10 : null,
   }
 }
 
@@ -468,10 +515,12 @@ process.on('SIGINT', () => finish('interrupted'))
 process.on('SIGTERM', () => finish('terminated'))
 // A status line when something moved since the last one; a quiet line every
 // 10 minutes otherwise, so hours of waiting before first pitch stay short.
+// This tick also enforces --maxMinutes while a socket sits open and silent.
 let lastBeat = ''
 let quietBeats = 0
 setInterval(() => {
   if (finished) return
+  if (since() > maxMs) return finish('max-minutes')
   writeFileSync(`${outDir}/summary.json`, JSON.stringify(summary('running'), null, 2))
   const d = stats.diff
   const beat = `pushes ${stats.pushes}, diffs patch ${d.patch} empty ${d.empty} fallback ${d.fallback}, connects ${stats.connects}`

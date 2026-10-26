@@ -13,10 +13,11 @@
 // origin, serve this page there with Gary's agreement.
 import { createServer } from 'node:http'
 import { chromium } from 'playwright'
+import { parseArgs } from '../../scripts/lib/args.mjs'
 import { statsapiUrl } from '../../scripts/lib/statsapi.mjs'
 import { classify, shape } from './shape.mjs'
 
-const args = Object.fromEntries(process.argv.slice(2).map((a) => a.replace(/^--/, '').split('=')))
+const args = parseArgs(process.argv.slice(2))
 const gamePk = Number(args.gamePk)
 if (!Number.isInteger(gamePk)) {
   console.error('usage: node browser-check.mjs --gamePk=849805 [--holdSec=20]')
