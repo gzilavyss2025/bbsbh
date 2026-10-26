@@ -1,6 +1,7 @@
 # Sub-step stepping: pitch mode and event taps share one cursor inside an at-bat
 
-**Status:** Proposed (the answers marked *inference* below wait for Gary's review)
+**Status:** Accepted (2026-10-26). Gary settled decisions 8 and 9 the same day. The few answers still marked
+*inference* are this ADR's reading of the feed, open to review.
 **Date:** 2026-10-26
 **Issue:** #2604, for #2570 (pitch-by-pitch mode) and #2571 (event taps). Part of #2566.
 **Extends** ADR-0016 (the at-bat cursor is a staging layer, never a second spoiler
@@ -23,7 +24,8 @@ step smaller than that:
   tap, while the at-bat's result stays sealed. Mound visits, injury delays, ABS
   challenges and reviews do not pause an at-bat. (Gary, 2026-10-22.)
 
-Gary also decided, on 2026-10-26: an automatic call gets its own tap in pitch mode; the
+Gary also decided, on 2026-10-26: an automatic call gets its own tap in pitch mode, but an
+intentional walk is one tap; every substitution is its own tap, even in a run; the
 pitch-mode flag survives a reload; and a tap while the stage is still animating finishes
 the animation and does not advance (#2573).
 
@@ -88,15 +90,14 @@ Both features change what one tap reveals, so they need one rule, not two.
    one sub-step per change in feed order, then the first at-bat. The control looks and acts
    the same whether a half opens with five changes or none. The first tap into the half
    reveals whichever comes first. This replaces the staged "Now pitching" card, whose
-   presence was a tell. *Inference for Gary:* every change is its own tap, so 823035's top
-   8th takes five taps before its first pitch. Gary chose "every substitution" on
-   2026-10-22; confirm that a run of changes is not one tap.
+   presence was a tell. **Every change is its own tap, even in a run** (Gary, 2026-10-26),
+   so 823035's top 8th takes five taps before its first pitch.
 9. **Automatic calls.** In pitch mode each one is its own sub-step (Gary, 2026-10-26), so
    the count on screen always matches the paper. Sub-steps are keyed by the event's own
    `index` in `playEvents`, never by `pitchNumber` (0 for every automatic call) and never by
    position in a pitch list (a pitch with no tracking can drop out of one; the old
-   `replaySteps.js` header learned this). *Inference for Gary:* an intentional walk is ONE
-   sub-step, not four. The four `VB` entries are one decision and one mark on paper.
+   `replaySteps.js` header learned this). **An intentional walk is ONE sub-step, not four**
+   (Gary, 2026-10-26): the four `VB` entries are one decision and one mark on paper.
 10. **The half commit.** Unchanged from ADR-0016: the cursor never writes `revealedThrough`
     until the half's last sub-step is shown, and then it collapses into the normal
     `revealTo` commit. Not while the half is still being played (ADR-0055).
