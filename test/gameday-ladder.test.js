@@ -2,7 +2,7 @@
 // thresholds and the block table are Gary's locked round 2 calls.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { blocksFor, tierOf } from '../src/lib/gameday/ladder.js'
+import { blocksFor, foldedFor, tierOf } from '../src/lib/gameday/ladder.js'
 
 const NEVER_FOLD = ['band', 'stage', 'hero', 'bar']
 
@@ -28,4 +28,9 @@ test('the round 2 DEVICES table lands on the tier the Sizes tab shows', () => {
 
 test('the never-fold set is in every tier', () => {
   for (const t of ['P', 'T', 'L', 'D']) for (const b of NEVER_FOLD) assert.ok(blocksFor(t).includes(b), `${t} ${b}`)
+})
+
+test('the menu folds what the tier does not show', () => {
+  assert.deepEqual(foldedFor('P'), ['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog'])
+  assert.deepEqual(foldedFor('D'), [])
 })

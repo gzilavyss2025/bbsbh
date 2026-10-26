@@ -24,7 +24,7 @@ specific first:
   - `api/` — the Vercel functions, one line each.
   - `src/` — screen flow, routing, fetching, the design system, and the UI half of the
     spoiler rule. Folder detail sits below it: `src/screens/team/` (the seven-band page),
-    `src/screens/profile/` (My Tally), `src/screens/player/next/` (the new player page, module contract), `src/screens/lineup/next/` (the new lineup page), `src/styles/`, `src/components/`, and in that
+    `src/screens/profile/` (My Tally), `src/screens/player/next/` (the new player page, module contract), `src/screens/lineup/next/` (the new lineup page), `src/screens/gameday/next/` (the new Gameday shell), `src/styles/`, `src/components/`, and in that
     folder `src/components/ui/`, `src/components/boxlines/`, `src/components/chrome/`,
     `src/components/worldseries/`, `src/components/honors/`, `src/components/logbook/`, `src/components/offseason/`, `src/components/passport/`,
     `src/components/playbyplay/`, and `src/components/transactions/`.
