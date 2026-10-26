@@ -13,7 +13,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { buildFeed } from './fixtures/mini-game.js'
-import { challengesForPlay, selectChallengeState, gameHasAbs } from '../src/api/challenges.js'
+import { challengesForPlay, challengesLeft, selectChallengeState, gameHasAbs } from '../src/api/challenges.js'
 
 // A field-trimmed snapshot of statsapi's /api/v1.1/game/815863/feed/live —
 // Buffalo at Rochester, 2026-08-26, a real TRIPLE-A game with three real ABS
@@ -502,4 +502,42 @@ test('every Triple-A challenge returned sits at or before the reached half', () 
       }
     }
   }
+})
+
+// ------------------------------------------------- challengesLeft, the one rule
+// Every surface reads it (StatBox's row, the box score's, Gameday's reviews.js;
+// Gary, 2026-10-26). A club that ENTERS an extra inning with none left is given
+// one (docs/abs-challenges.md, "The rule that is only true for nine innings").
+test('challengesLeft: a failure spends one, a success keeps it, floored at none', () => {
+  const fail = (inning) => ({ inning, outcome: 'fail' })
+  assert.equal(challengesLeft([], { throughInning: 5 }), 2)
+  assert.equal(challengesLeft([fail(2), { inning: 3, outcome: 'success' }], { throughInning: 5 }), 1)
+  assert.equal(challengesLeft([fail(2), fail(4), fail(6)], { throughInning: 9 }), 0)
+})
+
+test('challengesLeft: entering an extra inning with none left gives one back', () => {
+  const twoFails = [{ inning: 3, outcome: 'fail' }, { inning: 7, outcome: 'fail' }]
+  assert.equal(challengesLeft(twoFails, { regulation: 9, throughInning: 9 }), 0)
+  assert.equal(challengesLeft(twoFails, { regulation: 9, throughInning: 10 }), 1)
+  // Spent in the 10th, given again for the 11th.
+  assert.equal(challengesLeft([...twoFails, { inning: 10, outcome: 'fail' }], { regulation: 9, throughInning: 10 }), 0)
+  assert.equal(challengesLeft([...twoFails, { inning: 10, outcome: 'fail' }], { regulation: 9, throughInning: 11 }), 1)
+  // A seven-inning game's extras start at the 8th.
+  assert.equal(challengesLeft(twoFails.map((o) => ({ ...o, inning: 2 })), { regulation: 7, throughInning: 8 }), 1)
+  // A club with one left is not given a second.
+  assert.equal(challengesLeft([{ inning: 3, outcome: 'fail' }], { regulation: 9, throughInning: 10 }), 1)
+})
+
+test('challengesLeft: a review still in progress spends nothing yet', () => {
+  assert.equal(challengesLeft([{ inning: 4, outcome: 'fail', inProgress: true }], { throughInning: 4 }), 2)
+})
+
+test('selectChallengeState: the row has its extra-inning challenge back (gamePk 815625, 13 innings)', () => {
+  const feed = JSON.parse(readFileSync(new URL('./fixtures/game-815625.gameday.json', import.meta.url), 'utf8'))
+  // The away club fails in the bottom 10th with none to spare, and is given one for the 11th.
+  assert.equal(selectChallengeState(feed, 10, 'bottom').away.remaining, 0)
+  assert.equal(selectChallengeState(feed, 11, 'top').away.remaining, 1)
+  // The box score's whole game (Infinity) ends where the feed's own count does.
+  const whole = selectChallengeState(feed, Infinity, 'bottom')
+  for (const side of ['away', 'home']) assert.equal(whole[side].remaining, feed.gameData.absChallenges[side].remaining)
 })

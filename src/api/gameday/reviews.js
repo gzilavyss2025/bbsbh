@@ -28,14 +28,13 @@
 //    that was not overturned is `overturned: false`. While `inProgress` is true
 //    the outcome is not known yet and `overturned` is null.
 //
-// THE BANK (ABS only, the challenges.js rules): each club starts with
-// START_CHALLENGES, keeps one on a success and spends one on a failure, and a
-// club that enters an extra inning empty is given one. Checked on gamePk
-// 815625 (13 innings, five failed away challenges): walked this way, no club
-// ever fails a challenge with an empty bank. A game that does not run the
+// THE BANK (ABS only) is challenges.js' challengesLeft, the one rule the
+// scorebug row and the box score read too: START_CHALLENGES, a failure spends
+// one, a success keeps it, and a club that enters an extra inning empty is
+// given one. A game that does not run the
 // system (gameHasAbs) has no bank: `bank` is null.
 
-import { isAbsChallenge, challengesForPlay, gameHasAbs, START_CHALLENGES } from '../challenges.js'
+import { isAbsChallenge, challengesForPlay, challengesLeft, gameHasAbs } from '../challenges.js'
 import { halfIndex, selectRegulationInnings } from '../select.js'
 import { stepCutAtBatIndex, safeStep } from './stepCut.js'
 
@@ -121,38 +120,31 @@ export function reviewsAtStep(feed, { inning, half, step = null, revealedThrough
   const here = halfIndex(inning, half)
   if (here > (revealedThrough ?? -1) + 1) return null
   const cut = stepCutAtBatIndex(feed, inning, half, safeStep(step, here, revealedThrough))
-  const regulation = selectRegulationInnings(feed)
-  const hasBank = gameHasAbs(feed)
-  const bank = {
-    away: { remaining: START_CHALLENGES, used: 0, overturned: 0 },
-    home: { remaining: START_CHALLENGES, used: 0, overturned: 0 },
-  }
   const reviews = []
-  // The refill keys on the inning alone (a structural fact, never a result), so
-  // it lands when the reader enters an extra inning, before any play in it.
-  let lastInning = null
-  const enter = (inn) => {
-    if (inn === lastInning) return
-    lastInning = inn
-    if (inn > regulation) for (const s of ['away', 'home']) if (bank[s].remaining === 0) bank[s].remaining = 1
-  }
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
     const inn = play?.about?.inning
     const h = play?.about?.halfInning
     if (!inn || !h) continue
     const i = halfIndex(inn, h)
     if (i > here) break
-    enter(inn)
     if (i === here && (play.about?.atBatIndex ?? Infinity) > cut) continue
-    for (const r of reviewsInPlay(feed, play)) {
-      reviews.push(r)
-      if (r.kind !== 'abs' || r.inProgress) continue
-      const b = bank[r.side]
-      b.used += 1
-      if (r.overturned) b.overturned += 1
-      else b.remaining = Math.max(0, b.remaining - 1)
+    reviews.push(...reviewsInPlay(feed, play))
+  }
+  if (!gameHasAbs(feed)) return { reviews, bank: null }
+  // The refill keys on the inning alone (a structural fact, never a result),
+  // so it lands when the reader enters an extra inning, before any play in it.
+  const regulation = selectRegulationInnings(feed)
+  const bankOf = (side) => {
+    const abs = reviews.filter((r) => r.kind === 'abs' && r.side === side)
+    const settled = abs.filter((r) => !r.inProgress)
+    return {
+      remaining: challengesLeft(
+        abs.map((r) => ({ inning: r.inning, inProgress: r.inProgress, outcome: r.overturned ? 'success' : 'fail' })),
+        { regulation, throughInning: inning },
+      ),
+      used: settled.length,
+      overturned: settled.filter((r) => r.overturned).length,
     }
   }
-  enter(inning)
-  return { reviews, bank: hasBank ? bank : null }
+  return { reviews, bank: { away: bankOf('away'), home: bankOf('home') } }
 }

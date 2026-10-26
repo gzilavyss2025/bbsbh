@@ -185,6 +185,10 @@ again at the start of **every extra inning**: 55 club-games on file carry a
 third failed challenge, all of them in extras, and gamePk 815625 lost **five**
 in a thirteen-inning game.
 
+In the app this rule lives once, in `challengesLeft` (`src/api/challenges.js`): the
+scorebug's ABS row, the box score's and Gameday's `reviews.js` all read it (Gary,
+2026-10-26). A challenge given back for an extra inning draws as an ordinary open pip.
+
 So the in-game loss cap on the page is **read off the season**
 (`inGameLossCap(summary)`) and never stated as a rule. It is 3 at both levels
 today. A page that printed "two is the rulebook, not a record" would be wrong
