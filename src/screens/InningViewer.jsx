@@ -749,7 +749,7 @@ export function InningViewer({
           }}
           meta={meta}
           panels={{
-            feed, meta, regulation, unlocked: renderUnlocked, revealedThrough: renderRevealedThrough, runsInProgress, curIdx,
+            feed, meta, regulation, unlocked: renderUnlocked, mark: renderRevealedThrough, runsInProgress, curIdx,
             onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
             inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : curAtBatCount,
           }}

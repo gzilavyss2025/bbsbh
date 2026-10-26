@@ -24,7 +24,7 @@ const Sealed = () => <p className="gdp__sealed">Sealed</p>;
 
 // Result-bearing panels draw through here; `key` re-seals on every half, as the page does.
 function Sealable({ ctx, children }) {
-  const { inning, half, step, revealedThrough } = ctx;
+  const { inning, half, step, mark: revealedThrough } = ctx;
   const shown = halfIndex(inning, half) <= revealedThrough || step > 0;
   return (
     <SealBox key={`${inning}-${half}`} forceRevealed={shown} coverless>
@@ -44,7 +44,7 @@ function Navigator({ ctx }) {
     feed,
     regulation,
     unlocked,
-    revealedThrough,
+    mark: revealedThrough,
     runsInProgress,
     curIdx,
     onSelect,
@@ -181,7 +181,7 @@ const Rows = ({ order, codes }) => (
 
 // The Field tab: FieldCard's park with surnames at the spots, the defense as of the cursor.
 function Field({ ctx }) {
-  const { feed, inning, half, step, revealedThrough } = ctx;
+  const { feed, inning, half, step, mark: revealedThrough } = ctx;
   const v = feed?.gameData?.venue;
   const layout = resolveBallparkLayout({
     venueId: v?.id,
