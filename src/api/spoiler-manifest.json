@@ -431,12 +431,17 @@
     },
     "gameday/checkpoint.js": {
       "class": "reveal-only",
-      "why": "Gameday's half-end checkpoint pages (#2605): the closed half's R/H/E/LOB and its pitches, strikes and whiffs per pitcher. Answers only for a half at or under revealedThrough, reads that half and nothing after it, and never asks whether the game is over (ADR-0043's double rule). No screen imports it yet.",
+      "why": "Gameday's half-end checkpoint pages (#2605, #2572): the closed half's R/H/E/LOB; its pitches, strikes, whiffs and fouls per pitcher; its at-bats in order with the substitutions a scorer writes; the line through this half with who is due up next (dueup.js, lineupEntering's gate; no pitcher named); and the next half's score-free notes (between-innings.js), left out when empty. Answers only for a half at or under revealedThrough, reads nothing after it but the next half's pre-pitch entries, and keys the last half on selectFinalReached with the clamped mark, never selectIsFinal (ADR-0043's double rule). No screen imports it yet.",
       "importers": []
     },
     "gameday/dayLine.js": {
       "class": "reveal-only",
       "why": "Gameday's day lines (#2606): the batter's and the pitcher's line for today as of the reader's step. A line names results ('2-for-3'). Built from computeHalfInningFeed's cards WITH the step cap and sliced at it, and from computePitcherLines' own step clamp, so step k never sees step k+1; a half past revealedThrough + 1 answers null. No screen imports it yet; the fresh Gameday stage (#2568) will call it inside a SealBox reveal render function.",
+      "importers": []
+    },
+    "gameday/defense.js": {
+      "class": "reveal-only",
+      "why": "Gameday's Field tab (#2566): the fielding side's alignment and pitcher as of the reader's step. A substitution can telegraph a sealed blowout. The side's starters, then its earlier fielding halves whole and the reader's half from computeHalfInningFeed built with the step cap and sliced at it, so a change counts only once its own entry is on screen (ADR-0016); a half past revealedThrough + 1 answers null. No screen imports it yet.",
       "importers": []
     },
     "gameday/moments/moments.js": {
@@ -453,15 +458,25 @@
       "why": "Gameday's review list and ABS bank (#2607) as of the reader's step: manager, crew-chief and ABS reviews with their outcome. A review can flip a called third strike or an out. Earlier halves whole, the reader's half only up to the last plate appearance on screen (gameday/stepCut.js); a half past revealedThrough + 1 answers null. Never reads gameData.absChallenges, whose counts are the whole game's. No screen imports it yet.",
       "importers": []
     },
+    "gameday/zones.js": {
+      "class": "spoiler-free",
+      "why": "Gameday's zone map data (#2568): a batter's batting average and MLB's temp word for zones 01-09, season through the day BEFORE the game (endDate = dayBefore(officialDate), the ADR-0088 footing the lineup pages use). It reads no live game data and the season total it asks for holds no game in progress; without endDate the total would include the game being scored (zone 5 for Arozarena on 824716 moves .250 to .261 after his home run). Null when MLB sends no zones (sportIds 12-14, a debut). Season stats on an open surface (ADR-0034). No screen imports it yet."
+    },
     "gameday/stepCut.js": {
       "class": "reveal-only",
       "why": "The step cut the Gameday data modules share: which at-bat cards of the reader's half are on screen, from computeHalfInningFeed built with the step cap and sliced at it (ADR-0016). Reads the cards, so reveal-only like them.",
       "importers": [
         "api/gameday/checkpoint.js",
         "api/gameday/dayLine.js",
+        "api/gameday/defense.js",
         "api/gameday/moments/moments.js",
         "api/gameday/reviews.js"
       ]
+    },
+    "gameday/subSteps.js": {
+      "class": "reveal-only",
+      "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. No screen imports it yet.",
+      "importers": []
     },
     "highlights.js": {
       "class": "mixed",
@@ -798,6 +813,7 @@
         "api/dueup.js",
         "api/expresslane/runners.js",
         "api/gameday/checkpoint.js",
+        "api/gameday/defense.js",
         "api/gameday/stepCut.js",
         "api/pitchers.js",
         "api/scorecardGame.js",
@@ -854,9 +870,10 @@
     },
     "playbyplay/pitchInfo.js": {
       "class": "reveal-only",
-      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with one importer outside the barrel: Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. That importer is itself reveal-only, so the containment does not widen.",
+      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with two importers outside the barrel. Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. Gameday's subSteps.js reaches AUTOMATIC_CODES for the same reason (the same call is a sub-step on one surface and a card dot on the other). Both importers are themselves reveal-only, so the containment does not widen.",
       "importers": [
         "api/expresslane/rail.js",
+        "api/gameday/subSteps.js",
         "api/playbyplay.js",
         "api/playbyplay/halfInningFeed.js"
       ]

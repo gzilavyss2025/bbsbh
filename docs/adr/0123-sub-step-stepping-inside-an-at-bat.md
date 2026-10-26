@@ -124,6 +124,10 @@ reader's cursor.
 The control's words, the pitch button's place and look, how a sub-step looks on the stage,
 and how a mid-at-bat event card looks. Each must keep decisions 3 and 4.
 
+**Amended 2026-10-26 (Gary, the control's words):** the advance control reads "Next play ›"
+in at-bat mode and "Next pitch ›" in pitch mode. Within a mode it never changes (decision 3).
+The words change only when the reader flips the At-bat | Pitch switch, which reveals nothing (#2570).
+
 ## Consequences
 
 - One cursor serves both modes, so a reader can switch mid-at-bat without a second model.
