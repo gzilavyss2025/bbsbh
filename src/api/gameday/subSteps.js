@@ -19,6 +19,7 @@
 // Data only: no words, no timing (ADR-0046).
 
 import { NON_PA_EVENT_TYPES, pitchCallCode } from '../playbyplay/eventTypes.js'
+import { AUTOMATIC_CODES } from '../playbyplay/pitchInfo.js'
 
 const CHANGES = new Set([
   'pitching_substitution',
@@ -53,10 +54,14 @@ export function subSteps(feed, card) {
   for (const [pos, e] of (play?.playEvents ?? []).entries()) {
     const index = e.index ?? pos
     const et = e.details?.eventType
-    if (e.isPitch || e.type === 'no_pitch') {
-      const call = pitchCallCode(e)
+    // An automatic call is a step; the umpire's No Pitch (N) changes no count
+    // and rides like any other no-effect entry (pitchCardInfo skips it too).
+    const call = pitchCallCode(e)
+    if (e.isPitch || AUTOMATIC_CODES.has(call)) {
       const count = { balls: e.count?.balls ?? null, strikes: e.count?.strikes ?? null }
       if (call === 'VB' && prev?.kind === 'auto' && prev.call === 'VB') {
+        // One step for the run; it takes the last VB's index, where the walk's legs sit.
+        prev.index = index
         prev.count = count
         continue
       }

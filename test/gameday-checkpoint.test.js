@@ -182,7 +182,9 @@ test('824716 bottom 9th: Milner and Muñoz, the final line, no due-up', () => {
   assert.equal(p.fouls, 0)
   const rows = page(pages, 'atBats').fields.rows
   assert.deepEqual(rows.map((r) => r.kind === 'sub' ? r.eventType : r.code),
-    ['1B', 'pinch_hitting', 'HR', 'L1', 'pitching_substitution', 'K', '4-3'])
+    ['pitching_substitution', '1B', 'pinch_hitting', 'HR', 'L1', 'pitching_substitution', 'K', '4-3'])
+  // The change that opens the half is a row too: the scorer writes Milner in.
+  assert.equal(rows[0].playerId, p.pitchers[0].id)
   const g = page(pages, 'gameSoFar').fields
   assert.equal(g.final, true)
   assert.equal(g.dueUp, null)

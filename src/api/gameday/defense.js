@@ -34,13 +34,18 @@ export function defenseAt(feed, { inning, half, step = null, revealedThrough }) 
     for (const k of Object.keys(at)) if (at[k] === id) delete at[k]
     at[pos] = id
   }
+  // Only this side's own players take its spots (defenseEntering's roster gate:
+  // the other club's move must not bleed into this defense).
+  const ours = new Set(Object.values(feed?.liveData?.boxscore?.teams?.[fieldingSideOf(half)]?.players ?? {}).map((p) => p?.person?.id))
   for (let inn = 1; inn <= inning; inn++) {
     const cap = inn === inning ? safeStep(step, here, revealedThrough) : null
     const cards = computeHalfInningFeed(feed, inn, half, battingSideOf(half), cap)
     for (const c of cap == null ? cards : cards.slice(0, cap)) {
       if (c.kind === 'atbat' && c.pitcher?.id != null) at.P = c.pitcher.id
-      else if (c.eventType === 'pitching_substitution' && c.playerId != null) at.P = c.playerId
-      else if (MOVES.has(c.eventType) && c.playerId != null && c.position) put(c.position, c.playerId)
+      else if (!ours.has(c.playerId)) continue
+      // put, so a position player who takes the mound leaves his old spot.
+      else if (c.eventType === 'pitching_substitution') put('P', c.playerId)
+      else if (MOVES.has(c.eventType) && c.position) put(c.position, c.playerId)
     }
   }
   const players = feed?.gameData?.players ?? {}

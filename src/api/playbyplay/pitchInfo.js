@@ -47,7 +47,7 @@ export const BALL_CODES = new Set(['B', '*B', 'H', 'I', 'P', 'V', 'VB', 'VC', 'V
 // number on it (verified against gamePks 823430, 824481 and 823517), so they
 // reach a card only because pitchCardInfo asks for them by name — and they are
 // counted as a pitch by nobody.
-const AUTOMATIC_CODES = new Set(['A', 'AB', 'AC', 'V', 'VB', 'VC', 'VP', 'VS'])
+export const AUTOMATIC_CODES = new Set(['A', 'AB', 'AC', 'V', 'VB', 'VC', 'VP', 'VS'])
 
 // Classifies one call code into the five dots the card renders. An automatic
 // strike shares the called-strike dot (the umpire put it on the count either

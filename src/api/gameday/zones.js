@@ -11,9 +11,9 @@ import { getJson } from '../statsapi.js'
 import { dayBefore } from '../game.js'
 
 // { zones: { '01'..'09': { avg, temp } } }, or null when there are no zones (MiLB, a debut) or
-// no date to stop at. A failed fetch is null too: the map is left off rather than mislabelled.
+// no level or no date to stop at. A failed fetch is null too: the map is left off rather than mislabelled.
 export async function fetchBatterZones(personId, season, sportId, officialDate) {
-  if (!personId || !season || !officialDate) return null
+  if (!personId || !season || !sportId || !officialDate) return null
   try {
     const data = await getJson(
       `/api/v1/people/${personId}/stats?stats=hotColdZones&group=hitting` +

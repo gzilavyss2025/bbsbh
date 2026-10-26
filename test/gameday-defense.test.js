@@ -51,3 +51,24 @@ test('a half past revealedThrough + 1 answers null; a stepped half reads null st
   assert.equal(defenseAt(feed, { inning: 9, half: 'bottom', step: null, revealedThrough: 16 }).P.last, 'Ferrer')
   assert.equal(defenseAt(feed, { inning: 9, half: 'bottom', step: null, revealedThrough: 17 }).P.last, 'Muñoz')
 })
+
+// Two mutated copies of 824716's top 3rd (Boston in the field).
+const ev = (eventType, id, pos) => ({ type: 'action', isPitch: false, details: { eventType, description: '' }, player: { id }, position: { abbreviation: pos } })
+const top3 = (f) => f.liveData.plays.allPlays.filter((p) => p.about.inning === 3 && p.about.halfInning === 'top')
+const top4 = (f) => defenseAt(f, { inning: 4, half: 'top', step: 0, revealedThrough: 6 })
+
+test("the other club's move never lands in this defense (defenseEntering's roster gate)", () => {
+  const f = structuredClone(feed)
+  top3(f)[1].playEvents.unshift(ev('defensive_switch', 668227, '3B')) // Arozarena, a Mariner
+  assert.equal(top4(f)['3B'].last, 'Durbin')
+})
+
+test('a position player who takes the mound leaves his old spot', () => {
+  const f = structuredClone(feed)
+  const last = top3(f).at(-1)
+  last.playEvents.unshift(ev('pitching_substitution', 681508, 'P')) // Gasper, Boston's 1B
+  last.matchup.pitcher = { id: 681508 }
+  const d = top4(f)
+  assert.equal(d.P.last, 'Gasper')
+  assert.notEqual(d['1B']?.id, 681508)
+})

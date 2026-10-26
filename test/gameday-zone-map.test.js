@@ -56,3 +56,9 @@ test('a failed fetch is null, not a throw', async () => {
   globalThis.fetch = async () => ({ ok: false, status: 404 })
   assert.equal(await fetchBatterZones(668227, 2026, 1, '2026-09-01'), null)
 })
+
+test('no level, no request: sportId=undefined would ask for the wrong league', async () => {
+  const asked = stub(recorded)
+  assert.equal(await fetchBatterZones(668227, 2026, undefined, '2026-09-01'), null)
+  assert.equal(asked.length, 0)
+})

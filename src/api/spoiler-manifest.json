@@ -432,7 +432,6 @@
     "gameday/checkpoint.js": {
       "class": "reveal-only",
       "why": "Gameday's half-end checkpoint pages (#2605, #2572): the closed half's R/H/E/LOB; its pitches, strikes, whiffs and fouls per pitcher; its at-bats in order with the substitutions a scorer writes; the line through this half with who is due up next (dueup.js, lineupEntering's gate; no pitcher named); and the next half's score-free notes (between-innings.js), left out when empty. Answers only for a half at or under revealedThrough, reads nothing after it but the next half's pre-pitch entries, and keys the last half on selectFinalReached with the clamped mark, never selectIsFinal (ADR-0043's double rule). No screen imports it yet.",
-"why": "Gameday's half-end checkpoint pages (#2605): the closed half's R/H/E/LOB and its pitches, strikes and whiffs per pitcher. Answers only for a half at or under revealedThrough, reads that half and nothing after it, and never asks whether the game is over (ADR-0043's double rule). No screen imports it yet.",
       "importers": []
     },
     "gameday/dayLine.js": {
@@ -871,9 +870,10 @@
     },
     "playbyplay/pitchInfo.js": {
       "class": "reveal-only",
-      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with one importer outside the barrel: Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. That importer is itself reveal-only, so the containment does not widen.",
+      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with two importers outside the barrel. Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. Gameday's subSteps.js reaches AUTOMATIC_CODES for the same reason (the same call is a sub-step on one surface and a card dot on the other). Both importers are themselves reveal-only, so the containment does not widen.",
       "importers": [
         "api/expresslane/rail.js",
+        "api/gameday/subSteps.js",
         "api/playbyplay.js",
         "api/playbyplay/halfInningFeed.js"
       ]

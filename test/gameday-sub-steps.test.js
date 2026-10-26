@@ -14,7 +14,7 @@ import { visibleAtBatCards } from '../src/api/gameday/stepCut.js'
 
 const load = (pk) =>
   JSON.parse(readFileSync(new URL(`./fixtures/game-${pk}.gameday.json`, import.meta.url), 'utf8'))
-const games = Object.fromEntries([824716, 816025, 823764, 815625, 823035].map((pk) => [pk, load(pk)]))
+const games = Object.fromEntries([824716, 816025, 823764, 815625, 823035, 778442].map((pk) => [pk, load(pk)]))
 
 const cardAt = (feed, atBatIndex) => {
   const play = feed.liveData.plays.allPlays.find((p) => p.about.atBatIndex === atBatIndex)
@@ -65,7 +65,8 @@ test('823764 ab51: a caught stealing ends the half and the at-bat has no result'
 
 test('815625 ab74: the intentional walk is one step, and it is the result', () => {
   const steps = subSteps(games[815625], cardAt(games[815625], 74))
-  assert.deepEqual(shape(steps), ['change:0', 'result:2'])
+  // The step's index is the LAST VB, the entry the walk's runner leg carries.
+  assert.deepEqual(shape(steps), ['change:0', 'result:5'])
   assert.deepEqual(steps[0].riders.map((r) => r.eventType), ['runner_placed'])
 })
 
@@ -101,4 +102,10 @@ test('no step before the result holds any of the result (decision 2), in five wh
     }
   }
   assert.ok(checked > 300)
+})
+
+test("778442 ab51: the umpire's No Pitch (N) changes no count, so it is no step", () => {
+  const steps = subSteps(games[778442], cardAt(games[778442], 51))
+  assert.equal(steps.some((s) => s.call === 'N'), false)
+  assert.deepEqual(steps.filter((s) => s.kind === 'pitch' || s.kind === 'result').map((s) => s.index), [0, 3, 4])
 })

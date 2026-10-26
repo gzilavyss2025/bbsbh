@@ -117,6 +117,14 @@ function pitchingPage(feed, inning, half) {
 
 function atBatsPage(feed, inning, half) {
   const rows = []
+  // The changes before the half's first pitch: computeHalfInningFeed leaves them
+  // to the step before (ADR-0016), but a scorer writes them into this half.
+  const first = (feed?.liveData?.plays?.allPlays ?? []).find((p) => p.about?.inning === inning && p.about?.halfInning === half)
+  for (const e of first?.playEvents ?? []) {
+    if (e.isPitch) break
+    const et = e.details?.eventType
+    if (SUB_ROWS.has(et)) rows.push({ kind: 'sub', eventType: et, playerId: e.player?.id ?? null, text: e.details?.description ?? '' })
+  }
   for (const c of computeHalfInningFeed(feed, inning, half, battingSideOf(half))) {
     if (c.kind === 'atbat') {
       const { jersey, first, last } = c.batter ?? {}
