@@ -28,3 +28,4 @@ each value looks. Pure physics goes in `src/lib/gameday/`, not here.
 | `checkpoint.js` | The half-end checkpoint's pages: the tally and the pitching split (#2605); two more wait for #2572. |
 | `moments/` | The moments engine: `moments.js` scores one revealed play (four kinds, three dial cut-offs); `thresholds.js` holds the measured floors (#2608). |
 | `reviews.js` | Manager, crew-chief and ABS reviews, and each club's ABS bank, as of the step (#2607). Never `gameData.absChallenges`. |
+| `zones.js` | The zone map's data: a batter's AVG and temp by zone 01-09, season through the day BEFORE the game (#2568). **Spoiler-free**, the one exception to the reveal-only rule above: no game data, `endDate` = `dayBefore(officialDate)` (ADR-0088). |

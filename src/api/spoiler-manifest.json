@@ -453,6 +453,10 @@
       "why": "Gameday's review list and ABS bank (#2607) as of the reader's step: manager, crew-chief and ABS reviews with their outcome. A review can flip a called third strike or an out. Earlier halves whole, the reader's half only up to the last plate appearance on screen (gameday/stepCut.js); a half past revealedThrough + 1 answers null. Never reads gameData.absChallenges, whose counts are the whole game's. No screen imports it yet.",
       "importers": []
     },
+    "gameday/zones.js": {
+      "class": "spoiler-free",
+      "why": "Gameday's zone map data (#2568): a batter's batting average and MLB's temp word for zones 01-09, season through the day BEFORE the game (endDate = dayBefore(officialDate), the ADR-0088 footing the lineup pages use). It reads no live game data and the season total it asks for holds no game in progress; without endDate the total would include the game being scored (zone 5 for Arozarena on 824716 moves .250 to .261 after his home run). Null when MLB sends no zones (sportIds 12-14, a debut). Season stats on an open surface (ADR-0034). No screen imports it yet."
+    },
     "gameday/stepCut.js": {
       "class": "reveal-only",
       "why": "The step cut the Gameday data modules share: which at-bat cards of the reader's half are on screen, from computeHalfInningFeed built with the step cap and sliced at it (ADR-0016). Reads the cards, so reveal-only like them.",
