@@ -1,0 +1,61 @@
+/* Round 2 tokens. The app half is copied from src/tokens/ with the app's own names and values, so a
+   build reads the same names. The stage half is new: one token per palette slot of the 16-bit stage.
+   A stage drawing reads ONLY --stage-* tokens. Two ways to fill them, which Gary picks between:
+     .pal-stage  the new palette (round 1's 16-bit colours, made into tokens)
+     .pal-paper  every slot points at an existing paper token (no new colours) */
+:root {
+  /* ---- App tokens (src/tokens/colors.css, typography.css, spacing.css) ---- */
+  --paper-0: #F6EFDC; --paper-2: #FBF6E9; --paper-3: #FFFDF6; --paper-5: #EFE6C8; --paper-cream: #F1E7CC;
+  --ink-0: #0F1822; --ink-1: #1B2A3A; --ink-2: #3C4A5A; --graphite: #6B6558; --graphite-soft: #938C7C;
+  --rule: #CBC1A7; --rule-soft: #DED6C0; --rule-grid: #EDE6D1;
+  --field: #2F6E4F; --field-deep: #255740; --field-wash: #DDE7CF; --field-mint: #86BE98;
+  --field-outfield: #D8E6C9; --field-infield: #A6C393; --field-dirt: #D6AA83; --field-fence: #80A376; --field-chalk: #FFF8E9;
+  --clay: #B4453A; --clay-soft: #F3E0DB; --winprob-home: #C6D2DE; --winprob-away: #EFDAD3; --navy: #1B2A3A; --allstar-blue: #1D4E8F;
+  --seal: #B5824A; --seal-hatch: #A9743C; --seal-ink: #1E1405;
+  --marker: #F2C14E; --award-ink: #8A5A1E; --award-line: #C79A3E;
+
+  --bg-canvas: var(--paper-0); --surface-card: var(--paper-2); --surface-inset: var(--paper-3);
+  --surface-row-selected: var(--paper-5); --surface-stamped-ink: var(--ink-0); --surface-stamped-tint: var(--field-wash);
+  --text-heading: var(--ink-0); --text-body: var(--ink-1); --text-muted: var(--ink-2); --text-caption: var(--graphite);
+  --text-on-ink: var(--paper-2); --text-on-ink-soft: var(--rule-soft); --text-on-ink-dim: var(--rule); --text-on-seal: var(--seal-ink);
+  --border-rule: var(--rule); --border-hairline: var(--rule-soft); --border-stamped: var(--ink-0);
+  --accent-primary: var(--navy); --accent-positive: var(--field); --accent-negative: var(--clay);
+  --seal-cover: var(--seal); --focus-ring: var(--field);
+  --seal-texture: repeating-linear-gradient(135deg, var(--seal) 0 6px, var(--seal-hatch) 6px 12px);
+
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --fs-display: 34px; --fs-h1: 26px; --fs-title-lg: 24px; --fs-num-lg: 22px; --fs-title-md: 20px; --fs-title-sm: 18px;
+  --fs-h3: 17px; --fs-field: 16px; --fs-body: 15px; --fs-ui: 14px; --fs-small: 13px; --fs-label: 12px; --fs-cell: 11px;
+  --fs-score-md: 42px; --fs-hero-sm: 28px;
+  --lh-solid: 1; --lh-tight: 1.05; --lh-compact: 1.2; --lh-ui: 1.35;
+  --space-1: 4px; --space-1h: 6px; --space-2: 8px; --space-2h: 10px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px;
+  --bw-hair: 1px; --bw-rule: 1.5px; --bw-heavy: 2px; --stamped-offset: 3px;
+  --shadow-stamped: var(--stamped-offset) var(--stamped-offset) 0 var(--border-stamped);
+
+  /* ---- New: the stage palette (29 slots), default fill = .pal-stage ---- */
+  --stage-sky: #5b9be0; --stage-sky-haze: #a3d3f2;
+  --stage-crowd-1: #2a2640; --stage-crowd-2: #5c4a6c; --stage-crowd-3: #ad6258; --stage-crowd-4: #d9b06e;
+  --stage-wall-deep: #1b4530; --stage-wall: #2c6644; --stage-wall-lit: #47885a;
+  --stage-grass: #3c8838; --stage-grass-lit: #55a644; --stage-grass-far: #2e6c32; --stage-grass-foul: #357b35;
+  --stage-dirt: #b4743d; --stage-dirt-lit: #d29a5b; --stage-chalk: #f2efe2; --stage-outline: #121418;
+  --stage-shadow: #1d4524; --stage-shadow-dirt: #7e4f28;
+  --stage-kit-navy: #1d2b4f; --stage-kit-trim: #2a9893; --stage-kit-road: #aab0ba; --stage-kit-road-shade: #6c7280; --stage-kit-red: #c3323b;
+  --stage-skin: #e2a67b; --stage-skin-shade: #9a6445; --stage-bat: #dba45f; --stage-landing: #f5cf3e;
+  --stage-zone-cold: #3b6fb6; --stage-zone-cool: #8fb3df; --stage-zone-lukewarm: #e8e2cf; --stage-zone-warm: #e8a76a; --stage-zone-hot: #c3323b;
+  --stage-frame: var(--stage-outline);
+}
+
+/* The other fill: every stage slot is an existing paper token. Nothing new. */
+.pal-paper {
+  --stage-sky: var(--paper-2); --stage-sky-haze: var(--paper-3);
+  --stage-crowd-1: var(--ink-1); --stage-crowd-2: var(--ink-2); --stage-crowd-3: var(--graphite); --stage-crowd-4: var(--rule);
+  --stage-wall-deep: var(--field-deep); --stage-wall: var(--field); --stage-wall-lit: var(--field-fence);
+  --stage-grass: var(--field-infield); --stage-grass-lit: var(--field-outfield); --stage-grass-far: var(--field-fence); --stage-grass-foul: var(--field-mint);
+  --stage-dirt: var(--field-dirt); --stage-dirt-lit: var(--paper-cream); --stage-chalk: var(--field-chalk); --stage-outline: var(--ink-0);
+  --stage-shadow: var(--field-deep); --stage-shadow-dirt: var(--award-ink);
+  --stage-kit-navy: var(--navy); --stage-kit-trim: var(--field); --stage-kit-road: var(--rule); --stage-kit-road-shade: var(--graphite-soft); --stage-kit-red: var(--clay);
+  --stage-skin: var(--clay-soft); --stage-skin-shade: var(--graphite-soft); --stage-bat: var(--award-line); --stage-landing: var(--marker);
+  --stage-zone-cold: var(--allstar-blue); --stage-zone-cool: var(--winprob-home); --stage-zone-lukewarm: var(--paper-3); --stage-zone-warm: var(--winprob-away); --stage-zone-hot: var(--clay);
+  --stage-frame: var(--border-stamped);
+}

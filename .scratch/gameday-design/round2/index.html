@@ -1,0 +1,245 @@
+<title>Gameday Design Round 2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="gameday.css">
+<style>
+/* The page around the wireframes: Tally Baseball design system (paper and ink, square, stamped). Light only. */
+:root { color-scheme: light; --stamp: 4px 4px 0 var(--ink-0); }
+html, body { background: var(--paper-0); color: var(--ink-1); }
+body { margin: 0; font-family: var(--font-body); font-size: 14px; line-height: 1.55; }
+* { box-sizing: border-box; }
+a { color: var(--ink-1); text-underline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--field); outline-offset: 2px; }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; max-width: 1560px; margin: 0 auto; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper-0); }
+header.top { padding-block: 22px 14px; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(30px, 6vw, 46px); line-height: 1; letter-spacing: .01em; text-transform: uppercase; margin: 0; color: var(--ink-0); text-wrap: balance; }
+.sub { color: var(--graphite); font-size: 13px; }
+nav.jump { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper-0); padding-block: 8px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; border-bottom: 2px solid var(--ink-0); }
+nav.jump a { flex: none; font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: .09em; text-transform: uppercase; text-decoration: none; padding: 9px 12px; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--ink-0); background: var(--paper-2); color: var(--ink-0); }
+nav.jump a[aria-current="page"] { background: var(--ink-0); color: var(--paper-2); }
+nav.jump a .ct { font-family: var(--font-body); font-size: 11px; letter-spacing: 0; background: var(--marker); color: var(--ink-0); padding: 0 5px; }
+section.tab { padding-top: 22px; }
+section.tab[hidden] { display: none !important; }
+h2 { font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; font-size: 22px; color: var(--ink-0); margin: 0 0 4px; text-wrap: balance; }
+h3 { font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 16px; color: var(--ink-0); margin: 0 0 6px; }
+p { margin: 0 0 10px; max-width: 72ch; }
+.lede { font-size: 14px; color: var(--ink-2); max-width: 80ch; }
+.card2 { position: relative; background: var(--paper-2); border: 2px solid var(--ink-0); box-shadow: var(--stamp); padding: 18px 16px 16px; min-width: 0; }
+.card2 > .name { position: absolute; top: -14px; left: 12px; background: var(--ink-0); color: var(--paper-2); font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 9px; }
+.grid2 { display: grid; gap: 28px 24px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); margin-top: 22px; }
+ul.plain { margin: 0; padding-left: 18px; } ul.plain li { margin: 0 0 6px; max-width: 76ch; }
+.chip { display: inline-block; font-family: var(--font-display); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 12px; padding: 1px 7px; border: 1.5px solid var(--ink-0); background: var(--paper-3); }
+.chip.ok { background: var(--field-wash); } .chip.fix { background: var(--marker); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 2px solid var(--ink-0); background: var(--paper-2); }
+.seg button { font-family: var(--font-display); font-weight: 700; letter-spacing: .07em; text-transform: uppercase; font-size: 14px; min-height: 40px; padding: 6px 12px; border: 0; border-right: 2px solid var(--ink-0); background: transparent; color: var(--ink-0); cursor: pointer; }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink-0); color: var(--paper-2); }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; margin: 14px 0 6px; }
+.controls .l, .fbl { font-family: var(--font-display); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; color: var(--graphite); display: block; margin-bottom: 3px; }
+.note { font-size: 12.5px; color: var(--graphite); }
+.fb { display: grid; grid-template-columns: minmax(0, 260px) 1fr; gap: 6px; align-items: start; margin-top: 8px; }
+.fb select, .fb textarea { font: inherit; font-size: 13px; border: 1.5px solid var(--ink-0); background: var(--paper-3); color: var(--ink-0); padding: 6px 8px; border-radius: 0; min-height: 38px; width: 100%; }
+.fb textarea { resize: vertical; }
+@media (max-width: 560px) { .fb { grid-template-columns: 1fr; } }
+.saved { font-size: 11.5px; color: var(--field); min-height: 1em; display: block; }
+.ask { margin-top: 26px; }
+.ask h3 { margin-bottom: 2px; }
+/* Wireframe hosts: each frame is drawn at true size and scaled to the column. */
+.frames { display: grid; gap: 26px 22px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); align-items: start; margin-top: 16px; }
+.frames.pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 700px) { .frames.pair { grid-template-columns: 1fr; } }
+.fcol { min-width: 0; }
+.fcol h3 { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.fcol h3 span { font-family: var(--font-body); font-weight: 500; letter-spacing: 0; text-transform: none; font-size: 12px; color: var(--graphite); }
+.fcol.P { max-width: 430px; }
+.fcol.full { grid-column: 1 / -1; }
+.frames.pair .fcol.full { grid-column: auto; }
+.host { position: relative; border: 2px solid var(--ink-0); box-shadow: var(--stamp); overflow: hidden; background: var(--paper-0); }
+.host > .gd { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cap { font-size: 12.5px; margin-top: 10px; color: var(--ink-2); max-width: 70ch; }
+.cap b { font-family: var(--font-display); letter-spacing: .06em; text-transform: uppercase; font-size: 12px; color: var(--ink-0); }
+/* Swing */
+.poses { display: grid; gap: 26px 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); margin-top: 22px; }
+.pose { display: flex; flex-direction: column; gap: 8px; }
+.pose canvas { width: 100%; aspect-ratio: 260 / 320; border: 2px solid var(--ink-0); background: var(--paper-3); display: block; }
+.pose .views { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pose figure { margin: 0; } .pose figcaption { font-size: 11px; color: var(--graphite); text-align: center; }
+.motion { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 900px; }
+.motion figure { margin: 0; } .motion canvas { width: 100%; aspect-ratio: 13 / 16; display: block; border: 2px solid var(--ink-0); background: var(--paper-3); }
+.motion canvas.px { aspect-ratio: 3 / 4; image-rendering: pixelated; }
+.motion figcaption { font-size: 11px; color: var(--graphite); text-align: center; }
+.mbtn { font-family: var(--font-display); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 14px; min-height: 40px; padding: 6px 14px; border: 2px solid var(--ink-0); background: var(--paper-2); color: var(--ink-0); cursor: pointer; }
+.mbtn[aria-pressed="true"] { background: var(--ink-0); color: var(--paper-2); }
+.strip5 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+.strip5 figure { margin: 0; } .strip5 canvas { width: 100%; aspect-ratio: 3 / 4; display: block; border: 2px solid var(--ink-0); image-rendering: pixelated; }
+.strip5 figcaption { font-size: 11px; color: var(--graphite); text-align: center; }
+/* Token table */
+.ttbl { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 10px; }
+.ttbl th { text-align: left; font-family: var(--font-display); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 12px; color: var(--graphite); border-bottom: 2px solid var(--ink-0); padding: 4px 6px; }
+.ttbl td { padding: 4px 6px; border-bottom: 1px solid var(--rule-soft); vertical-align: middle; }
+.sw { display: inline-block; width: 18px; height: 18px; border: 1.5px solid var(--ink-0); vertical-align: middle; margin-right: 6px; }
+.tblwrap { overflow-x: auto; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Gameday design round 2</h1>
+    <span class="sub">#2568 · 2026-10-26 · real data: SEA @ BOS, 2026-09-01 (gamePk 824716)</span>
+  </header>
+  <nav class="jump" aria-label="Sections">
+    <a href="#overview" data-tab="overview">Overview</a>
+    <a href="#swing" data-tab="swing">Swing <span class="ct">4</span></a>
+    <a href="#tokens" data-tab="tokens">Tokens</a>
+    <a href="#checkpoint" data-tab="checkpoint">Checkpoint</a>
+    <a href="#whole" data-tab="whole">Whole half</a>
+    <a href="#steps" data-tab="steps">Steps</a>
+    <a href="#zones" data-tab="zones">Zone map</a>
+    <a href="#sizes" data-tab="sizes">Sizes</a>
+  </nav>
+
+  <section class="tab" id="tab-overview" data-tab="overview">
+    <div class="grid2">
+      <div class="card2" style="grid-column:1/-1;background:var(--paper-3)"><span class="name">Round 2 · locked 2026-10-26</span>
+        <ul class="plain">
+          <li><b>Swing:</b> Stance, Load, Launch, Contact, Extension and Over the shoulder are approved. The finish is not: "bad, will fix in later session". <b>The bat rule is met</b>; the bat may be drawn in the app.</li>
+          <li><b>Colours:</b> the panels stay in paper tokens; the stage keeps the bright 16-bit palette as new <code>--stage-*</code> tokens that only the stage reads.</li>
+          <li><b>Checkpoint:</b> all the pages that fit (the phone cycles), with labelled tabs. After the third out the advance control names the next half ("Bottom 2nd ›"). The end of the game is the checkpoint, then "Close the book ›", then the box score. The score-free notes are a fifth page. The tally page carries the half's pitches, whiffs and fouls ("needs pitches thrown in that inning, whiffs and foul balls"), and page 2 has a fouls column.</li>
+          <li><b>Whole half:</b> nothing replaces "See the whole half".</li>
+          <li><b>Steps (ADR-0123):</b> the advance control reads "Next play ›" in at-bat mode and "Next pitch ›" in pitch mode, the same on every tap within a mode. The pitch-by-pitch control is a two-way switch in the bar (At-bat | Pitch). A pitch on the stage and the mid-at-bat event card are right as drawn.</li>
+          <li><b>Zone map:</b> both the tint in the zone and the numbers in the corner, batting average, pre-game numbers. "Have the ability to dismiss the zone in the top right."</li>
+          <li><b>Sizes:</b> the breakpoints and the fold order as proposed.</li>
+          <li><b>Field tab:</b> the park and the defensive alignment, as today's lineup page draws them (your comment).</li>
+          <li><b>ESPN's silhouette:</b> not used (it faces the screen; our batter faces away). Filed as a reference.</li>
+        </ul>
+      </div>
+      <div class="card2"><span class="name">Kept from round 1</span>
+        <ul class="plain">
+          <li>Layout B, panels around the stage, with round 1's boxes at all four sizes.</li>
+          <li>The 16-bit stage. 2D.</li>
+          <li>The scorebook box at every size: B and S columns with numbers and an X, the diamond, the code, the RBI, the out number.</li>
+          <li>Square corners. No sound, no haptics. No scroll at the four sizes.</li>
+          <li>A ground out shows the throw (Canzone's 4-3).</li>
+        </ul>
+      </div>
+      <div class="card2" style="grid-column:1/-1"><span class="name">Found in round 2</span>
+        <ul class="plain" id="found"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-swing" data-tab="swing" hidden>
+    <h2>The swing</h2>
+    <p class="lede">Three poses are approved. Load is redrawn: the front knee lifts and tucks. The follow-through is redrawn twice: it now keeps turning the same way as the swing, in three frames (the barrel points at the pitcher, rises over the front shoulder, then ends behind the back). Round 1's version is beside Load and the finish. The strip at the bottom is the swing as the 16-bit stage draws it (J. Rodríguez's swinging strike three, top 2nd).</p>
+    <div class="controls"><div><span class="l" id="l-hand">Batter</span><div class="seg" role="group" aria-labelledby="l-hand" id="seg-hand"><button type="button" data-v="R" aria-pressed="true">Right-handed</button><button type="button" data-v="L" aria-pressed="false">Left-handed</button></div></div></div>
+    <div class="card2" style="margin-top:22px"><span class="name">In motion</span>
+      <div class="motion" id="motion"><figure><canvas width="520" height="640"></canvas><figcaption>Stage camera</figcaption></figure><figure><canvas width="520" height="640"></canvas><figcaption>From the side</figcaption></figure><figure><canvas width="390" height="520" class="px"></canvas><figcaption>On the 16-bit stage</figcaption></figure></div>
+      <div class="controls" style="margin:10px 0 0"><button type="button" class="mbtn" id="motion-play">Pause</button><button type="button" class="mbtn" id="motion-slow" aria-pressed="false">Slow (×4)</button><span class="note" id="motion-t"></span></div>
+      <p class="note" style="margin-top:6px">The whole swing on a loop, at the stage's own timing: J. Rodríguez's swinging strike three on a 92 mph four-seamer (0.41 s to the plate). Judge Load and Follow-through here.</p>
+    </div>
+    <div class="poses" id="poses"></div>
+    <div class="card2" style="margin-top:30px"><span class="name">On the stage</span>
+      <div class="strip5" id="swingstrip"></div>
+      <p class="note" style="margin-top:8px">Phone stage, new palette. Frames at the swing's five keyframes.</p>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-tokens" data-tab="tokens" hidden>
+    <h2>Tokens: two ways</h2>
+    <p class="lede">The same layout B frames, drawn twice. On the left, everything is in the app's paper tokens, and the stage is repainted with paper colours. On the right, the panels stay in paper tokens and the stage keeps its own 16-bit palette. Either way the stage reads only <code>--stage-*</code> tokens, so <code>npm run lint</code> passes. The table under the frames lists every slot.</p>
+    <div class="controls">
+      <div><span class="l" id="l-tsz">Size</span><div class="seg" role="group" aria-labelledby="l-tsz" id="seg-tsize"></div></div>
+      <div><span class="l" id="l-tst">At-bat</span><div class="seg" role="group" aria-labelledby="l-tst" id="seg-tstate"><button type="button" data-v="waiting" aria-pressed="true">Waiting</button><button type="button" data-v="revealed" aria-pressed="false">Revealed</button></div></div>
+      <div><span class="l" id="l-tmo">Stage moment</span><div class="seg" role="group" aria-labelledby="l-tmo" id="seg-tmoment"><button type="button" data-v="rest" aria-pressed="true">Rest</button><button type="button" data-v="pitch" aria-pressed="false">Pitch</button><button type="button" data-v="contact" aria-pressed="false">Contact</button><button type="button" data-v="chase" aria-pressed="false">Chase</button><button type="button" data-v="end" aria-pressed="false">End</button></div></div>
+    </div>
+    <div class="frames pair" id="tok-frames"></div>
+    <div class="card2 ask"><span class="name">Your pick</span>
+      <div class="fb"><select id="fb-tokens" aria-label="Your pick for the tokens"><option value="">No pick yet</option><option value="paper">Paper tokens everywhere</option><option value="stage">Paper panels, new stage palette</option><option value="mix">A mix (say which in the note)</option></select><textarea id="fb-tokens-note" rows="2" aria-label="Note on the tokens" placeholder="Note"></textarea></div><span class="saved" id="fb-tokens-saved"></span>
+    </div>
+    <div class="card2" style="margin-top:30px"><span class="name">The stage slots</span>
+      <p class="note">34 slots, one token each (29 for the stage, 5 for the zone map). The new palette adds 34 tokens. The paper fill adds none: each slot points at a token the app already has.</p>
+      <div class="tblwrap"><table class="ttbl" id="tok-table"></table></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-checkpoint" data-tab="checkpoint" hidden>
+    <h2>The checkpoint</h2>
+    <p class="lede">When the third out lands, the checkpoint takes the stage's slot. The hero keeps the third out's box, so you can copy it. Nothing moves on until you tap the advance control. The numbers are real: <code>checkpoint.js</code>'s own pages for the top 2nd (Seattle scores 5), and the bottom 9th, where the game ends.</p>
+    <div class="controls">
+      <div><span class="l" id="l-ch">Half</span><div class="seg" role="group" aria-labelledby="l-ch" id="seg-cphalf"><button type="button" data-v="top2" aria-pressed="true">Top 2nd</button><button type="button" data-v="bot9" aria-pressed="false">End of game</button></div></div>
+      <div><span class="l" id="l-cm">Pages</span><div class="seg" role="group" aria-labelledby="l-cm" id="seg-cpmode"><button type="button" data-v="grid" aria-pressed="true">All that fit</button><button type="button" data-v="one" aria-pressed="false">One at a time</button></div></div>
+      <div><span class="l" id="l-cn">Cycle with</span><div class="seg" role="group" aria-labelledby="l-cn" id="seg-cpnav"><button type="button" data-v="tabs" aria-pressed="true">Labelled tabs</button><button type="button" data-v="dots" aria-pressed="false">Arrows and dots</button></div></div>
+      <div><span class="l" id="l-cf">Notes</span><div class="seg" role="group" aria-labelledby="l-cf" id="seg-cpfacts"><button type="button" data-v="page" aria-pressed="false">Fifth page</button><button type="button" data-v="menu" aria-pressed="true">In the menu</button><button type="button" data-v="none" aria-pressed="false">Nowhere</button></div></div>
+      <div><span class="l" id="l-ca">Advance control</span><div class="seg" role="group" aria-labelledby="l-ca" id="seg-cpadv"><button type="button" data-v="next" aria-pressed="true">Names the next half</button><button type="button" data-v="same" aria-pressed="false">Same words as always</button></div></div>
+      <div><span class="l" id="l-cpg">Page (phone)</span><div class="seg" role="group" aria-labelledby="l-cpg" id="seg-cppage"></div></div>
+    </div>
+    <p class="note" id="cp-note"></p>
+    <div class="frames" id="cp-frames"></div>
+    <div id="cp-asks"></div>
+  </section>
+
+  <section class="tab" id="tab-whole" data-tab="whole" hidden>
+    <h2>What replaces "See the whole half"</h2>
+    <p class="lede">Today's link opens the whole half as a stacked list that scrolls, which the no-scroll rule ends. Three candidates, at the phone and the desktop. The reader is mid-half: Arozarena's home run is revealed and Canzone is sealed.</p>
+    <div class="controls"><div><span class="l" id="l-wc">Candidate</span><div class="seg" role="group" aria-labelledby="l-wc" id="seg-whole"><button type="button" data-v="atbats" aria-pressed="true">1 · Checkpoint's at-bats page</button><button type="button" data-v="plays" aria-pressed="false">2 · One line per play</button><button type="button" data-v="none" aria-pressed="false">3 · Nothing</button></div></div></div>
+    <p class="note" id="whole-note"></p>
+    <div class="frames" id="whole-frames"></div>
+    <div class="card2 ask"><span class="name">Your pick</span>
+      <div class="fb"><select id="fb-whole" aria-label="Your pick for the whole half"><option value="">No pick yet</option><option value="atbats">1 · The checkpoint's at-bats page</option><option value="plays">2 · One line per play, star on scoring plays</option><option value="none">3 · Nothing</option></select><textarea id="fb-whole-note" rows="2" aria-label="Note on the whole half" placeholder="Note"></textarea></div><span class="saved" id="fb-whole-saved"></span>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-steps" data-tab="steps" hidden>
+    <h2>Steps inside an at-bat (ADR-0123)</h2>
+    <p class="lede">Duran's at-bat, bottom 6th: a ball in the dirt, a mound visit, five pitches, a wild pitch that sends Durbin to 3rd, then a 4-3 for the third out. The advance control reads the same on every tap (decision 3), and the frames keep one height whatever the at-bat holds (decision 4). Pick the words, the button and the mode to see each.</p>
+    <div class="controls">
+      <div><span class="l" id="l-sw">Advance words</span><div class="seg" role="group" aria-labelledby="l-sw" id="seg-swords"><button type="button" data-v="next" aria-pressed="true">Next ›</button><button type="button" data-v="mode" aria-pressed="false">Next play / Next pitch ›</button><button type="button" data-v="play" aria-pressed="false">Play ›</button></div></div>
+      <div><span class="l" id="l-ss">Pitch button</span><div class="seg" role="group" aria-labelledby="l-ss" id="seg-sstyle"><button type="button" data-v="toggle" aria-pressed="true">Toggle</button><button type="button" data-v="switch" aria-pressed="false">Two-way switch</button></div></div>
+      <div><span class="l" id="l-sm">Mode</span><div class="seg" role="group" aria-labelledby="l-sm" id="seg-smode"><button type="button" data-v="pitch" aria-pressed="true">Pitch by pitch</button><button type="button" data-v="atbat" aria-pressed="false">At-bat</button></div></div>
+    </div>
+    <div class="frames" id="steps-frames"></div>
+    <div id="steps-asks"></div>
+  </section>
+
+  <section class="tab" id="tab-zones" data-tab="zones" hidden>
+    <h2>The zone map at rest</h2>
+    <p class="lede">Before the tap, the stage shows the batter's season by zone: the nine zones tinted in the pixel strike zone, and the numbers in the corner. The numbers are MLB's hotColdZones for Arozarena, season through Aug 31, the day before this game, so the game being scored is not in them. Zone 1 is top left as the catcher sees it, which is how the stage looks. It goes away on the tap.</p>
+    <div class="controls">
+      <div><span class="l" id="l-zs">Number</span><div class="seg" role="group" aria-labelledby="l-zs" id="seg-zstat"><button type="button" data-v="avg" aria-pressed="true">AVG</button><button type="button" data-v="slg" aria-pressed="false">SLG</button></div></div>
+      <div><span class="l" id="l-zp">Stage palette</span><div class="seg" role="group" aria-labelledby="l-zp" id="seg-zpal"><button type="button" data-v="stage" aria-pressed="true">New palette</button><button type="button" data-v="paper" aria-pressed="false">Paper tokens</button></div></div>
+    </div>
+    <div class="frames" id="zone-frames"></div>
+    <div id="zone-asks"></div>
+  </section>
+
+  <section class="tab" id="tab-sizes" data-tab="sizes" hidden>
+    <h2>Breakpoints and the fold order</h2>
+    <p class="lede">Width alone breaks on a short landscape window, so each size needs a width and a height. A window gets the largest size whose minimum it meets. The widths reuse ones the app already allows (740, 1000, 1200), so the width guard needs no new entry.</p>
+    <div class="grid2">
+      <div class="card2"><span class="name">The rule</span><div class="tblwrap"><table class="ttbl" id="size-rule"></table></div></div>
+      <div class="card2"><span class="name">Real windows</span><div class="tblwrap"><table class="ttbl" id="size-dev"></table></div><p class="note" style="margin-top:6px">Browser viewport sizes are Claude's general knowledge, not measured.</p></div>
+      <div class="card2"><span class="name">What shows where</span><div class="tblwrap"><table class="ttbl" id="size-matrix"></table></div></div>
+      <div class="card2"><span class="name">Fold order</span><ol class="plain" id="size-fold"></ol></div>
+    </div>
+    <div class="card2" style="margin-top:30px"><span class="name">Try a window</span>
+      <div class="controls"><label><span class="l">Width</span><input type="range" id="sim-w" min="320" max="1920" step="10" value="1180"></label><label><span class="l">Height</span><input type="range" id="sim-h" min="500" max="1200" step="10" value="760"></label><span id="sim-out"></span></div>
+      <div class="frames" id="sim-frame"></div>
+    </div>
+    <div id="size-asks"></div>
+  </section>
+</div>
+
+<script src="data.js"></script>
+<script src="data2.js"></script>
+<script src="facts.js"></script>
+<script src="engine.js"></script>
+<script src="concept-sprites.js"></script>
+<script src="gd.js"></script>
+<script src="checkpoint.js"></script>
+<script src="zones.js"></script>
+<script src="field.js"></script>
+<script src="app.js"></script>
+<script src="drop2.js"></script>

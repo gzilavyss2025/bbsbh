@@ -1,5 +1,5 @@
 // Pull the top 2nd (and AB 45) of gamePk 824716 through the repo's engine, for prototype/data.js.
-// node extract.mjs <feed.json> <out.json>  (feed: the game's /api/v1.1/game/{gamePk}/feed/live, saved to a file)
+// node extract.mjs <feed.json> <out.json> [atBatIndexes, comma-separated]  (feed: the game's /api/v1.1/game/{gamePk}/feed/live, saved to a file)
 import fs from 'node:fs'
 const R = new URL('../../../src/lib', import.meta.url).href
 const { realFlight } = await import(R + '/pitch/pitchFlight.js')
@@ -18,7 +18,7 @@ const out = { gamePk: gd.game.pk, date: gd.datetime.officialDate, venue: gd.venu
   home: { id: gd.teams.home.id, abbr: gd.teams.home.abbreviation, name: gd.teams.home.teamName },
   wall: [], plays: [] }
 for (let d = -45; d <= 45; d += 5) { const w = wallOnLine(layout, d); out.wall.push([d, w?.ft ?? wallDistanceAt(layout, d), w?.height ?? null]) }
-const want = new Set([7, 8, 9, 10, 11, 12, 13, 14, 15, 45])
+const want = new Set(process.argv[4] ? process.argv[4].split(',').map(Number) : [7, 8, 9, 10, 11, 12, 13, 14, 15, 45])
 for (const p of g.liveData.plays.allPlays) {
   if (!want.has(p.atBatIndex)) continue
   const pitches = []

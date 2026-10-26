@@ -1,13 +1,17 @@
-# Gameday design round (#2568): round 1 handoff
+# Gameday design round (#2568): handoff after round 2
 
-Working notes for the design round in #2568 (umbrella #2566). Round 1 ran on 2026-10-26 in a
-session Gary watched. Round 2 starts from this file.
+Working notes for the design round in #2568 (umbrella #2566). Rounds 1 and 2 ran on 2026-10-26 in
+sessions Gary watched. The build starts from this file.
 
-- **Artifact (private to Gary):** https://claude.ai/artifact/BCZgTVQDbXUheJiypLsXtu (version 4 is
-  round 1 as locked). Read it with the Artifact tool, `action: "read"`. Do not WebFetch it.
+- **Round 1 artifact (private to Gary):** https://claude.ai/artifact/BCZgTVQDbXUheJiypLsXtu (version 4
+  is round 1 as locked). Read it with the Artifact tool, `action: "read"`. Do not WebFetch it.
+- **Round 2 artifact (private to Gary):** https://claude.ai/artifact/KQnaidLRwyBnVJYXrg9AYa (version 5
+  is round 2 as locked). Gary's picks: its `db`, collection `feedback` (`ArtifactData`, `list`).
 - **Decisions on record:** the #2568 comment "Design round 1: Gary's locked choices (2026-10-26)",
   and the #2580 comment that drops the 3D spike.
-- **Round 2 prompt:** `round2-prompt.md`.
+- **Build plan:** `docs/gameday-build.md` (13 prompts, in waves).
+- **Round 2 prompt:** `round2-prompt.md`. **Round 2 record:** "Round 2: what Gary locked" below, and
+  the #2568 comment text in `round2/issue-comment-2568.md` (posted by hand if this session could not).
 - Delete this folder in the PR that ships the last Gameday slice, with `.scratch/at-bat-console/`
   and `.scratch/innings-console-redesign/` (#2566, "Done means").
 
@@ -36,23 +40,119 @@ session Gary watched. Round 2 starts from this file.
 Gary's saved feedback is in the artifact's `db`, collection `feedback`: `direction`,
 `concept-<id>`, `rank-<n>`, `pose-<name>`. Read it with the `ArtifactData` tool, `action: "list"`.
 
-## Round 2: what is open
+## Round 2: what Gary locked (2026-10-26)
 
-- **Tokens** for the 16-bit look inside layout B: the app's paper tokens, a new set for the stage
-  only, or both. `npm run lint` fails on raw values (`check-raw-values`), so a new palette needs
-  tokens. Gary decides after seeing them.
-- **What replaces "See the whole half"** (it scrolls). Candidates: the checkpoint's at-bats page; a
-  paged view; one line per play with a star on scoring plays (The Show 13 post-game list); nothing.
-- **The checkpoint wireframes** (#2572): four pages, how they cycle, and whether the score-free
-  facts (`src/api/between-innings.js`) become a fifth page, go in the menu, or go away. Pages 1
-  and 2 are built as data in `src/api/gameday/checkpoint.js` (`PAGE_ORDER`).
-- **ADR-0123's wireframe questions:** the advance control's words, the pitch button's place and
-  look, how a sub-step looks on the stage, and how a mid-at-bat event card looks. Each keeps
-  ADR-0123 decisions 3 and 4.
-- **The ESPN candidates** (#2568 step 0, item 8): the batter zone map as the stage's resting state,
-  and the batter silhouette.
-- **The breakpoints** between the four sizes, and the final order of folding.
-- **The swing stills**, for Gary's approval.
+Round 2 ran in two drops on the round 2 artifact (`round2/`). Every frame is layout B at round 1's
+boxes, drawn in the app's tokens, on real data from gamePk 824716: the top 2nd, the bottom 6th
+(Duran's at-bat with the wild pitch) and the bottom 9th (the end of the game).
+
+1. **Swing.** Approved: Stance, Launch, Contact (first verdict), then Load, Extension and Over the
+   shoulder. Not approved: the finish. Gary: "bad, will fix in later session." **The bat rule
+   (2026-10-07) is met**: Gary chose "Met; redo the two", so the bat may be drawn in the app. The
+   follow-through is now three keyframes (`extend`, `wrap`, `finish` in `round2/engine.js`). The
+   first redraw swept the bat backward after contact; the second turns it the same way as the swing.
+   (Gary's note on the Load card, "the follow-thru looks awful", is read as about the follow-through:
+   he marked Load approve.)
+2. **Colours.** The panels use the app's paper tokens. The stage keeps the 16-bit palette ("B: bright
+   game colours") as 34 new `--stage-*` tokens that only the stage reads (29 stage slots, 5 zone-map
+   temperatures; `round2/tokens.css`). The build adds them to `src/tokens/colors.css`.
+3. **Checkpoint (#2572).** All the pages that fit (the phone cycles, one page at a time), with
+   labelled tabs. After the third out the advance control names the next half ("Bottom 2nd ›"). At
+   the end of the game: the checkpoint, then "Close the book ›", then the box score. The score-free
+   notes (`between-innings.js`) are a **fifth page**. Gary's change to the pages: "needs pitches thrown
+   in that inning, whiffs and foul balls". The tally page now carries the half's pitches, whiffs and
+   fouls, and page 2 has a fouls column per pitcher. Layout at T, L and D: the tally, pitching and
+   game pages in the left column; the at-bats (then the notes) in the right.
+4. **"See the whole half": nothing replaces it.** The trail and the navigator reach every at-bat; the
+   desktop keeps the event log.
+5. **ADR-0123's wireframe questions.** The advance control reads "Next play ›" in at-bat mode and
+   "Next pitch ›" in pitch mode, the same on every tap within a mode. The pitch-by-pitch control is a
+   two-way switch in the bar, "At-bat | Pitch". A pitch sub-step plays that pitch, leaves its numbered
+   mark, and adds its number to the B or S column of the batter's open box, whose diamond and code
+   stay under tape. A mid-at-bat event is a lower third on the stage with the runner's own box and
+   the new leg (Durbin, WP). Both were "right as drawn".
+6. **ESPN ideas.** The zone map at rest: both the tint in the pixel zone and the numbers in a corner
+   card, batting average, pre-game numbers (season through the day before the game). Gary: "have the
+   ability to dismiss the zone in the top right." The silhouette is not used: "the espn theme shows
+   the batter facing the screen, where our concepts show the batter facing away", but Gary wants it
+   "as an example for future reference". Source, not copied into the repo (ESPN's art): the
+   `HitMap__Batter__Silhouette` components in ESPN's Gamecast client file `9076-3a189e38.js` (path in
+   the #2566 ESPN research comment), modules 993972 (light) and 791610 (dark), 72 × 158 px, a grey
+   body holding a bat, team colour on the helmet and belt only, flipped by CSS for a lefty.
+7. **Breakpoints and fold order, as proposed.** A window gets the largest size whose minimum it meets:
+   Desktop ≥ 1200 × 780; iPad landscape ≥ 1000 × 700 and landscape; Tablet portrait ≥ 740 × 900;
+   else Phone. The widths are already on the width guard's list; heights have no guard. Fold order:
+   the event log first, then the pitches panel, then the batting order and reference tabs, then the
+   trail, then the navigator. Never: band, stage, hero with the scorebook box, bar.
+8. **Field tab (Gary's artifact comment).** "replace the "field" list with the svg of the field and
+   the defensive alignment like it is on the lineups page today". The reference panel's Field tab
+   draws FieldCard's park with surnames at the spots and the DH under it.
+
+### Found in round 2
+
+- **The zone map's season total includes the scored game.** hotColdZones for Arozarena with no date
+  bound counts 9/1 and every later game. With `endDate=2026-08-31` the numbers are pre-game: 8/31 to
+  9/1 changes exactly the five zones of his 9/1 at-bats (zone 5, his home run: .250 to .261). The
+  build adds one fetch per batter. MiLB was not checked.
+- **The notes need a callout bundle.** `public/data/callouts/` holds only the nightly window
+  (10/17 to 10/27 now), so 824716 shows no notes in today's app. The Notes page borrows 849817's
+  (TB @ CLE, top 2nd, built with the app's own `buildBetweenInnings`). Inference: an empty notes list
+  can hide its tab without a tell, because the list depends on data, not on the half.
+- **Page 2 has no fouls yet.** `checkpoint.js` counts pitches, strikes and whiffs. Fouls by
+  `FOUL_CODES` (F, L, T, O, R) give 4 for the top 2nd, which matches today's tally. #2605's model
+  needs a `fouls` field.
+- **A wild pitch is its own action event** after pitch 5 in 824716 bottom 6th (atBatIndex 57), and a
+  mound visit trails pitch 1. The Steps tab steps that at-bat from those events.
+- **A called third strike has no `code`, on purpose.** For a looking K (Sogard, 824716 atBatIndex 55)
+  `scorebookCode.js` returns `calledLooking: true` and no code; the UI draws the backwards K. The
+  Gameday scorebook box must do the same. (Round 2 first reported this as a missing code; it is not.)
+- **Today's FieldCard shows one alignment for the game.** Gameday's Field tab needs the defense as
+  of the cursor: 824716 changes it in the 7th (White, Kiner-Falefa, Robles). The round 2 frames place
+  it by hand from the feed's substitutions.
+- **Pitch counts check out.** Paez 29 before Arozarena, 33 after, 39 at the end of the half (11 + 28);
+  Woo 93 before Duran; the bottom 9th splits Milner 7, Muñoz 4.
+
+### Decided after round 2 (Gary, 2026-10-26, interview)
+
+- **The finish pose:** ship today's finish for now and replace it when Gary fixes it ("Use today's
+  finish for now"). The bat rule stays met.
+- **The zone map's dismiss:** closed for this game, through a reload; the next game shows it again.
+  Stored per gamePk like the pitch-mode flag (a flag, never a score).
+- **Notes with no bundle:** hide the Notes tab (four tabs). Safe: the list depends on data, not the half.
+- **The Field tab:** the defense as of the reader's cursor, with revealed substitutions only.
+- **Other event cards** (steal, caught stealing, pickoff, balk, substitution): follow the wild-pitch
+  card; the build PR sends Gary a screenshot of each.
+- **ADR-0123:** a short amendment in the first build PR: the advance words follow the mode ("Next play
+  ›", "Next pitch ›") and never change within a mode; the switch reveals nothing.
+- **Fouls:** the first slice of the checkpoint build (#2572) adds a `fouls` field to `checkpoint.js`
+  page 2, with a test that 824716 top 2nd gives 4.
+
+### Still open after round 2
+
+- The swing's finish pose (Gary will fix it in a later session; today's ships until then).
+- Height breakpoints have no guard; a build may want one beside the width guard.
+
+### The round 2 source (`round2/`)
+
+Design code, not app code. Built from round 1's prototype; `prototype/` stays as round 1 published it.
+
+| File | What |
+| --- | --- |
+| `index.html` | The page. Tabs: overview, swing, tokens, checkpoint, whole half, steps, zone map, sizes. |
+| `tokens.css`, `gameday.css` | The app's tokens (copied, same names) plus the new `--stage-*` set; layout B's parts in tokens. |
+| `gd.js` | Layout B at the four sizes in hi-fi: band, navigator, stage, hero with the scorebook box, bar, panels; the reading positions. |
+| `checkpoint.js` | The checkpoint in the stage's slot: pages, tabs, grid. |
+| `app.js`, `drop2.js` | Tabs, the feedback store, the stage painting, the swing player; drop 2's tabs. |
+| `engine.js`, `concept-sprites.js` | Round 1's, plus the new swing keyframes, the palette swap and the zone tint. |
+| `data.js` | Round 1's data plus atBatIndex 56 and 57 (`tools/extract.mjs` with a third argument). |
+| `data2.js`, `facts.js`, `zones.js`, `field.js` | Checkpoint pages and rows (`tools/extract2.mjs`); notes (`tools/facts2.mjs`); zone map (`tools/zones.mjs`); the lineup page's park and spots. |
+| `issue-comment-2568.md`, `pr-body.md` | The #2568 comment and the PR text, for posting by hand. |
+
+**Run it:** `sh tools/preview2.sh`, then
+`node tools/pageshot.mjs "file://$PWD/round2/preview.html#checkpoint" out.png 390 763`. The shot tools
+now launch `/opt/pw-browsers/chromium`: the repo's Playwright looks for a browser build this container
+does not have. **Publish:** the same artifact, `file_path` = `round2/index.html`, `root` = `round2/`,
+`files` = every `.js` and `.css` file. Keep the `db` and `user` capabilities.
 
 ## Layout B, size by size (round 1 wireframes)
 
@@ -140,9 +240,13 @@ fielding credits (0.25 s transfer, 85 ft/s), and the swing keyframes.
 
 | Tool | Use |
 | --- | --- |
-| `extract.mjs` | `node extract.mjs <feed.json> <out.json>`: pitches and batted balls through the repo's own `realFlight`, `fitLift`, `simFlight` and park layout. |
+| `extract.mjs` | `node extract.mjs <feed.json> <out.json> [atBatIndexes]`: pitches and batted balls through the repo's own `realFlight`, `fitLift`, `simFlight` and park layout. |
 | `release-check.mjs` | `node release-check.mjs <feed.json>`: the release-rule check above. |
 | `preview.sh` | Wraps `prototype/index.html` the way the publish skeleton does. |
+| `preview2.sh` | The same for `round2/index.html`. |
+| `extract2.mjs` | `node extract2.mjs <feed.json> <out.js>`: round 2's checkpoint pages (with fouls), half rows, lineups and pitch counts, through the repo's own `checkpointPages` and `computeHalfInningFeed`. |
+| `facts2.mjs` | The between-innings notes for one closed half, through `buildBetweenInnings` and a game's callout bundle. |
+| `zones.mjs` | The zone map's numbers from a saved hotColdZones response (fetch it with `endDate` = the day before the game). |
 | `shoot.mjs`, `pageshot.mjs`, `frames.mjs` | Screenshots: one concept at chosen times, one page tab, every wireframe at true size. |
 | `capture.mjs` + `plans/*.json` | Photographs blocks of TODAY's app at a set reading position, with an optional yellow outline around a part inside its card. Needs `npm run dev` on port 5173. |
 | `today.mjs`, `events.mjs` | Dump the classes on today's page; list the event cards in a stacked half. |
