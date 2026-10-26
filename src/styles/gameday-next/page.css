@@ -52,23 +52,31 @@
 .gdnext__slotname { position: absolute; top: 0; right: 0; padding: var(--space-1) var(--space-1h);
   font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
-/* The band: ink, square, the score at the left. */
-.gdnext-band { flex: 1; min-width: 0; display: flex; align-items: stretch;
-  background: var(--surface-stamped-ink); color: var(--text-on-ink); }
-/* layout-exempt: two score rows stacked, the cells set their own widths */
-.gdnext-band__score { display: flex; flex-direction: column; justify-content: center; gap: var(--space-1);
-  padding: 0 var(--space-3); border-right: var(--bw-rule) solid var(--text-on-ink-dim); }
-.gdnext-band__score span { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); min-width: 76px; }
-.gdnext-band__score b { font-family: var(--font-display); font-weight: var(--w-bold); font-size: var(--fs-title-sm); letter-spacing: var(--ls-wide); }
-.gdnext-band__score em { font-style: normal; font-size: var(--fs-num-lg); font-variant-numeric: tabular-nums; }
-.gdnext-band__half { display: flex; align-items: center; padding: 0 var(--space-3); white-space: nowrap;
-  font-family: var(--font-display); font-weight: var(--w-bold); font-size: var(--fs-title-md);
-  border-right: var(--bw-rule) solid var(--text-on-ink-dim); }
-.gdnext-band__state { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-around; gap: var(--space-2); }
-.gdnext-band__outs { display: inline-flex; gap: var(--space-1); }
-.gdnext-band__outs i { width: 10px; height: 10px; border: var(--bw-rule) solid var(--text-on-ink); }
-.gdnext-band__outs i.is-out { background: var(--text-on-ink); }
-.gdnext-band__pc { font-size: var(--fs-cell); color: var(--text-on-ink-dim); white-space: nowrap; }
+/* The band: today's score bug's parts and type (styles/gameview/inning-head.css, the inhead__*
+   rules) in one ink row: away tile and runs, the plate, home runs and tile, then the pitcher. */
+/* layout-exempt: one row of five cells, the pitcher at the end */
+.gdnext-band { flex: 1; min-width: 0; display: flex; align-items: center;
+  gap: var(--space-3); padding: 0 var(--space-3); background: var(--ink-0); border: var(--bw-heavy) solid var(--border-stamped); }
+/* layout-exempt: a tile beside its runs */
+.gdnext-band__club { display: flex; align-items: center; gap: var(--space-2); }
+.gdnext-band__club--home { flex-direction: row-reverse; }
+.gdnext-band__runs { font-size: var(--fs-hero-md); }
+.gdnext-band__num { font-size: var(--fs-title-md); }
+/* Tonight's uniform tile, as on the slate card and today's score bug (TeamTreatmentMark). */
+.gdnext-band__mark { width: 40px; height: 40px; flex: none; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; background: var(--tint, var(--bg-page)); }
+.gdnext-band__mark--pinstripe { background: repeating-linear-gradient(to right,
+  var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0 1px, var(--pinstripe-bg, #fff) 1px 7px); }
+.gdnext-band__mark .teamlogo { transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32)); }
+/* layout-exempt: the inning, the bases and the outs in a row */
+.gdnext-band__plate { display: flex; align-items: center; gap: var(--space-2); }
+.gdnext-band .basestate rect { stroke: var(--text-on-ink-dim); }
+.gdnext-band .basestate rect[fill='transparent'] { fill: var(--text-on-ink-soft); }
+.gdnext-band .basestate rect:not([fill='transparent']) { fill: var(--marker); stroke: var(--marker-deep); }
+/* layout-exempt: the pitcher's name over his count */
+.gdnext-band__pitcher { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; min-width: 0; }
+.gdnext-band__pitcher .inhead__who { font-size: var(--fs-title-sm); white-space: nowrap; }
+.gdnext-band__pitcher .inhead__val { font-size: var(--fs-ui); }
 
 /* The bar: menu door, the step switch, the advance. */
 /* layout-exempt: one row of three controls */

@@ -10,7 +10,11 @@ export function GamedayNextMount({ bug: { mark, ...bug }, meta, engine, advance,
   const band = bug.live ? (
     <ScorebugMount {...bug} revealedThrough={mark} meta={meta} Bug={GamedayBand} />
   ) : (
-    <GamedayBand awayAbbr={meta.away.abbreviation} homeAbbr={meta.home.abbreviation} awayRuns="—" homeRuns="—" />
+    <GamedayBand
+      awayName={meta.away.clubName} homeName={meta.home.clubName} awayTeamId={meta.away.id} homeTeamId={meta.home.id}
+      awayTreatment={bug.treatment?.away} homeTreatment={bug.treatment?.home} season={bug.season}
+      awayRuns="—" homeRuns="—"
+    />
   )
   return (
     <GamedayNextPage

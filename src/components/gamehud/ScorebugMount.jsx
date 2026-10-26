@@ -85,8 +85,6 @@ export function ScorebugMount({
   return (
     <Bug
       season={season}
-      awayAbbr={meta.away.abbreviation}
-      homeAbbr={meta.home.abbreviation}
       awayName={meta.away.clubName}
       homeName={meta.home.clubName}
       awayTeamId={meta.away.id}
