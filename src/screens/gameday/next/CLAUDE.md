@@ -13,3 +13,5 @@ design: `.scratch/gameday-design/`. Without the flag `InningViewer` renders as i
 - The band draws through `ScorebugMount` (`Bug` prop), so its reveal clamp stays the only gate on the
   score. A folded block is a name in the menu until its prompt builds it; opening the menu loads
   nothing.
+- `stage/` is the stage renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage` (slot-index buffer),
+  `StageCanvas` (palette from the `--stage-*` tokens). `GamedayNextPage`'s `stage` prop fills the slot; the mount and tap rule are prompt 10. `stage/swing.js` holds the swing keyframes alone.
