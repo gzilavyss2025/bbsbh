@@ -18,6 +18,8 @@
 // clamped scope (StatBox's inning/half, or playbyplay.js's single half), same
 // footing as every other per-play read in this app.
 
+import { regulationInnings } from './gamestate/gameState.js'
+
 // A club starts each game with this many challenges. THE RULES DO NOT CHANGE BY
 // LEVEL: every game that runs the system opens with `remaining: 2` a side in
 // gameData.absChallenges, keeps one on a success and spends one on a failure
@@ -228,17 +230,60 @@ function scanChallenges(feed, throughInning, throughHalf) {
   return out
 }
 
+// How many challenges one club has left, THE one rule every surface reads
+// (StatBox's row, the box score's, Gameday's api/gameday/reviews.js; Gary,
+// 2026-10-26). `outcomes` are that club's challenges in order, each with its
+// `inning` and `outcome`; `throughInning` is the inning the reader has
+// reached. START_CHALLENGES to begin; a failure spends one, a success keeps it;
+// a club that ENTERS an extra inning (past `regulation`, the game's own length:
+// 7 in a Triple-A doubleheader game) with none left is given one. That last
+// clause is why this is not `START_CHALLENGES − fails`, which said "none left"
+// in extras when the club had one (docs/abs-challenges.md, "The rule that is
+// only true for nine innings": 55 club-games on file carry a third failure,
+// all in extras). Checked on gamePk 815625, 13 innings: walked this way no club
+// ever fails with an empty bank, and the end matches the feed's own count. A
+// review still `inProgress` spends nothing yet.
+export function challengesLeft(outcomes, { regulation = 9, throughInning = 1 } = {}) {
+  let left = START_CHALLENGES
+  let inning = 1
+  const enter = (to) => {
+    while (inning < to) {
+      inning += 1
+      if (inning > regulation && left === 0) left = 1
+    }
+  }
+  for (const o of outcomes ?? []) {
+    enter(o.inning ?? inning)
+    if (o.inProgress || o.outcome !== 'fail') continue
+    left = Math.max(0, left - 1)
+  }
+  enter(throughInning)
+  return left
+}
+
 // Each club's challenges, in chronological order, through (throughInning,
 // throughHalf) inclusive — grouped by side for AbsRow's pip row + expandable
 // detail list (StatBox.jsx). Each entry is a full challengesForPlay record
 // (outcome, inning, half, who), not just the outcome string — AbsRow reads
 // the extra fields to answer "who challenged, and when" once expanded.
+// `remaining` is challengesLeft's count as of the inning reached: the box
+// score's Infinity reads as the game's last inning played.
 export function selectChallengeState(feed, throughInning, throughHalf) {
   const awayId = feed?.gameData?.teams?.away?.id ?? null
   const homeId = feed?.gameData?.teams?.home?.id ?? null
   const all = scanChallenges(feed, throughInning, throughHalf)
+  let reached = 1
+  for (const p of feed?.liveData?.plays?.allPlays ?? []) {
+    const inning = p.about?.inning
+    if (inning != null && inning <= throughInning && inning > reached) reached = inning
+  }
+  const regulation = regulationInnings(feed?.liveData?.linescore?.scheduledInnings)
+  const sideOf = (side) => {
+    const outcomes = all.filter((c) => c.side === side)
+    return { outcomes, remaining: challengesLeft(outcomes, { regulation, throughInning: reached }) }
+  }
   return {
-    away: { teamId: awayId, outcomes: all.filter((c) => c.side === 'away') },
-    home: { teamId: homeId, outcomes: all.filter((c) => c.side === 'home') },
+    away: { teamId: awayId, ...sideOf('away') },
+    home: { teamId: homeId, ...sideOf('home') },
   }
 }

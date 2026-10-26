@@ -666,7 +666,7 @@ function BoxAbs({ feed, sideKey, abbr, theme }) {
     <div className={`abs bs__abscard ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <span className="abs__title sectionhead--band">ABS Challenges</span>
       <div className="abs__rows">
-        <AbsRow teamId={side.teamId} abbr={abbr} outcomes={side.outcomes} showOpenPips={false} />
+        <AbsRow teamId={side.teamId} abbr={abbr} outcomes={side.outcomes} remaining={side.remaining} showOpenPips={false} />
       </div>
     </div>
   )

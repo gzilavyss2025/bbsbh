@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { selectOfficials } from '../../api/select.js'
 import { revealInning } from '../../api/linescore.js'
 import { revealDerived, rollingPitches, rollingMissedCalls } from '../../api/derive.js'
-import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../../api/challenges.js'
+import { selectChallengeState, gameHasAbs } from '../../api/challenges.js'
 import { selectUmpireFavor, hasPitchTracking } from '../../api/umpireFavor.js'
 import { resolveCardPlayer } from '../../api/boxscore.js'
 import { teamLogoUrl, teamStripeGradient } from '../../lib/teams.js'
@@ -185,8 +185,8 @@ function AbsChallengesCard({ challenges, awayAbbr, homeAbbr }) {
     <div className="abs">
       <span className="abs__title sectionhead--band">ABS challenges</span>
       <div className="abs__rows">
-        <AbsRow teamId={challenges.away.teamId} abbr={awayAbbr || 'AWAY'} outcomes={challenges.away.outcomes} />
-        <AbsRow teamId={challenges.home.teamId} abbr={homeAbbr || 'HOME'} outcomes={challenges.home.outcomes} />
+        <AbsRow teamId={challenges.away.teamId} abbr={awayAbbr || 'AWAY'} outcomes={challenges.away.outcomes} remaining={challenges.away.remaining} />
+        <AbsRow teamId={challenges.home.teamId} abbr={homeAbbr || 'HOME'} outcomes={challenges.home.outcomes} remaining={challenges.home.remaining} />
       </div>
     </div>
   )
@@ -226,10 +226,11 @@ export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
 // happened) — followed by any still-unused challenges as kraft-brown pips. A
 // success is RETAINED and a failure SPENDS one (the real rule — see
 // api/challenges.js), so a club that keeps winning shows a long green run and
-// still has its full bank. Remaining is `START_CHALLENGES − fails`, floored at
-// 0: extra-inning bonus challenges (see api/challenges.js) aren't tracked
-// precisely, so the unused count is a conservative lower bound rather than an
-// overstated bank. The logo falls back to the abbreviation for a club with no
+// still has its full bank. `remaining` is challengesLeft's count
+// (api/challenges.js), the one rule every surface reads: it gives a club that
+// enters an extra inning with none left one more, so the row no longer says
+// "none left" when the club has one (Gary, 2026-10-26). A challenge given back
+// that way draws as an ordinary open pip. The logo falls back to the abbreviation for a club with no
 // mark — which a MiLB club can be, now that Triple-A and the Florida State
 // League reach this row too.
 // Exported: the box score's pitching-notes area reuses this exact row for the
@@ -246,13 +247,12 @@ export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
 // challenge can't be spent, so the open pip is redundant with the "N left"
 // text right after it — it only earns its place live, previewing what's
 // still in the bank.
-export function AbsRow({ teamId, abbr, outcomes, showOpenPips = true }) {
+export function AbsRow({ teamId, abbr, outcomes, remaining, showOpenPips = true }) {
   const [logoBroken, setLogoBroken] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const hasChallenges = outcomes.length > 0
   const failed = outcomes.filter((o) => o.outcome === 'fail').length
   const won = outcomes.length - failed
-  const remaining = Math.max(START_CHALLENGES - failed, 0)
   const logo = teamId != null ? teamLogoUrl(teamId) : null
   const left = remaining === 0 ? 'none left' : `${remaining} left`
   const label = `${abbr}: ${won} of ${outcomes.length} challenge${
