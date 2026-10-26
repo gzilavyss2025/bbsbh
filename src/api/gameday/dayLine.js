@@ -23,8 +23,10 @@
 //  - An INTERRUPTED card (the half ended on the bases mid-count) and the extra-
 //    inning placed runner are no plate appearance and count for nothing.
 //  - A runner thrown out on the bases later changes nothing here: his at-bat
-//    already counted, and an out on the bases is no batting stat. His `r`
-//    counts only when the cap lets the run onto his card.
+//    already counted, and an out on the bases is no batting stat. A run is the
+//    runner's own (a pinch runner's, a placed runner's), from the plays on
+//    screen.
+//  - The live, still-open plate appearance counts for nothing until it ends.
 //  - The pitcher's line is computePitcherLines' own step clamp (../pitchers.js,
 //    via its `throughAtBatIndex`), cut at the last plate appearance on screen.
 //    A pitcher who enters mid-half starts his line at his first batter, and an
@@ -50,6 +52,27 @@ function visibleCards(feed, inning, half, step) {
   return cards
 }
 
+// Runs he scored himself, read off each on-screen play's runners: earlier
+// halves whole, the reader's half up to the cut. Not off the card's `scored`,
+// which a pinch runner's run lands on (his card is the batter's he ran for;
+// gamePk 823035, top 7th, 669003 for 641343), and which the placed runner's
+// card never reaches.
+function runsScored(feed, personId, here, cut) {
+  let r = 0
+  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
+    const inn = play?.about?.inning
+    const h = play?.about?.halfInning
+    if (!inn || !h) continue
+    const i = halfIndex(inn, h)
+    if (i > here) break
+    if (i === here && (play.about?.atBatIndex ?? Infinity) > cut) continue
+    for (const leg of play.runners ?? []) {
+      if (leg?.details?.runner?.id === personId && leg.movement?.end === 'score' && !leg.movement?.isOut) r += 1
+    }
+  }
+  return r
+}
+
 // The batter's line for today, or null when he has no plate appearance on
 // screen yet (or the half is out of reach). Shape:
 // { id, pa, ab, h, hr, bb, k, hbp, rbi, r }.
@@ -59,11 +82,11 @@ export function batterDayLine(feed, batterId, { inning, half, step = null, revea
   if (here > (revealedThrough ?? -1) + 1) return null
   step = safeStep(step, here, revealedThrough)
   const line = { id: batterId, pa: 0, ab: 0, h: 0, hr: 0, bb: 0, k: 0, hbp: 0, rbi: 0, r: 0 }
+  line.r = runsScored(feed, batterId, here, stepCutAtBatIndex(feed, inning, half, step))
   for (const card of visibleCards(feed, inning, half, step)) {
     if (card.batterId !== batterId) continue
-    // An out on the bases ends no line of his; a run he scored is his.
-    if (card.scored) line.r += 1
-    if (card.interrupted) continue
+    // The live, still-open plate appearance has no result yet: not counted.
+    if (card.interrupted || card.live) continue
     const et = card.eventType ?? ''
     line.pa += 1
     if (!NON_AB_EVENTS.has(et)) line.ab += 1

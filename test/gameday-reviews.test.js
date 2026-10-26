@@ -123,3 +123,15 @@ test('a null step on the half being stepped reads as step 0', () => {
   const r = reviewsAtStep(g823036, { inning: 2, half: 'top', step: null, revealedThrough: 1 })
   assert.equal(r.reviews.length, 0)
 })
+
+test('an ABS challenge still under review has no outcome yet (pitch level too)', () => {
+  const live = structuredClone(g823036)
+  // Fermín's pitch-level ABS challenge, bottom 3rd, ab24.
+  const p = live.liveData.plays.allPlays.find((x) => x.about.atBatIndex === 24)
+  p.playEvents.find((e) => e.reviewDetails).reviewDetails.inProgress = true
+  const r = reviewsAtStep(live, { inning: 3, half: 'bottom', step: 7, revealedThrough: 4 })
+  const abs = r.reviews.find((x) => x.atBatIndex === 24)
+  assert.equal(abs.kind, 'abs')
+  assert.equal(abs.overturned, null)
+  assert.equal(abs.reasonCode, 'J')
+})

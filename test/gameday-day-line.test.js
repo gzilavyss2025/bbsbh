@@ -102,3 +102,25 @@ test('a null step on the half being stepped reads as step 0, never the whole hal
     pitcherDayLine(feed, 690928, { ...TOP3, step: 0 }),
   )
 })
+
+test("a pinch runner's run is his, not the batter's he ran for", () => {
+  // Top 7: 641343 walks (ab54), 669003 runs for him and scores on ab56.
+  const TOP7 = { inning: 7, half: 'top', revealedThrough: 99, step: null }
+  assert.equal(batterDayLine(feed, 641343, TOP7).r, 0)
+  assert.equal(batterDayLine(feed, 669003, TOP7).r, 1)
+  assert.equal(batterDayLine(feed, 669003, TOP7).pa, 0)
+})
+
+test('the live, still-open plate appearance counts for nothing', () => {
+  const live = structuredClone(feed)
+  // Turn Moniak's top-3 at-bat (ab index 2 of that half) into the live one.
+  const p = live.liveData.plays.allPlays.find(
+    (x) => x.about.inning === 3 && x.about.halfInning === 'top' && x.matchup.batter.id === 592885,
+  )
+  p.about.isComplete = false
+  p.result = { type: 'atBat' }
+  p.runners = []
+  const line = batterDayLine(live, 592885, { ...TOP3, step: 3 })
+  assert.equal(line.pa, 1) // top 1 only
+  assert.equal(line.ab, 1)
+})

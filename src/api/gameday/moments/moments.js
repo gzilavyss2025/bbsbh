@@ -37,7 +37,7 @@ import { detectPlayFeat } from '../../callout-notes/lastTime.js'
 import { magnitudeOf, clampScore } from '../../callout-notes/shared.js'
 import { selectWinProbPath } from '../../winprob.js'
 import { halfIndex, selectRegulationInnings } from '../../select.js'
-import { stepCutAtBatIndex, safeStep } from '../stepCut.js'
+import { stepCutAtBatIndex, safeStep, battingSideOf } from '../stepCut.js'
 import { STATCAST, ODDS_SWING } from './thresholds.js'
 
 export const CUTOFFS = { quiet: 60, normal: 35, lots: 0 }
@@ -176,7 +176,7 @@ export function momentsForPlay(
   const h = halfIndex(play.about?.inning, play.about?.halfInning)
   if (h > here) return null
   if (h === here && atBatIndex > stepCutAtBatIndex(feed, inning, half, safeStep(step, here, revealedThrough))) return null
-  const battingSide = play.about?.halfInning === 'top' ? 'away' : 'home'
+  const battingSide = battingSideOf(play.about?.halfInning)
   const odds = Array.isArray(winProb) ? oddsMoment(winProb, play) : null
   return [
     ...rareMoments(feed, plays, i, battingSide),

@@ -9,6 +9,7 @@
 import { computeHalfInningFeed } from '../playbyplay.js'
 
 export const battingSideOf = (half) => (half === 'top' ? 'away' : 'home')
+export const fieldingSideOf = (half) => (half === 'top' ? 'home' : 'away')
 
 // Fail closed: `step` null means "the whole half", which is true only for a
 // committed half. For the half past `revealedThrough` (the one being stepped),

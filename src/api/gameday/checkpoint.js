@@ -24,21 +24,22 @@
 // Page 2, pitching: pitches, strikes and whiffs, with one line per pitcher who
 // threw in the half. A strike is any pitch that is not a ball (`isBall`): the
 // box score's own count. A pitch belongs to the pitcher on the mound when it
-// was thrown, not to the play's `matchup.pitcher`: when a pitcher is replaced
-// in the middle of an at-bat, the play names the one who finished it, and the
-// pitches before the `pitching_substitution` event are the replaced man's.
+// was thrown, not to the play's `matchup.pitcher`, which names the one who
+// finished the at-bat: walking the play's events, each `pitching_substitution`
+// puts its own `player.id` on the mound.
 // Checked 2026-10-26 on gamePk 823035, 823036, 823169, 824546 and 815625: every
 // pitcher's pitches and strikes summed over his halves equal his box-score line.
 
 import { revealInning } from '../linescore.js'
 import { pitchCallCode, WHIFF_CODES } from '../playbyplay.js'
 import { halfIndex, personNameParts } from '../select.js'
+import { battingSideOf, fieldingSideOf } from './stepCut.js'
 
 export const PAGE_ORDER = ['tally', 'pitching', 'atBats', 'gameSoFar']
 
 function tallyPage(feed, inning, half) {
-  const batting = half === 'top' ? 'away' : 'home'
-  const fielding = half === 'top' ? 'home' : 'away'
+  const batting = battingSideOf(half)
+  const fielding = fieldingSideOf(half)
   const line = revealInning(feed, inning, batting)
   const field = revealInning(feed, inning, fielding)
   return {
@@ -60,25 +61,27 @@ function pitchingPage(feed, inning, half) {
     if (!inn || !h) continue
     const i = halfIndex(inn, h)
     if (i > target) break
-    const side = h === 'top' ? 'home' : 'away'
+    const side = fieldingSideOf(h)
     const finisher = play.matchup?.pitcher?.id ?? null
-    if (i === target) {
-      const events = play.playEvents ?? []
-      const lastSub = events.findLastIndex((e) => e?.details?.eventType === 'pitching_substitution')
-      events.forEach((e, idx) => {
-        if (!e?.isPitch) return
-        const id = idx < lastSub && onMound[side] != null ? onMound[side] : finisher
-        if (id == null) return
-        if (!lines.has(id)) {
-          const { first, last } = personNameParts(players[`ID${id}`] ?? {})
-          lines.set(id, { id, first, last, pitches: 0, strikes: 0, whiffs: 0 })
-        }
-        const l = lines.get(id)
-        l.pitches += 1
-        if (e.details?.isBall !== true) l.strikes += 1
-        const code = pitchCallCode(e)
-        if (code && WHIFF_CODES.has(code)) l.whiffs += 1
-      })
+    // Who is on the mound, event by event: the last play's pitcher, then each
+    // `pitching_substitution`'s own incoming `player.id`.
+    let current = onMound[side] ?? null
+    for (const e of play.playEvents ?? []) {
+      if (e?.details?.eventType === 'pitching_substitution' && e.player?.id != null) {
+        current = e.player.id
+        continue
+      }
+      const id = current ?? finisher
+      if (!e?.isPitch || i !== target || id == null) continue
+      if (!lines.has(id)) {
+        const { first, last } = personNameParts(players[`ID${id}`] ?? {})
+        lines.set(id, { id, first, last, pitches: 0, strikes: 0, whiffs: 0 })
+      }
+      const l = lines.get(id)
+      l.pitches += 1
+      if (e.details?.isBall !== true) l.strikes += 1
+      const code = pitchCallCode(e)
+      if (code && WHIFF_CODES.has(code)) l.whiffs += 1
     }
     if (finisher != null) onMound[side] = finisher
   }

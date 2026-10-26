@@ -96,3 +96,30 @@ test('missing data falls back to null or empty, never throws', () => {
   const none = checkpointPages(g823035, { inning: 10, half: 'bottom', revealedThrough: 99 })
   assert.equal(page(none, 'pitching').fields.pitches, 0)
 })
+
+test('two changes in one half: each pitch goes to the pitcher the events put on the mound', () => {
+  // Hand-built, the top 6th (the home side fields).
+  // Pitcher 2 enters at the head of the half's first play and throws two
+  // pitches; pitcher 3 replaces him mid-at-bat and finishes it. The play's
+  // matchup names 3. Pitcher 1 threw the top 5th and nothing in the 6th.
+  const pitch = (isBall = false) => ({ isPitch: true, details: { isBall } })
+  const sub = (id) => ({ isPitch: false, details: { eventType: 'pitching_substitution' }, player: { id } })
+  const play = (inning, ab, pitcher, playEvents) => ({
+    about: { inning, halfInning: 'top', atBatIndex: ab },
+    matchup: { pitcher: { id: pitcher } },
+    result: { type: 'atBat', eventType: 'field_out' },
+    playEvents,
+  })
+  const feed = {
+    liveData: {
+      plays: {
+        allPlays: [
+          play(5, 0, 1, [pitch(), pitch()]),
+          play(6, 1, 3, [sub(2), pitch(), pitch(true), sub(3), pitch(), pitch()]),
+        ],
+      },
+    },
+  }
+  const p = page(checkpointPages(feed, { inning: 6, half: 'top', revealedThrough: 10 }), 'pitching').fields
+  assert.deepEqual(p.pitchers.map((l) => [l.id, l.pitches, l.strikes]), [[2, 2, 1], [3, 2, 2]])
+})

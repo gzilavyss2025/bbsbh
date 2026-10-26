@@ -457,6 +457,7 @@
       "class": "reveal-only",
       "why": "The step cut the Gameday data modules share: which at-bat cards of the reader's half are on screen, from computeHalfInningFeed built with the step cap and sliced at it (ADR-0016). Reads the cards, so reveal-only like them.",
       "importers": [
+        "api/gameday/checkpoint.js",
         "api/gameday/dayLine.js",
         "api/gameday/moments/moments.js",
         "api/gameday/reviews.js"

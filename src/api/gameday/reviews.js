@@ -35,7 +35,7 @@
 // ever fails a challenge with an empty bank. A game that does not run the
 // system (gameHasAbs) has no bank: `bank` is null.
 
-import { isAbsChallenge, gameHasAbs, START_CHALLENGES } from '../challenges.js'
+import { isAbsChallenge, challengesForPlay, gameHasAbs, START_CHALLENGES } from '../challenges.js'
 import { halfIndex, selectRegulationInnings } from '../select.js'
 import { stepCutAtBatIndex, safeStep } from './stepCut.js'
 
@@ -58,47 +58,56 @@ function sideOf(feed, teamId) {
   return null
 }
 
-// One review record. `pitchNumber` is the reviewed pitch's own number; a
-// play-level review names the at-bat's last pitch, flagged `isHeuristic` (the
-// same rule challengesForPlay uses).
-function record(feed, play, review, pitchNumber, isHeuristic) {
-  const abs = isAbsChallenge(review)
-  const side = sideOf(feed, review.challengeTeamId)
-  if (abs && !side) return null // an ABS review naming neither club: challenges.js drops it too
-  const code = typeof review.reviewType === 'string' ? review.reviewType.slice(1) : ''
-  const inProgress = review.inProgress === true
-  return {
-    kind: abs ? 'abs' : side ? 'manager' : 'crew',
-    side,
-    teamId: side ? review.challengeTeamId : null,
-    reasonCode: code || null,
-    reason: REASONS[code] ?? null,
-    overturned: inProgress ? null : review.isOverturned === true,
-    inProgress,
-    playerId: review.player?.id ?? null,
-    playerName: review.player?.fullName ?? '',
-    inning: play.about?.inning ?? null,
-    half: play.about?.halfInning ?? null,
-    atBatIndex: play.about?.atBatIndex ?? null,
-    pitchNumber,
-    isHeuristic,
-  }
+const reasonOf = (reviewType) => {
+  const code = typeof reviewType === 'string' ? reviewType.slice(1) : ''
+  return { reasonCode: code || null, reason: REASONS[code] ?? null }
 }
+const placeOf = (play) => ({
+  inning: play.about?.inning ?? null,
+  half: play.about?.halfInning ?? null,
+  atBatIndex: play.about?.atBatIndex ?? null,
+})
 
-// Every review in one play, in the order it happened: event-level ones in
-// event order, then a play-level one last (where it belongs in time).
+// Every review in one play. ABS challenges come from challenges.js'
+// challengesForPlay, the one walk that finds them and pins each to its pitch
+// (StatBox and the pitch list read it too); this module only adds the
+// manager's and the umpires' reviews, event-level in event order, then a
+// play-level one last (where it belongs in time).
 function reviewsInPlay(feed, play) {
-  const out = []
-  for (const e of play.playEvents ?? []) {
-    if (!e?.reviewDetails) continue
-    const r = record(feed, play, e.reviewDetails, e.isPitch ? e.pitchNumber ?? null : null, false)
-    if (r) out.push(r)
+  const out = challengesForPlay(feed, play).map((c) => ({
+    kind: 'abs',
+    side: c.side,
+    teamId: c.teamId,
+    ...reasonOf(c.reviewType),
+    overturned: c.inProgress ? null : c.outcome === 'success',
+    inProgress: c.inProgress,
+    playerId: c.playerId,
+    playerName: c.playerName,
+    ...placeOf(play),
+    pitchNumber: c.pitchNumber,
+    isHeuristic: c.isHeuristic,
+  }))
+  const other = (review, pitchNumber, isHeuristic) => {
+    if (!review || isAbsChallenge(review)) return
+    const side = sideOf(feed, review.challengeTeamId)
+    const inProgress = review.inProgress === true
+    out.push({
+      kind: side ? 'manager' : 'crew',
+      side,
+      teamId: side ? review.challengeTeamId : null,
+      ...reasonOf(review.reviewType),
+      overturned: inProgress ? null : review.isOverturned === true,
+      inProgress,
+      playerId: review.player?.id ?? null,
+      playerName: review.player?.fullName ?? '',
+      ...placeOf(play),
+      pitchNumber,
+      isHeuristic,
+    })
   }
-  if (play.reviewDetails) {
-    const lastPitch = (play.playEvents ?? []).filter((e) => e?.isPitch).at(-1)
-    const r = record(feed, play, play.reviewDetails, lastPitch?.pitchNumber ?? null, true)
-    if (r) out.push(r)
-  }
+  for (const e of play.playEvents ?? []) other(e?.reviewDetails, e?.isPitch ? e.pitchNumber ?? null : null, false)
+  const lastPitch = (play.playEvents ?? []).filter((e) => e?.isPitch).at(-1)
+  other(play.reviewDetails, lastPitch?.pitchNumber ?? null, true)
   return out
 }
 
