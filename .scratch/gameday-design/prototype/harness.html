@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><title>harness</title>
+<style>body{margin:0;background:#222;color:#eee;font:12px monospace}canvas{display:block;background:#000}#c{width:390px;height:300px}</style></head>
+<body><canvas id="c" width="780" height="600"></canvas><div id="info"></div>
+<script src="data.js"></script><script src="engine.js"></script>
+<script>
+const q = new URLSearchParams(location.search)
+const src = q.get('c') || 'concept-wire.js'
+const s = document.createElement('script'); s.src = src; s.onload = boot; document.body.appendChild(s)
+let inst
+function boot() {
+  const C = GD.concepts.at(-1); const cv = document.getElementById('c')
+  const w = +(q.get('w') || 390), h = +(q.get('h') || 300)
+  cv.style.width = w + 'px'; cv.style.height = h + 'px'; cv.width = w * 2; cv.height = h * 2
+  inst = C.create(cv)
+  window.renderAt = (ab, t) => { const p = GD.playByAb(ab); const st = GD.stateAt(p, t); inst.draw(st, cv.width, cv.height); return { phase: st.phase, end: st.L.t.end, ball: st.ballPos } }
+  window.ready = true
+}
+</script></body></html>

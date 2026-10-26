@@ -1,0 +1,22 @@
+[
+ {"id":"prev","route":"/09012026/seabos/top2","w":390,"h":844,"pk":824716,"rev":1,"ab":"2:7","crops":{
+   "b20":".pbp__atbat",
+   "b21":{"sel":".abhero","ctx":".pbp__atbat"},
+   "b23":{"sel":".pbp__desc","ctx":".pbp__atbat"},
+   "b26":{"sel":".pbp__zonebtn","ctx":".pbp__atbat"},
+   "b27":{"sel":".pbp__hlbtn","ctx":".pbp__atbat"},
+   "b28":{"sel":".pbp__replaybtn","ctx":".pbp__atbat"},
+   "b29":{"sel":".pbp__ladder","ctx":".pbp__atbat"},
+   "b30":{"sel":".pbp__play","ctx":".pbp__atbat"},
+   "b31":{"sel":".pbp__diamond","ctx":".pbp__atbat"},
+   "b33":{"sel":".pbp__flightbtn","ctx":".pbp__atbat"},
+   "b58":{"sel":".trailcell","nth":4,"ctx":".trailstrip"},
+   "b44":".change",
+   "b19":".pbp__entry",
+   "b13x":".innings__grid"}},
+ {"id":"pstart","route":"/09012026/seabos/top2","w":390,"h":844,"pk":824716,"rev":1,"ab":"-","crops":{"b88":".innings"}},
+ {"id":"pdone","route":"/09012026/seabos/top2","w":390,"h":844,"pk":824716,"rev":2,"ab":"-","crops":{"b60":{"sel":".trailstrip__summarybtn","ctx":".innings__grid"},"b32":{"sel":".pbp__outcircle","ctx":".pbp__atbat"}}},
+ {"id":"pend","route":"/09012026/seabos/top2","w":390,"h":844,"pk":824716,"rev":1,"ab":"2:9","crops":{"b86":".pagenav--innings","b66":".card:has-text('Due up next')"}},
+ {"id":"a6","route":"/07072026/milstl-2/bottom6","w":390,"h":844,"pk":823035,"rev":10,"ab":"-","crops":{"b15":".prepitch"}},
+ {"id":"bot9end","route":"/09012026/seabos/bottom9","w":390,"h":844,"pk":824716,"rev":16,"ab":"17:30","crops":{"b87":".pagenav--innings"}}
+]
