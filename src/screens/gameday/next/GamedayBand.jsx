@@ -1,5 +1,6 @@
 import { BaseState } from '../../../components/scoring/BaseState.jsx'
 import { TeamTreatmentMark } from '../../../components/logo/TeamTreatmentMark.jsx'
+import { plateLabel } from '../../../components/gamehud/HeaderBug.jsx'
 
 // The mark's size inside its tile; the tile (.gdnext-band__mark) is a little larger so the
 // overscaled art crops against its edge, as on the slate card and today's score bug.
@@ -24,7 +25,7 @@ export function GamedayBand({
   return (
     <div className="gdnext-band">
       {club('away', awayTeamId, awayName, awayTreatment, awayRuns)}
-      <div className="gdnext-band__plate">
+      <div className="gdnext-band__plate" role="img" aria-label={inning != null ? plateLabel({ final, top, inning, outs, bases }) : undefined}>
         {inning != null && (
           <div className="inhead__inning">
             {final ? (
@@ -38,7 +39,7 @@ export function GamedayBand({
           </div>
         )}
         <BaseState bases={bases} size={32} />
-        <div className="inhead__outs" role="img" aria-label={`${outs} out`}>
+        <div className="inhead__outs">
           {/* Two dots, as on today's bug: a half ends the instant the third out lands. */}
           {[0, 1].map((i) => <span key={i} className={`inhead__outdot${i < outs ? ' is-out' : ''}`} />)}
         </div>

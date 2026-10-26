@@ -1,3 +1,4 @@
+import '../../../styles/lineup-next/sheet.css'
 import { SheetFrame } from '../../lineup/next/sheets/SheetFrame.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 

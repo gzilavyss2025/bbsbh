@@ -14,9 +14,7 @@ import { useTier } from './useTier.js'
 export function GamedayNextPage({ band, engine, advance, onBoxScore, onScorecard, refresh }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
-  const shown = blocksFor(tier)
-  const slots = ['navigator', 'stage', 'hero', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog']
-    .filter((b) => shown.includes(b))
+  const slots = blocksFor(tier).filter((b) => b !== 'band' && b !== 'bar')
   return (
     <div className="gdnext" data-tier={tier}>
       <div className="gdnext__band">{band}</div>

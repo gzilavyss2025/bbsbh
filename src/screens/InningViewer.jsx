@@ -729,12 +729,15 @@ export function InningViewer({
   )
 
   if (isLookNew()) {
-    // The advance reads the states InningActionBar draws, with "Next play" for an at-bat step.
-    const advance = currentSealed
-      ? { label: atHalfEdge ? 'Caught up' : 'Next play', disabled: atHalfEdge, onClick: revealNextAtBat }
-      : nextIdx != null
-        ? { label: nextLabel, onClick: () => requestForwardHalf(nextIdx) }
-        : { label: bookClosed ? 'Close the book' : 'Box score', onClick: onBoxScore }
+    // The advance reads the states InningActionBar draws, with "Next play" for an at-bat step, and
+    // keeps its holds: no step while the page turns, no forward move while the half closes (ADR-0046).
+    const advance = focus.stepAhead
+      ? { label: 'Next play', disabled: turning, onClick: () => !turning && focus.stepNext() }
+      : currentSealed
+        ? { label: atHalfEdge ? 'Caught up' : 'Next play', disabled: atHalfEdge, onClick: revealNextAtBat }
+        : nextIdx != null
+          ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
+          : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }
     return (
       <CalloutLedgerProvider value={calloutLedger}>
         {cloudSync}

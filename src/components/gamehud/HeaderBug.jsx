@@ -15,7 +15,7 @@ const MARK = 40
 
 // One spoken line for the plate: where the game is, the outs, and who is on. It says only what the
 // plate shows, so it is as safe as the plate. Bare numbers would read as "0" and "0" with no club.
-function plateLabel({ final, top, inning, outs, bases }) {
+export function plateLabel({ final, top, inning, outs, bases }) {
   if (final) return 'Final'
   const on = ['first', 'second', 'third'].filter((b) => bases?.[b])
   return `${top ? 'Top' : 'Bottom'} ${inning}, ${outs} out, ${on.length ? `runners on ${on.join(' and ')}` : 'bases empty'}`

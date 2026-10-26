@@ -7,7 +7,7 @@ import { GamedayNextPage } from './GamedayNextPage.jsx'
 // clubs and no figures). `mark` is the reveal mark (named so the seal pin in InningViewer stays put); `advance` is the advance control, resolved by InningViewer from today's
 // reveal state (the same states InningActionBar draws, minus "Rest of half").
 export function GamedayNextMount({ bug: { mark, ...bug }, meta, engine, advance, onBoxScore, onScorecard, refresh }) {
-  const band = bug.live ? (
+  const band = bug.started && bug.live ? (
     <ScorebugMount {...bug} revealedThrough={mark} meta={meta} Bug={GamedayBand} />
   ) : (
     <GamedayBand
