@@ -115,7 +115,9 @@ export function gameHasAbs(feed) {
 // Triple-A at the 24 of 24 they already reached, since neither emits MZ.
 const ABS_REVIEW_TYPES = new Set(['MJ', 'MZ'])
 
-function isAbsChallenge(review) {
+// Exported for api/gameday/reviews.js, which lists every review a reader has
+// reached and must tell an ABS challenge from a manager's or a crew chief's.
+export function isAbsChallenge(review) {
   return Boolean(
     review && review.challengeTeamId != null && ABS_REVIEW_TYPES.has(review.reviewType),
   )

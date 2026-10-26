@@ -111,6 +111,14 @@ _Avoid_: zoom mode, focus mode (the old name for Gameday's windowed mode, not th
 The screen of a game's half-inning pages (`top{n}` and `bottom{n}`), the tab after the two lineups: the scorebug masthead, the due-up band, the play-by-play and the reference tabs, one half at a time. The tab reads "Gameday". Code and ADRs may still say "the innings viewer" (`InningViewer`) or, for its windowed mode, "focus mode" (ADR-0043). Addresses do not change.
 _Avoid_: focus mode, innings tab
 
+**Sub-step**:
+One tap inside a Gameday at-bat: a pitch, an automatic call, a baserunning event, a substitution, or the result (ADR-0123). The at-bat cursor's finer grain; never a spoiler boundary of its own.
+_Avoid_: micro-step, pitch step
+
+**Pitch mode**:
+Gameday's per-game mode in which each tap reveals one sub-step, pitch by pitch, instead of one at-bat (#2570, ADR-0123).
+_Avoid_: pitch-by-pitch setting (it is not a My Tally setting)
+
 **Half-inning**:
 The atomic unit of reveal granularity — a top or bottom of one inning.
 _Avoid_: side, frame

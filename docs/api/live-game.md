@@ -680,6 +680,53 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `/logbook/stats`.
 
 
+## Gameday data (`gameday/`, reveal-only)
+
+The Gameday rebuild's data modules (#2566). Folder rules: `src/api/gameday/CLAUDE.md`.
+Each one is clamped to the reader's step, not only to the half: the current half is
+built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
+
+- `gameday/dayLine.js` (#2606) — `batterDayLine(feed, batterId, { inning, half, step,
+  revealedThrough })` gives `{ id, pa, ab, h, hr, bb, k, hbp, rbi, r }` over every
+  earlier half of the batting side plus the current half up to `step` (`null` = the
+  whole half). `pitcherDayLine` takes the same options and returns
+  `computePitcherLines`' row, cut at the last plate appearance on screen through its
+  `throughAtBatIndex` clamp. Both answer null for a half past `revealedThrough + 1`, for
+  a player with nothing on screen yet, and for a missing field. Interrupted at-bats and
+  the placed runner count for nothing; a run counts only once the cap lets it onto the
+  card. Pinned on gamePk 823035 (`test/gameday-day-line.test.js`).
+- `gameday/stepCut.js` — the cut both modules share: `visibleAtBatCards(feed, inning,
+  half, step)` and `stepCutAtBatIndex` (the last on-screen card's `atBatIndex`, or -1).
+- `gameday/reviews.js` (#2607) — `reviewsAtStep(feed, { inning, half, step,
+  revealedThrough })` gives `{ reviews, bank }`. Each review: `kind` (`abs`, `manager`
+  when a club challenged anything else, `crew` when no club is named), `side`,
+  `reason` from MLB's `/api/v1/reviewReasons` (the second letter of `reviewType`),
+  `overturned` (null while `inProgress`), the player, and where it happened. The bank is
+  `challenges.js`' rules walked to the step, with a refill when a club enters an extra
+  inning empty; null for a game that does not run ABS. Never reads
+  `gameData.absChallenges`. Pinned on gamePk 823036, 823169 and 815625.
+- `gameday/checkpoint.js` (#2605) — `checkpointPages(feed, { inning, half,
+  revealedThrough })` gives the closed half's pages in `PAGE_ORDER` (`tally`,
+  `pitching`, then `atBats` and `gameSoFar` as `built: false` until #2572), or null for a
+  half past `revealedThrough`. The tally reads `revealInning` (E from the fielding side,
+  ADR-0006). The pitching page counts per pitcher: a strike is any pitch that is not a
+  ball, and a pitch thrown before a mid-at-bat `pitching_substitution` is the replaced
+  man's, not the play's `matchup.pitcher`. That rule matched the box score for every
+  pitcher in five games (2026-10-26).
+- `gameday/moments/moments.js` (#2608) — `momentsForPlay(feed, atBatIndex, { inning, half,
+  step, revealedThrough, winProb, milestones })` gives the play's moments, highest score
+  first, or null for a play not on screen. Kinds and families: rare (`walkOff`,
+  `grandSlam`, `triplePlay`, `cycle`), odds (`oddsSwing`), `milestone`, and statcast
+  (`hitHard`, `hitFar`, `thrownFast`). Score = `MOMENT_BASE` + a 0–20 `magnitudeOf` bonus
+  (docs/callouts.md, "Worthiness"); `levelFor(score)` maps it onto the #2574 dial through
+  `CUTOFFS` (Quiet 60, Normal 35, Lots 0). The walk-off reads the feed's running
+  `result.homeScore`/`awayScore` after this play and the one before, never the final.
+  Triple play and cycle reuse `detectPlayFeat`. "First-ever" is not built: no revealed
+  source says a feat is a player's first. The floors in `moments/thresholds.js` are p99
+  (p95 for the odds swing) of a 134-game 2026 sample,
+  `.scratch/gameday-engine/measure-moments.mjs`.
+
+
 ## Leader boards (live)
 
 - `leaders.js` / `teamLeaders.js` / `statsLevels.js` — ranking is pool-agnostic:
