@@ -103,7 +103,7 @@
 
   window.R2APP.FOUND([
     ['A wild pitch is a sub-step of its own.', '824716 bottom 6th, Duran\'s at-bat: the feed puts the wild pitch as its own action after pitch 5 (Durbin 2nd to 3rd), and a mound visit after pitch 1. The Steps tab draws the at-bat tap by tap from those events.'],
-    ['Sogard\'s strikeout has no scorebook code.', 'computeHalfInningFeed gives no code for atBatIndex 55 (bottom 6th), a called third strike confirmed on an ABS challenge. Inference: the challenge text is what trips the code; not traced. Outside this round.'],
+    ['A looking K has no code, on purpose.', 'For a called third strike (Sogard, atBatIndex 55) scorebookCode.js sets calledLooking and no code; the app draws the backwards K from the flag. The Gameday box must do the same.'],
     ['The notes need a callout bundle.', 'public/data/callouts holds only the nightly window (10/17 to 10/27 now), so a game outside it, like 824716, shows no between-innings notes in today\'s app. The Notes page borrows 849817\'s.'],
   ])
 })()

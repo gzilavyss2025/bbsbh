@@ -21,15 +21,22 @@ Round 2 ran in two drops. Every frame is layout B at round 1's boxes, in the app
 - The notes need a callout bundle, which the nightly job keeps only for recent dates (10/17 to 10/27 now). 824716 has none, so today's app shows no notes for it; the Notes page borrowed 849817's.
 - `checkpoint.js` page 2 has no fouls. Counting `FOUL_CODES` gives 4 for 824716 top 2nd, matching today's tally. #2605's model needs a `fouls` field.
 - A wild pitch is its own action event after the pitch (824716, atBatIndex 57), so it is its own sub-step; a mound visit trails pitch 1.
-- 824716 atBatIndex 55 (Sogard, a called third strike confirmed on an ABS challenge) has no scorebook code from `computeHalfInningFeed`. Not traced.
+- A called third strike carries `calledLooking: true` and no `code` (824716 atBatIndex 55, Sogard): the app draws the backwards K from that flag, so the Gameday scorebook box must too.
 - Today's FieldCard shows one alignment per game; Gameday's Field tab needs the defense as of the cursor (824716 changes it in the 7th).
+
+**Decided after the round (Gary, interview)**
+
+- Finish pose: ship today's finish for now ("Use today's finish for now"); replace it when Gary fixes it.
+- Zone map dismiss: closed for this game, through a reload (per gamePk, like the pitch-mode flag).
+- Notes with no callout bundle: hide the Notes tab.
+- Field tab: the defense as of the reader's cursor, revealed substitutions only.
+- Other event cards follow the wild-pitch card; the build PR sends a screenshot of each.
+- ADR-0123 gets a short amendment in the first build PR: the advance words follow the mode and never change within it.
+- Fouls go into `checkpoint.js` in the first checkpoint build slice (#2572), with a test (824716 top 2nd: 4).
 
 **Still open**
 
 - The swing's finish pose (Gary, later session).
-- The zone map's dismiss: for the batter, the game or the reader.
-- Whether "Next play / Next pitch" needs a line in ADR-0123 (the label changes only when the reader flips the switch, which reveals nothing). Inference: it keeps decision 3.
-- Event cards for steals, caught stealing, pickoffs, balks and substitutions (only the wild pitch is drawn).
 - Height breakpoints have no guard.
 
 ---

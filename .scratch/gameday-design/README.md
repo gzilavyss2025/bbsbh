@@ -102,22 +102,33 @@ boxes, drawn in the app's tokens, on real data from gamePk 824716: the top 2nd, 
   needs a `fouls` field.
 - **A wild pitch is its own action event** after pitch 5 in 824716 bottom 6th (atBatIndex 57), and a
   mound visit trails pitch 1. The Steps tab steps that at-bat from those events.
-- **Sogard's strikeout has no scorebook code** (824716, atBatIndex 55, a called third strike
-  confirmed on an ABS challenge): `computeHalfInningFeed` returns `code: undefined`. Not traced.
+- **A called third strike has no `code`, on purpose.** For a looking K (Sogard, 824716 atBatIndex 55)
+  `scorebookCode.js` returns `calledLooking: true` and no code; the UI draws the backwards K. The
+  Gameday scorebook box must do the same. (Round 2 first reported this as a missing code; it is not.)
 - **Today's FieldCard shows one alignment for the game.** Gameday's Field tab needs the defense as
   of the cursor: 824716 changes it in the 7th (White, Kiner-Falefa, Robles). The round 2 frames place
   it by hand from the feed's substitutions.
 - **Pitch counts check out.** Paez 29 before Arozarena, 33 after, 39 at the end of the half (11 + 28);
   Woo 93 before Duran; the bottom 9th splits Milner 7, Muñoz 4.
 
+### Decided after round 2 (Gary, 2026-10-26, interview)
+
+- **The finish pose:** ship today's finish for now and replace it when Gary fixes it ("Use today's
+  finish for now"). The bat rule stays met.
+- **The zone map's dismiss:** closed for this game, through a reload; the next game shows it again.
+  Stored per gamePk like the pitch-mode flag (a flag, never a score).
+- **Notes with no bundle:** hide the Notes tab (four tabs). Safe: the list depends on data, not the half.
+- **The Field tab:** the defense as of the reader's cursor, with revealed substitutions only.
+- **Other event cards** (steal, caught stealing, pickoff, balk, substitution): follow the wild-pitch
+  card; the build PR sends Gary a screenshot of each.
+- **ADR-0123:** a short amendment in the first build PR: the advance words follow the mode ("Next play
+  ›", "Next pitch ›") and never change within a mode; the switch reveals nothing.
+- **Fouls:** the first slice of the checkpoint build (#2572) adds a `fouls` field to `checkpoint.js`
+  page 2, with a test that 824716 top 2nd gives 4.
+
 ### Still open after round 2
 
-- The swing's finish pose (Gary will fix it in a later session).
-- The zone map's dismiss: whether it stays dismissed for the batter, the game or the reader.
-- Whether "Next play / Next pitch" needs a line in ADR-0123: the label changes only when the reader
-  flips the switch, which reveals nothing (#2570's toggle rule). Inference: it keeps decision 3.
-- Event cards for the other events (steal, caught stealing, pickoff, balk, substitution): only the
-  wild pitch is drawn.
+- The swing's finish pose (Gary will fix it in a later session; today's ships until then).
 - Height breakpoints have no guard; a build may want one beside the width guard.
 
 ### The round 2 source (`round2/`)
