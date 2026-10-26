@@ -13,7 +13,6 @@ import { lastBefore } from '../../../lib/worldSeries/lastBefore.js'
 import * as C from '../../../lib/worldSeries/classify.js'
 import { SCORE_BASE, clampScore, magnitudeOf, skewBonus, gameResult, dateText } from '../shared.js'
 
-export const WS_MIN_GAP_SEASONS = 3
 const GAP_FULL = 25 // seasons for the full magnitude bonus
 
 // Every row before tonight can come from here; null while the file is not loaded, so a slow
@@ -21,11 +20,12 @@ const GAP_FULL = 25 // seasons for the full magnitude bonus
 const rowsOf = (history, bundle) =>
   history?.events ? [...history.events, ...(bundle?.wsEvents?.events ?? [])] : null
 
-// The last earlier row of `tag`, and whether the gap clears the floor. null = stay quiet.
+// The last earlier row of `tag` (undefined = the first in history) and the magnitude bonus its gap
+// earns. There is no gap floor: every World Series note shows, however recent the last one.
 function lastTime(rows, gameDate, tag, filter) {
   const [prev] = lastBefore(rows, { before: gameDate, tag, filter })
   const gap = prev ? Number(gameDate.slice(0, 4)) - prev.season : GAP_FULL
-  return gap >= WS_MIN_GAP_SEASONS ? { prev, bonus: magnitudeOf(gap, GAP_FULL) } : null
+  return { prev, bonus: magnitudeOf(gap, GAP_FULL) }
 }
 
 // --- play card -----------------------------------------------------------------------------
@@ -89,7 +89,6 @@ export function buildWsLastTimeNotes(entry, ws, side = null) {
   for (const [tag, noun] of Object.entries(PLAY_NOUN)) {
     if (!hit[tag]) continue
     const t = lastTime(ws.rows, ws.gameDate, tag)
-    if (!t) continue
     return [{
       text: t.prev ? `The last World Series ${noun} came on ${dateText(t.prev.date)}.` : `The first ${noun} in World Series history.`,
       personId: entry.batterId ?? null,
@@ -126,7 +125,6 @@ export function buildWsLastTimeGameNotes(feed, bundle, history) {
     if (!ev) continue
     const same = tag === 'shutout' ? undefined : (r) => r.value >= ev.value
     const t = lastTime(rows, date, tag, same)
-    if (!t) continue
     const what = noun(ev.value)
     const side = ['away', 'home'].find((s) => bundle[s].teamId === ev.club) ?? null
     out.push({

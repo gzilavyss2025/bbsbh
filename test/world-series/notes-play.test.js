@@ -3,7 +3,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildCallouts } from '../../src/api/callout-notes/liveAtBat.js'
-import { wsPlayCtx, WS_MIN_GAP_SEASONS } from '../../src/api/callout-notes/worldSeries/events.js'
+import { wsPlayCtx } from '../../src/api/callout-notes/worldSeries/events.js'
 import { pl, feedOf, playsOf, BUNDLE } from './ws-fixture.js'
 
 const row = (tag, date, extra = {}) => ({ tag, pk: 1, date, season: Number(date.slice(0, 4)), n: 1, club: 1, player: 5, value: null, wta: false, ...extra })
@@ -26,9 +26,10 @@ test('the same slam on another card, or the neighbouring play, gets no note', ()
   assert.deepEqual(notesFor(SLAM, 2, { rows }), [])
 })
 
-test(`a gap under ${WS_MIN_GAP_SEASONS} seasons gives no note; exactly ${WS_MIN_GAP_SEASONS} does`, () => {
-  assert.equal(notesFor(SLAM, 1, { rows: [row('grandSlam', '2022-10-25')] }).length, 0)
-  assert.equal(notesFor(SLAM, 1, { rows: [row('grandSlam', '2021-10-25')] }).length, 1)
+test('there is no gap floor: a slam two years ago, last year or two days ago still notes it', () => {
+  for (const last of ['2022-10-25', '2023-10-25', '2024-10-24']) {
+    assert.equal(notesFor(SLAM, 1, { rows: [row('grandSlam', last)] }).length, 1, last)
+  }
 })
 
 test('no earlier row: the first in World Series history; no history loaded: silence', () => {
@@ -44,7 +45,7 @@ test('an old game never sees a later row', () => {
 test('the current Series comes from the bundle, older shards without the key still work', () => {
   const rows = [row('grandSlam', '2010-10-25')]
   const withKey = { ...BUNDLE, wsEvents: { events: [row('grandSlam', '2024-10-24')], wta: false } }
-  assert.equal(notesFor(SLAM, 1, { rows, bundle: withKey }).length, 0, 'a slam two days ago is under the gap')
+  assert.equal(notesFor(SLAM, 1, { rows, bundle: withKey })[0].text, 'The last World Series grand slam came on Oct. 24, 2024.')
   assert.equal(notesFor(SLAM, 1, { rows }).length, 1)
 })
 

@@ -118,3 +118,35 @@ test('buildBetweenInnings returns the same depth for a quiet and a loud half onc
   assert.equal(loudCards.length, CARD_MAX)
   assert.equal(quietCards.length, loudCards.length)
 })
+
+test('World Series games: the Series notes are extra, ranked and capped by nothing, and lead the card', () => {
+  const feed = feedWithProbables()
+  feed.gameData.game = { type: 'W' }
+  feed.gameData.datetime = { officialDate: GAME_DATE }
+  const marginNotes = [
+    { text: 'Laboring: 24.7 pitches per inning', kind: 'laboring', score: 48, dedupeKey: 'laboring-200' },
+    { text: 'Fastball down 2.3 mph', kind: 'veloDecay', score: 46, dedupeKey: 'veloDecay-200' },
+    { text: 'Working a 3rd straight day', kind: 'penFatigue', score: 42, dedupeKey: 'penFatigue-201' },
+  ]
+  // Game 1 of a first meeting; each starter is on his first World Series start.
+  const bundle = { ...seasonContextBundle, series: { id: 'ws', games: [] } }
+  const cards = buildBetweenInnings({
+    feed, bundle, marginNotes, gameDate: GAME_DATE, inning: 1, half: 'top', revealedThrough: 0,
+    seriesHistory: { series: [] }, wsStarts: { 300: 0, 200: 0 },
+    // Everything the ledger has already shown: a Series note still comes back.
+    shownCounts: new Map([['wsSeriesOdds-meeting', 3], ['wsStarterStart-300', 3], ['wsStarterStart-200', 3]]),
+  })
+  const ws = cards.filter((c) => /^ws[A-Z]/.test(c.kind)).map((c) => c.dedupeKey).sort()
+  assert.deepEqual(ws, ['wsSeriesOdds-meeting', 'wsStarterStart-200', 'wsStarterStart-300'])
+  assert.equal(cards.length, CARD_MAX + 3, 'the ordinary cards still stop at CARD_MAX')
+  assert.ok(/^ws[A-Z]/.test(cards[0].kind), 'and the Series notes lead')
+})
+
+test('a game that is not a World Series game gets no Series notes', () => {
+  const feed = feedWithProbables()
+  const cards = buildBetweenInnings({
+    feed, bundle: { ...seasonContextBundle, series: { id: 'x', games: [] } }, marginNotes: [], gameDate: GAME_DATE,
+    inning: 1, half: 'top', revealedThrough: 0, seriesHistory: { series: [] }, wsStarts: { 300: 0, 200: 0 },
+  })
+  assert.ok(!cards.some((c) => /^ws[A-Z]/.test(c.kind)))
+})

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { buildBetweenInnings } from '../../api/between-innings.js'
 import { fetchSavantMatchup } from '../../api/matchup/savant.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import { useWsCalloutInputs } from '../../hooks/postseason/useWsEvents.js'
 import { halfIndex } from '../../api/select.js'
 import { useCalloutLedger } from '../../hooks/useCalloutLedger.js'
 import { Headshot } from '../player/Headshot.jsx'
@@ -27,6 +28,8 @@ export function BetweenInnings({
   // Prop-drilling it through GameView -> InningViewer -> ConsoleBand bought
   // nothing and pushed InningViewer.jsx past its file-size budget.
   const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
+  // World Series games only (no request otherwise): the Series state and each starter's start count.
+  const { seriesHistory, wsStarts } = useWsCalloutInputs(feed)
   // This card stages the NEXT half (between-innings.js's nextHalfOf), which in
   // half-index terms is simply the one after this — so that is the half the
   // shown ledger reads and writes under. Reading a half the Arms tab has
@@ -43,10 +46,10 @@ export function BetweenInnings({
   const cards = useMemo(
     () => buildBetweenInnings({
       feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate,
-      shownCounts, savantMatchup,
+      shownCounts, savantMatchup, seriesHistory, wsStarts,
     }),
     [feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate, shownCounts,
-      savantMatchup],
+      savantMatchup, seriesHistory, wsStarts],
   )
   const [idx, setIdx] = useState(0)
   const advance = () => setIdx((i) => (i + 1) % (cards.length + 1))

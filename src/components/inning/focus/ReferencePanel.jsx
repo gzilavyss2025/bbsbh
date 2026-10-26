@@ -1,14 +1,11 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { halfIndex } from '../../../api/select.js'
 import { safeToShowEntering } from '../../../api/enteringHalf.js'
-import { buildPreHalfCallouts } from '../../../api/prehalf-callouts.js'
-import { rankNotes } from '../../../api/callout-notes.js'
+import { buildPreHalfCallouts, mergeNotes } from '../../../api/prehalf-callouts.js'
 import { useCalloutLedger } from '../../../hooks/useCalloutLedger.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { fetchSavantMatchup } from '../../../api/matchup/savant.js'
-import { fetchWorldSeriesStartsBefore } from '../../../api/postseason/pitcherWorldSeries.js'
-import { useEventHistory } from '../../../hooks/postseason/useWsEvents.js'
-import { loadSeriesHistory } from '../../../api/worldSeries/history.js'
+import { useEventHistory, useWsCalloutInputs } from '../../../hooks/postseason/useWsEvents.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
 import { Door } from '../../ui/control/Door.jsx'
@@ -282,17 +279,7 @@ function Section({
   // them (api/staticJson.js). Above the early return, like the ledger.
   const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
   // World Series games only: a game of any other type costs no request.
-  const isWorldSeries = feed?.gameData?.game?.type === 'W'
-  const seriesHistory = useAsync(() => (isWorldSeries ? loadSeriesHistory() : null), [isWorldSeries]).data ?? null
-  // And each probable's earlier World Series starts, cut at the game's own date.
-  const probables = feed?.gameData?.probablePitchers
-  const wsDate = isWorldSeries ? feed?.gameData?.datetime?.officialDate : null
-  const wsStarts = useAsync(async () => {
-    if (!wsDate) return null
-    const ids = [probables?.away?.id, probables?.home?.id].filter(Boolean)
-    const counts = await Promise.all(ids.map((id) => fetchWorldSeriesStartsBefore(id, wsDate)))
-    return Object.fromEntries(ids.map((id, i) => [id, counts[i]]))
-  }, [wsDate, probables?.away?.id, probables?.home?.id]).data ?? null
+  const { seriesHistory, wsStarts } = useWsCalloutInputs(feed)
   const eventHistory = useEventHistory(feed)
   if (tab === 'lineups' && showEntering) {
     return (
@@ -514,33 +501,6 @@ function Section({
       />
     </>
   )
-}
-
-// One ranked list out of two already-ranked ones. Both builders emit the same
-// `{ text, personId, side, kind, score, dedupeKey }` note shape and score on the
-// same 0–100 worthiness rubric (docs/callouts.md), so re-ranking on `score` is a
-// merge, not a re-ranking — a strip note and a digest note compete on the terms
-// they were already scored under. Deduped on `dedupeKey` for the case both
-// builders reach the same fact about the same pitcher; the pre-half copy wins
-// by arriving first, which is the entering-tense wording (ADR-0014) and the
-// right one for a half still being scored.
-//
-// The re-rank is `rankNotes` (api/callout-notes/shared.js), so the merged list
-// carries the same decay and once-per-game rules the two builders already
-// applied to themselves, plus one note per kind ACROSS both of them. This one
-// is deliberately UNCAPPED: MarginNotes.jsx shows the first few and hides the
-// rest behind "Show N more", and a note a diversity rule turned down is
-// deferred to the tail rather than thrown away, so it is still there to find.
-function mergeNotes(preHalf, marginNotes, shownCounts) {
-  const seen = new Set()
-  const out = []
-  for (const n of [...preHalf, ...(marginNotes ?? [])]) {
-    const key = n.dedupeKey ?? n.text
-    if (seen.has(key)) continue
-    seen.add(key)
-    out.push(n)
-  }
-  return rankNotes(out, { shownCounts, maxPerKind: 1 })
 }
 
 function RefSheet({ onClose, children }) {

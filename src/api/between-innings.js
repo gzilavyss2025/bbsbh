@@ -30,6 +30,8 @@
 
 import { halfIndex, derivedHalfStartingPitcherId, openingHalfFor } from './select.js'
 import { matchupNotesForHalf } from './matchup/forHalf.js'
+import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from './callout-notes/worldSeries/odds.js'
+import { isWorldSeriesKind } from '../lib/worldSeries/calloutKind.js'
 import {
   buildStarterTeamRecordNote,
   buildBullpenThinNote,
@@ -51,7 +53,7 @@ export const BETWEEN_INNINGS_ALLOWED_KINDS = new Set([
   'foulVolume', 'pitchPace', 'tto', 'ttoPitches',
   'laboring', 'veloVariety', 'veloDecay', 'penFatigue', 'workload', 'backToBack',
   'leverage', 'centuryClub', 'sideSplit', 'tenK', 'scorelessStreak', 'sixIp', 'homeAway',
-  'cgShutout', 'recentAppearances', 'wsSeriesOdds',
+  'cgShutout', 'recentAppearances', 'wsSeriesOdds', 'wsStarterStart',
   // The matchup families (api/matchup/notes.js, api/matchup/arsenal.js) —
   // season Statcast rates for a due-up hitter against the arm he will face.
   // They read no liveData at all, so they clear this surface's stricter bar
@@ -69,7 +71,7 @@ function nextHalfOf(inning, half) {
 
 export function buildBetweenInnings({
   feed, bundle, marginNotes = [], inning, half, revealedThrough, workload, gameDate,
-  shownCounts = null, savantMatchup = null,
+  shownCounts = null, savantMatchup = null, seriesHistory = null, wsStarts = null,
 }) {
   if (!bundle) return []
   const { inning: nInning, half: nHalf } = nextHalfOf(inning, half)
@@ -87,6 +89,18 @@ export function buildBetweenInnings({
     ?? derivedHalfStartingPitcherId(feed, 1, openingHalfFor('home'), revealedThrough)
   if (away != null) pool.push(buildStarterTeamRecordNote(bundle, 'away', away))
   if (home != null) pool.push(buildStarterTeamRecordNote(bundle, 'home', home))
+
+  // World Series only: the Series state heading in, and each starter's World Series start count.
+  // Both are entering-tense and read no score (ADR-0014, ADR-0087); history is cut at the
+  // game's own date, as the pre-half strip does.
+  const gameType = feed?.gameData?.game?.type
+  if (gameType === 'W') {
+    const wsDate = feed?.gameData?.datetime?.officialDate ?? gameDate
+    pool.push(...buildWorldSeriesOddsNotes({ history: seriesHistory, bundle, gameDate: wsDate, gameType }))
+    for (const [side, pid] of [['away', away], ['home', home]]) {
+      pool.push(buildWorldSeriesStarterNote({ starts: wsStarts, pid, side, gameType }))
+    }
+  }
 
   const dow = weekdayFromDate(gameDate) ?? gameWeekday(feed)
   for (const side of ['away', 'home']) pool.push(buildDayOfWeekNote(bundle, side, dow))
@@ -126,5 +140,10 @@ export function buildBetweenInnings({
 
   // min(CARD_MAX, pool.length) — a sub-5 pool tracks data completeness
   // (pre-game data, MiLB gaps), never how eventful the half was.
-  return rankNotes(ordered, { shownCounts, maxPerKind: 1, limit: CARD_MAX })
+  //
+  // A World Series note sits outside that: the Series is the occasion, so none of its notes is
+  // ranked, decayed or counted against CARD_MAX, and they lead the stack.
+  const series = ordered.filter((n) => isWorldSeriesKind(n.kind))
+  const ranked = rankNotes(ordered.filter((n) => !isWorldSeriesKind(n.kind)), { shownCounts, maxPerKind: 1, limit: CARD_MAX })
+  return [...series.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)), ...ranked]
 }

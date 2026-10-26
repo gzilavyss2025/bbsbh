@@ -139,3 +139,25 @@ test('the last-meeting winner is named as he was that season', () => {
   const t = buildWorldSeriesOddsNotes({ history: named, bundle: bundleAfter(1, 2, []), gameDate: '2001-10-20', gameType: 'W' }).map((n) => n.text)
   assert.ok(t.includes('The Club1 and the Club2 last met in the World Series in 2000; the Old Club1 won.'), t.join(' | '))
 })
+
+test('the pre-half strip never caps, ranks or trims a World Series note', async () => {
+  const { buildPreHalfCallouts } = await import('../../src/api/prehalf-callouts.js')
+  const feed = { gameData: { game: { type: 'W' }, datetime: { officialDate: '2001-10-12' }, probablePitchers: { away: { id: 10 }, home: { id: 20 } } }, liveData: { plays: { allPlays: [] }, linescore: { innings: [] } } }
+  // Game 1: the repeat champion and the first meeting are two notes of one kind, with the
+  // home starter's first Series start besides: three Series notes on a strip of two slots.
+  const strip = buildPreHalfCallouts({
+    feed, bundle: bundleAfter(1, 2, []), inning: 1, half: 'top', revealedThrough: -1,
+    workload: null, gameDate: '2001-10-12', seriesHistory: HISTORY, wsStarts: { 10: 0, 20: 0 },
+  })
+  const ws = strip.filter((n) => /^ws[A-Z]/.test(n.kind)).map((n) => n.dedupeKey)
+  assert.deepEqual(ws.sort(), ['wsSeriesOdds-meeting', 'wsSeriesOdds-repeat', 'wsStarterStart-20'])
+})
+
+test('the Arms tab merge keeps every World Series note, however often the ledger has seen it', async () => {
+  const { mergeNotes } = await import('../../src/api/prehalf-callouts.js')
+  const ws = (family) => ({ text: family, kind: 'wsSeriesOdds', score: 65, dedupeKey: `wsSeriesOdds-${family}` })
+  const other = { text: 'x', kind: 'laboring', score: 90, dedupeKey: 'laboring-1' }
+  const shown = new Map([['wsSeriesOdds-meeting', 3], ['wsSeriesOdds-drought-home', 3]])
+  const out = mergeNotes([ws('meeting'), ws('drought-home')], [other], shown)
+  assert.deepEqual(out.map((n) => n.dedupeKey), ['wsSeriesOdds-meeting', 'wsSeriesOdds-drought-home', 'laboring-1'])
+})
