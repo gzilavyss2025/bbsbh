@@ -22,7 +22,8 @@
 }
 
 /* The one round control on these pages is the info button (InfoPopover): square, as every other
-   control is (ADR-0112). A selector, not a token: its radius is --radius-pill, which the pips keep. */
-:is(.ww, .psseries--ws) .btn--icon {
+   control is (ADR-0112). A selector, not a token: its radius is --radius-pill, which the pips keep.
+   Named for that button alone, so no other icon button in these roots changes. */
+:is(.ww, .psseries--ws) .infopop__btn {
   border-radius: var(--radius-square);
 }

@@ -73,11 +73,12 @@ function Club({ clubId, grid }) {
   )
 }
 
-export function Bullpen({ clubIds, boxscoresByClub, slateDate }) {
+// `labelAs`: the tab's heading level, 'h3' on the series pages (under their h2 group bands).
+export function Bullpen({ clubIds, boxscoresByClub, slateDate, labelAs = 'h2' }) {
   const grids = clubIds.map((id) => bullpenGrid(boxscoresByClub?.[id], id, { slateDate }))
   if (grids.every((g) => g.rows.length === 0)) return null
   return (
-    <Card frame="stamped" label="Bullpen" count="Pitches per Oct game" className="ww-bullpen">
+    <Card frame="stamped" label="Bullpen" labelAs={labelAs} count="Pitches per Oct game" className="ww-bullpen">
       <Grid min={300} gap="base" fit>
         {clubIds.map((id, i) => (
           <Club key={id} clubId={id} grid={grids[i]} />

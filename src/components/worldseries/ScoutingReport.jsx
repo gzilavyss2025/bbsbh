@@ -194,14 +194,17 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
         />
       )}
       {failed && <p className="ww-scout__failed" role="status">{failed}</p>}
-      {cardRuns(cards).map((run) => {
+      {cardRuns(cards).map((run, at, runs) => {
         const items = run.map((c) => (
           <div key={c.id} id={`ww-scout-${c.id}`} className="ww-scout__card">
             {CARD[c.id](ctx)}
           </div>
         ))
         // A wide card is its own row; the cards between two of them flow in balanced columns.
-        return WIDE_CARDS.includes(run[0].id) ? items : <Flow key={run[0].id}>{items}</Flow>
+        // A flow is keyed by the wide card before it, not by its own first card: cards join a run as
+        // their data loads, and a new first card must not remount the cards after it (Park fit keeps
+        // its chosen park).
+        return WIDE_CARDS.includes(run[0].id) ? items : <Flow key={`after-${runs[at - 1]?.[0].id ?? 'start'}`}>{items}</Flow>
       })}
     </Stack>
   )

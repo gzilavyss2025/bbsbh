@@ -279,8 +279,8 @@ function LeaderDoor({ leader, category, doors }) {
 // roster, not a ranked/comparative board like the result banner or the
 // leader sections above it.
 //
-// `stamped` (the World Series page): a stamped card named "Roster" on its ink tab, the club
-// (mark and name) heading the lists, as the scouting Roster card names its clubs.
+// `stamped` (the World Series page): a stamped card named "{Club} roster" on its ink tab, so the
+// two cards have different names for a screen reader; the club's mark heads the lists.
 export function RosterCard({ teamId, roster, stamped = false }) {
   const positionPlayers = roster?.positionPlayers ?? []
   const pitchers = roster?.pitchers ?? []
@@ -289,14 +289,11 @@ export function RosterCard({ teamId, roster, stamped = false }) {
     <Card
       body="flush"
       className="psseries__rostercard"
-      {...(stamped ? { frame: 'stamped', label: 'Roster', labelAs: 'h3' } : null)}
+      {...(stamped ? { frame: 'stamped', label: `${teamClubNameShort(teamId)} roster`, labelAs: 'h3' } : null)}
     >
       <div className="psseries__rosterhead">
-        <TeamLogo teamId={teamId} name={teamClubNameShort(teamId)} size={24} />
-        <span className="psseries__rosterteam">
-          {teamClubNameShort(teamId)}
-          {stamped ? '' : ' roster'}
-        </span>
+        <TeamLogo teamId={teamId} name={stamped ? '' : teamClubNameShort(teamId)} size={24} />
+        {!stamped && <span className="psseries__rosterteam">{teamClubNameShort(teamId)} roster</span>}
       </div>
       {positionPlayers.length > 0 && <RosterGroup title="Position players" rows={positionPlayers} />}
       {pitchers.length > 0 && <RosterGroup title="Pitchers" rows={pitchers} />}

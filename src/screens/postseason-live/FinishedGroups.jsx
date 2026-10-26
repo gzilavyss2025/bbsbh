@@ -26,7 +26,7 @@ export function FinishedGroups({ groups, parts, view, mode, cutoff, meetings, no
         <Group id="series" label="Series">
           {parts.flow}
           {parts.games}
-          {data && <Reel series={series} slateDate={cutoff} clubGames={data.clubGames} lcsRound={NO_LCS} />}
+          {data && <Reel series={series} slateDate={cutoff} clubGames={data.clubGames} lcsRound={NO_LCS} labelAs="h3" />}
           {parts.totals}
           {parts.leaders}
         </Group>
@@ -54,12 +54,12 @@ export function FinishedGroups({ groups, parts, view, mode, cutoff, meetings, no
         <Group id="compare" label="Compare">
           {data && (
             <Flow>
-              <Tape awayId={clubA} homeId={clubB} data={data} slateDate={cutoff} />
-              <HotBats clubIds={clubIds} splitsByClub={data.hotBats} />
-              <HomeRoad clubIds={clubIds} clubGames={data.clubGames} slateDate={cutoff} />
+              <Tape awayId={clubA} homeId={clubB} data={data} slateDate={cutoff} labelAs="h3" />
+              <HotBats clubIds={clubIds} splitsByClub={data.hotBats} labelAs="h3" />
+              <HomeRoad clubIds={clubIds} clubGames={data.clubGames} slateDate={cutoff} labelAs="h3" />
             </Flow>
           )}
-          {data && <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={cutoff} />}
+          {data && <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={cutoff} labelAs="h3" />}
           {parts.strip}
           {meetings?.length > 0 && <FilmRoom meetings={meetings} compact={false} clubId={noteClub} />}
           {parts.nine}

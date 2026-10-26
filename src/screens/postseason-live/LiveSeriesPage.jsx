@@ -384,7 +384,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           />
   )
   const nineEl = pair && (
-          <SeriesNineKeys data={nineKeys} clubs={clubs} season={bracket.season} />
+          <SeriesNineKeys data={nineKeys} clubs={clubs} season={bracket.season} labelAs={ws ? 'h3' : 'h2'} />
   )
   const absEl = pair && (
           <SeriesAbsReport
@@ -464,7 +464,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
         <Group id="series" label="Series">
           {flowEl}
           {gamesEl}
-          {wsData && <Reel series={series} slateDate={cutoff} clubGames={wsData.clubGames} lcsRound={(id) => lcsRoundOf(bracket, id)} />}
+          {wsData && <Reel series={series} slateDate={cutoff} clubGames={wsData.clubGames} lcsRound={(id) => lcsRoundOf(bracket, id)} labelAs="h3" />}
           {noticesEl}
           {totalsEl}
           {leadersEl}
@@ -493,17 +493,18 @@ export function LiveSeriesPage({ seriesId, asOf }) {
         <Group id="compare" label="Compare">
           {/* The short cards flow in balanced columns; the Bullpen, two wide tables, takes the row. */}
           <Flow>
-            {wsData && <Tape awayId={game?.awayId ?? clubA} homeId={game?.homeId ?? clubB} data={wsData} slateDate={cutoff} />}
-            {wsData && <HotBats clubIds={view.clubIds} splitsByClub={wsData.hotBats} />}
+            {wsData && <Tape awayId={game?.awayId ?? clubA} homeId={game?.homeId ?? clubB} data={wsData} slateDate={cutoff} labelAs="h3" />}
+            {wsData && <HotBats clubIds={view.clubIds} splitsByClub={wsData.hotBats} labelAs="h3" />}
             <Trip
               fromVenueId={lastPlayed ? parkOf[lastPlayed.gamePk]?.venue?.id : null}
               toVenueId={game?.venue?.id}
               firstPitch={game?.gameDate}
               wide={wide}
+              labelAs="h3"
             />
-            {wsData && <HomeRoad clubIds={view.clubIds} clubGames={wsData.clubGames} slateDate={cutoff} />}
+            {wsData && <HomeRoad clubIds={view.clubIds} clubGames={wsData.clubGames} slateDate={cutoff} labelAs="h3" />}
           </Flow>
-          {wsData && <Bullpen clubIds={view.clubIds} boxscoresByClub={wsData.boxscores} slateDate={cutoff} />}
+          {wsData && <Bullpen clubIds={view.clubIds} boxscoresByClub={wsData.boxscores} slateDate={cutoff} labelAs="h3" />}
           {stripEl}
           {meetings?.length > 0 && <FilmRoom meetings={meetings} compact={mode.dayType === 'game'} clubId={noteClub} />}
           {nineEl}

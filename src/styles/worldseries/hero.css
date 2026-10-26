@@ -262,6 +262,8 @@
   --i: 3;
 }
 .ww-hero__who--home { --i: 4; }
+/* The pair rule above out-ranks the line before, so the home side's step is restated at its weight. */
+.ww-hero__pair > .ww-hero__who--home { --i: 4; }
 
 .ww-hero__name {
   align-self: end;

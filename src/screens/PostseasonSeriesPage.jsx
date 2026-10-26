@@ -359,7 +359,7 @@ export function PostseasonSeriesPage({ seriesId }) {
         title="Regular season"
       />
   )
-  const nineEl = <SeriesNineKeys data={nineKeys} clubs={clubs} season={year} />
+  const nineEl = <SeriesNineKeys data={nineKeys} clubs={clubs} season={year} labelAs={wsStamped ? 'h3' : 'h2'} />
   const absEl = <SeriesAbsReport season={year} clubIds={clubs.map((c) => c.id)} gamePks={games.map((g) => g.gamePk)} stamped={wsStamped} />
   const rostersEl = (
     <div className="psseries__rosters">

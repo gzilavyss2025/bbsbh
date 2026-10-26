@@ -91,9 +91,9 @@ export function SeriesAbsReport({ season, clubIds, gamePks, cutoff = null, stamp
           </Door>
         )}
         {stamped && (
-          <Door layout="block" {...routeLink('/abs-challenges')}>
-            All challenges
-          </Door>
+          <div className="psseries__absdoor">
+            <Door {...routeLink('/abs-challenges')}>All challenges</Door>
+          </div>
         )}
       </Card>
     </Wrap>

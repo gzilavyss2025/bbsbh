@@ -33,7 +33,7 @@ import { ScoutingReport } from './ScoutingReport.jsx'
 // Cards, top to bottom. Game day: hero, [ledger], reel, probables, tape + hot
 // bats, bullpen; the scouting report follows probables. Off day: hero, [ledger], reel,
 // scouting report, [played on a phone], the trip,
-// home and road + bullpen (side by side wide).
+// home and road, then the bullpen on its own full row.
 //
 // Wide, the top row is the hero beside a column of the postseason bracket and the next card that
 // fits 358px (Probables on a game day, The trip on an off day), and every card under it runs the
