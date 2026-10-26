@@ -37,7 +37,8 @@ is pinned on a captured real game (`test/fixtures/game-823035.trimmed.json`, see
   `game-820258.trimmed.json` (Single-A at the one park that runs challenges and
   reports no bank) are all field-trimmed to the paths the selectors under test read,
   and all rebuilt by a committed script under `.scratch/` rather than by hand — the
-  ABS pair by the same one, which takes the gamePk as its argument. The suite reads them
+  ABS pair by the same one, which takes the gamePk as its argument. The Gameday engine's
+  `game-*.gameday.json` set is rebuilt by `.scratch/gameday-engine/build-fixture.mjs`. The suite reads them
   from disk, so it stays offline.
 - **A hook is exercised through one server render.** `callout-ledger.test.js` reads
   `useCalloutLedgerValue` by rendering a probe component with

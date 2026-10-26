@@ -93,6 +93,8 @@ test('challengesForPlay resolves a pitch-level review to its exact pitch, not a 
       isHeuristic: false,
       playerId: 1,
       playerName: 'Aaron Ashby',
+      reviewType: 'MJ',
+      inProgress: false,
     },
   ])
 })
@@ -108,6 +110,8 @@ test('challengesForPlay falls back to the at-bat\'s last pitch for a play-level 
       isHeuristic: true,
       playerId: 12,
       playerName: 'Leo Lowe',
+      reviewType: 'MJ',
+      inProgress: false,
     },
   ])
 })

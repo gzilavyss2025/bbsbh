@@ -128,3 +128,10 @@ The steal, caught-stealing and pickoff cards also say which pitch of the at-bat 
 before the event in the play's own `playEvents`, or the whole play's for an event the feed
 folded into `runners[]`. That order is inferred from a three-day MLB sample (2026-09-25..27:
 49 of 49 events after at least one pitch), not documented by MLB.
+
+## Amendment (2026-10-26): sub-steps
+
+ADR-0123 makes a step smaller than one plate appearance for Gameday: pitch mode and event
+taps walk sub-steps inside a step, on this same cursor (stored `{halfIdx}:{count}:{sub}`).
+This ADR's rules stand: the cursor stages, it never writes `revealedThrough` before the
+half's last sub-step, and it is never a second spoiler boundary.
