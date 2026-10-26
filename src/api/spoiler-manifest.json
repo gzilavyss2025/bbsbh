@@ -238,6 +238,7 @@
       "class": "reveal-only",
       "why": "The 'last time' lines for a triple play, cycle or no-hitter, built from the feat index (ADR-0101). It names results, so hooks/callouts/useLastTime.js calls it only for a revealed play card or inside the box score's reveal.",
       "importers": [
+        "api/gameday/moments/moments.js",
         "hooks/callouts/useLastTime.js"
       ]
     },
@@ -438,6 +439,15 @@
       "why": "Gameday's day lines (#2606): the batter's and the pitcher's line for today as of the reader's step. A line names results ('2-for-3'). Built from computeHalfInningFeed's cards WITH the step cap and sliced at it, and from computePitcherLines' own step clamp, so step k never sees step k+1; a half past revealedThrough + 1 answers null. No screen imports it yet; the fresh Gameday stage (#2568) will call it inside a SealBox reveal render function.",
       "importers": []
     },
+    "gameday/moments/moments.js": {
+      "class": "reveal-only",
+      "why": "Gameday's moments engine (#2608): scores one revealed play (walk-off, grand slam, triple play, cycle, odds swing, milestone, Statcast extreme) and names the result. Answers null for a play not on screen (gameday/stepCut.js); every detector reads only this play and the ones before it, and the odds swing is winprob.js' own path clamped to this play. Returns data and decides no timing (ADR-0046). No screen imports it yet.",
+      "importers": []
+    },
+    "gameday/moments/thresholds.js": {
+      "class": "spoiler-free",
+      "why": "Constants only: the Statcast and odds-swing floors for the moments engine, measured from a 134-game league sample (the table in its header)."
+    },
     "gameday/reviews.js": {
       "class": "reveal-only",
       "why": "Gameday's review list and ABS bank (#2607) as of the reader's step: manager, crew-chief and ABS reviews with their outcome. A review can flip a called third strike or an out. Earlier halves whole, the reader's half only up to the last plate appearance on screen (gameday/stepCut.js); a half past revealedThrough + 1 answers null. Never reads gameData.absChallenges, whose counts are the whole game's. No screen imports it yet.",
@@ -448,6 +458,7 @@
       "why": "The step cut the Gameday data modules share: which at-bat cards of the reader's half are on screen, from computeHalfInningFeed built with the step cap and sliced at it (ADR-0016). Reads the cards, so reveal-only like them.",
       "importers": [
         "api/gameday/dayLine.js",
+        "api/gameday/moments/moments.js",
         "api/gameday/reviews.js"
       ]
     },
@@ -1293,6 +1304,7 @@
       "class": "reveal-only",
       "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp.",
       "importers": [
+        "api/gameday/moments/moments.js",
         "components/charts/WinProbChart.jsx",
         "screens/InningViewer.jsx",
         "screens/boxscore/revealBoxScore.js"

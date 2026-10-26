@@ -13,12 +13,19 @@
 //   823169  MIN@SF 2026-09-21 — the umpires' own reviews (NO, NH: no club)
 //           beside nine ABS challenges.
 //   815625  13 innings, five failed away challenges — the extra-inning refill.
+//   777747  BOS@MIL 2025-05-27 — Yelich's walk-off grand slam, bottom 10th.
+//   778442  ATH@COL 2025-04-05 — a 5-4-3 triple play, top 2nd (ab 9).
+//   778501  CHC@ATH 2025-03-31 — Carson Kelly's cycle.
+// Each carries `winProbability` (the separate endpoint, trimmed) when MLB serves it.
 import { writeFileSync } from 'node:fs'
 import { getJson } from '../../scripts/lib/statsapi.mjs'
 
 const PK = Number(process.argv[2])
 if (!PK) throw new Error('usage: build-fixture.mjs <gamePk>')
 const feed = await getJson(`/api/v1.1/game/${PK}/feed/live`)
+// The win-probability endpoint, trimmed to what api/winprob.js reads; absent at
+// most MiLB parks.
+const wp = await getJson(`/api/v1/game/${PK}/winProbability`).catch(() => null)
 
 const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o?.[k] !== undefined).map((k) => [k, o[k]]))
 const person = (p) => pick(p, ['id', 'fullName', 'firstName', 'lastName', 'useName', 'boxscoreName', 'primaryNumber', 'primaryPosition', 'batSide', 'pitchHand'])
@@ -40,6 +47,8 @@ const boxTeam = (t) => ({
 const event = (e) => ({
   ...pick(e, ['count', 'index', 'pitchNumber', 'isPitch', 'type', 'player', 'position', 'replacedPlayer', 'battingOrder', 'isSubstitution', 'base', 'reviewDetails', 'playId']),
   details: pick(e.details, ['call', 'description', 'code', 'type', 'event', 'eventType', 'isInPlay', 'isStrike', 'isBall', 'isOut', 'hasReview', 'runnerGoing', 'fromCatcher', 'disengagementNum']),
+  ...(e.pitchData?.startSpeed != null ? { pitchData: { startSpeed: e.pitchData.startSpeed } } : {}),
+  ...(e.hitData ? { hitData: pick(e.hitData, ['launchSpeed', 'launchAngle', 'totalDistance', 'trajectory', 'location', 'coordinates']) } : {}),
 })
 
 const out = {
@@ -55,12 +64,18 @@ const out = {
     plays: {
       allPlays: feed.liveData.plays.allPlays.map((p) => ({
         ...pick(p, ['about', 'count', 'runners', 'reviewDetails']),
-        result: pick(p.result, ['type', 'event', 'eventType', 'description', 'rbi', 'isOut']),
+        result: pick(p.result, ['type', 'event', 'eventType', 'description', 'rbi', 'isOut', 'awayScore', 'homeScore']),
         matchup: { batter: pick(p.matchup?.batter, ['id', 'fullName']), pitcher: pick(p.matchup?.pitcher, ['id', 'fullName']), batSide: p.matchup?.batSide, pitchHand: p.matchup?.pitchHand },
         playEvents: (p.playEvents ?? []).map(event),
       })),
     },
   },
+}
+if (Array.isArray(wp)) {
+  out.winProbability = wp.map((e) => ({
+    about: pick(e.about, ['inning', 'isTopInning', 'atBatIndex', 'isScoringPlay']),
+    homeTeamWinProbability: e.homeTeamWinProbability,
+  }))
 }
 const path = new URL(`../../test/fixtures/game-${PK}.gameday.json`, import.meta.url)
 writeFileSync(path, `${JSON.stringify(out)}\n`)

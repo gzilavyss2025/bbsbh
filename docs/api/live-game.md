@@ -713,6 +713,18 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
   ball, and a pitch thrown before a mid-at-bat `pitching_substitution` is the replaced
   man's, not the play's `matchup.pitcher`. That rule matched the box score for every
   pitcher in five games (2026-10-26).
+- `gameday/moments/moments.js` (#2608) — `momentsForPlay(feed, atBatIndex, { inning, half,
+  step, revealedThrough, winProb, milestones })` gives the play's moments, highest score
+  first, or null for a play not on screen. Kinds and families: rare (`walkOff`,
+  `grandSlam`, `triplePlay`, `cycle`), odds (`oddsSwing`), `milestone`, and statcast
+  (`hitHard`, `hitFar`, `thrownFast`). Score = `MOMENT_BASE` + a 0–20 `magnitudeOf` bonus
+  (docs/callouts.md, "Worthiness"); `levelFor(score)` maps it onto the #2574 dial through
+  `CUTOFFS` (Quiet 60, Normal 35, Lots 0). The walk-off reads the feed's running
+  `result.homeScore`/`awayScore` after this play and the one before, never the final.
+  Triple play and cycle reuse `detectPlayFeat`. "First-ever" is not built: no revealed
+  source says a feat is a player's first. The floors in `moments/thresholds.js` are p99
+  (p95 for the odds swing) of a 134-game 2026 sample,
+  `.scratch/gameday-engine/measure-moments.mjs`.
 
 
 ## Leader boards (live)
