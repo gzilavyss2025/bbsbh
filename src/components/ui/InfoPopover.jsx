@@ -9,7 +9,10 @@ import { IconButton } from './control/IconButton.jsx'
 // prefers-reduced-motion is honoured in the stylesheet.
 //
 // Used in the navy section mastheads on the lineup pages (BullpenBoard). On a
-// paper card, pass className="infopop--paper" (the Nine keys footers).
+// paper card, pass className="infopop--paper" (the Nine keys footers). The paper
+// tip spans its nearest positioned box and opens upward, so put the (i) in a row
+// that wears `infopop-row` (position: relative); add `infopop--down` for an (i) in
+// a card's header, so the tip opens below it (44-pre-game-cards.css).
 // `label` is the button's accessible name; `children` is the tip.
 export function InfoPopover({ label, children, className = '' }) {
   const [open, setOpen] = useState(false)

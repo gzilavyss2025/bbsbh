@@ -3,9 +3,10 @@ import '../../styles/postseason/series-parts.css'
 import '../../styles/postseason/series-abs.css'
 import '../../styles/postseason/series-live.css'
 import '../../styles/worldseries/home.css'
-import { useMemo, useState } from 'react'
+import '../../styles/worldseries/square.css'
+import { Fragment, useMemo, useState } from 'react'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
-import { bestOfLine, cardLines, recordLine, roundTitle } from '../../api/postseason/text.js'
+import { cardLines, roundTitle } from '../../api/postseason/text.js'
 import { fetchUpcomingSeriesGames } from '../../api/postseason/upcoming.js'
 import { loadNineKeys } from '../../api/nineKeys.js'
 import { formerTeammatePairs, loadFormerTeammates } from '../../api/formerTeammates.js'
@@ -28,8 +29,6 @@ import { gamePath } from '../../lib/route.js'
 import { useNav } from '../../lib/nav.js'
 import { monthDayName, toApiDate } from '../../lib/dates.js'
 import { teamClubNameShort } from '../../lib/teams.js'
-import { TeamLink } from '../../components/team/TeamLink.jsx'
-import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
@@ -48,6 +47,8 @@ import { SeriesNineKeys } from '../../components/postseason/SeriesNineKeys.jsx'
 import { SeriesAbsReport } from '../../components/postseason/SeriesAbsReport.jsx'
 import { SeasonSeriesStrip } from '../../components/teamstats/SeasonSeriesStrip.jsx'
 import { FormerTeammates } from '../../components/team/FormerTeammates.jsx'
+import { Flow } from '../../components/worldseries/Flow.jsx'
+import { ResultBanner } from './ResultBanner.jsx'
 import { Hero } from '../../components/worldseries/Hero.jsx'
 import { Reel } from '../../components/worldseries/Reel.jsx'
 import { ScoutingReport } from '../../components/worldseries/ScoutingReport.jsx'
@@ -58,10 +59,6 @@ import { HotBats } from '../../components/worldseries/cards/HotBats.jsx'
 import { Tape } from '../../components/worldseries/cards/Tape.jsx'
 import { Trip } from '../../components/worldseries/cards/Trip.jsx'
 import { FilmRoom } from '../../components/worldseries/cards/scouting/FilmRoom.jsx'
-import { Grid } from '../../components/ui/layout/Grid.jsx'
-import { Stack } from '../../components/ui/layout/Stack.jsx'
-import { seriesMark } from '../../lib/postseason/seriesMarks.js'
-import { SeriesMark } from '../../components/postseason/SeriesMark.jsx'
 
 
 // Live Postseason Series: a series still in progress, or a 2026 series that
@@ -159,6 +156,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   // The World Series gets the home page's pieces in jump-bar groups; every other round keeps the
   // original order. A decided Series keeps its banner (its headline names the winner).
   const mode = series?.round === 'worldseries' ? seriesMode(series) : null
+  // The World Series page draws every block as a stamped card; the other rounds keep the sheet look.
+  const ws = Boolean(mode)
   const wide = useMediaQuery(WIDE_QUERY)
   const view = useWorldSeriesView(mode, cutoff)
   const [scoutShown, setScoutShown] = useState(false)
@@ -230,56 +229,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
 
   // Every section is a value, so the World Series layout (groups) and every other round
   // (the original order) draw the same parts.
-      /* The result hero, reusing the finished page's exact banner/ledger
-          classes (.psseries__result etc.) — but the headline is recordLine's
-          state ("Series tied 1–1", "CHC leads 2–1", or a decided
-          series' own "TOR won 3–1": trap 7 means a decided 2026 series
-          still opens here) rather than a clinch declaration, since this page
-          may render before there IS one. Each club's win trace is the same
-          inked-cell ledger idiom (.psseries__cell--won); winner/loser tinting
-          applies only once the series actually is decided. */
-  const resultBanner = (
-      <Card body="flush" className="psseries__result">
-        <div className="psseries__banner">
-          <h2 className="psseries__headline">{results.length === 0 ? bestOfLine(series) : recordLine(series)}</h2>
-          <SeriesMark
-            mark={seriesMark({ season: bracket.season, round: series.round, league: series.league })}
-            height={40}
-            decorative
-            className="psseries__mark"
-          />
-        </div>
-        <div className="psseries__ledger">
-          {clubs.map((club) => {
-            const wins = series.slots.find((slot) => slot.club?.id === club.id)?.wins ?? 0
-            const isWinner = series.decided && series.winner?.id === club.id
-            const isLoser = series.decided && series.eliminated?.id === club.id
-            return (
-              <div
-                key={club.id}
-                className={`psseries__team${isWinner ? ' psseries__team--winner' : ''}${isLoser ? ' psseries__team--loser' : ''}`}
-              >
-                <TeamLink id={club.id} className="psseries__teamlink">
-                  <TeamLogo teamId={club.id} name={teamClubNameShort(club.id)} size={32} />
-                  <span className="psseries__teamname">{teamClubNameShort(club.id)}</span>
-                </TeamLink>
-                <div className="psseries__cells" aria-hidden="true">
-                  {results.map((g) => (
-                    <span
-                      key={g.gameNumber}
-                      className={`psseries__cell${g.winnerId === club.id ? ' psseries__cell--won' : ''}`}
-                    >
-                      {g.winnerId === club.id ? g.gameNumber : ''}
-                    </span>
-                  ))}
-                </div>
-                <span className="psseries__wins">{wins}</span>
-              </div>
-            )
-          })}
-        </div>
-      </Card>
-  )
+  const resultBanner = <ResultBanner series={series} results={results} clubs={clubs} season={bracket.season} />
   const pair = clubs.length === 2
   // Today's game — the home slate's own card, never scored. It is handed no score line, and no
   // feed or box-score fetch ever runs for this gamePk on this page (root CLAUDE.md's spoiler rule).
@@ -311,6 +261,8 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           note={[`Game ${nextRow.gameNumber}`, today ? nextDetail.venue.name : monthDayName(nextDetail.date)]
             .filter(Boolean)
             .join(' · ')}
+          tag={[`Game ${nextRow.gameNumber}`, today ? null : monthDayName(nextDetail.date)].filter(Boolean).join(' · ')}
+          stamped={ws}
           game={nextDetail}
           season={bracket.season}
           cutoff={cutoff}
@@ -324,6 +276,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
         previous={beforeUpcoming}
         showArms={showArms}
         formatDate={monthDayName}
+        stamped={ws}
       />
   )
   const flowEl = results.length > 0 && clubs.length === 2 && (
@@ -333,12 +286,14 @@ export function LiveSeriesPage({ seriesId, asOf }) {
           homeIdByPk={homeIdByPk}
           clubs={clubs}
           defaultId={clubs.some((c) => c.id === favoriteTeamId) ? favoriteTeamId : clubs[1].id}
+          stamped={ws}
         />
       )
+  const GamesWrap = ws ? Fragment : 'section'
   const gamesEl = results.length > 0 && (
-        <section className="psseries__games">
-          <SectionHead look="label">Game by game</SectionHead>
-          <Card as="div" body="flush" className="psseries__log">
+        <GamesWrap {...(ws ? null : { className: 'psseries__games' })}>
+          {!ws && <SectionHead look="label">Game by game</SectionHead>}
+          <Card as="div" body="flush" className="psseries__log" {...(ws ? { frame: 'stamped', label: 'Game by game', labelAs: 'h3' } : null)}>
             <div className="psseries__logbody">
               {results.map((g, i) => {
                 const card = cardsByPk?.[g.gamePk]
@@ -383,7 +338,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
               })}
             </div>
           </Card>
-        </section>
+        </GamesWrap>
   )
   const noticesEl = (
     <>
@@ -393,23 +348,25 @@ export function LiveSeriesPage({ seriesId, asOf }) {
       )}
     </>
   )
-  const totalsEl = stats?.totals && clubs.length === 2 && <SeriesTotals totals={stats.totals} clubs={clubs} />
+  const totalsEl = stats?.totals && clubs.length === 2 && <SeriesTotals totals={stats.totals} clubs={clubs} stamped={ws} labelAs="h3" />
   const leadersEl = (hasBatting || hasPitching) && (
         <div className="psseries__leaders">
           {hasBatting && (
             <SeriesLeaderBoard
-              title="Series batting leaders"
+              title={ws ? 'Batting leaders' : 'Series batting leaders'}
               categories={BATTING_CATEGORIES}
               byCategory={stats.batting}
               doors={leaderDoors('hitting')}
+              stamped={ws}
             />
           )}
           {hasPitching && (
             <SeriesLeaderBoard
-              title="Series pitching leaders"
+              title={ws ? 'Pitching leaders' : 'Series pitching leaders'}
               categories={SERIES_PITCHING_CATEGORIES}
               byCategory={stats.pitching}
               doors={leaderDoors('pitching')}
+              stamped={ws}
             />
           )}
         </div>
@@ -422,12 +379,12 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             sportId={1}
             gameTypes="R"
             settled
-            look="label"
+            look={ws ? 'stamped' : 'label'}
             title="Regular season"
           />
   )
   const nineEl = pair && (
-          <SeriesNineKeys data={nineKeys} clubs={clubs} season={bracket.season} />
+          <SeriesNineKeys data={nineKeys} clubs={clubs} season={bracket.season} labelAs={ws ? 'h3' : 'h2'} />
   )
   const absEl = pair && (
           <SeriesAbsReport
@@ -435,6 +392,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             clubIds={clubs.map((c) => c.id)}
             gamePks={games.map((g) => g.gamePk)}
             cutoff={cutoff}
+            stamped={ws}
           />
   )
   const matesEl = pair && (
@@ -444,6 +402,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
             dayNight=""
             away={{ id: clubs[0].id, teamName: teamClubNameShort(clubs[0].id) }}
             home={{ id: clubs[1].id, teamName: teamClubNameShort(clubs[1].id) }}
+            stamped={ws}
           />
   )
   const rostersEl = (
@@ -456,7 +415,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
       {rosterCards.length > 0 && (
         <div className="psseries__rosters">
           {rosterCards.map(({ club, roster }) => (
-            <RosterCard key={club.id} teamId={club.id} roster={roster} />
+            <RosterCard key={club.id} teamId={club.id} roster={roster} stamped={ws} />
           ))}
         </div>
       )}
@@ -505,7 +464,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
         <Group id="series" label="Series">
           {flowEl}
           {gamesEl}
-          {wsData && <Reel series={series} slateDate={cutoff} clubGames={wsData.clubGames} lcsRound={(id) => lcsRoundOf(bracket, id)} />}
+          {wsData && <Reel series={series} slateDate={cutoff} clubGames={wsData.clubGames} lcsRound={(id) => lcsRoundOf(bracket, id)} labelAs="h3" />}
           {noticesEl}
           {totalsEl}
           {leadersEl}
@@ -532,26 +491,20 @@ export function LiveSeriesPage({ seriesId, asOf }) {
       </div>
       {has('compare') && (
         <Group id="compare" label="Compare">
-          <Stack gap="loose">
-            {wsData && (
-              <Grid min={340} gap="loose">
-                <Tape awayId={game?.awayId ?? clubA} homeId={game?.homeId ?? clubB} data={wsData} slateDate={cutoff} />
-                <HotBats clubIds={view.clubIds} splitsByClub={wsData.hotBats} />
-              </Grid>
-            )}
+          {/* The short cards flow in balanced columns; the Bullpen, two wide tables, takes the row. */}
+          <Flow>
+            {wsData && <Tape awayId={game?.awayId ?? clubA} homeId={game?.homeId ?? clubB} data={wsData} slateDate={cutoff} labelAs="h3" />}
+            {wsData && <HotBats clubIds={view.clubIds} splitsByClub={wsData.hotBats} labelAs="h3" />}
             <Trip
               fromVenueId={lastPlayed ? parkOf[lastPlayed.gamePk]?.venue?.id : null}
               toVenueId={game?.venue?.id}
               firstPitch={game?.gameDate}
               wide={wide}
+              labelAs="h3"
             />
-            {wsData && (
-              <Grid min={340} gap="loose">
-                <HomeRoad clubIds={view.clubIds} clubGames={wsData.clubGames} slateDate={cutoff} />
-                <Bullpen clubIds={view.clubIds} boxscoresByClub={wsData.boxscores} slateDate={cutoff} />
-              </Grid>
-            )}
-          </Stack>
+            {wsData && <HomeRoad clubIds={view.clubIds} clubGames={wsData.clubGames} slateDate={cutoff} labelAs="h3" />}
+          </Flow>
+          {wsData && <Bullpen clubIds={view.clubIds} boxscoresByClub={wsData.boxscores} slateDate={cutoff} labelAs="h3" />}
           {stripEl}
           {meetings?.length > 0 && <FilmRoom meetings={meetings} compact={mode.dayType === 'game'} clubId={noteClub} />}
           {nineEl}
@@ -568,7 +521,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   )
 
   return (
-    <div className="screen psseries pslive">
+    <div className={`screen psseries pslive${ws ? ' psseries--ws' : ''}`}>
       <SiteHeader />
       <BackBtn onClick={back} />
 

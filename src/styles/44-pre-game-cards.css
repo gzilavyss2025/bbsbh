@@ -460,4 +460,13 @@
 .infopop--paper .infopop__tip::before {
   display: none;
 }
+/* The row that holds a paper (i): the positioned box its tip spans. The tip opens upward by
+   default; `infopop--down` opens it below the row, for an (i) in a card's header. */
+.infopop-row {
+  position: relative;
+}
+.infopop--paper.infopop--down .infopop__tip {
+  top: calc(100% + var(--space-1h));
+  bottom: auto;
+}
 

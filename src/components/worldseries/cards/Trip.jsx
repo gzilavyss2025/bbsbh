@@ -12,22 +12,31 @@ import { StatCell, StatStrip } from '../../ui/frame/StatStrip.jsx'
 // just played in dashed, the next park solid. Geography only: no result is read.
 // Hidden when either park fails to load or both games share a park.
 const SIZE = 220
+// The fence's points in the diagram's units, home plate at the foot of a SIZE box.
 const polygon = (dist) => {
-  const pts = fencePoints(dist)
   const scale = (SIZE * 0.9) / 420
-  return pts.map((p) => `${SIZE / 2 + p.x * scale},${SIZE - 10 - p.y * scale}`).join(' ')
+  return fencePoints(dist).map((p) => [SIZE / 2 + p.x * scale, SIZE - 10 - p.y * scale])
 }
+const asPoints = (pts) => pts.map(([x, y]) => `${x},${y}`).join(' ')
 
+// Only the outfield arc is drawn: from the deepest centre field (about y 5 to 20) to the shallowest
+// corner (about y 95 to 115) in these units, so the view is cropped to that band. A square box left more
+// than half the card empty. The drawing takes the card's width.
 function Fences({ from, to }) {
+  const a = polygon(from.dist)
+  const b = polygon(to.dist)
+  // A park with a distance missing yields NaN points: draw nothing rather than a broken polygon.
+  if (![...a, ...b].every((p) => p.every(Number.isFinite))) return null
   return (
-    <svg className="ww-trip__fences" viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={`Outfield fences: ${from.name} and ${to.name}`}>
-      <polygon className="ww-trip__fence ww-trip__fence--from" points={polygon(from.dist)} />
-      <polygon className="ww-trip__fence ww-trip__fence--to" points={polygon(to.dist)} />
+    <svg className="ww-trip__fences" viewBox="0 4 220 116" role="img" aria-label={`Outfield fences: ${from.name} and ${to.name}`}>
+      <polygon className="ww-trip__fence ww-trip__fence--from" points={asPoints(a)} />
+      <polygon className="ww-trip__fence ww-trip__fence--to" points={asPoints(b)} />
     </svg>
   )
 }
 
-export function Trip({ fromVenueId, toVenueId, firstPitch, wide }) {
+// `labelAs`: the tab's heading level, 'h3' on the series pages (under their h2 group bands).
+export function Trip({ fromVenueId, toVenueId, firstPitch, wide, labelAs = 'h2' }) {
   const { data } = useAsync(async () => {
     if (!fromVenueId || !toVenueId || fromVenueId === toVenueId) return null
     const [from, to] = await Promise.all([fetchTripVenue(fromVenueId), fetchTripVenue(toVenueId)])
@@ -43,7 +52,7 @@ export function Trip({ fromVenueId, toVenueId, firstPitch, wide }) {
     { label: to.name, mark: <span className="ww-swatch ww-swatch--to" aria-hidden="true" /> },
   ]
   return (
-    <Card frame="stamped" label="The trip" className="ww-trip">
+    <Card frame="stamped" label="The trip" labelAs={labelAs} className="ww-trip">
       <StatStrip>
         <StatCell label="Distance" value={t.distance} />
         <StatCell label="Clock" value={t.clock} />

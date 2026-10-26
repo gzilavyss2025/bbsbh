@@ -256,11 +256,12 @@
 .seriesedges__side--b .seriesedges__who2 {
   align-items: flex-end;
 }
+/* A name wraps to a second line rather than ending in an ellipsis: "Freddy Peral…" read as a
+   different player on a phone, where each side has about 130px. */
 .seriesedges__sidename {
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
   color: var(--text-heading);
 }
 .seriesedges__vs {

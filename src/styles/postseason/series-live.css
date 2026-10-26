@@ -389,3 +389,17 @@
 .psseries--ws {
   --slate-bar-h: env(safe-area-inset-top);
 }
+
+/* A group's parts sit one section gap below its band; the Scouting report brings its own band
+   inside the body, so this applies to the groups with a head only. Both series pages carry
+   `psseries--ws` whenever a group draws. */
+.psseries--ws .ww-group > .sectionhead + .ww-group__body {
+  margin-top: var(--space-section);
+}
+
+/* The body's Stack owns the space between its parts. A part from the sheet era (Today, Nine keys,
+   the leader boards) keeps no margin of its own: each added about 12px to the gap. A named card
+   keeps the margin that clears its tab, and the flow its trailing offset (flow.css). */
+.psseries--ws .ww-group__body > :not(.card, .ww-flow) {
+  margin-block: 0;
+}

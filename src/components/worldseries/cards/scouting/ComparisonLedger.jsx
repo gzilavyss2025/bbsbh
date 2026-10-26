@@ -6,7 +6,7 @@ import { NO_FIGURE, PairFigure, PairLedger, PairLegend } from '../../../ui/table
 // The home scouting cards share one reading order: measure, first club, second club.
 // Models supply the figures and leaders; the shared PairLedger (#2455) draws them. This
 // part only turns two club ids into the ledger's two sides: any pair, in the caller's order.
-export function ComparisonLedger({ title, note, clubIds, measureLabel, footer, className = '', children }) {
+export function ComparisonLedger({ title, note, noteAs, clubIds, measureLabel, footer, className = '', children }) {
   const sides = clubIds.map((id) => ({
     key: id,
     label: teamClubNameShort(id),
@@ -17,6 +17,7 @@ export function ComparisonLedger({ title, note, clubIds, measureLabel, footer, c
     <PairLedger
       title={title}
       note={note}
+      noteAs={noteAs}
       period="Regular season"
       sides={sides}
       measureLabel={measureLabel}

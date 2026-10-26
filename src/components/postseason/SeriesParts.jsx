@@ -146,16 +146,26 @@ export function SeriesPlayOfTheGame({ potg, gamePk, awayAbbr, homeAbbr }) {
 // cutoff, or the day after a finished series' last game) and `from` the date of
 // Game 1, so the rows are this series and nothing else. Only the leader's figure
 // is a door: the runner-ups' 11px figures are too small to tap.
-export function SeriesLeaderBoard({ title, categories, byCategory, doors = null }) {
+//
+// `stamped` (the World Series page): a stamped card named on its ink tab in place of the label
+// head over a sheet card. The "See all ›" note is dropped there: a tag is a label and never a
+// control, and each leader's underlined figure with its chevron is the door.
+export function SeriesLeaderBoard({ title, categories, byCategory, doors = null, stamped = false }) {
   const ranked = categories
     .map((category) => ({ category, entries: byCategory[category.key] ?? [] }))
     .filter((r) => r.entries.length > 0)
   if (ranked.length === 0) return null
   return (
-    <Card body="flush" className="psseries__lboard">
-      <SectionHead look="label" note={doors ? 'See all ›' : undefined}>
-        {title}
-      </SectionHead>
+    <Card
+      body="flush"
+      className="psseries__lboard"
+      {...(stamped ? { frame: 'stamped', label: title, labelAs: 'h3' } : null)}
+    >
+      {!stamped && (
+        <SectionHead look="label" note={doors ? 'See all ›' : undefined}>
+          {title}
+        </SectionHead>
+      )}
       <div className="psseries__lrows">
         {ranked.map(({ category, entries }) => (
           <SeriesLeaderLine key={category.key} category={category} entries={entries} doors={doors} />
@@ -268,15 +278,22 @@ function LeaderDoor({ leader, category, doors }) {
 // favoriteTeamId highlight here: this is a reference list of who was ON the
 // roster, not a ranked/comparative board like the result banner or the
 // leader sections above it.
-export function RosterCard({ teamId, roster }) {
+//
+// `stamped` (the World Series page): a stamped card named "{Club} roster" on its ink tab, so the
+// two cards have different names for a screen reader; the club's mark heads the lists.
+export function RosterCard({ teamId, roster, stamped = false }) {
   const positionPlayers = roster?.positionPlayers ?? []
   const pitchers = roster?.pitchers ?? []
   if (positionPlayers.length === 0 && pitchers.length === 0) return null
   return (
-    <Card body="flush" className="psseries__rostercard">
+    <Card
+      body="flush"
+      className="psseries__rostercard"
+      {...(stamped ? { frame: 'stamped', label: `${teamClubNameShort(teamId)} roster`, labelAs: 'h3' } : null)}
+    >
       <div className="psseries__rosterhead">
-        <TeamLogo teamId={teamId} name={teamClubNameShort(teamId)} size={24} />
-        <span className="psseries__rosterteam">{teamClubNameShort(teamId)} roster</span>
+        <TeamLogo teamId={teamId} name={stamped ? '' : teamClubNameShort(teamId)} size={24} />
+        {!stamped && <span className="psseries__rosterteam">{teamClubNameShort(teamId)} roster</span>}
       </div>
       {positionPlayers.length > 0 && <RosterGroup title="Position players" rows={positionPlayers} />}
       {pitchers.length > 0 && <RosterGroup title="Pitchers" rows={pitchers} />}

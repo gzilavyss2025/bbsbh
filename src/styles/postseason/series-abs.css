@@ -86,3 +86,11 @@ td.psseries__absrank {
 .psseries__abspct {
   color: var(--text-heading);
 }
+
+/* The stamped card's door to the full list sits at its foot, at the right (an inline door does not
+   align itself). */
+.psseries__absdoor {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-1) var(--space-3) var(--space-2);
+}

@@ -43,11 +43,12 @@ function Bat({ clubId, bat, other }) {
   )
 }
 
-export function HotBats({ clubIds, splitsByClub }) {
+// `labelAs`: the tab's heading level, 'h3' on the series pages (under their h2 group bands).
+export function HotBats({ clubIds, splitsByClub, labelAs = 'h2' }) {
   const bats = clubIds.map((id) => pickHotBat(splitsByClub?.[id]))
   if (bats.every((b) => !b)) return null
   return (
-    <Card frame="stamped" label="Hot bats" count="Oct OPS 1.000+" className="ww-hotbats">
+    <Card frame="stamped" label="Hot bats" labelAs={labelAs} count="Oct OPS 1.000+" className="ww-hotbats">
       <Grid min={260} gap="base">
         {clubIds.map((id, i) => (
           <Bat key={id} clubId={id} bat={bats[i]} other={bats[1 - i]} />

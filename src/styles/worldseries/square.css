@@ -1,0 +1,29 @@
+/* ---------------------------------------------------------------------------
+   THE WORLD SERIES IS SQUARE (Gary, 2026-10-26). Every card, tile, list box, door, badge, logo
+   frame and photo frame on the home Series section (`.ww`) and on both series pages
+   (`.psseries--ws`) has square corners, as the stamped cards do.
+
+   The radius primitives step down to `--radius-square` inside these roots, so a rule that reads
+   one (almost all of them do) follows without being edited, and a block the page shares with
+   another surface (the Former teammates ladder, the regular-season strip, the headshot frame)
+   stays rounded there. `--ladder-radius` is the ladder's own hook.
+
+   What stays round is a MARK, not a box: the win pips and the bullpen's rest dots
+   (`--radius-pill`, drawn as circles).
+
+   Imported next to home.css by WorldSeriesHome, LiveSeriesPage and PostseasonSeriesPage.
+   --------------------------------------------------------------------------- */
+:is(.ww, .psseries--ws) {
+  --radius-xs: var(--radius-square);
+  --radius-sm: var(--radius-square);
+  --radius-md: var(--radius-square);
+  --radius-lg: var(--radius-square);
+  --ladder-radius: var(--radius-square);
+}
+
+/* The one round control on these pages is the info button (InfoPopover): square, as every other
+   control is (ADR-0112). A selector, not a token: its radius is --radius-pill, which the pips keep.
+   Named for that button alone, so no other icon button in these roots changes. */
+:is(.ww, .psseries--ws) .infopop__btn {
+  border-radius: var(--radius-square);
+}

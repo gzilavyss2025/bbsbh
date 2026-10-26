@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { upcomingGameLabel } from '../../screens/postseason-live/selectors.js'
 import { dayShape } from '../../lib/postseason/dayShape.js'
 import { teamAbbr } from '../../lib/teams.js'
@@ -22,7 +23,9 @@ import { Card } from '../ui/frame/Card.jsx'
 //   showArms  false on a past `?d=`: the schedule now holds the starter who
 //             really pitched, picked after that date
 //   formatDate  ISO date -> the page's date words
-export function StillToPlay({ games, details, previous, showArms, formatDate }) {
+//   stamped  the World Series page's look: a stamped card named on its ink tab, in place of
+//            the label head over a sheet card
+export function StillToPlay({ games, details, previous, showArms, formatDate, stamped = false }) {
   if (!games?.length) return null
   // Each row measures its gap from the nearest DATED row above it, else from
   // the game before the list. An if-necessary row has no date to measure from.
@@ -33,10 +36,11 @@ export function StillToPlay({ games, details, previous, showArms, formatDate }) 
     for (let k = i - 1; k >= 0; k--) if (dated[k]) return dated[k]
     return previous
   }
+  const Wrap = stamped ? Fragment : 'section'
   return (
-    <section className="psseries__upcoming">
-      <SectionHead look="label">Still to play</SectionHead>
-      <Card as="div" body="flush">
+    <Wrap {...(stamped ? null : { className: 'psseries__upcoming' })}>
+      {!stamped && <SectionHead look="label">Still to play</SectionHead>}
+      <Card as="div" body="flush" {...(stamped ? { frame: 'stamped', label: 'Still to play', labelAs: 'h3' } : null)}>
         <ul className="psseries__upcominglist">
           {games.map((g, i) => {
             const info = g.date && g.gamePk ? details?.[g.gamePk] : null
@@ -53,7 +57,7 @@ export function StillToPlay({ games, details, previous, showArms, formatDate }) 
           })}
         </ul>
       </Card>
-    </section>
+    </Wrap>
   )
 }
 

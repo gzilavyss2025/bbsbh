@@ -23,7 +23,8 @@ import { useRouteLink } from '../../lib/nav.js'
 //   data    loadNineKeys()'s shape: { keys, bar, limit, firstSeason, current }
 //   clubs   [{ id }, { id }], the left club then the right club
 //   season  the series' season; the section shows only for that season's file
-export function SeriesNineKeys({ data, clubs, season }) {
+//   labelAs the tab's heading level: 'h3' on a World Series page (under its h2 group bands)
+export function SeriesNineKeys({ data, clubs, season, labelAs = 'h2' }) {
   const routeLink = useRouteLink()
   const teams = nineKeysTeams(data, clubs, season)
   if (!teams) return null
@@ -39,7 +40,7 @@ export function SeriesNineKeys({ data, clubs, season }) {
   const at = (rank) => `${((Math.min(Math.max(rank, 1), 30) - 1) / 29) * 100}%`
   return (
     <section className="psseries__keyssection">
-      <Card frame="stamped" label="Nine keys" labelAs="h2" as="div" className="psseries__keys">
+      <Card frame="stamped" label="Nine keys" labelAs={labelAs} as="div" className="psseries__keys">
         <Table frame="bare" density="keep" className="psseries__keystable">
           <caption className="sr-only">
             Nine Keys ranks out of 30, {abbr(a.teamId)} and {abbr(b.teamId)}
