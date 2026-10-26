@@ -248,6 +248,22 @@ chip, tap the diamond, then tap "Elevation Arc".
   is past the wall (313 ft), so the arc ends at the Monster's face.
 - `top5`, atBatIndex 45: J. Rodríguez pops out (77°, 61 ft). Peak ≈155 ft.
 
+## Pitcher leaves with a runner who scores off the reliever
+
+**2026-09-20 TOR @ TEX** — gamePk `822844`
+Route base: `/09202026/tortex/`
+Final: TOR 7, TEX 2.
+
+`top7`: Silseth leaves for Macko with McAdoo on 2B, and McAdoo scores on Macko's
+first batter, a run charged to Silseth. Before the fix, "Final line for Silseth"
+printed one play early. The batter's runner leg is listed before the leg of the man
+he forced up, so the handoff read "no inherited runners" (#2648).
+
+- atBatIndex 58 (Silseth's last play): McAdoo doubles (`null` to `2B`), listed before
+  Lukes `2B` to `3B` and `3B` to `score`.
+- atBatIndex 59 (the change is nested here): Macko's first batter, Giménez, singles
+  and McAdoo scores. The final-line cut is 59, not 58.
+
 ## Categories not included (couldn't verify)
 
 Batting out of order and an overturned replay challenge were searched but

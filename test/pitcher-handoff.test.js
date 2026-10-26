@@ -226,6 +226,34 @@ test('the half\'s very first, pre-pitch pitching change is not a handoff', () =>
   assert.deepEqual(pitcherHandoffs(feed, 4, 'top', 'away'), [])
 })
 
+// ---------------------------------------------------------------- scenario B
+// Runner legs are NOT listed in the order they happened. Real shape from
+// gamePk 822844, top 7th: Silseth's last play had the batter (McAdoo) land on
+// 2B BEFORE the man he forced up (Lukes) was listed leaving 2B for 3B and
+// scoring. Walking legs in listed order cleared McAdoo off 2B, so the handoff
+// read "no inherited runners" and the "Final line for Silseth" card printed one
+// play after he left, before McAdoo scored on Macko's first batter (charged to
+// Silseth).
+test('a runner placed on a base before the man ahead of him is listed leaving it still counts as inherited', () => {
+  const plays = [
+    play({ inning: 7, half: 'top', pitcherId: 600, atBatIndex: 58, outs: 1, events: [pitchEvent()], runners: [
+      runnerLeg(80, null, '2B'),
+      runnerLeg(81, '2B', '3B'),
+      runnerLeg(81, '3B', 'score', { scores: true, earned: true, chargedTo: 600 }),
+    ] }),
+    play({ inning: 7, half: 'top', pitcherId: 601, atBatIndex: 59, outs: 1, events: [subEvent(601), pitchEvent()], runners: [
+      runnerLeg(80, '2B', 'score', { scores: true, earned: true, chargedTo: 600 }),
+      runnerLeg(82, null, '1B'),
+    ] }),
+    play({ inning: 7, half: 'top', pitcherId: 601, atBatIndex: 60, outs: 3, events: [pitchEvent()] }),
+  ]
+  // 81 was on 2B before play 58 in the real game; start him there.
+  plays.unshift(play({ inning: 7, half: 'top', pitcherId: 600, atBatIndex: 57, outs: 1, events: [pitchEvent()], runners: [runnerLeg(81, null, '2B')] }))
+  const h = pitcherHandoffs(makeFeed(plays, { homePitcherIds: [600, 601] }), 7, 'top', 'away')[0]
+  assert.equal(h.inheritedCount, 1) // 80 on 2B
+  assert.equal(h.resolutionAtBatIndex, 59) // he scores on the reliever's first batter
+})
+
 // ---------------------------------------------------------------- the span
 // A starter pulled mid-count on the first batter of a new half threw in that
 // half, though the play's matchup names his reliever. His span must reach it,
