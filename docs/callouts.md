@@ -32,7 +32,7 @@ compared with in October.
 | Innings-view play cards | `buildCallouts` (`src/api/callout-notes.js`) via `PlayByPlay` | Entering + revealed plays only ("that's No. 16 this season") |
 | Pre-half strip (the reference panel's ARMS tab, merged into Margin Notes) | `buildPreHalfCallouts` (`src/api/prehalf-callouts.js`) via `ReferencePanel` | Entering; the leading-after + times-through notes restate already-revealed material |
 | Margin Notes (always open, spans both teams' pitchers) | `buildMarginNotes` (`src/api/pitcher-callouts.js`) via `MarginNotes` | Entering-tonight season aggregates + live health reads (laboring, velo decay), never result-aware — same footing as the pre-half strip |
-| Between Innings (the console band, any revealed half) | `buildBetweenInnings` (`src/api/between-innings.js`) via `BetweenInnings` | Same entering-tonight families as Margin Notes/the pre-half strip, through a stricter hard allowlist that drops every checkpoint family that reads tonight's score |
+| Between Innings (the console band, any revealed half) | `buildBetweenInnings` (`src/api/between-innings.js`) via `BetweenInnings` | Same entering-tonight families as Margin Notes/the pre-half strip, through a stricter hard allowlist that drops every checkpoint family that reads tonight's score. In a World Series game it also builds `wsSeriesOdds` and `wsStarterStart` (score-free); `ws*` kinds are extra to `CARD_MAX`, never ranked or decayed, and lead the stack |
 | Box score Insights roll-up | `computeGameCalloutNotes` (`src/api/callout-notes.js`) via `BoxScore` | Result-aware once Final, narrated with tonight's own events ("Struck out 7 tonight and leads…", "Went 0-for-3 tonight, snapping…") |
 
 Margin Notes replaced the old Pitchers-table note list, which used to sit

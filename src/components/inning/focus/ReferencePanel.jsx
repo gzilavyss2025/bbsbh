@@ -6,9 +6,7 @@ import { rankNotes } from '../../../api/callout-notes.js'
 import { useCalloutLedger } from '../../../hooks/useCalloutLedger.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { fetchSavantMatchup } from '../../../api/matchup/savant.js'
-import { fetchWorldSeriesStartsBefore } from '../../../api/postseason/pitcherWorldSeries.js'
-import { useEventHistory } from '../../../hooks/postseason/useWsEvents.js'
-import { loadSeriesHistory } from '../../../api/worldSeries/history.js'
+import { useEventHistory, useWsCalloutInputs } from '../../../hooks/postseason/useWsEvents.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
 import { Door } from '../../ui/control/Door.jsx'
@@ -282,17 +280,7 @@ function Section({
   // them (api/staticJson.js). Above the early return, like the ledger.
   const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
   // World Series games only: a game of any other type costs no request.
-  const isWorldSeries = feed?.gameData?.game?.type === 'W'
-  const seriesHistory = useAsync(() => (isWorldSeries ? loadSeriesHistory() : null), [isWorldSeries]).data ?? null
-  // And each probable's earlier World Series starts, cut at the game's own date.
-  const probables = feed?.gameData?.probablePitchers
-  const wsDate = isWorldSeries ? feed?.gameData?.datetime?.officialDate : null
-  const wsStarts = useAsync(async () => {
-    if (!wsDate) return null
-    const ids = [probables?.away?.id, probables?.home?.id].filter(Boolean)
-    const counts = await Promise.all(ids.map((id) => fetchWorldSeriesStartsBefore(id, wsDate)))
-    return Object.fromEntries(ids.map((id, i) => [id, counts[i]]))
-  }, [wsDate, probables?.away?.id, probables?.home?.id]).data ?? null
+  const { seriesHistory, wsStarts } = useWsCalloutInputs(feed)
   const eventHistory = useEventHistory(feed)
   if (tab === 'lineups' && showEntering) {
     return (
