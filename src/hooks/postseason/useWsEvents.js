@@ -20,7 +20,10 @@ export function useWsPlayCtx(feed, bundle) {
 const startsOnce = new Map()
 const startsBefore = (id, date) => {
   const key = `${id}|${date}`
-  if (!startsOnce.has(key)) startsOnce.set(key, fetchWorldSeriesStartsBefore(id, date))
+  if (!startsOnce.has(key)) {
+    // A failed read is not kept: the next mount asks again.
+    startsOnce.set(key, fetchWorldSeriesStartsBefore(id, date).catch((e) => { startsOnce.delete(key); throw e }))
+  }
   return startsOnce.get(key)
 }
 

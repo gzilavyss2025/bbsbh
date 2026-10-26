@@ -152,3 +152,12 @@ test('the pre-half strip never caps, ranks or trims a World Series note', async 
   const ws = strip.filter((n) => /^ws[A-Z]/.test(n.kind)).map((n) => n.dedupeKey)
   assert.deepEqual(ws.sort(), ['wsSeriesOdds-meeting', 'wsSeriesOdds-repeat', 'wsStarterStart-20'])
 })
+
+test('the Arms tab merge keeps every World Series note, however often the ledger has seen it', async () => {
+  const { mergeNotes } = await import('../../src/api/prehalf-callouts.js')
+  const ws = (family) => ({ text: family, kind: 'wsSeriesOdds', score: 65, dedupeKey: `wsSeriesOdds-${family}` })
+  const other = { text: 'x', kind: 'laboring', score: 90, dedupeKey: 'laboring-1' }
+  const shown = new Map([['wsSeriesOdds-meeting', 3], ['wsSeriesOdds-drought-home', 3]])
+  const out = mergeNotes([ws('meeting'), ws('drought-home')], [other], shown)
+  assert.deepEqual(out.map((n) => n.dedupeKey), ['wsSeriesOdds-meeting', 'wsSeriesOdds-drought-home', 'laboring-1'])
+})
