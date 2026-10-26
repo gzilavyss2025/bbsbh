@@ -1,0 +1,3 @@
+// The score-free notes after one closed half, built by tools/facts2.mjs with the app's own
+// buildBetweenInnings and the game's callout bundle. 824716 has no bundle, so these come from TB @ CLE, 2026-10-18.
+window.GD_FACTS = {"meta":{"pk":849817,"game":"TB @ CLE, 2026-10-18","half":"top 2"},"top2":[{"kind":"starterRec","who":"Drew Rasmussen","text":"The Rays are 22-10 in his starts this season"},{"kind":"homeAway","who":"Drew Rasmussen","text":"Rays are 9-6 in his road starts"},{"kind":"starterRec","who":"Parker Messick","text":"The Guardians are 19-16 in his starts this season"},{"kind":"homeAway","who":"Parker Messick","text":"Guardians are 8-9 in his home starts"}]}
