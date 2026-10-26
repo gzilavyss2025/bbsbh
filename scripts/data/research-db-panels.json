@@ -201,10 +201,6 @@
    "design canvas files and per-club rank probes for a page mock-up"
   ],
   [
-   ".scratch/live-feed-diffpatch/",
-   "one-off byte-count probes of the live feed (three tiny files)"
-  ],
-  [
    ".scratch/level-benchmarks/org-gaps.json",
    "empty array; no rows"
   ],
