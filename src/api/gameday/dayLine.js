@@ -36,22 +36,18 @@
 // MiLB and thin feeds: every field reads with a fallback, and a missing
 // player returns null rather than a line of zeros.
 
-import { computeHalfInningFeed } from '../playbyplay.js'
 import { computePitcherLines } from '../pitchers.js'
 import { halfIndex } from '../select.js'
 import { NON_AB_EVENTS } from '../scorecard/notation.js'
-
-const battingSideOf = (half) => (half === 'top' ? 'away' : 'home')
+import { visibleAtBatCards, stepCutAtBatIndex } from './stepCut.js'
 
 // Every at-bat card the reader may see, oldest first: whole earlier halves of
 // this batting side, then the current half up to `step`.
 function visibleCards(feed, inning, half, step) {
-  const side = battingSideOf(half)
   const cards = []
-  for (let inn = 1; inn < inning; inn++) cards.push(...computeHalfInningFeed(feed, inn, half, side))
-  const here = computeHalfInningFeed(feed, inning, half, side, step)
-  cards.push(...(step == null ? here : here.slice(0, step)))
-  return cards.filter((c) => c.kind === 'atbat')
+  for (let inn = 1; inn < inning; inn++) cards.push(...visibleAtBatCards(feed, inn, half, null))
+  cards.push(...visibleAtBatCards(feed, inning, half, step))
+  return cards
 }
 
 // The batter's line for today, or null when he has no plate appearance on
@@ -86,12 +82,8 @@ export function pitcherDayLine(feed, pitcherId, { inning, half, step = null, rev
   if (pitcherId == null || !inning || !half) return null
   const here = halfIndex(inning, half)
   if (here > (revealedThrough ?? -1) + 1) return null
-  const cards = computeHalfInningFeed(feed, inning, half, battingSideOf(half), step)
-  const shown = (step == null ? cards : cards.slice(0, step)).filter(
-    (c) => c.kind === 'atbat' && c.atBatIndex != null,
-  )
   // -1 admits nothing from this half: the line is the earlier halves' alone.
-  const cut = shown.length ? shown[shown.length - 1].atBatIndex : -1
+  const cut = stepCutAtBatIndex(feed, inning, half, step)
   const lines = computePitcherLines(feed, here - 1, { stepHalfIndex: here, throughAtBatIndex: cut })
   return [...(lines.away ?? []), ...(lines.home ?? [])].find((row) => row.id === pitcherId) ?? null
 }
