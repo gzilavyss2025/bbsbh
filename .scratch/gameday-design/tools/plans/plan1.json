@@ -1,0 +1,12 @@
+[
+ {"id":"prev","route":"/09012026/seabos/top2","w":390,"h":844,"pk":824716,"rev":1,"ab":"2:7","full":1,"crops":{
+   "b02":".inningnav","b04":".inhead","b06":".pagenav--innings","b20":".pbp__atbat","b21":".abhero","b23":".pbp__desc",
+   "b26":".pbp__zonebtn","b27":".pbp__hlbtn","b29":".pbp__ladder","b30":".pbp__play","b31":".pbp__diamond","b33":".pbp__flightbtn",
+   "b44":".change","b57":".trailstrip","b58":[".trailcell",4],"b61":".rolling","b68":".refbar","b85":".revealsplit","b19":".pbp__entry","b28":".pbp__side"}},
+ {"id":"pwait","route":"/09012026/seabos/top2","w":390,"h":844,"pk":824716,"rev":1,"ab":"2:5","full":1,"crops":{}},
+ {"id":"pstart","route":"/09012026/seabos/top2","w":390,"h":844,"pk":824716,"rev":1,"ab":"-","full":1,"crops":{"b13":".upnext","b09":".half"}},
+ {"id":"ptop1","route":"/09012026/seabos/top1","w":390,"h":844,"pk":824716,"rev":"-","ab":"-","full":1,"crops":{"b10":".pitchercard"}},
+ {"id":"pdone","route":"/09012026/seabos/top2","w":390,"h":844,"pk":824716,"rev":2,"ab":"-","full":1,"crops":{"b64":".halftally","b65":".betweeninnings","b66":".dueupnext","b62":".hitchart","b86":".pagenav--innings","b60":".trailstrip__summarybtn","b59":".trailstrip__followbtn"}},
+ {"id":"lwait","route":"/09012026/seabos/top2","w":1180,"h":820,"pk":824716,"rev":1,"ab":"2:5","full":1,"crops":{"b63":".dueupconsole","b03":".consolebar","b67":".focusrail"}},
+ {"id":"lrev","route":"/09012026/seabos/top2","w":1180,"h":820,"pk":824716,"rev":1,"ab":"2:7","full":1,"crops":{"b34":".pitchlist","b36":".strikezone--inline","b37":".replaycell","b38":".focusrail__replay","b22":".pbp__batshot"}}
+]
