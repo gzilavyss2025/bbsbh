@@ -18,3 +18,6 @@ const BLOCKS = [
 ]
 
 export const blocksFor = (tier) => BLOCKS.filter(([, on]) => on.includes(tier)).map(([b]) => b)
+
+// The blocks a tier folds into the menu, in table order.
+export const foldedFor = (tier) => BLOCKS.filter(([, on]) => !on.includes(tier)).map(([b]) => b)

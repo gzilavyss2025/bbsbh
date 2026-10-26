@@ -40,6 +40,8 @@ import { useStampUnseal } from '../hooks/useStamps.js'
 import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCalloutLedger.js'
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
+import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
+import { isLookNew } from './gameday/next/useTier.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -714,6 +716,45 @@ export function InningViewer({
     onScorecard,
   }
 
+  // The half page, kept in a variable so the new Gameday shell (?look=new) can mount it hidden.
+  const pageTurn = (
+    <InningPageTurn
+      ref={pageTurnRef}
+      activeIdx={curIdx}
+      maxIdx={maxIdx}
+      renderPage={renderInningPage}
+      onCommit={goTo}
+      onStatusChange={setTurnStatus}
+    />
+  )
+
+  if (isLookNew()) {
+    // The advance reads the states InningActionBar draws, with "Next play" for an at-bat step.
+    const advance = currentSealed
+      ? { label: atHalfEdge ? 'Caught up' : 'Next play', disabled: atHalfEdge, onClick: revealNextAtBat }
+      : nextIdx != null
+        ? { label: nextLabel, onClick: () => requestForwardHalf(nextIdx) }
+        : { label: bookClosed ? 'Close the book' : 'Box score', onClick: onBoxScore }
+    return (
+      <CalloutLedgerProvider value={calloutLedger}>
+        {cloudSync}
+        <GamedayNextMount
+          bug={{
+            started, live: curLiveState, feed, unlocked: renderUnlocked, mark: renderRevealedThrough,
+            runsInProgress, treatment: winProbTreatment, viewIdx: curIdx, viewInning: effInning, viewHalf: effHalf,
+            season: gameDate,
+          }}
+          meta={meta}
+          engine={pageTurn}
+          advance={advance}
+          onBoxScore={onBoxScore}
+          onScorecard={onScorecard}
+          refresh={selectIsFinal(feed) ? null : <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />}
+        />
+      </CalloutLedgerProvider>
+    )
+  }
+
   return (
     <CalloutLedgerProvider value={calloutLedger}>
     <div className={`innings innings--focus innings--${focus.windowed ? 'windowed' : 'stacked'}`}>
@@ -843,14 +884,7 @@ export function InningViewer({
               inning+half → fresh mount; a box at/under the reveal mark stays
               open) plus, only mid-turn, the inert preview + curl overlay for a
               forward navigation (see InningPageTurn.jsx). */}
-          <InningPageTurn
-            ref={pageTurnRef}
-            activeIdx={curIdx}
-            maxIdx={maxIdx}
-            renderPage={renderInningPage}
-            onCommit={goTo}
-            onStatusChange={setTurnStatus}
-          />
+          {pageTurn}
 
           {/* A preview of the OTHER side's next half, moved here from the
               ReferencePanel Arms tab: it belongs beside the cards it follows

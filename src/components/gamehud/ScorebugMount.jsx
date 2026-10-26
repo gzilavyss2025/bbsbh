@@ -32,6 +32,7 @@ export function ScorebugMount({
   viewInning,
   viewHalf,
   season = null,
+  Bug = HeaderBug, // Gameday's new band draws the same clamped facts (screens/gameday/next)
 }) {
   if (!started || !live) return null
 
@@ -82,8 +83,10 @@ export function ScorebugMount({
   const finished = selectFinalReached(feed, throughIdx)
 
   return (
-    <HeaderBug
+    <Bug
       season={season}
+      awayAbbr={meta.away.abbreviation}
+      homeAbbr={meta.home.abbreviation}
       awayName={meta.away.clubName}
       homeName={meta.home.clubName}
       awayTeamId={meta.away.id}

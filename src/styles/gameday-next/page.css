@@ -1,0 +1,81 @@
+/* ==== GAMEDAY, the new shell (docs/gameday-build.md), at ?look=new ====
+   A fixed frame that never scrolls. The tier (lib/gameday/ladder.js) sits on the root as
+   data-tier; each tier names its grid areas, and the stage row takes the slack. */
+
+/* layout-exempt: a fixed frame, placed by named areas per tier */
+.gdnext {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: grid;
+  gap: var(--space-2);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-canvas);
+  color: var(--text-body);
+}
+.gdnext[data-tier='P'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 86px minmax(0, 1fr) 240px 80px;
+  grid-template-areas: 'band' 'stage' 'hero' 'bar';
+}
+.gdnext[data-tier='T'] {
+  grid-template-columns: minmax(0, 452fr) minmax(0, 264fr);
+  grid-template-rows: 72px 44px minmax(0, 1fr) 268px 66px 80px;
+  grid-template-areas: 'band band' 'navigator navigator' 'stage stage' 'hero pitches' 'trail trail' 'bar bar';
+}
+.gdnext[data-tier='L'] {
+  grid-template-columns: 240px repeat(2, minmax(0, 1fr)) 240px;
+  grid-template-rows: 66px minmax(0, 1fr) 168px 58px 76px;
+  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage reference'
+    'battingOrder hero hero reference' 'trail trail trail trail' 'bar bar bar bar';
+}
+.gdnext[data-tier='D'] {
+  grid-template-columns: 264px minmax(0, 1fr) 324px 264px;
+  grid-template-rows: 68px minmax(0, 1fr) 164px 66px 68px;
+  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage reference'
+    'battingOrder hero pitches eventLog' 'trail trail trail trail' 'bar bar bar bar';
+}
+
+.gdnext__band { grid-area: band; min-width: 0; display: flex; }
+.gdnext__slot { grid-area: var(--gd-area); position: relative; min-width: 0; min-height: 0; overflow: hidden;
+  border: var(--bw-rule) solid var(--border-rule); background: var(--surface-inset); }
+.gdnext__slot--navigator { --gd-area: navigator; }
+.gdnext__slot--stage { --gd-area: stage; border: var(--bw-heavy) solid var(--border-stamped); }
+.gdnext__slot--hero { --gd-area: hero; background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); }
+.gdnext__slot--trail { --gd-area: trail; }
+.gdnext__slot--pitches { --gd-area: pitches; }
+.gdnext__slot--battingOrder { --gd-area: battingOrder; }
+.gdnext__slot--reference { --gd-area: reference; }
+.gdnext__slot--eventLog { --gd-area: eventLog; }
+.gdnext__slotname { position: absolute; top: 0; right: 0; padding: var(--space-1) var(--space-1h);
+  font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
+
+/* The band: ink, square, the score at the left. */
+.gdnext-band { flex: 1; min-width: 0; display: flex; align-items: stretch;
+  background: var(--surface-stamped-ink); color: var(--text-on-ink); }
+/* layout-exempt: two score rows stacked, the cells set their own widths */
+.gdnext-band__score { display: flex; flex-direction: column; justify-content: center; gap: var(--space-1);
+  padding: 0 var(--space-3); border-right: var(--bw-rule) solid var(--text-on-ink-dim); }
+.gdnext-band__score span { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); min-width: 76px; }
+.gdnext-band__score b { font-family: var(--font-display); font-weight: var(--w-bold); font-size: var(--fs-title-sm); letter-spacing: var(--ls-wide); }
+.gdnext-band__score em { font-style: normal; font-size: var(--fs-num-lg); font-variant-numeric: tabular-nums; }
+.gdnext-band__half { display: flex; align-items: center; padding: 0 var(--space-3); white-space: nowrap;
+  font-family: var(--font-display); font-weight: var(--w-bold); font-size: var(--fs-title-md);
+  border-right: var(--bw-rule) solid var(--text-on-ink-dim); }
+.gdnext-band__state { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-around; gap: var(--space-2); }
+.gdnext-band__outs { display: inline-flex; gap: var(--space-1); }
+.gdnext-band__outs i { width: 10px; height: 10px; border: var(--bw-rule) solid var(--text-on-ink); }
+.gdnext-band__outs i.is-out { background: var(--text-on-ink); }
+.gdnext-band__pc { font-size: var(--fs-cell); color: var(--text-on-ink-dim); white-space: nowrap; }
+
+/* The bar: menu door, the step switch, the advance. */
+/* layout-exempt: one row of three controls */
+.gdnext__bar { grid-area: bar; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; gap: var(--space-2); min-width: 0;
+  padding: var(--space-2) var(--space-3); background: var(--surface-card); border-top: var(--bw-heavy) solid var(--border-stamped); }
+.gdnext__bar .gdnext__menu { border-radius: 0; flex: none; width: auto; min-width: 88px; }
+.gdnext__switch { flex: none; display: flex; white-space: nowrap; }
+.gdnext__bar .gdnext__advance { flex: 1; min-width: 0; white-space: nowrap; }
+.gdnext__folded { margin: 0 0 var(--space-3); padding: 0; list-style: none; }
+.gdnext__folded li { padding: var(--space-2) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
