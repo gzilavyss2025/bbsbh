@@ -428,6 +428,11 @@
       "class": "spoiler-free",
       "why": "The static per-team highlight archive reader. Decided games only, every filter already ran in the generator, so the rails stay dumb. Not a scoring surface."
     },
+    "gameday/checkpoint.js": {
+      "class": "reveal-only",
+      "why": "Gameday's half-end checkpoint pages (#2605): the closed half's R/H/E/LOB and its pitches, strikes and whiffs per pitcher. Answers only for a half at or under revealedThrough, reads that half and nothing after it, and never asks whether the game is over (ADR-0043's double rule). No screen imports it yet.",
+      "importers": []
+    },
     "gameday/dayLine.js": {
       "class": "reveal-only",
       "why": "Gameday's day lines (#2606): the batter's and the pitcher's line for today as of the reader's step. A line names results ('2-for-3'). Built from computeHalfInningFeed's cards WITH the step cap and sliced at it, and from computePitcherLines' own step clamp, so step k never sees step k+1; a half past revealedThrough + 1 answers null. No screen imports it yet; the fresh Gameday stage (#2568) will call it inside a SealBox reveal render function.",
@@ -508,9 +513,10 @@
       "importers": [
         "api/boxscore.js",
         "api/derive.js",
+        "api/gameday/checkpoint.js",
         "api/scorecardGame.js",
-        "components/gamehud/RollingLine.jsx",
         "components/gamehud/HalfTally.jsx",
+        "components/gamehud/RollingLine.jsx",
         "components/gamehud/ScorebugMount.jsx",
         "components/gamehud/StatBox.jsx",
         "screens/boxscore/revealBoxScore.js"
@@ -779,6 +785,7 @@
         "api/derive.js",
         "api/dueup.js",
         "api/expresslane/runners.js",
+        "api/gameday/checkpoint.js",
         "api/gameday/stepCut.js",
         "api/pitchers.js",
         "api/scorecardGame.js",

@@ -705,6 +705,14 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
   `challenges.js`' rules walked to the step, with a refill when a club enters an extra
   inning empty; null for a game that does not run ABS. Never reads
   `gameData.absChallenges`. Pinned on gamePk 823036, 823169 and 815625.
+- `gameday/checkpoint.js` (#2605) — `checkpointPages(feed, { inning, half,
+  revealedThrough })` gives the closed half's pages in `PAGE_ORDER` (`tally`,
+  `pitching`, then `atBats` and `gameSoFar` as `built: false` until #2572), or null for a
+  half past `revealedThrough`. The tally reads `revealInning` (E from the fielding side,
+  ADR-0006). The pitching page counts per pitcher: a strike is any pitch that is not a
+  ball, and a pitch thrown before a mid-at-bat `pitching_substitution` is the replaced
+  man's, not the play's `matchup.pitcher`. That rule matched the box score for every
+  pitcher in five games (2026-10-26).
 
 
 ## Leader boards (live)
