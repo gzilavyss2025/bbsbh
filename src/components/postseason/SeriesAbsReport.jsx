@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { fetchAbsSeriesGames, fmtWinPct, seriesAbsRows } from '../../api/around-the-game/absSeries.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { teamClubNameShort } from '../../lib/teams.js'
@@ -24,9 +24,11 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 //   clubIds  the two clubs
 //   gamePks  the series' counted games
 //   cutoff   the page's cutoff date, or null when every game is counted
+//   stamped  the World Series page's look: a stamped card named on its ink tab, the "All
+//            challenges" door at its foot, in place of the label head over a sheet card
 const SHOWN = 5
 
-export function SeriesAbsReport({ season, clubIds, gamePks, cutoff = null }) {
+export function SeriesAbsReport({ season, clubIds, gamePks, cutoff = null, stamped = false }) {
   const routeLink = useRouteLink()
   const [all, setAll] = useState(false)
   const { data: file } = useAsync(() => fetchAbsSeriesGames(season).catch(() => null), [season])
@@ -39,12 +41,20 @@ export function SeriesAbsReport({ season, clubIds, gamePks, cutoff = null }) {
   )
   if (rows.length === 0) return null
   const shown = all ? rows : rows.slice(0, SHOWN)
+  const Wrap = stamped ? Fragment : 'section'
   return (
-    <section className="psseries__abssection">
-      <SectionHead look="label" action={<Door {...routeLink('/abs-challenges')}>All challenges</Door>}>
-        ABS challenges
-      </SectionHead>
-      <Card as="div" body="flush" className="psseries__abs">
+    <Wrap {...(stamped ? null : { className: 'psseries__abssection' })}>
+      {!stamped && (
+        <SectionHead look="label" action={<Door {...routeLink('/abs-challenges')}>All challenges</Door>}>
+          ABS challenges
+        </SectionHead>
+      )}
+      <Card
+        as="div"
+        body="flush"
+        className="psseries__abs"
+        {...(stamped ? { frame: 'stamped', label: 'ABS challenges', labelAs: 'h3' } : null)}
+      >
         <table className="psseries__abstable">
           <caption className="sr-only">ABS challenge record by player, best win percentage first</caption>
           <thead>
@@ -80,7 +90,12 @@ export function SeriesAbsReport({ season, clubIds, gamePks, cutoff = null }) {
             {all ? 'Show top 5' : `Show all ${rows.length} players`}
           </Door>
         )}
+        {stamped && (
+          <div className="psseries__absdoor">
+            <Door {...routeLink('/abs-challenges')}>All challenges</Door>
+          </div>
+        )}
       </Card>
-    </section>
+    </Wrap>
   )
 }

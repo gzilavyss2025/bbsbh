@@ -15,7 +15,8 @@ function Bar({ value, peak, side }) {
   return <span className={`ww-tape__bar ww-tape__bar--${side}${value < 0 ? ' ww-tape__bar--neg' : ''}`} style={{ width: `${pct}%` }} />
 }
 
-export function Tape({ awayId, homeId, data, slateDate }) {
+// `labelAs`: the tab's heading level, 'h3' on the series pages (under their h2 group bands).
+export function Tape({ awayId, homeId, data, slateDate, labelAs = 'h2' }) {
   const side = (id) => {
     const { wins: octW, losses: octL } = octRecord(data.clubGames?.[id], id, slateDate)
     const runDiff = Number(data.standings?.[id]?.runDiff)
@@ -33,7 +34,7 @@ export function Tape({ awayId, homeId, data, slateDate }) {
   }
   const rows = tapeRows({ away: side(awayId), home: side(homeId), meetingDates: data.meetings.map((g) => g.date), meetingWins })
   return (
-    <Card frame="stamped" label="Tale of the tape" className="ww-tape">
+    <Card frame="stamped" label="Tale of the tape" labelAs={labelAs} className="ww-tape">
       <div className="ww-tape__heads">
         <span className="ww-tape__club">
           <TeamLogo teamId={awayId} name={teamClubNameShort(awayId)} size={28} />

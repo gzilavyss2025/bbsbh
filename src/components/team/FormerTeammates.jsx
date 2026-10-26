@@ -19,8 +19,9 @@ import { posLabel, seasonRange } from './ladder/layout.js'
 // once, with no door and no "+N". A tie to tonight's own org is a badge on the
 // player who left it (solid: the club itself; dashed: its farm system only). A
 // green position badge marks a starter; a group with a pair who both start is
-// pinned first.
-export function FormerTeammates({ pairs, startingIds, dayNight, away, home }) {
+// pinned first. `stamped` (the World Series page) names the card on an ink tab in
+// place of the navy band head.
+export function FormerTeammates({ pairs, startingIds, dayNight, away, home, stamped = false }) {
   const ladder = useMemo(
     () =>
       teammateLadder(pairs, away.id, home.id, startingIds, {
@@ -30,11 +31,16 @@ export function FormerTeammates({ pairs, startingIds, dayNight, away, home }) {
     [pairs, away.id, home.id, away.teamName, home.teamName, startingIds],
   )
   if (Object.keys(ladder.players).length === 0) return null
-  const head = <SectionMasthead as="h3" title="Former teammates" />
+  const head = stamped ? undefined : <SectionMasthead as="h3" title="Former teammates" />
   return (
-    <Card className="metric teammates" head={head} body="flush">
+    <Card
+      className="metric teammates"
+      head={head}
+      body="flush"
+      {...(stamped ? { frame: 'stamped', label: 'Former teammates', labelAs: 'h3' } : null)}
+    >
       <div className="metric__body">
-        <Ladder ladder={ladder} dayNight={dayNight} away={away} home={home} />
+        <Ladder ladder={ladder} dayNight={dayNight} away={away} home={home} hint={stamped ? 'info' : 'line'} />
       </div>
     </Card>
   )

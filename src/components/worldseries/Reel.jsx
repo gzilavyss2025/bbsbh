@@ -12,7 +12,8 @@ import { ReelCard } from './ReelCard.jsx'
 // games only (the sources never include a game dated on or after the slate
 // date, and fetchReelGames drops one before any read). It draws nothing while
 // loading, on failure, or with no items: never an empty frame.
-export function Reel({ series, slateDate, clubGames, lcsRound }) {
+// `labelAs`: the tab's heading level, 'h3' on the series pages (under their h2 group bands).
+export function Reel({ series, slateDate, clubGames, lcsRound, labelAs = 'h2' }) {
   const [filter, setFilter] = useState('all')
   const [clip, setClip] = useState(null)
   const source = useMemo(
@@ -30,7 +31,7 @@ export function Reel({ series, slateDate, clubGames, lcsRound }) {
   const active = options.some((o) => o.value === filter) ? filter : 'all'
   const shown = active === 'all' ? cards : cards.filter((c) => c.filter === active)
   return (
-    <Card frame="stamped" label={source.title} className="ww-reel">
+    <Card frame="stamped" label={source.title} labelAs={labelAs} className="ww-reel">
       <Chips label="Filter the reel" options={options} value={active} onChange={(v) => setFilter(v ?? 'all')} />
       <ul className="ww-reel__rail">
         {shown.map((c) => (

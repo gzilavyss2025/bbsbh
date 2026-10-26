@@ -9,6 +9,8 @@ import { PlayerLink } from '../../../player/PlayerLink.jsx'
 import { Pill } from '../../../ui/control/Pill.jsx'
 import { Door } from '../../../ui/control/Door.jsx'
 import { Card } from '../../../ui/frame/Card.jsx'
+import { Cluster } from '../../../ui/layout/Cluster.jsx'
+import { InfoPopover } from '../../../ui/InfoPopover.jsx'
 import { Table } from '../../../ui/table/Table.jsx'
 
 // PITCH BY PITCH (#2316, slice 2): the probable starter's arsenal, and how the other club's
@@ -36,6 +38,7 @@ export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
   const routeLink = useRouteLink()
   const { starter, rows, hitters } = data
   const last = surnameOf(starter.name)
+  const note = `xwOBA against each pitch. Club hitters, not the posted lineup (${hitters} hitters).`
   const meta = [starter.hand && `${starter.hand}HP`, teamClubNameShort(clubId), `${starter.projected ? 'projected' : 'probable'}${gameNumber ? ` Game ${gameNumber}` : ''} starter`]
   return (
     <Card frame="stamped" label="Pitch by pitch" labelAs="h3" count={`${last} vs ${teamAbbr({ id: oppId })}`} body="flush" className="ww-pitch">
@@ -47,9 +50,7 @@ export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
         </span>
       </PlayerLink>
       <Table frame="bare" label="Pitch by pitch, by pitch type" className="ww-pitch__table">
-        <caption className="ww-pitch__cap">
-          xwOBA against each pitch. Club hitters, not the posted lineup ({hitters} hitters).
-        </caption>
+        <caption className="sr-only">{note}</caption>
         <thead>
           <tr>
             <th scope="col">Pitch</th>
@@ -77,9 +78,14 @@ export function PitchByPitch({ data, clubId, oppId, gameNumber }) {
           ))}
         </tbody>
       </Table>
-      <Door className="ww-pitch__door" {...routeLink('/scout')}>
-        Full scout
-      </Door>
+      <Cluster align="center" className="ww-pitch__foot infopop-row">
+        <InfoPopover label="About these figures" className="infopop--paper">
+          {note}
+        </InfoPopover>
+        <Door className="ww-pitch__door" {...routeLink('/scout')}>
+          Full scout
+        </Door>
+      </Cluster>
     </Card>
   )
 }

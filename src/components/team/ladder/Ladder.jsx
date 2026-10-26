@@ -4,6 +4,7 @@ import { fetchStaticTeams } from '../../../api/teams-static.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { HOVER_CARD_QUERY, useMediaQuery } from '../../../hooks/useMediaQuery.js'
 import { TeamLogo } from '../../logo/TeamLogo.jsx'
+import { InfoPopover } from '../../ui/InfoPopover.jsx'
 import { Headshot } from '../../player/Headshot.jsx'
 import { PlayerLink } from '../../player/PlayerLink.jsx'
 import { clubShortName, ladderGeometry, posLabel, seasonRange, traceOf } from './layout.js'
@@ -21,8 +22,9 @@ import { clubShortName, ladderGeometry, posLabel, seasonRange, traceOf } from '.
 // pointing has already traced.
 //
 // `legend` (on by default) draws the line of colour samples and the tap hint
-// under the side names. The lineup page's fold card turns it off.
-export function Ladder({ ladder, dayNight, away, home, legend = true }) {
+// under the side names. The lineup page's fold card turns it off. `hint` 'info'
+// folds the tap hint behind an (i) at the end of that line (the World Series page).
+export function Ladder({ ladder, dayNight, away, home, legend = true, hint = 'line' }) {
   const [node, setNode] = useState(null)
   const [width, setWidth] = useState(0)
   useEffect(() => {
@@ -74,7 +76,7 @@ export function Ladder({ ladder, dayNight, away, home, legend = true }) {
         {!sideways && sideName(home)}
       </div>
       {legend && (
-        <p className="ladder__legend">
+        <p className={`ladder__legend${hint === 'info' ? ' infopop-row' : ''}`}>
           {Object.values(ladder.players).some((p) => p.starting) && (
             <span className="ladder__key">
               <span className="ladder__mark" />
@@ -93,7 +95,13 @@ export function Ladder({ ladder, dayNight, away, home, legend = true }) {
               Its farm system only
             </span>
           )}
-          <span className="ladder__key">{hoverCapable ? 'Point to trace, click to pin' : 'Tap a player or club to trace it'}</span>
+          {hint === 'info' ? (
+            <InfoPopover label="How to trace a tie" className="infopop--paper">
+              {hoverCapable ? 'Point to trace, click to pin' : 'Tap a player or club to trace it'}
+            </InfoPopover>
+          ) : (
+            <span className="ladder__key">{hoverCapable ? 'Point to trace, click to pin' : 'Tap a player or club to trace it'}</span>
+          )}
         </p>
       )}
       <div

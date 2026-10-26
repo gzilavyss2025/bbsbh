@@ -31,16 +31,9 @@
 }
 
 .ww-pitch__meta,
-.ww-pitch__cap,
 .ww-pitch__even {
   font-size: var(--fs-cell);
   color: var(--text-caption);
-}
-
-.ww-pitch__cap {
-  caption-side: bottom;
-  text-align: left;
-  padding: var(--space-2) var(--space-4);
 }
 
 .ww-pitch__table td,
@@ -78,11 +71,17 @@
   }
 }
 
+/* The foot: the (i) with the table's note at the left, the door to the full scout at the right. */
+.ww-pitch__foot {
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+}
+
 .ww-pitch__door {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   min-height: var(--tap-min);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) 0;
   text-align: right;
 }

@@ -16,10 +16,13 @@ import { Card } from '../ui/frame/Card.jsx'
 //
 //   totals   loadSeriesStats's `totals`, { [clubId]: { batting, pitching, games } }
 //   clubs    [{ id }, { id }], the left club then the right club
-//   stamped  the home rail's look: a stamped card named on its ink tab, in place
-//            of the label head over a sheet card. The series pages keep the
-//            default, whose layout rules (series-live.css) key on its parts.
-export function SeriesTotals({ totals, clubs, stamped = false }) {
+//   stamped  a stamped card named on its ink tab, in place of the label head over a
+//            sheet card: the home rail's look and the World Series pages'. The other
+//            rounds' series pages keep the default, whose layout rules
+//            (series-live.css) key on its parts.
+//   labelAs  the stamped tab's heading level: 'h2' on the rail, 'h3' on a World Series
+//            page, under its h2 group bands
+export function SeriesTotals({ totals, clubs, stamped = false, labelAs = 'h2' }) {
   const [left, right] = clubs
   const groups = totalsRows(totals, left?.id, right?.id)
   if (!groups.length) return null
@@ -66,7 +69,7 @@ export function SeriesTotals({ totals, clubs, stamped = false }) {
   )
   if (stamped) {
     return (
-      <Card frame="stamped" body="flush" label="Series totals" count={note} className="psseries__totals">
+      <Card frame="stamped" body="flush" label="Series totals" labelAs={labelAs} count={note} className="psseries__totals">
         {table}
       </Card>
     )

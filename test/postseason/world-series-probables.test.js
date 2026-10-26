@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { pitcherLine } from '../../src/lib/postseason/worldseries/probables.js'
+import { leadingFigures, pitcherLine } from '../../src/lib/postseason/worldseries/probables.js'
 
 const SLATE = '2026-10-27'
 const o = (date, ip, er, k, bb, pitches, gs, opp = 'CLE', isHome = true) => ({
@@ -27,4 +27,33 @@ test('an empty October has no ERA, never NaN', () => {
   const l = pitcherLine([], SLATE)
   assert.equal(l.era, null)
   assert.equal(l.ip, '0.0')
+})
+
+// The Probables card tints a figure only on the starter who leads it (Game 3, 2026: Gasser 9.0 IP,
+// 1.00 ERA, 6 K, 2 BB against Peralta 16.2 IP, 1.08 ERA, 12 K, 7 BB). It once tinted all eight.
+const gasser = { games: 2, ipValue: 9, era: '1.00', k: 6, bb: 2 }
+const peralta = { games: 4, ipValue: 16 + 2 / 3, era: '1.08', k: 12, bb: 7 }
+
+test('leadingFigures: more innings and strikeouts lead, a lower ERA and fewer walks lead', () => {
+  assert.deepEqual(leadingFigures(gasser, peralta), ['ERA', 'BB'])
+  assert.deepEqual(leadingFigures(peralta, gasser), ['IP', 'K'])
+})
+
+test('leadingFigures: the two sides never lead the same figure', () => {
+  const a = leadingFigures(gasser, peralta)
+  const b = leadingFigures(peralta, gasser)
+  assert.deepEqual(a.filter((label) => b.includes(label)), [])
+})
+
+test('leadingFigures: a tie leads nothing, and a side with no October line leads nothing', () => {
+  assert.deepEqual(leadingFigures(gasser, { ...gasser }), [])
+  assert.deepEqual(leadingFigures(gasser, { games: 0, ipValue: 0, era: null, k: 0, bb: 0 }), [])
+  assert.deepEqual(leadingFigures({ games: 0 }, peralta), [])
+  assert.deepEqual(leadingFigures(gasser, null), [])
+})
+
+test('leadingFigures: a starter with no ERA yet cannot lead it', () => {
+  const noEra = { games: 1, ipValue: 0, era: null, k: 0, bb: 0 }
+  assert.ok(!leadingFigures(noEra, gasser).includes('ERA'))
+  assert.ok(!leadingFigures(gasser, noEra).includes('ERA'))
 })

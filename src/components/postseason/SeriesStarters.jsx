@@ -38,20 +38,35 @@ import { Card } from '../ui/frame/Card.jsx'
 //   cutoff    the page's cutoff date (ISO)
 //   gameNumber  the game's number in the DAY (a doubleheader), 1 here
 //   worldSeries true for the World Series: adds the All-time World Series row
-export function SeriesStarters({ head, note, game, season, cutoff, gameNumber = 1, worldSeries = false }) {
+//   stamped  the World Series page's look: a stamped card named on its ink tab, with `tag` (a
+//            short word, "Game 3") across its top-right edge, in place of the label head and
+//            its long note over a sheet card
+export function SeriesStarters({ head, note, tag, game, season, cutoff, gameNumber = 1, worldSeries = false, stamped = false }) {
   if (!game) return null
   const shared = { season, cutoff, restOn: game.date || cutoff, gameNumber, worldSeries }
+  const pair = (
+    <>
+      <Starter clubId={game.awayId} arm={game.away} {...shared} />
+      <div className="psseries__startersvs" aria-hidden="true">
+        <span>vs</span>
+      </div>
+      <Starter clubId={game.homeId} arm={game.home} {...shared} />
+    </>
+  )
+  if (stamped) {
+    return (
+      <Card frame="stamped" as="div" body="flush" label={head} labelAs="h3" count={tag} className="psseries__starters">
+        {pair}
+      </Card>
+    )
+  }
   return (
     <section className="psseries__startersection">
       <SectionHead look="label" note={note}>
         {head}
       </SectionHead>
       <Card as="div" body="flush" className="psseries__starters">
-        <Starter clubId={game.awayId} arm={game.away} {...shared} />
-        <div className="psseries__startersvs" aria-hidden="true">
-          <span>vs</span>
-        </div>
-        <Starter clubId={game.homeId} arm={game.home} {...shared} />
+        {pair}
       </Card>
     </section>
   )

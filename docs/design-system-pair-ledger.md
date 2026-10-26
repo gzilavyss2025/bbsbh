@@ -42,7 +42,9 @@ people for each side, a head-to-head event list, or a table with more than two s
   caller's and is the same on every sibling card.
 - **Title and note.** One title. The note names the measures and the direction
   ("League ranks · lower is better", "higher is better"). The period (for example
-  "Regular season") is quiet metadata beside the title.
+  "Regular season") is quiet metadata beside the title. `noteAs="info"` folds the note
+  behind an (i) beside the title, opening by tap (Gary, 2026-10-26: the World Series
+  cards keep their headers to one line); the words and the direction stay the same.
 - **Leader.** An amber underline (`--marker`) means "leads this measure". It does not
   mean "passes a threshold". `pairLead` picks the leader from the value at the precision
   the reader sees (pass `digits`). A tie marks neither side. A missing figure is never zero

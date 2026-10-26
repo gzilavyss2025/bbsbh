@@ -23,11 +23,12 @@ function Row({ label, marks, record }) {
   )
 }
 
-export function HomeRoad({ clubIds, clubGames, slateDate }) {
+// `labelAs`: the tab's heading level, 'h3' on the series pages (under their h2 group bands).
+export function HomeRoad({ clubIds, clubGames, slateDate, labelAs = 'h2' }) {
   const sides = clubIds.map((id) => ({ id, hr: homeRoad(clubGames?.[id], id, slateDate) }))
   if (sides.every((s) => s.hr.home.length + s.hr.road.length === 0)) return null
   return (
-    <Card frame="stamped" label="Home and road" className="ww-homeroad">
+    <Card frame="stamped" label="Home and road" labelAs={labelAs} className="ww-homeroad">
       <Stack gap="base">
         {sides.map(({ id, hr }) => (
           <section key={id} aria-label={`${teamClubNameShort(id)} home and road`}>
