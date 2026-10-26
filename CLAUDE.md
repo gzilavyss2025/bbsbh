@@ -30,8 +30,8 @@ specific first:
     `src/components/playbyplay/`, and `src/components/transactions/`.
   - `src/api/` — the data layer's RULE: the reveal-only vs. spoiler-free split
     (`spoiler-manifest.json`) and the build-time-fetch pattern. Folder detail:
-    `src/api/around-the-game/`, `src/api/boxlines/`, `src/api/expresslane/`, and
-    `src/api/transactions/`.
+    `src/api/around-the-game/`, `src/api/boxlines/`, `src/api/expresslane/`,
+    `src/api/gameday/` (Gameday's data), and `src/api/transactions/`.
   - `src/lib/` — club identity: colours, logo treatments, stamp ink. The stores:
     `src/lib/data/`.
   - `scripts/` — generator and guard rules. `test/` — the unit suite.

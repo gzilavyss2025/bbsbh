@@ -427,6 +427,11 @@
       "class": "spoiler-free",
       "why": "The static per-team highlight archive reader. Decided games only, every filter already ran in the generator, so the rails stay dumb. Not a scoring surface."
     },
+    "gameday/dayLine.js": {
+      "class": "reveal-only",
+      "why": "Gameday's day lines (#2606): the batter's and the pitcher's line for today as of the reader's step. A line names results ('2-for-3'). Built from computeHalfInningFeed's cards WITH the step cap and sliced at it, and from computePitcherLines' own step clamp, so step k never sees step k+1; a half past revealedThrough + 1 answers null. No screen imports it yet; the fresh Gameday stage (#2568) will call it inside a SealBox reveal render function.",
+      "importers": []
+    },
     "highlights.js": {
       "class": "mixed",
       "why": "A clip's title narrates the play's outcome, so the play JOIN is reveal-only — but fetching is safe eagerly, and the cascade's classification helpers are a plain data transform the Node generator runs with no DOM. selectCondensedGame/selectGameClips joined the sealed list in PR #601: a condensed cut and a game's own reel narrate the whole result, and their only protection is WHERE they mount — inside the box score's SealBox reveal (GameVideoRow). formatClipDuration stays spoiler-free: it formats a duration string and reads no game state, which is why the open surfaces that format a clip length need no place on this list. The win-probability chart's swing rows (useSwingClip) join a clip only for a big-swing play the chart already shows — and the chart is fed only reveal-gated points (winprob.js), so the play is revealed before its row, and its clip, exists. The pitcher Game Log's detail view (gameDetail.js) joins a clip to a play of a pitcher's game on the player page, an open surface where the plays of a game are open (ADR-0110); its score and decision come from the guarded log row, never the clip.",
@@ -739,6 +744,7 @@
       "why": "Running pitching lines (IP/R/ER/H). Accumulated ONLY from plays in revealed half-innings, so nothing from a sealed inning reaches the DOM — the ADR-0009 pattern this class is named for.",
       "importers": [
         "api/boxscore.js",
+        "api/gameday/dayLine.js",
         "api/pitcher-callouts.js",
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
@@ -759,6 +765,7 @@
         "api/derive.js",
         "api/dueup.js",
         "api/expresslane/runners.js",
+        "api/gameday/dayLine.js",
         "api/pitchers.js",
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",

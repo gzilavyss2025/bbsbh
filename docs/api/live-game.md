@@ -680,6 +680,23 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `/logbook/stats`.
 
 
+## Gameday data (`gameday/`, reveal-only)
+
+The Gameday rebuild's data modules (#2566). Folder rules: `src/api/gameday/CLAUDE.md`.
+Each one is clamped to the reader's step, not only to the half: the current half is
+built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
+
+- `gameday/dayLine.js` (#2606) — `batterDayLine(feed, batterId, { inning, half, step,
+  revealedThrough })` gives `{ id, pa, ab, h, hr, bb, k, hbp, rbi, r }` over every
+  earlier half of the batting side plus the current half up to `step` (`null` = the
+  whole half). `pitcherDayLine` takes the same options and returns
+  `computePitcherLines`' row, cut at the last plate appearance on screen through its
+  `throughAtBatIndex` clamp. Both answer null for a half past `revealedThrough + 1`, for
+  a player with nothing on screen yet, and for a missing field. Interrupted at-bats and
+  the placed runner count for nothing; a run counts only once the cap lets it onto the
+  card. Pinned on gamePk 823035 (`test/gameday-day-line.test.js`).
+
+
 ## Leader boards (live)
 
 - `leaders.js` / `teamLeaders.js` / `statsLevels.js` — ranking is pool-agnostic:
