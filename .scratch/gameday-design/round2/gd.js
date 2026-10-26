@@ -206,7 +206,7 @@
   function zoneCard(w, h, sc) {
     const Z = window.GD_ZONES, stat = sc.zoneStat || 'avg', big = w > 500
     const cells = Array.from({ length: 9 }, (_, i) => Z[stat][String(i + 1).padStart(2, '0')])
-    return `<div class="gd-zcard ${big ? 'is-big' : ''}"><span class="gd-zcard__h">${esc(Z.name.split(' ').at(-1))} · ${stat === 'avg' ? 'AVG' : 'SLG'} by zone</span>
+    return `<div class="gd-zcard ${big ? 'is-big' : ''}"><span class="gd-zcard__h">${esc(Z.name.split(' ').at(-1))} · ${stat === 'avg' ? 'AVG' : 'SLG'} by zone<span class="gd-zcard__x" aria-label="Hide the zone map">×</span></span>
       <div class="gd-zgrid">${cells.map((c) => `<span class="t-${c.temp}">${c.v}</span>`).join('')}</div><span class="gd-zcard__f">Season to Aug 31</span></div>`
   }
   function tag(st, w, h) {

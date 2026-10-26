@@ -168,6 +168,8 @@
 .gd-switch span.on { background: var(--surface-stamped-ink); color: var(--text-on-ink); }
 .gd-zcard { position: absolute; z-index: 2; right: 6px; top: 6px; background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); padding: 4px; display: flex; flex-direction: column; gap: 3px; width: 128px; }
 .gd-zcard.is-big { width: 168px; right: 10px; top: 10px; }
+.gd-zcard__h { display: flex; justify-content: space-between; align-items: center; }
+.gd-zcard__x { border: var(--bw-rule) solid var(--border-stamped); width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-heading); font-size: var(--fs-small); }
 .gd-zcard__h, .gd-zcard__f { font-family: var(--font-display); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: var(--fs-cell); color: var(--text-caption); }
 .gd-zgrid { display: grid; grid-template-columns: repeat(3, 1fr); border: var(--bw-rule) solid var(--border-stamped); }
 .gd-zgrid span { text-align: center; font-size: var(--fs-cell); font-variant-numeric: tabular-nums; padding: 6px 0; border: var(--bw-hair) solid var(--border-stamped); }
