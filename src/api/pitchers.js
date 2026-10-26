@@ -279,7 +279,7 @@ export function pitcherHandoffs(feed, inning, half, battingSide) {
   const halfLastAtBatIndex = plays[plays.length - 1]?.about?.atBatIndex ?? null
 
   const handoffs = []
-  const bases = [null, null, null] // runner id currently on 1B/2B/3B, this half only
+  const onBase = new Map() // runner id -> base now held (1-3), this half only
   let anyPitchInHalf = false
 
   plays.forEach((play, idx) => {
@@ -298,7 +298,7 @@ export function pitcherHandoffs(feed, inning, half, battingSide) {
         const departingPitcherId = prevPlay?.matchup?.pitcher?.id ?? null
         const snapshotAtBatIndex = prevPlay?.about?.atBatIndex ?? null
         if (departingPitcherId != null && snapshotAtBatIndex != null) {
-          const inheritedRunnerIds = bases.filter((id) => id != null)
+          const inheritedRunnerIds = [...onBase.keys()]
           const resolutionAtBatIndex = resolveHandoffRunners(
             plays,
             snapshotAtBatIndex,
@@ -320,13 +320,18 @@ export function pitcherHandoffs(feed, inning, half, battingSide) {
     }
 
     // Fold this play's own baserunning in AFTER checking it for a leading
-    // substitution — `bases` must reflect state as of the moment he left,
+    // substitution — `onBase` must reflect state as of the moment he left,
     // which is everything from STRICTLY EARLIER plays only.
+    // Keyed by runner id, not by base: a play's legs are NOT listed in the order
+    // they happened (the batter's `null -> 2B` comes before the man he forced
+    // off 2B), so clearing a base on a leg's `start` could wipe the runner just
+    // placed there (gamePk 822844, top 7th). One runner's own legs are in order.
     for (const r of play.runners ?? []) {
-      const startBase = HANDOFF_BASE_NUM[r.movement?.start]
+      const id = r.details?.runner?.id
       const endBase = HANDOFF_BASE_NUM[r.movement?.end]
-      if (startBase) bases[startBase - 1] = null
-      if (!r.movement?.isOut && endBase) bases[endBase - 1] = r.details?.runner?.id ?? null
+      if (id == null) continue
+      if (!r.movement?.isOut && endBase) onBase.set(id, endBase)
+      else onBase.delete(id)
     }
   })
 
