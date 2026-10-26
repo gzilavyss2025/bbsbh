@@ -745,7 +745,7 @@ export function InningViewer({
           bug={{
             started, live: curLiveState, feed, unlocked: renderUnlocked, mark: renderRevealedThrough,
             runsInProgress, treatment: winProbTreatment, viewIdx: curIdx, viewInning: effInning, viewHalf: effHalf,
-            season: gameDate,
+            season: gameDate, stepAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
           }}
           meta={meta}
           engine={pageTurn}

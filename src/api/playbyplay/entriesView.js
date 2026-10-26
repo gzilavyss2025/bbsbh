@@ -336,6 +336,7 @@ export function deriveLiveState(entries, cap) {
   let midHalfPitcherId = null
   let batter = null
   let batterDone = false
+  let last = null
   for (const e of visible) {
     if (e.kind === 'event' && e.eventType === 'pitching_substitution') {
       midHalfPitcherId = e.playerId ?? null
@@ -350,10 +351,11 @@ export function deriveLiveState(entries, cap) {
         ? { id: e.runnerId, last: e.runner?.last ?? '', first: e.runner?.first ?? '' }
         : { id: e.batterId, last: e.batter?.last ?? '', first: e.batter?.first ?? '' }
     batterDone = !e.interrupted
+    if (e.kind === 'atbat' && !e.live) last = e
     const key = BASE_KEY[e.reached]
     if (key && e.outNumber == null && !e.scored) bases[key] = true
   }
-  return { bases, outs, pitchesSoFar, midHalfPitcherId, batter, batterDone }
+  return { bases, outs, pitchesSoFar, midHalfPitcherId, batter, batterDone, last }
 }
 
 // The at-bat trail's chip data (AtBatTrail.jsx), one chip per focusWindows

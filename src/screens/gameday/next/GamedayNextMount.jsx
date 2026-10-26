@@ -1,5 +1,6 @@
 import { ScorebugMount } from '../../../components/gamehud/ScorebugMount.jsx'
 import { GamedayBand } from './GamedayBand.jsx'
+import { GamedayHero } from './hero/GamedayHero.jsx'
 import { GamedayNextPage } from './GamedayNextPage.jsx'
 
 // InningViewer's hand-off to the new shell: the band reads the live snapshot through
@@ -16,9 +17,16 @@ export function GamedayNextMount({ bug: { mark, ...bug }, meta, engine, advance,
       awayRuns="—" homeRuns="—"
     />
   )
+  const hero = bug.started && bug.feed && (
+    <GamedayHero
+      feed={bug.feed} inning={bug.viewInning} half={bug.viewHalf} mark={mark}
+      last={bug.live?.last ?? null} stepAtBatIndex={bug.stepAtBatIndex}
+    />
+  )
   return (
     <GamedayNextPage
       band={band}
+      hero={hero || null}
       engine={engine}
       advance={advance}
       onBoxScore={onBoxScore}

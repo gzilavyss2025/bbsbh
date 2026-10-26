@@ -824,10 +824,11 @@
     },
     "playbyplay/advanceCode.js": {
       "class": "reveal-only",
-      "why": "Runner advance/out notation — a play outcome. Barrel-internal.",
+      "why": "Runner advance/out notation — a play outcome. Barrel-internal, with one importer outside it: Gameday's hero reads battingSlot (a box-score batting-order fact) only for an at-bat already inside the reader's cursor, in a SealBox reveal render function.",
       "importers": [
         "api/playbyplay.js",
-        "api/playbyplay/halfInningFeed.js"
+        "api/playbyplay/halfInningFeed.js",
+        "screens/gameday/next/hero/heroMarkup.js"
       ]
     },
     "playbyplay/entriesView.js": {
@@ -870,12 +871,13 @@
     },
     "playbyplay/pitchInfo.js": {
       "class": "reveal-only",
-      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with two importers outside the barrel. Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. Gameday's subSteps.js reaches AUTOMATIC_CODES for the same reason (the same call is a sub-step on one surface and a card dot on the other). Both importers are themselves reveal-only, so the containment does not widen.",
+      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with two importers outside the barrel. Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. Gameday's subSteps.js reaches AUTOMATIC_CODES for the same reason (the same call is a sub-step on one surface and a card dot on the other). Both importers are themselves reveal-only, so the containment does not widen. Gameday's hero (heroModel.js) reaches pitchLadder to number the scorebook box's pips, so the box and the card cannot disagree; it runs it on an at-bat already inside the cursor, in a SealBox reveal render function.",
       "importers": [
         "api/expresslane/rail.js",
         "api/gameday/subSteps.js",
         "api/playbyplay.js",
-        "api/playbyplay/halfInningFeed.js"
+        "api/playbyplay/halfInningFeed.js",
+        "screens/gameday/next/hero/heroModel.js"
       ]
     },
     "playbyplay/runnerNotes.js": {
