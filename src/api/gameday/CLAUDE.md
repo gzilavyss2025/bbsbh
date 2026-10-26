@@ -28,3 +28,4 @@ each value looks. Pure physics goes in `src/lib/gameday/`, not here.
 | `checkpoint.js` | The half-end checkpoint's pages: the tally and the pitching split (#2605); two more wait for #2572. |
 | `moments/` | The moments engine: `moments.js` scores one revealed play (four kinds, three dial cut-offs); `thresholds.js` holds the measured floors (#2608). |
 | `reviews.js` | Manager, crew-chief and ABS reviews, and each club's ABS bank, as of the step (#2607). Never `gameData.absChallenges`. |
+| `subSteps.js` | The sub-steps inside one at-bat (ADR-0123): changes, pitches, automatic calls, events, then the result; `stop` marks at-bat mode's. |
