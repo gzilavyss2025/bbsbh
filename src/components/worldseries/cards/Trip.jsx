@@ -25,6 +25,8 @@ const asPoints = (pts) => pts.map(([x, y]) => `${x},${y}`).join(' ')
 function Fences({ from, to }) {
   const a = polygon(from.dist)
   const b = polygon(to.dist)
+  // A park with a distance missing yields NaN points: draw nothing rather than an invalid view box.
+  if (![...a, ...b].every((p) => p.every(Number.isFinite))) return null
   const xs = [...a, ...b].map((p) => p[0])
   const ys = [...a, ...b].map((p) => p[1])
   const x0 = Math.min(...xs) - PAD

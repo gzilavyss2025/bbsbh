@@ -55,7 +55,7 @@ export function SeriesStarters({ head, note, tag, game, season, cutoff, gameNumb
   )
   if (stamped) {
     return (
-      <Card frame="stamped" as="div" body="flush" label={head} count={tag} className="psseries__starters">
+      <Card frame="stamped" as="div" body="flush" label={head} labelAs="h3" count={tag} className="psseries__starters">
         {pair}
       </Card>
     )

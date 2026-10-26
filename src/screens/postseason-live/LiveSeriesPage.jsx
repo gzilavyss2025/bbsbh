@@ -293,7 +293,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   const gamesEl = results.length > 0 && (
         <GamesWrap {...(ws ? null : { className: 'psseries__games' })}>
           {!ws && <SectionHead look="label">Game by game</SectionHead>}
-          <Card as="div" body="flush" className="psseries__log" {...(ws ? { frame: 'stamped', label: 'Game by game' } : null)}>
+          <Card as="div" body="flush" className="psseries__log" {...(ws ? { frame: 'stamped', label: 'Game by game', labelAs: 'h3' } : null)}>
             <div className="psseries__logbody">
               {results.map((g, i) => {
                 const card = cardsByPk?.[g.gamePk]
@@ -348,7 +348,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
       )}
     </>
   )
-  const totalsEl = stats?.totals && clubs.length === 2 && <SeriesTotals totals={stats.totals} clubs={clubs} stamped={ws} />
+  const totalsEl = stats?.totals && clubs.length === 2 && <SeriesTotals totals={stats.totals} clubs={clubs} stamped={ws} labelAs="h3" />
   const leadersEl = (hasBatting || hasPitching) && (
         <div className="psseries__leaders">
           {hasBatting && (

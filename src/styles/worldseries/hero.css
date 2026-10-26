@@ -425,7 +425,7 @@
   .ww-hero__date, .ww-hero__time { font-size: var(--fs-ui); }
   .ww-hero__spotlight { padding: var(--space-3) var(--space-5); }
   .ww-hero__name { font-size: var(--fs-card-name); }
-  .ww-hero__who--home { justify-items: end; text-align: right; }
+  .ww-hero__pair > .ww-hero__who--home { justify-items: end; text-align: right; }
   .ww-hero__who--home .ww-hero__play { justify-self: end; }
   .ww-cal { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
 }

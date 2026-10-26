@@ -40,7 +40,7 @@ export function StillToPlay({ games, details, previous, showArms, formatDate, st
   return (
     <Wrap {...(stamped ? null : { className: 'psseries__upcoming' })}>
       {!stamped && <SectionHead look="label">Still to play</SectionHead>}
-      <Card as="div" body="flush" {...(stamped ? { frame: 'stamped', label: 'Still to play' } : null)}>
+      <Card as="div" body="flush" {...(stamped ? { frame: 'stamped', label: 'Still to play', labelAs: 'h3' } : null)}>
         <ul className="psseries__upcominglist">
           {games.map((g, i) => {
             const info = g.date && g.gamePk ? details?.[g.gamePk] : null

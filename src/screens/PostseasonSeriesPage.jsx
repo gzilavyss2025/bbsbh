@@ -132,6 +132,8 @@ export function PostseasonSeriesPage({ seriesId }) {
   const flowBuckets = useMemo(() => historyFlowBuckets(games), [games])
   // World Series only: the mode shape built from the history series, and the pieces' shared reads.
   const ws = useMemo(() => (data?.series?.isWorldSeries ? historySeriesMode(data.series) : null), [data])
+  // The World Series page draws every block as a stamped card; the other rounds keep the sheet look.
+  const wsStamped = Boolean(ws)
   const view = useWorldSeriesView(ws?.mode ?? null, ws?.cutoff ?? '')
   const [scoutShown, setScoutShown] = useState(false)
   const [clubA, clubB] = view.clubIds ?? []
@@ -237,7 +239,7 @@ export function PostseasonSeriesPage({ seriesId }) {
         homeIdByPk={homeIdByPk}
         clubs={clubs}
         defaultId={[teamA.teamId, teamB.teamId].includes(favoriteTeamId) ? favoriteTeamId : teamB.teamId}
-        stamped={Boolean(ws)}
+        stamped={wsStamped}
       />
   )
 
@@ -262,11 +264,11 @@ export function PostseasonSeriesPage({ seriesId }) {
           the band simply doesn't render) closes the log as a medal-amber
           award line under the clinching entry, the same --award-line trim
           the banner's seam wears. */
-  const GamesWrap = ws ? Fragment : 'section'
+  const GamesWrap = wsStamped ? Fragment : 'section'
   const gamesEl = (
-      <GamesWrap {...(ws ? null : { className: 'psseries__games' })}>
-        {!ws && <SectionHead look="label">Game by game</SectionHead>}
-        <Card as="div" body="flush" className="psseries__log" {...(ws ? { frame: 'stamped', label: 'Game by game' } : null)}>
+      <GamesWrap {...(wsStamped ? null : { className: 'psseries__games' })}>
+        {!wsStamped && <SectionHead look="label">Game by game</SectionHead>}
+        <Card as="div" body="flush" className="psseries__log" {...(wsStamped ? { frame: 'stamped', label: 'Game by game', labelAs: 'h3' } : null)}>
           <div className="psseries__logbody">
             {games.map((g, i) => {
               const card = cardsByPk?.[g.gamePk]
@@ -322,25 +324,25 @@ export function PostseasonSeriesPage({ seriesId }) {
         </Card>
       </GamesWrap>
   )
-  const totalsEl = <SeriesTotals totals={stats.totals} clubs={clubs} stamped={Boolean(ws)} />
+  const totalsEl = <SeriesTotals totals={stats.totals} clubs={clubs} stamped={wsStamped} labelAs="h3" />
   const leadersEl = (hasBatting || hasPitching) && (
         <div className="psseries__leaders">
           {hasBatting && (
             <SeriesLeaderBoard
-              title={ws ? 'Batting leaders' : 'Series batting leaders'}
+              title={wsStamped ? 'Batting leaders' : 'Series batting leaders'}
               categories={BATTING_CATEGORIES}
               byCategory={stats.batting}
               doors={doors('hitting')}
-              stamped={Boolean(ws)}
+              stamped={wsStamped}
             />
           )}
           {hasPitching && (
             <SeriesLeaderBoard
-              title={ws ? 'Pitching leaders' : 'Series pitching leaders'}
+              title={wsStamped ? 'Pitching leaders' : 'Series pitching leaders'}
               categories={SERIES_PITCHING_CATEGORIES}
               byCategory={stats.pitching}
               doors={doors('pitching')}
-              stamped={Boolean(ws)}
+              stamped={wsStamped}
             />
           )}
         </div>
@@ -353,16 +355,16 @@ export function PostseasonSeriesPage({ seriesId }) {
         sportId={1}
         gameTypes="R"
         settled
-        look={ws ? 'stamped' : 'label'}
+        look={wsStamped ? 'stamped' : 'label'}
         title="Regular season"
       />
   )
   const nineEl = <SeriesNineKeys data={nineKeys} clubs={clubs} season={year} />
-  const absEl = <SeriesAbsReport season={year} clubIds={clubs.map((c) => c.id)} gamePks={games.map((g) => g.gamePk)} stamped={Boolean(ws)} />
+  const absEl = <SeriesAbsReport season={year} clubIds={clubs.map((c) => c.id)} gamePks={games.map((g) => g.gamePk)} stamped={wsStamped} />
   const rostersEl = (
     <div className="psseries__rosters">
-      <RosterCard teamId={winner.teamId} roster={stats.rosters[winner.teamId]} stamped={Boolean(ws)} />
-      <RosterCard teamId={loser.teamId} roster={stats.rosters[loser.teamId]} stamped={Boolean(ws)} />
+      <RosterCard teamId={winner.teamId} roster={stats.rosters[winner.teamId]} stamped={wsStamped} />
+      <RosterCard teamId={loser.teamId} roster={stats.rosters[loser.teamId]} stamped={wsStamped} />
     </div>
   )
 

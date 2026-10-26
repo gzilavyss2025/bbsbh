@@ -17,7 +17,7 @@ import { failedCards, failedLine } from '../../lib/postseason/worldseries/scouti
 import { gloveLegsModel } from '../../lib/postseason/worldseries/scouting/gloveLegs.js'
 import { fitParks, parkFitModel } from '../../lib/postseason/worldseries/scouting/parkFit.js'
 import { platoonModel } from '../../lib/postseason/worldseries/scouting/platoon.js'
-import { clubOrder, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
+import { WIDE_CARDS, cardRuns, clubOrder, scoutingModel } from '../../lib/postseason/worldseries/scouting/scouting.js'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { HubTabBar } from '../chrome/HubTabBar.jsx'
 import { EdgeCard } from '../postseason/edges/EdgeCard.jsx'
@@ -72,20 +72,6 @@ const CARD = {
   platoon: ({ platoon }) => <Platoon blocks={platoon} />,
   'park-fit': ({ parkFit, parks, sides }) => <ParkFit model={parkFit} parks={parks} clubIds={sides} />,
   'umpire-edge': ({ plateUmpire, umpire }) => <UmpireEdge name={plateUmpire.name} lean={umpire?.lean ?? null} />,
-}
-
-// Cards that take the whole row.
-const WIDE = ['film-room', 'roster']
-
-// The card list cut into runs: each wide card alone, the cards between two of them together.
-function segments(cards) {
-  const runs = []
-  for (const c of cards) {
-    const last = runs.at(-1)
-    if (last && !WIDE.includes(c.id) && !WIDE.includes(last[0].id)) last.push(c)
-    else runs.push([c])
-  }
-  return runs
 }
 
 export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null, series = null, omit = [], jumpBar = true, onShown }) {
@@ -208,14 +194,14 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
         />
       )}
       {failed && <p className="ww-scout__failed" role="status">{failed}</p>}
-      {segments(cards).map((run) => {
+      {cardRuns(cards).map((run) => {
         const items = run.map((c) => (
           <div key={c.id} id={`ww-scout-${c.id}`} className="ww-scout__card">
             {CARD[c.id](ctx)}
           </div>
         ))
         // A wide card is its own row; the cards between two of them flow in balanced columns.
-        return WIDE.includes(run[0].id) ? items : <Flow key={run[0].id}>{items}</Flow>
+        return WIDE_CARDS.includes(run[0].id) ? items : <Flow key={run[0].id}>{items}</Flow>
       })}
     </Stack>
   )

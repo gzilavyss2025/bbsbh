@@ -149,9 +149,9 @@ export function WorldSeriesHome({ bracket, cutoff = null, slateDate, wide = fals
           {data && (
             <Flow>
               <HomeRoad clubIds={clubIds} clubGames={data.clubGames} slateDate={slateDate} />
-              {bullpen}
             </Flow>
           )}
+          {bullpen}
         </>
       )}
     </Stack>

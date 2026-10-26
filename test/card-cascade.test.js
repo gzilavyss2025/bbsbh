@@ -1631,8 +1631,9 @@ test('C6a: the upcoming games and the roster rows are <ul>s inside a flush Card 
     ['screens/AllStarRostersPage.jsx', 'allstarrosters__rows'],
   ]) {
     const code = src(rel)
-    // The optional `{...}` is the World Series page's stamped look (frame and name tab as props).
-    assert.match(code, new RegExp(`<Card as="div" body="flush"(?: \\{[^>]*\\})?>\\s*<ul className="${ns}">`), `${rel}: .${ns}`)
+    // The one optional spread is the World Series page's stamped look: the stamped frame and a name tab.
+    const stamped = `\\{\\.\\.\\.\\(stamped \\? \\{ frame: 'stamped', label: '[^']+'(?:, labelAs: 'h[34]')? \\} : null\\)\\}`
+    assert.match(code, new RegExp(`<Card as="div" body="flush"(?: ${stamped})?>\\s*<ul className="${ns}">`), `${rel}: .${ns}`)
   }
 })
 

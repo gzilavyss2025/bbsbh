@@ -53,7 +53,7 @@ export function SeriesAbsReport({ season, clubIds, gamePks, cutoff = null, stamp
         as="div"
         body="flush"
         className="psseries__abs"
-        {...(stamped ? { frame: 'stamped', label: 'ABS challenges' } : null)}
+        {...(stamped ? { frame: 'stamped', label: 'ABS challenges', labelAs: 'h3' } : null)}
       >
         <table className="psseries__abstable">
           <caption className="sr-only">ABS challenge record by player, best win percentage first</caption>

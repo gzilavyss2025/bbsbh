@@ -59,7 +59,9 @@ function centerOn(strip, cell) {
 // or before the schedule loads.
 //
 // The postseason series page (ADR-0087) draws it with `gameTypes="R"`,
-// `settled`, `look="label"` and `title="Regular season"`: regular season games
+// `settled`, `look="label"` (the World Series pages: `look="stamped"`, a stamped
+// card named on its ink tab with the lead line across its top-right edge) and
+// `title="Regular season"`: regular season games
 // only, because with no current game of its own on an off day the strip would
 // draw a card for every later postseason game the schedule still lists, and
 // whether an "if necessary" card exists says how the series ended; the lead

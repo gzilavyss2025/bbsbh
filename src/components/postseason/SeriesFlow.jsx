@@ -116,7 +116,7 @@ export function SeriesFlow({ series, gameSignals, homeIdByPk, clubs, defaultId, 
         as="div"
         body="flush"
         className="psseries__flow"
-        {...(stamped ? { frame: 'stamped', label: 'How the games went' } : null)}
+        {...(stamped ? { frame: 'stamped', label: 'How the games went', labelAs: 'h3' } : null)}
       >
         {stamped && <div className="psseries__flowbar">{switcher}</div>}
         <div className="psseries__flowreadout" aria-live="polite">

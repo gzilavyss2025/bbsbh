@@ -373,7 +373,9 @@ button.psseries__ldoor::after {
   vertical-align: -2px;
 }
 .psseries__keyscale {
-  padding-inline: var(--space-3) 2px;
+  /* The marks sit on a line inset --space-3 from each end (.psseries__keyline); the scale's two
+     labels share that inset, so "1st" no longer touches the club names beside it. */
+  padding-inline: var(--space-3);
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
