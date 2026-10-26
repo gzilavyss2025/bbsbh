@@ -21,8 +21,9 @@ test('no earlier game that long: the first in World Series history', () => {
     ['The first game of 18 or more innings in World Series history.'])
 })
 
-test('a gap under three seasons gives no note', () => {
-  assert.deepEqual(texts(game18(), [row('extraInnings', '2016-10-26', 18)]), [])
+test('there is no gap floor: a game that long two years ago still notes it', () => {
+  assert.deepEqual(texts(game18(), [row('extraInnings', '2016-10-26', 18)]),
+    ['The first World Series game of 18 or more innings since Oct. 26, 2016.'])
 })
 
 test('a row dated on or after the game never counts', () => {

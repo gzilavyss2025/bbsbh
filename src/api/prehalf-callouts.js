@@ -53,6 +53,7 @@ import { halfIndex, derivedHalfStartingPitcherId, sideOnMoundFor } from './selec
 import { matchupNotesForHalf } from './matchup/forHalf.js'
 import { buildWorldSeriesOddsNotes, buildWorldSeriesStarterNote } from './callout-notes/worldSeries/odds.js'
 import { buildWsWtaTrailing9Note } from './callout-notes/worldSeries/events.js'
+import { isWorldSeriesKind } from '../lib/worldSeries/calloutKind.js'
 import {
   cumulativeInnings,
   buildStarterTeamRecordNote,
@@ -218,11 +219,17 @@ export function buildPreHalfCallouts({
   // to one kind again, which is what the caps are here to prevent. A short
   // strip is the honest outcome. (Between Innings deliberately does not set
   // this — its depth is an invariant; see rankNotes' header.)
-  return rankNotes(notes, {
+  //
+  // A World Series note sits outside all of that: the Series is the occasion, so none of its
+  // notes is ranked, decayed or capped, and they lead the strip.
+  const isWs = (n) => isWorldSeriesKind(n?.kind)
+  const series = notes.filter((n) => n && isWs(n))
+  const ranked = rankNotes(notes.filter((n) => !isWs(n)), {
     shownCounts,
     maxPerKind: 1,
     maxRecordNotes: PREHALF_MAX_RECORDS,
     limit: PREHALF_MAX,
     strictCaps: true,
   })
+  return [...series.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)), ...ranked]
 }

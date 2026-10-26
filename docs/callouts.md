@@ -85,7 +85,8 @@ Every note carries `score` (0–100) = family base + magnitude bonus, clamped �
 the callouts sibling of the three stars' blended performance score
 (ADR-0013). The Insights card sorts by it, shows the top `INSIGHTS_SHOWN`
 (6), and folds the rest behind Show more; the pre-half strip sorts and caps
-at `PREHALF_MAX` (2). Play cards don't re-rank — a card rarely holds more
+at `PREHALF_MAX` (2), except World Series notes (`ws*` kinds), which are never ranked,
+decayed or capped there. Play cards don't re-rank — a card rarely holds more
 than a couple of notes, each already sitting on the play it belongs to.
 
 Bases encode how rare/dramatic a family is; bonuses reward how far past its
@@ -585,8 +586,8 @@ World Series games only; a game of any other type is unchanged and costs no requ
 tag means is `lib/worldSeries/classify.js`, the code that built `events.json`; every lookup is
 `lastBefore`, strictly before the game's own date (ADR-0087). The history is `events.json`
 plus `bundle.wsEvents` (the current Series, from the nightly shard); an older shard without
-the key leaves the second half empty. A note fires when the gap is `WS_MIN_GAP_SEASONS` (3)
-seasons or more, or when no earlier row exists ("The first … in World Series history.").
+the key leaves the second half empty. There is no gap floor (Gary, 2026-10-26): a note fires
+whatever the gap, and reads "The first … in World Series history." when no earlier row exists.
 
 - **wsLastTime** (play card) — "The last World Series grand slam came on Oct. 24, 2025."
   Only on the revealed play. One note per play, the most specific tag that fires:
