@@ -701,7 +701,8 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
   revealedThrough })` gives `{ reviews, bank }`. Each review: `kind` (`abs`, `manager`
   when a club challenged anything else, `crew` when no club is named), `side`,
   `reason` from MLB's `/api/v1/reviewReasons` (the second letter of `reviewType`),
-  `overturned` (null while `inProgress`), the player, and where it happened. The bank is
+  `overturned` (null while `inProgress`), the player, and where it happened. ABS records
+  come from `challenges.js`' `challengesForPlay` (one walk for every surface). The bank is
   `challenges.js`' rules walked to the step, with a refill when a club enters an extra
   inning empty; null for a game that does not run ABS. Never reads
   `gameData.absChallenges`. Pinned on gamePk 823036, 823169 and 815625.
@@ -710,9 +711,11 @@ built with computeHalfInningFeed's `stepCap` and sliced at it (ADR-0016).
   `pitching`, then `atBats` and `gameSoFar` as `built: false` until #2572), or null for a
   half past `revealedThrough`. The tally reads `revealInning` (E from the fielding side,
   ADR-0006). The pitching page counts per pitcher: a strike is any pitch that is not a
-  ball, and a pitch thrown before a mid-at-bat `pitching_substitution` is the replaced
-  man's, not the play's `matchup.pitcher`. That rule matched the box score for every
-  pitcher in five games (2026-10-26).
+  ball, and each pitch goes to the pitcher the play's events put on the mound (every
+  `pitching_substitution`'s own `player.id`), not to the play's `matchup.pitcher`, which
+  names the one who finished the at-bat. That matched the box score for every pitcher in
+  11 games (2026-10-26). `pitchers.js` walks the same events to stretch a pitcher's span
+  over a half he was pulled from mid-at-bat, so his box-score line waits for that half.
 - `gameday/moments/moments.js` (#2608) — `momentsForPlay(feed, atBatIndex, { inning, half,
   step, revealedThrough, winProb, milestones })` gives the play's moments, highest score
   first, or null for a play not on screen. Kinds and families: rare (`walkOff`,
