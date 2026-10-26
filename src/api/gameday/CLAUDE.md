@@ -25,6 +25,6 @@ each value looks. Pure physics goes in `src/lib/gameday/`, not here.
 | --- | --- |
 | `stepCut.js` | The shared step cut: the at-bat cards on screen, and the last one's `atBatIndex`. |
 | `dayLine.js` | The batter's and the pitcher's line for today, as of the step (#2606). |
-| `checkpoint.js` | The half-end checkpoint's pages: the tally and the pitching split (#2605); two more wait for #2572. |
+| `checkpoint.js` | The half-end checkpoint's five pages: tally, pitching (with fouls), at-bats, game so far, notes (#2605, #2572). |
 | `moments/` | The moments engine: `moments.js` scores one revealed play (four kinds, three dial cut-offs); `thresholds.js` holds the measured floors (#2608). |
 | `reviews.js` | Manager, crew-chief and ABS reviews, and each club's ABS bank, as of the step (#2607). Never `gameData.absChallenges`. |
