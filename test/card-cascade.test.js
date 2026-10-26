@@ -1501,7 +1501,7 @@ test('C5: the seal pin — no reveal-only import, SealBox or revealedThrough rea
 // page, whose tiles hold team links (a link inside a button card is invalid).
 const C6A = [
   { css: '34-postseason.css', sel: '.seed', jsx: ['screens/PostseasonHistoryPage.jsx', 'screens/PostseasonRacePage.jsx'], ns: 'seed', frame: 'ledger', keep: ['overflow'] },
-  { css: '35-postseason-series.css', sel: '.psseries__result', jsx: ['screens/PostseasonSeriesPage.jsx', 'screens/postseason-live/LiveSeriesPage.jsx'], ns: 'psseries__result' },
+  { css: '35-postseason-series.css', sel: '.psseries__result', jsx: ['screens/PostseasonSeriesPage.jsx', 'screens/postseason-live/ResultBanner.jsx'], ns: 'psseries__result' },
   { css: '35-postseason-series.css', sel: '.psseries__log', jsx: ['screens/PostseasonSeriesPage.jsx', 'screens/postseason-live/LiveSeriesPage.jsx'], ns: 'psseries__log', as: 'div', gone: true },
   { css: '35-postseason-series.css', sel: '.psseries__lboard', jsx: ['components/postseason/SeriesParts.jsx'], ns: 'psseries__lboard' },
   { css: '35-postseason-series.css', sel: '.psseries__rostercard', jsx: ['components/postseason/SeriesParts.jsx'], ns: 'psseries__rostercard' },
@@ -1631,7 +1631,8 @@ test('C6a: the upcoming games and the roster rows are <ul>s inside a flush Card 
     ['screens/AllStarRostersPage.jsx', 'allstarrosters__rows'],
   ]) {
     const code = src(rel)
-    assert.match(code, new RegExp(`<Card as="div" body="flush">\\s*<ul className="${ns}">`), `${rel}: .${ns}`)
+    // The optional `{...}` is the World Series page's stamped look (frame and name tab as props).
+    assert.match(code, new RegExp(`<Card as="div" body="flush"(?: \\{[^>]*\\})?>\\s*<ul className="${ns}">`), `${rel}: .${ns}`)
   }
 })
 

@@ -78,7 +78,7 @@ export function Bullpen({ clubIds, boxscoresByClub, slateDate }) {
   if (grids.every((g) => g.rows.length === 0)) return null
   return (
     <Card frame="stamped" label="Bullpen" count="Pitches per Oct game" className="ww-bullpen">
-      <Grid min={300} gap="base">
+      <Grid min={300} gap="base" fit>
         {clubIds.map((id, i) => (
           <Club key={id} clubId={id} grid={grids[i]} />
         ))}

@@ -79,6 +79,12 @@
   color: var(--text-caption);
 }
 
+/* The (i) that holds the sample sizes sits under the table, at the left. */
+.ww-fit__foot {
+  display: flex;
+  margin-top: var(--space-1);
+}
+
 /* THE TWO-PARK OVERLAY (2026-10-21). The card has two inks: the first park wears the wall's own navy,
    the second the clay that the infield dirt already borrows (--accent-negative). An ink never carries the
    meaning alone: the key names each park, the signs print the numbers, and a park that is off fades and
@@ -126,7 +132,7 @@
 
 /* The key: a line sample in the park's ink, then its name. A park that is off dims. */
 .ww-fence__key {
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-4);
   font-size: var(--fs-cell);
 }
 

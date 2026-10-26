@@ -23,6 +23,7 @@ import { HubTabBar } from '../chrome/HubTabBar.jsx'
 import { EdgeCard } from '../postseason/edges/EdgeCard.jsx'
 import { MatchupEdges } from '../postseason/edges/MatchupEdges.jsx'
 import { UmpireEdge } from '../postseason/edges/UmpireEdge.jsx'
+import { Flow } from './Flow.jsx'
 import { NineKeys } from './cards/scouting/NineKeys.jsx'
 import { FilmRoom } from './cards/scouting/FilmRoom.jsx'
 import { GloveLegs } from './cards/scouting/GloveLegs.jsx'
@@ -31,7 +32,6 @@ import { PitchByPitch } from './cards/scouting/PitchByPitch.jsx'
 import { Platoon } from './cards/scouting/Platoon.jsx'
 import { Roster } from './cards/scouting/Roster.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
-import { Grid } from '../ui/layout/Grid.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 
 // THE SCOUTING REPORT (#2316, slice 1): a navy band head, a sticky jump bar, and the
@@ -76,6 +76,17 @@ const CARD = {
 
 // Cards that take the whole row.
 const WIDE = ['film-room', 'roster']
+
+// The card list cut into runs: each wide card alone, the cards between two of them together.
+function segments(cards) {
+  const runs = []
+  for (const c of cards) {
+    const last = runs.at(-1)
+    if (last && !WIDE.includes(c.id) && !WIDE.includes(last[0].id)) last.push(c)
+    else runs.push([c])
+  }
+  return runs
+}
 
 export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, gamePk, gameNumber = null, plateUmpire = null, game = null, series = null, omit = [], jumpBar = true, onShown }) {
   const season = Number(slateDate.slice(0, 4))
@@ -197,13 +208,15 @@ export function ScoutingReport({ clubIds, sides: sidesProp, slateDate, dayType, 
         />
       )}
       {failed && <p className="ww-scout__failed" role="status">{failed}</p>}
-      <Grid min={340} gap="loose">
-        {cards.map((c) => (
-          <div key={c.id} id={`ww-scout-${c.id}`} className={WIDE.includes(c.id) ? 'ww-scout__card ww-scout__card--wide' : 'ww-scout__card'}>
+      {segments(cards).map((run) => {
+        const items = run.map((c) => (
+          <div key={c.id} id={`ww-scout-${c.id}`} className="ww-scout__card">
             {CARD[c.id](ctx)}
           </div>
-        ))}
-      </Grid>
+        ))
+        // A wide card is its own row; the cards between two of them flow in balanced columns.
+        return WIDE.includes(run[0].id) ? items : <Flow key={run[0].id}>{items}</Flow>
+      })}
     </Stack>
   )
 }

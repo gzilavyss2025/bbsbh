@@ -2,8 +2,7 @@ import { fetchPostseasonOutings } from '../../../api/postseason/worldSeriesHome.
 import { fetchWorkload } from '../../../api/workload.js'
 import { projectFromLiveLogs } from '../../../api/rotation/liveStarters.js'
 import { useAsync } from '../../../hooks/useAsync.js'
-import { leadSide } from '../../../lib/postseason/worldseries/hotBats.js'
-import { pitcherLine } from '../../../lib/postseason/worldseries/probables.js'
+import { leadingFigures, pitcherLine } from '../../../lib/postseason/worldseries/probables.js'
 import { teamClubNameShort } from '../../../lib/teams.js'
 import { TeamLogo } from '../../logo/TeamLogo.jsx'
 import { Headshot } from '../../player/Headshot.jsx'
@@ -28,15 +27,16 @@ async function loadSide(clubId, arm, game, season, slateDate) {
 }
 
 const TILES = [
-  ['IP', (l) => l.ip, (l) => l.ipValue, false],
-  ['ERA', (l) => l.era ?? '—', (l) => (l.era == null ? null : Number(l.era)), true],
-  ['K', (l) => l.k, (l) => l.k, false],
-  ['BB', (l) => l.bb, (l) => l.bb, true],
+  ['IP', (l) => l.ip],
+  ['ERA', (l) => l.era ?? '—'],
+  ['K', (l) => l.k],
+  ['BB', (l) => l.bb],
 ]
 
 function Side({ side, other }) {
   const { clubId, who, line } = side
   const club = teamClubNameShort(clubId)
+  const leads = leadingFigures(line, other?.line)
   return (
     <section className="ww-prob" aria-label={`${club} starter`}>
       <div className="ww-prob__who">
@@ -50,10 +50,9 @@ function Side({ side, other }) {
           <div className="ww-prob__body">
             <Headshot personId={who.id} name={who.name} teamId={clubId} className="ww-prob__shot" />
             <StatStrip>
-              {TILES.map(([label, show, num, lowerWins]) => {
-                const lead = other?.line?.games && line.games ? leadSide(num(line), num(other.line), { lowerWins }) : null
-                return <StatCell key={label} label={label} value={show(line)} className={lead ? 'ww-best' : ''} />
-              })}
+              {TILES.map(([label, show]) => (
+                <StatCell key={label} label={label} value={show(line)} className={leads.includes(label) ? 'ww-best' : ''} />
+              ))}
             </StatStrip>
           </div>
         </>

@@ -252,10 +252,15 @@
   color: var(--text-heading);
 }
 
+/* The heads row has two children in a three-track grid (1fr auto 1fr), so the home club landed in
+   the middle "auto" track, under the row labels. It belongs over its own figures, in the third. */
 .ww-tape__club--home,
 .ww-tape__val--home {
   justify-content: flex-end;
   text-align: right;
+}
+.ww-tape__club--home {
+  grid-column: 3;
 }
 
 .ww-tape__rows {
@@ -389,13 +394,14 @@
 
 .ww-trip__fences {
   display: block;
-  width: 220px;
-  max-width: 100%;
+  width: min(100%, 360px);
   margin: var(--space-3) auto 0;
 }
 
+/* The drawing scales with the card, so the line stays two screen pixels at any size. */
 .ww-trip__fence {
   stroke-width: 2;
+  vector-effect: non-scaling-stroke;
 }
 
 .ww-trip__fence--from,
@@ -468,18 +474,5 @@
 .ww-scout__card {
   scroll-margin-top: var(--ww-scout-offset, 0px);
 }
-/* Two cards in a row end at the same height: the card fills its grid cell. A flex column
-   does it, not height: 100%: a named card carries a top margin for its tab, and 100% plus
-   that margin ran the card 14px past its cell, into the row below's tab. */
-/* layout-exempt: one child fills the cell below the card's tab clearance */
-.ww-scout__card {
-  display: flex;
-  flex-direction: column;
-}
-.ww-scout__card > * {
-  flex: 1;
-}
-/* The Film room rail needs the whole row: one grid cell squeezes its three cards. */
-.ww-scout__card--wide {
-  grid-column: 1 / -1;
-}
+/* The cards flow in balanced columns, each at its own height (Flow.jsx, flow.css); the Film room
+   rail and the Roster take the whole row, so the report is cut into flows around them. */

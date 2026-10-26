@@ -46,6 +46,13 @@
   display: inline-flex;
   gap: var(--space-1);
 }
+/* The stamped card (the World Series page) carries the club switch on a row of its own under the
+   name tab, at the right; the sheet look puts it in the label head. */
+.psseries__flowbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-2);
+}
 .psseries__flow {
   padding: var(--space-2h) var(--space-3) var(--space-1h);
 }
@@ -366,7 +373,7 @@ button.psseries__ldoor::after {
   vertical-align: -2px;
 }
 .psseries__keyscale {
-  padding-inline: 2px;
+  padding-inline: var(--space-3) 2px;
   font-family: var(--font-mono);
   font-size: var(--fs-cell);
   letter-spacing: var(--ls-num);
@@ -459,11 +466,15 @@ button.psseries__ldoor::after {
   height: 18px;
   transform: translate(-50%, -50%);
 }
+/* Two clubs that rank within a place or two of each other sit on the same spot of the track and
+   hid one another. The away mark rides above the line and the home mark below it, so both show. */
 .psseries__keydot--away {
   z-index: 2;
+  transform: translate(-50%, calc(-50% - 5px));
 }
 .psseries__keydot--home {
   z-index: 1;
+  transform: translate(-50%, calc(-50% + 5px));
 }
 /* The foot under the table (a Cluster): the tally and its verdict at the left,
    the door to the full report at the right. It wraps on a narrow card; the door

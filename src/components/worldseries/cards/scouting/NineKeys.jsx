@@ -20,6 +20,7 @@ export function NineKeys({ data, clubIds, season }) {
     <ComparisonLedger
       title="Nine keys"
       note="League ranks · lower is better"
+      noteAs="info"
       clubIds={clubIds}
       measureLabel="Rank / 30"
       footer={<>

@@ -1,13 +1,12 @@
 import { Reel } from '../../components/worldseries/Reel.jsx'
 import { ScoutingReport } from '../../components/worldseries/ScoutingReport.jsx'
+import { Flow } from '../../components/worldseries/Flow.jsx'
 import { GroupJump, Group } from '../../components/worldseries/GroupJump.jsx'
 import { Bullpen } from '../../components/worldseries/cards/Bullpen.jsx'
 import { HomeRoad } from '../../components/worldseries/cards/HomeRoad.jsx'
 import { HotBats } from '../../components/worldseries/cards/HotBats.jsx'
 import { Tape } from '../../components/worldseries/cards/Tape.jsx'
 import { FilmRoom } from '../../components/worldseries/cards/scouting/FilmRoom.jsx'
-import { Grid } from '../../components/ui/layout/Grid.jsx'
-import { Stack } from '../../components/ui/layout/Stack.jsx'
 
 // No LCS names: a finished Series has games, so the Reel's "Road here" chips never draw.
 const NO_LCS = () => ''
@@ -54,17 +53,13 @@ export function FinishedGroups({ groups, parts, view, mode, cutoff, meetings, no
       {has('compare') && (
         <Group id="compare" label="Compare">
           {data && (
-            <Stack gap="loose">
-              <Grid min={340} gap="loose">
-                <Tape awayId={clubA} homeId={clubB} data={data} slateDate={cutoff} />
-                <HotBats clubIds={clubIds} splitsByClub={data.hotBats} />
-              </Grid>
-              <Grid min={340} gap="loose">
-                <HomeRoad clubIds={clubIds} clubGames={data.clubGames} slateDate={cutoff} />
-                <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={cutoff} />
-              </Grid>
-            </Stack>
+            <Flow>
+              <Tape awayId={clubA} homeId={clubB} data={data} slateDate={cutoff} />
+              <HotBats clubIds={clubIds} splitsByClub={data.hotBats} />
+              <HomeRoad clubIds={clubIds} clubGames={data.clubGames} slateDate={cutoff} />
+            </Flow>
           )}
+          {data && <Bullpen clubIds={clubIds} boxscoresByClub={data.boxscores} slateDate={cutoff} />}
           {parts.strip}
           {meetings?.length > 0 && <FilmRoom meetings={meetings} compact={false} clubId={noteClub} />}
           {parts.nine}

@@ -174,16 +174,24 @@ export function SeasonSeriesStrip({
   }
 
   // The band head sits inside the card, as on the lineup page. The label head
-  // sits above it, as every label-headed section of the host page does.
+  // sits above it, as every label-headed section of the host page does. The
+  // stamped look (the World Series page) names the card on its ink tab and
+  // puts the lead line across its top-right edge, so it takes no head.
+  const stamped = look === 'stamped'
   const head =
-    look === 'label' ? null : (
+    look !== 'band' ? null : (
       <SectionMasthead title={title} as="h3">
         {leadLabel && <span className="seasonseries__lead">{leadLabel}</span>}
       </SectionMasthead>
     )
 
   const card = (
-    <Card className="metric seasonseries" head={head} body="flush">
+    <Card
+      className="metric seasonseries"
+      head={head}
+      body="flush"
+      {...(stamped ? { frame: 'stamped', label: title, labelAs: 'h3', count: leadLabel ?? undefined } : null)}
+    >
       <div className="metric__body seasonseries__body">
         {canScroll && (
           <button

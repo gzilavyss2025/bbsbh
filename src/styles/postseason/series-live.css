@@ -389,3 +389,10 @@
 .psseries--ws {
   --slate-bar-h: env(safe-area-inset-top);
 }
+
+/* A group's parts sit one section gap below its band; the Scouting report brings its own band
+   inside the body, so this applies to the groups with a head only. */
+.pslive .ww-group > .sectionhead + .ww-group__body,
+.psseries--ws .ww-group > .sectionhead + .ww-group__body {
+  margin-top: var(--space-section);
+}

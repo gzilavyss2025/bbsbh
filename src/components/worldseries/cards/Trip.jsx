@@ -12,17 +12,29 @@ import { StatCell, StatStrip } from '../../ui/frame/StatStrip.jsx'
 // just played in dashed, the next park solid. Geography only: no result is read.
 // Hidden when either park fails to load or both games share a park.
 const SIZE = 220
+const PAD = 8
+// The fence's points in the diagram's units, home plate at the foot of a SIZE box.
 const polygon = (dist) => {
-  const pts = fencePoints(dist)
   const scale = (SIZE * 0.9) / 420
-  return pts.map((p) => `${SIZE / 2 + p.x * scale},${SIZE - 10 - p.y * scale}`).join(' ')
+  return fencePoints(dist).map((p) => [SIZE / 2 + p.x * scale, SIZE - 10 - p.y * scale])
 }
+const asPoints = (pts) => pts.map(([x, y]) => `${x},${y}`).join(' ')
 
+// Only the outfield arc is drawn, so the view is cropped to the two fences (a square box left more
+// than half the card empty) and the drawing takes the card's width.
 function Fences({ from, to }) {
+  const a = polygon(from.dist)
+  const b = polygon(to.dist)
+  const xs = [...a, ...b].map((p) => p[0])
+  const ys = [...a, ...b].map((p) => p[1])
+  const x0 = Math.min(...xs) - PAD
+  const y0 = Math.min(...ys) - PAD
+  const w = Math.max(...xs) - Math.min(...xs) + 2 * PAD
+  const h = Math.max(...ys) - Math.min(...ys) + 2 * PAD
   return (
-    <svg className="ww-trip__fences" viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={`Outfield fences: ${from.name} and ${to.name}`}>
-      <polygon className="ww-trip__fence ww-trip__fence--from" points={polygon(from.dist)} />
-      <polygon className="ww-trip__fence ww-trip__fence--to" points={polygon(to.dist)} />
+    <svg className="ww-trip__fences" viewBox={`${x0} ${y0} ${w} ${h}`} role="img" aria-label={`Outfield fences: ${from.name} and ${to.name}`}>
+      <polygon className="ww-trip__fence ww-trip__fence--from" points={asPoints(a)} />
+      <polygon className="ww-trip__fence ww-trip__fence--to" points={asPoints(b)} />
     </svg>
   )
 }

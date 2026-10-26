@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { flowPanels } from '../../lib/postseason/seriesFlow.js'
 import { chipColorsFor } from '../../lib/wpa/wpaBandColors.js'
 import { ordinal } from '../../lib/format.js'
@@ -26,6 +26,8 @@ import { Card } from '../ui/frame/Card.jsx'
 //   clubs     the two series clubs, [{ id, abbreviation }] in slot order
 //   defaultId the club the strip starts on (the reader's favourite when it is
 //             in the series, else the Game 1 home club)
+//   stamped   the World Series page's look: a stamped card named on its ink tab, the club
+//             switch on a row of its own inside, in place of the label head over a sheet card
 // The SVG is drawn in the CSS pixels of its own box (measured below), so its
 // labels stay at their true type size at every width instead of scaling with
 // a fixed viewBox. 360 is the first paint, before the box is measured.
@@ -35,7 +37,7 @@ const LABEL_H = 26
 const GAP = 4
 const MARK = 16
 
-export function SeriesFlow({ series, gameSignals, homeIdByPk, clubs, defaultId }) {
+export function SeriesFlow({ series, gameSignals, homeIdByPk, clubs, defaultId, stamped = false }) {
   // The reader's pick holds only while it names a club in THIS series; until
   // then (and after a move to another series) the strip follows `defaultId`,
   // which can change after the first paint (the favourite club loads).
@@ -101,12 +103,22 @@ export function SeriesFlow({ series, gameSignals, homeIdByPk, clubs, defaultId }
     </span>
   )
 
+  // The sheet look is a section with a label head over a card; the stamped look is the card alone.
+  const Wrap = stamped ? Fragment : 'section'
   return (
-    <section className="psseries__flowsection">
-      <SectionHead look="label" action={switcher}>
-        How the games went
-      </SectionHead>
-      <Card as="div" body="flush" className="psseries__flow">
+    <Wrap {...(stamped ? null : { className: 'psseries__flowsection' })}>
+      {!stamped && (
+        <SectionHead look="label" action={switcher}>
+          How the games went
+        </SectionHead>
+      )}
+      <Card
+        as="div"
+        body="flush"
+        className="psseries__flow"
+        {...(stamped ? { frame: 'stamped', label: 'How the games went' } : null)}
+      >
+        {stamped && <div className="psseries__flowbar">{switcher}</div>}
         <div className="psseries__flowreadout" aria-live="polite">
           {selected && <Readout panel={selected} perspectiveId={perspectiveId} abbr={abbr} />}
           {selected?.kind === 'played' && (
@@ -220,7 +232,7 @@ export function SeriesFlow({ series, gameSignals, homeIdByPk, clubs, defaultId }
           </svg>
         </div>
       </Card>
-    </section>
+    </Wrap>
   )
 }
 

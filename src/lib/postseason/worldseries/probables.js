@@ -8,6 +8,8 @@
 // the slate date's own start never reaches a total, whatever the
 // caller passes. Postseason, this year.
 
+import { leadSide } from './hotBats.js'
+
 const before = (outings, slateDate) =>
   (outings ?? []).filter((o) => o.date && o.date < slateDate).sort((a, b) => a.date.localeCompare(b.date))
 
@@ -42,4 +44,21 @@ export function pitcherLine(outings, slateDate) {
     k,
     bb,
   }
+}
+
+// The figures this starter leads the other on: more innings and strikeouts, a lower ERA, fewer
+// walks. A tie leads nothing, and a side with no October line (or no ERA yet) leads nothing, so the
+// two sides never share a figure. `mine` and `theirs` are pitcherLine results.
+export function leadingFigures(mine, theirs) {
+  if (!mine?.games || !theirs?.games) return []
+  const era = (l) => (l.era == null ? null : Number(l.era))
+  const figures = [
+    ['IP', mine.ipValue, theirs.ipValue, false],
+    ['ERA', era(mine), era(theirs), true],
+    ['K', mine.k, theirs.k, false],
+    ['BB', mine.bb, theirs.bb, true],
+  ]
+  return figures
+    .filter(([, a, b, lowerWins]) => a != null && b != null && leadSide(a, b, { lowerWins }) === 'a')
+    .map(([label]) => label)
 }
