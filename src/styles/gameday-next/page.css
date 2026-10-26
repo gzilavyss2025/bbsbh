@@ -1,0 +1,89 @@
+/* ==== GAMEDAY, the new shell (docs/gameday-build.md), at ?look=new ====
+   A fixed frame that never scrolls. The tier (lib/gameday/ladder.js) sits on the root as
+   data-tier; each tier names its grid areas, and the stage row takes the slack. */
+
+/* layout-exempt: a fixed frame, placed by named areas per tier */
+.gdnext {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: grid;
+  gap: var(--space-2);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-canvas);
+  color: var(--text-body);
+}
+.gdnext[data-tier='P'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 86px minmax(0, 1fr) 240px 80px;
+  grid-template-areas: 'band' 'stage' 'hero' 'bar';
+}
+.gdnext[data-tier='T'] {
+  grid-template-columns: minmax(0, 452fr) minmax(0, 264fr);
+  grid-template-rows: 72px 44px minmax(0, 1fr) 268px 66px 80px;
+  grid-template-areas: 'band band' 'navigator navigator' 'stage stage' 'hero pitches' 'trail trail' 'bar bar';
+}
+.gdnext[data-tier='L'] {
+  grid-template-columns: 240px repeat(2, minmax(0, 1fr)) 240px;
+  grid-template-rows: 66px minmax(0, 1fr) 168px 58px 76px;
+  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage reference'
+    'battingOrder hero hero reference' 'trail trail trail trail' 'bar bar bar bar';
+}
+.gdnext[data-tier='D'] {
+  grid-template-columns: 264px minmax(0, 1fr) 324px 264px;
+  grid-template-rows: 68px minmax(0, 1fr) 164px 66px 68px;
+  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage reference'
+    'battingOrder hero pitches eventLog' 'trail trail trail trail' 'bar bar bar bar';
+}
+
+.gdnext__band { grid-area: band; min-width: 0; display: flex; }
+.gdnext__slot { grid-area: var(--gd-area); position: relative; min-width: 0; min-height: 0; overflow: hidden;
+  border: var(--bw-rule) solid var(--border-rule); background: var(--surface-inset); }
+.gdnext__slot--navigator { --gd-area: navigator; }
+.gdnext__slot--stage { --gd-area: stage; border: var(--bw-heavy) solid var(--border-stamped); }
+.gdnext__slot--hero { --gd-area: hero; background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); }
+.gdnext__slot--trail { --gd-area: trail; }
+.gdnext__slot--pitches { --gd-area: pitches; }
+.gdnext__slot--battingOrder { --gd-area: battingOrder; }
+.gdnext__slot--reference { --gd-area: reference; }
+.gdnext__slot--eventLog { --gd-area: eventLog; }
+.gdnext__slotname { position: absolute; top: 0; right: 0; padding: var(--space-1) var(--space-1h);
+  font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
+
+/* The band: today's score bug's parts and type (styles/gameview/inning-head.css, the inhead__*
+   rules) in one ink row: away tile and runs, the plate, home runs and tile, then the pitcher. */
+/* layout-exempt: one row of five cells, the pitcher at the end */
+.gdnext-band { flex: 1; min-width: 0; display: flex; align-items: center;
+  gap: var(--space-3); padding: 0 var(--space-3); background: var(--ink-0); border: var(--bw-heavy) solid var(--border-stamped); }
+/* layout-exempt: a tile beside its runs */
+.gdnext-band__club { display: flex; align-items: center; gap: var(--space-2); }
+.gdnext-band__club--home { flex-direction: row-reverse; }
+.gdnext-band__runs { font-size: var(--fs-hero-md); }
+.gdnext-band__num { font-size: var(--fs-title-md); }
+/* Tonight's uniform tile, as on the slate card and today's score bug (TeamTreatmentMark). */
+.gdnext-band__mark { width: 40px; height: 40px; flex: none; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; background: var(--tint, var(--bg-page)); }
+.gdnext-band__mark--pinstripe { background: repeating-linear-gradient(to right,
+  var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0 1px, var(--pinstripe-bg, #fff) 1px 7px); }
+.gdnext-band__mark .teamlogo { transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32)); }
+/* layout-exempt: the inning, the bases and the outs in a row */
+.gdnext-band__plate { display: flex; align-items: center; gap: var(--space-2); }
+.gdnext-band .basestate rect { stroke: var(--text-on-ink-dim); }
+.gdnext-band .basestate rect[fill='transparent'] { fill: var(--text-on-ink-soft); }
+.gdnext-band .basestate rect:not([fill='transparent']) { fill: var(--marker); stroke: var(--marker-deep); }
+/* layout-exempt: the pitcher's name over his count */
+.gdnext-band__pitcher { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; min-width: 0; }
+.gdnext-band__pitcher .inhead__who { font-size: var(--fs-title-sm); white-space: nowrap; }
+.gdnext-band__pitcher .inhead__val { font-size: var(--fs-ui); }
+
+/* The bar: menu door, the step switch, the advance. */
+/* layout-exempt: one row of three controls */
+.gdnext__bar { grid-area: bar; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; gap: var(--space-2); min-width: 0;
+  padding: var(--space-2) var(--space-3); background: var(--surface-card); border-top: var(--bw-heavy) solid var(--border-stamped); }
+.gdnext__bar .gdnext__menu { border-radius: 0; flex: none; width: auto; min-width: 88px; }
+.gdnext__switch { flex: none; display: flex; white-space: nowrap; }
+.gdnext__bar .gdnext__advance { flex: 1; min-width: 0; white-space: nowrap; }
+.gdnext__folded { margin: 0 0 var(--space-3); padding: 0; list-style: none; }
+.gdnext__folded li { padding: var(--space-2) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
