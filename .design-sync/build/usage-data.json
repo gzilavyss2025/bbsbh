@@ -102,7 +102,7 @@
   "w-bold": "Bold (700): Barlow Condensed (its only weight).",
   "kraft-board": "Deep kraft of the Game Log passport board (the book-board-kraft cover). Much darker than seal, so paper foil holds AA on it.",
   "surface-row-hover": "A table row under the pointer (paper-4). The row is shaded, not lifted.",
-  "stage-overhead-night": "Muted deep green surround outside the fixed overhead field. No blue backdrop.",
+  "stage-overhead-night": "Deep green fallback for the stadium wash when the home club has no known brand color.",
   "stage-overhead-turf": "Overhead field turf under the small player sprites.",
   "stage-overhead-turf-lit": "Quiet mowing bands on the overhead turf.",
   "stage-overhead-turf-shade": "Sparse grass texture on the overhead field.",

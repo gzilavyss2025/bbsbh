@@ -35,6 +35,15 @@ const LABELS = {
   4: { x: 50, y: 96, anchor: 'middle' },
 }
 
+// `onLeg`: the notation sits beside the leg that ran INTO the base (1st→2nd for a 2nd-base advance), outside
+// the diamond, as a scorer pens it in the box, with no batting-order slot. Gameday's batting order draws it this way.
+const LEG_LABELS = {
+  1: { x: 70, y: 76, anchor: 'start' },
+  2: { x: 70, y: 31, anchor: 'start' },
+  3: { x: 30, y: 31, anchor: 'end' },
+  4: { x: 30, y: 76, anchor: 'end' },
+}
+
 // The out code can now run to ~6 characters ("CS 2-4", "PK 3-1"), which would
 // push off the viewBox from the advance LABELS above — 1st grows right off the
 // edge, 3rd grows left off it. These anchor the out code to grow INWARD instead
@@ -83,7 +92,11 @@ function perpStroke(a, b, p, len = 6) {
 // already there reinforcing it.
 const GHOST_DASH = '3 3'
 
-export function PlayDiamond({ reached = 0, scored = false, earned = true, legNotations = {}, outAt = null, outCode = '', prBase = null, prJersey = null, placedAt = null, size = 108 }) {
+export function PlayDiamond({ reached = 0, scored = false, earned = true, legNotations = {}, outAt = null, outCode = '', prBase = null, prJersey = null, placedAt = null, size = 108, onLeg = false }) {
+  const labels = onLeg ? LEG_LABELS : LABELS
+  // The onLeg caller draws its codes larger (Gameday's order), so an out at 2nd sits lower, just over the
+  // base, where its caps stay inside the viewBox instead of being cut off at the top.
+  const outLabels = onLeg ? { ...OUT_LABELS, 2: { ...OUT_LABELS[2], y: 19 } } : OUT_LABELS
   const { traveled: outTraveled, legA, legB } = outLegBases(reached, outAt)
   const traveled = scored ? 4 : outTraveled
   // Legs [0, ghostLegs) were given, not run: dotted, never inked solid.
@@ -205,12 +218,12 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
         <text
           key={base}
           className={`pbp__advance ${isErrorCode(n.code) ? 'pbp__advance--error' : ''}`}
-          x={LABELS[base].x}
-          y={LABELS[base].y}
-          textAnchor={LABELS[base].anchor}
+          x={labels[base].x}
+          y={labels[base].y}
+          textAnchor={labels[base].anchor}
         >
           {n.code}
-          {n.slot != null && (
+          {n.slot != null && !onLeg && (
             <tspan className="pbp__advslot" dy={-3}>
               {n.slot}
             </tspan>
@@ -220,9 +233,9 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
       {outAt != null && outCode && (
         <text
           className="pbp__advance pbp__advance--out"
-          x={OUT_LABELS[outAt].x}
-          y={OUT_LABELS[outAt].y}
-          textAnchor={OUT_LABELS[outAt].anchor}
+          x={outLabels[outAt].x}
+          y={outLabels[outAt].y}
+          textAnchor={outLabels[outAt].anchor}
         >
           {outCode}
         </text>

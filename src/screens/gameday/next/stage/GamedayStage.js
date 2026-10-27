@@ -1,4 +1,4 @@
-import { createElement as h, useEffect, useMemo, useState } from 'react'
+import { createElement as h, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
@@ -8,6 +8,8 @@ import { parkWashColorOverride } from '../../../../lib/ballpark/parkWash.js'
 import { teamPrimaryColor } from '../../../../lib/teams.js'
 import { stageActors } from './actors.js'
 import { stagePlay } from './play.js'
+import { celebrationForPlay } from '../cutscene/integration/celebrationForPlay.js'
+import { BALLPARK_SCENES } from '../cutscene/ballpark/scenes.js'
 
 // The stage slot (#2573, #2568 slice 4): the revealed play, or the rest frame. A `.js` file so the
 // suite can render it; GamedayNextMount passes the real SealBox and StageCanvas.
@@ -15,8 +17,8 @@ import { stagePlay } from './play.js'
 // SPOILER FOOTING. `shown` (tapRule.js) is an at-bat the reader already revealed. Its feed play is
 // read only inside the SealBox reveal render function (ADR-0001, ADR-0002), so a home run's landing
 // exists only in the revealed stage. The rest canvas reads no result: the batter's side, the
-// pitcher's hand and the zone card's pre-game temperatures only. Hover identities below use
-// the existing defense step clamp inside their own SealBox reveal function.
+// pitcher's hand and the zone card's pre-game temperatures only. Hover identities use the
+// existing defense step clamp inside their own SealBox reveal function.
 //
 // A sub-step (`shown` { count, sub }, steps/subStep.js stageKey) plays one pitch: the at-bat's play cut at that
 // pitch, with only the runner moves before it. Any other sub-step (an event, a change, an automatic
@@ -37,20 +39,35 @@ function subPlay(feed, inning, half, { count, sub }) {
   return { p: cut, still: false }
 }
 
-function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, actors }) {
+function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint, actors, sceneStyle }) {
   const [start] = useState(() => performance.now())
-  const { play, still } = useMemo(() => {
+  const covered = !!checkpoint
+  const { play, still, celebration, ending } = useMemo(() => {
     const { p, still } = typeof idx === 'object' ? subPlay(feed, inning, half, idx) : { p: feed.liveData.plays.allPlays.find((q) => q.about?.atBatIndex === idx), still: false }
-    return { play: stagePlay(p ?? {}, wall), still }
-  }, [feed, idx, inning, half, wall])
+    // The checkpoint commits this half. An older shown play must not stand
+    // in for its ending while the engine reports the tap's new last index.
+    const ending = covered && typeof idx !== 'object' && feed.liveData.plays.allPlays.findLast((q) => q.about?.inning === inning && q.about?.halfInning === half)?.about?.atBatIndex === idx
+    return { play: stagePlay(p ?? {}, wall), still, ending, celebration: typeof idx === 'object' ? null : celebrationForPlay(p, feed.gameData) }
+  }, [feed, idx, inning, half, wall, covered])
+  const eligible = !!celebration && ending
+  // Report only a presentation flag from this revealed subtree. Commit it
+  // before paint so the bottom button and visible scene agree on the tap.
+  useLayoutEffect(() => { if (covered) onCheckpoint?.(eligible) }, [covered, eligible, onCheckpoint])
   useEffect(() => {
-    if (!playing) return undefined
-    const left = (still ? STILL : play.end) * 1000 - (performance.now() - start)
+    if (!playing || (covered && (!eligible || checkpointDismissed))) return undefined
+    // Decorative assets may decode after the tap. Their player reports its
+    // own completion; this watchdog prevents a stalled import/load holding
+    // the scoring control. Ordinary field timing stays on its existing clock.
+    const duration = celebration ? BALLPARK_SCENES[celebration.scene].track.duration + 4 : still ? STILL : play.end
+    const left = duration * 1000 - (performance.now() - start)
     if (left <= 0 || motionIsReduced()) { onEnd(); return undefined }
     const id = setTimeout(onEnd, left)
     return () => clearTimeout(id)
-  }, [playing, play, still, start, onEnd])
-  return h(StageCanvas, playing && !still ? { play, start, actors } : { play, t: still ? 0 : play.end, actors })
+  }, [playing, play, still, celebration, start, onEnd, covered, eligible, checkpointDismissed])
+  if (covered && (!eligible || checkpointDismissed)) return checkpoint
+  const props = playing && !still ? { play, start } : { play, t: still ? 0 : play.end }
+  return h('div', { className: 'gdstageScene', style: sceneStyle },
+    h(StageCanvas, { ...props, actors, celebration, playing, onEnd, checkpointHeld: covered && eligible }))
 }
 
 // Who stands in at rest: the due-up batter of the half being scored (dueup.js, the pre-pitch lineup),
@@ -66,23 +83,26 @@ export const restZones = (zm, batterId, hidden) => (!hidden && batterId != null 
 
 // At rest the batter stands where he will hit: a switch hitter (S) opposite the pitcher's throwing
 // hand. Both are pre-game player data. A revealed play uses its own matchup.batSide instead.
-function Rest({ StageCanvas, wall, batSide, pitchHand, zones, actors }) {
+function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone, actors, sceneStyle }) {
   const side = batSide === 'S' ? (pitchHand === 'L' ? 'R' : 'L') : batSide
   const play = useMemo(() => stagePlay({ matchup: { batSide: { code: side }, pitchHand: { code: pitchHand } } }, wall), [wall, side, pitchHand])
-  return h(StageCanvas, { play, t: 0, zones, actors, label: 'The field before the pitch' })
+  return h('div', { className: 'gdstageScene', style: sceneStyle },
+    h(StageCanvas, { play, t: 0, zones, onZone, actors, label: 'The field before the pitch' }))
 }
 
-export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, playing, onEnd, batSide, pitchHand, zones, mark, step, open, batter }) {
-  // The same photograph, crop and club wash as the identity drawer. Identity only:
-  // no revealed play, score or inning decides this decorative background.
+// `run` counts trail-card replays (tapRule.js replay): a new run remounts the play, so its clock restarts.
+export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, batSide, pitchHand, zones, onZone, checkpoint, checkpointDismissed, onCheckpoint, mark, step, open, batter }) {
   const { t } = useCopy()
   const venue = feed?.gameData?.venue, homeId = feed?.gameData?.teams?.home?.id
   const park = parkBackdrop(venue?.name, t, venue?.id)
   const color = homeId != null ? parkWashColorOverride(homeId) ?? teamPrimaryColor(homeId) : null
   const style = { ...(park ? { '--park-art': park.cssUrl, '--park-focus': park.focus } : null), ...(color ? { '--park-tint': color } : null) }
+  // A numbered play keeps the checkpoint inside Played (pending or dismissed), so it never remounts.
+  if (checkpoint && (shown == null || typeof shown === 'object')) return checkpoint
   const field = (actors) => shown != null
-    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, actors }))
-    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, actors })
-  return h('div', { className: 'gdstageScene', style }, mark == null ? field(null)
-    : h(SealBox, { coverless: true, forceRevealed: true }, () => field(stageActors(feed, { inning, half, mark, step, open, batter }))))
+    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint, actors, sceneStyle: style })
+    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone, actors, sceneStyle: style })
+  if (mark == null && shown == null) return field(null)
+  return h(SealBox, { coverless: true, forceRevealed: true }, () => field(mark == null ? null
+    : stageActors(feed, { inning, half, mark, step, open, batter, shown })))
 }

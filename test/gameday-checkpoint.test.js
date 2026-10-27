@@ -156,7 +156,7 @@ test('824716 top 2nd: tally, Paez with fouls, eight at-bats, due up', () => {
   const abs = rows.filter((r) => r.kind === 'atBat')
   assert.equal(abs.length, 8)
   assert.deepEqual(abs.map((r) => r.last), ['Naylor', 'Young', 'Montes', 'Crawford', 'Rodden', 'Arozarena', 'Canzone', 'Rodríguez'])
-  assert.deepEqual(abs[3], { kind: 'atBat', atBatIndex: 11, jersey: '3', first: abs[3].first, last: 'Crawford', code: 'SF9', rbi: 1, out: 1, calledLooking: false })
+  assert.deepEqual(abs[3], { kind: 'atBat', atBatIndex: 11, id: 641487, jersey: '3', first: abs[3].first, last: 'Crawford', code: 'SF9', rbi: 1, out: 1, calledLooking: false })
   assert.deepEqual(abs.map((r) => r.out), [null, null, null, 1, null, null, 2, 3])
   assert.equal(abs[5].rbi, 3)
   // A mound visit is not a row a scorer writes.

@@ -21,7 +21,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   only before a tapped play and has a per-game dismiss; a switch hitter stands opposite the
   pitcher's hand; the hero's due-up hides under the checkpoint; the checkpoint's due-up names an
   announced pinch hitter; a pre-pitch pinch hitter is the first sub-step of his own at-bat.
-- The band draws through `ScorebugMount` (`Bug` prop), so its reveal clamp stays the only gate on the
+- The band draws through `ScorebugMount` (the default score bug; `GamedayBand` before a snapshot), so its clamp is the only gate on the
   score. Opening the Menu loads nothing: a folded
   block fetches when it shows.
 - Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line
@@ -36,6 +36,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its
   per-game dismiss (`bbsbh:zonemap:{gamePk}`); the zone card stays separate from the overhead field, at rest only.
+- The hero's scorebook box copies Gary's hand-scored box: `docs/gameday-reference/scorebook-box.jpg` (match it, do not restyle).
 - `hero/` is the hero slot (#2576): `heroMarkup.js` builds it (a `.js` builder, so `npm test` can render it),
   `heroModel.js` is the scorebook box's pure model. It reads the live snapshot's `last` (the last finished
   at-bat as of the cursor, `deriveLiveState`) inside a `SealBox` reveal function. The box has one height per
@@ -48,3 +49,10 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   (`bbsbh:pitchmode:{gamePk}`), the words, `nextSub` (read at the tap; it returns a count only) and the
   stage's key; the cursor is `useRevealProgress`'s `{halfIdx}:{count}:{sub}`. The hero's open box and
   `eventCardMarkup.js` (the stage's lower third) read `openAtBat` inside a `SealBox` reveal function, up to `sub`.
+- `cutscene/ballpark/` is the big-play celebration, a sprite system (the code-drawn kit from #2673 was
+  removed in the #2676 stack: the sprites replace it), also inspected at `/animation-lab#ballpark`:
+  separate character atlases, stadium, palette preparation and finite choreography. `cutscene/integration/`
+  selects completed revealed results inside `GamedayStage`'s SealBox subtree; the stage's existing tap rule
+  starts/skips it. Assets and chunks fail back to the ordinary field. A qualifying ending scene holds
+  until bottom Next opens its checkpoint without advancing the game; cold visits retain ordinary read-back.
+  Authoring, asset provenance and the next steps live in `docs/ballpark-celebrations.md`.

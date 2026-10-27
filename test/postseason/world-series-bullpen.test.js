@@ -37,10 +37,17 @@ test('starters are excluded; a pitcher with no outing in a game gets an empty ce
   assert.deepEqual(g.rows.find((r) => r.id === 11).cells, [null, 30])
 })
 
-test('a starter in one game who relieves in another counts only the relief outing', () => {
+test('a reliever who also started shows his start, marked, and it counts in his total', () => {
   const games = [box(1, '2026-10-24', 'home', [[1, 90]]), box(2, '2026-10-25', 'home', [[2, 80], [1, 12]])]
-  const g = bullpenGrid(games, CLUB, { slateDate: SLATE })
-  assert.deepEqual(g.rows.find((r) => r.id === 1).cells, [null, 12])
+  const row = bullpenGrid(games, CLUB, { slateDate: SLATE }).rows.find((r) => r.id === 1)
+  assert.deepEqual(row.cells, [90, 12])
+  assert.deepEqual(row.starts, [true, false])
+  assert.equal(row.total, 102)
+})
+
+test('a pitcher who only started has no row', () => {
+  const games = [box(1, '2026-10-24', 'home', [[1, 90], [10, 20]]), box(2, '2026-10-25', 'home', [[2, 80], [1, 12]])]
+  assert.ok(!bullpenGrid(games, CLUB, { slateDate: SLATE }).rows.some((r) => r.id === 2))
 })
 
 test('every reliever from every postseason game, most pitches first, ties by name', () => {

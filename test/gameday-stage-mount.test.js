@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { disarm, rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
+import { disarm, replay, rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
 import { GamedayStage, restBatter, restZones } from '../src/screens/gameday/next/stage/GamedayStage.js'
 import { stageActors, spriteTargets } from '../src/screens/gameday/next/stage/actors.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
@@ -46,6 +46,18 @@ test('the reveal tap plays the play it revealed, once', () => {
   assert.equal(s.playing, true)
   // A poll mid-play changes nothing.
   assert.equal(saw(s, 13, VIEW), s)
+})
+
+// Review finding 5: a trail-card replay tapped between the reveal tap and the engine's report must not
+// cancel the reveal; the revealed play still plays when it arrives.
+test('a replay tapped while a reveal tap waits keeps it armed: the revealed play still plays', () => {
+  const [armed] = tap(rest(12, VIEW), true, false)
+  const r = replay(armed, 10, false)
+  assert.equal(r.shown, 10)
+  assert.ok(r.armed, 'the pending reveal survives the replay')
+  const s = saw(r, 13, VIEW)
+  assert.equal(s.shown, 13)
+  assert.equal(s.playing, true)
 })
 
 test('a tap while playing finishes the play and does not advance; the next tap advances', () => {
@@ -193,4 +205,14 @@ test('sprite targets identify all nine defenders, the batter, and each revealed 
 test('sprite identities fail closed for an unreached half', () => {
   assert.equal(stageActors(sealedFeed, { inning: 9, half: 'top', mark: -1, step: 0 }), null)
   assert.deepEqual(spriteTargets(stagePlay({}, wall), null), [])
+})
+
+test('a trail replay keeps the defense from that play, before later substitutions', () => {
+  const feed = structuredClone(F)
+  const cursor = { inning: 2, half: 'top', mark: 2, step: null }
+  const original = stageActors(F, cursor).fielders
+  const later = feed.liveData.plays.allPlays.find((p) => p.about.atBatIndex === 14)
+  later.playEvents.unshift({ index: -1, details: { eventType: 'defensive_switch', description: 'Defensive switch' }, player: { id: original.RF.id }, position: { abbreviation: 'LF' } })
+  assert.equal(stageActors(feed, { ...cursor, shown: 13 }).fielders.LF.id, original.LF.id)
+  assert.equal(stageActors(feed, { ...cursor, shown: 14 }).fielders.LF.id, original.RF.id)
 })

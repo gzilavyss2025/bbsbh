@@ -4,7 +4,7 @@ import '../styles/postseason/series-abs.css'
 import '../styles/postseason/series-live.css'
 import '../styles/worldseries/home.css'
 import '../styles/worldseries/square.css'
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useMemo } from 'react'
 import { loadPostseasonHistory } from '../api/postseasonHistory.js'
 import {
   loadSeriesStats,
@@ -22,6 +22,9 @@ import { usePastGameSignals } from '../hooks/usePastGameSignals.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { gamePath } from '../lib/route.js'
 import { teamClubNameShort } from '../lib/teams.js'
+import { mvpStatLine } from '../lib/postseason/mvpLine.js'
+import { useRouteLink } from '../lib/nav.js'
+import { Door } from '../components/ui/control/Door.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
@@ -34,6 +37,7 @@ import { Notice } from '../components/ui/state/Notice.jsx'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../components/postseason/SeriesParts.jsx'
 import { SeriesFlow } from '../components/postseason/SeriesFlow.jsx'
 import { SeriesMvpCard } from '../components/postseason/SeriesMvpCard.jsx'
+import { DecidedHero } from '../components/worldseries/Hero.jsx'
 import { SeriesTotals } from '../components/postseason/SeriesTotals.jsx'
 import { SeriesNineKeys } from '../components/postseason/SeriesNineKeys.jsx'
 import { SeriesAbsReport } from '../components/postseason/SeriesAbsReport.jsx'
@@ -124,6 +128,7 @@ async function loadSeries(seriesId, getSignals) {
 // equal footing.
 export function PostseasonSeriesPage({ seriesId }) {
   const back = () => window.history.back()
+  const routeLink = useRouteLink()
   const getSignals = usePastGameSignals()
   const { loading, error, data } = useAsync(() => loadSeries(seriesId, getSignals), [seriesId])
   const { data: nineKeys } = useAsync(() => loadNineKeys(), [])
@@ -135,7 +140,6 @@ export function PostseasonSeriesPage({ seriesId }) {
   // The World Series page draws every block as a stamped card; the other rounds keep the sheet look.
   const wsStamped = Boolean(ws)
   const view = useWorldSeriesView(ws?.mode ?? null, ws?.cutoff ?? '')
-  const [scoutShown, setScoutShown] = useState(false)
   const [clubA, clubB] = view.clubIds ?? []
   const { data: meetings } = useAsync(
     (signal) => (ws ? fetchMeetings({ clubA, clubB, slateDate: ws.cutoff }, { signal }) : Promise.resolve(null)),
@@ -238,8 +242,9 @@ export function PostseasonSeriesPage({ seriesId }) {
         gameSignals={gameSignals}
         homeIdByPk={homeIdByPk}
         clubs={clubs}
-        defaultId={[teamA.teamId, teamB.teamId].includes(favoriteTeamId) ? favoriteTeamId : teamB.teamId}
+        defaultId={ws && winnerTeamId ? winnerTeamId : [teamA.teamId, teamB.teamId].includes(favoriteTeamId) ? favoriteTeamId : teamB.teamId}
         stamped={wsStamped}
+        fixed={Boolean(ws && winnerTeamId)}
       />
   )
 
@@ -298,6 +303,12 @@ export function PostseasonSeriesPage({ seriesId }) {
                     >
                       {seriesStatusAfterGame(games, i, teamA.teamId, teamB.teamId)}
                     </span>
+                    {/* The World Series page lifts Box score into this row, at its right end. */}
+                    {wsStamped && boxScorePath && (
+                      <Door className="psseries__boxdoor" {...routeLink(boxScorePath)}>
+                        Box score
+                      </Door>
+                    )}
                   </div>
                   {signals && boxScorePath ? (
                     <>
@@ -305,6 +316,7 @@ export function PostseasonSeriesPage({ seriesId }) {
                         <GameResultFace
                           feed={signals.feed}
                           boxScorePath={boxScorePath}
+                          door={!wsStamped}
                         />
                       </div>
                       <SeriesPlayOfTheGame
@@ -368,11 +380,13 @@ export function PostseasonSeriesPage({ seriesId }) {
     </div>
   )
 
-  // WORLD SERIES: the same jump-bar groups as the live page (layout C). The banner, trophy and MVP
-  // stay on top: Hero draws nothing for a decided Series. A group with no data is not drawn.
+  // WORLD SERIES: the same jump-bar groups as the live page (layout C). The Hero's decided state takes
+  // the banner's place (#2562) and carries the trophy and the Series MVP. No Scout group: a finished
+  // Series has nothing ahead to scout, and its Platoon card sits in Compare. A group with no data is
+  // not drawn.
   const groups = seriesGroups({
     series: true,
-    scout: scoutShown,
+    scout: false,
     compare: true,
     rosters: Boolean(stats.rosters[winner.teamId] || stats.rosters[loser.teamId]),
   })
@@ -381,12 +395,9 @@ export function PostseasonSeriesPage({ seriesId }) {
       groups={groups}
       parts={{ flow: flowEl, games: gamesEl, totals: totalsEl, leaders: leadersEl, strip: stripEl, nine: nineEl, abs: absEl, rosters: rostersEl }}
       view={view}
-      mode={ws.mode}
       cutoff={ws.cutoff}
       meetings={meetings}
       noteClub={[clubA, clubB].includes(favoriteTeamId) ? favoriteTeamId : clubA}
-      scoutShown={scoutShown}
-      onScout={setScoutShown}
     />
   )
 
@@ -401,8 +412,8 @@ export function PostseasonSeriesPage({ seriesId }) {
         </h1>
       </header>
 
-      {bannerEl}
-      {mvpEl}
+      {ws ? <DecidedHero mode={ws.mode} mvp={mvp} stats={mvp ? mvpStatLine(stats.lines, mvp.playerId) : []} /> : bannerEl}
+      {!ws && mvpEl}
       {grouped || (
         <>
           {flowEl}

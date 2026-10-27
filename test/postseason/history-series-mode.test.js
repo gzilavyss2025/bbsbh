@@ -28,3 +28,19 @@ test('slots, games and no games ahead, in the shape seriesMode wants', () => {
 test('a history series with no games has no mode', () => {
   assert.equal(historySeriesMode({ ...history, games: [] }), null)
 })
+
+test('a history series is decided: it names its winner and each game\'s winner from the score', () => {
+  const games = [
+    { ...history.games[0], awayScore: 4, homeScore: 11 },
+    { ...history.games[1], awayScore: 5, homeScore: 4 },
+  ]
+  const { mode } = historySeriesMode({ ...history, winnerTeamId: 119, games })
+  assert.equal(mode.series.decided, true)
+  assert.equal(mode.series.winner.id, 119)
+  assert.deepEqual(mode.series.games.map((g) => g.winnerId), [141, 119])
+})
+
+test('each history game carries its away and home club, for its lineups link', () => {
+  const { mode } = historySeriesMode(history)
+  assert.deepEqual(mode.series.games.map((g) => [g.awayId, g.homeId]), [[119, 141], [119, 141]])
+})

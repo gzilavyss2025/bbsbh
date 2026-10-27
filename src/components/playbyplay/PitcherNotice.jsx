@@ -28,11 +28,11 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 //
 // `flag`, when given, is the full Now Pitching card's note under the name —
 // "Pitched yesterday" or "Starter in relief" (pitcherCard/PitcherCard.jsx).
-export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = TABS.pitching, entering = null, flag = null, logo = true }) {
+export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = TABS.pitching, entering = null, flag = null, logo = true, stacked = false }) {
   if (!pitcher) return null
   return (
     <div className={`change ${className}`}>
-      <ActorHead tab={label} id={pitcher.id} name={pitcher.name} jersey={pitcher.jersey} hand={pitcher.hand} teamId={teamId} teamName={teamName} logo={logo}>
+      <ActorHead tab={label} id={pitcher.id} name={pitcher.name} jersey={pitcher.jersey} hand={pitcher.hand} teamId={teamId} teamName={teamName} logo={logo} stacked={stacked}>
         {flag && <span className="change__flag">{flag}</span>}
       </ActorHead>
       {entering && (
@@ -49,14 +49,20 @@ export function PitcherNotice({ pitcher, teamId = null, teamName, className = ''
 // event, the name ("Last, First"), a row of badges (jersey, throwing hand, PR), what the
 // caller adds under them, and the club's logo at the right end. The club is a logo, not
 // words; `teamName` is its alt text. A card with no club draws no logo.
-export function ActorHead({ tab, id, name, jersey, hand, pr = false, teamId = null, teamName, logo = true, children }) {
+// "Last, First" as the first name small over the last name large (the lineup's order rows read the same).
+function NameStack({ name }) {
+  const [last, first] = name.split(', ')
+  return first ? <><small className="change__first">{first}</small><b className="change__last">{last}</b></> : name
+}
+
+export function ActorHead({ tab, id, name, jersey, hand, pr = false, teamId = null, teamName, logo = true, stacked = false, children }) {
   return (
     <>
       <PitcherPhoto personId={id} name={name} teamId={teamId} stamped />
       <div className="change__body">
         <h4 className="card__name">{tab}</h4>
         <span className="change__pitcher">
-          <PlayerLink id={id}>{name}</PlayerLink>
+          <PlayerLink id={id}>{stacked ? <NameStack name={name} /> : name}</PlayerLink>
         </span>
         <span className="change__badges">
           {jersey ? <span className="change__jersey">{jersey}</span> : null}
