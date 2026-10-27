@@ -473,7 +473,8 @@
         "api/gameday/defense.js",
         "api/gameday/moments/moments.js",
         "api/gameday/reviews.js",
-        "screens/gameday/next/panels/GamedayPanels.jsx"
+        "screens/gameday/next/panels/GamedayPanels.jsx",
+        "screens/gameday/next/panels/panelData.js"
       ]
     },
     "gameday/subSteps.js": {
@@ -823,7 +824,8 @@
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
         "components/playbyplay/PlayByPlay.jsx",
-        "lib/scorecard/arm.js"
+        "lib/scorecard/arm.js",
+        "screens/gameday/next/panels/panelData.js"
       ]
     },
     "playbyplay/advanceCode.js": {
