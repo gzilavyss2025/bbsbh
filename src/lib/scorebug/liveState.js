@@ -9,6 +9,12 @@
 // unchanged snapshot instead of triggering another render (and another report)
 // forever. `over` is one of those leaves: dropping it would leave the dimmed
 // half-end state stuck on whatever the last report said.
+// `last` is the last finished at-bat card (Gameday's hero); a later play can still change its legs.
+const sameLast = (a, b) =>
+  a === b ||
+  (a?.atBatIndex === b?.atBatIndex && a?.code === b?.code && a?.reached === b?.reached &&
+    a?.scored === b?.scored && a?.outNumber === b?.outNumber && a?.pitches?.length === b?.pitches?.length)
+
 export function sameLiveState(a, b) {
   if (a === b) return true
   if (!a || !b) return false
@@ -24,7 +30,8 @@ export function sameLiveState(a, b) {
     a.batter?.last === b.batter?.last &&
     a.batter?.line === b.batter?.line &&
     a.pitcher?.last === b.pitcher?.last &&
-    a.pitcher?.pitches === b.pitcher?.pitches
+    a.pitcher?.pitches === b.pitcher?.pitches &&
+    sameLast(a.last, b.last)
   )
 }
 
