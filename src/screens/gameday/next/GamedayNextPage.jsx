@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/control/Button.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { blocksFor, foldedFor } from '../../../lib/gameday/ladder.js'
 import { BLOCK_LABEL, GamedayMenu } from './GamedayMenu.jsx'
+import { GamedayPanel } from './panels/GamedayPanels.jsx'
 import { useTier } from './useTier.js'
 
 // Gameday's new shell (#2568 slices 2, 3), behind `?look=new`: a fixed no-scroll frame whose
@@ -11,7 +12,10 @@ import { useTier } from './useTier.js'
 // stage, hero and panels are labelled slots the next prompts fill (docs/gameday-build.md).
 // `engine` is today's half page, mounted hidden so the reveal flow, the live snapshot and the
 // step cursor keep running until those slots take over.
-export function GamedayNextPage({ band, engine, advance, onBoxScore, onScorecard, refresh }) {
+// Blocks a panel fills; the rest keep their label until their prompts.
+const PANELLED = new Set(['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog'])
+
+export function GamedayNextPage({ band, panels, engine, advance, onBoxScore, onScorecard, refresh }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
   const slots = blocksFor(tier).filter((b) => b !== 'band' && b !== 'bar')
@@ -20,7 +24,8 @@ export function GamedayNextPage({ band, engine, advance, onBoxScore, onScorecard
       <div className="gdnext__band">{band}</div>
       {slots.map((b) => (
         <section key={b} className={`gdnext__slot gdnext__slot--${b}`} aria-label={BLOCK_LABEL[b]}>
-          <span className="gdnext__slotname">{BLOCK_LABEL[b]}</span>
+          <GamedayPanel block={b} ctx={panels} />
+          {!PANELLED.has(b) && <span className="gdnext__slotname">{BLOCK_LABEL[b]}</span>}
         </section>
       ))}
       <div className="gdnext__bar">
@@ -38,6 +43,7 @@ export function GamedayNextPage({ band, engine, advance, onBoxScore, onScorecard
       {menu && (
         <GamedayMenu
           folded={foldedFor(tier)}
+          panels={panels}
           onClose={() => setMenu(false)}
           onBoxScore={onBoxScore}
           onScorecard={onScorecard}

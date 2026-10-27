@@ -13,3 +13,4 @@ design: `.scratch/gameday-design/`. Without the flag `InningViewer` renders as i
 - The band draws through `ScorebugMount` (`Bug` prop), so its reveal clamp stays the only gate on the
   score. A folded block is a name in the menu until its prompt builds it; opening the menu loads
   nothing.
+- Panels (prompt 8) live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel also draws in the menu.

@@ -1,0 +1,37 @@
+/* ==== GAMEDAY panels (docs/gameday-build.md, prompt 8): navigator, trail, pitches, batting order,
+   reference, event log. Each fills a .gdnext__slot; nothing scrolls, so each clips (the ladder
+   folds what does not fit into the menu). */
+.gdnext__slot--navigator, .gdnext__slot--trail { background: var(--surface-card); }
+.gdp__sealed { margin: 0; padding: var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
+.gdp__label { display: block; padding: var(--space-1) var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
+
+.gdp__line { width: 100%; height: 100%; border-collapse: collapse; line-height: var(--lh-solid); font-variant-numeric: tabular-nums; font-size: var(--fs-cell); }
+.gdp__line th { font-weight: var(--w-bold); color: var(--text-caption); padding: 0 var(--space-1); }
+.gdp__line tbody th { text-align: left; padding-left: var(--space-2); }
+.gdp__line td { text-align: center; border-left: var(--bw-hair) solid var(--border-hairline); padding: 0; }
+.gdp__run { all: unset; box-sizing: border-box; display: block; width: 100%; cursor: pointer; }
+.gdp__run[aria-current] { background: var(--marker); }
+
+/* layout-exempt: a wrapping row of chips, clipped by the slot */
+.gdp__trail { display: flex; gap: var(--space-1); margin: 0; padding: var(--space-1); list-style: none; }
+/* layout-exempt: a code over a surname */
+.gdp__chip { flex: none; display: flex; flex-direction: column; padding: 0 var(--space-2); border: var(--bw-rule) solid var(--border-rule); font-size: var(--fs-cell); }
+.gdp__chip b { font-family: var(--font-mono); }
+.gdp__chip--cover { background: var(--surface-inset); color: var(--text-caption); }
+
+.gdp__pitches, .gdp__order { margin: 0; padding: 0 var(--space-2); list-style: none; font-size: var(--fs-small); }
+/* layout-exempt: a pip, the pitch type, the speed */
+.gdp__pitches li { display: grid; grid-template-columns: 24px 1fr auto; gap: var(--space-2); }
+.gdp__num { font-variant-numeric: tabular-nums; }
+.gdp__pip { font-family: var(--font-mono); font-weight: var(--w-bold); }
+/* layout-exempt: slot, name and position, the at-bat codes */
+.gdp__order li { display: grid; grid-template-columns: 16px 1fr auto; gap: var(--space-2); padding: var(--space-1) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
+.gdp__order em { font-style: normal; color: var(--text-caption); }
+
+/* layout-exempt: a tab row over the park */
+.gdp__tabs { display: flex; gap: var(--space-1); padding: var(--space-1); }
+.gdp__tabs [aria-selected='true'] { font-weight: var(--w-bold); border-bottom: var(--bw-heavy) solid var(--border-stamped); }
+.gdp__ref .lfld__dh { position: static; border-width: var(--bw-rule); }
+/* layout-exempt: the latest play sits at the foot, older ones clip off the top */
+.gdp__log { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; font-size: var(--fs-small); }
+.gdp__log p { margin: 0; padding: var(--space-1) var(--space-2); border-bottom: var(--bw-hair) solid var(--border-hairline); }
