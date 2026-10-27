@@ -9,7 +9,8 @@
   z-index: var(--z-overlay);
   display: grid;
   gap: var(--space-2);
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  /* 3px of air over the band so the score bug and line score do not sit on the frame's edge */
+  padding: calc(env(safe-area-inset-top) + 3px) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); /* raw-value-exempt: a hairline of room */
   height: 100dvh;
   overflow: hidden;
   background: var(--bg-canvas);
@@ -52,7 +53,7 @@
 .gdnext__band > :first-child { flex: 0 0 var(--gd-band-h); min-height: 0; }
 .gdnext__notice { margin: 0; padding: var(--space-1) var(--space-3); background: var(--marker); color: var(--text-heading); }
 .gdnext__slot { grid-area: var(--gd-area); position: relative; min-width: 0; min-height: 0; overflow: hidden;
-  border: var(--bw-rule) solid var(--border-rule); background: var(--surface-inset); }
+  border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-inset); }
 .gdnext__slot--navigator { --gd-area: navigator; }
 .gdnext__slot--stage { --gd-area: stage; border: var(--bw-heavy) solid var(--border-stamped); }
 .gdnext__slot--hero { --gd-area: hero; background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); }
@@ -121,3 +122,17 @@
   transform: translateX(105%); visibility: hidden; transition: transform var(--dur-med) ease, visibility 0s linear var(--dur-med); }
 .gdnext__drawer[data-open] { transform: none; visibility: visible; transition-delay: 0s; }
 @media (prefers-reduced-motion: reduce) { .gdnext__drawer { transition: none; } }
+
+/* The band is the old score bug (HeaderBug): the split halves and the dark plate, held to the tier's
+   band height. The pitcher and batter bars leave it (the arm and the lineup say who they are). */
+.gdnext__band .inhead { display: block; margin: 0; box-shadow: none; height: var(--gd-band-h); box-sizing: border-box; }
+.gdnext__band .inhead__bars { display: none; }
+.gdnext__band .inhead__strip { min-height: 0; height: 100%; }
+/* layout-exempt: the plate as three columns: the inning, the bases, the outs */
+.gdnext__band .inhead__center { flex-direction: row; justify-content: center; gap: var(--space-3); padding: 0; }
+/* layout-exempt: the two out dots one over the other */
+.gdnext__band .inhead__outs { flex-direction: column; }
+.gdnext__band .inhead .inhead__runs { font-size: var(--fs-hero-md); -webkit-text-stroke-width: 3px; /* raw-value-exempt: outline scaled with the smaller digit */ }
+.gdnext__band .inhead .inhead__num { font-size: var(--fs-title-md); }
+.gdnext__band .inhead .basestate { width: 46px; height: 46px; } /* raw-value-exempt: the bases fill the band's height beside the inning and the outs */
+.gdnext__band .inhead .inhead__num { font-size: var(--fs-title-sm); }

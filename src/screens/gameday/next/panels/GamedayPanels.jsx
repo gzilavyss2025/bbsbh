@@ -15,7 +15,6 @@ import { revealInning } from '../../../../api/linescore.js'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { pitcherDayLine } from '../../../../api/gameday/dayLine.js'
 import { halfIndex, selectHalfStartingPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
-import { pitchingChangePitcher } from '../../../../api/playbyplay/notificationCards.js'
 import { PitcherCard } from '../../../../components/playbyplay/pitcherCard/PitcherCard.jsx'
 import { defenseAt } from '../../../../api/gameday/defense.js'
 import { battingSideOf } from '../../../../api/gameday/stepCut.js'
@@ -93,7 +92,7 @@ const Trail = ({ ctx }) => (
       <ol className="gdp__trail" aria-label="At-bats this half">
         {cards.slice(-10).map((c) => (
           <li key={c.atBatIndex} className="gdp__chip">
-            <b>{chipCode(c) || '···'}</b>{c.batter?.last ?? c.batter?.fullName}
+            <b>{chipCode(c) || '···'}</b><span>{c.batter?.last ?? c.batter?.fullName}</span>
           </li>
         ))}
         {more && <li className="gdp__chip gdp__chip--cover"><b>Sealed</b></li>}
@@ -205,12 +204,20 @@ const Reference = ({ ctx }) => (
 
 // The arm on the mound: the pitcher card (season line, pitch mix, last outing). It reads only
 // completed seasons and games, so it holds no score; it opens with the half the reader may reach.
+// A pitcher by id from the feed's player index: the card's { id, name, jersey, hand }. No result in it.
+function moundPitcher(feed, id) {
+  const p = feed?.gameData?.players?.[`ID${id}`]
+  if (!p) return null
+  const first = p.useName || p.firstName
+  return { id, name: p.lastName ? `${p.lastName}${first ? `, ${first}` : ''}` : p.fullName ?? '', jersey: p.primaryNumber ?? '', hand: p.pitchHand?.code ?? '' }
+}
+
 function Arm({ ctx }) {
   const { feed, inning, half, mark, meta, pitcherId, treatment } = ctx
   const side = battingSideOf(half) === 'away' ? 'home' : 'away'
   const idx = halfIndex(inning, half)
   if (idx > mark + 1) return <p className="gdp__sealed">Sealed</p>
-  const pitcher = (pitcherId != null && pitchingChangePitcher(feed, pitcherId)) || selectHalfStartingPitcher(feed, inning, half, mark)
+  const pitcher = (pitcherId != null && moundPitcher(feed, pitcherId)) || selectHalfStartingPitcher(feed, inning, half, mark)
   if (!pitcher) return null
   const club = meta?.[side] ?? {}
   // His line for the game as of the step: each at-bat the reader reveals lands in it (dayLine.js clamps it).

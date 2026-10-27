@@ -17,12 +17,18 @@
 .gdp__run[aria-disabled='true'] { opacity: var(--opacity-disabled); pointer-events: none; }
 .gdp__run[aria-current] { background: var(--marker); }
 
-/* layout-exempt: a wrapping row of chips, clipped by the slot */
-.gdp__trail { display: flex; gap: var(--space-1); margin: 0; padding: var(--space-1); list-style: none; }
-/* layout-exempt: a code over a surname */
-.gdp__chip { flex: none; display: flex; flex-direction: column; padding: 0 var(--space-2); border: var(--bw-rule) solid var(--border-rule); font-size: var(--fs-cell); }
-.gdp__chip b { font-family: var(--font-mono); }
-.gdp__chip--cover { background: var(--surface-inset); color: var(--text-caption); }
+/* The half's at-bats as a ribbon of stamped chips, oldest first: the result in a green square, the surname beside it.
+   What is still sealed is the last chip, drawn in solid ink so the reader sees at once where the page ends. */
+/* layout-exempt: a row of chips, clipped by the slot */
+.gdp__trail { display: flex; align-items: center; gap: var(--space-2); height: 100%; box-sizing: border-box; margin: 0; padding: var(--space-1) var(--space-3); list-style: none; }
+/* layout-exempt: the result square and the surname on one row */
+.gdp__chip { flex: none; display: flex; align-items: stretch; height: 34px; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card);
+  font-family: var(--font-display); font-size: var(--fs-small); font-weight: var(--w-bold); line-height: var(--lh-solid); color: var(--text-heading); }
+.gdp__chip b { display: flex; align-items: center; padding: 0 var(--space-2); border-right: var(--bw-heavy) solid var(--border-stamped); background: var(--accent-tint);
+  font-family: var(--font-mono); font-size: var(--fs-small); }
+.gdp__chip span { display: flex; align-items: center; padding: 0 var(--space-3); }
+.gdp__chip--cover { background: var(--text-heading); color: var(--surface-card); }
+.gdp__chip--cover b { border-right: 0; background: none; padding: 0 var(--space-4); font-family: var(--font-display); letter-spacing: var(--ls-xwide); }
 
 .gdp__pitches, .gdp__order { margin: 0; padding: 0 var(--space-2); list-style: none; font-size: var(--fs-small); }
 /* layout-exempt: a pip, the pitch type, the speed */
@@ -34,6 +40,7 @@
 .gdp__order em { font-style: normal; color: var(--text-caption); }
 /* The headshot is a desktop thing: the phone and tablet order stays a plain list. */
 /* The order runs edge to edge and each name holds one line: the slot is the width it has. */
+/* layout-exempt: the order inside its slot */
 .gdnext__slot--battingOrder > .statgrid { padding: 0; }
 .gdp__order { padding: 0; }
 .gdp__order li { padding-inline: var(--space-2); } /* the rows run edge to edge so the batter's wash does too */
@@ -47,7 +54,7 @@
 .gdp__who .plink { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); max-width: 100%; text-align: left; }
 /* layout-exempt: the name over the runner's diamond */
 .gdp__who { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
-.gdp__trip { display: block; line-height: 0; }
+.gdp__trip { display: block; line-height: var(--lh-solid); }
 .gdp__who small { font-size: var(--fs-label); color: var(--text-caption); line-height: var(--lh-solid); }
 .gdp__who b { font-size: var(--fs-title-sm); font-weight: var(--w-bold); line-height: var(--lh-solid); }
 /* layout-exempt: the number and the position chip, right-aligned */
@@ -71,6 +78,7 @@
 .gdp__tonighthead span { font-size: var(--fs-cell); color: var(--text-caption); }
 /* layout-exempt: six equal tiles */
 .gdp__tonightgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; border-top: var(--bw-hair) solid var(--border-hairline); }
+/* layout-exempt: one tile: a label over its figure */
 .gdp__tonightgrid div { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border-left: var(--bw-hair) solid var(--border-hairline); }
 .gdp__tonightgrid div:first-child { border-left: 0; }
 .gdp__tonightgrid dt { font-size: var(--fs-cell); color: var(--text-caption); }
@@ -80,6 +88,7 @@
 /* The pitch mix as a stack of rows: mark and code, the name, its share, its speed. */
 /* layout-exempt: one row per pitch */
 .gdarm .pcard__tiles { display: flex; flex-direction: column; }
+/* layout-exempt: one pitch row: mark, name, share, speed */
 .gdarm .pcard__tile { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-2); padding: var(--space-1h) var(--space-3); border-right: 0; }
 .gdarm .pcard__code { display: none; } /* the mark and the name say it; the code is the narrow tile's */
 .gdarm .pcard__tname { min-height: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -88,6 +97,7 @@
 
 
 /* The arm's name: first name small over the last name large; the club's mark rides the band. */
+/* layout-exempt: the first name over the last name */
 .gdarm .change__pitcher .plink { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); text-align: left; }
 .gdarm .change__first { font-family: var(--font-display); font-size: var(--fs-label); font-weight: var(--w-bold); color: var(--text-caption); line-height: var(--lh-solid); }
 .gdarm .change__last { font-family: var(--font-display); font-size: var(--fs-title-lg, var(--fs-title-md)); font-weight: var(--w-bold); color: var(--text-heading); line-height: var(--lh-solid); }
@@ -119,7 +129,9 @@
 /* The nine rows share whatever height the batting order has, so the panel never ends in blank paper. */
 /* layout-exempt: the band over rows that split the rest evenly */
 .gdnext__slot--battingOrder { display: flex; flex-direction: column; }
+/* layout-exempt: the order inside its slot */
 .gdnext__slot--battingOrder > .statgrid { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+/* layout-exempt: nine rows in a column */
 .gdnext__slot--battingOrder .gdp__order { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .gdnext__slot--battingOrder .gdp__order li { flex: 1 1 0; min-height: min-content; }
 
@@ -129,4 +141,5 @@
 .gdarm > .unfold[data-open]:has(.pcard__sec--mix) { flex: 1 1 auto; }
 .gdarm .unfold__in > .pcard__sec--mix { height: 100%; }
 .gdarm .pcard__tiles { flex: 1 1 auto; }
+/* layout-exempt: one pitch row: mark, name, share, speed */
 .gdarm .pcard__tile { flex: 1 1 0; }

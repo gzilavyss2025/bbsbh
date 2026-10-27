@@ -31,7 +31,7 @@
   grid-template-rows: auto auto minmax(0, 1fr); grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar atBats'; }
 .gdnext:not([data-tier='P']) .gdcp[data-pages='5'] .gdcp__body { grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar facts'; }
 .gdnext:not([data-tier='P']) .gdcp__page { display: flex; animation: none; grid-area: var(--gdcp-area);
-  border-right: var(--bw-rule) solid var(--border-rule); border-bottom: var(--bw-rule) solid var(--border-rule); }
+  border-right: var(--bw-rule) solid var(--border-stamped); border-bottom: var(--bw-rule) solid var(--border-stamped); }
 .gdcp__page[data-page='tally'] { --gdcp-area: tally; }
 .gdcp__page[data-page='pitching'] { --gdcp-area: pitching; }
 .gdcp__page[data-page='atBats'] { --gdcp-area: atBats; }
@@ -57,7 +57,7 @@
 .gdcp__tally { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: var(--bw-heavy) solid var(--border-stamped); }
 .gdcp__tally + .gdcp__tally { margin-top: calc(-1 * var(--space-2)); border-top: 0; }
 /* layout-exempt: a figure over its label */
-.gdcp__tally div { display: flex; flex-direction: column; align-items: center; padding: var(--space-1h) 0; border-right: var(--bw-rule) solid var(--border-rule); }
+.gdcp__tally div { display: flex; flex-direction: column; align-items: center; padding: var(--space-1h) 0; border-right: var(--bw-rule) solid var(--border-stamped); }
 .gdcp__tally div:last-child { border-right: 0; }
 .gdcp__tally b { font: var(--w-medium) var(--fs-title-lg) / var(--lh-solid) var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-heading); }
 .gdcp__tally span { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
@@ -92,6 +92,6 @@
 /* layout-exempt: a wrapping row of chips */
 .gdcp__due { display: flex; flex-wrap: wrap; gap: var(--space-1); align-items: center; }
 .gdcp__due .gdcp__label { flex-basis: 100%; }
-.gdcp__due span:not(.gdcp__label) { padding: var(--space-1) var(--space-1h); border: var(--bw-rule) solid var(--border-rule);
+.gdcp__due span:not(.gdcp__label) { padding: var(--space-1) var(--space-1h); border: var(--bw-rule) solid var(--border-stamped);
   background: var(--surface-inset); font-size: var(--fs-cell); white-space: nowrap; }
-.gdcp__notes li { margin-bottom: var(--space-1h); padding: var(--space-1h) var(--space-2); background: var(--surface-inset); border: var(--bw-rule) solid var(--border-rule); }
+.gdcp__notes li { margin-bottom: var(--space-1h); padding: var(--space-1h) var(--space-2); background: var(--surface-inset); border: var(--bw-rule) solid var(--border-stamped); }

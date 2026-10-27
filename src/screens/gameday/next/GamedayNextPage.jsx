@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../../../styles/gameday-next/page.css'
 import { Button } from '../../../components/ui/control/Button.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
@@ -20,8 +20,9 @@ export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine,
   // for one; the narrower tiers fold it into the Menu as before.
   const drawer = tier === 'L' || tier === 'D'
   const [defense, setDefense] = useState(false)
-  const opened = useRef(false)
-  if (defense) opened.current = true
+  // The drawer fetches nothing until it is first opened, then stays mounted so it can slide out.
+  const [opened, setOpened] = useState(false)
+  if (defense && !opened) setOpened(true)
   useEffect(() => {
     if (!defense) return undefined
     const onKey = (e) => e.key === 'Escape' && setDefense(false)
@@ -70,7 +71,7 @@ export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine,
       </div>
       {drawer && (
         <aside id="gdnext-defense" className="gdnext__drawer" data-open={defense || undefined} aria-label="Defense" inert={!defense}>
-          {opened.current && <GamedayPanel block="reference" ctx={panels} />}
+          {opened && <GamedayPanel block="reference" ctx={panels} />}
         </aside>
       )}
       <div hidden>{engine}</div>
