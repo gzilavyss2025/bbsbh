@@ -15,7 +15,7 @@ import { useTier } from './useTier.js'
 // Blocks a panel fills; the rest keep their label until their prompts.
 const PANELLED = new Set(['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog'])
 
-export function GamedayNextPage({ band, panels, engine, advance, onBoxScore, onScorecard, refresh }) {
+export function GamedayNextPage({ band, panels, stage, engine, advance, onBoxScore, onScorecard, refresh }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
   const slots = blocksFor(tier).filter((b) => b !== 'band' && b !== 'bar')
@@ -24,8 +24,12 @@ export function GamedayNextPage({ band, panels, engine, advance, onBoxScore, onS
       <div className="gdnext__band">{band}</div>
       {slots.map((b) => (
         <section key={b} className={`gdnext__slot gdnext__slot--${b}`} aria-label={BLOCK_LABEL[b]}>
-          <GamedayPanel block={b} ctx={panels} />
-          {!PANELLED.has(b) && <span className="gdnext__slotname">{BLOCK_LABEL[b]}</span>}
+          {b === 'stage' && stage ? stage : (
+            <>
+              <GamedayPanel block={b} ctx={panels} />
+              {!PANELLED.has(b) && <span className="gdnext__slotname">{BLOCK_LABEL[b]}</span>}
+            </>
+          )}
         </section>
       ))}
       <div className="gdnext__bar">

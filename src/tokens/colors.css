@@ -313,4 +313,19 @@
   --batted-line:   #2F6E4F; /* outfield green */
   --batted-fly:    #1B2A3A; /* navy */
   --batted-pop:    #938C7C; /* graphite-soft */
+
+  /* ---- Gameday's stage (#2568 slice 4) ---- the 16-bit field keeps its own bright game
+     colours ("B: bright game colours", Gary 2026-10-26); the panels around it stay paper. Only
+     the stage reads these (screens/gameday/next/stage/, canvas pixels). The last five are the
+     zone map's temperatures, MLB's own words for hotColdZones. */
+  --stage-sky: #5b9be0; --stage-sky-haze: #a3d3f2;
+  --stage-crowd-1: #2a2640; --stage-crowd-2: #5c4a6c; --stage-crowd-3: #ad6258; --stage-crowd-4: #d9b06e;
+  --stage-wall-deep: #1b4530; --stage-wall: #2c6644; --stage-wall-lit: #47885a;
+  --stage-grass: #3c8838; --stage-grass-lit: #55a644; --stage-grass-far: #2e6c32; --stage-grass-foul: #357b35;
+  --stage-dirt: #b4743d; --stage-dirt-lit: #d29a5b; --stage-chalk: #f2efe2; --stage-outline: #121418;
+  --stage-shadow: #1d4524; --stage-shadow-dirt: #7e4f28;
+  --stage-kit-navy: #1d2b4f; --stage-kit-trim: #2a9893; --stage-kit-road: #aab0ba; --stage-kit-road-shade: #6c7280; --stage-kit-red: #c3323b;
+  --stage-skin: #e2a67b; --stage-skin-shade: #9a6445; --stage-bat: #dba45f; --stage-landing: #f5cf3e;
+  --stage-zone-cold: #3b6fb6; --stage-zone-cool: #8fb3df; --stage-zone-lukewarm: #e8e2cf; --stage-zone-warm: #e8a76a; --stage-zone-hot: #c3323b;
+  --stage-frame: var(--stage-outline);
 }

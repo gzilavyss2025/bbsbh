@@ -14,3 +14,5 @@ design: `.scratch/gameday-design/`. Without the flag `InningViewer` renders as i
   score. A folded block is a name in the menu until its prompt builds it; opening the menu loads
   nothing.
 - Panels (prompt 8) live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel also draws in the menu.
+- `stage/` is the stage renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage` (slot-index buffer),
+  `StageCanvas` (palette from the `--stage-*` tokens). `GamedayNextPage`'s `stage` prop fills the slot; the mount and tap rule are prompt 10. `stage/swing.js` holds the swing keyframes alone.
