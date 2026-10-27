@@ -123,17 +123,28 @@ function cacheOf(wall, key) {
 // B ball, S strike (called, swinging, foul), X in play.
 const callOf = (code) => ('XDE'.includes(code) ? 'X' : 'B*HVIP'.includes(code[0]) ? 'B' : 'S')
 
-function pitchView(fb, K, st, w, h) {
+const ZONE = { cold: S.zoneCold, cool: S.zoneCool, lukewarm: S.zoneLukewarm, warm: S.zoneWarm, hot: S.zoneHot }
+
+function pitchView(fb, K, st, w, h, zones) {
   const play = st.play, { t: T, last } = play, cam = K.cam || (K.cam = homeCamera(w / h))
-  fb.px.set(K.bg || (K.bg = pitchBg(play.wall, w, h, cam)).px)
+  fb.px.set((K.bg || (K.bg = pitchBg(play.wall, w, h, cam))).px)
   const P = (p) => project(cam, p, w, h)
   for (const k of Object.keys(st.fielders).filter((n) => n !== 'P' && n !== 'C').sort((a, c) => P(st.fielders[c]).d - P(st.fielders[a]).d)) {
     figure(fb, cam, fielderJoints(st.fielders[k]), FIELDER, { minR: 0.5 })
   }
   for (const r of st.runners) if (!r.batter && !r.gone) { const p = P(r.pos); if (p) sprite(fb, SPR.stand, p.x, p.y, KIT.road) }
   figure(fb, cam, st.pitcherPose, PITCHER, { minR: 0.6 })
-  // The strike zone at the front of the plate: a dotted frame.
-  const c0 = last && P([-0.83, PLATE_FRONT, last.szTop]), c1 = last && P([0.83, PLATE_FRONT, last.szBot])
+  // The strike zone at the front of the plate: a dotted frame (a usual one at rest, before a pitch).
+  const sz = last ?? { szTop: 3.4, szBot: 1.6 }
+  // The zone map at rest: nine cells tinted on the 50% checker the see-through catcher leaves
+  // open, zone 1 top left as the catcher sees it.
+  for (const [z, { temp }] of Object.entries(zones ?? {})) {
+    const i = Number(z) - 1, c = i % 3, r = Math.floor(i / 3), slot = ZONE[temp], d = (sz.szTop - sz.szBot) / 3
+    const a = P([-0.83 + c * (1.66 / 3), PLATE_FRONT, sz.szTop - r * d]), b = P([-0.83 + (c + 1) * (1.66 / 3), PLATE_FRONT, sz.szTop - (r + 1) * d])
+    if (!a || !b || slot == null) continue
+    for (let y = Math.round(a.y); y < Math.round(b.y); y++) for (let x = Math.round(a.x); x < Math.round(b.x); x++) if ((x + y) & 1) put(fb, x, y, slot)
+  }
+  const c0 = P([-0.83, PLATE_FRONT, sz.szTop]), c1 = P([0.83, PLATE_FRONT, sz.szBot])
   if (c0 && c1) {
     for (let x = Math.round(c0.x); x <= Math.round(c1.x); x += 2) { put(fb, x, c0.y, S.chalk); put(fb, x, c1.y, S.chalk) }
     for (let y = Math.round(c0.y); y <= Math.round(c1.y); y += 2) { put(fb, c0.x, y, S.chalk); put(fb, c1.x, y, S.chalk) }
@@ -220,10 +231,11 @@ function fieldView(fb, K, st, w, h) {
 const zLiftPx = (z, k) => zLift(z) * k
 
 // The whole stage at `st` = stateAt(play, t), in a w x h buffer of slot indices. The buffer is the
-// cache's own, redrawn by the next call at this size: paint it or copy it before then.
-export function drawStage(st, w, h) {
+// cache's own, redrawn by the next call at this size: paint it or copy it before then. `zones` (the
+// zone map, { '01'..'09': { temp } }) is for the rest frame only: pre-game numbers, never a play's.
+export function drawStage(st, w, h, zones) {
   const K = cacheOf(st.play.wall, `${w}x${h}`), fb = K.fb || (K.fb = newBuf(w, h))
   if (st.view === 'field') fieldView(fb, K, st, w, h)
-  else pitchView(fb, K, st, w, h)
+  else pitchView(fb, K, st, w, h, zones)
   return fb
 }
