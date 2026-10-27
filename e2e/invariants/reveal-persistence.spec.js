@@ -15,7 +15,10 @@ const GAME = '/07072026/milstl-2'
 async function cellName(page, half) {
   const cell = await halfCell(page, half)
   const name = await cell.getAttribute('aria-label')
-  if (await page.getByRole('dialog').count()) await page.keyboard.press('Escape')
+  if (await page.getByRole('dialog').count()) {
+    await page.keyboard.press('Escape')
+    await page.getByRole('dialog').waitFor({ state: 'detached' })
+  }
   return name
 }
 

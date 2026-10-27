@@ -15,13 +15,22 @@ const GAME = '/05272025/bosmil'
 async function innings(page) {
   await halfCell(page, 'Top 1')
   const heads = await page.locator('.gdp__line thead th').allTextContents()
-  if (await page.getByRole('dialog').count()) await page.keyboard.press('Escape')
+  if (await page.getByRole('dialog').count()) {
+    await page.keyboard.press('Escape')
+    await page.getByRole('dialog').waitFor({ state: 'detached' })
+  }
   return heads
 }
 
 test('the 10th inning stays hidden until the 9th’s bottom is revealed', async ({
   page,
 }) => {
+  // Revealing the bottom of the 9th is a tap per plate appearance. With motion on, every play the
+  // stage starts makes the next tap a skip (#2573), which doubles the taps; reduced motion rests the
+  // stage, so each tap is a step. The gate under test does not read motion. The longer timeout
+  // covers a slow feed on a cold dev server.
+  test.setTimeout(90_000)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto(`${GAME}/top1`)
 
   // Fresh state: only regulation (1-9) columns exist, and there's no way to

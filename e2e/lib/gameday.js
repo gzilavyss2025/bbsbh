@@ -30,10 +30,16 @@ export async function revealHalf(page) {
   throw new Error('the half did not close in 120 taps')
 }
 
-// A half's run cell in Gameday's line score ("Top 1, sealed", "Top 1, 2 runs"), opening the Menu
-// first where the window's tier folds the line score into it (a phone).
+// A half's run cell in Gameday's line score ("Top 1, sealed", "Top 1, 2 runs"). The line score folds
+// into the Menu on the phone tier only (lib/gameday/ladder.js), so the tier on `.gdnext` decides,
+// not the cell's visibility: at T and L the cell may not be drawn yet when this runs, and opening
+// the Menu there would lay its scrim over the cell. The Menu opens once; the cell is waited for.
 export async function halfCell(page, name) {
+  const tier = await page.locator('.gdnext[data-tier]').getAttribute('data-tier')
+  if (tier === 'P' && !(await page.getByRole('dialog').count())) {
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
+  }
   const cell = page.getByRole('button', { name: new RegExp(`^${name},`) })
-  if (!(await cell.isVisible())) await page.getByRole('button', { name: 'Menu', exact: true }).click()
+  await cell.waitFor({ state: 'visible' })
   return cell
 }
