@@ -45,13 +45,8 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   (`bbsbh:pitchmode:{gamePk}`), the words, `nextSub` (read at the tap; it returns a count only) and the
   stage's key; the cursor is `useRevealProgress`'s `{halfIdx}:{count}:{sub}`. The hero's open box and
   `eventCardMarkup.js` (the stage's lower third) read `openAtBat` inside a `SealBox` reveal function, up to `sub`.
-- `cutscene/` keeps the original standalone procedural kit: a scene spec (`cutsceneScenes.js`:
-  presets `hr`, `slam`, `rbi`; backdrop, poses, extras, band lines, timing) drives a pure clock (`cutsceneTimeline.js`)
-  and one frame as a slot-index buffer (`drawCutscene.js`). Backdrops and extras are registries (`cutsceneBackdrops.js`,
-  `cutsceneExtras.js`); poses build at load from one reference grid (`cutscenePoses.js`, a new pose is a few points);
-  `CutsceneCanvas` takes the palette from the `--stage-*` tokens plus a club `kit`. The mount decides which play earns
-  it, inside a `SealBox` reveal function, and hands it the words.
-- `cutscene/ballpark/` is the modern sprite system, also inspected at `/animation-lab#ballpark`:
+- `cutscene/ballpark/` is the big-play celebration, a sprite system (the code-drawn kit from #2673 was
+  removed in the #2676 stack: the sprites replace it), also inspected at `/animation-lab#ballpark`:
   separate character atlases, stadium, palette preparation and finite choreography. `cutscene/integration/`
   selects completed revealed results inside `GamedayStage`'s SealBox subtree; the stage's existing tap rule
   starts/skips it. Assets and chunks fail back to the ordinary field. A qualifying ending scene holds

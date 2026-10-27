@@ -323,15 +323,7 @@
   "stage-zone-lukewarm": "Gameday stage zone map temperature: lukewarm.",
   "stage-zone-warm": "Gameday stage zone map temperature: warm.",
   "stage-zone-hot": "Gameday stage zone map temperature: hot.",
-  "stage-frame": "Gameday stage: the canvas frame behind the buffer.",
-  "stage-night": "Gameday cutscene: the night stands' back wall. Only the cutscene canvas reads it.",
-  "stage-skin-light": "Gameday cutscene: the batter's lit skin.",
-  "stage-kit-road-light": "Gameday cutscene: the road kit's highlight (pants).",
-  "stage-leather": "Gameday cutscene: the batter's belt.",
-  "stage-bat-shade": "Gameday cutscene: the bat's underside.",
-  "stage-dusk-1": "Gameday cutscene, dusk backdrop: the sky's top band.",
-  "stage-dusk-2": "Gameday cutscene, dusk backdrop: the sky's middle band.",
-  "stage-dusk-3": "Gameday cutscene, dusk backdrop: the sky's low band."
+  "stage-frame": "Gameday stage: the canvas frame behind the buffer."
  },
  "flags": {
   "graphite-soft": " FLAG: 3.10:1 on paper-2 and 2.91:1 on paper-0, under 4.5:1. Kept exact; use only for \"not available\" placeholders, never a figure.",

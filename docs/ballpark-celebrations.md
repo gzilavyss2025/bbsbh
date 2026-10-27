@@ -13,7 +13,8 @@ The owner chose contemporary indie pixel art, citing Animal Well's craft and
 atmosphere rather than retro sports art or photorealistic rendering. Preserve
 readable team colors, convincing silhouette and body mechanics, layered stadium
 depth, and restrained rim lighting. The approved concept and interview are the
-basis for the new study; the old procedural cutscene stays available.
+basis for the new study. It replaces the old code-drawn cutscene (#2673), which
+the #2676 stack removed.
 
 The character represents a team, not a likeness. Its rear view, helmet or cap,
 covered arms and deep head/hand shadows avoid assigning an appearance to the named player. Do not infer race,
