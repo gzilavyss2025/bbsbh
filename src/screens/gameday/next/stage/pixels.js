@@ -4,12 +4,13 @@
 // the drawing never names a colour and a test can read it without a DOM.
 import { clamp, project } from './scene.js'
 
-// One slot per --stage-* token that the drawing paints with, in the token file's order. The five
-// zone-temperature tokens belong to the zone map (prompt 9), not this renderer.
+// One slot per --stage-* token that the drawing paints with, in the token file's order: the last
+// five are the zone map's temperatures, tinted into the strike zone at rest.
 export const TOKENS = [
   'sky', 'sky-haze', 'crowd-1', 'crowd-2', 'crowd-3', 'crowd-4', 'wall-deep', 'wall', 'wall-lit',
   'grass', 'grass-lit', 'grass-far', 'grass-foul', 'dirt', 'dirt-lit', 'chalk', 'outline', 'shadow', 'shadow-dirt',
   'kit-navy', 'kit-trim', 'kit-road', 'kit-road-shade', 'kit-red', 'skin', 'skin-shade', 'bat', 'landing', 'frame',
+  'zone-cold', 'zone-cool', 'zone-lukewarm', 'zone-warm', 'zone-hot',
 ]
 export const S = Object.fromEntries(TOKENS.map((n, i) => [n.replace(/-(\w)/g, (_, c) => c.toUpperCase()), i]))
 

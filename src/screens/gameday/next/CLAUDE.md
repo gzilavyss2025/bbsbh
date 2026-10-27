@@ -15,7 +15,11 @@ design: `.scratch/gameday-design/`. Without the flag `InningViewer` renders as i
   nothing.
 - Panels (prompt 8) live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel also draws in the menu.
 - `stage/` is the stage renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage` (slot-index buffer),
-  `StageCanvas` (palette from the `--stage-*` tokens). `GamedayNextPage`'s `stage` prop fills the slot; the mount and tap rule are prompt 10. `stage/swing.js` holds the swing keyframes alone.
+  `StageCanvas` (palette from the `--stage-*` tokens). `stage/swing.js` holds the swing keyframes alone.
+- The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
+  pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
+  reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its
+  per-game dismiss (`bbsbh:zonemap:{gamePk}`); the tint is `drawStage`'s `zones`, at rest only.
 - `hero/` is the hero slot (#2576): `heroMarkup.js` builds it (a `.js` builder, so `npm test` can render it),
   `heroModel.js` is the scorebook box's pure model. It reads the live snapshot's `last` (the last finished
   at-bat as of the cursor, `deriveLiveState`) inside a `SealBox` reveal function. The box has one height per
