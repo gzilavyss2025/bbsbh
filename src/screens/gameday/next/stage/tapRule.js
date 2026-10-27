@@ -14,8 +14,10 @@
 
 export const rest = (seen, view) => ({ seen, view, armed: null, shown: null, playing: false })
 
-// The advance tap. -> [state, advance?]
-export function tap(s, reveals, reduced) {
+// The advance tap. -> [state, advance?] While the checkpoint covers the stage nothing plays there,
+// so the tap always passes through and arms nothing.
+export function tap(s, reveals, reduced, covered = false) {
+  if (covered) return [{ ...s, armed: null, playing: false }, true]
   if (s.playing) return [{ ...s, playing: false }, false]
   return [{ ...s, armed: reveals ? { reduced } : null }, true]
 }
@@ -30,3 +32,7 @@ export function saw(s, seen, view) {
 
 // The animation reached its end on its own.
 export const ended = (s) => (s.playing ? { ...s, playing: false } : s)
+
+// The tapped step settled without a new last at-bat (a stoppage, a placed runner): a later change
+// that no tap made must not play.
+export const disarm = (s) => (s.armed ? { ...s, armed: null } : s)

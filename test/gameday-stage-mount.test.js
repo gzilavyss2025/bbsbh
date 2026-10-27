@@ -6,8 +6,8 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
-import { GamedayStage } from '../src/screens/gameday/next/stage/GamedayStage.js'
+import { disarm, rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
+import { GamedayStage, restBatter, restZones } from '../src/screens/gameday/next/stage/GamedayStage.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 import { stagePlay, stateAt } from '../src/screens/gameday/next/stage/play.js'
 import { drawStage } from '../src/screens/gameday/next/stage/drawStage.js'
@@ -70,13 +70,30 @@ test('a tap that is not a reveal (a page forward) never plays; a new half rests'
   assert.equal(s.view, VIEW + 1)
 })
 
+test('while the checkpoint covers the stage, a tap always advances and arms nothing', () => {
+  // The third out's reveal arms and plays, then the checkpoint takes the slot: the canvas never mounts.
+  const playing = saw(tap(rest(14, VIEW), true, false)[0], 15, VIEW)
+  assert.equal(playing.playing, true)
+  const [s, advance] = tap(playing, false, false, true)
+  assert.equal(advance, true)
+  assert.equal(s.playing, false)
+  assert.equal(tap(rest(15, VIEW), true, false, true)[0].armed, null)
+})
+
+test('a reveal tap that settles without a new last at-bat disarms: a later poll does not play', () => {
+  const [armed] = tap(rest(12, VIEW), true, false)
+  const s = saw(disarm(armed), 13, VIEW)
+  assert.equal(s.shown, null)
+  assert.equal(s.playing, false)
+})
+
 // ---- The mounted stage -------------------------------------------------------------------------
 
 // Stand-ins: a .jsx file cannot load here. The SealBox calls its render function, as the real one
 // does with forceRevealed; the canvas prints what it was handed.
 const SealBox = ({ children }) => children()
 const StageCanvas = ({ play, t, start, zones }) =>
-  h('i', { 'data-pitches': play.pitches.length, 'data-ball': play.ball ? play.ball.kind : '', 'data-t': t ?? '', 'data-start': start ?? '', 'data-zones': zones ? 1 : 0 })
+  h('i', { 'data-batter': play.batter, 'data-pitcher': play.pitcher, 'data-pitches': play.pitches.length, 'data-ball': play.ball ? play.ball.kind : '', 'data-t': t ?? '', 'data-start': start ?? '', 'data-zones': zones ? 1 : 0 })
 // A feed whose plays throw when read: before the reveal the stage must not touch them.
 const sealedFeed = { ...F, liveData: { ...F.liveData, plays: new Proxy({}, { get: () => { throw new Error('read a play before the reveal') } }) } }
 const html = (props) => renderToStaticMarkup(h(GamedayStage, { SealBox, StageCanvas, wall, batSide: 'R', ...props }))
@@ -86,6 +103,14 @@ test('before the reveal: no play is read, and the stage draws the rest frame onl
   assert.match(out, /data-pitches="0"/)
   assert.match(out, /data-ball=""/)
   assert.match(out, /data-zones="1"/)
+})
+
+test('at rest a switch hitter stands opposite the pitcher\'s hand; a one-sided hitter keeps his side', () => {
+  const at = (batSide, pitchHand) => html({ feed: sealedFeed, shown: null, batSide, pitchHand })
+  assert.match(at('S', 'R'), /data-batter="L" data-pitcher="R"/)
+  assert.match(at('S', 'L'), /data-batter="R" data-pitcher="L"/)
+  assert.match(at('L', 'L'), /data-batter="L"/)
+  assert.match(at('R', 'R'), /data-batter="R"/)
 })
 
 test('after the reveal: the revealed play draws, at its end at rest and from the tap while playing', () => {
@@ -108,6 +133,21 @@ test('the zone tint: zone 1 top left as the catcher sees it, zone 9 bottom right
   assert.ok(cold && hot)
   assert.ok(cold[0] < hot[2] && cold[1] < hot[3])
   assert.equal(where(drawStage(stateAt(play, 0), 256, 300), S.zoneCold), null)
+})
+
+test('the rest batter: the due-up of the half being scored; none for a committed half or under the checkpoint', () => {
+  const at = { view: 2, mark: 1, inning: 2, half: 'top', last: 12, stepAtBatIndex: 12 }
+  assert.equal(restBatter(F, at)?.id, 668227) // Arozarena
+  assert.equal(restBatter(F, { ...at, covered: true }), null)
+  assert.equal(restBatter(F, { ...at, mark: 2 }), null)
+})
+
+test('the zone card shows a batter only with his own zones, and only at rest', () => {
+  const zm = { id: 668227, zones: { '05': { avg: '.250', temp: 'lukewarm' } } }
+  assert.equal(restZones(zm, 668227, false), zm.zones)
+  assert.equal(restZones(zm, 641313, false), null) // the next batter, before his own fetch lands
+  assert.equal(restZones(zm, null, false), null)
+  assert.equal(restZones(zm, 668227, true), null) // dismissed
 })
 
 // ---- The zone map's dismiss --------------------------------------------------------------------
