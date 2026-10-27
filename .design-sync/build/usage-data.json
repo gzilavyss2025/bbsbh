@@ -328,7 +328,10 @@
   "stage-skin-light": "Gameday cutscene: the batter's lit skin.",
   "stage-kit-road-light": "Gameday cutscene: the road kit's highlight (pants).",
   "stage-leather": "Gameday cutscene: the batter's belt.",
-  "stage-bat-shade": "Gameday cutscene: the bat's underside."
+  "stage-bat-shade": "Gameday cutscene: the bat's underside.",
+  "stage-dusk-1": "Gameday cutscene, dusk backdrop: the sky's top band.",
+  "stage-dusk-2": "Gameday cutscene, dusk backdrop: the sky's middle band.",
+  "stage-dusk-3": "Gameday cutscene, dusk backdrop: the sky's low band."
  },
  "flags": {
   "graphite-soft": " FLAG: 3.10:1 on paper-2 and 2.91:1 on paper-0, under 4.5:1. Kept exact; use only for \"not available\" placeholders, never a figure.",

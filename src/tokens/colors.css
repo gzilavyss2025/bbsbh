@@ -331,4 +331,5 @@
   /* The big-play cutscene (screens/gameday/next/cutscene/) adds the night stands' back wall, a lighter
      skin, the road kit's highlight, leather for the belt, and the bat's shade. */
   --stage-night: #191a2e; --stage-skin-light: #f4ccb3; --stage-kit-road-light: #e2def0; --stage-leather: #5e3422; --stage-bat-shade: #9c6a32;
+  --stage-dusk-1: #6a2f5c; --stage-dusk-2: #d9643c; --stage-dusk-3: #f2b457; /* the dusk backdrop's sky, high to low */
 }
