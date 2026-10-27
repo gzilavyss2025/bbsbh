@@ -852,3 +852,22 @@
   height: 1px;
 }
 
+
+/* Only the ✕ (StrikeZoneModal head={false}): it floats in the sheet's top right corner, so the zone starts
+   at the sheet's top instead of under a title row. */
+.szmodal--bare { position: relative; }
+.szmodal__head--bare { position: absolute; z-index: 1; top: var(--space-1); right: var(--space-1); margin: 0; padding: 0; border-bottom: 0; }
+/* The bare sheet (Gameday's hero): square, no frame or grass; the zone runs edge to edge, and its dirt
+   carries on under the pitch list to the sheet's foot. */
+.szmodal--bare { padding: 0; border-radius: var(--radius-square); overflow: hidden;
+  --sz-dirt: color-mix(in srgb, var(--field-dirt) 75%, var(--surface-card)); }
+.szmodal--bare .szmodal__body { gap: 0; align-items: stretch; }
+.szmodal--bare .strikezone--modal { display: block; width: 100%; height: auto; }
+.szmodal--bare .szmodal__body .pitchlist { box-sizing: border-box; padding: var(--space-2) var(--space-3) var(--space-3); background: var(--sz-dirt); }
+/* On the dirt the decisive pitch drops the paper band (it read as loose boxes): its words go bold in
+   ink and its number takes an ink ring, so the row stands out in the list's own type. */
+.szmodal--bare .pitchlist__row--decisive > :is(.pitchlist__type, .pitchlist__meta, .pitchlist__challenge, span:empty) { background: none; }
+.szmodal--bare .pitchlist__row--decisive > :is(.pitchlist__type, .pitchlist__meta) { color: var(--text-heading); font-weight: var(--w-bold); }
+/* Every row's speed and call in the pitch names' face, so the list reads as one type. */
+.szmodal--bare .szmodal__body .pitchlist__meta { font-family: var(--font-display); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.szmodal--bare .pitchlist__row--decisive .pitchlist__num { outline-color: var(--border-stamped); }

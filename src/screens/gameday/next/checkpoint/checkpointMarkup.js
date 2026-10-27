@@ -71,7 +71,7 @@ function gameSoFar(h, f, Headshot, line, PlayerLink) {
       // Each batter due up as a photo card, the first name small over the surname (as the lineup reads), in batting order.
       h('ol', { className: 'gdcp__dueups' }, ...f.dueUp.map((b) => h('li', { key: b.slot },
         Headshot && link(b, [h(Headshot, { key: 'shot', personId: b.id, name: b.last, tint: false })]),
-        link(b, [b.first && h('small', { key: 'f' }, b.first), h('b', { key: 'l' }, b.last)]),
+        link(b, [b.first && h('small', { key: 'f' }, b.first), h('b', { key: 'l', className: 'gdcp__fitname' }, b.last)]),
         h('span', { className: 'gdcp__dueline' }, line(b)))))),
   ]
 }

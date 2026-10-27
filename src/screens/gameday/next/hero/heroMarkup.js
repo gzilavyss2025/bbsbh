@@ -108,11 +108,11 @@ function words(h, feed, e) {
 // no layout, draws no handle (BallFlight stands down itself).
 // The pitch columns are the handle for the strike zone and the pitches with their speeds (`Zone`,
 // GamedayHero.jsx: the old feed's StrikeZoneModal), on a click.
-function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null) {
+function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null) {
   const { batter } = e
   const contact = contactStats(e)
   const flight = Flight && e.battedBall ? h(Flight, { ball: e.battedBall, batter, code: e.code ?? '', facts: false, arc: false, head: false, hover: false }) : null
-  const zone = Zone ? h(Zone, { entry: e }) : null
+  const zone = Zone ? h(Zone, { entry: e, side }) : null
   return h('div', { className: 'gdhero__top' }, scorebookBox(h, boxModel(e), flight, zone),
     h('div', { className: 'gdhero__txt' },
       h('div', { className: 'gdhero__who' },
@@ -128,6 +128,6 @@ export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Lin
     open?.sub > 0
       ? h(SealBox, { coverless: true, forceRevealed: true }, () => openBox(h, feed, inning, half, open, Headshot, PlayerLink, Line))
       : last
-        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, Headshot, PlayerLink, Line, feed, Flight, Zone))
+        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, Headshot, PlayerLink, Line, feed, Flight, Zone, half === 'top' ? 'away' : 'home'))
         : sealedBox(h, atPlate(feed, inning, half, mark), Headshot, PlayerLink))
 }

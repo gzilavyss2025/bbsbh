@@ -1,4 +1,4 @@
-import { createElement, useLayoutEffect, useRef, useState } from 'react'
+import { createElement, useContext, useLayoutEffect, useRef, useState } from 'react'
 import '../../../../styles/gameday-next/hero.css'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { eventCardMarkup } from '../steps/eventCardMarkup.js'
@@ -9,6 +9,7 @@ import { ScrollCue } from '../ScrollCue.jsx'
 import { BallFlight } from '../../../../components/charts/BallFlight.jsx'
 import { StrikeZoneModal } from '../../../../components/scoring/StrikeZone.jsx'
 import { hasPitchLocations } from '../../../../api/playbyplay/pitchInfo.js'
+import { BattingUniformContext, GameUniformsContext } from '../../../../components/logo/uniformContexts.js'
 
 // Gameday's hero (markup and rules: heroMarkup.js), and the stage's event card that shares its box.
 export const GamedayHero = (props) => heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, ...props })
@@ -42,15 +43,22 @@ function PlayLine({ text }) {
 }
 
 // A click on the box's pitch columns opens the strike zone with every pitch and its speed (the old feed's
-// StrikeZoneModal). No tracked locations (a thin MiLB feed), no handle.
-function PitchZone({ entry }) {
+// StrikeZoneModal). No tracked locations (a thin MiLB feed), no handle. The batter in the zone wears
+// tonight's uniform of the club at bat (GameView's posted assets, as the half page hands them down);
+// the plain silhouette stands in where none is posted.
+// Zoomed out by about three-quarters of a foot a side, so a pitch well off the plate stays on the drawing.
+const ZONE_MARGIN = 44
+function PitchZone({ entry, side }) {
   const [open, setOpen] = useState(false)
+  const uniform = useContext(GameUniformsContext)?.[side] ?? null
   if (!hasPitchLocations(entry.pitchDetails)) return null
   return (
     <>
       <button type="button" className="gdhero__zonebtn" aria-label={`Pitches to ${entry.batter?.last ?? 'this batter'}`} onClick={() => setOpen(true)} />
       {open && (
-        <StrikeZoneModal pitchDetails={entry.pitchDetails} batSide={entry.batSide} batter={entry.batter} pitcher={entry.pitcher?.last} onClose={() => setOpen(false)} />
+        <BattingUniformContext.Provider value={uniform}>
+          <StrikeZoneModal pitchDetails={entry.pitchDetails} batSide={entry.batSide} batter={entry.batter} pitcher={entry.pitcher?.last} onClose={() => setOpen(false)} head={false} margin={ZONE_MARGIN} />
+        </BattingUniformContext.Provider>
       )}
     </>
   )

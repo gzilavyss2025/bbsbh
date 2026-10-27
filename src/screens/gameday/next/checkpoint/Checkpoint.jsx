@@ -1,4 +1,4 @@
-import { createElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { createElement, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import '../../../../styles/gameday-next/checkpoint.css'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { Headshot } from '../../../../components/player/Headshot.jsx'
@@ -39,6 +39,7 @@ export function Checkpoint({ notes, inning, half, feed, ...props }) {
   const shownCounts = useMemo(() => ledger.countsFor(stagedIdx), [ledger, stagedIdx])
   const allShown = useTier() !== 'P' || motionIsReduced()
   const Seen = useCallback((p) => createElement(SeenNotes, { ...p, ledger, stagedIdx, allShown }), [ledger, stagedIdx, allShown])
+  useFitNames()
   return checkpointMarkup(createElement, {
     SealBox, Seen, Headshot, Scroll: NotesScroll, PlayerLink, entry, feed, inning, half, ...props, page, onPage: setPage,
     notes: notes && { ...notes, shownCounts, savantMatchup, seriesHistory, wsStarts },
@@ -56,3 +57,21 @@ function SeenNotes({ notes, on, ledger, stagedIdx, allShown }) {
 
 // The notes scroll in their box with a bouncing cue (ScrollCue.jsx).
 const NotesScroll = ({ children }) => <ScrollCue label="More notes below">{children}</ScrollCue>
+
+// The due-up cards' long surnames keep their height and narrow to fit (.gdcp__fitname): each is squeezed
+// sideways by the share it runs past its card, measured after every render and on a resize.
+function useFitNames() {
+  useLayoutEffect(() => {
+    const fit = () => {
+      for (const b of document.querySelectorAll('.gdcp__fitname')) {
+        b.style.transform = ''
+        const room = b.closest('li')?.clientWidth ?? 0
+        const need = b.scrollWidth
+        if (room > 0 && need > room) b.style.transform = `scaleX(${room / need})`
+      }
+    }
+    fit()
+    window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  })
+}

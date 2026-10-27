@@ -128,3 +128,6 @@
 .gdcp__dueline { font: var(--w-medium) var(--fs-cell) / var(--lh-solid) var(--font-body); color: var(--text-caption); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .gdcp__dueups .plink { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-1); min-width: 0; padding: 0; border: 0; background: none;
   font: inherit; color: inherit; text-align: left; cursor: pointer; } /* layout-exempt: the photo, or the first name over the surname, as one link */
+/* A long surname keeps its height and narrows to its card's width instead of trailing off: Checkpoint.jsx
+   squeezes it sideways (scaleX) by just as much as it runs over. */
+.gdcp__dueups b.gdcp__fitname { width: max-content; max-width: none; overflow: visible; text-overflow: clip; transform-origin: left center; }
