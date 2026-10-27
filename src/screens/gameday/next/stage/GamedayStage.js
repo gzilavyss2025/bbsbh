@@ -1,8 +1,10 @@
-import { createElement as h, useEffect, useMemo, useState } from 'react'
+import { createElement as h, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
 import { stagePlay } from './play.js'
+import { celebrationForPlay } from '../cutscene/integration/celebrationForPlay.js'
+import { BALLPARK_SCENES } from '../cutscene/ballpark/scenes.js'
 
 // The stage slot (#2573, #2568 slice 4): the revealed play, or the rest frame. A `.js` file so the
 // suite can render it; GamedayNextMount passes the real SealBox and StageCanvas.
@@ -31,20 +33,34 @@ function subPlay(feed, inning, half, { count, sub }) {
   return { p: cut, still: false }
 }
 
-function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd }) {
+function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint }) {
   const [start] = useState(() => performance.now())
-  const { play, still } = useMemo(() => {
+  const covered = !!checkpoint
+  const { play, still, celebration, ending } = useMemo(() => {
     const { p, still } = typeof idx === 'object' ? subPlay(feed, inning, half, idx) : { p: feed.liveData.plays.allPlays.find((q) => q.about?.atBatIndex === idx), still: false }
-    return { play: stagePlay(p ?? {}, wall), still }
-  }, [feed, idx, inning, half, wall])
+    // The checkpoint commits this half. An older shown play must not stand
+    // in for its ending while the engine reports the tap's new last index.
+    const ending = covered && typeof idx !== 'object' && feed.liveData.plays.allPlays.findLast((q) => q.about?.inning === inning && q.about?.halfInning === half)?.about?.atBatIndex === idx
+    return { play: stagePlay(p ?? {}, wall), still, ending, celebration: typeof idx === 'object' ? null : celebrationForPlay(p, feed.gameData) }
+  }, [feed, idx, inning, half, wall, covered])
+  const eligible = !!celebration && ending
+  // Report only a presentation flag from this revealed subtree. Commit it
+  // before paint so the bottom button and visible scene agree on the tap.
+  useLayoutEffect(() => { if (covered) onCheckpoint?.(eligible) }, [covered, eligible, onCheckpoint])
   useEffect(() => {
-    if (!playing) return undefined
-    const left = (still ? STILL : play.end) * 1000 - (performance.now() - start)
+    if (!playing || (covered && (!eligible || checkpointDismissed))) return undefined
+    // Decorative assets may decode after the tap. Their player reports its
+    // own completion; this watchdog prevents a stalled import/load holding
+    // the scoring control. Ordinary field timing stays on its existing clock.
+    const duration = celebration ? BALLPARK_SCENES[celebration.scene].track.duration + 4 : still ? STILL : play.end
+    const left = duration * 1000 - (performance.now() - start)
     if (left <= 0 || motionIsReduced()) { onEnd(); return undefined }
     const id = setTimeout(onEnd, left)
     return () => clearTimeout(id)
-  }, [playing, play, still, start, onEnd])
-  return h(StageCanvas, playing && !still ? { play, start } : { play, t: still ? 0 : play.end })
+  }, [playing, play, still, celebration, start, onEnd, covered, eligible, checkpointDismissed])
+  if (covered && (!eligible || checkpointDismissed)) return checkpoint
+  const props = playing && !still ? { play, start } : { play, t: still ? 0 : play.end }
+  return h(StageCanvas, { ...props, celebration, playing, onEnd, checkpointHeld: covered && eligible })
 }
 
 // Who stands in at rest: the due-up batter of the half being scored (dueup.js, the pre-pitch lineup),
@@ -67,8 +83,9 @@ function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone }) {
 }
 
 // `run` counts trail-card replays (tapRule.js replay): a new run remounts the play, so its clock restarts.
-export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, batSide, pitchHand, zones, onZone }) {
+export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, batSide, pitchHand, zones, onZone, checkpoint, checkpointDismissed, onCheckpoint }) {
+  if (checkpoint && (checkpointDismissed || shown == null || typeof shown === 'object')) return checkpoint
   return shown != null
-    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: `${typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown}#${run}`, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd }))
+    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: `${typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown}#${run}`, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint }))
     : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone })
 }

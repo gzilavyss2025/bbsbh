@@ -478,6 +478,9 @@ export default defineConfig({
         // reaches for a couple of files at a time, plus the pdfjs chunk and
         // the link-preview card, each with its own reason below.
         globIgnores: [
+          // Standalone Animation Lab study art (~4 MB). Fetch only when the
+          // lab opens; ordinary PWA installs must not download the prototype.
+          '**/art/ballpark/**',
           // The curated club marks (~2.5 MB even after compress-logos.mjs,
           // across ~10 treatment directories). One slate shows a handful and
           // one game exactly two, so precaching the whole league's art on
