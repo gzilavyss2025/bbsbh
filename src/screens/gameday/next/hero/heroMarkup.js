@@ -48,7 +48,8 @@ function result(h, e, feed, side) {
 
 export function heroMarkup(h, { SealBox, feed, inning, half, mark, last, stepAtBatIndex }) {
   const side = half === 'top' ? 'away' : 'home'
-  const due = selectDueUpDuring(feed, inning, half, mark, stepAtBatIndex, 3)?.batters ?? []
+  // A committed half reports no step cursor; the last result's own index is the same cursor.
+  const due = selectDueUpDuring(feed, inning, half, mark, last?.atBatIndex ?? stepAtBatIndex, 3)?.batters ?? []
   return h('div', { className: 'gdhero' },
     last
       ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, feed, side))
