@@ -13,7 +13,7 @@
 .gdp__line thead { height: 18px; } /* raw-value-exempt: the inning numbers' strip */
 .gdp__line thead th { font: var(--w-bold) var(--fs-label) / 1 var(--font-display); color: var(--text-heading); text-align: center; padding: 0; border-bottom: var(--bw-hair) solid var(--border-stamped); }
 .gdp__line tbody th { width: 64px; padding: 0 var(--space-2); text-align: center; border-right: var(--bw-heavy) solid var(--border-stamped); }
-.gdp__line tbody th { background: var(--bar-fill, var(--ink-1));
+.gdp__line tbody th { /* component-reuse-exempt: the line score's club cell wears its club's colours; it is a table cell, not a band head */ background: var(--bar-fill, var(--ink-1));
   background-image: repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
     repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px),
     linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%); }
@@ -36,7 +36,7 @@
 /* The half's at-bats as a ribbon of stamped chips, oldest first: the result in a green square, the surname beside it.
    What is still sealed is the last chip, drawn in solid ink so the reader sees at once where the page ends. */
 /* layout-exempt: a row of chips, clipped by the slot */
-.gdp__trail { display: flex; align-items: center; gap: var(--space-2); height: 100%; box-sizing: border-box; margin: 0; padding: 0 var(--space-3) 0 10px; /* raw-value-exempt: the left edge of the lineup's headshots */ list-style: none; }
+.gdp__trail { display: flex; align-items: center; gap: var(--space-2); height: 100%; box-sizing: border-box; margin: 0; padding: 0 var(--space-3) 0 var(--space-2h); /* the left edge of the lineup's headshots */ list-style: none; }
 /* layout-exempt: the result square and the surname on one row */
 .gdp__chip { flex: none; display: flex; align-items: stretch; height: 34px; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card);
   font-family: var(--font-display); font-size: var(--fs-small); font-weight: var(--w-bold); line-height: var(--lh-solid); color: var(--text-heading); }
@@ -49,10 +49,10 @@
 .gdp__chip + .gdp__chip::before, .gdp__chip + .gdp__chip::after { content: ''; position: absolute; top: 50%; transform: translateY(-50%); background: var(--border-stamped); }
 .gdp__chip + .gdp__chip::before { right: calc(100% + var(--bw-heavy) + var(--space-2)); width: var(--space-4); height: var(--bw-heavy); }
 .gdp__chip + .gdp__chip::after { right: calc(100% + var(--bw-heavy)); width: var(--space-2); height: var(--space-3); clip-path: polygon(0 0, 100% 50%, 0 100%); }
-.gdp__replay { display: flex; align-items: stretch; padding: 0; margin: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; color: inherit; text-transform: inherit; cursor: pointer; }
+.gdp__replay { display: flex; align-items: stretch; padding: 0; margin: 0; border: 0; background: none; font: inherit; letter-spacing: var(--ls-none); color: inherit; text-transform: inherit; cursor: pointer; }
 .gdp__replay:disabled { cursor: default; }
 .gdp__replay:hover:not(:disabled) span { text-decoration: underline; }
-.gdp__replay:focus-visible { outline: var(--focus-ring); outline-offset: var(--bw-heavy); }
+.gdp__replay:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }
 .gdp__chip.is-out b { background: var(--clay-soft); color: var(--clay-deep); } /* the batter made an out */
 .gdp__chip--cover { background: var(--text-heading); color: var(--surface-card); }
 .gdp__chip--cover b { border-right: 0; background: none; padding: 0 var(--space-4); font-family: var(--font-display); letter-spacing: var(--ls-xwide); }
@@ -88,7 +88,7 @@
 .gdp__trip { grid-row: 1; grid-column: -3; display: flex; line-height: var(--lh-solid); }
 .gdp__order .gdp__tag { grid-row: 1; grid-column: -2; }
 /* The advance code beside the leg, in viewBox units (the 56px diamond draws 100 units): about 13px on screen. */
-.gdp__trip .pbp__advance { font-size: 24px; }
+.gdp__trip .pbp__advance { font-size: 1.5em; } /* 24 viewBox units at the page's 16px */
 /* A batter who did not reach: his result's code in the diamond's place, centred where a diamond would be, in
    deep red. The display face, since the mono face ships one weight and draws no bold. */
 .gdp__trip--code { width: 56px; height: 56px; align-items: center; justify-content: center; }
@@ -208,7 +208,7 @@
 .gdp__order li > .gdp__scout { grid-row: 2; grid-column: 1 / -1; display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; overflow: hidden; white-space: nowrap; }
 .gdp__scoutdoor { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase;
   color: var(--text-heading); text-decoration: underline; text-underline-offset: 2px; }
-.gdp__scoutdoor:focus-visible { outline: var(--focus-ring); outline-offset: var(--bw-heavy); }
+.gdp__scoutdoor:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }
 .gdp__scoutvs { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
 .gdp__scoutline { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); color: var(--text-heading); font-variant-numeric: tabular-nums; }
 /* Where the reader is in the half: the at-bat on screen stands up off the strip on a hard ink shadow,
