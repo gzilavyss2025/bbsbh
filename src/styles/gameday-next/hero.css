@@ -10,10 +10,15 @@
 .gdhero__top { display: flex; gap: var(--space-3); min-height: 0; }
 /* layout-exempt: the words stacked beside the box */
 .gdhero__txt { min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.gdhero__shot { flex: none; margin-left: auto; align-self: stretch; display: flex; }
+.gdhero__shot .plink { display: flex; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+.gdhero__who .plink { font: inherit; letter-spacing: inherit; color: inherit; text-transform: inherit; text-align: left; }
+.gdhero__shot .shot { height: 100%; width: auto; aspect-ratio: 4 / 5; border: var(--bw-heavy) solid var(--border-stamped); border-radius: 0; overflow: hidden; box-sizing: border-box; }
+.gdhero__shot .shot img { display: block; width: 100%; height: 100%; border: 0; border-radius: 0; object-fit: cover; }
 .gdhero__lbl { font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
 /* layout-exempt: the pitch columns beside the diamond */
-.gdhero__box { flex: none; box-sizing: border-box; display: grid; grid-template-columns: 64px minmax(0, 1fr); aspect-ratio: 1.45;
+.gdhero__box { flex: none; box-sizing: border-box; display: grid; grid-template-columns: 38px minmax(0, 1fr); aspect-ratio: 1.45;
   border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-inset); }
 .gdnext[data-tier='P'] .gdhero__box { height: 140px; }
 .gdnext[data-tier='T'] .gdhero__box { height: 128px; }
@@ -26,10 +31,11 @@
 /* layout-exempt: two columns of pips */
 .gdhero__bs { display: grid; grid-template-columns: 1fr 1fr; min-width: 0; border-right: var(--bw-rule) solid var(--border-stamped); }
 /* layout-exempt: the pips wrap inside a fixed column */
-.gdhero__col { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-1) 0; min-width: 0; }
-.gdhero__col + .gdhero__col { border-left: var(--bw-hair) solid var(--border-hairline); }
-.gdhero__col i { flex: none; text-align: center; font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); font-style: normal; color: var(--text-caption); }
-.gdhero__pip { width: 16px; font: var(--w-bold) var(--fs-small) / 1 var(--font-mono, var(--font-body)); text-align: center; color: var(--text-heading); }
+.gdhero__col { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 0; min-width: 0; }
+/* As in the old feed's pitch ladder: a light ball lane, a pencil-shaded strike lane. */
+.gdhero__col + .gdhero__col { background: color-mix(in srgb, var(--graphite) 22%, var(--surface-inset)); border-left: var(--bw-hair) solid var(--border-rule); }
+.gdhero__col i { flex: none; align-self: stretch; padding: 1px 0; border-bottom: var(--bw-hair) solid var(--border-rule); text-align: center; font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); font-style: normal; color: var(--text-caption); }
+.gdhero__pip { width: 100%; height: 15px; display: flex; align-items: center; justify-content: center; font: var(--w-bold) var(--fs-small) / 1 var(--font-mono, var(--font-body)); text-align: center; color: var(--text-heading); }
 .gdhero__pip.is-x { color: var(--text-heading); text-decoration: underline; }
 
 .gdhero__dia { position: relative; }
@@ -57,7 +63,14 @@
 .gdhero__who { font: var(--w-bold) var(--fs-title-sm) / var(--lh-tight) var(--font-display); letter-spacing: var(--ls-title); color: var(--text-heading); }
 .gdhero__who small { display: block; margin-top: var(--space-1); font: var(--w-medium) var(--fs-cell) / 1.2 var(--font-body); letter-spacing: var(--ls-none); color: var(--text-caption); }
 .gdhero__line { margin: 0; font-size: var(--fs-small); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
-.gdhero__contact { font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); color: var(--text-caption); }
+/* Exit velo, launch angle and distance as a stamped three-cell card, the labels over the numbers. */
+/* layout-exempt: one cell per number, a ground ball has two */
+.gdhero__contact { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; margin: auto 0 0; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-inset); }
+.gdhero__contact div { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); min-width: 0; padding: var(--space-1h) var(--space-2); }
+.gdhero__contact div + div { border-left: var(--bw-hair) solid var(--border-rule); }
+.gdhero__contact dt { font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); white-space: nowrap; }
+.gdhero__contact dd { display: flex; align-items: baseline; gap: var(--space-1); margin: 0; font: var(--w-bold) var(--fs-title-md) / var(--lh-solid) var(--font-display); color: var(--text-heading); font-variant-numeric: tabular-nums; }
+.gdhero__contact dd small { font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
 .gdnext[data-tier='T'] .gdhero__contact { display: none; } /* the pitches panel beside the hero carries it */
 
 /* The due-up strip: pre-pitch lineup, the same sealed or not */

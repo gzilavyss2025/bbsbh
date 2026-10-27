@@ -1,8 +1,6 @@
-import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
-import { battingSlot } from '../../../../api/playbyplay/advanceCode.js'
 import { pitchCallCode } from '../../../../api/playbyplay/eventTypes.js'
-import { boxModel, contactLine, ordinal, playLine } from './heroModel.js'
+import { boxModel, contactStats, playLine } from './heroModel.js'
 
 // THE HERO'S MARKUP (#2576, #2568): the scorebook box, the batter named once, the play line, the
 // contact numbers and the due-up strip. GamedayHero.jsx calls heroMarkup(createElement, …); node --test
@@ -43,7 +41,7 @@ export function scorebookBox(h, m) {
 const sealedBox = (h) => h('div', { className: 'gdhero__top' }, h('div', { className: 'gdhero__box is-sealed' }, h('span', null, 'Sealed')))
 
 // The open at-bat: only its shown sub-steps are read, so the last pitch and the result never reach it.
-function openBox(h, feed, inning, half, { count, sub }, side) {
+function openBox(h, feed, inning, half, { count, sub }, Headshot, PlayerLink) {
   const o = openAtBat(feed, inning, half, count)
   if (!o) return sealedBox(h)
   const events = o.play?.playEvents ?? []
@@ -55,42 +53,42 @@ function openBox(h, feed, inning, half, { count, sub }, side) {
   const line = now?.kind === 'pitch' && now.pitch ? `Pitch ${now.pitch.no}: ${[now.pitch.type, now.pitch.mph && Math.round(now.pitch.mph)].filter(Boolean).join(' ')}`
     : now?.kind === 'auto' ? events.find((e) => e.index === now.index)?.details?.description ?? '' : ''
   const { batter } = o.card
-  const slot = battingSlot(feed, side, batter.id)
   return h('div', { className: 'gdhero__top' }, scorebookBox(h, m),
     h('div', { className: 'gdhero__txt' },
-      h('span', { className: 'gdhero__lbl' }, 'At bat'),
       h('div', { className: 'gdhero__who' },
-        `${batter.jersey ? `#${batter.jersey} ` : ''}${[batter.first, batter.last].filter(Boolean).join(' ')}`,
-        h('small', null, [batter.pos, slot && ordinal(slot)].filter(Boolean).join(' · '))),
-      h('p', { className: 'gdhero__line' }, line)))
+        who(h, PlayerLink, batter)),
+      h('p', { className: 'gdhero__line' }, line)),
+    shot(h, Headshot, PlayerLink, batter))
 }
 
-function result(h, e, feed, side) {
-  const { batter, pitcher } = e
-  const slot = battingSlot(feed, side, batter.id)
-  const contact = contactLine(e)
-  const sub = [batter.pos, slot && ordinal(slot), pitcher?.last && `vs ${pitcher.last}`].filter(Boolean).join(' · ')
+// The batter's headshot, in a column of its own at the right of the hero.
+// The batter's name and headshot open his hover card and his page (PlayerLink).
+const fullName = (b) => [b.first, b.last].filter(Boolean).join(' ')
+const who = (h, PlayerLink, b) => (PlayerLink ? h(PlayerLink, { id: b.id, name: fullName(b) }, fullName(b)) : fullName(b))
+const shot = (h, Headshot, PlayerLink, b) => {
+  if (!Headshot) return null
+  const img = h(Headshot, { personId: b.id, name: b.last, tint: false })
+  return h('div', { className: 'gdhero__shot' }, PlayerLink ? h(PlayerLink, { id: b.id, name: fullName(b) }, img) : img)
+}
+
+function result(h, e, Headshot, PlayerLink) {
+  const { batter } = e
+  const contact = contactStats(e)
   return h('div', { className: 'gdhero__top' }, scorebookBox(h, boxModel(e)),
     h('div', { className: 'gdhero__txt' },
-      h('span', { className: 'gdhero__lbl' }, 'Last result'),
       h('div', { className: 'gdhero__who' },
-        `${batter.jersey ? `#${batter.jersey} ` : ''}${[batter.first, batter.last].filter(Boolean).join(' ')}`, h('small', null, sub)),
+        who(h, PlayerLink, batter)),
       h('p', { className: 'gdhero__line' }, playLine(e)),
-      contact && h('div', { className: 'gdhero__contact' }, contact)))
+      contact.length > 0 && h('dl', { className: 'gdhero__contact' },
+        ...contact.map((c) => h('div', { key: c.label }, h('dt', null, c.label), h('dd', null, c.value, c.unit && h('small', null, c.unit)))))),
+    shot(h, Headshot, PlayerLink, batter))
 }
 
-export function heroMarkup(h, { SealBox, PlayerLink = null, feed, inning, half, mark, last, stepAtBatIndex, open = null, checkpoint = false }) {
-  const side = half === 'top' ? 'away' : 'home'
-  // A committed half reports no step cursor; the last result's own index is the same cursor.
-  // While the checkpoint shows, it carries the due-up (the next half's side); the hero keeps only the box.
-  const due = checkpoint ? [] : selectDueUpDuring(feed, inning, half, mark, last?.atBatIndex ?? stepAtBatIndex, 3)?.batters ?? []
+export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, feed, inning, half, last, open = null }) {
   return h('div', { className: 'gdhero' },
     open?.sub > 0
-      ? h(SealBox, { coverless: true, forceRevealed: true }, () => openBox(h, feed, inning, half, open, side))
+      ? h(SealBox, { coverless: true, forceRevealed: true }, () => openBox(h, feed, inning, half, open, Headshot, PlayerLink))
       : last
-        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, feed, side))
-        : sealedBox(h),
-    due.length > 0 &&
-      h('div', { className: 'gdhero__due' }, h('span', { className: 'gdhero__lbl' }, 'Due up:'),
-        ...due.map((b, i) => h('span', { key: b.slot, className: i === 0 ? 'is-now' : undefined }, PlayerLink ? h(PlayerLink, { id: b.id }, b.last) : b.last))))
+        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, Headshot, PlayerLink))
+        : sealedBox(h))
 }

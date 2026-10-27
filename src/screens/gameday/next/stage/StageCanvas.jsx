@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import '../../../../styles/gameday-next/stage.css'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
-import { drawStage, stageScale } from './drawStage.js'
+import { drawStage, stageScale, zoneBox } from './drawStage.js'
 import { stateAt } from './play.js'
 import { TOKENS } from './pixels.js'
 
@@ -25,7 +25,7 @@ function paletteOf(el) {
   })
 }
 
-export function StageCanvas({ play, t, start, zones, label = 'The play on the field' }) {
+export function StageCanvas({ play, t, start, zones, onZone, label = 'The play on the field' }) {
   const box = useRef(null)
   const cv = useRef(null)
   const [size, setSize] = useState(null)
@@ -57,9 +57,18 @@ export function StageCanvas({ play, t, start, zones, label = 'The play on the fi
     id = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(id)
   }, [play, t, start, zones, w, h])
+  // A tap on the rest frame's strike zone toggles the zone map (`onZone`); the pointer shows where it lands.
+  const inZone = (e) => {
+    const r = e.currentTarget.getBoundingClientRect(), z = onZone && zoneBox(w, h), x = (e.clientX - r.left) / scale, y = (e.clientY - r.top) / scale
+    return !!z && x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1
+  }
   return (
     <div ref={box} className="gdstage">
-      <canvas ref={cv} className="gdstage__canvas" role="img" aria-label={label} width={w} height={h} style={{ width: w * scale, height: h * scale }} />
+      <canvas
+        ref={cv} className="gdstage__canvas" role="img" aria-label={label} width={w} height={h} style={{ width: w * scale, height: h * scale }}
+        onClick={(e) => { if (inZone(e)) onZone() }}
+        onMouseMove={onZone ? (e) => { e.currentTarget.style.cursor = inZone(e) ? 'pointer' : '' } : undefined}
+      />
     </div>
   )
 }

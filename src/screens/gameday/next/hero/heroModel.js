@@ -33,4 +33,15 @@ export function contactLine(e) {
   return parts.join(' · ')
 }
 
+// The same three numbers as the line, one entry each, for the hero's stat card.
+export function contactStats(e) {
+  const b = e.battedBall
+  if (!b || b.exitVelo == null) return []
+  return [
+    { label: 'Exit velo', value: Math.round(b.exitVelo), unit: 'mph' },
+    b.launchAngle != null && { label: 'Launch angle', value: `${b.launchAngle}°`, unit: '' },
+    b.distance != null && b.trajectory !== 'ground_ball' && { label: 'Distance', value: b.distance, unit: 'ft' },
+  ].filter(Boolean)
+}
+
 export const playLine = (e) => (e.descSegments ?? []).map((s) => s.text ?? '').join('').trim()

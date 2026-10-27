@@ -3,29 +3,39 @@
    folds what does not fit into the menu). */
 .gdnext__slot--navigator { background: var(--surface-card); }
 /* The trail sits on the page, not on a card: the SealBox around it adds no box, and the chips fill the bar. */
-.gdnext__slot--trail { background: none; }
+.gdnext__slot--trail { background: none; border: 0; }
 .gdnext__slot--trail > .statgrid { display: contents; }
 .gdp__sealed { margin: 0; padding: var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 .gdp__label { display: block; padding: var(--space-1) var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
-.gdp__line { width: 100%; height: 100%; border-collapse: collapse; line-height: var(--lh-solid); font-variant-numeric: tabular-nums; font-size: var(--fs-cell); }
-.gdp__line th { font-weight: var(--w-bold); color: var(--text-caption); padding: 0 var(--space-1); }
-.gdp__line tbody th { text-align: left; padding-left: var(--space-2); }
-.gdp__line td { text-align: center; border-left: var(--bw-hair) solid var(--border-hairline); padding: 0; }
+/* The line score as a game's score tray: the club's mark for the row, runs in the score bug's face. */
+.gdp__line { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; color: var(--text-heading); }
+.gdp__line thead { height: 18px; } /* raw-value-exempt: the inning numbers' strip */
+.gdp__line thead th { font: var(--w-bold) var(--fs-cell) / 1 var(--font-mono); color: var(--text-caption); text-align: center; padding: 0; border-bottom: var(--bw-hair) solid var(--border-stamped); }
+.gdp__line tbody th { width: 64px; padding: 0 var(--space-2); text-align: center; border-right: var(--bw-heavy) solid var(--border-stamped); }
+.gdp__line tbody th { background: var(--bar-fill, var(--ink-1));
+  background-image: repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px),
+    linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%); }
+.gdp__line tbody th .teamlogo { display: block; margin: 0 auto; }
+.gdp__line tbody tr + tr > * { border-top: var(--bw-hair) solid var(--border-stamped); }
+.gdp__line td { text-align: center; padding: 0; border-left: var(--bw-hair) solid var(--border-stamped); }
 .gdp__run { box-sizing: border-box; display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
 .gdp__run:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }
 .gdp__run:disabled { cursor: default; }
 /* Mid page-turn the cells carry aria-disabled, never `disabled` (focus never jumps): this stops a
    second tap; a keyboard pick still lands, and the turn reducer keeps the first forward request. */
 .gdp__run[aria-disabled='true'] { opacity: var(--opacity-disabled); pointer-events: none; }
-.gdp__run[aria-current] { background: var(--marker); }
+.gdp__run { font-family: var(--font-display); font-size: var(--fs-hero-md); font-weight: var(--w-bold); line-height: var(--lh-solid); height: 100%; }
+.gdp__run:disabled { color: var(--text-caption); }
+.gdp__run[aria-current] { background: var(--marker); color: var(--ink-0); }
 
 /* The half's at-bats as a ribbon of stamped chips, oldest first: the result in a green square, the surname beside it.
    What is still sealed is the last chip, drawn in solid ink so the reader sees at once where the page ends. */
 /* layout-exempt: a row of chips, clipped by the slot */
-.gdp__trail { display: flex; align-items: stretch; gap: var(--space-2); height: 100%; box-sizing: border-box; margin: 0; padding: var(--space-2) var(--space-3); list-style: none; }
+.gdp__trail { display: flex; align-items: center; gap: var(--space-2); height: 100%; box-sizing: border-box; margin: 0; padding: 0 var(--space-3) 0 10px; /* raw-value-exempt: the left edge of the lineup's headshots */ list-style: none; }
 /* layout-exempt: the result square and the surname on one row */
-.gdp__chip { flex: none; display: flex; align-items: stretch; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card);
+.gdp__chip { flex: none; display: flex; align-items: stretch; height: 34px; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card);
   font-family: var(--font-display); font-size: var(--fs-small); font-weight: var(--w-bold); line-height: var(--lh-solid); color: var(--text-heading); }
 .gdp__chip b { display: flex; align-items: center; padding: 0 var(--space-2); border-right: var(--bw-heavy) solid var(--border-stamped); background: var(--accent-tint);
   font-family: var(--font-mono); font-size: var(--fs-small); }

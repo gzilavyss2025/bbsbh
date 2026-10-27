@@ -30,7 +30,7 @@
 }
 .gdnext[data-tier='L'] {
   grid-template-columns: minmax(270px, 1fr) repeat(2, minmax(0, calc(max(720px, 40vw) / 2))) minmax(270px, 1fr);
-  --gd-band-h: 66px;
+  --gd-band-h: 92px;
   --gd-bar-h: 76px;
   grid-template-rows: auto minmax(0, 1fr) 168px 58px 76px;
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
@@ -39,7 +39,7 @@
 .gdnext[data-tier='D'] {
   /* the middle is the stage's width: past its desktop size it holds at 40% of the window and the sides take the rest */
   grid-template-columns: minmax(300px, 1fr) minmax(0, calc(max(672px, 40vw) - 324px)) 324px minmax(300px, 1fr);
-  --gd-band-h: 68px;
+  --gd-band-h: 92px;
   --gd-bar-h: 68px;
   grid-template-rows: auto minmax(0, 1fr) 164px 66px 68px;
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
@@ -55,6 +55,8 @@
 .gdnext__slot { grid-area: var(--gd-area); position: relative; min-width: 0; min-height: 0; overflow: hidden;
   border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-inset); }
 .gdnext__slot--navigator { --gd-area: navigator; }
+/* On the wide tiers the line score sits beside the score bug and is exactly its height, even when a status strip deepens the row. */
+.gdnext[data-tier='L'] .gdnext__slot--navigator, .gdnext[data-tier='D'] .gdnext__slot--navigator { align-self: start; height: var(--gd-band-h); }
 .gdnext__slot--stage { --gd-area: stage; border: var(--bw-heavy) solid var(--border-stamped); }
 .gdnext__slot--hero { --gd-area: hero; background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); }
 .gdnext__slot--trail { --gd-area: trail; }

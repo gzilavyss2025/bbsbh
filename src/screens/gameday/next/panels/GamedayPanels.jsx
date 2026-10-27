@@ -52,7 +52,9 @@ function Navigator({ ctx }) {
   }
   const row = (half, side, m) => (
     <tr key={side}>
-      <th scope="row">{m.abbreviation}</th>
+      <th scope="row" aria-label={m.abbreviation} style={bandPaint({ teamId: m.id, side, treatment: ctx.treatment }).style}>
+        <TeamLogo teamId={m.id} name={m.abbreviation} size={30} variant="mono" className="gdp__club sectionhead__mark" />
+      </th>
       {cols.map((n) => {
         const idx = halfIndex(n, half)
         const l = n <= unlocked ? cell(n, half, side) : null

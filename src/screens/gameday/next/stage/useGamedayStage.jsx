@@ -7,7 +7,7 @@ import { useAsync } from '../../../../hooks/useAsync.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { ZoneCard } from '../zonemap/ZoneCard.jsx'
-import { dismissZoneMap, zoneMapDismissed } from '../zonemap/zoneMapFlag.js'
+import { setZoneMapHidden, zoneMapDismissed } from '../zonemap/zoneMapFlag.js'
 import { GamedayStage, restBatter, restZones } from './GamedayStage.js'
 import { StageCanvas } from './StageCanvas.jsx'
 import { wallFn } from './scene.js'
@@ -41,6 +41,8 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
     async () => (hidden || !batter ? null : { id: batter.id, zones: (await fetchBatterZones(batter.id, gd.game.season, gd.teams?.home?.sport?.id ?? 1, date))?.zones }),
     [batter?.id, hidden, pk],
   )
+  // A tap on the strike zone, or the card's ✕, turns the zone map off and on for this game.
+  const toggleZones = () => { setZoneMapHidden(pk, !hidden); setHidden(!hidden) }
   // Inside an open at-bat the zone map stands down: a reload there rests under the sub-step's card.
   const zones = open?.sub > 0 ? null : restZones(zm, batter?.id, hidden)
 
@@ -52,10 +54,10 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
     <>
       <GamedayStage
         SealBox={SealBox} StageCanvas={StageCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} playing={cur.playing} onEnd={onEnd}
-        batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones}
+        batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones} onZone={batter ? toggleZones : undefined}
       />
       {zones && (
-        <ZoneCard name={batter.last} zones={zones} through={dayBefore(date)} onDismiss={() => { dismissZoneMap(pk); setHidden(true) }} />
+        <ZoneCard name={batter.last} zones={zones} through={dayBefore(date)} onDismiss={toggleZones} />
       )}
     </>
   ) : null
