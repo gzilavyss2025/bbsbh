@@ -753,6 +753,7 @@ export function InningViewer({
             onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
             inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : curAtBatCount,
           }}
+          checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
           engine={pageTurn}
           advance={advance}
           onBoxScore={onBoxScore}
