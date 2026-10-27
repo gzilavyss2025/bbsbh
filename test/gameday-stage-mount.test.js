@@ -12,7 +12,7 @@ import { stageActors, spriteTargets } from '../src/screens/gameday/next/stage/ac
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 import { stagePlay, stateAt } from '../src/screens/gameday/next/stage/play.js'
 import { drawStage } from '../src/screens/gameday/next/stage/drawStage.js'
-import { teamPrimaryColor } from '../src/lib/teams.js'
+import { battingSide } from '../src/screens/gameday/next/stage/battingSide.js'
 import { S } from '../src/screens/gameday/next/stage/pixels.js'
 import { dismissZoneMap, zoneMapDismissed } from '../src/screens/gameday/next/zonemap/zoneMapFlag.js'
 
@@ -174,14 +174,18 @@ test('the dismiss survives a reload and resets for another game', () => {
   }
 })
 
-test('the stadium wash reuses the park photo and home club color without reading a play', () => {
+test('the stage shell has no stadium photo or home-color wash', () => {
   const out = html({ feed: sealedFeed, shown: null })
   assert.match(out, /class="gdstageScene"/)
-  assert.match(out, /--park-art:url\(&quot;\/ballparks\/thumb\/fenwaypark.webp/)
-  assert.ok(out.includes('--park-tint:' + teamPrimaryColor(F.gameData.teams.home.id)))
-  const missing = html({ feed: { gameData: { venue: { name: 'Unknown park' } } }, shown: null })
-  assert.doesNotMatch(missing, /--park-art:/)
-  assert.match(missing, /data-pitches="0"/)
+  assert.doesNotMatch(out, /--park-(art|focus|tint):/)
+  assert.match(out, /data-pitches="0"/)
+})
+
+test('the plate inset and overhead field resolve the same handedness', () => {
+  for (const [bat, pitch, side] of [['R', 'R', 'R'], ['L', 'L', 'L'], ['S', 'L', 'R'], ['S', 'R', 'L'], [undefined, undefined, 'R']]) {
+    assert.equal(battingSide(bat, pitch), side)
+    assert.match(html({ feed: sealedFeed, shown: null, batSide: bat, pitchHand: pitch }), new RegExp('data-batter="' + side + '"'))
+  }
 })
 
 test('sprite targets identify all nine defenders, the batter, and each revealed runner', () => {

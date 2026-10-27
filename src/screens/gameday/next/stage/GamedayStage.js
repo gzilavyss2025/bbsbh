@@ -2,10 +2,7 @@ import { createElement as h, useEffect, useLayoutEffect, useMemo, useState } fro
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
-import { useCopy } from '../../../../copy/copyContext.js'
-import { parkBackdrop } from '../../../../lib/ballpark/parkBackdrop.js'
-import { parkWashColorOverride } from '../../../../lib/ballpark/parkWash.js'
-import { teamPrimaryColor } from '../../../../lib/teams.js'
+import { battingSide } from './battingSide.js'
 import { stageActors } from './actors.js'
 import { stagePlay } from './play.js'
 import { celebrationForPlay } from '../cutscene/integration/celebrationForPlay.js'
@@ -39,7 +36,7 @@ function subPlay(feed, inning, half, { count, sub }) {
   return { p: cut, still: false }
 }
 
-function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint, actors, sceneStyle }) {
+function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint, actors }) {
   const [start] = useState(() => performance.now())
   const covered = !!checkpoint
   const { play, still, celebration, ending } = useMemo(() => {
@@ -66,7 +63,7 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, ch
   }, [playing, play, still, celebration, start, onEnd, covered, eligible, checkpointDismissed])
   if (covered && (!eligible || checkpointDismissed)) return checkpoint
   const props = playing && !still ? { play, start } : { play, t: still ? 0 : play.end }
-  return h('div', { className: 'gdstageScene', style: sceneStyle },
+  return h('div', { className: 'gdstageScene' },
     h(StageCanvas, { ...props, actors, celebration, playing, onEnd, checkpointHeld: covered && eligible }))
 }
 
@@ -83,25 +80,20 @@ export const restZones = (zm, batterId, hidden) => (!hidden && batterId != null 
 
 // At rest the batter stands where he will hit: a switch hitter (S) opposite the pitcher's throwing
 // hand. Both are pre-game player data. A revealed play uses its own matchup.batSide instead.
-function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone, actors, sceneStyle }) {
-  const side = batSide === 'S' ? (pitchHand === 'L' ? 'R' : 'L') : batSide
+function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone, actors }) {
+  const side = battingSide(batSide, pitchHand)
   const play = useMemo(() => stagePlay({ matchup: { batSide: { code: side }, pitchHand: { code: pitchHand } } }, wall), [wall, side, pitchHand])
-  return h('div', { className: 'gdstageScene', style: sceneStyle },
+  return h('div', { className: 'gdstageScene' },
     h(StageCanvas, { play, t: 0, zones, onZone, actors, label: 'The field before the pitch' }))
 }
 
 // `run` counts trail-card replays (tapRule.js replay): a new run remounts the play, so its clock restarts.
 export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, batSide, pitchHand, zones, onZone, checkpoint, checkpointDismissed, onCheckpoint, mark, step, open, batter }) {
-  const { t } = useCopy()
-  const venue = feed?.gameData?.venue, homeId = feed?.gameData?.teams?.home?.id
-  const park = parkBackdrop(venue?.name, t, venue?.id)
-  const color = homeId != null ? parkWashColorOverride(homeId) ?? teamPrimaryColor(homeId) : null
-  const style = { ...(park ? { '--park-art': park.cssUrl, '--park-focus': park.focus } : null), ...(color ? { '--park-tint': color } : null) }
   // A numbered play keeps the checkpoint inside Played (pending or dismissed), so it never remounts.
   if (checkpoint && (shown == null || typeof shown === 'object')) return checkpoint
   const field = (actors) => shown != null
-    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint, actors, sceneStyle: style })
-    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone, actors, sceneStyle: style })
+    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint, actors })
+    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone, actors })
   if (mark == null && shown == null) return field(null)
   return h(SealBox, { coverless: true, forceRevealed: true }, () => field(mark == null ? null
     : stageActors(feed, { inning, half, mark, step, open, batter, shown })))

@@ -3,6 +3,7 @@ import '../../../../styles/gameday-next/stage.css'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
 import { drawStage, stageScale } from './drawStage.js'
 import { stateAt } from './play.js'
+import { spriteHitArea } from './hitArea.js'
 import { SpriteTargets } from './SpriteTargets.jsx'
 import { spriteTargets } from './actors.js'
 import { S, TOKENS } from './pixels.js'
@@ -43,8 +44,10 @@ export function StageCanvas({ play, t, start, actors, label = 'The play on the f
   useEffect(() => {
     if (!play || !w || !h) return undefined
     const g = cv.current.getContext('2d'), pal = paletteOf(cv.current), img = g.createImageData(w, h), out = new Uint32Array(img.data.buffer)
-    // The field stays opaque; its surround lets the shared stadium wash show through.
+    // The field stays opaque; the surround uses the same cream canvas as the page.
     pal[S.overheadNight] = 0
+    const firstTarget = targets.current.values().next().value
+    const hitSize = firstTarget ? parseFloat(getComputedStyle(firstTarget.firstElementChild).width) : 0
     const paint = (s) => {
       const fb = drawStage(stateAt(play, s), w, h)
       for (let i = 0; i < fb.px.length; i++) out[i] = pal[fb.px[i]]
@@ -52,7 +55,10 @@ export function StageCanvas({ play, t, start, actors, label = 'The play on the f
       for (const [key, el] of targets.current) {
         const sprite = fb.sprites.find((p) => p.key === key)
         el.hidden = !sprite
-        if (sprite) el.style.transform = 'translate(' + sprite.x * scale + 'px,' + sprite.y * scale + 'px) translate(-50%, -50%)'
+        if (sprite) {
+          el.style.transform = 'translate(' + sprite.x * scale + 'px,' + sprite.y * scale + 'px) translate(-50%, -50%)'
+          el.style.clipPath = 'polygon(' + spriteHitArea(sprite, fb.sprites, hitSize, scale).map(([x, y]) => x + 'px ' + y + 'px').join(',') + ')'
+        }
       }
     }
     if (t != null) { paint(t); return undefined }

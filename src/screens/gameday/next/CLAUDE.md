@@ -31,11 +31,11 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   precede runner advances and a settled result. No close-up windup/swing or celebration belongs in this renderer.
   Sprite targets use the global PlayerLink hover card and track the painted figures without React updates per frame;
   `actors.js` reads defense and substitutions only inside a SealBox with the existing step/sub-step clamp.
-  Its surround reuses the identity drawer's `parkBackdrop` photo/crop and home-club `parkWash` color; the canvas is transparent outside the field.
+  Its surround uses the page's cream canvas. The field leaves room at lower left for a static, handed batter beside the hot/cold zone map; no photo or color wash.
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its
-  per-game dismiss (`bbsbh:zonemap:{gamePk}`); the zone card stays separate from the overhead field, at rest only.
+  per-game dismiss (`bbsbh:zonemap:{gamePk}`); the zone card stays separate from the overhead field, at rest only. `battingSide.js` resolves both displays, including switch hitters; the inset keeps the existing PlayerLink hover card and per-game dismiss. `zonemap/batterPalette.js` maps the batting club through the shared MLB/MiLB identity resolver, with separately configurable equipment, shirt, piping and trousers; `batterArt.js` caches the prepared static atlas without changing celebration art.
 - The hero's scorebook box copies Gary's hand-scored box: `docs/gameday-reference/scorebook-box.jpg` (match it, do not restyle).
 - `hero/` is the hero slot (#2576): `heroMarkup.js` builds it (a `.js` builder, so `npm test` can render it),
   `heroModel.js` is the scorebook box's pure model. It reads the live snapshot's `last` (the last finished
