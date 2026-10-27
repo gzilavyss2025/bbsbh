@@ -103,8 +103,8 @@
 .gdp__tag b { color: var(--clay); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
 /* The position takes one width (DH's), so every number ends on the same line. */
 .gdp__tag i { flex: none; width: var(--space-5); font-style: normal; text-align: right; color: var(--text-heading); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
-.gdnext[data-tier='L'] .gdp__order li, .gdnext[data-tier='D'] .gdp__order li { grid-template-columns: auto 1fr auto calc(2 * var(--space-8)); }
-.gdnext[data-tier='L'] .gdp__order .gdp__shot, .gdnext[data-tier='D'] .gdp__order .gdp__shot { display: block; box-sizing: border-box;
+.gdnext[data-tier='L'] .gdp__order li, .gdnext[data-tier='D'] .gdp__order li, .gdnext__rail .gdp__order li { grid-template-columns: auto 1fr auto calc(2 * var(--space-8)); }
+.gdnext[data-tier='L'] .gdp__order .gdp__shot, .gdnext[data-tier='D'] .gdp__order .gdp__shot, .gdnext__rail .gdp__order .gdp__shot { display: block; box-sizing: border-box;
   width: auto; height: min(var(--shot-sm-h), calc((100dvh - 304px) / 9 - 10px)); aspect-ratio: 3 / 4; border: var(--bw-heavy) solid var(--border-stamped); border-radius: var(--radius-square); }
 
 .gdp__ref .lfld__dh { position: static; border-width: var(--bw-rule); }

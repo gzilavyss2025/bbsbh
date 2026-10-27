@@ -51,6 +51,12 @@ export function mergeMark(prev, next) {
   return next > prev ? next : prev
 }
 
+// A step inside a half (an at-bat or a pitch) opens every half before it (Gary, 2026-10-27): a
+// reader who jumps ahead on a fresh device and starts stepping has passed the halves they skipped.
+export function markAfterStep(revealedThrough, halfIdx) {
+  return mergeMark(revealedThrough, halfIdx - 1)
+}
+
 // How many innings are currently visible: regulation, plus one more for each
 // extra inning whose predecessor's bottom has already been fully revealed
 // (extras never spoil — ADR-0008).

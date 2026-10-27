@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import '../../../styles/gameday-next/page.css'
 import { Button } from '../../../components/ui/control/Button.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
@@ -29,10 +29,35 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [defense])
+  // The narrow tiers (P, T) keep the wide tiers' two side columns as rails (Gary, 2026-10-27): the Due up
+  // slides in from the left and the arm on the mound from the right, by a tab on the edge or a sideways
+  // swipe. Each rail fetches nothing until it is first opened, like the drawer.
+  const rails = !drawer
+  const [rail, setRail] = useState(null)
+  const [seen, setSeen] = useState({})
+  if (rail && !seen[rail]) setSeen({ ...seen, [rail]: true })
+  useEffect(() => {
+    if (!rail) return undefined
+    const onKey = (e) => e.key === 'Escape' && setRail(null)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [rail])
+  // A swipe is a mostly sideways drag of 48px or more that starts off the bar: toward the middle it
+  // opens the rail on that side, toward its own edge it closes an open one.
+  const swipe = useRef(null)
+  const onPointerDown = (e) => { swipe.current = rails && !e.target.closest?.('.gdnext__bar') ? [e.clientX, e.clientY] : null }
+  const onPointerUp = (e) => {
+    const s = swipe.current
+    swipe.current = null
+    if (!s) return
+    const dx = e.clientX - s[0], dy = e.clientY - s[1]
+    if (Math.abs(dx) < 48 || Math.abs(dx) < 2 * Math.abs(dy)) return
+    setRail((r) => (r ? ((r === 'left') === (dx < 0) ? null : r) : dx > 0 ? 'left' : 'right'))
+  }
   // The drawer tiers swap the Reference block for the arm on the mound (the field is the drawer).
   const slots = blocksFor(tier).flatMap((b) => (b === 'band' || b === 'bar' || (drawer && b === 'eventLog') ? [] : drawer && b === 'reference' ? ['arm'] : [b]))
   return (
-    <div className="gdnext" data-tier={tier}>
+    <div className="gdnext" data-tier={tier} data-rails={rails || undefined} onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
       {/* A delay or suspension, and a failed refresh, read as a strip under the band; the stage
           row gives up the room, so the frame still never scrolls. */}
       <div className="gdnext__band">
@@ -74,10 +99,23 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
           {opened && <GamedayPanel block="reference" ctx={panels} />}
         </aside>
       )}
+      {rails && (
+        <>
+          <Button size="control" className="gdnext__railtab gdnext__railtab--left" aria-expanded={rail === 'left'} aria-controls="gdnext-rail-left" onClick={() => setRail('left')}>Due up</Button>
+          <Button size="control" className="gdnext__railtab gdnext__railtab--right" aria-expanded={rail === 'right'} aria-controls="gdnext-rail-right" onClick={() => setRail('right')}>Pitcher</Button>
+          {rail && <button type="button" className="gdnext__scrim" aria-label="Close" onClick={() => setRail(null)} />}
+          <aside id="gdnext-rail-left" className="gdnext__rail gdnext__rail--left" data-open={rail === 'left' || undefined} aria-label="Due up" inert={rail !== 'left'}>
+            {seen.left && <div className="gdnext__slot gdnext__slot--battingOrder"><GamedayPanel block="battingOrder" ctx={panels} /></div>}
+          </aside>
+          <aside id="gdnext-rail-right" className="gdnext__rail gdnext__rail--right" data-open={rail === 'right' || undefined} aria-label="Now pitching" inert={rail !== 'right'}>
+            {seen.right && <div className="gdnext__slot gdnext__slot--arm"><GamedayPanel block="arm" ctx={panels} /></div>}
+          </aside>
+        </>
+      )}
       <div hidden>{engine}</div>
       {menu && (
         <GamedayMenu
-          folded={menuFor(tier)}
+          folded={rails ? menuFor(tier).filter((b) => b !== 'battingOrder') : menuFor(tier)}
           panels={panels}
           onClose={() => setMenu(false)}
           onBoxScore={onBoxScore}

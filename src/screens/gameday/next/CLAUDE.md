@@ -14,6 +14,9 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   chrome, so the Menu carries the ways out (both lineups, the scorecard, the box score, the slate),
   and a delay, suspension or failed refresh is a strip under the band (the stage row gives up the
   room; the band keeps `--gd-band-h`).
+- P and T keep the wide tiers' side columns as rails (Gary, 2026-10-27): the Due up slides in from the
+  left and the arm from the right, by an edge tab or a sideways swipe off the bar; the scrim or Escape
+  closes one, and each fetches nothing until first opened. On those tiers the Menu drops the batting order.
 - The old half page is mounted `hidden` as the engine: it reports the live snapshot (band), the
   step cursor and the runs so far, and its page turn moves halves. Rebuilding the engine is what
   lets it go; until then its parts stay (`components/inning/`, `styles/focus/`).
