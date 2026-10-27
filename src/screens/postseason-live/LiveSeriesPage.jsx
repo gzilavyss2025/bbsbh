@@ -49,7 +49,7 @@ import { SeasonSeriesStrip } from '../../components/teamstats/SeasonSeriesStrip.
 import { FormerTeammates } from '../../components/team/FormerTeammates.jsx'
 import { Flow } from '../../components/worldseries/Flow.jsx'
 import { ResultBanner } from './ResultBanner.jsx'
-import { Hero } from '../../components/worldseries/Hero.jsx'
+import { DecidedHero, Hero } from '../../components/worldseries/Hero.jsx'
 import { Reel } from '../../components/worldseries/Reel.jsx'
 import { ScoutingReport } from '../../components/worldseries/ScoutingReport.jsx'
 import { GroupJump, Group } from '../../components/worldseries/GroupJump.jsx'
@@ -154,7 +154,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   )
 
   // The World Series gets the home page's pieces in jump-bar groups; every other round keeps the
-  // original order. A decided Series keeps its banner (its headline names the winner).
+  // original order. A decided Series gets the Hero's decided state, which names the winner (#2562).
   const mode = series?.round === 'worldseries' ? seriesMode(series) : null
   // The World Series page draws every block as a stamped card; the other rounds keep the sheet look.
   const ws = Boolean(mode)
@@ -439,7 +439,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   const grouped = mode && (
     <>
       {series.decided ? (
-        resultBanner
+        <DecidedHero mode={mode} />
       ) : (
         <Hero
           mode={mode}

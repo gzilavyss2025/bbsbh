@@ -1,4 +1,5 @@
 import '../../styles/worldseries/hero.css'
+import '../../styles/worldseries/decided.css'
 import { useEffect, useRef, useState } from 'react'
 import { fetchTeamHighlights } from '../../api/gamehighlights.js'
 import { fetchSpotlightPool } from '../../api/postseason/worldseries/spotlightPool.js'
@@ -8,7 +9,7 @@ import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
-import { calendarDays, monthsOf, nextGamePath, slabPlayers, spotlightAt, spotlightCount, spotlightRoster, storedClip, withFormatDates } from '../../lib/postseason/worldseries/hero.js'
+import { calendarDays, decidedHero, monthsOf, nextGamePath, slabPlayers, spotlightAt, spotlightCount, spotlightRoster, storedClip, withFormatDates } from '../../lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
 import { logbookNewPath, umpirePath } from '../../lib/route.js'
 import { teamClubNameShort } from '../../lib/teams.js'
@@ -16,6 +17,7 @@ import { Pips } from '../bracket/bracketParts.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { Headshot } from '../player/Headshot.jsx'
+import { PlayerLink } from '../player/PlayerLink.jsx'
 import { SeriesMark } from '../postseason/SeriesMark.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { Door } from '../ui/control/Door.jsx'
@@ -258,6 +260,94 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
         )}
       </Stack>
       {open && <HighlightSheet item={open} onClose={() => setOpen(null)} />}
+    </Card>
+  )
+}
+
+// A decided Series (#2562; layout A, Gary 2026-10-27): this card replaces the result banner. It names
+// the winner, carries the trophy, ends on final pips and a strip whose game cells show who won each
+// one (decidedHero). Nothing is ahead, so there is no Next, no door and no "Best of seven". The
+// Series MVP is the only player drawn (`mvp`, the finished page's); a side with none, or a page with
+// no MVP known, keeps its club's mono mark. With an MVP, his cut-out stands on his club's side and his
+// action photo fills the other side, where his tag, name, club and line from this Series (`stats`,
+// mvpStatLine's [label, figure] pairs) sit at the foot of the stage. There is no MVP card.
+const SIDES = ['away', 'home']
+
+export function DecidedHero({ mode, mvp = null, stats = [] }) {
+  // No face on file (an MVP from before MLB's photo archive): both sides fall back to the clubs' mono
+  // marks, as SeriesMvpCard did, and his name and line still sit on the stage.
+  const [noPhoto, setNoPhoto] = useState(false)
+  const { series } = mode
+  const hero = decidedHero(series, mvp)
+  if (!hero) return null
+  const ids = series.slots.map((s) => s.club.id)
+  const slotOf = Object.fromEntries(series.slots.map((s) => [s.club.id, s]))
+  const dates = series.games.map((g) => g.date).filter(Boolean)
+  const mark = seriesMark({ season: Number(dates[0]?.slice(0, 4)), round: 'worldseries' })
+  const mvpAt = hero.players.findIndex(Boolean)
+  return (
+    <Card frame="stamped" label="Overview" className={`ww-hero ww-hero--decided${mvpAt >= 0 ? ' ww-hero--mvp' : ''}`}>
+      <Stack gap="base">
+        <div className="ww-hero__matchup">
+          <div className="ww-hero__stage">
+            <div className="ww-hero__split">
+              {mvpAt < 0 || noPhoto ? (
+                <>
+                  <Slab side="away" clubId={ids[0]} player={null} />
+                  <Slab side="home" clubId={ids[1]} player={null} />
+                </>
+              ) : (
+                SIDES.map((side, i) => (
+                  <div key={side} className={`ww-hero__slab ww-hero__slab--${side}${i === mvpAt ? '' : ' ww-hero__slab--action'}`}>
+                    {i === mvpAt ? (
+                      <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback onFallback={(kind) => setNoPhoto(kind != null)} className="ww-hero__cut" />
+                    ) : (
+                      <Wash key={mvp.playerId} personId={mvp.playerId} />
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="ww-hero__top">
+              <ClubHead side="away" slot={slotOf[ids[0]]} winsNeeded={series.winsNeeded ?? 4} />
+              <Stack gap="snug" className="ww-hero__crest">
+                <img src="/brand/world-series-trophy.png" alt="" aria-hidden="true" className="ww-hero__trophy" />
+                {mark ? <SeriesMark mark={mark} height={32} /> : <span className="ww-hero__words">World Series</span>}
+              </Stack>
+              <ClubHead side="home" slot={slotOf[ids[1]]} winsNeeded={series.winsNeeded ?? 4} />
+            </div>
+            <Stack gap="snug" className="ww-hero__focus">
+              <h2 className="ww-hero__game ww-hero__result">{`${teamClubNameShort(hero.winnerId)} win in ${hero.gamesPlayed}`}</h2>
+            </Stack>
+          </div>
+          {mvpAt >= 0 && (
+            <section className={`ww-hero__mvp ww-hero__mvp--${SIDES[1 - mvpAt]}`} aria-label="Series MVP">
+              <span className="ww-hero__mvptag">Series MVP</span>
+              <Cluster gap="snug" align="baseline">
+                <PlayerLink id={mvp.playerId} className="ww-hero__mvpname">{mvp.name}</PlayerLink>
+                <span className="ww-hero__mvpclub">{teamClubNameShort(mvp.teamId)}</span>
+              </Cluster>
+              {stats.length > 0 && (
+                <dl className="ww-hero__mvpstats">
+                  {stats.map(([k, v]) => (
+                    <div key={k} className="ww-hero__mvpstat">
+                      <dt>{k}</dt>
+                      <dd>{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </section>
+          )}
+        </div>
+        <Stack gap="snug">
+          <Cluster gap="base" rowGap="tight" align="baseline">
+            <span className="ww-hero__month">{monthsOf(hero.days)}</span>
+            <span className="ww-hero__schedulelabel">Series schedule</span>
+          </Cluster>
+          <ScheduleStrip days={hero.days} />
+        </Stack>
+      </Stack>
     </Card>
   )
 }

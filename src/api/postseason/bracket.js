@@ -122,7 +122,7 @@ function settle(series, counted, cutoff) {
   const ids = series.slots.map((s) => s.club?.id ?? null)
   series.games = series._rows
     .filter((r) => counted.has(r.gamePk))
-    .map((r) => ({ gamePk: r.gamePk, gameNumber: r.gameNumber, date: finalDate(r), winnerId: counted.get(r.gamePk) }))
+    .map((r) => ({ gamePk: r.gamePk, gameNumber: r.gameNumber, date: finalDate(r), winnerId: counted.get(r.gamePk), awayId: r.away?.id ?? null, homeId: r.home?.id ?? null }))
   // Only a win by a club the bracket placed in this series counts.
   series.games = series.games.filter((g) => ids.includes(g.winnerId))
   series.gamesPlayed = series.games.length

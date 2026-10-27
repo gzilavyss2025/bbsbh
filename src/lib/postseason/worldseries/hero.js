@@ -8,7 +8,9 @@
 //   spotlightAt   the pair a tap shows; spotlightCount, how many pairs there are.
 //   spotlightRoster  a club's whole roster in the order a tap on the art walks it, with a stat line each.
 //   storedClip    a player's newest play highlight, from the clubs' stored highlight files.
+//   decidedHero   a decided Series' hero: the winner, each game's winner, the Series MVP's slab.
 import { gamePath } from '../../route.js'
+import { ledgerModel } from './ledger.js'
 
 // 'Fri' and 23 from '2026-10-23'. Noon UTC keeps the date on its own day in every zone.
 const at = (date) => new Date(`${date}T12:00:00Z`)
@@ -97,6 +99,28 @@ export function calendarDays(columns, slateDate) {
     days.splice(slot === -1 ? days.length : slot, 0, cell)
   }
   return days.map((d) => ({ ...d, weekday: weekdayOf(d.date), day: dayOf(d.date) }))
+}
+
+// A decided Series' hero (#2562; layout A, Gary 2026-10-27): it replaces the result banner. Nothing
+// is ahead, so no cell is today or next, and every game cell names the club that won it (the
+// bracket's and the history file's `winnerId`). The Series MVP is the only player drawn, on his own
+// club's side (the 1960 MVP played for the club that lost); with no MVP known, neither side draws one.
+// Each game cell also carries `path`, its lineups page (null when the game row names no clubs).
+// -> null until decided, else { winnerId, gamesPlayed, days, players } (players in slot order).
+export function decidedHero(series, mvp = null) {
+  if (!series?.decided || !series.winner?.id) return null
+  const games = series.games ?? []
+  const gameOf = new Map(games.map((g) => [g.gameNumber, g]))
+  const ids = series.slots.map((s) => s.club.id)
+  const abbr = Object.fromEntries(series.slots.map((s) => [s.club.id, s.club.abbreviation]))
+  // A slate date past every game: each game is past, so none is today or next. The 'today' cell
+  // calendarDays adds when no cell is today is dropped.
+  const { columns } = ledgerModel({ clubIds: ids, games, slateDate: '9999-12-31' })
+  const days = calendarDays(columns, '9999-12-31')
+    .filter((d) => d.kind !== 'today')
+    .map((d) => (d.kind === 'game' ? { ...d, winnerId: gameOf.get(d.gameNumber)?.winnerId ?? null, path: nextGamePath(gameOf.get(d.gameNumber), d.date, abbr, 'lineup1') } : d))
+  const players = ids.map((id) => (mvp?.playerId && mvp.teamId === id ? { id: mvp.playerId, name: mvp.name } : null))
+  return { winnerId: series.winner.id, gamesPlayed: games.length, days, players }
 }
 
 // Before Game 1 is played, the slab shows a hitter Gary chose for each club; from then on, the

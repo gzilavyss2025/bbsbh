@@ -3,13 +3,15 @@ import { bullpenGrid } from '../../../lib/postseason/worldseries/bullpen.js'
 import { teamClubNameShort } from '../../../lib/teams.js'
 import { TeamLogo } from '../../logo/TeamLogo.jsx'
 import { Card } from '../../ui/frame/Card.jsx'
-import { Grid } from '../../ui/layout/Grid.jsx'
+import { Key } from '../../ui/frame/Key.jsx'
+import { Stack } from '../../ui/layout/Stack.jsx'
 import { Table } from '../../ui/table/Table.jsx'
 
 // BULLPEN: per club, every pitcher who relieved in the postseason, one column
 // per postseason game this year (numbered from 1, grouped under its round), an
-// ink cell with the pitch count when he pitched, and a Tot column. The table
-// scrolls sideways on a phone, name column fixed. Box scores of games dated
+// ink cell with the pitch count when he relieved, an outlined cell when he started, and a Tot column. The table
+// scrolls sideways on a phone, name column fixed. The clubs stack, one per row, so a
+// desktop table shows every game without a sideways scroll. Box scores of games dated
 // before the slate date only (bullpenGrid re-applies the cutoff).
 
 // Consecutive games of one round: [{ label, span }].
@@ -60,8 +62,9 @@ function Club({ clubId, grid }) {
                 {r.name}
               </th>
               {r.cells.map((n, i) => (
-                <td key={i} className={n ? 'ww-bulltable__on' : 'ww-bulltable__off'}>
+                <td key={i} className={r.starts[i] ? 'ww-bulltable__start' : n ? 'ww-bulltable__on' : 'ww-bulltable__off'}>
                   {n ?? ''}
+                  {r.starts[i] && <span className="sr-only"> (started)</span>}
                 </td>
               ))}
               <td>{r.total}</td>
@@ -79,11 +82,14 @@ export function Bullpen({ clubIds, boxscoresByClub, slateDate, labelAs = 'h2' })
   if (grids.every((g) => g.rows.length === 0)) return null
   return (
     <Card frame="stamped" label="Bullpen" labelAs={labelAs} count="Pitches per Oct game" className="ww-bullpen">
-      <Grid min={300} gap="base" fit>
+      <Stack gap="loose">
         {clubIds.map((id, i) => (
           <Club key={id} clubId={id} grid={grids[i]} />
         ))}
-      </Grid>
+        {grids.some((g) => g.rows.some((r) => r.starts.some(Boolean))) && (
+          <Key items={[{ label: 'Started', mark: <span className="ww-bulltable__startswatch" aria-hidden="true" /> }]} />
+        )}
+      </Stack>
     </Card>
   )
 }
