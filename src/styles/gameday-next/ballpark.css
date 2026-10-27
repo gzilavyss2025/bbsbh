@@ -1,0 +1,35 @@
+/* Standalone sprite scene. Geometry follows a fixed artboard, not app spacing.
+   raw-value-exempt: canvas composition is measured in artwork pixels/percentages. */
+.ballpark { position: relative; overflow: hidden; aspect-ratio: 16 / 9; width: 100%; isolation: isolate;
+  background: var(--stage-outline); color: var(--stage-chalk); }
+.ballpark__canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.ballpark[data-ready="false"] .ballpark__canvas { visibility: hidden; }
+.ballpark__shade { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(0deg, color-mix(in srgb, var(--stage-outline) 92%, transparent), transparent 46%); }
+.ballpark__caption { position: absolute; bottom: 8%; left: 5%; max-width: 58%; opacity: 0; transform: translateY(4px);
+  transition: opacity var(--dur-snappy) var(--ease-out), transform var(--dur-snappy) var(--ease-out); }
+.ballpark__caption[data-shown="true"] { opacity: 1; transform: translateY(0); }
+.ballpark__headline { margin: 0; font-family: var(--font-display); font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold); line-height: var(--lh-tight); letter-spacing: var(--ls-label); }
+.ballpark__name { margin: var(--space-1) 0 0; font-family: var(--font-body); font-size: var(--fs-label);
+  line-height: var(--lh-snug); letter-spacing: var(--ls-label); overflow-wrap: anywhere; }
+.ballpark__loading { position: absolute; left: 5%; top: 8%; font-size: var(--fs-small); }
+.ballpark__skip { position: absolute; right: var(--space-2); bottom: var(--space-2); color: var(--stage-chalk); }
+.ballpark__skip:focus-visible { outline: 2px solid var(--focus-ring-band); outline-offset: 2px; }
+.ballpark-review__stage { max-width: 960px; }
+.ballpark-review__timeline { width: 100%; accent-color: var(--accent-primary); min-height: 44px; }
+.ballpark-review__timeline:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.ballpark-review__frames { display: flex; overflow-x: auto; gap: var(--space-2); padding-bottom: var(--space-2); scroll-snap-type: x proximity; }
+.ballpark-review__frame { flex: 0 0 240px; scroll-snap-align: start; }
+.ballpark-review__frame .ballpark__caption { transition: none; }
+.ballpark-review__frame .ballpark__headline { font-size: var(--fs-title-sm); }
+.ballpark-review__frame .ballpark__name { font-size: var(--fs-cell); }
+.ballpark-review__time { font-family: var(--font-body); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+@media (min-width: 740px) {
+  .ballpark-review__stage .ballpark__headline { font-size: var(--fs-display); }
+  .ballpark-review__stage .ballpark__name { font-size: var(--fs-ui); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ballpark__caption { transition: none; transform: none; }
+}
+:root[data-motion="reduced"] .ballpark__caption { transition: none; transform: none; }

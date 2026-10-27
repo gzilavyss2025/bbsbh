@@ -478,6 +478,10 @@ export default defineConfig({
         // reaches for a couple of files at a time, plus the pdfjs chunk and
         // the link-preview card, each with its own reason below.
         globIgnores: [
+          // Gameday's big-play celebration art (~6.5 MB), also the Animation
+          // Lab's. Each role loads after the reveal tap that earns it; an
+          // install must not precache every atlas.
+          '**/art/ballpark/**',
           // The curated club marks (~2.5 MB even after compress-logos.mjs,
           // across ~10 treatment directories). One slate shows a handful and
           // one game exactly two, so precaching the whole league's art on

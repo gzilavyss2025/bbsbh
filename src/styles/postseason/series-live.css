@@ -403,3 +403,16 @@
 .psseries--ws .ww-group__body > :not(.card, .ww-flow) {
   margin-block: 0;
 }
+
+/* The finished World Series page: Series totals takes the left half from 740px, and the batting
+   and pitching leaders stack in the right half beside it. A phone keeps one column. */
+@media (min-width: 740px) {
+  /* layout-exempt: totals and the leaders' column share one row from 740px */
+  .psseries--ws .psseries__totalspair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    align-items: start;
+  }
+  .psseries--ws .psseries__totalspair .psseries__leaders { grid-template-columns: 1fr; margin: 0; }
+}

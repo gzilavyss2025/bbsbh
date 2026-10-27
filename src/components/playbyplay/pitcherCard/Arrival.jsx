@@ -10,10 +10,11 @@
 // and --bar-text, else the house navy. `house` forces the navy whatever the ancestor sets.
 // It repeats the tab's words, so it is hidden from assistive technology; the tab stays in the
 // DOM as the card's heading.
-export function CardBand({ label, house = false }) {
+export function CardBand({ label, house = false, logo = null }) {
   return (
     <div className={`cardband sectionhead--band${house ? ' sectionhead--house' : ''}`} aria-hidden="true">
       <span className="cardband__label">{label}</span>
+      {logo && <span className="cardband__logo">{logo}</span>}
     </div>
   )
 }

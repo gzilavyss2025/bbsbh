@@ -26,6 +26,12 @@ export function orderAt(feed, side, inning, half, mark, cards) {
   const slotOf = (id) => Math.floor(Number(feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`]?.battingOrder) / 100)
   return (lineupEntering(feed, side, inning, half, mark) ?? []).map(({ slot, entries }) => {
     const now = entries.at(-1)
-    return { slot, last: now.last, position: now.position, codes: cards.filter((c) => slotOf(c.batter?.id) === slot).map(chipCode) }
+    const mine = cards.filter((c) => slotOf(c.batter?.id) === slot)
+    // `trip` is his latest at-bat when he reached on it (the diamond reads its legs); `outcome` is its code
+    // when he did not (K, F9), drawn in the diamond's column.
+    const latest = mine.at(-1) ?? null
+    const trip = latest && (latest.reached > 0 || latest.scored) ? latest : null
+    const outcome = latest && !trip ? chipCode(latest) || null : null
+    return { slot, id: now.id, last: now.last, first: now.first, jersey: now.jersey, position: now.position, codes: mine.map(chipCode), trip, outcome }
   })
 }

@@ -2,7 +2,7 @@
 // thresholds and the block table are Gary's locked round 2 calls.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { blocksFor, foldedFor, tierOf } from '../src/lib/gameday/ladder.js'
+import { blocksFor, foldedFor, menuFor, tierOf } from '../src/lib/gameday/ladder.js'
 
 const NEVER_FOLD = ['band', 'stage', 'hero', 'bar']
 
@@ -33,4 +33,17 @@ test('the never-fold set is in every tier', () => {
 test('the menu folds what the tier does not show', () => {
   assert.deepEqual(foldedFor('P'), ['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog'])
   assert.deepEqual(foldedFor('D'), [])
+})
+
+// L and D draw the event log in the Menu even where the ladder shows it (the defense drawer
+// takes its slot). L already folds it, so the Menu must not list it twice (a duplicate key, the
+// panel drawn twice).
+test('the menu lists each block once, with the event log on L and D', () => {
+  for (const tier of ['P', 'T', 'L', 'D']) {
+    const m = menuFor(tier)
+    assert.equal(new Set(m).size, m.length, tier)
+  }
+  assert.ok(menuFor('L').includes('eventLog'))
+  assert.ok(menuFor('D').includes('eventLog'))
+  assert.deepEqual(menuFor('T'), foldedFor('T'))
 })

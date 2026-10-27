@@ -87,8 +87,8 @@ function BatterSilhouette({ x, mirror }) {
 // pants posted for this game, in the stance for the hand he bats from this
 // plate appearance (a switch-hitter's side is the play's own, halfInningFeed).
 // Gameday draws it from the catcher's side; this diagram is the pitcher's, so
-// the art is mirrored to leave his chest toward the plate (jersey lettering
-// reads reversed, the cost of facing the right way). He is drawn LARGE, behind
+// it draws the opposite stance's art as it comes, which faces the plate with
+// its lettering readable (StrikeZone below picks it). He is drawn LARGE, behind
 // the plot, and the box's own edge clips the bat off. The plain silhouette
 // stands in wherever the figure cannot come: MiLB, an assignment not posted
 // yet, or an image that fails to load (the CDN is unofficial,
@@ -101,7 +101,7 @@ const ART_W = 496
 const ART_H = 1050
 const ART_ZONE_TOP = 390
 const ART_ZONE_BOTTOM = 700
-// The mirrored body's edge nearest the plate, per hand, and how far outside the
+// The drawn body's edge nearest the plate, per hand (the opposite stance's art), and how far outside the
 // zone's edge it stands.
 const ART_NEAR_EDGE = { R: 56, L: 416 }
 const FIGURE_GAP = 34
@@ -111,12 +111,12 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
   const w = ART_W * scale
   return (
     <g className="strikezone__figure" aria-hidden="true" clipPath={`url(#${clipId})`}>
-      <g transform="scale(-1, 1)">
+      <g>
         {[urls.pants, urls.jersey].map((href) => (
           <image
             key={href}
             href={href}
-            x={-(x + w)}
+            x={x}
             y={zone.top - ART_ZONE_TOP * scale}
             width={w}
             height={ART_H * scale}
@@ -137,9 +137,16 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
 // third-base side is the picture's RIGHT: an 'R' batter's box goes to the
 // right of the plate and an 'L' batter's box to the left, which is where a
 // viewer watching the telecast beside this app has just seen them stand.
-export function StrikeZone({ pitchDetails, batSide, className = '' }) {
+// `margin` (svg units) zooms the view out: that much more ground on every side, so a pitch well off the
+// plate still lands on the drawing instead of past its edge (Gameday's hero sheet). 0 keeps the old frame.
+// `framed={false}`: no grass and no frame, only the dirt, for a sheet that carries the ground on to its
+// own edges (Gameday's hero sheet, .szmodal--bare).
+export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, framed = true }) {
   const figureAssets = useContext(BattingUniformContext)
-  const figureUrls = batterFigureUrls(figureAssets, batSide === 'L' ? 'left' : 'right')
+  // The OTHER hand's art, unmirrored: Gameday draws each stance from the catcher's side, so the opposite
+  // stance is this one seen from the pitcher's, with its lettering reading the right way round (mirroring
+  // the batter's own art turned the wordmark backwards).
+  const figureUrls = batterFigureUrls(figureAssets, batSide === 'L' ? 'right' : 'left')
   // A failed load drops to the silhouette; keyed by URL so a new batter retries.
   const [failedUrl, setFailedUrl] = useState(null)
   const clipId = useId()
@@ -175,7 +182,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
   return (
     <svg
       className={`strikezone ${className}${showBatter ? ' strikezone--withbatter' : ''}`}
-      viewBox={`0 0 ${totalW} ${H}`}
+      viewBox={`${-margin} ${-margin} ${totalW + 2 * margin} ${H + 2 * margin}`}
       role="img"
       aria-label={`Strike zone: ${shown.length} pitch${shown.length === 1 ? '' : 'es'} plotted${
         showBatter ? `, ${batSide === 'L' ? 'left' : 'right'}-handed batter's box shown` : ''
@@ -184,22 +191,23 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
       {showBatter && (
         <>
           <clipPath id={clipId}>
-            <rect width={totalW} height={H} />
+            <rect x={-margin} y={-margin} width={totalW + 2 * margin} height={H + 2 * margin} />
           </clipPath>
           {/* The ground, in the replay scene's own field colours: grass, and a flat strip of dirt the plate sits in (not a mound: this view is from behind the pitcher). */}
-          <rect className="strikezone__grass" width={totalW} height={H} />
-          <rect className="strikezone__dirt" x={0} y={py - 32} width={totalW} height={H - (py - 32)} />
-          <g clipPath={`url(#${clipId})`}>
+          {framed && <rect className="strikezone__grass" x={-margin} y={-margin} width={totalW + 2 * margin} height={H + 2 * margin} />}
+          <rect className="strikezone__dirt" x={-margin} y={py - 32} width={totalW + 2 * margin} height={H + margin - (py - 32)} />
+          {/* No batter's boxes on the bare sheet: the plate alone on the dirt. */}
+          {framed && <g clipPath={`url(#${clipId})`}>
             {groundBoxes(cx + zoneOffsetX, py - 8, zw).map((pts) => (
               <polygon key={pts} className="strikezone__chalk" points={pts} />
             ))}
-          </g>
+          </g>}
           {useFigure ? (
             <BatterFigure urls={figureUrls} hand={batSide} zone={{ left: zx + zoneOffsetX, right: zr + zoneOffsetX, top: zyT, h: zh }} clipId={clipId} onError={() => setFailedUrl(figureUrls.jersey)} />
           ) : (
             <BatterSilhouette x={batSide === 'L' ? 0 : W + zoneOffsetX} mirror={batSide === 'L'} />
           )}
-          <rect className="strikezone__box" x={0.5} y={0.5} width={totalW - 1} height={H - 1} />
+          {framed && <rect className="strikezone__box" x={0.5 - margin} y={0.5 - margin} width={totalW + 2 * margin - 1} height={H + 2 * margin - 1} />}
         </>
       )}
       <g transform={`translate(${zoneOffsetX}, 0)`}>
@@ -350,10 +358,11 @@ function ChallengeMark({ challenge }) {
 // Portalled to <body>: an at-bat card lives inside a half-inning page, whose
 // `.turnscene` ancestor isolates its stacking context, so an unportalled scrim
 // renders BELOW the fixed floating bar (`.pagenav`). See ModalPortal.jsx.
-export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClose }) {
+// `head={false}`: no title over the zone, only the ✕ (a host that already names the at-bat: Gameday's hero).
+export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClose, head = true, margin = 0 }) {
   return (
-    <ZoneSheet note="Pitch zone" batter={batter} pitcher={pitcher} onClose={onClose}>
-      <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--modal" />
+    <ZoneSheet note="Pitch zone" batter={batter} pitcher={pitcher} onClose={onClose} head={head}>
+      <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--modal" margin={margin} framed={head} />
       <PitchList pitchDetails={pitchDetails} />
     </ZoneSheet>
   )
@@ -361,7 +370,7 @@ export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClos
 
 // The sheet both of an at-bat's phone sheets wear: this zone, and the replay
 // (AtBatReplay.jsx). `note` names it; `pitcher` is his last name.
-export function ZoneSheet({ note, batter, pitcher, onClose, children }) {
+export function ZoneSheet({ note, batter, pitcher, onClose, children, head = true }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
 
@@ -372,13 +381,13 @@ export function ZoneSheet({ note, batter, pitcher, onClose, children }) {
         className="scrim scrim--center"
         onClick={(e) => e.target.classList.contains('scrim') && onClose()}
       >
-        <div className="szmodal" role="dialog" aria-modal="true" aria-label={`${note} for ${name || 'this at-bat'}`}>
-          <div className="szmodal__head">
-            <div className="szmodal__ttl">
+        <div className={head ? 'szmodal' : 'szmodal szmodal--bare'} role="dialog" aria-modal="true" aria-label={`${note} for ${name || 'this at-bat'}`}>
+          <div className={head ? 'szmodal__head' : 'szmodal__head szmodal__head--bare'}>
+            {head && <div className="szmodal__ttl">
               <span className="szmodal__note">{note}</span>
               <span className="szmodal__name">{name || 'At-bat'}</span>
               {pitcher ? <span className="szmodal__vs">vs {pitcher}</span> : null}
-            </div>
+            </div>}
             <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
               ✕
             </IconButton>

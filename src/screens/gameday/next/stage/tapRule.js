@@ -14,8 +14,8 @@
 
 export const rest = (seen, view) => ({ seen, view, armed: null, shown: null, playing: false })
 
-// The advance tap. -> [state, advance?] While the checkpoint covers the stage nothing plays there,
-// so the tap always passes through and arms nothing.
+// The advance tap. -> [state, advance?] Once the checkpoint is presented, the tap passes through
+// and arms nothing. useGamedayStage intercepts the preceding ending-celebration dismissal.
 export function tap(s, reveals, reduced, covered = false) {
   if (covered) return [{ ...s, armed: null, playing: false }, true]
   if (s.playing) return [{ ...s, playing: false }, false]
@@ -32,6 +32,11 @@ export function saw(s, seen, view) {
   if (s.armed && seen != null) return { seen, view, armed: null, shown: seen, playing: !s.armed.reduced }
   return rest(seen, view)
 }
+
+// A tap on a trail card: play that at-bat again. It is one the reader already revealed (the trail draws
+// inside its seal), so no tap rule gates it. `run` counts replays, so a second tap on the same card restarts it.
+// A reveal tap still waiting for its play stays armed: the revealed play takes over when it arrives.
+export const replay = (s, idx, reduced) => ({ ...s, shown: idx, playing: !reduced, run: (s.run ?? 0) + 1 })
 
 // The animation reached its end on its own.
 export const ended = (s) => (s.playing ? { ...s, playing: false } : s)

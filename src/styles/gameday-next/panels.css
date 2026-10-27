@@ -1,28 +1,61 @@
 /* ==== GAMEDAY panels (docs/gameday-build.md, prompt 8): navigator, trail, pitches, batting order,
    reference, event log. Each fills a .gdnext__slot; nothing scrolls, so each clips (the ladder
    folds what does not fit into the menu). */
-.gdnext__slot--navigator, .gdnext__slot--trail { background: var(--surface-card); }
+.gdnext__slot--navigator { background: var(--surface-card); }
+/* The trail sits on the page, not on a card: the SealBox around it adds no box, and the chips fill the bar. */
+.gdnext__slot--trail { background: none; border: 0; }
+.gdnext__slot--trail > .statgrid { display: contents; }
 .gdp__sealed { margin: 0; padding: var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 .gdp__label { display: block; padding: var(--space-1) var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
-.gdp__line { width: 100%; height: 100%; border-collapse: collapse; line-height: var(--lh-solid); font-variant-numeric: tabular-nums; font-size: var(--fs-cell); }
-.gdp__line th { font-weight: var(--w-bold); color: var(--text-caption); padding: 0 var(--space-1); }
-.gdp__line tbody th { text-align: left; padding-left: var(--space-2); }
-.gdp__line td { text-align: center; border-left: var(--bw-hair) solid var(--border-hairline); padding: 0; }
+/* The line score as a game's score tray: the club's mark for the row, runs in the score bug's face. */
+.gdp__line { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; color: var(--text-heading); }
+.gdp__line thead { height: 18px; } /* raw-value-exempt: the inning numbers' strip */
+.gdp__line thead th { font: var(--w-bold) var(--fs-label) / 1 var(--font-display); color: var(--text-heading); text-align: center; padding: 0; border-bottom: var(--bw-hair) solid var(--border-stamped); }
+.gdp__line tbody th { width: 64px; padding: 0 var(--space-2); text-align: center; border-right: var(--bw-heavy) solid var(--border-stamped); }
+.gdp__line tbody th { /* component-reuse-exempt: the line score's club cell wears its club's colours; it is a table cell, not a band head */ background: var(--bar-fill, var(--ink-1));
+  background-image: repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px),
+    linear-gradient(160deg, var(--sheen-light) 0%, transparent 50%, var(--sheen-dark) 100%); }
+.gdp__line tbody th .teamlogo { display: block; margin: 0 auto; }
+.gdp__line tbody tr + tr > * { border-top: var(--bw-hair) solid var(--border-stamped); }
+.gdp__line td { text-align: center; padding: 0; border-left: var(--bw-hair) solid var(--border-stamped); }
+/* R / H / E after the innings, the runs column set off by a heavy rule, as the box score's totals are. */
+.gdp__line .gdp__tot { font: var(--w-bold) var(--fs-title-md) / 1 var(--font-display); color: var(--text-heading); background: var(--surface-inset); }
+.gdp__line .is-runs { border-left: var(--bw-heavy) solid var(--border-stamped); }
 .gdp__run { box-sizing: border-box; display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
 .gdp__run:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }
 .gdp__run:disabled { cursor: default; }
 /* Mid page-turn the cells carry aria-disabled, never `disabled` (focus never jumps): this stops a
    second tap; a keyboard pick still lands, and the turn reducer keeps the first forward request. */
 .gdp__run[aria-disabled='true'] { opacity: var(--opacity-disabled); pointer-events: none; }
-.gdp__run[aria-current] { background: var(--marker); }
+.gdp__run { font-family: var(--font-display); font-size: var(--fs-hero-md); font-weight: var(--w-bold); line-height: var(--lh-solid); height: 100%; }
+.gdp__run:disabled { color: var(--text-caption); }
+.gdp__run[aria-current] { background: var(--marker); color: var(--ink-0); }
 
-/* layout-exempt: a wrapping row of chips, clipped by the slot */
-.gdp__trail { display: flex; gap: var(--space-1); margin: 0; padding: var(--space-1); list-style: none; }
-/* layout-exempt: a code over a surname */
-.gdp__chip { flex: none; display: flex; flex-direction: column; padding: 0 var(--space-2); border: var(--bw-rule) solid var(--border-rule); font-size: var(--fs-cell); }
-.gdp__chip b { font-family: var(--font-mono); }
-.gdp__chip--cover { background: var(--surface-inset); color: var(--text-caption); }
+/* The half's at-bats as a ribbon of stamped chips, oldest first: the result in a green square, the surname beside it.
+   What is still sealed is the last chip, drawn in solid ink so the reader sees at once where the page ends. */
+/* layout-exempt: a row of chips, clipped by the slot */
+.gdp__trail { display: flex; align-items: center; gap: var(--space-2); height: 100%; box-sizing: border-box; margin: 0; padding: 0 var(--space-3) 0 var(--space-2h); /* the left edge of the lineup's headshots */ list-style: none; }
+/* layout-exempt: the result square and the surname on one row */
+.gdp__chip { flex: none; display: flex; align-items: stretch; height: 34px; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card);
+  font-family: var(--font-display); font-size: var(--fs-small); font-weight: var(--w-bold); line-height: var(--lh-solid); color: var(--text-heading); }
+.gdp__chip b { display: flex; align-items: center; padding: 0 var(--space-2); border-right: var(--bw-heavy) solid var(--border-stamped); background: var(--accent-tint);
+  font-family: var(--font-mono); font-size: var(--fs-small); }
+.gdp__chip span { display: flex; align-items: center; padding: 0 var(--space-3); }
+/* A stamped connector between the cards, so they read as one after another: a heavy rule from the last
+   card's edge into a solid arrowhead that touches the next card. Drawn, not a font glyph. */
+.gdp__chip + .gdp__chip { position: relative; margin-left: var(--space-4); }
+.gdp__chip + .gdp__chip::before, .gdp__chip + .gdp__chip::after { content: ''; position: absolute; top: 50%; transform: translateY(-50%); background: var(--border-stamped); }
+.gdp__chip + .gdp__chip::before { right: calc(100% + var(--bw-heavy) + var(--space-2)); width: var(--space-4); height: var(--bw-heavy); }
+.gdp__chip + .gdp__chip::after { right: calc(100% + var(--bw-heavy)); width: var(--space-2); height: var(--space-3); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.gdp__replay { display: flex; align-items: stretch; padding: 0; margin: 0; border: 0; background: none; font: inherit; letter-spacing: var(--ls-none); color: inherit; text-transform: inherit; cursor: pointer; }
+.gdp__replay:disabled { cursor: default; }
+.gdp__replay:hover:not(:disabled) span { text-decoration: underline; }
+.gdp__replay:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }
+.gdp__chip.is-out b { background: var(--clay-soft); color: var(--clay-deep); } /* the batter made an out */
+.gdp__chip--cover { background: var(--text-heading); color: var(--surface-card); }
+.gdp__chip--cover b { border-right: 0; background: none; padding: 0 var(--space-4); font-family: var(--font-display); letter-spacing: var(--ls-xwide); }
 
 .gdp__pitches, .gdp__order { margin: 0; padding: 0 var(--space-2); list-style: none; font-size: var(--fs-small); }
 /* layout-exempt: a pip, the pitch type, the speed */
@@ -30,13 +63,159 @@
 .gdp__num { font-variant-numeric: tabular-nums; }
 .gdp__pip { font-family: var(--font-mono); font-weight: var(--w-bold); }
 /* layout-exempt: slot, name and position, the at-bat codes */
-.gdp__order li { display: grid; grid-template-columns: 16px 1fr auto; gap: var(--space-2); padding: var(--space-1) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
+.gdp__order li { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: var(--space-2); padding: var(--space-1) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
 .gdp__order em { font-style: normal; color: var(--text-caption); }
+/* The headshot is a desktop thing: the phone and tablet order stays a plain list. */
+/* The order runs edge to edge and each name holds one line: the slot is the width it has. */
+/* layout-exempt: the order inside its slot */
+.gdnext__slot--battingOrder > .statgrid { padding: 0; }
+.gdp__order { padding: 0; }
+.gdp__order li { padding-inline: var(--space-2); } /* the rows run edge to edge so the batter's wash does too */
+.gdp__order li > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gdp__order .gdp__shot { display: none; }
+/* As the lineup page's order card, dressed as the hover card: a big headshot, the first name small over
+   the surname, and the number and position at the right edge, the position in its stamped chip. */
+/* The number and position take one fixed width (#2 is narrower than #24), so every row's diamond or
+   outcome stands in the same column. */
+.gdp__order li { grid-template-columns: 1fr auto calc(2 * var(--space-8)); }
+.gdp__who { min-width: 0; color: var(--text-heading); font-family: var(--font-display); font-weight: var(--w-bold); }
+/* layout-exempt: the first name over the surname */
+.gdp__who .plink { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); max-width: 100%; text-align: left; }
+/* layout-exempt: the name over the runner's diamond */
+.gdp__who { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+/* The runner's diamond takes a column of its own between the name and the number: a row under the name
+   would push the ninth batter out of the slot. */
+.gdp__trip { grid-row: 1; grid-column: -3; display: flex; line-height: var(--lh-solid); }
+.gdp__order .gdp__tag { grid-row: 1; grid-column: -2; }
+/* The advance code beside the leg, in viewBox units (the 56px diamond draws 100 units): about 13px on screen. */
+.gdp__trip .pbp__advance { font-size: 1.5em; } /* 24 viewBox units at the page's 16px */
+/* A batter who did not reach: his result's code in the diamond's place, centred where a diamond would be, in
+   deep red. The display face, since the mono face ships one weight and draws no bold. */
+.gdp__trip--code { width: 56px; height: 56px; align-items: center; justify-content: center; }
+/* A long surname runs on over the empty left of the diamond's cell instead of being cut. */
+.gdp__order li > .gdp__who { overflow: visible; }
+.gdp__order li > .gdp__who .plink { overflow: visible; }
+.gdp__trip--code b { color: var(--clay-deep); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+.gdp__who small { font-size: var(--fs-label); color: var(--text-caption); line-height: var(--lh-solid); }
+.gdp__who b { font-size: var(--fs-title-sm); font-weight: var(--w-bold); line-height: var(--lh-solid); }
+/* layout-exempt: the number and the position chip, right-aligned */
+.gdp__tag { display: flex; align-items: center; gap: var(--space-2); justify-content: flex-end; font-family: var(--font-mono); white-space: nowrap; }
+/* The number and the position: plain bold type in the display face (the mono face draws no bold), close
+   together, the position set right a few px from the row's edge. */
+.gdp__order .gdp__tag { gap: var(--space-1); }
+.gdp__order li { padding-right: var(--space-1); }
+.gdp__tag b { color: var(--clay); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+/* The position takes one width (DH's), so every number ends on the same line. */
+.gdp__tag i { flex: none; width: var(--space-5); font-style: normal; text-align: right; color: var(--text-heading); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+.gdnext[data-tier='L'] .gdp__order li, .gdnext[data-tier='D'] .gdp__order li { grid-template-columns: auto 1fr auto calc(2 * var(--space-8)); }
+.gdnext[data-tier='L'] .gdp__order .gdp__shot, .gdnext[data-tier='D'] .gdp__order .gdp__shot { display: block; box-sizing: border-box;
+  width: auto; height: min(var(--shot-sm-h), calc((100dvh - 304px) / 9 - 10px)); aspect-ratio: 3 / 4; border: var(--bw-heavy) solid var(--border-stamped); border-radius: var(--radius-square); }
 
-/* layout-exempt: a tab row over the park */
-.gdp__tabs { display: flex; gap: var(--space-1); padding: var(--space-1); }
-.gdp__tabs [aria-selected='true'] { font-weight: var(--w-bold); border-bottom: var(--bw-heavy) solid var(--border-stamped); }
 .gdp__ref .lfld__dh { position: static; border-width: var(--bw-rule); }
 /* layout-exempt: the latest play sits at the foot, older ones clip off the top */
 .gdp__log { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; font-size: var(--fs-small); }
 .gdp__log p { margin: 0; padding: var(--space-1) var(--space-2); border-bottom: var(--bw-hair) solid var(--border-hairline); }
+
+
+/* The arm's line for the game: one tile per figure, the strikeouts and walks on the same ink as the order. */
+/* Tonight's line sits flush on the pitch mix: no rule under it, no padding below it. */
+.gdp__tonight { border-bottom: 0; }
+.gdarm .statgrid:has(> .gdp__tonight) { padding-bottom: 0; }
+/* layout-exempt: the label and the pitch count, one row */
+.gdp__tonighthead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3) var(--space-1); }
+.gdp__tonighthead span { font-size: var(--fs-cell); color: var(--text-caption); }
+/* layout-exempt: six equal tiles */
+.gdp__tonightgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; border-top: var(--bw-hair) solid var(--border-hairline); }
+/* layout-exempt: one tile: a label over its figure */
+.gdp__tonightgrid div { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border-left: var(--bw-hair) solid var(--border-hairline); }
+.gdp__tonightgrid div:first-child { border-left: 0; }
+.gdp__tonightgrid dt { font-size: var(--fs-cell); color: var(--text-caption); }
+.gdp__tonightgrid dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-title-md); font-weight: var(--w-bold); line-height: var(--lh-solid); color: var(--text-heading); font-variant-numeric: tabular-nums; }
+
+
+/* The pitch mix as a stack of rows: mark and code, the name, its share, its speed. */
+/* layout-exempt: one row per pitch */
+.gdarm .pcard__tiles { display: flex; flex-direction: column; }
+/* layout-exempt: one pitch row: mark, name, share, speed */
+.gdarm .pcard__tile { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-2); padding: var(--space-1h) var(--space-3); border-right: 0; }
+/* The (i) note hangs from the whole label row, not the (i), so it stays inside the sidebar at the screen's edge. */
+.gdarm .pcard__mixlabel { position: relative; }
+.gdarm .pcard__info { position: static; }
+.gdarm .pcard__tip { top: 100%; left: var(--space-2); right: var(--space-2); width: auto; }
+.gdarm .pcard__tile.is-active { box-shadow: none; } /* the tint alone marks the pitch in flight; no ink underline */
+.gdarm .pcard__code { display: none; } /* the mark and the name say it; the code is the narrow tile's */
+.gdarm .pcard__tname { min-height: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gdarm .pcard__pct { min-width: 3ch; text-align: right; }
+.gdarm .pcard__mph { min-width: 9ch; text-align: right; white-space: nowrap; }
+
+
+/* The arm's name: first name small over the last name large; the club's mark rides the band. */
+/* layout-exempt: the first name over the last name */
+.gdarm .change__pitcher .plink { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); text-align: left; }
+.gdarm .change__first { font-family: var(--font-display); font-size: var(--fs-label); font-weight: var(--w-bold); color: var(--text-caption); line-height: var(--lh-solid); }
+.gdarm .change__last { font-family: var(--font-display); font-size: var(--fs-title-lg, var(--fs-title-md)); font-weight: var(--w-bold); color: var(--text-heading); line-height: var(--lh-solid); }
+.gdarm .cardband__label { left: var(--space-4); font-size: var(--fs-body); letter-spacing: var(--ls-caps); }
+.gdarm .cardband__logo { position: absolute; right: var(--space-4); top: 0; display: flex; align-items: center; height: var(--cardband-fill); }
+
+/* The batting band is the pitcher band's height (30px of fill and the 3px rule, arrival.css), so the two columns start level. */
+.gdp__band { height: 33px; /* raw-value-exempt: the pitcher card's band, fill and rule */ overflow: hidden; }
+.gdp__band .sectionhead { height: 100%; box-sizing: border-box; min-height: 0; padding-block: 0; }
+/* One mark size on both bands: the crop-bar mark runs the band's full height, clipped by the band. */
+.gdp__band .sectionhead > .teamlogo-crop-bar, .gdarm .cardband__logo .teamlogo-crop-bar { height: 35px; margin-block: -1px; /* raw-value-exempt: the 33px band plus its bleed */ }
+.gdarm .cardband__logo { align-items: stretch; }
+
+/* The batter at the plate leads the order, on a soft wash of the marker yellow. */
+.gdp__order li[data-up] { background: color-mix(in srgb, var(--marker) 22%, var(--surface-card)); }
+
+/* The arm's number and hand wear the lineup's tag: #51 in clay, the hand in the stamped green chip, at the right edge of the row. */
+/* layout-exempt: the name block and its tag on one row */
+.gdarm .change__body { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2); }
+.gdarm .change__body > .card__name { display: none; }
+.gdarm .change__badges { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-mono); font-size: var(--fs-small); }
+/* The number and the hand as the Due up rows set the number and position: plain bold display type, the
+   number red with no "#", 4px apart, no chip. */
+.gdarm .change__badges { gap: var(--space-1); }
+.gdarm .change__jersey { padding: 0; border: 0; background: none; color: var(--clay); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+.gdarm .change__hand { padding: 0; border: 0; background: none; color: var(--text-heading); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+
+/* The line for the game runs edge to edge: SealBox's side padding comes off. */
+.gdarm > .statgrid { padding-inline: 0; }
+
+/* The nine rows share whatever height the batting order has, so the panel never ends in blank paper. */
+/* layout-exempt: the band over rows that split the rest evenly */
+.gdnext__slot--battingOrder { display: flex; flex-direction: column; }
+/* layout-exempt: the order inside its slot */
+.gdnext__slot--battingOrder > .statgrid { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+/* layout-exempt: nine rows in a column */
+.gdnext__slot--battingOrder .gdp__order { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.gdnext__slot--battingOrder .gdp__order li { flex: 1 1 0; min-height: min-content; }
+
+/* The pitcher card fills its column: the pitch rows share the room left under the scene, so the panel never ends in blank paper. */
+/* layout-exempt: the card as a column whose last section takes the slack */
+.gdarm { display: flex; flex-direction: column; min-height: 100%; box-sizing: border-box; }
+.gdarm > .unfold[data-open]:has(.pcard__sec--mix) { flex: 1 1 auto; }
+.gdarm .unfold__in > .pcard__sec--mix { height: 100%; }
+.gdarm .pcard__tiles { flex: 1 1 auto; }
+/* layout-exempt: one pitch row: mark, name, share, speed */
+.gdarm .pcard__tile { flex: 1 1 0; }
+/* The pitcher's photo at the stamped cards' large size (72x88), as an ejection card shows its person. */
+.gdarm .change__shot--stamped { width: 72px; height: 88px; } /* raw-value-exempt: the design's large photo */
+/* The diamond's codes may run past its 56px box (a long out chain); the row does not clip them. */
+.gdp__order li > .gdp__trip, .gdp__trip .pbp__diamond { overflow: visible; }
+.gdarm > .change { padding-left: var(--space-2); gap: var(--space-2); } /* the photo 8px in and 8px from the name, as the Due up rows set theirs */
+/* The Due up batter's Scout row under his name (ScoutLine.jsx): the door, then the pitcher and the line. */
+/* layout-exempt: one row across the batter's card */
+.gdp__order li > .gdp__scout { grid-row: 2; grid-column: 1 / -1; display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; overflow: hidden; white-space: nowrap; }
+.gdp__scoutdoor { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase;
+  color: var(--text-heading); text-decoration: underline; text-underline-offset: 2px; }
+.gdp__scoutdoor:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }
+.gdp__scoutvs { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
+.gdp__scoutline { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); color: var(--text-heading); font-variant-numeric: tabular-nums; }
+/* Where the reader is in the half: the at-bat on screen stands up off the strip on a hard ink shadow,
+   its name on the marker, and the ones after it sit back. (The chip's ::after is the connector's head.) */
+.gdp__chip.is-here { transform: translateY(calc(-1 * var(--space-1))); box-shadow: 0 var(--space-1) 0 var(--border-stamped); }
+.gdp__chip.is-here span { background: var(--marker); }
+.gdp__chip.is-ahead { opacity: 0.45; }
+/* At L and D the trail starts under the stage (the Due up card takes the left column down to the bar), so
+   its first card sits on the stage's left edge, as the hero's box does. */
+.gdnext[data-tier='L'] .gdp__trail, .gdnext[data-tier='D'] .gdp__trail { padding-left: 0; }

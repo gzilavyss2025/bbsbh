@@ -25,6 +25,7 @@ import {
   WriteOnDemo,
 } from './animlab/motionDemos.jsx'
 import { PlayerMotionLab } from './animlab/PlayerMotionLab.jsx'
+import { CutsceneMotionLab } from './animlab/CutsceneMotionLab.jsx'
 
 // Unlisted QA page (see route.js), reachable only by direct URL
 // (/animation-lab). Every decorative animation in the app gets its own entry:
@@ -58,6 +59,8 @@ export function AnimationLab() {
         Each stage rests on its first frame &mdash; press <strong>Play</strong> to run that one on
         its own, and again to replay it. Unlisted &mdash; not linked from anywhere else in the app.
       </p>
+
+      <CutsceneMotionLab />
 
       <Entry
         title="Box-score skeleton — rolling ball"

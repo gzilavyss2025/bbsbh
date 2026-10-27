@@ -5,7 +5,7 @@
 import { PLATE_FRONT } from '../../../../lib/pitch/pitchFlight.js'
 import { BASES, bearingOf, clamp, homeCamera, polar, v3, project } from './scene.js'
 import { stateAt } from './play.js'
-import { BATTER, CATCHER, CATCHER_PARTS, FIELDER, KIT, PITCHER, S, SPR, dith, figure, mark, newBuf, put, rect, sprite, text, textW } from './pixels.js'
+import { BATTER, FIELDER, KIT, PITCHER, S, SPR, dith, figure, mark, newBuf, put, rect, sprite, text, textW } from './pixels.js'
 import { fielderJoints } from './windup.js'
 
 // The buffer is about 256 px wide and the canvas scales it by a whole number, so every pixel stays square.
@@ -120,6 +120,12 @@ function cacheOf(wall, key) {
   return K
 }
 
+// The rest frame's strike zone in buffer px, for a tap on it (StageCanvas): the dotted box plus a margin.
+export function zoneBox(w, h, pad = 4) {
+  const cam = homeCamera(w / h), a = project(cam, [-0.83, PLATE_FRONT, 3.4], w, h), b = project(cam, [0.83, PLATE_FRONT, 1.6], w, h)
+  return a && b ? { x0: a.x - pad, y0: a.y - pad, x1: b.x + pad, y1: b.y + pad } : null
+}
+
 // B ball, S strike (called, swinging, foul), X in play.
 const callOf = (code) => ('XDE'.includes(code) ? 'X' : 'B*HVIP'.includes(code[0]) ? 'B' : 'S')
 
@@ -136,8 +142,7 @@ function pitchView(fb, K, st, w, h, zones) {
   figure(fb, cam, st.pitcherPose, PITCHER, { minR: 0.6 })
   // The strike zone at the front of the plate: a dotted frame (a usual one at rest, before a pitch).
   const sz = last ?? { szTop: 3.4, szBot: 1.6 }
-  // The zone map at rest: nine cells tinted on the 50% checker the see-through catcher leaves
-  // open, zone 1 top left as the catcher sees it.
+  // The zone map at rest: nine cells tinted on a 50% checker, zone 1 top left as the catcher sees it.
   for (const [z, { temp }] of Object.entries(zones ?? {})) {
     const i = Number(z) - 1, c = i % 3, r = Math.floor(i / 3), slot = ZONE[temp], d = (sz.szTop - sz.szBot) / 3
     const a = P([-0.83 + c * (1.66 / 3), PLATE_FRONT, sz.szTop - r * d]), b = P([-0.83 + (c + 1) * (1.66 / 3), PLATE_FRONT, sz.szTop - (r + 1) * d])
@@ -149,9 +154,6 @@ function pitchView(fb, K, st, w, h, zones) {
     for (let x = Math.round(c0.x); x <= Math.round(c1.x); x += 2) { put(fb, x, c0.y, S.chalk); put(fb, x, c1.y, S.chalk) }
     for (let y = Math.round(c0.y); y <= Math.round(c1.y); y += 2) { put(fb, c0.x, y, S.chalk); put(fb, c1.x, y, S.chalk) }
   }
-  const cj = {}
-  for (const k in CATCHER) cj[k] = [CATCHER[k][0], -3.6 + CATCHER[k][1], CATCHER[k][2]]
-  figure(fb, cam, cj, CATCHER_PARTS, { minR: 0.6, ghost: true })
   // Earlier pitches as numbered marks; the decision pitch's joins them when it arrives.
   const n = play.pitches.length, arrived = st.t >= T.pitch
   figure(fb, cam, st.batterPose, BATTER, { minR: 0.7 })

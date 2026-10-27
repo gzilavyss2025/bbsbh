@@ -36,13 +36,22 @@ export function seriesMode(ws) {
 }
 
 // The same shape for one postseason-history.json series (the finished page). Every game is
-// Final, so nothing is ahead: it reads as an off day with no game. `cutoff` is the day AFTER the
-// last game, so every read ends on the Series' last day. Null with no games.
+// Final, so nothing is ahead: it reads as an off day with no game. It is decided, and each game
+// names its winner from its score, as the bracket's do (the Hero's decided state reads both).
+// `cutoff` is the day AFTER the last game, so every read ends on the Series' last day. Null with no games.
 export function historySeriesMode(h) {
-  const games = (h.games ?? []).map((g) => ({ gamePk: g.gamePk, gameNumber: g.gameNumber, date: g.date }))
+  const games = (h.games ?? []).map((g) => ({
+    gamePk: g.gamePk,
+    gameNumber: g.gameNumber,
+    date: g.date,
+    winnerId: g.awayScore > g.homeScore ? g.awayTeamId : g.homeScore > g.awayScore ? g.homeTeamId : null,
+    awayId: g.awayTeamId ?? null,
+    homeId: g.homeTeamId ?? null,
+  }))
   if (!games.length) return null
   const slots = [h.teamA, h.teamB].map((t) => ({ club: { id: t.teamId, abbreviation: teamAbbr({ id: t.teamId }) }, wins: t.wins }))
-  const mode = seriesMode({ slots, games, upcoming: [], playsOnCutoff: false })
+  const winner = h.winnerTeamId ? { id: h.winnerTeamId } : null
+  const mode = seriesMode({ slots, games, upcoming: [], playsOnCutoff: false, decided: Boolean(winner), winner })
   return { mode, cutoff: toApiDate(addDays(new Date(`${games.at(-1).date}T12:00:00`), 1)) }
 }
 

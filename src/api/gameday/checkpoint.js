@@ -127,9 +127,9 @@ function atBatsPage(feed, inning, half) {
   }
   for (const c of computeHalfInningFeed(feed, inning, half, battingSideOf(half))) {
     if (c.kind === 'atbat') {
-      const { jersey, first, last } = c.batter ?? {}
+      const { id, jersey, first, last } = c.batter ?? {}
       rows.push({
-        kind: 'atBat', atBatIndex: c.atBatIndex, jersey, first, last,
+        kind: 'atBat', atBatIndex: c.atBatIndex, id, jersey, first, last,
         code: c.code ?? '', rbi: c.rbi, out: c.outNumber ?? null, calledLooking: c.calledLooking === true,
       })
     } else if (c.kind === 'event' && SUB_ROWS.has(c.eventType)) {

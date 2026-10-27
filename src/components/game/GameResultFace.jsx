@@ -19,8 +19,10 @@ import { Door } from '../ui/control/Door.jsx'
 // never learns what it is — which is what keeps it free of any stamp
 // identifier (check-stamp-surfaces.mjs names it a forbidden surface, and that
 // was not relaxed). Its one caller is the Stamp In page (ADR-0042); every
-// other caller passes nothing and renders nothing extra.
-export function GameResultFace({ feed, boxScorePath, trailing = null }) {
+// other caller passes nothing and renders nothing extra. `door={false}` leaves Box score out, for a
+// host that draws its own (the World Series page puts it in the game's head row); the row goes with it
+// when nothing trails.
+export function GameResultFace({ feed, boxScorePath, trailing = null, door = true }) {
   const routeLink = useRouteLink()
   const box = selectBoxscore(feed)
   const totalInnings = box.innings?.length ?? 9
@@ -28,13 +30,17 @@ export function GameResultFace({ feed, boxScorePath, trailing = null }) {
 
   return (
     <div className="flipback">
-      <div className="flipback__topRow">
-        {/* A door, not a button: it leaves the card for the box score (#1174). */}
-        <Door className="flipback__door" {...routeLink(boxScorePath)}>
-          Box score
-        </Door>
-        {trailing}
-      </div>
+      {(door || trailing) && (
+        <div className="flipback__topRow">
+          {/* A door, not a button: it leaves the card for the box score (#1174). */}
+          {door && (
+            <Door className="flipback__door" {...routeLink(boxScorePath)}>
+              Box score
+            </Door>
+          )}
+          {trailing}
+        </div>
+      )}
       <div className="flipback__linescore">
         <div className="flipback__lsHeader" aria-hidden="true">
           <span className="t-label t-label--bold flipback__lsTeamCol">
