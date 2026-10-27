@@ -8,7 +8,7 @@ import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
-import { calendarDays, monthsOf, nextGamePath, slabPlayers, spotlightAt, spotlightCount, spotlightRoster, storedClip, withFormatDates } from '../../lib/postseason/worldseries/hero.js'
+import { calendarDays, decidedHero, monthsOf, nextGamePath, slabPlayers, spotlightAt, spotlightCount, spotlightRoster, storedClip, withFormatDates } from '../../lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../../lib/postseason/worldseries/ledger.js'
 import { logbookNewPath, umpirePath } from '../../lib/route.js'
 import { teamClubNameShort } from '../../lib/teams.js'
@@ -258,6 +258,55 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
         )}
       </Stack>
       {open && <HighlightSheet item={open} onClose={() => setOpen(null)} />}
+    </Card>
+  )
+}
+
+// A decided Series (#2562; layout A, Gary 2026-10-27): this card replaces the result banner. It names
+// the winner, carries the trophy, ends on final pips and a strip whose game cells show who won each
+// one (decidedHero). Nothing is ahead, so there is no Next, no door and no "Best of seven". The
+// Series MVP is the only player drawn (`mvp`, the finished page's); a side with none, or a page with
+// no MVP known, keeps its club's mono mark. The MVP card under it stays the one that names him.
+export function DecidedHero({ mode, mvp = null }) {
+  const { series } = mode
+  const hero = decidedHero(series, mvp)
+  if (!hero) return null
+  const ids = series.slots.map((s) => s.club.id)
+  const slotOf = Object.fromEntries(series.slots.map((s) => [s.club.id, s]))
+  const dates = series.games.map((g) => g.date).filter(Boolean)
+  const span = dates.length ? [...new Set([dates[0], dates.at(-1)])].map(monthDayShort).join(' – ') : null
+  const mark = seriesMark({ season: Number(dates[0]?.slice(0, 4)), round: 'worldseries' })
+  return (
+    <Card frame="stamped" label="Overview" className="ww-hero ww-hero--decided">
+      <Stack gap="base">
+        <div className="ww-hero__matchup">
+          <div className="ww-hero__stage">
+            <div className="ww-hero__split">
+              <Slab side="away" clubId={ids[0]} player={hero.players[0]} />
+              <Slab side="home" clubId={ids[1]} player={hero.players[1]} />
+            </div>
+            <div className="ww-hero__top">
+              <ClubHead side="away" slot={slotOf[ids[0]]} winsNeeded={series.winsNeeded ?? 4} />
+              <Stack gap="snug" className="ww-hero__crest">
+                <img src="/brand/world-series-trophy.png" alt="" aria-hidden="true" className="ww-hero__trophy" />
+                {mark ? <SeriesMark mark={mark} height={32} /> : <span className="ww-hero__words">World Series</span>}
+              </Stack>
+              <ClubHead side="home" slot={slotOf[ids[1]]} winsNeeded={series.winsNeeded ?? 4} />
+            </div>
+            <Stack gap="snug" className="ww-hero__focus">
+              <h2 className="ww-hero__game ww-hero__result">{`${teamClubNameShort(hero.winnerId)} win in ${hero.gamesPlayed}`}</h2>
+              {span && <span className="ww-hero__date">{span}</span>}
+            </Stack>
+          </div>
+        </div>
+        <Stack gap="snug">
+          <Cluster gap="base" rowGap="tight" align="baseline">
+            <span className="ww-hero__month">{monthsOf(hero.days)}</span>
+            <span className="ww-hero__schedulelabel">Series schedule</span>
+          </Cluster>
+          <ScheduleStrip days={hero.days} />
+        </Stack>
+      </Stack>
     </Card>
   )
 }

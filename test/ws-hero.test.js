@@ -2,7 +2,7 @@
 // each club's slab, and the clip behind a slab's play button.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { PRE_SERIES_PICKS, calendarDays, monthsOf, nextGamePath, slabPlayers, spotlightAt, spotlightCount, spotlightRoster, storedClip, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
+import { PRE_SERIES_PICKS, calendarDays, decidedHero, monthsOf, nextGamePath, slabPlayers, spotlightAt, spotlightCount, spotlightRoster, storedClip, withFormatDates } from '../src/lib/postseason/worldseries/hero.js'
 import { ledgerModel } from '../src/lib/postseason/worldseries/ledger.js'
 
 // The 2026 Series as the bracket gives it before Game 1: seven dated games, three if needed.
@@ -350,4 +350,43 @@ test('a two-way player is a hitter, unless only his pitching has a line', () => 
   const by = Object.fromEntries(list.map((p) => [p.name, p]))
   assert.deepEqual([by['Both Ways'].kind, by['Both Ways'].figs], ['hitter', '.800 OPS · 30 PA'])
   assert.deepEqual([by['Two Way'].kind, by['Two Way'].figs], ['pitcher', '1.50 ERA · 6.0 IP'])
+})
+
+// A decided Series (#2562): the 2025 Series, Dodgers over the Blue Jays in 7, as the bracket
+// gives it (each played game names its winner).
+const WS_2025 = {
+  decided: true,
+  winner: { id: 119 },
+  slots: [{ club: { id: 119 }, wins: 4 }, { club: { id: 141 }, wins: 3 }],
+  games: [
+    ['2025-10-24', 141], ['2025-10-25', 119], ['2025-10-27', 119], ['2025-10-28', 141],
+    ['2025-10-29', 141], ['2025-10-31', 119], ['2025-11-01', 119],
+  ].map(([date, winnerId], i) => ({ gamePk: 813020 + i, gameNumber: i + 1, date, winnerId })),
+  upcoming: [],
+}
+const YAMAMOTO = { playerId: 808967, name: 'Yoshinobu Yamamoto', teamId: 119 }
+
+test('an undecided Series has no decided hero', () => {
+  assert.equal(decidedHero({ ...WS_2025, decided: false, winner: null }), null)
+})
+
+test('a decided Series: every game names its winner, with no today cell and no next game', () => {
+  const hero = decidedHero(WS_2025, YAMAMOTO)
+  assert.equal(hero.winnerId, 119)
+  assert.equal(hero.gamesPlayed, 7)
+  assert.equal(hero.days.some((d) => d.today || d.next || d.kind === 'today'), false)
+  assert.deepEqual(hero.days.map((d) => (d.kind === 'off' ? 'off' : d.winnerId)), [141, 119, 'off', 119, 141, 141, 'off', 119, 119])
+  assert.deepEqual([hero.days[0].weekday, hero.days.at(-1).weekday, hero.days.at(-1).day], ['Fri', 'Sat', 1])
+})
+
+test('the Series MVP is the only player drawn, on his own club\'s side', () => {
+  assert.deepEqual(decidedHero(WS_2025, YAMAMOTO).players, [{ id: 808967, name: 'Yoshinobu Yamamoto' }, null])
+  // 1960: the MVP (Bobby Richardson) played for the club that lost.
+  const lost = decidedHero({ ...WS_2025, slots: [{ club: { id: 141 }, wins: 3 }, { club: { id: 119 }, wins: 4 }] }, YAMAMOTO)
+  assert.deepEqual(lost.players, [null, { id: 808967, name: 'Yoshinobu Yamamoto' }])
+})
+
+test('with no MVP known (the live page), neither side draws a player', () => {
+  assert.deepEqual(decidedHero(WS_2025).players, [null, null])
+  assert.deepEqual(decidedHero(WS_2025, { name: 'No id', teamId: 119 }).players, [null, null])
 })

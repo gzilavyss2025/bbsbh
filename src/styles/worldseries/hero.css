@@ -384,6 +384,14 @@
 .ww-cal__day--next .ww-cal__flag { border-top: var(--bw-hair) solid currentColor; }
 .ww-cal__day--next .ww-cal__flag { color: var(--marker); }
 .ww-cal__day--maybe { border-style: dashed; }
+/* A decided Series: the game's winner in the flag row, under a hairline like Today/Next. */
+.ww-cal__day:has(.ww-cal__winner) .ww-cal__flag { line-height: var(--lh-solid); padding-block: var(--space-1); border-top: var(--bw-hair) solid var(--border-stamped-soft); }
+
+/* A decided Series (#2562): the trophy leads the crest, and the result takes the stage's centre. The
+   card keeps the result banner's own spacing, so the MVP card under it clears its shadow. */
+.ww-hero--decided { margin-block: var(--space-3); }
+.ww-hero__trophy { height: var(--space-10); width: auto; }
+.ww-hero__result { margin: 0; font-size: var(--fs-hero-sm); text-wrap: balance; }
 
 .door.ww-hero__next {
   display: flex;
@@ -424,6 +432,7 @@
   .shot.ww-hero__cut { width: var(--ww-stage-h); }
   .ww-hero__focus { padding-top: var(--space-5); }
   .ww-hero__game { font-size: var(--fs-hero-2xl); }
+  .ww-hero__result { font-size: var(--fs-display-lg); }
   .ww-hero__date, .ww-hero__time { font-size: var(--fs-ui); }
   .ww-hero__spotlight { padding: var(--space-3) var(--space-5); }
   .ww-hero__name { font-size: var(--fs-card-name); }

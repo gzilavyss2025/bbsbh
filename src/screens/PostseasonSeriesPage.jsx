@@ -34,6 +34,7 @@ import { Notice } from '../components/ui/state/Notice.jsx'
 import { SeriesPlayOfTheGame, SeriesLeaderBoard, RosterCard } from '../components/postseason/SeriesParts.jsx'
 import { SeriesFlow } from '../components/postseason/SeriesFlow.jsx'
 import { SeriesMvpCard } from '../components/postseason/SeriesMvpCard.jsx'
+import { DecidedHero } from '../components/worldseries/Hero.jsx'
 import { SeriesTotals } from '../components/postseason/SeriesTotals.jsx'
 import { SeriesNineKeys } from '../components/postseason/SeriesNineKeys.jsx'
 import { SeriesAbsReport } from '../components/postseason/SeriesAbsReport.jsx'
@@ -368,8 +369,9 @@ export function PostseasonSeriesPage({ seriesId }) {
     </div>
   )
 
-  // WORLD SERIES: the same jump-bar groups as the live page (layout C). The banner, trophy and MVP
-  // stay on top: Hero draws nothing for a decided Series. A group with no data is not drawn.
+  // WORLD SERIES: the same jump-bar groups as the live page (layout C). The Hero's decided state takes
+  // the banner's place (#2562) and carries the trophy; the MVP card stays under it. A group with no
+  // data is not drawn.
   const groups = seriesGroups({
     series: true,
     scout: scoutShown,
@@ -401,7 +403,7 @@ export function PostseasonSeriesPage({ seriesId }) {
         </h1>
       </header>
 
-      {bannerEl}
+      {ws ? <DecidedHero mode={ws.mode} mvp={mvp} /> : bannerEl}
       {mvpEl}
       {grouped || (
         <>
