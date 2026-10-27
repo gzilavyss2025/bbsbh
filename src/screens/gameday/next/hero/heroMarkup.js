@@ -46,10 +46,11 @@ function result(h, e, feed, side) {
       contact && h('div', { className: 'gdhero__contact' }, contact)))
 }
 
-export function heroMarkup(h, { SealBox, feed, inning, half, mark, last, stepAtBatIndex }) {
+export function heroMarkup(h, { SealBox, feed, inning, half, mark, last, stepAtBatIndex, checkpoint = false }) {
   const side = half === 'top' ? 'away' : 'home'
   // A committed half reports no step cursor; the last result's own index is the same cursor.
-  const due = selectDueUpDuring(feed, inning, half, mark, last?.atBatIndex ?? stepAtBatIndex, 3)?.batters ?? []
+  // While the checkpoint shows, it carries the due-up (the next half's side); the hero keeps only the box.
+  const due = checkpoint ? [] : selectDueUpDuring(feed, inning, half, mark, last?.atBatIndex ?? stepAtBatIndex, 3)?.batters ?? []
   return h('div', { className: 'gdhero' },
     last
       ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, feed, side))

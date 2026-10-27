@@ -8,8 +8,9 @@ import { TOKENS } from './pixels.js'
 // Gameday's stage: a low-resolution buffer (about 256 px wide) scaled up by a whole number, so every
 // pixel stays square. `play` is stagePlay()'s output, built only from a REVEALED play (ADR-0001);
 // without a `play` the canvas draws nothing. With `t` (seconds after the tap) it draws that one
-// frame; without, it plays from 0 to the end of the play, or jumps to the end under reduced motion.
-// The tap rule and the mount are the caller's (prompt 10).
+// frame; without, it plays from `start` (a performance.now() time, so a re-render mid-play keeps its
+// place) to the end of the play, or jumps to the end under reduced motion. `zones`
+// tints the rest frame (drawStage). The tap rule and the mount are GamedayStage.js and tapRule.js.
 
 // The --stage-* tokens as packed little-endian RGBA, in pixels.js's slot order. A 1 px canvas turns
 // any CSS colour the token holds into bytes.
@@ -24,7 +25,7 @@ function paletteOf(el) {
   })
 }
 
-export function StageCanvas({ play, t, label = 'The play on the field' }) {
+export function StageCanvas({ play, t, start, zones, label = 'The play on the field' }) {
   const box = useRef(null)
   const cv = useRef(null)
   const [size, setSize] = useState(null)
@@ -40,22 +41,22 @@ export function StageCanvas({ play, t, label = 'The play on the field' }) {
     if (!play || !w || !h) return undefined
     const g = cv.current.getContext('2d'), pal = paletteOf(cv.current), img = g.createImageData(w, h), out = new Uint32Array(img.data.buffer)
     const paint = (s) => {
-      const fb = drawStage(stateAt(play, s), w, h)
+      const fb = drawStage(stateAt(play, s), w, h, zones)
       for (let i = 0; i < fb.px.length; i++) out[i] = pal[fb.px[i]]
       g.putImageData(img, 0, 0)
     }
     if (t != null) { paint(t); return undefined }
     if (motionIsReduced()) { paint(play.end); return undefined }
-    const t0 = performance.now()
+    const t0 = start ?? performance.now()
     let id = 0
     const tick = (now) => {
-      const s = Math.min((now - t0) / 1000, play.end)
+      const s = Math.min(Math.max(0, now - t0) / 1000, play.end)
       paint(s)
       if (s < play.end) id = requestAnimationFrame(tick)
     }
     id = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(id)
-  }, [play, t, w, h])
+  }, [play, t, start, zones, w, h])
   return (
     <div ref={box} className="gdstage">
       <canvas ref={cv} className="gdstage__canvas" role="img" aria-label={label} width={w} height={h} style={{ width: w * scale, height: h * scale }} />

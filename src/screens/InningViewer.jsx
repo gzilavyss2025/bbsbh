@@ -734,7 +734,7 @@ export function InningViewer({
     const advance = focus.stepAhead
       ? { label: 'Next play', disabled: turning, onClick: () => !turning && focus.stepNext() }
       : currentSealed
-        ? { label: atHalfEdge ? 'Caught up' : 'Next play', disabled: atHalfEdge, onClick: revealNextAtBat }
+        ? { label: atHalfEdge ? 'Caught up' : 'Next play', disabled: atHalfEdge, onClick: revealNextAtBat, reveal: true }
         : nextIdx != null
           ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
           : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }
@@ -753,6 +753,7 @@ export function InningViewer({
             onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
             inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : curAtBatCount,
           }}
+          checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
           engine={pageTurn}
           advance={advance}
           onBoxScore={onBoxScore}

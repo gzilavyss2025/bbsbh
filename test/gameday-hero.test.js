@@ -122,3 +122,10 @@ test('hero: the due-up strip follows the last result even with no step cursor (a
   assert.match(strip, /1st · #56 Arozarena/, 'Arozarena is due after Rodden')
   assert.ok(!strip.includes('Naylor'), 'not the half\'s leadoff batters')
 })
+
+test('hero: no due-up strip while the checkpoint shows (it names the next half; the hero would name the wrong side)', () => {
+  const all = half(F824, 2, 'top')
+  const out = html({ last: live(all, all.length), stepAtBatIndex: null, checkpoint: true })
+  assert.ok(!out.includes('gdhero__due'), 'the checkpoint carries the due-up')
+  assert.match(out, /Rodr/, 'the third out\'s box stays')
+})
