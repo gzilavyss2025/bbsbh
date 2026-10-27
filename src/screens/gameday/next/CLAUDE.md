@@ -21,7 +21,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   only before a tapped play and has a per-game dismiss; a switch hitter stands opposite the
   pitcher's hand; the hero's due-up hides under the checkpoint; the checkpoint's due-up names an
   announced pinch hitter; a pre-pitch pinch hitter is the first sub-step of his own at-bat.
-- The band draws through `ScorebugMount` (`Bug` prop), so its reveal clamp stays the only gate on the
+- The band draws through `ScorebugMount` (the default score bug; `GamedayBand` before a snapshot), so its clamp is the only gate on the
   score. Opening the Menu loads nothing: a folded
   block fetches when it shows.
 - Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line

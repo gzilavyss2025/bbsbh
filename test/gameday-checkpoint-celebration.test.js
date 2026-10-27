@@ -59,3 +59,18 @@ test('ordinary ending plays, old results and cold checkpoint visits do not get a
   assert.match(html(f, final, { shown: null }), /data-checkpoint/)
   assert.match(html(f, final, { shown: { count: 5, sub: 2, last: 1 } }), /data-checkpoint/, 'an interrupted at-bat is not its future result')
 })
+
+// Review of the #2676 stack: a half end with no celebration first renders the checkpoint from
+// Played (inside the SealBox) while the gate is pending. Once Next dismisses it, the checkpoint must
+// stay at that position. If GamedayStage returned it from the top instead, React would remount it
+// and the summary's fetches and ledger marks would run twice.
+test('the checkpoint keeps one position in the tree from pending to dismissed', () => {
+  const f = feedOf(824716)
+  const final = f.liveData.plays.allPlays.find((p) => p.about.inning === 1 && p.about.halfInning === 'top' && p.count.outs === 3)
+  const sealed = (extra) => renderToStaticMarkup(h(GamedayStage, {
+    SealBox: ({ children }) => h('s', null, children()), StageCanvas, feed: f, checkpoint,
+    inning: 1, half: 'top', wall: wallFn(null), shown: final.about.atBatIndex, playing: true, ...extra,
+  }))
+  assert.match(sealed({}), /<s><b data-checkpoint/)
+  assert.match(sealed({ checkpointDismissed: true }), /<s><b data-checkpoint/)
+})

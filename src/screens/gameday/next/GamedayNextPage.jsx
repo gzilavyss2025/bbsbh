@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import '../../../styles/gameday-next/page.css'
 import { Button } from '../../../components/ui/control/Button.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
-import { blocksFor, foldedFor } from '../../../lib/gameday/ladder.js'
+import { blocksFor, menuFor } from '../../../lib/gameday/ladder.js'
 import { BLOCK_LABEL, GamedayMenu } from './GamedayMenu.jsx'
 import { GamedayPanel } from './panels/GamedayPanels.jsx'
 import { useTier } from './useTier.js'
@@ -13,7 +13,7 @@ import { useTier } from './useTier.js'
 // Blocks a panel fills; a stage or hero slot with nothing to draw yet shows its name.
 const PANELLED = new Set(['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'arm', 'eventLog'])
 
-export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine, advance, pitch, onBoxScore, onScorecard, lineups, slateHref, notices = [], refresh }) {
+export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pitch, onBoxScore, onScorecard, lineups, slateHref, notices = [], refresh }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
   // The defense (the Reference block) is a drawer from the right where the window is wide enough
@@ -43,7 +43,7 @@ export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine,
       </div>
       {slots.map((b) => (
         <section key={b} className={`gdnext__slot gdnext__slot--${b}`} aria-label={BLOCK_LABEL[b]}>
-          {b === 'stage' && (checkpoint || stage) ? checkpoint || stage : b === 'hero' && hero ? hero : (
+          {b === 'stage' && stage ? stage : b === 'hero' && hero ? hero : (
             <>
               <GamedayPanel block={b} ctx={panels} />
               {!PANELLED.has(b) && <span className="gdnext__slotname">{BLOCK_LABEL[b]}</span>}
@@ -77,7 +77,7 @@ export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine,
       <div hidden>{engine}</div>
       {menu && (
         <GamedayMenu
-          folded={drawer ? [...foldedFor(tier), 'eventLog'] : foldedFor(tier)}
+          folded={menuFor(tier)}
           panels={panels}
           onClose={() => setMenu(false)}
           onBoxScore={onBoxScore}
