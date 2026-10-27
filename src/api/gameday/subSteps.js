@@ -18,8 +18,11 @@
 // before it in this play belongs to the step before (ADR-0016) and is dropped.
 // Data only: no words, no timing (ADR-0046).
 
+import { computeHalfInningFeed } from '../playbyplay.js'
+import { nextStepBoundary } from '../playbyplay/entriesView.js'
 import { NON_PA_EVENT_TYPES, pitchCallCode } from '../playbyplay/eventTypes.js'
 import { AUTOMATIC_CODES } from '../playbyplay/pitchInfo.js'
+import { battingSideOf } from './stepCut.js'
 
 const CHANGES = new Set([
   'pitching_substitution',
@@ -93,4 +96,44 @@ export function subSteps(feed, card) {
     steps.splice(at + folded, 0, { kind: 'result', index: step.index, stop: true, pitch: step.pitch ?? null, card, riders: step.riders })
   }
   return steps
+}
+
+// The at-bat the reader is inside: the next step's card past `count` (the stored step cursor,
+// atBatCountFor), its play, its sub-steps, and the at-bat cards already on screen (`done`, built
+// with the cut, so no later play writes onto them). The step bounds are PlayByPlay's own: a first
+// tap's cap snaps forward to the first at-bat (its effectiveCap), and the step runs to
+// nextStepBoundary. Null when no at-bat is left in the feed. Built once per feed object, half and
+// count (ADR-0007): the tap, the hero, the event card and the stage all ask on one render.
+const built = new WeakMap()
+export function openAtBat(feed, inning, half, count) {
+  let byStep = built.get(feed)
+  if (!byStep) built.set(feed, (byStep = new Map()))
+  const key = `${inning}:${half}:${count}`
+  if (!byStep.has(key)) byStep.set(key, build(feed, inning, half, count))
+  return byStep.get(key)
+}
+
+function build(feed, inning, half, count) {
+  const side = battingSideOf(half)
+  const raw = computeHalfInningFeed(feed, inning, half, side, count)
+  const from = count > 0 ? Math.max(count, nextStepBoundary(raw, 0)) : 0
+  const end = nextStepBoundary(raw, from)
+  const step = computeHalfInningFeed(feed, inning, half, side, end)
+  const card = step.slice(from, end).find((c) => c.kind === 'atbat')
+  if (!card) return null
+  const play = (feed?.liveData?.plays?.allPlays ?? []).find((p) => p.about?.atBatIndex === card.atBatIndex)
+  const done = (from > count ? computeHalfInningFeed(feed, inning, half, side, from) : raw).slice(0, from).filter((c) => c.kind === 'atbat')
+  return { card, play, steps: subSteps(feed, card), done, runnerOf: (id) => runnerCard(done, step.slice(0, end), id) }
+}
+
+// A runner's own box: his latest plate appearance on screen (a man who batted around has two), found
+// through any pinch runners to the man who batted (halfInningFeed's prAlias and rootRunner).
+export function runnerCard(cards, entries, id) {
+  const alias = new Map(entries.filter((e) => e.eventType === 'pinch_running' && e.pinchId != null).map((e) => [e.pinchId, e.replacedId]))
+  const seen = new Set()
+  while (alias.has(id) && !seen.has(id)) {
+    seen.add(id)
+    id = alias.get(id)
+  }
+  return cards.findLast((c) => c.kind === 'atbat' && c.batterId === id) ?? null
 }

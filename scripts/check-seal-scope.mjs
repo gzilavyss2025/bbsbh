@@ -76,6 +76,9 @@ const ALLOWLIST = {
   // The lens bar's Unwrap button (ADR-0092): it lifts the same seal the frame
   // holds, through the same tap. The turn button beside it is navy.
   'scorecard/lens-bar.css': ['.sc-lensbar__unwrap', '.sc-lensbar__unwraptext'],
+  // Gameday's open box (ADR-0123): its code under tape while the at-bat is open; the result tap
+  // lifts it.
+  'gameday-next/hero.css': ['.gdhero__code.is-taped'],
 }
 
 // Outside src/styles/, a component may name --seal only if it is one of these.

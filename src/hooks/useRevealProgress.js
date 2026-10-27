@@ -5,6 +5,7 @@ import { computeDerivedByInning } from '../api/derive.js'
 import {
   parseRevealMark,
   parseAtBatMark,
+  formatAtBatMark,
   parseBoxRevealMark,
   catchUpMarkIn,
   mergeMark,
@@ -178,18 +179,18 @@ export function catchUpPlan(feed) {
 // localStorage key prefix + reader for the at-bat-mode stepping cursor (see
 // ADR-0016): how many play-by-play entries of whichever half is currently
 // being stepped through have been revealed so far. Stored as "{halfIdx}:
-// {count}" — the caller compares halfIdx against the half it's actually
+// {count}", or "{halfIdx}:{count}:{sub}" with Gameday's sub-steps of the next
+// at-bat (ADR-0123; formatAtBatMark) — the caller compares halfIdx against the half it's actually
 // showing (RollingLine and direct links both let a user jump to any unlocked
 // half, not just the reveal frontier, so this can't assume "frontier" means
 // "the half being viewed"). A stale value from a half that's since been
 // fully committed is simply ignored rather than misread as live progress.
 const ATBAT_KEY = ATBAT_MARK_PREFIX
 function readAtBatMark(storageKey) {
-  if (!storageKey) return { halfIdx: -1, count: 0 }
   try {
-    return parseAtBatMark(window.localStorage.getItem(storageKey))
+    return parseAtBatMark(storageKey ? window.localStorage.getItem(storageKey) : null)
   } catch {
-    return { halfIdx: -1, count: 0 }
+    return parseAtBatMark(null)
   }
 }
 
@@ -218,6 +219,11 @@ export function useRevealProgress(feed, regulation, actualCount) {
     (n, half) => (atBatMark.halfIdx === halfIndex(n, half) ? atBatMark.count : 0),
     [atBatMark],
   )
+  // Gameday's sub-steps shown of the half's next at-bat (ADR-0123): 0 for any other half.
+  const subFor = useCallback(
+    (n, half) => (atBatMark.halfIdx === halfIndex(n, half) ? atBatMark.sub : 0),
+    [atBatMark],
+  )
 
   // The one ratchet: revealedThrough only ever moves forward, from any
   // source (a tap, another tab's storage event, or a signed-in device's
@@ -242,7 +248,7 @@ export function useRevealProgress(feed, regulation, actualCount) {
   // be written straight back to storage by the persist effect below.
   const resealAll = useCallback(() => {
     setRevealedThrough(-1)
-    setAtBatMark({ halfIdx: -1, count: 0 })
+    setAtBatMark(parseAtBatMark(null))
   }, [])
 
   const revealTo = useCallback(
@@ -250,13 +256,20 @@ export function useRevealProgress(feed, regulation, actualCount) {
       mergeRevealedThrough(halfIndex(n, half))
       // Whatever was mid-step just got fully committed — clear it so a later
       // half doesn't inherit a stale count.
-      setAtBatMark({ halfIdx: -1, count: 0 })
+      setAtBatMark(parseAtBatMark(null))
     },
     [mergeRevealedThrough],
   )
 
   const revealAtBat = useCallback((n, half, count) => {
-    setAtBatMark({ halfIdx: halfIndex(n, half), count })
+    setAtBatMark({ halfIdx: halfIndex(n, half), count, sub: 0 })
+  }, [])
+
+  // One sub-step inside the next at-bat (ADR-0123, decision 10): the count stays, so nothing
+  // commits and revealedThrough is untouched; the result's tap goes through revealAtBat.
+  const revealSub = useCallback((n, half, sub) => {
+    const halfIdx = halfIndex(n, half)
+    setAtBatMark((m) => ({ halfIdx, count: m.halfIdx === halfIdx ? m.count : 0, sub }))
   }, [])
 
   useEffect(() => {
@@ -293,7 +306,7 @@ export function useRevealProgress(feed, regulation, actualCount) {
       if (atBatMark.halfIdx < 0) {
         window.localStorage.removeItem(atBatStorageKey)
       } else {
-        window.localStorage.setItem(atBatStorageKey, `${atBatMark.halfIdx}:${atBatMark.count}`)
+        window.localStorage.setItem(atBatStorageKey, formatAtBatMark(atBatMark))
       }
     } catch {
       // Private-mode / storage-disabled — degrade to in-session memory only.
@@ -335,6 +348,8 @@ export function useRevealProgress(feed, regulation, actualCount) {
     getDerived,
     atBatCountFor,
     revealAtBat,
+    subFor,
+    revealSub,
   }
 }
 

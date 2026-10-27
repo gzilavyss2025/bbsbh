@@ -15,7 +15,7 @@ import { useTier } from './useTier.js'
 // Blocks a panel fills; the rest keep their label until their prompts.
 const PANELLED = new Set(['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog'])
 
-export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine, advance, onBoxScore, onScorecard, refresh }) {
+export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine, advance, pitch, onBoxScore, onScorecard, refresh }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
   const slots = blocksFor(tier).filter((b) => b !== 'band' && b !== 'bar')
@@ -34,10 +34,10 @@ export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine,
       ))}
       <div className="gdnext__bar">
         <Door layout="block" className="gdnext__menu" onClick={() => setMenu(true)} aria-haspopup="dialog">Menu</Door>
-        {/* ponytail: static until the pitch mode lands (prompt 11) */}
+        {/* The step switch (ADR-0123): it reveals nothing, it sets what the next tap steps. */}
         <div className="gdnext__switch" role="group" aria-label="Step by">
-          <Button size="control" pressed>At-bat</Button>
-          <Button size="control" pressed={false} disabled>Pitch</Button>
+          <Button size="control" pressed={!pitch.on} onClick={() => pitch.set(false)}>At-bat</Button>
+          <Button size="control" pressed={pitch.on} onClick={() => pitch.set(true)}>Pitch</Button>
         </div>
         <Button skin="ink" className="gdnext__advance" disabled={advance.disabled} onClick={advance.onClick}>
           {advance.label} ›
