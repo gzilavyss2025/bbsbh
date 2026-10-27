@@ -1,4 +1,5 @@
 import '../../styles/worldseries/hero.css'
+import '../../styles/worldseries/decided.css'
 import { useEffect, useRef, useState } from 'react'
 import { fetchTeamHighlights } from '../../api/gamehighlights.js'
 import { fetchSpotlightPool } from '../../api/postseason/worldseries/spotlightPool.js'
@@ -16,6 +17,7 @@ import { Pips } from '../bracket/bracketParts.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
 import { Headshot } from '../player/Headshot.jsx'
+import { PlayerLink } from '../player/PlayerLink.jsx'
 import { SeriesMark } from '../postseason/SeriesMark.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { Door } from '../ui/control/Door.jsx'
@@ -266,24 +268,42 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
 // the winner, carries the trophy, ends on final pips and a strip whose game cells show who won each
 // one (decidedHero). Nothing is ahead, so there is no Next, no door and no "Best of seven". The
 // Series MVP is the only player drawn (`mvp`, the finished page's); a side with none, or a page with
-// no MVP known, keeps its club's mono mark. The MVP card under it stays the one that names him.
-export function DecidedHero({ mode, mvp = null }) {
+// no MVP known, keeps its club's mono mark. With an MVP, his cut-out stands on his club's side and his
+// action photo fills the other side, where his tag, name, club and line from this Series (`stats`,
+// mvpStatLine's [label, figure] pairs) sit at the foot of the stage. There is no MVP card.
+const SIDES = ['away', 'home']
+
+export function DecidedHero({ mode, mvp = null, stats = [] }) {
   const { series } = mode
   const hero = decidedHero(series, mvp)
   if (!hero) return null
   const ids = series.slots.map((s) => s.club.id)
   const slotOf = Object.fromEntries(series.slots.map((s) => [s.club.id, s]))
   const dates = series.games.map((g) => g.date).filter(Boolean)
-  const span = dates.length ? [...new Set([dates[0], dates.at(-1)])].map(monthDayShort).join(' – ') : null
   const mark = seriesMark({ season: Number(dates[0]?.slice(0, 4)), round: 'worldseries' })
+  const mvpAt = hero.players.findIndex(Boolean)
   return (
-    <Card frame="stamped" label="Overview" className="ww-hero ww-hero--decided">
+    <Card frame="stamped" label="Overview" className={`ww-hero ww-hero--decided${mvpAt >= 0 ? ' ww-hero--mvp' : ''}`}>
       <Stack gap="base">
         <div className="ww-hero__matchup">
           <div className="ww-hero__stage">
             <div className="ww-hero__split">
-              <Slab side="away" clubId={ids[0]} player={hero.players[0]} />
-              <Slab side="home" clubId={ids[1]} player={hero.players[1]} />
+              {mvpAt < 0 ? (
+                <>
+                  <Slab side="away" clubId={ids[0]} player={hero.players[0]} />
+                  <Slab side="home" clubId={ids[1]} player={hero.players[1]} />
+                </>
+              ) : (
+                SIDES.map((side, i) => (
+                  <div key={side} className={`ww-hero__slab ww-hero__slab--${side}${i === mvpAt ? '' : ' ww-hero__slab--action'}`}>
+                    {i === mvpAt ? (
+                      <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback className="ww-hero__cut" />
+                    ) : (
+                      <Wash key={mvp.playerId} personId={mvp.playerId} />
+                    )}
+                  </div>
+                ))
+              )}
             </div>
             <div className="ww-hero__top">
               <ClubHead side="away" slot={slotOf[ids[0]]} winsNeeded={series.winsNeeded ?? 4} />
@@ -295,9 +315,27 @@ export function DecidedHero({ mode, mvp = null }) {
             </div>
             <Stack gap="snug" className="ww-hero__focus">
               <h2 className="ww-hero__game ww-hero__result">{`${teamClubNameShort(hero.winnerId)} win in ${hero.gamesPlayed}`}</h2>
-              {span && <span className="ww-hero__date">{span}</span>}
             </Stack>
           </div>
+          {mvpAt >= 0 && (
+            <section className={`ww-hero__mvp ww-hero__mvp--${SIDES[1 - mvpAt]}`} aria-label="Series MVP">
+              <span className="ww-hero__mvptag">Series MVP</span>
+              <Cluster gap="snug" align="baseline">
+                <PlayerLink id={mvp.playerId} className="ww-hero__mvpname">{mvp.name}</PlayerLink>
+                <span className="ww-hero__mvpclub">{teamClubNameShort(mvp.teamId)}</span>
+              </Cluster>
+              {stats.length > 0 && (
+                <dl className="ww-hero__mvpstats">
+                  {stats.map(([k, v]) => (
+                    <div key={k} className="ww-hero__mvpstat">
+                      <dt>{k}</dt>
+                      <dd>{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </section>
+          )}
         </div>
         <Stack gap="snug">
           <Cluster gap="base" rowGap="tight" align="baseline">

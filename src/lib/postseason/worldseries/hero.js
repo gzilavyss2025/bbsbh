@@ -105,18 +105,21 @@ export function calendarDays(columns, slateDate) {
 // is ahead, so no cell is today or next, and every game cell names the club that won it (the
 // bracket's and the history file's `winnerId`). The Series MVP is the only player drawn, on his own
 // club's side (the 1960 MVP played for the club that lost); with no MVP known, neither side draws one.
+// Each game cell also carries `path`, its lineups page (null when the game row names no clubs).
 // -> null until decided, else { winnerId, gamesPlayed, days, players } (players in slot order).
 export function decidedHero(series, mvp = null) {
   if (!series?.decided || !series.winner?.id) return null
   const games = series.games ?? []
   const winnerOf = new Map(games.map((g) => [g.gameNumber, g.winnerId ?? null]))
+  const gameOf = new Map(games.map((g) => [g.gameNumber, g]))
   const ids = series.slots.map((s) => s.club.id)
+  const abbr = Object.fromEntries(series.slots.map((s) => [s.club.id, s.club.abbreviation]))
   // A slate date past every game: each game is past, so none is today or next. The 'today' cell
   // calendarDays adds when no cell is today is dropped.
   const { columns } = ledgerModel({ clubIds: ids, games, slateDate: '9999-12-31' })
   const days = calendarDays(columns, '9999-12-31')
     .filter((d) => d.kind !== 'today')
-    .map((d) => (d.kind === 'game' ? { ...d, winnerId: winnerOf.get(d.gameNumber) ?? null } : d))
+    .map((d) => (d.kind === 'game' ? { ...d, winnerId: winnerOf.get(d.gameNumber) ?? null, path: nextGamePath(gameOf.get(d.gameNumber), d.date, abbr, 'lineup1') } : d))
   const players = ids.map((id) => (mvp?.playerId && mvp.teamId === id ? { id: mvp.playerId, name: mvp.name } : null))
   return { winnerId: series.winner.id, gamesPlayed: games.length, days, players }
 }

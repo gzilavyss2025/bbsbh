@@ -1,0 +1,112 @@
+/* The decided World Series Hero (#2562, DecidedHero in Hero.jsx): the Series MVP on the stage and
+   the game cells that open each game's lineups. Split from hero.css, which holds the shared stage. */
+/* A decided Series with a known MVP: his cut-out on his club's side, his action photo filling the
+   other, and his tag, name, club and Series line at the foot of the stage over that photo. */
+.ww-hero__slab--action .ww-hero__wash {
+  /* A long fade in from the centre line and a soft top and foot, so the photo has no edge. */
+  --ww-wash-mask:
+    linear-gradient(var(--ww-slab-fade-direction), transparent, var(--ripple-mask) 65%),
+    linear-gradient(to bottom, transparent, var(--ripple-mask) 22%, var(--ripple-mask) 60%, transparent);
+  left: 0;
+  right: 0;
+  object-position: center 20%;
+}
+.ww-hero__slab--action .ww-hero__wash.is-ready { opacity: 0.45; }
+/* The action side drops its diagonal cut: the photo fades out instead of ending on a line. */
+.ww-hero__slab--action { clip-path: none; }
+
+/* layout-exempt: the MVP block stacks tag, name and his line at the foot of the stage */
+.ww-hero__mvp {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+  padding: var(--space-3);
+  border-top: var(--bw-hair) solid var(--sheen-light);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+
+.ww-hero__mvptag {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--award-line);
+}
+
+.ww-hero__mvp a.ww-hero__mvpname {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-title);
+  color: var(--text-on-ink-cream);
+}
+
+.ww-hero__mvpclub {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink-soft);
+}
+
+/* layout-exempt: his five figures share one row in equal cells */
+.ww-hero__mvpstats {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  margin: var(--space-1) 0 0;
+  border-top: var(--bw-hair) solid var(--sheen-light);
+}
+
+/* layout-exempt: label stacked over figure */
+.ww-hero__mvpstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1) 0;
+}
+.ww-hero__mvpstat + .ww-hero__mvpstat { border-left: var(--bw-hair) solid var(--sheen-light); }
+
+.ww-hero__mvpstat dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink-soft);
+}
+.ww-hero__mvpstat dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-ink-cream);
+}
+
+@media (min-width: 740px) {
+  .ww-hero--mvp .ww-hero__matchup { position: relative; }
+  .ww-hero__mvp {
+    position: absolute;
+    bottom: 0;
+    border-top: 0;
+    width: 46%;
+    padding: var(--space-6) var(--space-5) var(--space-4);
+    background: linear-gradient(to top, var(--surface-stamped-ink) 45%, transparent);
+  }
+  .ww-hero--mvp { --ww-stage-h: calc(var(--space-16) * 5 + var(--space-10)); }
+  .ww-hero__mvp--home { right: 0; }
+  .ww-hero__mvp--away { left: 0; }
+  .ww-hero__mvpstat dd { font-size: var(--fs-title-lg); }
+}
+
+/* A decided Series' game cell opens that game's lineups: one link stretched over the box. */
+.ww-cal__day--link { position: relative; }
+.ww-cal__link { position: absolute; inset: 0; z-index: 1; }
+.ww-cal__link:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--space-1)); }
+@media (hover: hover) and (pointer: fine) {
+  .ww-cal__day--link:hover { background: var(--surface-stamped-tint); }
+}

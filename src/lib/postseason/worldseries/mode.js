@@ -45,6 +45,8 @@ export function historySeriesMode(h) {
     gameNumber: g.gameNumber,
     date: g.date,
     winnerId: g.awayScore > g.homeScore ? g.awayTeamId : g.homeScore > g.awayScore ? g.homeTeamId : null,
+    awayId: g.awayTeamId ?? null,
+    homeId: g.homeTeamId ?? null,
   }))
   if (!games.length) return null
   const slots = [h.teamA, h.teamB].map((t) => ({ club: { id: t.teamId, abbreviation: teamAbbr({ id: t.teamId }) }, wins: t.wins }))

@@ -28,6 +28,8 @@ import { Card } from '../ui/frame/Card.jsx'
 //             in the series, else the Game 1 home club)
 //   stamped   the World Series page's look: a stamped card named on its ink tab, the club
 //             switch on a row of its own inside, in place of the label head over a sheet card
+//   fixed     no club switch: the strip stays on `defaultId` (the finished World Series page
+//             draws it from the Series winner's side)
 // The SVG is drawn in the CSS pixels of its own box (measured below), so its
 // labels stay at their true type size at every width instead of scaling with
 // a fixed viewBox. 360 is the first paint, before the box is measured.
@@ -37,7 +39,7 @@ const LABEL_H = 26
 const GAP = 4
 const MARK = 16
 
-export function SeriesFlow({ series, gameSignals, homeIdByPk, clubs, defaultId, stamped = false }) {
+export function SeriesFlow({ series, gameSignals, homeIdByPk, clubs, defaultId, stamped = false, fixed = false }) {
   // The reader's pick holds only while it names a club in THIS series; until
   // then (and after a move to another series) the strip follows `defaultId`,
   // which can change after the first paint (the favourite club loads).
@@ -87,7 +89,7 @@ export function SeriesFlow({ series, gameSignals, homeIdByPk, clubs, defaultId, 
   const x = (i, t) => RAIL + i * slotW + t * (slotW - GAP)
   const y = (pct) => PLOT_T + (1 - pct / 100) * PLOT_H
 
-  const switcher = (
+  const switcher = fixed ? null : (
     <span className="psseries__flowswitch">
       {clubs.map((c) => (
         <Pill
@@ -118,7 +120,7 @@ export function SeriesFlow({ series, gameSignals, homeIdByPk, clubs, defaultId, 
         className="psseries__flow"
         {...(stamped ? { frame: 'stamped', label: 'How the games went', labelAs: 'h3' } : null)}
       >
-        {stamped && <div className="psseries__flowbar">{switcher}</div>}
+        {stamped && switcher && <div className="psseries__flowbar">{switcher}</div>}
         <div className="psseries__flowreadout" aria-live="polite">
           {selected && <Readout panel={selected} perspectiveId={perspectiveId} abbr={abbr} />}
           {selected?.kind === 'played' && (

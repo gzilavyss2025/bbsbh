@@ -357,11 +357,11 @@ test('a two-way player is a hitter, unless only his pitching has a line', () => 
 const WS_2025 = {
   decided: true,
   winner: { id: 119 },
-  slots: [{ club: { id: 119 }, wins: 4 }, { club: { id: 141 }, wins: 3 }],
+  slots: [{ club: { id: 119, abbreviation: 'LAD' }, wins: 4 }, { club: { id: 141, abbreviation: 'TOR' }, wins: 3 }],
   games: [
     ['2025-10-24', 141], ['2025-10-25', 119], ['2025-10-27', 119], ['2025-10-28', 141],
     ['2025-10-29', 141], ['2025-10-31', 119], ['2025-11-01', 119],
-  ].map(([date, winnerId], i) => ({ gamePk: 813020 + i, gameNumber: i + 1, date, winnerId })),
+  ].map(([date, winnerId], i) => ({ gamePk: 813020 + i, gameNumber: i + 1, date, winnerId, awayId: i >= 2 && i <= 4 ? 141 : 119, homeId: i >= 2 && i <= 4 ? 119 : 141 })),
   upcoming: [],
 }
 const YAMAMOTO = { playerId: 808967, name: 'Yoshinobu Yamamoto', teamId: 119 }
@@ -389,4 +389,12 @@ test('the Series MVP is the only player drawn, on his own club\'s side', () => {
 test('with no MVP known (the live page), neither side draws a player', () => {
   assert.deepEqual(decidedHero(WS_2025).players, [null, null])
   assert.deepEqual(decidedHero(WS_2025, { name: 'No id', teamId: 119 }).players, [null, null])
+})
+
+test('each decided game cell opens its game lineups; a game row with no clubs has no link', () => {
+  const days = decidedHero(WS_2025, YAMAMOTO).days.filter((d) => d.kind === 'game')
+  assert.equal(days[0].path, '/10242025/ladtor/lineup1')
+  assert.equal(days[2].path, '/10272025/torlad/lineup1')
+  const bare = { ...WS_2025, games: WS_2025.games.map(({ awayId, homeId, ...g }) => g) }
+  assert.equal(decidedHero(bare).days.find((d) => d.kind === 'game').path, null)
 })

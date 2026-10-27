@@ -39,3 +39,8 @@ test('a history series is decided: it names its winner and each game\'s winner f
   assert.equal(mode.series.winner.id, 119)
   assert.deepEqual(mode.series.games.map((g) => g.winnerId), [141, 119])
 })
+
+test('each history game carries its away and home club, for its lineups link', () => {
+  const { mode } = historySeriesMode(history)
+  assert.deepEqual(mode.series.games.map((g) => [g.awayId, g.homeId]), [[119, 141], [119, 141]])
+})
