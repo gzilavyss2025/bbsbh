@@ -75,14 +75,14 @@ function gameSoFar(h, f, Headshot, line, PlayerLink) {
   ]
 }
 
-// A note about one man ("His first World Series start") is read beside no photo here, so his surname
-// takes the place of "his".
+// A note about one starter ("His first World Series start", "in his starts") is read beside no photo
+// here, so his surname takes the place of "his". Only these two kinds: elsewhere a note's "his" can be
+// another man's (a matchup note is keyed to the hitter but "his slider" is the pitcher's).
+const NAMED_KINDS = new Set(['wsStarterStart', 'starterRec'])
 const named = (n, nameOf) => {
-  const last = n.personId != null ? nameOf(n.personId) : null
+  const last = NAMED_KINDS.has(n.kind) && n.personId != null ? nameOf(n.personId) : null
   if (!last) return n.text
-  const t = n.text.replace(/^His /, `${last}'s `).replace(/ his /g, ` ${last}'s `)
-  // A note that opens on a bare verb ("Shows 3 pitches to lefties") gets him as its subject.
-  return t.includes(last) ? t : `${last} ${t[0].toLowerCase()}${t.slice(1)}`
+  return n.text.replace(/^His /, `${last}'s `).replace(/ his /g, ` ${last}'s `)
 }
 
 // `Scroll` (Checkpoint.jsx) lets the list scroll in its box and bounces a cue while more is below.
