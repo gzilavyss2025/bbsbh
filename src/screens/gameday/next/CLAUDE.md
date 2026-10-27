@@ -20,3 +20,7 @@ design: `.scratch/gameday-design/`. Without the flag `InningViewer` renders as i
   `heroModel.js` is the scorebook box's pure model. It reads the live snapshot's `last` (the last finished
   at-bat as of the cursor, `deriveLiveState`) inside a `SealBox` reveal function. The box has one height per
   tier in `styles/gameday-next/hero.css`; keep it free of pitch-count-driven size.
+- `checkpoint/` is the half-end checkpoint (#2572): `checkpointMarkup.js` builds it (`npm test` renders it),
+  calling `api/gameday/checkpoint.js` inside a `SealBox` reveal function. InningViewer sets `checkpoint`
+  once the half on screen is at or under the mark and its last step is shown; it then takes the stage's
+  slot. One page under tabs on the phone, all at T, L, D and under Motion: Reduced (`checkpoint.css`).

@@ -1,0 +1,106 @@
+/* ==== GAMEDAY, the checkpoint (#2572; design: .scratch/gameday-design/round2/checkpoint.js) ====
+   It fills the stage's slot once the third out is revealed. At T, L and D every page shows: the
+   tally, pitching and game pages on the left, the at-bats then the notes on the right. On the phone
+   one page shows under labelled tabs, and every page (scrolling) under Motion: Reduced. */
+
+/* The SealBox wrapper adds nothing here (as in hero.css). */
+.gdnext__slot--stage > .statgrid { display: contents; }
+/* layout-exempt: the head, the tabs, the pages */
+.gdcp { height: 100%; display: flex; flex-direction: column; background: var(--surface-card); }
+/* layout-exempt: the title and the score in one ink row */
+.gdcp__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
+  padding: var(--space-1h) var(--space-2h); background: var(--surface-stamped-ink); color: var(--text-on-ink);
+  font: var(--w-bold) var(--fs-field) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.gdcp__head small { font: var(--w-medium) var(--fs-cell) / var(--lh-solid) var(--font-body); color: var(--text-on-ink-dim); }
+
+/* layout-exempt: one tab per page, equal widths */
+.gdcp__tabs { display: flex; border-bottom: var(--bw-heavy) solid var(--border-stamped); }
+.gdcp__tabs button { flex: 1; min-height: 44px; margin: 0; padding: 0; border: 0; border-right: var(--bw-rule) solid var(--border-stamped);
+  background: none; color: var(--text-muted); cursor: pointer; white-space: nowrap;
+  font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-wide); text-transform: uppercase; }
+.gdcp__tabs button:last-child { border-right: 0; }
+.gdcp__tabs button:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }
+.gdcp__tabs [aria-selected='true'] { background: var(--surface-row-selected); color: var(--text-heading); box-shadow: inset 0 -4px 0 var(--border-stamped); }
+
+.gdcp__body { flex: 1; min-height: 0; overflow: hidden; }
+/* layout-exempt: a page's heading over its figures */
+.gdcp__page { display: none; min-width: 0; min-height: 0; flex-direction: column; gap: var(--space-2);
+  padding: var(--space-2h) var(--space-3); overflow: hidden; }
+.gdcp__page.is-on { display: flex; animation: gdcp-ink 220ms var(--ease-out) backwards; }
+@keyframes gdcp-ink { from { opacity: 0; } }
+.gdcp__page h4 { margin: 0; font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display);
+  letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
+.gdcp__label { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label);
+  text-transform: uppercase; color: var(--text-caption); }
+
+/* T, L and D: every page at once, no tabs. */
+.gdnext:not([data-tier='P']) .gdcp__tabs { display: none; }
+/* layout-exempt: two columns of pages; the at-bats (the tallest) take the right */
+.gdnext:not([data-tier='P']) .gdcp__body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto auto minmax(0, 1fr); grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar atBats'; }
+.gdnext:not([data-tier='P']) .gdcp[data-pages='5'] .gdcp__body { grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar facts'; }
+.gdnext:not([data-tier='P']) .gdcp__page { display: flex; animation: none; grid-area: var(--gdcp-area);
+  border-right: var(--bw-rule) solid var(--border-rule); border-bottom: var(--bw-rule) solid var(--border-rule); }
+.gdcp__page[data-page='tally'] { --gdcp-area: tally; }
+.gdcp__page[data-page='pitching'] { --gdcp-area: pitching; }
+.gdcp__page[data-page='atBats'] { --gdcp-area: atBats; }
+.gdcp__page[data-page='gameSoFar'] { --gdcp-area: gameSoFar; }
+.gdcp__page[data-page='facts'] { --gdcp-area: facts; }
+
+/* layout-exempt: the grid's pages run tighter so the left column fits its row */
+.gdnext:not([data-tier='P']) .gdcp__page { gap: var(--space-1h); padding: var(--space-2) var(--space-3); }
+.gdnext:not([data-tier='P']) .gdcp__tally b { font-size: var(--fs-title-md); }
+
+/* Motion: Reduced (the OS or My Tally): every page at once, no ink-in; the phone's slot scrolls. */
+@media (prefers-reduced-motion: reduce) {
+  .gdcp__tabs { display: none; }
+  .gdcp__body { overflow-y: auto; }
+  .gdcp .gdcp__page { display: flex; animation: none; }
+}
+:root[data-motion='reduced'] .gdcp__tabs { display: none; }
+:root[data-motion='reduced'] .gdcp__body { overflow-y: auto; }
+:root[data-motion='reduced'] .gdcp .gdcp__page { display: flex; animation: none; }
+
+/* Page 1, the tally: R, H, E, LOB, then the half's pitches, whiffs and fouls. */
+/* layout-exempt: equal cells, a figure over its label */
+.gdcp__tally { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: var(--bw-heavy) solid var(--border-stamped); }
+.gdcp__tally + .gdcp__tally { margin-top: calc(-1 * var(--space-2)); border-top: 0; }
+/* layout-exempt: a figure over its label */
+.gdcp__tally div { display: flex; flex-direction: column; align-items: center; padding: var(--space-1h) 0; border-right: var(--bw-rule) solid var(--border-rule); }
+.gdcp__tally div:last-child { border-right: 0; }
+.gdcp__tally b { font: var(--w-medium) var(--fs-title-lg) / var(--lh-solid) var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-heading); }
+.gdcp__tally span { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
+
+/* Page 2, pitching; page 4's line. */
+.gdcp__table, .gdcp__line { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: var(--fs-small); }
+.gdcp__table th, .gdcp__line th { font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); color: var(--text-caption); padding: var(--space-1); }
+.gdcp__table th { text-align: right; border-bottom: var(--bw-heavy) solid var(--border-stamped); }
+.gdcp__table td { text-align: right; padding: var(--space-1); border-bottom: var(--bw-hair) solid var(--border-hairline); }
+.gdcp__table :is(th, td):first-child { text-align: left; }
+.gdcp__table .is-total td { font-weight: var(--w-bold); border-top: var(--bw-heavy) solid var(--border-stamped); border-bottom: 0; }
+.gdcp__line td { text-align: center; padding: var(--space-1) 0; border-top: var(--bw-hair) solid var(--border-hairline); border-left: var(--bw-hair) solid var(--border-hairline); }
+.gdcp__line tbody th { text-align: left; }
+.gdcp__line .is-total { border-left: var(--bw-heavy) solid var(--border-stamped); font-weight: var(--w-bold); }
+/* The book is closed (ADR-0046): the double rule after the last inning. */
+.gdcp__line .is-double { border-right: 4px double var(--border-stamped); } /* raw-value-exempt: a double rule needs three strokes */
+
+/* Page 3, the at-bats in order. */
+.gdcp__rows, .gdcp__notes { margin: 0; padding: 0; list-style: none; font-size: var(--fs-small); }
+/* layout-exempt: number, name, code, RBI, out */
+.gdcp__rows li { display: grid; grid-template-columns: 30px minmax(0, 1fr) 40px 44px 20px; gap: var(--space-1h); align-items: center;
+  padding: var(--space-1) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
+.gdcp__rows li.is-sub { display: block; font-size: var(--fs-cell); color: var(--text-caption); }
+.gdcp__rows b { font: var(--w-bold) var(--fs-field) / var(--lh-solid) var(--font-display); color: var(--text-heading); }
+.gdcp__rows b.is-looking { display: inline-block; justify-self: start; transform: scaleX(-1); }
+.gdcp__name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* layout-exempt: the out number in its box */
+.gdcp__out { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;
+  border: var(--bw-rule) solid var(--text-heading); font-size: var(--fs-cell); font-weight: var(--w-bold); }
+
+/* Page 4's due-up; page 5's notes. */
+/* layout-exempt: a wrapping row of chips */
+.gdcp__due { display: flex; flex-wrap: wrap; gap: var(--space-1); align-items: center; }
+.gdcp__due .gdcp__label { flex-basis: 100%; }
+.gdcp__due span:not(.gdcp__label) { padding: var(--space-1) var(--space-1h); border: var(--bw-rule) solid var(--border-rule);
+  background: var(--surface-inset); font-size: var(--fs-cell); white-space: nowrap; }
+.gdcp__notes li { margin-bottom: var(--space-1h); padding: var(--space-1h) var(--space-2); background: var(--surface-inset); border: var(--bw-rule) solid var(--border-rule); }

@@ -431,8 +431,8 @@
     },
     "gameday/checkpoint.js": {
       "class": "reveal-only",
-      "why": "Gameday's half-end checkpoint pages (#2605, #2572): the closed half's R/H/E/LOB; its pitches, strikes, whiffs and fouls per pitcher; its at-bats in order with the substitutions a scorer writes; the line through this half with who is due up next (dueup.js, lineupEntering's gate; no pitcher named); and the next half's score-free notes (between-innings.js), left out when empty. Answers only for a half at or under revealedThrough, reads nothing after it but the next half's pre-pitch entries, and keys the last half on selectFinalReached with the clamped mark, never selectIsFinal (ADR-0043's double rule). No screen imports it yet.",
-      "importers": []
+      "why": "Gameday's half-end checkpoint pages (#2605, #2572): the closed half's R/H/E/LOB; its pitches, strikes, whiffs and fouls per pitcher; its at-bats in order with the substitutions a scorer writes; the line through this half with who is due up next (dueup.js, lineupEntering's gate; no pitcher named); and the next half's score-free notes (between-innings.js), left out when empty. Answers only for a half at or under revealedThrough, reads nothing after it but the next half's pre-pitch entries, and keys the last half on selectFinalReached with the clamped mark, never selectIsFinal (ADR-0043's double rule). Gameday's checkpoint (screens/gameday/next/checkpoint/checkpointMarkup.js) calls it inside a SealBox reveal function, only for a half at or under the mark once its last step is on screen.",
+      "importers": ["screens/gameday/next/checkpoint/checkpointMarkup.js"]
     },
     "gameday/dayLine.js": {
       "class": "reveal-only",
