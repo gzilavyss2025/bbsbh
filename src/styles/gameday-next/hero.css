@@ -37,6 +37,15 @@
 .gdhero__base { fill: none; stroke: var(--border-rule); stroke-width: 1.2; }
 .gdhero__leg { fill: none; stroke: var(--text-heading); stroke-width: 2.6; stroke-linecap: square; }
 .gdhero__run { fill: var(--text-heading); opacity: 0.22; }
+/* The open at-bat (ADR-0123): an empty diamond, its code under tape until the result tap */
+.gdhero__code.is-taped {
+  padding: 2px var(--space-1h);
+  background: var(--seal-texture);
+  color: var(--text-on-seal);
+  font: var(--w-bold) var(--fs-label) / 1 var(--font-display);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
 .gdhero__code { position: absolute; left: var(--space-1h); bottom: var(--space-1); font: var(--w-bold) var(--fs-title-lg) / var(--lh-solid) var(--font-display);
   color: var(--text-heading); }
 /* The backwards K a scorer draws for a called third strike */

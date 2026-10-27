@@ -432,7 +432,9 @@
     "gameday/checkpoint.js": {
       "class": "reveal-only",
       "why": "Gameday's half-end checkpoint pages (#2605, #2572): the closed half's R/H/E/LOB; its pitches, strikes, whiffs and fouls per pitcher; its at-bats in order with the substitutions a scorer writes; the line through this half with who is due up next (dueup.js, lineupEntering's gate; no pitcher named); and the next half's score-free notes (between-innings.js), left out when empty. Answers only for a half at or under revealedThrough, reads nothing after it but the next half's pre-pitch entries, and keys the last half on selectFinalReached with the clamped mark, never selectIsFinal (ADR-0043's double rule). Gameday's checkpoint (screens/gameday/next/checkpoint/checkpointMarkup.js) calls it inside a SealBox reveal function, only for a half at or under the mark once its last step is on screen.",
-      "importers": ["screens/gameday/next/checkpoint/checkpointMarkup.js"]
+      "importers": [
+        "screens/gameday/next/checkpoint/checkpointMarkup.js"
+      ]
     },
     "gameday/dayLine.js": {
       "class": "reveal-only",
@@ -473,14 +475,20 @@
         "api/gameday/defense.js",
         "api/gameday/moments/moments.js",
         "api/gameday/reviews.js",
+        "api/gameday/subSteps.js",
         "screens/gameday/next/panels/GamedayPanels.jsx",
         "screens/gameday/next/panels/panelData.js"
       ]
     },
     "gameday/subSteps.js": {
       "class": "reveal-only",
-      "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. No screen imports it yet.",
-      "importers": []
+      "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. openAtBat finds the reader's next at-bat past the step cursor with PlayByPlay's own step bounds. Gameday calls it at the advance tap (steps/subStep.js nextSub, which returns only a count) and inside SealBox reveal functions (the open box, the event card, the stage's one pitch), and those read only the sub-steps up to the reader's sub-step cursor.",
+      "importers": [
+        "screens/gameday/next/hero/heroMarkup.js",
+        "screens/gameday/next/stage/GamedayStage.js",
+        "screens/gameday/next/steps/eventCardMarkup.js",
+        "screens/gameday/next/steps/subStep.js"
+      ]
     },
     "highlights.js": {
       "class": "mixed",
@@ -820,6 +828,7 @@
         "api/gameday/checkpoint.js",
         "api/gameday/defense.js",
         "api/gameday/stepCut.js",
+        "api/gameday/subSteps.js",
         "api/pitchers.js",
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
@@ -841,6 +850,7 @@
       "class": "reveal-only",
       "why": "Readers over computeHalfInningFeed's entries — stepping boundaries and the cap-clamped live-state snapshot. Barrel-internal.",
       "importers": [
+        "api/gameday/subSteps.js",
         "api/playbyplay.js"
       ]
     },

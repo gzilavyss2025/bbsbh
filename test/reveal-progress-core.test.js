@@ -37,12 +37,12 @@ test('parseRevealMark collapses null / garbage / negative / fractional to -1', (
 // parseAtBatMark — the "{halfIdx}:{count}" stepping cursor (ADR-0016)
 // --------------------------------------------------------------------------
 test('parseAtBatMark reads a well-formed cursor', () => {
-  assert.deepEqual(parseAtBatMark('4:2'), { halfIdx: 4, count: 2 })
-  assert.deepEqual(parseAtBatMark('0:0'), { halfIdx: 0, count: 0 })
+  assert.deepEqual(parseAtBatMark('4:2'), { halfIdx: 4, count: 2, sub: 0 })
+  assert.deepEqual(parseAtBatMark('0:0'), { halfIdx: 0, count: 0, sub: 0 })
 })
 
 test('parseAtBatMark falls back to the inert cursor on anything malformed', () => {
-  const inert = { halfIdx: -1, count: 0 }
+  const inert = { halfIdx: -1, count: 0, sub: 0 }
   assert.deepEqual(parseAtBatMark(null), inert)
   assert.deepEqual(parseAtBatMark('x:2'), inert)
   assert.deepEqual(parseAtBatMark('3'), inert) // missing count

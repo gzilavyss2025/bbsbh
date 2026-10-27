@@ -28,3 +28,7 @@ design: `.scratch/gameday-design/`. Without the flag `InningViewer` renders as i
   calling `api/gameday/checkpoint.js` inside a `SealBox` reveal function. InningViewer sets `checkpoint`
   once the half on screen is at or under the mark and its last step is shown; it then takes the stage's
   slot. One page under tabs on the phone, all at T, L, D and under Motion: Reduced (`checkpoint.css`).
+- `steps/` is sub-step stepping (ADR-0123, #2570, #2571): `subStep.js` holds the pitch-mode flag
+  (`bbsbh:pitchmode:{gamePk}`), the words, `nextSub` (read at the tap; it returns a count only) and the
+  stage's key; the cursor is `useRevealProgress`'s `{halfIdx}:{count}:{sub}`. The hero's open box and
+  `eventCardMarkup.js` (the stage's lower third) read `openAtBat` inside a `SealBox` reveal function, up to `sub`.
