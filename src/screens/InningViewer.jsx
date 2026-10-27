@@ -555,6 +555,7 @@ export function InningViewer({
           feed, meta, regulation, unlocked: renderUnlocked, mark: renderRevealedThrough, runsInProgress, curIdx,
           onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
           inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : curAtBatCount,
+          pitcherId: curLiveState?.midHalfPitcherId ?? null, treatment: winProbTreatment,
         }}
         checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
         engine={pageTurn}

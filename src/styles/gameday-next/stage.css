@@ -10,8 +10,8 @@
 /* layout-exempt: the box beside its words, across the stage's foot */
 .gdevent { position: absolute; z-index: 2; left: var(--space-2); right: var(--space-2); bottom: var(--space-2); display: flex;
   gap: var(--space-2); align-items: center; padding: var(--space-1h); background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); }
-.gdnext .gdevent .gdhero__box { height: 72px; grid-template-columns: 48px minmax(0, 1fr); }
-.gdevent .gdhero__code { font-size: var(--fs-title-sm); }
+.gdnext .gdevent .gdhero__box { height: 72px; grid-template-columns: minmax(0, 1fr) 54px; --gd-code-h: 22px; }
+.gdevent .gdhero__code { font-size: var(--fs-label); }
 .gdevent .gdhero__col { gap: 0; padding: 2px; }
 .gdevent .gdhero__pip { font-size: var(--fs-cell); }
 .gdnext[data-tier='L'] .gdevent .gdhero__box, .gdnext[data-tier='D'] .gdevent .gdhero__box { height: 84px; }

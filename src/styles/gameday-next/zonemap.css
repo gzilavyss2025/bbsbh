@@ -14,6 +14,8 @@
 .gdzonemap__cell { padding: var(--space-1h) 0; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
   font-variant-numeric: tabular-nums; color: var(--text-heading); border: var(--bw-hair) solid var(--border-stamped); }
 .gdnext[data-tier='L'] .gdzonemap__cell, .gdnext[data-tier='D'] .gdzonemap__cell { padding: var(--space-2) 0; font-size: var(--fs-small); }
+.gdzonemap__num { position: relative; display: inline-block; }
+.gdzonemap__pt { position: absolute; right: 100%; }
 .gdzonemap__cell.is-cold { background: var(--stage-zone-cold); color: var(--text-on-ink); }
 .gdzonemap__cell.is-cool { background: var(--stage-zone-cool); }
 .gdzonemap__cell.is-lukewarm { background: var(--stage-zone-lukewarm); }

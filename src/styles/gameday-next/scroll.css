@@ -1,0 +1,22 @@
+/* ==== GAMEDAY, a box that scrolls when its words run past it (ScrollCue.jsx): the game notes, the hero's play.
+   While more is below, the foot fades and a chevron bounces there; a tap on it scrolls on. */
+.gdscroll { position: relative; flex: 1; min-height: 0; }
+.gdscroll__in { height: 100%; overflow-y: auto; overscroll-behavior: contain; padding-right: var(--space-2); box-sizing: border-box; }
+/* The scrollbar as a scorebook ruling: a paper channel with a hairline edge, a square ink bar in it. */
+.gdscroll__in::-webkit-scrollbar { width: var(--space-2); }
+.gdscroll__in::-webkit-scrollbar-track { background: var(--surface-inset); border-left: var(--bw-hair) solid var(--border-hairline); }
+.gdscroll__in::-webkit-scrollbar-thumb { background: var(--border-stamped); border: var(--bw-heavy) solid var(--surface-inset); border-radius: 0; }
+.gdscroll__in::-webkit-scrollbar-thumb:hover { background: var(--text-heading); }
+@supports not selector(::-webkit-scrollbar) { .gdscroll__in { scrollbar-width: thin; scrollbar-color: var(--border-stamped) var(--surface-inset); } }
+.gdscroll.has-more::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--space-8); pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--surface-card)); }
+/* layout-exempt: the chevron centred in its round button */
+.gdscroll__more { position: absolute; z-index: 1; left: 50%; bottom: var(--space-1); width: var(--space-6); height: var(--space-6); margin-left: calc(-0.5 * var(--space-6));
+  display: grid; place-items: center; padding: 0; border: var(--bw-heavy) solid var(--border-stamped); border-radius: 50%;
+  background: var(--surface-card); cursor: pointer; animation: gdscroll-bounce 1.4s var(--ease-out) infinite; }
+.gdscroll__more span { width: var(--space-2); height: var(--space-2); margin-top: calc(-0.5 * var(--space-1)); border-right: var(--bw-heavy) solid var(--text-heading);
+  border-bottom: var(--bw-heavy) solid var(--text-heading); transform: rotate(45deg); }
+.gdscroll__more:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--bw-heavy); }
+@keyframes gdscroll-bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(calc(-1 * var(--space-1h))); } }
+@media (prefers-reduced-motion: reduce) { .gdscroll__more { animation: none; } }
+:root[data-motion='reduced'] .gdscroll__more { animation: none; }

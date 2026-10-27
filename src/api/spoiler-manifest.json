@@ -430,8 +430,11 @@
     },
     "gameday/dayLine.js": {
       "class": "reveal-only",
-      "why": "Gameday's day lines (#2606): the batter's and the pitcher's line for today as of the reader's step. A line names results ('2-for-3'). Built from computeHalfInningFeed's cards WITH the step cap and sliced at it, and from computePitcherLines' own step clamp, so step k never sees step k+1; a half past revealedThrough + 1 answers null. No screen imports it yet; the fresh Gameday stage (#2568) will call it inside a SealBox reveal render function.",
-      "importers": []
+      "why": "Gameday's day lines (#2606): the batter's and the pitcher's line for today as of the reader's step. A line names results ('2-for-3'). Built from computeHalfInningFeed's cards WITH the step cap and sliced at it, and from computePitcherLines' own step clamp, so step k never sees step k+1; a half past revealedThrough + 1 answers null. Gameday's arm panel (screens/gameday/next/panels/GamedayPanels.jsx) calls pitcherDayLine inside a Sealable's SealBox reveal render function, only once the half is at or under revealedThrough + 1 (the same reach as the Field tab), with the panel's own step. The checkpoint's due-up cards (screens/gameday/next/checkpoint/checkpointMarkup.js) call batterDayLine inside its SealBox reveal function for the NEXT half at step 0, so it counts that side's earlier, revealed halves and none of the half it leads off.",
+      "importers": [
+        "screens/gameday/next/checkpoint/checkpointMarkup.js",
+        "screens/gameday/next/panels/GamedayPanels.jsx"
+      ]
     },
     "gameday/defense.js": {
       "class": "reveal-only",
@@ -876,12 +879,13 @@
     },
     "playbyplay/pitchInfo.js": {
       "class": "reveal-only",
-      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with two importers outside the barrel. Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. Gameday's subSteps.js reaches AUTOMATIC_CODES for the same reason (the same call is a sub-step on one surface and a card dot on the other). Both importers are themselves reveal-only, so the containment does not widen. Gameday's hero (heroModel.js) reaches pitchLadder to number the scorebook box's pips, so the box and the card cannot disagree; it runs it on an at-bat already inside the cursor, in a SealBox reveal render function.",
+      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with two importers outside the barrel. Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. Gameday's subSteps.js reaches AUTOMATIC_CODES for the same reason (the same call is a sub-step on one surface and a card dot on the other). Both importers are themselves reveal-only, so the containment does not widen. Gameday's hero (heroModel.js) reaches pitchLadder to number the scorebook box's pips, so the box and the card cannot disagree; it runs it on an at-bat already inside the cursor, in a SealBox reveal render function. Gameday's hero (screens/gameday/next/hero/GamedayHero.jsx) calls hasPitchLocations on a revealed at-bat card's pitchDetails, inside the hero's SealBox reveal render, to decide whether its pitch columns open the strike zone.",
       "importers": [
         "api/expresslane/rail.js",
         "api/gameday/subSteps.js",
         "api/playbyplay.js",
         "api/playbyplay/halfInningFeed.js",
+        "screens/gameday/next/hero/GamedayHero.jsx",
         "screens/gameday/next/hero/heroModel.js"
       ]
     },

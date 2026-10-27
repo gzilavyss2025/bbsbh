@@ -7,7 +7,7 @@ import { useRouteLink } from '../../../lib/nav.js'
 // The block names a reader sees (the menu and the empty slots).
 export const BLOCK_LABEL = {
   navigator: 'Line score', trail: 'Trail', pitches: 'Pitches', battingOrder: 'Batting order',
-  reference: 'Reference', eventLog: 'Event log', stage: 'Stage', hero: 'At-bat',
+  reference: 'Reference', arm: 'On the mound', eventLog: 'Event log', stage: 'Stage', hero: 'At-bat',
 }
 
 // The menu sheet: the blocks this tier folds (names only until their prompts build them), then

@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { disarm, rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
+import { disarm, replay, rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
 import { GamedayStage, restBatter, restZones } from '../src/screens/gameday/next/stage/GamedayStage.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 import { stagePlay, stateAt } from '../src/screens/gameday/next/stage/play.js'
@@ -44,6 +44,18 @@ test('the reveal tap plays the play it revealed, once', () => {
   assert.equal(s.playing, true)
   // A poll mid-play changes nothing.
   assert.equal(saw(s, 13, VIEW), s)
+})
+
+// Review finding 5: a trail-card replay tapped between the reveal tap and the engine's report must not
+// cancel the reveal; the revealed play still plays when it arrives.
+test('a replay tapped while a reveal tap waits keeps it armed: the revealed play still plays', () => {
+  const [armed] = tap(rest(12, VIEW), true, false)
+  const r = replay(armed, 10, false)
+  assert.equal(r.shown, 10)
+  assert.ok(r.armed, 'the pending reveal survives the replay')
+  const s = saw(r, 13, VIEW)
+  assert.equal(s.shown, 13)
+  assert.equal(s.playing, true)
 })
 
 test('a tap while playing finishes the play and does not advance; the next tap advances', () => {

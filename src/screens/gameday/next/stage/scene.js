@@ -68,5 +68,5 @@ export function project(cam, p, W, H) {
 // (round 1 finding, #2568).
 export function homeCamera(aspect) {
   const needHalfV = (Math.atan(Math.tan((11.3 * Math.PI) / 180) / Math.max(0.2, aspect)) * 180) / Math.PI
-  return camera([0, -30, 7.2], [0, 30, 2.2], Math.max(23, 2 * needHalfV))
+  return camera([0, -30, 7.2], [0, 30, 2.2], Math.max(17, 1.45 * needHalfV)) // zoomed in: the batter and the zone fill the frame
 }

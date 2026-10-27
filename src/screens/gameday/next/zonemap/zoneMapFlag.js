@@ -6,3 +6,4 @@ const store = (gamePk) => localStore(`bbsbh:zonemap:${gamePk}`, (v) => v === '1'
 
 export const zoneMapDismissed = (gamePk) => store(gamePk).read()
 export const dismissZoneMap = (gamePk) => store(gamePk).write('1')
+export const setZoneMapHidden = (gamePk, hidden) => store(gamePk).write(hidden ? '1' : '0')
