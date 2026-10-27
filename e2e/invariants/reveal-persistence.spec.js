@@ -25,6 +25,11 @@ async function cellName(page, half) {
 test('reveal mark advances forward, gates the line score and the checkpoint, and survives reload without over-revealing', async ({
   page,
 }) => {
+  // Revealing the top of the 1st is a tap per plate appearance. With motion on, every play the
+  // stage starts makes the next tap a skip (#2573); reduced motion rests the stage, so each tap is a
+  // step. The mark under test does not read motion. The longer timeout covers a cold dev server.
+  test.setTimeout(90_000)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto(`${GAME}/top1`)
 
   // Nothing revealed yet: the checkpoint (`.gdcp`, gated on the same mark) is
