@@ -42,7 +42,7 @@ import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
 import { isLookNew } from './gameday/next/useTier.js'
-import { nextSub, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { CAUGHT_UP, nextSub, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -484,6 +484,7 @@ export function InningViewer({
   const revealNextStep = () => {
     const n = nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode)
     if (n == null) return revealNextAtBat()
+    if (n === CAUGHT_UP) return
     focus.followLatest()
     revealSub(effInning, effHalf, n)
   }
@@ -741,10 +742,12 @@ export function InningViewer({
   if (isLookNew()) {
     // The advance reads the states InningActionBar draws, with the mode's words for a step, and
     // keeps its holds: no step while the page turns, no forward move while the half closes (ADR-0046).
+    // The live edge inside an at-bat still being played: a flag only, on a half in play (ADR-0055).
+    const edge = atHalfEdge || (currentHalfLive && currentSealed && nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode) === CAUGHT_UP)
     const advance = focus.stepAhead
       ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && focus.stepNext() }
       : currentSealed
-        ? { label: atHalfEdge ? 'Caught up' : stepWords(pitchMode), disabled: atHalfEdge, onClick: revealNextStep, reveal: true }
+        ? { label: edge ? 'Caught up' : stepWords(pitchMode), disabled: edge, onClick: revealNextStep, reveal: true }
         : nextIdx != null
           ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
           : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }

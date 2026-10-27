@@ -22,10 +22,13 @@ export function tap(s, reveals, reduced, covered = false) {
   return [{ ...s, armed: reveals ? { reduced } : null }, true]
 }
 
+// Keys are the last at-bat's index, or a sub-step's { count, sub, last } (steps/subStep.js stageKey).
+const same = (a, b) => a === b || (a != null && b != null && typeof a === 'object' && a.count === b.count && a.sub === b.sub && a.last === b.last)
+
 // Every render: the last at-bat and the half as of now.
 export function saw(s, seen, view) {
   if (view !== s.view) return rest(seen, view)
-  if (seen === s.seen) return s
+  if (same(seen, s.seen)) return s
   if (s.armed && seen != null) return { seen, view, armed: null, shown: seen, playing: !s.armed.reduced }
   return rest(seen, view)
 }

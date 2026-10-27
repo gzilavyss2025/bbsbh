@@ -12,7 +12,7 @@ import { stagePlay } from './play.js'
 // exists only in the revealed stage. The rest frame reads no play at all: the batter's side, the
 // pitcher's hand and the zone map's pre-game temperatures only.
 //
-// A sub-step (`shown` "count.sub", steps/subStep.js) plays one pitch: the at-bat's play cut at that
+// A sub-step (`shown` { count, sub }, steps/subStep.js stageKey) plays one pitch: the at-bat's play cut at that
 // pitch, with only the runner moves before it. Any other sub-step (an event, a change, an automatic
 // call) holds the field still under its card for one short beat (STILL), so a double tap on it is
 // swallowed like one on a pitch (#2573).
@@ -22,11 +22,10 @@ import { stagePlay } from './play.js'
 // switched on mid-play, must not leave the tap rule thinking it still plays.
 const STILL = 0.8 // seconds
 
-function subPlay(feed, inning, half, key) {
-  const [count, sub] = key.split('.').map(Number)
+function subPlay(feed, inning, half, { count, sub }) {
   const o = openAtBat(feed, inning, half, count)
   const s = o?.steps[sub - 1]
-  const p = o && feed.liveData.plays.allPlays.find((q) => q.about?.atBatIndex === o.card.atBatIndex)
+  const p = o?.play
   if (!p || s?.kind !== 'pitch') return { p: p && { matchup: p.matchup }, still: true }
   const cut = { ...p, playEvents: p.playEvents.filter((e, i) => (e.index ?? i) <= s.index), runners: (p.runners ?? []).filter((r) => r.details?.playIndex < s.index) }
   return { p: cut, still: false }
@@ -35,7 +34,7 @@ function subPlay(feed, inning, half, key) {
 function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd }) {
   const [start] = useState(() => performance.now())
   const { play, still } = useMemo(() => {
-    const { p, still } = typeof idx === 'string' ? subPlay(feed, inning, half, idx) : { p: feed.liveData.plays.allPlays.find((q) => q.about?.atBatIndex === idx), still: false }
+    const { p, still } = typeof idx === 'object' ? subPlay(feed, inning, half, idx) : { p: feed.liveData.plays.allPlays.find((q) => q.about?.atBatIndex === idx), still: false }
     return { play: stagePlay(p ?? {}, wall), still }
   }, [feed, idx, inning, half, wall])
   useEffect(() => {
@@ -69,6 +68,6 @@ function Rest({ StageCanvas, wall, batSide, pitchHand, zones }) {
 
 export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, playing, onEnd, batSide, pitchHand, zones }) {
   return shown != null
-    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: shown, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd }))
+    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd }))
     : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones })
 }

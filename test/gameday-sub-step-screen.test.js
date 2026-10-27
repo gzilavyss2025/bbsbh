@@ -10,12 +10,12 @@ import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { computeHalfInningFeed } from '../src/api/playbyplay.js'
 import { nextStepBoundary } from '../src/api/playbyplay/entriesView.js'
-import { openAtBat } from '../src/api/gameday/subSteps.js'
+import { openAtBat, runnerCard, subSteps } from '../src/api/gameday/subSteps.js'
 import { formatAtBatMark, parseAtBatMark } from '../src/hooks/revealProgressCore.js'
 import { heroMarkup } from '../src/screens/gameday/next/hero/heroMarkup.js'
 import { playLine } from '../src/screens/gameday/next/hero/heroModel.js'
 import { eventCardMarkup } from '../src/screens/gameday/next/steps/eventCardMarkup.js'
-import { nextSub, readPitchMode, stageKey, stepWords, subTap, writePitchMode } from '../src/screens/gameday/next/steps/subStep.js'
+import { CAUGHT_UP, nextSub, readPitchMode, stageKey, stepWords, subTap, writePitchMode } from '../src/screens/gameday/next/steps/subStep.js'
 import { GamedayStage } from '../src/screens/gameday/next/stage/GamedayStage.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 import { rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
@@ -164,6 +164,7 @@ test('the pitch-mode flag survives a reload and resets for another game', () => 
     assert.deepEqual(heard, ['bbsbh:pitchmode:824716']) // the same-tab echo the hook listens for
     writePitchMode(824716, false)
     assert.equal(readPitchMode(824716), false)
+    assert.equal(store.has('bbsbh:pitchmode:824716'), false) // off leaves no key behind
   } finally {
     delete globalThis.window
   }
@@ -171,12 +172,12 @@ test('the pitch-mode flag survives a reload and resets for another game', () => 
 
 test('a fast double tap during a pitch reveals one sub-step: the second tap ends the play', () => {
   const VIEW = 11
-  let s = rest(stageKey(30, 0, 56), VIEW)
+  let s = rest(stageKey({ count: 30, sub: 0 }, 56, null), VIEW)
   let advanced = 0
   const press = () => { const [n, go] = tap(s, true, false); s = n; if (go) advanced += 1 }
   press()
-  s = saw(s, stageKey(30, 1, 56), VIEW) // the engine shows sub-step 1
-  assert.equal(s.shown, '30.1')
+  s = saw(s, stageKey({ count: 30, sub: 1 }, 56, s.seen), VIEW) // the engine shows sub-step 1
+  assert.deepEqual(s.shown, { count: 30, sub: 1, last: 56 })
   assert.equal(s.playing, true)
   press() // the second tap lands mid-pitch
   assert.equal(advanced, 1)
@@ -189,7 +190,56 @@ test('the stage plays one pitch for a pitch sub-step, and holds still under an e
   const wall = wallFn(null)
   const StageCanvas = ({ play, t }) => h('i', { 'data-pitches': play.pitches.length, 'data-last': play.last?.code ?? '', 'data-ball': play.ball ? 1 : 0, 'data-t': t ?? '' })
   const c = countFor(F824, 6, 'bottom', 57)
-  const at = (sub) => renderToStaticMarkup(h(GamedayStage, { SealBox, StageCanvas, feed: F824, inning: 6, half: 'bottom', wall, shown: `${c}.${sub}`, playing: false }))
+  const at = (sub) => renderToStaticMarkup(h(GamedayStage, { SealBox, StageCanvas, feed: F824, inning: 6, half: 'bottom', wall, shown: { count: c, sub, last: 56 }, playing: false }))
   assert.match(at(3), /data-pitches="3" data-last="F" data-ball="0"/)
   assert.match(at(6), /data-pitches="0" data-last="" data-ball="0" data-t="0"/)
+})
+
+// ---- Stack review of #2669 ----------------------------------------------------------------------
+
+test('the result tap after sub-steps plays the NEW at-bat, once the engine reports it', () => {
+  const VIEW = 11
+  for (const before of [56, null]) { // null: the half's first at-bat
+    let s = rest(stageKey({ count: 5, sub: 6 }, before, null), VIEW)
+    ;[s] = tap(s, true, false) // the result tap: sub drops to 0 and the count moves in one render
+    s = saw(s, stageKey({ count: 8, sub: 0 }, before, s.seen), VIEW) // the engine has not reported yet
+    assert.equal(s.playing, false, 'nothing plays from the old last at-bat')
+    assert.ok(s.armed, 'the tap stays armed')
+    s = saw(s, stageKey({ count: 8, sub: 0 }, 57, s.seen), VIEW)
+    assert.equal(s.shown, 57)
+    assert.equal(s.playing, true)
+  }
+  // Keys compare by value: a re-render with an equal sub-step key changes nothing.
+  const s = rest(stageKey({ count: 5, sub: 2 }, 56, null), VIEW)
+  assert.equal(saw(s, stageKey({ count: 5, sub: 2 }, 56, s.seen), VIEW), s)
+})
+
+test('a live at-bat: the last known pitch stays a sub-step, then the advance is caught up', () => {
+  const c = countFor(F824, 6, 'bottom', 57)
+  const steps = subSteps(F824, { ...openAtBat(F824, 6, 'bottom', c).card, live: true })
+  assert.equal(steps.length, 7) // five pitches, the wild pitch, the last pitch so far: no result
+  assert.equal(subTap(steps, 6, true, true), 7)
+  assert.equal(subTap(steps, 7, true, true), CAUGHT_UP)
+  assert.equal(subTap(steps, 6, false, true), 7) // at-bat mode shows what has happened
+  assert.equal(subTap(steps, 7, false, true), CAUGHT_UP)
+  assert.equal(subTap(steps, 6, true, false), null) // a finished card's last step reveals the at-bat
+})
+
+test('the event card takes the runner\'s latest box, through a pinch runner to the man he ran for', () => {
+  const cards = [{ kind: 'atbat', batterId: 1, atBatIndex: 10 }, { kind: 'atbat', batterId: 2, atBatIndex: 11 }, { kind: 'atbat', batterId: 1, atBatIndex: 19 }]
+  assert.equal(runnerCard(cards, [], 1).atBatIndex, 19)
+  const ran = [{ kind: 'event', eventType: 'pinch_running', pinchId: 9, replacedId: 1 }, { kind: 'event', eventType: 'pinch_running', pinchId: 8, replacedId: 9 }]
+  assert.equal(runnerCard(cards, ran, 9).atBatIndex, 19)
+  assert.equal(runnerCard(cards, ran, 8).atBatIndex, 19)
+  assert.equal(runnerCard(cards, ran, 7), null)
+  // 823764 ab51: the runner caught stealing went in to run for a man who batted earlier in the half.
+  const c = countFor(F764, 7, 'bottom', 51)
+  assert.match(card(F764, 7, 'bottom', c, openAtBat(F764, 7, 'bottom', c).steps.length), /class="gdhero__box"/)
+})
+
+test('openAtBat is built once per feed, half and count, and carries its play', () => {
+  const c = countFor(F824, 6, 'bottom', 57)
+  const o = openAtBat(F824, 6, 'bottom', c)
+  assert.equal(openAtBat(F824, 6, 'bottom', c), o)
+  assert.equal(o.play.about.atBatIndex, 57)
 })
