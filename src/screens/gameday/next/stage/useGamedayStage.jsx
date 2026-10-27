@@ -22,10 +22,9 @@ import { disarm, ended, rest, saw, tap } from './tapRule.js'
 // `covered`: the checkpoint has the stage's slot; then the advance passes straight through.
 // `open` ({ count, sub }): a sub-step inside the open at-bat is what the stage plays (stageKey).
 export function useGamedayStage({ feed, last, reliever, view, inning, half, mark, stepAtBatIndex, covered, advance, open }) {
-  const seen = stageKey(open?.count, open?.sub ?? 0, last)
-  const [s, setS] = useState(() => rest(seen, view))
+  const [s, setS] = useState(() => rest(stageKey(open, last, null), view))
   // State adjusted during render (useBecameTrue's shape): the play starts on the frame it arrives.
-  const cur = saw(s, seen, view)
+  const cur = saw(s, stageKey(open, last, s.seen), view)
   if (cur !== s) setS(cur)
   const onEnd = useCallback(() => setS(ended), [])
 
@@ -42,7 +41,8 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
     async () => (hidden || !batter ? null : { id: batter.id, zones: (await fetchBatterZones(batter.id, gd.game.season, gd.teams?.home?.sport?.id ?? 1, date))?.zones }),
     [batter?.id, hidden, pk],
   )
-  const zones = restZones(zm, batter?.id, hidden)
+  // Inside an open at-bat the zone map stands down: a reload there rests under the sub-step's card.
+  const zones = open?.sub > 0 ? null : restZones(zm, batter?.id, hidden)
 
   // The pitcher on the mound at the cursor: the revealed change, else the half's opener (caller-gated
   // to the half reached, select.js). Hands are pre-game player data.

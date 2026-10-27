@@ -16,7 +16,7 @@ function card(h, feed, inning, half, count, sub) {
   const o = openAtBat(feed, inning, half, count)
   const s = o?.steps[sub - 1]
   if (!s || (s.kind !== 'event' && s.kind !== 'change')) return null
-  const play = feed.liveData.plays.allPlays.find((p) => p.about?.atBatIndex === o.card.atBatIndex)
+  const { play } = o
   const ev = play.playEvents.find((e) => e.index === s.index)
   const own = ev && !ev.isPitch
   const legs = s.legs ?? []
@@ -25,7 +25,7 @@ function card(h, feed, inning, half, count, sub) {
   const kind = own ? ev.details?.event : play.runners.find((r) => r.details?.playIndex === s.index && r.details?.runner?.id === s.playerId)?.details?.event
   const text = own ? ev.details?.description
     : `${runner?.boxscoreName ?? runner?.lastName ?? ''} ${end?.out ? 'out' : end?.to === 'score' ? 'scores' : `to ${BASE_WORD[end?.to] ?? end?.to}`}.`
-  const mine = s.kind === 'event' && o.done.find((c) => c.batterId === s.playerId)
+  const mine = s.kind === 'event' && o.runnerOf(s.playerId)
   const box = mine && end && { ...boxModel(mine), legs: BASE[end.out ? legs[0].from : end.to] ?? 0, out: null, rbi: 0 }
   return h('div', { className: 'gdevent', role: 'status' }, box && scorebookBox(h, box),
     h('div', { className: 'gdevent__txt' }, h('span', { className: 'gdevent__kind' }, kind ?? ''), h('span', null, text ?? '')))

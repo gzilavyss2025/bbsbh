@@ -46,7 +46,7 @@ const sealedBox = (h) => h('div', { className: 'gdhero__top' }, h('div', { class
 function openBox(h, feed, inning, half, { count, sub }, side) {
   const o = openAtBat(feed, inning, half, count)
   if (!o) return sealedBox(h)
-  const events = feed.liveData.plays.allPlays.find((p) => p.about?.atBatIndex === o.card.atBatIndex)?.playEvents ?? []
+  const events = o.play?.playEvents ?? []
   const shown = o.steps.slice(0, sub)
   const pitches = shown.filter((s) => s.kind === 'pitch' || s.kind === 'auto')
     .map((s) => s.call ?? pitchCallCode(events.find((e) => e.index === s.index)))
