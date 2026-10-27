@@ -1,0 +1,6 @@
+/* ==== GAMEDAY's big-play cutscene (screens/gameday/next/cutscene/) ====
+   A 192 x 144 pixel buffer scaled by a whole number: square pixels, no smoothing. Fills its slot
+   the way the stage does (stage.css). */
+.gdcut { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: var(--stage-frame); }
+.gdcut__canvas { flex: none; image-rendering: pixelated; }

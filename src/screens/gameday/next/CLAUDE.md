@@ -44,3 +44,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   (`bbsbh:pitchmode:{gamePk}`), the words, `nextSub` (read at the tap; it returns a count only) and the
   stage's key; the cursor is `useRevealProgress`'s `{halfIdx}:{count}:{sub}`. The hero's open box and
   `eventCardMarkup.js` (the stage's lower third) read `openAtBat` inside a `SealBox` reveal function, up to `sub`.
+- `cutscene/` is the big-play cutscene, built standalone and not yet mounted: `cutsceneTimeline.js` (pure clock),
+  `drawCutscene.js` (slot-index buffer, the "Night Game" direction), `cutsceneArt.js` (the hand-placed batter in
+  four poses, the font, the chip), `CutsceneCanvas` (palette from the `--stage-*` tokens plus a club `kit`). The
+  mount decides which play earns it, inside a `SealBox` reveal function, and hands it the words.

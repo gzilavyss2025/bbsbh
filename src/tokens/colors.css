@@ -328,4 +328,7 @@
   --stage-skin: #e2a67b; --stage-skin-shade: #9a6445; --stage-bat: #dba45f; --stage-landing: #f5cf3e;
   --stage-zone-cold: #3b6fb6; --stage-zone-cool: #8fb3df; --stage-zone-lukewarm: #e8e2cf; --stage-zone-warm: #e8a76a; --stage-zone-hot: #c3323b;
   --stage-frame: var(--stage-outline);
+  /* The big-play cutscene (screens/gameday/next/cutscene/) adds the night stands' back wall, a lighter
+     skin, the road kit's highlight, leather for the belt, and the bat's shade. */
+  --stage-night: #191a2e; --stage-skin-light: #f4ccb3; --stage-kit-road-light: #e2def0; --stage-leather: #5e3422; --stage-bat-shade: #9c6a32;
 }
