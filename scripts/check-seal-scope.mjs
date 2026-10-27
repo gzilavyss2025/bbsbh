@@ -53,9 +53,8 @@ const ALLOWLIST = {
   '05-masthead-nav.css': ['.masthead__at-ghost'],
   '06-loader-and-cards.css': ['.gamecard__atmark-ghost'],
 
-  // .btn--reveal IS the cover carried into the innings bar. .liveedge replaces
-  // it once the reader has caught up to a half still being played (ADR-0055).
-  '07-team-logo-and-buttons.css': ['.liveedge', '.liveedge__dot', '.btn--reveal'],
+  // .btn--reveal IS the cover carried onto a bar (the lineup dock's catch-up).
+  '07-team-logo-and-buttons.css': ['.btn--reveal'],
   // .btn--seal is the Game Log's mint strip (ADR-0035): minting is the one
   // action that leaves something behind on the far side of a seal. It moved
   // here with the rest of the button's skins when .btn left 07 (#1130), and it

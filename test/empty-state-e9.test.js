@@ -54,7 +54,6 @@ test('E9: the slate keeps its .btn caps rule, and the slate\'s error line is a N
 // site is dead weight; this fails the day one of them is orphaned.
 const KEPT = [
   'txpage__empty',
-  'roster__empty',
   'boxlines__empty',
   'prospects__empty',
   'payboard__empty',

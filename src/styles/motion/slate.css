@@ -31,8 +31,7 @@
 
 /* ---------------------------------------------------------------- #978 */
 /* The app's one idle beat, shared by every "this game is in progress" dot:
-   the slate card's LIVE pill below, and the innings bar's .liveedge__dot in
-   motion/innings.css.
+   the slate card's LIVE pill below.
 
    A slow sigh on the compositor's two free properties, deliberately NOT the
    outward ring an alert would push — the reader is keeping score by hand and

@@ -20,13 +20,13 @@ The OVR bars (`docs/ovr-rating.md`). `OvrBars` draws the attribute rows in the p
 
 ## `gamehud/`
 
-The two stamped "due up" cards in the innings viewer, `DueUpNextCard` ("Due up next", the other side's next half) and `UpNextBatters` ("Due up", the half's own batters before it starts), both draw through `dueup/DueUpBatters` (`styles/focus/dueup-next.css`): a bare headshot, the batting slot, the name and one `H-AB` or average line per batter, from `src/api/boxscore/batterLine.js`, capped at `revealedThrough`.
+The stamped "due up" card `UpNextBatters` ("Due up", the half's own batters before it starts) draws through `dueup/DueUpBatters` (`styles/focus/dueup-next.css`): a bare headshot, the batting slot, the name and one `H-AB` or average line per batter, from `src/api/boxscore/batterLine.js`, capped at `revealedThrough`.
 
-`ConsoleBand` is Gameday's console row (ADR-0043) — exactly one card: `DueUpConsole` while the half is being scored, or once it is over, `BetweenInnings` — one card that opens on `HalfTally`'s grid and cycles on tap through up to 5 score-free facts (`src/api/between-innings.js`) before returning to the grid
+`HalfTally` and `BetweenInnings` (the finished half's grid and its score-free facts, `src/api/between-innings.js`) render in the hidden engine and the animation lab. Gameday's checkpoint (`src/screens/gameday/next/checkpoint/`) carries the same half tally and notes on screen. The old console row (`ConsoleBand`, `DueUpConsole`) and `RollingLine` were deleted with the Gameday swap (#2566)
 
 ## `inning/`
 
-`ReferencePanel` is the tabbed shelf (LINEUPS / FIELD / ARMS — which also holds the stat-line row — / EXTRAS, which carries the WPA chart above the umpire Tendencies drawer); `ExtrasFacts` is the card-header block at the foot of EXTRAS
+`HalfInning` is the half page Gameday mounts hidden as its engine (`src/screens/gameday/next/CLAUDE.md`). The old reference shelf (`ReferencePanel`, `ExtrasFacts`, `PitchersSection`, `RosterPanel`, `MarginNotes`) was deleted with the Gameday swap (#2566); Gameday's reference panel is `screens/gameday/next/panels/`
 
 ## `player/`
 
@@ -46,7 +46,7 @@ The two stamped "due up" cards in the innings viewer, `DueUpNextCard` ("Due up n
 
 ## `umpire/`
 
-Umpire-specific surfaces: the Tendencies card and its hosts — the modal, the lineup page's top zone (TeamInfo renders it beside the one fact grid, which the crew's `UmpiresCard` cells share), and focus mode's EXTRAS-tab drawer (`UmpireTendenciesFold`). The tier pill/glyph live in `badges/` — shared with Game Score rankings
+Umpire-specific surfaces: the Tendencies card and its hosts — the modal, the lineup page's top zone (TeamInfo renders it beside the one fact grid, which the crew's `UmpiresCard` cells share). The tier pill/glyph live in `badges/` — shared with Game Score rankings
 
 ## `workload/`
 

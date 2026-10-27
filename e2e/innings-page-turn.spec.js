@@ -1,13 +1,20 @@
 import { test, expect } from './fixtures.js'
+import { halfCell } from './lib/gameday.js'
 
 // The forward-navigation page-turn transition (src/components/page-turn/).
 // Covers: the preview/overlay mount-and-clear lifecycle, that a multi-half
-// RollingLine jump plays exactly one transition (not one per intervening
+// navigator jump plays exactly one transition (not one per intervening
 // half), that backward navigation never animates, that
 // prefers-reduced-motion skips the animation entirely, and — the spoiler
 // invariant, re-asserted for this new preview layer specifically — that a
 // still-sealed destination's preview never puts revealed content in the DOM.
 // Anchor game per docs/test-games.md: 2026-07-07 MIL@STL g2 (gamePk 823035).
+//
+// Gameday mounts the half page hidden as its engine (src/screens/gameday/next/
+// CLAUDE.md), so the turn's layers are in the DOM but not drawn. Its line
+// score's run cells are the one way to move between halves by hand (ADR-0043):
+// the old bar's Back / Next half-inning buttons and RollingLine left with the
+// old screen. On a phone the line score folds into the Menu.
 const GAME = '/07072026/milstl-2'
 
 test('forward click plays exactly one transition, then the overlay/preview are gone', async ({
@@ -15,7 +22,7 @@ test('forward click plays exactly one transition, then the overlay/preview are g
 }) => {
   await page.goto(`${GAME}/top1`)
 
-  await page.getByRole('button', { name: 'Next half-inning' }).click()
+  await (await halfCell(page, 'Bottom 1')).click()
 
   // Mid-turn: exactly one preview layer and one curl overlay, and the URL
   // hasn't advanced yet (it only updates on commit, once the animation
@@ -30,14 +37,14 @@ test('forward click plays exactly one transition, then the overlay/preview are g
   await expect(page.locator('.pagecurl')).toHaveCount(0)
 })
 
-test('a multi-half RollingLine jump plays exactly one transition, landing directly on the target', async ({
+test('a multi-half navigator jump plays exactly one transition, landing directly on the target', async ({
   page,
 }) => {
   await page.goto(`${GAME}/top1`)
 
   // Jump three halves ahead (top1 -> bottom2) in one tap — this must not
   // step through top2/bottom1 one at a time, each with its own turn.
-  await page.getByRole('button', { name: /Bottom of the 2nd/ }).click()
+  await (await halfCell(page, 'Bottom 2')).click()
 
   await expect(page.locator('.turnscene__layer--preview')).toHaveCount(1)
   await expect(page.locator('.pagecurl')).toHaveCount(1)
@@ -50,52 +57,30 @@ test('a multi-half RollingLine jump plays exactly one transition, landing direct
 test('backward navigation never renders the overlay', async ({ page }) => {
   await page.goto(`${GAME}/bottom1`)
 
-  await page.getByRole('button', { name: 'Back one half-inning' }).click()
+  await (await halfCell(page, 'Top 1')).click()
 
   await expect(page).toHaveURL(new RegExp(`${GAME}/top1$`))
   await expect(page.locator('.pagecurl')).toHaveCount(0)
   await expect(page.locator('.turnscene__layer--preview')).toHaveCount(0)
 })
 
-test('keyboard-activating Back mid-turn lands backward, not on the abandoned forward target', async ({
+test('keyboard-activating a backward navigator pick mid-turn lands there, not on the abandoned forward target', async ({
   page,
 }) => {
   await page.goto(`${GAME}/bottom1`)
 
   // Start a forward turn (bottom1 -> top2), wait for it to actually be
-  // mid-animation, then interrupt it via Back. index.css's
-  // `[aria-disabled='true'] { pointer-events: none }` rule already blocks a
-  // literal mouse/touch tap here, but that CSS can't stop a keyboard user
-  // (Tab to the button, press Enter) — the button never gets the real
-  // `disabled` attribute, only `aria-disabled`, which browsers don't treat as
-  // blocking keyboard activation. So this should still land on top1, not on
-  // the top2 the abandoned turn was headed to.
-  await page.getByRole('button', { name: 'Next half-inning' }).click()
+  // mid-animation, then interrupt it via a keyboard-activated pick of the
+  // half before. The cells carry aria-disabled mid-turn, never the real
+  // `disabled` attribute (panels.css's `pointer-events: none` stops a tap),
+  // and browsers don't treat aria-disabled as blocking keyboard activation;
+  // the cell's onClick is deliberately unconditional. So this exercises the
+  // InningPageTurn invariant (any external activeIdx change mid-turn cancels
+  // rather than commits). It also covers the old bar's keyboard Back, which
+  // was this same move through a button that is gone.
+  await (await halfCell(page, 'Top 2')).click()
   await expect(page.locator('.turnscene__layer--preview')).toHaveCount(1)
-  const backButton = page.getByRole('button', { name: 'Back one half-inning' })
-  await backButton.focus()
-  await page.keyboard.press('Enter')
-
-  await expect(page).toHaveURL(new RegExp(`${GAME}/top1$`))
-  await expect(page.locator('.turnscene__layer--preview')).toHaveCount(0)
-  await expect(page.locator('.pagecurl')).toHaveCount(0)
-})
-
-test('keyboard-activating a backward RollingLine pick mid-turn lands there, not on the abandoned forward target', async ({
-  page,
-}) => {
-  await page.goto(`${GAME}/bottom1`)
-
-  // Start a forward turn (bottom1 -> top2), then interrupt it via a
-  // keyboard-activated RollingLine pick rather than the Back button — the
-  // same aria-disabled-doesn't-block-keyboard gap as the Back button test
-  // above (RollingLine.jsx's onClick is deliberately unconditional; see its
-  // header comment), so this exercises the same InningPageTurn invariant
-  // (any external activeIdx change mid-turn cancels rather than commits)
-  // through a different call site.
-  await page.getByRole('button', { name: 'Next half-inning' }).click()
-  await expect(page.locator('.turnscene__layer--preview')).toHaveCount(1)
-  const topOfFirst = page.getByRole('button', { name: /Top of the 1st/ })
+  const topOfFirst = await halfCell(page, 'Top 1')
   await topOfFirst.focus()
   await page.keyboard.press('Enter')
 
@@ -104,7 +89,7 @@ test('keyboard-activating a backward RollingLine pick mid-turn lands there, not 
   await expect(page.locator('.pagecurl')).toHaveCount(0)
 })
 
-test('keyboard-activating a further-forward RollingLine pick mid-turn is dropped (first-request-wins)', async ({
+test('keyboard-activating a further-forward navigator pick mid-turn is dropped (first-request-wins)', async ({
   page,
 }) => {
   await page.goto(`${GAME}/top1`)
@@ -114,9 +99,9 @@ test('keyboard-activating a further-forward RollingLine pick mid-turn is dropped
   // honored from idle (pageTurnState.js), so this must be a no-op: the
   // in-flight turn keeps heading to bottom1 rather than restarting or
   // stacking toward bottom2.
-  await page.getByRole('button', { name: 'Next half-inning' }).click()
+  await (await halfCell(page, 'Bottom 1')).click()
   await expect(page.locator('.turnscene__layer--preview')).toHaveCount(1)
-  const bottomOfSecond = page.getByRole('button', { name: /Bottom of the 2nd/ })
+  const bottomOfSecond = await halfCell(page, 'Bottom 2')
   await bottomOfSecond.focus()
   await page.keyboard.press('Enter')
 
@@ -131,7 +116,7 @@ test('prefers-reduced-motion skips the animation but navigation still works', as
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto(`${GAME}/top1`)
 
-  await page.getByRole('button', { name: 'Next half-inning' }).click()
+  await (await halfCell(page, 'Bottom 1')).click()
 
   // Commits immediately — no preview/overlay ever mounts.
   await expect(page).toHaveURL(new RegExp(`${GAME}/bottom1$`))
@@ -144,7 +129,7 @@ test('a still-sealed destination half never puts revealed content in the preview
 }) => {
   await page.goto(`${GAME}/top1`)
 
-  await page.getByRole('button', { name: 'Next half-inning' }).click()
+  await (await halfCell(page, 'Bottom 1')).click()
 
   // Mid-turn, with the destination (bottom of the 1st) still sealed: the
   // preview layer exists (for the curl visual) but must contain no revealed

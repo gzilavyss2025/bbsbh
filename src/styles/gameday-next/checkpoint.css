@@ -1,4 +1,4 @@
-/* ==== GAMEDAY, the checkpoint (#2572; design: .scratch/gameday-design/round2/checkpoint.js) ====
+/* ==== GAMEDAY, the checkpoint (#2572; design: #2568 round 2) ====
    It fills the stage's slot once the third out is revealed. At T, L and D every page shows: the
    tally, pitching and game pages on the left, the at-bats then the notes on the right. On the phone
    one page shows under labelled tabs, and every page (scrolling) under Motion: Reduced. */

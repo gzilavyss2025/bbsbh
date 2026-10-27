@@ -46,11 +46,12 @@ const files = (dir) =>
 // this fails, the slice moved a seal: stop and ask, never update the literal.
 const N5_SEAL = {
   'components/inning/DelayCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/inning/ExtrasBanner.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/game/GameCardParts.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   // 16: the scorebug's mount moved from ConsoleBand to InningsHeader (the page's masthead), so the
   // viewer hands the same clamped mark to one more child. Same consumer, same clamp, no new import (ruled on by the maintainer).
-  'screens/InningViewer.jsx': { reveal: ['winprob.js'], sealBoxes: 0, revealedThrough: 16 },
+  // 10, and no winprob.js: the Gameday swap (#2566) deleted the old screen's reads (the Arms tab's win
+  // probability, the reference panel, the running line). Removals only; no read moved or was added.
+  'screens/InningViewer.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 10 },
   'components/game/GameCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
 }
 const SPOILER_MANIFEST = JSON.parse(src('api/spoiler-manifest.json')).modules
@@ -82,15 +83,9 @@ test('N5: the seal pin — no reveal-only import, SealBox or revealedThrough rea
 
 // ---- 2. the gates ----
 
-test('N5: the three gates stay byte for byte (ADR-0008, ADR-0060)', () => {
-  const viewer = src('screens/InningViewer.jsx')
-  assert.match(viewer, /\{effInning > regulation && \(\n\s*<ExtrasBanner\n/, 'the extras line mounts only past regulation')
-  assert.match(viewer, /const delays = useMemo\(\(\) => selectDelays\(feed\), \[feed\]\)/, 'selectDelays feeds the delay card')
-  assert.match(
-    viewer,
-    /\{delays\n\s*\.filter\(\(d\) => d\.inning === effInning && d\.half === effHalf\)\n\s*\.map\(\(d, i\) => \(\n\s*<DelayCard key=\{`\$\{d\.inning\}-\$\{d\.half\}-\$\{i\}`\} delay=\{d\} \/>/,
-    'the delay card mounts only for the half on screen',
-  )
+// The extras line and the delay card left the innings screen with the old console (#2566); the
+// postponed banner's gate stays.
+test('N5: the postponed gate stays byte for byte (ADR-0060)', () => {
   assert.match(src('components/game/GameCard.jsx'), /\{postponed && <PostponedBanner game=\{game\} status=\{status\} \/>\}/)
 })
 
@@ -108,35 +103,6 @@ test('N5: the delay card is an info Notice with the namespace .delay, its glyph 
   assert.match(code, /Play stopped for <b>\{formatDelay\(durationMinutes\)\}<\/b>/)
   assert.match(code, /'Delay in progress'/)
   assert.match(code, /export function formatDelay\(min\)/, 'EventCards.jsx imports formatDelay')
-})
-
-test('N5: the extra-innings line is a compact info Notice with the ball as its icon', () => {
-  const code = src('components/inning/ExtrasBanner.jsx')
-  assert.match(code, /import \{ Notice \} from '\.\.\/ui\/state\/Notice\.jsx'/)
-  assert.match(code, /<Notice tone="info" size="compact" role="note" className="innings__extras" icon="⚾️">/)
-  assert.match(code, /if \(!away && !home\) return null/, 'no record, no line')
-  assert.match(code, /Extra innings this season:\{' '\}/)
-  assert.match(code, /<span className="innings__extras-team">\n\s*\{awayName \|\| 'Away'\} \{away\}/)
-  assert.match(code, /<span className="innings__extras-team">\n\s*\{homeName \|\| 'Home'\} \{home\}/)
-  assert.match(code, /<span className="innings__extras-dot" aria-hidden="true"> · <\/span>/)
-  assert.doesNotMatch(code, /innings__extras-icon/, 'the icon slot draws the ball')
-})
-
-// THE ICON STAYS BESIDE ITS TEXT. Notice's root wraps, so a long sentence can
-// push an action under it, and its body's basis is its content. With no action,
-// a long line on a phone wrapped the whole body under the icon: at 390px the
-// extras line drew the ball alone on one row and the sentence on the next.
-// Neither member has an action, so each namespace turns the wrap off and the
-// sentence wraps inside its own column. (The fix does not go in notice.css:
-// notice-cascade.test.js pins every rule there as one class at one weight.)
-test('N5: the extras rule keeps only what Notice does not draw: its margin, and the icon beside the text', () => {
-  const sheet = css('11-innings.css')
-  const body = ruleBody(sheet, '.innings__extras')
-  assert.deepEqual(body.split(';').map((d) => d.trim()).filter(Boolean), ['margin: 0 0 10px', 'flex-wrap: nowrap'])
-  assert.equal(ruleBody(sheet, '.innings__extras-icon'), null)
-  const team = ruleBody(sheet, '.innings__extras-team')
-  assert.equal(decl(team, 'white-space'), 'nowrap')
-  assert.equal(decl(team, 'color'), 'var(--text-caption)')
 })
 
 // ---- 4. the rename ----

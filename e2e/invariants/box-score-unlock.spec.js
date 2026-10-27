@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures.js'
+import { halfCell } from '../lib/gameday.js'
 
 // THE BOX SCORE YOU OPENED STAYS OPEN (ADR-0049).
 //
@@ -99,7 +100,8 @@ test('an opened box score opens the box score ONLY — the innings viewer still 
   await expect(page.getByRole('button', { name: SEAL })).toHaveCount(0)
 
   await page.goto(`${GAME}/top1`)
-  await expect(page.getByRole('button', { name: /, sealed$/ }).first()).toBeVisible()
+  // Gameday's line score names a sealed half "Top 1, sealed"; a phone folds it into the Menu.
+  await expect(await halfCell(page, 'Top 1')).toHaveAccessibleName('Top 1, sealed')
 })
 
 test('a mangled box-score mark leaves the seal exactly where it was', async ({ page }) => {

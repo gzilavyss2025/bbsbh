@@ -1,14 +1,13 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { usePreferences } from '../hooks/preferences/usePreferences.js'
-import { gameSeriesHref, sectionToStep, stepToSection } from '../lib/route.js'
+import { canonicalSection, gameSeriesHref, sectionToStep, slatePath, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
 import { selectHasNoPlayByPlay } from '../api/gamerecord/played.js'
 import { Door } from '../components/ui/control/Door.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
-import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { catchUpPlan, catchUpRevealTo } from '../hooks/useRevealProgress.js'
 import { LogoModal } from '../components/logo/LogoModal.jsx'
 import { GameUniformsContext } from '../components/logo/uniformContexts.js'
@@ -63,20 +62,19 @@ const ScorecardPage = lazy(() =>
   import('./scorecard/ScorecardPage.jsx').then((m) => ({ default: m.ScorecardPage })),
 )
 
-// Express Lane (step 7). Split hardest of all: three data tiers, an IndexedDB
-// byte store and its own stylesheet, and most visits never open it. It takes
-// the WHOLE screen, so it returns before the chrome below — its header says why.
-const ExpressLanePage = lazy(() =>
-  import('./expresslane/ExpressLanePage.jsx').then((m) => ({ default: m.ExpressLanePage })),
-)
-
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
 // The chrome is two grayscale team marks (away @ home) that open the sketch
 // modal; a small site mark up top returns to the slate. Which section shows is
 // driven entirely by `section` / `onSection` so every step is a real URL.
 export function GameView({ game, section, onSection }) {
-  const { step: addressedStep, inning, half } = sectionToStep(section)
+  const { step, inning, half } = sectionToStep(section)
+  // An old half address (express-top5, inning4) opens its half, then becomes the address the app
+  // writes (top5), replaced so Back never revisits it.
+  const canonical = canonicalSection(section)
+  useEffect(() => {
+    if (canonical) onSection(canonical, { replace: true })
+  }, [canonical]) // eslint-disable-line react-hooks/exhaustive-deps
   const [sketching, setSketching] = useState(null) // 'away' | 'home' | null
 
   // All of this game's data fetching (feed, uniforms, managers, weather,
@@ -93,7 +91,6 @@ export function GameView({ game, section, onSection }) {
     weather,
     starterLines,
     winProb,
-    pitcherRoles,
     prospectsData,
     rookiesData,
     gameCallouts,
@@ -102,28 +99,11 @@ export function GameView({ game, section, onSection }) {
     careerMatchupsData,
     vsTeamSplitsData,
     highlightsData,
-    runExpectancyData,
     workloadData,
     jerseyTreatments,
     started,
-  } = useGameData(game, addressedStep)
+  } = useGameData(game, step)
 
-  // THE EXPRESS LANE ROUTE FAILS CLOSED, not only the door onto it.
-  //
-  // `ExpressLaneDoor` asks `filmCanExist` and draws nothing when the answer is
-  // no, which covers the lineup page — but a URL is not a button. A bookmarked
-  // or shared `…/express` link on a MiLB game, on anything before 2016, on the
-  // All-Star game or on a postponed one walked straight past that door into the
-  // full surface, where every rail row carries `playId: null`, the film gate
-  // never blocks because nothing is ever expected, and every play in the game
-  // reads "Nothing to watch here — write it on the card."
-  //
-  // The predicate is pure and already unit-tested, so the route asks it too and
-  // an ineligible address falls back to the away lineup — the page the door
-  // lives on, and the page a scorer opening that game would have reached
-  // anyway. `feed` has to be here first, which is why this sits below the fetch
-  // rather than beside `sectionToStep`.
-  const step = addressedStep === 7 && feed && !filmCanExist(feed) ? 0 : addressedStep
   // An old played game with no plays has no half-inning pages worth a tap
   // (selectHasNoPlayByPlay): "Innings ›" goes to the box score, and a direct
   // load of a half shows one line instead of InningViewer. No SealBox renders.
@@ -232,20 +212,6 @@ export function GameView({ game, section, onSection }) {
     series: seriesMark
       ? { mark: seriesMark, gameNumber: seriesHit?.gameNumber ?? null, status: seriesStatus, href: seriesPage }
       : null,
-  }
-
-  if (feed && step === 7) {
-    return (
-      <Suspense fallback={<Loader />}>
-        <ExpressLanePage
-          feed={feed}
-          gamePk={game.gamePk}
-          section={section}
-          onSection={onSection}
-          onLeave={() => onSection('boxscore')}
-        />
-      </Suspense>
-    )
   }
 
   return (
@@ -420,22 +386,18 @@ export function GameView({ game, section, onSection }) {
             onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
             onBoxScore={() => onSection('boxscore')}
             onScorecard={() => onSection('scorecard')}
+            onLineup={(side) => onSection(side === 'home' ? 'lineup2' : 'lineup1')}
+            slateHref={slatePath(officialDate, game.sportId)}
+            gameStatus={selectGameStatus(feed)}
+            refreshFailed={Boolean(feedState.error)}
             onReload={feedState.reload}
             loading={feedState.loading}
             lastUpdated={feedState.lastUpdated}
-            pitcherRoles={pitcherRoles.data}
-            winProbability={winProb.data}
             winProbTreatment={jerseyTreatments}
-            prospectsData={prospectsData}
-            rookiesData={rookiesData}
             callouts={gameCallouts}
             vsTeam={vsTeamSplitsData}
             highlights={highlightsData}
-            runExpectancy={runExpectancyData}
             workload={workloadData}
-            managers={managers.data}
-            uniforms={uniformBrief}
-            scorebookWeather={weather.data}
             onSketch={setSketching}
           />
         </GameUniformsContext.Provider>
@@ -538,7 +500,6 @@ function gameTitle(game, step, inning, half, round = '') {
     : step === 4 ? 'Preview card'
     : step === 5 ? 'Print sheet'
     : step === 6 ? 'Scorecard'
-    : step === 7 ? 'Express Lane'
     : `${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
   return titleWithRound(matchup, section, round)
 }

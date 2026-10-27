@@ -11,17 +11,14 @@ import { fetchHighlights } from '../api/highlights.js'
 import { fetchGameUniforms, uniformSummary, liveJerseyTreatment } from '../api/uniforms.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
 import { fetchGameBroadcast } from '../api/broadcast.js'
-import { fetchTeamRoster } from '../api/team.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectGameSeason, selectHasStarted } from '../api/select.js'
-import { rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { fetchRookiesData, rookiesForGameSeason } from '../api/rookies.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplitsForTeams } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
 import { loadCareerMatchups } from '../api/careerMatchups.js'
-import { fetchRunExpectancy } from '../api/umpireFavor.js'
 import { fetchWorkload } from '../api/workload.js'
 import { useAsync } from './useAsync.js'
 import { useAsyncOnFeed } from './useAsyncOnFeed.js'
@@ -44,7 +41,7 @@ const FEED_POLL_MS = 60 * 1000
 
 // Sticky "has `active` ever been true for the current `resetKey`" flag — lets
 // a fetch start lazily on first visit to its consuming surface (winProb: the
-// innings view or the box score; highlights: either one too — see below),
+// box score; highlights: the innings view or the box score — see below),
 // then behave exactly like every other feed-derived fetch in this hook: fired
 // once, cached, and immune to a later visit toggling the surface off and back
 // on (navigating from the box score back to a lineup page must not drop
@@ -62,9 +59,9 @@ function useEverActive(active, resetKey) {
 }
 
 // Owns every data fetch a game page needs: the feed itself plus the roughly
-// nine independent lookups derived from or alongside it (managers, weather,
-// starter lines, win probability, pitcher roles, prospects, callouts,
-// broadcast, former teammates). Pulling this out of GameView keeps that
+// independent lookups derived from or alongside it (managers, weather,
+// starter lines, win probability, prospects, callouts, broadcast, former
+// teammates). Pulling this out of GameView keeps that
 // component free to focus on section-routing and rendering; this hook is the
 // one place that reasons about fetch sequencing/keying/caching.
 //
@@ -216,15 +213,12 @@ export function useGameData(game, activeStep = null) {
   )
 
   // Per-play win probability — the sole source of WPA for the box score's
-  // three stars, and of the innings view's WinProbChart band (both reveal-
-  // clamped to `revealedThrough`, never rendered before that). Neither
-  // consumer exists on the two lineup pages (step 0/1), so the fetch itself
-  // waits for the innings view or the box score to actually be opened
-  // (`useEverActive`) rather than firing on every cold game load — a live
-  // Refresh still won't re-pull it once fetched, matching how both consumers
-  // are really a post-reveal/post-game read. Resolves null off-MLB, hiding
-  // the card.
-  const winProbActive = useEverActive(activeStep === 2 || activeStep === 3, game.gamePk)
+  // three stars (reveal-clamped, never rendered before that). The box score is
+  // its one consumer since Gameday replaced the innings console (#2566), so the
+  // fetch waits for the box score to actually be opened (`useEverActive`)
+  // rather than firing on every cold game load — a live Refresh still won't
+  // re-pull it once fetched. Resolves null off-MLB, hiding the card.
+  const winProbActive = useEverActive(activeStep === 3, game.gamePk)
   const winProb = useAsync(
     () => (feed && winProbActive ? fetchWinProbability(game.gamePk) : Promise.resolve(null)),
     [game.gamePk, Boolean(feed), winProbActive],
@@ -247,8 +241,7 @@ export function useGameData(game, activeStep = null) {
   // `winProb` above; the 5-minute poll below is a no-op while inactive.
   // Resolves [] on failure or off-MLB (most MiLB games carry no clips).
   //
-  // TWO consumers now, so the gate matches winProb's exactly: the innings
-  // view's per-play Watch buttons (step 2) and the box score's Play of the
+  // TWO consumers: the innings view's per-play Watch buttons (step 2) and the box score's Play of the
   // Game card (step 3), which looks up the one clip for its WPA-picked play
   // inside its own SealBox reveal render.
   const highlightsActive = useEverActive(activeStep === 2 || activeStep === 3, game.gamePk)
@@ -272,35 +265,6 @@ export function useGameData(game, activeStep = null) {
     const id = setInterval(feedState.reload, FEED_POLL_MS)
     return () => clearInterval(id)
   }, [isLive, feedState.reload])
-
-  // Each pitcher's inferred role (SP/CL/RP) from season stats — the same
-  // gamesStarted-ratio/saves heuristic the team page badges pitchers with
-  // (see rosterPitcherRole). The live feed carries no season stats, so this is
-  // its own fetch; it powers the innings roster panel's Starters/Bullpen
-  // split (see InningViewer). Keyed on team ids, like managers: role doesn't
-  // change mid-game.
-  const pitcherRoles = useAsyncOnFeed(
-    feed,
-    async (f) => {
-      const season = f.gameData?.game?.season
-      if (!season) return null
-      const [awayRoster, homeRoster] = await Promise.all([
-        fetchTeamRoster(game.away.id, season, { sportId: game.sportId }),
-        fetchTeamRoster(game.home.id, season, { sportId: game.sportId }),
-      ])
-      const roles = {}
-      for (const r of [...awayRoster, ...homeRoster]) {
-        // A two-way player (Ohtani-type) is roster-typed 'Two-Way Player', not
-        // 'Pitcher' — without isTwoWay here he'd carry no role at all and
-        // splitBullpen would default him into relief instead of starters.
-        if ((r.position?.type === 'Pitcher' || isTwoWay(r.person)) && r.person?.id) {
-          roles[r.person.id] = rosterPitcherRole(r)
-        }
-      }
-      return roles
-    },
-    [game.away.id, game.home.id],
-  )
 
   // Prospect badges for the lineup/roster surfaces (see ProspectPill /
   // prospectBadge) — the app-wide Top 100 + org-farm-system snapshot,
@@ -401,18 +365,6 @@ export function useGameData(game, activeStep = null) {
       ? rookiesForGameSeason(rookiesRaw, selectGameSeason(activeFeed))
       : rookiesRaw
 
-  // The league-wide run-expectancy (RE288) table — a static, same-origin,
-  // hand-run backfill (scripts/gen-run-expectancy.mjs) with no game or score
-  // information of its own, so it's safe to fetch eagerly like
-  // vsTeamSplits/formerTeammates. Only StatBox's reveal-only selector
-  // (api/umpireFavor.js's selectUmpireFavor) combines it with this game's own
-  // plays — see .scratch/umpire-accuracy/consistency-favor-scope.md §3.
-  const runExpectancy = useAsync(
-    () => (enrichmentReady ? fetchRunExpectancy() : Promise.resolve(null)),
-    [enrichmentReady],
-  )
-  const runExpectancyData = runExpectancy.data ?? null
-
   // Rolling pitcher workload (gen-workload.mjs) — completed-
   // appearance aggregates feeding the bullpen availability board (TeamInfo)
   // and the Pitchers table's laboring baseline (pitcherHealth.js). MLB-only
@@ -484,7 +436,6 @@ export function useGameData(game, activeStep = null) {
     weather,
     starterLines,
     winProb,
-    pitcherRoles,
     prospectsData,
     rookiesData,
     gameCallouts,
@@ -493,7 +444,6 @@ export function useGameData(game, activeStep = null) {
     careerMatchupsData,
     vsTeamSplitsData,
     highlightsData: highlights.data ?? null,
-    runExpectancyData,
     workloadData,
     jerseyTreatments,
     started,

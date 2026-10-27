@@ -334,43 +334,6 @@
   margin-top: 20px;
 }
 
-/* "Caught up" status — replaces the forward action in the innings bar once the
-   reader has stepped through every fetched at-bat of a half still being played
-   (ADR-0055, InningActionBar). Same footprint as .btn--next / .revealsplit so
-   the bar never jumps as the next batter arrives; a soft medal-amber chip with
-   a slow-pulsing dot, reading "we're current." */
-.liveedge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  width: 100%;
-  margin-top: 20px;
-  min-height: var(--tap-min);
-  padding: var(--space-2) var(--space-3);
-  border: var(--bw-rule) solid var(--seal);
-  border-radius: var(--radius-sm);
-  background: var(--award-soft);
-  color: var(--award-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-}
-/* The dot at rest. Its breath — and the reduced-motion cut — live in
-   motion/innings.css, with the rest of this page's motion. It used to push a
-   ring outward on `box-shadow` here, which the compositor cannot take (it
-   repaints every frame) and which reads as a notification rather than as a
-   game quietly running. */
-.liveedge__dot {
-  flex: none;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--seal);
-}
-
 /* The innings bar's primary action while the shown half is still sealed. It IS
    the seal now (the inline cover is gone): the same kraft diagonal-hatch texture
    the cover box carried, so revealing still reads as "peel the tape." Flips to
@@ -405,50 +368,6 @@
   font-size: 1.1em;
 }
 
-/* Two side-by-side choices in the innings bar, one of two shapes: a sealed
-   half's own reveal pair (ADR-0016 — step to the next at-bat, or reveal the
-   whole half at once, both wearing the kraft-seal .btn--reveal texture), or a
-   just-finished half's Summary/next-half pair (InningViewer's focus.postHalf
-   — plain .btn/.btn--next skins instead, since nothing there is sealed
-   anymore). Same layout either way, just split into equal-width halves
-   instead of one full-width button. */
-.revealsplit {
-  display: flex;
-  gap: var(--space-2);
-  width: 100%;
-  max-width: calc(var(--app-width) - 2 * var(--app-gutter));
-  margin-top: 20px;
-}
-.revealsplit__btn {
-  width: auto;
-  flex: 1 1 0;
-  margin-top: 0;
-  min-width: 0;
-  /* Wrapping, not truncating: a phone column gives each of this pair only half
-     of .revealsplit's already-narrow max-width, and a label that doesn't fit
-     must break to a second line rather than lose its own last word to an
-     ellipsis (min-height is a floor, not a fixed height, so the button grows).
-     This stays as the backstop for the longest label the bar can carry — a
-     next-half advance like "Bottom 12th ›" beside Summary. */
-  padding: var(--space-2) var(--space-2h);
-  white-space: normal;
-  text-align: center;
-  line-height: var(--lh-snug);
-}
-
-/* The two labels the reader actually taps forty times a half-hour — "Next
-   at-bat" and "Rest of half" — sit one hair apart at the phone width: the
-   first held one line while the second broke, so the pair rendered visibly
-   unequal, one button a row taller than its twin, at every single tap. They
-   are short enough now (they used to read "Reveal next at-bat" / "Reveal whole
-   {half}", which genuinely needed two lines) that trimming the side padding
-   fits both on one line and squares the pair up, without touching the type
-   scale or the 44px tap floor. */
-@media (max-width: 739.98px) {
-  .revealsplit__btn {
-    padding: var(--space-2) var(--space-1);
-  }
-}
 /* (A `.revealsplit__btn.is-active` filled-navy state used to live here, for
    focus mode's Summary button. That button is gone — the half's numbers arrive
    in the console band on their own now, so the post-half bar carries the

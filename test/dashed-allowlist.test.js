@@ -26,7 +26,6 @@ const ALLOWED = {
     ['player-next/gamelog/milestones.css', '.milestones__proj'], // a projection: pencilled in, or paused with no year yet
     ['player-next/history/awards.css', '.awmod__org.awmod__none'], // an award row whose club or org the feed does not name
     ['34-postseason.css', '.seed--bye'],
-    ['77-express-lane.css', '.xl__chip--placed'],
     ['80-postseason-bracket.css', '.pbkt-mark--empty'],
     ['80-postseason-bracket.css', '.pbkt-blank'],
     ['postseason/series-live.css', '.psseries__starter .projection'],

@@ -34,29 +34,6 @@ const REVEAL_ONLY = /\/api\/(linescore|derive|hitchart)\.js['"]/
 // file, the import line, the EmptyState JSX, the old element, the empty test(s)
 const SITES = [
   {
-    file: 'components/inning/focus/ReferencePanel.jsx',
-    import: "import { EmptyState } from '../../ui/state/EmptyState.jsx'",
-    jsx: '<EmptyState>No pitching lines yet</EmptyState>',
-    old: /refpanel__empty/,
-    tests: [
-      'const armsEmpty = !notes.length && !pitcherTeams.some((t) => t.rows?.length)',
-      '{armsEmpty ? (',
-      'const revealed = idx <= revealedThrough',
-      'const showEntering = safeToShowEntering(revealedThrough, effInning, effHalf)',
-    ],
-  },
-  {
-    file: 'components/inning/RosterPanel.jsx',
-    import: "import { EmptyState } from '../ui/state/EmptyState.jsx'",
-    jsx: '<EmptyState size="compact" className="roster__empty">\n              Not posted yet.\n            </EmptyState>',
-    old: /<p className="hint">Not posted yet\.<\/p>/,
-    tests: [
-      "const empty =\n    (!shows('starters') || roster.starters.length === 0) &&\n    (!shows('bullpen') || roster.bullpen.length === 0) &&\n    (!shows('bench') || roster.bench.length === 0)",
-      '{empty && (',
-      'const entered = (p) => enteredAsOf(p, revealedThrough, halfIdx)',
-    ],
-  },
-  {
     file: 'screens/lineup/next/cards/StarterCard.jsx',
     import: "import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'",
     jsx: '<EmptyState size="compact">Not posted yet.</EmptyState>',
@@ -99,8 +76,9 @@ test('E3: the .refpanel__empty rule is gone, with no ground left to paint', () =
   assert.equal(ruleBody(read('focus/reference.css'), '.refpanel__empty'), null)
 })
 
-test('E3: .roster__empty and .boxlines__empty keep only a margin, never a second frame', () => {
-  assert.deepEqual(props(ruleBody(read('13-play-by-play.css'), '.roster__empty')), ['margin'])
+// ReferencePanel and RosterPanel were deleted with the old innings screen (#2566), and their rules with them.
+test('E3: .roster__empty went with RosterPanel; .boxlines__empty keeps only a margin, never a second frame', () => {
+  assert.equal(ruleBody(read('13-play-by-play.css'), '.roster__empty'), null)
   assert.deepEqual(props(ruleBody(read('boxlines/boxlines.css'), '.boxlines__empty')), ['margin'])
 })
 

@@ -187,10 +187,12 @@ test('a dashed edge on a pill is kept only where dashed means pencilled-in', () 
   }
 })
 
+// The favour meter's outlier pill went with StatBox (#2566); the marker pill is the host now.
 test('--marker reaches a pill only as its fill, never as its ink', () => {
-  const body = ruleBody(read('12-sealbox.css'), '.favormeter__tierpill--outlier')
+  const body = ruleBody(read('system/pill.css'), '.pill--marker')
   assert.equal(decl(body, '--pill-fill'), 'var(--marker)')
-  assert.doesNotMatch(decl(body, '--pill-ink'), /marker/)
+  assert.doesNotMatch(decl(body, '--pill-ink') ?? '', /marker/)
+  assert.doesNotMatch(decl(body, '--pill-text') ?? '', /marker/)
 })
 
 test('the win-probability chip takes its club colour through the pill, not a repaint', () => {

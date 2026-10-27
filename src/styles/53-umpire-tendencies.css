@@ -325,17 +325,3 @@
   color: var(--text-on-ink);
 }
 
-/* ------------------------------------------------ the EXTRAS-tab drawer
-   UmpireTendenciesFold.jsx — the same card behind a collapsed .roster-style
-   drawer in focus mode's EXTRAS tab. The drawer's own chrome frames it, so
-   the card sheds its frame (the .umpmodal rule's reasoning), and the toggle
-   already says "Umpire tendencies", so the card's own masthead would print
-   the title twice — dropped. */
-.umptendfold .umptend {
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-.umptendfold .umptend__bar {
-  display: none;
-}

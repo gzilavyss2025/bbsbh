@@ -432,15 +432,6 @@
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
-/* The innings viewer's Arms tab: the dots ride the team heading, so the
-   running lines below them and "who is left" read as one block. The heading
-   was a plain block element, hence the flex. */
-.pitchers__teamname {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 /* The slate card's dots. Its own row UNDER .gamecard__teams rather than a third
    track inside it — that grid is two rows of marks and names with an absolutely
    positioned watermark behind them (06-loader-and-cards.css), and this row only

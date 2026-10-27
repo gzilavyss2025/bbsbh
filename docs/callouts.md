@@ -30,9 +30,9 @@ compared with in October.
 | Surface | Module | Tense |
 | --- | --- | --- |
 | Innings-view play cards | `buildCallouts` (`src/api/callout-notes.js`) via `PlayByPlay` | Entering + revealed plays only ("that's No. 16 this season") |
-| Pre-half strip (the reference panel's ARMS tab, merged into Margin Notes) | `buildPreHalfCallouts` (`src/api/prehalf-callouts.js`) via `ReferencePanel` | Entering; the leading-after + times-through notes restate already-revealed material |
-| Margin Notes (always open, spans both teams' pitchers) | `buildMarginNotes` (`src/api/pitcher-callouts.js`) via `MarginNotes` | Entering-tonight season aggregates + live health reads (laboring, velo decay), never result-aware — same footing as the pre-half strip |
-| Between Innings (the console band, any revealed half) | `buildBetweenInnings` (`src/api/between-innings.js`) via `BetweenInnings` | Same entering-tonight families as Margin Notes/the pre-half strip, through a stricter hard allowlist that drops every checkpoint family that reads tonight's score. In a World Series game it also builds `wsSeriesOdds` and `wsStarterStart` (score-free); `ws*` kinds are extra to `CARD_MAX`, never ranked or decayed, and lead the stack |
+| Pre-half strip (no screen draws it since the Gameday swap, #2566; the generators still build it) | `buildPreHalfCallouts` (`src/api/prehalf-callouts.js`), read by `scripts/gen-callouts.mjs` and `audit-callouts.mjs` | Entering; the leading-after + times-through notes restate already-revealed material |
+| Margin Notes (spans both teams' pitchers; an input to Gameday's checkpoint notes since the swap, #2566) | `buildMarginNotes` (`src/api/pitcher-callouts.js`) via InningViewer into the checkpoint | Entering-tonight season aggregates + live health reads (laboring, velo decay), never result-aware — same footing as the pre-half strip |
+| Between Innings (Gameday's checkpoint Notes page, any revealed half) | `buildBetweenInnings` (`src/api/between-innings.js`) via `checkpoint/Checkpoint.jsx` | Same entering-tonight families as Margin Notes/the pre-half strip, through a stricter hard allowlist that drops every checkpoint family that reads tonight's score. In a World Series game it also builds `wsSeriesOdds` and `wsStarterStart` (score-free); `ws*` kinds are extra to `CARD_MAX`, never ranked or decayed, and lead the stack |
 | Box score Insights roll-up | `computeGameCalloutNotes` (`src/api/callout-notes.js`) via `BoxScore` | Result-aware once Final, narrated with tonight's own events ("Struck out 7 tonight and leads…", "Went 0-for-3 tonight, snapping…") |
 
 Margin Notes replaced the old Pitchers-table note list, which used to sit
@@ -71,7 +71,7 @@ breaks one is a bug in the writing.
   into something he cannot know — a season total, a streak, a comparison.
 - **Do not name the subject in the text.** Every surface that renders these
   already groups by person and draws a headshot with the name above the
-  bullets (MarginNotes.jsx, BoxScore.jsx's InsightNoteCard). Naming him again
+  bullets (Gameday's checkpoint notes, BoxScore.jsx's InsightNoteCard). Naming him again
   in the sentence prints his name twice on one card.
 - **Never show a number without the number it should be.** The reliever
   workload note is the model: "71 pitches across 3 appearances in the last 5
@@ -262,12 +262,12 @@ print seventeen times. Four rules answer that.
 All four are applied by one pure function, `rankNotes` in
 `callout-notes/shared.js`, at each surface's own sort-and-cap step: the
 pre-half strip (`prehalf-callouts.js`, `maxRecordNotes: 1`), Between Innings
-(`between-innings.js`), and the Arms tab's merge of the strip with Margin Notes
-(`ReferencePanel.jsx`'s `mergeNotes`, uncapped). The builders stay pure — they
+(`between-innings.js`). (The Arms tab's merge of the strip with Margin Notes left with the old
+reference panel, #2566.) The builders stay pure — they
 are HANDED the counts (`shownCounts`) and only read them. A surface records
 what it showed from an effect, on the notes that actually reached the screen:
-`MarginNotes.jsx` marks the notes it renders (not the hidden tail), and
-`BetweenInnings.jsx` marks only the card the reader advanced to. Play cards
+Gameday's checkpoint marks the notes on its page (`SeenNotes`, as `BetweenInnings.jsx` marks only
+the card the reader advanced to). Play cards
 (`liveAtBat.js`) and the box-score roll-up stay outside all of this: neither
 ranks against a cap, and the roll-up's whole job is to restate (ADR-0014).
 
@@ -281,7 +281,6 @@ the surface applies its own count.
 | `PREHALF_MAX` | 2 | `prehalf-callouts.js` | Notes on the pre-half strip |
 | `PREHALF_MAX_RECORDS` | 1 | `prehalf-callouts.js` | `RECORD_KINDS` notes on that strip |
 | `CARD_MAX` | 5 | `between-innings.js` | Cards in one Between Innings set |
-| `MARGIN_NOTES_SHOWN` | 5 | `MarginNotes.jsx` | Margin Notes shown before "Show N more" |
 | `INSIGHTS_SHOWN` | 6 | `src/screens/BoxScore.jsx` | Roll-up notes shown before Show more |
 | `VS_TEAM_ROLLUP_MAX` | 3 | roll-up | `vsTeam` notes in the roll-up |
 | `MAGNITUDE_MAX` | 20 | `callout-notes/shared.js` | Every family's magnitude bonus |
@@ -754,16 +753,14 @@ None of the three is in `BETWEEN_INNINGS_ALLOWED_KINDS` or `RECORD_KINDS`.
   headlines got the same prose treatment ("The Brewers edged the Cubs by a
   single run" — `dayHighlights.js`), distinct from these record cards.
 
-### Margin Notes (always-open, entering-tense, spans both teams)
+### Margin Notes (entering-tense, spans both teams)
 
-Renders below the seal, alongside the (now purely numeric) Pitchers stat
-grid — `buildMarginNotes` (`src/api/pitcher-callouts.js`) runs every
+No screen draws Margin Notes as a list since the Gameday swap (#2566); they feed Gameday's
+checkpoint notes. `buildMarginNotes` (`src/api/pitcher-callouts.js`) runs every
 pitcher who's appeared so far this game (both sides) through
 `buildPitcherNotes` plus the health builders below, dedupes by `dedupeKey`
 (same latest-wins contract as `callout-notes.js`'s box-score roll-up), and
-sorts by score — the builder itself doesn't truncate. `MarginNotes.jsx` shows
-the first `MARGIN_NOTES_SHOWN` (5) up front and reveals the rest on tap, the
-same "Show N more" pattern as `InsightsCard`.
+sorts by score — the builder itself doesn't truncate.
 `homeAway` only fires for the pitcher who actually started tonight's game
 (`isStarter`, position 0 in the team's boxscore pitching order) — a reliever
 who also has a starts record on file elsewhere in the rotation must not be

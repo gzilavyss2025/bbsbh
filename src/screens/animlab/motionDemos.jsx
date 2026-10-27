@@ -26,16 +26,12 @@ import { Entry, Frame } from './Entry.jsx'
 // class hooks the app renders — not a copy of a keyframe, and never a game.
 // The names, jersey numbers and pitch sequences are invented.
 
-// Both "this game is in progress" dots at once, on the one 2.4s beat: the slate
-// card's LIVE pill and the innings bar's live-edge status.
+// The "this game is in progress" dot, on its 2.4s beat: the slate card's LIVE pill. (The old
+// innings bar's live-edge dot shared the beat; it went with that bar, #2566.)
 export function BreathDemo() {
   return (
     <div className="animlab__breathrow">
       <span className="gamecard__live">Live</span>
-      <div className="liveedge">
-        <span className="liveedge__dot" aria-hidden="true" />
-        <span className="liveedge__label">Caught up — waiting on the next batter</span>
-      </div>
     </div>
   )
 }

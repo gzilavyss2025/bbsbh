@@ -1,7 +1,11 @@
 # Gameday build: run plan and prompts
 
-Status: **plan** (2026-10-26). Written with the `write-prompt` skill from the locked design rounds of
-#2568 (round 1 and round 2, both 2026-10-26). Part of #2566.
+Status: **built** (2026-10-27). Prompt 13 swapped Gameday in, removed `?look=new` and deleted the old
+pieces; ADR-0043's 2026-10-27 amendment records the screen. Written with the `write-prompt` skill from
+the locked design rounds of #2568 (round 1 and round 2, both 2026-10-26). Part of #2566.
+
+`.scratch/gameday-design/` was deleted in that PR as its README asked; `git log` keeps it, and the
+#2568 comments keep Gary's locked choices. Paths into it below are history.
 
 The design is the source of truth: `.scratch/gameday-design/README.md` ("Round 1: what Gary locked",
 "Round 2: what Gary locked", "Decided after round 2") and the round 2 artifact,

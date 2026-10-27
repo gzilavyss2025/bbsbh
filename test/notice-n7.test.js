@@ -155,10 +155,8 @@ test('N7: .pcard stretches its sections, does not wrap and keeps its gap', () =>
 
 // ---- 5. the console ----
 
-// card-cascade.test.js forbids a rule outside card.css from naming .card--, so
-// the console keys on the namespaces every staged card carries instead.
-test('N7: the console finds a lone staged card by its namespace', () => {
-  const sheet = css('focus/console.css')
-  assert.ok(sheet.includes('.half:has(:is(.change--framed, .change--event, .pitcherhandoff)):not(:has(.statgrid))'))
-  assert.doesNotMatch(sheet, /notice--event/)
+// The lone-staged-card rule went with the old due-up console (#2566); the console still never
+// names the old event class.
+test('N7: the console never names .notice--event', () => {
+  assert.doesNotMatch(css('focus/console.css'), /notice--event/)
 })

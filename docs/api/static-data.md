@@ -1312,7 +1312,7 @@ rebuild — ADR-0067 has the reasoning.
 
 `loadSeriesHistory()` reads the static `world-series/series.json` (every finished
 World Series, one row per game; shape in `.scratch/world-series-callouts/contract.md`
-section 3). It is `cutoff-gated`: the only reader is `ReferencePanel.jsx`, and only for a
+section 3). It is `cutoff-gated`: Gameday's checkpoint reads it through `useWsCalloutInputs`, and only for a
 game whose type is `W`. It returns `null` until the generator has written the file.
 `lib/worldSeries/odds.js` turns it into the `wsSeriesOdds` numbers, and every lookup goes
 through `lib/worldSeries/lastBefore.js`, strictly before the game's own date. The builder
@@ -1337,7 +1337,7 @@ pins the cutoff. A failed read drops the key, and an older shard without it work
 with `gameType=W`: `yearByYear` for seasons before `season`, plus the caller's World Series
 line for this season. It never uses `stats=career` (ADR-0088). `fetchWorldSeriesStartsBefore(id, date)`
 returns his starts before `date`. The live series page draws the line as the "All-time World
-Series" row (World Series only); `ReferencePanel.jsx` feeds the counts to the `wsStarterStart`
+Series" row (World Series only); Gameday's checkpoint feeds the counts to the `wsStarterStart`
 note ("His first World Series start", 5th, 10th). A failed read counts as 0 starts.
 
 ## `hotcold/rule.js`
