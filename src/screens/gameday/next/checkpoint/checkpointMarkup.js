@@ -1,5 +1,7 @@
 import { checkpointPages } from '../../../../api/gameday/checkpoint.js'
 import { halfIndex } from '../../../../api/select.js'
+import { selectRegulationInnings } from '../../../../api/gamestate/gameState.js'
+import { segmentedMarkup } from '../../../../lib/design/segmentedClass.js'
 import { ordinal } from '../../../../lib/format.js'
 
 // THE CHECKPOINT'S MARKUP (#2572 slices 3 to 5; design: .scratch/gameday-design/round2/checkpoint.js).
@@ -9,7 +11,9 @@ import { ordinal } from '../../../../lib/format.js'
 // checkpointPages is reveal-only, so it is called inside SealBox's reveal function, and only for a
 // half at or under `mark` (the caller's gate; checkpoint.js answers null past it as well). Every page
 // is in the DOM; checkpoint.css shows them all at T, L and D, and one (`page`) on the phone, all of
-// them under Motion: Reduced. A page that answers null (the notes with no bundle) has no tab.
+// them under Motion: Reduced. A page that answers null (the notes with no bundle) has no tab. The page
+// switch is the app's Segmented control. `Seen` (Checkpoint.jsx) records the notes drawn in the callout
+// ledger; `on` says whether the phone shows the notes page.
 
 export const LABEL = { tally: 'Tally', pitching: 'Pitching', atBats: 'At-bats', gameSoFar: 'Game', facts: 'Notes' }
 
@@ -41,10 +45,11 @@ function atBats(h, f) {
       h('span', { className: r.out ? 'gdcp__out' : undefined }, r.out ?? ''))))
 }
 
-// The line through this half: regulation's columns always (a blank column is no news), an extra
-// inning's only once it is on the line. At the last half the closing column draws the double rule.
-function gameSoFar(h, f, abbr, nextLabel) {
-  const span = Math.max(f.innings.length, 9)
+// The line through this half: regulation's columns always (a blank column is no news; 7 for a short
+// game), an extra inning's only once it is on the line. At the last half the closing column draws the
+// double rule.
+function gameSoFar(h, f, abbr, nextLabel, regulation) {
+  const span = Math.max(f.innings.length, regulation)
   const cols = Array.from({ length: span }, (_, i) => f.innings[i] ?? { num: i + 1, away: null, home: null })
   const last = f.final ? f.innings.length : 0
   const row = (side) => h('tr', { key: side }, h('th', null, abbr[side]),
@@ -61,20 +66,23 @@ function gameSoFar(h, f, abbr, nextLabel) {
   ]
 }
 
-const facts = (h, f) => h('ul', { className: 'gdcp__notes' }, ...f.notes.map((n, i) => h('li', { key: n.dedupeKey ?? i }, n.text)))
+const facts = (h, f, Seen, on) => [
+  h('ul', { key: 'list', className: 'gdcp__notes' }, ...f.notes.map((n, i) => h('li', { key: n.dedupeKey ?? i }, n.text))),
+  Seen && h(Seen, { key: 'seen', notes: f.notes, on }),
+]
 
-function body(h, pages, id, abbr, nextLabel) {
+function body(h, pages, id, { abbr, nextLabel, regulation, Seen, on }) {
   const f = pages.find((p) => p.id === id).fields
   if (id === 'tally') return tally(h, f, pages.find((p) => p.id === 'pitching').fields)
   if (id === 'pitching') return pitching(h, f)
   if (id === 'atBats') return atBats(h, f)
-  if (id === 'gameSoFar') return gameSoFar(h, f, abbr, nextLabel)
-  return facts(h, f)
+  if (id === 'gameSoFar') return gameSoFar(h, f, abbr, nextLabel, regulation)
+  return facts(h, f, Seen, on === id)
 }
 
 const HEAD = { tally: null, pitching: 'Pitching this half', atBats: 'The at-bats', facts: 'Notes for the next half' }
 
-function layer(h, pages, { inning, half, abbr, page, onPage, nextLabel }) {
+function layer(h, pages, { inning, half, abbr, page, onPage, nextLabel, regulation, Seen }) {
   const ids = pages.map((p) => p.id)
   const on = ids.includes(page) ? page : ids[0]
   const game = pages.find((p) => p.id === 'gameSoFar').fields
@@ -83,22 +91,21 @@ function layer(h, pages, { inning, half, abbr, page, onPage, nextLabel }) {
   return h('div', { className: 'gdcp', 'data-pages': ids.length },
     h('div', { className: 'gdcp__head' }, h('span', null, title),
       h('small', null, `${abbr.away} ${game.away.runs} · ${abbr.home} ${game.home.runs}`)),
-    h('div', { className: 'gdcp__tabs', role: 'tablist', 'aria-label': 'Checkpoint pages' },
-      ...ids.map((id) => h('button', {
-        key: id, type: 'button', role: 'tab', id: `gdcp-tab-${id}`, 'aria-selected': id === on, 'aria-controls': `gdcp-${id}`,
-        onClick: () => onPage?.(id),
-      }, LABEL[id]))),
+    segmentedMarkup(h, {
+      label: 'Checkpoint pages', value: on, onChange: onPage, fill: true, className: 'gdcp__tabs',
+      options: ids.map((id) => ({ value: id, label: LABEL[id] })),
+    }),
     h('div', { className: 'gdcp__body' },
       ...ids.map((id) => h('section', {
-        key: `${id}-${id === on}`, id: `gdcp-${id}`, role: 'tabpanel', 'aria-labelledby': `gdcp-tab-${id}`,
+        key: `${id}-${id === on}`, 'aria-label': LABEL[id],
         className: id === on ? 'gdcp__page is-on' : 'gdcp__page', 'data-page': id,
-      }, h('h4', null, heads[id]), body(h, pages, id, abbr, nextLabel)))))
+      }, h('h4', null, heads[id]), body(h, pages, id, { abbr, nextLabel, regulation, Seen, on })))))
 }
 
-export function checkpointMarkup(h, { SealBox, feed, inning, half, mark, notes = null, abbr, page, onPage, nextLabel }) {
+export function checkpointMarkup(h, { SealBox, Seen = null, feed, inning, half, mark, notes = null, abbr, page, onPage, nextLabel }) {
   if (!feed || !inning || !half || halfIndex(inning, half) > (mark ?? -1)) return null
   return h(SealBox, { coverless: true, forceRevealed: true }, () => {
     const pages = checkpointPages(feed, { inning, half, revealedThrough: mark, notes })
-    return pages && layer(h, pages, { inning, half, abbr, page, onPage, nextLabel })
+    return pages && layer(h, pages, { inning, half, abbr, page, onPage, nextLabel, regulation: selectRegulationInnings(feed), Seen })
   })
 }
