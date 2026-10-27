@@ -48,7 +48,7 @@ export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoi
     <GamedayNextPage
       band={band}
       stage={stage}
-      panels={panels}
+      panels={staged.onReplay ? { ...panels, onReplay: staged.onReplay } : panels}
       hero={hero || null}
       checkpoint={cp || null}
       engine={engine}

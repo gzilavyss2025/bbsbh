@@ -32,6 +32,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its
   per-game dismiss (`bbsbh:zonemap:{gamePk}`); the tint is `drawStage`'s `zones`, at rest only.
+- The hero's scorebook box copies Gary's hand-scored box: `docs/gameday-reference/scorebook-box.jpg` (match it, do not restyle).
 - `hero/` is the hero slot (#2576): `heroMarkup.js` builds it (a `.js` builder, so `npm test` can render it),
   `heroModel.js` is the scorebook box's pure model. It reads the live snapshot's `last` (the last finished
   at-bat as of the cursor, `deriveLiveState`) inside a `SealBox` reveal function. The box has one height per

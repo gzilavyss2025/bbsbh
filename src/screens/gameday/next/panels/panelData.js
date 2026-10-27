@@ -27,8 +27,11 @@ export function orderAt(feed, side, inning, half, mark, cards) {
   return (lineupEntering(feed, side, inning, half, mark) ?? []).map(({ slot, entries }) => {
     const now = entries.at(-1)
     const mine = cards.filter((c) => slotOf(c.batter?.id) === slot)
-    // `trip` is his latest at-bat while he is on the bases (or has been round them): the diamond reads its legs.
-    const trip = mine.findLast((c) => c.reached > 0 || c.scored) ?? null
-    return { slot, id: now.id, last: now.last, first: now.first, jersey: now.jersey, position: now.position, codes: mine.map(chipCode), trip }
+    // `trip` is his latest at-bat when he reached on it (the diamond reads its legs); `outcome` is its code
+    // when he did not (K, F9), drawn in the diamond's column.
+    const latest = mine.at(-1) ?? null
+    const trip = latest && (latest.reached > 0 || latest.scored) ? latest : null
+    const outcome = latest && !trip ? chipCode(latest) || null : null
+    return { slot, id: now.id, last: now.last, first: now.first, jersey: now.jersey, position: now.position, codes: mine.map(chipCode), trip, outcome }
   })
 }

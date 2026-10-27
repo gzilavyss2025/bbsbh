@@ -636,6 +636,8 @@
   font-family: var(--font-body);
   padding: var(--space-3) var(--space-3) var(--space-1);
 }
+/* Square corners, card and code chip, as every Gameday surface is (Card's sheet rounds by default). */
+.card.bflight, .bflight .bflight__code { border-radius: var(--radius-square); }
 
 .bflight--hover {
   position: fixed;
@@ -670,6 +672,10 @@
   border-bottom: var(--bw-hair) solid var(--border-hairline);
   padding-bottom: var(--space-2);
 }
+/* Only the ✕ (BallFlight head={false}): it floats in the card's top right corner, over the drawing's
+   empty corner, so the field starts at the card's top instead of under a row of white. */
+.card.bflight:has(> .bflight__head--bare) { position: relative; }
+.bflight__head--bare { position: absolute; z-index: 1; top: var(--space-1); right: var(--space-1); border-bottom: 0; padding-bottom: 0; }
 
 .bflight__ttl {
   display: flex;

@@ -58,7 +58,7 @@
 /* On the wide tiers the line score sits beside the score bug and is exactly its height, even when a status strip deepens the row. */
 .gdnext[data-tier='L'] .gdnext__slot--navigator, .gdnext[data-tier='D'] .gdnext__slot--navigator { align-self: start; height: var(--gd-band-h); }
 .gdnext__slot--stage { --gd-area: stage; border: var(--bw-heavy) solid var(--border-stamped); }
-.gdnext__slot--hero { --gd-area: hero; background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); }
+.gdnext__slot--hero { --gd-area: hero; background: none; border: 0; }
 .gdnext__slot--trail { --gd-area: trail; }
 .gdnext__slot--pitches { --gd-area: pitches; }
 .gdnext__slot--battingOrder { --gd-area: battingOrder; }
@@ -97,8 +97,8 @@
 /* The bar: menu door, the step switch, the advance. */
 /* layout-exempt: one row of three controls */
 .gdnext__bar { grid-area: bar; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; gap: var(--space-2); min-width: 0;
-  padding: var(--space-2) var(--space-3); background: var(--surface-card); border-top: var(--bw-heavy) solid var(--border-stamped); }
-.gdnext__bar .gdnext__menu { margin: 0; border-radius: 0; flex: none; width: auto; min-width: 88px; }
+  padding: var(--space-2) var(--space-3); background: transparent; border-top: var(--bw-heavy) solid var(--border-stamped); }
+.gdnext__bar .gdnext__menu { margin: 0; border-radius: 0; flex: none; width: auto; min-width: 88px; font-family: var(--font-display); font-weight: var(--w-regular); letter-spacing: var(--ls-label); }
 .gdnext__switch { flex: none; display: flex; white-space: nowrap; }
 /* Menu, the switch and the advance share one height, so the three read as one row. */
 .gdnext__bar .gdnext__menu, .gdnext__bar .gdnext__defbtn, .gdnext__switch .btn, .gdnext__bar .gdnext__advance { box-sizing: border-box; height: var(--tap-min); min-height: 0; font-size: var(--fs-label); }
@@ -134,7 +134,7 @@
 .gdnext__band .inhead__center { flex-direction: row; justify-content: center; gap: var(--space-3); padding: 0; }
 /* layout-exempt: the two out dots one over the other */
 .gdnext__band .inhead__outs { flex-direction: column; }
-.gdnext__band .inhead .inhead__runs { font-size: var(--fs-hero-md); -webkit-text-stroke-width: 3px; /* raw-value-exempt: outline scaled with the smaller digit */ }
+.gdnext__band .inhead .inhead__runs { font-size: var(--fs-hero-2xl); -webkit-text-stroke-width: 5px; /* raw-value-exempt: the score bug's outline at its full digit */ }
 .gdnext__band .inhead .inhead__num { font-size: var(--fs-title-md); }
 .gdnext__band .inhead .basestate { width: 46px; height: 46px; } /* raw-value-exempt: the bases fill the band's height beside the inning and the outs */
 .gdnext__band .inhead .inhead__num { font-size: var(--fs-title-sm); }

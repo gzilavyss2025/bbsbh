@@ -11,7 +11,7 @@
 /* The line score as a game's score tray: the club's mark for the row, runs in the score bug's face. */
 .gdp__line { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; color: var(--text-heading); }
 .gdp__line thead { height: 18px; } /* raw-value-exempt: the inning numbers' strip */
-.gdp__line thead th { font: var(--w-bold) var(--fs-cell) / 1 var(--font-mono); color: var(--text-caption); text-align: center; padding: 0; border-bottom: var(--bw-hair) solid var(--border-stamped); }
+.gdp__line thead th { font: var(--w-bold) var(--fs-label) / 1 var(--font-display); color: var(--text-heading); text-align: center; padding: 0; border-bottom: var(--bw-hair) solid var(--border-stamped); }
 .gdp__line tbody th { width: 64px; padding: 0 var(--space-2); text-align: center; border-right: var(--bw-heavy) solid var(--border-stamped); }
 .gdp__line tbody th { background: var(--bar-fill, var(--ink-1));
   background-image: repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
@@ -20,6 +20,9 @@
 .gdp__line tbody th .teamlogo { display: block; margin: 0 auto; }
 .gdp__line tbody tr + tr > * { border-top: var(--bw-hair) solid var(--border-stamped); }
 .gdp__line td { text-align: center; padding: 0; border-left: var(--bw-hair) solid var(--border-stamped); }
+/* R / H / E after the innings, the runs column set off by a heavy rule, as the box score's totals are. */
+.gdp__line .gdp__tot { font: var(--w-bold) var(--fs-title-md) / 1 var(--font-display); color: var(--text-heading); background: var(--surface-inset); }
+.gdp__line .is-runs { border-left: var(--bw-heavy) solid var(--border-stamped); }
 .gdp__run { box-sizing: border-box; display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
 .gdp__run:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }
 .gdp__run:disabled { cursor: default; }
@@ -40,6 +43,17 @@
 .gdp__chip b { display: flex; align-items: center; padding: 0 var(--space-2); border-right: var(--bw-heavy) solid var(--border-stamped); background: var(--accent-tint);
   font-family: var(--font-mono); font-size: var(--fs-small); }
 .gdp__chip span { display: flex; align-items: center; padding: 0 var(--space-3); }
+/* A stamped connector between the cards, so they read as one after another: a heavy rule from the last
+   card's edge into a solid arrowhead that touches the next card. Drawn, not a font glyph. */
+.gdp__chip + .gdp__chip { position: relative; margin-left: var(--space-4); }
+.gdp__chip + .gdp__chip::before, .gdp__chip + .gdp__chip::after { content: ''; position: absolute; top: 50%; transform: translateY(-50%); background: var(--border-stamped); }
+.gdp__chip + .gdp__chip::before { right: calc(100% + var(--bw-heavy) + var(--space-2)); width: var(--space-4); height: var(--bw-heavy); }
+.gdp__chip + .gdp__chip::after { right: calc(100% + var(--bw-heavy)); width: var(--space-2); height: var(--space-3); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.gdp__replay { display: flex; align-items: stretch; padding: 0; margin: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; color: inherit; text-transform: inherit; cursor: pointer; }
+.gdp__replay:disabled { cursor: default; }
+.gdp__replay:hover:not(:disabled) span { text-decoration: underline; }
+.gdp__replay:focus-visible { outline: var(--focus-ring); outline-offset: var(--bw-heavy); }
+.gdp__chip.is-out b { background: var(--clay-soft); color: var(--clay-deep); } /* the batter made an out */
 .gdp__chip--cover { background: var(--text-heading); color: var(--surface-card); }
 .gdp__chip--cover b { border-right: 0; background: none; padding: 0 var(--space-4); font-family: var(--font-display); letter-spacing: var(--ls-xwide); }
 
@@ -61,20 +75,39 @@
 .gdp__order .gdp__shot { display: none; }
 /* As the lineup page's order card, dressed as the hover card: a big headshot, the first name small over
    the surname, and the number and position at the right edge, the position in its stamped chip. */
-.gdp__order li { grid-template-columns: 1fr auto; }
+/* The number and position take one fixed width (#2 is narrower than #24), so every row's diamond or
+   outcome stands in the same column. */
+.gdp__order li { grid-template-columns: 1fr auto calc(2 * var(--space-8)); }
 .gdp__who { min-width: 0; color: var(--text-heading); font-family: var(--font-display); font-weight: var(--w-bold); }
 /* layout-exempt: the first name over the surname */
 .gdp__who .plink { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); max-width: 100%; text-align: left; }
 /* layout-exempt: the name over the runner's diamond */
 .gdp__who { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
-.gdp__trip { display: block; line-height: var(--lh-solid); }
+/* The runner's diamond takes a column of its own between the name and the number: a row under the name
+   would push the ninth batter out of the slot. */
+.gdp__trip { grid-row: 1; grid-column: -3; display: flex; line-height: var(--lh-solid); }
+.gdp__order .gdp__tag { grid-row: 1; grid-column: -2; }
+/* The advance code beside the leg, in viewBox units (the 56px diamond draws 100 units): about 13px on screen. */
+.gdp__trip .pbp__advance { font-size: 24px; }
+/* A batter who did not reach: his result's code in the diamond's place, centred where a diamond would be, in
+   deep red. The display face, since the mono face ships one weight and draws no bold. */
+.gdp__trip--code { width: 56px; height: 56px; align-items: center; justify-content: center; }
+/* A long surname runs on over the empty left of the diamond's cell instead of being cut. */
+.gdp__order li > .gdp__who { overflow: visible; }
+.gdp__order li > .gdp__who .plink { overflow: visible; }
+.gdp__trip--code b { color: var(--clay-deep); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
 .gdp__who small { font-size: var(--fs-label); color: var(--text-caption); line-height: var(--lh-solid); }
 .gdp__who b { font-size: var(--fs-title-sm); font-weight: var(--w-bold); line-height: var(--lh-solid); }
 /* layout-exempt: the number and the position chip, right-aligned */
 .gdp__tag { display: flex; align-items: center; gap: var(--space-2); justify-content: flex-end; font-family: var(--font-mono); white-space: nowrap; }
-.gdp__tag b { color: var(--clay); }
-.gdp__tag i { font-style: normal; min-width: 2.2em; text-align: center; padding: var(--space-1) var(--space-1h); border: var(--bw-heavy) solid var(--border-stamped); background: var(--accent-tint); color: var(--text-heading); font-weight: var(--w-bold); }
-.gdnext[data-tier='L'] .gdp__order li, .gdnext[data-tier='D'] .gdp__order li { grid-template-columns: auto 1fr auto; }
+/* The number and the position: plain bold type in the display face (the mono face draws no bold), close
+   together, the position set right a few px from the row's edge. */
+.gdp__order .gdp__tag { gap: var(--space-1); }
+.gdp__order li { padding-right: var(--space-1); }
+.gdp__tag b { color: var(--clay); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+/* The position takes one width (DH's), so every number ends on the same line. */
+.gdp__tag i { flex: none; width: var(--space-5); font-style: normal; text-align: right; color: var(--text-heading); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+.gdnext[data-tier='L'] .gdp__order li, .gdnext[data-tier='D'] .gdp__order li { grid-template-columns: auto 1fr auto calc(2 * var(--space-8)); }
 .gdnext[data-tier='L'] .gdp__order .gdp__shot, .gdnext[data-tier='D'] .gdp__order .gdp__shot { display: block; box-sizing: border-box;
   width: auto; height: min(var(--shot-sm-h), calc((100dvh - 304px) / 9 - 10px)); aspect-ratio: 3 / 4; border: var(--bw-heavy) solid var(--border-stamped); border-radius: var(--radius-square); }
 
@@ -85,7 +118,9 @@
 
 
 /* The arm's line for the game: one tile per figure, the strikeouts and walks on the same ink as the order. */
-.gdp__tonight { border-bottom: var(--bw-heavy) solid var(--border-stamped); }
+/* Tonight's line sits flush on the pitch mix: no rule under it, no padding below it. */
+.gdp__tonight { border-bottom: 0; }
+.gdarm .statgrid:has(> .gdp__tonight) { padding-bottom: 0; }
 /* layout-exempt: the label and the pitch count, one row */
 .gdp__tonighthead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3) var(--space-1); }
 .gdp__tonighthead span { font-size: var(--fs-cell); color: var(--text-caption); }
@@ -103,6 +138,11 @@
 .gdarm .pcard__tiles { display: flex; flex-direction: column; }
 /* layout-exempt: one pitch row: mark, name, share, speed */
 .gdarm .pcard__tile { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-2); padding: var(--space-1h) var(--space-3); border-right: 0; }
+/* The (i) note hangs from the whole label row, not the (i), so it stays inside the sidebar at the screen's edge. */
+.gdarm .pcard__mixlabel { position: relative; }
+.gdarm .pcard__info { position: static; }
+.gdarm .pcard__tip { top: 100%; left: var(--space-2); right: var(--space-2); width: auto; }
+.gdarm .pcard__tile.is-active { box-shadow: none; } /* the tint alone marks the pitch in flight; no ink underline */
 .gdarm .pcard__code { display: none; } /* the mark and the name say it; the code is the narrow tile's */
 .gdarm .pcard__tname { min-height: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gdarm .pcard__pct { min-width: 3ch; text-align: right; }
@@ -132,9 +172,11 @@
 .gdarm .change__body { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2); }
 .gdarm .change__body > .card__name { display: none; }
 .gdarm .change__badges { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-mono); font-size: var(--fs-small); }
-.gdarm .change__jersey { padding: 0; border: 0; background: none; color: var(--clay); font-weight: var(--w-bold); }
-.gdarm .change__jersey::before { content: '#'; }
-.gdarm .change__hand { min-width: 2.2em; text-align: center; padding: var(--space-1) var(--space-1h); border: var(--bw-heavy) solid var(--border-stamped); background: var(--accent-tint); color: var(--text-heading); font-weight: var(--w-bold); }
+/* The number and the hand as the Due up rows set the number and position: plain bold display type, the
+   number red with no "#", 4px apart, no chip. */
+.gdarm .change__badges { gap: var(--space-1); }
+.gdarm .change__jersey { padding: 0; border: 0; background: none; color: var(--clay); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+.gdarm .change__hand { padding: 0; border: 0; background: none; color: var(--text-heading); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
 
 /* The line for the game runs edge to edge: SealBox's side padding comes off. */
 .gdarm > .statgrid { padding-inline: 0; }
@@ -156,3 +198,16 @@
 .gdarm .pcard__tiles { flex: 1 1 auto; }
 /* layout-exempt: one pitch row: mark, name, share, speed */
 .gdarm .pcard__tile { flex: 1 1 0; }
+/* The pitcher's photo at the stamped cards' large size (72x88), as an ejection card shows its person. */
+.gdarm .change__shot--stamped { width: 72px; height: 88px; } /* raw-value-exempt: the design's large photo */
+/* The diamond's codes may run past its 56px box (a long out chain); the row does not clip them. */
+.gdp__order li > .gdp__trip, .gdp__trip .pbp__diamond { overflow: visible; }
+.gdarm > .change { padding-left: var(--space-2); gap: var(--space-2); } /* the photo 8px in and 8px from the name, as the Due up rows set theirs */
+/* The Due up batter's Scout row under his name (ScoutLine.jsx): the door, then the pitcher and the line. */
+/* layout-exempt: one row across the batter's card */
+.gdp__order li > .gdp__scout { grid-row: 2; grid-column: 1 / -1; display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; overflow: hidden; white-space: nowrap; }
+.gdp__scoutdoor { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase;
+  color: var(--text-heading); text-decoration: underline; text-underline-offset: 2px; }
+.gdp__scoutdoor:focus-visible { outline: var(--focus-ring); outline-offset: var(--bw-heavy); }
+.gdp__scoutvs { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
+.gdp__scoutline { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); color: var(--text-heading); font-variant-numeric: tabular-nums; }

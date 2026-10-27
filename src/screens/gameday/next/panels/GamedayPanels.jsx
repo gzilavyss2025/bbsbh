@@ -6,6 +6,7 @@ import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { bandPaint } from '../../../../lib/pitcherCard/card.js'
 import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
 import { PlayDiamond } from '../../../../components/scoring/PlayDiamond.jsx'
+import { ScoutLine } from './ScoutLine.jsx'
 import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram.jsx'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
@@ -29,11 +30,12 @@ import { chipCode, cutAt, orderAt } from './panelData.js'
 
 // Result-bearing panels draw through here; `key` re-seals on every half, as the page does. Until
 // the panel may show, the slot says "Sealed" (a label, outside the box: it holds no value).
-function Sealable({ ctx, reach = false, children }) {
+// `quiet`: draw nothing at all until then (the trail: an empty strip says nothing).
+function Sealable({ ctx, reach = false, quiet = false, children }) {
   const { feed, inning, half, step, mark } = ctx
   const idx = halfIndex(inning, half)
   const shown = reach ? idx <= mark + 1 : idx <= mark || step > 0
-  if (!shown) return <p className="gdp__sealed">Sealed</p>
+  if (!shown) return quiet ? null : <p className="gdp__sealed">Sealed</p>
   return (
     <SealBox key={`${inning}-${half}`} forceRevealed coverless>
       {() => children(cutAt(feed, inning, half, idx <= mark ? null : step))}
@@ -49,6 +51,18 @@ function Navigator({ ctx }) {
     if (idx <= mark) return revealInning(feed, n, side)
     if (idx === runsInProgress?.idx) return { runs: runsInProgress.runs, hits: runsInProgress.hits }
     return null
+  }
+  // R / H / E as of the cursor: runs and hits over the club's halves on the line, errors (a fielding
+  // stat, ADR-0006) over the halves it fielded that are revealed. A club that has not batted reads 0 0 0.
+  const totals = (half, side) => {
+    const other = half === 'top' ? 'bottom' : 'top'
+    let r = 0; let hits = 0; let e = 0
+    for (const n of cols) {
+      const l = n <= unlocked ? cell(n, half, side) : null
+      if (l) { r += l.runs ?? 0; hits += l.hits ?? 0 }
+      if (halfIndex(n, other) <= mark) e += revealInning(feed, n, side)?.errors ?? 0
+    }
+    return [r, hits, e]
   }
   const row = (half, side, m) => (
     <tr key={side}>
@@ -71,30 +85,36 @@ function Navigator({ ctx }) {
               aria-label={`${half === 'top' ? 'Top' : 'Bottom'} ${n}${skipped ? ', not played' : l ? `, ${l.runs} runs` : ', sealed'}`}
               onClick={() => onSelect(idx)}
             >
-              {skipped ? '✕' : l ? l.runs : '·'}
+              {skipped ? '✕' : l ? l.runs : ''}{/* a sealed half is an empty cell, as on paper */}
             </button>
           </td>
         )
       })}
+      {totals(half, side).map((v, i) => <td key={`t${i}`} className={i === 0 ? 'gdp__tot is-runs' : 'gdp__tot'}>{v}</td>)}
     </tr>
   )
   return (
     <table className="gdp__line" aria-label="Line score">
       <thead>
-        <tr><th />{cols.map((n) => <th key={n}>{n}</th>)}</tr>
+        <tr><th />{cols.map((n) => <th key={n}>{n}</th>)}{['R', 'H', 'E'].map((c, i) => <th key={c} className={i === 0 ? 'is-runs' : undefined}>{c}</th>)}</tr>
       </thead>
       <tbody>{row('top', 'away', meta.away)}{row('bottom', 'home', meta.home)}</tbody>
     </table>
   )
 }
 
+// Nothing on the trail until the half's first at-bat is revealed.
 const Trail = ({ ctx }) => (
-  <Sealable ctx={ctx}>
-    {({ cards, more }) => (
+  <Sealable ctx={ctx} quiet>
+    {({ cards, more }) => cards.length === 0 ? null : (
       <ol className="gdp__trail" aria-label="At-bats this half">
         {cards.slice(-10).map((c) => (
-          <li key={c.atBatIndex} className="gdp__chip">
-            <b>{chipCode(c) || '···'}</b><span>{c.batter?.last ?? c.batter?.fullName}</span>
+          <li key={c.atBatIndex} className={c.outNumber != null ? 'gdp__chip is-out' : 'gdp__chip'}>
+            {/* A tap plays this at-bat again on the stage (stage/tapRule.js replay). */}
+            <button type="button" className="gdp__replay" disabled={!ctx.onReplay} onClick={() => ctx.onReplay?.(c.atBatIndex)}
+              aria-label={`Replay: ${chipCode(c) || 'at-bat'}, ${c.batter?.last ?? c.batter?.fullName ?? ''}`}>
+              <b>{chipCode(c) || '···'}</b><span>{c.batter?.last ?? c.batter?.fullName}</span>
+            </button>
           </li>
         ))}
         {more && <li className="gdp__chip gdp__chip--cover"><b>Sealed</b></li>}
@@ -140,12 +160,14 @@ function BattingOrder({ ctx }) {
   const side = battingSideOf(ctx.half)
   const club = ctx.meta?.[side] ?? {}
   const band = bandPaint({ teamId: club.id, side, treatment: ctx.treatment })
+  // The pitcher the batter at the top faces (the Arm panel's own read), for his Scout row.
+  const up = ctx.pitcherId ?? selectHalfStartingPitcher(ctx.feed, ctx.inning, ctx.half, ctx.mark)?.id ?? null
   return (
     <>
       {/* The batting club's own band, as the lineup page's cards wear it (ADR-0030). */}
       <div className="gdp__band" style={band.style}>
         <SectionHead look="band" as="h3" mark={<TeamLogo teamId={club.id} name={club.clubName ?? ''} size={22} variant="mono" crop="bar" className="sectionhead__mark" />}>
-          Batting lineup
+          Due up
         </SectionHead>
       </div>
       <Sealable ctx={ctx} reach>
@@ -154,8 +176,11 @@ function BattingOrder({ ctx }) {
             {atTheTop(orderAt(ctx.feed, side, ctx.inning, ctx.half, ctx.mark, cards), ctx, cards).map((r, i) => (
               <li key={r.slot} data-up={i === 0 || undefined}>
                 <Headshot personId={r.id} name={r.last} tint={false} className="gdp__shot" />
-                <span className="gdp__who"><PlayerLink id={r.id} name={[r.first, r.last].filter(Boolean).join(' ')}>{r.first && <small>{r.first}</small>}<b>{r.last}</b></PlayerLink>{r.trip && <span className="gdp__trip"><PlayDiamond reached={r.trip.reached} scored={r.trip.scored} earned={r.trip.earned} legNotations={r.trip.legNotations ?? {}} outAt={r.trip.outAt ?? null} outCode={r.trip.outCode ?? ''} size={28} /></span>}</span>
-                <span className="gdp__tag">{r.jersey && <b>#{r.jersey}</b>}{r.position && <i>{r.position}</i>}</span>
+                <span className="gdp__who"><PlayerLink id={r.id} name={[r.first, r.last].filter(Boolean).join(' ')}>{r.first && <small>{r.first}</small>}<b>{r.last}</b></PlayerLink></span>
+                <span className="gdp__tag">{r.jersey && <b>{r.jersey}</b>}{r.position && <i>{r.position}</i>}</span>
+                {r.trip && <span className="gdp__trip"><PlayDiamond reached={r.trip.reached} scored={r.trip.scored} earned={r.trip.earned} legNotations={r.trip.legNotations ?? {}} outAt={r.trip.outAt ?? null} outCode={r.trip.outCode ?? ''} size={56} onLeg /></span>}
+                {r.outcome && <span className="gdp__trip gdp__trip--code"><b>{r.outcome}</b></span>}
+                {i === 0 && up && <ScoutLine feed={ctx.feed} hitterId={r.id} pitcherId={up} />}
               </li>
             ))}
           </ol>

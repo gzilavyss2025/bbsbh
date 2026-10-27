@@ -77,21 +77,54 @@
 
 /* Page 3, the at-bats in order. */
 .gdcp__rows, .gdcp__notes { margin: 0; padding: 0; list-style: none; font-size: var(--fs-small); }
-/* layout-exempt: number, name, code, RBI, out */
-.gdcp__rows li { display: grid; grid-template-columns: 30px minmax(0, 1fr) 40px 44px 20px; gap: var(--space-1h); align-items: center;
+/* layout-exempt: name, RBI, out, code: the code right-set in a narrow column, so its out circle sits
+   close (a longer code, 6-4-3, runs left into the gap) */
+.gdcp__rows li { display: grid; grid-template-columns: minmax(0, 1fr) auto 20px var(--space-6); gap: var(--space-1h); align-items: center;
   padding: var(--space-1) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
 .gdcp__rows li.is-sub { display: block; font-size: var(--fs-cell); color: var(--text-caption); }
-.gdcp__rows b { font: var(--w-bold) var(--fs-field) / var(--lh-solid) var(--font-display); color: var(--text-heading); }
-.gdcp__rows b.is-looking { display: inline-block; justify-self: start; transform: scaleX(-1); }
+.gdcp__rows b { text-align: right; white-space: nowrap; font: var(--w-bold) var(--fs-field) / var(--lh-solid) var(--font-display); color: var(--text-heading); }
+.gdcp__rows b.is-looking { display: inline-block; justify-self: end; transform: scaleX(-1); }
+.gdcp__name .plink { font: inherit; letter-spacing: inherit; color: inherit; text-transform: inherit; text-align: left; }
 .gdcp__name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* layout-exempt: the out number in its box */
-.gdcp__out { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;
-  border: var(--bw-rule) solid var(--text-heading); font-size: var(--fs-cell); font-weight: var(--w-bold); }
+/* layout-exempt: the out number in its circle, as the scorebook box rings it */
+.gdcp__out { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; box-sizing: border-box;
+  border: var(--bw-rule) solid var(--text-heading); border-radius: 50%; font-size: var(--fs-cell); font-weight: var(--w-bold); }
 
 /* Page 4's due-up; page 5's notes. */
 /* layout-exempt: a wrapping row of chips */
 .gdcp__due { display: flex; flex-wrap: wrap; gap: var(--space-1); align-items: center; }
 .gdcp__due .gdcp__label { flex-basis: 100%; }
-.gdcp__due span:not(.gdcp__label) { padding: var(--space-1) var(--space-1h); border: var(--bw-rule) solid var(--border-stamped);
-  background: var(--surface-inset); font-size: var(--fs-cell); white-space: nowrap; }
-.gdcp__notes li { margin-bottom: var(--space-1h); padding: var(--space-1h) var(--space-2); background: var(--surface-inset); border: var(--bw-rule) solid var(--border-stamped); }
+/* The notes read as running text: a hairline between them, no boxes. */
+.gdcp__notes li { padding: var(--space-1h) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); line-height: var(--lh-ui); }
+.gdcp__notes li:last-child { border-bottom: 0; }
+/* The batters due up as photo cards across the page's width, the three filling it: the headshot at the
+   card's full width, the first name small over the surname. */
+.gdcp__page[data-page='gameSoFar'] .gdcp__due { flex: 1; min-height: 0; flex-direction: column; flex-wrap: nowrap; align-items: stretch; }
+/* layout-exempt: one card per batter due up */
+.gdcp__dueups { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: start; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+/* layout-exempt: the photo over the names */
+.gdcp__dueups li { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-1); min-width: 0; }
+.gdcp__dueups .shot { width: 100%; height: auto; aspect-ratio: 4 / 5; box-sizing: border-box; border: var(--bw-heavy) solid var(--border-stamped); border-radius: 0; overflow: hidden; margin-bottom: var(--space-1); }
+.gdcp__dueups .shot img { display: block; width: 100%; height: 100%; object-fit: cover; border: 0; border-radius: 0; }
+.gdcp__dueups small { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
+.gdcp__dueups :is(small, b) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gdcp__dueups b { font: var(--w-bold) var(--fs-title-md) / var(--lh-solid) var(--font-display); color: var(--text-heading); }
+
+
+/* The tally fills its page edge to edge: no padding, the two rows splitting the height, the page's own
+   rules for the outer edge. */
+.gdnext .gdcp__page[data-page='tally'] { padding: 0; gap: 0; }
+.gdcp__page[data-page='tally'] .gdcp__tally { flex: 1; border: 0; }
+.gdcp__page[data-page='tally'] .gdcp__tally + .gdcp__tally { margin-top: 0; border-top: var(--bw-rule) solid var(--border-stamped); }
+.gdcp__page[data-page='tally'] .gdcp__tally div { justify-content: center; }
+/* The notes run wider: a slimmer side margin, and the text closer to the scrollbar. */
+.gdnext .gdcp__page[data-page='facts'] { padding-inline: var(--space-2); }
+.gdcp__page[data-page='facts'] .gdscroll__in { padding-right: var(--space-1); }
+/* No rule under the table's last row: one pitcher's line ends the page; with more, the total row closes it. */
+.gdcp__table tbody tr:last-child td { border-bottom: 0; }
+.gdcp__page[data-page='gameSoFar'] .gdcp__due .gdcp__label { flex-basis: auto; } /* a column here: the row's 100% would take the height */
+/* The pitching table runs to the page's edges. */
+.gdnext .gdcp__page[data-page='pitching'] { padding-inline: 0; }
+.gdcp__dueline { font: var(--w-medium) var(--fs-cell) / var(--lh-solid) var(--font-body); color: var(--text-caption); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gdcp__dueups .plink { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-1); min-width: 0; padding: 0; border: 0; background: none;
+  font: inherit; color: inherit; text-align: left; cursor: pointer; } /* layout-exempt: the photo, or the first name over the surname, as one link */

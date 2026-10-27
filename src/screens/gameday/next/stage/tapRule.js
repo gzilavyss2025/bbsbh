@@ -33,6 +33,10 @@ export function saw(s, seen, view) {
   return rest(seen, view)
 }
 
+// A tap on a trail card: play that at-bat again. It is one the reader already revealed (the trail draws
+// inside its seal), so no tap rule gates it. `run` counts replays, so a second tap on the same card restarts it.
+export const replay = (s, idx, reduced) => ({ ...s, armed: null, shown: idx, playing: !reduced, run: (s.run ?? 0) + 1 })
+
 // The animation reached its end on its own.
 export const ended = (s) => (s.playing ? { ...s, playing: false } : s)
 

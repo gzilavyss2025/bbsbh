@@ -181,26 +181,26 @@ const VIEWS = [
   { value: 'arc', label: 'Elevation Arc' },
 ]
 
-function FlightBody({ ball, park, name, code, closeRef, onClose }) {
+function FlightBody({ ball, park, name, code, closeRef, onClose, facts = true, arc = true, head = true }) {
   const [view, setView] = useState('spray')
-  const toggle = Boolean(onClose) && hasElevationArc(ball)
+  const toggle = Boolean(onClose) && arc && hasElevationArc(ball)
   const side = toggle && view === 'arc'
   return (
     <>
-      <div className="bflight__head">
-        <span className="bflight__ttl">
+      {(head || onClose) && <div className={head ? 'bflight__head' : 'bflight__head bflight__head--bare'}>
+        {head && <span className="bflight__ttl">
           <span className="bflight__who">{name}</span>
           <span className="bflight__result">
             <span className="bflight__outcome">{outcomeWord(ball)}</span>
             {code && <span className="bflight__code">{code}</span>}
           </span>
-        </span>
+        </span>}
         {onClose && (
           <IconButton ref={closeRef} mark="md" onClick={onClose} label="Close">
             ✕
           </IconButton>
         )}
-      </div>
+      </div>}
       {toggle && (
         // The sheet is a dismiss target end to end; a press on the toggle is not
         // "I am done reading", so it stops here.
@@ -209,12 +209,15 @@ function FlightBody({ ball, park, name, code, closeRef, onClose }) {
         </div>
       )}
       {side ? <ElevationPlot ball={ball} park={park} /> : <FlightPlot ball={ball} park={park} />}
-      <FlightFacts ball={ball} />
+      {facts && <FlightFacts ball={ball} />}
     </>
   )
 }
 
-export function BallFlight({ ball, batter, code = '' }) {
+// `facts={false}`: leave out the exit velo / launch / distance strip, for a host that already shows them
+// beside the diamond (Gameday's hero). `arc={false}`: the field spray only, no Elevation Arc view.
+// `head={false}`: no name or result over the drawing, only the sheet's ✕ (the host names the play).
+export function BallFlight({ ball, batter, code = '', facts = true, arc = true, head = true }) {
   const hoverCapable = useMediaQuery(HOVER_CARD_QUERY)
   const btnRef = useRef(null)
   const closeRef = useRef(null)
@@ -324,7 +327,7 @@ export function BallFlight({ ball, batter, code = '' }) {
             aria-label={label}
             style={{ left: pos.left, top: pos.top }}
           >
-            <FlightBody ball={ball} park={park} name={name} code={code} />
+            <FlightBody ball={ball} park={park} name={name} code={code} facts={facts} arc={arc} head={head} />
           </Card>
         </ModalPortal>
       )}
@@ -343,6 +346,9 @@ export function BallFlight({ ball, batter, code = '' }) {
                 park={park}
                 name={name}
                 code={code}
+                facts={facts}
+                arc={arc}
+                head={head}
                 closeRef={closeRef}
                 onClose={() => setOpen(false)}
               />

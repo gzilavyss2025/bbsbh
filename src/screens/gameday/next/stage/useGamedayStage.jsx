@@ -12,7 +12,7 @@ import { GamedayStage, restBatter, restZones } from './GamedayStage.js'
 import { StageCanvas } from './StageCanvas.jsx'
 import { wallFn } from './scene.js'
 import { stageKey } from '../steps/subStep.js'
-import { disarm, ended, rest, saw, tap } from './tapRule.js'
+import { disarm, ended, replay, rest, saw, tap } from './tapRule.js'
 
 // The stage mount (#2573, #2568 slice 4): the stage slot, and the advance control wrapped in the tap
 // rule (tapRule.js). `last` is the last finished at-bat's index as of the cursor, `view` the half on
@@ -27,6 +27,8 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   const cur = saw(s, stageKey(open, last, s.seen), view)
   if (cur !== s) setS(cur)
   const onEnd = useCallback(() => setS(ended), [])
+  // A trail card's tap plays its at-bat again (tapRule.js replay).
+  const onReplay = useCallback((idx) => setS((p) => replay(p, idx, motionIsReduced())), [])
 
   const gd = feed?.gameData
   const pk = gd?.game?.pk
@@ -53,7 +55,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   const stage = feed ? (
     <>
       <GamedayStage
-        SealBox={SealBox} StageCanvas={StageCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} playing={cur.playing} onEnd={onEnd}
+        SealBox={SealBox} StageCanvas={StageCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} run={cur.run ?? 0} playing={cur.playing} onEnd={onEnd}
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones} onZone={batter ? toggleZones : undefined}
       />
       {zones && (
@@ -71,5 +73,5 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
     // last at-bat (a stoppage, a placed runner) is disarmed after a second rather than tracked.
     if (next.armed) setTimeout(() => setS(disarm), 1000)
   }
-  return { stage, advance: { ...advance, onClick } }
+  return { stage, advance: { ...advance, onClick }, onReplay: covered ? undefined : onReplay }
 }

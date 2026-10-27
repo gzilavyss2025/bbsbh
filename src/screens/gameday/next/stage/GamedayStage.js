@@ -66,8 +66,9 @@ function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone }) {
   return h(StageCanvas, { play, t: 0, zones, onZone, label: 'The field before the pitch' })
 }
 
-export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, playing, onEnd, batSide, pitchHand, zones, onZone }) {
+// `run` counts trail-card replays (tapRule.js replay): a new run remounts the play, so its clock restarts.
+export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, batSide, pitchHand, zones, onZone }) {
   return shown != null
-    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd }))
+    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: `${typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown}#${run}`, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd }))
     : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone })
 }

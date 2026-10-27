@@ -4,10 +4,10 @@
 
 /* layout-exempt: fills its slot; the box and the strip are placed by flow */
 .gdhero { position: absolute; inset: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-2);
-  padding: var(--space-2h); overflow: hidden; }
+  padding: var(--space-2h) 0; overflow: hidden; } /* no side padding: the hero's edges line up with the stage's */
 .gdhero > .statgrid { display: contents; }
 /* layout-exempt: the box beside its words */
-.gdhero__top { display: flex; gap: var(--space-3); min-height: 0; }
+.gdhero__top { display: flex; align-items: stretch; gap: var(--space-3); min-height: 0; }
 /* layout-exempt: the words stacked beside the box */
 .gdhero__txt { min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
 .gdhero__shot { flex: none; margin-left: auto; align-self: stretch; display: flex; }
@@ -18,51 +18,72 @@
 .gdhero__lbl { font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
 /* layout-exempt: the pitch columns beside the diamond */
-.gdhero__box { flex: none; box-sizing: border-box; display: grid; grid-template-columns: 38px minmax(0, 1fr); aspect-ratio: 1.45;
-  border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-inset); }
-.gdnext[data-tier='P'] .gdhero__box { height: 140px; }
-.gdnext[data-tier='T'] .gdhero__box { height: 128px; }
-.gdnext[data-tier='L'] .gdhero__box { height: 128px; }
-.gdnext[data-tier='D'] .gdhero__box { height: 128px; }
+.gdhero__box { flex: none; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 66px; aspect-ratio: 1.45; --gd-code-h: 36px;
+  border: var(--bw-hair) solid var(--border-stamped); background: var(--surface-inset); }
+.gdnext[data-tier='P'] .gdhero__box, .gdnext[data-tier='P'] .gdhero__top { height: 140px; }
+.gdnext[data-tier='T'] .gdhero__box, .gdnext[data-tier='T'] .gdhero__top { height: 128px; }
+.gdnext[data-tier='L'] .gdhero__box, .gdnext[data-tier='L'] .gdhero__top { height: 128px; }
+.gdnext[data-tier='D'] .gdhero__box, .gdnext[data-tier='D'] .gdhero__top { height: 128px; }
 .gdhero__box.is-sealed { grid-template-columns: 1fr; place-items: center; background: var(--surface-inset); color: var(--text-caption); }
 .gdhero__box.is-sealed span { font: var(--w-bold) var(--fs-label) / 1 var(--font-display); letter-spacing: var(--ls-xwide); text-transform: uppercase; }
 
-/* B and S: pitch numbers down two columns, X for the ball put in play */
-/* layout-exempt: two columns of pips */
-.gdhero__bs { display: grid; grid-template-columns: 1fr 1fr; min-width: 0; border-right: var(--bw-rule) solid var(--border-stamped); }
-/* layout-exempt: the pips wrap inside a fixed column */
-.gdhero__col { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 0; min-width: 0; }
-/* As in the old feed's pitch ladder: a light ball lane, a pencil-shaded strike lane. */
-.gdhero__col + .gdhero__col { background: color-mix(in srgb, var(--graphite) 22%, var(--surface-inset)); border-left: var(--bw-hair) solid var(--border-rule); }
-.gdhero__col i { flex: none; align-self: stretch; padding: 1px 0; border-bottom: var(--bw-hair) solid var(--border-rule); text-align: center; font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); font-style: normal; color: var(--text-caption); }
-.gdhero__pip { width: 100%; height: 15px; display: flex; align-items: center; justify-content: center; font: var(--w-bold) var(--fs-small) / 1 var(--font-mono, var(--font-body)); text-align: center; color: var(--text-heading); }
-.gdhero__pip.is-x { color: var(--text-heading); text-decoration: underline; }
+/* The box as the reader scores it on paper (docs/gameday-reference/scorebook-box.jpg): thin ruled frame, the result
+   in a heavy box at the top left, B and S as ruled columns at the right, a third empty shaded column, a squat diamond. */
+/* layout-exempt: three ruled columns of pips */
+.gdhero__bs { display: grid; grid-template-columns: repeat(3, 1fr); min-width: 0; order: 2; border-left: var(--bw-hair) solid var(--border-stamped); }
+/* The pips run down a ruled column in six even rows (the box's height in sixths). The strikes take the
+   two shaded columns: past six they carry on at the top of the third, as a scorer runs on. */
+/* layout-exempt: the pips in even rows down a ruled column */
+.gdhero__col { display: grid; grid-template-rows: repeat(6, minmax(0, 1fr)); grid-auto-flow: column; justify-items: center; padding: 0; min-width: 0; min-height: 0; overflow: hidden; }
+.gdhero__col + .gdhero__col { position: relative; grid-column: span 2; grid-template-columns: repeat(2, minmax(0, 1fr));
+  background: color-mix(in srgb, var(--graphite) 22%, var(--surface-inset)); border-left: var(--bw-hair) solid var(--border-stamped); }
+.gdhero__col + .gdhero__col::after { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; border-left: var(--bw-hair) solid var(--border-stamped); }
+.gdhero__col i { display: none; }
+.gdhero__pip { width: 100%; min-height: 0; display: flex; align-items: center; justify-content: center; font: var(--w-bold) var(--fs-title-sm) / 1 var(--font-display); text-align: center; color: var(--text-heading); }
+.gdhero__pip.is-x { color: var(--text-heading); text-decoration: none; }
 
 .gdhero__dia { position: relative; }
-.gdhero__dia svg { position: absolute; inset: 14% 12% 22% 12%; width: 76%; height: 64%; }
-.gdhero__base { fill: none; stroke: var(--border-rule); stroke-width: 1.2; }
-.gdhero__leg { fill: none; stroke: var(--text-heading); stroke-width: 2.6; stroke-linecap: square; }
+.gdhero__dia svg { position: absolute; left: 25%; top: 45%; width: 49%; height: 38%; overflow: visible; }
+.gdhero__base { fill: none; stroke: var(--text-heading); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.gdhero__leg { fill: none; stroke: var(--text-heading); stroke-width: 4px; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
 .gdhero__run { fill: var(--text-heading); opacity: 0.22; }
+/* The result box: heavy, top left, laid over the frame so the two corners are one line. The scorer's rule runs
+   from its right edge to the first column, on its bottom edge. */
+.gdhero__code { position: absolute; left: calc(-1 * var(--bw-hair)); top: calc(-1 * var(--bw-hair)); width: 60%; height: var(--gd-code-h); box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  font: var(--w-bold) var(--fs-title-md) / var(--lh-solid) var(--font-display); color: var(--text-heading); border: var(--bw-hair) solid var(--border-stamped); }
+/* Only a hit (and the tape over an open at-bat) gets the heavy box. */
+.gdhero__code.is-hit, .gdhero__code.is-taped { border-width: var(--bw-heavy); }
+/* The fielders who made the out, in the middle of the diamond (the svg's box: 25% + 49%/2, 45% + 38%/2). */
+.gdhero__play { position: absolute; left: 49.5%; top: 64%; transform: translate(-50%, -50%); white-space: nowrap;
+  font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); color: var(--text-heading); }
+.gdhero__dia::before { content: ''; position: absolute; left: 60%; right: 0; top: calc(var(--gd-code-h) - 2 * var(--bw-hair)); border-top: var(--bw-hair) solid var(--border-stamped); }
 /* The open at-bat (ADR-0123): an empty diamond, its code under tape until the result tap */
 .gdhero__code.is-taped {
-  padding: 2px var(--space-1h);
   background: var(--seal-texture);
   color: var(--text-on-seal);
   font: var(--w-bold) var(--fs-label) / 1 var(--font-display);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
-.gdhero__code { position: absolute; left: var(--space-1h); bottom: var(--space-1); font: var(--w-bold) var(--fs-title-lg) / var(--lh-solid) var(--font-display);
-  color: var(--text-heading); }
 /* The backwards K a scorer draws for a called third strike */
-.gdhero__code.is-looking { display: inline-block; transform: scaleX(-1); }
-.gdhero__rbi { position: absolute; right: var(--space-1); bottom: var(--space-1); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); }
-.gdhero__out { position: absolute; left: var(--space-1h); top: var(--space-1h); width: 20px; height: 20px; display: flex; align-items: center;
-  justify-content: center; border: var(--bw-heavy) solid var(--text-heading); font: var(--w-bold) var(--fs-small) / 1 var(--font-body); }
+.gdhero__code.is-looking { transform: scaleX(-1); }
+.gdhero__rbi { position: absolute; right: var(--space-2); top: 0; height: var(--gd-code-h); display: flex; align-items: center; font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); }
+/* The out circle: a shaded disc centred on the B column's rule, under the pitch columns, the out number inside. */
+.gdhero__out { position: absolute; right: calc(-0.5 * var(--bw-hair)); bottom: 0; height: 30%; aspect-ratio: 1; transform: translateX(50%);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--graphite) 14%, var(--surface-inset));
+  box-sizing: border-box; font: var(--w-bold) var(--fs-title-sm) / 1 var(--font-display); color: var(--text-heading); }
+.gdhero__out.is-out { border: var(--bw-heavy) solid var(--border-stamped); } /* an out: the scorer rings the number */
 
 .gdhero__who { font: var(--w-bold) var(--fs-title-sm) / var(--lh-tight) var(--font-display); letter-spacing: var(--ls-title); color: var(--text-heading); }
 .gdhero__who small { display: block; margin-top: var(--space-1); font: var(--w-medium) var(--fs-cell) / 1.2 var(--font-body); letter-spacing: var(--ls-none); color: var(--text-caption); }
-.gdhero__line { margin: 0; font-size: var(--fs-small); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.gdhero__line { margin: 0; font-size: var(--fs-small); }
+/* The play scrolls in the room between the name and the stat card (ScrollCue.jsx), never clamped. */
+.gdhero__scroll { flex: 1 1 auto; min-height: 0; }
+/* The out that cut the at-bat short leads its words, in the out red: CS 2-4. */
+.gdhero__cut { color: var(--clay-deep); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+.gdhero__scroll .gdscroll__in { padding-right: var(--space-1); }
+/* A long play (GamedayHero.jsx PlayLine): the smaller size, tighter lines, before it has to scroll. */
+.gdhero__line.is-tight { font-size: var(--fs-cell); line-height: var(--lh-title); }
 /* Exit velo, launch angle and distance as a stamped three-cell card, the labels over the numbers. */
 /* layout-exempt: one cell per number, a ground ball has two */
 .gdhero__contact { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; margin: auto 0 0; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-inset); }
