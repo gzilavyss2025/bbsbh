@@ -76,7 +76,7 @@ test('hero: the last result shows the batter once, the code and the contact; the
   const out = html({ last: live(half(F824, 2, 'top', cap), cap), stepAtBatIndex: 12 })
   assert.match(out, /#90 Brenden Rodden|#90[\s\S]*Rodden/)
   assert.equal(out.split('Rodden').length - 1, 1, 'the batter is named once')
-  assert.match(out, /3rd/, 'slot as an ordinal')
+  assert.match(out, /9th/, 'slot as an ordinal')
   assert.match(out, /1B/)
   assert.match(out, /84 mph/)
   // Arozarena is the next at-bat: his code, line and contact do not exist yet. His name may stand

@@ -1,7 +1,10 @@
 /* ==== GAMEDAY panels (docs/gameday-build.md, prompt 8): navigator, trail, pitches, batting order,
    reference, event log. Each fills a .gdnext__slot; nothing scrolls, so each clips (the ladder
    folds what does not fit into the menu). */
-.gdnext__slot--navigator, .gdnext__slot--trail { background: var(--surface-card); }
+.gdnext__slot--navigator { background: var(--surface-card); }
+/* The trail sits on the page, not on a card: the SealBox around it adds no box, and the chips fill the bar. */
+.gdnext__slot--trail { background: none; }
+.gdnext__slot--trail > .statgrid { display: contents; }
 .gdp__sealed { margin: 0; padding: var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 .gdp__label { display: block; padding: var(--space-1) var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
@@ -20,9 +23,9 @@
 /* The half's at-bats as a ribbon of stamped chips, oldest first: the result in a green square, the surname beside it.
    What is still sealed is the last chip, drawn in solid ink so the reader sees at once where the page ends. */
 /* layout-exempt: a row of chips, clipped by the slot */
-.gdp__trail { display: flex; align-items: center; gap: var(--space-2); height: 100%; box-sizing: border-box; margin: 0; padding: var(--space-1) var(--space-3); list-style: none; }
+.gdp__trail { display: flex; align-items: stretch; gap: var(--space-2); height: 100%; box-sizing: border-box; margin: 0; padding: var(--space-2) var(--space-3); list-style: none; }
 /* layout-exempt: the result square and the surname on one row */
-.gdp__chip { flex: none; display: flex; align-items: stretch; height: 34px; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card);
+.gdp__chip { flex: none; display: flex; align-items: stretch; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card);
   font-family: var(--font-display); font-size: var(--fs-small); font-weight: var(--w-bold); line-height: var(--lh-solid); color: var(--text-heading); }
 .gdp__chip b { display: flex; align-items: center; padding: 0 var(--space-2); border-right: var(--bw-heavy) solid var(--border-stamped); background: var(--accent-tint);
   font-family: var(--font-mono); font-size: var(--fs-small); }
