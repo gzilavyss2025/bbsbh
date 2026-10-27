@@ -27,7 +27,7 @@ function pitchOf(e) {
   const c = e.pitchData?.coordinates ?? {}, pd = e.pitchData ?? {}
   const f = realFlight({ vx0: c.vX0, vy0: c.vY0, vz0: c.vZ0, ax: c.aX, ay: c.aY, az: c.aZ, px: c.pX, pz: c.pZ, release: [c.x0, 60.5 - (pd.extension ?? 6.3), c.z0] })
   return {
-    n: e.pitchNumber, code: e.details?.code ?? '', type: e.details?.type?.code ?? '', mph: pd.startSpeed ?? null,
+    n: e.pitchNumber, index: e.index, code: e.details?.code ?? '', type: e.details?.type?.code ?? '', mph: pd.startSpeed ?? null,
     px: c.pX ?? null, pz: c.pZ ?? null, szTop: pd.strikeZoneTop ?? 3.4, szBot: pd.strikeZoneBottom ?? 1.6,
     T: f ? f.T : (pd.plateTime ?? 0.42), at: f ? f.at : null,
   }
@@ -84,6 +84,31 @@ function ballOf(hitData, wall, credits) {
   return { ...out, T, at, hit: end }
 }
 
+// The feed lists one entry per movement, so a runner who moves twice (a single: 1B to 2B, then 2B
+// to 3B) has two. One runner is one figure: he stands where he was before the last pitch, and moves
+// at contact from his first contact entry's start to his last entry's end. A move before the last
+// pitch (a steal, a wild pitch) is not a contact move: it only sets where he stands; a runner put
+// out before it is not on the field.
+function runnersOf(entries, lastIdx) {
+  const by = new Map()
+  for (const r of entries) {
+    const id = r.details?.runner?.id ?? `#${by.size}`
+    by.set(id, [...(by.get(id) ?? []), r])
+  }
+  const out = []
+  for (const es of by.values()) {
+    const move = es.filter((r) => (r.details?.playIndex ?? Infinity) >= lastIdx)
+    if (move.length) {
+      const a = move[0].movement
+      out.push({ start: a?.start ?? a?.originBase ?? null, end: move.at(-1).movement?.end ?? null, out: move.some((r) => r.movement?.isOut) })
+    } else if (!es.some((r) => r.movement?.isOut)) {
+      const b = es.at(-1).movement?.end ?? null
+      out.push({ start: b, end: b, out: false })
+    }
+  }
+  return out
+}
+
 // Build the stage's play from one feed play (allPlays[i]) and its park's `wall(deg)` ({ ft, h }).
 export function stagePlay(p, wall) {
   const pitches = (p.playEvents ?? []).filter((e) => e.isPitch).map(pitchOf)
@@ -106,7 +131,7 @@ export function stagePlay(p, wall) {
     pitcher: p.matchup?.pitchHand?.code === 'L' ? 'L' : 'R',
     fielder: credits[0]?.pos ?? null,
     pOff: last?.at ? releaseOffset(last.at(0), p.matchup?.pitchHand?.code) : [0, 0, 0],
-    runners: (p.runners ?? []).map((r) => ({ start: r.movement?.originBase ?? null, end: r.movement?.end ?? null, out: !!r.movement?.isOut })),
+    runners: runnersOf(p.runners ?? [], last?.index ?? 0),
   }
 }
 
