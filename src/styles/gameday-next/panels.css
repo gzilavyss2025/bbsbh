@@ -12,6 +12,9 @@
 .gdp__run { box-sizing: border-box; display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
 .gdp__run:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }
 .gdp__run:disabled { cursor: default; }
+/* Mid page-turn the cells carry aria-disabled, never `disabled` (focus never jumps): this stops a
+   second tap; a keyboard pick still lands, and the turn reducer keeps the first forward request. */
+.gdp__run[aria-disabled='true'] { opacity: var(--opacity-disabled); pointer-events: none; }
 .gdp__run[aria-current] { background: var(--marker); }
 
 /* layout-exempt: a wrapping row of chips, clipped by the slot */

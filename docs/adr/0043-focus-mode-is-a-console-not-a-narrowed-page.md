@@ -474,3 +474,61 @@ called **Gameday**: the "Innings" tab reads "Gameday", and `CONTEXT.md` has the 
 here changes: the decision above stands, and the file, the code (`InningViewer`, `useFocusMode`,
 `src/styles/focus/`) and the addresses keep their names. Read "focus mode" in this ADR as
 Gameday's windowed mode.
+
+## Amendment, 2026-10-27: Gameday replaces the console
+
+The console this ADR describes is gone. Since #2568 slice 5 (part of #2566) the Gameday step
+renders the new screen with no flag (`?look=new` is removed), and the console's screen parts are
+deleted (`ConsoleBand`, `DueUpConsole`, `RollingLine`, `ReferencePanel`, `InningActionBar`, the
+trail, Express Lane's screens; the PR lists them). The design record is `docs/gameday-build.md`
+and the #2568 comments; the code's map is `src/screens/gameday/next/CLAUDE.md`.
+
+What carries over from this ADR, in the new form:
+
+- **Decision 1, the scorebug is placed:** the band draws through `ScorebugMount`, so its reveal
+  clamp is still the only gate on the score. The band uses the score bug's own tiles and type.
+- **Decision 3, one reference section at a time:** the reference panel's tabs (Field draws the
+  park with the defense as of the cursor), shown at the iPad-landscape and desktop tiers.
+- **Decision 4, the navigator is never removed:** the line score's run cells are still the only way
+  to reach a half more than one step away. A tier that has no room folds it into the Menu; it is
+  never dropped.
+- **The stepping model** (`focusView.js`, ADR-0016, the 2026-10-06 amendment): a half opens one
+  at-bat at a time, a revealed half reads back from at-bat 1, and the hidden half page still keeps
+  the cursor. Gameday mounts that page `hidden` as its engine until the engine is rebuilt.
+
+What is new (Gary's calls, 2026-10-22 to 2026-10-27):
+
+- **One window, no scroll, at every size.** Layout B, panels around the stage. A window takes the
+  largest tier whose minimum it meets: desktop ≥ 1200 × 780, iPad landscape ≥ 1000 × 700 and
+  landscape, tablet portrait ≥ 740 × 900, else phone (`lib/gameday/ladder.js`). Fold order: the
+  event log, then the pitches panel, then the batting order and reference tabs, then the trail,
+  then the navigator. Never folded: the band, the stage, the hero with the scorebook box, the bar.
+  `e2e/gameday-no-scroll.spec.js` checks the four sizes.
+- **The bar** holds the Menu, the "At-bat | Pitch" switch and one advance. No "Rest of half", in
+  any form. The advance reads "Next play ›" in at-bat mode and "Next pitch ›" in pitch mode, the
+  same on every tap within a mode (ADR-0123); after the third out it names the next half; at the
+  end, "Close the book ›", then the box score. The advance owns the bar's dead space around it
+  (`e2e/reveal-hit-area.spec.js`) and holds with aria-disabled, so a tap still ends a hold.
+- **The frame hides the site chrome** (Gary, 2026-10-27): the Menu carries the doors out (both
+  lineups, the scorecard, the box score, the slate for the game's date), and a delay, suspension or
+  failed refresh reads as a thin strip under the band, inside the frame.
+- **The stage** is 16-bit sprites with its own `--stage-*` palette. It plays only on the reveal tap,
+  never on a cold load, a return visit, a poll or a force-reveal; a tap during a play skips it. The
+  zone map shows only at rest before a tapped play, and the reader can dismiss it for the game
+  (`bbsbh:zonemap:{gamePk}`). A switch hitter stands opposite the pitcher's hand.
+- **The hero** is the scorebook box (B and S columns of pitch numbers and X, the diamond, the code,
+  the RBI and the out), one fixed height per tier. Its due-up strip hides under the checkpoint.
+- **The checkpoint** takes the stage's slot at the end of each half: tally, pitching, at-bats, the
+  game so far, and the notes when the game has a callout bundle. One page under tabs on a phone;
+  all of them at the larger tiers. Its due-up names an announced pinch hitter.
+- **Sub-steps** (ADR-0123): a pre-pitch pinch hitter is the first sub-step of his own at-bat; a
+  baserunning event or substitution inside an at-bat is a card on the stage's lower third.
+- **"See the whole half": nothing replaces it.** The trail and the navigator reach every at-bat.
+- **The #22 rules stand** (Gary, 2026-10-01 to 10-07): every #22 field on screen in the form it is
+  penciled; no Retrosheet letter strings; pitch marks are numbers and X only; name the batter once,
+  slots as ordinals and uniform numbers with `#`; no lined index-card look; no words the visuals
+  already say. Notation is option B (#2575): `PK 1-3`, `PKCS 1-3` with the out on the path to the
+  stolen base, an error right after a steal credits no batter slot.
+- **Superseded:** this ADR's sticky band, chip row and sheet, the trail above the hero, the
+  "Summary" and "See the whole half" links, and the 2026-10-07 plan to reuse the Now Pitching scene
+  and `AtBatReplay` on the stage (the fresh-start rule, #2566).

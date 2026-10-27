@@ -1,7 +1,6 @@
 /* -------------------------------------------------- focus mode: the at-bat */
-/* The hero card, and the motion that brings it in. One of three focus-mode
-   partials — see focus/stage.css's header for the split and the cascade rule
-   they all depend on. */
+/* The hero card, and the motion that brings it in. See src/index.css's focus/
+   note for why these stay and the cascade rule they depend on. */
 
 /* ------------------------------------------------------------ at-bat hero */
 /* AtBatHero.jsx — the focused plate appearance's header, and in focus mode the
@@ -409,26 +408,6 @@
   animation: focus-deal var(--dur-med) var(--ease-out);
 }
 
-/* A STACKED mount is a batch — a dozen cards landing on the desk at once on
-   direct navigation to an old half, or on "See the whole half" — not one
-   card dealt at a time. Animating all of them together is the same
-   batch-mount defect the denotation beat's own `!active` short-circuit
-   avoids for the ink (useDenotationBeat.js); this is its CSS counterpart. */
-.innings--stacked .pbp__atbat {
-  animation: none;
-}
-
-.trailcell {
-  animation: focus-fade var(--dur-fast) var(--ease-standard);
-}
-
-/* Same batch-mount argument as .pbp__atbat above. Not reachable yet — the
-   trail stays hidden while stacked until commit 3 gives it a scroll-to role
-   — but the rule belongs beside its sibling rather than arriving separately. */
-.innings--stacked .trailcell {
-  animation: none;
-}
-
 /* --------------------------------------------- THE BEAT (ADR-0046) */
 /* The card arrives whole except for the scorebook denotation, which holds
    blank for DENOTATION_HOLD_MS and then lands. PlayByPlay.jsx owns the timer
@@ -512,7 +491,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .innings--focus .pbp__atbat,
-  .trailcell,
   .pbp__code--ink {
     animation: none;
     transition: none;

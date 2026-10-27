@@ -4,7 +4,7 @@ import { selectRegulationInnings } from '../../../../api/gamestate/gameState.js'
 import { segmentedMarkup } from '../../../../lib/design/segmentedClass.js'
 import { ordinal } from '../../../../lib/format.js'
 
-// THE CHECKPOINT'S MARKUP (#2572 slices 3 to 5; design: .scratch/gameday-design/round2/checkpoint.js).
+// THE CHECKPOINT'S MARKUP (#2572 slices 3 to 5; design: #2568 round 2).
 // It takes the stage's slot once the third out is revealed. Checkpoint.jsx calls
 // checkpointMarkup(createElement, …); node --test renders the same builder with react-dom/server.
 //

@@ -58,7 +58,7 @@ const NESTED_MAX_CHARS = NESTED_MAX * 80
 // decision that belongs in a PR description, not a reflex to make lint green.
 const BUDGETS = {
   // Screens, routing, the design system, and the UI half of the spoiler rule.
-  'src/CLAUDE.md': 248,
+  'src/CLAUDE.md': 247,
   // The club-identity data model; the stores moved to src/lib/data/.
   'src/lib/CLAUDE.md': 262,
 }

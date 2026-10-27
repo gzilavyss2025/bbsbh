@@ -96,26 +96,7 @@ test('selectDueUpNext previews the other side\'s next half, continuing case', ()
   assert.deepEqual(idsOf(info), [5, 6, 7])
 })
 
-// --------------------------------------------------------------------------
-// DueUpNextCard's own seal pin. The card left the C4 frame-only pin
-// (card-cascade.test.js) when it became a stamped card with a stat line: it
-// now reads the batter's game line, so it holds its own. It has no SealBox
-// (selectDueUpNext returns null until the half on screen is fully revealed),
-// and every read of the feed goes through a function that takes
-// `revealedThrough` as its hard boundary.
-// --------------------------------------------------------------------------
 import { readFileSync } from 'node:fs'
-
-test('DueUpNextCard: no SealBox, and only revealedThrough-bounded reads of the feed', () => {
-  const src = readFileSync(new URL('../src/components/playbyplay/dueup/DueUpNextCard.jsx', import.meta.url), 'utf8')
-  assert.doesNotMatch(src, /import .*SealBox|<SealBox/)
-  // The two reads, each bounded by the reveal mark.
-  assert.match(src, /selectDueUpNext\(feed, inning, half, revealedThrough\)/)
-  assert.match(src, /batterLineText\(feed, due\.battingSide, b\.id, revealedThrough\)/)
-  // No other api module: nothing reveal-only is imported but the capped line.
-  const apiImports = [...src.matchAll(/from '\.\.\/\.\.\/\.\.\/api\/([^']+)'/g)].map((m) => m[1])
-  assert.deepEqual(apiImports.sort(), ['boxscore/batterLine.js', 'dueup.js'])
-})
 
 test('UpNextBatters: no SealBox, and only revealedThrough-bounded reads of the feed', () => {
   const src = readFileSync(new URL('../src/components/playbyplay/dueup/UpNextBatters.jsx', import.meta.url), 'utf8')

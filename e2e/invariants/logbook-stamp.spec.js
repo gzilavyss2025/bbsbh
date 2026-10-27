@@ -1,4 +1,5 @@
 import { test, expect, openStampCard } from '../fixtures.js'
+import { halfCell } from '../lib/gameday.js'
 
 // The Logbook's half of the spoiler invariant (ADR-0035). A game stamp IS a
 // final score, so the two things this file pins are:
@@ -97,7 +98,8 @@ test('minting files the game in the Game Log, and un-stamping takes it back', as
   await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toHaveCount(0)
 
   await page.goto(`${GAME}/top1`)
-  await expect(page.getByRole('button', { name: /, sealed$/ }).first()).toBeVisible()
+  // Gameday's line score names a sealed half "Top 1, sealed"; a phone folds it into the Menu.
+  await expect(await halfCell(page, 'Top 1')).toHaveAccessibleName('Top 1, sealed')
   // And neither the stamp nor the box score's own bit ever touched the by-hand
   // scoring frontier. Had opening a stamped game ratcheted `revealedThrough`,
   // this game would stay open forever, on every device the reader owns.

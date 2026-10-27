@@ -204,23 +204,6 @@
     margin-inline: auto;
   }
 
-  /* ---- innings, wide layout. Refresh rides in the floating bottom bar above
-     Next at every width now (see .pagenav--innings), so it's always one reach
-     from the primary action — the old top toolbar is gone. */
-
-  /* The base .pagenav .btn rule caps every floating-bar button to the phone
-     column's width (calc(440px - 2*gutter)) — fine for a single Next/Box
-     score button, but the reveal-split pair's longer "Reveal next at-bat" /
-     "Reveal whole {half}" labels wrap onto a second line at that width (see
-     .revealsplit__btn) when there's actually 780px of column (.inningchrome's
-     own measure) to give them and keep it to one line instead. Both rules
-     share this selector's specificity with the base one, so source order
-     here (after it) is what makes this win. */
-  .pagenav--innings .btn,
-  .pagenav--innings .revealsplit {
-    max-width: 780px;
-  }
-
   /* The jump bar and the half navigator stay stacked here, as on a phone, and run the
      masthead card's full width: all three are bordered boxes, so a narrower middle one
      reads as a mistake. They shared one centered 780px row while the tabs were five
@@ -229,15 +212,6 @@
     margin: 0 0 14px;
   }
 
-  /* ABS Challenges' whole-card copy (AbsCard) unhides at this breakpoint —
-     `.statbox__abs` below is StatBox's OWN inline copy, hidden here in favor
-     of it. Both render unconditionally now (ReferencePanel's ARMS tab,
-     `StatBox className="innings__statbox"` + a sibling `AbsCard`), so this
-     pairing is what keeps the ABS block from showing TWICE at wide width —
-     it isn't optional, don't drop the class off either component. */
-  .innings__statbox .statbox__abs {
-    display: none;
-  }
   /* AbsCard is a flush Card, like .winprob/.marginnotes (#1113 slice C4):
      system/card.css draws its frame, since it sits as its own sibling card in
      the ARMS tab rather than nested inside StatBox's card. This rule only
@@ -250,7 +224,7 @@
   .absframe {
     display: block;
   }
-  /* Same fix as .statbox .statgrid above: SealBox's own .statgrid wrapper
+  /* SealBox's own .statgrid wrapper
      paints --surface-inset once revealed, which otherwise shows through as
      a whiter patch inside this card's own background. */
   .absframe .statgrid {

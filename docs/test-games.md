@@ -264,6 +264,21 @@ he forced up, so the handoff read "no inherited runners" (#2648).
 - atBatIndex 59 (the change is nested here): Macko's first batter, Giménez, singles
   and McAdoo scores. The final-line cut is 59, not 58.
 
+## Gameday: runner events, reviews and ABS
+
+Six games the innings console design used, each with the moment it exercises (from the old
+`.scratch/innings-console-redesign/` handoff, deleted in the Gameday swap, #2566). The
+`no-scroll` spec (`e2e/gameday-no-scroll.spec.js`) runs on 823035 and 823169.
+
+| gamePk | Game | What it exercises |
+|---|---|---|
+| 823035 | MIL @ STL, 2026-07-07, game 2 | Pitching changes, pinch hitter, pinch runner (PR mark), defensive switches, mound visits; ABS overturned (top 1st, Lara) |
+| 823166 | MIN @ SF, 2026-09-22 | SB then E2 on the same throw (bot 1st), pickoff 1-3 (bot 4th), CS 2-6 (top 7th), K + wild pitch reach (bot 3rd); ABS by both clubs |
+| 824546 | DET @ CWS, 2026-09-20 | Balk then wild pitch on the next pitch (bot 6th), passed ball, SB, CS 2-4; ABS by both clubs, overturned and upheld |
+| 824624 | MIA @ CHC, 2026-09-22 | Manager challenges by both clubs (tag play, play at 1st); a pickoff that ends the 3rd mid at-bat (`interrupted`, "PK →"), overturned on review; 12 innings with automatic runners |
+| 824951 | LAA @ ATH, 2026-09-23 | Pickoff caught stealing (`PKCS`), forced balk, a manager challenge DURING an at-bat (tag on a CS, upheld) |
+| 823169 | MIN @ SF, 2026-09-21 | Crew-chief home run review, upheld; several ABS overturns; Davidson's 9-pitch at-bat (bottom 1st) |
+
 ## Categories not included (couldn't verify)
 
 Batting out of order and an overturned replay challenge were searched but

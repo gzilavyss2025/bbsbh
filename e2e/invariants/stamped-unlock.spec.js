@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures.js'
+import { halfCell } from '../lib/gameday.js'
 
 // A STAMPED GAME OPENS UNSEALED, AND STILL PERSISTS NOTHING (ADR-0048).
 //
@@ -64,17 +65,19 @@ test('a stamped game opens the innings viewer unsealed, and still writes no reve
   await seedStamp(page)
   await page.goto(`${GAME}/top1`)
 
-  // No sealed half anywhere on the page — the innings viewer's seals are named
-  // "{Half} of the {ordinal}, sealed" (see reveal-persistence.spec.js).
+  // No sealed half anywhere on the page — Gameday's line score names a sealed
+  // half "{Half} {n}, sealed" (see reveal-persistence.spec.js). On a phone the
+  // line score folds into the Menu, so it is opened first: without it this
+  // count would pass on a page that drew no line score at all.
+  await halfCell(page, 'Top 1')
   await expect(page.getByRole('button', { name: /, sealed$/ })).toHaveCount(0)
 
-  // Two surfaces that are gated by the reveal mark WITHOUT a SealBox of their
-  // own — the half's R/H/E tally and the RollingLine's runs cells. They are the
-  // check that the RENDER mark actually moved, rather than that a few seals
-  // happened to be force-torn: verified to read 0 on a sealed page and 1/4 on a
-  // fully hand-revealed one, which is exactly what a stamped page must match.
-  await expect(page.locator('.halftally')).toHaveCount(1)
-  await expect(page.locator('.rolling__runs')).toHaveCount(4)
+  // The surface gated by the reveal mark WITHOUT a SealBox of its own — the
+  // line score's run cells. It is the check that the RENDER mark actually
+  // moved, rather than that a few seals happened to be force-torn: it reads
+  // no runs on a sealed page and every half's runs on a fully revealed one
+  // (this game played all 18 halves), which is what a stamped page must match.
+  await expect(page.getByRole('button', { name: /, \d+ runs?$/ })).toHaveCount(18)
 
   const mark = await page.evaluate((pk) => localStorage.getItem(`bbsbh:reveal:${pk}`), GAME_PK)
   expect(mark).toBeNull()
@@ -88,7 +91,7 @@ test('an unstamped game is untouched — still sealed', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toBeVisible()
 
   await page.goto(`${GAME}/top1`)
-  await expect(page.getByRole('button', { name: /, sealed$/ }).first()).toBeVisible()
+  await expect(await halfCell(page, 'Top 1')).toHaveAccessibleName('Top 1, sealed')
 })
 
 // A tombstoned stamp is NOT a stamp. `removeStamp` writes `state: 'off'` rather

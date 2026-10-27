@@ -2,10 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import {
   selectInningCount,
   selectRegulationInnings,
-  selectBullpen,
-  selectBench,
   selectTeamMeta,
-  selectDelays,
   selectSkippedBottomHalf,
   selectIsFinal,
   selectFinalHalfIndex,
@@ -13,22 +10,12 @@ import {
 } from '../api/select.js'
 import { selectHasFirstPitch } from '../api/playbyplay/firstPitch.js'
 import { selectLiveHalf } from '../api/liveEdge.js'
-import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
-import { computePitcherLines } from '../api/pitchers.js'
-import { clubPenCounts } from '../api/workload.js'
 import { buildMarginNotes } from '../api/pitcher-callouts.js'
 import { ordinal } from '../lib/format.js'
 import { RefreshButton } from '../components/ui/control/RefreshButton.jsx'
-import { RollingLine } from '../components/gamehud/RollingLine.jsx'
-import { ExtrasBanner } from '../components/inning/ExtrasBanner.jsx'
-import { FocusControls, FocusTrail, useFocusMode } from '../components/inning/focus/FocusControls.jsx'
-import { InningActionBar } from '../components/inning/InningActionBar.jsx'
+import { useFocusMode } from '../components/inning/focus/FocusControls.jsx'
 import { bookIsClosed } from '../components/inning/focus/beats.js'
-import { ReferencePanel } from '../components/inning/focus/ReferencePanel.jsx'
 import { ReplayRail } from '../components/playbyplay/pitcherCard/AtBatReplay.jsx'
-import { DueUpNextCard } from '../components/playbyplay/dueup/DueUpNextCard.jsx'
-import { DelayCard } from '../components/inning/DelayCard.jsx'
-import { ConsoleBand } from '../components/gamehud/ConsoleBand.jsx'
 import { InningsHeader } from './gameview/InningsHeader.jsx'
 import { InningPage } from './innings/InningPage.jsx'
 import { InningPageTurn } from '../components/page-turn/InningPageTurn.jsx'
@@ -41,7 +28,6 @@ import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCallou
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
-import { isLookNew } from './gameday/next/useTier.js'
 import { CAUGHT_UP, nextSub, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
@@ -102,25 +88,18 @@ export function InningViewer({
   onInning,
   onBoxScore,
   onScorecard,
+  onLineup,
+  slateHref,
+  gameStatus,
+  refreshFailed,
   onReload,
   loading,
   lastUpdated,
-  pitcherRoles,
-  winProbability,
   winProbTreatment,
-  prospectsData,
-  rookiesData,
   callouts,
   vsTeam,
   highlights,
-  runExpectancy,
   workload,
-  // Staging facts, resolved once by GameView and shared with the box score and
-  // both lineup pages. Used only by focus mode's EXTRAS tab (ExtrasFacts.jsx)
-  // — all three are spoiler-free, none is fetched on this screen's account.
-  managers,
-  uniforms,
-  scorebookWeather,
   onSketch,
 }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
@@ -143,7 +122,7 @@ export function InningViewer({
   // Reveal high-water mark, extras-unlock state, and the feed-keyed derived
   // cache — see useRevealProgress. The running line and Pitchers section both
   // read from `revealedThrough`; any half at or below it renders unsealed.
-  const { revealedThrough, revealTo, mergeRevealedThrough, unlocked, getDerived, atBatCountFor, revealAtBat, subFor, revealSub } =
+  const { revealedThrough, revealTo, mergeRevealedThrough, unlocked, atBatCountFor, revealAtBat, subFor, revealSub } =
     useRevealProgress(feed, regulation, actualCount)
   const [pitchMode, setPitchMode] = usePitchMode(feed?.gamePk) // Gameday's At-bat | Pitch (ADR-0123)
 
@@ -225,37 +204,12 @@ export function InningViewer({
     () => ({ away: selectTeamMeta(feed, 'away'), home: selectTeamMeta(feed, 'home') }),
     [feed],
   )
-  // Same MLB-vs-MiLB gate TeamInfo.jsx's lineup pages use for RookiePill —
-  // a rehab/optioned player still under the rookie limit gets DebutPill on a
-  // MiLB roster/lineup surface here, not a second ROOKIE claim (see
-  // showRookiePill, api/rookies.js).
   const gameDate = feed?.gameData?.datetime?.officialDate ?? null
-  const isMlb = (meta.away.sportId ?? 1) === 1
   const firstPitchThrown = useMemo(() => selectHasFirstPitch(feed), [feed])
 
   // Warm the headshot CDN for both rosters as soon as there's an at-bat feed
   // to step through — see useHeadshotPrefetch's own header.
   useHeadshotPrefetch(feed, firstPitchThrown)
-
-  // In-game delays (rain, etc.), spoiler-free (see selectDelays) — surfaced as a
-  // between-half-innings notice on the affected half's page. Almost always empty.
-  const delays = useMemo(() => selectDelays(feed), [feed])
-
-  const rosters = useMemo(
-    () => ({
-      away: {
-        name: meta.away.name || 'Away',
-        ...splitBullpen(selectBullpen(feed, 'away'), pitcherRoles),
-        bench: selectBench(feed, 'away'),
-      },
-      home: {
-        name: meta.home.name || 'Home',
-        ...splitBullpen(selectBullpen(feed, 'home'), pitcherRoles),
-        bench: selectBench(feed, 'home'),
-      },
-    }),
-    [feed, meta, pitcherRoles],
-  )
 
   // The page being shown, as a half-index clamped to what's unlocked. The last
   // navigable page is the bottom of the last unlocked inning.
@@ -278,8 +232,6 @@ export function InningViewer({
   // actually prevents a second turn from starting).
   const pageTurnRef = useRef(null)
   const [turnStatus, setTurnStatus] = useState('idle')
-  // The reference rail's empty slot for the at-bat replay (ReferencePanel.jsx).
-  const [replaySlot, setReplaySlot] = useState(null)
   const turning = turnStatus !== 'idle'
   const requestForwardHalf = (idx) => pageTurnRef.current?.requestHalf(idx)
 
@@ -329,7 +281,7 @@ export function InningViewer({
     const pageHalf = idx % 2 === 0 ? 'top' : 'bottom'
     // The at-bat replay's rail slot, for the live page only (AtBatReplay.jsx).
     return (
-      <ReplayRail key={`${pageInning}-${pageHalf}`} slot={presentationOnly ? null : replaySlot} inCard={!focus.windowed}>
+      <ReplayRail key={`${pageInning}-${pageHalf}`} slot={null} inCard={!focus.windowed}>
       <InningPage
         feed={feed}
         inning={pageInning}
@@ -409,7 +361,6 @@ export function InningViewer({
   // reveal frontier — RollingLine and direct links both let a user jump
   // straight to any unlocked half.
   const curAtBatCount = atBatCountFor(effInning, effHalf)
-  const revealWholeHalf = () => revealTo(effInning, effHalf)
   // What the NEXT "reveal next at-bat" tap should pass to revealAtBat — null
   // until HalfInning/PlayByPlay has actually computed the half's entries
   // (nothing to report before the first tap, which just starts at 1).
@@ -510,7 +461,7 @@ export function InningViewer({
   // wouldn't optimize this useMemo away. Not restructuring this file's
   // memoization to chase compiler-readiness alone — see the spoiler-rule
   // warnings throughout this component before touching any of it.
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+   
   const workloadGameDate = useMemo(() => {
     const d = feed?.gameData?.datetime?.officialDate ?? null
     const asOf = workload?.asOf ?? null
@@ -528,15 +479,15 @@ export function InningViewer({
   // pitcherLines itself.
   // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
   // babel-plugin-react-compiler in this build — see that comment).
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+   
   const marginNotes = useMemo(
     () =>
-      buildMarginNotes(feed, renderRevealedThrough, callouts, { away: rosters.away.name, home: rosters.home.name }, {
+      buildMarginNotes(feed, renderRevealedThrough, callouts, { away: meta.away.name || 'Away', home: meta.home.name || 'Home' }, {
         workload,
         gameDate: workloadGameDate,
       }),
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
-    [feed, renderRevealedThrough, callouts, rosters, workload, workloadGameDate],
+     
+    [feed, renderRevealedThrough, callouts, meta, workload, workloadGameDate],
   )
 
   // The per-game record of which callout notes this reader has already been
@@ -546,119 +497,6 @@ export function InningViewer({
   // this component does not. It stores dedupeKeys and half indices, nothing
   // else, and can only ever remove a note from a ranked list.
   const calloutLedger = useCalloutLedgerValue(feed?.gamePk)
-
-  // The win-probability line "so far" — the plays through the revealed half,
-  // PLUS (when the half on screen is being stepped through one at-bat at a
-  // time rather than committed whole, ADR-0016) the plays of that one half up
-  // to whichever at-bat PlayByPlay has actually rendered. `curStepInfo` is
-  // reported back up from inside PlayByPlay's own SealBox reveal function (see
-  // its onStepInfo doc) — this component never computes that boundary itself,
-  // only relays it, so the reveal-only rule (ADR-0001) still holds.
-  //
-  // `stepFrontierIdx` gates the step clamp to ONLY the half immediately after
-  // the real reveal mark (`curIdx === renderRevealedThrough + 1`) — NOT just
-  // whichever half happens to be on screen. ADR-0016's stepping cursor is keyed
-  // to whatever half the user is VIEWING, which — per RollingLine's own
-  // half-inning navigator — can be any unlocked regulation half regardless of
-  // revealedThrough (a user can jump straight to, say, bottom 8 and start
-  // stepping it with nothing else revealed). Every other reveal-only surface is
-  // fine with that because each half's own data is self-contained, but win
-  // probability is CUMULATIVE — a single plotted point from bottom 8 encodes
-  // the whole game's trajectory up to that moment, not just that half's own
-  // events. api/winprob.js's own `stepHalfIndex === throughHalf + 1` check
-  // enforces this same adjacency independently (an earlier draft of this
-  // feature relied on the caller alone getting it right and would have
-  // plotted a full-game spoiler off a bare "Next at-bat" tap on a non-
-  // adjacent half — caught in review before it shipped), so both layers stay
-  // in place rather than trusting either one alone. Empty until at least one
-  // half is revealed/stepped into in order, and at MiLB parks with no
-  // win-prob feed — the chart then renders nothing.
-  const stepFrontierIdx = curIdx === renderRevealedThrough + 1 ? curIdx : null
-  // BUILT FOR EVERY HALF NOW — the reference panel's ARMS tab renders
-  // WinProbChart unconditionally (it used to be skipped entirely while
-  // focused, InningPage's old `!focusOne` gate, since the chart was never
-  // built at all — #686's "don't build what folds" argument). That argument
-  // no longer applies: the chart is always on screen somewhere now, so
-  // there's nothing left to build for nobody to see. The step-clamped path
-  // below (`stepFrontierIdx` non-null) is consequently exercised on every
-  // "Next at-bat" tap for the first time since that gate shipped — see this
-  // refactor's spoiler-safety verification notes on `api/winprob.js`'s own
-  // independent `stepHalfIndex === throughHalf + 1` enforcement, the second
-  // layer this doesn't rely on alone.
-  //
-  // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
-  // babel-plugin-react-compiler in this build — see that comment).
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const winProbPoints = useMemo(
-    () =>
-      selectWinProbPath(winProbability, {
-        throughHalf: renderRevealedThrough,
-        stepHalfIndex: stepFrontierIdx,
-        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
-      }),
-    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
-  )
-  // The biggest-swing ledger — same reveal-only selector, same clamp
-  // (committed halves plus the in-progress step), so it only ever covers
-  // plays already on screen and grows one entry at a time right along with
-  // the chart above (never hinting what's ahead).
-  // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
-  // babel-plugin-react-compiler in this build — see that comment).
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const winProbBigPlays = useMemo(
-    () =>
-      selectWinProbBigPlays(winProbability, {
-        throughHalf: renderRevealedThrough,
-        stepHalfIndex: stepFrontierIdx,
-        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
-      }),
-    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
-  )
-
-  // Every pitcher who has appeared in a revealed half-inning, with running
-  // lines (see api/pitchers.js) — plus, same adjacency rule as the win-prob
-  // pair above, the partial line for the ONE half currently being stepped
-  // through one at-bat at a time, so the table (and the Arms tab) update
-  // right along with "Next at-bat" instead of waiting for the half to commit.
-  const pitcherLines = useMemo(
-    () =>
-      computePitcherLines(feed, renderRevealedThrough, {
-        stepHalfIndex: stepFrontierIdx,
-        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
-      }),
-    [feed, renderRevealedThrough, stepFrontierIdx, curStepInfo],
-  )
-
-  // PitchersSection's own prop, memoized rather than built inline: the section
-  // is memoized, and an array literal rebuilt each render would defeat that.
-  //
-  // `penCounts` is each club's bullpen as fresh/limited/down, drawn as pen dots
-  // beside the team name — "who is left", which the running lines cannot say.
-  // It comes from the NIGHTLY FILE ONLY (clubPenCounts stops at yesterday) and
-  // must stay that way: crossed with tonight's used-pitcher list it would count
-  // pitching changes, which tracks the score. Gated on workloadGameDate for the
-  // same reason the callout notes are — on an archival game the flags would be
-  // about the wrong day.
-  const pitcherTeams = useMemo(() => {
-    const countsFor = (teamId) =>
-      workload && workloadGameDate && teamId != null
-        ? clubPenCounts(workload, Number(teamId), workloadGameDate)
-        : null
-    return [
-      {
-        name: rosters.away.name,
-        side: 'away',
-        rows: pitcherLines.away,
-        penCounts: countsFor(meta.away.id),
-      },
-      {
-        name: rosters.home.name,
-        side: 'home',
-        rows: pitcherLines.home,
-        penCounts: countsFor(meta.home.id),
-      },
-    ]
-  }, [rosters, pitcherLines, meta, workload, workloadGameDate])
 
   if (!firstPitchThrown) {
     return (
@@ -679,55 +517,8 @@ export function InningViewer({
     )
   }
 
-  // Rendered once, below the trail, in .innings__stage (see below) — its run
-  // cells double as the half-inning navigator (the only way to reach a half
-  // that isn't ±1 away), so it stays on screen at every reveal state.
-  const rollingLine = (
-    <RollingLine
-      feed={feed}
-      regulation={regulation}
-      unlocked={renderUnlocked}
-      revealedThrough={renderRevealedThrough}
-      awayAbbr={meta.away.abbreviation}
-      homeAbbr={meta.home.abbreviation}
-      awayName={meta.away.clubName}
-      homeName={meta.home.clubName}
-      awayId={meta.away.id}
-      homeId={meta.home.id}
-      runsInProgress={runsInProgress}
-      curIdx={curIdx}
-      onSelect={(idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx))}
-      disabled={turning}
-    />
-  )
-
-  const refProps = {
-    feed,
-    callouts,
-    marginNotes,
-    pitcherTeams,
-    effInning,
-    effHalf,
-    meta,
-    treatment: winProbTreatment,
-    prospectsData,
-    rookiesData,
-    isMlb,
-    revealedThrough: renderRevealedThrough,
-    workload,
-    workloadGameDate,
-    stepAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
-    managers,
-    uniforms,
-    scorebookWeather,
-    getDerived,
-    runExpectancy,
-    winProbPoints,
-    winProbBigPlays,
-    onScorecard,
-  }
-
-  // The half page, kept in a variable so the new Gameday shell (?look=new) can mount it hidden.
+  // The half page, mounted hidden as the Gameday shell's engine: it reports the live snapshot
+  // and the step cursor (src/screens/gameday/next/CLAUDE.md).
   const pageTurn = (
     <InningPageTurn
       ref={pageTurnRef}
@@ -739,261 +530,47 @@ export function InningViewer({
     />
   )
 
-  if (isLookNew()) {
-    // The advance reads the states InningActionBar draws, with the mode's words for a step, and
-    // keeps its holds: no step while the page turns, no forward move while the half closes (ADR-0046).
-    // The live edge inside an at-bat still being played: a flag only, on a half in play (ADR-0055).
-    const edge = atHalfEdge || (currentHalfLive && currentSealed && nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode) === CAUGHT_UP)
-    const advance = focus.stepAhead
-      ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && focus.stepNext() }
-      : currentSealed
-        ? { label: edge ? 'Caught up' : stepWords(pitchMode), disabled: edge, onClick: revealNextStep, reveal: true }
-        : nextIdx != null
-          ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
-          : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }
-    return (
-      <CalloutLedgerProvider value={calloutLedger}>
-        {cloudSync}
-        <GamedayNextMount
-          bug={{
-            started, live: curLiveState, feed, unlocked: renderUnlocked, mark: renderRevealedThrough,
-            runsInProgress, treatment: winProbTreatment, viewIdx: curIdx, viewInning: effInning, viewHalf: effHalf,
-            season: gameDate, stepAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
-          }}
-          meta={meta}
-          panels={{
-            feed, meta, regulation, unlocked: renderUnlocked, mark: renderRevealedThrough, runsInProgress, curIdx,
-            onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
-            inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : curAtBatCount,
-          }}
-          checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
-          engine={pageTurn}
-          advance={advance}
-          open={currentSealed ? { count: curAtBatCount, sub: curSub } : null}
-          pitch={{ on: pitchMode, set: setPitchMode }}
-          onBoxScore={onBoxScore}
-          onScorecard={onScorecard}
-          refresh={selectIsFinal(feed) ? null : <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />}
-        />
-      </CalloutLedgerProvider>
-    )
-  }
-
+  // The advance: a step in the mode's words, else the next half, "Close the book" or the box score. It
+  // keeps its holds: no step while the page turns, no forward move while the half closes (ADR-0046).
+  // The live edge inside an at-bat still being played: a flag only, on a half in play (ADR-0055).
+  const edge = atHalfEdge || (currentHalfLive && currentSealed && nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode) === CAUGHT_UP)
+  const advance = focus.stepAhead
+    ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && focus.stepNext() }
+    : currentSealed
+      ? { label: edge ? 'Caught up' : stepWords(pitchMode), disabled: edge, caughtUp: edge, onClick: revealNextStep, reveal: true }
+      : nextIdx != null
+        ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
+        : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }
   return (
     <CalloutLedgerProvider value={calloutLedger}>
-    <div className={`innings innings--focus innings--${focus.windowed ? 'windowed' : 'stacked'}`}>
       {cloudSync}
-      {/* The masthead: the scorebug itself once the half has a live snapshot, the plain split
-          band before that. The jump bar below carries the date and Watch. */}
-      <InningsHeader
-        started={started}
-        live={curLiveState}
-        feed={feed}
-        unlocked={renderUnlocked}
-        revealedThrough={renderRevealedThrough}
-        runsInProgress={runsInProgress}
+      <GamedayNextMount
+        bug={{
+          started, live: curLiveState, feed, unlocked: renderUnlocked, mark: renderRevealedThrough,
+          runsInProgress, treatment: winProbTreatment, viewIdx: curIdx, viewInning: effInning, viewHalf: effHalf,
+          season: gameDate, stepAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
+        }}
         meta={meta}
-        treatment={winProbTreatment}
-        viewIdx={curIdx}
-        viewInning={effInning}
-        viewHalf={effHalf}
-        date={gameDate}
-        onSketch={onSketch}
-      />
-      {/* The section jump bar (handed down from GameView) and the half-inning
-          navigator stack in one chrome block at every width. Refresh no longer sits up here — it moved to the
-          floating bottom bar (below) at every width, so refreshing live data is
-          always one reach from the Next button. */}
-      <div className="inningchrome">
-        {sectionNav}
-        <nav className="inningnav" aria-label="Half-inning navigator">
-          <button
-            type="button"
-            className="btn"
-            onClick={() => goTo(Math.max(0, curIdx - 1))}
-            disabled={curIdx === 0}
-            aria-disabled={turning || undefined}
-            aria-label="Back one half-inning"
-          >
-            ‹ Back
-          </button>
-          <span className="inningnav__label">
-            {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
-          </span>
-          <button
-            type="button"
-            className="btn"
-            onClick={() => requestForwardHalf(Math.min(maxIdx, curIdx + 1))}
-            disabled={curIdx === maxIdx || skippedBottomHalf}
-            aria-disabled={turning || undefined}
-            aria-label="Next half-inning"
-          >
-            Next ›
-          </button>
-        </nav>
-      </div>
-
-      {/* Extra-innings team-record banner: only shows once the page IS an extra
-          inning, which the user can only reach after revealing through
-          regulation (extras unlock one at a time — ADR-0008), so it leaks
-          nothing. Season W-L splits (spoiler-free); absent for MiLB / un-
-          generated games (callouts null). */}
-      {effInning > regulation && (
-        <ExtrasBanner
-          records={callouts?.teamRecords}
-          awayName={meta.away.clubName || meta.away.abbreviation}
-          homeName={meta.home.clubName || meta.home.abbreviation}
-        />
-      )}
-
-      {/* A rain/other delay that stopped play during the half being viewed —
-          spoiler-free structural info (see selectDelays), rendered like the
-          status banner rather than behind a seal. Usually none. */}
-      {delays
-        .filter((d) => d.inning === effInning && d.half === effHalf)
-        .map((d, i) => (
-          <DelayCard key={`${d.inning}-${d.half}-${i}`} delay={d} />
-        ))}
-
-      {/* On a phone these wrappers are inert divs and everything stacks in the
-          same row order as ever: linescore, then the play-by-play (with its
-          strike zones) — the most important thing on the page as the scorer
-          progresses — then the stat card + WPA chart, then the pitchers /
-          lineups / defense reference band, then rosters. From the wide
-          breakpoint up the stat card and WPA chart sit side by side. */}
-      <div className="innings__grid">
-        {/* The anchored console band — unconditional now. The scorebug as
-            this screen's masthead rather than a dock floating over the at-bat
-            card, plus whichever companion card the half's state calls for; it
-            spans both grid columns. See ConsoleBand.jsx (ADR-0043) for the
-            row's states. There is no floating dock any more — this is the
-            scorebug's one placement. */}
-        <ConsoleBand
-          feed={feed}
-          revealedThrough={renderRevealedThrough}
-          meta={meta}
-          viewIdx={curIdx}
-          viewInning={effInning}
-          viewHalf={effHalf}
-          getDerived={getDerived}
-          currentSealed={currentSealed}
-          closePhase={focus.closePhase}
-          stepAtBatIndex={curStepInfo?.lastAtBatIndex ?? null}
-          bundle={callouts}
-          marginNotes={marginNotes}
-          workload={workload}
-          gameDate={workloadGameDate}
-        />
-
-        {/* `.innings__stage` is a real box in the grid's first column at wide
-            width (styles/focus/stage.css) — CSS Grid auto-placement cannot
-            otherwise tell these children apart from the reference column,
-            which explicitly claims column 2, and an item auto-placed after an
-            explicitly positioned one can resolve into that same column. One
-            explicit item per column removes the ambiguity instead of relying
-            on span math. */}
-        <div className="innings__stage">
-          {/* THE TRAIL, ABOVE THE HERO (ADR-0043's amendment). Every at-bat
-              already revealed this half is what shows the half BUILDING — the
-              point of watching it live rather than reading it after — landing
-              right next to the card it describes, in the reader's normal
-              top-to-bottom scan. The "See the whole half" link
-              stays under the card, by the bar it hands off to —
-              `FocusControls` below still owns that link. */}
-          <FocusTrail focus={focus} turning={turning} inning={effInning} half={effHalf} />
-
-          {/* The half's play-by-play (paired with its strike zone on the wide
-              layout) plus the R/H/E/LOB + pitch-stat/WPA row beneath it — see
-              InningPage.jsx. InningPageTurn owns the active render (key on
-              inning+half → fresh mount; a box at/under the reveal mark stays
-              open) plus, only mid-turn, the inert preview + curl overlay for a
-              forward navigation (see InningPageTurn.jsx). */}
-          {pageTurn}
-
-          {/* A preview of the OTHER side's next half, moved here from the
-              ReferencePanel Arms tab: it belongs beside the cards it follows
-              on, not tucked behind a tab a reader may not open. Its own gate
-              (selectDueUpNext) is what makes this conditional — it renders
-              nothing until the half on screen is fully revealed, i.e. right
-              as "See the whole half" appears below it. */}
-          <DueUpNextCard
-            feed={feed}
-            inning={effInning}
-            half={effHalf}
-            revealedThrough={renderRevealedThrough}
-            awayId={meta.away.id}
-            homeId={meta.home.id}
-          />
-
-          <FocusControls focus={focus} turning={turning} />
-
-          {/* Under the trail, so the at-bat and the control that pages it stay
-              adjacent and the linescore reads as the reference it is here —
-              its run cells double as the half-inning navigator, the only way
-              to jump to a half that isn't ±1 away (e2e/innings-page-turn pins
-              this). */}
-          {rollingLine}
-        </div>
-
-        {/* The reference shelf — pitchers, lineups, fielding defense, benches —
-            through ReferencePanel: a tabbed, permanently-open reserved column
-            at wide widths, or a chip row opening a sheet on a phone
-            (ReferencePanel.jsx, ADR-0043). One section at a time, so the
-            reader reaches the one they want without scrolling past four they
-            don't. Unconditional now — every half gets it, live or historical. */}
-        <ReferencePanel {...refProps} rosters={rosters} onReplaySlot={setReplaySlot} />
-      </div>
-
-      {/* The floating bar (components/inning/InningActionBar.jsx) — the three
-          states it renders, the Refresh it always carries, and the hold the
-          closing rule puts on its forward action all live in that file's
-          header. Everything it needs is resolved here and handed down; it
-          decides nothing about the reveal mark itself. */}
-      <InningActionBar
-        focus={focus}
-        turning={turning}
-        refresh={
-          /* Dropped once the game is over — the feed is complete and a refetch
-             returns the same bytes. Same `selectIsFinal` test, for the same
-             reason, that already drops the box score's own Refresh
-             (screens/BoxScore.jsx). Revealing is unaffected: it reads the feed
-             already in hand. */
-          selectIsFinal(feed) ? null : (
-            <RefreshButton
-              onReload={onReload}
-              loading={loading}
-              lastUpdated={lastUpdated}
-              className="innings__refresh--float"
-            />
-          )
-        }
-        currentSealed={currentSealed}
-        halfLive={currentHalfLive}
-        atHalfEdge={atHalfEdge}
-        effInning={effInning}
-        effHalf={effHalf}
-        onRevealNextAtBat={revealNextAtBat}
-        onRevealWholeHalf={revealWholeHalf}
-        nextIdx={nextIdx}
-        nextLabel={nextLabel}
-        onForward={requestForwardHalf}
-        bookClosed={bookClosed}
+        panels={{
+          feed, meta, regulation, unlocked: renderUnlocked, mark: renderRevealedThrough, runsInProgress, curIdx,
+          onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
+          inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : curAtBatCount,
+        }}
+        checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
+        engine={pageTurn}
+        advance={advance}
+        open={currentSealed ? { count: curAtBatCount, sub: curSub } : null}
+        pitch={{ on: pitchMode, set: setPitchMode }}
         onBoxScore={onBoxScore}
+        onScorecard={onScorecard}
+        onLineup={onLineup}
+        slateHref={slateHref}
+        notices={[
+          gameStatus?.label && `${gameStatus.label}${gameStatus.reason ? ` — ${gameStatus.reason}` : ''}`,
+          refreshFailed && 'Couldn’t refresh — showing the last update.',
+        ].filter(Boolean)}
+        refresh={selectIsFinal(feed) ? null : <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />}
       />
-    </div>
     </CalloutLedgerProvider>
   )
-}
-
-// Splits selectBullpen's card into rotation starters (won't enter once the
-// game's underway — see the module docstring) and the actual bullpen, using
-// the same season-stats role inference the team page badges pitchers with
-// (rosterPitcherRole: gamesStarted ratio / saves — see person.js). A pitcher
-// with no resolved role (the roles fetch hasn't landed yet, or a rookie with
-// no starts on record) defaults into the bullpen list rather than being ruled
-// out as unavailable.
-function splitBullpen(bullpen, roles) {
-  const starters = bullpen.filter((p) => roles?.[p.id] === 'SP')
-  const relief = bullpen.filter((p) => roles?.[p.id] !== 'SP')
-  return { starters, bullpen: relief }
 }

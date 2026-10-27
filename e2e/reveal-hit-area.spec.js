@@ -1,127 +1,123 @@
 import { test, expect } from './fixtures.js'
 
-// The innings bar's dead space belongs to its primary action
-// (`.pagenav--innings .btn::after`, src/styles/24-floating-nav-and-hud.css,
-// with focus mode's own tighter set in src/styles/focus/stage.css — that is the
-// one in force on this anchor, which opens focused). `.pagenav` is click-through
-// by design, so a thumb that missed the reveal button used to punch through
-// the fade and open whichever player card sat underneath — you asked to
-// reveal an at-bat and got a page you didn't want. These specs pin the two
-// halves of that: the dead space around the button now answers for it, and
-// the two things that must NOT be swallowed — Refresh, and the page above the
-// bar — still answer for themselves.
+// Gameday's bar: the dead space around the advance control belongs to it
+// (`.gdnext__bar .gdnext__advance::after`, src/styles/gameday-next/page.css).
+// A thumb that misses the button still steps, instead of landing on nothing.
+// These specs pin that, and the things the area must NOT swallow: the step
+// switch beside it, the Menu, and the page above the bar.
+//
+// The old innings bar carried a reveal PAIR ("Next at-bat" / "Rest of half")
+// that split the dead space between them. Gameday has one forward action and
+// no "Rest of half" (#2568), so the seam this file pins is now the one between
+// the advance and the At-bat | Pitch switch.
 //
 // Anchor game per docs/test-games.md: 2026-07-07 MIL@STL g2 (gamePk 823035).
-// Its top of the 1st is sealed on arrival, so the bar shows the reveal-split
-// pair (ADR-0016).
+// Its top of the 1st is sealed on arrival. A step writes the at-bat cursor
+// (`bbsbh:reveal-atbat:{gamePk}` = "{halfIdx}:{count}", ADR-0016); revealing
+// the whole half would write the reveal mark (`bbsbh:reveal:{gamePk}`).
 const GAME = '/07072026/milstl-2'
+const CURSOR = 'bbsbh:reveal-atbat:823035'
+const MARK = 'bbsbh:reveal:823035'
+const PITCH_MODE = 'bbsbh:pitchmode:823035'
 
 // Where the bar's dead space actually is, measured from the live layout rather
 // than from the CSS offsets under test (which would make the assertions
-// tautological). `deadY` is the gap above the action row — under Refresh where
-// Refresh is there (the "as of 7:42 PM" stamp lives in that gap, so its height
-// moves with the poll), and the bar's own top padding where it is not;
-// `belowY` is the bar's bottom padding under the buttons.
-//
-// REFRESH IS OPTIONAL HERE. A finished game drops it — nothing left to fetch
-// (InningViewer's `selectIsFinal` gate) — and every fixture game in
-// docs/test-games.md is in the past, so on THIS anchor there is none. The
-// helper measures from the bar's own top edge in that case rather than
-// dereferencing a button that isn't there, and `refreshX/refreshY` come back
-// null so the spec that needs them can say so.
+// tautological). Refresh is in the Menu now, not on the bar.
 async function barSpots(page) {
-  await page.waitForSelector('.pagenav--innings .btn')
+  await page.waitForSelector('.gdnext__bar .gdnext__advance')
   return page.evaluate(() => {
-    const bar = document.querySelector('.pagenav--innings')
-    const refresh = bar.querySelector('.innings__refresh--float')
-    const btns = [...bar.querySelectorAll('.btn')].filter((b) => b !== refresh)
+    const bar = document.querySelector('.gdnext__bar')
+    const adv = bar.querySelector('.gdnext__advance').getBoundingClientRect()
+    const sw = bar.querySelector('.gdnext__switch').getBoundingClientRect()
     const rBar = bar.getBoundingClientRect()
-    const rRefresh = refresh?.getBoundingClientRect() ?? null
-    const first = btns[0].getBoundingClientRect()
-    const last = btns[btns.length - 1].getBoundingClientRect()
     return {
-      firstX: first.left + first.width / 2,
-      // Sampled near the right-hand choice's INNER edge, not its centre: on
-      // the wide layout the scorebug dock (.gamehud-dock, z-index 21 — above
-      // .pagenav by design) parks over the bar's bottom-right corner and takes
-      // those clicks itself, button and dead space alike.
-      lastX: last.left + last.width * 0.2,
-      deadY: ((rRefresh ? rRefresh.bottom : rBar.top) + first.top) / 2,
-      belowY: (first.bottom + rBar.bottom) / 2,
-      refreshX: rRefresh ? (rRefresh.left + rRefresh.right) / 2 : null,
-      refreshY: rRefresh ? (rRefresh.top + rRefresh.bottom) / 2 : null,
+      advX: adv.left + adv.width / 2,
+      advY: adv.top + adv.height / 2,
+      deadY: (rBar.top + adv.top) / 2 + 1,
+      belowY: (adv.bottom + rBar.bottom) / 2,
+      seamX: (sw.right + adv.left) / 2,
+      // One pixel inside the switch's right edge: the last point that is the switch's, where the
+      // advance's area (which reaches left across the gap) must stop.
+      switchEdgeX: sw.right - 1,
+      switchY: sw.top + sw.height / 2,
+      rightX: (adv.right + rBar.right) / 2,
       aboveBarY: rBar.top - 6,
       centreX: window.innerWidth / 2,
     }
   })
 }
 
-test('a click in the dead space above the buttons steps an at-bat', async ({ page }) => {
+const stored = (page, key) => page.evaluate((k) => localStorage.getItem(k), key)
+
+// A "nothing happened" check has to give a late write the time to land, or it passes on a tap that
+// stepped a moment later. A step writes the cursor within a frame or two of the tap; 1.5 s is far
+// past that, and the advance must still offer the same step.
+async function settled(page) {
+  await page.waitForTimeout(1500)
+  await expect(page.locator('.gdnext__advance')).toHaveText(/Next play/)
+}
+
+test('a click in the dead space above the button steps an at-bat', async ({ page }) => {
   await page.goto(`${GAME}/top1`)
   const at = await barSpots(page)
-  await expect(page.locator('.pbp__entry')).toHaveCount(0)
+  expect(await stored(page, CURSOR)).toBeNull()
 
-  await page.mouse.click(at.firstX, at.deadY)
+  await page.mouse.click(at.advX, at.deadY)
 
-  await expect(page.locator('.pbp__entry')).toHaveCount(1)
-  // One at-bat, not the whole half: the SEALED pair is still on the bar. Both
-  // choices, by count — `.revealsplit` alone no longer says this, since the bar
-  // carries a second split once the half is done (see the next spec).
-  await expect(page.locator('.revealsplit .btn--reveal')).toHaveCount(2)
+  await expect.poll(() => stored(page, CURSOR)).toBe('0:1')
+  // One at-bat, not the whole half: the reveal mark is untouched, and the bar
+  // still offers the next step.
+  expect(await stored(page, MARK)).toBeNull()
+  await expect(page.locator('.gdnext__advance')).toHaveText(/Next play/)
 })
 
-test('the dead space below the buttons steps an at-bat too', async ({ page }) => {
+test('the dead space below the button steps an at-bat too', async ({ page }) => {
   await page.goto(`${GAME}/top1`)
   const at = await barSpots(page)
 
-  await page.mouse.click(at.firstX, at.belowY)
+  await page.mouse.click(at.advX, at.belowY)
 
-  await expect(page.locator('.pbp__entry')).toHaveCount(1)
+  await expect.poll(() => stored(page, CURSOR)).toBe('0:1')
 })
 
-test('the dead space splits between the two choices, seam included', async ({ page }) => {
+test('the dead space reaches the seam with the step switch and the bar end, and stops at the switch', async ({ page }) => {
   await page.goto(`${GAME}/top1`)
   const at = await barSpots(page)
 
-  // Over the right-hand choice: the whole half, not one at-bat — so the kraft
-  // seal leaves the bar entirely.
-  //
-  // WHAT THE SEAL GOING IS, AND WHY IT ISN'T `.revealsplit` GOING. This used to
-  // read `.revealsplit` count 0, on the arrangement where revealing a whole half
-  // put a single full-width `.btn--next` back on the bar. Focus mode's postHalf
-  // state (ADR-0043) ended that: a just-finished half now offers its own
-  // Summary/next-half pair, which is a `.revealsplit` too — so the count stayed
-  // 1 and this spec failed while the hit area was working perfectly. Measured on
-  // the anchor at all three projects: a click at (lastX, deadY) lands on the
-  // "Rest of half" button itself (document.elementFromPoint), commits
-  // `bbsbh:reveal:823035` = "0", and leaves the bar reading Summary / Bottom 1st
-  // › — byte-for-byte the state that pressing the real button produces.
-  //
-  // `.btn--reveal` is the kraft-seal skin, and ONLY the sealed pair wears it
-  // here. Gone means the half is open; the left-hand step above keeps both. That
-  // is the difference this spec is actually about, so assert it directly rather
-  // than through a container whose meaning moved.
-  await page.mouse.click(at.lastX, at.deadY)
+  // The gap between the switch and the advance, and the bar's right end, are
+  // the advance's: each steps one at-bat.
+  await page.mouse.click(at.seamX, at.advY)
+  await expect.poll(() => stored(page, CURSOR)).toBe('0:1')
+  // A tap while the stage still plays that step skips the play instead of
+  // stepping (#2573), so the stage is put at rest first: a reload restores
+  // the cursor and never replays (ADR-0046).
+  await page.reload()
+  const rested = await barSpots(page)
+  await page.mouse.click(rested.rightX, rested.advY)
+  await expect.poll(() => stored(page, CURSOR)).toBe('0:2')
+  expect(await stored(page, MARK)).toBeNull()
 
-  await expect(page.locator('.revealsplit .btn--reveal')).toHaveCount(0)
-  await expect(page.locator('.pbp__entry').first()).toBeVisible()
+  // The switch keeps its own taps right up to its edge: a tap one pixel inside
+  // its right edge, where the advance's area begins, sets Pitch mode and steps
+  // nothing (ADR-0123: the switch reveals nothing).
+  await page.mouse.click(rested.switchEdgeX, rested.switchY)
+  await expect.poll(() => stored(page, PITCH_MODE)).not.toBeNull()
+  await page.waitForTimeout(1500)
+  expect(await stored(page, CURSOR)).toBe('0:2')
+  await expect(page.locator('.gdnext__advance')).toHaveText(/Next pitch/)
 })
 
-test('Refresh keeps its own taps', async ({ page }) => {
+test('the Menu keeps its own taps', async ({ page }) => {
   await page.goto(`${GAME}/top1`)
-  const at = await barSpots(page)
-  // Only while the game can still change. Refresh is gone on a finished one,
-  // and the pointer behaviour this pins — Refresh riding ABOVE the reveal's
-  // hit area rather than the area stopping short of it — has nothing to sit on
-  // then. Skipped rather than deleted: the rule still governs a live game, and
-  // this is the spec that says so. Point the anchor at a live gamePk and it
-  // runs.
-  test.skip(at.refreshX == null, 'the anchor game is final, so it carries no Refresh')
+  await barSpots(page)
 
-  await page.mouse.click(at.refreshX, at.refreshY)
+  // Refresh lives in the Menu now (on a live game; the anchor is final, so it
+  // has none). The Menu itself must not be swallowed by the advance's area.
+  await page.getByRole('button', { name: 'Menu', exact: true }).click()
 
-  await expect(page.locator('.pbp__entry')).toHaveCount(0)
-  await expect(page.locator('.revealsplit .btn--reveal')).toHaveCount(2)
+  await expect(page.getByRole('dialog')).toHaveCount(1)
+  await page.waitForTimeout(1500)
+  expect(await stored(page, CURSOR)).toBeNull()
 })
 
 test('the page above the bar keeps its own taps', async ({ page }) => {
@@ -130,5 +126,6 @@ test('the page above the bar keeps its own taps', async ({ page }) => {
 
   await page.mouse.click(at.centreX, at.aboveBarY)
 
-  await expect(page.locator('.pbp__entry')).toHaveCount(0)
+  await settled(page)
+  expect(await stored(page, CURSOR)).toBeNull()
 })

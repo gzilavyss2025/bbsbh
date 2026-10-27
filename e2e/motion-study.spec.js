@@ -3,9 +3,7 @@ import { installMockApi, ANCHOR_DATE, ANCHOR_GAME_PK } from './fixtures/mock-api
 
 // The motion study (issues #976-#983, src/styles/motion/). Verification pass
 // for the parts the Animation Lab cannot show, which are all the JS gates: that
-// a cascade fires once per mount and not on a poll, that a strike renders
-// already drawn on a cold load, that a half writes itself only when the reader
-// unseals it, and that the write is capped.
+// a cascade fires once per mount and not on a poll.
 //
 // Offline against the captured anchor game (mock-api.js) — 2026-07-07 MIL@STL
 // game 2, whose pinch runners and mid-inning substitutions are what put a
@@ -43,102 +41,11 @@ test('#980 the batting order staggers in once, and the roster does not', async (
   if (await roster.count()) expect(await animName(roster)).toBe('none')
 })
 
-test('#982 the half writes itself when it is laid out to be read back, capped at six', async ({ page }) => {
-  await installMockApi(page)
-  await page.goto(`${BASE}/top7`)
-
-  // Nothing sealed is in the DOM before the tap (ADR-0002), so there is nothing
-  // to animate either — and the frontier seal breathes while it waits (#983).
-  await expect(page.locator('.btn--reveal').first()).toBeVisible()
-  await expect(page.locator('.pbp__atbat')).toHaveCount(0)
-  expect(await animName(page.locator('.btn--reveal').first())).toBe('sc-seal-breathe')
-
-  await page.locator('.revealsplit__btn--quiet').click()
-  await expect(page.locator('.pbp__atbat').first()).toBeVisible()
-
-  // The seal has nothing left to say once the tape is torn.
-  await expect(page.locator('.btn--reveal')).toHaveCount(0)
-
-  // Revealing holds the WINDOWED at-bat, which owns ADR-0046's ink-set — the
-  // write-on stays out of its way. See HalfInning's comment.
-  await expect(page.locator('.pbp__atbat--writing')).toHaveCount(0)
-
-  // "See the whole half" lays the half out stacked. THAT is the write.
-  await page.locator('.trailstrip__summarybtn').click()
-  const total = await page.locator('.pbp__atbat').count()
-  expect(total, 'the half is laid out').toBeGreaterThan(6)
-  await expect(page.locator('.pbp__atbat--writing')).toHaveCount(6)
-
-  // Beat 2 is the only new technique: one fixed dasharray for every leg.
-  const leg = page.locator('.pbp__atbat--writing .pbp__leg').first()
-  if (await leg.count()) {
-    expect(await animName(leg)).toBe('leg-trace')
-    expect(await leg.evaluate((el) => getComputedStyle(el).strokeDasharray)).toBe('43px')
-  }
-})
-
-test('#982 a half read back a second time renders settled ink, never a replay', async ({ page }) => {
-  await installMockApi(page)
-  await page.goto(`${BASE}/top7`)
-  await page.locator('.revealsplit__btn--quiet').click()
-  await page.locator('.trailstrip__summarybtn').click()
-  await expect(page.locator('.pbp__atbat--writing').first()).toBeVisible()
-
-  // Same half, loaded fresh: the reveal mark persisted, so the cards come back
-  // already written. This is the cold-load case useBecameTrue exists for.
-  //
-  // The longer timeout is on the ARRIVAL only, never on the assertion that
-  // matters. A reload re-fetches the feed and rebuilds the half from cold, which
-  // runs 8-11s on a quiet machine and longer under a full-suite load — the
-  // default 5s made this flaky in the sweep while passing standalone. The
-  // invariant below keeps the default: once the cards are up, ZERO of them may
-  // be writing.
-  await page.reload()
-  await expect(page.locator('.pbp__atbat').first()).toBeVisible({ timeout: 25_000 })
-  await expect(page.locator('.pbp__atbat--writing')).toHaveCount(0)
-})
-
-test('#981 a struck name renders already drawn on a cold load', async ({ page }) => {
-  await installMockApi(page)
-
-  // A REVEALED half, arrived at cold. This anchor game's defensive substitutions
-  // never reach a `.defdiamond__name--out` on its lineup pages — an earlier
-  // draft of this test walked that list and asserted nothing at all, because the
-  // list is empty on every route the game has. The pinch runners DO put a struck
-  // batter on a play-by-play card, so that is the subject: reveal the half, then
-  // reload, which is exactly the cold load useBecameTrue exists for.
-  await page.goto(`${BASE}/top7`)
-  await page.locator('.revealsplit__btn--quiet').click()
-  await page.locator('.trailstrip__summarybtn').click()
-  await expect(page.locator('.pbp__replaced').first()).toBeVisible()
-
-  await page.reload()
-  await expect(page.locator('.pbp__atbat').first()).toBeVisible({ timeout: 25_000 })
-  const out = page.locator('.pbp__replaced')
-  const n = await out.count()
-  expect(n, 'there is a struck name to look at').toBeGreaterThan(0)
-  for (let i = 0; i < n; i += 1) {
-    const ink = out.nth(i).locator('.struckline')
-    await expect(ink).not.toHaveClass(/is-drawing/)
-    expect(await animName(ink, '::after'), 'settled, not drawing').toBe('none')
-    const bar = await ink.evaluate((el) => getComputedStyle(el, '::after').transform)
-    expect(bar, 'the bar is fully drawn').toBe('matrix(1, 0, 0, 1, 0, 0)')
-
-    // AND IT STOPS AT THE NAME. The bar fills its containing block, so on the
-    // wrapper it ran the width of the BOX — and `.abhero__name` is an item of a
-    // column flex container, which stretches it to the full card. 175px of
-    // pencil past an 87px name. `.struckline` is inline, so it hugs the glyphs.
-    const fit = await ink.evaluate((el) => {
-      const r = document.createRange()
-      r.selectNodeContents(el)
-      return {
-        bar: parseFloat(getComputedStyle(el, '::after').width) || 0,
-        text: r.getBoundingClientRect().width,
-      }
-    })
-    expect(fit.bar, 'the bar hugs the name').toBeLessThanOrEqual(fit.text + 3)
-  }
-})
+// #982 (the half writing itself when laid out stacked), its read-back twin and
+// #981 (a struck name on a play-by-play card, drawn on a cold load) went with
+// the old innings page (#2566): Gameday has no "See the whole half" and draws
+// no play-by-play card, so neither surface can be reached. The keyframes stay
+// pinned below through the Animation Lab, which still draws both.
 
 test('#983 only the innings frontier seal breathes, not every kraft button', async ({ page }) => {
   await installMockApi(page)
@@ -179,8 +86,10 @@ test('the whole study is off under reduced motion', async ({ page }) => {
   expect(await animName(page.locator('.lord__item').first())).toBe('none')
 
   await page.goto('/animation-lab')
-  await expect(page.locator('.animlab__live .liveedge__dot').first()).toBeVisible()
-  for (const sel of ['.liveedge__dot', '.btn--reveal', '.pbp__cell', '.pbp__leg', '.pbp__outcircle']) {
+  // The old innings bar's live-edge dot left the lab with that bar (#2566); the LIVE pill keeps the beat.
+  await expect(page.locator('.animlab__live .gamecard__live').first()).toBeVisible()
+  expect(await animName(page.locator('.animlab__live .gamecard__live').first(), '::before')).toBe('none')
+  for (const sel of ['.btn--reveal', '.pbp__cell', '.pbp__leg', '.pbp__outcircle']) {
     expect(await animName(page.locator(`.animlab__live ${sel}`).first()), sel).toBe('none')
   }
   expect(

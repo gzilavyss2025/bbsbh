@@ -259,25 +259,6 @@ test('T1: the seal pin: neither moved page reads a reveal-only module or a seal'
 // api/ and stamp modules the file imports: the move adds none (ADR-0035).
 const T3 = [
   {
-    jsx: 'components/gamehud/RollingLine.jsx',
-    ns: 'rolling__grid',
-    bases: [['20-charts.css', 'rolling__grid']],
-    attrs: ['frame="bare"', 'density="tight"', 'sticky'],
-    // The running line is a linescore, not a ledger: its own mono head and a 2px
-    // ink rule under it (the stamped look), so it may dress its own head.
-    ownHead: true,
-    label: /label="Running line"/,
-    apis: ['../../api/select.js', '../../api/linescore.js'],
-  },
-  {
-    jsx: 'components/inning/PitchersSection.jsx',
-    ns: 'pitchers__grid',
-    bases: [['20-charts.css', 'pitchers__grid']],
-    attrs: ['frame="bare"', 'density="tight"'],
-    label: null,
-    apis: [],
-  },
-  {
     jsx: 'components/playbyplay/PitcherHandoffCard.jsx',
     ns: 'pitchers__grid',
     bases: [['20-charts.css', 'pitchers__grid']],
@@ -409,11 +390,6 @@ test('T3: the held scorecard and inning tally keep their base rules, at their ol
 
 test('T3: a moved table keeps its own margin, column widths and figure alignment', () => {
   const kept = [
-    ['20-charts.css', '.rolling', 'margin-bottom', 'var(--space-4)'],
-    ['20-charts.css', '.rolling__grid td', 'min-width', 'var(--rolling-cell)'],
-    ['20-charts.css', '.rolling__grid td', 'text-align', 'center'],
-    ['20-charts.css', '.rolling__grid td + td', 'border-left', 'var(--bw-hair) solid var(--border-hairline)'],
-    ['20-charts.css', '.rolling__grid td.rolling__cell', 'padding', '0'],
     ['20-charts.css', '.pitchers__grid', 'table-layout', 'fixed'],
     ['20-charts.css', '.pitchers__grid td', 'text-align', 'center'],
     ['20-charts.css', '.pitchers__pitcher', 'width', '36%'],
@@ -456,23 +432,12 @@ test('T3: the line score draws each box once, with no doubled edge', () => {
   assert.equal(decl(need(css, '.bs__grid--board thead :is(.bs__boardInn, .bs__boardFinal)'), 'border-top-width'), 'var(--bw-hair)')
 })
 
-test('T3: the running line\'s focus ring sits inside the Card that clips it', () => {
-  assert.equal(decl(need(read('20-charts.css'), '.rolling__scroll .table:focus-visible'), 'outline-offset'), 'calc(-1 * var(--bw-heavy))')
-})
-
 test('T3: the seal stays where it was: no gate moved and no api/ import added', () => {
   for (const { jsx, apis } of T3) {
     if (!apis) continue
     const froms = [...src(jsx).matchAll(/from ['"]([^'"]+)['"]/g)].map((m) => m[1])
     assert.deepEqual(froms.filter((f) => /\/api\/|stamp/i.test(f)), apis, `${jsx} imports exactly the api/ and stamp modules it did`)
   }
-  // The running line reads a half only at or under the reveal mark, in the cell.
-  const rolling = src('components/gamehud/RollingLine.jsx')
-  assert.match(rolling, /if \(idx <= revealedThrough\) return revealInning\(feed, n, side\)/)
-  assert.match(rolling, /if \(battingIdx <= revealedThrough\) \{/)
-  assert.match(rolling, /if \(halfIndex\(n, fieldingHalf\) <= revealedThrough\) \{/)
-  // ADR-0009: the pitchers table is gated by the caller's lines, never a SealBox.
-  assert.doesNotMatch(src('components/inning/PitchersSection.jsx'), /<SealBox\b|import \{ SealBox|revealedThrough/)
   // The box score's four grids render only inside the one reveal render, which
   // reads the box score and nothing else reads it.
   const box = src('screens/BoxScore.jsx')

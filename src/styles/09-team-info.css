@@ -324,44 +324,6 @@
   line-height: var(--lh-body);
   animation: postponed-in var(--dur-med) var(--ease-out) both;
 }
-/* The umpire crew: a gap-rule grid. The rules between the umpires are this
-   grid's own --border-rule ground, seen through its 1px gaps. The Card around
-   it (ExtrasFacts.jsx, #1113 slice C3; the lineup page's crew is fact cells now, see UmpiresCard.jsx) draws the edge,
-   the corners and the shadow, and clips the corner cells, so the grid draws
-   no frame of its own. */
-.umps__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--border-rule);
-}
-
-/* A crew size that doesn't fill the last row (1, 3, or 5 umpires — MiLB
-   often posts fewer than four, postseason crews sometimes post an odd
-   number) would leave the .umps__list background showing through as a gap;
-   stretch the lone last item across both columns instead. */
-.umps__list li:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-}
-
-.umps__list li {
-  background: var(--surface-card);
-  padding: var(--space-2) var(--space-2h);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.umps__role {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 
 /* Scoped through the parent (not just `.umps__name`) so this outranks
    `.plink`'s `font`/`color`/`text-transform: inherit` reset further down the

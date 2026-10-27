@@ -71,7 +71,7 @@ export const ROUTES = [
     shots: [{ name: 'page' }],
   },
   { name: 'lineup', path: `${ANCHOR}/lineup1`, ready: '.lineup', shots: [{ name: 'page' }] },
-  { name: 'innings', path: `${ANCHOR}/top1`, ready: '.pagenav--innings', shots: [{ name: 'page' }] },
+  { name: 'innings', path: `${ANCHOR}/top1`, ready: '.gdnext__advance', shots: [{ name: 'page' }] },
   { name: 'boxscore', path: `${ANCHOR}/boxscore`, ready: '.sealbox:visible', shots: [{ name: 'page' }] },
   {
     // Overview: the club band and the Standings card with "Postseason odds".

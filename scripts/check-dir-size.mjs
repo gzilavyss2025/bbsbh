@@ -64,7 +64,7 @@ const BUDGETS = {
   // that ordering for no gain. Growing this count is what "put new code
   // elsewhere" MEANS in a directory that can't nest, so it will keep climbing.
   // See ADR-0038.
-  'src/styles': 112,
+  'src/styles': 108,
   // Static-file readers over nightly precomputes (targetCommand, gloveTarget,
   // milbPool (ADR-0080), notebook, ...) sit flat beside the siblings they are read with and
   // written to match; every module the player page's Analytics tab loads is here
@@ -86,7 +86,7 @@ const BUDGETS = {
   // code between generators, so inlining them would copy it into each one.
   'scripts/lib': 42,
   'src/screens': 41,
-  'src/hooks': 26,
+  'src/hooks': 25,
   'src/screens/identity-lab': 15,
   // One file per diary finding. A research diary is append-only
   // (docs/agents/research-diary.md, docs/agents/contender-diary.md), so these
