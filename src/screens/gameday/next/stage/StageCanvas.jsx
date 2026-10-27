@@ -9,7 +9,7 @@ import { TOKENS } from './pixels.js'
 // pixel stays square. `play` is stagePlay()'s output, built only from a REVEALED play (ADR-0001);
 // without a `play` the canvas draws nothing. With `t` (seconds after the tap) it draws that one
 // frame; without, it plays from `start` (a performance.now() time, so a re-render mid-play keeps its
-// place) to the end of the play and calls `onEnd`, or jumps to the end under reduced motion. `zones`
+// place) to the end of the play, or jumps to the end under reduced motion. `zones`
 // tints the rest frame (drawStage). The tap rule and the mount are GamedayStage.js and tapRule.js.
 
 // The --stage-* tokens as packed little-endian RGBA, in pixels.js's slot order. A 1 px canvas turns
@@ -25,7 +25,7 @@ function paletteOf(el) {
   })
 }
 
-export function StageCanvas({ play, t, start, onEnd, zones, label = 'The play on the field' }) {
+export function StageCanvas({ play, t, start, zones, label = 'The play on the field' }) {
   const box = useRef(null)
   const cv = useRef(null)
   const [size, setSize] = useState(null)
@@ -53,11 +53,10 @@ export function StageCanvas({ play, t, start, onEnd, zones, label = 'The play on
       const s = Math.min(Math.max(0, now - t0) / 1000, play.end)
       paint(s)
       if (s < play.end) id = requestAnimationFrame(tick)
-      else onEnd?.()
     }
     id = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(id)
-  }, [play, t, start, onEnd, zones, w, h])
+  }, [play, t, start, zones, w, h])
   return (
     <div ref={box} className="gdstage">
       <canvas ref={cv} className="gdstage__canvas" role="img" aria-label={label} width={w} height={h} style={{ width: w * scale, height: h * scale }} />
