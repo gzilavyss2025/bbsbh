@@ -1,11 +1,15 @@
 // Shared decode + material recolour, cached outside React. No pixel work in the
 // animation loop. Cream cloth and cool stadium highlights stay neutral; only
 // the authored navy equipment and gold piping take the two kit colours.
+import { materialFor } from './materials.js'
+import { isolateFrames } from './atlas.js'
 const decoded = new Map()
 const palettes = new Map()
 export const STADIUM_URL = '/art/ballpark/night.png'
 export const ATLAS_URL = '/art/ballpark/home-run.png'
 export const HOME_RUN_ART = { url: ATLAS_URL, columns: 4, rows: 3, height: 420, centerX: 0.62, top: 12 }
+export const STRIKEOUT_ART = { url: '/art/ballpark/strikeout.png', columns: 4, rows: 3, height: 420, centerX: 0.62, top: 12 }
+export const DEFENSE_ART = { url: '/art/ballpark/catch.png', columns: 4, rows: 3, height: 410, centerX: 0.64, top: 16 }
 
 function loadImage(url) {
   if (!decoded.has(url)) {
@@ -37,14 +41,14 @@ export function prepareArt(helmet, trim, character = HOME_RUN_ART, backdrop = ST
     atlas.height = source.naturalHeight
     const g = atlas.getContext('2d', { willReadFrequently: true })
     g.drawImage(source, 0, 0)
-    const image = g.getImageData(0, 0, atlas.width, atlas.height)
+    const image = isolateFrames(g.getImageData(0, 0, atlas.width, atlas.height), character.columns, character.rows)
     const kit = rgb(helmet), piping = rgb(trim), p = image.data
     for (let i = 0; i < p.length; i += 4) {
       if (p[i + 3] < 16) continue
       const r = p[i], gr = p[i + 1], b = p[i + 2]
-      const equipment = b > r * 1.25 && b > gr * 1.04 && b < 155
-      const gold = r > gr * 1.12 && gr > b * 1.35 && r > 85 && b < 115
-      if (!equipment && !gold) continue
+      const material = materialFor(r, gr, b)
+      if (!material) continue
+      const equipment = material === 'equipment'
       const target = equipment ? kit : piping
       const light = equipment ? Math.max(r, gr, b) / 90 : Math.max(r, gr, b) / 195
       for (let c = 0; c < 3; c++) p[i + c] = Math.min(255, target[c] * Math.min(1, light) + Math.max(0, light - 1) * 105)

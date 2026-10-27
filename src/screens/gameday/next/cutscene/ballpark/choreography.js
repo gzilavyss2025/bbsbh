@@ -20,6 +20,47 @@ export const HOME_RUN = {
   ],
 }
 
+export const STRIKEOUT = {
+  duration: 1.9,
+  captionAt: 0.5,
+  accentAt: 0.44,
+  frames: [
+    { at: 0, frame: 0, beat: 'Follow through' },
+    { at: 0.12, frame: 1, beat: 'Rise' },
+    { at: 0.24, frame: 2, beat: 'Gather' },
+    { at: 0.34, frame: 3, beat: 'Gather' },
+    { at: 0.44, frame: 4, beat: 'Pump' },
+    { at: 0.54, frame: 5, beat: 'Release' },
+    { at: 0.66, frame: 6, beat: 'Release' },
+    { at: 0.78, frame: 7, beat: 'Settle' },
+    { at: 0.92, frame: 8, beat: 'Settle' },
+    { at: 1.06, frame: 9, beat: 'Settle' },
+    { at: 1.2, frame: 10, beat: 'Settle' },
+    { at: 1.38, frame: 11, beat: 'Settle' },
+  ],
+}
+
+export const DEFENSIVE_CATCH = {
+  duration: 2.8,
+  captionAt: 0.78,
+  accentAt: 0.7,
+  flight: { startAt: 0, catchAt: 0.7, from: [0.08, 0.02], to: [0.815, 0.1], arc: -0.025 },
+  frames: [
+    { at: 0, frame: 0, beat: 'Track' },
+    { at: 0.12, frame: 1, beat: 'Track' },
+    { at: 0.24, frame: 2, beat: 'Reach' },
+    { at: 0.4, frame: 3, beat: 'Reach' },
+    { at: 0.56, frame: 4, beat: 'Reach' },
+    { at: 0.7, frame: 5, beat: 'Catch' },
+    { at: 0.86, frame: 6, beat: 'Absorb' },
+    { at: 1.04, frame: 7, beat: 'Secure' },
+    { at: 1.25, frame: 8, beat: 'Recover' },
+    { at: 1.48, frame: 9, beat: 'Acknowledge' },
+    { at: 1.72, frame: 10, beat: 'Acknowledge' },
+    { at: 1.98, frame: 11, beat: 'Settle' },
+  ],
+}
+
 export const clampTime = (time, track = HOME_RUN) => Math.max(0, Math.min(track.duration, Number.isFinite(time) ? time : 0))
 
 export function momentAt(time, track = HOME_RUN) {

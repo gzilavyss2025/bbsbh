@@ -46,11 +46,13 @@ export function BallparkCelebration({
       return undefined
     }
     const g = canvas.current.getContext('2d')
+    const style = getComputedStyle(host.current)
+    const colors = { outline: style.getPropertyValue('--stage-outline').trim(), chalk: style.getPropertyValue('--stage-chalk').trim() }
     const still = reduced || lessMotion
     let id = 0, previous = null
     if (time != null) { playhead.current = time; completed.current = false }
     const paint = (t) => {
-      const m = drawBallpark(g, art, t, { track, still })
+      const m = drawBallpark(g, art, t, { track, still, colors })
       setMoment((before) => before.frame === m.frame && before.caption === m.caption && before.ended === m.ended ? before : m)
     }
     const finish = () => {
