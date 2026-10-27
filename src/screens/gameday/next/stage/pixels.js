@@ -137,11 +137,6 @@ export const BATTER = [
 ]
 export const PITCHER = [...kit(S.chalk, S.kitRoad, S.chalk, S.kitNavy, S.kitNavy, S.kitRed), { kind: 'cap', at: ['rElb', 'ball'], r: 0.19, c: S.skin }, { kind: 'cap', at: ['lElb', 'lElb'], r: 0.32, c: S.dirt }]
 export const FIELDER = kit(S.chalk, S.kitRoad, S.chalk, S.kitNavy, S.kitNavy, S.kitRed)
-export const CATCHER = {
-  head: [0, 0.2, 3.5], neck: [0, 0.1, 3.05], lSho: [-0.62, 0.15, 2.9], rSho: [0.62, 0.15, 2.9], lElb: [-0.75, 0.75, 2.3], rElb: [0.7, 0.55, 2.2],
-  pelvis: [0, -0.3, 1.8], lHip: [-0.5, -0.3, 1.8], rHip: [0.5, -0.3, 1.8], lKnee: [-0.95, 0.7, 1.5], rKnee: [0.95, 0.7, 1.5], lFoot: [-0.8, -0.2, 0], rFoot: [0.8, -0.2, 0], ball: [0, 0, 0],
-}
-export const CATCHER_PARTS = [...kit(S.kitNavy, S.outline, S.chalk, S.kitNavy, S.kitNavy, S.kitNavy), { kind: 'cap', at: ['lElb', 'lElb'], r: 0.42, c: S.dirt }]
 
 // ---- A numbered pitch mark: a round dot with the pitch's number (or X for the pitch put in play) --
 const R = [[-2, 2], [-3, 3], [-4, 4], [-4, 4], [-4, 4], [-4, 4], [-4, 4], [-3, 3], [-2, 2]]

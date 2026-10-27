@@ -30,7 +30,7 @@ test('the checkpoint mounts only for a half at or under revealedThrough', () => 
   assert.equal(calls, 0, 'nothing reveal-only runs for a sealed half')
   const out = html({ feed: F824, inning: 2, half: 'top', mark: 2 })
   assert.equal(calls, 1)
-  assert.match(out, /End of the top 2nd/)
+  assert.match(out, /<span>Middle 2nd<\/span>/, 'after a top half, the broadcast word "Middle"')
 })
 
 test('824716 top 2nd: four labelled tabs (no notes bundle), every page in the DOM, the due-up names the next half', () => {
@@ -38,40 +38,36 @@ test('824716 top 2nd: four labelled tabs (no notes bundle), every page in the DO
   assert.deepEqual(tabs(out), ['Tally', 'Pitching', 'At-bats', 'Game'])
   assert.doesNotMatch(out, /Notes/)
   assert.equal((out.match(/class="gdcp__page/g) ?? []).length, 4)
-  assert.match(out, /Due up · Bottom 2nd/)
-  assert.doesNotMatch(out, /is-double/)
+  // The due-up is the NEXT half's leadoff men, by photo card and name (BOS bats in the bottom 2nd).
+  assert.match(out, /class="gdcp__label">Due up</)
+  assert.match(out, /gdcp__dueups[\s\S]*Sogard[\s\S]*Durbin[\s\S]*Duran/)
+  assert.doesNotMatch(out, /Naylor<\/b>/, 'not the batters of the closed half')
   // The phone shows one page: the tally by default, the one tapped otherwise.
   assert.match(out, /class="gdcp__page is-on" data-page="tally"/)
   const at = html({ feed: F824, inning: 2, half: 'top', mark: 2, page: 'atBats' })
   assert.match(at, /class="gdcp__page is-on" data-page="atBats"/)
 })
 
-test('824716 bottom 9th, the last half: the final line with the double rule, no due-up, Close the book', () => {
+test('824716 bottom 9th, the last half: Final, no due-up, Close the book', () => {
   const mark = selectFinalHalfIndex(F824)
   assert.equal(mark, 17)
   const out = html({ feed: F824, inning: 9, half: 'bottom', mark })
   assert.match(out, /<span>Final<\/span>/)
-  assert.match(out, /class="is-double"/)
   assert.doesNotMatch(out, /Due up/)
   assert.equal(bookIsClosed(mark, selectFinalHalfIndex(F824)), true)
 })
 
 test('777747 bottom 9th of a game that goes on: not the final line, no Close the book (the 10th exists)', () => {
   const out = html({ feed: F777, inning: 9, half: 'bottom', mark: 17, abbr: { away: 'BOS', home: 'MIL' } })
-  assert.match(out, /End of the bottom 9th/)
+  assert.match(out, /<span>End 9th<\/span>/, 'after a bottom half, its "End"')
   assert.doesNotMatch(out, /Final/)
-  assert.doesNotMatch(out, /is-double/)
   assert.equal(bookIsClosed(17, selectFinalHalfIndex(F777)), false)
 })
 
-// Stack review of #2667, 2026-10-27.
-const lineCols = (s) => s.match(/<table class="gdcp__line"><thead><tr>(.*?)<\/tr>/)[1].match(/<th/g).length - 4
-
-test('the line draws the game\'s regulation length: a 7-inning game has no dead 8th and 9th', () => {
-  assert.equal(lineCols(html({ feed: F824, inning: 2, half: 'top', mark: 2 })), 9)
-  const short = structuredClone(F824)
-  short.liveData.linescore.scheduledInnings = 7
-  assert.equal(lineCols(html({ feed: short, inning: 2, half: 'top', mark: 2 })), 7)
+// Gary, 2026-10-27: the line score left the checkpoint; the band's tray at the top right draws it, with
+// its own regulation length and extras rule (GamedayPanels.jsx Navigator).
+test('the checkpoint draws no line score: the tray at the top right carries it', () => {
+  assert.doesNotMatch(html({ feed: F824, inning: 2, half: 'top', mark: 2 }), /gdcp__line/)
 })
 
 test('the page switch is the app\'s Segmented control (toggle Buttons), not a third control', () => {

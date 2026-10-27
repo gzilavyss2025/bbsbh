@@ -1,7 +1,6 @@
 import { checkpointPages } from '../../../../api/gameday/checkpoint.js'
 import { batterDayLine } from '../../../../api/gameday/dayLine.js'
 import { halfIndex } from '../../../../api/select.js'
-import { selectRegulationInnings } from '../../../../api/gamestate/gameState.js'
 import { segmentedMarkup } from '../../../../lib/design/segmentedClass.js'
 import { ordinal } from '../../../../lib/format.js'
 
@@ -107,7 +106,7 @@ function body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, li
 // Only the notes carry a heading (Gary, 2026-10-27): the other pages' figures say what they are.
 const HEAD = { tally: null, pitching: null, gameSoFar: null, atBats: null, facts: 'Game notes' }
 
-function layer(h, pages, { inning, half, abbr, page, onPage, nextLabel, regulation, Seen, Headshot, nameOf, Scroll, PlayerLink, line }) {
+function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line }) {
   const ids = pages.map((p) => p.id)
   const on = ids.includes(page) ? page : ids[0]
   const game = pages.find((p) => p.id === 'gameSoFar').fields
@@ -127,13 +126,13 @@ function layer(h, pages, { inning, half, abbr, page, onPage, nextLabel, regulati
       }, heads[id] && h('h4', null, heads[id]), body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line })))))
 }
 
-export function checkpointMarkup(h, { SealBox, Seen = null, Headshot = null, Scroll = null, PlayerLink = null, entry = null, feed, inning, half, mark, notes = null, abbr, page, onPage, nextLabel }) {
+export function checkpointMarkup(h, { SealBox, Seen = null, Headshot = null, Scroll = null, PlayerLink = null, entry = null, feed, inning, half, mark, notes = null, page, onPage}) {
   if (!feed || !inning || !half || halfIndex(inning, half) > (mark ?? -1)) return null
   return h(SealBox, { coverless: true, forceRevealed: true }, () => {
     const pages = checkpointPages(feed, { inning, half, revealedThrough: mark, notes })
     const next = half === 'top' ? { inning, half: 'bottom' } : { inning: inning + 1, half: 'top' }
     const line = (b) => dueLine(feed, b, next, mark, entry)
     const nameOf = (id) => feed.gameData?.players?.[`ID${id}`]?.lastName ?? null
-    return pages && layer(h, pages, { inning, half, abbr, page, onPage, nextLabel, regulation: selectRegulationInnings(feed), Seen, Headshot, nameOf, Scroll, PlayerLink, line })
+    return pages && layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line })
   })
 }
