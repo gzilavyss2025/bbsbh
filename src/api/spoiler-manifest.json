@@ -440,7 +440,8 @@
       "class": "reveal-only",
       "why": "Gameday's Field tab (#2566): the fielding side's alignment and pitcher as of the reader's step. A substitution can telegraph a sealed blowout. The side's starters, then its earlier fielding halves whole and the reader's half from computeHalfInningFeed built with the step cap and sliced at it, so a change counts only once its own entry is on screen (ADR-0016); a half past revealedThrough + 1 answers null. No screen imports it yet.",
       "importers": [
-        "screens/gameday/next/panels/GamedayPanels.jsx"
+        "screens/gameday/next/panels/GamedayPanels.jsx",
+        "screens/gameday/next/stage/actors.js"
       ]
     },
     "gameday/moments/moments.js": {
@@ -472,7 +473,8 @@
         "api/gameday/reviews.js",
         "api/gameday/subSteps.js",
         "screens/gameday/next/panels/GamedayPanels.jsx",
-        "screens/gameday/next/panels/panelData.js"
+        "screens/gameday/next/panels/panelData.js",
+        "screens/gameday/next/stage/actors.js"
       ]
     },
     "gameday/subSteps.js": {
@@ -482,7 +484,8 @@
         "screens/gameday/next/hero/heroMarkup.js",
         "screens/gameday/next/stage/GamedayStage.js",
         "screens/gameday/next/steps/eventCardMarkup.js",
-        "screens/gameday/next/steps/subStep.js"
+        "screens/gameday/next/steps/subStep.js",
+        "screens/gameday/next/stage/actors.js"
       ]
     },
     "highlights.js": {
@@ -826,7 +829,8 @@
         "components/inning/HalfInning.jsx",
         "components/playbyplay/PlayByPlay.jsx",
         "lib/scorecard/arm.js",
-        "screens/gameday/next/panels/panelData.js"
+        "screens/gameday/next/panels/panelData.js",
+        "screens/gameday/next/stage/actors.js"
       ]
     },
     "playbyplay/advanceCode.js": {

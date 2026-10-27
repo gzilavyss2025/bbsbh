@@ -2,6 +2,8 @@ import { createElement as h, useEffect, useLayoutEffect, useMemo, useState } fro
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
+import { battingSide } from './battingSide.js'
+import { stageActors } from './actors.js'
 import { stagePlay } from './play.js'
 import { celebrationForPlay } from '../cutscene/integration/celebrationForPlay.js'
 import { BALLPARK_SCENES } from '../cutscene/ballpark/scenes.js'
@@ -11,8 +13,9 @@ import { BALLPARK_SCENES } from '../cutscene/ballpark/scenes.js'
 //
 // SPOILER FOOTING. `shown` (tapRule.js) is an at-bat the reader already revealed. Its feed play is
 // read only inside the SealBox reveal render function (ADR-0001, ADR-0002), so a home run's landing
-// exists only in the revealed stage. The rest frame reads no play at all: the batter's side, the
-// pitcher's hand and the zone map's pre-game temperatures only.
+// exists only in the revealed stage. The rest canvas reads no result: the batter's side, the
+// pitcher's hand and the zone card's pre-game temperatures only. Hover identities use the
+// existing defense step clamp inside their own SealBox reveal function.
 //
 // A sub-step (`shown` { count, sub }, steps/subStep.js stageKey) plays one pitch: the at-bat's play cut at that
 // pitch, with only the runner moves before it. Any other sub-step (an event, a change, an automatic
@@ -33,7 +36,7 @@ function subPlay(feed, inning, half, { count, sub }) {
   return { p: cut, still: false }
 }
 
-function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint }) {
+function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint, actors }) {
   const [start] = useState(() => performance.now())
   const covered = !!checkpoint
   const { play, still, celebration, ending } = useMemo(() => {
@@ -60,7 +63,8 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, ch
   }, [playing, play, still, celebration, start, onEnd, covered, eligible, checkpointDismissed])
   if (covered && (!eligible || checkpointDismissed)) return checkpoint
   const props = playing && !still ? { play, start } : { play, t: still ? 0 : play.end }
-  return h(StageCanvas, { ...props, celebration, playing, onEnd, checkpointHeld: covered && eligible })
+  return h('div', { className: 'gdstageScene' },
+    h(StageCanvas, { ...props, actors, celebration, playing, onEnd, checkpointHeld: covered && eligible }))
 }
 
 // Who stands in at rest: the due-up batter of the half being scored (dueup.js, the pre-pitch lineup),
@@ -76,17 +80,21 @@ export const restZones = (zm, batterId, hidden) => (!hidden && batterId != null 
 
 // At rest the batter stands where he will hit: a switch hitter (S) opposite the pitcher's throwing
 // hand. Both are pre-game player data. A revealed play uses its own matchup.batSide instead.
-function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone }) {
-  const side = batSide === 'S' ? (pitchHand === 'L' ? 'R' : 'L') : batSide
+function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone, actors }) {
+  const side = battingSide(batSide, pitchHand)
   const play = useMemo(() => stagePlay({ matchup: { batSide: { code: side }, pitchHand: { code: pitchHand } } }, wall), [wall, side, pitchHand])
-  return h(StageCanvas, { play, t: 0, zones, onZone, label: 'The field before the pitch' })
+  return h('div', { className: 'gdstageScene' },
+    h(StageCanvas, { play, t: 0, zones, onZone, actors, label: 'The field before the pitch' }))
 }
 
 // `run` counts trail-card replays (tapRule.js replay): a new run remounts the play, so its clock restarts.
-export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, batSide, pitchHand, zones, onZone, checkpoint, checkpointDismissed, onCheckpoint }) {
+export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, batSide, pitchHand, zones, onZone, checkpoint, checkpointDismissed, onCheckpoint, mark, step, open, batter }) {
   // A numbered play keeps the checkpoint inside Played (pending or dismissed), so it never remounts.
   if (checkpoint && (shown == null || typeof shown === 'object')) return checkpoint
-  return shown != null
-    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: `${typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown}#${run}`, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint }))
-    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone })
+  const field = (actors) => shown != null
+    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint, actors })
+    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone, actors })
+  if (mark == null && shown == null) return field(null)
+  return h(SealBox, { coverless: true, forceRevealed: true }, () => field(mark == null ? null
+    : stageActors(feed, { inning, half, mark, step, open, batter, shown })))
 }

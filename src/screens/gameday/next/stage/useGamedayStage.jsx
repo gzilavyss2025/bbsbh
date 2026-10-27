@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { selectHalfStartingPitcher } from '../../../../api/select.js'
-import { dayBefore } from '../../../../api/game.js'
 import { fetchBatterZones } from '../../../../api/gameday/zones.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
@@ -10,6 +9,7 @@ import { ZoneCard } from '../zonemap/ZoneCard.jsx'
 import { setZoneMapHidden, zoneMapDismissed } from '../zonemap/zoneMapFlag.js'
 import { GamedayStage, restBatter, restZones } from './GamedayStage.js'
 import { GamedayPlayCanvas } from '../cutscene/integration/GamedayPlayCanvas.jsx'
+import { battingSide } from './battingSide.js'
 import { wallFn } from './scene.js'
 import { stageKey } from '../steps/subStep.js'
 import { disarm, ended, replay, rest, saw, tap } from './tapRule.js'
@@ -63,11 +63,12 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
     <>
       {!(covered && cur.armed) && <GamedayStage
         SealBox={SealBox} StageCanvas={GamedayPlayCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} run={cur.run ?? 0} playing={cur.playing} onEnd={onEnd}
+        mark={mark} step={open?.count ?? null} open={open} batter={batter}
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones} onZone={batter ? toggleZones : undefined}
         checkpoint={checkpoint} checkpointDismissed={phase === 'checkpoint'} onCheckpoint={onCheckpoint}
       />}
-      {zones && (
-        <ZoneCard name={batter.last} zones={zones} through={dayBefore(date)} onDismiss={toggleZones} />
+      {batter && !hidden && !(open?.sub > 0) && (
+        <ZoneCard teamId={gd?.teams?.[half === 'top' ? 'away' : 'home']?.id} id={batter.id} name={gd?.players?.[`ID${batter.id}`]?.fullName ?? batter.last} side={battingSide(hand(batter.id, 'batSide'), hand(pitcherId, 'pitchHand'))} zones={zones ?? {}} onDismiss={toggleZones} />
       )}
     </>
   ) : null
