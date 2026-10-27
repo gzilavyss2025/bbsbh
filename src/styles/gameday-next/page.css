@@ -130,15 +130,17 @@
 /* The rails (P and T, Gary 2026-10-27): the wide tiers' Due up and arm columns, slid in from the
    left and the right between the band and the bar, so the advance stays in reach. A tab on each
    edge opens one, and so does a sideways swipe (GamedayNextPage); the scrim or Escape closes it.
-   pan-y hands the sideways drag to the page and keeps a rail's own scroll. */
-.gdnext[data-rails] { touch-action: pan-y; }
+   pan-y hands the sideways drag to the page and keeps a rail's own scroll; pinch-zoom stays.
+   --gd-rail-top is the band's measured foot (with any status strip); the fallback is the band alone. */
+.gdnext[data-rails] { touch-action: pan-y pinch-zoom; }
 /* layout-exempt: a side sheet, its panel filling it */
 .gdnext__rail { position: absolute; z-index: 3; display: flex; flex-direction: column;
-  top: calc(env(safe-area-inset-top) + var(--space-1) + var(--gd-band-h) + var(--space-2)); bottom: calc(env(safe-area-inset-bottom) + var(--gd-bar-h));
+  top: calc(var(--gd-rail-top, calc(env(safe-area-inset-top) + var(--gd-band-h))) + var(--space-2)); bottom: calc(env(safe-area-inset-bottom) + var(--gd-bar-h));
   width: min(var(--app-width), 85%); background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped);
   visibility: hidden; transition: transform var(--dur-med) ease, visibility 0s linear var(--dur-med); }
 .gdnext__rail--left { left: 0; border-left: 0; transform: translateX(-105%); }
 .gdnext__rail--right { right: 0; border-right: 0; transform: translateX(105%); }
+.gdnext__rail:focus { outline: none; } /* focus-ring-exempt: the rail takes focus only to hand it to its contents */
 .gdnext__rail[data-open] { transform: none; visibility: visible; transition-delay: 0s; }
 .gdnext__rail > .gdnext__slot { flex: 1; min-height: 0; border: 0; }
 .gdnext__scrim { position: absolute; z-index: 2; inset: 0 0 calc(env(safe-area-inset-bottom) + var(--gd-bar-h)); margin: 0; padding: 0; border: 0;

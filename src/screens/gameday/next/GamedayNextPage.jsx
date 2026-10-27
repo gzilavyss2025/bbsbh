@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import '../../../styles/gameday-next/page.css'
 import { Button } from '../../../components/ui/control/Button.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
@@ -34,18 +34,48 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
   // swipe. Each rail fetches nothing until it is first opened, like the drawer.
   const rails = !drawer
   const [rail, setRail] = useState(null)
+  // A rail open when the window widens past T closes, so it never comes back on its own.
+  if (rail && !rails) setRail(null)
   const [seen, setSeen] = useState({})
   if (rail && !seen[rail]) setSeen({ ...seen, [rail]: true })
+  // Escape closes the rail unless the Menu sits over it (the Menu's own Escape closes only the Menu).
   useEffect(() => {
-    if (!rail) return undefined
+    if (!rail || menu) return undefined
     const onKey = (e) => e.key === 'Escape' && setRail(null)
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+  }, [rail, menu])
+  // Focus goes into a rail as it opens and back to its tab when it closes, so a keyboard or screen
+  // reader keeps its place.
+  const tabLeft = useRef(null), tabRight = useRef(null), railLeft = useRef(null), railRight = useRef(null)
+  const lastRail = useRef(null)
+  useEffect(() => {
+    const tabRef = { left: tabLeft, right: tabRight }, railRef = { left: railLeft, right: railRight }
+    if (rail) {
+      lastRail.current = rail
+      railRef[rail].current?.focus()
+      return
+    }
+    const side = lastRail.current
+    lastRail.current = null
+    if (side && (document.activeElement === document.body || railRef[side].current?.contains(document.activeElement))) tabRef[side].current?.focus()
   }, [rail])
-  // A swipe is a mostly sideways drag of 48px or more that starts off the bar: toward the middle it
-  // opens the rail on that side, toward its own edge it closes an open one.
+  // The rails start under the band and its status strip, whatever height the strip takes.
+  const bandRef = useRef(null)
+  const [railTop, setRailTop] = useState(null)
+  useLayoutEffect(() => {
+    const el = bandRef.current
+    if (!rails || !el || typeof ResizeObserver === 'undefined') return undefined
+    const measure = () => setRailTop(el.offsetTop + el.offsetHeight)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [rails])
+  // A swipe is a mostly sideways drag of 48px or more that starts off the bar, with the Menu shut:
+  // toward the middle it opens the rail on that side, toward its own edge it closes an open one.
   const swipe = useRef(null)
-  const onPointerDown = (e) => { swipe.current = rails && !e.target.closest?.('.gdnext__bar') ? [e.clientX, e.clientY] : null }
+  const onPointerDown = (e) => { swipe.current = rails && !menu && !e.target.closest?.('.gdnext__bar') ? [e.clientX, e.clientY] : null }
   const onPointerUp = (e) => {
     const s = swipe.current
     swipe.current = null
@@ -57,10 +87,10 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
   // The drawer tiers swap the Reference block for the arm on the mound (the field is the drawer).
   const slots = blocksFor(tier).flatMap((b) => (b === 'band' || b === 'bar' || (drawer && b === 'eventLog') ? [] : drawer && b === 'reference' ? ['arm'] : [b]))
   return (
-    <div className="gdnext" data-tier={tier} data-rails={rails || undefined} onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
+    <div className="gdnext" data-tier={tier} data-rails={rails || undefined} style={railTop != null ? { '--gd-rail-top': `${railTop}px` } : undefined} onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
       {/* A delay or suspension, and a failed refresh, read as a strip under the band; the stage
           row gives up the room, so the frame still never scrolls. */}
-      <div className="gdnext__band">
+      <div className="gdnext__band" ref={bandRef}>
         {band}
         {notices.length > 0 && (
           <p className="gdnext__notice t-label t-label--bold" role="status">{notices.join(' · ')}</p>
@@ -101,13 +131,13 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
       )}
       {rails && (
         <>
-          <Button size="control" className="gdnext__railtab gdnext__railtab--left" aria-expanded={rail === 'left'} aria-controls="gdnext-rail-left" onClick={() => setRail('left')}>Due up</Button>
-          <Button size="control" className="gdnext__railtab gdnext__railtab--right" aria-expanded={rail === 'right'} aria-controls="gdnext-rail-right" onClick={() => setRail('right')}>Pitcher</Button>
+          <Button ref={tabLeft} size="control" className="gdnext__railtab gdnext__railtab--left" aria-expanded={rail === 'left'} aria-controls="gdnext-rail-left" onClick={() => setRail('left')}>Due up</Button>
+          <Button ref={tabRight} size="control" className="gdnext__railtab gdnext__railtab--right" aria-expanded={rail === 'right'} aria-controls="gdnext-rail-right" onClick={() => setRail('right')}>Pitcher</Button>
           {rail && <button type="button" className="gdnext__scrim" aria-label="Close" onClick={() => setRail(null)} />}
-          <aside id="gdnext-rail-left" className="gdnext__rail gdnext__rail--left" data-open={rail === 'left' || undefined} aria-label="Due up" inert={rail !== 'left'}>
+          <aside ref={railLeft} tabIndex={-1} id="gdnext-rail-left" className="gdnext__rail gdnext__rail--left" data-open={rail === 'left' || undefined} aria-label="Due up" inert={rail !== 'left'}>
             {seen.left && <div className="gdnext__slot gdnext__slot--battingOrder"><GamedayPanel block="battingOrder" ctx={panels} /></div>}
           </aside>
-          <aside id="gdnext-rail-right" className="gdnext__rail gdnext__rail--right" data-open={rail === 'right' || undefined} aria-label="Now pitching" inert={rail !== 'right'}>
+          <aside ref={railRight} tabIndex={-1} id="gdnext-rail-right" className="gdnext__rail gdnext__rail--right" data-open={rail === 'right' || undefined} aria-label="Pitcher" inert={rail !== 'right'}>
             {seen.right && <div className="gdnext__slot gdnext__slot--arm"><GamedayPanel block="arm" ctx={panels} /></div>}
           </aside>
         </>
