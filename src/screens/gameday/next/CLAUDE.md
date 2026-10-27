@@ -50,3 +50,6 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   `cutsceneExtras.js`); poses build at load from one reference grid (`cutscenePoses.js`, a new pose is a few points);
   `CutsceneCanvas` takes the palette from the `--stage-*` tokens plus a club `kit`. The mount decides which play earns
   it, inside a `SealBox` reveal function, and hands it the words.
+- `cutscene/ballpark/` is the modern sprite prototype, reviewed at `/animation-lab#ballpark`:
+  separate character atlas, stadium, palette preparation and finite choreography. It is not mounted in Gameday.
+  Authoring, asset provenance and the next steps live in `docs/ballpark-celebrations.md`.
