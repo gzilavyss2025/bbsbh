@@ -422,14 +422,6 @@
   margin: var(--space-2);
 }
 
-/* Wide focus: the scene's slot at the top of the reference rail
-   (ReferencePanel.jsx). Empty until a revealed card portals its scene in. */
-.focusrail__replay {
-  margin-bottom: var(--space-3);
-}
-.focusrail__replay:empty {
-  display: none;
-}
 /* Wide, the whole half laid out: a pick's scene plays in its own card, on a
    row of its own under the pitch list and zone plot (AtBatReplay.jsx). */
 .pbp__zonecell:has(> .pbp__replay) {

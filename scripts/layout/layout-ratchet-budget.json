@@ -35,9 +35,9 @@
     "grid": 4
   },
   "src/styles/09-team-info.css": {
-    "column": 3,
+    "column": 2,
     "wrap": 1,
-    "grid": 2
+    "grid": 1
   },
   "src/styles/10-lineup.css": {
     "column": 3,
@@ -55,9 +55,9 @@
     "grid": 3
   },
   "src/styles/12-sealbox.css": {
-    "column": 17,
-    "wrap": 3,
-    "grid": 7
+    "column": 7,
+    "wrap": 1,
+    "grid": 4
   },
   "src/styles/13-play-by-play.css": {
     "column": 4
@@ -90,10 +90,6 @@
     "wrap": 2,
     "grid": 1
   },
-  "src/styles/20-charts.css": {
-    "column": 1,
-    "grid": 1
-  },
   "src/styles/21-box-score.css": {
     "column": 8,
     "wrap": 3
@@ -114,9 +110,6 @@
     "column": 2,
     "wrap": 1,
     "grid": 1
-  },
-  "src/styles/24-floating-nav-and-hud.css": {
-    "column": 1
   },
   "src/styles/25-wide-layout.css": {
     "column": 2,
@@ -366,18 +359,6 @@
     "column": 1,
     "grid": 5
   },
-  "src/styles/77-express-lane.css": {
-    "column": 4,
-    "grid": 3
-  },
-  "src/styles/77a-express-lane-entry.css": {
-    "column": 4,
-    "wrap": 1,
-    "grid": 3
-  },
-  "src/styles/77c-express-lane-deck.css": {
-    "column": 2
-  },
   "src/styles/78-offseason.css": {
     "column": 6,
     "wrap": 4,
@@ -414,15 +395,10 @@
     "wrap": 1
   },
   "src/styles/focus/console.css": {
-    "column": 4
+    "column": 1
   },
   "src/styles/focus/reference.css": {
-    "column": 5,
-    "wrap": 1
-  },
-  "src/styles/focus/stage.css": {
-    "column": 1,
-    "grid": 1
+    "column": 1
   },
   "src/styles/history/history.css": {
     "grid": 2

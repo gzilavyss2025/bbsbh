@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
-// THE FILM PANE — the top band of Concept A's Split Deck.
+// THE FILM PANE — the pitch modal's clip. It began as Express Lane's top band and moved here when
+// Gameday replaced Express Lane (#2566); its `xl-film` classes keep that name (scout/meet.css).
 //
 // It shows one of four things and never a fifth: the clip, an indeterminate
 // wait, a row that has no film, or a refusal it can explain.

@@ -181,13 +181,7 @@ test('every band in the innings view and the box score wears the band paint', ()
   // The heads that drew their own navy and kraft before slice H1b. Each must
   // carry .sectionhead--band in its markup, or it draws no band at all now.
   const heads = {
-    'components/gamehud/StatBox.jsx': ['statbox__title', 'abs__title'],
-    'components/inning/EnteringReference.jsx': ['entering__title', 'lineupteam__name', 'halfdefense__title'],
-    'components/inning/RosterPanel.jsx': ['roster__toggle'],
-    'components/umpire/UmpireTendenciesFold.jsx': ['roster__toggle'],
     'components/charts/WinProbChart.jsx': ['winprob__head'],
-    'components/inning/MarginNotes.jsx': ['marginnotes__title'],
-    'components/inning/PitchersSection.jsx': ['pitchers__title'],
     'screens/BoxScore.jsx': ['abs__title', 'halfdefense__title'],
   }
   for (const [rel, classes] of Object.entries(heads)) {
@@ -678,7 +672,6 @@ const C2 = [
   { css: '09-team-info.css', sel: '.factgrid', jsx: ['components/ui/frame/FactGrid.jsx'], ns: 'factgrid' },
 ]
 const FACT_GRID_USERS = [
-  'components/inning/focus/ExtrasFacts.jsx',
   'components/player/AdvancedStatsCard.jsx',
   'components/playerstats/FoulCard.jsx',
   'screens/lineup/next/LineupFacts.jsx',
@@ -823,30 +816,16 @@ test('C2: the awards ledger frames the whole ledger narrow and each table wide',
 const C4 = [
   // The whole .half rule was the frame, so it is gone (`gone`).
   { css: '11-innings.css', sel: '.half', jsx: ['components/inning/HalfInning.jsx'], ns: 'half', gone: true },
-  { css: '12-sealbox.css', sel: '.statbox', jsx: ['components/gamehud/StatBox.jsx'], ns: 'statbox' },
   // The lineup card is the stamped frame now (the lineup page's paper look): `frame` names it.
-  { css: '12-sealbox.css', sel: '.entering', jsx: ['components/inning/EnteringReference.jsx'], ns: 'entering', frame: 'stamped' },
-  { css: '12-sealbox.css', sel: '.halfdefense', jsx: ['components/inning/EnteringReference.jsx'], ns: 'halfdefense' },
-  // The focus-mode umpire drawer wears the same drawer (UmpireTendenciesFold).
-  {
-    css: '13-play-by-play.css',
-    sel: '.roster',
-    jsx: ['components/inning/RosterPanel.jsx', 'components/umpire/UmpireTendenciesFold.jsx'],
-    ns: 'roster',
-  },
   // The Card only clips: the Table inside it is the scroller (#1132, slice T3),
   // so the Card's own overflow-x rule is gone. The running line wears the
   // stamped frame (the player-page look); its namespace rule keeps layout only
   // (a fit-width card from 740px), never a second frame.
-  { css: '20-charts.css', sel: '.rolling__scroll', jsx: ['components/gamehud/RollingLine.jsx'], ns: 'rolling__scroll', frame: 'stamped' },
   { css: 'charts/winprob.css', sel: '.winprob', jsx: ['components/charts/WinProbChart.jsx'], ns: 'winprob' },
-  { css: '20-charts.css', sel: '.marginnotes', jsx: ['components/inning/MarginNotes.jsx'], ns: 'marginnotes' },
   // ADR-0009: the table is gated by revealedThrough in the caller, not here.
-  { css: '20-charts.css', sel: '.pitchers', jsx: ['components/inning/PitchersSection.jsx'], ns: 'pitchers' },
   // The animation lab draws the real tally, so it wears the real frame too.
   { css: 'focus/console.css', sel: '.halftally', jsx: ['components/gamehud/HalfTally.jsx', 'screens/AnimationLab.jsx'], ns: 'halftally' },
   { css: 'focus/console.css', sel: '.betweeninnings', jsx: ['components/gamehud/BetweenInnings.jsx'], ns: 'betweeninnings', as: 'button' },
-  { css: '25-wide-layout.css', sel: '.absframe', jsx: ['components/gamehud/StatBox.jsx'], ns: 'absframe' },
 ]
 const bareC4 = (ns) =>
   new RegExp(`<(div|section|li|article|button)\\s+(type="button"\\s+)?(key=\\{[^}]+\\}\\s+)?className=\\{?["'\`]${ns}(?![\\w-])`)
@@ -883,17 +862,9 @@ test('C4: every innings-view and HUD block renders on Card, a sheet (or its name
 // the space and the inset it had, in its own namespace rule.
 test('C4: each block keeps its own margin and inset', () => {
   const kept = [
-    ['12-sealbox.css', '.entering', 'margin', '12px 14px 0'],
     ['12-sealbox.css', '.halfdefense', 'margin', '12px 14px 0'],
-    ['12-sealbox.css', '.statbox', 'min-width', '0'],
-    ['13-play-by-play.css', '.roster', 'margin-top', '10px'],
     ['charts/winprob.css', '.winprob', 'margin-bottom', 'var(--space-4)'],
     ['charts/winprob.css', '.winprob', 'padding', 'var(--space-3) var(--space-3h) var(--space-2h)'],
-    ['20-charts.css', '.marginnotes', 'margin-top', 'var(--space-4)'],
-    ['20-charts.css', '.marginnotes', 'margin-bottom', 'var(--space-3)'],
-    ['20-charts.css', '.marginnotes', 'padding', 'var(--space-3) var(--space-3h) var(--space-2)'],
-    ['20-charts.css', '.pitchers', 'margin-top', 'var(--space-4)'],
-    ['20-charts.css', '.pitchers', 'padding', 'var(--space-3) var(--space-3h) var(--space-2)'],
     ['focus/console.css', '.halftally', 'margin', '0'],
     ['focus/console.css', '.halftally', 'min-width', '0'],
     ['focus/console.css', '.betweeninnings', 'padding', 'var(--space-3)'],
@@ -901,19 +872,6 @@ test('C4: each block keeps its own margin and inset', () => {
   for (const [css, sel, prop, value] of kept) {
     assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
   }
-})
-
-// The running line scrolls sideways. Its grid is a Table in the Card, and the
-// Table's wrap is the one scroller (#1132, slice T3): the Card only clips.
-test('C4: the running line is still a horizontal scroller', () => {
-  assert.match(
-    src('components/gamehud/RollingLine.jsx'),
-    /<Card as="div" frame="stamped" body="flush" stampIn=\{playStamp\} className="rolling__scroll" ref=\{cardRef\}>\s*<Table\b[^>]*\bclassName="rolling__grid"/,
-    'the grid sits on a Table, straight inside the Card',
-  )
-  const body = ruleBody(read('system/table.css'), '.table')
-  assert.equal(decl(body, 'overflow-x'), 'auto')
-  assert.equal(decl(body, '-webkit-overflow-scrolling'), 'touch')
 })
 
 // The wide ABS frame shows only from 740px (StatBox's inline copy is the
@@ -954,17 +912,6 @@ test('C4: the box score defence stays unframed, and BoxScore.jsx takes no Card f
   }
 })
 
-// Focus mode drops the half's paper while a staged notice is all it holds,
-// so the notice is not a card inside a card. That rule outranks Card's frame
-// on specificity, so it must still name the three properties Card draws.
-test('C4: focus mode still drops the half sheet around a lone staged notice', () => {
-  const css = read('focus/console.css')
-  const at = css.indexOf('.half:has(:is(.change--framed, .change--event, .pitcherhandoff)):not(:has(.statgrid))')
-  assert.ok(at > 0)
-  const body = css.slice(css.indexOf('{', at) + 1, css.indexOf('}', at))
-  for (const prop of ['background', 'border', 'box-shadow']) assert.equal(decl(body, prop), 'none', prop)
-})
-
 // THE SEAL PIN. Written before this slice changed a line: for each file the
 // slice touches, the reveal-only modules it imports (src/api/spoiler-manifest
 // .json; a "mixed" module counts when a sealed export is imported), and how
@@ -978,14 +925,7 @@ test('C4: focus mode still drops the half sheet around a lone staged notice', ()
 // them reachable only from that render site.
 const C4_SEAL = {
   'components/inning/HalfInning.jsx': { reveal: ['boxscore.js', 'highlights.js', 'hitchart.js', 'playbyplay.js'], sealBoxes: 1, revealedThrough: 12 },
-  'components/gamehud/StatBox.jsx': { reveal: ['boxscore.js', 'challenges.js', 'derive.js', 'linescore.js', 'umpireFavor.js'], sealBoxes: 2, revealedThrough: 0 },
-  'components/inning/EnteringReference.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 9 },
-  'components/inning/RosterPanel.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 2 },
-  'components/umpire/UmpireTendenciesFold.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/gamehud/RollingLine.jsx': { reveal: ['linescore.js'], sealBoxes: 0, revealedThrough: 7 },
   'components/charts/WinProbChart.jsx': { reveal: ['winprob.js'], sealBoxes: 0, revealedThrough: 0 },
-  'components/inning/MarginNotes.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/inning/PitchersSection.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/gamehud/HalfTally.jsx': { reveal: ['derive.js', 'linescore.js'], sealBoxes: 1, revealedThrough: 0 },
   'components/gamehud/BetweenInnings.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 3 },
   'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
@@ -1045,15 +985,6 @@ const C3 = [
   },
   { css: '10-lineup.css', sel: '.teammate', jsx: ['components/team/FormerTeammates.jsx'], ns: 'teammate', as: 'li' },
   { css: 'scoring/defense-diamond.css', sel: '.defdiamond', jsx: ['components/scoring/DefenseDiamond.jsx'], ns: 'defdiamond', as: 'div' },
-  {
-    css: '09-team-info.css',
-    sel: '.umps__list',
-    jsx: ['components/inning/focus/ExtrasFacts.jsx'],
-    ns: 'umps__list',
-    mode: 'wrap',
-    as: 'div',
-    keep: ['background'],
-  },
 ]
 // Every rule whose selector LIST names `sel`: `.lineup, .opp, .starter` is one
 // rule for three blocks.
@@ -1104,22 +1035,6 @@ test('C3: every pre-game block renders on Card, with its frame, its head and a f
       }
     }
   }
-})
-
-// The umpire crew is a gap-rule grid: the rules between the umpires are the
-// grid's own --border-rule ground in 1px gaps. The Card paints card paper, so
-// that ground stays on the grid inside it, and the grid draws no edge.
-test('C3: the umpire grid keeps its rules inside the Card', () => {
-  const css = read('09-team-info.css')
-  const body = ruleBody(css, '.umps__list')
-  assert.ok(body, 'a .umps__list rule')
-  assert.equal(decl(body, 'display'), 'grid')
-  assert.equal(decl(body, 'grid-template-columns'), '1fr 1fr')
-  assert.equal(decl(body, 'gap'), '1px')
-  assert.equal(decl(body, 'background'), 'var(--border-rule)')
-  assert.deepEqual(frameDecls(body, ['background']), [], '.umps__list draws no frame of its own')
-  assert.equal(decl(ruleBody(css, '.umps__list li'), 'background'), 'var(--surface-card)')
-  assert.equal(decl(ruleBody(css, '.umps__list li:last-child:nth-child(odd)'), 'grid-column'), '1 / -1')
 })
 
 // Where a host reshapes the diamond, its rule must still beat the Card's frame:
@@ -1428,24 +1343,6 @@ test('C5: .playercard is gone, from stylesheets, markup, comments and e2e', () =
   assert.deepEqual(found, [])
 })
 
-// The innings view's Statcast row (.halfcast) draws the tile with no frame of
-// its own. Its two-class rule outranks .card, in a partial that loads after
-// system/card.css. (The slate result card's performer slot was the second host
-// until ADR-0116 removed it.)
-test('C5: the host that draws the tile unframed still drops its frame', () => {
-  const imports = importOrder()
-  const card = imports.indexOf('system/card.css')
-  const hosts = [
-    ['12-sealbox.css', '.halfcast .playerline', { border: 'none', 'border-radius': '0', background: 'none', padding: '0' }],
-  ]
-  for (const [rel, sel, want] of hosts) {
-    const body = ruleBody(read(rel), sel)
-    assert.ok(body, `${rel}: ${sel}`)
-    for (const [prop, value] of Object.entries(want)) assert.equal(decl(body, prop), value, `${sel} ${prop}`)
-    assert.ok(imports.indexOf(rel) > card, `${rel} loads after system/card.css`)
-  }
-})
-
 // The design lab draws the real tile, so it wears the real frame too (Q5:
 // the lab keeps its look).
 test('C5: the design lab draws the performer tile on the ledger frame', () => {
@@ -1472,7 +1369,6 @@ const C5_SEAL = {
   'screens/boxscore/InningTally.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/player/PerformerCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'screens/AwardsHistoryPage.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/gamehud/StatBox.jsx': { reveal: ['boxscore.js', 'challenges.js', 'derive.js', 'linescore.js', 'umpireFavor.js'], sealBoxes: 2, revealedThrough: 0 },
   'components/game/GameResultFace.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
 }
 
@@ -1789,25 +1685,23 @@ test('C6b: the record tile keeps its lift and its top edge on hover', () => {
   assert.match(decl(base, 'transition') ?? '', /border-color[^,]*,\s*background-color/, 'the hover tint eases in, as it does on every Card link')
 })
 
-// The tendencies card renders in four hosts. Three shed its frame (the umpire
-// modal, and the Extras drawer, whose own chrome frames it) or place it (the
-// lineup page's top zone). Each host rule names two classes, so it beats .card
+// The tendencies card renders in its hosts. The umpire modal sheds its frame;
+// the lineup page's top zone places it. (The Extras drawer host went with the
+// old innings screen, #2566.) Each host rule names two classes, so it beats .card
 // on weight, and each partial loads after card.css. The card's band stays the
 // house navy on a themed page (ADR-0030): it keeps its `house` switch.
-test('C6b: the umpire tendencies card keeps its house band and its four hosts', () => {
+test('C6b: the umpire tendencies card keeps its house band and its hosts', () => {
   assert.match(src('components/umpire/UmpireTendencies.jsx'), /<SectionHead\b[^>]*\bhouse\b/, 'the band is the house band')
   const css = read('53-umpire-tendencies.css')
   const shed = { border: '0', 'border-radius': '0', 'box-shadow': 'none' }
-  for (const sel of ['.umpmodal .umptend', '.umptendfold .umptend']) {
+  for (const sel of ['.umpmodal .umptend']) {
     const body = ruleBody(css, sel)
     assert.ok(body, `53-umpire-tendencies.css: ${sel}`)
     for (const [prop, value] of Object.entries(shed)) assert.equal(decl(body, prop), value, `${sel} sheds ${prop}`)
     assert.ok((sel.match(/\./g) ?? []).length > 1, `${sel} outranks .card`)
   }
-  assert.equal(decl(ruleBody(css, '.umptendfold .umptend__bar') ?? '', 'display'), 'none')
-  // The two game screens that still host the card keep those class names.
+  // The game screen that still hosts the card keeps its class name.
   assert.match(src('components/umpire/UmpireAccuracyModal.jsx'), /umpmodal/)
-  assert.match(src('components/umpire/UmpireTendenciesFold.jsx'), /umptendfold/)
 })
 
 // The card is the box and nothing else: the tendencies card adds no reveal-only
@@ -2259,7 +2153,6 @@ const H3_RENAMED = [
   // `note__note` repeated its block; the block is `.seasonnote` now (see below)
   ['note__lede', 'seasonnote__note'],
   ['stampin__lede', 'stampin__note'],
-  ['xl-entry__lede', 'xl-entry__note'],
   // batch B, step one: the entry's own note gives up the name the page-level lede takes
   ['dlab__note', 'dlabentry__note'],
   // batch B, step two: the page-level lede takes the freed name

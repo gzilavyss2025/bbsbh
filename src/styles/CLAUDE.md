@@ -48,13 +48,13 @@ Focus rings use `var(--focus-ring)`/`var(--ring)`, on a band `--focus-ring-band`
 `--ring-band` (`check-focus-ring.mjs`). Text-on-background pairings hold WCAG AA
 (`check-contrast.mjs`) — ADR-0023.
 
-## The innings bar tap target
+## The Gameday bar tap target
 
-Either choice's **tap target is the dead space around it**: `.pagenav` is click-through,
-so a missed thumb landed on the card under the fade. `.pagenav--innings .btn::after`
-(`styles/24-floating-nav-and-hud.css`) claims the bar around each button — split between
-the pair, Refresh excepted — offsets from the button, not the bar (else the area
-re-collapses mid-tap under `.btn:active`). `e2e/reveal-hit-area.spec.js` pins it.
+The advance's **tap target is the dead space around it**: `.gdnext__bar .gdnext__advance::after`
+(`styles/gameday-next/page.css`) reaches the bar's top and bottom edges (the bar's overflow clip
+trims it), its right end, and the gap to the step switch. It offsets from the button, not the bar
+(else the area re-collapses mid-tap under `.btn:active`). The switch and the Menu keep their own
+taps. `e2e/reveal-hit-area.spec.js` pins it.
 
 ## Exemption markers
 

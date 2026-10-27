@@ -173,7 +173,6 @@
       "importers": [
         "api/boxscore/batterLine.js",
         "components/game/GameResultFace.jsx",
-        "components/gamehud/StatBox.jsx",
         "components/inning/HalfInning.jsx",
         "screens/boxscore/InsightCards.jsx",
         "screens/boxscore/revealBoxScore.js",
@@ -185,8 +184,6 @@
       "class": "reveal-gated",
       "why": "The one line a due-up card prints under a batter: H-AB over the REVEALED halves, else his average entering the game. A thin wrapper over computeBatterLine and preGameAvg, so the cutoff is `revealedThrough` itself (ADR-0009) and nothing here reads past it. Split out of boxscore.js to keep it under its size budget.",
       "importers": [
-        "components/gamehud/DueUpConsole.jsx",
-        "components/playbyplay/dueup/DueUpNextCard.jsx",
         "components/playbyplay/dueup/UpNextBatters.jsx"
       ]
     },
@@ -295,7 +292,6 @@
       "importers": [
         "api/gameday/reviews.js",
         "api/playbyplay/pitchInfo.js",
-        "components/gamehud/StatBox.jsx",
         "screens/BoxScore.jsx"
       ]
     },
@@ -333,7 +329,6 @@
       "importers": [
         "api/scorecardGame.js",
         "components/gamehud/HalfTally.jsx",
-        "components/gamehud/StatBox.jsx",
         "hooks/useRevealProgress.js",
         "screens/boxscore/revealBoxScore.js"
       ]
@@ -357,15 +352,12 @@
     "expresslane/rail.js": {
       "class": "reveal-only",
       "why": "Express Lane Tier 1 — the ordered, complete event list for ONE half-inning. Its `description`, `result` and `pitch` fields narrate the play, so it is callable only from inside a SealBox's reveal render function, the same footing as linescore.js and derive.js (ADR-0001/0002). Express Lane tightens that rather than restating it: under the FILM GATE the cursor may not pass the picture, so the prose may not either — a scorer who can read 'grounds out, second baseman to first' has no reason to wait for the clip, and the gate erodes to nothing. The reveal is atomic: the narrating fields arrive WITH the film or not at all. Two further containments are structural rather than in this list. The builder takes one half-inning per call and there is deliberately no whole-game variant, because a game-wide rail states how many innings the game ran and so whether it went to extras (ADR-0008). And it drops nothing else: rows with no clip — substitutions, mound visits, stolen bases, wild pitches — survive into the rail, since the film gate must never block on a row that expects no film. Its one importer is hooks/useExpressLane.js, the surface's own hook, which calls it to build the half the cursor is in and hands the rows to the film gate. Nothing else may take it: the rail narrates the play, so a second caller would be a second place the prose could get out ahead of the picture.",
-      "importers": [
-        "hooks/useExpressLane.js"
-      ]
+      "importers": []
     },
     "expresslane/runners.js": {
       "class": "reveal-only",
       "why": "Express Lane's scoring deck — the batter's box and the boxes of the men standing on base, which is where a scorer writes a stolen base, a wild pitch and every hit that moves a runner already on. Every card carries its plate appearance's outcome, so this is callable only from inside a SealBox's reveal render function (ADR-0001/0002), the same footing as rail.js beside it. It re-derives nothing: computeHalfInningFeed already solved the hard half for at-bat stepping (ADR-0016), and this maps one rail row onto that function's own `stepCap` and reads the cards back out. THE CAP IS THE WHOLE POINT and is not optional. A runner's diamond shades the bases he legged out, so built from the finished half it would show his EVENTUAL fate — a man who reached first in the third would carry a fully shaded diamond the moment his own at-bat was revealed, telling the scorer the run came home before he had scored the play that drove it in. There is deliberately no variant of `expressDeck` that omits the cursor. Two containments ride along: the chip strip names only plate appearances already REACHED, since chips for ones still ahead would say how many batters are left to bat, and the deck is built one half-inning at a time for the same ADR-0008 reason the rail has no whole-game builder. Widened 2026-10-02 for lib/scorecard/situation.js and lib/scorecard/words.js (the phone lens bar, #724, ADR-0092), which call it at the scorecard page's render top level, outside a SealBox. That is safe for one reason: they pass it only the scorecard's CLAMPED cards (halfCards of the view scorecardFull built at the reader's own step cursor), so every card it reads is a box already open on the sheet. They never hand it the feed or computeHalfInningFeed's output.",
       "importers": [
-        "hooks/useExpressLane.js",
         "lib/scorecard/situation.js",
         "lib/scorecard/words.js"
       ]
@@ -555,9 +547,7 @@
         "api/gameday/checkpoint.js",
         "api/scorecardGame.js",
         "components/gamehud/HalfTally.jsx",
-        "components/gamehud/RollingLine.jsx",
         "components/gamehud/ScorebugMount.jsx",
-        "components/gamehud/StatBox.jsx",
         "screens/boxscore/revealBoxScore.js",
         "screens/gameday/next/panels/GamedayPanels.jsx"
       ]
@@ -808,8 +798,7 @@
         "api/pitcher-callouts.js",
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
-        "components/playbyplay/PlayByPlay.jsx",
-        "screens/InningViewer.jsx"
+        "components/playbyplay/PlayByPlay.jsx"
       ]
     },
     "playbyplay.js": {
@@ -1300,11 +1289,8 @@
     },
     "umpireFavor.js": {
       "class": "reveal-only",
-      "why": "Cumulative-through-the-revealed-half plate-umpire consistency and favor. Same StatBox row tier and half-clamp as challenges.js. (fetchRunExpectancy, the static table, is safe eagerly — it carries no game info of its own.)",
-      "importers": [
-        "components/gamehud/StatBox.jsx",
-        "hooks/useGameData.js"
-      ]
+      "why": "Now only missEdge, the zone edge one missed call is off, for the build-time ABS scripts. Kept reveal-only with no UI importer: the in-game favor selector went with StatBox (#2566), and a UI caller would have to argue its way back onto this list.",
+      "importers": []
     },
     "umpires.js": {
       "class": "spoiler-free",
@@ -1340,7 +1326,6 @@
       "importers": [
         "api/gameday/moments/moments.js",
         "components/charts/WinProbChart.jsx",
-        "screens/InningViewer.jsx",
         "screens/boxscore/revealBoxScore.js"
       ]
     },

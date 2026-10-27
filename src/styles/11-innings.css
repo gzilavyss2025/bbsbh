@@ -29,20 +29,6 @@
   gap: var(--space-3);
 }
 
-/* Extra-innings team-record banner (see ExtrasBanner) — a compact info Notice
-   (#1132) above the reading pane on any extra-inning page, reading each club's
-   season W-L in extras. Notice draws the box; this namespace keeps the space
-   under it and the club names. No wrap: on a phone the sentence wraps inside
-   its column, beside the ball, and never drops under it. */
-.innings__extras {
-  margin: 0 0 10px;
-  flex-wrap: nowrap;
-}
-.innings__extras-team {
-  white-space: nowrap;
-  color: var(--text-caption);
-}
-
 /* Refresh (TeamInfo.jsx's RefreshButton) is a Button: control size, outline,
    the ↻ in its icon slot, and busy while it fetches. Nothing about its dress
    is left here; where it stands is its hosts' — the floating bar
@@ -192,41 +178,6 @@ body:has(.innings) {
   --radius-lg: 0;
 }
 
-.inningnav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin: 0 0 var(--space-1);
-}
-
-/* ‹ Back and Next › and the reference chips (styles/focus/reference.css) are Buttons
-   re-inked to the jump bar's dress (system/jumpbar): a 2px ink rule, square, the same
-   recipe .segmented__btn uses. So they read as one set with the TB / CLE / INNINGS / BOX
-   stops above them. The Button draws the press, hover, focus and disabled states. */
-.inningnav .btn,
-.refbar__chip {
-  --btn-edge: var(--border-stamped);
-  --btn-ink: var(--text-heading);
-  --btn-edge-hover: var(--btn-edge);
-
-  border-width: var(--bw-heavy);
-}
-
-/* Back and Next take the jump bar's type size too. */
-.inningnav .btn {
-  font-size: var(--fs-h3);
-}
-
-.inningnav__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-title-md);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--text-heading);
-}
-
 .inning {
   display: flex;
   flex-direction: column;
@@ -236,7 +187,7 @@ body:has(.innings) {
 /* Focus mode's rules (the .innings--focus fold, the .trailstrip at-bat
    navigator, the reference panel, the one-row action bar) live in
    styles/focus/*.css, which import LAST so they win on cascade order instead of
-   specificity — see focus/stage.css's header. */
+   specificity — see src/index.css's focus/ note. */
 
 /* The page-turn scene (InningPageTurn.jsx) that replaces the plain .inning +
    .innings__row2 pairing as .innings__grid's row-2 child. The active layer
@@ -281,19 +232,6 @@ body:has(.innings) {
   position: absolute;
   inset: 0;
   z-index: 3;
-  pointer-events: none;
-}
-
-/* The floating/inline nav's mid-turn state (InningViewer.jsx passes
-   aria-disabled, never the real `disabled` attribute, while a page turn is
-   preparing/turning, so focus never jumps). aria-disabled alone doesn't stop
-   clicks the way `disabled` does — pointer-events: none here is what
-   actually blocks a second tap from landing mid-animation; the reducer's
-   own first-request-wins guard (pageTurnState.js) is the real backstop. */
-.inningnav button[aria-disabled='true'],
-.rolling__pick[aria-disabled='true'],
-.pagenav--innings .btn[aria-disabled='true'] {
-  opacity: 0.6;
   pointer-events: none;
 }
 

@@ -119,25 +119,23 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   half opening with a fresh arm (`selectIsFreshPitcher`), only until the first
   at-bat is unveiled. Those two omissions make it the ONLY announcement of a
   between-innings change, so it may not be dropped there: ADR-0043's second.
-- **Extra innings never spoil** — `InningViewer` and `RollingLine` show only
+- **Extra innings never spoil** — `InningViewer` and Gameday's line score show only
   `regulation` innings up front, unlocking extras one at a time as `revealedThrough`
-  advances (ADR-0008). `RollingLine`'s run cells double as the half-inning navigator
-  (away row = tops, home row = bottoms, current half inked as selected); its
-  Back/Next controls cover the full unlocked range. Each extra half opens with the
-  **placed runner's own card** (`PlacedRunnerCard.jsx`, `kind: 'placed'`) — the
+  advances (ADR-0008). The line score's run cells double as the half-inning navigator
+  (away row = tops, home row = bottoms, current half marked); a phone folds it into the
+  Menu. Each extra half opens with the **placed runner's own card** (`PlacedRunnerCard.jsx`, `kind: 'placed'`) — the
   at-bat frame minus the pitch ladder and RBI chip, an `AR` pill where a batting
   result would go, and `PlayDiamond`'s `placedAt` dotting the bases he was given.
   Deliberately a THIRD entry kind: `nextStepBoundary` and this file's `hasAtBat`
   guard both key on `kind === 'atbat'` and stay correct only if a placement doesn't
   answer to it. Never surface the placement above the seal — he is by rule the
   previous half's last batter.
-- **At-bat stepping**: a sealed half's floating-bar button splits into "Next at-bat" /
-  "Rest of half", stepping `PlayByPlay`'s cards one plate appearance at a time via a
+- **At-bat stepping**: a sealed half's advance ("Next play ›") steps `PlayByPlay`'s cards one
+  plate appearance at a time (there is no "Rest of half", #2568) via a
   transient cursor (`atBatCountFor`, `useRevealProgress`) that collapses into a normal
   `revealTo` commit, not a second spoiler boundary (ADR-0016) — but NOT while the half
   is still being PLAYED (ADR-0055), where the entry list is only the half SO FAR:
-  `stepCommitReady` withholds the commit, the bar drops "Rest of half", and the live edge
-  reads "Caught up" (`selectLiveHalf`, `api/liveEdge.js`). The lineup page's "Catch up to
+  `stepCommitReady` withholds the commit, and the live edge reads "Caught up" (`selectLiveHalf`, `api/liveEdge.js`). The lineup page's "Catch up to
   live" (`catchUpPlan`) is its sibling: it ratchets to the half BEFORE the live one and
   lands there sealed. One step is an at-bat **plus the notes trailing it** — the feed
   nests a stoppage at the head of the PA that follows it, so they announce what followed
@@ -145,10 +143,11 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   between pitches (`midAtBat`), or any steal/pickoff, which leads its own step and window (ADR-0016's amendment). A step therefore ends
   mid-play, which is why the pinch-runner pencil-in keys on its notice's index rather
   than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`. Gameday's pitch mode and event taps step sub-steps inside a step on the same cursor: ADR-0123. Notation (#2575): a pickoff caught stealing is `PKCS 1-3`, out on the path to the stolen base; an error right after a steal credits no batter slot.
-- **The console** (ADR-0043): the scorebug is the page's masthead now (`screens/gameview/InningsHeader.jsx`, `components/gamehud/HeaderBug.jsx`; the plain split band before first pitch, still gated by `ScorebugMount`'s clamp), then the due-up/tally band, wrapping trail, tabbed
-  reference, `RollingLine` demoted but NEVER removed — every half, live or
-  historical. Only the play-by-play varies: **windowed** (one at-bat, every half
-  by default) vs. **stacked** (only after "See the whole half"); `focusView.js`.
+- **Gameday** (ADR-0043's 2026-10-27 amendment, `src/screens/gameday/next/CLAUDE.md`): one
+  window that never scrolls; the band (`ScorebugMount`'s clamp), stage, hero and bar never fold.
+  The old half page runs `hidden` as the engine, so its seals still gate what the shell reads.
+  Gary's #22 rules (every #22 field as penciled, pitch marks numbers and X, no "Rest of half", …)
+  are listed in that amendment; do not regress them.
 - **One opt-in departure** rides through `InningViewer` without touching its guarantees:
   the reader's own **stamp** on this game (ADR-0048, from `useStamps`). `effectiveReveal`
   takes it, substituting a render-only
@@ -190,10 +189,10 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   callbacks (`onReveal`/`onStepInfo`) so the preview can't
   itself advance `revealedThrough` or double-report a step. Not a second
   reveal boundary — see ADR-0024. **Box Lines** (`components/boxlines/`) carries final scores on the lineup page; its gate is `api/boxlines/rows.js`, not the sheet — ADR-0069.
-- **Express Lane posters** (`src/api/expresslane/`): a poster URL is safe while the
-  PICTURE is not — every frame carries the broadcast scorebug burned into the pixels —
-  so a poster may render only inside an already-revealed play, and never as the
-  placeholder for the next clip.
+- **Clip posters** (`src/api/expresslane/clipIndex.js`, the Scout's `FilmPane`): a poster URL is
+  safe while the PICTURE is not — every frame carries the broadcast scorebug burned into the
+  pixels — so a poster may render only inside an already-revealed play, never as the placeholder
+  for the next clip.
 
 ## Components with folder rules
 

@@ -108,8 +108,16 @@ _Avoid_: zoom mode, focus mode (the old name for Gameday's windowed mode, not th
 ### Game structure
 
 **Gameday**:
-The screen of a game's half-inning pages (`top{n}` and `bottom{n}`), the tab after the two lineups: the scorebug masthead, the due-up band, the play-by-play and the reference tabs, one half at a time. The tab reads "Gameday". Code and ADRs may still say "the innings viewer" (`InningViewer`) or, for its windowed mode, "focus mode" (ADR-0043). Addresses do not change.
-_Avoid_: focus mode, innings tab
+The screen of a game's half-inning pages (`top{n}` and `bottom{n}`), the tab after the two lineups. One window that never scrolls, at any size: the band, the stage, the hero and the bar always, and the panels the window's tier has room for; the rest fold into the Menu (#2566, ADR-0043's 2026-10-27 amendment). One tap on the advance reveals and plays one at-bat, or one sub-step in pitch mode. The tab reads "Gameday". Code and ADRs may still say "the innings viewer" (`InningViewer`). Addresses do not change. It replaced Express Lane.
+_Avoid_: focus mode, innings tab, MLB Gameday (that is MLB's own product)
+
+**Stage**:
+Gameday's home-plate view, the centerpiece: 16-bit sprites, the pitch on its measured path, the swing, and the ball in play. It plays only on the reveal tap (ADR-0046). At rest, before the tapped play, it draws the due-up batter with his zone map (pre-game numbers), which a reader can dismiss for the game.
+_Avoid_: scene, replay (the old pitcher card's terms)
+
+**Checkpoint**:
+The pause at the end of each half on Gameday: pages of the half's tally, its pitching, its at-bats and the game so far (plus the notes when the game has a callout bundle). It takes the stage's slot until the advance names the next half.
+_Avoid_: summary, between-innings card
 
 **Sub-step**:
 One tap inside a Gameday at-bat: a pitch, an automatic call, a baserunning event, a substitution, or the result (ADR-0123). The at-bat cursor's finer grain; never a spoiler boundary of its own.
@@ -132,10 +140,11 @@ Innings beyond regulation. They unlock one at a time as the user reveals
 their way there, so the interface never hints a game went to extras in
 advance.
 
-**RollingLine**:
-The boxscore-style component that doubles as the half-inning navigator —
-every run cell is a button that jumps to that half, with cumulative R/H/E
-over every revealed inning.
+**Line score (Gameday)**:
+Gameday's navigator panel: a runs grid over every unlocked inning whose run
+cells are buttons that jump to that half, the only way to reach a half more
+than one step away (ADR-0043). A phone folds it into the Menu.
+_Avoid_: RollingLine (the old screen's component, deleted in the swap)
 
 **Pitchers table**:
 The running line (IP/R/ER/H…) for every pitcher who has appeared, one block

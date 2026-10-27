@@ -1,4 +1,4 @@
-/* ==== GAMEDAY, the new shell (docs/gameday-build.md), at ?look=new ====
+/* ==== GAMEDAY, the page (ADR-0043's 2026-10-27 amendment) ====
    A fixed frame that never scrolls. The tier (lib/gameday/ladder.js) sits on the root as
    data-tier; each tier names its grid areas, and the stage row takes the slack. */
 
@@ -84,6 +84,15 @@
   padding: var(--space-2) var(--space-3); background: var(--surface-card); border-top: var(--bw-heavy) solid var(--border-stamped); }
 .gdnext__bar .gdnext__menu { border-radius: 0; flex: none; width: auto; min-width: 88px; }
 .gdnext__switch { flex: none; display: flex; white-space: nowrap; }
-.gdnext__bar .gdnext__advance { flex: 1; min-width: 0; white-space: nowrap; }
+.gdnext__bar .gdnext__advance { position: relative; flex: 1; min-width: 0; white-space: nowrap; }
+/* The advance owns the bar's dead space around it: up and down to the bar's edges (the bar's
+   overflow clip trims the reach, and its top rule stays the page's), right to its end, left across
+   the gap to the step switch, so a thumb that misses still steps. Offsets from the button, not the
+   bar, so the area holds under .btn:active (e2e/reveal-hit-area.spec.js). */
+.gdnext__bar .gdnext__advance::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--tap-min)) calc(-1 * var(--space-3)) calc(-1 * var(--tap-min)) calc(-1 * var(--space-2));
+}
 .gdnext__folded { margin: 0 0 var(--space-3); padding: 0; list-style: none; }
 .gdnext__folded li { padding: var(--space-2) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }

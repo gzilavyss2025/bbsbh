@@ -444,26 +444,11 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   game the home team led entering it carries hits/errors/LOB and no `runs`, and
   testing the half object instead printed real-looking zeros for an inning that
   never happened.
-- **`expresslane/rail.js`** — reveal-only. Express Lane Tier 1: the ordered,
-  COMPLETE event list for ONE half-inning, which the two modes filter
-  (`resultModeRows` keeps each plate appearance's terminal row plus the
-  paperwork; `fullModeRows` keeps everything). It costs no new fetch — every
-  field comes off the `feed/live` payload already in hand — and it COMPOSES the
-  parse rather than repeating it: `pitchInfo.js` classifies the call code,
-  `eventTypes.js` names the event families. Three things to know before touching
-  it. (1) Clips are a SPARSE OVERLAY on the rail, not the rail: roughly 275
-  events a game carry no `playId` and never will — substitutions, mound visits,
-  batter timeouts, and the steals, wild pitches and caught stealings that happen
-  DURING a pitch — and every one still gets a row, because the film gate must
-  never block on a row that expects no film. (2) The terminal anchor is the last
-  `playEvents[]` element with `isPitch` AND a `playId` (570 of 570 plate
-  appearances over 7 games), with three fallbacks that have never fired, the
-  third of which is the MiLB / pre-2016 case: the last pitch, clip or no clip, so
-  the notation still gets written. (3) There is deliberately no whole-game
-  builder, because a game-wide rail states how many innings the game ran and so
-  whether it went to extras (ADR-0008). Under the film gate the reveal is
-  ATOMIC — `description` / `result` / `pitch` arrive with the picture or not at
-  all, since a scorer who can read the outcome has no reason to wait for it.
+- **Express Lane's screens were deleted** when Gameday replaced it (#2566), with its staging
+  (`lib/expresslane/`, which was deleted). Three modules stay: `clipIndex.js` (the play-by-play's
+  Watch), `runners.js` (Gameday and the scorecard reuse it, ADR-0072) and `rail.js`, the ordered
+  event list of one half that `runners.js`'s deck is tested through. `rail.js` is reveal-only and
+  has no screen importer now; a new caller reads it inside a `SealBox` reveal function.
 - **`expresslane/clipIndex.js`** — spoiler-free. Express Lane Tier 2:
   `playId → { mp4Url, posterUrl, durationSec }`, cached in IndexedDB by gamePk.
   `resolveClipUrl(playId, { fetchImpl, signal, timeoutMs })` is the ONE place
@@ -520,33 +505,6 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `AtBatBox` draws but does not compute (`outType`, `centerCode`, `ladder`),
   composed from the sheet's own two modules so one plate appearance draws the
   same box here and on paper.
-- **Tier 3 is not in `src/api/`** — `src/lib/expresslane/` holds it, because it
-  reads no baseball at all: `staging.js` is the queue and THE FILM GATE (a pure
-  state machine over playIds), `byteStore.js` is the on-device IndexedDB Blob
-  store, `runner.js` is the single-threaded download loop that joins them to
-  `clipIndex.js`, and `hold.js` is THE HELD PLAY. That last one is the rule to
-  read before touching `expressDeck`: a row whose clip is on the screen arrives
-  held, and the hold asks for the deck through `unwrittenRow(row)` — the same
-  row with `isTerminal: false` — so the cap above does the covering and the box,
-  the chip and the runners' diamonds are never computed at all. The reveal mark
-  moves on the REVEAL rather than on the landing, or the last out of a half
-  prints its run total in the running line while the out is still being watched
-  (ADR-0071). Four things a caller of Tier 1 or 2 should know about it. (1)
-  The gate blocks the cursor ONLY while a clip that is EXPECTED has not arrived,
-  and an empty resolution counts as no clip expected — MLB mints playIds by
-  formula for every intentional walk and most pitch-timer violations, about 1.2 a
-  game, and a gate that waits on one deadlocks (#1024). Never pattern-match the id
-  string. (2) The queue is filled ONE HALF AT A TIME, for the same ADR-0008 reason
-  the rail has no whole-game builder; the sanctioned `revealedThrough + 1`
-  lookahead also happens to be the right staging lead, so nothing else caps it.
-  (3) Staging is SINGLE-THREADED by measurement — 7 parallel downloads gave the
-  same 2.1 Mbps aggregate as one — and a 403 stops the job rather than being
-  retried. (4) Bytes are IndexedDB Blobs and the service worker stays out of the
-  playback path; `checkoutClip` hands back the call that revokes the object URL,
-  and a caller that leaves a clip without calling it leaks about 6 MB each time.
-  Verified 2026-09-10: the byte host answers cross-origin with
-  `access-control-allow-origin: *` and a real 206, so a plain `fetch()` reaches it
-  with no proxy, no service worker and no Referer spoofing.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
   `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
   (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches
@@ -679,6 +637,36 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   arbitrary game list. Rendered by `screens/LogbookStatsPage.jsx` at
   `/logbook/stats`.
 
+
+## Feed gotchas for an at-bat screen
+
+Found while designing the innings console (2026-10, #1389) and kept when its `.scratch/` folder
+was deleted in the Gameday swap (#2566). Each held on the six games in `docs/test-games.md`
+("Gameday: runner events, reviews and ABS").
+
+- `computeHalfInningFeed(feed, inning, half, side, stepCap)` returns an ARRAY of entries (`atbat`,
+  `placed`, `event`). `stepCap` is a COUNT OF ENTRIES, events included, not a count of at-bats.
+- An `event` entry with `midAtBat: true` belongs to the NEXT `atbat` entry; one with
+  `midAtBat: false` is pre-pitch (pitching change, PH, PR, switches, mound visit). Filter
+  `game_advisory` out of the pre-pitch list.
+- The sealed state of at-bat k: cap the feed through the pre-pitch entries before it, then
+  `runnersOnBase(entries)` with no exclusion. The revealed state: `expressDeck(feed, inning, half,
+  { atBatIndex, isTerminal: true })` gives `batter`, `runners` (batter excluded) and `departed`.
+- Mid-at-bat runner moves: `runners[].details.playIndex` indexes `playEvents[]`; count the `isPitch`
+  events before it for the pitch number, and leave out the batter's own runner entries (else a
+  K + WP reach shows as a runner event). A pickoff reads "After pitch n" ("Before pitch 1" at 0);
+  everything else "Pitch n".
+- The out chain for a runner out: `credits[]` assists, then the putout, by position code.
+- ABS: the per-pitch `challenge` on `pitchDetails` (`challengesForPlay`). `callDesc` is the FINAL
+  call; when overturned, the original is the opposite. A play-level `MJ` review on the last pitch
+  counts too (ball four). Count only through the revealed point: `gameData.absChallenges` is
+  whole-game and leaks (`challenges.js`).
+- A manager or crew review is `play.reviewDetails` with a type other than MJ/MZ;
+  `challengeTeamId == null` is a crew-chief review. One during an at-bat sits on
+  `playEvents[k].reviewDetails`.
+- An interrupted at-bat (a pickoff or CS ends the half mid-count) has `codeKind: 'interrupted'`, an
+  empty outcome and "PK →": a step, but not a plate appearance in the day line.
+- `defenseEntering` has no `P` entry, so a field drawn from it shows eight positions.
 
 ## Gameday data (`gameday/`, reveal-only)
 

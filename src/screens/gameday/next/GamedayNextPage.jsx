@@ -7,12 +7,10 @@ import { BLOCK_LABEL, GamedayMenu } from './GamedayMenu.jsx'
 import { GamedayPanel } from './panels/GamedayPanels.jsx'
 import { useTier } from './useTier.js'
 
-// Gameday's new shell (#2568 slices 2, 3), behind `?look=new`: a fixed no-scroll frame whose
-// blocks the window's tier places (lib/gameday/ladder.js). The band and the bar are real; the
-// stage, hero and panels are labelled slots the next prompts fill (docs/gameday-build.md).
-// `engine` is today's half page, mounted hidden so the reveal flow, the live snapshot and the
-// step cursor keep running until those slots take over.
-// Blocks a panel fills; the rest keep their label until their prompts.
+// The Gameday page (ADR-0043's 2026-10-27 amendment): a fixed no-scroll frame whose blocks the
+// window's tier places (lib/gameday/ladder.js). `engine` is the old half page, mounted hidden so
+// the reveal flow, the live snapshot and the step cursor keep running.
+// Blocks a panel fills; a stage or hero slot with nothing to draw yet shows its name.
 const PANELLED = new Set(['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog'])
 
 export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine, advance, pitch, onBoxScore, onScorecard, refresh }) {

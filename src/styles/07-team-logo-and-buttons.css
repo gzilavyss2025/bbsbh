@@ -405,50 +405,6 @@
   font-size: 1.1em;
 }
 
-/* Two side-by-side choices in the innings bar, one of two shapes: a sealed
-   half's own reveal pair (ADR-0016 — step to the next at-bat, or reveal the
-   whole half at once, both wearing the kraft-seal .btn--reveal texture), or a
-   just-finished half's Summary/next-half pair (InningViewer's focus.postHalf
-   — plain .btn/.btn--next skins instead, since nothing there is sealed
-   anymore). Same layout either way, just split into equal-width halves
-   instead of one full-width button. */
-.revealsplit {
-  display: flex;
-  gap: var(--space-2);
-  width: 100%;
-  max-width: calc(var(--app-width) - 2 * var(--app-gutter));
-  margin-top: 20px;
-}
-.revealsplit__btn {
-  width: auto;
-  flex: 1 1 0;
-  margin-top: 0;
-  min-width: 0;
-  /* Wrapping, not truncating: a phone column gives each of this pair only half
-     of .revealsplit's already-narrow max-width, and a label that doesn't fit
-     must break to a second line rather than lose its own last word to an
-     ellipsis (min-height is a floor, not a fixed height, so the button grows).
-     This stays as the backstop for the longest label the bar can carry — a
-     next-half advance like "Bottom 12th ›" beside Summary. */
-  padding: var(--space-2) var(--space-2h);
-  white-space: normal;
-  text-align: center;
-  line-height: var(--lh-snug);
-}
-
-/* The two labels the reader actually taps forty times a half-hour — "Next
-   at-bat" and "Rest of half" — sit one hair apart at the phone width: the
-   first held one line while the second broke, so the pair rendered visibly
-   unequal, one button a row taller than its twin, at every single tap. They
-   are short enough now (they used to read "Reveal next at-bat" / "Reveal whole
-   {half}", which genuinely needed two lines) that trimming the side padding
-   fits both on one line and squares the pair up, without touching the type
-   scale or the 44px tap floor. */
-@media (max-width: 739.98px) {
-  .revealsplit__btn {
-    padding: var(--space-2) var(--space-1);
-  }
-}
 /* (A `.revealsplit__btn.is-active` filled-navy state used to live here, for
    focus mode's Summary button. That button is gone — the half's numbers arrive
    in the console band on their own now, so the post-half bar carries the

@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures.js'
+import { revealHalf } from '../lib/gameday.js'
 
 // The core invariant (CLAUDE.md: "the whole point of the app"): a sealed
 // value must not exist in the DOM pre-reveal, not merely be hidden by CSS.
@@ -15,18 +16,22 @@ test('half-inning stat line is absent from the DOM, not just hidden, until revea
 }) => {
   await page.goto(`${GAME}/top1`)
 
+  // `.gdcp` is Gameday's half-end checkpoint, whose first page is the half's
+  // R/H/E/LOB tally (it took over from the old page's `.statline`).
   await expect(page.locator('.statgrid')).toHaveCount(0)
-  await expect(page.locator('.statline')).toHaveCount(0)
+  await expect(page.locator('.gdcp')).toHaveCount(0)
 
-  await page.getByRole('button', { name: /Reveal the rest of half/i }).click()
+  // No "Rest of half" (#2568): the half opens one step at a time, and the last
+  // step commits it.
+  await revealHalf(page)
 
-  // Each coverless SealBox for this half (the play-by-play feed, the Insights
-  // stat card, and — only on a game with ABS challenges — the AbsCard) wraps
-  // its revealed content in its own `.statgrid` proxy, so the count here can
-  // legitimately be 2 or 3 depending on the fixture game; the invariant is
-  // "at least one", not an exact number tied to how many cards this half has.
+  // Each coverless SealBox for this half (Gameday's hero, panels and
+  // checkpoint, and the hidden engine's play-by-play) wraps its revealed
+  // content in its own `.statgrid` proxy, so the count here legitimately
+  // varies; the invariant is "at least one", not an exact number tied to how
+  // many blocks this window shows.
   expect(await page.locator('.statgrid').count()).toBeGreaterThan(0)
-  await expect(page.locator('.statline')).toHaveCount(1)
+  await expect(page.locator('.gdcp')).toHaveCount(1)
 })
 
 test('box score is absent from the DOM until its own seal is tapped', async ({ page }) => {

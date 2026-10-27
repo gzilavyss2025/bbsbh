@@ -104,7 +104,6 @@ const SPACING_RESIDUE = {
   // derived — see the re-derivation note at that rule.
   '08-site-shell.css': { 22: 2 },
   '11-innings.css': { 130: 1 },
-  '12-sealbox.css': { 18: 1 },
   '16-identity-lab-shell.css': { 72: 1, 120: 1, 200: 1 },
   '19-pattern-and-sketch-labs.css': { 22: 1, 28: 1 },
   '21-box-score.css': { 72: 1 },
@@ -116,7 +115,6 @@ const SPACING_RESIDUE = {
   '63-print-sheet.css': { 72: 1 },
   '69-pitch-arsenal.css': { 18: 1 },
   '72-club-transactions.css': { 18: 1 },
-  '77-express-lane.css': { 18: 1 },
   // The Now Pitching card's pitch tile pads 6px top, 7px bottom: the approved
   // design (#1344), where the extra pixel balances the mono figure's descent
   // against the 3px colour bar at the top. No token carries 7px.

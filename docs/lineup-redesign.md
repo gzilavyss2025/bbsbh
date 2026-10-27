@@ -53,5 +53,6 @@ nothing is fetched and then hidden.
 - Old CSS that only the deleted page used (`.lineup__*`, `.starter__*`, `.teaminfo__*` in
   `10-lineup.css`, `09-team-info.css`, `44-pre-game-cards.css`) is not removed yet. Several tests pin
   those rules, so removing them is its own change.
-- Components that only the old page used (`StarterMatchups`, `ExpressLaneDoor`, the live
-  `FormerTeammates` card) are still in the tree. Check each for other callers before deleting.
+- Components that only the old page used (`StarterMatchups`, the live `FormerTeammates` card) are
+  still in the tree. Check each for other callers before deleting. (`ExpressLaneDoor` went with
+  Express Lane in the Gameday swap, #2566.)

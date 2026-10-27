@@ -217,17 +217,6 @@
    are drawn on six surfaces, the slate among them — a mark on a game card
    cannot wait on a route chunk. */
 @import './styles/76-workload-marks.css';
-@import './styles/77-express-lane.css';
-@import './styles/77a-express-lane-entry.css';
-/* The DOOR into that surface, on the lineup page (components/game/
-   ExpressLaneDoor.jsx). It sits with Express Lane rather than with the
-   lineup page because it is drawn from Express Lane vocabulary — a cut
-   length of film — and because 09-team-info.css was at its file cap. */
-@import './styles/77b-express-lane-door.css';
-/* The SCORING DECK band of that surface (screens/expresslane/ScoringDeck.jsx),
-   split off when 77 reached its file cap a second time. It shares no class with
-   77a or 77b, so its place after them changes nothing in the cascade. */
-@import './styles/77c-express-lane-deck.css';
 /* The offseason home page (issue #1038): the roster wire promoted to the lead
    of the slate's games area from November to February, the winter's dated
    calendar under it, and the countdown standing in the rail slot the wire
@@ -246,8 +235,8 @@
    live here. check-typography, check-focus-ring and check-strike-links walk
    the tree as of the same commit, so these are guarded like any other partial.
 
-   BEFORE focus/, not after. focus/'s four sheets stay last and win on cascade
-   order rather than specificity (see focus/stage.css) — a contract this
+   BEFORE focus/, not after. focus/'s sheets stay last and win on cascade
+   order rather than specificity — a contract this
    package must not quietly take away. Where a motion rule has to outrank one
    of them it does so on specificity, not position. See motion/slate.css. */
 @import './styles/motion/slate.css';
@@ -263,22 +252,16 @@
 @import './styles/motion/arrival.css';
 @import './styles/motion/board-in.css';
 
-/* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
-   rather than three more numbered siblings: src/styles is a flat directory at
-   its own file ratchet (scripts/check-dir-size.mjs), so the honest way to split
-   a partial that outgrew the 600-line file cap was to subdivide, which is what
-   ADR-0038 asks for in the first place. It happened a second time when the
-   half's tally joined the console row: console.css came out of stage.css along
-   the same seam — the shell versus one band inside it. These five stay LAST,
-   and in this order — every rule in them wins on cascade order, not
-   specificity. See focus/stage.css's header. */
-@import './styles/focus/stage.css';
+/* Focus mode — the old innings console's parts (ADR-0043). Gameday mounts the
+   old half page hidden as its engine (src/screens/gameday/next/CLAUDE.md), and
+   the animation lab draws some of these parts, so these stay until the engine
+   goes. A subdirectory because src/styles is flat at its own ratchet
+   (ADR-0038). They stay LAST: every rule in them wins on cascade order. */
 @import './styles/focus/console.css';
 @import './styles/focus/dueup-next.css';
 @import './styles/focus/atbat.css';
 @import './styles/focus/bigplay.css';
 @import './styles/focus/reference.css';
-@import './styles/focus/lineup.css';
 
 /* ------------------------------------------------------------
    Per-route partials — still in src/styles/, still numbered, still
@@ -338,10 +321,6 @@
                               components/admin/contracts/{TierBar,ReviewQueue,
                               DecisionPane,CandidateList,RosterSearch}.jsx
      74a-contract-lookup      components/admin/contracts/LookupDeck.jsx
-     77-express-lane          screens/expresslane/{ExpressLanePage,FilmPane}.jsx
-     77a-express-lane-entry   screens/expresslane/{EntryChooser,PitchExpand}.jsx
-     77b-express-lane-door    components/game/ExpressLaneDoor.jsx
-     77c-express-lane-deck    screens/expresslane/ScoringDeck.jsx
      78-offseason             components/offseason/{OffseasonLead,
                               WinterCalendar}.jsx
      80-postseason-bracket    components/bracket/PostseasonBracket.jsx

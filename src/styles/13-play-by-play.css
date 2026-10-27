@@ -505,44 +505,12 @@
   margin-top: 10px;
 }
 
-/* A club bar, not a plain paper row — same navy/seal/white recipe
-   .lineupteam__name and .halfdefense__title already wear, and the same
-   `.roster.is-themed` recolour on top of it (09-team-info.css). This is the
-   club's name; it now looks like every other place this app prints one. */
-.roster__toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-3h);
-  border-top: 0;
-  border-inline: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  cursor: pointer;
-}
-
 /* Takes the slack so mark and chevron stay pinned right — three children now,
    hence gap+flex-fill rather than the old two-child `space-between`. */
 .roster__club {
   flex: 1 1 auto;
   min-width: 0;
   text-align: left;
-}
-
-/* Same bleed formula as .lineupteam__name's (12-sealbox.css), off this bar's
-   own type + 12px padding, so the mark crops to the bar's edges. */
-.roster__toggle > .teamlogo-crop-bar {
-  height: calc(var(--fs-ui) * var(--lh-solid) + 24px);
-  margin-block: -12px;
-}
-
-.roster__chevron {
-  color: inherit; /* the band's ink, house or club */
-  opacity: 0.8;
 }
 
 .roster__list {
@@ -555,41 +523,5 @@
 /* Roster rows carry no batting-order slot — name / jersey / handedness|pos. */
 .roster__row {
   grid-template-columns: 1fr auto auto;
-}
-
-.roster__body {
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  padding-bottom: var(--space-1h);
-}
-
-/* The "Not posted yet." EmptyState (#1132, E3). The body has no side padding,
-   so the dashed box insets itself; with the body's own bottom padding it sits
-   the same distance from the rule above and the card's edge below. Only a
-   margin: the box is EmptyState's own. */
-.roster__empty {
-  margin: var(--space-2h) var(--space-3) var(--space-1);
-}
-
-.roster__group {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  margin: 10px 12px 4px;
-}
-
-/* A bullpen/bench player who has entered the game (within revealed innings) is
-   no longer eligible — struck through like a pencil line in the scorebook. */
-.roster__row.is-entered .roster__name,
-.roster__row.is-entered .roster__jersey,
-.roster__row.is-entered .roster__pos {
-  color: var(--text-caption);
-  /* strike-link-exempt — .roster__name IS the .plink here (RosterPanel passes
-     the class to PlayerLink), so this rule already targets the button itself
-     and outranks .plink's own text-decoration: none. */
-  text-decoration: line-through;
-  text-decoration-color: var(--graphite-soft);
-  text-decoration-thickness: 1.5px;
 }
 

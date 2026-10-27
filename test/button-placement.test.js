@@ -50,8 +50,6 @@ const KEPT = [
   ['21b-box-score-tally.css', '.bs__tallyScopebtn', 'min-width', '42px', 'three segments read as equal'],
   ['11-innings.css', '.innings__notes', 'flex', 'none', 'Game Notes never shrinks in the team head'],
   ['24-floating-nav-and-hud.css', '.innings__refresh--float', 'pointer-events', 'auto', 'the bar is click-through; Refresh is not'],
-  ['focus/stage.css', '.pagenav--focus .innings__refresh--float', 'z-index', '3', 'Refresh rides above the reveal pair’s dead space'],
-  ['focus/stage.css', '.pagenav--focus .innings__refresh--float', 'min-width', 'var(--tap-min)', 'Refresh stays a square-ish tap target on one row'],
   ['04-site-bar.css', '.sitebar__search', 'min-width', 'var(--tap-min)', 'an icon-only control is square'],
   ['04-site-bar.css', '.btn.sitebar__search', 'padding', '0', 'a square takes its width from the height'],
   ['04-site-bar.css', '.btn.sitebar__logbook', 'padding', '0 var(--space-2h)', 'the Game Log lockup draws at its row’s height'],
@@ -91,7 +89,6 @@ test('the floating bar keeps its primary-action rules off Refresh', () => {
   const css = read('24-floating-nav-and-hud.css')
   assert.ok(ruleBody(css, '.pagenav .btn:where(:not(.innings__refresh))'), '.pagenav .btn must exclude Refresh')
   assert.equal(ruleBody(css, '.pagenav .btn'), null)
-  assert.ok(ruleBody(css, '.pagenav--innings .btn:where(:not(.innings__refresh))::after'))
 })
 
 // The last hand-drawn copies (#1174). Each drew its own fill, edge, radius,

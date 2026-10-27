@@ -93,5 +93,5 @@ test('src/index.css imports the rise right after the stamp-in, before focus/', (
   const lines = read('index.css').split('\n')
   const at = (p) => lines.findIndex((l) => l.includes(p))
   assert.equal(at("motion/player-rise.css'"), at("motion/stamp-in.css'") + 1)
-  assert.ok(at("motion/player-rise.css'") < at("focus/stage.css'"))
+  assert.ok(at("motion/player-rise.css'") < at("focus/console.css'"))
 })

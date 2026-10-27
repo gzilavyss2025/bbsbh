@@ -59,7 +59,7 @@ function Navigator({ ctx }) {
               aria-disabled={disabled || undefined}
               disabled={n > unlocked || skipped}
               aria-label={`${half === 'top' ? 'Top' : 'Bottom'} ${n}${skipped ? ', not played' : l ? `, ${l.runs} runs` : ', sealed'}`}
-              onClick={() => !disabled && onSelect(idx)}
+              onClick={() => onSelect(idx)}
             >
               {skipped ? '✕' : l ? l.runs : '·'}
             </button>

@@ -1,19 +1,27 @@
-# src/screens/gameday/next — the new Gameday shell
+# src/screens/gameday/next — the Gameday page
 
-Behind `?look=new` on the Gameday step (`isLookNew`, `useTier.js`). Plan: `docs/gameday-build.md`;
-design: `.scratch/gameday-design/`. Without the flag `InningViewer` renders as it always did.
+The Gameday page (ADR-0043's 2026-10-27 amendment). No flag: the Gameday step renders this shell.
+Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 
-- `InningViewer` hands the shell its resolved state (`GamedayNextMount`). The advance control reuses
-  today's reveal flow (`revealNextAtBat`, the next half, the box score); the shell decides nothing.
-- `GamedayNextPage` is a fixed 100dvh frame, no scroll. The tier (`lib/gameday/ladder.js`) is
-  `data-tier` on the root and `styles/gameday-next/page.css` names the grid areas; the stage row
-  takes the slack. Slots for the stage, hero and panels are empty and labelled until prompts 7 to 9.
-- Today's half page is mounted `hidden` as the engine: it reports the live snapshot (band) and the
-  step cursor. Prompts 7 to 12 replace it block by block; the last one deletes it.
+- `InningViewer` hands the shell its resolved state (`GamedayNextMount`). The advance reuses the
+  reveal flow (`revealNextStep`, the next half, the box score); the shell decides nothing.
+- `GamedayNextPage` is a fixed 100dvh frame that never scrolls, at any size
+  (`e2e/gameday-no-scroll.spec.js`). The tier (`lib/gameday/ladder.js`) is `data-tier` on the root
+  and `styles/gameday-next/page.css` names the grid areas; the stage row takes the slack. The bar
+  holds the Menu, the "At-bat | Pitch" switch and the advance, which owns the bar's dead space
+  (`e2e/reveal-hit-area.spec.js`). There is no "Rest of half".
+- The old half page is mounted `hidden` as the engine: it reports the live snapshot (band), the
+  step cursor and the runs so far, and its page turn moves halves. Rebuilding the engine is what
+  lets it go; until then its parts stay (`components/inning/`, `styles/focus/`).
+- Gary's calls this shell keeps: the band uses the score bug's tiles and type; the zone map shows
+  only before a tapped play and has a per-game dismiss; a switch hitter stands opposite the
+  pitcher's hand; the hero's due-up hides under the checkpoint; the checkpoint's due-up names an
+  announced pinch hitter; a pre-pitch pinch hitter is the first sub-step of his own at-bat.
 - The band draws through `ScorebugMount` (`Bug` prop), so its reveal clamp stays the only gate on the
-  score. A folded block is a name in the menu until its prompt builds it; opening the menu loads
-  nothing.
-- Panels (prompt 8) live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel also draws in the menu.
+  score. Opening the Menu loads nothing: a folded
+  block fetches when it shows.
+- Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line
+  score's run cells take a keyboard pick mid page-turn (aria-disabled only), as the old running line did.
 - `stage/` is the stage renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage` (slot-index buffer),
   `StageCanvas` (palette from the `--stage-*` tokens). `stage/swing.js` holds the swing keyframes alone.
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,

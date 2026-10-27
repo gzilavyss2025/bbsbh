@@ -1,4 +1,4 @@
-# src/api/expresslane — the Express Lane rail and clip index
+# src/api/expresslane — the runner functions, the rail and the clip index
 
 The sealing line in `expresslane/` runs BETWEEN its files rather than around them.
 `rail.js` is reveal-only: it is the ordered, complete event list for one half-inning, and
@@ -13,13 +13,8 @@ manifest. The rail takes ONE half-inning per call and has no whole-game builder,
 game-wide rail states how many innings the game ran and so whether it went to extras
 (ADR-0008). The other, the poster rule, governs rendering and lives in `src/CLAUDE.md`.
 
-Tier 3 — the staging queue, the film gate and the on-device byte store —
-is NOT here: it holds no baseball, only playIds and Blobs, so it lives in
-`src/lib/expresslane/` (`staging.js`, `byteStore.js`, `runner.js`, `hold.js`).
-`speed.js` is the fifth file there: the speed of clips already downloaded, shown
-on the entry step. It names no clip, so it may show on any screen of the surface.
-`hold.js` is the one to read before touching the deck: a play with film on the
-screen arrives HELD, and the hold is a CAP rather than a cover — it hands
-`expressDeck` the cursor row with `isTerminal: false`, so the box, the chip and
-the runners' diamonds are never computed (ADR-0071).
-`.scratch/express-lane/PRD.md` carries the reasoning and the measurements.
+Express Lane's screens, and its staging queue and byte store (`src/lib/expresslane/`), were
+deleted when Gameday replaced it (#2566). What stays: `runners.js` (Gameday's scorebook box and the
+scorecard read it, ADR-0072), `clipIndex.js` (the play-by-play's Watch and the Scout's pitch modal),
+`eligibility.js`, and `rail.js`, which no screen imports now; `runners.js`'s deck tests drive
+through it. A new caller of either reveal-only file reads it inside a `SealBox` reveal function.

@@ -25,8 +25,7 @@ it does when something changes.
 
 ## Why a subdirectory
 
-The same reason `focus/` is one, and `focus/stage.css`'s header makes the
-argument: `src/styles` is a flat directory sitting at its own file ratchet
+The same reason `focus/` is one (src/index.css's note says why): `src/styles` is a flat directory sitting at its own file ratchet
 (`scripts/check-dir-size.mjs`), so a partial that outgrows the 600-line file cap
 subdivides rather than adding numbered siblings — ADR-0038's own answer.
 

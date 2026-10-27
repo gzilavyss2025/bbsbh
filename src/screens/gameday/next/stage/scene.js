@@ -65,7 +65,7 @@ export function project(cam, p, W, H) {
 
 // Behind home plate, a little high. A tall phone stage would cut the batter off with a fixed lens,
 // so the vertical field of view widens to keep at least 6 ft either side of the plate in view
-// (round 1 finding, .scratch/gameday-design/README.md).
+// (round 1 finding, #2568).
 export function homeCamera(aspect) {
   const needHalfV = (Math.atan(Math.tan((11.3 * Math.PI) / 180) / Math.max(0.2, aspect)) * 180) / Math.PI
   return camera([0, -30, 7.2], [0, 30, 2.2], Math.max(23, 2 * needHalfV))

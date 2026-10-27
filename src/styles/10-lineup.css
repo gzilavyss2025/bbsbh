@@ -106,7 +106,6 @@
    truncates on one line, but a pill that doesn't fit drops to its own line
    instead of fighting the row's fixed jersey/position columns for width. */
 .lineup__namewrap,
-.roster__namewrap,
 .thub-namewrap {
   display: flex;
   align-items: center;

@@ -11,17 +11,14 @@ import { fetchHighlights } from '../api/highlights.js'
 import { fetchGameUniforms, uniformSummary, liveJerseyTreatment } from '../api/uniforms.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
 import { fetchGameBroadcast } from '../api/broadcast.js'
-import { fetchTeamRoster } from '../api/team.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectGameSeason, selectHasStarted } from '../api/select.js'
-import { rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { fetchRookiesData, rookiesForGameSeason } from '../api/rookies.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplitsForTeams } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
 import { loadCareerMatchups } from '../api/careerMatchups.js'
-import { fetchRunExpectancy } from '../api/umpireFavor.js'
 import { fetchWorkload } from '../api/workload.js'
 import { useAsync } from './useAsync.js'
 import { useAsyncOnFeed } from './useAsyncOnFeed.js'
@@ -273,35 +270,6 @@ export function useGameData(game, activeStep = null) {
     return () => clearInterval(id)
   }, [isLive, feedState.reload])
 
-  // Each pitcher's inferred role (SP/CL/RP) from season stats — the same
-  // gamesStarted-ratio/saves heuristic the team page badges pitchers with
-  // (see rosterPitcherRole). The live feed carries no season stats, so this is
-  // its own fetch; it powers the innings roster panel's Starters/Bullpen
-  // split (see InningViewer). Keyed on team ids, like managers: role doesn't
-  // change mid-game.
-  const pitcherRoles = useAsyncOnFeed(
-    feed,
-    async (f) => {
-      const season = f.gameData?.game?.season
-      if (!season) return null
-      const [awayRoster, homeRoster] = await Promise.all([
-        fetchTeamRoster(game.away.id, season, { sportId: game.sportId }),
-        fetchTeamRoster(game.home.id, season, { sportId: game.sportId }),
-      ])
-      const roles = {}
-      for (const r of [...awayRoster, ...homeRoster]) {
-        // A two-way player (Ohtani-type) is roster-typed 'Two-Way Player', not
-        // 'Pitcher' — without isTwoWay here he'd carry no role at all and
-        // splitBullpen would default him into relief instead of starters.
-        if ((r.position?.type === 'Pitcher' || isTwoWay(r.person)) && r.person?.id) {
-          roles[r.person.id] = rosterPitcherRole(r)
-        }
-      }
-      return roles
-    },
-    [game.away.id, game.home.id],
-  )
-
   // Prospect badges for the lineup/roster surfaces (see ProspectPill /
   // prospectBadge) — the app-wide Top 100 + org-farm-system snapshot,
   // session-memoized so this costs nothing beyond the first call anywhere in
@@ -401,18 +369,6 @@ export function useGameData(game, activeStep = null) {
       ? rookiesForGameSeason(rookiesRaw, selectGameSeason(activeFeed))
       : rookiesRaw
 
-  // The league-wide run-expectancy (RE288) table — a static, same-origin,
-  // hand-run backfill (scripts/gen-run-expectancy.mjs) with no game or score
-  // information of its own, so it's safe to fetch eagerly like
-  // vsTeamSplits/formerTeammates. Only StatBox's reveal-only selector
-  // (api/umpireFavor.js's selectUmpireFavor) combines it with this game's own
-  // plays — see .scratch/umpire-accuracy/consistency-favor-scope.md §3.
-  const runExpectancy = useAsync(
-    () => (enrichmentReady ? fetchRunExpectancy() : Promise.resolve(null)),
-    [enrichmentReady],
-  )
-  const runExpectancyData = runExpectancy.data ?? null
-
   // Rolling pitcher workload (gen-workload.mjs) — completed-
   // appearance aggregates feeding the bullpen availability board (TeamInfo)
   // and the Pitchers table's laboring baseline (pitcherHealth.js). MLB-only
@@ -484,7 +440,6 @@ export function useGameData(game, activeStep = null) {
     weather,
     starterLines,
     winProb,
-    pitcherRoles,
     prospectsData,
     rookiesData,
     gameCallouts,
@@ -493,7 +448,6 @@ export function useGameData(game, activeStep = null) {
     careerMatchupsData,
     vsTeamSplitsData,
     highlightsData: highlights.data ?? null,
-    runExpectancyData,
     workloadData,
     jerseyTreatments,
     started,
