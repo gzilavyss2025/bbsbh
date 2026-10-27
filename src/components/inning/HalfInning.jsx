@@ -325,8 +325,9 @@ export function HalfInning({
       pitcher = { last: nowPitching.name.split(',')[0], pitches: (enteringPitches ?? 0) + (live?.pitchesSoFar ?? 0) }
     }
     // The 3rd out is revealed and the reader has not navigated on: see liveAtThirdOut.
-    if (outs >= 3) return liveAtThirdOut({ batter, pitcher, inning, half })
-    return { bases, outs, batter, pitcher, inning, half }
+    const last = live?.last ?? null // Gameday's hero keeps the last result
+    if (outs >= 3) return { ...liveAtThirdOut({ batter, pitcher, inning, half }), last }
+    return { bases, outs, batter, pitcher, inning, half, last }
   }
 
   // The entering-state fallback: fires once (and again on any dep change)

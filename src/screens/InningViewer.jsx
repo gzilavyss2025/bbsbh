@@ -745,9 +745,14 @@ export function InningViewer({
           bug={{
             started, live: curLiveState, feed, unlocked: renderUnlocked, mark: renderRevealedThrough,
             runsInProgress, treatment: winProbTreatment, viewIdx: curIdx, viewInning: effInning, viewHalf: effHalf,
-            season: gameDate,
+            season: gameDate, stepAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
           }}
           meta={meta}
+          panels={{
+            feed, meta, regulation, unlocked: renderUnlocked, mark: renderRevealedThrough, runsInProgress, curIdx,
+            onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
+            inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : curAtBatCount,
+          }}
           engine={pageTurn}
           advance={advance}
           onBoxScore={onBoxScore}

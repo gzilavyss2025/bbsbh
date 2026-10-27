@@ -442,7 +442,9 @@
     "gameday/defense.js": {
       "class": "reveal-only",
       "why": "Gameday's Field tab (#2566): the fielding side's alignment and pitcher as of the reader's step. A substitution can telegraph a sealed blowout. The side's starters, then its earlier fielding halves whole and the reader's half from computeHalfInningFeed built with the step cap and sliced at it, so a change counts only once its own entry is on screen (ADR-0016); a half past revealedThrough + 1 answers null. No screen imports it yet.",
-      "importers": []
+      "importers": [
+        "screens/gameday/next/panels/GamedayPanels.jsx"
+      ]
     },
     "gameday/moments/moments.js": {
       "class": "reveal-only",
@@ -470,7 +472,9 @@
         "api/gameday/dayLine.js",
         "api/gameday/defense.js",
         "api/gameday/moments/moments.js",
-        "api/gameday/reviews.js"
+        "api/gameday/reviews.js",
+        "screens/gameday/next/panels/GamedayPanels.jsx",
+        "screens/gameday/next/panels/panelData.js"
       ]
     },
     "gameday/subSteps.js": {
@@ -546,7 +550,8 @@
         "components/gamehud/RollingLine.jsx",
         "components/gamehud/ScorebugMount.jsx",
         "components/gamehud/StatBox.jsx",
-        "screens/boxscore/revealBoxScore.js"
+        "screens/boxscore/revealBoxScore.js",
+        "screens/gameday/next/panels/GamedayPanels.jsx"
       ]
     },
     "liveEdge.js": {
@@ -819,15 +824,17 @@
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
         "components/playbyplay/PlayByPlay.jsx",
-        "lib/scorecard/arm.js"
+        "lib/scorecard/arm.js",
+        "screens/gameday/next/panels/panelData.js"
       ]
     },
     "playbyplay/advanceCode.js": {
       "class": "reveal-only",
-      "why": "Runner advance/out notation — a play outcome. Barrel-internal.",
+      "why": "Runner advance/out notation — a play outcome. Barrel-internal, with one importer outside it: Gameday's hero reads battingSlot (a box-score batting-order fact) only for an at-bat already inside the reader's cursor, in a SealBox reveal render function.",
       "importers": [
         "api/playbyplay.js",
-        "api/playbyplay/halfInningFeed.js"
+        "api/playbyplay/halfInningFeed.js",
+        "screens/gameday/next/hero/heroMarkup.js"
       ]
     },
     "playbyplay/entriesView.js": {
@@ -870,12 +877,13 @@
     },
     "playbyplay/pitchInfo.js": {
       "class": "reveal-only",
-      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with two importers outside the barrel. Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. Gameday's subSteps.js reaches AUTOMATIC_CODES for the same reason (the same call is a sub-step on one surface and a card dot on the other). Both importers are themselves reveal-only, so the containment does not widen.",
+      "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal, with two importers outside the barrel. Express Lane's rail reaches pitchCallCode/pitchDotCategory directly, because the call-code table is closed and a second spelling of it would sort the same strike into a different lane on the two surfaces. Gameday's subSteps.js reaches AUTOMATIC_CODES for the same reason (the same call is a sub-step on one surface and a card dot on the other). Both importers are themselves reveal-only, so the containment does not widen. Gameday's hero (heroModel.js) reaches pitchLadder to number the scorebook box's pips, so the box and the card cannot disagree; it runs it on an at-bat already inside the cursor, in a SealBox reveal render function.",
       "importers": [
         "api/expresslane/rail.js",
         "api/gameday/subSteps.js",
         "api/playbyplay.js",
-        "api/playbyplay/halfInningFeed.js"
+        "api/playbyplay/halfInningFeed.js",
+        "screens/gameday/next/hero/heroModel.js"
       ]
     },
     "playbyplay/runnerNotes.js": {
@@ -902,7 +910,6 @@
         "api/playbyplay/notificationCards.js"
       ]
     },
-
     "player/context.js": {
       "class": "spoiler-free",
       "why": "The player hub's shared fetch vocabulary — the person, his transaction feed, the current-season date-cut window and the year-by-year tables. Season and career facts on a surface deliberately outside the scoring flow. Its one date rule (every dated fetch is cut off the day BEFORE a `?d=` link's game) is the player page's own as-of contract, not a seal."
@@ -951,7 +958,6 @@
       "class": "spoiler-free",
       "why": "The player page's Prospect rankings card: the years a man sat on a top-prospect list, from a frozen 2005-2024 file. A scout's ranking of a player, not a fact about a game, so it opens live (ADR-0034). It names no source and no year itself; labels, credits and coverage all come from the file."
     },
-
     "ovr/career.js": {
       "class": "spoiler-free",
       "why": "Pure OVR career blend: per-season Savant percentiles in, one percentile per metric out, with a recency weight and an age shift for sprint speed and fastball velocity (docs/ovr-rating.md). Season quality-of-contact figures on an open surface (ADR-0034), never a game's result. It fetches nothing and reads no game."

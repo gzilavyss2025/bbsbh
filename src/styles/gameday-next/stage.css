@@ -1,0 +1,5 @@
+/* ==== GAMEDAY's stage canvas (screens/gameday/next/stage/) ====
+   A pixel buffer scaled by a whole number: square pixels, no smoothing. */
+.gdstage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: var(--stage-frame); }
+.gdstage__canvas { flex: none; image-rendering: pixelated; }
