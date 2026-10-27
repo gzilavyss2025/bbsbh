@@ -36,6 +36,10 @@ async function barSpots(page) {
       deadY: (rBar.top + adv.top) / 2 + 1,
       belowY: (adv.bottom + rBar.bottom) / 2,
       seamX: (sw.right + adv.left) / 2,
+      // One pixel inside the switch's right edge: the last point that is the switch's, where the
+      // advance's area (which reaches left across the gap) must stop.
+      switchEdgeX: sw.right - 1,
+      switchY: sw.top + sw.height / 2,
       rightX: (adv.right + rBar.right) / 2,
       aboveBarY: rBar.top - 6,
       centreX: window.innerWidth / 2,
@@ -44,6 +48,14 @@ async function barSpots(page) {
 }
 
 const stored = (page, key) => page.evaluate((k) => localStorage.getItem(k), key)
+
+// A "nothing happened" check has to give a late write the time to land, or it passes on a tap that
+// stepped a moment later. A step writes the cursor within a frame or two of the tap; 1.5 s is far
+// past that, and the advance must still offer the same step.
+async function settled(page) {
+  await page.waitForTimeout(1500)
+  await expect(page.locator('.gdnext__advance')).toHaveText(/Next play/)
+}
 
 test('a click in the dead space above the button steps an at-bat', async ({ page }) => {
   await page.goto(`${GAME}/top1`)
@@ -85,10 +97,12 @@ test('the dead space reaches the seam with the step switch and the bar end, and 
   await expect.poll(() => stored(page, CURSOR)).toBe('0:2')
   expect(await stored(page, MARK)).toBeNull()
 
-  // The switch keeps its own taps: Pitch sets the mode and steps nothing
-  // (ADR-0123: the switch reveals nothing).
-  await page.getByRole('button', { name: 'Pitch', exact: true }).click()
+  // The switch keeps its own taps right up to its edge: a tap one pixel inside
+  // its right edge, where the advance's area begins, sets Pitch mode and steps
+  // nothing (ADR-0123: the switch reveals nothing).
+  await page.mouse.click(rested.switchEdgeX, rested.switchY)
   await expect.poll(() => stored(page, PITCH_MODE)).not.toBeNull()
+  await page.waitForTimeout(1500)
   expect(await stored(page, CURSOR)).toBe('0:2')
   await expect(page.locator('.gdnext__advance')).toHaveText(/Next pitch/)
 })
@@ -102,6 +116,7 @@ test('the Menu keeps its own taps', async ({ page }) => {
   await page.getByRole('button', { name: 'Menu', exact: true }).click()
 
   await expect(page.getByRole('dialog')).toHaveCount(1)
+  await page.waitForTimeout(1500)
   expect(await stored(page, CURSOR)).toBeNull()
 })
 
@@ -111,5 +126,6 @@ test('the page above the bar keeps its own taps', async ({ page }) => {
 
   await page.mouse.click(at.centreX, at.aboveBarY)
 
+  await settled(page)
   expect(await stored(page, CURSOR)).toBeNull()
 })

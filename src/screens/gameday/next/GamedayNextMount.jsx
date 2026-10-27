@@ -11,7 +11,7 @@ import { useGamedayStage } from './stage/useGamedayStage.jsx'
 // reveal state (a step, the next half, "Close the book", the box score; no "Rest of half"). `checkpoint` is set once
 // the half on screen is at or under the mark (its notes' inputs), and the checkpoint takes the stage.
 // `open` ({ count, sub }) is the at-bat the reader is inside (ADR-0123); `pitch` the At-bat | Pitch switch.
-export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoint, engine, advance, open, pitch, onBoxScore, onScorecard, refresh }) {
+export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoint, engine, advance, open, pitch, onBoxScore, onScorecard, onLineup, slateHref, notices, refresh }) {
   const band = bug.started && bug.live ? (
     <ScorebugMount {...bug} revealedThrough={mark} meta={meta} Bug={GamedayBand} />
   ) : (
@@ -56,6 +56,9 @@ export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoi
       pitch={pitch}
       onBoxScore={onBoxScore}
       onScorecard={onScorecard}
+      lineups={{ away: meta.away.abbreviation, home: meta.home.abbreviation, onLineup }}
+      slateHref={slateHref}
+      notices={notices}
       refresh={refresh}
     />
   )

@@ -101,12 +101,12 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   seal as the pre-scoring reference (above it while sealed, below the play-by-play
   once revealed), gated to `revealed || isNextToReveal` (ADR-0010). The data comes
   from the caller-gated pre-pitch selectors in `src/api/` (see `src/api/CLAUDE.md`).
-- **The Pitchers table** (`src/api/pitchers.js` → `computePitcherLines`, rendered by
-  `components/inning/PitchersSection.jsx`) is gated by the same `revealedThrough`
-  high-water mark as the seals rather than wrapped in a `SealBox` (ADR-0009). A
-  pure numeric stat grid — the season-context/health prose now lives in **Margin Notes**
-  (`MarginNotes.jsx`, same reveal-clamp footing), a ranked digest over both teams' arms that
-  demotes what this reader already saw (`hooks/useCalloutLedger.js`; rules `docs/callouts.md`).
+- **Pitcher lines** (`src/api/pitchers.js` → `computePitcherLines`) are gated by the same
+  `revealedThrough` high-water mark as the seals rather than wrapped in a `SealBox` (ADR-0009):
+  Gameday's day lines (`api/gameday/dayLine.js`), the box score and the scorecard read them
+  under that clamp. The season-context/health prose is **Margin Notes**
+  (`buildMarginNotes`, same footing), now an input to Gameday's checkpoint notes, demoted by what
+  this reader already saw (`hooks/useCalloutLedger.js`; rules `docs/callouts.md`).
 - **The "Now Pitching" card** (`HalfInning.jsx`) names the arm the half OPENS
   with, from `select.js`'s `selectHalfStartingPitcher` (spoiler-safe, callable
   before reveal), gated `revealed || isNextToReveal` (ADR-0010). It names that

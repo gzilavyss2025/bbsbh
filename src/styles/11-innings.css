@@ -1,15 +1,4 @@
 /* ---------------------------------------------------------------- innings */
-/* Room at the bottom so the last roster panel clears the fixed .pagenav bar.
-   Taller than the generic 72px other screens use: .pagenav--innings stacks a
-   Refresh button above the primary Next/reveal-split row at every width now
-   (see InningViewer.jsx), so the floating bar itself runs closer to 130px
-   tall (14px top pad + 34px refresh + 8px gap + 44px button row + 14px
-   bottom pad) — 72px left the primary row, and sometimes Refresh too,
-   overlapping the last content above it. */
-.innings {
-  padding-bottom: calc(130px + env(safe-area-inset-bottom));
-}
-
 /* Section tabs + half navigator wrapper. On a phone they stack (each child
    keeps its own margins); the wide layout flips this to a single row (see the
    740px media query).

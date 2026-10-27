@@ -1,9 +1,9 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { usePreferences } from '../hooks/preferences/usePreferences.js'
-import { gameSeriesHref, sectionToStep, stepToSection } from '../lib/route.js'
+import { canonicalSection, gameSeriesHref, sectionToStep, slatePath, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
 import { selectHasNoPlayByPlay } from '../api/gamerecord/played.js'
 import { Door } from '../components/ui/control/Door.jsx'
@@ -69,6 +69,12 @@ const ScorecardPage = lazy(() =>
 // driven entirely by `section` / `onSection` so every step is a real URL.
 export function GameView({ game, section, onSection }) {
   const { step, inning, half } = sectionToStep(section)
+  // An old half address (express-top5, inning4) opens its half, then becomes the address the app
+  // writes (top5), replaced so Back never revisits it.
+  const canonical = canonicalSection(section)
+  useEffect(() => {
+    if (canonical) onSection(canonical, { replace: true })
+  }, [canonical]) // eslint-disable-line react-hooks/exhaustive-deps
   const [sketching, setSketching] = useState(null) // 'away' | 'home' | null
 
   // All of this game's data fetching (feed, uniforms, managers, weather,
@@ -380,6 +386,10 @@ export function GameView({ game, section, onSection }) {
             onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
             onBoxScore={() => onSection('boxscore')}
             onScorecard={() => onSection('scorecard')}
+            onLineup={(side) => onSection(side === 'home' ? 'lineup2' : 'lineup1')}
+            slateHref={slatePath(officialDate, game.sportId)}
+            gameStatus={selectGameStatus(feed)}
+            refreshFailed={Boolean(feedState.error)}
             onReload={feedState.reload}
             loading={feedState.loading}
             lastUpdated={feedState.lastUpdated}

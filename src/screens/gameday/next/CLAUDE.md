@@ -9,7 +9,11 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   (`e2e/gameday-no-scroll.spec.js`). The tier (`lib/gameday/ladder.js`) is `data-tier` on the root
   and `styles/gameday-next/page.css` names the grid areas; the stage row takes the slack. The bar
   holds the Menu, the "At-bat | Pitch" switch and the advance, which owns the bar's dead space
-  (`e2e/reveal-hit-area.spec.js`). There is no "Rest of half".
+  (`e2e/reveal-hit-area.spec.js`); it holds with aria-disabled, never `disabled`, so a tap still ends
+  a hold, and the live edge is a polite status. There is no "Rest of half". The frame hides the site
+  chrome, so the Menu carries the ways out (both lineups, the scorecard, the box score, the slate),
+  and a delay, suspension or failed refresh is a strip under the band (the stage row gives up the
+  room; the band keeps `--gd-band-h`).
 - The old half page is mounted `hidden` as the engine: it reports the live snapshot (band), the
   step cursor and the runs so far, and its page turn moves halves. Rebuilding the engine is what
   lets it go; until then its parts stay (`components/inning/`, `styles/focus/`).

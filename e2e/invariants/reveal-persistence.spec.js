@@ -22,6 +22,18 @@ async function cellName(page, half) {
   return name
 }
 
+// How many line-score cells read sealed and how many show runs: exact counts, so a half that
+// leaked (or a mark that crept) changes them.
+async function cellCounts(page) {
+  await halfCell(page, 'Top 1')
+  const names = await page.locator('.gdp__run').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')))
+  if (await page.getByRole('dialog').count()) {
+    await page.keyboard.press('Escape')
+    await page.getByRole('dialog').waitFor({ state: 'detached' })
+  }
+  return { sealed: names.filter((n) => /, sealed$/.test(n)).length, runs: names.filter((n) => /, \d+ runs?$/.test(n)).length }
+}
+
 test('reveal mark advances forward, gates the line score and the checkpoint, and survives reload without over-revealing', async ({
   page,
 }) => {
@@ -35,7 +47,11 @@ test('reveal mark advances forward, gates the line score and the checkpoint, and
   // Nothing revealed yet: the checkpoint (`.gdcp`, gated on the same mark) is
   // not in the DOM at all.
   await expect(page.locator('.gdcp')).toHaveCount(0)
+  // The hero's revealed box (the batter's name and his code) is not there either.
+  await expect(page.locator('.gdhero__who')).toHaveCount(0)
+  await expect(page.locator('.gdhero__code')).toHaveCount(0)
   expect(await cellName(page, 'Bottom 1')).toBe('Bottom 1, sealed')
+  expect(await cellCounts(page)).toEqual({ sealed: 18, runs: 0 })
 
   await revealHalf(page)
 
@@ -53,13 +69,19 @@ test('reveal mark advances forward, gates the line score and the checkpoint, and
   // revealed and the line score keeps its runs)...
   await page.reload()
   await page.locator('.gdnext__advance').waitFor()
-  expect(await page.locator('.statgrid').count()).toBeGreaterThan(0)
+  // Exactly one revealed box in the hero (the half's first at-bat), and exactly one half's runs
+  // in the line score: the other 17 halves still read sealed.
+  await expect(page.locator('.gdhero__who')).toHaveCount(1)
+  await expect(page.locator('.gdhero__code')).toHaveCount(1)
   expect(await cellName(page, 'Top 1')).toMatch(/^Top 1, \d+ runs?$/)
+  expect(await cellCounts(page)).toEqual({ sealed: 17, runs: 1 })
 
   // ...but the persisted mark must not have crept past what was actually
   // revealed: bottom of the 1st is still sealed after the reload.
   await page.goto(`${GAME}/bottom1`)
   await expect(page.locator('.gdnext__advance')).toHaveText(/Next play/)
   await expect(page.locator('.gdcp')).toHaveCount(0)
+  await expect(page.locator('.gdhero__who')).toHaveCount(0)
   expect(await cellName(page, 'Bottom 1')).toBe('Bottom 1, sealed')
+  expect(await cellCounts(page)).toEqual({ sealed: 17, runs: 1 })
 })

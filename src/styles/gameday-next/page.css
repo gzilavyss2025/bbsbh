@@ -17,28 +17,37 @@
 }
 .gdnext[data-tier='P'] {
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 86px minmax(0, 1fr) 240px 80px;
+  --gd-band-h: 86px;
+  grid-template-rows: auto minmax(0, 1fr) 240px 80px;
   grid-template-areas: 'band' 'stage' 'hero' 'bar';
 }
 .gdnext[data-tier='T'] {
   grid-template-columns: minmax(0, 452fr) minmax(0, 264fr);
-  grid-template-rows: 72px 44px minmax(0, 1fr) 268px 66px 80px;
+  --gd-band-h: 72px;
+  grid-template-rows: auto 44px minmax(0, 1fr) 268px 66px 80px;
   grid-template-areas: 'band band' 'navigator navigator' 'stage stage' 'hero pitches' 'trail trail' 'bar bar';
 }
 .gdnext[data-tier='L'] {
   grid-template-columns: 240px repeat(2, minmax(0, 1fr)) 240px;
-  grid-template-rows: 66px minmax(0, 1fr) 168px 58px 76px;
+  --gd-band-h: 66px;
+  grid-template-rows: auto minmax(0, 1fr) 168px 58px 76px;
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage reference'
     'battingOrder hero hero reference' 'trail trail trail trail' 'bar bar bar bar';
 }
 .gdnext[data-tier='D'] {
   grid-template-columns: 264px minmax(0, 1fr) 324px 264px;
-  grid-template-rows: 68px minmax(0, 1fr) 164px 66px 68px;
+  --gd-band-h: 68px;
+  grid-template-rows: auto minmax(0, 1fr) 164px 66px 68px;
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage reference'
     'battingOrder hero pitches eventLog' 'trail trail trail trail' 'bar bar bar bar';
 }
 
-.gdnext__band { grid-area: band; min-width: 0; display: flex; }
+/* The band row is `auto`: the band keeps its tier's height (--gd-band-h), and the status strip
+   under it, when there is one, takes its room from the stage row. */
+/* layout-exempt: the band over its status strip */
+.gdnext__band { grid-area: band; min-width: 0; display: flex; flex-direction: column; }
+.gdnext__band > :first-child { flex: 0 0 var(--gd-band-h); min-height: 0; }
+.gdnext__notice { margin: 0; padding: var(--space-1) var(--space-3); background: var(--marker); color: var(--text-heading); }
 .gdnext__slot { grid-area: var(--gd-area); position: relative; min-width: 0; min-height: 0; overflow: hidden;
   border: var(--bw-rule) solid var(--border-rule); background: var(--surface-inset); }
 .gdnext__slot--navigator { --gd-area: navigator; }

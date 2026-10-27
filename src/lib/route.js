@@ -671,6 +671,16 @@ export function sectionToStep(section) {
   return { step: 0, inning: 1, half: 'top' } // lineup1 / anything unknown
 }
 
+// The canonical half section ('top5') for an old one that still opens a half ('express-top5',
+// 'inning4'), or null when the section is already canonical or names no half. GameView replaces
+// the address with it once, so an old link ends on the address the app itself writes.
+export function canonicalSection(section) {
+  const { step, inning, half } = sectionToStep(section)
+  if (step !== 2) return null
+  const canonical = stepToSection(2, inning, half)
+  return canonical === section ? null : canonical
+}
+
 // step (+ inning/half for the innings viewer) -> section string.
 export function stepToSection(step, inning = 1, half = 'top') {
   if (step === 0) return 'lineup1'

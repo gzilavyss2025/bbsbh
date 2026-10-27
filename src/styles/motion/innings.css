@@ -11,20 +11,6 @@
    off the score, the inning, or how late the game is. One says "in progress"
    and the other says "press here"; that is the whole of what they know. */
 
-/* ---------------------------------------------------------------- #978 */
-/* The innings bar's live-edge dot, on the beat the slate card's LIVE pill
-   runs — @keyframes tally-breathe is declared once beside that pill in
-   motion/slate.css, and keyframes are document-global, so both dots share the
-   one definition. The dot itself is in 07-team-logo-and-buttons.css. */
-.liveedge__dot {
-  animation: tally-breathe 2.4s var(--ease-standard) infinite alternate;
-}
-@media (prefers-reduced-motion: reduce) {
-  .liveedge__dot {
-    animation: none;
-  }
-}
-
 /* ---------------------------------------------------------------- #983 */
 .btn--reveal:hover,
 .btn--reveal:active,
@@ -32,7 +18,7 @@
   animation: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .btn--reveal:not(.revealsplit__btn--quiet) {
+  .btn--reveal {
     animation: none;
   }
 }

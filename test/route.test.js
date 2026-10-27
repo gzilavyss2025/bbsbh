@@ -13,6 +13,7 @@ import test from 'node:test'
 import { isYearView } from '../src/lib/dates.js'
 import { SEASONS } from '../src/api/tradeDeadline.js'
 import {
+  canonicalSection,
   gameNotesPath,
   parseRoute,
   slugify,
@@ -603,6 +604,17 @@ test('an old Express Lane address opens Gameday on its half (Gameday replaced it
   // Bare `express` named no half: it falls to the lineup default, as do malformed ones.
   for (const bad of ['express', 'express-', 'express-top', 'express-sideways2', 'expressly']) {
     assert.equal(sectionToStep(bad).step, 0, bad)
+  }
+})
+
+test('canonicalSection names the address an old half section should be replaced with', () => {
+  // GameView replaces the URL once with it (replace: true), so an old link ends on topN.
+  assert.equal(canonicalSection('express-top5'), 'top5')
+  assert.equal(canonicalSection('express-bottom3'), 'bottom3')
+  assert.equal(canonicalSection('inning4'), 'top4')
+  // Already canonical, or not a half: nothing to replace.
+  for (const ok of ['top5', 'bottom12', 'lineup1', 'lineup2', 'boxscore', 'scorecard', 'express', undefined]) {
+    assert.equal(canonicalSection(ok), null, String(ok))
   }
 })
 

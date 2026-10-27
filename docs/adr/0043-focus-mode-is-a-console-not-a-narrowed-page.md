@@ -508,7 +508,10 @@ What is new (Gary's calls, 2026-10-22 to 2026-10-27):
   any form. The advance reads "Next play ›" in at-bat mode and "Next pitch ›" in pitch mode, the
   same on every tap within a mode (ADR-0123); after the third out it names the next half; at the
   end, "Close the book ›", then the box score. The advance owns the bar's dead space around it
-  (`e2e/reveal-hit-area.spec.js`).
+  (`e2e/reveal-hit-area.spec.js`) and holds with aria-disabled, so a tap still ends a hold.
+- **The frame hides the site chrome** (Gary, 2026-10-27): the Menu carries the doors out (both
+  lineups, the scorecard, the box score, the slate for the game's date), and a delay, suspension or
+  failed refresh reads as a thin strip under the band, inside the frame.
 - **The stage** is 16-bit sprites with its own `--stage-*` palette. It plays only on the reveal tap,
   never on a cold load, a return visit, a poll or a force-reveal; a tap during a play skips it. The
   zone map shows only at rest before a tapped play, and the reader can dismiss it for the game

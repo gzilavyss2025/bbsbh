@@ -204,10 +204,6 @@
     margin-inline: auto;
   }
 
-  /* ---- innings, wide layout. Refresh rides in the floating bottom bar above
-     Next at every width now (see .pagenav--innings), so it's always one reach
-     from the primary action — the old top toolbar is gone. */
-
   /* The jump bar and the half navigator stay stacked here, as on a phone, and run the
      masthead card's full width: all three are bordered boxes, so a narrower middle one
      reads as a mistake. They shared one centered 780px row while the tabs were five

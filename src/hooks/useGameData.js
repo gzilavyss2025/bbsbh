@@ -41,7 +41,7 @@ const FEED_POLL_MS = 60 * 1000
 
 // Sticky "has `active` ever been true for the current `resetKey`" flag — lets
 // a fetch start lazily on first visit to its consuming surface (winProb: the
-// innings view or the box score; highlights: either one too — see below),
+// box score; highlights: the innings view or the box score — see below),
 // then behave exactly like every other feed-derived fetch in this hook: fired
 // once, cached, and immune to a later visit toggling the surface off and back
 // on (navigating from the box score back to a lineup page must not drop
@@ -59,9 +59,9 @@ function useEverActive(active, resetKey) {
 }
 
 // Owns every data fetch a game page needs: the feed itself plus the roughly
-// nine independent lookups derived from or alongside it (managers, weather,
-// starter lines, win probability, pitcher roles, prospects, callouts,
-// broadcast, former teammates). Pulling this out of GameView keeps that
+// independent lookups derived from or alongside it (managers, weather,
+// starter lines, win probability, prospects, callouts, broadcast, former
+// teammates). Pulling this out of GameView keeps that
 // component free to focus on section-routing and rendering; this hook is the
 // one place that reasons about fetch sequencing/keying/caching.
 //
@@ -213,15 +213,12 @@ export function useGameData(game, activeStep = null) {
   )
 
   // Per-play win probability — the sole source of WPA for the box score's
-  // three stars, and of the innings view's WinProbChart band (both reveal-
-  // clamped to `revealedThrough`, never rendered before that). Neither
-  // consumer exists on the two lineup pages (step 0/1), so the fetch itself
-  // waits for the innings view or the box score to actually be opened
-  // (`useEverActive`) rather than firing on every cold game load — a live
-  // Refresh still won't re-pull it once fetched, matching how both consumers
-  // are really a post-reveal/post-game read. Resolves null off-MLB, hiding
-  // the card.
-  const winProbActive = useEverActive(activeStep === 2 || activeStep === 3, game.gamePk)
+  // three stars (reveal-clamped, never rendered before that). The box score is
+  // its one consumer since Gameday replaced the innings console (#2566), so the
+  // fetch waits for the box score to actually be opened (`useEverActive`)
+  // rather than firing on every cold game load — a live Refresh still won't
+  // re-pull it once fetched. Resolves null off-MLB, hiding the card.
+  const winProbActive = useEverActive(activeStep === 3, game.gamePk)
   const winProb = useAsync(
     () => (feed && winProbActive ? fetchWinProbability(game.gamePk) : Promise.resolve(null)),
     [game.gamePk, Boolean(feed), winProbActive],
@@ -244,8 +241,7 @@ export function useGameData(game, activeStep = null) {
   // `winProb` above; the 5-minute poll below is a no-op while inactive.
   // Resolves [] on failure or off-MLB (most MiLB games carry no clips).
   //
-  // TWO consumers now, so the gate matches winProb's exactly: the innings
-  // view's per-play Watch buttons (step 2) and the box score's Play of the
+  // TWO consumers: the innings view's per-play Watch buttons (step 2) and the box score's Play of the
   // Game card (step 3), which looks up the one clip for its WPA-picked play
   // inside its own SealBox reveal render.
   const highlightsActive = useEverActive(activeStep === 2 || activeStep === 3, game.gamePk)

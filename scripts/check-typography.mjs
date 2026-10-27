@@ -103,7 +103,6 @@ const SPACING_RESIDUE = {
   // joined the scale. A derived literal follows its input or it stops being
   // derived — see the re-derivation note at that rule.
   '08-site-shell.css': { 22: 2 },
-  '11-innings.css': { 130: 1 },
   '16-identity-lab-shell.css': { 72: 1, 120: 1, 200: 1 },
   '19-pattern-and-sketch-labs.css': { 22: 1, 28: 1 },
   '21-box-score.css': { 72: 1 },

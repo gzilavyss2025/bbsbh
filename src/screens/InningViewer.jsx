@@ -88,6 +88,10 @@ export function InningViewer({
   onInning,
   onBoxScore,
   onScorecard,
+  onLineup,
+  slateHref,
+  gameStatus,
+  refreshFailed,
   onReload,
   loading,
   lastUpdated,
@@ -533,7 +537,7 @@ export function InningViewer({
   const advance = focus.stepAhead
     ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && focus.stepNext() }
     : currentSealed
-      ? { label: edge ? 'Caught up' : stepWords(pitchMode), disabled: edge, onClick: revealNextStep, reveal: true }
+      ? { label: edge ? 'Caught up' : stepWords(pitchMode), disabled: edge, caughtUp: edge, onClick: revealNextStep, reveal: true }
       : nextIdx != null
         ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
         : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }
@@ -559,6 +563,12 @@ export function InningViewer({
         pitch={{ on: pitchMode, set: setPitchMode }}
         onBoxScore={onBoxScore}
         onScorecard={onScorecard}
+        onLineup={onLineup}
+        slateHref={slateHref}
+        notices={[
+          gameStatus?.label && `${gameStatus.label}${gameStatus.reason ? ` — ${gameStatus.reason}` : ''}`,
+          refreshFailed && 'Couldn’t refresh — showing the last update.',
+        ].filter(Boolean)}
         refresh={selectIsFinal(feed) ? null : <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />}
       />
     </CalloutLedgerProvider>

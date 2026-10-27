@@ -334,43 +334,6 @@
   margin-top: 20px;
 }
 
-/* "Caught up" status — replaces the forward action in the innings bar once the
-   reader has stepped through every fetched at-bat of a half still being played
-   (ADR-0055, InningActionBar). Same footprint as .btn--next / .revealsplit so
-   the bar never jumps as the next batter arrives; a soft medal-amber chip with
-   a slow-pulsing dot, reading "we're current." */
-.liveedge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  width: 100%;
-  margin-top: 20px;
-  min-height: var(--tap-min);
-  padding: var(--space-2) var(--space-3);
-  border: var(--bw-rule) solid var(--seal);
-  border-radius: var(--radius-sm);
-  background: var(--award-soft);
-  color: var(--award-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-}
-/* The dot at rest. Its breath — and the reduced-motion cut — live in
-   motion/innings.css, with the rest of this page's motion. It used to push a
-   ring outward on `box-shadow` here, which the compositor cannot take (it
-   repaints every frame) and which reads as a notification rather than as a
-   game quietly running. */
-.liveedge__dot {
-  flex: none;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--seal);
-}
-
 /* The innings bar's primary action while the shown half is still sealed. It IS
    the seal now (the inline cover is gone): the same kraft diagonal-hatch texture
    the cover box carried, so revealing still reads as "peel the tape." Flips to
