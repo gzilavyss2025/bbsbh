@@ -1,11 +1,10 @@
 // The stage's world: Statcast's frame in feet (x toward first base, y from the plate toward the
-// mound, z up, home plate at the origin), vector math, the pitch-view camera and the park's wall.
+// mound, z up, home plate at the origin), vector math and the park's wall.
 // Pure: no React, no DOM, no clock. Part of Gameday's stage (#2568 slice 4, #2569).
 import { wallOnLine } from '../../../../lib/ballpark/ballFlight.js'
 
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
 export const lerp = (a, b, u) => a + (b - a) * u
-export const ease = (u) => (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2)
 export const smooth = (u) => u * u * (3 - 2 * u)
 
 export const v3 = {
@@ -21,11 +20,9 @@ export const v3 = {
 
 // A point `ft` out on the ray `deg` off straightaway center (negative toward left field).
 export const polar = (deg, ft, z = 0) => [ft * Math.sin((deg * Math.PI) / 180), ft * Math.cos((deg * Math.PI) / 180), z]
-export const bearingOf = (x, y) => (Math.atan2(x, y) * 180) / Math.PI
 
 const B90 = 90 / Math.SQRT2
 export const BASES = { home: [0, 0, 0], '1B': [B90, B90, 0], '2B': [0, 2 * B90, 0], '3B': [-B90, B90, 0] }
-export const MOUND = [0, 60.5, 0]
 // Where each fielder stands, drawn (not tracked).
 export const POS = {
   P: [0, 58, 0], C: [0, -3.5, 0], '1B': polar(37, 108), '2B': polar(14, 148), SS: polar(-13, 146),
@@ -44,29 +41,4 @@ export function wallFn(layout) {
     }
     return memo.get(d)
   }
-}
-
-// ---- Camera ------------------------------------------------------------------------------------
-function camera(pos, target, vfov) {
-  const f = v3.norm(v3.sub(target, pos))
-  let r = v3.cross(f, [0, 0, 1])
-  if (v3.len(r) < 1e-6) r = [1, 0, 0]
-  r = v3.norm(r)
-  return { pos, f, r, u: v3.cross(r, f), k: 1 / Math.tan(((vfov || 30) * Math.PI) / 360) }
-}
-
-// Screen px for a W x H buffer: d is depth in ft, s px per ft at that depth. Null behind the lens.
-export function project(cam, p, W, H) {
-  const q = v3.sub(p, cam.pos), d = v3.dot(q, cam.f)
-  if (d < 0.5) return null
-  const half = H / 2
-  return { x: W / 2 + ((v3.dot(q, cam.r) * cam.k) / d) * half, y: half - ((v3.dot(q, cam.u) * cam.k) / d) * half, d, s: (cam.k * half) / d }
-}
-
-// Behind home plate, a little high. A tall phone stage would cut the batter off with a fixed lens,
-// so the vertical field of view widens to keep at least 6 ft either side of the plate in view
-// (round 1 finding, #2568).
-export function homeCamera(aspect) {
-  const needHalfV = (Math.atan(Math.tan((11.3 * Math.PI) / 180) / Math.max(0.2, aspect)) * 180) / Math.PI
-  return camera([0, -30, 7.2], [0, 30, 2.2], Math.max(23, 2 * needHalfV))
 }

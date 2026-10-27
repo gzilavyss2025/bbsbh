@@ -3,14 +3,16 @@ import '../../../../styles/gameday-next/stage.css'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
 import { drawStage, stageScale } from './drawStage.js'
 import { stateAt } from './play.js'
-import { TOKENS } from './pixels.js'
+import { SpriteTargets } from './SpriteTargets.jsx'
+import { spriteTargets } from './actors.js'
+import { S, TOKENS } from './pixels.js'
 
-// Gameday's stage: a low-resolution buffer (about 256 px wide) scaled up by a whole number, so every
+// Gameday's stage: a low-resolution buffer (about 480 px wide) scaled up by a whole number, so every
 // pixel stays square. `play` is stagePlay()'s output, built only from a REVEALED play (ADR-0001);
 // without a `play` the canvas draws nothing. With `t` (seconds after the tap) it draws that one
 // frame; without, it plays from `start` (a performance.now() time, so a re-render mid-play keeps its
-// place) to the end of the play, or jumps to the end under reduced motion. `zones`
-// tints the rest frame (drawStage). The tap rule and the mount are GamedayStage.js and tapRule.js.
+// place) to the end of the play, or jumps to the settled result under reduced motion.
+// The zone card is a separate overlay. The tap rule and the mount are GamedayStage.js and tapRule.js.
 
 // The --stage-* tokens as packed little-endian RGBA, in pixels.js's slot order. A 1 px canvas turns
 // any CSS colour the token holds into bytes.
@@ -25,9 +27,10 @@ function paletteOf(el) {
   })
 }
 
-export function StageCanvas({ play, t, start, zones, label = 'The play on the field' }) {
+export function StageCanvas({ play, t, start, actors, label = 'The play on the field' }) {
   const box = useRef(null)
   const cv = useRef(null)
+  const targets = useRef(new Map())
   const [size, setSize] = useState(null)
   useEffect(() => {
     const ro = new ResizeObserver(([e]) => setSize({ W: Math.floor(e.contentRect.width), H: Math.floor(e.contentRect.height) }))
@@ -40,10 +43,17 @@ export function StageCanvas({ play, t, start, zones, label = 'The play on the fi
   useEffect(() => {
     if (!play || !w || !h) return undefined
     const g = cv.current.getContext('2d'), pal = paletteOf(cv.current), img = g.createImageData(w, h), out = new Uint32Array(img.data.buffer)
+    // The field stays opaque; its surround lets the shared stadium wash show through.
+    pal[S.overheadNight] = 0
     const paint = (s) => {
-      const fb = drawStage(stateAt(play, s), w, h, zones)
+      const fb = drawStage(stateAt(play, s), w, h)
       for (let i = 0; i < fb.px.length; i++) out[i] = pal[fb.px[i]]
       g.putImageData(img, 0, 0)
+      for (const [key, el] of targets.current) {
+        const sprite = fb.sprites.find((p) => p.key === key)
+        el.hidden = !sprite
+        if (sprite) el.style.transform = 'translate(' + sprite.x * scale + 'px,' + sprite.y * scale + 'px) translate(-50%, -50%)'
+      }
     }
     if (t != null) { paint(t); return undefined }
     if (motionIsReduced()) { paint(play.end); return undefined }
@@ -56,9 +66,10 @@ export function StageCanvas({ play, t, start, zones, label = 'The play on the fi
     }
     id = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(id)
-  }, [play, t, start, zones, w, h])
+  }, [play, t, start, actors, w, h, scale])
   return (
     <div ref={box} className="gdstage">
+      <SpriteTargets targets={spriteTargets(play, actors)} elements={targets} />
       <canvas ref={cv} className="gdstage__canvas" role="img" aria-label={label} width={w} height={h} style={{ width: w * scale, height: h * scale }} />
     </div>
   )

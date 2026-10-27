@@ -2,6 +2,11 @@ import { createElement as h, useEffect, useMemo, useState } from 'react'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
+import { useCopy } from '../../../../copy/copyContext.js'
+import { parkBackdrop } from '../../../../lib/ballpark/parkBackdrop.js'
+import { parkWashColorOverride } from '../../../../lib/ballpark/parkWash.js'
+import { teamPrimaryColor } from '../../../../lib/teams.js'
+import { stageActors } from './actors.js'
 import { stagePlay } from './play.js'
 
 // The stage slot (#2573, #2568 slice 4): the revealed play, or the rest frame. A `.js` file so the
@@ -9,8 +14,9 @@ import { stagePlay } from './play.js'
 //
 // SPOILER FOOTING. `shown` (tapRule.js) is an at-bat the reader already revealed. Its feed play is
 // read only inside the SealBox reveal render function (ADR-0001, ADR-0002), so a home run's landing
-// exists only in the revealed stage. The rest frame reads no play at all: the batter's side, the
-// pitcher's hand and the zone map's pre-game temperatures only.
+// exists only in the revealed stage. The rest canvas reads no result: the batter's side, the
+// pitcher's hand and the zone card's pre-game temperatures only. Hover identities below use
+// the existing defense step clamp inside their own SealBox reveal function.
 //
 // A sub-step (`shown` { count, sub }, steps/subStep.js stageKey) plays one pitch: the at-bat's play cut at that
 // pitch, with only the runner moves before it. Any other sub-step (an event, a change, an automatic
@@ -31,7 +37,7 @@ function subPlay(feed, inning, half, { count, sub }) {
   return { p: cut, still: false }
 }
 
-function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd }) {
+function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, actors }) {
   const [start] = useState(() => performance.now())
   const { play, still } = useMemo(() => {
     const { p, still } = typeof idx === 'object' ? subPlay(feed, inning, half, idx) : { p: feed.liveData.plays.allPlays.find((q) => q.about?.atBatIndex === idx), still: false }
@@ -44,7 +50,7 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd }) 
     const id = setTimeout(onEnd, left)
     return () => clearTimeout(id)
   }, [playing, play, still, start, onEnd])
-  return h(StageCanvas, playing && !still ? { play, start } : { play, t: still ? 0 : play.end })
+  return h(StageCanvas, playing && !still ? { play, start, actors } : { play, t: still ? 0 : play.end, actors })
 }
 
 // Who stands in at rest: the due-up batter of the half being scored (dueup.js, the pre-pitch lineup),
@@ -60,14 +66,23 @@ export const restZones = (zm, batterId, hidden) => (!hidden && batterId != null 
 
 // At rest the batter stands where he will hit: a switch hitter (S) opposite the pitcher's throwing
 // hand. Both are pre-game player data. A revealed play uses its own matchup.batSide instead.
-function Rest({ StageCanvas, wall, batSide, pitchHand, zones }) {
+function Rest({ StageCanvas, wall, batSide, pitchHand, zones, actors }) {
   const side = batSide === 'S' ? (pitchHand === 'L' ? 'R' : 'L') : batSide
   const play = useMemo(() => stagePlay({ matchup: { batSide: { code: side }, pitchHand: { code: pitchHand } } }, wall), [wall, side, pitchHand])
-  return h(StageCanvas, { play, t: 0, zones, label: 'The field before the pitch' })
+  return h(StageCanvas, { play, t: 0, zones, actors, label: 'The field before the pitch' })
 }
 
-export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, playing, onEnd, batSide, pitchHand, zones }) {
-  return shown != null
-    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd }))
-    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones })
+export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, playing, onEnd, batSide, pitchHand, zones, mark, step, open, batter }) {
+  // The same photograph, crop and club wash as the identity drawer. Identity only:
+  // no revealed play, score or inning decides this decorative background.
+  const { t } = useCopy()
+  const venue = feed?.gameData?.venue, homeId = feed?.gameData?.teams?.home?.id
+  const park = parkBackdrop(venue?.name, t, venue?.id)
+  const color = homeId != null ? parkWashColorOverride(homeId) ?? teamPrimaryColor(homeId) : null
+  const style = { ...(park ? { '--park-art': park.cssUrl, '--park-focus': park.focus } : null), ...(color ? { '--park-tint': color } : null) }
+  const field = (actors) => shown != null
+    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, actors }))
+    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, actors })
+  return h('div', { className: 'gdstageScene', style }, mark == null ? field(null)
+    : h(SealBox, { coverless: true, forceRevealed: true }, () => field(stageActors(feed, { inning, half, mark, step, open, batter }))))
 }

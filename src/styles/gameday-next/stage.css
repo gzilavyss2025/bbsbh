@@ -1,10 +1,15 @@
 /* ==== GAMEDAY's stage canvas (screens/gameday/next/stage/) ====
    A pixel buffer scaled by a whole number: square pixels, no smoothing. */
+.gdstageScene { position: absolute; inset: 0; isolation: isolate; background: var(--bg-canvas); }
+.gdstageScene::before, .gdstageScene::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+.gdstageScene::before { background-image: var(--park-art, none); background-size: cover;
+  background-position: var(--park-focus, 50% 50%); filter: grayscale(1); opacity: 0.24; }
+.gdstageScene::after { background: var(--park-tint, var(--stage-overhead-night)); mix-blend-mode: color; }
 .gdstage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;
-  background: var(--stage-frame); }
+  z-index: 1; }
 .gdstage__canvas { flex: none; image-rendering: pixelated; }
 /* The SealBox around the revealed play adds no box: the canvas fills the slot. */
-.gdnext__slot--stage > .statgrid { display: contents; }
+.gdnext__slot--stage > .statgrid, .gdstageScene .statgrid { display: contents; }
 
 /* The event card (ADR-0123, #2571): a lower third on the stage, the runner's own box beside the words */
 /* layout-exempt: the box beside its words, across the stage's foot */
@@ -19,3 +24,8 @@
 .gdevent__txt { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; font-size: var(--fs-small); }
 .gdevent__kind { align-self: flex-start; padding: 2px var(--space-1h); background: var(--surface-stamped-ink); color: var(--text-on-ink);
   font: var(--w-bold) var(--fs-label) / 1 var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
+
+/* Transparent semantic targets track the small painted players. */
+.gdstage__target { position: absolute; z-index: 2; top: 0; left: 0; }
+.gdstage__player { width: var(--control-min); height: var(--control-min); }
+@media (pointer: coarse) { .gdstage__player { width: var(--tap-min); height: var(--tap-min); } }

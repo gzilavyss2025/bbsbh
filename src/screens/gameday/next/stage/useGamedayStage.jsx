@@ -52,6 +52,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
     <>
       <GamedayStage
         SealBox={SealBox} StageCanvas={StageCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} playing={cur.playing} onEnd={onEnd}
+        mark={mark} step={open?.count ?? null} open={open} batter={batter}
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones}
       />
       {zones && (
