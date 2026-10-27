@@ -8,10 +8,10 @@ const NEVER_FOLD = ['band', 'stage', 'hero', 'bar']
 
 test('each tier at its round 1 size shows its blocks', () => {
   assert.deepEqual(blocksFor(tierOf(390, 763)), NEVER_FOLD)
-  assert.deepEqual(blocksFor(tierOf(760, 1024)), [...NEVER_FOLD, 'navigator', 'trail', 'pitches'])
+  assert.deepEqual(blocksFor(tierOf(760, 1024)), [...NEVER_FOLD, 'navigator', 'trail'])
   assert.deepEqual(blocksFor(tierOf(1180, 820)), [...NEVER_FOLD, 'navigator', 'trail', 'battingOrder', 'reference'])
   assert.deepEqual(blocksFor(tierOf(1440, 900)), [
-    ...NEVER_FOLD, 'navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog',
+    ...NEVER_FOLD, 'navigator', 'trail', 'battingOrder', 'reference', 'eventLog',
   ])
 })
 
@@ -31,7 +31,7 @@ test('the never-fold set is in every tier', () => {
 })
 
 test('the menu folds what the tier does not show', () => {
-  assert.deepEqual(foldedFor('P'), ['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog'])
+  assert.deepEqual(foldedFor('P'), ['navigator', 'trail', 'battingOrder', 'reference', 'eventLog'])
   assert.deepEqual(foldedFor('D'), [])
 })
 

@@ -11,6 +11,9 @@ export function celebrationForPlay(play, gameData) {
   const nameOf = (person) => person?.fullName ?? gameData?.players?.[`ID${person?.id}`]?.fullName ?? ''
   const of = (scene, person, side) => ({ scene, name: nameOf(person), teamId: gameData?.teams?.[side]?.id ?? null })
   if (type === 'home_run') return of(result.rbi >= 4 ? 'grandSlam' : 'homeRun', play.matchup?.batter, batting)
+  // Every other RBI (Gary, 2026-10-27): the batter's art, the headline naming the play.
+  const rbi = result?.rbi ?? 0
+  if (rbi > 0) return { scene: 'rbi', headline: `${rbi === 1 ? 'RBI' : `${rbi}-run`} ${result.event ?? ''}`.trim(), ...of('rbi', play.matchup?.batter, batting) }
   const scored = (play.runners ?? []).some((r) => r.movement?.end === 'score' && r.movement?.isOut !== true)
   if (type.startsWith('strikeout') && result.isOut === true && !scored) return of('strikeout', play.matchup?.pitcher, fielding)
   if (result?.isOut !== true || scored) return null

@@ -13,6 +13,7 @@ import {
   mergeMark,
   unlockedInnings,
   effectiveReveal,
+  markAfterStep,
 } from '../src/hooks/revealProgressCore.js'
 import { halfIndex } from '../src/api/select.js'
 
@@ -240,4 +241,12 @@ test('parseBoxRevealMark reads anything else as sealed', () => {
   for (const raw of [null, undefined, '', '0', '2', 'true', 'yes', '1 ', ' 1', '01', '{}', 1, true]) {
     assert.equal(parseBoxRevealMark(raw), false, `${JSON.stringify(raw)} must not lift a seal`)
   }
+})
+
+// A step inside a half opens every half before it (Gary, 2026-10-27): a reader who jumps to the 4th on a
+// fresh device and starts stepping has passed the halves they skipped, so the Due up and the arm open.
+test('markAfterStep ratchets the mark to the half before the one being stepped, never back', () => {
+  assert.equal(markAfterStep(-1, halfIndex(4, 'top')), halfIndex(3, 'bottom'))
+  assert.equal(markAfterStep(-1, 0), -1)
+  assert.equal(markAfterStep(9, halfIndex(4, 'top')), 9)
 })

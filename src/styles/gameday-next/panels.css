@@ -1,4 +1,4 @@
-/* ==== GAMEDAY panels (docs/gameday-build.md, prompt 8): navigator, trail, pitches, batting order,
+/* ==== GAMEDAY panels (docs/gameday-build.md, prompt 8): navigator, trail, batting order,
    reference, event log. Each fills a .gdnext__slot; nothing scrolls, so each clips (the ladder
    folds what does not fit into the menu). */
 .gdnext__slot--navigator { background: var(--surface-card); }
@@ -57,11 +57,7 @@
 .gdp__chip--cover { background: var(--text-heading); color: var(--surface-card); }
 .gdp__chip--cover b { border-right: 0; background: none; padding: 0 var(--space-4); font-family: var(--font-display); letter-spacing: var(--ls-xwide); }
 
-.gdp__pitches, .gdp__order { margin: 0; padding: 0 var(--space-2); list-style: none; font-size: var(--fs-small); }
-/* layout-exempt: a pip, the pitch type, the speed */
-.gdp__pitches li { display: grid; grid-template-columns: 24px 1fr auto; gap: var(--space-2); }
-.gdp__num { font-variant-numeric: tabular-nums; }
-.gdp__pip { font-family: var(--font-mono); font-weight: var(--w-bold); }
+.gdp__order { margin: 0; padding: 0 var(--space-2); list-style: none; font-size: var(--fs-small); }
 /* layout-exempt: slot, name and position, the at-bat codes */
 .gdp__order li { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: var(--space-2); padding: var(--space-1) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
 .gdp__order em { font-style: normal; color: var(--text-caption); }
@@ -107,8 +103,8 @@
 .gdp__tag b { color: var(--clay); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
 /* The position takes one width (DH's), so every number ends on the same line. */
 .gdp__tag i { flex: none; width: var(--space-5); font-style: normal; text-align: right; color: var(--text-heading); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
-.gdnext[data-tier='L'] .gdp__order li, .gdnext[data-tier='D'] .gdp__order li { grid-template-columns: auto 1fr auto calc(2 * var(--space-8)); }
-.gdnext[data-tier='L'] .gdp__order .gdp__shot, .gdnext[data-tier='D'] .gdp__order .gdp__shot { display: block; box-sizing: border-box;
+.gdnext[data-tier='L'] .gdp__order li, .gdnext[data-tier='D'] .gdp__order li, .gdnext__rail .gdp__order li { grid-template-columns: auto 1fr auto calc(2 * var(--space-8)); }
+.gdnext[data-tier='L'] .gdp__order .gdp__shot, .gdnext[data-tier='D'] .gdp__order .gdp__shot, .gdnext__rail .gdp__order .gdp__shot { display: block; box-sizing: border-box;
   width: auto; height: min(var(--shot-sm-h), calc((100dvh - 304px) / 9 - 10px)); aspect-ratio: 3 / 4; border: var(--bw-heavy) solid var(--border-stamped); border-radius: var(--radius-square); }
 
 .gdp__ref .lfld__dh { position: static; border-width: var(--bw-rule); }

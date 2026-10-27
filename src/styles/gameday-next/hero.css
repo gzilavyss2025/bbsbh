@@ -94,7 +94,6 @@
 .gdhero__contact dt { font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); white-space: nowrap; }
 .gdhero__contact dd { display: flex; align-items: baseline; gap: var(--space-1); margin: 0; font: var(--w-bold) var(--fs-title-md) / var(--lh-solid) var(--font-display); color: var(--text-heading); font-variant-numeric: tabular-nums; }
 .gdhero__contact dd small { font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
-.gdnext[data-tier='T'] .gdhero__contact { display: none; } /* the pitches panel beside the hero carries it */
 
 /* The due-up strip: pre-pitch lineup, the same sealed or not */
 /* layout-exempt: one row of chips */

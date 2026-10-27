@@ -13,7 +13,7 @@ export function tierOf(width, height) {
 // [block, tiers that show it]. The first four never fold.
 const BLOCKS = [
   ['band', 'PTLD'], ['stage', 'PTLD'], ['hero', 'PTLD'], ['bar', 'PTLD'],
-  ['navigator', 'TLD'], ['trail', 'TLD'], ['pitches', 'TD'],
+  ['navigator', 'TLD'], ['trail', 'TLD'],
   ['battingOrder', 'LD'], ['reference', 'LD'], ['eventLog', 'D'],
 ]
 

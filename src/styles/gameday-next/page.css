@@ -19,14 +19,16 @@
 .gdnext[data-tier='P'] {
   grid-template-columns: minmax(0, 1fr);
   --gd-band-h: 86px;
-  grid-template-rows: auto minmax(0, 1fr) 240px 80px;
+  --gd-bar-h: 80px;
+  grid-template-rows: auto minmax(0, 1fr) 240px var(--gd-bar-h);
   grid-template-areas: 'band' 'stage' 'hero' 'bar';
 }
 .gdnext[data-tier='T'] {
   grid-template-columns: minmax(0, 452fr) minmax(0, 264fr);
   --gd-band-h: 72px;
-  grid-template-rows: auto 44px minmax(0, 1fr) 268px 66px 80px;
-  grid-template-areas: 'band band' 'navigator navigator' 'stage stage' 'hero pitches' 'trail trail' 'bar bar';
+  --gd-bar-h: 80px;
+  grid-template-rows: auto 44px minmax(0, 1fr) 268px 66px var(--gd-bar-h);
+  grid-template-areas: 'band band' 'navigator navigator' 'stage stage' 'hero hero' 'trail trail' 'bar bar';
 }
 .gdnext[data-tier='L'] {
   grid-template-columns: minmax(270px, 1fr) repeat(2, minmax(0, calc(max(720px, 40vw) / 2))) minmax(270px, 1fr);
@@ -44,7 +46,7 @@
   --gd-bar-h: 68px;
   grid-template-rows: auto minmax(0, 1fr) 164px 66px 68px;
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
-    'battingOrder hero pitches arm' 'battingOrder trail trail trail' 'bar bar bar bar';
+    'battingOrder hero hero arm' 'battingOrder trail trail trail' 'bar bar bar bar';
 }
 
 /* The band row is `auto`: the band keeps its tier's height (--gd-band-h), and the status strip
@@ -61,7 +63,6 @@
 .gdnext__slot--stage { --gd-area: stage; border: var(--bw-heavy) solid var(--border-stamped); }
 .gdnext__slot--hero { --gd-area: hero; background: none; border: 0; }
 .gdnext__slot--trail { --gd-area: trail; }
-.gdnext__slot--pitches { --gd-area: pitches; }
 .gdnext__slot--battingOrder { --gd-area: battingOrder; }
 .gdnext__slot--reference { --gd-area: reference; }
 .gdnext__slot--arm { --gd-area: arm; overflow-y: auto; } /* the one panel taller than its column on a short window: it scrolls inside its own box, the frame never does */
@@ -125,6 +126,31 @@
   transform: translateX(105%); visibility: hidden; transition: transform var(--dur-med) ease, visibility 0s linear var(--dur-med); }
 .gdnext__drawer[data-open] { transform: none; visibility: visible; transition-delay: 0s; }
 @media (prefers-reduced-motion: reduce) { .gdnext__drawer { transition: none; } }
+
+/* The rails (P and T, Gary 2026-10-27): the wide tiers' Due up and arm columns, slid in from the
+   left and the right between the band and the bar, so the advance stays in reach. A tab on each
+   edge opens one, and so does a sideways swipe (GamedayNextPage); the scrim or Escape closes it.
+   pan-y hands the sideways drag to the page and keeps a rail's own scroll; pinch-zoom stays.
+   --gd-rail-top is the band's measured foot (with any status strip); the fallback is the band alone. */
+.gdnext[data-rails] { touch-action: pan-y pinch-zoom; }
+/* layout-exempt: a side sheet, its panel filling it */
+.gdnext__rail { position: absolute; z-index: 3; display: flex; flex-direction: column;
+  top: calc(var(--gd-rail-top, calc(env(safe-area-inset-top) + var(--gd-band-h))) + var(--space-2)); bottom: calc(env(safe-area-inset-bottom) + var(--gd-bar-h));
+  width: min(var(--app-width), 85%); background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped);
+  visibility: hidden; transition: transform var(--dur-med) ease, visibility 0s linear var(--dur-med); }
+.gdnext__rail--left { left: 0; border-left: 0; transform: translateX(-105%); }
+.gdnext__rail--right { right: 0; border-right: 0; transform: translateX(105%); }
+.gdnext__rail:focus { outline: none; } /* focus-ring-exempt: the rail takes focus only to hand it to its contents */
+.gdnext__rail[data-open] { transform: none; visibility: visible; transition-delay: 0s; }
+.gdnext__rail > .gdnext__slot { flex: 1; min-height: 0; border: 0; }
+.gdnext__scrim { position: absolute; z-index: 2; inset: 0 0 calc(env(safe-area-inset-bottom) + var(--gd-bar-h)); margin: 0; padding: 0; border: 0;
+  background: color-mix(in srgb, var(--text-heading) 35%, transparent); }
+/* The tabs sit on the frame's edges at the stage's height, set sideways so they take no room. */
+.gdnext__railtab { position: absolute; z-index: 1; top: 38%; height: auto; min-height: 0; padding: var(--space-3) var(--space-1h);
+  writing-mode: vertical-rl; font-size: var(--fs-label); background: var(--surface-card); }
+.gdnext__railtab--left { left: 0; border-left: 0; transform: rotate(180deg); }
+.gdnext__railtab--right { right: 0; border-right: 0; }
+@media (prefers-reduced-motion: reduce) { .gdnext__rail { transition: none; } }
 
 /* The band is the old score bug (HeaderBug): the split halves and the dark plate, held to the tier's
    band height. The pitcher and batter bars leave it (the arm and the lineup say who they are). */

@@ -8,6 +8,7 @@ import {
   formatAtBatMark,
   parseBoxRevealMark,
   catchUpMarkIn,
+  markAfterStep,
   mergeMark,
   offerCatchUp,
   unlockedInnings,
@@ -262,13 +263,16 @@ export function useRevealProgress(feed, regulation, actualCount) {
   )
 
   const revealAtBat = useCallback((n, half, count) => {
-    setAtBatMark({ halfIdx: halfIndex(n, half), count, sub: 0 })
+    const halfIdx = halfIndex(n, half)
+    setRevealedThrough((prev) => markAfterStep(prev, halfIdx))
+    setAtBatMark({ halfIdx, count, sub: 0 })
   }, [])
 
   // One sub-step inside the next at-bat (ADR-0123, decision 10): the count stays, so nothing
-  // commits and revealedThrough is untouched; the result's tap goes through revealAtBat.
+  // commits this half; the result's tap goes through revealAtBat. Like it, it opens the halves before this one.
   const revealSub = useCallback((n, half, sub) => {
     const halfIdx = halfIndex(n, half)
+    setRevealedThrough((prev) => markAfterStep(prev, halfIdx))
     setAtBatMark((m) => ({ halfIdx, count: m.halfIdx === halfIdx ? m.count : 0, sub }))
   }, [])
 
