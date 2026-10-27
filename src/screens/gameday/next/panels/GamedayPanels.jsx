@@ -109,7 +109,10 @@ const Trail = ({ ctx }) => (
     {({ cards, more }) => cards.length === 0 ? null : (
       <ol className="gdp__trail" aria-label="At-bats this half">
         {cards.slice(-10).map((c) => (
-          <li key={c.atBatIndex} className={c.outNumber != null ? 'gdp__chip is-out' : 'gdp__chip'}>
+          // The at-bat on screen (ctx.here) is marked; the ones after it, already read, sit back.
+          <li key={c.atBatIndex} aria-current={c.atBatIndex === ctx.here ? 'step' : undefined}
+            className={['gdp__chip', c.outNumber != null && 'is-out', ctx.here != null && c.atBatIndex === ctx.here && 'is-here',
+              ctx.here != null && c.atBatIndex > ctx.here && 'is-ahead'].filter(Boolean).join(' ')}>
             {/* A tap plays this at-bat again on the stage (stage/tapRule.js replay). */}
             <button type="button" className="gdp__replay" disabled={!ctx.onReplay} onClick={() => ctx.onReplay?.(c.atBatIndex)}
               aria-label={`Replay: ${chipCode(c) || 'at-bat'}, ${c.batter?.last ?? c.batter?.fullName ?? ''}`}>

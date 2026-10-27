@@ -30,7 +30,7 @@
 /* The box as the reader scores it on paper (docs/gameday-reference/scorebook-box.jpg): thin ruled frame, the result
    in a heavy box at the top left, B and S as ruled columns at the right, a third empty shaded column, a squat diamond. */
 /* layout-exempt: three ruled columns of pips */
-.gdhero__bs { display: grid; grid-template-columns: repeat(3, 1fr); min-width: 0; order: 2; border-left: var(--bw-hair) solid var(--border-stamped); }
+.gdhero__bs { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); min-width: 0; order: 2; border-left: var(--bw-hair) solid var(--border-stamped); }
 /* The pips run down a ruled column in six even rows (the box's height in sixths). The strikes take the
    two shaded columns: past six they carry on at the top of the third, as a scorer runs on. */
 /* layout-exempt: the pips in even rows down a ruled column */
@@ -68,8 +68,9 @@
 /* The backwards K a scorer draws for a called third strike */
 .gdhero__code.is-looking { transform: scaleX(-1); }
 .gdhero__rbi { position: absolute; right: var(--space-2); top: 0; height: var(--gd-code-h); display: flex; align-items: center; font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); }
-/* The out circle: a shaded disc centred on the B column's rule, under the pitch columns, the out number inside. */
-.gdhero__out { position: absolute; right: calc(-0.5 * var(--bw-hair)); bottom: 0; height: 30%; aspect-ratio: 1; transform: translateX(50%);
+/* The out circle: a shaded disc centred on the B column's rule, the out number inside. It always paints over the
+   pitch columns (z-index 2: the columns are positioned for their zone handle and come later in the grid's order). */
+.gdhero__out { position: absolute; z-index: 2; right: calc(-0.5 * var(--bw-hair)); bottom: 0; height: 30%; aspect-ratio: 1; transform: translateX(50%);
   border-radius: 50%; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--graphite) 14%, var(--surface-inset));
   box-sizing: border-box; font: var(--w-bold) var(--fs-title-sm) / 1 var(--font-display); color: var(--text-heading); }
 .gdhero__out.is-out { border: var(--bw-heavy) solid var(--border-stamped); } /* an out: the scorer rings the number */
@@ -102,3 +103,6 @@
 .gdhero__due span:not(.gdhero__lbl) + span::before { content: '•'; margin-right: var(--space-3); font-weight: var(--w-medium); color: var(--text-caption); }
 .gdhero__due .plink { font: inherit; color: inherit; text-transform: inherit; }
 .gdhero__due .is-now { font-weight: var(--w-bold); color: var(--text-heading); }
+/* The pitch columns' handle for the strike zone (GamedayHero.jsx PitchZone): the whole block, transparent. */
+.gdhero__zonebtn { position: absolute; inset: 0; z-index: 1; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.gdhero__zonebtn:focus-visible { outline: var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }

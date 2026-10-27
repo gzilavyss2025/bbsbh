@@ -211,3 +211,11 @@
 .gdp__scoutdoor:focus-visible { outline: var(--focus-ring); outline-offset: var(--bw-heavy); }
 .gdp__scoutvs { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
 .gdp__scoutline { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); color: var(--text-heading); font-variant-numeric: tabular-nums; }
+/* Where the reader is in the half: the at-bat on screen stands up off the strip on a hard ink shadow,
+   its name on the marker, and the ones after it sit back. (The chip's ::after is the connector's head.) */
+.gdp__chip.is-here { transform: translateY(calc(-1 * var(--space-1))); box-shadow: 0 var(--space-1) 0 var(--border-stamped); }
+.gdp__chip.is-here span { background: var(--marker); }
+.gdp__chip.is-ahead { opacity: 0.45; }
+/* At L and D the trail starts under the stage (the Due up card takes the left column down to the bar), so
+   its first card sits on the stage's left edge, as the hero's box does. */
+.gdnext[data-tier='L'] .gdp__trail, .gdnext[data-tier='D'] .gdp__trail { padding-left: 0; }

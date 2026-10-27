@@ -26,11 +26,12 @@ const column = (h, head, pips) =>
     ...pips.map((p, i) => h('span', { key: i, className: p === 'X' ? 'gdhero__pip is-x' : 'gdhero__pip' }, p)))
 
 // `m.taped`: the open box (an empty diamond, the code under tape).
-// `flight`: an element laid over the diamond cell (the ball flight's handle, result() below), or null.
-export function scorebookBox(h, m, flight = null) {
+// `flight`: an element laid over the diamond cell (the ball flight's handle, result() below), or null;
+// `zone` the same over the pitch columns (the strike zone's).
+export function scorebookBox(h, m, flight = null, zone = null) {
   const label = m.taped ? 'at bat' : m.looking ? 'called third strike' : m.code
   return h('div', { className: 'gdhero__box', role: 'img', 'aria-label': `Scorebook box: ${label}` },
-    h('div', { className: 'gdhero__bs' }, column(h, 'B', m.balls), column(h, 'S', m.strikes)),
+    h('div', { className: 'gdhero__bs' }, column(h, 'B', m.balls), column(h, 'S', m.strikes), zone),
     h('div', { className: 'gdhero__dia' },
       h('svg', { viewBox: '4 4 32 32', preserveAspectRatio: 'none', 'aria-hidden': 'true' },
         h('path', { d: DIAMOND, className: 'gdhero__base' }),
@@ -105,11 +106,14 @@ function words(h, feed, e) {
 // The diamond is the handle for where the ball went (`Flight`, charts/BallFlight.jsx, as the old
 // Gameday's feed had it): hover on a desktop, tap on a phone. A ball not put in play, or a park with
 // no layout, draws no handle (BallFlight stands down itself).
-function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null) {
+// The pitch columns are the handle for the strike zone and the pitches with their speeds (`Zone`,
+// GamedayHero.jsx: the old feed's StrikeZoneModal), on a click.
+function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null) {
   const { batter } = e
   const contact = contactStats(e)
-  const flight = Flight && e.battedBall ? h(Flight, { ball: e.battedBall, batter, code: e.code ?? '', facts: false, arc: false, head: false }) : null
-  return h('div', { className: 'gdhero__top' }, scorebookBox(h, boxModel(e), flight),
+  const flight = Flight && e.battedBall ? h(Flight, { ball: e.battedBall, batter, code: e.code ?? '', facts: false, arc: false, head: false, hover: false }) : null
+  const zone = Zone ? h(Zone, { entry: e }) : null
+  return h('div', { className: 'gdhero__top' }, scorebookBox(h, boxModel(e), flight, zone),
     h('div', { className: 'gdhero__txt' },
       h('div', { className: 'gdhero__who' },
         who(h, PlayerLink, batter)),
@@ -119,11 +123,11 @@ function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null) {
     shot(h, Headshot, PlayerLink, batter))
 }
 
-export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, feed, inning, half, last, open = null, mark = null }) {
+export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, feed, inning, half, last, open = null, mark = null }) {
   return h('div', { className: 'gdhero' },
     open?.sub > 0
       ? h(SealBox, { coverless: true, forceRevealed: true }, () => openBox(h, feed, inning, half, open, Headshot, PlayerLink, Line))
       : last
-        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, Headshot, PlayerLink, Line, feed, Flight))
+        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, Headshot, PlayerLink, Line, feed, Flight, Zone))
         : sealedBox(h, atPlate(feed, inning, half, mark), Headshot, PlayerLink))
 }

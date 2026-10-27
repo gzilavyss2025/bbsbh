@@ -217,8 +217,9 @@ function FlightBody({ ball, park, name, code, closeRef, onClose, facts = true, a
 // `facts={false}`: leave out the exit velo / launch / distance strip, for a host that already shows them
 // beside the diamond (Gameday's hero). `arc={false}`: the field spray only, no Elevation Arc view.
 // `head={false}`: no name or result over the drawing, only the sheet's ✕ (the host names the play).
-export function BallFlight({ ball, batter, code = '', facts = true, arc = true, head = true }) {
-  const hoverCapable = useMediaQuery(HOVER_CARD_QUERY)
+// `hover={false}`: no popover on a pointer's hover; the flight opens only on a click or tap.
+export function BallFlight({ ball, batter, code = '', facts = true, arc = true, head = true, hover = true }) {
+  const hoverCapable = useMediaQuery(HOVER_CARD_QUERY) && hover
   const btnRef = useRef(null)
   const closeRef = useRef(null)
   const timer = useRef(null)

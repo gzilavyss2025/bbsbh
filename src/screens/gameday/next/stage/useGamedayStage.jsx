@@ -73,5 +73,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
     // last at-bat (a stoppage, a placed runner) is disarmed after a second rather than tracked.
     if (next.armed) setTimeout(() => setS(disarm), 1000)
   }
-  return { stage, advance: { ...advance, onClick }, onReplay: covered ? undefined : onReplay }
+  // The at-bat the stage is replaying (a trail tap), for the trail's "you are here" mark.
+  const replaying = typeof cur.shown === 'number' && cur.run ? cur.shown : null
+  return { stage, advance: { ...advance, onClick }, onReplay: covered ? undefined : onReplay, replaying }
 }
