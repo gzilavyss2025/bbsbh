@@ -76,7 +76,7 @@ test('a tap that is not a reveal (a page forward) never plays; a new half rests'
 // does with forceRevealed; the canvas prints what it was handed.
 const SealBox = ({ children }) => children()
 const StageCanvas = ({ play, t, start, zones }) =>
-  h('i', { 'data-pitches': play.pitches.length, 'data-ball': play.ball ? play.ball.kind : '', 'data-t': t ?? '', 'data-start': start ?? '', 'data-zones': zones ? 1 : 0 })
+  h('i', { 'data-batter': play.batter, 'data-pitcher': play.pitcher, 'data-pitches': play.pitches.length, 'data-ball': play.ball ? play.ball.kind : '', 'data-t': t ?? '', 'data-start': start ?? '', 'data-zones': zones ? 1 : 0 })
 // A feed whose plays throw when read: before the reveal the stage must not touch them.
 const sealedFeed = { ...F, liveData: { ...F.liveData, plays: new Proxy({}, { get: () => { throw new Error('read a play before the reveal') } }) } }
 const html = (props) => renderToStaticMarkup(h(GamedayStage, { SealBox, StageCanvas, wall, batSide: 'R', ...props }))
@@ -86,6 +86,14 @@ test('before the reveal: no play is read, and the stage draws the rest frame onl
   assert.match(out, /data-pitches="0"/)
   assert.match(out, /data-ball=""/)
   assert.match(out, /data-zones="1"/)
+})
+
+test('at rest a switch hitter stands opposite the pitcher\'s hand; a one-sided hitter keeps his side', () => {
+  const at = (batSide, pitchHand) => html({ feed: sealedFeed, shown: null, batSide, pitchHand })
+  assert.match(at('S', 'R'), /data-batter="L" data-pitcher="R"/)
+  assert.match(at('S', 'L'), /data-batter="R" data-pitcher="L"/)
+  assert.match(at('L', 'L'), /data-batter="L"/)
+  assert.match(at('R', 'R'), /data-batter="R"/)
 })
 
 test('after the reveal: the revealed play draws, at its end at rest and from the tap while playing', () => {

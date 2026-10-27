@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
+import { selectHalfStartingPitcher } from '../../../../api/select.js'
 import { dayBefore } from '../../../../api/game.js'
 import { fetchBatterZones } from '../../../../api/gameday/zones.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
@@ -17,7 +18,8 @@ import { ended, rest, saw, tap } from './tapRule.js'
 // rule (tapRule.js). `last` is the last finished at-bat's index as of the cursor, `view` the half on
 // screen, `advance.reveal` marks the tap that reveals an at-bat. At rest with no tapped play, the
 // stage draws the due-up batter before the pitch, with his zone map unless this game dismissed it.
-export function useGamedayStage({ feed, last, view, inning, half, mark, stepAtBatIndex, advance }) {
+// `reliever` is the live snapshot's revealed mid-half change (deriveLiveState's midHalfPitcherId).
+export function useGamedayStage({ feed, last, reliever, view, inning, half, mark, stepAtBatIndex, advance }) {
   const [s, setS] = useState(() => rest(last, view))
   // State adjusted during render (useBecameTrue's shape): the play starts on the frame it arrives.
   const cur = saw(s, last, view)
@@ -39,12 +41,15 @@ export function useGamedayStage({ feed, last, view, inning, half, mark, stepAtBa
   )
   const zones = cur.shown == null && !hidden ? zm?.zones ?? null : null
 
-  // ponytail: a switch hitter stands right-handed at rest; the pitcher's hand would settle it.
+  // The pitcher on the mound at the cursor: the revealed change, else the half's opener (caller-gated
+  // to the half reached, select.js). Hands are pre-game player data.
+  const pitcherId = batter ? reliever ?? selectHalfStartingPitcher(feed, inning, half, mark)?.id : null
+  const hand = (id, k) => gd?.players?.[`ID${id}`]?.[k]?.code
   const stage = feed ? (
     <>
       <GamedayStage
         SealBox={SealBox} StageCanvas={StageCanvas} feed={feed} wall={wall} shown={cur.shown} playing={cur.playing} onEnd={onEnd}
-        batSide={gd.players?.[`ID${batter?.id}`]?.batSide?.code === 'L' ? 'L' : 'R'} zones={zones}
+        batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones}
       />
       {zones && (
         <ZoneCard name={batter.last} zones={zones} through={dayBefore(date)} onDismiss={() => { dismissZoneMap(pk); setHidden(true) }} />

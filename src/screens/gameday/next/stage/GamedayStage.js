@@ -6,8 +6,8 @@ import { stagePlay } from './play.js'
 //
 // SPOILER FOOTING. `shown` (tapRule.js) is an at-bat the reader already revealed. Its feed play is
 // read only inside the SealBox reveal render function (ADR-0001, ADR-0002), so a home run's landing
-// exists only in the revealed stage. The rest frame reads no play at all: the batter's side and the
-// zone map's pre-game temperatures only.
+// exists only in the revealed stage. The rest frame reads no play at all: the batter's side, the
+// pitcher's hand and the zone map's pre-game temperatures only.
 
 // The clock starts when the play mounts and holds through a poll or a resize, so neither restarts it.
 function Played({ StageCanvas, feed, idx, wall, playing, onEnd }) {
@@ -16,13 +16,16 @@ function Played({ StageCanvas, feed, idx, wall, playing, onEnd }) {
   return h(StageCanvas, playing ? { play, start, onEnd } : { play, t: play.end })
 }
 
-function Rest({ StageCanvas, wall, batSide, zones }) {
-  const play = useMemo(() => stagePlay({ matchup: { batSide: { code: batSide } } }, wall), [wall, batSide])
+// At rest the batter stands where he will hit: a switch hitter (S) opposite the pitcher's throwing
+// hand. Both are pre-game player data. A revealed play uses its own matchup.batSide instead.
+function Rest({ StageCanvas, wall, batSide, pitchHand, zones }) {
+  const side = batSide === 'S' ? (pitchHand === 'L' ? 'R' : 'L') : batSide
+  const play = useMemo(() => stagePlay({ matchup: { batSide: { code: side }, pitchHand: { code: pitchHand } } }, wall), [wall, side, pitchHand])
   return h(StageCanvas, { play, t: 0, zones, label: 'The field before the pitch' })
 }
 
-export function GamedayStage({ SealBox, StageCanvas, feed, wall, shown, playing, onEnd, batSide, zones }) {
+export function GamedayStage({ SealBox, StageCanvas, feed, wall, shown, playing, onEnd, batSide, pitchHand, zones }) {
   return shown != null
     ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: shown, StageCanvas, feed, idx: shown, wall, playing, onEnd }))
-    : h(Rest, { StageCanvas, wall, batSide, zones })
+    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones })
 }

@@ -11,7 +11,7 @@ import { useGamedayStage } from './stage/useGamedayStage.jsx'
 // the tap rule (stage/useGamedayStage.jsx).
 export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, engine, advance: next, onBoxScore, onScorecard, refresh }) {
   const { stage, advance } = useGamedayStage({
-    feed: bug.started ? bug.feed : null, last: bug.live?.last?.atBatIndex ?? null, view: bug.viewIdx,
+    feed: bug.started ? bug.feed : null, last: bug.live?.last?.atBatIndex ?? null, reliever: bug.live?.midHalfPitcherId ?? null, view: bug.viewIdx,
     inning: bug.viewInning, half: bug.viewHalf, mark, stepAtBatIndex: bug.stepAtBatIndex, advance: next,
   })
   const band = bug.started && bug.live ? (
