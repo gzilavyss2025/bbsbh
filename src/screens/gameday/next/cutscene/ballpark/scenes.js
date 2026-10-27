@@ -14,6 +14,12 @@ export const BALLPARK_SCENES = {
     character: HOME_RUN_ART, track: GRAND_SLAM,
     review: [0, 0.32, 0.58, 0.86, 1.83, 3.6],
   },
+  // Any RBI that is not a homer; celebrationForPlay names the play in its own headline.
+  rbi: {
+    label: 'RBI', headline: 'RBI', role: 'Batter', exampleName: 'Batter Name',
+    character: HOME_RUN_ART, track: HOME_RUN,
+    review: [0, 0.32, 0.58, 0.86, 1.48, 2.8],
+  },
   strikeout: {
     label: 'Strikeout', headline: 'Strikeout', role: 'Pitcher', exampleName: 'Pitcher Name',
     character: STRIKEOUT_ART, track: STRIKEOUT,

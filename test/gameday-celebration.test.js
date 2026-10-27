@@ -70,3 +70,14 @@ test('the integration is lazy at the seal and reads no future results at rest', 
 test('an open-at-bat pitch does not receive its future home-run celebration', () => {
   assert.doesNotMatch(stage({ inning: 1, half: 'top', shown: { count: 1, sub: 1, last: 0 }, playing: true }), /data-celebration="homeRun"/)
 })
+
+// Gary, 2026-10-27: every RBI celebrates. A non-homer RBI plays the batter art, its headline naming the play.
+test('a non-homer RBI celebrates the batter, its headline naming the runs and the play', () => {
+  const sac = plays.find((p) => p.result.eventType === 'sac_fly')
+  assert.deepEqual(celebrationForPlay(sac, F.gameData), { scene: 'rbi', headline: 'RBI Sac Fly', name: sac.matchup.batter.fullName, teamId: F.gameData.teams[sac.about.halfInning === 'top' ? 'away' : 'home'].id })
+  const two = plays.find((p) => p.result.eventType === 'double' && p.result.rbi === 2)
+  assert.equal(celebrationForPlay(two, F.gameData).headline, '2-run Double')
+  const walk = clone(plays[0]); Object.assign(walk.result, { eventType: 'walk', event: 'Walk', rbi: 1, isOut: false })
+  assert.equal(celebrationForPlay(walk, F.gameData).headline, 'RBI Walk')
+  assert.equal(celebrationForPlay(hr, F.gameData).scene, 'homeRun')
+})

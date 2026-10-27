@@ -21,7 +21,7 @@ export function GamedayPlayCanvas({ celebration, playing, onEnd, checkpointHeld 
       {field}
       <div className="gdcelebration">
         <Suspense fallback={null}>
-          <Ballpark character={scene.character} track={scene.track} headline={scene.headline} name={celebration.name}
+          <Ballpark character={scene.character} track={scene.track} headline={celebration.headline ?? scene.headline} name={celebration.name}
             helmet={kit?.primary} trim={kit?.secondary} playing={playing} time={playing ? undefined : scene.track.duration}
             onDone={onEnd} onSkip={checkpointHeld ? undefined : onEnd} onError={fail} />
         </Suspense>
