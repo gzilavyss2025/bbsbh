@@ -14,8 +14,8 @@
 
 export const rest = (seen, view) => ({ seen, view, armed: null, shown: null, playing: false })
 
-// The advance tap. -> [state, advance?] While the checkpoint covers the stage nothing plays there,
-// so the tap always passes through and arms nothing.
+// The advance tap. -> [state, advance?] Once the checkpoint is presented, the tap passes through
+// and arms nothing. useGamedayStage intercepts the preceding ending-celebration dismissal.
 export function tap(s, reveals, reduced, covered = false) {
   if (covered) return [{ ...s, armed: null, playing: false }, true]
   if (s.playing) return [{ ...s, playing: false }, false]

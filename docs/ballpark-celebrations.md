@@ -84,15 +84,20 @@ depends on the sealed result (ADR-0046, ADR-0123).
 selected result. The ordinary field's end state stays behind it until art is
 ready. Import/image failure restores the field and releases playback; a bounded
 post-reveal watchdog also prevents a stalled download holding the scoring control.
-The Skip button uses the same completion callback. App/OS reduced motion shows
-the final pose and does not consume an extra advance tap.
+The Skip button uses the same completion callback for ordinary celebrations.
+App/OS reduced motion shows the final pose without an extra animation-skip tap.
 
 The scene contains within the existing stage at each layout size. Once ready,
 its letterbox covers the old field; the legacy engine's body-portal big-play
-stamp is suppressed while the new scene supplies the title. The checkpoint's
-existing priority is unchanged: when a half/game-end checkpoint owns the stage,
-it takes precedence over celebration playback. This pass does not delay that
-checkpoint or change the scoring frontier.
+stamp is suppressed while the new scene supplies the title. A qualifying play
+that ends a half or the game celebrates before its checkpoint. Its final pose
+stays on screen until the bottom Next › button opens the summary; that press
+does not reveal another play, turn the half, or change the scoring frontier.
+Next can also dismiss the animation early. Reduced motion keeps this same
+explicit handoff. The ending scene has no separate Skip control. Ordinary
+ending plays do not add a hold. Cold/return visits retain the existing read-back
+flow without replaying celebrations. Eligibility is reported from the revealed
+stage subtree as a presentation flag only.
 
 Result flags, identities, and putout-credit paths were verified against the live
 824716 feed during implementation. Names and kit colors come from data, never
@@ -140,8 +145,8 @@ later does not change the scene's public interface.
 1. Add verified uniform material maps and park landmarks independently.
 2. Extend the scene library as new event types require it. Batting, pitching
    and fielding can choose close-ups or action sequences per event.
-3. Any later checkpoint/celebration handoff must preserve the scoring frontier
-   and the checkpoint's one-window, touch-first contract.
+3. Additional celebrations must preserve the explicit Next handoff into a
+   checkpoint and the scoring frontier's existing reveal contract.
 
 Provisional event lengths are 1–2 seconds for quick reactions, 2–3 seconds for
 home runs and defensive highlights, and at most about 4 seconds for rare moments.

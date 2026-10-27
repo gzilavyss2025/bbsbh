@@ -1,4 +1,4 @@
-import { createElement as h, useEffect, useMemo, useState } from 'react'
+import { createElement as h, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
@@ -33,14 +33,22 @@ function subPlay(feed, inning, half, { count, sub }) {
   return { p: cut, still: false }
 }
 
-function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd }) {
+function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint }) {
   const [start] = useState(() => performance.now())
-  const { play, still, celebration } = useMemo(() => {
+  const covered = !!checkpoint
+  const { play, still, celebration, ending } = useMemo(() => {
     const { p, still } = typeof idx === 'object' ? subPlay(feed, inning, half, idx) : { p: feed.liveData.plays.allPlays.find((q) => q.about?.atBatIndex === idx), still: false }
-    return { play: stagePlay(p ?? {}, wall), still, celebration: typeof idx === 'object' ? null : celebrationForPlay(p, feed.gameData) }
-  }, [feed, idx, inning, half, wall])
+    // The checkpoint commits this half. An older shown play must not stand
+    // in for its ending while the engine reports the tap's new last index.
+    const ending = covered && typeof idx !== 'object' && feed.liveData.plays.allPlays.findLast((q) => q.about?.inning === inning && q.about?.halfInning === half)?.about?.atBatIndex === idx
+    return { play: stagePlay(p ?? {}, wall), still, ending, celebration: typeof idx === 'object' ? null : celebrationForPlay(p, feed.gameData) }
+  }, [feed, idx, inning, half, wall, covered])
+  const eligible = !!celebration && ending
+  // Report only a presentation flag from this revealed subtree. Commit it
+  // before paint so the bottom button and visible scene agree on the tap.
+  useLayoutEffect(() => { if (covered) onCheckpoint?.(eligible) }, [covered, eligible, onCheckpoint])
   useEffect(() => {
-    if (!playing) return undefined
+    if (!playing || (covered && (!eligible || checkpointDismissed))) return undefined
     // Decorative assets may decode after the tap. Their player reports its
     // own completion; this watchdog prevents a stalled import/load holding
     // the scoring control. Ordinary field timing stays on its existing clock.
@@ -49,9 +57,10 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd }) 
     if (left <= 0 || motionIsReduced()) { onEnd(); return undefined }
     const id = setTimeout(onEnd, left)
     return () => clearTimeout(id)
-  }, [playing, play, still, celebration, start, onEnd])
+  }, [playing, play, still, celebration, start, onEnd, covered, eligible, checkpointDismissed])
+  if (covered && (!eligible || checkpointDismissed)) return checkpoint
   const props = playing && !still ? { play, start } : { play, t: still ? 0 : play.end }
-  return h(StageCanvas, { ...props, celebration, playing, onEnd })
+  return h(StageCanvas, { ...props, celebration, playing, onEnd, checkpointHeld: covered && eligible })
 }
 
 // Who stands in at rest: the due-up batter of the half being scored (dueup.js, the pre-pitch lineup),
@@ -73,8 +82,9 @@ function Rest({ StageCanvas, wall, batSide, pitchHand, zones }) {
   return h(StageCanvas, { play, t: 0, zones, label: 'The field before the pitch' })
 }
 
-export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, playing, onEnd, batSide, pitchHand, zones }) {
+export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, playing, onEnd, batSide, pitchHand, zones, checkpoint, checkpointDismissed, onCheckpoint }) {
+  if (checkpoint && (checkpointDismissed || shown == null || typeof shown === 'object')) return checkpoint
   return shown != null
-    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd }))
+    ? h(SealBox, { coverless: true, forceRevealed: true }, () => h(Played, { key: typeof shown === 'object' ? `${shown.count}.${shown.sub}` : shown, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, checkpoint, checkpointDismissed, onCheckpoint }))
     : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones })
 }

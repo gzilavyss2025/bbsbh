@@ -9,7 +9,7 @@ const Ballpark = lazy(() => import('../ballpark/BallparkCelebration.jsx').then((
 
 // Only receives an already-revealed event from GamedayStage's lazy SealBox
 // subtree. The normal field stays behind the cutscene until its art is ready.
-export function GamedayPlayCanvas({ celebration, playing, onEnd, ...stage }) {
+export function GamedayPlayCanvas({ celebration, playing, onEnd, checkpointHeld = false, ...stage }) {
   const [failed, setFailed] = useState(false)
   const fail = useCallback(() => { setFailed(true); onEnd?.() }, [onEnd])
   if (!celebration || failed) return <StageCanvas {...stage} />
@@ -23,7 +23,7 @@ export function GamedayPlayCanvas({ celebration, playing, onEnd, ...stage }) {
         <Suspense fallback={null}>
           <Ballpark character={scene.character} track={scene.track} headline={scene.headline} name={celebration.name}
             helmet={kit?.primary} trim={kit?.secondary} playing={playing} time={playing ? undefined : scene.track.duration}
-            onDone={onEnd} onSkip={onEnd} onError={fail} />
+            onDone={onEnd} onSkip={checkpointHeld ? undefined : onEnd} onError={fail} />
         </Suspense>
       </div>
     </CelebrationBoundary>

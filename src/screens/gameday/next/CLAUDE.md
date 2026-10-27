@@ -53,5 +53,6 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - `cutscene/ballpark/` is the modern sprite system, also inspected at `/animation-lab#ballpark`:
   separate character atlases, stadium, palette preparation and finite choreography. `cutscene/integration/`
   selects completed revealed results inside `GamedayStage`'s SealBox subtree; the stage's existing tap rule
-  starts/skips it. Assets and chunks fail back to the ordinary field; the checkpoint keeps its slot priority.
+  starts/skips it. Assets and chunks fail back to the ordinary field. A qualifying ending scene holds
+  until bottom Next opens its checkpoint without advancing the game; cold visits retain ordinary read-back.
   Authoring, asset provenance and the next steps live in `docs/ballpark-celebrations.md`.
