@@ -100,7 +100,7 @@ WHAT TO BUILD
   width >= 1000 and height >= 700 and width > height; else Tablet portrait if width >= 740 and
   height >= 900; else Phone.
   Blocks per tier (shown; the rest go to the menu): band, stage, hero, bar at every tier;
-  navigator and trail at T, L, D; pitches panel at T and D; batting order and reference tabs at L
+  navigator and trail at T, L, D; pitches panel cut 2026-10-27 (Gary: the hero takes its slot); batting order and reference tabs at L
   and D; event log at D. The never-fold set is band, stage, hero, bar.
 - test/gameday-ladder.test.js, written first: each tier at its round 1 size (390 x 763,
   760 x 1024, 1180 x 820, 1440 x 900) returns its block list; the windows in drop2.js's DEVICES

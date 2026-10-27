@@ -11,7 +11,7 @@ import { useTier } from './useTier.js'
 // window's tier places (lib/gameday/ladder.js). `engine` is the old half page, mounted hidden so
 // the reveal flow, the live snapshot and the step cursor keep running.
 // Blocks a panel fills; a stage or hero slot with nothing to draw yet shows its name.
-const PANELLED = new Set(['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'arm', 'eventLog'])
+const PANELLED = new Set(['navigator', 'trail', 'battingOrder', 'reference', 'arm', 'eventLog'])
 
 export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pitch, onBoxScore, onScorecard, lineups, slateHref, notices = [], refresh }) {
   const tier = useTier()

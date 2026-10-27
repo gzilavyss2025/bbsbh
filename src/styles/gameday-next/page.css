@@ -26,7 +26,7 @@
   grid-template-columns: minmax(0, 452fr) minmax(0, 264fr);
   --gd-band-h: 72px;
   grid-template-rows: auto 44px minmax(0, 1fr) 268px 66px 80px;
-  grid-template-areas: 'band band' 'navigator navigator' 'stage stage' 'hero pitches' 'trail trail' 'bar bar';
+  grid-template-areas: 'band band' 'navigator navigator' 'stage stage' 'hero hero' 'trail trail' 'bar bar';
 }
 .gdnext[data-tier='L'] {
   grid-template-columns: minmax(270px, 1fr) repeat(2, minmax(0, calc(max(720px, 40vw) / 2))) minmax(270px, 1fr);
@@ -44,7 +44,7 @@
   --gd-bar-h: 68px;
   grid-template-rows: auto minmax(0, 1fr) 164px 66px 68px;
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
-    'battingOrder hero pitches arm' 'battingOrder trail trail trail' 'bar bar bar bar';
+    'battingOrder hero hero arm' 'battingOrder trail trail trail' 'bar bar bar bar';
 }
 
 /* The band row is `auto`: the band keeps its tier's height (--gd-band-h), and the status strip
@@ -61,7 +61,6 @@
 .gdnext__slot--stage { --gd-area: stage; border: var(--bw-heavy) solid var(--border-stamped); }
 .gdnext__slot--hero { --gd-area: hero; background: none; border: 0; }
 .gdnext__slot--trail { --gd-area: trail; }
-.gdnext__slot--pitches { --gd-area: pitches; }
 .gdnext__slot--battingOrder { --gd-area: battingOrder; }
 .gdnext__slot--reference { --gd-area: reference; }
 .gdnext__slot--arm { --gd-area: arm; overflow-y: auto; } /* the one panel taller than its column on a short window: it scrolls inside its own box, the frame never does */

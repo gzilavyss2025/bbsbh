@@ -126,29 +126,6 @@ const Trail = ({ ctx }) => (
   </Sealable>
 )
 
-const Pitches = ({ ctx }) => (
-  <Sealable ctx={ctx}>
-    {({ cards }) => {
-      const c = cards.at(-1)
-      if (!c) return null
-      return (
-        <div>
-          <span className="gdp__label">Pitches · {c.batter?.last ?? c.batter?.fullName}</span>
-          <ol className="gdp__pitches">
-            {c.pitchDetails.map((p) => (
-              <li key={p.no}>
-                <span className="gdp__pip">{p.cat === 'inplay' ? 'X' : p.no}</span>
-                <span>{p.type}</span>
-                <span className="gdp__num">{p.mph != null ? `${Math.round(p.mph)} mph` : ''}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )
-    }}
-  </Sealable>
-)
-
 // Names and slots are the order entering the half (lineupEntering gates itself); the at-bat result codes no longer show.
 // The order turned so the batter at the plate leads and the rest follow in turn, wrapping to the
 // ones just retired. `cards` is what the reader has seen, so the lead is the slot after the last
@@ -285,7 +262,7 @@ const EventLog = ({ ctx }) => (
   </Sealable>
 )
 
-const PANELS = { navigator: Navigator, trail: Trail, pitches: Pitches, battingOrder: BattingOrder, reference: Reference, arm: Arm, eventLog: EventLog }
+const PANELS = { navigator: Navigator, trail: Trail, battingOrder: BattingOrder, reference: Reference, arm: Arm, eventLog: EventLog }
 
 // The panel for a ladder block, or null for the blocks other prompts build.
 export function GamedayPanel({ block, ctx }) {

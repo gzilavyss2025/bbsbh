@@ -1,4 +1,4 @@
-/* ==== GAMEDAY panels (docs/gameday-build.md, prompt 8): navigator, trail, pitches, batting order,
+/* ==== GAMEDAY panels (docs/gameday-build.md, prompt 8): navigator, trail, batting order,
    reference, event log. Each fills a .gdnext__slot; nothing scrolls, so each clips (the ladder
    folds what does not fit into the menu). */
 .gdnext__slot--navigator { background: var(--surface-card); }
@@ -57,11 +57,7 @@
 .gdp__chip--cover { background: var(--text-heading); color: var(--surface-card); }
 .gdp__chip--cover b { border-right: 0; background: none; padding: 0 var(--space-4); font-family: var(--font-display); letter-spacing: var(--ls-xwide); }
 
-.gdp__pitches, .gdp__order { margin: 0; padding: 0 var(--space-2); list-style: none; font-size: var(--fs-small); }
-/* layout-exempt: a pip, the pitch type, the speed */
-.gdp__pitches li { display: grid; grid-template-columns: 24px 1fr auto; gap: var(--space-2); }
-.gdp__num { font-variant-numeric: tabular-nums; }
-.gdp__pip { font-family: var(--font-mono); font-weight: var(--w-bold); }
+.gdp__order { margin: 0; padding: 0 var(--space-2); list-style: none; font-size: var(--fs-small); }
 /* layout-exempt: slot, name and position, the at-bat codes */
 .gdp__order li { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: var(--space-2); padding: var(--space-1) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
 .gdp__order em { font-style: normal; color: var(--text-caption); }
