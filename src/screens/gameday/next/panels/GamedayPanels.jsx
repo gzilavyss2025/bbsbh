@@ -1,13 +1,22 @@
 import '../../../../styles/gameday-next/panels.css'
 import '../../../../styles/lineup-next/field.css'
-import { useState } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
+import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
+import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
+import { bandPaint } from '../../../../lib/pitcherCard/card.js'
+import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
+import { PlayDiamond } from '../../../../components/scoring/PlayDiamond.jsx'
+import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram.jsx'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { DEFENSE_SPOTS } from '../../../../lib/ballpark/layout/defenseWindow.js'
 import { parkWindow } from '../../../../lib/ballpark/layout/parkWindow.js'
 import { revealInning } from '../../../../api/linescore.js'
-import { halfIndex, selectSkippedBottomHalf } from '../../../../api/select.js'
+import { selectDueUpDuring } from '../../../../api/dueup.js'
+import { pitcherDayLine } from '../../../../api/gameday/dayLine.js'
+import { halfIndex, selectHalfStartingPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
+import { pitchingChangePitcher } from '../../../../api/playbyplay/notificationCards.js'
+import { PitcherCard } from '../../../../components/playbyplay/pitcherCard/PitcherCard.jsx'
 import { defenseAt } from '../../../../api/gameday/defense.js'
 import { battingSideOf } from '../../../../api/gameday/stepCut.js'
 import { chipCode, cutAt, orderAt } from './panelData.js'
@@ -116,22 +125,44 @@ const Pitches = ({ ctx }) => (
   </Sealable>
 )
 
-// Names and slots are the order entering the half (lineupEntering gates itself); the codes are results.
-const BattingOrder = ({ ctx }) => (
-  <Sealable ctx={ctx} reach>
-    {({ cards }) => (
-      <ol className="gdp__order">
-        {orderAt(ctx.feed, battingSideOf(ctx.half), ctx.inning, ctx.half, ctx.mark, cards).map((r) => (
-          <li key={r.slot}>
-            <em>{r.slot}</em>
-            <span>{r.last} <em>{r.position}</em></span>
-            <em>{r.codes.join(' ')}</em>
-          </li>
-        ))}
-      </ol>
-    )}
-  </Sealable>
-)
+// Names and slots are the order entering the half (lineupEntering gates itself); the at-bat result codes no longer show.
+// The order turned so the batter at the plate leads and the rest follow in turn, wrapping to the
+// ones just retired. `cards` is what the reader has seen, so the lead is the slot after the last
+// plate appearance on screen (selectDueUpDuring, the hero's own due-up); before any, the half's leadoff.
+function atTheTop(rows, ctx, cards) {
+  const up = selectDueUpDuring(ctx.feed, ctx.inning, ctx.half, ctx.mark, cards.at(-1)?.atBatIndex ?? null, 1)?.batters?.[0]?.slot
+  const i = rows.findIndex((r) => r.slot === up)
+  return i > 0 ? [...rows.slice(i), ...rows.slice(0, i)] : rows
+}
+
+function BattingOrder({ ctx }) {
+  const side = battingSideOf(ctx.half)
+  const club = ctx.meta?.[side] ?? {}
+  const band = bandPaint({ teamId: club.id, side, treatment: ctx.treatment })
+  return (
+    <>
+      {/* The batting club's own band, as the lineup page's cards wear it (ADR-0030). */}
+      <div className="gdp__band" style={band.style}>
+        <SectionHead look="band" as="h3" mark={<TeamLogo teamId={club.id} name={club.clubName ?? ''} size={22} variant="mono" crop="bar" className="sectionhead__mark" />}>
+          Batting lineup
+        </SectionHead>
+      </div>
+      <Sealable ctx={ctx} reach>
+        {({ cards }) => (
+          <ol className="gdp__order">
+            {atTheTop(orderAt(ctx.feed, side, ctx.inning, ctx.half, ctx.mark, cards), ctx, cards).map((r, i) => (
+              <li key={r.slot} data-up={i === 0 || undefined}>
+                <Headshot personId={r.id} name={r.last} tint={false} className="gdp__shot" />
+                <span className="gdp__who"><PlayerLink id={r.id} name={[r.first, r.last].filter(Boolean).join(' ')}>{r.first && <small>{r.first}</small>}<b>{r.last}</b></PlayerLink>{r.trip && <span className="gdp__trip"><PlayDiamond reached={r.trip.reached} scored={r.trip.scored} earned={r.trip.earned} legNotations={r.trip.legNotations ?? {}} outAt={r.trip.outAt ?? null} outCode={r.trip.outCode ?? ''} size={28} /></span>}</span>
+                <span className="gdp__tag">{r.jersey && <b>#{r.jersey}</b>}{r.position && <i>{r.position}</i>}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </Sealable>
+    </>
+  )
+}
 
 // The Field tab: FieldCard's park with surnames at the spots, the defense as of the cursor.
 function Field({ ctx }) {
@@ -165,17 +196,43 @@ function Field({ ctx }) {
   )
 }
 
-// ponytail: Field is the one tab built (round 2's Arms and Extras tabs are later prompts).
-const Reference = ({ ctx }) => {
-  const [tab, setTab] = useState('field')
-  return (
-    <div className="gdp__ref">
-      <div className="gdp__tabs" role="tablist">
-        <button type="button" role="tab" aria-selected={tab === 'field'} onClick={() => setTab('field')}>Field</button>
-      </div>
-      <Field ctx={ctx} />
-    </div>
+// The park with the defense as of the cursor; the Arms and Extras tabs are later prompts, so there is no tab row yet.
+const Reference = ({ ctx }) => (
+  <div className="gdp__ref">
+    <Field ctx={ctx} />
+  </div>
+)
+
+// The arm on the mound: the pitcher card (season line, pitch mix, last outing). It reads only
+// completed seasons and games, so it holds no score; it opens with the half the reader may reach.
+function Arm({ ctx }) {
+  const { feed, inning, half, mark, meta, pitcherId, treatment } = ctx
+  const side = battingSideOf(half) === 'away' ? 'home' : 'away'
+  const idx = halfIndex(inning, half)
+  if (idx > mark + 1) return <p className="gdp__sealed">Sealed</p>
+  const pitcher = (pitcherId != null && pitchingChangePitcher(feed, pitcherId)) || selectHalfStartingPitcher(feed, inning, half, mark)
+  if (!pitcher) return null
+  const club = meta?.[side] ?? {}
+  // His line for the game as of the step: each at-bat the reader reveals lands in it (dayLine.js clamps it).
+  const tonight = (
+    <Sealable ctx={ctx} reach>
+      {() => {
+        const l = pitcherDayLine(feed, pitcher.id, { inning, half, step: ctx.step, revealedThrough: mark })
+        const pitches = l?.pitches ?? 0
+        const faced = l?.bf ?? 0
+        const cells = [['IP', l?.ip ?? '0.0'], ['H', l?.h ?? 0], ['R', l?.r ?? 0], ['ER', l?.er ?? 0], ['BB', l?.bb ?? 0], ['K', l?.k ?? 0]]
+        return (
+          <div className="gdp__tonight" aria-label="His line tonight">
+            <span className="gdp__tonighthead"><span>{pitches} {pitches === 1 ? 'pitch' : 'pitches'} • {faced} {faced === 1 ? 'batter' : 'batters'} faced</span></span>
+            <dl className="gdp__tonightgrid">
+              {cells.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
+            </dl>
+          </div>
+        )
+      }}
+    </Sealable>
   )
+  return <PitcherCard feed={feed} pitcher={pitcher} teamId={club.id} teamName={club.clubName} side={side} treatment={treatment} relief={false} tonight={tonight} showLast={false} gameday className="gdarm" />
 }
 
 const EventLog = ({ ctx }) => (
@@ -191,7 +248,7 @@ const EventLog = ({ ctx }) => (
   </Sealable>
 )
 
-const PANELS = { navigator: Navigator, trail: Trail, pitches: Pitches, battingOrder: BattingOrder, reference: Reference, eventLog: EventLog }
+const PANELS = { navigator: Navigator, trail: Trail, pitches: Pitches, battingOrder: BattingOrder, reference: Reference, arm: Arm, eventLog: EventLog }
 
 // The panel for a ladder block, or null for the blocks other prompts build.
 export function GamedayPanel({ block, ctx }) {

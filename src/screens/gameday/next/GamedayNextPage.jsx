@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import '../../../styles/gameday-next/page.css'
 import { Button } from '../../../components/ui/control/Button.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
@@ -11,12 +11,25 @@ import { useTier } from './useTier.js'
 // window's tier places (lib/gameday/ladder.js). `engine` is the old half page, mounted hidden so
 // the reveal flow, the live snapshot and the step cursor keep running.
 // Blocks a panel fills; a stage or hero slot with nothing to draw yet shows its name.
-const PANELLED = new Set(['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'eventLog'])
+const PANELLED = new Set(['navigator', 'trail', 'pitches', 'battingOrder', 'reference', 'arm', 'eventLog'])
 
 export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine, advance, pitch, onBoxScore, onScorecard, lineups, slateHref, notices = [], refresh }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
-  const slots = blocksFor(tier).filter((b) => b !== 'band' && b !== 'bar')
+  // The defense (the Reference block) is a drawer from the right where the window is wide enough
+  // for one; the narrower tiers fold it into the Menu as before.
+  const drawer = tier === 'L' || tier === 'D'
+  const [defense, setDefense] = useState(false)
+  const opened = useRef(false)
+  if (defense) opened.current = true
+  useEffect(() => {
+    if (!defense) return undefined
+    const onKey = (e) => e.key === 'Escape' && setDefense(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [defense])
+  // The drawer tiers swap the Reference block for the arm on the mound (the field is the drawer).
+  const slots = blocksFor(tier).flatMap((b) => (b === 'band' || b === 'bar' || (drawer && b === 'eventLog') ? [] : drawer && b === 'reference' ? ['arm'] : [b]))
   return (
     <div className="gdnext" data-tier={tier}>
       {/* A delay or suspension, and a failed refresh, read as a strip under the band; the stage
@@ -44,6 +57,9 @@ export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine,
           <Button size="control" pressed={!pitch.on} onClick={() => pitch.set(false)}>At-bat</Button>
           <Button size="control" pressed={pitch.on} onClick={() => pitch.set(true)}>Pitch</Button>
         </div>
+        {drawer && (
+          <Button size="control" className="gdnext__defbtn" pressed={defense} aria-expanded={defense} aria-controls="gdnext-defense" onClick={() => setDefense((d) => !d)}>Defense</Button>
+        )}
         {/* aria-disabled, never `disabled`: a hold (the half closing, the step hold) must still
             take the tap that ends it early, and a disabled button gets no pointer events (ADR-0046). */}
         <Button skin="ink" className="gdnext__advance" aria-disabled={advance.disabled || undefined} onClick={() => !advance.disabled && advance.onClick()}>
@@ -52,10 +68,15 @@ export function GamedayNextPage({ band, panels, stage, checkpoint, hero, engine,
         {/* The live edge, said once and politely (ADR-0055). Always mounted so the change is read. */}
         <p className="sr-only" role="status" aria-live="polite">{advance.caughtUp ? 'Caught up — waiting on the next batter' : ''}</p>
       </div>
+      {drawer && (
+        <aside id="gdnext-defense" className="gdnext__drawer" data-open={defense || undefined} aria-label="Defense" inert={!defense}>
+          {opened.current && <GamedayPanel block="reference" ctx={panels} />}
+        </aside>
+      )}
       <div hidden>{engine}</div>
       {menu && (
         <GamedayMenu
-          folded={foldedFor(tier)}
+          folded={drawer ? [...foldedFor(tier), 'eventLog'] : foldedFor(tier)}
           panels={panels}
           onClose={() => setMenu(false)}
           onBoxScore={onBoxScore}

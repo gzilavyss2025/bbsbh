@@ -119,7 +119,7 @@ test('hero: the due-up strip follows the last result even with no step cursor (a
   const cap = all.indexOf(at(all, 12)) + 1
   const out = html({ last: live(half(F824, 2, 'top', cap), cap), stepAtBatIndex: null })
   const strip = out.slice(out.indexOf('gdhero__due'))
-  assert.match(strip, /1st · #56 Arozarena/, 'Arozarena is due after Rodden')
+  assert.match(strip, /Due up:.*Arozarena/, 'Arozarena is due after Rodden')
   assert.ok(!strip.includes('Naylor'), 'not the half\'s leadoff batters')
 })
 

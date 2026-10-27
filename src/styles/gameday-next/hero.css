@@ -13,7 +13,7 @@
 .gdhero__lbl { font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
 /* layout-exempt: the pitch columns beside the diamond */
-.gdhero__box { flex: none; box-sizing: border-box; display: grid; grid-template-columns: 88px minmax(0, 1fr); aspect-ratio: 1.45;
+.gdhero__box { flex: none; box-sizing: border-box; display: grid; grid-template-columns: 64px minmax(0, 1fr); aspect-ratio: 1.45;
   border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-inset); }
 .gdnext[data-tier='P'] .gdhero__box { height: 140px; }
 .gdnext[data-tier='T'] .gdhero__box { height: 128px; }
@@ -26,9 +26,9 @@
 /* layout-exempt: two columns of pips */
 .gdhero__bs { display: grid; grid-template-columns: 1fr 1fr; min-width: 0; border-right: var(--bw-rule) solid var(--border-rule); }
 /* layout-exempt: the pips wrap inside a fixed column */
-.gdhero__col { display: flex; flex-flow: row wrap; align-content: flex-start; gap: var(--space-1); padding: var(--space-1); min-width: 0; }
+.gdhero__col { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-1) 0; min-width: 0; }
 .gdhero__col + .gdhero__col { border-left: var(--bw-hair) solid var(--border-hairline); }
-.gdhero__col i { flex: 0 0 100%; font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); font-style: normal; color: var(--text-caption); }
+.gdhero__col i { flex: none; text-align: center; font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); font-style: normal; color: var(--text-caption); }
 .gdhero__pip { width: 16px; font: var(--w-bold) var(--fs-small) / 1 var(--font-mono, var(--font-body)); text-align: center; color: var(--text-heading); }
 .gdhero__pip.is-x { color: var(--text-heading); text-decoration: underline; }
 
@@ -64,4 +64,7 @@
 /* layout-exempt: one row of chips */
 .gdhero__due { margin-top: auto; display: flex; align-items: center; gap: var(--space-3); min-width: 0; overflow: hidden; white-space: nowrap;
   font: var(--w-medium) var(--fs-small) / 1 var(--font-body); }
+/* The names read "Bauers • Yelich • Contreras": a bullet between them, none after the label. */
+.gdhero__due span:not(.gdhero__lbl) + span::before { content: '•'; margin-right: var(--space-3); font-weight: var(--w-medium); color: var(--text-caption); }
+.gdhero__due .plink { font: inherit; color: inherit; text-transform: inherit; }
 .gdhero__due .is-now { font-weight: var(--w-bold); color: var(--text-heading); }

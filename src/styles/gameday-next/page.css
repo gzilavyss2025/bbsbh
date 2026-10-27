@@ -28,18 +28,21 @@
   grid-template-areas: 'band band' 'navigator navigator' 'stage stage' 'hero pitches' 'trail trail' 'bar bar';
 }
 .gdnext[data-tier='L'] {
-  grid-template-columns: 240px repeat(2, minmax(0, 1fr)) 240px;
+  grid-template-columns: minmax(270px, 1fr) repeat(2, minmax(0, calc(max(720px, 40vw) / 2))) minmax(270px, 1fr);
   --gd-band-h: 66px;
+  --gd-bar-h: 76px;
   grid-template-rows: auto minmax(0, 1fr) 168px 58px 76px;
-  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage reference'
-    'battingOrder hero hero reference' 'trail trail trail trail' 'bar bar bar bar';
+  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
+    'battingOrder hero hero arm' 'trail trail trail trail' 'bar bar bar bar';
 }
 .gdnext[data-tier='D'] {
-  grid-template-columns: 264px minmax(0, 1fr) 324px 264px;
+  /* the middle is the stage's width: past its desktop size it holds at 40% of the window and the sides take the rest */
+  grid-template-columns: minmax(300px, 1fr) minmax(0, calc(max(672px, 40vw) - 324px)) 324px minmax(300px, 1fr);
   --gd-band-h: 68px;
+  --gd-bar-h: 68px;
   grid-template-rows: auto minmax(0, 1fr) 164px 66px 68px;
-  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage reference'
-    'battingOrder hero pitches eventLog' 'trail trail trail trail' 'bar bar bar bar';
+  grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
+    'battingOrder hero pitches arm' 'trail trail trail trail' 'bar bar bar bar';
 }
 
 /* The band row is `auto`: the band keeps its tier's height (--gd-band-h), and the status strip
@@ -57,6 +60,7 @@
 .gdnext__slot--pitches { --gd-area: pitches; }
 .gdnext__slot--battingOrder { --gd-area: battingOrder; }
 .gdnext__slot--reference { --gd-area: reference; }
+.gdnext__slot--arm { --gd-area: arm; overflow-y: auto; } /* the one panel taller than its column on a short window: it scrolls inside its own box, the frame never does */
 .gdnext__slot--eventLog { --gd-area: eventLog; }
 .gdnext__slotname { position: absolute; top: 0; right: 0; padding: var(--space-1) var(--space-1h);
   font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
@@ -91,8 +95,11 @@
 /* layout-exempt: one row of three controls */
 .gdnext__bar { grid-area: bar; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; gap: var(--space-2); min-width: 0;
   padding: var(--space-2) var(--space-3); background: var(--surface-card); border-top: var(--bw-heavy) solid var(--border-stamped); }
-.gdnext__bar .gdnext__menu { border-radius: 0; flex: none; width: auto; min-width: 88px; }
+.gdnext__bar .gdnext__menu { margin: 0; border-radius: 0; flex: none; width: auto; min-width: 88px; }
 .gdnext__switch { flex: none; display: flex; white-space: nowrap; }
+/* Menu, the switch and the advance share one height, so the three read as one row. */
+.gdnext__bar .gdnext__menu, .gdnext__bar .gdnext__defbtn, .gdnext__switch .btn, .gdnext__bar .gdnext__advance { box-sizing: border-box; height: var(--tap-min); min-height: 0; font-size: var(--fs-label); }
+.gdnext__switch { align-items: stretch; }
 .gdnext__bar .gdnext__advance { position: relative; flex: 1; min-width: 0; white-space: nowrap; }
 /* The advance owns the bar's dead space around it: up and down to the bar's edges (the bar's
    overflow clip trims the reach, and its top rule stays the page's), right to its end, left across
@@ -105,3 +112,12 @@
 }
 .gdnext__folded { margin: 0 0 var(--space-3); padding: 0; list-style: none; }
 .gdnext__folded li { padding: var(--space-2) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
+
+/* The defense drawer (L and D): the park at the lineup page's own size, slid in from the right over
+   the frame above the bar, so the advance and the switch stay in reach. */
+/* layout-exempt: a fixed side sheet */
+.gdnext__drawer { position: absolute; z-index: 3; top: var(--gd-band-h); right: 0; max-height: calc(100% - var(--gd-band-h) - var(--gd-bar-h) - var(--space-2));
+  width: min(var(--app-width), 90%); overflow: hidden; background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped);
+  transform: translateX(105%); visibility: hidden; transition: transform var(--dur-med) ease, visibility 0s linear var(--dur-med); }
+.gdnext__drawer[data-open] { transform: none; visibility: visible; transition-delay: 0s; }
+@media (prefers-reduced-motion: reduce) { .gdnext__drawer { transition: none; } }

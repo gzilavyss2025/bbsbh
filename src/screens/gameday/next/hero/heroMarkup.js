@@ -79,7 +79,7 @@ function result(h, e, feed, side) {
       contact && h('div', { className: 'gdhero__contact' }, contact)))
 }
 
-export function heroMarkup(h, { SealBox, feed, inning, half, mark, last, stepAtBatIndex, open = null, checkpoint = false }) {
+export function heroMarkup(h, { SealBox, PlayerLink = null, feed, inning, half, mark, last, stepAtBatIndex, open = null, checkpoint = false }) {
   const side = half === 'top' ? 'away' : 'home'
   // A committed half reports no step cursor; the last result's own index is the same cursor.
   // While the checkpoint shows, it carries the due-up (the next half's side); the hero keeps only the box.
@@ -91,7 +91,6 @@ export function heroMarkup(h, { SealBox, feed, inning, half, mark, last, stepAtB
         ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, feed, side))
         : sealedBox(h),
     due.length > 0 &&
-      h('div', { className: 'gdhero__due' }, h('span', { className: 'gdhero__lbl' }, last ? 'Up' : 'Next'),
-        ...due.map((b, i) => h('span', { key: b.slot, className: i === 0 ? 'is-now' : undefined },
-          `${ordinal(b.slot)} · ${b.jersey ? `#${b.jersey} ` : ''}${b.last}`))))
+      h('div', { className: 'gdhero__due' }, h('span', { className: 'gdhero__lbl' }, 'Due up:'),
+        ...due.map((b, i) => h('span', { key: b.slot, className: i === 0 ? 'is-now' : undefined }, PlayerLink ? h(PlayerLink, { id: b.id }, b.last) : b.last))))
 }

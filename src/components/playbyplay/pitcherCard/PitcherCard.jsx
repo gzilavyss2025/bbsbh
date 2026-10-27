@@ -16,6 +16,7 @@ import {
 import { PitcherNotice } from '../PitcherNotice.jsx'
 import { TABS } from '../cardCopy.js'
 import { useArrival } from '../../../hooks/motion/useArrival.js'
+import { TeamLogo } from '../../logo/TeamLogo.jsx'
 import { CardBand, Unfold } from './Arrival.jsx'
 import { LastAppearance } from './LastAppearance.jsx'
 import { PitchMix } from './PitchMix.jsx'
@@ -54,7 +55,7 @@ import { SeasonLines } from './SeasonLines.jsx'
 // arrives with it (the departing arm's line), told whether the card has settled.
 const cardData = keyedCache()
 
-export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className, label, entering, side, treatment, after }) {
+export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className, label, entering, side, treatment, after, tonight = null, showLast = true, gameday = false }) {
   const game = feed?.gameData ?? {}
   const officialDate = game.datetime?.officialDate ?? null
   const season = game.game?.season ?? null
@@ -103,7 +104,7 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
   return (
     <>
       <div className={`pcard ${arrival} ${className ?? ''}`} style={band.style}>
-        <CardBand label={tab} house={band.house} />
+        <CardBand label={tab} house={band.house} logo={gameday && teamId != null ? <TeamLogo teamId={teamId} name={teamName ?? ''} size={22} variant="mono" crop="bar" className="sectionhead__mark" /> : null} />
         <PitcherNotice
           pitcher={pitcher}
           teamId={teamId}
@@ -111,22 +112,26 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
           label={label}
           entering={entering}
           flag={flag}
+          logo={!gameday}
+          stacked={gameday}
         />
-        <Unfold open={open} delay={380}>
-          <SeasonLines
-            role={role}
-            line={data?.line}
-            post={showPostseasonRow(gameType, data?.post) ? data.post : null}
-            season={season}
-            career={showCareerRow(gameType, data?.career, data?.post) ? data.career : null}
-            debut={!data?.line && !data?.last}
-            sportId={sportId}
-          />
-        </Unfold>
+        {tonight ?? (
+          <Unfold open={open} delay={380}>
+            <SeasonLines
+              role={role}
+              line={data?.line}
+              post={showPostseasonRow(gameType, data?.post) ? data.post : null}
+              season={season}
+              career={showCareerRow(gameType, data?.career, data?.post) ? data.career : null}
+              debut={!data?.line && !data?.last}
+              sportId={sportId}
+            />
+          </Unfold>
+        )}
         <Unfold open={open && tiles.length > 0} delay={435}>
           <PitchMix tiles={tiles} lefty={pitcher?.hand === 'L'} name={pitcher?.name} />
         </Unfold>
-        <Unfold open={Boolean(data?.last)} delay={490}>
+        <Unfold open={showLast && Boolean(data?.last)} delay={490}>
           <LastAppearance
             last={data?.last}
             season={season}
