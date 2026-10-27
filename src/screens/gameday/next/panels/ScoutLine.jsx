@@ -1,5 +1,6 @@
 import { fetchHeadToHead } from '../../../../api/scout/headToHead.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
+import { fetchOnce } from '../../../../lib/gameday/fetchOnce.js'
 import { useRouteLink } from '../../../../lib/nav.js'
 import { scoutPath } from '../../../../lib/scout/path.js'
 
@@ -12,9 +13,12 @@ const person = (feed, id) => {
   return { id, last: p.lastName ?? '', name: p.fullName ?? '' }
 }
 
+// One Savant read per pair and date for the session: a batter comes up again every few innings.
+const headToHead = fetchOnce(fetchHeadToHead)
+
 export function ScoutLine({ feed, hitterId, pitcherId }) {
   const date = feed?.gameData?.datetime?.officialDate ?? null
-  const { data } = useAsync(() => fetchHeadToHead(hitterId, pitcherId, date), [hitterId, pitcherId, date])
+  const { data } = useAsync(() => headToHead(hitterId, pitcherId, date), [hitterId, pitcherId, date])
   const linkProps = useRouteLink()
   const hitter = person(feed, hitterId)
   const pitcher = person(feed, pitcherId)

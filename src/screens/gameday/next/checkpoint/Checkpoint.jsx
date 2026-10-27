@@ -7,6 +7,7 @@ import { fetchSavantMatchup } from '../../../../api/matchup/savant.js'
 import { fetchHitterEntryLines } from '../../../../api/player/hitterEntryLines.js'
 import { halfIndex } from '../../../../api/select.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
+import { fetchOnce } from '../../../../lib/gameday/fetchOnce.js'
 import { useCalloutLedger } from '../../../../hooks/useCalloutLedger.js'
 import { useWsCalloutInputs } from '../../../../hooks/postseason/useWsEvents.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
@@ -21,6 +22,9 @@ import { checkpointMarkup } from './checkpointMarkup.js'
 // margin notes, workload, date), plus the Savant rates, the World Series inputs and the ledger's counts
 // for the next half, frozen for the half. A note counts as shown once it is on screen: at T, L and D or
 // under Motion: Reduced every page is, on the phone only while the Notes page is open.
+// The rosters' entry lines, once per roster for the session: the checkpoint remounts every half.
+const entryLines = fetchOnce(fetchHitterEntryLines, (v) => !Object.keys(v ?? {}).length)
+
 export function Checkpoint({ notes, inning, half, feed, ...props }) {
   const [page, setPage] = useState(null)
   const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
@@ -30,7 +34,7 @@ export function Checkpoint({ notes, inning, half, feed, ...props }) {
   const order = ['away', 'home'].flatMap((s) => Object.values(feed?.liveData?.boxscore?.teams?.[s]?.players ?? {})
     .filter((p) => p.position?.type !== 'Pitcher' || p.position?.abbreviation === 'TWP').map((p) => p.person?.id)).filter(Boolean).sort().join(',')
   const entry = useAsync(
-    () => (order ? fetchHitterEntryLines(order.split(','), gd?.game?.season, gd?.datetime?.officialDate, gd?.teams?.home?.sport?.id ?? 1) : Promise.resolve({})),
+    () => (order ? entryLines(order.split(','), gd?.game?.season, gd?.datetime?.officialDate, gd?.teams?.home?.sport?.id ?? 1) : Promise.resolve({})),
     [order, gd?.game?.season, gd?.datetime?.officialDate],
   ).data ?? null
   const { seriesHistory, wsStarts } = useWsCalloutInputs(feed)
