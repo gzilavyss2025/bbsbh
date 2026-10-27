@@ -28,18 +28,21 @@ export function parseBoxRevealMark(raw) {
   return raw === '1'
 }
 
-// Parse the at-bat stepping cursor, stored as "{halfIdx}:{count}" (ADR-0016).
-// Either field being absent/negative/non-integer collapses the whole cursor to
-// the inert { halfIdx: -1, count: 0 } — a stale or garbled value is ignored
-// rather than misread as live progress.
+// Parse the at-bat stepping cursor, stored as "{halfIdx}:{count}" (ADR-0016), or
+// "{halfIdx}:{count}:{sub}" with the sub-steps shown of the next at-bat (ADR-0123,
+// decision 12; Gameday only). Any field being negative/non-integer, or the count
+// absent, collapses the whole cursor to the inert { halfIdx: -1, count: 0, sub: 0 }:
+// a stale or garbled value is ignored rather than misread as live progress.
 export function parseAtBatMark(raw) {
-  if (raw == null) return { halfIdx: -1, count: 0 }
-  const [h, c] = String(raw).split(':').map(Number)
-  if (!Number.isInteger(h) || !Number.isInteger(c) || h < 0 || c < 0) {
-    return { halfIdx: -1, count: 0 }
-  }
-  return { halfIdx: h, count: c }
+  const inert = { halfIdx: -1, count: 0, sub: 0 }
+  if (raw == null) return inert
+  const [h, c, s = 0] = String(raw).split(':').map(Number)
+  if (![h, c, s].every((n) => Number.isInteger(n) && n >= 0)) return inert
+  return { halfIdx: h, count: c, sub: s }
 }
+
+// The stored form. A cursor with no sub-step keeps the two-field form older builds read.
+export const formatAtBatMark = ({ halfIdx, count, sub = 0 }) => `${halfIdx}:${count}${sub > 0 ? `:${sub}` : ''}`
 
 // The one ratchet: the mark only ever moves forward. Every path that pushes in
 // an externally-sourced value (a tap, another tab's storage event, a signed-in

@@ -18,8 +18,11 @@
 // before it in this play belongs to the step before (ADR-0016) and is dropped.
 // Data only: no words, no timing (ADR-0046).
 
+import { computeHalfInningFeed } from '../playbyplay.js'
+import { nextStepBoundary } from '../playbyplay/entriesView.js'
 import { NON_PA_EVENT_TYPES, pitchCallCode } from '../playbyplay/eventTypes.js'
 import { AUTOMATIC_CODES } from '../playbyplay/pitchInfo.js'
+import { battingSideOf } from './stepCut.js'
 
 const CHANGES = new Set([
   'pitching_substitution',
@@ -93,4 +96,20 @@ export function subSteps(feed, card) {
     steps.splice(at + folded, 0, { kind: 'result', index: step.index, stop: true, pitch: step.pitch ?? null, card, riders: step.riders })
   }
   return steps
+}
+
+// The at-bat the reader is inside: the next step's card past `count` (the stored step cursor,
+// atBatCountFor), its sub-steps, and the at-bat cards already on screen (`done`, built with the
+// cut, so no later play writes onto them). The step bounds are PlayByPlay's own: a first tap's
+// cap snaps forward to the first at-bat (its effectiveCap), and the step runs to nextStepBoundary.
+// Null when no at-bat is left in the feed.
+export function openAtBat(feed, inning, half, count) {
+  const side = battingSideOf(half)
+  const raw = computeHalfInningFeed(feed, inning, half, side, count)
+  const from = count > 0 ? Math.max(count, nextStepBoundary(raw, 0)) : 0
+  const end = nextStepBoundary(raw, from)
+  const card = computeHalfInningFeed(feed, inning, half, side, end).slice(from, end).find((c) => c.kind === 'atbat')
+  if (!card) return null
+  const shown = from > count ? computeHalfInningFeed(feed, inning, half, side, from) : raw
+  return { card, steps: subSteps(feed, card), done: shown.slice(0, from).filter((c) => c.kind === 'atbat') }
 }

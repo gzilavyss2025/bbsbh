@@ -5,3 +5,17 @@
 .gdstage__canvas { flex: none; image-rendering: pixelated; }
 /* The SealBox around the revealed play adds no box: the canvas fills the slot. */
 .gdnext__slot--stage > .statgrid { display: contents; }
+
+/* The event card (ADR-0123, #2571): a lower third on the stage, the runner's own box beside the words */
+/* layout-exempt: the box beside its words, across the stage's foot */
+.gdevent { position: absolute; z-index: 2; left: var(--space-2); right: var(--space-2); bottom: var(--space-2); display: flex;
+  gap: var(--space-2); align-items: center; padding: var(--space-1h); background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); }
+.gdnext .gdevent .gdhero__box { height: 72px; grid-template-columns: 48px minmax(0, 1fr); }
+.gdevent .gdhero__code { font-size: var(--fs-title-sm); }
+.gdevent .gdhero__col { gap: 0; padding: 2px; }
+.gdevent .gdhero__pip { font-size: var(--fs-cell); }
+.gdnext[data-tier='L'] .gdevent .gdhero__box, .gdnext[data-tier='D'] .gdevent .gdhero__box { height: 84px; }
+/* layout-exempt: the kind tab over its sentence */
+.gdevent__txt { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; font-size: var(--fs-small); }
+.gdevent__kind { align-self: flex-start; padding: 2px var(--space-1h); background: var(--surface-stamped-ink); color: var(--text-on-ink);
+  font: var(--w-bold) var(--fs-label) / 1 var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }

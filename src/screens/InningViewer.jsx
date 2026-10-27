@@ -42,6 +42,7 @@ import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
 import { isLookNew } from './gameday/next/useTier.js'
+import { nextSub, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -142,8 +143,9 @@ export function InningViewer({
   // Reveal high-water mark, extras-unlock state, and the feed-keyed derived
   // cache — see useRevealProgress. The running line and Pitchers section both
   // read from `revealedThrough`; any half at or below it renders unsealed.
-  const { revealedThrough, revealTo, mergeRevealedThrough, unlocked, getDerived, atBatCountFor, revealAtBat } =
+  const { revealedThrough, revealTo, mergeRevealedThrough, unlocked, getDerived, atBatCountFor, revealAtBat, subFor, revealSub } =
     useRevealProgress(feed, regulation, actualCount)
+  const [pitchMode, setPitchMode] = usePitchMode(feed?.gamePk) // Gameday's At-bat | Pitch (ADR-0123)
 
   // THE ONE OPENER (ADR-0048): the reader's own stamp on this game. A stamp is
   // minted only from inside a revealed box score of a FINAL game and records "I
@@ -477,6 +479,14 @@ export function InningViewer({
     focus.followLatest() // show the new at-bat even if the reader paged back
     revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (curStepInfo?.nextCap ?? curAtBatCount + 1))
   }
+  // Gameday: one sub-step inside the next at-bat, until the tap that reveals the at-bat (ADR-0123).
+  const curSub = subFor(effInning, effHalf)
+  const revealNextStep = () => {
+    const n = nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode)
+    if (n == null) return revealNextAtBat()
+    focus.followLatest()
+    revealSub(effInning, effHalf, n)
+  }
 
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
@@ -729,12 +739,12 @@ export function InningViewer({
   )
 
   if (isLookNew()) {
-    // The advance reads the states InningActionBar draws, with "Next play" for an at-bat step, and
+    // The advance reads the states InningActionBar draws, with the mode's words for a step, and
     // keeps its holds: no step while the page turns, no forward move while the half closes (ADR-0046).
     const advance = focus.stepAhead
-      ? { label: 'Next play', disabled: turning, onClick: () => !turning && focus.stepNext() }
+      ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && focus.stepNext() }
       : currentSealed
-        ? { label: atHalfEdge ? 'Caught up' : 'Next play', disabled: atHalfEdge, onClick: revealNextAtBat, reveal: true }
+        ? { label: atHalfEdge ? 'Caught up' : stepWords(pitchMode), disabled: atHalfEdge, onClick: revealNextStep, reveal: true }
         : nextIdx != null
           ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
           : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }
@@ -756,6 +766,8 @@ export function InningViewer({
           checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
           engine={pageTurn}
           advance={advance}
+          open={currentSealed ? { count: curAtBatCount, sub: curSub } : null}
+          pitch={{ on: pitchMode, set: setPitchMode }}
           onBoxScore={onBoxScore}
           onScorecard={onScorecard}
           refresh={selectIsFinal(feed) ? null : <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />}
