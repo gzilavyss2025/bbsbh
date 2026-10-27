@@ -274,6 +274,9 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
 const SIDES = ['away', 'home']
 
 export function DecidedHero({ mode, mvp = null, stats = [] }) {
+  // No face on file (an MVP from before MLB's photo archive): both sides fall back to the clubs' mono
+  // marks, as SeriesMvpCard did, and his name and line still sit on the stage.
+  const [noPhoto, setNoPhoto] = useState(false)
   const { series } = mode
   const hero = decidedHero(series, mvp)
   if (!hero) return null
@@ -288,16 +291,16 @@ export function DecidedHero({ mode, mvp = null, stats = [] }) {
         <div className="ww-hero__matchup">
           <div className="ww-hero__stage">
             <div className="ww-hero__split">
-              {mvpAt < 0 ? (
+              {mvpAt < 0 || noPhoto ? (
                 <>
-                  <Slab side="away" clubId={ids[0]} player={hero.players[0]} />
-                  <Slab side="home" clubId={ids[1]} player={hero.players[1]} />
+                  <Slab side="away" clubId={ids[0]} player={null} />
+                  <Slab side="home" clubId={ids[1]} player={null} />
                 </>
               ) : (
                 SIDES.map((side, i) => (
                   <div key={side} className={`ww-hero__slab ww-hero__slab--${side}${i === mvpAt ? '' : ' ww-hero__slab--action'}`}>
                     {i === mvpAt ? (
-                      <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback className="ww-hero__cut" />
+                      <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback onFallback={(kind) => setNoPhoto(kind != null)} className="ww-hero__cut" />
                     ) : (
                       <Wash key={mvp.playerId} personId={mvp.playerId} />
                     )}

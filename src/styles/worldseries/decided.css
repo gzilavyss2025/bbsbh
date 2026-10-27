@@ -98,9 +98,12 @@
     background: linear-gradient(to top, var(--surface-stamped-ink) 45%, transparent);
   }
   .ww-hero--mvp { --ww-stage-h: calc(var(--space-16) * 5 + var(--space-10)); }
+  /* The MVP block sits over the stage's foot, so the stage keeps that much room under the result:
+     a headline that wraps grows the stage instead of running into his name and line. */
+  .ww-hero--mvp .ww-hero__stage { padding-bottom: calc(var(--space-16) * 2 + var(--space-6)); }
   .ww-hero__mvp--home { right: 0; }
   .ww-hero__mvp--away { left: 0; }
-  .ww-hero__mvpstat dd { font-size: var(--fs-title-lg); }
+  .ww-hero__mvpstat dd { font-size: var(--fs-title-md); }
 }
 
 /* A decided Series' game cell opens that game's lineups: one link stretched over the box. */

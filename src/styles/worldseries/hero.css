@@ -388,7 +388,7 @@
 .ww-cal__day:has(.ww-cal__winner) .ww-cal__flag { line-height: var(--lh-solid); padding-block: var(--space-1); border-top: var(--bw-hair) solid var(--border-stamped-soft); }
 
 /* A decided Series (#2562): the trophy leads the crest, and the result takes the stage's centre. The
-   card keeps the result banner's own spacing, so the MVP card under it clears its shadow. */
+   card keeps the result banner's own spacing on the page. */
 .ww-hero--decided { margin-block: var(--space-3); }
 .ww-hero__trophy { height: var(--space-10); width: auto; }
 .ww-hero__result { margin: 0; font-size: var(--fs-hero-sm); text-wrap: balance; }

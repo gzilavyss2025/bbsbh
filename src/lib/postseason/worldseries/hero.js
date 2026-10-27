@@ -110,7 +110,6 @@ export function calendarDays(columns, slateDate) {
 export function decidedHero(series, mvp = null) {
   if (!series?.decided || !series.winner?.id) return null
   const games = series.games ?? []
-  const winnerOf = new Map(games.map((g) => [g.gameNumber, g.winnerId ?? null]))
   const gameOf = new Map(games.map((g) => [g.gameNumber, g]))
   const ids = series.slots.map((s) => s.club.id)
   const abbr = Object.fromEntries(series.slots.map((s) => [s.club.id, s.club.abbreviation]))
@@ -119,7 +118,7 @@ export function decidedHero(series, mvp = null) {
   const { columns } = ledgerModel({ clubIds: ids, games, slateDate: '9999-12-31' })
   const days = calendarDays(columns, '9999-12-31')
     .filter((d) => d.kind !== 'today')
-    .map((d) => (d.kind === 'game' ? { ...d, winnerId: winnerOf.get(d.gameNumber) ?? null, path: nextGamePath(gameOf.get(d.gameNumber), d.date, abbr, 'lineup1') } : d))
+    .map((d) => (d.kind === 'game' ? { ...d, winnerId: gameOf.get(d.gameNumber)?.winnerId ?? null, path: nextGamePath(gameOf.get(d.gameNumber), d.date, abbr, 'lineup1') } : d))
   const players = ids.map((id) => (mvp?.playerId && mvp.teamId === id ? { id: mvp.playerId, name: mvp.name } : null))
   return { winnerId: series.winner.id, gamesPlayed: games.length, days, players }
 }
