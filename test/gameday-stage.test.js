@@ -57,7 +57,7 @@ test('a ball with no landing coordinate (tier C) has no chase', () => {
 })
 
 test('drawStage is a pure function of the play and the time', () => {
-  const w = 195, h = 300, at = (play, t) => drawStage(stateAt(play, t), w, h).px
+  const w = 195, h = 300, at = (play, t) => drawStage(stateAt(play, t), w, h).px.slice() // the buffer is reused
   for (const [play, t] of [[hr, 0.3], [hr, hr.t.contact + 1], [groundout, groundout.t.chase - 0.2]]) {
     assert.deepEqual(at(play, t), at(play, t))
   }
@@ -65,4 +65,25 @@ test('drawStage is a pure function of the play and the time', () => {
   const px = at(hr, hr.t.contact + 1)
   assert.ok(px.every((v) => v <= S.frame))
   assert.notDeepEqual(px, at(hr, hr.t.pitch - 0.05))
+  // A frame is not allocated per call, and a resize takes the new size.
+  const a = drawStage(stateAt(hr, 0.3), w, h), b = drawStage(stateAt(hr, 0.4), w, h)
+  assert.equal(a.px, b.px)
+  assert.equal(drawStage(stateAt(hr, 0.3), 100, 150).px.length, 100 * 150)
+  assert.equal(drawStage(stateAt(hr, 0.3), w, h).px.length, w * h)
+})
+
+// The feed lists one runner entry per movement, so a single sends a runner 1B to 2B then 2B to 3B
+// as two entries, and a steal mid-at-bat adds another. One runner is one figure (#2662 review).
+test('a runner who moves twice is one figure, from his first base to his last', () => {
+  const p = JSON.parse(JSON.stringify(F.plays[1]))
+  const idx = p.playEvents.at(-1).index
+  const mv = (id, playIndex, start, end) => ({ details: { runner: { id }, playIndex }, movement: { originBase: start, start, end, isOut: false }, credits: [] })
+  p.runners.push(
+    mv(11, idx, '1B', '2B'), mv(11, idx, '2B', '3B'), // a single: two entries, one run
+    mv(22, idx - 1, '1B', '2B'), mv(22, idx, '2B', '3B'), // stole second mid-at-bat, then moved on the hit
+    mv(33, idx - 1, '2B', '3B'), // stole third mid-at-bat, then stayed
+  )
+  const rs = stagePlay(p, wall).runners
+  assert.equal(rs.length, 4) // the batter and three runners
+  assert.deepEqual(rs.slice(1).map((r) => [r.start, r.end]), [['1B', '3B'], ['2B', '3B'], ['3B', '3B']])
 })

@@ -109,9 +109,16 @@ function fieldMap(wall, k, viewH) {
   return { b, toMap }
 }
 
-// Caches keyed by the park's wall function, then by buffer size.
+// One cache per park (its wall function), holding only the current buffer size: a resize or a
+// rotation replaces the backgrounds instead of piling up a new set.
 const CACHE = new WeakMap()
-const cacheOf = (wall, key) => { if (!CACHE.has(wall)) CACHE.set(wall, new Map()); const m = CACHE.get(wall); if (!m.has(key)) m.set(key, {}); return m.get(key) }
+function cacheOf(wall, key) {
+  const c = CACHE.get(wall)
+  if (c?.key === key) return c.K
+  const K = {}
+  CACHE.set(wall, { key, K })
+  return K
+}
 
 // B ball, S strike (called, swinging, foul), X in play.
 const callOf = (code) => ('XDE'.includes(code) ? 'X' : 'B*HVIP'.includes(code[0]) ? 'B' : 'S')
@@ -212,10 +219,11 @@ function fieldView(fb, K, st, w, h) {
 }
 const zLiftPx = (z, k) => zLift(z) * k
 
-// The whole stage at `st` = stateAt(play, t), in a w x h buffer of slot indices.
+// The whole stage at `st` = stateAt(play, t), in a w x h buffer of slot indices. The buffer is the
+// cache's own, redrawn by the next call at this size: paint it or copy it before then.
 export function drawStage(st, w, h) {
   const K = cacheOf(st.play.wall, `${w}x${h}`), fb = K.fb || (K.fb = newBuf(w, h))
   if (st.view === 'field') fieldView(fb, K, st, w, h)
   else pitchView(fb, K, st, w, h)
-  return { w, h, px: fb.px.slice() }
+  return fb
 }
