@@ -1,9 +1,11 @@
 # Ballpark celebrations
 
-The modern pixel-art study extends PR 2673's standalone cutscene kit. Home run,
-strikeout and defensive-catch scenes are reviewed at `/animation-lab?nointro#ballpark`;
-Gameday does not mount them yet. Browser recordings and pose sheets are exported
-for the owner's cloud-session review; a localhost address is not a review deliverable.
+The modern pixel-art system extends PR 2673's standalone cutscene kit. Home run,
+grand slam, strikeout and defensive-catch scenes are inspected at
+`/animation-lab?nointro#ballpark` and are connected to the revealed Gameday stage.
+The owner approved the visual direction and future development after the first
+animation; do not stop for further video/GIF approval rounds. Cloud-local URLs
+are for agent verification, not owner review.
 
 ## Art direction
 
@@ -29,6 +31,8 @@ skin tone or appearance from player data. The player caption carries identity.
   2.8 seconds. Each has its own caption entrance and review beats.
 - `scenes.js` pairs each role's artwork and choreography. This is an authored
   catalog, not a rule for which real game events earn a celebration.
+- Grand slams reuse the batter atlas with a more deliberate accent and a
+  3.6-second sequence, rather than inventing a different real-player action.
 - `assets.js`: shared image decode, bounded palette cache and conservative
   material recoloring, performed once per palette, not once per animation frame.
   `HOME_RUN_ART` describes the atlas grid and scene framing.
@@ -52,6 +56,47 @@ scenes have their own atlases and choreography; a future park gets its own backg
 Do not recolor a batter into a pitcher and call it a new animation. Future tracks
 must use valid frame indices in their matching atlas and ascending beat times.
 Review their framing and anatomy, not only whether the file decodes.
+
+## Gameday integration
+
+`stage/GamedayStage.js` selects one completed result only inside its existing
+SealBox reveal subtree. `integration/celebrationForPlay.js` receives that one
+play and pre-game identity data, never an uncapped list of future plays:
+
+- A completed home run uses the batter and batting club; four RBI selects the
+  longer grand slam sequence.
+- A completed strikeout with a recorded out uses the pitcher and fielding club.
+  Dropped-third-strike reaches and a strikeout on which a run scores do not
+  receive a celebratory reaction.
+- Defense requires a recorded air out, at least the existing moments engine's
+  measured hard-hit floor (110 mph), and a credited LF/CF/RF putout of the batter.
+  Missing tracking or credited fielder means no cutscene, not a guessed highlight.
+  Fixture 815625, at-bat 102, supplies a real positive case: Ryan Kreidler catches
+  a 113.1 mph line drive. Other ordinary outs keep the existing field animation.
+
+Pitch/event sub-steps never receive their at-bat's eventual celebration. The
+existing tap rule controls playback: one reveal tap starts it, a tap during it
+finishes it without advancing, and the next tap advances. Cold loads, returns,
+polls and force-reveals do not start it. No control label or pre-reveal duration
+depends on the sealed result (ADR-0046, ADR-0123).
+
+`integration/GamedayPlayCanvas.jsx` loads the decorative component only for a
+selected result. The ordinary field's end state stays behind it until art is
+ready. Import/image failure restores the field and releases playback; a bounded
+post-reveal watchdog also prevents a stalled download holding the scoring control.
+The Skip button uses the same completion callback. App/OS reduced motion shows
+the final pose and does not consume an extra advance tap.
+
+The scene contains within the existing stage at each layout size. Once ready,
+its letterbox covers the old field; the legacy engine's body-portal big-play
+stamp is suppressed while the new scene supplies the title. The checkpoint's
+existing priority is unchanged: when a half/game-end checkpoint owns the stage,
+it takes precedence over celebration playback. This pass does not delay that
+checkpoint or change the scoring frontier.
+
+Result flags, identities, and putout-credit paths were verified against the live
+824716 feed during implementation. Names and kit colors come from data, never
+from the generated character's apparent identity.
 
 ## Uniforms
 
@@ -92,12 +137,11 @@ later does not change the scene's public interface.
 
 ## Next slices
 
-1. Review the exported home-run, strikeout and catch playback, especially pose
-   registration and catch contact. Generated frames need art review; passing
-   tests is not art approval.
-2. Add verified uniform material maps and park landmarks independently.
-3. Integrate event triggers in a later pass, preserving Gameday's reveal boundary.
-   Batting, pitching and fielding can choose close-ups or action sequences per event.
+1. Add verified uniform material maps and park landmarks independently.
+2. Extend the scene library as new event types require it. Batting, pitching
+   and fielding can choose close-ups or action sequences per event.
+3. Any later checkpoint/celebration handoff must preserve the scoring frontier
+   and the checkpoint's one-window, touch-first contract.
 
 Provisional event lengths are 1–2 seconds for quick reactions, 2–3 seconds for
 home runs and defensive highlights, and at most about 4 seconds for rare moments.

@@ -9,7 +9,7 @@ import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLa
 import { ZoneCard } from '../zonemap/ZoneCard.jsx'
 import { dismissZoneMap, zoneMapDismissed } from '../zonemap/zoneMapFlag.js'
 import { GamedayStage, restBatter, restZones } from './GamedayStage.js'
-import { StageCanvas } from './StageCanvas.jsx'
+import { GamedayPlayCanvas } from '../cutscene/integration/GamedayPlayCanvas.jsx'
 import { wallFn } from './scene.js'
 import { stageKey } from '../steps/subStep.js'
 import { disarm, ended, rest, saw, tap } from './tapRule.js'
@@ -51,7 +51,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   const stage = feed ? (
     <>
       <GamedayStage
-        SealBox={SealBox} StageCanvas={StageCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} playing={cur.playing} onEnd={onEnd}
+        SealBox={SealBox} StageCanvas={GamedayPlayCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} playing={cur.playing} onEnd={onEnd}
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones}
       />
       {zones && (

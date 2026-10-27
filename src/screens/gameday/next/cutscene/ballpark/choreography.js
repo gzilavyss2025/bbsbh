@@ -40,6 +40,14 @@ export const STRIKEOUT = {
   ],
 }
 
+// Same batter art with a more deliberate accent and longer hold for a slam.
+// No extra action is invented about the named player.
+export const GRAND_SLAM = {
+  ...HOME_RUN,
+  duration: 3.6,
+  frames: HOME_RUN.frames.map((f) => ({ ...f, at: f.at > HOME_RUN.accentAt ? f.at + 0.35 : f.at })),
+}
+
 export const DEFENSIVE_CATCH = {
   duration: 2.8,
   captionAt: 0.78,

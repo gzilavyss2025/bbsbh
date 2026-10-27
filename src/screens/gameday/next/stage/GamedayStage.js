@@ -3,6 +3,8 @@ import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
 import { stagePlay } from './play.js'
+import { celebrationForPlay } from '../cutscene/integration/celebrationForPlay.js'
+import { BALLPARK_SCENES } from '../cutscene/ballpark/scenes.js'
 
 // The stage slot (#2573, #2568 slice 4): the revealed play, or the rest frame. A `.js` file so the
 // suite can render it; GamedayNextMount passes the real SealBox and StageCanvas.
@@ -33,18 +35,23 @@ function subPlay(feed, inning, half, { count, sub }) {
 
 function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd }) {
   const [start] = useState(() => performance.now())
-  const { play, still } = useMemo(() => {
+  const { play, still, celebration } = useMemo(() => {
     const { p, still } = typeof idx === 'object' ? subPlay(feed, inning, half, idx) : { p: feed.liveData.plays.allPlays.find((q) => q.about?.atBatIndex === idx), still: false }
-    return { play: stagePlay(p ?? {}, wall), still }
+    return { play: stagePlay(p ?? {}, wall), still, celebration: typeof idx === 'object' ? null : celebrationForPlay(p, feed.gameData) }
   }, [feed, idx, inning, half, wall])
   useEffect(() => {
     if (!playing) return undefined
-    const left = (still ? STILL : play.end) * 1000 - (performance.now() - start)
+    // Decorative assets may decode after the tap. Their player reports its
+    // own completion; this watchdog prevents a stalled import/load holding
+    // the scoring control. Ordinary field timing stays on its existing clock.
+    const duration = celebration ? BALLPARK_SCENES[celebration.scene].track.duration + 4 : still ? STILL : play.end
+    const left = duration * 1000 - (performance.now() - start)
     if (left <= 0 || motionIsReduced()) { onEnd(); return undefined }
     const id = setTimeout(onEnd, left)
     return () => clearTimeout(id)
-  }, [playing, play, still, start, onEnd])
-  return h(StageCanvas, playing && !still ? { play, start } : { play, t: still ? 0 : play.end })
+  }, [playing, play, still, celebration, start, onEnd])
+  const props = playing && !still ? { play, start } : { play, t: still ? 0 : play.end }
+  return h(StageCanvas, { ...props, celebration, playing, onEnd })
 }
 
 // Who stands in at rest: the due-up batter of the half being scored (dueup.js, the pre-pitch lineup),

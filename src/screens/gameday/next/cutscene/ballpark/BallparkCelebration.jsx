@@ -12,7 +12,7 @@ import '../../../../../styles/gameday-next/ballpark.css'
 export function BallparkCelebration({
   headline = 'Home run', name = '', helmet, trim, track = HOME_RUN,
   character = HOME_RUN_ART, backdrop = STADIUM_URL,
-  time, playing = false, rate = 1, reduced = false, onTime, onDone, onSkip,
+  time, playing = false, rate = 1, reduced = false, onTime, onDone, onSkip, onError,
 }) {
   const canvas = useRef(null), host = useRef(null)
   const [loaded, setLoaded] = useState(null)
@@ -21,9 +21,9 @@ export function BallparkCelebration({
   const failed = loaded?.key === artKey && loaded.failed
   const [moment, setMoment] = useState(() => momentAt(time ?? 0, track))
   const [lessMotion, setLessMotion] = useState(motionIsReduced)
-  const callbacks = useRef({ onTime, onDone })
+  const callbacks = useRef({ onTime, onDone, onError })
   const playhead = useRef(time ?? 0), completed = useRef(false)
-  useEffect(() => { callbacks.current = { onTime, onDone } }, [onTime, onDone])
+  useEffect(() => { callbacks.current = { onTime, onDone, onError } }, [onTime, onDone, onError])
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => setLessMotion(motionIsReduced())
@@ -37,7 +37,9 @@ export function BallparkCelebration({
     const style = getComputedStyle(host.current)
     prepareArt(helmet || style.getPropertyValue('--stage-kit-navy').trim(), trim || style.getPropertyValue('--stage-kit-trim').trim(), character, backdrop)
       .then((next) => { if (!cancelled) setLoaded({ key: artKey, art: next, failed: false }) })
-      .catch(() => { if (!cancelled) setLoaded({ key: artKey, art: null, failed: true }) })
+      .catch((error) => {
+        if (!cancelled) { setLoaded({ key: artKey, art: null, failed: true }); callbacks.current.onError?.(error) }
+      })
     return () => { cancelled = true }
   }, [helmet, trim, character, backdrop, artKey])
   useEffect(() => {
