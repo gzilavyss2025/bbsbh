@@ -17,7 +17,7 @@ import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { pitcherDayLine, pitchingDayLines } from '../../../../api/gameday/dayLine.js'
 import { pitchingLinesMarkup } from './pitchingLinesMarkup.js'
 import { createElement, useState } from 'react'
-import { halfIndex, lastName, selectLineup, selectMoundPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
+import { halfIndex, selectLineup, selectMoundPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
 import { PitcherCard } from '../../../../components/playbyplay/pitcherCard/PitcherCard.jsx'
 import { defenseAt } from '../../../../api/gameday/defense.js'
 import { battingSideOf } from '../../../../api/gameday/stepCut.js'
@@ -125,18 +125,15 @@ const Trail = ({ ctx }) => (
           </li>
         ))}
         {/* The at-bat still open names its batter, as the hero does, instead of "Sealed" (Gary, 2026-10-28). */}
-        {more && <li className="gdp__chip gdp__chip--cover"><b>{upNext(ctx.feed, cards) || 'Sealed'}</b></li>}
+        {more && <li className="gdp__chip gdp__chip--cover"><b>{upNext(ctx, cards) || 'Sealed'}</b></li>}
       </ol>
     )}
   </Sealable>
 )
 
-// The batter of the at-bat after the last one shown: the one the reader is inside.
-const upNext = (feed, cards) => {
-  const at = cards.at(-1)?.atBatIndex
-  const p = at == null ? null : feed?.liveData?.plays?.allPlays?.find((q) => q.about?.atBatIndex === at + 1)
-  return p?.matchup?.batter?.id ? feed.gameData?.players?.[`ID${p.matchup.batter.id}`]?.lastName ?? '' : ''
-}
+// The batter due after the last at-bat shown (the hero's own due-up): the next play's matchup would name
+// a pinch hitter before his own notice.
+const upNext = (ctx, cards) => selectDueUpDuring(ctx.feed, ctx.inning, ctx.half, ctx.mark, cards.at(-1)?.atBatIndex ?? null, 1)?.batters?.[0]?.last ?? ''
 
 // Names and slots are the order entering the half (lineupEntering gates itself); the at-bat result codes no longer show.
 // The order turned so the batter at the plate leads and the rest follow in turn, wrapping to the
@@ -191,7 +188,7 @@ function otherDefense(feed, inning, half, mark) {
   const by = prev.inning >= 1 ? defenseAt(feed, { ...prev, step: null, revealedThrough: mark }) : null
   if (by) return by
   const at = {}
-  for (const p of selectLineup(feed, battingSideOf(half))) if (p.position) at[p.position] = { id: p.id, last: lastName(p) }
+  for (const p of selectLineup(feed, battingSideOf(half))) if (p.position) at[p.position] = { id: p.id, last: p.last }
   return at
 }
 

@@ -55,10 +55,12 @@
   .gdcp .gdcp__tabs { display: none; }
   .gdcp__body { overflow-y: auto; }
   .gdcp .gdcp__page { display: flex; animation: none; }
+  .gdcp__notesdue { display: none; } /* the Game page shows its own due-up */
 }
 :root[data-motion='reduced'] .gdcp .gdcp__tabs { display: none; }
 :root[data-motion='reduced'] .gdcp__body { overflow-y: auto; }
 :root[data-motion='reduced'] .gdcp .gdcp__page { display: flex; animation: none; }
+:root[data-motion='reduced'] .gdcp__notesdue { display: none; }
 
 /* Page 1, the tally: R, H, E, LOB, then the half's pitches, whiffs and fouls. */
 /* layout-exempt: equal cells, a figure over its label */

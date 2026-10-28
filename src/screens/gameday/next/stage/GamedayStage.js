@@ -25,6 +25,7 @@ import { BALLPARK_SCENES } from '../cutscene/ballpark/scenes.js'
 // The clock starts when the play mounts and holds through a poll or a resize, so neither restarts it.
 // The play ends on its own duration, not on the canvas: an unmeasured canvas, or Motion: Reduced
 // switched on mid-play, must not leave the tap rule thinking it still plays.
+const STILL = 0.8 // seconds
 
 function subPlay(feed, inning, half, { count, sub }) {
   const o = openAtBat(feed, inning, half, count)
@@ -54,8 +55,9 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, on
     // Decorative assets may decode after the tap. Their player reports its
     // own completion; this watchdog prevents a stalled import/load holding
     // the scoring control. Ordinary field timing stays on its existing clock.
-    // The corner field is gone (Gary, 2026-10-28): an ordinary play draws nothing, so it ends at once.
-    const duration = celebration ? BALLPARK_SCENES[celebration.scene].track.duration + 4 : 0
+    // The corner field is gone (Gary, 2026-10-28): an ordinary play draws nothing, but it still holds
+    // one short beat (STILL), so a double tap is swallowed (tapRule.js) instead of revealing the next step.
+    const duration = celebration ? BALLPARK_SCENES[celebration.scene].track.duration + 4 : STILL
     const left = duration * 1000 - (performance.now() - start)
     if (left <= 0 || motionIsReduced()) { onEnd(); return undefined }
     const id = setTimeout(onEnd, left)
@@ -75,16 +77,17 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, on
 // is never empty); the half is under the mark, so naming him reveals nothing. Null under the checkpoint.
 // Right after a result tap (the cursor at the next at-bat's start) the man who just finished stays up
 // with his zones and pitches, the ball in play among them, until the next tap (Gary, 2026-10-28).
-// dueup.js names the slot as the half began, so inside an open at-bat a pinch hitter stands in from his
-// own sub-step on: only the sub-steps the reader revealed are read, as openingChangeHeld reads them.
-export const holdsFinished = ({ view, mark, open, last }) => view <= (mark ?? -1) || (last != null && open?.count > 0 && !(open.sub > 0))
+// dueup.js names the slot as the half began, so inside an open at-bat a pinch hitter (not a pinch runner)
+// stands in from his own sub-step on: only the sub-steps the reader revealed are read, as openingChangeHeld
+// reads them. Inside an at-bat, a half read back included (InningViewer's pitch-mode replay), it is his.
+export const holdsFinished = ({ view, mark, open, last }) => !(open?.sub > 0) && (view <= (mark ?? -1) || (last != null && open?.count > 0))
 export function restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered, open = null }) {
   if (!feed || covered) return null
   if (holdsFinished({ view, mark, open, last })) {
     const b = feed.liveData?.plays?.allPlays?.[last ?? stepAtBatIndex]?.matchup?.batter
     return b?.id ? { id: b.id, last: b.fullName?.split(' ').slice(-1)[0] ?? '' } : null
   }
-  const ph = open?.sub > 0 ? openAtBat(feed, inning, half, open.count)?.steps.slice(0, open.sub).findLast((s) => s.eventType === 'offensive_substitution') : null
+  const ph = open?.sub > 0 ? openAtBat(feed, inning, half, open.count)?.steps.slice(0, open.sub).findLast((s) => s.eventType === 'offensive_substitution' && s.position === 'PH') : null
   if (ph?.playerId != null) return { id: ph.playerId, last: feed.gameData?.players?.[`ID${ph.playerId}`]?.lastName ?? '' }
   return selectDueUpDuring(feed, inning, half, mark, last ?? stepAtBatIndex, 1)?.batters?.[0] ?? null
 }
