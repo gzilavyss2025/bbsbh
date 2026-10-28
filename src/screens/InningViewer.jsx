@@ -559,6 +559,7 @@ export function InningViewer({
     <CalloutLedgerProvider value={calloutLedger}>
       {cloudSync}
       <GamedayNextMount
+        sectionNav={sectionNav}
         bug={{
           started, live: curLiveState, feed, unlocked: renderUnlocked, mark: renderRevealedThrough,
           runsInProgress, treatment: winProbTreatment, viewIdx: curIdx, viewInning: effInning, viewHalf: effHalf,
