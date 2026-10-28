@@ -17,6 +17,7 @@ import { playLine } from '../src/screens/gameday/next/hero/heroModel.js'
 import { eventCardMarkup } from '../src/screens/gameday/next/steps/eventCardMarkup.js'
 import { CAUGHT_UP, nextSub, readPitchMode, replayTap, stageKey, stepWords, subTap, writePitchMode } from '../src/screens/gameday/next/steps/subStep.js'
 import { GamedayStage } from '../src/screens/gameday/next/stage/GamedayStage.js'
+import { zonePitches } from '../src/screens/gameday/next/zonemap/zonePitches.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 import { rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
 
@@ -102,7 +103,7 @@ test('the open box: each pitch adds its number to B or S; the code stays under t
   const out = hero(F823, 1, 'bottom', { count: c, sub: 8 })
   assert.match(out, /<i>B<\/i><span class="gdhero__pip">3<\/span><span class="gdhero__pip">4<\/span><span class="gdhero__pip">6<\/span><\/div>/)
   assert.match(out, /<i>S<\/i><span class="gdhero__pip">1<\/span><span class="gdhero__pip">2<\/span><span class="gdhero__pip">5<\/span><span class="gdhero__pip">7<\/span><span class="gdhero__pip">8<\/span><\/div>/)
-  assert.match(out, /class="gdhero__code is-taped">Sealed</)
+  assert.match(out, /class="gdhero__code"><\/span>/)
   // The shown pitch reads as a sentence, its call included (a foul here).
   assert.match(out, /Matthews throws a 95 mph four-seam fastball, fouled off\./)
 })
@@ -189,13 +190,22 @@ test('a fast double tap during a pitch reveals one sub-step: the second tap ends
   assert.equal(advanced, 2)
 })
 
-test('the stage plays one pitch for a pitch sub-step, and holds still under an event', () => {
+// The corner field is gone (Gary, 2026-10-28, #2694): a sub-step draws no field, and the zone card
+// plots the at-bat's pitches instead, only those through the sub-step on screen.
+test('a pitch sub-step draws no field; the zone card plots only the pitches through it', () => {
   const wall = wallFn(null)
-  const StageCanvas = ({ play, t }) => h('i', { 'data-pitches': play.pitches.length, 'data-last': play.last?.code ?? '', 'data-ball': play.ball ? 1 : 0, 'data-t': t ?? '' })
+  const StageCanvas = () => h('i')
   const c = countFor(F824, 6, 'bottom', 57)
   const at = (sub) => renderToStaticMarkup(h(GamedayStage, { SealBox, StageCanvas, feed: F824, inning: 6, half: 'bottom', wall, shown: { count: c, sub, last: 56 }, playing: false }))
-  assert.match(at(3), /data-pitches="3" data-last="F" data-ball="0"/)
-  assert.match(at(6), /data-pitches="0" data-last="" data-ball="0" data-t="0"/)
+  assert.doesNotMatch(at(3), /<i/)
+  assert.doesNotMatch(at(6), /<i/)
+  // The fixture trims plate locations; a copy puts every pitch of at-bat 57 in the middle of the zone.
+  const f = structuredClone(F824)
+  for (const e of f.liveData.plays.allPlays[57].playEvents) if (e.isPitch) e.pitchData = { ...e.pitchData, coordinates: { pX: 0, pZ: 2.5 }, strikeZoneTop: 3.4, strikeZoneBottom: 1.6 }
+  const plotted = (sub) => zonePitches(f, { inning: 6, half: 'bottom', open: { count: c, sub }, last: 56, committed: false }).map((p) => p.no)
+  assert.deepEqual(plotted(3), [1, 2, 3]) // the third pitch, a foul: none after it
+  assert.deepEqual(plotted(6), [1, 2, 3, 4, 5]) // the event after the fifth pitch adds none
+  assert.deepEqual(plotted(0), []) // between at-bats nothing of this one shows
 })
 
 // ---- Stack review of #2669 ----------------------------------------------------------------------

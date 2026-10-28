@@ -82,10 +82,13 @@ function gameSoFar(h, f, Headshot, line, PlayerLink) {
 }
 
 // A note about one starter ("His first World Series start", "in his starts") is read beside no photo
-// here, so his surname takes the place of "his". Only these two kinds: elsewhere a note's "his" can be
+// here, so his surname takes the place of "his". Only these kinds: elsewhere a note's "his" can be
 // another man's (a matchup note is keyed to the hitter but "his slider" is the pitcher's).
-const NAMED_KINDS = new Set(['wsStarterStart', 'starterRec'])
+// `homeAway` ("…are 2-4 in his road starts") is one more; `cgShutout` ("1 complete game") names no one at
+// all, so it reads as his (Gary, 2026-10-28).
+const NAMED_KINDS = new Set(['wsStarterStart', 'starterRec', 'homeAway'])
 const named = (n, nameOf) => {
+  if (n.kind === 'cgShutout' && n.personId != null && nameOf(n.personId)) return `${nameOf(n.personId)} has ${n.text}`
   const last = NAMED_KINDS.has(n.kind) && n.personId != null ? nameOf(n.personId) : null
   if (!last) return n.text
   return n.text.replace(/^His /, `${last}'s `).replace(/ his /g, ` ${last}'s `)
@@ -114,7 +117,11 @@ const HEAD = { tally: null, pitching: null, gameSoFar: null, atBats: null, facts
 
 function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line, lines }) {
   const ids = pages.map((p) => p.id)
-  const on = ids.includes(page) ? page : ids[0]
+  // On the phone the due-up closes the Notes page and the Game tab goes (Gary, 2026-10-28); the wider
+  // tiers show every page at once, tabs hidden. With no notes the Game tab stays.
+  const folded = ids.includes('facts') && ids.includes('gameSoFar')
+  const tabs = folded ? ids.filter((id) => id !== 'gameSoFar') : ids
+  const on = tabs.includes(page) ? page : folded && page === 'gameSoFar' ? 'facts' : tabs[0]
   const game = pages.find((p) => p.id === 'gameSoFar').fields
   // The broadcast's words: after the top it is the middle of the inning, after the bottom its end.
   const title = game.final ? 'Final' : `${half === 'top' ? 'Middle' : 'End'} ${ordinal(inning)}`
@@ -123,13 +130,14 @@ function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, S
     h('div', { className: 'gdcp__head' }, h('span', null, title)), // the score is the band's, so the head names the half only
     segmentedMarkup(h, {
       label: 'Checkpoint pages', value: on, onChange: onPage, fill: true, className: 'gdcp__tabs',
-      options: ids.map((id) => ({ value: id, label: LABEL[id] })),
+      options: tabs.map((id) => ({ value: id, label: LABEL[id] })),
     }),
     h('div', { className: 'gdcp__body' },
       ...ids.map((id) => h('section', {
         key: `${id}-${id === on}`, 'aria-label': LABEL[id],
         className: id === on ? 'gdcp__page is-on' : 'gdcp__page', 'data-page': id,
-      }, heads[id] && h('h4', null, heads[id]), body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line, lines })))))
+      }, heads[id] && h('h4', null, heads[id]), body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line, lines }),
+      folded && id === 'facts' && h('div', { key: 'due', className: 'gdcp__notesdue' }, gameSoFar(h, pages.find((p) => p.id === 'gameSoFar').fields, Headshot, line, PlayerLink))))))
 }
 
 export function checkpointMarkup(h, { SealBox, Seen = null, Headshot = null, Scroll = null, PlayerLink = null, entry = null, feed, inning, half, mark, notes = null, page, onPage}) {

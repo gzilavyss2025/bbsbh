@@ -8,7 +8,6 @@ const palettes = new Map()
 export const STADIUM_URL = '/art/ballpark/night.png'
 export const ATLAS_URL = '/art/ballpark/home-run.png'
 export const HOME_RUN_ART = { url: ATLAS_URL, columns: 4, rows: 3, height: 420, centerX: 0.62, top: 12 }
-export const STRIKEOUT_ART = { url: '/art/ballpark/strikeout.png', columns: 4, rows: 3, height: 420, centerX: 0.62, top: 12 }
 export const DEFENSE_ART = { url: '/art/ballpark/catch.png', columns: 4, rows: 3, height: 410, centerX: 0.64, top: 16 }
 
 function loadImage(url) {
@@ -42,10 +41,15 @@ export function prepareArt(helmet, trim, character = HOME_RUN_ART, backdrop = ST
   if (palettes.has(key)) return palettes.get(key)
   const ready = Promise.all([loadImage(character.url), loadImage(backdrop)]).then(([source, stadium]) => {
     const atlas = document.createElement('canvas')
-    atlas.width = source.naturalWidth
-    atlas.height = source.naturalHeight
+    atlas.width = character.sourceCells ? 256 * character.columns : source.naturalWidth
+    atlas.height = character.sourceCells ? 256 * character.rows : source.naturalHeight
     const g = atlas.getContext('2d', { willReadFrequently: true })
-    g.drawImage(source, 0, 0)
+    g.imageSmoothingEnabled = false
+    if (character.sourceCells) {
+      character.sourceCells.forEach(([x, y, w, h], i) => {
+        g.drawImage(source, x, y, w, h, i * 256 + Math.floor((256 - w) / 2), 256 - h, w, h)
+      })
+    } else g.drawImage(source, 0, 0)
     const image = isolateFrames(g.getImageData(0, 0, atlas.width, atlas.height), character.columns, character.rows)
     const kit = rgb(helmet), piping = rgb(trim), p = image.data
     for (let i = 0; i < p.length; i += 4) {
@@ -59,7 +63,7 @@ export function prepareArt(helmet, trim, character = HOME_RUN_ART, backdrop = ST
       for (let c = 0; c < 3; c++) p[i + c] = Math.min(255, target[c] * Math.min(1, light) + Math.max(0, light - 1) * 105)
     }
     g.putImageData(image, 0, 0)
-    return { atlas, stadium, character }
+    return { atlas, stadium, character, palette: { helmet, trim } }
   }).catch((error) => { palettes.delete(key); throw error })
   palettes.set(key, ready)
   // Kept on the promise too, so a remounted scene (Replay) starts ready instead of flashing the field.

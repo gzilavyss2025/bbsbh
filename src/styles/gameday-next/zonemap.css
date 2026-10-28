@@ -1,43 +1,91 @@
 /* ==== GAMEDAY's static batter and hot/cold zone inset ====
    A compact ready stance beside the plate; the overhead field keeps its fixed framing. */
-/* layout-exempt: the inset sits in the stage's lower-left corner */
-.gdzonemap { position: absolute; z-index: 1; bottom: var(--space-1h); left: var(--space-1h); width: min(56%, 240px); height: min(220px, calc(100% - var(--space-3))); box-sizing: border-box;
-  display: flex; flex-direction: column;
-  padding: var(--space-1); }
-.gdnext[data-tier='L'] .gdzonemap, .gdnext[data-tier='D'] .gdzonemap { width: min(46%, 320px); height: min(290px, calc(100% - var(--space-3))); bottom: var(--space-2); left: var(--space-2); }
-/* P and T draw the Due up rail's tab on the stage's left edge (page.css): the inset starts clear of it. */
-.gdnext[data-tier='P'] .gdzonemap, .gdnext[data-tier='T'] .gdzonemap { left: var(--space-8); }
-.gdzonemap__dismiss { position: absolute; left: 0; top: 0; z-index: 2; }
+/* layout-exempt: the batting view fills the stage behind the corner field */
+.gdzonemap { position: absolute; z-index: 1; inset: 0; box-sizing: border-box; pointer-events: none; }
 /* The way back to a dismissed zone map: a boxed control in the stage's lower left. */
 .gdzonemap__show { position: absolute; z-index: 1; bottom: var(--space-1h); left: var(--space-1h);
   border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); border-radius: 0; }
 .gdnext[data-tier='P'] .gdzonemap__show, .gdnext[data-tier='T'] .gdzonemap__show { left: var(--space-8); }
 /* layout-exempt: a fixed 3 x 3, the strike zone's nine cells */
-.gdzonemap__grid { position: absolute; right: 0; bottom: 28%; width: 60%; display: grid; grid-template-columns: repeat(3, 1fr); border: var(--bw-rule) solid var(--border-stamped); }
-.gdzonemap__cell { padding: var(--space-1h) 0; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
-  font-variant-numeric: tabular-nums; color: var(--text-heading); border: var(--bw-hair) solid var(--border-stamped); }
-.gdnext[data-tier='L'] .gdzonemap__cell, .gdnext[data-tier='D'] .gdzonemap__cell { padding: var(--space-1h) 0; font-size: var(--fs-small); }
+.gdzonemap__grid { position: absolute; left: 50%; bottom: calc(var(--gd-ground) + var(--gd-zone-w) * .68); width: var(--gd-zone-w); height: var(--gd-zone-h); transform: translateX(-50%); pointer-events: auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: var(--bw-hair); background: var(--border-hairline); border: var(--bw-rule) solid var(--border-hairline); }
+.gdzonemap__cell { display: flex; align-items: center; justify-content: center; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
+  font-variant-numeric: tabular-nums; color: var(--text-heading); background: var(--stage-zone-lukewarm); }
+.gdzonemap__grid .statgrid { display: contents; }
+/* An at-bat's pitch, centred on where it crossed the plate (zonePitches.js). */
+.gdzonemap__pitch { position: absolute; z-index: 1; transform: translate(-50%, -50%); pointer-events: none;
+  width: 17px; height: 17px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font: var(--w-bold) var(--fs-cell) / 1 var(--font-mono); color: var(--text-on-ink-bright); }
+/* The strike-zone modal's dots (14-strike-zone.css): strikes red, balls green, in play blue. */
+.gdzonemap__pitch--called, .gdzonemap__pitch--whiff, .gdzonemap__pitch--foul { background: var(--accent-negative); }
+.gdzonemap__pitch--ball { background: var(--accent-positive); }
+.gdzonemap__pitch--inplay { background: var(--accent-inplay); }
 .gdzonemap__num { position: relative; display: inline-block; }
 .gdzonemap__pt { position: absolute; right: 100%; }
-.gdzonemap__cell.is-cold { background: var(--stage-zone-cold); color: var(--text-on-ink); }
+.gdzonemap__cell.is-cold { background: var(--stage-zone-cold); color: var(--text-heading); }
 .gdzonemap__cell.is-cool { background: var(--stage-zone-cool); }
 .gdzonemap__cell.is-lukewarm { background: var(--stage-zone-lukewarm); }
 .gdzonemap__cell.is-warm { background: var(--stage-zone-warm); }
-.gdzonemap__cell.is-hot { background: var(--stage-zone-hot); color: var(--text-on-ink); }
+.gdzonemap__cell.is-hot { background: var(--stage-zone-hot); color: var(--text-heading); }
 
 /* layout-exempt: the batter and zone share the same plate, reflected for a left-handed hitter */
-.gdzonemap__plateview { position: relative; flex: 1; min-height: 0; }
-.gdzonemap__batter { position: absolute; left: -15%; bottom: 0; width: auto; height: 100%; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
+.gdzonemap__plateview { position: absolute; inset: 0; }
+.gdzonemap__batter { position: absolute; left: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); bottom: calc(var(--gd-ground) - var(--gd-zone-w) * .08); width: auto; height: var(--gd-figure-h); pointer-events: auto; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
 .gdzonemap__sprite { display: block; width: 100%; height: 100%; background-image: url('/art/gameday/batter-ready.webp');
   background-repeat: no-repeat; background-size: 200% 100%; background-position: left center; image-rendering: pixelated; }
-.gdzonemap__plate { position: absolute; right: 0; bottom: 2%; width: 60%; height: 20%;
-  background: var(--border-stamped); clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%); }
-.gdzonemap[data-side='L'] .gdzonemap__batter { left: auto; right: -15%; clip-path: inset(0 24% 0 17%); }
+.gdzonemap__plate { position: absolute; left: 50%; bottom: var(--gd-ground); width: var(--gd-zone-w); height: auto; aspect-ratio: 196 / 60; transform: translateX(-50%); overflow: visible; fill: var(--stage-chalk); }
+.gdzonemap[data-side='L'] .gdzonemap__batter { left: auto; right: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); clip-path: inset(0 24% 0 17%); }
 .gdzonemap[data-side='L'] .gdzonemap__sprite { background-position: right center; }
-.gdzonemap[data-side='L'] .gdzonemap__grid { right: auto; left: 0; }
-.gdzonemap[data-side='L'] .gdzonemap__plate { right: auto; left: 0; }
-.gdzonemap__plate::after { content: ''; position: absolute; inset: var(--bw-rule); background: var(--surface-card); clip-path: inherit; }
+.gdzonemap__plate-edge { fill: var(--stage-overhead-cloth-shade); }
+.gdzonemap__plate-face { stroke: var(--stage-overhead-cloth-shade); stroke-width: var(--bw-hair); vector-effect: non-scaling-stroke; }
 
 
 /* Match the outside edges, including the zone grid rule. */
 .gdzonemap__grid, .gdzonemap__plate { box-sizing: border-box; }
+
+/* Quiet chalk on the ground gives the plate and feet a shared perspective. */
+.gdzonemap__ground { position: absolute; left: 50%; bottom: calc(var(--gd-ground) - var(--gd-zone-w) * .06); width: calc(var(--gd-zone-w) * 3.3); height: auto; transform: translateX(-50%); fill: none; stroke: var(--border-hairline); stroke-width: var(--bw-rule); }
+.gdzonemap__ground path { vector-effect: non-scaling-stroke; }
+.gdzonemap__batter { z-index: 1; }
+.gdzonemap__grid { border-color: var(--text-caption); container-type: inline-size; }
+@container (min-width: 132px) { .gdzonemap__cell { font-size: var(--fs-small); } }
+/* The pitcher on the mound, in the corner opposite the batter: his photo, the first name small over the surname. */
+/* layout-exempt: a photo over its two name lines */
+.gdzonemap__pitcher { position: absolute; top: var(--space-2); right: var(--space-2); z-index: 2; pointer-events: auto; width: min(26%, 112px);
+  display: flex; flex-direction: column; align-items: stretch; gap: var(--space-1); }
+/* layout-exempt: the photo over its two name lines */
+.gdzonemap__pitcherlink { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-1); padding: 0; border: 0; background: none; text-align: left; min-width: 0; }
+/* The matchup line stacks under the name: the Scout door, then "vs May", then the line. */
+/* layout-exempt: three short lines under the name */
+.gdzonemap__pitcher .gdp__scout { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; font-size: var(--fs-cell); }
+.gdzonemap[data-side='L'] .gdzonemap__pitcher { right: auto; left: var(--space-2); }
+.gdzonemap__pitcher .shot { width: 100%; height: auto; aspect-ratio: 4 / 5; box-sizing: border-box; border: var(--bw-heavy) solid var(--border-stamped); border-radius: 0; overflow: hidden; }
+.gdzonemap__pitcher .shot img { display: block; width: 100%; height: 100%; object-fit: cover; border: 0; border-radius: 0; }
+.gdzonemap__pitcher small { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); color: var(--text-caption); }
+.gdzonemap__pitcher b { font: var(--w-bold) var(--fs-title-md) / var(--lh-solid) var(--font-display); color: var(--text-heading); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The photo already names the pitcher: no "vs May" here. */
+.gdzonemap__pitcher .gdp__scoutvs { display: none; }
+/* The matchup line sits a step under the name and keeps the surname's size while it fits; a longer
+   line shrinks to the card's width (a condensed character runs about 0.44em). */
+.gdzonemap__pitcher { container-type: inline-size; }
+.gdzonemap__pitcher .gdp__scout { margin-top: var(--space-1); }
+.gdzonemap__pitcher .gdp__scoutline { font-size: clamp(var(--fs-cell), calc(225cqw / var(--len, 10)), var(--fs-title-md)); white-space: nowrap; }
+/* The in-play dot takes the tap: BallFlight's button lies over it. */
+.gdzonemap__pitch.has-flight { pointer-events: auto; z-index: 2; }
+/* A pitch outside the stage: a small square box at the edge, its arrow then its number. */
+.gdzonemap__pitch.is-off { width: auto; height: auto; padding: 1px var(--space-1); border-radius: 0; gap: 2px; border: var(--bw-rule) solid var(--border-stamped); }
+.gdzonemap__offarrow { font-size: var(--fs-cell); line-height: var(--lh-solid); }
+/* The uniform figure keeps its own tall canvas, unclipped, at the sprite's height. */
+.gdzonemap__batter.is-uniform { aspect-ratio: 496 / 1050; clip-path: none; }
+.gdzonemap__batter.is-uniform .ufig { height: 100%; margin: 0; }
+/* The uniform canvas is narrower than the sprite's (496 / 1050): it stands one figure-width off the zone. */
+.gdzonemap__batter.is-uniform { left: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.47 - var(--space-2)); }
+.gdzonemap[data-side='L'] .gdzonemap__batter.is-uniform { clip-path: none; left: auto; right: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.47 - var(--space-2)); }
+.gdzonemap[data-side] .gdzonemap__batter.is-uniform { clip-path: none; } /* out-ranks the sprite's per-side crop */
+/* At scale: a batter stands about three strike zones tall (knees to letters is a third of him), so the
+   uniform figure takes the zone's own height times that. */
+.gdzonemap__batter.is-uniform { height: calc(var(--gd-zone-h) * 3.3); } /* may run off the stage top or side (Gary, 2026-10-28) */
+.gdzonemap__batter.is-uniform { left: calc(50% - var(--gd-zone-w) / 2 - var(--gd-zone-h) * 3.3 * 0.47 - var(--space-2)); }
+.gdzonemap[data-side='L'] .gdzonemap__batter.is-uniform { left: auto; right: calc(50% - var(--gd-zone-w) / 2 - var(--gd-zone-h) * 3.3 * 0.47 - var(--space-2)); }
+/* With the uniform figure at scale, the zone rises to run from his knees to the letters (about 0.3 to
+   0.65 of his height); the plate and the box stay on the ground under him. */
+.gdzonemap:has(.is-uniform) .gdzonemap__grid { bottom: calc(var(--gd-ground) + var(--gd-zone-h) * .95); }

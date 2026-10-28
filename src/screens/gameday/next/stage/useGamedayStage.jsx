@@ -1,3 +1,4 @@
+import '../../../../styles/gameday-next/stage.css' // the stage's sizes; StageCanvas no longer mounts at rest
 import { useCallback, useMemo, useState } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { selectMoundPitcher } from '../../../../api/select.js'
@@ -7,8 +8,12 @@ import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.j
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
 import { Button } from '../../../../components/ui/control/Button.jsx'
 import { ZoneCard } from '../zonemap/ZoneCard.jsx'
+import { zonePitches } from '../zonemap/zonePitches.js'
+import { ScoutLine } from '../panels/ScoutLine.jsx'
+import { BallFlight } from '../../../../components/charts/BallFlight.jsx'
+import { SavantFacts } from '../hero/SavantFacts.jsx'
 import { setZoneMapHidden, zoneMapDismissed } from '../zonemap/zoneMapFlag.js'
-import { GamedayStage, restBatter, restZones } from './GamedayStage.js'
+import { GamedayStage, holdsFinished, restBatter, restZones } from './GamedayStage.js'
 import { GamedayPlayCanvas } from '../cutscene/integration/GamedayPlayCanvas.jsx'
 import { battingSide } from './battingSide.js'
 import { wallFn } from './scene.js'
@@ -18,12 +23,15 @@ import { checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoi
 
 // The stage mount (#2573, #2568 slice 4): the stage slot, and the advance control wrapped in the tap
 // rule (tapRule.js). `last` is the last finished at-bat's index as of the cursor, `view` the half on
-// screen, `advance.reveal` marks the tap that reveals an at-bat. At rest with no tapped play, the
+// screen, `advance.reveal` marks the tap that reveals an at-bat. At rest, including after a tapped play settles, the
 // stage draws the due-up batter before the pitch, with his zone map unless this game dismissed it.
 // `reliever` is the live snapshot's revealed mid-half change (deriveLiveState's midHalfPitcherId).
 // A qualifying ending celebration keeps the stage until Next dismisses it
 // into the checkpoint. The reveal subtree reports only its eligibility flag.
 // `open` ({ count, sub }): a sub-step inside the open at-bat is what the stage plays (stageKey).
+// A pitch pinned to the stage's edge points the way it went.
+const OFF_ARROW = { up: '▲', down: '▼', left: '◀', right: '▶' }
+
 export function useGamedayStage({ feed, last, reliever, view, inning, half, mark, stepAtBatIndex, checkpoint, advance, open }) {
   const covered = !!checkpoint
   const [s, setS] = useState(() => rest(stageKey(open, last, null), view))
@@ -43,9 +51,13 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   const date = gd?.datetime?.officialDate
   const venue = gd?.venue
   const wall = useMemo(() => wallFn(resolveBallparkLayout({ venueId: venue?.id, venueName: venue?.name, gameDate: date })), [venue?.id, venue?.name, date])
-
   // The due-up batter is the pre-pitch lineup (dueup.js, caller-gated like the hero's strip).
-  const batter = cur.shown == null ? restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered }) : null
+  // He and his zones stay up while a pitch plays (Gary, 2026-10-28): a tap never blanks the batting view.
+  // A held ending scene closed by its ✕ gives the stage back to the batting view (the man who made the
+  // last out, his zones and pitches) until Next opens the checkpoint (Gary, 2026-10-28).
+  const [closedAt, setClosedAt] = useState(null)
+  const shelved = covered && phase === 'celebration' && closedAt != null && closedAt === checkpointKey
+  const batter = restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered: covered && !shelved, open })
   const [hidden, setHidden] = useState(() => zoneMapDismissed(pk))
   const { data: zm } = useAsync(
     async () => (hidden || !batter ? null : { id: batter.id, zones: (await fetchBatterZones(batter.id, gd.game.season, gd.teams?.home?.sport?.id ?? 1, date))?.zones }),
@@ -53,8 +65,8 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   )
   // A tap on the strike zone, or the card's ✕, turns the zone map off and on for this game.
   const toggleZones = () => { setZoneMapHidden(pk, !hidden); setHidden(!hidden) }
-  // Inside an open at-bat the zone map stands down: a reload there rests under the sub-step's card.
-  const zones = open?.sub > 0 ? null : restZones(zm, batter?.id, hidden)
+  // The batting view returns when playback settles, including between pitch sub-steps.
+  const zones = restZones(zm, batter?.id, hidden)
 
   // The pitcher on the mound at the cursor: the revealed change, else the half's opener (caller-gated
   // to the half reached, select.js). Hands are pre-game player data.
@@ -67,12 +79,25 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
         mark={mark} step={open ? stepCapAt(feed, inning, half, open.count, open.sub) : null} open={open} batter={batter}
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones} onZone={batter ? toggleZones : undefined}
         checkpoint={checkpoint} checkpointDismissed={phase === 'checkpoint'} onCheckpoint={onCheckpoint}
+        // The celebration's ✕: a held ending scene opens its checkpoint, as Next would.
+        onCloseCelebration={() => { if (covered) setClosedAt(checkpointKey) }}
       />}
-      {batter && !hidden && !(open?.sub > 0) && (
-        <ZoneCard teamId={gd?.teams?.[half === 'top' ? 'away' : 'home']?.id} id={batter.id} name={gd?.players?.[`ID${batter.id}`]?.fullName ?? batter.last} side={battingSide(hand(batter.id, 'batSide'), hand(pitcherId, 'pitchHand'))} zones={zones ?? {}} onDismiss={toggleZones} />
+      {batter && !hidden && (
+        <ZoneCard teamId={gd?.teams?.[half === 'top' ? 'away' : 'home']?.id} id={batter.id} name={gd?.players?.[`ID${batter.id}`]?.fullName ?? batter.last} side={battingSide(hand(batter.id, 'batSide'), hand(pitcherId, 'pitchHand'))} zones={zones ?? {}} club={half === 'top' ? 'away' : 'home'}
+          matchup={pitcherId ? <ScoutLine feed={feed} hitterId={batter.id} pitcherId={pitcherId} /> : null}
+          pitcher={pitcherId ? { id: pitcherId, first: gd?.players?.[`ID${pitcherId}`]?.useName ?? gd?.players?.[`ID${pitcherId}`]?.firstName ?? '', last: gd?.players?.[`ID${pitcherId}`]?.lastName ?? '' } : null}
+          pitches={<SealBox coverless forceRevealed>{() => zonePitches(feed, { inning, half, open, last, committed: holdsFinished({ view, mark, open, last }) }).map((p) => (
+            <span key={p.no} className={`gdzonemap__pitch gdzonemap__pitch--${p.cat}${p.ball ? ' has-flight' : ''}${p.off ? ` is-off is-off--${p.off}` : ''}`} style={{ left: `${p.left}%`, top: `${p.top}%` }}>
+              {p.off && <span className="gdzonemap__offarrow" aria-hidden="true">{OFF_ARROW[p.off]}</span>}
+              {p.no}
+              {/* The ball in play opens where it went (the hero diamond's flight card). */}
+              {p.ball && <BallFlight ball={p.ball} batter={{ id: batter.id, last: batter.last }} facts={false} arc={false} head={false} hover={false}
+                extra={p.playId ? <SavantFacts gamePk={feed.gamePk} sportId={gd?.teams?.home?.sport?.id ?? 1} playId={p.playId} /> : null} />}
+            </span>
+          ))}</SealBox>} />
       )}
       {/* A dismissed zone map comes back from the stage's corner (Gary, 2026-10-28). */}
-      {batter && hidden && !(open?.sub > 0) && (
+      {batter && hidden && (
         <Button size="control" className="gdzonemap__show" onClick={toggleZones}>Zones</Button>
       )}
     </>

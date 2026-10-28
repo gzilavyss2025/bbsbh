@@ -479,13 +479,14 @@
     },
     "gameday/subSteps.js": {
       "class": "reveal-only",
-      "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. openAtBat finds the reader's next at-bat past the step cursor with PlayByPlay's own step bounds. Gameday calls it at the advance tap (steps/subStep.js nextSub, which returns only a count; InningViewer also reads its live-edge flag on a half still in play) and inside SealBox reveal functions (the open box, the event card, the stage's one pitch), and those read only the sub-steps up to the reader's sub-step cursor.",
+      "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. openAtBat finds the reader's next at-bat past the step cursor with PlayByPlay's own step bounds. Gameday calls it at the advance tap (steps/subStep.js nextSub, which returns only a count; InningViewer also reads its live-edge flag on a half still in play) and inside SealBox reveal functions (the open box, the event card, the stage's one pitch), and those read only the sub-steps up to the reader's sub-step cursor. Two render-time reads return only what the reader's own sub-steps already revealed: steps/subStep.js openingChangeHeld (a held opening pitching change) and stage/GamedayStage.js restBatter (a pinch hitter announced inside the open at-bat, from his own sub-step on).",
       "importers": [
         "screens/gameday/next/hero/heroMarkup.js",
         "screens/gameday/next/stage/GamedayStage.js",
         "screens/gameday/next/steps/eventCardMarkup.js",
         "screens/gameday/next/steps/subStep.js",
-        "screens/gameday/next/stage/actors.js"
+        "screens/gameday/next/stage/actors.js",
+        "screens/gameday/next/zonemap/zonePitches.js"
       ]
     },
     "highlights.js": {
@@ -513,7 +514,8 @@
       "importers": [
         "screens/boxscore/revealBoxScore.js",
         "components/inning/HalfInning.jsx",
-        "api/playbyplay/halfInningFeed.js"
+        "api/playbyplay/halfInningFeed.js",
+        "screens/gameday/next/zonemap/zonePitches.js"
       ]
     },
     "hitterForm.js": {
@@ -891,7 +893,8 @@
         "api/playbyplay.js",
         "api/playbyplay/halfInningFeed.js",
         "screens/gameday/next/hero/GamedayHero.jsx",
-        "screens/gameday/next/hero/heroModel.js"
+        "screens/gameday/next/hero/heroModel.js",
+        "screens/gameday/next/zonemap/zonePitches.js"
       ]
     },
     "playbyplay/runnerNotes.js": {
@@ -1157,7 +1160,8 @@
       "class": "reveal-only",
       "why": "Contact replay phase B (#1771) — Savant /gf bat-tracking fields (batSpeed, xba, barrel, homeRunBallparks) for one game, stripped on parse. The /gf body carries the whole game's linescore, box score and play text, so the module fetches and parses in one scope, reads only team_home[] and team_away[], keeps five fields per row and lets the raw body go out of scope; no cache, ref or state holds it and nothing logs it. What survives still describes one batted ball, so it is callable only from the replay inside the half's reveal. MLB only: sportId other than 1 returns an empty Map and makes no fetch. Its one importer is the replay, which mounts only inside the half's reveal; it keeps only the at-bat's own swings (fetchAtBatTracking).",
       "importers": [
-        "components/playbyplay/pitcherCard/AtBatReplay.jsx"
+        "components/playbyplay/pitcherCard/AtBatReplay.jsx",
+        "screens/gameday/next/hero/SavantFacts.jsx"
       ]
     },
     "scout/headToHead.js": {

@@ -10,8 +10,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   and `styles/gameday-next/page.css` names the grid areas; the stage row takes the slack. The bar
   holds the Menu, the "At-bat | Pitch" switch and the advance, which owns the bar's dead space
   (`e2e/reveal-hit-area.spec.js`); it holds with aria-disabled, never `disabled`, so a tap still ends
-  a hold, and the live edge is a polite status. In pitch mode the caught-up advance is a Refresh that reveals nothing (`caughtUpAdvance`). There is no "Rest of half". The frame hides the site
-  chrome, so the Menu carries the ways out (both lineups and the box score; Gary dropped the scorecard and the slate, 2026-10-28),
+  a hold, and the live edge is a polite status. In pitch mode the caught-up advance is a Refresh that reveals nothing (`caughtUpAdvance`). There is no "Rest of half". The compact tiers show SiteHeader and the existing game-section tabs above the band; the wide frame keeps the Menu as its way out (both lineups and the box score; Gary dropped the scorecard and the slate, 2026-10-28),
   and a delay, suspension or failed refresh is a strip under the band (the stage row gives up the
   room; the band keeps `--gd-band-h`).
 - P and T keep the wide tiers' side columns as rails (Gary, 2026-10-27): the Due up slides in from the
@@ -20,8 +19,8 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - The old half page is mounted `hidden` as the engine: it reports the live snapshot (band), the
   step cursor and the runs so far, and its page turn moves halves. Rebuilding the engine is what
   lets it go; until then its parts stay (`components/inning/`, `styles/focus/`).
-- Gary's calls this shell keeps: the band uses the score bug's tiles and type; the zone map shows
-  only before a tapped play and has a per-game dismiss; a switch hitter stands opposite the
+- Gary's calls this shell keeps: the band uses the score bug's tiles and type; the batting view and zone map show
+  whenever playback rests (including after a play), and have a per-game dismiss; a switch hitter stands opposite the
   pitcher's hand; the hero's due-up hides under the checkpoint; the checkpoint's due-up names an
   announced pinch hitter; a pre-pitch pinch hitter is the first sub-step of his own at-bat.
 - The band draws through `ScorebugMount` (the default score bug; `GamedayBand` before a snapshot), so its clamp is the only gate on the
@@ -29,16 +28,14 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   block fetches when it shows.
 - Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line
   score's run cells take a keyboard pick mid page-turn (aria-disabled only), as the old running line did.
-- `stage/` is the stage renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage` (slot-index buffer),
-  `StageCanvas` (palette from the `--stage-*` tokens). One fixed overhead field fits the whole park; short ball paths
-  precede runner advances and a settled result. No close-up windup/swing or celebration belongs in this renderer.
-  Sprite targets use the global PlayerLink hover card and track the painted figures without React updates per frame;
-  `actors.js` reads defense and substitutions only inside a SealBox with the existing step/sub-step clamp.
-  Its surround uses the page's cream canvas. The field leaves room at lower left for a static, handed batter beside the hot/cold zone map; no photo or color wash.
+- `stage/` held the overhead field renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage`, `StageCanvas`,
+  `art/players.js` and the runner atlas (`docs/gameday-runner-art.md`). The corner field is gone (Gary, 2026-10-28, #2694):
+  `GamedayStage` still times a revealed play from `stagePlay` and mounts only a celebration over the batting view, so
+  `StageCanvas`, `drawStage`, the sprite targets in `actors.js` and the runner art no longer render. No photo or color wash.
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its
-  per-game dismiss (`bbsbh:zonemap:{gamePk}`); the zone card stays separate from the overhead field, at rest only. `battingSide.js` resolves both displays, including switch hitters; the inset keeps the existing PlayerLink hover card and per-game dismiss. `zonemap/batterPalette.js` maps the batting club through the shared MLB/MiLB identity resolver, with separately configurable equipment, shirt, piping and trousers; `batterArt.js` caches the prepared static atlas without changing celebration art.
+  per-game dismiss (`bbsbh:zonemap:{gamePk}`). It is the batting view: the batter in tonight's uniform sized to the zone (knees to letters), the pitcher opposite with his line against him, and the at-bat's revealed pitches on the grid (`zonePitches.js`, inside a SealBox, up to the sub-step). A just-finished at-bat or a half read back keeps its batter until the next tap (`holdsFinished`); inside an open at-bat a pinch hitter stands in from his own sub-step. `battingSide.js` resolves both displays, including switch hitters; the inset keeps the existing PlayerLink hover card and per-game dismiss. `zonemap/batterPalette.js` maps the batting club through the shared MLB/MiLB identity resolver, with separately configurable equipment, shirt, piping and trousers; `batterArt.js` caches the prepared static atlas without changing celebration art.
 - The hero's scorebook box copies Gary's hand-scored box: `docs/gameday-reference/scorebook-box.jpg` (match it, do not restyle).
 - `hero/` is the hero slot (#2576): `heroMarkup.js` builds it (a `.js` builder, so `npm test` can render it),
   `heroModel.js` is the scorebook box's pure model. It reads the live snapshot's `last` (the last finished

@@ -131,3 +131,25 @@ test('the entire field fits phone, desktop and landscape slots without following
     for (const slot of [S.sky, S.crowd1, S.crowd2, S.crowd3, S.crowd4]) assert.ok(!rest.includes(slot))
   }
 })
+
+// A finished fly ball used to remain clamped outside the small base diagram.
+test('the base diagram paints a ball in flight but never leaves one at rest', () => {
+  const at = (st) => drawStage(st, 160, 160, false).px.slice()
+  const chase = stateAt(hr, (hr.t.contact + hr.t.chase) / 2)
+  assert.notDeepEqual(at(chase), at({ ...chase, ballPos: null, pitchPos: null }))
+  for (const play of [hr, groundout]) {
+    const settled = stateAt(play, play.end)
+    assert.deepEqual(at(settled), at({ ...settled, ballPos: null, pitchPos: null }))
+  }
+})
+
+test('the illustrated layer retains only batter and runner anchors over unfilled basepaths', () => {
+  const before = drawStage(stateAt(stagePlay({}, wall), 0), 160, 160, false)
+  assert.deepEqual(before.sprites.map((p) => p.key), ['batter'])
+  for (const slot of [S.overheadTurf, S.overheadTurfLit, S.overheadClay]) assert.ok(!before.px.includes(slot))
+  const during = drawStage(stateAt(hr, hr.t.contact + .2), 160, 160, false)
+  assert.deepEqual(during.sprites.map((p) => p.key).sort(), ['runner:0', 'runner:1', 'runner:2'])
+  const runner = during.sprites.find((p) => p.key === 'runner:0')
+  assert.ok(runner.feet > runner.y)
+  assert.ok(runner.pose === 1 || runner.pose === 2)
+})

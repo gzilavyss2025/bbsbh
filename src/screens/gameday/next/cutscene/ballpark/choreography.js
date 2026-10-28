@@ -20,34 +20,6 @@ export const HOME_RUN = {
   ],
 }
 
-export const STRIKEOUT = {
-  duration: 1.9,
-  captionAt: 0.5,
-  accentAt: 0.44,
-  frames: [
-    { at: 0, frame: 0, beat: 'Follow through' },
-    { at: 0.12, frame: 1, beat: 'Rise' },
-    { at: 0.24, frame: 2, beat: 'Gather' },
-    { at: 0.34, frame: 3, beat: 'Gather' },
-    { at: 0.44, frame: 4, beat: 'Pump' },
-    { at: 0.54, frame: 5, beat: 'Release' },
-    { at: 0.66, frame: 6, beat: 'Release' },
-    { at: 0.78, frame: 7, beat: 'Settle' },
-    { at: 0.92, frame: 8, beat: 'Settle' },
-    { at: 1.06, frame: 9, beat: 'Settle' },
-    { at: 1.2, frame: 10, beat: 'Settle' },
-    { at: 1.38, frame: 11, beat: 'Settle' },
-  ],
-}
-
-// Same batter art with a more deliberate accent and longer hold for a slam.
-// No extra action is invented about the named player.
-export const GRAND_SLAM = {
-  ...HOME_RUN,
-  duration: 3.6,
-  frames: HOME_RUN.frames.map((f) => ({ ...f, at: f.at > HOME_RUN.accentAt ? f.at + 0.35 : f.at })),
-}
-
 export const DEFENSIVE_CATCH = {
   duration: 2.8,
   captionAt: 0.78,

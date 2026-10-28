@@ -43,11 +43,13 @@ export function scorebookBox(h, m, flight = null, zone = null) {
       ...(m.notes ?? []).map((n) => h('span', { key: `n${n.leg}`, className: `gdhero__note gdhero__note--${n.leg}` }, n.code)),
       h('span', { className: m.out != null ? 'gdhero__out is-out' : 'gdhero__out' }, m.out ?? ''),
       // The box holds the kind of result, heavy only for a hit; the fielders sit in the diamond (splitCode).
-      m.taped ? h('span', { className: 'gdhero__code is-taped' }, 'Sealed')
+      // Blank until the result tap (Gary, 2026-10-28: no "Sealed" tape).
+      m.taped ? h('span', { className: 'gdhero__code' })
         : h('span', { className: ['gdhero__code', m.hit && 'is-hit'].filter(Boolean).join(' ') }, m.box ?? m.code),
       // A called third strike's K turns backwards in the diamond.
       !m.taped && m.mid && h('span', { className: m.looking ? 'gdhero__play is-looking' : 'gdhero__play' }, m.mid),
-      !m.taped && m.rbi > 0 && h('span', { className: 'gdhero__rbi' }, `${m.rbi} RBI`),
+      // The RBI count alone on a green tag (Gary, 2026-10-28); the label says what it counts.
+      !m.taped && m.rbi > 0 && h('span', { className: 'gdhero__rbi', 'aria-label': `${m.rbi} RBI` }, m.rbi),
       flight))
 }
 
@@ -133,10 +135,13 @@ function words(h, feed, e) {
 // no layout, draws no handle (BallFlight stands down itself).
 // The pitch columns are the handle for the strike zone and the pitches with their speeds (`Zone`,
 // GamedayHero.jsx: the old feed's StrikeZoneModal), on a click.
-function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null) {
+function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null, Savant = null, Parks = null) {
   const { batter } = e
   const contact = contactStats(e)
-  const flight = Flight && e.battedBall ? h(Flight, { ball: e.battedBall, batter, code: e.code ?? '', facts: false, arc: false, head: false, hover: false }) : null
+  // The opened card adds Savant's figures for the ball in play (`Savant`, GamedayHero.jsx): its playId is the in-play pitch's.
+  const inPlay = (Savant || Parks) && e.battedBall ? feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === e.atBatIndex)?.playEvents?.findLast((ev) => ev.details?.isInPlay)?.playId : null
+  const extra = inPlay && Savant ? h(Savant, { gamePk: feed.gamePk, sportId: feed.gameData?.teams?.home?.sport?.id ?? 1, playId: inPlay }) : null
+  const flight = Flight && e.battedBall ? h(Flight, { ball: e.battedBall, batter, code: e.code ?? '', facts: false, arc: false, head: false, hover: false, extra }) : null
   const zone = Zone ? h(Zone, { entry: e, side }) : null
   return h('div', { className: 'gdhero__top' }, scorebookBox(h, boxModel(e), flight, zone),
     h('div', { className: 'gdhero__txt' },
@@ -144,15 +149,20 @@ function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = nu
         who(h, PlayerLink, batter)),
       playText(h, Line, words(h, feed, e)),
       contact.length > 0 && h('dl', { className: 'gdhero__contact' },
-        ...contact.map((c) => h('div', { key: c.label }, h('dt', null, c.label), h('dd', null, c.value, c.unit && h('small', null, c.unit)))))),
+        ...contact.map((c) => {
+          const cell = [h('dt', { key: 'l' }, c.label), h('dd', { key: 'v' }, c.value, c.unit && h('small', null, c.unit))]
+          // Distance taps over to Savant's home-run parks count (`Parks`, SavantFacts.jsx).
+          const body = Parks && inPlay && c.label === 'Distance' ? h(Parks, { gamePk: feed.gamePk, sportId: feed.gameData?.teams?.home?.sport?.id ?? 1, playId: inPlay }, cell) : cell
+          return h('div', { key: c.label, className: c.hard ? 'is-hard' : undefined }, body)
+        }))),
     shot(h, Headshot, PlayerLink, batter))
 }
 
-export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, feed, inning, half, last, open = null, mark = null }) {
+export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, Savant = null, Parks = null, feed, inning, half, last, open = null, mark = null }) {
   return h('div', { className: 'gdhero' },
     open?.sub > 0
       ? h(SealBox, { coverless: true, forceRevealed: true }, () => openBox(h, feed, inning, half, open, Headshot, PlayerLink, Line, Zone))
       : last
-        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, Headshot, PlayerLink, Line, feed, Flight, Zone, half === 'top' ? 'away' : 'home'))
+        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, last, Headshot, PlayerLink, Line, feed, Flight, Zone, half === 'top' ? 'away' : 'home', Savant, Parks))
         : sealedBox(h, atPlate(feed, inning, half, mark), Headshot, PlayerLink))
 }
