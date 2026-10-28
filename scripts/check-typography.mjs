@@ -106,7 +106,7 @@ const SPACING_RESIDUE = {
   '19-pattern-and-sketch-labs.css': { 22: 1, 28: 1 },
   '21-box-score.css': { 72: 1 },
   '30-standings.css': { 56: 1 },
-  '31-wild-card.css': { 18: 5 },
+  '31-wild-card.css': { 18: 4 },
   '34-postseason.css': { 56: 1 },
   '35-postseason-series.css': { 50: 1 },
   '42-first-scorebook.css': { 28: 2, 30: 1, 36: 1, 42: 1, 52: 1, 62: 1, 84: 1 },

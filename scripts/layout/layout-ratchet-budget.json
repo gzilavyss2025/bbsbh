@@ -144,7 +144,7 @@
     "grid": 1
   },
   "src/styles/31-wild-card.css": {
-    "column": 12,
+    "column": 11,
     "wrap": 2,
     "grid": 7
   },
@@ -317,8 +317,7 @@
     "grid": 1
   },
   "src/styles/70-contracts-grid.css": {
-    "wrap": 1,
-    "grid": 1
+    "wrap": 1
   },
   "src/styles/70-postseason-race.css": {
     "grid": 2

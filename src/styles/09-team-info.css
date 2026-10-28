@@ -88,7 +88,6 @@
   margin-top: 0;
 }
 
-
 /* Header buttons/pills/toggles ride on a themed bar as neutral opaque
    chips — the same "card floating on the bar" convention the lineup page's
    Game Notes button already uses (this file, ~4440) — rather than
@@ -114,19 +113,6 @@
 .team-hub.is-themed .psodds-pill:focus-visible {
   outline-color: var(--focus-ring-band);
   box-shadow: var(--ring-band);
-}
-.team-hub.is-themed .roster-super__toggle {
-  border-color: var(--border-rule);
-}
-.team-hub.is-themed .roster-super__toggle-btn {
-  color: var(--bar-text, var(--text-caption));
-}
-.team-hub.is-themed .roster-super__toggle-btn + .roster-super__toggle-btn {
-  border-left-color: var(--border-rule);
-}
-.team-hub.is-themed .roster-super__toggle-btn.is-active {
-  background: var(--surface-card);
-  color: var(--text-heading);
 }
 
 /* The fact card is a Card (sheet, flush body; #1113, slice C2), and this rule
