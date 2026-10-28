@@ -5,18 +5,14 @@
 // from a REVEALED play, inside a SealBox reveal render function (ADR-0001, ADR-0002). The stage
 // plays from the tap and never on a cold load (#2568, "Spoiler-rule check"); that rule is the mount's.
 //
-// DATA. Pitches ride realFlight (pitch/pitchFlight.js) with the release point at 60.5 ft minus the
-// feed's extension (matched the feed's plateTime on all 334 pitches of 824716). The batted ball
-// rides flightPath (lib/gameday/flightPath.js): tier A measured, tier B drawn, tier C none, and a
-// tier C ball has no chase, only the pitch view. The wall and the throw are drawn, not measured.
+// DATA. Measured pitch and batted-ball paths keep their feed coordinates, but the overhead
+// stage abbreviates their timing. The camera and runner routes do not follow the ball.
 import { realFlight } from '../../../../lib/pitch/pitchFlight.js'
 import { flightPath } from '../../../../lib/gameday/flightPath.js'
 import { BASES, POS, clamp, lerp, polar, smooth, v3 } from './scene.js'
-import { CONTACT, SWING, batterToWorld, swingPose } from './swing.js'
-import { pitcherPose, pitcherToWorld, releaseOffset } from './windup.js'
 
-const BEAT = { dots: 0.12, windup: 0.95, contact: 0.18, settle: 1.0, result: 1.6 }
-const SWUNG = /[SWFLTMXDE]/
+const BEAT = { ready: 0.08, pitch: 0.22, settle: 0.16, result: 0.5 }
+const RUN_SPEED = 200 // feet per second of the abbreviated basepath sequence
 const FLY = ['fly_ball', 'line_drive', 'popup', 'bunt_popup']
 // The bag a putout is made at, by the position that covers it.
 const BAG = { '1B': '1B', P: '1B', '2B': '2B', SS: '2B', '3B': '3B', C: 'home' }
@@ -100,10 +96,10 @@ function runnersOf(entries, lastIdx) {
     const move = es.filter((r) => (r.details?.playIndex ?? Infinity) >= lastIdx)
     if (move.length) {
       const a = move[0].movement
-      out.push({ start: a?.start ?? a?.originBase ?? null, end: move.at(-1).movement?.end ?? null, out: move.some((r) => r.movement?.isOut) })
+      out.push({ id: es[0].details?.runner?.id ?? null, start: a?.start ?? a?.originBase ?? null, end: move.at(-1).movement?.end ?? null, out: move.some((r) => r.movement?.isOut), outAt: move.find((r) => r.movement?.isOut)?.movement?.outBase })
     } else if (!es.some((r) => r.movement?.isOut)) {
       const b = es.at(-1).movement?.end ?? null
-      out.push({ start: b, end: b, out: false })
+      out.push({ id: es[0].details?.runner?.id ?? null, start: b, end: b, out: false })
     }
   }
   return out
@@ -117,22 +113,34 @@ export function stagePlay(p, wall) {
   const hitData = p.playEvents?.findLast((e) => e.hitData)?.hitData
   const credits = (p.runners?.find((r) => r.credits?.length && r.movement?.isOut)?.credits ?? []).map((c) => ({ pos: c.position?.abbreviation, credit: c.credit }))
   const ball = inPlay && hitData ? ballOf(hitData, wall, credits) : null
-  const dots = BEAT.dots * Math.max(0, pitches.length - 1)
-  const t = { dots, windup: dots + BEAT.windup }
-  t.pitch = t.windup + (last?.T ?? 0.42)
-  t.contact = t.pitch + (ball ? BEAT.contact : 0.25)
-  t.chase = t.contact + (ball ? ball.T : 0)
-  t.settle = t.chase + BEAT.settle
+  const runners = runnersOf(p.runners ?? [], last?.index ?? 0)
+  const t = { dots: 0, windup: BEAT.ready }
+  t.pitch = t.windup + (last ? BEAT.pitch : 0)
+  t.contact = t.pitch
+  // A hit and its throw share one short beat. Running can outlast it, including a full homer.
+  t.chase = t.contact + (ball ? clamp(ball.T * 0.15, 0.4, 0.85) : 0)
+  const runTime = Math.max(0, ...runners.map((r) => runnerDistance(r, ball) / RUN_SPEED))
+  t.advance = Math.max(t.chase, t.contact + runTime)
+  t.settle = t.advance + BEAT.settle
   t.end = t.settle + BEAT.result
   return {
-    pitches, last, ball, t, wall, end: t.end,
-    swings: !!last && SWUNG.test(last.code),
+    pitches, last, ball, t, wall, end: t.end, runners,
+    batterId: p.matchup?.batter?.id ?? null, pitcherId: p.matchup?.pitcher?.id ?? null,
     batter: p.matchup?.batSide?.code === 'L' ? 'L' : 'R',
     pitcher: p.matchup?.pitchHand?.code === 'L' ? 'L' : 'R',
     fielder: credits[0]?.pos ?? null,
-    pOff: last?.at ? releaseOffset(last.at(0), p.matchup?.pitchHand?.code) : [0, 0, 0],
-    runners: runnersOf(p.runners ?? [], last?.index ?? 0),
   }
+}
+
+// Outs stop short of the bag; a strikeout never sends the batter running.
+function runnerDistance(r, ball) {
+  const a = baseIndex(r.start) * 90
+  if (r.out) {
+    if (!ball && r.start == null) return 0
+    const bag = r.outAt ? baseIndex(r.outAt) * 90 : a + (r.start == null && ball?.throw ? 90 : 45)
+    return Math.max(0, bag - a - 6)
+  }
+  return r.end ? Math.max(0, baseIndex(r.end) * 90 - a) : 0
 }
 
 const onPath = (d) => {
@@ -140,49 +148,33 @@ const onPath = (d) => {
   return v3.lerp(BASES[ORDER[i]], BASES[ORDER[i + 1]], (c - i * 90) / 90)
 }
 
-// Bring the bat's sweet spot to where the pitch crossed the plate, most at contact: the keyframes
-// swing at a middle pitch, this bends the arms toward an inside, outside, high or low one.
-function aim(w, play, s) {
-  const k = Math.exp(-(((s - CONTACT) / 0.45) ** 2))
-  if (!play.swings || !play.last?.at || k < 0.01) return w
-  const c = batterToWorld(SWING.contact, play.batter), sweet = v3.lerp(c.hands, c.batTip, 0.72), hit = play.last.at(1)
-  const d = v3.mul([hit[0] - sweet[0], 0, hit[2] - sweet[2]], k)
-  return { ...w, hands: v3.add(w.hands, d), batTip: v3.add(w.batTip, d), lElb: v3.add(w.lElb, v3.mul(d, 0.55)), rElb: v3.add(w.rElb, v3.mul(d, 0.55)) }
-}
-
-// Everything the drawing needs at `t` seconds after the tap.
+// Everything the drawing needs at t seconds after the tap. The field is always overhead.
 export function stateAt(play, t) {
   const { t: T, last, ball } = play
-  const phase = t < T.dots ? 'dots' : t < T.windup ? 'windup' : t < T.pitch ? 'pitch' : t < T.contact ? 'contact' : t < T.chase ? 'chase' : t < T.settle ? 'settle' : 'result'
-  const pitchU = clamp((t - T.windup) / (last?.T || 1), 0, 1)
-  const pClock = clamp((t - T.dots) / BEAT.windup, 0, 1) * 2.35 + clamp((t - T.windup) / 0.6, 0, 1) * 0.65
-  // The load runs through the windup, the launch through the flight: contact lands on the pitch's
-  // last sample (an early engine had it 0.2 s late).
-  const clock = t < T.dots ? 0 : t < T.windup ? (t - T.dots) / BEAT.windup : t < T.pitch ? 1 + (CONTACT - 1) * pitchU : CONTACT + 0.6 * clamp((t - T.pitch) / 0.6, 0, 1)
-  const ballT = ball && t >= T.contact ? clamp(t - T.contact, 0, ball.T) : 0
-  const runStart = ball ? T.contact : T.pitch
+  const phase = t < T.windup ? 'ready' : t < T.pitch ? 'pitch' : t < T.chase ? 'chase' : t < T.advance ? 'advance' : t < T.settle ? 'settle' : 'result'
+  const pitchU = clamp((t - T.windup) / BEAT.pitch, 0, 1)
+  const ballU = clamp((t - T.contact) / (T.chase - T.contact || 1), 0, 1)
+  const ballT = ball ? ballU * ball.T : 0
   const runners = play.runners.map((r) => {
-    const a = baseIndex(r.start) * 90
-    const b = r.out ? a + (r.start == null && ball?.throw ? 84 : 45) : r.end ? baseIndex(r.end) * 90 : a
-    const d = Math.min(Math.max(a, b), a + Math.max(0, t - runStart) * 26)
-    return { pos: onPath(d), batter: r.start == null, gone: (r.out && !ball && r.start == null) || (r.out && t > T.settle) || d >= 360 }
+    const a = baseIndex(r.start) * 90, distance = runnerDistance(r, ball)
+    const travelled = Math.min(distance, Math.max(0, t - T.contact) * RUN_SPEED)
+    const moving = travelled < distance && t >= T.contact
+    return { id: r.id, pos: onPath(a + travelled), batter: r.start == null, moving,
+      gone: (r.out && !ball && r.start == null) || (r.out && t >= T.advance) || a + travelled >= 360 }
   })
   const fielders = { ...POS }
-  if (ball && play.fielder && POS[play.fielder] && t > T.contact) {
-    const to = ball.field, from = POS[play.fielder], dir = v3.sub([to[0], to[1], 0], from)
-    fielders[play.fielder] = v3.add(from, v3.mul(v3.norm(dir), Math.min(v3.len(dir), (t - T.contact) * 24)))
+  if (ball && play.fielder && POS[play.fielder] && t >= T.contact) {
+    const to = [...ball.field.slice(0, 2), 0]
+    fielders[play.fielder] = v3.lerp(POS[play.fielder], to, smooth(ballU))
   }
-  if (ball?.throw && POS[ball.throw.to] && t > T.contact) {
+  if (ball?.throw && POS[ball.throw.to] && t >= T.contact) {
     const bag = ball.throw.target
-    fielders[ball.throw.to] = v3.lerp(POS[ball.throw.to], [bag[0] - Math.sign(bag[0]) * 1.5, bag[1], 0], smooth(clamp((t - T.contact) / 1.2, 0, 1)))
+    fielders[ball.throw.to] = v3.lerp(POS[ball.throw.to], [bag[0] - Math.sign(bag[0]) * 1.5, bag[1], 0], smooth(ballU))
   }
   return {
-    t, phase, play, clock, pitchU, ballT, runners, fielders,
-    view: ball && t >= T.contact ? 'field' : 'pitch',
-    marks: Math.min(play.pitches.length - 1, Math.floor(t / BEAT.dots) + (t > 0 ? 1 : 0)),
-    pitchPos: last?.at && t >= T.windup && t < T.pitch + 0.05 ? last.at(pitchU) : null,
+    t, phase, play, pitchU, ballT, runners, fielders, view: 'field',
+    pitchPos: last && t >= T.windup && t < T.pitch
+      ? (last.at ? last.at(pitchU) : v3.lerp([0, 60.5, 0], BASES.home, pitchU)) : null,
     ballPos: ball && t >= T.contact ? ball.at(ballT) : null,
-    batterPose: aim(batterToWorld(swingPose(clock, play.swings), play.batter), play, clock),
-    pitcherPose: pitcherToWorld(pitcherPose(pClock), play.pitcher, play.pOff),
   }
 }

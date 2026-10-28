@@ -11,6 +11,10 @@
 /* layout-exempt: the words stacked beside the box */
 .gdhero__txt { min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
 .gdhero__shot { flex: none; margin-left: auto; align-self: stretch; display: flex; }
+/* A narrow hero has no room for a third column: beside the box the headshot left the name, play and stat card a
+   sliver (Gary, 2026-10-27). Measured on the hero, so a phone and a narrow iPad landscape both drop it. */
+.gdhero { container-type: inline-size; }
+@container (max-width: 560px) { .gdhero__shot { display: none; } }
 .gdhero__shot .plink { display: flex; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
 .gdhero__who .plink { font: inherit; letter-spacing: var(--ls-title); color: inherit; text-transform: inherit; text-align: left; }
 .gdhero__shot .shot { height: 100%; width: auto; aspect-ratio: 4 / 5; border: var(--bw-heavy) solid var(--border-stamped); border-radius: 0; overflow: hidden; box-sizing: border-box; }
@@ -106,3 +110,16 @@
 /* The pitch columns' handle for the strike zone (GamedayHero.jsx PitchZone): the whole block, transparent. */
 .gdhero__zonebtn { position: absolute; inset: 0; z-index: 1; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .gdhero__zonebtn:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }
+
+/* A phone-wide hero (Gary, 2026-10-27): the stat card leaves the words' column for a full-width row under the box,
+   so its three cells keep their room at 320px. The name and play stay beside the box. */
+@container (max-width: 400px) {
+  /* layout-exempt: box beside the name and play, the stat card across the row under them */
+  .gdnext .gdhero .gdhero__top { height: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'box who' 'box line' 'card card'; column-gap: var(--space-3); row-gap: var(--space-2); }
+  .gdhero__txt { display: contents; }
+  .gdhero__box { grid-area: box; }
+  .gdhero__who { grid-area: who; }
+  .gdhero__scroll, .gdhero__txt > .gdhero__line { grid-area: line; }
+  .gdhero__contact { grid-area: card; margin: 0; }
+}

@@ -101,7 +101,18 @@
   "w-semibold": "Semibold (600): the count tag face and bold runs.",
   "w-bold": "Bold (700): Barlow Condensed (its only weight).",
   "kraft-board": "Deep kraft of the Game Log passport board (the book-board-kraft cover). Much darker than seal, so paper foil holds AA on it.",
-  "surface-row-hover": "A table row under the pointer (paper-4). The row is shaded, not lifted."
+  "surface-row-hover": "A table row under the pointer (paper-4). The row is shaded, not lifted.",
+  "stage-overhead-night": "Outside-field palette slot; made transparent by StageCanvas so the page cream shows through.",
+  "stage-overhead-turf": "Overhead field turf under the small player sprites.",
+  "stage-overhead-turf-lit": "Quiet mowing bands on the overhead turf.",
+  "stage-overhead-turf-shade": "Sparse grass texture on the overhead field.",
+  "stage-overhead-clay": "Warm clay on the overhead infield and mound.",
+  "stage-overhead-clay-lit": "Sparse warm highlights on the overhead clay.",
+  "stage-overhead-gold": "Thin field boundary and sprite uniform piping, following the celebration material family.",
+  "stage-overhead-cloth": "Cream sprite uniforms and basepath rules.",
+  "stage-overhead-cloth-shade": "Shaded folds on the small overhead player uniforms.",
+  "stage-overhead-equipment": "Deep navy shading on caps, sleeves and shoes; never a stage background.",
+  "stage-overhead-leather": "Brown glove leather on the overhead fielders."
  },
  "extra": {
   "field-outfield": "Field illustration, outfield grass (defense alignments, position innings).",

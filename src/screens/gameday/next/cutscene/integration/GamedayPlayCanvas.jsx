@@ -15,7 +15,7 @@ export function GamedayPlayCanvas({ celebration, playing, onEnd, checkpointHeld 
   if (!celebration || failed) return <StageCanvas {...stage} />
   const scene = BALLPARK_SCENES[celebration.scene]
   const kit = teamChipColors(celebration.teamId)
-  const field = <StageCanvas {...stage} t={stage.play.end} />
+  const field = <StageCanvas {...stage} actors={null} t={stage.play.end} />
   return (
     <CelebrationBoundary fallback={field} onFail={fail}>
       {field}

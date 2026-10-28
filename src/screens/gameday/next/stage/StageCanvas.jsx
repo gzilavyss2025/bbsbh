@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import '../../../../styles/gameday-next/stage.css'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
-import { drawStage, stageScale, zoneBox } from './drawStage.js'
+import { drawStage, stageScale } from './drawStage.js'
 import { stateAt } from './play.js'
-import { TOKENS } from './pixels.js'
+import { spriteHitArea } from './hitArea.js'
+import { SpriteTargets } from './SpriteTargets.jsx'
+import { spriteTargets } from './actors.js'
+import { S, TOKENS } from './pixels.js'
 
-// Gameday's stage: a low-resolution buffer (about 256 px wide) scaled up by a whole number, so every
+// Gameday's stage: a low-resolution buffer (about 480 px wide) scaled up by a whole number, so every
 // pixel stays square. `play` is stagePlay()'s output, built only from a REVEALED play (ADR-0001);
 // without a `play` the canvas draws nothing. With `t` (seconds after the tap) it draws that one
 // frame; without, it plays from `start` (a performance.now() time, so a re-render mid-play keeps its
-// place) to the end of the play, or jumps to the end under reduced motion. `zones`
-// tints the rest frame (drawStage). The tap rule and the mount are GamedayStage.js and tapRule.js.
+// place) to the end of the play, or jumps to the settled result under reduced motion.
+// The zone card is a separate overlay. The tap rule and the mount are GamedayStage.js and tapRule.js.
 
 // The --stage-* tokens as packed little-endian RGBA, in pixels.js's slot order. A 1 px canvas turns
 // any CSS colour the token holds into bytes.
@@ -25,9 +28,10 @@ function paletteOf(el) {
   })
 }
 
-export function StageCanvas({ play, t, start, zones, onZone, label = 'The play on the field' }) {
+export function StageCanvas({ play, t, start, actors, label = 'The play on the field' }) {
   const box = useRef(null)
   const cv = useRef(null)
+  const targets = useRef(new Map())
   const [size, setSize] = useState(null)
   useEffect(() => {
     const ro = new ResizeObserver(([e]) => setSize({ W: Math.floor(e.contentRect.width), H: Math.floor(e.contentRect.height) }))
@@ -40,10 +44,22 @@ export function StageCanvas({ play, t, start, zones, onZone, label = 'The play o
   useEffect(() => {
     if (!play || !w || !h) return undefined
     const g = cv.current.getContext('2d'), pal = paletteOf(cv.current), img = g.createImageData(w, h), out = new Uint32Array(img.data.buffer)
+    // The field stays opaque; the surround uses the same cream canvas as the page.
+    pal[S.overheadNight] = 0
+    const firstTarget = targets.current.values().next().value
+    const hitSize = firstTarget ? parseFloat(getComputedStyle(firstTarget.firstElementChild).width) : 0
     const paint = (s) => {
-      const fb = drawStage(stateAt(play, s), w, h, zones)
+      const fb = drawStage(stateAt(play, s), w, h)
       for (let i = 0; i < fb.px.length; i++) out[i] = pal[fb.px[i]]
       g.putImageData(img, 0, 0)
+      for (const [key, el] of targets.current) {
+        const sprite = fb.sprites.find((p) => p.key === key)
+        el.hidden = !sprite
+        if (sprite) {
+          el.style.transform = 'translate(' + sprite.x * scale + 'px,' + sprite.y * scale + 'px) translate(-50%, -50%)'
+          el.style.clipPath = 'polygon(' + spriteHitArea(sprite, fb.sprites, hitSize, scale).map(([x, y]) => x + 'px ' + y + 'px').join(',') + ')'
+        }
+      }
     }
     if (t != null) { paint(t); return undefined }
     if (motionIsReduced()) { paint(play.end); return undefined }
@@ -56,19 +72,11 @@ export function StageCanvas({ play, t, start, zones, onZone, label = 'The play o
     }
     id = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(id)
-  }, [play, t, start, zones, w, h])
-  // A tap on the rest frame's strike zone toggles the zone map (`onZone`); the pointer shows where it lands.
-  const inZone = (e) => {
-    const r = e.currentTarget.getBoundingClientRect(), z = onZone && zoneBox(w, h), x = (e.clientX - r.left) / scale, y = (e.clientY - r.top) / scale
-    return !!z && x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1
-  }
+  }, [play, t, start, actors, w, h, scale])
   return (
     <div ref={box} className="gdstage">
-      <canvas
-        ref={cv} className="gdstage__canvas" role="img" aria-label={label} width={w} height={h} style={{ width: w * scale, height: h * scale }}
-        onClick={(e) => { if (inZone(e)) onZone() }}
-        onMouseMove={onZone ? (e) => { e.currentTarget.style.cursor = inZone(e) ? 'pointer' : '' } : undefined}
-      />
+      <SpriteTargets targets={spriteTargets(play, actors)} elements={targets} />
+      <canvas ref={cv} className="gdstage__canvas" role="img" aria-label={label} width={w} height={h} style={{ width: w * scale, height: h * scale }} />
     </div>
   )
 }
