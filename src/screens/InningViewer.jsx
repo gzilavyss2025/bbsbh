@@ -28,7 +28,7 @@ import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCallou
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
-import { CAUGHT_UP, caughtUpAdvance, nextSub, openingChangeHeld, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { CAUGHT_UP, caughtUpAdvance, nextSub, openingChangeHeld, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -443,6 +443,18 @@ export function InningViewer({
     focus.followLatest()
     revealSub(effInning, effHalf, n)
   }
+  // A half read back in pitch mode walks each pitch again (Gary, 2026-10-28): a cursor inside the
+  // read-back step (focus.cursor), view state only, never stored, reset when the step or half moves.
+  const [replay, setReplay] = useState({ idx: curIdx, cursor: focus.cursor, sub: 0 })
+  const replaySub = replay.idx === curIdx && replay.cursor === focus.cursor ? replay.sub : 0
+  const replayNext = () => {
+    const n = replayTap(feed, effInning, effHalf, focus.cursor, replaySub)
+    if (n == null) {
+      setReplay({ idx: curIdx, cursor: focus.cursor + 1, sub: 0 })
+      return focus.stepNext()
+    }
+    setReplay({ idx: curIdx, cursor: focus.cursor, sub: n })
+  }
 
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
@@ -539,7 +551,7 @@ export function InningViewer({
   // The live edge inside an at-bat still being played: a flag only, on a half in play (ADR-0055).
   const edge = atHalfEdge || (currentHalfLive && currentSealed && nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode) === CAUGHT_UP)
   const advance = focus.stepAhead
-    ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && focus.stepNext() }
+    ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && (pitchMode ? replayNext() : focus.stepNext()), reveal: pitchMode || undefined }
     : currentSealed
       ? edge ? caughtUpAdvance(pitchMode, loading, onReload) : { label: stepWords(pitchMode), onClick: revealNextStep, reveal: true }
       : nextIdx != null
@@ -565,7 +577,7 @@ export function InningViewer({
         checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
         engine={pageTurn}
         advance={advance}
-        open={currentSealed ? { count: curAtBatCount, sub: curSub } : null}
+        open={currentSealed ? { count: curAtBatCount, sub: curSub } : focus.stepAhead && replaySub > 0 ? { count: focus.cursor + 1, sub: replaySub } : null}
         pitch={{ on: pitchMode, set: setPitchMode }}
         onBoxScore={onBoxScore}
         onScorecard={onScorecard}

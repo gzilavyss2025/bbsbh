@@ -60,6 +60,15 @@ export function nextSub(feed, inning, half, count, sub, pitch) {
   return o ? subTap(o.steps, sub, pitch, o.card.live === true) : null
 }
 
+// A half read back in pitch mode (Gary, 2026-10-28): the reader already revealed it, and paging back
+// walks each pitch again. `cursor` is the read-back step on screen (useFocusMode's), so the at-bat
+// being walked is the next one; the sub-step count to show next, or null when the next tap moves the
+// cursor on to that at-bat. Reveals nothing new: the half is under the reveal mark.
+export function replayTap(feed, inning, half, cursor, sub) {
+  const n = nextSub(feed, inning, half, cursor + 1, sub, true)
+  return n === CAUGHT_UP ? null : n
+}
+
 // The engine's cap for the half on screen, given the sub-step (Gary, 2026-10-28: a substitution is
 // its own step). The stored count follows nextStepBoundary, whose trailing sweep (ADR-0016) puts a
 // change made between batters under the PREVIOUS batter's result tap; the open at-bat then lists

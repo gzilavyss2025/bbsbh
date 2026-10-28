@@ -15,7 +15,7 @@ import { formatAtBatMark, parseAtBatMark } from '../src/hooks/revealProgressCore
 import { heroMarkup } from '../src/screens/gameday/next/hero/heroMarkup.js'
 import { playLine } from '../src/screens/gameday/next/hero/heroModel.js'
 import { eventCardMarkup } from '../src/screens/gameday/next/steps/eventCardMarkup.js'
-import { CAUGHT_UP, nextSub, readPitchMode, stageKey, stepWords, subTap, writePitchMode } from '../src/screens/gameday/next/steps/subStep.js'
+import { CAUGHT_UP, nextSub, readPitchMode, replayTap, stageKey, stepWords, subTap, writePitchMode } from '../src/screens/gameday/next/steps/subStep.js'
 import { GamedayStage } from '../src/screens/gameday/next/stage/GamedayStage.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 import { rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
@@ -245,4 +245,13 @@ test('openAtBat is built once per feed, half and count, and carries its play', (
   const o = openAtBat(F824, 6, 'bottom', c)
   assert.equal(openAtBat(F824, 6, 'bottom', c), o)
   assert.equal(o.play.about.atBatIndex, 57)
+})
+
+test('824716 ab57 read back in pitch mode: the replay walks every sub-step again, then hands on to the at-bat', () => {
+  // The read-back cursor sits on the step before ab57 (cursor = count - 1); the replay walks ab57's
+  // five pitches and the wild pitch one tap at a time, and the tap after them moves the cursor on.
+  const c = countFor(F824, 6, 'bottom', 57)
+  const taps = []
+  for (let sub = 0; sub != null; sub = replayTap(F824, 6, 'bottom', c - 1, sub)) taps.push(sub)
+  assert.deepEqual(taps, [0, 1, 2, 3, 4, 5, 6])
 })
