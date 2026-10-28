@@ -1,10 +1,15 @@
 /* ==== GAMEDAY's stage canvas (screens/gameday/next/stage/) ====
    A pixel buffer scaled by a whole number: square pixels, no smoothing. */
 .gdstageScene { position: absolute; inset: 0; background: var(--bg-canvas); }
-.gdstage { position: absolute; inset: var(--space-2) var(--space-2) auto auto; width: 28%; height: 38%; display: flex; align-items: center; justify-content: center; overflow: hidden;
+.gdnext__slot--stage { container-type: size;
+  --gd-zone-w: clamp(108px, min(24cqw, 42cqh), 180px);
+  --gd-zone-h: calc(var(--gd-zone-w) * 1.18);
+  --gd-figure-h: calc(var(--gd-zone-w) * 3);
+  --gd-map-w: clamp(80px, min(23cqw, 40cqh), 150px); }
+.gdstage { position: absolute; top: 8%; right: max(var(--space-2), calc(50% - var(--gd-zone-w) / 2 - var(--gd-map-w) - var(--space-4))); width: var(--gd-map-w); height: var(--gd-map-w); display: flex; align-items: center; justify-content: center; overflow: hidden;
   z-index: 3; }
 
-.gdstageScene[data-batter-side='L'] .gdstage { left: var(--space-2); right: auto; }
+.gdstageScene[data-batter-side='L'] .gdstage { left: max(var(--space-2), calc(50% - var(--gd-zone-w) / 2 - var(--gd-map-w) - var(--space-4))); right: auto; }
 .gdstage__canvas { flex: none; image-rendering: pixelated; }
 /* The SealBox around the revealed play adds no box: the canvas fills the slot. The checkpoint's own
    SealBox, nested in the stage's after a revealed third out, adds none either: as a box it grew to

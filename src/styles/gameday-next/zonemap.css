@@ -4,8 +4,8 @@
 .gdzonemap { position: absolute; z-index: 1; inset: 0; box-sizing: border-box; pointer-events: none; container-type: size; }
 .gdzonemap__dismiss { position: absolute; left: var(--space-2); top: var(--space-2); z-index: 2; pointer-events: auto; }
 /* layout-exempt: a fixed 3 x 3, the strike zone's nine cells */
-.gdzonemap__grid { position: absolute; left: 46%; bottom: 34%; width: 18%; height: 34%; transform: translateX(-50%); pointer-events: auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: var(--bw-hair); background: var(--border-hairline); border: var(--bw-rule) solid var(--border-hairline); }
-.gdzonemap__cell { display: grid; place-items: center; text-align: center; font: clamp(var(--fs-cell), 2.6cqw, var(--fs-small)) / 1 var(--font-mono);
+.gdzonemap__grid { position: absolute; left: 50%; bottom: calc(1% + var(--gd-zone-w) * 77 / 196 + var(--space-2)); width: var(--gd-zone-w); height: var(--gd-zone-h); transform: translateX(-50%); pointer-events: auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: var(--bw-hair); background: var(--border-hairline); border: var(--bw-rule) solid var(--border-hairline); }
+.gdzonemap__cell { display: grid; place-items: center; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
   font-variant-numeric: tabular-nums; color: var(--text-heading); background: var(--stage-zone-lukewarm); }
 .gdzonemap__num { position: relative; display: inline-block; }
 .gdzonemap__pt { position: absolute; right: 100%; }
@@ -16,15 +16,15 @@
 .gdzonemap__cell.is-hot { background: var(--stage-zone-hot); color: var(--text-heading); }
 
 /* layout-exempt: the batter and zone share the same plate, reflected for a left-handed hitter */
-.gdzonemap__plateview { container-type: inline-size; position: absolute; left: 50%; bottom: 0; width: min(100cqw, calc(100cqh * 1.45)); aspect-ratio: 1.45; transform: translateX(-50%); }
-.gdzonemap__batter { position: absolute; left: -12%; bottom: -2%; width: auto; height: 112%; pointer-events: auto; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
+.gdzonemap__plateview { position: absolute; inset: 0; }
+.gdzonemap__batter { position: absolute; left: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); bottom: calc(var(--gd-figure-h) * -0.12); width: auto; height: var(--gd-figure-h); pointer-events: auto; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
 .gdzonemap__sprite { display: block; width: 100%; height: 100%; background-image: url('/art/gameday/batter-ready.webp');
   background-repeat: no-repeat; background-size: 200% 100%; background-position: left center; image-rendering: pixelated; }
-.gdzonemap__plate { position: absolute; left: 46%; bottom: 6%; width: 18%; height: auto; aspect-ratio: 196 / 74; transform: translateX(-50%); overflow: visible; fill: var(--stage-chalk); }
-.gdzonemap[data-side='L'] .gdzonemap__batter { left: auto; right: -12%; clip-path: inset(0 24% 0 17%); }
+.gdzonemap__plate { position: absolute; left: 50%; bottom: 1%; width: var(--gd-zone-w); height: auto; aspect-ratio: 196 / 77; transform: translateX(-50%); overflow: visible; fill: var(--stage-chalk); }
+.gdzonemap[data-side='L'] .gdzonemap__batter { left: auto; right: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); clip-path: inset(0 24% 0 17%); }
 .gdzonemap[data-side='L'] .gdzonemap__sprite { background-position: right center; }
-.gdzonemap[data-side='L'] .gdzonemap__grid { left: 54%; }
-.gdzonemap[data-side='L'] .gdzonemap__plate { left: 54%; }
+.gdzonemap[data-side='L'] .gdzonemap__grid { left: 50%; }
+.gdzonemap[data-side='L'] .gdzonemap__plate { left: 50%; }
 .gdzonemap__plate-edge { fill: var(--stage-overhead-cloth-shade); }
 .gdzonemap__plate-face { stroke: var(--stage-overhead-cloth-shade); stroke-width: var(--bw-hair); vector-effect: non-scaling-stroke; }
 

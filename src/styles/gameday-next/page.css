@@ -20,7 +20,7 @@
   grid-template-columns: minmax(0, 1fr);
   --gd-band-h: 86px;
   --gd-bar-h: 80px;
-  grid-template-rows: auto auto minmax(0, 1fr) 240px var(--gd-bar-h);
+  grid-template-rows: auto auto minmax(0, 1fr) 210px var(--gd-bar-h);
   grid-template-areas: 'chrome' 'band' 'stage' 'hero' 'bar';
 }
 .gdnext[data-tier='T'] {
@@ -176,8 +176,8 @@
 .screen:has(.gdnext) > .sitebar { display: none; }
 .gdnext[data-rails] { padding-top: 0; }
 .gdnext__chrome { grid-area: chrome; min-width: 0; }
-.gdnext__chrome .sitebar { padding-right: var(--space-2); padding-left: var(--space-2); }
-.gdnext__chrome .jumpbar { position: static; margin: 0; }
+.gdnext__chrome .sitebar { padding-top: env(safe-area-inset-top); padding-bottom: 0; padding-right: var(--space-2); padding-left: var(--space-2); }
+.gdnext__chrome .jumpbar { position: static; margin: 0; padding: 0 var(--space-2) var(--space-1); }
 .gdnext__chrome .jumpbar__aside, .gdnext__chrome .jumpbar__item--wide { display: none; }
 .gdnext__chrome .jumpbar__row { gap: 0; }
 .gdnext__chrome .jumpbar__item { flex: 1; text-align: center; justify-content: center; }
