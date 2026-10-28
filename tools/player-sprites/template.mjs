@@ -30,9 +30,10 @@ export function renderSprite(config = {}, poseName = 'infielder') {
   }
   const height = number(config.heightInches, 72, 54, 84)
   const weight = number(config.weightPounds, 195, 100, 350)
-  // Height sets overall scale; BMI relative to the baseline sets build independently.
+  // Height scales the figure up and down; weight alone sets its width (the square root keeps a heavy
+  // build from ballooning). A taller player at the same weight reads leaner.
   const sy = height / 72
-  const sx = sy * Math.sqrt((weight / 195) / (sy * sy))
+  const sx = Math.sqrt(weight / 195)
   const mirror = poses[poseName].mirror
   const pose = { ...poses[mirror || poseName], ...config.poses?.[poseName] }
   for (const key of ['arms', 'legs']) {
