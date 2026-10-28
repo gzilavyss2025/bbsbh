@@ -96,7 +96,7 @@ export function BallparkCelebration({
       </div>
       {!art && <p className="ballpark__loading" role="status">{failed ? 'Celebration art could not load.' : 'Loading celebration…'}</p>}
       {onSkip && <Button skin="ghost" className="ballpark__skip" onClick={onSkip}>Skip</Button>}
-      {onReplay && art && !reduced && !lessMotion && <Button skin="ghost" className="ballpark__skip" onClick={onReplay}>Replay</Button>}
+      {onReplay && art && !reduced && !lessMotion && <Button skin="ghost" className="ballpark__replay" onClick={onReplay}>Replay</Button>}
     </div>
   )
 }
