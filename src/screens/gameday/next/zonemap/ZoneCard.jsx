@@ -1,26 +1,22 @@
 import '../../../../styles/gameday-next/zonemap.css'
-// Parked for a future agent to refine (Gary, 2026-10-27): the batter sprite and the plate are commented
-// out below; the hot/cold grid stays. Restore these imports and the `id` prop with them.
-// import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
-// import { BatterSprite } from './BatterSprite.jsx'
+import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
+import { BatterSprite } from './BatterSprite.jsx'
 import { IconButton } from '../../../../components/ui/control/IconButton.jsx'
 
 // The static plate inset (#2568, round 2 item 6): the batter's average by zone, zone 1 top left
 // as the catcher sees it, season through the day before the game (api/gameday/zones.js). The tint
 // uses the existing zone temperature tokens. The ✕ hides the inset for this game (zoneMapFlag.js).
-export function ZoneCard({ name, teamId, side = 'R', zones, onDismiss }) {
+export function ZoneCard({ id, name, teamId, side = 'R', zones, onDismiss }) {
   return (
     <div className="gdzonemap" data-side={side} data-team={teamId} aria-label={`${name} at the plate, ${side === 'L' ? 'left' : 'right'}-handed`}>
       <div className="gdzonemap__dismiss">
         <IconButton label="Hide the zone map" mark="sm" onClick={onDismiss}>✕</IconButton>
       </div>
       <div className="gdzonemap__plateview">
-        {/* Parked (see the import): the batter sprite and the plate.
         <PlayerLink id={id} name={name} className="gdzonemap__batter" ariaLabel={`Batter at the plate: ${name}`}>
           <BatterSprite key={teamId} side={side} teamId={teamId} />
         </PlayerLink>
         <span className="gdzonemap__plate" aria-hidden="true" />
-        */}
         <div className="gdzonemap__grid" aria-label="Batting average by strike zone">
           {Array.from({ length: 9 }, (_, i) => {
             const z = zones[`0${i + 1}`]
