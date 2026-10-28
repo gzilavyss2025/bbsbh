@@ -114,8 +114,8 @@
    per challenge MADE, colored by outcome (overturned = won, stood = lost) —
    followed by any still-unused challenges in kraft brown. A right-aligned
    record + remaining readout carries the same information as digits for anyone
-   who'd rather not decode the dots. (Unlike the mound-visit UsagePips, this is
-   an outcome history, not a plain remaining count, so it uses its own pips.) */
+   who'd rather not decode the dots. It is an outcome history, not a plain
+   remaining count. */
 .abs {
   margin-top: 10px;
 }
@@ -504,27 +504,6 @@
 .change__pip--used {
   background: var(--border-stamped);
 }
-/* UsagePips (StatBox.jsx's ABS challenge row) — "how many of a capped resource are left"
-   as used/open circles. Drawn as CSS shapes rather than glyphs: those characters aren't
-   rendered at the same optical size in any font. */
-.usagepips {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  flex: none;
-}
-.usagepips__pip {
-  box-sizing: border-box;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-.usagepips__pip--used {
-  background: var(--text-caption);
-}
-.usagepips__pip--open {
-  border: 1.3px solid var(--graphite-soft);
-}
 /* An event card's one sentence — mono, natural case (the #root exemption in
    13-play-by-play.css), since it is a full sentence straight from the feed. */
 .change__eventtext {
@@ -783,41 +762,6 @@
    margin, so the inset stays here. */
 .entering {
   margin: 12px 14px 0;
-}
-
-/* Names the topic ("Lineups") — same navy masthead treatment as
-   .halfdefense__title (deliberately identical rules, not just a similar look:
-   the two read as one matched pair at both layouts, rather than Defense having a
-   title and Lineups improvising its own). Both titles used to name the half too;
-   EnteringReference.jsx has why they stopped and why the pair stays matched
-   either way. Replaces the old .innings__reference-title, which only existed on
-   the wide layout and left the phone's inline copy with no title at all.
-   A <button> (LineupSection) toggling .entering__teams below — reset off
-   the browser's own button chrome so it still reads as a plain masthead. */
-.entering__title {
-  width: 100%;
-  margin: 0;
-  padding: var(--space-2) var(--space-2h);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font: inherit;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  border-top: 0;
-  border-inline: 0;
-  border-radius: 0;
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  text-align: left;
-  cursor: pointer;
-}
-
-.entering__name {
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
 }
 
 /* A batter who's been replaced: struck through in pencil, same as the defense

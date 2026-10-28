@@ -263,38 +263,12 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- the player page's card -------------------------------- */
-
-.rvcard__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.rvcard__total {
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-lg);
-  font-weight: var(--w-bold);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-heading);
-}
-
-.rvcard__rank {
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  color: var(--text-caption);
-  text-align: right;
-}
+/* ---- the team page's board note ---------------------------- */
 
 .rvcard__note {
   margin: var(--space-3) 0 0;
   font-size: var(--fs-small);
   color: var(--text-caption);
-}
-
-.rvcard__door {
-  margin-top: var(--space-2);
 }
 
 /* ---- the four single-skill boards -------------------------- */

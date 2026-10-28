@@ -293,10 +293,10 @@ export const PILLS = [
   {
     cls: 'mastheadpill',
     partial: '10-lineup.css',
-    consumers: 4,
+    consumers: 0,
     group: 'interactive',
     verdict: 'Merged — Pill (#1131)',
-    fill: 'Now <Pill role="control" fill="paper" pressed>: a 34px paper control, because it rides a club bar. Pressed is the Pill’s navy with a tick. .mastheadpill keeps only its state dot.',
+    fill: 'Was <Pill role="control" fill="paper" pressed>, a 34px paper control on a club bar. Retired: the masthead toggles that wore it left with the old lineup and player pages, and its dot and focus rules went with them.',
     pill: { role: 'control', fill: 'paper', pressed: false },
   },
   {

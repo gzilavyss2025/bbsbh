@@ -98,9 +98,7 @@
 /* The pre-decided kicker banner (In/Out/Up/Down/Up-Down/IL-N) — solid fill +
    light text is the app's existing convention for a colored badge on a photo
    (a win cell in the season grid), reused here rather than the softer outline-chip
-   look .txntl__chip uses on the player page's own transaction timeline (this
-   card is deliberately a different visual language from that component —
-   see scope.md). */
+   look the old player-page transaction timeline used (see scope.md). */
 .banner {
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -134,7 +132,7 @@
   text-transform: uppercase;
   color: var(--graphite);
 }
-/* Same three-tone system as .txntl__chip--add/--out/--move, mapped per story
+/* A three-tone system (add / out / move), mapped per story
    type (see TYPE_TONE in MoveRow.jsx, shared with the wire) rather than per
    row. A story the pipeline typed `roster-move` gets NO pill at all — see that
    constant for why a label on a third of the rows is not a label. */
@@ -143,8 +141,7 @@
 .txstory__type--move { color: var(--text-muted); }
 
 /* The serif cutline register — same --font-read (Newsreader) the app already
-   uses for box-score-notes / in-game notification copy, distinct from the
-   plainer Plex Sans .txntl__desc uses on the player page's timeline. Reads
+   uses for box-score-notes / in-game notification copy. Reads
    as an ordinary sentence rather than shouted app chrome (sanctioned
    exception to the ALL-CAPS INVARIANT, see that block comment up top) — no
    bold/italic emphasis; a player's name is a plain PlayerLink instead. */
@@ -175,27 +172,14 @@
 .txstory__cutline .plink {
   display: contents;
 }
-/* A player's name additionally stays bold + all-caps (the app's default
-   #root * uppercase already applies to this <button> — no override needed)
-   even though the sentence around it reads natural-case, so the name reads
-   as the "headline" word in an otherwise ordinary sentence — a club name
-   stays a plain link, so it doesn't compete with the player for emphasis.
-   The link wraps just the bare name — the position abbreviation stays in
-   the surrounding plain prose (see teamTransactions.js: the emphasized/
-   linked span is built from the player's name alone, never "{POS} {Name}"). */
-.txstory__cutline .txstory__namelink {
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-/* A club name (TeamLink, no .txstory__namelink) is just the plain link
-   described above — unlike .txstory__namelink, it has no override to keep
-   #root *'s uppercase, so it would otherwise shout "HOUSTON ASTROS" against
+/* A club name (TeamLink) is just the plain link described above. It has no
+   override to keep #root *'s uppercase, so it would otherwise shout "HOUSTON ASTROS" against
    the natural-case sentence around it. Reads in the cutline's own case even
    though it's still a hyperlink, same as the surrounding prose. #root prefix
    ties the ID component of #root *'s specificity, same technique as
    #root .txstory__cutline above — a plain .txstory__cutline .plink selector
    would lose to #root * and be silently ignored. */
-#root .txstory__cutline .plink:not(.txstory__namelink) {
+#root .txstory__cutline .plink {
   text-transform: none; /* caps-exempt: team-name link matches the cutline's natural-case prose */
 }
 

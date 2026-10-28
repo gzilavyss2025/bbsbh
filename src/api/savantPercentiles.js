@@ -70,7 +70,7 @@ export function similarHittersFor(data, personId, opts) {
 
 // Metric display order + labels for the percentile cards — kept here so the
 // component doesn't hard-code JSX per metric. `def` is the plain-language
-// gloss shown on a card's flipped-open back face (StatcastPercentiles.jsx).
+// gloss a card shows for the metric.
 // A higher percentile is always the good direction — Savant's own
 // percentiles are pre-flipped so 99th is always "elite" even for stats where
 // a low raw number is good (xERA, Chase%, BB% allowed) — see
@@ -223,8 +223,7 @@ export const PITCHER_METRICS = [
 // comparable figures, not two different scales. Null when that metric had no
 // trustworthy median (see medianRatesFor); the row still renders fine without
 // one, same degradation as a missing raw value. It is deliberately not a
-// separate visible caption — PercentileStrip.jsx renders it as a bare,
-// subordinate figure, and this module's own job is only to hand over the
+// separate visible caption; this module's own job is only to hand over the
 // number, correctly formatted, or null.
 //
 // Returns null when fewer than three metrics are known — a two-row strip is a

@@ -81,7 +81,7 @@ const BUDGETS = {
   'src/styles/78-offseason.css': 1100, // 1082
   'src/styles/06-loader-and-cards.css': 800, // 900
   'src/styles/08-site-shell.css': 800, // 900
-  'src/styles/12-sealbox.css': 1000, // 951
+  'src/styles/12-sealbox.css': 900, // 895
   'src/styles/14-strike-zone.css': 900, // 898
   'src/styles/15-team-color-lab.css': 680, // 674
   'src/styles/17-identity-lab-workbench.css': 1196, // 1200

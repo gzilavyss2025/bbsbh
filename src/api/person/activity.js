@@ -11,6 +11,7 @@ import {
   openRehabStint,
   mentionsInjuredList,
   injuredListDays,
+  isIlPlacementOrTransferTxn,
 } from '../rehab-policy.js'
 import { monthDayName } from '../../lib/dates.js'
 import { pitcherRole } from './identity.js'
@@ -79,13 +80,6 @@ export function detectRehabAssignment(transactions, debutYear, asOf) {
 // parking or a winter-ball club's roster move (Aguilas Cibaenas, Cangrejeros de
 // Santurce), never an injury.
 const IL_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'DFA', 'SFA', 'FA', 'DES'])
-export function isIlPlacementTxn(t) {
-  return (
-    t.typeCode === 'SC' &&
-    mentionsInjuredList(t) &&
-    /(placed|transferred)/i.test(t.description || '')
-  )
-}
 function isIlEndingTxn(t) {
   if (IL_END_CODES.has(t.typeCode)) return true
   return (
@@ -111,7 +105,7 @@ function isIlEndingTxn(t) {
 // caller capped the feed with) is treated as cleared even if no explicit
 // closing transaction was recorded.
 export function detectInjuredList(transactions, asOf) {
-  const placements = (transactions ?? []).filter((t) => isIlPlacementTxn(t) && txnDate(t))
+  const placements = (transactions ?? []).filter((t) => isIlPlacementOrTransferTxn(t) && txnDate(t))
   if (!placements.length) return null
   const latest = placements.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
   const start = txnDate(latest)
@@ -202,7 +196,7 @@ export function injuredListStints(transactions) {
       if (open) open.days60 = transferDestinationDays(t) ?? open.days60
       continue
     }
-    if (isIlPlacementTxn(t)) {
+    if (isIlPlacementOrTransferTxn(t)) {
       if (open && open.start === date) continue // same-day duplicate placement
       // A placement while a stint is still open is an ESCALATION, not a second
       // stint — a player can't be put on the IL while already on it. MLB writes

@@ -9,8 +9,8 @@
     "grid": 1
   },
   "src/styles/05-masthead-nav.css": {
-    "wrap": 2,
-    "grid": 2
+    "wrap": 1,
+    "grid": 1
   },
   "src/styles/05a-career-timeline.css": {
     "column": 1,
@@ -117,11 +117,6 @@
     "grid": 3
   },
   "src/styles/26-player-page.css": {
-    "wrap": 2,
-    "grid": 3
-  },
-  "src/styles/26a-percentile-strip.css": {
-    "column": 1,
     "grid": 3
   },
   "src/styles/26g-command-received.css": {
@@ -148,7 +143,7 @@
     "grid": 1
   },
   "src/styles/31-wild-card.css": {
-    "column": 12,
+    "column": 11,
     "wrap": 2,
     "grid": 7
   },
@@ -311,10 +306,6 @@
     "column": 5,
     "grid": 5
   },
-  "src/styles/67-awards-ledger.css": {
-    "wrap": 1,
-    "grid": 1
-  },
   "src/styles/68-around-the-game.css": {
     "wrap": 4,
     "grid": 1
@@ -324,13 +315,8 @@
     "wrap": 1,
     "grid": 1
   },
-  "src/styles/69-pitch-arsenal.css": {
-    "column": 1,
-    "grid": 1
-  },
   "src/styles/70-contracts-grid.css": {
-    "wrap": 1,
-    "grid": 1
+    "wrap": 1
   },
   "src/styles/70-postseason-race.css": {
     "grid": 2

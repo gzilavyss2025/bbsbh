@@ -1,5 +1,5 @@
-// The player page's Awards section (components/player/AwardsLedger.jsx), and
-// the weight order that decides what it leads with.
+// The player page's awards, and the weight order that decides what they lead
+// with.
 //
 // Split out of transactions.js, which carried the retired Trophy Case and is
 // at its own size budget. Nothing here fetches; `awards` is the raw
@@ -307,18 +307,6 @@ export function rankAwards(categories, order = DEFAULT_AWARD_ORDER) {
     if (b.count !== a.count) return b.count - a.count
     return a.label.localeCompare(b.label)
   })
-}
-
-// Compact count chips for the Overview preview — "All-Star ×3, Silver Slugger
-// ×2" — the same rank order and ties the full ledger's tables use, trimmed to
-// `limit` categories. Pure aggregation over an already-shaped ledger; it reads
-// no copy and makes no ranking rule of its own, so a caller with no `/admin`
-// order handy (the Overview loader has no `useCopy`) still gets the right
-// leaders, just against the shipped default rather than a site owner's edit.
-export function awardChipsView(categories, order = DEFAULT_AWARD_ORDER, limit = categories.length) {
-  return rankAwards(categories, order)
-    .slice(0, limit)
-    .map((c) => ({ key: c.key, label: c.label, count: c.count }))
 }
 
 // The stored order is one rank key per line — the shape a registry field can

@@ -63,7 +63,7 @@ const inches = (n) => n.toFixed(1)
 //
 // A row with no percentile still renders: a knuckleball has no league
 // population to rank against (see gen-command.mjs's MIN_RANKED_POPULATION), and
-// the figure is worth printing without a rank... except that PercentileStrip
+// the figure is worth printing without a rank... except that a percentile strip
 // draws a row's whole track from its percentile and skips a row without one. So
 // an unranked type is dropped here rather than handed over to be silently
 // swallowed downstream.

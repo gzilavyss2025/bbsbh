@@ -1,13 +1,4 @@
 /* ---- pitch arsenal: unique pitch types + average velocity ---- */
-.pitch__unit {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  color: var(--text-muted);
-  margin-left: 3px;
-}
 
 /* ---- pitch mix (player page "Pitches"): a family-colored usage bar over
    per-pitch rows. The bar is decorative (aria-hidden in PitchMix.jsx) — every

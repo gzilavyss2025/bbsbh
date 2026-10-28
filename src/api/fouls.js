@@ -90,20 +90,6 @@ export function compareFoulsInScope(data, scope) {
   return foulsInScope(data, scope)
 }
 
-// What the foul card draws for one player: his line in the picked scope, the
-// compare season's line in that same scope, and whether the toggle shows. Pure
-// because FoulCard.jsx cannot be imported by the suite. `line` is null when he has
-// no line in the scope on screen (a man used only in October, on Regular): the
-// card still shows, since the toggle is the way in, and prints an empty note.
-export function foulCardView({ data, before, group, playerId, vs = null, wantPost = false }) {
-  const lineIn = (d) => (!d ? null : group === 'pitching' ? pitcherFoulLine(d, playerId) : batterFoulLine(d, playerId))
-  const hasPost = !!(lineIn(data?.post) || lineIn(before?.post))
-  const post = wantPost && hasPost
-  const line = lineIn(post ? data?.post : data)
-  const prev = vs == null ? null : lineIn(post ? before?.post : before)
-  return { hasPost, post, line, prev, show: !!(line || prev || hasPost) }
-}
-
 export const MIN_BATTER_GAMES = 20
 export const MIN_PITCHER_PITCHES = 200
 

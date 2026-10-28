@@ -505,23 +505,3 @@
   margin-top: 10px;
 }
 
-/* Takes the slack so mark and chevron stay pinned right — three children now,
-   hence gap+flex-fill rather than the old two-child `space-between`. */
-.roster__club {
-  flex: 1 1 auto;
-  min-width: 0;
-  text-align: left;
-}
-
-.roster__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-
-/* Roster rows carry no batting-order slot — name / jersey / handedness|pos. */
-.roster__row {
-  grid-template-columns: 1fr auto auto;
-}
-

@@ -102,14 +102,6 @@
 }
 /* Position, or an arm's throwing hand as RHP/LHP — a quiet condensed aside.
    `flex: none` keeps it whole while the name beside it ellipsises. */
-.tledg__pos {
-  flex: none;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .tledg__val {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

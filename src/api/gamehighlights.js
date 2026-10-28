@@ -9,8 +9,8 @@
 // content gate, the hand-maintained blocklist — already ran in the generator,
 // so a shipped file only ever holds clips that passed all of them and there is
 // no policy here to drift out of sync with it. The one thing a caller does on
-// top is identity scoping: PlayerHighlightsRail reads its player's CURRENT
-// team's file and keeps clips where `playerId` matches. (Consequence, accepted
+// top is identity scoping: a player's rail reads his CURRENT team's file and
+// keeps clips where `playerId` matches. (Consequence, accepted
 // for v1: a traded player's pre-trade clips live under his old club and so
 // don't surface on his page.)
 //
@@ -39,9 +39,9 @@ export async function fetchTeamHighlights(teamId) {
 
 // Flattens a fetchTeamHighlights() result into one chronological (OLDEST
 // first) list of clips, each annotated with its game's gamePk/date — shared
-// by TeamHighlightsRail and PlayerHighlightsRail, which differ only in which
-// clips they keep after this call (the team rail keeps them all;
-// PlayerHighlightsRail filters to `clip.playerId === personId`). Oldest-first
+// by the team and player rails, which differ only in which clips they keep
+// after this call (the team rail keeps them all; a player rail filters to
+// `clip.playerId === personId`). Oldest-first
 // on purpose: both rails anchor to the newest clip on the right edge (PRD's
 // "Rail ordering"), so rendering oldest-to-newest lets that anchor land at
 // the end of the list with no separate reverse step. `games` rows in the

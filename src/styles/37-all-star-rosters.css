@@ -38,8 +38,8 @@
    behind the shorter one. Scoped overrides (not touching the shared rule,
    which the Team Page also uses) let the three columns wrap to 2-then-1 at
    an iPad-ish width instead of squeezing into three narrow slivers.
-   The section columns sit straight in .roster-super, NOT in
-   .roster-super__body, so they carry that body's padding themselves —
+   The section columns sit straight in .roster-super, with no body
+   wrapper, so they carry the padding themselves —
    without it the section lists' own borders would sit right on the card's
    border and read as one doubled rule down each side. */
 .allstarrosters__leagues .roster-super__row {

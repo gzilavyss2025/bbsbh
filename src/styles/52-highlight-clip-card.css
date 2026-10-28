@@ -3,8 +3,7 @@
    (src/components/highlights/HighlightClipCard.jsx).
 
    One card per clip in a horizontal scroll-snap rail (today the team
-   Games tab's TeamHighlightsRail; a PlayerHighlightsRail is planned to
-   reuse it verbatim — .scratch/highlights-cascade/issues/04). Purely
+   Games tab's TeamHighlightsRail). Purely
    presentational, caller-agnostic, so these rules must not know about
    teams, games, or the rail shell (.teamphotos__* owns the track).
 

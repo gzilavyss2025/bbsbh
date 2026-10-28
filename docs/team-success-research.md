@@ -335,4 +335,4 @@ pull there. **Not every cached pull belongs in git**: spike #5's raw cache
 they rebuild in about two minutes, unlike the small caches from spikes #1-#4
 that other scripts read directly. Commit the distilled findings file, not the
 sweep, whenever the sweep runs to tens of megabytes. The diary itself: `src/lib/research/contenderDiary/`,
-rendered at `/admin/contenders` by `src/screens/contenders/ContenderDiaryPage.jsx`.
+rendered at `/admin/contenders` by `src/screens/contenders/ContenderDiaryPage.jsx` (drawn by `src/screens/research/DiaryPage.jsx`).

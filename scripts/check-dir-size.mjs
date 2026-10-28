@@ -64,7 +64,7 @@ const BUDGETS = {
   // that ordering for no gain. Growing this count is what "put new code
   // elsewhere" MEANS in a directory that can't nest, so it will keep climbing.
   // See ADR-0038.
-  'src/styles': 108,
+  'src/styles': 106,
   // Static-file readers over nightly precomputes (targetCommand, gloveTarget,
   // milbPool (ADR-0080), notebook, ...) sit flat beside the siblings they are read with and
   // written to match; every module the player page's Analytics tab loads is here
@@ -80,7 +80,7 @@ const BUDGETS = {
   // Each generator's pure half lives in scripts/lib/ (ADR-0100, ADR-0111 for the
   // open-data and pitch-start generators), so the script itself stays a thin runner.
   scripts: 141, // +gen-played-for-both.mjs (#2579; the issue and the docs name it by path), +gen-franchise-ledger.mjs (#2595; the issue and the docs name it by path), +gen-outliers.mjs (#2453; the issue and the nightly workflow name it by path), +gen-hof-pace.mjs (#1857; package.json and the docs name it by path), +gen-league-pennants.mjs (team and player pennants), +gen-season-checkpoints.mjs (#1855), +gen-umpire-history.mjs (#1565), +gen-club-defense-running.mjs (#2316), +gen-world-series.mjs and gen-world-series-events.mjs (#2235): the contract names these paths; +gen-where-from-map.mjs and gen-where-from.mjs (#1526)
-  'src/lib': 53,
+  'src/lib': 52,
   // Testable helpers the generators import (scripts/CLAUDE.md's convention,
   // lib/roster.mjs is the worked example). They run nothing on import and share
   // code between generators, so inlining them would copy it into each one.

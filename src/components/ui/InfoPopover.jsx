@@ -8,7 +8,7 @@ import { IconButton } from './control/IconButton.jsx'
 // closes on Escape and outside-click, and its motion is CSS-only so
 // prefers-reduced-motion is honoured in the stylesheet.
 //
-// Used in the navy section mastheads on the lineup pages (BullpenBoard). On a
+// For a navy section masthead, use the default look. On a
 // paper card, pass className="infopop--paper" (the Nine keys footers). The paper
 // tip spans its nearest positioned box and opens upward, so put the (i) in a row
 // that wears `infopop-row` (position: relative); add `infopop--down` for an (i) in

@@ -69,7 +69,6 @@
      - `.gamestory__headline` (a real MLB.com headline reads as a natural sentence)
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
-       (a player's `.txstory__namelink` stays uppercase on purpose)
      - the slate's roster-move card, same split as the team card above —
        `.wire__cutline`, and its club-name link `.wire__cutline .plink`
        (a player's `.wire__namelink` stays uppercase)

@@ -1,71 +1,9 @@
-// The Statcast percentile strip's scale math (src/lib/percentileStrip.js) and
-// the row join behind it (src/api/savantPercentiles.js's percentileRows).
-// Both are pure, so the axis can be pinned here rather than eyeballed in a
-// browser — same footing the radar's geometry sat on before ADR-0040 replaced
-// it.
+// The Statcast percentile row join (src/api/savantPercentiles.js's
+// percentileRows), pure so it can be pinned here rather than eyeballed in a
+// browser. The strip's scale math went with the unused strip component.
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { LEAGUE_AVERAGE, deviationBar, dotFraction } from '../src/lib/percentileStrip.js'
 import { percentileRows } from '../src/api/savantPercentiles.js'
-
-// ---------------------------------------------------------------- the scale
-
-test('the league-average reference is the 50th percentile', () => {
-  // Not a tunable — it is what a percentile rank means. The single ruled line
-  // down the strip depends on it being a constant.
-  assert.equal(LEAGUE_AVERAGE, 50)
-})
-
-test('dotFraction maps the percentile scale onto the track linearly', () => {
-  assert.equal(dotFraction(0), 0)
-  assert.equal(dotFraction(50), 0.5)
-  assert.equal(dotFraction(100), 1)
-  assert.equal(dotFraction(37), 0.37)
-})
-
-test('dotFraction clamps out-of-range ranks instead of plotting off the track', () => {
-  assert.equal(dotFraction(-5), 0)
-  assert.equal(dotFraction(140), 1)
-})
-
-test('dotFraction answers null for an unknown rank rather than plotting zero', () => {
-  // A metric under Savant's sample floor must not draw a dot at the worst end
-  // of the track — that would read as "worst in the league" instead of "no
-  // data". The radar this replaced plotted such a spoke at the average ring,
-  // which read as a real, exactly-average measurement.
-  for (const bad of [null, undefined, NaN, 'x']) assert.equal(dotFraction(bad), null)
-})
-
-test('the deviation bar runs from league average to the dot, either way', () => {
-  const above = deviationBar(80)
-  assert.equal(above.side, 'above')
-  assert.equal(above.start, 0.5)
-  assert.equal(above.width, 0.3)
-
-  const below = deviationBar(20)
-  assert.equal(below.side, 'below')
-  assert.equal(below.start, 0.2)
-  assert.equal(below.width, 0.3)
-})
-
-test('a player exactly at league average draws no deviation bar', () => {
-  const bar = deviationBar(50)
-  assert.equal(bar.width, 0)
-  assert.equal(bar.start, 0.5)
-})
-
-test('equal distances from average draw equal bars on opposite sides', () => {
-  // The property the radar could not have: the encoding is linear in the
-  // quantity, so the same 30-point gap looks the same size wherever it sits.
-  const a = deviationBar(50 + 30)
-  const b = deviationBar(50 - 30)
-  assert.equal(a.width, b.width)
-  assert.notEqual(a.side, b.side)
-})
-
-test('deviationBar answers null for an unknown rank', () => {
-  assert.equal(deviationBar(null), null)
-})
 
 // ------------------------------------------------------------------ the rows
 

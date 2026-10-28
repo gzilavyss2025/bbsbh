@@ -112,19 +112,19 @@ test('the standing front matter is present', () => {
 })
 
 test('the traps heading can still count the traps it is standing over', () => {
-  // ContenderDiaryPage.jsx spells the count as a word from its own COUNT_WORDS
-  // list; a count that runs off the end falls back to a numeral, which is not
+  // The diary page (research/DiaryPage.jsx, shared with the prospect diary)
+  // spells the count as a word from its COUNT_WORDS list; a count that runs off the end falls back to a numeral, which is not
   // this page's voice. Read the ceiling off the page instead of hard-coding a
   // number here, so widening the page's list is enough to widen this test.
   const page = readFileSync(
-    new URL('../src/screens/contenders/ContenderDiaryPage.jsx', import.meta.url),
+    new URL('../src/screens/research/DiaryPage.jsx', import.meta.url),
     'utf8',
   )
   const words = page.match(/const COUNT_WORDS = \[([\s\S]*?)\]/)
-  assert.ok(words, 'COUNT_WORDS not found in ContenderDiaryPage.jsx')
+  assert.ok(words, 'COUNT_WORDS not found in DiaryPage.jsx')
   const ceiling = words[1].split(',').filter((word) => word.trim()).length - 1
   assert.ok(
     TRAPS.length <= ceiling,
-    `TRAPS is ${TRAPS.length}; widen COUNT_WORDS in ContenderDiaryPage.jsx (holds up to ${ceiling}) before adding more`,
+    `TRAPS is ${TRAPS.length}; widen COUNT_WORDS in DiaryPage.jsx (holds up to ${ceiling}) before adding more`,
   )
 })

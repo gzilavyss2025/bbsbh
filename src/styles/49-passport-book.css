@@ -283,14 +283,6 @@
   color: var(--text-body);
 }
 
-/* Left empty on purpose — the near-transparent Tally watermark fills this,
-   and it is the page's FIRST child so it always paints beneath the stamps. */
-.passportpage__watermark {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
 /* ---- the ruled guide: eight boxes, one per stamp the page holds --------- */
 
 /* Every box's left/top/width/height is written inline from passportLayout's

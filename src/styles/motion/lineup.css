@@ -18,8 +18,7 @@
    This is the one hover in the study that does a job rather than being
    pleasant: a lineup is a list read across four columns, row tracking is the
    actual task, and STANDARDS.md lists "state indication" as a valid purpose
-   for motion. It carries to .roster__row unchanged, which is the same list
-   shape in the innings viewer's roster panel.
+   for motion.
 
    ANCHORED TO bottom: 0, NEVER A FIXED HEIGHT. A note that opens inside the
    namewrap (`flex: 1 0 100%`) wraps its row onto extra lines, and a rule
@@ -36,12 +35,10 @@
    own top border and read as a doubled frame. One hairline in graphite is
    darker than the border it sits against, which is what makes it read as a
    drawn line rather than a thickened one. */
-.lineup__row,
-.roster__row {
+.lineup__row {
   position: relative;
 }
-.lineup__row::after,
-.roster__row::after {
+.lineup__row::after {
   content: '';
   position: absolute;
   left: 12px;
@@ -53,35 +50,29 @@
   transform-origin: left center;
 }
 @media (hover: hover) and (pointer: fine) {
-  .lineup__row::after,
-  .roster__row::after {
+  .lineup__row::after {
     transition: transform var(--dur-snappy) var(--ease-out);
   }
-  .lineup__row:hover::after,
-  .roster__row:hover::after {
+  .lineup__row:hover::after {
     transform: scaleX(1);
   }
 
   /* The number inks up on the same beat. A plain colour change takes `ease`,
      per STANDARDS.md's easing order. */
-  .lineup__order,
-  .roster__order {
+  .lineup__order {
     transition: color var(--dur-snappy) ease;
   }
-  .lineup__row:hover .lineup__order,
-  .roster__row:hover .roster__order {
+  .lineup__row:hover .lineup__order {
     color: var(--ink-1);
   }
 
   /* Reduced motion keeps the rule and drops the wipe — it is a tracking aid,
      and reduced motion means less movement, not fewer affordances. */
   @media (prefers-reduced-motion: reduce) {
-    .lineup__row::after,
-    .roster__row::after {
+    .lineup__row::after {
       transition: none;
     }
-    .lineup__row:hover::after,
-    .roster__row:hover::after {
+    .lineup__row:hover::after {
       transform: scaleX(1);
     }
   }
@@ -119,8 +110,7 @@
    THE STAGGER NEVER BLOCKS A TAP. It is opacity and a 2px lift on rows that
    are in the DOM, hit-testable and interactive from the first frame.
 
-   KEPT TO THE NINE. `.roster__row` is deliberately absent — running this down
-   a 40-man roster would be slow and silly. */
+   KEPT TO THE NINE: a 40-man roster list would make this slow and silly. */
 @media (prefers-reduced-motion: no-preference) {
   .lineup__row,
   .lord__item {
