@@ -17,9 +17,9 @@ question, different commissioning ask, and a verdict vocabulary that may
 diverge over time (this diary needed a `framework` verdict on day one, which
 the prospect diary has never needed) — sharing the entry list would mean
 either forcing one vocabulary onto both or growing conditional cases into a
-shared module for no real benefit. The page-rendering code duplicates the
-prospect diary's `ResearchDiaryPage.jsx` almost exactly on purpose, for now —
-see that file's own header for why a shared renderer wasn't extracted yet.
+shared module for no real benefit. The page itself is shared:
+`src/screens/research/DiaryPage.jsx` draws both diaries, each passing its own
+content module, so the vocabularies stay apart while the renderer is one.
 
 ## The two rules
 
