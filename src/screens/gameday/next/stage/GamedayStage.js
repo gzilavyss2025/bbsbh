@@ -75,6 +75,8 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, on
 // is never empty); the half is under the mark, so naming him reveals nothing. Null under the checkpoint.
 // Right after a result tap (the cursor at the next at-bat's start) the man who just finished stays up
 // with his zones and pitches, the ball in play among them, until the next tap (Gary, 2026-10-28).
+// dueup.js names the slot as the half began, so inside an open at-bat a pinch hitter stands in from his
+// own sub-step on: only the sub-steps the reader revealed are read, as openingChangeHeld reads them.
 export const holdsFinished = ({ view, mark, open, last }) => view <= (mark ?? -1) || (last != null && open?.count > 0 && !(open.sub > 0))
 export function restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered, open = null }) {
   if (!feed || covered) return null
@@ -82,6 +84,8 @@ export function restBatter(feed, { view, mark, inning, half, last, stepAtBatInde
     const b = feed.liveData?.plays?.allPlays?.[last ?? stepAtBatIndex]?.matchup?.batter
     return b?.id ? { id: b.id, last: b.fullName?.split(' ').slice(-1)[0] ?? '' } : null
   }
+  const ph = open?.sub > 0 ? openAtBat(feed, inning, half, open.count)?.steps.slice(0, open.sub).findLast((s) => s.eventType === 'offensive_substitution') : null
+  if (ph?.playerId != null) return { id: ph.playerId, last: feed.gameData?.players?.[`ID${ph.playerId}`]?.lastName ?? '' }
   return selectDueUpDuring(feed, inning, half, mark, last ?? stepAtBatIndex, 1)?.batters?.[0] ?? null
 }
 

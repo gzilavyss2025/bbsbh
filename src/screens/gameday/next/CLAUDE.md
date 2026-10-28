@@ -28,16 +28,14 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   block fetches when it shows.
 - Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line
   score's run cells take a keyboard pick mid page-turn (aria-disabled only), as the old running line did.
-- `stage/` is the stage renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage` (slot-index buffer),
-  `StageCanvas` (palette from the `--stage-*` tokens). One fixed overhead scorebook base diamond keeps the runners readable; short ball paths
-  precede runner advances and a settled result. No close-up windup/swing or celebration belongs in this renderer.
-  Sprite targets use the global PlayerLink hover card and track the painted figures without React updates per frame;
-  `actors.js` reads defense and substitutions only inside a SealBox with the existing step/sub-step clamp.
-  Its surround uses the page's cream canvas. The batting view uses a shared zone-width scale for the foreground sprite, chest-to-knee zone, foreshortened plate and nearby base diamond; light batter’s-box lines establish the ground plane, the plate matches the zone width, and short frames can crop the bat while the zone stays readable; the fixed overhead mini-map sits opposite the batter (left for a left-handed hitter, right for a right-handed hitter) and shows only the batter and runners; navy basepaths and outlined paper bags replace the turf. `stage/art/players.js` prepares the illustrated batter and runner atlases in the batting club’s MLB/MiLB colors once per palette; their painted positions still drive the PlayerLink targets. No photo or color wash.
+- `stage/` held the overhead field renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage`, `StageCanvas`,
+  `art/players.js` and the runner atlas (`docs/gameday-runner-art.md`). The corner field is gone (Gary, 2026-10-28, #2694):
+  `GamedayStage` still times a revealed play from `stagePlay` and mounts only a celebration over the batting view, so
+  `StageCanvas`, `drawStage`, the sprite targets in `actors.js` and the runner art no longer render. No photo or color wash.
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its
-  per-game dismiss (`bbsbh:zonemap:{gamePk}`); the zone card stays separate from the overhead field, at rest only. `battingSide.js` resolves both displays, including switch hitters; the inset keeps the existing PlayerLink hover card and per-game dismiss. `zonemap/batterPalette.js` maps the batting club through the shared MLB/MiLB identity resolver, with separately configurable equipment, shirt, piping and trousers; `batterArt.js` caches the prepared static atlas without changing celebration art.
+  per-game dismiss (`bbsbh:zonemap:{gamePk}`). It is the batting view: the batter in tonight's uniform sized to the zone (knees to letters), the pitcher opposite with his line against him, and the at-bat's revealed pitches on the grid (`zonePitches.js`, inside a SealBox, up to the sub-step). A just-finished at-bat or a half read back keeps its batter until the next tap (`holdsFinished`); inside an open at-bat a pinch hitter stands in from his own sub-step. `battingSide.js` resolves both displays, including switch hitters; the inset keeps the existing PlayerLink hover card and per-game dismiss. `zonemap/batterPalette.js` maps the batting club through the shared MLB/MiLB identity resolver, with separately configurable equipment, shirt, piping and trousers; `batterArt.js` caches the prepared static atlas without changing celebration art.
 - The hero's scorebook box copies Gary's hand-scored box: `docs/gameday-reference/scorebook-box.jpg` (match it, do not restyle).
 - `hero/` is the hero slot (#2576): `heroMarkup.js` builds it (a `.js` builder, so `npm test` can render it),
   `heroModel.js` is the scorebook box's pure model. It reads the live snapshot's `last` (the last finished

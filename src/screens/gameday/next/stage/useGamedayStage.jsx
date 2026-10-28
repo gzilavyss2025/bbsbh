@@ -97,7 +97,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
           ))}</SealBox>} />
       )}
       {/* A dismissed zone map comes back from the stage's corner (Gary, 2026-10-28). */}
-      {batter && hidden && !(open?.sub > 0) && (
+      {batter && hidden && (
         <Button size="control" className="gdzonemap__show" onClick={toggleZones}>Zones</Button>
       )}
     </>

@@ -112,19 +112,19 @@ const StageCanvas = ({ play, t, start, zones }) =>
 const sealedFeed = { ...F, liveData: { ...F.liveData, plays: new Proxy({}, { get: () => { throw new Error('read a play before the reveal') } }) } }
 const html = (props) => renderToStaticMarkup(h(GamedayStage, { SealBox, StageCanvas, wall, batSide: 'R', ...props }))
 
-test('before the reveal: no play is read, and the stage draws the rest frame only', () => {
+// The corner field is gone (Gary, 2026-10-28, #2694): at rest the stage mounts no canvas, and the
+// batting view (the zone card, useGamedayStage) stands alone over the scene's batter side.
+test('before the reveal: no play is read, and the rest frame mounts no canvas', () => {
   const out = html({ feed: sealedFeed, shown: null, zones: { '05': { avg: '.250', temp: 'lukewarm' } } })
-  assert.match(out, /data-pitches="0"/)
-  assert.match(out, /data-ball=""/)
-  assert.match(out, /data-zones="1"/)
+  assert.equal(out, '<div class="gdstageScene" data-batter-side="R"></div>')
 })
 
 test('at rest a switch hitter stands opposite the pitcher\'s hand; a one-sided hitter keeps his side', () => {
   const at = (batSide, pitchHand) => html({ feed: sealedFeed, shown: null, batSide, pitchHand })
-  assert.match(at('S', 'R'), /data-batter="L" data-pitcher="R"/)
-  assert.match(at('S', 'L'), /data-batter="R" data-pitcher="L"/)
-  assert.match(at('L', 'L'), /data-batter="L"/)
-  assert.match(at('R', 'R'), /data-batter="R"/)
+  assert.match(at('S', 'R'), /data-batter-side="L"/)
+  assert.match(at('S', 'L'), /data-batter-side="R"/)
+  assert.match(at('L', 'L'), /data-batter-side="L"/)
+  assert.match(at('R', 'R'), /data-batter-side="R"/)
 })
 
 test('after the reveal: the revealed play draws, at its end at rest and from the tap while playing', () => {
@@ -148,6 +148,17 @@ test('the rest batter: the due-up of the half being scored; the batter on screen
   assert.equal(restBatter(F, at)?.id, 668227) // Arozarena
   assert.equal(restBatter(F, { ...at, covered: true }), null)
   assert.equal(restBatter(F, { ...at, mark: 2 })?.id, F.liveData.plays.allPlays[12].matchup.batter.id)
+})
+
+// Bottom 9th: Jahmai Jones (663330) pinch-hits for Mickey Gasper (681508), the first sub-step of
+// at-bat 83. The due-up names the slot as the half began, so the at-bat's own revealed sub-steps
+// name the man at the plate.
+test('the rest batter inside an open at-bat: a pinch hitter from his own sub-step on, never before it', () => {
+  const at = { view: 17, mark: 16, inning: 9, half: 'bottom', last: 82, stepAtBatIndex: 82 }
+  assert.equal(restBatter(F, at)?.id, 681508) // between at-bats: the slot, Gasper
+  assert.equal(restBatter(F, { ...at, open: { count: 1, sub: 0 } })?.id, F.liveData.plays.allPlays[82].matchup.batter.id) // Anthony, who just finished, stays up
+  assert.equal(restBatter(F, { ...at, open: { count: 1, sub: 1 } })?.id, 663330) // his notice
+  assert.equal(restBatter(F, { ...at, open: { count: 1, sub: 2 } })?.id, 663330) // his first pitch
 })
 
 test('the zone card shows a batter only with his own zones, and only at rest', () => {
@@ -178,13 +189,13 @@ test('the stage shell has no stadium photo or home-color wash', () => {
   const out = html({ feed: sealedFeed, shown: null })
   assert.match(out, /class="gdstageScene"/)
   assert.doesNotMatch(out, /--park-(art|focus|tint):/)
-  assert.match(out, /data-pitches="0"/)
+  assert.doesNotMatch(out, /<i /) // no canvas at rest
 })
 
 test('the plate inset and overhead field resolve the same handedness', () => {
   for (const [bat, pitch, side] of [['R', 'R', 'R'], ['L', 'L', 'L'], ['S', 'L', 'R'], ['S', 'R', 'L'], [undefined, undefined, 'R']]) {
     assert.equal(battingSide(bat, pitch), side)
-    assert.match(html({ feed: sealedFeed, shown: null, batSide: bat, pitchHand: pitch }), new RegExp('data-batter="' + side + '"'))
+    assert.match(html({ feed: sealedFeed, shown: null, batSide: bat, pitchHand: pitch }), new RegExp('data-batter-side="' + side + '"'))
   }
 })
 
