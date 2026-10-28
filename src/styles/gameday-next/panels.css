@@ -218,3 +218,16 @@
 /* At L and D the trail starts under the stage (the Due up card takes the left column down to the bar), so
    its first card sits on the stage's left edge, as the hero's box does. */
 .gdnext[data-tier='L'] .gdp__trail, .gdnext[data-tier='D'] .gdp__trail { padding-left: 0; }
+
+/* The scorebook's pitching page (pitchingLinesMarkup.js): a table per club, the scorebook's columns,
+   in the checkpoint's Pitching page and the Menu. Figures right, the name left and cut with an ellipsis. */
+.gdpl__club + .gdpl__club { margin-top: var(--space-3); }
+.gdpl__head { margin: 0 0 var(--space-1); font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--text-caption); }
+.gdpl__none { margin: 0; font-size: var(--fs-small); color: var(--text-caption); }
+.gdpl__table { width: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; font-size: var(--fs-cell); }
+.gdpl__table thead th { font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); color: var(--text-caption); text-align: right; padding: var(--space-1) 0; border-bottom: var(--bw-heavy) solid var(--border-stamped); }
+.gdpl__table thead th:first-child { width: 34%; text-align: left; }
+.gdpl__table tbody th { text-align: left; font-weight: var(--w-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: var(--space-1) var(--space-1) var(--space-1) 0; }
+.gdpl__table td { text-align: right; padding: var(--space-1) 0 var(--space-1) var(--space-1); border-bottom: var(--bw-hair) solid var(--border-hairline); }
+.gdpl__table tbody th { border-bottom: var(--bw-hair) solid var(--border-hairline); }
+.gdpl__table tbody tr:last-child :is(th, td) { border-bottom: 0; }
