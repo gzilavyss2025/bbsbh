@@ -31,8 +31,29 @@ function card(h, feed, inning, half, count, sub) {
   const notes = play.runners.filter((r) => r.details?.playIndex === s.index && r.details?.runner?.id === s.playerId && !r.movement?.isOut && BASE[r.movement?.end])
     .map((r) => ({ leg: BASE[r.movement.end], code: legAdvanceCode(play, r) }))
   const box = mine && end && { ...boxModel(mine), legs: BASE[end.out ? legs[0].from : end.to] ?? 0, out: null, rbi: 0, notes }
+  // A change names the man coming in: his number, his position and his hand (Gary, 2026-10-28), "(41 · LHP)",
+  // set in line right after his name.
+  const inId = s.kind === 'change' && own ? ev.player?.id : null
+  const inP = inId ? feed.gameData?.players?.[`ID${inId}`] : null
+  const pos = ev?.position?.abbreviation ?? inP?.primaryPosition?.abbreviation ?? ''
+  const hand = pos === 'P' ? (inP?.pitchHand?.code ? `${inP.pitchHand.code}HP` : '') : (inP?.batSide?.code ? `Bats ${inP.batSide.code}` : '')
+  // A pitcher's hand says his position ("LHP"), so the P is left out.
+  const facts = inP && [inP.primaryNumber, pos !== 'P' && pos, hand].filter(Boolean).join(' · ')
   return h('div', { className: 'gdevent', role: 'status' }, box && scorebookBox(h, box),
-    h('div', { className: 'gdevent__txt' }, h('span', { className: 'gdevent__kind' }, (kind ?? '').replace(/\s+(2B|3B|Home)$/i, '')), h('span', null, text ?? '')))
+    h('div', { className: 'gdevent__txt' }, h('span', { className: 'gdevent__kind' }, (kind ?? '').replace(/\s+(2B|3B|Home)$/i, '')), h('span', null, withFacts(h, unlabeled(text ?? '', kind), inP?.fullName, facts))))
+}
+
+// The tab already names the kind, so a sentence that opens on it ("Offensive Substitution: …") drops it (Gary, 2026-10-28).
+const unlabeled = (text, kind) => (kind && text.toLowerCase().startsWith(`${kind.toLowerCase()}:`) ? text.slice(kind.length + 1).trimStart() : text) // caps-js-exempt: compares only, renders nothing
+
+// The sentence with the facts right after the incoming man's name; at the end when the name is not in it.
+function withFacts(h, text, name, facts) {
+  if (!facts) return text
+  const tag = h('span', { key: 'f', className: 'gdevent__facts' }, `(${facts})`)
+  const at = name ? text.indexOf(name) : -1
+  if (at < 0) return [text, ' ', tag]
+  const cut = at + name.length
+  return [text.slice(0, cut), ' ', tag, text.slice(cut)]
 }
 
 export const eventCardMarkup = (h, { SealBox, feed, inning, half, count, sub }) =>

@@ -108,8 +108,9 @@ export function StarterCard({ data, theme, masthead }) {
                 {pitcher.nameLastFirst}
               </PlayerLink>
               <span className="lsp__meta">
+                {/* Number then hand, as Gameday's Due up reads a batter's "26 RF" (Gary, 2026-10-28). */}
+                {pitcher.jersey && <span className="lsp__jersey">{pitcher.jersey}</span>}
                 {pitcher.hand && <span className="lsp__hand">{pitcher.hand}HP</span>}
-                {pitcher.jersey && <span className="lsp__jersey">#{pitcher.jersey}</span>}
               </span>
               <span className="lsp__pills">
                 <ProspectPill {...prospectBadge(data.prospectsData, pitcher.id, data.oppOrgTeamId)} />

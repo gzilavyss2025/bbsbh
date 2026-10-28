@@ -25,3 +25,5 @@
 .gdevent__kind { align-self: flex-start; padding: 2px var(--space-1h); background: var(--surface-stamped-ink); color: var(--text-on-ink);
   font: var(--w-bold) var(--fs-label) / 1 var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
 
+/* A change's incoming man: number, position, hand, in line after his name. */
+.gdevent__facts { font: inherit; color: var(--text-heading); } /* the sentence's own mono face, in line */

@@ -35,23 +35,20 @@
 /* layout-exempt: hand and number on one line */
 .lsp__meta {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-1);
   align-items: center;
 }
+/* The number in clay and the hand in ink, both plain bold display type: Gameday's Due up tag (panels.css .gdp__tag). */
+.lsp__hand,
+.lsp__jersey {
+  font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display);
+  white-space: nowrap;
+}
 .lsp__hand {
-  padding: var(--space-1) var(--space-1h);
-  border: var(--bw-heavy) solid var(--border-stamped);
-  background: var(--accent-tint);
   color: var(--text-heading);
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
 }
 .lsp__jersey {
   color: var(--clay);
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  font-weight: var(--w-bold);
 }
 /* layout-exempt: pills on one wrapping line */
 .lsp__pills {

@@ -67,6 +67,18 @@ export function gameStatusLine(series, gameNumber) {
   return `Game ${gameNumber} · ${name} Lead ${hi}–${lo}`.replace('  ', ' ')
 }
 
+// The same line after this game, once its box score is open (Gary, 2026-10-28): `winnerId` is the club
+// that won it, handed in by the one caller that may know (GameView, from the box score's reveal).
+// "Game 4 · Brewers Lead 3–1", or "Game 4 · Brewers Win 4–1" when it took the series.
+export function gameStatusAfter(series, gameNumber, winnerId) {
+  if (!series || !gameNumber || !winnerId || series.decided) return gameStatusLine(series, gameNumber)
+  const slots = series.slots.map((s) => ({ ...s, wins: s.wins + (s.club?.id === winnerId ? 1 : 0) }))
+  const won = slots.find((s) => s.club && s.wins >= series.winsNeeded)
+  if (!won) return gameStatusLine({ ...series, slots }, gameNumber)
+  const lo = Math.min(...slots.map((s) => s.wins))
+  return `Game ${gameNumber} · ${teamClubNameShort(won.club.id)} Win ${won.wins}–${lo}`
+}
+
 // "Best of 3" — the series' length, for the live page's banner before any
 // game has a result to head the page with.
 export function bestOfLine(series) {

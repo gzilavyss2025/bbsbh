@@ -49,8 +49,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 66px;
-  height: 66px;
+  width: 160px;
+  height: 160px;
   padding: var(--space-1);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-square);
@@ -302,4 +302,39 @@
   .bs__potg:has(.bs__potgWatch--poster) .bs__potgWatch--poster {
     margin-top: 0;
   }
+}
+
+/* The box score's strip is the stamp and its button alone (Gary, 2026-10-28): no eyebrow, no lede. */
+.bs .stampstrip__eyebrow, .bs .stampstrip__lede { display: none; }
+/* The box score's strip, redesigned (Gary, 2026-10-28): the stamp alone, large and centred, set a little
+   askew like one pressed by hand, with no hinge or well around it; the button runs the full width below.
+   Unpressed, the stamp is a faint proof of itself. Above every width rule here, so the stack holds wide too. */
+.bs .stampstrip__row, .bs .stampstrip__row--quiet { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'mount' 'say' 'do'; justify-items: center; row-gap: var(--space-3); }
+.bs .stampstrip__mount { border: 0; background: none; padding: 0; transform: rotate(-6deg); }
+.bs .stampstrip__mount--empty .gamestamp { opacity: .4; }
+.bs .stampstrip__say:not(:has(> :not(.stampstrip__eyebrow, .stampstrip__lede))) { display: none; }
+.bs .stampstrip__do { justify-self: stretch; }
+.bs .stampstrip__do .btn { width: 100%; }
+
+/* The press: confetti flies off both sides of the stamp, once, and falls away (StampGameButton.jsx
+   mounts it on the mint; Motion: Reduced never mounts it). Each piece takes its side from its index
+   (even left, odd right), a spread of angles and a colour from the paper's accents. */
+.stampstrip__mount { position: relative; overflow: visible; }
+.stampstrip__burst { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.stampstrip__burst i {
+  --side: calc(mod(var(--i), 2) * 2 - 1);
+  --rise: calc((mod(var(--i) * 7, 9) - 4) * 14px);
+  --reach: calc(70px + mod(var(--i) * 13, 5) * 16px);
+  position: absolute; left: 50%; top: 50%; width: 7px; height: 11px;
+  background: var(--marker);
+  animation: stamp-confetti 1100ms cubic-bezier(.15, .7, .3, 1) both;
+  animation-delay: calc(mod(var(--i), 4) * 30ms);
+}
+.stampstrip__burst i:nth-child(4n + 1) { background: var(--accent-negative); }
+.stampstrip__burst i:nth-child(4n + 2) { background: var(--accent-inplay); }
+.stampstrip__burst i:nth-child(4n + 3) { background: var(--accent-positive); }
+@keyframes stamp-confetti {
+  0% { transform: translate(-50%, -50%) translate(calc(var(--side) * 46%), 0) rotate(0) scale(.6); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(calc(var(--side) * var(--reach)), calc(var(--rise) + 40px)) rotate(calc(var(--side) * 540deg)); opacity: 0; }
 }

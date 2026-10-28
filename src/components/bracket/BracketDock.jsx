@@ -28,6 +28,8 @@ function todayLine(bracket, slateDate) {
   const today = seriesPlayingToday(bracket, slateDate)
   if (today.length === 1) {
     const [s] = today
+    // The World Series names itself rather than its clubs (Gary, 2026-10-28): "World Series · MIL leads 3–1".
+    if (s.round === 'worldseries') return `World Series · ${recordLine(s)}`
     return `${s.slots.map((slot) => slot.club.abbreviation).join('–')} · ${recordLine(s)}`
   }
   if (today.length > 1) return `${today.length} series today`
@@ -56,7 +58,6 @@ export function BracketDock({ bracket, cutoff, slateDate, onPresence }) {
       style={{ '--wire-club': 'var(--navy)' }}
       measureKey={line}
       title="Postseason"
-      note={bracket.champion ? 'Final' : `${alive} clubs left`}
       closeLabel="Collapse the bracket"
       collapsedLabel={`Open the bracket. ${line}.`}
       collapsed={
@@ -64,7 +65,7 @@ export function BracketDock({ bracket, cutoff, slateDate, onPresence }) {
           <span className="wiredock__spine" aria-hidden="true" />
           <span className="bracketdock__trophy" aria-hidden="true"><Trophy size={20} /></span>
           <span className="wiredock__line">
-            <span className="wiredock__club">Bracket</span>
+            <span className="wiredock__club">Postseason</span>
             <span className="wiredock__cut">{line}</span>
           </span>
           {!bracket.champion && <Pill fill="paper" figure className="wiredock__count">{alive} left</Pill>}
@@ -73,7 +74,7 @@ export function BracketDock({ bracket, cutoff, slateDate, onPresence }) {
       }
     >
       <div className="pbkt bracketdock__body">
-        <FullBracket bracket={bracket} cutoff={cutoff} historyIds={historyIds} />
+        <FullBracket bracket={bracket} cutoff={cutoff} historyIds={historyIds} rail /> {/* the World Series home's desktop rail layout (Gary, 2026-10-28) */}
       </div>
     </SheetDock>
   )

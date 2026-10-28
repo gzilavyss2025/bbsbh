@@ -20,7 +20,8 @@ test('rows in tape order, wins and run diff drawn as bars', () => {
   assert.deepEqual(rows.map((r) => r.key), ['wins', 'runDiff', 'oct', 'meeting', 'lastWs', 'lastTitle'])
   assert.deepEqual(rows.filter((r) => r.bar).map((r) => r.key), ['wins', 'runDiff'])
   assert.equal(rows.find((r) => r.key === 'oct').away, '5–2')
-  assert.equal(rows.find((r) => r.key === 'meeting').label, 'June 16–18')
+  // Gary, 2026-10-28: the row says what it counts, not its dates (they still decide whether it shows).
+  assert.equal(rows.find((r) => r.key === 'meeting').label, 'Vs in regular season')
 })
 
 test('the meeting row is hidden when the clubs did not meet', () => {

@@ -106,11 +106,13 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk, officialD
 // game `currentGamePk` masks, nor any game after it (seasonSeriesCells already
 // stripped their scores, so they never count either way). `{ aWins: 0, bWins: 0 }` before anything's
 // been decided.
-export function seasonSeriesRecord(cells, teamAId, teamBId) {
+// `withPostseason` counts the postseason legs too: the lineup page's series card heads the whole year
+// between them (Gary, 2026-10-28); the masked current game and later ones still never count.
+export function seasonSeriesRecord(cells, teamAId, teamBId, { withPostseason = false } = {}) {
   let aWins = 0
   let bWins = 0
   for (const c of cells) {
-    if (!c.hasScore || c.round) continue
+    if (!c.hasScore || (c.round && !withPostseason)) continue
     if (c.winnerId === teamAId) aWins++
     else if (c.winnerId === teamBId) bWins++
   }

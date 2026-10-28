@@ -1,6 +1,6 @@
 // Regenerates public/data/vs-team-splits/ — for every player on an MLB
-// active roster, his CAREER regular-season stats against each opposing club plus
-// the stat line of the LAST game he played against them. Feeds the player page's
+// active roster, his CAREER regular-season stats against each opposing club (and, as `all`, the
+// same with his postseason games added) plus the stat line of the LAST game he played against them. Feeds the player page's
 // SPLITS VS TEAM card (src/api/vsTeamSplits.js just reads these files) and the
 // play-by-play/box-score vs-opponent callout (src/api/callout-notes.js), whose
 // rate comparisons read the hitter line's pa/bb/xbh component sums.
@@ -161,12 +161,40 @@ async function fetchActiveRoster(teamId) {
 }
 
 // --- per-player career vs each club ------------------------------------------
+// The postseason's game types: wild card, division, LCS and World Series.
+const POST_TYPES = new Set(['F', 'D', 'L', 'W'])
+
+// One game's line into running component sums.
+function addGame(t, st, isPitcher) {
+  if (isPitcher) {
+    t.g += num(st.gamesPlayed)
+    t.outs += ipToOuts(st.inningsPitched)
+    t.er += num(st.earnedRuns)
+    t.k += num(st.strikeOuts)
+    t.bb += num(st.baseOnBalls)
+    return
+  }
+  t.g += num(st.gamesPlayed)
+  t.pa += num(st.plateAppearances)
+  t.ab += num(st.atBats)
+  t.h += num(st.hits)
+  t.d += num(st.doubles)
+  t.t += num(st.triples)
+  t.hr += num(st.homeRuns)
+  t.rbi += num(st.rbi)
+  t.bb += num(st.baseOnBalls)
+  t.hbp += num(st.hitByPitch)
+  t.sf += num(st.sacFlies)
+  t.so += num(st.strikeOuts)
+  t.tb += num(st.totalBases)
+}
+
 // The MLB seasons a player appeared in for this group, from year-by-year (skips
 // years spent entirely in the minors, so no empty game-log fetch).
-async function fetchMlbSeasons(personId, group) {
+async function fetchMlbSeasons(personId, group, gameType = 'R') {
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}/stats?stats=yearByYear&group=${group}&sportId=1`,
+      `/api/v1/people/${personId}/stats?stats=yearByYear&group=${group}&sportId=1&gameType=${gameType}`,
     )
     const splits = data.stats?.[0]?.splits ?? []
     return [...new Set(splits.map((s) => Number(s.season)).filter(Boolean))].sort()
@@ -175,10 +203,10 @@ async function fetchMlbSeasons(personId, group) {
   }
 }
 
-async function fetchGameLog(personId, group, season) {
+async function fetchGameLog(personId, group, season, gameType = 'R') {
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}/stats?stats=gameLog&group=${group}&season=${season}&sportId=1`,
+      `/api/v1/people/${personId}/stats?stats=gameLog&group=${group}&season=${season}&sportId=1&gameType=${gameType}`,
     )
     return data.stats?.[0]?.splits ?? []
   } catch {
@@ -186,52 +214,43 @@ async function fetchGameLog(personId, group, season) {
   }
 }
 
-// Sweep a player's whole MLB career (regular season) and fold every game into a
-// per-opponent bucket: running component sums for the career line, plus the
-// most-recent meeting for the last-game line. Returns { [oppTeamId]: entry }.
+// Sweep a player's whole MLB career and fold every game into a per-opponent bucket: running
+// component sums for the career line (regular season, `car`, what the player page and the callouts
+// read), the same sums with his postseason games added (`all`, the lineup pages' "Career vs" line,
+// Gary 2026-10-28; only when he has met that club in October), plus the most-recent meeting of
+// either kind for the last-game line. Postseason logs are fetched only for the seasons he pitched or
+// batted in October (yearByYear with gameType=P), so the extra cost is one request a player plus one
+// a postseason season. Returns { [oppTeamId]: entry }.
 async function buildPlayerVs(personId, group, teamAbbr) {
-  const seasons = await fetchMlbSeasons(personId, group)
-  if (!seasons.length) return {}
-  const logs = await mapConcurrent(seasons, 4, (yr) => fetchGameLog(personId, group, yr))
+  const [seasons, postSeasons] = await Promise.all([fetchMlbSeasons(personId, group), fetchMlbSeasons(personId, group, 'P')])
+  if (!seasons.length && !postSeasons.length) return {}
+  const logs = [
+    ...(await mapConcurrent(seasons, 4, (yr) => fetchGameLog(personId, group, yr))),
+    ...(await mapConcurrent(postSeasons, 4, (yr) => fetchGameLog(personId, group, yr, 'P'))),
+  ]
 
   const isPitcher = group === 'pitching'
   const buckets = new Map() // oppId -> { sums, last }
   for (const splits of logs) {
     for (const s of splits ?? []) {
-      // Regular season only, and games with a real opponent + date.
-      if (s.gameType !== 'R') continue
+      // Regular season and postseason, and games with a real opponent + date.
+      if (s.gameType !== 'R' && !POST_TYPES.has(s.gameType)) continue
       const oppId = s.opponent?.id
       const date = s.date
       if (!oppId || !date) continue
       const st = s.stat ?? {}
       let b = buckets.get(oppId)
       if (!b) {
-        b = { last: null, sums: isPitcher
+        const zero = () => (isPitcher
           ? { g: 0, outs: 0, er: 0, k: 0, bb: 0 }
-          : { g: 0, pa: 0, ab: 0, h: 0, d: 0, t: 0, hr: 0, rbi: 0, bb: 0, hbp: 0, sf: 0, so: 0, tb: 0 } }
+          : { g: 0, pa: 0, ab: 0, h: 0, d: 0, t: 0, hr: 0, rbi: 0, bb: 0, hbp: 0, sf: 0, so: 0, tb: 0 })
+        b = { last: null, sums: zero(), post: zero(), hasPost: false }
         buckets.set(oppId, b)
       }
-      if (isPitcher) {
-        b.sums.g += num(st.gamesPlayed)
-        b.sums.outs += ipToOuts(st.inningsPitched)
-        b.sums.er += num(st.earnedRuns)
-        b.sums.k += num(st.strikeOuts)
-        b.sums.bb += num(st.baseOnBalls)
-      } else {
-        b.sums.g += num(st.gamesPlayed)
-        b.sums.pa += num(st.plateAppearances)
-        b.sums.ab += num(st.atBats)
-        b.sums.h += num(st.hits)
-        b.sums.d += num(st.doubles)
-        b.sums.t += num(st.triples)
-        b.sums.hr += num(st.homeRuns)
-        b.sums.rbi += num(st.rbi)
-        b.sums.bb += num(st.baseOnBalls)
-        b.sums.hbp += num(st.hitByPitch)
-        b.sums.sf += num(st.sacFlies)
-        b.sums.so += num(st.strikeOuts)
-        b.sums.tb += num(st.totalBases)
-      }
+      // Each game adds to the regular-season sums or the postseason ones.
+      const into = POST_TYPES.has(s.gameType) ? b.post : b.sums
+      if (POST_TYPES.has(s.gameType)) b.hasPost = true
+      addGame(into, st, isPitcher)
       // Track the latest meeting for the last-game line.
       if (!b.last || date > b.last.date) {
         b.last = {
@@ -249,10 +268,13 @@ async function buildPlayerVs(personId, group, teamAbbr) {
     const s = b.sums
     // `pa`/`bb`/`xbh` feed the vs-opponent callout's rate comparisons (see
     // src/api/callout-notes.js) — the player-page card doesn't read them.
-    const car = isPitcher
-      ? { g: s.g, ip: outsToIp(s.outs), era: eraText(s.er, s.outs), k: s.k, bb: s.bb }
-      : hitterCar(s)
-    vs[oppId] = { car, last: b.last }
+    const line = (t) => (isPitcher
+      ? { g: t.g, ip: outsToIp(t.outs), era: eraText(t.er, t.outs), k: t.k, bb: t.bb }
+      : hitterCar(t))
+    // A club met only in October has no regular-season line: `car` stays an empty one, `all` holds it.
+    const car = line(s)
+    const both = Object.fromEntries(Object.keys(s).map((k) => [k, s[k] + b.post[k]]))
+    vs[oppId] = b.hasPost ? { car, all: line(both), last: b.last } : { car, last: b.last }
   }
   return vs
 }

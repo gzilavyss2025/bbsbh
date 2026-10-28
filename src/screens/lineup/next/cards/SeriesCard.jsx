@@ -43,7 +43,7 @@ export function SeriesCard({ data }) {
     })
   }, [cells.length])
   if (cells.length < 2 || !season) return null
-  const lead = leadLabel(seasonSeriesRecord(cells, meta.id, oppMeta.id), meta.id, oppMeta.id)
+  const lead = leadLabel(seasonSeriesRecord(cells, meta.id, oppMeta.id, { withPostseason: true }), meta.id, oppMeta.id)
   const go = (cell) => navigate(gamePath(cell.apiDate, cell.awayAbbr, cell.homeAbbr, cell.final ? 'boxscore' : 'lineup1', cell.gameNumber))
   const scroll = (dir) => stripRef.current?.scrollBy({ left: dir * stripRef.current.clientWidth * 0.8, behavior: 'smooth' })
   return (
@@ -71,7 +71,8 @@ export function SeriesCard({ data }) {
               </b>
               <span className="lss__vs">
                 <i>{cell.homeId === meta.id ? 'vs' : '@'}</i>
-                <TeamLogo teamId={oppMeta.id} name={oppMeta.name} size={20} />
+                {/* On the navy current cell a dark mark would vanish: its one-colour knockout instead (Gary, 2026-10-28). */}
+                <TeamLogo teamId={oppMeta.id} name={oppMeta.name} size={20} variant={cell.isCurrent ? 'mono' : undefined} />
               </span>
               {(cell.round || cell.isCurrent) && (
                 <em className="lss__tag">{[cell.round && (cell.seriesGame ? `${cell.round} · G${cell.seriesGame}` : cell.round), cell.isCurrent && (cell.final ? 'This game' : 'Today')].filter(Boolean).join(' · ')}</em>

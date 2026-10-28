@@ -44,22 +44,16 @@ export function SiteFooter({ onShowLogos }) {
         >
           Settings
         </button>
-        <button
-          type="button"
-          className="btn sitefooter__btn"
-          onClick={() => setShowFinder(true)}
-        >
-          Find a past matchup
-        </button>
-        <button type="button" className="btn sitefooter__btn" onClick={onShowLogos}>
-          Logo sheet
-        </button>
       </div>
 
       <FooterDirectory
         groups={PAGE_GROUPS}
         trail={FOOTER_TRAIL}
-        onEverything={() => navigate('/more')}
+        // The two footer tools join the page list (Gary, 2026-10-28).
+        actions={[
+          { label: 'Find a past matchup', onClick: () => setShowFinder(true) },
+          { label: 'Logo sheet', onClick: onShowLogos },
+        ]}
       />
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}

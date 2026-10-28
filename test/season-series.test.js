@@ -290,3 +290,14 @@ test('seasonSeriesCells: startTimeTBD rides through to the cell, absent reads fa
   assert.equal(tbd.startTimeTBD, true)
   assert.equal(real.startTimeTBD, false)
 })
+
+test('the lineup card\'s record counts postseason legs when asked; the plain record does not', () => {
+  const cells = [
+    { hasScore: true, winnerId: 1 },
+    { hasScore: true, winnerId: 2, round: 'WS' },
+    { hasScore: true, winnerId: 2, round: 'WS' },
+    { hasScore: false, winnerId: null, round: 'WS' }, // the masked current game
+  ]
+  assert.deepEqual(seasonSeriesRecord(cells, 1, 2), { aWins: 1, bWins: 0 })
+  assert.deepEqual(seasonSeriesRecord(cells, 1, 2, { withPostseason: true }), { aWins: 1, bWins: 2 })
+})

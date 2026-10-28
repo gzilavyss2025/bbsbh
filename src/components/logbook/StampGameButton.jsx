@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { motionIsReduced } from '../../hooks/preferences/motionIsReduced.js'
 import { useBooks } from '../../hooks/useBooks.js'
 import { useStamps } from '../../hooks/useStamps.js'
 import { useNav } from '../../lib/nav.js'
@@ -65,6 +66,15 @@ export function StampGameButton({ game }) {
   const { books } = useBooks()
   const [noteDraft, setNoteDraft] = useState(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
+  // A burst of confetti off the stamp's sides the moment it is pressed (Gary, 2026-10-28): only on the
+  // change from unminted to minted in this visit, never for a stamp already in the book on load.
+  const minted = Boolean(game?.gamePk && stampFor(game.gamePk))
+  const wasMinted = useRef(minted)
+  const [burst, setBurst] = useState(0)
+  useEffect(() => {
+    if (minted && !wasMinted.current && !motionIsReduced()) setBurst((n) => n + 1)
+    wasMinted.current = minted
+  }, [minted])
 
   if (!game?.gamePk || !game.date) return null
 
@@ -109,6 +119,11 @@ export function StampGameButton({ game }) {
             stamp comes up to the winning club's ink (lib/stampInk.js). */}
         <div className={`stampstrip__mount${existing ? '' : ' stampstrip__mount--empty'}`}>
           <GameStamp game={game} instanceId={`bs-${game.gamePk}`} />
+          {burst > 0 && (
+            <span key={burst} className="stampstrip__burst" aria-hidden="true">
+              {Array.from({ length: 18 }, (_, i) => <i key={i} style={{ '--i': i }} />)}
+            </span>
+          )}
         </div>
 
         <div className="stampstrip__say">

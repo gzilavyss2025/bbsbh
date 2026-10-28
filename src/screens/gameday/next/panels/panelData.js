@@ -37,7 +37,7 @@ export function orderAt(feed, side, inning, half, mark, cards, hitters = []) {
     const latest = mine.at(-1) ?? null
     const trip = latest && (latest.reached > 0 || latest.scored) ? latest : null
     const outcome = latest && !trip ? chipCode(latest) || null : null
-    return { slot, id: now.id, last: now.last, first: now.first, jersey: now.jersey, position: now.position, codes: mine.map(chipCode), trip, outcome }
+    return { slot, id: now.id, last: now.last, first: now.first, jersey: now.jersey, position: now.position, codes: mine.map(chipCode), trip, outcome, looking: !!(outcome && latest.calledLooking) }
   })
 }
 

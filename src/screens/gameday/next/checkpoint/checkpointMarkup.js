@@ -28,13 +28,14 @@ function tally(h, f, p) {
 
 // The half's pitch tally, then the game's lines for both clubs as of the half's end (the scorebook's
 // pitching page, pitchingLinesMarkup).
-function pitching(h, f, lines) {
+// The total row names the half itself ("Top 5th", Gary 2026-10-28), not the bare word.
+function pitching(h, f, lines, halfName = 'Half') {
   const row = (name, l, key, className) => h('tr', { key, className }, h('td', null, name), h('td', null, l.pitches),
     h('td', null, l.strikes), h('td', null, l.whiffs), h('td', null, l.fouls))
   return [h('table', { key: 'half', className: 'gdcp__table' },
     h('thead', null, h('tr', null, ...['Pitcher', 'Pitches', 'Strikes', 'Whiffs', 'Fouls'].map((c) => h('th', { key: c }, c)))),
     h('tbody', null, ...f.pitchers.map((l) => row(l.last, l, l.id)),
-      f.pitchers.length > 1 && row('Half', f, 'tot', 'is-total'))),
+      f.pitchers.length > 1 && row(halfName, f, 'tot', 'is-total'))),
   lines]
 }
 
@@ -81,17 +82,22 @@ function gameSoFar(h, f, Headshot, line, PlayerLink) {
   ]
 }
 
-// A note about one starter ("His first World Series start", "in his starts") is read beside no photo
-// here, so his surname takes the place of "his". Only these kinds: elsewhere a note's "his" can be
-// another man's (a matchup note is keyed to the hitter but "his slider" is the pitcher's).
-// `homeAway` ("…are 2-4 in his road starts") is one more; `cgShutout` ("1 complete game") names no one at
-// all, so it reads as his (Gary, 2026-10-28).
-const NAMED_KINDS = new Set(['wsStarterStart', 'starterRec', 'homeAway'])
+// A note about one player reads beside his photo elsewhere, so it often says only "his" or names no one
+// ("Has not allowed a run in his last 3 outings"). The checkpoint shows no photo, so every note keyed to
+// one player (`personId`) that does not already carry his surname gets it (Gary, 2026-10-28): "His …"
+// becomes "May's …", a sentence that opens on its verb gets him as its subject ("May has not allowed…"),
+// "off him" / "when he" name him, and anything else is headed "May: …". A note whose "his" is another
+// man's (a matchup keyed to the hitter about the pitcher's slider) carries that other man's id, not his.
+const VERB = /^(Has|Is|Was|Hits|Throws|Leads|Needs|Pitching|Working|Batting|Averaging|Faced|Faces|Gets|Got|Owns|Went|Made|Makes)\b/
 const named = (n, nameOf) => {
-  if (n.kind === 'cgShutout' && n.personId != null && nameOf(n.personId)) return `${nameOf(n.personId)} has ${n.text}`
-  const last = NAMED_KINDS.has(n.kind) && n.personId != null ? nameOf(n.personId) : null
-  if (!last) return n.text
-  return n.text.replace(/^His /, `${last}'s `).replace(/ his /g, ` ${last}'s `)
+  const last = n.personId != null ? nameOf(n.personId) : null
+  if (!last || n.text.includes(last)) return n.text
+  if (n.kind === 'cgShutout') return `${last} has ${n.text}`
+  let t = n.text.replace(/^His /, `${last}'s `)
+  if (t === n.text && VERB.test(t)) t = `${last} ${/^[A-Z]\w*ing\b/.test(t) ? 'is ' : ''}${t[0].toLowerCase()}${t.slice(1)}` // caps-js-exempt: the verb now follows his name; the page shouts it anyway
+  t = t.replace(/ (off|against|for|to) him\b/, ` $1 ${last}`).replace(/ when he /, ` when ${last} `)
+  if (!t.includes(last)) t = t.replace(/ his /, ` ${last}'s `)
+  return t.includes(last) ? t : `${last}: ${t}`
 }
 
 // `Scroll` (Checkpoint.jsx) lets the list scroll in its box and bounces a cue while more is below.
@@ -103,10 +109,10 @@ const facts = (h, f, Seen, on, nameOf, Scroll) => {
   ]
 }
 
-function body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line, lines }) {
+function body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line, lines, halfName }) {
   const f = pages.find((p) => p.id === id).fields
   if (id === 'tally') return tally(h, f, pages.find((p) => p.id === 'pitching').fields)
-  if (id === 'pitching') return pitching(h, f, lines)
+  if (id === 'pitching') return pitching(h, f, lines, halfName)
   if (id === 'atBats') return atBats(h, f, PlayerLink, Scroll)
   if (id === 'gameSoFar') return gameSoFar(h, f, Headshot, line, PlayerLink)
   return facts(h, f, Seen, on === id, nameOf, Scroll)
@@ -136,7 +142,7 @@ function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, S
       ...ids.map((id) => h('section', {
         key: `${id}-${id === on}`, 'aria-label': LABEL[id],
         className: id === on ? 'gdcp__page is-on' : 'gdcp__page', 'data-page': id,
-      }, heads[id] && h('h4', null, heads[id]), body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line, lines }),
+      }, heads[id] && h('h4', null, heads[id]), body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line, lines, halfName: `${half === 'top' ? 'Top' : 'Bottom'} ${ordinal(inning)}` }),
       folded && id === 'facts' && h('div', { key: 'due', className: 'gdcp__notesdue' }, gameSoFar(h, pages.find((p) => p.id === 'gameSoFar').fields, Headshot, line, PlayerLink))))))
 }
 

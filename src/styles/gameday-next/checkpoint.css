@@ -161,3 +161,5 @@
 /* The due-up under the phone's notes (checkpointMarkup.js `folded`); the wider tiers keep its own page. */
 .gdcp__notesdue { flex: none; margin-top: var(--space-2); }
 .gdnext:not([data-tier='P']) .gdcp__notesdue { display: none; }
+/* The total row's half name ("Top 5th") wears the header's display face, as a label. */
+.gdcp__table .is-total td:first-child { font-family: var(--font-display); }

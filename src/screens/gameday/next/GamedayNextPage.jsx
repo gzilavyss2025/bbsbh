@@ -86,6 +86,22 @@ function useTabDrag(side) {
   return { style: top != null ? { top: `${top}%` } : undefined, lifted, handlers, tapped }
 }
 
+// The phone's trail under the hero keeps its newest chip in view (Gary, 2026-10-28): each new at-bat
+// scrolls it to the end, and the reader scrolls back to see what came before.
+function HeroTrail({ children }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof MutationObserver === 'undefined') return undefined
+    const end = () => { el.scrollLeft = el.scrollWidth }
+    end()
+    const mo = new MutationObserver(end)
+    mo.observe(el, { childList: true, subtree: true })
+    return () => mo.disconnect()
+  }, [])
+  return <div ref={ref} className="gdnext__herotrail">{children}</div>
+}
+
 export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine, advance, pitch, onBoxScore, lineups, notices = [], refresh, pregame }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
@@ -179,7 +195,7 @@ export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine,
         <section key={b} className={`gdnext__slot gdnext__slot--${b}`} aria-label={BLOCK_LABEL[b]}>
           {b === 'stage' && pregame && !drawer ? <GamedayPanel block="arm" ctx={panels} /> : b === 'stage' && stage ? stage : b === 'hero' && hero && tier === 'P' ? (
             // On the phone the hero's open floor carries the trail, so a tap moves between at-bats (Gary, 2026-10-28).
-            <>{hero}<div className="gdnext__herotrail"><GamedayPanel block="trail" ctx={panels} /></div></>
+            <>{hero}<HeroTrail><GamedayPanel block="trail" ctx={panels} /></HeroTrail></>
           ) : b === 'hero' && hero ? hero : (
             <>
               <GamedayPanel block={b} ctx={panels} />

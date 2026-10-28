@@ -4,7 +4,6 @@ import { isGuidePath } from '../../lib/reportPages.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
 import { BuildStamp } from '../ui/BuildStamp.jsx'
-import { DirectoryHeading } from './DirectoryHeading.jsx'
 
 // AdminFooterLink.jsx imports @clerk/clerk-react at its top, so it is only
 // dynamically imported — and only then does that SDK reach a device — when a
@@ -37,44 +36,36 @@ const AdminFooterLink = isClerkEnabled
 // an empty #root shell to a crawler, so this footer is the only one of the
 // three a crawler can follow. See useRouteLink: a plain left-click is still a
 // client-side push with no page load.
-export function FooterDirectory({ groups, trail, onEverything }) {
+// Gary, 2026-10-28: one list, no group headings, every page in alphabetical order, folded shut until
+// opened. `actions` ({ label, onClick }) are the footer's own tools (Find a past matchup, the logo
+// sheet), listed with the pages as buttons. The rows are still links, so a crawler still finds them.
+export function FooterDirectory({ groups, trail, actions = [] }) {
   const linkProps = useRouteLink()
+  const rows = [
+    ...groups.flatMap((g) => g.pages),
+    ...trail,
+    ...actions,
+  ].sort((a, b) => a.label.localeCompare(b.label))
 
   return (
     <nav className="sitefooter__more" aria-label="More pages">
-      <p className="t-label t-label--bold sitefooter__more-label">More Baseball</p>
-
-      <div className="navdir">
-        {groups.map((group) => (
-          <section key={group.id} className="navdir__col">
-            <DirectoryHeading group={group} />
-            <ul className="navdir__list">
-              {group.pages.map((page) => (
-                <li key={page.path}>
-                  <a className="dirlink" {...linkProps(page.path)}>
-                    {page.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-      </div>
-
-      <div className="navdir__trail">
-        {trail.map((page) => (
-          <section key={page.path} className="navdir__trail-group">
-            <DirectoryHeading group={page.group} />
-            <a className="dirlink dirlink--trail" {...linkProps(page.path)}>
-              {page.label}
-              {isGuidePath(page.path) && <span className="dirtag">Guides</span>}
-            </a>
-          </section>
-        ))}
-        <button type="button" className="navdir__everything" onClick={onEverything}>
-          Everything, on one page
-        </button>
-      </div>
+      <details className="navdir__fold">
+        <summary className="t-label t-label--bold sitefooter__more-label">More Baseball</summary>
+        <ul className="navdir__list navdir__list--all">
+          {rows.map((r) => (
+            <li key={r.path ?? r.label}>
+              {r.path ? (
+                <a className="dirlink" {...linkProps(r.path)}>
+                  {r.label}
+                  {isGuidePath(r.path) && <span className="dirtag">Guides</span>}
+                </a>
+              ) : (
+                <button type="button" className="dirlink dirlink--action" onClick={r.onClick}>{r.label}</button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </details>
     </nav>
   )
 }

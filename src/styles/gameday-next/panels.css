@@ -236,3 +236,10 @@
 @keyframes gdp-flip { from { transform: perspective(600px) rotateY(-90deg); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .gdp__flip { animation: none; } }
 :root[data-motion='reduced'] .gdp__flip { animation: none; }
+/* How the batter reached, centred in his diamond. */
+.gdp__trip:has(.gdp__tripcode) { position: relative; }
+.gdp__tripcode { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font: var(--w-bold) calc(var(--fs-label) * 1.25) / var(--lh-solid) var(--font-display); color: var(--text-heading); pointer-events: none; }
+/* He scored: the diamond is filled in, so its code reads in paper white. */
+.gdp__tripcode.is-scored { color: var(--text-on-ink-bright); font-weight: var(--w-regular); font-size: 1.27em; } /* light on the dark fill: not bold, 10% larger than the 15px code (1.27 of the row's 13px) */
+/* The backwards K of a called third strike. */
+.gdp__kback, .gdp__trail .gdp__chip b > .gdp__kback { display: inline-block; transform: scaleX(-1); padding: 0; background: none; color: inherit; font: inherit; } /* not the chip's name span */

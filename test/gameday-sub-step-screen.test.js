@@ -92,8 +92,9 @@ test('a 1-pitch and a 9-pitch at-bat: the same sealed hero and the same words on
     }
     assert.equal(words.size, 1)
   }
-  assert.equal(stepWords(false), 'Next play')
-  assert.equal(stepWords(true), 'Next pitch')
+  // Gary, 2026-10-28: one word in both modes; the switch beside it names the mode.
+  assert.equal(stepWords(false), 'Next')
+  assert.equal(stepWords(true), 'Next')
   // Open, the box is the same one box (one height per tier, hero.css): only its pips differ.
   const box = (s) => s.match(/<div class="gdhero__box"[^>]*>/)?.[0]
   assert.equal(box(hero(F823, 1, 'bottom', { count: nine, sub: 8 })), box(hero(F823, 1, 'bottom', { count: nine, sub: 1 })))

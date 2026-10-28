@@ -26,7 +26,7 @@ export function FieldCard({ data, theme, masthead }) {
       body="flush"
       className={`lfld ${headerThemeClass(theme)}`.trim()}
       style={headerThemeStyle(theme, masthead.scale)}
-      head={<ClubBar title="Defensive alignment" teamId={oppMeta.id} teamName={oppMeta.teamName} masthead={masthead} season={season} />}
+      head={<ClubBar title="Defense" teamId={oppMeta.id} teamName={oppMeta.teamName} masthead={masthead} season={season} />}
     >
       {!posted && closed ? (
         <p className="roster__notice">The defensive alignment is not in the record for this game.</p>

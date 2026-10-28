@@ -30,13 +30,16 @@ export function UmpireTierGlyph({ tier, rank, total, onFullBreakdown }) {
       <button
         type="button"
         className={`umptier__glyph umptier__glyph--${tier}${open ? ' umptier__glyph--open' : ''}`}
-        onClick={() => setOpen((was) => !was)}
-        aria-expanded={open}
+        // With a breakdown to open, the tap goes straight to it (Gary, 2026-10-28); the in-place note
+        // (tier and rank) is only for a host with none, as the design lab draws it.
+        onClick={onFullBreakdown ?? (() => setOpen((was) => !was))}
+        aria-expanded={onFullBreakdown ? undefined : open}
+        aria-haspopup={onFullBreakdown ? 'dialog' : undefined}
         aria-label={`Umpire accuracy — ${label}`}
       >
         <HomePlateIcon />
       </button>
-      {open && (
+      {open && !onFullBreakdown && (
         <span className="umptier__note">
           <TierPill tier={tier} />
           {rank && <span className="umptier__note-stats">{rank} out of {total}</span>}

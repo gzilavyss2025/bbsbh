@@ -53,7 +53,6 @@ export function BullpenCard({ data, workloadData, theme, masthead }) {
         ))}
         <p className="lpen__key">
           <span><i className="lpen__cell is-on" /> pitched</span>
-          <span><i className="lpen__cell" /> rested</span>
           <span><i className="lpen__cell is-today" /> today</span>
         </p>
       </div>

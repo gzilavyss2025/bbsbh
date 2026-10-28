@@ -73,9 +73,13 @@ export function useLineupData({ feed, side, vsTeam, careerMatchupsData, workload
   const orgTeamId = teamIdentity?.parentOrgId ?? meta.id
   const oppOrgTeamId = oppTeamIdentity?.parentOrgId ?? oppMeta.id
 
-  // His whole career line against this club: MLB only, a lookup in the shard already loaded.
+  // His whole career line against this club: MLB only, a lookup in the shard already loaded. `all` adds
+  // his postseason games (Gary, 2026-10-28; gen-vs-team-splits.mjs writes it only when there are any).
   const careerVsOpp = useMemo(
-    () => (isMlb ? vsTeam?.players?.[oppPitcher?.id]?.vs?.[String(meta.id)]?.car ?? null : null),
+    () => {
+      const vs = isMlb ? vsTeam?.players?.[oppPitcher?.id]?.vs?.[String(meta.id)] : null
+      return vs?.all ?? vs?.car ?? null
+    },
     [isMlb, vsTeam, oppPitcher?.id, meta.id],
   )
   const vsOpponentAbbr = teamAbbr({ id: meta.id, teamName: meta.teamName, name: meta.name })

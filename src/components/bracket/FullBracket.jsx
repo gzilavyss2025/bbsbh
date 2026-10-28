@@ -320,7 +320,7 @@ function wsNoteText(series) {
   if (series.decided) return null
   if (isDecidingGame(series)) return 'Winner take all'
   if (series.playsOnCutoff) {
-    return `Today · Game ${series.cutoffGame.gameNumber}${isElimination(series) ? ' · facing elimination' : ''}`
+    return `Today · Game ${series.cutoffGame.gameNumber}` // no "facing elimination" (Gary, 2026-10-28)
   }
   return null
 }

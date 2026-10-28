@@ -230,3 +230,9 @@
 .gdnext__railscroll .gdscroll__in { padding-right: 0; }
 /* The Due up list runs to the rail's edges: no inset around it. */
 .gdnext__rail--left .gdnext__slot--battingOrder .statgrid { padding: 0; }
+/* The bar's words (Menu, the switch, the advance) match the game tabs' size above the band (Gary, 2026-10-28). */
+.gdnext__bar :is(.gdnext__advance, .gdnext__menu, .gdnext__switch .btn) { font-size: var(--fs-h3); }
+/* At that size the bar's three parts share the width on tighter insets, so the advance's longer
+   words ("Next pitch ›", "Bottom 5th ›") still fit. */
+.gdnext__bar :is(.gdnext__advance, .gdnext__menu, .gdnext__switch .btn) { padding-inline: var(--space-2); }
+.gdnext__bar .gdnext__menu { min-width: 0; }

@@ -120,7 +120,7 @@ const Trail = ({ ctx }) => (
             {/* A tap plays this at-bat again on the stage (stage/tapRule.js replay). */}
             <button type="button" className="gdp__replay" disabled={!ctx.onReplay} onClick={() => ctx.onReplay?.(c.atBatIndex)}
               aria-label={`Replay: ${chipCode(c) || 'at-bat'}, ${c.batter?.last ?? c.batter?.fullName ?? ''}`}>
-              <b>{chipCode(c) || '···'}</b><span>{c.batter?.last ?? c.batter?.fullName}</span>
+              <b>{codeMark(c) || '···'}</b><span>{c.batter?.last ?? c.batter?.fullName}</span>
             </button>
           </li>
         ))}
@@ -134,6 +134,9 @@ const Trail = ({ ctx }) => (
 // The batter due after the last at-bat shown (the hero's own due-up): the next play's matchup would name
 // a pinch hitter before his own notice.
 const upNext = (ctx, cards) => selectDueUpDuring(ctx.feed, ctx.inning, ctx.half, ctx.mark, cards.at(-1)?.atBatIndex ?? null, 1)?.batters?.[0]?.last ?? ''
+
+// A called third strike's K turns backwards, as the hero box and the scorebook draw it (Gary, 2026-10-28).
+const codeMark = (c) => (c.calledLooking && chipCode(c) === 'K' ? <span className="gdp__kback">K</span> : chipCode(c))
 
 // Names and slots are the order entering the half (lineupEntering gates itself); the at-bat result codes no longer show.
 // The order turned so the batter at the plate leads and the rest follow in turn, wrapping to the
@@ -167,8 +170,10 @@ function BattingOrder({ ctx }) {
                 <Headshot personId={r.id} name={r.last} tint={false} className="gdp__shot" />
                 <span className="gdp__who"><PlayerLink id={r.id} name={[r.first, r.last].filter(Boolean).join(' ')}>{r.first && <small>{r.first}</small>}<b>{r.last}</b></PlayerLink></span>
                 <span className="gdp__tag">{r.jersey && <b>{r.jersey}</b>}{r.position && <i>{r.position}</i>}</span>
-                {r.trip && <span className="gdp__trip"><PlayDiamond reached={r.trip.reached} scored={r.trip.scored} earned={r.trip.earned} legNotations={r.trip.legNotations ?? {}} outAt={r.trip.outAt ?? null} outCode={r.trip.outCode ?? ''} size={56} onLeg /></span>}
-                {r.outcome && <span className="gdp__trip gdp__trip--code"><b>{r.outcome}</b></span>}
+                {r.trip && <span className="gdp__trip"><PlayDiamond reached={r.trip.reached} scored={r.trip.scored} earned={r.trip.earned} legNotations={r.trip.legNotations ?? {}} outAt={r.trip.outAt ?? null} outCode={r.trip.outCode ?? ''} size={56} onLeg />
+                  {/* How he reached (2B, BB, E6), in the diamond as the scorer pencils it (Gary, 2026-10-28). */}
+                  {chipCode(r.trip) && <b className={r.trip.scored ? 'gdp__tripcode is-scored' : 'gdp__tripcode'}>{chipCode(r.trip)}</b>}</span>}
+                {r.outcome && <span className="gdp__trip gdp__trip--code"><b>{r.looking && r.outcome === 'K' ? <span className="gdp__kback">K</span> : r.outcome}</b></span>}
                 {i === 0 && up && <ScoutLine feed={ctx.feed} hitterId={r.id} pitcherId={up} />}
               </li>
             ))}

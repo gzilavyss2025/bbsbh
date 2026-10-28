@@ -54,7 +54,7 @@ const stored = (page, key) => page.evaluate((k) => localStorage.getItem(k), key)
 // past that, and the advance must still offer the same step.
 async function settled(page) {
   await page.waitForTimeout(1500)
-  await expect(page.locator('.gdnext__advance')).toHaveText(/Next play/)
+  await expect(page.locator('.gdnext__advance')).toHaveText(/^Next ›/)
 }
 
 test('a click in the dead space above the button steps an at-bat', async ({ page }) => {
@@ -68,7 +68,7 @@ test('a click in the dead space above the button steps an at-bat', async ({ page
   // One at-bat, not the whole half: the reveal mark is untouched, and the bar
   // still offers the next step.
   expect(await stored(page, MARK)).toBeNull()
-  await expect(page.locator('.gdnext__advance')).toHaveText(/Next play/)
+  await expect(page.locator('.gdnext__advance')).toHaveText(/^Next ›/)
 })
 
 test('the dead space below the button steps an at-bat too', async ({ page }) => {
@@ -104,7 +104,7 @@ test('the dead space reaches the seam with the step switch and the bar end, and 
   await expect.poll(() => stored(page, PITCH_MODE)).not.toBeNull()
   await page.waitForTimeout(1500)
   expect(await stored(page, CURSOR)).toBe('0:2')
-  await expect(page.locator('.gdnext__advance')).toHaveText(/Next pitch/)
+  await expect(page.locator('.gdnext__advance')).toHaveText(/^Next ›/)
 })
 
 test('the Menu keeps its own taps', async ({ page }) => {
