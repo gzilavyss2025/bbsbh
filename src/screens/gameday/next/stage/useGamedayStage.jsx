@@ -62,7 +62,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   const stage = feed ? (
     <>
       {!(covered && cur.armed) && <GamedayStage
-        SealBox={SealBox} StageCanvas={GamedayPlayCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} run={cur.run ?? 0} playing={cur.playing} onEnd={onEnd} onReplay={covered ? undefined : onReplay}
+        SealBox={SealBox} StageCanvas={GamedayPlayCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} run={cur.run ?? 0} playing={cur.playing} onEnd={onEnd} onReplay={onReplay}
         mark={mark} step={open?.count ?? null} open={open} batter={batter}
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones} onZone={batter ? toggleZones : undefined}
         checkpoint={checkpoint} checkpointDismissed={phase === 'checkpoint'} onCheckpoint={onCheckpoint}

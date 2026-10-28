@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../../../../../components/ui/control/Button.jsx'
 import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduced.js'
-import { HOME_RUN_ART, STADIUM_URL, prepareArt } from './assets.js'
+import { HOME_RUN_ART, STADIUM_URL, prepareArt, preparedArt } from './assets.js'
 import { HOME_RUN, advanceTime, momentAt } from './choreography.js'
 import { HEIGHT, WIDTH, drawBallpark } from './drawBallpark.js'
 import '../../../../../styles/gameday-next/ballpark.css'
@@ -9,14 +9,21 @@ import '../../../../../styles/gameday-next/ballpark.css'
 // Standalone reviewable cutscene, not mounted on a scoring surface. `time` is a
 // controlled frozen frame for scrubbing/strips; omit it for a one-shot playback.
 // A new event supplies an authored `track` rather than branching on player data.
+// Replay remounts the scene (a new `run`), so a keyboard press hands focus to the
+// new Skip through this flag; a scene that ends with Skip focused moves it to Replay.
+let focusSkipOnMount = false
+
 export function BallparkCelebration({
   headline = 'Home run', name = '', helmet, trim, track = HOME_RUN,
   character = HOME_RUN_ART, backdrop = STADIUM_URL,
   time, playing = false, rate = 1, reduced = false, onTime, onDone, onSkip, onReplay, onError,
 }) {
-  const canvas = useRef(null), host = useRef(null)
-  const [loaded, setLoaded] = useState(null)
+  const canvas = useRef(null), host = useRef(null), skip = useRef(null), again = useRef(null), skipFocused = useRef(false)
   const artKey = `${JSON.stringify(character)}:${backdrop}:${helmet ?? ''}:${trim ?? ''}`
+  const [loaded, setLoaded] = useState(() => {
+    const ready = helmet && trim ? preparedArt(helmet, trim, character, backdrop) : null
+    return ready ? { key: artKey, art: ready, failed: false } : null
+  })
   const art = loaded?.key === artKey ? loaded.art : null
   const failed = loaded?.key === artKey && loaded.failed
   const [moment, setMoment] = useState(() => momentAt(time ?? 0, track))
@@ -24,6 +31,14 @@ export function BallparkCelebration({
   const callbacks = useRef({ onTime, onDone, onError })
   const playhead = useRef(time ?? 0), completed = useRef(false)
   useEffect(() => { callbacks.current = { onTime, onDone, onError } }, [onTime, onDone, onError])
+  const showSkip = !!onSkip, showReplay = !!onReplay && !!art && !reduced && !lessMotion
+  useEffect(() => {
+    if (showSkip && focusSkipOnMount) { focusSkipOnMount = false; skip.current?.focus() }
+  }, [showSkip])
+  useEffect(() => {
+    if (showReplay && skipFocused.current && document.activeElement === document.body) again.current?.focus()
+    skipFocused.current = false
+  }, [showReplay])
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => setLessMotion(motionIsReduced())
@@ -95,8 +110,10 @@ export function BallparkCelebration({
         {name && <p className="ballpark__name">{name}</p>}
       </div>
       {!art && <p className="ballpark__loading" role="status">{failed ? 'Celebration art could not load.' : 'Loading celebration…'}</p>}
-      {onSkip && <Button skin="ghost" className="ballpark__skip" onClick={onSkip}>Skip</Button>}
-      {onReplay && art && !reduced && !lessMotion && <Button skin="ghost" className="ballpark__replay" onClick={onReplay}>Replay</Button>}
+      {showSkip && <Button ref={skip} skin="ghost" className="ballpark__skip" onClick={onSkip}
+        onFocus={() => { skipFocused.current = true }} onBlur={(e) => { if (e.relatedTarget) skipFocused.current = false }}>Skip</Button>}
+      {showReplay && <Button ref={again} skin="ghost" className="ballpark__replay"
+        onClick={(e) => { focusSkipOnMount = document.activeElement === e.currentTarget; onReplay() }}>Replay</Button>}
     </div>
   )
 }

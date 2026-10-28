@@ -1,12 +1,11 @@
 /* A cutscene fits the existing stage slot; the ordinary field stays behind
-   it while a decorative chunk or atlas loads. No layout shifts at reveal. */
-.gdcelebration { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+   it while a decorative chunk or atlas loads. z-index 2 lifts the scene over
+   .gdstage (z-index 1) and its hover targets. No layout shifts at reveal. */
+.gdcelebration { position: absolute; z-index: 2; inset: 0; display: flex; align-items: center; justify-content: center;
   container-type: size; pointer-events: none; }
 .gdcelebration .ballpark { width: min(100cqw, calc(100cqh * 16 / 9)); flex: none; pointer-events: auto; }
 .gdcelebration .ballpark[data-ready="false"] { opacity: 0; pointer-events: none; }
 .gdcelebration:has(.ballpark[data-ready="true"]) { background: var(--stage-outline); }
-/* Once the art is ready the field gives way: .gdstage's z-index would otherwise paint it over the scene. */
-.gdstageScene:has(.ballpark[data-ready="true"]) .gdstage { visibility: hidden; }
 /* The hidden legacy engine portals its decorative stamp to body. The new
    revealed scene supplies the same event title; do not stamp over its art. */
 body:has(.gdcelebration) .bigplay { display: none; }
