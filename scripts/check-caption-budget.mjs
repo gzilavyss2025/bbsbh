@@ -67,6 +67,7 @@ import { resolve, join } from 'node:path'
 // 113 -> 112: the old Records card's rules went with the team page swap (#1107).
 // 112 -> 111: the slate's Reveal-all chip went with the reveal-all chain
 // (ADR-0116).
+// 103 -> 102: the percentile strip's sheet went with its unimported component.
 const BUDGET = 102
 
 const stylesDir = resolve('src/styles')
