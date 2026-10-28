@@ -85,7 +85,7 @@ export function CommandReceivedCard({ data, personId, season }) {
 
       <p className="cmdrecv__note">{CAUSATION_NOTE}</p>
 
-      <p className="pctstrip__source cmdrecv__source">
+      <p className="cmdrecv__source">
         <a href={credit.href} rel="noreferrer noopener" target="_blank">
           {credit.text}
         </a>
