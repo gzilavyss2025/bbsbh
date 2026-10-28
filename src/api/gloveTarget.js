@@ -112,9 +112,9 @@ export function gloveTargetBias(view) {
   if (!Number.isFinite(x) || !Number.isFinite(z)) return null
   const parts = []
   // NAMED BY THE SIDE OF THE FIELD, never by somebody's left or right. x runs
-  // to the CATCHER's right, and the card draws it from the camera behind the
-  // pitcher, so "the catcher's right" would print on a reader's LEFT — a
-  // sentence and a picture pointing opposite ways. First base is first base
+  // to the CATCHER's right, and the card draws it from the catcher's side
+  // (ADR-0124), but "right" would still mean the opposite to anyone picturing
+  // the telecast. First base is first base
   // from every seat in the park, so the words hold whichever view the plot
   // takes.
   if (Math.abs(x) >= BIAS_FLOOR_IN) parts.push(x > 0 ? 'to the first-base side' : 'to the third-base side')

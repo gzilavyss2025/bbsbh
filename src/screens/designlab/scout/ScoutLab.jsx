@@ -96,7 +96,7 @@ function scout({ hitter, scope, hand, hitterHand, hitterStance, metric, stance, 
 export function ScoutLab({ asOf: asOfProp }) {
   const [state, setState] = useState('pair')
   const [who, setWho] = useState('lefty')
-  const [view, setView] = useState('pitcher')
+  const [view, setView] = useState('hitter')
   const [scope, setScope] = useState('all')
   const [hand, setHand] = useState(null)
   const [metricPick, setMetric] = useState(null)

@@ -47,7 +47,7 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `preview/` | `SavePosterButton` | Saves the finished poster out of the canvas (`docs/preview-poster.md`) |
 | `profile/` | `ClubSeal`, `ProfileAccount`, `SyncReceipt`, `MergeReceipt`, `EraseDataDialog` | My Tally's parts. They render no game data (`src/screens/profile/CLAUDE.md`) |
 | `salaries/` | `SalaryBoard`, `ClubPayrolls`, `ContractGrid`, `Money` | The money pages (ADR-0052): open surfaces, no seal |
-| `scoring/` | `AtBatBox`, `ScorecardSheet`, `PlayDiamond`, `DefenseDiamond`, `StrikeZone`, `StruckLine`, `lens/` | The scorebook-diamond drawing family. `StruckLine` is the one strike wrapper. `StrikeZone` is drawn from the catcher's side (ADR-0077's 2026-10-28 amendment) |
+| `scoring/` | `AtBatBox`, `ScorecardSheet`, `PlayDiamond`, `DefenseDiamond`, `StrikeZone`, `StruckLine`, `lens/` | The scorebook-diamond drawing family. `StruckLine` is the one strike wrapper. `StrikeZone` is drawn from the catcher's side, like every zone chart (ADR-0124) |
 | `scout/` | `Matchup`, `ScoutMap`, `Choice` | The Matchup Scout's parts (`docs/scout-design.md`) |
 | `season/` | `SeasonPicker`, `PartOfSeason` | The season views' shared parts (ADR-0086, #1202). **`SeasonPicker` is the one season picker**; a page that takes a season renders it, never a second one |
 | `seal/` | `AsOfBanner` | The as-of date picker for open pages (not a seal) |

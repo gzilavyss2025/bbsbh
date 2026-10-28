@@ -146,3 +146,14 @@ test('the glyph and the panel head are drawn in plate.css with tokens', () => {
   assert.match(ruleBody(c, '.fplate__pname'), /font-size:\s*var\(--fs-hero-sm\)/)
   assert.match(ruleBody(c, '.fplate__menu'), /margin-top:\s*var\(--space-3\)/)
 })
+
+// The catcher's view (ADR-0124): the map draws the stored columns in order, third base on the left. Under the
+// pitcher's view (ADR-0077) it read each column through viewCol and named the sides the other way round.
+test('the Plate map is drawn from the catcher’s side', () => {
+  const jsx = read(`${MOD}PlateModule.jsx`)
+  assert.match(jsx, /sidesInOrder\('hitter'\)/)
+  assert.match(jsx, /const c = view\.cells\[k\]/)
+  assert.match(jsx, /\$\{COLS\[c\.i % GRID\]\}/)
+  assert.match(jsx, /catcher's view, the third-base side on the left/)
+  assert.doesNotMatch(jsx, /viewCol|pitcher's view/)
+})

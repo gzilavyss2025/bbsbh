@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { arsenalView } from '../src/screens/player/next/modules/arsenal/arsenalView.js'
 import {
+  PLATE_Z,
   ZD,
   flightPath,
   lineD,
@@ -207,4 +208,14 @@ test('Gasser 688107 from the committed store: FF is 23.3% of 1,815 pitches, and 
   assert.equal(ff.pct, 23.3)
   for (const r of v) assert.ok(r.path, `${r.code} has a flight path`)
   assert.ok(v.find((r) => r.code === 'SL').path)
+})
+
+// The catcher's view (ADR-0124): a mark on the first-base side (the last stored column) sits right of the
+// zone's centre, in the card's landing map and in the catcher camera alike. Mirrored, it would sit left.
+test('the landing map and the catcher camera draw first base on the right', () => {
+  assert.ok(markFeet({ col: 4, row: 2 }).x > 0)
+  const card = readFileSync(new URL('../src/screens/player/next/modules/arsenal/ArsenalCard.jsx', import.meta.url), 'utf8')
+  assert.match(card, /translate\(\$\{\(40 \+ r\.landing\.x \* 28\)/)
+  const cam = makeCamera('catcher', 300, 200)
+  assert.ok(project(cam, [0.7, 2.4, PLATE_Z]).x > project(cam, [-0.7, 2.4, PLATE_Z]).x)
 })
