@@ -1,0 +1,20 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "api/**/*.js",
+    "scripts/**/*.mjs",
+    "test/**/*.test.js",
+    ".claude/hooks/*.mjs",
+    ".claude/skills/**/*.mjs",
+    ".design-sync/build/*.mjs",
+    "e2e/shots/*.mjs",
+    "tools/**/*.mjs"
+  ],
+  "ignore": [
+    ".scratch/**"
+  ],
+  "ignoreDependencies": [
+    "@fontsource/.*",
+    "playwright"
+  ]
+}
