@@ -1,10 +1,10 @@
 /* ==== GAMEDAY's static batter and hot/cold zone inset ====
    A compact ready stance beside the plate; the overhead field keeps its fixed framing. */
 /* layout-exempt: the batting view fills the stage behind the corner field */
-.gdzonemap { position: absolute; z-index: 1; inset: 0; box-sizing: border-box; pointer-events: none; container-type: size; }
+.gdzonemap { position: absolute; z-index: 1; inset: 0; box-sizing: border-box; pointer-events: none; }
 .gdzonemap__dismiss { position: absolute; left: var(--space-2); top: var(--space-2); z-index: 2; pointer-events: auto; }
 /* layout-exempt: a fixed 3 x 3, the strike zone's nine cells */
-.gdzonemap__grid { position: absolute; left: 50%; bottom: calc(1% + var(--gd-zone-w) * 77 / 196 + var(--space-2)); width: var(--gd-zone-w); height: var(--gd-zone-h); transform: translateX(-50%); pointer-events: auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: var(--bw-hair); background: var(--border-hairline); border: var(--bw-rule) solid var(--border-hairline); }
+.gdzonemap__grid { position: absolute; left: 50%; bottom: calc(var(--gd-ground) + var(--gd-zone-w) * .68); width: var(--gd-zone-w); height: var(--gd-zone-h); transform: translateX(-50%); pointer-events: auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: var(--bw-hair); background: var(--border-hairline); border: var(--bw-rule) solid var(--border-hairline); }
 .gdzonemap__cell { display: grid; place-items: center; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
   font-variant-numeric: tabular-nums; color: var(--text-heading); background: var(--stage-zone-lukewarm); }
 .gdzonemap__num { position: relative; display: inline-block; }
@@ -17,17 +17,22 @@
 
 /* layout-exempt: the batter and zone share the same plate, reflected for a left-handed hitter */
 .gdzonemap__plateview { position: absolute; inset: 0; }
-.gdzonemap__batter { position: absolute; left: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); bottom: calc(var(--gd-figure-h) * -0.12); width: auto; height: var(--gd-figure-h); pointer-events: auto; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
+.gdzonemap__batter { position: absolute; left: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); bottom: calc(var(--gd-ground) - var(--gd-zone-w) * .08); width: auto; height: var(--gd-figure-h); pointer-events: auto; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
 .gdzonemap__sprite { display: block; width: 100%; height: 100%; background-image: url('/art/gameday/batter-ready.webp');
   background-repeat: no-repeat; background-size: 200% 100%; background-position: left center; image-rendering: pixelated; }
-.gdzonemap__plate { position: absolute; left: 50%; bottom: 1%; width: var(--gd-zone-w); height: auto; aspect-ratio: 196 / 77; transform: translateX(-50%); overflow: visible; fill: var(--stage-chalk); }
+.gdzonemap__plate { position: absolute; left: 50%; bottom: var(--gd-ground); width: var(--gd-zone-w); height: auto; aspect-ratio: 196 / 60; transform: translateX(-50%); overflow: visible; fill: var(--stage-chalk); }
 .gdzonemap[data-side='L'] .gdzonemap__batter { left: auto; right: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); clip-path: inset(0 24% 0 17%); }
 .gdzonemap[data-side='L'] .gdzonemap__sprite { background-position: right center; }
-.gdzonemap[data-side='L'] .gdzonemap__grid { left: 50%; }
-.gdzonemap[data-side='L'] .gdzonemap__plate { left: 50%; }
 .gdzonemap__plate-edge { fill: var(--stage-overhead-cloth-shade); }
 .gdzonemap__plate-face { stroke: var(--stage-overhead-cloth-shade); stroke-width: var(--bw-hair); vector-effect: non-scaling-stroke; }
 
 
 /* Match the outside edges, including the zone grid rule. */
 .gdzonemap__grid, .gdzonemap__plate { box-sizing: border-box; }
+
+/* Quiet chalk on the ground gives the plate and feet a shared perspective. */
+.gdzonemap__ground { position: absolute; left: 50%; bottom: calc(var(--gd-ground) - var(--gd-zone-w) * .06); width: calc(var(--gd-zone-w) * 3.3); height: auto; transform: translateX(-50%); fill: none; stroke: var(--border-hairline); stroke-width: var(--bw-rule); }
+.gdzonemap__ground path { vector-effect: non-scaling-stroke; }
+.gdzonemap__batter { z-index: 1; }
+.gdzonemap__grid { border-color: var(--text-caption); container-type: inline-size; }
+@container (min-width: 132px) { .gdzonemap__cell { font-size: var(--fs-small); } }

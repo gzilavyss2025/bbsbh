@@ -29,11 +29,11 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line
   score's run cells take a keyboard pick mid page-turn (aria-disabled only), as the old running line did.
 - `stage/` is the stage renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage` (slot-index buffer),
-  `StageCanvas` (palette from the `--stage-*` tokens). One fixed overhead base diamond keeps the runners readable; short ball paths
+  `StageCanvas` (palette from the `--stage-*` tokens). One fixed overhead scorebook base diamond keeps the runners readable; short ball paths
   precede runner advances and a settled result. No close-up windup/swing or celebration belongs in this renderer.
   Sprite targets use the global PlayerLink hover card and track the painted figures without React updates per frame;
   `actors.js` reads defense and substitutions only inside a SealBox with the existing step/sub-step clamp.
-  Its surround uses the page's cream canvas. The batting view uses a shared zone-width scale for the foreground sprite, zone grid, SVG plate and nearby base diamond; short frames crop the foreground batter while the zone stays readable; the fixed overhead mini-map sits opposite the batter (left for a left-handed hitter, right for a right-handed hitter) and shows only the batter and runners; no photo or color wash.
+  Its surround uses the page's cream canvas. The batting view uses a shared zone-width scale for the foreground sprite, chest-to-knee zone, foreshortened plate and nearby base diamond; light batter’s-box lines establish the ground plane, the plate matches the zone width, and short frames can crop the bat while the zone stays readable; the fixed overhead mini-map sits opposite the batter (left for a left-handed hitter, right for a right-handed hitter) and shows only the batter and runners; navy basepaths and outlined paper bags replace the turf. `stage/art/players.js` prepares the illustrated batter and runner atlases in the batting club’s MLB/MiLB colors once per palette; their painted positions still drive the PlayerLink targets. No photo or color wash.
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its

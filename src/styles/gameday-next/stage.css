@@ -1,15 +1,17 @@
 /* ==== GAMEDAY's stage canvas (screens/gameday/next/stage/) ====
    A pixel buffer scaled by a whole number: square pixels, no smoothing. */
 .gdstageScene { position: absolute; inset: 0; background: var(--bg-canvas); }
+/* One unit ties the player's anatomy, elevated zone and ground plane together. */
 .gdnext__slot--stage { container-type: size;
-  --gd-zone-w: clamp(108px, min(24cqw, 42cqh), 180px);
-  --gd-zone-h: calc(var(--gd-zone-w) * 1.18);
-  --gd-figure-h: calc(var(--gd-zone-w) * 3);
-  --gd-map-w: clamp(80px, min(23cqw, 40cqh), 150px); }
-.gdstage { position: absolute; top: 8%; right: max(var(--space-2), calc(50% - var(--gd-zone-w) / 2 - var(--gd-map-w) - var(--space-4))); width: var(--gd-map-w); height: var(--gd-map-w); display: flex; align-items: center; justify-content: center; overflow: hidden;
+  --gd-zone-w: clamp(104px, min(30cqw, 39cqh), 190px);
+  --gd-zone-h: calc(var(--gd-zone-w) * 1.1);
+  --gd-figure-h: calc(var(--gd-zone-w) * 2.7);
+  --gd-ground: max(var(--space-3), 3cqh);
+  --gd-map-w: clamp(128px, min(30cqw, 44cqh), 196px);
+  --gd-map-edge: max(var(--space-2), calc(50% - var(--gd-zone-w) * .68 - var(--gd-map-w))); }
+.gdstage { position: absolute; top: 10%; right: var(--gd-map-edge); width: var(--gd-map-w); height: var(--gd-map-w); display: flex; align-items: center; justify-content: center; overflow: hidden;
   z-index: 3; }
-
-.gdstageScene[data-batter-side='L'] .gdstage { left: max(var(--space-2), calc(50% - var(--gd-zone-w) / 2 - var(--gd-map-w) - var(--space-4))); right: auto; }
+.gdstageScene[data-batter-side='L'] .gdstage { left: var(--gd-map-edge); right: auto; }
 .gdstage__canvas { flex: none; image-rendering: pixelated; }
 /* The SealBox around the revealed play adds no box: the canvas fills the slot. The checkpoint's own
    SealBox, nested in the stage's after a revealed third out, adds none either: as a box it grew to

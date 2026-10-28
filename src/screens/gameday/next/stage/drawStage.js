@@ -1,12 +1,12 @@
-// One fixed overhead field at every point in a play. Coordinates are in feet; height never
+// One fixed overhead base diagram at every point in a play. Coordinates are in feet; height never
 // shifts the camera or the ball's ground position. The only paths are the ball's short trail.
 import { BASES, clamp } from './scene.js'
 import { KIT, S, newBuf, put, rect, sprite } from './pixels.js'
 
 export const stageScale = (W) => Math.max(1, Math.round(W / 480))
 
-// Small shaded figures: cream cloth, navy equipment, gold piping and brown leather,
-// echoing #2675's material separation without depending on its celebration atlases.
+// Small code-drawn fallback figures for artwork decode failures. The normal view
+// paints the prepared illustrated atlas after this buffer (art/players.js).
 const STAND = [
   '......hhh......', '.....hHHHh.....', '.....hHHTH.....', '......Fff......',
   '......Ff.......', '....jJJJJj.....', '...sjJJTJjs....', '...sjJJTJjs....',
@@ -40,7 +40,7 @@ function line(b, a, c, slot) {
 // Framing depends only on slot size, never a revealed result.
 export function fieldFrame(wall, w, h) {
   const fence = ['home', '1B', '2B', '3B'].map((key) => BASES[key])
-  const left = -95, right = 95, top = 185, bottom = -40
+  const left = -90, right = 90, top = 185, bottom = -35
   const k = Math.max(0.001, Math.min((w - 20) / (right - left), (h - 20) / (top - bottom)))
   const x0 = (w - (right - left) * k) / 2, y0 = (h - (top - bottom) * k) / 2
   const project = (p) => [x0 + (p[0] - left) * k, y0 + (top - p[1]) * k]
@@ -51,22 +51,24 @@ export function fieldFrame(wall, w, h) {
 function background(wall, w, h) {
   const fb = newBuf(w, h), frame = fieldFrame(wall, w, h), P = frame.project
   fb.px.fill(S.overheadNight)
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const [wx, wy] = frame.world(x, y)
-    const edge = Math.abs(wx) + Math.abs(wy - BASES['1B'][1])
-    if (edge > BASES['1B'][1] + 10) continue
-    const path = edge > BASES['1B'][1] - 10
-    const stripe = Math.floor(wy / 24) & 1
-    const slot = path ? S.overheadClay : stripe ? S.overheadTurfLit : S.overheadTurf
-    fb.px[y * w + x] = slot
-  }
-  const home = P(BASES.home), fence = frame.fence.map(P)
-  line(fb, home, fence[0], S.overheadGold)
-  for (let i = 1; i < fence.length; i++) line(fb, fence[i - 1], fence[i], S.overheadGold)
-  line(fb, fence.at(-1), home, S.overheadGold)
+  // A scorebook diagram: pencil basepaths, navy-edged bags, paper between them.
   const bags = ['home', '1B', '2B', '3B', 'home'].map((key) => P(BASES[key]))
-  for (let i = 1; i < bags.length; i++) line(fb, bags[i - 1], bags[i], S.overheadCloth)
-  for (const bag of bags.slice(0, 4)) rect(fb, Math.round(bag[0]) - 1, Math.round(bag[1]) - 1, 3, 3, S.chalk)
+  for (let i = 1; i < bags.length; i++) line(fb, bags[i - 1], bags[i], S.overheadEquipment)
+  for (const [index, bag] of bags.slice(0, 4).entries()) {
+    const [x, y] = bag.map(Math.round)
+    if (index === 0) {
+      for (let dy = -3; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+        if (dy > 0 && Math.abs(dx) > 4 - dy) continue
+        const edge = dy === -3 || Math.abs(dx) === (dy > 0 ? 4 - dy : 4)
+        put(fb, x + dx, y + dy, edge ? S.outline : S.chalk)
+      }
+    } else {
+      for (let dy = -5; dy <= 5; dy++) for (let dx = -5; dx <= 5; dx++) {
+        const edge = Math.abs(dx) + Math.abs(dy)
+        if (edge <= 5) put(fb, x + dx, y + dy, edge === 5 ? S.outline : S.chalk)
+      }
+    }
+  }
   return { fb, frame }
 }
 
@@ -79,23 +81,22 @@ function cacheOf(wall, w, h) {
   return next
 }
 
-export function drawStage(st, w, h) {
+export function drawStage(st, w, h, paintFigures = true) {
   const K = cacheOf(st.play.wall, w, h), fb = K.out, P = K.frame.project
   fb.px.set(K.fb.px)
   const frame = Math.floor(st.t / 0.1) & 1, people = []
-  const person = (key, p, moving, kit, flip = false) => people.push({ key, p, kit, flip, rows: moving ? MINI[frame ? 'run1' : 'run0'] : MINI.stand })
+  const person = (key, p, moving, kit, flip = false) => people.push({ key, p, kit, flip, pose: moving ? (frame ? 2 : 1) : 0, rows: moving ? MINI[frame ? 'run1' : 'run0'] : MINI.stand })
   if (!st.play.runners.some((r) => r.start == null)) person('batter', [st.play.batter === 'L' ? 32 : -32, -5, 0], false, RUNNER_KIT)
   st.runners.forEach((r, i) => { if (!r.gone) person('runner:' + i, r.pos, r.moving, RUNNER_KIT, r.pos[0] < 0) })
   people.sort((a, b) => b.p[1] - a.p[1])
   fb.sprites = []
   for (const m of people) {
     const [x, y] = P(m.p)
-    rect(fb, Math.round(x) - 4, Math.round(y), 9, 2, S.shadow)
-    sprite(fb, m.rows, x, y, m.kit, m.flip)
-    fb.sprites.push({ key: m.key, x, y: y - m.rows.length / 2 })
+    if (paintFigures) sprite(fb, m.rows, x, y, m.kit, m.flip)
+    fb.sprites.push({ key: m.key, x, y: y - m.rows.length / 2, feet: y, pose: m.pose, flip: m.flip })
   }
   // At most three trailing pixels. No full-flight arc, scrolling chase, burst or celebration.
-  const ball = st.ballPos ?? st.pitchPos
+  const ball = st.phase === 'chase' ? st.ballPos : st.pitchPos
   const toScreen = (p) => P(p).map((v, i) => clamp(v, 4, (i ? h : w) - 5))
   if (ball) {
     if (st.phase === 'chase') {
