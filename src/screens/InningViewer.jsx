@@ -28,7 +28,7 @@ import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCallou
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
-import { CAUGHT_UP, caughtUpAdvance, nextSub, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { CAUGHT_UP, caughtUpAdvance, nextSub, openingChangeHeld, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -293,7 +293,7 @@ export function InningViewer({
         vsTeam={vsTeam}
         treatment={winProbTreatment}
         highlights={highlights}
-        atBatCountFor={atBatCountFor}
+        atBatCountFor={engineCountFor}
         halfInProgress={idx === liveHalfIdx}
         windowed={presentationOnly || focus.windowed}
         focusStep={presentationOnly ? 0 : focus.step}
@@ -361,6 +361,9 @@ export function InningViewer({
   // reveal frontier — RollingLine and direct links both let a user jump
   // straight to any unlocked half.
   const curAtBatCount = atBatCountFor(effInning, effHalf)
+  // What the engine and the panels may show: the stored count, moved to the sub-step's own
+  // substitutions (stepCapAt: a change shows on its own tap, never with the result before it).
+  const engineCountFor = (inning, half) => stepCapAt(feed, inning, half, atBatCountFor(inning, half), subFor(inning, half))
   // What the NEXT "reveal next at-bat" tap should pass to revealAtBat — null
   // until HalfInning/PlayByPlay has actually computed the half's entries
   // (nothing to report before the first tap, which just starts at 1).
@@ -554,8 +557,9 @@ export function InningViewer({
         panels={{
           feed, meta, regulation, unlocked: renderUnlocked, mark: renderRevealedThrough, runsInProgress, curIdx,
           onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
-          inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : curAtBatCount,
+          inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : engineCountFor(effInning, effHalf),
           pitcherId: curLiveState?.midHalfPitcherId ?? null, treatment: winProbTreatment,
+          openingHeld: currentSealed && openingChangeHeld(feed, effInning, effHalf, curAtBatCount, curSub),
         }}
         checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
         engine={pageTurn}

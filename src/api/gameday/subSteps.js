@@ -102,7 +102,8 @@ export function subSteps(feed, card) {
 // atBatCountFor), its play, its sub-steps, and the at-bat cards already on screen (`done`, built
 // with the cut, so no later play writes onto them). The step bounds are PlayByPlay's own: a first
 // tap's cap snaps forward to the first at-bat (its effectiveCap), and the step runs to
-// nextStepBoundary. Null when no at-bat is left in the feed. Built once per feed object, half and
+// nextStepBoundary. `entries` is the half's feed built to the step's end (kinds and order, for
+// stepCapAt). Null when no at-bat is left in the feed. Built once per feed object, half and
 // count (ADR-0007): the tap, the hero, the event card and the stage all ask on one render.
 const built = new WeakMap()
 export function openAtBat(feed, inning, half, count) {
@@ -123,7 +124,13 @@ function build(feed, inning, half, count) {
   if (!card) return null
   const play = (feed?.liveData?.plays?.allPlays ?? []).find((p) => p.about?.atBatIndex === card.atBatIndex)
   const done = (from > count ? computeHalfInningFeed(feed, inning, half, side, from) : raw).slice(0, from).filter((c) => c.kind === 'atbat')
-  return { card, play, steps: subSteps(feed, card), done, runnerOf: (id) => runnerCard(done, step.slice(0, end), id) }
+  return { card, play, steps: subSteps(feed, card), done, entries: step, runnerOf: (id) => runnerCard(done, step.slice(0, end), id) }
+}
+
+// Where a half's first step ends: the first at-bat and the notes trailing it (nextStepBoundary). The
+// half's first tap stores 1 and means this; steps/subStep.js stepCapAt measures from it. An index only.
+export function firstStepEnd(feed, inning, half) {
+  return nextStepBoundary(computeHalfInningFeed(feed, inning, half, battingSideOf(half), 0), 0)
 }
 
 // A runner's own box: his latest plate appearance on screen (a man who batted around has two), found

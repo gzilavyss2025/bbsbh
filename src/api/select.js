@@ -731,9 +731,11 @@ export function selectHalfStartingPitcher(feed, inning, half, revealedThrough = 
 // innings of a live game, when the half has no play yet): the half's own first pitcher, else the
 // club's last pitcher from its previous half (inning - 1, same half: a club pitches every other
 // half), else the probable starter before the game's first pitch. Same reach as the starter's.
-export function selectMoundPitcher(feed, inning, half, revealedThrough = Infinity) {
+// `opening: false` skips the half's own first pitcher while Gameday holds a half-opening change to
+// its sub-step (steps/subStep.js openingChangeHeld): the previous man stands in until it.
+export function selectMoundPitcher(feed, inning, half, revealedThrough = Infinity, { opening: useOpening = true } = {}) {
   if (halfIndex(inning, half) > revealedThrough + 1) return null
-  const opening = derivedHalfStartingPitcherId(feed, inning, half, revealedThrough)
+  const opening = useOpening ? derivedHalfStartingPitcherId(feed, inning, half, revealedThrough) : null
   if (opening != null) return pitcherCard(feed, opening)
   const before = (feed?.liveData?.plays?.allPlays ?? []).findLast(
     (p) => p?.about?.inning === inning - 1 && p?.about?.halfInning === half,

@@ -11,7 +11,7 @@ import { GamedayStage, restBatter, restZones } from './GamedayStage.js'
 import { GamedayPlayCanvas } from '../cutscene/integration/GamedayPlayCanvas.jsx'
 import { battingSide } from './battingSide.js'
 import { wallFn } from './scene.js'
-import { stageKey } from '../steps/subStep.js'
+import { openingChangeHeld, stageKey } from '../steps/subStep.js'
 import { disarm, ended, replay, rest, saw, tap } from './tapRule.js'
 import { checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoint } from '../cutscene/integration/checkpointGate.js'
 
@@ -57,7 +57,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
 
   // The pitcher on the mound at the cursor: the revealed change, else the half's opener (caller-gated
   // to the half reached, select.js). Hands are pre-game player data.
-  const pitcherId = batter ? reliever ?? selectMoundPitcher(feed, inning, half, mark)?.id : null
+  const pitcherId = batter ? reliever ?? selectMoundPitcher(feed, inning, half, mark, { opening: !(open && openingChangeHeld(feed, inning, half, open.count, open.sub)) })?.id : null
   const hand = (id, k) => gd?.players?.[`ID${id}`]?.[k]?.code
   const stage = feed ? (
     <>

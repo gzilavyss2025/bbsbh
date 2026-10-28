@@ -266,6 +266,11 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           kind: 'event',
           eventType: et,
           midAtBat: pitchInPlay,
+          // Where it sits in the feed: Gameday matches a change to its own sub-step by these
+          // (steps/subStep.js stepCapAt), so the engine reveals it on that tap. Not `atBatIndex`:
+          // that names an at-bat card, and readers find cards by it.
+          fromAtBat: play.about?.atBatIndex ?? null,
+          eventIndex: e.index ?? evIndex,
           text,
           playerId: e.player?.id ?? null,
           position:
@@ -286,6 +291,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           kind: 'event',
           eventType: 'pinch_running',
           midAtBat: pitchInPlay,
+          fromAtBat: play.about?.atBatIndex ?? null,
+          eventIndex: e.index ?? evIndex,
           pinchId: e.player?.id ?? null,
           replacedId: e.replacedPlayer?.id ?? null,
           base: e.base ?? null,
@@ -331,6 +338,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           kind: 'event',
           eventType: 'pinch_hitting',
           midAtBat: pitchInPlay,
+          fromAtBat: play.about?.atBatIndex ?? null,
+          eventIndex: e.index ?? evIndex,
           playerId: e.player.id,
           text,
           segments: linkifyNames(text, nameIndex),

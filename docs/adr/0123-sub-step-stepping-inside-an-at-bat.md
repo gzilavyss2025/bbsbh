@@ -142,3 +142,21 @@ A runner thrown out on a pickoff mid-at-bat in a live game (gamePk 824951 was na
 pickoff caught stealing; not re-read here), a balk, and a disengagement violation (gamePk
 824951 has one, an `action` event: *inference*, it is a baserunning event and gets a tap).
 Pickoff ATTEMPTS that retire nobody: *inference*, they are not stops.
+
+## Amendment, 2026-10-28: a substitution is its own step
+
+Gary, watching 849803 live: a substitution (a pitching change, a defensive change, a pinch hitter,
+a pinch runner) shows on its own sub-step, and nothing names the new man before that tap.
+
+- ADR-0016's trailing sweep still decides the STORED count, so the scorecard and every cursor keep
+  their meaning. Gameday moves only the cap its hidden engine and panels read:
+  `steps/subStep.js` `stepCapAt` stops before a change of the open at-bat the reader has not reached
+  by `sub`, and runs past a mid-at-bat one they have. Change entries carry `fromAtBat` and
+  `eventIndex` (`halfInningFeed.js`) so each matches its own sub-step exactly.
+- The half's first tap stores 1; `stepCapAt` applies PlayByPlay's first-step snap to the count
+  itself, and PlayByPlay's own snap now only guarantees the first at-bat card.
+- A half-opening pitching change is no entry (the engine names the half's first pitcher):
+  `openingChangeHeld` keeps the club's previous pitcher on the rail and the rest frame until its
+  sub-step (`selectMoundPitcher`'s `opening: false`).
+- `HalfInning`'s live snapshot now carries `midHalfPitcherId`; before, it was dropped, and the
+  Pitcher rail and the stage named the half's starter through every mid-half change.
