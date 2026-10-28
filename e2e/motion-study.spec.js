@@ -15,7 +15,7 @@ const BASE = `/${MMDDYYYY}/milstl-2`
 const animName = (loc, pseudo) =>
   loc.evaluate((el, ps) => getComputedStyle(el, ps || null).animationName, pseudo)
 
-test('#980 the batting order staggers in once, and the roster does not', async ({ page }) => {
+test('#980 the batting order staggers in once, and the bench does not', async ({ page }) => {
   await installMockApi(page)
   await page.goto(`${BASE}/lineup1`)
   await expect(page.locator('.lord__item').first()).toBeVisible()
@@ -36,9 +36,17 @@ test('#980 the batting order staggers in once, and the roster does not', async (
   const still = await rows.first().evaluate((el) => el.getAnimations().length)
   expect(still, 'the cascade must not loop').toBe(0)
 
-  // The 40-man roster is deliberately left out of it.
-  const roster = page.locator('.roster__row').first()
-  if (await roster.count()) expect(await animName(roster)).toBe('none')
+  // The bench list under the order is deliberately left out of it. The anchor
+  // game posts no bench, so this reads the sheet rather than a row: no rule that
+  // names a bench row may set an animation.
+  const benchAnims = await page.evaluate(() => {
+    const walk = (rules) => [...rules].flatMap((r) => [r, ...(r.cssRules ? walk(r.cssRules) : [])])
+    return [...document.styleSheets]
+      .flatMap((s) => { try { return walk(s.cssRules) } catch { return [] } })
+      .filter((r) => r.selectorText?.includes('lord__bench') && (r.style.animationName || r.style.animation))
+      .map((r) => r.selectorText)
+  })
+  expect(benchAnims, 'no bench row animates').toEqual([])
 })
 
 // #982 (the half writing itself when laid out stacked), its read-back twin and
