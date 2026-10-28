@@ -118,9 +118,9 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // leading event note rather than a plate-appearance card, that tap would
   // otherwise strand the note alone with no batter, unlike every later tap
   // (which always bundles a leading note forward via nextStepBoundary — see
-  // its own doc). Snap the effective cap forward to the first genuine at-bat
-  // boundary so a fresh half's first tap behaves the same as every later one.
-  const effectiveCap = stepping ? Math.max(stepCap, nextStepBoundary(rawEntries, 0)) : stepCap
+  // its own doc). Snap the cap forward past the first at-bat card only: Gameday's
+  // stepCapAt (steps/subStep.js) snaps the count itself and may hold a change back.
+  const effectiveCap = stepping ? Math.max(stepCap, rawEntries.findIndex((e) => e.kind === 'atbat') + 1) : stepCap
   // entries.push is unconditional in computeHalfInningFeed regardless of
   // stepCap — stepCap only gates RETROACTIVE writes onto already-pushed
   // entries (the `visible` check) — so rawEntries' entry KINDS/order above are

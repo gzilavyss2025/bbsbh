@@ -141,7 +141,7 @@ function BattingOrder({ ctx }) {
   const club = ctx.meta?.[side] ?? {}
   const band = bandPaint({ teamId: club.id, side, treatment: ctx.treatment })
   // The pitcher the batter at the top faces (the Arm panel's own read), for his Scout row.
-  const up = ctx.pitcherId ?? selectMoundPitcher(ctx.feed, ctx.inning, ctx.half, ctx.mark)?.id ?? null
+  const up = ctx.pitcherId ?? selectMoundPitcher(ctx.feed, ctx.inning, ctx.half, ctx.mark, { opening: !ctx.openingHeld })?.id ?? null
   return (
     <>
       {/* The batting club's own band, as the lineup page's cards wear it (ADR-0030). */}
@@ -224,7 +224,8 @@ function Arm({ ctx }) {
   const side = battingSideOf(half) === 'away' ? 'home' : 'away'
   const idx = halfIndex(inning, half)
   if (idx > mark + 1) return <p className="gdp__sealed">Sealed</p>
-  const pitcher = (pitcherId != null && moundPitcher(feed, pitcherId)) || selectMoundPitcher(feed, inning, half, mark)
+  // A half-opening change shows on its own sub-step: until then the club's previous man (openingHeld).
+  const pitcher = (pitcherId != null && moundPitcher(feed, pitcherId)) || selectMoundPitcher(feed, inning, half, mark, { opening: !ctx.openingHeld })
   if (!pitcher) return null
   const club = meta?.[side] ?? {}
   // His line for the game as of the step: each at-bat the reader reveals lands in it (dayLine.js clamps it).

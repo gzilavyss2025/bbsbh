@@ -42,3 +42,12 @@ test('glyphD draws a path per family shape and falls back to the hexagon for an 
   }
   assert.equal(glyphD('blob', 7), glyphD('hexagon', 7))
 })
+
+// Gameday's Pitcher rail and stage read the revealed mid-half change by id (2026-10-28: Kevin Kelly
+// for Griffin Jax, 849803 top 5th, never reached the rail). A snapshot that moves only that id must
+// replace the stored one.
+test('sameLiveState sees the mid-half pitcher, so a revealed change is never swallowed', () => {
+  const before = { inning: 5, half: 'top', outs: 0, bases: {}, midHalfPitcherId: null }
+  assert.equal(sameLiveState(before, { ...before }), true)
+  assert.equal(sameLiveState(before, { ...before, midHalfPitcherId: 687330 }), false)
+})

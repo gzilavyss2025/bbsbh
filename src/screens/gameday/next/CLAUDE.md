@@ -52,6 +52,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   (`bbsbh:pitchmode:{gamePk}`), the words, `nextSub` (read at the tap; it returns a count only) and the
   stage's key; the cursor is `useRevealProgress`'s `{halfIdx}:{count}:{sub}`. The hero's open box and
   `eventCardMarkup.js` (the stage's lower third) read `openAtBat` inside a `SealBox` reveal function, up to `sub`.
+  A substitution is its own sub-step: the engine and panels read `stepCapAt`'s cap, not the stored count (ADR-0123's 2026-10-28 amendment).
 - `cutscene/ballpark/` is the big-play celebration, a sprite system (the code-drawn kit from #2673 was
   removed in the #2676 stack: the sprites replace it), also inspected at `/animation-lab#ballpark`:
   separate character atlases, stadium, palette preparation and finite choreography. `cutscene/integration/`

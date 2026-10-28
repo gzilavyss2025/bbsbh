@@ -326,8 +326,11 @@ export function HalfInning({
     }
     // The 3rd out is revealed and the reader has not navigated on: see liveAtThirdOut.
     const last = live?.last ?? null // Gameday's hero keeps the last result
-    if (outs >= 3) return { ...liveAtThirdOut({ batter, pitcher, inning, half }), last }
-    return { bases, outs, batter, pitcher, inning, half, last }
+    // Gameday's Pitcher rail and stage read the revealed mid-half change by id (InningViewer's
+    // panels, GamedayNextMount's `reliever`); dropped here, the rail named the starter all half.
+    const midHalfPitcherId = live?.midHalfPitcherId ?? null
+    if (outs >= 3) return { ...liveAtThirdOut({ batter, pitcher, inning, half }), last, midHalfPitcherId }
+    return { bases, outs, batter, pitcher, inning, half, last, midHalfPitcherId }
   }
 
   // The entering-state fallback: fires once (and again on any dep change)

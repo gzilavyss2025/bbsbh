@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react'
-import { openAtBat } from '../../../../api/gameday/subSteps.js'
+import { firstStepEnd, openAtBat } from '../../../../api/gameday/subSteps.js'
 import { localStore } from '../../../../lib/account/localStore.js'
 
 // Sub-step stepping (ADR-0123; #2570 pitch mode, #2571 event taps). Indexes and a flag only: the
@@ -57,6 +57,45 @@ export function subTap(steps, sub, pitch, live = false) {
 export function nextSub(feed, inning, half, count, sub, pitch) {
   const o = openAtBat(feed, inning, half, count)
   return o ? subTap(o.steps, sub, pitch, o.card.live === true) : null
+}
+
+// The engine's cap for the half on screen, given the sub-step (Gary, 2026-10-28: a substitution is
+// its own step). The stored count follows nextStepBoundary, whose trailing sweep (ADR-0016) puts a
+// change made between batters under the PREVIOUS batter's result tap; the open at-bat then lists
+// it again as its first sub-step. So the cap stops before any change of the open at-bat the reader
+// has not reached by `sub` (the band, the Pitcher rail and Due up keep the old man until that tap),
+// and runs past a mid-at-bat one they have (it leads the step, so the count alone waits for the
+// result). An index only; nothing else moves. Same reach as nextSub.
+const SUBSTITUTIONS = new Set(['pitching_substitution', 'defensive_substitution', 'defensive_switch', 'pinch_hitting', 'pinch_running'])
+export function stepCapAt(feed, inning, half, count, sub) {
+  if (count === 0) return 0
+  const floor = Math.max(count, firstStepEnd(feed, inning, half))
+  const o = openAtBat(feed, inning, half, count)
+  if (!o) return floor
+  const reached = new Set(o.steps.slice(0, sub).filter((s) => s.kind === 'change').map((s) => s.index))
+  const own = (e) => e.kind === 'event' && SUBSTITUTIONS.has(e.eventType) && e.fromAtBat === o.card.atBatIndex
+  const card = o.entries.findIndex((e) => e.kind === 'atbat' && e.atBatIndex === o.card.atBatIndex)
+  // The half's first tap stores 1, and the step it means runs to the first boundary (PlayByPlay
+  // snapped to it): measure from there, so only an unreached change comes off it.
+  let cap = floor
+  for (let i = 0; i < card; i++) {
+    const e = o.entries[i]
+    if (!own(e)) continue
+    if (!reached.has(e.eventIndex)) return Math.min(cap, i)
+    if (i >= cap) cap = i + 1
+  }
+  return cap
+}
+
+// The half's OPENING pitching change (before its first pitch) is no entry: the engine names the
+// half's first pitcher at once (selectHalfStartingPitcher). Gameday holds it to its own sub-step like
+// any other change: true while the reader is inside the half's first at-bat (count 0) and short of
+// that change's sub-step, so the rail and the rest frame keep the club's previous pitcher.
+export function openingChangeHeld(feed, inning, half, count, sub) {
+  if (count !== 0) return false
+  const steps = openAtBat(feed, inning, half, 0)?.steps ?? []
+  const k = steps.findIndex((s) => s.kind !== 'change' || s.eventType === 'pitching_substitution')
+  return k >= 0 && steps[k].kind === 'change' && sub <= k
 }
 
 // The stage's key for what the cursor shows: a sub-step ({ count, sub, last }) inside the open
