@@ -13,7 +13,9 @@ export const ordinal = (n) => ORD[n] ?? ''
 export function splitCode(code, kind) {
   // An at-bat cut short by the half's last out on the bases (CS →): nothing in the box, the play in the diamond.
   if (kind === 'interrupted') return { box: '', mid: code }
-  if (kind !== 'out' || !code || code === 'K') return { box: code, mid: '' }
+  // A strikeout reads SO in the box and its K in the diamond (Gary, 2026-10-28).
+  if (code === 'K') return { box: 'SO', mid: 'K' }
+  if (kind !== 'out' || !code) return { box: code, mid: '' }
   const [head, chain] = code.includes('\n') ? code.split('\n') : [null, code]
   if (head) return { box: head, mid: chain }
   const sac = /^(SAC|SF)\s*(.*)$/.exec(code)

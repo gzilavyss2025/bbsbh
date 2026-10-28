@@ -13,7 +13,76 @@ import { useTier } from './useTier.js'
 // Blocks a panel fills; a stage or hero slot with nothing to draw yet shows its name.
 const PANELLED = new Set(['navigator', 'trail', 'battingOrder', 'reference', 'arm', 'eventLog'])
 
-export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pitch, onBoxScore, onScorecard, lineups, slateHref, notices = [], refresh }) {
+// A rail tab rides its edge where the reader last left it (Gary, 2026-10-28): press and hold, then
+// drag it up or down between the band and the bar; a plain tap still opens the rail. The spot is a
+// share of the frame's height, kept per side.
+const HOLD_MS = 350
+const tabKey = (side) => `bbsbh:gdrailtab:${side}`
+function readTabTop(side) {
+  try {
+    const v = Number(localStorage.getItem(tabKey(side)))
+    return v > 0 && v < 100 ? v : null
+  } catch { return null }
+}
+function useTabDrag(side) {
+  const [top, setTop] = useState(() => readTabTop(side))
+  const [lifted, setLifted] = useState(false)
+  const drag = useRef(null)
+  const dragged = useRef(false)
+  const end = (e) => {
+    const d = drag.current
+    drag.current = null
+    if (!d) return
+    clearTimeout(d.timer)
+    if (!d.lifted) return
+    e.stopPropagation()
+    setLifted(false)
+    dragged.current = true
+    try { localStorage.setItem(tabKey(side), String(d.pct)) } catch { /* private mode: the spot lasts the visit */ }
+  }
+  const handlers = {
+    onPointerDown: (e) => {
+      const el = e.currentTarget
+      const d = { id: e.pointerId, x: e.clientX, y: e.clientY, lifted: false }
+      d.timer = setTimeout(() => {
+        const frame = el.offsetParent
+        const band = frame?.querySelector('.gdnext__band'), bar = frame?.querySelector('.gdnext__bar')
+        if (!frame || !band || !bar) return
+        d.lifted = true
+        d.h = frame.clientHeight
+        d.start = el.offsetTop
+        d.min = band.offsetTop + band.offsetHeight
+        d.max = bar.offsetTop - el.offsetHeight
+        d.pct = (d.start / d.h) * 100
+        try { el.setPointerCapture(d.id) } catch { /* the drag still follows while over the tab */ }
+        setLifted(true)
+      }, HOLD_MS)
+      drag.current = d
+    },
+    onPointerMove: (e) => {
+      const d = drag.current
+      if (!d) return
+      if (!d.lifted) {
+        if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 8) { clearTimeout(d.timer); drag.current = null }
+        return
+      }
+      d.pct = (Math.min(d.max, Math.max(d.min, d.start + e.clientY - d.y)) / d.h) * 100
+      setTop(d.pct)
+    },
+    onPointerUp: end,
+    onPointerCancel: end,
+    onContextMenu: (e) => e.preventDefault(),
+  }
+  // The click that ends a drag opens nothing.
+  const tapped = () => {
+    if (!dragged.current) return true
+    dragged.current = false
+    return false
+  }
+  return { style: top != null ? { top: `${top}%` } : undefined, lifted, handlers, tapped }
+}
+
+export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pitch, onBoxScore, onScorecard, lineups, slateHref, notices = [], refresh, pregame }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
   // The defense (the Reference block) is a drawer from the right where the window is wide enough
@@ -49,6 +118,7 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
   // reader keeps its place.
   const tabLeft = useRef(null), tabRight = useRef(null), railLeft = useRef(null), railRight = useRef(null)
   const lastRail = useRef(null)
+  const dragLeft = useTabDrag('left'), dragRight = useTabDrag('right')
   useEffect(() => {
     const tabRef = { left: tabLeft, right: tabRight }, railRef = { left: railLeft, right: railRight }
     if (rail) {
@@ -84,6 +154,8 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
     if (Math.abs(dx) < 48 || Math.abs(dx) < 2 * Math.abs(dy)) return
     setRail((r) => (r ? ((r === 'left') === (dx < 0) ? null : r) : dx > 0 ? 'left' : 'right'))
   }
+  // `pregame` (before the first pitch): the stage introduces the game's starting pitcher (Gary,
+  // 2026-10-28), the pitcher pane's card, which holds no score. The first tap brings the field back.
   // The drawer tiers swap the Reference block for the arm on the mound (the field is the drawer).
   const slots = blocksFor(tier).flatMap((b) => (b === 'band' || b === 'bar' || (drawer && b === 'eventLog') ? [] : drawer && b === 'reference' ? ['arm'] : [b]))
   return (
@@ -98,7 +170,10 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
       </div>
       {slots.map((b) => (
         <section key={b} className={`gdnext__slot gdnext__slot--${b}`} aria-label={BLOCK_LABEL[b]}>
-          {b === 'stage' && stage ? stage : b === 'hero' && hero ? hero : (
+          {b === 'stage' && pregame ? <GamedayPanel block="arm" ctx={panels} /> : b === 'stage' && stage ? stage : b === 'hero' && hero && rails ? (
+            // On the phone the hero's open floor carries the trail, so a tap moves between at-bats (Gary, 2026-10-28).
+            <>{hero}<div className="gdnext__herotrail"><GamedayPanel block="trail" ctx={panels} /></div></>
+          ) : b === 'hero' && hero ? hero : (
             <>
               <GamedayPanel block={b} ctx={panels} />
               {!PANELLED.has(b) && <span className="gdnext__slotname">{BLOCK_LABEL[b]}</span>}
@@ -131,8 +206,8 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
       )}
       {rails && (
         <>
-          <Button ref={tabLeft} size="control" className="gdnext__railtab gdnext__railtab--left" aria-expanded={rail === 'left'} aria-controls="gdnext-rail-left" onClick={() => setRail('left')}>Due up</Button>
-          <Button ref={tabRight} size="control" className="gdnext__railtab gdnext__railtab--right" aria-expanded={rail === 'right'} aria-controls="gdnext-rail-right" onClick={() => setRail('right')}>Pitcher</Button>
+          <Button ref={tabLeft} size="control" className="gdnext__railtab gdnext__railtab--left" style={dragLeft.style} data-lifted={dragLeft.lifted || undefined} {...dragLeft.handlers} aria-expanded={rail === 'left'} aria-controls="gdnext-rail-left" onClick={() => dragLeft.tapped() && setRail('left')}>Due up</Button>
+          <Button ref={tabRight} size="control" className="gdnext__railtab gdnext__railtab--right" style={dragRight.style} data-lifted={dragRight.lifted || undefined} {...dragRight.handlers} aria-expanded={rail === 'right'} aria-controls="gdnext-rail-right" onClick={() => dragRight.tapped() && setRail('right')}>Pitcher</Button>
           {rail && <button type="button" className="gdnext__scrim" aria-label="Close" onClick={() => setRail(null)} />}
           <aside ref={railLeft} tabIndex={-1} id="gdnext-rail-left" className="gdnext__rail gdnext__rail--left" data-open={rail === 'left' || undefined} aria-label="Due up" inert={rail !== 'left'}>
             {seen.left && <div className="gdnext__slot gdnext__slot--battingOrder"><GamedayPanel block="battingOrder" ctx={panels} /></div>}

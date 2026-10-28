@@ -42,7 +42,7 @@
   font-family: var(--font-display); font-size: var(--fs-small); font-weight: var(--w-bold); line-height: var(--lh-solid); color: var(--text-heading); }
 .gdp__chip b { display: flex; align-items: center; padding: 0 var(--space-2); border-right: var(--bw-heavy) solid var(--border-stamped); background: var(--accent-tint);
   font-family: var(--font-mono); font-size: var(--fs-small); }
-.gdp__chip span { display: flex; align-items: center; padding: 0 var(--space-3); }
+.gdp__chip span { text-transform: uppercase; display: flex; align-items: center; padding: 0 var(--space-3); }
 /* A stamped connector between the cards, so they read as one after another: a heavy rule from the last
    card's edge into a solid arrowhead that touches the next card. Drawn, not a font glyph. */
 .gdp__chip + .gdp__chip { position: relative; margin-left: var(--space-4); }
@@ -212,7 +212,6 @@
 .gdp__scoutline { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); color: var(--text-heading); font-variant-numeric: tabular-nums; }
 /* Where the reader is in the half: the at-bat on screen stands up off the strip on a hard ink shadow,
    its name on the marker, and the ones after it sit back. (The chip's ::after is the connector's head.) */
-.gdp__chip.is-here { transform: translateY(calc(-1 * var(--space-1))); box-shadow: 0 var(--space-1) 0 var(--border-stamped); }
 .gdp__chip.is-here span { background: var(--marker); }
 .gdp__chip.is-ahead { opacity: 0.45; }
 /* At L and D the trail starts under the stage (the Due up card takes the left column down to the bar), so

@@ -13,6 +13,8 @@
 
 /* The page switch is the app's Segmented control (system/segmented), across the slot. */
 .gdcp .gdcp__tabs { margin: var(--space-2) var(--space-3) 0; }
+/* The phone's page tabs run short and on one line, so the tally below keeps its room (Gary, 2026-10-28). raw-value-exempt: the short tab */
+.gdcp .gdcp__tabs .segmented__btn { min-height: 28px; height: 28px; padding: 0 var(--space-1); font-size: var(--fs-cell); white-space: nowrap; }
 .gdcp__body { flex: 1; min-height: 0; overflow: hidden; }
 /* layout-exempt: a page's heading over its figures */
 .gdcp__page { display: none; min-width: 0; min-height: 0; flex-direction: column; gap: var(--space-2);
@@ -143,4 +145,9 @@
 .gdcp__dueups b.gdcp__fitname { width: max-content; max-width: none; overflow: visible; text-overflow: clip; transform-origin: left center; }
 /* P: the rail tabs (Due up, Pitcher) sit over the slot's edges at mid-height, where the lines land:
    the table keeps clear of them (one label line, the tab's padding, its border). */
-.gdnext[data-tier='P'] .gdcp__page[data-page='pitching'] .gdpl { padding-inline: calc(var(--fs-label) + 2 * var(--space-2) + var(--space-1)); }
+/* P (Gary, 2026-10-28): the half's table and the game's lines share one inset, the tabs' own margin; the
+   rail tabs drag clear of them. */
+.gdnext[data-tier='P'] .gdcp__page[data-page='pitching'] { padding-inline: var(--space-3); }
+.gdnext[data-tier='P'] .gdcp__page[data-page='pitching'] .gdpl { padding-inline: 0; }
+/* P: no due-up photos, so names and averages fit the short page (Gary, 2026-10-28). */
+.gdnext[data-tier='P'] .gdcp__dueups li > .plink:has(> .shot) { display: none; }

@@ -50,6 +50,7 @@ export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoi
       band={band}
       stage={stage}
       // `here`: the at-bat on screen (a replayed chip, else the hero's), which the trail marks.
+      pregame={(mark ?? -1) < 0 && bug.viewInning === 1 && bug.viewHalf === 'top' && !!open && !open.count && !open.sub}
       panels={{ ...panels, onReplay: staged.onReplay, here: staged.replaying ?? bug.live?.last?.atBatIndex ?? null }}
       hero={hero || null}
       engine={engine}

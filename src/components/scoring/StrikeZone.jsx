@@ -3,6 +3,9 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Button } from '../ui/control/Button.jsx'
 import { EDGE, H, W, sx, sy } from '../../lib/zone/zoneGeometry.js'
+// The catcher's view (Gary, 2026-10-28, replacing ADR-0077's pitcher's view here only): the feed's pX as it
+// comes, +pX (first base) to the RIGHT. zoneGeometry's sx mirrors it for the charts that keep the pitcher's view.
+const catcherX = (px) => sx(-px)
 import { groundBoxes } from '../../lib/zone/ground.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { batterFigureUrls } from '../../api/uniforms.js'
@@ -101,13 +104,13 @@ const ART_W = 496
 const ART_H = 1050
 const ART_ZONE_TOP = 390
 const ART_ZONE_BOTTOM = 700
-// The drawn body's edge nearest the plate, per hand (the opposite stance's art), and how far outside the
+// The drawn body's edge nearest the plate, per hand (his own stance's art), and how far outside the
 // zone's edge it stands.
-const ART_NEAR_EDGE = { R: 56, L: 416 }
+const ART_NEAR_EDGE = { R: 416, L: 56 }
 const FIGURE_GAP = 34
 function BatterFigure({ urls, hand, zone, clipId, onError }) {
   const scale = zone.h / (ART_ZONE_BOTTOM - ART_ZONE_TOP)
-  const x = (hand === 'L' ? zone.left - FIGURE_GAP : zone.right + FIGURE_GAP) - ART_NEAR_EDGE[hand] * scale
+  const x = (hand === 'R' ? zone.left - FIGURE_GAP : zone.right + FIGURE_GAP) - ART_NEAR_EDGE[hand] * scale
   const w = ART_W * scale
   return (
     <g className="strikezone__figure" aria-hidden="true" clipPath={`url(#${clipId})`}>
@@ -143,10 +146,8 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
 // own edges (Gameday's hero sheet, .szmodal--bare).
 export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, framed = true }) {
   const figureAssets = useContext(BattingUniformContext)
-  // The OTHER hand's art, unmirrored: Gameday draws each stance from the catcher's side, so the opposite
-  // stance is this one seen from the pitcher's, with its lettering reading the right way round (mirroring
-  // the batter's own art turned the wordmark backwards).
-  const figureUrls = batterFigureUrls(figureAssets, batSide === 'L' ? 'right' : 'left')
+  // His own stance's art as it comes: Gameday draws each stance from the catcher's side, as this diagram is now.
+  const figureUrls = batterFigureUrls(figureAssets, batSide === 'L' ? 'left' : 'right')
   // A failed load drops to the silhouette; keyed by URL so a new batter retries.
   const [failedUrl, setFailedUrl] = useState(null)
   const clipId = useId()
@@ -159,8 +160,8 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
   // The projection mirrors pX, so +EDGE (the first-base side) is the LEFT edge
   // of the drawn box and -EDGE the right. Reading these two the other way round
   // is a rect with a negative width, which renders as nothing at all.
-  const zx = sx(EDGE)
-  const zr = sx(-EDGE)
+  const zx = catcherX(-EDGE)
+  const zr = catcherX(EDGE)
   const zyT = sy(zt)
   const zyB = sy(zb)
   const zw = zr - zx
@@ -175,7 +176,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
   // the plate and pitch dots keep their usual scale — the whole zone plot
   // just shifts over to make room when the batter's box sits to its left.
   const showBatter = batSide === 'L' || batSide === 'R'
-  const zoneOffsetX = batSide === 'L' ? BATTER_W : 0
+  const zoneOffsetX = batSide === 'R' ? BATTER_W : 0
   const totalW = showBatter ? W + BATTER_W : W
   const useFigure = figureUrls && failedUrl !== figureUrls.jersey
 
@@ -205,7 +206,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
           {useFigure ? (
             <BatterFigure urls={figureUrls} hand={batSide} zone={{ left: zx + zoneOffsetX, right: zr + zoneOffsetX, top: zyT, h: zh }} clipId={clipId} onError={() => setFailedUrl(figureUrls.jersey)} />
           ) : (
-            <BatterSilhouette x={batSide === 'L' ? 0 : W + zoneOffsetX} mirror={batSide === 'L'} />
+            <BatterSilhouette x={batSide === 'R' ? 0 : W + zoneOffsetX} mirror={batSide === 'R'} />
           )}
           {framed && <rect className="strikezone__box" x={0.5 - margin} y={0.5 - margin} width={totalW + 2 * margin - 1} height={H + 2 * margin - 1} />}
         </>
@@ -225,7 +226,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
           points={`${cx - half},${py - 8} ${cx + half},${py - 8} ${cx + half},${py - 2} ${cx},${py + 6} ${cx - half},${py - 2}`}
         />
         {shown.map((p) => {
-          const x = sx(p.px)
+          const x = catcherX(p.px)
           const y = sy(p.pz)
           return (
             <g key={p.no}>

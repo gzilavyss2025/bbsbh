@@ -5,6 +5,7 @@ import { fetchBatterZones } from '../../../../api/gameday/zones.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
 import { resolveBallparkLayout } from '../../../../lib/ballpark/layout/resolveLayout.js'
+import { Button } from '../../../../components/ui/control/Button.jsx'
 import { ZoneCard } from '../zonemap/ZoneCard.jsx'
 import { setZoneMapHidden, zoneMapDismissed } from '../zonemap/zoneMapFlag.js'
 import { GamedayStage, restBatter, restZones } from './GamedayStage.js'
@@ -69,6 +70,10 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
       />}
       {batter && !hidden && !(open?.sub > 0) && (
         <ZoneCard teamId={gd?.teams?.[half === 'top' ? 'away' : 'home']?.id} id={batter.id} name={gd?.players?.[`ID${batter.id}`]?.fullName ?? batter.last} side={battingSide(hand(batter.id, 'batSide'), hand(pitcherId, 'pitchHand'))} zones={zones ?? {}} onDismiss={toggleZones} />
+      )}
+      {/* A dismissed zone map comes back from the stage's corner (Gary, 2026-10-28). */}
+      {batter && hidden && !(open?.sub > 0) && (
+        <Button size="control" className="gdzonemap__show" onClick={toggleZones}>Zones</Button>
       )}
     </>
   ) : null

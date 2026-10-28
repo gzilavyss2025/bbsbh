@@ -181,7 +181,7 @@
   align-items: center;
   gap: 3px;
   padding: 1px var(--space-1);
-  border-radius: var(--radius-pill);
+  border-radius: 0;
   background: color-mix(in srgb, var(--graphite-soft) 16%, var(--surface-card));
   border: var(--bw-hair) solid var(--graphite-soft);
 }
