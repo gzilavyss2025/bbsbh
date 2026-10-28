@@ -15,7 +15,7 @@ import { parkWindow } from '../../../../lib/ballpark/layout/parkWindow.js'
 import { revealInning } from '../../../../api/linescore.js'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { pitcherDayLine } from '../../../../api/gameday/dayLine.js'
-import { halfIndex, selectHalfStartingPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
+import { halfIndex, selectMoundPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
 import { PitcherCard } from '../../../../components/playbyplay/pitcherCard/PitcherCard.jsx'
 import { defenseAt } from '../../../../api/gameday/defense.js'
 import { battingSideOf } from '../../../../api/gameday/stepCut.js'
@@ -141,7 +141,7 @@ function BattingOrder({ ctx }) {
   const club = ctx.meta?.[side] ?? {}
   const band = bandPaint({ teamId: club.id, side, treatment: ctx.treatment })
   // The pitcher the batter at the top faces (the Arm panel's own read), for his Scout row.
-  const up = ctx.pitcherId ?? selectHalfStartingPitcher(ctx.feed, ctx.inning, ctx.half, ctx.mark)?.id ?? null
+  const up = ctx.pitcherId ?? selectMoundPitcher(ctx.feed, ctx.inning, ctx.half, ctx.mark)?.id ?? null
   return (
     <>
       {/* The batting club's own band, as the lineup page's cards wear it (ADR-0030). */}
@@ -224,7 +224,7 @@ function Arm({ ctx }) {
   const side = battingSideOf(half) === 'away' ? 'home' : 'away'
   const idx = halfIndex(inning, half)
   if (idx > mark + 1) return <p className="gdp__sealed">Sealed</p>
-  const pitcher = (pitcherId != null && moundPitcher(feed, pitcherId)) || selectHalfStartingPitcher(feed, inning, half, mark)
+  const pitcher = (pitcherId != null && moundPitcher(feed, pitcherId)) || selectMoundPitcher(feed, inning, half, mark)
   if (!pitcher) return null
   const club = meta?.[side] ?? {}
   // His line for the game as of the step: each at-bat the reader reveals lands in it (dayLine.js clamps it).
