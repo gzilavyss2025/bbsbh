@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import '../../../styles/gameday-next/page.css'
+import { SiteHeader } from '../../../components/chrome/SiteHeader.jsx'
 import { Button } from '../../../components/ui/control/Button.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
 import { blocksFor, menuFor } from '../../../lib/gameday/ladder.js'
@@ -84,7 +85,7 @@ function useTabDrag(side) {
   return { style: top != null ? { top: `${top}%` } : undefined, lifted, handlers, tapped }
 }
 
-export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pitch, onBoxScore, lineups, notices = [], refresh, pregame }) {
+export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine, advance, pitch, onBoxScore, lineups, notices = [], refresh, pregame }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
   // The defense (the Reference block) is a drawer from the right where the window is wide enough
@@ -142,6 +143,7 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(el)
+    if (el.previousElementSibling) ro.observe(el.previousElementSibling)
     return () => ro.disconnect()
   }, [rails])
   // A swipe is a mostly sideways drag of 48px or more that starts off the bar, with the Menu shut:
@@ -163,6 +165,7 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
   const slots = blocksFor(tier).flatMap((b) => (b === 'band' || b === 'bar' || (drawer && b === 'eventLog') ? [] : drawer && b === 'reference' ? ['arm'] : [b]))
   return (
     <div className="gdnext" data-tier={tier} data-rails={rails || undefined} style={railTop != null ? { '--gd-rail-top': `${railTop}px` } : undefined} onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
+      {rails && <header className="gdnext__chrome"><SiteHeader />{sectionNav}</header>}
       {/* A delay or suspension, and a failed refresh, read as a strip under the band; the stage
           row gives up the room, so the frame still never scrolls. */}
       <div className="gdnext__band" ref={bandRef}>

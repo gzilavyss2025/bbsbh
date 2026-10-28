@@ -1,16 +1,30 @@
-// One fixed overhead field at every point in a play. Coordinates are in feet; height never
+// One fixed overhead base diagram at every point in a play. Coordinates are in feet; height never
 // shifts the camera or the ball's ground position. The only paths are the ball's short trail.
-import { BASES, POS, clamp, polar } from './scene.js'
+import { BASES, clamp } from './scene.js'
 import { KIT, S, newBuf, put, rect, sprite } from './pixels.js'
 
 export const stageScale = (W) => Math.max(1, Math.round(W / 480))
 
-// Small shaded figures: cream cloth, navy equipment, gold piping and brown leather,
-// echoing #2675's material separation without depending on its celebration atlases.
+// Small code-drawn fallback figures for artwork decode failures. The normal view
+// paints the prepared illustrated atlas after this buffer (art/players.js).
+const STAND = [
+  '......hhh......', '.....hHHHh.....', '.....hHHTH.....', '......Fff......',
+  '......Ff.......', '....jJJJJj.....', '...sjJJTJjs....', '...sjJJTJjs....',
+  '..ss.jJTJj.ss..', '...s.jJTJj.s...', '.....jJJJj.....', '.....nnnnn.....',
+  '....pPPPPPp....', '....pPP.PPp....', '....pPP.PPp....', '....pPP.PPp....',
+  '....pPP.PPp....', '....pSS.SSp....', '....SSS.SSS....', '...kKKK.KKKk...',
+  '...kKKK.KKKk...',
+]
 const MINI = {
-  stand: ['....hhh....', '...hHHHh...', '...hHHTH...', '....Ff.....', '...jJJJj...', '..BjJTJjs..', '..bJJTJJs..', '...jJJJj...', '....nnn....', '...pPPPp...', '...pP.Pp...', '...pP.Pp...', '...SS.SS...', '..kKK.KKk..'],
-  run0: ['....hhh....', '...hHHHh...', '...hHHTH...', '....Ff.....', '...jJJJjs..', '..BjJTJj...', '..bJJTJJ...', '...jJJJj...', '....nnn....', '...pPPPp...', '..pPP..Pp..', '..pP...Pp..', '..SS...SS..', '.kKK...KKk.'],
-  run1: ['....hhh....', '...hHHHh...', '...hHHTH...', '....Ff.....', '..sjJJJj...', '...jJTJjB..', '...JJTJJb..', '...jJJJj...', '....nnn....', '...pPPPp...', '....pPPp...', '.....pPp...', '.....SS....', '....kKKk...'],
+  stand: STAND,
+  run0: [...STAND.slice(0, 6), '....jJJTJjss...', '...sjJJTJj.....', '..ss.jJTJj.....',
+    '.....jJTJj.....', ...STAND.slice(10, 13), '...pPP..PPp....', '..pPP...PPp....',
+    '..pPP....PPp...', '..SSS.....SS...', '.kKKK.....SS...', '.kKKK....kKKk..',
+    '.........kKKk..', '...............'],
+  run1: [...STAND.slice(0, 6), '...ssjJTJj.....', '.....jJTJjs....', '.....jJTJjss...',
+    '.....jJTJj.....', ...STAND.slice(10, 13), '.....pPP.Pp....', '......pPPPp....',
+    '.......pPPp....', '.......pPPp....', '.......SSS.....', '......kKKK.....',
+    '......kKKK.....', '...............'],
 }
 const FIELD_KIT = { ...KIT.home, H: S.kitNavy, h: S.overheadEquipment, F: S.skin, f: S.skinShade,
   J: S.overheadCloth, j: S.overheadClothShade, T: S.overheadGold, P: S.overheadCloth,
@@ -22,13 +36,11 @@ function line(b, a, c, slot) {
   for (let i = 0; i <= n; i++) put(b, a[0] + dx * i / (n || 1), a[1] + dy * i / (n || 1), slot)
 }
 
-// Framing depends only on the park and slot size, never the revealed result. Fit the entire
-// outline with room behind home, even in a short landscape slot.
+// A stable base diamond, with headroom for the taller runner sprites.
+// Framing depends only on slot size, never a revealed result.
 export function fieldFrame(wall, w, h) {
-  const fence = Array.from({ length: 91 }, (_, i) => { const a = i - 45; return polar(a, wall(a).ft) })
-  const xs = fence.map((p) => p[0]), ys = fence.map((p) => p[1])
-  const left = Math.min(...xs, -90) - 24, right = Math.max(...xs, 90) + 24
-  const top = Math.max(...ys, ...Object.values(POS).map((p) => p[1])) + 24, bottom = -30
+  const fence = ['home', '1B', '2B', '3B'].map((key) => BASES[key])
+  const left = -90, right = 90, top = 185, bottom = -35
   const k = Math.max(0.001, Math.min((w - 20) / (right - left), (h - 20) / (top - bottom)))
   const x0 = (w - (right - left) * k) / 2, y0 = (h - (top - bottom) * k) / 2
   const project = (p) => [x0 + (p[0] - left) * k, y0 + (top - p[1]) * k]
@@ -39,28 +51,24 @@ export function fieldFrame(wall, w, h) {
 function background(wall, w, h) {
   const fb = newBuf(w, h), frame = fieldFrame(wall, w, h), P = frame.project
   fb.px.fill(S.overheadNight)
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const [wx, wy] = frame.world(x, y), distance = Math.hypot(wx, wy)
-    const angle = Math.atan2(wx, wy) * 180 / Math.PI
-    const fair = wy >= 0 && Math.abs(wx) <= wy && distance <= wall(angle).ft
-    if (!fair && distance > 13) continue
-    const noise = ((x * 73 ^ y * 179) >>> 0) % 37
-    const stripe = Math.floor(wy / 32) & 1
-    let slot = noise === 0 ? S.overheadTurfShade : stripe ? S.overheadTurfLit : S.overheadTurf
-    const skin = Math.hypot(wx, wy - 60.5) < 94 && Math.abs(wx) + Math.abs(wy - 63.64) > 48
-    const mound = Math.hypot(wx, wy - 60.5) < 8
-    if (distance < 13 || skin || mound) slot = noise < 3 ? S.overheadClayLit : S.overheadClay
-    fb.px[y * w + x] = slot
-  }
-  const home = P(BASES.home), fence = frame.fence.map(P)
-  line(fb, home, fence[0], S.overheadGold)
-  for (let i = 1; i < fence.length; i++) line(fb, fence[i - 1], fence[i], S.overheadGold)
-  line(fb, fence.at(-1), home, S.overheadGold)
+  // A scorebook diagram: pencil basepaths, navy-edged bags, paper between them.
   const bags = ['home', '1B', '2B', '3B', 'home'].map((key) => P(BASES[key]))
-  for (let i = 1; i < bags.length; i++) line(fb, bags[i - 1], bags[i], S.overheadCloth)
-  for (const bag of bags.slice(0, 4)) rect(fb, Math.round(bag[0]) - 1, Math.round(bag[1]) - 1, 3, 3, S.chalk)
-  const mound = P([0, 60.5, 0])
-  rect(fb, Math.round(mound[0]) - 1, Math.round(mound[1]), 3, 1, S.overheadCloth)
+  for (let i = 1; i < bags.length; i++) line(fb, bags[i - 1], bags[i], S.overheadEquipment)
+  for (const [index, bag] of bags.slice(0, 4).entries()) {
+    const [x, y] = bag.map(Math.round)
+    if (index === 0) {
+      for (let dy = -3; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+        if (dy > 0 && Math.abs(dx) > 4 - dy) continue
+        const edge = dy === -3 || Math.abs(dx) === (dy > 0 ? 4 - dy : 4)
+        put(fb, x + dx, y + dy, edge ? S.outline : S.chalk)
+      }
+    } else {
+      for (let dy = -5; dy <= 5; dy++) for (let dx = -5; dx <= 5; dx++) {
+        const edge = Math.abs(dx) + Math.abs(dy)
+        if (edge <= 5) put(fb, x + dx, y + dy, edge === 5 ? S.outline : S.chalk)
+      }
+    }
+  }
   return { fb, frame }
 }
 
@@ -73,27 +81,22 @@ function cacheOf(wall, w, h) {
   return next
 }
 
-export function drawStage(st, w, h) {
+export function drawStage(st, w, h, paintFigures = true) {
   const K = cacheOf(st.play.wall, w, h), fb = K.out, P = K.frame.project
   fb.px.set(K.fb.px)
   const frame = Math.floor(st.t / 0.1) & 1, people = []
-  const person = (key, p, moving, kit, flip = false) => people.push({ key, p, kit, flip, rows: moving ? MINI[frame ? 'run1' : 'run0'] : MINI.stand })
-  for (const [name, p] of Object.entries(st.fielders)) {
-    const moving = st.phase === 'chase' && Math.hypot(p[0] - POS[name][0], p[1] - POS[name][1]) > 0.5
-    person(name, name === 'C' ? [0, -22, 0] : p, moving, FIELD_KIT)
-  }
+  const person = (key, p, moving, kit, flip = false) => people.push({ key, p, kit, flip, pose: moving ? (frame ? 2 : 1) : 0, rows: moving ? MINI[frame ? 'run1' : 'run0'] : MINI.stand })
   if (!st.play.runners.some((r) => r.start == null)) person('batter', [st.play.batter === 'L' ? 32 : -32, -5, 0], false, RUNNER_KIT)
   st.runners.forEach((r, i) => { if (!r.gone) person('runner:' + i, r.pos, r.moving, RUNNER_KIT, r.pos[0] < 0) })
   people.sort((a, b) => b.p[1] - a.p[1])
   fb.sprites = []
   for (const m of people) {
     const [x, y] = P(m.p)
-    rect(fb, Math.round(x) - 4, Math.round(y), 9, 2, S.shadow)
-    sprite(fb, m.rows, x, y, m.kit, m.flip)
-    fb.sprites.push({ key: m.key, x, y: y - m.rows.length / 2 })
+    if (paintFigures) sprite(fb, m.rows, x, y, m.kit, m.flip)
+    fb.sprites.push({ key: m.key, x, y: y - m.rows.length / 2, feet: y, pose: m.pose, flip: m.flip })
   }
   // At most three trailing pixels. No full-flight arc, scrolling chase, burst or celebration.
-  const ball = st.ballPos ?? st.pitchPos
+  const ball = st.phase === 'chase' ? st.ballPos : st.pitchPos
   const toScreen = (p) => P(p).map((v, i) => clamp(v, 4, (i ? h : w) - 5))
   if (ball) {
     if (st.phase === 'chase') {

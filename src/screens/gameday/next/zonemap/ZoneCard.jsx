@@ -13,10 +13,16 @@ export function ZoneCard({ id, name, teamId, side = 'R', zones, onDismiss }) {
         <IconButton label="Hide the zone map" mark="sm" onClick={onDismiss}>✕</IconButton>
       </div>
       <div className="gdzonemap__plateview">
+        <svg className="gdzonemap__ground" viewBox="0 0 640 120" aria-hidden="true">
+          <path d="M70 12H217L193 108H8ZM423 12H570L632 108H447Z" />
+        </svg>
         <PlayerLink id={id} name={name} className="gdzonemap__batter" ariaLabel={`Batter at the plate: ${name}`}>
           <BatterSprite key={teamId} side={side} teamId={teamId} />
         </PlayerLink>
-        <span className="gdzonemap__plate" aria-hidden="true" />
+        <svg className="gdzonemap__plate" viewBox="0 0 196 60" aria-hidden="true">
+          <path className="gdzonemap__plate-edge" d="M1 4H195V32L98 59L1 32Z" />
+          <path className="gdzonemap__plate-face" d="M1 1H195V29L98 56L1 29Z" />
+        </svg>
         <div className="gdzonemap__grid" aria-label="Batting average by strike zone">
           {Array.from({ length: 9 }, (_, i) => {
             const z = zones[`0${i + 1}`]

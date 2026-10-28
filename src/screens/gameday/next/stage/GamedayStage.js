@@ -36,7 +36,7 @@ function subPlay(feed, inning, half, { count, sub }) {
   return { p: cut, still: false }
 }
 
-function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors }) {
+function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors, mapSide, teamId }) {
   const [start] = useState(() => performance.now())
   const covered = !!checkpoint
   const { play, still, celebration, ending } = useMemo(() => {
@@ -65,8 +65,8 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, on
   const props = playing && !still ? { play, start } : { play, t: still ? 0 : play.end }
   // A finished celebration can play again (tapRule.js replay); a held ending scene leaves Next in charge.
   const replay = celebration && onReplay && !covered ? () => onReplay(idx) : undefined
-  return h('div', { className: 'gdstageScene' },
-    h(StageCanvas, { ...props, actors, celebration, playing, onEnd, onReplay: replay, checkpointHeld: covered && eligible }))
+  return h('div', { className: 'gdstageScene', 'data-batter-side': mapSide ?? play.batter },
+    h(StageCanvas, { ...props, actors, teamId, celebration, playing, onEnd, onReplay: replay, checkpointHeld: covered && eligible }))
 }
 
 // Who stands in at rest: the due-up batter of the half being scored (dueup.js, the pre-pitch lineup),
@@ -82,20 +82,21 @@ export const restZones = (zm, batterId, hidden) => (!hidden && batterId != null 
 
 // At rest the batter stands where he will hit: a switch hitter (S) opposite the pitcher's throwing
 // hand. Both are pre-game player data. A revealed play uses its own matchup.batSide instead.
-function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone, actors }) {
+function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone, actors, teamId }) {
   const side = battingSide(batSide, pitchHand)
   const play = useMemo(() => stagePlay({ matchup: { batSide: { code: side }, pitchHand: { code: pitchHand } } }, wall), [wall, side, pitchHand])
-  return h('div', { className: 'gdstageScene' },
-    h(StageCanvas, { play, t: 0, zones, onZone, actors, label: 'The field before the pitch' }))
+  return h('div', { className: 'gdstageScene', 'data-batter-side': side },
+    h(StageCanvas, { play, t: 0, zones, onZone, actors, teamId, label: 'The field before the pitch' }))
 }
 
 // `run` counts trail-card replays (tapRule.js replay): a new run remounts the play, so its clock restarts.
 export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, onReplay, batSide, pitchHand, zones, onZone, checkpoint, checkpointDismissed, onCheckpoint, mark, step, open, batter }) {
   // A numbered play keeps the checkpoint inside Played (pending or dismissed), so it never remounts.
   if (checkpoint && (shown == null || typeof shown === 'object')) return checkpoint
+  const teamId = feed?.gameData?.teams?.[half === 'top' ? 'away' : 'home']?.id
   const field = (actors) => shown != null
-    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors })
-    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone, actors })
+    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors, teamId, mapSide: batter ? battingSide(batSide, pitchHand) : null })
+    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone, actors, teamId })
   if (mark == null && shown == null) return field(null)
   return h(SealBox, { coverless: true, forceRevealed: true }, () => field(mark == null ? null
     : stageActors(feed, { inning, half, mark, step, open, batter, shown })))

@@ -12,7 +12,7 @@ import { useGamedayStage } from './stage/useGamedayStage.jsx'
 // the half on screen is at or under the mark (its notes' inputs). A qualifying ending celebration
 // holds the stage until Next opens that checkpoint, without advancing the scoring frontier.
 // `open` ({ count, sub }) is the at-bat the reader is inside (ADR-0123); `pitch` the At-bat | Pitch switch.
-export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoint, engine, advance, open, pitch, onBoxScore, onLineup, notices, refresh }) {
+export function GamedayNextMount({ sectionNav, bug: { mark, ...bug }, meta, panels, checkpoint, engine, advance, open, pitch, onBoxScore, onLineup, notices, refresh }) {
   const band = bug.started && bug.live ? (
     <ScorebugMount {...bug} revealedThrough={mark} meta={meta} />
   ) : (
@@ -47,6 +47,7 @@ export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoi
   )
   return (
     <GamedayNextPage
+      sectionNav={sectionNav}
       band={band}
       stage={stage}
       // Before the first pitch: nothing revealed, the top of the 1st, the cursor at its start.
