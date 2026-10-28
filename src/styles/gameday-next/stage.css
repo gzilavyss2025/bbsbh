@@ -5,8 +5,10 @@
   z-index: 1; }
 .gdnext[data-tier='P'] .gdstage { bottom: 32%; left: 34%; }
 .gdstage__canvas { flex: none; image-rendering: pixelated; }
-/* The SealBox around the revealed play adds no box: the canvas fills the slot. */
-.gdnext__slot--stage > .statgrid, .gdstageScene .statgrid { display: contents; }
+/* The SealBox around the revealed play adds no box: the canvas fills the slot. The checkpoint's own
+   SealBox, nested in the stage's after a revealed third out, adds none either: as a box it grew to
+   the checkpoint's height, past the slot, and clipped the phone's notes instead of letting them scroll. */
+.gdnext__slot--stage > .statgrid, .gdstageScene .statgrid, .gdnext__slot--stage .statgrid:has(> .gdcp) { display: contents; }
 
 /* The event card (ADR-0123, #2571): a lower third on the stage, the runner's own box beside the words */
 /* layout-exempt: the box beside its words, across the stage's foot */

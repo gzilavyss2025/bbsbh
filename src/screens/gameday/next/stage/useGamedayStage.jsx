@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
-import { selectHalfStartingPitcher } from '../../../../api/select.js'
+import { selectMoundPitcher } from '../../../../api/select.js'
 import { fetchBatterZones } from '../../../../api/gameday/zones.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
@@ -57,7 +57,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
 
   // The pitcher on the mound at the cursor: the revealed change, else the half's opener (caller-gated
   // to the half reached, select.js). Hands are pre-game player data.
-  const pitcherId = batter ? reliever ?? selectHalfStartingPitcher(feed, inning, half, mark)?.id : null
+  const pitcherId = batter ? reliever ?? selectMoundPitcher(feed, inning, half, mark)?.id : null
   const hand = (id, k) => gd?.players?.[`ID${id}`]?.[k]?.code
   const stage = feed ? (
     <>
