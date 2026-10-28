@@ -221,8 +221,7 @@
    AWARD WEIGHT — the panel's one non-text editor
    (components/admin/AwardOrderEditor.jsx, ADR-0063). A reorder list on the
    left, a live rehearsal against one real career on the right. The tier chip
-   reuses the player page's own .tier-* colours (67-awards-ledger.css) so a row
-   here and the rule it produces there are visibly the same thing.
+   carries a .tier-* class; no stylesheet colours it.
    --------------------------------------------------------------------------- */
 .awardord__caps {
   display: flex;

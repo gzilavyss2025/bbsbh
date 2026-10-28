@@ -328,30 +328,14 @@ button.starter__careervs {
   color: var(--text-caption);
 }
 
-/* The toggle in a section masthead's aside slot — the batting order's
-   "vs [pitcher]" matchup-notes switch (StarterMatchups.jsx), the starting
-   pitcher card's "Bullpen" switch (BullpenBoard.jsx), and the player page's
-   "MLB only" and "AAA log" switches. It is a Pill control now (#1131 slice 4):
+/* The toggle in a section masthead's aside slot. It is a Pill control now (#1131 slice 4):
    <Pill role="control" fill="paper" pressed>, so the shape, the 34px height,
    the states and the selected look (navy, with a tick) are the Pill's
-   (system/pill.css). .mastheadpill is only the hook for the dot below.
+   (system/pill.css).
 
    PAPER, NOT OUTLINE: the bar is club-themed (ADR-0030), so a see-through pill
    would sit on 30 different backdrops. The paper fill is the same chip on every
-   club's bar — the fill the Pill keeps for a control that rides a band.
-
-   The dot carries the state by SHAPE as well as the tick: a hollow ring when
-   off, filled when on. */
-.mastheadpill__dot {
-  width: 8px;
-  height: 8px;
-  border: var(--bw-hair) solid currentColor;
-  border-radius: 50%;
-  background: none;
-}
-.mastheadpill[aria-pressed='true'] .mastheadpill__dot {
-  background: currentColor;
-}
+   club's bar — the fill the Pill keeps for a control that rides a band.  */
 
 /* On a bar, the green ring sits on the bar's colour and falls under 3:1
    (2.41:1 on the house navy). A band head is always a bar, navy or the

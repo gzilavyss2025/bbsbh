@@ -19,7 +19,6 @@ const SOLID = [
   ['45-admin-copy-editor.css', '.awardord__note'],
   ['48-stamp-strip.css', '.stampstrip__details'],
   ['62-identity-admin.css', '.iddrawer__foot'],
-  ['69-pitch-arsenal.css', '.arsenal__row'],
   ['box-score/scoring-summary.css', '.scoresum__play + .scoresum__play'],
   ['pitcher-card/card.css', '.pcard__sec'],
   ['postseason/series-parts.css', '.psseries__flowreadout'],
@@ -27,7 +26,6 @@ const SOLID = [
   ['scout/scout.css', '.scout__readout'],
   ['10b-former-teammates.css', '.ladder__badge--farm'],
   ['76-workload-marks.css', '.daystrip__day--today'],
-  ['67-awards-ledger.css', '.awardtbl__chip--none'],
   ['72-player-hover-card.css', '.phcard__tag--rehab'],
   ['14-strike-zone.css', '.gamephotos__notice'],
 ]

@@ -504,27 +504,6 @@
 .change__pip--used {
   background: var(--border-stamped);
 }
-/* UsagePips (StatBox.jsx's ABS challenge row) — "how many of a capped resource are left"
-   as used/open circles. Drawn as CSS shapes rather than glyphs: those characters aren't
-   rendered at the same optical size in any font. */
-.usagepips {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  flex: none;
-}
-.usagepips__pip {
-  box-sizing: border-box;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-.usagepips__pip--used {
-  background: var(--text-caption);
-}
-.usagepips__pip--open {
-  border: 1.3px solid var(--graphite-soft);
-}
 /* An event card's one sentence — mono, natural case (the #root exemption in
    13-play-by-play.css), since it is a full sentence straight from the feed. */
 .change__eventtext {

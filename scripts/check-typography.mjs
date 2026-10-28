@@ -96,7 +96,6 @@ const NUDGE_MAX = 3
 
 const SPACING_RESIDUE = {
   '04a-wire-dock.css': { 62: 1 },
-  '05-masthead-nav.css': { 18: 1 },
   '07-team-logo-and-buttons.css': { 18: 1 },
   // 23 -> 22: the favourite-team sheet's two centring paddings are HALF A LOGO
   // BUTTON, and the button narrowed to 44px when .vsteam__team's own padding
