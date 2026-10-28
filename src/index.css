@@ -170,7 +170,6 @@
 @import './styles/slate/masthead.css';
 @import './styles/26-player-page.css';
 @import './styles/72-player-hover-card.css';
-@import './styles/67-awards-ledger.css';
 @import './styles/27-player-position-innings.css';
 @import './styles/69-pitch-arsenal.css';
 @import './styles/28-team-hub.css';
@@ -276,7 +275,6 @@
      16-identity-lab-shell    screens/identity-lab/index.jsx (DEV-only)
      17-identity-lab-workbench  screens/identity-lab/index.jsx (DEV-only)
      17a-identity-lab-mark-panels  screens/identity-lab/index.jsx (DEV-only)
-     26a-percentile-strip     components/charts/PercentileStrip.jsx
      26b-player-contract      screens/designlab/blocks.jsx (the .contractcard
                               specimen; its card left with the old tabs, #1898)
      30-standings             screens/StandingsPage.jsx

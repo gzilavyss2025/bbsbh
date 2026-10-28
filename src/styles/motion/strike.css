@@ -84,8 +84,7 @@
    its baseline alignment. Restated here rather than in each surface's own
    partial because the inner span exists only for the bar above; the wrappers
    keep their own declarations untouched, and this is what makes the extra
-   element cost nothing. The other two sites need nothing: `.entering__name`
-   is a flex item in a ROW, so it already hugs, and `.defdiamond__name` lays its
+   element cost nothing. The other site needs nothing: `.defdiamond__name` lays its
    content out as ordinary centred inline text. */
 .abhero__pr > .struckline {
   display: inline-flex;

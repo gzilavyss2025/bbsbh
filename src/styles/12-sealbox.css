@@ -504,27 +504,6 @@
 .change__pip--used {
   background: var(--border-stamped);
 }
-/* UsagePips (StatBox.jsx's ABS challenge row) — "how many of a capped resource are left"
-   as used/open circles. Drawn as CSS shapes rather than glyphs: those characters aren't
-   rendered at the same optical size in any font. */
-.usagepips {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  flex: none;
-}
-.usagepips__pip {
-  box-sizing: border-box;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-.usagepips__pip--used {
-  background: var(--text-caption);
-}
-.usagepips__pip--open {
-  border: 1.3px solid var(--graphite-soft);
-}
 /* An event card's one sentence — mono, natural case (the #root exemption in
    13-play-by-play.css), since it is a full sentence straight from the feed. */
 .change__eventtext {
@@ -794,31 +773,6 @@
    the wide layout and left the phone's inline copy with no title at all.
    A <button> (LineupSection) toggling .entering__teams below — reset off
    the browser's own button chrome so it still reads as a plain masthead. */
-.entering__title {
-  width: 100%;
-  margin: 0;
-  padding: var(--space-2) var(--space-2h);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font: inherit;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  border-top: 0;
-  border-inline: 0;
-  border-radius: 0;
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  text-align: left;
-  cursor: pointer;
-}
-
-.entering__name {
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
 
 /* A batter who's been replaced: struck through in pencil, same as the defense
    diamond's --out name. The strike is a drawn bar now rather than

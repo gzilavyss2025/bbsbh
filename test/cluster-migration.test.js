@@ -67,7 +67,6 @@ const MIGRATED = {
   // The other three keep justify-content (the part does not own justification).
   umpage__teamgrid: { file: '38-umpire-pages.css', gap: 'base', sites: 1 },
   allstargame__main: { file: '37-all-star-rosters.css', gap: 'base', sites: 1, align: 'center', keeps: ['justify-content: space-between'] },
-  arsenal__head: { file: '69-pitch-arsenal.css', gap: 'snug', sites: 1, align: 'center', keeps: ['justify-content: space-between', 'margin-bottom'] },
   // C12: the Design Lab chrome. The jump bar and the entry head keep their own frame and justification.
   dlab__jump: { file: 'designlab/lab.css', gap: 'snug', sites: 1, keeps: ['position', 'top', 'z-index', 'padding', 'background', 'border-bottom'] },
   dlab__entryhead: { file: 'designlab/lab.css', gap: 'snug', sites: 1, align: 'baseline', keeps: ['justify-content: space-between'] },

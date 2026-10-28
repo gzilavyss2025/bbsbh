@@ -445,8 +445,8 @@ for each generator; the reader modules:
   postseason, same shape (ADR-0102); `foulsInScope`/`hasPostseason` pick one for the
   page's Regular season / Postseason toggle. `compareFoulsInScope` reads the compare
   season in the same scope and gives `null` for a season with no postseason, never its
-  regular season; `foulCardView` is the pure half of `FoulCard`. Feeds the Foul Tracker page (`/fouls`,
-  `FoulTrackerPage.jsx`) and the player page's `FoulCard` (current-day only —
+  regular season; `foulCardView` is the pure half of the old player-page foul card (deleted). Feeds the Foul Tracker page (`/fouls`,
+  `FoulTrackerPage.jsx`) and the player page's fouls module (`FoulsCard.jsx`) (current-day only —
   the precompute can't be cut to a spoiler `asOf`, so the card hides under
   one, same rule as the Milestone Watch projection). `FOUL_PRIORS` carries the
   SABR foul-accumulation hit-probability constants used in copy. The LIVE
@@ -498,7 +498,7 @@ for each generator; the reader modules:
   point of it. `arsenalSidesView` hands a card both sides already shaped like
   the unfiltered rows, and returns null when either side sits under the floor:
   one side is no split, the same rule a single look follows. `pitchFamily(code)` groups codes into
-  fastball/breaking/offspeed/other for `PitchArsenalMix.jsx`'s bar coloring
+  fastball/breaking/offspeed/other for bar coloring
   (`tokens/colors.css`'s `--arsenal-*`). Surface: the opposing-starter card's
   wide-layout pitch-mix bar (removed with the old `TeamInfo.jsx` lineup page), filling
   the space the name/stats column leaves open on a wide screen.
@@ -608,8 +608,8 @@ for each generator; the reader modules:
   `components/charts/PercentileStrip.jsx` draws. That pre-flip is what lets
   every metric, in its own unit, share ONE 0–100 axis where farther right is
   always better — so read `lib/percentileStrip.js`'s header before changing how
-  any of it is scaled. Surface: `StatcastPercentiles.jsx`'s percentile strip
-  (ADR-0040, which records why the five-spoke radar it replaced could show only
+  any of it is scaled. Surface: none; `StatcastPercentiles.jsx` and
+  `PercentileStrip.jsx` were deleted as unused (ADR-0040, which records why the five-spoke radar it replaced could show only
   five of the metrics and drew a different shape for the same numbers depending
   on the order the spokes were listed in).
   `similarHittersFor(data, personId)` is the THIRD surface — the hitter page's
@@ -645,7 +645,7 @@ for each generator; the reader modules:
   role baseline). `apps` takes every game type (`R,F,D,L,W`), so October relief
   work counts toward rest days and the board; `season`, `role` and the baseline
   floors stay regular-season only, so a postseason cameo cannot re-class a
-  pitcher or move a league mean. Surfaces: `BullpenBoard` on the lineup pages (gated to
+  pitcher or move a league mean. Surfaces: the lineup page's `BullpenCard` (gated to
   slate-current games — the file describes "now"), the player page's
   `PitcherWorkloadCard`, and the laboring baseline for `pitcherHealth.js`.
 - `rotation/projectedStarters.js` + `rotation/liveStarters.js` — a LIKELY starter

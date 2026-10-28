@@ -8,8 +8,7 @@
   padding: 0;
 }
 
-.lineup__row,
-.roster__row {
+.lineup__row {
   display: grid;
   grid-template-columns: 24px 44px 1fr auto;
   /* start, not center: when a namewrap child (an open note) wraps the
@@ -37,13 +36,12 @@
   border-top: none;
 }
 
-.lineup__order,
-.roster__order {
+.lineup__order {
   font-family: var(--font-mono);
   color: var(--text-caption);
   font-weight: var(--w-bold);
   text-align: center;
-  /* .lineup__row/.roster__row keep align-items: start (see above) so these
+  /* .lineup__row keeps align-items: start (see above) so these
      stay pinned to the name's first line when a namewrap pill note wraps the
      row taller; a normal single-line row is shorter than that edge case
      accounts for, and start alignment there reads as sitting a hair high
@@ -53,7 +51,7 @@
 }
 /* The batting order slot (1-9) reads as part of the name, sized/weighted to
    match .lineup__name — but stays the quieter gray of the shared
-   .lineup__order/.roster__order rule above rather than full name-ink. */
+   .lineup__order rule above rather than full name-ink. */
 .lineup__order {
   font-family: var(--font-body);
   font-size: var(--fs-ui);
@@ -63,15 +61,13 @@
 /* Jersey number sits between name and pos/hand, in seam red — matched to
    pos/hand's --fs-compact so the two line up as one size, not the row's
    larger --fs-ui leaking in unset. */
-.lineup__jersey,
-.roster__jersey {
+.lineup__jersey {
   color: var(--clay);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-align: right;
 }
-.lineup__jersey,
-.roster__jersey {
+.lineup__jersey {
   align-self: center;
 }
 /* Batting order's jersey/position columns are fixed-width (see .lineup__row
@@ -82,8 +78,7 @@
   font-size: var(--fs-ui);
 }
 
-.lineup__name,
-.roster__name {
+.lineup__name {
   font-weight: var(--w-semibold);
   color: var(--text-body);
   overflow: hidden;
@@ -96,8 +91,7 @@
    .plink.pitchers__pname below. Win it back with higher specificity so the
    name still reads semibold body-ink instead of falling back to regular
    inherited text. */
-.plink.lineup__name,
-.plink.roster__name {
+.plink.lineup__name {
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
@@ -114,8 +108,7 @@
   min-width: 0;
 }
 
-.lineup__pos,
-.roster__pos {
+.lineup__pos {
   font-family: var(--font-display);
   color: var(--accent-positive);
   font-size: var(--fs-compact);
@@ -138,9 +131,6 @@
    season, and (conditionally) his whole career against them, so the card
    reads as a stack of dated facts (badges, season-to-date, last time out,
    this year vs this club, career vs this club) rather than one lump. */
-.starter__stats,
-.starter__last,
-.starter__seasonvs,
 .starter__careervs {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -318,40 +308,15 @@ button.starter__careervs {
    flex-basis:100% is what makes this a line of its own rather than one more
    flex item. Without it the note rides up beside short names and drops below
    long ones, and the card's left edge goes ragged row by row. */
-.lineup__vs,
-.roster__vs {
-  flex-basis: 100%;
-  margin-top: -2px;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-caption);
-}
 
-/* The toggle in a section masthead's aside slot — the batting order's
-   "vs [pitcher]" matchup-notes switch (StarterMatchups.jsx), the starting
-   pitcher card's "Bullpen" switch (BullpenBoard.jsx), and the player page's
-   "MLB only" and "AAA log" switches. It is a Pill control now (#1131 slice 4):
+/* The toggle in a section masthead's aside slot. It is a Pill control now (#1131 slice 4):
    <Pill role="control" fill="paper" pressed>, so the shape, the 34px height,
    the states and the selected look (navy, with a tick) are the Pill's
-   (system/pill.css). .mastheadpill is only the hook for the dot below.
+   (system/pill.css).
 
    PAPER, NOT OUTLINE: the bar is club-themed (ADR-0030), so a see-through pill
    would sit on 30 different backdrops. The paper fill is the same chip on every
-   club's bar — the fill the Pill keeps for a control that rides a band.
-
-   The dot carries the state by SHAPE as well as the tick: a hollow ring when
-   off, filled when on. */
-.mastheadpill__dot {
-  width: 8px;
-  height: 8px;
-  border: var(--bw-hair) solid currentColor;
-  border-radius: 50%;
-  background: none;
-}
-.mastheadpill[aria-pressed='true'] .mastheadpill__dot {
-  background: currentColor;
-}
+   club's bar — the fill the Pill keeps for a control that rides a band.  */
 
 /* On a bar, the green ring sits on the bar's colour and falls under 3:1
    (2.41:1 on the house navy). A band head is always a bar, navy or the
@@ -371,36 +336,14 @@ button.starter__careervs {
 /* Batters with history against tonight's starter who AREN'T in the posted nine
    — never empty in practice (see splitMatchupRows), and the reason folding the
    notes into the order doesn't quietly lose a pinch-hit read. */
-.lineup__bench {
-  padding: var(--space-2) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-rule);
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  color: var(--text-caption);
-}
-.lineup__benchlabel {
-  display: block;
-  margin-bottom: 2px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-.lineup__bench b {
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
 
 /* The Full roster door closing the pregame roster fallback (TeamInfo.jsx's
-   FullRosterLink) — same closing-row idea as .lineup__bench above. .thub__door's
+   FullRosterLink), a closing row. .thub__door's
    usual home is BETWEEN two already-bordered cards (TeamPage's previews), so a
    bare margin reads fine there; here it sits inside the SAME card as the
    batter rows above it, so without its own top edge it read as a stray link
    adrift in the card's leftover bottom whitespace rather than the list's own
-   closing row. The border/inset match .roster__row's own rhythm (12px
-   horizontal) instead of .thub__door's plain margin. */
+   closing row. The border/inset keep the rows' 12px horizontal rhythm instead of .thub__door's plain margin. */
 .lineup .thub__door {
   margin: 0;
   padding: var(--space-2) var(--space-3) var(--space-3);

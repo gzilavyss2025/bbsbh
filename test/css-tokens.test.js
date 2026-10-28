@@ -40,9 +40,6 @@ const KNOWN_UNDEFINED = new Set([
   // --- set inline from JS at runtime; no fallback, but never unresolved ---
   '--team-color', // charts/winprob.css — the club's own ink, set per chart
   '--card-accent',
-  '--start', // 26a-percentile-strip.css — the band's geometry, per player
-  '--width',
-  '--pct',
   '--tier', // ovr/card.css — the row's tier colour, set per row by OvrBars.jsx
 ])
 import test from 'node:test'

@@ -88,7 +88,6 @@
   margin-top: 0;
 }
 
-
 /* Header buttons/pills/toggles ride on a themed bar as neutral opaque
    chips — the same "card floating on the bar" convention the lineup page's
    Game Notes button already uses (this file, ~4440) — rather than
@@ -114,19 +113,6 @@
 .team-hub.is-themed .psodds-pill:focus-visible {
   outline-color: var(--focus-ring-band);
   box-shadow: var(--ring-band);
-}
-.team-hub.is-themed .roster-super__toggle {
-  border-color: var(--border-rule);
-}
-.team-hub.is-themed .roster-super__toggle-btn {
-  color: var(--bar-text, var(--text-caption));
-}
-.team-hub.is-themed .roster-super__toggle-btn + .roster-super__toggle-btn {
-  border-left-color: var(--border-rule);
-}
-.team-hub.is-themed .roster-super__toggle-btn.is-active {
-  background: var(--surface-card);
-  color: var(--text-heading);
 }
 
 /* The fact card is a Card (sheet, flush body; #1113, slice C2), and this rule
@@ -280,50 +266,6 @@
    above, just anchored next to the fact's LABEL instead of its value, since
    every cell here carries its own glyph rather than one card carrying just
    one. */
-.fact__label--info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-.fact__infoglyph {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  box-sizing: border-box;
-  width: 14px;
-  height: 14px;
-  padding: 0;
-  border-radius: 999px;
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-heading);
-  cursor: pointer;
-}
-.fact__infoglyph:hover {
-  box-shadow: 0 0 0 1px var(--border-rule);
-}
-.fact__infoglyph--open {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-}
-.fact__infoglyph:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-.fact__infonote {
-  margin: 6px 0 0;
-  padding: var(--space-1h) var(--space-2);
-  border-radius: var(--radius-sm);
-  background: var(--bg-page);
-  border: var(--bw-hair) solid var(--border-hairline);
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-  font-weight: var(--w-regular);
-  line-height: var(--lh-body);
-  animation: postponed-in var(--dur-med) var(--ease-out) both;
-}
 
 /* Scoped through the parent (not just `.umps__name`) so this outranks
    `.plink`'s `font`/`color`/`text-transform: inherit` reset further down the
