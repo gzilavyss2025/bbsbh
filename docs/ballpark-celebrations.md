@@ -22,21 +22,22 @@ skin tone or appearance from player data. The player caption carries identity.
 
 ## Separate authoring concerns
 
-- `cutscene/ballpark/choreography.js`: three finite actions and a pure clock.
-  The frame track holds anticipation, a turn, the pump, then a confident settle.
-  It ends after 2.8 seconds; it never cycles. Pose 9 is omitted from the playback
-  because its lowered arm breaks the settling arc. It remains in the source atlas.
-- The strikeout uses a dedicated cap-and-glove pitcher atlas: rise, compact
-  pump, release and settle over 1.9 seconds. The defensive catch uses a separate
-  full-body fielder: track, reach, catch, absorb, secure and acknowledge over
-  2.8 seconds. Each has its own caption entrance and review beats.
+- `cutscene/ballpark/variants.js`: the approved fist pump, confetti win,
+  victory hop, home-run salute, and cap-and-glove strikeout pump. Each uses its
+  own row of six generated poses and a finite authored track. Confetti holds
+  the raised-arm pose; the hop includes a finite takeoff and landing offset.
+- `choreography.js`: the shared pure clock, the original default batter track,
+  and the defensive catch's track. Catch keeps its separate full-body atlas.
+- `effects.js`: deterministic pixel sparkles, confetti, starbursts and fireworks.
+  These take the club palette, respect scrubbing, and finish with the action.
+  Reduced motion paints the final settled pose without moving effects.
 - `scenes.js` pairs each role's artwork and choreography. This is an authored
   catalog, not a rule for which real game events earn a celebration.
-- Grand slams reuse the batter atlas with a more deliberate accent and a
-  3.6-second sequence, rather than inventing a different real-player action.
 - `assets.js`: shared image decode, bounded palette cache and conservative
   material recoloring, performed once per palette, not once per animation frame.
-  `HOME_RUN_ART` describes the atlas grid and scene framing.
+  The new study's measured source cells exclude generated gutters and normalize
+  to six 256-pixel playback cells without stretching the character. Each action
+  prepares only its own row; all five share one source download.
 - `atlas.js` isolates the connected character within each cell before recoloring.
   This removes neighboring-cell shoe fragments and disconnected generation
   debris without trimming the glove's reach. The source files stay intact.
@@ -65,8 +66,10 @@ SealBox reveal subtree. `integration/celebrationForPlay.js` receives that one
 play and pre-game identity data, never an uncapped list of future plays:
 
 - A completed home run uses the batter and batting club; four RBI selects the
-  longer grand slam sequence.
-- A completed strikeout with a recorded out uses the pitcher and fielding club.
+  longer confetti sequence. Other home runs use the bat salute.
+- A non-homer RBI uses the fist pump; two or more RBI use the victory hop.
+  Both retain the result-specific RBI headline.
+- A completed strikeout with a recorded out uses the pitcher pump and fielding club.
   Dropped-third-strike reaches and a strikeout on which a run scores do not
   receive a celebratory reaction.
 - Defense requires a recorded air out, at least the existing moments engine's
@@ -132,6 +135,9 @@ with the image generation tool. No third-party sprite gallery art is used by
 the modern study. The original generated images remain in the session's
 `/workspace/generated_images` folder; committed files are direct copies.
 
+- `public/art/ballpark/celebrations.png`: 1374 × 1145 RGBA generated study,
+  five rows of six poses (fist pump, confetti win, hop, bat salute, pitcher pump).
+  `variants.js` records the source rectangles; no third-party art is used.
 - `public/art/ballpark/night.png`: 1672 × 941 RGB, separate generic night ballpark.
 - `public/art/ballpark/home-run.png`: 1448 × 1086 RGBA, a 4 × 3 grid of 362-pixel
   cells. One character per cell, helmet through thigh. Transparent backdrop.
@@ -142,8 +148,10 @@ the modern study. The original generated images remain in the session's
 
 The renderer uses a 768 × 432 artboard and nearest-neighbor sampling. These are
 high-resolution pixel-art study assets, not a final tightly indexed sprite pack.
-They total about 6.5 MB before HTTP transfer compression. The stadium and selected
-role's atlas load on demand; selecting another role fetches its atlas. `vite.config.js` excludes this study-art directory
+The new shared study is about 1.8 MB before HTTP transfer compression. The stadium
+and selected atlas load on demand; switching between the five new actions reuses
+the study download. The catch still fetches its separate atlas. The older batter
+and pitcher sources remain as original study assets; the catalog uses the new poses. `vite.config.js` excludes this study-art directory
 from the PWA install precache. Replacing the art with smaller authored atlases
 later does not change the scene's public interface.
 

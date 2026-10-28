@@ -66,7 +66,8 @@ test('brown fielding leather stays leather when club trim changes', () => {
 
 test('each role has its own finite valid track, artwork and review points', () => {
   const scenes = Object.values(BALLPARK_SCENES)
-  assert.equal(new Set(scenes.map((s) => s.character.url)).size, 3)
+  // Generated rows share a download, but retain separate role/gesture cells.
+  assert.equal(new Set(scenes.map((s) => JSON.stringify(s.character))).size, scenes.length)
   for (const { track, character, review } of scenes) {
     assert.equal(track.frames[0].at, 0)
     for (const [i, f] of track.frames.entries()) {
