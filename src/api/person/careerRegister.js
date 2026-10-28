@@ -2,7 +2,7 @@
 // the career timeline live in ./career/progression.js. See ../person.js's
 // header for the module's overall as-of footing.
 import { SPORT_LABEL } from '../../lib/teams.js'
-import { txnDate, transactionTeamRanks, isIlPlacementTxn } from '../rehab-policy.js'
+import { txnDate, transactionTeamRanks, isIlPlacementOrTransferTxn } from '../rehab-policy.js'
 import { DASH, num } from './shared.js'
 import { aggregateSplits, withoutMultiTeamAggregate } from './stats.js'
 
@@ -136,7 +136,7 @@ function missingSeasonRows(presentYears, debutYear, currentSeason, transactions,
   for (let yr = Math.min(...presentYears); yr < endSeason; yr++) {
     if (presentYears.has(yr)) continue
     const injured = !otherGroupYears?.has(yr) && (transactions ?? []).some(
-      (t) => isIlPlacementTxn(t) && txnDate(t)?.slice(0, 4) === String(yr),
+      (t) => isIlPlacementOrTransferTxn(t) && txnDate(t)?.slice(0, 4) === String(yr),
     )
     rows.push({
       key: `${yr}-gap`,

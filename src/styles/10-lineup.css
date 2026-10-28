@@ -304,20 +304,6 @@ button.starter__careervs {
    annotate removed the last of those; the toggle in the masthead is what puts
    back the heading that card used to supply. */
 
-/* .lineup__namewrap / .roster__namewrap are WRAPPING FLEX containers, so
-   flex-basis:100% is what makes this a line of its own rather than one more
-   flex item. Without it the note rides up beside short names and drops below
-   long ones, and the card's left edge goes ragged row by row. */
-
-/* The toggle in a section masthead's aside slot. It is a Pill control now (#1131 slice 4):
-   <Pill role="control" fill="paper" pressed>, so the shape, the 34px height,
-   the states and the selected look (navy, with a tick) are the Pill's
-   (system/pill.css).
-
-   PAPER, NOT OUTLINE: the bar is club-themed (ADR-0030), so a see-through pill
-   would sit on 30 different backdrops. The paper fill is the same chip on every
-   club's bar — the fill the Pill keeps for a control that rides a band.  */
-
 /* On a bar, the green ring sits on the bar's colour and falls under 3:1
    (2.41:1 on the house navy). A band head is always a bar, navy or the
    club's; a club head (the player page's section bars) is a bar only when it
@@ -332,10 +318,6 @@ button.starter__careervs {
   outline-color: var(--focus-ring-band);
   box-shadow: var(--ring-band);
 }
-
-/* Batters with history against tonight's starter who AREN'T in the posted nine
-   — never empty in practice (see splitMatchupRows), and the reason folding the
-   notes into the order doesn't quietly lose a pinch-hit read. */
 
 /* The Full roster door closing the pregame roster fallback (TeamInfo.jsx's
    FullRosterLink), a closing row. .thub__door's

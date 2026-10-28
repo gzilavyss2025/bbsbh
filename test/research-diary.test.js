@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { RESEARCH_DIARY, VERDICTS, HOW_TO_READ, TRAPS } from '../src/lib/research/diary/index.js'
 
 // The diary is authored data, so what is worth testing is not a computation —
@@ -92,8 +93,12 @@ test('the traps heading counts the traps it is standing over', () => {
   // a count that runs off the end of COUNT_WORDS silently falls back to a
   // numeral, which is not this page's voice.
   assert.ok(TRAPS.length >= 1, 'there must be traps to count')
+  const page = readFileSync(new URL('../src/screens/research/DiaryPage.jsx', import.meta.url), 'utf8')
+  const words = page.match(/const COUNT_WORDS = \[([\s\S]*?)\]/)
+  assert.ok(words, 'COUNT_WORDS not found in DiaryPage.jsx')
+  const ceiling = words[1].split(',').filter((word) => word.trim()).length - 1
   assert.ok(
-    TRAPS.length <= 12,
-    `TRAPS is ${TRAPS.length}; widen COUNT_WORDS in DiaryPage.jsx before adding more`,
+    TRAPS.length <= ceiling,
+    `TRAPS is ${TRAPS.length}; widen COUNT_WORDS in DiaryPage.jsx (holds up to ${ceiling}) before adding more`,
   )
 })

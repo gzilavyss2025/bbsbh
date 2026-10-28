@@ -81,10 +81,6 @@
    .factgrid / .umps__list chrome so the two surfaces print the same fact the
    same way. Only the geometry changes here. */
 
-/* Each block's heading rides the panel's own flex gap instead of the 18px top
-   margin a label head carries on a full-width page, which stacked on top of
-   that gap and opened a hole between the benches and the facts under them. */
-
 /* ONE FACT PER ROW. The grid is two columns on a lineup page that is the width
    of the phone; here it is inside a 328px rail (--refrail-w) minus the panel's
    own padding, which leaves each of two cells about 150px. A value is set at

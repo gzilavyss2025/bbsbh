@@ -21,7 +21,8 @@ import { mentionsInjuredList } from '../rehab-policy.js'
 // The injured list, and the three lists that are not it
 // ---------------------------------------------------------------------------
 
-// Mirrors person.js's isIlPlacementTxn/isIlEndingTxn keyword logic, split into
+// Mirrors rehab-policy.js's isIlPlacementOrTransferTxn and person/activity.js's
+// isIlEndingTxn keyword logic, split into
 // THREE disjoint categories (placement / activation / IL-to-IL transfer)
 // rather than person.js's two — the story grouper needs to tell a transfer
 // apart from a fresh placement, which person.js's own player-timeline use case

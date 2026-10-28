@@ -261,12 +261,6 @@
   color: var(--text-caption);
 }
 
-/* The Advanced card's per-fact "i" glyph + unfold note (see
-   AdvancedStatsCard.jsx) — same tap-glyph idiom as .attendance__glyph
-   above, just anchored next to the fact's LABEL instead of its value, since
-   every cell here carries its own glyph rather than one card carrying just
-   one. */
-
 /* Scoped through the parent (not just `.umps__name`) so this outranks
    `.plink`'s `font`/`color`/`text-transform: inherit` reset further down the
    sheet — same specificity tie otherwise, and `.plink` would win by source

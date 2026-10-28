@@ -441,9 +441,6 @@
   background: var(--clay-soft);
   color: var(--clay-deep);
 }
-/* The Bullpen list's compound "SV · G · IP" badge — longer than every other
-   rolechip use, but still kept to one line (wrapping read badly); the name
-   column shrinks/ellipsizes first instead (see .thub-name). */
 
 /* Roster super-section (Preferred Lineup / Starting Pitchers / Bullpen) — one
    bordered soft-cream card (a ledger Card, like .tstats; #1113) so the three

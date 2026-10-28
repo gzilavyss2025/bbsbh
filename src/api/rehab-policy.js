@@ -219,11 +219,11 @@ export function mentionsInjuredList(t) {
   return /(injured|disabled) list/i.test(t.description || '')
 }
 
-// A placement on (or transfer within) the injured list. The player page's
+// A placement on, or a transfer within, the injured list. The player page's
 // activity timeline and career register both read it; it lives here so neither
-// imports the other. transactions/vocabulary.js keeps its own stricter copy that
-// splits a transfer out of a placement.
-export function isIlPlacementTxn(t) {
+// imports the other. Not transactions/vocabulary.js's isIlPlacementTxn, which
+// leaves a transfer out; the two names keep the two meanings apart.
+export function isIlPlacementOrTransferTxn(t) {
   return (
     t.typeCode === 'SC' &&
     mentionsInjuredList(t) &&

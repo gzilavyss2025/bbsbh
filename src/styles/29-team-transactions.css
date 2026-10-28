@@ -175,14 +175,6 @@
 .txstory__cutline .plink {
   display: contents;
 }
-/* A player's name additionally stays bold + all-caps (the app's default
-   #root * uppercase already applies to this <button> — no override needed)
-   even though the sentence around it reads natural-case, so the name reads
-   as the "headline" word in an otherwise ordinary sentence — a club name
-   stays a plain link, so it doesn't compete with the player for emphasis.
-   The link wraps just the bare name — the position abbreviation stays in
-   the surrounding plain prose (see teamTransactions.js: the emphasized/
-   linked span is built from the player's name alone, never "{POS} {Name}"). */
 /* A club name (TeamLink) is just the plain link described above. It has no
    override to keep #root *'s uppercase, so it would otherwise shout "HOUSTON ASTROS" against
    the natural-case sentence around it. Reads in the cutline's own case even
@@ -190,6 +182,9 @@
    ties the ID component of #root *'s specificity, same technique as
    #root .txstory__cutline above — a plain .txstory__cutline .plink selector
    would lose to #root * and be silently ignored. */
+#root .txstory__cutline .plink {
+  text-transform: none; /* caps-exempt: team-name link matches the cutline's natural-case prose */
+}
 
 /* Colors mix FROM the hero's own `--ink` (28a-team-hub-hero.css) rather than
    a fixed token pair, so "Manager:" stays legibly muted against the label

@@ -764,16 +764,6 @@
   margin: 12px 14px 0;
 }
 
-/* Names the topic ("Lineups") — same navy masthead treatment as
-   .halfdefense__title (deliberately identical rules, not just a similar look:
-   the two read as one matched pair at both layouts, rather than Defense having a
-   title and Lineups improvising its own). Both titles used to name the half too;
-   EnteringReference.jsx has why they stopped and why the pair stays matched
-   either way. Replaces the old .innings__reference-title, which only existed on
-   the wide layout and left the phone's inline copy with no title at all.
-   A <button> (LineupSection) toggling .entering__teams below — reset off
-   the browser's own button chrome so it still reads as a plain masthead. */
-
 /* A batter who's been replaced: struck through in pencil, same as the defense
    diamond's --out name. The strike is a drawn bar now rather than
    `text-decoration` — see styles/motion/strike.css, which took the `.plink`
