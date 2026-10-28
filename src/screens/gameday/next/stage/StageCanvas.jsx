@@ -75,7 +75,7 @@ export function StageCanvas({ play, t, start, actors, label = 'The play on the f
   }, [play, t, start, actors, w, h, scale])
   return (
     <div ref={box} className="gdstage">
-      <SpriteTargets targets={spriteTargets(play, actors)} elements={targets} />
+      <SpriteTargets targets={spriteTargets(play, actors).filter((p) => p.key === 'batter' || p.key.startsWith('runner:'))} elements={targets} />
       <canvas ref={cv} className="gdstage__canvas" role="img" aria-label={label} width={w} height={h} style={{ width: w * scale, height: h * scale }} />
     </div>
   )

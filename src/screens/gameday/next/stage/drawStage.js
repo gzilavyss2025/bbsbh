@@ -78,10 +78,6 @@ export function drawStage(st, w, h) {
   fb.px.set(K.fb.px)
   const frame = Math.floor(st.t / 0.1) & 1, people = []
   const person = (key, p, moving, kit, flip = false) => people.push({ key, p, kit, flip, rows: moving ? MINI[frame ? 'run1' : 'run0'] : MINI.stand })
-  for (const [name, p] of Object.entries(st.fielders)) {
-    const moving = st.phase === 'chase' && Math.hypot(p[0] - POS[name][0], p[1] - POS[name][1]) > 0.5
-    person(name, name === 'C' ? [0, -22, 0] : p, moving, FIELD_KIT)
-  }
   if (!st.play.runners.some((r) => r.start == null)) person('batter', [st.play.batter === 'L' ? 32 : -32, -5, 0], false, RUNNER_KIT)
   st.runners.forEach((r, i) => { if (!r.gone) person('runner:' + i, r.pos, r.moving, RUNNER_KIT, r.pos[0] < 0) })
   people.sort((a, b) => b.p[1] - a.p[1])

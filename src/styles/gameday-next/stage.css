@@ -4,6 +4,7 @@
 .gdstage { position: absolute; inset: var(--space-2) var(--space-2) auto auto; width: 28%; height: 38%; display: flex; align-items: center; justify-content: center; overflow: hidden;
   z-index: 3; }
 
+.gdstageScene[data-batter-side='L'] .gdstage { left: var(--space-2); right: auto; }
 .gdstage__canvas { flex: none; image-rendering: pixelated; }
 /* The SealBox around the revealed play adds no box: the canvas fills the slot. The checkpoint's own
    SealBox, nested in the stage's after a revealed third out, adds none either: as a box it grew to

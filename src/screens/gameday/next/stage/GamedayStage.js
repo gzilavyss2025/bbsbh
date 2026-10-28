@@ -36,7 +36,7 @@ function subPlay(feed, inning, half, { count, sub }) {
   return { p: cut, still: false }
 }
 
-function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors }) {
+function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors, mapSide }) {
   const [start] = useState(() => performance.now())
   const covered = !!checkpoint
   const { play, still, celebration, ending } = useMemo(() => {
@@ -65,7 +65,7 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, on
   const props = playing && !still ? { play, start } : { play, t: still ? 0 : play.end }
   // A finished celebration can play again (tapRule.js replay); a held ending scene leaves Next in charge.
   const replay = celebration && onReplay && !covered ? () => onReplay(idx) : undefined
-  return h('div', { className: 'gdstageScene' },
+  return h('div', { className: 'gdstageScene', 'data-batter-side': mapSide ?? play.batter },
     h(StageCanvas, { ...props, actors, celebration, playing, onEnd, onReplay: replay, checkpointHeld: covered && eligible }))
 }
 
@@ -85,7 +85,7 @@ export const restZones = (zm, batterId, hidden) => (!hidden && batterId != null 
 function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone, actors }) {
   const side = battingSide(batSide, pitchHand)
   const play = useMemo(() => stagePlay({ matchup: { batSide: { code: side }, pitchHand: { code: pitchHand } } }, wall), [wall, side, pitchHand])
-  return h('div', { className: 'gdstageScene' },
+  return h('div', { className: 'gdstageScene', 'data-batter-side': side },
     h(StageCanvas, { play, t: 0, zones, onZone, actors, label: 'The field before the pitch' }))
 }
 
@@ -94,7 +94,7 @@ export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, s
   // A numbered play keeps the checkpoint inside Played (pending or dismissed), so it never remounts.
   if (checkpoint && (shown == null || typeof shown === 'object')) return checkpoint
   const field = (actors) => shown != null
-    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors })
+    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors, mapSide: batter ? battingSide(batSide, pitchHand) : null })
     : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone, actors })
   if (mark == null && shown == null) return field(null)
   return h(SealBox, { coverless: true, forceRevealed: true }, () => field(mark == null ? null
