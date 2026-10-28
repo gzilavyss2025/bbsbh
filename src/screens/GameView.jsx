@@ -3,7 +3,7 @@ import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { usePreferences } from '../hooks/preferences/usePreferences.js'
-import { canonicalSection, gameSeriesHref, sectionToStep, slatePath, stepToSection } from '../lib/route.js'
+import { canonicalSection, gameSeriesHref, sectionToStep, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
 import { selectHasNoPlayByPlay } from '../api/gamerecord/played.js'
 import { Door } from '../components/ui/control/Door.jsx'
@@ -385,9 +385,7 @@ export function GameView({ game, section, onSection }) {
             half={half}
             onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
             onBoxScore={() => onSection('boxscore')}
-            onScorecard={() => onSection('scorecard')}
             onLineup={(side) => onSection(side === 'home' ? 'lineup2' : 'lineup1')}
-            slateHref={slatePath(officialDate, game.sportId)}
             gameStatus={selectGameStatus(feed)}
             refreshFailed={Boolean(feedState.error)}
             onReload={feedState.reload}

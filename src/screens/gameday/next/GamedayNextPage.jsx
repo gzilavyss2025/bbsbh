@@ -42,6 +42,8 @@ function useTabDrag(side) {
   }
   const handlers = {
     onPointerDown: (e) => {
+      // A press starts fresh: a drag whose release brought no click must not eat this tap.
+      dragged.current = false
       const el = e.currentTarget
       const d = { id: e.pointerId, x: e.clientX, y: e.clientY, lifted: false }
       d.timer = setTimeout(() => {
@@ -156,6 +158,7 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
   }
   // `pregame` (before the first pitch): the stage introduces the game's starting pitcher (Gary,
   // 2026-10-28), the pitcher pane's card, which holds no score. The first tap brings the field back.
+  // The drawer tiers already show the arm in its own slot, so they keep the field.
   // The drawer tiers swap the Reference block for the arm on the mound (the field is the drawer).
   const slots = blocksFor(tier).flatMap((b) => (b === 'band' || b === 'bar' || (drawer && b === 'eventLog') ? [] : drawer && b === 'reference' ? ['arm'] : [b]))
   return (
@@ -170,7 +173,7 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
       </div>
       {slots.map((b) => (
         <section key={b} className={`gdnext__slot gdnext__slot--${b}`} aria-label={BLOCK_LABEL[b]}>
-          {b === 'stage' && pregame ? <GamedayPanel block="arm" ctx={panels} /> : b === 'stage' && stage ? stage : b === 'hero' && hero && rails ? (
+          {b === 'stage' && pregame && !drawer ? <GamedayPanel block="arm" ctx={panels} /> : b === 'stage' && stage ? stage : b === 'hero' && hero && tier === 'P' ? (
             // On the phone the hero's open floor carries the trail, so a tap moves between at-bats (Gary, 2026-10-28).
             <>{hero}<div className="gdnext__herotrail"><GamedayPanel block="trail" ctx={panels} /></div></>
           ) : b === 'hero' && hero ? hero : (

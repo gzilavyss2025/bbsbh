@@ -2,7 +2,7 @@ import { useContext, useId, useRef, useState } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
 import { Button } from '../ui/control/Button.jsx'
-import { EDGE, H, W, catcherX, sy } from '../../lib/zone/zoneGeometry.js'
+import { EDGE, H, W, boxLeftOfPlate, catcherX, stanceArt, sy } from '../../lib/zone/zoneGeometry.js'
 import { groundBoxes } from '../../lib/zone/ground.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { batterFigureUrls } from '../../api/uniforms.js'
@@ -107,7 +107,7 @@ const ART_NEAR_EDGE = { R: 416, L: 56 }
 const FIGURE_GAP = 34
 function BatterFigure({ urls, hand, zone, clipId, onError }) {
   const scale = zone.h / (ART_ZONE_BOTTOM - ART_ZONE_TOP)
-  const x = (hand === 'R' ? zone.left - FIGURE_GAP : zone.right + FIGURE_GAP) - ART_NEAR_EDGE[hand] * scale
+  const x = (boxLeftOfPlate(hand) ? zone.left - FIGURE_GAP : zone.right + FIGURE_GAP) - ART_NEAR_EDGE[hand] * scale
   const w = ART_W * scale
   return (
     <g className="strikezone__figure" aria-hidden="true" clipPath={`url(#${clipId})`}>
@@ -143,7 +143,7 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
 export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, framed = true }) {
   const figureAssets = useContext(BattingUniformContext)
   // His own stance's art as it comes: Gameday draws each stance from the catcher's side, as this diagram is now.
-  const figureUrls = batterFigureUrls(figureAssets, batSide === 'L' ? 'left' : 'right')
+  const figureUrls = batterFigureUrls(figureAssets, stanceArt(batSide))
   // A failed load drops to the silhouette; keyed by URL so a new batter retries.
   const [failedUrl, setFailedUrl] = useState(null)
   const clipId = useId()
@@ -172,7 +172,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
   // the plate and pitch dots keep their usual scale — the whole zone plot
   // just shifts over to make room when the batter's box sits to its left (a righty).
   const showBatter = batSide === 'L' || batSide === 'R'
-  const zoneOffsetX = batSide === 'R' ? BATTER_W : 0
+  const zoneOffsetX = boxLeftOfPlate(batSide) ? BATTER_W : 0
   const totalW = showBatter ? W + BATTER_W : W
   const useFigure = figureUrls && failedUrl !== figureUrls.jersey
 
@@ -202,7 +202,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
           {useFigure ? (
             <BatterFigure urls={figureUrls} hand={batSide} zone={{ left: zx + zoneOffsetX, right: zr + zoneOffsetX, top: zyT, h: zh }} clipId={clipId} onError={() => setFailedUrl(figureUrls.jersey)} />
           ) : (
-            <BatterSilhouette x={batSide === 'R' ? 0 : W + zoneOffsetX} mirror={batSide === 'R'} />
+            <BatterSilhouette x={boxLeftOfPlate(batSide) ? 0 : W + zoneOffsetX} mirror={boxLeftOfPlate(batSide)} />
           )}
           {framed && <rect className="strikezone__box" x={0.5 - margin} y={0.5 - margin} width={totalW + 2 * margin - 1} height={H + 2 * margin - 1} />}
         </>
