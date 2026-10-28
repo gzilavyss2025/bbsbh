@@ -21,8 +21,6 @@
 .gdzonemap__cell.is-warm { background: var(--stage-zone-warm); }
 .gdzonemap__cell.is-hot { background: var(--stage-zone-hot); color: var(--text-on-ink); }
 
-/* Parked with ZoneCard's batter sprite and plate (Gary, 2026-10-27): the __batter, __sprite and __plate rules below
-   style nothing until ZoneCard renders them again. */
 /* layout-exempt: the batter and zone share the same plate, reflected for a left-handed hitter */
 .gdzonemap__plateview { position: relative; flex: 1; min-height: 0; }
 .gdzonemap__batter { position: absolute; left: -15%; bottom: 0; width: auto; height: 100%; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
