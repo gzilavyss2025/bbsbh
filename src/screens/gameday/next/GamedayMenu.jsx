@@ -2,7 +2,6 @@ import '../../../styles/lineup-next/sheet.css'
 import { SheetFrame } from '../../lineup/next/sheets/SheetFrame.jsx'
 import { GamedayPanel } from './panels/GamedayPanels.jsx'
 import { Door } from '../../../components/ui/control/Door.jsx'
-import { useRouteLink } from '../../../lib/nav.js'
 
 // The block names a reader sees (the menu and the empty slots).
 export const BLOCK_LABEL = {
@@ -12,14 +11,13 @@ export const BLOCK_LABEL = {
 }
 
 // The menu sheet: the blocks this tier folds (names only until their prompts build them), then
-// the pages that leave Gameday: both lineups, the scorecard, the box score and the slate for the
-// game's date (the page is a fixed frame, so these are its way out). Opening it loads nothing: a
+// the pages that leave Gameday: both lineups and the box score (the page is a fixed frame, so these
+// are its way out; Gary dropped the scorecard and the slate, 2026-10-28). Opening it loads nothing: a
 // folded block fetches when it shows.
 // Blocks that read as themselves in the Menu, with no heading over them (Gary, 2026-10-28).
 const UNTITLED = new Set(['navigator', 'trail', 'reference', 'eventLog'])
 
-export function GamedayMenu({ folded, panels, onClose, onBoxScore, onScorecard, lineups, slateHref, refresh }) {
-  const link = useRouteLink()
+export function GamedayMenu({ folded, panels, onClose, onBoxScore, lineups, refresh }) {
   return (
     <SheetFrame title="Menu" onClose={onClose}>
       <ul className="gdnext__folded">

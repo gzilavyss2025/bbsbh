@@ -835,11 +835,12 @@
     },
     "playbyplay/advanceCode.js": {
       "class": "reveal-only",
-      "why": "Runner advance/out notation — a play outcome. Barrel-internal, with one importer outside it: Gameday's hero reads battingSlot (a box-score batting-order fact) only for an at-bat already inside the reader's cursor, in a SealBox reveal render function.",
+      "why": "Runner advance/out notation — a play outcome. Barrel-internal, with one importer outside it: Gameday's hero reads battingSlot (a box-score batting-order fact) only for an at-bat already inside the reader's cursor, in a SealBox reveal render function. Gameday's event card reads legAdvanceCode (SB, WP, E2) for the one shown baserunning sub-step's own runner entries, also inside its SealBox reveal render function (eventCardMarkup.js).",
       "importers": [
         "api/playbyplay.js",
         "api/playbyplay/halfInningFeed.js",
-        "screens/gameday/next/hero/heroMarkup.js"
+        "screens/gameday/next/hero/heroMarkup.js",
+        "screens/gameday/next/steps/eventCardMarkup.js"
       ]
     },
     "playbyplay/entriesView.js": {

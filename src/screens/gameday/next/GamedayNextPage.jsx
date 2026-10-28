@@ -82,7 +82,7 @@ function useTabDrag(side) {
   return { style: top != null ? { top: `${top}%` } : undefined, lifted, handlers, tapped }
 }
 
-export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pitch, onBoxScore, onScorecard, lineups, slateHref, notices = [], refresh, pregame }) {
+export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pitch, onBoxScore, lineups, notices = [], refresh, pregame }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
   // The defense (the Reference block) is a drawer from the right where the window is wide enough
@@ -224,9 +224,7 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
           panels={panels}
           onClose={() => setMenu(false)}
           onBoxScore={onBoxScore}
-          onScorecard={onScorecard}
           lineups={lineups}
-          slateHref={slateHref}
           refresh={refresh}
         />
       )}

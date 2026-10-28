@@ -95,3 +95,12 @@ seat in the park and stays true whichever way a future plot is drawn.
 - **Leave the plot and label the axes instead** ("3B" on one side, "1B" on the
   other). Honest, and it still asks the reader to do the flip; labels explain a
   picture that could simply have been right.
+
+## Amendment, 2026-10-28: the strike-zone modal turns round
+
+Gary read the Gameday strike-zone modal (`components/scoring/StrikeZone.jsx`) from the catcher's side, as
+MLB's own Gameday draws it, and the pitcher's view read wrong to him: the batter art, drawn by Gameday from
+behind the catcher, showed a right-handed hitter as a lefty once it stood in the pitcher's view. The modal
+now draws from the catcher's side: `catcherX` in `zoneGeometry.js` (the feed's `pX` as it comes, first base
+to the right), a right-handed batter's box left of the plate, and each batter's own stance art unmirrored.
+The other zone charts keep `sx`, the pitcher's view, until decided otherwise (#2687).

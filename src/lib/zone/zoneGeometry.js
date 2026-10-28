@@ -13,7 +13,7 @@
 // for, and it gives the normalisers below a home beside the plot maths.
 //
 // ---------------------------------------------------------------------------
-// THE VIEW — every pitch plot in this app is drawn from the BROADCAST CAMERA,
+// THE VIEW — every pitch plot in this app but the strike-zone modal (catcherX, below) is drawn from the BROADCAST CAMERA,
 // the one in centre field behind the pitcher, and never from the umpire's eye.
 //
 // The feed reports pX from behind the plate: positive is the catcher's right,
@@ -49,6 +49,9 @@ export const EDGE = 0.708 // half plate width, ft
 // screen, sx(-EDGE) its right.
 export const sx = (px) => PAD + ((-px - DOM_X[0]) / (DOM_X[1] - DOM_X[0])) * (W - 2 * PAD)
 // SVG y grows downward, so height flips: the top of the zone maps to a small y.
+// The catcher's view (Gary, 2026-10-28, #2687): the strike-zone modal draws the feed's pX as it comes, +pX
+// (first base) to the RIGHT, as MLB's Gameday does. The other zone charts keep `sx`, the pitcher's view.
+export const catcherX = (px) => sx(-px)
 export const sy = (pz) => PAD + ((DOM_Z[1] - pz) / (DOM_Z[1] - DOM_Z[0])) * (H - 2 * PAD)
 
 // ---------------------------------------------------------------------------
