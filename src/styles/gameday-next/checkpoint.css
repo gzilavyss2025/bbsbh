@@ -24,12 +24,18 @@
 .gdcp__label { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label);
   text-transform: uppercase; color: var(--text-caption); }
 
+/* P: the one page under its tab fills the body, so the notes' ScrollCue has a bounded box to scroll in
+   (unbounded, the list grew past the body and was clipped there). */
+/* layout-exempt: the tab's one page, filling the body */
+.gdnext[data-tier='P'] .gdcp__body { display: flex; flex-direction: column; }
+.gdnext[data-tier='P'] .gdcp__page { flex: 1; }
+
 /* T, L and D: every page at once, no tabs. */
 .gdnext:not([data-tier='P']) .gdcp .gdcp__tabs { display: none; }
 /* layout-exempt: two columns of pages; the at-bats (the tallest) take the right */
 .gdnext:not([data-tier='P']) .gdcp__body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: auto auto minmax(0, 1fr); grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar atBats'; }
-.gdnext:not([data-tier='P']) .gdcp[data-pages='5'] .gdcp__body { grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar facts'; }
+  grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar atBats'; }
+.gdnext:not([data-tier='P']) .gdcp[data-pages='5'] .gdcp__body { grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar facts'; }
 .gdnext:not([data-tier='P']) .gdcp__page { display: flex; animation: none; grid-area: var(--gdcp-area);
   border-right: var(--bw-rule) solid var(--border-stamped); border-bottom: var(--bw-rule) solid var(--border-stamped); }
 .gdcp__page[data-page='tally'] { --gdcp-area: tally; }
@@ -124,8 +130,10 @@
 /* No rule under the table's last row: one pitcher's line ends the page; with more, the total row closes it. */
 .gdcp__table tbody tr:last-child td { border-bottom: 0; }
 .gdcp__page[data-page='gameSoFar'] .gdcp__due .gdcp__label { flex-basis: auto; } /* a column here: the row's 100% would take the height */
-/* The pitching table runs to the page's edges. */
-.gdnext .gdcp__page[data-page='pitching'] { padding-inline: 0; }
+/* The pitching table runs to the page's edges. The page scrolls in its box: the game's pitching lines
+   (both clubs) sit under the half's tally. */
+.gdnext .gdcp__page[data-page='pitching'] { padding-inline: 0; overflow-y: auto; overscroll-behavior: contain; }
+.gdcp__page[data-page='pitching'] .gdpl { padding-inline: var(--space-3); }
 .gdcp__dueline { font: var(--w-medium) var(--fs-cell) / var(--lh-solid) var(--font-body); color: var(--text-caption); font-variant-numeric: tabular-nums; white-space: nowrap; }
 /* layout-exempt: the photo, or the first name over the surname, as one link */
 .gdcp__dueups .plink { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-1); min-width: 0; padding: 0; border: 0; background: none;
@@ -133,3 +141,6 @@
 /* A long surname keeps its height and narrows to its card's width instead of trailing off: Checkpoint.jsx
    squeezes it sideways (scaleX) by just as much as it runs over. */
 .gdcp__dueups b.gdcp__fitname { width: max-content; max-width: none; overflow: visible; text-overflow: clip; transform-origin: left center; }
+/* P: the rail tabs (Due up, Pitcher) sit over the slot's edges at mid-height, where the lines land:
+   the table keeps clear of them (one label line, the tab's padding, its border). */
+.gdnext[data-tier='P'] .gdcp__page[data-page='pitching'] .gdpl { padding-inline: calc(var(--fs-label) + 2 * var(--space-2) + var(--space-1)); }

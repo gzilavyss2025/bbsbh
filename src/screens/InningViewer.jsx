@@ -28,7 +28,7 @@ import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCallou
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
-import { CAUGHT_UP, nextSub, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { CAUGHT_UP, caughtUpAdvance, nextSub, openingChangeHeld, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -293,7 +293,7 @@ export function InningViewer({
         vsTeam={vsTeam}
         treatment={winProbTreatment}
         highlights={highlights}
-        atBatCountFor={atBatCountFor}
+        atBatCountFor={engineCountFor}
         halfInProgress={idx === liveHalfIdx}
         windowed={presentationOnly || focus.windowed}
         focusStep={presentationOnly ? 0 : focus.step}
@@ -361,6 +361,10 @@ export function InningViewer({
   // reveal frontier — RollingLine and direct links both let a user jump
   // straight to any unlocked half.
   const curAtBatCount = atBatCountFor(effInning, effHalf)
+  // What the engine and the panels may show: the stored count, moved to the sub-step's own
+  // substitutions (stepCapAt: a change shows on its own tap, never with the result before it).
+  // Stable across renders like atBatCountFor itself, so InningPage's memo still holds.
+  const engineCountFor = useCallback((inning, half) => stepCapAt(feed, inning, half, atBatCountFor(inning, half), subFor(inning, half)), [feed, atBatCountFor, subFor])
   // What the NEXT "reveal next at-bat" tap should pass to revealAtBat — null
   // until HalfInning/PlayByPlay has actually computed the half's entries
   // (nothing to report before the first tap, which just starts at 1).
@@ -418,10 +422,10 @@ export function InningViewer({
   // guarantee: this component has no legitimate way to know whether the
   // half's first entry is a leading event note rather than a plate
   // appearance (computeHalfInningFeed is reveal-only, ADR-0001, so it can't
-  // be consulted from here ahead of PlayByPlay's own render). PlayByPlay.jsx
-  // silently corrects an understated cap forward to the first genuine at-bat
-  // boundary on its own — a new stepping entry point that bypasses PlayByPlay
-  // (or calls it in some other way) must preserve that correction itself, or
+  // be consulted from here ahead of PlayByPlay's own render). stepCapAt
+  // (engineCountFor) corrects an understated cap forward to the first step's
+  // boundary, and PlayByPlay keeps it past the first at-bat card — a new
+  // stepping entry point that bypasses both must preserve that correction, or
   // the "reveal just a lone note" bug this pairing exists to prevent comes
   // back.
   const atHalfEdge = currentHalfLive && curStepInfo?.atHalfEdge === true
@@ -537,7 +541,7 @@ export function InningViewer({
   const advance = focus.stepAhead
     ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && focus.stepNext() }
     : currentSealed
-      ? { label: edge ? 'Caught up' : stepWords(pitchMode), disabled: edge, caughtUp: edge, onClick: revealNextStep, reveal: true }
+      ? edge ? caughtUpAdvance(pitchMode, loading, onReload) : { label: stepWords(pitchMode), onClick: revealNextStep, reveal: true }
       : nextIdx != null
         ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
         : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }
@@ -554,8 +558,9 @@ export function InningViewer({
         panels={{
           feed, meta, regulation, unlocked: renderUnlocked, mark: renderRevealedThrough, runsInProgress, curIdx,
           onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
-          inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : curAtBatCount,
+          inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : engineCountFor(effInning, effHalf),
           pitcherId: curLiveState?.midHalfPitcherId ?? null, treatment: winProbTreatment,
+          openingHeld: currentSealed && openingChangeHeld(feed, effInning, effHalf, curAtBatCount, curSub),
         }}
         checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
         engine={pageTurn}

@@ -31,6 +31,7 @@ export function sameLiveState(a, b) {
     a.batter?.line === b.batter?.line &&
     a.pitcher?.last === b.pitcher?.last &&
     a.pitcher?.pitches === b.pitcher?.pitches &&
+    a.midHalfPitcherId === b.midHalfPitcherId &&
     sameLast(a.last, b.last)
   )
 }

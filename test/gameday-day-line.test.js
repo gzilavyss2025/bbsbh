@@ -9,7 +9,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { batterDayLine, pitcherDayLine } from '../src/api/gameday/dayLine.js'
+import { batterDayLine, pitcherDayLine, pitchingDayLines } from '../src/api/gameday/dayLine.js'
 
 const feed = JSON.parse(
   readFileSync(new URL('./fixtures/game-823035.trimmed.json', import.meta.url), 'utf8'),
@@ -123,4 +123,21 @@ test('the live, still-open plate appearance counts for nothing', () => {
   const line = batterDayLine(live, 592885, { ...TOP3, step: 3 })
   assert.equal(line.pa, 1) // top 1 only
   assert.equal(line.ab, 1)
+})
+
+// The scorebook's pitching page (Gary, 2026-10-28): every pitcher's line, both clubs, as of the step.
+// Same clamp as pitcherDayLine, so the table and the Pitcher rail never disagree.
+test('pitchingDayLines lists both clubs as of the step, row for row with pitcherDayLine', () => {
+  const at = (step) => pitchingDayLines(feed, { ...TOP6, step })
+  const before = at(2)
+  assert.ok(!before.home.some((r) => r.id === 694363), 'the reliever is not on the page before his change')
+  const after = at(4)
+  const row = after.home.find((r) => r.id === 694363)
+  assert.deepEqual(row, pitcherDayLine(feed, 694363, { ...TOP6, step: 4 }))
+  assert.ok(after.away.length > 0, 'the other club is there too')
+  for (const r of [...after.away, ...after.home]) assert.deepEqual(r, pitcherDayLine(feed, r.id, { ...TOP6, step: 4 }))
+})
+
+test('pitchingDayLines answers empty past the reader\'s reach', () => {
+  assert.deepEqual(pitchingDayLines(feed, { inning: 9, half: 'top', revealedThrough: 2 }), { away: [], home: [] })
 })

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
-import { selectHalfStartingPitcher } from '../../../../api/select.js'
+import { selectMoundPitcher } from '../../../../api/select.js'
 import { fetchBatterZones } from '../../../../api/gameday/zones.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
@@ -11,7 +11,7 @@ import { GamedayStage, restBatter, restZones } from './GamedayStage.js'
 import { GamedayPlayCanvas } from '../cutscene/integration/GamedayPlayCanvas.jsx'
 import { battingSide } from './battingSide.js'
 import { wallFn } from './scene.js'
-import { stageKey } from '../steps/subStep.js'
+import { openingChangeHeld, stageKey, stepCapAt } from '../steps/subStep.js'
 import { disarm, ended, replay, rest, saw, tap } from './tapRule.js'
 import { checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoint } from '../cutscene/integration/checkpointGate.js'
 
@@ -57,13 +57,13 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
 
   // The pitcher on the mound at the cursor: the revealed change, else the half's opener (caller-gated
   // to the half reached, select.js). Hands are pre-game player data.
-  const pitcherId = batter ? reliever ?? selectHalfStartingPitcher(feed, inning, half, mark)?.id : null
+  const pitcherId = batter ? reliever ?? selectMoundPitcher(feed, inning, half, mark, { opening: !(open && openingChangeHeld(feed, inning, half, open.count, open.sub)) })?.id : null
   const hand = (id, k) => gd?.players?.[`ID${id}`]?.[k]?.code
   const stage = feed ? (
     <>
       {!(covered && cur.armed) && <GamedayStage
         SealBox={SealBox} StageCanvas={GamedayPlayCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} run={cur.run ?? 0} playing={cur.playing} onEnd={onEnd} onReplay={onReplay}
-        mark={mark} step={open?.count ?? null} open={open} batter={batter}
+        mark={mark} step={open ? stepCapAt(feed, inning, half, open.count, open.sub) : null} open={open} batter={batter}
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones} onZone={batter ? toggleZones : undefined}
         checkpoint={checkpoint} checkpointDismissed={phase === 'checkpoint'} onCheckpoint={onCheckpoint}
       />}
@@ -92,5 +92,5 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   // The at-bat the stage is replaying (a trail tap), for the trail's "you are here" mark.
   const replaying = typeof cur.shown === 'number' && cur.run ? cur.shown : null
   const holding = phase === 'pending' || phase === 'celebration'
-  return { stage, advance: { ...advance, ...(holding ? { label: 'Next', disabled: false, caughtUp: false } : {}), onClick }, onReplay: covered ? undefined : onReplay, replaying }
+  return { stage, advance: { ...advance, ...(holding ? { label: 'Next', disabled: false, caughtUp: false, refresh: false } : {}), onClick }, onReplay: covered ? undefined : onReplay, replaying }
 }

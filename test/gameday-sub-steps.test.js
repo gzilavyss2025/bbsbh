@@ -10,6 +10,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { subSteps } from '../src/api/gameday/subSteps.js'
+import { caughtUpAdvance } from '../src/screens/gameday/next/steps/subStep.js'
 import { visibleAtBatCards } from '../src/api/gameday/stepCut.js'
 
 const load = (pk) =>
@@ -108,4 +109,24 @@ test("778442 ab51: the umpire's No Pitch (N) changes no count, so it is no step"
   const steps = subSteps(games[778442], cardAt(games[778442], 51))
   assert.equal(steps.some((s) => s.call === 'N'), false)
   assert.deepEqual(steps.filter((s) => s.kind === 'pitch' || s.kind === 'result').map((s) => s.index), [0, 3, 4])
+})
+
+// Gary, 2026-10-28: following a live game pitch by pitch, the caught-up advance fetches instead of
+// waiting on the minute poll. It reveals nothing (reveal: false); at-bat mode keeps "Caught up".
+test('the caught-up advance refreshes in pitch mode and stays a held "Caught up" otherwise', () => {
+  const reload = () => 'reloaded'
+  const pitch = caughtUpAdvance(true, false, reload)
+  assert.equal(pitch.label, 'Refresh')
+  assert.equal(pitch.refresh, true)
+  assert.equal(pitch.disabled, false)
+  assert.equal(pitch.caughtUp, true)
+  assert.equal(pitch.reveal, false)
+  assert.equal(pitch.onClick(), 'reloaded')
+  const busy = caughtUpAdvance(true, true, reload)
+  assert.equal(busy.label, 'Refreshing…')
+  assert.equal(busy.disabled, true)
+  const atBat = caughtUpAdvance(false, false, reload)
+  assert.equal(atBat.label, 'Caught up')
+  assert.equal(atBat.disabled, true)
+  assert.equal(caughtUpAdvance(true, false, undefined).label, 'Caught up', 'no reload: nothing to tap')
 })

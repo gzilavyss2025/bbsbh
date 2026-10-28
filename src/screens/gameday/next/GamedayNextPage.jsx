@@ -119,7 +119,7 @@ export function GamedayNextPage({ band, panels, stage, hero, engine, advance, pi
         {/* aria-disabled, never `disabled`: a hold (the half closing, the step hold) must still
             take the tap that ends it early, and a disabled button gets no pointer events (ADR-0046). */}
         <Button skin="ink" className="gdnext__advance" aria-disabled={advance.disabled || undefined} onClick={() => !advance.disabled && advance.onClick()}>
-          {advance.label} ›
+          {advance.refresh ? <>{advance.label} <span aria-hidden="true">↻</span></> : `${advance.label} ›`}
         </Button>
         {/* The live edge, said once and politely (ADR-0055). Always mounted so the change is read. */}
         <p className="sr-only" role="status" aria-live="polite">{advance.caughtUp ? 'Caught up — waiting on the next batter' : ''}</p>

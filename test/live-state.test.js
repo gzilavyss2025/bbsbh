@@ -42,3 +42,23 @@ test('glyphD draws a path per family shape and falls back to the hexagon for an 
   }
   assert.equal(glyphD('blob', 7), glyphD('hexagon', 7))
 })
+
+// Gameday's Pitcher rail and stage read the revealed mid-half change by id (2026-10-28: Kevin Kelly
+// for Griffin Jax, 849803 top 5th, never reached the rail). A snapshot that moves only that id must
+// replace the stored one.
+test('sameLiveState sees the mid-half pitcher, so a revealed change is never swallowed', () => {
+  const before = { inning: 5, half: 'top', outs: 0, bases: {}, midHalfPitcherId: null }
+  assert.equal(sameLiveState(before, { ...before }), true)
+  assert.equal(sameLiveState(before, { ...before, midHalfPitcherId: 687330 }), false)
+})
+
+// HalfInning (a .jsx file, so the suite reads its source) composes the snapshot Gameday reads; it
+// once dropped midHalfPitcherId, and the Pitcher rail named the starter all half (849803 top 5th).
+test('HalfInning\'s composed live snapshot carries midHalfPitcherId on both of its returns', async () => {
+  const { readFileSync } = await import('node:fs')
+  const src = readFileSync(new URL('../src/components/inning/HalfInning.jsx', import.meta.url), 'utf8')
+  const compose = src.slice(src.indexOf('const composeLive'), src.indexOf('The entering-state fallback'))
+  assert.ok(compose.length > 0, 'composeLive is where it was')
+  assert.match(compose, /if \(outs >= 3\) return \{ \.\.\.liveAtThirdOut\([^)]*\), last, midHalfPitcherId \}/)
+  assert.match(compose, /return \{ bases, outs, batter, pitcher, inning, half, last, midHalfPitcherId \}/)
+})
