@@ -25,7 +25,6 @@ import { BALLPARK_SCENES } from '../cutscene/ballpark/scenes.js'
 // The clock starts when the play mounts and holds through a poll or a resize, so neither restarts it.
 // The play ends on its own duration, not on the canvas: an unmeasured canvas, or Motion: Reduced
 // switched on mid-play, must not leave the tap rule thinking it still plays.
-const STILL = 0.8 // seconds
 
 function subPlay(feed, inning, half, { count, sub }) {
   const o = openAtBat(feed, inning, half, count)
@@ -36,7 +35,7 @@ function subPlay(feed, inning, half, { count, sub }) {
   return { p: cut, still: false }
 }
 
-function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors, mapSide, teamId }) {
+function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, onCloseCelebration, actors, mapSide, teamId }) {
   const [start] = useState(() => performance.now())
   const covered = !!checkpoint
   const { play, still, celebration, ending } = useMemo(() => {
@@ -55,7 +54,8 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, on
     // Decorative assets may decode after the tap. Their player reports its
     // own completion; this watchdog prevents a stalled import/load holding
     // the scoring control. Ordinary field timing stays on its existing clock.
-    const duration = celebration ? BALLPARK_SCENES[celebration.scene].track.duration + 4 : still ? STILL : play.end
+    // The corner field is gone (Gary, 2026-10-28): an ordinary play draws nothing, so it ends at once.
+    const duration = celebration ? BALLPARK_SCENES[celebration.scene].track.duration + 4 : 0
     const left = duration * 1000 - (performance.now() - start)
     if (left <= 0 || motionIsReduced()) { onEnd(); return undefined }
     const id = setTimeout(onEnd, left)
@@ -63,16 +63,25 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, on
   }, [playing, play, still, celebration, start, onEnd, covered, eligible, checkpointDismissed])
   if (covered && (!eligible || checkpointDismissed)) return checkpoint
   const props = playing && !still ? { play, start } : { play, t: still ? 0 : play.end }
-  // A finished celebration can play again (tapRule.js replay); a held ending scene leaves Next in charge.
-  const replay = celebration && onReplay && !covered ? () => onReplay(idx) : undefined
+  // A finished celebration can play again (tapRule.js replay).
+  // A held ending scene can replay too (Gary, 2026-10-28); Next still opens its checkpoint.
+  const replay = celebration && onReplay && (!covered || eligible) ? () => onReplay(idx) : undefined
   return h('div', { className: 'gdstageScene', 'data-batter-side': mapSide ?? play.batter },
-    h(StageCanvas, { ...props, actors, teamId, celebration, playing, onEnd, onReplay: replay, checkpointHeld: covered && eligible }))
+    celebration && h(StageCanvas, { ...props, actors, teamId, celebration, playing, onEnd, onReplay: replay, onClose: onCloseCelebration, checkpointHeld: covered && eligible }))
 }
 
 // Who stands in at rest: the due-up batter of the half being scored (dueup.js, the pre-pitch lineup),
-// or null when the checkpoint covers the stage or the half on screen is committed.
-export function restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered }) {
-  if (!feed || covered || view <= (mark ?? -1)) return null
+// A committed half read back keeps the batter of the at-bat on screen (Gary, 2026-10-28: the stage
+// is never empty); the half is under the mark, so naming him reveals nothing. Null under the checkpoint.
+// Right after a result tap (the cursor at the next at-bat's start) the man who just finished stays up
+// with his zones and pitches, the ball in play among them, until the next tap (Gary, 2026-10-28).
+export const holdsFinished = ({ view, mark, open, last }) => view <= (mark ?? -1) || (last != null && open?.count > 0 && !(open.sub > 0))
+export function restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered, open = null }) {
+  if (!feed || covered) return null
+  if (holdsFinished({ view, mark, open, last })) {
+    const b = feed.liveData?.plays?.allPlays?.[last ?? stepAtBatIndex]?.matchup?.batter
+    return b?.id ? { id: b.id, last: b.fullName?.split(' ').slice(-1)[0] ?? '' } : null
+  }
   return selectDueUpDuring(feed, inning, half, mark, last ?? stepAtBatIndex, 1)?.batters?.[0] ?? null
 }
 
@@ -82,20 +91,19 @@ export const restZones = (zm, batterId, hidden) => (!hidden && batterId != null 
 
 // At rest the batter stands where he will hit: a switch hitter (S) opposite the pitcher's throwing
 // hand. Both are pre-game player data. A revealed play uses its own matchup.batSide instead.
-function Rest({ StageCanvas, wall, batSide, pitchHand, zones, onZone, actors, teamId }) {
+function Rest({ batSide, pitchHand }) {
   const side = battingSide(batSide, pitchHand)
-  const play = useMemo(() => stagePlay({ matchup: { batSide: { code: side }, pitchHand: { code: pitchHand } } }, wall), [wall, side, pitchHand])
-  return h('div', { className: 'gdstageScene', 'data-batter-side': side },
-    h(StageCanvas, { play, t: 0, zones, onZone, actors, teamId, label: 'The field before the pitch' }))
+  // At rest the batting view stands alone: the corner field draws only a play (Gary, 2026-10-28).
+  return h('div', { className: 'gdstageScene', 'data-batter-side': side })
 }
 
 // `run` counts trail-card replays (tapRule.js replay): a new run remounts the play, so its clock restarts.
-export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, onReplay, batSide, pitchHand, zones, onZone, checkpoint, checkpointDismissed, onCheckpoint, mark, step, open, batter }) {
+export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, onReplay, batSide, pitchHand, zones, onZone, checkpoint, checkpointDismissed, onCheckpoint, onCloseCelebration, mark, step, open, batter }) {
   // A numbered play keeps the checkpoint inside Played (pending or dismissed), so it never remounts.
   if (checkpoint && (shown == null || typeof shown === 'object')) return checkpoint
   const teamId = feed?.gameData?.teams?.[half === 'top' ? 'away' : 'home']?.id
   const field = (actors) => shown != null
-    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, actors, teamId, mapSide: batter ? battingSide(batSide, pitchHand) : null })
+    ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, onCloseCelebration, actors, teamId, mapSide: batter ? battingSide(batSide, pitchHand) : null })
     : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone, actors, teamId })
   if (mark == null && shown == null) return field(null)
   return h(SealBox, { coverless: true, forceRevealed: true }, () => field(mark == null ? null

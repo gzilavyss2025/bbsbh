@@ -102,7 +102,7 @@ test('the open box: each pitch adds its number to B or S; the code stays under t
   const out = hero(F823, 1, 'bottom', { count: c, sub: 8 })
   assert.match(out, /<i>B<\/i><span class="gdhero__pip">3<\/span><span class="gdhero__pip">4<\/span><span class="gdhero__pip">6<\/span><\/div>/)
   assert.match(out, /<i>S<\/i><span class="gdhero__pip">1<\/span><span class="gdhero__pip">2<\/span><span class="gdhero__pip">5<\/span><span class="gdhero__pip">7<\/span><span class="gdhero__pip">8<\/span><\/div>/)
-  assert.match(out, /class="gdhero__code is-taped">Sealed</)
+  assert.match(out, /class="gdhero__code"><\/span>/)
   // The shown pitch reads as a sentence, its call included (a foul here).
   assert.match(out, /Matthews throws a 95 mph four-seam fastball, fouled off\./)
 })

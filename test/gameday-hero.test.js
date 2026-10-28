@@ -88,7 +88,7 @@ test('hero: before any at-bat is revealed, no at-bat value of the half is in the
   const out = html({ last: null })
   // The blank scorebook box under its tape, and the batter at the plate (the pre-pitch lineup).
   assert.match(out, /aria-label="Scorebook box: at bat"/)
-  assert.match(out, /gdhero__code is-taped">Sealed</)
+  assert.match(out, /class="gdhero__code"><\/span>/)
   assert.match(out, /class="gdhero__who">Josh Naylor</)
   for (const secret of ['1B', 'Singles', 'Homers', 'mph', 'Rodden', 'Doubles']) assert.ok(!out.includes(secret), secret)
 })

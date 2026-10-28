@@ -19,15 +19,15 @@
 .gdnext[data-tier='P'] {
   grid-template-columns: minmax(0, 1fr);
   --gd-band-h: 86px;
-  --gd-bar-h: 80px;
-  /* The hero (a 104px box) plus the trail on its floor (gdnext__herotrail); the stage takes the rest. */
-  grid-template-rows: auto auto minmax(0, 1fr) 236px var(--gd-bar-h);
+  --gd-bar-h: 64px;
+  /* The hero (a 104px box and its contact strip) plus the trail on its floor (gdnext__herotrail); the stage takes the rest. */
+  grid-template-rows: auto auto minmax(0, 1fr) 244px var(--gd-bar-h);
   grid-template-areas: 'chrome' 'band' 'stage' 'hero' 'bar';
 }
 .gdnext[data-tier='T'] {
   grid-template-columns: minmax(0, 452fr) minmax(0, 264fr);
   --gd-band-h: 72px;
-  --gd-bar-h: 80px;
+  --gd-bar-h: 64px;
   grid-template-rows: auto auto 44px minmax(0, 1fr) 268px 66px var(--gd-bar-h);
   grid-template-areas: 'chrome chrome' 'band band' 'navigator navigator' 'stage stage' 'hero hero' 'trail trail' 'bar bar';
 }
@@ -100,7 +100,7 @@
 /* The bar: menu door, the step switch, the advance. */
 /* layout-exempt: one row of three controls */
 .gdnext__bar { grid-area: bar; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; gap: var(--space-2); min-width: 0;
-  padding: var(--space-2) var(--space-3); background: transparent; border-top: var(--bw-heavy) solid var(--border-stamped); }
+  padding: var(--space-1) var(--space-3); background: transparent; }
 .gdnext__bar .gdnext__menu { margin: 0; border-radius: 0; flex: none; width: auto; min-width: 88px; font-family: var(--font-display); font-weight: var(--w-regular); letter-spacing: var(--ls-label); }
 .gdnext__switch { flex: none; display: flex; white-space: nowrap; }
 /* Menu, the switch and the advance share one height, so the three read as one row. */
@@ -198,7 +198,7 @@
 .gdnext__band .inhead__runs--home { padding-left: var(--space-3); }
 /* layout-exempt: the two out dots one over the other */
 .gdnext__band .inhead__outs { flex-direction: column; }
-.gdnext__band .inhead .inhead__runs { font-size: var(--fs-hero-2xl); -webkit-text-stroke-width: 5px; /* raw-value-exempt: the score bug's outline at its full digit */ }
+.gdnext__band .inhead .inhead__runs { font-size: var(--fs-hero-2xl); top: -0.06em; /* the display digits sit low in their line box: lift them to the band's middle */ -webkit-text-stroke-width: 5px; /* raw-value-exempt: the score bug's outline at its full digit */ }
 .gdnext__band .inhead .inhead__num { font-size: var(--fs-title-md); }
 .gdnext__band .inhead .basestate { width: 46px; height: 46px; } /* raw-value-exempt: the bases fill the band's height beside the inning and the outs */
 .gdnext__band .inhead .inhead__num { font-size: var(--fs-title-sm); }
@@ -208,7 +208,25 @@
 .gdnext[data-rails] { padding-top: 0; }
 .gdnext__chrome { grid-area: chrome; min-width: 0; }
 .gdnext__chrome .sitebar { padding-top: env(safe-area-inset-top); padding-bottom: 0; padding-right: var(--space-2); padding-left: var(--space-2); }
-.gdnext__chrome .jumpbar { position: static; margin: 0; padding: 0 var(--space-2) var(--space-1); }
+.gdnext__chrome .jumpbar { position: static; margin: 0; border-block: 0; background: transparent; padding: 0 var(--space-2) var(--space-1); }
 .gdnext__chrome .jumpbar__aside, .gdnext__chrome .jumpbar__item--wide { display: none; }
 .gdnext__chrome .jumpbar__row { gap: 0; }
 .gdnext__chrome .jumpbar__item { flex: 1; text-align: center; justify-content: center; }
+/* The band's club marks fill its height (Gary, 2026-10-28): HeaderBug sizes them 40px inline for the
+   half page's shorter bug, so the band overrides that one size. */
+.gdnext__band .inhead__half .teamlogo { width: calc(var(--gd-band-h) * .64) !important; height: calc(var(--gd-band-h) * .64) !important; }
+/* The marks ride out to the band's ends and may clip there (Gary, 2026-10-28), clear of the score. */
+.gdnext__band .inhead { overflow: hidden; }
+.gdnext__band .inhead__half--away .teamlogo { translate: -28% 0; }
+.gdnext__band .inhead__half--home .teamlogo { translate: 28% 0; }
+/* An open rail comes out of the frame's edge, not out of its tab: the tabs step aside while one is
+   open, so a tab dragged to any height never reads as the panel's handle (Gary, 2026-10-28). */
+.gdnext:has(.gdnext__rail[data-open]) .gdnext__railtab { visibility: hidden; }
+/* The Menu sheet portals outside #root, so #root's all-caps rule misses it: it shouts here as the page does. */
+.gdnext__folded { text-transform: uppercase; }
+/* Each rail scrolls in its box under ScrollCue's "more below" chevron (Gary, 2026-10-28). */
+/* layout-exempt: the rail's one scroll box filling it */
+.gdnext__rail > .gdnext__slot { display: flex; flex-direction: column; }
+.gdnext__railscroll .gdscroll__in { padding-right: 0; }
+/* The Due up list runs to the rail's edges: no inset around it. */
+.gdnext__rail--left .gdnext__slot--battingOrder .statgrid { padding: 0; }

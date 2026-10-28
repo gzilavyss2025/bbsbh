@@ -51,7 +51,7 @@
 .gdhero__dia { position: relative; }
 .gdhero__dia svg { position: absolute; left: 25%; top: 45%; width: 49%; height: 38%; overflow: visible; }
 .gdhero__base { fill: none; stroke: var(--text-heading); stroke-width: 1px; vector-effect: non-scaling-stroke; }
-.gdhero__leg { fill: none; stroke: var(--text-heading); stroke-width: 4px; stroke-linecap: square; stroke-linejoin: miter; vector-effect: non-scaling-stroke; }
+.gdhero__leg { fill: none; stroke: var(--text-heading); stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; /* a smoother pencil line (Gary, 2026-10-28) */ vector-effect: non-scaling-stroke; }
 .gdhero__run { fill: var(--text-heading); opacity: 0.22; }
 /* The result box: heavy, top left, laid over the frame so the two corners are one line. The scorer's rule runs
    from its right edge to the first column, on its bottom edge. */
@@ -72,8 +72,9 @@
   text-transform: uppercase;
 }
 /* The backwards K a scorer draws for a called third strike */
-.gdhero__play.is-looking { transform: scaleX(-1); }
-.gdhero__rbi { position: absolute; right: var(--space-2); top: 0; height: var(--gd-code-h); display: flex; align-items: center; font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); }
+.gdhero__play.is-looking { transform: translate(-50%, -50%) scaleX(-1); } /* keep the centring: the backwards K mirrors in place */
+.gdhero__rbi { position: absolute; left: calc(60% - var(--bw-hair)); right: 0; top: calc(-1 * var(--bw-hair)); height: var(--gd-code-h); box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  font: var(--w-bold) calc(var(--gd-code-h) * .72) / 1 var(--font-display); /* one digit, 1 to 4: it fills the cell, in the code box's face */ background: var(--accent-positive); color: var(--text-on-ink-bright); } /* fills the cell beside the code box (60%, as .gdhero__code) */
 /* The out circle: a shaded disc centred on the B column's rule, the out number inside. It always paints over the
    pitch columns (z-index 2: the columns are positioned for their zone handle and come later in the grid's order). */
 .gdhero__out { position: absolute; z-index: 2; right: calc(-0.5 * var(--bw-hair)); bottom: 0; height: 30%; aspect-ratio: 1; transform: translateX(50%);
@@ -133,3 +134,19 @@
 .gdhero__note--2 { left: 62%; bottom: 46%; }
 .gdhero__note--3 { right: 62%; bottom: 46%; }
 .gdhero__note--4 { right: 62%; top: 72%; }
+/* The display digits sit low in their line box: lift the out number to the ring's middle. */
+.gdhero__out { box-sizing: border-box; line-height: var(--lh-solid); padding-bottom: 0.14em; }
+/* A hard-hit ball (95 mph and up): the exit-velo cell breathes in the hit colour, slow and faint. */
+.gdhero__contact div.is-hard { animation: gdhero-hard 2.4s ease-in-out infinite; }
+@keyframes gdhero-hard {
+  0%, 100% { background: transparent; }
+  50% { background: color-mix(in srgb, var(--accent-negative) 22%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .gdhero__contact div.is-hard { animation: none; background: color-mix(in srgb, var(--accent-negative) 16%, transparent); } }
+:root[data-motion='reduced'] .gdhero__contact div.is-hard { animation: none; background: color-mix(in srgb, var(--accent-negative) 16%, transparent); }
+/* The Distance cell is a toggle: it keeps the cell's own column look, no button chrome. */
+/* layout-exempt: the cell's label over its value */
+.gdhero__parks { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+.gdhero__parks dd small { white-space: nowrap; }
+/* On the phone the contact strip keeps a step of air under the box and its out ring. */
+.gdnext[data-tier='P'] .gdhero__contact { margin-top: var(--space-2); }

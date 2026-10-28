@@ -151,3 +151,11 @@
 .gdnext[data-tier='P'] .gdcp__page[data-page='pitching'] .gdpl { padding-inline: 0; }
 /* P: no due-up photos, so names and averages fit the short page (Gary, 2026-10-28). */
 .gdnext[data-tier='P'] .gdcp__dueups li > .plink:has(> .shot) { display: none; }
+/* The half's tally shares the pitching lines' grid below it (panels.css .gdpl__table): the same type,
+   cell padding and flush left edge, so both tables' columns and rules line up. */
+.gdcp__page[data-page='pitching'] .gdcp__table { font-size: var(--fs-cell); margin-bottom: var(--space-3); }
+.gdcp__page[data-page='pitching'] .gdcp__table :is(th, td) { padding: var(--space-1) 0 var(--space-1) var(--space-1); }
+.gdcp__page[data-page='pitching'] .gdcp__table :is(th, td):first-child { padding-left: 0; }
+/* The due-up under the phone's notes (checkpointMarkup.js `folded`); the wider tiers keep its own page. */
+.gdcp__notesdue { flex: none; margin-top: var(--space-2); }
+.gdnext:not([data-tier='P']) .gdcp__notesdue { display: none; }

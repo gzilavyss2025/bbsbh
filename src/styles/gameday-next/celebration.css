@@ -9,3 +9,12 @@
 /* The hidden legacy engine portals its decorative stamp to body. The new
    revealed scene supplies the same event title; do not stamp over its art. */
 body:has(.gdcelebration) .bigplay { display: none; }
+/* The ✕ that puts the scene away, over its top right corner. */
+.gdcelebration__close { position: absolute; top: var(--space-1h); right: var(--space-1h); z-index: 2; pointer-events: auto; } /* the scene layer passes taps through */
+/* The scene fills the stage (Gary, 2026-10-28): the 16:9 art is cropped at its sides, never stretched,
+   so no bars sit above and below it on a taller stage. */
+.gdcelebration .ballpark { width: 100%; height: 100%; aspect-ratio: auto; }
+.gdcelebration .ballpark__canvas { object-fit: cover; }
+/* The celebrating club's mark sits over the stands at the scene's upper left, scaled with the stage. */
+.gdcelebration__club { position: absolute; z-index: 1; left: 9%; top: 16%; width: min(24cqw, 30cqh, 112px); aspect-ratio: 1; pointer-events: none; }
+.gdcelebration__club .teamlogo { width: 100% !important; height: 100% !important; object-fit: contain; }

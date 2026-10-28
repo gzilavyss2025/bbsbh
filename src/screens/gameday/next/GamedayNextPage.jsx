@@ -7,6 +7,7 @@ import { blocksFor, menuFor } from '../../../lib/gameday/ladder.js'
 import { BLOCK_LABEL, GamedayMenu } from './GamedayMenu.jsx'
 import { GamedayPanel } from './panels/GamedayPanels.jsx'
 import { useTier } from './useTier.js'
+import { ScrollCue } from './ScrollCue.jsx'
 
 // The Gameday page (ADR-0043's 2026-10-27 amendment): a fixed no-scroll frame whose blocks the
 // window's tier places (lib/gameday/ladder.js). `engine` is the old half page, mounted hidden so
@@ -216,17 +217,18 @@ export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine,
           <Button ref={tabRight} size="control" className="gdnext__railtab gdnext__railtab--right" style={dragRight.style} data-lifted={dragRight.lifted || undefined} {...dragRight.handlers} aria-expanded={rail === 'right'} aria-controls="gdnext-rail-right" onClick={() => dragRight.tapped() && setRail('right')}>Pitcher</Button>
           {rail && <button type="button" className="gdnext__scrim" aria-label="Close" onClick={() => setRail(null)} />}
           <aside ref={railLeft} tabIndex={-1} id="gdnext-rail-left" className="gdnext__rail gdnext__rail--left" data-open={rail === 'left' || undefined} aria-label="Due up" inert={rail !== 'left'}>
-            {seen.left && <div className="gdnext__slot gdnext__slot--battingOrder"><GamedayPanel block="battingOrder" ctx={panels} /></div>}
+            {seen.left && <div className="gdnext__slot gdnext__slot--battingOrder"><ScrollCue label="More batters below" className="gdnext__railscroll"><GamedayPanel block="battingOrder" ctx={panels} /></ScrollCue></div>}
           </aside>
           <aside ref={railRight} tabIndex={-1} id="gdnext-rail-right" className="gdnext__rail gdnext__rail--right" data-open={rail === 'right' || undefined} aria-label="Pitcher" inert={rail !== 'right'}>
-            {seen.right && <div className="gdnext__slot gdnext__slot--arm"><GamedayPanel block="arm" ctx={panels} /></div>}
+            {seen.right && <div className="gdnext__slot gdnext__slot--arm"><ScrollCue label="More of the pitcher below" className="gdnext__railscroll"><GamedayPanel block="arm" ctx={panels} /></ScrollCue></div>}
           </aside>
         </>
       )}
       <div hidden>{engine}</div>
       {menu && (
         <GamedayMenu
-          folded={rails ? menuFor(tier).filter((b) => b !== 'battingOrder') : menuFor(tier)}
+          // The rails carry the batting order and the hero's floor the trail (Gary, 2026-10-28), so the Menu drops both there.
+          folded={rails ? menuFor(tier).filter((b) => b !== 'battingOrder' && !(tier === 'P' && b === 'trail')) : menuFor(tier)}
           panels={panels}
           onClose={() => setMenu(false)}
           onBoxScore={onBoxScore}
