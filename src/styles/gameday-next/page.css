@@ -156,9 +156,15 @@
    band height. The pitcher and batter bars leave it (the arm and the lineup say who they are). */
 .gdnext__band .inhead { display: block; margin: 0; box-shadow: none; height: var(--gd-band-h); box-sizing: border-box; }
 .gdnext__band .inhead__bars { display: none; }
-.gdnext__band .inhead__strip { min-height: 0; height: 100%; }
+/* The plate takes its row's width (inning, bases, outs) rather than the score bug's 92px floor, which
+   the row filled edge to edge; its padding keeps that row clear of the halves' leaning edges. */
+/* layout-exempt: the score bug's five-cell strip, its plate sized to its row */
+.gdnext__band .inhead__strip { min-height: 0; height: 100%; grid-template-columns: 72px minmax(0, 1fr) auto minmax(0, 1fr) 72px; }
 /* layout-exempt: the plate as three columns: the inning, the bases, the outs */
-.gdnext__band .inhead__center { flex-direction: row; justify-content: center; gap: var(--space-3); padding: 0; }
+.gdnext__band .inhead__center { flex-direction: row; justify-content: center; gap: var(--space-3); padding: 0 var(--space-4); }
+/* The runs stand off the lean, which reaches into their cell at its foot (away) and its head (home). */
+.gdnext__band .inhead__runs--away { padding-right: var(--space-3); }
+.gdnext__band .inhead__runs--home { padding-left: var(--space-3); }
 /* layout-exempt: the two out dots one over the other */
 .gdnext__band .inhead__outs { flex-direction: column; }
 .gdnext__band .inhead .inhead__runs { font-size: var(--fs-hero-2xl); -webkit-text-stroke-width: 5px; /* raw-value-exempt: the score bug's outline at its full digit */ }
