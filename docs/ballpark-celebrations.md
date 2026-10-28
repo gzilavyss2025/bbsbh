@@ -85,8 +85,14 @@ depends on the sealed result (ADR-0046, ADR-0123).
 selected result. The ordinary field's end state stays behind it until art is
 ready. Import/image failure restores the field and releases playback; a bounded
 post-reveal watchdog also prevents a stalled download holding the scoring control.
-The Skip button uses the same completion callback for ordinary celebrations.
-App/OS reduced motion shows the final pose without an extra animation-skip tap.
+The Skip button (bottom right, while it plays) uses the same completion callback
+for ordinary celebrations. Once one ends, Replay (top right) plays the same at-bat
+again through the tap rule's `replay`, as a trail card does; keyboard focus moves
+Skip → Replay at the end and Replay → Skip on the restart. `.gdcelebration`'s
+z-index lifts the scene over the field and its hover targets, and `preparedArt`
+lets a replayed scene start ready, so the field never flashes through.
+App/OS reduced motion shows the final pose without an extra animation-skip tap,
+and offers no Replay.
 
 The scene contains within the existing stage at each layout size. Once ready,
 its letterbox covers the old field; the legacy engine's body-portal big-play
@@ -95,7 +101,7 @@ that ends a half or the game celebrates before its checkpoint. Its final pose
 stays on screen until the bottom Next › button opens the summary; that press
 does not reveal another play, turn the half, or change the scoring frontier.
 Next can also dismiss the animation early. Reduced motion keeps this same
-explicit handoff. The ending scene has no separate Skip control. Ordinary
+explicit handoff. The ending scene has no separate Skip or Replay control. Ordinary
 ending plays do not add a hold. Cold/return visits retain the existing read-back
 flow without replaying celebrations. Eligibility is reported from the revealed
 stage subtree as a presentation flag only.

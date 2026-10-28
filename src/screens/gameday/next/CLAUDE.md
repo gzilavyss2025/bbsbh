@@ -56,6 +56,6 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   removed in the #2676 stack: the sprites replace it), also inspected at `/animation-lab#ballpark`:
   separate character atlases, stadium, palette preparation and finite choreography. `cutscene/integration/`
   selects completed revealed results inside `GamedayStage`'s SealBox subtree; the stage's existing tap rule
-  starts/skips it. Assets and chunks fail back to the ordinary field. A qualifying ending scene holds
+  starts/skips it, and a finished one offers Replay (tapRule `replay`; none while held for the checkpoint). Assets and chunks fail back to the ordinary field. A qualifying ending scene holds
   until bottom Next opens its checkpoint without advancing the game; cold visits retain ordinary read-back.
   Authoring, asset provenance and the next steps live in `docs/ballpark-celebrations.md`.

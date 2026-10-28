@@ -32,6 +32,11 @@ function rgb(css) {
   return [...g.getImageData(0, 0, 1, 1).data].slice(0, 3)
 }
 
+// The art prepareArt already finished for these colours, or null. Synchronous.
+export function preparedArt(helmet, trim, character = HOME_RUN_ART, backdrop = STADIUM_URL) {
+  return palettes.get(`${JSON.stringify(character)}:${backdrop}:${helmet}:${trim}`)?.art ?? null
+}
+
 export function prepareArt(helmet, trim, character = HOME_RUN_ART, backdrop = STADIUM_URL) {
   const key = `${JSON.stringify(character)}:${backdrop}:${helmet}:${trim}`
   if (palettes.has(key)) return palettes.get(key)
@@ -57,6 +62,8 @@ export function prepareArt(helmet, trim, character = HOME_RUN_ART, backdrop = ST
     return { atlas, stadium, character }
   }).catch((error) => { palettes.delete(key); throw error })
   palettes.set(key, ready)
+  // Kept on the promise too, so a remounted scene (Replay) starts ready instead of flashing the field.
+  ready.then((art) => { ready.art = art }, () => {})
   // A bounded palette cache: frame strips share these surfaces, not copies.
   if (palettes.size > 8) palettes.delete(palettes.keys().next().value)
   return ready

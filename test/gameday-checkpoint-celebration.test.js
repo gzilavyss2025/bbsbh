@@ -74,3 +74,19 @@ test('the checkpoint keeps one position in the tree from pending to dismissed', 
   assert.match(sealed({}), /<s><b data-checkpoint/)
   assert.match(sealed({ checkpointDismissed: true }), /<s><b data-checkpoint/)
 })
+
+// Gary, 2026-10-28: a finished celebration offers Replay; a held ending scene leaves Next in charge.
+test('a finished celebration offers Replay of its own at-bat, but not while it is held for the checkpoint', () => {
+  const f = feedOf(824716), ps = f.liveData.plays.allPlays
+  const hr = ps.find((p) => p.result.eventType === 'home_run')
+  const asked = []
+  const Probe = ({ onReplay }) => { onReplay?.(); return h('i', { 'data-replay': !!onReplay }) }
+  const render = (play, extra) => renderToStaticMarkup(h(GamedayStage, {
+    SealBox: ({ children }) => children(), StageCanvas: Probe, feed: f, inning: play.about.inning, half: play.about.halfInning,
+    wall: wallFn(null), shown: play.about.atBatIndex, playing: false, onReplay: (idx) => asked.push(idx), ...extra,
+  }))
+  assert.match(render(hr), /data-replay="true"/)
+  assert.deepEqual(asked, [hr.about.atBatIndex])
+  const slam = feedOf(777747).liveData.plays.allPlays.find((p) => p.result.eventType === 'home_run' && p.result.rbi === 4)
+  assert.match(render(slam, { feed: feedOf(777747), checkpoint }), /data-replay="false"/)
+})
