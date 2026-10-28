@@ -14,7 +14,9 @@ import { DEFENSE_SPOTS } from '../../../../lib/ballpark/layout/defenseWindow.js'
 import { parkWindow } from '../../../../lib/ballpark/layout/parkWindow.js'
 import { revealInning } from '../../../../api/linescore.js'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
-import { pitcherDayLine } from '../../../../api/gameday/dayLine.js'
+import { pitcherDayLine, pitchingDayLines } from '../../../../api/gameday/dayLine.js'
+import { pitchingLinesMarkup } from './pitchingLinesMarkup.js'
+import { createElement } from 'react'
 import { halfIndex, selectMoundPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
 import { PitcherCard } from '../../../../components/playbyplay/pitcherCard/PitcherCard.jsx'
 import { defenseAt } from '../../../../api/gameday/defense.js'
@@ -263,7 +265,14 @@ const EventLog = ({ ctx }) => (
   </Sealable>
 )
 
-const PANELS = { navigator: Navigator, trail: Trail, battingOrder: BattingOrder, reference: Reference, arm: Arm, eventLog: EventLog }
+// The scorebook's pitching page, both clubs, as of the step (Gary, 2026-10-28): the Menu's block.
+const PitchingLines = ({ ctx }) => (
+  <Sealable ctx={ctx} reach>
+    {() => pitchingLinesMarkup(createElement, { feed: ctx.feed, lines: pitchingDayLines(ctx.feed, { inning: ctx.inning, half: ctx.half, step: ctx.step, revealedThrough: ctx.mark }) })}
+  </Sealable>
+)
+
+const PANELS = { navigator: Navigator, trail: Trail, battingOrder: BattingOrder, reference: Reference, arm: Arm, eventLog: EventLog, pitchingLines: PitchingLines }
 
 // The panel for a ladder block, or null for the blocks other prompts build.
 export function GamedayPanel({ block, ctx }) {

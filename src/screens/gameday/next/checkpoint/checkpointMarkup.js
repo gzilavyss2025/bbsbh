@@ -1,5 +1,6 @@
 import { checkpointPages } from '../../../../api/gameday/checkpoint.js'
-import { batterDayLine } from '../../../../api/gameday/dayLine.js'
+import { batterDayLine, pitchingDayLines } from '../../../../api/gameday/dayLine.js'
+import { pitchingLinesMarkup } from '../panels/pitchingLinesMarkup.js'
 import { halfIndex } from '../../../../api/select.js'
 import { segmentedMarkup } from '../../../../lib/design/segmentedClass.js'
 import { ordinal } from '../../../../lib/format.js'
@@ -25,13 +26,16 @@ function tally(h, f, p) {
     cells(h, 'pitches', [['Pitches', p.pitches], ['Whiffs', p.whiffs], ['Fouls', p.fouls]])]
 }
 
-function pitching(h, f) {
+// The half's pitch tally, then the game's lines for both clubs as of the half's end (the scorebook's
+// pitching page, pitchingLinesMarkup).
+function pitching(h, f, lines) {
   const row = (name, l, key, className) => h('tr', { key, className }, h('td', null, name), h('td', null, l.pitches),
     h('td', null, l.strikes), h('td', null, l.whiffs), h('td', null, l.fouls))
-  return h('table', { className: 'gdcp__table' },
+  return [h('table', { key: 'half', className: 'gdcp__table' },
     h('thead', null, h('tr', null, ...['Pitcher', 'Pitches', 'Strikes', 'Whiffs', 'Fouls'].map((c) => h('th', { key: c }, c)))),
     h('tbody', null, ...f.pitchers.map((l) => row(l.last, l, l.id)),
-      f.pitchers.length > 1 && row('Half', f, 'tot', 'is-total')))
+      f.pitchers.length > 1 && row('Half', f, 'tot', 'is-total'))),
+  lines && h('div', { key: 'game' }, lines)]
 }
 
 // The name opens his hover card and his page (PlayerLink); then the RBI, the out circle, and the code
@@ -94,10 +98,10 @@ const facts = (h, f, Seen, on, nameOf, Scroll) => {
   ]
 }
 
-function body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line }) {
+function body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line, lines }) {
   const f = pages.find((p) => p.id === id).fields
   if (id === 'tally') return tally(h, f, pages.find((p) => p.id === 'pitching').fields)
-  if (id === 'pitching') return pitching(h, f)
+  if (id === 'pitching') return pitching(h, f, lines)
   if (id === 'atBats') return atBats(h, f, PlayerLink)
   if (id === 'gameSoFar') return gameSoFar(h, f, Headshot, line, PlayerLink)
   return facts(h, f, Seen, on === id, nameOf, Scroll)
@@ -106,7 +110,7 @@ function body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, li
 // Only the notes carry a heading (Gary, 2026-10-27): the other pages' figures say what they are.
 const HEAD = { tally: null, pitching: null, gameSoFar: null, atBats: null, facts: 'Game notes' }
 
-function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line }) {
+function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line, lines }) {
   const ids = pages.map((p) => p.id)
   const on = ids.includes(page) ? page : ids[0]
   const game = pages.find((p) => p.id === 'gameSoFar').fields
@@ -123,7 +127,7 @@ function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, S
       ...ids.map((id) => h('section', {
         key: `${id}-${id === on}`, 'aria-label': LABEL[id],
         className: id === on ? 'gdcp__page is-on' : 'gdcp__page', 'data-page': id,
-      }, heads[id] && h('h4', null, heads[id]), body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line })))))
+      }, heads[id] && h('h4', null, heads[id]), body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, line, lines })))))
 }
 
 export function checkpointMarkup(h, { SealBox, Seen = null, Headshot = null, Scroll = null, PlayerLink = null, entry = null, feed, inning, half, mark, notes = null, page, onPage}) {
@@ -133,6 +137,7 @@ export function checkpointMarkup(h, { SealBox, Seen = null, Headshot = null, Scr
     const next = half === 'top' ? { inning, half: 'bottom' } : { inning: inning + 1, half: 'top' }
     const line = (b) => dueLine(feed, b, next, mark, entry)
     const nameOf = (id) => feed.gameData?.players?.[`ID${id}`]?.lastName ?? null
-    return pages && layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line })
+    const lines = pitchingLinesMarkup(h, { feed, lines: pitchingDayLines(feed, { inning, half, revealedThrough: mark }) })
+    return pages && layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line, lines })
   })
 }

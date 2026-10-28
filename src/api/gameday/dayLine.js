@@ -104,12 +104,21 @@ export function batterDayLine(feed, batterId, { inning, half, step = null, revea
 // yet. Shape: computePitcherLines' row — { id, last, first, jersey, hand, ip,
 // pitches, bf, h, r, er, bb, k }.
 export function pitcherDayLine(feed, pitcherId, { inning, half, step = null, revealedThrough }) {
-  if (pitcherId == null || !inning || !half) return null
+  if (pitcherId == null) return null
+  const lines = pitchingDayLines(feed, { inning, half, step, revealedThrough })
+  return [...lines.away, ...lines.home].find((row) => row.id === pitcherId) ?? null
+}
+
+// Every pitcher's line for today, both clubs, as of the step: the scorebook's pitching page (Gary,
+// 2026-10-28). { away: [...], home: [...] } in the order each club's pitchers entered, rows as above;
+// both empty past the reader's reach.
+export function pitchingDayLines(feed, { inning, half, step = null, revealedThrough }) {
+  if (!inning || !half) return { away: [], home: [] }
   const here = halfIndex(inning, half)
-  if (here > (revealedThrough ?? -1) + 1) return null
+  if (here > (revealedThrough ?? -1) + 1) return { away: [], home: [] }
   step = safeStep(step, here, revealedThrough)
-  // -1 admits nothing from this half: the line is the earlier halves' alone.
+  // -1 admits nothing from this half: the lines are the earlier halves' alone.
   const cut = stepCutAtBatIndex(feed, inning, half, step)
   const lines = computePitcherLines(feed, here - 1, { stepHalfIndex: here, throughAtBatIndex: cut })
-  return [...(lines.away ?? []), ...(lines.home ?? [])].find((row) => row.id === pitcherId) ?? null
+  return { away: lines.away ?? [], home: lines.home ?? [] }
 }
