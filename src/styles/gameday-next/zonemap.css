@@ -5,6 +5,8 @@
   display: flex; flex-direction: column;
   padding: var(--space-1); }
 .gdnext[data-tier='L'] .gdzonemap, .gdnext[data-tier='D'] .gdzonemap { width: min(46%, 320px); height: min(290px, calc(100% - var(--space-3))); bottom: var(--space-2); left: var(--space-2); }
+/* P and T draw the Due up rail's tab on the stage's left edge (page.css): the inset starts clear of it. */
+.gdnext[data-tier='P'] .gdzonemap, .gdnext[data-tier='T'] .gdzonemap { left: var(--space-8); }
 .gdzonemap__dismiss { position: absolute; left: 0; top: 0; z-index: 2; }
 /* layout-exempt: a fixed 3 x 3, the strike zone's nine cells */
 .gdzonemap__grid { position: absolute; right: 0; bottom: 28%; width: 60%; display: grid; grid-template-columns: repeat(3, 1fr); border: var(--bw-rule) solid var(--border-stamped); }
