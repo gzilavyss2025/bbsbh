@@ -660,10 +660,8 @@ test('no band underline reads the seal', () => {
 // not the padded body's, so its layout does not move. `keep` names a frame
 // property that is the block's own look, not the frame: a gap-rule grid's
 // --border-rule ground, the 3px accent rule on the two dossier cards, and the
-// ball-flight popover's raised shadow. `.awards` and `.awardblk` swap the
-// frame at 740px, so they have a test of their own below.
+// ball-flight popover's raised shadow.
 const C2 = [
-  { css: '26-player-page.css', sel: '.milestonewatch', jsx: ['components/playerstats/MilestoneWatchCard.jsx'], ns: 'milestonewatch' },
   { css: '69-hit-chart.css', sel: '.hitchart', jsx: ['components/charts/HitChart.jsx'], ns: 'hitchart' },
   { css: '69-hit-chart.css', sel: '.bflight', jsx: ['components/charts/BallFlight.jsx'], ns: 'bflight', keep: ['box-shadow'] },
   // .factgrid: the Card is the block and keeps its margin; the gap-rule grid
@@ -672,8 +670,6 @@ const C2 = [
   { css: '09-team-info.css', sel: '.factgrid', jsx: ['components/ui/frame/FactGrid.jsx'], ns: 'factgrid' },
 ]
 const FACT_GRID_USERS = [
-  'components/player/AdvancedStatsCard.jsx',
-  'components/playerstats/FoulCard.jsx',
   'screens/lineup/next/LineupFacts.jsx',
 ]
 
@@ -782,23 +778,6 @@ test('the player hover store imports no React and no hook', () => {
 test('C2: the ball-flight card keeps its raised shadow', () => {
   assert.equal(decl(ruleBody(read('69-hit-chart.css'), '.bflight'), 'box-shadow'), 'var(--shadow-raised)')
 })
-
-// Narrow, ONE card holds every award table, divided by hairlines. From 740px
-// the tables pair off and each table is its own card, so the outer block is
-// only the grid. Card draws the frame in both cases, and the CSS never strips
-// one: AwardsLedger picks the framed element from the same WIDE_QUERY.
-test('C2: the awards ledger frames the whole ledger narrow and each table wide', () => {
-  const code = src('components/player/AwardsLedger.jsx')
-  const tags = cardTags(code)
-  assert.ok(tags.some((attrs) => namesClass(attrs, 'awards') && /body="flush"/.test(attrs)), 'the narrow ledger is a Card')
-  assert.ok(tags.some((attrs) => namesClass(attrs, 'awardblk') && /body="flush"/.test(attrs)), 'a wide table is a Card')
-  for (const attrs of tags) assert.doesNotMatch(attrs, /frame=/, 'both are sheets')
-  const css = read('67-awards-ledger.css')
-  for (const sel of ['.awards', '.awards--preview', '.awardblk']) {
-    for (const body of bodiesOf(css, sel)) assert.deepEqual(frameDecls(body), [], `${sel} draws or strips no frame`)
-  }
-})
-
 
 // ---- 14. slice C4: the innings viewer and the game HUD ----
 
@@ -975,7 +954,6 @@ const C3 = [
     sel: '.metric',
     jsx: [
       'components/game/GamePhotosStrip.jsx',
-      'components/teamstats/BullpenBoard.jsx',
       'components/teamstats/SeasonSeriesStrip.jsx',
       'components/team/FormerTeammates.jsx',
       'screens/foul-tracker/Boards.jsx',

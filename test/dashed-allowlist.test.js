@@ -60,7 +60,6 @@ const ALLOWED = {
   ],
   // Chart reference lines: a mean, a median, a key bar. Not a UI state.
   chartLine: [
-    ['26a-percentile-strip.css', '.pctstrip__track::before'],
     ['report/charts.css', '.colchart__rule--mean'],
     ['report/challenge-faces.css', '.chalplot__swatch--line'], // the key's swatch for the dashed MLB-average line on the ABS Challenges plot
     ['postseason/series-parts.css', '.psseries__keybar'],

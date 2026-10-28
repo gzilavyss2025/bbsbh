@@ -900,7 +900,7 @@ don't run these by hand.
   disk with no sweep: the mode for whenever a derived, non-per-game field like
   this one changes and re-fetching every ingested feed would change nothing in
   the database. App reads it via `src/api/pitchArsenal.js` (the opposing-starter
-  card's pitch-mix bar `PitchArsenalMix.jsx`, and the player page's
+  card's pitch-mix bar (its `PitchArsenalMix.jsx` is deleted), and the player page's
   `SimilarPitchers`). Each type row also tallies `century_pitches` (count at
   `CENTURY_MPH`+, summed like `pitches`) and `max_velo` (that type's fastest
   reading, `MAX`'d rather than summed) — `gen-callouts.mjs` joins these
@@ -916,8 +916,7 @@ don't run these by hand.
   pitcher's median distance, in inches, between where the catcher set up and
   where the pitch actually crossed, per pitch type, for one season. Read by
   `src/api/targetCommand.js` for the player page's Analytics tab
-  (`TargetCommand.jsx`, the second percentile strip on that shelf, sitting under
-  the Command Map it deepens).
+  (its `TargetCommand.jsx` strip was deleted as unused; no surface reads it now).
   **The only generator here that reads an OUTSIDE dataset.** The source is
   [OpenCommand](https://huggingface.co/datasets/tomdoyo/open-command) — catcher
   targets inferred from broadcast video, `CC BY-NC-SA 4.0`, so every surface

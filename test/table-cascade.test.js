@@ -447,15 +447,14 @@ test('T3: the seal stays where it was: no gate moved and no api/ import added', 
 
 // ---- slice T4: the small ledgers ----
 //
-// Five tables: the career register (Ledger.jsx; the two splits and the
+// Four tables: the career register (Ledger.jsx; the two splits and the
 // recent-form table left with the old player tabs, #1898), the team page's
-// prospects table, and the three small tables that had no side space (awards,
-// moved up, youngest regulars). `tag` finds the
+// prospects table, and the two small tables that had no side space (moved
+// up, youngest regulars). `tag` finds the
 // <Table> by its className; `frame` and `label` are the expected props.
 const T4 = [
   { css: '26-player-page.css', ns: 'ledger', jsx: 'components/player/Ledger.jsx', tag: 'className=\\{`ledger ', frame: 'bare', label: true, gradient: true },
   { css: '31-wild-card.css', ns: 'prospecttable', jsx: 'screens/team/modules/minors/ProspectsCard.jsx', tag: 'className="ledger prospecttable"', frame: 'bare', label: true },
-  { css: '67-awards-ledger.css', ns: 'awardtbl', jsx: 'components/player/AwardsLedger.jsx', tag: 'className="awardtbl"', frame: 'bare', label: false },
   { css: '78-offseason.css', ns: 'movedup__table', jsx: 'components/offseason/MovedUp.jsx', tag: 'className="movedup__table"', frame: 'bare', label: false, words: true },
   { css: '78-offseason.css', ns: 'seasonnote__table', jsx: 'components/offseason/YoungestRegulars.jsx', tag: 'className="seasonnote__table"', frame: 'bare', label: false, words: true },
 ]
@@ -557,12 +556,6 @@ test('T4: a table of words says it is not a table of figures, and keeps its edge
   assert.equal(decl(ruleBody(css, '.movedup__table :is(th, td):last-child'), 'padding-right'), 'var(--space-3)')
   assert.equal(decl(ruleBody(css, '.movedup__card'), 'margin-top'), 'var(--space-2)')
   assert.equal(decl(ruleBody(css, '.seasonnote__table'), 'margin-top'), 'var(--space-4)')
-})
-
-test('T4: the awards table keeps its column widths and its left reading', () => {
-  const css = read('67-awards-ledger.css')
-  assert.equal(decl(ruleBody(css, '.awardtbl__yr'), 'width'), '62px')
-  assert.equal(decl(rules(css).find(([s]) => s.includes('.awardtbl__lg'))[1], 'width'), '52px')
 })
 
 test('T4: the seal pin: no moved ledger reads a reveal-only module or a seal', () => {

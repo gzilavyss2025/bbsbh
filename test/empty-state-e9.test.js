@@ -24,15 +24,6 @@ test('E9: .hint__link is gone from the stylesheets and from every file under src
   assert.doesNotMatch(jsx, /hint__link/)
 })
 
-test('E9: the season stack renders its empty season on a compact EmptyState', () => {
-  const code = src('components/season/SeasonStack.jsx')
-  assert.match(code, /import \{ EmptyState \} from '\.\.\/ui\/state\/EmptyState\.jsx'/)
-  assert.match(code, /<EmptyState size="compact">\s*\{empty\} in \{year\}\./)
-  assert.doesNotMatch(code, /className="hint"/)
-  // The empty test stays the caller's: a season with no body.
-  assert.match(code, /body \?\? \(/)
-})
-
 test('E9: the umpire page renders its "no games on file" line on EmptyState, test unchanged', () => {
   const code = src('screens/UmpirePage.jsx')
   assert.match(code, /<EmptyState>No games on file for this umpire in \{view\.label\}\.<\/EmptyState>/)

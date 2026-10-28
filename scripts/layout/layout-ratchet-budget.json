@@ -120,10 +120,6 @@
     "wrap": 2,
     "grid": 3
   },
-  "src/styles/26a-percentile-strip.css": {
-    "column": 1,
-    "grid": 3
-  },
   "src/styles/26g-command-received.css": {
     "grid": 2
   },
