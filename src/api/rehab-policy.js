@@ -219,6 +219,18 @@ export function mentionsInjuredList(t) {
   return /(injured|disabled) list/i.test(t.description || '')
 }
 
+// A placement on (or transfer within) the injured list. The player page's
+// activity timeline and career register both read it; it lives here so neither
+// imports the other. transactions/vocabulary.js keeps its own stricter copy that
+// splits a transfer out of a placement.
+export function isIlPlacementTxn(t) {
+  return (
+    t.typeCode === 'SC' &&
+    mentionsInjuredList(t) &&
+    /(placed|transferred)/i.test(t.description || '')
+  )
+}
+
 // The "N-day" qualifier off a placement, hyphenated or not — '7' | '10' | '15' |
 // '60', or null for a plain / full-season list with no day count at all.
 export function injuredListDays(t) {

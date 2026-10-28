@@ -5,7 +5,7 @@
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { monthDay } from '../../lib/dates.js'
 import { ipToOuts } from '../../lib/math/innings.js'
-import { seriesAbbr } from '../boxlines/rows.js'
+import { roundName } from '../../lib/postseason/roundTag.js'
 import { LEAGUE_BY_ID } from '../../lib/postseason/seriesMarks.js'
 import { DASH, NBSP, num } from './shared.js'
 
@@ -98,7 +98,7 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
         level: tagLevel ? SPORT_LABEL[s.sport?.id] ?? '' : '',
         // A postseason game wears its round (WC/DS/LCS/WS); '' for the regular
         // season, so most rows carry no pill at all.
-        series: seriesAbbr(s.gameType, LEAGUE_BY_ID[s.league?.id]),
+        series: roundName(s.gameType, LEAGUE_BY_ID[s.league?.id]),
         result: score ? (group === 'pitching' ? decision(st) : teamResult(score)) : null,
         runs: score?.runs ?? null,
         oppRuns: score?.oppRuns ?? null,

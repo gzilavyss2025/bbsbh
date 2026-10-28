@@ -2,10 +2,9 @@
 // the career timeline live in ./career/progression.js. See ../person.js's
 // header for the module's overall as-of footing.
 import { SPORT_LABEL } from '../../lib/teams.js'
-import { txnDate, transactionTeamRanks } from '../rehab-policy.js'
+import { txnDate, transactionTeamRanks, isIlPlacementTxn } from '../rehab-policy.js'
 import { DASH, num } from './shared.js'
 import { aggregateSplits, withoutMultiTeamAggregate } from './stats.js'
-import { isIlPlacementTxn } from './activity.js'
 
 // ---------------------------------------------------------------------------
 // Career register support — the shared per-row cells and the season/level

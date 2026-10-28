@@ -11,6 +11,7 @@ import {
   openRehabStint,
   mentionsInjuredList,
   injuredListDays,
+  isIlPlacementTxn,
 } from '../rehab-policy.js'
 import { monthDayName } from '../../lib/dates.js'
 import { pitcherRole } from './identity.js'
@@ -79,13 +80,6 @@ export function detectRehabAssignment(transactions, debutYear, asOf) {
 // parking or a winter-ball club's roster move (Aguilas Cibaenas, Cangrejeros de
 // Santurce), never an injury.
 const IL_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'DFA', 'SFA', 'FA', 'DES'])
-export function isIlPlacementTxn(t) {
-  return (
-    t.typeCode === 'SC' &&
-    mentionsInjuredList(t) &&
-    /(placed|transferred)/i.test(t.description || '')
-  )
-}
 function isIlEndingTxn(t) {
   if (IL_END_CODES.has(t.typeCode)) return true
   return (
