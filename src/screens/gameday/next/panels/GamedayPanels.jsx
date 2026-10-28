@@ -96,12 +96,14 @@ function Navigator({ ctx }) {
     </tr>
   )
   return (
+    <div className="gdp__linescroll">
     <table className="gdp__line" aria-label="Line score">
       <thead>
         <tr><th />{cols.map((n) => <th key={n}>{n}</th>)}{['R', 'H', 'E'].map((c, i) => <th key={c} className={i === 0 ? 'is-runs' : undefined}>{c}</th>)}</tr>
       </thead>
       <tbody>{row('top', 'away', meta.away)}{row('bottom', 'home', meta.home)}</tbody>
     </table>
+    </div>
   )
 }
 
@@ -252,13 +254,16 @@ function Arm({ ctx }) {
   return <PitcherCard feed={feed} pitcher={pitcher} teamId={club.id} teamName={club.clubName} side={side} treatment={treatment} relief={false} tonight={tonight} showLast={false} gameday className="gdarm" />
 }
 
+// The description reads on from the batter's name, so its verb starts lower case ("strikes out").
+const afterName = (t) => (/^[A-Z][a-z]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t) // caps-js-exempt: sentence case after a name
+
 const EventLog = ({ ctx }) => (
   <Sealable ctx={ctx}>
     {({ cards }) => (
       <div className="gdp__log">
         <span className="gdp__label">This half</span>
         {cards.map((c) => (
-          <p key={c.atBatIndex}><b>{c.batter?.last}</b> {c.descSegments?.map((s) => s.text ?? s).join('')}</p>
+          <p key={c.atBatIndex}><b>{c.batter?.last}</b> {afterName(c.descSegments?.map((s) => s.text ?? s).join('') ?? '')}</p>
         ))}
       </div>
     )}

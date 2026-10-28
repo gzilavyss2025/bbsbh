@@ -16,6 +16,7 @@
 .ballpark__loading { position: absolute; left: 5%; top: 8%; font-size: var(--fs-small); }
 .ballpark__skip { position: absolute; right: var(--space-2); bottom: var(--space-2); color: var(--stage-chalk); }
 .ballpark__replay { position: absolute; right: var(--space-2); top: var(--space-2); color: var(--stage-chalk); }
+.ballpark__replay:hover, .ballpark__skip:hover { color: var(--text-body); }
 .ballpark__skip:focus-visible, .ballpark__replay:focus-visible { outline: 2px solid var(--focus-ring-band); outline-offset: 2px; }
 .ballpark-review__stage { max-width: 960px; }
 .ballpark-review__timeline { width: 100%; accent-color: var(--accent-primary); min-height: 44px; }

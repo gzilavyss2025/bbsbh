@@ -40,8 +40,8 @@ function pitching(h, f, lines) {
 
 // The name opens his hover card and his page (PlayerLink); then the RBI, the out circle, and the code
 // at the row's end.
-function atBats(h, f, PlayerLink) {
-  return h('ol', { className: 'gdcp__rows' }, ...f.rows.map((r, i) => r.kind === 'sub'
+function atBats(h, f, PlayerLink, Scroll) {
+  const list = h('ol', { className: 'gdcp__rows' }, ...f.rows.map((r, i) => r.kind === 'sub'
     ? h('li', { key: i, className: 'is-sub' }, r.text)
     : h('li', { key: i },
       h('span', { className: 'gdcp__name' }, PlayerLink && r.id != null
@@ -50,6 +50,8 @@ function atBats(h, f, PlayerLink) {
       h('span', null, r.rbi > 0 ? `${r.rbi} RBI` : ''),
       h('span', { className: r.out ? 'gdcp__out' : undefined }, r.out ?? ''),
       h('b', { className: r.calledLooking ? 'is-looking' : undefined }, r.calledLooking ? 'K' : r.code))))
+  // A long half scrolls in its box under the same cue as the notes (Gary, 2026-10-28).
+  return Scroll ? h(Scroll, { label: 'More at-bats below' }, list) : list
 }
 
 // The game page is the due-up alone: the line score lives in the band's tray at the top right (Gary,
@@ -102,7 +104,7 @@ function body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, li
   const f = pages.find((p) => p.id === id).fields
   if (id === 'tally') return tally(h, f, pages.find((p) => p.id === 'pitching').fields)
   if (id === 'pitching') return pitching(h, f, lines)
-  if (id === 'atBats') return atBats(h, f, PlayerLink)
+  if (id === 'atBats') return atBats(h, f, PlayerLink, Scroll)
   if (id === 'gameSoFar') return gameSoFar(h, f, Headshot, line, PlayerLink)
   return facts(h, f, Seen, on === id, nameOf, Scroll)
 }

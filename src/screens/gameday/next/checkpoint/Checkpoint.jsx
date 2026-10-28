@@ -60,7 +60,7 @@ function SeenNotes({ notes, on, ledger, stagedIdx, allShown }) {
 }
 
 // The notes scroll in their box with a bouncing cue (ScrollCue.jsx).
-const NotesScroll = ({ children }) => <ScrollCue label="More notes below">{children}</ScrollCue>
+const NotesScroll = ({ children, label = 'More notes below' }) => <ScrollCue label={label}>{children}</ScrollCue>
 
 // The due-up cards' long surnames keep their height and narrow to fit (.gdcp__fitname): each is squeezed
 // sideways by the share it runs past its card, measured after every render and on a resize.

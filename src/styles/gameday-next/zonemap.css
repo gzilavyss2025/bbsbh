@@ -8,6 +8,10 @@
 /* P and T draw the Due up rail's tab on the stage's left edge (page.css): the inset starts clear of it. */
 .gdnext[data-tier='P'] .gdzonemap, .gdnext[data-tier='T'] .gdzonemap { left: var(--space-8); }
 .gdzonemap__dismiss { position: absolute; left: 0; top: 0; z-index: 2; }
+/* The way back to a dismissed zone map: a boxed control in the stage's lower left. */
+.gdzonemap__show { position: absolute; z-index: 1; bottom: var(--space-1h); left: var(--space-1h);
+  border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); border-radius: 0; }
+.gdnext[data-tier='P'] .gdzonemap__show, .gdnext[data-tier='T'] .gdzonemap__show { left: var(--space-8); }
 /* layout-exempt: a fixed 3 x 3, the strike zone's nine cells */
 .gdzonemap__grid { position: absolute; right: 0; bottom: 28%; width: 60%; display: grid; grid-template-columns: repeat(3, 1fr); border: var(--bw-rule) solid var(--border-stamped); }
 .gdzonemap__cell { padding: var(--space-1h) 0; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
