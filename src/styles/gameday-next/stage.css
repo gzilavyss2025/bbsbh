@@ -1,9 +1,9 @@
 /* ==== GAMEDAY's stage canvas (screens/gameday/next/stage/) ====
    A pixel buffer scaled by a whole number: square pixels, no smoothing. */
-.gdstageScene { position: absolute; inset: 0; isolation: isolate; background: var(--bg-canvas); }
-.gdstage { position: absolute; inset: 0 0 22% 30%; display: flex; align-items: center; justify-content: center; overflow: hidden;
-  z-index: 1; }
-.gdnext[data-tier='P'] .gdstage { bottom: 32%; left: 34%; }
+.gdstageScene { position: absolute; inset: 0; background: var(--bg-canvas); }
+.gdstage { position: absolute; inset: var(--space-2) var(--space-2) auto auto; width: 28%; height: 38%; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  z-index: 3; }
+
 .gdstage__canvas { flex: none; image-rendering: pixelated; }
 /* The SealBox around the revealed play adds no box: the canvas fills the slot. The checkpoint's own
    SealBox, nested in the stage's after a revealed third out, adds none either: as a box it grew to

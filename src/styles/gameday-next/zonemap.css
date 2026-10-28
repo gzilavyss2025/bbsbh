@@ -1,18 +1,13 @@
 /* ==== GAMEDAY's static batter and hot/cold zone inset ====
    A compact ready stance beside the plate; the overhead field keeps its fixed framing. */
-/* layout-exempt: the inset sits in the stage's lower-left corner */
-.gdzonemap { position: absolute; z-index: 1; bottom: var(--space-1h); left: var(--space-1h); width: min(56%, 240px); height: min(220px, calc(100% - var(--space-3))); box-sizing: border-box;
-  display: flex; flex-direction: column;
-  padding: var(--space-1); }
-.gdnext[data-tier='L'] .gdzonemap, .gdnext[data-tier='D'] .gdzonemap { width: min(46%, 320px); height: min(290px, calc(100% - var(--space-3))); bottom: var(--space-2); left: var(--space-2); }
-/* P and T draw the Due up rail's tab on the stage's left edge (page.css): the inset starts clear of it. */
-.gdnext[data-tier='P'] .gdzonemap, .gdnext[data-tier='T'] .gdzonemap { left: var(--space-8); }
-.gdzonemap__dismiss { position: absolute; left: 0; top: 0; z-index: 2; }
+/* layout-exempt: the batting view fills the stage behind the corner field */
+.gdzonemap { position: absolute; z-index: 1; inset: 0; box-sizing: border-box; pointer-events: none; }
+.gdzonemap__dismiss { position: absolute; left: var(--space-2); top: var(--space-2); z-index: 2; pointer-events: auto; }
 /* layout-exempt: a fixed 3 x 3, the strike zone's nine cells */
-.gdzonemap__grid { position: absolute; right: 0; bottom: 28%; width: 60%; display: grid; grid-template-columns: repeat(3, 1fr); border: var(--bw-rule) solid var(--border-stamped); }
-.gdzonemap__cell { padding: var(--space-1h) 0; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
+.gdzonemap__grid { position: absolute; left: 52%; bottom: 24%; width: 32%; aspect-ratio: 0.82; transform: translateX(-50%); pointer-events: auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); border: var(--bw-rule) solid var(--border-stamped); }
+.gdzonemap__cell { display: grid; place-items: center; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
   font-variant-numeric: tabular-nums; color: var(--text-heading); border: var(--bw-hair) solid var(--border-stamped); }
-.gdnext[data-tier='L'] .gdzonemap__cell, .gdnext[data-tier='D'] .gdzonemap__cell { padding: var(--space-1h) 0; font-size: var(--fs-small); }
+.gdnext[data-tier='L'] .gdzonemap__cell, .gdnext[data-tier='D'] .gdzonemap__cell { font-size: var(--fs-title-sm); }
 .gdzonemap__num { position: relative; display: inline-block; }
 .gdzonemap__pt { position: absolute; right: 100%; }
 .gdzonemap__cell.is-cold { background: var(--stage-zone-cold); color: var(--text-on-ink); }
@@ -22,16 +17,16 @@
 .gdzonemap__cell.is-hot { background: var(--stage-zone-hot); color: var(--text-on-ink); }
 
 /* layout-exempt: the batter and zone share the same plate, reflected for a left-handed hitter */
-.gdzonemap__plateview { position: relative; flex: 1; min-height: 0; }
-.gdzonemap__batter { position: absolute; left: -15%; bottom: 0; width: auto; height: 100%; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
+.gdzonemap__plateview { position: absolute; inset: 0; }
+.gdzonemap__batter { position: absolute; left: -15%; bottom: -4%; width: auto; height: 120%; pointer-events: auto; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
 .gdzonemap__sprite { display: block; width: 100%; height: 100%; background-image: url('/art/gameday/batter-ready.webp');
   background-repeat: no-repeat; background-size: 200% 100%; background-position: left center; image-rendering: pixelated; }
-.gdzonemap__plate { position: absolute; right: 0; bottom: 2%; width: 60%; height: 20%;
+.gdzonemap__plate { position: absolute; left: 52%; bottom: 6%; width: 32%; height: 14%; transform: translateX(-50%);
   background: var(--border-stamped); clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%); }
 .gdzonemap[data-side='L'] .gdzonemap__batter { left: auto; right: -15%; clip-path: inset(0 24% 0 17%); }
 .gdzonemap[data-side='L'] .gdzonemap__sprite { background-position: right center; }
-.gdzonemap[data-side='L'] .gdzonemap__grid { right: auto; left: 0; }
-.gdzonemap[data-side='L'] .gdzonemap__plate { right: auto; left: 0; }
+.gdzonemap[data-side='L'] .gdzonemap__grid { left: 48%; }
+.gdzonemap[data-side='L'] .gdzonemap__plate { left: 48%; }
 .gdzonemap__plate::after { content: ''; position: absolute; inset: var(--bw-rule); background: var(--surface-card); clip-path: inherit; }
 
 

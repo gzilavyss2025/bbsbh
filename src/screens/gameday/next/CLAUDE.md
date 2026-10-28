@@ -34,7 +34,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   precede runner advances and a settled result. No close-up windup/swing or celebration belongs in this renderer.
   Sprite targets use the global PlayerLink hover card and track the painted figures without React updates per frame;
   `actors.js` reads defense and substitutions only inside a SealBox with the existing step/sub-step clamp.
-  Its surround uses the page's cream canvas. The field leaves room at lower left for a static, handed batter beside the hot/cold zone map; no photo or color wash.
+  Its surround uses the page's cream canvas. The batting view fills the stage with a large handed sprite and hot/cold zone map; the fixed overhead field is a top-right mini-map; no photo or color wash.
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its
