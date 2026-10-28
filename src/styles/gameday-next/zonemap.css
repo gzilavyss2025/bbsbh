@@ -16,7 +16,7 @@
 .gdzonemap__cell.is-hot { background: var(--stage-zone-hot); color: var(--text-heading); }
 
 /* layout-exempt: the batter and zone share the same plate, reflected for a left-handed hitter */
-.gdzonemap__plateview { position: absolute; left: 50%; bottom: 0; width: min(100cqw, calc(100cqh * 1.45)); aspect-ratio: 1.45; transform: translateX(-50%); }
+.gdzonemap__plateview { container-type: inline-size; position: absolute; left: 50%; bottom: 0; width: min(100cqw, calc(100cqh * 1.45)); aspect-ratio: 1.45; transform: translateX(-50%); }
 .gdzonemap__batter { position: absolute; left: -12%; bottom: -2%; width: auto; height: 112%; pointer-events: auto; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
 .gdzonemap__sprite { display: block; width: 100%; height: 100%; background-image: url('/art/gameday/batter-ready.webp');
   background-repeat: no-repeat; background-size: 200% 100%; background-position: left center; image-rendering: pixelated; }
