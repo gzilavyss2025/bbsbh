@@ -5,7 +5,7 @@
 .gdzonemap__dismiss { position: absolute; left: var(--space-2); top: var(--space-2); z-index: 2; pointer-events: auto; }
 /* layout-exempt: a fixed 3 x 3, the strike zone's nine cells */
 .gdzonemap__grid { position: absolute; left: 50%; bottom: calc(var(--gd-ground) + var(--gd-zone-w) * .68); width: var(--gd-zone-w); height: var(--gd-zone-h); transform: translateX(-50%); pointer-events: auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: var(--bw-hair); background: var(--border-hairline); border: var(--bw-rule) solid var(--border-hairline); }
-.gdzonemap__cell { display: grid; place-items: center; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
+.gdzonemap__cell { display: flex; align-items: center; justify-content: center; text-align: center; font: var(--fs-cell) / 1 var(--font-mono);
   font-variant-numeric: tabular-nums; color: var(--text-heading); background: var(--stage-zone-lukewarm); }
 .gdzonemap__num { position: relative; display: inline-block; }
 .gdzonemap__pt { position: absolute; right: 100%; }
