@@ -104,7 +104,7 @@ These have one home, and every other caller imports it. I found no copy.
 
 - **Run expectancy.** `src/lib/runExpectancy.js`, imported by `gen-run-expectancy.mjs`, `gen-umpire-accuracy.mjs`, `umpireFavor.js` and `scripts/lib/abs/rows.mjs`.
 - **Tiers.** `src/lib/statTiers.js` (`tierForZ`, `leanTierForZ`) has one caller, `src/api/umpires.js`. The prospect bands (`levelTier`, `standingLabel`) live only in `src/api/prospectTrend.js`.
-- **The percentile strip.** `dotFraction` in `src/lib/percentileStrip.js` takes Savant's own percentile. `gen-savant-percentiles.mjs` does no percentile math.
+- **The percentile strip.** `dotFraction` took Savant's own percentile; `src/lib/percentileStrip.js` was deleted with the unused strip component. `gen-savant-percentiles.mjs` does no percentile math.
 - **Prospect percentile rank.** `percentileRank` in `scripts/lib/prospectPercentile.mjs` is shared by both trend generators. (A5 is about what goes into it.)
 - **Rookie limit.** `scripts/lib/rookie-crossing.mjs`, shared by both rookie generators.
 - **Bullpen thresholds.** `gen-workload.mjs` imports `clubPenCounts` from `src/api/workload.js`.

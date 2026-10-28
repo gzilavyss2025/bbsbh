@@ -6,9 +6,8 @@
 // hands it decided-game clips — see TeamHighlightsRail's header). `clip`
 // only needs `poster` (image URL) and `title`; `caption` arrives as a
 // prebuilt string ("Jul 9 @ STL") because the game lookup that produces it
-// is the CALLER's business — that's what lets the planned
-// PlayerHighlightsRail (.scratch/highlights-cascade/issues/04) render this
-// exact card from a differently-sourced clip list.
+// is the CALLER's business — that's what lets any rail render this exact card
+// from a differently-sourced clip list.
 //
 // Two sizes, one card. The default is the rail slip (fixed 232px, title and
 // caption on the lower margin). `feature` is the same print blown up to fill

@@ -445,7 +445,7 @@ for each generator; the reader modules:
   postseason, same shape (ADR-0102); `foulsInScope`/`hasPostseason` pick one for the
   page's Regular season / Postseason toggle. `compareFoulsInScope` reads the compare
   season in the same scope and gives `null` for a season with no postseason, never its
-  regular season; `foulCardView` is the pure half of the old player-page foul card (deleted). Feeds the Foul Tracker page (`/fouls`,
+  regular season. Feeds the Foul Tracker page (`/fouls`,
   `FoulTrackerPage.jsx`) and the player page's fouls module (`FoulsCard.jsx`) (current-day only —
   the precompute can't be cut to a spoiler `asOf`, so the card hides under
   one, same rule as the Milestone Watch projection). `FOUL_PRIORS` carries the
@@ -604,12 +604,12 @@ for each generator; the reader modules:
   percentile board carries no raw values at all, every column already a rank).
   `BATTER_METRICS`/`PITCHER_METRICS` hold display order, labels, plain-language
   definitions, per-metric raw formatting and the `lowerIsBetter` flag;
-  `percentileRows` joins the two maps into the row list
-  `components/charts/PercentileStrip.jsx` draws. That pre-flip is what lets
-  every metric, in its own unit, share ONE 0–100 axis where farther right is
-  always better — so read `lib/percentileStrip.js`'s header before changing how
-  any of it is scaled. Surface: none; `StatcastPercentiles.jsx` and
-  `PercentileStrip.jsx` were deleted as unused (ADR-0040, which records why the five-spoke radar it replaced could show only
+  `percentileRows` joins the two maps into the row list. That pre-flip is what
+  lets every metric, in its own unit, share ONE 0–100 axis where farther right
+  is always better. Surface: the player page's percentile module
+  (`screens/player/next/modules/percentile/`) and the similar-hitters module
+  (`lib/hitterSimilarity.js`). The old strip (`PercentileStrip.jsx`,
+  `StatcastPercentiles.jsx`, `lib/percentileStrip.js`) was deleted as unused (ADR-0040, which records why the five-spoke radar it replaced could show only
   five of the metrics and drew a different shape for the same numbers depending
   on the order the spokes were listed in).
   `similarHittersFor(data, personId)` is the THIRD surface — the hitter page's

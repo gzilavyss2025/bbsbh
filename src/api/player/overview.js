@@ -59,8 +59,8 @@ export async function loadPlayerOverview(id, asOf) {
     asOf ? Promise.resolve(null) : fetchPlayerContract(id),
     currentActivitySportId === 1 ? fetchSavantPercentiles() : Promise.resolve(null),
     // The awards chip strip reads every category the feed carries, same as
-    // the History tab's full ledger — ranking happens in the component
-    // (AwardsLedger's `preview` branch), against the site owner's own
+    // the History tab's full ledger — ranking happens in the component,
+    // against the site owner's own
     // /admin order, so a reorder there moves the same award first in both
     // places.
     fetchPlayerAwards(id),

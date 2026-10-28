@@ -4,8 +4,7 @@
 // challenges, KEEPS one when its challenge succeeds (the umpire's call is
 // overturned) and LOSES one only when it fails; a club that runs out gets one
 // more for each extra inning it enters empty. StatBox's AbsRow surfaces this
-// as a REMAINING COUNT — used/open pips, same grammar as the mound-visit
-// notice's pip row (UsagePips) — not an outcome history: a club that keeps
+// as a REMAINING COUNT — used/open pips — not an outcome history: a club that keeps
 // winning its challenges always shows its full starting count, since a
 // success never spends one.
 //

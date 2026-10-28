@@ -279,7 +279,7 @@
   --winprob-line:     #FFFFFF;
 
   /* ---- Pitch arsenal mix bar ---- four families, chart-only (no text ever
-     sits directly on these fills — see PitchArsenalMix.jsx), ordered
+     sits directly on these fills), ordered
      fastball -> breaking -> offspeed -> other so a pitcher's hardest stuff
      always anchors the same end of the bar. */
   --arsenal-fastball: #2F6E4F; /* outfield green — same ink as --field */

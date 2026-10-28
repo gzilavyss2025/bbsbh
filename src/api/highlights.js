@@ -290,7 +290,7 @@ export function formatClipDuration(duration) {
 // (`scripts/lib/highlights.mjs` calls this function once at generation time
 // and writes the result). HighlightSheet.jsx calls this on whatever `item` its
 // caller hands it, so both the box score's raw per-play item and a
-// TeamHighlightsRail/PlayerHighlightsRail clip need to resolve correctly here
+// highlights-rail clip need to resolve correctly here
 // without the rails re-deriving playback URLs themselves.
 export function highlightPlaybacks(item) {
   const playbacks = item?.playbacks

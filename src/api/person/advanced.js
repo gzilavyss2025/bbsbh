@@ -61,10 +61,9 @@ export function advancedPitchingView(bundle, { post = false } = {}) {
   if (!adv && !saber) return null
   if (post && !postseasonPlayed(seasonStat)) return null
   const facts = []
-  // Each fact carries its own one-line explainer, shown when the card's
-  // per-fact "i" glyph is tapped open (AdvancedStatsCard.jsx) — colocated
-  // with the value it explains rather than string-matched by label in the
-  // component, so a relabel here can't silently orphan its note.
+  // Each fact carries its own one-line explainer, colocated with the value it
+  // explains rather than string-matched by label in a component, so a relabel
+  // here can't silently orphan its note.
   const push = (label, value, note) => {
     if (value != null) facts.push({ label, value, note })
   }
@@ -132,8 +131,8 @@ export function advancedPitchingView(bundle, { post = false } = {}) {
 // Advanced hitting card — the plate-discipline/power rates behind the hitter
 // tiles, from person-fetch's fetchHittingAdvanced bundle (standard season +
 // seasonAdvanced + sabermetrics, one request). Same shape and footing
-// as advancedPitchingView (AdvancedStatsCard.jsx renders both, generically,
-// off `facts`): full-season aggregates, labeled "full season" by the UI.
+// as advancedPitchingView (both generic, off `facts`): full-season
+// aggregates, labeled "full season" by the UI.
 // MLB-only at the source — degrades to null and the card doesn't render.
 // ---------------------------------------------------------------------------
 

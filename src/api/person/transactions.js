@@ -1,7 +1,7 @@
 // Transaction timeline — the career roster-move ledger at the foot of the
 // player page. See ../person.js's header for the module's overall as-of
 // footing. Career honors used to live here too; they now have their own
-// module and their own section (./awards.js, AwardsLedger.jsx).
+// module (./awards.js).
 //
 // The raw /transactions feed is verbose and duplicative (a single IL stint
 // emits 3-4 near-identical "Status Change" rows; the #42/#21 ceremonial number

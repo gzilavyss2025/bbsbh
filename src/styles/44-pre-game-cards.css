@@ -1,7 +1,7 @@
 /* ------------------------------------------------------- pre-game metric card
    Shared shell, originally for the derived/analytic cards under the batting
-   order — BullpenBoard.jsx (a workload signal), alongside the since-removed
-   Lineup Strength grade — where the navy/gold masthead marked them as the
+   order — the bullpen workload board and the Lineup Strength grade, both
+   since removed — where the navy/gold masthead marked them as the
    page's INTERPRETIVE modules, contrasted with the plain-titled factual
    sections around them (roster, opposing defense, umpires — posted facts).
    Former Teammates (TeamInfo.jsx) reuses the same shell for its card chrome

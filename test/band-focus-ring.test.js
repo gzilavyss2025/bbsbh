@@ -88,8 +88,6 @@ const hex = (ref) => {
 // hub's hero, which wears the club's tile colour.
 const BAND_CONTROLS = [
   ['09-team-info.css', '.team-hub.is-themed .psodds-pill'],
-  ['10-lineup.css', '.sectionhead--band .mastheadpill'],
-  ['10-lineup.css', '.is-themed .sectionhead--club .mastheadpill'],
   ['11-innings.css', '.team-hub__id .innings__notes'],
 ]
 

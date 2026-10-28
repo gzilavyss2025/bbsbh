@@ -114,8 +114,8 @@
    per challenge MADE, colored by outcome (overturned = won, stood = lost) —
    followed by any still-unused challenges in kraft brown. A right-aligned
    record + remaining readout carries the same information as digits for anyone
-   who'd rather not decode the dots. (Unlike the mound-visit UsagePips, this is
-   an outcome history, not a plain remaining count, so it uses its own pips.) */
+   who'd rather not decode the dots. It is an outcome history, not a plain
+   remaining count. */
 .abs {
   margin-top: 10px;
 }

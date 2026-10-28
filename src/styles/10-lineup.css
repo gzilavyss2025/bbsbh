@@ -294,31 +294,6 @@ button.starter__careervs {
   white-space: nowrap;
 }
 
-/* Career vs today's starter — a margin note under the batter's name in the
-   batting order (TeamInfo.jsx + components/teamstats/StarterMatchups.jsx),
-   the thing a paper scorer pencils beside the name while staging the sheet.
-   Three earlier shapes collapsed into this one: a three-column
-   batter/pitcher/line table that overflowed a phone's width, a pair of
-   per-direction tables listing every pitcher on both staffs, and a standalone
-   "Career vs today's starter" card. Folding the lines into the order they
-   annotate removed the last of those; the toggle in the masthead is what puts
-   back the heading that card used to supply. */
-
-/* On a bar, the green ring sits on the bar's colour and falls under 3:1
-   (2.41:1 on the house navy). A band head is always a bar, navy or the
-   club's; a club head (the player page's section bars) is a bar only when it
-   is themed.
-   There the ring is the two-colour band ring (#1215): a paper outline with an
-   ink halo. The Pill keeps the ring's width, style and offset. A pressed
-   chip's paper edge stays apart from the ring: the halo's ink fills the gap
-   between them. A press draws no shadow (the stamp-press, #2073), so the halo
-   stays on through it. test/band-focus-ring.test.js holds it. */
-.sectionhead--band .mastheadpill:focus-visible,
-.is-themed .sectionhead--club .mastheadpill:focus-visible {
-  outline-color: var(--focus-ring-band);
-  box-shadow: var(--ring-band);
-}
-
 /* The Full roster door closing the pregame roster fallback (TeamInfo.jsx's
    FullRosterLink), a closing row. .thub__door's
    usual home is BETWEEN two already-bordered cards (TeamPage's previews), so a
