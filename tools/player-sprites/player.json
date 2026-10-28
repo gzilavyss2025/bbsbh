@@ -1,0 +1,11 @@
+{
+  "heightInches": 72,
+  "weightPounds": 195,
+  "colors": {
+    "jersey": "#f5f1e5", "pants": "#deded8", "cap": "#183b64",
+    "trim": "#c69632", "socks": "#183b64", "shoes": "#242629",
+    "belt": "#503b2a", "skin": "#bb8059", "glove": "#946137",
+    "bat": "#c49b64", "gear": "#183b64", "outline": "#282723"
+  },
+  "poses": {}
+}

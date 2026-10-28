@@ -12,7 +12,7 @@ import { useGamedayStage } from './stage/useGamedayStage.jsx'
 // the half on screen is at or under the mark (its notes' inputs). A qualifying ending celebration
 // holds the stage until Next opens that checkpoint, without advancing the scoring frontier.
 // `open` ({ count, sub }) is the at-bat the reader is inside (ADR-0123); `pitch` the At-bat | Pitch switch.
-export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoint, engine, advance, open, pitch, onBoxScore, onScorecard, onLineup, slateHref, notices, refresh }) {
+export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoint, engine, advance, open, pitch, onBoxScore, onLineup, notices, refresh }) {
   const band = bug.started && bug.live ? (
     <ScorebugMount {...bug} revealedThrough={mark} meta={meta} />
   ) : (
@@ -49,6 +49,8 @@ export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoi
     <GamedayNextPage
       band={band}
       stage={stage}
+      // Before the first pitch: nothing revealed, the top of the 1st, the cursor at its start.
+      pregame={(mark ?? -1) < 0 && bug.viewInning === 1 && bug.viewHalf === 'top' && !!open && !open.count && !open.sub}
       // `here`: the at-bat on screen (a replayed chip, else the hero's), which the trail marks.
       panels={{ ...panels, onReplay: staged.onReplay, here: staged.replaying ?? bug.live?.last?.atBatIndex ?? null }}
       hero={hero || null}
@@ -56,9 +58,7 @@ export function GamedayNextMount({ bug: { mark, ...bug }, meta, panels, checkpoi
       advance={staged.advance}
       pitch={pitch}
       onBoxScore={onBoxScore}
-      onScorecard={onScorecard}
       lineups={{ away: meta.away.abbreviation, home: meta.home.abbreviation, onLineup }}
-      slateHref={slateHref}
       notices={notices}
       refresh={refresh}
     />

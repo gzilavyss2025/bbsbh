@@ -1,6 +1,7 @@
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
 import { boxModel } from '../hero/heroModel.js'
 import { scorebookBox } from '../hero/heroMarkup.js'
+import { legAdvanceCode } from '../../../../api/playbyplay/advanceCode.js'
 
 // THE EVENT CARD (#2571, round 2's wild-pitch card): a lower third on the stage while the sub-step on
 // screen is a baserunning event or a change. The runner's own box runs to his new base; a change has
@@ -26,9 +27,12 @@ function card(h, feed, inning, half, count, sub) {
   const text = own ? ev.details?.description
     : `${runner?.boxscoreName ?? runner?.lastName ?? ''} ${end?.out ? 'out' : end?.to === 'score' ? 'scores' : `to ${BASE_WORD[end?.to] ?? end?.to}`}.`
   const mine = s.kind === 'event' && o.runnerOf(s.playerId)
-  const box = mine && end && { ...boxModel(mine), legs: BASE[end.out ? legs[0].from : end.to] ?? 0, out: null, rbi: 0 }
+  // Each leg this event ran is penciled on its own base path, as on paper: SB 1st to 2nd, E2 2nd to 3rd (Gary, 2026-10-28).
+  const notes = play.runners.filter((r) => r.details?.playIndex === s.index && r.details?.runner?.id === s.playerId && !r.movement?.isOut && BASE[r.movement?.end])
+    .map((r) => ({ leg: BASE[r.movement.end], code: legAdvanceCode(play, r) }))
+  const box = mine && end && { ...boxModel(mine), legs: BASE[end.out ? legs[0].from : end.to] ?? 0, out: null, rbi: 0, notes }
   return h('div', { className: 'gdevent', role: 'status' }, box && scorebookBox(h, box),
-    h('div', { className: 'gdevent__txt' }, h('span', { className: 'gdevent__kind' }, kind ?? ''), h('span', null, text ?? '')))
+    h('div', { className: 'gdevent__txt' }, h('span', { className: 'gdevent__kind' }, (kind ?? '').replace(/\s+(2B|3B|Home)$/i, '')), h('span', null, text ?? '')))
 }
 
 export const eventCardMarkup = (h, { SealBox, feed, inning, half, count, sub }) =>

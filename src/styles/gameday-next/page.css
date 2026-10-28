@@ -20,7 +20,8 @@
   grid-template-columns: minmax(0, 1fr);
   --gd-band-h: 86px;
   --gd-bar-h: 80px;
-  grid-template-rows: auto minmax(0, 1fr) 240px var(--gd-bar-h);
+  /* The hero (a 104px box) plus the trail on its floor (gdnext__herotrail); the stage takes the rest. */
+  grid-template-rows: auto minmax(0, 1fr) 236px var(--gd-bar-h);
   grid-template-areas: 'band' 'stage' 'hero' 'bar';
 }
 .gdnext[data-tier='T'] {
@@ -116,7 +117,33 @@
   inset: calc(-1 * var(--tap-min)) calc(-1 * var(--space-3)) calc(-1 * var(--tap-min)) calc(-1 * var(--space-2));
 }
 .gdnext__folded { margin: 0 0 var(--space-3); padding: 0; list-style: none; }
-.gdnext__folded li { padding: var(--space-2) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
+.gdnext__folded > li { padding: var(--space-2) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
+/* In the Menu the club cell keeps its logo's width and the innings scroll sideways under the club
+   and R/H/E columns, which stay put (Gary, 2026-10-28). raw-value-exempt: the line score's columns */
+/* The trail on the hero's floor (P only: T has its own trail row): under the box, scrolling sideways. */
+.gdnext__herotrail { position: absolute; z-index: 1; left: 0; right: 0; bottom: var(--space-2); overflow-x: auto; }
+.gdnext__herotrail .statgrid { padding: var(--space-1) 0; background: transparent; }
+.gdnext__herotrail .gdp__trail { padding-inline: 0; }
+/* The hero ends above the trail: the chip's 34px, its padding and the floor gap. raw-value-exempt: the chip height */
+.gdnext[data-tier='P'] .gdnext__slot--hero .gdhero { bottom: calc(34px + var(--space-2) + var(--space-2) + var(--space-2)); }
+/* layout-exempt: the Menu's ways out, two lineups and the box score in one row */
+.gdnext__exits { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: var(--space-1h); margin-bottom: var(--space-3); }
+.gdnext__exits .gdnext__exit { justify-content: center; min-width: 0; padding: var(--space-2) var(--space-1); text-align: center;
+  border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); color: var(--text-heading); text-decoration: none;
+  border-radius: 0; font: var(--w-bold) var(--fs-label) / 1 var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
+/* The event log and the pitching lines run edge to edge in the Menu. */
+.gdnext__folded .statgrid { padding-inline: 0; background: transparent; }
+.gdnext__folded .gdp__trail, .gdnext__folded .gdp__log, .gdnext__folded .gdp__log > * { padding-inline: 0; }
+.gdnext__folded .gdp__linescroll { overflow-x: auto; }
+.gdnext__folded .gdp__line { width: auto; min-width: 100%; table-layout: auto; border-collapse: separate; border-spacing: 0; }
+.gdnext__folded .gdp__line th, .gdnext__folded .gdp__line td { min-width: 32px; height: 32px; } /* raw-value-exempt: a scorebook cell */
+.gdnext__folded .gdp__line tbody th { min-width: 46px; position: sticky; left: 0; z-index: 1; } /* raw-value-exempt: the logo's cell */
+.gdnext__folded .gdp__line thead th:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface-card); }
+.gdnext__folded .gdp__line tr > :nth-last-child(-n+3) { position: sticky; z-index: 1; width: 32px; min-width: 32px; max-width: 32px; } /* raw-value-exempt: a scorebook cell */
+.gdnext__folded .gdp__line tr > :nth-last-child(1) { right: 0; }
+.gdnext__folded .gdp__line tr > :nth-last-child(2) { right: 32px; } /* raw-value-exempt: one cell in */
+.gdnext__folded .gdp__line tr > :nth-last-child(3) { right: 64px; } /* raw-value-exempt: two cells in */
+.gdnext__folded .gdp__line thead th:nth-last-child(-n+3) { background: var(--surface-card); }
 
 /* The defense drawer (L and D): the park at the lineup page's own size, slid in from the right over
    the frame above the bar, so the advance and the switch stay in reach. */
@@ -148,8 +175,12 @@
 /* The tabs sit on the frame's edges at the stage's height, set sideways so they take no room. */
 .gdnext__railtab { position: absolute; z-index: 1; top: 38%; height: auto; min-height: 0; padding: var(--space-3) var(--space-1h);
   writing-mode: vertical-rl; font-size: var(--fs-label); background: var(--surface-card); }
-.gdnext__railtab--left { left: 0; border-left: 0; transform: rotate(180deg); }
-.gdnext__railtab--right { right: 0; border-right: 0; }
+.gdnext__railtab--left { left: 0; transform: rotate(180deg); }
+.gdnext__railtab--right { right: 0; }
+.gdnext__railtab { border: var(--bw-heavy) solid var(--border-stamped); }
+/* Held to drag: the browser keeps the touch (no scroll, no callout) and the tab lifts off the edge. */
+.gdnext__railtab { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.gdnext__railtab[data-lifted] { z-index: 2; box-shadow: var(--shadow-raised); }
 @media (prefers-reduced-motion: reduce) { .gdnext__rail { transition: none; } }
 
 /* The band is the old score bug (HeaderBug): the split halves and the dark plate, held to the tier's

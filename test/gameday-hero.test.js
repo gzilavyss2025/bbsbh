@@ -7,7 +7,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { computeHalfInningFeed } from '../src/api/playbyplay.js'
 import { deriveLiveState } from '../src/api/playbyplay/entriesView.js'
-import { boxModel, contactLine, ordinal } from '../src/screens/gameday/next/hero/heroModel.js'
+import { boxModel, contactLine, ordinal, splitCode } from '../src/screens/gameday/next/hero/heroModel.js'
 import { heroMarkup } from '../src/screens/gameday/next/hero/heroMarkup.js'
 import { stripComments, ruleBody } from './helpers/css.js'
 
@@ -126,4 +126,10 @@ test('hero: no due-up strip while the checkpoint shows (it names the next half; 
   const out = html({ last: live(all, all.length), stepAtBatIndex: null, checkpoint: true })
   assert.ok(!out.includes('gdhero__due'), 'the checkpoint carries the due-up')
   assert.match(out, /Rodr/, 'the third out\'s box stays')
+})
+
+test('a strikeout reads SO in the box and its K in the diamond (Gary, 2026-10-28)', () => {
+  assert.deepEqual(splitCode('K', 'out'), { box: 'SO', mid: 'K' })
+  // Other outs keep their split: the kind in the box, the fielders in the diamond.
+  assert.deepEqual(splitCode('6-3', 'out'), { box: 'GO', mid: '6-3' })
 })

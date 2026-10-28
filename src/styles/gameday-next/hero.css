@@ -24,7 +24,9 @@
 /* layout-exempt: the pitch columns beside the diamond */
 .gdhero__box { flex: none; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) 66px; aspect-ratio: 1.45; --gd-code-h: 36px;
   border: var(--bw-hair) solid var(--border-stamped); background: var(--surface-inset); }
-.gdnext[data-tier='P'] .gdhero__box, .gdnext[data-tier='P'] .gdhero__top { height: 140px; }
+.gdnext[data-tier='P'] .gdhero__box, .gdnext[data-tier='P'] .gdhero__top { height: 104px; }
+/* The columns and the diamond keep to the box at the phone's shorter height. */
+.gdnext[data-tier='P'] .gdhero__box { grid-template-rows: minmax(0, 1fr); }
 .gdnext[data-tier='T'] .gdhero__box, .gdnext[data-tier='T'] .gdhero__top { height: 128px; }
 .gdnext[data-tier='L'] .gdhero__box, .gdnext[data-tier='L'] .gdhero__top { height: 128px; }
 .gdnext[data-tier='D'] .gdhero__box, .gdnext[data-tier='D'] .gdhero__top { height: 128px; }
@@ -49,7 +51,7 @@
 .gdhero__dia { position: relative; }
 .gdhero__dia svg { position: absolute; left: 25%; top: 45%; width: 49%; height: 38%; overflow: visible; }
 .gdhero__base { fill: none; stroke: var(--text-heading); stroke-width: 1px; vector-effect: non-scaling-stroke; }
-.gdhero__leg { fill: none; stroke: var(--text-heading); stroke-width: 4px; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
+.gdhero__leg { fill: none; stroke: var(--text-heading); stroke-width: 4px; stroke-linecap: square; stroke-linejoin: miter; vector-effect: non-scaling-stroke; }
 .gdhero__run { fill: var(--text-heading); opacity: 0.22; }
 /* The result box: heavy, top left, laid over the frame so the two corners are one line. The scorer's rule runs
    from its right edge to the first column, on its bottom edge. */
@@ -70,7 +72,7 @@
   text-transform: uppercase;
 }
 /* The backwards K a scorer draws for a called third strike */
-.gdhero__code.is-looking { transform: scaleX(-1); }
+.gdhero__play.is-looking { transform: scaleX(-1); }
 .gdhero__rbi { position: absolute; right: var(--space-2); top: 0; height: var(--gd-code-h); display: flex; align-items: center; font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); }
 /* The out circle: a shaded disc centred on the B column's rule, the out number inside. It always paints over the
    pitch columns (z-index 2: the columns are positioned for their zone handle and come later in the grid's order). */
@@ -123,3 +125,11 @@
   .gdhero__scroll, .gdhero__txt > .gdhero__line { grid-area: line; }
   .gdhero__contact { grid-area: card; margin: 0; }
 }
+
+/* A runner's leg marks (eventCardMarkup notes): each sits against its own base path, just outside the
+   diamond (the svg spans 25-74% across and 45-83% down the cell). The anchor is the mark's corner nearest the path. */
+.gdhero__note { position: absolute; z-index: 1; font: var(--w-bold) var(--fs-cell) / 1 var(--font-display); color: var(--text-heading); white-space: nowrap; }
+.gdhero__note--1 { left: 62%; top: 72%; }
+.gdhero__note--2 { left: 62%; bottom: 46%; }
+.gdhero__note--3 { right: 62%; bottom: 46%; }
+.gdhero__note--4 { right: 62%; top: 72%; }

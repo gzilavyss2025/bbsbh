@@ -11,7 +11,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   holds the Menu, the "At-bat | Pitch" switch and the advance, which owns the bar's dead space
   (`e2e/reveal-hit-area.spec.js`); it holds with aria-disabled, never `disabled`, so a tap still ends
   a hold, and the live edge is a polite status. In pitch mode the caught-up advance is a Refresh that reveals nothing (`caughtUpAdvance`). There is no "Rest of half". The frame hides the site
-  chrome, so the Menu carries the ways out (both lineups, the scorecard, the box score, the slate),
+  chrome, so the Menu carries the ways out (both lineups and the box score; Gary dropped the scorecard and the slate, 2026-10-28),
   and a delay, suspension or failed refresh is a strip under the band (the stage row gives up the
   room; the band keeps `--gd-band-h`).
 - P and T keep the wide tiers' side columns as rails (Gary, 2026-10-27): the Due up slides in from the
@@ -55,6 +55,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   stage's key; the cursor is `useRevealProgress`'s `{halfIdx}:{count}:{sub}`. The hero's open box and
   `eventCardMarkup.js` (the stage's lower third) read `openAtBat` inside a `SealBox` reveal function, up to `sub`.
   A substitution is its own sub-step: the engine and panels read `stepCapAt`'s cap, not the stored count (ADR-0123's 2026-10-28 amendment).
+  A half read back in pitch mode walks each pitch again (`replayTap`, InningViewer's `replay`): view state inside `useFocusMode`'s cursor, never stored, reveals nothing.
 - `cutscene/ballpark/` is the big-play celebration, a sprite system (the code-drawn kit from #2673 was
   removed in the #2676 stack: the sprites replace it), also inspected at `/animation-lab#ballpark`:
   separate character atlases, stadium, palette preparation and finite choreography. `cutscene/integration/`
