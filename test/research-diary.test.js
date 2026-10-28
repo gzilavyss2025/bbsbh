@@ -94,6 +94,6 @@ test('the traps heading counts the traps it is standing over', () => {
   assert.ok(TRAPS.length >= 1, 'there must be traps to count')
   assert.ok(
     TRAPS.length <= 12,
-    `TRAPS is ${TRAPS.length}; widen COUNT_WORDS in ResearchDiaryPage.jsx before adding more`,
+    `TRAPS is ${TRAPS.length}; widen COUNT_WORDS in DiaryPage.jsx before adding more`,
   )
 })
