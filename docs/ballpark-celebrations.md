@@ -141,8 +141,6 @@ the modern study. The original generated images remain in the session's
 - `public/art/ballpark/night.png`: 1672 × 941 RGB, separate generic night ballpark.
 - `public/art/ballpark/home-run.png`: 1448 × 1086 RGBA, a 4 × 3 grid of 362-pixel
   cells. One character per cell, helmet through thigh. Transparent backdrop.
-- `public/art/ballpark/strikeout.png`: 1448 × 1086 RGBA, 4 × 3 cells, cap through
-  thigh. Cap/glove pitcher art, distinct from the batter.
 - `public/art/ballpark/catch.png`: 1448 × 1086 RGBA, 4 × 3 cells, a full-body
   fielding sequence. No appearance or handedness claim about a named player.
 

@@ -28,10 +28,8 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   block fetches when it shows.
 - Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line
   score's run cells take a keyboard pick mid page-turn (aria-disabled only), as the old running line did.
-- `stage/` held the overhead field renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage`, `StageCanvas`,
-  `art/players.js` and the runner atlas (`docs/gameday-runner-art.md`). The corner field is gone (Gary, 2026-10-28, #2694):
-  `GamedayStage` still times a revealed play from `stagePlay` and mounts only a celebration over the batting view, so
-  `StageCanvas`, `drawStage`, the sprite targets in `actors.js` and the runner art no longer render. No photo or color wash.
+- `stage/` times a revealed play from `stagePlay` + `stateAt` (pure timeline, `play.js`) and mounts only a
+  celebration over the batting view. The corner field is gone (Gary, 2026-10-28, #2694); its renderer and art were deleted (#2702).
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its
@@ -57,6 +55,6 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   removed in the #2676 stack: the sprites replace it), also inspected at `/animation-lab#ballpark`:
   separate character atlases, stadium, palette preparation and finite choreography. `cutscene/integration/`
   selects completed revealed results inside `GamedayStage`'s SealBox subtree; the stage's existing tap rule
-  starts/skips it, and a finished one offers Replay (tapRule `replay`; none while held for the checkpoint). Assets and chunks fail back to the ordinary field. A qualifying ending scene holds
+  starts/skips it, and a finished one offers Replay (tapRule `replay`), held for the checkpoint too. A scene whose assets or chunks fail leaves the stage empty. A qualifying ending scene holds
   until bottom Next opens its checkpoint without advancing the game; cold visits retain ordinary read-back.
   Authoring, asset provenance and the next steps live in `docs/ballpark-celebrations.md`.
