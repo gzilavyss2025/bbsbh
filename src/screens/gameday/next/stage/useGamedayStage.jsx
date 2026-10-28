@@ -11,7 +11,7 @@ import { GamedayStage, restBatter, restZones } from './GamedayStage.js'
 import { GamedayPlayCanvas } from '../cutscene/integration/GamedayPlayCanvas.jsx'
 import { battingSide } from './battingSide.js'
 import { wallFn } from './scene.js'
-import { openingChangeHeld, stageKey } from '../steps/subStep.js'
+import { openingChangeHeld, stageKey, stepCapAt } from '../steps/subStep.js'
 import { disarm, ended, replay, rest, saw, tap } from './tapRule.js'
 import { checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoint } from '../cutscene/integration/checkpointGate.js'
 
@@ -63,7 +63,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
     <>
       {!(covered && cur.armed) && <GamedayStage
         SealBox={SealBox} StageCanvas={GamedayPlayCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} run={cur.run ?? 0} playing={cur.playing} onEnd={onEnd} onReplay={onReplay}
-        mark={mark} step={open?.count ?? null} open={open} batter={batter}
+        mark={mark} step={open ? stepCapAt(feed, inning, half, open.count, open.sub) : null} open={open} batter={batter}
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones} onZone={batter ? toggleZones : undefined}
         checkpoint={checkpoint} checkpointDismissed={phase === 'checkpoint'} onCheckpoint={onCheckpoint}
       />}
@@ -92,5 +92,5 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   // The at-bat the stage is replaying (a trail tap), for the trail's "you are here" mark.
   const replaying = typeof cur.shown === 'number' && cur.run ? cur.shown : null
   const holding = phase === 'pending' || phase === 'celebration'
-  return { stage, advance: { ...advance, ...(holding ? { label: 'Next', disabled: false, caughtUp: false } : {}), onClick }, onReplay: covered ? undefined : onReplay, replaying }
+  return { stage, advance: { ...advance, ...(holding ? { label: 'Next', disabled: false, caughtUp: false, refresh: false } : {}), onClick }, onReplay: covered ? undefined : onReplay, replaying }
 }

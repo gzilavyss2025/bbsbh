@@ -112,3 +112,20 @@ test('a change right after the half\'s first at-bat still waits for its own sub-
   assert.equal(stepCapAt(feed, 6, 'top', 1, k - 1), change, 'the first batter, without the change')
   assert.equal(stepCapAt(feed, 6, 'top', 1, k), nextStepBoundary(raw, 0), 'his card: the whole first step')
 })
+
+// Review of the 2026-10-28 stack: a starter pulled MID-at-bat in the half's first at-bat. The first
+// play's matchup.pitcher is the reliever, so the half's "opener" named him before his change.
+test('a pitching change mid-way through the half\'s first at-bat is held to its own sub-step too', () => {
+  const feed = JSON.parse(readFileSync(new URL('./fixtures/game-777747.gameday.json', import.meta.url), 'utf8'))
+  const play = feed.liveData.plays.allPlays.find((p) => p.about.atBatIndex === 64)
+  const ev = play.playEvents
+  const at = ev.findIndex((e) => e.details?.eventType === 'pitching_substitution')
+  const [change] = ev.splice(at, 1)
+  const first = ev.findIndex((e) => e.isPitch)
+  ev.splice(first + 1, 0, change)
+  ev.forEach((e, i) => { e.index = i })
+  const k = openAtBat(feed, 9, 'bottom', 0).steps.findIndex((s) => s.kind === 'change' && s.eventType === 'pitching_substitution')
+  assert.ok(openAtBat(feed, 9, 'bottom', 0).steps.slice(0, k).some((s) => s.kind === 'pitch'), 'a pitch comes first now')
+  assert.equal(openingChangeHeld(feed, 9, 'bottom', 0, k), true)
+  assert.equal(openingChangeHeld(feed, 9, 'bottom', 0, k + 1), false)
+})

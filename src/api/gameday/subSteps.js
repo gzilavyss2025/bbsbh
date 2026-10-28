@@ -129,8 +129,13 @@ function build(feed, inning, half, count) {
 
 // Where a half's first step ends: the first at-bat and the notes trailing it (nextStepBoundary). The
 // half's first tap stores 1 and means this; steps/subStep.js stepCapAt measures from it. An index only.
+const ends = new WeakMap() // feed -> half -> end: built once per feed object (ADR-0007)
 export function firstStepEnd(feed, inning, half) {
-  return nextStepBoundary(computeHalfInningFeed(feed, inning, half, battingSideOf(half), 0), 0)
+  let byHalf = ends.get(feed)
+  if (!byHalf) ends.set(feed, (byHalf = new Map()))
+  const key = `${inning}:${half}`
+  if (!byHalf.has(key)) byHalf.set(key, nextStepBoundary(computeHalfInningFeed(feed, inning, half, battingSideOf(half), 0), 0))
+  return byHalf.get(key)
 }
 
 // A runner's own box: his latest plate appearance on screen (a man who batted around has two), found

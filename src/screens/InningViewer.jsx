@@ -363,7 +363,8 @@ export function InningViewer({
   const curAtBatCount = atBatCountFor(effInning, effHalf)
   // What the engine and the panels may show: the stored count, moved to the sub-step's own
   // substitutions (stepCapAt: a change shows on its own tap, never with the result before it).
-  const engineCountFor = (inning, half) => stepCapAt(feed, inning, half, atBatCountFor(inning, half), subFor(inning, half))
+  // Stable across renders like atBatCountFor itself, so InningPage's memo still holds.
+  const engineCountFor = useCallback((inning, half) => stepCapAt(feed, inning, half, atBatCountFor(inning, half), subFor(inning, half)), [feed, atBatCountFor, subFor])
   // What the NEXT "reveal next at-bat" tap should pass to revealAtBat — null
   // until HalfInning/PlayByPlay has actually computed the half's entries
   // (nothing to report before the first tap, which just starts at 1).
@@ -421,10 +422,10 @@ export function InningViewer({
   // guarantee: this component has no legitimate way to know whether the
   // half's first entry is a leading event note rather than a plate
   // appearance (computeHalfInningFeed is reveal-only, ADR-0001, so it can't
-  // be consulted from here ahead of PlayByPlay's own render). PlayByPlay.jsx
-  // silently corrects an understated cap forward to the first genuine at-bat
-  // boundary on its own — a new stepping entry point that bypasses PlayByPlay
-  // (or calls it in some other way) must preserve that correction itself, or
+  // be consulted from here ahead of PlayByPlay's own render). stepCapAt
+  // (engineCountFor) corrects an understated cap forward to the first step's
+  // boundary, and PlayByPlay keeps it past the first at-bat card — a new
+  // stepping entry point that bypasses both must preserve that correction, or
   // the "reveal just a lone note" bug this pairing exists to prevent comes
   // back.
   const atHalfEdge = currentHalfLive && curStepInfo?.atHalfEdge === true

@@ -155,7 +155,7 @@ a pinch runner) shows on its own sub-step, and nothing names the new man before 
   `eventIndex` (`halfInningFeed.js`) so each matches its own sub-step exactly.
 - The half's first tap stores 1; `stepCapAt` applies PlayByPlay's first-step snap to the count
   itself, and PlayByPlay's own snap now only guarantees the first at-bat card.
-- A half-opening pitching change is no entry (the engine names the half's first pitcher):
+- A pitching change in the half's first at-bat (before its first pitch or mid-way) is no entry (the engine names the half's first pitcher):
   `openingChangeHeld` keeps the club's previous pitcher on the rail and the rest frame until its
   sub-step (`selectMoundPitcher`'s `opening: false`).
 - `HalfInning`'s live snapshot now carries `midHalfPitcherId`; before, it was dropped, and the

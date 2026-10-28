@@ -35,7 +35,7 @@ function pitching(h, f, lines) {
     h('thead', null, h('tr', null, ...['Pitcher', 'Pitches', 'Strikes', 'Whiffs', 'Fouls'].map((c) => h('th', { key: c }, c)))),
     h('tbody', null, ...f.pitchers.map((l) => row(l.last, l, l.id)),
       f.pitchers.length > 1 && row('Half', f, 'tot', 'is-total'))),
-  lines && h('div', { key: 'game' }, lines)]
+  lines]
 }
 
 // The name opens his hover card and his page (PlayerLink); then the RBI, the out circle, and the code
@@ -137,7 +137,7 @@ export function checkpointMarkup(h, { SealBox, Seen = null, Headshot = null, Scr
     const next = half === 'top' ? { inning, half: 'bottom' } : { inning: inning + 1, half: 'top' }
     const line = (b) => dueLine(feed, b, next, mark, entry)
     const nameOf = (id) => feed.gameData?.players?.[`ID${id}`]?.lastName ?? null
-    const lines = pitchingLinesMarkup(h, { feed, lines: pitchingDayLines(feed, { inning, half, revealedThrough: mark }) })
+    const lines = pitchingLinesMarkup(h, { key: 'game', feed, lines: pitchingDayLines(feed, { inning, half, revealedThrough: mark }) })
     return pages && layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line, lines })
   })
 }

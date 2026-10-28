@@ -18,7 +18,7 @@ function club(h, side, name, rows) {
           ...COLUMNS.map(([c, k]) => h('td', { key: c }, r[k] === '' || r[k] == null ? '—' : String(r[k]))))))))
 }
 
-export function pitchingLinesMarkup(h, { feed, lines }) {
+export function pitchingLinesMarkup(h, { key, feed, lines }) {
   const name = (side) => feed?.gameData?.teams?.[side]?.teamName ?? feed?.gameData?.teams?.[side]?.name ?? (side === 'away' ? 'Away' : 'Home')
-  return h('div', { className: 'gdpl' }, club(h, 'away', name('away'), lines?.away ?? []), club(h, 'home', name('home'), lines?.home ?? []))
+  return h('div', { key, className: 'gdpl' }, club(h, 'away', name('away'), lines?.away ?? []), club(h, 'home', name('home'), lines?.home ?? []))
 }

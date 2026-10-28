@@ -119,6 +119,5 @@ export function pitchingDayLines(feed, { inning, half, step = null, revealedThro
   step = safeStep(step, here, revealedThrough)
   // -1 admits nothing from this half: the lines are the earlier halves' alone.
   const cut = stepCutAtBatIndex(feed, inning, half, step)
-  const lines = computePitcherLines(feed, here - 1, { stepHalfIndex: here, throughAtBatIndex: cut })
-  return { away: lines.away ?? [], home: lines.home ?? [] }
+  return computePitcherLines(feed, here - 1, { stepHalfIndex: here, throughAtBatIndex: cut })
 }
