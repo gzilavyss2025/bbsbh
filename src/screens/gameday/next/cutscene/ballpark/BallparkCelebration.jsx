@@ -12,7 +12,7 @@ import '../../../../../styles/gameday-next/ballpark.css'
 export function BallparkCelebration({
   headline = 'Home run', name = '', helmet, trim, track = HOME_RUN,
   character = HOME_RUN_ART, backdrop = STADIUM_URL,
-  time, playing = false, rate = 1, reduced = false, onTime, onDone, onSkip, onError,
+  time, playing = false, rate = 1, reduced = false, onTime, onDone, onSkip, onReplay, onError,
 }) {
   const canvas = useRef(null), host = useRef(null)
   const [loaded, setLoaded] = useState(null)
@@ -96,6 +96,7 @@ export function BallparkCelebration({
       </div>
       {!art && <p className="ballpark__loading" role="status">{failed ? 'Celebration art could not load.' : 'Loading celebration…'}</p>}
       {onSkip && <Button skin="ghost" className="ballpark__skip" onClick={onSkip}>Skip</Button>}
+      {onReplay && art && !reduced && !lessMotion && <Button skin="ghost" className="ballpark__skip" onClick={onReplay}>Replay</Button>}
     </div>
   )
 }

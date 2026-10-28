@@ -5,6 +5,8 @@
 .gdcelebration .ballpark { width: min(100cqw, calc(100cqh * 16 / 9)); flex: none; pointer-events: auto; }
 .gdcelebration .ballpark[data-ready="false"] { opacity: 0; pointer-events: none; }
 .gdcelebration:has(.ballpark[data-ready="true"]) { background: var(--stage-outline); }
+/* Once the art is ready the field gives way: .gdstage's z-index would otherwise paint it over the scene. */
+.gdstageScene:has(.ballpark[data-ready="true"]) .gdstage { visibility: hidden; }
 /* The hidden legacy engine portals its decorative stamp to body. The new
    revealed scene supplies the same event title; do not stamp over its art. */
 body:has(.gdcelebration) .bigplay { display: none; }
