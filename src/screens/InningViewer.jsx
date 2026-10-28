@@ -28,7 +28,7 @@ import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCallou
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
-import { CAUGHT_UP, nextSub, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { CAUGHT_UP, caughtUpAdvance, nextSub, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -537,7 +537,7 @@ export function InningViewer({
   const advance = focus.stepAhead
     ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && focus.stepNext() }
     : currentSealed
-      ? { label: edge ? 'Caught up' : stepWords(pitchMode), disabled: edge, caughtUp: edge, onClick: revealNextStep, reveal: true }
+      ? edge ? caughtUpAdvance(pitchMode, loading, onReload) : { label: stepWords(pitchMode), onClick: revealNextStep, reveal: true }
       : nextIdx != null
         ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
         : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }

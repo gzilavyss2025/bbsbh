@@ -30,6 +30,14 @@ export function usePitchMode(gamePk) {
 // The advance's words follow the mode and nothing else (decision 3, its 2026-10-26 amendment).
 export const stepWords = (pitch) => (pitch ? 'Next pitch' : 'Next play')
 
+// The advance at the live edge (ADR-0055). Pitch by pitch, a pitch lands every ~20s against the
+// feed's one-minute poll, so it becomes a Refresh: it fetches the feed and reveals nothing. Once
+// the poll or the tap brings a new pitch, the advance is "Next pitch" again.
+export function caughtUpAdvance(pitch, loading, onReload) {
+  if (!pitch || !onReload) return { label: 'Caught up', disabled: true, caughtUp: true }
+  return { label: loading ? 'Refreshing…' : 'Refresh', refresh: true, disabled: !!loading, caughtUp: true, reveal: false, onClick: onReload }
+}
+
 // One tap inside the open at-bat: the sub-step count after it, or null when this tap reveals the
 // at-bat itself (its result, or the event that ends the half: decision 7). Pitch mode shows the next
 // sub-step; at-bat mode runs to the next stop. A switch mid-at-bat keeps `sub`, so turning pitch

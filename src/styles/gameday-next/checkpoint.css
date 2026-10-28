@@ -24,6 +24,12 @@
 .gdcp__label { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label);
   text-transform: uppercase; color: var(--text-caption); }
 
+/* P: the one page under its tab fills the body, so the notes' ScrollCue has a bounded box to scroll in
+   (unbounded, the list grew past the body and was clipped there). */
+/* layout-exempt: the tab's one page, filling the body */
+.gdnext[data-tier='P'] .gdcp__body { display: flex; flex-direction: column; }
+.gdnext[data-tier='P'] .gdcp__page { flex: 1; }
+
 /* T, L and D: every page at once, no tabs. */
 .gdnext:not([data-tier='P']) .gdcp .gdcp__tabs { display: none; }
 /* layout-exempt: two columns of pages; the at-bats (the tallest) take the right */
