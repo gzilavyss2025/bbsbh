@@ -1,14 +1,14 @@
 {
   "$schema": "https://unpkg.com/knip@5.88.1/schema.json",
   "entry": [
-    "api/**/*.js",
-    "scripts/**/*.mjs",
+    "api/**/*.js!",
+    "scripts/**/*.mjs!",
     "test/**/*.test.js",
-    ".claude/hooks/*.mjs",
-    ".claude/skills/**/*.mjs",
-    ".design-sync/build/*.mjs",
-    "e2e/shots/*.mjs",
-    "tools/**/*.mjs"
+    ".claude/hooks/*.mjs!",
+    ".claude/skills/**/*.mjs!",
+    ".design-sync/build/*.mjs!",
+    "e2e/shots/*.mjs!",
+    "tools/**/*.mjs!"
   ],
   "ignore": [
     ".scratch/**"
@@ -16,5 +16,9 @@
   "ignoreDependencies": [
     "@fontsource/.*",
     "playwright"
+  ],
+  "project": [
+    "src/**/*.{js,jsx,mjs}!",
+    "api/**/*.js!"
   ]
 }
