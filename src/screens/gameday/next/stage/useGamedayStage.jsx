@@ -17,7 +17,7 @@ import { checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoi
 
 // The stage mount (#2573, #2568 slice 4): the stage slot, and the advance control wrapped in the tap
 // rule (tapRule.js). `last` is the last finished at-bat's index as of the cursor, `view` the half on
-// screen, `advance.reveal` marks the tap that reveals an at-bat. At rest with no tapped play, the
+// screen, `advance.reveal` marks the tap that reveals an at-bat. At rest, including after a tapped play settles, the
 // stage draws the due-up batter before the pitch, with his zone map unless this game dismissed it.
 // `reliever` is the live snapshot's revealed mid-half change (deriveLiveState's midHalfPitcherId).
 // A qualifying ending celebration keeps the stage until Next dismisses it
@@ -44,7 +44,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   const wall = useMemo(() => wallFn(resolveBallparkLayout({ venueId: venue?.id, venueName: venue?.name, gameDate: date })), [venue?.id, venue?.name, date])
 
   // The due-up batter is the pre-pitch lineup (dueup.js, caller-gated like the hero's strip).
-  const batter = cur.shown == null ? restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered }) : null
+  const batter = !cur.playing ? restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered }) : null
   const [hidden, setHidden] = useState(() => zoneMapDismissed(pk))
   const { data: zm } = useAsync(
     async () => (hidden || !batter ? null : { id: batter.id, zones: (await fetchBatterZones(batter.id, gd.game.season, gd.teams?.home?.sport?.id ?? 1, date))?.zones }),
@@ -52,8 +52,8 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   )
   // A tap on the strike zone, or the card's ✕, turns the zone map off and on for this game.
   const toggleZones = () => { setZoneMapHidden(pk, !hidden); setHidden(!hidden) }
-  // Inside an open at-bat the zone map stands down: a reload there rests under the sub-step's card.
-  const zones = open?.sub > 0 ? null : restZones(zm, batter?.id, hidden)
+  // The batting view returns when playback settles, including between pitch sub-steps.
+  const zones = restZones(zm, batter?.id, hidden)
 
   // The pitcher on the mound at the cursor: the revealed change, else the half's opener (caller-gated
   // to the half reached, select.js). Hands are pre-game player data.
@@ -67,7 +67,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones} onZone={batter ? toggleZones : undefined}
         checkpoint={checkpoint} checkpointDismissed={phase === 'checkpoint'} onCheckpoint={onCheckpoint}
       />}
-      {batter && !hidden && !(open?.sub > 0) && (
+      {batter && !hidden && (
         <ZoneCard teamId={gd?.teams?.[half === 'top' ? 'away' : 'home']?.id} id={batter.id} name={gd?.players?.[`ID${batter.id}`]?.fullName ?? batter.last} side={battingSide(hand(batter.id, 'batSide'), hand(pitcherId, 'pitchHand'))} zones={zones ?? {}} onDismiss={toggleZones} />
       )}
     </>

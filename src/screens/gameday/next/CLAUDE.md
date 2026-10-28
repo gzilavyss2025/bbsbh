@@ -20,8 +20,8 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - The old half page is mounted `hidden` as the engine: it reports the live snapshot (band), the
   step cursor and the runs so far, and its page turn moves halves. Rebuilding the engine is what
   lets it go; until then its parts stay (`components/inning/`, `styles/focus/`).
-- Gary's calls this shell keeps: the band uses the score bug's tiles and type; the zone map shows
-  only before a tapped play and has a per-game dismiss; a switch hitter stands opposite the
+- Gary's calls this shell keeps: the band uses the score bug's tiles and type; the batting view and zone map show
+  whenever playback rests (including after a play), and have a per-game dismiss; a switch hitter stands opposite the
   pitcher's hand; the hero's due-up hides under the checkpoint; the checkpoint's due-up names an
   announced pinch hitter; a pre-pitch pinch hitter is the first sub-step of his own at-bat.
 - The band draws through `ScorebugMount` (the default score bug; `GamedayBand` before a snapshot), so its clamp is the only gate on the
