@@ -52,6 +52,10 @@ export const sx = (px) => PAD + ((-px - DOM_X[0]) / (DOM_X[1] - DOM_X[0])) * (W 
 // The catcher's view (Gary, 2026-10-28, #2687): the strike-zone modal draws the feed's pX as it comes, +pX
 // (first base) to the RIGHT, as MLB's Gameday does. The other zone charts keep `sx`, the pitcher's view.
 export const catcherX = (px) => sx(-px)
+// In that view a right-handed batter's box (third-base side) is LEFT of the plate, a lefty's right, and
+// Gameday's art for his own stance draws as it comes ('left' / 'right' are its folders).
+export const boxLeftOfPlate = (batSide) => batSide === 'R'
+export const stanceArt = (batSide) => (batSide === 'L' ? 'left' : 'right')
 export const sy = (pz) => PAD + ((DOM_Z[1] - pz) / (DOM_Z[1] - DOM_Z[0])) * (H - 2 * PAD)
 
 // ---------------------------------------------------------------------------

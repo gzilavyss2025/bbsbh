@@ -120,12 +120,12 @@
 .gdnext__folded > li { padding: var(--space-2) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
 /* In the Menu the club cell keeps its logo's width and the innings scroll sideways under the club
    and R/H/E columns, which stay put (Gary, 2026-10-28). raw-value-exempt: the line score's columns */
-/* The trail on the hero's floor (P, T): under the box, clear of the rail tabs, scrolling sideways. */
+/* The trail on the hero's floor (P only: T has its own trail row): under the box, scrolling sideways. */
 .gdnext__herotrail { position: absolute; z-index: 1; left: 0; right: 0; bottom: var(--space-2); overflow-x: auto; }
 .gdnext__herotrail .statgrid { padding: var(--space-1) 0; background: transparent; }
 .gdnext__herotrail .gdp__trail { padding-inline: 0; }
 /* The hero ends above the trail: the chip's 34px, its padding and the floor gap. raw-value-exempt: the chip height */
-.gdnext[data-rails] .gdnext__slot--hero .gdhero { bottom: calc(34px + var(--space-2) + var(--space-2) + var(--space-2)); }
+.gdnext[data-tier='P'] .gdnext__slot--hero .gdhero { bottom: calc(34px + var(--space-2) + var(--space-2) + var(--space-2)); }
 /* layout-exempt: the Menu's ways out, two lineups and the box score in one row */
 .gdnext__exits { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: var(--space-1h); margin-bottom: var(--space-3); }
 .gdnext__exits .gdnext__exit { justify-content: center; min-width: 0; padding: var(--space-2) var(--space-1); text-align: center;

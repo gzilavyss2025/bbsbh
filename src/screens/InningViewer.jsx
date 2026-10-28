@@ -87,9 +87,7 @@ export function InningViewer({
   half,
   onInning,
   onBoxScore,
-  onScorecard,
   onLineup,
-  slateHref,
   gameStatus,
   refreshFailed,
   onReload,
@@ -580,9 +578,7 @@ export function InningViewer({
         open={currentSealed ? { count: curAtBatCount, sub: curSub } : focus.stepAhead && replaySub > 0 ? { count: focus.cursor + 1, sub: replaySub } : null}
         pitch={{ on: pitchMode, set: setPitchMode }}
         onBoxScore={onBoxScore}
-        onScorecard={onScorecard}
         onLineup={onLineup}
-        slateHref={slateHref}
         notices={[
           gameStatus?.label && `${gameStatus.label}${gameStatus.reason ? ` — ${gameStatus.reason}` : ''}`,
           refreshFailed && 'Couldn’t refresh — showing the last update.',
