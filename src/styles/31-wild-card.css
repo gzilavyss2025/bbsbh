@@ -444,9 +444,6 @@
 /* The Bullpen list's compound "SV · G · IP" badge — longer than every other
    rolechip use, but still kept to one line (wrapping read badly); the name
    column shrinks/ellipsizes first instead (see .thub-name). */
-.rolechip--stats {
-  white-space: nowrap;
-}
 
 /* Roster super-section (Preferred Lineup / Starting Pitchers / Bullpen) — one
    bordered soft-cream card (a ledger Card, like .tstats; #1113) so the three
@@ -707,10 +704,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-1);
-  white-space: nowrap;
-}
-.prospecttable__line {
-  font-size: var(--fs-compact);
   white-space: nowrap;
 }
 

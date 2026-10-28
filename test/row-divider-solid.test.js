@@ -8,7 +8,6 @@ import { join } from 'node:path'
 
 const STYLES = join(import.meta.dirname, '..', 'src', 'styles')
 const SOLID = [
-  ['10-lineup.css', '.starter__stats'],
   ['10-lineup.css', 'button.starter__careervs'],
   ['scoring/defense-diamond.css', '.defdiamond__dh'],
   ['13-play-by-play.css', '.pbp__note'],

@@ -68,7 +68,8 @@ import { resolve, join } from 'node:path'
 // 112 -> 111: the slate's Reveal-all chip went with the reveal-all chain
 // (ADR-0116).
 // 103 -> 102: the percentile strip's sheet went with its unimported component.
-const BUDGET = 102
+// 102 -> 101: a rule for a class no component draws went in the PurgeCSS sweep.
+const BUDGET = 101
 
 const stylesDir = resolve('src/styles')
 const sheets = []

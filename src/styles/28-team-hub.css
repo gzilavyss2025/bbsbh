@@ -140,8 +140,6 @@
   pointer-events: none;
 }
 
-.topbar__home svg,
-.topbar__home img,
 .sitefooter__brand svg,
 .sitefooter__brand img {
   display: block;

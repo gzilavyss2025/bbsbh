@@ -363,10 +363,6 @@
   --btn-fill-hover: var(--seal-texture);
   --btn-edge-hover: var(--seal-hatch);
 }
-.btn--reveal .btn__ball {
-  margin-right: 6px;
-  font-size: 1.1em;
-}
 
 /* (A `.revealsplit__btn.is-active` filled-navy state used to live here, for
    focus mode's Summary button. That button is gone — the half's numbers arrive

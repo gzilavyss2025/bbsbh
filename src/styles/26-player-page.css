@@ -120,21 +120,7 @@
 }
 
 /* The Regular / Postseason switch above the split tables. */
-.player__splitscope {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1h);
-  margin-top: 10px;
-}
 
-.player__splitscopelabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  min-width: 52px;
-}
 /* The opponent picker's "tray" — an inset panel (recessed paper + hairline
    border + inner shadow) that lifts the logo strip off the page so it reads as a
    control you scrub through, not just a loose row of images. */

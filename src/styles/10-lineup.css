@@ -131,9 +131,6 @@
    season, and (conditionally) his whole career against them, so the card
    reads as a stack of dated facts (badges, season-to-date, last time out,
    this year vs this club, career vs this club) rather than one lump. */
-.starter__stats,
-.starter__last,
-.starter__seasonvs,
 .starter__careervs {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -311,14 +308,6 @@ button.starter__careervs {
    flex-basis:100% is what makes this a line of its own rather than one more
    flex item. Without it the note rides up beside short names and drops below
    long ones, and the card's left edge goes ragged row by row. */
-.lineup__vs {
-  flex-basis: 100%;
-  margin-top: -2px;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-caption);
-}
 
 /* The toggle in a section masthead's aside slot. It is a Pill control now (#1131 slice 4):
    <Pill role="control" fill="paper" pressed>, so the shape, the 34px height,
@@ -347,30 +336,9 @@ button.starter__careervs {
 /* Batters with history against tonight's starter who AREN'T in the posted nine
    — never empty in practice (see splitMatchupRows), and the reason folding the
    notes into the order doesn't quietly lose a pinch-hit read. */
-.lineup__bench {
-  padding: var(--space-2) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-rule);
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  color: var(--text-caption);
-}
-.lineup__benchlabel {
-  display: block;
-  margin-bottom: 2px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-.lineup__bench b {
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
 
 /* The Full roster door closing the pregame roster fallback (TeamInfo.jsx's
-   FullRosterLink) — same closing-row idea as .lineup__bench above. .thub__door's
+   FullRosterLink), a closing row. .thub__door's
    usual home is BETWEEN two already-bordered cards (TeamPage's previews), so a
    bare margin reads fine there; here it sits inside the SAME card as the
    batter rows above it, so without its own top edge it read as a stray link

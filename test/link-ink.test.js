@@ -68,7 +68,6 @@ const TEXT_CONTROLS = [
   ['08-site-shell.css', '.searchbox__clear'],
   ['08-site-shell.css', '.searchoverlay__cancel'],
   ['08-site-shell.css', '.searchoverlay__clearrecent'],
-  ['09-team-info.css', '.fact__infoglyph'],
   ['04-site-bar.css', '.tally-cl-textbtn'],
   ['postseason/series-parts.css', '.psseries__ldoormark'],
 ]
