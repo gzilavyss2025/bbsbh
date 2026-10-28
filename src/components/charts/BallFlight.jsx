@@ -218,7 +218,8 @@ function FlightBody({ ball, park, name, code, closeRef, onClose, facts = true, a
 // beside the diamond (Gameday's hero). `arc={false}`: the field spray only, no Elevation Arc view.
 // `head={false}`: no name or result over the drawing, only the sheet's ✕ (the host names the play).
 // `hover={false}`: no popover on a pointer's hover; the flight opens only on a click or tap.
-export function BallFlight({ ball, batter, code = '', facts = true, arc = true, head = true, hover = true }) {
+// `extra`: more for the opened card only, under the drawing (Gameday's Savant figures).
+export function BallFlight({ ball, batter, code = '', facts = true, arc = true, head = true, hover = true, extra = null }) {
   const hoverCapable = useMediaQuery(HOVER_CARD_QUERY) && hover
   const btnRef = useRef(null)
   const closeRef = useRef(null)
@@ -353,6 +354,7 @@ export function BallFlight({ ball, batter, code = '', facts = true, arc = true, 
                 closeRef={closeRef}
                 onClose={() => setOpen(false)}
               />
+              {extra}
             </Card>
           </div>
         </ModalPortal>

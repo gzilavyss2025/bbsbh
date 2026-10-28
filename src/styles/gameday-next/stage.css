@@ -7,9 +7,10 @@
   --gd-zone-h: calc(var(--gd-zone-w) * 1.1);
   --gd-figure-h: calc(var(--gd-zone-w) * 2.7);
   --gd-ground: max(var(--space-3), 3cqh);
-  --gd-map-w: clamp(128px, min(30cqw, 44cqh), 196px);
-  --gd-map-edge: max(var(--space-2), calc(50% - var(--gd-zone-w) * .68 - var(--gd-map-w))); }
-.gdstage { position: absolute; top: 10%; right: var(--gd-map-edge); width: var(--gd-map-w); height: var(--gd-map-w); display: flex; align-items: center; justify-content: center; overflow: hidden;
+  /* The overhead map tucks into the upper corner opposite the batter. */
+  --gd-map-w: clamp(120px, min(32cqw, 40cqh), 180px);
+  --gd-map-edge: var(--space-1h); }
+.gdstage { position: absolute; top: var(--space-1h); right: var(--gd-map-edge); width: var(--gd-map-w); height: var(--gd-map-w); display: flex; align-items: center; justify-content: center; overflow: hidden;
   z-index: 3; }
 .gdstageScene[data-batter-side='L'] .gdstage { left: var(--gd-map-edge); right: auto; }
 .gdstage__canvas { flex: none; image-rendering: pixelated; }

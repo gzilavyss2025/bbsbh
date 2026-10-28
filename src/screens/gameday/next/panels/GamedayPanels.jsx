@@ -16,8 +16,8 @@ import { revealInning } from '../../../../api/linescore.js'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { pitcherDayLine, pitchingDayLines } from '../../../../api/gameday/dayLine.js'
 import { pitchingLinesMarkup } from './pitchingLinesMarkup.js'
-import { createElement } from 'react'
-import { halfIndex, selectMoundPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
+import { createElement, useState } from 'react'
+import { halfIndex, lastName, selectLineup, selectMoundPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
 import { PitcherCard } from '../../../../components/playbyplay/pitcherCard/PitcherCard.jsx'
 import { defenseAt } from '../../../../api/gameday/defense.js'
 import { battingSideOf } from '../../../../api/gameday/stepCut.js'
@@ -124,11 +124,19 @@ const Trail = ({ ctx }) => (
             </button>
           </li>
         ))}
-        {more && <li className="gdp__chip gdp__chip--cover"><b>Sealed</b></li>}
+        {/* The at-bat still open names its batter, as the hero does, instead of "Sealed" (Gary, 2026-10-28). */}
+        {more && <li className="gdp__chip gdp__chip--cover"><b>{upNext(ctx.feed, cards) || 'Sealed'}</b></li>}
       </ol>
     )}
   </Sealable>
 )
+
+// The batter of the at-bat after the last one shown: the one the reader is inside.
+const upNext = (feed, cards) => {
+  const at = cards.at(-1)?.atBatIndex
+  const p = at == null ? null : feed?.liveData?.plays?.allPlays?.find((q) => q.about?.atBatIndex === at + 1)
+  return p?.matchup?.batter?.id ? feed.gameData?.players?.[`ID${p.matchup.batter.id}`]?.lastName ?? '' : ''
+}
 
 // Names and slots are the order entering the half (lineupEntering gates itself); the at-bat result codes no longer show.
 // The order turned so the batter at the plate leads and the rest follow in turn, wrapping to the
@@ -175,20 +183,41 @@ function BattingOrder({ ctx }) {
 }
 
 // The Field tab: FieldCard's park with surnames at the spots, the defense as of the cursor.
+// The other club's alignment, for the Field card's flip (Gary, 2026-10-28): the batting side as it last
+// took the field, its half already behind the reader (the half before this one), else its lineup card
+// (the top of the 1st, before it has fielded). Pre-pitch and reference data only.
+function otherDefense(feed, inning, half, mark) {
+  const prev = half === 'bottom' ? { inning, half: 'top' } : { inning: inning - 1, half: 'bottom' }
+  const by = prev.inning >= 1 ? defenseAt(feed, { ...prev, step: null, revealedThrough: mark }) : null
+  if (by) return by
+  const at = {}
+  for (const p of selectLineup(feed, battingSideOf(half))) if (p.position) at[p.position] = { id: p.id, last: lastName(p) }
+  return at
+}
+
 function Field({ ctx }) {
   const { feed, inning, half, mark } = ctx
+  const [flipped, setFlipped] = useState(false)
   const v = feed?.gameData?.venue
   const layout = resolveBallparkLayout({ venueId: v?.id, venueName: v?.name, gameDate: feed?.gameData?.datetime?.officialDate })
   if (!layout) return <p className="gdp__sealed">No park drawing for this venue.</p>
   const win = parkWindow(layout)
+  const fielding = feed?.gameData?.teams?.[half === 'top' ? 'home' : 'away']
+  const batting = feed?.gameData?.teams?.[half === 'top' ? 'away' : 'home']
+  const shown = flipped ? batting : fielding
+  const other = flipped ? fielding : batting
   return (
     <Sealable ctx={ctx} reach>
       {({ cap }) => {
-        const by = defenseAt(feed, { inning, half, step: cap, revealedThrough: mark }) ?? {}
+        const by = (flipped ? otherDefense(feed, inning, half, mark) : defenseAt(feed, { inning, half, step: cap, revealedThrough: mark })) ?? {}
         return (
-          <>
+          <div key={flipped ? 'b' : 'f'} className="gdp__flip">
             <div className="lfld__field" style={{ aspectRatio: win.aspectRatio }}>
-              <BallparkDiagram layout={layout} viewBox={win.viewBox} className="lfld__park" label={`${v?.name} with the defense`} />
+              <BallparkDiagram layout={layout} viewBox={win.viewBox} className="lfld__park" label={`${v?.name} with the ${shown?.teamName ?? ''} defense`} />
+              {/* The other club's mark turns the card over to its alignment, and back. */}
+              <button type="button" className="gdp__flipbtn" aria-pressed={flipped} aria-label={`Show the ${other?.teamName ?? 'other'} defense`} onClick={() => setFlipped(!flipped)}>
+                <TeamLogo teamId={other?.id} name={other?.teamName ?? ''} size={32} />
+              </button>
               {Object.entries(DEFENSE_SPOTS).map(([pos, xy]) => {
                 const { left, top } = win.percent(xy)
                 return (
@@ -199,7 +228,7 @@ function Field({ ctx }) {
               })}
             </div>
             {by.DH && <p className="lfld__dh"><span>DH</span>{by.DH.last}</p>}
-          </>
+          </div>
         )
       }}
     </Sealable>

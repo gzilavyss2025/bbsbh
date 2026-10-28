@@ -143,11 +143,11 @@ test('the overhead field stays minimal: zone data does not add a close-up strike
   assert.ok(!zones.includes(S.zoneCold) && !zones.includes(S.zoneHot))
 })
 
-test('the rest batter: the due-up of the half being scored; none for a committed half or under the checkpoint', () => {
+test('the rest batter: the due-up of the half being scored; the batter on screen for a committed half; none under the checkpoint', () => {
   const at = { view: 2, mark: 1, inning: 2, half: 'top', last: 12, stepAtBatIndex: 12 }
   assert.equal(restBatter(F, at)?.id, 668227) // Arozarena
   assert.equal(restBatter(F, { ...at, covered: true }), null)
-  assert.equal(restBatter(F, { ...at, mark: 2 }), null)
+  assert.equal(restBatter(F, { ...at, mark: 2 })?.id, F.liveData.plays.allPlays[12].matchup.batter.id)
 })
 
 test('the zone card shows a batter only with his own zones, and only at rest', () => {

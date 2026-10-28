@@ -7,12 +7,13 @@ import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { heroMarkup } from './heroMarkup.js'
 import { ScrollCue } from '../ScrollCue.jsx'
 import { BallFlight } from '../../../../components/charts/BallFlight.jsx'
+import { ParksCell, SavantFacts } from './SavantFacts.jsx'
 import { StrikeZoneModal } from '../../../../components/scoring/StrikeZone.jsx'
 import { hasPitchLocations } from '../../../../api/playbyplay/pitchInfo.js'
 import { BattingUniformContext, GameUniformsContext } from '../../../../components/logo/uniformContexts.js'
 
 // Gameday's hero (markup and rules: heroMarkup.js), and the stage's event card that shares its box.
-export const GamedayHero = (props) => heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, ...props })
+export const GamedayHero = (props) => heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, Savant: SavantFacts, Parks: ParksCell, ...props })
 export const GamedayEventCard = (props) => eventCardMarkup(createElement, { SealBox, ...props })
 
 // The play's words at the normal size; past their space, the smaller size; past that too, they scroll

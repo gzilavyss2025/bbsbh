@@ -230,3 +230,9 @@
 .gdpl__table td { text-align: right; padding: var(--space-1) 0 var(--space-1) var(--space-1); border-bottom: var(--bw-hair) solid var(--border-hairline); }
 .gdpl__table tbody th { border-bottom: var(--bw-hair) solid var(--border-hairline); }
 .gdpl__table tbody tr:last-child :is(th, td) { border-bottom: 0; }
+/* The Field card's flip: the other club's mark in the park's top right corner turns the card over. */
+.gdp__flipbtn { position: absolute; top: var(--space-1); right: var(--space-1); z-index: 2; display: flex; padding: var(--space-1); border: 0; background: none; cursor: pointer; }
+.gdp__flip { animation: gdp-flip var(--dur-med) ease-out; }
+@keyframes gdp-flip { from { transform: perspective(600px) rotateY(-90deg); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .gdp__flip { animation: none; } }
+:root[data-motion='reduced'] .gdp__flip { animation: none; }

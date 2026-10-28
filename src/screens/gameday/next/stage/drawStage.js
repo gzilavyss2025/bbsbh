@@ -40,7 +40,7 @@ function line(b, a, c, slot) {
 // Framing depends only on slot size, never a revealed result.
 export function fieldFrame(wall, w, h) {
   const fence = ['home', '1B', '2B', '3B'].map((key) => BASES[key])
-  const left = -90, right = 90, top = 185, bottom = -35
+  const left = -76, right = 76, top = 150, bottom = -18
   const k = Math.max(0.001, Math.min((w - 20) / (right - left), (h - 20) / (top - bottom)))
   const x0 = (w - (right - left) * k) / 2, y0 = (h - (top - bottom) * k) / 2
   const project = (p) => [x0 + (p[0] - left) * k, y0 + (top - p[1]) * k]
@@ -51,9 +51,12 @@ export function fieldFrame(wall, w, h) {
 function background(wall, w, h) {
   const fb = newBuf(w, h), frame = fieldFrame(wall, w, h), P = frame.project
   fb.px.fill(S.overheadNight)
-  // A scorebook diagram: pencil basepaths, navy-edged bags, paper between them.
+  // The score bug's bases on paper (Gary, 2026-10-28): broad ink-edged diamonds, a thin
+  // pencil path between them; home stays the small plate.
   const bags = ['home', '1B', '2B', '3B', 'home'].map((key) => P(BASES[key]))
-  for (let i = 1; i < bags.length; i++) line(fb, bags[i - 1], bags[i], S.overheadEquipment)
+  // Two pixels wide, so the path reads at the corner map's size.
+  for (let i = 1; i < bags.length; i++) for (const o of [0, 1]) line(fb, [bags[i - 1][0] + o, bags[i - 1][1]], [bags[i][0] + o, bags[i][1]], S.overheadEquipment)
+  const r = Math.max(5, Math.round(frame.k * 13))
   for (const [index, bag] of bags.slice(0, 4).entries()) {
     const [x, y] = bag.map(Math.round)
     if (index === 0) {
@@ -63,9 +66,9 @@ function background(wall, w, h) {
         put(fb, x + dx, y + dy, edge ? S.outline : S.chalk)
       }
     } else {
-      for (let dy = -5; dy <= 5; dy++) for (let dx = -5; dx <= 5; dx++) {
-        const edge = Math.abs(dx) + Math.abs(dy)
-        if (edge <= 5) put(fb, x + dx, y + dy, edge === 5 ? S.outline : S.chalk)
+      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+        const d = Math.abs(dx) + Math.abs(dy)
+        if (d <= r) put(fb, x + dx, y + dy, d >= r - 1 ? S.outline : S.chalk)
       }
     }
   }

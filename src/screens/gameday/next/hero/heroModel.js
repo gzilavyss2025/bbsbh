@@ -1,3 +1,4 @@
+import { HARD_HIT_MPH } from '../../../../lib/ballpark/hitProjection.js'
 import { pitchLadder } from '../../../../api/playbyplay/pitchInfo.js'
 
 // The hero's pure parts: what the scorebook box draws for one at-bat entry (a computeHalfInningFeed
@@ -66,7 +67,8 @@ export function contactStats(e) {
   const b = e.battedBall
   if (!b || b.exitVelo == null) return []
   return [
-    { label: 'Exit velo', value: velo(b.exitVelo), unit: 'mph' },
+    // Statcast's hard-hit line (95 mph) marks the cell (Gary, 2026-10-28: a slow pulse, hero.css).
+    { label: 'Exit velo', value: velo(b.exitVelo), unit: 'mph', hard: b.exitVelo >= HARD_HIT_MPH },
     b.launchAngle != null && { label: 'Launch angle', value: `${b.launchAngle}°`, unit: '' },
     b.distance != null && b.trajectory !== 'ground_ball' && { label: 'Distance', value: b.distance, unit: 'ft' },
   ].filter(Boolean)
