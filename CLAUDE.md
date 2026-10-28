@@ -86,6 +86,7 @@ npm run preview    # serve the built app
 npm run lint       # eslint + guard scripts (caps, casing, typography, contrast, claude-md, …)
 npm test           # node:test unit suite (pure logic; CI-gated)
 npm run test:coverage  # same, with a per-file coverage report
+npm run knip       # unused files/exports/deps (advisory, not in CI; config: knip.json)
 npm run e2e        # playwright — ONLY when Gary asks (hook-enforced, see docs/testing.md)
 ```
 
