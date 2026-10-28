@@ -16,7 +16,9 @@ export function ZoneCard({ id, name, teamId, side = 'R', zones, onDismiss }) {
         <PlayerLink id={id} name={name} className="gdzonemap__batter" ariaLabel={`Batter at the plate: ${name}`}>
           <BatterSprite key={teamId} side={side} teamId={teamId} />
         </PlayerLink>
-        <span className="gdzonemap__plate" aria-hidden="true" />
+        <svg className="gdzonemap__plate" viewBox="0 0 196 74" aria-hidden="true">
+          <path d="M1 1H195V43L98 73L1 43Z" />
+        </svg>
         <div className="gdzonemap__grid" aria-label="Batting average by strike zone">
           {Array.from({ length: 9 }, (_, i) => {
             const z = zones[`0${i + 1}`]

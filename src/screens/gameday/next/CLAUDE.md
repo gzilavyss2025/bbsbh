@@ -30,11 +30,11 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line
   score's run cells take a keyboard pick mid page-turn (aria-disabled only), as the old running line did.
 - `stage/` is the stage renderer (#2569): `stagePlay` + `stateAt` (pure timeline), `drawStage` (slot-index buffer),
-  `StageCanvas` (palette from the `--stage-*` tokens). One fixed overhead field fits the whole park; short ball paths
+  `StageCanvas` (palette from the `--stage-*` tokens). One fixed overhead base diamond keeps the runners readable; short ball paths
   precede runner advances and a settled result. No close-up windup/swing or celebration belongs in this renderer.
   Sprite targets use the global PlayerLink hover card and track the painted figures without React updates per frame;
   `actors.js` reads defense and substitutions only inside a SealBox with the existing step/sub-step clamp.
-  Its surround uses the page's cream canvas. The batting view fills the stage with a large handed sprite and hot/cold zone map; the fixed overhead mini-map sits opposite the batter (left for a left-handed hitter, right for a right-handed hitter) and shows only the batter and runners; no photo or color wash.
+  Its surround uses the page's cream canvas. The batting view uses one proportional artboard for the handed sprite, zone grid and SVG plate, scaling the whole composition together; the fixed overhead mini-map sits opposite the batter (left for a left-handed hitter, right for a right-handed hitter) and shows only the batter and runners; no photo or color wash.
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its

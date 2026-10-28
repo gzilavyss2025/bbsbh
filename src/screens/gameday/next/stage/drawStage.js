@@ -1,16 +1,30 @@
 // One fixed overhead field at every point in a play. Coordinates are in feet; height never
 // shifts the camera or the ball's ground position. The only paths are the ball's short trail.
-import { BASES, POS, clamp, polar } from './scene.js'
+import { BASES, clamp } from './scene.js'
 import { KIT, S, newBuf, put, rect, sprite } from './pixels.js'
 
 export const stageScale = (W) => Math.max(1, Math.round(W / 480))
 
 // Small shaded figures: cream cloth, navy equipment, gold piping and brown leather,
 // echoing #2675's material separation without depending on its celebration atlases.
+const STAND = [
+  '......hhh......', '.....hHHHh.....', '.....hHHTH.....', '......Fff......',
+  '......Ff.......', '....jJJJJj.....', '...sjJJTJjs....', '...sjJJTJjs....',
+  '..ss.jJTJj.ss..', '...s.jJTJj.s...', '.....jJJJj.....', '.....nnnnn.....',
+  '....pPPPPPp....', '....pPP.PPp....', '....pPP.PPp....', '....pPP.PPp....',
+  '....pPP.PPp....', '....pSS.SSp....', '....SSS.SSS....', '...kKKK.KKKk...',
+  '...kKKK.KKKk...',
+]
 const MINI = {
-  stand: ['....hhh....', '...hHHHh...', '...hHHTH...', '....Ff.....', '...jJJJj...', '..BjJTJjs..', '..bJJTJJs..', '...jJJJj...', '....nnn....', '...pPPPp...', '...pP.Pp...', '...pP.Pp...', '...SS.SS...', '..kKK.KKk..'],
-  run0: ['....hhh....', '...hHHHh...', '...hHHTH...', '....Ff.....', '...jJJJjs..', '..BjJTJj...', '..bJJTJJ...', '...jJJJj...', '....nnn....', '...pPPPp...', '..pPP..Pp..', '..pP...Pp..', '..SS...SS..', '.kKK...KKk.'],
-  run1: ['....hhh....', '...hHHHh...', '...hHHTH...', '....Ff.....', '..sjJJJj...', '...jJTJjB..', '...JJTJJb..', '...jJJJj...', '....nnn....', '...pPPPp...', '....pPPp...', '.....pPp...', '.....SS....', '....kKKk...'],
+  stand: STAND,
+  run0: [...STAND.slice(0, 6), '....jJJTJjss...', '...sjJJTJj.....', '..ss.jJTJj.....',
+    '.....jJTJj.....', ...STAND.slice(10, 13), '...pPP..PPp....', '..pPP...PPp....',
+    '..pPP....PPp...', '..SSS.....SS...', '.kKKK.....SS...', '.kKKK....kKKk..',
+    '.........kKKk..', '...............'],
+  run1: [...STAND.slice(0, 6), '...ssjJTJj.....', '.....jJTJjs....', '.....jJTJjss...',
+    '.....jJTJj.....', ...STAND.slice(10, 13), '.....pPP.Pp....', '......pPPPp....',
+    '.......pPPp....', '.......pPPp....', '.......SSS.....', '......kKKK.....',
+    '......kKKK.....', '...............'],
 }
 const FIELD_KIT = { ...KIT.home, H: S.kitNavy, h: S.overheadEquipment, F: S.skin, f: S.skinShade,
   J: S.overheadCloth, j: S.overheadClothShade, T: S.overheadGold, P: S.overheadCloth,
@@ -22,13 +36,11 @@ function line(b, a, c, slot) {
   for (let i = 0; i <= n; i++) put(b, a[0] + dx * i / (n || 1), a[1] + dy * i / (n || 1), slot)
 }
 
-// Framing depends only on the park and slot size, never the revealed result. Fit the entire
-// outline with room behind home, even in a short landscape slot.
+// A stable base diamond, with headroom for the taller runner sprites.
+// Framing depends only on slot size, never a revealed result.
 export function fieldFrame(wall, w, h) {
-  const fence = Array.from({ length: 91 }, (_, i) => { const a = i - 45; return polar(a, wall(a).ft) })
-  const xs = fence.map((p) => p[0]), ys = fence.map((p) => p[1])
-  const left = Math.min(...xs, -90) - 24, right = Math.max(...xs, 90) + 24
-  const top = Math.max(...ys, ...Object.values(POS).map((p) => p[1])) + 24, bottom = -30
+  const fence = ['home', '1B', '2B', '3B'].map((key) => BASES[key])
+  const left = -95, right = 95, top = 185, bottom = -40
   const k = Math.max(0.001, Math.min((w - 20) / (right - left), (h - 20) / (top - bottom)))
   const x0 = (w - (right - left) * k) / 2, y0 = (h - (top - bottom) * k) / 2
   const project = (p) => [x0 + (p[0] - left) * k, y0 + (top - p[1]) * k]
@@ -40,16 +52,12 @@ function background(wall, w, h) {
   const fb = newBuf(w, h), frame = fieldFrame(wall, w, h), P = frame.project
   fb.px.fill(S.overheadNight)
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const [wx, wy] = frame.world(x, y), distance = Math.hypot(wx, wy)
-    const angle = Math.atan2(wx, wy) * 180 / Math.PI
-    const fair = wy >= 0 && Math.abs(wx) <= wy && distance <= wall(angle).ft
-    if (!fair && distance > 13) continue
-    const noise = ((x * 73 ^ y * 179) >>> 0) % 37
-    const stripe = Math.floor(wy / 32) & 1
-    let slot = noise === 0 ? S.overheadTurfShade : stripe ? S.overheadTurfLit : S.overheadTurf
-    const skin = Math.hypot(wx, wy - 60.5) < 94 && Math.abs(wx) + Math.abs(wy - 63.64) > 48
-    const mound = Math.hypot(wx, wy - 60.5) < 8
-    if (distance < 13 || skin || mound) slot = noise < 3 ? S.overheadClayLit : S.overheadClay
+    const [wx, wy] = frame.world(x, y)
+    const edge = Math.abs(wx) + Math.abs(wy - BASES['1B'][1])
+    if (edge > BASES['1B'][1] + 10) continue
+    const path = edge > BASES['1B'][1] - 10
+    const stripe = Math.floor(wy / 24) & 1
+    const slot = path ? S.overheadClay : stripe ? S.overheadTurfLit : S.overheadTurf
     fb.px[y * w + x] = slot
   }
   const home = P(BASES.home), fence = frame.fence.map(P)
@@ -59,8 +67,6 @@ function background(wall, w, h) {
   const bags = ['home', '1B', '2B', '3B', 'home'].map((key) => P(BASES[key]))
   for (let i = 1; i < bags.length; i++) line(fb, bags[i - 1], bags[i], S.overheadCloth)
   for (const bag of bags.slice(0, 4)) rect(fb, Math.round(bag[0]) - 1, Math.round(bag[1]) - 1, 3, 3, S.chalk)
-  const mound = P([0, 60.5, 0])
-  rect(fb, Math.round(mound[0]) - 1, Math.round(mound[1]), 3, 1, S.overheadCloth)
   return { fb, frame }
 }
 
