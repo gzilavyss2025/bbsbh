@@ -12,6 +12,7 @@ import { computeHalfInningFeed } from '../src/api/playbyplay.js'
 import { nextStepBoundary } from '../src/api/playbyplay/entriesView.js'
 import { openAtBat, runnerCard, subSteps } from '../src/api/gameday/subSteps.js'
 import { formatAtBatMark, parseAtBatMark } from '../src/hooks/revealProgressCore.js'
+import { cutAt } from '../src/screens/gameday/next/panels/panelData.js'
 import { heroMarkup } from '../src/screens/gameday/next/hero/heroMarkup.js'
 import { playLine } from '../src/screens/gameday/next/hero/heroModel.js'
 import { eventCardMarkup } from '../src/screens/gameday/next/steps/eventCardMarkup.js'
@@ -289,4 +290,15 @@ test('a live at-bat before its first pitch: caught up, and the reader can step i
   // Stepped in, the stage stops holding the last finished batter.
   assert.equal(holdsFinished({ view: 11, mark: 10, open: { count: c, sub: 0 }, last: 56 }), true)
   assert.equal(holdsFinished({ view: 11, mark: 10, open: { count: c, sub: 0, in: true }, last: 56 }), false)
+})
+
+test('a replayed trail chip puts its own at-bat in the hero box, cut at the reader\'s step', () => {
+  const c = countFor(F824, 6, 'bottom', 57)
+  const cards = cutAt(F824, 6, 'bottom', c).cards
+  const [first, latest] = [cards[0], cards.at(-1)]
+  assert.notEqual(first.atBatIndex, latest.atBatIndex)
+  const box = (replay) => renderToStaticMarkup(heroMarkup(h, { SealBox, feed: F824, inning: 6, half: 'bottom', mark: 10, last: latest, step: c, replay }))
+  assert.match(box(null), new RegExp(latest.batter.last))
+  assert.match(box(first.atBatIndex), new RegExp(first.batter.last))
+  assert.doesNotMatch(box(first.atBatIndex), new RegExp(`>${latest.batter.last}<`))
 })

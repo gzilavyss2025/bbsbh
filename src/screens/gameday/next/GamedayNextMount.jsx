@@ -42,7 +42,7 @@ export function GamedayNextMount({ sectionNav, bug: { mark, ...bug }, meta, pane
   const hero = bug.started && bug.feed && (
     <GamedayHero
       feed={bug.feed} inning={bug.viewInning} half={bug.viewHalf} mark={mark}
-      last={bug.live?.last ?? null} stepAtBatIndex={bug.stepAtBatIndex} open={open} checkpoint={Boolean(checkpoint)}
+      last={bug.live?.last ?? null} stepAtBatIndex={bug.stepAtBatIndex} open={open} replay={staged.replaying} step={panels.step} checkpoint={Boolean(checkpoint)}
     />
   )
   return (
