@@ -18,8 +18,7 @@ it does not mint a second collectible or replace the circular stamp.
   Source-provided `locationName` and `teamName` separate the city from the nickname;
   older facts without those fields retain the full name. Uneven ink transfer,
   small edge breaks and paper grain use the existing deterministic `stampSeed`,
-  so a game's impression remains stable across renders. Stadium artwork remains
-  a separate effort. The navy-band header uses the same local MLB/MiLB knockout
+  so a game's impression remains stable across renders. The navy-band header uses the same local MLB/MiLB knockout
   art as the passport cover. Small secondary team marks use the existing CDN
   primary/cap/wordmark variants, sanitized and converted with `monoLogoSvg`.
   Shape fingerprints exclude the primary mark; unavailable or historically
@@ -36,13 +35,16 @@ it does not mint a second collectible or replace the circular stamp.
   doubleheader meaning. The live feed does not provide a series game number;
   that field is omitted on the box score instead of adding a second request.
 
-## Stadium artwork is separate
+## Stadium artwork
 
-No ballpark illustrations are created or added by this feature. The component
-accepts an optional `artwork={{ src, alt }}` supplied by a future caller. It
-does not resolve a venue ID, import a catalog, fetch metadata, or manage assets.
-Absent or broken artwork leaves the same engraved venue name. Future stadium
-graphics are developed and reviewed separately, one ballpark at a time.
+The component accepts an optional `artwork={{ src, alt }}`; it never resolves a
+venue itself. Callers (the box score and `HeritagePassPages`) pass
+`heritageArt(game.venue)` from `src/lib/heritage/art.js`, which maps a `parkKey`
+to `public/heritage-art/{parkKey}.webp`. Five parks have art (Gary, 2026-10-29):
+American Family Field, Fenway Park, Tropicana Field, Wrigley Field, Yankee
+Stadium. Each is a navy-on-cream engraving, 900px wide, transparent outside the
+drawing. Any other park, and a file that fails to load, leaves the engraved venue
+name. Add a park by adding its webp and one line to `ART`, one ballpark at a time.
 
 ## Where it renders
 

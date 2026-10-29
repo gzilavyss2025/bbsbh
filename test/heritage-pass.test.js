@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { heritagePassModel, passDate, passPage } from '../src/lib/heritage/pass.js'
 import { stampGameFacts } from '../src/api/logbook.js'
 import { revealStampFacts } from '../src/api/linescore.js'
 import { parseRoute } from '../src/lib/route.js'
 import { secondaryLogoSvg } from '../src/lib/heritage/marks.js'
+import { heritageArt } from '../src/lib/heritage/art.js'
 import { logoCdnUrl } from '../src/lib/logoCdn.js'
 
 const fixtures = JSON.parse(readFileSync(new URL('../src/screens/heritage/fixtures.json', import.meta.url)))
@@ -121,4 +122,13 @@ test('unavailable or repeated secondary marks leave the engraved fallback availa
     return url === logoCdnUrl(158, 'cap') ? secondarySvg : primarySvg
   })
   assert.ok(svg.includes('heritage-secondary-158-cap'))
+})
+
+test('stadium artwork resolves by park key and every mapped file ships', () => {
+  assert.equal(heritageArt('American Family Field').src, '/heritage-art/americanfamilyfield.webp')
+  assert.equal(heritageArt('Busch Stadium'), null)
+  assert.equal(heritageArt(''), null)
+  for (const venue of ['Fenway Park', 'Tropicana Field', 'Wrigley Field', 'Yankee Stadium', 'American Family Field']) {
+    assert.ok(existsSync(new URL(`../public${heritageArt(venue).src}`, import.meta.url)), venue)
+  }
 })

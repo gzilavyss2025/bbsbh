@@ -6,10 +6,10 @@ provenance: `docs/heritage-pass.md`. The circular stamp is a separate, preserved
 - A pass carries a final score. `scripts/check-stamp-surfaces.mjs` allowlists
   its callers: the box score's revealed body, the owner's collection, and the
   DEV-only fixed-record preview. Never mount it on a slate or unrevealed game.
-- Stadium artwork is a separate system. Accept optional caller-owned artwork;
-  never generate it, discover assets, manage a stadium catalog, or fetch it here.
-  Both absent and failed artwork keep the venue typography. Artwork is developed
-  separately, one ballpark at a time.
+- Stadium artwork is caller-owned: callers pass `heritageArt(venue)` from
+  `lib/heritage/art.js` (`public/heritage-art/{parkKey}.webp`). The component never
+  resolves, fetches, or generates it. Absent and failed artwork keep the venue
+  typography. Add parks one at a time.
 - The adapter uses `game:final` facts, not a second game model. Optional metadata
   stays absent; `gameNumber` is a doubleheader number, never a series number.
 - Tall-pass pagination is display-only. Never rewrite circular stamp placements,

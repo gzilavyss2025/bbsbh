@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { passPage, passDate, heritagePassModel } from '../../lib/heritage/pass.js'
 import { HeritagePass } from './HeritagePass.jsx'
+import { heritageArt } from '../../lib/heritage/art.js'
 import { Grid } from '../ui/layout/Grid.jsx'
 import { Stack } from '../ui/layout/Stack.jsx'
 import { Cluster } from '../ui/layout/Cluster.jsx'
@@ -16,7 +17,8 @@ export function HeritagePassPages({ stamps, factsByPk, onOpenGame }) {
       <Grid as="ul" min="250px" gap="loose" aria-label="Heritage Pass collection">
         {entries.map((entry) => (
           <li key={entry.gamePk}>
-            {heritagePassModel(factsByPk[entry.gamePk]) ? <HeritagePass game={factsByPk[entry.gamePk]} /> : (
+            {heritagePassModel(factsByPk[entry.gamePk]) ? <HeritagePass game={factsByPk[entry.gamePk]}
+              artwork={heritageArt(factsByPk[entry.gamePk].venue)} /> : (
               <p>{passDate(entry.date)} · Game details not available</p>
             )}
             <Button className="heritagepasses__open" onClick={() => onOpenGame?.(entry.gamePk)}

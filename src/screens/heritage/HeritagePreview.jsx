@@ -17,6 +17,7 @@ export function HeritagePreview() {
     { label: 'MLB · Regular season', game: regular },
     { label: 'MLB · Postseason', game: FIXTURES[1].game },
     { label: 'MiLB · Regular season', game: FIXTURES[2].game },
+    { label: 'Stadium artwork slot', game: regular, artwork: { src: '/heritage-art/americanfamilyfield.webp', alt: 'Engraving of American Family Field' } },
     { label: 'Without stadium artwork', game: regular, artwork: brokenArt ? { src: '/missing-heritage-art.svg' } : null },
     { label: 'Optional metadata omitted', game: incomplete },
   ]
