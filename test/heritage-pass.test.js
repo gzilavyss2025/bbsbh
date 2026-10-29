@@ -126,6 +126,8 @@ test('unavailable or repeated secondary marks leave the engraved fallback availa
 
 test('stadium artwork resolves by park key and every mapped file ships', () => {
   assert.equal(heritageArt('American Family Field').src, '/heritage-art/americanfamilyfield.webp')
+  // Pre-2021 Brewers games carry the park's former name.
+  assert.equal(heritageArt('Miller Park')?.src, '/heritage-art/americanfamilyfield.webp')
   assert.equal(heritageArt('Busch Stadium'), null)
   assert.equal(heritageArt(''), null)
   for (const venue of ['Fenway Park', 'Tropicana Field', 'Wrigley Field', 'Yankee Stadium', 'American Family Field']) {

@@ -43,7 +43,9 @@ venue itself. Callers (the box score and `HeritagePassPages`) pass
 to `public/heritage-art/{parkKey}.webp`. Five parks have art (Gary, 2026-10-29):
 American Family Field, Fenway Park, Tropicana Field, Wrigley Field, Yankee
 Stadium. Each is a navy-on-cream engraving, 900px wide, transparent outside the
-drawing. Any other park, and a file that fails to load, leaves the engraved venue
+drawing. Every game at those parks gets its art, whatever the year; `FORMER`
+maps Miller Park (before 2021) to American Family Field. The drawings keep their
+sponsor and club marks by Gary's choice (2026-10-29). Any other park, and a file that fails to load, leaves the engraved venue
 name. Add a park by adding its webp and one line to `ART`, one ballpark at a time.
 
 ## Where it renders

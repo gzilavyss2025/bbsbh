@@ -11,9 +11,12 @@ const ART = {
   wrigleyfield: 'Wrigley Field',
   yankeestadium: 'Yankee Stadium',
 }
+// Former names that parkKey does not pin, so older games still find their park.
+const FORMER = { millerpark: 'americanfamilyfield' }
 
 /** @returns {{src: string, alt: string} | null} */
 export function heritageArt(venueName, venueId = null) {
-  const key = parkKey(venueName, venueId)
+  const raw = parkKey(venueName, venueId)
+  const key = FORMER[raw] ?? raw
   return ART[key] ? { src: `/heritage-art/${key}.webp`, alt: `Engraving of ${ART[key]}` } : null
 }
