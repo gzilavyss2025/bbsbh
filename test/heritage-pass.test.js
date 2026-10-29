@@ -130,6 +130,9 @@ test('stadium artwork resolves by park key and every mapped file ships', () => {
   // Pre-2021 Brewers games carry the park's former name.
   assert.equal(heritageArt('Miller Park')?.src, '/heritage-art/americanfamilyfield.webp')
   assert.equal(heritageArt('Busch Stadium'), null)
+  // Fenway's light towers are the drawing's top edge; the crop keeps them.
+  assert.equal(heritageArt('Fenway Park').position, 'center top')
+  assert.equal(heritageArt('American Family Field').position, undefined)
   assert.equal(heritageArt(''), null)
   for (const venue of ['Fenway Park', 'Tropicana Field', 'Wrigley Field', 'Yankee Stadium', 'American Family Field']) {
     assert.ok(existsSync(new URL(`../public${heritageArt(venue).src}`, import.meta.url)), venue)

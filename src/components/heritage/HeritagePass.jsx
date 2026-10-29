@@ -132,7 +132,8 @@ function PassVenue({ artwork }) {
   return (
     <div className="heritagepass__venue">
       {artwork?.src && !failed && (
-        <img className="heritagepass__art" src={artwork.src} alt={artwork.alt ?? ''} onError={() => setFailed(true)} />
+        <img className="heritagepass__art" src={artwork.src} alt={artwork.alt ?? ''} onError={() => setFailed(true)}
+          style={artwork.position ? { objectPosition: artwork.position } : undefined} />
       )}
     </div>
   )
