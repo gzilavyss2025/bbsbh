@@ -72,7 +72,7 @@ copied here. Check each against `src/` before you cite it.
 
 ## How to verify a design change
 
-- Start the first free reserved dev server (`npm run dev`, or `dev:2` to `dev:5`). Load the
+- Start a dev server (`npm run dev`, or `npm run dev -- --port N` if 5173 is taken). Load the
   exact route with `?nointro`. Hand Gary the clickable local URL. The `run` skill has the
   loop and `docs/test-games.md` has verified game ids.
 - A cloud session takes a screenshot with `.claude/skills/run/shot.mjs`.

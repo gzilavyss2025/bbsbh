@@ -165,8 +165,8 @@ free because no other agent shares the container.
    `git worktree add --detach ../bbsbh-baseline origin/main`, then `npm install`
    and `npm run dev` there (port 5173). Update it to the `main` that your branch
    starts from.
-2. The BRANCH: your worktree's own dev server, on your reserved port. If it is
-   not running, the suite starts it.
+2. The BRANCH: your worktree's own dev server, on its own port (`E2E_PORT`). If
+   it is not running, the suite starts it (`npm run dev -- --port`).
 
 Then, in your worktree (the sandbox must be off, because the suite reads the
 live network):

@@ -1,5 +1,4 @@
 import { defineConfig } from '@playwright/test'
-import { devScript } from './e2e/fixtures/dev-script.js'
 import { BASE, BRANCH, BRANCH_PORT } from './e2e/visual/setup.js'
 
 // The screenshot suite (issue #1177). `npm run visual` shoots every page in
@@ -25,8 +24,6 @@ if (BASE === BRANCH) {
       'Set E2E_PORT to your worktree\'s port and VISUAL_BASE to a server running main.',
   )
 }
-
-const DEV_SCRIPT = devScript(BRANCH_PORT)
 
 export default defineConfig({
   testDir: './e2e/visual',
@@ -78,7 +75,7 @@ export default defineConfig({
   // Starts the branch server if it is not up. The base server must already run:
   // it is another worktree's, and global-setup.js stops the run if it is down.
   webServer: {
-    command: `npm run ${DEV_SCRIPT}`,
+    command: `npm run dev -- --port ${BRANCH_PORT}`,
     url: BRANCH,
     reuseExistingServer: true,
     timeout: 30_000,

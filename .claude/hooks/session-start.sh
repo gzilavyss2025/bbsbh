@@ -162,9 +162,9 @@ if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
   fi
 else
   # --- Stale dev-server report (local sessions only) ---------------------
-  # Dev servers started in a worktree (npm run dev / dev:2../5) aren't tied
-  # to any session lifecycle, so they keep running — and squatting on the
-  # reserved ports — after their worktree's work is merged and the session
+  # Dev servers started in a worktree (npm run dev, with or without --port)
+  # aren't tied to any session lifecycle, so they keep running — and squatting
+  # on their ports — after their worktree's work is merged and the session
   # that started them is long gone. This just reports; it never kills
   # anything (see .claude/skills/clean-dev-servers.md for the interactive
   # on-demand cleanup that does).
