@@ -28,7 +28,7 @@ import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCallou
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
-import { CAUGHT_UP, caughtUpAdvance, nextSub, openingChangeHeld, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { CAUGHT_UP, canStepIn, caughtUpAdvance, nextSub, openingChangeHeld, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -444,6 +444,10 @@ export function InningViewer({
   // A half read back in pitch mode walks each pitch again (Gary, 2026-10-28): a cursor inside the
   // read-back step (focus.cursor), view state only, never stored, reset when the step or half moves.
   const [replay, setReplay] = useState({ idx: curIdx, cursor: focus.cursor, sub: 0 })
+  // Stepped in to a batter at the plate before his first pitch: view state for this at-bat only.
+  const [steppedIn, setSteppedIn] = useState(null)
+  const atBatKey = `${curIdx}:${curAtBatCount}`
+  const stepIn = currentSealed && currentHalfLive && steppedIn !== atBatKey && canStepIn(feed, effInning, effHalf, curAtBatCount, curSub)
   const replaySub = replay.idx === curIdx && replay.cursor === focus.cursor ? replay.sub : 0
   const replayNext = () => {
     const n = replayTap(feed, effInning, effHalf, focus.cursor, replaySub)
@@ -551,7 +555,8 @@ export function InningViewer({
   const advance = focus.stepAhead
     ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && (pitchMode ? replayNext() : focus.stepNext()), reveal: pitchMode || undefined }
     : currentSealed
-      ? edge ? caughtUpAdvance(pitchMode, loading, onReload) : { label: stepWords(pitchMode), onClick: revealNextStep, reveal: true }
+      ? stepIn ? { label: 'Step in', onClick: () => { focus.followLatest(); setSteppedIn(atBatKey) } }
+      : edge ? caughtUpAdvance(pitchMode, loading, onReload) : { label: stepWords(pitchMode), onClick: revealNextStep, reveal: true }
       : nextIdx != null
         ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
         : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }
@@ -576,7 +581,7 @@ export function InningViewer({
         checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
         engine={pageTurn}
         advance={advance}
-        open={currentSealed ? { count: curAtBatCount, sub: curSub } : focus.stepAhead && replaySub > 0 ? { count: focus.cursor + 1, sub: replaySub } : null}
+        open={currentSealed ? { count: curAtBatCount, sub: curSub, in: steppedIn === atBatKey || undefined } : focus.stepAhead && replaySub > 0 ? { count: focus.cursor + 1, sub: replaySub } : null}
         pitch={{ on: pitchMode, set: setPitchMode }}
         onBoxScore={onBoxScore}
         onLineup={onLineup}

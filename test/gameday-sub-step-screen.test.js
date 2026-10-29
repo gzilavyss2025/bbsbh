@@ -15,8 +15,8 @@ import { formatAtBatMark, parseAtBatMark } from '../src/hooks/revealProgressCore
 import { heroMarkup } from '../src/screens/gameday/next/hero/heroMarkup.js'
 import { playLine } from '../src/screens/gameday/next/hero/heroModel.js'
 import { eventCardMarkup } from '../src/screens/gameday/next/steps/eventCardMarkup.js'
-import { CAUGHT_UP, nextSub, readPitchMode, replayTap, stageKey, stepWords, subTap, writePitchMode } from '../src/screens/gameday/next/steps/subStep.js'
-import { GamedayStage } from '../src/screens/gameday/next/stage/GamedayStage.js'
+import { CAUGHT_UP, canStepIn, nextSub, readPitchMode, replayTap, stageKey, stepWords, subTap, writePitchMode } from '../src/screens/gameday/next/steps/subStep.js'
+import { GamedayStage, holdsFinished } from '../src/screens/gameday/next/stage/GamedayStage.js'
 import { zonePitches } from '../src/screens/gameday/next/zonemap/zonePitches.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 import { rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
@@ -264,4 +264,29 @@ test('824716 ab57 read back in pitch mode: the replay walks every sub-step again
   const taps = []
   for (let sub = 0; sub != null; sub = replayTap(F824, 6, 'bottom', c - 1, sub)) taps.push(sub)
   assert.deepEqual(taps, [0, 1, 2, 3, 4, 5, 6])
+})
+
+// The feed's live card (about.isComplete false) before its first pitch: at-bat 57 cut to no events.
+function freshAtBat() {
+  const f = structuredClone(F824)
+  const plays = f.liveData.plays.allPlays
+  const i = plays.findIndex((p) => p.about.atBatIndex === 57)
+  const p = plays[i]
+  Object.assign(p, { playEvents: [], runners: [], result: { type: 'atBat' }, count: { balls: 0, strikes: 0, outs: p.count.outs } })
+  p.about.isComplete = false
+  f.liveData.plays.allPlays = plays.slice(0, i + 1)
+  return f
+}
+
+test('a live at-bat before its first pitch: caught up, and the reader can step in to it', () => {
+  const f = freshAtBat()
+  const c = countFor(f, 6, 'bottom', 57)
+  // The feed's live is a count object, not true: the advance must not reveal the open at-bat.
+  assert.equal(nextSub(f, 6, 'bottom', c, 0, true), CAUGHT_UP)
+  assert.equal(nextSub(f, 6, 'bottom', c, 0, false), CAUGHT_UP)
+  assert.equal(canStepIn(f, 6, 'bottom', c, 0), true)
+  assert.equal(canStepIn(F824, 6, 'bottom', c, 0), false) // a finished at-bat has pitches to step to
+  // Stepped in, the stage stops holding the last finished batter.
+  assert.equal(holdsFinished({ view: 11, mark: 10, open: { count: c, sub: 0 }, last: 56 }), true)
+  assert.equal(holdsFinished({ view: 11, mark: 10, open: { count: c, sub: 0, in: true }, last: 56 }), false)
 })

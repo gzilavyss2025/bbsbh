@@ -79,8 +79,9 @@ function Played({ StageCanvas, feed, idx, inning, half, wall, playing, onEnd, on
 // with his zones and pitches, the ball in play among them, until the next tap (Gary, 2026-10-28).
 // dueup.js names the slot as the half began, so inside an open at-bat a pinch hitter (not a pinch runner)
 // stands in from his own sub-step on: only the sub-steps the reader revealed are read, as openingChangeHeld
-// reads them. Inside an at-bat, a half read back included (InningViewer's pitch-mode replay), it is his.
-export const holdsFinished = ({ view, mark, open, last }) => !(open?.sub > 0) && (view <= (mark ?? -1) || (last != null && open?.count > 0))
+// reads them. Inside an at-bat, a half read back included (InningViewer's pitch-mode replay), it is his,
+// and so is one the reader stepped in to before its first pitch (open.in, steps/subStep.js canStepIn).
+export const holdsFinished = ({ view, mark, open, last }) => !(open?.sub > 0 || open?.in) && (view <= (mark ?? -1) || (last != null && open?.count > 0))
 export function restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered, open = null }) {
   if (!feed || covered) return null
   if (holdsFinished({ view, mark, open, last })) {
