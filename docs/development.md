@@ -283,7 +283,7 @@ Then classify the task:
   the first command in a brand-new worktree.
 
   Dev servers started in a worktree keep running after that worktree's work is
-  merged and forgotten, squatting on the reserved ports. `session-start.sh`
+  merged and forgotten, squatting on their ports. `session-start.sh`
   reports any stale ones (branch already merged, or worktree deleted) at the
   start of every local session; run the `/clean-dev-servers` skill to review
   and kill them interactively.
@@ -390,8 +390,8 @@ unmerged work has not been pushed or explicitly abandoned by the maintainer.
 
 For every user-visible change:
 
-- Run the relevant checks and start the first free reserved server: `npm run dev`,
-  then `npm run dev:2` through `dev:5` if another agent owns the earlier port.
+- Run the relevant checks and start a dev server: `npm run dev`, or
+  `npm run dev -- --port 5172` (or another free port) if another agent owns 5173.
 - **Confirm the port's owner before trusting any browser result.** `strictPort`
   means a taken port makes vite EXIT rather than increment — and the old server
   still answers 200, so Playwright happily verifies someone else's branch
