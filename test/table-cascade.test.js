@@ -401,7 +401,7 @@ test('T3: a moved table keeps its own margin, column widths and figure alignment
     ['23-box-score-detail.css', '.bs__grid--totals', 'table-layout', 'fixed'],
     ['23-box-score-detail.css', '.bs__grid--totals td', 'width', '20%'],
     ['23-box-score-detail.css', '.bs__totalsCard', 'padding', 'var(--space-2h) var(--space-3h) var(--space-3)'],
-    ['23-box-score-detail.css', '.bs__board', 'padding', 'var(--space-2h) var(--space-3h) var(--space-3)'],
+    ['23-box-score-detail.css', '.bs__board', 'padding', '0'], // the table runs to the card's edges (Gary, 2026-10-28)
     ['23-box-score-detail.css', '.tledg__leader', 'max-width', '0'],
     ['23-box-score-detail.css', '.tledg__leader', 'width', '100%'],
     ['23-box-score-detail.css', '.tledg__who .tledg__name', 'text-overflow', 'ellipsis'],

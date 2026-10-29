@@ -89,12 +89,15 @@ function gameSoFar(h, f, Headshot, line, PlayerLink) {
 // "off him" / "when he" name him, and anything else is headed "May: …". A note whose "his" is another
 // man's (a matchup keyed to the hitter about the pitcher's slider) carries that other man's id, not his.
 const VERB = /^(Has|Is|Was|Hits|Throws|Leads|Needs|Pitching|Working|Batting|Averaging|Faced|Faces|Gets|Got|Owns|Went|Made|Makes)\b/
+const MATCHUP = /^matchup/
 const named = (n, nameOf) => {
   const last = n.personId != null ? nameOf(n.personId) : null
   if (!last || n.text.includes(last)) return n.text
   if (n.kind === 'cgShutout') return `${last} has ${n.text}`
   let t = n.text.replace(/^His /, `${last}'s `)
   if (t === n.text && VERB.test(t)) t = `${last} ${/^[A-Z]\w*ing\b/.test(t) ? 'is ' : ''}${t[0].toLowerCase()}${t.slice(1)}` // caps-js-exempt: the verb now follows his name; the page shouts it anyway
+  // A matchup note is keyed to the hitter while its "his"/"him" is the pitcher's: it gets its subject, never a pronoun.
+  if (MATCHUP.test(n.kind ?? '')) return t.includes(last) ? t : `${last}: ${t}`
   t = t.replace(/ (off|against|for|to) him\b/, ` $1 ${last}`).replace(/ when he /, ` when ${last} `)
   if (!t.includes(last)) t = t.replace(/ his /, ` ${last}'s `)
   return t.includes(last) ? t : `${last}: ${t}`
