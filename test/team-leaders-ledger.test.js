@@ -133,6 +133,8 @@ test('the MLB qualifier holds rate categories to 3.1 PA / 1.0 IP per team game',
   assert.deepEqual(computeLeaders(pool, avg, { qualifier }).map((r) => r.id), [2])
   assert.deepEqual(computeLeaders(pool, era, { qualifier }).map((r) => r.id), [4])
   assert.deepEqual(computeLeaders(pool, hr, { qualifier }).map((r) => r.id), [1, 2])
+  // MLB's bar for 162 games is 502 PA, so a hitter on exactly 502 qualifies.
+  assert.deepEqual(computeLeaders([hitter(5, '.310', 502)], avg, { qualifier }).map((r) => r.id), [5])
   // The minors' lower bar lets both hitters in.
   assert.deepEqual(computeLeaders(pool, avg, { qualifier: { teamGames: 162, sportId: 11 } }).map((r) => r.id), [1, 2])
 })

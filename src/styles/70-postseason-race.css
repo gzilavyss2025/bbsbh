@@ -37,6 +37,8 @@
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-heading);
+  /* One line in every column, so the three columns' lanes start level and the connectors meet. */
+  white-space: nowrap;
 }
 .psrace__format {
   display: block;

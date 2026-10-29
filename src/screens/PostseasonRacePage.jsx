@@ -123,10 +123,10 @@ const CS_LANE = [{ type: 'tbd', key: 'cs' }]
 // THE BRACKET — drawn in the homepage rail's look (FullBracket's rail tree, Gary 2026-10-29):
 // one stamped card per league, three narrow columns that fit a phone with no side scroll,
 // each box a seed, a club mark and the abbreviation. No clinch letters (Gary, 2026-10-29):
-// the table under the card carries them. A row is a link to the club's Numbers tab.
+// the division leaders' marks are on the Standings page. A row is a link to the club's Numbers tab.
 function SeedRow({ t, bye = false }) {
   return (
-    <TeamLink id={t.id} tab="numbers" className={`psrace__row${bye ? ' psrace__row--bye' : ''}`} aria-label={`${t.seed} seed, ${t.name}`}>
+    <TeamLink id={t.id} tab="numbers" className={`psrace__row${bye ? ' psrace__row--bye' : ''}`} aria-label={`${t.seed} seed, ${t.name}${bye ? ', bye' : ''}`}>
       <span className="psrace__seed">{t.seed}</span>
       <TeamLogo teamId={t.id} name={t.name} size={16} />
       <span className="psrace__abbr">{teamAbbr(t)}</span>
@@ -155,10 +155,11 @@ function Lane({ lane }) {
   }
   if (lane.type === 'pending-ds') {
     const names = lane.candidates.map((t) => t.name).join(' or ')
+    const label = names ? `Winner of ${names}` : 'Wild Card winner, to come'
     return (
       <div className="psrace__box">
         <SeedRow t={lane.bye} bye />
-        <OpenRow label={`Winner of ${names}`} />
+        <OpenRow label={label} />
       </div>
     )
   }
@@ -173,10 +174,10 @@ function Lane({ lane }) {
 function BracketColumn({ label, lanes, round, format }) {
   return (
     <div className={`psrace__round psrace__round--${round}`}>
-      <h3 className="psrace__collabel">
+      <h4 className="psrace__collabel">
         {label}
         <span className="psrace__format">{format}</span>
-      </h3>
+      </h4>
       <div className="psrace__lanes">
         {lanes.map((lane) => (
           <Lane key={lane.key} lane={lane} />

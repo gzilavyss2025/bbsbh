@@ -192,7 +192,8 @@ function playingTime(stat, group) {
 const QUAL_FRACTION = 0.6
 function qualifiedFloor(group, { teamGames, sportId }) {
   const mlb = sportId === 1
-  return group === 'hitting' ? (mlb ? 3.1 : 2.7) * teamGames : (mlb ? 3 : 2.4) * teamGames
+  // MLB rounds down: 162 games is 502 PA. Rounding also keeps float noise (3.1 * 162 = 502.20000000000005) off the bar.
+  return Math.floor(group === 'hitting' ? (mlb ? 3.1 : 2.7) * teamGames : (mlb ? 3 : 2.4) * teamGames)
 }
 function eligiblePlayers(pool, category, qualifier = 'roster') {
   const group = category.group
