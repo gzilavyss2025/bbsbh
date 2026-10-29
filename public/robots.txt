@@ -20,6 +20,23 @@ Disallow: /game-notes-debug
 Disallow: /uniform-names
 Disallow: /*?edit
 
+# SEO backlink crawlers: shut out entirely. They index links for their own
+# paid products, send no readers, and run up the host's request quota. On
+# 2026-10-29 AhrefsBot made ~888k requests in 12 hours, which paused the
+# Vercel Hobby team. A named group overrides the wildcard above, so each of
+# these sees only its own Disallow.
+User-agent: AhrefsBot
+User-agent: AhrefsSiteAudit
+User-agent: SemrushBot
+User-agent: SemrushBot-SA
+User-agent: MJ12bot
+User-agent: DotBot
+User-agent: BLEXBot
+User-agent: DataForSeoBot
+User-agent: SerpstatBot
+User-agent: Barkrowler
+Disallow: /
+
 # Search and answer engines
 User-agent: Googlebot
 Allow: /
