@@ -289,7 +289,7 @@
 .gdfilt__cat.is-set { background: var(--text-heading); color: var(--surface-card); }
 .gdfilt__cat.is-set small { color: inherit; }
 .gdfilt__reset, .gdfilt__back, .gdfilt__opt { padding: var(--space-1) var(--space-1h); font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
-.gdfilt__reset { flex-basis: 100%; border-style: dashed; color: var(--text-caption); }
+.gdfilt__reset { flex-basis: 100%; color: var(--text-caption); }
 .gdfilt__back { border-color: transparent; background: none; color: var(--text-caption); }
 .gdfilt__opt.is-on { background: var(--text-heading); color: var(--surface-card); }
 @media (prefers-reduced-motion: reduce) { .gdfilt__track, .gdfilt button { transition: none; } }
