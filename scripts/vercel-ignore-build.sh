@@ -7,13 +7,15 @@
 #
 # Diffs against VERCEL_GIT_PREVIOUS_SHA (the last deployment Vercel actually
 # built for this branch — only set because ignoreCommand is configured) so a
-# multi-commit push is compared as a whole, not just its last commit. Falls
-# back to HEAD^ for a branch's first-ever deployment, and — if even that
-# doesn't resolve (a fresh/shallow clone) — falls through to "build," since a
-# false skip is a real regression and a false build just costs one deploy.
-BASE="${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}"
+# multi-commit push is compared as a whole, not just its last commit. A
+# branch's first-ever deployment has no previous SHA: build it. (It used to
+# fall back to HEAD^, which judged a new branch by its last commit alone and
+# skipped a code branch whose final commit was docs-only.) A base that does
+# not resolve (a fresh/shallow clone) also builds, since a false skip is a
+# real regression and a false build just costs one deploy.
+BASE="${VERCEL_GIT_PREVIOUS_SHA:-}"
 
-if ! git cat-file -e "${BASE}^{commit}" >/dev/null 2>&1; then
+if [ -z "$BASE" ] || ! git cat-file -e "${BASE}^{commit}" >/dev/null 2>&1; then
   exit 1
 fi
 

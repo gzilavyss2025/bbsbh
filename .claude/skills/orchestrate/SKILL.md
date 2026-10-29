@@ -170,7 +170,7 @@ Verify: the test files you wrote or changed, the existing test files that import
 a file you changed (git grep -l <basename> test/), and npm run lint. Do not
 run the full npm test or npm run build: CI runs them on your PR. For a visible
 change, send a screenshot with SendUserFile (Chromium, ?nointro, say what is
-mocked).
+mocked), and name the PR's preview link for that route in the handoff.
 Handoff: open a DRAFT PR to main. Body: base SHA, files, how you verified, and
 one line per issue. Write "Closes #n" when this PR meets the issue's "Done means".
 Write "Part of #n" only when the issue has more slices after this one. Subscribe

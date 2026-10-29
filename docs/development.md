@@ -56,9 +56,10 @@ sessions that share one machine. In the cloud, these rules change:
   overlap, or wait for that PR. Keep the change to the one task you were given, and
   list the files you touched in the PR. A task that needs an unmerged PR names that PR
   and bases on its branch on purpose; otherwise it waits.
-- **Deploy budget.** Merging to `main` deploys. Parallel sessions never merge. They
-  leave their PRs open, and `/stack-prs` lands them together: the maintainer runs it,
+- **One deploy per stack.** Merging to `main` deploys. Parallel sessions never merge.
+  They leave their PRs open, and `/stack-prs` lands them together: the maintainer runs it,
   or the orchestrator runs it under his standing permission (`.claude/skills/orchestrate/`).
+  A PR branch gets its own preview; the maintainer looks there, not at `main`.
 - **Nightly data.** The data cron pushes to `main` (`public/data/*.json`). A branch open
   across a nightly run can conflict there. Take `origin/main`'s version of a generated
   file. Regenerate it with its `scripts/gen-*.mjs` only when your PR changes that

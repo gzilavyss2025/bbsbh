@@ -71,7 +71,7 @@ structure, check that the nested `CLAUDE.md` and `docs/adr/` entry still match.
 
 ## Auto-merge (PRs that do not deploy)
 
-Gary allowed auto-merge for a PR that causes no Vercel deployment. Such a PR changes
+Gary allowed auto-merge for a PR that causes no production deployment. Such a PR changes
 none of these paths, the same list `scripts/vercel-ignore-build.sh` uses: `src`,
 `public`, `index.html`, `package.json`, `package-lock.json`, `vite.config.js`,
 `vercel.json`, `api`. So workflow, docs, test, script and `.claude` changes qualify.

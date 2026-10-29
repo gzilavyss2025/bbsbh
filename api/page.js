@@ -19,8 +19,9 @@
 // feed — and `test/landing-pages.test.js` pins it.
 //
 // ONE FUNCTION, ALL PAGES. `vercel.json` rewrites `/learn` and `/learn/:slug`
-// here. A function per page would read more simply and would also put this
-// project against Vercel's Hobby function ceiling for the sake of eight files.
+// here. A function per page would read more simply, but eight files do not
+// earn eight cold starts. (It was first written against the Hobby plan's
+// twelve-function ceiling, ADR-0053; the team is on Pro since 2026-10-29.)
 
 import { LANDING_GROUPS, pageBySlug } from '../src/copy/landing/pages/index.js'
 import { renderIndex, renderPage } from '../src/copy/landing/render.js'
