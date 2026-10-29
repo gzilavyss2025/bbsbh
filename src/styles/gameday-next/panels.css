@@ -419,3 +419,5 @@
 /* The edge-to-edge tab row drops its outer left and right borders: the card's own frame is that edge. */
 .gdtabs .gdtabs__row .segmented__btn:first-child { border-left-color: transparent; }
 .gdtabs .gdtabs__row .segmented__btn:last-child { border-right-color: transparent; }
+/* No gap between the tab row and the view under it (Gary, 2026-10-29). */
+.gdtabs .gdtabs__row { margin-bottom: 0; }

@@ -12,6 +12,7 @@ import { zonePitches } from '../zonemap/zonePitches.js'
 import { ScoutLine } from '../panels/ScoutLine.jsx'
 import { BallFlight } from '../../../../components/charts/BallFlight.jsx'
 import { SavantFacts } from '../hero/SavantFacts.jsx'
+import { contactStats } from '../hero/heroModel.js'
 import { setZoneMapHidden, zoneMapDismissed } from '../zonemap/zoneMapFlag.js'
 import { GamedayStage, holdsFinished, restBatter, restZones } from './GamedayStage.js'
 import { GamedayPlayCanvas } from '../cutscene/integration/GamedayPlayCanvas.jsx'
@@ -98,6 +99,15 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
           backdrop={gd?.venue?.id ? `https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/stadiums/${gd?.datetime?.dayNight === 'day' ? 'day' : 'night'}/${gd.venue.id}@2x.jpg` : null}
           matchup={pitcherId ? <ScoutLine feed={feed} hitterId={batter.id} pitcherId={pitcherId} door={false} vsHitter /> : null}
           pitcher={pitcherId ? { id: pitcherId, first: gd?.players?.[`ID${pitcherId}`]?.useName ?? gd?.players?.[`ID${pitcherId}`]?.firstName ?? '', last: gd?.players?.[`ID${pitcherId}`]?.lastName ?? '' } : null}
+          contact={<SealBox coverless forceRevealed>{() => {
+            const ball = zonePitches(feed, replayed ? { inning, half, open: null, last: replaying, committed: true } : { inning, half, open, last, committed: holdsFinished({ view, mark, open, last }) }).find((p) => p.ball)?.ball
+            const stats = ball ? contactStats({ battedBall: ball }).filter((c) => c.label !== 'Distance') : []
+            return stats.length > 0 && (
+              <dl className="gdhero__contact gdzonemap__contact">
+                {stats.map((c) => <div key={c.label} className={c.hard ? 'is-hard' : undefined}><dt>{c.label}</dt><dd>{c.value}{c.unit && <small>{c.unit}</small>}</dd></div>)}
+              </dl>
+            )
+          }}</SealBox>}
           pitches={<SealBox coverless forceRevealed>{() => zonePitches(feed, replayed ? { inning, half, open: null, last: replaying, committed: true } : { inning, half, open, last, committed: holdsFinished({ view, mark, open, last }) }).map((p) => (
             <span key={p.no} tabIndex={0} aria-label={`Pitch ${p.no}: ${[p.type, p.mph != null && `${p.mph.toFixed(1)} mph`, p.call].filter(Boolean).join(', ')}`}
               className={`gdzonemap__pitch gdzonemap__pitch--${p.cat}${p.ball ? ' has-flight' : ''}${p.off ? ` is-off is-off--${p.off}` : ''}${p.top < 15 ? ' is-high' : ''}`} style={{ left: `${p.left}%`, top: `${p.top}%` }}>

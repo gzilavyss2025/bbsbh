@@ -15,7 +15,7 @@ import { stanceArt } from '../../../../lib/zone/zoneGeometry.js'
 // `matchup` is the batter's line against him and the door to the Scout (panels/ScoutLine.jsx), under his name.
 // TRIAL (Gary, 2026-10-29, not decided): `backdrop` is MLB Gameday's stadium art for tonight's park
 // (docs/gameday-assets.md, "Stadium backdrops"), behind the batting view. MLB-hosted art: see that doc's licence note.
-export function ZoneCard({ name, teamId, side = 'R', zones, pitches = null, pitcher = null, matchup = null, club = null, backdrop = null }) {
+export function ZoneCard({ name, teamId, side = 'R', zones, pitches = null, pitcher = null, matchup = null, club = null, backdrop = null, contact = null }) {
   // MLB Gameday's own batter in every case (Gary, 2026-10-29, over the drawn sprite): tonight's posted
   // uniform, else the club's usual Gameday figure, else MLB's generic one; each failed image steps on.
   const figures = [batterFigureUrls(useContext(GameUniformsContext)?.[club] ?? null, stanceArt(side)), ...fallbackFigureUrls(teamId, club, stanceArt(side))].filter(Boolean)
@@ -44,12 +44,14 @@ export function ZoneCard({ name, teamId, side = 'R', zones, pitches = null, pitc
         </div>
       )}
       {backdrop && <img className="gdzonemap__backdrop" src={backdrop} alt="" aria-hidden="true" crossOrigin="anonymous" onError={(e) => { e.currentTarget.hidden = true }} />}
-      {/* TRIAL (Gary, 2026-10-29): the plate and batter's boxes as a photo, the field's lower half, fitting up
-          against the park backdrop at the horizon. It stands in for the drawn chalk and plate. */}
+      {/* TRIAL (Gary, 2026-10-29): the bare field as a photo, the stage's lower half, fitting up against the park
+          backdrop at the horizon; the drawn chalk and plate stay on top. */}
       {backdrop && <span className="gdzonemap__field" aria-hidden="true" />}
       <div className="gdzonemap__plateview">
         <svg className="gdzonemap__ground" viewBox="0 0 640 120" aria-hidden="true">
           <path d="M70 12H217L193 108H8ZM423 12H570L632 108H447Z" />
+          {/* The foul lines, out from the boxes' far corners toward left and right field (Gary, 2026-10-29). */}
+          {backdrop && <path className="gdzonemap__foul" d="M130 12L-520 -150M510 12L1160 -150" />}
         </svg>
         {/* The figure is art, not a door (Gary, 2026-10-28): a tap opens nothing. */}
         <span className={figure ? 'gdzonemap__batter is-uniform' : 'gdzonemap__batter'}>
@@ -75,6 +77,8 @@ export function ZoneCard({ name, teamId, side = 'R', zones, pitches = null, pitc
           })}
           {pitches}
         </div>
+        {/* The ball in play's exit velo and launch angle, over the plate's left (Gary, 2026-10-29: moved from the hero). */}
+        {contact}
         {note && (
           <p className="gdzonemap__note" role="status">
             {name.split(' ').at(-1)}’s batting average on pitches in this zone this season (does not include this game’s at-bats).

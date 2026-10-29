@@ -923,3 +923,19 @@
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
+
+/* Bat speed as a tap (SavantFacts): the swing among the league's hitters' average bat speeds, a histogram. */
+.bflight__fact--tap { border: 0; border-left: var(--bw-hair) solid var(--border-hairline); background: none; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
+.bflight__fact--tap.is-on .bflight__factlabel { text-decoration: underline; }
+.bshist { padding: var(--space-2) var(--space-3) var(--space-3); border-top: var(--bw-hair) solid var(--border-hairline); }
+.bshist__head { margin: 0 0 var(--space-2); font-size: var(--fs-small); }
+.bshist__head b { font-family: var(--font-mono); }
+/* layout-exempt: the bins in one row, standing on a baseline */
+.bshist__plot { position: relative; display: flex; align-items: flex-end; gap: 1px; height: 64px; border-bottom: var(--bw-hair) solid var(--text-heading); } /* raw-value-exempt: the plot's height and bin gap */
+.bshist__bar { flex: 1; background: var(--border-stamped); opacity: 0.35; }
+.bshist__bar.is-here { opacity: 1; background: var(--accent-primary); }
+.bshist__mark { position: absolute; top: -4px; bottom: 0; width: var(--bw-heavy); background: var(--accent-primary); } /* raw-value-exempt: reaches over the tallest bin */
+.bshist__median { position: absolute; top: 0; bottom: 0; border-left: var(--bw-hair) dashed var(--text-caption); }
+.bshist__median small { position: absolute; top: -2px; left: var(--space-1); color: var(--text-caption); font: var(--fs-cell) / 1 var(--font-mono); white-space: nowrap; } /* raw-value-exempt: label hugs the line */
+.bshist__axis { display: flex; justify-content: space-between; margin: var(--space-1) 0 0; color: var(--text-caption); font: var(--fs-cell) / 1 var(--font-mono); }
+.bflight--modal:has(.bshist) { height: auto; max-height: 92dvh; overflow-y: auto; } /* the opened histogram grows the card */

@@ -134,12 +134,23 @@
 /* The park in black and white (Gary, 2026-10-29): the club colours on the stage stay the batter's and the zone's. */
 .gdzonemap__backdrop { filter: grayscale(1); opacity: 0.35; } /* 20 points fainter than the 0.55 trial */
 
-/* TRIAL: the field photo (public/art/gameday/plate-field.webp, Gary's) fills the stage under the horizon, its
-   home plate centred under the zone, and meets the park backdrop where the wall stands. The drawn chalk boxes
-   and plate step aside while it shows. */
+/* TRIAL: the bare field photo (public/art/gameday/field-bare.webp, Gary's: dirt, infield grass and mound, no
+   chalk) fills the stage under the horizon and meets the park backdrop where the wall stands. The app's own
+   drawn batter's boxes and plate stay on top of it, sized and placed from the zone (Gary, 2026-10-29). */
 .gdzonemap__field { position: absolute; left: 0; right: 0; bottom: 0; top: 50%; pointer-events: none;
-  background: url('/art/gameday/plate-field.webp') center 92% / cover no-repeat;
+  background: url('/art/gameday/field-bare.webp') center 92% / cover no-repeat;
   mask-image: linear-gradient(to bottom, transparent, #000 18%); } /* raw-value-exempt: a mask, not a colour */
-.gdzonemap:has(.gdzonemap__field) :is(.gdzonemap__ground, .gdzonemap__plate) { visibility: hidden; }
 /* The field matches the park above it (Gary, 2026-10-29): black and white, at the same 35%. */
 .gdzonemap__field { filter: grayscale(1); opacity: 0.35; }
+/* Over the field photo the drawn batter's boxes read as chalk: paper-white and a heavier line. */
+.gdzonemap:has(.gdzonemap__field) .gdzonemap__ground { stroke: var(--surface-card); stroke-width: var(--bw-heavy); }
+.gdzonemap__ground { overflow: visible; }
+/* The strike zone's frame, heavy (Gary, 2026-10-29): a thick ink border so the box reads over the park. */
+.gdzonemap__grid { border-width: 6px; border-color: var(--text-heading); } /* raw-value-exempt: the zone's heavy frame */
+/* Both photos 10 points fainter (Gary, 2026-10-29): 35% to 25%. */
+.gdzonemap__backdrop, .gdzonemap__field { opacity: 0.25; }
+
+/* The ball in play's exit velo and launch angle sit over the plate's left (Gary, 2026-10-29). */
+.gdzonemap__contact { position: absolute; z-index: var(--z-raised); left: var(--space-2); bottom: var(--space-2); margin: 0; background: var(--surface-card); }
+/* No empty band over the park (Gary, 2026-10-29): the art's blank sky rides up past the stage's top edge. */
+.gdzonemap__backdrop { top: -18%; height: 76%; }

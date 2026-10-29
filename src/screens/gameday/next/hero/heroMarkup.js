@@ -148,7 +148,7 @@ function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = nu
     h('div', { className: 'gdhero__txt' },
       h('div', { className: 'gdhero__who' },
         who(h, PlayerLink, batter)),
-      flip(h, Flip, e.atBatIndex, playText(h, Line, words(h, feed, e)), contact.length > 0 && h('dl', { className: 'gdhero__contact' },
+      flip(h, Flip, e.atBatIndex, playText(h, Line, words(h, feed, e)), false && contact.length > 0 && h('dl', { className: 'gdhero__contact' },
         ...contact.map((c) => {
           const cell = [h('dt', { key: 'l' }, c.label), h('dd', { key: 'v' }, c.value, c.unit && h('small', null, c.unit))]
           // Distance taps over to Savant's home-run parks count (`Parks`, SavantFacts.jsx).
