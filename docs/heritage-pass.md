@@ -80,8 +80,9 @@ API, checked on 2026-10-29. Each record includes its source URL and check date:
 | 823035 | 2026-07-07 | Milwaukee at St. Louis | 10–2 |
 | 715724 | 2022-10-28 | Philadelphia at Houston, World Series Game 1 | 6–5 |
 | 815625 | 2026-04-08 | St. Paul at Toledo, Triple-A | 4–3 |
+| 823762 | 2026-07-20 | New York Mets at Milwaukee (stadium artwork) | 3–8 |
 
-To reproduce, fetch `/api/v1/schedule?gamePks=823035,715724,815625&hydrate=linescore,team,venue`
+To reproduce, fetch `/api/v1/schedule?gamePks=823035,715724,815625,823762&hydrate=linescore,team,venue`
 on `https://statsapi.mlb.com`, then run each schedule row through
 `stampGameFacts`. The metadata-omitted case removes optional fields from 823035;
 it invents no replacement values. Layout stress checks may alter displayed text

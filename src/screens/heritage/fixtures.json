@@ -133,5 +133,50 @@
         "save": ""
       }
     }
+  },
+  {
+    "source": "https://statsapi.mlb.com/api/v1/schedule?gamePks=823762&hydrate=linescore,team,venue",
+    "checked": "2026-10-29",
+    "game": {
+      "gamePk": 823762,
+      "date": "2026-07-20",
+      "gameNumber": 1,
+      "sportId": 1,
+      "gameType": "R",
+      "seriesDescription": "Regular Season",
+      "seriesGameNumber": 1,
+      "leagueId": 104,
+      "venue": "American Family Field",
+      "innings": 9,
+      "scheduledInnings": 9,
+      "homeBattedLast": false,
+      "status": "Final",
+      "away": {
+        "id": 121,
+        "abbreviation": "NYM",
+        "name": "New York Mets",
+        "locationName": "Flushing",
+        "teamName": "Mets",
+        "runs": 3,
+        "hits": 6,
+        "errors": 0
+      },
+      "home": {
+        "id": 158,
+        "abbreviation": "MIL",
+        "name": "Milwaukee Brewers",
+        "locationName": "Milwaukee",
+        "teamName": "Brewers",
+        "runs": 8,
+        "hits": 10,
+        "errors": 1
+      },
+      "winnerId": 158,
+      "decisions": {
+        "winner": "",
+        "loser": "",
+        "save": ""
+      }
+    }
   }
 ]

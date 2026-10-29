@@ -2,6 +2,7 @@ import { useState } from 'react'
 import FIXTURES from './fixtures.json' with { type: 'json' }
 import { HeritagePass } from '../../components/heritage/HeritagePass.jsx'
 import { HeritagePassPages } from '../../components/heritage/HeritagePassPages.jsx'
+import { heritageArt } from '../../lib/heritage/art.js'
 import { SealBox } from '../../components/SealBox.jsx'
 import { Grid } from '../../components/ui/layout/Grid.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
@@ -17,7 +18,7 @@ export function HeritagePreview() {
     { label: 'MLB · Regular season', game: regular },
     { label: 'MLB · Postseason', game: FIXTURES[1].game },
     { label: 'MiLB · Regular season', game: FIXTURES[2].game },
-    { label: 'Stadium artwork slot', game: regular, artwork: { src: '/heritage-art/americanfamilyfield.webp', alt: 'Engraving of American Family Field' } },
+    { label: 'MLB · Stadium artwork', game: FIXTURES[3].game, artwork: heritageArt(FIXTURES[3].game.venue) },
     { label: 'Without stadium artwork', game: regular, artwork: brokenArt ? { src: '/missing-heritage-art.svg' } : null },
     { label: 'Optional metadata omitted', game: incomplete },
   ]

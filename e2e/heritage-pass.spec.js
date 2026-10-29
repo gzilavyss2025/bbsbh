@@ -105,8 +105,11 @@ test('preview keeps real league marks, optional-metadata fallback and failed art
   await expect(minor.locator('.heritagepass__league-emblem img')).toHaveAttribute('src', '/data/logos/league/milb.svg')
   await expect(minor.locator('.heritagepass__occasion')).toHaveText('Triple-A')
   await expect(missing.locator('.heritagepass__league-emblem')).toHaveText('Baseball')
+  const art = page.locator('.heritage-preview__case').filter({ has: page.getByRole('heading', { name: 'MLB · Stadium artwork', exact: true }) })
+  await expect(art.locator('.heritagepass__art')).toHaveAttribute('src', '/heritage-art/americanfamilyfield.webp')
+  const unavailable = page.locator('.heritage-preview__case').filter({ has: page.getByRole('heading', { name: 'Without stadium artwork', exact: true }) })
   await page.getByRole('button', { name: 'Test unavailable artwork' }).click()
-  await expect(page.locator('.heritagepass__art')).toHaveCount(0)
+  await expect(unavailable.locator('.heritagepass__art')).toHaveCount(0)
   for (const width of [320, 390, 820, 1180, 1440]) {
     await page.setViewportSize({ width, height: 900 })
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
