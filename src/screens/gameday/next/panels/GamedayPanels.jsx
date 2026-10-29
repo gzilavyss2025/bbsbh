@@ -160,9 +160,9 @@ function BattingOrder({ ctx }) {
         </SectionHead>
       </div>
       <Sealable ctx={ctx} reach>
-        {({ cards }) => (
+        {({ cards, hitters }) => (
           <ol className="gdp__order">
-            {atTheTop(orderAt(ctx.feed, side, ctx.inning, ctx.half, ctx.mark, cards), ctx, cards).map((r, i) => (
+            {atTheTop(orderAt(ctx.feed, side, ctx.inning, ctx.half, ctx.mark, cards, hitters), ctx, cards).map((r, i) => (
               <li key={r.slot} data-up={i === 0 || undefined}>
                 <Headshot personId={r.id} name={r.last} tint={false} className="gdp__shot" />
                 <span className="gdp__who"><PlayerLink id={r.id} name={[r.first, r.last].filter(Boolean).join(' ')}>{r.first && <small>{r.first}</small>}<b>{r.last}</b></PlayerLink></span>
