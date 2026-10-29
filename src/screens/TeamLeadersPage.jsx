@@ -1,4 +1,4 @@
-import { fetchTeam } from '../api/team.js'
+import { fetchTeam, fetchTeamGamesPlayed } from '../api/team.js'
 import { ALL_CATEGORIES } from '../api/teamLeaders.js'
 import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { SPORT_LABEL } from '../lib/teams.js'
@@ -28,11 +28,10 @@ async function loadTeamLeaders(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const season = Number((asOf || isoToday()).slice(0, 4))
-  return {
-    team,
-    sportId: team.sport?.id ?? 1,
-    pool: await loadCombinedPoolForTeams([{ id }], season),
-  }
+  const sportId = team.sport?.id ?? 1
+  const [pool, teamGames] = await Promise.all([loadCombinedPoolForTeams([{ id }], season), fetchTeamGamesPlayed(id, season)])
+  // MLB's qualified bar for the rate categories, as on the team page's Ranks band.
+  return { team, sportId, pool, qualifier: teamGames ? { teamGames, sportId } : 'roster' }
 }
 
 export function TeamLeadersPage({ id, asOf, sportId }) {
@@ -71,7 +70,7 @@ export function TeamLeadersPage({ id, asOf, sportId }) {
           </div>
         </header>
 
-        <TeamLeaders pool={data.pool} categories={ALL_CATEGORIES} limit={10} showTeamAbbr={false} />
+        <TeamLeaders pool={data.pool} categories={ALL_CATEGORIES} limit={10} showTeamAbbr={false} qualifier={data.qualifier} />
       </div>
     </LinkScope>
   )
