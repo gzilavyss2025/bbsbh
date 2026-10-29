@@ -104,7 +104,7 @@ export function StampCollection({
                       <small>{loading ? 'Loading' : 'Not available offline'}</small>
                     </Stack>
                   )}
-                  <p className="logbook__caption">
+                  <p className="logbook__caption t-label t-label--nocaps">
                     <span>{monthDay(entry.date)}</span>
                     <span className="logbook__mode">{entry.mode}</span>
                     {isFiled(entry) ? (

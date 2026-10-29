@@ -197,11 +197,6 @@
 .sc-decision__label {
   flex: 0 0 auto;
   min-width: 20px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 /* The rule the name is written on. It runs to the end of the block whether or
    not there is a name yet, so an unrevealed game shows three lines to write on
