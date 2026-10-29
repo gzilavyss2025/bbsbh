@@ -3,7 +3,7 @@
 // 5x5 command cells never change, a region is a read-time sum, and both views
 // draw through the same projection a single pitch takes. Shared by the Scout
 // page and its Design Lab prototype. test/scout-regions.test.js pins it.
-import { EDGE, GRID, sx, sy, viewCol } from './zoneGeometry.js'
+import { EDGE, GRID, catcherX, sy } from './zoneGeometry.js'
 
 // ---------------------------------------------------------------------------
 // THE 13 REGIONS. The inner nine are the strike zone's own thirds, one 5x5
@@ -38,15 +38,15 @@ export function rollUp(cells) {
 }
 
 // ---------------------------------------------------------------------------
-// THE MIRROR. 'pitcher' is the house view (ADR-0077): sx as it ships, +pX
-// (first base) on the left. 'hitter' is the catcher's view: the same sx read
-// through one negation. A drawn cell is computed from the SAME projection a
+// THE VIEW. 'hitter' is the house view, the catcher's side (ADR-0124):
+// catcherX as it ships, +pX (first base) on the right. 'pitcher' is the
+// mirror, kept only for the Design Lab's toggle. A drawn cell is computed from the SAME projection a
 // pitch would take, so the cell a pitch is counted in is the cell the map
 // draws, in both views (test/scout-design.test.js pins it).
-export const projX = (px, view) => (view === 'hitter' ? sx(-px) : sx(px))
+export const projX = (px, view) => (view === 'pitcher' ? catcherX(-px) : catcherX(px))
 // A stored column's drawn position, for a card that draws 5x5 cells one by
-// one (CommandMap's way): the house mirror is viewCol, the hitter's view none.
-export const drawCol = (col, view) => (view === 'hitter' ? col : viewCol(col))
+// one (CommandMap's way): the stored column itself, mirrored only in the pitcher's view.
+export const drawCol = (col, view) => (view === 'pitcher' ? GRID - 1 - col : col)
 
 // A nominal zone for the map's frame: a season map spans many batters, so it
 // draws one shape (CommandMap does the same). Edges in the normalised units
@@ -106,7 +106,7 @@ export function mapBox(stance, view, s = stanceRect(stance, view)) {
 }
 
 // The map's two sides, the one drawn on the viewer's left first. Field
-// sides, never "left" or "right" (ADR-0077).
+// sides, never "left" or "right" (ADR-0077, ADR-0124).
 export const SIDE_LABEL = { side3b: '3B side', side1b: '1B side' }
 export const sidesInOrder = (view) =>
   (regionRect('side1b', view).x < regionRect('side3b', view).x ? ['side1b', 'side3b'] : ['side3b', 'side1b'])

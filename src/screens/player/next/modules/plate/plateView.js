@@ -3,7 +3,7 @@ import { GRID, inZone } from '../../../../../lib/zone/zoneGeometry.js'
 
 // The batter Plate approach's pure view (#1887): what the hitter did with each pitch, from the
 // hitter-grid counters (ADR-0096, #1911). Season sums over Final games; an open surface.
-// A cell index is the grid's feed frame (commandCell order); the card draws a column through viewCol.
+// A cell index is the grid's feed frame (commandCell order) and is drawn in that order (the catcher's view).
 
 // The five ways a pitch ended, hitter's side first. A foul tip is a whiff (Gary, 2026-10-13).
 export const OUTCOMES = ['In play', 'Ball', 'Foul', 'Called', 'Whiff']

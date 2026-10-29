@@ -117,11 +117,10 @@ test('a pitcher who lives below it is told so', () => {
 })
 
 test('a drift to one side is named by the side of the FIELD, not by a seat', () => {
-  // x runs to the catcher's right, which is the first-base side — and the card
-  // draws it from the camera behind the pitcher, where that side is on the
-  // reader's left. So the sentence names the base, which is true from every
-  // seat in the park, rather than somebody's left or right, which would point
-  // the opposite way to the picture beside it.
+  // x runs to the catcher's right, which is the first-base side. The card draws it
+  // from the catcher's side (ADR-0124), but the sentence still names the base,
+  // which is true from every seat in the park, rather than somebody's left or
+  // right, which would point the opposite way for anyone picturing the telecast.
   assert.match(gloveTargetBias(withBias(4, 0)).text, /first-base side/)
   assert.match(gloveTargetBias(withBias(-4, 0)).text, /third-base side/)
 })

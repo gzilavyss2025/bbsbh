@@ -45,12 +45,12 @@ test('credit line names the source and the licence', () => {
   assert.match(targetView({ entry, data }).credit.text, /OpenCommand 2026 · CC BY-NC-SA 4\.0/)
 })
 
-test('cloud: 48 dots in the camera view, the rim dot clamped, rings and readout', () => {
+test('cloud: 48 dots in the catcher’s view, the rim dot clamped, rings and readout', () => {
   const v = targetView({ entry, data })
   const c = cloudFor(glove, v.rows[0])
   assert.equal(c.dots.length, 48)
-  // x is mirrored for the camera behind the pitcher; z up is screen up (negative y).
-  assert.equal(c.dots[0].x, -30)
+  // x as the feed has it, the catcher's view (first base right); z up is screen up (negative y).
+  assert.equal(c.dots[0].x, 30)
   assert.equal(c.dots[0].clamped, true)
   assert.equal(c.dots[1].clamped, false)
   assert.deepEqual(c.rings, [10, 20, 30])

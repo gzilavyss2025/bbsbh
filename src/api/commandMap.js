@@ -179,7 +179,7 @@ export function commandTypes(entry, { level = 'mlb', stand = null } = {}) {
 // One row per pitch type for the per-pitch numbers (#1908): pitches, whiff % and
 // the zone mark, the pitch-weighted centroid of its cells. `mark` is in the
 // grid's own stored frame ({ col, row }, row 0 on top, un-mirrored; see
-// zoneGeometry.js), so a card maps it through viewCol like any other cell.
+// zoneGeometry.js), drawn in that frame like any other cell (the catcher's view).
 export function commandPitchMarks(entry, { level = 'mlb', stand = null } = {}) {
   return commandTypes(entry, { level, stand }).map(({ code }) => {
     const { cells, pitches, whiffPct } = commandView(entry, { level, code, stand })

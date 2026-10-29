@@ -202,7 +202,7 @@ PHONE (375 px)                              TABLET / DESKTOP (≥ 740 px, screen
 | Control | Where | Options | Default | One line at 375 px? |
 | --- | --- | --- | --- | --- |
 | Pitch | Above the answer strip | All, then each type ≥ 5% | All | One line that scrolls sideways |
-| View | Above the maps (it changes the drawing) | Pitcher's / Hitter's | Pitcher's (ADR-0077) | Yes |
+| View | Above the maps (it changes the drawing) | Pitcher's / Hitter's | Hitter's (ADR-0124) | Yes |
 | Metric | Above the maps (it changes the hitter map's meaning) | xwOBA (est.) / Whiff % / Swing % | xwOBA (est.) | **No**: "Swing %" wraps to a second line |
 | Hand | Below the key (it changes the data pool) | All / vs R / vs L | All | Yes |
 | Scope | Below the key (it changes the data pool, and the list) | Regular / Postseason / All | All | Yes |
@@ -213,9 +213,9 @@ PHONE (375 px)                              TABLET / DESKTOP (≥ 740 px, screen
 - All controls are `Pill role="control"` (`aria-pressed`), in labelled
   `role="group"` rows, the same as `CommandMap`'s chips. No native `title=`
   tooltip.
-- **The mirror.** View changes only the drawing. `projX` in `model.js` is
-  `sx(px)` for the Pitcher's view and `sx(-px)` for the Hitter's view;
-  `drawCol` is `viewCol` and its identity. A region's rect and the batter's
+- **The mirror.** View changes only the drawing. `projX` in `lib/zone/regions.js` is
+  `catcherX(px)` for the Hitter's view (the house view, ADR-0124) and
+  `catcherX(-px)` for the Pitcher's view; `drawCol` is the identity and its mirror. A region's rect and the batter's
   box come from that projection, so the mirror moves them together.
   `test/scout-design.test.js` checks a lattice of pitches: in both views, the
   drawn point is inside the region that counts it.

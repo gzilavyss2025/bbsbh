@@ -33,7 +33,7 @@ export function targetView({ entry, data }) {
 }
 
 // One row's miss cloud, or null when the glove file has no entry for that code (never the All cloud under
-// another pitch's name). Dots are in inches in the camera view behind the pitcher: x mirrored, y down.
+// another pitch's name). Dots are in inches in the catcher's view: x as the feed has it (first base right), y down.
 export function cloudFor(glove, row) {
   const v = glove?.[row.key] ? gloveTargetView(glove, row.key) : null
   if (!v) return null
@@ -42,7 +42,7 @@ export function cloudFor(glove, row) {
   const mlb = row.league != null ? ` · MLB ${row.mlb}` : ''
   return {
     mark: row.mark,
-    dots: v.dots.map((d) => ({ x: -d.x, y: -d.z, clamped: d.clamped })),
+    dots: v.dots.map((d) => ({ x: d.x, y: -d.z, clamped: d.clamped })),
     rings: REFERENCE_RINGS,
     median: row.miss,
     league: row.league,
