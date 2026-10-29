@@ -1,0 +1,2001 @@
+{
+ "league": [
+  {
+   "number": 42,
+   "name": "Jackie Robinson",
+   "role": "player",
+   "year": 1997,
+   "note": "Retired across MLB in 1997.",
+   "source": "https://www.mlb.com/brewers/history/retired-numbers",
+   "checked": "2026-10-29"
+  }
+ ],
+ "clubs": {
+  "108": {
+   "source": "https://www.mlb.com/angels/history/hall-of-fame",
+   "checked": "2026-10-29",
+   "note": "retired-numbers URL 404s; numbers read from the Hall of Fame & Retired Numbers page",
+   "numbers": [
+    {
+     "number": 11,
+     "name": "Jim Fregosi",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/angels/history/hall-of-fame",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year; honored as player and later manager"
+    },
+    {
+     "number": 26,
+     "name": "Gene Autry",
+     "role": "executive",
+     "year": null,
+     "source": "https://www.mlb.com/angels/history/hall-of-fame",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year; says the honor was initiated by members of the 1982 team"
+    },
+    {
+     "number": 29,
+     "name": "Rod Carew",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/angels/history/hall-of-fame",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 30,
+     "name": "Nolan Ryan",
+     "role": "player",
+     "year": 1992,
+     "source": "https://www.mlb.com/angels/history/hall-of-fame",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 50,
+     "name": "Jimmie Reese",
+     "role": "other",
+     "year": null,
+     "source": "https://www.mlb.com/angels/history/hall-of-fame",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    }
+   ]
+  },
+  "109": {
+   "source": "https://www.mlb.com/dbacks/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 20,
+     "name": "Luis Gonzalez",
+     "role": "player",
+     "year": 2010,
+     "source": "https://www.mlb.com/dbacks/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 51,
+     "name": "Randy Johnson",
+     "role": "player",
+     "year": 2015,
+     "source": "https://www.mlb.com/dbacks/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "110": {
+   "source": "https://www.mlb.com/orioles/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Page gives no retirement years",
+   "numbers": [
+    {
+     "number": 4,
+     "name": "Earl Weaver",
+     "role": "manager",
+     "year": null,
+     "source": "https://www.mlb.com/orioles/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 5,
+     "name": "Brooks Robinson",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/orioles/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 8,
+     "name": "Cal Ripken, Jr.",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/orioles/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 20,
+     "name": "Frank Robinson",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/orioles/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year; says he was the first Oriole so honored, after being traded after the '71 season"
+    },
+    {
+     "number": 22,
+     "name": "Jim Palmer",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/orioles/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 33,
+     "name": "Eddie Murray",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/orioles/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    }
+   ]
+  },
+  "111": {
+   "source": "https://www.mlb.com/redsox/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Page gives no retirement years",
+   "numbers": [
+    {
+     "number": 1,
+     "name": "Bobby Doerr",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 4,
+     "name": "Joe Cronin",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page honors him as player/manager/GM; defaulted to player"
+    },
+    {
+     "number": 6,
+     "name": "Johnny Pesky",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 8,
+     "name": "Carl Yastrzemski",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 9,
+     "name": "Ted Williams",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 14,
+     "name": "Jim Rice",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 26,
+     "name": "Wade Boggs",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 27,
+     "name": "Carlton Fisk",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 34,
+     "name": "David Ortiz",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 45,
+     "name": "Pedro Martinez",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/redsox/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    }
+   ]
+  },
+  "112": {
+   "source": "https://www.mlb.com/cubs/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 10,
+     "name": "Ron Santo",
+     "role": "player",
+     "year": 2003,
+     "source": "https://www.mlb.com/cubs/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 14,
+     "name": "Ernie Banks",
+     "role": "player",
+     "year": 1982,
+     "source": "https://www.mlb.com/cubs/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 23,
+     "name": "Ryne Sandberg",
+     "role": "player",
+     "year": 2005,
+     "source": "https://www.mlb.com/cubs/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 26,
+     "name": "Billy Williams",
+     "role": "player",
+     "year": 1987,
+     "source": "https://www.mlb.com/cubs/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 31,
+     "name": "Ferguson Jenkins",
+     "role": "player",
+     "year": 2009,
+     "source": "https://www.mlb.com/cubs/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 31,
+     "name": "Greg Maddux",
+     "role": "player",
+     "year": 2009,
+     "source": "https://www.mlb.com/cubs/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "113": {
+   "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Real URL is /reds/history/records-stats-awards/retired-numbers",
+   "numbers": [
+    {
+     "number": 1,
+     "name": "Fred Hutchinson",
+     "role": "manager",
+     "year": 1965,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 5,
+     "name": "Johnny Bench",
+     "role": "player",
+     "year": 1984,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 8,
+     "name": "Joe Morgan",
+     "role": "player",
+     "year": 1998,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page conflicts: 'Number Retired' field says 8/11/1984 (same as Bench), but its bio text says #8 was retired in 1998; used 1998"
+    },
+    {
+     "number": 10,
+     "name": "Sparky Anderson",
+     "role": "manager",
+     "year": 2005,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 11,
+     "name": "Barry Larkin",
+     "role": "player",
+     "year": 2012,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 13,
+     "name": "David Concepcion",
+     "role": "player",
+     "year": 2007,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 14,
+     "name": "Pete Rose",
+     "role": "player",
+     "year": 2016,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 18,
+     "name": "Ted Kluszewski",
+     "role": "player",
+     "year": 1998,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 20,
+     "name": "Frank Robinson",
+     "role": "player",
+     "year": 1998,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 24,
+     "name": "Tony Perez",
+     "role": "player",
+     "year": 2000,
+     "source": "https://www.mlb.com/reds/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "114": {
+   "source": "https://www.mlb.com/guardians/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Page gives no retirement years",
+   "numbers": [
+    {
+     "number": 3,
+     "name": "Earl Averill",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/guardians/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 5,
+     "name": "Lou Boudreau",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/guardians/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Listed as SS; was also player-manager"
+    },
+    {
+     "number": 14,
+     "name": "Larry Doby",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/guardians/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 18,
+     "name": "Mel Harder",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/guardians/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 19,
+     "name": "Bob Feller",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/guardians/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 20,
+     "name": "Frank Robinson",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/guardians/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 21,
+     "name": "Bob Lemon",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/guardians/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 25,
+     "name": "Jim Thome",
+     "role": "player",
+     "year": null,
+     "source": "https://www.mlb.com/guardians/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    }
+   ]
+  },
+  "115": {
+   "source": "https://www.mlb.com/rockies/news/colorado-rockies-retired-numbers-c300199110",
+   "checked": "2026-10-29",
+   "note": "retired-numbers page has only an intro; the list is in the linked MLB.com article",
+   "numbers": [
+    {
+     "number": 17,
+     "name": "Todd Helton",
+     "role": "player",
+     "year": 2014,
+     "source": "https://www.mlb.com/rockies/news/colorado-rockies-retired-numbers-c300199110",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 33,
+     "name": "Larry Walker",
+     "role": "player",
+     "year": 2021,
+     "source": "https://www.mlb.com/rockies/news/colorado-rockies-retired-numbers-c300199110",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "116": {
+   "source": "https://www.mlb.com/tigers/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 1,
+     "name": "Lou Whitaker",
+     "role": "player",
+     "year": 2022,
+     "source": "https://www.mlb.com/tigers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 2,
+     "name": "Charlie Gehringer",
+     "role": "player",
+     "year": 1983,
+     "source": "https://www.mlb.com/tigers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 3,
+     "name": "Alan Trammell",
+     "role": "player",
+     "year": 2018,
+     "source": "https://www.mlb.com/tigers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 5,
+     "name": "Hank Greenberg",
+     "role": "player",
+     "year": 1983,
+     "source": "https://www.mlb.com/tigers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 6,
+     "name": "Al Kaline",
+     "role": "player",
+     "year": 1980,
+     "source": "https://www.mlb.com/tigers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 11,
+     "name": "George \"Sparky\" Anderson",
+     "role": "manager",
+     "year": 2011,
+     "source": "https://www.mlb.com/tigers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 16,
+     "name": "Hal Newhouser",
+     "role": "player",
+     "year": 1997,
+     "source": "https://www.mlb.com/tigers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 23,
+     "name": "Willie Horton",
+     "role": "player",
+     "year": 2000,
+     "source": "https://www.mlb.com/tigers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 47,
+     "name": "Jack Morris",
+     "role": "player",
+     "year": 2018,
+     "source": "https://www.mlb.com/tigers/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "117": {
+   "source": "https://www.baseball-reference.com/teams/HOU/",
+   "checked": "2026-10-29",
+   "note": "No MLB.com retired-numbers page found (retired-numbers 404; history and hall-of-fame pages have no list). Source is Baseball-Reference, which gives no retirement years",
+   "numbers": [
+    {
+     "number": 5,
+     "name": "Jeff Bagwell",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 7,
+     "name": "Craig Biggio",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 13,
+     "name": "Billy Wagner",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 24,
+     "name": "Jimmy Wynn",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 25,
+     "name": "Jose Cruz",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 32,
+     "name": "Jim Umbricht",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 33,
+     "name": "Mike Scott",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 34,
+     "name": "Nolan Ryan",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 40,
+     "name": "Don Wilson",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    },
+    {
+     "number": 49,
+     "name": "Larry Dierker",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/HOU/",
+     "checked": "2026-10-29",
+     "note": "Page gives no retirement year"
+    }
+   ]
+  },
+  "118": {
+   "source": "https://www.mlb.com/royals/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 5,
+     "name": "George Brett",
+     "role": "player",
+     "year": 1994,
+     "source": "https://www.mlb.com/royals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 10,
+     "name": "Dick Howser",
+     "role": "manager",
+     "year": 1987,
+     "source": "https://www.mlb.com/royals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 20,
+     "name": "Frank White",
+     "role": "player",
+     "year": 1995,
+     "source": "https://www.mlb.com/royals/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "119": {
+   "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Page also lists Jackie Robinson #42 retired by the Dodgers June 4, 1972 (skipped per league-wide rule).",
+   "numbers": [
+    {
+     "number": 1,
+     "name": "Pee Wee Reese",
+     "role": "player",
+     "year": 1984,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 2,
+     "name": "Tommy Lasorda",
+     "role": "manager",
+     "year": 1997,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 4,
+     "name": "Duke Snider",
+     "role": "player",
+     "year": 1980,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 14,
+     "name": "Gil Hodges",
+     "role": "player",
+     "year": 2022,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 19,
+     "name": "Jim Gilliam",
+     "role": "player",
+     "year": 1978,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 20,
+     "name": "Don Sutton",
+     "role": "player",
+     "year": 1998,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 24,
+     "name": "Walter Alston",
+     "role": "manager",
+     "year": 1977,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 32,
+     "name": "Sandy Koufax",
+     "role": "player",
+     "year": 1972,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 34,
+     "name": "Fernando Valenzuela",
+     "role": "player",
+     "year": 2023,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 39,
+     "name": "Roy Campanella",
+     "role": "player",
+     "year": 1972,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 53,
+     "name": "Don Drysdale",
+     "role": "player",
+     "year": 1984,
+     "source": "https://www.mlb.com/dodgers/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "120": {
+   "source": "https://www.mlb.com/nationals/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "All four retired by the Montreal Expos; page says the numbers remain in circulation with the Nationals.",
+   "numbers": [
+    {
+     "number": 8,
+     "name": "Gary Carter",
+     "role": "player",
+     "year": 1993,
+     "source": "https://www.mlb.com/nationals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 10,
+     "name": "Andre Dawson",
+     "role": "player",
+     "year": 1997,
+     "source": "https://www.mlb.com/nationals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 10,
+     "name": "Rusty Staub",
+     "role": "player",
+     "year": 1993,
+     "source": "https://www.mlb.com/nationals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 30,
+     "name": "Tim Raines",
+     "role": "player",
+     "year": 2004,
+     "source": "https://www.mlb.com/nationals/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "121": {
+   "source": "https://www.mlb.com/mets/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Honored marks (Bob Murphy, Ralph Kiner, Bill Shea) are not uniform numbers and are excluded.",
+   "numbers": [
+    {
+     "number": 5,
+     "name": "David Wright",
+     "role": "player",
+     "year": 2025,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 14,
+     "name": "Gil Hodges",
+     "role": "manager",
+     "year": 1973,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 16,
+     "name": "Dwight Gooden",
+     "role": "player",
+     "year": 2024,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 17,
+     "name": "Keith Hernandez",
+     "role": "player",
+     "year": 2022,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 18,
+     "name": "Darryl Strawberry",
+     "role": "player",
+     "year": 2024,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 24,
+     "name": "Willie Mays",
+     "role": "player",
+     "year": 2022,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 31,
+     "name": "Mike Piazza",
+     "role": "player",
+     "year": 2016,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 36,
+     "name": "Jerry Koosman",
+     "role": "player",
+     "year": 2021,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 37,
+     "name": "Casey Stengel",
+     "role": "manager",
+     "year": 1965,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 41,
+     "name": "Tom Seaver",
+     "role": "player",
+     "year": 1988,
+     "source": "https://www.mlb.com/mets/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "133": {
+   "source": "https://www.mlb.com/athletics/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Years read from each player's 'NUMBER RETIRED' field in the bio block (after BORN). Intro text says 'Five' but names six.",
+   "numbers": [
+    {
+     "number": 9,
+     "name": "Reggie Jackson",
+     "role": "player",
+     "year": 2004,
+     "source": "https://www.mlb.com/athletics/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 24,
+     "name": "Rickey Henderson",
+     "role": "player",
+     "year": 2009,
+     "source": "https://www.mlb.com/athletics/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 27,
+     "name": "Jim \"Catfish\" Hunter",
+     "role": "player",
+     "year": 1991,
+     "source": "https://www.mlb.com/athletics/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 34,
+     "name": "Dave Stewart",
+     "role": "player",
+     "year": 2022,
+     "source": "https://www.mlb.com/athletics/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 34,
+     "name": "Rollie Fingers",
+     "role": "player",
+     "year": 1993,
+     "source": "https://www.mlb.com/athletics/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 43,
+     "name": "Dennis Eckersley",
+     "role": "player",
+     "year": 2005,
+     "source": "https://www.mlb.com/athletics/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "134": {
+   "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "/pirates/history/retired-numbers 404s; real page found via /pirates/history.",
+   "numbers": [
+    {
+     "number": 1,
+     "name": "Billy Meyer",
+     "role": "manager",
+     "year": 1954,
+     "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 4,
+     "name": "Ralph Kiner",
+     "role": "player",
+     "year": 1987,
+     "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 8,
+     "name": "Willie Stargell",
+     "role": "player",
+     "year": 1982,
+     "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 9,
+     "name": "Bill Mazeroski",
+     "role": "player",
+     "year": 1987,
+     "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 11,
+     "name": "Paul Waner",
+     "role": "player",
+     "year": 2007,
+     "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 20,
+     "name": "Pie Traynor",
+     "role": "player",
+     "year": 1972,
+     "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 21,
+     "name": "Roberto Clemente",
+     "role": "player",
+     "year": 1973,
+     "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 33,
+     "name": "Honus Wagner",
+     "role": "player",
+     "year": 1952,
+     "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 40,
+     "name": "Danny Murtaugh",
+     "role": "manager",
+     "year": 1977,
+     "source": "https://www.mlb.com/pirates/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "135": {
+   "source": "https://www.mlb.com/padres/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Club page gives no years; years from MLB.com article 'Here's the list of SD retired numbers' (Dec 1, 2021), cited per entry.",
+   "numbers": [
+    {
+     "number": 6,
+     "name": "Steve Garvey",
+     "role": "player",
+     "year": 1988,
+     "source": "https://www.mlb.com/padres/news/padres-retired-numbers/c-300026552",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 19,
+     "name": "Tony Gwynn",
+     "role": "player",
+     "year": 2004,
+     "source": "https://www.mlb.com/padres/news/padres-retired-numbers/c-300026552",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 31,
+     "name": "Dave Winfield",
+     "role": "player",
+     "year": 2001,
+     "source": "https://www.mlb.com/padres/news/padres-retired-numbers/c-300026552",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 35,
+     "name": "Randy Jones",
+     "role": "player",
+     "year": 1997,
+     "source": "https://www.mlb.com/padres/news/padres-retired-numbers/c-300026552",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 51,
+     "name": "Trevor Hoffman",
+     "role": "player",
+     "year": 2011,
+     "source": "https://www.mlb.com/padres/news/padres-retired-numbers/c-300026552",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "136": {
+   "source": "https://www.mlb.com/mariners/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 11,
+     "name": "Edgar Martinez",
+     "role": "player",
+     "year": 2017,
+     "source": "https://www.mlb.com/mariners/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 24,
+     "name": "Ken Griffey Jr.",
+     "role": "player",
+     "year": 2016,
+     "source": "https://www.mlb.com/mariners/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 51,
+     "name": "Ichiro Suzuki",
+     "role": "player",
+     "year": 2025,
+     "source": "https://www.mlb.com/mariners/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 51,
+     "name": "Randy Johnson",
+     "role": "player",
+     "year": 2026,
+     "source": "https://www.mlb.com/mariners/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "137": {
+   "source": "https://www.mlb.com/giants/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Club page gives no years; years from linked MLB.com article 'Giants' all-time retired numbers', cited per entry. Christy Mathewson and John McGraw honored 1986 with no number (excluded).",
+   "numbers": [
+    {
+     "number": 3,
+     "name": "Bill Terry",
+     "role": "player",
+     "year": 1983,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 4,
+     "name": "Mel Ott",
+     "role": "player",
+     "year": 1949,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 11,
+     "name": "Carl Hubbell",
+     "role": "player",
+     "year": 1944,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 20,
+     "name": "Monte Irvin",
+     "role": "player",
+     "year": 2010,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 22,
+     "name": "Will Clark",
+     "role": "player",
+     "year": 2022,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 24,
+     "name": "Willie Mays",
+     "role": "player",
+     "year": 1972,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 25,
+     "name": "Barry Bonds",
+     "role": "player",
+     "year": 2018,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 27,
+     "name": "Juan Marichal",
+     "role": "player",
+     "year": 1975,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 30,
+     "name": "Orlando Cepeda",
+     "role": "player",
+     "year": 1999,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 36,
+     "name": "Gaylord Perry",
+     "role": "player",
+     "year": 2005,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 44,
+     "name": "Willie McCovey",
+     "role": "player",
+     "year": 1980,
+     "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "138": {
+   "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Page lists each person twice (deduped). Rogers Hornsby (honored 1997, no number) and Jack Buck (broadcaster, 2002) excluded as non-numbers.",
+   "numbers": [
+    {
+     "number": 1,
+     "name": "Ozzie Smith",
+     "role": "player",
+     "year": 1996,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 2,
+     "name": "Red Schoendienst",
+     "role": "player",
+     "year": 1996,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 6,
+     "name": "Stan Musial",
+     "role": "player",
+     "year": 1963,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 9,
+     "name": "Enos Slaughter",
+     "role": "player",
+     "year": 1996,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 10,
+     "name": "Tony La Russa",
+     "role": "manager",
+     "year": 2012,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 14,
+     "name": "Ken Boyer",
+     "role": "player",
+     "year": 1984,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 17,
+     "name": "Dizzy Dean",
+     "role": "player",
+     "year": 1974,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 20,
+     "name": "Lou Brock",
+     "role": "player",
+     "year": 1979,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 23,
+     "name": "Ted Simmons",
+     "role": "player",
+     "year": 2020,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 24,
+     "name": "Whitey Herzog",
+     "role": "manager",
+     "year": 2010,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 42,
+     "name": "Bruce Sutter",
+     "role": "player",
+     "year": 2006,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 45,
+     "name": "Bob Gibson",
+     "role": "player",
+     "year": 1975,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 85,
+     "name": "August Busch",
+     "role": "executive",
+     "year": 1984,
+     "source": "https://www.mlb.com/cardinals/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "139": {
+   "source": "https://www.mlb.com/rays/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 3,
+     "name": "Evan Longoria",
+     "role": "player",
+     "year": 2026,
+     "source": "https://www.mlb.com/rays/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 12,
+     "name": "Wade Boggs",
+     "role": "player",
+     "year": 2000,
+     "source": "https://www.mlb.com/rays/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 66,
+     "name": "Don Zimmer",
+     "role": "other",
+     "year": 2015,
+     "source": "https://www.mlb.com/rays/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Honored as Rays senior baseball advisor (coach/advisor, not player or manager with the club)"
+    }
+   ]
+  },
+  "140": {
+   "source": "https://www.mlb.com/rangers/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 7,
+     "name": "Ivan Rodriguez",
+     "role": "player",
+     "year": 2017,
+     "source": "https://www.mlb.com/rangers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 10,
+     "name": "Michael Young",
+     "role": "player",
+     "year": 2019,
+     "source": "https://www.mlb.com/rangers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 26,
+     "name": "Johnny Oates",
+     "role": "manager",
+     "year": 2005,
+     "source": "https://www.mlb.com/rangers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 29,
+     "name": "Adrian Beltre",
+     "role": "player",
+     "year": 2019,
+     "source": "https://www.mlb.com/rangers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 34,
+     "name": "Nolan Ryan",
+     "role": "player",
+     "year": 1996,
+     "source": "https://www.mlb.com/rangers/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "141": {
+   "source": "https://www.mlb.com/bluejays/news/blue-jays-retired-numbers-c300064072",
+   "checked": "2026-10-29",
+   "note": "No /bluejays/history/retired-numbers page; MLB.com story dated 2026-02-16 says Halladay is the only number retired by the club.",
+   "numbers": [
+    {
+     "number": 32,
+     "name": "Roy Halladay",
+     "role": "player",
+     "year": 2018,
+     "source": "https://www.mlb.com/bluejays/news/blue-jays-retired-numbers-c300064072",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "142": {
+   "source": "https://www.mlb.com/twins/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 3,
+     "name": "Harmon Killebrew",
+     "role": "player",
+     "year": 1975,
+     "source": "https://www.mlb.com/twins/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 6,
+     "name": "Tony Oliva",
+     "role": "player",
+     "year": 1991,
+     "source": "https://www.mlb.com/twins/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 7,
+     "name": "Joe Mauer",
+     "role": "player",
+     "year": 2019,
+     "source": "https://www.mlb.com/twins/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 10,
+     "name": "Tom Kelly",
+     "role": "manager",
+     "year": 2012,
+     "source": "https://www.mlb.com/twins/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 14,
+     "name": "Kent Hrbek",
+     "role": "player",
+     "year": 1995,
+     "source": "https://www.mlb.com/twins/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 28,
+     "name": "Bert Blyleven",
+     "role": "player",
+     "year": 2011,
+     "source": "https://www.mlb.com/twins/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 29,
+     "name": "Rod Carew",
+     "role": "player",
+     "year": 1987,
+     "source": "https://www.mlb.com/twins/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 34,
+     "name": "Kirby Puckett",
+     "role": "player",
+     "year": 1997,
+     "source": "https://www.mlb.com/twins/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 36,
+     "name": "Jim Kaat",
+     "role": "player",
+     "year": 2022,
+     "source": "https://www.mlb.com/twins/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "143": {
+   "source": "https://www.mlb.com/phillies/history/records-stats-awards/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "Page also honors Alexander, Delahanty, Hamilton, Klein and Thompson with a 'P' jersey symbol, not a uniform number; omitted.",
+   "numbers": [
+    {
+     "number": 1,
+     "name": "Richie Ashburn",
+     "role": "player",
+     "year": 1979,
+     "source": "https://www.mlb.com/phillies/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 14,
+     "name": "Jim Bunning",
+     "role": "player",
+     "year": 2001,
+     "source": "https://www.mlb.com/phillies/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 15,
+     "name": "Dick Allen",
+     "role": "player",
+     "year": 2020,
+     "source": "https://www.mlb.com/phillies/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 20,
+     "name": "Mike Schmidt",
+     "role": "player",
+     "year": 1990,
+     "source": "https://www.mlb.com/phillies/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 32,
+     "name": "Steve Carlton",
+     "role": "player",
+     "year": 1989,
+     "source": "https://www.mlb.com/phillies/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 34,
+     "name": "Roy Halladay",
+     "role": "player",
+     "year": 2021,
+     "source": "https://www.mlb.com/phillies/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 36,
+     "name": "Robin Roberts",
+     "role": "player",
+     "year": 2008,
+     "source": "https://www.mlb.com/phillies/history/records-stats-awards/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page: retired unofficially in 1962 and officially on June 18, 2008; year is the official date"
+    }
+   ]
+  },
+  "144": {
+   "source": "https://www.mlb.com/braves/history/retired-numbers",
+   "checked": "2026-10-29",
+   "note": "History page lists the numbers but no dates; years come from its linked 'Full Story' MLB.com article.",
+   "numbers": [
+    {
+     "number": 3,
+     "name": "Dale Murphy",
+     "role": "player",
+     "year": 1994,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 6,
+     "name": "Bobby Cox",
+     "role": "manager",
+     "year": 2011,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 10,
+     "name": "Chipper Jones",
+     "role": "player",
+     "year": 2013,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 21,
+     "name": "Warren Spahn",
+     "role": "player",
+     "year": 1965,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 29,
+     "name": "John Smoltz",
+     "role": "player",
+     "year": 2012,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 31,
+     "name": "Greg Maddux",
+     "role": "player",
+     "year": 2009,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 35,
+     "name": "Phil Niekro",
+     "role": "player",
+     "year": 1984,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 41,
+     "name": "Eddie Mathews",
+     "role": "player",
+     "year": 1969,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 44,
+     "name": "Hank Aaron",
+     "role": "player",
+     "year": 1977,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 47,
+     "name": "Tom Glavine",
+     "role": "player",
+     "year": 2010,
+     "source": "https://www.mlb.com/braves/news/braves-retired-numbers/c-300106638",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "145": {
+   "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 2,
+     "name": "Nellie Fox",
+     "role": "player",
+     "year": 1976,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 3,
+     "name": "Harold Baines",
+     "role": "player",
+     "year": 1989,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 4,
+     "name": "Luke Appling",
+     "role": "player",
+     "year": 1975,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 9,
+     "name": "Minnie Minoso",
+     "role": "player",
+     "year": 1983,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 11,
+     "name": "Luis Aparicio",
+     "role": "player",
+     "year": 1984,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 14,
+     "name": "Paul Konerko",
+     "role": "player",
+     "year": 2015,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 16,
+     "name": "Ted Lyons",
+     "role": "player",
+     "year": 1987,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 19,
+     "name": "Billy Pierce",
+     "role": "player",
+     "year": 1987,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 35,
+     "name": "Frank Thomas",
+     "role": "player",
+     "year": 2010,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 56,
+     "name": "Mark Buehrle",
+     "role": "player",
+     "year": 2017,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 72,
+     "name": "Carlton Fisk",
+     "role": "player",
+     "year": 1997,
+     "source": "https://www.mlb.com/whitesox/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "146": {
+   "source": "https://www.mlb.com/marlins/history",
+   "checked": "2026-10-29",
+   "note": "No MLB.com retired-numbers page (404). /marlins/history 'Retired Numbers' block names only #42 (Jackie Robinson); https://www.baseball-reference.com/teams/FLA/ Retired Numbers block also shows only 42. Club has no retired numbers of its own.",
+   "numbers": []
+  },
+  "147": {
+   "source": "https://www.mlb.com/yankees/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 1,
+     "name": "Billy Martin",
+     "role": "player",
+     "year": 1986,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page honors him as player and manager; defaulted to player"
+    },
+    {
+     "number": 2,
+     "name": "Derek Jeter",
+     "role": "player",
+     "year": 2017,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 3,
+     "name": "Babe Ruth",
+     "role": "player",
+     "year": 1948,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 4,
+     "name": "Lou Gehrig",
+     "role": "player",
+     "year": 1939,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 5,
+     "name": "Joe DiMaggio",
+     "role": "player",
+     "year": 1952,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 6,
+     "name": "Joe Torre",
+     "role": "manager",
+     "year": 2014,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 7,
+     "name": "Mickey Mantle",
+     "role": "player",
+     "year": 1969,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 8,
+     "name": "Bill Dickey",
+     "role": "player",
+     "year": 1972,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 8,
+     "name": "Yogi Berra",
+     "role": "player",
+     "year": 1972,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 9,
+     "name": "Roger Maris",
+     "role": "player",
+     "year": 1984,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 10,
+     "name": "Phil Rizzuto",
+     "role": "player",
+     "year": 1985,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 15,
+     "name": "Thurman Munson",
+     "role": "player",
+     "year": 1979,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 16,
+     "name": "Whitey Ford",
+     "role": "player",
+     "year": 1974,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 20,
+     "name": "Jorge Posada",
+     "role": "player",
+     "year": 2015,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 21,
+     "name": "Paul O'Neill",
+     "role": "player",
+     "year": 2022,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 23,
+     "name": "Don Mattingly",
+     "role": "player",
+     "year": 1997,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 32,
+     "name": "Elston Howard",
+     "role": "player",
+     "year": 1984,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 37,
+     "name": "Casey Stengel",
+     "role": "manager",
+     "year": 1970,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 42,
+     "name": "Mariano Rivera",
+     "role": "player",
+     "year": 2013,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 44,
+     "name": "Reggie Jackson",
+     "role": "player",
+     "year": 1993,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 46,
+     "name": "Andy Pettitte",
+     "role": "player",
+     "year": 2015,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 49,
+     "name": "Ron Guidry",
+     "role": "player",
+     "year": 2003,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 51,
+     "name": "Bernie Williams",
+     "role": "player",
+     "year": 2015,
+     "source": "https://www.mlb.com/yankees/history/retired-numbers",
+     "checked": "2026-10-29"
+    }
+   ]
+  },
+  "158": {
+   "source": "https://www.mlb.com/brewers/history/retired-numbers",
+   "checked": "2026-10-29",
+   "numbers": [
+    {
+     "number": 1,
+     "name": "Bud Selig",
+     "role": "executive",
+     "year": 2015,
+     "source": "https://www.mlb.com/brewers/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page: 'Prior to the 2015 Season'"
+    },
+    {
+     "number": 4,
+     "name": "Paul Molitor",
+     "role": "player",
+     "year": 1999,
+     "source": "https://www.mlb.com/brewers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 19,
+     "name": "Robin Yount",
+     "role": "player",
+     "year": 1994,
+     "source": "https://www.mlb.com/brewers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 34,
+     "name": "Rollie Fingers",
+     "role": "player",
+     "year": 1992,
+     "source": "https://www.mlb.com/brewers/history/retired-numbers",
+     "checked": "2026-10-29"
+    },
+    {
+     "number": 44,
+     "name": "Hank Aaron",
+     "role": "player",
+     "year": 1976,
+     "source": "https://www.mlb.com/brewers/history/retired-numbers",
+     "checked": "2026-10-29",
+     "note": "Page: 'At the conclusion of the 1976 season'"
+    }
+   ]
+  }
+ }
+}
