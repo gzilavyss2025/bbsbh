@@ -380,7 +380,8 @@ for each generator; the reader modules:
   `alsoPlayed`, never both. Keyed by the current team id. MLB only; a MiLB id reads empty. No screen
   reads it yet.
 - `history/retiredNumbers.js` — a club's retired numbers, from `public/data/retired-numbers.json`, hand-curated
-  from each club's MLB.com retired-numbers page (#2598; the MLB API has none). `retiredNumbersFor(teamId)` returns
+  from each club's MLB.com retired-numbers page, and from Baseball-Reference's franchise page where MLB.com
+  has no list (Astros) or is behind (#2598; the MLB API has none). Each entry names its own source. `retiredNumbersFor(teamId)` returns
   `{ numbers, league }`. Each entry is `{ number, name, role, year, source, checked }`; `role` is player, manager,
   executive or other, and `year` is null when the source gives none. Jackie Robinson's 42 is the one `league` entry.
   `test/retired-numbers.test.js` fails an entry with no https source or checked date. Edit the file by hand; there

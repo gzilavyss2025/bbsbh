@@ -460,6 +460,15 @@
      "source": "https://www.mlb.com/guardians/history/retired-numbers",
      "checked": "2026-10-29",
      "note": "Page gives no retirement year"
+    },
+    {
+     "number": 455,
+     "name": "The Fans",
+     "role": "other",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/CLE/",
+     "checked": "2026-10-29",
+     "note": "Not on the club's MLB.com retired-numbers page (checked 2026-10-29); Baseball-Reference's franchise page lists it. It gives no year. Honors the fans for the 455-game sellout streak."
     }
    ]
   },
@@ -529,6 +538,15 @@
      "year": 1980,
      "source": "https://www.mlb.com/tigers/history/retired-numbers",
      "checked": "2026-10-29"
+    },
+    {
+     "number": 10,
+     "name": "Jim Leyland",
+     "role": "manager",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/DET/",
+     "checked": "2026-10-29",
+     "note": "Not on the club's MLB.com retired-numbers page (checked 2026-10-29); Baseball-Reference's franchise page lists it. It gives no year."
     },
     {
      "number": 11,
@@ -816,6 +834,15 @@
      "checked": "2026-10-29"
     },
     {
+     "number": 11,
+     "name": "Ryan Zimmerman",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/WSN/",
+     "checked": "2026-10-29",
+     "note": "Not on the club's MLB.com retired-numbers page (checked 2026-10-29); Baseball-Reference's franchise page lists it. It gives no year."
+    },
+    {
      "number": 30,
      "name": "Tim Raines",
      "role": "player",
@@ -845,6 +872,15 @@
      "year": 1973,
      "source": "https://www.mlb.com/mets/history/retired-numbers",
      "checked": "2026-10-29"
+    },
+    {
+     "number": 15,
+     "name": "Carlos Beltrán",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/NYM/",
+     "checked": "2026-10-29",
+     "note": "Not on the club's MLB.com retired-numbers page (checked 2026-10-29); Baseball-Reference's franchise page lists it. It gives no year."
     },
     {
      "number": 16,
@@ -1167,6 +1203,15 @@
      "year": 2010,
      "source": "https://www.mlb.com/giants/news/giants-retired-numbers/c-300002862",
      "checked": "2026-10-29"
+    },
+    {
+     "number": 21,
+     "name": "Jeff Kent",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/SFG/",
+     "checked": "2026-10-29",
+     "note": "Not on the club's MLB.com retired-numbers page (checked 2026-10-29); Baseball-Reference's franchise page lists it. It gives no year."
     },
     {
      "number": 22,
@@ -1609,6 +1654,15 @@
      "checked": "2026-10-29"
     },
     {
+     "number": 25,
+     "name": "Andruw Jones",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/ATL/",
+     "checked": "2026-10-29",
+     "note": "Not on the club's MLB.com retired-numbers page (checked 2026-10-29); Baseball-Reference's franchise page lists it. It gives no year."
+    },
+    {
      "number": 29,
      "name": "John Smoltz",
      "role": "player",
@@ -1701,6 +1755,15 @@
      "year": 1984,
      "source": "https://www.mlb.com/whitesox/history/retired-numbers",
      "checked": "2026-10-29"
+    },
+    {
+     "number": 13,
+     "name": "Ozzie Guillén",
+     "role": "manager",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/CHW/",
+     "checked": "2026-10-29",
+     "note": "Not on the club's MLB.com retired-numbers page (checked 2026-10-29); Baseball-Reference's franchise page lists it. It gives no year. Honored as player and manager."
     },
     {
      "number": 14,
@@ -1946,6 +2009,15 @@
      "year": 2015,
      "source": "https://www.mlb.com/yankees/history/retired-numbers",
      "checked": "2026-10-29"
+    },
+    {
+     "number": 52,
+     "name": "CC Sabathia",
+     "role": "player",
+     "year": null,
+     "source": "https://www.baseball-reference.com/teams/NYY/",
+     "checked": "2026-10-29",
+     "note": "Not on the club's MLB.com retired-numbers page (checked 2026-10-29); Baseball-Reference's franchise page lists it. It gives no year."
     }
    ]
   },

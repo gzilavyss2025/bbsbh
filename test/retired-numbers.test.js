@@ -54,8 +54,11 @@ test('Jackie Robinson\'s 42 is one league note, not 30 club entries', () => {
   for (const c of Object.values(FILE.clubs)) assert.ok(!c.numbers.some((e) => e.name === 'Jackie Robinson'))
 })
 
-test('the Brewers: Molitor 4, Yount 19, Fingers 34 and Aaron 44, each with a source', async () => {
-  globalThis.fetch = async (url) => ({ ok: true, json: async () => FILE, url })
+test('the Brewers: Molitor 4, Yount 19, Fingers 34 and Aaron 44, each with a source', async (t) => {
+  const real = globalThis.fetch
+  // Only the reader's own file answers, so a mistyped path fails here too.
+  globalThis.fetch = async (url) => (String(url) === '/data/retired-numbers.json' ? { ok: true, json: async () => FILE } : { ok: false, json: async () => null })
+  t.after(() => { globalThis.fetch = real })
   const { retiredNumbersFor } = await import('../src/api/history/retiredNumbers.js')
   const mil = await retiredNumbersFor(158)
   for (const [n, name] of [[4, 'Paul Molitor'], [19, 'Robin Yount'], [34, 'Rollie Fingers'], [44, 'Hank Aaron']]) {

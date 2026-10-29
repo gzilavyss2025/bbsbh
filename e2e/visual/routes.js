@@ -161,7 +161,9 @@ export const ROUTES = [
   {
     // One /learn guide, drawn by the same function Vercel runs (api/page.js),
     // with no stored copy overrides. Its stylesheet, /learn.css, comes from
-    // each server's own tree, so a change to it shows here.
+    // each server's own tree, so a change to it shows here. The HTML itself is
+    // drawn once, from this tree, and handed to both servers: a markup or copy
+    // change in src/copy/landing does NOT show as a diff on this route.
     name: 'learn-guide',
     path: '/learn/score-a-baseball-game',
     html: () => renderPage(resolvePage(pageBySlug('score-a-baseball-game'), {})),
