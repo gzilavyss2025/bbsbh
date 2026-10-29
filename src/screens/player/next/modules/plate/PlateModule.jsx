@@ -85,7 +85,7 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
   }
   const read = picked
     ? {
-        title: `${ROWS[Math.floor(picked.i / GRID)]} · ${COLS[GRID - 1 - (picked.i % GRID)]}`,
+        title: `${ROWS[Math.floor(picked.i / GRID)]} · ${COLS[picked.i % GRID]}`,
         text: picked.n < MIN_CELL
           ? `Only ${picked.n} pitches landed here, too few to read.`
           : picked.segs

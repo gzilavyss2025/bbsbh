@@ -170,3 +170,58 @@ test('a trail replay keeps the defense from that play, before later substitution
   assert.equal(stageActors(feed, { ...cursor, shown: 13 }).fielders.LF.id, original.LF.id)
   assert.equal(stageActors(feed, { ...cursor, shown: 14 }).fielders.LF.id, original.RF.id)
 })
+test('the rest batter: the due-up of the half being scored; the batter on screen for a committed half; none under the checkpoint', () => {
+  const at = { view: 2, mark: 1, inning: 2, half: 'top', last: 12, stepAtBatIndex: 12 }
+  assert.equal(restBatter(F, at)?.id, 668227) // Arozarena
+  assert.equal(restBatter(F, { ...at, covered: true }), null)
+  assert.equal(restBatter(F, { ...at, mark: 2 })?.id, F.liveData.plays.allPlays[12].matchup.batter.id)
+})
+
+// Bottom 9th: Jahmai Jones (663330) pinch-hits for Mickey Gasper (681508), the first sub-step of
+// at-bat 83. The due-up names the slot as the half began, so the at-bat's own revealed sub-steps
+// name the man at the plate.
+test('the rest batter inside an open at-bat: a pinch hitter from his own sub-step on, never before it', () => {
+  const at = { view: 17, mark: 16, inning: 9, half: 'bottom', last: 82, stepAtBatIndex: 82 }
+  assert.equal(restBatter(F, at)?.id, 681508) // between at-bats: the slot, Gasper
+  assert.equal(restBatter(F, { ...at, open: { count: 1, sub: 0 } })?.id, F.liveData.plays.allPlays[82].matchup.batter.id) // Anthony, who just finished, stays up
+  assert.equal(restBatter(F, { ...at, open: { count: 1, sub: 1 } })?.id, 663330) // his notice
+  assert.equal(restBatter(F, { ...at, open: { count: 1, sub: 2 } })?.id, 663330) // his first pitch
+  // 823764, bottom 7th, at-bat 51: Luis Lara (800325) pinch-hits, then Cooper Pratt pinch-runs for a
+  // runner. A pinch runner is an offensive substitution too, and never the man at the plate.
+  const G = JSON.parse(readFileSync(new URL('./fixtures/game-823764.gameday.json', import.meta.url)))
+  const g = { view: 99, mark: -1, inning: 7, half: 'bottom', last: null, stepAtBatIndex: null }
+  for (const sub of [1, 2, 4, 8]) assert.equal(restBatter(G, { ...g, open: { count: 4, sub } })?.id, 800325, `sub ${sub}`)
+})
+
+// A half read back in pitch mode walks each pitch of an at-bat again (InningViewer's replay): the
+// cursor's `last` is the at-bat before it, so the batting view names the man the pitches belong to.
+test('the rest batter in a pitch-mode read-back: the at-bat being walked, not the one before it', () => {
+  const at = { view: 11, mark: 16, inning: 6, half: 'bottom', last: 56, stepAtBatIndex: 56 }
+  assert.equal(restBatter(F, { ...at, open: { count: 5, sub: 2 } })?.id, F.liveData.plays.allPlays[57].matchup.batter.id) // Duran
+  assert.equal(restBatter(F, at)?.id, F.liveData.plays.allPlays[56].matchup.batter.id) // between replays: Durbin's card
+})
+
+test('the zone card shows a batter only with his own zones, and only at rest', () => {
+  const zm = { id: 668227, zones: { '05': { avg: '.250', temp: 'lukewarm' } } }
+  assert.equal(restZones(zm, 668227, false), zm.zones)
+  assert.equal(restZones(zm, 641313, false), null) // the next batter, before his own fetch lands
+  assert.equal(restZones(zm, null, false), null)
+  assert.equal(restZones(zm, 668227, true), null) // dismissed
+})
+
+// ---- The zone map's dismiss --------------------------------------------------------------------
+
+test('the dismiss survives a reload and resets for another game', () => {
+  const store = new Map()
+  globalThis.window = { localStorage: { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) } }
+  try {
+    assert.equal(zoneMapDismissed(824716), false)
+    dismissZoneMap(824716)
+    assert.equal(zoneMapDismissed(824716), true)
+    assert.deepEqual([...store.keys()], ['bbsbh:zonemap:824716'])
+    assert.equal(zoneMapDismissed(823169), false)
+  } finally {
+    delete globalThis.window
+  }
+})
+

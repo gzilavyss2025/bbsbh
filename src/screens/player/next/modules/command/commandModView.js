@@ -1,6 +1,6 @@
 // The Command card's pure view (#2014). One pitcher's pitch-command entry, the picked hand, pitch
-// and cell, and the league block in; the switch, the chips, the four tiles, the 25 cells in camera
-// view, the pitch marks and the readout out. No React, no fetch.
+// and cell, and the league block in; the switch, the chips, the four tiles, the 25 cells from the
+// catcher's side, the pitch marks and the readout out. No React, no fetch.
 import { MIN_COMMAND_PITCHES, commandHandCounts, commandPitchMarks, commandRank, commandTypes, commandView } from '../../../../../api/commandMap.js'
 import { pitchLabel } from '../../../../../api/pitchArsenal.js'
 import { ordinal } from '../../../../../lib/format.js'
@@ -15,7 +15,7 @@ const TILES = [
   ['whiffPct', 'Whiff', (v) => `of ${fmt(sum(v.swings))} swings`],
 ]
 const ROW_WORD = ['Above the zone', 'Top third', 'Middle third', 'Bottom third', 'Below the zone']
-// By VIEW column, camera view: column 0 is the first-base side, column 4 the third-base side.
+// By stored column, catcher's view (ADR-0124): column 0 is the third-base side, column 4 the first-base side.
 const COL_WORD = ['off the plate, 3B side', '3B-side third', 'middle', '1B-side third', 'off the plate, 1B side']
 const STEPS = 5
 export const HEART = 12 // the stored index of middle-middle; the readout opens on it
@@ -85,10 +85,9 @@ export function commandModView(entry, { stand = null, code = null, cell = HEART,
     return view
   }
   // Screen order, row by row: the stored order, since the catcher's view draws the feed's frame.
-  view.cells = Array.from({ length: GRID * GRID }, (_, k) => {
-    const row = Math.floor(k / GRID)
-    const col = k % GRID
-    const i = row * GRID + col
+  view.cells = Array.from({ length: GRID * GRID }, (_, i) => {
+    const row = Math.floor(i / GRID)
+    const col = i % GRID
     const n = v.cells[i]
     const where = cellWords(row, col, stand)
     return { i, n, step: n ? Math.ceil((n / v.max) * STEPS) : 0, where, label: `${where}: ${fmt(n)} ${n === 1 ? 'pitch' : 'pitches'}, ${pct(n, v.pitches)}%` }

@@ -156,4 +156,7 @@ test('the Plate map is drawn from the catcher’s side', () => {
   assert.match(jsx, /\$\{COLS\[c\.i % GRID\]\}/)
   assert.match(jsx, /catcher's view, the third-base side on the left/)
   assert.doesNotMatch(jsx, /viewCol|pitcher's view/)
+  // The picked cell's readout names the same side its box is drawn on.
+  assert.match(jsx, /\$\{COLS\[picked\.i % GRID\]\}/)
+  assert.doesNotMatch(jsx, /GRID - 1 - \(picked\.i/)
 })

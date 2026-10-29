@@ -161,7 +161,7 @@ function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = nu
 
 export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, Savant = null, Parks = null, feed, inning, half, last, open = null, mark = null, replay = null, step = null }) {
   // A replayed trail chip (Gary, 2026-10-29) puts its own at-bat in the box, read at the trail's cut so
-  // nothing after the reader's step shows; past the replay, the box goes back to the cursor.
+  // nothing after the reader's step shows. It holds, as the trail's mark does, until the next tap.
   const shown = () => (replay != null && cutAt(feed, inning, half, step).cards.find((c) => c.atBatIndex === replay)) || last
   return h('div', { className: 'gdhero' },
     replay == null && open?.sub > 0

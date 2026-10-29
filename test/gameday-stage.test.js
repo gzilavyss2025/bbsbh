@@ -1,4 +1,4 @@
-// The stage's pure parts: a fixed overhead field, short measured ball paths and completed runner routes. Real data: gamePk 824716 (SEA @ BOS, Fenway), top 2nd, atBatIndex 13
+// The stage's pure play timeline: short measured ball paths and completed runner routes. Real data: gamePk 824716 (SEA @ BOS, Fenway), top 2nd, atBatIndex 13
 // (a 382 ft home run, tier A) and 14 (a 4-3 groundout, tier A).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
