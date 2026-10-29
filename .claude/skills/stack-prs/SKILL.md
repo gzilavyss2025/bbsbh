@@ -118,7 +118,8 @@ did, and end with a short list of what needs him.
    merge waits until every one is true:
    - CI `lint-and-build` is green on the latest commit. If it is red, root-cause
      it, fix it, and push. Do not re-run to hope.
-   - The Vercel preview deployment of the latest commit is Ready. Production builds
+   - The Vercel preview deployment of the latest commit is Ready, or Ignored
+     because the push touched nothing that deploys. Production builds
      the same way, so a failed preview is a failed deploy: read the build error
      (`mcp__Vercel__list_deployment_events`), fix it, and push.
    - No merge conflict with `main`. If `main` moved, merge it into the stack

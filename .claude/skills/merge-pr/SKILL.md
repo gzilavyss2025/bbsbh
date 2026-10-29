@@ -33,8 +33,9 @@ Use the `mcp__github__*` tools in a cloud session (`gh` in a local session).
      step from the job log.
    - The Vercel preview deployment for the head SHA is not failed (the `Vercel`
      check, or the vercel[bot] comment's Deployment column). Production builds the
-     same way, so a failed preview is a failed deploy. Still building: wait as above.
-     Failed: stop, and give the build error from the deployment's logs
+     same way, so a failed preview is a failed deploy. "Ignored" is fine: the push
+     touched nothing that deploys, and the earlier preview stands. Still building:
+     wait as above. Failed: stop, and give the build error from the deployment's logs
      (`mcp__Vercel__list_deployment_events`).
    - No merge conflict. If the branch is only behind `main`, update it on GitHub
      (`mcp__github__update_pull_request_branch`) and go back to the CI gate for the
