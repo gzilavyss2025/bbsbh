@@ -547,3 +547,36 @@ export const resetPitcherReads = () => memos.forEach((m) => m.clear())
 
 export const fetchPitcherSeasonLine = memoRequest(readPitcherSeasonLine)
 export const fetchPitcherLastGame = memoRequest(readPitcherLastGame)
+
+// His last `n` appearances this season, at every level (MLB, postseason, and minor-league or rehab
+// outings: LAST_GAME_SPORT_IDS, as readPitcherLastGame reads them), strictly BEFORE this game (doubleheader-safe, the same
+// cutoff as readPitcherLastGame), newest first: the Gameday arm card's Game Log tab (Gary,
+// 2026-10-29). Each row { date, gamePk, opponent, opponentId, home, sportId, level, ip, h, er, bb, k, pitches }.
+// A completed game's line, never tonight's. [] on any failure.
+async function readPitcherRecentGames(personId, season, cutoffDate, cutoffGameNumber = 1, n = 5) {
+  if (!personId || !season) return []
+  const gameNumber = (s) => s.game?.gameNumber ?? 1
+  const before = (s) => !cutoffDate || s.date < cutoffDate || (s.date === cutoffDate && gameNumber(s) < cutoffGameNumber)
+  const perLevel = await Promise.all(LAST_GAME_SPORT_IDS.map((sportId) => fetchGameLogSplits(personId, season, sportId)))
+  const splits = perLevel.flat().filter((s) => s.date && before(s))
+  splits.sort((a, b) => (a.date !== b.date ? (a.date < b.date ? 1 : -1) : gameNumber(b) - gameNumber(a)))
+  return splits.slice(0, n).map((s) => {
+    const st = s.stat ?? {}
+    return {
+      date: s.date,
+      gamePk: s.game?.gamePk ?? null,
+      opponent: teamAbbr(s.opponent ?? {}),
+      opponentId: s.opponent?.id ?? null,
+      home: Boolean(s.isHome),
+      sportId: s.sport?.id ?? 1,
+      level: s.sport?.id && s.sport.id !== 1 ? SPORT_LABEL[s.sport.id] ?? '' : '',
+      ip: st.inningsPitched ?? '',
+      h: st.hits ?? 0,
+      er: st.earnedRuns ?? 0,
+      bb: st.baseOnBalls ?? 0,
+      k: st.strikeOuts ?? 0,
+      pitches: st.numberOfPitches ?? 0,
+    }
+  })
+}
+export const fetchPitcherRecentGames = memoRequest(readPitcherRecentGames)

@@ -2,7 +2,8 @@
 .gdstageScene { position: absolute; inset: 0; background: var(--bg-canvas); }
 /* One unit ties the player's anatomy, elevated zone and ground plane together. */
 .gdnext__slot--stage { container-type: size;
-  --gd-zone-w: clamp(104px, min(30cqw, 39cqh), 190px);
+  /* 15% smaller than before (Gary, 2026-10-29) so more of where the pitches land shows on the stage. */
+  --gd-zone-w: clamp(88px, min(25.5cqw, 33cqh), 162px);
   --gd-zone-h: calc(var(--gd-zone-w) * 1.1);
   --gd-figure-h: calc(var(--gd-zone-w) * 2.7);
   --gd-ground: max(var(--space-3), 3cqh); }

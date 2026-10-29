@@ -7,7 +7,8 @@ import { selectPlayBattedBall } from '../../../../api/hitchart.js'
 // the sub-step on screen, or every pitch of the at-bat on screen in a half read back. Reveal-only:
 // call it inside a SealBox reveal function. Each is placed in the grid's own box (catcher's view,
 // pX as it comes; 0-100 spans the zone, a ball outside lands past the edge).
-const TOP = [-28, 145], LEFT = [-100, 300] // the raised grid leaves about a third of itself above it
+// Widened with the 15% smaller zone (Gary, 2026-10-29): the stage now holds more of the grid's own size around it.
+const TOP = [-70, 175], LEFT = [-150, 350] // the raised grid leaves about two-thirds of itself above it
 const clamp = (v, [lo, hi]) => Math.min(hi, Math.max(lo, v))
 
 export function zonePitches(feed, { inning, half, open, last, committed }) {
@@ -31,7 +32,8 @@ export function zonePitches(feed, { inning, half, open, last, committed }) {
     // bounds are shares of the grid: the stage leaves about this much room around the zone.
     const left = ((n.xn + 1) / 2) * 100, top = (1 - n.zn) * 100
     const off = top < TOP[0] ? 'up' : top > TOP[1] ? 'down' : left < LEFT[0] ? 'left' : left > LEFT[1] ? 'right' : null
-    return [{ no: p.no, cat: p.cat, off, left: clamp(left, LEFT), top: clamp(top, TOP),
+    // Its type, speed and call, for the dot's hover card (Gary, 2026-10-29): a pitch already on screen.
+    return [{ no: p.no, cat: p.cat, off, left: clamp(left, LEFT), top: clamp(top, TOP), type: p.type ?? '', mph: p.mph ?? null, call: p.callDesc ?? '',
       ball: ball && { ...ball, venue: g?.venue?.name ?? '', venueId: g?.venue?.id ?? null, gameDate: g?.datetime?.officialDate ?? null },
       playId: ball ? play.playEvents?.findLast((e) => e.details?.isInPlay)?.playId ?? null : null }]
   })

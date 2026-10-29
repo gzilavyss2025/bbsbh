@@ -11,6 +11,7 @@ import { hoverCardPosition } from '../../lib/playerHoverPosition.js'
 import { useMediaQuery, HOVER_CARD_QUERY } from '../../hooks/useMediaQuery.js'
 import { DEFAULT_HARD_HIT_MPH } from './HitChart.jsx'
 import { IconButton } from '../ui/control/IconButton.jsx'
+import { CountUp, FlightClock } from './CountUp.jsx'
 
 // WHERE THIS ONE BALL WENT. The play-by-play's base diamond is the handle: point
 // at it on a desktop and the flight opens beside the card; tap it on a phone and
@@ -64,10 +65,23 @@ function outcomeWord(ball) {
 
 // The drawing, the path, and the mark where the ball came down. One component so
 // the popover and the sheet can never drift into two different pictures.
+// How long the opened card's ball takes to land (Gary, 2026-10-29): a grounder skims, a liner is
+// quick, a fly ball hangs, a popup hangs longest; anything else by its carry. Real hang times sped
+// up to well under a second, so the card settles fast.
+export function flightMs(ball) {
+  const t = ball?.trajectory ?? ''
+  if (t === 'ground_ball' || t === 'bunt_grounder') return 450
+  if (t === 'line_drive') return 600
+  if (t === 'fly_ball') return 850
+  if (t === 'popup' || t === 'bunt_popup') return 950
+  return Math.min(950, Math.max(450, (ball?.distance ?? 200) * 2.4))
+}
+
 function FlightPlot({ ball, park }) {
   // An SVG gradient id is document-global, and a phone can hold this card open
   // over a feed that already rendered a hit chart carrying rings of its own.
   const heatId = `bflight-heat-${useId()}`
+  const drawId = `bflight-draw-${useId()}`
   const { d, grounded } = ballFlightPath({ x: ball.x, y: ball.y }, ball.launchAngle, ball.trajectory)
   return (
     <BallparkDiagram
@@ -81,6 +95,11 @@ function FlightPlot({ ball, park }) {
           <stop offset="0%" className="bflight__heat-from" />
           <stop offset="100%" className="bflight__heat-to" />
         </linearGradient>
+        {/* The path draws out from the plate (the opened card only, 69-hit-chart.css): a solid copy
+            of it, stroked on over the flight, masks the drawn line, so a dashed grounder draws too. */}
+        <mask id={drawId} maskUnits="userSpaceOnUse">
+          <path className="bflight__draw" d={d} pathLength="1" />
+        </mask>
       </defs>
       {/* The path rides UNDER the landing mark, so the mark reads as the end of
           it rather than as a bead threaded on it. A ball on the ground is drawn
@@ -92,7 +111,7 @@ function FlightPlot({ ball, park }) {
           across a card while this one is 300px wide — the chart's 6.5-unit dot
           comes out under 3px here, a speck at the end of a line. These are sized
           to read at THIS width; nothing about the coordinates changed. */}
-      <path className={`bflight__path${grounded ? ' bflight__path--ground' : ''}`} d={d} />
+      <path className={`bflight__path${grounded ? ' bflight__path--ground' : ''}`} d={d} mask={`url(#${drawId})`} />
       {isHard(ball) && (
         <circle
           className="bflight__heat"
@@ -132,14 +151,14 @@ function FlightFacts({ ball }) {
       <div className="bflight__fact">
         <p className="bflight__factlabel">Exit velo</p>
         <p className="bflight__factvalue">
-          {ball.exitVelo == null ? DASH : ball.exitVelo.toFixed(1)}
+          {ball.exitVelo == null ? DASH : <CountUp value={ball.exitVelo.toFixed(1)} />}
           <span className="bflight__unit"> mph</span>
         </p>
       </div>
       <div className="bflight__fact">
         <p className="bflight__factlabel">Launch</p>
         <p className="bflight__factvalue">
-          {ball.launchAngle == null ? DASH : `${ball.launchAngle}°`}
+          {ball.launchAngle == null ? DASH : <CountUp value={`${ball.launchAngle}°`} />}
         </p>
       </div>
       <div className="bflight__fact">
@@ -147,7 +166,7 @@ function FlightFacts({ ball }) {
         <p className="bflight__factvalue">
           {carried(ball) ? (
             <>
-              {ball.distance}
+              <CountUp value={String(ball.distance)} />
               <span className="bflight__unit"> ft</span>
             </>
           ) : (
@@ -342,7 +361,9 @@ export function BallFlight({ ball, batter, code = '', facts = true, arc = true, 
               two. The ✕ stays for the pointer that expects one and for a
               keyboard, which needs a real focus target. */}
           <div className="scrim scrim--center" onClick={() => setOpen(false)}>
-            <Card as="div" body="flush" className="bflight bflight--modal" role="dialog" aria-modal="true" aria-label={label}>
+            {/* The opened card plays the flight: the path draws, the mark lands, the figures count up (Gary, 2026-10-29). */}
+            <FlightClock.Provider value={flightMs(ball)}>
+            <Card as="div" body="flush" className="bflight bflight--modal" style={{ '--flight-ms': `${flightMs(ball)}ms` }} role="dialog" aria-modal="true" aria-label={label}>
               <FlightBody
                 ball={ball}
                 park={park}
@@ -356,6 +377,7 @@ export function BallFlight({ ball, batter, code = '', facts = true, arc = true, 
               />
               {extra}
             </Card>
+            </FlightClock.Provider>
           </div>
         </ModalPortal>
       )}

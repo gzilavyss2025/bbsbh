@@ -96,9 +96,17 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
           matchup={pitcherId ? <ScoutLine feed={feed} hitterId={batter.id} pitcherId={pitcherId} /> : null}
           pitcher={pitcherId ? { id: pitcherId, first: gd?.players?.[`ID${pitcherId}`]?.useName ?? gd?.players?.[`ID${pitcherId}`]?.firstName ?? '', last: gd?.players?.[`ID${pitcherId}`]?.lastName ?? '' } : null}
           pitches={<SealBox coverless forceRevealed>{() => zonePitches(feed, replayed ? { inning, half, open: null, last: replaying, committed: true } : { inning, half, open, last, committed: holdsFinished({ view, mark, open, last }) }).map((p) => (
-            <span key={p.no} className={`gdzonemap__pitch gdzonemap__pitch--${p.cat}${p.ball ? ' has-flight' : ''}${p.off ? ` is-off is-off--${p.off}` : ''}`} style={{ left: `${p.left}%`, top: `${p.top}%` }}>
+            <span key={p.no} tabIndex={0} aria-label={`Pitch ${p.no}: ${[p.type, p.mph != null && `${p.mph.toFixed(1)} mph`, p.call].filter(Boolean).join(', ')}`}
+              className={`gdzonemap__pitch gdzonemap__pitch--${p.cat}${p.ball ? ' has-flight' : ''}${p.off ? ` is-off is-off--${p.off}` : ''}${p.top < 15 ? ' is-high' : ''}`} style={{ left: `${p.left}%`, top: `${p.top}%` }}>
               {p.off && <span className="gdzonemap__offarrow" aria-hidden="true">{OFF_ARROW[p.off]}</span>}
               {p.no}
+              {/* The hover card: the pitch's type, speed and call (Gary, 2026-10-29). Not a `title` tip: a
+                  card that shows on hover and on keyboard focus. */}
+              <span className="gdzonemap__tip" aria-hidden="true">
+                <b>{p.type || 'Pitch'}</b>
+                {p.mph != null && <span>{p.mph.toFixed(1)} mph</span>}
+                {p.call && <small>{p.call}</small>}
+              </span>
               {/* The ball in play opens where it went (the hero diamond's flight card). */}
               {p.ball && <BallFlight ball={p.ball} batter={{ id: batter.id, last: batter.last }} facts={false} arc={false} head={false} hover={false}
                 extra={p.playId ? <SavantFacts gamePk={feed.gamePk} sportId={gd?.teams?.home?.sport?.id ?? 1} playId={p.playId} /> : null} />}

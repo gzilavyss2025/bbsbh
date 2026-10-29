@@ -6,7 +6,7 @@ import { EDGE, H, W, boxLeftOfPlate, catcherX, stanceArt, sy } from '../../lib/z
 import { groundBoxes } from '../../lib/zone/ground.js'
 import { useDialogFocus } from '../../hooks/dialog/useDialogFocus.js'
 import { batterFigureUrls } from '../../api/uniforms.js'
-import { BattingUniformContext } from '../logo/uniformContexts.js'
+import { BatterFallbackContext, BattingUniformContext } from '../logo/uniformContexts.js'
 import { IconButton } from '../ui/control/IconButton.jsx'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
@@ -112,7 +112,7 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
   return (
     <g className="strikezone__figure" aria-hidden="true" clipPath={`url(#${clipId})`}>
       <g>
-        {[urls.pants, urls.jersey].map((href) => (
+        {[urls.pants, urls.jersey].filter(Boolean).map((href) => (
           <image
             key={href}
             href={href}
@@ -142,10 +142,12 @@ function BatterFigure({ urls, hand, zone, clipId, onError }) {
 // own edges (Gameday's hero sheet, .szmodal--bare).
 export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, framed = true }) {
   const figureAssets = useContext(BattingUniformContext)
+  // Figures to try when no uniform is posted or it fails (Gameday's hero: the club's usual Gameday batter, then MLB's generic one).
+  const fallbacks = useContext(BatterFallbackContext) ?? []
   // His own stance's art as it comes: Gameday draws each stance from the catcher's side, as this diagram is now.
   const figureUrls = batterFigureUrls(figureAssets, stanceArt(batSide))
-  // A failed load drops to the silhouette; keyed by URL so a new batter retries.
-  const [failedUrl, setFailedUrl] = useState(null)
+  // Each failed image steps on to the next figure, and past the last to the silhouette; keyed by URL so a new batter retries.
+  const [failed, setFailed] = useState(() => new Set())
   const clipId = useId()
   const shown = (pitchDetails ?? []).filter(plottable)
   if (shown.length === 0) return null
@@ -174,7 +176,10 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
   const showBatter = batSide === 'L' || batSide === 'R'
   const zoneOffsetX = boxLeftOfPlate(batSide) ? BATTER_W : 0
   const totalW = showBatter ? W + BATTER_W : W
-  const useFigure = figureUrls && failedUrl !== figureUrls.jersey
+  // The first figure that has not failed: tonight's posted pieces, then each fallback in turn.
+  const figures = [figureUrls, ...fallbacks].filter(Boolean)
+  const figure = figures.find((f) => !failed.has(f.jersey)) ?? null
+  const useFigure = Boolean(figure)
 
   return (
     <svg
@@ -200,7 +205,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '', margin = 0, 
             ))}
           </g>}
           {useFigure ? (
-            <BatterFigure urls={figureUrls} hand={batSide} zone={{ left: zx + zoneOffsetX, right: zr + zoneOffsetX, top: zyT, h: zh }} clipId={clipId} onError={() => setFailedUrl(figureUrls.jersey)} />
+            <BatterFigure key={figure.jersey} urls={figure} hand={batSide} zone={{ left: zx + zoneOffsetX, right: zr + zoneOffsetX, top: zyT, h: zh }} clipId={clipId} onError={() => setFailed((s) => new Set(s).add(figure.jersey))} />
           ) : (
             <BatterSilhouette x={boxLeftOfPlate(batSide) ? 0 : W + zoneOffsetX} mirror={boxLeftOfPlate(batSide)} />
           )}
@@ -356,9 +361,10 @@ function ChallengeMark({ challenge }) {
 // `.turnscene` ancestor isolates its stacking context, so an unportalled scrim
 // renders BELOW the fixed floating bar (`.pagenav`). See ModalPortal.jsx.
 // `head={false}`: no title over the zone, only the ✕ (a host that already names the at-bat: Gameday's hero).
-export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClose, head = true, margin = 0 }) {
+// `title` ([line, line]): two lines over the zone on the bare sheet (Gameday's hero: who faced whom, and the situation).
+export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClose, head = true, margin = 0, title = null }) {
   return (
-    <ZoneSheet note="Pitch zone" batter={batter} pitcher={pitcher} onClose={onClose} head={head}>
+    <ZoneSheet note="Pitch zone" batter={batter} pitcher={pitcher} onClose={onClose} head={head} title={title}>
       <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--modal" margin={margin} framed={head} />
       <PitchList pitchDetails={pitchDetails} />
     </ZoneSheet>
@@ -367,7 +373,7 @@ export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClos
 
 // The sheet both of an at-bat's phone sheets wear: this zone, and the replay
 // (AtBatReplay.jsx). `note` names it; `pitcher` is his last name.
-export function ZoneSheet({ note, batter, pitcher, onClose, children, head = true }) {
+export function ZoneSheet({ note, batter, pitcher, onClose, children, head = true, title = null }) {
   const closeRef = useRef(null)
   useDialogFocus(closeRef, onClose)
 
@@ -380,6 +386,10 @@ export function ZoneSheet({ note, batter, pitcher, onClose, children, head = tru
       >
         <div className={head ? 'szmodal' : 'szmodal szmodal--bare'} role="dialog" aria-modal="true" aria-label={`${note} for ${name || 'this at-bat'}`}>
           <div className={head ? 'szmodal__head' : 'szmodal__head szmodal__head--bare'}>
+            {!head && title && <div className="szmodal__ttl szmodal__ttl--bare">
+              <span className="szmodal__name">{title[0]}</span>
+              {title[1] && <span className="szmodal__note">{title[1]}</span>}
+            </div>}
             {head && <div className="szmodal__ttl">
               <span className="szmodal__note">{note}</span>
               <span className="szmodal__name">{name || 'At-bat'}</span>

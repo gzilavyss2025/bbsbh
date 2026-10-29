@@ -327,30 +327,63 @@
   justify-content: space-between;
   gap: var(--space-3);
 }
-/* The zone map and the batter beside it, inside edge to inside edge. */
+/* The zone map and the batter beside it, in proportion: the figure's own strike zone (Gameday's
+   art, 496x1050, zone band 390-700 — StrikeZone.jsx's ART_* constants) is stretched over the
+   map's grid, so he stands to the plate's scale. The box clips his head, feet and bat, as the
+   at-bat strike zone does. --g is the grid's height; the map's frame pads it 3/156 each side. */
 .lump__zone {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-1);
+  --g: 96px;
+  --s: calc(var(--g) / 310);
+  --ext: 56px; /* raw-value-exempt: how far the batter shows above and below the map */
+  position: relative;
   flex: none;
+  /* Bleeds through the sheet's right padding to its edge (Gary, 2026-10-29). */
+  margin-right: calc(-1 * var(--space-3h));
+  width: calc(var(--g) * 144 / 156 + 96px); /* raw-value-exempt: the window beside the map */
+  height: calc(var(--g) * 162 / 156 + 2 * var(--ext));
+  overflow: hidden;
+  /* The batter fades out at the top and bottom instead of a hard crop. */
+  mask-image: linear-gradient(to bottom, transparent, #000 var(--ext), #000 calc(100% - var(--ext)), transparent); /* raw-value-exempt: a mask, not a colour */
 }
-.lump__zone--left {
-  flex-direction: row-reverse;
-}
-.lump__zone--left .zonemap {
-  transform: scaleX(-1);
+.lump__zone .zonemap {
+  position: absolute;
+  top: var(--ext);
+  left: 0;
+  width: auto;
+  height: calc(var(--g) * 162 / 156);
 }
 .lump__batter {
-  height: 96px;
+  position: absolute;
+  top: calc(var(--ext) + var(--g) * 3 / 156 - 390 * var(--s));
+  /* Mirrored (drawn from the catcher's side; the map is the pitcher's), his near edge (art x 416,
+     80 once mirrored) stands a step outside the map's inside edge. */
+  left: calc(var(--g) * 144 / 156 + 6px - 80 * var(--s)); /* raw-value-exempt: the step off the plate */
+  height: calc(1050 * var(--s));
   width: auto;
+  max-width: none;
   transform: scaleX(-1);
+}
+/* A lefty: the map flips so inside faces him, and he stands on the left. */
+.lump__zone--left .zonemap {
+  left: auto;
+  right: 0;
+  transform: scaleX(-1);
+}
+.lump__zone--left .lump__batter {
+  left: auto;
+  right: calc(var(--g) * 144 / 156 + 6px - 56 * var(--s)); /* raw-value-exempt: the step off the plate */
 }
 .lump__watch b {
   font-family: var(--font-display);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
+/* layout-exempt: one grid for the whole table, so every row's columns share widths (subgrid),
+   and each figure sits under its heading. */
 .lump__games {
+  display: grid;
+  grid-template-columns: 4em 1fr auto auto;
+  column-gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -364,15 +397,22 @@
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
+.lump__game > :nth-child(n + 3) {
+  text-align: right;
+}
 .lump__game .plink {
+  justify-self: start;
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
 }
+/* layout-exempt: a fixed four-column table (date, game, accuracy, consistency). The game column starts at the
+   same x on every row, so the first club marks line up; an AAA pill sits after them. */
 .lump__game {
-  display: flex;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-2) 0;
   border-bottom: var(--bw-hair) solid var(--border-hairline);

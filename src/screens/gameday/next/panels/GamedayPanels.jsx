@@ -15,6 +15,8 @@ import { parkWindow } from '../../../../lib/ballpark/layout/parkWindow.js'
 import { revealInning } from '../../../../api/linescore.js'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { pitcherDayLine, pitchingDayLines } from '../../../../api/gameday/dayLine.js'
+import { tonightPitches } from '../../../../api/gameday/pitchMix.js'
+import { ArmTabs, ArmGameLog, TonightMix } from './ArmTabs.jsx'
 import { pitchingLinesMarkup } from './pitchingLinesMarkup.js'
 import { createElement, useState } from 'react'
 import { halfIndex, selectLineup, selectMoundPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
@@ -52,6 +54,9 @@ function Navigator({ ctx }) {
     const idx = halfIndex(n, half)
     if (idx <= mark) return revealInning(feed, n, side)
     if (idx === runsInProgress?.idx) return { runs: runsInProgress.runs, hits: runsInProgress.hits }
+    // The half being stepped through, before its first run reaches the screen: 0 so far, never a later
+    // play's count (Gary, 2026-10-29). It rises only as runsInProgress does.
+    if (idx === curIdx && idx === mark + 1) return { runs: 0, hits: 0 }
     return null
   }
   // R / H / E as of the cursor: runs and hits over the club's halves on the line, errors (a fielding
@@ -268,7 +273,8 @@ function Arm({ ctx }) {
     <Sealable ctx={ctx} reach>
       {() => {
         const l = pitcherDayLine(feed, pitcher.id, { inning, half, step: ctx.step, revealedThrough: mark })
-        const pitches = l?.pitches ?? 0
+        // In pitch mode the at-bat being stepped through adds its shown pitches (pitchMix.js's clamp).
+        const pitches = Math.max(l?.pitches ?? 0, tonightPitches(feed, pitcher.id, { inning, half, step: ctx.step, revealedThrough: mark, open: ctx.open })?.length ?? 0)
         const faced = l?.bf ?? 0
         const cells = [['IP', l?.ip ?? '0.0'], ['H', l?.h ?? 0], ['R', l?.r ?? 0], ['ER', l?.er ?? 0], ['BB', l?.bb ?? 0], ['K', l?.k ?? 0]]
         return (
@@ -282,7 +288,29 @@ function Arm({ ctx }) {
       }}
     </Sealable>
   )
-  return <PitcherCard feed={feed} pitcher={pitcher} teamId={club.id} teamName={club.clubName} side={side} treatment={treatment} relief={false} tonight={tonight} showLast={false} gameday className="gdarm" />
+  // The tabs under his line (Gary, 2026-10-29). Pitch Mix and Scout read tonight's game, so each draws in
+  // its own seal at the same reach and step as his line above.
+  const mix = (
+    <Sealable ctx={ctx} reach>
+      {() => <TonightMix pitches={tonightPitches(feed, pitcher.id, { inning, half, step: ctx.step, revealedThrough: mark, open: ctx.open })} />}
+    </Sealable>
+  )
+  const game = feed?.gameData ?? {}
+  const log = <ArmGameLog pitcherId={pitcher.id} season={game.game?.season} date={game.datetime?.officialDate} gameNumber={game.game?.gameNumber ?? 1} sportId={game.teams?.home?.sport?.id ?? 1} />
+  // The batter at the top of the Due up (the same read as that card's Scout row).
+  const bat = battingSideOf(half)
+  const scout = (
+    <Sealable ctx={ctx} reach>
+      {({ cards, hitters }) => {
+        const up = atTheTop(orderAt(feed, bat, inning, half, mark, cards, hitters), ctx, cards)[0]
+        return up ? <div className="gdtabs__scout"><ScoutLine feed={feed} hitterId={up.id} pitcherId={pitcher.id} /></div> : null
+      }}
+    </Sealable>
+  )
+  return (
+    <PitcherCard feed={feed} pitcher={pitcher} teamId={club.id} teamName={club.clubName} side={side} treatment={treatment} relief={false} tonight={tonight} showLast={false} gameday className="gdarm"
+      tabs={(arsenal) => <ArmTabs arsenal={arsenal} mix={mix} log={log} scout={scout} />} />
+  )
 }
 
 // The description reads on from the batter's name, so its verb starts lower case ("strikes out"). A description

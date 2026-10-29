@@ -99,7 +99,7 @@ function openBox(h, feed, inning, half, { count, sub }, Headshot, PlayerLink, Li
   const { batter } = o.card
   // The pitch columns open the strike zone mid at-bat too, with only the pitches shown so far.
   const thrown = shown.filter((s) => s.kind === 'pitch' && s.pitch).map((s) => s.pitch)
-  const zone = Zone && thrown.length > 0 ? h(Zone, { entry: { ...o.card, pitchDetails: thrown }, side: half === 'top' ? 'away' : 'home' }) : null
+  const zone = Zone && thrown.length > 0 ? h(Zone, { entry: { ...o.card, pitchDetails: thrown }, side: half === 'top' ? 'away' : 'home', teamId: feed?.gameData?.teams?.[half === 'top' ? 'away' : 'home']?.id ?? null, feed }) : null
   return h('div', { className: 'gdhero__top' }, scorebookBox(h, m, null, zone),
     h('div', { className: 'gdhero__txt' },
       h('div', { className: 'gdhero__who' },
@@ -143,7 +143,7 @@ function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = nu
   const inPlay = (Savant || Parks) && e.battedBall ? feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === e.atBatIndex)?.playEvents?.findLast((ev) => ev.details?.isInPlay)?.playId : null
   const extra = inPlay && Savant ? h(Savant, { gamePk: feed.gamePk, sportId: feed.gameData?.teams?.home?.sport?.id ?? 1, playId: inPlay }) : null
   const flight = Flight && e.battedBall ? h(Flight, { ball: e.battedBall, batter, code: e.code ?? '', facts: false, arc: false, head: false, hover: false, extra }) : null
-  const zone = Zone ? h(Zone, { entry: e, side }) : null
+  const zone = Zone ? h(Zone, { entry: e, side, teamId: side ? feed?.gameData?.teams?.[side]?.id ?? null : null, feed }) : null
   return h('div', { className: 'gdhero__top' }, scorebookBox(h, boxModel(e), flight, zone),
     h('div', { className: 'gdhero__txt' },
       h('div', { className: 'gdhero__who' },

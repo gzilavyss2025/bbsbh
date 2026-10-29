@@ -36,9 +36,9 @@
   --gd-band-h: 92px;
   --gd-bar-h: 76px;
   grid-template-rows: auto minmax(0, 1fr) 168px 58px 76px;
-  /* the Due up card runs down past the trail's row, so nine rows and the up batter's Scout line fit */
+  /* the Due up card and the pitcher's card both run down past the trail's row (nine rows and the Scout line fit; the arm card matches, Gary 2026-10-29) */
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
-    'battingOrder hero hero arm' 'battingOrder trail trail trail' 'bar bar bar bar';
+    'battingOrder hero hero arm' 'battingOrder trail trail arm' 'bar bar bar bar';
 }
 .gdnext[data-tier='D'] {
   /* the middle is the stage's width: past its desktop size it holds at 40% of the window and the sides take the rest */
@@ -47,7 +47,7 @@
   --gd-bar-h: 68px;
   grid-template-rows: auto minmax(0, 1fr) 164px 66px 68px;
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
-    'battingOrder hero hero arm' 'battingOrder trail trail trail' 'bar bar bar bar';
+    'battingOrder hero hero arm' 'battingOrder trail trail arm' 'bar bar bar bar';
 }
 
 /* The band row is `auto`: the band keeps its tier's height (--gd-band-h), and the status strip

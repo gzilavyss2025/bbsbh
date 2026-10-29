@@ -12,7 +12,7 @@
   font-variant-numeric: tabular-nums; color: var(--text-heading); background: var(--stage-zone-lukewarm); }
 .gdzonemap__grid .statgrid { display: contents; }
 /* An at-bat's pitch, centred on where it crossed the plate (zonePitches.js). */
-.gdzonemap__pitch { position: absolute; z-index: 1; transform: translate(-50%, -50%); pointer-events: none;
+.gdzonemap__pitch { position: absolute; z-index: 1; transform: translate(-50%, -50%); pointer-events: auto; cursor: default;
   width: 17px; height: 17px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font: var(--w-bold) var(--fs-cell) / 1 var(--font-mono); color: var(--text-on-ink-bright); }
 /* The strike-zone modal's dots (14-strike-zone.css): strikes red, balls green, in play blue. */
@@ -30,11 +30,8 @@
 /* layout-exempt: the batter and zone share the same plate, reflected for a left-handed hitter */
 .gdzonemap__plateview { position: absolute; inset: 0; }
 .gdzonemap__batter { position: absolute; left: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); bottom: calc(var(--gd-ground) - var(--gd-zone-w) * .08); width: auto; height: var(--gd-figure-h); pointer-events: auto; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
-.gdzonemap__sprite { display: block; width: 100%; height: 100%; background-image: url('/art/gameday/batter-ready.webp');
-  background-repeat: no-repeat; background-size: 200% 100%; background-position: left center; image-rendering: pixelated; }
 .gdzonemap__plate { position: absolute; left: 50%; bottom: var(--gd-ground); width: var(--gd-zone-w); height: auto; aspect-ratio: 196 / 60; transform: translateX(-50%); overflow: visible; fill: var(--stage-chalk); }
 .gdzonemap[data-side='L'] .gdzonemap__batter { left: auto; right: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); clip-path: inset(0 24% 0 17%); }
-.gdzonemap[data-side='L'] .gdzonemap__sprite { background-position: right center; }
 .gdzonemap__plate-edge { fill: var(--stage-overhead-cloth-shade); }
 .gdzonemap__plate-face { stroke: var(--stage-overhead-cloth-shade); stroke-width: var(--bw-hair); vector-effect: non-scaling-stroke; }
 
@@ -89,3 +86,21 @@
 /* With the uniform figure at scale, the zone rises to run from his knees to the letters (about 0.3 to
    0.65 of his height); the plate and the box stay on the ground under him. */
 .gdzonemap:has(.is-uniform) .gdzonemap__grid { bottom: calc(var(--gd-ground) + var(--gd-zone-h) * .95); }
+
+/* A pitch's hover card (Gary, 2026-10-29): its type, speed and call, above the dot on hover or focus. */
+/* layout-exempt: three short lines in a small card */
+.gdzonemap__tip { position: absolute; bottom: calc(100% + var(--space-1h)); left: 50%; z-index: var(--z-raised); display: none; flex-direction: column; gap: 2px; transform: translateX(-50%);
+  padding: var(--space-1h) var(--space-2); border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); box-shadow: var(--shadow-stamped-soft);
+  color: var(--text-heading); white-space: nowrap; text-align: left; pointer-events: none; } /* raw-value-exempt: lines hug */
+.gdzonemap__tip b { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.gdzonemap__tip span { font: var(--fs-small) / var(--lh-solid) var(--font-mono); }
+.gdzonemap__tip small { color: var(--text-caption); font: var(--fs-cell) / var(--lh-solid) var(--font-mono); text-transform: uppercase; }
+.gdzonemap__pitch:hover, .gdzonemap__pitch:focus-visible { z-index: var(--z-raised); }
+.gdzonemap__pitch:hover .gdzonemap__tip, .gdzonemap__pitch:focus-visible .gdzonemap__tip { display: flex; }
+/* A high pitch (near or over the zone's top, or pinned at the stage's top edge) opens its card below
+   it, so the stage's edge never cuts the card off. */
+.gdzonemap__pitch.is-high .gdzonemap__tip, .gdzonemap__pitch.is-off--up .gdzonemap__tip { bottom: auto; top: calc(100% + var(--space-1h)); }
+/* The grid is its own layer (its transform), under the batter (z-index 1). While a pitch's card is
+   open, the whole grid steps above everything on the stage, so the card is never hidden. */
+.gdzonemap__grid:has(.gdzonemap__pitch:hover, .gdzonemap__pitch:focus-visible) { z-index: var(--z-raised); }
+.gdzonemap:has(.gdzonemap__pitch:hover, .gdzonemap__pitch:focus-visible) { z-index: var(--z-sticky); }

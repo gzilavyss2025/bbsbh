@@ -762,6 +762,42 @@
   opacity: 0.7;
 }
 
+/* THE FLIGHT PLAYS when the card is opened (Gary, 2026-10-29): the mask's solid copy of the path
+   strokes on from the plate over --flight-ms (BallFlight.jsx flightMs), so the drawn line follows
+   it; then the landing mark drops in with a small overshoot. Everywhere else (the hover card) the
+   mask is fully drawn and nothing moves. Transform and opacity only; none under reduced motion. */
+.bflight__draw {
+  fill: none;
+  stroke: #fff; /* raw-value-exempt: a mask's white means "show" */
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+.bflight--modal .bflight__draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: bflight-draw var(--flight-ms, 700ms) var(--ease-out) forwards;
+}
+/* The home-run diamond is drawn rotated (a transform attribute), so it fades in rather than scales. */
+.bflight--modal .bflight__hr { opacity: 0; animation: bflight-fade 240ms var(--ease-out) var(--flight-ms, 700ms) forwards; }
+@keyframes bflight-fade { to { opacity: 1; } }
+.bflight--modal :is(.bflight__hit, .bflight__out, .bflight__heat) {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: bflight-land 320ms var(--ease-out) var(--flight-ms, 700ms) forwards;
+}
+@keyframes bflight-draw { to { stroke-dashoffset: 0; } }
+@keyframes bflight-land {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.18); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bflight--modal .bflight__draw, .bflight--modal :is(.bflight__hit, .bflight__out, .bflight__hr, .bflight__heat) { animation: none; opacity: 1; stroke-dashoffset: 0; }
+}
+:root[data-motion='reduced'] .bflight--modal .bflight__draw,
+:root[data-motion='reduced'] .bflight--modal :is(.bflight__hit, .bflight__out, .bflight__hr, .bflight__heat) { animation: none; opacity: 1; stroke-dashoffset: 0; }
+
 /* ---- The marks: the hit chart's, at this card's scale ---- */
 
 .bflight__hit {

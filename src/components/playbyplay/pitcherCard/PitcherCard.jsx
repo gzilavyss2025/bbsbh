@@ -55,7 +55,7 @@ import { SeasonLines } from './SeasonLines.jsx'
 // arrives with it (the departing arm's line), told whether the card has settled.
 const cardData = keyedCache()
 
-export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className, label, entering, side, treatment, after, tonight = null, showLast = true, gameday = false }) {
+export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className, label, entering, side, treatment, after, tonight = null, showLast = true, gameday = false, tabs = null }) {
   const game = feed?.gameData ?? {}
   const officialDate = game.datetime?.officialDate ?? null
   const season = game.game?.season ?? null
@@ -128,9 +128,15 @@ export function PitcherCard({ feed, relief, pitcher, teamId, teamName, className
             />
           </Unfold>
         )}
-        <Unfold open={open && tiles.length > 0} delay={435}>
-          <PitchMix tiles={tiles} lefty={pitcher?.hand === 'L'} name={pitcher?.name} />
-        </Unfold>
+        {/* Gameday's arm card puts the pitch tiles under its tabs as the Arsenal view (`tabs`
+            draws the row and the other views, panels/ArmTabs.jsx). */}
+        {tabs ? (
+          tabs(tiles.length > 0 ? <PitchMix tiles={tiles} lefty={pitcher?.hand === 'L'} name={pitcher?.name} /> : null)
+        ) : (
+          <Unfold open={open && tiles.length > 0} delay={435}>
+            <PitchMix tiles={tiles} lefty={pitcher?.hand === 'L'} name={pitcher?.name} />
+          </Unfold>
+        )}
         <Unfold open={showLast && Boolean(data?.last)} delay={490}>
           <LastAppearance
             last={data?.last}

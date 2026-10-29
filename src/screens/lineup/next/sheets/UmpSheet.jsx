@@ -77,13 +77,8 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
         <div>
           <small className="lump__role">{plate ? 'Home plate' : 'Plate record'}</small>
           <strong className="lump__name">{u?.name ?? (loading ? '…' : '—')}</strong>
-          {season?.called ? (
-            <p className="lump__meta">
-              {season.games} scored games · {season.called.toLocaleString()} called pitches
-            </p>
-          ) : (
-            !loading && <EmptyState size="compact">No plate-accuracy data on file for this umpire yet.</EmptyState>
-          )}
+          {/* The game count lives in the Regular season header now (Gary, 2026-10-29). */}
+          {!season?.called && !loading && <EmptyState size="compact">No plate-accuracy data on file for this umpire yet.</EmptyState>}
         </div>
       </div>
       {season?.called > 0 && (
@@ -109,8 +104,8 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
           )}
           {lean && (
             <>
-              <h4 className="lsheet__head">Zone lean</h4>
-              <div className="lump__lean" role="img" aria-label={`Zone lean: ${LEAN_TIER_LABELS[lean.tier]}`}>
+              <h4 className="lsheet__head">Strike zone</h4>
+              <div className="lump__lean" role="img" aria-label={`Strike zone: ${LEAN_TIER_LABELS[lean.tier]}`}>
                 <span className="lump__caret" style={{ left: `${leanCaretFraction(lean.z) * 100}%` }} />
                 <div className="lump__bar">
                   {LEAN_TIERS.map((t) => (
@@ -124,9 +119,10 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
           )}
           {(watchArea || zoneCells) && (
             <>
-              <h4 className="lsheet__head">Area to watch</h4>
               <div className="lump__watch">
                 <div>
+                  {/* The head rides with its text, beside the tall batter, not above an empty gap (Gary, 2026-10-29). */}
+                  <h4 className="lsheet__head">Area to watch</h4>
                   <b>{watchArea ? `${watchArea.phrase}${watchArea.hand ? ` to ${HAND[watchArea.hand]}` : ''}` : 'No clear tendency'}</b>
                   <p className="lump__meta">Batter’s view. Outlined where his misses run above the league average.</p>
                 </div>
@@ -157,10 +153,6 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
               </dl>
             </>
           )}
-          <p className="lsheet__foot">
-            {season.games} scored games
-            {u.generatedAt && ` · updated ${u.generatedAt.slice(0, 10)}`}
-          </p>
         </>
       )}
       {/* No regular-season tiles to sit beside: the postseason line stands alone. */}
@@ -173,6 +165,7 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
               <span>Date</span>
               <span>Game</span>
               <span>Accuracy</span>
+              <span>Consistency</span>
             </li>
             {hpGames.map((g) => (
               <li key={`${g.gamePk}-${g.gameNumber}`} className="lump__game">
@@ -181,9 +174,11 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
                   {/* Club marks, not abbreviations (Gary, 2026-10-29); the abbreviation stays the name. */}
                   <TeamLogo teamId={g.awayId} name={g.awayAbbr} size={20} /> @ <TeamLogo teamId={g.homeId} name={g.homeAbbr} size={20} />
                   <span className="sr-only">{g.awayAbbr} at {g.homeAbbr}</span>
+                  {mixed && (g.level ?? 'MLB') === 'AAA' && <Pill>AAA</Pill>}
                 </button>
-                {mixed && (g.level ?? 'MLB') === 'AAA' && <Pill>AAA</Pill>}
                 <b>{g.row?.called ? `${((g.row.correct / g.row.called) * 100).toFixed(1)}%` : '—'}</b>
+                {/* The game's own consistency, as the season tile reads it (consistent / judged). */}
+                <span>{g.row?.consistentCalled ? `${((g.row.consistent / g.row.consistentCalled) * 100).toFixed(1)}%` : '—'}</span>
               </li>
             ))}
           </ul>

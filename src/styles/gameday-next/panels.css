@@ -9,6 +9,8 @@
 .gdp__label { display: block; padding: var(--space-1) var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
 /* The line score as a game's score tray: the club's mark for the row, runs in the score bug's face. */
+/* The line score fills its slot, which the scorebug band beside it sizes: no empty strip under it. */
+.gdnext__slot--navigator .gdp__linescroll { height: 100%; }
 .gdp__line { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; color: var(--text-heading); }
 .gdp__line thead { height: 18px; } /* raw-value-exempt: the inning numbers' strip */
 .gdp__line thead th { font: var(--w-bold) var(--fs-label) / 1 var(--font-display); color: var(--text-heading); text-align: center; padding: 0; border-bottom: var(--bw-hair) solid var(--border-stamped); }
@@ -120,6 +122,11 @@
 /* Tonight's line sits flush on the pitch mix: no rule under it, no padding below it. */
 .gdp__tonight { border-bottom: 0; }
 .gdarm .statgrid:has(> .gdp__tonight) { padding-bottom: 0; }
+/* No gap between the pitcher's head and tonight's line: the card's room goes to its tabs below (Gary, 2026-10-29). */
+.gdarm .change:has(+ .statgrid) { padding-bottom: 0; }
+/* His cut-out photo on the card itself, no paper fill behind it (Gary, 2026-10-29). */
+.gdarm .change__shot { background: transparent; }
+.gdarm .statgrid:has(> .gdp__tonight) { padding-top: 0; }
 /* layout-exempt: the label and the pitch count, one row */
 .gdp__tonighthead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3) var(--space-1); }
 .gdp__tonighthead span { font-size: var(--fs-cell); color: var(--text-caption); }
@@ -243,3 +250,68 @@
 .gdp__tripcode.is-scored { color: var(--text-on-ink-bright); font-weight: var(--w-regular); font-size: 1.27em; } /* light on the dark fill: not bold, 10% larger than the 15px code (1.27 of the row's 13px) */
 /* The backwards K of a called third strike. */
 .gdp__kback, .gdp__trail .gdp__chip b > .gdp__kback { display: inline-block; transform: scaleX(-1); padding: 0; background: none; color: inherit; font: inherit; } /* not the chip's name span */
+
+/* The arm card's tabs under his line tonight (Gary, 2026-10-29): Arsenal, Pitch mix, Game log, Scout.
+   The body takes the card's remaining height and scrolls inside it; the page never scrolls. */
+/* layout-exempt: the card stacks so the tabs take the height left under his line */
+.gdarm { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+/* layout-exempt: tab row over a body that takes the rest */
+.gdtabs { display: flex; flex-direction: column; flex: 1; min-height: 0; border-top: var(--bw-hair) solid var(--border-hairline); }
+/* layout-exempt: four equal tabs in one row */
+.gdtabs__row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: var(--bw-heavy) solid var(--text-heading); }
+.gdtabs__tab { padding: var(--space-2) var(--space-1); border: 0; background: none; color: var(--text-caption); font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; cursor: pointer; }
+.gdtabs__tab.is-on { background: var(--text-heading); color: var(--surface-card); }
+/* layout-exempt: the view under the tabs takes the card's remaining height */
+.gdtabs__body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+/* The seal's own box adds no side padding inside a tab; the views carry their own gutters. */
+.gdtabs .statgrid { padding: 0; }
+.gdtabs .gdscroll__in { padding-right: 0; }
+.gdtabs__empty { margin: 0; padding: var(--space-3); color: var(--text-caption); font-size: var(--fs-small); }
+.gdtabs__scout { padding: var(--space-3); }
+
+/* layout-exempt: the filters over the mix table */
+.gdmix { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-2) 0; }
+/* The filter strip: two panes side by side in a clipped track; opening a filter slides the track a
+   pane to the left. */
+.gdfilt { overflow: hidden; padding: 0 var(--space-2); }
+.gdfilt__track { display: flex; width: 200%; transition: transform var(--dur-med) var(--ease-out); }
+.gdfilt.is-open .gdfilt__track { transform: translateX(-50%); }
+/* layout-exempt: one pane's buttons, wrapping in a narrow card */
+.gdfilt__pane { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--space-1); width: 50%; box-sizing: border-box; }
+.gdfilt__pane:first-child { padding-right: var(--space-2); }
+.gdfilt__pane:last-child { padding-left: var(--space-2); }
+.gdfilt button { border: var(--bw-hair) solid var(--border-stamped); border-radius: 0; background: var(--surface-card); color: var(--text-heading); cursor: pointer; transition: transform var(--dur-fast) var(--ease-out); }
+.gdfilt button:active { transform: scale(0.97); }
+/* layout-exempt: a filter's name over its choice */
+.gdfilt__cat { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1 1 0; min-width: 0; padding: var(--space-1) var(--space-1h); } /* raw-value-exempt: name hugs its choice */
+.gdfilt__cat small { color: var(--text-caption); font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.gdfilt__cat b { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); text-transform: uppercase; }
+.gdfilt__cat.is-set { background: var(--text-heading); color: var(--surface-card); }
+.gdfilt__cat.is-set small { color: inherit; }
+.gdfilt__reset, .gdfilt__back, .gdfilt__opt { padding: var(--space-1) var(--space-1h); font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.gdfilt__reset { flex-basis: 100%; border-style: dashed; color: var(--text-caption); }
+.gdfilt__back { border-color: transparent; background: none; color: var(--text-caption); }
+.gdfilt__opt.is-on { background: var(--text-heading); color: var(--surface-card); }
+@media (prefers-reduced-motion: reduce) { .gdfilt__track, .gdfilt button { transition: none; } }
+:root[data-motion='reduced'] .gdfilt__track, :root[data-motion='reduced'] .gdfilt button { transition: none; }
+.gdmix__table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.gdmix__table th { padding: var(--space-1) var(--space-2); border-bottom: var(--bw-heavy) solid var(--text-heading); color: var(--text-caption); font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; text-align: right; }
+.gdmix__table td { padding: var(--space-1h) var(--space-2); border-bottom: var(--bw-hair) solid var(--border-hairline); text-align: right; }
+.gdmix__table th:first-child, .gdmix__table td:first-child { text-align: left; }
+/* Each pitch's row carries its share as a soft bar in the pitch's colour behind the name. */
+.gdmix__table tbody td.gdmix__name { background: linear-gradient(to right, color-mix(in srgb, var(--pitch, currentColor) 22%, transparent) var(--share, 0%), transparent var(--share, 0%)); font-family: var(--font-display); font-weight: var(--w-bold); text-transform: uppercase; }
+.gdmix__dot { display: inline-block; width: 8px; height: 8px; margin-right: var(--space-1h); border-radius: 50%; background: var(--pitch, currentColor); } /* raw-value-exempt: the pitch dot */
+.gdmix__table tfoot td { border-bottom: 0; color: var(--text-caption); font-size: var(--fs-cell); }
+
+.gdlog { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.gdlog th { padding: var(--space-1h) var(--space-1); color: var(--text-caption); font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; text-align: right; }
+/* The column heads hold at the top while the season scrolls under them. */
+.gdlog thead th { position: sticky; top: 0; z-index: 1; background: var(--surface-card); }
+.gdlog td { padding: var(--space-1h) var(--space-1); border-top: var(--bw-hair) solid var(--border-hairline); text-align: right; }
+.gdlog th:first-child, .gdlog td:first-child { padding-left: var(--space-3); text-align: left; }
+.gdlog th:nth-child(2), .gdlog td:nth-child(2), .gdlog td:nth-child(3) { text-align: left; }
+.gdlog tr.is-other td { background: var(--surface-inset); color: var(--text-caption); }
+.gdlog__level { display: block; font-size: var(--fs-cell); }
+.gdlog .gdlog__at { width: 1em; padding-right: 0; color: var(--text-caption); }
+.gdlog th:last-child, .gdlog td:last-child { padding-right: var(--space-3); }
+.gdlog__opp img { display: block; }

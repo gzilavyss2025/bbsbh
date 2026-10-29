@@ -1,3 +1,4 @@
+import { CountUp } from '../../../../components/charts/CountUp.jsx'
 import { useState } from 'react'
 import { fetchAtBatTracking } from '../../../../api/savant/gameFeed.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
@@ -19,7 +20,7 @@ export function SavantFacts({ gamePk, sportId, playId }) {
       {facts.map(([label, value, unit]) => (
         <div key={label} className="bflight__fact">
           <p className="bflight__factlabel">{label}</p>
-          <p className="bflight__factvalue">{value}{unit && <span className="bflight__unit">{unit}</span>}</p>
+          <p className="bflight__factvalue"><CountUp value={value} />{unit && <span className="bflight__unit">{unit}</span>}</p>
         </div>
       ))}
     </div>

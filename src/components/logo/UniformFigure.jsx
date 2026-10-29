@@ -19,7 +19,7 @@ export function UniformFigure({ urls, label, onError }) {
   )
   return (
     <span className="ufig">
-      {img(urls.pants, '')}
+      {urls.pants && img(urls.pants, '')}
       {img(urls.jersey, label)}
     </span>
   )

@@ -121,6 +121,21 @@ export function batterFigureUrls(assets, hand = 'right') {
   return jersey && pants ? { jersey, pants } : null
 }
 
+// MLB Gameday's own batter when tonight's uniform is not posted (Gary, 2026-10-29: the Gameday
+// figure in every case, never the drawn sprite): the club's usual "immortal" figure for its home or
+// road set, jersey and pants in one 496x1050 image (the same canvas as the posted pieces,
+// docs/gameday-assets.md), then MLB's generic batter. Each is { jersey, pants: null }, the shape
+// batterFigureUrls answers, in the order to try.
+const IMMORTAL_BASE = 'https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/batters/immortal'
+export function fallbackFigureUrls(teamId, club, hand = 'right') {
+  const stance = hand === 'left' ? 'left' : 'right'
+  const set = club === 'away' ? 'away' : 'home'
+  return [
+    teamId != null && { jersey: `${IMMORTAL_BASE}/${stance}/${teamId}-${set}.png`, pants: null },
+    { jersey: `${IMMORTAL_BASE}/${stance}/GENERIC-home.png`, pants: null },
+  ].filter(Boolean)
+}
+
 // A club's HOME batting set from fetchTeamUniformCatalog's answer: the jersey
 // whose text says "Home", plus the pants whose text matches it ("Brewers Home
 // Cream Jersey" → "Brewers Home Cream Pants"). `[jersey, pants]` in the shape

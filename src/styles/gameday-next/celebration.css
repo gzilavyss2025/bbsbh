@@ -14,6 +14,14 @@ body:has(.gdcelebration) .bigplay { display: none; }
    so no bars sit above and below it on a taller stage. */
 .gdcelebration .ballpark { width: 100%; height: 100%; aspect-ratio: auto; }
 .gdcelebration .ballpark__canvas { object-fit: cover; }
-/* The celebrating club's mark sits over the stands at the scene's upper left, scaled with the stage. */
-.gdcelebration__club { position: absolute; z-index: 1; left: 9%; top: 16%; width: min(24cqw, 30cqh, 112px); aspect-ratio: 1; pointer-events: none; }
+/* The celebrating club's mark heads the caption (Gary, 2026-10-29): it sits on the caption's left edge
+   (ballpark.css: left 5%, bottom 8%), just above the headline and the name, sized from the stage's
+   height, so it travels with the words at every stage size instead of floating over a cropped crowd. */
+.gdcelebration__club { position: absolute; z-index: 1; left: 5%; bottom: calc(8% + var(--fs-title-lg) * 1.2 + var(--fs-small) * 1.4 + var(--space-3));
+  width: clamp(40px, 20cqh, 76px); aspect-ratio: 1; pointer-events: none; } /* raw-value-exempt: the mark's smallest and largest */
 .gdcelebration__club .teamlogo { width: 100% !important; height: 100% !important; object-fit: contain; }
+/* The mark waits for the scene (Gary, 2026-10-29): hidden until the celebration's art has drawn its
+   first frame (.ballpark[data-ready]), then fades in with it, never alone on an empty stage. */
+.gdcelebration__club { opacity: 0; transition: opacity var(--dur-med) var(--ease-out); }
+.gdcelebration:has(.ballpark[data-ready='true']) .gdcelebration__club { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .gdcelebration__club { transition: none; } }
