@@ -33,3 +33,16 @@ test('the order keeps every at-bat, a substitute with his slot', () => {
 test('the order names no one before the half is reachable', () => {
   assert.deepEqual(orderAt(feed, 'home', 9, 'bottom', 0, []), [])
 })
+
+// 823035 top 6: Jackson Chourio (694192) pinch-hits for Sal Frelick (686217), announced at atBatIndex 42.
+test('an announced pinch hitter takes his slot in the order before he bats', () => {
+  const f = JSON.parse(readFileSync(new URL('./fixtures/game-823035.gameday.json', import.meta.url), 'utf8'))
+  let step = 1
+  let cut = cutAt(f, 6, 'top', step)
+  while (!cut.hitters.includes(694192)) cut = cutAt(f, 6, 'top', ++step)
+  const rows = orderAt(f, 'away', 6, 'top', 9, cut.cards, cut.hitters)
+  const row = rows.find((r) => r.id === 694192)
+  assert.equal(row?.last, 'Chourio')
+  assert.equal(row.position, 'PH')
+  assert.equal(rows.some((r) => r.id === 686217), false)
+})
