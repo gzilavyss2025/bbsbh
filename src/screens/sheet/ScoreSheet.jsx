@@ -45,7 +45,7 @@ export function ScoreSheet({ model }) {
 function WriteIn({ label, value = '', span = 1 }) {
   return (
     <div className={`ps-writein ps-writein--${span}`}>
-      <span className="ps-writein__label">{label}</span>
+      <span className="ps-writein__label t-label t-label--nocaps">{label}</span>
       <span className="ps-writein__line">{value}</span>
     </div>
   )
@@ -85,7 +85,7 @@ function SheetHead({ model }) {
         <span className="t-label printsheet__crewhead">Umpires</span>
         {model.crew.map((u) => (
           <span key={u.role} className="ps-ump">
-            <span className="ps-ump__role">{u.role}</span>
+            <span className="ps-ump__role t-label t-label--nocaps">{u.role}</span>
             <span className="ps-ump__name">{u.name}</span>
           </span>
         ))}
@@ -98,11 +98,11 @@ function SheetHead({ model }) {
 function ClubBlock({ club }) {
   return (
     <section className="printsheet__block">
-      <h3 className="printsheet__clubline">
+      <h3 className="printsheet__clubline t-label t-label--nocaps">
         <span className="printsheet__clubname">{club.name || club.label}</span>
         <span className="printsheet__clubside">{club.label}</span>
         <span className="ps-clubfact">
-          <span className="ps-clubfact__label">Mgr</span>
+          <span className="ps-clubfact__label t-label t-label--nocaps">Mgr</span>
           <span className="ps-clubfact__line">{club.manager}</span>
         </span>
         {/* The pitcher this order bats against, which is the OTHER club's
@@ -110,7 +110,7 @@ function ClubBlock({ club }) {
             pitching line. Blank when nobody has announced one (or when the feed
             never carries probables, as a MiLB one often doesn't). */}
         <span className="ps-clubfact">
-          <span className="ps-clubfact__label">Pitching</span>
+          <span className="ps-clubfact__label t-label t-label--nocaps">Pitching</span>
           <span className="ps-clubfact__line">
             {club.facing ? `${club.facing.name}${club.facing.hand ? ` (${club.facing.hand})` : ''}` : ''}
           </span>

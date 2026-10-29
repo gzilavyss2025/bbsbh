@@ -68,7 +68,7 @@ test('other commands are not', () => {
   for (const c of [
     'npm test',
     'npm run lint',
-    'npm run dev:2',
+    'npm run dev -- --port 5172',
     'npx playwright install chromium',
     'node e2e/shots/poster-shot.mjs /08122026/milsd/preview out.png',
     'grep -rn e2e docs',

@@ -73,7 +73,7 @@ sessions".
 checklist file, end with `Blocked on me` / `Changed` / `Found`, and mark what you could
 not confirm. Detail: `docs/development.md`, "Long runs".
 
-**Local sessions** (worktree, reserved dev ports `dev:2` to `dev:5`): `docs/development.md`,
+**Local sessions** (worktree, a second dev server on `npm run dev -- --port N`): `docs/development.md`,
 "Local sessions only".
 
 ## Commands

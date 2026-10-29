@@ -160,11 +160,6 @@
   height: var(--space-6);
   background: var(--bg-page);
   border-top: 0;
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 .phcard__rowk {

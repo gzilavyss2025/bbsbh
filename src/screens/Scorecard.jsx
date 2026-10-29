@@ -228,7 +228,7 @@ function ClockField({ label, time = '', stacked = false }) {
 function DecisionLine({ label, id, name, note }) {
   return (
     <div className="sc-decision">
-      <span className="sc-decision__label">{label}</span>
+      <span className="sc-decision__label t-label t-label--nocaps">{label}</span>
       <span className="sc-decision__line">
         {name ? (
           <span className="sc-decision__value">

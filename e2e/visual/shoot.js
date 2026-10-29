@@ -84,7 +84,13 @@ function fulfilment(entry) {
 // Open `route` on `origin` and bring it to the state it is shot in. Throws if
 // the page never gets there.
 export async function visit(page, origin, route) {
-  await freeze(page)
+  await freeze(page, route.now ?? FROZEN_NOW)
+  if (route.html) {
+    const at = new URL(route.path, origin)
+    await page.route((url) => url.origin === at.origin && url.pathname === at.pathname, (r) =>
+      r.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: route.html() }),
+    )
+  }
   await page.goto(withNoIntro(`${origin}${route.path}`))
   await routeRendered(page)
   await settle(page, route.ready)
@@ -126,11 +132,12 @@ async function stableShot(page, target, mask) {
 }
 
 // A page is frozen before it loads. DATA comes from the recording (above).
-// TIME: the clock is fixed at FROZEN_NOW, so "today" is the same on both
+// TIME: the clock is fixed at the route's `now` (FROZEN_NOW unless the route
+// names another), so "today" is the same on both
 // servers. CHANCE: Math.random is a seeded generator, so a random pick is the
 // same on both servers.
-async function freeze(page) {
-  await page.clock.setFixedTime(new Date(FROZEN_NOW))
+async function freeze(page, now) {
+  await page.clock.setFixedTime(new Date(now))
   await page.addInitScript(() => {
     // mulberry32, seed 1177.
     let a = 1177

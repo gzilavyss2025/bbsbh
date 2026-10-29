@@ -269,16 +269,11 @@ the page.
 
 Do you run more than one dev server at a time? Ports `5173` (dev) and `4173`
 (preview) use `strictPort`, so a second server on the same port fails instead of
-colliding silently. Take the next numbered slot:
+colliding silently. Give the second one its own port:
 
 ```bash
-npm run dev:2     # 5172 — if 5173 is taken
-npm run dev:3     # 5171
-npm run dev:4     # 5170
-npm run dev:5     # 5169
+npm run dev -- --port 5172
 ```
-
-Preview does the same: `preview:2..5` → `4172..4169`.
 
 ### Commands
 

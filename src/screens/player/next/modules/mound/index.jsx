@@ -53,7 +53,7 @@ function MoundCard({ view, once }) {
             options={view.tabs.map((t) => ({ value: t, label: TAB_LABEL[t] }))}
           />
         )}
-        {view.roleWord !== TAB_LABEL[tab] && <span className="mound__role">{view.roleWord}</span>}
+        {view.roleWord !== TAB_LABEL[tab] && <span className="mound__role t-label t-label--nocaps">{view.roleWord}</span>}
       </div>
       <Track v={v} />
       <Calendar chart={v.chart} />

@@ -150,7 +150,7 @@ function PlayerHoverCardBody({ data, detail }) {
           <tr>
             <th scope="col"><span className="sr-only">Split</span></th>
             {data.fields.map((f) => (
-              <th key={f.k} scope="col" className="phcard__colk">{f.k}</th>
+              <th key={f.k} scope="col" className="phcard__colk t-label t-label--nocaps">{f.k}</th>
             ))}
           </tr>
         </thead>
@@ -182,7 +182,7 @@ function HoverDetail({ detail }) {
         <tr>
           <th scope="col"><span className="sr-only">Split</span></th>
           {columns.map((c) => (
-            <th key={c} scope="col" className="phcard__colk">{c}</th>
+            <th key={c} scope="col" className="phcard__colk t-label t-label--nocaps">{c}</th>
           ))}
         </tr>
       </thead>

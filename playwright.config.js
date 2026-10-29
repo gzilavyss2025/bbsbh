@@ -1,5 +1,4 @@
 import { defineConfig, devices } from '@playwright/test'
-import { devScript } from './e2e/fixtures/dev-script.js'
 
 // Verification harness for manually exercising the app (there is no CI test
 // suite — see CLAUDE.md). `npm run e2e` (or `npx playwright test <file>`)
@@ -8,8 +7,8 @@ import { devScript } from './e2e/fixtures/dev-script.js'
 // "start the dev server / wait for it / remember to kill it" round trip.
 //
 // E2E_PORT exists because `reuseExistingServer` plus a hardcoded 5173 is a trap
-// in this repo's multi-worktree workflow (CLAUDE.md: agents work in parallel
-// worktrees on the reserved 5173/5172/5171/5170/5169 band). A second worktree
+// in this repo's multi-worktree workflow (agents may run parallel worktrees,
+// each with its own dev server port). A second worktree
 // running `npm run e2e` finds ANOTHER worktree's server already on 5173, reuses
 // it, and silently verifies that branch's code instead of its own — the specs
 // pass or fail for reasons that have nothing to do with the diff under test.
@@ -17,11 +16,10 @@ import { devScript } from './e2e/fixtures/dev-script.js'
 //
 //   E2E_PORT=5172 npx playwright test e2e/invariants/logbook-stamp.spec.js
 //
-// The dev script it launches follows suit, so a cold run starts a server on the
-// same port rather than colliding on 5173 (vite's strictPort would refuse).
+// The dev server it launches follows suit (`npm run dev -- --port`), so a cold
+// run starts a server on the same port rather than colliding on 5173 (vite's
+// strictPort would refuse).
 const PORT = Number(process.env.E2E_PORT) || 5173
-const DEV_SCRIPT = devScript(PORT)
-
 export default defineConfig({
   testDir: './e2e',
   // Warms the cold dev server before the first test; see e2e/global-setup.js.
@@ -61,7 +59,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npm run ${DEV_SCRIPT}`,
+    command: `npm run dev -- --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: true,
     timeout: 30_000,

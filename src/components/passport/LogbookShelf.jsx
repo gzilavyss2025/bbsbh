@@ -84,7 +84,7 @@ export function LogbookShelf({
             <PassportCover book={book} placing={Boolean(placing)} onOpen={() => onOpenBook(book)} />
             <button
               type="button"
-              className="shelf__edit"
+              className="shelf__edit t-label t-label--nocaps"
               onClick={() => setManaging(book)}
             >
               Settings

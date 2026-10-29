@@ -73,11 +73,6 @@
 }
 .sc-sheet__linepos {
   grid-area: pos;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 /* Each man's line is two lines tall in the compact rail, so his AB/H/R/RBI
    take the same height and stay level with HIS name when a substitute's line

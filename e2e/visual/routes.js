@@ -1,3 +1,7 @@
+import { pageBySlug } from '../../src/copy/landing/pages/index.js'
+import { renderPage } from '../../src/copy/landing/render.js'
+import { resolvePage } from '../../src/copy/landing/schema.js'
+
 // The pages the screenshot suite covers (issue #1177), and how each one is shot.
 //
 // WHY THESE PAGES. The issue asks for /design-lab plus about ten routes that
@@ -25,6 +29,13 @@
 // for dates computed from this clock, and each run records what it asks for.
 export const FROZEN_NOW = '2026-09-23T11:00:00-05:00'
 
+// A second clock, for the pages the September one cannot reach (#2525): the World
+// Series draws only on postseason dates, and a level's offseason page only once its
+// season is over. 2026-10-25, 11:00 in Chicago, is the off day between Games 2 and 3
+// (Rays at Brewers): no game that day, so no score slot, and the hero ends on the
+// next game. A route takes it with `now: SERIES_NOW`; every other route keeps FROZEN_NOW.
+export const SERIES_NOW = '2026-10-25T11:00:00-05:00'
+
 const ANCHOR = '/07072026/milstl-2'
 
 // Parts of a page that move on their own, painted over in every shot: the
@@ -44,7 +55,10 @@ export const HIDDEN = ['.sitefooter__build-link']
 // Each route: `name` (the start of each shot's file name), `path`, and `shots`.
 // A shot with no `selector` is the full page; with one, it is that element
 // alone. `ready` is a selector the page draws once its data has arrived.
-// `prepare` runs after the page settles and before the shots. `offShot` names
+// `prepare` runs after the page settles and before the shots. `now` is the
+// route's frozen clock (FROZEN_NOW when absent). `html`, when set, answers the
+// route's own address with that document instead of the dev server (the /learn
+// guides, which only Vercel serves: api/page.js). `offShot` names
 // requests that only feed parts of the page no shot shows, so the recording not
 // holding one is not a failure.
 export const ROUTES = [
@@ -110,4 +124,50 @@ export const ROUTES = [
     shots: [{ name: 'page' }],
   },
   { name: 'situational-records', path: '/situational-records', shots: [{ name: 'page' }] },
+  {
+    // The World Series home on the slate (#2525): the hero, which ends on the
+    // next game's own card, and the Film room, whose cards end on a Box score door.
+    name: 'ws-home',
+    path: '/10252026',
+    now: SERIES_NOW,
+    ready: '.ww-film__grid',
+    shots: [
+      { name: 'hero', selector: '.ww-hero' },
+      { name: 'film-room', selector: '.ww-film' },
+    ],
+  },
+  {
+    // The live series page: the hero keeps its next-game door (`.ww-hero__next`),
+    // the door #2522's `.door--inline` change underlined by mistake.
+    name: 'ws-series',
+    path: '/postseason/2026-worldseries-139-158?d=2026-10-25',
+    now: SERIES_NOW,
+    ready: '.ww-hero__next',
+    shots: [
+      { name: 'hero', selector: '.ww-hero' },
+      { name: 'film-room', selector: '.ww-film' },
+    ],
+  },
+  // Every club's pre-game notes, a long table of outward PDF links. It reads a local file.
+  { name: 'game-notes', path: '/game-notes', ready: 'table', shots: [{ name: 'page' }] },
+  {
+    // A level's offseason page (ADR-0079): its season is over by the Series clock.
+    name: 'offseason-aaa',
+    path: '/aaa',
+    now: SERIES_NOW,
+    ready: '.oseason',
+    shots: [{ name: 'page' }],
+  },
+  {
+    // One /learn guide, drawn by the same function Vercel runs (api/page.js),
+    // with no stored copy overrides. Its stylesheet, /learn.css, comes from
+    // each server's own tree, so a change to it shows here. The HTML itself is
+    // drawn once, from this tree, and handed to both servers: a markup or copy
+    // change in src/copy/landing does NOT show as a diff on this route.
+    name: 'learn-guide',
+    path: '/learn/score-a-baseball-game',
+    html: () => renderPage(resolvePage(pageBySlug('score-a-baseball-game'), {})),
+    ready: 'article',
+    shots: [{ name: 'page' }],
+  },
 ]
