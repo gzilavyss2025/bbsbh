@@ -252,7 +252,8 @@ async function buildPlayerVs(personId, group, teamAbbr) {
       if (POST_TYPES.has(s.gameType)) b.hasPost = true
       addGame(into, st, isPitcher)
       // Track the latest meeting for the last-game line.
-      if (!b.last || date > b.last.date) {
+      // The last-game line stays regular season, as the player page and the callout read it.
+      if (!POST_TYPES.has(s.gameType) && (!b.last || date > b.last.date)) {
         b.last = {
           date,
           home: Boolean(s.isHome),
@@ -271,10 +272,12 @@ async function buildPlayerVs(personId, group, teamAbbr) {
     const line = (t) => (isPitcher
       ? { g: t.g, ip: outsToIp(t.outs), era: eraText(t.er, t.outs), k: t.k, bb: t.bb }
       : hitterCar(t))
-    // A club met only in October has no regular-season line: `car` stays an empty one, `all` holds it.
-    const car = line(s)
+    // A club met only in October has no regular-season line: no `car` (its readers say "no meetings"),
+    // only `all`. `last` is regular season only, so it is null there too.
+    const car = s.g > 0 ? line(s) : null
     const both = Object.fromEntries(Object.keys(s).map((k) => [k, s[k] + b.post[k]]))
-    vs[oppId] = b.hasPost ? { car, all: line(both), last: b.last } : { car, last: b.last }
+    const entry = { ...(car ? { car } : {}), ...(b.hasPost ? { all: line(both) } : {}), last: b.last }
+    if (car || b.hasPost) vs[oppId] = entry
   }
   return vs
 }

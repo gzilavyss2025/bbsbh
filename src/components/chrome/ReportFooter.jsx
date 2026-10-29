@@ -1,5 +1,4 @@
 import { FooterDirectory, FooterLegal } from './FooterParts.jsx'
-import { useNav } from '../../lib/nav.js'
 import { PAGE_GROUPS, FOOTER_TRAIL } from '../../lib/reportPages.js'
 
 // The directory + legal blurb shared by every standalone report page
@@ -17,13 +16,11 @@ import { PAGE_GROUPS, FOOTER_TRAIL } from '../../lib/reportPages.js'
 // SiteFooter, and not folded into FooterParts) so scripts/check-report-pages.mjs
 // still catches drift; see that script before adding a third copy of this line.
 export function ReportFooter() {
-  const navigate = useNav()
   return (
     <footer className="sitefooter">
       <FooterDirectory
         groups={PAGE_GROUPS}
         trail={FOOTER_TRAIL}
-        onEverything={() => navigate('/more')}
       />
       <FooterLegal />
     </footer>

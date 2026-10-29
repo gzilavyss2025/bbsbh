@@ -90,9 +90,12 @@ function gameSoFar(h, f, Headshot, line, PlayerLink) {
 // man's (a matchup keyed to the hitter about the pitcher's slider) carries that other man's id, not his.
 const VERB = /^(Has|Is|Was|Hits|Throws|Leads|Needs|Pitching|Working|Batting|Averaging|Faced|Faces|Gets|Got|Owns|Went|Made|Makes)\b/
 const MATCHUP = /^matchup/
+// Already names him: his surname as a word, not a month or a place before a number ("since May 3").
+const reEscape = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const namesHim = (text, last) => new RegExp(`(^|[^\\p{L}])${reEscape(last)}(?![\\p{L}])(?!\\s*\\d)`, 'u').test(text)
 const named = (n, nameOf) => {
   const last = n.personId != null ? nameOf(n.personId) : null
-  if (!last || n.text.includes(last)) return n.text
+  if (!last || namesHim(n.text, last)) return n.text
   if (n.kind === 'cgShutout') return `${last} has ${n.text}`
   let t = n.text.replace(/^His /, `${last}'s `)
   if (t === n.text && VERB.test(t)) t = `${last} ${/^[A-Z]\w*ing\b/.test(t) ? 'is ' : ''}${t[0].toLowerCase()}${t.slice(1)}` // caps-js-exempt: the verb now follows his name; the page shouts it anyway

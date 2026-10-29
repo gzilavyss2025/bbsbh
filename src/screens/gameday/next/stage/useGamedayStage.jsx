@@ -61,13 +61,12 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   // until the next tap; it is one the reader already revealed.
   // Under the checkpoint a chip's tap lifts it for that at-bat's batting view; Next puts it back (`over`).
   const [over, setOver] = useState(null)
-  const lifted = covered && over != null
+  const lifted = covered && over != null // a stale `over` is inert once the checkpoint goes; Next clears it
   const replaying = lifted ? over : typeof cur.shown === 'number' && cur.run ? cur.shown : null
   // A held ending scene's own Replay plays under the checkpoint: it brings no batting view over it.
   const replayed = replaying != null && (lifted || !covered) ? feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === replaying)?.matchup?.batter : null
   const batter = replayed?.id ? { id: replayed.id, last: gd?.players?.[`ID${replayed.id}`]?.lastName ?? '' }
     : restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered: covered && !shelved, open })
-  if (over != null && !covered) setOver(null) // the checkpoint has gone: nothing left to lift
   const [hidden, setHidden] = useState(() => zoneMapDismissed(pk))
   const { data: zm } = useAsync(
     async () => (hidden || !batter ? null : { id: batter.id, zones: (await fetchBatterZones(batter.id, gd.game.season, gd.teams?.home?.sport?.id ?? 1, date))?.zones }),

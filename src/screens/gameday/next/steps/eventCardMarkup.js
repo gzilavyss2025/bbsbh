@@ -38,7 +38,9 @@ function card(h, feed, inning, half, count, sub) {
   const pos = ev?.position?.abbreviation ?? inP?.primaryPosition?.abbreviation ?? ''
   const hand = pos === 'P' ? (inP?.pitchHand?.code ? `${inP.pitchHand.code}HP` : '') : (inP?.batSide?.code ? `Bats ${inP.batSide.code}` : '')
   // A pitcher's hand says his position ("LHP"), so the P is left out.
-  const facts = inP && [inP.primaryNumber, pos !== 'P' && pos, hand].filter(Boolean).join(' · ')
+  // The number he wears in this game (the boxscore's), else his profile's.
+  const worn = ['away', 'home'].map((t) => feed.liveData?.boxscore?.teams?.[t]?.players?.[`ID${inId}`]?.jerseyNumber).find(Boolean)
+  const facts = inP && [worn ?? inP.primaryNumber, pos !== 'P' && pos, hand].filter(Boolean).join(' · ')
   return h('div', { className: 'gdevent', role: 'status' }, box && scorebookBox(h, box),
     h('div', { className: 'gdevent__txt' }, h('span', { className: 'gdevent__kind' }, (kind ?? '').replace(/\s+(2B|3B|Home)$/i, '')), h('span', null, withFacts(h, unlabeled(text ?? '', kind), inP?.fullName, facts))))
 }

@@ -1209,7 +1209,7 @@ test('C5: each block keeps its own margin and inset, from a rule that loads afte
     ['22-box-score-tables.css', '.playerline', 'padding', 'var(--space-2)'],
     ['22-box-score-tables.css', '.playerline', 'display', 'flex'],
     ['23-box-score-detail.css', '.bs__info', 'padding', 'var(--space-3) var(--space-3h)'],
-    ['23-box-score-detail.css', '.bs__totalsCard', 'padding', 'var(--space-2h) var(--space-3h) var(--space-3)'],
+    ['23-box-score-detail.css', '.bs__totalsCard', 'padding', '0'], // to the card's edges (Gary, 2026-10-28)
     ['23-box-score-detail.css', '.bs__board', 'padding', '0'], // the table runs to the card's edges (Gary, 2026-10-28)
   ]
   for (const [css, sel, prop, value] of kept) {

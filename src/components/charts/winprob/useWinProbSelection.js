@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { focusInput, followLatest, moveSnaps, nearestWinProbEvent, snapToMarker } from './explore.js'
+import { focusInput, followLatest, moveSnaps, nearestWinProbEvent, snapToMarker, touchIntent } from './explore.js'
 
 // Which plotted play WinProbChart shows, and the slider's pointer and key
 // handlers. `plot` is the chart's viewBox geometry: { W, H, left, width }.
@@ -33,6 +33,8 @@ export function useWinProbSelection(count, plot, markers = []) {
   const rectRef = useRef(null)
   // When the last pointer down on the slider happened; onFocus reads and clears it.
   const downAtRef = useRef(null)
+  // A touch that has not yet shown whether it is a tap, a sideways scrub or a page scroll.
+  const touchRef = useRef(null)
   useEffect(() => {
     const drop = () => { rectRef.current = null }
     window.addEventListener('scroll', drop, { capture: true, passive: true })
@@ -53,9 +55,9 @@ export function useWinProbSelection(count, plot, markers = []) {
     select(snap ? snapToMarker(fraction, count, markers, SNAP / plot.width) : nearestWinProbEvent(fraction, count))
   }
 
-  // A mouse or pen selects at once, and so does a finger (Gary, 2026-10-28): a tap lands on the play
-  // under it and a drag anywhere on the chart scrubs, in any direction (touch-action: none, winprob.css).
-  // The page scrolls from outside the chart.
+  // A mouse or pen selects at once. A finger (Gary, 2026-10-28): a tap lands on the play under it, a
+  // sideways drag scrubs from its first few pixels, and a mostly vertical one scrolls the page
+  // (touch-action: pan-y, winprob.css). A finger never snaps to a nearby marker: it is too wide.
   const svgHandlers = {
     onKeyDown: (e) => {
       const next = { ArrowLeft: activeIdx - 1, ArrowRight: activeIdx + 1,
@@ -74,15 +76,36 @@ export function useWinProbSelection(count, plot, markers = []) {
       rectRef.current = null
       downAtRef.current = e.timeStamp
       setInput('pointer')
+      if (e.pointerType === 'touch') {
+        touchRef.current = { id: e.pointerId, x: e.clientX, y: e.clientY, drag: false }
+        return
+      }
       e.currentTarget.focus({ preventScroll: true })
       e.currentTarget.setPointerCapture(e.pointerId)
-      // A finger is wide: it lands on the play under it rather than snapping to a nearby marker.
-      selectAtPointer(e, e.pointerType !== 'touch')
+      selectAtPointer(e, true)
     },
     onPointerMove: (e) => {
+      const t = touchRef.current
+      if (t && t.id === e.pointerId) {
+        if (!t.drag) {
+          const intent = touchIntent(e.clientX - t.x, e.clientY - t.y)
+          if (intent === 'scroll') { touchRef.current = null; return }
+          if (intent === 'pending') return
+          t.drag = true
+          e.currentTarget.setPointerCapture(e.pointerId)
+        }
+        selectAtPointer(e)
+        return
+      }
       const captured = e.currentTarget.hasPointerCapture(e.pointerId)
       if (e.pointerType === 'mouse' || captured) selectAtPointer(e, moveSnaps(e.pointerType, captured))
     },
+    onPointerUp: (e) => {
+      const t = touchRef.current
+      if (t && t.id === e.pointerId && !t.drag) selectAtPointer(e)
+      touchRef.current = null
+    },
+    onPointerCancel: () => { touchRef.current = null },
 
   }
 

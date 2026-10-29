@@ -93,9 +93,15 @@ function HeroTrail({ children }) {
   useEffect(() => {
     const el = ref.current
     if (!el || typeof MutationObserver === 'undefined') return undefined
-    const end = () => { el.scrollLeft = el.scrollWidth }
-    end()
-    const mo = new MutationObserver(end)
+    // Only a new chip moves it: a re-render inside an existing chip leaves a reader's scroll-back alone.
+    const chips = () => el.querySelectorAll('.gdp__chip').length
+    let seen = chips()
+    el.scrollLeft = el.scrollWidth
+    const mo = new MutationObserver(() => {
+      const n = chips()
+      if (n > seen) el.scrollLeft = el.scrollWidth
+      seen = n
+    })
     mo.observe(el, { childList: true, subtree: true })
     return () => mo.disconnect()
   }, [])

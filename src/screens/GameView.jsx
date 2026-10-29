@@ -154,10 +154,10 @@ export function GameView({ game, section, onSection }) {
   // After the final, once this box score is open (its reveal reports it: `boxShown`), the line counts
   // this game too (Gary, 2026-10-28). The winner is read only then, so the lineup pages and a sealed
   // box score keep the count from before the game.
+  // The box score's reveal hands up the winner itself (BoxScore's `Opened`); nothing here reads a score.
   const [boxShown, setBoxShown] = useState(null)
-  const onBoxOpened = useCallback(() => setBoxShown(feed?.gamePk ?? null), [feed?.gamePk])
-  const ls = step === 3 && boxShown != null && boxShown === feed?.gamePk && feed?.gameData?.status?.codedGameState === 'F' ? feed.liveData?.linescore?.teams : null
-  const winnerId = ls && ls.home?.runs !== ls.away?.runs ? feed.gameData.teams[ls.home.runs > ls.away.runs ? 'home' : 'away']?.id : null
+  const onBoxOpened = useCallback((winner) => setBoxShown({ pk: feed?.gamePk ?? null, winner }), [feed?.gamePk])
+  const winnerId = step === 3 && boxShown?.pk === feed?.gamePk ? boxShown.winner : null
   const seriesStatus = gameStatusAfter(seriesHit?.series, seriesHit?.gameNumber, winnerId)
   const routeLink = useRouteLink()
 

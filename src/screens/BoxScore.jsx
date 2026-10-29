@@ -92,10 +92,17 @@ function NumPos({ num, pos }) {
 // nothing score-revealing is in the DOM until the user taps to reveal, exactly
 // like every half-inning seal. This holds even for a deep link straight to the
 // box score, so the card's "Box score" shortcut can't spoil either.
-// Mounted only inside the reveal render: it fires once the box score is shown, never before.
-function Opened({ onOpened }) {
-  useEffect(() => { onOpened() }, [onOpened])
+// Mounted only inside the reveal render: it fires once the box score is shown, never before, and hands
+// up the final's winner (a club id, or null for a tie or a game not final), read here inside the seal.
+function Opened({ onOpened, winnerId }) {
+  useEffect(() => { onOpened(winnerId) }, [onOpened, winnerId])
   return null
+}
+const finalWinnerId = (feed) => {
+  if (feed?.gameData?.status?.codedGameState !== 'F') return null
+  const ls = feed.liveData?.linescore?.teams
+  if (!ls || ls.home?.runs === ls.away?.runs) return null
+  return feed.gameData.teams?.[ls.home.runs > ls.away.runs ? 'home' : 'away']?.id ?? null
 }
 
 export function BoxScore({
@@ -182,7 +189,7 @@ export function BoxScore({
           return (
             <>
             {/* Tells GameView the box score is open, so its series line may count this game. */}
-            {onOpened && <Opened onOpened={onOpened} />}
+            {onOpened && <Opened onOpened={onOpened} winnerId={finalWinnerId(feed)} />}
             <BoxScoreBody
               stampFacts={r.stampFacts}
               feed={feed}
