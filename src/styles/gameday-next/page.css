@@ -65,6 +65,9 @@
 .gdnext__slot--hero { --gd-area: hero; background: none; border: 0; }
 .gdnext__slot--trail { --gd-area: trail; }
 .gdnext__slot--battingOrder { --gd-area: battingOrder; }
+/* The frame has no side gutter, so the two edge columns drop their outer border: a dark line on the window's edge (Gary, 2026-10-29), as the rails do. */
+.gdnext__slot--battingOrder { border-left: 0; }
+.gdnext__slot--arm { border-right: 0; }
 .gdnext__slot--reference { --gd-area: reference; }
 .gdnext__slot--arm { --gd-area: arm; overflow-y: auto; } /* the one panel taller than its column on a short window: it scrolls inside its own box, the frame never does */
 .gdnext__slot--eventLog { --gd-area: eventLog; }

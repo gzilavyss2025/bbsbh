@@ -71,14 +71,14 @@ const heroProps = { feed: F824, inning: 2, half: 'top', mark: 1, stepAtBatIndex:
 const SealBox = ({ children }) => children()
 const html = (props) => renderToStaticMarkup(heroMarkup(createElement, { SealBox, ...heroProps, ...props }))
 
-test('hero: the last result shows the batter once, the code and the contact; the next at-bat is nowhere', () => {
+test('hero: the last result shows the batter once and the code; the next at-bat is nowhere', () => {
   const all = half(F824, 2, 'top')
   const cap = all.indexOf(at(all, 12)) + 1
   const out = html({ last: live(half(F824, 2, 'top', cap), cap), stepAtBatIndex: 12 })
   assert.match(out, /class="gdhero__who">[^<]*Rodden</)
   assert.equal(out.split('Rodden').length - 1, 1, 'the batter is named once')
   assert.match(out, /gdhero__code is-hit">1B</, 'a hit gets the heavy box')
-  assert.match(out, /84\.2<small>mph/)
+  assert.ok(!out.includes('84.2'), 'exit velo sits on the stage now (useGamedayStage.jsx), not in the hero')
   // Arozarena is the next at-bat: his code, line and contact do not exist yet. His name may stand
   // in the due-up strip (a pre-pitch lineup fact), but nowhere else.
   for (const secret of ['HR', 'Homers', '102.6', '382']) assert.ok(!out.includes(secret), secret)

@@ -7,7 +7,7 @@ import { Headshot } from '../../../../components/player/Headshot.jsx'
 import { heroMarkup } from './heroMarkup.js'
 import { ScrollCue } from '../ScrollCue.jsx'
 import { BallFlight } from '../../../../components/charts/BallFlight.jsx'
-import { ParksCell, SavantFacts } from './SavantFacts.jsx'
+import { SavantFacts } from './SavantFacts.jsx'
 import { StrikeZoneModal } from '../../../../components/scoring/StrikeZone.jsx'
 import { hasPitchLocations } from '../../../../api/playbyplay/pitchInfo.js'
 import { BatterFallbackContext, BattingUniformContext, GameUniformsContext } from '../../../../components/logo/uniformContexts.js'
@@ -15,23 +15,8 @@ import { fallbackFigureUrls } from '../../../../api/uniforms.js'
 import { stanceArt } from '../../../../lib/zone/zoneGeometry.js'
 
 // Gameday's hero (markup and rules: heroMarkup.js), and the stage's event card that shares its box.
-export const GamedayHero = (props) => heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, Savant: SavantFacts, Parks: ParksCell, Flip: PlayFlip, ...props })
+export const GamedayHero = (props) => heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, Savant: SavantFacts, ...props })
 export const GamedayEventCard = (props) => eventCardMarkup(createElement, { SealBox, ...props })
-
-// The words and the contact card in one place (heroMarkup.js flip): a tap anywhere but a link or the scroll
-// chevron turns it. `data-side` picks the face; the CSS shows one only on the phone. The hidden toggle is the
-// keyboard's way to it.
-function PlayFlip({ line, card }) {
-  const [onCard, setOnCard] = useState(false)
-  const turn = (e) => { if (!e.target.closest('a, button:not(.gdhero__fliptog), .gdhero__parks')) setOnCard(!onCard) }
-  return (
-    <div className="gdhero__flip" data-side={onCard ? 'card' : 'line'} onClick={turn}>
-      <button type="button" className="gdhero__fliptog sr-only" aria-pressed={onCard}>{onCard ? 'Show the play' : 'Show exit velo, launch angle and distance'}</button>
-      {line}
-      {card}
-    </div>
-  )
-}
 
 // The play's words at the normal size; past their space, the smaller size; past that too, they scroll
 // in place with ScrollCue's bouncing chevron. Never cut off with an ellipsis. Measured again on a resize.

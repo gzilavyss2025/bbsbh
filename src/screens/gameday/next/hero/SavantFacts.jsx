@@ -64,22 +64,3 @@ function BatSpeedHistogram({ mph }) {
     </div>
   )
 }
-
-// The hero's Distance cell as a toggle (Gary, 2026-10-28): a tap turns it to how many of the 30 parks
-// the ball would have left (Savant), and back. The read waits for the first tap. `children` is the
-// cell's own label and value.
-export function ParksCell({ gamePk, sportId, playId, children }) {
-  const [on, setOn] = useState(false)
-  const { data } = useAsync(() => (on && playId ? fetchAtBatTracking(gamePk, sportId, [playId]).catch(() => new Map()) : Promise.resolve(null)), [on, gamePk, sportId, playId])
-  const parks = data?.get(playId)?.hrParks
-  return (
-    <button type="button" className="gdhero__parks" aria-pressed={on} onClick={() => setOn(!on)}>
-      {!on ? children : (
-        <>
-          <dt>HR in</dt>
-          <dd>{parks == null ? (data ? '—' : '…') : parks}<small>{parks == null ? '' : ' of 30 parks'}</small></dd>
-        </>
-      )}
-    </button>
-  )
-}

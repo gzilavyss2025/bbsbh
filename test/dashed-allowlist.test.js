@@ -63,6 +63,7 @@ const ALLOWED = {
     ['report/charts.css', '.colchart__rule--mean'],
     ['report/challenge-faces.css', '.chalplot__swatch--line'], // the key's swatch for the dashed MLB-average line on the ABS Challenges plot
     ['postseason/series-parts.css', '.psseries__keybar'],
+    ['69-hit-chart.css', '.bshist__median'], // the league median on Gameday's bat-speed histogram
     ['player-next/top/header-extras.css', '.pnext-ovr__cap'], // a minor leaguer's level cap on the OVR meter: the most his level can give
   ],
   // A stop set apart from a system it is not part of: the slate masthead's
