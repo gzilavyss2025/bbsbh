@@ -183,6 +183,14 @@ On a dry run, or when a gate stopped the merge, give the stack preview link with
 
 Do not start other work after the report.
 
+## If production breaks after the merge
+
+Roll back first, fix second. Vercel Pro rolls production back to any earlier
+deployment at once (`mcp__Vercel__request_rollback` to the last Ready production
+deployment before the stack, or `vercel rollback <url>` locally). Say what you
+rolled back to and which source PR is suspected. Then fix on a branch and land it
+as a new stack. Never revert on `main` by hand.
+
 ## Rules that do not bend
 
 - Never push to `main`. The only way to `main` is the stack PR.

@@ -48,3 +48,11 @@ Use the `mcp__github__*` tools in a cloud session (`gh` in a local session).
    say so. Do not comment on issues, close other PRs or touch labels.
 
 If a gate fails, say which gate, why, and what is needed. Never merge around a gate.
+
+## If production breaks after the merge
+
+Roll back first, fix second. Vercel Pro rolls production back to any earlier
+deployment at once (`mcp__Vercel__request_rollback` to the last Ready production
+deployment before this merge, or `vercel rollback <url>` locally). Say what you
+rolled back to. Then fix on a branch; the fix PR lands the usual way. Do not
+revert on `main` and do not push to `main`.

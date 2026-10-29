@@ -171,7 +171,10 @@ Hosted on Vercel, auto-deploying `main` to production on every push. The team mo
 from Hobby to Pro on 2026-10-29, so deployments are no longer scarce (Hobby capped
 them at about 100 a day). Every branch now gets a preview deployment: the PR's
 Vercel check links it, and Vercel Authentication protects it, so a viewer signs in to
-Vercel first. That sign-in is also what keeps crawlers off previews; a crawler storm
+Vercel first (a cloud session passes `VERCEL_AUTOMATION_BYPASS_SECRET` instead, when
+the environment has it; see `.claude/skills/run/`). The maintainer can pin comments
+to a preview from the Vercel toolbar; `.claude/skills/steward/` says how a session
+answers them. That sign-in is also what keeps crawlers off previews; a crawler storm
 on 2026-10-29 paused the Hobby team at 3x its request allowance. Keep work on PR
 branches and batch related changes into one stack anyway: one reviewed deploy per
 stack keeps `main` tidy, and Pro bills usage past the plan's allowance instead of

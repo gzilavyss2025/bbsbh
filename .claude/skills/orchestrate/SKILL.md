@@ -356,6 +356,11 @@ regular basis. A stack is one deployment, so it is cheap.
   other sessions' drafts included.
 - Build each stack on a new branch (`claude/stack-<date>-r<n>`). Never reuse a
   stack branch whose PR merged.
+- **Rollback.** He gave standing permission (2026-10-29): if production is broken
+  after a stack (the site errors, a function 500s, the slate does not load), roll
+  back to the last good production deployment on your own, following
+  `/stack-prs`, "If production breaks after the merge". Tell him what you rolled
+  back to and which PR you suspect. The forward fix still goes through a PR.
 - `/stack-prs` ends with "do not start other work". That ends the stack step
   only. After the merge, go on with this skill: start the work that waited on
   it, and say in the report what the stack carried.
