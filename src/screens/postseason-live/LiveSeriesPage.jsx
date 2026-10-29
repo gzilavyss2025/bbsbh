@@ -15,6 +15,8 @@ import { BATTING_CATEGORIES, SERIES_PITCHING_CATEGORIES } from '../../api/postse
 import { fetchScheduleGame } from '../../api/schedule.js'
 import { fetchMeetings } from '../../api/postseason/meetings.js'
 import { computePlayOfTheGame } from '../../api/boxscore.js'
+import { fetchSeasonAward } from '../../api/awardsHistory.js'
+import { mvpStatLine } from '../../lib/postseason/mvpLine.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { EMPTY_LOG, useSeriesLog } from '../../hooks/postseason/useSeriesLog.js'
@@ -110,6 +112,16 @@ export function LiveSeriesPage({ seriesId, asOf }) {
 
   const games = series?.games ?? []
   const { loading: logLoading, error: logError, data: log } = useSeriesLog(games)
+
+  // A decided World Series: its MVP, read live from the awards endpoint as MLB names him.
+  // Before the announcement (a 404) the hero keeps the clubs' marks.
+  const mvpSeason = Number(cutoffInput.slice(0, 4))
+  const wantMvp = Boolean(series?.decided && series?.round === 'worldseries')
+  const { data: mvpAward } = useAsync(
+    () => (wantMvp ? fetchSeasonAward('WSMVP', mvpSeason) : Promise.resolve(null)),
+    [wantMvp, mvpSeason],
+  )
+  const mvp = mvpAward?.recipients?.[0] ?? null
 
   // The three game buckets, sorted once: counted results, today's game, the
   // games still ahead (today excluded). Null-safe before the series loads.
@@ -439,7 +451,7 @@ export function LiveSeriesPage({ seriesId, asOf }) {
   const grouped = mode && (
     <>
       {series.decided ? (
-        <DecidedHero mode={mode} />
+        <DecidedHero mode={mode} mvp={mvp} stats={mvp ? mvpStatLine(log?.stats?.lines, mvp.playerId) : []} />
       ) : (
         <Hero
           mode={mode}

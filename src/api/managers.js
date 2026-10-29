@@ -195,6 +195,17 @@ export function currentStint(stints, season = new Date().getFullYear()) {
   )
 }
 
+// Which season of his current run with `teamId` `season` is: the unbroken string of managing
+// seasons with that club ending at `season` (5 -> "5th season as Rays manager"). Null when he
+// did not manage them that season, or the file has no row for it yet.
+export function seasonOfRun(stints, teamId, season) {
+  const years = new Set(managerialStints(stints).filter((s) => s.teamId === teamId).map((s) => s.season))
+  if (!years.has(season)) return null
+  let n = 0
+  while (years.has(season - n)) n += 1
+  return n
+}
+
 // The most recent stint where this person actually managed (any season) —
 // the "last managed {team}, {year}" fallback when he isn't in a current
 // dugout, or is currently in a non-managerial role.

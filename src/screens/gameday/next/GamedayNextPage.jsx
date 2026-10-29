@@ -1,3 +1,4 @@
+import { BoxSheet, WinProbSheet } from './panels/GamedaySheets.jsx'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import '../../../styles/gameday-next/page.css'
 import { SiteHeader } from '../../../components/chrome/SiteHeader.jsx'
@@ -86,9 +87,9 @@ function useTabDrag(side) {
   return { style: top != null ? { top: `${top}%` } : undefined, lifted, handlers, tapped }
 }
 
-// The phone's trail under the hero keeps its newest chip in view (Gary, 2026-10-28): each new at-bat
-// scrolls it to the end, and the reader scrolls back to see what came before.
-function HeroTrail({ children }) {
+// The trail keeps its newest chip in view (Gary, 2026-10-28; the wide tiers' strip too, 2026-10-29): each
+// new at-bat scrolls it to the end, and the reader scrolls back to see what came before.
+function HeroTrail({ children, className = 'gdnext__herotrail' }) {
   const ref = useRef(null)
   useEffect(() => {
     const el = ref.current
@@ -105,12 +106,13 @@ function HeroTrail({ children }) {
     mo.observe(el, { childList: true, subtree: true })
     return () => mo.disconnect()
   }, [])
-  return <div ref={ref} className="gdnext__herotrail">{children}</div>
+  return <div ref={ref} className={className}>{children}</div>
 }
 
-export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine, advance, pitch, onBoxScore, lineups, notices = [], refresh, pregame }) {
+export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine, advance, pitch, onBoxScore, lineups, notices = [], refresh, pregame, wideCheckpoint = false, trailPanels = null }) {
   const tier = useTier()
   const [menu, setMenu] = useState(false)
+  const [sheet, setSheet] = useState(null)
   // The defense (the Reference block) is a drawer from the right where the window is wide enough
   // for one; the narrower tiers fold it into the Menu as before.
   const drawer = tier === 'L' || tier === 'D'
@@ -187,7 +189,7 @@ export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine,
   // The drawer tiers swap the Reference block for the arm on the mound (the field is the drawer).
   const slots = blocksFor(tier).flatMap((b) => (b === 'band' || b === 'bar' || (drawer && b === 'eventLog') ? [] : drawer && b === 'reference' ? ['arm'] : [b]))
   return (
-    <div className="gdnext" data-tier={tier} data-rails={rails || undefined} style={railTop != null ? { '--gd-rail-top': `${railTop}px` } : undefined} onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
+    <div className="gdnext" data-tier={tier} data-rails={rails || undefined} data-checkpoint={wideCheckpoint || undefined} style={railTop != null ? { '--gd-rail-top': `${railTop}px` } : undefined} onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
       {rails && <header className="gdnext__chrome"><SiteHeader />{sectionNav}</header>}
       {/* A delay or suspension, and a failed refresh, read as a strip under the band; the stage
           row gives up the room, so the frame still never scrolls. */}
@@ -201,8 +203,10 @@ export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine,
         <section key={b} className={`gdnext__slot gdnext__slot--${b}`} aria-label={BLOCK_LABEL[b]}>
           {b === 'stage' && pregame && !drawer ? <GamedayPanel block="arm" ctx={panels} /> : b === 'stage' && stage ? stage : b === 'hero' && hero && tier === 'P' ? (
             // On the phone the hero's open floor carries the trail, so a tap moves between at-bats (Gary, 2026-10-28).
-            <>{hero}<HeroTrail><GamedayPanel block="trail" ctx={panels} /></HeroTrail></>
-          ) : b === 'hero' && hero ? hero : (
+            <>{hero}<HeroTrail><GamedayPanel block="trail" ctx={trailPanels ?? panels} /></HeroTrail></>
+          ) : b === 'hero' && hero ? hero : b === 'trail' ? (
+            <HeroTrail className="gdnext__trailscroll"><GamedayPanel block="trail" ctx={trailPanels ?? panels} /></HeroTrail>
+          ) : (
             <>
               <GamedayPanel block={b} ctx={panels} />
               {!PANELLED.has(b) && <span className="gdnext__slotname">{BLOCK_LABEL[b]}</span>}
@@ -220,6 +224,9 @@ export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine,
         {drawer && (
           <Button size="control" className="gdnext__defbtn" pressed={defense} aria-expanded={defense} aria-controls="gdnext-defense" onClick={() => setDefense((d) => !d)}>Defense</Button>
         )}
+        {/* The Box and Win % sheets (Gary, 2026-10-29): the game as of the reader's step, over the page. */}
+        {drawer && <Button size="control" className="gdnext__sheetbtn" aria-haspopup="dialog" onClick={() => setSheet('box')}>Box</Button>}
+        {drawer && <Button size="control" className="gdnext__sheetbtn" aria-haspopup="dialog" onClick={() => setSheet('wp')}>Win %</Button>}
         {/* aria-disabled, never `disabled`: a hold (the half closing, the step hold) must still
             take the tap that ends it early, and a disabled button gets no pointer events (ADR-0046). */}
         <Button skin="ink" className="gdnext__advance" aria-disabled={advance.disabled || undefined} onClick={() => !advance.disabled && advance.onClick()}>
@@ -247,6 +254,8 @@ export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine,
         </>
       )}
       <div hidden>{engine}</div>
+      {sheet === 'box' && <BoxSheet ctx={panels} onClose={() => setSheet(null)} onFull={onBoxScore ? () => { setSheet(null); onBoxScore() } : null} />}
+      {sheet === 'wp' && <WinProbSheet ctx={panels} onClose={() => setSheet(null)} />}
       {menu && (
         <GamedayMenu
           // The rails carry the batting order and the hero's floor the trail (Gary, 2026-10-28), so the Menu drops both there.

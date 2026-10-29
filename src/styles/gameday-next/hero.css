@@ -10,14 +10,15 @@
 .gdhero__top { display: flex; align-items: stretch; gap: var(--space-3); min-height: 0; }
 /* layout-exempt: the words stacked beside the box */
 .gdhero__txt { min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
-.gdhero__shot { flex: none; margin-left: auto; align-self: stretch; display: flex; }
+.gdhero__shot { flex: none; margin-left: auto; align-self: flex-start; display: flex; }
 /* A narrow hero has no room for a third column: beside the box the headshot left the name, play and stat card a
    sliver (Gary, 2026-10-27). Measured on the hero, so a phone and a narrow iPad landscape both drop it. */
 .gdhero { container-type: inline-size; }
 @container (max-width: 560px) { .gdhero__shot { display: none; } }
-.gdhero__shot .plink { display: flex; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+.gdhero__shot .plink { display: flex; height: auto; padding: 0; border: 0; background: none; cursor: pointer; }
 .gdhero__who .plink { font: inherit; letter-spacing: var(--ls-title); color: inherit; text-transform: inherit; text-align: left; }
-.gdhero__shot .shot { height: 100%; width: auto; aspect-ratio: 4 / 5; border: var(--bw-heavy) solid var(--border-stamped); border-radius: 0; overflow: hidden; box-sizing: border-box; }
+/* The batter's photo matches the pitcher's on the batting view (.gdzonemap__pitcher: 112px wide, 4:5), Gary 2026-10-29. */
+.gdhero__shot .shot { height: auto; width: 112px; aspect-ratio: 4 / 5; border: var(--bw-heavy) solid var(--border-stamped); border-radius: 0; overflow: hidden; box-sizing: border-box; }
 .gdhero__shot .shot img { display: block; width: 100%; height: 100%; border: 0; border-radius: 0; object-fit: cover; }
 .gdhero__lbl { font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
@@ -114,33 +115,21 @@
 .gdhero__zonebtn { position: absolute; inset: 0; z-index: 1; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .gdhero__zonebtn:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }
 
-/* The words and the stat card share one place (GamedayHero.jsx PlayFlip). Wider heroes show both, in the
-   column as before; the toggle is only the phone's. */
-.gdhero__flip { display: contents; }
-.gdhero__fliptog { display: none; }
+/* The play's words (heroMarkup.js result): in the column on wider heroes; the phone gives it a grid area. */
+.gdhero__words { display: contents; }
 
-/* A phone-wide hero (Gary, 2026-10-29): beside the box, under the name, one place holds the play in
-   readable type; a tap turns it to the three numbers, stacked, and back. */
+/* A phone-wide hero (Gary, 2026-10-29): beside the box, under the name, the play in readable type. */
 @container (max-width: 500px) {
-  /* layout-exempt: box beside the name, the play or its numbers under the name */
+  /* layout-exempt: box beside the name, the play under the name */
   .gdnext .gdhero .gdhero__top { height: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
-    grid-template-areas: 'box who' 'box flip'; column-gap: var(--space-3); row-gap: var(--space-2); }
+    grid-template-areas: 'box who' 'box words'; column-gap: var(--space-3); row-gap: var(--space-2); }
   .gdhero__txt { display: contents; }
   .gdhero__box { grid-area: box; }
   .gdhero__who { grid-area: who; }
-  /* layout-exempt: one face at a time */
-  .gdhero__flip { grid-area: flip; display: flex; flex-direction: column; min-height: 0; cursor: pointer; }
-  .gdhero__flip:has(.gdhero__fliptog:focus-visible) { outline: var(--bw-heavy) solid var(--focus-ring); }
-  .gdhero__fliptog { display: block; }
-  .gdhero__flip[data-side='line'] > .gdhero__contact, .gdhero__flip[data-side='card'] > :not(.gdhero__contact, .gdhero__fliptog) { display: none; }
-  .gdhero__flip .gdhero__line, .gdhero__flip .gdhero__line.is-tight { font: var(--w-medium) var(--fs-field) / var(--lh-snug) var(--font-body);
+  /* layout-exempt: the play's words in their own area */
+  .gdhero__words { grid-area: words; display: flex; flex-direction: column; min-height: 0; }
+  .gdhero__words .gdhero__line, .gdhero__words .gdhero__line.is-tight { font: var(--w-medium) var(--fs-field) / var(--lh-snug) var(--font-body);
     letter-spacing: var(--ls-none); color: var(--text-heading); }
-  /* layout-exempt: the three numbers stacked, each a label beside its number */
-  .gdhero__flip .gdhero__contact { margin: 0; grid-auto-flow: row; }
-  .gdhero__flip .gdhero__contact div, .gdhero__flip .gdhero__parks { flex-direction: row; justify-content: space-between; align-items: center; padding: var(--space-1) var(--space-2); }
-  .gdhero__flip .gdhero__contact div:has(> .gdhero__parks) { padding: 0; }
-  .gdhero__flip .gdhero__contact dd { font-size: var(--fs-title-sm); }
-  .gdhero__flip .gdhero__contact div + div { border-left: 0; border-top: var(--bw-hair) solid var(--border-rule); }
 }
 
 /* A runner's leg marks (eventCardMarkup notes): each sits against its own base path, just outside the
@@ -160,9 +149,3 @@
 }
 @media (prefers-reduced-motion: reduce) { .gdhero__contact div.is-hard { animation: none; background: color-mix(in srgb, var(--accent-negative) 16%, transparent); } }
 :root[data-motion='reduced'] .gdhero__contact div.is-hard { animation: none; background: color-mix(in srgb, var(--accent-negative) 16%, transparent); }
-/* The Distance cell is a toggle: it keeps the cell's own column look, no button chrome. */
-/* layout-exempt: the cell's label over its value */
-.gdhero__parks { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
-.gdhero__parks dd small { white-space: nowrap; }
-/* On the phone the contact strip keeps a step of air under the box and its out ring. */
-.gdnext[data-tier='P'] .gdhero__contact { margin-top: var(--space-2); }

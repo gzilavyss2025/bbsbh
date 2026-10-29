@@ -280,3 +280,12 @@
     padding-left: var(--space-6);
   }
 }
+
+/* Gameday's tap targets over each club's half (HeaderBug `onTeam`, 2026-10-29): the mark and its runs
+   open how the club scored. Clear buttons over the strip; a hover tints the half. */
+.inhead__strip { position: relative; }
+.inhead__teambtn { position: absolute; top: 0; bottom: 0; width: 40%; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.inhead__teambtn--away { left: 0; }
+.inhead__teambtn--home { right: 0; }
+.inhead__teambtn:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }
+@media (hover: hover) and (pointer: fine) { .inhead__teambtn:hover { background: color-mix(in srgb, var(--text-heading) 8%, transparent); } }

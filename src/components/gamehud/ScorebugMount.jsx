@@ -33,6 +33,7 @@ export function ScorebugMount({
   viewHalf,
   season = null,
   Bug = HeaderBug, // Gameday's new band draws the same clamped facts (screens/gameday/next)
+  onTeam = null,
 }) {
   if (!started || !live) return null
 
@@ -101,6 +102,6 @@ export function ScorebugMount({
       bases={live.bases}
       outs={live.outs}
       over={Boolean(live.over)}
-    />
+    onTeam={onTeam} />
   )
 }

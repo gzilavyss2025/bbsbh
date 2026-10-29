@@ -426,4 +426,30 @@
 
 /* The lineup page's Manager cell (Gary, 2026-10-28): a larger photo, the name stacked beside it, so the
    cell keeps the table's row height instead of a small face in a tall box. */
-.lfact__text .fact__person .shot.fact__shot { width: var(--shot-xs-w); height: var(--shot-xs-h); }
+/* Lineup page: the manager's name leads and his photo sits at the cell's right edge, larger (Gary, 2026-10-29). */
+/* The photo is its own column, the cell's full height (label row included), so the cell keeps
+   its right side clear for it and grows to hold at least the sm rung. */
+.lfact:has(.fact__person) {
+  position: relative;
+  min-height: calc(var(--shot-sm-h) + 2 * var(--space-2h));
+  padding-right: calc(var(--shot-sm-w) * 1.3 + var(--space-3h) * 2);
+}
+.lfact__tenure {
+  display: none;
+  margin: var(--space-1) 0 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+@media (min-width: 740px) {
+  .lfact__tenure { display: block; }
+}
+.lfact__text .fact__person .shot.fact__shot {
+  position: absolute;
+  top: var(--space-2h);
+  bottom: var(--space-2h);
+  right: var(--space-3h);
+  width: auto;
+  height: auto;
+  aspect-ratio: 3 / 4;
+}

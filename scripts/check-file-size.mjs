@@ -73,6 +73,7 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // improvement. The 24 entries below are the stylesheet's remaining real debt,
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
+  'src/screens/InningViewer.jsx': 610, // 602: a trail chip moves Gameday's read-back cursor (2026-10-29); split before growing more
   // Every src/styles partial below is over the line for the same standing reason:
   // src/styles is AT its directory budget in check-dir-size.mjs (the partials are
   // an ordered @import sequence and cannot nest), so a new rule cannot go in a new
@@ -103,7 +104,7 @@ const BUDGETS = {
   // caps-exempt method-note prose, whose `#root` prefix is the whole reason
   // it works. Both notes prevented a real regression. Trimming them to hit a
   // line count would be deleting the reason the rules are correct.
-  'src/styles/69-hit-chart.css': 900, // 811 — the ball-flight card shares marks, heat ring and drawing with the chart: one partial, not two that can drift
+  'src/styles/69-hit-chart.css': 1000, // 925 (the flight card's draw-and-land motion, 2026-10-29) — the ball-flight card shares marks, heat ring and drawing with the chart: one partial, not two that can drift
   'src/styles/68-around-the-game.css': 1100, // 1200
   'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1700, // 1608

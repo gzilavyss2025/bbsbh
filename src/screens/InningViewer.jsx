@@ -28,7 +28,7 @@ import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCallou
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
-import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, caughtUpAdvance, nextSub, openingChangeHeld, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, caughtUpAdvance, nextSub, openingChangeHeld, readBackAfter, readBackStepOf, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -453,13 +453,17 @@ export function InningViewer({
     if (followSub > curSub) revealSub(effInning, effHalf, followSub)
   }, [followSub]) // eslint-disable-line react-hooks/exhaustive-deps
   const replaySub = replay.idx === curIdx && replay.cursor === focus.cursor ? replay.sub : 0
+  const walkAt = replay.idx === curIdx && replay.cursor === focus.cursor && replay.at != null ? replay.at : focus.cursor // a chip's walk position
+  // A trail chip on a half read back moves the read-back cursor to that at-bat, its pitches all shown (2026-10-29).
+  const onPick = (abi) => { const n = readBackStepOf(focus.items, abi); if (n != null && curIdx <= renderRevealedThrough) { focus.goToStep(n); setReplay({ idx: curIdx, cursor: n, sub: 0, at: readBackAfter(feed, effInning, effHalf, abi) }) } }
   const replayNext = () => {
-    const n = replayTap(feed, effInning, effHalf, focus.cursor, replaySub)
+    const at = walkAt !== focus.cursor ? walkAt : null // kept as it walks on
+    const n = replayTap(feed, effInning, effHalf, walkAt, replaySub)
     if (n == null) {
-      setReplay({ idx: curIdx, cursor: focus.cursor + 1, sub: 0 })
+      setReplay({ idx: curIdx, cursor: focus.cursor + 1, sub: 0, at: at != null ? at + 1 : undefined })
       return focus.stepNext()
     }
-    setReplay({ idx: curIdx, cursor: focus.cursor, sub: n })
+    setReplay({ idx: curIdx, cursor: focus.cursor, sub: n, at: at ?? undefined })
   }
 
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
@@ -580,12 +584,12 @@ export function InningViewer({
           onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
           inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : engineCountFor(effInning, effHalf),
           pitcherId: curLiveState?.midHalfPitcherId ?? null, treatment: winProbTreatment,
-          openingHeld: currentSealed && openingChangeHeld(feed, effInning, effHalf, curAtBatCount, curSub),
+          openingHeld: currentSealed && openingChangeHeld(feed, effInning, effHalf, curAtBatCount, curSub), open: currentSealed ? { count: curAtBatCount, sub: curSub } : null, onPick, readAt: curIdx <= renderRevealedThrough ? focus.items[focus.cursor]?.atBatIndex ?? null : null, // open: per pitch; onPick/readAt: the read-back
         }}
         checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
         engine={pageTurn}
         advance={advance}
-        open={currentSealed ? { count: curAtBatCount, sub: curSub, in: steppedIn === atBatKey || undefined } : focus.stepAhead && replaySub > 0 ? { count: focus.cursor + 1, sub: replaySub } : null}
+        open={currentSealed ? { count: curAtBatCount, sub: curSub, in: steppedIn === atBatKey || undefined } : focus.stepAhead && replaySub > 0 ? { count: walkAt + 1, sub: replaySub } : null}
         pitch={{ on: pitchMode, set: setPitchMode }}
         onBoxScore={onBoxScore}
         onLineup={onLineup}

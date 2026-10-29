@@ -337,6 +337,44 @@
   outline: 2px solid var(--focus-ring-band);
   outline-offset: 2px;
 }
+.ldock__tabs {
+  display: none;
+}
+@media (min-width: 740px) {
+  /* .ldock prefix: the advance button's own display rule comes later in this file. */
+  .lnext__jump,
+  .ldock .ldock__next {
+    display: none;
+  }
+  .ldock__tabs {
+    display: flex;
+    flex: 1;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  .ldock__tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    flex: 1;
+    background: var(--surface-card);
+    color: var(--text-heading);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .ldock__tab--innings {
+    flex: 2;
+  }
+  .ldock__tab:active {
+    transform: scale(0.97);
+  }
+  /* The page you are on: ink on the dock's navy, no fill. */
+  .ldock__tab.is-current {
+    background: none;
+    color: var(--surface-card);
+    cursor: default;
+  }
+}
 .ldock__ref,
 .ldock__awake {
   display: inline-flex;
@@ -367,8 +405,38 @@
   min-width: 0;
 }
 .ldock__next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   background: var(--surface-card);
   color: var(--text-heading);
+}
+/* Motion (emil-design-eng): the press answers at once; on a mouse, the next club's mark lifts and
+   tips toward the arrow. Transform only, ease-out, under 200ms; none for reduced motion. */
+.ldock__next {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.ldock__next:active {
+  transform: scale(0.97);
+}
+.ldock__mark {
+  transition: transform var(--dur-med) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ldock__next:hover .ldock__mark,
+  .ldock__tab:not(.is-current):hover .ldock__mark {
+    transform: translateY(-2px) rotate(-8deg) scale(1.08);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ldock__next,
+  .ldock__mark {
+    transition: none;
+  }
+  .ldock__next:hover .ldock__mark {
+    transform: none;
+  }
 }
 
 @media (min-width: 740px) {
@@ -429,4 +497,4 @@
 /* Gary, 2026-10-28: the hero names the club without the "Away · Lineup" line; the section tabs sit on
    the page's paper, no card fill. */
 .lnext__role { display: none; }
-.lnext__jump { background: transparent; border-block: 0; padding-block: 0; padding-left: 0; } /* flush with the cards' left edge */
+.lnext__jump { background: transparent; border: 0; box-shadow: none; padding: 0; } /* flush with the cards: no frame, no stamped shadow */

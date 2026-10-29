@@ -1,6 +1,8 @@
+> **Retired 2026-10-29.** The drawn sprite batter this page describes was removed: the batting view always shows MLB's own Gameday figure now (`src/screens/gameday/next/CLAUDE.md`). Kept as a record.
+
 # Gameday batter inset
 
-`public/art/gameday/batter-ready.webp` is a static two-cell atlas for the lower-left plate inset.
+`public/art/gameday/batter-ready.webp` (was deleted 2026-10-29) was a static two-cell atlas for the lower-left plate inset.
 The left cell is the right-handed hitter; the right cell is the mirrored left-handed hitter.
 It is independent of the celebration atlases and has no animation track.
 

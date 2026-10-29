@@ -3,8 +3,8 @@
 // `step` is sectionToStep's step; `lastInningSection` is where "Gameday" returns to.
 export function gameSectionTabs(game, step, lastInningSection) {
   return [
-    { key: 'away', label: game.away.abbreviation || 'Away', active: step === 0, section: 'lineup1' },
-    { key: 'home', label: game.home.abbreviation || 'Home', active: step === 1, section: 'lineup2' },
+    { key: 'away', label: game.away.abbreviation || 'Away', active: step === 0, section: 'lineup1', teamId: game.away.id ?? null },
+    { key: 'home', label: game.home.abbreviation || 'Home', active: step === 1, section: 'lineup2', teamId: game.home.id ?? null },
     { key: 'innings', label: 'Gameday', active: step === 2, section: lastInningSection },
     { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
     // Fifth stop: the live #22 sheet, filled through the reveal mark. Last, so the four

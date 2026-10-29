@@ -12,7 +12,7 @@
   font-variant-numeric: tabular-nums; color: var(--text-heading); background: var(--stage-zone-lukewarm); }
 .gdzonemap__grid .statgrid { display: contents; }
 /* An at-bat's pitch, centred on where it crossed the plate (zonePitches.js). */
-.gdzonemap__pitch { position: absolute; z-index: 1; transform: translate(-50%, -50%); pointer-events: none;
+.gdzonemap__pitch { position: absolute; z-index: 1; transform: translate(-50%, -50%); pointer-events: auto; cursor: default;
   width: 17px; height: 17px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font: var(--w-bold) var(--fs-cell) / 1 var(--font-mono); color: var(--text-on-ink-bright); }
 /* The strike-zone modal's dots (14-strike-zone.css): strikes red, balls green, in play blue. */
@@ -30,11 +30,8 @@
 /* layout-exempt: the batter and zone share the same plate, reflected for a left-handed hitter */
 .gdzonemap__plateview { position: absolute; inset: 0; }
 .gdzonemap__batter { position: absolute; left: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); bottom: calc(var(--gd-ground) - var(--gd-zone-w) * .08); width: auto; height: var(--gd-figure-h); pointer-events: auto; aspect-ratio: 3 / 4; clip-path: inset(0 17% 0 24%); }
-.gdzonemap__sprite { display: block; width: 100%; height: 100%; background-image: url('/art/gameday/batter-ready.webp');
-  background-repeat: no-repeat; background-size: 200% 100%; background-position: left center; image-rendering: pixelated; }
 .gdzonemap__plate { position: absolute; left: 50%; bottom: var(--gd-ground); width: var(--gd-zone-w); height: auto; aspect-ratio: 196 / 60; transform: translateX(-50%); overflow: visible; fill: var(--stage-chalk); }
 .gdzonemap[data-side='L'] .gdzonemap__batter { left: auto; right: calc(50% - var(--gd-zone-w) / 2 - var(--gd-figure-h) * 0.6 - var(--space-3)); clip-path: inset(0 24% 0 17%); }
-.gdzonemap[data-side='L'] .gdzonemap__sprite { background-position: right center; }
 .gdzonemap__plate-edge { fill: var(--stage-overhead-cloth-shade); }
 .gdzonemap__plate-face { stroke: var(--stage-overhead-cloth-shade); stroke-width: var(--bw-hair); vector-effect: non-scaling-stroke; }
 
@@ -89,3 +86,71 @@
 /* With the uniform figure at scale, the zone rises to run from his knees to the letters (about 0.3 to
    0.65 of his height); the plate and the box stay on the ground under him. */
 .gdzonemap:has(.is-uniform) .gdzonemap__grid { bottom: calc(var(--gd-ground) + var(--gd-zone-h) * .95); }
+
+/* A pitch's hover card (Gary, 2026-10-29): its type, speed and call, above the dot on hover or focus. */
+/* layout-exempt: three short lines in a small card */
+.gdzonemap__tip { position: absolute; bottom: calc(100% + var(--space-1h)); left: 50%; z-index: var(--z-raised); display: none; flex-direction: column; gap: 2px; transform: translateX(-50%);
+  padding: var(--space-1h) var(--space-2); border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); box-shadow: var(--shadow-stamped-soft);
+  color: var(--text-heading); white-space: nowrap; text-align: left; pointer-events: none; } /* raw-value-exempt: lines hug */
+.gdzonemap__tip b { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.gdzonemap__tip span { font: var(--fs-small) / var(--lh-solid) var(--font-mono); }
+.gdzonemap__tip small { color: var(--text-caption); font: var(--fs-cell) / var(--lh-solid) var(--font-mono); text-transform: uppercase; }
+.gdzonemap__pitch:hover, .gdzonemap__pitch:focus-visible { z-index: var(--z-raised); }
+.gdzonemap__pitch:hover .gdzonemap__tip, .gdzonemap__pitch:focus-visible .gdzonemap__tip { display: flex; }
+/* A high pitch (near or over the zone's top, or pinned at the stage's top edge) opens its card below
+   it, so the stage's edge never cuts the card off. */
+.gdzonemap__pitch.is-high .gdzonemap__tip, .gdzonemap__pitch.is-off--up .gdzonemap__tip { bottom: auto; top: calc(100% + var(--space-1h)); }
+/* The grid is its own layer (its transform). It sits over the batter, always (Gary, 2026-10-29): a pitch
+   that runs past his body is still drawn on top of him, and so is its card. */
+.gdzonemap__grid { z-index: var(--z-raised); }
+.gdzonemap:has(.gdzonemap__pitch:hover, .gdzonemap__pitch:focus-visible) { z-index: var(--z-sticky); }
+/* The pitcher block names the batter instead ("vs Chourio"), where the Scout link was (Gary, 2026-10-29). */
+.gdzonemap__pitcher .gdp__scoutvs--hitter { display: inline; font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); color: var(--text-caption); }
+
+/* The zone's explainer (ZoneCard `note`): a notification card at the stage's lower right, over the
+   ground right of the plate, until the next tap. Fades and rises in; none under reduced motion. */
+.gdzonemap__grid { cursor: help; }
+.gdzonemap__note { position: absolute; z-index: var(--z-sticky); right: var(--space-3); bottom: var(--space-3); max-width: min(46%, 280px); margin: 0;
+  padding: var(--space-2) var(--space-3); border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); box-shadow: var(--shadow-stamped-soft);
+  color: var(--text-heading); font-size: var(--fs-small); line-height: var(--lh-prose); pointer-events: auto; animation: gdzonemap-note var(--dur-med) var(--ease-out); } /* raw-value-exempt: the card's widest */
+@keyframes gdzonemap-note { from { opacity: 0; transform: translateY(var(--space-1)); } }
+#root .gdzonemap__note { text-transform: none; } /* caps-exempt: an explaining sentence reads as prose */
+@media (prefers-reduced-motion: reduce) { .gdzonemap__note { animation: none; } }
+
+/* TRIAL: the park backdrop behind the batting view, its top (stands, scoreboard) showing, cropped to fill. */
+.gdzonemap__backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; pointer-events: none; }
+/* Readable over the park (Gary, 2026-10-29): the art sits back, muted and washed toward the page's paper, more
+   so toward the ground where the plate and the batter's feet are; the pitcher's block gets a paper card. */
+.gdzonemap__backdrop { opacity: 0.55; filter: saturate(0.7); }
+.gdzonemap:has(.gdzonemap__backdrop:not([hidden]))::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-canvas) 25%, transparent), color-mix(in srgb, var(--bg-canvas) 80%, transparent) 70%, var(--bg-canvas)); }
+.gdzonemap:has(.gdzonemap__backdrop:not([hidden])) .gdzonemap__pitcher { padding: var(--space-1h); background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); box-shadow: var(--shadow-stamped-soft); }
+/* From the plate (Gary, 2026-10-29): the render is the outfield wall and the stands, the wall along its bottom
+   edge and no field. So it fills the stage's upper part with that wall on a horizon about level with the
+   batter's waist; the stage's floor below is the field. The wash fades it into the floor at the horizon. */
+.gdzonemap__backdrop { inset: 0 0 auto 0; height: 58%; object-position: center bottom; }
+.gdzonemap:has(.gdzonemap__backdrop:not([hidden]))::before {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-canvas) 20%, transparent), color-mix(in srgb, var(--bg-canvas) 35%, transparent) 50%, var(--bg-canvas) 60%); }
+/* The park in black and white (Gary, 2026-10-29): the club colours on the stage stay the batter's and the zone's. */
+.gdzonemap__backdrop { filter: grayscale(1); opacity: 0.35; } /* 20 points fainter than the 0.55 trial */
+
+/* TRIAL: the bare field photo (public/art/gameday/field-bare.webp, Gary's: dirt, infield grass and mound, no
+   chalk) fills the stage under the horizon and meets the park backdrop where the wall stands. The app's own
+   drawn batter's boxes and plate stay on top of it, sized and placed from the zone (Gary, 2026-10-29). */
+.gdzonemap__field { position: absolute; left: 0; right: 0; bottom: 0; top: 50%; pointer-events: none;
+  background: url('/art/gameday/field-bare.webp') center 92% / cover no-repeat;
+  mask-image: linear-gradient(to bottom, transparent, #000 18%); } /* raw-value-exempt: a mask, not a colour */
+/* The field matches the park above it (Gary, 2026-10-29): black and white, at the same 35%. */
+.gdzonemap__field { filter: grayscale(1); opacity: 0.35; }
+/* Over the field photo the drawn batter's boxes read as chalk: paper-white and a heavier line. */
+.gdzonemap:has(.gdzonemap__field) .gdzonemap__ground { stroke: var(--surface-card); stroke-width: var(--bw-heavy); }
+.gdzonemap__ground { overflow: visible; }
+/* The strike zone's frame, heavy (Gary, 2026-10-29): a thick ink border so the box reads over the park. */
+.gdzonemap__grid { border-width: 6px; border-color: var(--text-heading); } /* raw-value-exempt: the zone's heavy frame */
+/* Both photos 10 points fainter (Gary, 2026-10-29): 35% to 25%. */
+.gdzonemap__backdrop, .gdzonemap__field { opacity: 0.25; }
+
+/* The ball in play's exit velo and launch angle sit over the plate's left (Gary, 2026-10-29). */
+.gdzonemap__contact { position: absolute; z-index: var(--z-raised); left: var(--space-2); bottom: var(--space-2); margin: 0; background: var(--surface-card); }
+/* No empty band over the park (Gary, 2026-10-29): the art's blank sky rides up past the stage's top edge. */
+.gdzonemap__backdrop { top: -18%; height: 76%; }

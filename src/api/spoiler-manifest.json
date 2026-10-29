@@ -436,6 +436,7 @@
       "class": "reveal-only",
       "why": "Gameday's day lines (#2606): the batter's and the pitcher's line for today as of the reader's step. A line names results ('2-for-3'). Built from computeHalfInningFeed's cards WITH the step cap and sliced at it, and from computePitcherLines' own step clamp, so step k never sees step k+1; a half past revealedThrough + 1 answers null. Gameday's arm panel (screens/gameday/next/panels/GamedayPanels.jsx) calls pitcherDayLine inside a Sealable's SealBox reveal render function, only once the half is at or under revealedThrough + 1 (the same reach as the Field tab), with the panel's own step. The checkpoint's due-up cards (screens/gameday/next/checkpoint/checkpointMarkup.js) call batterDayLine inside its SealBox reveal function for the NEXT half at step 0, so it counts that side's earlier, revealed halves and none of the half it leads off.",
       "importers": [
+        "screens/gameday/next/panels/GamedaySheets.jsx",
         "screens/gameday/next/checkpoint/checkpointMarkup.js",
         "screens/gameday/next/panels/GamedayPanels.jsx"
       ]
@@ -457,6 +458,14 @@
       "class": "spoiler-free",
       "why": "Constants only: the Statcast and odds-swing floors for the moments engine, measured from a 134-game league sample (the table in its header)."
     },
+    "gameday/pitchMix.js": {
+      "class": "reveal-only",
+      "why": "Tonight's pitch mix for the arm on the mound (Gary, 2026-10-29): each pitch he has thrown that the reader has on screen, tagged by batter hand, outcome, inning and time through the order. An outcome ('in play') is a result. Clamped exactly as dayLine.js: earlier halves whole, the reader's half up to stepCutAtBatIndex (built with the step cap), a half past revealedThrough + 1 answers null, and the open plate appearance counts only its pitches already on screen in pitch mode (subSteps.js openAtBat, up to the reader's `sub`). Gameday's arm panel (screens/gameday/next/panels/GamedayPanels.jsx) calls tonightPitches inside a Sealable's SealBox reveal render function, with the panel's own step, and hands the list to ArmTabs.jsx, which only counts it (mixOf, pure).",
+      "importers": [
+        "screens/gameday/next/panels/ArmTabs.jsx",
+        "screens/gameday/next/panels/GamedayPanels.jsx"
+      ]
+    },
     "gameday/reviews.js": {
       "class": "reveal-only",
       "why": "Gameday's review list and ABS bank (#2607) as of the reader's step: manager, crew-chief and ABS reviews with their outcome. A review can flip a called third strike or an out. Earlier halves whole, the reader's half only up to the last plate appearance on screen (gameday/stepCut.js); a half past revealedThrough + 1 answers null. Never reads gameData.absChallenges, whose counts are the whole game's. No screen imports it yet.",
@@ -470,8 +479,10 @@
       "class": "reveal-only",
       "why": "The step cut the Gameday data modules share: which at-bat cards of the reader's half are on screen, from computeHalfInningFeed built with the step cap and sliced at it (ADR-0016). Reads the cards, so reveal-only like them.",
       "importers": [
+        "screens/gameday/next/panels/GamedaySheets.jsx",
         "api/gameday/checkpoint.js",
         "api/gameday/dayLine.js",
+        "api/gameday/pitchMix.js",
         "api/gameday/defense.js",
         "api/gameday/moments/moments.js",
         "api/gameday/reviews.js",
@@ -485,7 +496,9 @@
       "class": "reveal-only",
       "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. openAtBat finds the reader's next at-bat past the step cursor with PlayByPlay's own step bounds. Gameday calls it at the advance tap (steps/subStep.js nextSub, which returns only a count; InningViewer also reads its live-edge flag on a half still in play) and inside SealBox reveal functions (the open box, the event card, the stage's one pitch), and those read only the sub-steps up to the reader's sub-step cursor. Two render-time reads return only what the reader's own sub-steps already revealed: steps/subStep.js openingChangeHeld (a held opening pitching change) and stage/GamedayStage.js restBatter (a pinch hitter announced inside the open at-bat, from his own sub-step on).",
       "importers": [
+        "api/gameday/pitchMix.js",
         "screens/gameday/next/hero/heroMarkup.js",
+        "screens/gameday/next/panels/panelData.js",
         "screens/gameday/next/stage/GamedayStage.js",
         "screens/gameday/next/steps/eventCardMarkup.js",
         "screens/gameday/next/steps/subStep.js",
@@ -843,6 +856,7 @@
       "class": "reveal-only",
       "why": "Runner advance/out notation — a play outcome. Barrel-internal, with one importer outside it: Gameday's hero reads battingSlot (a box-score batting-order fact) only for an at-bat already inside the reader's cursor, in a SealBox reveal render function. Gameday's event card reads legAdvanceCode (SB, WP, E2) for the one shown baserunning sub-step's own runner entries, also inside its SealBox reveal render function (eventCardMarkup.js).",
       "importers": [
+        "screens/gameday/next/panels/panelData.js",
         "api/playbyplay.js",
         "api/playbyplay/halfInningFeed.js",
         "screens/gameday/next/hero/heroMarkup.js",
@@ -1341,6 +1355,7 @@
       "class": "reveal-only",
       "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp.",
       "importers": [
+        "screens/gameday/next/panels/GamedaySheets.jsx",
         "api/gameday/moments/moments.js",
         "components/charts/WinProbChart.jsx",
         "screens/boxscore/revealBoxScore.js"

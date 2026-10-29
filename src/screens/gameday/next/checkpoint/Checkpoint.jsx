@@ -41,12 +41,15 @@ export function Checkpoint({ notes, inning, half, feed, ...props }) {
   const ledger = useCalloutLedger()
   const stagedIdx = halfIndex(inning, half) + 1
   const shownCounts = useMemo(() => ledger.countsFor(stagedIdx), [ledger, stagedIdx])
-  const allShown = useTier() !== 'P' || motionIsReduced()
+  const wide = useTier() !== 'P'
+  // A note counts as seen once on screen: on every tier now only while its page is open (2026-10-29),
+  // except under Motion: Reduced on the phone, where every page shows.
+  const allShown = motionIsReduced() && !wide
   const Seen = useCallback((p) => createElement(SeenNotes, { ...p, ledger, stagedIdx, allShown }), [ledger, stagedIdx, allShown])
   useFitNames()
   return checkpointMarkup(createElement, {
     SealBox, Seen, Headshot, Scroll: NotesScroll, PlayerLink, entry, feed, inning, half, ...props, page, onPage: setPage,
-    notes: notes && { ...notes, shownCounts, savantMatchup, seriesHistory, wsStarts },
+    notes: notes && { ...notes, shownCounts, savantMatchup, seriesHistory, wsStarts }, wide,
   })
 }
 

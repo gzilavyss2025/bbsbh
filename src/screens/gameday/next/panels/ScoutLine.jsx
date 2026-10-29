@@ -16,7 +16,9 @@ const person = (feed, id) => {
 // One Savant read per pair and date for the session: a batter comes up again every few innings.
 const headToHead = fetchOnce(fetchHeadToHead)
 
-export function ScoutLine({ feed, hitterId, pitcherId }) {
+// `door={false}`: no Scout link; `vsHitter`: "vs Chourio", the batter named, for a line read from the pitcher's
+// side (the batting view's pitcher block, Gary 2026-10-29).
+export function ScoutLine({ feed, hitterId, pitcherId, door = true, vsHitter = false }) {
   const date = feed?.gameData?.datetime?.officialDate ?? null
   const { data } = useAsync(() => headToHead(hitterId, pitcherId, date), [hitterId, pitcherId, date])
   const linkProps = useRouteLink()
@@ -27,8 +29,8 @@ export function ScoutLine({ feed, hitterId, pitcherId }) {
   const line = !data ? null : !t?.pa ? '0-for-0' : [`${t.h}-for-${t.ab}`, t.hr && `${t.hr} HR`, t.bb && `${t.bb} BB`, t.k && `${t.k} K`].filter(Boolean).join(' · ')
   return (
     <span className="gdp__scout">
-      <a className="gdp__scoutdoor" {...linkProps(href)}>Scout ›</a>
-      <span className="gdp__scoutvs">vs {pitcher.last}</span>
+      {door && <a className="gdp__scoutdoor" {...linkProps(href)}>Scout ›</a>}
+      <span className={`gdp__scoutvs${vsHitter ? ' gdp__scoutvs--hitter' : ''}`}>vs {vsHitter ? hitter.last : pitcher.last}</span>
       {/* `--len` lets a host size a long line down to its width (the stage's pitcher card). */}
       {line && <b className="gdp__scoutline" style={{ '--len': line.length }}>{line}</b>}
     </span>

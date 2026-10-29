@@ -36,9 +36,9 @@
   --gd-band-h: 92px;
   --gd-bar-h: 76px;
   grid-template-rows: auto minmax(0, 1fr) 168px 58px 76px;
-  /* the Due up card runs down past the trail's row, so nine rows and the up batter's Scout line fit */
+  /* the Due up card and the pitcher's card both run down past the trail's row (nine rows and the Scout line fit; the arm card matches, Gary 2026-10-29) */
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
-    'battingOrder hero hero arm' 'battingOrder trail trail trail' 'bar bar bar bar';
+    'battingOrder hero hero arm' 'battingOrder trail trail arm' 'bar bar bar bar';
 }
 .gdnext[data-tier='D'] {
   /* the middle is the stage's width: past its desktop size it holds at 40% of the window and the sides take the rest */
@@ -47,7 +47,7 @@
   --gd-bar-h: 68px;
   grid-template-rows: auto minmax(0, 1fr) 164px 66px 68px;
   grid-template-areas: 'band band navigator navigator' 'battingOrder stage stage arm'
-    'battingOrder hero hero arm' 'battingOrder trail trail trail' 'bar bar bar bar';
+    'battingOrder hero hero arm' 'battingOrder trail trail arm' 'bar bar bar bar';
 }
 
 /* The band row is `auto`: the band keeps its tier's height (--gd-band-h), and the status strip
@@ -65,6 +65,9 @@
 .gdnext__slot--hero { --gd-area: hero; background: none; border: 0; }
 .gdnext__slot--trail { --gd-area: trail; }
 .gdnext__slot--battingOrder { --gd-area: battingOrder; }
+/* The frame has no side gutter, so the two edge columns drop their outer border: a dark line on the window's edge (Gary, 2026-10-29), as the rails do. */
+.gdnext__slot--battingOrder { border-left: 0; }
+.gdnext__slot--arm { border-right: 0; }
 .gdnext__slot--reference { --gd-area: reference; }
 .gdnext__slot--arm { --gd-area: arm; overflow-y: auto; } /* the one panel taller than its column on a short window: it scrolls inside its own box, the frame never does */
 .gdnext__slot--eventLog { --gd-area: eventLog; }
@@ -121,6 +124,16 @@
 /* In the Menu the club cell keeps its logo's width and the innings scroll sideways under the club
    and R/H/E columns, which stay put (Gary, 2026-10-28). raw-value-exempt: the line score's columns */
 /* The trail on the hero's floor (P only: T has its own trail row): under the box, scrolling sideways. */
+/* The wide tiers' trail strip scrolls sideways and keeps the newest chip in view (HeroTrail). */
+.gdnext__trailscroll { height: 100%; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
+/* Its scrollbar is the game log's scorebook ruling (scroll.css .gdscroll__in), laid sideways: a paper
+   channel with a hairline edge, a square ink bar in it (Gary, 2026-10-29). */
+.gdnext__trailscroll::-webkit-scrollbar { height: var(--space-2); }
+.gdnext__trailscroll::-webkit-scrollbar-track { background: var(--surface-inset); border-top: var(--bw-hair) solid var(--border-hairline); }
+.gdnext__trailscroll::-webkit-scrollbar-thumb { background: var(--border-stamped); border: var(--bw-heavy) solid var(--surface-inset); border-radius: 0; }
+.gdnext__trailscroll::-webkit-scrollbar-thumb:hover { background: var(--text-heading); }
+@supports not selector(::-webkit-scrollbar) { .gdnext__trailscroll { scrollbar-width: thin; scrollbar-color: var(--border-stamped) var(--surface-inset); } }
+.gdnext__trailscroll .gdp__trail { width: max-content; }
 .gdnext__herotrail { position: absolute; z-index: 1; left: 0; right: 0; bottom: var(--space-2); overflow-x: auto; }
 .gdnext__herotrail .statgrid { padding: var(--space-1) 0; background: transparent; }
 .gdnext__herotrail .gdp__trail { padding-inline: 0; }
@@ -236,3 +249,46 @@
    words ("Next pitch ›", "Bottom 5th ›") still fit. */
 .gdnext__bar :is(.gdnext__advance, .gdnext__menu, .gdnext__switch .btn) { padding-inline: var(--space-2); }
 .gdnext__bar .gdnext__menu { min-width: 0; }
+
+/* ONE BAR, ONE LOOK (Gary, 2026-10-29): Menu, the step switch, Defense, Box, Win % and the advance share
+   the height, the type, the side padding and the stamped edge; only the advance is ink and takes the
+   slack. The Menu door drops its own dress for the buttons'. */
+.gdnext__bar :is(.gdnext__menu, .gdnext__defbtn, .gdnext__sheetbtn, .gdnext__switch .btn, .gdnext__advance) {
+  box-sizing: border-box; height: var(--tap-min); min-height: 0; padding-inline: var(--space-2);
+  font-family: var(--font-display); font-size: var(--fs-h3); font-weight: var(--w-bold); letter-spacing: var(--ls-label);
+}
+.gdnext__bar :is(.gdnext__switch .btn, .gdnext__advance) { border-width: var(--bw-heavy); }
+.gdnext__bar :is(.gdnext__menu, .gdnext__defbtn, .gdnext__sheetbtn) { flex: none; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); color: var(--text-heading); text-decoration: none; }
+/* The motion, felt (emil-design-eng): on a mouse a control lifts off the page with a stamped shadow; a
+   press sinks it past flat. Transform and shadow only, quick and ease-out; none under reduced motion. */
+.gdnext__bar :is(.gdnext__menu, .gdnext__defbtn, .gdnext__sheetbtn, .gdnext__switch .btn, .gdnext__advance) {
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .gdnext__bar :is(.gdnext__menu, .gdnext__defbtn, .gdnext__sheetbtn, .gdnext__switch .btn, .gdnext__advance):where(:not([aria-disabled='true'])):hover {
+    transform: translate(calc(-1 * var(--bw-heavy)), calc(-1 * var(--bw-heavy)));
+    box-shadow: var(--bw-heavy) var(--bw-heavy) 0 var(--text-heading);
+  }
+}
+.gdnext__bar :is(.gdnext__menu, .gdnext__defbtn, .gdnext__sheetbtn, .gdnext__switch .btn, .gdnext__advance):where(:not([aria-disabled='true'])):active {
+  transform: translate(var(--bw-heavy), var(--bw-heavy)) scale(0.96);
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gdnext__bar :is(.gdnext__menu, .gdnext__defbtn, .gdnext__sheetbtn, .gdnext__switch .btn, .gdnext__advance) { transition: none; }
+  .gdnext__bar :is(.gdnext__menu, .gdnext__defbtn, .gdnext__sheetbtn, .gdnext__switch .btn, .gdnext__advance):hover { transform: none; box-shadow: none; }
+}
+:root[data-motion='reduced'] .gdnext__bar :is(.gdnext__menu, .gdnext__defbtn, .gdnext__sheetbtn, .gdnext__switch .btn, .gdnext__advance) { transition: none; }
+
+/* The opened checkpoint takes the whole center (Gary, 2026-10-29): the stage runs down over the hero's
+   row, and the hero (the last at-bat's box, already read) steps aside. The wider tiers only. */
+.gdnext[data-checkpoint]:not([data-tier='P']) .gdnext__slot--stage { grid-row: stage-start / hero-end; }
+.gdnext[data-checkpoint]:not([data-tier='P']) .gdnext__slot--hero { display: none; }
+/* The bar's edges are the columns' edges (Gary, 2026-10-29): Menu starts under the Due up card and the
+   advance ends under the pitcher's, no inset. */
+.gdnext:not([data-tier='P']) .gdnext__bar { padding-inline: 0; }
+/* The step switch wears the bar's ink edge, the pressed half in ink like the page tabs (Segmented). */
+.gdnext__bar .gdnext__switch .btn { border-color: var(--border-stamped); background: var(--surface-card); color: var(--text-heading); }
+.gdnext__bar .gdnext__switch .btn + .btn { margin-left: calc(-1 * var(--bw-heavy)); }
+.gdnext__bar .gdnext__switch .btn[aria-pressed='true'] { background: var(--text-heading); border-color: var(--text-heading); color: var(--surface-card); box-shadow: none; text-decoration: none; }
+.gdnext__bar .gdnext__switch .btn[aria-pressed='true']::before { display: none; }

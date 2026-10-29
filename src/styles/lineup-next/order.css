@@ -81,8 +81,14 @@
   font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display);
 }
 .lord__pos {
-  margin-left: calc(-1 * var(--space-1));
   color: var(--text-heading);
+}
+/* A rule between the number and the position: "6 | SS". */
+.lord__num + .lord__pos::before {
+  content: '|';
+  margin-right: var(--space-2);
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
 }
 .lord__num {
   color: var(--clay);

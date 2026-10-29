@@ -3,11 +3,11 @@ import { cutAt } from '../panels/panelData.js'
 import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { halfIndex } from '../../../../api/select.js'
 import { pitchCallCode } from '../../../../api/playbyplay/eventTypes.js'
-import { boxModel, contactStats, cutShort, playLine } from './heroModel.js'
+import { boxModel, cutShort, playLine } from './heroModel.js'
 import { runnerOutCode } from '../../../../api/playbyplay/advanceCode.js'
 
-// THE HERO'S MARKUP (#2576, #2568): the scorebook box, the batter named once, the play line, the
-// contact numbers and the due-up strip. GamedayHero.jsx calls heroMarkup(createElement, …); node --test
+// THE HERO'S MARKUP (#2576, #2568): the scorebook box, the batter named once, the play line and
+// the due-up strip. GamedayHero.jsx calls heroMarkup(createElement, …); node --test
 // renders the same builder with react-dom/server (a .jsx file cannot be imported there), passing a
 // SealBox stand-in.
 //
@@ -99,7 +99,7 @@ function openBox(h, feed, inning, half, { count, sub }, Headshot, PlayerLink, Li
   const { batter } = o.card
   // The pitch columns open the strike zone mid at-bat too, with only the pitches shown so far.
   const thrown = shown.filter((s) => s.kind === 'pitch' && s.pitch).map((s) => s.pitch)
-  const zone = Zone && thrown.length > 0 ? h(Zone, { entry: { ...o.card, pitchDetails: thrown }, side: half === 'top' ? 'away' : 'home' }) : null
+  const zone = Zone && thrown.length > 0 ? h(Zone, { entry: { ...o.card, pitchDetails: thrown }, side: half === 'top' ? 'away' : 'home', teamId: feed?.gameData?.teams?.[half === 'top' ? 'away' : 'home']?.id ?? null, feed }) : null
   return h('div', { className: 'gdhero__top' }, scorebookBox(h, m, null, zone),
     h('div', { className: 'gdhero__txt' },
       h('div', { className: 'gdhero__who' },
@@ -136,33 +136,22 @@ function words(h, feed, e) {
 // no layout, draws no handle (BallFlight stands down itself).
 // The pitch columns are the handle for the strike zone and the pitches with their speeds (`Zone`,
 // GamedayHero.jsx: the old feed's StrikeZoneModal), on a click.
-function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null, Savant = null, Parks = null, Flip = null) {
+function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null, Savant = null) {
   const { batter } = e
-  const contact = contactStats(e)
   // The opened card adds Savant's figures for the ball in play (`Savant`, GamedayHero.jsx): its playId is the in-play pitch's.
-  const inPlay = (Savant || Parks) && e.battedBall ? feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === e.atBatIndex)?.playEvents?.findLast((ev) => ev.details?.isInPlay)?.playId : null
-  const extra = inPlay && Savant ? h(Savant, { gamePk: feed.gamePk, sportId: feed.gameData?.teams?.home?.sport?.id ?? 1, playId: inPlay }) : null
+  const inPlay = Savant && e.battedBall ? feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === e.atBatIndex)?.playEvents?.findLast((ev) => ev.details?.isInPlay)?.playId : null
+  const extra = inPlay ? h(Savant, { gamePk: feed.gamePk, sportId: feed.gameData?.teams?.home?.sport?.id ?? 1, playId: inPlay }) : null
   const flight = Flight && e.battedBall ? h(Flight, { ball: e.battedBall, batter, code: e.code ?? '', facts: false, arc: false, head: false, hover: false, extra }) : null
-  const zone = Zone ? h(Zone, { entry: e, side }) : null
+  const zone = Zone ? h(Zone, { entry: e, side, teamId: side ? feed?.gameData?.teams?.[side]?.id ?? null : null, feed }) : null
   return h('div', { className: 'gdhero__top' }, scorebookBox(h, boxModel(e), flight, zone),
     h('div', { className: 'gdhero__txt' },
       h('div', { className: 'gdhero__who' },
         who(h, PlayerLink, batter)),
-      flip(h, Flip, e.atBatIndex, playText(h, Line, words(h, feed, e)), contact.length > 0 && h('dl', { className: 'gdhero__contact' },
-        ...contact.map((c) => {
-          const cell = [h('dt', { key: 'l' }, c.label), h('dd', { key: 'v' }, c.value, c.unit && h('small', null, c.unit))]
-          // Distance taps over to Savant's home-run parks count (`Parks`, SavantFacts.jsx).
-          const body = Parks && inPlay && c.label === 'Distance' ? h(Parks, { gamePk: feed.gamePk, sportId: feed.gameData?.teams?.home?.sport?.id ?? 1, playId: inPlay }, cell) : cell
-          return h('div', { key: c.label, className: c.hard ? 'is-hard' : undefined }, body)
-        })))),
+      h('div', { className: 'gdhero__words' }, playText(h, Line, words(h, feed, e)))),
     shot(h, Headshot, PlayerLink, batter))
 }
 
-// The play's words and the contact card share one place on the phone (Gary, 2026-10-29): the words fill it,
-// and a tap turns it to the card (`Flip`, GamedayHero.jsx). Wider heroes show both. A new at-bat opens on the words.
-const flip = (h, Flip, key, line, card) => (Flip && card ? h(Flip, { key, line, card }) : [line, card])
-
-export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, Savant = null, Parks = null, Flip = null, feed, inning, half, last, open = null, mark = null, replay = null, step = null }) {
+export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, Savant = null, feed, inning, half, last, open = null, mark = null, replay = null, step = null }) {
   // A replayed trail chip (Gary, 2026-10-29) puts its own at-bat in the box, read at the trail's cut so
   // nothing after the reader's step shows. It holds, as the trail's mark does, until the next tap.
   const shown = () => (replay != null && cutAt(feed, inning, half, step).cards.find((c) => c.atBatIndex === replay)) || last
@@ -170,6 +159,6 @@ export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Lin
     replay == null && open?.sub > 0
       ? h(SealBox, { coverless: true, forceRevealed: true }, () => openBox(h, feed, inning, half, open, Headshot, PlayerLink, Line, Zone))
       : last
-        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, shown(), Headshot, PlayerLink, Line, feed, Flight, Zone, half === 'top' ? 'away' : 'home', Savant, Parks, Flip))
+        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, shown(), Headshot, PlayerLink, Line, feed, Flight, Zone, half === 'top' ? 'away' : 'home', Savant))
         : sealedBox(h, atPlate(feed, inning, half, mark), Headshot, PlayerLink))
 }
