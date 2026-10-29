@@ -334,3 +334,13 @@ test('at-bat mode follows a live at-bat the reader is in, pitch by pitch; pitch 
   const done = followLive(F824, 6, 'bottom', 0, 1, false)
   assert.equal(done, 1) // a finished at-bat is never followed: its result waits for the tap
 })
+
+test('the play and its contact card go to Flip together, keyed to the at-bat', () => {
+  const c = countFor(F824, 6, 'bottom', 57)
+  const last = cutAt(F824, 6, 'bottom', c).cards.findLast((x) => x.battedBall)
+  const seen = []
+  const Flip = ({ line, card }) => (seen.push(1), h('div', { 'data-flip': '' }, line, card))
+  const out = renderToStaticMarkup(heroMarkup(h, { SealBox, Flip, feed: F824, inning: 6, half: 'bottom', mark: 10, last }))
+  assert.equal(seen.length, 1)
+  assert.match(out, /data-flip="">.*gdhero__line.*gdhero__contact/s)
+})
