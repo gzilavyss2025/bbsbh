@@ -33,6 +33,17 @@ test('a club that has not pitched yet shows its starter with every figure 0 (Gar
   for (const row of rows(out)) assert.deepEqual(row.slice(3), ['0.0', '0', '0', '0', '0', '0', '0', '0'])
 })
 
+test('a scratched probable gives way to the man who actually started (the boxscore staff, first arm)', () => {
+  const f = structuredClone(F)
+  const started = f.liveData.boxscore.teams.home.pitchers[0]
+  const other = Object.values(f.gameData.players).find((p) => p.id !== started && p.pitchHand)
+  f.gameData.probablePitchers = { ...f.gameData.probablePitchers, home: { id: other.id } }
+  const out = html(pitchingLinesMarkup(createElement, { feed: f, lines: { away: [], home: [] } }))
+  const real = f.gameData.players[`ID${started}`]
+  assert.ok(out.includes(real.lastName), 'the real starter is named')
+  assert.ok(!out.includes(`>${other.lastName},`), 'the scratched probable is not')
+})
+
 test('a club with no starter known at all still says "No pitcher yet"', () => {
   const bare = { gameData: { teams: F.gameData.teams, players: {} }, liveData: { boxscore: { teams: {} } } }
   const out = html(pitchingLinesMarkup(createElement, { feed: bare, lines: { away: [], home: [] } }))

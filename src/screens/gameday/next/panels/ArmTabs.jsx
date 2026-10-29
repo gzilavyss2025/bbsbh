@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { mixOf } from '../../../../api/gameday/pitchMix.js'
 import { fetchPitcherRecentGames } from '../../../../api/game.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
+import { monthDay } from '../../../../lib/dates.js'
 import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { ScrollCue } from '../ScrollCue.jsx'
@@ -135,8 +136,6 @@ export function TonightMix({ pitches }) {
   )
 }
 
-const shortDate = (iso) => `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`
-
 // Every outing this season BEFORE tonight, postseason and minor-league/rehab outings included (fetchPitcherRecentGames' cutoff),
 // newest first: completed games only.
 // The sortable columns (Gary, 2026-10-29): a tap on a head sorts largest first, a second smallest first, a
@@ -173,7 +172,7 @@ export function ArmGameLog({ pitcherId, season, date, gameNumber, sportId = 1 })
         {(sort ? [...data].sort((a, b) => sort.dir * compare(a, b, sort.key)) : data).map((g) => (
           // An outing at another level than tonight's (a rehab or minor-league start) is shaded and tagged.
           <tr key={`${g.gamePk}-${g.date}`} className={g.sportId !== sportId ? 'is-other' : undefined}>
-            <td>{shortDate(g.date)}{g.sportId !== sportId && g.level && <small className="gdlog__level">{g.level}</small>}</td>
+            <td>{monthDay(g.date)}{g.sportId !== sportId && g.level && <small className="gdlog__level">{g.level}</small>}</td>
             {/* "@" in its own narrow column, so every opponent's mark lines up (Gary, 2026-10-29). */}
             <td className="gdlog__at">{g.home ? '' : '@'}</td>
             <td className="gdlog__opp"><TeamLogo teamId={g.opponentId} name={g.opponent} size={16} /></td>

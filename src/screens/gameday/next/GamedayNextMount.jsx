@@ -6,7 +6,7 @@ import { GamedayNextPage } from './GamedayNextPage.jsx'
 import { useGamedayStage } from './stage/useGamedayStage.jsx'
 import { ScoringSheet } from './panels/GamedaySheets.jsx'
 import { rewindTo, walkCut } from './panels/panelData.js'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { ordinal } from '../../../lib/format.js'
 
 // InningViewer's hand-off to the new shell: the band reads the live snapshot through
@@ -18,13 +18,13 @@ import { ordinal } from '../../../lib/format.js'
 // `open` ({ count, sub }) is the at-bat the reader is inside (ADR-0123); `pitch` the At-bat | Pitch switch.
 export function GamedayNextMount({ sectionNav, bug: { mark, ...bug }, meta, panels, checkpoint, engine, advance, open, pitch, onBoxScore, onLineup, notices, refresh }) {
   // A tap on a club's half of the band opens how it scored, as of the step (Gary, 2026-10-29).
-  const [runsOf, setRunsOf] = useState(null)
+  const [runsOf, setRunsOf] = useState(false)
   const [closing, setClosing] = useState(false)
   // A close plays the drop's exit first (`closing`); `onClosed` then takes it away.
   const closeRuns = useCallback(() => setClosing(true), [])
-  const closedRuns = useCallback(() => { setClosing(false); setRunsOf(null) }, [])
+  const closedRuns = useCallback(() => { setClosing(false); setRunsOf(false) }, [])
   // Either half of the bug toggles the one combined summary.
-  const onTeam = () => (runsOf ? setClosing(true) : (setClosing(false), setRunsOf('both')))
+  const onTeam = () => (runsOf ? setClosing(true) : (setClosing(false), setRunsOf(true)))
   const cp = checkpoint && bug.feed && (
     <Checkpoint
       key={bug.viewIdx} feed={bug.feed} inning={bug.viewInning} half={bug.viewHalf} mark={mark} notes={checkpoint}
@@ -50,13 +50,15 @@ export function GamedayNextMount({ sectionNav, bug: { mark, ...bug }, meta, pane
   // The walk inside an at-bat counts the one before it; else the at-bat the read-back cursor stands on (a chip
   // moves it), else a stage replay. It holds until the reader moves it again.
   const rewindAbi = committed ? walkCut(bug.feed, bug.viewInning, bug.viewHalf, open) ?? panels.readAt ?? staged.replaying : null
-  const rewind = rewindAbi != null && bug.feed ? rewindTo(bug.feed, bug.viewInning, bug.viewHalf, rewindAbi) : null
+  // walkCut and rewindTo read results, so they run only on a `committed` half: one already at or under the
+  // reveal mark, which shows nothing the reader has not revealed. That gate is what keeps them out of a SealBox.
+  const rewind = useMemo(() => (rewindAbi != null && bug.feed ? rewindTo(bug.feed, bug.viewInning, bug.viewHalf, rewindAbi) : null), [bug.feed, bug.viewInning, bug.viewHalf, rewindAbi])
   const trailExtras = { onReplay: (i) => { staged.onReplay(i); panels.onPick?.(i) }, onBack: staged.replaying != null ? staged.onBack : null, here: staged.replaying ?? (open?.sub > 0 ? null : bug.live?.last?.atBatIndex ?? null) }
   const shown = rewind ? { ...panels, step: rewind.step, mark: rewind.mark, runsInProgress: rewind.runsInProgress } : panels
   const band = bug.started && bug.live ? (
     <>
       <ScorebugMount {...bug} {...(rewind ? { runsInProgress: rewind.runsInProgress } : {})} revealedThrough={rewind ? rewind.mark : mark} meta={meta} onTeam={onTeam} />
-      {runsOf && <ScoringSheet ctx={panels} onClose={closeRuns} closing={closing} onClosed={closedRuns} />}
+      {runsOf && <ScoringSheet ctx={shown} onClose={closeRuns} closing={closing} onClosed={closedRuns} />}
     </>
   ) : (
     <GamedayBand

@@ -91,8 +91,12 @@ export function rewindTo(feed, inning, half, atBatIndex) {
   const side = battingSideOf(half)
   const key = side === 'away' ? 'awayScore' : 'homeScore'
   const plays = feed?.liveData?.plays?.allPlays ?? []
-  const mine = plays.filter((p) => p.about?.inning === inning && p.about?.halfInning === half && (p.about?.atBatIndex ?? Infinity) <= atBatIndex)
-  const first = plays.findIndex((p) => p.about?.inning === inning && p.about?.halfInning === half)
+  const inHalf = (p) => p.about?.inning === inning && p.about?.halfInning === half
+  // Its last at-bat is the whole half: the mark takes it in, so the line score reads the half's own R / H / E
+  // (runsInProgress carries no errors), as it did before the rewind.
+  if (atBatIndex >= (plays.findLast(inHalf)?.about?.atBatIndex ?? Infinity)) return { step, mark: idx, runsInProgress: null }
+  const mine = plays.filter((p) => inHalf(p) && (p.about?.atBatIndex ?? Infinity) <= atBatIndex)
+  const first = plays.findIndex(inHalf)
   const before = first > 0 ? plays[first - 1]?.result?.[key] ?? 0 : 0
   const after = mine.at(-1)?.result?.[key] ?? before
   const hits = mine.filter((p) => HITS.has(p.result?.eventType)).length

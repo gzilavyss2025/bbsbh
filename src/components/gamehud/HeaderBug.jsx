@@ -94,9 +94,10 @@ export function HeaderBug({
           block="inhead__half"
           className={`inhead__half--home${batting === 'home' ? ' is-atbat' : ''}`}
         />
+        {/* Either half opens the one scoring summary: two touch targets, one stop for a keyboard or a screen reader. */}
         {onTeam && ['away', 'home'].map((side) => (
           <button key={side} type="button" className={`inhead__teambtn inhead__teambtn--${side}`} aria-haspopup="dialog"
-            aria-label="Scoring summary" onClick={() => onTeam(side)} />
+            {...(side === 'away' ? { 'aria-label': 'Scoring summary' } : { 'aria-hidden': true, tabIndex: -1 })} onClick={onTeam} />
         ))}
       </div>
       {(pitcher || batter) && (

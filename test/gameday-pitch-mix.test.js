@@ -37,3 +37,17 @@ test("each pitch type's speed is the average of its timed pitches", () => {
   assert.equal(rows[0].mph, 95)
   assert.equal(rows[1].mph, null)
 })
+
+test('pitch mode: a change in the middle of the open at-bat gives the reliever only the pitches after it', () => {
+  const f = structuredClone(feed)
+  const play = f.liveData.plays.allPlays.find((p) => p.about.inning === 1 && p.about.halfInning === 'top')
+  const pitches = play.playEvents.filter((e) => e.isPitch)
+  assert.ok(pitches.length >= 3, 'the fixture at-bat has at least three pitches')
+  // The starter throws two, then a reliever (a made-up id) finishes the at-bat.
+  const at = play.playEvents.indexOf(pitches[1]) + 1
+  play.playEvents.splice(at, 0, { isPitch: false, index: 900, details: { eventType: 'pitching_substitution' }, player: { id: 9999 } })
+  play.matchup.pitcher = { id: 9999 }
+  const open = { count: 0, sub: 99 }
+  const reliever = tonightPitches(f, 9999, { inning: 1, half: 'top', step: 0, revealedThrough: -1, open })
+  assert.equal(reliever.length, pitches.length - 2)
+})

@@ -12,9 +12,8 @@ import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { LEAN_TIERS, LEAN_TIER_LABELS, leanCaretFraction } from '../../../../lib/statTiers.js'
 import { SheetFrame } from './SheetFrame.jsx'
+import { monthDay } from '../../../../lib/dates.js'
 
-// "10/24" from "2026-10-24" (Gary, 2026-10-29).
-const numericDate = (iso) => (iso ? `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}` : '')
 const pct = (x) => (x == null ? '—' : `${(x * 100).toFixed(1)}%`)
 const HAND = { L: 'left-handers', R: 'right-handers' }
 
@@ -169,7 +168,7 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
             </li>
             {hpGames.map((g) => (
               <li key={`${g.gamePk}-${g.gameNumber}`} className="lump__game">
-                <span>{numericDate(g.date)}</span>
+                <span>{monthDay(g.date)}</span>
                 <button type="button" className="plink" onClick={() => openGame(g)}>
                   {/* Club marks, not abbreviations (Gary, 2026-10-29); the abbreviation stays the name. */}
                   <TeamLogo teamId={g.awayId} name={g.awayAbbr} size={20} /> @ <TeamLogo teamId={g.homeId} name={g.homeAbbr} size={20} />

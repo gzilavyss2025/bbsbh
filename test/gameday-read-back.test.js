@@ -27,12 +27,18 @@ test('a chip maps to its read-back step, and the walk resumes at the at-bat afte
   assert.equal(openAtBat(feed, 1, 'top', at + 1).card.atBatIndex > first, true)
 })
 
-test('rewinding a finished half to an at-bat counts only the runs and hits through it', () => {
+test('rewinding a finished half to an at-bat counts only the runs and hits through it; its last at-bat counts the whole half', () => {
   const last = top1.at(-1)
-  const r = rewindTo(feed, 1, 'top', last.about.atBatIndex)
+  const mid = top1.at(-2)
+  const r = rewindTo(feed, 1, 'top', mid.about.atBatIndex)
   assert.equal(r.mark, -1)
-  assert.equal(stepCutAtBatIndex(feed, 1, 'top', r.step), last.about.atBatIndex)
-  assert.equal(r.runsInProgress.runs, last.result.awayScore)
+  assert.equal(stepCutAtBatIndex(feed, 1, 'top', r.step), mid.about.atBatIndex)
+  assert.equal(r.runsInProgress.runs, mid.result.awayScore)
+  // At the half's last at-bat the whole half counts: the mark takes it in, so the line score reads the
+  // half's own R / H / E (errors included, which runsInProgress does not carry), as when it was committed.
+  const end = rewindTo(feed, 1, 'top', last.about.atBatIndex)
+  assert.equal(end.mark, 0)
+  assert.equal(stepCutAtBatIndex(feed, 1, 'top', end.step), last.about.atBatIndex)
   const none = rewindTo(feed, 1, 'top', -1)
   assert.deepEqual([none.step, none.runsInProgress.runs], [0, 0])
 })

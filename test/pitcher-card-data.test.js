@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test, { mock } from 'node:test'
-import { fetchPitcherLastGame, fetchPitcherSeasonLine, resetPitcherReads } from '../src/api/game.js'
+import { fetchPitcherLastGame, fetchPitcherRecentGames, fetchPitcherSeasonLine, resetPitcherReads } from '../src/api/game.js'
 import { fetchPitcherPostseasonCareer } from '../src/api/postseason/pitcherCareer.js'
 
 // The Now Pitching card's two fetchers, run against responses captured from
@@ -319,4 +319,26 @@ test('a null answer is not kept, so the next ask goes back to the network', asyn
       assert.equal(urls.length, 2)
     },
   )
+})
+
+// ---- Gameday's Game Log tab ---------------------------------------------------
+
+test('a failed game-log read is not kept: the next ask reads again and gets the outings', async () => {
+  resetPitcherReads()
+  let down = true
+  const outing = { date: '2026-09-20', game: { gamePk: 1, gameNumber: 1 }, opponent: { id: 147 }, sport: { id: 1 }, stat: { inningsPitched: '6.0' } }
+  const fetchMock = mock.method(globalThis, 'fetch', async (url) => {
+    if (down) throw new Error('offline')
+    const body = String(url).includes('sportId=') ? EMPTY : { stats: [{ splits: [outing] }] }
+    return { ok: true, status: 200, json: async () => body }
+  })
+  try {
+    const first = await fetchPitcherRecentGames(669276, 2026, '2026-09-30', 1, 5)
+    assert.ok(!first?.length, 'nothing to show while the read fails')
+    down = false
+    const again = await fetchPitcherRecentGames(669276, 2026, '2026-09-30', 1, 5)
+    assert.equal(again.length, 1)
+  } finally {
+    fetchMock.mock.restore()
+  }
 })

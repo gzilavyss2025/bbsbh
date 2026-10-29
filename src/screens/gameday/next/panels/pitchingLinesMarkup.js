@@ -18,11 +18,12 @@ function club(h, side, name, rows) {
           ...COLUMNS.map(([c, k]) => h('td', { key: c }, r[k] === '' || r[k] == null ? '—' : String(r[k]))))))))
 }
 
-// A club that has not pitched yet still shows its starter, every figure 0 (Gary, 2026-10-29): the
-// announced probable (gameData.probablePitchers, a pregame fact), else the first arm on its boxscore staff.
+// A club that has not pitched yet still shows its starter, every figure 0 (Gary, 2026-10-29): the first
+// arm on its boxscore staff (who really started, so a scratched probable or an opener reads right), else
+// the announced probable (gameData.probablePitchers, a pregame fact) before the boxscore lists anyone.
 // No result is read: nobody has thrown a pitch for this club at this step.
 function starterRow(feed, side) {
-  const id = feed?.gameData?.probablePitchers?.[side]?.id ?? feed?.liveData?.boxscore?.teams?.[side]?.pitchers?.[0]
+  const id = feed?.liveData?.boxscore?.teams?.[side]?.pitchers?.[0] ?? feed?.gameData?.probablePitchers?.[side]?.id
   const p = id != null ? feed?.gameData?.players?.[`ID${id}`] : null
   if (!p) return []
   const worn = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`]?.jerseyNumber

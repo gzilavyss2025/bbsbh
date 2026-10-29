@@ -396,7 +396,7 @@ async function fetchGameLogSplits(personId, season, sportId) {
     )
     return data.stats?.[0]?.splits ?? []
   } catch {
-    return []
+    return null // a failed read, told apart from an empty log (readPitcherRecentGames keeps neither)
   }
 }
 
@@ -432,7 +432,7 @@ async function readPitcherLastGame(personId, season, cutoffDate, cutoffGameNumbe
     const perLevel = await Promise.all(
       LAST_GAME_SPORT_IDS.map((sportId) => fetchGameLogSplits(personId, yr, sportId)),
     )
-    const eligible = perLevel.flat().filter((s) => s.date && before(s))
+    const eligible = perLevel.flatMap((s) => s ?? []).filter((s) => s.date && before(s))
     if (eligible.length === 0) continue
     eligible.sort((a, b) => (a.date !== b.date ? (a.date < b.date ? 1 : -1) : gameNumber(b) - gameNumber(a)))
     const s = eligible[0]
@@ -487,7 +487,7 @@ async function readPitcherLastGame(personId, season, cutoffDate, cutoffGameNumbe
 
 export async function fetchPitcherSeasonVsOpponent(personId, season, opponentTeamId, cutoffDate, sportId = 1) {
   if (!personId || !season || !opponentTeamId) return null
-  const splits = await fetchGameLogSplits(personId, season, sportId)
+  const splits = (await fetchGameLogSplits(personId, season, sportId)) ?? []
   const eligible = splits.filter(
     (s) =>
       s.gameType === 'R' &&
@@ -552,12 +552,13 @@ export const fetchPitcherLastGame = memoRequest(readPitcherLastGame)
 // outings: LAST_GAME_SPORT_IDS, as readPitcherLastGame reads them), strictly BEFORE this game (doubleheader-safe, the same
 // cutoff as readPitcherLastGame), newest first: the Gameday arm card's Game Log tab (Gary,
 // 2026-10-29). Each row { date, gamePk, opponent, opponentId, home, sportId, level, ip, h, er, bb, k, pitches }.
-// A completed game's line, never tonight's. [] on any failure.
+// A completed game's line, never tonight's. Null when a level's read fails, so memoRequest asks again next time.
 async function readPitcherRecentGames(personId, season, cutoffDate, cutoffGameNumber = 1, n = 5) {
   if (!personId || !season) return []
   const gameNumber = (s) => s.game?.gameNumber ?? 1
   const before = (s) => !cutoffDate || s.date < cutoffDate || (s.date === cutoffDate && gameNumber(s) < cutoffGameNumber)
   const perLevel = await Promise.all(LAST_GAME_SPORT_IDS.map((sportId) => fetchGameLogSplits(personId, season, sportId)))
+  if (perLevel.includes(null)) return null
   const splits = perLevel.flat().filter((s) => s.date && before(s))
   splits.sort((a, b) => (a.date !== b.date ? (a.date < b.date ? 1 : -1) : gameNumber(b) - gameNumber(a)))
   return splits.slice(0, n).map((s) => {

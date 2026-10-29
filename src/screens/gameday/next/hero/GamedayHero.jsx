@@ -13,6 +13,7 @@ import { hasPitchLocations } from '../../../../api/playbyplay/pitchInfo.js'
 import { BatterFallbackContext, BattingUniformContext, GameUniformsContext } from '../../../../components/logo/uniformContexts.js'
 import { fallbackFigureUrls } from '../../../../api/uniforms.js'
 import { stanceArt } from '../../../../lib/zone/zoneGeometry.js'
+import { ordinal } from '../../../../lib/format.js'
 
 // Gameday's hero (markup and rules: heroMarkup.js), and the stage's event card that shares its box.
 export const GamedayHero = (props) => heroMarkup(createElement, { SealBox, Headshot, PlayerLink, Line: PlayLine, Flight: BallFlight, Zone: PitchZone, Savant: SavantFacts, ...props })
@@ -54,8 +55,6 @@ const ZONE_MARGIN = 44
 // The sheet's two title lines (Gary, 2026-10-29): who faced whom, and the situation he came up to —
 // the inning and the runners and outs as the plate appearance BEGAN (the play before it in the same
 // half; none before the first). Nothing from the at-bat's own result.
-const ORD = ['th', 'st', 'nd', 'rd']
-const ordinal = (n) => `${n}${ORD[(n % 100 - 20) % 10] ?? ORD[n % 100] ?? ORD[0]}`
 function zoneTitle(feed, entry) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   const at = plays.findIndex((p) => p.about?.atBatIndex === entry.atBatIndex)

@@ -76,10 +76,13 @@ function openPitches(feed, pitcherId, inning, half, { count, sub }, faced) {
   if (!o?.play || o.play.matchup?.pitcher?.id !== pitcherId) return []
   const events = o.play.playEvents ?? []
   const tto = (faced.get(o.play.matchup?.batter?.id) ?? 0) + 1
+  // As the loop above: a change in the middle of the plate appearance leaves him only the pitches after it.
+  const from = events.findLastIndex((ev) => ev?.details?.eventType === 'pitching_substitution') + 1
+  const his = new Set(events.slice(from))
   return o.steps
     .slice(0, sub)
     .map((s) => events.find((e) => e.index === s.index))
-    .filter((e) => e?.isPitch)
+    .filter((e) => e?.isPitch && his.has(e))
     .map((e) => ({
       type: e.details?.type?.code ?? '',
       typeName: e.details?.type?.description ?? '',
