@@ -24,7 +24,7 @@ INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (136, 2026, 'R', 76, 4, 11, 20, 90, 97, 106);
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (137, 2026, 'R', 66, 3, 6, 10, 100, 103, 107);
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (138, 2026, 'R', 77, 8, 11, 20, 93, 96, 105);
-INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (139, 2026, 'P', 8, 0, 1, 1, 5, 6, 6);
+INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (139, 2026, 'P', 8, 0, 1, 1, 6, 7, 7);
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (139, 2026, 'R', 98, 5, 9, 17, 69, 73, 81);
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (140, 2026, 'R', 80, 4, 12, 20, 86, 94, 102);
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (141, 2026, 'R', 79, 5, 14, 20, 88, 97, 103);
@@ -38,7 +38,7 @@ INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (146, 2026, 'R', 80, 6, 13, 20, 88, 95, 102);
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (147, 2026, 'P', 2, 0, 0, 0, 3, 3, 3);
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (147, 2026, 'R', 93, 6, 15, 23, 74, 83, 91);
-INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (158, 2026, 'P', 10, 0, 4, 5, 2, 6, 7);
+INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (158, 2026, 'P', 11, 0, 4, 5, 2, 6, 7);
 INSERT INTO comeback_win_totals (team_id, season, scope, wins, sub10, sub20, sub30, att10, att20, att30) VALUES (158, 2026, 'R', 103, 6, 13, 30, 65, 72, 89);
 INSERT INTO comeback_ingested_games (game_pk, season) VALUES (822678, 2026);
 INSERT INTO comeback_ingested_games (game_pk, season) VALUES (822679, 2026);
@@ -2469,6 +2469,7 @@ INSERT INTO comeback_ingested_games (game_pk, season) VALUES (825105, 2026);
 INSERT INTO comeback_ingested_games (game_pk, season) VALUES (825106, 2026);
 INSERT INTO comeback_ingested_games (game_pk, season) VALUES (825107, 2026);
 INSERT INTO comeback_ingested_games (game_pk, season) VALUES (825108, 2026);
+INSERT INTO comeback_ingested_games (game_pk, season) VALUES (849799, 2026);
 INSERT INTO comeback_ingested_games (game_pk, season) VALUES (849802, 2026);
 INSERT INTO comeback_ingested_games (game_pk, season) VALUES (849803, 2026);
 INSERT INTO comeback_ingested_games (game_pk, season) VALUES (849804, 2026);
