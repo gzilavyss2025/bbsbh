@@ -182,6 +182,24 @@ export function withCrawlBody(html, card, roster) {
     : withBody
 }
 
+// Our own static shell (a filesystem file — served directly, never rewritten
+// back here, so no loop), fetched over the request's origin to keep the hashed
+// asset refs correct. Memoised per origin for the life of the instance, as
+// api/page.js does: index.html changes only on a deploy, and a deploy gets
+// fresh instances. Without it every deep link cost two CDN requests. A failure
+// is NOT cached, so the next request tries again.
+const shellCache = new Map()
+
+async function appShell(origin) {
+  const cached = shellCache.get(origin)
+  if (cached) return cached
+  const res = await fetch(`${origin}/index.html`, { headers: { Accept: 'text/html' } })
+  if (!res.ok) throw new Error(`index ${res.status}`)
+  const html = await res.text()
+  shellCache.set(origin, html)
+  return html
+}
+
 export default async function handler(req) {
   const url = new URL(req.url)
   const origin = url.origin
@@ -199,13 +217,9 @@ export default async function handler(req) {
     roster = null
   }
 
-  // Fetch our own static shell (a filesystem file — served directly, never
-  // rewritten back here, so no loop) to keep the hashed asset refs correct.
   let html
   try {
-    const res = await fetch(`${origin}/index.html`, { headers: { Accept: 'text/html' } })
-    if (!res.ok) throw new Error(`index ${res.status}`)
-    html = await res.text()
+    html = await appShell(origin)
   } catch {
     // Own origin unreachable (the whole deploy is down) — last resort that
     // can't loop back into this function: bounce the browser to the home route.
