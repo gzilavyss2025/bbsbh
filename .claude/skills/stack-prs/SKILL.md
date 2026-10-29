@@ -5,9 +5,8 @@ description: Combine every open bbsbh PR into one stacked PR, review it, fix wha
 
 # /stack-prs
 
-Land all open PRs as one change. One merge to `main` means one Vercel deployment.
-The Hobby plan allows about 100 deployments a day; one batch per stack keeps `main`
-tidy and each deploy reviewed.
+Land all open PRs as one change. One merge to `main` means one Vercel deployment;
+one batch per stack keeps `main` tidy and each deploy reviewed.
 
 **Invoking this skill is the maintainer's explicit yes to merge to `main`.** The
 orchestrator may also invoke it under the maintainer's standing permission

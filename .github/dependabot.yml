@@ -1,5 +1,5 @@
-# One grouped pull request a week per ecosystem, so dependency updates do not
-# spend a Vercel deployment each (Hobby plan, docs/development.md). A pull request
+# One grouped pull request a week per ecosystem, so dependency updates land as
+# one reviewed deploy (docs/development.md, "Deployment"). A pull request
 # that changes package.json deploys, so the auto-merge rule in
 # .claude/skills/steward/SKILL.md does not apply to it: merge these in a batch.
 version: 2

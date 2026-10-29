@@ -342,7 +342,7 @@ needs him, say exactly that.
 ## Stacking
 
 He gave standing permission (2026-10-08): you run `/stack-prs` on your own, on a
-regular basis. Vercel allows 100 deployments a day, so a stack is cheap.
+regular basis. A stack is one deployment, so it is cheap.
 
 - Stack at a check-in when one or more child PRs are green, finished, and not
   waiting on a pick from him. At most one stack per check-in.
