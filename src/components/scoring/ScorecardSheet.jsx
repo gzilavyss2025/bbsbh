@@ -346,7 +346,7 @@ export function ScorecardSheet({
                         </PlayerLink>
                         {/* The compact rail writes the position under the
                             name, since its Pos column is folded away. */}
-                        {inLens && <span className="sc-sheet__linepos">{line.pos}</span>}
+                        {inLens && <span className="sc-sheet__linepos t-label t-label--nocaps">{line.pos}</span>}
                         <span className="sc-sheet__jersey">{line.jersey}</span>
                       </span>
                     ))}

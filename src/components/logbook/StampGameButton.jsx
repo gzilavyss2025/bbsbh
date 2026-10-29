@@ -112,7 +112,7 @@ export function StampGameButton({ game }) {
         </div>
 
         <div className="stampstrip__say">
-          <span className="stampstrip__eyebrow">Game Log</span>
+          <span className="stampstrip__eyebrow t-label t-label--nocaps">Game Log</span>
           {full ? (
             <p className="stampstrip__lede stampstrip__lede--full">
               Your {season} Game Log is full. Remove a stamp to make room.

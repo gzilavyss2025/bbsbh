@@ -158,7 +158,7 @@ function Entry({ entry, verdicts }) {
   return (
     <article className="researchdiary__entry" id={entry.id}>
       <header className="researchdiary__entryhead">
-        <p className="researchdiary__meta">
+        <p className="researchdiary__meta t-label t-label--nocaps">
           <time dateTime={entry.date}>{entry.date}</time>
           <span className="researchdiary__source">{entry.source}</span>
           <span className={`researchdiary__verdict researchdiary__verdict--${entry.verdict}`}>

@@ -249,7 +249,7 @@ export function LogbookStatsPage({ bookId = null }) {
       <LevelFilterBar value={level} onChange={setLevel} />
 
       {stats.dateRange && (
-        <p className="logbookstats__dateline">
+        <p className="logbookstats__dateline t-label t-label--nocaps">
           <span>{dateLabel(stats.dateRange[0])}</span>
           <i aria-hidden="true" />
           <span>{dateLabel(stats.dateRange[1])}</span>
