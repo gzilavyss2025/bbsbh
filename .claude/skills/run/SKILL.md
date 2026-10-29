@@ -131,8 +131,8 @@ Ready when the terminal prints `ready in`. Navigate directly to
 `http://localhost:5173/{route}?nointro` — don't hit `/` and click through if you
 already know the route (see below), and keep the `?nointro` flag so the welcome
 modal never blocks the first-visit slate. For a user-visible change, keep the
-server running for the maintainer's handoff as required by `AGENTS.md`; stop it
-only when no handoff is needed or when you must release the reserved port.
+server running for the maintainer's handoff (`docs/development.md`, "Local visual handoff"); stop it
+only when no handoff is needed or when you must release the port.
 
 ## Cloud sessions: screenshots with live MLB data
 
