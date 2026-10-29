@@ -1,4 +1,4 @@
-import { fetchTeam, fetchLeagueTeamStats } from '../../../api/team.js'
+import { fetchTeam, fetchLeagueTeamStats, fetchTeamGamesPlayed } from '../../../api/team.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
 import { fetchTeamRecords } from '../../../api/teamRecords.js'
 import { fetchScheduleShape } from '../../../api/scheduleShape.js'
@@ -194,12 +194,14 @@ export async function loadRanks(id, asOf, src = DIRECT) {
     // run the rig; below that there is no level, no fetch, and no card.
     absExposureClubs,
     ilRoster,
+    teamGames,
   ] = await Promise.all([
     sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
     loadCombinedPoolForTeams([{ id }], season, { withHand: true, fetchStats: src.fetchTeamSeasonStats }),
     sportId === 1 ? fetchRunValue() : Promise.resolve(null),
     fetchAbsExposureClubs(absExposureLevel),
     src.fetchTeamIL(id, season),
+    fetchTeamGamesPlayed(id, season),
   ])
 
   const batting = league.hitting.length
@@ -262,6 +264,8 @@ export async function loadRanks(id, asOf, src = DIRECT) {
     // has no rank cells, so no count.
     clubCount: league.hitting.length || league.pitching.length || null,
     leaderPool,
+    // MLB's qualified bar for the leaders' rate categories (3.1 PA / 1.0 IP per game).
+    leaderQualifier: teamGames ? { teamGames, sportId } : 'roster',
     runValue,
     // Handed through whole rather than sliced here: the card ranks this club
     // against every other one in the file, so it needs them all. The level
