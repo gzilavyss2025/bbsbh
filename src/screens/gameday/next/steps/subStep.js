@@ -57,7 +57,15 @@ export function subTap(steps, sub, pitch, live = false) {
 // read is InningViewer's live-edge label, on a half still being played, which yields that flag alone.
 export function nextSub(feed, inning, half, count, sub, pitch) {
   const o = openAtBat(feed, inning, half, count)
-  return o ? subTap(o.steps, sub, pitch, o.card.live === true) : null
+  return o ? subTap(o.steps, sub, pitch, !!o.card.live) : null // live is the feed's count, not a boolean
+}
+
+// A batter at the plate before his first pitch (Gary, 2026-10-29): the open at-bat is live with no
+// sub-step yet, so the advance can step in to it. The stage then shows him, not the last finished
+// at-bat; it reveals nothing (a flag only, the same reach as nextSub's live-edge read).
+export function canStepIn(feed, inning, half, count, sub) {
+  const o = sub === 0 ? openAtBat(feed, inning, half, count) : null
+  return !!o?.card.live && o.steps.length === 0
 }
 
 // A half read back in pitch mode (Gary, 2026-10-28): the reader already revealed it, and paging back
