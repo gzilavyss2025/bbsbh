@@ -400,6 +400,17 @@ export async function fetchLeagueStandings(season, date) {
 const LEAGUE_TEAM_STATS_TTL_MS = 60 * 60 * 1000
 let leagueTeamStatsCache = null // { season, ts, data }
 
+// The club's games played this season — the base of MLB's qualified bar on the
+// team page's leaders. Null when the feed has no row (a season not started).
+export async function fetchTeamGamesPlayed(teamId, season) {
+  try {
+    const data = await getJson(`/api/v1/teams/${teamId}/stats?season=${season}&group=hitting&stats=season`)
+    return data.stats?.[0]?.splits?.[0]?.stat?.gamesPlayed ?? null
+  } catch {
+    return null
+  }
+}
+
 export async function fetchLeagueTeamStats(season) {
   if (!season) return { hitting: [], pitching: [] }
   if (

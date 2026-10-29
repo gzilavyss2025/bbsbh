@@ -95,8 +95,8 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
       {emptyPost && <p className="rnk__empty">No postseason stats yet.</p>}
       {hasLeaders && !emptyPost && (
         <>
-          <TeamLeaders pool={pool} categories={LEDGER_HITTING} limit={5} title="Batting leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
-          <TeamLeaders pool={pool} categories={LEDGER_PITCHING} limit={5} title="Pitching leaders" showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
+          <TeamLeaders pool={pool} categories={LEDGER_HITTING} limit={5} title="Batting leaders" qualifier={showPost ? 'roster' : n.leaderQualifier} showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
+          <TeamLeaders pool={pool} categories={LEDGER_PITCHING} limit={5} title="Pitching leaders" qualifier={showPost ? 'roster' : n.leaderQualifier} showTeamAbbr={false} showCount={false} injuredIds={n.injuredIds} />
         </>
       )}
       {hasLeaders && (

@@ -118,3 +118,23 @@ test('a hitter with no position on file renders no tag rather than a dash', () =
   assert.equal(positionTag({ position: '' }, 'hitting'), '')
   assert.equal(positionTag({}, 'hitting'), '')
 })
+
+// MLB's qualified bar (#team Ranks): 3.1 PA and 1.0 IP per team game in MLB,
+// 2.7 PA and 0.8 IP in the minors. A hot part-timer the roster-relative bar
+// would keep must drop off the rate boards; counting boards keep everyone.
+test('the MLB qualifier holds rate categories to 3.1 PA / 1.0 IP per team game', () => {
+  const hitter = (id, avg, pa) => ({ id, name: `H${id}`, teamId: 158, hitting: { avg, homeRuns: 30 - id, plateAppearances: pa }, pitching: null })
+  const pitcher = (id, era, ip) => ({ id, name: `P${id}`, teamId: 158, hitting: null, pitching: { era, inningsPitched: ip } })
+  const pool = [hitter(1, '.330', 496), hitter(2, '.300', 503), pitcher(3, '2.10', '161.2'), pitcher(4, '3.50', '162.0')]
+  const avg = LEDGER_HITTING.find((c) => c.key === 'avg')
+  const hr = LEDGER_HITTING.find((c) => c.key === 'hr')
+  const era = LEDGER_PITCHING.find((c) => c.key === 'era')
+  const qualifier = { teamGames: 162, sportId: 1 }
+  assert.deepEqual(computeLeaders(pool, avg, { qualifier }).map((r) => r.id), [2])
+  assert.deepEqual(computeLeaders(pool, era, { qualifier }).map((r) => r.id), [4])
+  assert.deepEqual(computeLeaders(pool, hr, { qualifier }).map((r) => r.id), [1, 2])
+  // MLB's bar for 162 games is 502 PA, so a hitter on exactly 502 qualifies.
+  assert.deepEqual(computeLeaders([hitter(5, '.310', 502)], avg, { qualifier }).map((r) => r.id), [5])
+  // The minors' lower bar lets both hitters in.
+  assert.deepEqual(computeLeaders(pool, avg, { qualifier: { teamGames: 162, sportId: 11 } }).map((r) => r.id), [1, 2])
+})
