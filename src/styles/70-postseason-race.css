@@ -1,4 +1,4 @@
-/* Postseason Race: connected league brackets and wild-card standings. */
+/* Postseason Race: league brackets in the homepage rail's look, then the wild-card table. */
 
 .psrace__asof {
   margin: 4px 0 var(--space-3);
@@ -10,54 +10,109 @@
   color: var(--text-caption);
 }
 
-/* American League, then National League, always full width — never side by
-   side. Splitting each league into its own bracket only pays off if each one
-   gets the whole row to stay readable; halving the width back at a desktop
-   breakpoint would just reintroduce the cramped-column truncation problem
-   the split was meant to fix. */
-/* One league's own 3-column bracket. */
-.psrace__miniboard {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0 var(--space-2);
-  margin-top: 4px;
-}
-/* A real Wild Card matchup card holds two independently-tappable SeedRow
-   links rather than opening a series (there's no series yet) — the card
-   itself carries no affordance of its own. */
-.psrace__matchup {
-  cursor: default;
+/* The table under each league's card: a continuation of it, so a tight top margin. */
+.psrace__league > .table {
+  margin-top: var(--space-2);
 }
 
-/* A Division Series card: a real, clickable SeedRow (the bye seed) over a
-   PendingRow (the fixed-but-unplayed Wild Card matchup that feeds this
-   slot). `.psrace__ds` only overrides the pointer — `.seed`'s own
-   column layout and border already fit this card unchanged. */
-.psrace__ds {
-  cursor: default;
+/* One league's tree inside its stamped card (FullBracket's rail tree, drawn with
+   CSS): three columns that fit a phone, elbow connectors in pencil (nothing is
+   decided on this page), seed + mark + abbreviation in each row. */
+.psrace__card {
+  margin-top: var(--space-4);
 }
-.seedrow--pending {
-  color: var(--text-caption);
+.psrace__tree {
+  --bracket-gap: 14px;
+  --row-h: 30px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--bracket-gap);
+  max-width: 480px;
 }
-.seedrow--pending .seedrow__seed {
-  color: var(--text-caption);
-}
-.seedrow__pendteams {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  flex: 1;
-  min-width: 0;
-}
-.seedrow__pendslash {
-  color: var(--text-caption);
-  font-size: var(--fs-caption);
-}
-.seedrow__pendlabel {
-  flex: none;
+.psrace__collabel {
+  margin: 0 0 var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-label);
-  font-style: italic;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.psrace__format {
+  display: block;
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+.psrace__lanes {
+  position: relative;
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  height: calc(var(--row-h) * 4 + var(--space-4) * 2);
+  align-items: center;
+}
+.psrace__round--cs .psrace__lanes { grid-template-rows: 1fr; }
+.psrace__box {
+  position: relative;
+  border: var(--bw-hair) solid var(--graphite);
+  background: var(--surface-card);
+}
+.psrace__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--row-h);
+  padding: 0 var(--space-1);
+  color: var(--text-body);
+  text-decoration: none;
+}
+.psrace__box > .psrace__row { box-sizing: border-box; width: 100%; }
+.psrace__row + .psrace__row { border-top: var(--bw-hair) solid var(--border-rule); }
+.psrace__row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.psrace__row--bye { background: var(--surface-stamped-tint); }
+.psrace__row--open .pbkt-blank { flex: 1; margin: 0 var(--space-1); }
+.psrace__seed {
+  width: 1ch;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.psrace__abbr {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+}
+
+/* Connectors: Wild Card straight across to its Division box's open row; the two
+   Division boxes join midway, then run into the LCS box. */
+.psrace__round--wc .psrace__box::after,
+.psrace__round--ds .psrace__box::after,
+.psrace__round--cs .psrace__box::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: var(--bracket-gap);
+  border-top: var(--bw-hair) dashed var(--text-caption);
+  pointer-events: none;
+}
+.psrace__round--wc .psrace__box::after { top: 75%; }
+.psrace__round--ds .psrace__box::after { width: calc(var(--bracket-gap) / 2); }
+.psrace__round--ds .psrace__lanes::after {
+  content: '';
+  position: absolute;
+  left: calc(100% + var(--bracket-gap) / 2);
+  top: 25%;
+  height: 50%;
+  border-left: var(--bw-hair) dashed var(--text-caption);
+}
+.psrace__round--cs .psrace__box::before { left: auto; right: 100%; width: calc(var(--bracket-gap) / 2); }
+
+.psrace__guide {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
 
@@ -68,90 +123,4 @@
   line-height: var(--lh-body);
   color: var(--text-caption);
   text-align: center;
-}
-
-/* The condensed wild-card table under each league's bracket — tighter top
-   margin than a full standalone section gets, since it's a continuation of
-   the bracket above it, not its own page section. */
-.psrace__league > .table {
-  margin-top: var(--space-2);
-}
-
-/* Connected rounds keep their geometry on phones inside a local scroller. */
-.psrace__guide, .psrace__scrollhint, .psrace__destination {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-caption);
-}
-.psrace__guide { margin: var(--space-3) 0; }
-.psrace__scrollhint { display: none; }
-.psrace__scroll { overflow-x: auto; padding: 2px; }
-.psrace__scroll:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.psrace__miniboard {
-  --bracket-gap: 40px;
-  column-gap: var(--bracket-gap);
-  min-width: 660px;
-}
-.psrace__round .psbracket__collabel {
-  margin: 0;
-  padding: var(--space-2) 0;
-  border-bottom: var(--bw-hair) solid var(--border-rule);
-  text-align: left;
-}
-.psrace__format {
-  display: block;
-  margin-top: 4px;
-  color: var(--text-caption);
-  font-size: var(--fs-label);
-  font-weight: var(--w-regular);
-}
-.psrace__round .psbracket__lanes {
-  position: relative;
-  display: grid;
-  grid-template-rows: repeat(2, 1fr);
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
-  height: 248px;
-  flex: none;
-  align-items: center;
-}
-.psrace__round--cs .psbracket__lanes { grid-template-rows: 1fr; }
-.psrace__miniboard .seed { padding: 0; gap: 0; border-radius: 0; cursor: default; }
-.psrace__miniboard .seedrow { min-height: 44px; padding: var(--space-2); color: var(--text-body); }
-.psrace__miniboard .seedrow + .seedrow { border-top: var(--bw-hair) solid var(--border-rule); }
-.psrace__miniboard .seedrow__name { font-weight: var(--w-semibold); }
-.psrace__miniboard .seedrow__seed { color: var(--text-body); }
-.psrace__miniboard .seedrow:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
-.psrace__bye { font-family: var(--font-display); font-size: var(--fs-label); color: var(--text-caption); }
-/* The two Division Series paths join midway before the Championship. */
-.psrace__round--wc .seed::after,
-.psrace__round--ds .seed::after,
-.psrace__round--cs .seed::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 100%;
-  width: var(--bracket-gap);
-  border-top: var(--bw-hair) solid var(--text-caption);
-  pointer-events: none;
-}
-.psrace__round--ds .seed::after { width: calc(var(--bracket-gap) / 2); }
-.psrace__round--ds .psbracket__lanes::after {
-  content: '';
-  position: absolute;
-  left: calc(100% + var(--bracket-gap) / 2);
-  top: 25%;
-  height: 50%;
-  border-left: var(--bw-hair) solid var(--text-caption);
-}
-.psrace__round--cs .seed::before { left: auto; right: 100%; width: calc(var(--bracket-gap) / 2); }
-.psrace__miniboard .seed--tbd { opacity: 1; border-style: solid; }
-.psrace__miniboard .seedrow--pending,
-.psrace__miniboard .seedrow--tbd { color: var(--text-caption); background: var(--bg-canvas); font-style: normal; }
-.psrace__destination { margin: 0 0 var(--space-4); text-align: right; }
-@media (max-width: 739px) {
-  .psrace__scrollhint { display: block; margin: 0 0 var(--space-2); }
-  .psrace__destination { margin-top: var(--space-2); text-align: left; }
 }

@@ -28,6 +28,10 @@ const ALLOWED = {
     ['34-postseason.css', '.seed--bye'],
     ['80-postseason-bracket.css', '.pbkt-mark--empty'],
     ['80-postseason-bracket.css', '.pbkt-blank'],
+    ['70-postseason-race.css', '.psrace__round--wc .psrace__box::after'], // the race bracket's connectors: no series decided yet, pencil as on the homepage rail
+    ['70-postseason-race.css', '.psrace__round--ds .psrace__box::after'],
+    ['70-postseason-race.css', '.psrace__round--cs .psrace__box::before'],
+    ['70-postseason-race.css', '.psrace__round--ds .psrace__lanes::after'],
     ['postseason/series-live.css', '.psseries__starter .projection'],
     ['postseason/primer-main.css', '.seriesribbon__game--ahead'], // a game still to play
     ['postseason/primer-main.css', '.seriesribbon__game--ifNecessary'], // a game that may not be played
