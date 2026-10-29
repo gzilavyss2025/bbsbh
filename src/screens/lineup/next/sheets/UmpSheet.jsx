@@ -1,19 +1,34 @@
+import { useState } from 'react'
 import { loadUmpire } from '../../../../api/umpires.js'
-import { PostseasonPlateLine } from '../../../../components/umpire/PostseasonPlateLine.jsx'
+import { postseasonPlateLine } from '../../../../components/umpire/postseasonPlateLine.js'
 import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { Door } from '../../../../components/ui/control/Door.jsx'
 import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
-import { monthDayName } from '../../../../lib/dates.js'
 import { useNav } from '../../../../lib/nav.js'
 import { gamePath, umpirePath } from '../../../../lib/route.js'
 import { HomePlateIcon } from '../../../../components/badges/UmpireTierGlyph.jsx'
 import { UmpireZoneMap } from '../../../../components/umpire/UmpireZoneMap.jsx'
+import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { LEAN_TIERS, LEAN_TIER_LABELS, leanCaretFraction } from '../../../../lib/statTiers.js'
 import { SheetFrame } from './SheetFrame.jsx'
 
+// "10/24" from "2026-10-24" (Gary, 2026-10-29).
+const numericDate = (iso) => (iso ? `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}` : '')
 const pct = (x) => (x == null ? '—' : `${(x * 100).toFixed(1)}%`)
 const HAND = { L: 'left-handers', R: 'right-handers' }
+
+// The batter the area to watch is about, beside the zone map: Gameday's generic "immortal"
+// figure (docs/gameday-assets.md) in that hand's stance. The art is drawn from the catcher's
+// side; the map is seen from the pitcher's, so it is mirrored (CSS). Drawn only when the tendency
+// names a hand, and dropped if the unofficial CDN fails (Gary, 2026-10-29).
+const IMMORTAL = 'https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/batters/immortal'
+function WatchBatter({ hand }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return null
+  const stance = hand === 'L' ? 'left' : 'right'
+  return <img className="lump__batter" src={`${IMMORTAL}/${stance}/GENERIC-home.png`} alt="" aria-hidden="true" onError={() => setFailed(true)} />
+}
 
 function Tile({ label, value, sup }) {
   return (
@@ -50,6 +65,8 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
     navigate(gamePath(g.date, g.awayAbbr, g.homeAbbr, 'boxscore', g.gameNumber))
   }
   const season = u?.accuracy?.season
+  const postSeason = u?.accuracyPost?.season
+  const post = postseasonPlateLine(postSeason)
   const { lean, watchArea, zoneCells, rank, challenges, leagueChallenges } = u ?? {}
   return (
     <SheetFrame title="Umpire tendencies" label={u?.name ? `Umpire tendencies for ${u.name}` : 'Umpire tendencies'} onClose={onClose}>
@@ -71,12 +88,25 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
       </div>
       {season?.called > 0 && (
         <>
+          <h4 className="lsheet__head">Regular season · {season.games} {season.games === 1 ? 'game' : 'games'}</h4>
           <dl className="lump__tiles">
             <Tile label="Accuracy" value={pct(season.accuracy)} />
             {rank ? <Tile label="Rank" value={rank.rank} sup={`/${rank.total}`} /> : <Tile label="Called" value={season.called.toLocaleString()} />}
             <Tile label="Consistency" value={pct(season.consistency)} />
             <Tile label="Run impact" value={season.favorPerGame?.toFixed(1) ?? '—'} sup="/gm" />
           </dl>
+          {post && (
+            <>
+              {/* The postseason in the same tiles as the season, under its own head (Gary, 2026-10-29).
+                  Still unranked: postseasonPlateLine takes no rank (api/umpires.js). */}
+              <h4 className="lsheet__head">Postseason · {post.games} {post.games === 1 ? 'game' : 'games'}</h4>
+              <dl className="lump__tiles lump__tiles--three">
+                <Tile label="Accuracy" value={post.accuracy} />
+                <Tile label="Consistency" value={pct(postSeason.consistency)} />
+                <Tile label="Run impact" value={postSeason.favorPerGame?.toFixed(1) ?? '—'} sup="/gm" />
+              </dl>
+            </>
+          )}
           {lean && (
             <>
               <h4 className="lsheet__head">Zone lean</h4>
@@ -100,7 +130,14 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
                   <b>{watchArea ? `${watchArea.phrase}${watchArea.hand ? ` to ${HAND[watchArea.hand]}` : ''}` : 'No clear tendency'}</b>
                   <p className="lump__meta">Batter’s view. Outlined where his misses run above the league average.</p>
                 </div>
-                {zoneCells && <UmpireZoneMap cells={zoneCells} />}
+                {zoneCells && (
+                  // The map runs outside -> inside, left to right. A lefty stands on the left from the
+                  // pitcher's side, so for him the map is mirrored to put inside next to him.
+                  <div className={`lump__zone${watchArea?.hand === 'L' ? ' lump__zone--left' : ''}`}>
+                    <UmpireZoneMap cells={zoneCells} />
+                    {watchArea?.hand && <WatchBatter hand={watchArea.hand} />}
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -109,9 +146,15 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
               <h4 className="lsheet__head">ABS challenges</h4>
               <dl className="lump__tiles lump__tiles--two">
                 <Tile label="Per game" value={challenges.perGame.toFixed(1)} />
-                <Tile label="Overturned" value={pct(challenges.overturnRate)} sup="*" />
+                <Tile label="Overturned" value={pct(challenges.overturnRate)} />
+                {/* The league's rate as the box's own last row, not a footnote under it (Gary, 2026-10-29). */}
+                {leagueChallenges?.overturnRate != null && (
+                  <div className="lump__tilefoot">
+                    <dt>League average</dt>
+                    <dd>{pct(leagueChallenges.overturnRate)} overturned</dd>
+                  </div>
+                )}
               </dl>
-              {leagueChallenges?.overturnRate != null && <p className="lsheet__foot">*League average: {pct(leagueChallenges.overturnRate)} overturned</p>}
             </>
           )}
           <p className="lsheet__foot">
@@ -120,16 +163,24 @@ export function UmpSheet({ id, plate = true, seasonYear, onClose }) {
           </p>
         </>
       )}
-      <PostseasonPlateLine post={u?.accuracyPost?.season} />
+      {/* No regular-season tiles to sit beside: the postseason line stands alone. */}
+      {post && !(season?.called > 0) && <p className="hint">{post.text}</p>}
       {hpGames.length > 0 && (
         <>
           <h4 className="lsheet__head">Last {hpGames.length} behind the plate</h4>
           <ul className="lump__games">
+            <li className="lump__game lump__game--head" aria-hidden="true">
+              <span>Date</span>
+              <span>Game</span>
+              <span>Accuracy</span>
+            </li>
             {hpGames.map((g) => (
               <li key={`${g.gamePk}-${g.gameNumber}`} className="lump__game">
-                <span>{monthDayName(g.date)}</span>
+                <span>{numericDate(g.date)}</span>
                 <button type="button" className="plink" onClick={() => openGame(g)}>
-                  {g.awayAbbr} @ {g.homeAbbr}
+                  {/* Club marks, not abbreviations (Gary, 2026-10-29); the abbreviation stays the name. */}
+                  <TeamLogo teamId={g.awayId} name={g.awayAbbr} size={20} /> @ <TeamLogo teamId={g.homeId} name={g.homeAbbr} size={20} />
+                  <span className="sr-only">{g.awayAbbr} at {g.homeAbbr}</span>
                 </button>
                 {mixed && (g.level ?? 'MLB') === 'AAA' && <Pill>AAA</Pill>}
                 <b>{g.row?.called ? `${((g.row.correct / g.row.called) * 100).toFixed(1)}%` : '—'}</b>

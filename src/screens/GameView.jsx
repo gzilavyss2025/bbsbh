@@ -340,6 +340,7 @@ export function GameView({ game, section, onSection }) {
           onNext={() => onSection('lineup2')}
           // The home club by its name, "Rays ›" (Gary, 2026-10-28).
           nextLabel={`${feed?.gameData?.teams?.home?.clubName || 'Home team'} ›`}
+          nextTeamId={feed?.gameData?.teams?.home?.id ?? null}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}

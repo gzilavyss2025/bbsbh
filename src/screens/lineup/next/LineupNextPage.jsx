@@ -24,6 +24,7 @@ import '../../../styles/lineup-next/field.css'
 import '../../../styles/lineup-next/series.css'
 import '../../../styles/lineup-next/sheet.css'
 import '../../../styles/lineup-next/grid.css'
+import { slateToday } from '../../../lib/dates.js'
 
 // The new lineup page (docs/lineup-redesign.md), at `?look=new` on lineup1 and lineup2.
 // It takes the props TeamInfo takes, plus the game chrome the live page leaves to GameView
@@ -33,11 +34,12 @@ export function LineupNextPage({
   feed, side, game, tabs, onSection, isLive, keepAwake, onSetKeepAwake, series, onSketch,
   manager, uniform, uniformFigure, treatment, oppTreatment, broadcast, scorebookWeather, scorebookWeatherLoading,
   oppPitcherLine, vsTeam, prospectsData, rookiesData, formerTeammatesData, careerMatchupsData, workloadData, callouts,
-  onNext, nextLabel, onCatchUp = null, onReload, loading, lastUpdated,
+  onNext, nextLabel, nextTeamId = null, onCatchUp = null, onReload, loading, lastUpdated,
 }) {
   const [sheet, setSheet] = useState(false)
   const id = lineupIdentity(feed, side, treatment, oppTreatment)
   const info = selectGameInfo(feed)
+  const pastGame = Boolean(info.officialDate) && info.officialDate < slateToday()
   const officials = selectOfficials(feed)
   const data = {
     gamePk: feed?.gamePk,
@@ -93,7 +95,8 @@ export function LineupNextPage({
           />
         )}
         <LineupDock
-          onReload={onReload}
+          // A game from a past day is settled: its data will not change, so no Refresh.
+          onReload={pastGame ? null : onReload}
           loading={loading}
           lastUpdated={lastUpdated}
           isLive={isLive}
@@ -102,6 +105,9 @@ export function LineupNextPage({
           onCatchUp={onCatchUp}
           onNext={onNext}
           nextLabel={nextLabel}
+          nextTeamId={nextTeamId}
+          tabs={tabs}
+          onSection={onSection}
         />
       </Stack>
     </div>

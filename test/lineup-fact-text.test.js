@@ -1,12 +1,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parkShort, shortDate } from '../src/screens/lineup/next/logic/factText.js'
+import { parkShort, longDate } from '../src/screens/lineup/next/logic/factText.js'
 import { seriesPosition } from '../src/screens/lineup/next/logic/seriesPosition.js'
 
-test('the date prints as weekday, month and day', () => {
-  assert.equal(shortDate('2026-10-14'), 'Wed Oct 14')
-  assert.equal(shortDate(''), '')
-  assert.equal(shortDate('not a date'), '')
+test('the date prints in full: weekday, month, day and year', () => {
+  assert.equal(longDate('2026-10-24'), 'Saturday, October 24, 2026')
+  assert.equal(longDate(''), '')
+  assert.equal(longDate('not a date'), '')
 })
 
 test('a sponsor name is dropped from "<sponsor> at <park>"', () => {

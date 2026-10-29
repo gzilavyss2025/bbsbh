@@ -5,8 +5,13 @@ import { FactGrid } from '../../../components/ui/frame/FactGrid.jsx'
 import { ballparkFor, rankedDimensions } from '../../../lib/ballpark/ballparkData.js'
 import { resolveBallparkLayout } from '../../../lib/ballpark/layout/resolveLayout.js'
 import { managerFact } from '../../../components/team/ManagerFact.jsx'
+import { managerFactParts } from '../../../components/team/managerFactParts.js'
+import { loadManagerHistory, seasonOfRun } from '../../../api/managers.js'
+import { useAsync } from '../../../hooks/useAsync.js'
+import { ordinal } from '../../../lib/format.js'
+import { teamClubNameShort } from '../../../lib/teams.js'
 import { CrowdIcon } from '../parts.jsx'
-import { parkShort, shortDate } from './logic/factText.js'
+import { parkShort, longDate } from './logic/factText.js'
 import { ParkSheet } from './sheets/ParkSheet.jsx'
 import { UmpSheet } from './sheets/UmpSheet.jsx'
 
@@ -93,27 +98,39 @@ function CrowdCell({ info }) {
 // The fact strip and the crew, in two strips under the hero. Weather is the outdoor reading
 // (Box weather shows only when it is missing). The Uniform glyph opens the crest sheet. The
 // crew is UmpiresCard's cells; before the crew posts the strip says so in one cell.
+// The Manager cell, plus which season of his run with this club this is ("5th season as Rays
+// manager"), from the manager-history shards. Wide screens only (.lfact__tenure); a manager
+// with no history on file, or a first read still in flight, shows no line.
+function ManagerCell({ manager, teamId, season }) {
+  const personId = managerFactParts(manager)?.personId ?? null
+  const { data } = useAsync(() => (personId ? loadManagerHistory(personId) : Promise.resolve(null)), [personId])
+  const n = data && teamId ? seasonOfRun(data.stints, teamId, Number(season)) : null
+  const note = n ? <p className="lfact__tenure">{ordinal(n)} season<br />as {teamClubNameShort(teamId)} manager</p> : null
+  return <Cell label="Manager" value={managerFact(manager)} note={note} />
+}
+
 export function LineupFacts({ feed, side, info, officials, season, manager, uniform, broadcast, weather, weatherLoading, onUniform }) {
   const boxWeather = !weatherLoading && !weather?.text && Boolean(info.weather)
-  // Date, park, weather, attendance, manager, uniform, plus Box weather and Broadcast when shown.
+  // Date, park, weather, attendance, manager, uniform, broadcast, plus Box weather when shown.
   // The strip splits them into two even rows on a wide screen (see .lnext__facts--7 and --8), so a
   // cell never sits alone on a row of its own.
-  const count = 6 + (boxWeather ? 1 : 0) + (side === 'away' ? 1 : 0)
+  // Both clubs' pages show the same cells in the same order, Broadcast included (Gary, 2026-10-29).
+  const count = 7 + (boxWeather ? 1 : 0)
   return (
     <>
       <FactGrid look="strip" className={`lnext__facts lnext__facts--${count}`}>
-        <Cell label="Date" value={shortDate(info.officialDate)} />
+        <Cell label="Date" value={longDate(info.officialDate)} />
         <ParkCell info={info} />
         <Cell label="Weather" value={weatherLoading ? '…' : weather?.text} />
         {boxWeather && <Cell label="Box weather" value={info.weather} />}
         <CrowdCell info={info} />
-        <Cell label="Manager" value={managerFact(manager)} />
+        <ManagerCell manager={manager} teamId={feed?.gameData?.teams?.[side]?.id ?? null} season={season} />
         <Cell
           label="Uniform"
           value={uniform}
           glyph={uniform && <Glyph label={`Uniform and marks: ${uniform}`} onClick={onUniform}><ShirtIcon /></Glyph>}
         />
-        {side === 'away' && <Cell label="Broadcast" value={broadcast} />}
+        <Cell label="Broadcast" value={broadcast} />
       </FactGrid>
       <FactGrid look="strip" className={`lnext__facts lnext__umps lnext__umps--${officials.length}`}>
         {officials.length === 0 && !selectRecordIsClosed(feed) && <Cell label="Umpires" value="Not posted yet" />}
