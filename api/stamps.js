@@ -54,6 +54,7 @@ import {
   normalizeStamp,
   sanitizeNote,
   seasonFromDate,
+  recordAfterGame,
   toGamePk,
 } from '../src/lib/stamps.js'
 import { authenticateUser } from './_lib/auth.js'
@@ -86,6 +87,8 @@ function sideFacts(side, lineSide) {
     name: side?.team?.name ?? '',
     locationName: side?.team?.locationName ?? '',
     teamName: side?.team?.teamName ?? '',
+    franchiseName: side?.team?.franchiseName ?? '',
+    record: recordAfterGame(side?.leagueRecord),
     runs: typeof lineSide?.runs === 'number' ? lineSide.runs : (side?.score ?? null),
     hits: typeof lineSide?.hits === 'number' ? lineSide.hits : null,
     errors: typeof lineSide?.errors === 'number' ? lineSide.errors : null,

@@ -35,6 +35,25 @@ it does not mint a second collectible or replace the circular stamp.
   doubleheader meaning. The live feed does not provide a series game number;
   that field is omitted on the box score instead of adding a second request.
 
+## Records, game number and city (Gary, 2026-10-29)
+
+- Under each header mark: the club's record after this game. A regular-season
+  pass reads it from its own facts (`record` per side, the feed's leagueRecord,
+  this game included; all three producers keep it). In the postseason the feeds
+  report only the SERIES record, so `useClubRecord` asks `src/api/heritage/records.js`
+  for the club's year of games (one ~50 KB request per club and season, shared)
+  and `yearRecordThrough` adds every postseason game through this one to the final
+  regular-season record. 2022 World Series Game 1 reads Phillies 97-77, Astros
+  113-57. Older facts without `record` take the same request.
+- The ribbon numbers a regular-season game by the reader's favorite club's season
+  game when that club played, else the home club's (`seasonGame`). Postseason
+  passes keep the series game.
+- The city line is `passCity`: the franchise name ("New York", not the feed's
+  "Flushing"), else the full name minus the nickname, else `locationName`.
+- Header marks are larger. A badge mark whose first shape is a dark disc (the
+  Brewers' roundel) knocks that disc out (`badgeFieldPins`), so its art reads on
+  the navy band; of all 30 MLB clubs' header picks, only the Brewers' changes.
+
 ## Stadium artwork
 
 The component accepts an optional `artwork={{ src, alt }}`; it never resolves a
@@ -43,7 +62,7 @@ venue itself. Callers (the box score and `HeritagePassPages`) pass
 to `public/heritage-art/{parkKey}.webp`. Five parks have art (Gary, 2026-10-29):
 American Family Field, Fenway Park, Tropicana Field, Wrigley Field, Yankee
 Stadium. Each is a navy-on-cream engraving, 900px wide, transparent outside the
-drawing. Every game at those parks gets its art, whatever the year; `FORMER`
+drawing. It bleeds to the frame's inner rule and is cropped there. Every game at those parks gets its art, whatever the year; `FORMER`
 maps Miller Park (before 2021) to American Family Field. The drawings keep their
 sponsor and club marks by Gary's choice (2026-10-29). Any other park, and a file that fails to load, leaves the engraved venue
 name. Add a park by adding its webp and one line to `ART`, one ballpark at a time.

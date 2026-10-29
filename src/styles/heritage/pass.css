@@ -37,7 +37,7 @@
 /* layout-exempt: two small secondary marks frame the league emblem */
 .heritagepass__league {
   display: grid;
-  grid-template-columns: clamp(28px, 12cqw, 48px) minmax(0, 1fr) clamp(28px, 12cqw, 48px);
+  grid-template-columns: clamp(44px, 20cqw, 76px) minmax(0, 1fr) clamp(44px, 20cqw, 76px);
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-2) var(--space-4);
@@ -49,7 +49,15 @@
   letter-spacing: var(--ls-display);
   line-height: var(--lh-compact);
 }
-.heritagepass__secondary { display: block; width: 100%; height: 48px; object-fit: contain; }
+.heritagepass__club { align-items: center; }
+.heritagepass__secondary { display: block; width: 100%; height: clamp(44px, 18cqw, 68px); object-fit: contain; }
+.heritagepass__record {
+  font-family: "Big Shoulders Display", var(--font-display);
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-display);
+  white-space: nowrap;
+}
 .heritagepass__league-emblem { position: relative; display: block; padding-inline: var(--space-4); }
 .heritagepass__league-emblem > img { display: block; width: 100%; height: 46px; object-fit: contain; }
 .heritagepass__league-emblem::before,
@@ -166,15 +174,28 @@
 }
 .heritagepass__score[data-long] { font-size: clamp(var(--fs-h1), 13cqw, var(--fs-display-lg)); }
 .heritagepass__bats svg { display: block; width: 100%; }
-.heritagepass__venue { flex: 1; align-content: end; min-height: 64px; }
-.heritagepass__art { display: block; width: 100%; max-height: 200px; object-fit: contain; margin-top: var(--space-3); }
+/* layout-exempt: the art slot grows into the ticket's spare height and sits on the stub */
+.heritagepass__venue { flex: 1; display: flex; flex-direction: column; justify-content: end; min-height: 64px; }
+/* The engraving bleeds to the frame's inner rule (x 22 of the 360-unit frame) and
+   is cropped there. It grows into whatever height the ticket leaves between the
+   scores and the stub, so there is no empty band above or below it.
+   raw-value-exempt: frame artwork units. */
+.heritagepass__art {
+  display: block;
+  flex: 1 1 0;
+  width: calc(100% + 2 * (var(--space-6) - 22cqw * 100 / 360));
+  min-height: 40cqw;
+  margin: var(--space-2) calc(22cqw * 100 / 360 - var(--space-6)) 0;
+  object-fit: cover;
+  object-position: center bottom;
+}
 /* layout-exempt: date and venue share the two compartments of the ticket stub */
 .heritagepass__foot {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
   min-height: 54px;
-  margin-top: var(--space-3);
+  margin-top: var(--space-1);
   padding: var(--space-2) var(--space-1) 0;
   border-top: 3px double currentColor;
   text-align: center;

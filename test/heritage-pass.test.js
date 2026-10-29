@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync, existsSync } from 'node:fs'
-import { heritagePassModel, passDate, passPage } from '../src/lib/heritage/pass.js'
+import { factsRecord, heritagePassModel, passCity, passDate, passPage, passRecordText, yearRecordThrough } from '../src/lib/heritage/pass.js'
 import { stampGameFacts } from '../src/api/logbook.js'
 import { revealStampFacts } from '../src/api/linescore.js'
 import { parseRoute } from '../src/lib/route.js'
-import { secondaryLogoSvg } from '../src/lib/heritage/marks.js'
+import { badgeFieldPins, secondaryLogoSvg } from '../src/lib/heritage/marks.js'
+import { recordAfterGame } from '../src/lib/stamps.js'
 import { heritageArt } from '../src/lib/heritage/art.js'
 import { logoCdnUrl } from '../src/lib/logoCdn.js'
 
@@ -133,4 +134,70 @@ test('stadium artwork resolves by park key and every mapped file ships', () => {
   for (const venue of ['Fenway Park', 'Tropicana Field', 'Wrigley Field', 'Yankee Stadium', 'American Family Field']) {
     assert.ok(existsSync(new URL(`../public${heritageArt(venue).src}`, import.meta.url)), venue)
   }
+})
+
+test('the city line prefers the franchise name over the feed location', () => {
+  assert.equal(passCity({ name: 'New York Mets', teamName: 'Mets', locationName: 'Flushing', franchiseName: 'New York' }), 'New York')
+  // Facts saved before franchiseName was kept: the club name still carries the city.
+  assert.equal(passCity({ name: 'New York Mets', teamName: 'Mets', locationName: 'Flushing' }), 'New York')
+  assert.equal(passCity({ name: 'Athletics', teamName: 'Athletics', locationName: 'Sacramento', franchiseName: 'Athletics' }), 'Sacramento')
+  assert.equal(passCity({ name: 'Arizona Diamondbacks', teamName: 'D-backs', locationName: 'Phoenix', franchiseName: 'Arizona' }), 'Arizona')
+  assert.equal(passCity({ name: 'Somewhere', teamName: '' }), '')
+})
+
+test('a regular-season pass numbers the favorite club\'s season game, else the home club\'s', () => {
+  const game = { ...regular, away: { ...regular.away, record: { wins: 42, losses: 59, ties: 0 } }, home: { ...regular.home, record: { wins: 63, losses: 37, ties: 0 } } }
+  assert.equal(heritagePassModel(game, regular.away.id).seasonGame, 101)
+  assert.equal(heritagePassModel(game, regular.home.id).seasonGame, 100)
+  assert.equal(heritagePassModel(game, null).seasonGame, 100)
+  assert.equal(heritagePassModel({ ...game, home: { ...game.home, record: null } }, null).seasonGame, null)
+  assert.equal(heritagePassModel({ ...game, gameType: 'W' }, null).seasonGame, null)
+})
+
+test('the record after the game comes from the feed record, this game included', () => {
+  assert.deepEqual(recordAfterGame({ wins: 63, losses: 37, ties: 0 }), { wins: 63, losses: 37, ties: 0 })
+  assert.equal(recordAfterGame(undefined), null)
+  assert.equal(recordAfterGame({ wins: 0, losses: 0 }), null)
+})
+
+// Phillies 2022, trimmed from /schedule?teamId=143&season=2022&gameType=R,F,D,L,W:
+// their last regular-season game, two Wild Card wins, a postponed row and World Series Games 1-2.
+const row = (gamePk, gameType, away, home, winner, state = 'Final') => ({
+  gamePk, gameType, status: { detailedState: state },
+  teams: {
+    away: { team: { id: away.id }, leagueRecord: away.record, isWinner: winner === away.id },
+    home: { team: { id: home.id }, leagueRecord: home.record, isWinner: winner === home.id },
+  },
+})
+const phi2022 = [
+  row(663127, 'R', { id: 143, record: { wins: 87, losses: 75, ties: 0 } }, { id: 144, record: { wins: 101, losses: 61, ties: 0 } }, 144),
+  row(715764, 'F', { id: 143, record: { wins: 1, losses: 0 } }, { id: 138, record: { wins: 0, losses: 1 } }, 143),
+  row(715763, 'F', { id: 138, record: { wins: 0, losses: 2 } }, { id: 143, record: { wins: 2, losses: 0 } }, 143),
+  row(715760, 'W', { id: 143, record: { wins: 0, losses: 0 } }, { id: 117, record: { wins: 0, losses: 0 } }, null, 'Postponed'),
+  row(715724, 'W', { id: 143, record: { wins: 1, losses: 0 } }, { id: 117, record: { wins: 0, losses: 1 } }, 143),
+  row(715723, 'W', { id: 143, record: { wins: 1, losses: 1 } }, { id: 117, record: { wins: 1, losses: 1 } }, 117),
+]
+
+test('a postseason record adds the year\'s postseason games to the final regular season', () => {
+  assert.deepEqual(yearRecordThrough(phi2022, 143, 715724), { wins: 90, losses: 75 })
+  assert.deepEqual(yearRecordThrough(phi2022, 143, 715723), { wins: 90, losses: 76 })
+  assert.deepEqual(yearRecordThrough(phi2022, 143, 663127), { wins: 87, losses: 75 })
+  assert.equal(yearRecordThrough(phi2022, 143, 999), null)
+  assert.equal(yearRecordThrough([], 143, 715724), null)
+})
+
+test('a pass reads regular-season records from its own facts', () => {
+  const game = { ...regular, away: { ...regular.away, record: { wins: 42, losses: 59, ties: 0 } }, home: { ...regular.home, record: null } }
+  assert.deepEqual(factsRecord(game, 'away'), { wins: 42, losses: 59 })
+  assert.equal(factsRecord(game, 'home'), null)
+  assert.equal(factsRecord({ ...game, gameType: 'W' }, 'away'), null)
+  assert.equal(passRecordText({ wins: 90, losses: 75 }), '90–75')
+  assert.equal(passRecordText(null), '')
+})
+
+test('a dark badge field is knocked out so its art reads on the navy band', () => {
+  const badge = '<svg viewBox="0 0 10 10"><path d="M0 0h10v10H0z" fill="#12284b"/><path d="M2 2h6v6H2z" fill="#ffc52f"/><path d="M4 4h2v2H4z" fill="#fff"/></svg>'
+  assert.deepEqual(badgeFieldPins(badge), { 0: 'knockout', 1: 'ink', 2: 'ink' })
+  const wordmark = '<svg viewBox="0 0 10 10"><path d="M0 0h4v4H0z" fill="#12284b"/><path d="M5 5h4v4H5z" fill="#ffc52f"/></svg>'
+  assert.equal(badgeFieldPins(wordmark), null)
 })

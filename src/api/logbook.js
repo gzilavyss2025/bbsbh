@@ -1,5 +1,6 @@
 import { chunk } from '../lib/math/number.js'
 import { getJson } from './statsapi.js'
+import { recordAfterGame } from '../lib/stamps.js'
 
 // The Logbook's game facts — runs, clubs, venue, innings — for a set of stamped
 // gamePks (ADR-0035).
@@ -58,6 +59,8 @@ export function stampGameFacts(game) {
       name: team.name ?? '',
       locationName: team.locationName ?? '',
       teamName: team.teamName ?? '',
+      franchiseName: team.franchiseName ?? '',
+      record: recordAfterGame(game.teams?.[key]?.leagueRecord),
       runs: typeof totals.runs === 'number' ? totals.runs : (game.teams?.[key]?.score ?? null),
       hits: typeof totals.hits === 'number' ? totals.hits : null,
       errors: typeof totals.errors === 'number' ? totals.errors : null,

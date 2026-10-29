@@ -20,21 +20,33 @@
         "id": 158,
         "abbreviation": "MIL",
         "name": "Milwaukee Brewers",
+        "locationName": "Milwaukee",
+        "teamName": "Brewers",
+        "franchiseName": "Milwaukee",
+        "record": {
+          "wins": 58,
+          "losses": 33,
+          "ties": 0
+        },
         "runs": 10,
         "hits": 11,
-        "errors": 0,
-        "teamName": "Brewers",
-        "locationName": "Milwaukee"
+        "errors": 0
       },
       "home": {
         "id": 138,
         "abbreviation": "STL",
         "name": "St. Louis Cardinals",
+        "locationName": "St. Louis",
+        "teamName": "Cardinals",
+        "franchiseName": "St. Louis",
+        "record": {
+          "wins": 47,
+          "losses": 43,
+          "ties": 0
+        },
         "runs": 2,
         "hits": 4,
-        "errors": 0,
-        "teamName": "Cardinals",
-        "locationName": "St. Louis"
+        "errors": 0
       },
       "winnerId": 158,
       "decisions": {
@@ -65,21 +77,33 @@
         "id": 143,
         "abbreviation": "PHI",
         "name": "Philadelphia Phillies",
+        "locationName": "Philadelphia",
+        "teamName": "Phillies",
+        "franchiseName": "Philadelphia",
+        "record": {
+          "wins": 1,
+          "losses": 0,
+          "ties": 0
+        },
         "runs": 6,
         "hits": 9,
-        "errors": 0,
-        "teamName": "Phillies",
-        "locationName": "Philadelphia"
+        "errors": 0
       },
       "home": {
         "id": 117,
         "abbreviation": "HOU",
         "name": "Houston Astros",
+        "locationName": "Houston",
+        "teamName": "Astros",
+        "franchiseName": "Houston",
+        "record": {
+          "wins": 0,
+          "losses": 1,
+          "ties": 0
+        },
         "runs": 5,
         "hits": 10,
-        "errors": 0,
-        "teamName": "Astros",
-        "locationName": "Houston"
+        "errors": 0
       },
       "winnerId": 143,
       "decisions": {
@@ -110,21 +134,33 @@
         "id": 1960,
         "abbreviation": "STP",
         "name": "St. Paul Saints",
+        "locationName": "St. Paul",
+        "teamName": "Saints",
+        "franchiseName": "St. Paul",
+        "record": {
+          "wins": 4,
+          "losses": 6,
+          "ties": 0
+        },
         "runs": 4,
         "hits": 5,
-        "errors": 2,
-        "teamName": "Saints",
-        "locationName": "St. Paul"
+        "errors": 2
       },
       "home": {
         "id": 512,
         "abbreviation": "TOL",
         "name": "Toledo Mud Hens",
+        "locationName": "Toledo",
+        "teamName": "Mud Hens",
+        "franchiseName": "Toledo",
+        "record": {
+          "wins": 4,
+          "losses": 7,
+          "ties": 0
+        },
         "runs": 3,
         "hits": 9,
-        "errors": 1,
-        "teamName": "Mud Hens",
-        "locationName": "Toledo"
+        "errors": 1
       },
       "winnerId": 1960,
       "decisions": {
@@ -157,6 +193,12 @@
         "name": "New York Mets",
         "locationName": "Flushing",
         "teamName": "Mets",
+        "franchiseName": "New York",
+        "record": {
+          "wins": 42,
+          "losses": 59,
+          "ties": 0
+        },
         "runs": 3,
         "hits": 6,
         "errors": 0
@@ -167,6 +209,12 @@
         "name": "Milwaukee Brewers",
         "locationName": "Milwaukee",
         "teamName": "Brewers",
+        "franchiseName": "Milwaukee",
+        "record": {
+          "wins": 63,
+          "losses": 37,
+          "ties": 0
+        },
         "runs": 8,
         "hits": 10,
         "errors": 1

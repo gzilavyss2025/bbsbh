@@ -1,7 +1,10 @@
 import '../../styles/heritage/pass.css'
 import '@fontsource/bungee/latin-400.css'
 import { useId, useState } from 'react'
-import { heritagePassModel } from '../../lib/heritage/pass.js'
+import { factsRecord, heritagePassModel, passCity, yearRecordThrough } from '../../lib/heritage/pass.js'
+import { fetchClubSeason } from '../../api/heritage/records.js'
+import { useAsync } from '../../hooks/useAsync.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { stampSeed } from '../../lib/stampArt.js'
 import { PassMark } from './PassMark.jsx'
 import { PassHeader } from './PassHeader.jsx'
@@ -14,7 +17,9 @@ import { PassHeader } from './PassHeader.jsx'
  */
 export function HeritagePass({ game, artwork = null }) {
   const id = useId()
-  const model = heritagePassModel(game)
+  const { favoriteTeamId } = useFavoriteTeam()
+  const model = heritagePassModel(game, favoriteTeamId)
+  const records = { away: useClubRecord(game, 'away'), home: useClubRecord(game, 'home') }
   if (!model) return null
   const seed = stampSeed(game.gamePk)
   return (
@@ -44,7 +49,7 @@ export function HeritagePass({ game, artwork = null }) {
         <rect className="heritagepass__grain" x="4" y="4" width="352" height="552" rx="22" filter={`url(#${id}-grain)`} opacity="0.16" />
       </svg>
       <div className="heritagepass__body" style={{ filter: `url(#${id}-press)` }}>
-        <PassHeader game={game} model={model} />
+        <PassHeader game={game} model={model} records={records} />
         <div className="heritagepass__matchup">
           <PassTeam team={game.away} date={game.date} />
           <span className="heritagepass__at"><span>at</span></span>
@@ -65,13 +70,27 @@ export function HeritagePass({ game, artwork = null }) {
   )
 }
 
+// The club's record after this game. A regular-season pass carries it in its facts;
+// a postseason pass (or older facts without it) reads the club's year of games.
+function useClubRecord(game, side) {
+  const fromFacts = factsRecord(game, side)
+  const teamId = game?.[side]?.id
+  const season = /^\d{4}/.exec(game?.date ?? '')?.[0]
+  const fetchable = !fromFacts && game?.status === 'Final' && teamId && season && game.sportId
+  const { data } = useAsync(async () => (fetchable
+    ? yearRecordThrough(await fetchClubSeason(teamId, season, game.sportId), teamId, game.gamePk)
+    : null), [fetchable, teamId, season, game?.sportId, game?.gamePk])
+  return fromFacts ?? data ?? null
+}
+
 function PassTeam({ team, date }) {
-  const splitName = Boolean(team.teamName && team.locationName)
+  const city = passCity(team)
+  const splitName = Boolean(team.teamName && city)
   const nickname = (splitName ? team.teamName : team.name) || team.abbreviation || 'Team not posted yet'
   return (
     <div className="heritagepass__team">
       <PassMark team={team} date={date} />
-      {splitName && <span className="heritagepass__city">{team.locationName}</span>}
+      {splitName && <span className="heritagepass__city">{city}</span>}
       <span className="heritagepass__name">
         {nickname.length <= 14 ? (
           <svg viewBox="0 0 300 88" role="img" aria-label={nickname}>

@@ -493,6 +493,13 @@
         "screens/gameday/next/zonemap/zonePitches.js"
       ]
     },
+    "heritage/records.js": {
+      "class": "reveal-only",
+      "why": "A club's season of results for the Heritage Pass's record line (the regular season plus the year's postseason through this game). Every row states a result, so only the pass calls it, and the pass mounts only inside the box score's reveal render, the owner's own Game Log, or the DEV preview (check-stamp-surfaces).",
+      "importers": [
+        "components/heritage/HeritagePass.jsx"
+      ]
+    },
     "highlights.js": {
       "class": "mixed",
       "why": "A clip's title narrates the play's outcome, so the play JOIN is reveal-only — but fetching is safe eagerly, and the cascade's classification helpers are a plain data transform the Node generator runs with no DOM. selectCondensedGame/selectGameClips joined the sealed list in PR #601: a condensed cut and a game's own reel narrate the whole result, and their only protection is WHERE they mount — inside the box score's SealBox reveal (GameVideoRow). formatClipDuration stays spoiler-free: it formats a duration string and reads no game state, which is why the open surfaces that format a clip length need no place on this list. The win-probability chart's swing rows (useSwingClip) join a clip only for a big-swing play the chart already shows — and the chart is fed only reveal-gated points (winprob.js), so the play is revealed before its row, and its clip, exists. The pitcher Game Log's detail view (gameDetail.js) joins a clip to a play of a pitcher's game on the player page, an open surface where the plays of a game are open (ADR-0110); its score and decision come from the guarded log row, never the clip.",
