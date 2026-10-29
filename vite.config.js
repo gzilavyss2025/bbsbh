@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { readFileSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { execSync } from 'node:child_process'
 import {
@@ -83,6 +84,22 @@ function resolveBuildCommit() {
   }
 }
 process.env.VITE_BUILD_COMMIT = resolveBuildCommit()
+
+// The service worker's precache filter (see `manifestTransforms` below). Keeps
+// every non-code entry the glob found, and of `assets/`, only the fonts and
+// the files the built index.html names (entry script, modulepreloads,
+// stylesheet). It runs after the bundle is written, so index.html is on disk.
+// An index.html that names no assets means the regex no longer matches Vite's
+// output; that throws rather than ship a worker that precaches no code.
+function shellOnly(entries) {
+  const html = readFileSync(new URL('./dist/index.html', import.meta.url), 'utf8')
+  const shell = new Set([...html.matchAll(/(?:src|href)="\/(assets\/[^"]+)"/g)].map((m) => m[1]))
+  if (shell.size === 0) throw new Error('shellOnly: dist/index.html names no /assets/ files')
+  const manifest = entries.filter(
+    (e) => !e.url.startsWith('assets/') || e.url.endsWith('.woff2') || shell.has(e.url),
+  )
+  return { manifest, warnings: [] }
+}
 
 // Buffer a request body, or answer 413 and give up. Resolves null when nothing
 // usable arrived (too large, or the socket went away) — in which case the
@@ -470,6 +487,15 @@ export default defineConfig({
         // install nothing, silently, which is the right direction for a
         // mistake to fall.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}', 'data/teams.json'],
+        // …and of the built code, only the SHELL: what index.html itself
+        // loads, plus the fonts its stylesheet names. The glob above matches
+        // every route chunk too (577 entries), and that was the app's biggest
+        // request cost: an install fetched all of them, and since every chunk
+        // imports the content-hashed index-*.js, each deploy renamed ~150 and
+        // every installed copy fetched those again on its next visit. A route
+        // chunk now loads the first time its page opens and stays offline
+        // through the CacheFirst `/assets/` rule below.
+        manifestTransforms: [shellOnly],
         // What is left to exclude, now that `data/**.json` is opted OUT by
         // default above: the ART. Two directories of images that a page
         // reaches for a couple of files at a time, plus the pdfjs chunk and
@@ -782,6 +808,24 @@ export default defineConfig({
             urlPattern: ({ url }) => /\/assets\/pdf.*\.(m?js)$/.test(url.pathname),
             handler: 'CacheFirst',
             method: 'GET',
+          },
+          {
+            // Every other built chunk: the route code left out of the precache
+            // by shellOnly. Content-hashed, so a cached copy is never stale and
+            // CacheFirst is exact. A deploy's renamed chunks are new URLs; the
+            // old ones age out under the cap. Only 200s are stored, so a chunk
+            // a deploy removed is never cached as a 404 (main.jsx's
+            // vite:preloadError reload handles that tab instead).
+            urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/assets/'),
+            handler: 'CacheFirst',
+            method: 'GET',
+            options: {
+              cacheName: 'bbsbh-app-chunks',
+              expiration: {
+                maxEntries: 400,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
           },
           {
             urlPattern: ({ url }) => url.hostname === 'statsapi.mlb.com',

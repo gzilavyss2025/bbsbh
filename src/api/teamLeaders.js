@@ -184,12 +184,25 @@ function playingTime(stat, group) {
 //   qualification bar and self-scales through the season (early-season the
 //   leader's PA is small, so the floor is too).
 //
+// - { teamGames, sportId }: MLB's own qualified bar — 3.1 PA and 1.0 IP per
+//   team game in MLB, 2.7 PA and 0.8 IP in the minors. The team page's Ranks
+//   band uses it; without a game count it falls back to 'roster'.
+//
 // Either way, unqualified counting stats (HR, SO, …) skip this entirely.
 const QUAL_FRACTION = 0.6
+function qualifiedFloor(group, { teamGames, sportId }) {
+  const mlb = sportId === 1
+  // MLB rounds down: 162 games is 502 PA. Rounding also keeps float noise (3.1 * 162 = 502.20000000000005) off the bar.
+  return Math.floor(group === 'hitting' ? (mlb ? 3.1 : 2.7) * teamGames : (mlb ? 3 : 2.4) * teamGames)
+}
 function eligiblePlayers(pool, category, qualifier = 'roster') {
   const group = category.group
   const withSplit = pool.filter((p) => p[group])
   if (!category.qualified || withSplit.length === 0) return withSplit
+  if (qualifier?.teamGames > 0) {
+    const floor = qualifiedFloor(group, qualifier)
+    return withSplit.filter((p) => playingTime(p[group], group) >= floor)
+  }
   if (qualifier === 'leader-relative') {
     const maxTime = Math.max(...withSplit.map((p) => playingTime(p[group], group)))
     const floor = QUAL_FRACTION * maxTime
