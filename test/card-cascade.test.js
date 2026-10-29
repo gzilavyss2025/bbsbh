@@ -1371,10 +1371,10 @@ test('C5: the seal pin — no reveal-only import, SealBox or revealedThrough rea
 // so a padded body would move the layout. Each head stays the Card's first
 // child, where H1b and H2 left it.
 //
-// The seed tile is a Card button on the history page and a Card div on the race
-// page, whose tiles hold team links (a link inside a button card is invalid).
+// The seed tile is a Card button on the history page. The race page draws its
+// bracket in the homepage rail's look (plain boxes inside one stamped Card).
 const C6A = [
-  { css: '34-postseason.css', sel: '.seed', jsx: ['screens/PostseasonHistoryPage.jsx', 'screens/PostseasonRacePage.jsx'], ns: 'seed', frame: 'ledger', keep: ['overflow'] },
+  { css: '34-postseason.css', sel: '.seed', jsx: ['screens/PostseasonHistoryPage.jsx'], ns: 'seed', frame: 'ledger', keep: ['overflow'] },
   { css: '35-postseason-series.css', sel: '.psseries__result', jsx: ['screens/PostseasonSeriesPage.jsx', 'screens/postseason-live/ResultBanner.jsx'], ns: 'psseries__result' },
   { css: '35-postseason-series.css', sel: '.psseries__log', jsx: ['screens/PostseasonSeriesPage.jsx', 'screens/postseason-live/LiveSeriesPage.jsx'], ns: 'psseries__log', as: 'div', gone: true },
   { css: '35-postseason-series.css', sel: '.psseries__lboard', jsx: ['components/postseason/SeriesParts.jsx'], ns: 'psseries__lboard' },
@@ -1428,17 +1428,18 @@ test('C6a: every postseason and All-Star block renders on Card, with its frame a
   }
 })
 
-// The seed tile is a Card button only where it is a tap target of its own. On
-// the race page it holds team links, so it is a Card div.
-test('C6a: the seed tile is a Card button on the history page and a Card div on the race page', () => {
+// The seed tile is a Card button only where it is a tap target of its own. The
+// race page's bracket is one stamped Card whose boxes hold team links, never a button.
+test('C6a: the seed tile is a Card button on the history page; the race bracket is one stamped Card', () => {
   const history = cardTags(src('screens/PostseasonHistoryPage.jsx')).filter((a) => namesClass(a, 'seed'))
   assert.equal(history.length, 2, 'the bye tile and the matchup tile')
   assert.equal(history.filter((a) => /as="button"/.test(a)).length, 1, 'one button tile')
   assert.equal(history.filter((a) => /as="div"/.test(a)).length, 1, 'the bye tile is a div')
   assert.match(history.find((a) => /as="button"/.test(a)), /onClick=/, 'the button tile is the one that opens a series')
-  const race = cardTags(src('screens/PostseasonRacePage.jsx')).filter((a) => namesClass(a, 'seed'))
-  assert.equal(race.length, 3, 'matchup, division series and TBD tiles')
-  for (const attrs of race) assert.match(attrs, /as="div"/, 'a race tile holds links, so it is not a button')
+  const race = cardTags(src('screens/PostseasonRacePage.jsx')).filter((a) => namesClass(a, 'psrace__card'))
+  assert.equal(race.length, 1, 'one card per league bracket')
+  assert.match(race[0], /frame="stamped"/, 'the race bracket is stamped, as the homepage rail is')
+  assert.doesNotMatch(race[0], /as="button"/, 'its boxes hold links, so it is not a button')
 })
 
 // Card owns no margin, and a flush body adds no padding, so each block keeps
@@ -1487,7 +1488,7 @@ test('C6a: each block keeps its own margin, inset and layout', () => {
 test('C6a: the seed tile does not clip, so the bracket connectors still show', () => {
   const body = ruleBody(read('34-postseason.css'), '.seed')
   assert.equal(decl(body, 'overflow'), 'visible')
-  for (const [css, sel] of [['34-postseason.css', '.psbracket__col--al .seed::after'], ['70-postseason-race.css', '.psrace__round--wc .seed::after']]) {
+  for (const [css, sel] of [['34-postseason.css', '.psbracket__col--al .seed::after'], ['70-postseason-race.css', '.psrace__round--wc .psrace__box::after']]) {
     assert.ok(read(css).includes(sel), `${css}: ${sel} still draws a connector`)
   }
 })

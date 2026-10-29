@@ -1,6 +1,7 @@
 import '../styles/34-postseason.css'
 import '../styles/30-standings.css'
 import '../styles/70-postseason-race.css'
+import '../styles/80-postseason-bracket.css'
 import { useMemo } from 'react'
 import { fetchLeagueStandings } from '../api/team.js'
 import { shapeWildCard } from '../api/standings.js'
@@ -22,6 +23,8 @@ import { Door } from '../components/ui/control/Door.jsx'
 import { Card } from '../components/ui/frame/Card.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
+import { BlankSlot } from '../components/bracket/bracketParts.jsx'
+import { teamAbbr } from '../lib/teams.js'
 
 // The league mark that rides the bar's right edge — same convention (and same
 // All-Star team ids) as StandingsPage's own LeagueBar. Not shared code: this
@@ -29,11 +32,6 @@ import { Stack } from '../components/ui/layout/Stack.jsx'
 // handful of self-contained ~15-line pieces (see gen-postseason-odds.mjs's
 // header) rather than exporting a component neither screen otherwise needs.
 const LEAGUE_MARK_ID = { 103: 159, 104: 160 }
-// The AL/NL color-coding this page borrows from Postseason History's bracket
-// (`.psbracket__collabel--al`/`--nl`, red/green) — used only for that label
-// tint here, since each league now draws its own self-contained bracket
-// rather than converging on a shared World Series.
-const LEAGUE_SIDE = { 103: 'al', 104: 'nl' }
 
 function LeagueBar({ league }) {
   const markId = LEAGUE_MARK_ID[league.id]
@@ -122,97 +120,64 @@ function dsLanesFor(lg) {
 // undetermined round, so there's no "one known team" to anchor it on.
 const CS_LANE = [{ type: 'tbd', key: 'cs' }]
 
-// One seed's row — seed number, logo, club name — a real link to that
-// club's Numbers tab (same `tab="numbers"` convention StandingsPage's rows
-// use). No win-loss record here: the record already lives one tap away on
-// that tab and in the wild-card table beneath this bracket, and printing it
-// on a ~150px-wide card was what pushed longer club names (Yankees,
-// Guardians) into ellipsis.
+// THE BRACKET — drawn in the homepage rail's look (FullBracket's rail tree, Gary 2026-10-29):
+// one stamped card per league, three narrow columns that fit a phone with no side scroll,
+// each box a seed, a club mark and the abbreviation. No clinch letters (Gary, 2026-10-29):
+// the table under the card carries them. A row is a link to the club's Numbers tab.
 function SeedRow({ t, bye = false }) {
   return (
-    <TeamLink id={t.id} tab="numbers" className="seedrow">
-      <span className="seedrow__seed">{t.seed}</span>
-      <TeamLogo teamId={t.id} name={t.name} size={18} />
-      <span className="seedrow__name">{t.name}</span>
-      <ClinchMark mark={t.clinch} />
-      {bye && <span className="psrace__bye">Bye</span>}
+    <TeamLink id={t.id} tab="numbers" className={`psrace__row${bye ? ' psrace__row--bye' : ''}`} aria-label={`${t.seed} seed, ${t.name}`}>
+      <span className="psrace__seed">{t.seed}</span>
+      <TeamLogo teamId={t.id} name={t.name} size={16} />
+      <span className="psrace__abbr">{teamAbbr(t)}</span>
     </TeamLink>
   )
 }
 
-function MatchupCard({ pair }) {
+// A slot no club fills yet: the rail's blank ruled line, never "TBD".
+function OpenRow({ label }) {
   return (
-    <Card as="div" frame="ledger" body="flush" className="seed psrace__matchup">
-      {pair.map((t) => (
-        <SeedRow key={t.id} t={t} />
-      ))}
-    </Card>
-  )
-}
-
-// A Division Series slot's unresolved half — the winner of a specific,
-// already-known Wild Card matchup. Two small logos rather than one, since
-// (unlike a genuine TBD) exactly two teams can still fill this row.
-function PendingRow({ candidates }) {
-  return (
-    <span className="seedrow seedrow--pending">
-      <span className="seedrow__seed">—</span>
-      <span className="seedrow__pendteams">
-        {candidates.map((t, i) => (
-          <span className="seedrow__pendteam" key={t.id}>
-            {i > 0 && <span className="seedrow__pendslash">/</span>}
-            <TeamLogo teamId={t.id} name={t.name} size={14} />
-          </span>
-        ))}
-      </span>
-      <span className="seedrow__pendlabel">Winner</span>
+    <span className="psrace__row psrace__row--open">
+      <BlankSlot label={label} />
     </span>
-  )
-}
-
-// A bye seed (known) waiting on the winner of the Wild Card matchup fixed to
-// its Division Series slot (dsLanesFor) — not a button, since half the card
-// names no single team to open.
-function DivisionSeriesCard({ bye, candidates }) {
-  return (
-    <Card as="div" frame="ledger" body="flush" className="seed psrace__ds">
-      <SeedRow t={bye} bye />
-      <PendingRow candidates={candidates} />
-    </Card>
-  )
-}
-
-// Each Championship slot names the Division Series path that feeds it.
-function TbdRow({ seed }) {
-  return (
-    <span className="seedrow seedrow--tbd">
-      <span className="seedrow__name">{seed === 1 ? 'Upper' : 'Lower'} DS winner</span>
-    </span>
-  )
-}
-function TbdCard() {
-  return (
-    <Card as="div" frame="ledger" body="flush" className="seed seed--tbd">
-      <TbdRow seed={1} />
-      <TbdRow seed={2} />
-    </Card>
   )
 }
 
 function Lane({ lane }) {
-  if (lane.type === 'matchup') return <MatchupCard pair={lane.pair} />
-  if (lane.type === 'pending-ds') return <DivisionSeriesCard bye={lane.bye} candidates={lane.candidates} />
-  return <TbdCard />
+  if (lane.type === 'matchup') {
+    return (
+      <div className="psrace__box">
+        {lane.pair.map((t) => (
+          <SeedRow key={t.id} t={t} />
+        ))}
+      </div>
+    )
+  }
+  if (lane.type === 'pending-ds') {
+    const names = lane.candidates.map((t) => t.name).join(' or ')
+    return (
+      <div className="psrace__box">
+        <SeedRow t={lane.bye} bye />
+        <OpenRow label={`Winner of ${names}`} />
+      </div>
+    )
+  }
+  return (
+    <div className="psrace__box">
+      <OpenRow label="Upper Division Series winner" />
+      <OpenRow label="Lower Division Series winner" />
+    </div>
+  )
 }
 
-// Each round owns its heading and vertically aligned matchup slots.
-function BracketColumn({ label, labelSide, lanes, round, format }) {
+function BracketColumn({ label, lanes, round, format }) {
   return (
-    <div className={`psbracket__col psrace__round psrace__round--${round}`}>
-      <h3 className={`psbracket__collabel psbracket__collabel--${labelSide}`}>
-        {label}<span className="psrace__format">{format}</span>
+    <div className={`psrace__round psrace__round--${round}`}>
+      <h3 className="psrace__collabel">
+        {label}
+        <span className="psrace__format">{format}</span>
       </h3>
-      <div className="psbracket__lanes">
+      <div className="psrace__lanes">
         {lanes.map((lane) => (
           <Lane key={lane.key} lane={lane} />
         ))}
@@ -221,25 +186,19 @@ function BracketColumn({ label, labelSide, lanes, round, format }) {
   )
 }
 
-// Keep the connected rounds on phones, with scrolling inside the bracket.
-function LeagueBracket({ lg, side, final }) {
+function LeagueBracket({ lg, final }) {
   const wc = wcLanesFor(lg)
   const ds = dsLanesFor(lg)
+  const cs = lg.id === 104 ? 'NLCS' : 'ALCS'
   return (
-    <>
-      <p className="psrace__guide">
-        {final ? 'The field' : 'If the season ended today'} · Seeds 1 & 2 receive a bye
-      </p>
-      <p className="psrace__scrollhint">Scroll to follow the bracket →</p>
-      <div className="psrace__scroll" role="region" aria-label={`${lg.name} bracket`} tabIndex={0}>
-        <div className="psrace__miniboard">
-          <BracketColumn labelSide={side} label="Wild Card" lanes={wc} round="wc" format="Best of 3" />
-          <BracketColumn labelSide={side} label="Division Series" lanes={ds} round="ds" format="Best of 5" />
-          <BracketColumn labelSide={side} label="Championship" lanes={CS_LANE} round="cs" format="Best of 7" />
-        </div>
+    <Card frame="stamped" label={final ? 'The field' : 'If the season ended today'} labelAs="h3" className="psrace__card">
+      <div className="psrace__tree" role="group" aria-label={`${lg.name} bracket`}>
+        <BracketColumn label="Wild Card" lanes={wc} round="wc" format="Best of 3" />
+        <BracketColumn label="Division" lanes={ds} round="ds" format="Best of 5" />
+        <BracketColumn label={cs} lanes={CS_LANE} round="cs" format="Best of 7" />
       </div>
-      <p className="psrace__destination">League champion advances to the World Series →</p>
-    </>
+      <p className="psrace__guide">Seeds 1 and 2 receive a bye · League champion advances to the World Series</p>
+    </Card>
   )
 }
 
@@ -301,13 +260,12 @@ function WildCardMiniTable({ lg, final }) {
 }
 
 // The marks the key has to explain — collected from what this page actually
-// prints, not from the league. A league's eliminated clubs never reach either
-// surface here (the bracket shows six seeds, the table shows who is still
-// alive), so an 'e' row in the key would point at a chip nobody can see.
+// prints, not from the league. The bracket prints no marks, and the table shows
+// only who is still alive, so an 'e' row in the key would point at a chip nobody can see.
 function marksOnPage(leagues, final) {
   const marks = new Set()
   for (const lg of leagues) {
-    for (const t of [...seedField(lg), ...wildCardRows(lg, final)]) {
+    for (const t of wildCardRows(lg, final)) {
       if (t.clinch) marks.add(t.clinch)
     }
   }
@@ -315,11 +273,10 @@ function marksOnPage(leagues, final) {
 }
 
 function LeagueBlock({ lg, final }) {
-  const side = LEAGUE_SIDE[lg.id] ?? 'al'
   return (
     <section className="psrace__league">
       <LeagueBar league={lg} />
-      <LeagueBracket lg={lg} side={side} final={final} />
+      <LeagueBracket lg={lg} final={final} />
       <WildCardMiniTable lg={lg} final={final} />
     </section>
   )
