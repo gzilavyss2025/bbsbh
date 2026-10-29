@@ -136,7 +136,7 @@ function words(h, feed, e) {
 // no layout, draws no handle (BallFlight stands down itself).
 // The pitch columns are the handle for the strike zone and the pitches with their speeds (`Zone`,
 // GamedayHero.jsx: the old feed's StrikeZoneModal), on a click.
-function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null, Savant = null, Parks = null) {
+function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = null, side = null, Savant = null, Parks = null, Flip = null) {
   const { batter } = e
   const contact = contactStats(e)
   // The opened card adds Savant's figures for the ball in play (`Savant`, GamedayHero.jsx): its playId is the in-play pitch's.
@@ -148,18 +148,21 @@ function result(h, e, Headshot, PlayerLink, Line, feed, Flight = null, Zone = nu
     h('div', { className: 'gdhero__txt' },
       h('div', { className: 'gdhero__who' },
         who(h, PlayerLink, batter)),
-      playText(h, Line, words(h, feed, e)),
-      contact.length > 0 && h('dl', { className: 'gdhero__contact' },
+      flip(h, Flip, e.atBatIndex, playText(h, Line, words(h, feed, e)), contact.length > 0 && h('dl', { className: 'gdhero__contact' },
         ...contact.map((c) => {
           const cell = [h('dt', { key: 'l' }, c.label), h('dd', { key: 'v' }, c.value, c.unit && h('small', null, c.unit))]
           // Distance taps over to Savant's home-run parks count (`Parks`, SavantFacts.jsx).
           const body = Parks && inPlay && c.label === 'Distance' ? h(Parks, { gamePk: feed.gamePk, sportId: feed.gameData?.teams?.home?.sport?.id ?? 1, playId: inPlay }, cell) : cell
           return h('div', { key: c.label, className: c.hard ? 'is-hard' : undefined }, body)
-        }))),
+        })))),
     shot(h, Headshot, PlayerLink, batter))
 }
 
-export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, Savant = null, Parks = null, feed, inning, half, last, open = null, mark = null, replay = null, step = null }) {
+// The play's words and the contact card share one place on the phone (Gary, 2026-10-29): the words fill it,
+// and a tap turns it to the card (`Flip`, GamedayHero.jsx). Wider heroes show both. A new at-bat opens on the words.
+const flip = (h, Flip, key, line, card) => (Flip && card ? h(Flip, { key, line, card }) : [line, card])
+
+export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Line = null, Flight = null, Zone = null, Savant = null, Parks = null, Flip = null, feed, inning, half, last, open = null, mark = null, replay = null, step = null }) {
   // A replayed trail chip (Gary, 2026-10-29) puts its own at-bat in the box, read at the trail's cut so
   // nothing after the reader's step shows. It holds, as the trail's mark does, until the next tap.
   const shown = () => (replay != null && cutAt(feed, inning, half, step).cards.find((c) => c.atBatIndex === replay)) || last
@@ -167,6 +170,6 @@ export function heroMarkup(h, { SealBox, Headshot = null, PlayerLink = null, Lin
     replay == null && open?.sub > 0
       ? h(SealBox, { coverless: true, forceRevealed: true }, () => openBox(h, feed, inning, half, open, Headshot, PlayerLink, Line, Zone))
       : last
-        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, shown(), Headshot, PlayerLink, Line, feed, Flight, Zone, half === 'top' ? 'away' : 'home', Savant, Parks))
+        ? h(SealBox, { coverless: true, forceRevealed: true }, () => result(h, shown(), Headshot, PlayerLink, Line, feed, Flight, Zone, half === 'top' ? 'away' : 'home', Savant, Parks, Flip))
         : sealedBox(h, atPlate(feed, inning, half, mark), Headshot, PlayerLink))
 }

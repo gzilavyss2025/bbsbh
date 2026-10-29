@@ -114,17 +114,33 @@
 .gdhero__zonebtn { position: absolute; inset: 0; z-index: 1; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .gdhero__zonebtn:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: calc(-1 * var(--bw-heavy)); }
 
-/* A phone-wide hero (Gary, 2026-10-27): the stat card leaves the words' column for a full-width row under the box,
-   so its three cells keep their room at 320px. The name and play stay beside the box. */
+/* The words and the stat card share one place (GamedayHero.jsx PlayFlip). Wider heroes show both, in the
+   column as before; the toggle is only the phone's. */
+.gdhero__flip { display: contents; }
+.gdhero__fliptog { display: none; }
+
+/* A phone-wide hero (Gary, 2026-10-29): beside the box, under the name, one place holds the play in
+   readable type; a tap turns it to the three numbers, stacked, and back. */
 @container (max-width: 400px) {
-  /* layout-exempt: box beside the name and play, the stat card across the row under them */
-  .gdnext .gdhero .gdhero__top { height: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto;
-    grid-template-areas: 'box who' 'box line' 'card card'; column-gap: var(--space-3); row-gap: var(--space-2); }
+  /* layout-exempt: box beside the name, the play or its numbers under the name */
+  .gdnext .gdhero .gdhero__top { height: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: 'box who' 'box flip'; column-gap: var(--space-3); row-gap: var(--space-2); }
   .gdhero__txt { display: contents; }
   .gdhero__box { grid-area: box; }
   .gdhero__who { grid-area: who; }
-  .gdhero__scroll, .gdhero__txt > .gdhero__line { grid-area: line; }
-  .gdhero__contact { grid-area: card; margin: 0; }
+  /* layout-exempt: one face at a time */
+  .gdhero__flip { grid-area: flip; display: flex; flex-direction: column; min-height: 0; cursor: pointer; }
+  .gdhero__flip:has(.gdhero__fliptog:focus-visible) { outline: var(--bw-heavy) solid var(--focus-ring); }
+  .gdhero__fliptog { display: block; }
+  .gdhero__flip[data-side='line'] > .gdhero__contact, .gdhero__flip[data-side='card'] > :not(.gdhero__contact, .gdhero__fliptog) { display: none; }
+  .gdhero__flip .gdhero__line, .gdhero__flip .gdhero__line.is-tight { font: var(--w-medium) var(--fs-field) / var(--lh-snug) var(--font-body);
+    letter-spacing: var(--ls-none); color: var(--text-heading); }
+  /* layout-exempt: the three numbers stacked, each a label beside its number */
+  .gdhero__flip .gdhero__contact { margin: 0; grid-auto-flow: row; }
+  .gdhero__flip .gdhero__contact div, .gdhero__flip .gdhero__parks { flex-direction: row; justify-content: space-between; align-items: center; padding: var(--space-1) var(--space-2); }
+  .gdhero__flip .gdhero__contact div:has(> .gdhero__parks) { padding: 0; }
+  .gdhero__flip .gdhero__contact dd { font-size: var(--fs-title-sm); }
+  .gdhero__flip .gdhero__contact div + div { border-left: 0; border-top: var(--bw-hair) solid var(--border-rule); }
 }
 
 /* A runner's leg marks (eventCardMarkup notes): each sits against its own base path, just outside the
