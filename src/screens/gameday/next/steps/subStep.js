@@ -87,6 +87,25 @@ export function canStepIn(feed, inning, half, count, sub) {
 // walks each pitch again. `cursor` is the read-back step on screen (useFocusMode's), so the at-bat
 // being walked is the next one; the sub-step count to show next, or null when the next tap moves the
 // cursor on to that at-bat. Reveals nothing new: the half is under the reveal mark.
+// A trail chip tapped on a half read back (Gary, 2026-10-29): the read-back step that shows that at-bat,
+// so the next tap carries on from it instead of from the half's first pitch. Null when it is not a step.
+export const readBackStepOf = (items, atBatIndex) => {
+  const n = (items ?? []).findIndex((it) => it.atBatIndex === atBatIndex)
+  return n < 0 ? null : n
+}
+
+// The walk position after that at-bat: the step count whose open at-bat is the first one past it, less
+// one (replayTap walks `at + 1`). Counted on the plays, not the trail's windows, which a mid at-bat
+// event (a steal) splits in two. Null when none follows it in the half.
+export function readBackAfter(feed, inning, half, atBatIndex) {
+  for (let k = 1; k < 200; k++) {
+    const o = openAtBat(feed, inning, half, k)
+    if (!o) return null
+    if ((o.card?.atBatIndex ?? -1) > atBatIndex) return k - 1
+  }
+  return null
+}
+
 export function replayTap(feed, inning, half, cursor, sub) {
   const n = nextSub(feed, inning, half, cursor + 1, sub, true)
   return n === CAUGHT_UP ? null : n

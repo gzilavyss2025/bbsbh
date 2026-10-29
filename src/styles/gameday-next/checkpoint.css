@@ -32,14 +32,16 @@
 .gdnext[data-tier='P'] .gdcp__body { display: flex; flex-direction: column; }
 .gdnext[data-tier='P'] .gdcp__page { flex: 1; }
 
-/* T, L and D: every page at once, no tabs. */
-.gdnext:not([data-tier='P']) .gdcp .gdcp__tabs { display: none; }
-/* layout-exempt: two columns of pages; the at-bats (the tallest) take the right */
-.gdnext:not([data-tier='P']) .gdcp__body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar atBats'; }
-.gdnext:not([data-tier='P']) .gdcp[data-pages='5'] .gdcp__body { grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'tally atBats' 'pitching atBats' 'gameSoFar facts'; }
-.gdnext:not([data-tier='P']) .gdcp__page { display: flex; animation: none; grid-area: var(--gdcp-area);
-  border-right: var(--bw-rule) solid var(--border-stamped); border-bottom: var(--bw-rule) solid var(--border-stamped); }
+/* T, L and D (Gary, 2026-10-29): the tally stays up top, four buttons under it (Pitching, Half inning,
+   Due up, Game notes) pick one page, and that page fills the rest. The body is unwrapped so the tally,
+   the buttons and the page stack as one column in that order. */
+/* layout-exempt: the head, the tally, the buttons and one page, stacked */
+.gdnext:not([data-tier='P']) .gdcp { display: flex; flex-direction: column; }
+.gdnext:not([data-tier='P']) .gdcp__body { display: contents; }
+.gdnext:not([data-tier='P']) .gdcp__head { order: 0; }
+.gdnext:not([data-tier='P']) .gdcp__page[data-page='tally'] { order: 1; display: flex; animation: none; border-bottom: var(--bw-rule) solid var(--border-stamped); }
+.gdnext:not([data-tier='P']) .gdcp .gdcp__tabs { order: 2; display: flex; margin: var(--space-2) var(--space-3); }
+.gdnext:not([data-tier='P']) .gdcp__page:not([data-page='tally']) { order: 3; flex: 1; min-height: 0; overflow: hidden; }
 .gdcp__page[data-page='tally'] { --gdcp-area: tally; }
 .gdcp__page[data-page='pitching'] { --gdcp-area: pitching; }
 .gdcp__page[data-page='atBats'] { --gdcp-area: atBats; }
@@ -52,14 +54,16 @@
 
 /* Motion: Reduced (the OS or My Tally): every page at once, no ink-in; the phone's slot scrolls. */
 @media (prefers-reduced-motion: reduce) {
-  .gdcp .gdcp__tabs { display: none; }
-  .gdcp__body { overflow-y: auto; }
-  .gdcp .gdcp__page { display: flex; animation: none; }
+  .gdnext[data-tier='P'] .gdcp .gdcp__tabs { display: none; }
+  .gdnext[data-tier='P'] .gdcp__body { overflow-y: auto; }
+  .gdnext[data-tier='P'] .gdcp .gdcp__page { display: flex; animation: none; }
+  .gdcp .gdcp__page { animation: none; }
   .gdcp__notesdue { display: none; } /* the Game page shows its own due-up */
 }
-:root[data-motion='reduced'] .gdcp .gdcp__tabs { display: none; }
-:root[data-motion='reduced'] .gdcp__body { overflow-y: auto; }
-:root[data-motion='reduced'] .gdcp .gdcp__page { display: flex; animation: none; }
+:root[data-motion='reduced'] .gdnext[data-tier='P'] .gdcp .gdcp__tabs { display: none; }
+:root[data-motion='reduced'] .gdnext[data-tier='P'] .gdcp__body { overflow-y: auto; }
+:root[data-motion='reduced'] .gdnext[data-tier='P'] .gdcp .gdcp__page { display: flex; animation: none; }
+:root[data-motion='reduced'] .gdcp .gdcp__page { animation: none; }
 :root[data-motion='reduced'] .gdcp__notesdue { display: none; }
 
 /* Page 1, the tally: R, H, E, LOB, then the half's pitches, whiffs and fouls. */
@@ -163,3 +167,15 @@
 .gdnext:not([data-tier='P']) .gdcp__notesdue { display: none; }
 /* The total row's half name ("Top 5th") wears the header's display face, as a label. */
 .gdcp__table .is-total td:first-child { font-family: var(--font-display); }
+/* The Pitching page on the wider tiers (Gary, 2026-10-29): the half's table keeps the page's side
+   gutter like the pitching lines under it, a rule apart from them. */
+.gdnext:not([data-tier='P']) .gdcp__page[data-page='pitching'] .gdcp__table { width: auto; margin: 0 var(--space-3); }
+.gdnext:not([data-tier='P']) .gdcp__page[data-page='pitching'] { gap: 0; }
+.gdnext:not([data-tier='P']) .gdcp__page[data-page='pitching'] .gdpl { margin-top: var(--space-1); }
+.gdnext:not([data-tier='P']) .gdcp__page[data-page='pitching'] .gdpl__club + .gdpl__club { margin-top: var(--space-2); }
+/* The Pitching page reads larger on the wider tiers (Gary, 2026-10-29): there is room for it now that
+   it is one page at a time. Figures a step up, the column heads a step up. */
+.gdnext:not([data-tier='P']) .gdcp__page[data-page='pitching'] :is(.gdcp__table, .gdpl__table) td,
+.gdnext:not([data-tier='P']) .gdcp__page[data-page='pitching'] .gdpl__table tbody th { font-size: var(--fs-ui); }
+.gdnext:not([data-tier='P']) .gdcp__page[data-page='pitching'] :is(.gdcp__table, .gdpl__table) thead th,
+.gdnext:not([data-tier='P']) .gdcp__page[data-page='pitching'] .gdpl__head { font-size: var(--fs-label); }

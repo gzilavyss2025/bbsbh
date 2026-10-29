@@ -17,6 +17,9 @@ import { ordinal } from '../../../../lib/format.js'
 // ledger; `on` says whether the phone shows the notes page.
 
 export const LABEL = { tally: 'Tally', pitching: 'Pitching', atBats: 'At-bats', gameSoFar: 'Game', facts: 'Notes' }
+// The wider tiers' buttons under the tally (Gary, 2026-10-29), in this order.
+const WIDE = ['pitching', 'atBats', 'gameSoFar', 'facts']
+const WIDE_LABEL = { pitching: 'Pitching', atBats: 'Half inning', gameSoFar: 'Due up', facts: 'Game notes' }
 
 const cells = (h, key, list) => h('div', { key, className: 'gdcp__tally' },
   ...list.map(([k, v]) => h('div', { key: k }, h('b', null, v ?? '—'), h('span', null, k))))
@@ -127,13 +130,16 @@ function body(h, pages, id, { Seen, on, Headshot, nameOf, Scroll, PlayerLink, li
 // Only the notes carry a heading (Gary, 2026-10-27): the other pages' figures say what they are.
 const HEAD = { tally: null, pitching: null, gameSoFar: null, atBats: null, facts: 'Game notes' }
 
-function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line, lines }) {
+function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line, lines, wide = false }) {
   const ids = pages.map((p) => p.id)
   // On the phone the due-up closes the Notes page and the Game tab goes (Gary, 2026-10-28); the wider
   // tiers show every page at once, tabs hidden. With no notes the Game tab stays.
-  const folded = ids.includes('facts') && ids.includes('gameSoFar')
-  const tabs = folded ? ids.filter((id) => id !== 'gameSoFar') : ids
-  const on = tabs.includes(page) ? page : folded && page === 'gameSoFar' ? 'facts' : tabs[0]
+  // The wider tiers (Gary, 2026-10-29): the tally stays up top and four buttons under it pick one page. The phone keeps its tabs, the tally among them.
+  const folded = !wide && ids.includes('facts') && ids.includes('gameSoFar')
+  const tabs = wide ? WIDE.filter((id) => ids.includes(id)) : folded ? ids.filter((id) => id !== 'gameSoFar') : ids
+  // The wider tiers open on Due up (Gary, 2026-10-29): who is coming up next is the first question at a break.
+  const first = wide && tabs.includes('gameSoFar') ? 'gameSoFar' : tabs[0]
+  const on = tabs.includes(page) ? page : folded && page === 'gameSoFar' ? 'facts' : first
   const game = pages.find((p) => p.id === 'gameSoFar').fields
   // The broadcast's words: after the top it is the middle of the inning, after the bottom its end.
   const title = game.final ? 'Final' : `${half === 'top' ? 'Middle' : 'End'} ${ordinal(inning)}`
@@ -142,7 +148,7 @@ function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, S
     h('div', { className: 'gdcp__head' }, h('span', null, title)), // the score is the band's, so the head names the half only
     segmentedMarkup(h, {
       label: 'Checkpoint pages', value: on, onChange: onPage, fill: true, className: 'gdcp__tabs',
-      options: tabs.map((id) => ({ value: id, label: LABEL[id] })),
+      options: tabs.map((id) => ({ value: id, label: (wide ? WIDE_LABEL : LABEL)[id] })),
     }),
     h('div', { className: 'gdcp__body' },
       ...ids.map((id) => h('section', {
@@ -152,7 +158,7 @@ function layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, S
       folded && id === 'facts' && h('div', { key: 'due', className: 'gdcp__notesdue' }, gameSoFar(h, pages.find((p) => p.id === 'gameSoFar').fields, Headshot, line, PlayerLink))))))
 }
 
-export function checkpointMarkup(h, { SealBox, Seen = null, Headshot = null, Scroll = null, PlayerLink = null, entry = null, feed, inning, half, mark, notes = null, page, onPage}) {
+export function checkpointMarkup(h, { SealBox, Seen = null, Headshot = null, Scroll = null, PlayerLink = null, entry = null, feed, inning, half, mark, notes = null, page, onPage, wide = false }) {
   if (!feed || !inning || !half || halfIndex(inning, half) > (mark ?? -1)) return null
   return h(SealBox, { coverless: true, forceRevealed: true }, () => {
     const pages = checkpointPages(feed, { inning, half, revealedThrough: mark, notes })
@@ -160,6 +166,6 @@ export function checkpointMarkup(h, { SealBox, Seen = null, Headshot = null, Scr
     const line = (b) => dueLine(feed, b, next, mark, entry)
     const nameOf = (id) => feed.gameData?.players?.[`ID${id}`]?.lastName ?? null
     const lines = pitchingLinesMarkup(h, { key: 'game', feed, lines: pitchingDayLines(feed, { inning, half, revealedThrough: mark }) })
-    return pages && layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line, lines })
+    return pages && layer(h, pages, { inning, half, page, onPage, Seen, Headshot, nameOf, Scroll, PlayerLink, line, lines, wide })
   })
 }

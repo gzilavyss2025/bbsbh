@@ -18,7 +18,7 @@ import { GamedayPlayCanvas } from '../cutscene/integration/GamedayPlayCanvas.jsx
 import { battingSide } from './battingSide.js'
 import { wallFn } from './scene.js'
 import { openingChangeHeld, stageKey, stepCapAt } from '../steps/subStep.js'
-import { disarm, ended, replay, rest, saw, tap } from './tapRule.js'
+import { disarm, ended, replay, rest, saw, tap, back } from './tapRule.js'
 import { checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoint } from '../cutscene/integration/checkpointGate.js'
 
 // The stage mount (#2573, #2568 slice 4): the stage slot, and the advance control wrapped in the tap
@@ -61,6 +61,8 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   // until the next tap; it is one the reader already revealed.
   // Under the checkpoint a chip's tap lifts it for that at-bat's batting view; Next puts it back (`over`).
   const [over, setOver] = useState(null)
+  // The open at-bat's chip: back from a replay to the step the reader is on (tapRule.js back).
+  const onBack = useCallback(() => { setOver(null); setS(back) }, [])
   const lifted = covered && over != null // a stale `over` is inert once the checkpoint goes; Next clears it
   const replaying = lifted ? over : typeof cur.shown === 'number' && cur.run ? cur.shown : null
   // A held ending scene's own Replay plays under the checkpoint: it brings no batting view over it.
@@ -93,7 +95,8 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
       />}
       {batter && !hidden && (
         <ZoneCard teamId={gd?.teams?.[half === 'top' ? 'away' : 'home']?.id} id={batter.id} name={gd?.players?.[`ID${batter.id}`]?.fullName ?? batter.last} side={battingSide(hand(batter.id, 'batSide'), hand(pitcherId, 'pitchHand'))} zones={zones ?? {}} club={half === 'top' ? 'away' : 'home'}
-          matchup={pitcherId ? <ScoutLine feed={feed} hitterId={batter.id} pitcherId={pitcherId} /> : null}
+          backdrop={gd?.venue?.id ? `https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.3.0/images/stadiums/${gd?.datetime?.dayNight === 'day' ? 'day' : 'night'}/${gd.venue.id}@2x.jpg` : null}
+          matchup={pitcherId ? <ScoutLine feed={feed} hitterId={batter.id} pitcherId={pitcherId} door={false} vsHitter /> : null}
           pitcher={pitcherId ? { id: pitcherId, first: gd?.players?.[`ID${pitcherId}`]?.useName ?? gd?.players?.[`ID${pitcherId}`]?.firstName ?? '', last: gd?.players?.[`ID${pitcherId}`]?.lastName ?? '' } : null}
           pitches={<SealBox coverless forceRevealed>{() => zonePitches(feed, replayed ? { inning, half, open: null, last: replaying, committed: true } : { inning, half, open, last, committed: holdsFinished({ view, mark, open, last }) }).map((p) => (
             <span key={p.no} tabIndex={0} aria-label={`Pitch ${p.no}: ${[p.type, p.mph != null && `${p.mph.toFixed(1)} mph`, p.call].filter(Boolean).join(', ')}`}
@@ -139,5 +142,5 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   }
   // `replaying` (above) also marks the trail's "you are here".
   const holding = phase === 'pending' || phase === 'celebration'
-  return { stage, advance: { ...advance, ...(holding ? { label: 'Next', disabled: false, caughtUp: false, refresh: false } : {}), onClick }, onReplay: covered ? setOver : onReplay, replaying }
+  return { stage, advance: { ...advance, ...(holding ? { label: 'Next', disabled: false, caughtUp: false, refresh: false } : {}), onClick }, onReplay: covered ? setOver : onReplay, onBack, replaying }
 }

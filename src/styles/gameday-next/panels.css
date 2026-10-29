@@ -4,7 +4,7 @@
 .gdnext__slot--navigator { background: var(--surface-card); }
 /* The trail sits on the page, not on a card: the SealBox around it adds no box, and the chips fill the bar. */
 .gdnext__slot--trail { background: none; border: 0; }
-.gdnext__slot--trail > .statgrid { display: contents; }
+.gdnext__slot--trail > .statgrid, .gdnext__trailscroll > .statgrid { display: contents; }
 .gdp__sealed { margin: 0; padding: var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 .gdp__label { display: block; padding: var(--space-1) var(--space-2); font: var(--w-bold) var(--fs-cell) / 1 var(--font-body); text-transform: uppercase; color: var(--text-caption); }
 
@@ -257,10 +257,9 @@
 .gdarm { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 /* layout-exempt: tab row over a body that takes the rest */
 .gdtabs { display: flex; flex-direction: column; flex: 1; min-height: 0; border-top: var(--bw-hair) solid var(--border-hairline); }
-/* layout-exempt: four equal tabs in one row */
-.gdtabs__row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: var(--bw-heavy) solid var(--text-heading); }
-.gdtabs__tab { padding: var(--space-2) var(--space-1); border: 0; background: none; color: var(--text-caption); font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; cursor: pointer; }
-.gdtabs__tab.is-on { background: var(--text-heading); color: var(--surface-card); }
+/* The switch, as the checkpoint draws it (checkpoint.css .gdcp__tabs): Segmented across the card. raw-value-exempt: the short tab */
+.gdtabs .gdtabs__row { margin: var(--space-2) var(--space-3); }
+.gdtabs .gdtabs__row .segmented__btn { min-height: 28px; height: 28px; padding: 0 var(--space-1); font-size: var(--fs-cell); white-space: nowrap; }
 /* layout-exempt: the view under the tabs takes the card's remaining height */
 .gdtabs__body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 /* The seal's own box adds no side padding inside a tab; the views carry their own gutters. */
@@ -311,7 +310,112 @@
 .gdlog th:first-child, .gdlog td:first-child { padding-left: var(--space-3); text-align: left; }
 .gdlog th:nth-child(2), .gdlog td:nth-child(2), .gdlog td:nth-child(3) { text-align: left; }
 .gdlog tr.is-other td { background: var(--surface-inset); color: var(--text-caption); }
-.gdlog__level { display: block; font-size: var(--fs-cell); }
+/* The level rides beside the date, small, so every row keeps one line (Gary, 2026-10-29). */
+.gdlog__level { margin-left: var(--space-1); font-size: var(--fs-cell); }
+.gdlog td:first-child { white-space: nowrap; }
 .gdlog .gdlog__at { width: 1em; padding-right: 0; color: var(--text-caption); }
 .gdlog th:last-child, .gdlog td:last-child { padding-right: var(--space-3); }
 .gdlog__opp img { display: block; }
+
+/* The Scout tab's verdict (ScoutVerdict.jsx): the Scout page's scale (styles/scout/edge.css), small. */
+/* layout-exempt: the verdict over its scale and the two names */
+.gdtabs__scout { display: flex; flex-direction: column; gap: var(--space-3); }
+.gdverdict { padding: var(--space-2) var(--space-3); background: var(--surface-stamped-ink); color: var(--text-on-ink-bright); }
+.gdverdict p { margin: 0; }
+.gdverdict__head { display: flex; align-items: baseline; gap: var(--space-2); }
+.gdverdict__head b { font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); text-transform: uppercase; }
+.gdverdict__head small { margin-left: auto; font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.gdverdict__scale { position: relative; display: flex; height: var(--space-2); margin: var(--space-2) 0 var(--space-1); }
+.gdverdict__step--pitcher2 { flex: 0 0 15%; background: var(--allstar-blue); }
+.gdverdict__step--pitcher1 { flex: 0 0 20%; background: color-mix(in srgb, var(--allstar-blue) 70%, var(--surface-stamped-ink)); }
+.gdverdict__step--even { flex: 0 0 30%; background: var(--graphite); }
+.gdverdict__step--hitter1 { flex: 0 0 20%; background: color-mix(in srgb, var(--award-line) 60%, var(--surface-stamped-ink)); }
+.gdverdict__step--hitter2 { flex: 1 1 auto; background: var(--award-line); }
+.gdverdict__pin { position: absolute; top: calc(-1 * var(--space-1)); bottom: calc(-1 * var(--space-1)); width: var(--bw-heavy); margin-left: calc(-0.5 * var(--bw-heavy)); background: var(--text-on-ink-bright); }
+.gdverdict__sides { display: flex; justify-content: space-between; font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
+
+/* The Scout tab's "Things to watch" (ScoutVerdict.jsx): the Scout page's sentences, under the verdict. */
+.gdwatch { margin: var(--space-3) calc(-1 * var(--space-3)) calc(-1 * var(--space-2)); padding: 0; list-style: none; background: var(--surface-card); color: var(--text-heading); }
+.gdwatch li { padding: var(--space-2) var(--space-3); border-top: var(--bw-hair) solid var(--border-hairline); }
+.gdwatch li p { margin: var(--space-1) 0 0; font-size: var(--fs-small); line-height: var(--lh-prose); color: var(--text-body); }
+.gdwatch li p strong { font-family: var(--font-mono); font-weight: var(--w-bold); color: var(--text-heading); }
+/* The Scout's generated sentences, natural case as on the Scout page (01-base.css lists the exemption). */
+#root .gdwatch li p,
+#root .gdwatch li p * {
+  text-transform: none; /* caps-exempt: the Scout's generated sentences read as prose */
+}
+.gdwatch__tag { display: inline-block; padding: 1px var(--space-1); font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; } /* raw-value-exempt: a tag's hairline pad */
+.gdwatch__tag--hitter { background: var(--award-line); color: var(--text-heading); }
+.gdwatch__tag--pitcher { background: var(--allstar-blue); color: var(--text-on-ink-bright); }
+
+/* The game log's sortable heads: the head's own look, a tap target; the sorted column is ink-underlined. */
+.gdlog__sort { padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: var(--ls-label); text-transform: inherit; cursor: pointer; }
+.gdlog__sort.is-on { color: var(--text-heading); text-decoration: underline; text-decoration-thickness: var(--bw-heavy); text-underline-offset: var(--space-1); }
+.gdlog__sort.is-down::after { content: ' ▼'; font-size: 0.8em; }
+.gdlog__sort.is-up::after { content: ' ▲'; font-size: 0.8em; }
+
+/* The bar's Box and Win % sheets (GamedaySheets.jsx): a stamped card over the page, its body scrolling. */
+/* layout-exempt: head over a scrolling body */
+.gdsheet { display: flex; flex-direction: column; width: min(720px, 94vw); max-height: 88dvh; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); box-shadow: var(--shadow-stamped); } /* raw-value-exempt: the sheet's width */
+.gdsheet__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border-bottom: var(--bw-heavy) solid var(--text-heading); }
+.gdsheet__head h2 { margin: 0; font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-title); }
+.gdsheet__body { overflow-y: auto; padding: var(--space-3); }
+.gdsheet__sub { margin: var(--space-4) 0 var(--space-2); font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); }
+/* layout-exempt: the two clubs' batting side by side, stacking when narrow */
+.gdsheet__pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-3); } /* raw-value-exempt: a table's narrowest */
+.gdsheet__table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.gdsheet__table th { padding: var(--space-1) var(--space-1h); border-bottom: var(--bw-heavy) solid var(--text-heading); color: var(--text-caption); font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-align: right; }
+.gdsheet__table td { padding: var(--space-1) var(--space-1h); border-bottom: var(--bw-hair) solid var(--border-hairline); text-align: right; }
+.gdsheet__table :is(th, td):first-child { text-align: left; }
+.gdsheet__empty { margin: var(--space-3) 0; color: var(--text-caption); font-size: var(--fs-small); }
+.gdsheet__split { display: flex; gap: var(--space-2); margin: 0 0 var(--space-2); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+.gdsheet__door { margin-top: var(--space-4); padding: 0; border: 0; background: none; color: var(--text-heading); font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-decoration: underline; cursor: pointer; }
+/* How a club scored (ScoringSheet): each scoring play, its half, and the score after it. */
+.gdruns { margin: 0; padding: 0; list-style: none; }
+/* layout-exempt: the half, the play, the score after it */
+.gdruns li { display: grid; grid-template-columns: 4.5em minmax(0, 1fr) auto; gap: var(--space-3); align-items: baseline; padding: var(--space-2) 0; border-bottom: var(--bw-hair) solid var(--border-hairline); }
+.gdruns li p { margin: 0; font-size: var(--fs-small); line-height: var(--lh-prose); }
+.gdruns__inn { color: var(--text-caption); font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); }
+.gdruns__score { font: var(--w-bold) var(--fs-small) / var(--lh-solid) var(--font-mono); white-space: nowrap; }
+
+/* The scoring summary drops from under the score bug (ScoringSheet's Drop): the band's full width,
+   joined to its bottom edge, sliding down out of it; none under reduced motion. */
+.gdnext__band { position: relative; }
+/* layout-exempt: head over a scrolling body */
+.gddrop { position: absolute; z-index: var(--z-overlay); top: 100%; left: 0; right: 0; display: flex; flex-direction: column; max-height: 60dvh;
+  border: var(--bw-heavy) solid var(--border-stamped); border-top: 0; background: var(--surface-card); box-shadow: var(--shadow-stamped);
+  transform-origin: top; animation: gddrop-in var(--dur-med) var(--ease-out); }
+/* The exit is the entrance reversed, a touch quicker. */
+.gddrop.is-closing { animation: gddrop-out var(--dur-fast) var(--ease-out) forwards; }
+@keyframes gddrop-out { from { clip-path: inset(0 0 0 0); transform: none; } to { clip-path: inset(0 0 100% 0); transform: translateY(calc(-1 * var(--space-2))); } }
+@keyframes gddrop-in { from { clip-path: inset(0 0 100% 0); transform: translateY(calc(-1 * var(--space-2))); } to { clip-path: inset(0 0 0 0); transform: none; } }
+@media (prefers-reduced-motion: reduce) { .gddrop { animation: none; } }
+:root[data-motion='reduced'] .gddrop { animation: none; }
+/* The drop's head is the club's bar, its ✕ over the bar's right end in the bar's own ink. */
+.gddrop__head { position: relative; }
+.gddrop__head .gdp__band .sectionhead { padding-right: calc(var(--tap-min) + var(--space-2)); }
+.gddrop__close { position: absolute; top: 50%; right: var(--space-1); transform: translateY(-50%); color: var(--bar-text, var(--text-on-ink-bright)); }
+.gddrop .gdsheet__body > .statgrid { background: transparent; }
+.gdruns__score { display: inline-flex; align-items: center; gap: var(--space-1); }
+/* On the club's bar the ✕'s hover keeps its ink: a faint wash of that ink, not the ghost button's
+   paper fill, which turned the bar-coloured ✕ into a pale blank (Gary, 2026-10-29). */
+.gddrop__close.btn { --btn-ink: var(--bar-text, var(--text-on-ink-bright)); --btn-fill-hover: color-mix(in srgb, var(--bar-text, var(--text-on-ink-bright)) 18%, transparent); --btn-edge-hover: transparent; }
+/* Tighter (Gary, 2026-10-29): the list starts close under the bar, less padding, a narrow half column. */
+.gddrop .gdsheet__body { padding: 0; }
+.gddrop .gdsheet__body > .statgrid { padding: 0 var(--space-3) var(--space-1); }
+.gddrop .gdruns li { grid-template-columns: 2.5em minmax(0, 1fr) auto; gap: var(--space-2); padding: var(--space-1h) 0; }
+.gddrop .gdruns li:last-child { border-bottom: 0; }
+.gddrop__marks { display: inline-flex; gap: var(--space-2); }
+/* The wide trail's first chip keeps a step off the box's left border (Gary, 2026-10-29). */
+.gdnext:not([data-tier='P']) .gdnext__trailscroll .gdp__trail { padding-left: var(--space-2); }
+/* Edge to edge (Gary, 2026-10-29): the pitcher card's tab row spans the card, and the Scout view's verdict and
+   its notes run to the card's sides with no inset around them. */
+.gdtabs .gdtabs__row { margin-inline: 0; }
+.gdtabs__scout { padding: 0; gap: 0; }
+/* No scroll channel down the card's right edge: the views scroll by touch and wheel, and the bouncing
+   chevron says when more is below. */
+.gdtabs .gdscroll__in { scrollbar-width: none; }
+.gdtabs .gdscroll__in::-webkit-scrollbar { display: none; }
+/* The edge-to-edge tab row drops its outer left and right borders: the card's own frame is that edge. */
+.gdtabs .gdtabs__row .segmented__btn:first-child { border-left-color: transparent; }
+.gdtabs .gdtabs__row .segmented__btn:last-child { border-right-color: transparent; }

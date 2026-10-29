@@ -18,7 +18,18 @@ function club(h, side, name, rows) {
           ...COLUMNS.map(([c, k]) => h('td', { key: c }, r[k] === '' || r[k] == null ? '—' : String(r[k]))))))))
 }
 
+// A club that has not pitched yet still shows its starter, every figure 0 (Gary, 2026-10-29): the
+// announced probable (gameData.probablePitchers, a pregame fact), else the first arm on its boxscore staff.
+// No result is read: nobody has thrown a pitch for this club at this step.
+function starterRow(feed, side) {
+  const id = feed?.gameData?.probablePitchers?.[side]?.id ?? feed?.liveData?.boxscore?.teams?.[side]?.pitchers?.[0]
+  const p = id != null ? feed?.gameData?.players?.[`ID${id}`] : null
+  if (!p) return []
+  const worn = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`]?.jerseyNumber
+  return [{ id, last: p.lastName ?? '', first: p.useName ?? p.firstName ?? '', jersey: worn ?? p.primaryNumber ?? '', hand: p.pitchHand?.code ?? '', ip: '0.0', pitches: 0, bf: 0, h: 0, r: 0, er: 0, bb: 0, k: 0 }]
+}
+
 export function pitchingLinesMarkup(h, { key, feed, lines }) {
   const name = (side) => feed?.gameData?.teams?.[side]?.teamName ?? feed?.gameData?.teams?.[side]?.name ?? (side === 'away' ? 'Away' : 'Home')
-  return h('div', { key, className: 'gdpl' }, club(h, 'away', name('away'), lines?.away ?? []), club(h, 'home', name('home'), lines?.home ?? []))
+  return h('div', { key, className: 'gdpl' }, club(h, 'away', name('away'), lines?.away?.length ? lines.away : starterRow(feed, 'away')), club(h, 'home', name('home'), lines?.home?.length ? lines.home : starterRow(feed, 'home')))
 }

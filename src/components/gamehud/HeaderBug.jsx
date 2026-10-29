@@ -39,6 +39,7 @@ export function HeaderBug({
   bases,
   outs = 0,
   over = false, // the half just ended: the name bars stay, dimmed
+  onTeam = null, // (side) => void: a tap on a club's half opens how it scored (Gameday, 2026-10-29)
 }) {
   const top = half === 'top'
   // The club at bat wears the marker underline, as on the console band; nobody bats once it is over.
@@ -93,6 +94,10 @@ export function HeaderBug({
           block="inhead__half"
           className={`inhead__half--home${batting === 'home' ? ' is-atbat' : ''}`}
         />
+        {onTeam && ['away', 'home'].map((side) => (
+          <button key={side} type="button" className={`inhead__teambtn inhead__teambtn--${side}`} aria-haspopup="dialog"
+            aria-label="Scoring summary" onClick={() => onTeam(side)} />
+        ))}
       </div>
       {(pitcher || batter) && (
         <div className="inhead__bars">

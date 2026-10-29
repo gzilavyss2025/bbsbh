@@ -27,9 +27,15 @@ test('one table per club in the scorebook\'s columns, a row per pitcher as of th
   assert.deepEqual(r[0], [`${first.last}, ${first.first}`, String(first.jersey), first.hand, first.ip, ...[first.pitches, first.bf, first.h, first.r, first.er, first.bb, first.k].map(String)])
 })
 
-test('a club with nobody on the page yet says so instead of an empty table', () => {
+test('a club that has not pitched yet shows its starter with every figure 0 (Gary, 2026-10-29)', () => {
   const out = html(pitchingLinesMarkup(createElement, { feed: F, lines: { away: [], home: [] } }))
-  assert.equal((out.match(/<table/g) ?? []).length, 0)
+  assert.equal((out.match(/<table/g) ?? []).length, 2)
+  for (const row of rows(out)) assert.deepEqual(row.slice(3), ['0.0', '0', '0', '0', '0', '0', '0', '0'])
+})
+
+test('a club with no starter known at all still says "No pitcher yet"', () => {
+  const bare = { gameData: { teams: F.gameData.teams, players: {} }, liveData: { boxscore: { teams: {} } } }
+  const out = html(pitchingLinesMarkup(createElement, { feed: bare, lines: { away: [], home: [] } }))
   assert.equal((out.match(/No pitcher yet/g) ?? []).length, 2)
 })
 

@@ -5,10 +5,11 @@ import { useAsync } from '../../../../hooks/useAsync.js'
 import { pitchMark } from '../../../../lib/pitch/pitchTypes.js'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { ScrollCue } from '../ScrollCue.jsx'
+import { Segmented } from '../../../../components/ui/control/Segmented.jsx'
 
 // The Gameday arm card's tabs, under his line tonight (Gary, 2026-10-29): Arsenal (his season
 // repertoire, the card's own pitch tiles), Pitch Mix (tonight so far, with drill-downs), Game Log
-// (every outing this season before tonight) and Scout (him against the batter up). Pitch Mix opens.
+// (every outing this season before tonight) and Scout (him against the batter up). Scout opens.
 // `mix` and `scout` arrive already drawn inside the arm panel's seal (GamedayPanels.jsx): this
 // file only switches between them.
 const TABS = [
@@ -19,17 +20,12 @@ const TABS = [
 ]
 
 export function ArmTabs({ arsenal, mix, log, scout }) {
-  const [tab, setTab] = useState('mix')
+  const [tab, setTab] = useState('scout') // Scout opens (Gary, 2026-10-29)
   const body = { arsenal, mix, log, scout }[tab]
   return (
     <div className="gdtabs">
-      <div className="gdtabs__row" role="tablist" aria-label="Pitcher views">
-        {TABS.map(([key, label]) => (
-          <button key={key} type="button" role="tab" aria-selected={tab === key} className={`gdtabs__tab${tab === key ? ' is-on' : ''}`} onClick={() => setTab(key)}>
-            {label}
-          </button>
-        ))}
-      </div>
+      {/* The checkpoint's page switch, the same control (Gary, 2026-10-29): the app's Segmented. */}
+      <Segmented label="Pitcher views" value={tab} onChange={setTab} fill className="gdtabs__row" options={TABS.map(([value, label]) => ({ value, label }))} />
       {/* A long view scrolls inside the card, with Gameday's bouncing chevron while more is below. */}
       <div className="gdtabs__body" role="tabpanel">
         <ScrollCue key={tab} label="More below">{body ?? <p className="gdtabs__empty">Nothing on file yet.</p>}</ScrollCue>
@@ -143,17 +139,38 @@ const shortDate = (iso) => `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10)
 
 // Every outing this season BEFORE tonight, postseason and minor-league/rehab outings included (fetchPitcherRecentGames' cutoff),
 // newest first: completed games only.
+// The sortable columns (Gary, 2026-10-29): a tap on a head sorts largest first, a second smallest first, a
+// third goes back to newest first. Innings sort by outs ("6.1" is 19), so 6.1 sits above 6.0.
+// Date and Opp sort too (Gary, 2026-10-29): Date's first tap is oldest first (newest is already the order),
+// Opp's is A to Z; a second tap flips it and a third clears it, as for the figures.
+const SORTS = [['ip', 'IP'], ['pitches', 'P'], ['h', 'H'], ['er', 'ER'], ['bb', 'BB'], ['k', 'K']]
+const FIRST_DIR = { date: -1, opp: -1 }
+const outs = (ip) => { const [w, f] = String(ip || '0').split('.'); return Number(w) * 3 + Number(f || 0) }
+const sortValue = (g, key) => (key === 'ip' ? outs(g.ip) : key === 'date' ? g.date : key === 'opp' ? g.opponent ?? '' : Number(g[key]) || 0)
+const compare = (a, b, key) => { const x = sortValue(a, key), y = sortValue(b, key); return typeof x === 'string' ? y.localeCompare(x) : y - x }
+
 export function ArmGameLog({ pitcherId, season, date, gameNumber, sportId = 1 }) {
+  const [sort, setSort] = useState(null) // { key, dir: 1 largest first | -1 smallest first } or null
+  const first = (key) => FIRST_DIR[key] ?? 1
+  const next = (key) => setSort(sort?.key !== key ? { key, dir: first(key) } : sort.dir === first(key) ? { key, dir: -sort.dir } : null)
+  const head = (key, label, extra = {}) => (
+    <th key={key} {...extra} aria-sort={sort?.key === key ? (sort.dir === 1 ? 'descending' : 'ascending') : undefined}>
+      <button type="button" className={`gdlog__sort${sort?.key === key ? (sort.dir === 1 ? ' is-on is-down' : ' is-on is-up') : ''}`} onClick={() => next(key)}>{label}</button>
+    </th>
+  )
   const { data, loading } = useAsync(() => fetchPitcherRecentGames(pitcherId, season, date, gameNumber, Infinity), [pitcherId, season, date, gameNumber])
   if (loading && !data) return <p className="gdtabs__empty">…</p>
   if (!data?.length) return <p className="gdtabs__empty">No outings before tonight this season.</p>
   return (
     <table className="gdlog">
       <thead>
-        <tr><th>Date</th><th colSpan={2}>Opp</th><th>IP</th><th>P</th><th>H</th><th>ER</th><th>BB</th><th>K</th></tr>
+        <tr>
+          {head('date', 'Date')}{head('opp', 'Opp', { colSpan: 2 })}
+          {SORTS.map(([key, label]) => head(key, label))}
+        </tr>
       </thead>
       <tbody>
-        {data.map((g) => (
+        {(sort ? [...data].sort((a, b) => sort.dir * compare(a, b, sort.key)) : data).map((g) => (
           // An outing at another level than tonight's (a rehab or minor-league start) is shaded and tagged.
           <tr key={`${g.gamePk}-${g.date}`} className={g.sportId !== sportId ? 'is-other' : undefined}>
             <td>{shortDate(g.date)}{g.sportId !== sportId && g.level && <small className="gdlog__level">{g.level}</small>}</td>

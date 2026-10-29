@@ -100,7 +100,46 @@
 /* A high pitch (near or over the zone's top, or pinned at the stage's top edge) opens its card below
    it, so the stage's edge never cuts the card off. */
 .gdzonemap__pitch.is-high .gdzonemap__tip, .gdzonemap__pitch.is-off--up .gdzonemap__tip { bottom: auto; top: calc(100% + var(--space-1h)); }
-/* The grid is its own layer (its transform), under the batter (z-index 1). While a pitch's card is
-   open, the whole grid steps above everything on the stage, so the card is never hidden. */
-.gdzonemap__grid:has(.gdzonemap__pitch:hover, .gdzonemap__pitch:focus-visible) { z-index: var(--z-raised); }
+/* The grid is its own layer (its transform). It sits over the batter, always (Gary, 2026-10-29): a pitch
+   that runs past his body is still drawn on top of him, and so is its card. */
+.gdzonemap__grid { z-index: var(--z-raised); }
 .gdzonemap:has(.gdzonemap__pitch:hover, .gdzonemap__pitch:focus-visible) { z-index: var(--z-sticky); }
+/* The pitcher block names the batter instead ("vs Chourio"), where the Scout link was (Gary, 2026-10-29). */
+.gdzonemap__pitcher .gdp__scoutvs--hitter { display: inline; font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); color: var(--text-caption); }
+
+/* The zone's explainer (ZoneCard `note`): a notification card at the stage's lower right, over the
+   ground right of the plate, until the next tap. Fades and rises in; none under reduced motion. */
+.gdzonemap__grid { cursor: help; }
+.gdzonemap__note { position: absolute; z-index: var(--z-sticky); right: var(--space-3); bottom: var(--space-3); max-width: min(46%, 280px); margin: 0;
+  padding: var(--space-2) var(--space-3); border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); box-shadow: var(--shadow-stamped-soft);
+  color: var(--text-heading); font-size: var(--fs-small); line-height: var(--lh-prose); pointer-events: auto; animation: gdzonemap-note var(--dur-med) var(--ease-out); } /* raw-value-exempt: the card's widest */
+@keyframes gdzonemap-note { from { opacity: 0; transform: translateY(var(--space-1)); } }
+#root .gdzonemap__note { text-transform: none; } /* caps-exempt: an explaining sentence reads as prose */
+@media (prefers-reduced-motion: reduce) { .gdzonemap__note { animation: none; } }
+
+/* TRIAL: the park backdrop behind the batting view, its top (stands, scoreboard) showing, cropped to fill. */
+.gdzonemap__backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; pointer-events: none; }
+/* Readable over the park (Gary, 2026-10-29): the art sits back, muted and washed toward the page's paper, more
+   so toward the ground where the plate and the batter's feet are; the pitcher's block gets a paper card. */
+.gdzonemap__backdrop { opacity: 0.55; filter: saturate(0.7); }
+.gdzonemap:has(.gdzonemap__backdrop:not([hidden]))::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-canvas) 25%, transparent), color-mix(in srgb, var(--bg-canvas) 80%, transparent) 70%, var(--bg-canvas)); }
+.gdzonemap:has(.gdzonemap__backdrop:not([hidden])) .gdzonemap__pitcher { padding: var(--space-1h); background: var(--surface-card); border: var(--bw-heavy) solid var(--border-stamped); box-shadow: var(--shadow-stamped-soft); }
+/* From the plate (Gary, 2026-10-29): the render is the outfield wall and the stands, the wall along its bottom
+   edge and no field. So it fills the stage's upper part with that wall on a horizon about level with the
+   batter's waist; the stage's floor below is the field. The wash fades it into the floor at the horizon. */
+.gdzonemap__backdrop { inset: 0 0 auto 0; height: 58%; object-position: center bottom; }
+.gdzonemap:has(.gdzonemap__backdrop:not([hidden]))::before {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg-canvas) 20%, transparent), color-mix(in srgb, var(--bg-canvas) 35%, transparent) 50%, var(--bg-canvas) 60%); }
+/* The park in black and white (Gary, 2026-10-29): the club colours on the stage stay the batter's and the zone's. */
+.gdzonemap__backdrop { filter: grayscale(1); opacity: 0.35; } /* 20 points fainter than the 0.55 trial */
+
+/* TRIAL: the field photo (public/art/gameday/plate-field.webp, Gary's) fills the stage under the horizon, its
+   home plate centred under the zone, and meets the park backdrop where the wall stands. The drawn chalk boxes
+   and plate step aside while it shows. */
+.gdzonemap__field { position: absolute; left: 0; right: 0; bottom: 0; top: 50%; pointer-events: none;
+  background: url('/art/gameday/plate-field.webp') center 92% / cover no-repeat;
+  mask-image: linear-gradient(to bottom, transparent, #000 18%); } /* raw-value-exempt: a mask, not a colour */
+.gdzonemap:has(.gdzonemap__field) :is(.gdzonemap__ground, .gdzonemap__plate) { visibility: hidden; }
+/* The field matches the park above it (Gary, 2026-10-29): black and white, at the same 35%. */
+.gdzonemap__field { filter: grayscale(1); opacity: 0.35; }

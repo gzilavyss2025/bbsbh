@@ -38,6 +38,11 @@ export function saw(s, seen, view) {
 // A reveal tap still waiting for its play stays armed: the revealed play takes over when it arrives.
 export const replay = (s, idx, reduced) => ({ ...s, shown: idx, playing: !reduced, run: (s.run ?? 0) + 1 })
 
+// Back from a replay to where the reader was (Gary, 2026-10-29: the open at-bat's chip): the stage
+// draws the current step again, a sub-step's key when inside an at-bat, else the rest frame. Reveals
+// nothing: `seen` is the cursor already on screen.
+export const back = (s) => ({ ...s, shown: typeof s.seen === 'object' && s.seen != null ? s.seen : null, playing: false, run: 0 })
+
 // The animation reached its end on its own.
 export const ended = (s) => (s.playing ? { ...s, playing: false } : s)
 

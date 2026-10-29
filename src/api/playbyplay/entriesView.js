@@ -396,7 +396,8 @@ export function buildTrailItems(entries, wins, eventCodeFor) {
     // code already is, rather than the empty-code '···' placeholder a real
     // strikeout should never show.
     if (atbat) {
-      return { name: atbat.batter.last, code: atbat.code || (atbat.calledLooking ? 'K' : ''), kind: atbat.codeKind, notices }
+      // `atBatIndex`: which play the step is, so Gameday's trail can move the read-back cursor to it (2026-10-29).
+      return { name: atbat.batter.last, code: atbat.code || (atbat.calledLooking ? 'K' : ''), kind: atbat.codeKind, notices, atBatIndex: atbat.atBatIndex ?? null }
     }
     // The extra-innings automatic runner, when he is ALONE in his window. He
     // normally isn't — focusWindows anchors on at-bats, so a placement rides

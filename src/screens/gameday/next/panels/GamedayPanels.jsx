@@ -17,13 +17,14 @@ import { selectDueUpDuring } from '../../../../api/dueup.js'
 import { pitcherDayLine, pitchingDayLines } from '../../../../api/gameday/dayLine.js'
 import { tonightPitches } from '../../../../api/gameday/pitchMix.js'
 import { ArmTabs, ArmGameLog, TonightMix } from './ArmTabs.jsx'
+import { ScoutVerdict } from './ScoutVerdict.jsx'
 import { pitchingLinesMarkup } from './pitchingLinesMarkup.js'
 import { createElement, useState } from 'react'
 import { halfIndex, selectLineup, selectMoundPitcher, selectSkippedBottomHalf } from '../../../../api/select.js'
 import { PitcherCard } from '../../../../components/playbyplay/pitcherCard/PitcherCard.jsx'
 import { defenseAt } from '../../../../api/gameday/defense.js'
 import { battingSideOf } from '../../../../api/gameday/stepCut.js'
-import { chipCode, cutAt, orderAt } from './panelData.js'
+import { chipCode, cutAt, orderAt, withOpenRunning } from './panelData.js'
 
 // Gameday's panels (#2568), one per ladder block. `ctx` is the reader's cursor: the half on
 // screen, `step` (the entry count PlayByPlay is capped at; null once the half is committed) and
@@ -112,10 +113,15 @@ function Navigator({ ctx }) {
   )
 }
 
-// Nothing on the trail until the half's first at-bat is revealed.
+// Before the half's first at-bat is revealed the trail holds one chip, the leadoff man's (Gary, 2026-10-29): the
+// half within reach and nothing on it yet. His name is the lineup's, not a result.
 const Trail = ({ ctx }) => (
-  <Sealable ctx={ctx} quiet>
-    {({ cards, more }) => cards.length === 0 ? null : (
+  <Sealable ctx={ctx} reach quiet>
+    {({ cards, more }) => cards.length === 0 ? (
+      <ol className="gdp__trail" aria-label="At-bats this half">
+        <li className="gdp__chip gdp__chip--cover"><b>{upNext(ctx, cards) || 'Sealed'}</b></li>
+      </ol>
+    ) : (
       <ol className="gdp__trail" aria-label="At-bats this half">
         {cards.slice(-10).map((c) => (
           // The at-bat on screen (ctx.here) is marked; the ones after it, already read, sit back.
@@ -130,7 +136,11 @@ const Trail = ({ ctx }) => (
           </li>
         ))}
         {/* The at-bat still open names its batter, as the hero does, instead of "Sealed" (Gary, 2026-10-28). */}
-        {more && <li className="gdp__chip gdp__chip--cover"><b>{upNext(ctx, cards) || 'Sealed'}</b></li>}
+        {/* Once a pitch of it is on screen, the open at-bat's chip is the way back from a replay to
+            where the reader was (Gary, 2026-10-29). */}
+        {more && (ctx.onBack && ctx.open?.sub > 0
+          ? <li className="gdp__chip gdp__chip--cover"><button type="button" className="gdp__replay" onClick={ctx.onBack} aria-label={`Back to ${upNext(ctx, cards) || 'the at-bat'}`}><b>{upNext(ctx, cards) || 'Sealed'}</b></button></li>
+          : <li className="gdp__chip gdp__chip--cover"><b>{upNext(ctx, cards) || 'Sealed'}</b></li>)}
       </ol>
     )}
   </Sealable>
@@ -170,7 +180,7 @@ function BattingOrder({ ctx }) {
       <Sealable ctx={ctx} reach>
         {({ cards, hitters }) => (
           <ol className="gdp__order">
-            {atTheTop(orderAt(ctx.feed, side, ctx.inning, ctx.half, ctx.mark, cards, hitters), ctx, cards).map((r, i) => (
+            {atTheTop(withOpenRunning(orderAt(ctx.feed, side, ctx.inning, ctx.half, ctx.mark, cards, hitters), ctx.feed, ctx.inning, ctx.half, ctx.open), ctx, cards).map((r, i) => (
               <li key={r.slot} data-up={i === 0 || undefined}>
                 <Headshot personId={r.id} name={r.last} tint={false} className="gdp__shot" />
                 <span className="gdp__who"><PlayerLink id={r.id} name={[r.first, r.last].filter(Boolean).join(' ')}>{r.first && <small>{r.first}</small>}<b>{r.last}</b></PlayerLink></span>
@@ -303,7 +313,8 @@ function Arm({ ctx }) {
     <Sealable ctx={ctx} reach>
       {({ cards, hitters }) => {
         const up = atTheTop(orderAt(feed, bat, inning, half, mark, cards, hitters), ctx, cards)[0]
-        return up ? <div className="gdtabs__scout"><ScoutLine feed={feed} hitterId={up.id} pitcherId={pitcher.id} /></div> : null
+        // The Scout page's verdict and things to watch, small (Gary, 2026-10-29); the head-to-head line lives on the Due up card.
+        return up ? <div className="gdtabs__scout"><ScoutVerdict pitcherId={pitcher.id} hitterId={up.id} /></div> : null
       }}
     </Sealable>
   )
