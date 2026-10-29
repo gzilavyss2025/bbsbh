@@ -42,10 +42,11 @@ export function tapeRows({ away, home, meetingDates, meetingWins = null }) {
     { key: 'oct', label: 'Oct W–L', away: `${away.octW}–${away.octL}`, home: `${home.octW}–${home.octL}` },
   ]
   const meeting = meetingLabel(meetingDates)
-  if (meeting) rows.push({ key: 'meeting', label: meeting, away: meetingWins?.away ?? null, home: meetingWins?.home ?? null })
+  // Named for what it counts, not its dates (Gary, 2026-10-28).
+  if (meeting) rows.push({ key: 'meeting', label: 'Vs in regular season', away: meetingWins?.away ?? null, home: meetingWins?.home ?? null })
   rows.push(
-    { key: 'lastWs', label: 'Last WS', away: orDash(away.lastWs), home: orDash(home.lastWs) },
-    { key: 'lastTitle', label: 'Last title', away: orDash(away.lastTitle), home: orDash(home.lastTitle) },
+    { key: 'lastWs', label: 'Last WS app', away: orDash(away.lastWs), home: orDash(home.lastWs) }, // app = appearance
+    { key: 'lastTitle', label: 'Last WS title', away: orDash(away.lastTitle), home: orDash(home.lastTitle) },
   )
   return rows
 }

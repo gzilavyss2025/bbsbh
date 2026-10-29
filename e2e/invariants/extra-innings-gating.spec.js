@@ -45,7 +45,7 @@ test('the 10th inning stays hidden until the 9th’s bottom is revealed', async 
   // Box score door is a door, not the advance; it is closed here.)
   await page.goto(`${GAME}/bottom9`)
   expect(await innings(page)).not.toContain('10')
-  await expect(page.locator('.gdnext__advance')).toHaveText(/Next play/)
+  await expect(page.locator('.gdnext__advance')).toHaveText(/^Next ›/)
   await expect(page.getByRole('button', { name: /top 10th/i })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /box score/i })).toHaveCount(0)
 

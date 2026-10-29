@@ -92,7 +92,8 @@ test('the notes page hands the notes it draws to `Seen`, which records them in t
 
 // Review finding 4: only a note known to be about its one pitcher trades "his" for his surname. Any
 // other note keeps its own words, since its "his" (or its bare verb) may be about another man.
-test('the notes page names the man only in a starter note; every other note keeps its wording', () => {
+// Gary, 2026-10-28: every note keyed to one player names him; a matchup note's "his" stays the pitcher's.
+test('the notes page names the man a note is about, and keeps a matchup note’s “his” for the pitcher', () => {
   const notes = (n) => ({ bundle: {}, marginNotes: [n] })
   const page = (n) => html({ feed: F824, inning: 2, half: 'top', mark: 2, notes: notes(n), page: 'facts' })
   const ws = { kind: 'wsStarterStart', personId: 647304, text: 'His first World Series start.', dedupeKey: 'ws' }
@@ -102,6 +103,6 @@ test('the notes page names the man only in a starter note; every other note keep
   // A matchup note is keyed to the hitter, but its "his" is the pitcher's.
   const other = { kind: 'matchupSkill', personId: 647304, text: 'Hits .310 off his slider this season', dedupeKey: 'mu' }
   const out = page(other)
-  assert.match(out, /Hits \.310 off his slider this season/)
-  assert.doesNotMatch(out.match(/<ul class="gdcp__notes">.*?<\/ul>/)[0], /Naylor/)
+  assert.match(out, /Naylor hits \.310 off his slider this season/)
+  assert.doesNotMatch(out, /Naylor&#x27;s slider/)
 })

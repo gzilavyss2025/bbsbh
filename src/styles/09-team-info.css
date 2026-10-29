@@ -423,3 +423,7 @@
    surface it opens. It left this sheet when it was redrawn as a strip of
    film: the sheet was at its file cap, and the door's vocabulary is Express
    Lane's, not the lineup page's. */
+
+/* The lineup page's Manager cell (Gary, 2026-10-28): a larger photo, the name stacked beside it, so the
+   cell keeps the table's row height instead of a small face in a tall box. */
+.lfact__text .fact__person .shot.fact__shot { width: var(--shot-xs-w); height: var(--shot-xs-h); }

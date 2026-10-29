@@ -74,16 +74,18 @@
   font-size: var(--fs-small);
   text-transform: uppercase;
 }
+/* The number in clay and the position in ink, plain bold display type close together: Gameday's
+   Due up tag (gameday-next/panels.css .gdp__tag). */
+.lord__pos,
+.lord__num {
+  font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display);
+}
 .lord__pos {
-  padding: var(--space-1) var(--space-1h);
-  border: var(--bw-heavy) solid var(--border-stamped);
-  background: var(--accent-tint);
+  margin-left: calc(-1 * var(--space-1));
   color: var(--text-heading);
-  font-weight: var(--w-bold);
 }
 .lord__num {
   color: var(--clay);
-  font-weight: var(--w-bold);
 }
 .lord__vs {
   color: var(--text-caption);
@@ -162,7 +164,8 @@
   background: var(--border-hairline);
 }
 .lord__det div {
-  padding: var(--space-2);
+  /* Six cells across a phone: a narrow side inset, so ".351" fits its cell rather than spilling past the edge. */
+  padding: var(--space-2) var(--space-1h);
   background: var(--surface-card);
   text-align: center;
 }

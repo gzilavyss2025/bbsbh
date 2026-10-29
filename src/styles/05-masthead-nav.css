@@ -140,7 +140,7 @@
   overflow: hidden;
   padding: 2px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
+  border-radius: 0; /* square tiles (Gary, 2026-10-28) */
   background: var(--tint, var(--bg-page));
   box-shadow: var(--inset-cell);
 }
@@ -326,4 +326,17 @@
    under the date row. This margin gives back the 12px the .hint padding had. */
 .slatebody__main > .emptystate:first-child {
   margin-top: var(--space-3);
+}
+
+/* The score bug's ripple rings behind the club mark (Gary, 2026-10-28), under the logo, over the club fill. */
+.masthead__logobox { position: relative; isolation: isolate; }
+.masthead__logobox::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    repeating-radial-gradient(circle at 105% 130%, var(--ripple-light) 0 1px, transparent 1px 7px),
+    repeating-radial-gradient(circle at -5% -40%, var(--ripple-dark) 0 1px, transparent 1px 9px);
 }

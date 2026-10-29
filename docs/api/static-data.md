@@ -226,7 +226,10 @@ for each generator; the reader modules:
   `public/data/vs-team-splits/`, and the play-by-play vs-opponent callout
   (`callout-notes/vsTeamNote.js`). Cost-driven: the API's vs-team split types
   carry no game granularity, so `gen-vs-team-splits.mjs` sweeps each player's whole
-  MLB game log season by season. `vsTeamSplitsFor` (read in `src/screens/player/next/modules/splits/splitsData.js`) pre-selects the
+  MLB game log season by season (and each October one). Each club entry is `{ car, last }`, plus `all` when he
+  has met that club in the postseason: `car` is regular season only (the player page and the callout read it),
+  `all` adds the postseason games (the lineup pages' Career vs line, 2026-10-28), and `last` is the latest
+  regular-season meeting. A club met only in October has `all` and no `car`. `vsTeamSplitsFor` (read in `src/screens/player/next/modules/splits/splitsData.js`) pre-selects the
   club's next opponent. The career totals are spoiler-free like "Season splits"; the
   one score-revealing element — the last-game line — is gated against the page's
   `asOf` cutoff in `SplitsVsTeam.jsx`. It also words the career line for BOTH

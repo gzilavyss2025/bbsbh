@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
@@ -26,7 +26,7 @@ import { seriesMarkForFeed } from '../lib/postseason/seriesMarks.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
 import { seriesForGame } from '../api/postseason/bracket.js'
-import { gameStatusLine } from '../api/postseason/text.js'
+import { gameStatusAfter } from '../api/postseason/text.js'
 import { gameSectionTabs } from './lineup/gameSections.js'
 
 // GameView is itself a lazily-loaded route (App.jsx), but its three sections
@@ -151,7 +151,14 @@ export function GameView({ game, section, onSection }) {
   const seriesHit = seriesForGame(seriesBracket, feed?.gamePk)
   const seriesPage = gameSeriesHref(seriesHit?.series, officialDate)
   // "Game 2 · Braves Lead 1–0", beside the mark. Empty until the bracket loads.
-  const seriesStatus = gameStatusLine(seriesHit?.series, seriesHit?.gameNumber)
+  // After the final, once this box score is open (its reveal reports it: `boxShown`), the line counts
+  // this game too (Gary, 2026-10-28). The winner is read only then, so the lineup pages and a sealed
+  // box score keep the count from before the game.
+  // The box score's reveal hands up the winner itself (BoxScore's `Opened`); nothing here reads a score.
+  const [boxShown, setBoxShown] = useState(null)
+  const onBoxOpened = useCallback((winner) => setBoxShown({ pk: feed?.gamePk ?? null, winner }), [feed?.gamePk])
+  const winnerId = step === 3 && boxShown?.pk === feed?.gamePk ? boxShown.winner : null
+  const seriesStatus = gameStatusAfter(seriesHit?.series, seriesHit?.gameNumber, winnerId)
   const routeLink = useRouteLink()
 
   // CATCH UP TO LIVE (ADR-0055) — the extra button on the home lineup page for
@@ -182,7 +189,8 @@ export function GameView({ game, section, onSection }) {
     />
   ) : (
     <nav className="stepnav" aria-label="Game sections">
-      {tabs.map((s) => (
+      {/* No Scorecard tab here (Gary, 2026-10-28); the scorecard page itself keeps its own. */}
+      {tabs.filter((s) => s.key !== 'scorecard' || s.active).map((s) => (
         <button
           key={s.key}
           type="button"
@@ -330,7 +338,8 @@ export function GameView({ game, section, onSection }) {
           workloadData={workloadData}
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
-          nextLabel="Home team ›"
+          // The home club by its name, "Rays ›" (Gary, 2026-10-28).
+          nextLabel={`${feed?.gameData?.teams?.home?.clubName || 'Home team'} ›`}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -360,7 +369,7 @@ export function GameView({ game, section, onSection }) {
           workloadData={workloadData}
           callouts={gameCallouts}
           onNext={() => onSection(noPlays ? 'boxscore' : 'top1')}
-          nextLabel={noPlays ? 'Box score ›' : 'Innings ›'}
+          nextLabel={noPlays ? 'Box score ›' : 'Gameday ›'} // the section's own name (Gary, 2026-10-28)
           onCatchUp={onCatchUp}
           onReload={feedState.reload}
           loading={feedState.loading}
@@ -404,6 +413,7 @@ export function GameView({ game, section, onSection }) {
       {feed && step === 3 && (
         <Suspense fallback={<Loader />}>
         <BoxScore
+          onOpened={onBoxOpened}
           feed={feed}
           managers={managers.data}
           uniforms={uniformBrief}

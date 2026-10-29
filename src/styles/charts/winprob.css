@@ -76,7 +76,7 @@
   width: calc(100% + 2 * var(--space-3h));
   margin-inline: calc(-1 * var(--space-3h));
   height: auto;
-  touch-action: pan-y;
+  touch-action: pan-y; /* a vertical drag scrolls the page; a sideways one scrubs (useWinProbSelection.js) */
   cursor: crosshair;
 }
 /* The ring marks keyboard focus only: a tap or click also focuses the slider,

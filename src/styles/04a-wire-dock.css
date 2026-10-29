@@ -315,3 +315,12 @@
   .wiredock { display: none; }
   .screen--slate.screen--wiredock { padding-bottom: 0; }
 }
+
+/* The postseason dock is square (Gary, 2026-10-28), as the World Series boxes are. */
+.wiredock--bracket .wiredock__sheet, .wiredock--bracket.wiredock__sheet, .wiredock--bracket .wiredock__sheet * { border-radius: 0; }
+/* The open postseason dock has no title row (Gary, 2026-10-28): the bracket is its own heading, and the
+   scrim, a drag or the grabber puts it away. */
+.wiredock--bracket .wiredock__head { display: none; }
+/* Open, the rail is the grabber alone, so the bracket starts right under it (Gary, 2026-10-28). */
+.wiredock--bracket:not([data-state='rail']) .wiredock__headbox { display: none; }
+.wiredock--bracket:not([data-state='rail']) .wiredock__rail { padding-bottom: 0; }

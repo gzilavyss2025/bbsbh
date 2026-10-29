@@ -46,7 +46,7 @@ export function moveSnaps(pointerType, captured) {
 }
 // A touch on the chart selects only once it moves sideways past the slop; a
 // mostly vertical move is the page scrolling, which the chart must not follow.
-const TOUCH_SLOP = 8
+const TOUCH_SLOP = 4 // a sideways scrub starts within a few pixels (Gary, 2026-10-28)
 export function touchIntent(dx, dy) {
   if (Math.max(Math.abs(dx), Math.abs(dy)) < TOUCH_SLOP) return 'pending'
   return Math.abs(dx) > Math.abs(dy) ? 'drag' : 'scroll'

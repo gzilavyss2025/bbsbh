@@ -511,6 +511,10 @@
   color: var(--text-body);
 }
 .bs__noteLabel {
+  /* The mono body face ships one weight, so bold never showed: the label takes the display face, which has a bold (Gary, 2026-10-28). */
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -767,7 +771,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
-  padding: var(--space-2);
+  padding: var(--space-2) 0; /* no side inset (Gary, 2026-10-28) */
   margin-bottom: 8px;
   border-color: var(--border-hairline);
   box-shadow: var(--inset-cell);

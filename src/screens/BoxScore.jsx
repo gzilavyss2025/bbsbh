@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { revealBoxScore } from './boxscore/revealBoxScore.js'
 import { InningTally } from './boxscore/InningTally.jsx'
@@ -27,6 +27,7 @@ import { GameVideoRow } from '../components/highlights/GameVideoRow.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
+import { resolveBallparkLayout } from '../lib/ballpark/layout/resolveLayout.js'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { UmpireAccuracyModal } from '../components/umpire/UmpireAccuracyModal.jsx'
 import { TierPill } from '../components/badges/TierPill.jsx'
@@ -91,6 +92,19 @@ function NumPos({ num, pos }) {
 // nothing score-revealing is in the DOM until the user taps to reveal, exactly
 // like every half-inning seal. This holds even for a deep link straight to the
 // box score, so the card's "Box score" shortcut can't spoil either.
+// Mounted only inside the reveal render: it fires once the box score is shown, never before, and hands
+// up the final's winner (a club id, or null for a tie or a game not final), read here inside the seal.
+function Opened({ onOpened, winnerId }) {
+  useEffect(() => { onOpened(winnerId) }, [onOpened, winnerId])
+  return null
+}
+const finalWinnerId = (feed) => {
+  if (feed?.gameData?.status?.codedGameState !== 'F') return null
+  const ls = feed.liveData?.linescore?.teams
+  if (!ls || ls.home?.runs === ls.away?.runs) return null
+  return feed.gameData.teams?.[ls.home.runs > ls.away.runs ? 'home' : 'away']?.id ?? null
+}
+
 export function BoxScore({
   feed,
   managers,
@@ -105,6 +119,7 @@ export function BoxScore({
   loading,
   lastUpdated,
   onSection,
+  onOpened = null,
 }) {
   // The masthead above every section (GameView.jsx) already carries this
   // game's date, so the title itself just says "Box score" — no second date
@@ -172,6 +187,9 @@ export function BoxScore({
         {() => {
           const r = revealBoxScore(revealCacheRef, feed, winProbability, highlights, callouts, vsTeam, eventHistory)
           return (
+            <>
+            {/* Tells GameView the box score is open, so its series line may count this game. */}
+            {onOpened && <Opened onOpened={onOpened} winnerId={finalWinnerId(feed)} />}
             <BoxScoreBody
               stampFacts={r.stampFacts}
               feed={feed}
@@ -193,6 +211,7 @@ export function BoxScore({
               scorebookWeather={scorebookWeather}
               onSection={onSection}
             />
+            </>
           )
         }}
       </SealBox>
@@ -693,7 +712,8 @@ function BoxDefense({ feed, sideKey, theme }) {
       style={headerThemeStyle(theme)}
     >
       <h4 className="halfdefense__title sectionhead--band">Defense</h4>
-      <DefenseDiamond defense={defense} />
+      {/* The lineup page's park outline, with the game's substitutions on it (Gary, 2026-10-28). */}
+      <DefenseDiamond defense={defense} layout={resolveBallparkLayout({ venueId: feed?.gameData?.venue?.id, venueName: feed?.gameData?.venue?.name, gameDate: feed?.gameData?.datetime?.officialDate })} label={`${feed?.gameData?.venue?.name ?? 'The park'} with the defense`} />
     </section>
   )
 }

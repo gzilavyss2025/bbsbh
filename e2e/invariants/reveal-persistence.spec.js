@@ -79,7 +79,7 @@ test('reveal mark advances forward, gates the line score and the checkpoint, and
   // ...but the persisted mark must not have crept past what was actually
   // revealed: bottom of the 1st is still sealed after the reload.
   await page.goto(`${GAME}/bottom1`)
-  await expect(page.locator('.gdnext__advance')).toHaveText(/Next play/)
+  await expect(page.locator('.gdnext__advance')).toHaveText(/^Next ›/)
   await expect(page.locator('.gdcp')).toHaveCount(0)
   await expect(page.locator('.gdhero__who')).toHaveCount(0)
   expect(await cellName(page, 'Bottom 1')).toBe('Bottom 1, sealed')

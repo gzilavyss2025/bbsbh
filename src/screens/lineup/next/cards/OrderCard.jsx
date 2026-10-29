@@ -74,9 +74,10 @@ function OrderRow({ lead, player, line, bats, note, wide, open, onToggle, pills,
             {player.nameLastFirst ?? player.name}
           </PlayerLink>
           <span className="lord__meta">
+            {/* Number then position, as Gameday's Due up tags a batter ("21 CF"), then his side (Gary, 2026-10-28). */}
+            {player.jersey && <span className="lord__num">{player.jersey}</span>}
             {player.position && <span className="lord__pos">{player.position}</span>}
             {bats && <span>Bats {bats}</span>}
-            {player.jersey && <span className="lord__num">#{player.jersey}</span>}
             {pills}
           </span>
           {note && <span className="lord__vs">{note}</span>}
@@ -133,7 +134,8 @@ export function OrderCard({ data, masthead }) {
   const noteOf = (id) => {
     if (!data.starterLast) return ''
     const row = matchups.byId.get(id)
-    return row ? `vs ${data.starterLast} ${matchupLine(row, level)}` : `No prior meetings with ${data.starterLast}`
+    // No meeting: no line at all (Gary, 2026-10-28), rather than saying so.
+    return row ? `vs ${data.starterLast} ${matchupLine(row, level)}` : ''
   }
   const posted = lineup.length > 0
   const title = posted ? 'Batting order' : 'Who could play'

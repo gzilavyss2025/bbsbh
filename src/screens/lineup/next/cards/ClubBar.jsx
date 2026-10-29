@@ -1,7 +1,7 @@
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 
-// The club band that heads a card (Starting pitcher, Batting order, Defensive alignment):
+// The club band that heads a card (Starting pitcher, Batting order, Defense):
 // the title, an optional control, and the club's mono mark at the far right (ADR-0031).
 // The colours come from the theme on the card root (ADR-0030).
 export function ClubBar({ title, teamId, teamName, masthead, season, children }) {

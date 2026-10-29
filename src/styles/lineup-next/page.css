@@ -425,3 +425,8 @@
   font-weight: var(--w-regular);
   text-transform: uppercase;
 }
+
+/* Gary, 2026-10-28: the hero names the club without the "Away · Lineup" line; the section tabs sit on
+   the page's paper, no card fill. */
+.lnext__role { display: none; }
+.lnext__jump { background: transparent; border-block: 0; padding-block: 0; padding-left: 0; } /* flush with the cards' left edge */

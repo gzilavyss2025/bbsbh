@@ -1201,7 +1201,7 @@ test('C5: each block keeps its own margin and inset, from a rule that loads afte
     ['21-box-score.css', '.bs__insights', 'padding', 'var(--space-3) var(--space-3h)'],
     ['21-box-score.css', '.bs__insights', 'margin-top', 'var(--space-3)'],
     ['21-box-score.css', '.bs__statcastCard', 'padding', 'var(--space-3) var(--space-3h)'],
-    ['21-box-score.css', '.bs__noteCard', 'padding', 'var(--space-2)'],
+    ['21-box-score.css', '.bs__noteCard', 'padding', 'var(--space-2) 0'], // no side inset (Gary, 2026-10-28)
     ['21-box-score.css', '.bs__noteCard', 'margin-bottom', '8px'],
     ['21a-box-score-stars.css', '.bs__stars', 'padding', 'var(--space-3) var(--space-3h)'],
     ['21a-box-score-stars.css', '.stars3__card', 'padding', 'var(--space-2) 2px'],
@@ -1209,8 +1209,8 @@ test('C5: each block keeps its own margin and inset, from a rule that loads afte
     ['22-box-score-tables.css', '.playerline', 'padding', 'var(--space-2)'],
     ['22-box-score-tables.css', '.playerline', 'display', 'flex'],
     ['23-box-score-detail.css', '.bs__info', 'padding', 'var(--space-3) var(--space-3h)'],
-    ['23-box-score-detail.css', '.bs__totalsCard', 'padding', 'var(--space-2h) var(--space-3h) var(--space-3)'],
-    ['23-box-score-detail.css', '.bs__board', 'padding', 'var(--space-2h) var(--space-3h) var(--space-3)'],
+    ['23-box-score-detail.css', '.bs__totalsCard', 'padding', '0'], // to the card's edges (Gary, 2026-10-28)
+    ['23-box-score-detail.css', '.bs__board', 'padding', '0'], // the table runs to the card's edges (Gary, 2026-10-28)
   ]
   for (const [css, sel, prop, value] of kept) {
     assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)

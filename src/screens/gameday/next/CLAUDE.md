@@ -19,8 +19,8 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - The old half page is mounted `hidden` as the engine: it reports the live snapshot (band), the
   step cursor and the runs so far, and its page turn moves halves. Rebuilding the engine is what
   lets it go; until then its parts stay (`components/inning/`, `styles/focus/`).
-- Gary's calls this shell keeps: the band uses the score bug's tiles and type; the batting view and zone map show
-  whenever playback rests (including after a play), and have a per-game dismiss; a switch hitter stands opposite the
+- Gary's calls this shell keeps: the band uses the score bug's tiles and type; the batting view and zone map stay
+  up through playback (a pitch never blanks them), and have a per-game dismiss; a switch hitter stands opposite the
   pitcher's hand; the hero's due-up hides under the checkpoint; the checkpoint's due-up names an
   announced pinch hitter; a pre-pitch pinch hitter is the first sub-step of his own at-bat.
 - The band draws through `ScorebugMount` (the default score bug; `GamedayBand` before a snapshot), so its clamp is the only gate on the
@@ -33,7 +33,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,
   pure): it plays only a play an armed reveal tap (`advance.reveal`) revealed; anything else rests. `GamedayStage.js`
   reads that play inside a `SealBox` reveal function; the rest frame reads none. `zonemap/` is the zone card and its
-  per-game dismiss (`bbsbh:zonemap:{gamePk}`). It is the batting view: the batter in tonight's uniform sized to the zone (knees to letters), the pitcher opposite with his line against him, and the at-bat's revealed pitches on the grid (`zonePitches.js`, inside a SealBox, up to the sub-step). A just-finished at-bat or a half read back keeps its batter until the next tap (`holdsFinished`); inside an open at-bat a pinch hitter stands in from his own sub-step. `battingSide.js` resolves both displays, including switch hitters; the inset keeps the existing PlayerLink hover card and per-game dismiss. `zonemap/batterPalette.js` maps the batting club through the shared MLB/MiLB identity resolver, with separately configurable equipment, shirt, piping and trousers; `batterArt.js` caches the prepared static atlas without changing celebration art.
+  per-game dismiss (`bbsbh:zonemap:{gamePk}`). It is the batting view: the batter in tonight's uniform sized to the zone (knees to letters), the pitcher opposite with his line against him, and the at-bat's revealed pitches on the grid (`zonePitches.js`, inside a SealBox, up to the sub-step). A just-finished at-bat or a half read back keeps its batter until the next tap (`holdsFinished`), and so does a trail chip's tap (`replaying`, over the checkpoint too until Next); inside an open at-bat a pinch hitter stands in from his own sub-step. `battingSide.js` resolves both displays, including switch hitters; the batter figure is art, not a link, and the map has no ✕ (the stage's "Zones" button brings a dismissed one back). `zonemap/batterPalette.js` maps the batting club through the shared MLB/MiLB identity resolver, with separately configurable equipment, shirt, piping and trousers; `batterArt.js` caches the prepared static atlas without changing celebration art.
 - The hero's scorebook box copies Gary's hand-scored box: `docs/gameday-reference/scorebook-box.jpg` (match it, do not restyle).
 - `hero/` is the hero slot (#2576): `heroMarkup.js` builds it (a `.js` builder, so `npm test` can render it),
   `heroModel.js` is the scorebook box's pure model. It reads the live snapshot's `last` (the last finished
@@ -55,6 +55,6 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   removed in the #2676 stack: the sprites replace it), also inspected at `/animation-lab#ballpark`:
   separate character atlases, stadium, palette preparation and finite choreography. `cutscene/integration/`
   selects completed revealed results inside `GamedayStage`'s SealBox subtree; the stage's existing tap rule
-  starts/skips it, and a finished one offers Replay (tapRule `replay`), held for the checkpoint too. A scene whose assets or chunks fail leaves the stage empty. A qualifying ending scene holds
+  starts/skips it, and a finished one offers Replay (tapRule `replay`), held for the checkpoint too. It fills the stage, cropped not stretched, with the club's mono mark and a ✕ that puts it away (a held ending scene's ✕ gives the stage back to the batting view until Next). A scene whose assets or chunks fail leaves the stage empty. A qualifying ending scene holds
   until bottom Next opens its checkpoint without advancing the game; cold visits retain ordinary read-back.
   Authoring, asset provenance and the next steps live in `docs/ballpark-celebrations.md`.

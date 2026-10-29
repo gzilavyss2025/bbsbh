@@ -180,7 +180,12 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
     slateDate,
   })
   // A game day's Next is today's game, the one the lineups door opens.
-  const days = calendarDays(columns, slateDate).map((day) => (gameDay ? { ...day, next: day.today && day.kind === 'game' } : day))
+  // A game already played opens its lineups page from its cell (Gary, 2026-10-28), as a decided Series' cells do.
+  const playedOf = new Map((series.games ?? []).map((g) => [g.gameNumber, g]))
+  const days = calendarDays(columns, slateDate).map((day) => {
+    const d = gameDay ? { ...day, next: day.today && day.kind === 'game' } : day
+    return d.kind === 'game' && d.date && d.date < slateDate ? { ...d, path: nextGamePath(playedOf.get(d.gameNumber), d.date, abbr, 'lineup1') } : d
+  })
   const nextDay = days.find((d) => (gameDay ? d.next : d.gameNumber === gameNumber))
   const path = (section) => nextGamePath(game, slateDate, abbr, section)
   // A game day's door needs no game number (a resumed game can lack one); a preview names its game.
@@ -188,7 +193,6 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
   const nextName = gameDay ? (gameNumber ? `Game ${gameNumber} lineups` : 'Lineups') : `Game ${gameNumber} preview`
   const when = [nextDay?.date && `${nextDay.weekday} ${monthDayShort(nextDay.date)}`, game && firstPitchText(game.gameDate, game.startTimeTBD)]
   const months = monthsOf(days)
-  const innings = gameDay ? path('top1') : null
   // Wide off day: one Stamp door per played game here (the phone has them in Played).
   const stamps = wide && !gameDay ? played : []
   const mark = seriesMark({ season, round: 'worldseries' })
@@ -249,9 +253,8 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
             </span>
           </Door>
         )}
-        {(innings || (wide && gameDay && umpire) || stamps.length > 0) && (
+        {((wide && gameDay && umpire) || stamps.length > 0) && (
           <Cluster gap="base" className="ww-hero__doors">
-            {innings && <Door {...link(innings)}>Innings</Door>}
             {wide && gameDay && umpire && <Door {...link(umpirePath(umpire.id, umpire.name))}>Plate umpire</Door>}
             {stamps.map((r) => (
               <Door key={r.gamePk} {...link(logbookNewPath(r.gamePk))}>{`Stamp G${r.gameNumber}`}</Door>

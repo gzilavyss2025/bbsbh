@@ -57,7 +57,16 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   // last out, his zones and pitches) until Next opens the checkpoint (Gary, 2026-10-28).
   const [closedAt, setClosedAt] = useState(null)
   const shelved = covered && phase === 'celebration' && closedAt != null && closedAt === checkpointKey
-  const batter = restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered: covered && !shelved, open })
+  // A trail chip's tap brings back that at-bat's batter, his zones and its pitches (Gary, 2026-10-28)
+  // until the next tap; it is one the reader already revealed.
+  // Under the checkpoint a chip's tap lifts it for that at-bat's batting view; Next puts it back (`over`).
+  const [over, setOver] = useState(null)
+  const lifted = covered && over != null // a stale `over` is inert once the checkpoint goes; Next clears it
+  const replaying = lifted ? over : typeof cur.shown === 'number' && cur.run ? cur.shown : null
+  // A held ending scene's own Replay plays under the checkpoint: it brings no batting view over it.
+  const replayed = replaying != null && (lifted || !covered) ? feed?.liveData?.plays?.allPlays?.find((p) => p.about?.atBatIndex === replaying)?.matchup?.batter : null
+  const batter = replayed?.id ? { id: replayed.id, last: gd?.players?.[`ID${replayed.id}`]?.lastName ?? '' }
+    : restBatter(feed, { view, mark, inning, half, last, stepAtBatIndex, covered: covered && !shelved, open })
   const [hidden, setHidden] = useState(() => zoneMapDismissed(pk))
   const { data: zm } = useAsync(
     async () => (hidden || !batter ? null : { id: batter.id, zones: (await fetchBatterZones(batter.id, gd.game.season, gd.teams?.home?.sport?.id ?? 1, date))?.zones }),
@@ -74,7 +83,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   const hand = (id, k) => gd?.players?.[`ID${id}`]?.[k]?.code
   const stage = feed ? (
     <>
-      {!(covered && cur.armed) && <GamedayStage
+      {!(covered && cur.armed) && !lifted && <GamedayStage
         SealBox={SealBox} StageCanvas={GamedayPlayCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} run={cur.run ?? 0} playing={cur.playing} onEnd={onEnd} onReplay={onReplay}
         mark={mark} step={open ? stepCapAt(feed, inning, half, open.count, open.sub) : null} open={open} batter={batter}
         batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')}
@@ -86,7 +95,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
         <ZoneCard teamId={gd?.teams?.[half === 'top' ? 'away' : 'home']?.id} id={batter.id} name={gd?.players?.[`ID${batter.id}`]?.fullName ?? batter.last} side={battingSide(hand(batter.id, 'batSide'), hand(pitcherId, 'pitchHand'))} zones={zones ?? {}} club={half === 'top' ? 'away' : 'home'}
           matchup={pitcherId ? <ScoutLine feed={feed} hitterId={batter.id} pitcherId={pitcherId} /> : null}
           pitcher={pitcherId ? { id: pitcherId, first: gd?.players?.[`ID${pitcherId}`]?.useName ?? gd?.players?.[`ID${pitcherId}`]?.firstName ?? '', last: gd?.players?.[`ID${pitcherId}`]?.lastName ?? '' } : null}
-          pitches={<SealBox coverless forceRevealed>{() => zonePitches(feed, { inning, half, open, last, committed: holdsFinished({ view, mark, open, last }) }).map((p) => (
+          pitches={<SealBox coverless forceRevealed>{() => zonePitches(feed, replayed ? { inning, half, open: null, last: replaying, committed: true } : { inning, half, open, last, committed: holdsFinished({ view, mark, open, last }) }).map((p) => (
             <span key={p.no} className={`gdzonemap__pitch gdzonemap__pitch--${p.cat}${p.ball ? ' has-flight' : ''}${p.off ? ` is-off is-off--${p.off}` : ''}`} style={{ left: `${p.left}%`, top: `${p.top}%` }}>
               {p.off && <span className="gdzonemap__offarrow" aria-hidden="true">{OFF_ARROW[p.off]}</span>}
               {p.no}
@@ -104,6 +113,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   ) : null
 
   const onClick = () => {
+    if (lifted) { setOver(null); return } // back to the checkpoint, nothing revealed
     if (phase === 'pending') return
     if (phase === 'celebration') {
       setGate(dismissCheckpoint)
@@ -119,8 +129,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
     // last at-bat (a stoppage, a placed runner) is disarmed after a second rather than tracked.
     if (next.armed) setTimeout(() => setS(disarm), 1000)
   }
-  // The at-bat the stage is replaying (a trail tap), for the trail's "you are here" mark.
-  const replaying = typeof cur.shown === 'number' && cur.run ? cur.shown : null
+  // `replaying` (above) also marks the trail's "you are here".
   const holding = phase === 'pending' || phase === 'celebration'
-  return { stage, advance: { ...advance, ...(holding ? { label: 'Next', disabled: false, caughtUp: false, refresh: false } : {}), onClick }, onReplay: covered ? undefined : onReplay, replaying }
+  return { stage, advance: { ...advance, ...(holding ? { label: 'Next', disabled: false, caughtUp: false, refresh: false } : {}), onClick }, onReplay: covered ? setOver : onReplay, replaying }
 }

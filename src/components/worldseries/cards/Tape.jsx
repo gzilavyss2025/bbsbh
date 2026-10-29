@@ -16,6 +16,9 @@ function Bar({ value, peak, side }) {
 }
 
 // `labelAs`: the tab's heading level, 'h3' on the series pages (under their h2 group bands).
+// A run differential reads signed, "+214" (Gary, 2026-10-28); the bar keeps the number.
+const shown = (r, v) => (v == null ? '' : r.key === 'runDiff' && v > 0 ? `+${v}` : v)
+
 export function Tape({ awayId, homeId, data, slateDate, labelAs = 'h2' }) {
   const side = (id) => {
     const { wins: octW, losses: octL } = octRecord(data.clubGames?.[id], id, slateDate)
@@ -50,9 +53,9 @@ export function Tape({ awayId, homeId, data, slateDate, labelAs = 'h2' }) {
           const peak = r.bar ? Math.max(Math.abs(r.away ?? 0), Math.abs(r.home ?? 0)) : 0
           return (
             <li key={r.key} className="ww-tape__row">
-              <span className="ww-tape__val">{r.away ?? ''}</span>
+              <span className="ww-tape__val">{shown(r, r.away)}</span>
               <span className="ww-tape__label">{r.label}</span>
-              <span className="ww-tape__val ww-tape__val--home">{r.home ?? ''}</span>
+              <span className="ww-tape__val ww-tape__val--home">{shown(r, r.home)}</span>
               {r.bar && (
                 <span className="ww-tape__bars" aria-hidden="true">
                   <Bar value={r.away ?? 0} peak={peak} side="away" />
