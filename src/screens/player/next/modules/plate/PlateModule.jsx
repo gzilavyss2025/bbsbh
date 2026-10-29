@@ -5,7 +5,7 @@ import { SectionHead } from '../../../../../components/ui/frame/SectionHead.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { pitchMark } from '../../../../../lib/pitch/pitchTypes.js'
 import { sidesInOrder } from '../../../../../lib/zone/regions.js'
-import { GRID, viewCol } from '../../../../../lib/zone/zoneGeometry.js'
+import { GRID } from '../../../../../lib/zone/zoneGeometry.js'
 import { MenuRail } from '../../../../../components/ui/control/MenuRail.jsx'
 import { glyphD } from '../arsenal/PitchGlyph.jsx'
 import { MIN_CELL, OUTCOMES, fmtMph, fmtPct, outcomeFigures, pitchRows, pitchesVs, plateView } from './plateView.js'
@@ -16,8 +16,8 @@ import { MIN_CELL, OUTCOMES, fmtMph, fmtPct, outcomeFigures, pitchRows, pitchesV
 // The pitch mix is the shared MenuRail (#2073): a card a pitch type; the panel opens the picked one.
 const HANDS = [[null, 'All pitchers'], ['L', 'vs LHP'], ['R', 'vs RHP']]
 const ROWS = ['Above the zone', 'High', 'Middle', 'Low', 'Below the zone']
-const ENDS = ["Hitter's side", "Pitcher's side"]
-const [LEFT, RIGHT] = sidesInOrder('pitcher')
+const ENDS = ["Hitter's outcomes", "Pitcher's outcomes"]
+const [LEFT, RIGHT] = sidesInOrder('hitter')
 const COLS = [`Wide ${LEFT}`, LEFT, 'Center', RIGHT, `Wide ${RIGHT}`]
 const pct = (v) => Math.round(v * 100)
 
@@ -85,7 +85,7 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
   }
   const read = picked
     ? {
-        title: `${ROWS[Math.floor(picked.i / GRID)]} · ${COLS[GRID - 1 - (picked.i % GRID)]}`,
+        title: `${ROWS[Math.floor(picked.i / GRID)]} · ${COLS[picked.i % GRID]}`,
         text: picked.n < MIN_CELL
           ? `Only ${picked.n} pitches landed here, too few to read.`
           : picked.segs
@@ -106,9 +106,9 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
       <div className="fplate__cols">
         <div className="fplate__zone">
           <SectionHead look="rule" as="h3" note={name}>Where it lands</SectionHead>
-          <div className="fplate__map" role="group" aria-label={`Strike zone, five by five, pitcher's view. Each box shows the percent of pitches that ended in play or as a ball. ${name}, ${handName}.`}>
+          <div className="fplate__map" role="group" aria-label={`Strike zone, five by five, catcher's view, the third-base side on the left. Each box shows the percent of pitches that ended in play or as a ball. ${name}, ${handName}.`}>
             {Array.from({ length: GRID * GRID }, (_, k) => {
-              const c = view.cells[Math.floor(k / GRID) * GRID + viewCol(k % GRID)] // drawn column -> stored column
+              const c = view.cells[k] // drawn in the stored order (catcher's view)
               return (
                 <button
                   key={c.i}
@@ -116,7 +116,7 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
                   className="fplate__cell"
                   data-band={c.band ?? 'none'}
                   aria-pressed={cell === c.i}
-                  aria-label={`${ROWS[Math.floor(c.i / GRID)]}, ${COLS[GRID - 1 - (c.i % GRID)]}: ${c.hit == null ? (c.n < MIN_CELL ? `fewer than ${MIN_CELL} pitches` : 'not on file') : `${pct(c.hit)} percent hitter outcomes on ${c.n} pitches`}`}
+                  aria-label={`${ROWS[Math.floor(c.i / GRID)]}, ${COLS[c.i % GRID]}: ${c.hit == null ? (c.n < MIN_CELL ? `fewer than ${MIN_CELL} pitches` : 'not on file') : `${pct(c.hit)} percent hitter outcomes on ${c.n} pitches`}`}
                   onClick={() => setCell(cell === c.i ? -1 : c.i)}
                 >
                   {c.hit != null && <>{pct(c.hit)}<small>%</small></>}

@@ -8,12 +8,9 @@ import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { disarm, replay, rest, saw, tap } from '../src/screens/gameday/next/stage/tapRule.js'
 import { GamedayStage, restBatter, restZones } from '../src/screens/gameday/next/stage/GamedayStage.js'
-import { stageActors, spriteTargets } from '../src/screens/gameday/next/stage/actors.js'
+import { stageActors } from '../src/screens/gameday/next/stage/actors.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
-import { stagePlay, stateAt } from '../src/screens/gameday/next/stage/play.js'
-import { drawStage } from '../src/screens/gameday/next/stage/drawStage.js'
 import { battingSide } from '../src/screens/gameday/next/stage/battingSide.js'
-import { S } from '../src/screens/gameday/next/stage/pixels.js'
 import { dismissZoneMap, zoneMapDismissed } from '../src/screens/gameday/next/zonemap/zoneMapFlag.js'
 
 const F = JSON.parse(readFileSync(new URL('./fixtures/game-824716.gameday.json', import.meta.url)))
@@ -135,14 +132,44 @@ test('after the reveal: the revealed play draws, at its end at rest and from the
   assert.match(html({ feed: F, shown: 13, playing: true }), /data-t="" data-start="\d/)
 })
 
-test('the overhead field stays minimal: zone data does not add a close-up strike zone', () => {
-  const play = stagePlay({}, wall)
-  const plain = drawStage(stateAt(play, 0), 256, 300).px.slice()
-  const zones = drawStage(stateAt(play, 0), 256, 300, { '01': { temp: 'cold' }, '09': { temp: 'hot' } }).px
-  assert.deepEqual(zones, plain)
-  assert.ok(!zones.includes(S.zoneCold) && !zones.includes(S.zoneHot))
+
+test('the stage shell has no stadium photo or home-color wash', () => {
+  const out = html({ feed: sealedFeed, shown: null })
+  assert.match(out, /class="gdstageScene"/)
+  assert.doesNotMatch(out, /--park-(art|focus|tint):/)
+  assert.doesNotMatch(out, /<i /) // no canvas at rest
 })
 
+test('the plate inset and overhead field resolve the same handedness', () => {
+  for (const [bat, pitch, side] of [['R', 'R', 'R'], ['L', 'L', 'L'], ['S', 'L', 'R'], ['S', 'R', 'L'], [undefined, undefined, 'R']]) {
+    assert.equal(battingSide(bat, pitch), side)
+    assert.match(html({ feed: sealedFeed, shown: null, batSide: bat, pitchHand: pitch }), new RegExp('data-batter-side="' + side + '"'))
+  }
+})
+
+test('stage actors identify all nine defenders and the batter', () => {
+  const cursor = { inning: 2, half: 'top', mark: 1, step: 0 }
+  const batter = restBatter(F, { ...cursor, view: 2, last: 12 })
+  const actors = stageActors(F, { ...cursor, batter })
+  for (const pos of ['P', 'C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF']) {
+    assert.ok(actors.fielders[pos]?.id, pos + ' has an actual player')
+  }
+  assert.equal(actors.batterId, batter.id)
+})
+
+test('stage actors fail closed for an unreached half', () => {
+  assert.equal(stageActors(sealedFeed, { inning: 9, half: 'top', mark: -1, step: 0 }), null)
+})
+
+test('a trail replay keeps the defense from that play, before later substitutions', () => {
+  const feed = structuredClone(F)
+  const cursor = { inning: 2, half: 'top', mark: 2, step: null }
+  const original = stageActors(F, cursor).fielders
+  const later = feed.liveData.plays.allPlays.find((p) => p.about.atBatIndex === 14)
+  later.playEvents.unshift({ index: -1, details: { eventType: 'defensive_switch', description: 'Defensive switch' }, player: { id: original.RF.id }, position: { abbreviation: 'LF' } })
+  assert.equal(stageActors(feed, { ...cursor, shown: 13 }).fielders.LF.id, original.LF.id)
+  assert.equal(stageActors(feed, { ...cursor, shown: 14 }).fielders.LF.id, original.RF.id)
+})
 test('the rest batter: the due-up of the half being scored; the batter on screen for a committed half; none under the checkpoint', () => {
   const at = { view: 2, mark: 1, inning: 2, half: 'top', last: 12, stepAtBatIndex: 12 }
   assert.equal(restBatter(F, at)?.id, 668227) // Arozarena
@@ -198,49 +225,3 @@ test('the dismiss survives a reload and resets for another game', () => {
   }
 })
 
-test('the stage shell has no stadium photo or home-color wash', () => {
-  const out = html({ feed: sealedFeed, shown: null })
-  assert.match(out, /class="gdstageScene"/)
-  assert.doesNotMatch(out, /--park-(art|focus|tint):/)
-  assert.doesNotMatch(out, /<i /) // no canvas at rest
-})
-
-test('the plate inset and overhead field resolve the same handedness', () => {
-  for (const [bat, pitch, side] of [['R', 'R', 'R'], ['L', 'L', 'L'], ['S', 'L', 'R'], ['S', 'R', 'L'], [undefined, undefined, 'R']]) {
-    assert.equal(battingSide(bat, pitch), side)
-    assert.match(html({ feed: sealedFeed, shown: null, batSide: bat, pitchHand: pitch }), new RegExp('data-batter-side="' + side + '"'))
-  }
-})
-
-test('sprite targets identify all nine defenders, the batter, and each revealed runner', () => {
-  const cursor = { inning: 2, half: 'top', mark: 1, step: 0 }
-  const batter = restBatter(F, { ...cursor, view: 2, last: 12 })
-  const actors = stageActors(F, { ...cursor, batter })
-  const targets = spriteTargets(stagePlay({}, wall), actors)
-  for (const pos of ['P', 'C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF']) {
-    assert.ok(targets.find((p) => p.key === pos)?.id, pos + ' has an actual player')
-  }
-  assert.equal(targets.find((p) => p.key === 'batter').id, batter.id)
-  const p = F.liveData.plays.allPlays.find((q) => q.about.atBatIndex === 13)
-  const play = stagePlay(p, wall), revealed = spriteTargets(play, actors)
-  assert.equal(revealed.find((q) => q.key === 'P').id, p.matchup.pitcher.id)
-  for (const [i, r] of play.runners.entries()) {
-    assert.ok(r.id)
-    assert.equal(revealed.find((q) => q.key === 'runner:' + i).id, r.id)
-  }
-})
-
-test('sprite identities fail closed for an unreached half', () => {
-  assert.equal(stageActors(sealedFeed, { inning: 9, half: 'top', mark: -1, step: 0 }), null)
-  assert.deepEqual(spriteTargets(stagePlay({}, wall), null), [])
-})
-
-test('a trail replay keeps the defense from that play, before later substitutions', () => {
-  const feed = structuredClone(F)
-  const cursor = { inning: 2, half: 'top', mark: 2, step: null }
-  const original = stageActors(F, cursor).fielders
-  const later = feed.liveData.plays.allPlays.find((p) => p.about.atBatIndex === 14)
-  later.playEvents.unshift({ index: -1, details: { eventType: 'defensive_switch', description: 'Defensive switch' }, player: { id: original.RF.id }, position: { abbreviation: 'LF' } })
-  assert.equal(stageActors(feed, { ...cursor, shown: 13 }).fielders.LF.id, original.LF.id)
-  assert.equal(stageActors(feed, { ...cursor, shown: 14 }).fielders.LF.id, original.RF.id)
-})

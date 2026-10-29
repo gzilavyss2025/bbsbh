@@ -7,7 +7,7 @@ export function Mark({ code, r }) {
   return <path className={`command__mark${mark.ring ? ' command__mark--ring' : ''}`} d={glyphD(mark.shape, r)} style={{ '--pitch': mark.color }} />
 }
 
-// The 5×5 map, camera view from behind him: 25 cell buttons in a square, ink heat per cell, then one
+// The 5×5 map, the catcher's view (ADR-0124), third base on the left: 25 cell buttons in a square, ink heat per cell, then one
 // SVG over them for the zone frame (the middle nine), the dashed heart and each pitch's centroid mark.
 // The cells arrive in screen order from commandModView; `cell` is the picked stored index.
 export function CommandMapSvg({ view, cell, onCell }) {
@@ -42,13 +42,13 @@ export function CommandMapSvg({ view, cell, onCell }) {
       </div>
       <div className="command__foot">
         <span>
-          <span className={`command__box${view.stand === 'L' ? ' command__box--on' : ''}`}>LHB</span>
-          <span className="command__side-word">1B side</span>
+          <span className={`command__box${view.stand === 'R' ? ' command__box--on' : ''}`}>RHB</span>
+          <span className="command__side-word">3B side</span>
         </span>
         <span className="command__side-word">Low</span>
         <span>
-          <span className="command__side-word">3B side</span>
-          <span className={`command__box${view.stand === 'R' ? ' command__box--on' : ''}`}>RHB</span>
+          <span className="command__side-word">1B side</span>
+          <span className={`command__box${view.stand === 'L' ? ' command__box--on' : ''}`}>LHB</span>
         </span>
       </div>
     </div>

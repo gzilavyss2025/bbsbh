@@ -1,6 +1,6 @@
 # Every pitch is drawn from the camera behind the pitcher
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-0124](0124-every-zone-chart-is-drawn-from-the-catchers-side.md) (2026-10-28): every zone chart is now drawn from the catcher's side.
 **Date:** 2026-09-17
 
 ## Context

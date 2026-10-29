@@ -31,11 +31,11 @@ export function usePitchMode(gamePk) {
 // The advance's words follow the mode and nothing else (decision 3, its 2026-10-26 amendment).
 export const stepWords = (pitch) => (pitch ? 'Next pitch' : 'Next play')
 
-// The advance at the live edge (ADR-0055). Pitch by pitch, a pitch lands every ~20s against the
-// feed's one-minute poll, so it becomes a Refresh: it fetches the feed and reveals nothing. Once
-// the poll or the tap brings a new pitch, the advance is "Next pitch" again.
-export function caughtUpAdvance(pitch, loading, onReload) {
-  if (!pitch || !onReload) return { label: 'Caught up', disabled: true, caughtUp: true }
+// The advance at the live edge (ADR-0055). A pitch lands every ~20s against the feed's one-minute
+// poll, so it becomes a Refresh in either mode (Gary, 2026-10-28; at-bat mode 2026-10-29): it fetches
+// the feed and reveals nothing. Once the poll or the tap brings more, the advance steps again.
+export function caughtUpAdvance(loading, onReload) {
+  if (!onReload) return { label: 'Caught up', disabled: true, caughtUp: true }
   return { label: loading ? 'Refreshing…' : 'Refresh', refresh: true, disabled: !!loading, caughtUp: true, reveal: false, onClick: onReload }
 }
 
@@ -51,6 +51,20 @@ export function subTap(steps, sub, pitch, live = false) {
   if (live) return sub < steps.length ? Math.min(n, steps.length) : CAUGHT_UP
   return n < steps.length ? n : null
 }
+
+// At-bat mode inside a live at-bat (Gary, 2026-10-29): once the reader is in it (a sub-step shown, or
+// stepped in before the first pitch), each refresh shows every pitch thrown so far, with no tap. The
+// sub-step count to show; pitch mode keeps its own taps. A count only, the same reach as nextSub.
+export function followLive(feed, inning, half, count, sub, pitch, inside = false) {
+  if (pitch || !(sub > 0 || inside)) return sub
+  const o = openAtBat(feed, inning, half, count)
+  return o?.card.live ? Math.max(sub, o.steps.length) : sub
+}
+
+// Is the advance at the live edge? `n` is nextSub's answer for a half in play (null on any other). The
+// engine's atHalfEdge says only that the half's entries ran out, and a live at-bat is its last entry: while
+// the open at-bat still has pitches to step to, the reader is not caught up (Gary, 2026-10-29).
+export const atLiveEdge = (atHalfEdge, n) => n === CAUGHT_UP || (n == null && atHalfEdge)
 
 // The reader's tap on a sealed half: the sub-step count to show next, null to reveal the at-bat
 // (InningViewer's revealNextAtBat), or CAUGHT_UP. Reveal-only: call it from the tap; the one render

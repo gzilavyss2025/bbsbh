@@ -123,7 +123,7 @@ Module issue: #1887. #1846 is confirmed: the hitter grid holds what it says.
 
 | Field | Source today | Status | Fix |
 | --- | --- | --- | --- |
-| Pitches per zone cell, by pitch type and pitcher hand | `public/data/hitter-grid/{season}/{NN}.json` via `hitterCounters` (`src/api/scout/hitterGrid.js`) | have | Draw columns through `viewCol` |
+| Pitches per zone cell, by pitch type and pitcher hand | `public/data/hitter-grid/{season}/{NN}.json` via `hitterCounters` (`src/api/scout/hitterGrid.js`) | have | Draw columns in stored order (the catcher's view, ADR-0124) |
 | Swings, whiffs | grid `swings`, `whiffs` | have | Foul tips: the store counts them as fouls, the board as whiffs. Pick one |
 | Called strikes, balls in play, the outcome bar | none | missing | Add `calledStrikes`, `inPlay` to `scripts/lib/pitch/hitter-grid.mjs` and `FIELDS` |
 | In-zone count | middle nine cells (`inZone`, `src/lib/zone/zoneGeometry.js`) | reshape | Sum the nine cells |

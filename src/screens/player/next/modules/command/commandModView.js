@@ -1,10 +1,10 @@
 // The Command card's pure view (#2014). One pitcher's pitch-command entry, the picked hand, pitch
-// and cell, and the league block in; the switch, the chips, the four tiles, the 25 cells in camera
-// view, the pitch marks and the readout out. No React, no fetch.
+// and cell, and the league block in; the switch, the chips, the four tiles, the 25 cells from the
+// catcher's side, the pitch marks and the readout out. No React, no fetch.
 import { MIN_COMMAND_PITCHES, commandHandCounts, commandPitchMarks, commandRank, commandTypes, commandView } from '../../../../../api/commandMap.js'
 import { pitchLabel } from '../../../../../api/pitchArsenal.js'
 import { ordinal } from '../../../../../lib/format.js'
-import { GRID, viewCol } from '../../../../../lib/zone/zoneGeometry.js'
+import { GRID } from '../../../../../lib/zone/zoneGeometry.js'
 
 const HAND_WORD = { L: 'vs left-handed batters', R: 'vs right-handed batters' }
 // Each tile's rate, label, and base: the count its rate is out of.
@@ -15,8 +15,8 @@ const TILES = [
   ['whiffPct', 'Whiff', (v) => `of ${fmt(sum(v.swings))} swings`],
 ]
 const ROW_WORD = ['Above the zone', 'Top third', 'Middle third', 'Bottom third', 'Below the zone']
-// By VIEW column, camera view: column 0 is the first-base side, column 4 the third-base side.
-const COL_WORD = ['off the plate, 1B side', '1B-side third', 'middle', '3B-side third', 'off the plate, 3B side']
+// By stored column, catcher's view (ADR-0124): column 0 is the third-base side, column 4 the first-base side.
+const COL_WORD = ['off the plate, 3B side', '3B-side third', 'middle', '1B-side third', 'off the plate, 1B side']
 const STEPS = 5
 export const HEART = 12 // the stored index of middle-middle; the readout opens on it
 
@@ -30,10 +30,10 @@ const rankWord = (p) => ordinal(Math.min(99, Math.max(1, p)))
 // Triple-A-only arm.
 export const levelOf = (entry) => (commandView(entry, { level: 'mlb' }) ? 'mlb' : 'aaa')
 
-// A cell's words, by VIEW column. A right-handed batter stands on the third-base side (camera right).
+// A cell's words, by VIEW column. A right-handed batter stands on the third-base side (catcher's view: left).
 function cellWords(row, col, stand) {
   if (!stand || col === 2) return `${ROW_WORD[row]}, ${COL_WORD[col]}`
-  const inside = stand === 'R' ? col > 2 : col < 2
+  const inside = stand === 'R' ? col < 2 : col > 2
   return `${ROW_WORD[row]}, ${col === 0 || col === 4 ? 'off the plate, ' : ''}${inside ? 'inside' : 'away'} to a ${stand === 'R' ? 'righty' : 'lefty'}`
 }
 
@@ -84,19 +84,18 @@ export function commandModView(entry, { stand = null, code = null, cell = HEART,
     view.thin = `Only ${n} ${what}${stand ? ` ${HAND_WORD[stand]}` : ''}. Too few to draw a map (the floor is ${MIN_COMMAND_PITCHES}).`
     return view
   }
-  // Screen order, row by row; viewCol mirrors the stored column for the camera (and is its own inverse).
-  view.cells = Array.from({ length: GRID * GRID }, (_, k) => {
-    const row = Math.floor(k / GRID)
-    const col = k % GRID
-    const i = row * GRID + viewCol(col)
+  // Screen order, row by row: the stored order, since the catcher's view draws the feed's frame.
+  view.cells = Array.from({ length: GRID * GRID }, (_, i) => {
+    const row = Math.floor(i / GRID)
+    const col = i % GRID
     const n = v.cells[i]
     const where = cellWords(row, col, stand)
     return { i, n, step: n ? Math.ceil((n / v.max) * STEPS) : 0, where, label: `${where}: ${fmt(n)} ${n === 1 ? 'pitch' : 'pitches'}, ${pct(n, v.pitches)}%` }
   })
-  // Each mapped pitch's centroid, in percent of the map (stored frame mirrored like a cell).
+  // Each mapped pitch's centroid, in percent of the map (the stored frame, like a cell).
   view.marks = commandPitchMarks(entry, { level, stand })
     .filter((m) => m.pitches >= MIN_COMMAND_PITCHES && (!code || m.code === code))
-    .map((m) => ({ code: m.code, x: +(((viewCol(m.mark.col) + 0.5) / GRID) * 100).toFixed(2), y: +(((m.mark.row + 0.5) / GRID) * 100).toFixed(2) }))
+    .map((m) => ({ code: m.code, x: +(((m.mark.col + 0.5) / GRID) * 100).toFixed(2), y: +(((m.mark.row + 0.5) / GRID) * 100).toFixed(2) }))
   const c = view.cells.find((x) => x.i === cell) ?? view.cells[HEART]
   const count = (n, one, many) => `${fmt(n)} ${n === 1 ? one : many}`
   const at = (k) => v[k]?.[c.i] ?? 0

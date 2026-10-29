@@ -8,7 +8,7 @@
 //    ADR-0093).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { EDGE, GRID, commandCell, inZone, normalizePitch, sx, sy } from '../src/lib/zone/zoneGeometry.js'
+import { EDGE, GRID, commandCell, inZone, normalizePitch, catcherX, sy } from '../src/lib/zone/zoneGeometry.js'
 import {
   NOMINAL, REGIONS, REGION_OF, drawCol, platePoints, projX, regionLabel, regionRect, rollUp, sidesInOrder, stanceRect,
 } from '../src/lib/zone/regions.js'
@@ -52,7 +52,7 @@ test('in both views, a pitch is drawn inside the region it is counted in', () =>
   }
 })
 
-test('drawCol (viewCol in the pitcher’s view) orders cells the way the projection draws them', () => {
+test('drawCol (mirrored only in the pitcher’s view) orders cells the way the projection draws them', () => {
   for (const view of VIEWS) {
     const xs = [1, 2, 3].map((c) => regionRect(`r2c${c}`, view).x)
     const order = [1, 2, 3].map((c) => drawCol(c, view))
@@ -61,8 +61,9 @@ test('drawCol (viewCol in the pitcher’s view) orders cells the way the project
   }
 })
 
-test('the pitcher’s view is the house view and the hitter’s view is its mirror', () => {
-  assert.equal(projX(1, 'pitcher'), sx(1))
+test('the hitter’s (catcher’s) view is the house view and the pitcher’s view is its mirror', () => {
+  assert.equal(projX(1, 'hitter'), catcherX(1))
+  assert.equal(projX(1, 'pitcher'), catcherX(-1))
   const side = (view, r) => regionRect(r, view).x
   // From behind the pitcher the third-base side is on the right…
   assert.ok(side('pitcher', 'side3b') > side('pitcher', 'side1b'))
@@ -73,7 +74,7 @@ test('the pitcher’s view is the house view and the hitter’s view is its mirr
   assert.ok(stanceRect('R', 'pitcher').x > zone('pitcher'))
   assert.ok(stanceRect('R', 'hitter').x < zone('hitter'))
   assert.ok(stanceRect('L', 'pitcher').x < zone('pitcher'))
-  assert.ok(Math.abs(regionRect('r2c2', 'pitcher').width - (sx(-EDGE) - sx(EDGE)) / 3) < 1e-9)
+  assert.ok(Math.abs(regionRect('r2c2', 'pitcher').width - (catcherX(EDGE) - catcherX(-EDGE)) / 3) < 1e-9)
 })
 
 test('a region is named by row, inside or away from the hitter, and the side of the field — never left or right', () => {

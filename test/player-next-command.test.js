@@ -84,14 +84,14 @@ test('a code the hand never saw falls back to ALL', () => {
   assert.deepEqual(v.chips.map((c) => c.code), [null, 'FF'])
 })
 
-test('cells run in camera view: the stored column is mirrored, each cell has words, heat steps, a readout', () => {
+test('cells run in the catcher’s view: the stored column draws as stored, each cell has words, heat steps, a readout', () => {
   const cells = Array(25).fill(0)
   cells[5] = 50 // stored row 1 (top third), col 0: the third-base side, a righty's inside
   cells[12] = 10 // the heart
   const entry = { mlb: { FF: { R: { cells, whiffs: Array(25).fill(0).map((_, i) => (i === 5 ? 1 : 0)), homers: Array(25).fill(0) } } } }
   const v = commandModView(entry, { stand: 'R', cell: 5 })
-  // View row 1, view column 4 (camera right) holds stored cell 5.
-  const shown = v.cells[1 * 5 + 4]
+  // View row 1, view column 0 (the catcher's left, third base) holds stored cell 5.
+  const shown = v.cells[1 * 5 + 0]
   assert.equal(shown.i, 5)
   assert.equal(shown.n, 50)
   assert.equal(shown.step, 5)
@@ -101,8 +101,8 @@ test('cells run in camera view: the stored column is mirrored, each cell has wor
   assert.equal(v.cells[0].step, 0)
   assert.deepEqual(v.readout, { where: 'Top third, off the plate, inside to a righty', facts: ['50 pitches', '83% of his 60', '1 whiff', '0 called strikes', '0 HR'] })
   // Both hands: field words, no batter.
-  assert.equal(commandModView(entry).cells[1 * 5 + 4].label, 'Top third, off the plate, 3B side: 50 pitches, 83%')
-  assert.equal(commandModView(entry).cells[1 * 5 + 3].label, 'Top third, 3B-side third: 0 pitches, 0%')
+  assert.equal(commandModView(entry).cells[1 * 5 + 0].label, 'Top third, off the plate, 3B side: 50 pitches, 83%')
+  assert.equal(commandModView(entry).cells[1 * 5 + 1].label, 'Top third, 3B-side third: 0 pitches, 0%')
 })
 
 test('pitch marks sit at each mapped pitch centroid in view units, thin pitches left off', () => {
@@ -111,15 +111,23 @@ test('pitch marks sit at each mapped pitch centroid in view units, thin pitches 
   for (const m of v.marks) assert.ok(m.x > 0 && m.x < 100 && m.y > 0 && m.y < 100)
   const one = commandModView(gasser, { code: 'FF' })
   assert.deepEqual(one.marks.map((m) => m.code), ['FF'])
-  // A single cell's pitches sit at that cell's centre, mirrored.
+  // A single cell's pitches sit at that cell's centre, third base on the left.
   const cells = Array(25).fill(0)
   cells[5] = 60
   const c = commandModView({ mlb: { FF: { R: { cells } } } }).marks[0]
-  assert.deepEqual([c.x, c.y], [90, 30])
+  assert.deepEqual([c.x, c.y], [10, 30])
 })
 
 test('a rank at either end of the pool reads 1st or 99th, never 0th or 100th', () => {
   const at = (r) => ({ ...league, zonePct: { ...league.zonePct, rates: league.zonePct.rates.map(() => r) } })
   assert.match(byKey(commandModView(gasser, { league: at(99) }).tiles, 'key').zonePct.caption, / · 1st$/)
   assert.match(byKey(commandModView(gasser, { league: at(1) }).tiles, 'key').zonePct.caption, / · 99th$/)
+})
+
+// The catcher's view (ADR-0124): the map's foot names the third-base side (a righty's box) on the left.
+test('the Command map foot puts the 3B side and RHB on the left', () => {
+  const jsx = readFileSync(new URL('../src/screens/player/next/modules/command/CommandMapSvg.jsx', import.meta.url), 'utf8')
+  assert.ok(jsx.indexOf('>RHB<') < jsx.indexOf('>3B side<'))
+  assert.ok(jsx.indexOf('>3B side<') < jsx.indexOf('>1B side<'))
+  assert.ok(jsx.indexOf('>1B side<') < jsx.indexOf('>LHB<'))
 })

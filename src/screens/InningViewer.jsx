@@ -28,7 +28,7 @@ import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCallou
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
-import { CAUGHT_UP, canStepIn, caughtUpAdvance, nextSub, openingChangeHeld, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, caughtUpAdvance, nextSub, openingChangeHeld, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -448,6 +448,10 @@ export function InningViewer({
   const [steppedIn, setSteppedIn] = useState(null)
   const atBatKey = `${curIdx}:${curAtBatCount}`
   const stepIn = currentSealed && currentHalfLive && steppedIn !== atBatKey && canStepIn(feed, effInning, effHalf, curAtBatCount, curSub)
+  const followSub = currentSealed && currentHalfLive ? followLive(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode, steppedIn === atBatKey) : curSub
+  useEffect(() => {
+    if (followSub > curSub) revealSub(effInning, effHalf, followSub)
+  }, [followSub]) // eslint-disable-line react-hooks/exhaustive-deps
   const replaySub = replay.idx === curIdx && replay.cursor === focus.cursor ? replay.sub : 0
   const replayNext = () => {
     const n = replayTap(feed, effInning, effHalf, focus.cursor, replaySub)
@@ -551,12 +555,12 @@ export function InningViewer({
   // The advance: a step in the mode's words, else the next half, "Close the book" or the box score. It
   // keeps its holds: no step while the page turns, no forward move while the half closes (ADR-0046).
   // The live edge inside an at-bat still being played: a flag only, on a half in play (ADR-0055).
-  const edge = atHalfEdge || (currentHalfLive && currentSealed && nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode) === CAUGHT_UP)
+  const edge = atLiveEdge(atHalfEdge, currentHalfLive && currentSealed ? nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode) : null)
   const advance = focus.stepAhead
     ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && (pitchMode ? replayNext() : focus.stepNext()), reveal: pitchMode || undefined }
     : currentSealed
       ? stepIn ? { label: 'Step in', onClick: () => { focus.followLatest(); setSteppedIn(atBatKey) } }
-      : edge ? caughtUpAdvance(pitchMode, loading, onReload) : { label: stepWords(pitchMode), onClick: revealNextStep, reveal: true }
+      : edge ? caughtUpAdvance(loading, onReload) : { label: stepWords(pitchMode), onClick: revealNextStep, reveal: true }
       : nextIdx != null
         ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
         : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }

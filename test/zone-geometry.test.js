@@ -5,16 +5,14 @@
 // it reuses the in-game zone's vocabulary, so a cell it counts a pitch into has
 // to be the cell the diagram DRAWS that pitch in. Those are two different
 // pieces of arithmetic — one bins normalised coordinates, the other projects
-// feet to SVG — and nothing but a test keeps them agreeing. Both are read
-// through the same mirror (`viewCol` for the grid, `sx`'s own negation for a
-// single pitch), because the app draws every pitch from the camera behind the
-// pitcher while the feed reports pX from behind the plate: a flip applied to
+// feet to SVG — and nothing but a test keeps them agreeing. Both read the
+// feed's frame unmirrored (the catcher's view, ADR-0124): a flip applied to
 // one side of that comparison and not the other is exactly the bug this file
 // exists to catch.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
-  EDGE, GRID, W, commandCell, inHeart, inZone, normalizePitch, sx, sy, viewCol,
+  EDGE, GRID, W, commandCell, inHeart, inZone, normalizePitch, catcherX, sy,
 } from '../src/lib/zone/zoneGeometry.js'
 
 const TOP = 3.4
@@ -23,9 +21,9 @@ const cellFor = (px, pz) => commandCell(normalizePitch(px, pz, TOP, BOT))
 
 // Where StrikeZone.jsx draws the zone rect and its thirds, from the same
 // constants — the drawing side of the comparison. +EDGE is the first-base
-// side, which the mirrored projection puts on the LEFT.
-const zx = sx(EDGE)
-const zr = sx(-EDGE)
+// side, which the catcher's view puts on the RIGHT.
+const zx = catcherX(-EDGE)
+const zr = catcherX(EDGE)
 const zyT = sy(TOP)
 const zyB = sy(BOT)
 const colEdges = [zx, zx + (zr - zx) / 3, zx + (2 * (zr - zx)) / 3, zr]
@@ -33,7 +31,7 @@ const rowEdges = [zyT, zyT + (zyB - zyT) / 3, zyT + (2 * (zyB - zyT)) / 3, zyB]
 
 // Which drawn third a projected point lands in, 1..3, or 0/4 outside the box.
 function drawnCol(px) {
-  const x = sx(px)
+  const x = catcherX(px)
   if (x < colEdges[0]) return 0
   if (x > colEdges[3]) return GRID - 1
   return 1 + Math.min(2, [0, 1, 2].filter((i) => x > colEdges[i + 1]).length)
@@ -52,7 +50,7 @@ test('PIN: a counted cell is the cell the in-game diagram draws the pitch in', (
     for (let pz = 0.8; pz <= 4.2; pz += 0.1) {
       const cell = cellFor(px, pz)
       assert.deepEqual(
-        [viewCol(cell.col), cell.row],
+        [cell.col, cell.row],
         [drawnCol(px), drawnRow(pz)],
         `binning and drawing disagree at pX=${px.toFixed(1)} pZ=${pz.toFixed(1)}`,
       )
@@ -60,20 +58,14 @@ test('PIN: a counted cell is the cell the in-game diagram draws the pitch in', (
   }
 })
 
-test('THE VIEW: a pitch is drawn from behind the PITCHER, not behind the plate', () => {
-  // pX arrives from the umpire's side of the ball: positive is the catcher's
-  // right, which is the first-base side. Every telecast shows that side on the
-  // LEFT, with a right-handed batter (third-base side, negative pX) standing
-  // on the right. Projected the feed's way round, every zone in this app would
-  // be a mirror of the game playing beside it.
-  assert.ok(sx(1) < sx(-1), 'the first-base side draws left of the third-base side')
-  assert.ok(sx(EDGE) < sx(-EDGE), 'and so do the two edges of the plate')
-  assert.equal(sx(0), W / 2) // down the middle is still down the middle
-  // The binned grid mirrors the same way, so the season card and the in-game
-  // diagram put a given pitch on the same side of the picture.
-  assert.equal(viewCol(0), GRID - 1)
-  assert.equal(viewCol(GRID - 1), 0)
-  assert.equal(viewCol(2), 2)
+test('THE VIEW: a pitch is drawn from the CATCHER\'s side, as MLB Gameday draws it', () => {
+  // pX arrives from behind the plate: positive is the catcher's right, the
+  // first-base side. The catcher's view (ADR-0124) draws it that way round,
+  // first base on the RIGHT and a right-handed batter (third-base side,
+  // negative pX) on the left. The old pitcher's view (ADR-0077) fails this.
+  assert.ok(catcherX(1) > catcherX(-1), 'the first-base side draws right of the third-base side')
+  assert.ok(catcherX(EDGE) > catcherX(-EDGE), 'and so do the two edges of the plate')
+  assert.equal(catcherX(0), W / 2) // down the middle is still down the middle
 })
 
 test('normalisation is against THIS batter\'s zone, not absolute feet', () => {
@@ -90,7 +82,7 @@ test('the plate\'s black is +/-1, and just past it is the chase ring', () => {
   assert.equal(inZone(cellFor(EDGE * 0.99, 2.5)), true)
   assert.equal(inZone(cellFor(EDGE * 1.01, 2.5)), false)
   // In the FEED's frame, where the bins are stored: +pX is the first-base
-  // side, the last column. The card draws it first, through viewCol.
+  // side, the last column, which the card also draws last (the catcher's view).
   assert.equal(cellFor(EDGE * 1.01, 2.5).col, GRID - 1)
 })
 

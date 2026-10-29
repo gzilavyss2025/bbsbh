@@ -112,21 +112,22 @@ test("778442 ab51: the umpire's No Pitch (N) changes no count, so it is no step"
 })
 
 // Gary, 2026-10-28: following a live game pitch by pitch, the caught-up advance fetches instead of
-// waiting on the minute poll. It reveals nothing (reveal: false); at-bat mode keeps "Caught up".
-test('the caught-up advance refreshes in pitch mode and stays a held "Caught up" otherwise', () => {
+// waiting on the minute poll. It reveals nothing (reveal: false). Gary, 2026-10-29: at-bat mode too.
+test('the caught-up advance refreshes in either mode', () => {
   const reload = () => 'reloaded'
-  const pitch = caughtUpAdvance(true, false, reload)
+  const pitch = caughtUpAdvance(false, reload)
   assert.equal(pitch.label, 'Refresh')
   assert.equal(pitch.refresh, true)
   assert.equal(pitch.disabled, false)
   assert.equal(pitch.caughtUp, true)
   assert.equal(pitch.reveal, false)
   assert.equal(pitch.onClick(), 'reloaded')
-  const busy = caughtUpAdvance(true, true, reload)
+  const busy = caughtUpAdvance(true, reload)
   assert.equal(busy.label, 'Refreshing…')
   assert.equal(busy.disabled, true)
-  const atBat = caughtUpAdvance(false, false, reload)
-  assert.equal(atBat.label, 'Caught up')
-  assert.equal(atBat.disabled, true)
-  assert.equal(caughtUpAdvance(true, false, undefined).label, 'Caught up', 'no reload: nothing to tap')
+  const atBat = caughtUpAdvance(false, reload)
+  assert.equal(atBat.label, 'Refresh')
+  assert.equal(atBat.disabled, false)
+  assert.equal(atBat.reveal, false)
+  assert.equal(caughtUpAdvance(false, undefined).label, 'Caught up', 'no reload: nothing to tap')
 })

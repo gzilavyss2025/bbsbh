@@ -37,16 +37,3 @@ export function stageActors(feed, { inning, half, mark, step = null, open, batte
   return { fielders: at, batterId, players: feed.gameData?.players ?? {}, open: !!current }
 }
 
-export function spriteTargets(play, actors) {
-  if (!actors) return []
-  const person = (key, id, role) => {
-    if (id == null) return null
-    const p = actors.players['ID' + id]
-    const name = p?.fullName || [p?.firstName, p?.lastName].filter(Boolean).join(' ') || 'Player ' + id
-    return { key, id, name, role }
-  }
-  const out = Object.entries(actors.fielders).filter(([pos]) => POS[pos]).map(([pos, p]) => person(pos, pos === 'P' && !actors.open ? play.pitcherId ?? p.id : p.id, pos === 'P' ? 'Pitcher' : pos === 'C' ? 'Catcher' : pos))
-  out.push(person('batter', actors.open ? actors.batterId : play.batterId ?? actors.batterId, 'Batter'))
-  play.runners.forEach((r, i) => out.push(person('runner:' + i, r.id, r.start == null ? 'Batter running' : 'Baserunner')))
-  return out.filter(Boolean)
-}

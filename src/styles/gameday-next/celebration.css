@@ -1,6 +1,5 @@
-/* A cutscene fits the existing stage slot; the ordinary field stays behind
-   it while a decorative chunk or atlas loads. z-index 2 lifts the scene over
-   .gdstage (z-index 1) and its hover targets. No layout shifts at reveal. */
+/* A cutscene fits the existing stage slot over the batting view. z-index 2
+   lifts the scene over the zone card and batter. No layout shifts at reveal. */
 .gdcelebration { position: absolute; z-index: 2; inset: 0; display: flex; align-items: center; justify-content: center;
   container-type: size; pointer-events: none; }
 .gdcelebration .ballpark { width: min(100cqw, calc(100cqh * 16 / 9)); flex: none; pointer-events: auto; }
