@@ -22,9 +22,12 @@ import { halfCell } from '../lib/gameday.js'
 const GAME = '/07072026/milstl-2'
 
 test('a stamp is absent from the DOM until the box score seal is tapped', async ({ page }) => {
+  // Same-day clock keeps the host's date opener from bypassing this tap test.
+  await page.clock.install({ time: new Date('2026-07-07T18:00:00Z') })
   await page.goto(`${GAME}/boxscore`)
 
   await expect(page.locator('.gamestamp')).toHaveCount(0)
+  await expect(page.locator('.heritagepass')).toHaveCount(0)
   await expect(page.locator('.stampstrip')).toHaveCount(0)
   // Belt and braces: the affordance's own copy must not be in the markup
   // either, which catches a rendered-then-hidden regression that a class
@@ -35,11 +38,14 @@ test('a stamp is absent from the DOM until the box score seal is tapped', async 
 
   await expect(page.locator('.stampstrip')).toHaveCount(1)
   await expect(page.locator('.gamestamp')).toHaveCount(1)
+  await expect(page.locator('.heritagepass')).toHaveCount(1)
+  await expect(page.locator('.bs__board')).toHaveCount(1)
 })
 
 test('the slate never carries a stamp', async ({ page }) => {
   await page.goto('/07072026')
   await expect(page.locator('.gamestamp')).toHaveCount(0)
+  await expect(page.locator('.heritagepass')).toHaveCount(0)
 })
 
 test('minting files the game in the Game Log, and un-stamping takes it back', async ({ page }) => {

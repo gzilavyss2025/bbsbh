@@ -22,6 +22,7 @@ import { FeatLabel } from './boxscore/FeatLabel.jsx'
 import { AbsRow } from '../components/gamehud/StatBox.jsx'
 import { GameStoryCard } from '../components/game/GameStoryCard.jsx'
 import { StampGameButton } from '../components/logbook/StampGameButton.jsx'
+import { HeritagePass } from '../components/heritage/HeritagePass.jsx'
 import { GamePhotosStrip } from '../components/game/GamePhotosStrip.jsx'
 import { GameVideoRow } from '../components/highlights/GameVideoRow.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
@@ -452,6 +453,12 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
         <ThreeStars stars={stars} />
       </section>
 
+      {stampFacts?.status === 'Final' && (
+        <section className="heritagepass-box" aria-label="Game souvenir">
+          <h2>Heritage Pass</h2>
+          <HeritagePass game={stampFacts} />
+        </section>
+      )}
       {modalId != null && <UmpireAccuracyModal id={modalId} seasonYear={seasonYear} onClose={() => setModalId(null)} />}
     </div>
   )

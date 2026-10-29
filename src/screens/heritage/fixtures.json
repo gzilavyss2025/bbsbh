@@ -1,0 +1,137 @@
+[
+  {
+    "source": "https://statsapi.mlb.com/api/v1/schedule?gamePks=823035&hydrate=linescore,team,venue",
+    "checked": "2026-10-29",
+    "game": {
+      "gamePk": 823035,
+      "date": "2026-07-07",
+      "gameNumber": 2,
+      "sportId": 1,
+      "gameType": "R",
+      "seriesDescription": "Regular Season",
+      "seriesGameNumber": 3,
+      "leagueId": 104,
+      "venue": "Busch Stadium",
+      "innings": 9,
+      "scheduledInnings": 9,
+      "homeBattedLast": true,
+      "status": "Final",
+      "away": {
+        "id": 158,
+        "abbreviation": "MIL",
+        "name": "Milwaukee Brewers",
+        "runs": 10,
+        "hits": 11,
+        "errors": 0,
+        "teamName": "Brewers",
+        "locationName": "Milwaukee"
+      },
+      "home": {
+        "id": 138,
+        "abbreviation": "STL",
+        "name": "St. Louis Cardinals",
+        "runs": 2,
+        "hits": 4,
+        "errors": 0,
+        "teamName": "Cardinals",
+        "locationName": "St. Louis"
+      },
+      "winnerId": 158,
+      "decisions": {
+        "winner": "",
+        "loser": "",
+        "save": ""
+      }
+    }
+  },
+  {
+    "source": "https://statsapi.mlb.com/api/v1/schedule?gamePks=715724&hydrate=linescore,team,venue",
+    "checked": "2026-10-29",
+    "game": {
+      "gamePk": 715724,
+      "date": "2022-10-28",
+      "gameNumber": 1,
+      "sportId": 1,
+      "gameType": "W",
+      "seriesDescription": "World Series",
+      "seriesGameNumber": 1,
+      "leagueId": 103,
+      "venue": "Minute Maid Park",
+      "innings": 10,
+      "scheduledInnings": 9,
+      "homeBattedLast": true,
+      "status": "Final",
+      "away": {
+        "id": 143,
+        "abbreviation": "PHI",
+        "name": "Philadelphia Phillies",
+        "runs": 6,
+        "hits": 9,
+        "errors": 0,
+        "teamName": "Phillies",
+        "locationName": "Philadelphia"
+      },
+      "home": {
+        "id": 117,
+        "abbreviation": "HOU",
+        "name": "Houston Astros",
+        "runs": 5,
+        "hits": 10,
+        "errors": 0,
+        "teamName": "Astros",
+        "locationName": "Houston"
+      },
+      "winnerId": 143,
+      "decisions": {
+        "winner": "",
+        "loser": "",
+        "save": ""
+      }
+    }
+  },
+  {
+    "source": "https://statsapi.mlb.com/api/v1/schedule?gamePks=815625&hydrate=linescore,team,venue",
+    "checked": "2026-10-29",
+    "game": {
+      "gamePk": 815625,
+      "date": "2026-04-08",
+      "gameNumber": 1,
+      "sportId": 11,
+      "gameType": "R",
+      "seriesDescription": "Regular Season",
+      "seriesGameNumber": 2,
+      "leagueId": 117,
+      "venue": "Fifth Third Field",
+      "innings": 13,
+      "scheduledInnings": 9,
+      "homeBattedLast": true,
+      "status": "Final",
+      "away": {
+        "id": 1960,
+        "abbreviation": "STP",
+        "name": "St. Paul Saints",
+        "runs": 4,
+        "hits": 5,
+        "errors": 2,
+        "teamName": "Saints",
+        "locationName": "St. Paul"
+      },
+      "home": {
+        "id": 512,
+        "abbreviation": "TOL",
+        "name": "Toledo Mud Hens",
+        "runs": 3,
+        "hits": 9,
+        "errors": 1,
+        "teamName": "Mud Hens",
+        "locationName": "Toledo"
+      },
+      "winnerId": 1960,
+      "decisions": {
+        "winner": "",
+        "loser": "",
+        "save": ""
+      }
+    }
+  }
+]

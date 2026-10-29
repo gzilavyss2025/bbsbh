@@ -157,7 +157,7 @@ export function GameView({ game, section, onSection }) {
   // The box score's reveal hands up the winner itself (BoxScore's `Opened`); nothing here reads a score.
   const [boxShown, setBoxShown] = useState(null)
   const onBoxOpened = useCallback((winner) => setBoxShown({ pk: feed?.gamePk ?? null, winner }), [feed?.gamePk])
-  const winnerId = step === 3 && boxShown?.pk === feed?.gamePk ? boxShown.winner : null
+  const winnerId = step === 3 && boxShown != null && boxShown.pk === feed?.gamePk ? boxShown.winner : null
   const seriesStatus = gameStatusAfter(seriesHit?.series, seriesHit?.gameNumber, winnerId)
   const routeLink = useRouteLink()
 

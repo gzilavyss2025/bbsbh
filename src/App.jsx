@@ -274,6 +274,9 @@ const ScorecardLab = import.meta.env.DEV
 const IdentityLab = import.meta.env.DEV
   ? lazyNamed(() => import('./screens/identity-lab/index.jsx'), 'IdentityLab')
   : null
+const HeritagePreview = import.meta.env.DEV
+  ? lazyNamed(() => import('./screens/heritage/HeritagePreview.jsx'), 'HeritagePreview')
+  : null
 const UniformNamesPage = import.meta.env.DEV
   ? lazyNamed(() => import('./screens/UniformNamesPage.jsx'), 'UniformNamesPage')
   : null
@@ -497,6 +500,8 @@ export default function App() {
     content = <ScorecardLab />
   } else if (route.name === 'identity-lab' && IdentityLab) {
     content = <IdentityLab />
+  } else if (route.name === 'heritage-pass-preview' && HeritagePreview) {
+    content = <HeritagePreview />
   } else if (route.name === 'uniform-names' && UniformNamesPage) {
     content = <UniformNamesPage />
   } else if (route.name === 'leaders') {

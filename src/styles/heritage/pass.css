@@ -1,0 +1,210 @@
+/* A ticket-book keepsake: the engraving and lettering are collectible art.
+   The frame deliberately sits outside the application's Card primitive. */
+.heritagepass {
+  position: relative;
+  isolation: isolate;
+  container-type: inline-size;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  color: color-mix(in srgb, var(--book-board-blue) 65%, var(--accent-primary));
+  background: var(--bg-canvas);
+  border-radius: calc(var(--radius-lg) + var(--space-2));
+  overflow: hidden;
+}
+.heritagepass__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%; /* card-fill-exempt: SVG engraving stretches over the ticket, not a Card */
+  pointer-events: none;
+}
+.heritagepass__grain { mix-blend-mode: multiply; }
+/* layout-exempt: a physical ticket has a fixed reading order and expanding artwork slot */
+.heritagepass__body {
+  position: relative;
+  min-height: 590px;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+}
+.heritagepass__head {
+  margin: 0 calc(-1 * var(--space-1));
+  padding: var(--space-1) var(--space-1) 0;
+  background: currentColor;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+/* layout-exempt: two small secondary marks frame the league emblem */
+.heritagepass__league {
+  display: grid;
+  grid-template-columns: clamp(28px, 12cqw, 48px) minmax(0, 1fr) clamp(28px, 12cqw, 48px);
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2) var(--space-4);
+  color: var(--text-on-ink);
+  text-align: center;
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-display);
+  line-height: var(--lh-compact);
+}
+.heritagepass__secondary { display: block; width: 100%; height: 48px; object-fit: contain; }
+.heritagepass__league-emblem { position: relative; display: block; padding-inline: var(--space-4); }
+.heritagepass__league-emblem > img { display: block; width: 100%; height: 46px; object-fit: contain; }
+.heritagepass__league-emblem::before,
+.heritagepass__league-emblem::after {
+  content: '';
+  position: absolute;
+  top: 40%;
+  width: 12px;
+  height: 8px;
+  border-block: 1px solid currentColor;
+}
+.heritagepass__league-emblem::before { left: 0; }
+.heritagepass__league-emblem::after { right: 0; }
+.heritagepass__ribbon { position: relative; margin-bottom: calc(-1 * var(--space-2)); }
+.heritagepass__ribbon svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%; /* card-fill-exempt: the ticket ribbon's contour follows its lettering */
+}
+.heritagepass__occasion {
+  position: relative;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  text-align: center;
+  font-family: var(--font-read);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-display);
+  line-height: var(--lh-compact);
+}
+/* layout-exempt: away / at / home are aligned on the same ticket columns */
+.heritagepass__matchup,
+.heritagepass__scores {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr);
+  gap: var(--space-1);
+  align-items: center;
+  text-align: center;
+}
+.heritagepass__matchup { margin-top: var(--space-6); }
+.heritagepass__team { min-width: 0; align-self: start; }
+.heritagepass__mark,
+.heritagepass__team .teamlogo {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+  max-width: 140px;
+  margin: 0 auto var(--space-2);
+  object-fit: contain;
+}
+.heritagepass__city {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-xwide);
+  line-height: var(--lh-compact);
+  overflow-wrap: anywhere;
+}
+.heritagepass__name {
+  display: block;
+  overflow-wrap: anywhere;
+  font-family: "Big Shoulders Display", var(--font-display);
+  font-size: clamp(var(--fs-title-lg), 8cqw, var(--fs-display-md));
+  font-weight: var(--w-black);
+  letter-spacing: var(--ls-none);
+  line-height: var(--lh-tight);
+}
+.heritagepass__name svg { display: block; width: 100%; height: auto; fill: currentColor; }
+.heritagepass__name text { font-size: var(--fs-watermark-sm); }
+.heritagepass__at {
+  position: relative;
+  align-self: start;
+  align-content: center;
+  height: 130px;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+}
+.heritagepass__at::before,
+.heritagepass__at::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 1px;
+  height: 30%;
+  background: currentColor;
+}
+.heritagepass__at::before { top: var(--space-2); }
+.heritagepass__at::after { bottom: var(--space-2); }
+.heritagepass__at span { display: inline-block; padding-block: var(--space-1); border-block: 1px solid currentColor; }
+.heritagepass__scores { margin-top: var(--space-3); grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); }
+.heritagepass__score {
+  position: relative;
+  width: 100%;
+  max-width: 110px;
+  margin: 0 auto;
+  padding: var(--space-2) var(--space-1);
+  font-family: "Bungee", var(--font-display);
+  font-size: clamp(var(--fs-score-lg), 19cqw, var(--fs-watermark-sm));
+  font-weight: var(--w-regular);
+  line-height: var(--lh-solid);
+  font-variant-numeric: tabular-nums;
+}
+.heritagepass__score > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%; /* card-fill-exempt: the engraved score outline follows its own numeral */
+  pointer-events: none;
+}
+.heritagepass__score[data-long] { font-size: clamp(var(--fs-h1), 13cqw, var(--fs-display-lg)); }
+.heritagepass__bats svg { display: block; width: 100%; }
+.heritagepass__venue { flex: 1; align-content: end; min-height: 64px; }
+.heritagepass__art { display: block; width: 100%; max-height: 200px; object-fit: contain; margin-top: var(--space-3); }
+/* layout-exempt: date and venue share the two compartments of the ticket stub */
+.heritagepass__foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  min-height: 54px;
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-1) 0;
+  border-top: 3px double currentColor;
+  text-align: center;
+}
+.heritagepass__foot time {
+  padding-right: var(--space-2);
+  font-family: "Big Shoulders Display", var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-black);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-tight);
+}
+.heritagepass__park {
+  display: block;
+  padding-left: var(--space-2);
+  border-left: 1px solid currentColor;
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-label);
+}
+.heritagepass__foot > :only-child { grid-column: 1 / -1; border-left: 0; padding-inline: 0; }
+.heritagepasses { margin-block: var(--space-4); }
+.heritagepasses__nav { justify-content: center; }
+.heritagepasses__open { width: 100%; margin-top: var(--space-2); }
+.heritagepass-box { margin-block: var(--space-6); }
+.heritagepass-box h2 { text-align: center; margin-bottom: var(--space-4); }
+.heritage-preview { max-width: 1200px; margin: 0 auto; padding: var(--space-6); }
+.heritage-preview h1 { font-family: var(--font-display); font-size: var(--fs-display-lg); }
+.heritage-preview__case { margin-block: var(--space-6); }
+.heritage-preview__case h2 { font-size: var(--fs-h3); margin-bottom: var(--space-3); }
