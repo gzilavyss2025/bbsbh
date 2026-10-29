@@ -121,7 +121,7 @@
 
 /* A phone-wide hero (Gary, 2026-10-29): beside the box, under the name, one place holds the play in
    readable type; a tap turns it to the three numbers, stacked, and back. */
-@container (max-width: 400px) {
+@container (max-width: 500px) {
   /* layout-exempt: box beside the name, the play or its numbers under the name */
   .gdnext .gdhero .gdhero__top { height: auto; display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
     grid-template-areas: 'box who' 'box flip'; column-gap: var(--space-3); row-gap: var(--space-2); }
