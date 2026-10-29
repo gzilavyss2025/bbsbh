@@ -9,13 +9,12 @@ import { celebrationForPlay } from '../cutscene/integration/celebrationForPlay.j
 import { BALLPARK_SCENES } from '../cutscene/ballpark/scenes.js'
 
 // The stage slot (#2573, #2568 slice 4): the revealed play, or the rest frame. A `.js` file so the
-// suite can render it; GamedayNextMount passes the real SealBox and StageCanvas.
+// suite can render it; useGamedayStage passes the real SealBox and the celebration canvas.
 //
 // SPOILER FOOTING. `shown` (tapRule.js) is an at-bat the reader already revealed. Its feed play is
 // read only inside the SealBox reveal render function (ADR-0001, ADR-0002), so a home run's landing
-// exists only in the revealed stage. The rest canvas reads no result: the batter's side, the
-// pitcher's hand and the zone card's pre-game temperatures only. Hover identities use the
-// existing defense step clamp inside their own SealBox reveal function.
+// exists only in the revealed stage. The rest frame reads no result: the batter's side and the
+// pitcher's hand only. Identities use the existing defense step clamp inside their own SealBox reveal function.
 //
 // A sub-step (`shown` { count, sub }, steps/subStep.js stageKey) plays one pitch: the at-bat's play cut at that
 // pitch, with only the runner moves before it. Any other sub-step (an event, a change, an automatic
@@ -106,13 +105,13 @@ function Rest({ batSide, pitchHand }) {
 }
 
 // `run` counts trail-card replays (tapRule.js replay): a new run remounts the play, so its clock restarts.
-export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, onReplay, batSide, pitchHand, zones, onZone, checkpoint, checkpointDismissed, onCheckpoint, onCloseCelebration, mark, step, open, batter }) {
+export function GamedayStage({ SealBox, StageCanvas, feed, inning, half, wall, shown, run = 0, playing, onEnd, onReplay, batSide, pitchHand, checkpoint, checkpointDismissed, onCheckpoint, onCloseCelebration, mark, step, open, batter }) {
   // A numbered play keeps the checkpoint inside Played (pending or dismissed), so it never remounts.
   if (checkpoint && (shown == null || typeof shown === 'object')) return checkpoint
   const teamId = feed?.gameData?.teams?.[half === 'top' ? 'away' : 'home']?.id
   const field = (actors) => shown != null
     ? h(Played, { key: (typeof shown === 'object' ? shown.count + '.' + shown.sub : shown) + '#' + run, StageCanvas, feed, idx: shown, inning, half, wall, playing, onEnd, onReplay, checkpoint, checkpointDismissed, onCheckpoint, onCloseCelebration, actors, teamId, mapSide: batter ? battingSide(batSide, pitchHand) : null })
-    : h(Rest, { StageCanvas, wall, batSide, pitchHand, zones, onZone, actors, teamId })
+    : h(Rest, { batSide, pitchHand })
   if (mark == null && shown == null) return field(null)
   return h(SealBox, { coverless: true, forceRevealed: true }, () => field(mark == null ? null
     : stageActors(feed, { inning, half, mark, step, open, batter, shown })))

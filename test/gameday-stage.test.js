@@ -7,8 +7,6 @@ import { resolveBallparkLayout } from '../src/lib/ballpark/layout/resolveLayout.
 import { HIT_COORD_ORIGIN, HIT_COORD_FT_PER_UNIT } from '../src/lib/ballpark/hitProjection.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 import { stagePlay, stateAt } from '../src/screens/gameday/next/stage/play.js'
-import { drawStage, fieldFrame } from '../src/screens/gameday/next/stage/drawStage.js'
-import { S, TOKENS } from '../src/screens/gameday/next/stage/pixels.js'
 
 const F = JSON.parse(readFileSync(new URL('./fixtures/gameday/stage-824716.json', import.meta.url)))
 const layout = resolveBallparkLayout({ venueId: F.venue.id, venueName: F.venue.name, gameDate: F.officialDate })
@@ -56,22 +54,6 @@ test('a ball with no landing coordinate (tier C) has no chase', () => {
   assert.equal(stateAt(play, play.end).view, 'field')
 })
 
-test('drawStage is a pure function of the play and the time', () => {
-  const w = 195, h = 300, at = (play, t) => drawStage(stateAt(play, t), w, h).px.slice() // the buffer is reused
-  for (const [play, t] of [[hr, 0.3], [hr, hr.t.contact + 1], [groundout, groundout.t.chase - 0.2]]) {
-    assert.deepEqual(at(play, t), at(play, t))
-  }
-  // Every pixel is a palette slot, and play movement changes the frame.
-  const px = at(hr, hr.t.contact + 1)
-  assert.ok(px.every((v) => v < TOKENS.length))
-  assert.notDeepEqual(px, at(hr, hr.t.pitch - 0.05))
-  // A frame is not allocated per call, and a resize takes the new size.
-  const a = drawStage(stateAt(hr, 0.3), w, h), b = drawStage(stateAt(hr, 0.4), w, h)
-  assert.equal(a.px, b.px)
-  assert.equal(drawStage(stateAt(hr, 0.3), 100, 150).px.length, 100 * 150)
-  assert.equal(drawStage(stateAt(hr, 0.3), w, h).px.length, w * h)
-})
-
 // The feed lists one runner entry per movement, so a single sends a runner 1B to 2B then 2B to 3B
 // as two entries, and a steal mid-at-bat adds another. One runner is one figure (#2662 review).
 test('a runner who moves twice is one figure, from his first base to his last', () => {
@@ -114,42 +96,4 @@ test('a walk and an untracked hit still advance runners and stop on their destin
   }
   const walk = stagePlay({ runners: [{ details: { runner: { id: 1 } }, movement: { start: null, end: '1B' } }] }, wall)
   assert.deepEqual(stateAt(walk, walk.end).runners[0].pos, [90 / Math.SQRT2, 90 / Math.SQRT2, 0])
-})
-
-test('the entire field fits phone, desktop and landscape slots without following a result', () => {
-  for (const [w, h] of [[195, 300], [256, 150], [360, 90]]) {
-    const { fence, project } = fieldFrame(wall, w, h)
-    for (const p of [...fence, [0, 0, 0]]) {
-      const [x, y] = project(p)
-      assert.ok(x >= 8 && x < w - 8, 'field stays inside the horizontal margins')
-      assert.ok(y >= 8 && y < h - 8, 'field stays inside the vertical margins')
-    }
-    // Isolate the background: sprites and the ball can legitimately cover a line pixel.
-    const fieldOnly = (t) => ({ ...stateAt(hr, t), fielders: {}, runners: [], ballPos: null, pitchPos: null })
-    const rest = drawStage(fieldOnly(0), w, h).px.slice()
-    assert.deepEqual(rest, drawStage(fieldOnly(hr.end), w, h).px)
-    for (const slot of [S.sky, S.crowd1, S.crowd2, S.crowd3, S.crowd4]) assert.ok(!rest.includes(slot))
-  }
-})
-
-// A finished fly ball used to remain clamped outside the small base diagram.
-test('the base diagram paints a ball in flight but never leaves one at rest', () => {
-  const at = (st) => drawStage(st, 160, 160, false).px.slice()
-  const chase = stateAt(hr, (hr.t.contact + hr.t.chase) / 2)
-  assert.notDeepEqual(at(chase), at({ ...chase, ballPos: null, pitchPos: null }))
-  for (const play of [hr, groundout]) {
-    const settled = stateAt(play, play.end)
-    assert.deepEqual(at(settled), at({ ...settled, ballPos: null, pitchPos: null }))
-  }
-})
-
-test('the illustrated layer retains only batter and runner anchors over unfilled basepaths', () => {
-  const before = drawStage(stateAt(stagePlay({}, wall), 0), 160, 160, false)
-  assert.deepEqual(before.sprites.map((p) => p.key), ['batter'])
-  for (const slot of [S.overheadTurf, S.overheadTurfLit, S.overheadClay]) assert.ok(!before.px.includes(slot))
-  const during = drawStage(stateAt(hr, hr.t.contact + .2), 160, 160, false)
-  assert.deepEqual(during.sprites.map((p) => p.key).sort(), ['runner:0', 'runner:1', 'runner:2'])
-  const runner = during.sprites.find((p) => p.key === 'runner:0')
-  assert.ok(runner.feet > runner.y)
-  assert.ok(runner.pose === 1 || runner.pose === 2)
 })

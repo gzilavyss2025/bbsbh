@@ -1,4 +1,4 @@
-import '../../../../styles/gameday-next/stage.css' // the stage's sizes; StageCanvas no longer mounts at rest
+import '../../../../styles/gameday-next/stage.css' // the stage slot's sizes
 import { useCallback, useMemo, useState } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { selectMoundPitcher } from '../../../../api/select.js'
@@ -77,7 +77,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
       {!(covered && cur.armed) && <GamedayStage
         SealBox={SealBox} StageCanvas={GamedayPlayCanvas} feed={feed} inning={inning} half={half} wall={wall} shown={cur.shown} run={cur.run ?? 0} playing={cur.playing} onEnd={onEnd} onReplay={onReplay}
         mark={mark} step={open ? stepCapAt(feed, inning, half, open.count, open.sub) : null} open={open} batter={batter}
-        batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')} zones={zones} onZone={batter ? toggleZones : undefined}
+        batSide={hand(batter?.id, 'batSide')} pitchHand={hand(pitcherId, 'pitchHand')}
         checkpoint={checkpoint} checkpointDismissed={phase === 'checkpoint'} onCheckpoint={onCheckpoint}
         // The celebration's ✕: a held ending scene opens its checkpoint, as Next would.
         onCloseCelebration={() => { if (covered) setClosedAt(checkpointKey) }}
