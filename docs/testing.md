@@ -200,7 +200,12 @@ changed pixel in red.
    shoot it, and compare.
 
 So the two shots of a page get the same data. The clock is fixed at
-`FROZEN_NOW` (`routes.js`) on both servers, and `Math.random` is seeded. Images
+`FROZEN_NOW` (`routes.js`, 2026-09-23) on both servers, and `Math.random` is seeded.
+A route can name its own clock with `now`: the World Series routes and the AAA
+offseason page use `SERIES_NOW` (2026-10-25, the off day before Game 3), the only
+date those pages draw on (#2525). The `/learn` guide is answered with `renderPage`'s
+HTML (the route's `html`), since only Vercel serves it; its `/learn.css` still comes
+from each server. Images
 are replayed from the recording, not replaced with a placeholder: a logo or a
 photo sets the size of its box on some pages, and a placeholder would hide a
 layout change there. A request that the recording does not hold is aborted,
