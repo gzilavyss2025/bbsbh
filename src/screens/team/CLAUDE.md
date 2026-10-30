@@ -48,16 +48,18 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
 - **Roster** (`next/roster/`): lineup and bench, the staff (starters, bullpen, the seven-day pen
   grid), the coaching staff (`CoachingStaff.jsx`, a swipe row that reads its own `fetchCoachingStaff`), the 40-man,
   the injured list, and a door to the transactions ledger. The lineup and staff cards are one
-  ruled table each (`RosterBox.jsx`, rows from `boxRows.js`), never the 40-man's `RosterList` row;
+  ruled table each (`RosterBox.jsx`, rows from `boxRows.js`), and so are the 40-man and the injured list;
   the diamond stands on the club's own park (`team.venue`) in the current season.
 - **Farm** (`next/farm/`): `MinorsBody`, the affiliation history, affiliates, Horizon, prospects
   and the depth chart. Absent for a club with no parent org (a MiLB club or winter ball).
 - **Money** (`next/money/`): payroll, contract grid, the cliff and the source line. MLB only.
+  The source line portals into the foot's `#tnext-credits` slot (Gary, 2026-10-30), the one
+  sanctioned reach outside a band's folder; inline until the slot exists.
   Not keyed on `asOf`: it is a season's book (ADR-0052).
-- **About** (`next/about/`): the ballpark with the manager, franchise history (MLB), jerseys
+- **About** (`next/about/`): the ballpark, franchise history (MLB), jerseys
   (these follow `?d=`) and, for MiLB, Made The Show.
 - **Foot** (`next/foot/`): not a band, no jump-bar button. The level's other clubs with the
-  Affiliate chip, and the Game Notes card. It adds no request.
+  Affiliate chip, the Game Notes card, and the `#tnext-credits` slot. It adds no request.
 
 Every link keeps `?d=` and `?s=` (the shell wraps the page in `LinkScope`). `?y=2018` is a past season: the as-of `2018-12-31` with no date labels (`isYearView`, `lib/dates.js`); the banner reads "2018 Season" with Show current; `?d=` wins when both are present. Open surface
 (ADR-0034, "The cutoff is opt-in now"): nothing here is sealed, and adding a gate is a regression.
