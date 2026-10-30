@@ -178,7 +178,11 @@ answers them. That sign-in is also what keeps crawlers off previews; a crawler s
 on 2026-10-29 paused the Hobby team at 3x its request allowance. Keep work on PR
 branches and batch related changes into one stack anyway: one reviewed deploy per
 stack keeps `main` tidy, and Pro bills usage past the plan's allowance instead of
-pausing. One setting in `vercel.json` still trims deployments:
+pausing. The Vercel Firewall's managed **Bot Protection** is on with action Challenge
+(dashboard, 2026-10-30): real browsers pass, scripted clients get a checkpoint, so a
+`curl` probe of production sees a 429 with `x-vercel-mitigated: challenge` and that is
+correct. Do not add a rate-limit rule: the first attempt counted site-wide and
+challenged every reader. One setting in `vercel.json` still trims deployments:
 
 - `git.deploymentEnabled: { "dependabot/**": false }` — Dependabot branches get no
   preview; their weekly grouped PR lands in a stack like any other.
