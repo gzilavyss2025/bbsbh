@@ -181,8 +181,12 @@ stack keeps `main` tidy, and Pro bills usage past the plan's allowance instead o
 pausing. The Vercel Firewall's managed **Bot Protection** is on with action Challenge
 (dashboard, 2026-10-30): real browsers pass, scripted clients get a checkpoint, so a
 `curl` probe of production sees a 429 with `x-vercel-mitigated: challenge` and that is
-correct. Do not add a rate-limit rule: the first attempt counted site-wide and
-challenged every reader. One setting in `vercel.json` still trims deployments:
+correct, not a rate limit. A custom rule also rate-limits each IP to 600 requests a
+minute outside `/assets/`, `/data/` and `/_vercel/` (Deny 403 for five minutes). One
+reader's page view is roughly a dozen requests, so the limit only catches a storm;
+the first draft at 100 blocked the maintainer's own phone. The Firewall's
+Persistent Actions list shows who tripped it. Both settings live only in the
+dashboard. One setting in `vercel.json` still trims deployments:
 
 - `git.deploymentEnabled: { "dependabot/**": false }` — Dependabot branches get no
   preview; their weekly grouped PR lands in a stack like any other.
