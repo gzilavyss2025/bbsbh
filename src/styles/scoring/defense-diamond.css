@@ -25,6 +25,12 @@
   height: 100%;
 }
 
+/* The manager page's global .bpdiagram caps a park at 380px with a margin; inside the field it
+   fills the field instead. Two classes, so it wins over that later sheet. */
+.defdiamond__field .defdiamond__park {
+  max-width: none;
+  margin: 0;
+}
 .defdiamond__field--park {
   max-width: none;
   overflow: hidden;

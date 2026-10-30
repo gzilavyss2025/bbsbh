@@ -124,7 +124,8 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
     return (
       <>
         {(lineup.length > 0 || subs.length > 0) && (
-          <Card frame="stamped" label="Lineup" labelAs="h3" count={recent ? (thisSeason ? 'current' : 'last game') : 'season'} {...card()}>
+          // No count tag: the Current / Season switch already names the view (Gary, 2026-10-30).
+          <Card frame="stamped" label="Lineup" labelAs="h3" {...card()}>
             <Stack gap="section">
               {toggle}
               <Grid min="20rem" gap="loose" fit className="rosterbox-pair">
@@ -146,7 +147,7 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
           </Card>
         )}
         {(sp.length > 0 || pen.length > 0) && (
-          <Card frame="stamped" label="Pitching staff" labelAs="h3" count={`${sp.length + pen.length} arms`} {...card()}>
+          <Card frame="stamped" label="Pitching staff" labelAs="h3" {...card()}>
             <Grid min="20rem" gap="loose" fit className="rosterbox-pair">
               <RosterBox
                 label="Rotation and bullpen"
@@ -156,7 +157,8 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
                 showProspect={d.isMilb}
                 groups={[{ title: 'Rotation', sum: 'Rotation', rows: rotation }, { title: 'Bullpen', sum: 'bullpen', role: true, rows: bullpen }]}
               />
-              <PenWeek teamId={team.id} />
+              {/* A club whose season is over has no pen to rest or ride (Gary, 2026-10-30). */}
+              {!d.seasonOver && <PenWeek teamId={team.id} />}
             </Grid>
           </Card>
         )}

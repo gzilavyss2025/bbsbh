@@ -169,6 +169,8 @@
 }
 .fplate__facts {
   margin-top: var(--space-4);
+  /* Square, like the stamped cards around it (Gary, 2026-10-30). */
+  border-radius: var(--radius-square);
 }
 .fplate__note {
   margin: var(--space-3) 0 0;

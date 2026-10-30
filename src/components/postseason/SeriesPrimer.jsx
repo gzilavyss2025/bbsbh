@@ -7,6 +7,7 @@ import { roundTitle } from '../../api/postseason/text.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { ribbonNodes } from '../../lib/postseason/primer/ribbonNodes.js'
 import { seriesMark } from '../../lib/postseason/seriesMarks.js'
+import { ChampionHero } from '../worldseries/ChampionHero.jsx'
 import { BracketNow } from '../bracket/BracketNow.jsx'
 import { BracketRail } from '../bracket/BracketRail.jsx'
 import { SurvivorsBoard } from '../bracket/SurvivorsBoard.jsx'
@@ -32,10 +33,17 @@ import { SeriesTotals } from './SeriesTotals.jsx'
 // (park and probables, pinned by test/postseason/upcoming-games.test.js) and
 // fetchPlateUmpires (the umpire, pinned by plate-umpire.test.js). Change either
 // list only with its test. No SealBox.
-export function SeriesPrimer({ part, primer }) {
+export function SeriesPrimer({ part, primer, championBand = false }) {
   const { series, bracket, cutoff, slateDate, favoriteTeamId } = primer
   if (part === 'main') {
-    return series ? <Main primer={primer} /> : <SurvivorsBoard bracket={bracket} slateDate={slateDate} favoriteTeamId={favoriteTeamId} />
+    if (series) return <Main primer={primer} />
+    // When the rail takes the bracket fold, its champion band goes with it: draw the band here.
+    return (
+      <>
+        {championBand && bracket?.champion && <ChampionHero bracket={bracket} />}
+        <SurvivorsBoard bracket={bracket} slateDate={slateDate} favoriteTeamId={favoriteTeamId} />
+      </>
+    )
   }
   return series ? <Rail primer={primer} /> : <BracketRail bracket={bracket} cutoff={cutoff} slateDate={slateDate} />
 }

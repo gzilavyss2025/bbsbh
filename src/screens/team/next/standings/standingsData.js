@@ -67,12 +67,10 @@ export const hasDroughts = (n, cutoff) => Boolean(n?.scheduleShape && droughtsFo
 export const hasRecords = (data, cutoff) => teamRecordsFor(data, { cutoff }) != null
 
 // The jump-bar badge: one per card the band draws. The score card needs a pool of two or more.
+// One per card the band draws: the division table and Last time. Team score, Records, Day of week
+// and Comeback wins draw in the Ranks band now (StandingsRankCards.jsx), so they count nowhere here.
 export const standingsCount = (n, cutoff) =>
   (n.standings.length > 0) +
-  (n.standings.length > 1) +
-  hasRecords(n.teamRecords, cutoff) +
-  Boolean(n.dayOfWeek) +
-  Boolean(n.comeback) +
   hasDroughts(n, cutoff)
 
 // Games back as the table prints it. A winter leader can arrive as "-1.0" (a one-game lead);

@@ -17,6 +17,7 @@ import { SHARED } from '../once.js'
 import { useBandData } from '../useBandData.js'
 import { ChallengeBoard } from './ChallengeBoard.jsx'
 import { RunValueBoard } from './RunValueBoard.jsx'
+import { StandingsRankCards } from '../standings/StandingsRankCards.jsx'
 import { rankCount } from './ranksData.js'
 import '../../../../styles/team-next/ranks.css'
 
@@ -72,12 +73,13 @@ export default function Ranks({ team, asOf, sportId, onReady, onCount }) {
   const isMilb = (team.sport?.id ?? 1) !== 1
   const orgId = isMilb ? parentOrgIdOf(team) : team.id
   const clubName = teamClubName(team)
-  const any = Boolean(n && (n.batting || n.pitching || n.runValue || n.absExposureClubs || hasLeaders))
 
   return (
     <div className={`tnext__square rnk${still ? ' rnk--still' : ''}`}>
       <AsyncStatus loading={numbers.loading} error={numbers.error} hasData={n != null} errorMessage="Couldn’t load team ranks. Try again." />
-      {any && <h2 className="tnext__bandhead">Ranks</h2>}
+      <h2 className="tnext__bandhead">Ranks</h2>
+      {/* Team score, Records, Day of week and Comeback wins lead the band (Gary, 2026-10-30). */}
+      <StandingsRankCards team={team} asOf={asOf} still={still} />
       {n?.batting && <RankBoard title="Team batting" stats={n.batting} clubCount={n.clubCount} still={still} />}
       {n?.pitching && <RankBoard title="Team pitching" stats={n.pitching} clubCount={n.clubCount} still={still} />}
       {n && <RunValueBoard data={n.runValue} clubName={clubName} asOf={asOf} sportId={sportId} still={still} />}

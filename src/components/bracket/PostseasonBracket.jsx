@@ -55,7 +55,7 @@ export function PostseasonBracket({ bracket, cutoff, slateDate = null, autoOpen 
         showDoor={!alwaysOpen}
         onToggle={() => setChoice(!open)}
       />
-      {open && <FullBracket bracket={bracket} cutoff={cutoff} historyIds={historyIds} />}
+      {open && <FullBracket bracket={bracket} cutoff={cutoff} historyIds={historyIds} rail />}
     </section>
   )
 }

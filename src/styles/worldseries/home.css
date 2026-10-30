@@ -488,3 +488,42 @@
 }
 /* The cards flow in balanced columns, each at its own height (Flow.jsx, flow.css); the Film room
    rail and the Roster take the whole row, so the report is cut into flows around them. */
+
+/* The home slate's champion hero (ChampionHero.jsx): the crest and the result sit over the left
+   half, clear of the MVP's photos on the right. */
+@media (min-width: 740px) {
+  .ww-champhero .ww-hero__top { margin-left: var(--space-4); }
+  .ww-champhero .ww-hero__focus { width: 46%; margin-left: var(--space-4); text-align: center; }
+}
+.ww-hero__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* The club stripe along the photo's slanted edge: outer, inner, outer, each band its own slant. */
+.ww-hero__stripe,
+.ww-hero__stripe::before,
+.ww-hero__stripe::after {
+  --b: calc(var(--space-4) / 3);
+  position: absolute;
+  inset: 0;
+}
+.ww-hero__stripe { z-index: var(--z-raised); }
+.ww-hero__stripe::before,
+.ww-hero__stripe::after { content: ''; }
+.ww-hero__stripe::before {
+  background: var(--stripe-out, var(--text-heading));
+  clip-path: polygon(var(--cut) 0, calc(var(--cut) + 3 * var(--b)) 0, calc(3 * var(--b)) 100%, 0 100%);
+}
+.ww-hero__stripe::after {
+  background: var(--stripe-in, var(--surface-card));
+  clip-path: polygon(calc(var(--cut) + var(--b)) 0, calc(var(--cut) + 2 * var(--b)) 0, calc(2 * var(--b)) 100%, var(--b) 100%);
+}
+/* On the home slate the hero stands on the page: no Overview card around it. */
+.ww-champhero .card.ww-hero { --card-edge: 0; --card-shadow: none; --card-ground: transparent; margin-top: 0; }
+.ww-champhero .card.ww-hero > .card__name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.ww-champhero .card.ww-hero > .card__body { padding: 0; }
+/* The home hero's crest: the Series mark alone, larger; no trophy. */
+.ww-champhero .ww-hero__trophy { display: none; }
+/* Hover: the photo eases in closer inside its slanted slab, which clips it; the club stripe is its
+   own layer, so it stays where it is (Gary, 2026-10-30). Pointers that hover only, motion allowed. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .ww-champhero .ww-hero__photo { transition: transform var(--dur-slow) var(--ease-out); }
+  .ww-champhero .ww-hero__stage:hover .ww-hero__photo { transform: scale(1.08); }
+}

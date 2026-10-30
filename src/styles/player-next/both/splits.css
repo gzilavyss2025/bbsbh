@@ -18,9 +18,31 @@
 .splitsmod__bar {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-2h) var(--space-4);
+  align-items: center;
+  gap: var(--space-2);
 }
+/* On the bar's own line, the picker and the scope share one control height (Gary, 2026-10-30). */
+.splitsmod__bar .splitsmod__select,
+.splitsmod__bar .pnext-pick {
+  min-height: var(--space-10);
+}
+.splitsmod__bar .splitsmod__select { min-width: 0; }
+.splitsmod__reset {
+  min-height: var(--space-10);
+  margin-left: auto;
+  padding: 0 var(--space-1);
+  border: 0;
+  background: none;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+  cursor: pointer;
+}
+.splitsmod__reset:focus-visible { outline: none; box-shadow: var(--ring); }
 /* layout-exempt: a caption stacked over its control */
 .splitsmod__field {
   display: flex;
@@ -221,15 +243,17 @@
 /* layout-exempt: every row kind is a fixed set of figure tracks beside one flexible name track */
 .splitsmod__grid {
   display: grid;
-  column-gap: var(--space-1h);
+  /* The figures spread into the row (Gary, 2026-10-30): the name track had the room. */
+  column-gap: var(--space-3);
   align-items: start;
 }
 .splitsmod__grid--slash {
-  --cols: minmax(0, 1fr) calc(var(--space-1) * 7) calc(var(--space-1) * 9) calc(var(--space-1) * 5.5) calc(var(--space-1) * 7) calc(var(--space-1) * 7);
+  /* The PA track holds a four-digit career total at the row's one size (13px). */
+  --cols: minmax(0, 1fr) calc(var(--space-1) * 10) calc(var(--space-1) * 10) calc(var(--space-1) * 7) calc(var(--space-1) * 7) calc(var(--space-1) * 7);
   grid-template-columns: var(--cols);
 }
 .splitsmod__grid--era {
-  --cols: minmax(0, 1fr) calc(var(--space-1) * 6) calc(var(--space-1) * 10) calc(var(--space-1) * 6.5) calc(var(--space-1) * 6.5);
+  --cols: minmax(0, 1fr) calc(var(--space-1) * 10) calc(var(--space-1) * 10) calc(var(--space-1) * 6.5) calc(var(--space-1) * 6.5);
   grid-template-columns: var(--cols);
 }
 .splitsmod__grid.is-dr {
@@ -264,9 +288,9 @@
   padding: var(--space-2h) 0;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
+/* The base row reads by its bold name and its "base" tag, on the card's own paper (Gary, 2026-10-30). */
 .splitsmod__row.is-base {
-  background: var(--surface-inset);
-  box-shadow: calc(var(--space-2) * -1) 0 0 var(--surface-inset), var(--space-2) 0 0 var(--surface-inset);
+  background: transparent;
 }
 .splitsmod__fam {
   margin: 0;
@@ -294,7 +318,8 @@
   gap: var(--space-1) var(--space-1h);
   color: var(--text-heading);
   font-family: var(--font-body);
-  font-size: var(--fs-body);
+  /* One size across the row: name, cells, figure and delta (Gary, 2026-10-30). */
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   line-height: var(--lh-solid);
 }
@@ -312,7 +337,7 @@
 .splitsmod__cell {
   color: var(--text-body);
   font-family: var(--font-mono);
-  font-size: var(--fs-cell);
+  font-size: var(--fs-small);
   line-height: var(--lh-loose);
   text-align: right;
 }
@@ -371,7 +396,7 @@
 .splitsmod__delta {
   color: var(--text-caption);
   font-family: var(--font-mono);
-  font-size: var(--fs-label);
+  font-size: var(--fs-small);
   text-align: right;
 }
 .splitsmod__delta.is-pos {
@@ -467,4 +492,8 @@
   .splitsmod__cell {
     font-size: var(--fs-small);
   }
+}
+/* A phone keeps the name track wide enough for its longest single word. */
+@media (max-width: 739.98px) {
+  .splitsmod__grid { column-gap: var(--space-2); }
 }

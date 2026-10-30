@@ -8,7 +8,6 @@ import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
-import { useIntroFlag } from '../hooks/preferences/useIntroFlag.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { isPostseasonWindow } from '../lib/postseason/capSlateDate.js'
 import { usePostseasonBracket } from '../hooks/postseason/usePostseasonBracket.js'
@@ -34,7 +33,6 @@ import { LogbookButton } from '../components/chrome/LogbookButton.jsx'
 import { goHome } from '../lib/home.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
-import { FavoriteTeamModal } from '../components/account/FavoriteTeamModal.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
 import { WireRail } from '../components/transactions/WireRail.jsx'
@@ -78,20 +76,6 @@ const MergeReceiptStrip = isClerkEnabled
 // that made the app's shortest address mean a different day's league to every
 // reader; a link to "today's Triple-A games" could not be sent at all.
 
-// Testing escape hatch: `?nointro` on any slate URL suppresses the first-visit
-// welcome modal for that load, so an automated test (or a manual spot-check)
-// can hit the site with a cleared localStorage without the modal covering the
-// screen. Only affects the modal — the favorite-team default still applies —
-// and it's a one-load query flag, never persisted, so a shared link doesn't
-// carry it forward.
-function welcomeSuppressed() {
-  try {
-    return new URLSearchParams(window.location.search).has('nointro')
-  } catch {
-    return false
-  }
-}
-
 // Screen 1: pick a game. A single level's slate for the chosen date, sorted
 // soonest → latest (the favorite team pinned to the top), with a LIVE pill on
 // any game in progress. Level is toggled with the thin buttons up top; no
@@ -105,12 +89,8 @@ export function GameSelect({
 }) {
   useDocumentTitle(null)
   const navigate = useNav()
-  const { favoriteTeamId, hasClubOpinion, setFavoriteTeam } = useFavoriteTeam()
-  // Replaces the old "has a club opinion" proxy for first-visit detection —
-  // see src/lib/account/intro.js for why the two questions had to be
-  // decoupled once the welcome modal grew a second step.
-  const [introSeen, markIntroSeen] = useIntroFlag(hasClubOpinion)
-  const [showWelcome, setShowWelcome] = useState(!introSeen && !welcomeSuppressed())
+  // The first-visit welcome sheet is gone (Gary, 2026-10-30): the club is picked in My Tally.
+  const { favoriteTeamId } = useFavoriteTeam()
 
   // The displayed date comes from the URL (see App.jsx): bare '/' means today.
   // Paging navigates to the neighboring day's URL rather than bumping local
@@ -696,7 +676,7 @@ export function GameSelect({
                 winter that is every club — and wide, it moves to the rail
                 (WinterRail.jsx, #1078). */}
             {/* October: the survivors' board, or the series primer on a primer day. */}
-            {october && !wsMode && <SeriesPrimer part="main" primer={primer} />}
+            {october && !wsMode && <SeriesPrimer part="main" primer={primer} championBand={bracketInRail} />}
             {offDayTeams.length > 0 && !(wide && winter) && !october && (
               <OffDaySection
                 teams={offDayTeams}
@@ -753,17 +733,6 @@ export function GameSelect({
       )}
 
       <SiteFooter onShowLogos={onShowLogos} />
-
-      {showWelcome && (
-        <FavoriteTeamModal
-          favoriteTeamId={favoriteTeamId}
-          onSave={setFavoriteTeam}
-          onClose={(step) => {
-            markIntroSeen(step)
-            setShowWelcome(false)
-          }}
-        />
-      )}
 
       {/* Last child on purpose: the dock is fixed, so its position on the page
           is decided by CSS, but being last puts it after the games in the

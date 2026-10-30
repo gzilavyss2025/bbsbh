@@ -8,7 +8,8 @@ import '../../../../../styles/player-next/both/formchart.css'
 //            left to right in the order of `legend`; `good` and `bad` ("55% on base") print under the bar.
 //   legend   the outcome names, left to right.   ends  [left, right] names of the two winners.
 //   cursor   the point the chart shows, so the row that sits on it reads as pressed.
-export function StretchTable({ columns, rows, legend, ends, cursor, onPick }) {
+//   noKey    leave the key out: the caller draws StretchKey itself (the batter's card, at its top).
+export function StretchTable({ columns, rows, legend, ends, cursor, onPick, noKey = false }) {
   const cols = { '--fcols': columns.length }
   return (
     <div className="fstretch" style={cols}>
@@ -44,11 +45,19 @@ export function StretchTable({ columns, rows, legend, ends, cursor, onPick }) {
           <button key={r.key} type="button" className="fstretch__row fstretch__row--pick" aria-pressed={cursor === r.at} aria-label={aria} onClick={() => onPick(r.at)}>{body}</button>
         )
       })}
-      <div className="fstretch__key">
-        <div className="fstretch__keyhead"><span className="fstretch__end--good">{ends[0]}</span><span className="fstretch__end--bad">{ends[1]}</span></div>
-        <div className="fstretch__bar" aria-hidden="true">
-          {legend.map((name, i) => <span key={name} className="fstretch__seg" data-i={i}>{name}</span>)}
-        </div>
+      {!noKey && <StretchKey legend={legend} ends={ends} />}
+    </div>
+  )
+}
+
+// The bar key: the two winners over the outcome names, in bar order. `sticky` pins it under the
+// page's jump bar while its card scrolls by (Gary, 2026-10-30).
+export function StretchKey({ legend, ends, sticky = false }) {
+  return (
+    <div className={`fstretch__key${sticky ? ' fstretch__key--sticky' : ''}`}>
+      <div className="fstretch__keyhead"><span className="fstretch__end--good">{ends[0]}</span><span className="fstretch__end--bad">{ends[1]}</span></div>
+      <div className="fstretch__bar" aria-hidden="true">
+        {legend.map((name, i) => <span key={name} className="fstretch__seg" data-i={i}>{name}</span>)}
       </div>
     </div>
   )

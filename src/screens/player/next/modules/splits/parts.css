@@ -10,9 +10,33 @@
   gap: var(--space-1);
   overflow-x: auto;
   margin: 0 calc(var(--space-1h) * -1);
-  padding: var(--space-3h) var(--space-1h) var(--space-2);
+  /* Tight above the logos (Gary, 2026-10-30): just room for the NEXT tag on the next opponent. */
+  padding: var(--space-2) var(--space-1h) var(--space-1);
   scroll-snap-type: x proximity;
+  scrollbar-width: none;
 }
+.splitsmod__strip::-webkit-scrollbar { display: none; }
+/* layout-exempt: an arrow each side of the strip */
+.splitsmod__stripwrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.splitsmod__stripwrap > .splitsmod__strip { flex: 1; min-width: 0; }
+/* The step buttons: square, stamped, the slate's ‹ › glyphs. */
+.splitsmod__arrow {
+  flex: none;
+  width: var(--space-8);
+  height: var(--space-8);
+  padding: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.splitsmod__arrow:focus-visible { outline: none; box-shadow: var(--ring); }
 .splitsmod__club {
   position: relative;
   flex: 0 0 auto;

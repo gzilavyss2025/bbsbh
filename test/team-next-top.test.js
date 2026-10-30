@@ -224,7 +224,7 @@ test('runsCaption needs both runs; a missing runs-allowed gives no caption, neve
 })
 
 test('the page keeps its seven bands, the standing key and folder, and its hidden rules', () => {
-  assert.deepEqual(BANDS.map((b) => b.key), ['standings', 'ranks', 'games', 'roster', 'farm', 'money', 'about'])
+  assert.deepEqual(BANDS.map((b) => b.key), ['standings', 'roster', 'ranks', 'games', 'farm', 'money', 'about'])
   assert.equal(BANDS[0].label, 'Standings')
   assert.deepEqual([...hiddenTeamSections({ sport: { id: 1 }, league: { id: 104 } })], [])
   assert.deepEqual([...hiddenTeamSections({ sport: { id: 14 }, league: { id: 123 }, parentOrgId: 158 })], ['money'])

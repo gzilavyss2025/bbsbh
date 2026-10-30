@@ -49,7 +49,6 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
   // Instance key -> true once that slot's module has said it has no data.
   const [empty, setEmpty] = useState({})
   // The hero tile a rank chip lights: { group, tile }. Held here, stored nowhere.
-  const [lit, setLit] = useState(null)
   // The section a jump-bar tap landed on, and how many landings so far (decision 3):
   // its cards stamp in once per landing. Never set on a cold load, Back or an old address.
   const [landed, setLanded] = useState({ key: null, tick: 0 })
@@ -108,8 +107,10 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
                 key={b.group}
                 block={b}
                 playerId={core.data.bio.id}
+                name={core.data.bio.fullName}
+                position={core.data.bio.posAbbr}
+                mlb={(core.data.sportId ?? sportId ?? 1) === 1}
                 season={core.data.season}
-                lit={lit}
                 label={blocks.length > 1 ? b.title : undefined}
               />
             ))}
@@ -121,7 +122,7 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
               sportId={core.data.sportId ?? sportId ?? null}
               asOf={asOf}
             />
-            <OverviewExtras blocks={blocks} lit={lit} onLight={setLit} season={core.data.season} playerId={core.data.bio.id} cutoff={asOf} />
+            <OverviewExtras blocks={blocks} season={core.data.season} playerId={core.data.bio.id} cutoff={asOf} />
           </Stack>
           <HubTabBar variant="anchor" tabs={sections} ariaLabel="Page sections" hold onLand={onLand} />
           {sections

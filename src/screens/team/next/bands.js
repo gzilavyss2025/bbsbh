@@ -5,9 +5,10 @@ import { lazy } from 'react'
 // this list, Band.jsx and the page are not a module's to touch.
 export const BANDS = [
   { key: 'standings', label: 'Standings', Module: lazy(() => import('./standings/index.jsx')) },
+  // The roster sits right under the standings (Gary, 2026-10-30).
+  { key: 'roster', label: 'Roster', Module: lazy(() => import('./roster/index.jsx')) },
   { key: 'ranks', label: 'Ranks', Module: lazy(() => import('./ranks/index.jsx')) },
   { key: 'games', label: 'Games', Module: lazy(() => import('./games/index.jsx')) },
-  { key: 'roster', label: 'Roster', Module: lazy(() => import('./roster/index.jsx')) },
   { key: 'farm', label: 'Farm', Module: lazy(() => import('./farm/index.jsx')) },
   { key: 'money', label: 'Money', Module: lazy(() => import('./money/index.jsx')) },
   { key: 'about', label: 'About', Module: lazy(() => import('./about/index.jsx')) },

@@ -24,7 +24,9 @@ import { COLORS, VIEWS, ballDetail, contactBalls, contactView, firstView, markKe
 // angle and xBA, and how his contact ends by ball type. An open surface (ADR-0034): one season of
 // decided games, no seal. The spray store and its contact sibling carry the balls; the game log
 // only dates them, for the asOf cutoff and the detail line.
-const VIEWBOX = '10 40 600 485'
+// The field plus room for a dot's radius on every side: a ball on the plate, deep in a corner or
+// past the fence draws whole (Gary, 2026-10-30: the frame clipped dots at its edges).
+const VIEWBOX = '0 20 620 525'
 const FOUL_FT = 330
 const FENCE_FT = 400
 const pt = (deg, ft) => {
@@ -64,7 +66,9 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
   const card = useMemo(() => {
     if (!data) return null
     const dates = new Map((data[1] ?? []).map((g) => [g.game?.gamePk, g.date]))
-    const balls = sprayView(data[0], bio.id)?.balls
+    // The game log's opponent rides each ball too, for the detail card's "vs" line.
+    const opps = new Map((data[1] ?? []).map((g) => [g.game?.gamePk, g.opponent?.id ?? null]))
+    const balls = sprayView(data[0], bio.id)?.balls?.map((b) => ({ ...b, oppId: opps.get(b.gamePk) ?? null }))
     return balls && contactView(contactBalls(balls, dates, asOf))
   }, [data, bio.id, asOf])
   const view = pickedView ?? (card ? firstView(card.counts) : 'hr')
@@ -175,13 +179,10 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
           </div>
         </div>
       </FlightClock>
-      <p className="fcontact__note">
-        Exit velocity, launch angle, distance and xBA are Statcast, one value per ball. A missing value prints a dash.
-        Spray angle is read from the hit location, on a standard field, not the park where he hit the ball.
-      </p>
       {mix && (
         <>
-          <SectionHead look="rule" as="h3" note={`${mix.reduce((t, r) => t + r.n, 0)} balls with a launch angle`}>How contact ends</SectionHead>
+          {/* No ball count and no explaining notes on this card (Gary, 2026-10-30). */}
+          <SectionHead look="rule" as="h3">How contact ends</SectionHead>
           <BattedBallMix battedBall={{ rows: mix }} />
           <MenuRail
             label="Batted ball type"
@@ -201,10 +202,6 @@ export default function ContactModule({ bio, asOf, season, onEmpty, onCount }) {
             panel={(k) => <TypeFacts row={mix.find((r) => r.key === k)} />}
             backLabel="All batted balls"
           />
-          <p className="fcontact__note">
-            Share is of balls with a launch angle. The right-hand figure is his average on those balls (hits over balls in play).
-            Hard is 95 mph or more. Pick a ball type to see its averages and to show only those balls on the field.
-          </p>
         </>
       )}
     </div>

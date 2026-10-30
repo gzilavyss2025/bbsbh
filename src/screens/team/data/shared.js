@@ -350,6 +350,10 @@ export function lineupDefenseFrom(preferredLineup, injuredIds) {
     last: p.last,
     name: p.name,
     id: p.id,
+    // Carried when the entry has its own (a player off the roster, from the box score); else the
+    // table falls back to the roster's.
+    ...(p.jersey != null && { jersey: p.jersey }),
+    ...(p.war !== undefined && { war: p.war }),
     hurt: injuredIds.has(p.id),
   }))
 }

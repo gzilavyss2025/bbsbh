@@ -10,6 +10,7 @@ import { fetchWarData } from '../../../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../../../api/recentForm.js'
 import { splitPitchingStaff } from '../../../api/pitcherSplit.js'
 import { rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } from '../../../api/person.js'
+import { splitDisplayName } from '../../../api/person/identity.js'
 import { lastName } from '../../../api/select.js'
 import { fetchTopProspects, prospectBadge } from '../../../api/prospects.js'
 import { fetchRookiesData, showRookiePill } from '../../../api/rookies.js'
@@ -243,13 +244,40 @@ export async function loadRoster(id, asOf, src = DIRECT) {
         ]
       }),
   )
-  const eligibleRoster = recentFormEligibleRoster(roster, fullRoster, currentInjuredIds)
   const recentFormGames = await fetchRecentFormGames(schedule)
+  // Once the club's season is over (this season, every game on its schedule decided), "Current" is
+  // the last team that took the field, not who is on the roster now: the offseason empties the
+  // active roster, and a free agent who played the last game would leave his spot blank (Gary,
+  // 2026-10-30). So the window counts everyone who played in it, named from the box score.
+  const seasonOver = season === seasonOf(null, sportId) && schedule.length > 0 && schedule.every((g) => g.won != null)
+  const eligibleRoster = seasonOver
+    ? playedInWindow(recentFormGames)
+    : recentFormEligibleRoster(roster, fullRoster, currentInjuredIds)
   const recentForm = buildRecentForm(recentFormGames, eligibleRoster)
+  // A departed player (offseason only) gets the same meta a rostered one has, from the box score
+  // (name, the number he wore: Bauers wore 9) and the season WAR file, so the lineup, the bench and
+  // the staff all keep him and nothing about him reads blank.
+  if (seasonOver) {
+    for (const r of eligibleRoster) {
+      const id = r.person.id
+      if (rosterMetaById.has(id) || !r.person.fullName) continue
+      const pitcher = r.position?.type === 'Pitcher'
+      rosterMetaById.set(id, {
+        id,
+        name: r.person.fullName,
+        last: splitDisplayName(r.person.fullName).last,
+        jersey: r.jersey,
+        war: sportId === 1 ? (pitcher ? warPit[id] : warBat[id]) ?? null : undefined,
+        departed: true,
+      })
+    }
+  }
   const recentPreferredLineup = recentForm.preferredLineupIds
     .map(({ position, id }) => {
       const meta = rosterMetaById.get(id)
-      return meta ? { position, id, last: meta.last, name: meta.name } : null
+      if (!meta) return null
+      // A departed player's number and WAR ride the lineup entry (the table reads it first).
+      return { position, id, last: meta.last, name: meta.name, ...(meta.departed && { jersey: meta.jersey, war: meta.war }) }
     })
     .filter(Boolean)
   const recentSubstitutes = recentForm.substituteIds.map((id) => rosterMetaById.get(id)).filter(Boolean)
@@ -305,8 +333,21 @@ export async function loadRoster(id, asOf, src = DIRECT) {
     startingPitchers,
     bullpen,
     recentPreferredLineup,
+    seasonOver,
     recentSubstitutes,
     recentStartingPitchers,
     recentBullpen,
   }
+}
+
+// Everyone on the club's side of the window's box scores, shaped as roster rows ({ person, position })
+// for buildRecentForm: the offseason's "who played", not "who is on the roster".
+function playedInWindow(games) {
+  const byId = new Map()
+  for (const { side, box } of games) {
+    for (const p of Object.values(box?.teams?.[side]?.players ?? {})) {
+      if (p.person?.id && !byId.has(p.person.id)) byId.set(p.person.id, { person: p.person, position: p.position, jersey: p.jerseyNumber ?? '' })
+    }
+  }
+  return [...byId.values()]
 }

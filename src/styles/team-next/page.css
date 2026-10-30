@@ -16,4 +16,13 @@
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
+  /* Full width, as on the player page (Gary, 2026-10-30): it bleeds out of the column by the gutter
+     each side and pads back in by the same, so its buttons start where the column does. 100vw counts
+     the scrollbar, so the page root clips the overshoot (clip keeps sticky working). */
+  --bleed: calc((100vw - 100%) / 2);
+  margin-inline: calc(-1 * var(--bleed));
+  /* The buttons use the whole bar, from the window's own gutter (Gary, 2026-10-30: fill the space). */
+  padding-inline: var(--space-4);
 }
+html:has(.tnext__jump),
+body:has(.tnext__jump) { overflow-x: clip; }

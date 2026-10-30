@@ -136,27 +136,25 @@ export default function SplitsModule({ bio, role, asOf, season, onEmpty, onCount
 
   return (
     <Stack gap="loose" className="splitsmod">
+      {/* One line (Gary, 2026-10-30): the season picker and the scope, their captions for the screen
+          reader only; the card's corner tag already counts the PA, and Reset shows once a pick moves. */}
       <div className="splitsmod__bar" role="group" aria-label="Filter the season parts">
         <label className="splitsmod__field">
-          <span className="splitsmod__lbl">Season</span>
+          <span className="sr-only">Season</span>
           <select className="splitsmod__select" value={shown} onChange={(e) => setPicked(e.target.value)}>
             {choices.map((c) => <option key={c} value={c}>{c === 'career' ? 'Career' : c}</option>)}
           </select>
         </label>
-        <div className="splitsmod__field" role="group" aria-label="Scope">
-          <span className="splitsmod__lbl">Scope</span>
-          <div className="splitsmod__segs">
-            {SCOPES.map(([id, label]) => (
-              <button key={id} type="button" className="pnext-pick" aria-pressed={scope === id} disabled={id !== 'R' && !postOk} onClick={() => { setPicked(shown); setWanted(id) }}>
-                {label}
-              </button>
-            ))}
-          </div>
+        <div className="splitsmod__segs" role="group" aria-label="Scope">
+          {SCOPES.map(([id, label]) => (
+            <button key={id} type="button" className="pnext-pick" aria-pressed={scope === id} disabled={id !== 'R' && !postOk} onClick={() => { setPicked(shown); setWanted(id) }}>
+              {label}
+            </button>
+          ))}
         </div>
-        <span className="splitsmod__sum">
-          <span className="splitsmod__pa">{pa ?? '—'}</span> {pitching ? 'BF' : 'PA'}
-          <button type="button" className="pnext-pick" onClick={() => { setPicked(null); setWanted('R'); setSitAll(false); setFocus(null) }}>Reset</button>
-        </span>
+        {(picked != null || wanted !== 'R' || sitAll || focus != null) && (
+          <button type="button" className="splitsmod__reset" onClick={() => { setPicked(null); setWanted('R'); setSitAll(false); setFocus(null) }}>Reset</button>
+        )}
       </div>
       <ul className="splitsmod__legend" aria-label="How to read the bars">
         <li className="splitsmod__lgh">{pitching ? 'Bars show OPS against, then ERA. Shorter is better' : 'Bars show OPS'}</li>

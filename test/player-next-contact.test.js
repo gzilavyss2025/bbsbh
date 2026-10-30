@@ -87,7 +87,9 @@ test('ballDetail: the tapped ball, xBA from the store, dashes for a missing fiel
   assert.equal(e.big, '—')
   assert.equal(e.unit, '')
   assert.equal(d.unit, 'ft')
-  assert.deepEqual(e.stats.map((s) => s[1]), ['—', '—', '—', '—'])
+  // Barrel shows only for a barrel (2026-10-30); a missing or false one adds no row.
+  assert.deepEqual(e.stats.map((s) => s[1]), ['—', '—', '—'])
+  assert.equal(ballDetail(ball({ barrel: false })).stats.some(([k]) => k === 'Barrel'), false)
   assert.equal(e.when, '')
 })
 

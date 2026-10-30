@@ -9,7 +9,7 @@ import { motionIsReduced } from '../../../../../hooks/preferences/motionIsReduce
 import { PlayPauseIcon } from '../../parts/PlayPauseIcon.jsx'
 import { rate3 } from '../../../../../api/person/shared.js'
 import { FormChart } from './FormChart.jsx'
-import { StretchTable } from './StretchTable.jsx'
+import { StretchKey, StretchTable } from './StretchTable.jsx'
 import { COLUMNS, DEFAULT_WINDOW, ENDS, OUTCOMES, WINDOWS, cursorText, formView, stretchRows } from './formView.js'
 
 // The batter Form trend (#1889): his rolling OPS over the last 10, 15 or 20 games against the
@@ -56,6 +56,8 @@ export default function FormModule({ bio, asOf, season, onEmpty, onCount }) {
   const { points } = view
   return (
     <div className="fform">
+      {/* The bar key leads the card and sticks under the jump bar while it scrolls by (Gary, 2026-10-30). */}
+      <StretchKey legend={OUTCOMES} ends={ENDS} sticky />
       <div className="fform__top">
         <div className="fform__read" aria-live={running ? 'off' : 'polite'}>
           <span className="fform__big">{text.big}</span>
@@ -102,11 +104,7 @@ export default function FormModule({ bio, asOf, season, onEmpty, onCount }) {
         Open surface: season stats only, no game result is shown.
       </p>
       <SectionHead look="rule" as="h3" note="Plate appearances">How the stretches ended</SectionHead>
-      <StretchTable columns={COLUMNS} rows={stretchRows(view, cursor)} legend={OUTCOMES} ends={ENDS} cursor={cursor} onPick={scrub} />
-      <p className="fform__note">
-        Bar: how each plate appearance ended, left to right. Out is an out in play or a sacrifice. On base counts a walk or hit by pitch.
-        Tap Best or Worst to move the chart to that stretch.
-      </p>
+      <StretchTable columns={COLUMNS} rows={stretchRows(view, cursor)} legend={OUTCOMES} ends={ENDS} cursor={cursor} onPick={scrub} noKey />
     </div>
   )
 }

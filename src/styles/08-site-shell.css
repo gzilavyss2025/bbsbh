@@ -198,17 +198,21 @@
    minmax lets them flow onto as many rows as fit — two columns on a phone,
    more as the viewport widens — and each cell is wide enough that its label
    wraps inside the box instead of spilling past the border. */
-.sitefooter__actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-2);
+/* layout-exempt: the directory takes the row, Settings keeps its own width at the right */
+.sitefooter__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
 }
+.sitefooter__row > .sitefooter__more { flex: 1; min-width: 0; }
 
 /* Each action is a Button (outline, tap size). All it keeps is its place in
    the grid: min-width 0 lets a long label wrap inside its cell instead of
    widening the column past the phone. */
 .sitefooter__btn {
+  flex: none;
   min-width: 0;
+  padding-inline: var(--space-4);
 }
 
 .sitefooter__more-label {
