@@ -25,9 +25,12 @@ it does not mint a second collectible or replace the circular stamp.
   unsafe variants use an engraved baseball ornament. Requests and conversions
   are shared by team identity across the collection. No new logo catalog or
   team-specific exceptions are introduced.
-- `HeritagePassPages.jsx`: four passes per display page, one column on a phone
-  and as many 250px columns as fit on larger screens. Reads the same book stamp
-  list and facts as `PassportBook`; never alters its placements or pagination.
+- `HeritagePassPages.jsx`: a native horizontal scroll-snap strip below the stamp
+  book in Game Log. It receives only the owner's active stamps (including stamps
+  waiting for placement), reuses the collection's facts, and never adds a game
+  from facts alone. Touch swiping, keyboard scrolling, and previous/next controls
+  browse the tickets; reduced motion disables smooth scrolling. The stamp book
+  remains visible and its saved placements are untouched.
 - Facts producers preserve absent sport/type as null rather than asserting MLB
   regular season. The circular stamp already treats unknown sport as its default
   ring and absent type as no postseason label. Schedule facts also carry optional
@@ -125,5 +128,5 @@ in the browser only; those values are not game records or saved fixtures.
 zero and unusual scores, unknown metadata, MLB/MiLB round vocabulary, series
 number separation, date validation and non-mutating pagination. Run the existing
 stamp/passport suites too. Browser checks cover 320/390/820/1180/1440px widths,
-artwork failures, long names, the real box score reveal gate, and switching modes
+artwork failures, long names, the real box score reveal gate, and swiping through stamped-game tickets
 without changing saved placements.

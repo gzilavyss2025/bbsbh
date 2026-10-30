@@ -220,7 +220,26 @@
 }
 .heritagepass__foot > :only-child { grid-column: 1 / -1; border-left: 0; padding-inline: 0; }
 .heritagepasses { margin-block: var(--space-4); }
-.heritagepasses__nav { justify-content: center; }
+.heritagepasses__head { justify-content: space-between; }
+.heritagepasses__head h2 { font-family: var(--font-display); font-size: var(--fs-h2); }
+/* layout-exempt: a native horizontal ticket strip with touch and keyboard scrolling */
+.heritagepasses__rail {
+  display: flex;
+  align-items: start;
+  gap: var(--space-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  padding: var(--space-1) var(--space-1) var(--space-4);
+  list-style: none;
+  margin: 0;
+}
+.heritagepasses__rail:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--space-1); }
+.heritagepasses__ticket { flex: 0 0 min(85%, 360px); min-width: 0; scroll-snap-align: start; }
+@media (prefers-reduced-motion: reduce) {
+  .heritagepasses__rail { scroll-behavior: auto; }
+}
 .heritagepasses__open { width: 100%; margin-top: var(--space-2); }
 .heritagepass-box { margin-block: var(--space-6); }
 .heritagepass-box h2 { text-align: center; margin-bottom: var(--space-4); }

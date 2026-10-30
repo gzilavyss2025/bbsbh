@@ -59,7 +59,8 @@ no stamp art and stays off it. Read ADR-0036 before adding a name; the multi-boo
 adding one, and `StampCollection.jsx` joined it the same way (read that script).
 `LogbookShelf.jsx`/`BookManagementSheet.jsx` draw no stamp art.
 
-The optional Heritage Pass mode is a separate paginated view of this same book's
-stamps (`components/heritage/HeritagePassPages.jsx`). Four tall passes per display
-page, responsive columns, no saved geometry changes. Placement mode still opens
-the circular-stamp book. See `docs/heritage-pass.md`.
+Heritage Passes sit in a separate swipeable ticket strip below the book
+(`components/heritage/HeritagePassPages.jsx`). It shows only the owner's active
+stamps across the collection, including unplaced stamps, using the same facts.
+The circular-stamp book stays visible; saved geometry and placement mode do not
+change. See `docs/heritage-pass.md`.
