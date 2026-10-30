@@ -36,8 +36,9 @@ export function fetchPositionWarPool(season, pos) {
           `&limit=2000&fields=stats,splits,player,id,position,abbreviation,stat,plateAppearances`,
       ),
     ])
+      // war.json holds one season: any other season has no WAR to rank, so no pool.
       .then(([war, data]) =>
-        (data?.stats?.[0]?.splits ?? [])
+        war?.season !== Number(season) ? [] : (data?.stats?.[0]?.splits ?? [])
           .filter((s) => s.position?.abbreviation === pos && s.stat?.plateAppearances >= POSITION_MIN_PA)
           .map((s) => Number(war?.bat?.[s.player?.id]))
           .filter(Number.isFinite),

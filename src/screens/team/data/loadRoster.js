@@ -10,6 +10,7 @@ import { fetchWarData } from '../../../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../../../api/recentForm.js'
 import { splitPitchingStaff } from '../../../api/pitcherSplit.js'
 import { rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } from '../../../api/person.js'
+import { splitDisplayName } from '../../../api/person/identity.js'
 import { lastName } from '../../../api/select.js'
 import { fetchTopProspects, prospectBadge } from '../../../api/prospects.js'
 import { fetchRookiesData, showRookiePill } from '../../../api/rookies.js'
@@ -253,18 +254,30 @@ export async function loadRoster(id, asOf, src = DIRECT) {
     ? playedInWindow(recentFormGames)
     : recentFormEligibleRoster(roster, fullRoster, currentInjuredIds)
   const recentForm = buildRecentForm(recentFormGames, eligibleRoster)
-  // A departed player's row reads his name and number from the box score and his WAR from the
-  // season file (Bauers wore 9), so nothing about him reads blank.
-  const fromBox = new Map(eligibleRoster.map((r) => [r.person.id, r]))
+  // A departed player (offseason only) gets the same meta a rostered one has, from the box score
+  // (name, the number he wore: Bauers wore 9) and the season WAR file, so the lineup, the bench and
+  // the staff all keep him and nothing about him reads blank.
+  if (seasonOver) {
+    for (const r of eligibleRoster) {
+      const id = r.person.id
+      if (rosterMetaById.has(id) || !r.person.fullName) continue
+      const pitcher = r.position?.type === 'Pitcher'
+      rosterMetaById.set(id, {
+        id,
+        name: r.person.fullName,
+        last: splitDisplayName(r.person.fullName).last,
+        jersey: r.jersey,
+        war: sportId === 1 ? (pitcher ? warPit[id] : warBat[id]) ?? null : undefined,
+        departed: true,
+      })
+    }
+  }
   const recentPreferredLineup = recentForm.preferredLineupIds
     .map(({ position, id }) => {
       const meta = rosterMetaById.get(id)
-      if (meta) return { position, id, last: meta.last, name: meta.name }
-      const r = seasonOver && fromBox.get(id)
-      const full = r?.person?.fullName
-      if (!full) return null
-      const war = sportId === 1 ? warBat[id] ?? null : undefined
-      return { position, id, last: full.split(' ').slice(1).join(' ') || full, name: full, jersey: r.jersey, war }
+      if (!meta) return null
+      // A departed player's number and WAR ride the lineup entry (the table reads it first).
+      return { position, id, last: meta.last, name: meta.name, ...(meta.departed && { jersey: meta.jersey, war: meta.war }) }
     })
     .filter(Boolean)
   const recentSubstitutes = recentForm.substituteIds.map((id) => rosterMetaById.get(id)).filter(Boolean)

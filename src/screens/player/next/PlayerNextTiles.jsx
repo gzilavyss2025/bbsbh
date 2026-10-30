@@ -8,12 +8,11 @@ import { rankFor, tileStampDelay } from './heroData.js'
 // Every tile is plain; the one whose ruler is open turns ink (Gary, 2026-10-30). The caption is the tile's
 // own ("680 PA", "20 GS"). A tile that opens a ruler carries neither caption nor league figure: both
 // moved into the ruler's label (Gary, 2026-10-30).
-function captionOf(t, group) {
-  return histogramFor(group, t.k) ? undefined : t.caption || undefined
-}
 
 // One role's five tiles. A two-way player gets a labelled row per role.
-export function PlayerNextTiles({ block, playerId, name, position, season, label }) {
+export function PlayerNextTiles({ block, playerId, name, position, season, label, mlb = true }) {
+  // The ruler's pools are MLB's; a minor-league line has no league to sit in, so its tiles do not open.
+  const opens = (k) => mlb && histogramFor(block.group, k)
   // The open tile, and whether its ruler is sliding back under the row. A close plays the slide in
   // reverse and unmounts on its end; with reduced motion there is no slide, so it unmounts at once.
   const [open, setOpen] = useState(null)
@@ -38,7 +37,7 @@ export function PlayerNextTiles({ block, playerId, name, position, season, label
               key={t.k}
               label={i === 0 ? <>{t.k}<span className="pnext__tileyr">{` · ${season}`}</span></> : t.k}
               value={t.v}
-              caption={captionOf(t, block.group)}
+              caption={opens(t.k) ? undefined : t.caption || undefined}
               rank={rankFor(marks, t.k)}
               tone={open === t.k && !closing ? 'ink' : 'plain'}
               className="stattile--compact"
@@ -47,7 +46,7 @@ export function PlayerNextTiles({ block, playerId, name, position, season, label
             />
           )
           // A tile with a league pool opens its histogram under the row; tap again to close.
-          return histogramFor(block.group, t.k) ? (
+          return opens(t.k) ? (
             <button key={t.k} type="button" className="pnext__tilebtn" aria-expanded={open === t.k && !closing} onClick={() => toggle(t.k)}>
               {tile}
             </button>

@@ -10,7 +10,8 @@ Absent bands come from `hiddenTeamSections(team, { pastSeason })` (`data/shared.
 `/team/{id}/leaders`, `stamp-in`, `photos` and `transactions` are separate pages, not bands.
 
 **Each band loads only its own data.** One `data/load{Band}.js` per band, never a shared
-mega-fetch. A loader's last argument is `src` (`data/sources.js`): with none it fetches its own
+mega-fetch. One exception: Ranks also draws `standings/StandingsRankCards.jsx`, which reads
+`loadStandings` through SHARED (the same requests Standings makes, none new). A loader's last argument is `src` (`data/sources.js`): with none it fetches its own
 copy; the page passes `SHARED` (`next/once.js`), so standings, schedule, roster, the 40-man
 Injured List view, `/stats` and the manager are bought once per page. A new read that two loaders
 make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test.js`.

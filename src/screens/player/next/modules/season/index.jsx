@@ -130,8 +130,13 @@ function YearTable({ rounds, table, label, allCols, onAllCols, onCompare, openKe
       .catch(() => null)
       .then((got) => setByYear((m) => ({ ...m, [year]: got ?? [] })))
   }
+  // A traded October has a row per club; the round split is the whole October, so only the year's
+  // first row opens, and once.
+  const firstOfYear = new Map()
+  for (const r of table.rows) if (!r.gap && !firstOfYear.has(r.year)) firstOfYear.set(r.year, r)
+  const opensRounds = (r) => Boolean(rounds) && firstOfYear.get(r.year) === r
   const roundRowsFor = (r) => {
-    if (!rounds || !openYears.has(r.year)) return []
+    if (!opensRounds(r) || !openYears.has(r.year)) return []
     const got = byYear[r.year]
     if (!got?.length) {
       return [{ key: `${r.key}-wait`, className: 'reg-round', cells: [<>{''}</>, spanCell(<span className="reg-gap__note">{got ? 'No round split on file.' : 'Loading the rounds…'}</span>)] }]
@@ -149,7 +154,7 @@ function YearTable({ rounds, table, label, allCols, onAllCols, onCompare, openKe
         {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
       </>
     )
-    return rounds ? (
+    return opensRounds(r) ? (
       <button type="button" className="seasonmod__year" aria-expanded={openYears.has(r.year)} onClick={() => toggleYear(r.year)}>
         {inner}
         <span className="seasonmod__chev" aria-hidden="true">{openYears.has(r.year) ? '▾' : '▸'}</span>

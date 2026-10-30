@@ -3,6 +3,7 @@ import { useFlight } from './ContactFlight.jsx'
 import { fetchPersonName } from '../../../../../api/person-fetch.js'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { teamClubNameShort } from '../../../../../lib/teams.js'
+import { splitDisplayName } from '../../../../../api/person/identity.js'
 import { Headshot } from '../../../../../components/player/Headshot.jsx'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 
@@ -22,7 +23,8 @@ export function ContactDetail({ cur, detail }) {
   const { frame } = useFlight()
   const flying = !!frame?.flying
   const { data: pitcher } = useAsync(() => fetchPersonName(cur?.pitcherId), [cur?.pitcherId])
-  if (!detail) return null
+  // Before a tap only the polite region mounts, so the first ball's line is spoken when it lands.
+  if (!detail) return <span className="sr-only" aria-live="polite" />
   const opp = cur?.oppId ? teamClubNameShort(cur.oppId) : null
   return (
     <div className={`fcontact__detail${flying ? ' fcontact__detail--fly' : ''}`}>
@@ -42,8 +44,9 @@ export function ContactDetail({ cur, detail }) {
           {opp && <TeamLogo teamId={cur.oppId} name={opp} variant="mono" size={20} />}
           {pitcher && (
             <span className="fcontact__pname">
-              {pitcher.split(' ')[0]}
-              {pitcher.includes(' ') && <><br />{pitcher.slice(pitcher.indexOf(' ') + 1)}</>}
+              {splitDisplayName(pitcher).first}
+              {splitDisplayName(pitcher).first && <br />}
+              {splitDisplayName(pitcher).last}
             </span>
           )}
         </span>

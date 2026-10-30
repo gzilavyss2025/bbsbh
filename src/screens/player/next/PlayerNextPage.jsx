@@ -109,6 +109,7 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
                 playerId={core.data.bio.id}
                 name={core.data.bio.fullName}
                 position={core.data.bio.posAbbr}
+                mlb={(core.data.sportId ?? sportId ?? 1) === 1}
                 season={core.data.season}
                 label={blocks.length > 1 ? b.title : undefined}
               />

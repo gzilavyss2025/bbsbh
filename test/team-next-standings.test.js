@@ -91,8 +91,9 @@ test('scoreCard: no row for the club, or a pool of one, is no card; no grade key
 const played = { allStarDate: null, games: [{ d: '2026-04-01', o: 'CHC', r: 'W', h: 1 }] }
 
 test('standingsCount: one per card the band draws', () => {
+  // Team score, Records, Day of week and Comeback wins draw in Ranks now (2026-10-30): they count nowhere here.
   const full = { standings: [1, 2], teamRecords: played, scheduleShape: null, dayOfWeek: [1], comeback: {} }
-  assert.equal(standingsCount(full), 5)
+  assert.equal(standingsCount(full), 1)
   assert.equal(standingsCount({ standings: [1], teamRecords: null, dayOfWeek: null, comeback: null }), 1)
   assert.equal(standingsCount({ standings: [], teamRecords: null, dayOfWeek: null, comeback: null }), 0)
 })
@@ -103,8 +104,9 @@ test('hasRecords: no game counted at the cutoff is no Records card, and no badge
   assert.equal(hasRecords({ allStarDate: null, games: [] }, null), false)
   assert.equal(hasRecords(null, null), false)
   const none = { standings: [1, 2], teamRecords: played, dayOfWeek: null, comeback: null }
-  assert.equal(standingsCount(none, null), 3)
-  assert.equal(standingsCount(none, '2026-03-31'), 2)
+  // The Records card moved to Ranks, so its cutoff no longer moves this band's count.
+  assert.equal(standingsCount(none, null), 1)
+  assert.equal(standingsCount(none, '2026-03-31'), 1)
 })
 
 test('hasDroughts: a schedule shape with nothing to report draws no Last time card', () => {

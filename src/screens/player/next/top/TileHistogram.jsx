@@ -1,4 +1,5 @@
 import { fetchLeaguePool, fetchPositionWarPool } from '../../../../api/player/leaguePool.js'
+import { useEffect } from 'react'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { ordinal } from '../../../../lib/format.js'
 
@@ -30,7 +31,12 @@ export function TileHistogram({ group, tile, season, name, position, closing = f
     [season, group, key, position],
   )
   const value = Number(tile.v)
-  if (!pool?.length || !Number.isFinite(value)) return null
+  const drawn = Boolean(pool?.length) && Number.isFinite(value)
+  // Nothing drawn means no slide to end, so a close finishes at once.
+  useEffect(() => {
+    if (closing && !drawn) onClosed?.()
+  }, [closing, drawn, onClosed])
+  if (!drawn) return null
   const lo = Math.min(...pool, value)
   const hi = Math.max(...pool, value)
   const at = (v) => `${((flip ? hi - v : v - lo) / (hi - lo || 1)) * 100}%`

@@ -65,8 +65,8 @@ the work is done and CI is green; never merge it. `/stack-prs` lands it. Every p
 CI run, so while Gary iterates, commit locally and push at his checkpoints, when the PR is
 ready, or before you stop (the PR is the handoff) — never every turn. Verify in the
 container by rendering the route you changed in the preinstalled Chromium.
-**Add `?nointro` to any test URL**, so the first-visit welcome modal does
-not cover the slate (`e2e` specs add this through `e2e/fixtures.js`). A session Gary is
+There is no first-visit welcome modal any more; `?nointro` on a test URL is harmless and
+`e2e/fixtures.js` still adds it. A session Gary is
 watching may ask with `AskUserQuestion`, one question at a time. A child or unattended
 session writes `[DECISION: ...]` lines instead. Detail: `docs/development.md`, "Cloud
 sessions".
