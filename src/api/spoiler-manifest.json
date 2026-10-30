@@ -468,8 +468,10 @@
     },
     "gameday/reviews.js": {
       "class": "reveal-only",
-      "why": "Gameday's review list and ABS bank (#2607) as of the reader's step: manager, crew-chief and ABS reviews with their outcome. A review can flip a called third strike or an out. Earlier halves whole, the reader's half only up to the last plate appearance on screen (gameday/stepCut.js); a half past revealedThrough + 1 answers null. Never reads gameData.absChallenges, whose counts are the whole game's. No screen imports it yet.",
-      "importers": []
+      "why": "Gameday's review list and ABS bank (#2607) as of the reader's step: manager, crew-chief and ABS reviews with their outcome. A review can flip a called third strike or an out. Earlier halves whole, the reader's half only up to the last plate appearance on screen (gameday/stepCut.js); a half past revealedThrough + 1 answers null. Never reads gameData.absChallenges, whose counts are the whole game's. The stage's event card reads reviewsInPlay for the one pitch on screen, inside its SealBox reveal function.",
+      "importers": [
+        "screens/gameday/next/steps/eventCardMarkup.js"
+      ]
     },
     "gameday/zones.js": {
       "class": "spoiler-free",

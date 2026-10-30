@@ -44,10 +44,12 @@ const RAIL_FLOOR = { wc: 90, ds: 100, lcs: 110 }
 // width left over goes to the league's current round.
 const COLUMN_FLOOR = { wc: 88, ds: 102, lcs: 116 }
 const COLUMN_NOW = { wildcard: 'wc', division: 'ds', lcs: 'lcs', done: 'lcs' }
-function columns(phase, rail) {
+// A past season with no Wild Card round (the history page, before 2012) has no first column.
+function columns(phase, rail, hasWc) {
   const c = { ...(rail ? RAIL_FLOOR : COLUMN_FLOOR) }
+  if (!hasWc) c.wc = 0
   const now = COLUMN_NOW[phase]
-  if (now) c[now] += (rail ? RAIL_TREE_W : TREE_W) - 2 * GAP - c.wc - c.ds - c.lcs
+  if (now) c[now] += (rail ? RAIL_TREE_W : TREE_W) - (hasWc ? 2 : 1) * GAP - c.wc - c.ds - c.lcs
   return c
 }
 
@@ -152,24 +154,35 @@ function SeriesBox({ series, bracket, cutoff, historyIds, x, y, w, note, rail })
 // slot position), the LCS centered against both lanes.
 function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff, historyIds, rail }) {
   const phase = leaguePhase(league)
-  const c = columns(phase, rail)
+  const hasWc = league.wildcard.length > 0
+  // A past season with the LCS first (the history page, 1969–1993) draws that one box alone.
+  const hasDs = league.division.length > 0
+  const c = hasDs ? columns(phase, rail, hasWc) : { wc: 0, ds: 0, lcs: (rail ? RAIL_FLOOR : COLUMN_FLOOR).lcs + 30 }
   const xWC = 0
-  const xDS = c.wc + GAP
-  const xLCS = xDS + c.ds + GAP
+  const xDS = hasWc ? c.wc + GAP : 0
+  const xLCS = hasDs ? xDS + c.ds + GAP : 0
   const wcPast = phase !== 'wildcard'
   const dsPast = phase === 'lcs' || phase === 'done'
   // Per half: the Division box at 0, the Wild Card box under it.
   const HALF = 132
-  const halves = rail ? [0, RAIL_LANE] : [0, HALF + 12]
-  const dsY = (h) => halves[h] + (rail ? 2 : 16)
-  // Rail: level with the Division box it feeds. Otherwise: under it.
-  const wcY = (h) => (rail ? dsY(h) : halves[h] + 16 + BOX + 14)
-  const lcsY = (dsY(0) + dsY(1)) / 2 + R / 2
-  const H = rail ? 2 * RAIL_LANE : halves[1] + HALF + 14
-  const treeW = rail ? RAIL_TREE_W : TREE_W
-  const wcFor = (ds) => league.wildcard.find((w) => w.feeds === ds.key) ?? null
+  // Rail: a lane is as tall as the Wild Card boxes that feed its Division box (two in 2020's format).
+  const wcsFor = (ds) => league.wildcard.filter((w) => w.feeds === ds.key)
+  const fed = league.division.map((ds) => Math.max(1, wcsFor(ds).length))
+  const halves = rail ? [0, fed[0] * RAIL_LANE] : [0, HALF + 12]
+  const dsY = (h) => halves[h] + (rail ? 2 + ((fed[h] - 1) * RAIL_LANE) / 2 : 16)
+  // Rail: level with the Division box it feeds, or stacked beside it. Otherwise: under it.
+  const wcY = (h, i = 0) => (rail ? halves[h] + 2 + i * RAIL_LANE : halves[h] + 16 + BOX + 14)
+  const lcsY = hasDs ? (dsY(0) + dsY(1)) / 2 + R / 2 : 2
+  const H = !hasDs ? RAIL_LANE : rail ? (fed[0] + fed[1]) * RAIL_LANE : halves[1] + HALF + 14
+  const treeW = !hasDs ? c.lcs : rail ? RAIL_TREE_W : TREE_W
 
-  const lanes = league.division.map((ds, h) => ({ ds, wc: wcFor(ds), h, bye: byeSlotIndex(ds) }))
+  const lanes = league.division.map((ds, h) => ({ ds, wcs: wcsFor(ds), h, bye: byeSlotIndex(ds) }))
+  // The Division row a Wild Card winner lands on: the slot that names it, else the one that is not the bye.
+  const fedRow = (ds, wc, bye) => {
+    const i = ds.slots.findIndex((s) => s.from === wc.key)
+    return i !== -1 ? i : bye === 0 ? 1 : 0
+  }
+  const wcBestOf = league.wildcard[0]?.bestOf ?? 3
 
   return (
     <LeagueFrame rail={rail} name={name}>
@@ -188,35 +201,39 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
           />
         </header>
       )}
-      <div className="pbkt-colheads" style={{ gridTemplateColumns: `${c.wc}px ${c.ds}px ${c.lcs}px` }}>
-        <span className={`pbkt-colhead${phase === 'wildcard' ? ' pbkt-colhead--now' : ''}`}>
-          Wild Card
-          <span className="pbkt-bestof">Best of 3</span>
-        </span>
-        <span className={`pbkt-colhead${phase === 'division' ? ' pbkt-colhead--now' : ''}`}>
-          Division
-          <span className="pbkt-bestof">Best of 5</span>
-        </span>
+      <div className="pbkt-colheads" style={{ gridTemplateColumns: [hasWc && c.wc, hasDs && c.ds, c.lcs].filter(Boolean).map((w) => `${w}px`).join(' ') }}>
+        {hasWc && (
+          <span className={`pbkt-colhead${phase === 'wildcard' ? ' pbkt-colhead--now' : ''}`}>
+            Wild Card
+            <span className="pbkt-bestof">{wcBestOf === 1 ? 'One game' : `Best of ${wcBestOf}`}</span>
+          </span>
+        )}
+        {hasDs && (
+          <span className={`pbkt-colhead${phase === 'division' ? ' pbkt-colhead--now' : ''}`}>
+            Division
+            <span className="pbkt-bestof">Best of 5</span>
+          </span>
+        )}
         <span className={`pbkt-colhead${phase === 'lcs' || phase === 'done' ? ' pbkt-colhead--now' : ''}`}>
           {roundName}
-          <span className="pbkt-bestof">Best of 7</span>
+          <span className="pbkt-bestof">Best of {league.lcs?.bestOf ?? 7}</span>
         </span>
       </div>
       <div className="pbkt-tree" style={{ height: H, width: treeW }}>
         <svg className="pbkt-lines" width={treeW} height={H} aria-hidden="true">
-          {lanes.map(({ ds, wc, h, bye }) => {
-            const dsFedRow = bye === 0 ? 1 : 0
+          {lanes.map(({ ds, wcs, h, bye }) => {
             return (
               <g key={ds.key}>
-                {wc && (
+                {wcs.map((wc, i) => (
                   <Elbow
+                    key={wc.key}
                     x1={c.wc}
-                    y1={rowCenter(wc, wcPast, wcY(h))}
+                    y1={rowCenter(wc, wcPast, wcY(h, i))}
                     x2={xDS}
-                    y2={dsY(h) + (dsFedRow === 0 ? R / 2 : R + R / 2)}
+                    y2={dsY(h) + (fedRow(ds, wc, bye) === 0 ? R / 2 : R + R / 2)}
                     inked={wc.decided}
                   />
-                )}
+                ))}
                 {!rail && !wcPast && bye !== -1 && (
                   <path
                     d={`M${c.wc - 30} ${dsY(h) + (bye === 0 ? R / 2 : R + R / 2)} H${xDS}`}
@@ -234,7 +251,7 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
             )
           })}
         </svg>
-        {lanes.map(({ ds, wc, h, bye }) => (
+        {lanes.map(({ ds, wcs, h, bye }) => (
           <div key={ds.key}>
             {!rail && !wcPast && bye !== -1 && (
               <div
@@ -244,21 +261,22 @@ function League({ league, leagueId, leagueKey, name, roundName, bracket, cutoff,
                 Bye
               </div>
             )}
-            {wc && (
+            {wcs.map((wc, i) => (
               <SeriesBox
+                key={wc.key}
                 series={wc}
                 bracket={bracket}
                 cutoff={cutoff}
                 historyIds={historyIds}
                 x={xWC}
-                y={wcY(h)}
+                y={wcY(h, i)}
                 w={c.wc}
                 rail={rail}
                 note={
-                  <BoxNote series={wc} x={xWC} y={wcY(h) + BOX + 2} w={c.wc} />
+                  <BoxNote series={wc} x={xWC} y={wcY(h, i) + BOX + 2} w={c.wc} />
                 }
               />
-            )}
+            ))}
             <SeriesBox
               series={ds}
               bracket={bracket}
@@ -364,9 +382,9 @@ function WorldSeriesBand({ bracket, cutoff, historyIds, rail }) {
         <Card
           frame="stamped"
           tone="tint"
-          label={champion ? champion.name : 'World Series'}
+          label="World Series"
           labelAs="h3"
-          count={champion ? `World champions · in ${ws.gamesPlayed}` : 'Best of 7'}
+          count={champion ? null : 'Best of 7'}
           className={`pbkt-wscard${isDecidingGame(ws) ? ' pbkt-wscard--bold' : ''}`}
         >
           {rows}
@@ -404,6 +422,7 @@ function WorldSeriesBand({ bracket, cutoff, historyIds, rail }) {
 export function FullBracket({ bracket, cutoff, historyIds, rail = false }) {
   return (
     <div className={`pbkt-full${rail ? ' pbkt-full--rail' : ''}`}>
+      {bracket.leagues && (<>
       <League
         league={bracket.leagues.AL}
         leagueId={159}
@@ -426,6 +445,7 @@ export function FullBracket({ bracket, cutoff, historyIds, rail = false }) {
         historyIds={historyIds}
         rail={rail}
       />
+      </>)}
       <WorldSeriesBand bracket={bracket} cutoff={cutoff} historyIds={historyIds} rail={rail} />
     </div>
   )

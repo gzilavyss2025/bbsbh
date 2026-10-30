@@ -17,13 +17,12 @@ import { splitDisplayName } from '../../../../api/person.js'
 import { loadRoster } from '../../data/loadRoster.js'
 import { lineupDefenseFrom, seasonOf } from '../../data/shared.js'
 import { monthDayShort } from '../../../../lib/dates.js'
-import { RosterList } from '../../modules/RosterList.jsx'
 import { SHARED } from '../once.js'
 import { useBandData } from '../useBandData.js'
 import { rosterCount, transactionsDoor } from './rosterData.js'
 import { CoachingStaff } from './CoachingStaff.jsx'
 import { RosterBox } from './RosterBox.jsx'
-import { benchRows, lineupRows, metaById, penRows, penWeekFigures, rotationRows } from './boxRows.js'
+import { benchRows, fortyRows, lineupRows, metaById, penRows, penWeekFigures, rotationRows } from './boxRows.js'
 import '../../../../styles/team-next/roster.css'
 
 // Roster band (#1107, row 6c): the old Roster tab's data (loadRoster, through SHARED, so no new
@@ -35,7 +34,6 @@ import '../../../../styles/team-next/roster.css'
 // them. At wide the lineup table sits beside the diamond, and the staff table beside the pen
 // week; on a phone each stacks. Grid `fit` lets a lone table (a farm club has no pen week) take
 // the full width, so no half of a card stands empty.
-const DASH = '—'
 const Sub = ({ title, children }) => (
   <section className="roster-sub">
     <h4 className="roster-sub__title">{title}</h4>
@@ -166,27 +164,23 @@ export default function Roster({ team, asOf, sportId: hint, onReady, onCount }) 
         <CoachingStaff key={`${team.id}|${asOf ?? ''}|${sportId}`} team={team} asOf={asOf} sportId={sportId} />
         {rosterCount(d) > 0 && (
           <Card frame="stamped" label="40-man roster" labelAs="h3" count={`${rosterCount(d)} players`} {...card()}>
-            <div className="roster-cols">
+            <Grid min="20rem" gap="loose" fit className="rosterbox-pair">
               {d.position.length > 0 && (
-                <Sub title={`Position players${sportId === 1 ? ' · season WAR' : ''}`}>
-                  <RosterList season={d.season} showProspect={d.isMilb} rows={d.position.map((p) => ({ ...p, badge: p.pos, badgeClass: 'thub-pos' }))} />
-                </Sub>
+                <RosterBox label="Position players" lead="Pos" showWar={showWar} showProspect={d.isMilb} season={d.season}
+                  groups={[{ sum: 'Hitters', rows: fortyRows(d.position, (p) => p.pos) }]} />
               )}
               {d.pitchers.length > 0 && (
-                <Sub title={`Pitchers · role inferred${sportId === 1 ? ' · season WAR' : ''}`}>
-                  <RosterList
-                    season={d.season}
-                    showProspect={d.isMilb}
-                    rows={d.pitchers.map((p) => ({ ...p, badge: p.role ?? DASH, badgeClass: `rolechip${p.role === 'RP' ? ' rolechip--rp' : p.role === 'CL' ? ' rolechip--cl' : ''}` }))}
-                  />
-                </Sub>
+                <RosterBox label="Pitchers" lead="Role" showWar={showWar} showProspect={d.isMilb} season={d.season}
+                  groups={[{ sum: 'Pitchers', rows: fortyRows(d.pitchers, (p) => p.role) }]} />
               )}
-            </div>
+            </Grid>
           </Card>
         )}
         {d.injured.length > 0 && (
           <Card frame="stamped" label="Injured list" labelAs="h3" count={d.injured.length} {...card()}>
-            <RosterList season={d.season} showProspect={false} rows={d.injured.map((p) => ({ ...p, badge: p.ilLabel, badgeClass: 'ilchip', war: undefined }))} />
+            {/* The same ruled box as the 40-man, led by the list's days (Gary, 2026-10-30). */}
+            <RosterBox label="Injured list" lead="IL" showWar={false} showProspect={false} season={d.season}
+              groups={[{ sum: 'Injured', rows: fortyRows(d.injured, (p) => p.ilLabel) }]} />
           </Card>
         )}
         {door && <Door className="tnext__roster-door" {...linkProps(door)}>All transactions</Door>}

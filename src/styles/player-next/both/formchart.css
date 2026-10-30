@@ -247,7 +247,7 @@
    the card's paper and full width, like the Game log's bar key. Its sticky range is its card's box. */
 .fstretch__key--sticky {
   position: sticky;
-  top: calc(var(--space-2h) * 2 + var(--space-10) + var(--bw-heavy) * 2);
+  top: var(--jumpbar-h, 0px); /* the bar measures itself (HubTabBar.jsx) */
   z-index: 2;
   margin: 0 calc(var(--space-4) * -1) var(--space-3);
   padding: var(--space-2) var(--space-4);

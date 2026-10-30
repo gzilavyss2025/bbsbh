@@ -151,6 +151,16 @@ function JumpBar({ tabs, ariaLabel, scrollRoot, offset = 0, className = '', badg
   const [barWidth, setBarWidth] = useState(0)
   const keys = tabs.map((t) => t.key).join('|')
 
+  // The bar's real height, for what sticks under it (--jumpbar-h): it wraps and resizes with the window.
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav || typeof ResizeObserver === 'undefined') return undefined
+    const root = document.documentElement.style
+    const ro = new ResizeObserver(() => root.setProperty('--jumpbar-h', `${nav.offsetHeight}px`))
+    ro.observe(nav)
+    return () => { ro.disconnect(); root.removeProperty('--jumpbar-h') }
+  }, [])
+
   // The scroll-spy. Measured on a frame, at most once a frame.
   useEffect(() => {
     const root = scrollRoot?.current ?? null

@@ -103,6 +103,18 @@
 .rosterbox-pair__diamond {
   align-self: start;
 }
+/* No sheet around the park: just the cream field on a black rule (Gary, 2026-10-30). */
+.rosterbox-pair__diamond .defdiamond {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.rosterbox-pair__diamond .defdiamond__field--park {
+  border: var(--bw-rule) solid var(--text-heading);
+  background: var(--surface-card);
+}
 /* Stacked, the park and the lineup table run the roster card's full width (Gary, 2026-10-30):
    out to the card's edges, no side padding and no side rules. */
 @media (max-width: 739.98px) {
@@ -139,4 +151,11 @@
   position: sticky;
   top: calc(68px + var(--space-3)); /* the sticky jump bar's height, see BAR_H in TeamNextPage.jsx */
   align-self: start;
+}
+
+/* The staff's WAR leader: the whole cell in marker yellow, navy figure (Gary, 2026-10-30). */
+.rosterbox tbody td.rosterbox__war--lead {
+  background: var(--marker);
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
 }

@@ -226,6 +226,13 @@
 }
 .fcontact__facts {
   margin-top: var(--space-3);
+  /* Square, black-ruled, no soft shadow (Gary, 2026-10-30). */
+  border-radius: 0;
+  border: var(--bw-rule) solid var(--text-heading);
+  box-shadow: none;
+}
+.fcontact__facts .factgrid__grid {
+  background: var(--text-heading);
 }
 
 /* The ball-type menu (MenuRail): a colour swatch and the hits / outs line on each card. */

@@ -19,7 +19,7 @@ const turangMilb = [
 ]
 const turangMlb = [row(2023, SPORT_IDS.MLB, 158, 'Milwaukee Brewers', 99), row(2026, SPORT_IDS.MLB, 158, 'Milwaukee Brewers', 500)]
 
-test('a debuted player: levels with games, years and clubs, then the majors tile with "Here now"', () => {
+test('a debuted player: levels with games, years and clubs, then the majors tile: his debut club and date', () => {
   const v = pathView({ milb: turangMilb, mlb: turangMlb, group: 'hitting', debutDate: '2023-03-30', currentSportId: 1 })
   assert.equal(v.badge, 'MLB')
   assert.equal(v.headline, 'Debuted March 30, 2023')
@@ -29,7 +29,7 @@ test('a debuted player: levels with games, years and clubs, then the majors tile
   assert.equal(rok.logoId, 2, 'the club he played most for')
   assert.equal(v.levels.find((l) => l.label === 'AAA').years, '2021–23')
   assert.equal(v.total, 314)
-  assert.deepEqual(v.mlb, { games: 599, years: '2023–26', logoId: 158, now: true })
+  assert.deepEqual(v.mlb, { debut: '3/30/2023', logoId: 158, now: true })
   assert.ok(v.levels.every((l) => !l.now))
 })
 

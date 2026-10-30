@@ -115,7 +115,7 @@ test('a closer missing from the active roster is still CL by his saves', () => {
 
 test('the foot sums each group, and is absent when no row has a WAR', () => {
   const groups = [{ sum: 'Lineup', rows: [{ war: 1.5 }, { war: 2 }] }, { sum: 'bench', rows: [{ war: -0.5 }] }]
-  assert.equal(footText(groups), 'Lineup 3.5 · bench -0.5')
+  assert.equal(footText(groups), 'Lineup 3.5 WAR · bench -0.5 WAR')
   assert.equal(footText([{ sum: 'Lineup', rows: [{ war: null }, { war: null }] }]), null)
 })
 

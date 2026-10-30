@@ -442,3 +442,16 @@ body:has(.pnext__page) { overflow-x: clip; }
   /* The buttons use the whole bar, from the window's own gutter (Gary, 2026-10-30: fill the space). */
   padding-inline: var(--space-4);
 }
+
+/* The data credits at the page's foot: small prose, its own case. */
+.pnext__credits {
+  margin-top: var(--space-6);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+}
+.pnext__credits p { margin: 0 0 var(--space-1); }
+#root .pnext__credits {
+  text-transform: none; /* caps-exempt: credit prose keeps its own case, as .teamhist__credit did */
+}

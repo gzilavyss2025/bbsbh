@@ -16,7 +16,7 @@ export function FirstsCard({ bio, role, asOf, onEmpty, onCount }) {
   const view = mine ? firstsView({ firsts: data.firsts, role }) : null
   useEffect(() => {
     if (!loading && !view) onEmpty()
-    onCount(view?.count)
+    onCount(null) // no count tag (Gary, 2026-10-30)
   }, [loading, view, onEmpty, onCount])
 
   if (!view) return loading ? <div className="firsts firsts--wait" aria-busy="true" /> : null

@@ -64,7 +64,7 @@
   gap: var(--space-1);
   min-width: var(--space-10);
   margin-left: calc(var(--bw-heavy) * -1);
-  padding-bottom: var(--space-1h);
+  padding: 0 var(--bw-heavy) var(--space-1h);
 }
 .pathmod__tile.is-now {
   background: var(--surface-stamped-tint);

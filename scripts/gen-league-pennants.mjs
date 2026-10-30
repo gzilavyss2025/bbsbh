@@ -14,7 +14,7 @@
 // HAND-RUN, immutable: `node scripts/gen-league-pennants.mjs [--through 2025]`.
 // Re-run once the LCS end each year. The file carries no clock, so a
 // re-run with no new season writes the same bytes. Any failed call aborts the run
-// (strict), so a hole cannot ship. The world champion is NOT stored.
+// (strict), so a hole cannot ship. The world champion's row carries `ws: true`.
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'

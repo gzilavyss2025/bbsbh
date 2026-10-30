@@ -1,4 +1,6 @@
 import '../styles/34-postseason.css'
+import '../styles/80-postseason-bracket.css'
+import '../styles/postseason/home.css'
 import { useState } from 'react'
 import { loadPostseasonHistory } from '../api/postseasonHistory.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -16,6 +18,8 @@ import { Card } from '../components/ui/frame/Card.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { teamClubNameShort, teamFullName } from '../lib/teams.js'
 import { SeriesMark } from '../components/postseason/SeriesMark.jsx'
+import { FullBracket } from '../components/bracket/FullBracket.jsx'
+import { historyBracket } from '../components/bracket/historyBracket.js'
 import { Cluster } from '../components/ui/layout/Cluster.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
 import { seriesMark } from '../lib/postseason/seriesMarks.js'
@@ -24,7 +28,7 @@ const AL = 103
 const NL = 104
 
 // Seasons at/after this year show eagerly; older ones (the data goes back
-// to 2000 — see gen-postseason-history.mjs) sit behind "Load more" so the
+// to 1903 — see gen-postseason-history.mjs) sit behind "Load more" so the
 // wide layout's default view isn't 26 stacked full brackets.
 const DEFAULT_CUTOFF_YEAR = 2020
 
@@ -342,6 +346,11 @@ function BracketStack({ season, onOpenSeries }) {
 }
 
 function SeasonBracket({ season, onOpenSeries, wide }) {
+  // The World Series home's bracket for every season it can draw (the twelve-club format, 2022 on; Gary,
+  // 2026-10-30). Each finished series links to its own page, as it does on the home page.
+  const drawn = historyBracket(season)
+  // The champion by the name it had that year (1921's New York Giants), else today's.
+  const championName = season.teams?.[season.championTeamId]?.name ?? teamFullName(season.championTeamId)
   return (
     <Stack as="section" className="pshistory__season">
       <Cluster gap="base" align="center" className="pshistory__seasonhead">
@@ -349,10 +358,10 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
         <TeamLink id={season.championTeamId} className="pshistory__champion">
           <TeamLogo
             teamId={season.championTeamId}
-            name={teamFullName(season.championTeamId)}
+            name={championName}
             size={28}
           />
-          <span className="pshistory__championname">{teamFullName(season.championTeamId)}</span>
+          <span className="pshistory__championname">{championName}</span>
           <span className="pshistory__championtag">
             <img
               src="/brand/world-series-trophy-icon.png"
@@ -365,7 +374,9 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
         </TeamLink>
       </Cluster>
 
-      {wide ? (
+      {drawn ? (
+        <FullBracket bracket={drawn} cutoff={drawn.cutoff} historyIds={new Set(drawn.series.map((s) => s.id))} rail />
+      ) : wide ? (
         <BracketGrid season={season} onOpenSeries={onOpenSeries} />
       ) : (
         <BracketStack season={season} onOpenSeries={onOpenSeries} />
@@ -376,7 +387,7 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
 
 // Postseason History: the completed bracket (who advanced, how many games
 // each series went, and each team's seed) for every MLB postseason back to
-// 2000. Tablet/desktop shows every season from DEFAULT_CUTOFF_YEAR on
+// 1903. Tablet/desktop shows every season from DEFAULT_CUTOFF_YEAR on
 // stacked, each one a real 7-column bracket (AL converging from the left,
 // NL from the right, World Series centered — see BracketGrid), with a
 // "Load more" button to reveal the older seasons rather than stacking 26

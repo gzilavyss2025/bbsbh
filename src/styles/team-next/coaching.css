@@ -124,6 +124,6 @@
     display: inline-flex;
   }
   .coachstaff__slide {
-    flex-basis: 176px;
+    flex-basis: 140px; /* 20% under the old 176px (Gary, 2026-10-30); the photo keeps its 3:4 */
   }
 }

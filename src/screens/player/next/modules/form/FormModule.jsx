@@ -99,10 +99,6 @@ export default function FormModule({ bio, asOf, season, onEmpty, onCount }) {
         {view.seasonOps != null && <li>Season <b>{rate3(view.seasonOps)}</b></li>}
         {points.some((p) => p.mark) && <li>Game with a home run</li>}
       </ul>
-      <p className="fform__note">
-        Each point is OPS over his last {w} games. Green fill sits above his season OPS, the other fill below.
-        Open surface: season stats only, no game result is shown.
-      </p>
       <SectionHead look="rule" as="h3" note="Plate appearances">How the stretches ended</SectionHead>
       <StretchTable columns={COLUMNS} rows={stretchRows(view, cursor)} legend={OUTCOMES} ends={ENDS} cursor={cursor} onPick={scrub} noKey />
     </div>

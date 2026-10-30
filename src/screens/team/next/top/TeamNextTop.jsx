@@ -92,6 +92,19 @@ export function TeamNextTop({ team, standings, season, asOf }) {
                 <ClubGrid key={taps.clubs} cells={cells} title={mlb ? `All ${cells.length} clubs` : (line?.divisionName ?? 'Standings')} name={team.teamName ?? team.name} />
               )}
           </div>
+            {/* Last 10 and Run diff fill the room under the record (Gary, 2026-10-30). */}
+            {(ten || line?.diff) && (
+              <div className="tnext__tiles tnext__tiles--lead">
+                {ten && (
+                  <Tile label={ten.n < 10 ? `Last ${ten.n}` : 'Last 10'} value={`${ten.w}-${ten.l}`} caption={`Streak ${ten.streak}`} delay={TILE_DELAY[0]}
+                    controls={rail ? 'tnext-days' : null} open={taps.days > 0} onTap={() => tap('days')} />
+                )}
+                {line?.diff && (
+                  <Tile label="Run diff" value={line.diff} caption={runsCaption(line)} delay={TILE_DELAY[1]}
+                    controls={line.rs != null ? 'tnext-runs' : null} open={taps.runs > 0} onTap={() => tap('runs')} />
+                )}
+              </div>
+            )}
           </div>
           {(series || taps.days > 0 || taps.runs > 0) && (
             <div className="tnext__form">
@@ -113,18 +126,6 @@ export function TeamNextTop({ team, standings, season, asOf }) {
           </div>
         )}
       </Card>
-      {(ten || line?.diff) && (
-        <div className="tnext__tiles">
-          {ten && (
-            <Tile label={ten.n < 10 ? `Last ${ten.n}` : 'Last 10'} value={`${ten.w}-${ten.l}`} caption={`Streak ${ten.streak}`} delay={TILE_DELAY[0]}
-              controls={rail ? 'tnext-days' : null} open={taps.days > 0} onTap={() => tap('days')} />
-          )}
-          {line?.diff && (
-            <Tile label="Run diff" value={line.diff} caption={runsCaption(line)} delay={TILE_DELAY[1]}
-              controls={line.rs != null ? 'tnext-runs' : null} open={taps.runs > 0} onTap={() => tap('runs')} />
-          )}
-        </div>
-      )}
     </Stack>
   )
 }

@@ -31,13 +31,14 @@ function tally(h, f, p) {
 
 // The half's pitch tally, then the game's lines for both clubs as of the half's end (the scorebook's
 // pitching page, pitchingLinesMarkup).
+// A pitcher reads "Last, First", as the pitching lines under it do (Gary, 2026-10-30).
 // The total row names the half itself ("Top 5th", Gary 2026-10-28), not the bare word.
 function pitching(h, f, lines, halfName = 'Half') {
   const row = (name, l, key, className) => h('tr', { key, className }, h('td', null, name), h('td', null, l.pitches),
     h('td', null, l.strikes), h('td', null, l.whiffs), h('td', null, l.fouls))
   return [h('table', { key: 'half', className: 'gdcp__table' },
     h('thead', null, h('tr', null, ...['Pitcher', 'Pitches', 'Strikes', 'Whiffs', 'Fouls'].map((c) => h('th', { key: c }, c)))),
-    h('tbody', null, ...f.pitchers.map((l) => row(l.last, l, l.id)),
+    h('tbody', null, ...f.pitchers.map((l) => row([l.last, l.first].filter(Boolean).join(', '), l, l.id)),
       f.pitchers.length > 1 && row(halfName, f, 'tot', 'is-total'))),
   lines]
 }

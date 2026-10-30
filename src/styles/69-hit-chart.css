@@ -925,17 +925,29 @@
 }
 
 /* Bat speed as a tap (SavantFacts): the swing among the league's hitters' average bat speeds, a histogram. */
-.bflight__fact--tap { border: 0; border-left: var(--bw-hair) solid var(--border-hairline); background: none; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
+.bflight__fact--tap { border: 0; border-left: var(--bw-hair) solid var(--border-hairline); background: none; color: inherit; font: inherit; text-align: center; cursor: pointer; } /* centred like its two neighbours */
 .bflight__fact--tap.is-on .bflight__factlabel { text-decoration: underline; }
-.bshist { padding: var(--space-2) var(--space-3) var(--space-3); border-top: var(--bw-hair) solid var(--border-hairline); }
-.bshist__head { margin: 0 0 var(--space-2); font-size: var(--fs-small); }
-.bshist__head b { font-family: var(--font-mono); }
-/* layout-exempt: the bins in one row, standing on a baseline */
-.bshist__plot { position: relative; display: flex; align-items: flex-end; gap: 1px; height: 64px; border-bottom: var(--bw-hair) solid var(--text-heading); } /* raw-value-exempt: the plot's height and bin gap */
-.bshist__bar { flex: 1; background: var(--border-stamped); opacity: 0.35; }
-.bshist__bar.is-here { opacity: 1; background: var(--accent-primary); }
-.bshist__mark { position: absolute; top: -4px; bottom: 0; width: var(--bw-heavy); background: var(--accent-primary); } /* raw-value-exempt: reaches over the tallest bin */
-.bshist__median { position: absolute; top: 0; bottom: 0; border-left: var(--bw-hair) dashed var(--text-caption); }
-.bshist__median small { position: absolute; top: -2px; left: var(--space-1); color: var(--text-caption); font: var(--fs-cell) / 1 var(--font-mono); white-space: nowrap; } /* raw-value-exempt: label hugs the line */
-.bshist__axis { display: flex; justify-content: space-between; margin: var(--space-1) 0 0; color: var(--text-caption); font: var(--fs-cell) / 1 var(--font-mono); }
+/* Open, it inks like the player page's pressed pick (.pnext-pick[aria-pressed]; Gary, 2026-10-30). */
+.bflight__fact--tap.is-on { background: var(--text-body); color: var(--text-on-ink); }
+.bflight__fact--tap.is-on :is(.bflight__factlabel, .bflight__factvalue, .bflight__unit) { color: var(--text-on-ink); text-decoration: none; }
+/* The bat-speed drawer (Gary, 2026-10-30): it hangs off the facts box in the same heavy rule, the count large,
+   this swing's bin in marker yellow with its speed above it, and the league's average named on the axis below. */
+.bshist { padding: var(--space-6) var(--space-3) var(--space-2); /* room over the plot for this swing's speed */ border: var(--bw-heavy) solid var(--text-heading); border-top: 0; }
+/* layout-exempt: a histogram's bins side by side */
+.bshist__plot { position: relative; display: flex; align-items: flex-end; gap: 2px; height: 56px; border-bottom: var(--bw-heavy) solid var(--text-heading); } /* raw-value-exempt: the plot's height and bin gap */
+.bshist__bar { flex: 1; background: color-mix(in srgb, var(--text-heading) 22%, transparent); }
+.bshist__bar.is-here { background: var(--marker); box-shadow: inset 0 0 0 var(--bw-rule) var(--text-heading); }
+.bshist__mark { position: absolute; top: 0; bottom: 0; width: 0; }
+.bshist__mark small { position: absolute; bottom: calc(100% + var(--space-1)); transform: translateX(-50%); font: var(--w-bold) var(--fs-cell) / 1 var(--font-mono); color: var(--text-heading); white-space: nowrap; }
+.bshist__median { position: absolute; top: 0; bottom: 0; border-left: var(--bw-rule) dashed var(--text-heading); }
+.bshist__axis { position: relative; display: flex; justify-content: space-between; margin: var(--space-1) 0 0; color: var(--text-caption); font: var(--fs-cell) / 1 var(--font-mono); text-transform: uppercase; }
+.bshist__lg { position: absolute; top: 0; transform: translateX(-50%); color: var(--text-heading); font-weight: var(--w-bold); white-space: nowrap; }
 .bflight--modal:has(.bshist) { height: auto; max-height: 92dvh; overflow-y: auto; } /* the opened histogram grows the card */
+
+/* The sheet's numbers as their own ruled box under the drawing (Gary, 2026-10-30): the hairline ran through the
+   plate's dirt and the strip sat flush on the card's foot, which read as a clipped bug. */
+.bflight--modal { padding-bottom: var(--space-3); }
+.bflight--modal .bflight__facts { margin-top: var(--space-3); border: var(--bw-heavy) solid var(--text-heading); }
+.bflight--modal .bflight__fact + .bflight__fact,
+.bflight--modal .bflight__fact--tap { border-left: var(--bw-heavy) solid var(--text-heading); }
+.bflight--modal .bflight__fact:first-child { border-left: 0; }

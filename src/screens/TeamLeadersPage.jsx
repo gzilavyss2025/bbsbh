@@ -50,10 +50,9 @@ export function TeamLeadersPage({ id, asOf, sportId }) {
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
       <div className="screen team-hub">
         <SiteHeader />
-        <AsOfBanner asOf={asOf} sportId={sportId} />
         <BackBtn onClick={back} />
 
-        <header className="team-hub__id">
+        <header className="team-hub__id tlead-id">
           <div className="team-hub__logo">
             <TeamLogo teamId={team.id} name={team.name} size={64} />
           </div>
@@ -71,6 +70,7 @@ export function TeamLeadersPage({ id, asOf, sportId }) {
         </header>
 
         <TeamLeaders pool={data.pool} categories={ALL_CATEGORIES} limit={10} showTeamAbbr={false} qualifier={data.qualifier} />
+        <AsOfBanner asOf={asOf} sportId={sportId} />
       </div>
     </LinkScope>
   )

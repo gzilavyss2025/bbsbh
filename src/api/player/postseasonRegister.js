@@ -94,13 +94,25 @@ export async function fetchPostseasonSeason(personId, group, { season, startDate
 // postseason game, so the row does not exist before October. `season` is the
 // year the tiles cover (the page's cutoff season), so the title never says
 // the real year over a past October.
+// A hitter's postseason columns: AB, OBP and SLG are `wide`, shown on desktop only (Gary, 2026-10-30).
+export function postseasonHitterCols(stat) {
+  const [avg, hr, rbi, so] = hitterTiles(stat)
+  return [
+    { k: 'AB', v: stat.atBats ?? DASH, wide: true },
+    avg, hr, rbi, so,
+    { k: 'OBP', v: stat.obp ?? DASH, wide: true },
+    { k: 'SLG', v: stat.slg ?? DASH, wide: true },
+    { k: 'OPS', v: stat.ops ?? DASH },
+  ]
+}
+
 export function postseasonTilesView(splits, group, role = null, season = null) {
   const stat = aggregateSplits(splits ?? [], group)
   if (!stat || !(Number(stat.gamesPlayed) > 0)) return null
   const tiles =
     group === 'pitching'
       ? [...pitcherTiles(stat, role).slice(0, 4), { k: 'WHIP', v: stat.whip ?? DASH }]
-      : [...hitterTiles(stat).slice(0, 4), { k: 'OPS', v: stat.ops ?? DASH }]
+      : postseasonHitterCols(stat)
   return { title: `${season} Postseason`, games: Number(stat.gamesPlayed), tiles }
 }
 

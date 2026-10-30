@@ -376,7 +376,7 @@ body:has(.screen.awardhistory) {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-2h) var(--space-1) var(--space-1h);
-  border-radius: var(--radius-pill);
+  border-radius: 0;
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
 }

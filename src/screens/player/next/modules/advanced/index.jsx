@@ -39,7 +39,6 @@ export default function AdvancedModule({ bio, role, asOf, season, onEmpty, onCou
             options={SCOPES.map(([k, text]) => ({ value: k, label: text }))}
           />
         )}
-        {shown.sample && <span className="pnext-adv__sample mono">{shown.sample}</span>}
       </div>
       <div className="pnext-adv__grid">
         {shown.tiles.map((t) => (

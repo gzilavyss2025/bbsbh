@@ -17,11 +17,11 @@ export function warLeaderId(rows) {
 
 export const warSum = (rows) => rows.reduce((sum, r) => sum + (r.war ?? 0), 0)
 
-// The foot row's words: each group's sum by its name ("Lineup 21.9 · bench 5.2"). Null when
+// The foot row's words: each group's sum by its name ("Lineup 21.9 WAR · bench 5.2 WAR"). Null when
 // no row has a WAR (a season the WAR file does not cover yet), so no 0.0 stands for "none".
 export function footText(groups) {
   if (!groups.some((g) => g.rows.some((r) => r.war != null))) return null
-  return groups.map((g) => `${g.sum} ${warText(warSum(g.rows))}`).join(' · ')
+  return groups.map((g) => `${g.sum} ${warText(warSum(g.rows))} WAR`).join(' · ')
 }
 
 // Every player loadRoster returned, by id. The lineup's spots carry only a name and a
@@ -50,6 +50,11 @@ const rowOf = (p, m, hurt, lead) => ({
   lead,
   line: seasonLineOf(p),
 })
+
+// The 40-man, one row a player, led by `leadOf(p)` (a position or a role), with no season line
+// under the name: the same ruled box as the lineup and the staff (Gary, 2026-10-30).
+export const fortyRows = (list, leadOf) =>
+  list.map((p) => ({ ...rowOf(p, {}, false, leadOf(p) ?? DASH), line: '' }))
 
 // The nine, in the diamond's order, each led by his position.
 export const lineupRows = (lineup, meta) =>

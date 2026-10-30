@@ -47,7 +47,11 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   const gd = feed?.gameData
   const pk = gd?.game?.pk
   const checkpointKey = typeof cur.shown === 'number' ? `${pk}:${view}:${cur.shown}` : null
-  const phase = checkpointPhase(covered, checkpointKey, gate, !!cur.armed)
+  // The half's last-play celebration plays once, then steps aside for the checkpoint on its own (Gary,
+  // 2026-10-30: it used to hold until Next). A held scene that has stopped playing reads as the checkpoint,
+  // so Next plays on; its Replay plays it again over the checkpoint.
+  const held = checkpointPhase(covered, checkpointKey, gate, !!cur.armed)
+  const phase = held === 'celebration' && !cur.playing ? 'checkpoint' : held
   const onCheckpoint = useCallback((eligible) => setGate((g) => recordCheckpoint(g, checkpointKey, eligible)), [checkpointKey])
   const date = gd?.datetime?.officialDate
   const venue = gd?.venue

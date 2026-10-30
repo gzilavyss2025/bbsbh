@@ -147,6 +147,11 @@ function PlayerNextBody({ id, asOf, sportId, tab }) {
             ))}
         </Stack>
         <AsOfBanner asOf={asOf} sportId={sportId} />
+        {/* The data credits, small, in the page's foot (Gary, 2026-10-30; ADR-0100 asks for Retrosheet's words). */}
+        <footer className="pnext__credits">
+          <p>The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested parties may contact Retrosheet at 20 Sunset Rd., Newark, DE 19711.</p>
+          <p>Player ids matched through the Chadwick Bureau register (Open Data Commons Attribution License 1.0).</p>
+        </footer>
       </div>
     </LinkScope>
   )

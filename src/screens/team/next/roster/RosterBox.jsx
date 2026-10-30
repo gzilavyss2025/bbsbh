@@ -10,7 +10,7 @@ import { DASH, footText, warIsDown, warLeaderId, warSum, warText } from './boxRo
 // head row. Each row is a lead cell (a position, a rotation slot or a role), the number, the
 // name with its marks (and, in the Season view, the arm's line under it), and WAR. A group
 // with a title opens on a break row; a foot row sums WAR, group by group and in all. The one
-// leading WAR in the box takes the marker pill.
+// leading WAR in the box fills its cell in marker yellow.
 //
 //   lead     the first column's head ("Pos", "Role").
 //   groups   [{ title?, sum, role?, rows }]; a row is boxRows.js's shape. `sum` names the
@@ -51,12 +51,9 @@ export function RosterBox({ label, lead, groups, showWar, showProspect, season }
                 {r.line && <span className="t-label rosterbox__line">{r.line}</span>}
               </td>
               {showWar && (
-                <td>
-                  {r.id === leader ? (
-                    <Pill mark figure fill="marker">{warText(r.war)}</Pill>
-                  ) : (
-                    <span className={warIsDown(r.war) ? 'rosterbox__war--down' : undefined}>{warText(r.war)}</span>
-                  )}
+                // The staff's leader fills the whole cell in marker yellow (Gary, 2026-10-30).
+                <td className={r.id === leader ? 'rosterbox__war--lead' : undefined}>
+                  <span className={r.id !== leader && warIsDown(r.war) ? 'rosterbox__war--down' : undefined}>{warText(r.war)}</span>
                 </td>
               )}
             </tr>

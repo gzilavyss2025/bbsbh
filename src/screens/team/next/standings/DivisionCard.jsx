@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { TeamLogo } from '../../../../components/logo/TeamLogo.jsx'
 import { TeamLink } from '../../../../components/team/TeamLink.jsx'
 import { PostseasonOddsModal } from '../../../../components/teamstats/PostseasonOddsModal.jsx'
-import { Pill } from '../../../../components/ui/control/Pill.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { Table } from '../../../../components/ui/table/Table.jsx'
 import { humanDate, isYearView } from '../../../../lib/dates.js'
@@ -21,7 +20,10 @@ export function DivisionCard({ team, standings, asOf, odds, stampIn, style }) {
         frame="stamped"
         body="flush"
         label={name}
-        count={asOf && !isYearView(asOf) ? `entering ${humanDate(asOf)}` : `${standings.length} clubs`}
+        // The odds door rides in the count tag's place (Gary, 2026-10-30).
+        count={odds.length > 0
+          ? <button type="button" className="stnd__oddsbtn" onClick={() => setShowOdds(true)}>Postseason odds</button>
+          : asOf && !isYearView(asOf) ? `entering ${humanDate(asOf)}` : `${standings.length} clubs`}
         stampIn={stampIn}
         className="stnd__card"
         style={style}
@@ -61,16 +63,6 @@ export function DivisionCard({ team, standings, asOf, odds, stampIn, style }) {
             ))}
           </tbody>
         </Table>
-        {/* No L10 note under the table (Gary, 2026-10-30); the foot holds the odds door alone. */}
-        {odds.length > 0 && (
-          <div className="stnd__foot">
-            {odds.length > 0 && (
-              <Pill role="control" fill="ink" onClick={() => setShowOdds(true)}>
-                Postseason Odds
-              </Pill>
-            )}
-          </div>
-        )}
       </Card>
       {showOdds && <PostseasonOddsModal divisionName={name} rows={odds} onClose={() => setShowOdds(false)} />}
     </>

@@ -58,6 +58,7 @@ function Postseason({ block, playerId, season, cutoff }) {
         label={ps.title}
         leftCols={1}
         head={['', 'G', ...keys]}
+        hideNarrow={ps.tiles.flatMap((t, i) => (t.wide ? [i + 2] : []))}
         // The postseason line leads, and its rounds open under it (Gary, 2026-10-30), as the
         // Season card's year rows do.
         rows={[

@@ -2,12 +2,16 @@ import '../../../../styles/57a-franchise-history.css'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
+import { leagueLogoUrl } from '../../../../lib/teams.js'
 
 // The club's history under the Ballpark card, one module: a strip of names,
 // leagues and parks by season, then a line for each park. Open
 // (names and parks, no game). The data starts in 1901, so a park line says
 // "seasons in this data", never "opened" (src/api/franchiseHistory.js).
 // MLB only: a MiLB id has no file, `spans` is empty, and nothing renders.
+
+// The league's own mark in place of its name (Gary, 2026-10-30); any other league stays a word.
+const LEAGUE_ID = { 'American League': 103, 'National League': 104 }
 
 const years = (from, to) => (from === to ? `${from}` : `${from}–${to}`)
 // A span or park still running in the last season of the file reads "from on".
@@ -23,7 +27,9 @@ export function FranchiseHistory({ spans, parks, through, cardProps }) {
           <Stack gap="tight" as="li" key={s.from} className="fhist__span">
             <span className="fhist__years">{run(s.from, s.to, through)}</span>
             <span className="fhist__name">{s.name}</span>
-            <span className="fhist__league">{s.league}</span>
+            {LEAGUE_ID[s.league]
+              ? <img className="fhist__leaguelogo" src={leagueLogoUrl(LEAGUE_ID[s.league])} alt={s.league} width="32" height="32" />
+              : <span className="fhist__league">{s.league}</span>}
             {s.venueName && <span className="fhist__park">{s.venueName}</span>}
           </Stack>
         ))}

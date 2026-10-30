@@ -1,4 +1,5 @@
 import { openAtBat } from '../../../../api/gameday/subSteps.js'
+import { reviewsInPlay } from '../../../../api/gameday/reviews.js'
 import { boxModel } from '../hero/heroModel.js'
 import { scorebookBox } from '../hero/heroMarkup.js'
 import { legAdvanceCode } from '../../../../api/playbyplay/advanceCode.js'
@@ -16,7 +17,9 @@ const BASE_WORD = { '1B': '1st', '2B': '2nd', '3B': '3rd' }
 function card(h, feed, inning, half, count, sub) {
   const o = openAtBat(feed, inning, half, count)
   const s = o?.steps[sub - 1]
-  if (!s || (s.kind !== 'event' && s.kind !== 'change')) return null
+  if (!s) return null
+  if (s.kind === 'pitch' || s.kind === 'result') return reviewCard(h, feed, o.play, s)
+  if (s.kind !== 'event' && s.kind !== 'change') return null
   const { play } = o
   const ev = play.playEvents.find((e) => e.index === s.index)
   const own = ev && !ev.isPitch
@@ -45,8 +48,30 @@ function card(h, feed, inning, half, count, sub) {
     h('div', { className: 'gdevent__txt' }, h('span', { className: 'gdevent__kind' }, (kind ?? '').replace(/\s+(2B|3B|Home)$/i, '')), h('span', null, withFacts(h, unlabeled(text ?? '', kind), inP?.fullName, facts))))
 }
 
+// A challenge or review on the pitch on screen (Gary, 2026-10-30): the tab names it, the line says who asked and
+// how it came out. A review the feed keeps on the whole play pins to its last pitch (reviews.js), so it shows on
+// the result. Only the shown sub-step's pitch is read: a later pitch's review never shows early.
+const REVIEW_TAB = { abs: 'ABS challenge', manager: 'Manager challenge', crew: 'Umpire review' }
+function reviewCard(h, feed, play, s) {
+  const pitchNo = play.playEvents.find((e) => e.index === s.index)?.pitchNumber
+  const found = pitchNo == null ? [] : reviewsInPlay(feed, play).filter((r) => r.pitchNumber === pitchNo)
+  if (!found.length) return null
+  return found.map((r, i) => {
+    const who = feed.gameData?.players?.[`ID${r.playerId}`]
+    const club = r.side ? feed.gameData?.teams?.[r.side]?.abbreviation : null
+    const name = [who?.lastName ?? r.playerName, club && `(${club})`].filter(Boolean).join(' ')
+    const asks = r.kind === 'crew' ? 'The umpires review the call' : `${name || club || 'A club'} challenges the call`
+    const end = r.inProgress ? 'under review.' : r.overturned ? 'overturned.' : 'the call stands.'
+    return h('div', { key: i, className: 'gdevent gdevent--review', role: 'status' },
+      h('div', { className: 'gdevent__txt' }, h('span', { className: 'gdevent__kind' }, REVIEW_TAB[r.kind] ?? 'Review'),
+        h('span', null, `${asks}: ${end}`)))
+  })
+}
+
 // The tab already names the kind, so a sentence that opens on it ("Offensive Substitution: …") drops it (Gary, 2026-10-28).
-const unlabeled = (text, kind) => (kind && text.toLowerCase().startsWith(`${kind.toLowerCase()}:`) ? text.slice(kind.length + 1).trimStart() : text) // caps-js-exempt: compares only, renders nothing
+// Any short label of plain words before a colon goes too, since the feed's label need not match the tab ("Pitching
+// Change:" under "Pitching substitution"; Gary, 2026-10-30). A sentence with a comma or bracket before its colon keeps it.
+const unlabeled = (text, kind) => (kind && text.toLowerCase().startsWith(`${kind.toLowerCase()}:`) ? text.slice(kind.length + 1).trimStart() : text.replace(/^[A-Za-z][A-Za-z ]{2,28}:\s*/, '')) // caps-js-exempt: compares only, renders nothing
 
 // The sentence with the facts right after the incoming man's name; at the end when the name is not in it.
 function withFacts(h, text, name, facts) {

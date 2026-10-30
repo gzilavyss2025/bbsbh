@@ -4,6 +4,12 @@ import '@fontsource/bungee/latin-400.css'
 import '@fontsource/yellowtail/latin-400.css'
 import '../../styles/honors/league-pennant.css'
 
+// A champion's pennant: the club mark moves left and the trophy (215x435) stands at its right.
+const WS_ART = {
+  full: { mark: { x: 52, y: 83, width: 140, height: 143 }, trophy: { x: 196, y: 78, width: 76, height: 154 } },
+  compact: { mark: { x: 40, y: 87, width: 160, height: 170 }, trophy: { x: 200, y: 80, width: 90, height: 182 } },
+}
+
 function PennantMark({ url, abbreviation, box, id }) {
   const [failed, setFailed] = useState(false)
   if (!url || failed) {
@@ -36,7 +42,7 @@ function PennantMark({ url, abbreviation, box, id }) {
 export function LeaguePennant({
   teamId, season, league, teamName, clubLabel, abbreviation,
   variant = 'full', width = 160, palette, logoUrl,
-  lettering = 'block', decorative = false, className = '',
+  lettering = 'block', decorative = false, className = '', ws = false,
 }) {
   const id = useId()
   const model = pennantModel({ teamId, season, league, teamName, clubLabel, abbreviation, logoUrl, palette })
@@ -60,10 +66,11 @@ export function LeaguePennant({
       aria-hidden={decorative || undefined}
       focusable="false"
     >
-      {!decorative && <title id={`${id}-title`}>{model.label}</title>}
+      {!decorative && <title id={`${id}-title`}>{ws ? `${model.season} ${teamName || model.clubLabel}, World Series champions` : model.label}</title>}
       <g aria-hidden="true">
         <path d={PENNANT_ART.outline} fill="var(--pennant-field)" stroke="var(--pennant-border)" strokeWidth="6" />
-        {!compact && (
+        {/* The block-lettered club name is off (Gary, 2026-10-30); only script lettering prints one. */}
+        {!compact && script && (
           <text
             className={script ? 'leaguehonor__script' : undefined}
             x="160" y="49" textAnchor="middle" fill="var(--pennant-ink)"
@@ -74,15 +81,17 @@ export function LeaguePennant({
         <PennantMark
           key={model.logoUrl ?? model.abbreviation}
           url={model.logoUrl} abbreviation={model.abbreviation}
-          box={compact ? PENNANT_ART.compactMark : PENNANT_ART.mark} id={`${id}-mark`}
+          box={ws ? WS_ART[compact ? 'compact' : 'full'].mark : compact ? PENNANT_ART.compactMark : PENNANT_ART.mark} id={`${id}-mark`}
         />
+        {/* A World Series winner's pennant carries the trophy beside the mark (Gary, 2026-10-30). */}
+        {ws && <image href="/brand/world-series-trophy.png" {...WS_ART[compact ? 'compact' : 'full'].trophy} preserveAspectRatio="xMidYMid meet" />}
         <text
           x="160" y={compact ? 380 : 331} textAnchor="middle" fill="var(--pennant-year)"
           fontFamily="Bungee, sans-serif" fontSize={compact ? 99 : 97}
         >{model.season}</text>
         {!compact && (
           <g fill="var(--pennant-ink)" textAnchor="middle" fontFamily="var(--font-display)" fontWeight="700" fontSize="31" letterSpacing="2">
-            <text x="160" y="383">{leagueLabel} LEAGUE</text>
+            <text x="160" y="383">{ws ? 'WORLD SERIES' : `${leagueLabel} LEAGUE`}</text>
             <text x="160" y="428">CHAMPIONS</text>
           </g>
         )}
