@@ -127,8 +127,8 @@ test('unavailable or repeated secondary marks leave the engraved fallback availa
 
 test('stadium artwork resolves by park key and every mapped file ships', () => {
   assert.equal(heritageArt('American Family Field').src, '/heritage-art/americanfamilyfield.webp')
-  // Pre-2021 Brewers games carry the park's former name.
-  assert.equal(heritageArt('Miller Park')?.src, '/heritage-art/americanfamilyfield.webp')
+  // Pre-2021 Brewers games have their own Miller Park engraving.
+  assert.equal(heritageArt('Miller Park')?.src, '/heritage-art/millerpark.webp')
   assert.equal(heritageArt('Busch Stadium'), null)
   // Complete drawings share the default bottom alignment, without crop anchors.
   assert.equal(heritageArt('Comerica Park').position, undefined)
@@ -138,7 +138,8 @@ test('stadium artwork resolves by park key and every mapped file ships', () => {
   assert.equal(heritageArt('Minute Maid Park', 2392)?.src, '/heritage-art/daikinpark.webp')
   for (const venue of ['Fenway Park', 'Tropicana Field', 'Wrigley Field', 'Yankee Stadium', 'American Family Field',
     'Chase Field', 'Citi Field', 'Comerica Park', 'Coors Field', 'Daikin Park', 'Dodger Stadium', 'Globe Life Field',
-    'Nationals Park', 'Oracle Park', 'Sutter Health Park', 'Target Field', 'T-Mobile Park', 'Truist Park']) {
+    'Nationals Park', 'Oracle Park', 'Sutter Health Park', 'Target Field', 'T-Mobile Park', 'Truist Park',
+    'Erlanger Park', 'Great American Ball Park', 'Keesler Federal Park', 'Miller Park', 'Turner Field']) {
     assert.ok(existsSync(new URL(`../public${heritageArt(venue).src}`, import.meta.url)), venue)
   }
 })

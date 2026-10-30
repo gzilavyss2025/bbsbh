@@ -12,8 +12,12 @@ const ART = {
   coorsfield: 'Coors Field',
   daikinpark: 'Daikin Park',
   dodgerstadium: 'Dodger Stadium',
+  erlangerpark: 'Erlanger Park',
   fenwaypark: 'Fenway Park',
   globelifefield: 'Globe Life Field',
+  greatamericanballpark: 'Great American Ball Park',
+  keeslerfederalpark: 'Keesler Federal Park',
+  millerpark: 'Miller Park',
   nationalspark: 'Nationals Park',
   oraclepark: 'Oracle Park',
   sutterhealthpark: 'Sutter Health Park',
@@ -21,16 +25,14 @@ const ART = {
   tmobilepark: 'T-Mobile Park',
   tropicanafield: 'Tropicana Field',
   truistpark: 'Truist Park',
+  turnerfield: 'Turner Field',
   wrigleyfield: 'Wrigley Field',
   yankeestadium: 'Yankee Stadium',
 }
-// Former names that parkKey does not pin, so older games still find their park.
-const FORMER = { millerpark: 'americanfamilyfield' }
 
 /** @returns {{src: string, alt: string, position?: string} | null} */
 export function heritageArt(venueName, venueId = null) {
-  const raw = parkKey(venueName, venueId)
-  const key = FORMER[raw] ?? raw
+  const key = parkKey(venueName, venueId)
   const entry = typeof ART[key] === 'string' ? { name: ART[key] } : ART[key]
   if (!entry) return null
   return { src: `/heritage-art/${key}.webp`, alt: `Engraving of ${entry.name}`, ...(entry.position && { position: entry.position }) }

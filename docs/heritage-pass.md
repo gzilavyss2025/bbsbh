@@ -59,19 +59,23 @@ it does not mint a second collectible or replace the circular stamp.
 The component accepts an optional `artwork={{ src, alt }}`; it never resolves a
 venue itself. Callers (the box score and `HeritagePassPages`) pass
 `heritageArt(game.venue)` from `src/lib/heritage/art.js`, which maps a `parkKey`
-to `public/heritage-art/{parkKey}.webp`. Eighteen parks have art (Gary, 2026-10-29;
+to `public/heritage-art/{parkKey}.webp`. Twenty-three parks have art (Gary, 2026-10-29;
 redrawn and extended 2026-10-30): American Family Field, Chase Field, Citi Field,
 Comerica Park, Coors Field, Daikin Park, Dodger Stadium, Fenway Park, Globe Life
 Field, Nationals Park, Oracle Park, Sutter Health Park, Target Field, T-Mobile Park,
-Tropicana Field, Truist Park, Wrigley Field, Yankee Stadium. Each is a navy engraving
+Tropicana Field, Truist Park, Wrigley Field, Yankee Stadium. The five later additions
+(2026-10-30) are Erlanger Park, Great American Ball Park, Keesler Federal Park,
+Miller Park, and Turner Field, from Gary's [Drive folder](https://drive.google.com/drive/folders/1q2WJzL1hkILkFscnUYf7dmaUjy_WUFdD).
+Each is a navy engraving
 exported from Gary's PNG at 900px wide, WebP quality 80, transparent outside the
 drawing. Dodger Stadium, Fenway, Tropicana and Wrigley arrived on solid halftone
 grounds; their skies were cut out by an edge flood fill (blur, fill from the frame,
 close small gaps, feather), so a redraw should arrive transparent instead. The slot
 fills the width between the inner blue rules with no extra side padding.
 Artwork keeps its natural
-aspect ratio and sits above the stub, preserving roofs, signs, and foregrounds. Every game at those parks gets its art, whatever the year; `FORMER`
-maps Miller Park (before 2021) to American Family Field. The drawings keep their
+aspect ratio and sits above the stub, preserving roofs, signs, and foregrounds. Games listed as Miller Park use its separate sponsor-era drawing; American Family
+Field retains its current-name engraving. Other games at those parks get the mapped
+art whatever the year. The drawings keep their
 sponsor and club marks by Gary's choice (2026-10-29). Any other park, and a file that fails to load, leaves the engraved venue
 name. Add a park by adding its webp and one line to `ART`, then check its crop on `/heritage-pass-preview`.
 
