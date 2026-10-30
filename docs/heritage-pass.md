@@ -25,9 +25,12 @@ it does not mint a second collectible or replace the circular stamp.
   unsafe variants use an engraved baseball ornament. Requests and conversions
   are shared by team identity across the collection. No new logo catalog or
   team-specific exceptions are introduced.
-- `HeritagePassPages.jsx`: four passes per display page, one column on a phone
-  and as many 250px columns as fit on larger screens. Reads the same book stamp
-  list and facts as `PassportBook`; never alters its placements or pagination.
+- `HeritagePassPages.jsx`: a native horizontal scroll-snap strip below the stamp
+  book in Game Log. It receives only the owner's active stamps (including stamps
+  waiting for placement), reuses the collection's facts, and never adds a game
+  from facts alone. Touch swiping, keyboard scrolling, and previous/next controls
+  browse the tickets; reduced motion disables smooth scrolling. The stamp book
+  remains visible and its saved placements are untouched.
 - Facts producers preserve absent sport/type as null rather than asserting MLB
   regular season. The circular stamp already treats unknown sport as its default
   ring and absent type as no postseason label. Schedule facts also carry optional
@@ -59,13 +62,25 @@ it does not mint a second collectible or replace the circular stamp.
 The component accepts an optional `artwork={{ src, alt }}`; it never resolves a
 venue itself. Callers (the box score and `HeritagePassPages`) pass
 `heritageArt(game.venue)` from `src/lib/heritage/art.js`, which maps a `parkKey`
-to `public/heritage-art/{parkKey}.webp`. Five parks have art (Gary, 2026-10-29):
-American Family Field, Fenway Park, Tropicana Field, Wrigley Field, Yankee
-Stadium. Each is a navy-on-cream engraving, 900px wide, transparent outside the
-drawing. It bleeds to the frame's inner rule and is cropped there. Every game at those parks gets its art, whatever the year; `FORMER`
-maps Miller Park (before 2021) to American Family Field. The drawings keep their
+to `public/heritage-art/{parkKey}.webp`. Twenty-three parks have art (Gary, 2026-10-29;
+redrawn and extended 2026-10-30): American Family Field, Chase Field, Citi Field,
+Comerica Park, Coors Field, Daikin Park, Dodger Stadium, Fenway Park, Globe Life
+Field, Nationals Park, Oracle Park, Sutter Health Park, Target Field, T-Mobile Park,
+Tropicana Field, Truist Park, Wrigley Field, Yankee Stadium. The five later additions
+(2026-10-30) are Erlanger Park, Great American Ball Park, Keesler Federal Park,
+Miller Park, and Turner Field, from Gary's [Drive folder](https://drive.google.com/drive/folders/1q2WJzL1hkILkFscnUYf7dmaUjy_WUFdD).
+Each is a navy engraving
+exported from Gary's PNG at 900px wide, WebP quality 80, transparent outside the
+drawing. Dodger Stadium, Fenway, Tropicana and Wrigley arrived on solid halftone
+grounds; their skies were cut out by an edge flood fill (blur, fill from the frame,
+close small gaps, feather), so a redraw should arrive transparent instead. The slot
+fills the width between the inner blue rules with no extra side padding.
+Artwork keeps its natural
+aspect ratio and sits above the stub, preserving roofs, signs, and foregrounds. Games listed as Miller Park use its separate sponsor-era drawing; American Family
+Field retains its current-name engraving. Other games at those parks get the mapped
+art whatever the year. The drawings keep their
 sponsor and club marks by Gary's choice (2026-10-29). Any other park, and a file that fails to load, leaves the engraved venue
-name. Add a park by adding its webp and one line to `ART`, one ballpark at a time.
+name. Add a park by adding its webp and one line to `ART`, then check its crop on `/heritage-pass-preview`.
 
 ## Where it renders
 
@@ -74,11 +89,11 @@ The box score mounts the pass after its existing statistical section, inside
 The component's own Final check is additional protection, not the reveal gate.
 Date-opened and stamped-game behavior remain the host's existing rules.
 
-The Game Log's **Circular stamps / Heritage Passes** control defaults to stamps.
-It changes this visit's display only. The original book, placement flow, tray,
-season collection, and local/cloud storage contract remain available. Placement
-or stamp options temporarily show the circular book. Unresolved pass facts keep
-their date and an unavailable-details message.
+Game Log labels the section **Souvenir tickets**. Each complete ticket is a real
+link to its game's first lineup, supporting tap, keyboard activation, and opening
+in a new tab. No separate action button appears below it. The stamp book stays
+above the swipeable strip. Unresolved facts retain the date and unavailable-details
+message until a ticket can be rendered.
 
 `scripts/check-stamp-surfaces.mjs` enforces import allowlists for both pass
 components and forbids them on the same no-art surfaces as circular stamps.
@@ -113,5 +128,5 @@ in the browser only; those values are not game records or saved fixtures.
 zero and unusual scores, unknown metadata, MLB/MiLB round vocabulary, series
 number separation, date validation and non-mutating pagination. Run the existing
 stamp/passport suites too. Browser checks cover 320/390/820/1180/1440px widths,
-artwork failures, long names, the real box score reveal gate, and switching modes
+artwork failures, long names, the real box score reveal gate, and swiping through stamped-game tickets
 without changing saved placements.

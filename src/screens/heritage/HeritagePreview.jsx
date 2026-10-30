@@ -11,7 +11,6 @@ import { Button } from '../../components/ui/control/Button.jsx'
 // See docs/heritage-pass.md for fixture provenance and reproduction.
 export function HeritagePreview() {
   const [brokenArt, setBrokenArt] = useState(false)
-  const [opened, setOpened] = useState(null)
   const regular = FIXTURES[0].game
   const incomplete = { ...regular, sportId: null, gameType: null, venue: '', date: '', seriesGameNumber: null }
   const examples = [
@@ -26,7 +25,7 @@ export function HeritagePreview() {
   const facts = Object.fromEntries(FIXTURES.map(({ game }) => [game.gamePk, game]))
   return (
     <main className="heritage-preview">
-      <h1>Heritage Pass</h1>
+      <h1>Souvenir tickets</h1>
       <p>Development preview · Captured game records</p>
       <Grid min="280px" gap="loose">
         {examples.map(({ label, game, artwork }) => (
@@ -44,9 +43,8 @@ export function HeritagePreview() {
         <SealBox label="Tap to reveal the souvenir">{() => <HeritagePass game={regular} />}</SealBox>
       </section>
       <section className="heritage-preview__case">
-        <h2>Passport visual mode</h2>
-        <HeritagePassPages stamps={stamps} factsByPk={facts} onOpenGame={setOpened} />
-        {opened && <p role="status">Selected game {opened}</p>}
+        <h2>Souvenir tickets</h2>
+        <HeritagePassPages stamps={stamps} factsByPk={facts} />
       </section>
     </main>
   )

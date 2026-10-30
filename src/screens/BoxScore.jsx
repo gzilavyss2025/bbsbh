@@ -456,7 +456,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars,
 
       {stampFacts?.status === 'Final' && (
         <section className="heritagepass-box" aria-label="Game souvenir">
-          <h2>Heritage Pass</h2>
+          <h2>Souvenir ticket</h2>
           <HeritagePass game={stampFacts} artwork={heritageArt(stampFacts.venue)} />
         </section>
       )}

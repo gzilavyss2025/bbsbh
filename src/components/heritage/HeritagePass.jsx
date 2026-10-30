@@ -23,7 +23,7 @@ export function HeritagePass({ game, artwork = null }) {
   if (!model) return null
   const seed = stampSeed(game.gamePk)
   return (
-    <figure className="heritagepass" aria-label="Heritage Pass">
+    <figure className="heritagepass" aria-label="Souvenir ticket">
       <svg className="heritagepass__frame" viewBox="0 0 360 560" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <filter id={`${id}-grain`}>
