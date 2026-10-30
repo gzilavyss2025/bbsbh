@@ -240,7 +240,8 @@
 @media (prefers-reduced-motion: reduce) {
   .heritagepasses__rail { scroll-behavior: auto; }
 }
-.heritagepasses__open { width: 100%; margin-top: var(--space-2); }
+.heritagepasses__link { display: block; color: inherit; text-decoration: none; }
+.heritagepasses__link:focus-visible { outline: var(--bw-heavy) solid var(--focus-ring); outline-offset: var(--space-1); }
 .heritagepass-box { margin-block: var(--space-6); }
 .heritagepass-box h2 { text-align: center; margin-bottom: var(--space-4); }
 .heritage-preview { max-width: 1200px; margin: 0 auto; padding: var(--space-6); }

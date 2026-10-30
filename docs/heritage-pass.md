@@ -89,11 +89,11 @@ The box score mounts the pass after its existing statistical section, inside
 The component's own Final check is additional protection, not the reveal gate.
 Date-opened and stamped-game behavior remain the host's existing rules.
 
-The Game Log's **Circular stamps / Heritage Passes** control defaults to stamps.
-It changes this visit's display only. The original book, placement flow, tray,
-season collection, and local/cloud storage contract remain available. Placement
-or stamp options temporarily show the circular book. Unresolved pass facts keep
-their date and an unavailable-details message.
+Game Log labels the section **Souvenir tickets**. Each complete ticket is a real
+link to its game's first lineup, supporting tap, keyboard activation, and opening
+in a new tab. No separate action button appears below it. The stamp book stays
+above the swipeable strip. Unresolved facts retain the date and unavailable-details
+message until a ticket can be rendered.
 
 `scripts/check-stamp-surfaces.mjs` enforces import allowlists for both pass
 components and forbids them on the same no-art surfaces as circular stamps.

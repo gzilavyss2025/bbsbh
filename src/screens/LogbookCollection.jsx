@@ -523,7 +523,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
             coverSlot={<PassportCover book={book} onOpen={() => setOpenPage(1)} />}
           />
 
-          <HeritagePassPages stamps={all} factsByPk={byPk} onOpenGame={openGame} />
+          <HeritagePassPages stamps={all} factsByPk={byPk} />
 
           {/* The league under the book — which clubs have turned up in a game
               you stamped. Reads the WHOLE collection (`all`), not the season
