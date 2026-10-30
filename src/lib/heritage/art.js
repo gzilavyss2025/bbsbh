@@ -8,6 +8,9 @@ import { parkKey } from '../ballpark/parkKeys.js'
 const ART = {
   americanfamilyfield: 'American Family Field',
   fenwaypark: { name: 'Fenway Park', position: 'center top' },
+  kauffmanstadium: 'Kauffman Stadium',
+  petcopark: 'Petco Park',
+  pncpark: 'PNC Park',
   tropicanafield: 'Tropicana Field',
   wrigleyfield: 'Wrigley Field',
   yankeestadium: 'Yankee Stadium',

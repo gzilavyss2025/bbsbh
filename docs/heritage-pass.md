@@ -59,13 +59,32 @@ it does not mint a second collectible or replace the circular stamp.
 The component accepts an optional `artwork={{ src, alt }}`; it never resolves a
 venue itself. Callers (the box score and `HeritagePassPages`) pass
 `heritageArt(game.venue)` from `src/lib/heritage/art.js`, which maps a `parkKey`
-to `public/heritage-art/{parkKey}.webp`. Five parks have art (Gary, 2026-10-29):
-American Family Field, Fenway Park, Tropicana Field, Wrigley Field, Yankee
-Stadium. Each is a navy-on-cream engraving, 900px wide, transparent outside the
-drawing. It bleeds to the frame's inner rule and is cropped there. Every game at those parks gets its art, whatever the year; `FORMER`
+to `public/heritage-art/{parkKey}.webp`. Eight parks have art (Gary, 2026-10-30):
+American Family Field, Fenway Park, Kauffman Stadium, Petco Park, PNC Park,
+Tropicana Field, Wrigley Field, Yankee Stadium. Each is a navy-on-cream engraving,
+900px wide, transparent outside the drawing. It bleeds to the frame's inner rule
+and is cropped there. Every game at those parks gets its art, whatever the year; `FORMER`
 maps Miller Park (before 2021) to American Family Field. The drawings keep their
 sponsor and club marks by Gary's choice (2026-10-29). Any other park, and a file that fails to load, leaves the engraved venue
 name. Add a park by adding its webp and one line to `ART`, one ballpark at a time.
+
+The three 2026-10-30 additions were generated and reviewed in the stadium-art
+chat, then trimmed and resized to the existing 900px transparent WebP format:
+
+- Kauffman Stadium: the approved Zack Greinke portrait on CrownVision, with
+  the crown, light banks and fountains. References: the
+  [Royals' ballpark photograph](https://www.mlb.com/royals/ballpark) and
+  [2026 fence changes](https://www.mlb.com/royals/history/ballparks).
+- Petco Park: Western Metal Supply Co., outfield boards and downtown skyline.
+  References: the bundled ballpark photograph (credit in `ballparkArt.js`) and
+  [Gensler's renovation documentation](https://www.gensler.com/projects/petco-park-western-metal-supply-co-building).
+- PNC Park: Clemente Bridge, river, skyline and the enlarged left-field board.
+  References: the bundled ballpark photograph (credit in `ballparkArt.js`) and
+  [Pirates' current scoreboard photograph](https://www.mlb.com/pirates/ballpark/enhancements).
+
+These are stylized illustrations, not measured architectural drawings. They
+share the existing venue-based behavior: Greinke's portrait and the modern park
+features also appear on historical games at those venues.
 
 ## Where it renders
 
