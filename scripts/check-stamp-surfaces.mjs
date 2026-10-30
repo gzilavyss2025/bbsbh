@@ -40,6 +40,17 @@ const SRC = join(ROOT, 'src')
 // is a spoiler-rule decision — read ADR-0035 first, and say in the PR why the
 // new surface cannot show an unrevealed game.
 const STAMP_ALLOWLIST = {
+  // Final-score souvenir: the revealed box score body, the owner's collection,
+  // and fixed captured records behind App.jsx's DEV gate. Never a slate.
+  'components/heritage/HeritagePass.jsx': [
+    'screens/BoxScore.jsx',
+    'components/heritage/HeritagePassPages.jsx',
+    'screens/heritage/HeritagePreview.jsx',
+  ],
+  'components/heritage/HeritagePassPages.jsx': [
+    'screens/LogbookCollection.jsx',
+    'screens/heritage/HeritagePreview.jsx',
+  ],
   // `components/passport/PassportPage.jsx` is on this list deliberately, and it
   // is the one surface added since the guard was written. A passport page draws
   // ONLY the stamps the user has placed on it — its entire input is this user's
@@ -118,7 +129,7 @@ const FORBIDDEN_SURFACES = [
   'components/game/GameResultFace.jsx',
   'components/game/GameFinder.jsx',
 ]
-const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'useStamps']
+const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'HeritagePass', 'HeritagePassPages', 'useStamps']
 
 // Whole DIRECTORIES where no stamp ART may render — every file beneath them,
 // present and future, so a surface added later is covered without anyone
@@ -146,7 +157,7 @@ const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'useStamps']
 // prompt's trigger) — which is exactly the count-versus-art distinction this
 // narrower list exists to draw.
 const FORBIDDEN_ART_DIRS = ['screens/profile', 'components/profile', 'components/account']
-const FORBIDDEN_ART_IDENTIFIERS = ['GameStamp', 'StampGameButton']
+const FORBIDDEN_ART_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'HeritagePass', 'HeritagePassPages']
 
 // Individual FILES held to the same narrower rule as the directories above:
 // no stamp ART, while `useStamps` stays legal. A file, not a directory,

@@ -26,7 +26,7 @@ specific first:
     spoiler rule. Folder detail sits below it: `src/screens/team/` (the seven-band page),
     `src/screens/profile/` (My Tally), `src/screens/player/next/` (the new player page, module contract), `src/screens/lineup/next/` (the new lineup page), `src/screens/gameday/next/` (the new Gameday shell), `src/styles/`, `src/components/`, and in that
     folder `src/components/ui/`, `src/components/boxlines/`, `src/components/chrome/`,
-    `src/components/worldseries/`, `src/components/honors/`, `src/components/logbook/`, `src/components/offseason/`, `src/components/passport/`,
+    `src/components/worldseries/`, `src/components/honors/`, `src/components/logbook/`, `src/components/heritage/`, `src/components/offseason/`, `src/components/passport/`,
     `src/components/playbyplay/`, and `src/components/transactions/`.
   - `src/api/` — the data layer's RULE: the reveal-only vs. spoiler-free split
     (`spoiler-manifest.json`) and the build-time-fetch pattern. Folder detail:

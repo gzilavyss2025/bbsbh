@@ -415,6 +415,8 @@ export function parseRoute(url) {
   // and linked from nowhere, so there's nothing to redirect.
   if (parts.length === 1 && parts[0] === 'identity-lab')
     return { name: 'identity-lab' }
+  if (parts.length === 1 && parts[0] === 'heritage-pass-preview')
+    return { name: 'heritage-pass-preview' }
   // Dev-only uniform-name curation page (App.jsx gates the actual component
   // to import.meta.env.DEV, same as scorecard-lab above) — parsed here
   // regardless so a stray production visit falls through to 'home' instead of

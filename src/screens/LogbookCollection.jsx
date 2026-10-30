@@ -30,6 +30,8 @@ import { PassportCover } from '../components/passport/PassportCover.jsx'
 import { BookOrderControl } from '../components/passport/BookOrderControl.jsx'
 import { BookManagementSheet } from '../components/passport/BookManagementSheet.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
+import { Segmented } from '../components/ui/control/Segmented.jsx'
+import { HeritagePassPages } from '../components/heritage/HeritagePassPages.jsx'
 
 // One open Game Log book — the topbar, the tray, the passport book itself,
 // and the season grid below it (ADR-0035, ADR-0036). Split out of
@@ -92,6 +94,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
   // shelf, which is what lets a single-book user discover "make a second
   // book" at all (ADR-0036's multi-book addendum).
   const [managing, setManaging] = useState(false)
+  const [souvenirView, setSouvenirView] = useState('stamps')
 
   // Which stamp, if any, we are placing. Seeded from `?place=` (the hand-off
   // from the box score's mint card) but owned locally afterwards, so picking a
@@ -497,11 +500,17 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
               page 1 is an action on pages, offered over a cover with no page in
               sight — it read as chrome belonging to the whole screen rather
               than to the book, and it was the loudest thing above the fold. */}
-          {!placingPk && !selectedStamp && bookOpen && (
+          {!placingPk && !selectedStamp && (
+            <Segmented label="Passport visual mode" value={souvenirView} onChange={setSouvenirView}
+              options={[{ value: 'stamps', label: 'Circular stamps' }, { value: 'passes', label: 'Heritage Passes' }]} />
+          )}
+          {!placingPk && !selectedStamp && bookOpen && souvenirView === 'stamps' && (
             <BookOrderControl count={bookStamps.length} onReorder={reorderBook} />
           )}
 
-          <PassportBook
+          {souvenirView === 'passes' && !placingPk && !selectedStamp ? (
+            <HeritagePassPages key={bookId} stamps={bookStamps} factsByPk={byPk} onOpenGame={openGame} />
+          ) : <PassportBook
             pageCount={pageCount}
             openPage={openPage}
             onOpenPage={setOpenPage}
@@ -520,7 +529,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
             onOpeningChange={onOpeningChange}
             stand
             coverSlot={<PassportCover book={book} onOpen={() => setOpenPage(1)} />}
-          />
+          />}
 
           {/* The league under the book — which clubs have turned up in a game
               you stamped. Reads the WHOLE collection (`all`), not the season
