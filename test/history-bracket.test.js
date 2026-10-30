@@ -65,3 +65,14 @@ test('a season with no Wild Card round draws Division Series fed by no one, and 
   assert.ok(b.leagues.AL.division.every((d) => d.slots.every((s) => !s.from && !s.bye)))
   assert.equal(historyBracket(null), null)
 })
+
+test('a tied game is won by nobody, so a series never shows more wins than it needs', () => {
+  // 1907 World Series game 1 ended 3-3 (gamePk 67237); the Cubs won 4-0-1.
+  const ws = historyBracket(season(1907)).worldSeries
+  assert.equal(ws.games.find((g) => g.gamePk === 67237).winnerId, null)
+  assert.deepEqual(ws.slots.map((s) => s.wins), [0, 4])
+  for (const s of history.seasons) {
+    const b = historyBracket(s)
+    for (const x of b?.series ?? []) for (const slot of x.slots) assert.ok(slot.wins <= x.winsNeeded, `${x.key}: ${slot.wins} of ${x.winsNeeded}`)
+  }
+})

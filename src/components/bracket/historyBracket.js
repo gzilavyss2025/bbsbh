@@ -31,7 +31,7 @@ function series(raw, round, year) {
     gamePk: g.gamePk,
     gameNumber: g.gameNumber,
     date: g.date,
-    winnerId: g.awayScore > g.homeScore ? g.awayTeamId : g.homeTeamId,
+    winnerId: g.awayScore === g.homeScore ? null : g.awayScore > g.homeScore ? g.awayTeamId : g.homeTeamId, // a tie: 1907, 1912, 1922
   }))
   return {
     key: raw.id,

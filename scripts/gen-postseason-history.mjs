@@ -231,6 +231,8 @@ async function buildSeason(year) {
     series.games.sort((a, b) => a.gameNumber - b.gameNumber)
     const wins = new Map()
     for (const g of series.games) {
+      // A tie (1907, 1912 and 1922 World Series, called for darkness) is nobody's win.
+      if (g.awayScore === g.homeScore) continue
       const winnerId = g.awayScore > g.homeScore ? g.awayTeamId : g.homeTeamId
       wins.set(winnerId, (wins.get(winnerId) ?? 0) + 1)
     }
