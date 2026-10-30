@@ -11,3 +11,6 @@ export function checkpointPhase(covered, key, gate, armed = false) {
   if (gate.key !== key) return 'pending'
   return gate.eligible && !gate.dismissed ? 'celebration' : 'checkpoint'
 }
+// The half's last celebration plays once, then steps aside for the checkpoint (Gary, 2026-10-30). Under
+// reduced motion it never plays, so its still card holds until Next as before.
+export const afterCelebration = (phase, playing, reduced) => (phase === 'celebration' && !playing && !reduced ? 'checkpoint' : phase)

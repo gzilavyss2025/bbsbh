@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoint } from '../src/screens/gameday/next/cutscene/integration/checkpointGate.js'
+import { afterCelebration, checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoint } from '../src/screens/gameday/next/cutscene/integration/checkpointGate.js'
 import { GamedayStage } from '../src/screens/gameday/next/stage/GamedayStage.js'
 import { wallFn } from '../src/screens/gameday/next/stage/scene.js'
 
@@ -13,6 +13,13 @@ test('a qualifying ending play holds until Next, including after its animation f
   assert.equal(checkpointPhase(true, gate.key, gate), 'celebration', 'no clock or playing flag can advance the presentation')
   assert.equal(checkpointPhase(true, gate.key, dismissCheckpoint(gate)), 'checkpoint', 'one Next dismisses into the checkpoint')
   assert.equal(checkpointPhase(false, gate.key, gate), 'stage')
+})
+
+test('a celebration steps aside once it stops playing, but a reduced-motion still holds until Next', () => {
+  assert.equal(afterCelebration('celebration', true, false), 'celebration', 'still playing')
+  assert.equal(afterCelebration('celebration', false, false), 'checkpoint', 'played once, then the checkpoint')
+  assert.equal(afterCelebration('celebration', false, true), 'celebration', 'reduced motion never plays, so the still card holds')
+  assert.equal(afterCelebration('stage', false, false), 'stage')
 })
 
 test('polls preserve dismissal; another result must make its own decision', () => {
