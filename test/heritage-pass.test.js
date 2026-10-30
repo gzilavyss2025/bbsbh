@@ -130,8 +130,8 @@ test('stadium artwork resolves by park key and every mapped file ships', () => {
   // Pre-2021 Brewers games carry the park's former name.
   assert.equal(heritageArt('Miller Park')?.src, '/heritage-art/americanfamilyfield.webp')
   assert.equal(heritageArt('Busch Stadium'), null)
-  // Comerica's sign is the drawing's top edge; the crop keeps it.
-  assert.equal(heritageArt('Comerica Park').position, 'center top')
+  // Complete drawings share the default bottom alignment, without crop anchors.
+  assert.equal(heritageArt('Comerica Park').position, undefined)
   assert.equal(heritageArt('American Family Field').position, undefined)
   assert.equal(heritageArt(''), null)
   // Houston's park keeps its art under its old sponsor's games.
