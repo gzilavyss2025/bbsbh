@@ -2,6 +2,8 @@
 // invoke these when the user has tapped to reveal — the returned numbers must
 // never be rendered into the DOM while a box is still sealed.
 
+import { recordAfterGame } from '../lib/stamps.js'
+
 // Per-inning, per-side R / H / E / LOB straight from the linescore. `side` is
 // 'away' or 'home'; `inningNum` is 1-based.
 export function revealInning(feed, inningNum, side) {
@@ -72,6 +74,10 @@ export function revealStampFacts(feed) {
       id: team.id ?? null,
       abbreviation: team.abbreviation ?? '',
       name: team.name ?? '',
+      locationName: team.locationName ?? '',
+      teamName: team.teamName ?? '',
+      franchiseName: team.franchiseName ?? '',
+      record: recordAfterGame(team.record?.leagueRecord),
       runs: typeof totals.runs === 'number' ? totals.runs : null,
       hits: typeof totals.hits === 'number' ? totals.hits : null,
       errors: typeof totals.errors === 'number' ? totals.errors : null,
@@ -90,8 +96,8 @@ export function revealStampFacts(feed) {
     gamePk: feed?.gamePk ?? gameData.game?.pk ?? null,
     date: gameData.datetime?.officialDate ?? '',
     gameNumber: Number.isInteger(gameData.game?.gameNumber) ? gameData.game.gameNumber : 1,
-    sportId: gameData.teams?.home?.sport?.id ?? 1,
-    gameType: gameData.game?.type ?? 'R',
+    sportId: gameData.teams?.home?.sport?.id ?? null,
+    gameType: gameData.game?.type ?? null,
     // The home club's league, so a postseason stamp can name its round (stampArt.js).
     leagueId: gameData.teams?.home?.league?.id ?? null,
     venue: gameData.venue?.name ?? '',

@@ -615,6 +615,13 @@
       "Iowa Cubs"
     ]
   },
+  "segrapark": {
+    "venue": "Prisma Health Park",
+    "venueId": 4980,
+    "teams": [
+      "Columbia Fireflies"
+    ]
+  },
   "publixfieldatjokermarchantstadium": {
     "venue": "Publix Field at Joker Marchant Stadium",
     "venueId": 2511,
@@ -670,13 +677,6 @@
     "venueId": 2728,
     "teams": [
       "Inland Empire 66ers"
-    ]
-  },
-  "segrapark": {
-    "venue": "Segra Park",
-    "venueId": 4980,
-    "teams": [
-      "Columbia Fireflies"
     ]
   },
   "segrastadium": {

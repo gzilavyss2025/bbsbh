@@ -67,10 +67,13 @@ export function redisConfigFromEnv(env = process.env) {
 // The client, or null when nothing is configured. `options` is passed straight
 // through to the Redis constructor — api/copy.js needs
 // `automaticDeserialization: false`, for a reason its own call site explains.
+// `responseEncoding: 'base64'` keeps the wire format every caller and
+// test/api-copy-handler.test.js were written against; @upstash/redis 1.40
+// changed the default to plain JSON.
 export function getRedis(options = {}) {
   const config = redisConfigFromEnv()
   if (!config) return null
-  return new Redis({ ...config, ...options })
+  return new Redis({ responseEncoding: 'base64', ...config, ...options })
 }
 
 // Pair Upstash's HGETALL reply into a `{ field: value }` object. One copy for

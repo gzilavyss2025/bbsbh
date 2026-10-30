@@ -68,8 +68,8 @@ export const BAND_INNER_R = INNER_RING_R - 0.75
 // Stated as `!== 1` rather than as a membership test on purpose — a stamp for
 // some level not yet on the slate should still read as "not the majors"
 // instead of quietly drawing as one. A fact blob with no sportId at all is the
-// one case that stays MLB, because both producers already default it to 1 and
-// an absent value means "we never learned", not "the minors".
+// one case that stays MLB, because an absent value (the producers now leave it
+// null when the feed omits it) means "we never learned", not "the minors".
 //
 // The test is on the RAW value being a finite number, deliberately not on
 // `Number(game?.sportId)`: that coercion turns both null and '' into 0, which
