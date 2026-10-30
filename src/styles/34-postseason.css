@@ -392,3 +392,33 @@
   padding-bottom: calc(56px + env(safe-area-inset-bottom));
 }
 
+
+/* A season drawn with the World Series home's rail bracket (Gary, 2026-10-30): on a wide screen ONE stamped card
+   holds both leagues, the American League running left to right and the National League mirrored to run right to
+   left, so they meet at the World Series card in the middle. The league cards inside lose their own frames. */
+@media (min-width: 740px) {
+  /* layout-exempt: AL, the Series, NL across one card, a fixed three-part arrangement */
+  .pshistory__season .pbkt-full--rail {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    align-items: center;
+    column-gap: var(--space-4);
+    padding: var(--space-3);
+    border: var(--bw-heavy) solid var(--border-stamped);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-stamped);
+  }
+  .pshistory__season .pbkt-full--rail > :nth-child(1) { order: 1; }
+  .pshistory__season .pbkt-full--rail > :nth-child(3) { order: 2; }
+  .pshistory__season .pbkt-full--rail > :nth-child(2) { order: 3; }
+  .pshistory__season .pbkt-full--rail > .card { border: 0; box-shadow: none; background: transparent; padding-top: 0; margin: 0; }
+  .pshistory__season .pbkt-full--rail > .card > .card__name { position: static; display: inline-block; margin-bottom: var(--space-2); }
+  /* The National League, mirrored: its tree flips, and each club row flips back so it reads. */
+  .pshistory__season .pbkt-full--rail > :nth-child(2) { text-align: right; }
+  .pshistory__season .pbkt-full--rail > :nth-child(2) .pbkt-tree { transform: scaleX(-1); }
+  .pshistory__season .pbkt-full--rail > :nth-child(2) .pbkt-trow { transform: scaleX(-1); }
+  .pshistory__season .pbkt-full--rail > :nth-child(2) .pbkt-colheads { transform: scaleX(-1); }
+  .pshistory__season .pbkt-full--rail > :nth-child(2) .pbkt-colheads > * { transform: scaleX(-1); text-align: right; }
+  /* Before 1969 the World Series was the whole postseason: its card stands alone, with no wrapper (Gary, 2026-10-30). */
+  .pshistory__season .pbkt-full--rail:has(> :only-child) { display: flex; padding: 0; border: 0; background: none; box-shadow: none; }
+}
