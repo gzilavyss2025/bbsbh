@@ -135,11 +135,17 @@
   .fcontact__dots--play .fcontact__dot { animation: none; }
 }
 /* layout-exempt: the panel stacks its lines */
+/* Two columns (Gary, 2026-10-30: use the space): the result, distance and figures down the left,
+   the matchup card on the right, and the card as tall as the taller of the two. */
+/* layout-exempt: a text column beside the matchup card */
 .fcontact__detail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-height: calc(var(--space-16) * 4);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-auto-rows: auto;
+  align-content: start;
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
   padding: var(--space-3h) var(--space-4);
   border: var(--bw-heavy) solid var(--border-stamped);
   background: var(--field-wash);
@@ -169,11 +175,16 @@
   font-weight: var(--w-regular);
 }
 /* layout-exempt: two fixed columns */
+/* One row along the card's foot, a column per figure (3, or 4 with a barrel), so the matchup card
+   above can take the right side (Gary, 2026-10-30). */
+/* layout-exempt: one row of three or four figures, a column each */
 .fcontact__stats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2h) var(--space-3);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-3);
   margin: 0;
+  align-self: end;
 }
 .fcontact__stats dd {
   margin: 0;
@@ -341,3 +352,61 @@
     transition: none;
   }
 }
+
+/* The matchup, one card in the detail's top-right corner (Gary, 2026-10-30): the pitcher's
+   headshot over an ink nameplate with the opponent's mono mark beside his name, one frame and one
+   offset shadow around both, so they read as a pair. */
+/* layout-exempt: a headshot over its nameplate, one fixed card */
+.fcontact__matchup {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  width: calc(var(--shot-sm-w) * 2.5);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-stamped);
+}
+.shot.fcontact__shot {
+  width: 100%;
+  height: calc(var(--shot-sm-h) * 1.5);
+  border: 0;
+  border-radius: var(--radius-square);
+}
+/* layout-exempt: a mark beside two lines of name */
+.fcontact__plate {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  min-height: var(--space-8);
+  padding: var(--space-1) var(--space-1h);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink-cream);
+}
+.fcontact__plate .teamlogo { flex: none; }
+.fcontact__pname {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-label);
+}
+/* Stacked under the field, the detail runs the card's full width (Gary, 2026-10-30): out to the
+   card's edges, with no side borders. Its own padding matches the card's, so its text still lines
+   up with the card's. */
+/* breakpoint-exempt: the stacked side of this card's own 720px two-column step */
+@media (max-width: 719.98px) {
+  .fcontact__detail {
+    margin-inline: calc(-1 * var(--space-4));
+    border-inline: 0;
+  }
+}
+
+.fcontact__detail > .fcontact__eyebrow,
+.fcontact__detail > .fcontact__big { grid-column: 1; }
+/* The figures run the card's whole width under both columns, each on one line. */
+.fcontact__detail > .fcontact__stats { grid-column: 1 / -1; margin-top: var(--space-1h); }
+.fcontact__stats dd,
+.fcontact__stats dt { white-space: nowrap; }

@@ -9,9 +9,25 @@
   gap: var(--space-5);
 }
 @container (min-width: 720px) {
+  /* The rank chips take their own width; the postseason row takes the rest. */
   .pnext-ext__cols {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: auto minmax(0, 1fr);
   }
+}
+/* A tile row's head line: the section head, then the postseason switch at its right end. */
+/* layout-exempt: a head and its control on one line */
+.pnext-ext__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.pnext-ext__head > :first-child { flex: 1; min-width: 0; }
+/* The tiles in one row: as many columns as figures, each at least a compact tile wide. */
+/* layout-exempt: a fixed count of equal tiles that wraps on a phone */
+.pnext-ext__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  gap: var(--space-2);
 }
 .pnext-ext__ord {
   font-family: var(--font-mono);
@@ -33,4 +49,9 @@
 .pnext__tile--lit {
   outline: 3px solid var(--border-stamped);
   outline-offset: 2px;
+}
+/* The table runs to the card's sides and foot: no side or bottom padding (Gary, 2026-10-30). */
+.card__body:has(> .pnext-ext) {
+  padding-inline: 0;
+  padding-bottom: 0;
 }

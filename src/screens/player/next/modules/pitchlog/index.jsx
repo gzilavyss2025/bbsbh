@@ -25,7 +25,7 @@ import { StartDetail } from './StartDetail.jsx'
 const SHOWN = 5
 const SCOPES = [
   ['all', 'All'],
-  ['reg', 'Regular season'],
+  ['reg', 'Regular'], // short, so the three fit a phone's width (Gary, 2026-10-30)
   ['post', 'Postseason'],
 ]
 const HI = { k: (v) => v >= 7, er: (v) => v >= 4 }

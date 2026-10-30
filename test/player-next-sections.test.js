@@ -126,7 +126,7 @@ test('a slot for both roles gets one instance per role the player has; a one-rol
   const pitcher = slotInstances(['pitching'])
   assert.ok(pitcher.every((i) => i.role === 'pitching'))
   assert.ok(!pitcher.some((i) => i.id === 'plate'))
-  assert.equal(pitcher.find((i) => i.id === 'season').label, 'Season')
+  assert.equal(pitcher.find((i) => i.id === 'season').label, 'Season stats')
 })
 
 test('a button hides only when every slot in its section is empty', () => {

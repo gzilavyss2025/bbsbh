@@ -194,9 +194,6 @@
      each button full width. The cap holds the auto-fit cells to a tidy size
      (the base rule wraps them across as many rows as fit); 720px keeps the
      five stops on one or two rows without ballooning. */
-  .sitefooter__actions {
-    max-width: 720px;
-  }
 
   /* ---- game chrome: the section tabs keep a readable width too. */
   .stepnav {

@@ -276,7 +276,10 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
 // mvpStatLine's [label, figure] pairs) sit at the foot of the stage. There is no MVP card.
 const SIDES = ['away', 'home']
 
-export function DecidedHero({ mode, mvp = null, stats = [] }) {
+// `washBehind` (the home slate): the action photo sits behind the MVP's cut-out, not across the stage.
+// `photo`: a Series photo URL that takes the MVP's side in place of the cut-out; `stripe`, two
+// colours [outer, inner], edges it with a three-band club stripe.
+export function DecidedHero({ mode, mvp = null, stats = [], washBehind = false, photo = null, stripe = null, markHeight = 32, scheduleTitle = null }) {
   // No face on file (an MVP from before MLB's photo archive): both sides fall back to the clubs' mono
   // marks, as SeriesMvpCard did, and his name and line still sit on the stage.
   const [noPhoto, setNoPhoto] = useState(false)
@@ -303,9 +306,17 @@ export function DecidedHero({ mode, mvp = null, stats = [] }) {
                 SIDES.map((side, i) => (
                   <div key={side} className={`ww-hero__slab ww-hero__slab--${side}${i === mvpAt ? '' : ' ww-hero__slab--action'}`}>
                     {i === mvpAt ? (
-                      <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback onFallback={(kind) => setNoPhoto(kind != null)} className="ww-hero__cut" />
+                      photo ? (
+                        <>
+                          <img src={photo} alt="" className="ww-hero__photo" decoding="async" />
+                          {stripe && <span className="ww-hero__stripe" aria-hidden="true" style={{ '--stripe-out': stripe[0], '--stripe-in': stripe[1] }} />}
+                        </>
+                      ) : <>
+                        {washBehind && <Wash key={mvp.playerId} personId={mvp.playerId} />}
+                        <Headshot personId={mvp.playerId} name={mvp.name} teamId={mvp.teamId} tint={false} hideFallback onFallback={(kind) => setNoPhoto(kind != null)} className="ww-hero__cut" />
+                      </>
                     ) : (
-                      <Wash key={mvp.playerId} personId={mvp.playerId} />
+                      !washBehind && <Wash key={mvp.playerId} personId={mvp.playerId} />
                     )}
                   </div>
                 ))
@@ -315,7 +326,7 @@ export function DecidedHero({ mode, mvp = null, stats = [] }) {
               <ClubHead side="away" slot={slotOf[ids[0]]} winsNeeded={series.winsNeeded ?? 4} />
               <Stack gap="snug" className="ww-hero__crest">
                 <img src="/brand/world-series-trophy.png" alt="" aria-hidden="true" className="ww-hero__trophy" />
-                {mark ? <SeriesMark mark={mark} height={32} /> : <span className="ww-hero__words">World Series</span>}
+                {mark ? <SeriesMark mark={mark} height={markHeight} /> : <span className="ww-hero__words">World Series</span>}
               </Stack>
               <ClubHead side="home" slot={slotOf[ids[1]]} winsNeeded={series.winsNeeded ?? 4} />
             </div>
@@ -345,8 +356,8 @@ export function DecidedHero({ mode, mvp = null, stats = [] }) {
         </div>
         <Stack gap="snug">
           <Cluster gap="base" rowGap="tight" align="baseline">
-            <span className="ww-hero__month">{monthsOf(hero.days)}</span>
-            <span className="ww-hero__schedulelabel">Series schedule</span>
+            <span className="ww-hero__month">{scheduleTitle ?? monthsOf(hero.days)}</span>
+            {!scheduleTitle && <span className="ww-hero__schedulelabel">Series schedule</span>}
           </Cluster>
           <ScheduleStrip days={hero.days} />
         </Stack>

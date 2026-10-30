@@ -40,27 +40,47 @@
 .pnext__id--wash {
   min-height: 15rem;
 }
-.pnext__action {
+/* The slab: the row's right third, cut on a slant at its left edge like the champion hero's, the
+   photo crisp inside it (Gary, 2026-10-30). It fades in once loaded. */
+.pnext__actionslab {
+  --cut: var(--space-10);
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 52%;
+  inset: 0 0 0 auto;
+  z-index: -1;
+  width: 30%;
+  overflow: hidden;
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%);
+  background: var(--surface-stamped-ink);
+  opacity: 0;
+  pointer-events: none;
+}
+.pnext__actionslab.is-ready { opacity: 1; }
+.pnext__action {
+  width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top;
-  z-index: -1;
-  opacity: 0;
-  filter: saturate(0.85);
-  pointer-events: none;
-  -webkit-mask-image:
-    linear-gradient(to right, transparent 0, black 62%), linear-gradient(to top, transparent 0, black 22%);
-  mask-image:
-    linear-gradient(to right, transparent 0, black 62%), linear-gradient(to top, transparent 0, black 22%);
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
+  object-position: center 20%;
 }
-.pnext__action.is-ready {
-  opacity: 0.92;
+/* The club stripe along the slab's slanted edge: outer, inner, outer, each band its own slant. */
+.pnext__stripe,
+.pnext__stripe::before,
+.pnext__stripe::after {
+  --b: calc(var(--space-4) / 3);
+  position: absolute;
+  inset: 0;
+}
+.pnext__stripe::before,
+.pnext__stripe::after { content: ''; }
+.pnext__stripe::before {
+  background: var(--stripe-out, var(--text-heading));
+  clip-path: polygon(var(--cut) 0, calc(var(--cut) + 3 * var(--b)) 0, calc(3 * var(--b)) 100%, 0 100%);
+}
+.pnext__stripe::after {
+  background: var(--stripe-in, var(--surface-card));
+  clip-path: polygon(calc(var(--cut) + var(--b)) 0, calc(var(--cut) + 2 * var(--b)) 0, calc(2 * var(--b)) 100%, var(--b) 100%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pnext__actionslab { transition: opacity var(--dur-slow) var(--ease-out); }
 }
 /* Text can reach the photo's soft edge: a paper halo keeps it readable. */
 .pnext__id--photo .pnext__role,
@@ -81,6 +101,12 @@
 .pnext__who {
   min-width: 0;
 }
+.pnext__role b,
+.pnext__role i {
+  font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display);
+  font-style: normal;
+}
+.pnext__role b { color: var(--clay); margin-right: var(--space-1h); }
 .pnext__role {
   margin: 0;
   color: var(--text-heading);
@@ -194,22 +220,23 @@
   text-transform: uppercase;
 }
 /* layout-exempt: a fixed two-up grid whose lead tile spans it; Grid fits columns by width */
+/* Five tiles in one row at every width (Gary, 2026-10-30: on a phone two rows of big tiles took the
+   screen). The phone's tile is tighter still than the compact one: less padding, a smaller figure. */
+/* layout-exempt: a fixed five tiles in one row */
 .pnext__tilerow {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-1h);
 }
-.pnext__tilerow > :first-child {
-  grid-column: 1 / -1;
+@media (max-width: 739.98px) {
+  .pnext__tilerow .stattile { padding: var(--space-1h); }
+  /* The lead tile's season does not fit a fifth of a phone: the page's season says it. */
+  .pnext__tileyr { display: none; }
+  .pnext__tilerow .stattile__label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pnext__tilerow .stattile__value { font-size: var(--fs-title-lg); line-height: var(--lh-solid); }
 }
 @media (min-width: 740px) {
-  /* layout-exempt: five tiles in one row at the wide step */
-  .pnext__tilerow {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-  .pnext__tilerow > :first-child {
-    grid-column: auto;
-  }
+  .pnext__tilerow { gap: var(--space-4); }
 }
 
 /* A section is one jump-bar target. Its first card's name tab hangs above the card, so the
@@ -279,6 +306,14 @@
     gap: var(--space-5);
     padding: var(--space-4);
   }
+  /* Wide, the hero packs tighter: a shorter photo row and the facts four across. */
+  .pnext__id--wash {
+    min-height: 11rem;
+  }
+  /* layout-exempt: the fact strip's fixed four columns at the wide step */
+  .factgrid--strip.pnext__facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
   .shot.pnext__shot {
     width: 112px;
     height: 132px;
@@ -322,4 +357,88 @@
 /* Joined segments: a run of picks inside a Splits bar shares one border. */
 .splitsmod__segs .pnext-pick + .pnext-pick {
   margin-left: calc(var(--bw-heavy) * -1);
+}
+
+/* A hero tile that opens its histogram: the button is only the tap; the tile draws itself. */
+/* layout-exempt: one tile filling its button, not a layout */
+.pnext__tilebtn {
+  display: grid;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+.pnext__tilebtn:focus-visible { outline: none; box-shadow: var(--ring); }
+/* The tile ruler (TileHistogram.jsx): one track from the worst qualified player to the best, filled
+   up to his figure; his figure a clay dot with its number above, the league figure a dashed mark
+   with its label below. */
+/* A panel that floats over the cards below rather than pushing them down (Gary, 2026-10-30). The
+   tile row's own section lifts above its neighbours; inside it, the ruler sits under the row. */
+.pnext__tiles { position: relative; z-index: var(--z-raised); }
+.tileruler {
+  position: absolute;
+  z-index: 0;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: var(--space-2);
+  padding: var(--space-8) var(--space-4) var(--space-3);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-stamped);
+}
+/* It slides down out from under the tile row, and back up under it on close (Gary, 2026-10-30). */
+.pnext__tiles .pnext__tilerow { position: relative; z-index: 1; }
+@keyframes tileruler-slide {
+  from { opacity: 0; transform: translateY(calc(-1 * var(--space-12))); clip-path: inset(var(--space-12) 0 0 0); }
+  to { opacity: 1; transform: none; clip-path: inset(calc(-1 * var(--space-8)) 0 calc(-1 * var(--space-8)) 0); }
+}
+@keyframes tileruler-slide-back {
+  from { opacity: 1; transform: none; clip-path: inset(calc(-1 * var(--space-8)) 0 calc(-1 * var(--space-8)) 0); }
+  to { opacity: 0; transform: translateY(calc(-1 * var(--space-12))); clip-path: inset(var(--space-12) 0 0 0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tileruler { animation: tileruler-slide var(--dur-med) var(--ease-out) both; }
+  .tileruler.is-closing { animation: tileruler-slide-back var(--dur-med) var(--ease-standard) both; }
+}
+.tileruler__track { position: relative; height: var(--space-2); border-radius: var(--radius-pill); background: var(--border-hairline); }
+.tileruler__fill { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--clay); opacity: 0.35; }
+.tileruler__him { position: absolute; top: 50%; width: var(--space-4); height: var(--space-4); border: var(--bw-heavy) solid var(--surface-card); border-radius: 50%; background: var(--clay); transform: translate(-50%, -50%); }
+.tileruler__him small { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); padding-bottom: var(--space-1); color: var(--clay); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); white-space: nowrap; }
+.tileruler__lg { position: absolute; top: calc(-1 * var(--space-1)); height: calc(100% + var(--space-3)); border-left: var(--bw-heavy) dashed var(--text-heading); }
+.tileruler__lg small { position: absolute; top: 100%; left: 0; transform: translateX(-50%); padding-top: var(--space-1); color: var(--text-caption); font: var(--fs-cell) / 1 var(--font-mono); white-space: nowrap; }
+.tileruler__among { margin: 0 0 var(--space-8); color: var(--text-caption); font: var(--fs-cell) / 1 var(--font-mono); }
+/* With the note on its own line, the panel's top pad need not hold his label as well. */
+.tileruler:has(.tileruler__among) { padding-top: var(--space-3); }
+/* His label runs from the dot toward the open side, so it never passes the panel's edge: right of
+   the dot in the left half, left of it in the right half. */
+.tileruler__him small { left: calc(-1 * var(--space-2)); transform: none; }
+.tileruler__him.is-right small { left: auto; right: calc(-1 * var(--space-2)); }
+.tileruler__axis { display: flex; justify-content: space-between; margin: var(--space-2) 0 0; color: var(--text-caption); font: var(--fs-cell) / 1 var(--font-mono); }
+
+/* On a phone the action photo adds nothing beside the headshot (Gary, 2026-10-30): no slab, and
+   the row drops the height it held for one. */
+@media (max-width: 739.98px) {
+  .pnext__actionslab { display: none; }
+  .pnext__id--wash { min-height: 0; }
+}
+
+/* The jump bar (Gary, 2026-10-30): it runs the page's full width, and once the page scrolls past it,
+   it sticks to the top. It bleeds out of the column by the gutter each side and pads back in by the
+   same, so its buttons still start where the column does. 100vw counts the scrollbar, so the page
+   root clips the few pixels it overshoots (clip, not hidden: no scroll container, so sticky holds). */
+html:has(.pnext__page),
+body:has(.pnext__page) { overflow-x: clip; }
+.pnext__page > .jumpbar {
+  --bleed: calc((100vw - 100%) / 2);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  margin-inline: calc(-1 * var(--bleed));
+  /* The buttons use the whole bar, from the window's own gutter (Gary, 2026-10-30: fill the space). */
+  padding-inline: var(--space-4);
 }

@@ -243,13 +243,28 @@ export async function loadRoster(id, asOf, src = DIRECT) {
         ]
       }),
   )
-  const eligibleRoster = recentFormEligibleRoster(roster, fullRoster, currentInjuredIds)
   const recentFormGames = await fetchRecentFormGames(schedule)
+  // Once the club's season is over (this season, every game on its schedule decided), "Current" is
+  // the last team that took the field, not who is on the roster now: the offseason empties the
+  // active roster, and a free agent who played the last game would leave his spot blank (Gary,
+  // 2026-10-30). So the window counts everyone who played in it, named from the box score.
+  const seasonOver = season === seasonOf(null, sportId) && schedule.length > 0 && schedule.every((g) => g.won != null)
+  const eligibleRoster = seasonOver
+    ? playedInWindow(recentFormGames)
+    : recentFormEligibleRoster(roster, fullRoster, currentInjuredIds)
   const recentForm = buildRecentForm(recentFormGames, eligibleRoster)
+  // A departed player's row reads his name and number from the box score and his WAR from the
+  // season file (Bauers wore 9), so nothing about him reads blank.
+  const fromBox = new Map(eligibleRoster.map((r) => [r.person.id, r]))
   const recentPreferredLineup = recentForm.preferredLineupIds
     .map(({ position, id }) => {
       const meta = rosterMetaById.get(id)
-      return meta ? { position, id, last: meta.last, name: meta.name } : null
+      if (meta) return { position, id, last: meta.last, name: meta.name }
+      const r = seasonOver && fromBox.get(id)
+      const full = r?.person?.fullName
+      if (!full) return null
+      const war = sportId === 1 ? warBat[id] ?? null : undefined
+      return { position, id, last: full.split(' ').slice(1).join(' ') || full, name: full, jersey: r.jersey, war }
     })
     .filter(Boolean)
   const recentSubstitutes = recentForm.substituteIds.map((id) => rosterMetaById.get(id)).filter(Boolean)
@@ -305,8 +320,21 @@ export async function loadRoster(id, asOf, src = DIRECT) {
     startingPitchers,
     bullpen,
     recentPreferredLineup,
+    seasonOver,
     recentSubstitutes,
     recentStartingPitchers,
     recentBullpen,
   }
+}
+
+// Everyone on the club's side of the window's box scores, shaped as roster rows ({ person, position })
+// for buildRecentForm: the offseason's "who played", not "who is on the roster".
+function playedInWindow(games) {
+  const byId = new Map()
+  for (const { side, box } of games) {
+    for (const p of Object.values(box?.teams?.[side]?.players ?? {})) {
+      if (p.person?.id && !byId.has(p.person.id)) byId.set(p.person.id, { person: p.person, position: p.position, jersey: p.jerseyNumber ?? '' })
+    }
+  }
+  return [...byId.values()]
 }

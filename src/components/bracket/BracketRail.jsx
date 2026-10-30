@@ -19,25 +19,13 @@
 // (ADR-0087). No seal, no kraft.
 import '../../styles/80-postseason-bracket.css'
 import '../../styles/postseason/home.css'
-import { humanDate } from '../../lib/dates.js'
 import { FullBracket } from './FullBracket.jsx'
 import { useBracketHistoryIds } from './PostseasonBracket.jsx'
 
-export function BracketRail({ bracket, cutoff, slateDate }) {
+export function BracketRail({ bracket, cutoff }) {
   const historyIds = useBracketHistoryIds()
-  // A slate day after today still draws today's bracket (its cutoff never
-  // passes today), and the head says so.
-  const ahead = Boolean(slateDate && cutoff && slateDate > cutoff)
   return (
     <aside className="bracketrail" aria-label="Postseason bracket">
-      <div className="bracketrail__head">
-        <h2 className="t-label t-label--bold bracketrail__title">Postseason</h2>
-        {cutoff && (
-          <span className="bracketrail__note">
-            {ahead ? 'As of today' : `Heading into ${humanDate(cutoff)}`}
-          </span>
-        )}
-      </div>
       {bracket && (
         <div className="pbkt bracketrail__body">
           <FullBracket bracket={bracket} cutoff={cutoff} historyIds={historyIds} rail />

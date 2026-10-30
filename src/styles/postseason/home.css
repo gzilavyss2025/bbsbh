@@ -47,9 +47,10 @@
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-/* .pbkt's own vertical margin is for a block in the games column; in the rail
-   the head above already spaces it. */
-.bracketrail__body.pbkt {
+/* .pbkt's own vertical margin is for a block in the games column. The rail has no head, so its
+   first card's tab lines up with the top of the games column. */
+.bracketrail__body.pbkt,
+.bracketrail__body > .pbkt-full {
   margin: 0;
 }
 

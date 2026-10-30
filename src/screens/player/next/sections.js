@@ -42,7 +42,7 @@ const HP = ['hitting', 'pitching']
 // loads above the reader does not push the page (Slot.jsx). Measured on two players (slice 07a);
 // a floor, not the real height. 0 for a slot that is often empty.
 export const SLOTS = [
-  { id: 'season', module: 'season', section: 'season', label: 'Season', minH: [500, 480], roles: HP, load: () => import('./modules/season/index.jsx') },
+  { id: 'season', module: 'season', section: 'season', label: 'Season stats', minH: [500, 480], roles: HP, load: () => import('./modules/season/index.jsx') },
   { id: 'percentile', module: 'percentile', section: 'season', label: 'Percentile rank', minH: [440, 420], roles: HP, load: () => import('./modules/percentile/index.jsx') },
   { id: 'advanced', module: 'advanced', section: 'season', label: 'Advanced', minH: [480, 260], roles: HP, load: () => import('./modules/advanced/index.jsx') },
   { id: 'runvalue', module: 'runvalue', section: 'season', label: 'Run value', minH: [340, 340], roles: HP, once: true, load: () => import('./modules/runvalue/index.jsx') },

@@ -9,11 +9,10 @@
 :root[data-motion='reduced'] .tnext__roster .card--stamp-in {
   animation: none !important;
 }
-/* The pen's week sits on the inset ground, as the hero's foot does: a second layer of paper
-   under the lists, so the staff card has depth. */
+/* The pen's week sits on the card's own paper (Gary, 2026-10-30), under a rule. */
 .tnext__roster .roster-sub:has(.staffgrid) {
   padding: var(--space-3);
-  background: var(--surface-inset);
+  background: transparent;
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 
@@ -103,6 +102,29 @@
    height, it left a band of empty paper above center field (Gary, 2026-10-21). */
 .rosterbox-pair__diamond {
   align-self: start;
+}
+/* Stacked, the park and the lineup table run the roster card's full width (Gary, 2026-10-30):
+   out to the card's edges, no side padding and no side rules. */
+@media (max-width: 739.98px) {
+  .rosterbox-pair {
+    margin-inline: calc(var(--space-4) * -1);
+  }
+  .rosterbox-pair .table,
+  .rosterbox-pair .rosterbox {
+    border-inline: 0;
+    border-radius: 0;
+  }
+  .rosterbox-pair__diamond .defdiamond {
+    padding-inline: 0;
+    padding-bottom: 0;
+    border-inline: 0;
+    border-bottom: 0;
+    border-radius: 0;
+  }
+  /* The park sits close over the table: no rule under it and a small gap (Gary, 2026-10-30). */
+  .rosterbox-pair {
+    row-gap: var(--space-1);
+  }
 }
 /* The pen week's strip keeps its three figures on one row, even on a phone: a third cell
    wrapped alone and left an empty fill beside it. */

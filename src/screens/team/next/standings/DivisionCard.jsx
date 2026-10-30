@@ -15,7 +15,6 @@ import { gbText } from './standingsData.js'
 export function DivisionCard({ team, standings, asOf, odds, stampIn, style }) {
   const [showOdds, setShowOdds] = useState(false)
   const name = team.division?.name || 'Standings'
-  const mlb = (team.sport?.id ?? 1) === 1
   return (
     <>
       <Card
@@ -62,9 +61,9 @@ export function DivisionCard({ team, standings, asOf, odds, stampIn, style }) {
             ))}
           </tbody>
         </Table>
-        {(mlb || odds.length > 0) && (
+        {/* No L10 note under the table (Gary, 2026-10-30); the foot holds the odds door alone. */}
+        {odds.length > 0 && (
           <div className="stnd__foot">
-            {mlb && <p className="stnd__note">L10 counts the regular season. The Last 10 tile above counts October too.</p>}
             {odds.length > 0 && (
               <Pill role="control" fill="ink" onClick={() => setShowOdds(true)}>
                 Postseason Odds

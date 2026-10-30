@@ -60,6 +60,7 @@
   width: var(--simp-ini-w);
   height: var(--simp-ini-h);
   border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: var(--radius-square); /* square, like the page's other headshots (Gary, 2026-10-30) */
 }
 .shot.simp__shot.shot--fallback {
   font-size: var(--fs-h3);

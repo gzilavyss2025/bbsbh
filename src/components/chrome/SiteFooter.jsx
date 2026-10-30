@@ -36,7 +36,16 @@ export function SiteFooter({ onShowLogos }) {
 
   return (
     <footer className="sitefooter">
-      <div className="sitefooter__actions">
+      <div className="sitefooter__row">
+        <FooterDirectory
+          groups={PAGE_GROUPS}
+          trail={FOOTER_TRAIL}
+          // The two footer tools join the page list (Gary, 2026-10-28).
+          actions={[
+            { label: 'Find a past matchup', onClick: () => setShowFinder(true) },
+            { label: 'Logo sheet', onClick: onShowLogos },
+          ]}
+        />
         <button
           type="button"
           className="btn sitefooter__btn"
@@ -45,16 +54,6 @@ export function SiteFooter({ onShowLogos }) {
           Settings
         </button>
       </div>
-
-      <FooterDirectory
-        groups={PAGE_GROUPS}
-        trail={FOOTER_TRAIL}
-        // The two footer tools join the page list (Gary, 2026-10-28).
-        actions={[
-          { label: 'Find a past matchup', onClick: () => setShowFinder(true) },
-          { label: 'Logo sheet', onClick: onShowLogos },
-        ]}
-      />
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}
 

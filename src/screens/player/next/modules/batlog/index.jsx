@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react'
 import '../../../../../styles/player-next/batter/batlog.css'
 import { TeamLogo } from '../../../../../components/logo/TeamLogo.jsx'
 import { Segmented } from '../../../../../components/ui/control/Segmented.jsx'
-import { FactGrid } from '../../../../../components/ui/frame/FactGrid.jsx'
 import { Cluster } from '../../../../../components/ui/layout/Cluster.jsx'
 import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
-import { DASH, Fact } from '../../../parts.jsx'
+import { DASH } from '../../../parts.jsx'
 import { LogMore } from '../../parts/LogMore.jsx'
 import { LogTable } from '../../parts/LogTable.jsx'
-import { COLUMNS, loadBatlog, scopeRows, totalsOf } from './batlogView.js'
+import { COLUMNS, loadBatlog, scopeRows } from './batlogView.js'
 
 // The batter Game Log (#1890, board "BatterGameLog"): his games this season, newest first, a totals
 // strip that follows the filter, and each game's pitches seen split into whiffs, fouls and the
@@ -18,7 +17,7 @@ import { COLUMNS, loadBatlog, scopeRows, totalsOf } from './batlogView.js'
 const SHOWN = 8
 const SCOPES = [
   ['all', 'All'],
-  ['reg', 'Regular season'],
+  ['reg', 'Regular'], // short, so the three fit a phone's width (Gary, 2026-10-30)
   ['post', 'Postseason'],
 ]
 const games = (n) => `${n} ${n === 1 ? 'game' : 'games'}`
@@ -33,10 +32,10 @@ const SEGS = [
   ['other', 'Other pitches'],
 ]
 
+// No game number or position on a row, and no reading note under the log (Gary, 2026-10-30).
 const CELLS = {
   game: (r) => (
     <Cluster as="span" gap="tight" align="center">
-      <span className="mono batlog__n">{r.n}</span>
       <b className="batlog__date">{r.date}</b>
       <span className="mono batlog__at">{r.home ? 'vs' : 'at'}</span>
       <TeamLogo teamId={r.oppId} name={r.opp} size={30} />
@@ -53,7 +52,6 @@ const CELLS = {
       ) : (
         <span className="mono">{DASH}</span>
       )}
-      <span className="mono batlog__pos">{r.pos}</span>
     </Cluster>
   ),
   seen: (r) => (
@@ -104,7 +102,7 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
   const all = view.rows
   const rows = scopeRows(all, scope)
   const post = scopeRows(all, 'post').length
-  const t = totalsOf(rows)
+  // No totals box over the log (Gary, 2026-10-30): the hero tiles already carry the season line.
   const shown = rows.slice(0, limit)
   // In the All view, a heading over each group, with its count.
   const groups = scope === 'all' && post > 0
@@ -127,18 +125,8 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
             options={SCOPES.map(([id, label]) => ({ value: id, label, count: counts[id] }))}
           />
         )}
-        <span className="mono batlog__scope">{season} · newest first</span>
       </Cluster>
-      <FactGrid look="strip" as="div" className="batlog__totals">
-        <Fact label="Games" value={t.games} mono />
-        <Fact label="AVG" value={t.avg} mono />
-        <Fact label="OBP" value={t.obp} mono />
-        <Fact label="SLG" value={t.slg} mono />
-        <Fact label="HR" value={t.hr} mono />
-        <Fact label="RBI" value={t.rbi} mono />
-      </FactGrid>
-      <LogTable columns={TABLE_COLUMNS} rows={lines} caption={`Game log, ${season}`} />
-      <LogMore total={rows.length} limit={limit} first={SHOWN} onPage={setLimit} />
+      {/* The bar key leads the log and sticks under the jump bar while the log scrolls by (Gary, 2026-10-30). */}
       <Cluster as="ul" className="batlog__key">
         {SEGS.map(([k, name]) => (
           <li key={k}>
@@ -147,12 +135,8 @@ export default function BatlogModule({ bio, asOf, season, onEmpty, onCount }) {
           </li>
         ))}
       </Cluster>
-      <p className="hint batlog__note">
-        Bar: every pitch he saw that game, in the order above. Whiffs are swings and misses. Fouls include foul bunts and foul tips. Other is
-        balls, called strikes and balls in play. Green underlined: 3 or more hits, a home run, or 3 or more RBI. Clay underlined: 3 or more
-        strikeouts. AVG is the hits per at-bat of that day. Pos is where he played; PH pinch hitter, PR pinch runner.
-        {all.some((r) => !r.result) && ' A dash in Result: no final score on file. A game played today shows none until the next day, and so does a suspended game that resumes today (its row keeps the earlier date).'}
-      </p>
+      <LogTable columns={TABLE_COLUMNS} rows={lines} caption={`Game log, ${season}`} />
+      <LogMore total={rows.length} limit={limit} first={SHOWN} onPage={setLimit} />
     </Stack>
   )
 }

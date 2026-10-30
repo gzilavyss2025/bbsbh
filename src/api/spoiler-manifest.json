@@ -551,6 +551,10 @@
       "class": "spoiler-free",
       "why": "League AVG and ERA of one MLB season, for the career table's vs-league column. Season rates from public/data/league-averages.json, plus one live teams/stats request for the season in play. No game, no linescore, no reveal state."
     },
+    "player/leaguePool.js": {
+      "class": "spoiler-free",
+      "why": "Every qualified MLB player's season figure for one stat (stats=season, playerPool=qualified), and war.json's batting WAR for the hitters at one position with 300+ PA, for the player page's tile ruler (2026-10-30). Season figures of other players, no game, no linescore, no reveal state."
+    },
     "player/leagueRanks.js": {
       "class": "spoiler-free",
       "why": "League rank marks for the player page (#1856): the rank from stats=rankings; a rate stat reads \"N of M\" with M the qualified pool from one stats request per season and league, a counting stat reads the place only (\"6th\") and needs no pool. Season ranks, no game, no linescore, no reveal state."

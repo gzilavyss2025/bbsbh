@@ -11,6 +11,7 @@ import { useOvr } from '../../../components/ovr/useOvr.js'
 import { DASH, Fact, debutLabel, draftLabel } from '../parts.jsx'
 import { HERO_STAMP_DELAY, ageFact, headerExtras } from './heroData.js'
 import { HeroActionPhoto } from './top/HeroActionPhoto.jsx'
+import { TEAM_COLOR_PAIRS } from '../../../lib/brandColors.js'
 import { HeroBand } from './top/HeroBand.jsx'
 import { HeroStamp } from './top/HeroStamp.jsx'
 import { BornValue, SchoolsValue, useFromLinks } from './top/HeroFromLinks.jsx'
@@ -51,11 +52,21 @@ function AgeFact({ fact, birthDate }) {
 // fact strip. The position rule is PlayerHubShell's: DH/P for a two-way player,
 // SP/RP/CL for a pitcher, the listed position for everyone else. The header extras (#2009) ride
 // in it: the OVR stamp on the photo, the name-block extras, and the ratings strip, folded on load.
+// The OVR stamp and its ratings strip are parked (Gary, 2026-10-30) until there is a better use for
+// the ratings: the data, HeroStamp and HeroStrip stay wired, and this flag brings them back.
+const SHOW_OVR = false
+
+// The club's secondary outside, its primary in the middle (the Brewers: gold, navy, gold).
+const stripeOf = (teamId) => {
+  const pair = TEAM_COLOR_PAIRS[teamId]
+  return pair ? [pair[1], pair[0]] : null
+}
+
 export function PlayerNextHero({ core }) {
   const { bio, rosterStatus: status, heroRole } = core
   const x = headerExtras(core, useOvr(bio))
   const from = useFromLinks(bio)
-  const stamp = x?.ratings[0]
+  const stamp = SHOW_OVR ? x?.ratings[0] : null
   const [open, setOpen] = useState(false)
   // The action photo: 'wait' until it loads, 'ready' once shown, 'gone' after a 404.
   const [photo, setPhoto] = useState('wait')
@@ -90,6 +101,7 @@ export function PlayerNextHero({ core }) {
             ready={photo === 'ready'}
             onReady={() => setPhoto('ready')}
             onGone={() => setPhoto('gone')}
+            stripe={stripeOf(club?.parentOrgId ?? club?.id)}
           />
         )}
         <Headshot
@@ -100,7 +112,8 @@ export function PlayerNextHero({ core }) {
           className="pnext__shot"
         />
         <div className="pnext__who">
-          <p className="pnext__role">{[pos || role, bio.number && `#${bio.number}`].filter(Boolean).join(' · ')}</p>
+          {/* Gameday's lineup tag: the number in clay, the position beside it. */}
+          <p className="pnext__role">{bio.number && <b>{bio.number}</b>}{(pos || role) && <i>{pos || role}</i>}</p>
           <h1 className="pnext__name">{bio.fullName}</h1>
           {(club || x?.rank || x?.orgRank) && (
             <p className="pnext__club">

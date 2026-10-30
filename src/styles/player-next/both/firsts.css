@@ -1,8 +1,10 @@
 /* ==== NEW PLAYER PAGE: the Firsts card (#1895), copied from the Firsts board ==== */
 
 /* One row per first: label left, date and the opponent's logo right. */
+/* The rows run the card's full width, edge to edge (Gary, 2026-10-30): the list pulls out by the
+   card body's own padding, and each row pads back in by the same, so the text still lines up. */
 .firsts {
-  margin: 0 calc(var(--space-3h) * -1);
+  margin: 0 calc(var(--space-4) * -1);
 }
 /* Holds four rows while the firsts load. */
 .firsts--wait {
@@ -16,7 +18,7 @@
   gap: var(--space-3);
   width: 100%;
   min-height: 3.5rem;
-  padding: var(--space-3) var(--space-3h);
+  padding: var(--space-3) var(--space-4);
   border: 0;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
   background: transparent;

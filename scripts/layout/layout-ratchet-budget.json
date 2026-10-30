@@ -28,7 +28,7 @@
   },
   "src/styles/08-site-shell.css": {
     "column": 7,
-    "grid": 1
+    "grid": 0
   },
   "src/styles/08a-site-menu.css": {
     "column": 3,

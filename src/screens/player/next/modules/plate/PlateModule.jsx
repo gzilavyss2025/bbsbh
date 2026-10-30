@@ -135,6 +135,8 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
             The number is the share of pitches that ended in play or as a ball: the hitter&rsquo;s outcomes. A blank box has fewer than {MIN_CELL} pitches.
             {view.segs == null && ' Called strikes and balls in play are not on file for this hitter, so the boxes and the bars stay blank.'}
           </p>
+          {/* The key sits above the first bar it reads (Gary, 2026-10-30), not under the pitch mix. */}
+          <Key />
           <div className="fplate__read" aria-live="polite">
             <span className="fplate__readtitle">{read.title}</span>
             {!picked && view.segs && <Bar f={outcomeFigures(name, view)} />}
@@ -152,7 +154,6 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
             panel={focus}
             backLabel="All pitches"
           />
-          <Key />
           <FactGrid className="fplate__facts">
             <Fact label="Swing" value={fmtPct(view.rates.swing)} />
             <Fact label="Chase" value={fmtPct(view.rates.chase)} />
@@ -161,10 +162,6 @@ export default function PlateModule({ bio, asOf, season, onEmpty, onCount }) {
             <Fact label="Avg MPH" value={fmtMph(view.rates.mph)} />
             <Fact label="Swings" value={view.swings.toLocaleString()} />
           </FactGrid>
-          <p className="fplate__note">
-            Whiff is a swing and a miss, a foul tip included. Swing is swings per pitch; chase is swings at pitches outside the zone; in zone is the share of pitches thrown in it.
-            Tap a pitch to read the map for it.
-          </p>
         </div>
       </div>
     </div>
@@ -190,7 +187,8 @@ function Glyph({ code, size = 20 }) {
   )
 }
 
-// The five outcomes and the two sides: the Form trend table's bar markup, on its classes (formchart.css).
+// The five outcomes: the Form trend table's bar markup, on its classes (formchart.css). No "hitter's /
+// pitcher's" share line under it (Gary, 2026-10-30): the key at the card's head reads the colours.
 function Bar({ f }) {
   return (
     <>
@@ -198,10 +196,6 @@ function Bar({ f }) {
         {f.segs.map((s, i) => (
           <span key={OUTCOMES[i]} className="fstretch__seg" data-i={i} hidden={!s.n} style={{ flex: `${s.n} 1 0` }}>{s.label}</span>
         ))}
-      </span>
-      <span className="fstretch__ends" aria-hidden="true">
-        <span className="fstretch__end fstretch__end--good">{f.good}</span>
-        <span className="fstretch__end fstretch__end--bad">{f.bad}</span>
       </span>
     </>
   )

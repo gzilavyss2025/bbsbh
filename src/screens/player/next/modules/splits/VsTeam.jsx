@@ -19,6 +19,7 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
   const [pick, setPick] = useState(vs.preselectId)
   const [open, setOpen] = useState(false)
   const stripRef = useRef(null)
+  const stepStrip = (dir) => stripRef.current?.scrollBy({ left: dir * stripRef.current.clientWidth * 0.8, behavior: 'smooth' })
   const activeRef = useRef(null)
   // Keep the picked club centred in the strip, scrolling the strip itself and not the page. The
   // first centre is instant; a club the reader picks glides there (board Splits, center()).
@@ -46,32 +47,37 @@ export function VsTeam({ vs, group, career, season, asOf, bio, surname }) {
   return (
     <Part once={viewKey(bio.id, `splits-${group}:v`)} wide label="Splits vs team">
       <SectionHead look="rule" note={`Career vs ${team?.abbr ?? ''}`}>Splits vs team</SectionHead>
-      <div className="splitsmod__strip" role="group" aria-label="Opponent" ref={stripRef}>
-        {vs.teams.map((t) => {
-          const chip = clubChip(t, vs.byOpp[String(t.id)], group)
-          const active = t.id === team?.id
-          return (
-            <button
-              key={t.id}
-              type="button"
-              className={`splitsmod__club${chip.faced ? '' : ' is-none'}`}
-              aria-pressed={active}
-              aria-label={chip.aria}
-              ref={active ? activeRef : null}
-              onClick={() => setPick(t.id)}
-            >
-              {t.id === vs.preselectId && <span className="splitsmod__next">Next</span>}
-              <TeamLogo teamId={t.id} name={t.name} size={34} />
-              <span className="splitsmod__abbr">{t.abbr}</span>
-              <span className={`splitsmod__chipfig${chip.thin ? ' is-thin' : ''}`}>{chip.text}</span>
-            </button>
-          )
-        })}
+      {/* No scrollbar (Gary, 2026-10-30): ‹ › step the strip by most of its width, as the slate's club
+          strip does. A touchscreen swipes it. */}
+      <div className="splitsmod__stripwrap">
+        <button type="button" className="splitsmod__arrow" aria-label="Scroll teams left" onClick={() => stepStrip(-1)}>‹</button>
+        <div className="splitsmod__strip" role="group" aria-label="Opponent" ref={stripRef}>
+          {vs.teams.map((t) => {
+            const chip = clubChip(t, vs.byOpp[String(t.id)], group)
+            const active = t.id === team?.id
+            return (
+              <button
+                key={t.id}
+                type="button"
+                className={`splitsmod__club${chip.faced ? '' : ' is-none'}`}
+                aria-pressed={active}
+                aria-label={chip.aria}
+                ref={active ? activeRef : null}
+                onClick={() => setPick(t.id)}
+              >
+                {t.id === vs.preselectId && <span className="splitsmod__next">Next</span>}
+                <TeamLogo teamId={t.id} name={t.name} size={34} />
+                <span className="splitsmod__abbr">{t.abbr}</span>
+                <span className={`splitsmod__chipfig${chip.thin ? ' is-thin' : ''}`}>{chip.text}</span>
+              </button>
+            )
+          })}
+        </div>
+        <button type="button" className="splitsmod__arrow" aria-label="Scroll teams right" onClick={() => stepStrip(1)}>›</button>
       </div>
       <div className="splitsmod__clubhead" aria-live="polite">
         <TeamLogo teamId={team?.id} name={clubName} size={30} />
         <span className="splitsmod__clubname">{clubName}</span>
-        {team?.id === vs.preselectId && <span className="splitsmod__nexttag">Next opponent</span>}
       </div>
       <Head dr layout={layout} title="Career" group={group} vs="Career" />
       {open && baseLine && <Row dr base line={baseLine} layout={layout} />}

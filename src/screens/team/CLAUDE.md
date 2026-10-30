@@ -2,7 +2,7 @@
 
 The team page is **one scroll of seven named bands** (ADR-0082, #1107). It replaced six tabs
 (ADR-0034, superseded). `next/TeamNextPage.jsx` draws `TeamHubShell` with the page `top`, the
-anchor jump bar (`bar` prop), one `Band` per `BANDS` entry (`next/bands.js`), and the foot. A band
+anchor jump bar (`bar` prop), one `Band` per `BANDS` entry (`next/bands.js`; Roster sits second, after Standings), and the foot. A band
 mounts its folder (`next/<band>/index.jsx`) only when near (`useNearView`), so nothing loads
 before it is. **A band edits only its own folder**, never `bands.js`, `Band.jsx` or the page.
 Module props: `{ team, asOf, sportId, onReady, onCount }`; call `useBandData` for the two reports.
@@ -27,8 +27,9 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
   form line, the stretches, Last 10, the days calendar and the record grid read only games with
   a `won`, so `?d=` stops every one of them. The grid's other-league standings are the page's
   one request on a tap.
-- **Standings** (`next/standings/`): division table, team score, Records, Last time, day of
-  week, comeback wins. The jump-bar count is one per card drawn. The **Records card**
+- **Standings** (`next/standings/`): the division table and Last time. Team score, Records, day of
+  week and comeback wins draw at the head of **Ranks** through `standings/StandingsRankCards.jsx`
+  (same loader via SHARED, no new request). The jump-bar count is one per card drawn. The **Records card**
   (`standings/records/`) is a rank-strip index of the record groups. Each group folds open in
   place. The half and the month are the two scope levers, and an option with no games in the
   other pick is disabled. It costs no request: the shard holds each club's rank per scope, read

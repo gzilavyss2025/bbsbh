@@ -1,102 +1,96 @@
 import { useEffect, useState } from 'react'
 import { fetchPostseasonByRound } from '../../../../api/player/postseasonRegister.js'
+import { Ledger } from '../../../../components/player/Ledger.jsx'
 import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { SectionHead } from '../../../../components/ui/frame/SectionHead.jsx'
 import { StatTile } from '../../../../components/ui/frame/StatTile.jsx'
-import { Cluster } from '../../../../components/ui/layout/Cluster.jsx'
-import { Grid } from '../../../../components/ui/layout/Grid.jsx'
 import { Stack } from '../../../../components/ui/layout/Stack.jsx'
 import { roleWord } from '../../parts.jsx'
-import { hasExtras } from '../heroData.js'
-import { chipsView, countTag, nextLit, roundRows } from './overviewView.js'
+import { roundRows } from './overviewView.js'
 import '../../../../styles/player-next/top/overview-extras.css'
+// The row that opens (seasonmod__year, reg-round) is the Season card's; its sheet is imported here too.
+import '../../../../styles/player-next/both/season.css'
 
-function TileRow({ title, note, tiles }) {
+// One row of compact tiles (Gary, 2026-10-30: the card took too much room). `head` replaces the
+// section head's note, for the postseason switch.
+function TileRow({ title, note, tiles, head }) {
   return (
     <Stack gap="snug">
-      <SectionHead look="rule" as="span" note={note}>{title}</SectionHead>
-      <Grid min="7rem">
-        {tiles.map((t) => <StatTile key={t.k} label={t.k} value={t.v} />)}
-      </Grid>
+      {(title || head) && (
+        <div className="pnext-ext__head">
+          {title ? <SectionHead look="rule" as="span" note={note}>{title}</SectionHead> : <span />}
+          {head}
+        </div>
+      )}
+      <div className="pnext-ext__tiles">
+        {tiles.map((t) => <StatTile key={t.k} label={t.k} value={t.v} className="stattile--compact" />)}
+      </div>
     </Stack>
   )
 }
 
-// Rank chips as buttons: a chip with a hero tile lights it; one without (R, 2B) says so.
-function Ranks({ block, lit, onLight }) {
-  const [bare, setBare] = useState(null)
-  const tap = (key, tile) => {
-    setBare(tile ? null : key)
-    onLight(nextLit(lit, block.group, tile))
-  }
-  return (
-    <Stack gap="snug">
-      <SectionHead look="rule" as="span" note="top 10">League rank</SectionHead>
-      {chipsView(block).map((r) => (
-        <Cluster key={r.league} className="pnext-ext__chips">
-          {r.items.map((it) => {
-            const key = `${r.league}:${it.label}`
-            const on = it.tile ? lit?.group === block.group && lit.tile === it.tile : bare === key
-            return (
-              <button key={key} type="button" className="pnext-pick" aria-pressed={on} onClick={() => tap(key, it.tile)}>
-                <strong className="pnext-ext__ord">{it.text}</strong>
-                {` ${r.league} · ${it.label}${r.club ? ` · with ${r.club}` : ''}`}
-              </button>
-            )
-          })}
-        </Cluster>
-      ))}
-      {bare && <p className="hint" role="status">No hero tile shows this stat, so none lights.</p>}
-    </Stack>
-  )
-}
-
-// The Total row, or one row per round. The rounds load only when the switch asks, and the Total
-// row stays up (dimmed) meanwhile, so the group holds its height.
+// One table, the season's postseason line. Tapping its "Postseason" cell opens one row per round
+// under it, read on that first tap (Gary, 2026-10-30: no Total | By round switch; the Season card's
+// year rows open the same way).
 function Postseason({ block, playerId, season, cutoff }) {
   const ps = block.postseason
-  const [scope, setScope] = useState('total')
+  const [open, setOpen] = useState(false)
   const [rounds, setRounds] = useState(undefined)
   useEffect(() => {
-    if (scope !== 'rounds' || rounds !== undefined) return undefined
+    if (!open || rounds !== undefined) return undefined
     let live = true
     fetchPostseasonByRound(playerId, block.group, { season, cutoff })
       .catch(() => null)
       .then((r) => live && setRounds(r))
     return () => { live = false }
-  }, [scope, rounds, playerId, block.group, season, cutoff])
-  const rows = scope === 'rounds' && rounds ? roundRows(rounds, block.group, block.role) : null
+  }, [open, rounds, playerId, block.group, season, cutoff])
+  const rows = open && rounds ? roundRows(rounds, block.group, block.role) : []
+  const keys = ps.tiles.map((t) => t.k)
+  const label = (
+    <button type="button" className="seasonmod__year" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+      Postseason
+      <span className="seasonmod__chev" aria-hidden="true">{open ? '▾' : '▸'}</span>
+    </button>
+  )
   return (
     <Stack gap="snug">
-      <Cluster className="pnext-ext__switch" role="group" aria-label="Postseason scope">
-        {[['total', 'Total'], ['rounds', 'By round']].map(([key, label]) => (
-          <button key={key} type="button" className="pnext-pick" aria-pressed={scope === key} onClick={() => setScope(key)}>{label}</button>
-        ))}
-      </Cluster>
-      {rows ? rows.map((r) => <TileRow key={r.gameType} title={r.series} note={`${r.games} G`} tiles={r.tiles} />) : (
-        <div className="pnext-ext__total" aria-busy={scope === 'rounds' && rounds === undefined}>
-          <TileRow title={ps.title} note={`${ps.games} G`} tiles={ps.tiles} />
-        </div>
-      )}
-      {scope === 'rounds' && rounds === null && <p className="hint">No round split on file.</p>}
+      <Ledger
+        label={ps.title}
+        leftCols={1}
+        head={['', 'G', ...keys]}
+        // The postseason line leads, and its rounds open under it (Gary, 2026-10-30), as the
+        // Season card's year rows do.
+        rows={[
+          { key: 'post', cells: [label, ps.games, ...ps.tiles.map((t) => t.v)] },
+          ...rows.map((r) => ({ key: r.gameType, className: 'reg-round', cells: [<span key="round" className="reg-round__name">{r.series}</span>, r.games, ...keys.map((k) => r.tiles.find((t) => t.k === k)?.v ?? '—')] })),
+        ]}
+      />
+      {open && rounds === undefined && <p className="hint">Loading the rounds…</p>}
+      {open && rounds === null && <p className="hint">No round split on file.</p>}
     </Stack>
   )
 }
 
-// The third top card (#2010), under the tiles: this season's league-rank chips (they light a hero
-// tile), October (Total | By round) and an up-and-down player's other levels. They ride the
-// overview blocks the tiles read. Each group hides when empty; so does the card.
-export function OverviewExtras({ blocks, lit, onLight, season, playerId, cutoff }) {
-  const mine = blocks.filter(hasExtras)
+// The third top card (#2010), under the tiles: October (one table that opens by round), and an up-and-down
+// player's other levels. The league-rank chips left it (Gary, 2026-10-30), so it shows only for a
+// player with a postseason or another level this season, and is named for what it holds: the card's
+// own name says "Postseason", so the group under it carries no second head.
+export function OverviewExtras({ blocks, season, playerId, cutoff }) {
+  const mine = blocks.filter((b) => b.postseason || b.otherLevels?.length)
   if (!mine.length) return null
+  const ps = mine.find((b) => b.postseason)?.postseason
   return (
-    <Card frame="stamped" label={`${season} extras`} count={countTag(mine)} className="pnext__slot">
+    <Card
+      frame="stamped"
+      label={ps ? `${season} Postseason` : `${season} other levels`}
+      count={ps ? `${ps.games} G` : undefined}
+      className="pnext__slot"
+    >
       <Stack gap="base" className="pnext-ext">
         {mine.map((b) => (
           <Stack key={b.group} gap="snug">
             {blocks.length > 1 && <h3 className="pnext__rowlabel">{b.title}</h3>}
             <div className="pnext-ext__cols">
-              {b.ranks?.length > 0 && <Ranks block={b} lit={lit} onLight={onLight} />}
               {b.postseason && <Postseason block={b} playerId={playerId} season={season} cutoff={cutoff} />}
               {b.otherLevels?.length > 0 && (
                 <Stack gap="snug">

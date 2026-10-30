@@ -56,6 +56,22 @@ export async function fetchPerson(personId) {
   }
 }
 
+// One player's full name, for a line that names him (the Contact card's "off" pitcher). Cached per
+// id; null on a miss, and a failed read is dropped so the next ask tries again.
+const names = new Map()
+export function fetchPersonName(personId) {
+  if (!personId) return Promise.resolve(null)
+  if (!names.has(personId)) {
+    names.set(
+      personId,
+      getJson(`/api/v1/people/${personId}?fields=people,fullName`)
+        .then((d) => d.people?.[0]?.fullName ?? null)
+        .catch(() => (names.delete(personId), null)),
+    )
+  }
+  return names.get(personId)
+}
+
 // A batch of primary positions, keyed by person id ({ [id]: 'C' | 'SS' | ... }).
 // One request for however many ids a caller has (same batched-lookup idiom as
 // fetchGamesByPk) rather than a fetchPerson() per id — used where a board only

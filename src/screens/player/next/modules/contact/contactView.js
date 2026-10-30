@@ -90,7 +90,8 @@ export function ballDetail(b) {
       ['Exit velo', f(b.exitVelo, (v) => `${v.toFixed(1)} mph`)],
       ['Launch angle', f(b.launchAngle, (v) => `${v}°`)],
       ['xBA', f(b.xba, rate3)],
-      ['Barrel', f(b.barrel, (v) => (v ? 'Yes' : 'No'))],
+      // Only a barrel says so; a "No" was noise (Gary, 2026-10-30).
+      ...(b.barrel ? [['Barrel', 'Yes']] : []),
     ],
   }
 }

@@ -9,6 +9,8 @@ import { Stack } from '../../../../../components/ui/layout/Stack.jsx'
 import { EmptyState } from '../../../../../components/ui/state/EmptyState.jsx'
 import { useAsync } from '../../../../../hooks/useAsync.js'
 import { lastCompleteSeason, leagueAverage } from '../../../../../api/player/leagueAverages.js'
+import { fetchPostseasonByRound } from '../../../../../api/player/postseasonRegister.js'
+import { yearByYearCells } from '../../../../../api/person/careerRegister.js'
 import { loadSeason } from './seasonData.js'
 import { compareView, scopesOf, tableFor, tilesFor } from './seasonView.js'
 import '../../../../../styles/player-next/both/season.css'
@@ -16,11 +18,11 @@ import '../../../../../styles/player-next/both/season.css'
 const DASH = '—'
 // The secondary columns a phone sheds until "All columns" is on (the board's narrow set).
 const NARROW = new Set(['AB', 'GS', 'K', 'BB', 'WHIP'])
-const CAPTION = { mlb: 'MLB · by year', milb: 'Minor leagues · by year', all: 'Every level · by year', post: 'Postseason · by year' }
 
 // The Season statistics module (#1885): one scope switch (MLB, Minors, All, Postseason) drives the
-// five tiles and the year-by-year table. Tap a season's WAR to set it beside the league.
-export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount }) {
+// five tiles and the year-by-year table. Tap a season's AVG (ERA for an arm) to set it beside the league.
+// The card carries no count tag (Gary, 2026-10-30): the scope switch already names the scope.
+export default function SeasonModule({ bio, role, asOf, season, onEmpty }) {
   const { data, error, loading } = useAsync(() => loadSeason({ bio, role, asOf }), [bio.id, role, asOf])
   const [pick, setPick] = useState(null)
   const [allCols, setAllCols] = useState(false)
@@ -54,9 +56,6 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
   useEffect(() => {
     if (empty) onEmpty()
   }, [empty, onEmpty])
-  useEffect(() => {
-    onCount(view?.badge || undefined)
-  }, [view?.badge, onCount])
 
   // A card that has not loaded yet reserves its height; Slot reads a bare first render as "no data".
   if (!scope) return <div className="seasonmod seasonmod--wait" aria-busy={!empty} />
@@ -72,18 +71,21 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
           onChange={(id) => { setPick(id); setOpen(null) }}
           options={scopes.map((s) => ({ value: s.id, label: s.label }))}
         />
-        <span className="seasonmod__caption">{CAPTION[scope]}</span>
       </Cluster>
 
       {scope === 'post' && postseason === undefined ? (
         <p className="hint">Loading the postseason…</p>
-      ) : view.tiles.length ? (
+      ) : scope === 'mlb' ? null : view.tiles.length ? (
+        // The MLB tiles repeat the hero's tiles at the top of the page, so that scope draws none
+        // (Gary, 2026-10-30); the other scopes' lines appear nowhere else.
         <div className="seasonmod__tiles">
           {view.tiles.map((t) => (
             <StatTile key={t.k} label={t.k} value={t.v} tone={t.tone} className="seasonmod__tile stattile--compact" />
           ))}
         </div>
-      ) : (
+      ) : table?.rows.length ? null : (
+        // No line this season: the table below says enough, so the note shows only with no table
+        // either (Gary, 2026-10-30).
         <EmptyState size="compact">{view.empty}</EmptyState>
       )}
 
@@ -93,9 +95,9 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
           label={`${role === 'pitching' ? 'Pitching' : 'Batting'} by year, ${scopes.find((s) => s.id === scope).label}`}
           allCols={allCols}
           onAllCols={() => setAllCols(!allCols)}
-          note={scope !== 'post' && scope !== 'milb'}
           onCompare={setOpen}
           openKey={open?.key}
+          rounds={scope === 'post' ? { playerId: bio.id, group: role, asOf, showSaves: data.armRole === 'CL' } : null}
         />
       )}
 
@@ -105,20 +107,63 @@ export default function SeasonModule({ bio, role, asOf, season, onEmpty, onCount
 }
 
 // The register's rows as a ledger, the "All columns" switch and the WAR hint.
-function YearTable({ table, label, allCols, onAllCols, note, onCompare, openKey }) {
-  const warAt = table.columns.indexOf('WAR')
+// `rounds` (the Postseason scope only): a year's row opens to one row per round of that October
+// (Gary, 2026-10-30), read on the tap from the game log (fetchPostseasonByRound).
+function YearTable({ rounds, table, label, allCols, onAllCols, onCompare, openKey }) {
+  // The league comparison is of AVG (a bat) or ERA (an arm), so that figure is the one to tap
+  // (Gary, 2026-10-30), not WAR.
+  const cmpKey = table.columns.includes('ERA') ? 'ERA' : 'AVG'
+  const cmpAt = table.columns.indexOf(cmpKey)
   const hideNarrow = allCols ? [] : table.columns.flatMap((c, i) => (NARROW.has(c) ? [i + 2] : []))
-  const rows = table.rows.map((r) => ({
+  // year -> null while loading, [] for none, else the round rows
+  const [byYear, setByYear] = useState({})
+  const [openYears, setOpenYears] = useState(() => new Set())
+  const toggleYear = (year) => {
+    setOpenYears((prev) => {
+      const next = new Set(prev)
+      next.has(year) ? next.delete(year) : next.add(year)
+      return next
+    })
+    if (byYear[year] !== undefined) return
+    setByYear((m) => ({ ...m, [year]: null }))
+    fetchPostseasonByRound(rounds.playerId, rounds.group, { season: year, cutoff: rounds.asOf })
+      .catch(() => null)
+      .then((got) => setByYear((m) => ({ ...m, [year]: got ?? [] })))
+  }
+  const roundRowsFor = (r) => {
+    if (!rounds || !openYears.has(r.year)) return []
+    const got = byYear[r.year]
+    if (!got?.length) {
+      return [{ key: `${r.key}-wait`, className: 'reg-round', cells: [<>{''}</>, spanCell(<span className="reg-gap__note">{got ? 'No round split on file.' : 'Loading the rounds…'}</span>)] }]
+    }
+    return got.map((g) => ({
+      key: `${r.key}-${g.gameType}`,
+      className: 'reg-round',
+      cells: [<span key="round" className="reg-round__name">{g.series}</span>, <>{''}</>, ...yearByYearCells(g.stat, rounds.group, rounds.showSaves)],
+    }))
+  }
+  const yearCell = (r) => {
+    const inner = (
+      <>
+        {r.year}
+        {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
+      </>
+    )
+    return rounds ? (
+      <button type="button" className="seasonmod__year" aria-expanded={openYears.has(r.year)} onClick={() => toggleYear(r.year)}>
+        {inner}
+        <span className="seasonmod__chev" aria-hidden="true">{openYears.has(r.year) ? '▾' : '▸'}</span>
+      </button>
+    ) : inner
+  }
+  const rows = table.rows.flatMap((r) => [{
     key: r.key,
     className: r.className,
     allStar: r.allStar,
     cells: r.gap
       ? [<>{r.year}</>, spanCell(<span className="reg-gap__note">{r.note}</span>)]
       : [
-          <>
-            {r.year}
-            {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
-          </>,
+          yearCell(r),
           <>
             {r.teamId ? (
               <span className="seasonmod__club" title={r.team || undefined}>
@@ -131,14 +176,14 @@ function YearTable({ table, label, allCols, onAllCols, note, onCompare, openKey 
             {r.pill && <span className="reg-pill">{r.pill}</span>}
           </>,
           ...r.cells.map((c, i) =>
-            i === warAt && r.compare ? (
+            i === cmpAt && r.compare ? (
               <button
-                key="war"
+                key="cmp"
                 type="button"
                 className="seasonmod__war"
                 aria-haspopup="dialog"
                 aria-expanded={openKey === r.key}
-                aria-label={`WAR ${c}, ${r.year}. Compare with the league`}
+                aria-label={`${cmpKey} ${c}, ${r.year}. Compare with the league`}
                 onClick={() => onCompare(r)}
               >
                 {c}
@@ -148,17 +193,16 @@ function YearTable({ table, label, allCols, onAllCols, note, onCompare, openKey 
             ),
           ),
         ],
-  }))
+  }, ...roundRowsFor(r)])
   return (
     <>
       <Ledger label={label} leftCols={2} head={['Year', 'Team', ...table.columns]} rows={rows} hideNarrow={hideNarrow} totals={table.totals} />
       <Cluster gap="tight" align="center" className="seasonmod__foot">
         {table.columns.some((c) => NARROW.has(c)) && (
           <button type="button" className="seasonmod__link" aria-pressed={allCols} onClick={onAllCols}>
-            {allCols ? 'Fewer columns' : 'All columns'}
+            {allCols ? 'Show fewer columns' : 'Show all columns'}
           </button>
         )}
-        {note && <span>Tap a season’s WAR to compare it with the league.</span>}
       </Cluster>
     </>
   )
