@@ -145,6 +145,9 @@
 /* Over the field photo the drawn batter's boxes read as chalk: paper-white and a heavier line. */
 .gdzonemap:has(.gdzonemap__field) .gdzonemap__ground { stroke: var(--surface-card); stroke-width: var(--bw-heavy); }
 .gdzonemap__ground { overflow: visible; }
+/* The batter's stance stands inside his box (Gary, 2026-10-30): the boxes drawn 15% bigger and set lower, so the
+   back foot lands in the chalk instead of over its bottom edge. The plate keeps its place. */
+.gdzonemap__ground { width: calc(var(--gd-zone-w) * 3.8); bottom: calc(var(--gd-ground) - var(--gd-zone-w) * .14); }
 /* The strike zone's frame, heavy (Gary, 2026-10-29): a thick ink border so the box reads over the park. */
 .gdzonemap__grid { border-width: 6px; border-color: var(--text-heading); } /* raw-value-exempt: the zone's heavy frame */
 /* Both photos 10 points fainter (Gary, 2026-10-29): 35% to 25%. */
@@ -154,3 +157,6 @@
 .gdzonemap__contact { position: absolute; z-index: var(--z-raised); left: var(--space-2); bottom: var(--space-2); margin: 0; background: var(--surface-card); }
 /* No empty band over the park (Gary, 2026-10-29): the art's blank sky rides up past the stage's top edge. */
 .gdzonemap__backdrop { top: -18%; height: 76%; }
+/* The pale band at the stage's top was never the art (Gary, 2026-10-30): it was the plate view's SealBox, an empty
+   .statgrid whose paper fill and padding drew a 28px strip over the park. It wears no fill on the stage. */
+.gdzonemap__plateview .statgrid { background: transparent; }

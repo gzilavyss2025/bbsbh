@@ -1,4 +1,5 @@
-import { hitterTiles, pitcherTiles, RANK_STATS } from '../../../../api/person/stats.js'
+import { pitcherTiles, RANK_STATS } from '../../../../api/person/stats.js'
+import { postseasonHitterCols } from '../../../../api/player/postseasonRegister.js'
 import { DASH } from '../../../../api/person/shared.js'
 
 // The Overview extras card's pure view (#2010). Open surface (ADR-0034): no seal, no gate.
@@ -36,6 +37,6 @@ export function roundRows(rounds, group, role) {
     games: Number(stat.gamesPlayed) || 0,
     tiles: group === 'pitching'
       ? [...pitcherTiles(stat, role).slice(0, 4), { k: 'WHIP', v: stat.whip ?? DASH }]
-      : [...hitterTiles(stat).slice(0, 4), { k: 'OPS', v: stat.ops ?? DASH }],
+      : postseasonHitterCols(stat),
   }))
 }

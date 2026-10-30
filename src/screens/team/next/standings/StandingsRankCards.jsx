@@ -46,7 +46,7 @@ export function StandingsRankCards({ team, asOf, still }) {
 
   let i = 0
   const wrap = (label, tag, body, key) => (
-    <Card key={key} frame="stamped" body="flush" label={label} count={tag} stampIn={!still} className="stnd__card stnd__wrap" style={stampAt(i++)}>
+    <Card key={key} frame="stamped" body="flush" label={label} count={tag} stampIn={!still} className={`stnd__card stnd__wrap stnd__wrap--${key}`} style={stampAt(i++)}>
       {body}
     </Card>
   )

@@ -26,3 +26,17 @@
 }
 html:has(.tnext__jump),
 body:has(.tnext__jump) { overflow-x: clip; }
+
+/* A little room between the top tiles and the jump bar under them (Gary, 2026-10-30). */
+.tnext__jump { margin-top: var(--space-5); }
+
+/* The page's data credits at the foot: small grey prose (Gary, 2026-10-30). */
+.tnext__credits:empty { display: none; }
+.tnext__credits .paysource {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-loose);
+}
+.tnext__credits .paysource a { color: inherit; }

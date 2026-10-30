@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from 'react'
+import { createPortal } from 'react-dom'
 import '../../../../styles/70-contracts-grid.css'
 import '../../../../styles/team-next/money.css'
 import { commitmentCliff, payrollScale } from '../../../../api/salaries.js'
@@ -58,9 +60,17 @@ export default function Money({ team, onReady, onCount }) {
               <ContractKey />
             </div>
           </Card>
-          <SourceLine meta={ledger.meta} note={MONEY_NOTE} />
+          <FootCredit><SourceLine meta={ledger.meta} note={MONEY_NOTE} /></FootCredit>
         </>
       )}
     </div>
   )
+}
+
+// The contract credit renders with the data but shows at the page's foot (Gary, 2026-10-30): the
+// foot's #tnext-credits slot. Inline until that slot exists.
+const noSubscribe = () => () => {}
+function FootCredit({ children }) {
+  const slot = useSyncExternalStore(noSubscribe, () => document.getElementById('tnext-credits'), () => null)
+  return slot ? createPortal(children, slot) : children
 }

@@ -131,9 +131,9 @@
 .gdp__tonighthead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3) var(--space-1); }
 .gdp__tonighthead span { font-size: var(--fs-cell); color: var(--text-caption); }
 /* layout-exempt: six equal tiles */
-.gdp__tonightgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; border-top: var(--bw-hair) solid var(--border-hairline); }
+.gdp__tonightgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; border-top: var(--bw-heavy) solid var(--border-stamped); } /* the tabs' ink rule under it (Gary, 2026-10-30) */
 /* layout-exempt: one tile: a label over its figure */
-.gdp__tonightgrid div { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border-left: var(--bw-hair) solid var(--border-hairline); }
+.gdp__tonightgrid div { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border-left: var(--bw-heavy) solid var(--border-stamped); }
 .gdp__tonightgrid div:first-child { border-left: 0; }
 .gdp__tonightgrid dt { font-size: var(--fs-cell); color: var(--text-caption); }
 .gdp__tonightgrid dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-title-md); font-weight: var(--w-bold); line-height: var(--lh-solid); color: var(--text-heading); font-variant-numeric: tabular-nums; }
@@ -256,7 +256,7 @@
 /* layout-exempt: the card stacks so the tabs take the height left under his line */
 .gdarm { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 /* layout-exempt: tab row over a body that takes the rest */
-.gdtabs { display: flex; flex-direction: column; flex: 1; min-height: 0; border-top: var(--bw-hair) solid var(--border-hairline); }
+.gdtabs { display: flex; flex-direction: column; flex: 1; min-height: 0; border-top: var(--bw-heavy) solid var(--border-stamped); } /* black, as the stat strip over it (Gary, 2026-10-30) */
 /* The switch, as the checkpoint draws it (checkpoint.css .gdcp__tabs): Segmented across the card. raw-value-exempt: the short tab */
 .gdtabs .gdtabs__row { margin: var(--space-2) var(--space-3); }
 .gdtabs .gdtabs__row .segmented__btn { min-height: 28px; height: 28px; padding: 0 var(--space-1); font-size: var(--fs-cell); white-space: nowrap; }
@@ -335,8 +335,8 @@
 .gdverdict__sides { display: flex; justify-content: space-between; font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-transform: uppercase; }
 
 /* The Scout tab's "Things to watch" (ScoutVerdict.jsx): the Scout page's sentences, under the verdict. */
-.gdwatch { margin: var(--space-3) calc(-1 * var(--space-3)) calc(-1 * var(--space-2)); padding: 0; list-style: none; background: var(--surface-card); color: var(--text-heading); }
-.gdwatch li { padding: var(--space-2) var(--space-3); border-top: var(--bw-hair) solid var(--border-hairline); }
+.gdwatch { margin: var(--space-3) calc(-1 * var(--space-3)) calc(-1 * var(--space-2)); padding: 0; list-style: none; background: var(--surface-inset); /* the arm slot's own cream, as behind the pitcher's card (Gary, 2026-10-30) */ color: var(--text-heading); }
+.gdwatch li { padding: var(--space-2) var(--space-3); border-top: var(--bw-heavy) solid var(--border-stamped); }
 .gdwatch li p { margin: var(--space-1) 0 0; font-size: var(--fs-small); line-height: var(--lh-prose); color: var(--text-body); }
 .gdwatch li p strong { font-family: var(--font-mono); font-weight: var(--w-bold); color: var(--text-heading); }
 /* The Scout's generated sentences, natural case as on the Scout page (01-base.css lists the exemption). */
@@ -358,8 +358,10 @@
 /* layout-exempt: head over a scrolling body */
 .gdsheet { display: flex; flex-direction: column; width: min(720px, 94vw); max-height: 88dvh; border: var(--bw-heavy) solid var(--border-stamped); background: var(--surface-card); box-shadow: var(--shadow-stamped); } /* raw-value-exempt: the sheet's width */
 .gdsheet__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border-bottom: var(--bw-heavy) solid var(--text-heading); }
-.gdsheet__head h2 { margin: 0; font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-title); }
+.gdsheet__head h2 { margin: 0; font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-title); text-transform: uppercase; } /* portaled outside #root, so the shout is its own */
 .gdsheet__body { overflow-y: auto; padding: var(--space-3); }
+/* The box score's revealed grid sits on the sheet's own paper, no white panel (Gary, 2026-10-30). */
+.gdsheet__body .statgrid { background: transparent; padding: 0; } /* and no inset: every block shares the line score's left edge */
 .gdsheet__sub { margin: var(--space-4) 0 var(--space-2); font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); }
 /* layout-exempt: the two clubs' batting side by side, stacking when narrow */
 .gdsheet__pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-3); } /* raw-value-exempt: a table's narrowest */
@@ -368,7 +370,14 @@
 .gdsheet__table td { padding: var(--space-1) var(--space-1h); border-bottom: var(--bw-hair) solid var(--border-hairline); text-align: right; }
 .gdsheet__table :is(th, td):first-child { text-align: left; }
 .gdsheet__empty { margin: var(--space-3) 0; color: var(--text-caption); font-size: var(--fs-small); }
-.gdsheet__split { display: flex; gap: var(--space-2); margin: 0 0 var(--space-2); font: var(--w-bold) var(--fs-title-sm) / var(--lh-solid) var(--font-display); }
+/* layout-exempt: the two clubs' shares face each other across a centre rule, a scoreboard */
+.gdsheet__split { display: flex; justify-content: center; align-items: center; margin: 0 0 var(--space-3); font-family: var(--font-display); }
+.gdsheet__side { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-5); }
+.gdsheet__side--home { border-left: var(--bw-heavy) solid var(--text-heading); text-align: right; }
+/* layout-exempt: a share over its club's letters, inside one scoreboard side */
+.gdsheet__side > span { display: flex; flex-direction: column; }
+.gdsheet__side b { font: var(--w-bold) var(--fs-num-lg) / var(--lh-solid) var(--font-display); color: var(--text-heading); font-variant-numeric: tabular-nums; }
+.gdsheet__side small { font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); color: var(--text-caption); }
 .gdsheet__door { margin-top: var(--space-4); padding: 0; border: 0; background: none; color: var(--text-heading); font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); letter-spacing: var(--ls-label); text-decoration: underline; cursor: pointer; }
 /* How a club scored (ScoringSheet): each scoring play, its half, and the score after it. */
 .gdruns { margin: 0; padding: 0; list-style: none; }
@@ -421,3 +430,43 @@
 .gdtabs .gdtabs__row .segmented__btn:last-child { border-right-color: transparent; }
 /* No gap between the tab row and the view under it (Gary, 2026-10-29). */
 .gdtabs .gdtabs__row { margin-bottom: 0; }
+
+/* The defense drawer's field fills the drawer: its SealBox adds no paper and no padding (Gary, 2026-10-30). */
+.gdp__ref > .statgrid { padding: 0; background: transparent; }
+/* In the box score sheet the pitchers' rows read at the batters' size (Gary, 2026-10-30). */
+.gdsheet__body .gdpl__table tbody :is(th, td) { font-size: var(--fs-small); }
+/* The sheet's names shout, as names do on #root (the sheet is portaled outside it). */
+.gdsheet__body :is(.gdsheet__table tbody td:first-child, .gdpl__table tbody th),
+.gdsheet__body :is(.gdsheet__table tbody td:first-child, .gdpl__table tbody th) .plink { text-transform: uppercase; }
+/* The batting tables' first column starts on the sheet's edge, as the pitchers' does. */
+.gdsheet__table :is(th, td):first-child { padding-left: 0; text-align: left; }
+.gdsheet__table thead th { text-transform: uppercase; }
+.gdsheet__table .gdsheet__pos { color: var(--text-caption); font-family: var(--font-display); font-weight: var(--w-bold); font-size: var(--fs-ui); } /* the number's size */
+/* The number in the Due up's clay ink (.gdp__tag b), at the table's size. */
+.gdsheet__table .gdsheet__num { color: var(--clay); font-family: var(--font-display); font-weight: var(--w-bold); font-size: var(--fs-ui); }
+.gdsheet__door { text-transform: uppercase; } /* outside #root: the door shouts like every other door */
+/* The sheet's vertical rhythm (Gary, 2026-10-30): 24px over a section head, 8px from a head to its table,
+   12px between the clubs, 24px over the door. The heads shout, outside #root. */
+.gdsheet__body .gdsheet__sub { margin: var(--space-6) 0 var(--space-2); text-transform: uppercase; }
+.gdsheet__body :is(.gdsheet__pair, .gdpl) { margin-top: 0; padding-top: 0; }
+.gdsheet__body .gdpl__club:first-child .gdpl__head { margin-top: 0; }
+.gdsheet__body .gdsheet__door { margin-top: var(--space-6); }
+.gdsheet__body .statgrid { gap: 0; } /* the SealBox adds no gap of its own; the rhythm above is the only spacing */
+/* The pitchers' numbers as the batters' (Gary, 2026-10-30): clay, bold, the table's size, and no "#" head on
+   screen (the cell keeps its text for a screen reader). The table is shared, so this is the sheet's alone. */
+.gdsheet__body .gdpl__table tbody td:nth-child(2) { color: var(--clay); font-family: var(--font-display); font-weight: var(--w-bold); font-size: var(--fs-ui); }
+.gdsheet__body .gdpl__table thead th:nth-child(2) { color: transparent; }
+/* Square, as every Gameday surface is (Gary, 2026-10-30): the win-probability card, its band head and its play strip. */
+.gdsheet .winprob, .gdsheet .winprob * { border-radius: 0; }
+.gdsheet .winprob button { text-transform: uppercase; } /* outside #root: the Watch button shouts as buttons do */
+/* The scoreboard above names the split; the band's own copy goes (Gary, 2026-10-30). */
+.gdsheet .winprob__head { display: none; } /* and its band head: the sheet's title already names the chart */
+.gdsheet .winprob__ledger-row { background: transparent; } /* the play strip sits on the card's paper, active or not */
+.gdsheet .winprob__context { text-transform: uppercase; }
+/* The chart fills the sheet to its left, right and bottom edges, with no card around it (Gary, 2026-10-30);
+   only its words keep the sheet's side inset. */
+.gdsheet__body:has(.winprob) { padding: var(--space-3) 0 0; }
+.gdsheet .winprob { border: 0; padding: 0; margin: 0; background: transparent; box-shadow: none; }
+.gdsheet .winprob :is(.winprob__readout, .winprob__ledger) { padding-inline: var(--space-3); }
+/* Room at the right for the newest play's numbered marker, which sits on the chart's right edge. */
+.gdsheet .winprob__svg { overflow: visible; width: calc(100% - var(--space-4)); }

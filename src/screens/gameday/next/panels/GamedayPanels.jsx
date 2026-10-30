@@ -344,7 +344,7 @@ const EventLog = ({ ctx }) => (
 // The scorebook's pitching page, both clubs, as of the step (Gary, 2026-10-28): the Menu's block.
 const PitchingLines = ({ ctx }) => (
   <Sealable ctx={ctx} reach>
-    {() => pitchingLinesMarkup(createElement, { feed: ctx.feed, lines: pitchingDayLines(ctx.feed, { inning: ctx.inning, half: ctx.half, step: ctx.step, revealedThrough: ctx.mark }) })}
+    {() => pitchingLinesMarkup(createElement, { feed: ctx.feed, link: (r, text) => createElement(PlayerLink, { id: r.id }, text), lines: pitchingDayLines(ctx.feed, { inning: ctx.inning, half: ctx.half, step: ctx.step, revealedThrough: ctx.mark }) })}
   </Sealable>
 )
 

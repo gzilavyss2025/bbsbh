@@ -539,8 +539,9 @@ export function teamLogoUrl(teamId, variant = 'base') {
 // logo) under team id 1 in the "league" subfolder — verified live, a
 // real logo, not the base logo echoed back. Used for the prospect-rank
 // badges, which aren't tied to any one club.
-export function leagueLogoUrl() {
-  return `${LOGO_BASE}/league-on-light/1.svg`
+// `id` 103 / 104 gives the American / National League mark (Gary, 2026-10-30).
+export function leagueLogoUrl(id = 1) {
+  return `${LOGO_BASE}/league-on-light/${id}.svg`
 }
 
 // Alternate/City Connect tile-background colors — hand-curated together with

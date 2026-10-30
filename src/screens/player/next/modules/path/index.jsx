@@ -13,9 +13,8 @@ function Tile({ label, games, years, logoId, now, mlb, aria }) {
       <span className={`pathmod__bar${mlb ? ' pathmod__bar--mlb' : ''}`} />
       {logoId && <img className="pathmod__logo" src={teamLogoUrl(logoId)} alt="" width="26" height="26" />}
       <span className="pathmod__lvl">{label}</span>
-      <span className="pathmod__g">{games}</span>
+      {games != null && <span className="pathmod__g">{games}</span>}
       <span className="pathmod__yr">{years}</span>
-      {now && <span className="pathmod__here">Here now</span>}
     </li>
   )
 }
@@ -30,7 +29,7 @@ export default function PathModule({ bio, role, asOf, onEmpty, onCount }) {
   const view = mine ? pathView(data) : null
   useEffect(() => {
     if (!loading && !view) onEmpty()
-    onCount(view?.badge)
+    onCount(null) // no count tag (Gary, 2026-10-30)
   }, [loading, view, onEmpty, onCount])
 
   if (!view) return loading ? <div className="pathmod pathmod--wait" aria-busy="true" /> : null
@@ -50,7 +49,7 @@ export default function PathModule({ bio, role, asOf, onEmpty, onCount }) {
           <div className="pathmod__majors">
             <p className="pathmod__cap">The Majors</p>
             <ol className="pathmod__tiles">
-              <Tile mlb label="MLB" games={view.mlb.games} years={view.mlb.years} logoId={view.mlb.logoId} now={view.mlb.now} />
+              <Tile mlb label="MLB" years={view.mlb.debut} logoId={view.mlb.logoId} now={view.mlb.now} />
             </ol>
           </div>
         )}

@@ -68,6 +68,8 @@ export function TeamNextFoot({ team, asOf, sportId }) {
           </Cluster>
         </Card>
       )}
+      {/* The page's data credits land here, small, at the very bottom (Money's contract source). */}
+      <div id="tnext-credits" className="tnext__credits" />
     </Stack>
   )
 }

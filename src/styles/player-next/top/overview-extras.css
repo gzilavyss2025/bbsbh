@@ -13,6 +13,13 @@
   .pnext-ext__cols {
     grid-template-columns: auto minmax(0, 1fr);
   }
+  /* With no rank chips, the postseason row is alone: it takes the whole width. */
+  .pnext-ext__cols > :only-child {
+    grid-column: 1 / -1;
+  }
+}
+.pnext-ext__cols > :only-child .table__grid {
+  width: 100%;
 }
 /* A tile row's head line: the section head, then the postseason switch at its right end. */
 /* layout-exempt: a head and its control on one line */

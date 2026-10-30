@@ -80,3 +80,13 @@
   flex: none;
   padding: 1px var(--space-1h);
 }
+
+/* The leaders page's club header: square and stamped like the boards under it, no gloss
+   (Gary, 2026-10-30). */
+.team-hub__id.tlead-id {
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+  grid-template-columns: 80px 1fr;
+}
+.team-hub__id.tlead-id::after { content: none; }

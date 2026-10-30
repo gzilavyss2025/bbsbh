@@ -10,6 +10,12 @@ const yearSpan = (a, b) => (a === b ? `${a}` : `${a}–${String(b).slice(2)}`)
 const longDate = (iso) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 
+// "7/24/2020"
+const shortDate = (iso) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${m}/${d}/${y}`
+}
+
 export function pathView({ milb, mlb, group, debutDate, currentSportId }) {
   const debutYear = debutDate ? Number(debutDate.slice(0, 4)) : null
   const p = levelProgressionView(dropRehabStints(milb, debutYear), group, currentSportId, mlb)
@@ -32,12 +38,11 @@ export function pathView({ milb, mlb, group, debutDate, currentSportId }) {
   const mlbRows = debutDate ? withoutMultiTeamAggregate(mlb).filter((s) => Number(s.season)) : []
   let majors = null
   if (mlbRows.length) {
-    const seasons = mlbRows.map((s) => Number(s.season))
-    const last = mlbRows.reduce((a, s) => (Number(s.season) >= Number(a.season) ? s : a))
+    // The club he debuted with and the day of that first game, not his games and years (Gary, 2026-10-30).
+    const first = mlbRows.reduce((a, s) => (Number(s.season) < Number(a.season) ? s : a))
     majors = {
-      games: p.mlbGames,
-      years: yearSpan(Math.min(...seasons), Math.max(...seasons)),
-      logoId: last.team?.id ?? null,
+      debut: shortDate(debutDate),
+      logoId: first.team?.id ?? null,
       now: currentSportId === 1,
     }
   }

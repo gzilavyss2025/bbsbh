@@ -150,9 +150,11 @@ test('a player who never debuted asks nothing', async () => {
 const bat = { gamesPlayed: 3, atBats: 11, hits: 4, avg: '.364', homeRuns: 1, rbi: 2, strikeOuts: 3, ops: '1.010', totalBases: 8 }
 const arm = { gamesPlayed: 1, gamesStarted: 1, wins: 1, losses: 0, saves: 0, era: '1.50', inningsPitched: '6.0', strikeOuts: 7, whip: '0.67' }
 
-test('a hitter\u2019s tiles are AVG, HR, RBI, SO and OPS, with the duplicate API row folded', () => {
-  const v = postseasonTilesView([{ stat: bat }, { stat: { ...bat } }], 'hitting')
-  assert.deepEqual(v.tiles.map((t) => [t.k, t.v]), [['AVG', '.364'], ['HR', '1'], ['RBI', '2'], ['SO', '3'], ['OPS', '1.010']])
+test('a hitter\u2019s columns are AB, AVG, HR, RBI, SO, OBP, SLG and OPS, the duplicate API row folded; AB, OBP and SLG wide-only', () => {
+  const full = { ...bat, obp: '.364', slg: '.727' }
+  const v = postseasonTilesView([{ stat: full }, { stat: { ...full } }], 'hitting')
+  assert.deepEqual(v.tiles.map((t) => [t.k, t.v]), [['AB', 11], ['AVG', '.364'], ['HR', '1'], ['RBI', '2'], ['SO', '3'], ['OBP', '.364'], ['SLG', '.727'], ['OPS', '1.010']])
+  assert.deepEqual(v.tiles.filter((t) => t.wide).map((t) => t.k), ['AB', 'OBP', 'SLG'])
   assert.equal(v.games, 3)
 })
 

@@ -3,8 +3,8 @@ import { Headshot } from '../../../../../components/player/Headshot.jsx'
 import { PlayerLink } from '../../../../../components/player/PlayerLink.jsx'
 
 // Family in baseball, at the foot of Team history: who, his relation, and his own line
-// ("LF · Mariners · 1993–94 · 78 G"). The Retrosheet credit prints beside the rows (its licence asks).
-export function FamilyBand({ entries, credit = [] }) {
+// ("LF · Mariners · 1993–94 · 78 G"). The Retrosheet credit prints in the page's foot (PlayerNextPage.jsx).
+export function FamilyBand({ entries }) {
   return (
     <section className="teamhist__fam" aria-label="Family in baseball">
       <h3 className="teamhist__faml">Family in baseball</h3>
@@ -22,11 +22,6 @@ export function FamilyBand({ entries, credit = [] }) {
           </li>
         ))}
       </ul>
-      {credit.map((line) => (
-        <p key={line} className="teamhist__credit">
-          {line}
-        </p>
-      ))}
     </section>
   )
 }

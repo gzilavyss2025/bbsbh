@@ -6,7 +6,7 @@
 
 const COLUMNS = [['#', 'jersey'], ['R/L', 'hand'], ['IP', 'ip'], ['P', 'pitches'], ['BF', 'bf'], ['H', 'h'], ['R', 'r'], ['ER', 'er'], ['BB', 'bb'], ['K', 'k']]
 
-function club(h, side, name, rows) {
+function club(h, side, name, rows, link) {
   return h('section', { key: side, className: 'gdpl__club' },
     h('h4', { className: 'gdpl__head' }, name),
     rows.length === 0
@@ -14,7 +14,7 @@ function club(h, side, name, rows) {
       : h('table', { className: 'gdpl__table' },
         h('thead', null, h('tr', null, h('th', { scope: 'col' }, 'Pitcher'), ...COLUMNS.map(([c]) => h('th', { key: c, scope: 'col' }, c)))),
         h('tbody', null, ...rows.map((r) => h('tr', { key: r.id, className: 'gdpl__row' },
-          h('th', { scope: 'row' }, [r.last, r.first].filter(Boolean).join(', ')),
+          h('th', { scope: 'row' }, link(r, [r.last, r.first].filter(Boolean).join(', '))),
           ...COLUMNS.map(([c, k]) => h('td', { key: c }, r[k] === '' || r[k] == null ? '—' : String(r[k]))))))))
 }
 
@@ -30,7 +30,9 @@ function starterRow(feed, side) {
   return [{ id, last: p.lastName ?? '', first: p.useName ?? p.firstName ?? '', jersey: worn ?? p.primaryNumber ?? '', hand: p.pitchHand?.code ?? '', ip: '0.0', pitches: 0, bf: 0, h: 0, r: 0, er: 0, bb: 0, k: 0 }]
 }
 
-export function pitchingLinesMarkup(h, { key, feed, lines }) {
+// `link(row, text)` dresses a pitcher's name (the box score sheet makes it a player link with its hover card);
+// by default the name is plain text.
+export function pitchingLinesMarkup(h, { key, feed, lines, link = (r, text) => text }) {
   const name = (side) => feed?.gameData?.teams?.[side]?.teamName ?? feed?.gameData?.teams?.[side]?.name ?? (side === 'away' ? 'Away' : 'Home')
-  return h('div', { key, className: 'gdpl' }, club(h, 'away', name('away'), lines?.away?.length ? lines.away : starterRow(feed, 'away')), club(h, 'home', name('home'), lines?.home?.length ? lines.home : starterRow(feed, 'home')))
+  return h('div', { key, className: 'gdpl' }, club(h, 'away', name('away'), lines?.away?.length ? lines.away : starterRow(feed, 'away'), link), club(h, 'home', name('home'), lines?.home?.length ? lines.home : starterRow(feed, 'home'), link))
 }

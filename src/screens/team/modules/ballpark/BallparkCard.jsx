@@ -181,14 +181,13 @@ function AttendanceFacts({ attendance, skipAvg }) {
   return (
     <>
       <dl className="bpsheet__facts">
-        {!skipAvg && (
-          <Facts
-            label="Avg attendance"
-            value={attendance.avg.toLocaleString()}
-            note={rank ? `${ordinal(rank)} of ${of}` : null}
-          />
-        )}
+        {/* The average sits between the high and the low (Gary, 2026-10-30). */}
         <Facts label="Season high" value={attendance.high.toLocaleString()} />
+        <Facts
+          label={skipAvg ? 'Avg crowd' : 'Avg attendance'}
+          value={attendance.avg.toLocaleString()}
+          note={rank ? `${ordinal(rank)} of ${of}` : null}
+        />
         <Facts label="Season low" value={attendance.low.toLocaleString()} />
       </dl>
       <dl className="bpsheet__facts">
@@ -299,14 +298,6 @@ export function BallparkCard({ team, venue: venueProp, layoutDate, attendance, c
     park && <ParkFact key="o" label="Opened" value={park.built} />,
     park && <ParkFact key="r" label="Roof" value={park.roof} />,
     park?.capacity && <ParkFact key="c" label="Capacity" value={park.capacity.toLocaleString()} />,
-    attendance && (
-      <ParkFact
-        key="a"
-        label="Avg crowd"
-        value={attendance.avg.toLocaleString()}
-        note={attendance.rank ? `${ordinal(attendance.rank)} of ${attendance.of}` : null}
-      />
-    ),
     manager && <ParkFact key="m" label="Manager" value={managerFact(manager)} />,
   ].filter(Boolean)
   return (
