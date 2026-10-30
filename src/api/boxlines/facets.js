@@ -88,7 +88,9 @@ export function facetPlan(facet) {
           keep: (r) => r.date >= from,
         }
       }
-      return { ...plan, opponentId: facet.opponentId ?? null, narrowsSplits: true }
+      // Every meeting, October's included (Gary, 2026-10-30): the "Career vs" line it opens counts his
+      // postseason games against the club (vs-team-splits' `all`), so the rows under it must too.
+      return { ...plan, opponentId: facet.opponentId ?? null, narrowsSplits: true, gameTypes: [...REGULAR_SEASON, ...POSTSEASON] }
     case 'venue':
       // WHICH PARK, off the SCHEDULE record's own venue and never off opponent
       // + isHome, which is wrong at a neutral site — London, Mexico City, a

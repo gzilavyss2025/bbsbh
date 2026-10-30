@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { pennantsOfSeason, groupByTeam } from '../scripts/lib/club/league-pennants.mjs'
+import { pennantsOfSeason, groupByTeam, worldChampion } from '../scripts/lib/club/league-pennants.mjs'
 import { pennantsBefore, pennantsList } from '../src/api/history/leaguePennants.js'
 
 const side = (id, name, franchiseName, abbreviation, leagueId) => ({
@@ -57,4 +57,26 @@ test('a dated team page leaves out the pennant of its own season and later ones'
   const rows = [{ season: 2026 }, { season: 2016 }, { season: 1982 }]
   assert.deepEqual(pennantsBefore(rows, 2016).map((p) => p.season), [1982])
   assert.deepEqual(pennantsBefore(rows, undefined).map((p) => p.season), [2026, 2016, 1982])
+})
+
+// The World Series winner: the side whose series wins (the last game's leagueRecord) pass half of gamesInSeries.
+const fin = (aw, hw, of = 7) => ({ gamesInSeries: of, teams: { away: { team: { id: 158 }, leagueRecord: { wins: aw } }, home: { team: { id: 119 }, leagueRecord: { wins: hw } } } })
+test('the World Series winner is the side that reached the clinching win', () => {
+  assert.equal(worldChampion([fin(1, 0), fin(4, 1)]), 158)
+  assert.equal(worldChampion([fin(3, 4)]), 119)
+  assert.equal(worldChampion([fin(5, 3, 9)]), 158, 'a best-of-nine needs five')
+})
+test('a Series still being played has no champion yet', () => {
+  assert.equal(worldChampion([fin(3, 2)]), null)
+  assert.equal(worldChampion([]), null)
+})
+test('the champion pennant row says so, and the loser row does not', () => {
+  const g = { gameType: 'W', gamesInSeries: 7, teams: {
+    away: { ...side(158, 'Milwaukee Brewers', 'Milwaukee', 'MIL', 104), leagueRecord: { wins: 4 } },
+    home: { ...side(147, 'New York Yankees', 'New York', 'NYY', 103), leagueRecord: { wins: 1 } },
+  } }
+  const rows = pennantsOfSeason(2026, [{ games: [g] }])
+  assert.deepEqual(rows.map((r) => [r.abbr, r.ws === true]), [['MIL', true], ['NYY', false]])
+  assert.equal(groupByTeam(rows)[158][0].ws, true)
+  assert.equal('ws' in groupByTeam(rows)[147][0], false)
 })

@@ -203,19 +203,11 @@ button.teamhist__badge:focus-visible {
   font-weight: var(--w-bold);
   font-size: var(--fs-body);
 }
-.teamhist__credit {
-  margin: 0;
-  color: var(--text-caption);
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  line-height: var(--lh-loose);
-}
 
 /* The sentences are prose, so they keep the case they were written in (same idiom as
    .prankhist__foot): the hatched band, the rehab note and the Retrosheet credit. */
 #root .teamhist__gap,
-#root .teamhist__note,
-#root .teamhist__credit {
+#root .teamhist__note {
   text-transform: none; /* caps-exempt: the card's prose lines, same idiom as .prankhist__foot */
 }
 

@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { PlayerLink } from '../../../../components/player/PlayerLink.jsx'
+import { useEffect, useRef, useState } from 'react'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
 import { SealBox } from '../../../../components/SealBox.jsx'
 import { ModalPortal } from '../../../../components/ui/ModalPortal.jsx'
@@ -48,6 +49,7 @@ function reachOf(ctx) {
 
 const Sealed = () => <p className="gdsheet__empty">Sealed</p>
 
+// The full box score's columns, AB · R · H · RBI (the #22 scorebook's order; Gary, 2026-10-30).
 // Each club's hitters with their line tonight as of the step (dayLine.js), in batting order.
 function BattingLines({ ctx }) {
   const at = { inning: ctx.inning, half: ctx.half, step: ctx.step, revealedThrough: ctx.mark }
@@ -57,14 +59,14 @@ function BattingLines({ ctx }) {
     return (
       <table key={side} className="gdsheet__table">
         <thead>
-          <tr><th>{club?.abbreviation ?? side}</th><th>AB</th><th>H</th><th>R</th><th>RBI</th><th>BB</th><th>K</th></tr>
+          <tr><th>{ctx.feed?.gameData?.teams?.[side]?.teamName ?? club?.abbreviation ?? side}</th><th aria-label="Number" /><th>Pos</th><th>AB</th><th>R</th><th>H</th><th>RBI</th></tr>
         </thead>
         <tbody>
           {order.map(({ slot, entries }) => entries.map((p) => {
             const l = batterDayLine(ctx.feed, p.id, at)
             return (
               <tr key={`${slot}-${p.id}`}>
-                <td>{p.last}</td><td>{l?.ab ?? 0}</td><td>{l?.h ?? 0}</td><td>{l?.r ?? 0}</td><td>{l?.rbi ?? 0}</td><td>{l?.bb ?? 0}</td><td>{l?.k ?? 0}</td>
+                <td><PlayerLink id={p.id}>{[p.last, p.first].filter(Boolean).join(', ')}</PlayerLink></td><td className="gdsheet__num">{p.jersey || '—'}</td><td className="gdsheet__pos">{p.position || '—'}</td><td>{l?.ab ?? 0}</td><td>{l?.r ?? 0}</td><td>{l?.h ?? 0}</td><td>{l?.rbi ?? 0}</td>
               </tr>
             )
           }))}
@@ -77,7 +79,7 @@ function BattingLines({ ctx }) {
 export function BoxSheet({ ctx, onClose, onFull }) {
   const reach = reachOf(ctx)
   return (
-    <Sheet title="Box score so far" onClose={onClose}>
+    <Sheet title="Box score" onClose={onClose}>
       {/* The line score as the strip draws it, R / H / E as of the step. */}
       <GamedayPanel block="navigator" ctx={{ ...ctx, onSelect: () => {}, disabled: true }} />
       {reach ? (
@@ -197,6 +199,8 @@ export function WinProbSheet({ ctx, onClose }) {
   const reach = reachOf(ctx)
   const away = ctx.meta?.away ?? {}
   const home = ctx.meta?.home ?? {}
+  // The scoreboard follows the chart's scrub: the split as of the play under the cursor (Gary, 2026-10-30).
+  const [active, setActive] = useState(null)
   return (
     <Sheet title="Win probability so far" onClose={onClose}>
       {!reach ? <Sealed /> : loading && !wp ? <p className="gdsheet__empty">…</p> : (
@@ -205,12 +209,16 @@ export function WinProbSheet({ ctx, onClose }) {
             const at = { throughHalf: ctx.mark ?? -1, stepHalfIndex: reach.here, throughAtBatIndex: reach.cut }
             const points = selectWinProbPath(wp, at)
             if (!points.length) return <p className="gdsheet__empty">No win probability yet for this game.</p>
-            const split = winProbSplit(points)
+            const split = winProbSplit(active == null ? points : points.slice(0, active + 1))
             return (
               <>
-                <p className="gdsheet__split"><b>{away.abbreviation} {split.away}%</b><span>·</span><b>{home.abbreviation} {split.home}%</b></p>
+                {/* The split as a scoreboard (Gary, 2026-10-30): each club's mark beside its share, large and centred. */}
+                <p className="gdsheet__split">
+                  <span className="gdsheet__side"><TeamLogo teamId={away.id} name={away.abbreviation} size={44} /><span><b>{split.away}%</b><small>{away.abbreviation}</small></span></span>
+                  <span className="gdsheet__side gdsheet__side--home"><span><b>{split.home}%</b><small>{home.abbreviation}</small></span><TeamLogo teamId={home.id} name={home.abbreviation} size={44} /></span>
+                </p>
                 <WinProbChart points={points} bigPlays={selectWinProbBigPlays(wp, at)} awayAbbr={away.abbreviation} homeAbbr={home.abbreviation}
-                  awayId={away.id} homeId={home.id} awayTreatment={ctx.treatment?.away} homeTreatment={ctx.treatment?.home} partial />
+                  awayId={away.id} homeId={home.id} awayTreatment={ctx.treatment?.away} homeTreatment={ctx.treatment?.home} partial onActive={setActive} />
               </>
             )
           }}

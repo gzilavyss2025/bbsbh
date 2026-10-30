@@ -46,3 +46,11 @@
   font-size: var(--fs-small);
   color: var(--text-muted);
 }
+
+/* The AL / NL mark in the strip (Gary, 2026-10-30). */
+.fhist__leaguelogo {
+  display: block;
+  width: var(--space-8);
+  height: var(--space-8);
+  object-fit: contain;
+}

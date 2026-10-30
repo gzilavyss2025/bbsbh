@@ -573,3 +573,8 @@
 .tnext__ends {
   background: var(--surface-inset);
 }
+
+/* The two tiles inside the hero, under the record (Gary, 2026-10-30): the lead column's own room. */
+.tnext__tiles--lead {
+  margin: 0 var(--space-4) var(--space-4);
+}

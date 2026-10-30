@@ -1,4 +1,4 @@
-import { useId, useMemo, useRef } from 'react'
+import { useId, useMemo, useRef, useEffect } from 'react'
 import { winProbSplit } from '../../api/winprob.js'
 import { winProbChangeLabel, winProbReadout, wholeSwing } from './winprob/explore.js'
 import { useWinProbSelection } from './winprob/useWinProbSelection.js'
@@ -98,6 +98,7 @@ export function WinProbChart({
   final = false,
   highlights = null,
   filmEligible = true,
+  onActive = null,
 }) {
   const patternUid = useId()
   // The latest play until the user picks one (winprob/useWinProbSelection.js).
@@ -107,6 +108,8 @@ export function WinProbChart({
   )
   // A swing row's Watch button opens that play's clip (winprob/useSwingClip.js).
   const clip = useSwingClip({ highlights, filmEligible })
+  // A host may follow the scrub (Gameday's sheet sets its scoreboard to the play under the cursor).
+  useEffect(() => { onActive?.(activeIdx) }, [onActive, activeIdx])
   const svgRef = useRef(null)
   // A swing row selects its play and brings the plot into view to show it.
   const pickSwing = (idx) => {
@@ -333,6 +336,12 @@ export function WinProbChart({
         {/* An ink casing under the line keeps it readable on any band. */}
         <path className="winprob__line-casing" d={linePath} />
         <path className="winprob__line" d={linePath} />
+        {/* A game still going ends in an arrow, not a blunt cap (Gary, 2026-10-30), past the plot's right edge. An
+            open path: the fill closes it, but no ink rule crosses the line at its back. */}
+        {partial && (() => {
+          const ye = y(pts[n - 1].home)
+          return <path className="winprob__arrow" d={`M ${W - 1} ${(ye - 6).toFixed(1)} L ${W + 7} ${ye.toFixed(1)} L ${W - 1} ${(ye + 6).toFixed(1)}`} />
+        })()}
 
         {/* Scoring plays — where the line took its steps. Flattened into the
             line on purpose (small, dim, no stroke halo, no pointer affordance):

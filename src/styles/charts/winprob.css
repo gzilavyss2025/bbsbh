@@ -112,6 +112,8 @@
 .winprob__line { stroke: var(--winprob-line); stroke-width: 2.5; }
 /* Drawn under the line: a light band loses a white line without it. */
 .winprob__line-casing { stroke: var(--ink-0); stroke-width: 5; }
+/* The running game's arrowhead: the line's colour in the casing's ink. */
+.winprob__arrow { fill: var(--winprob-line); stroke: var(--ink-0); stroke-width: 1.5; stroke-linejoin: miter; }
 
 /* Scoring-play flecks — deliberately flattened into the line (small, dim, no
    stroke halo, no pointer affordance): a DIFFERENT set of plays than the

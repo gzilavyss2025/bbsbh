@@ -12,7 +12,7 @@ import { useBandData } from '../useBandData.js'
 import { aboutCount, loadAbout } from './loadAbout.js'
 import '../../../../styles/team-next/about.css'
 
-// About: what this club is. The ballpark (with the manager in its fact strip), the franchise
+// About: what this club is. The ballpark (no manager cell: the Roster band names him, Gary 2026-10-30), the franchise
 // history and league pennants (MLB), the jerseys and (MiLB) Made The Show, each a stamped card with a name tab.
 // Everything here is open (ADR-0034) and moves with nothing but the jerseys, which follow `?d=`.
 // Motion plays once per page visit (docs/motion.md, "The one-shot gate").
@@ -34,7 +34,7 @@ export default function About({ team, asOf, onReady, onCount }) {
   let i = 0
   return (
     <Stack gap="section" className="tnext__about">
-      <BallparkCard team={team} venue={d.venue} layoutDate={d.venue === undefined ? undefined : asOf} attendance={d.attendance} manager={d.manager} cardProps={card('Ballpark', i++)} />
+      <BallparkCard team={team} venue={d.venue} layoutDate={d.venue === undefined ? undefined : asOf} attendance={d.attendance} cardProps={card('Ballpark', i++)} />
       {d.franchise && <FranchiseHistory {...d.franchise} cardProps={card('Franchise history', i++)} />}
       {d.pennants?.length > 0 && <PennantWall pennants={d.pennants} cardProps={card('Pennants', i++)} />}
       {door && <Door className="tnext__about-door" {...linkProps(door)}>Postseason history</Door>}

@@ -132,9 +132,9 @@
   font-size: var(--fs-small);
   /* Pinned under the page's sticky jump bar while this card scrolls by (Gary, 2026-10-30); its
      sticky range is the log's own box, so it leaves with the card. The offset is the jump bar's
-     height (its 2.5-step padding each side, a 40px button row, its two 2px rules). */
+     measured height. */
   position: sticky;
-  top: calc(var(--space-2h) * 2 + var(--space-10) + var(--bw-heavy) * 2);
+  top: var(--jumpbar-h, 0px); /* the bar measures itself (HubTabBar.jsx) */
   z-index: 2;
   margin-inline: calc(var(--space-4) * -1);
   padding: var(--space-2) var(--space-4);

@@ -30,15 +30,6 @@
 
 /* THE DIVISION TABLE's foot: the L10 note and the Postseason Odds control. */
 /* layout-exempt: a note and one control on a row, wrapping on a phone */
-.stnd__foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
 .stnd__note {
   margin: 0;
   flex: 1 1 14rem;
@@ -188,4 +179,47 @@
 :root[data-motion='reduced'] .stnd .card--stamp-in {
   animation: none !important;
   transition: none !important;
+}
+
+/* The odds door in the count tag's place: the tag draws the box, the button only resets. */
+.stnd__oddsbtn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: var(--ls-label);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.stnd__oddsbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* The division table's header row sits on the card's own paper (Gary, 2026-10-30). */
+.stnd__card .clubtable thead th {
+  background: transparent;
+  border-bottom: var(--bw-heavy) solid var(--text-heading);
+}
+
+/* Day of week on a wide screen: seven columns, Sunday to Saturday, like a calendar week
+   (Gary, 2026-10-30). Each day stacks its name, record and pct. */
+@media (min-width: 740px) {
+  .stnd__wrap--dow .tstats__grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    column-gap: 0;
+  }
+  .stnd__wrap--dow .tstatrow {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-2);
+    border-top: 0;
+    border-left: var(--bw-heavy) solid var(--text-heading);
+    text-align: center;
+  }
+  .stnd__wrap--dow .tstatrow:first-child { border-left: 0; }
+  /* The day rules run to the card's foot (Gary, 2026-10-30). */
+  .stnd__wrap--dow .tstats__body { padding-bottom: 0; }
 }

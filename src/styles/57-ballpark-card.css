@@ -53,7 +53,10 @@
   width: 100%;
   aspect-ratio: 1.85 / 1;
   object-fit: cover;
-  border-radius: var(--radius-sm);
+  /* Square, on a heavy black rule (Gary, 2026-10-30). */
+  border-radius: 0;
+  border: var(--bw-heavy) solid var(--text-heading);
+  box-sizing: border-box;
   background: var(--surface-sunken, rgba(0, 0, 0, 0.06));
 }
 

@@ -72,7 +72,7 @@ const placeOf = (play) => ({
 // (StatBox and the pitch list read it too); this module only adds the
 // manager's and the umpires' reviews, event-level in event order, then a
 // play-level one last (where it belongs in time).
-function reviewsInPlay(feed, play) {
+export function reviewsInPlay(feed, play) {
   const out = challengesForPlay(feed, play).map((c) => ({
     kind: 'abs',
     side: c.side,

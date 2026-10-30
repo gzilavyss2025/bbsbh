@@ -54,13 +54,18 @@ function BatSpeedHistogram({ mph }) {
   const faster = speeds.filter((v) => v < mph).length
   return (
     <div className="bshist" role="img" aria-label={`This swing, ${mph.toFixed(1)} mph, is faster than the average swing of ${faster} of ${speeds.length} qualified hitters`}>
-      <p className="bshist__head">Faster than the average swing of <b>{faster} of {speeds.length}</b> hitters</p>
+      {/* A drawer out of the facts box (Gary, 2026-10-30): no headline (the count rides in the aria-label), this
+          swing's speed over its bin, the league's average on the axis under the plot, so the labels never collide. */}
       <div className="bshist__plot">
         {bins.map((n, i) => <i key={i} className={`bshist__bar${lo + i === Math.floor(mph) ? ' is-here' : ''}`} style={{ height: `${(n / top) * 100}%` }} />)}
-        {median != null && <span className="bshist__median" style={{ left: at(median) }}><small>Lg {median.toFixed(1)}</small></span>}
-        <span className="bshist__mark" style={{ left: at(mph) }} />
+        {median != null && <span className="bshist__median" style={{ left: at(median) }} />}
+        <span className="bshist__mark" style={{ left: at(mph) }}><small>{mph.toFixed(1)} mph</small></span>
       </div>
-      <p className="bshist__axis"><span>{lo} mph</span><span>{hi} mph</span></p>
+      <p className="bshist__axis">
+        <span>{lo} mph</span>
+        {median != null && <span className="bshist__lg" style={{ left: at(median) }}>Lg avg {median.toFixed(1)} mph</span>}
+        <span>{hi} mph</span>
+      </p>
     </div>
   )
 }

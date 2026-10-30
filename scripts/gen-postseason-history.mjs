@@ -1,6 +1,6 @@
 // Regenerates public/data/postseason-history.json — the completed bracket
 // (who played, who won, how many games) for every MLB postseason back to
-// 2000 (EARLIEST_YEAR below), plus the round MVP where one exists (LCS +
+// 1903 (EARLIEST_YEAR below), plus the round MVP where one exists (LCS +
 // World Series only — Wild Card/Division Series carry no official MVP
 // award). Covers three different Wild Card formats across that span —
 // straight-to-Division-Series (2000-2011), a single Wild Card game
@@ -66,7 +66,7 @@ const out = join(here, '..', 'public', 'data', 'postseason-history.json')
 // The app's own UI shows 2020-present eagerly and gates 2000-2019 behind a
 // "Load more" button (PostseasonHistoryPage.jsx) — EARLIEST_YEAR is the
 // generator's own floor, independent of that UI cutoff.
-const EARLIEST_YEAR = 2000
+const EARLIEST_YEAR = 1903 // the first World Series (Gary asked for the years before 2000, 2026-10-30)
 const CURRENT_YEAR = new Date().getUTCFullYear()
 
 // gameType -> round bucket. Order here is bracket order (earliest round
@@ -89,7 +89,11 @@ function mvpAwardId(roundKey, leagueId) {
 
 async function fetchMvp(awardId, season) {
   if (!awardId) return null
-  const data = await getJson(`/api/v1/awards/${awardId}/recipients?season=${season}`)
+  // A season before the award existed answers 404 (ALCSMVP for 1979, verified 2026-10-30): no MVP, not an error.
+  const data = await getJson(`/api/v1/awards/${awardId}/recipients?season=${season}`).catch((e) => {
+    if (e.status === 404) return {}
+    throw e
+  })
   const award = (data.awards ?? [])[0]
   if (!award?.player?.id) return null
   return {
@@ -227,6 +231,8 @@ async function buildSeason(year) {
     series.games.sort((a, b) => a.gameNumber - b.gameNumber)
     const wins = new Map()
     for (const g of series.games) {
+      // A tie (1907, 1912 and 1922 World Series, called for darkness) is nobody's win.
+      if (g.awayScore === g.homeScore) continue
       const winnerId = g.awayScore > g.homeScore ? g.awayTeamId : g.homeTeamId
       wins.set(winnerId, (wins.get(winnerId) ?? 0) + 1)
     }
@@ -305,7 +311,15 @@ async function buildSeason(year) {
     series: seriesByRound.get(r.key),
   })).filter((r) => r.series.length > 0)
 
-  return { year, championTeamId, rounds }
+  // Each club's name and abbreviation that year, from the schedule pull ("New York Giants", NYG, in 1921), so the
+  // page names a club as it was then; the app's own teams.js knows only today's names.
+  const teams = {}
+  for (const g of games) for (const side of ['away', 'home']) {
+    const t = g.teams[side].team
+    teams[t.id] = { name: t.name, abbreviation: t.abbreviation }
+  }
+
+  return { year, championTeamId, teams, rounds }
 }
 
 const seasons = []

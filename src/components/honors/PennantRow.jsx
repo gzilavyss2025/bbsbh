@@ -18,6 +18,7 @@ export function PennantRow({ pennants, label }) {
             teamName={p.name}
             clubLabel={p.club}
             abbreviation={p.abbr}
+            ws={p.ws}
             variant={wide ? 'full' : 'compact'}
             width={wide ? 150 : 64}
           />

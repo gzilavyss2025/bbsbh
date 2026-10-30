@@ -1,9 +1,9 @@
 /* ==== THE JUMP BAR (HubTabBar variant="anchor", #1883) ==== */
 /* The same control as .teamtabs on a one-scroll page: each item scrolls to a
    section, and the section in view marks its item current. From the canvas
-   boards B-phone and B-wide (docs/player-redesign.md, section 3). Square
-   items, 44px tall, each with a count badge. The current item is ink, and its
-   badge is --accent-tint. The app's own colours on every page (ADR-0030).
+   boards B-phone and B-wide (docs/player-redesign.md, section 3). Square,
+   thin items with no count badge (Gary, 2026-10-30), each with an invisible
+   --tap-min hit area above and below. The current item is ink. The app's own colours on every page (ADR-0030).
 
    Under 740px: one row with a rule above and below, scrolling sideways. The
    row is a Cluster (it wraps); here it does not, so the bar scrolls instead.
@@ -49,6 +49,10 @@
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
+  /* This row scrolls, so it would clip the items' --tap-min hit areas: room for them above and
+     below the 24px stop ((44 - 24) / 2), given back by the margin so nothing moves. */
+  padding-block: var(--space-2h);
+  margin-block: calc(-1 * var(--space-2h));
 }
 .jumpbar--aside .jumpbar__row::-webkit-scrollbar {
   display: none;
@@ -79,23 +83,30 @@
   }
 }
 .jumpbar__item {
+  position: relative; /* anchors its hit area */
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: var(--tap-min);
-  padding: 0 var(--space-3);
+  padding: var(--space-1) var(--space-2);
   white-space: nowrap;
-  border: var(--bw-heavy) solid var(--text-heading);
+  border: var(--bw-rule) solid var(--text-heading);
   border-radius: 0;
   background: var(--surface-card);
   color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: var(--fs-h3);
+  font-size: var(--fs-label);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-stamp);
+}
+/* The thin stop keeps a --tap-min target (Gary, 2026-10-30): an invisible band above and below,
+   inside the bar's own padding, so the scrolling row does not clip it. */
+.jumpbar__item::after {
+  content: '';
+  position: absolute;
+  inset: calc((var(--tap-min) - 100%) / -2) 0;
 }
 /* The press: the item moves 2px down and right on the stamp curve, the same
    press as Button and Pill (#2073). */
@@ -111,6 +122,7 @@
   color: var(--text-on-ink);
 }
 .jumpbar__count {
+  display: none; /* Thinner stops, no count boxes (Gary, 2026-10-30). */
   padding: 0 var(--space-1);
   border: var(--bw-heavy) solid var(--text-heading);
   background: var(--surface-card);

@@ -56,7 +56,7 @@ test('round rows build a tile row per round, keyed by gameType, with a dash for 
   assert.equal(rows[0].tiles.at(-1).k, 'OPS')
   assert.equal(rows[0].tiles.at(-1).v, '.347')
   assert.equal(rows[1].tiles.find((t) => t.k === 'AVG').v, '—')
-  assert.equal(rows[0].tiles.length, 5)
+  assert.equal(rows[0].tiles.length, 8)
 })
 
 test('pitcher round rows end in WHIP and lead by role', () => {

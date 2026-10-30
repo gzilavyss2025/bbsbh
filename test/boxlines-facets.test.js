@@ -294,8 +294,8 @@ test('a club facet with postseasonFrom is one series: that club, October only, f
   assert.equal(plan.keep(row({ date: '2026-10-03' })), true)
   assert.equal(plan.keep(row({ date: '2026-10-05' })), true)
   assert.equal(plan.keep(row({ date: '2025-10-04' })), false)
-  // A plain club facet is unchanged: regular season, no predicate.
+  // A plain club facet counts every meeting, October's too (the Career vs line it opens does), with no predicate.
   const plain = facetPlan({ kind: 'club', opponentId: 158 })
   assert.equal(plain.keep, null)
-  assert.equal(plain.gameTypes, null)
+  assert.deepEqual(plain.gameTypes, ['R', 'F', 'D', 'L', 'W'])
 })

@@ -329,3 +329,11 @@
   border-color: var(--border-stamped);
   border-radius: 0;
 }
+
+/* The stat boxes and the pitch mix run the card's full width, their sides on the card's own rule (Gary,
+   2026-10-30); the strip heads keep the inset. */
+.lsp__boxes { margin-inline: calc(var(--space-3h) * -1); border-inline: 0; }
+.lmix { margin-inline: 0; border-inline: 0; }
+/* No green ring on the Career door (Gary, 2026-10-30): a faint ink wash on its boxes says it opens. */
+.lsp .lsp__career.door:hover { outline: 0; }
+.lsp .lsp__career.door:hover .lsp__boxes { background: color-mix(in srgb, var(--text-heading) 6%, transparent); }

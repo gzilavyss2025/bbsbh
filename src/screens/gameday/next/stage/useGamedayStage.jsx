@@ -20,15 +20,15 @@ import { battingSide } from './battingSide.js'
 import { wallFn } from './scene.js'
 import { openingChangeHeld, stageKey, stepCapAt } from '../steps/subStep.js'
 import { disarm, ended, replay, rest, saw, tap, back } from './tapRule.js'
-import { checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoint } from '../cutscene/integration/checkpointGate.js'
+import { afterCelebration, checkpointPhase, dismissCheckpoint, emptyCheckpointGate, recordCheckpoint } from '../cutscene/integration/checkpointGate.js'
 
 // The stage mount (#2573, #2568 slice 4): the stage slot, and the advance control wrapped in the tap
 // rule (tapRule.js). `last` is the last finished at-bat's index as of the cursor, `view` the half on
 // screen, `advance.reveal` marks the tap that reveals an at-bat. At rest, including after a tapped play settles, the
 // stage draws the due-up batter before the pitch, with his zone map unless this game dismissed it.
 // `reliever` is the live snapshot's revealed mid-half change (deriveLiveState's midHalfPitcherId).
-// A qualifying ending celebration keeps the stage until Next dismisses it
-// into the checkpoint. The reveal subtree reports only its eligibility flag.
+// A qualifying ending celebration plays once, then steps aside for the checkpoint
+// (a reduced-motion still holds until Next). The reveal subtree reports only its eligibility flag.
 // `open` ({ count, sub }): a sub-step inside the open at-bat is what the stage plays (stageKey).
 // A pitch pinned to the stage's edge points the way it went.
 const OFF_ARROW = { up: '▲', down: '▼', left: '◀', right: '▶' }
@@ -47,7 +47,9 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
   const gd = feed?.gameData
   const pk = gd?.game?.pk
   const checkpointKey = typeof cur.shown === 'number' ? `${pk}:${view}:${cur.shown}` : null
-  const phase = checkpointPhase(covered, checkpointKey, gate, !!cur.armed)
+  // A celebration that has played reads as the checkpoint, so Next plays on; its Replay plays it again over
+  // the checkpoint (checkpointGate.js afterCelebration).
+  const phase = afterCelebration(checkpointPhase(covered, checkpointKey, gate, !!cur.armed), cur.playing, motionIsReduced())
   const onCheckpoint = useCallback((eligible) => setGate((g) => recordCheckpoint(g, checkpointKey, eligible)), [checkpointKey])
   const date = gd?.datetime?.officialDate
   const venue = gd?.venue

@@ -12,7 +12,6 @@ import {
 import { isClerkEnabled } from '../../../../lib/clerkConfig.js'
 import { useCopy } from '../../../../copy/copyContext.js'
 import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram.jsx'
-import { managerFact } from '../../../../components/team/ManagerFact.jsx'
 import { EmptyState } from '../../../../components/ui/state/EmptyState.jsx'
 import { FactGrid } from '../../../../components/ui/frame/FactGrid.jsx'
 import { Facts, RankGroup } from '../../../../components/ballpark/BallparkFacts.jsx'
@@ -181,14 +180,13 @@ function AttendanceFacts({ attendance, skipAvg }) {
   return (
     <>
       <dl className="bpsheet__facts">
-        {!skipAvg && (
-          <Facts
-            label="Avg attendance"
-            value={attendance.avg.toLocaleString()}
-            note={rank ? `${ordinal(rank)} of ${of}` : null}
-          />
-        )}
+        {/* The average sits between the high and the low (Gary, 2026-10-30). */}
         <Facts label="Season high" value={attendance.high.toLocaleString()} />
+        <Facts
+          label={skipAvg ? 'Avg crowd' : 'Avg attendance'}
+          value={attendance.avg.toLocaleString()}
+          note={rank ? `${ordinal(rank)} of ${of}` : null}
+        />
         <Facts label="Season low" value={attendance.low.toLocaleString()} />
       </dl>
       <dl className="bpsheet__facts">
@@ -213,9 +211,9 @@ function AttendanceFacts({ attendance, skipAvg }) {
 }
 
 // `cardProps` is the one-scroll page's stamped frame and name tab (props for Card). With it the
-// card is laid out for that page: the park's facts and the manager in a strip under the photo
-// and name, and a plain empty state for a park with nothing drawn. `manager` shows only there.
-export function BallparkCard({ team, venue: venueProp, layoutDate, attendance, cardProps, manager }) {
+// card is laid out for that page: the park's facts in a strip under the photo and name, and a
+// plain empty state for a park with nothing drawn.
+export function BallparkCard({ team, venue: venueProp, layoutDate, attendance, cardProps }) {
   const { t } = useCopy()
   // `venue` is the park of a past season (null: none known, and the card draws nothing rather than
   // today's park); undefined is the club's park now (#2591).
@@ -299,15 +297,6 @@ export function BallparkCard({ team, venue: venueProp, layoutDate, attendance, c
     park && <ParkFact key="o" label="Opened" value={park.built} />,
     park && <ParkFact key="r" label="Roof" value={park.roof} />,
     park?.capacity && <ParkFact key="c" label="Capacity" value={park.capacity.toLocaleString()} />,
-    attendance && (
-      <ParkFact
-        key="a"
-        label="Avg crowd"
-        value={attendance.avg.toLocaleString()}
-        note={attendance.rank ? `${ordinal(attendance.rank)} of ${attendance.of}` : null}
-      />
-    ),
-    manager && <ParkFact key="m" label="Manager" value={managerFact(manager)} />,
   ].filter(Boolean)
   return (
     <Card
