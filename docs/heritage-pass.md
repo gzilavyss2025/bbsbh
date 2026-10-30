@@ -68,9 +68,8 @@ exported from Gary's PNG at 900px wide, WebP quality 80, transparent outside the
 drawing. Dodger Stadium, Fenway, Tropicana and Wrigley arrived on solid halftone
 grounds; their skies were cut out by an edge flood fill (blur, fill from the frame,
 close small gaps, feather), so a redraw should arrive transparent instead. The slot
-is wider than most drawings, so `object-fit: contain` preserves the complete
-engraving, bottom-aligned above the stub. Taller drawings leave side space inside
-the frame's inner rule rather than cropping roofs, signs, or foregrounds. Every game at those parks gets its art, whatever the year; `FORMER`
+uses the full ticket width with no side padding. Artwork keeps its natural
+aspect ratio and sits above the stub, preserving roofs, signs, and foregrounds. Every game at those parks gets its art, whatever the year; `FORMER`
 maps Miller Park (before 2021) to American Family Field. The drawings keep their
 sponsor and club marks by Gary's choice (2026-10-29). Any other park, and a file that fails to load, leaves the engraved venue
 name. Add a park by adding its webp and one line to `ART`, then check its crop on `/heritage-pass-preview`.
