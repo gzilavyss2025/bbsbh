@@ -31,9 +31,18 @@ if (!url || !out) {
 
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 const page = await browser.newPage({ viewport: { width: +w, height: +h }, deviceScaleFactor: 1 })
+// A PR's preview deployment sits behind Vercel sign-in. With the bypass
+// secret in the environment, every relayed request to a *.vercel.app host
+// carries it, so the preview opens (docs/development.md, "Deployment").
+const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
 await page.route(/^https:\/\//, async (route) => {
   try {
-    const res = await fetch(route.request().url())
+    const target = route.request().url()
+    const headers =
+      bypass && new URL(target).hostname.endsWith('.vercel.app')
+        ? { 'x-vercel-protection-bypass': bypass }
+        : undefined
+    const res = await fetch(target, { headers })
     const body = Buffer.from(await res.arrayBuffer())
     await route.fulfill({
       status: res.status,

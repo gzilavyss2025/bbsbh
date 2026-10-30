@@ -41,7 +41,7 @@ Out of scope:
   data comes from the public MLB Stats API and isn't sensitive. A report
   that a *score* is visible somewhere isn't a security issue; file it as a
   regular bug against the spoiler rule instead (see `CLAUDE.md`).
-- Denial-of-service reports against a free-tier Vercel Hobby deployment.
+- Denial-of-service reports against a small Vercel deployment.
 - Issues that require physical access to a user's device.
 
 ## What to expect

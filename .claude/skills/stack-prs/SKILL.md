@@ -5,9 +5,10 @@ description: Combine every open bbsbh PR into one stacked PR, review it, fix wha
 
 # /stack-prs
 
-Land all open PRs as one change. One merge to `main` means one Vercel deployment.
-The Hobby plan allows about 100 deployments a day; one batch per stack keeps `main`
-tidy and each deploy reviewed.
+Land all open PRs as one change. One merge to `main` means one production
+deployment; one batch per stack keeps `main` tidy and each deploy reviewed. The
+stack PR's own branch gets a preview deployment like any PR: that is where the
+maintainer looks at the combined change before it lands.
 
 **Invoking this skill is the maintainer's explicit yes to merge to `main`.** The
 orchestrator may also invoke it under the maintainer's standing permission
@@ -83,7 +84,10 @@ did, and end with a short list of what needs him.
    per line, so GitHub closes those issues when the stack PR merges. Do not add a
    closing keyword for an issue that a source PR only references.
    Add the attribution lines from the session reminder. Subscribe to its activity
-   (`subscribe_pr_activity`).
+   (`subscribe_pr_activity`). Vercel builds a preview of the stack branch
+   (`https://bbsbh-git-<branch>-gareedge.vercel.app`, behind a Vercel sign-in);
+   a session cannot open it, so verify in Chromium as usual and keep the link for
+   the report.
 6. **Review the stack, then fix.** This is the only review the source PRs get.
    Run the `code-review` skill on the stack PR at `high` effort, then the
    `ponytail-review` skill on the same diff. If you split the review across
@@ -114,6 +118,10 @@ did, and end with a short list of what needs him.
    merge waits until every one is true:
    - CI `lint-and-build` is green on the latest commit. If it is red, root-cause
      it, fix it, and push. Do not re-run to hope.
+   - The Vercel preview deployment of the latest commit is Ready, or Ignored
+     because the push touched nothing that deploys. Production builds
+     the same way, so a failed preview is a failed deploy: read the build error
+     (`mcp__Vercel__list_deployment_events`), fix it, and push.
    - No merge conflict with `main`. If `main` moved, merge it into the stack
      branch. Run step 4's narrow check only if the merge had a conflict; CI
      runs the full suite on the push.
@@ -170,8 +178,18 @@ Name each item. Examples: a PR left out and why, a design choice from the
 review, a gate that stopped the merge, an issue you could not update. If the
 merge happened, give the stack PR link, the count of PRs it landed, and the
 issues you closed or commented on. If nothing needs him, say exactly that.
+On a dry run, or when a gate stopped the merge, give the stack preview link with
+`?nointro` so he can look at the combined change on his phone before he says go.
 
 Do not start other work after the report.
+
+## If production breaks after the merge
+
+Roll back first, fix second. Vercel Pro rolls production back to any earlier
+deployment at once (`mcp__Vercel__request_rollback` to the last Ready production
+deployment before the stack, or `vercel rollback <url>` locally). Say what you
+rolled back to and which source PR is suspected. Then fix on a branch and land it
+as a new stack. Never revert on `main` by hand.
 
 ## Rules that do not bend
 

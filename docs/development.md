@@ -56,9 +56,10 @@ sessions that share one machine. In the cloud, these rules change:
   overlap, or wait for that PR. Keep the change to the one task you were given, and
   list the files you touched in the PR. A task that needs an unmerged PR names that PR
   and bases on its branch on purpose; otherwise it waits.
-- **Deploy budget.** Merging to `main` deploys. Parallel sessions never merge. They
-  leave their PRs open, and `/stack-prs` lands them together: the maintainer runs it,
+- **One deploy per stack.** Merging to `main` deploys. Parallel sessions never merge.
+  They leave their PRs open, and `/stack-prs` lands them together: the maintainer runs it,
   or the orchestrator runs it under his standing permission (`.claude/skills/orchestrate/`).
+  A PR branch gets its own preview; the maintainer looks there, not at `main`.
 - **Nightly data.** The data cron pushes to `main` (`public/data/*.json`). A branch open
   across a nightly run can conflict there. Take `origin/main`'s version of a generated
   file. Regenerate it with its `scripts/gen-*.mjs` only when your PR changes that
@@ -166,15 +167,29 @@ each file's shape and reason live in `src/api/CLAUDE.md` (the reader module) and
 
 ## Deployment
 
-Hosted on Vercel, auto-deploying `main` to production on every push. This is a
-Hobby-plan account, so production deployments are scarce. Agents must reduce them
-ruthlessly: keep work on PR branches, combine related changes, avoid unnecessary
-push/merge cycles, and leave the final merge timing to the maintainer. Two settings
-in `vercel.json` enforce part of that policy:
+Hosted on Vercel, auto-deploying `main` to production on every push. The team moved
+from Hobby to Pro on 2026-10-29, so deployments are no longer scarce (Hobby capped
+them at about 100 a day). Every branch now gets a preview deployment: the PR's
+Vercel check links it, and Vercel Authentication protects it, so a viewer signs in to
+Vercel first (a cloud session passes `VERCEL_AUTOMATION_BYPASS_SECRET` instead, when
+the environment has it; see `.claude/skills/run/`). The maintainer can pin comments
+to a preview from the Vercel toolbar; `.claude/skills/steward/` says how a session
+answers them. That sign-in is also what keeps crawlers off previews; a crawler storm
+on 2026-10-29 paused the Hobby team at 3x its request allowance. Keep work on PR
+branches and batch related changes into one stack anyway: one reviewed deploy per
+stack keeps `main` tidy, and Pro bills usage past the plan's allowance instead of
+pausing. The Vercel Firewall's managed **Bot Protection** is on with action Challenge
+(dashboard, 2026-10-30): real browsers pass, scripted clients get a checkpoint, so a
+`curl` probe of production sees a 429 with `x-vercel-mitigated: challenge` and that is
+correct, not a rate limit. A custom rule also rate-limits each IP to 600 requests a
+minute outside `/assets/`, `/data/` and `/_vercel/` (Deny 403 for five minutes). One
+reader's page view is roughly a dozen requests, so the limit only catches a storm;
+the first draft at 100 blocked the maintainer's own phone. The Firewall's
+Persistent Actions list shows who tripped it. Both settings live only in the
+dashboard. One setting in `vercel.json` still trims deployments:
 
-- `git.deploymentEnabled: { "main": true, "*": false }` — skips deployments
-  entirely for every branch except `main`. Verify any other branch in your own
-  container or checkout; nothing but `main` ever gets a Vercel URL.
+- `git.deploymentEnabled: { "dependabot/**": false }` — Dependabot branches get no
+  preview; their weekly grouped PR lands in a stack like any other.
 - `ignoreCommand: scripts/vercel-ignore-build.sh` — Vercel's Ignored Build Step;
   skips a deployment when the push touched only docs/scripts/workflow files with no
   effect on the deployed app (diffs against `VERCEL_GIT_PREVIOUS_SHA`, the last commit
@@ -345,9 +360,9 @@ files. Treat isolation as a hard requirement:
 - Prefer merging/closing promptly over letting several `claude/*` branches sit open
   in parallel — the longer one lives, the more likely another session's PR conflicts
   with it.
-- No branch other than `main` gets its own Vercel preview deployment (see
-  `git.deploymentEnabled` below) — verify locally (`npm run dev`)
-  before opening the PR rather than expecting a preview URL on the PR check.
+- Every PR branch gets a Vercel preview deployment (see Deployment below). Still
+  verify in your own container first; the preview URL on the PR check is for the
+  maintainer to look at on a phone, and it asks for a Vercel sign-in.
 
 ### End-of-task handoff and cleanup
 
@@ -362,6 +377,7 @@ Based on: origin/main at <short SHA>, or dependency PR #<number>
 State: clean and pushed / dirty with named files
 Validation: commands and result
 Local example: http://localhost:<port>/<exact-route>, or not applicable
+Preview: https://bbsbh-git-<branch>-gareedge.vercel.app/<exact-route>?nointro, or not built yet
 Cleanup: safe after PR merges / do not remove yet
 ```
 

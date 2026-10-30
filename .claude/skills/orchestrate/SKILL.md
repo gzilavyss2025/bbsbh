@@ -170,7 +170,7 @@ Verify: the test files you wrote or changed, the existing test files that import
 a file you changed (git grep -l <basename> test/), and npm run lint. Do not
 run the full npm test or npm run build: CI runs them on your PR. For a visible
 change, send a screenshot with SendUserFile (Chromium, ?nointro, say what is
-mocked).
+mocked), and name the PR's preview link for that route in the handoff.
 Handoff: open a DRAFT PR to main. Body: base SHA, files, how you verified, and
 one line per issue. Write "Closes #n" when this PR meets the issue's "Done means".
 Write "Part of #n" only when the issue has more slices after this one. Subscribe
@@ -342,7 +342,7 @@ needs him, say exactly that.
 ## Stacking
 
 He gave standing permission (2026-10-08): you run `/stack-prs` on your own, on a
-regular basis. Vercel allows 100 deployments a day, so a stack is cheap.
+regular basis. A stack is one deployment, so it is cheap.
 
 - Stack at a check-in when one or more child PRs are green, finished, and not
   waiting on a pick from him. At most one stack per check-in.
@@ -356,6 +356,11 @@ regular basis. Vercel allows 100 deployments a day, so a stack is cheap.
   other sessions' drafts included.
 - Build each stack on a new branch (`claude/stack-<date>-r<n>`). Never reuse a
   stack branch whose PR merged.
+- **Rollback.** He gave standing permission (2026-10-29): if production is broken
+  after a stack (the site errors, a function 500s, the slate does not load), roll
+  back to the last good production deployment on your own, following
+  `/stack-prs`, "If production breaks after the merge". Tell him what you rolled
+  back to and which PR you suspect. The forward fix still goes through a PR.
 - `/stack-prs` ends with "do not start other work". That ends the stack step
   only. After the merge, go on with this skill: start the work that waited on
   it, and say in the report what the stack carried.

@@ -151,6 +151,15 @@ Args: `url out [width=390] [height=844] [full=0|1]`. The script's header lists
 the three traps (CA, response headers, binary path). Do not turn off TLS
 checks to get around the proxy.
 
+## Opening the PR's preview deployment
+
+Every PR branch has a preview at `https://bbsbh-git-<branch>-gareedge.vercel.app`
+behind a Vercel sign-in. When the environment sets `VERCEL_AUTOMATION_BYPASS_SECRET`,
+`shot.mjs` sends it as the `x-vercel-protection-bypass` header and the preview
+opens; without it the screenshot shows Vercel's sign-in page, so verify in the
+local dev server instead. Use the preview for the final screenshot of a visible
+change: it is the real build, with real data, and it is what Gary sees.
+
 ## Routes, so you don't have to derive them
 
 `/{MMDDYYYY}/{away}{home}/{section}` — team abbrs lowercased, game 2 of a

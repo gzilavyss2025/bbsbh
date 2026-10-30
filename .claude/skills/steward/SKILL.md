@@ -51,6 +51,15 @@ you push (`docs/development.md`, "Long runs").
   thread, and carry plainly correct nits into the next push that already changes
   those files.
 
+## Preview comments
+
+Gary can pin a comment to a spot on the PR's preview deployment from his phone
+(the Vercel toolbar). It reaches the PR as a vercel[bot] comment, and
+`mcp__Vercel__list_toolbar_threads` has the thread with the page and element it
+points at. Treat each one like a review comment from him, by the rules above:
+fix and push a small ask, reply with a proposal for a larger one. Resolve the
+thread when done (`mcp__Vercel__change_toolbar_thread_resolve_status`).
+
 ## Merge conflicts
 
 Merge `origin/main` into the PR branch. Do not rebase or force-push.
@@ -71,7 +80,7 @@ structure, check that the nested `CLAUDE.md` and `docs/adr/` entry still match.
 
 ## Auto-merge (PRs that do not deploy)
 
-Gary allowed auto-merge for a PR that causes no Vercel deployment. Such a PR changes
+Gary allowed auto-merge for a PR that causes no production deployment. Such a PR changes
 none of these paths, the same list `scripts/vercel-ignore-build.sh` uses: `src`,
 `public`, `index.html`, `package.json`, `package-lock.json`, `vite.config.js`,
 `vercel.json`, `api`. So workflow, docs, test, script and `.claude` changes qualify.

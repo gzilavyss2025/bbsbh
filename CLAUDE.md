@@ -48,9 +48,11 @@ fails, move content out; do not raise the cap. After structural work, update the
 **All sessions use task branches and pull requests. Never push directly to `main`
 or trigger a Vercel deployment.** Two exceptions: a `/stack-prs` merge, run by Gary or
 by the orchestrator under his standing permission (`.claude/skills/orchestrate/`), and
-`merge-pr` when Gary says "merge the pr" (green CI only, no stack). This
-is a Vercel Hobby project (about 100 deployments a day): keep work-in-progress off
-`main` and batch related changes into one stack. Non-`main` previews are disabled. Verify in your own container or checkout instead.
+`merge-pr` when Gary says "merge the pr" (green CI only, no stack). Keep
+work-in-progress off `main` and batch related changes into one stack (Vercel Pro since
+2026-10-29). Every push to a PR branch gets a preview URL on the PR's Vercel check; it
+needs a Vercel sign-in. Verify in your own container first; the preview is for Gary:
+end your handoff with the preview link for the route you changed, `?nointro` added.
 
 **Cloud is the default** (`CLAUDE_CODE_REMOTE=true`; Gary works in claude.ai/code). One
 container, one branch: use the branch the session gives you, cut from current

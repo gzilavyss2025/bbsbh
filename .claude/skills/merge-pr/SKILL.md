@@ -18,8 +18,8 @@ Use the `mcp__github__*` tools in a cloud session (`gh` in a local session).
 - He did not: use the PR for this session's branch. If there is none, and exactly one
   open PR is not `wip`, use it. Otherwise ask which one (in an unattended run, stop and
   report).
-- Several numbers: do each one in turn, lowest first. This gives one deployment per PR.
-  For more than two, say that `/stack-prs` gives one deployment for all of them.
+- Several numbers: do each one in turn, lowest first. This gives one production
+  deployment per PR. For more than two, say that `/stack-prs` gives one for all of them.
 
 ## Steps
 
@@ -31,6 +31,12 @@ Use the `mcp__github__*` tools in a cloud session (`gh` in a local session).
    - The `lint-and-build` check passed on the head SHA. Still running: wait for it
      (`send_later` or a PR event, not a `sleep` loop). Red: stop, and give the failing
      step from the job log.
+   - The Vercel preview deployment for the head SHA is not failed (the `Vercel`
+     check, or the vercel[bot] comment's Deployment column). Production builds the
+     same way, so a failed preview is a failed deploy. "Ignored" is fine: the push
+     touched nothing that deploys, and the earlier preview stands. Still building:
+     wait as above. Failed: stop, and give the build error from the deployment's logs
+     (`mcp__Vercel__list_deployment_events`).
    - No merge conflict. If the branch is only behind `main`, update it on GitHub
      (`mcp__github__update_pull_request_branch`) and go back to the CI gate for the
      new head. A conflict: stop and say which files. Do not resolve it here.
@@ -42,3 +48,11 @@ Use the `mcp__github__*` tools in a cloud session (`gh` in a local session).
    say so. Do not comment on issues, close other PRs or touch labels.
 
 If a gate fails, say which gate, why, and what is needed. Never merge around a gate.
+
+## If production breaks after the merge
+
+Roll back first, fix second. Vercel Pro rolls production back to any earlier
+deployment at once (`mcp__Vercel__request_rollback` to the last Ready production
+deployment before this merge, or `vercel rollback <url>` locally). Say what you
+rolled back to. Then fix on a branch; the fix PR lands the usual way. Do not
+revert on `main` and do not push to `main`.
