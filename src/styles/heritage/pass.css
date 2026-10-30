@@ -176,13 +176,14 @@
 .heritagepass__bats svg { display: block; width: 100%; }
 /* layout-exempt: the art slot grows into the ticket's spare height and sits on the stub */
 .heritagepass__venue { flex: 1; display: flex; flex-direction: column; justify-content: end; min-height: 64px; }
-/* Full-width artwork keeps its natural proportions so no edge is cropped. */
+/* Artwork meets the inner blue rule (x 22 of the 360-unit frame) without
+   cropping the drawing. raw-value-exempt: frame artwork units. */
 .heritagepass__art {
   display: block;
   flex: 0 0 auto;
-  width: calc(100% + 2 * var(--space-6));
+  width: calc(100% + 2 * (var(--space-6) - 22cqw * 100 / 360));
   height: auto;
-  margin: var(--space-2) calc(-1 * var(--space-6)) 0;
+  margin: var(--space-2) calc(22cqw * 100 / 360 - var(--space-6)) 0;
 }
 /* layout-exempt: date and venue share the two compartments of the ticket stub */
 .heritagepass__foot {
