@@ -411,7 +411,7 @@
   .pshistory__season .pbkt-full--rail > :nth-child(1) { order: 1; }
   .pshistory__season .pbkt-full--rail > :nth-child(3) { order: 2; }
   .pshistory__season .pbkt-full--rail > :nth-child(2) { order: 3; }
-  .pshistory__season .pbkt-full--rail > .card { border: 0; box-shadow: none; background: transparent; padding-top: 0; margin: 0; }
+  .pshistory__season .pbkt-full--rail > .card { --card-edge: 0; --card-shadow: none; --card-ground: transparent; padding-top: 0; margin: 0; }
   .pshistory__season .pbkt-full--rail > .card > .card__name { position: static; display: inline-block; margin-bottom: var(--space-2); }
   /* The National League, mirrored: its tree flips, and each club row flips back so it reads. */
   .pshistory__season .pbkt-full--rail > :nth-child(2) { text-align: right; }
