@@ -72,14 +72,18 @@ export function HeritagePass({ game, artwork = null }) {
 
 // The club's record after this game. A regular-season pass carries it in its facts;
 // a postseason pass (or older facts without it) reads the club's year of games.
+// The game types records.js asks for; any other game cannot be found in its rows.
+const RECORD_TYPES = new Set(['R', 'F', 'D', 'L', 'W'])
+
 function useClubRecord(game, side) {
   const fromFacts = factsRecord(game, side)
   const teamId = game?.[side]?.id
   const season = /^\d{4}/.exec(game?.date ?? '')?.[0]
-  const fetchable = !fromFacts && game?.status === 'Final' && teamId && season && game.sportId
+  const fetchable = !fromFacts && game?.status === 'Final' && RECORD_TYPES.has(game.gameType) &&
+    teamId && season && game.sportId
   const { data } = useAsync(async () => (fetchable
-    ? yearRecordThrough(await fetchClubSeason(teamId, season, game.sportId), teamId, game.gamePk)
-    : null), [fetchable, teamId, season, game?.sportId, game?.gamePk])
+    ? yearRecordThrough(await fetchClubSeason(teamId, season, game.sportId, game.date), teamId, game.gamePk)
+    : null), [fetchable, teamId, season, game?.sportId, game?.gamePk, game?.date])
   return fromFacts ?? data ?? null
 }
 

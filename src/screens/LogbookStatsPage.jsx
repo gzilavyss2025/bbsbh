@@ -156,7 +156,11 @@ export function LogbookStatsPage({ bookId = null }) {
   const [level, setLevel] = useState(LEVEL_ALL)
   const levelStamps = useMemo(() => {
     if (!facts.data || level === LEVEL_ALL) return stamps
-    return stamps.filter((s) => facts.data[s.gamePk]?.sportId === level)
+    return stamps.filter((s) => {
+      // A fact with no sport id stays MLB, the same reading as stampRingInverted.
+      const fact = facts.data[s.gamePk]
+      return fact != null && (fact.sportId ?? 1) === level
+    })
   }, [stamps, facts.data, level])
 
   // Reveal-only by classification, called with the user's own stamps and

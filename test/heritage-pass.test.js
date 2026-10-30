@@ -166,7 +166,7 @@ test('the record after the game comes from the feed record, this game included',
 // Phillies 2022, trimmed from /schedule?teamId=143&season=2022&gameType=R,F,D,L,W:
 // their last regular-season game, two Wild Card wins, a postponed row and World Series Games 1-2.
 const row = (gamePk, gameType, away, home, winner, state = 'Final') => ({
-  gamePk, gameType, status: { detailedState: state },
+  gamePk, gameType, status: { abstractGameState: state === 'In Progress' ? 'Live' : 'Final', detailedState: state },
   teams: {
     away: { team: { id: away.id }, leagueRecord: away.record, isWinner: winner === away.id },
     home: { team: { id: home.id }, leagueRecord: home.record, isWinner: winner === home.id },
@@ -187,6 +187,19 @@ test('a postseason record adds the year\'s postseason games to the final regular
   assert.deepEqual(yearRecordThrough(phi2022, 143, 663127), { wins: 87, losses: 75 })
   assert.equal(yearRecordThrough(phi2022, 143, 999), null)
   assert.equal(yearRecordThrough([], 143, 715724), null)
+})
+
+test('a postponed game counts once, on the row it was played', () => {
+  // The rained-out row and the played row share one gamePk (#1342).
+  const rainedOut = { ...phi2022[4], status: { abstractGameState: 'Final', detailedState: 'Postponed' } }
+  const rows = [...phi2022.slice(0, 4), rainedOut, ...phi2022.slice(4)]
+  assert.deepEqual(yearRecordThrough(rows, 143, 715724), { wins: 90, losses: 75 })
+})
+
+test('a game just ended or called early counts toward the record', () => {
+  const rows = phi2022.map((r) => (r.gamePk === 715724 ? { ...r, status: { abstractGameState: 'Final', detailedState: 'Game Over' } }
+    : r.gamePk === 715763 ? { ...r, status: { abstractGameState: 'Final', detailedState: 'Completed Early: Rain' } } : r))
+  assert.deepEqual(yearRecordThrough(rows, 143, 715724), { wins: 90, losses: 75 })
 })
 
 test('a pass reads regular-season records from its own facts', () => {

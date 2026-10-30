@@ -76,11 +76,12 @@ export function factsRecord(game, side) {
 // plus every postseason game it finished up to and including this one. `rows` is the
 // club's schedule for the season (regular season and postseason), in schedule order.
 export function yearRecordThrough(rows, teamId, gamePk) {
-  const through = rows.findIndex((row) => row.gamePk === gamePk)
+  // A postponed game is listed twice under one gamePk; the played row is the last.
+  const through = rows.findLastIndex((row) => row.gamePk === gamePk)
   if (through < 0) return null
   let record = null
   for (const row of rows.slice(0, through + 1)) {
-    if (row.status?.detailedState !== 'Final') continue
+    if (!isPlayed(row)) continue
     const side = ['away', 'home'].map((key) => row.teams?.[key]).find((t) => t?.team?.id === teamId)
     if (!side) continue
     if (row.gameType === 'R') {
@@ -91,6 +92,11 @@ export function yearRecordThrough(rows, teamId, gamePk) {
   }
   return record
 }
+
+// Finished and played: 'Final', 'Game Over' and 'Completed Early' all count; a
+// postponed or cancelled row also reads abstractly Final and does not.
+const isPlayed = (row) => row.status?.abstractGameState === 'Final' &&
+  !/^(Postponed|Cancelled)/.test(row.status?.detailedState ?? '')
 
 export const passRecordText = (record) => (record ? `${record.wins}\u2013${record.losses}` : '')
 

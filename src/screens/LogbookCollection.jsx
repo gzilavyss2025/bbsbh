@@ -500,7 +500,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
               page 1 is an action on pages, offered over a cover with no page in
               sight — it read as chrome belonging to the whole screen rather
               than to the book, and it was the loudest thing above the fold. */}
-          {!placingPk && !selectedStamp && (
+          {!placingPk && !selectedStamp && bookOpen && (
             <Segmented label="Passport visual mode" value={souvenirView} onChange={setSouvenirView}
               options={[{ value: 'stamps', label: 'Circular stamps' }, { value: 'passes', label: 'Heritage Passes' }]} />
           )}
