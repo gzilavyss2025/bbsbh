@@ -1,5 +1,6 @@
 import { chunk } from '../lib/math/number.js'
 import { getJson } from './statsapi.js'
+import { recordAfterGame } from '../lib/stamps.js'
 
 // The Logbook's game facts — runs, clubs, venue, innings — for a set of stamped
 // gamePks (ADR-0035).
@@ -56,6 +57,10 @@ export function stampGameFacts(game) {
       id: team.id ?? null,
       abbreviation: team.abbreviation ?? '',
       name: team.name ?? '',
+      locationName: team.locationName ?? '',
+      teamName: team.teamName ?? '',
+      franchiseName: team.franchiseName ?? '',
+      record: recordAfterGame(game.teams?.[key]?.leagueRecord),
       runs: typeof totals.runs === 'number' ? totals.runs : (game.teams?.[key]?.score ?? null),
       hits: typeof totals.hits === 'number' ? totals.hits : null,
       errors: typeof totals.errors === 'number' ? totals.errors : null,
@@ -68,8 +73,10 @@ export function stampGameFacts(game) {
     gamePk: game.gamePk,
     date: game.officialDate ?? (game.gameDate ?? '').slice(0, 10),
     gameNumber: Number.isInteger(game.gameNumber) ? game.gameNumber : 1,
-    sportId: game.teams?.home?.team?.sport?.id ?? 1,
-    gameType: game.gameType ?? 'R',
+    sportId: game.teams?.home?.team?.sport?.id ?? null,
+    gameType: game.gameType ?? null,
+    seriesDescription: game.seriesDescription ?? '',
+    seriesGameNumber: game.seriesGameNumber ?? null,
     // The home club's league, so a postseason stamp can name its round (stampArt.js).
     leagueId: game.teams?.home?.team?.league?.id ?? null,
     venue: game.venue?.name ?? '',

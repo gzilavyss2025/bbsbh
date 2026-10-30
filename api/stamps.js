@@ -54,6 +54,7 @@ import {
   normalizeStamp,
   sanitizeNote,
   seasonFromDate,
+  recordAfterGame,
   toGamePk,
 } from '../src/lib/stamps.js'
 import { authenticateUser } from './_lib/auth.js'
@@ -84,6 +85,10 @@ function sideFacts(side, lineSide) {
     id: side?.team?.id ?? null,
     abbreviation: side?.team?.abbreviation ?? '',
     name: side?.team?.name ?? '',
+    locationName: side?.team?.locationName ?? '',
+    teamName: side?.team?.teamName ?? '',
+    franchiseName: side?.team?.franchiseName ?? '',
+    record: recordAfterGame(side?.leagueRecord),
     runs: typeof lineSide?.runs === 'number' ? lineSide.runs : (side?.score ?? null),
     hits: typeof lineSide?.hits === 'number' ? lineSide.hits : null,
     errors: typeof lineSide?.errors === 'number' ? lineSide.errors : null,
@@ -139,8 +144,10 @@ export async function fetchGameFinal(gamePk) {
     gamePk,
     date: game.officialDate ?? '',
     gameNumber: Number.isInteger(game.gameNumber) ? game.gameNumber : 1,
-    sportId: game.teams?.home?.team?.sport?.id ?? 1,
-    gameType: game.gameType ?? 'R',
+    sportId: game.teams?.home?.team?.sport?.id ?? null,
+    gameType: game.gameType ?? null,
+    seriesDescription: game.seriesDescription ?? '',
+    seriesGameNumber: game.seriesGameNumber ?? null,
     // The home club's league, so a postseason stamp can name its round (src/lib/stampArt.js).
     leagueId: game.teams?.home?.team?.league?.id ?? null,
     venue: game.venue?.name ?? '',

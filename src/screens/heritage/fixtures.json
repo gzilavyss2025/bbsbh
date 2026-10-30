@@ -1,0 +1,230 @@
+[
+  {
+    "source": "https://statsapi.mlb.com/api/v1/schedule?gamePks=823035&hydrate=linescore,team,venue",
+    "checked": "2026-10-29",
+    "game": {
+      "gamePk": 823035,
+      "date": "2026-07-07",
+      "gameNumber": 2,
+      "sportId": 1,
+      "gameType": "R",
+      "seriesDescription": "Regular Season",
+      "seriesGameNumber": 3,
+      "leagueId": 104,
+      "venue": "Busch Stadium",
+      "innings": 9,
+      "scheduledInnings": 9,
+      "homeBattedLast": true,
+      "status": "Final",
+      "away": {
+        "id": 158,
+        "abbreviation": "MIL",
+        "name": "Milwaukee Brewers",
+        "locationName": "Milwaukee",
+        "teamName": "Brewers",
+        "franchiseName": "Milwaukee",
+        "record": {
+          "wins": 58,
+          "losses": 33,
+          "ties": 0
+        },
+        "runs": 10,
+        "hits": 11,
+        "errors": 0
+      },
+      "home": {
+        "id": 138,
+        "abbreviation": "STL",
+        "name": "St. Louis Cardinals",
+        "locationName": "St. Louis",
+        "teamName": "Cardinals",
+        "franchiseName": "St. Louis",
+        "record": {
+          "wins": 47,
+          "losses": 43,
+          "ties": 0
+        },
+        "runs": 2,
+        "hits": 4,
+        "errors": 0
+      },
+      "winnerId": 158,
+      "decisions": {
+        "winner": "",
+        "loser": "",
+        "save": ""
+      }
+    }
+  },
+  {
+    "source": "https://statsapi.mlb.com/api/v1/schedule?gamePks=715724&hydrate=linescore,team,venue",
+    "checked": "2026-10-29",
+    "game": {
+      "gamePk": 715724,
+      "date": "2022-10-28",
+      "gameNumber": 1,
+      "sportId": 1,
+      "gameType": "W",
+      "seriesDescription": "World Series",
+      "seriesGameNumber": 1,
+      "leagueId": 103,
+      "venue": "Minute Maid Park",
+      "innings": 10,
+      "scheduledInnings": 9,
+      "homeBattedLast": true,
+      "status": "Final",
+      "away": {
+        "id": 143,
+        "abbreviation": "PHI",
+        "name": "Philadelphia Phillies",
+        "locationName": "Philadelphia",
+        "teamName": "Phillies",
+        "franchiseName": "Philadelphia",
+        "record": {
+          "wins": 1,
+          "losses": 0,
+          "ties": 0
+        },
+        "runs": 6,
+        "hits": 9,
+        "errors": 0
+      },
+      "home": {
+        "id": 117,
+        "abbreviation": "HOU",
+        "name": "Houston Astros",
+        "locationName": "Houston",
+        "teamName": "Astros",
+        "franchiseName": "Houston",
+        "record": {
+          "wins": 0,
+          "losses": 1,
+          "ties": 0
+        },
+        "runs": 5,
+        "hits": 10,
+        "errors": 0
+      },
+      "winnerId": 143,
+      "decisions": {
+        "winner": "",
+        "loser": "",
+        "save": ""
+      }
+    }
+  },
+  {
+    "source": "https://statsapi.mlb.com/api/v1/schedule?gamePks=815625&hydrate=linescore,team,venue",
+    "checked": "2026-10-29",
+    "game": {
+      "gamePk": 815625,
+      "date": "2026-04-08",
+      "gameNumber": 1,
+      "sportId": 11,
+      "gameType": "R",
+      "seriesDescription": "Regular Season",
+      "seriesGameNumber": 2,
+      "leagueId": 117,
+      "venue": "Fifth Third Field",
+      "innings": 13,
+      "scheduledInnings": 9,
+      "homeBattedLast": true,
+      "status": "Final",
+      "away": {
+        "id": 1960,
+        "abbreviation": "STP",
+        "name": "St. Paul Saints",
+        "locationName": "St. Paul",
+        "teamName": "Saints",
+        "franchiseName": "St. Paul",
+        "record": {
+          "wins": 4,
+          "losses": 6,
+          "ties": 0
+        },
+        "runs": 4,
+        "hits": 5,
+        "errors": 2
+      },
+      "home": {
+        "id": 512,
+        "abbreviation": "TOL",
+        "name": "Toledo Mud Hens",
+        "locationName": "Toledo",
+        "teamName": "Mud Hens",
+        "franchiseName": "Toledo",
+        "record": {
+          "wins": 4,
+          "losses": 7,
+          "ties": 0
+        },
+        "runs": 3,
+        "hits": 9,
+        "errors": 1
+      },
+      "winnerId": 1960,
+      "decisions": {
+        "winner": "",
+        "loser": "",
+        "save": ""
+      }
+    }
+  },
+  {
+    "source": "https://statsapi.mlb.com/api/v1/schedule?gamePks=823762&hydrate=linescore,team,venue",
+    "checked": "2026-10-29",
+    "game": {
+      "gamePk": 823762,
+      "date": "2026-07-20",
+      "gameNumber": 1,
+      "sportId": 1,
+      "gameType": "R",
+      "seriesDescription": "Regular Season",
+      "seriesGameNumber": 1,
+      "leagueId": 104,
+      "venue": "American Family Field",
+      "innings": 9,
+      "scheduledInnings": 9,
+      "homeBattedLast": false,
+      "status": "Final",
+      "away": {
+        "id": 121,
+        "abbreviation": "NYM",
+        "name": "New York Mets",
+        "locationName": "Flushing",
+        "teamName": "Mets",
+        "franchiseName": "New York",
+        "record": {
+          "wins": 42,
+          "losses": 59,
+          "ties": 0
+        },
+        "runs": 3,
+        "hits": 6,
+        "errors": 0
+      },
+      "home": {
+        "id": 158,
+        "abbreviation": "MIL",
+        "name": "Milwaukee Brewers",
+        "locationName": "Milwaukee",
+        "teamName": "Brewers",
+        "franchiseName": "Milwaukee",
+        "record": {
+          "wins": 63,
+          "losses": 37,
+          "ties": 0
+        },
+        "runs": 8,
+        "hits": 10,
+        "errors": 1
+      },
+      "winnerId": 158,
+      "decisions": {
+        "winner": "",
+        "loser": "",
+        "save": ""
+      }
+    }
+  }
+]

@@ -545,3 +545,12 @@ export function remoteStampsFromExport(data) {
   }
   return remote
 }
+
+// A club's leagueRecord as of the end of this game, this game included (checked
+// on 823762 and 823760, 2026-07-20/21, and 565259-61 in 2019). In the postseason
+// the feeds report the SERIES record here (715724: 1-0 after World Series Game 1),
+// so a reader that wants the year's record must not take it from a postseason row.
+export function recordAfterGame(record) {
+  const [wins, losses, ties] = ['wins', 'losses', 'ties'].map((k) => (Number.isInteger(record?.[k]) ? record[k] : 0))
+  return wins + losses + ties > 0 ? { wins, losses, ties } : null
+}
