@@ -1,7 +1,7 @@
 # api — the Vercel functions
 
-**Thirteen Vercel functions live in `api/`**, each inert when unconfigured;
-**twelve never render or fetch a score.** Root `CLAUDE.md` keeps the count and the
+**Fourteen Vercel functions live in `api/`**, each inert when unconfigured;
+**thirteen never render or fetch a score.** Root `CLAUDE.md` keeps the count and the
 three phrases `scripts/check-claude-md-facts.mjs` checks, so change both together.
 
 - `preview.js` + `_lib/cards.js` — link previews. They render Open Graph cards, failing
@@ -25,6 +25,9 @@ three phrases `scripts/check-claude-md-facts.mjs` checks, so change both togethe
 - `game-story.js` — a CORS hop to MLB.com's team RSS feeds, which send none.
 - `page.js` + `src/copy/landing/` — server-render `/learn` for AI crawlers, which run no JS
   (ADR-0053).
-- **The thirteenth stores a score, by design**: the Game Log's stamps (`stamps.js`,
+- `crash.js` + `src/lib/crash/` — the crash signal (#2514). A beacon of four allowlisted
+  values (kind, route name, status, build) becomes one `bbsbh-crash` line in the runtime logs.
+  The same builder re-checks it server-side; no score, id or URL is ever logged.
+- **The fourteenth stores a score, by design**: the Game Log's stamps (`stamps.js`,
   `src/lib/stamps.js`). That is safe because of WHERE stamp art may render
   (`check-stamp-surfaces`), not a mint-time check (ADR-0035). Voice: `docs/game-log.md`.

@@ -4,6 +4,8 @@
 // were verified against the live July 5 2026 Brewers @ D-backs game (gamePk
 // 825061).
 
+import { reportCrash } from '../lib/crash/report.js'
+
 const BASE = 'https://statsapi.mlb.com'
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504])
 const DEFAULT_TIMEOUT_MS = 15_000
@@ -44,6 +46,9 @@ export async function getJson(
         await delay(250 * 2 ** attempt)
         continue
       }
+      // A server error after the retries is the crash signal's `fetch` kind (#2514): the status
+      // only, never the path. A 4xx is ordinary here (MiLB feeds miss data) and is not reported.
+      if (res.status >= 500) reportCrash({ kind: 'fetch', status: res.status })
       throw new Error(`MLB API ${res.status} for ${path}`)
     } catch (error) {
       if (parentSignal?.aborted) throw error

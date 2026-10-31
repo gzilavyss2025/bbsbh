@@ -6,7 +6,17 @@ import App from './App.jsx'
 import { CopyProvider } from './copy/CopyProvider.jsx'
 import { hydrateIdentityFromCache, refreshIdentityOverrides } from './lib/identity/hydrate.js'
 import { CLERK_PUBLISHABLE_KEY, isClerkEnabled } from './lib/clerkConfig.js'
+import { installCrashReporter } from './lib/crash/report.js'
+import { parseRoute } from './lib/route.js'
+import { BUILD_COMMIT_SHORT } from './lib/buildInfo.js'
 import './index.css'
+
+// The crash signal (#2514): the route's NAME and the build, never the URL (lib/crash/report.js).
+installCrashReporter(() => {
+  let route = ''
+  try { route = parseRoute(window.location.pathname)?.name ?? '' } catch { /* no route name */ }
+  return { route, build: BUILD_COMMIT_SHORT }
+})
 
 // Every deploy renames the content-hashed chunk files (see App.jsx's per-route
 // `lazy()` imports), so a tab left open across one gets a failed dynamic
