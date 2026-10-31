@@ -20,6 +20,38 @@ export async function secondaryLogoSvg(teamId, sourceVariant, loadSvg) {
   return null
 }
 
+// Share lookups by club across passes. fetchSvg rejects with `missing: true` for a
+// variant the CDN does not have; that answer, and a club's null result, stay cached
+// for the session. Any other rejection (offline, timeout) is dropped so it retries.
+export function secondaryMarkCache(fetchSvg) {
+  const sources = new Map()
+  const marks = new Map()
+  const load = (url) => {
+    if (!sources.has(url)) {
+      sources.set(url, fetchSvg(url).catch((error) => {
+        if (!error?.missing) sources.delete(url)
+        throw error
+      }))
+    }
+    return sources.get(url)
+  }
+  return (teamId, sourceVariant) => {
+    const key = `${teamId}:${sourceVariant}`
+    if (!marks.has(key)) {
+      let transient = false
+      const track = (url) => load(url).catch((error) => {
+        if (!error?.missing) transient = true
+        throw error
+      })
+      marks.set(key, secondaryLogoSvg(teamId, sourceVariant, track).then((svg) => {
+        if (!svg && transient) marks.delete(key)
+        return svg
+      }))
+    }
+    return marks.get(key)
+  }
+}
+
 // A badge (the Brewers' roundel) paints a dark disc first and draws its lettering
 // and art over it in light colours. The automatic pass inks the disc AND the gold
 // art on it, which prints a solid blob on the navy band. When the first shape is

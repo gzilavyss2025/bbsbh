@@ -5,7 +5,7 @@ import { factsRecord, heritagePassModel, passCity, passDate, passPage, passRecor
 import { stampGameFacts } from '../src/api/logbook.js'
 import { revealStampFacts } from '../src/api/linescore.js'
 import { parseRoute } from '../src/lib/route.js'
-import { badgeFieldPins, secondaryLogoSvg } from '../src/lib/heritage/marks.js'
+import { badgeFieldPins, secondaryLogoSvg, secondaryMarkCache } from '../src/lib/heritage/marks.js'
 import { recordAfterGame } from '../src/lib/stamps.js'
 import { heritageArt } from '../src/lib/heritage/art.js'
 import { logoCdnUrl } from '../src/lib/logoCdn.js'
@@ -221,4 +221,27 @@ test('a dark badge field is knocked out so its art reads on the navy band', () =
   assert.deepEqual(badgeFieldPins(badge), { 0: 'knockout', 1: 'ink', 2: 'ink' })
   const wordmark = '<svg viewBox="0 0 10 10"><path d="M0 0h4v4H0z" fill="#12284b"/><path d="M5 5h4v4H5z" fill="#ffc52f"/></svg>'
   assert.equal(badgeFieldPins(wordmark), null)
+})
+
+test('a club with no distinct secondary mark costs its CDN lookups once; a network error retries', async () => {
+  const missing = () => Object.assign(new Error('Logo unavailable'), { missing: true })
+  let calls = 0
+  const none = secondaryMarkCache(async (url) => {
+    calls += 1
+    if (url !== logoCdnUrl(999)) throw missing()
+    return primarySvg
+  })
+  assert.equal(await none(999, 'base'), null)
+  const first = calls
+  assert.equal(await none(999, 'base'), null)
+  assert.equal(calls, first)
+
+  let offline = true
+  const flaky = secondaryMarkCache(async (url) => {
+    if (offline) throw new Error('offline')
+    return url === logoCdnUrl(158, 'cap') ? secondarySvg : primarySvg
+  })
+  assert.equal(await flaky(158, 'base'), null)
+  offline = false
+  assert.ok((await flaky(158, 'base')).includes('heritage-secondary-158-cap'))
 })

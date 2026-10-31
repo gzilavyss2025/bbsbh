@@ -3,32 +3,18 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { monoInkFor } from '../../lib/monoInk.js'
 import { seasonMark } from '../../lib/identity/seasonMarks.js'
 import { sanitizeSvgMarkup } from '../../lib/svgSanitize.js'
-import { secondaryLogoSvg } from '../../lib/heritage/marks.js'
+import { secondaryMarkCache } from '../../lib/heritage/marks.js'
 
 // Many passes repeat the same clubs. Share requests and conversions by club's
 // source identity, not by game; no additional requests as each pass mounts.
-const sources = new Map()
-const marks = new Map()
-function loadSvg(url) {
-  if (!sources.has(url)) {
-    const pending = fetch(url, { signal: AbortSignal.timeout(8000) }).then(async (response) => {
-      if (!response.ok) throw new Error('Logo unavailable')
-      return sanitizeSvgMarkup(await response.text())
-    }).catch((error) => { sources.delete(url); throw error })
-    sources.set(url, pending)
-  }
-  return sources.get(url)
-}
-
-function secondaryUrl(teamId, sourceVariant) {
-  const key = `${teamId}:${sourceVariant}`
-  if (!marks.has(key)) {
-    marks.set(key, secondaryLogoSvg(teamId, sourceVariant, loadSvg).then((svg) => {
-      if (!svg) { marks.delete(key); return null }
-      return `data:image/svg+xml,${encodeURIComponent(svg)}`
-    }))
-  }
-  return marks.get(key)
+const secondaryMark = secondaryMarkCache(async (url) => {
+  const response = await fetch(url, { signal: AbortSignal.timeout(8000) })
+  if (!response.ok) throw Object.assign(new Error('Logo unavailable'), { missing: response.status === 404 })
+  return sanitizeSvgMarkup(await response.text())
+})
+async function secondaryUrl(teamId, sourceVariant) {
+  const svg = await secondaryMark(teamId, sourceVariant)
+  return svg ? `data:image/svg+xml,${encodeURIComponent(svg)}` : null
 }
 
 export function SecondaryMark({ team, date }) {
