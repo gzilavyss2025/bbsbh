@@ -951,3 +951,11 @@
 .bflight--modal .bflight__fact + .bflight__fact,
 .bflight--modal .bflight__fact--tap { border-left: var(--bw-heavy) solid var(--text-heading); }
 .bflight--modal .bflight__fact:first-child { border-left: 0; }
+
+/* The home-run parks sheet (#2695): the parks a ball leaves, then the ones it does not. */
+.hrparks { max-height: 70dvh; overflow-y: auto; }
+.hrparks__note { margin: 0 0 var(--space-3); color: var(--text-caption); font-size: var(--fs-cell); }
+.hrparks__head { margin: var(--space-3) 0 var(--space-1); font: var(--w-bold) var(--fs-cell) / 1 var(--font-mono); text-transform: uppercase; color: var(--text-heading); }
+.hrparks__list { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: var(--space-3); font-size: var(--fs-cell); }
+.hrparks__list li { break-inside: avoid; padding: var(--space-1) 0; border-bottom: var(--bw-rule) solid var(--border-grid); }
+.hrparks__none { margin: 0; color: var(--text-caption); font-size: var(--fs-cell); }
