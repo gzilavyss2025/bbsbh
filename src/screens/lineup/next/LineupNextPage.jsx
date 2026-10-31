@@ -14,6 +14,7 @@ import { SeriesCard } from './cards/SeriesCard.jsx'
 import { ClubSheet } from './sheets/ClubSheet.jsx'
 import { StarterCard } from './cards/StarterCard.jsx'
 import { TeammatesCard } from './cards/TeammatesCard.jsx'
+import { PlayedForBothCard } from './cards/PlayedForBothCard.jsx'
 import { useLineupData } from './useLineupData.js'
 import { lineupIdentity } from './logic/lineupIdentity.js'
 import { seriesPosition } from './logic/seriesPosition.js'
@@ -24,6 +25,7 @@ import '../../../styles/lineup-next/field.css'
 import '../../../styles/lineup-next/series.css'
 import '../../../styles/lineup-next/sheet.css'
 import '../../../styles/lineup-next/grid.css'
+import '../../../styles/lineup-next/played-for-both.css'
 import { slateToday } from '../../../lib/dates.js'
 
 // The new lineup page (docs/lineup-redesign.md), at `?look=new` on lineup1 and lineup2.
@@ -73,6 +75,11 @@ export function LineupNextPage({
             <FieldCard data={data} theme={id.oppTheme} masthead={id.oppMasthead} />
             <BullpenCard data={data} workloadData={workloadData} theme={id.oppTheme} masthead={id.oppMasthead} />
             <TeammatesCard data={data} side={side} />
+            <PlayedForBothCard
+              pfb={data.playedBoth}
+              away={side === 'away' ? data.meta : data.oppMeta}
+              home={side === 'away' ? data.oppMeta : data.meta}
+            />
           </aside>
           <div className="lgrid__main">
             <OrderCard data={data} masthead={id.masthead} />

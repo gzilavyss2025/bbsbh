@@ -10,7 +10,8 @@ import { Button } from '../ui/control/Button.jsx'
 
 // Only the owner's active stamps may supply tickets, including unplaced stamps.
 // Facts alone never add a game. This view does not alter book placements.
-export function HeritagePassPages({ stamps, factsByPk }) {
+// `loading` and `failed` describe the facts read, so a ticket says why it is blank.
+export function HeritagePassPages({ stamps, factsByPk, loading = false, failed = false }) {
   const linkProps = useRouteLink()
   const rail = useRef(null)
   const [edges, setEdges] = useState({ start: true, end: stamps.length < 2 })
@@ -50,7 +51,8 @@ export function HeritagePassPages({ stamps, factsByPk }) {
                   aria-label={`Open ${game.away.name} at ${game.home.name}, ${passDate(game.date)}`}>
                   <HeritagePass game={game} artwork={heritageArt(game.venue)} />
                 </a>
-              ) : <p>{passDate(entry.date)} · Game details not available</p>}
+              ) : <p>{passDate(entry.date)} · {loading ? 'Loading game details…'
+                : failed ? 'Game details could not load' : 'Game details not available'}</p>}
             </li>
           )
         })}

@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { markIntroSeenIn } from '../../lib/account/intro.js'
 import { clearTallyDataIn } from '../../lib/account/localData.js'
+import { clearAllPhotos } from '../../lib/scorecard-photos/store.js'
 import { browserStorage } from '../../lib/account/preferencesStorage.js'
 import { Notice } from '../ui/state/Notice.jsx'
 import { Cluster } from '../ui/layout/Cluster.jsx'
@@ -35,7 +36,7 @@ import { Cluster } from '../ui/layout/Cluster.jsx'
 const COPY = {
   device: {
     title: 'Erase this device',
-    body: 'This clears everything Tally has saved in this browser — your club and settings, how far you have opened each game, the days you unsealed, and your Game Log.',
+    body: 'This clears everything Tally has saved in this browser — your club and settings, how far you have opened each game, the days you unsealed, your Game Log and its scorecard photos.',
     tail: 'Your account, if you have one, keeps its copy. Signing in again brings it back.',
     confirm: 'Erase this device',
     working: 'Erasing…',
@@ -91,8 +92,10 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
   // The local half. Every hook in the app re-reads its key on mount, so the
   // only honest way to show the erased state is to start the app over — a
   // navigation to the slate rather than a re-render with a dozen stale stores.
-  const wipeDeviceAndRestart = () => {
+  const wipeDeviceAndRestart = async () => {
     clearTallyDataIn(browserStorage())
+    // The scorecard photos live in IndexedDB, not under a bbsbh: key (#2511).
+    await clearAllPhotos()
     // Erasing sweeps `bbsbh:intro` along with everything else, which made the
     // reload look like a brand-new visitor and reopened the welcome modal.
     // That is a bad moment on its own — you asked to be forgotten and got
@@ -109,7 +112,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
 
   const run = async () => {
     if (scope === 'device' || !eraseAccount) {
-      wipeDeviceAndRestart()
+      await wipeDeviceAndRestart()
       return
     }
     setState('working')
@@ -121,7 +124,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
       setState('failed')
       return
     }
-    wipeDeviceAndRestart()
+    await wipeDeviceAndRestart()
   }
 
   return (

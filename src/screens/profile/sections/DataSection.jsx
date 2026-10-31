@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { EraseDataDialog } from '../../../components/profile/EraseDataDialog.jsx'
 import { SyncReceipt } from '../../../components/profile/SyncReceipt.jsx'
 import { buildGameLogExport, gameLogFilename } from '../../../lib/account/localData.js'
+import { allPhotoRecords, photoExportFilename } from '../../../lib/scorecard-photos/store.js'
 
 // Sync & data — where everything is, how to take it with you, and how to take
 // it away.
@@ -33,6 +34,33 @@ function downloadGameLog(stamps) {
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
+// The scorecard photos' own export (#2511, Gary 2026-10-31: separate from the Game Log JSON,
+// which stays small). Photos live only in this browser, so this file is their only backup:
+// one JSON with each photo as a data URL, keyed by game. Returns how many it saved.
+const asDataUrl = (blob) => new Promise((resolve, reject) => {
+  const r = new FileReader()
+  r.onload = () => resolve(r.result)
+  r.onerror = () => reject(r.error)
+  r.readAsDataURL(blob)
+})
+async function downloadPhotos() {
+  const records = await allPhotoRecords()
+  const photos = []
+  for (const rec of records) {
+    for (const p of rec.photos ?? []) photos.push({ gamePk: rec.gamePk, addedAt: p.addedAt, image: await asDataUrl(p.blob) })
+  }
+  if (!photos.length) return 0
+  const url = URL.createObjectURL(new Blob([JSON.stringify({ kind: 'tally-scorecard-photos', version: 1, photos })], { type: 'application/json' }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = photoExportFilename()
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+  return photos.length
+}
+
 export function DataSection({
   status,
   accountPhase,
@@ -44,6 +72,7 @@ export function DataSection({
 }) {
   const [erasing, setErasing] = useState(false)
   const [cleared, setCleared] = useState(false)
+  const [photoNote, setPhotoNote] = useState('')
 
   return (
     <section className="mytally__section">
@@ -70,6 +99,24 @@ export function DataSection({
             {stampCount === 0
               ? 'Nothing to export yet — your book is empty.'
               : 'A JSON file of your stamps, their notes and where each one sits.'}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className="mytally__rowbtn"
+          onClick={async () => {
+            try {
+              const n = await downloadPhotos()
+              setPhotoNote(n ? `Saved ${n} ${n === 1 ? 'photo' : 'photos'}.` : 'No scorecard photos on this device yet.')
+            } catch {
+              setPhotoNote('The photos could not be exported. Try again.')
+            }
+          }}
+        >
+          Export your scorecard photos
+          <span className="mytally__rowbtnhint caps-exempt">
+            {photoNote || 'They live only in this browser, so this file is their backup.'}
           </span>
         </button>
 

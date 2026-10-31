@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import { reportCrash } from '../../../lib/crash/report.js'
 
 // Catches a module that throws, or a module chunk that fails to load (a 404 after a
 // deploy), so one bad module drops only its own card and never the page's React root.
@@ -13,6 +14,8 @@ export class SlotBoundary extends Component {
   componentDidCatch(error) {
     console.error(`player page: slot ${this.props.slotKey} failed`, error)
     this.props.onFail()
+    // The crash signal (#2514): the kind only, never the error (lib/crash/report.js).
+    ;(this.props.report ?? reportCrash)({ kind: 'render', route: 'player' })
   }
 
   render() {

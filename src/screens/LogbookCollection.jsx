@@ -31,6 +31,7 @@ import { BookOrderControl } from '../components/passport/BookOrderControl.jsx'
 import { BookManagementSheet } from '../components/passport/BookManagementSheet.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
 import { HeritagePassPages } from '../components/heritage/HeritagePassPages.jsx'
+import { ScorecardPhotos } from '../components/logbook/ScorecardPhotos.jsx'
 
 // One open Game Log book — the topbar, the tray, the passport book itself,
 // and the season grid below it (ADR-0035, ADR-0036). Split out of
@@ -417,13 +418,16 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                 {monthDay(selectedStamp.date)} · page {selectedStamp.placement?.page}
               </p>
               <div className="logbook__placingactions">
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={() => openGame(selectedStamp.gamePk)}
-                >
-                  Open game ›
-                </button>
+                {/* No facts (still loading, or the read failed): no route to open. */}
+                {byPk[selectedStamp.gamePk] && (
+                  <button
+                    type="button"
+                    className="btn btn--ghost"
+                    onClick={() => openGame(selectedStamp.gamePk)}
+                  >
+                    Open game ›
+                  </button>
+                )}
                 <button
                   type="button"
                   className="btn btn--ink"
@@ -449,6 +453,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                   Done
                 </button>
               </div>
+              <ScorecardPhotos gamePk={selectedStamp.gamePk} />
             </section>
           )}
 
@@ -523,7 +528,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
             coverSlot={<PassportCover book={book} onOpen={() => setOpenPage(1)} />}
           />
 
-          <HeritagePassPages stamps={all} factsByPk={byPk} />
+          <HeritagePassPages stamps={all} factsByPk={byPk} loading={facts.loading} failed={Boolean(facts.error)} />
 
           {/* The league under the book — which clubs have turned up in a game
               you stamped. Reads the WHOLE collection (`all`), not the season

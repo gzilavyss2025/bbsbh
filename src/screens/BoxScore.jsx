@@ -3,7 +3,7 @@ import { filmCanExist } from '../api/expresslane/eligibility.js'
 import { revealBoxScore } from './boxscore/revealBoxScore.js'
 import { InningTally } from './boxscore/InningTally.jsx'
 import { ScoringSummary } from './boxscore/ScoringSummary.jsx'
-import { managerLabel } from '../api/game.js'
+import { POSTSEASON_TYPES, fetchSeriesFacts, managerLabel, withSeriesFacts } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { selectGameSeason, selectOfficials, selectIsFinal, selectVenueRef } from '../api/select.js'
 import { stepToSection } from '../lib/route.js'
@@ -143,6 +143,10 @@ export function BoxScore({
   // mints a fresh feed, a fresh feed is a cache miss, and the sheet recomputes.
   const revealCacheRef = useRef({ key: null, value: null })
   const eventHistory = useEventHistory(feed)
+  // The Heritage Pass ribbon's series name and game number: schedule facts, not a score,
+  // so read outside the seal. Postseason only; the live feed carries neither.
+  const postseasonPk = POSTSEASON_TYPES.has(feed?.gameData?.game?.type) ? feed?.gamePk : null
+  const { data: series } = useAsync(() => postseasonPk ? fetchSeriesFacts(postseasonPk) : null, [postseasonPk])
   const stamped = useStampUnseal(feed?.gamePk)
   // THIS BOX SCORE'S OWN MARK (ADR-0049): the reader already lifted this seal,
   // here or on another of their devices. Alone of the two openers below, it
@@ -193,7 +197,7 @@ export function BoxScore({
             {/* Tells GameView the box score is open, so its series line may count this game. */}
             {onOpened && <Opened onOpened={onOpened} winnerId={finalWinnerId(feed)} />}
             <BoxScoreBody
-              stampFacts={r.stampFacts}
+              stampFacts={withSeriesFacts(r.stampFacts, series)}
               feed={feed}
               box={r.box}
               battedBalls={r.battedBalls}

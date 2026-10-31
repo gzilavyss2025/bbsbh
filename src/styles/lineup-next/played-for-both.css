@@ -1,0 +1,100 @@
+/* ==== PLAYED FOR BOTH (#2579): the folded card and its sheet ==== */
+
+.lpfb__caption,
+.lpfb__summary {
+  margin: 0 0 var(--space-3);
+  color: var(--text-caption);
+  font-size: var(--fs-label);
+}
+
+/* layout-exempt: a four-up faces grid */
+.lpfb__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* layout-exempt: a face, two name lines and a tag, stacked */
+.lpfb__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  text-align: center;
+}
+.lpfb__tile--skel {
+  aspect-ratio: 3 / 4;
+  background: var(--accent-tint);
+}
+.lpfb__shot {
+  width: 100%;
+  aspect-ratio: 1;
+}
+.lpfb__first {
+  color: var(--text-caption);
+  font-size: var(--fs-cell);
+}
+.lpfb__last {
+  font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.lpfb__pos {
+  margin-left: var(--space-1);
+  padding: 0 var(--space-1);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--accent-tint);
+  color: var(--text-heading);
+  font: var(--w-bold) var(--fs-cell) / var(--lh-solid) var(--font-display);
+}
+.lpfb__tile .lpfb__pos {
+  margin-left: 0;
+}
+.lpfb__names {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-2);
+  border-top: var(--bw-rule) solid var(--border-grid);
+  font-size: var(--fs-label);
+}
+.lpfb__door {
+  margin-top: var(--space-3);
+}
+
+/* The sheet's table */
+.lpfb__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-label);
+}
+.lpfb__table th,
+.lpfb__table td {
+  padding: var(--space-1) var(--space-2) var(--space-1) 0;
+  border-bottom: var(--bw-rule) solid var(--border-grid);
+  text-align: left;
+  vertical-align: top;
+}
+.lpfb__table thead th {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+.lpfb__table tbody th {
+  font-weight: var(--w-regular);
+}
+/* layout-exempt: a logo beside the club's name */
+.lpfb__club {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.lpfb__credit {
+  margin-top: var(--space-3);
+  color: var(--text-caption);
+  font-size: var(--fs-cell);
+}
+.lpfb__credit p {
+  margin: 0;
+}

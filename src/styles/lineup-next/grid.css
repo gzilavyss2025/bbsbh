@@ -32,6 +32,9 @@
 .lgrid .ltm {
   order: 6;
 }
+.lgrid .lpfb {
+  order: 7;
+}
 
 @media (min-width: 740px) {
   /* layout-exempt: a fixed-width rail beside a fluid main column */
