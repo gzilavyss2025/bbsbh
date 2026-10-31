@@ -18,6 +18,7 @@ import { arsenalSidesView, arsenalTtoView, fetchPitchArsenalFor, pitchArsenalFor
 import { fetchHitterEntryLines } from '../../../api/player/hitterEntryLines.js'
 import { splitMatchupRows, starterMatchupsFor } from '../../../api/careerMatchups.js'
 import { formerTeammatePairs, orgTiesFor } from '../../../api/formerTeammates.js'
+import { playedForBoth } from '../../../api/history/playedForBoth.js'
 import { projectFromLiveLogs } from '../../../api/rotation/liveStarters.js'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { teamAbbr } from '../../../lib/teams.js'
@@ -111,6 +112,11 @@ export function useLineupData({ feed, side, vsTeam, careerMatchupsData, workload
   const teammatePairs = useMemo(() => formerTeammatePairs(formerTeammatesData, meta.id, oppMeta.id), [formerTeammatesData, meta.id, oppMeta.id])
   const orgTies = useMemo(() => orgTiesFor(formerTeammatesData, meta.id, oppMeta.id), [formerTeammatesData, meta.id, oppMeta.id])
   const startingIds = useMemo(() => startingIdsFor(feed), [feed])
+  // Everyone who played for both clubs (#2579): MLB only; a pair with no shard reads empty.
+  const { data: playedBoth } = useAsync(
+    () => (isMlb ? playedForBoth(meta.id, oppMeta.id).catch(() => null) : Promise.resolve(null)),
+    [isMlb, meta.id, oppMeta.id],
+  )
 
   // This club's batters against the arm they face; keyed by gamePk for doubleheaders.
   const starterMatchups = useMemo(() => starterMatchupsFor(careerMatchupsData, feed?.gamePk, meta.id), [careerMatchupsData, feed?.gamePk, meta.id])
@@ -153,7 +159,7 @@ export function useLineupData({ feed, side, vsTeam, careerMatchupsData, workload
 
   return {
     batsOf, tagOf, nameOf, seriesGames: seriesGames ?? [], meta, oppMeta, info, season, isMlb, closed, lineup, birthdayIds, oppPitcher, oppDefense,
-    orgTeamId, oppOrgTeamId, careerVsOpp, vsOpponentAbbr, oppPitcherLine,
+    orgTeamId, oppOrgTeamId, playedBoth, careerVsOpp, vsOpponentAbbr, oppPitcherLine,
     arsenal, arsenalTto, arsenalSides, boardGameDate, projectedStarters,
     teammatePairs, orgTies, startingIds, matchups, starterLast, roster, hitterLines: hitterLines ?? {},
   }

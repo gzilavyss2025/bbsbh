@@ -96,6 +96,26 @@ export async function fetchPositions(personIds) {
   }
 }
 
+// fetchPositions, but a pitcher reads RHP or LHP, as on the starter card (#2579). Same one
+// batched call, plus `pitchHand`. {} on failure or no ids.
+const TAGS_FIELDS = 'people,id,primaryPosition,abbreviation,pitchHand,code'
+export async function fetchPositionTags(personIds) {
+  const list = [...new Set((personIds ?? []).filter(Boolean))]
+  if (!list.length) return {}
+  try {
+    const data = await getJson(`/api/v1/people?personIds=${list.join(',')}&fields=${TAGS_FIELDS}`)
+    const out = {}
+    for (const p of data.people ?? []) {
+      const pos = p.primaryPosition?.abbreviation ?? ''
+      const hand = p.pitchHand?.code
+      out[p.id] = pos === 'P' && (hand === 'R' || hand === 'L') ? `${hand}HP` : pos
+    }
+    return out
+  } catch {
+    return {}
+  }
+}
+
 // One stats bundle, parameterized by `type`
 // ('byDateRange' | 'career' | 'yearByYear' | 'statSplits' | 'gameLog') and
 // `group` ('hitting' | 'pitching'). Returns the RAW splits array — shaping and

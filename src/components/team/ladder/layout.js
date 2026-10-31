@@ -260,3 +260,16 @@ export function seasonRange(seasons) {
   const yy = (y) => `’${String(y).slice(-2)}`
   return ys.length === 1 ? yy(ys[0]) : `${yy(ys[0])}–${yy(ys[ys.length - 1])}`
 }
+
+// Like seasonRange, but a gap shows: [2018, 2023, 2024] -> "’18, ’23–’24" (#2579, the
+// Played for both sheet, where a return to a club is the point).
+export function seasonRuns(seasons) {
+  const ys = [...new Set(seasons ?? [])].sort((a, b) => a - b)
+  const runs = []
+  for (const y of ys) {
+    const last = runs[runs.length - 1]
+    if (last && y === last[1] + 1) last[1] = y
+    else runs.push([y, y])
+  }
+  return runs.map(([a, b]) => seasonRange(a === b ? [a] : [a, b])).join(', ')
+}
