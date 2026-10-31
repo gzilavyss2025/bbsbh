@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { acceptableBody, mergeOverrides, sanitizeOverrides } from '../api/contract-identity.js'
+import { acceptableBody, mergeOverrides, publicOverrides, sanitizeOverrides } from '../api/contract-identity.js'
 
 const STAMP = { userId: 'user_admin1', now: '2026-08-26T00:00:00.000Z' }
 
@@ -194,4 +194,11 @@ test('acceptableBody: only a plain patch object is accepted', () => {
   assert.equal(acceptableBody({ patch: null }), false)
   assert.equal(acceptableBody({}), false)
   assert.equal(acceptableBody(null), false)
+})
+
+test('publicOverrides: the public GET never carries the admin user id', () => {
+  const out = publicOverrides({ 'extensions#1': { mlbId: 111, dismissed: false, note: null, correctedBy: 'user_admin1', correctedAt: 't' } })
+  assert.equal('correctedBy' in out['extensions#1'], false)
+  assert.equal(out['extensions#1'].mlbId, 111)
+  assert.equal(out['extensions#1'].correctedAt, 't')
 })

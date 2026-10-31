@@ -148,6 +148,25 @@ export function plannedWrites(body) {
   return { mark: wantsMark ? raw : null, box }
 }
 
+// A real gamePk is six digits today; nine leaves decades of headroom while
+// keeping a client from minting keys for arbitrarily long made-up ids.
+export const isGamePk = (v) => typeof v === 'string' && /^\d{1,9}$/.test(v)
+
+// Each POST can add a key per gamePk, so a scripted account could fill the
+// store with made-up games. A reader reveals a few halves a minute at most.
+// Same shape and fail-open posture as stamps.js's overMintLimit.
+export const REVEAL_LIMIT_PER_MIN = 60
+export async function overRevealLimit(redis, userId) {
+  try {
+    const key = `reveal:rate:${userId}`
+    const n = await redis.incr(key)
+    await redis.expire(key, 60, 'NX')
+    return n > REVEAL_LIMIT_PER_MIN
+  } catch {
+    return false
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'DELETE') {
     return privateJson(res, { error: 'method not allowed' }, 405)
@@ -156,7 +175,7 @@ export default async function handler(req, res) {
   const { searchParams } = requestUrl(req)
   const wantRecent = searchParams.get('recent') === '1'
   const gamePk = searchParams.get('gamePk')
-  if (!wantRecent && (!gamePk || !/^\d+$/.test(gamePk))) {
+  if (!wantRecent && !isGamePk(gamePk)) {
     return privateJson(res, { error: 'gamePk required' }, 400)
   }
 
@@ -233,6 +252,9 @@ export default async function handler(req, res) {
   }
 
   // POST — ratchet: the stored value can only ever increase.
+  if (await overRevealLimit(redis, userId)) {
+    return privateJson(res, { error: 'too many requests' }, 429)
+  }
   const body = await readJsonBody(req)
   if (body == null) {
     return privateJson(res, { error: 'invalid body' }, 400)

@@ -35,7 +35,7 @@ import { birthplace } from '../../src/lib/person/birthplace.js'
 import { rosterStatusView } from '../../src/lib/person/rosterStatus.js'
 import { scheduleRoundLine } from '../../src/lib/postseason/gameRound.js'
 import { playerCrawl, teamCrawl } from './crawl.js'
-import { clean, entitySegment, idFromSlug, isMlbTeamId, matchupSlug, niceDate, teamAbbr, urlDateToApi } from './entity.js'
+import { clean, entitySegment, isMlbTeamId, numericId, matchupSlug, niceDate, teamAbbr, urlDateToApi } from './entity.js'
 
 const MLB = 'https://statsapi.mlb.com'
 // Every statsapi call here runs on an UNAUTHENTICATED path where a novel query
@@ -169,7 +169,8 @@ function ogUrl(origin) {
 // adds about 0.4 KB for a one-stint player and about 4 KB for a veteran (measured on
 // 114794, 120274, 545361, 605141): still one request, and the 4 s budget is unchanged.
 async function playerCard(idSegment, origin) {
-  const id = idFromSlug(idSegment)
+  const id = numericId(idSegment)
+  if (!id) return null
   const data = await getJson(`/api/v1/people/${id}?hydrate=currentTeam,stats(type=season),rosterEntries`)
   const p = data.people?.[0]
   if (!p) return null
@@ -209,7 +210,8 @@ export const TEAM_TABS = {
 }
 
 async function teamCard(idSegment, origin, { tab } = {}) {
-  const id = idFromSlug(idSegment)
+  const id = numericId(idSegment)
+  if (!id) return null
   const data = await getJson(`/api/v1/teams/${id}`)
   const t = data.teams?.[0]
   if (!t) return null
@@ -257,7 +259,8 @@ async function teamCard(idSegment, origin, { tab } = {}) {
 export async function buildRoster(params) {
   if (params.get('route') !== 'team') return null
   try {
-    const id = idFromSlug(params.get('id'))
+    const id = numericId(params.get('id'))
+    if (!id) return null
     const data = await getJson(`/api/v1/teams/${id}/roster?rosterType=active`)
     const items = (data.roster ?? [])
       .map((entry) => {

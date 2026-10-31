@@ -38,18 +38,6 @@ export function adminIds(env = process.env) {
   )
 }
 
-// Optional authorizedParties hardening: set CLERK_AUTHORIZED_PARTIES to the
-// app's own origin(s) (comma-separated) so a token minted for a different azp
-// can't be replayed here. Left unset, verifyToken skips the check — the
-// allowlist still bounds writes to enumerated user ids.
-export function authorizedParties(env = process.env) {
-  const parties = (env.CLERK_AUTHORIZED_PARTIES || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
-  return parties.length ? parties : undefined
-}
-
 // Deliberately null-or-userId, unlike the per-user sync endpoints. Those
 // distinguish "this deploy cannot verify" from "you sent no token" because that
 // distinction is what makes a broken sync deploy diagnosable. Here every failure
@@ -58,7 +46,7 @@ export function authorizedParties(env = process.env) {
 // benefit to the one person who is allowed in. The reason still reaches the
 // server log through authenticateUser.
 export async function authenticateAdmin(req, { env = process.env, ...rest } = {}) {
-  const auth = await authenticateUser(req, { env, authorizedParties: authorizedParties(env), ...rest })
+  const auth = await authenticateUser(req, { env, ...rest })
   if (!auth.ok) return null
   return adminIds(env).has(auth.userId) ? auth.userId : null
 }

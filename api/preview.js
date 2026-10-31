@@ -75,28 +75,37 @@ function esc(s) {
 // a player's OLD club, a truncated slug, or no slug at all still names the same
 // one canonical page. With no card (statsapi down), it falls back to the
 // incoming segment — the address still resolves, and the next crawl fixes it.
+//
+// Every value taken from the query must look like a path segment, or the route
+// falls back to its bare path: a shared junk URL must not get a cached
+// canonical naming a made-up page on SITE_URL.
+const segment = (v) => (typeof v === 'string' && /^[a-z0-9-]+$/i.test(v) ? v : null)
+
 export function canonicalUrl(params, card = null) {
   const route = params.get('route')
-  const entity = card?.segment || params.get('id')
+  const entity = segment(card?.segment || params.get('id'))
+  const date = /^\d{8}$/.test(params.get('date') ?? '') ? params.get('date') : null
+  const [matchup, section, scope] = ['matchup', 'section', 'scope'].map((k) => segment(params.get(k)))
+  const orgId = /^\d+$/.test(params.get('orgId') ?? '') ? params.get('orgId') : null
   let path
   switch (route) {
     case 'player':
-      path = `/player/${entity}`
+      path = entity ? `/player/${entity}` : '/'
       break
     case 'team':
-      path = `/team/${entity}`
+      path = entity ? `/team/${entity}` : '/'
       break
     case 'team-leaders':
-      path = `/team/${entity}/leaders`
+      path = entity ? `/team/${entity}/leaders` : '/'
       break
     case 'game':
-      path = `/${params.get('date')}/${params.get('matchup')}/${params.get('section')}`
+      path = date && matchup && section ? `/${date}/${matchup}/${section}` : '/'
       break
     case 'leaders':
-      path = params.get('scope') ? `/leaders/${params.get('scope')}` : '/leaders'
+      path = scope ? `/leaders/${scope}` : '/leaders'
       break
     case 'leaders-org':
-      path = `/leaders/org/${params.get('orgId')}`
+      path = orgId ? `/leaders/org/${orgId}` : '/leaders'
       break
     case 'standings':
     case 'prospects':
@@ -200,9 +209,18 @@ async function appShell(origin) {
   return html
 }
 
+// The request's origin is trusted only when it is one of this deployment's own
+// hosts: the three production names, or the URLs Vercel gives this build. Any
+// other Host falls back to SITE_URL, so a forged Host header can neither steer
+// the shell fetch nor poison shellCache and og:image with a foreign origin.
+export function trustedOrigin(url, env = process.env) {
+  const hosts = new Set(['tallybb.com', 'www.tallybb.com', 'bbsbh.vercel.app', env.VERCEL_URL, env.VERCEL_BRANCH_URL])
+  return hosts.has(url.host) || url.hostname === 'localhost' ? url.origin : SITE_URL
+}
+
 export default async function handler(req) {
   const url = new URL(req.url)
-  const origin = url.origin
+  const origin = trustedOrigin(url)
 
   // Two requests at most, and never in series. buildRoster answers null for
   // every route but /team/{id} (and the old tab addresses that

@@ -143,6 +143,14 @@ export function acceptableBody(body) {
   return patch != null && typeof patch === 'object' && !Array.isArray(patch)
 }
 
+// The public, CDN-cached GET drops `correctedBy`: it is the admin's Clerk user
+// id, the very value COPY_ADMIN_USER_IDS allowlists, and no reader needs it.
+export function publicOverrides(overrides) {
+  return Object.fromEntries(
+    Object.entries(overrides).map(([key, { correctedBy: _omit, ...row }]) => [key, row]),
+  )
+}
+
 export default async function handler(req, res) {
   const method = req.method
   if (method !== 'GET' && method !== 'PATCH') {
@@ -162,7 +170,7 @@ export default async function handler(req, res) {
     }
     return reply(
       res,
-      { overrides: sanitizeOverrides(stored) },
+      { overrides: publicOverrides(sanitizeOverrides(stored)) },
       200,
       { 'cache-control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=600' },
     )

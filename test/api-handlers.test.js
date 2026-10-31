@@ -744,6 +744,19 @@ test('the secret key and options reach verifyToken unchanged', async () => {
   assert.equal('env' in seen.options, false)
 })
 
+test('every user endpoint gets CLERK_AUTHORIZED_PARTIES, not only the admin gate', async () => {
+  let seen = null
+  await authenticateUser(withToken('tok'), {
+    env: { CLERK_SECRET_KEY: 'sk_live_x', CLERK_AUTHORIZED_PARTIES: 'https://tallybb.com, https://www.tallybb.com' },
+    log: () => {},
+    verify: async (_token, options) => {
+      seen = options
+      return { sub: 'user_1' }
+    },
+  })
+  assert.deepEqual(seen.authorizedParties, ['https://tallybb.com', 'https://www.tallybb.com'])
+})
+
 test('a payload with no sub is rejected, and says so distinctly', async () => {
   const { lines, log } = capture()
   const out = await authenticateUser(withToken('tok'), {

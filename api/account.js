@@ -57,7 +57,8 @@ export const config = { runtime: 'nodejs' }
 // SCAN. Pure apart from the two reads, and exported so the unit suite can pin
 // the key set — including the negative: `game:final:*` is never in it.
 export async function keysForUser(redis, userId) {
-  const keys = [`prefs:${userId}`, `spoiled:${userId}`, `scorebook:${userId}`]
+  // `books:{u}` is the Game Log shelf (api/books.js): titles the user typed.
+  const keys = [`prefs:${userId}`, `spoiled:${userId}`, `scorebook:${userId}`, `books:${userId}`]
   // An index we could not READ must not be deleted. Deleting it anyway would
   // destroy the only way to find the shards it names, turning a transient Redis
   // failure into permanent, unreachable residue — and the reply would still say
@@ -152,7 +153,7 @@ export async function erase(res, redis, userId) {
   // whole file: any game, club, date, or number that came out of a ballpark.
   return privateJson(res, {
     ok: true,
-    erased: { prefs: 1, spoiled: 1, scorebook: 1, stamps: seasons, reveal: reveals },
+    erased: { books: 1, prefs: 1, spoiled: 1, scorebook: 1, stamps: seasons, reveal: reveals },
   })
 }
 
