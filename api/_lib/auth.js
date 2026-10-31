@@ -130,14 +130,28 @@ function failureReason(caught) {
   return `${caught?.name ?? 'Error'}: ${caught?.message ?? String(caught)}`
 }
 
-// The full check. `verifyOptions` is passed through to Clerk — api/copy.js adds
-// `authorizedParties`, the others don't. `log` and `verify` are injectable so
+// Optional authorizedParties hardening: set CLERK_AUTHORIZED_PARTIES to the
+// app's own origin(s) (comma-separated) so a token minted for a different azp
+// can't be replayed here. Applied to EVERY authenticated endpoint, user and
+// admin alike, unless a caller passes its own. Left unset, verifyToken skips the check — the
+// allowlist still bounds writes to enumerated user ids.
+export function authorizedParties(env = process.env) {
+  const parties = (env.CLERK_AUTHORIZED_PARTIES || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  return parties.length ? parties : undefined
+}
+
+// The full check. `verifyOptions` is passed through to Clerk; `authorizedParties`
+// defaults to CLERK_AUTHORIZED_PARTIES. `log` and `verify` are injectable so
 // the unit suite can pin both the logging and the return-shape contract above
 // without a live Clerk instance, which CI has no way to reach.
 export async function authenticateUser(
   req,
-  { env = process.env, log = console.error, verify = verifyToken, ...verifyOptions } = {},
+  { env = process.env, log = console.error, verify = verifyToken, ...rest } = {},
 ) {
+  const verifyOptions = { authorizedParties: authorizedParties(env), ...rest }
   const pre = authPreflight(req, env)
   if (!pre.ok) return pre
   const reject = (caught) => {

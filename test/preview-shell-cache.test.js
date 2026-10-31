@@ -25,7 +25,19 @@ function stubFetch(t, respond) {
   return calls
 }
 
+// The handler trusts a request origin only when it is this deployment's own
+// (trustedOrigin), so each test names its made-up host as the deployment URL.
+function asDeployment(t, host) {
+  const original = process.env.VERCEL_URL
+  process.env.VERCEL_URL = host
+  t.after(() => {
+    if (original === undefined) delete process.env.VERCEL_URL
+    else process.env.VERCEL_URL = original
+  })
+}
+
 test('the app shell is fetched once per origin, not once per request', async (t) => {
+  asDeployment(t, 'cache-a.test')
   const calls = stubFetch(t, () => new Response(SHELL, { status: 200 }))
   for (let i = 0; i < 3; i++) {
     const res = await handler(new Request('https://cache-a.test/api/preview?route=about'))
@@ -35,6 +47,7 @@ test('the app shell is fetched once per origin, not once per request', async (t)
 })
 
 test('a failed shell fetch is not cached', async (t) => {
+  asDeployment(t, 'cache-b.test')
   let ok = false
   const calls = stubFetch(t, () => (ok ? new Response(SHELL, { status: 200 }) : new Response('', { status: 503 })))
   const first = await handler(new Request('https://cache-b.test/api/preview?route=about'))

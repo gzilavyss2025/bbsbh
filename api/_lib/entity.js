@@ -66,6 +66,13 @@ export function idFromSlug(segment) {
   return m ? m[1] : s
 }
 
+// idFromSlug's answer, but only when it is a number: a segment with no id in it
+// must never be spliced into a statsapi path (`../../v1/…`). Null means no card.
+export function numericId(segment) {
+  const id = idFromSlug(segment)
+  return /^\d+$/.test(id) ? id : null
+}
+
 export function slugify(name) {
   return String(name ?? '')
     .normalize('NFD')

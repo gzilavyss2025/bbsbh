@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { storeReveal } from '../api/reveal.js'
+import { isGamePk, overRevealLimit, REVEAL_LIMIT_PER_MIN, storeReveal } from '../api/reveal.js'
 
 function fakeRedis(hashes = {}) {
   const calls = []
@@ -158,4 +158,21 @@ test('a malformed mark is refused before any write', async () => {
   const out = await storeReveal(redis, 'u1', '100', { revealedThrough: -1 })
   assert.deepEqual(out, { error: 'revealedThrough out of range' })
   assert.deepEqual(redis.calls, [])
+})
+
+test('isGamePk takes a real id and refuses an unbounded one', () => {
+  assert.equal(isGamePk('776543'), true)
+  assert.equal(isGamePk('1'.repeat(10)), false)
+  assert.equal(isGamePk('12a'), false)
+  assert.equal(isGamePk(null), false)
+})
+
+test('overRevealLimit trips past the per-minute cap and fails open', async () => {
+  const counts = {}
+  const redis = { incr: async (k) => (counts[k] = (counts[k] ?? 0) + 1), expire: async () => 1 }
+  for (let i = 0; i < REVEAL_LIMIT_PER_MIN; i++) assert.equal(await overRevealLimit(redis, 'u1'), false)
+  assert.equal(await overRevealLimit(redis, 'u1'), true)
+  assert.equal(await overRevealLimit(redis, 'u2'), false, 'the window is per user')
+  const broken = { incr: async () => { throw new Error('down') } }
+  assert.equal(await overRevealLimit(broken, 'u1'), false)
 })

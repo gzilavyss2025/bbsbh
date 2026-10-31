@@ -85,10 +85,16 @@ const PARK_KEYS = new Set(
 // URL — including a page on somebody else's site that we must not so much as
 // send a delete for. Checking the host before the call keeps that from being
 // the token's problem to catch.
-export function isOwnBlobUrl(raw) {
+//
+// With BLOB_READ_WRITE_TOKEN set (`vercel_blob_rw_<storeId>_<secret>`), the host
+// must be THIS store's own; any other Vercel Blob store is somebody else's.
+const STORE_HOST_SUFFIX = '.public.blob.vercel-storage.com'
+export function isOwnBlobUrl(raw, env = process.env) {
   try {
     const url = new URL(String(raw))
-    return url.protocol === 'https:' && url.hostname.endsWith('.public.blob.vercel-storage.com')
+    if (url.protocol !== 'https:' || !url.hostname.endsWith(STORE_HOST_SUFFIX)) return false
+    const storeId = /^vercel_blob_rw_([a-z0-9]+)_/i.exec(env.BLOB_READ_WRITE_TOKEN ?? '')?.[1]
+    return !storeId || url.hostname === `${storeId.toLowerCase()}${STORE_HOST_SUFFIX}`
   } catch {
     return false
   }

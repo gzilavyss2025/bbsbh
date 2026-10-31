@@ -183,6 +183,12 @@ test('fieldIds builds ids the registry actually knows, with capitalised suffixes
 // photos AND club marks; `isOwnBlobUrl` says only "ours", so on its own it lets
 // a ballpark upload's `replaces=` name a club's logo and take it out from under
 // the identity override still pointing at it.
+test('isOwnBlobUrl is pinned to the store BLOB_READ_WRITE_TOKEN names', () => {
+  const env = { BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_AbC123xyz_secretpart' }
+  assert.ok(isOwnBlobUrl('https://abc123xyz.public.blob.vercel-storage.com/ballparks/x.jpg', env))
+  assert.equal(isOwnBlobUrl('https://otherstore.public.blob.vercel-storage.com/ballparks/x.jpg', env), false)
+})
+
 test('isOwnBlobUrlUnder keeps a delete inside the folder that wrote it', () => {
   const photo = 'https://abc123.public.blob.vercel-storage.com/ballparks/fenwaypark-photo-x.jpg'
   const mark = 'https://abc123.public.blob.vercel-storage.com/identity-logos/158-main-y.png'

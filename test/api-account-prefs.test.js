@@ -323,6 +323,7 @@ test('erase resolves every per-user key from the two indexes', async () => {
   // the one thing an erase forgets — leaving it behind would re-open a box score
   // on the next visit to a device the user had just wiped.
   assert.deepEqual(keys.sort(), [
+    'books:u1',
     'prefs:u1',
     'reveal:index:u1',
     'reveal:u1:777',
@@ -457,6 +458,7 @@ test('the erase response names no game, club, date, or score', async () => {
   const body = JSON.stringify(out.json)
   assert.equal(/\d{6,}/.test(body), false, 'no gamePk may appear in the confirmation')
   assert.deepEqual(Object.keys(out.json.erased).sort(), [
+    'books',
     'prefs',
     'reveal',
     'scorebook',

@@ -10,14 +10,14 @@ import { readFileSync } from 'node:fs'
 
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { firstNonNull, buildCard, TEAM_TABS, todayEt } from '../api/_lib/cards.js'
+import { firstNonNull, buildCard, buildRoster, TEAM_TABS, todayEt } from '../api/_lib/cards.js'
 // The slug helpers moved to api/_lib/entity.js when the crawlable body gave them
 // a second caller (ADR-0059). Still the edge-side copies this asserts against
 // the app's own — the file changed, the claim did not.
 import { slugify as edgeSlugify, idFromSlug as edgeIdFromSlug, isMlbTeamId as edgeIsMlbTeamId } from '../api/_lib/entity.js'
 import { slugify, idFromSlug } from '../src/lib/route.js'
 import { isMlbTeamId } from '../src/lib/teams.js'
-import { canonicalUrl, renderHead } from '../api/preview.js'
+import { canonicalUrl, renderHead, trustedOrigin } from '../api/preview.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
 
 const delay = (ms, value) => new Promise((resolve) => setTimeout(() => resolve(value), ms))
@@ -172,6 +172,20 @@ test('every rewritten route resolves to its own canonical path, not the home pag
   assert.equal(canonicalUrl(new URLSearchParams({ route: 'nope' })), `${SITE_URL}/`)
 })
 
+test('canonicalUrl never echoes an unsafe query value into the canonical path', () => {
+  const junk = 'buy now/../x?y'
+  const cases = [
+    [{ route: 'leaders', scope: junk }, '/leaders'],
+    [{ route: 'leaders-org', orgId: '15x' }, '/leaders'],
+    [{ route: 'player', id: junk }, '/'],
+    [{ route: 'game', date: '20260817', matchup: 'mil-chc', section: junk }, '/'],
+    [{ route: 'game', date: '2026', matchup: 'mil-chc', section: 'boxscore' }, '/'],
+  ]
+  for (const [params, path] of cases) {
+    assert.equal(canonicalUrl(new URLSearchParams(params)), `${SITE_URL}${path}`)
+  }
+})
+
 // The hand-written list above is what let six routes ship pointing at "/": a
 // page added to vercel.json gets its card from cards.js and is never noticed to
 // be missing a canonical, because nothing here knew to ask about it. So take the
@@ -193,7 +207,7 @@ test('every route vercel.json rewrites through api/preview has its own canonical
   const homed = []
   for (const route of routes) {
     // Give the parameterised routes their parameters; the rest take none.
-    const params = new URLSearchParams({ route, id: '158', scope: 'pitching', orgId: '158' })
+    const params = new URLSearchParams({ route, id: '158', scope: 'pitching', orgId: '158', date: '20260817', matchup: 'milchc', section: 'boxscore' })
     if (canonicalUrl(params) === `${SITE_URL}/`) homed.push(route)
   }
   assert.deepEqual(homed, [], `these routes canonicalise to the home page: ${homed.join(', ')}`)
@@ -323,4 +337,26 @@ test('todayEt is the Eastern date, so 9 pm ET is still today and not UTC tomorro
   assert.equal(todayEt(new Date('2026-10-09T01:00:00Z')), '2026-10-08')
   assert.equal(todayEt(new Date('2026-10-08T14:00:00Z')), '2026-10-08')
   assert.equal(todayEt(new Date('2026-10-09T05:00:00Z')), '2026-10-09')
+})
+
+test('trustedOrigin keeps this deployment\'s own hosts and drops a forged one', () => {
+  const env = { VERCEL_URL: 'bbsbh-abc123.vercel.app', VERCEL_BRANCH_URL: 'bbsbh-git-x.vercel.app' }
+  assert.equal(trustedOrigin(new URL('https://www.tallybb.com/a'), env), 'https://www.tallybb.com')
+  assert.equal(trustedOrigin(new URL('https://bbsbh-abc123.vercel.app/a'), env), 'https://bbsbh-abc123.vercel.app')
+  assert.equal(trustedOrigin(new URL('http://localhost:3000/a'), env), 'http://localhost:3000')
+  assert.equal(trustedOrigin(new URL('https://evil.example/a'), env), SITE_URL)
+})
+
+test('an id with no number in it never reaches statsapi', async (t) => {
+  const fetched = []
+  t.mock.method(globalThis, 'fetch', async (url) => {
+    fetched.push(String(url))
+    return new Response('{}', { status: 200 })
+  })
+  const id = '../../v1/foo?x'
+  for (const route of ['player', 'team', 'team-leaders']) {
+    assert.equal(await buildCard(new URLSearchParams({ route, id }), 'https://example.test'), null)
+  }
+  assert.equal(await buildRoster(new URLSearchParams({ route: 'team', id })), null)
+  assert.deepEqual(fetched, [])
 })
