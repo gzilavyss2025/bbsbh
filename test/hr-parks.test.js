@@ -39,3 +39,12 @@ test('no coordinates, no distance, or a foul ball: null', () => {
   assert.equal(hrParks({ x: null, y: null, distance: 400, gameDate: '2026-07-01' }), null)
   assert.equal(hrParks({ x: HOME.x - 300, y: HOME.y + 10, distance: 300, gameDate: '2026-07-01' }), null)
 })
+
+test('a park with no wall on the ball\'s ray is left out, not the whole list (stack review)', () => {
+  // On the right-field line (45°) 16 of the 30 layouts have no wall point; the other 14 still answer.
+  const d = 450
+  const rad = (45 * Math.PI) / 180
+  const r = hrParks({ x: HOME.x + d * Math.sin(rad), y: HOME.y - d * Math.cos(rad), distance: d, gameDate: '2026-07-01' })
+  assert.ok(r, 'a list, not null')
+  assert.ok(r.leaves.length + r.stays.length > 0 && r.leaves.length + r.stays.length < 30)
+})

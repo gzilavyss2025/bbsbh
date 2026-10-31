@@ -34,7 +34,7 @@ import { computeScoringSummary } from '../../api/boxscore/scoringSummary.js'
 // on a pre-refresh derivation — the exact bug ADR-0007 was written about. The
 // other four inputs are keyed the same way for the same reason: `highlights` is
 // re-polled during a live game and decides the Play of the Game's clip.
-export function revealBoxScore(cacheRef, feed, winProbability, highlights, callouts, vsTeam, eventHistory = null, series = null) {
+export function revealBoxScore(cacheRef, feed, winProbability, highlights, callouts, vsTeam, eventHistory = null) {
   const cached = cacheRef.current
   const k = cached.key
   if (
@@ -44,8 +44,7 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
     k.highlights === highlights &&
     k.callouts === callouts &&
     k.vsTeam === vsTeam &&
-    k.eventHistory === eventHistory &&
-    k.series === series
+    k.eventHistory === eventHistory
   ) {
     return cached.value
   }
@@ -88,7 +87,7 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
   // the venue, the date. Reveal-only for the same reason as everything else
   // here. See StampGameButton for why rendering inside the reveal render
   // function IS the client-side reveal gate.
-  const stampFacts = revealStampFacts(feed, series)
+  const stampFacts = revealStampFacts(feed)
   // Every batted ball with a landing coordinate, for the hit chart. No half
   // clamp: the box score is already one seal over the whole game (ADR-0049), so
   // the chart here shows what the rest of this line already shows (ADR-0051).
@@ -108,6 +107,6 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
     calloutNotes,
     stampFacts,
   }
-  cacheRef.current = { key: { feed, winProbability, highlights, callouts, vsTeam, eventHistory, series }, value }
+  cacheRef.current = { key: { feed, winProbability, highlights, callouts, vsTeam, eventHistory }, value }
   return value
 }

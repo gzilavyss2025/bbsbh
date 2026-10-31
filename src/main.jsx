@@ -6,7 +6,7 @@ import App from './App.jsx'
 import { CopyProvider } from './copy/CopyProvider.jsx'
 import { hydrateIdentityFromCache, refreshIdentityOverrides } from './lib/identity/hydrate.js'
 import { CLERK_PUBLISHABLE_KEY, isClerkEnabled } from './lib/clerkConfig.js'
-import { installCrashReporter } from './lib/crash/report.js'
+import { installCrashReporter, reportCrash } from './lib/crash/report.js'
 import { parseRoute } from './lib/route.js'
 import { BUILD_COMMIT_SHORT } from './lib/buildInfo.js'
 import './index.css'
@@ -54,7 +54,13 @@ hydrateIdentityFromCache()
 refreshIdentityOverrides()
 
 async function mount() {
-  const root = createRoot(document.getElementById('root'))
+  // Any error a React boundary catches, or one none catches, is the crash signal's `render` kind
+  // (#2514): the kind only, never the error (lib/crash/report.js).
+  const root = createRoot(document.getElementById('root'), {
+    // React's default for both is to log the error; that stays.
+    onCaughtError: (error) => { console.error(error); reportCrash({ kind: 'render' }) },
+    onUncaughtError: (error) => { console.error(error); reportCrash({ kind: 'render' }) },
+  })
   let content = (
     <CopyProvider>
       <App />

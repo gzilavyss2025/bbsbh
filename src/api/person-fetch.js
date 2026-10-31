@@ -81,39 +81,31 @@ export function fetchPersonName(personId) {
 // failure or an empty id list — every caller already treats a missing entry
 // as "no position to show".
 const POSITIONS_FIELDS = 'people,id,primaryPosition,abbreviation'
-export async function fetchPositions(personIds) {
+// One batched /people call, mapped to { [id]: tag(person) }; {} on failure or no ids.
+async function peopleTags(personIds, fields, tag) {
   const list = [...new Set((personIds ?? []).filter(Boolean))]
   if (!list.length) return {}
   try {
-    const data = await getJson(`/api/v1/people?personIds=${list.join(',')}&fields=${POSITIONS_FIELDS}`)
+    const data = await getJson(`/api/v1/people?personIds=${list.join(',')}&fields=${fields}`)
     const out = {}
-    for (const p of data.people ?? []) {
-      out[p.id] = p.primaryPosition?.abbreviation ?? ''
-    }
+    for (const p of data.people ?? []) out[p.id] = tag(p)
     return out
   } catch {
     return {}
   }
 }
 
-// fetchPositions, but a pitcher reads RHP or LHP, as on the starter card (#2579). Same one
-// batched call, plus `pitchHand`. {} on failure or no ids.
-const TAGS_FIELDS = 'people,id,primaryPosition,abbreviation,pitchHand,code'
-export async function fetchPositionTags(personIds) {
-  const list = [...new Set((personIds ?? []).filter(Boolean))]
-  if (!list.length) return {}
-  try {
-    const data = await getJson(`/api/v1/people?personIds=${list.join(',')}&fields=${TAGS_FIELDS}`)
-    const out = {}
-    for (const p of data.people ?? []) {
-      const pos = p.primaryPosition?.abbreviation ?? ''
-      const hand = p.pitchHand?.code
-      out[p.id] = pos === 'P' && (hand === 'R' || hand === 'L') ? `${hand}HP` : pos
-    }
-    return out
-  } catch {
-    return {}
-  }
+export function fetchPositions(personIds) {
+  return peopleTags(personIds, POSITIONS_FIELDS, (p) => p.primaryPosition?.abbreviation ?? '')
+}
+
+// fetchPositions, but a pitcher reads RHP or LHP, as on the starter card (#2579).
+export function fetchPositionTags(personIds) {
+  return peopleTags(personIds, `${POSITIONS_FIELDS},pitchHand,code`, (p) => {
+    const pos = p.primaryPosition?.abbreviation ?? ''
+    const hand = p.pitchHand?.code
+    return pos === 'P' && (hand === 'R' || hand === 'L') ? `${hand}HP` : pos
+  })
 }
 
 // One stats bundle, parameterized by `type`

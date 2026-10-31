@@ -12,14 +12,15 @@ export function ScorecardPhotos({ gamePk }) {
   // { pk, photos, urls }: the loaded game's photos and one object URL each. A state for another
   // game reads as still loading, so a stamp switch never shows the last stamp's pages.
   const [state, setState] = useState(null)
-  const [busy, setBusy] = useState(false)
+  const [busy, setBusy] = useState(null) // the gamePk a save is running for
   const [error, setError] = useState('')
   const [viewing, setViewing] = useState(null)
   const input = useRef(null)
   const photos = state?.pk === gamePk ? state.photos : null
   const urls = state?.pk === gamePk ? state.urls : {}
 
-  const show = (list) => setState({ pk: gamePk, photos: list, urls: urlsFor(list) })
+  // A save that lands after the reader picked another stamp must not overwrite that stamp's state.
+  const show = (pk, list) => setState((prev) => (prev?.pk === pk ? { pk, photos: list, urls: urlsFor(list) } : prev))
 
   useEffect(() => {
     let live = true
@@ -31,23 +32,25 @@ export function ScorecardPhotos({ gamePk }) {
 
   const add = async (file) => {
     if (!file) return
-    setBusy(true)
+    const pk = gamePk
+    setBusy(pk)
     setError('')
     try {
       const { blob } = await compressImage(file, COMPRESS)
       const next = withPhoto(photos ?? [], { id: Date.now(), blob, addedAt: Date.now() })
-      if (await savePhotos(gamePk, next)) show(next)
+      if (await savePhotos(pk, next)) show(pk, next)
       else setError('This browser could not save the photo.')
     } catch (e) {
       setError(e?.message || 'That photo could not be read.')
     } finally {
-      setBusy(false)
+      setBusy(null)
     }
   }
 
   const remove = async (id) => {
+    const pk = gamePk
     const next = withoutPhoto(photos ?? [], id)
-    if (await savePhotos(gamePk, next)) show(next)
+    if (await savePhotos(pk, next)) show(pk, next)
   }
 
   if (photos === null) return null
@@ -68,8 +71,8 @@ export function ScorecardPhotos({ gamePk }) {
         </ul>
       )}
       <input ref={input} type="file" accept="image/*" hidden onChange={(e) => { add(e.target.files?.[0]); e.target.value = '' }} />
-      <button type="button" className="btn btn--ghost" disabled={busy || full} onClick={() => input.current?.click()}>
-        {busy ? 'Saving…' : full ? `${MAX_PHOTOS} of ${MAX_PHOTOS} photos` : 'Add a photo of your scorecard'}
+      <button type="button" className="btn btn--ghost" disabled={busy === gamePk || full} onClick={() => input.current?.click()}>
+        {busy === gamePk ? 'Saving…' : full ? `${MAX_PHOTOS} of ${MAX_PHOTOS} photos` : 'Add a photo of your scorecard'}
       </button>
       <p className="scphotos__note">
         {error || 'Kept in this browser only. Export them from My Tally.'}

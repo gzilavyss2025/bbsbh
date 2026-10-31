@@ -4,6 +4,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { factsRecord, heritagePassModel, passCity, passDate, passPage, passRecordText, yearRecordThrough } from '../src/lib/heritage/pass.js'
 import { stampGameFacts } from '../src/api/logbook.js'
 import { revealStampFacts } from '../src/api/linescore.js'
+import { withSeriesFacts } from '../src/api/game.js'
 import { parseRoute } from '../src/lib/route.js'
 import { badgeFieldPins, secondaryLogoSvg, secondaryMarkCache } from '../src/lib/heritage/marks.js'
 import { recordAfterGame } from '../src/lib/stamps.js'
@@ -260,7 +261,7 @@ test('a postseason box-score pass reads the same ribbon as the Game Log pass', (
     },
     liveData: { linescore: { teams: { away: { runs: game.teams.away.score }, home: { runs: game.teams.home.score } } } },
   }
-  const box = revealStampFacts(feed, { seriesDescription: game.seriesDescription, seriesGameNumber: game.seriesGameNumber })
+  const box = withSeriesFacts(revealStampFacts(feed), { seriesDescription: game.seriesDescription, seriesGameNumber: game.seriesGameNumber })
   assert.equal(box.seriesDescription, 'World Series')
   assert.equal(box.seriesGameNumber, game.seriesGameNumber)
   const fromBox = heritagePassModel(box)

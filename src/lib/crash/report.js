@@ -6,7 +6,7 @@
 // strict shape. The route is a parseRoute NAME ('player', 'game'), never a URL; no id, name,
 // message or stack is ever read. api/crash.js runs the same builder again on the server.
 
-export const CRASH_KINDS = ['render', 'chunk', 'fetch', 'unhandled']
+const CRASH_KINDS = ['render', 'chunk', 'fetch', 'unhandled']
 const ROUTE_NAME = /^[a-z][a-z-]{0,31}$/
 const BUILD = /^[0-9a-f]{7,40}$/
 

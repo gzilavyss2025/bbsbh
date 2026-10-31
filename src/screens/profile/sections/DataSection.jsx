@@ -106,8 +106,12 @@ export function DataSection({
           type="button"
           className="mytally__rowbtn"
           onClick={async () => {
-            const n = await downloadPhotos()
-            setPhotoNote(n ? `Saved ${n} ${n === 1 ? 'photo' : 'photos'}.` : 'No scorecard photos on this device yet.')
+            try {
+              const n = await downloadPhotos()
+              setPhotoNote(n ? `Saved ${n} ${n === 1 ? 'photo' : 'photos'}.` : 'No scorecard photos on this device yet.')
+            } catch {
+              setPhotoNote('The photos could not be exported. Try again.')
+            }
           }}
         >
           Export your scorecard photos

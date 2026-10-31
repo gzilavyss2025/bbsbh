@@ -412,20 +412,11 @@ export async function fetchRoundShort(gamePk) {
   }
 }
 
-export async function fetchSeriesGameNumber(gamePk) {
-  try {
-    const data = await getJson(`/api/v1/schedule?gamePk=${gamePk}`)
-    return data.dates?.[0]?.games?.[0]?.seriesGameNumber ?? null
-  } catch {
-    return null
-  }
-}
-
-// A postseason game's series name and game number, from the schedule (the live feed
-// has neither). Pregame facts, never a result. null on any failure.
+// A postseason game's series name and game number, from the schedule (the live feed has
+// neither). Pregame facts, never a result. null on any failure.
 export async function fetchSeriesFacts(gamePk) {
   try {
-    const data = await getJson(`/api/v1/schedule?gamePk=${gamePk}`)
+    const data = await getJson(`/api/v1/schedule?gamePk=${gamePk}&fields=dates,games,seriesDescription,seriesGameNumber`)
     const game = data.dates?.[0]?.games?.[0]
     return game ? { seriesDescription: game.seriesDescription ?? '', seriesGameNumber: game.seriesGameNumber ?? null } : null
   } catch {
@@ -433,7 +424,18 @@ export async function fetchSeriesFacts(gamePk) {
   }
 }
 
-const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
+export async function fetchSeriesGameNumber(gamePk) {
+  return (await fetchSeriesFacts(gamePk))?.seriesGameNumber ?? null
+}
+
+// Stamp facts plus the schedule's series fields, for the box score's Heritage Pass ribbon (#2728).
+export function withSeriesFacts(facts, series) {
+  return facts && series
+    ? { ...facts, seriesDescription: series.seriesDescription, seriesGameNumber: series.seriesGameNumber }
+    : facts
+}
+
+export const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
 
 async function readPitcherLastGame(personId, season, cutoffDate, cutoffGameNumber = 1) {
   if (!personId || !season) return null
