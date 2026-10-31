@@ -421,6 +421,18 @@ export async function fetchSeriesGameNumber(gamePk) {
   }
 }
 
+// A postseason game's series name and game number, from the schedule (the live feed
+// has neither). Pregame facts, never a result. null on any failure.
+export async function fetchSeriesFacts(gamePk) {
+  try {
+    const data = await getJson(`/api/v1/schedule?gamePk=${gamePk}`)
+    const game = data.dates?.[0]?.games?.[0]
+    return game ? { seriesDescription: game.seriesDescription ?? '', seriesGameNumber: game.seriesGameNumber ?? null } : null
+  } catch {
+    return null
+  }
+}
+
 const POSTSEASON_TYPES = new Set(['F', 'D', 'L', 'W'])
 
 async function readPitcherLastGame(personId, season, cutoffDate, cutoffGameNumber = 1) {

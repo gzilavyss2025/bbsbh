@@ -116,6 +116,9 @@ export async function fetchStampGames(gamePks, { signal } = {}) {
     }),
   )
 
+  // Every read failed (offline): reject, so the caller can say so (#2729).
+  if (results.every((data) => data === null)) throw new Error('Game details could not load')
+
   // A game postponed and made up later is the SAME gamePk on two dates, and the
   // postponed row still says 'Final' (#1342). The played row wins whatever the
   // row order; a game that never was played keeps its postponed row.
