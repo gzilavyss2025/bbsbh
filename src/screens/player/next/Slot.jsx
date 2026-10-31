@@ -3,7 +3,7 @@ import { useNearView } from '../../../hooks/scroll/useNearView.js'
 import { useInViewOnce } from '../../../hooks/scroll/useInViewOnce.js'
 import { riseClass, viewKey } from '../../../lib/motion/inViewOnce.js'
 import { Card } from '../../../components/ui/frame/Card.jsx'
-import { SlotBoundary } from './SlotBoundary.jsx'
+import { SlotBoundary } from './SlotBoundary.js'
 
 // Runs once the module has mounted. A module that rendered nothing has no data. A module
 // that shows content (nothing inside it says aria-busy) is ready: the slot drops its

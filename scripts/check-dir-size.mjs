@@ -57,7 +57,8 @@ const BUDGETS = {
   // every client falls back to its "not configured" degrade, the class of outage
   // the KV_* episode was (api/_lib/redis.js). So the endpoints stay flat; this is
   // a deliberate exception, not a directory awaiting subdivision.
-  api: 13,
+  // 14 since #2514: crash.js, the crash signal sink, is a function and must sit here.
+  api: 14,
   // The stylesheet partials src/index.css @imports in order. The files are an
   // ORDERED SEQUENCE, not independent modules, and the numeric prefix is what
   // makes the @import list and the cascade readable. Nesting them would break
