@@ -245,3 +245,26 @@ test('a club with no distinct secondary mark costs its CDN lookups once; a netwo
   offline = false
   assert.ok((await flaky(158, 'base')).includes('heritage-secondary-158-cap'))
 })
+
+test('a postseason box-score pass reads the same ribbon as the Game Log pass', () => {
+  const source = JSON.parse(readFileSync(new URL('./fixtures/world-series/schedule-2022.json', import.meta.url)))
+  const game = source.dates[0].games[0]
+  const feed = {
+    gamePk: game.gamePk,
+    gameData: {
+      game: { type: 'W' },
+      datetime: { officialDate: game.officialDate },
+      status: { abstractGameState: 'Final' },
+      venue: { name: game.venue?.name },
+      teams: { away: { id: game.teams.away.team.id }, home: { id: game.teams.home.team.id, sport: { id: 1 }, league: { id: 104 } } },
+    },
+    liveData: { linescore: { teams: { away: { runs: game.teams.away.score }, home: { runs: game.teams.home.score } } } },
+  }
+  const box = revealStampFacts(feed, { seriesDescription: game.seriesDescription, seriesGameNumber: game.seriesGameNumber })
+  assert.equal(box.seriesDescription, 'World Series')
+  assert.equal(box.seriesGameNumber, game.seriesGameNumber)
+  const fromBox = heritagePassModel(box)
+  const fromLog = heritagePassModel(stampGameFacts(game))
+  assert.equal(fromBox.occasion, fromLog.occasion)
+  assert.equal(fromBox.seriesGame, fromLog.seriesGame)
+})
