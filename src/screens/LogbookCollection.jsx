@@ -31,6 +31,7 @@ import { BookOrderControl } from '../components/passport/BookOrderControl.jsx'
 import { BookManagementSheet } from '../components/passport/BookManagementSheet.jsx'
 import { Stack } from '../components/ui/layout/Stack.jsx'
 import { HeritagePassPages } from '../components/heritage/HeritagePassPages.jsx'
+import { ScorecardPhotos } from '../components/logbook/ScorecardPhotos.jsx'
 
 // One open Game Log book — the topbar, the tray, the passport book itself,
 // and the season grid below it (ADR-0035, ADR-0036). Split out of
@@ -452,6 +453,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                   Done
                 </button>
               </div>
+              <ScorecardPhotos gamePk={selectedStamp.gamePk} />
             </section>
           )}
 

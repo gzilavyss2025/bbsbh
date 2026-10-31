@@ -116,6 +116,8 @@ const STAMP_ALLOWLIST = {
   // The mint affordance lives inside the box score's SealBox reveal render
   // function (ADR-0002 is what makes that safe). One importer, on purpose.
   'components/logbook/StampGameButton.jsx': ['screens/BoxScore.jsx'],
+  // A scorecard photo may show the final score (#2511): the selected stamp's panel only.
+  'components/logbook/ScorecardPhotos.jsx': ['screens/LogbookCollection.jsx'],
   // Not a stamp, but the same footing: the feat label names a result (ADR-0101).
   'screens/boxscore/FeatLabel.jsx': ['screens/BoxScore.jsx'],
 }
@@ -129,7 +131,7 @@ const FORBIDDEN_SURFACES = [
   'components/game/GameResultFace.jsx',
   'components/game/GameFinder.jsx',
 ]
-const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'HeritagePass', 'HeritagePassPages', 'useStamps']
+const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'HeritagePass', 'HeritagePassPages', 'useStamps', 'ScorecardPhotos']
 
 // Whole DIRECTORIES where no stamp ART may render — every file beneath them,
 // present and future, so a surface added later is covered without anyone
@@ -157,7 +159,7 @@ const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'HeritagePass', '
 // prompt's trigger) — which is exactly the count-versus-art distinction this
 // narrower list exists to draw.
 const FORBIDDEN_ART_DIRS = ['screens/profile', 'components/profile', 'components/account']
-const FORBIDDEN_ART_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'HeritagePass', 'HeritagePassPages']
+const FORBIDDEN_ART_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'HeritagePass', 'HeritagePassPages', 'ScorecardPhotos']
 
 // Individual FILES held to the same narrower rule as the directories above:
 // no stamp ART, while `useStamps` stays legal. A file, not a directory,
