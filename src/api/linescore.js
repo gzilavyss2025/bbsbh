@@ -52,7 +52,9 @@ export function revealTotals(feed, side) {
 // PHI@BAL, "Completed Early: Rain" after 5 1/2) has a 9-long array whose last
 // five rows carry no `runs` at all — reading its length would claim nine innings
 // and demand a half nobody played.
-export function revealStampFacts(feed) {
+// `series` is the schedule's { seriesDescription, seriesGameNumber } for a postseason
+// game: the live feed carries neither (checked on gamePk 715724, 2026-10-31).
+export function revealStampFacts(feed, series = null) {
   if (!feed?.gamePk && !feed?.gameData) return null
   const gameData = feed?.gameData ?? {}
   const line = feed?.liveData?.linescore ?? {}
@@ -100,6 +102,8 @@ export function revealStampFacts(feed) {
     gameType: gameData.game?.type ?? null,
     // The home club's league, so a postseason stamp can name its round (stampArt.js).
     leagueId: gameData.teams?.home?.league?.id ?? null,
+    seriesDescription: series?.seriesDescription ?? '',
+    seriesGameNumber: series?.seriesGameNumber ?? null,
     venue: gameData.venue?.name ?? '',
     innings,
     scheduledInnings: Number.isInteger(line.scheduledInnings) ? line.scheduledInnings : null,

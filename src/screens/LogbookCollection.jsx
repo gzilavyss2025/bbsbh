@@ -417,13 +417,16 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                 {monthDay(selectedStamp.date)} · page {selectedStamp.placement?.page}
               </p>
               <div className="logbook__placingactions">
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={() => openGame(selectedStamp.gamePk)}
-                >
-                  Open game ›
-                </button>
+                {/* No facts (still loading, or the read failed): no route to open. */}
+                {byPk[selectedStamp.gamePk] && (
+                  <button
+                    type="button"
+                    className="btn btn--ghost"
+                    onClick={() => openGame(selectedStamp.gamePk)}
+                  >
+                    Open game ›
+                  </button>
+                )}
                 <button
                   type="button"
                   className="btn btn--ink"
@@ -523,7 +526,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
             coverSlot={<PassportCover book={book} onOpen={() => setOpenPage(1)} />}
           />
 
-          <HeritagePassPages stamps={all} factsByPk={byPk} />
+          <HeritagePassPages stamps={all} factsByPk={byPk} loading={facts.loading} failed={Boolean(facts.error)} />
 
           {/* The league under the book — which clubs have turned up in a game
               you stamped. Reads the WHOLE collection (`all`), not the season

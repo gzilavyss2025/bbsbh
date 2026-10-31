@@ -3,11 +3,13 @@ import { useState } from 'react'
 import { fetchAtBatTracking } from '../../../../api/savant/gameFeed.js'
 import { useAsync } from '../../../../hooks/useAsync.js'
 import { fetchSavantPercentiles } from '../../../../api/savantPercentiles.js'
+import { hrParks } from '../../../../lib/ballpark/layout/hrParks.js'
+import { ZoneSheet } from '../../../../components/scoring/StrikeZone.jsx'
 
 // The batted ball's Savant figures in the opened flight card (Gary, 2026-10-28): xBA, bat speed and
 // how many parks it would have left. It mounts only with the card, so the read waits for that tap,
 // and the card lives in the hero's reveal. MLB only; a figure Savant has not posted yet is left out.
-export function SavantFacts({ gamePk, sportId, playId }) {
+export function SavantFacts({ gamePk, sportId, playId, ball = null }) {
   const { data } = useAsync(() => (playId ? fetchAtBatTracking(gamePk, sportId, [playId]).catch(() => new Map()) : Promise.resolve(new Map())), [gamePk, sportId, playId])
   const t = data?.get(playId)
   const facts = [
@@ -16,6 +18,9 @@ export function SavantFacts({ gamePk, sportId, playId }) {
     t?.hrParks != null && ['HR in', String(t.hrParks), ' of 30 parks'],
   ].filter(Boolean)
   const [open, setOpen] = useState(false)
+  const [parksOpen, setParksOpen] = useState(false)
+  // Which parks (#2695): Savant gives only the count, so the list is our own wall check (hrParks.js).
+  const parks = t?.hrParks >= 1 ? hrParks(ball) : null
   if (facts.length === 0) return null
   return (
     <>
@@ -28,12 +33,14 @@ export function SavantFacts({ gamePk, sportId, playId }) {
             </>
           )
           // Bat speed opens where this swing sits among the league's hitters (Gary, 2026-10-29).
-          return label === 'Bat speed'
-            ? <button key={label} type="button" className={`bflight__fact bflight__fact--tap${open ? ' is-on' : ''}`} aria-expanded={open} onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}>{inner}</button>
-            : <div key={label} className="bflight__fact">{inner}</div>
+          if (label === 'Bat speed') return <button key={label} type="button" className={`bflight__fact bflight__fact--tap${open ? ' is-on' : ''}`} aria-expanded={open} onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}>{inner}</button>
+          // The park count opens the list of parks it leaves (Gary, 2026-10-28).
+          if (label === 'HR in' && parks) return <button key={label} type="button" className="bflight__fact bflight__fact--tap" aria-haspopup="dialog" onClick={(e) => { e.stopPropagation(); setParksOpen(true) }}>{inner}</button>
+          return <div key={label} className="bflight__fact">{inner}</div>
         })}
       </div>
       {open && t?.batSpeed != null && <BatSpeedHistogram mph={t.batSpeed} />}
+      {parksOpen && <HrParksSheet parks={parks} savant={t.hrParks} onClose={() => setParksOpen(false)} />}
     </>
   )
 }
@@ -67,5 +74,26 @@ function BatSpeedHistogram({ mph }) {
         <span>{hi} mph</span>
       </p>
     </div>
+  )
+}
+
+// The parks list: the ones it leaves, then the ones it does not. Our own estimate from each park's wall
+// distance and height on the ball's bearing (wind and air ignored), so it says so, and says when its
+// count differs from Savant's.
+function HrParksSheet({ parks, savant, onClose }) {
+  const n = parks.leaves.length + parks.stays.length
+  return (
+    <ZoneSheet note="Home run parks" head={false} title={[`Gone in ${parks.leaves.length} of ${n} parks`, 'Our estimate']} onClose={onClose}>
+      <div className="hrparks" onClick={(e) => e.stopPropagation()}>
+        <p className="hrparks__note">
+          From each park&rsquo;s wall distance and height on this ball&rsquo;s line. Wind and air are not counted.
+          {parks.leaves.length !== savant && ` Savant counts ${savant} of 30.`}
+        </p>
+        <h3 className="hrparks__head">Gone in</h3>
+        {parks.leaves.length ? <ul className="hrparks__list">{parks.leaves.map((p) => <li key={p}>{p}</li>)}</ul> : <p className="hrparks__none">None</p>}
+        <h3 className="hrparks__head">In the park at</h3>
+        {parks.stays.length ? <ul className="hrparks__list">{parks.stays.map((p) => <li key={p}>{p}</li>)}</ul> : <p className="hrparks__none">None</p>}
+      </div>
+    </ZoneSheet>
   )
 }
