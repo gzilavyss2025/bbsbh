@@ -205,3 +205,15 @@
   padding: var(--space-4);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
+
+/* Scorecard photos in the selected stamp's panel (#2511). */
+.scphotos { margin-top: var(--space-3); }
+.scphotos__label { margin: 0 0 var(--space-2); font: var(--w-bold) var(--fs-label) / var(--lh-solid) var(--font-display); color: var(--text-heading); }
+/* layout-exempt: up to four thumbnails in a row */
+.scphotos__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); margin: 0 0 var(--space-2); padding: 0; list-style: none; }
+.scphotos__item { position: relative; }
+.scphotos__thumb { display: block; width: 100%; aspect-ratio: 3 / 4; padding: 0; border: var(--bw-rule) solid var(--border-stamped); background: var(--bg-page); cursor: zoom-in; }
+.scphotos__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.scphotos__remove { position: absolute; top: var(--space-1); right: var(--space-1); padding: 0 var(--space-1); border: 0; background: var(--bg-page); color: var(--text-heading); font-size: var(--fs-cell); }
+.scphotos__note { margin: var(--space-1) 0 0; color: var(--text-caption); font-size: var(--fs-cell); }
+.scphotos__full { max-width: 96vw; max-height: 92dvh; object-fit: contain; }
