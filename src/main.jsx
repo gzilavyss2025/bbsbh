@@ -9,6 +9,8 @@ import { CLERK_PUBLISHABLE_KEY, isClerkEnabled } from './lib/clerkConfig.js'
 import { installCrashReporter, reportCrash } from './lib/crash/report.js'
 import { parseRoute } from './lib/route.js'
 import { BUILD_COMMIT_SHORT } from './lib/buildInfo.js'
+import { recoverOnce, clearRecoveryFlag } from './lib/crash/recover.js'
+import { RootBoundary } from './components/ui/state/RootBoundary.jsx'
 import './index.css'
 
 // The crash signal (#2514): the route's NAME and the build, never the URL (lib/crash/report.js).
@@ -19,22 +21,16 @@ installCrashReporter(() => {
 })
 
 // Every deploy renames the content-hashed chunk files (see App.jsx's per-route
-// `lazy()` imports), so a tab left open across one gets a failed dynamic
-// import — "Failed to fetch dynamically imported module" — the next time it
-// navigates to a route it hasn't loaded yet. Vite fires this event for
-// exactly that case; reload once to pick up the new manifest instead of
-// leaving the screen blank. The sessionStorage flag stops a reload loop if
-// the failure is persistent rather than a one-off stale deploy; it's cleared
-// a few seconds after a clean load so the NEXT deploy can trigger a reload
-// too.
-const PRELOAD_RELOAD_FLAG = 'bbsbh:reloaded-after-preload-error'
-window.addEventListener('vite:preloadError', () => {
-  if (sessionStorage.getItem(PRELOAD_RELOAD_FLAG)) return
-  sessionStorage.setItem(PRELOAD_RELOAD_FLAG, '1')
-  window.location.reload()
-})
+// `lazy()` imports), so a tab or installed app left open across one gets a failed
+// dynamic import the next time it opens a route it hasn't loaded yet. Vite fires
+// this event for exactly that case. Repair once a session: drop the cached app
+// files and the service worker, then reload from the network (lib/crash/recover.js
+// — localStorage is untouched). The flag clears a few seconds after a clean load
+// so the NEXT deploy can repair itself too. RootBoundary uses the same repair for
+// a render error.
+window.addEventListener('vite:preloadError', () => { recoverOnce() })
 window.addEventListener('load', () => {
-  setTimeout(() => sessionStorage.removeItem(PRELOAD_RELOAD_FLAG), 10_000)
+  setTimeout(() => clearRecoveryFlag(sessionStorage), 10_000)
 })
 
 // @clerk/clerk-react is dynamically imported so its whole SDK is only ever
@@ -99,7 +95,7 @@ async function mount() {
   document.getElementById('crawl')?.remove()
   root.render(
     <StrictMode>
-      {content}
+      <RootBoundary>{content}</RootBoundary>
       <Analytics />
       <SpeedInsights />
     </StrictMode>,
