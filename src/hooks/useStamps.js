@@ -18,6 +18,7 @@ import {
   unplaceStamp,
 } from '../lib/stamps.js'
 import { localStore, readOwner, writeOwner } from '../lib/account/localStore.js'
+import { savePhotos } from '../lib/scorecard-photos/store.js'
 
 // The Logbook's React entry point (ADR-0035). Mirrors useRevealProgress.js: the
 // rules are the React-free core in src/lib/stamps.js (unit-tested there, and
@@ -93,6 +94,8 @@ export function useStamps() {
   const unstamp = useCallback(
     (gamePk) => {
       commit((prev) => removeStamp(prev, gamePk, { now: Date.now() }))
+      // Its scorecard photos go with it (Gary, 2026-11-01): an empty list deletes the record.
+      savePhotos(gamePk, [])
     },
     [commit],
   )
