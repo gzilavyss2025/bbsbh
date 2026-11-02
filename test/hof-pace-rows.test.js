@@ -42,3 +42,11 @@ test('the WAR row comes last, as a tenth', () => {
   assert.equal(v.rows.at(-1).value, '2.5')
   assert.equal(v.rows.at(-1).comps[0].value, '2.5')
 })
+
+test('IP over 1,000 gets a thousands comma and keeps its thirds', () => {
+  const pool = players.map((p) => ({ ...p, rows: p.rows.map(([w, so, , sv]) => [w, so, 15025, sv]) }))
+  const splits = [line(2020, 22, { inningsPitched: '2500.1' }), line(2021, 23, { inningsPitched: '2500.0' })]
+  const ip = hofPaceRows({ players: pool, splits, role: 'pitching' }).rows.find((r) => r.label === 'IP')
+  assert.equal(ip.value, '5,000.1')
+  assert.equal(ip.comps[0].value, '5,008.1')
+})

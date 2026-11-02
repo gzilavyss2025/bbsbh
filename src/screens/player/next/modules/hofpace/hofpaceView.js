@@ -1,6 +1,5 @@
 // Which rows the Hall of Fame pace card shows (#1857 slice 3). Pure.
 import { hofPaceView } from '../../../../../api/person/hof/pace.js'
-import { outsToIp } from '../../../../../lib/math/innings.js'
 
 const ROWS = {
   hitting: [['hr', 'HR', 'home runs'], ['h', 'H', 'hits']],
@@ -10,7 +9,7 @@ const ROWS = {
 const RELIEVER_SAVES = 20
 
 const WAR = ['war', 'WAR', 'WAR (MLB calc)']
-const fmt = (stat, v) => (stat === 'outs' ? outsToIp(v) : stat === 'war' ? v.toFixed(1) : v.toLocaleString('en-US'))
+const fmt = (stat, v) => (stat === 'outs' ? `${Math.floor(v / 3).toLocaleString('en-US')}.${v % 3}` : stat === 'war' ? v.toFixed(1) : v.toLocaleString('en-US'))
 
 // Null when there is no card (under two seasons, a start after 30, an empty pool).
 // `id` is his own: a Hall of Famer is never his own comp.
