@@ -106,6 +106,16 @@
     grid-template-columns: 1fr;
     row-gap: 2px;
   }
+  /* Two or more faces: a phone has no room for a face column beside the
+     sentence, so the faces run in one row above it at full width. */
+  /* layout-exempt: a multi-player move stacks faces over its sentence */
+  .oseason__list .wire__row:has(.wire__face + .wire__face) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-2);
+  }
+  .oseason__list .wire__row:has(.wire__face + .wire__face) .wire__faces {
+    max-width: none;
+  }
 }
 
 /* THE FACT LINE — the player's background under a move (WireFacts.jsx): a
