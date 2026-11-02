@@ -1,5 +1,6 @@
 import { defineConfig } from '@playwright/test'
 import { BASE, BRANCH, BRANCH_PORT } from './e2e/visual/setup.js'
+import { cloudLaunch } from './playwright.config.js'
 
 // The screenshot suite (issue #1177). `npm run visual` shoots every page in
 // e2e/visual/routes.js on two dev servers — BASE, a worktree on `main`, and
@@ -54,6 +55,7 @@ export default defineConfig({
     // a row matched to the pixel. They change how Chromium draws, not what the
     // page looks like.
     launchOptions: {
+      ...cloudLaunch,
       args: [
         '--disable-gpu',
         '--disable-gpu-rasterization',
