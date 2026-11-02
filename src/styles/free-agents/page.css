@@ -1,0 +1,203 @@
+/* The free-agent class page (#2509, src/screens/free-agents/). Imported by the
+   page itself, so the core sheet does not carry it. A list of rows on a phone;
+   from 900px the same rows line up as table columns. */
+
+.fa__table {
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+}
+
+/* layout-exempt: one free-agent row is a bespoke two-shape grid (stacked on a phone, table columns wide) */
+.fa__row {
+  display: grid;
+  grid-template-columns: var(--shot-xs-w) minmax(0, 1fr) auto;
+  grid-template-areas:
+    'player player war'
+    'club club war'
+    'status status status'
+    'deal deal deal'
+    'stats stats stats';
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+  padding: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.fa__table > .fa__row:first-child {
+  border-top: 0;
+}
+
+.fa__row--head {
+  display: none;
+}
+
+.fa__player {
+  grid-area: player;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.fa__shot {
+  flex: none;
+}
+
+.shot.fa__face {
+  display: block;
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
+  border: var(--bw-rule) solid var(--border-stamped);
+  border-radius: 0;
+  background: var(--surface-inset);
+  overflow: hidden;
+}
+
+.fa__clubs,
+.fa__clubs .vsteam__team {
+  border-radius: var(--radius-square);
+}
+
+.fa__filters {
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+/* layout-exempt: name over note inside one grid cell */
+.fa__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fa__name {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  text-align: left;
+}
+
+.fa__note,
+.fa__date,
+.fa__deal,
+.fa__stats {
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+
+.fa__note {
+  color: var(--text-muted);
+}
+
+.fa__club {
+  grid-area: club;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-left: calc(var(--shot-xs-w) + var(--space-3));
+}
+
+.fa__pos {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-label);
+  color: var(--text-muted);
+}
+
+/* layout-exempt: tag, two logos and a date wrap inside one grid cell */
+.fa__status {
+  grid-area: status;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.fa__tag {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-label);
+  padding: 0 var(--space-1h);
+  border: var(--bw-hair) solid var(--border-rule);
+  color: var(--text-muted);
+}
+
+.fa__tag--signed {
+  background: var(--surface-stamped-tint);
+  color: var(--text-heading);
+}
+
+.fa__deal {
+  grid-area: deal;
+}
+
+.fa__stats {
+  grid-area: stats;
+}
+
+.fa__label {
+  color: var(--text-muted);
+}
+
+.fa__war {
+  grid-area: war;
+  align-self: start;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-lg);
+  color: var(--text-heading);
+}
+
+.fa__war .fa__label {
+  font-size: var(--fs-label);
+}
+
+.fa__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 900px) {
+  /* layout-exempt: one free-agent row is a bespoke two-shape grid (stacked on a phone, table columns wide) */
+  .fa__row,
+  .fa__row--head {
+    display: grid;
+    grid-template-columns: minmax(0, 2.2fr) minmax(0, 0.8fr) minmax(0, 1.4fr) minmax(0, 1.4fr) minmax(0, 1.8fr) 56px;
+    grid-template-areas: none;
+    align-items: center;
+    column-gap: var(--space-4);
+  }
+
+  .fa__row > * {
+    grid-area: auto;
+  }
+
+  .fa__row--head {
+    background: var(--bg-page);
+    font-family: var(--font-display);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--ls-label);
+    font-size: var(--fs-label);
+    color: var(--text-caption);
+  }
+
+  .fa__club {
+    padding-left: 0;
+  }
+
+  .fa__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .fa__war {
+    font-size: var(--fs-h3);
+    align-self: center;
+  }
+}

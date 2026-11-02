@@ -195,6 +195,12 @@ test('an impossible calendar date falls through to today rather than erroring', 
 // --------------------------------------------------------------------------
 // parseRoute — the standalone named pages
 // --------------------------------------------------------------------------
+test('free-agent class routes carry an optional season', () => {
+  assert.deepEqual(parseRoute('/free-agents'), { name: 'free-agents', season: null })
+  assert.deepEqual(parseRoute('/free-agents/2025'), { name: 'free-agents', season: 2025 })
+  assert.deepEqual(parseRoute('/free-agents/abc'), { name: 'free-agents', season: null })
+})
+
 test('single-segment named routes resolve to their route name', () => {
   const cases = {
     '/logos': 'logos',

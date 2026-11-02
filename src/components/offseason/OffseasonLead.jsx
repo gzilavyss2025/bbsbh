@@ -8,6 +8,8 @@ import { WinterCalendar } from './WinterCalendar.jsx'
 import { useCopy } from '../../copy/copyContext.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
+import { Door } from '../ui/control/Door.jsx'
+import { useNav } from '../../lib/nav.js'
 
 // THE OFFSEASON LEAD — the same roster wire, promoted.
 //
@@ -49,6 +51,7 @@ const LEAD_ROWS = 6
 
 export function OffseasonLead({ endDate, sportId, winter, children }) {
   const { t } = useCopy()
+  const navigate = useNav()
   const { data, loading } = useAsync(
     (signal) => fetchLeagueMoves(endDate, sportId, { signal, singleDay: false }),
     [endDate, sportId],
@@ -98,6 +101,12 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           {`No moves filed in the last ${windowDaysFor(sportId)} days.`}
         </EmptyState>
       )}
+
+      {/* The free-agent class (#2509): the hot-stove question the wire answers
+          one move at a time, as one list. */}
+      <Door className="oseason__fa" onClick={() => navigate(`/free-agents/${winter.seasonEnded}`)}>
+        Free agents
+      </Door>
 
       {/* One note about the season the wire has just stopped covering, and the
           one door on this page that opens onto results — issue #1078, step 4.
