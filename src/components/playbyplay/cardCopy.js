@@ -26,7 +26,7 @@ export function firstLast(name) {
 export const forLine = (replacedName, base) => `For ${firstLast(replacedName)}${base ? ` at ${ordinal(base)} base` : ''}`
 
 // A delay's tab is its headline ("Injury delay", "Rain delay"); its one sentence is the man
-// who left, or, with nobody, how long play stopped. `format` is DelayCard's formatDelay.
+// who left, or, with nobody, how long play stopped. `format` is formatDelay (screens/gameday/next/notices.js).
 export const delayTab = (title) => title || 'Delay'
 export function delaySentence({ detail, minutes }, format) {
   if (detail) return `${detail}.`

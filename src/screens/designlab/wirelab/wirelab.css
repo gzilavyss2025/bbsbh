@@ -1,0 +1,46 @@
+/* THE WIRE LAB (/wire-lab) — the fact templates' tuning page. Its moves are
+   drawn by the offseason ledger's own rules (.oseason__list in
+   styles/offseason/winter-home.css); this sheet only lays out the groups. */
+.wirelab {
+  padding-block: var(--space-4) var(--space-6);
+}
+.wirelab__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+}
+.wirelab__meta {
+  margin: var(--space-1) 0 var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+}
+.wirelab__group {
+  margin-bottom: var(--space-3);
+}
+.wirelab__head {
+  cursor: pointer;
+  padding-block: var(--space-2);
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+.wirelab__count {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+.wirelab__list,
+.wirelab__one {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wirelab__item {
+  padding-block: var(--space-2);
+  border-bottom: var(--border-hairline);
+}
+.wirelab__codes {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-muted);
+}

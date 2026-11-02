@@ -549,6 +549,8 @@ function shapeStory(draft, ctx) {
     id: `${ctx.orgId}-${date}-${draft.storyType}-${anchor ?? 'x'}`,
     type: draft.storyType,
     typeLabel: TYPE_LABELS[draft.storyType],
+    // The rows' own type codes, for the wire's major/minor rule (transactions/major.js).
+    codes: [...new Set(draft.rows.map((r) => r.row.typeCode).filter(Boolean))],
     rail: buildRail(draft, ctx),
     cutline: buildCutline(draft, ctx),
   }

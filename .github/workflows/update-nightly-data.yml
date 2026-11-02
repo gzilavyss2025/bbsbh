@@ -440,6 +440,13 @@ jobs:
         id: awards-history
         continue-on-error: true
         run: node scripts/gen-awards-history.mjs --nightly
+      # Which players make a roster move a full card on the winter wire
+      # (src/api/transactions/major.js). After WAR, prospects and awards, which
+      # it reads. Staged by the `git add -A -- public …` below.
+      - name: Notable players
+        id: notable-players
+        continue-on-error: true
+        run: node scripts/wire/gen-notable-players.mjs
       # Every ABS challenge of the season, MLB and Triple-A, for
       # /abs-challenges. Append-only over newly-played games, so the trailing
       # window is all it ever needs; the one-time season backfill is
@@ -755,6 +762,7 @@ jobs:
           steps.prospect-trend.outcome == 'failure' ||
           steps.comeback-wins.outcome == 'failure' ||
           steps.awards-history.outcome == 'failure' ||
+          steps.notable-players.outcome == 'failure' ||
           steps.abs-challenges.outcome == 'failure' ||
           steps.jerseys.outcome == 'failure' ||
           steps.pitch-arsenal.outcome == 'failure' ||

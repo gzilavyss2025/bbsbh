@@ -66,7 +66,7 @@ test('the winter calendar default is this winter only, and says what is an estim
   const nextWinter = parseWinterCalendar(field.default, { startDate: '2027-11-01', endDate: '2028-02-29' })
   assert.equal(nextWinter.length, 0, 'no shipped date survives into next winter')
   const confirmed = new Set([
-    'Free agents can sign elsewhere',
+    'Free agency begins',
     'GM meetings',
     'Owners meetings',
     'Non-tender deadline',

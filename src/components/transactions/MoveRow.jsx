@@ -1,9 +1,33 @@
-import { Fragment } from 'react'
+import { Component, Fragment, Suspense, lazy } from 'react'
+import { reportCrash } from '../../lib/crash/report.js'
 import { isMlbTeamId, teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+// The player notes and their sheet load on their own, off the first load: a
+// ledger row draws its plain sentence until they arrive.
+const WireFacts = lazy(() => import('./WireFacts.jsx').then((m) => ({ default: m.WireFacts })))
+
+// A notes chunk that fails to load (a 404 after a deploy, a phone gone offline)
+// leaves the row its plain sentence, never takes the ledger down
+// (player/next/SlotBoundary.js is the same rule for a player-page card).
+class WireFactsBoundary extends Component {
+  state = { failed: false }
+
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+
+  componentDidCatch() {
+    // The crash signal (#2514): the kind only, never the error (lib/crash/report.js).
+    reportCrash({ kind: 'render' })
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children
+  }
+}
 
 // One roster-move story, and the day-grouping helpers around it. Extracted from
 // the slate's wide surface when the phone got a SECOND presentation of the
@@ -117,7 +141,9 @@ export function takeStories(items, n) {
 // `linked={false}` renders the same sentence with no anchors at all, which is
 // what the dock's one-line rail wants: the rail IS a single expand control, and
 // an anchor nested inside a button is neither valid HTML nor reliably tappable.
-export function Cutline({ segments, className = 'wire__cutline', linked = true }) {
+// `tail` is prose that runs on after the sentence in the same paragraph: a
+// single player's background note on the offseason ledger (WireFacts.jsx).
+export function Cutline({ segments, className = 'wire__cutline', linked = true, tail = null }) {
   return (
     <p className={className}>
       {(segments ?? []).map((seg, i) => {
@@ -129,6 +155,7 @@ export function Cutline({ segments, className = 'wire__cutline', linked = true }
         if (linked && seg.teamId) return <TeamLink key={i} id={seg.teamId}>{seg.text}</TeamLink>
         return <Fragment key={i}>{seg.text}</Fragment>
       })}
+      {tail && <span className="wire__tail"> {tail}</span>}
     </p>
   )
 }
@@ -193,21 +220,31 @@ function clubTabFor(teamId) {
   return isMlbTeamId(teamId) ? 'transactions' : 'overview'
 }
 
-export function MoveRow({ story, compact = false }) {
+// `marks` is the offseason ledger's row: a bigger club mark, and on a trade
+// the other club's mark beside it (the first club the cutline names). `line`
+// is that ledger's minor move (transactions/major.js): the same row with no
+// faces, so a routine move reads as one entry rather than a card. `date` turns
+// on the player's background under the sentence (WireFacts.jsx).
+export function MoveRow({ story, compact = false, marks = false, line = false, date = null }) {
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
   const lead = compact ? story.rail?.[0] : null
+  const markSize = marks ? (line ? 22 : 32) : 18
+  const partnerId =
+    marks && story.type === 'trade'
+      ? story.cutline?.find((seg) => seg.teamId && seg.teamId !== story.teamId)?.teamId
+      : null
   return (
     <li
-      className={`wire__row${compact ? ' wire__row--compact' : ''}`}
+      className={`wire__row${compact ? ' wire__row--compact' : ''}${line ? ' wire__row--line' : ''}`}
       data-move-row=""
       // The spine is the club's own colour, decorative and text-free — no
       // contrast floor applies to it, and none of the row's copy sits on it.
       style={{ '--wire-club': teamPrimaryColor(story.teamId) || 'var(--graphite)' }}
     >
-      {!compact && (
+      {!compact && !line && (
         <div className="wire__faces">
-          {story.rail.slice(0, FACES_PER_ROW).map((slot, i) => (
+          {story.rail.slice(0, marks ? story.rail.length : FACES_PER_ROW).map((slot, i) => (
             <Face key={slot.playerId ?? i} slot={slot} />
           ))}
         </div>
@@ -225,14 +262,29 @@ export function MoveRow({ story, compact = false }) {
             className="wire__club"
             ariaLabel={`${abbr} transactions`}
           >
-            <TeamLogo teamId={story.teamId} size={18} className="wire__mark" />
+            <TeamLogo teamId={story.teamId} size={markSize} className="wire__mark" />
             <span>{abbr}</span>
           </TeamLink>
+          {partnerId && (
+            <TeamLink id={partnerId} tab={clubTabFor(partnerId)} className="wire__club" ariaLabel={`${teamAbbr({ id: partnerId })} transactions`}>
+              <TeamLogo teamId={partnerId} size={markSize} className="wire__mark" />
+            </TeamLink>
+          )}
           {tone && (
             <span className={`wire__type wire__type--${tone}`}>{story.typeLabel}</span>
           )}
         </div>
-        <Cutline segments={story.cutline} />
+        {date ? (
+          <WireFactsBoundary fallback={<Cutline segments={story.cutline} />}>
+            <Suspense fallback={<Cutline segments={story.cutline} />}>
+              <WireFacts story={story} date={date} line={line}>
+                {(tail) => <Cutline segments={story.cutline} tail={tail} />}
+              </WireFacts>
+            </Suspense>
+          </WireFactsBoundary>
+        ) : (
+          <Cutline segments={story.cutline} />
+        )}
       </div>
     </li>
   )
@@ -242,7 +294,7 @@ export function MoveRow({ story, compact = false }) {
 // The caller owns the <ul> — its ref, its clamp, its scrolling; only what goes
 // INSIDE it is shared, which is the whole point of this module. `compact` is
 // passed straight through to MoveRow; a dateline is the same either way.
-export function MoveItems({ items, compact = false }) {
+export function MoveItems({ items, compact = false, marks = false, isMajor = null, facts = false }) {
   return items.map((item) =>
     item.kind === 'date' ? (
       <li className="wire__date" key={item.key}>
@@ -251,7 +303,7 @@ export function MoveItems({ items, compact = false }) {
         <span className="wire__count">{item.count}</span>
       </li>
     ) : (
-      <MoveRow key={item.key} story={item.story} compact={compact} />
+      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} />
     ),
   )
 }

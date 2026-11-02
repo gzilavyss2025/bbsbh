@@ -59,21 +59,6 @@
   color: var(--graphite-soft);
 }
 
-.oseason__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* The rest of the window, behind one control — the rail's door, widened. It
-   keeps the rail's quiet treatment rather than becoming a call to action: the
-   page's action is reading the wire, not opening more of it. */
-.oseason__door {
-  display: flex;
-  width: 100%;
-  margin-top: var(--space-3);
-}
-
 /* The wire is silent while it loads and on a failure — a habit that suits a
    margin and not a lead, where it would leave a bare heading over nothing.
    So the lead says which: this loading line, or the EmptyState below it
@@ -86,75 +71,6 @@
 }
 .oseason__empty {
   margin: var(--space-4) 0 0;
-}
-
-/* ---------------------------------------------------------------------------
-   THE WINTER CALENDAR — the dated strip under the ledger.
-
-   A row of tick marks on one line of the winter, scrolled sideways on a phone.
-   Each is a date and a short label, and the first one that has not happened yet
-   takes the ink. Nothing here is a control: the strip says where in the winter
-   the reader is standing, and the dates it shows are the ones the app can
-   either check (spring training, Opening Day) or was told (the admin's own
-   calendar) — see WinterCalendar.jsx.
-   --------------------------------------------------------------------------- */
-.wintercal {
-  margin-top: var(--space-6);
-  padding-top: var(--space-4);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-.wintercal__list {
-  display: flex;
-  gap: var(--space-5);
-  list-style: none;
-  margin: 0;
-  padding: 0 0 var(--space-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.wintercal__list::-webkit-scrollbar {
-  display: none;
-}
-/* A tick must never be split across the scroll edge, so each one refuses to
-   shrink and refuses to wrap inside itself. */
-.wintercal__item {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-left: var(--space-3);
-  border-left: var(--bw-rule) solid var(--border-rule);
-  white-space: nowrap;
-}
-.wintercal__date {
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  color: var(--text-caption);
-}
-.wintercal__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-small);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-/* The one the reader is heading for. Ink and a heavier tick, never colour
-   alone — and it carries aria-current in the markup, so the distinction
-   survives with no styling at all. */
-.wintercal__item--next {
-  border-left-color: var(--accent-primary);
-  border-left-width: var(--bw-heavy);
-}
-.wintercal__item--next .wintercal__date,
-.wintercal__item--next .wintercal__label {
-  color: var(--text-heading);
-}
-/* Behind them. Lightened, but still legible — the shape of the winter includes
-   the part already served. */
-.wintercal__item--past .wintercal__date,
-.wintercal__item--past .wintercal__label {
-  color: var(--graphite-soft);
 }
 
 /* ---------------------------------------------------------------------------
@@ -708,18 +624,8 @@
      ellipsis. The figure goes ABOVE instead, which is also how the design
      study's own MLB card reads it: the count and its denominator on one line,
      then the rows at the full width of the column. */
-  .seasonnote--stories .seasonnote__body {
-    flex-direction: column;
-    gap: var(--space-4);
-  }
   .seasonnote--stories .seasonnote__figure {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-3);
     width: auto;
-  }
-  .seasonnote--stories .seasonnote__under {
-    max-width: 24em;
   }
 }
 
@@ -772,249 +678,14 @@
   font-family: var(--font-body);
   color: var(--text-caption);
 }
-
-/* ---------------------------------------------------------------------------
-   THE WINTER RAIL — what stands in the column the wire vacated.
-
-   In season that 288px column is the roster rail. Through the offseason the
-   wire has been promoted into the page, and the column was holding a 112px
-   countdown over 1,700px of nothing while the club grid ran down the bottom of
-   the games column instead.
-
-   So the column becomes a real rail again: the countdown at its head, and the
-   whole league under it — which in the winter is what "the clubs with an off
-   day" amounts to, every one of them. It fills the margin AND takes roughly a
-   third off the page's height, because a two-column grid of thirty tiles is
-   far shorter than a five-column one.
-
-   WIDE ONLY, and GameSelect decides that rather than a media query: on a phone
-   there is no second column, the countdown already sits inside the lead, and
-   the grid already follows it down the one column there is. Nothing to move.
-   --------------------------------------------------------------------------- */
-.winterrail {
-  flex: 0 0 auto;
-  width: 288px;
-  /* .gamelist's own top margin (06-loader-and-cards.css), the same 14px the
-     wire rail answers to, so this column's head starts level with the page
-     beside it rather than 14px above it. */
-  margin-top: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+.seasonnote--stories .seasonnote__figure {
+  text-align: center;
 }
-/* Inside the rail the countdown no longer sets its own width or offset — the
-   column does both, and restating them here would double the margin. It
-   stretches rather than sitting at its own content width, so the card and the
-   grid beneath it share one edge. */
-.winterrail .springcount {
-  width: auto;
-  align-self: stretch;
-  margin-top: 0;
-}
-/* The grid is two tiles wide at 288px (auto-fill over minmax(120px, 1fr) —
-   06b-offday-cards.css), which is what makes thirty clubs a column rather than
-   a page. Nothing about a tile changes; only what it is standing in. */
-.winterrail .offday {
-  margin: 0;
-}
-
-/* ---------------------------------------------------------------------------
-   THE AT-BAT STORIES — the twelve-pitch note's rows, issue #1078.
-
-   This is the /fouls page's "Most fouls in one plate appearance" row, brought
-   over on purpose: the batter's face pinned left, the pitcher's pinned right,
-   their names and clubs facing each other across the count. A long at-bat is
-   two men refusing to give in, and a table row cannot draw that.
-
-   WHAT DID NOT COME WITH IT IS THE SCOREBUG. On /fouls the middle of the second
-   line carries the score, the inning, the outs, the bases and what the at-bat
-   finally did. Every one of those is a result, and this note is on the SLATE,
-   offering games a reader has not scored (ADR-0081). The slot holds the date
-   instead — the one thing about the at-bat that opens its game without saying
-   a word about it.
-
-   The classes are the note's own rather than .storypa-row's, because
-   43-foul-tracker.css is component-imported by that page alone and pulling 877
-   lines of foul-tracker chrome onto the home slate to reuse forty of them would
-   be a bad trade. The shared version is the design lab's job (issues
-   #1112-1114). The box itself is the canonical Card already (#1113).
-   --------------------------------------------------------------------------- */
-.seasonnote__storybox {
-  margin-top: var(--space-4);
-}
-.seasonnote__stories {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-/* A 3x2 grid: both faces span both rows, so they read tall while the middle
-   column stacks the name line over the date. minmax(0, 1fr), not a bare 1fr —
-   a bare 1fr refuses to shrink below its content's own width, which on a phone
-   pushes the grid wider than its box and clips the pitcher's face clean off
-   (the trap .storypa-row records at length). */
-.seasonnote__story {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    'battershot line   pitchershot'
-    'battershot when   pitchershot';
-  column-gap: var(--space-2h);
-  row-gap: var(--space-1h);
-  padding: var(--space-2h) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-.seasonnote__story:first-child {
-  border-top: none;
-}
-/* A size down from /fouls' hero row (--shot-lg). That board is a full-width
-   report card; this is a row on the home slate, sharing its column with the
-   wire and the record — and the two names either side of the count need the
-   50px the bigger face would take. --shot-md is the app's roster/leader size,
-   which is what this row is. */
-.seasonnote__shot {
-  width: var(--shot-md-w);
-  height: var(--shot-md-h);
-  border-radius: var(--radius-sm);
-  align-self: center;
-  flex: none;
-}
-.seasonnote__shot--batter {
-  grid-area: battershot;
-}
-.seasonnote__shot--pitcher {
-  grid-area: pitchershot;
-}
-
-.seasonnote__line {
-  grid-area: line;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2h);
-}
-/* Equal growth on BOTH name blocks is what keeps the count genuinely centred
-   between two faces, whatever either name's length. */
-.seasonnote__who {
-  flex: 1 1 0;
-  min-width: 0;
-}
-.seasonnote__who--pitcher {
-  text-align: right;
-}
-.seasonnote__who--pitcher .seasonnote__nameline {
-  justify-content: flex-end;
-}
-.seasonnote__nameline {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1h);
-}
-/* Compound, to beat .plink's own `font: inherit` reset — the same convention
-   .sgh-top .sgh-name uses on /fouls. */
-.seasonnote__nameline .seasonnote__name {
-  font-family: var(--font-body);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-body);
-  color: var(--text-heading);
-  letter-spacing: var(--ls-caps);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.seasonnote__club {
-  font-family: var(--font-mono);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-regular);
-  color: var(--text-caption);
-}
-/* The count, on one line with its label. */
-.seasonnote__val {
-  flex: none;
+/* layout-exempt: the (i) sits after the sentence */
+.seasonnote--stories .seasonnote__under {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-1);
-  white-space: nowrap;
-}
-.seasonnote__valn {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-weight: var(--w-bold);
-  font-size: var(--fs-num-md);
-  line-height: var(--lh-solid);
-  color: var(--text-heading);
-}
-
-/* Where the scorebug sits on /fouls, and the whole reason this row is allowed
-   on the slate: a date, and the game it opens — sealed, like any other. Drawn
-   as the same inset chip so the row keeps its shape. */
-.seasonnote__when {
-  grid-area: when;
-  justify-self: center;
-  gap: var(--space-1h);
-  /* An inset chip at rest, a card wash on hover: the one boxed door that is filled. */
-  background: var(--surface-inset);
-}
-.seasonnote__when:hover:not(:disabled),
-.seasonnote__when:active:not(:disabled) {
-  background: var(--surface-card);
-}
-
-/* The "vs {pitcher}" line under the batter — hidden by default, because the
-   pitcher's own name sits beside his face on the right. It comes back on a
-   phone, where that right-hand block is what drops instead. Same swap
-   .sgh-sub / .storypa-row__who--pitcher make on /fouls. */
-.seasonnote__vs {
-  display: none;
-  margin-top: 2px;
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  /* Ellipsis truncation needs overflow:hidden, which also clips .plink's
-     focus/hover underline; the padding gives that underline its room back. */
-  padding-bottom: var(--space-1h);
-}
-#root .seasonnote__vs {
-  text-transform: none; /* caps-exempt: "vs Gavin Williams" is a phrase, not a label */
-}
-
-/* /fouls makes the same swap at 600px. This row needs it at 900, and the
-   difference is not the screen — it is the COLUMN. That board runs the width of
-   a report page; this one shares the slate with a 288px rail and a 24px gutter,
-   so a 900px window leaves it about 390px, which two names and a count do not
-   fit into however the window is measured. Below it the pitcher's own block
-   drops (his face still carries him) and "vs {pitcher}" under the batter
-   becomes the only place he is named — and with nothing to its right the
-   batter's block grows, pushing the count to the row's edge for free. */
-@media (max-width: 899px) {
-  .seasonnote__vs {
-    display: block;
-  }
-  .seasonnote__who--pitcher {
-    display: none;
-  }
-  .seasonnote__when {
-    justify-self: stretch;
-    justify-content: center;
-  }
-}
-
-/* On a phone the batter's name WRAPS rather than truncating. The ellipsis is
-   the right answer on a wide row, where it clips a rare long name; at 390px it
-   was clipping every one of them — "TRISTAN ..." names nobody, and a reader
-   cannot tap a player page they cannot read the name of. Two lines is the
-   cheaper cost. */
-@media (max-width: 480px) {
-  .seasonnote__nameline {
-    flex-wrap: wrap;
-    row-gap: 0;
-  }
-  .seasonnote__nameline .seasonnote__name {
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
-  }
 }
 
 /* A row with no champion on its face (a minor level, or MLB before a

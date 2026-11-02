@@ -10,5 +10,6 @@ notebook note — twelve-pitch at-bats at MLB (the /fouls batter-vs-pitcher row,
 scorebug), youngest regulars at a level — and the season record, the one door onto
 results: a label, never a seal, inward at MLB and out to MiLB.com below it. MLB's row also
 carries the postseason champion for the whole offseason, off slice 3's live bracket, with
-the full bracket one tap away (ADR-0081's addendum). Wide, the rail the wire left holds the
-countdown and the whole league (`WinterRail`) — ADR-0081.
+the full bracket one tap away (ADR-0081's addendum). MLB's page is one column, no right rail:
+a hero row (season record + countdown), the winter calendar, the wire two-up, then the
+notebook as three stamped cards. The logo rail links every club, so no club grid.

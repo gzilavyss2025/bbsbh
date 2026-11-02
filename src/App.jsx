@@ -240,6 +240,7 @@ const GameNotesDebugPage = lazyNamed(
 // direct URL (see lib/route.js).
 const AnimationLab = lazyNamed(() => import('./screens/AnimationLab.jsx'), 'AnimationLab')
 const DesignLab = lazyNamed(() => import('./screens/designlab/index.jsx'), 'DesignLab')
+const WireLab = lazyNamed(() => import('./screens/designlab/wirelab/WireLab.jsx'), 'WireLab')
 const FirstScorebookPage = lazyNamed(
   () => import('./screens/FirstScorebookPage.jsx'),
   'FirstScorebookPage',
@@ -326,6 +327,7 @@ const BARE_ROUTES = {
   'game-notes-debug': GameNotesDebugPage,
   'animation-lab': AnimationLab,
   'design-lab': DesignLab,
+  'wire-lab': WireLab,
   'first-scorebook': FirstScorebookPage,
 }
 

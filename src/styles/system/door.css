@@ -139,6 +139,27 @@
   background: var(--surface-inset);
 }
 
+/* --stamped: a boxed door in the stamped cards' dress, a thick ink edge on card paper (the winter
+   home page's record doors, 2026-11-02). Rides on --boxed: <a class="door door--boxed door--stamped">. */
+.door--boxed.door--stamped {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--surface-card);
+}
+/* --bar: a boxed door as an ink footer bar across the foot of a stamped card, like the card's
+   own datelines (the winter ledger's "10 more"). The host makes it full width. */
+.door--boxed.door--bar {
+  border: 0;
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--text-heading);
+  color: var(--surface-card);
+  font-size: var(--fs-h3);
+}
+.door--boxed.door--bar:hover:not(:disabled),
+.door--boxed.door--bar:active:not(:disabled) {
+  background: var(--text-heading);
+  text-decoration: underline;
+}
+
 .door--block {
   display: block;
   width: 100%;
