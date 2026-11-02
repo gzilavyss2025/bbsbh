@@ -1659,7 +1659,11 @@ Re-run only to fold in a new season.
   a request. Matches on `stat.age` (June 30 rule), not season count. A traded season counts once: the
   team-less `numTeams > 1` roll-up row is used instead of the stints. Negro League seasons come back
   as MLB. Rows are dense from the first age (an age with no season repeats the one before). Hitters
-  `[h, hr]`, pitchers `[w, so, outs, sv]`. No WAR here: the card reads it from `war-history/`.
+  `[h, hr]`, pitchers `[w, so, outs, sv]`. No WAR: the card shows no WAR row yet.
+  **Yearly refresh** (early August, after the induction): run `npm run gen:hof-pace`; check the
+  new class is in the file and the count grew by its players; spot-check one new inductee's
+  line against the API by hand; open a PR. The card (`screens/player/next/modules/hofpace/`)
+  needs no change. Retired players' lines never change, so a skipped year only misses the class.
   The pure half (age cumulation, the roll-up rule) is `lib/hof/pace.mjs`, tested by `test/hof-pace.test.js`.
   About 83 KB, 31 KB gzipped. Checked by hand: Mays through age 24 is 547 H, 116 HR in both the
   file and the summed API rows (1948 Birmingham included).
