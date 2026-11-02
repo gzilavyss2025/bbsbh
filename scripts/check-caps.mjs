@@ -23,9 +23,9 @@ const BANNED = /text-transform\s*:\s*(none|lowercase|capitalize)\b/gi;
 const EXEMPT = /caps-exempt\b/i;
 
 // The blanket uppercase rules an exemption has to out-rank. `#root *`
-// (01-base.css) covers the app; `.focusrail__sheet *` (focus/reference.css)
-// re-states the invariant for the one sheet ModalPortal renders into <body>,
-// outside #root. A marked exemption that cannot beat its blanket is a silent
+// (01-base.css) covers the app. A sheet ModalPortal renders into <body> sits
+// outside #root and would need a blanket of its own (the old `.focusrail__sheet *`
+// went with focus/reference.css, #2747). A marked exemption that cannot beat its blanket is a silent
 // no-op — the marker reads as "deliberate" while the cascade says otherwise,
 // which is how five shouted paragraphs shipped (issue #769).
 const BLANKET = /^(.*?)\s*\*$/;

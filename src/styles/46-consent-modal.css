@@ -158,8 +158,7 @@
   animation-delay: var(--animlab-delay, 0s);
 }
 
-/* THE MOTION STUDY'S DELAYED ANIMATIONS, in the additive form — same reason
-   the closing tally below needs it. Each of these starts late: the staggered
+/* THE MOTION STUDY'S DELAYED ANIMATIONS, in the additive form. Each of these starts late: the staggered
    ones off `--row-i` / `--cell-i` / `--leg-i`, and the write-on's last two
    beats off a flat head start. Overwriting that with the bare frame offset
    would freeze every row, cell or leg at the same instant, and would start the
@@ -207,42 +206,6 @@
 .animlab__frame .pbp__atbat--writing .pbp__outcircle {
   animation-play-state: paused;
   animation-delay: calc(560ms + var(--animlab-delay, 0s));
-}
-
-/* Focus mode's half-close tally ink-in (ADR-0046) needs a longer selector than
-   its siblings above, for the same two reasons its retired predecessor
-   (`.halfclose`, the separate hairline-and-figures display this replaced) did:
-
-   SPECIFICITY. Its own rule lives in styles/focus/console.css, which
-   src/index.css imports LAST, so a plain `.animlab__frame .stat` (0,2,0) would
-   tie `.statline--closing .stat` (0,2,0) and lose on order. Matching the
-   closing class here breaks the tie on specificity instead of hoping about
-   order.
-
-   THE CELLS SCRUB ADDITIVELY. Each already carries its own staggered
-   `animation-delay`, so overwriting it with the bare frame offset would freeze
-   all eight at the same point and the strip would show a stagger that does not
-   exist. The frame offset is added to the cell's own delay instead, which is
-   what makes each frozen frame a truthful reading of the real sequence. */
-.animlab__frame .statline--closing .stat {
-  animation-play-state: paused;
-  animation-delay: calc(var(--tally-i, 0) * var(--tally-step, 90ms) + var(--animlab-delay, 0s));
-}
-
-/* BETWEEN INNINGS LAB (src/screens/BetweenInningsLab.jsx) — same section
-   shape as Animation Lab above, catalog rather than animation review. */
-.bilab__entry {
-  padding: var(--space-4) 0;
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-.bilab__entry:first-of-type {
-  border-top: none;
-}
-.bilab__title {
-  font-family: var(--font-display);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
 }
 
 /* ==== TEAM HUB: SHELL + TAB BAR ==== */

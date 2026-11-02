@@ -18,10 +18,7 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import {
   CLOSE_SEQUENCE_MS,
-  DENOTATION_HOLD_MS,
   INK_SET_MS,
-  TALLY_CELL_COUNT,
-  TALLY_STAGGER_MS,
   bookIsClosed,
 } from '../src/components/inning/focus/beats.js'
 
@@ -45,9 +42,7 @@ test('beats.js imports nothing, so no timing can be derived from a feed', () => 
 
 test('every beat is a plain positive number', () => {
   for (const [name, value] of Object.entries({
-    DENOTATION_HOLD_MS,
     INK_SET_MS,
-    TALLY_STAGGER_MS,
     CLOSE_SEQUENCE_MS,
   })) {
     assert.equal(typeof value, 'number', `${name} is not a number`)
@@ -55,16 +50,10 @@ test('every beat is a plain positive number', () => {
   }
 })
 
-test('the close sequence lasts exactly as long as the tally cells take to ink in', () => {
-  // The bar's forward action is held for CLOSE_SEQUENCE_MS. If this drifts
-  // shorter than the animation it is covering, the last cell inks in after
-  // the reader can already page away from it.
-  assert.equal(CLOSE_SEQUENCE_MS, (TALLY_CELL_COUNT - 1) * TALLY_STAGGER_MS)
-  assert.equal(
-    TALLY_CELL_COUNT,
-    8,
-    'R, H, E, LOB, Pitches, Whiffs, Fouls, 1st-pitch strikes — HalfTally.jsx draws exactly eight',
-  )
+test('the close hold keeps the 630ms it had while the half tally inked in (7 gaps of 90ms)', () => {
+  // The bar's forward action is held for CLOSE_SEQUENCE_MS. The tally is gone, but a
+  // forward half move must still time exactly as it did.
+  assert.equal(CLOSE_SEQUENCE_MS, 630)
 })
 
 test('the book is closed once the reveal mark reaches the last half played', () => {

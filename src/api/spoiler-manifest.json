@@ -239,7 +239,7 @@
     },
     "callout-notes/liveAtBat.js": {
       "class": "caller-gated",
-      "why": "`buildCallouts` may fold in only what the reader has revealed through the play it builds for, never the game's outcome. PlayByPlay.jsx is the gating caller."
+      "why": "`buildCallouts` may fold in only what the reader has revealed through the play it builds for, never the game's outcome. Its callers are callout-notes/rollup.js (the box score's roll-up, built inside the box score's reveal) and scripts/audit-callouts.mjs (an offline audit); no screen calls it since PlayByPlay.jsx was deleted (#2747)."
     },
     "callout-notes/progress.js": {
       "class": "reveal-only",
@@ -459,7 +459,7 @@
     },
     "gameday/engine/halfReport.js": {
       "class": "reveal-only",
-      "why": "What PlayByPlay reports up for one half at one step (#2747): the cap snap, the commit test (stepCommitReady), the step report, runs and hits, the trail and the scorebug snapshot, all from computeHalfInningFeed WITH the step cap (ADR-0016). Called only by PlayByPlay (inside HalfInning's SealBox reveal function) and by EngineReport, which GamedayEngine's one SealBox mounts from its reveal function (ADR-0001).",
+      "why": "What the engine reports up for one half at one step (#2747): the cap snap, the commit test (stepCommitReady), the step report, runs and hits, the trail and the scorebug snapshot, all from computeHalfInningFeed WITH the step cap (ADR-0016). Called only by EngineReport, which GamedayEngine's one SealBox mounts from its reveal function (ADR-0001).",
       "importers": [
         "screens/gameday/next/engine/GamedayEngine.jsx"
       ]
@@ -511,7 +511,7 @@
     },
     "gameday/subSteps.js": {
       "class": "reveal-only",
-      "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. openAtBat finds the reader's next at-bat past the step cursor with PlayByPlay's own step bounds. Gameday calls it at the advance tap (steps/subStep.js nextSub, which returns only a count; InningViewer also reads its live-edge flag on a half still in play) and inside SealBox reveal functions (the open box, the event card, the stage's one pitch), and those read only the sub-steps up to the reader's sub-step cursor. Two render-time reads return only what the reader's own sub-steps already revealed: steps/subStep.js openingChangeHeld (a held opening pitching change) and stage/GamedayStage.js restBatter (a pinch hitter announced inside the open at-bat, from his own sub-step on).",
+      "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. openAtBat finds the reader's next at-bat past the step cursor with the same step bounds the half report uses. Gameday calls it at the advance tap (steps/subStep.js nextSub, which returns only a count; InningViewer also reads its live-edge flag on a half still in play) and inside SealBox reveal functions (the open box, the event card, the stage's one pitch), and those read only the sub-steps up to the reader's sub-step cursor. Two render-time reads return only what the reader's own sub-steps already revealed: steps/subStep.js openingChangeHeld (a held opening pitching change) and stage/GamedayStage.js restBatter (a pinch hitter announced inside the open at-bat, from his own sub-step on).",
       "importers": [
         "api/gameday/pitchMix.js",
         "screens/gameday/next/hero/heroMarkup.js",
