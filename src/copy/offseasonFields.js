@@ -47,8 +47,9 @@ export function offseasonFields() {
       maxLength: 900,
       multiline: true,
       // The 2026-27 winter, shipped as a default at the owner's request (issue
-      // #1038) — none of these dates is in statsapi. Only the labor-deal line
-      // is confirmed. Every "(est.)" line is an estimate from the same event's
+      // #1038) — none of these dates is in statsapi. Lines without "(est.)"
+      // are confirmed by ESPN's 2026-27 free-agency tracker (espn.com/mlb/story/
+      // _/id/50328768). Every "(est.)" line is an estimate from the same event's
       // day of the week in the last three winters, and a lockout from December
       // 2 can move the Rule 5 draft, arbitration and report day. Replace a
       // line at /admin when MLB publishes the real date. Next winter these
@@ -56,8 +57,11 @@ export function offseasonFields() {
       // drops them and the strip goes back to the two schedule dates: it
       // cannot reprint this winter's dates as next winter's.
       default: [
-        '2026-11-10 | GM meetings (est.)',
+        '2026-11-02 | Free agents can sign elsewhere',
+        '2026-11-10 | GM meetings',
         '2026-11-17 | 40-man roster deadline (est.)',
+        '2026-11-17 | Owners meetings',
+        '2026-11-20 | Non-tender deadline',
         '2026-12-01 | Labor deal expires',
         '2026-12-09 | Rule 5 draft (est.)',
         '2027-01-07 | Arbitration figures due (est.)',

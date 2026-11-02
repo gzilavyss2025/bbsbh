@@ -65,7 +65,13 @@ test('the winter calendar default is this winter only, and says what is an estim
   assert.equal(thisWinter.length, lines.length, 'every line parses and falls inside the 2026-27 offseason')
   const nextWinter = parseWinterCalendar(field.default, { startDate: '2027-11-01', endDate: '2028-02-29' })
   assert.equal(nextWinter.length, 0, 'no shipped date survives into next winter')
-  const confirmed = new Set(['Labor deal expires'])
+  const confirmed = new Set([
+    'Free agents can sign elsewhere',
+    'GM meetings',
+    'Owners meetings',
+    'Non-tender deadline',
+    'Labor deal expires',
+  ])
   for (const row of thisWinter) {
     if (confirmed.has(row.label)) continue
     assert.match(row.label, /\(est\.\)$/, `${row.date} is an estimate and must say so`)
