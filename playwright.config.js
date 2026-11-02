@@ -37,21 +37,26 @@ export default defineConfig({
     // verification pass.
     browserName: 'chromium',
   },
-  // Three breakpoints: phone-first is the primary target, but the app also
-  // has a wider layout (see the `min-width: 740px` rule in index.css) that
-  // iPad/desktop sizes exercise. `npm run e2e` runs a spec against all
-  // three; pass `--project=mobile` (etc.) to check just one.
+  // Phone-first is the primary target, but the app also has a wider layout
+  // (see the `min-width: 740px` rule in index.css). `npm run e2e` runs mobile
+  // and desktop; iPad sits on the same side of 740px as desktop, so it joins
+  // only for `npm run e2e:all` (E2E_ALL=1). Pass `--project=mobile` (etc.)
+  // to check just one.
   //
   // e2e/invariants/** tests the spoiler-reveal mechanism itself, which is
   // viewport-independent — ipad/desktop skip it so tripling those specs
   // doesn't just triple runtime for no coverage gain.
   projects: [
     { name: 'mobile', use: { ...devices['iPhone 13'], browserName: 'chromium' } },
-    {
-      name: 'ipad',
-      use: { ...devices['iPad (gen 7)'], browserName: 'chromium' },
-      testIgnore: /invariants[\\/]/,
-    },
+    ...(process.env.E2E_ALL
+      ? [
+          {
+            name: 'ipad',
+            use: { ...devices['iPad (gen 7)'], browserName: 'chromium' },
+            testIgnore: /invariants[\\/]/,
+          },
+        ]
+      : []),
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'], browserName: 'chromium' },
