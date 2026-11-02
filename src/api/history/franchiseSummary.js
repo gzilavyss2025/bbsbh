@@ -5,10 +5,10 @@ import { pennantsFor } from './leaguePennants.js'
 // No file of its own. Finished seasons only: the ledger stops the season before today's, while
 // `pennants` is pennantsFor as it stands, so it can hold the current season's pennant.
 //
-// Winningest manager: each manager's w-l summed over the ledger seasons that carry it (one
-// manager that season). A shared season has no split on file, so it does not count (#2600:
-// Counsell reads 646-549, not B-R's 707-625). The manager data starts in 1969, so `managersFrom`
-// names the first season counted and the screen says "since" it.
+// Winningest manager: each manager's w-l summed over the ledger seasons that carry it (a season
+// he managed alone, or a shared season split by scripts/manager-transitions-seed.json). A shared
+// season with no seed entry has no split on file, so it does not count. The manager data starts in
+// 1969, so `managersFrom` names the first season counted and the screen says "since" it.
 
 // Pure. -> { names: [{ name, from, to }], seasons: { from, to, count } | null, record: { w, l },
 //   postseasons: [season], titles: [season], pennants, winningestManager: { id, name, w, l, seasons } | null,

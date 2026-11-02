@@ -1090,9 +1090,9 @@ for each generator; the reader modules:
   [season], pennants, winningestManager: { id, name, w, l, seasons } | null, managersFrom }`. The
   record and counts stop at the ledger's `through`; `pennants` is `pennantsFor` as is, so it can hold
   the current season. Winningest manager: most wins summed over the seasons a manager had alone
-  (a shared season has no split on file), ties to fewer losses; `managersFrom` is the first season
-  with manager data (1969), so the screen says "since". 158 reads Craig Counsell 646-549 (B-R
-  707-625 adds his 2015 share). No screen reads it yet.
+  (a shared season counts only once `manager-transitions-seed.json` splits it), ties to fewer
+  losses; `managersFrom` is the first season with manager data (1969), so the screen says "since".
+  158 reads Craig Counsell 707-625, as B-R does. No screen reads it yet.
 - `history/playedForBoth.js` — everyone who appeared in an MLB game for each of two clubs, from
   `public/data/played-for-both/{a}-{b}.json` (hand-run `gen-played-for-both.mjs`, #2579), ids
   ascending like `former-teammates`. `playedForBoth(teamIdA, teamIdB)` returns `{ credit,

@@ -105,10 +105,10 @@ test('franchiseSummary(158): the 1982 Brewers lost the World Series, so no title
   assert.deepEqual(s.postseasons, [1981, 1982, 2008, 2011, 2018, 2019, 2020, 2021, 2023, 2024, 2025])
 })
 
-test('franchiseSummary(158): the winningest manager is Craig Counsell, 646-549 over his eight sole seasons', async () => {
-  // B-R reads 707-625; the difference is his share of 2015 (61-76), a shared season with no split on file.
+test('franchiseSummary(158): the winningest manager is Craig Counsell, 707-625, the same as B-R', async () => {
+  // 2015 is split at 2015-05-04 (manager-transitions-seed.json): Roenicke 7-18, Counsell 61-76.
   const s = await franchiseSummary(158)
-  assert.deepEqual(s.winningestManager, { id: s.winningestManager.id, name: 'Craig Counsell', w: 646, l: 549, seasons: 8 })
+  assert.deepEqual(s.winningestManager, { id: 112736, name: 'Craig Counsell', w: 707, l: 625, seasons: 9 })
   assert.equal(s.managersFrom, 1969)
 })
 
