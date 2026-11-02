@@ -160,6 +160,10 @@ const TeamTransactionsPage = lazyNamed(
   () => import('./screens/team/TeamTransactionsPage.jsx'),
   'TeamTransactionsPage',
 )
+const TeamFranchisePage = lazyNamed(
+  () => import('./screens/team/franchise/TeamFranchisePage.jsx'),
+  'TeamFranchisePage',
+)
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
 const OutliersPage = lazyNamed(() => import('./screens/outliers/OutliersPage.jsx'), 'OutliersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
@@ -339,6 +343,7 @@ const ID_ROUTES = {
   'team-stamp-in': StampInPage,
   'team-photos': TeamPhotosPage,
   'team-transactions': TeamTransactionsPage,
+  'team-franchise': TeamFranchisePage,
 }
 
 // Top-level router over the History API (no react-router — see lib/route.js).

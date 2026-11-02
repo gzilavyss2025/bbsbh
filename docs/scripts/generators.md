@@ -1659,9 +1659,15 @@ Re-run only to fold in a new season.
   a request. Matches on `stat.age` (June 30 rule), not season count. A traded season counts once: the
   team-less `numTeams > 1` roll-up row is used instead of the stints. Negro League seasons come back
   as MLB. Rows are dense from the first age (an age with no season repeats the one before). Hitters
-  `[h, hr]`, pitchers `[w, so, outs, sv]`. No WAR here: the card reads it from `war-history/`.
+  `[h, hr, war]`, pitchers `[w, so, outs, sv, war]`. WAR (#2765) is read from the committed
+  `war-history/` shards, so run `gen-war-history.mjs` first when a season is added; it is cumulative,
+  in tenths, and null for the 43 careers that began before 1901 (never a WAR comp).
+  **Yearly refresh** (early August, after the induction): run `npm run gen:hof-pace`; check the
+  new class is in the file and the count grew by its players; spot-check one new inductee's
+  line against the API by hand; open a PR. The card (`screens/player/next/modules/hofpace/`)
+  needs no change. Retired players' lines never change, so a skipped year only misses the class.
   The pure half (age cumulation, the roll-up rule) is `lib/hof/pace.mjs`, tested by `test/hof-pace.test.js`.
-  About 83 KB, 31 KB gzipped. Checked by hand: Mays through age 24 is 547 H, 116 HR in both the
+  About 104 KB, 38 KB gzipped. Checked by hand: Mays through age 24 is 547 H, 116 HR in both the
   file and the summed API rows (1948 Birmingham included).
 - `gen-savant-history.mjs` → `public/data/savant-history/{NN}.json` (player-keyed,
   bucketed on `personId % 100` via `shardKey100`) — Savant `percentile-rankings`

@@ -1,6 +1,6 @@
 # Spec: Hall of Fame pace check on the player page
 
-Status: draft, waiting on Gary. Nothing here is built. Source idea: ScriMLB
+Status: built (#1857). Slices 1–2: #2462, #2468; slices 3–4: #2762. WAR row: #2765. Source idea: ScriMLB
 (`docs/peer-sites.md`), which compares a player with about 17 hand-picked
 greats using hardcoded numbers. This spec uses a sourced pool instead.
 

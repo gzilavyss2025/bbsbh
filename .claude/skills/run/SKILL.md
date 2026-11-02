@@ -35,8 +35,9 @@ has not run.
 
 When Gary asks for e2e, scope it to the change: one spec (or `-g "name"`), one
 `--project` when the check doesn't care about breakpoint (most don't — see
-below). Run the full `npm run e2e` (all specs × all three projects) only when
-Gary asks for the full suite.
+below). Run the full `npm run e2e` (all specs × mobile and desktop) only when
+Gary asks for the full suite, and `npm run e2e:all` (adds iPad) only when he
+asks for every breakpoint.
 
 **Never troubleshoot a failing run by going headed (`--headed`, `--debug`,
 `--ui`) or reaching for an interactive/computer-use browser tool.** Nothing in
@@ -95,11 +96,10 @@ npx playwright test -g "innings viewer"       # by test name
 npx playwright test --project=mobile          # one breakpoint only
 ```
 
-Three projects — `mobile` (iPhone 13), `ipad` (iPad gen 7), `desktop`
-(1280×720) — all forced onto Chromium regardless of the device preset's
-default engine (only Chromium's binary is cached here). Running with no
-`--project` flag runs every spec against all three, which is the default for
-`npm run e2e`; scope to one project when the check doesn't care about
+Three projects — `mobile` (iPhone 13), `desktop` (1280×720), and `ipad`
+(iPad gen 7, only under `npm run e2e:all` / `E2E_ALL=1`) — all forced onto
+Chromium regardless of the device preset's default engine. Running with no
+`--project` flag runs every spec against mobile and desktop; scope to one project when the check doesn't care about
 layout/breakpoint (740px is the one wide step, ADR-0108; its rules are in
 `styles/25-wide-layout.css` — mobile is below it, ipad/desktop are above it).
 

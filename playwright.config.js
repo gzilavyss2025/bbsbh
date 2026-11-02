@@ -20,6 +20,12 @@ import { defineConfig, devices } from '@playwright/test'
 // run starts a server on the same port rather than colliding on 5173 (vite's
 // strictPort would refuse).
 const PORT = Number(process.env.E2E_PORT) || 5173
+// Cloud containers ship a preinstalled Chromium that may not match this
+// project's Playwright build; point at it instead of pinning a version
+// (issue #2751, docs/testing.md).
+export const cloudLaunch = process.env.CLAUDE_CODE_REMOTE
+  ? { executablePath: '/opt/pw-browsers/chromium' }
+  : {}
 export default defineConfig({
   testDir: './e2e',
   // Warms the cold dev server before the first test; see e2e/global-setup.js.
@@ -36,22 +42,30 @@ export default defineConfig({
     // pre-cached here — avoids a browser download just to run a quick
     // verification pass.
     browserName: 'chromium',
+    launchOptions: cloudLaunch,
   },
-  // Three breakpoints: phone-first is the primary target, but the app also
-  // has a wider layout (see the `min-width: 740px` rule in index.css) that
-  // iPad/desktop sizes exercise. `npm run e2e` runs a spec against all
-  // three; pass `--project=mobile` (etc.) to check just one.
+  // Phone-first is the primary target, but the app also has a wider layout
+  // (see the `min-width: 740px` rule in index.css). `npm run e2e` runs mobile
+  // and desktop; iPad (the one wide + touch project) joins only for
+  // `npm run e2e:all` (or E2E_ALL=1). Pass `--project=mobile` (etc.)
+  // to check just one.
   //
   // e2e/invariants/** tests the spoiler-reveal mechanism itself, which is
   // viewport-independent — ipad/desktop skip it so tripling those specs
   // doesn't just triple runtime for no coverage gain.
   projects: [
     { name: 'mobile', use: { ...devices['iPhone 13'], browserName: 'chromium' } },
-    {
-      name: 'ipad',
-      use: { ...devices['iPad (gen 7)'], browserName: 'chromium' },
-      testIgnore: /invariants[\\/]/,
-    },
+    // npm sets npm_lifecycle_event to the script name, so `npm run e2e:all`
+    // needs no env prefix (POSIX `VAR=1 cmd` fails under Windows cmd).
+    ...(process.env.E2E_ALL || process.env.npm_lifecycle_event === 'e2e:all'
+      ? [
+          {
+            name: 'ipad',
+            use: { ...devices['iPad (gen 7)'], browserName: 'chromium' },
+            testIgnore: /invariants[\\/]/,
+          },
+        ]
+      : []),
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'], browserName: 'chromium' },

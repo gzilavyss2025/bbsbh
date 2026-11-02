@@ -1084,6 +1084,15 @@ for each generator; the reader modules:
   empty before 1969, and a shared season's carry no w/l), `postseason` (`{ round, won }` or null:
   the highest round the club reached) and `note` ("split season" 1981, "strike" 1994, "60-game
   season" 2020). Keyed by the current team id. MLB only; a MiLB id reads empty. No screen reads it yet.
+- `history/franchiseSummary.js` — a club's franchise summary (#2600), no file of its own: derived from
+  `franchiseLedger` and `pennantsFor`. `franchiseSummary(teamId)` returns `{ teamId, through, names:
+  [{ name, from, to }], seasons: { from, to, count }, record: { w, l }, postseasons: [season], titles:
+  [season], pennants, winningestManager: { id, name, w, l, seasons } | null, managersFrom }`. The
+  record and counts stop at the ledger's `through`; `pennants` is `pennantsFor` as is, so it can hold
+  the current season. Winningest manager: most wins summed over the seasons a manager had alone
+  (a shared season counts only once `manager-transitions-seed.json` splits it), ties to fewer
+  losses; `managersFrom` is the first season with manager data (1969), so the screen says "since".
+  158 reads Craig Counsell 707-625, as B-R does. No screen reads it yet.
 - `history/playedForBoth.js` — everyone who appeared in an MLB game for each of two clubs, from
   `public/data/played-for-both/{a}-{b}.json` (hand-run `gen-played-for-both.mjs`, #2579), ids
   ascending like `former-teammates`. `playedForBoth(teamIdA, teamIdB)` returns `{ credit,
