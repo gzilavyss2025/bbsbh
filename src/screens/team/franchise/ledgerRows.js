@@ -74,9 +74,15 @@ const POST_ROUND = { F: 1, D: 2, L: 3, W: 4 }
 // round; it is decided once a side has more than half of `gamesInSeries`.
 function furthestSeries(games, teamId) {
   const series = new Map()
+  const seen = new Set()
   for (const gm of games) {
     const round = POST_ROUND[gm.gameType]
     if (!round) continue
+    // A suspended game is listed on its first date and again on the day it resumed: count it once.
+    if (gm.gamePk != null && gm.status?.abstractGameState === 'Final') {
+      if (seen.has(gm.gamePk)) continue
+      seen.add(gm.gamePk)
+    }
     const mine = gm.teams.home.team.id === teamId ? gm.teams.home : gm.teams.away
     const other = mine === gm.teams.home ? gm.teams.away : gm.teams.home
     const key = `${round}-${other.team.id}`
@@ -92,14 +98,22 @@ function furthestSeries(games, teamId) {
 const games = (v) => (v == null || v === '-' || v === '' ? 0 : Number(v))
 const rank = (v) => (v == null || v === '' ? null : Number(v))
 
+// The club's standings record in `records`, or null when it has played no game yet.
+export function clubRecord(records, teamId) {
+  const t = (records ?? []).flatMap((r) => r.teamRecords ?? []).find((x) => x.team?.id === teamId)
+  return t && t.wins + t.losses > 0 ? t : null
+}
+
 // A season the stored ledger does not hold yet, read live: `records` from standings
 // (regularSeason), `dates` from the club's own schedule for the season (regular season and
-// postseason), `manager` from fetchManager. Null before the club's first game. `inProgress` while
+// postseason), `manager` from fetchManager. Null before the club's first game, and null when the
+// schedule could not be read (`dates` null): without it the row cannot say whether the season is
+// over or how far the club went, and a missing row is better than a wrong one. `inProgress` while
 // any game of the club's is not final: once its last game is, the row reads like any other.
 export function liveRow({ teamId, season, name, records, dates, manager }) {
-  const t = (records ?? []).flatMap((r) => r.teamRecords ?? []).find((x) => x.team?.id === teamId)
-  if (!t || t.wins + t.losses === 0) return null
-  const all = (dates ?? []).flatMap((d) => d.games ?? [])
+  const t = clubRecord(records, teamId)
+  if (!t || dates == null) return null
+  const all = dates.flatMap((d) => d.games ?? [])
   return {
     season,
     name,

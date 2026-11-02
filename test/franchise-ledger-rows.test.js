@@ -141,3 +141,15 @@ test('liveRow: no manager on file reads an empty list', () => {
   const r = liveRow({ ...base, manager: null, records: standings(1, 0), dates: [] })
   assert.deepEqual(r.managers, [])
 })
+
+test('liveRow: a schedule that could not be read (null) drops the row rather than guessing', () => {
+  assert.equal(liveRow({ ...base, records: standings(103, 59), dates: null }), null)
+})
+
+test('liveRow: a game listed twice (suspended, then resumed) counts once', () => {
+  const ws = (pk, awayWon) => ({ ...g('W', 'World Series', 158, 147, awayWon), gamePk: pk })
+  // 3-1 in a best of seven, with game 4 listed on both its dates: not decided yet
+  const dates = [{ games: [ws(1, true), ws(2, true), ws(3, false), ws(4, true)] }, { games: [ws(4, true), { ...ws(5, true), status: { abstractGameState: 'Preview' } }] }]
+  const r = liveRow({ ...base, records: standings(103, 59), dates })
+  assert.deepEqual(r.postseason, { round: 'World Series', won: null })
+})
