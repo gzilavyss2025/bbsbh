@@ -16,9 +16,12 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - P and T keep the wide tiers' side columns as rails (Gary, 2026-10-27): the Due up slides in from the
   left and the arm from the right, by an edge tab or a sideways swipe off the bar; the scrim or Escape
   closes one, and each fetches nothing until first opened. On those tiers the Menu drops the batting order.
-- The old half page is mounted `hidden` as the engine: it reports the live snapshot (band), the
-  step cursor and the runs so far, and its page turn moves halves. Rebuilding the engine is what
-  lets it go; until then its parts stay (`components/inning/`, `styles/focus/`).
+- `engine/GamedayEngine.jsx` draws nothing (#2747). It reports the live snapshot (band), the step cursor,
+  the runs so far, the trail and the half commit up to InningViewer, from `api/gameday/engine/` (`halfReport`,
+  `engineLive`). The parent reports the spoiler-free entering baseline; its one SealBox mounts `EngineReport`,
+  whose four effects keep PlayByPlay's count-based dependencies (never `entries`). A forward half move is
+  `goTo` and waits only for `focus.closing` (`forwardAdvance`); the page turn is gone. The old half page's
+  files stay until the deletion PR.
 - Gary's calls this shell keeps: the band uses the score bug's tiles and type; the batting view and zone map stay
   up through playback (a pitch never blanks them), and have a per-game dismiss; a switch hitter stands opposite the
   pitcher's hand; the hero's due-up hides under the checkpoint; the checkpoint's due-up names an

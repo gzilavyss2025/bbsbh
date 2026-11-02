@@ -145,7 +145,7 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`. Gameday's pitch mode and event taps step sub-steps inside a step on the same cursor: ADR-0123. Notation (#2575): a pickoff caught stealing is `PKCS 1-3`, out on the path to the stolen base; an error right after a steal credits no batter slot.
 - **Gameday** (ADR-0043's 2026-10-27 amendment, `src/screens/gameday/next/CLAUDE.md`): one
   window that never scrolls; the band (`ScorebugMount`'s clamp), stage, hero and bar never fold.
-  The old half page runs `hidden` as the engine, so its seals still gate what the shell reads.
+  `screens/gameday/next/engine/GamedayEngine.jsx` is the engine and the **only engine seal**: one SealBox that draws nothing; every `halfReport`/`engineLive` read of the half's plays runs inside it.
   Gary's #22 rules (every #22 field as penciled, pitch marks numbers and X, no "Rest of half", …)
   are listed in that amendment; do not regress them.
 - **One opt-in departure** rides through `InningViewer` without touching its guarantees:

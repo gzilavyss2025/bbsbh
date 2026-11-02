@@ -11,8 +11,8 @@ import { useTier } from './useTier.js'
 import { ScrollCue } from './ScrollCue.jsx'
 
 // The Gameday page (ADR-0043's 2026-10-27 amendment): a fixed no-scroll frame whose blocks the
-// window's tier places (lib/gameday/ladder.js). `engine` is the old half page, mounted hidden so
-// the reveal flow, the live snapshot and the step cursor keep running.
+// window's tier places (lib/gameday/ladder.js). `engine` is GamedayEngine, which draws nothing: it
+// keeps the live snapshot, the step cursor and the half commit reported.
 // Blocks a panel fills; a stage or hero slot with nothing to draw yet shows its name.
 const PANELLED = new Set(['navigator', 'trail', 'battingOrder', 'reference', 'arm', 'eventLog'])
 
@@ -253,7 +253,7 @@ export function GamedayNextPage({ sectionNav, band, panels, stage, hero, engine,
           </aside>
         </>
       )}
-      <div hidden>{engine}</div>
+      {engine}
       {sheet === 'box' && <BoxSheet ctx={panels} onClose={() => setSheet(null)} onFull={onBoxScore ? () => { setSheet(null); onBoxScore() } : null} />}
       {sheet === 'wp' && <WinProbSheet ctx={panels} onClose={() => setSheet(null)} />}
       {menu && (
