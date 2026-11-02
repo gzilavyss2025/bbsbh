@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { selectPrePitchChanges, selectHalfStartingPitcher, selectIsFreshPitcher, selectVenueRef, halfIndex } from '../../api/select.js'
 import { computePitcherLines, pitcherHandoffs, pitcherLineAt, halfClosingPitcher } from '../../api/pitchers.js'
-import { battingSlot, pitchingChangePitcher } from '../../api/playbyplay.js'
-import { selectDueUpNow } from '../../api/dueup.js'
-import { preGameAvg, computeBatterLine } from '../../api/boxscore.js'
+import { composeLive as composeLiveFrom, enteringPitchesFor } from '../../api/gameday/engine/engineLive.js'
 import { highlightsByPlayId } from '../../api/highlights.js'
 import { selectBattedBalls } from '../../api/hitchart.js'
 import { ordinal } from '../../lib/format.js'
@@ -19,7 +17,6 @@ import { BatterNotice } from '../playbyplay/BatterNotice.jsx'
 import { FinalizedLineCard } from '../playbyplay/PitcherHandoffCard.jsx'
 import { UpNextBatters } from '../playbyplay/dueup/UpNextBatters.jsx'
 import { useBecameTrue } from '../../hooks/motion/useBecameTrue.js'
-import { liveAtThirdOut } from '../../lib/scorebug/liveState.js'
 
 export function HalfInning({
   feed,
@@ -194,9 +191,7 @@ export function HalfInning({
     () => computePitcherLines(feed, halfIndex(inning, half) - 1),
     [feed, inning, half],
   )
-  const enteringPitches = nowPitching
-    ? [...enteringPitchLines.away, ...enteringPitchLines.home].find((r) => r.id === nowPitching.id)?.pitches
-    : null
+  const enteringPitches = enteringPitchesFor(enteringPitchLines, nowPitching)
   const entering =
     enteringPitches != null ? { pitches: enteringPitches, halfLabel: `the start of the ${ordinal(inning)}` } : null
 
@@ -271,67 +266,8 @@ export function HalfInning({
   // (deliberately not carrying forward an earlier stint's count — see
   // deriveLiveState's own doc).
   const hasContent = revealed || isNextToReveal
-  const battingLineFor = (id) => {
-    const box = feed?.liveData?.boxscore?.teams?.[battingSide]?.players?.[`ID${id}`]
-    if (!box) return null
-    // Reveal-gated, NOT box.stats.batting (the always-live true line — see
-    // computeBatterLine's doc for why reading that directly here would show
-    // a batter's actual current-game at-bats before the user has revealed
-    // any of them, e.g. "0-5" before his first plate appearance of the night).
-    const { hits, atBats } = computeBatterLine(feed, id, revealedThrough)
-    if (atBats > 0 || hits > 0) return `${hits}-${atBats}`
-    return preGameAvg(box)
-  }
-  const composeLive = (live) => {
-    const bases = live?.bases ?? { first: false, second: false, third: false }
-    const outs = live?.outs ?? 0
-    let batter = null
-    // Once the last visible at-bat has actually FINISHED (batterDone — false
-    // only for a mid-count stoppage, where the same guy is still up) and the
-    // half isn't over, the "current" batter is whoever's next in the order,
-    // not the one who just finished (e.g. showing the batter who just
-    // doubled forever instead of advancing to the next slot).
-    //
-    // NOT WHILE WINDOWED, where that same advance is a contradiction. The
-    // whole screen is built around ONE at-bat card, and the band sits directly
-    // above it: the hero named ABRAMS while the band beside it said
-    // "2. ORTIZ", who has not batted. The scorebug's job there is to caption
-    // the card under it, and who's up next is already answered — in more
-    // detail, with three names — by DueUpConsole in the same row (which shows
-    // only while `currentSealed`). The pitch count is
-    // untouched either way: it stays the tally AFTER the at-bat on screen
-    // finished, which is what a scorer writes down.
-    if (!windowed && live?.batter && live.batterDone && outs < 3) {
-      const finishedSlot = battingSlot(feed, battingSide, live.batter.id)
-      const nextSlot = finishedSlot != null ? (finishedSlot >= 9 ? 1 : finishedSlot + 1) : null
-      const upcoming =
-        nextSlot != null
-          ? selectDueUpNow(feed, inning, half, revealedThrough, 9)?.batters?.find((b) => b.slot === nextSlot)
-          : null
-      if (upcoming) batter = { order: upcoming.slot, last: upcoming.last, line: battingLineFor(upcoming.id) }
-    }
-    if (!batter && live?.batter) {
-      const slot = battingSlot(feed, battingSide, live.batter.id)
-      batter = { order: slot ?? '', last: live.batter.last, line: battingLineFor(live.batter.id) }
-    } else if (!batter) {
-      const due = selectDueUpNow(feed, inning, half, revealedThrough, 1)?.batters?.[0]
-      if (due) batter = { order: due.slot, last: due.last, line: battingLineFor(due.id) }
-    }
-    let pitcher = null
-    if (live?.midHalfPitcherId != null) {
-      const p = pitchingChangePitcher(feed, live.midHalfPitcherId)
-      if (p) pitcher = { last: p.name.split(',')[0], pitches: live.pitchesSoFar ?? 0 }
-    } else if (nowPitching) {
-      pitcher = { last: nowPitching.name.split(',')[0], pitches: (enteringPitches ?? 0) + (live?.pitchesSoFar ?? 0) }
-    }
-    // The 3rd out is revealed and the reader has not navigated on: see liveAtThirdOut.
-    const last = live?.last ?? null // Gameday's hero keeps the last result
-    // Gameday's Pitcher rail and stage read the revealed mid-half change by id (InningViewer's
-    // panels, GamedayNextMount's `reliever`); dropped here, the rail named the starter all half.
-    const midHalfPitcherId = live?.midHalfPitcherId ?? null
-    if (outs >= 3) return { ...liveAtThirdOut({ batter, pitcher, inning, half }), last, midHalfPitcherId }
-    return { bases, outs, batter, pitcher, inning, half, last, midHalfPitcherId }
-  }
+  const composeLive = (live) =>
+    composeLiveFrom(live, { feed, inning, half, battingSide, revealedThrough, windowed, nowPitching, enteringPitches })
 
   // The entering-state fallback: fires once (and again on any dep change)
   // for as long as PlayByPlay hasn't mounted yet (`!startedRevealing`).
