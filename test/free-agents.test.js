@@ -71,6 +71,14 @@ test('maps a signed row with its new club and a cleaned note', () => {
   assert.equal(r.war, null)
 })
 
+test('a signing back with the same club is a re-signing', () => {
+  const r = mapFreeAgent({ ...signed, newTeam: { id: 111, name: 'Boston Red Sox' } })
+  assert.equal(r.signed, true)
+  assert.equal(r.resigned, true)
+  assert.equal(mapFreeAgent(signed).resigned, false)
+  assert.equal(mapFreeAgent(unsigned).resigned, false)
+})
+
 test('a signed date with no new club id is not a signing', () => {
   const r = mapFreeAgent({ ...signed, newTeam: { link: '/api/v1/teams/null' } })
   assert.equal(r.signed, false)

@@ -61,6 +61,8 @@ export function mapFreeAgent(row, { war } = {}) {
     newTeamId: signed ? newTeamId : null,
     newTeamName: signed ? (row?.newTeam?.name ?? '') : '',
     signed,
+    // Back with the club he left (an exercised option, a quick re-sign).
+    resigned: signed && newTeamId === (row?.originalTeam?.id ?? null),
     dateDeclared: row?.dateDeclared ?? null,
     dateSigned: signed ? row.dateSigned : null,
     minor: rawNote === MINOR_LEAGUE_NOTE,

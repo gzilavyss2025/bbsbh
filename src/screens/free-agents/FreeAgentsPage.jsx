@@ -158,7 +158,14 @@ function FreeAgentRow({ row: r, deal, season }) {
         <span className="fa__pos">{r.pos || DASH}</span>
       </span>
       <span className="fa__status" role="cell">
-        {r.signed ? (
+        {r.resigned ? (
+          <>
+            <span className="fa__tag fa__tag--signed">Re-signed</span>
+            <TeamLogo teamId={r.teamId} name={r.teamName} size={20} />
+            <span className="sr-only">with {r.teamName}</span>
+            <span className="fa__date">{monthDayName(r.dateSigned)}</span>
+          </>
+        ) : r.signed ? (
           <>
             <span className="fa__tag fa__tag--signed">Signed</span>
             <TeamLogo teamId={r.teamId} name={r.teamName} size={20} />
