@@ -1,7 +1,7 @@
 # api — the Vercel functions
 
-**Fourteen Vercel functions live in `api/`**, each inert when unconfigured;
-**thirteen never render or fetch a score.** Root `CLAUDE.md` keeps the count and the
+**Fifteen Vercel functions live in `api/`**, each inert when unconfigured;
+**fourteen never render or fetch a score.** Root `CLAUDE.md` keeps the count and the
 three phrases `scripts/check-claude-md-facts.mjs` checks, so change both together.
 
 - `preview.js` + `_lib/cards.js` — link previews. They render Open Graph cards, failing
@@ -28,6 +28,8 @@ three phrases `scripts/check-claude-md-facts.mjs` checks, so change both togethe
 - `crash.js` + `src/lib/crash/` — the crash signal (#2514). A beacon of four allowlisted
   values (kind, route name, status, build) becomes one `bbsbh-crash` line in the runtime logs.
   The same builder re-checks it server-side; no score, id or URL is ever logged.
-- **The fourteenth stores a score, by design**: the Game Log's stamps (`stamps.js`,
+- `cron/nightly-dispatch.js` — the nightly data trigger. A Vercel cron at 08:17 UTC asks GitHub to run
+  `update-nightly-data.yml` (`trigger: cron`); the job stays in Actions (ADR-0125).
+- **The fifteenth stores a score, by design**: the Game Log's stamps (`stamps.js`,
   `src/lib/stamps.js`). That is safe because of WHERE stamp art may render
   (`check-stamp-surfaces`), not a mint-time check (ADR-0035). Voice: `docs/game-log.md`.

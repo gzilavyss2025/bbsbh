@@ -90,7 +90,14 @@ on:
     # The "Wait for yesterday's slate" step below still backs off hourly if
     # a late West Coast game is in progress.
     - cron: '17 8 * * *'
-  workflow_dispatch: {}
+  # The Vercel cron (api/cron/nightly-dispatch.js, ADR-0125) dispatches with trigger: cron, which the gate
+  # treats like this schedule. A hand dispatch leaves it at 'hand' and never skips.
+  workflow_dispatch:
+    inputs:
+      trigger:
+        description: "'cron' when the Vercel cron dispatched it; a hand run never skips"
+        required: false
+        default: hand
 
 permissions:
   contents: write
@@ -99,7 +106,7 @@ jobs:
   # The nightly Claude routine dispatches this workflow about an hour after the
   # last game goes Final (2026-10-09), usually BEFORE this cron fires. A second
   # full run would rewrite every generatedAt stamp, commit, and deploy again,
-  # so a SCHEDULED run skips when another run is in flight or succeeded in the
+  # so a SCHEDULED run (or the Vercel cron's dispatch, trigger: cron) skips when another run is in flight or succeeded in the
   # last 18 hours. A hand dispatch never skips: the maintainer dispatches after
   # a merge to pick up a new generator, and that must always run. 18 hours sits
   # under check-data-freshness.mjs's 20-hour budget. If the API call fails, the
@@ -115,11 +122,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           EVENT: ${{ github.event_name }}
+          TRIGGER: ${{ inputs.trigger }}
           RUN_ID: ${{ github.run_id }}
           REPO: ${{ github.repository }}
         run: |
           skip=false
-          if [ "$EVENT" = "schedule" ]; then
+          if [ "$EVENT" = "schedule" ] || [ "$TRIGGER" = "cron" ]; then
             cutoff="$(date -u -d '18 hours ago' +%Y-%m-%dT%H:%M:%SZ)"
             recent="$(gh api "repos/$REPO/actions/workflows/update-nightly-data.yml/runs?per_page=10" \
               | jq --arg id "$RUN_ID" --arg cutoff "$cutoff" \

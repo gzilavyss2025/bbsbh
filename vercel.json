@@ -5,6 +5,7 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "ignoreCommand": "scripts/vercel-ignore-build.sh",
+  "crons": [{ "path": "/api/cron/nightly-dispatch", "schedule": "17 8 * * *" }],
   "git": {
     "deploymentEnabled": {
       "dependabot/**": false
