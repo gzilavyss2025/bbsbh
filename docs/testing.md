@@ -86,6 +86,14 @@ which the unit suite can't reach because `SealBox` is a `.jsx` component. When
 Gary asks for them, run them against a live or recent game;
 `docs/test-games.md` lists gamePks with rare events.
 
+**Cloud sessions.** When `CLAUDE_CODE_REMOTE` is set, `playwright.config.js`
+(and the visual config, through its `cloudLaunch` export) launches the
+container's preinstalled Chromium at `/opt/pw-browsers/chromium`, so
+`npm run e2e` runs with no shim even if `@playwright/test` and that build drift
+apart. Do not pin the Playwright version to match, and do not run
+`playwright install`. Local runs are unchanged: no `executablePath`, the
+Playwright-managed browser.
+
 `e2e/tab-clearance.spec.js` is the one layout check here: on the slate and five static pages, at
 the phone, iPad and desktop widths, no name tab may sit within 8px of the card above it (its
 shadow counts). It catches a card that overruns its cell or loses its tab margin, whatever the
