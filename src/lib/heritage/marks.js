@@ -22,7 +22,9 @@ export async function secondaryLogoSvg(teamId, sourceVariant, loadSvg) {
 
 // Share lookups by club across passes. fetchSvg rejects with `missing: true` for a
 // variant the CDN does not have; that answer, and a club's null result, stay cached
-// for the session. Any other rejection (offline, timeout) is dropped so it retries.
+// for the session. Any other rejection (offline, timeout) is dropped so it retries,
+// and so is the club's result, even a later variant's mark: else a timed-out cap
+// pins the wordmark for the session (#2742).
 export function secondaryMarkCache(fetchSvg) {
   const sources = new Map()
   const marks = new Map()
@@ -44,7 +46,7 @@ export function secondaryMarkCache(fetchSvg) {
         throw error
       })
       marks.set(key, secondaryLogoSvg(teamId, sourceVariant, track).then((svg) => {
-        if (!svg && transient) marks.delete(key)
+        if (transient) marks.delete(key)
         return svg
       }))
     }
