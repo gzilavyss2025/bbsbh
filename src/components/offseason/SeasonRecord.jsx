@@ -120,12 +120,12 @@ export function SeasonRecord({ sportId, season, dateStr }) {
   )
 }
 
-// The MLB record's three doors. Beside a champion they sit under the
-// countdown, in the hero's side column; otherwise inside the record's card.
-export function RecordDoors({ className = '' }) {
+// The MLB record's three doors, stacked under the countdown in the hero's
+// side column (OffseasonLead.jsx).
+export function RecordDoors() {
   const linkProps = useRouteLink()
   return (
-    <Cluster gap="base" className={`srecord__doors ${className}`.trim()}>
+    <Cluster gap="base" className="ohero__doors">
       <a className="door door--boxed door--stamped srecord__door" {...linkProps('/standings')}>
         Final standings
       </a>
