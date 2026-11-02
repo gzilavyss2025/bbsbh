@@ -59,6 +59,7 @@ export const SLOTS = [
   { id: 'fouls', module: 'fouls', section: 'game-log', label: 'Foul balls', minH: [840, 460], roles: H, twin: true, load: () => import('./modules/fouls/index.jsx') },
   { id: 'similar', module: 'similar', section: 'game-log', label: 'Similar players', minH: [360, 340], roles: HP, load: () => import('./modules/similar/index.jsx') },
   { id: 'milestones', module: 'milestones', section: 'game-log', label: 'Milestone watch', minH: [0, 0], roles: HP, load: () => import('./modules/milestones/index.jsx') },
+  { id: 'hofpace', module: 'hofpace', section: 'game-log', label: 'Hall of Fame pace', minH: [0, 0], roles: HP, load: () => import('./modules/hofpace/index.jsx') },
   { id: 'tbd-gamelog', module: 'tbd', section: 'game-log', label: 'More game log', minH: [0, 0], roles: HP, load: () => import('./modules/tbd/index.jsx') },
   { id: 'arsenal', module: 'arsenal', section: 'pitches', label: 'Pitch arsenal', minH: [1720, 1180], roles: P, load: () => import('./modules/arsenal/index.jsx') },
   { id: 'mound', module: 'mound', section: 'on-the-mound', label: 'On the mound', minH: [700, 620], roles: P, load: () => import('./modules/mound/index.jsx') },

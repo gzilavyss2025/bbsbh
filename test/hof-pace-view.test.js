@@ -70,3 +70,25 @@ test('under a cutoff, seasons after the cutoff season are dropped', () => {
   assert.equal(v.age, 21)
   assert.equal(v.value, 7)
 })
+
+// WAR: hitters' column 2, pitchers' column 4; null = a pre-1901 career, never a comp.
+const warPool = [
+  hof(11, 20, [[0, 0, 1], [0, 0, 3], [0, 0, 9]]),
+  hof(12, 20, [[0, 0, 1], [0, 0, 2], [0, 0, 5]]),
+  hof(13, 20, [[0, 0, null], [0, 0, null], [0, 0, null]]),
+]
+const warBySeason = { 2020: 1, 2021: 2, 2022: 3.04 }
+
+test('WAR: his total from the season map; pre-1901 Hall of Famers are never comps', () => {
+  const v = hofPaceView({ players: warPool, splits: base, group: 'hitting', stat: 'war', war: warBySeason })
+  assert.equal(v.value, 6)
+  assert.deepEqual(v.comps.map((c) => c.id), [11, 12])
+})
+
+test('WAR: no row under a ?d= cutoff, with no WAR map, or for a career that began before 1901', () => {
+  const cutoff = { season: 2022, stat: { homeRuns: 1 } }
+  assert.equal(hofPaceView({ players: warPool, splits: base, group: 'hitting', stat: 'war', war: warBySeason, cutoff }), null)
+  assert.equal(hofPaceView({ players: warPool, splits: base, group: 'hitting', stat: 'war' }), null)
+  const old = [season(1899, 20, 1), season(1900, 21, 1)]
+  assert.equal(hofPaceView({ players: warPool, splits: old, group: 'hitting', stat: 'war', war: { 1899: 1, 1900: 1 } }), null)
+})
