@@ -9,7 +9,11 @@ import { hofPaceRows } from './hofpaceView.js'
 let pool = null
 const loadPool = () =>
   (pool ??= fetch('/data/hof-pace.json')
-    .then((r) => (r.ok ? r.json() : { players: [] }))
+    .then((r) => {
+      if (!r.ok) throw new Error(`hof-pace.json ${r.status}`)
+      return r.json()
+    })
+    // A failed load is not cached: the next player page tries again.
     .catch(() => ((pool = null), { players: [] })))
 
 // `fetchStats` and `load` are seams for the test.
