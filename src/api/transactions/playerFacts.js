@@ -12,6 +12,8 @@ import { getJson } from '../statsapi.js'
 import { fetchPlayerContract } from '../person/contracts.js'
 import { fetchTopProspects } from '../prospects.js'
 import { FULL_SEASON } from './templates.js'
+import { isMlbTeamId } from '../../lib/teams.js'
+import { shiftDays } from '../../lib/time/standingsDates.js'
 
 const HYDRATE = 'transactions,draft,stats(group=[hitting,pitching],type=[yearByYear,career],sportId=1)'
 // The moves that bring a player to a club, and the words for each.
@@ -41,11 +43,18 @@ function shapeLine(stat, pitcher) {
       }
 }
 
-// The raw /people record, its contract row and the season the move speaks
-// for, shaped into the facts the templates read. Pure, so it is tested on
-// captured records (test/wire-templates.test.js).
-// The levels a minor-league line names, by the feed's sport abbreviation.
-const LEVELS = { AAA: 'Triple-A', AA: 'Double-A', 'A+': 'High-A', A: 'Single-A', ROK: 'rookie ball' }
+// The minor-league levels by the feed's sport abbreviation, as a sentence
+// names them and as the sheet's table marks them. Older seasons write High-A
+// and Single-A as 'A(Adv)' and 'A(Full)'.
+const LEVELS = {
+  AAA: ['Triple-A', 'AAA'],
+  AA: ['Double-A', 'AA'],
+  'A+': ['High-A', 'A+'],
+  'A(Adv)': ['High-A', 'A+'],
+  A: ['Single-A', 'A'],
+  'A(Full)': ['Single-A', 'A'],
+  ROK: ['rookie ball', 'ROK'],
+}
 
 // His season in the minors, from the milb_all stats read: the whole season
 // (the read's own "Minors" total row), the levels he pitched or hit at,
@@ -58,7 +67,7 @@ export function shapeMinors(splits, pitcher) {
   // one-level season has only its level's.
   const loose = (splits ?? []).filter((s) => !s.team)
   const total = loose.find((s) => s.sport?.abbreviation === 'Minors') ?? (loose.length === 1 ? loose[0] : rows[0])
-  const levels = [...new Set(rows.map((s) => LEVELS[s.sport?.abbreviation]).filter(Boolean))].sort(
+  const levels = [...new Set(rows.map((s) => LEVELS[s.sport?.abbreviation]?.[0]).filter(Boolean))].sort(
     (a, b) => LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b),
   )
   return {
@@ -80,6 +89,9 @@ export function prospectOf(snapshot, playerId) {
   return org ? { rank: org.orgRank, teamId: org.teamId } : null
 }
 
+// The raw /people record, its contract row and the season the move speaks
+// for, shaped into the facts the templates read. Pure, so it is tested on
+// captured records (test/wire-templates.test.js).
 export function shapeFacts(person, { contract = null, season, teamId = null, minors = null, prospects = null } = {}) {
   if (!person) return null
   const pitcher = person.primaryPosition?.code === '1'
@@ -112,12 +124,39 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
       return { season: year, line: shapeLine(row.stat, pitcher) }
     })
 
-  const moves = person.transactions ?? []
+  // Oldest first: the feed's row order is not stable, and every lookup below
+  // (the latest arrival, the stint before this one) reads by position.
+  const moves = [...(person.transactions ?? [])].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
   // An injured-list stint in the season: the 60-day list says he lost most of it.
+  // A farm club's own injured list ("Syracuse Mets placed RHP X on the 7-day
+  // injured list") is not a big-league stint; the row's club is its toTeam.
+  const bigLeagueIl = (t) =>
+    t.typeCode === 'SC' && /injured list/i.test(t.description ?? '') && (t.toTeam?.id == null || isMlbTeamId(t.toTeam.id))
   const ilMoves = moves.filter(
-    (t) => t.typeCode === 'SC' && /placed/i.test(t.description ?? '') && /injured list/i.test(t.description ?? '') && t.date?.startsWith(String(season)),
+    (t) => bigLeagueIl(t) && /placed/i.test(t.description ?? '') && /injured list/i.test(t.description ?? '') && t.date?.startsWith(String(season)),
   )
   const injured = ilMoves.some((t) => /60-day/i.test(t.description)) ? 'long' : ilMoves.length ? 'some' : null
+  // Each stint this season: placed (from the effective date, which a
+  // retroactive placement sets back), the feed's own injury note, and the day
+  // he came off. A transfer to the 60-day list stays inside its stint.
+  const stints = []
+  for (const t of moves.filter((m) => m.date?.startsWith(String(season)))) {
+    if (!bigLeagueIl(t)) continue
+    if (/placed/i.test(t.description)) {
+      // A placement while a stint is still open is the same stint filed again,
+      // as a traded player's new club does (Rutschman, Aug. 3, 2026).
+      const open = stints.find((x) => !x.to)
+      if (open) {
+        open.filings.push(t.date)
+        continue
+      }
+      const injury = (t.description.match(/injured list(?: retroactive to [^.]+)?\.\s*(.+)/i)?.[1] ?? '').trim().replace(/\.$/, '')
+      stints.push({ from: t.effectiveDate ?? t.date, filings: [t.date], injury: injury || null, to: null })
+    } else if (/activated/i.test(t.description)) {
+      const open = [...stints].reverse().find((x) => !x.to)
+      if (open) open.to = t.date
+    }
+  }
 
   // The latest move that brought him to the club he is with now.
   const current = teamId ?? [...moves].reverse().find((t) => t.toTeam?.id)?.toTeam?.id ?? null
@@ -148,6 +187,7 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
     seasons: years.length,
     years,
     injured,
+    stints,
     clubs,
     arrival: arrival ? arrivalOf(arrival) : null,
     // Every arrival, oldest first: a quick second move ("two days after
@@ -168,8 +208,11 @@ export function factSeason(isoDate) {
 // One player's facts, read once per session. A failed read is null, and the
 // card simply shows no fact line.
 const cache = new Map()
-export function fetchPlayerFacts(personId, { season, teamId = null } = {}) {
-  const key = `${personId}|${season}|${teamId}`
+// `ilMove` (an injured-list move's date) adds the stint it is about and his
+// line up to it.
+const near = (a, b) => Math.abs(Date.parse(a) - Date.parse(b)) <= 86_400_000
+export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = null } = {}) {
+  const key = `${personId}|${season}|${teamId}|${ilMove}`
   if (!cache.has(key)) {
     cache.set(
       key,
@@ -177,13 +220,27 @@ export function fetchPlayerFacts(personId, { season, teamId = null } = {}) {
         .then(async ([data, contract, prospects]) => {
           const person = data?.people?.[0]
           const facts = shapeFacts(person, { contract, season, teamId, prospects })
+          // An injured-list move: his line up to the stint it is about (the
+          // placement filed that day, or the stint he came off that day).
+          const stint = ilMove && facts?.stints.find((x) => x.filings.some((d) => near(d, ilMove)) || (x.to && near(x.to, ilMove)))
+          const until = stint ? shiftDays(stint.from, -1) : null
+          if (stint) facts.stint = stint
+          if (facts && until) {
+            const group = facts.pitcher ? 'pitching' : 'hitting'
+            const range = await getJson(
+              `/api/v1/people/${personId}/stats?stats=byDateRange&group=${group}&sportId=1&startDate=${season}-03-01&endDate=${until}`,
+            ).catch(() => null)
+            const stat = range?.stats?.[0]?.splits?.[0]?.stat
+            facts.beforeLine = stat ? shapeLine(stat, facts.pitcher) : null
+          }
           // A thin big-league season (or none): one more read for where he
           // spent the rest of it.
           const full = facts?.seasonLine && facts.seasonLine.games >= (facts.pitcher ? FULL_SEASON.pitcher : FULL_SEASON.hitter)
           if (!facts || full) return facts
           const group = facts.pitcher ? 'pitching' : 'hitting'
           const milb = await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null)
-          return shapeFacts(person, { contract, season, teamId, prospects, minors: milb?.stats?.flatMap((x) => x.splits ?? []) })
+          const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors: milb?.stats?.flatMap((x) => x.splits ?? []) })
+          return { ...withMinors, stint: facts.stint, beforeLine: facts.beforeLine }
         })
         .catch(() => {
           cache.delete(key)
@@ -197,7 +254,8 @@ export function fetchPlayerFacts(personId, { season, teamId = null } = {}) {
 // The sheet's other two views, read only when one is first chosen: every
 // minor-league season by club (milb_all), or every postseason by club
 // (gameType=P), each with its own career total. Rows match `facts.rows`.
-const MILB_LEVELS = { AAA: 'AAA', AA: 'AA', 'A(Adv)': 'A+', 'A(Full)': 'A', 'A+': 'A+', A: 'A', ROK: 'ROK' }
+// `career` is the career read's splits: for milb_all a subtotal per level and
+// one "Minors" row, the total; for the postseason a single team-less row.
 export function shapeScopeRows(yearly, career, pitcher) {
   const rows = (yearly ?? [])
     .filter((s) => s.team?.id)
@@ -205,10 +263,12 @@ export function shapeScopeRows(yearly, career, pitcher) {
     .map((s) => ({
       season: Number(s.season),
       teamId: s.team.id,
-      level: MILB_LEVELS[s.sport?.abbreviation] ?? null,
+      level: LEVELS[s.sport?.abbreviation]?.[1] ?? null,
       line: shapeLine(s.stat, pitcher),
     }))
-  return { rows, total: career ? shapeLine(career, pitcher) : null }
+  const loose = (career ?? []).filter((s) => !s.team)
+  const total = loose.find((s) => s.sport?.abbreviation === 'Minors') ?? (loose.length === 1 ? loose[0] : null)
+  return { rows, total: total ? shapeLine(total.stat, pitcher) : null }
 }
 
 const SCOPE_QUERY = { milb: 'leagueListId=milb_all', post: 'gameType=P' }
@@ -222,7 +282,7 @@ export function fetchScopeRows(personId, scope, pitcher) {
     scopeCache.set(
       key,
       Promise.all([getJson(`${base}&stats=yearByYear`), getJson(`${base}&stats=career`)])
-        .then(([yearly, career]) => shapeScopeRows(splits(yearly), splits(career).find((s) => !s.team)?.stat, pitcher))
+        .then(([yearly, career]) => shapeScopeRows(splits(yearly), splits(career), pitcher))
         .catch(() => {
           scopeCache.delete(key)
           return { rows: [], total: null }

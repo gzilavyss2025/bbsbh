@@ -1,14 +1,19 @@
 // WIRE TEMPLATES — which background a roster move shows, and the words for it.
-// A move picks one template by its type codes; the template turns the player's
-// facts (transactions/playerFacts.js) into the card's short fact line and the
-// fuller sheet a tap opens. Spoiler-free: season and career stats, never a score.
+// Each player a move names gets the template for his own part of the sentence
+// (subjectsOf), and the template turns his facts (transactions/playerFacts.js)
+// into the card's note. Spoiler-free: season and career stats, never a score.
 //
-// The four, tuned together in the Wire Lab (/wire-lab):
-//   free-agency  elected free agency: the season by club, years and clubs, last deal
-//   cut          outrighted, designated, released, claimed: has he reached the
-//                majors, his career line, how long he has been with the club
-//   deal         a signing or a trade: the season line, years and clubs
-//   fallback     every other move: no line on the card, the sheet on a tap
+// Tuned together in the Wire Lab (/wire-lab):
+//   free-agency   elected free agency: the season and deal, debut, every club
+//   signing       a big-league signing: the same narrative
+//   minor-deal    a minor-league contract: one sentence, his season and level
+//   trade         one side of a trade: the same sentence, plus a minor
+//                 leaguer's draft and trades since
+//   cut           outrighted, designated, released, claimed: how he got here,
+//                 his career line, what the move means, his options
+//   il-placed     onto the injured list: his stints this season, his line
+//   il-activated  off it: the days missed, his line before it
+//   fallback      every other move: no note, the sheet on a tap
 // Note the feed's own codes: DFA is "declared free agency", DES is designated.
 import { teamAbbr, teamClubName, teamLocationName } from '../../lib/teams.js'
 
@@ -38,6 +43,8 @@ export function subjectOf(story) {
 const CLAUSE_TEMPLATES = [
   ['free-agency', /elected free agency/i],
   ['cut', /outright|designated|released|claimed/i],
+  ['il-placed', /placed .*injured list/i],
+  ['il-activated', /activated .*from the .*injured list/i],
   ['minor-deal', /minor league contract/i],
   ['trade', /traded|acquired/i],
   ['signing', /signed/i],
@@ -66,36 +73,14 @@ export function subjectsOf(story) {
   }
   if (!out.length) {
     const id = subjectOf(story)
-    if (id != null) out.push({ playerId: id, name: null, template: templateFor(story) })
+    const byCodes = templateFor(story)
+    const template = byCodes === 'deal' ? ((story.codes ?? []).includes('TR') ? 'trade' : 'signing') : byCodes
+    if (id != null) out.push({ playerId: id, name: null, template, clause: '' })
   }
   return out
 }
 
 const abbr = (teamId) => teamAbbr({ id: teamId })
-const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
-
-// A stat line in a few words: a hitter's average and homers, a pitcher's ERA
-// and innings, games for both.
-export function lineText(line, pitcher) {
-  if (!line) return null
-  return pitcher ? `${line.era} ERA, ${line.ip} IP, ${line.games} G` : `${line.avg}, ${line.hr} HR, ${line.games} G`
-}
-
-function seasonText(facts) {
-  if (!facts.seasonLine) return `no MLB games in ${facts.season}`
-  const split = facts.seasonClubs.length
-    ? ` (${facts.seasonClubs.map((c) => `${abbr(c.teamId)} ${c.line.games}`).join(', ')})`
-    : ''
-  const club = facts.seasonClubs.length ? '' : ` ${abbr(facts.clubs[facts.clubs.length - 1]?.teamId)}`
-  return `${facts.season}${club} ${lineText(facts.seasonLine, facts.pitcher)}${split}`
-}
-const tenure = (facts) =>
-  facts.seasons
-    ? `${plural(facts.seasons, 'season')} · ${plural(new Set(facts.clubs.map((c) => c.teamId)).size, 'club')}`
-    : 'Has not reached the majors'
-const age = (facts) => (facts.age ? `Age ${facts.age}` : null)
-const join = (parts) => parts.filter(Boolean).join(' · ')
-
 // THE NARRATIVE — a free agent's card reads as two short sentences, the way a
 // newspaper transaction note does: the season just played (with the deal he
 // played it on), then the career. A split season names each club instead, and
@@ -135,7 +120,7 @@ const mostlyMinors = (facts) => (facts.minors?.line?.games ?? 0) > (facts.season
 const an = (num) => (/^(8|11|18)/.test(String(num)) ? 'an' : 'a')
 // What he did in a minor-league season, after "posting" or "hitting".
 function minorsText(line, pitcher) {
-  return pitcher ? `posting ${an(line.era)} ${line.era} ERA over ${line.ip} innings` : `hitting ${line.avg} with ${line.hr === 1 ? 'one homer' : `${line.hr} homers`}`
+  return pitcher ? `posting ${an(line.era)} ${line.era} ERA over ${line.ip} innings` : `hitting ${line.avg} with ${line.hr === 0 ? 'no homers' : line.hr === 1 ? 'one homer' : `${line.hr} homers`}`
 }
 
 // Who a later sentence is about: his last name the first time after "The
@@ -311,6 +296,8 @@ function originSentence(facts, name, moveDate) {
 // A CUT — outrighted, designated, released or claimed: how he came to the club,
 // then what he has done in the majors. The newspaper's month style ("Aug. 3",
 // "June 9").
+// A month with no day is spelled out ("December 2025").
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const AP_MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
 function apDate(iso) {
   const [, m, d] = iso.split('-').map(Number)
@@ -330,6 +317,9 @@ function arrivalSentence(facts, who, moveDate) {
   if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)} from ${the(a.fromTeamId)} in ${/^(Aug|April|Oct)/.test(when) ? 'an' : 'a'} ${when}${year ? ',' : ''} trade`
   else if (a.how === 'waiver claim' && a.fromTeamId) s = `${who} was claimed off waivers from ${the(a.fromTeamId)} on ${when}`
   else if (a.how === 'draft') s = `${who} was drafted by ${the(a.teamId)} in ${a.date.slice(0, 4)}`
+  else if (a.how === 'Rule 5 draft')
+    s = `${who} was a Rule 5 pick by ${the(a.teamId)}${a.fromTeamId ? ` from ${the(a.fromTeamId)}` : ''} in ${MONTH_NAMES[Number(a.date.slice(5, 7)) - 1]} ${a.date.slice(0, 4)}`
+  else if (a.how === 'purchase') s = `${who} was bought by ${the(a.teamId)}${a.fromTeamId ? ` from ${the(a.fromTeamId)}` : ''} on ${when}`
   else s = `${who} signed with ${the(a.teamId)} on ${when}`
   // Back with a club he played for before he left.
   const before = spansOf(new Set(facts.clubs.filter((c) => c.teamId === a.teamId && c.to < Number(a.date.slice(0, 4))).flatMap((c) => range(c.from, c.to))))
@@ -352,6 +342,8 @@ function careerSentence(facts, name) {
       : `${name} has not reached the majors.`
   }
   const l = facts.careerLine
+  // A debut with no career split for his group on file: say nothing rather than guess.
+  if (!l) return null
   const games = `${NUMBER.format(l.games)} big-league games`
   const what = facts.pitcher
     ? `${name} has ${an(l.era)} ${l.era} ERA over ${l.ip} innings in ${games}`
@@ -392,6 +384,48 @@ export function cutStory(facts, { moveDate = null, clause = '' } = {}) {
   return [first, careerSentence(facts, name), facts.debut ? lastFullSentence(facts) : null, moveSentence(facts, clause)].filter(Boolean).join(' ')
 }
 
+// THE INJURED LIST — the move's sentence already names the list, the injury
+// and the call-up who took his spot (cutline.js), so the note adds what it
+// cannot: his stints earlier in the season, how he was playing before this
+// one, and on an activation, the time he missed.
+const COUNT = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth']
+// The feed's injury note, set in parentheses as the move's own sentence does:
+// no article to guess ("a left oblique strain", but not "a plantar fasciitis").
+const lower = (t) => (t ? t[0].toLowerCase() + t.slice(1) : t)
+
+// "He was hitting .281 with 9 homers in 54 games" / "had a 3.40 ERA over 98.0 innings".
+function beforeText(line, pitcher) {
+  if (!line?.games) return null
+  return pitcher
+    ? `had ${an(line.era)} ${line.era} ERA over ${line.ip} innings in ${line.games === 1 ? 'one game' : `${line.games} games`}`
+    : `was hitting ${line.avg} with ${line.hr === 0 ? 'no homers' : line.hr === 1 ? 'one homer' : `${line.hr} homers`} in ${line.games === 1 ? 'one game' : `${line.games} games`}`
+}
+
+export function injuredStory(facts, { placed }) {
+  const stint = facts.stint
+  if (!stint) return null
+  const name = facts.lastName ?? 'He'
+  const at = facts.stints.findIndex((x) => x.from === stint.from)
+  const earlier = facts.stints.slice(0, at)
+  const out = []
+  if (placed) {
+    const prev = earlier[earlier.length - 1]
+    let s = `It is ${name}'s ${COUNT[at + 1] ?? `${at + 1}th`} stint on the injured list in ${facts.season}`
+    if (prev?.to) s += `; he missed ${daysBetween(prev.from, prev.to)} days from ${apDate(prev.from)}${prev.injury ? ` (${lower(prev.injury)})` : ''}`
+    out.push(`${s}.`)
+    const before = beforeText(facts.beforeLine, facts.pitcher)
+    if (before) out.push(`He ${before}.`)
+  } else {
+    let s = `${name} missed ${daysBetween(stint.from, stint.to)} days`
+    if (stint.injury) s += ` (${lower(stint.injury)})`
+    if (at > 0) s += `, his ${COUNT[at + 1] ?? `${at + 1}th`} stint of ${facts.season}`
+    out.push(`${s}.`)
+    const before = beforeText(facts.beforeLine, facts.pitcher)
+    if (before) out.push(`He ${before} before it.`)
+  }
+  return out.join(' ')
+}
+
 // The card's fact line: up to two short lines, or none for the fallback.
 export function factLines(template, facts, ctx = {}) {
   if (!facts || template === 'fallback') return []
@@ -403,6 +437,10 @@ export function factLines(template, facts, ctx = {}) {
     return [freeAgentStory(facts)]
   }
   if (template === 'cut') return [cutStory(facts, ctx)]
+  if (template === 'il-placed' || template === 'il-activated') {
+    const note = injuredStory(facts, { placed: template === 'il-placed' })
+    return note ? [note] : []
+  }
 
-  return [join([age(facts), seasonText(facts)]), tenure(facts)]
+  return []
 }

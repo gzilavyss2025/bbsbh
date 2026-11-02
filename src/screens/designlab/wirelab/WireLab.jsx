@@ -2,11 +2,12 @@ import { useState } from 'react'
 import './wirelab.css'
 import { useAsync } from '../../../hooks/useAsync.js'
 import { fetchLeagueMoves } from '../../../api/transactions/leagueFeed.js'
-import { templateFor } from '../../../api/transactions/templates.js'
+import { subjectsOf } from '../../../api/transactions/templates.js'
 import { MoveRow } from '../../../components/transactions/MoveRow.jsx'
 import { Button } from '../../../components/ui/control/Button.jsx'
 import { Segmented } from '../../../components/ui/control/Segmented.jsx'
 import { isoToday } from '../../../lib/dates.js'
+import { shiftDays } from '../../../lib/time/standingsDates.js'
 
 // THE WIRE LAB (/wire-lab) — unlisted. The last few weeks of real roster moves,
 // grouped by the fact template each one gets (api/transactions/templates.js),
@@ -17,8 +18,24 @@ const TEMPLATES = [
   ['free-agency', 'Elected free agency'],
   ['cut', 'Outrighted, designated, released, claimed'],
   ['deal', 'Signings and trades'],
+  ['injured', 'Injured list'],
   ['fallback', 'Everything else (sheet only)'],
 ]
+// Each card picks a template per player (subjectsOf); a story is filed under
+// the first of its players' templates that writes a note, in this order.
+const GROUP_OF = {
+  'free-agency': 'free-agency',
+  cut: 'cut',
+  trade: 'deal',
+  'minor-deal': 'deal',
+  signing: 'deal',
+  'il-placed': 'injured',
+  'il-activated': 'injured',
+}
+function groupOf(story) {
+  const groups = new Set(subjectsOf(story).map((s) => GROUP_OF[s.template]).filter(Boolean))
+  return TEMPLATES.find(([key]) => groups.has(key))?.[0] ?? 'fallback'
+}
 const SPAN = 3
 // Windows worth tuning against. The 2026 deadline fell on Aug. 3 (136 trade
 // rows that day); the window reads back from the day after.
@@ -26,12 +43,6 @@ const PRESETS = [
   { value: 'today', label: 'Latest', end: null },
   { value: 'deadline', label: 'Trade deadline', end: '2026-08-04' },
 ]
-
-function shiftDay(day, n) {
-  const d = new Date(`${day}T12:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
-}
 
 export function WireLab() {
   const [windows, setWindows] = useState(4)
@@ -42,13 +53,13 @@ export function WireLab() {
   const { data, loading } = useAsync(
     (signal) =>
       Promise.all(
-        Array.from({ length: windows }, (_, i) => fetchLeagueMoves(shiftDay(end, -i * SPAN), undefined, { signal })),
+        Array.from({ length: windows }, (_, i) => fetchLeagueMoves(shiftDays(end, -i * SPAN), undefined, { signal })),
       ).then((all) => all.flat()),
     [end, windows],
   )
   const groups = new Map(TEMPLATES.map(([key]) => [key, []]))
   for (const day of data ?? []) {
-    for (const story of day.stories ?? []) groups.get(templateFor(story)).push({ story, date: day.date })
+    for (const story of day.stories ?? []) groups.get(groupOf(story)).push({ story, date: day.date })
   }
   return (
     <div className="screen wirelab">

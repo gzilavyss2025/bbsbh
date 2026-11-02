@@ -1,4 +1,5 @@
 import { fetchLeagueMoves, windowDaysFor } from '../../api/transactions/leagueFeed.js'
+import { shiftDays } from '../../lib/time/standingsDates.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchNotableLists, isMajorMove } from '../../api/transactions/major.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -44,13 +45,6 @@ import { EmptyState } from '../ui/state/EmptyState.jsx'
 // days, so a reader can keep going through the winter.
 const STEP = 10
 
-// 'YYYY-MM-DD' shifted by n days.
-function shiftDay(day, n) {
-  const d = new Date(`${day}T12:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
-}
-
 export function OffseasonLead({ endDate, sportId, winter, children }) {
   const [pages, setPages] = useState(1)
   const [cap, setCap] = useState(null)
@@ -60,7 +54,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
   const span = windowDaysFor(sportId)
   // One window per page, newest first, each ending where the last began. It
   // may reach back past the winter's first day: October's moves are moves too.
-  const ends = Array.from({ length: pages }, (_, i) => shiftDay(endDate, -i * span))
+  const ends = Array.from({ length: pages }, (_, i) => shiftDays(endDate, -i * span))
   const { data, loading } = useAsync(
     (signal) =>
       Promise.all(ends.map((end) => fetchLeagueMoves(end, sportId, { signal, singleDay: false }))).then(

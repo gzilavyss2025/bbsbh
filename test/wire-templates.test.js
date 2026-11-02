@@ -5,8 +5,8 @@
 // (/wire-lab) on 2026-11-02; each names the player it came from.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { shapeFacts, shapeMinors } from '../src/api/transactions/playerFacts.js'
-import { cutStory, dealPhrase, freeAgentStory, seasonSentence, subjectsOf } from '../src/api/transactions/templates.js'
+import { shapeFacts, shapeMinors, shapeScopeRows } from '../src/api/transactions/playerFacts.js'
+import { cutStory, dealPhrase, freeAgentStory, injuredStory, seasonSentence, subjectsOf } from '../src/api/transactions/templates.js'
 
 // The minimum facts a template reads, with overrides.
 const facts = (over = {}) => ({
@@ -47,7 +47,7 @@ test('a busy day: each player gets the template for his own part of the sentence
       { text: 'Lovelady', playerId: 4 }, { text: ' for assignment.' },
     ],
   }
-  assert.deepEqual(subjectsOf(story).map((s) => s.template), ['fallback', 'fallback', 'free-agency', 'cut'])
+  assert.deepEqual(subjectsOf(story).map((s) => s.template), ['il-activated', 'fallback', 'free-agency', 'cut'])
 })
 
 test("a minor-league signing and a trade's two sides read their own templates", () => {
@@ -173,4 +173,97 @@ test('a split season merges each club into its own runs of years', () => {
   }
   const f = shapeFacts(person, { season: 2026 })
   assert.match(freeAgentStory({ ...f, age: 28, lastName: 'Peralta', debut: '2025-04-01' }), /Angels \(2025-26\) and Rockies \(2026\)/)
+})
+
+// Adley Rutschman's 2026 (668939): three stints, the third filed twice when the
+// Orioles traded him to the Red Sox mid-stint.
+const il = (date, effective, text) => ({ typeCode: 'SC', date, effectiveDate: effective, description: text })
+const rutschman = {
+  id: 668939,
+  lastName: 'Rutschman',
+  primaryPosition: { code: '2' },
+  stats: [],
+  transactions: [
+    il('2026-04-11', '2026-04-11', 'Baltimore Orioles placed C Adley Rutschman on the 10-day injured list. Left ankle inflammation.'),
+    il('2026-04-21', '2026-04-21', 'Baltimore Orioles activated C Adley Rutschman from the 10-day injured list.'),
+    il('2026-06-20', '2026-06-19', 'Baltimore Orioles placed C Adley Rutschman on the 7-day injured list retroactive to June 19, 2026. Concussion.'),
+    il('2026-06-28', '2026-06-28', 'Baltimore Orioles activated C Adley Rutschman from the 7-day injured list.'),
+    il('2026-07-20', '2026-07-19', 'Baltimore Orioles placed C Adley Rutschman on the 10-day injured list retroactive to July 19, 2026. Left wrist inflammation.'),
+    il('2026-08-03', '2026-08-03', 'Boston Red Sox placed C Adley Rutschman on the 10-day injured list. Left wrist inflammation.'),
+    il('2026-08-11', '2026-08-11', 'Boston Red Sox activated C Adley Rutschman from the 10-day injured list.'),
+  ],
+}
+
+test('a stint filed again by a new club is one stint, from its retroactive start', () => {
+  const f = shapeFacts(rutschman, { season: 2026 })
+  assert.deepEqual(f.stints.map((x) => [x.from, x.to]), [['2026-04-11', '2026-04-21'], ['2026-06-19', '2026-06-28'], ['2026-07-19', '2026-08-11']])
+  assert.equal(f.stints[1].injury, 'Concussion')
+})
+
+test('an IL placement: which stint it is, the one before, and how he was hitting', () => {
+  const f = shapeFacts(rutschman, { season: 2026 })
+  const placed = { ...f, stint: f.stints[2], beforeLine: { games: 67, avg: '.251', hr: 8 } }
+  assert.equal(
+    injuredStory(placed, { placed: true }),
+    "It is Rutschman's third stint on the injured list in 2026; he missed 9 days from June 19 (concussion). He was hitting .251 with 8 homers in 67 games.",
+  )
+})
+
+test('an IL activation: the time he missed, from the stint he came off', () => {
+  const f = shapeFacts(rutschman, { season: 2026 })
+  const back = { ...f, stint: f.stints[1], beforeLine: null }
+  assert.equal(injuredStory(back, { placed: false }), 'Rutschman missed 9 days (concussion), his second stint of 2026.')
+})
+
+// Code review, 2026-11-02: six bugs, each pinned before its fix.
+
+test('arrivals are read in date order, whatever order the feed returns them in', () => {
+  const tr = (date, to, from) => ({ typeCode: 'TR', date, toTeam: { id: to }, fromTeam: { id: from }, description: 'traded' })
+  // Codi Heuer's August, listed newest first.
+  const person = { id: 1, primaryPosition: { code: '1' }, stats: [], transactions: [tr('2026-08-03', 110, 158), tr('2026-08-01', 158, 114)] }
+  const f = shapeFacts(person, { season: 2026 })
+  assert.equal(f.arrival.teamId, 110)
+  assert.deepEqual(f.arrivals.map((a) => a.date), ['2026-08-01', '2026-08-03'])
+})
+
+test("a farm club's own injured list is not a big-league stint", () => {
+  const sc = (date, team, text) => ({ typeCode: 'SC', date, effectiveDate: date, toTeam: { id: team }, description: text })
+  const person = {
+    id: 2,
+    primaryPosition: { code: '1' },
+    stats: [],
+    transactions: [
+      sc('2026-05-01', 552, 'Syracuse Mets placed RHP X on the 7-day injured list.'),
+      sc('2026-07-01', 121, 'New York Mets placed RHP X on the 15-day injured list. Right elbow strain.'),
+      sc('2026-07-20', 121, 'New York Mets activated RHP X from the 15-day injured list.'),
+    ],
+  }
+  const f = shapeFacts(person, { season: 2026 })
+  assert.deepEqual(f.stints.map((x) => [x.from, x.to]), [['2026-07-01', '2026-07-20']])
+})
+
+test("the Minors view's total is the season's Minors row, not a level's subtotal", () => {
+  const career = [
+    { sport: { abbreviation: 'AA' }, stat: { gamesPitched: 11, inningsPitched: '44.2' } },
+    { sport: { abbreviation: 'Minors' }, stat: { gamesPitched: 25, inningsPitched: '106.2' } },
+  ]
+  assert.equal(shapeScopeRows([], career, true).total.ip, '106.2')
+})
+
+test('a minor-league hitter with no homers reads "no homers"', () => {
+  const f = facts({ age: 26, seasonLine: null, minors: { team: 'Syracuse Mets', level: ['Triple-A'], line: { games: 80, avg: '.231', hr: 0 } }, clubs: [] })
+  const thin = facts({ seasonLine: { games: 3, avg: '.100', hr: 0 }, clubs: [{ teamId: 121, from: 2026, to: 2026 }], minors: { team: 'Syracuse Mets', level: ['Triple-A'], line: { games: 80, avg: '.231', hr: 0 } } })
+  assert.match(seasonSentence(thin), /hitting \.231 with no homers/)
+  assert.match(seasonSentence(f), /hit \.231 with no homers/)
+})
+
+test('an outright of a player with no career line on file does not throw', () => {
+  assert.doesNotThrow(() => cutStory(facts({ careerLine: null }), { clause: 'Sent X outright.' }))
+})
+
+test('a Rule 5 pick and a purchased contract say how he really arrived', () => {
+  const r5 = facts({ arrival: { how: 'Rule 5 draft', date: '2025-12-10', teamId: 146, fromTeamId: 147 } })
+  assert.match(cutStory(r5, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^The 35-year-old was a Rule 5 pick by the Marlins from the Yankees in December 2025\./)
+  const bought = facts({ arrival: { how: 'purchase', date: '2026-06-02', teamId: 146, fromTeamId: 147 } })
+  assert.match(cutStory(bought, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^The 35-year-old was bought by the Marlins from the Yankees on June 2\./)
 })
