@@ -63,3 +63,20 @@ test('loadContracts on a frozen past season reads the frozen ledger and league f
   assert.ok(seen.includes('/data/frozen/2026/team-contracts/158.json'))
   assert.ok(seen.includes('/data/frozen/2026/salaries.json'))
 })
+
+// The Roster band's prospect badges follow the same rule: a frozen past season reads its own list,
+// and an unfrozen past season reads none (today's list says nothing true about 2018).
+const { loadRoster } = await import('../src/screens/team/data/loadRoster.js')
+
+test('loadRoster on an unfrozen past season reads no prospect list (run first: the list is memoized)', async () => {
+  seen.length = 0
+  await loadRoster(158, '2018-12-31')
+  assert.ok(!seen.some((u) => u.includes('top-prospects')))
+})
+
+test('loadRoster on a frozen past season reads the frozen prospect list', async () => {
+  seen.length = 0
+  await loadRoster(158, '2026-12-31')
+  // The frozen list is memoized from loadMinors above, so the proof is that today's list is never read.
+  assert.ok(!seen.includes('/data/top-prospects.json'))
+})

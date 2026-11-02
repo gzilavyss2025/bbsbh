@@ -18,6 +18,7 @@ import { SPORT_IDS } from '../../../lib/teams.js'
 import {
   parentOrgIdOf,
   seasonOf,
+  isFrozenSeason,
   cutoffFor,
   injuredListFrom,
   preferredLineupFrom,
@@ -61,6 +62,13 @@ export async function loadRoster(id, asOf, src = DIRECT) {
   const currentOrgId = parentOrgIdOf(team) ?? id
   const season = seasonOf(asOf, sportId)
   const standingsDate = cutoffFor(asOf)
+  // Prospect badges know only today's list: a past season reads its frozen list (#2776), or none.
+  const pastSeason = season < seasonOf(null, sportId)
+  const prospectsRead = !pastSeason
+    ? fetchTopProspects()
+    : isFrozenSeason(season)
+      ? fetchTopProspects(season)
+      : Promise.resolve({ players: [], orgProspects: [] })
 
   const [roster, fullRoster, seasonRoster, ilRoster, allStarIds, warData, prospectsSnapshot, rookiesData, schedule] =
     await Promise.all([
@@ -81,7 +89,7 @@ export async function loadRoster(id, asOf, src = DIRECT) {
       src.fetchTeamIL(id, season),
       sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
       sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
-      fetchTopProspects(),
+      prospectsRead,
       fetchRookiesData(),
       src.fetchTeamSchedule(id, season, sportId, standingsDate),
     ])
