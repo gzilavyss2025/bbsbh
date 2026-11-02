@@ -68,7 +68,6 @@
 //                                          '?team=' opens on one MLB club, 'all' on every club, else the default)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
-//   '/between-innings-lab'              -> { name: 'between-innings-lab' }  (unlisted QA page)
 //   '/design-lab'                       -> { name: 'design-lab' }  (unlisted design-system catalog)
 //   '/wire-lab'                         -> { name: 'wire-lab' }  (unlisted wire-template tuning page)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
@@ -94,6 +93,9 @@
 //   '/team/{id}/transactions'           -> { name: 'team-transactions', id, asOf, sportId }
 //                                          (the club's roster moves, whole season.
 //                                           NOT a tab — where the home slate's wire sends a reader.)
+//   '/team/{id}/franchise'              -> { name: 'team-franchise', id, asOf, sportId }
+//                                          (the club across all its seasons, one row a season,
+//                                           #2586. NOT a tab: history, so it reads no cutoff.)
 //   '/team/{id}/{anything else}'        -> { name: 'team', id, asOf, sportId }
 //                                          (an unknown tab lands on the club's page, never a game — #1164)
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
@@ -448,10 +450,6 @@ export function parseRoute(url) {
   // frozen stage-by-stage — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'animation-lab')
     return { name: 'animation-lab' }
-  // Unlisted QA page cataloging the post-half hold's card set against
-  // synthetic fixtures — no score/reveal content, safe to ship.
-  if (parts.length === 1 && parts[0] === 'between-innings-lab')
-    return { name: 'between-innings-lab' }
   // Unlisted catalog of the design system — every token, shared component and
   // card/pill block, drawn from invented fixtures. No score/reveal content,
   // safe to ship (issue #1112).
@@ -610,6 +608,9 @@ export function parseRoute(url) {
   // either, same reasoning and same placement as the two above.
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'transactions')
     return { name: 'team-transactions', id: idFromSlug(parts[1]), asOf, sportId }
+  // The club across all its seasons (#2763): a standalone page like the three above.
+  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'franchise')
+    return { name: 'team-franchise', id: idFromSlug(parts[1]), asOf, sportId }
   // The old tab addresses ('/team/{id}/roster', and behind the hidden '/team/{id}/next/' the
   // same five) are the one-scroll team page, which lands on the tab's band (#1107). A bare or
   // unknown '/team/{id}/next/{x}' is the bare page. All sit above the unknown-segment branch.

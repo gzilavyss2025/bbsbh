@@ -283,7 +283,7 @@ date, so the same game draws the same wall on every card:
 
 | Surface | Venue id from | Date from |
 | --- | --- | --- |
-| Innings hit chart (`HalfInning.jsx`) | `feed.gameData.venue.id` | `feed.gameData.datetime.officialDate` |
+| Innings hit chart (was `HalfInning.jsx`, deleted in #2747) | `feed.gameData.venue.id` | `feed.gameData.datetime.officialDate` |
 | Box score hit chart (`BoxScore.jsx` → `HitChartCard`) | `feed.gameData.venue.id` | `feed.gameData.datetime.officialDate` |
 | Ball-flight card (`halfInningFeed.js` puts both on the batted ball) | `feed.gameData.venue.id` | `feed.gameData.datetime.officialDate` |
 | Lineup page Ballpark sheet (`TeamInfo.jsx` → `BallparkModal`) | `selectGameInfo(feed).venueId` | `selectGameInfo(feed).officialDate` |

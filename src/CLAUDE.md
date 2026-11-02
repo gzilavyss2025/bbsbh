@@ -107,30 +107,26 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   under that clamp. The season-context/health prose is **Margin Notes**
   (`buildMarginNotes`, same footing), now an input to Gameday's checkpoint notes, demoted by what
   this reader already saw (`hooks/useCalloutLedger.js`; rules `docs/callouts.md`).
-- **The "Now Pitching" card** (`HalfInning.jsx`) names the arm the half OPENS
-  with, from `select.js`'s `selectHalfStartingPitcher` (spoiler-safe, callable
-  before reveal), gated `revealed || isNextToReveal` (ADR-0010). It names that
-  pitcher and keeps naming him — a **mid-half change belongs in the feed**, where
-  `PlayByPlay` renders it as this same `PitcherNotice` in chronological place. A
-  live "who's on the mound now" override used to put the reliever's card in two
-  places at once; same header-not-feed split as `computeHalfInningFeed` dropping
-  a *pre*-pitch change (`anyPitchInHalf`) and `PrePitchChanges` dropping one from
-  the staged list. **Windowed, it is an announcement, not a header** — only a
-  half opening with a fresh arm (`selectIsFreshPitcher`), only until the first
-  at-bat is unveiled. Those two omissions make it the ONLY announcement of a
-  between-innings change, so it may not be dropped there: ADR-0043's second.
+- **The entering pitcher** names the arm the half OPENS with, from `select.js`'s
+  `selectHalfStartingPitcher` (spoiler-safe, callable before reveal), gated
+  `revealed || isNextToReveal` (ADR-0010); `GamedayEngine.jsx` carries it in the entering
+  baseline. A **mid-half change belongs in the feed**: `computeHalfInningFeed` drops a
+  *pre*-pitch change (`anyPitchInHalf`), and the live arm comes from the half report.
+  **Windowed, the opening arm is an announcement, not a header** — only a half opening with a
+  fresh arm (`selectIsFreshPitcher`), only until the first at-bat is unveiled. Those two
+  omissions make it the ONLY announcement of a between-innings change, so it may not be dropped
+  there: ADR-0043's second.
 - **Extra innings never spoil** — `InningViewer` and Gameday's line score show only
   `regulation` innings up front, unlocking extras one at a time as `revealedThrough`
   advances (ADR-0008). The line score's run cells double as the half-inning navigator
   (away row = tops, home row = bottoms, current half marked); a phone folds it into the
-  Menu. Each extra half opens with the **placed runner's own card** (`PlacedRunnerCard.jsx`, `kind: 'placed'`) — the
-  at-bat frame minus the pitch ladder and RBI chip, an `AR` pill where a batting
-  result would go, and `PlayDiamond`'s `placedAt` dotting the bases he was given.
+  Menu. Each extra half opens with the **placed runner's own entry** (`kind: 'placed'`, an `AR` mark where a
+  batting result would go), and `PlayDiamond`'s `placedAt` dots the bases he was given.
   Deliberately a THIRD entry kind: `nextStepBoundary` and this file's `hasAtBat`
   guard both key on `kind === 'atbat'` and stay correct only if a placement doesn't
   answer to it. Never surface the placement above the seal — he is by rule the
   previous half's last batter.
-- **At-bat stepping**: a sealed half's advance ("Next play ›") steps `PlayByPlay`'s cards one
+- **At-bat stepping**: a sealed half's advance ("Next play ›") steps the half's entries one
   plate appearance at a time (there is no "Rest of half", #2568) via a
   transient cursor (`atBatCountFor`, `useRevealProgress`) that collapses into a normal
   `revealTo` commit, not a second spoiler boundary (ADR-0016) — but NOT while the half
@@ -145,7 +141,7 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`. Gameday's pitch mode and event taps step sub-steps inside a step on the same cursor: ADR-0123. Notation (#2575): a pickoff caught stealing is `PKCS 1-3`, out on the path to the stolen base; an error right after a steal credits no batter slot.
 - **Gameday** (ADR-0043's 2026-10-27 amendment, `src/screens/gameday/next/CLAUDE.md`): one
   window that never scrolls; the band (`ScorebugMount`'s clamp), stage, hero and bar never fold.
-  The old half page runs `hidden` as the engine, so its seals still gate what the shell reads.
+  `screens/gameday/next/engine/GamedayEngine.jsx` is the engine and the **only engine seal**: one SealBox that draws nothing; every `halfReport`/`engineLive` read of the half's plays runs inside it.
   Gary's #22 rules (every #22 field as penciled, pitch marks numbers and X, no "Rest of half", …)
   are listed in that amendment; do not regress them.
 - **One opt-in departure** rides through `InningViewer` without touching its guarantees:
@@ -181,14 +177,7 @@ caches of reveal-only derivations must key on the `feed` object (ADR-0007).
   `scripts/check-stamp-surfaces.mjs` fails `npm run lint` otherwise, and
   `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection and its local-first store: `src/components/logbook/CLAUDE.md`.
   The stamp art, its one tunable store, and its ink: `src/lib/CLAUDE.md`. **The feat label** (`boxscore/FeatLabel.jsx`) renders only inside that same reveal and fetches after it (ADR-0101).
-- **The forward page-turn transition** (`src/components/page-turn/`) mounts an
-  inert preview of the destination half — real (possibly still-sealed)
-  content — underneath the active one during the animation. `SealBox`'s own
-  render-function gate (ADR-0002) is what keeps that preview spoiler-safe;
-  `InningPage.jsx`'s `presentationOnly` flag only mutes side-effecting
-  callbacks (`onReveal`/`onStepInfo`) so the preview can't
-  itself advance `revealedThrough` or double-report a step. Not a second
-  reveal boundary — see ADR-0024. **Box Lines** (`components/boxlines/`) carries final scores on the lineup page; its gate is `api/boxlines/rows.js`, not the sheet — ADR-0069.
+- **Box Lines** (`components/boxlines/`) carries final scores on the lineup page; its gate is `api/boxlines/rows.js`, not the sheet — ADR-0069.
 - **Clip posters** (`src/api/expresslane/clipIndex.js`, the Scout's `FilmPane`): a poster URL is
   safe while the PICTURE is not — every frame carries the broadcast scorebug burned into the
   pixels — so a poster may render only inside an already-revealed play, never as the placeholder

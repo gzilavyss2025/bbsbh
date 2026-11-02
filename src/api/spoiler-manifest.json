@@ -183,9 +183,7 @@
     "boxscore/batterLine.js": {
       "class": "reveal-gated",
       "why": "The one line a due-up card prints under a batter: H-AB over the REVEALED halves, else his average entering the game. A thin wrapper over computeBatterLine and preGameAvg, so the cutoff is `revealedThrough` itself (ADR-0009) and nothing here reads past it. Split out of boxscore.js to keep it under its size budget.",
-      "importers": [
-        "components/playbyplay/dueup/UpNextBatters.jsx"
-      ]
+      "importers": []
     },
     "boxscore/gameNotes.js": {
       "class": "reveal-only",
@@ -241,7 +239,7 @@
     },
     "callout-notes/liveAtBat.js": {
       "class": "caller-gated",
-      "why": "`buildCallouts` may fold in only what the reader has revealed through the play it builds for, never the game's outcome. PlayByPlay.jsx is the gating caller."
+      "why": "`buildCallouts` may fold in only what the reader has revealed through the play it builds for, never the game's outcome. Its callers are callout-notes/rollup.js (the box score's roll-up, built inside the box score's reveal) and scripts/audit-callouts.mjs (an offline audit); no screen calls it since PlayByPlay.jsx was deleted (#2747)."
     },
     "callout-notes/progress.js": {
       "class": "reveal-only",
@@ -328,7 +326,6 @@
       "why": "The per-half derivations — runs, hits, errors, Statcast superlatives, foul counters. One of the two original reveal-only modules (ADR-0001).",
       "importers": [
         "api/scorecardGame.js",
-        "components/gamehud/HalfTally.jsx",
         "hooks/useRevealProgress.js",
         "screens/boxscore/revealBoxScore.js"
       ]
@@ -389,6 +386,10 @@
     "history/retiredNumbers.js": {
       "class": "spoiler-free",
       "why": "Hand-curated retired-numbers file: each club's retired numbers with a source and checked date. History, no game."
+    },
+    "history/franchiseSummary.js": {
+      "class": "spoiler-free",
+      "why": "Derived from the franchise ledger and league pennants: a club's names, seasons, all-time record, postseasons, titles, pennants and winningest manager. Finished seasons, no game."
     },
     "history/franchiseHof.js": {
       "class": "spoiler-free",
@@ -451,16 +452,16 @@
     },
     "gameday/engine/engineLive.js": {
       "class": "reveal-only",
-      "why": "The scorebug's live snapshot Gameday reads (#2747): composeLive folds deriveLiveState's output with the entering baseline (the half's starter, his pitches entering, the due-up batter) and the reveal-gated batter line (computeBatterLine through revealedThrough). Called only with `live` null (the spoiler-free entering baseline, as before the first step) or with the snapshot PlayByPlay reports from inside HalfInning's SealBox reveal function (ADR-0001, ADR-0016).",
+      "why": "The scorebug's live snapshot Gameday reads (#2747): composeLive folds deriveLiveState's output with the entering baseline (the half's starter, his pitches entering, the due-up batter) and the reveal-gated batter line (computeBatterLine through revealedThrough). Called only with `live` null (the spoiler-free entering baseline, as before the first step) or with the snapshot halfReport returns inside the SealBox reveal function (ADR-0001, ADR-0016). GamedayEngine's parent calls it with `live` null at top level; its child, EngineReport, calls it inside the seal.",
       "importers": [
-        "components/inning/HalfInning.jsx"
+        "screens/gameday/next/engine/GamedayEngine.jsx"
       ]
     },
     "gameday/engine/halfReport.js": {
       "class": "reveal-only",
-      "why": "What PlayByPlay reports up for one half at one step (#2747): the cap snap, the commit test (stepCommitReady), the step report, runs and hits, the trail and the scorebug snapshot, all from computeHalfInningFeed WITH the step cap (ADR-0016). Called only by PlayByPlay, which HalfInning renders inside its SealBox reveal function (ADR-0001).",
+      "why": "What the engine reports up for one half at one step (#2747): the cap snap, the commit test (stepCommitReady), the step report, runs and hits, the trail and the scorebug snapshot, all from computeHalfInningFeed WITH the step cap (ADR-0016). Called only by EngineReport, which GamedayEngine's one SealBox mounts from its reveal function (ADR-0001).",
       "importers": [
-        "components/playbyplay/PlayByPlay.jsx"
+        "screens/gameday/next/engine/GamedayEngine.jsx"
       ]
     },
     "gameday/moments/moments.js": {
@@ -510,7 +511,7 @@
     },
     "gameday/subSteps.js": {
       "class": "reveal-only",
-      "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. openAtBat finds the reader's next at-bat past the step cursor with PlayByPlay's own step bounds. Gameday calls it at the advance tap (steps/subStep.js nextSub, which returns only a count; InningViewer also reads its live-edge flag on a half still in play) and inside SealBox reveal functions (the open box, the event card, the stage's one pitch), and those read only the sub-steps up to the reader's sub-step cursor. Two render-time reads return only what the reader's own sub-steps already revealed: steps/subStep.js openingChangeHeld (a held opening pitching change) and stage/GamedayStage.js restBatter (a pinch hitter announced inside the open at-bat, from his own sub-step on).",
+      "why": "Gameday's sub-steps inside one revealed at-bat (ADR-0123; #2570, #2571): each change, pitch, automatic call and baserunning event, then the result. Reads the card and its play. The last pitch rides only on the result sub-step, which alone carries the card; an event carries only its own runner legs. openAtBat finds the reader's next at-bat past the step cursor with the same step bounds the half report uses. Gameday calls it at the advance tap (steps/subStep.js nextSub, which returns only a count; InningViewer also reads its live-edge flag on a half still in play) and inside SealBox reveal functions (the open box, the event card, the stage's one pitch), and those read only the sub-steps up to the reader's sub-step cursor. Two render-time reads return only what the reader's own sub-steps already revealed: steps/subStep.js openingChangeHeld (a held opening pitching change) and stage/GamedayStage.js restBatter (a pinch hitter announced inside the open at-bat, from his own sub-step on).",
       "importers": [
         "api/gameday/pitchMix.js",
         "screens/gameday/next/hero/heroMarkup.js",
@@ -533,7 +534,6 @@
       "class": "mixed",
       "why": "A clip's title narrates the play's outcome, so the play JOIN is reveal-only — but fetching is safe eagerly, and the cascade's classification helpers are a plain data transform the Node generator runs with no DOM. selectCondensedGame/selectGameClips joined the sealed list in PR #601: a condensed cut and a game's own reel narrate the whole result, and their only protection is WHERE they mount — inside the box score's SealBox reveal (GameVideoRow). formatClipDuration stays spoiler-free: it formats a duration string and reads no game state, which is why the open surfaces that format a clip length need no place on this list. The win-probability chart's swing rows (useSwingClip) join a clip only for a big-swing play the chart already shows — and the chart is fed only reveal-gated points (winprob.js), so the play is revealed before its row, and its clip, exists. The pitcher Game Log's detail view (gameDetail.js) joins a clip to a play of a pitcher's game on the player page, an open surface where the plays of a game are open (ADR-0110); its score and decision come from the guarded log row, never the clip.",
       "revealOnlyExports": [
-        "highlightsByPlayId",
         "highlightForPlay",
         "eligibleHighlightForPlay",
         "selectCondensedGame",
@@ -542,7 +542,6 @@
       "importers": [
         "components/highlights/GameVideoRow.jsx",
         "components/charts/winprob/useSwingClip.js",
-        "components/inning/HalfInning.jsx",
         "screens/boxscore/revealBoxScore.js",
         "screens/logbook/RetrospectiveSections.jsx",
         "screens/player/next/modules/pitchlog/gameDetail.js"
@@ -553,7 +552,6 @@
       "why": "The hit chart's batted balls. A dot IS a play outcome — one in the left-field seats is a home run, a cluster on the grass is a rally — so selectBattedBalls runs only inside a SealBox reveal or behind an explicit reveal gate. Its `throughHalfIndex` option is the clamp an inning page passes its own revealedThrough into, so the chart can never run ahead of the scorekeeper. The projection half (hitCoordToSvg and the three constants) reads no feed and now lives in lib/ballpark/hitProjection.js, re-exported from here so this module's API is unchanged: the player page's season spray map (spray.js) shares the geometry from the OPEN side of the spoiler line, and an open surface may not import a reveal-only module for four constants. Both call sites are gated, each in the way its own page already gates everything else: the box score's is inside the single seal that page already lifts over the whole game (ADR-0049), and the inning page's passes its render-time revealedThrough as the clamp, so it can only ever draw halves the reader has committed (ADR-0051). The third importer takes ONE play's ball rather than a walk of the game (selectPlayBattedBall, for the flight card the play-by-play diamond opens) and needs no clamp of its own: computeHalfInningFeed already runs only inside its own half's SealBox reveal, and a ball from that half is the very result the reveal just handed over.",
       "importers": [
         "screens/boxscore/revealBoxScore.js",
-        "components/inning/HalfInning.jsx",
         "api/playbyplay/halfInningFeed.js",
         "screens/gameday/next/zonemap/zonePitches.js"
       ]
@@ -598,7 +596,6 @@
         "api/derive.js",
         "api/gameday/checkpoint.js",
         "api/scorecardGame.js",
-        "components/gamehud/HalfTally.jsx",
         "components/gamehud/ScorebugMount.jsx",
         "screens/boxscore/revealBoxScore.js",
         "screens/gameday/next/panels/GamedayPanels.jsx"
@@ -849,8 +846,7 @@
         "api/gameday/dayLine.js",
         "api/pitcher-callouts.js",
         "api/scorecardGame.js",
-        "components/inning/HalfInning.jsx",
-        "components/playbyplay/PlayByPlay.jsx"
+        "screens/gameday/next/engine/GamedayEngine.jsx"
       ]
     },
     "playbyplay.js": {
@@ -874,7 +870,6 @@
         "api/gameday/subSteps.js",
         "api/pitchers.js",
         "api/scorecardGame.js",
-        "components/playbyplay/PlayByPlay.jsx",
         "lib/scorecard/arm.js",
         "screens/gameday/next/panels/panelData.js",
         "screens/gameday/next/stage/actors.js"
@@ -1198,15 +1193,12 @@
     "savant/attackAngle.js": {
       "class": "reveal-only",
       "why": "Contact replay phase C (#1771) — the bat's measured attack angle and direction from Savant's Statcast CSV, stripped on parse. The CSV carries the whole game's bat_score and post_bat_score, so the module fetches and parses in one scope, keeps game_pk, at_bat_number, pitch_number, attack_angle and attack_direction, and lets the text go out of scope; nothing holds or logs it. What survives describes one swing, so it is callable only from the replay inside the half's reveal. Fetches only for a Final MLB game, once per gamePk per page load, never polled; any other game returns an empty Map and makes no fetch.",
-      "importers": [
-        "components/playbyplay/pitcherCard/AtBatReplay.jsx"
-      ]
+      "importers": []
     },
     "savant/gameFeed.js": {
       "class": "reveal-only",
       "why": "Contact replay phase B (#1771) — Savant /gf bat-tracking fields (batSpeed, xba, barrel, homeRunBallparks) for one game, stripped on parse. The /gf body carries the whole game's linescore, box score and play text, so the module fetches and parses in one scope, reads only team_home[] and team_away[], keeps five fields per row and lets the raw body go out of scope; no cache, ref or state holds it and nothing logs it. What survives still describes one batted ball, so it is callable only from the replay inside the half's reveal. MLB only: sportId other than 1 returns an empty Map and makes no fetch. Its one importer is the replay, which mounts only inside the half's reveal; it keeps only the at-bat's own swings (fetchAtBatTracking).",
       "importers": [
-        "components/playbyplay/pitcherCard/AtBatReplay.jsx",
         "screens/gameday/next/hero/SavantFacts.jsx"
       ]
     },

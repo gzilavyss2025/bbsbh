@@ -230,21 +230,20 @@ export function useGameData(game, activeStep = null) {
   // fetch near game start would miss nearly all of them. Poll every 5 minutes
   // while the game is Live — same interval/cleanup shape as GameNotesButton's
   // NOTES_POLL_MS (TeamInfo.jsx) — and stop once it leaves Live (Final, or
-  // not started yet). HalfInning's SealBox reveal function re-runs on every
-  // render and rebuilds highlightsByPlayId from whatever this resolves to, so
-  // a newly-posted clip surfaces on an already-revealed half with no other
-  // wiring: nothing here is rendered until highlightsByPlayId is called
-  // inside that reveal, so a poll landing mid-game is still spoiler-safe.
+  // not started yet). A consumer inside a seal's reveal looks a clip up from
+  // whatever this resolves to, so a newly-posted clip surfaces on an
+  // already-revealed play with no other wiring: nothing here is rendered until
+  // that lookup runs inside the reveal, so a poll landing mid-game is still
+  // spoiler-safe.
   // The fetch is safe to start eagerly (a raw fetch result produces no DOM on
-  // its own), but its consumers are both behind a seal, so it waits for one of
-  // their views to actually be opened (`useEverActive`), same reasoning as
-  // `winProb` above; the 5-minute poll below is a no-op while inactive.
+  // its own), but its consumer is behind a seal, so it waits for that view to
+  // actually be opened (`useEverActive`), same reasoning as `winProb` above;
+  // the 5-minute poll below is a no-op while inactive.
   // Resolves [] on failure or off-MLB (most MiLB games carry no clips).
   //
-  // TWO consumers: the innings view's per-play Watch buttons (step 2) and the box score's Play of the
-  // Game card (step 3), which looks up the one clip for its WPA-picked play
-  // inside its own SealBox reveal render.
-  const highlightsActive = useEverActive(activeStep === 2 || activeStep === 3, game.gamePk)
+  // ONE consumer: the box score's Play of the Game card (step 3), which looks
+  // up the one clip for its WPA-picked play inside its own SealBox reveal render.
+  const highlightsActive = useEverActive(activeStep === 3, game.gamePk)
   const highlights = useAsync(
     () => (feed && highlightsActive ? fetchHighlights(game.gamePk) : Promise.resolve(null)),
     [game.gamePk, Boolean(feed), highlightsActive],

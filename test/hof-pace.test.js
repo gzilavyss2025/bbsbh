@@ -35,3 +35,11 @@ test('pitcher: W, SO, outs (200.1 IP = 601), SV; minor-league and postseason row
 test('no MLB season gives null', () => {
   assert.equal(paceLine([], false), null)
 })
+
+test('WAR column: cumulative by age from a season map, rounded to tenths; null before 1901', () => {
+  const splits = [row('1951', 20, { hits: 127, homeRuns: 20 }), row('1953', 22, { hits: 1, homeRuns: 0 })]
+  const { rows } = paceLine(splits, false, { 1951: 2.14, 1953: -0.3 })
+  assert.deepEqual(rows, [[127, 20, 2.1], [127, 20, 2.1], [128, 20, 1.8]])
+  const old = paceLine([row('1899', 20, { hits: 1, homeRuns: 0 }), row('1901', 22, { hits: 1, homeRuns: 0 })], false, { 1901: 3 })
+  assert.deepEqual(old.rows.map((r) => r[2]), [null, null, null])
+})

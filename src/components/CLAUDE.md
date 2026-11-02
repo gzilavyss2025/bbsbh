@@ -31,18 +31,18 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `charts/` | `WinProbChart`, `HitChart`, `BallFlight` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
 | `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `BackBtn` | Global site frame — header/footer/menu/search, not any one screen. Rules: `chrome/CLAUDE.md` |
 | `game/` | `GameCard`, `GameFinder`, `GameResultFace`, `ContinueScoring`, `BoxScoreSkeleton` | The slate/game-selection layer — a game before you're inside its innings |
-| `gamehud/` | `HeaderBug`, `ScorebugMount`, `HalfTally`, `BetweenInnings`, `StatBox` (`Stat`, `AbsRow`) | Live-game heads-up widgets. Gameday's band draws through `ScorebugMount`; `HalfTally` and `BetweenInnings` render only in the hidden engine and the animation lab now |
+| `gamehud/` | `HeaderBug`, `ScorebugMount`, `StatBox` (`Stat`, `AbsRow`) | Live-game heads-up widgets. Gameday's band draws through `ScorebugMount` |
 | `history/` | `BornNearPark`, `PeopleList` | History about people (ADR-0100): the preview's "Born near the park" line. Open surface, no SealBox |
 | `honors/` | `LeaguePennant`, `PennantRow` | Flat league-champion artwork for team and player pages. Draw-only; callers supply verified season honors. Rules: `honors/CLAUDE.md` |
 | `highlights/` | `HighlightClipCard` | Purely presentational video-clip cards — no fetching, no game-shape knowledge; the caller precomputes the caption and owns the `HighlightSheet` it opens |
-| `inning/` | `HalfInning`, `DelayCard`, `PregameScoreboard`, and `focus/` (`useFocusMode`, `focusView.js`) | The half page Gameday mounts hidden as its engine (`src/screens/gameday/next/CLAUDE.md`). The old console's screen parts were deleted with the Gameday swap (#2566) |
+| `inning/` | `PregameScoreboard`, and `focus/` (`useFocusMode`, `focusView.js`, `beats.js`) | The pregame scoreboard and the focus cursor Gameday steps with. The hidden half page (`HalfInning`, `DelayCard`) went in #2747 and the old console's screen parts with the Gameday swap (#2566); the engine is `src/screens/gameday/next/engine/` |
 | `logbook/` | `GameStamp`, `StampGameButton`, `StampInButton`, `StampSheet` | The Logbook stamp (ADR-0035) and its shelves. `check-stamp-surfaces.mjs` names these by path. Rules: `logbook/CLAUDE.md` |
-| `logo/` | `TeamLogo`, `LogoModal`, `TeamTreatmentMark`, `JerseyCombos`, `UniformFigure` | Club-mark rendering and its sketch/print modal. `UniformFigure` is Gameday's batter figure for tonight's uniform (#1852): the bare pants-and-jersey image, which the lineup page's crest sheet draws. `uniformContexts.js` hands the posted assets down (`GameUniformsContext` from `GameView`, `BattingUniformContext` per half from `InningPage`) so `StrikeZone` can dress its batter without prop drilling |
+| `logo/` | `TeamLogo`, `LogoModal`, `TeamTreatmentMark`, `JerseyCombos`, `UniformFigure` | Club-mark rendering and its sketch/print modal. `UniformFigure` is Gameday's batter figure for tonight's uniform (#1852): the bare pants-and-jersey image, which the lineup page's crest sheet draws. `uniformContexts.js` hands the posted assets down (`GameUniformsContext` from `GameView`, `BattingUniformContext` per half) so `StrikeZone` can dress its batter without prop drilling |
 | `offseason/` | `LevelOffseason`, `SeasonRecord`, `MovedUp`, `WinterCalendar` | The empty-slate page state (ADR-0074, ADR-0079, ADR-0080, ADR-0081). Rules: `offseason/CLAUDE.md` |
 | `ovr/` | `OvrBars`, `useOvr` | The player page's OVR bars (#1703), drawn by the header extras card. Open surface, no SealBox (ADR-0034). Logic is pure, in `lib/ovr/`; the bars are draw-only and read the ratings through `api/ovr/` |
 | `player/` | `Headshot`, `PlayerLink`, `PlayerHoverCard`, `Ledger`, `CareerTimeline` | Player-identity primitives and career-level cards |
 | `playerstats/` | `CommandReceivedCard` | Player statistical cards (as distinct from `charts/`'s plotted quantities), drawn by the player page's TBD slots |
-| `playbyplay/` | `PlayByPlay`, `BatterNotice`, `PitcherNotice`, `FielderNotice`, `pitcherCard/` | The at-bat feed's notification-card family (ADR-0017). `PitchScene` never uses React state per frame. Rules: `playbyplay/CLAUDE.md` |
+| `playbyplay/` | `PitcherNotice`, `cardCopy.js`, `pitcherCard/` | The notification-card family's surviving parts (ADR-0017); the feed that drew the rest (`PlayByPlay`) was deleted in #2747. `PitchScene` never uses React state per frame. Rules: `playbyplay/CLAUDE.md` |
 | `postseason/` | `SeriesParts`, `SeriesMark`, `SeriesFlow`, `SeriesTotals`, `SeriesRibbon`, `SeriesLeadersLedger`, `SeriesPrimer`, `edges/` | The parts both series pages draw the same way: the finished page and the live page. Draw-only; each page keeps its own spoiler footing (ADR-0087's 2026-10-01 addendum). `SeriesPrimer` is the home page series primer's two slots, fed by `usePrimer`: `SeriesRibbon` and `edges/` (Today's edges) are its main column, `BracketNow`, `SeriesTotals` and `SeriesLeadersLedger` its right column (2026-10-08 addendum) |
 | `preview/` | `SavePosterButton` | Saves the finished poster out of the canvas (`docs/preview-poster.md`) |
 | `profile/` | `ClubSeal`, `ProfileAccount`, `SyncReceipt`, `MergeReceipt`, `EraseDataDialog` | My Tally's parts. They render no game data (`src/screens/profile/CLAUDE.md`) |
@@ -61,9 +61,8 @@ A bucket with a `CLAUDE.md` of its own has rules there. Per-bucket detail: `docs
 | `winter/` | `LeaguePicker` | The WINTER tab's league picker: four leagues share one rail tab (ADR-0078) |
 | `workload/` | `DayStrip`, `ThresholdBullets`, `PenDots`, `StaffGrid`, `ProjectedStarters` | The four marks that draw `api/workload.js` without a sentence. Their ink is global (`styles/76-workload-marks.css`), not component-imported |
 
-Two untouched subdirectories predate this bucketing and follow their own
-internal convention rather than the domain-bucket one above: `page-turn/` (the
-forward inning-transition animation), `passport/` (the Logbook's passport-book
+One untouched subdirectory predates this bucketing and follows its own
+internal convention rather than the domain-bucket one above: `passport/` (the Logbook's passport-book
 UI, ADR-0036/0041).
 
 ## Two constraints that outrank tidiness

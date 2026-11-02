@@ -32,15 +32,8 @@ const src = (rel) => readFileSync(join(SRC, rel), 'utf8')
 // measured on origin/main at a75f6edae. A rename changes none of these. If this
 // fails, the slice moved a seal: stop and ask, never update the literal.
 const N8C_SEAL = {
-  'components/inning/HalfInning.jsx': { reveal: ['gameday/engine/engineLive.js', 'highlights.js', 'hitchart.js'], sealBoxes: 1, revealedThrough: 10 },
-  'components/playbyplay/PlayByPlay.jsx': { reveal: ['gameday/engine/halfReport.js', 'playbyplay.js'], sealBoxes: 0, revealedThrough: 1 },
   'components/scoring/lens/PitcherSheet.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/playbyplay/PitcherNotice.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/BatterNotice.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/FielderNotice.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/PinchRunNotice.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/PitcherHandoffCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/EventCards.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/scoring/lens/LensCards.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/playbyplay/pitcherCard/PitcherCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
 }
@@ -122,17 +115,12 @@ const count = (code, s) => code.split(s).length - 1
 const FRAME = "eventCardClass('change--framed')"
 const NOTICE_FRAME = "noticeClass({ tone: 'event', className: 'change--framed' })"
 
-test('N8c: the four role roots wear change, and a handoff header row too', () => {
-  for (const name of ['PitcherNotice', 'BatterNotice', 'FielderNotice', 'PinchRunNotice']) {
-    assert.ok(src(`components/playbyplay/${name}.jsx`).includes('<div className={`change ${className}`}>'), `${name}'s root`)
-  }
-  assert.equal(count(src('components/playbyplay/PitcherHandoffCard.jsx'), '<div className="change">'), 2, 'both handoff headers')
+test('N8c: the role root wears change', () => {
+  assert.ok(src('components/playbyplay/PitcherNotice.jsx').includes('<div className={`change ${className}`}>'), "PitcherNotice's root")
 })
 
-test('N8c: the nine call sites pass change--framed through eventCardClass (ADR-0113)', () => {
+test('N8c: the call site passes change--framed through eventCardClass (ADR-0113)', () => {
   const callers = {
-    'components/inning/HalfInning.jsx': 3,
-    'components/playbyplay/PlayByPlay.jsx': 4,
     'components/scoring/lens/PitcherSheet.jsx': 1,
   }
   for (const [rel, n] of Object.entries(callers)) assert.equal(count(src(rel), `className={${FRAME}}`), n, `${rel}: ${n} call sites`)
@@ -141,11 +129,4 @@ test('N8c: the nine call sites pass change--framed through eventCardClass (ADR-0
 test('N8c: ArmNotice is still one <button> and wears change and the Notice frame', () => {
   const code = src('components/scoring/lens/LensCards.jsx')
   assert.equal(count(code, `<button type="button" className={\`change \${${NOTICE_FRAME}} sc-armnotice\`} onClick={onOpen}>`), 1)
-})
-
-test('N8c: the event bars wear change, change--event and (the mound visit) change--mv', () => {
-  const code = src('components/playbyplay/EventCards.jsx')
-  const bar = "<div className={`change ${eventCardClass()} change--event"
-  assert.equal(count(code, bar), 4, 'four event bars')
-  assert.equal(count(code, `${bar} change--mv\`}>`), 1, 'the mound visit')
 })

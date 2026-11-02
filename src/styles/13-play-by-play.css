@@ -1,82 +1,3 @@
-/* --------------------------------------------------------------- play-by-play
-   Per-plate-appearance feed shown below the pitch-summary row once a half is
-   revealed (api/playbyplay.js — reveal-only, same rule as linescore.js). One
-   card per batter, first-at-bat first, with mound-visit / pitching-change
-   notes interleaved between cards. No border-top divider before the first
-   record — nothing above it in the card needs dividing from anymore. */
-.pbp {
-  margin-top: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-.pbp__note {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1h) 2px;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-  /* Sentence-like event notes (mound visits, pitching changes) — same prose
-     treatment as .pbp__desc: the high-legibility serif in natural case (the
-     caps exception is the #root rule below). */
-  font-family: var(--font-read);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-text);
-  color: var(--text-caption);
-}
-
-.pbp__noteicon {
-  font-style: normal;
-  font-size: var(--fs-small);
-}
-
-/* The note's text as one wrapping flex item (so its player deep-links flow
-   inline beside the icon instead of each becoming its own flex child). */
-.pbp__notetext {
-  min-width: 0;
-}
-
-/* Player names lifted out of a prose description. The description now reads as a
-   natural-case sentence (see the #root .pbp__desc override), so the names flow
-   inline with it rather than taking the scorebook's uppercase name style — the
-   span stays as a hook for that override. */
-
-/* The batter's headshot, leading his at-bat row at a park with no plate
-   locations (AtBatCard). A phone column has no room beside the card, so it is
-   hidden outright rather than shrunk — which also keeps the lazy image from
-   ever loading there. Two rungs up from the pitching-change photo (--shot-sm),
-   the only other headshot in this feed. */
-.pbp__batshot {
-  display: none;
-}
-@media (min-width: 740px) {
-  .pbp__batshot {
-    display: block;
-    align-self: start;
-  }
-  .pbp__batshot .change__shot {
-    width: var(--shot-lg-w);
-    height: var(--shot-lg-h);
-  }
-}
-
-.pbp__card {
-  display: flex;
-  align-items: stretch;
-  gap: var(--space-2);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  padding: var(--space-1) var(--space-1h);
-}
-
-.pbp__main {
-  flex: 1;
-  min-width: 0;
-}
-
 /* The right-hand tally — pitch lanes + result code + diamond. Sits directly on
    the card (no inner frame) so it doesn't read as a card-within-a-card. */
 .pbp__side {
@@ -115,38 +36,6 @@
   color: var(--accent-positive);
 }
 
-.pbp__code--error {
-  color: var(--clay-deep);
-}
-
-/* The RBI count, focus mode only. `margin-left` is the ONLY gap from the code
-   — no leading space in the text, which used to stack into a visibly wide gap.
-   "RBI" downsizes below as the count's unit (`.favormeter__unit` convention). */
-.pbp__code__rbi {
-  color: var(--accent-positive);
-  background: var(--field-soft);
-  border-radius: var(--radius-pill);
-  padding: 1px var(--space-1h);
-  margin-left: 3px;
-}
-
-.pbp__code__rbi-unit {
-  font-family: var(--font-display);
-  font-size: 0.65em;
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  opacity: 0.75;
-}
-
-/* An interrupted at-bat's carry-over mark ("CS →" — the half ended on the
-   bases mid-count; the at-bat restarts next inning), penciled in the MIDDLE
-   of the diamond (combined with .pbp__code--center) the way the scorer
-   writes it. Pencil graphite, not ink: it's a scorer's note, not a batting
-   result. Same treatment on the scorecard sheet (.sc-ab__center--interrupted). */
-.pbp__code--interrupted {
-  color: var(--text-caption);
-}
-
 /* An out's fielding chain, penciled dead center on the diamond instead of
    above it — bigger than the reach codes since it's the dominant mark on
    the card. Mirrors .sc-ab__center's placement on the scorecard sheet, minus
@@ -155,7 +44,7 @@
 /* THE CENTRING IS THE INDIVIDUAL `translate` PROPERTY, NOT `transform`, so it
    applies OUTSIDE any scale and cannot be multiplied by one — which is what
    keeps focus mode's ink-set from dragging this mark off the diamond as it
-   settles (the argument is in styles/focus/atbat.css, ADR-0046). It also means
+   settles (ADR-0046). It also means
    the backwards-K rule below no longer has to restate it to avoid clobbering
    it: the two write different properties. */
 .pbp__code--center {
@@ -168,15 +57,6 @@
   line-height: var(--lh-solid);
   text-align: center;
   white-space: pre-line;
-}
-
-/* The backwards-K needs its mirror flip and nothing else: the centring above is
-   a `translate` now, so this no longer has to restate it to avoid clobbering it
-   (see that rule's note). Stated anyway rather than left to `.pbp__klooking`'s
-   own copy, because this pairing is the one that has to keep working when the
-   ink-set's `scale` is composing with it too. */
-.pbp__code--center.pbp__klooking {
-  transform: scaleX(-1);
 }
 
 .pbp__outcircle {
@@ -241,27 +121,6 @@
   letter-spacing: var(--ls-num);
 }
 
-.pbp__top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-1h);
-  margin-bottom: 6px;
-}
-
-.pbp__batter {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-small);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-num);
-  color: var(--text-heading);
-}
-
 /* One name line inside the batter cell — the batter, plus any pinch runner
    penciled beneath him — keeping the name and its position tag on one line. */
 .pbp__batline {
@@ -284,30 +143,6 @@
   font-weight: var(--w-regular);
   color: var(--graphite-soft);
   margin-left: 4px;
-}
-
-/* The extra-innings automatic runner's mark ("AR"), in the top-right slot the
-   RBI chip would take on an at-bat card — where a scorer writes it, in the
-   place a batting result would otherwise go. Penciled graphite in the pill
-   shape the roster/lineup pills already use (the rookie pill), deliberately NOT
-   the RBI chip's green: nothing here was earned. The dashed border is the
-   same given-not-run motif the diamond's dotted ghost path carries. See
-   PlacedRunnerCard.jsx. */
-/* The placement card itself: the at-bat card's frame — its diamond has to sit
-   in the same place and read the same way — with a dashed leading edge, the
-   one structural cue that this row isn't a plate appearance. */
-.pbp__card--placed {
-  border-left: var(--bw-heavy) dashed var(--graphite-soft);
-}
-
-/* The capsule is .pill's (#1131), inked --text-caption by the component.
-   What stays here is the motif: the dashed edge, in the same --graphite-soft
-   as the card's dashed leading edge above, so the mark and its card say
-   "given, not run" in one line. Edge colour is kept on purpose — the pill's
-   own rule would draw it in the ink. */
-.pbp__placed {
-  --pill-edge: var(--graphite-soft);
-  border-style: dashed;
 }
 
 /* Numbers Game #22-style ball/strike lanes beside the diamond: two adjacent
@@ -381,19 +216,6 @@
   flex: 0 0 auto;
 }
 
-.pbp__desc {
-  /* Sentence-like play copy — the high-legibility serif at a smaller size, with
-     a touch of tracking and looser leading. Rendered in natural case (the caps
-     exception below) so it reads as a real sentence. See --font-read in
-     tokens/typography.css. */
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-text);
-  line-height: var(--lh-prose);
-  color: var(--text-body);
-}
-
 /* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment and
    .buzz__text for the same pattern): play-by-play copy reads as natural-case
    sentences — the play descriptions (MLB's templated prose, and the verbose
@@ -403,37 +225,10 @@
    (1 id + 1 class) outweigh the global `#root *` uppercase; the inline player
    names — `.pbp__name` spans in descriptions, `.plink` deep-links in notes — go
    natural too so each sentence reads whole. */
-#root .pbp__desc,
-#root .pbp__desc .pbp__name,
-#root .pbp__subnote,
-#root .pbp__subnote .pbp__name,
-#root .pbp__note,
-#root .pbp__note .plink,
-#root .pbp__notetext,
 #root .pbp__callout,
 #root .change__eventtext,
 #root .change__eventtext :is(.plink, b) {
   text-transform: none; /* caps-exempt: play-by-play copy reads as sentences */
-}
-
-/* Secondary prose beneath a batter's own description: a baserunning event
-   (steal, caught stealing, wild pitch…) that happened during his plate
-   appearance. Quieter than .pbp__desc, marked off with a short left rule. */
-.pbp__subnote {
-  margin-top: 4px;
-  padding-left: var(--space-1h);
-  border-left: 2px solid var(--border-rule);
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-text);
-  line-height: var(--lh-ui);
-  color: var(--text-caption);
-}
-
-.pbp__klooking {
-  display: inline-block;
-  transform: scaleX(-1);
 }
 
 /* Season-context call-out beneath a play: a leader / streak / situational-record
@@ -470,16 +265,6 @@
   width: 1.1em; /* about the star's width, so note text lines up */
   object-fit: contain;
   align-self: center;
-}
-
-/* In the play-by-play feed, match the pitching-change notice card's total
-   horizontal inset from the .half edge: the notice sits directly in
-   .statgrid's 14px padding plus its own 14px margin (28px total); the
-   callout sits one level deeper, inside .pbp__card's own 6px padding, so 8px
-   more here reaches that same 28px and the two cards read the same width. */
-.pbp__card .pbp__callout {
-  margin-left: 8px;
-  margin-right: 8px;
 }
 
 /* ---------------------------------------------------------------- roster */

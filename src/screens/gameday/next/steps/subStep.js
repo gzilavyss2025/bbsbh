@@ -40,6 +40,10 @@ export function caughtUpAdvance(loading, onReload) {
   return { label: loading ? 'Refreshing…' : 'Refresh', refresh: true, disabled: !!loading, caughtUp: true, reveal: false, onClick: onReload }
 }
 
+// The advance to the next half. It waits out the close-out (focus.closing, ADR-0046); there is no page
+// turn to wait for any more (#2747), so a forward move is `goTo` itself.
+export const forwardAdvance = (label, idx, closing, goTo) => ({ label, disabled: closing, onClick: () => !closing && goTo(idx) })
+
 // One tap inside the open at-bat: the sub-step count after it, or null when this tap reveals the
 // at-bat itself (its result, or the event that ends the half: decision 7). Pitch mode shows the next
 // sub-step; at-bat mode runs to the next stop. A switch mid-at-bat keeps `sub`, so turning pitch

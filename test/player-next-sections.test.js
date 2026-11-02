@@ -73,10 +73,10 @@ import { SLOTS, rolesOf, seedEmpty, shownSections, slotInstances } from '../src/
 
 const BOTH = ['hitting', 'pitching']
 
-test('the slots are the 31 module folders, with each section holding its modules in order', () => {
+test('the slots are the 32 module folders, with each section holding its modules in order', () => {
   assert.deepEqual(
     [...new Set(SLOTS.map((s) => s.module))].sort(),
-    ['advanced', 'arsenal', 'awards', 'batlog', 'command', 'contact', 'contract', 'firsts', 'form', 'fouls', 'highlights', 'innings', 'milestones', 'mound', 'moves', 'path', 'percentile', 'pform', 'pfouls', 'photos', 'pitchlog', 'plate', 'prospect', 'prospects', 'runvalue', 'season', 'similar', 'splits', 'target', 'tbd', 'teams'],
+    ['advanced', 'arsenal', 'awards', 'batlog', 'command', 'contact', 'contract', 'firsts', 'form', 'fouls', 'highlights', 'hofpace', 'innings', 'milestones', 'mound', 'moves', 'path', 'percentile', 'pform', 'pfouls', 'photos', 'pitchlog', 'plate', 'prospect', 'prospects', 'runvalue', 'season', 'similar', 'splits', 'target', 'tbd', 'teams'],
   )
   const at = (section) => SLOTS.filter((s) => s.section === section).map((s) => s.module)
   assert.deepEqual(at('season'), ['season', 'percentile', 'advanced', 'runvalue', 'tbd'])
@@ -87,8 +87,8 @@ test('the slots are the 31 module folders, with each section holding its modules
   assert.equal(new Set(SLOTS.map((s) => s.id)).size, SLOTS.length)
 })
 
-test('the Game log section runs logs, foul balls, similar players, milestones, then the tbd slot', () => {
-  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'pfouls', 'fouls', 'similar', 'milestones', 'tbd'])
+test('the Game log section runs logs, foul balls, similar players, milestones, Hall of Fame pace, then the tbd slot', () => {
+  assert.deepEqual(SLOTS.filter((s) => s.section === 'game-log').map((s) => s.module), ['batlog', 'pitchlog', 'pfouls', 'fouls', 'similar', 'milestones', 'hofpace', 'tbd'])
 })
 
 test('the tbd slots for the pitcher boards: On the mound for a pitcher only, Game log for both', () => {
@@ -194,7 +194,7 @@ test('with every slot a stub, all nine batter buttons show', () => {
 // Modules an issue has built: real modules, which may return null and call onEmpty when
 // they have no data. Add a module here in the PR that builds it; every other module must
 // still be a stub.
-const BUILT = new Set(['tbd', 'similar', 'prospects', 'prospect', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog', 'runvalue', 'percentile', 'target', 'advanced', 'milestones', 'awards', 'command', 'moves', 'teams', 'photos', 'pfouls', 'highlights'])
+const BUILT = new Set(['tbd', 'similar', 'prospects', 'prospect', 'innings', 'contract', 'mound', 'form', 'season', 'firsts', 'pform', 'path', 'splits', 'contact', 'fouls', 'arsenal', 'pitchlog', 'plate', 'batlog', 'runvalue', 'percentile', 'target', 'advanced', 'milestones', 'hofpace', 'awards', 'command', 'moves', 'teams', 'photos', 'pfouls', 'highlights'])
 
 // A stub renders nothing, so Slot's probe hides its card (and a section whose every slot is a
 // stub loses its button) until the issue builds it: the live page never shows a "loads here"

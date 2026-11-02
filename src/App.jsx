@@ -160,6 +160,10 @@ const TeamTransactionsPage = lazyNamed(
   () => import('./screens/team/TeamTransactionsPage.jsx'),
   'TeamTransactionsPage',
 )
+const TeamFranchisePage = lazyNamed(
+  () => import('./screens/team/franchise/TeamFranchisePage.jsx'),
+  'TeamFranchisePage',
+)
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
 const OutliersPage = lazyNamed(() => import('./screens/outliers/OutliersPage.jsx'), 'OutliersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
@@ -235,10 +239,6 @@ const GameNotesDebugPage = lazyNamed(
 // unlike the two DEV-gated curation surfaces below it ships, reachable only by
 // direct URL (see lib/route.js).
 const AnimationLab = lazyNamed(() => import('./screens/AnimationLab.jsx'), 'AnimationLab')
-const BetweenInningsLab = lazyNamed(
-  () => import('./screens/BetweenInningsLab.jsx'),
-  'BetweenInningsLab',
-)
 const DesignLab = lazyNamed(() => import('./screens/designlab/index.jsx'), 'DesignLab')
 const WireLab = lazyNamed(() => import('./screens/designlab/wirelab/WireLab.jsx'), 'WireLab')
 const FirstScorebookPage = lazyNamed(
@@ -326,7 +326,6 @@ const BARE_ROUTES = {
   'run-value': RunValuePage,
   'game-notes-debug': GameNotesDebugPage,
   'animation-lab': AnimationLab,
-  'between-innings-lab': BetweenInningsLab,
   'design-lab': DesignLab,
   'wire-lab': WireLab,
   'first-scorebook': FirstScorebookPage,
@@ -341,6 +340,7 @@ const ID_ROUTES = {
   'team-stamp-in': StampInPage,
   'team-photos': TeamPhotosPage,
   'team-transactions': TeamTransactionsPage,
+  'team-franchise': TeamFranchisePage,
 }
 
 // Top-level router over the History API (no react-router — see lib/route.js).

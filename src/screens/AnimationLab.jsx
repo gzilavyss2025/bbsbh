@@ -2,11 +2,9 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BoxScoreSkeleton } from '../components/game/BoxScoreSkeleton.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
-import { Card } from '../components/ui/frame/Card.jsx'
-import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { PostponedBanner } from '../components/game/GameCardParts.jsx'
-import { CountBlink, Stat } from '../components/gamehud/StatBox.jsx'
-import { CLOSE_SEQUENCE_MS, INK_SET_MS, INK_SET_OVERSHOOT, TALLY_STAGGER_MS } from '../components/inning/focus/beats.js'
+import { CountBlink } from '../components/gamehud/StatBox.jsx'
+import { INK_SET_MS, INK_SET_OVERSHOOT } from '../components/inning/focus/beats.js'
 import { Entry, Frame } from './animlab/Entry.jsx'
 import {
   AtMarkDemo,
@@ -126,26 +124,6 @@ export function AnimationLab() {
       </Entry>
 
       <Entry
-        title="Weather delay — pop-in + rain loop"
-        note={
-          <>
-            A between-half-innings notice that play stopped (src/components/DelayCard.jsx) &mdash; the
-            card pops up on mount, and an unresolved delay keeps a small cloud dripping.
-          </>
-        }
-        live={<DelayCard delay={{ reason: 'Rain', durationMinutes: 42, resolved: false }} />}
-      >
-        <span className="animlab__stagelabel">Rain loop, one 1.7s cycle</span>
-        <div className="animlab__frozen">
-          {[0, 340, 680, 1020, 1360].map((ms) => (
-            <Frame key={ms} label={`${(ms / 1000).toFixed(2)}s`} delayMs={ms}>
-              <DelayCard delay={{ reason: 'Rain', durationMinutes: 42, resolved: false }} />
-            </Frame>
-          ))}
-        </div>
-      </Entry>
-
-      <Entry
         title="Postponed rubber stamp"
         note={
           <>
@@ -189,31 +167,6 @@ export function AnimationLab() {
           {[0, 400, 800, 1200, 1600].map((ms) => (
             <Frame key={`new-${ms}`} label={`${(ms / 1000).toFixed(1)}s`} delayMs={ms}>
               <CountBlink before="2–1" after="K" />
-            </Frame>
-          ))}
-        </div>
-      </Entry>
-
-      <Entry
-        title="Gameday — the half-close tally"
-        note={
-          <>
-            The console band&rsquo;s finished-half tally
-            (src/components/gamehud/HalfTally.jsx, ADR-0046) &mdash; the half committed, so
-            its eight cells ink in one at a time, 90ms apart, instead of a separate
-            hairline-and-figures display drawn under the at-bat card (this entry&rsquo;s
-            old demo). Made-up figures; this page never reads a game.
-          </>
-        }
-        live={<TallyCloseDemo />}
-      >
-        <span className="animlab__stagelabel">
-          The whole ~{CLOSE_SEQUENCE_MS}ms sequence
-        </span>
-        <div className="animlab__frozen">
-          {[0, 90, 270, 450, 630, 720].map((ms) => (
-            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
-              <TallyCloseDemo />
             </Frame>
           ))}
         </div>
@@ -494,37 +447,6 @@ export function AnimationLab() {
 
       <PlayerMotionLab />
     </div>
-  )
-}
-
-// A plausible half's line, invented. Same eight cells HalfTally.jsx draws.
-const TALLY_CELLS = [
-  { k: 'R', v: 2, tone: 'run' },
-  { k: 'H', v: 3 },
-  { k: 'E', v: 0 },
-  { k: 'LOB', v: 1 },
-  { k: 'Pitches', v: 18 },
-  { k: 'Whiffs', v: 4 },
-  { k: 'Fouls', v: 3 },
-  { k: '1st-pitch strikes', v: '3/5' },
-]
-
-// The real `.statline--console` grid wearing the real `.statline--closing`
-// class and `--tally-i`/`--tally-step` custom properties HalfTally.jsx sets,
-// at the made-up line above — not a copy of the keyframe, the same recipe
-// that file uses, minus the feed read (`Stat` itself never touches one).
-function TallyCloseDemo() {
-  return (
-    <Card as="div" body="flush" className="halftally">
-      <div
-        className="statline statline--console statline--closing"
-        style={{ '--tally-step': `${TALLY_STAGGER_MS}ms` }}
-      >
-        {TALLY_CELLS.map((c, i) => (
-          <Stat key={c.k} k={c.k} v={c.v} tone={c.tone} style={{ '--tally-i': i }} />
-        ))}
-      </div>
-    </Card>
   )
 }
 

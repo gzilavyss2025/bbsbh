@@ -48,7 +48,7 @@
     "wrap": 1
   },
   "src/styles/11-innings.css": {
-    "column": 3
+    "column": 2
   },
   "src/styles/11-pregame-scoreboard.css": {
     "grid": 3
@@ -59,7 +59,7 @@
     "grid": 4
   },
   "src/styles/13-play-by-play.css": {
-    "column": 4
+    "column": 2
   },
   "src/styles/14-strike-zone.css": {
     "column": 6,
@@ -373,16 +373,6 @@
     "column": 8,
     "wrap": 4,
     "grid": 3
-  },
-  "src/styles/focus/atbat.css": {
-    "column": 4,
-    "wrap": 1
-  },
-  "src/styles/focus/console.css": {
-    "column": 1
-  },
-  "src/styles/focus/reference.css": {
-    "column": 1
   },
   "src/styles/history/history.css": {
     "grid": 2

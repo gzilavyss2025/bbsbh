@@ -29,7 +29,7 @@ compared with in October.
 
 | Surface | Module | Tense |
 | --- | --- | --- |
-| Innings-view play cards | `buildCallouts` (`src/api/callout-notes.js`) via `PlayByPlay` | Entering + revealed plays only ("that's No. 16 this season") |
+| Innings-view play cards | `buildCallouts` (`src/api/callout-notes.js`), drawn by the old `PlayByPlay` until it was deleted (#2747) | Entering + revealed plays only ("that's No. 16 this season") |
 | Pre-half strip (no screen draws it since the Gameday swap, #2566; the generators still build it) | `buildPreHalfCallouts` (`src/api/prehalf-callouts.js`), read by `scripts/gen-callouts.mjs` and `audit-callouts.mjs` | Entering; the leading-after + times-through notes restate already-revealed material |
 | Margin Notes (spans both teams' pitchers; an input to Gameday's checkpoint notes since the swap, #2566) | `buildMarginNotes` (`src/api/pitcher-callouts.js`) via InningViewer into the checkpoint | Entering-tonight season aggregates + live health reads (laboring, velo decay), never result-aware — same footing as the pre-half strip |
 | Between Innings (Gameday's checkpoint Notes page, any revealed half) | `buildBetweenInnings` (`src/api/between-innings.js`) via `checkpoint/Checkpoint.jsx` | Same entering-tonight families as Margin Notes/the pre-half strip, through a stricter hard allowlist that drops every checkpoint family that reads tonight's score. In a World Series game it also builds `wsSeriesOdds` and `wsStarterStart` (score-free); `ws*` kinds are extra to `CARD_MAX`, never ranked or decayed, and lead the stack |
@@ -222,7 +222,7 @@ print seventeen times. Four rules answer that.
 - **The ledger.** `src/hooks/useCalloutLedger.js` remembers, per gamePk, which
   `dedupeKey` reached the screen on which HALF — distinct halves, never
   renders. It is a `Map` inside a React context mounted in `InningViewer`,
-  ABOVE every keyed boundary (`InningPage` and `BetweenInnings` both remount on
+  ABOVE every keyed boundary (the old `InningPage` and `BetweenInnings` both remounted on
   each half, which is exactly when the memory is needed), so a `SealBox`
   re-seal leaves it alone. It is deliberately NOT persisted: after a reload the
   reader is reading the page again and the strip must populate normally. It
@@ -266,7 +266,7 @@ pre-half strip (`prehalf-callouts.js`, `maxRecordNotes: 1`), Between Innings
 reference panel, #2566.) The builders stay pure — they
 are HANDED the counts (`shownCounts`) and only read them. A surface records
 what it showed from an effect, on the notes that actually reached the screen:
-Gameday's checkpoint marks the notes on its page (`SeenNotes`, as `BetweenInnings.jsx` marks only
+Gameday's checkpoint marks the notes on its page (`SeenNotes`, which marks only
 the card the reader advanced to). Play cards
 (`liveAtBat.js`) and the box-score roll-up stay outside all of this: neither
 ranks against a cap, and the roll-up's whole job is to restate (ADR-0014).

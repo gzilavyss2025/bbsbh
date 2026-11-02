@@ -1,0 +1,37 @@
+/* ==== HALL OF FAME PACE (the new player page, #1857) ====
+   One row per stat: his total, then the nearest Hall of Famers at the same age. Tokens only. */
+
+/* layout-exempt: one column of stat rows */
+.hofpace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.hofpace--loading {
+  min-height: 120px;
+}
+.hofpace__note,
+.hofpace__his {
+  margin: 0;
+}
+.hofpace__list,
+.hofpace__comps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* layout-exempt: a row is his total beside the comps */
+.hofpace__row {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+  padding-block: var(--space-2);
+  border-top: 1px solid var(--border-grid);
+}
+/* layout-exempt: name and total, one line */
+.hofpace__comp {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}

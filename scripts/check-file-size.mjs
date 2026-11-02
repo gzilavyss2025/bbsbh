@@ -73,7 +73,6 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // improvement. The 24 entries below are the stylesheet's remaining real debt,
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
-  'src/screens/InningViewer.jsx': 610, // 602: a trail chip moves Gameday's read-back cursor (2026-10-29); split before growing more
   // Every src/styles partial below is over the line for the same standing reason:
   // src/styles is AT its directory budget in check-dir-size.mjs (the partials are
   // an ordered @import sequence and cannot nest), so a new rule cannot go in a new
@@ -151,7 +150,6 @@ const BUDGETS = {
   // rest of the old page lives in src/screens/player/ — one screen per tab, each
   // well under the cap. That is the outcome this guard's third assertion exists
   // to force, so the entry is gone rather than tightened.
-  'src/components/playbyplay/PlayByPlay.jsx': 800, // 705
   'src/api/tradeDeadline.js': 700, // 629
   'src/App.jsx': 700, // 606
 }

@@ -72,10 +72,6 @@ for (const s of SITES) {
   })
 }
 
-test('E3: the .refpanel__empty rule is gone, with no ground left to paint', () => {
-  assert.equal(ruleBody(read('focus/reference.css'), '.refpanel__empty'), null)
-})
-
 // ReferencePanel and RosterPanel were deleted with the old innings screen (#2566), and their rules with them.
 test('E3: .roster__empty went with RosterPanel; .boxlines__empty keeps only a margin, never a second frame', () => {
   assert.equal(ruleBody(read('13-play-by-play.css'), '.roster__empty'), null)

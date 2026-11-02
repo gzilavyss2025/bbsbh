@@ -405,20 +405,3 @@ export function ZoneSheet({ note, batter, pitcher, onClose, children, head = tru
     </ModalPortal>
   )
 }
-
-// The strike-zone glyph for the mobile card's icon button: the batter's zone as
-// a 3×3 box with two pitch dots. Uses currentColor so it inherits ink on the
-// card and seal-ink on the amber button.
-export function StrikeZoneGlyph({ className = '' }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="5" y="3.5" width="14" height="17" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.7" />
-      <line x1="9.7" y1="3.5" x2="9.7" y2="20.5" stroke="currentColor" strokeWidth="1" opacity="0.7" />
-      <line x1="14.3" y1="3.5" x2="14.3" y2="20.5" stroke="currentColor" strokeWidth="1" opacity="0.7" />
-      <line x1="5" y1="9.2" x2="19" y2="9.2" stroke="currentColor" strokeWidth="1" opacity="0.7" />
-      <line x1="5" y1="14.8" x2="19" y2="14.8" stroke="currentColor" strokeWidth="1" opacity="0.7" />
-      <circle cx="12" cy="12" r="1.7" fill="currentColor" />
-      <circle cx="8" cy="17" r="1.4" fill="currentColor" />
-    </svg>
-  )
-}

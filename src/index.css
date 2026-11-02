@@ -131,7 +131,6 @@
 @import './styles/12-sealbox.css';
 @import './styles/12a-seal-tear.css';
 @import './styles/13-play-by-play.css';
-@import './styles/play-by-play/repeat-tag.css';
 /* The full Now Pitching card (#1344) — a subdirectory, since src/styles is at
    its file ratchet (scripts/check-dir-size.mjs). */
 @import './styles/pitcher-card/card.css';
@@ -144,7 +143,7 @@
 @import './styles/20-charts.css';
 /* The win-probability card, split out of 20-charts.css at the 600-line file
    cap (ADR-0038). A subdirectory, not a numbered sibling, for the reason
-   motion/ and focus/ are: src/styles is a flat directory at its own ratchet. */
+   motion/ is: src/styles is a flat directory at its own ratchet. */
 @import './styles/charts/winprob.css';
 @import './styles/21-box-score.css';
 @import './styles/21a-box-score-stars.css';
@@ -226,7 +225,7 @@
 /* The winter home page's rows, split out of 78-offseason.css at its file budget. */
 @import './styles/offseason/winter-home.css';
 /* Motion — the animation layer (the motion study, issues #976-#983). A
-   SUBDIRECTORY for the same reason focus/ below is one: src/styles is a flat
+   SUBDIRECTORY because src/styles is a flat
    directory at its own file ratchet (scripts/check-dir-size.mjs), the study
    landed rules on six surfaces at once, and four of the host partials were
    already at or over the file cap — which check-file-size.mjs says is never a
@@ -235,11 +234,7 @@
    reference them, and the hover states that exist purely to move something
    live here. check-typography, check-focus-ring and check-strike-links walk
    the tree as of the same commit, so these are guarded like any other partial.
-
-   BEFORE focus/, not after. focus/'s sheets stay last and win on cascade
-   order rather than specificity — a contract this
-   package must not quietly take away. Where a motion rule has to outrank one
-   of them it does so on specificity, not position. See motion/slate.css. */
+   See motion/slate.css. */
 @import './styles/motion/slate.css';
 @import './styles/motion/slate/masthead.css';
 @import './styles/motion/lineup.css';
@@ -252,17 +247,6 @@
 @import './styles/motion/menurail.css';
 @import './styles/motion/arrival.css';
 @import './styles/motion/board-in.css';
-
-/* Focus mode — the old innings console's parts (ADR-0043). Gameday mounts the
-   old half page hidden as its engine (src/screens/gameday/next/CLAUDE.md), and
-   the animation lab draws some of these parts, so these stay until the engine
-   goes. A subdirectory because src/styles is flat at its own ratchet
-   (ADR-0038). They stay LAST: every rule in them wins on cascade order. */
-@import './styles/focus/console.css';
-@import './styles/focus/dueup-next.css';
-@import './styles/focus/atbat.css';
-@import './styles/focus/bigplay.css';
-@import './styles/focus/reference.css';
 
 /* ------------------------------------------------------------
    Per-route partials — still in src/styles/, still numbered, still

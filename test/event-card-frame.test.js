@@ -63,13 +63,6 @@ test('the event tone is a stamped tone, and eventCardClass names the whole frame
 
 const CARD_FILES = [
   'components/playbyplay/PitcherNotice.jsx',
-  'components/playbyplay/BatterNotice.jsx',
-  'components/playbyplay/FielderNotice.jsx',
-  'components/playbyplay/PinchRunNotice.jsx',
-  'components/playbyplay/PitcherHandoffCard.jsx',
-  'components/playbyplay/EventCards.jsx',
-  'components/playbyplay/PlayByPlay.jsx',
-  'components/inning/HalfInning.jsx',
   'components/scoring/lens/PitcherSheet.jsx', // hands PitcherCard its frame
 ]
 const live = (code) => code.replace(/^\s*\/\/.*$/gm, '')
@@ -79,7 +72,7 @@ test('no notification card passes the Notice frame any more; each passes eventCa
     const code = live(src(rel))
     assert.doesNotMatch(code, /noticeClass\(/, `${rel} draws no Notice frame`)
     // PitcherNotice.jsx took no frame once ReliefRepeat left it (slice 3): its callers pass it.
-    if (!rel.endsWith('PinchRunNotice.jsx') && !rel.endsWith('BatterNotice.jsx') && !rel.endsWith('FielderNotice.jsx') && !rel.endsWith('PitcherNotice.jsx')) {
+    if (!rel.endsWith('PitcherNotice.jsx')) {
       assert.match(code, /eventCardClass\(/, `${rel} passes the stamped event frame`)
     }
   }
@@ -88,11 +81,6 @@ test('no notification card passes the Notice frame any more; each passes eventCa
 test('every card has a name tab that is its heading, drawn by .card__name', () => {
   const tabs = {
     'components/playbyplay/PitcherNotice.jsx': 1, // ActorHead: the four actor cards and the two handoff cards draw their tab here (slice 2)
-    'components/playbyplay/BatterNotice.jsx': 0,
-    'components/playbyplay/FielderNotice.jsx': 0,
-    'components/playbyplay/PinchRunNotice.jsx': 0,
-    'components/playbyplay/PitcherHandoffCard.jsx': 0,
-    'components/playbyplay/EventCards.jsx': 4, // mound visit, ejection, event, delay
   }
   for (const [rel, n] of Object.entries(tabs)) {
     const count = live(src(rel)).split('className="card__name"').length - 1
@@ -128,14 +116,6 @@ test('a row of an event card clears the tab: 28px above the body (24px on a moun
 test('a parent leaves 34px above a card (tab 14px, shadow 4px, room), 12px below, and the card keeps its 14px inset', () => {
   const card = ruleBody(css('12-sealbox.css'), '.card--event')
   assert.equal(card.match(/margin:\s*([^;]+);/)?.[1].trim(), 'calc(var(--space-6) + var(--space-2h)) var(--space-3h) var(--space-3)')
-})
-
-test('every shorthand code EventCard can get has a tab name, so no tab is empty', () => {
-  const cards = src('components/playbyplay/EventCards.jsx')
-  const codes = new Set([...cards.match(/export const EVENT_CODES = \{[\s\S]*?\n\}/)[0].matchAll(/: '([A-Z]{2})'/g)].map((m) => m[1]))
-  const names = new Set([...cards.match(/export const EVENT_NAMES = \{[\s\S]*?\n\}/)[0].matchAll(/\b([A-Z]{2}): '/g)].map((m) => m[1]))
-  assert.ok(codes.size >= 8)
-  for (const code of codes) assert.ok(names.has(code), `${code} has a tab name`)
 })
 
 test('the lens arm button keeps the Notice frame, and .change--framed keeps its margin and no-wrap for it', () => {
