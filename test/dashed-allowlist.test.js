@@ -18,8 +18,6 @@ const ALLOWED = {
   provisional: [
     ['06-loader-and-cards.css', '.postponed'],
     ['27-player-position-innings.css', '.asof-banner'], // as-of: the figures are pencilled to a date (Gary)
-    ['13-play-by-play.css', '.pbp__card--placed'],
-    ['13-play-by-play.css', '.pbp__placed'],
     ['player-next/both/contract.css', '.cnext__st--fa'], // free agency: not reached yet, the club may still sign him
     ['player-next/both/contract.css', '.cnext__bar--left'], // 2020: the contracted salary, not what the 60-game season paid
     ['player-next/both/contract.css', '.cnext__bar--gap'], // a season with a row and no figure

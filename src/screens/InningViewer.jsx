@@ -38,12 +38,11 @@ const RevealCloudSync = isClerkEnabled
 
 // Stand-in for `revealTo` while this game is stamped (see effectiveReveal's
 // `commitReveals`). Module-scope so its identity is stable
-// across renders, and a real function rather than undefined because HalfInning
-// calls onReveal directly, not via `?.()` — the same reason InningPage.jsx keeps
-// its own `noop` for the page-turn preview.
+// across renders, and a real function rather than undefined because the engine's
+// SealBox calls onReveal directly, not via `?.()`.
 const noopReveal = () => {}
 
-// Value-equality checks for the other two things PlayByPlay reports back up
+// Value-equality checks for the other two things GamedayEngine reports back up
 // (`runsInProgress`, `stepInfo`), for exactly the reason `sameLiveState` (lib/scorebug/liveState.js)
 // exists: each report arrives as a freshly-built object every time, so a plain
 // setState replaced state — and re-rendered this whole tree — even when the
@@ -217,8 +216,7 @@ export function InningViewer({
   const goTo = (idx) => onInning(Math.floor(idx / 2) + 1, idx % 2 === 0 ? 'top' : 'bottom')
 
   // Runs AND hits so far in the half currently being STEPPED through
-  // (ADR-0016) — reported up from PlayByPlay (via HalfInning/InningPage, see
-  // onRunsSoFar) so RollingLine's cell and R/H totals build up as you reveal
+  // (ADR-0016) — reported up from GamedayEngine (see onRunsSoFar) so the line score's cell and R/H totals build up as you reveal
   // the half, instead of staying blank until it commits. No such signal
   // exists yet for errors (no per-entry classification like HIT_EVENT_TYPES),
   // so E still only moves once revealedThrough advances. Reset on every half
@@ -235,17 +233,16 @@ export function InningViewer({
 
   // The persistent scorebug HUD's live snapshot (components/gamehud/HeaderBug.jsx):
   // batter/pitcher/bases/outs for the half on screen, reported up from
-  // HalfInning (see its own onLiveState doc — the entering-fallback baseline
-  // before any of a half is revealed, PlayByPlay's own cap-respecting
-  // snapshot once stepping starts). Tagged with the half-index it belongs to
+  // GamedayEngine (the entering-fallback baseline before any of a half is
+  // revealed, the half report's cap-respecting snapshot once stepping starts). Tagged with the half-index it belongs to
   // (`forIdx`), same `forIdx`-tagged-and-trusted-only-on-match pattern
   // `stepInfo` above already uses for an identical race: `entries` is
-  // rebuilt fresh every render in PlayByPlay.jsx (no memoization), so a
+  // rebuilt on every report from GamedayEngine, so a
   // composite snapshot object arrives with a new identity every render even
   // when its content hasn't changed — `sameLiveState` below is the value-
   // equality guard that keeps that from turning into a re-render loop
   // (setState only actually replaces state when the CONTENT differs, not
-  // just the reference). A page-turn transition or half navigation lands on
+  // just the reference). A half navigation lands on
   // a fresh idx before that half's own effect has fired even once — reading
   // `liveState` through `forIdx === curIdx` below naturally falls back to
   // "nothing to show yet" rather than rendering the half just left behind.
@@ -308,19 +305,19 @@ export function InningViewer({
   const curAtBatCount = atBatCountFor(effInning, effHalf)
   // What the engine and the panels may show: the stored count, moved to the sub-step's own
   // substitutions (stepCapAt: a change shows on its own tap, never with the result before it).
-  // Stable across renders like atBatCountFor itself, so InningPage's memo still holds.
+  // Stable across renders like atBatCountFor itself, so the engine's props stay stable.
   const engineCountFor = useCallback((inning, half) => stepCapAt(feed, inning, half, atBatCountFor(inning, half), subFor(inning, half)), [feed, atBatCountFor, subFor])
   // What the NEXT "reveal next at-bat" tap should pass to revealAtBat — null
-  // until HalfInning/PlayByPlay has actually computed the half's entries
+  // until the half report has actually computed the half's entries
   // (nothing to report before the first tap, which just starts at 1).
   // Tagged with the half-index it was computed for (forIdx) and only trusted
   // when that still matches curIdx, rather than cleared via a separate
-  // `useEffect(..., [curIdx])`: that reset raced against PlayByPlay's own
+  // `useEffect(..., [curIdx])`: that reset raced against the engine's own
   // mount-time report-back effect (a child effect fires before a parent's in
   // the same commit), so navigating back into an already-partially-stepped
   // half could have the freshly-computed, correctly-bundled nextCap
   // immediately clobbered back to null by this component's own reset —
-  // silently reintroducing the exact "stranded lone note" bug PlayByPlay's
+  // silently reintroducing the exact "stranded lone note" bug the half report's
   // effectiveCap fix exists to eliminate, just for the resume case instead of
   // the fresh-first-tap case. Tagging makes a stale value from a half the
   // user has since navigated away from self-invalidate on read, with no
@@ -329,11 +326,11 @@ export function InningViewer({
 
   // The three things a half-inning page reports back up. Each takes the
   // reporting half's own index as its first argument, so all three can be
-  // stable for the life of the component: `InningPage` is memoized, and a memo
+  // stable for the life of the component: the old `InningPage` was memoized, and a memo
   // boundary is only worth anything if the props crossing it keep their
   // identity — an arrow rebuilt per render would miss on every render.
   //
-  // Each is value-guarded. PlayByPlay rebuilds its report object on every render
+  // Each is value-guarded. the half report rebuilds its report object on every render
   // (its `entries` are a reveal-only derivation, so they cannot be memoized
   // above the seal — ADR-0001), and replacing state on an unchanged report is
   // what turned one report into another render into another report: one
@@ -358,7 +355,7 @@ export function InningViewer({
 
   const curStepInfo = stepInfo?.forIdx === curIdx ? stepInfo : null
   // Nothing left in the feed to step to, on a half that is still being played
-  // (ADR-0055). Only ever true while `currentHalfLive` — PlayByPlay reports it
+  // (ADR-0055). Only ever true while `currentHalfLive` — GamedayEngine reports it
   // as `capReached && !halfInProgress ? commit : atHalfEdge`, so the two can't
   // disagree — but the `&&` is kept here anyway: this drives a control the
   // reader taps, and a stale report from a half they have since navigated off
@@ -367,9 +364,9 @@ export function InningViewer({
   // guarantee: this component has no legitimate way to know whether the
   // half's first entry is a leading event note rather than a plate
   // appearance (computeHalfInningFeed is reveal-only, ADR-0001, so it can't
-  // be consulted from here ahead of PlayByPlay's own render). stepCapAt
+  // be consulted from here ahead of the engine's own render). stepCapAt
   // (engineCountFor) corrects an understated cap forward to the first step's
-  // boundary, and PlayByPlay keeps it past the first at-bat card — a new
+  // boundary, and the half report keeps it past the first at-bat card — a new
   // stepping entry point that bypasses both must preserve that correction, or
   // the "reveal just a lone note" bug this pairing exists to prevent comes
   // back.
@@ -465,8 +462,8 @@ export function InningViewer({
 
   // The per-game record of which callout notes this reader has already been
   // shown (src/hooks/useCalloutLedger.js), provided to the whole subtree below.
-  // It lives HERE, above every keyed boundary: InningPage and BetweenInnings
-  // both remount on each half — exactly when the ledger has to remember — and
+  // It lives HERE, above every keyed boundary: the old InningPage and BetweenInnings
+  // both remounted on each half — exactly when the ledger has to remember — and
   // this component does not. It stores dedupeKeys and half indices, nothing
   // else, and can only ever remove a note from a ranked list.
   const calloutLedger = useCalloutLedgerValue(feed?.gamePk)
@@ -491,7 +488,7 @@ export function InningViewer({
   }
 
   // The advance: a step in the mode's words, else the next half, "Close the book" or the box score. It
-  // keeps its holds: no step while the page turns, no forward move while the half closes (ADR-0046).
+  // keeps its hold: no forward move while the half closes (ADR-0046).
   // The live edge inside an at-bat still being played: a flag only, on a half in play (ADR-0055).
   const edge = atLiveEdge(atHalfEdge, currentHalfLive && currentSealed ? nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode) : null)
   const advance = focus.stepAhead

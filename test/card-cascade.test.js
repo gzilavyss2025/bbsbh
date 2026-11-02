@@ -754,8 +754,6 @@ test('C2: every fact grid is a FactGrid: one .factgrid__grid inside one .factgri
     assert.doesNotMatch(code, /factgrid__grid/, `${rel} builds no fact grid of its own`)
     assert.equal(cardTags(code).filter((attrs) => namesClass(attrs, 'factgrid')).length, 0, `${rel}: no hand-built .factgrid Card`)
   }
-  // The co-classes that sized the old grid now size its inner grid.
-  assert.equal(decl(ruleBody(read('focus/reference.css'), '.refextras__grid .factgrid__grid'), 'grid-template-columns'), '1fr')
 })
 
 
@@ -793,8 +791,6 @@ test('C2: the ball-flight card keeps its raised shadow', () => {
 // .lineupcard is .entering, and the wide ABS frame .abscard is .absframe (not
 // .abs, which is the ABS block inside it).
 const C4 = [
-  // The whole .half rule was the frame, so it is gone (`gone`).
-  { css: '11-innings.css', sel: '.half', jsx: ['components/inning/HalfInning.jsx'], ns: 'half', gone: true },
   // The lineup card is the stamped frame now (the lineup page's paper look): `frame` names it.
   // The Card only clips: the Table inside it is the scroller (#1132, slice T3),
   // so the Card's own overflow-x rule is gone. The running line wears the
@@ -802,9 +798,6 @@ const C4 = [
   // (a fit-width card from 740px), never a second frame.
   { css: 'charts/winprob.css', sel: '.winprob', jsx: ['components/charts/WinProbChart.jsx'], ns: 'winprob' },
   // ADR-0009: the table is gated by revealedThrough in the caller, not here.
-  // The animation lab draws the real tally, so it wears the real frame too.
-  { css: 'focus/console.css', sel: '.halftally', jsx: ['components/gamehud/HalfTally.jsx', 'screens/AnimationLab.jsx'], ns: 'halftally' },
-  { css: 'focus/console.css', sel: '.betweeninnings', jsx: ['components/gamehud/BetweenInnings.jsx'], ns: 'betweeninnings', as: 'button' },
 ]
 const bareC4 = (ns) =>
   new RegExp(`<(div|section|li|article|button)\\s+(type="button"\\s+)?(key=\\{[^}]+\\}\\s+)?className=\\{?["'\`]${ns}(?![\\w-])`)
@@ -844,9 +837,6 @@ test('C4: each block keeps its own margin and inset', () => {
     ['12-sealbox.css', '.halfdefense', 'margin', '12px 14px 0'],
     ['charts/winprob.css', '.winprob', 'margin-bottom', 'var(--space-4)'],
     ['charts/winprob.css', '.winprob', 'padding', 'var(--space-3) var(--space-3h) var(--space-2h)'],
-    ['focus/console.css', '.halftally', 'margin', '0'],
-    ['focus/console.css', '.halftally', 'min-width', '0'],
-    ['focus/console.css', '.betweeninnings', 'padding', 'var(--space-3)'],
   ]
   for (const [css, sel, prop, value] of kept) {
     assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
@@ -903,15 +893,12 @@ test('C4: the box score defence stays unframed, and BoxScore.jsx takes no Card f
 // approved re-pinning the two new files. The containment test below keeps
 // them reachable only from that render site.
 const C4_SEAL = {
-  'components/inning/HalfInning.jsx': { reveal: ['gameday/engine/engineLive.js', 'highlights.js', 'hitchart.js'], sealBoxes: 1, revealedThrough: 10 },
   // #2747 row 2a, re-pinned with Gary's approval (as in row 1b): the engine's one SealBox. The reveal-only
   // imports are the two engine modules (halfReport reads the half's plays; engineLive composes the snapshot).
   'screens/gameday/next/engine/GamedayEngine.jsx': { reveal: ['gameday/engine/engineLive.js', 'gameday/engine/halfReport.js'], sealBoxes: 1, revealedThrough: 6 },
   'api/gameday/engine/halfReport.js': { reveal: ['playbyplay.js'], sealBoxes: 0, revealedThrough: 0 },
   'api/gameday/engine/engineLive.js': { reveal: ['boxscore.js', 'playbyplay.js'], sealBoxes: 0, revealedThrough: 7 },
   'components/charts/WinProbChart.jsx': { reveal: ['winprob.js'], sealBoxes: 0, revealedThrough: 0 },
-  'components/gamehud/HalfTally.jsx': { reveal: ['derive.js', 'linescore.js'], sealBoxes: 1, revealedThrough: 0 },
-  'components/gamehud/BetweenInnings.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 3 },
   'screens/BoxScore.jsx': { reveal: ['challenges.js'], sealBoxes: 1, revealedThrough: 0 },
   'screens/boxscore/InsightCards.jsx': { reveal: ['boxscore.js'], sealBoxes: 0, revealedThrough: 0 },
   'screens/boxscore/GameNotes.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
@@ -2239,16 +2226,6 @@ test('H3: the held rows keep their names', () => {
       `.${name} lost its rule`,
     )
   }
-})
-
-test('H3: the between-innings button is still named by its fact', () => {
-  const jsx = readFileSync(join(SRC, 'components/gamehud/BetweenInnings.jsx'), 'utf8')
-  const button = jsx.slice(jsx.indexOf('<Card as="button"'), jsx.indexOf('</Card>'))
-  // The name comes from the content: the progress count, the player and the fact.
-  // An aria-label would replace it and hide the fact from a screen reader.
-  assert.match(button, /betweeninnings__progress/)
-  assert.match(button, /\{card\.text\}/)
-  assert.doesNotMatch(button, /aria-label/)
 })
 
 // The new box-score files hold reveal-only reads, so they may be imported only by

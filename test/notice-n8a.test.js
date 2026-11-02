@@ -91,12 +91,7 @@ test('N8a: .change__shot, --logo and --fallback exist in 12-sealbox.css', () => 
 
 test('N8a: the callers of the well use the new name; the :has rule names the whole family by it (N8c)', () => {
   assert.match(css('12-sealbox.css'), /\.change:has\(\.change__entering\) \.change__shot\s*\{/)
-  assert.match(css('13-play-by-play.css'), /\.pbp__batshot \.change__shot\s*\{/)
   assert.match(css('26-player-page.css'), /\.change__shot img\[data-pending\]\s*\{/)
-  const atbat = css('focus/atbat.css')
-  assert.match(atbat, /\.abhero__shot \.change__shot\s*\{/)
-  assert.match(atbat, /\.abhero__shot \.change__shot img\s*\{/)
-  assert.match(atbat, /\.abhero__shot--bat \.change__shot,\s*\.abhero__shot--arm \.change__shot\s*\{/)
 })
 
 test('N8a: PitcherNotice.jsx builds the well class with the new name', () => {

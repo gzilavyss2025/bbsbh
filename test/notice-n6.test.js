@@ -16,7 +16,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { dirname, join, relative } from 'node:path'
+import { dirname, join } from 'node:path'
 import { stripComments, ruleBody } from './helpers/css.js'
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', 'src')
@@ -29,84 +29,6 @@ const decl = (body, property) =>
     .find((d) => d.startsWith(`${property}:`))
     ?.slice(property.length + 1)
     .trim()
-// The text of one exported function, up to the next top-level function.
-const fn = (code, name) => {
-  const at = code.indexOf(`export function ${name}(`)
-  assert.ok(at >= 0, `${name} exists`)
-  const end = code.slice(at + 1).search(/\n(export )?function /)
-  return end < 0 ? code.slice(at) : code.slice(at, at + 1 + end)
-}
-
-// ---- 1. the seal pin ----
-
-// THE SEAL PIN. Written before this slice changed a line: for each file the
-// slice touches or mounts from, the reveal-only modules it imports
-// (src/api/spoiler-manifest.json; a "mixed" module counts when a sealed export
-// is imported), and how many SealBoxes and revealedThrough reads it holds, as
-// measured on origin/main at 118f08809. A frame move changes none of these. If
-// this fails, the slice moved a seal: stop and ask, never update the literal.
-const N6_SEAL = {
-  'components/playbyplay/EventCards.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/PitcherHandoffCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/PlayByPlay.jsx': { reveal: ['gameday/engine/halfReport.js', 'playbyplay.js'], sealBoxes: 0, revealedThrough: 1 },
-  'components/inning/HalfInning.jsx': { reveal: ['gameday/engine/engineLive.js', 'highlights.js', 'hitchart.js'], sealBoxes: 1, revealedThrough: 10 },
-}
-const SPOILER_MANIFEST = JSON.parse(src('api/spoiler-manifest.json')).modules
-
-function revealOnlyImports(rel) {
-  const code = src(rel)
-  const found = new Set()
-  for (const m of code.matchAll(/^import\s+([^'"]*?)\s+from\s+['"](\.[^'"]+)['"]/gm)) {
-    const target = join(dirname(join(SRC, rel)), m[2])
-    const fromApi = relative(join(SRC, 'api'), target).replaceAll('\\', '/')
-    const apiRel = fromApi.startsWith('..') ? null : fromApi
-    const entry = apiRel && SPOILER_MANIFEST[apiRel]
-    if (!entry) continue
-    const names = (m[1].match(/\{([^}]*)\}/)?.[1] ?? '').split(',').map((n) => n.trim().split(/\s+as\s+/)[0]).filter(Boolean)
-    if (entry.class === 'reveal-only') found.add(apiRel)
-    else if (entry.class === 'mixed' && names.some((n) => entry.revealOnlyExports.includes(n))) found.add(apiRel)
-  }
-  return [...found].sort()
-}
-
-test('N6: the seal pin — no reveal-only import, SealBox or revealedThrough read moved', () => {
-  for (const [rel, want] of Object.entries(N6_SEAL)) {
-    const code = src(rel)
-    assert.deepEqual(revealOnlyImports(rel), want.reveal, `${rel}: its reveal-only imports changed`)
-    assert.equal((code.match(/<SealBox\b/g) ?? []).length, want.sealBoxes, `${rel}: a SealBox was added or removed`)
-    assert.equal((code.match(/revealedThrough/g) ?? []).length, want.revealedThrough, `${rel}: a revealedThrough read moved`)
-  }
-})
-
-// ---- 2. the roots ----
-
-// ADR-0113 moved the six roots from the Notice frame to the stamped event card.
-const HELPER = /import \{ eventCardClass \} from '\.\.\/\.\.\/lib\/design\/cardClass\.js'/
-
-test('N6: the four event bars take the event frame from noticeClass and keep their own classes', () => {
-  const code = src('components/playbyplay/EventCards.jsx')
-  assert.match(code, HELPER)
-  const bar = '<div className={`change ${eventCardClass()} change--event'
-  assert.ok(fn(code, 'MoundVisitBar').includes(`${bar} change--mv\`}>`), 'the mound visit keeps change--mv')
-  for (const name of ['EjectionBar', 'EventCard', 'DelayNotice']) {
-    assert.ok(fn(code, name).includes(`${bar}\`}>`), `${name}'s root`)
-  }
-  assert.doesNotMatch(code, /className=[^>]*change--framed/, 'no event bar wears the old frame')
-})
-
-test('N6: the two handoff cards take the event frame on their Stack and keep their inner layout', () => {
-  const code = src('components/playbyplay/PitcherHandoffCard.jsx')
-  assert.match(code, HELPER)
-  for (const name of ['DepartureLineCard', 'FinalizedLineCard']) {
-    const body = fn(code, name)
-    // Slice 3 (ADR-0113): the root also carries the arrival's class list (useArrival).
-    assert.ok(body.includes("<Stack gap=\"snug\" className={`${eventCardClass('pitcherhandoff')} ${arrival}`}>"), `${name}'s root`)
-    assert.ok(body.includes('<div className="change">'), `${name} keeps its header row`)
-    assert.ok(body.includes('<PitcherLineTable line={line}'), `${name} keeps its table`)
-  }
-  assert.doesNotMatch(code, /change--framed/, 'no handoff card wears the old frame')
-})
-
 // ---- 3. the namespaces ----
 
 // THE GAP AND THE STRETCH. ADR-0113 moved the margin onto .card--event (the
@@ -142,10 +64,8 @@ test('N6: .change--framed keeps the margin and no-wrap for the lens button, and 
   assert.equal(decl(frame, 'margin'), 'var(--space-1) var(--space-3h)')
   assert.equal(decl(frame, 'flex-wrap'), 'nowrap')
   for (const prop of ['padding', 'border', 'border-radius', 'background', 'box-shadow']) assert.equal(decl(frame, prop), undefined, `.card--event draws the ${prop}`)
-  // Slice 3 (ADR-0113): ReliefRepeat is gone, so PitcherNotice.jsx no longer passes the frame; the repeat is a PlayByPlay caller of the full card.
+  // Slice 3 (ADR-0113): ReliefRepeat is gone, so PitcherNotice.jsx no longer passes the frame.
   for (const rel of [
-    'components/playbyplay/PlayByPlay.jsx',
-    'components/inning/HalfInning.jsx',
     'components/scoring/lens/PitcherSheet.jsx',
   ]) {
     assert.match(src(rel), /\{eventCardClass\('change--framed'\)\}/, `${rel} wears the helper`)

@@ -17,9 +17,9 @@ surfaces and need no seal; do not add a `SealBox` to one of those (ADR-0034).
 
 `linescore.js`, `derive.js` and `hitchart.js` are **reveal-only** modules — callable only from
 inside a `SealBox`'s reveal render function, never at render top-level or in an
-eager `useMemo` (ADR-0001). `highlights.js`'s join (`highlightsByPlayId`) is
-reveal-only in the same sense: a clip's title narrates the play, so the map is built
-inside `HalfInning`'s `SealBox` reveal function. The fetches themselves (`fetchHighlights`,
+eager `useMemo` (ADR-0001). `highlights.js`'s play joins (`highlightForPlay`, `eligibleHighlightForPlay`) are
+reveal-only in the same sense: a clip's title narrates the play, so they are read
+inside a revealed play's render. The fetches themselves (`fetchHighlights`,
 `fetchWinProbability`) are safe eagerly, since a raw fetch result produces no DOM;
 `useGameData` still waits for the consuming surface to open (`useEverActive`).
 `select.js` is spoiler-**free**. In between sit **caller-gated pre-pitch selectors**

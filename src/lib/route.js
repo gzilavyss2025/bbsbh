@@ -68,7 +68,6 @@
 //                                          '?team=' opens on one MLB club, 'all' on every club, else the default)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
-//   '/between-innings-lab'              -> { name: 'between-innings-lab' }  (unlisted QA page)
 //   '/design-lab'                       -> { name: 'design-lab' }  (unlisted design-system catalog)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/logbook'                           -> { name: 'logbook', season: null }  (your game stamps, newest season)
@@ -450,10 +449,6 @@ export function parseRoute(url) {
   // frozen stage-by-stage — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'animation-lab')
     return { name: 'animation-lab' }
-  // Unlisted QA page cataloging the post-half hold's card set against
-  // synthetic fixtures — no score/reveal content, safe to ship.
-  if (parts.length === 1 && parts[0] === 'between-innings-lab')
-    return { name: 'between-innings-lab' }
   // Unlisted catalog of the design system — every token, shared component and
   // card/pill block, drawn from invented fixtures. No score/reveal content,
   // safe to ship (issue #1112).

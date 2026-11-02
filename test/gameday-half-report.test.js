@@ -350,9 +350,9 @@ for (const pk of [824716, 823035]) {
   })
 }
 
-// The call site's real combination (PlayByPlay.jsx): `halfInProgress` from InningViewer and `codeOf`
-// from EVENT_CODES. EVENT_CODES lives in a .jsx file the node suite cannot import, so a stand-in
-// proves the live-half flag through halfReport (neither fixture has a standalone event, so codeOf's output is not asserted) and a source read proves PlayByPlay passes both.
+// The call site's real combination (GamedayEngine.jsx): `halfInProgress` from InningViewer and `codeOf`
+// from EVENT_CODES. A stand-in proves the live-half flag through halfReport (neither fixture has a standalone event,
+// so codeOf's output is not asserted) and a source read proves GamedayEngine passes both.
 test('a half still being played: the last step is withheld and reported as the live edge (ADR-0055)', () => {
   const feed = load(824716)
   const cap = stepCapAt(feed, 1, 'top', 4, 0) // the third out's step: commits when the half is over
@@ -364,7 +364,7 @@ test('a half still being played: the last step is withheld and reported as the l
   assert.equal(live.isLastStep, true)
 })
 
-test('PlayByPlay hands halfReport the live-half flag and the EVENT_CODES lookup', () => {
-  const code = readFileSync(new URL('../src/components/playbyplay/PlayByPlay.jsx', import.meta.url), 'utf8')
+test('GamedayEngine hands halfReport the live-half flag and the EVENT_CODES lookup', () => {
+  const code = readFileSync(new URL('../src/screens/gameday/next/engine/GamedayEngine.jsx', import.meta.url), 'utf8')
   assert.match(code, /halfReport\(feed, inning, half, battingSide, stepCap, \{ halfInProgress, windowed, focusStep, codeOf: \(t\) => EVENT_CODES\[t\] \}\)/)
 })

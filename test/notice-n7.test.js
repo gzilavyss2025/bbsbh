@@ -41,15 +41,10 @@ const decl = (body, property) =>
 // measured on origin/main at f150612ab. A frame move changes none of these. If
 // this fails, the slice moved a seal: stop and ask, never update the literal.
 const N7_SEAL = {
-  'components/inning/HalfInning.jsx': { reveal: ['gameday/engine/engineLive.js', 'highlights.js', 'hitchart.js'], sealBoxes: 1, revealedThrough: 10 },
-  'components/playbyplay/PlayByPlay.jsx': { reveal: ['gameday/engine/halfReport.js', 'playbyplay.js'], sealBoxes: 0, revealedThrough: 1 },
   'components/scoring/lens/PitcherSheet.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/playbyplay/PitcherNotice.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/scoring/lens/LensCards.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/playbyplay/pitcherCard/PitcherCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/BatterNotice.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/FielderNotice.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/PinchRunNotice.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'screens/scorecard/ScorecardPage.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 7 },
 }
 const SPOILER_MANIFEST = JSON.parse(src('api/spoiler-manifest.json')).modules
@@ -86,13 +81,11 @@ const FRAME = "eventCardClass('change--framed')"
 const HELPER = /^import \{ eventCardClass \} from '(\.\.\/)+lib\/design\/cardClass\.js'$/m
 // file -> how many of its card props take the frame from the helper
 const CALLERS = {
-  'components/inning/HalfInning.jsx': 3, // the Now Pitching card, the staged batter and fielder
-  'components/playbyplay/PlayByPlay.jsx': 4, // mid-half pitcher (and, slice 3, its lead-in repeat), fielder, pinch runner, pinch hitter
   'components/scoring/lens/PitcherSheet.jsx': 1, // the full card in the lens sheet
 }
 const count = (code, s) => code.split(s).length - 1
 
-test('N7: the nine call sites pass the event frame from noticeClass, never the bare class', () => {
+test('N7: the call site passes the event frame from noticeClass, never the bare class', () => {
   for (const [rel, n] of Object.entries(CALLERS)) {
     const code = src(rel)
     assert.match(code, HELPER, `${rel} imports noticeClass`)
@@ -113,12 +106,10 @@ test('N7: ArmNotice is still one <button> and keeps the Notice frame (ADR-0113 l
 // the full card renders PitcherNotice bare inside div.pcard, so its header draws
 // no second frame.
 test('N7: the role roots keep the caller\'s className, and the full card\'s header stays bare', () => {
-  for (const name of ['PitcherNotice', 'BatterNotice', 'FielderNotice', 'PinchRunNotice']) {
-    const code = src(`components/playbyplay/${name}.jsx`)
-    assert.ok(code.includes('<div className={`change ${className}`}>'), `${name}'s root`)
-    const live = code.replace(/^\s*\/\/.*$/gm, '') // a comment may name the helper
-    assert.equal(count(live, 'eventCardClass('), 0, `${name} does not draw the frame itself`)
-  }
+  const code = src('components/playbyplay/PitcherNotice.jsx')
+  assert.ok(code.includes('<div className={`change ${className}`}>'), "PitcherNotice's root")
+  const live = code.replace(/^\s*\/\/.*$/gm, '') // a comment may name the helper
+  assert.equal(count(live, 'eventCardClass('), 0, 'PitcherNotice does not draw the frame itself')
   const card = src('components/playbyplay/pitcherCard/PitcherCard.jsx')
   // The root also carries the pitching club's theme properties as `style` (ADR-0030's 2026-10-14 addendum); the frame class still lands on it.
   // Slice 3 (ADR-0113) adds the arrival's class list and moves the club paint to bandPaint.
@@ -151,12 +142,4 @@ test('N7: .pcard stretches its sections, does not wrap and keeps its gap', () =>
   assert.equal(decl(body, 'align-items'), 'stretch')
   assert.equal(decl(body, 'flex-wrap'), 'nowrap')
   assert.equal(decl(body, 'gap'), 'var(--space-2h)')
-})
-
-// ---- 5. the console ----
-
-// The lone-staged-card rule went with the old due-up console (#2566); the console still never
-// names the old event class.
-test('N7: the console never names .notice--event', () => {
-  assert.doesNotMatch(css('focus/console.css'), /notice--event/)
 })

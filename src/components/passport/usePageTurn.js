@@ -6,14 +6,14 @@ import { clamp } from '../../lib/math/number.js'
 // open, and whether a leaf is mid-flip.
 //
 // ===========================================================================
-// Why this is NOT src/components/page-turn/
+// Why this is NOT the inning viewer's page turn
 // ===========================================================================
-// The app already has a page-turn transition (InningPageTurn.jsx, ADR-0024)
-// and it was the first thing considered here. It doesn't fit a book, for
+// The app had a page-turn transition (InningPageTurn.jsx, ADR-0024; deleted in
+// #2747) and it was the first thing considered here. It doesn't fit a book, for
 // three structural reasons rather than cosmetic ones:
 //
 //   1. It is forward-only by design. `isForward`/`isEligibleForCurl` in
-//      pageTurnState.js exist because an inning you have not revealed is
+//      its pageTurnState.js existed because an inning you have not revealed is
 //      unreachable (ADR-0008), so "backward" there means "no animation".
 //      A book turns back as often as forward, and the backward turn is the
 //      same physical motion played the other way — not a fallback.
@@ -41,7 +41,7 @@ import { clamp } from '../../lib/math/number.js'
 // leaf that animates carries the spread we just LEFT (`from`). The live DOM
 // is therefore always the page the user is actually on — an interrupted,
 // backgrounded, or unmounted turn can never strand the book on the wrong
-// page, the leaf just stops. (InningPageTurn commits at the END of its turn
+// page, the leaf just stops. (The inning turn committed at the END of its turn
 // because it must not advance the reveal mark early; nothing here has a
 // reveal mark to advance.)
 

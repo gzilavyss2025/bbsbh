@@ -33,14 +33,8 @@
 // Every number here is meant to be felt and adjusted. They are the single
 // source of truth for BOTH halves of each beat: the JS timers read them
 // directly, and the CSS reads them through inline custom properties the
-// components set (`--ink-set`, `--ink-overshoot`, `--tally-step`), so there is
+// components set (`--ink-set`, `--ink-overshoot`), so there is
 // no second copy in a stylesheet to drift out of step with these.
-
-// (1) THE BEAT — the hold between an at-bat card arriving and its scorebook
-// denotation printing. The pitch ladder and the batter's name are up for this
-// whole window; only the denotation cell is blank. Start here and adjust by
-// feel; nothing else depends on the exact value.
-export const DENOTATION_HOLD_MS = 180
 
 // The ink-set that lands the mark: a scale overshoot settling to rest, no
 // colour change and no rebound — a mark pressed onto paper, not a bounce.
@@ -54,43 +48,21 @@ export const DENOTATION_HOLD_MS = 180
 //
 // Tune the two independently: OVERSHOOT is how hard the mark is pressed,
 // INK_SET_MS is how long it takes to settle. Nothing else needs editing —
-// PlayByPlay.jsx publishes both to the CSS as inline custom properties.
+// the animation lab publishes both to the CSS as inline custom properties.
 export const INK_SET_MS = 220
 export const INK_SET_OVERSHOOT = 1.25
 
-// (2) THE TALLY — the half commits, and its console-band card (HalfTally.jsx)
-// is what marks it: the card's eight cells ink in one at a time instead of
-// just appearing. This USED to be a separate hairline-plus-four-figures
-// display of its own (HalfClose.jsx/HalfCloseRule.jsx, ADR-0046) drawn under
-// the at-bat card — retired because it repeated four of the eight numbers the
-// console band already prints a beat later, in a second place, in a second
-// type treatment. The ink now lands on the numbers that were already going to
-// be there.
-export const TALLY_STAGGER_MS = 90
-
-// Eight cells: R, H, E, LOB, Pitches, Whiffs, Fouls, 1st-pitch strikes — the
-// grid HalfTally.jsx draws. Named rather than typed as a bare 8 below, because
-// CLOSE_SEQUENCE_MS and HalfTally's own cell count have to agree about it or
-// the sequence ends before its last cell is in.
-export const TALLY_CELL_COUNT = 8
-
-// The whole close, end to end: the last cell starts one stagger after the
-// second-to-last. The forward action on the bar is held for exactly this long
-// (or until any tap cuts it short) and no longer.
-export const CLOSE_SEQUENCE_MS = (TALLY_CELL_COUNT - 1) * TALLY_STAGGER_MS
+// (2) THE CLOSE — the forward action on the bar is held for exactly this long
+// (or until any tap cuts it short) and no longer. It was (8 cells - 1) * 90ms
+// while the half tally inked in cell by cell; the tally is gone (#2747) but the
+// hold keeps its length, so a forward half move times exactly as it did.
+export const CLOSE_SEQUENCE_MS = 630
 
 // (2b) THE STEP HOLD — on a half read back (#1539), "Next at-bat ›" turns into
 // the next-half advance in the same bar slot when it lands on the last at-bat.
 // The advance is held this long, so a fast second tap cannot turn the page.
 // A plain timer: no tap cuts it short, because the stray tap is the thing held.
 export const STEP_HOLD_MS = 400
-
-// (2c) THE BIG-PLAY STAMP — how long the stamp (BigPlayStamp.jsx) stays up
-// after a big play's denotation has inked. A map of literals, one per kind of
-// play; the kind is only known once the mark has printed, so a number here
-// can say nothing the reader has not already read. It STARTS at the ink's end
-// (useBigPlayBeat.js) and never earlier. The next step cuts it short.
-export const BIG_PLAY_MS = { slam: 1800, homer: 1500, triple: 1300, double: 1000, stranded: 1300 }
 
 // (3) THE BOOK CLOSING — whether the book is closed: the reader has revealed
 // every half that was actually played.

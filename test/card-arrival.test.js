@@ -54,12 +54,6 @@ test('a club with no triad, or no jersey to read, keeps the house navy', () => {
   }
 })
 
-test('a handoff card is the house navy whatever the club has: it asks CardBand for it', () => {
-  const handoff = src('components/playbyplay/PitcherHandoffCard.jsx')
-  assert.equal([...handoff.matchAll(/<CardBand label=\{TABS\.(departing|final)\} house \/>/g)].length, 2)
-  assert.doesNotMatch(handoff, /bandPaint/, 'no club paint reaches a handoff card')
-})
-
 test('the band paints from identity only: the same inputs give the same answer', () => {
   assert.deepEqual(bandPaint({ teamId: 158, side: 'away', treatment: BOTH_MAIN }), bandPaint({ teamId: 158, side: 'away', treatment: BOTH_MAIN }))
   // Its signature takes no feed, score or inning (ADR-0030, ADR-0046).
@@ -214,10 +208,9 @@ test('the times and the curve are the spec\'s', () => {
   assert.match(motion, /opacity var\(--dur-arrive-fade\) ease var\(--unfold-delay\)/)
 })
 
-test('the sections unfold at 380, 435 and 490 ms; the handoff table at 380', () => {
+test('the sections unfold at 380, 435 and 490 ms', () => {
   const card = src('components/playbyplay/pitcherCard/PitcherCard.jsx')
   assert.deepEqual([...card.matchAll(/<Unfold [^\n]*delay=\{(\d+)\}/g)].map((m) => Number(m[1])), [380, 435, 490])
-  assert.match(src('components/playbyplay/PitcherHandoffCard.jsx'), /<Unfold open=\{open\} delay=\{380\}>/)
 })
 
 test('the band is 30px of fill and a 3px rule, with the head made room for it', () => {
@@ -252,26 +245,10 @@ test('the full card draws no white of its own: its labels and bands show the eve
   assert.doesNotMatch(table, /--surface-card|--surface-inset/, 'no ground but the card\'s own yellow')
 })
 
-test('"Before this at-bat" is an inked tag in the count tag\'s face', () => {
-  const tag = css('play-by-play/repeat-tag.css').match(/\.pbp__repeat-tag \{([^}]*)\}/)[1]
-  for (const part of ['border: var(--bw-heavy) solid var(--border-stamped)', 'font-family: var(--font-display-tag)', 'text-transform: uppercase', 'width: fit-content']) assert.ok(tag.includes(part), part)
-})
-
 // ---- 6. the callers ----
 
-test('the repeat is the full card; ReliefRepeat is gone', () => {
-  const pbp = src('components/playbyplay/PlayByPlay.jsx')
-  assert.doesNotMatch(pbp, /ReliefRepeat/)
+test('ReliefRepeat is gone', () => {
   assert.doesNotMatch(src('components/playbyplay/PitcherNotice.jsx'), /ReliefRepeat/)
-  assert.match(pbp, /label=\{repeat \? TABS\.reminder : undefined\}/)
-  assert.match(pbp, /\{repeat && <span className="pbp__repeat-tag">Before this at-bat<\/span>\}/)
-})
-
-test('the departing arm\'s card arrives with the pitching card, in the house navy', () => {
-  const pbp = src('components/playbyplay/PlayByPlay.jsx')
-  assert.match(pbp, /after=\{\(open\) =>[\s\S]*<DepartureLineCard[\s\S]*open=\{open\}/)
-  const handoff = src('components/playbyplay/PitcherHandoffCard.jsx')
-  assert.equal([...handoff.matchAll(/<CardBand label=\{TABS\.(departing|final)\} house \/>/g)].length, 2)
 })
 
 // A wide child must scroll inside its own box. `.unfold`'s one implicit column is `auto`, which

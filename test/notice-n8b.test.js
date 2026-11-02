@@ -13,7 +13,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { dirname, join, relative } from 'node:path'
+import { dirname, join } from 'node:path'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const SRC = join(ROOT, 'src')
@@ -26,46 +26,6 @@ function files(dir, ext, prefix = '') {
     return ext.some((e) => f.endsWith(e)) ? [`${prefix}${f}`] : []
   })
 }
-
-// ---- 1. the seal pin ----
-
-// THE SEAL PIN. Written before this slice changed a line: for each file the
-// slice touches or mounts from, the reveal-only modules it imports
-// (src/api/spoiler-manifest.json; a "mixed" module counts when a sealed export
-// is imported), and how many SealBoxes and revealedThrough reads it holds, as
-// measured on origin/main at a75f6edae. A rename changes none of these. If this
-// fails, the slice moved a seal: stop and ask, never update the literal.
-const N8B_SEAL = {
-  'components/playbyplay/EventCards.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/PlayByPlay.jsx': { reveal: ['gameday/engine/halfReport.js', 'playbyplay.js'], sealBoxes: 0, revealedThrough: 1 },
-  'components/inning/HalfInning.jsx': { reveal: ['gameday/engine/engineLive.js', 'highlights.js', 'hitchart.js'], sealBoxes: 1, revealedThrough: 10 },
-}
-const SPOILER_MANIFEST = JSON.parse(src('api/spoiler-manifest.json')).modules
-
-function revealOnlyImports(rel) {
-  const code = src(rel)
-  const found = new Set()
-  for (const m of code.matchAll(/^import\s+([^'"]*?)\s+from\s+['"](\.[^'"]+)['"]/gm)) {
-    const target = join(dirname(join(SRC, rel)), m[2])
-    const fromApi = relative(join(SRC, 'api'), target).replaceAll('\\', '/')
-    const apiRel = fromApi.startsWith('..') ? null : fromApi
-    const entry = apiRel && SPOILER_MANIFEST[apiRel]
-    if (!entry) continue
-    const names = (m[1].match(/\{([^}]*)\}/)?.[1] ?? '').split(',').map((n) => n.trim().split(/\s+as\s+/)[0]).filter(Boolean)
-    if (entry.class === 'reveal-only') found.add(apiRel)
-    else if (entry.class === 'mixed' && names.some((n) => entry.revealOnlyExports.includes(n))) found.add(apiRel)
-  }
-  return [...found].sort()
-}
-
-test('N8b: the seal pin — no reveal-only import, SealBox or revealedThrough read moved', () => {
-  for (const [rel, want] of Object.entries(N8B_SEAL)) {
-    const code = src(rel)
-    assert.deepEqual(revealOnlyImports(rel), want.reveal, `${rel}: its reveal-only imports changed`)
-    assert.equal((code.match(/<SealBox\b/g) ?? []).length, want.sealBoxes, `${rel}: a SealBox was added or removed`)
-    assert.equal((code.match(/revealedThrough/g) ?? []).length, want.revealedThrough, `${rel}: a revealedThrough read moved`)
-  }
-})
 
 // ---- 2. retired ----
 
@@ -98,14 +58,6 @@ test('N8b: 12-sealbox.css draws the eight parts under .change', () => {
   }
 })
 
-test('N8b: the four event bars wear the new names', () => {
-  const code = src('components/playbyplay/EventCards.jsx')
-  for (const part of LIVE) {
-    assert.match(code, new RegExp(`change__${part}(?![\\w-])`), `change__${part}`)
-  }
-  assert.equal((code.match(/change__eventtext/g) ?? []).length, 3, 'ejection, baserunning and delay each carry the event text')
-})
-
 // ---- 4. the caps exemption ----
 
 test('N8b: the event text keeps its #root caps exemption', () => {
@@ -123,6 +75,4 @@ test('N8b: the root and its modifiers took the .change name in N8c', () => {
   const css = src('styles/12-sealbox.css')
   assert.match(css, /^\.change--event \{/m)
   assert.match(css, /^\.change--framed \{/m)
-  const code = src('components/playbyplay/EventCards.jsx')
-  assert.match(code, /change \$\{eventCardClass\(\)\} change--event/)
 })

@@ -19,9 +19,9 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
 - `engine/GamedayEngine.jsx` draws nothing (#2747). It reports the live snapshot (band), the step cursor,
   the runs so far, the trail and the half commit up to InningViewer, from `api/gameday/engine/` (`halfReport`,
   `engineLive`). The parent reports the spoiler-free entering baseline; its one SealBox mounts `EngineReport`,
-  whose four effects keep PlayByPlay's count-based dependencies (never `entries`). A forward half move is
-  `goTo` and waits only for `focus.closing` (`forwardAdvance`); the page turn is gone. The old half page's
-  files stay until the deletion PR.
+  whose four effects keep count-based dependencies (never `entries`: that was a 264-render loop). A forward half move is
+  `goTo` and waits only for `focus.closing` (`forwardAdvance`). The old hidden half page, the page turn and the
+  play-by-play cards were deleted (#2747).
 - Gary's calls this shell keeps: the band uses the score bug's tiles and type; the batting view and zone map stay
   up through playback (a pitch never blanks them), and have a per-game dismiss; a switch hitter stands opposite the
   pitcher's hand; the hero's due-up hides under the checkpoint; the checkpoint's due-up names an
@@ -30,7 +30,7 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   score. Opening the Menu loads nothing: a folded
   block fetches when it shows.
 - Panels live in `panels/GamedayPanels.jsx` (`panels.css`): InningViewer hands the cursor as `panels`; every result reads in a `Sealable` (SealBox, up to the step cut); a folded panel draws in the Menu. The line
-  score's run cells take a keyboard pick mid page-turn (aria-disabled only), as the old running line did.
+  score's run cells take a keyboard pick while a half move is held (aria-disabled only), as the old running line did.
 - `stage/` times a revealed play from `stagePlay` + `stateAt` (pure timeline, `play.js`) and mounts only a
   celebration over the batting view. The corner field is gone (Gary, 2026-10-28, #2694); its renderer and art were deleted (#2702).
 - The stage mount (#2573): `useGamedayStage` fills the slot and wraps the advance in the tap rule (`tapRule.js`,

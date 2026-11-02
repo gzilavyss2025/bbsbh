@@ -555,7 +555,7 @@ WHAT TO DO
   src/api/expresslane/runners.js). List what you deleted in the PR body.
 - A Playwright check that document.scrollingElement.scrollHeight <= innerHeight and
   scrollWidth <= innerWidth at 390 x 763, 760 x 1024, 1180 x 820 and 1440 x 900, on gamePk 823169
-  and 823035, with ?nointro. Update e2e/reveal-hit-area.spec.js, e2e/innings-page-turn.spec.js and
+  and 823035, with ?nointro. Update e2e/reveal-hit-area.spec.js, e2e/innings-page-turn.spec.js (deleted in #2747) and
   e2e/inning-modal-stacking.spec.js to the new screen without dropping any assertion. Gary runs
   npm run e2e.
 - Docs: the ADR-0043 amendment, CONTEXT.md, src/CLAUDE.md and src/screens/gameday/next/CLAUDE.md

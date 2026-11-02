@@ -259,14 +259,6 @@ test('T1: the seal pin: neither moved page reads a reveal-only module or a seal'
 // api/ and stamp modules the file imports: the move adds none (ADR-0035).
 const T3 = [
   {
-    jsx: 'components/playbyplay/PitcherHandoffCard.jsx',
-    ns: 'pitchers__grid',
-    bases: [['20-charts.css', 'pitchers__grid']],
-    attrs: ['frame="bare"', 'density="tight"', 'sticky'], // slice 2 (ADR-0113): the pitcher column is pinned
-    label: /label=\{label\}/,
-    apis: [],
-  },
-  {
     jsx: 'screens/BoxScore.jsx',
     ns: 'bs__grid bs__grid--bat',
     bases: [['21-box-score.css', 'bs__grid'], ['21-box-score.css', 'bs__grid--bat']],
@@ -336,11 +328,6 @@ test('T3: two tables on one page never share a spoken name', () => {
     .filter(Boolean)
   assert.equal(labels.length, 3, 'bat, pit and the line score scroll; the totals card does not')
   assert.equal(new Set(labels).size, 3)
-  // The departure card and the finalized card can show together, for the same
-  // pitcher: each passes its own name for the table.
-  const handoff = src('components/playbyplay/PitcherHandoffCard.jsx')
-  assert.match(handoff, /<PitcherLineTable line=\{line\} label=\{`Line at departure, \$\{displayName\(line\)\}`\} open=\{open\} \/>/)
-  assert.match(handoff, /<PitcherLineTable line=\{line\} label=\{`Final line, \$\{displayName\(line\)\}`\} open=\{open\} \/>/)
 })
 
 test('T3: no rule that reaches a moved table draws a frame, pads a plain cell, dresses the head or draws a row rule', () => {
@@ -419,7 +406,6 @@ test('T3: the wrappers that only scrolled are gone; Table\'s wrap is the one scr
   ]) {
     assert.equal(ruleBody(read(css), sel), null, `${css}: ${sel} is gone`)
   }
-  assert.doesNotMatch(src('components/playbyplay/PitcherHandoffCard.jsx'), /pitcherhandoff__tablewrap/)
   assert.doesNotMatch(src('screens/BoxScore.jsx'), /bs__scroll/, 'the tally keeps .bs__scroll; the box score grids scroll in Table')
 })
 
