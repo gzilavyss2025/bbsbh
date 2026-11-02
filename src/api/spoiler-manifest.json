@@ -390,6 +390,10 @@
       "class": "spoiler-free",
       "why": "Hand-curated retired-numbers file: each club's retired numbers with a source and checked date. History, no game."
     },
+    "history/franchiseSummary.js": {
+      "class": "spoiler-free",
+      "why": "Derived from the franchise ledger and league pennants: a club's names, seasons, all-time record, postseasons, titles, pennants and winningest manager. Finished seasons, no game."
+    },
     "history/franchiseHof.js": {
       "class": "spoiler-free",
       "why": "Static franchise-hof shards: a club's Hall of Famers, inducted as the club and also played there, with the seasons. History, no game."

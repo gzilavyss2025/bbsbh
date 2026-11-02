@@ -89,5 +89,12 @@
     "transitionDate": "2024-08-08",
     "outgoingManagerId": 437073,
     "incomingManagerId": 429713
+  },
+  {
+    "teamId": 158,
+    "season": 2015,
+    "transitionDate": "2015-05-04",
+    "outgoingManagerId": 121373,
+    "incomingManagerId": 112736
   }
 ]
