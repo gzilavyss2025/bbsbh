@@ -21,14 +21,13 @@
     "grid": 4
   },
   "src/styles/06b-offday-cards.css": {
-    "column": 2
+    "column": 1
   },
   "src/styles/07-team-logo-and-buttons.css": {
     "wrap": 1
   },
   "src/styles/08-site-shell.css": {
-    "column": 7,
-    "grid": 0
+    "column": 7
   },
   "src/styles/08a-site-menu.css": {
     "column": 3,
@@ -346,9 +345,8 @@
     "grid": 5
   },
   "src/styles/78-offseason.css": {
-    "column": 6,
-    "wrap": 4,
-    "grid": 1
+    "column": 3,
+    "wrap": 3
   },
   "src/styles/79-nine-keys.css": {
     "wrap": 2,

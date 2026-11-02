@@ -1312,6 +1312,13 @@ for each generator; the reader modules:
   surface with no such list already loaded (a player page, say) — read that
   doc, including its note on what shipped without it, before building it.
 
+## `transactions/major.js`
+
+Reads `notable-players.json` (`wire/gen-notable-players.mjs`) once per session through
+`staticJson`; a missing file is two empty lists, so every move reads as a line and only
+the favorite team's moves are cards. `isMajorMove` is the pure rule the offseason
+ledger calls per story (`test/transactions-major.test.js`).
+
 ## `contractsHistory.js`
 
 `contractsHistory.js` reads sharded `public/data/contracts-history/`

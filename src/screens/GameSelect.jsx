@@ -37,7 +37,6 @@ import { OffDaySection } from '../components/team/OffDaySection.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
 import { WireRail } from '../components/transactions/WireRail.jsx'
 import { OffseasonSlot } from '../components/offseason/OffseasonSlot.jsx'
-import { WinterRail } from '../components/offseason/WinterRail.jsx'
 import { useOffseason } from '../hooks/useOffseason.js'
 import { useWinter } from '../hooks/useWinter.js'
 import { LeaguePicker } from '../components/winter/LeaguePicker.jsx'
@@ -518,7 +517,7 @@ export function GameSelect({
     <div
       className={`screen screen--slate${coldLoad ? ' screen--coldload' : ''}${
         docked ? ' screen--wiredock' : ''
-      }${railed ? ' screen--wirerail' : ''}${bracketInRail ? ' screen--bracketrail' : ''}`}
+      }${railed && !winter ? ' screen--wirerail' : ''}${bracketInRail ? ' screen--bracketrail' : ''}`}
     >
       {/* The D1 masthead: the brand bar, the ladder card (level + day) and,
           on a phone, the compact bar that replaces the card on scroll. Every
@@ -642,7 +641,7 @@ export function GameSelect({
               the words "No games scheduled." — OffseasonSlot.jsx picks which of
               the two leads it, and says why MLB's and a level's differ. */}
           {winter && (
-            <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} wide={wide} />
+            <OffseasonSlot dateStr={dateStr} sportId={sportId} winter={winter} />
           )}
 
           {showBreakBanner && (
@@ -672,12 +671,12 @@ export function GameSelect({
               {listGames.map(renderCard)}
             </ul>
 
-            {/* Any idle club, the whole-league All-Star case included. In the
-                winter that is every club — and wide, it moves to the rail
-                (WinterRail.jsx, #1078). */}
+            {/* Any idle club, the whole-league All-Star case included. Not in the
+                winter: every club is idle then, and the logo rail above already
+                links all of them (2026-11-02). */}
             {/* October: the survivors' board, or the series primer on a primer day. */}
             {october && !wsMode && <SeriesPrimer part="main" primer={primer} championBand={bracketInRail} />}
-            {offDayTeams.length > 0 && !(wide && winter) && !october && (
+            {offDayTeams.length > 0 && !winter && !october && (
               <OffDaySection
                 teams={offDayTeams}
                 favoriteTeamId={favoriteTeamId}
@@ -710,15 +709,6 @@ export function GameSelect({
             bracket beside the hero (WorldSeriesHome), so the page runs the full width under it. */}
         {bracketInRail && !wsMode && <SeriesPrimer part="rail" primer={primer} />}
 
-        {/* The slot the wire left; `railed` reserves it (WinterRail.jsx). */}
-        {wide && winter && (
-          <WinterRail
-            winter={winter}
-            teams={offDayTeams}
-            favoriteTeamId={favoriteTeamId}
-            favoriteAffiliateIds={favoriteAffiliateIds}
-          />
-        )}
       </div>
 
       {/* Signed-in only, and only when the cloud scorebook has entries —

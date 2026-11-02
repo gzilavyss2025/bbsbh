@@ -79,7 +79,7 @@ const BUDGETS = {
   // an ordered @import sequence and cannot nest), so a new rule cannot go in a new
   // flat file. Split a sheet by moving a component's rules into a subdirectory
   // (src/styles/system/, focus/, report/) before you raise a number here.
-  'src/styles/78-offseason.css': 1100, // 1082
+  'src/styles/78-offseason.css': 800, // 706: the winter home page's rows moved to offseason/winter-home.css
   'src/styles/06-loader-and-cards.css': 800, // 900
   'src/styles/08-site-shell.css': 800, // 900
   'src/styles/12-sealbox.css': 900, // 895

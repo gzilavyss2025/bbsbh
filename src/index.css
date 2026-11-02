@@ -223,6 +223,8 @@
    is why it is its own partial — scripts/check-dir-size.mjs records the
    directory budget that bought it. */
 @import './styles/78-offseason.css';
+/* The winter home page's rows, split out of 78-offseason.css at its file budget. */
+@import './styles/offseason/winter-home.css';
 /* Motion — the animation layer (the motion study, issues #976-#983). A
    SUBDIRECTORY for the same reason focus/ below is one: src/styles is a flat
    directory at its own file ratchet (scripts/check-dir-size.mjs), the study

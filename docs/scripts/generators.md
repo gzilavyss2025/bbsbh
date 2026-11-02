@@ -58,6 +58,13 @@ sleep of its own.
 Precomputed because they're too heavy (COST) to build on a page load. Normally you
 don't run these by hand.
 
+- `wire/gen-notable-players.mjs` → `public/data/notable-players.json` — two id lists for the
+  winter wire's major/minor rule (`src/api/transactions/major.js`): `star` (4+ WAR in one
+  of the last three seasons, or an All-Star or award in the last five) and `notable`
+  (300+ games, 150+ pitching appearances, or a top-100 prospect). Reads `war.json`,
+  `war-history/`, `all-star-rosters.json`, `awards-history.json` and
+  `top-prospects.json`; fetches only career games, for every player in MLB in the last
+  three seasons (about 22 batched calls). Refuses to write an empty list.
 - `gen-war.mjs` → `public/data/war.json` — season WAR per player, from
   `statsapi.mlb.com`'s own `stats=sabermetrics` stat type (undocumented but
   first-party, same domain the rest of the app depends on; needs

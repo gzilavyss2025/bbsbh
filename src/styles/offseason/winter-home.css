@@ -1,0 +1,457 @@
+/* ---------------------------------------------------------------------------
+   THE WINTER HOME PAGE — the offseason slate's hero row (the World Series hero
+   beside the spring countdown and the record's doors), the winter calendar as
+   month pages, the transaction ledger (major moves as cards, minor as lines,
+   transactions/major.js) and the notebook's three cards. Split out of
+   78-offseason.css, which sits at its file-size budget; imported right after it
+   in src/index.css so the cascade is unchanged.
+   --------------------------------------------------------------------------- */
+.oseason__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* THE LEDGER — one line per move: faces, the sentence, the club. A stamped
+   card, ten moves at a time; each day's dateline is an ink bar. */
+.oseason__ledger {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: 4px 4px 0 var(--border-stamped);
+  background: var(--surface-card);
+}
+/* The door is the card's footer: an ink bar across its foot, like the
+   datelines, rather than a loose button under it. */
+.oseason__ledger .oseason__door {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  padding-block: var(--space-3);
+}
+.oseason__list > .wire__date {
+  padding: var(--space-1) var(--space-3);
+  background: var(--text-heading);
+}
+.oseason__list > .wire__date .wire__dateline,
+.oseason__list > .wire__date .wire__count {
+  color: var(--surface-card);
+}
+.oseason__list > .wire__date .wire__rule {
+  visibility: hidden;
+}
+/* layout-exempt: club column beside the sentence */
+.oseason__list .wire__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: var(--space-1h) var(--space-3);
+}
+.oseason__list .wire__row::before {
+  display: none;
+}
+.oseason__list .wire__faces {
+  gap: var(--space-2);
+}
+.oseason__list .wire__face {
+  min-width: var(--shot-md-w);
+}
+.oseason__list .shot.wire__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border: var(--bw-heavy) solid var(--border-stamped);
+}
+.oseason__list .wire__face .banner {
+  display: none;
+}
+/* layout-exempt: the sentence, then its club at the row's right end */
+.oseason__list .wire__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--space-3);
+}
+.oseason__list .wire__kicker {
+  order: 1;
+  margin: 0;
+}
+/* The mark alone; the abbreviation stays for screen readers in aria-label. */
+.oseason__list .wire__club > span {
+  display: none;
+}
+.oseason__list .wire__type {
+  display: none;
+}
+.oseason__list .wire__cutline {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+}
+/* A minor move: one line, no faces, quieter type. */
+.oseason__list .wire__row--line {
+  grid-template-columns: minmax(0, 1fr);
+  padding-block: var(--space-1h);
+}
+.oseason__list .wire__row--line .wire__cutline {
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+}
+/* A card with many players wraps its faces rather than squeezing the sentence. */
+/* layout-exempt: a big trade's faces wrap in a fixed three-wide column */
+.oseason__list .wire__faces {
+  flex-wrap: wrap;
+  max-width: calc(3 * var(--shot-md-w) + 2 * var(--space-2));
+}
+@media (max-width: 739px) {
+  .oseason__list .wire__body {
+    grid-template-columns: 1fr;
+    row-gap: 2px;
+  }
+}
+
+/* THE HERO — the season record beside the countdown, one row of stamped cards. */
+/* layout-exempt: hero row, record 2 : countdown 1 */
+.ohero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+@media (min-width: 740px) {
+  .ohero {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+.ohero .srecord,
+.ohero .springcount {
+  margin: 0;
+}
+/* The side column: the countdown, then the record's doors under it. */
+/* layout-exempt: countdown over its doors */
+.ohero__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+/* layout-exempt: the three doors stacked full width */
+.ohero__doors {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+/* layout-exempt: photo on top, the count centred under it */
+.ohero .springcount {
+  align-self: stretch;
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 0;
+}
+/* Runs edge to edge across the card's top, under its ink border. */
+.springcount__photo {
+  display: block;
+  width: calc(100% + 2 * var(--space-4));
+  max-width: none;
+  margin: 0 calc(-1 * var(--space-4));
+  aspect-ratio: 5 / 2;
+  overflow: hidden;
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+}
+/* Zoomed in on the infield and the stands behind it, at the frame's height. */
+.springcount__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.3);
+  transform-origin: 38% 45%;
+}
+/* The leagues and the count sit centred in the space under the photo: the
+   first takes the slack above, the last the slack below. */
+/* layout-exempt: the two league marks side by side */
+.springcount__leagues {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
+  padding-top: var(--space-4);
+}
+.springcount__league {
+  width: 48px;
+  height: 48px;
+}
+.ohero .springcount__day {
+  padding-bottom: var(--space-4);
+}
+
+/* The rest of the window, behind one control — the rail's door, widened. It
+   keeps the rail's quiet treatment rather than becoming a call to action: the
+   page's action is reading the wire, not opening more of it. */
+.oseason__door {
+  display: flex;
+  width: 100%;
+  margin-top: var(--space-3);
+}
+
+/* ---------------------------------------------------------------------------
+   THE WINTER CALENDAR — the dated strip under the ledger.
+
+   A row of tick marks on one line of the winter, scrolled sideways on a phone.
+   Each is a date and a short label, and the first one that has not happened yet
+   takes the ink. Nothing here is a control: the strip says where in the winter
+   the reader is standing, and the dates it shows are the ones the app can
+   either check (spring training, Opening Day) or was told (the admin's own
+   calendar) — see WinterCalendar.jsx.
+   --------------------------------------------------------------------------- */
+.wintercal {
+  margin-bottom: var(--space-6);
+}
+/* A month per column, as many as fit; on a phone they wrap two-up. */
+/* layout-exempt: calendar month columns */
+.wintercal__months {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4);
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+}
+/* Each month is a calendar page: an ink header bar with the month, then its
+   dates as day tiles. All pages in a row share one height. */
+/* layout-exempt: header bar over the month's dates */
+.wintercal__month {
+  display: flex;
+  flex-direction: column;
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: 4px 4px 0 var(--border-stamped);
+  background: var(--surface-card);
+}
+.wintercal__mon {
+  margin: 0;
+  padding: var(--space-1h) var(--space-2);
+  background: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--surface-card);
+}
+/* layout-exempt: the month's dates, stacked */
+.wintercal__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+/* A day tile: the date in a square box, the event beside it. */
+/* layout-exempt: day tile beside its label */
+.wintercal__item {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+}
+/* layout-exempt: centres the weekday over the date inside the square tile */
+.wintercal__day {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  aspect-ratio: 1;
+  line-height: var(--lh-solid);
+  border: var(--bw-rule) solid var(--border-stamped);
+  background: var(--surface-card);
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+.wintercal__dow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  margin-bottom: 2px;
+}
+.wintercal__label {
+  font-family: var(--font-read);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+  text-wrap: pretty;
+}
+/* #root ties #root *'s specificity, or the ALL-CAPS invariant wins. */
+#root .wintercal__label {
+  text-transform: none; /* caps-exempt: a calendar entry reads as a phrase, like the wire's cutlines */
+}
+/* The one the reader is heading for: its day tile takes the marker fill and
+   the label full ink, never colour alone — it carries aria-current too. */
+.wintercal__item--next .wintercal__day {
+  background: var(--marker);
+  border-width: var(--bw-heavy);
+}
+.wintercal__item--next .wintercal__day,
+.wintercal__item--next .wintercal__label {
+  color: var(--text-heading);
+}
+/* Behind them. Lightened and struck through, still legible. */
+.wintercal__item--past .wintercal__day,
+.wintercal__item--past .wintercal__label {
+  color: var(--graphite-soft);
+}
+.wintercal__item--past .wintercal__label {
+  /* strike-link-exempt: a calendar entry is plain copy and holds no name link */
+  text-decoration: line-through;
+}
+
+/* ---------------------------------------------------------------------------
+   THE AT-BAT STORIES — the twelve-pitch note's rows, issue #1078.
+
+   This is the /fouls page's "Most fouls in one plate appearance" row, brought
+   over on purpose: the batter's face pinned left, the pitcher's pinned right,
+   their names and clubs facing each other across the count. A long at-bat is
+   two men refusing to give in, and a table row cannot draw that.
+
+   WHAT DID NOT COME WITH IT IS THE SCOREBUG. On /fouls the middle of the second
+   line carries the score, the inning, the outs, the bases and what the at-bat
+   finally did. Every one of those is a result, and this note is on the SLATE,
+   offering games a reader has not scored (ADR-0081). The slot holds the date
+   instead — the one thing about the at-bat that opens its game without saying
+   a word about it.
+
+   The classes are the note's own rather than .storypa-row's, because
+   43-foul-tracker.css is component-imported by that page alone and pulling 877
+   lines of foul-tracker chrome onto the home slate to reuse forty of them would
+   be a bad trade. The shared version is the design lab's job (issues
+   #1112-1114). The box itself is the canonical Card already (#1113).
+   --------------------------------------------------------------------------- */
+/* THE NOTEBOOK ROW — three stamped cards: the census figure, the longest
+   at-bat drawn one square per pitch, the next longest as bars against it. */
+/* layout-exempt: notebook row, figure 1 : longest 1.4 : rest 1.4 */
+.seasonnote__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+@media (min-width: 740px) {
+  .seasonnote__row {
+    grid-template-columns: 1fr 1.4fr 1.4fr;
+  }
+}
+.seasonnote__row > .card {
+  min-width: 0;
+}
+.seasonnote__what {
+  margin: 0 0 var(--space-2);
+}
+/* layout-exempt: face, name, vs, name, face on one line */
+.seasonnote__pair {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+.seasonnote__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+/* layout-exempt: name over club */
+.seasonnote__who {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.seasonnote__who--pitcher {
+  text-align: right;
+}
+.seasonnote__who .seasonnote__name {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-small);
+  color: var(--text-heading);
+  letter-spacing: var(--ls-caps);
+}
+.seasonnote__club {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+.seasonnote__vs {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-caption);
+}
+/* layout-exempt: a row of pitch squares that wraps */
+.seasonnote__pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  list-style: none;
+  margin: var(--space-3) 0;
+  padding: 0;
+}
+.seasonnote__pip {
+  width: 12px;
+  height: 12px;
+  background: var(--text-heading);
+}
+/* layout-exempt: count left, game door right */
+.seasonnote__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.seasonnote__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+.seasonnote__when {
+  gap: var(--space-1h);
+}
+.seasonnote__bars {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+}
+/* layout-exempt: name and count over a full-width bar */
+.seasonnote__barrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--space-2);
+  padding: var(--space-1h) 0;
+  color: inherit;
+  text-decoration: none;
+}
+.seasonnote__barname {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.seasonnote__barn {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+.seasonnote__bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  background: var(--border-hairline);
+}
+.seasonnote__bar > span {
+  display: block;
+  height: 100%;
+  background: var(--text-heading);
+}
+a.seasonnote__barrow:hover .seasonnote__barname {
+  color: var(--text-heading);
+  text-decoration: underline;
+}

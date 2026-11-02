@@ -193,21 +193,30 @@ function clubTabFor(teamId) {
   return isMlbTeamId(teamId) ? 'transactions' : 'overview'
 }
 
-export function MoveRow({ story, compact = false }) {
+// `marks` is the offseason ledger's row: a bigger club mark, and on a trade
+// the other club's mark beside it (the first club the cutline names). `line`
+// is that ledger's minor move (transactions/major.js): the same row with no
+// faces, so a routine move reads as one entry rather than a card.
+export function MoveRow({ story, compact = false, marks = false, line = false }) {
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
   const lead = compact ? story.rail?.[0] : null
+  const markSize = marks ? (line ? 22 : 32) : 18
+  const partnerId =
+    marks && story.type === 'trade'
+      ? story.cutline?.find((seg) => seg.teamId && seg.teamId !== story.teamId)?.teamId
+      : null
   return (
     <li
-      className={`wire__row${compact ? ' wire__row--compact' : ''}`}
+      className={`wire__row${compact ? ' wire__row--compact' : ''}${line ? ' wire__row--line' : ''}`}
       data-move-row=""
       // The spine is the club's own colour, decorative and text-free — no
       // contrast floor applies to it, and none of the row's copy sits on it.
       style={{ '--wire-club': teamPrimaryColor(story.teamId) || 'var(--graphite)' }}
     >
-      {!compact && (
+      {!compact && !line && (
         <div className="wire__faces">
-          {story.rail.slice(0, FACES_PER_ROW).map((slot, i) => (
+          {story.rail.slice(0, marks ? story.rail.length : FACES_PER_ROW).map((slot, i) => (
             <Face key={slot.playerId ?? i} slot={slot} />
           ))}
         </div>
@@ -225,9 +234,14 @@ export function MoveRow({ story, compact = false }) {
             className="wire__club"
             ariaLabel={`${abbr} transactions`}
           >
-            <TeamLogo teamId={story.teamId} size={18} className="wire__mark" />
+            <TeamLogo teamId={story.teamId} size={markSize} className="wire__mark" />
             <span>{abbr}</span>
           </TeamLink>
+          {partnerId && (
+            <TeamLink id={partnerId} tab={clubTabFor(partnerId)} className="wire__club" ariaLabel={`${teamAbbr({ id: partnerId })} transactions`}>
+              <TeamLogo teamId={partnerId} size={markSize} className="wire__mark" />
+            </TeamLink>
+          )}
           {tone && (
             <span className={`wire__type wire__type--${tone}`}>{story.typeLabel}</span>
           )}
@@ -242,7 +256,7 @@ export function MoveRow({ story, compact = false }) {
 // The caller owns the <ul> — its ref, its clamp, its scrolling; only what goes
 // INSIDE it is shared, which is the whole point of this module. `compact` is
 // passed straight through to MoveRow; a dateline is the same either way.
-export function MoveItems({ items, compact = false }) {
+export function MoveItems({ items, compact = false, marks = false, isMajor = null }) {
   return items.map((item) =>
     item.kind === 'date' ? (
       <li className="wire__date" key={item.key}>
@@ -251,7 +265,7 @@ export function MoveItems({ items, compact = false }) {
         <span className="wire__count">{item.count}</span>
       </li>
     ) : (
-      <MoveRow key={item.key} story={item.story} compact={compact} />
+      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} />
     ),
   )
 }

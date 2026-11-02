@@ -15,12 +15,10 @@ import { SPORT_IDS } from '../../lib/teams.js'
 // level the week its season ends, which is who left it going up
 // (LevelOffseason.jsx, issue #1077).
 //
-// The countdown is the one piece both share, and it appears exactly once: in
-// the rail slot the wire vacated when the screen is wide, and inside the lead
-// when it is not. GameSelect mounts the wide one itself, which is why this
-// takes `wide` rather than deciding it.
-export function OffseasonSlot({ dateStr, sportId, winter, wide }) {
-  const countdown = wide ? null : <WinterCountdown winter={winter} />
+// The countdown is the one piece both share. The winter page has no right
+// column, so it always sits inside the lead (MLB's puts it in the hero).
+export function OffseasonSlot({ dateStr, sportId, winter }) {
+  const countdown = <WinterCountdown winter={winter} />
 
   if (sportId === SPORT_IDS.MLB) {
     return (

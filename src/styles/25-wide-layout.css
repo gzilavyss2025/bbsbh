@@ -1,3 +1,12 @@
+/* Square corners on the slate (the Scout page's #2319 pattern): one token
+   override squares every shared part. On <body> so portalled sheets follow. */
+body:has(.slatebody) {
+  --radius-xs: var(--radius-square);
+  --radius-sm: var(--radius-square);
+  --radius-md: var(--radius-square);
+  --radius-lg: var(--radius-square);
+  --radius-pill: var(--radius-square);
+}
 /* ============================================================
    WIDE LAYOUT — tablet / desktop (min-width: 740px)
    Phone-first stays the default: below the breakpoint nothing

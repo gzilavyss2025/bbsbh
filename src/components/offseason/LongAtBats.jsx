@@ -7,6 +7,9 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { InfoPopover } from '../ui/InfoPopover.jsx'
+
+const lastName = (name) => name.split(' ').slice(1).join(' ') || name
 
 // THE NOTEBOOK, AT MLB — one note about the season that just finished (issue
 // #1078, step 4 of #1038).
@@ -55,7 +58,7 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 // all of it in one press dropped a reader into eight thousand pixels of scroll
 // with the rest of the page somewhere below it. The door pages instead. Every
 // row is still reachable; none of them arrives uninvited.
-const LEAD_ROWS = 5
+const LEAD_ROWS = 4
 const STEP = 10
 
 export function LongAtBats({ season }) {
@@ -75,13 +78,17 @@ export function LongAtBats({ season }) {
   // it is read. A complete zero is still a count.
   const post = data.post?.coverage.complete ? data.post : null
 
-  const shown = rows.slice(0, visible)
-  const hidden = rows.length - shown.length
-  // The last press of the door is a short one — 170 rows off a 5 + 10n ladder
-  // ends on 5, and a button saying "10 more" that produced five would be a
-  // small lie about the file's own count.
+  const [top, ...rest] = rows
+  const shown = rest.slice(0, visible)
+  const hidden = rest.length - shown.length
+  // The last press of the door is a short one — a button saying "10 more"
+  // that produced five would be a small lie about the file's own count.
   const next = Math.min(STEP, hidden)
+  const path = atBatGamePath(top)
 
+  // THREE STAMPED CARDS IN ONE ROW: the census figure, the longest at-bat
+  // drawn one square per pitch, and the next longest as bars measured against
+  // it. A phone stacks them.
   return (
     <section className="seasonnote seasonnote--stories" aria-label={`Twelve-pitch at-bats in the ${season} season`}>
       {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
@@ -90,132 +97,110 @@ export function LongAtBats({ season }) {
         The notebook
       </SectionHead>
 
-      <div className="seasonnote__body">
-        <div className="seasonnote__figure">
+      <div className="seasonnote__row">
+        <Card frame="stamped" as="div" className="seasonnote__figure">
           <p className="seasonnote__n">{rows.length}</p>
-          <p className="seasonnote__under">
-            of <span className="seasonnote__against">{count(data.coverage.plateAppearances)}</span> plate
-            appearances, in all{' '}
-            <span className="seasonnote__against">{count(data.coverage.games)}</span> regular-season games
+          <p className="t-label t-label--bold seasonnote__what">
+            At-bats of {data.threshold}+ pitches
           </p>
-          {/* The postseason is its own count with its own denominator, beside the
-              figure and never in it (ADR-0104). Only where the file has one. */}
-          {post && (
-            <p className="seasonnote__under">
-              Postseason: <span className="seasonnote__against">{post.rows.length}</span> of{' '}
-              <span className="seasonnote__against">{count(post.coverage.plateAppearances)}</span> plate
-              appearances, in{' '}
-              <span className="seasonnote__against">{count(post.coverage.games)}</span> games
-            </p>
-          )}
-        </div>
-
-        <div className="seasonnote__main">
-          <SectionHead look="label" as="h4">The twelve-pitch at-bats</SectionHead>
-          <p className="seasonnote__note">
-            Every regular-season plate appearance that took {data.threshold} pitches or more. Each
-            one opens its game, sealed.
+          <p className="seasonnote__under infopop-row">
+            of <span className="seasonnote__against">{count(data.coverage.plateAppearances)}</span> in{' '}
+            <span className="seasonnote__against">{count(data.coverage.games)}</span> games
+            <InfoPopover label="How the at-bats are counted" className="infopop--paper">
+              Regular season only; the postseason is never summed in
+              {post
+                ? ` (it had ${post.rows.length} of ${count(post.coverage.plateAppearances)} plate appearances, in ${count(post.coverage.games)} games)`
+                : ''}
+              . A batter left mid-count by an inning-ending caught stealing starts a new
+              at-bat next inning, and is counted as one. Each one opens its game, sealed.
+            </InfoPopover>
           </p>
+        </Card>
 
-          <Card as="div" body="flush" className="seasonnote__storybox">
-            <ol className="seasonnote__stories">
-              {shown.map((row) => (
-                <li className="seasonnote__story" key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
-                  <Headshot
-                    personId={row.batter.id}
-                    name={row.batter.name}
-                    teamId={row.batter.teamId}
-                    className="seasonnote__shot seasonnote__shot--batter"
-                  />
+        <Card frame="stamped" as="div" className="seasonnote__longest">
+          <p className="t-label t-label--bold seasonnote__what">The longest at-bat</p>
+          <div className="seasonnote__pair">
+            <Headshot personId={top.batter.id} name={top.batter.name} teamId={top.batter.teamId} className="seasonnote__shot" />
+            <div className="seasonnote__who">
+              <PlayerLink id={top.batter.id} name={top.batter.name} className="seasonnote__name">
+                {top.batter.name}
+              </PlayerLink>
+              <span className="seasonnote__club">{clubAbbr(top, top.batter.teamId)}</span>
+            </div>
+            <span className="seasonnote__vs" aria-hidden="true">vs</span>
+            <div className="seasonnote__who seasonnote__who--pitcher">
+              <PlayerLink id={top.pitcher.id} name={top.pitcher.name} className="seasonnote__name">
+                {top.pitcher.name}
+              </PlayerLink>
+              <span className="seasonnote__club">{clubAbbr(top, top.pitcher.teamId)}</span>
+            </div>
+            <Headshot personId={top.pitcher.id} name={top.pitcher.name} teamId={top.pitcher.teamId} className="seasonnote__shot" />
+          </div>
+          {/* One square per pitch: the length IS the note, so it is drawn. */}
+          <ol className="seasonnote__pips" aria-label={`${top.pitches} pitches`}>
+            {Array.from({ length: top.pitches }, (_, i) => (
+              <li key={i} className="seasonnote__pip" />
+            ))}
+          </ol>
+          <div className="seasonnote__foot">
+            <span className="seasonnote__count">{top.pitches} pitches</span>
+            {path && (
+              <a className="door door--boxed seasonnote__when" {...linkProps(path)}>
+                {monthDayShort(top.date)}
+                <span className="sr-only"> — open this game</span>
+                <span aria-hidden="true">›</span>
+              </a>
+            )}
+          </div>
+        </Card>
 
-                  <div className="seasonnote__line">
-                    <div className="seasonnote__who">
-                      <div className="seasonnote__nameline">
-                        <PlayerLink id={row.batter.id} name={row.batter.name} className="seasonnote__name">
-                          {row.batter.name}
-                        </PlayerLink>
-                        <span className="seasonnote__club">{clubAbbr(row, row.batter.teamId)}</span>
-                      </div>
-                      {/* The phone's only copy of the pitcher's name — his own
-                          block on the right drops at 600px, and his face alone
-                          would not tell a reader who he is. */}
-                      <div className="seasonnote__vs">
-                        vs{' '}
-                        <PlayerLink id={row.pitcher.id} name={row.pitcher.name}>
-                          {row.pitcher.name}
-                        </PlayerLink>
-                      </div>
-                    </div>
-
-                    <span className="seasonnote__val">
-                      <span className="seasonnote__valn">{row.pitches}</span>
-                      <span className="t-label t-label--bold seasonnote__vallabel">Pitches</span>
-                    </span>
-
-                    <div className="seasonnote__who seasonnote__who--pitcher">
-                      <div className="seasonnote__nameline">
-                        <PlayerLink id={row.pitcher.id} name={row.pitcher.name} className="seasonnote__name">
-                          {row.pitcher.name}
-                        </PlayerLink>
-                        <span className="seasonnote__club">{clubAbbr(row, row.pitcher.teamId)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* The game, at its first lineup page — the same address the
-                      slate's own cards build, so it arrives sealed. */}
-                  {atBatGamePath(row) && (
-                    <a className="door door--boxed seasonnote__when" {...linkProps(atBatGamePath(row))}>
-                      {monthDayShort(row.date)}
-                      <span className="sr-only"> — open this game</span>
-                      <span aria-hidden="true">›</span>
+        <Card frame="stamped" as="div" className="seasonnote__rest">
+          <p className="t-label t-label--bold seasonnote__what">Next longest</p>
+          <ol className="seasonnote__bars">
+            {shown.map((row) => {
+              const rowPath = atBatGamePath(row)
+              const label = (
+                <>
+                  <span className="seasonnote__barname">
+                    {lastName(row.batter.name)} v {lastName(row.pitcher.name)}
+                  </span>
+                  <span className="seasonnote__barn">{row.pitches}</span>
+                  <span className="seasonnote__bar" aria-hidden="true">
+                    <span style={{ width: `${(row.pitches / top.pitches) * 100}%` }} />
+                  </span>
+                </>
+              )
+              return (
+                <li key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
+                  {rowPath ? (
+                    <a
+                      className="seasonnote__barrow"
+                      {...linkProps(rowPath)}
+                      aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayShort(row.date)} — open this game`}
+                    >
+                      {label}
                     </a>
+                  ) : (
+                    <span className="seasonnote__barrow">{label}</span>
                   )}
-
-                  <Headshot
-                    personId={row.pitcher.id}
-                    name={row.pitcher.name}
-                    teamId={row.pitcher.teamId}
-                    className="seasonnote__shot seasonnote__shot--pitcher"
-                  />
                 </li>
-              ))}
-            </ol>
-          </Card>
-
+              )
+            })}
+          </ol>
           {(hidden > 0 || visible > LEAD_ROWS) && (
             <button
               type="button"
               className="door door--boxed oseason__door"
-              // The visible words are inside the accessible name, which is what
-              // WCAG 2.5.3 asks of a control whose label says more than its
-              // text does.
               aria-label={hidden > 0 ? `Show ${next} more at-bats` : 'Show fewer at-bats'}
-              onClick={() =>
-                setVisible((n) => (hidden > 0 ? n + STEP : LEAD_ROWS))
-              }
+              onClick={() => setVisible((n) => (hidden > 0 ? n + STEP : LEAD_ROWS))}
             >
               {hidden > 0 ? `${next} more` : 'Show fewer'}
             </button>
           )}
-
-          {/* Where the reader is in the census, for a reader who cannot see the
-              list grow. Polite, so it never interrupts — research.md §8's
-              acceptance criteria ask for exactly this when a requested change
-              adds content below the control that asked for it. */}
           <p className="sr-only" role="status">
-            Showing {shown.length} of {rows.length} at-bats.
+            Showing {shown.length + 1} of {rows.length} at-bats.
           </p>
-
-          {/* Natural case, because it is a sentence — the app shouts everything
-              by default (01-base.css's ALL-CAPS INVARIANT) and a surface with
-              real prose on it has to opt out. */}
-          <p className="seasonnote__pool">
-            The figure and the list are the regular season only; the postseason is never summed into
-            them. A batter left mid-count by an inning-ending caught stealing starts a new at-bat
-            next inning, and is counted as one.
-          </p>
-        </div>
+        </Card>
       </div>
     </section>
   )
