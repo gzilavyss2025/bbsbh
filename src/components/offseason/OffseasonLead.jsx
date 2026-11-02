@@ -102,17 +102,17 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
         </EmptyState>
       )}
 
-      {/* One note about the season the wire has just stopped covering, and the
-          one door on this page that opens onto results — issue #1078, step 4.
-          Both sit under the ledger because the wire is what a reader came for
-          in December; the note is what they stay for. Either renders nothing
-          when its file is not the season this page names. */}
       {/* The free-agent class (#2509): the hot-stove question the wire answers
           one move at a time, as one list. */}
       <Door className="oseason__fa" onClick={() => navigate(`/free-agents/${winter.seasonEnded}`)}>
         Free agents
       </Door>
 
+      {/* One note about the season the wire has just stopped covering, and the
+          one door on this page that opens onto results — issue #1078, step 4.
+          Both sit under the ledger because the wire is what a reader came for
+          in December; the note is what they stay for. Either renders nothing
+          when its file is not the season this page names. */}
       <LongAtBats season={winter.seasonEnded} />
 
       <SeasonRecord sportId={sportId} season={winter.seasonEnded} dateStr={endDate} />

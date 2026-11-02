@@ -16,3 +16,10 @@ export async function fetchPlayerContract(personId) {
   const contract = shard?.players?.[personId]
   return contract ? { ...contract, source: shard.meta } : null
 }
+
+// The one season the contract files cover (every shard's meta carries it).
+// Null when the file is missing.
+export async function fetchContractsSeason() {
+  const shard = await fetchShard('00')
+  return shard?.meta?.season ?? null
+}

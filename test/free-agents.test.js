@@ -11,6 +11,7 @@ import {
   statLine,
   statsByPerson,
   cleanNote,
+  dealFor,
   positionGroup,
 } from '../src/api/free-agents/freeAgents.js'
 
@@ -154,4 +155,13 @@ test('stat lines for hitters and pitchers', () => {
   assert.equal(statLine(stats[2], false), '.281/.381/.484 · 26 HR')
   assert.equal(statLine(stats[2], true), '')
   assert.equal(statLine(undefined, false), '')
+})
+
+test('a last deal shows only when the contract file is the class season', () => {
+  const c = { season: 2026, terms: '1 y/$15.65M (26)' }
+  assert.equal(dealFor(c, 2026), '1 y/$15.65M (26)')
+  // /free-agents/2025 must not show the deal a player signed AFTER filing.
+  assert.equal(dealFor(c, 2025), null)
+  assert.equal(dealFor({ terms: 'x', source: { season: 2026 } }, 2026), 'x')
+  assert.equal(dealFor(null, 2026), null)
 })

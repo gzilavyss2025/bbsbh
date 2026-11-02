@@ -48,10 +48,8 @@ export function FreeAgentsPage({ season: routeSeason }) {
   const season = routeSeason ?? latestClassSeason()
   useDocumentTitle(`${season} MLB Free Agents`)
   const navigate = useNav()
-  const { loading, error, data, reload } = useAsync(() => loadFreeAgents(season), [season])
+  const { loading, error, data, reload } = useAsync((signal) => loadFreeAgents(season, { signal }), [season])
   const rows = useMemo(() => data ?? [], [data])
-  const mlbIds = useMemo(() => rows.filter((r) => !r.minor).map((r) => r.id), [rows])
-  const { data: deals } = useAsync(() => (mlbIds.length ? loadLastDeals(mlbIds) : Promise.resolve({})), [mlbIds.join(',')])
 
   const [group, setGroup] = useState(ALL)
   const [teamId, setTeamId] = useState(null)
@@ -60,6 +58,12 @@ export function FreeAgentsPage({ season: routeSeason }) {
 
   const summary = useMemo(() => summarizeFreeAgents(rows), [rows])
   const shown = filterFreeAgents(rows, { group: group === ALL ? null : group, teamId, unsignedOnly, includeMinors })
+  // Deals for the rows on screen only, not the whole class.
+  const shownKey = shown.map((r) => r.id).join(',')
+  const { data: deals } = useAsync(
+    () => (shownKey ? loadLastDeals(shownKey.split(',').map(Number), season) : Promise.resolve({})),
+    [shownKey, season],
+  )
 
   return (
     <div className="screen fa">
@@ -129,7 +133,7 @@ export function FreeAgentsPage({ season: routeSeason }) {
             </div>
           )}
           <p className="hint">
-            {shown.length} {shown.length === 1 ? 'player' : 'players'}. Sorted by {season} WAR.
+            {shown.length} {shown.length === 1 ? 'player' : 'players'}.
           </p>
         </>
       )}

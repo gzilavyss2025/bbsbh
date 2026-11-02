@@ -1,6 +1,6 @@
 import { getJson } from '../statsapi.js'
 import { fetchWarData } from '../war.js'
-import { fetchPlayerContract } from '../person/contracts.js'
+import { fetchPlayerContract, fetchContractsSeason } from '../person/contracts.js'
 
 // The free-agent class (#2509): everyone who filed for free agency after a
 // season, where he played last, and where he signed. One live read of
@@ -145,13 +145,13 @@ export function statsByPerson(people) {
 
 const PEOPLE_CHUNK = 150
 
-async function fetchSeasonStats(ids, season) {
+async function fetchSeasonStats(ids, season, signal) {
   const chunks = []
   for (let i = 0; i < ids.length; i += PEOPLE_CHUNK) chunks.push(ids.slice(i, i + PEOPLE_CHUNK))
   const hydrate = `stats(group=[hitting,pitching],type=season,season=${season})`
   const pages = await Promise.all(
     chunks.map((c) =>
-      getJson(`/api/v1/people?personIds=${c.join(',')}&hydrate=${encodeURIComponent(hydrate)}`).catch(() => null),
+      getJson(`/api/v1/people?personIds=${c.join(',')}&hydrate=${encodeURIComponent(hydrate)}`, { signal }).catch(() => null),
     ),
   )
   return statsByPerson(pages.flatMap((p) => p?.people ?? []))
@@ -159,27 +159,42 @@ async function fetchSeasonStats(ids, season) {
 
 // The class, sorted, with each row's age and stat line. A failed stats read
 // leaves the lines blank; a failed class read throws (the page shows a retry).
-export async function loadFreeAgents(season) {
+export async function loadFreeAgents(season, { signal } = {}) {
   const [json, war] = await Promise.all([
-    getJson(`/api/v1/people/freeAgents?season=${season}`),
+    getJson(`/api/v1/people/freeAgents?season=${season}`, { signal }),
     fetchWarData(),
   ])
   // war.json holds one season; a past class gets no WAR rather than the wrong year's.
   const seasonWar = Number(war?.season) === Number(season) ? war : null
   const rows = (json?.freeAgents ?? []).map((r) => mapFreeAgent(r, { war: seasonWar })).filter((r) => r.id != null)
-  const stats = rows.length ? await fetchSeasonStats(rows.filter((r) => !r.minor).map((r) => r.id), season) : {}
+  const stats = rows.length ? await fetchSeasonStats(rows.filter((r) => !r.minor).map((r) => r.id), season, signal) : {}
   return sortFreeAgents(
     rows.map((r) => ({ ...r, age: stats[r.id]?.age ?? null, stats: statLine(stats[r.id], r.isPitcher) })),
   )
 }
 
-// The deal that just ran out, by player id, from the Cot's shards. Read after
-// the list draws: a missing shard or player is a dash, never a failure.
-export async function loadLastDeals(ids) {
+// The deal that just ran out, or null. The Cot's file holds ONE season's
+// contracts; for any other class it would show the wrong deal (a past class's
+// player may already have signed the next one), so it shows nothing.
+export function dealFor(contract, season) {
+  const fileSeason = contract?.season ?? contract?.source?.season
+  if (!contract?.terms || Number(fileSeason) !== Number(season)) return null
+  return contract.terms
+}
+
+// Deals by player id for the rows on screen, read after the list draws. The
+// shard reads are memoized, so a filter change refetches nothing it has seen.
+// A missing shard or player is a dash, never a failure.
+export async function loadLastDeals(ids, season) {
+  // One shard first: if the file is another season, no deal can show, so the
+  // rest are never fetched (a past class would otherwise pull every shard).
+  const fileSeason = await fetchContractsSeason().catch(() => null)
+  if (fileSeason != null && Number(fileSeason) !== Number(season)) return {}
   const deals = await Promise.all(ids.map((id) => fetchPlayerContract(id).catch(() => null)))
   const out = {}
   ids.forEach((id, i) => {
-    if (deals[i]?.terms) out[id] = deals[i].terms
+    const terms = dealFor(deals[i], season)
+    if (terms) out[id] = terms
   })
   return out
 }
