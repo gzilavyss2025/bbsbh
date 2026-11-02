@@ -903,7 +903,7 @@ test('C4: the box score defence stays unframed, and BoxScore.jsx takes no Card f
 // approved re-pinning the two new files. The containment test below keeps
 // them reachable only from that render site.
 const C4_SEAL = {
-  'components/inning/HalfInning.jsx': { reveal: ['boxscore.js', 'highlights.js', 'hitchart.js', 'playbyplay.js'], sealBoxes: 1, revealedThrough: 12 },
+  'components/inning/HalfInning.jsx': { reveal: ['gameday/engine/engineLive.js', 'highlights.js', 'hitchart.js'], sealBoxes: 1, revealedThrough: 10 },
   'components/charts/WinProbChart.jsx': { reveal: ['winprob.js'], sealBoxes: 0, revealedThrough: 0 },
   'components/gamehud/HalfTally.jsx': { reveal: ['derive.js', 'linescore.js'], sealBoxes: 1, revealedThrough: 0 },
   'components/gamehud/BetweenInnings.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 3 },

@@ -52,12 +52,12 @@ test('sameLiveState sees the mid-half pitcher, so a revealed change is never swa
   assert.equal(sameLiveState(before, { ...before, midHalfPitcherId: 687330 }), false)
 })
 
-// HalfInning (a .jsx file, so the suite reads its source) composes the snapshot Gameday reads; it
+// composeLive (lifted out of HalfInning into engine/engineLive.js, #2747) builds the snapshot Gameday reads; it
 // once dropped midHalfPitcherId, and the Pitcher rail named the starter all half (849803 top 5th).
-test('HalfInning\'s composed live snapshot carries midHalfPitcherId on both of its returns', async () => {
+test('The composed live snapshot carries midHalfPitcherId on both of its returns', async () => {
   const { readFileSync } = await import('node:fs')
-  const src = readFileSync(new URL('../src/components/inning/HalfInning.jsx', import.meta.url), 'utf8')
-  const compose = src.slice(src.indexOf('const composeLive'), src.indexOf('The entering-state fallback'))
+  const src = readFileSync(new URL('../src/api/gameday/engine/engineLive.js', import.meta.url), 'utf8')
+  const compose = src.slice(src.indexOf('export function composeLive'))
   assert.ok(compose.length > 0, 'composeLive is where it was')
   assert.match(compose, /if \(outs >= 3\) return \{ \.\.\.liveAtThirdOut\([^)]*\), last, midHalfPitcherId \}/)
   assert.match(compose, /return \{ bases, outs, batter, pitcher, inning, half, last, midHalfPitcherId \}/)
