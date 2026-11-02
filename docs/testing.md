@@ -349,6 +349,11 @@ Consequences to keep in mind when touching CI:
   dispatches the workflow about an hour after the last game goes Final, so the 08:17 UTC
   cron usually finds the work done and does not commit or deploy a second time. A hand
   dispatch never skips.
+- **Vercel Cron starts the run on time** (ADR-0125, 2026-11-02): `api/cron/nightly-dispatch.js`, on the
+  `vercel.json` cron at 08:17 UTC, dispatches the workflow with `trigger: cron`, which the gate treats
+  like the schedule. GitHub's own schedule stays as the backup; whichever fires second skips. It
+  needs `CRON_SECRET` and `NIGHTLY_DISPATCH_TOKEN` (fine-grained, Actions: write on this repo) in
+  Vercel's env; without them the function answers 503 and only the GitHub schedule runs.
 - If you ever rotate or remove `GH_BOT_TOKEN`, the crons stop being able to push
   to `main`. Keep it valid and admin-scoped.
 - Nothing in CI regenerates the README any more. `regenerate-readme.yml` was
