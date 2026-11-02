@@ -33,3 +33,12 @@ test('a Hall of Famer is never his own comp', () => {
   const v = hofPaceRows({ id: 1, players, splits, role: 'pitching' })
   assert.deepEqual(v.rows[0].comps.map((c) => c.id), [2])
 })
+
+test('the WAR row comes last, as a tenth', () => {
+  const pool = players.map((p) => ({ ...p, rows: p.rows.map((r) => [...r, 2.5]) }))
+  const splits = [line(2020, 22, { wins: 8 }), line(2021, 23, { wins: 9 })]
+  const v = hofPaceRows({ players: pool, splits, role: 'pitching', war: { 2020: 1, 2021: 1.5 } })
+  assert.deepEqual(v.rows.map((r) => r.label), ['W', 'SO', 'IP', 'WAR'])
+  assert.equal(v.rows.at(-1).value, '2.5')
+  assert.equal(v.rows.at(-1).comps[0].value, '2.5')
+})

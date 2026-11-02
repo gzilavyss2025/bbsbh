@@ -9,18 +9,23 @@ const ROWS = {
 // A pitcher gets the SV row only as a reliever: this many career saves.
 const RELIEVER_SAVES = 20
 
-const fmt = (stat, v) => (stat === 'outs' ? outsToIp(v) : v.toLocaleString('en-US'))
+const WAR = ['war', 'WAR', 'WAR (MLB calc)']
+const fmt = (stat, v) => (stat === 'outs' ? outsToIp(v) : stat === 'war' ? v.toFixed(1) : v.toLocaleString('en-US'))
 
 // Null when there is no card (under two seasons, a start after 30, an empty pool).
 // `id` is his own: a Hall of Famer is never his own comp.
-export function hofPaceRows({ id = null, players, splits, role, cutoff = null }) {
+// `war` ({ [season]: war }) adds the last row, WAR, when it can be shown (see hofPaceView).
+export function hofPaceRows({ id = null, players, splits, role, war = null, cutoff = null }) {
   players = (players ?? []).filter((p) => p.id !== id)
   if (!players.length) return null
   let age = null
   const rows = []
-  for (const [stat, label, title] of ROWS[role] ?? []) {
-    const v = hofPaceView({ players, splits, group: role, stat, cutoff })
-    if (!v) return null
+  for (const [stat, label, title] of [...(ROWS[role] ?? []), WAR]) {
+    const v = hofPaceView({ players, splits, group: role, stat, war, cutoff })
+    if (!v || !v.comps.length) {
+      if (stat === 'war') continue
+      return null
+    }
     if (stat === 'sv' && v.value < RELIEVER_SAVES) continue
     age = v.age
     rows.push({
