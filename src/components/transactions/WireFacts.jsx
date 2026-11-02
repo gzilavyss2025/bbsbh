@@ -7,7 +7,8 @@ import { FactSheet } from './FactSheet.jsx'
 // One move's player background on the offseason ledger. One player: his note
 // runs on in the move's sentence, with a "More" control that opens his full
 // sheet. A busy day's folded story names several; the card keeps to the
-// sentence, and More opens each player's note and sheet. Each player's template
+// sentence, and More opens each player's note and sheet. A one-line move's
+// More opens his note above his sheet. Each player's template
 // is his own move's (transactions/templates.js).
 //
 // A card reads its facts when it mounts, since its note shows at once. A one-line
@@ -16,6 +17,8 @@ function useMoveFacts(story, date, subjects, enabled = true) {
   const ids = subjects.map((s) => s.playerId).join(',')
   // An injured-list move reads the stint it is about, and his line before it.
   const ilIds = subjects.filter((s) => s.template.startsWith('il-')).map((s) => s.playerId).join(',')
+  // A trade reads his line up to the deal, so the note stays as it was that day.
+  const tradeIds = subjects.filter((s) => s.template === 'trade').map((s) => s.playerId).join(',')
   const [facts, setFacts] = useState(null)
   useEffect(() => {
     if (!ids || !enabled) return undefined
@@ -24,13 +27,18 @@ function useMoveFacts(story, date, subjects, enabled = true) {
     // itself sends him to a farm club.
     const opts = { season: factSeason(date), teamId: story.teamId }
     const ilFor = new Set(ilIds.split(','))
-    Promise.all(ids.split(',').map((id) => fetchPlayerFacts(Number(id), { ...opts, ilMove: ilFor.has(id) ? date : null }))).then(
+    const tradeFor = new Set(tradeIds.split(','))
+    Promise.all(
+      ids.split(',').map((id) =>
+        fetchPlayerFacts(Number(id), { ...opts, ilMove: ilFor.has(id) ? date : null, tradeMove: tradeFor.has(id) ? date : null }),
+      ),
+    ).then(
       (all) => live && setFacts(all),
     )
     return () => {
       live = false
     }
-  }, [ids, ilIds, date, story.teamId, enabled])
+  }, [ids, ilIds, tradeIds, date, story.teamId, enabled])
   return facts
 }
 
@@ -58,10 +66,13 @@ export function WireFacts({ story, date, line = false, children }) {
       aria-controls={sheetId}
       onClick={() => setOpen((o) => !o)}
     >
-      {open ? 'Less' : 'More ›'}
+      {open ? 'Hide' : 'More ›'}
     </Button>
   )
-  const note = !line && !named ? people[0].note : ''
+  // A placement with a call-up beside it is still about the injured player:
+  // his note runs on, and the call-up's waits in the card.
+  const lead = people[0] && (!named || subjects[all.indexOf(people[0].facts)]?.template === 'il-placed') ? people[0] : null
+  const note = !line && lead ? lead.note : ''
   return (
     <>
       {children(
@@ -73,7 +84,7 @@ export function WireFacts({ story, date, line = false, children }) {
       {open && (
         <div className="wirefacts" id={sheetId}>
           {people.length ? (
-            <FactSheet people={people.map(({ facts, note: n }) => ({ facts, note: named ? n || null : null }))} />
+            <FactSheet people={people.map((p) => ({ facts: p.facts, note: note && p === lead ? null : p.note || null }))} />
           ) : (
             <p className="factsheet__none" aria-busy="true">Loading…</p>
           )}

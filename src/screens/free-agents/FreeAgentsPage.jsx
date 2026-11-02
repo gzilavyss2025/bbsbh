@@ -3,7 +3,6 @@ import {
   loadFreeAgents,
   loadLastDeals,
   filterFreeAgents,
-  summarizeFreeAgents,
   POSITION_GROUPS,
 } from '../../api/free-agents/freeAgents.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -12,7 +11,6 @@ import { useNav } from '../../lib/nav.js'
 import { monthDayName } from '../../lib/dates.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
-import { StatTile } from '../../components/ui/frame/StatTile.jsx'
 import { Chips } from '../../components/ui/control/Chips.jsx'
 import { Switch } from '../../components/ui/control/Switch.jsx'
 import { Button } from '../../components/ui/control/Button.jsx'
@@ -22,7 +20,6 @@ import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { Headshot } from '../../components/player/Headshot.jsx'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
-import { Grid } from '../../components/ui/layout/Grid.jsx'
 import { Stack } from '../../components/ui/layout/Stack.jsx'
 import { Cluster } from '../../components/ui/layout/Cluster.jsx'
 import '../../styles/free-agents/page.css'
@@ -56,7 +53,6 @@ export function FreeAgentsPage({ season: routeSeason }) {
   const [unsignedOnly, setUnsignedOnly] = useState(false)
   const [includeMinors, setIncludeMinors] = useState(false)
 
-  const summary = useMemo(() => summarizeFreeAgents(rows), [rows])
   const shown = filterFreeAgents(rows, { group: group === ALL ? null : group, teamId, unsignedOnly, includeMinors })
   // Deals for the rows on screen only, not the whole class.
   const shownKey = shown.map((r) => r.id).join(',')
@@ -90,22 +86,6 @@ export function FreeAgentsPage({ season: routeSeason }) {
 
       {rows.length > 0 && (
         <>
-          <Grid min={150} gap="base" className="fa__tiles">
-            <StatTile tone="ink" label="Still unsigned" value={summary.unsigned} caption={`of ${summary.declared} who filed`} />
-            <StatTile
-              tone="tint"
-              label="Signed"
-              value={summary.signed}
-              caption={summary.latest ? `Latest: ${summary.latest.name}, ${monthDayName(summary.latest.dateSigned)}` : 'None yet'}
-            />
-            <StatTile
-              label="Best unsigned"
-              value={summary.best ? summary.best.war.toFixed(1) : DASH}
-              caption={summary.best ? `${summary.best.name} · WAR` : 'No WAR on file'}
-            />
-            <StatTile label="Options declined" value={summary.optionsDeclined} caption="Club, player or mutual" />
-          </Grid>
-
           <Stack gap="snug" className="fa__filters">
             <Chips label="Position" options={POSITION_OPTIONS} value={group} onChange={setGroup} layout="wrap" />
             <Cluster gap="base">
@@ -144,7 +124,7 @@ export function FreeAgentsPage({ season: routeSeason }) {
 }
 
 function FreeAgentRow({ row: r, deal, season }) {
-  const statsText = [r.age != null ? `Age ${r.age}` : null, r.stats || null].filter(Boolean).join(' · ') || DASH
+  const parts = r.stats ? r.stats.split(' · ') : []
   return (
     <div className="fa__row" role="row">
       <span className="fa__player" role="cell">
@@ -188,7 +168,17 @@ function FreeAgentRow({ row: r, deal, season }) {
       </span>
       <span className="fa__stats" role="cell">
         <span className="fa__label">{season} </span>
-        {statsText}
+        <span className="fa__line">
+          {parts.length
+            ? parts.map((part, i) => (
+                <span key={part}>
+                  {i > 0 && ' · '}
+                  {part}
+                </span>
+              ))
+            : DASH}
+        </span>
+        {r.age != null && <span className="fa__age">Age {r.age}</span>}
       </span>
       <span className="fa__war fa__num" role="cell">
         {r.war != null ? r.war.toFixed(1) : DASH}

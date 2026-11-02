@@ -30,8 +30,7 @@
   padding: var(--space-1) var(--space-3);
   background: var(--text-heading);
 }
-.oseason__list > .wire__date .wire__dateline,
-.oseason__list > .wire__date .wire__count {
+.oseason__list > .wire__date .wire__dateline {
   color: var(--surface-card);
 }
 .oseason__list > .wire__date .wire__rule {
@@ -58,6 +57,7 @@
   width: var(--shot-md-w);
   height: var(--shot-md-h);
   border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
 }
 .oseason__list .wire__face .banner {
   display: none;
@@ -69,9 +69,12 @@
   align-items: start;
   column-gap: var(--space-3);
 }
+/* layout-exempt: every mark the same size, one column; a trade's partner stacks under */
 .oseason__list .wire__kicker {
   order: 1;
   margin: 0;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 /* The mark alone; the abbreviation stays for screen readers in aria-label. */
 .oseason__list .wire__club > span {
@@ -90,7 +93,6 @@
   padding-block: var(--space-1h);
 }
 .oseason__list .wire__row--line .wire__cutline {
-  font-size: var(--fs-body);
   color: var(--text-muted);
 }
 /* A card with many players wraps its faces rather than squeezing the sentence. */
@@ -188,11 +190,22 @@
   line-height: var(--lh-prose);
 }
 #root .factsheet__note { text-transform: none } /* caps-exempt: the note reads as prose */
-.oseason__list .factsheet__none {
-  margin: var(--space-2) 0 0;
-  color: var(--text-muted);
-  font-size: var(--fs-small);
+/* A name in the note reads as the cutline's names do. */
+.factsheet__note .plink {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
 }
+.oseason__list .factsheet__none {
+  margin: 0;
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-read);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+  font-style: italic;
+  color: var(--text-muted);
+}
+#root .factsheet__none { text-transform: none } /* caps-exempt: reads as prose, like the note */
 
 /* THE HERO — the season record beside the countdown, one row of stamped cards. */
 /* layout-exempt: hero row, record 2 : countdown 1 */

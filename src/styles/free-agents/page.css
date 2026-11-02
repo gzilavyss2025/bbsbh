@@ -72,6 +72,7 @@
 }
 
 .fa__name {
+  font-family: var(--font-read);
   font-weight: var(--w-bold);
   color: var(--text-heading);
   text-align: left;
@@ -135,6 +136,17 @@
 
 .fa__stats {
   grid-area: stats;
+}
+/* The line, then his age under it; a stat never breaks across lines. */
+.fa__line {
+  display: block;
+}
+.fa__line > span {
+  white-space: nowrap;
+}
+.fa__age {
+  display: block;
+  color: var(--text-muted);
 }
 
 .fa__label {

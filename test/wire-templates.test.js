@@ -5,8 +5,8 @@
 // (/wire-lab) on 2026-11-02; each names the player it came from.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { shapeFacts, shapeMinors, shapeScopeRows } from '../src/api/transactions/playerFacts.js'
-import { cutStory, dealPhrase, freeAgentStory, injuredStory, seasonSentence, subjectsOf } from '../src/api/transactions/templates.js'
+import { shapeFacts, shapeMinors, shapeScopeRows, tradedFor } from '../src/api/transactions/playerFacts.js'
+import { cutStory, dealPhrase, draftSentence, freeAgentStory, injuredStory, seasonSentence, subjectsOf } from '../src/api/transactions/templates.js'
 
 // The minimum facts a template reads, with overrides.
 const facts = (over = {}) => ({
@@ -205,7 +205,7 @@ test('an IL placement: which stint it is, the one before, and how he was hitting
   const placed = { ...f, stint: f.stints[2], beforeLine: { games: 67, avg: '.251', hr: 8 } }
   assert.equal(
     injuredStory(placed, { placed: true }),
-    "It is Rutschman's third stint on the injured list in 2026; he missed 9 days from June 19 (concussion). He was hitting .251 with 8 homers in 67 games.",
+    "Rutschman was hitting .251 with 8 homers in 67 games. It is his third stint on the injured list in 2026; he missed 9 days from June 19 (concussion).",
   )
 })
 
@@ -266,4 +266,73 @@ test('a Rule 5 pick and a purchased contract say how he really arrived', () => {
   assert.match(cutStory(r5, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^The 35-year-old was a Rule 5 pick by the Marlins from the Yankees in December 2025\./)
   const bought = facts({ arrival: { how: 'purchase', date: '2026-06-02', teamId: 146, fromTeamId: 147 } })
   assert.match(cutStory(bought, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^The 35-year-old was bought by the Marlins from the Yankees on June 2\./)
+})
+
+// The More card's additions, 2026-11-02.
+
+test('a trade names who he went for, from the other side of the deal', () => {
+  const giolito = 'Chicago White Sox traded RHP Lucas Giolito and RHP Reynaldo López to Los Angeles Angels for C Edgar Quero and LHP Ky Bush.'
+  assert.equal(tradedFor(giolito, 'Ky Bush'), 'Lucas Giolito and Reynaldo López')
+  assert.equal(tradedFor(giolito, 'Lucas Giolito'), 'Edgar Quero and Ky Bush')
+  const rosario = 'Cleveland Guardians traded SS Amed Rosario to Los Angeles Dodgers for RHP Noah Syndergaard and cash.'
+  assert.equal(tradedFor(rosario, 'Amed Rosario'), 'Noah Syndergaard and cash')
+  assert.equal(tradedFor('Some row with no trade in it.', 'Ky Bush'), null)
+})
+
+test('the draft read is the one he signed out of, the latest, with its overall pick', () => {
+  // Ky Bush: a Royals 40th-rounder out of high school in 2018, signed as the Angels' 2nd-rounder in 2021.
+  const person = {
+    id: 681066,
+    primaryPosition: { code: '1' },
+    stats: [],
+    drafts: [
+      { year: '2021', pickRound: '2', pickNumber: 45, team: { id: 108 }, school: { name: "St. Mary's College" } },
+      { year: '2018', pickRound: '40', pickNumber: 1202, team: { id: 118 }, school: { name: 'Fremont HS' } },
+    ],
+  }
+  const f = shapeFacts(person, { season: 2026 })
+  assert.equal(f.draft.year, 2021)
+  assert.equal(draftSentence(f), "The Angels drafted him out of St. Mary's College in the 2nd round (45th overall) in 2021.")
+  assert.equal(draftSentence({ draft: null }), null)
+})
+
+test("a first IL trip of the season reads his earlier seasons' trips instead", () => {
+  const person = {
+    ...rutschman,
+    transactions: [
+      il('2025-05-01', '2025-05-01', 'Baltimore Orioles placed C Adley Rutschman on the 10-day injured list. Left oblique strain.'),
+      il('2025-06-10', '2025-06-10', 'Baltimore Orioles activated C Adley Rutschman from the 10-day injured list.'),
+      il('2026-04-11', '2026-04-11', 'Baltimore Orioles placed C Adley Rutschman on the 10-day injured list. Left ankle inflammation.'),
+    ],
+  }
+  const f = shapeFacts(person, { season: 2026 })
+  assert.equal(f.stints.length, 1)
+  const placed = { ...f, stint: f.stints[0], beforeLine: { games: 10, avg: '.300', hr: 2 } }
+  assert.equal(
+    injuredStory(placed, { placed: true }),
+    'Rutschman was hitting .300 with 2 homers in 10 games. He missed 40 days (left oblique strain) in 2025.',
+  )
+})
+
+test("a stint filed again names his first filing, and its injury only when the move's words leave it out", () => {
+  const f = shapeFacts(rutschman, { season: 2026 })
+  const placed = { ...f, stint: f.stints[2], beforeLine: null }
+  const note = injuredStory(placed, { placed: true, moveDate: '2026-08-03', clause: 'Placed C Adley Rutschman on the 10-day injured list' })
+  assert.match(note, /^He first went on the list July 19 \(left wrist inflammation\)\./)
+  const named = injuredStory(placed, { placed: true, moveDate: '2026-08-03', clause: 'Placed C Adley Rutschman on the 10-day injured list (left wrist inflammation)' })
+  assert.match(named, /^He first went on the list July 19\./)
+})
+
+test("a trade's note is his line up to the deal, for the club he left", () => {
+  const f = facts({
+    rows: [
+      { season: 2026, teamId: 111, line: {} },
+      { season: 2026, teamId: 110, line: {} },
+    ],
+    trade: { line: { games: 67, avg: '.251', hr: 8 }, fromTeamId: 110, toTeamId: 111 },
+  })
+  assert.equal(seasonSentence(f), 'The 35-year-old hit .251 with 8 homers in 67 games for the Orioles in 2026 before the trade.')
+  // Two clubs before the deal: the line is his, not one club's.
+  const two = { ...f, rows: [...f.rows, { season: 2026, teamId: 121, line: {} }] }
+  assert.equal(seasonSentence(two), 'The 35-year-old hit .251 with 8 homers in 67 games in 2026 before the trade.')
 })

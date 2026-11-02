@@ -359,12 +359,6 @@
   height: 1px;
   background: var(--border-hairline);
 }
-.wire__count {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-cell);
-  color: var(--graphite-soft);
-}
 
 /* One move. The 3px spine is the club's own brand colour (--wire-club, set per
    row in the component) — the thing that answers "whose move is this?" before

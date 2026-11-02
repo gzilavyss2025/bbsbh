@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchScopeRows } from '../../api/transactions/playerFacts.js'
+import { draftSentence } from '../../api/transactions/templates.js'
 import { teamAbbr } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Ledger } from '../player/Ledger.jsx'
@@ -51,11 +52,34 @@ function Club({ teamId, level }) {
   )
 }
 
+// Out of the sentence that named him, the note names him again: "The
+// 26-year-old is…" reads "Graham Pauley, the 26-year-old, is…".
+function namedNote(note, name) {
+  if (!name) return note
+  const age = note.match(/^The (\d+)-year-old\b/)
+  if (age) return `${name}, the ${age[1]}-year-old,${note.slice(age[0].length)}`
+  return note.replace(/^He\b/, name)
+}
+
+// The players he was traded for become links (and the desktop hover card).
+function linkNames(text, ids) {
+  const names = Object.keys(ids ?? {})
+  if (!names.length) return text
+  const parts = text.split(new RegExp(`(${names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`))
+  return parts.map((part, i) => (ids[part] ? <PlayerLink key={i} id={ids[part]}>{part}</PlayerLink> : part))
+}
+
 export function FactSheet({ people }) {
   const [at, setAt] = useState(0)
   const [scope, setScope] = useState(people[0].facts.rows.length ? 'mlb' : 'milb')
   const [read, setRead] = useState({})
   const { facts, note } = people[Math.min(at, people.length - 1)]
+  // Each player opens on his own first view: a prospect who has not reached
+  // the majors opens on the minors.
+  const step = (i) => {
+    setAt(i)
+    setScope(people[i].facts.rows.length ? 'mlb' : 'milb')
+  }
   const cols = COLUMNS[facts.pitcher ? 'pitching' : 'hitting']
   const key = `${facts.id}|${scope}`
   useEffect(() => {
@@ -68,6 +92,8 @@ export function FactSheet({ people }) {
   }, [scope, key, read, facts.id, facts.pitcher])
   const view = scope === 'mlb' ? { rows: facts.rows, total: facts.careerLine } : read[key]
   const meta = SCOPES.find((s) => s.value === scope)
+  // A note that already says where he was drafted keeps its own wording.
+  const draft = note && /-round pick|draft pick|drafted/.test(note) ? null : draftSentence(facts)
   const who = <PlayerLink id={facts.id} className="factsheet__name">{facts.name}</PlayerLink>
   return (
     <Card frame="stamped" className="factsheet">
@@ -83,8 +109,8 @@ export function FactSheet({ people }) {
             label={who}
             prevLabel="Previous player"
             nextLabel="Next player"
-            onPrev={() => setAt((i) => i - 1)}
-            onNext={() => setAt((i) => i + 1)}
+            onPrev={() => step(at - 1)}
+            onNext={() => step(at + 1)}
             prevDisabled={at === 0}
             nextDisabled={at === people.length - 1}
             className="factsheet__step"
@@ -93,7 +119,7 @@ export function FactSheet({ people }) {
           who
         )}
       </div>
-      {note && <p className="factsheet__note">{note}</p>}
+      {(note || draft) && <p className="factsheet__note">{linkNames(namedNote([note, draft].filter(Boolean).join(' '), facts.name), facts.tradeIds)}</p>}
       {!view ? (
         <p className="factsheet__none" aria-busy="true">Loading…</p>
       ) : view.rows.length ? (
