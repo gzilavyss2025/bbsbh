@@ -451,12 +451,18 @@ function clubLeaders(pool) {
 // Extra-inning + one-run W-L for every club, from the standings splitRecords as
 // of the slate's eve (the endpoint honors `date`, so tonight's-in-progress games
 // never fold in). Keyed by teamId; degrades to an empty map on failure.
+// The endpoint answers nothing for a date past the regular season's last day, so a
+// postseason slate asks as of that day: the final regular-season splits.
 async function fetchSplitRecords() {
   const map = {}
+  const end = await getJson(`/api/v1/seasons/${season}?sportId=1`)
+    .then((r) => r.seasons?.[0]?.regularSeasonEndDate ?? null)
+    .catch(() => null)
+  const date = end && end < asOf ? end : asOf
   const leagues = await Promise.allSettled(
     [103, 104].map((leagueId) =>
       getJson(
-        `/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason&date=${asOf}`,
+        `/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason&date=${date}`,
       ),
     ),
   )
