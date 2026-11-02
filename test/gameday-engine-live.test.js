@@ -1,9 +1,9 @@
 // PINS TODAY'S `composeLive` (#2747, row 1a). No product code changes here; row 1b lifts
 // composeLive into src/api/gameday/engine/engineLive.js and these values must pass UNCHANGED.
 //
-// composeLive is a closure inside the HalfInning component, so no test can call it. `composeLive`
-// below is a copy of its body, line for line, and the expected values are literals read off today's
-// behaviour. It pins, from src/components/inning/HalfInning.jsx:
+// Row 1a copied HalfInning's composeLive closure here; row 1b points `compose` at the lifted module.
+// The expected values are literals read off the behaviour before the lift. They pin, from the old
+// src/components/inning/HalfInning.jsx:
 //   :200-206  the entering baseline's inputs (nowPitching, enteringPitches)
 //   :257-264  battingLineFor (computeBatterLine, else preGameAvg)
 //   :265-333  composeLive: batter (batterDone advance, not while windowed), pitcher (mid-half change,
@@ -15,56 +15,20 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { selectHalfStartingPitcher, halfIndex } from '../src/api/select.js'
 import { computePitcherLines } from '../src/api/pitchers.js'
-import { battingSlot, pitchingChangePitcher, computeHalfInningFeed, deriveLiveState } from '../src/api/playbyplay.js'
-import { selectDueUpNow } from '../src/api/dueup.js'
-import { preGameAvg, computeBatterLine } from '../src/api/boxscore.js'
-import { liveAtThirdOut } from '../src/lib/scorebug/liveState.js'
+import { computeHalfInningFeed, deriveLiveState } from '../src/api/playbyplay.js'
+import { composeLive, enteringPitchesFor } from '../src/api/gameday/engine/engineLive.js'
 
 const load = (pk) => JSON.parse(readFileSync(new URL(`./fixtures/game-${pk}.gameday.json`, import.meta.url), 'utf8'))
 
 // `live` null is the entering state; otherwise a cap into the half. The mark is the half before it,
 // which is what a half being stepped through sits on (HalfInning's own reachability note, :207-215).
-function composeLive(feed, inning, half, cap, windowed) {
+function compose(feed, inning, half, cap, windowed) {
   const battingSide = half === 'top' ? 'away' : 'home'
   const revealedThrough = halfIndex(inning, half) - 1
   const live = cap == null ? null : deriveLiveState(computeHalfInningFeed(feed, inning, half, battingSide, cap), cap)
   const nowPitching = selectHalfStartingPitcher(feed, inning, half, revealedThrough)
-  const lines = computePitcherLines(feed, halfIndex(inning, half) - 1)
-  const enteringPitches = nowPitching ? [...lines.away, ...lines.home].find((r) => r.id === nowPitching.id)?.pitches : null
-  const battingLineFor = (id) => {
-    const box = feed?.liveData?.boxscore?.teams?.[battingSide]?.players?.[`ID${id}`]
-    if (!box) return null
-    const { hits, atBats } = computeBatterLine(feed, id, revealedThrough)
-    if (atBats > 0 || hits > 0) return `${hits}-${atBats}`
-    return preGameAvg(box)
-  }
-  const bases = live?.bases ?? { first: false, second: false, third: false }
-  const outs = live?.outs ?? 0
-  let batter = null
-  if (!windowed && live?.batter && live.batterDone && outs < 3) {
-    const finishedSlot = battingSlot(feed, battingSide, live.batter.id)
-    const nextSlot = finishedSlot != null ? (finishedSlot >= 9 ? 1 : finishedSlot + 1) : null
-    const upcoming = nextSlot != null ? selectDueUpNow(feed, inning, half, revealedThrough, 9)?.batters?.find((b) => b.slot === nextSlot) : null
-    if (upcoming) batter = { order: upcoming.slot, last: upcoming.last, line: battingLineFor(upcoming.id) }
-  }
-  if (!batter && live?.batter) {
-    const slot = battingSlot(feed, battingSide, live.batter.id)
-    batter = { order: slot ?? '', last: live.batter.last, line: battingLineFor(live.batter.id) }
-  } else if (!batter) {
-    const due = selectDueUpNow(feed, inning, half, revealedThrough, 1)?.batters?.[0]
-    if (due) batter = { order: due.slot, last: due.last, line: battingLineFor(due.id) }
-  }
-  let pitcher = null
-  if (live?.midHalfPitcherId != null) {
-    const p = pitchingChangePitcher(feed, live.midHalfPitcherId)
-    if (p) pitcher = { last: p.name.split(',')[0], pitches: live.pitchesSoFar ?? 0 }
-  } else if (nowPitching) {
-    pitcher = { last: nowPitching.name.split(',')[0], pitches: (enteringPitches ?? 0) + (live?.pitchesSoFar ?? 0) }
-  }
-  const last = live?.last ?? null
-  const midHalfPitcherId = live?.midHalfPitcherId ?? null
-  if (outs >= 3) return { ...liveAtThirdOut({ batter, pitcher, inning, half }), last, midHalfPitcherId }
-  return { bases, outs, batter, pitcher, inning, half, last, midHalfPitcherId }
+  const enteringPitches = enteringPitchesFor(computePitcherLines(feed, halfIndex(inning, half) - 1), nowPitching)
+  return composeLive(live, { feed, inning, half, battingSide, revealedThrough, windowed, nowPitching, enteringPitches })
 }
 
 // `last` is a whole card; the pin is which at-bat it is.
@@ -101,6 +65,6 @@ const EXPECTED = {
 
 for (const [name, pk, inning, half, cap, windowed] of CASES) {
   test(name, () => {
-    assert.deepEqual(view(composeLive(load(pk), inning, half, cap, windowed)), EXPECTED[name])
+    assert.deepEqual(view(compose(load(pk), inning, half, cap, windowed)), EXPECTED[name])
   })
 }
