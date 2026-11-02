@@ -1,0 +1,188 @@
+/* ==== THE YEAR CHIP AND THE SEASON SHEET (#2599) ====
+   SeasonPicker.jsx imports this file. The chip takes the hero's count tag (card__count): the tag
+   keeps its frame, and the chip is the door inside it. On a phone the sheet is the shared
+   .scrim/.sheet bottom sheet; at the wide step it is a popover under the chip, placed from the
+   chip's box (--pop-top, --pop-right, set on open). */
+
+.tnext__hero > .card__count:has(.tnext__yearchip) {
+  padding: 0;
+}
+/* layout-exempt: the year, the caret and the level in one row */
+.tnext__yearchip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  padding: var(--space-1) var(--space-2);
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+}
+/* The tag is shorter than a finger: an invisible box gives it the 44px target. */
+.tnext__yearchip::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  min-height: var(--tap-min);
+  transform: translateY(-50%);
+}
+.tnext__yearcaret {
+  width: var(--space-3);
+  height: var(--space-3);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tnext__yearchip[aria-expanded='true'] .tnext__yearcaret {
+  transform: rotate(180deg);
+}
+.tnext__yearlevel {
+  color: var(--text-muted);
+}
+
+/* THE SHEET */
+/* layout-exempt: a fixed head and foot around a scrolling body */
+.tnext__yearsheet {
+  display: flex;
+  flex-direction: column;
+  max-height: min(85vh, 780px);
+  padding: 0;
+}
+/* layout-exempt: the title block and the close button in one row */
+.tnext__yearsheet-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2) var(--space-2h) var(--space-4);
+}
+.tnext__yearsheet-head .sheet__title {
+  margin: var(--space-1) 0 0;
+}
+.tnext__yearsheet-sub {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+.tnext__yearsheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--space-4) var(--space-4);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+/* layout-exempt: the group's name and its span on one baseline */
+.tnext__era-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-4) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.tnext__era-span {
+  flex: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  letter-spacing: var(--ls-none);
+}
+/* layout-exempt: a fixed count, five years to a row (six at the wide step) */
+.tnext__years {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+/* layout-exempt: the year over its NOW mark */
+.tnext__year {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--tap-min);
+  padding: var(--space-1) 0;
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+.tnext__year:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.tnext__year.is-active {
+  box-shadow: var(--shadow-stamped);
+}
+.tnext__year--now {
+  background: var(--accent-positive);
+  border-color: var(--accent-positive);
+  color: var(--text-on-ink);
+}
+.tnext__year-now {
+  font-size: var(--fs-cell);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-xwide);
+  line-height: var(--lh-solid);
+}
+.tnext__yearsheet-foot {
+  flex: none;
+  padding: var(--space-2h) var(--space-4) calc(var(--space-2h) + env(safe-area-inset-bottom));
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  background: var(--bg-canvas);
+}
+/* layout-exempt: the door's words and its arrow at the two ends */
+.tnext__yearsheet-door {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-heavy) solid var(--border-stamped);
+  box-shadow: var(--shadow-stamped);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+/* THE WIDE STEP: a popover under the chip, about 400px wide, six years to a row. */
+@media (min-width: 740px) {
+  .tnext__yearscrim {
+    background: transparent;
+    animation: none;
+  }
+  .tnext__yearsheet {
+    position: fixed;
+    top: calc(var(--pop-top, 0px) + var(--space-2));
+    right: var(--pop-right, 0px);
+    width: 400px;
+    max-height: min(70vh, 560px);
+    border: var(--bw-heavy) solid var(--border-stamped);
+    border-radius: 0;
+    box-shadow: var(--shadow-stamped);
+  }
+  .tnext__years {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}

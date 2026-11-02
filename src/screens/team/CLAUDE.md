@@ -29,7 +29,8 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
   (it replaces the identity header and the club strip). `topData.js` holds the pure shapes: the
   form line, the stretches, Last 10, the days calendar and the record grid read only games with
   a `won`, so `?d=` stops every one of them. The grid's other-league standings are the page's
-  one request on a tap.
+  one request on a tap. On an MLB club the hero's count tag is the year chip (`SeasonPicker.jsx`, #2599): it
+  opens the season sheet, grouped by `seasonEras.js` from the franchise spans; a year opens `?y=`, NOW the bare page.
 - **Standings** (`next/standings/`): the division table and Last time. Team score, Records, day of
   week and comeback wins draw at the head of **Ranks** through `standings/StandingsRankCards.jsx`
   (same loader via SHARED, no new request). The jump-bar count is one per card drawn. The **Records card**
