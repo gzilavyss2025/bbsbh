@@ -37,6 +37,8 @@ export function isMajorMove(story, { lists, favoriteTeamId }) {
   ids.delete(null)
   if ([...ids].some((id) => lists.star.has(id))) return true
   const sentence = segments.map((seg) => seg.text).join('')
+  // Every injured-list placement is a full card: the loss is the news.
+  if (/\bplaced\b[^;]*injured list/i.test(sentence)) return true
   const news = (story.codes ?? []).some((code) => NEWS_CODES.has(code)) && !MINOR_DEAL.test(sentence)
   return news && [...ids].some((id) => lists.notable.has(id))
 }
