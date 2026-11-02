@@ -80,7 +80,26 @@ export function shapeMinors(splits, pitcher) {
 // His rank on the weekly prospect lists: MLB's top 100, else his club's own
 // list. The club is the one that ranked him, which on a trade is the club that
 // gave him up.
-const arrivalOf = (t) => ({ how: ARRIVALS[t.typeCode], date: t.date, teamId: t.toTeam.id, fromTeamId: t.fromTeam?.id ?? null })
+const arrivalOf = (t, name) => ({
+  how: ARRIVALS[t.typeCode],
+  date: t.date,
+  teamId: t.toTeam.id,
+  fromTeamId: t.fromTeam?.id ?? null,
+  tradedFor: ARRIVALS[t.typeCode] === 'trade' ? tradedFor(t.description, t.person?.fullName ?? name) : null,
+})
+
+// The other side of a trade, out of the row's own description: "White Sox
+// traded RHP Lucas Giolito and RHP Reynaldo López to Los Angeles Angels for
+// C Edgar Quero and LHP Ky Bush." read for Bush is "Lucas Giolito and Reynaldo
+// López". Positions drop; "cash" and "a player to be named later" stay.
+export function tradedFor(description, name) {
+  const m = (description ?? '').match(/\btraded (.+?) to .+? for (.+?)\.?$/)
+  if (!m || !name) return null
+  const [, sent, got] = m
+  const side = got.includes(name) ? sent : sent.includes(name) ? got : null
+  if (!side) return null
+  return side.replace(/\b(?:[LR]HP|C|1B|2B|3B|SS|LF|CF|RF|OF|IF|DH|P|UT)\s+(?=\p{Lu})/gu, '').trim() || null
+}
 
 export function prospectOf(snapshot, playerId) {
   const top = (snapshot?.players ?? []).find((p) => p.playerId === playerId)
@@ -139,30 +158,38 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
   // Each stint this season: placed (from the effective date, which a
   // retroactive placement sets back), the feed's own injury note, and the day
   // he came off. A transfer to the 60-day list stays inside its stint.
-  const stints = []
-  for (const t of moves.filter((m) => m.date?.startsWith(String(season)))) {
+  // Every season's stints are read; this season's are `stints`, the earlier
+  // ones `pastStints`, for a first trip's history.
+  const allStints = []
+  for (const t of moves.filter((m) => m.date && m.date.slice(0, 4) <= String(season))) {
     if (!bigLeagueIl(t)) continue
     if (/placed/i.test(t.description)) {
       // A placement while a stint is still open is the same stint filed again,
-      // as a traded player's new club does (Rutschman, Aug. 3, 2026).
-      const open = stints.find((x) => !x.to)
+      // as a traded player's new club does (Rutschman, Aug. 3, 2026), or a
+      // transfer to the 60-day list. One left open from an earlier season is
+      // not: the feed never closed it.
+      const open = allStints.find((x) => !x.to && x.from.slice(0, 4) === t.date.slice(0, 4))
       if (open) {
         open.filings.push(t.date)
         continue
       }
       const injury = (t.description.match(/injured list(?: retroactive to [^.]+)?\.\s*(.+)/i)?.[1] ?? '').trim().replace(/\.$/, '')
-      stints.push({ from: t.effectiveDate ?? t.date, filings: [t.date], injury: injury || null, to: null })
+      allStints.push({ from: t.effectiveDate ?? t.date, filings: [t.date], injury: injury || null, to: null })
     } else if (/activated/i.test(t.description)) {
-      const open = [...stints].reverse().find((x) => !x.to)
+      const open = [...allStints].reverse().find((x) => !x.to)
       if (open) open.to = t.date
     }
   }
+  const stints = allStints.filter((x) => x.filings[0].startsWith(String(season)))
+  const pastStints = allStints.filter((x) => x.filings[0].slice(0, 4) < String(season))
 
   // The latest move that brought him to the club he is with now.
   const current = teamId ?? [...moves].reverse().find((t) => t.toTeam?.id)?.toTeam?.id ?? null
   const arrival = [...moves]
     .reverse()
     .find((t) => ARRIVALS[t.typeCode] && t.toTeam?.id === current)
+
+  const signed = [...(person.drafts ?? [])].sort((a, b) => Number(a.year) - Number(b.year)).at(-1)
 
   return {
     id: person.id,
@@ -177,8 +204,10 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
     careerLine: career ? shapeLine(career, pitcher) : null,
     minors: minors ? shapeMinors(minors, pitcher) : null,
     prospect: prospectOf(prospects, person.id),
-    draft: person.drafts?.[0]?.team?.id
-      ? { teamId: person.drafts[0].team.id, year: Number(person.drafts[0].year), round: person.drafts[0].pickRound ?? null, school: person.drafts[0].school?.name ?? null }
+    // The draft he signed out of: the latest, since a pick who went back to
+    // school is drafted again.
+    draft: signed?.team?.id
+      ? { teamId: signed.team.id, year: Number(signed.year), round: signed.pickRound ?? null, pick: signed.pickNumber ?? null, school: signed.school?.name ?? null }
       : null,
     // Every club season, newest first, for the sheet's table.
     rows: [...clubRows]
@@ -188,11 +217,12 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
     years,
     injured,
     stints,
+    pastStints,
     clubs,
-    arrival: arrival ? arrivalOf(arrival) : null,
+    arrival: arrival ? arrivalOf(arrival, person.fullName) : null,
     // Every arrival, oldest first: a quick second move ("two days after
     // Milwaukee got him from Cleveland") reads the one before.
-    arrivals: moves.filter((t) => ARRIVALS[t.typeCode] && t.toTeam?.id).map(arrivalOf),
+    arrivals: moves.filter((t) => ARRIVALS[t.typeCode] && t.toTeam?.id).map((t) => arrivalOf(t, person.fullName)),
     contract: contract
       ? { terms: contract.terms ?? null, club: contract.clubAbbrev ?? null, season: contract.season ?? null, options: contract.options?.remaining ?? null }
       : null,
@@ -211,8 +241,21 @@ const cache = new Map()
 // `ilMove` (an injured-list move's date) adds the stint it is about and his
 // line up to it.
 const near = (a, b) => Math.abs(Date.parse(a) - Date.parse(b)) <= 86_400_000
-export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = null } = {}) {
-  const key = `${personId}|${season}|${teamId}|${ilMove}`
+// The players he was traded for, by name, with their ids: that day's trade
+// rows carry every player in the deal, so the note can link each one.
+async function withTradeIds(facts) {
+  const a = facts?.arrival
+  if (!a?.tradedFor) return facts
+  const day = await getJson(`/api/v1/transactions?startDate=${a.date}&endDate=${a.date}`).catch(() => null)
+  const tradeIds = {}
+  for (const t of day?.transactions ?? []) {
+    if (t.typeCode === 'TR' && t.person?.id && a.tradedFor.includes(t.person.fullName)) tradeIds[t.person.fullName] = t.person.id
+  }
+  return { ...facts, tradeIds }
+}
+
+export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = null, tradeMove = null } = {}) {
+  const key = `${personId}|${season}|${teamId}|${ilMove}|${tradeMove}`
   if (!cache.has(key)) {
     cache.set(
       key,
@@ -233,6 +276,17 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
             const stat = range?.stats?.[0]?.splits?.[0]?.stat
             facts.beforeLine = stat ? shapeLine(stat, facts.pitcher) : null
           }
+          // A trade: his line up to the day before it, for the club he left,
+          // so the note reads as it did the day of the deal.
+          const deal = tradeMove && facts?.arrivals.find((a) => a.how === 'trade' && near(a.date, tradeMove))
+          if (deal?.fromTeamId && tradeMove.startsWith(String(season))) {
+            const group = facts.pitcher ? 'pitching' : 'hitting'
+            const range = await getJson(
+              `/api/v1/people/${personId}/stats?stats=byDateRange&group=${group}&sportId=1&startDate=${season}-03-01&endDate=${shiftDays(tradeMove, -1)}`,
+            ).catch(() => null)
+            const stat = range?.stats?.[0]?.splits?.[0]?.stat
+            if (stat) facts.trade = { line: shapeLine(stat, facts.pitcher), fromTeamId: deal.fromTeamId, toTeamId: deal.teamId }
+          }
           // A thin big-league season (or none): one more read for where he
           // spent the rest of it.
           const full = facts?.seasonLine && facts.seasonLine.games >= (facts.pitcher ? FULL_SEASON.pitcher : FULL_SEASON.hitter)
@@ -240,8 +294,9 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
           const group = facts.pitcher ? 'pitching' : 'hitting'
           const milb = await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null)
           const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors: milb?.stats?.flatMap((x) => x.splits ?? []) })
-          return { ...withMinors, stint: facts.stint, beforeLine: facts.beforeLine }
+          return { ...withMinors, stint: facts.stint, beforeLine: facts.beforeLine, trade: facts.trade }
         })
+        .then(withTradeIds)
         .catch(() => {
           cache.delete(key)
           return null

@@ -229,6 +229,15 @@ export function seasonSentence(facts) {
   const who = `${facts.age ? `The ${facts.age}-year-old` : facts.lastName ?? 'He'}${rank ? `, ${rank},` : ''}`
   // A thin big-league season with a minor-league one: lead with where he
   // spent most of the year.
+  // A trade's note stays as it read that day: his line up to the deal, for
+  // the club he left.
+  if (facts.trade?.line?.games && !mostlyMinors(facts)) {
+    // The club only when it was his one club before the deal; a line across
+    // two clubs is his season, not theirs.
+    const before = new Set((facts.rows ?? []).filter((r) => r.season === facts.season && r.teamId !== facts.trade.toTeamId).map((r) => r.teamId))
+    const club = before.size === 1 && before.has(facts.trade.fromTeamId) ? ` for ${the(facts.trade.fromTeamId)}` : ''
+    return `${who} ${didText(facts.trade.line, facts.pitcher)}${club} in ${facts.season} before the trade.`
+  }
   if (facts.seasonLine && mostlyMinors(facts) && !isFull(facts.seasonLine, facts.pitcher)) {
     const team = facts.clubs[facts.clubs.length - 1]?.teamId
     const g = facts.seasonLine.games
@@ -304,7 +313,7 @@ function arrivalSentence(facts, who, moveDate) {
   const year = a.date.slice(0, 4) === String(facts.season) ? '' : `, ${a.date.slice(0, 4)}`
   const when = `${apDate(a.date)}${year}`
   let s
-  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)} from ${the(a.fromTeamId)} in ${aMonth(when)} ${when}${year ? ',' : ''} trade`
+  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)} from ${the(a.fromTeamId)} in ${aMonth(when)} ${when}${year ? ',' : ''} trade${a.tradedFor ? ` for ${a.tradedFor}` : ''}`
   else if (a.how === 'waiver claim' && a.fromTeamId) s = `${who} was claimed off waivers from ${the(a.fromTeamId)} on ${when}`
   else if (a.how === 'draft') s = `${who} was drafted by ${the(a.teamId)} in ${a.date.slice(0, 4)}`
   else if (a.how === 'Rule 5 draft')
@@ -391,7 +400,20 @@ function beforeText(line, pitcher) {
     : `was hitting ${line.avg} with ${homers(line.hr)} in ${gamesText(line.games)}`
 }
 
-export function injuredStory(facts, { placed }) {
+// Earlier seasons' trips, newest first, at most three: "He missed 40 days in
+// 2025 (left oblique strain) and 22 days in 2023."
+function pastTrips(stints) {
+  // A trip the feed never closed has no length to give, so it is left out.
+  const trips = [...(stints ?? [])].filter((x) => x.to).reverse().slice(0, 3).map((x) => {
+    const injury = x.injury ? ` (${lower(x.injury)})` : ''
+    return `${daysBetween(x.from, x.to)} days${injury} in ${x.filings[0].slice(0, 4)}`
+  })
+  if (!trips.length) return null
+  const list = trips.length > 1 ? `${trips.slice(0, -1).join(', ')} and ${trips[trips.length - 1]}` : trips[0]
+  return `He missed ${list}.`
+}
+
+export function injuredStory(facts, { placed, moveDate = null, clause = '' }) {
   const stint = facts.stint
   if (!stint) return null
   const name = facts.lastName ?? 'He'
@@ -399,12 +421,24 @@ export function injuredStory(facts, { placed }) {
   const earlier = facts.stints.slice(0, at)
   const out = []
   if (placed) {
-    const prev = earlier[earlier.length - 1]
-    let s = `It is ${name}'s ${COUNT[at + 1] ?? `${at + 1}th`} stint on the injured list in ${facts.season}`
-    if (prev?.to) s += `; he missed ${daysBetween(prev.from, prev.to)} days from ${apDate(prev.from)}${prev.injury ? ` (${lower(prev.injury)})` : ''}`
-    out.push(`${s}.`)
+    // How big the loss is comes first.
     const before = beforeText(facts.beforeLine, facts.pitcher)
-    if (before) out.push(`He ${before}.`)
+    if (before) out.push(`${name} ${before}.`)
+    // A later filing of a stint already open (a transfer to the 60-day list)
+    // often carries no injury: the first filing's one is his.
+    const refiled = moveDate && stint.filings.length > 1 && Math.abs(daysBetween(stint.filings[0], moveDate)) > 1
+    // The injury only when the move's own words leave it out.
+    const borrowed = stint.injury && !clause.toLowerCase().includes(stint.injury.toLowerCase()) ? ` (${lower(stint.injury)})` : ''
+    if (refiled) out.push(`He first went on the list ${apDate(stint.from)}${borrowed}.`)
+    if (at > 0) {
+      const prev = earlier[earlier.length - 1]
+      let s = `It is his ${COUNT[at + 1] ?? `${at + 1}th`} stint on the injured list in ${facts.season}`
+      if (prev?.to) s += `; he missed ${daysBetween(prev.from, prev.to)} days from ${apDate(prev.from)}${prev.injury ? ` (${lower(prev.injury)})` : ''}`
+      out.push(`${s}.`)
+    } else {
+      const past = pastTrips(facts.pastStints)
+      if (past) out.push(past)
+    }
   } else {
     let s = `${name} missed ${daysBetween(stint.from, stint.to)} days`
     if (stint.injury) s += ` (${lower(stint.injury)})`
@@ -417,6 +451,15 @@ export function injuredStory(facts, { placed }) {
 }
 
 // The card's fact line: up to two short lines, or none for the fallback.
+// The card's draft sentence, run on after the note: "The Padres drafted him
+// out of Duke in the 13th round in 2022." Null for a player never drafted.
+export function draftSentence(facts) {
+  const d = facts?.draft
+  if (!d) return null
+  const club = the(d.teamId)
+  return `${club[0].toUpperCase()}${club.slice(1)} drafted him${d.school ? ` out of ${d.school}` : ''}${d.round ? ` in the ${ordinal(d.round)} round${d.pick ? ` (${ordinal(d.pick)} overall)` : ''}` : ''} in ${d.year}.` // caps-js-exempt: sentence case
+}
+
 export function factLines(template, facts, ctx = {}) {
   if (!facts || template === 'fallback') return []
   if (template === 'minor-deal' || template === 'trade') {
@@ -428,7 +471,7 @@ export function factLines(template, facts, ctx = {}) {
   }
   if (template === 'cut') return [cutStory(facts, ctx)]
   if (template === 'il-placed' || template === 'il-activated') {
-    const note = injuredStory(facts, { placed: template === 'il-placed' })
+    const note = injuredStory(facts, { placed: template === 'il-placed', moveDate: ctx.moveDate, clause: ctx.clause ?? '' })
     return note ? [note] : []
   }
 

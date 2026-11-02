@@ -229,7 +229,7 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
   const lead = compact ? story.rail?.[0] : null
-  const markSize = marks ? (line ? 22 : 32) : 18
+  const markSize = marks ? 28 : 18
   const partnerId =
     marks && story.type === 'trade'
       ? story.cutline?.find((seg) => seg.teamId && seg.teamId !== story.teamId)?.teamId
@@ -300,7 +300,6 @@ export function MoveItems({ items, compact = false, marks = false, isMajor = nul
       <li className="wire__date" key={item.key}>
         <span className="wire__dateline">{dateline(item.date)}</span>
         <span className="wire__rule" aria-hidden="true" />
-        <span className="wire__count">{item.count}</span>
       </li>
     ) : (
       <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} />

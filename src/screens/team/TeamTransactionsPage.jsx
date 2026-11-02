@@ -6,8 +6,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { loadMoreTeamTransactions } from '../../api/teamTransactions.js'
-import { dateline } from '../../components/transactions/MoveRow.jsx'
-import { TxStory } from '../../components/transactions/TxStory.jsx'
+import { MoveItems, flattenDays } from '../../components/transactions/MoveRow.jsx'
+import { fetchNotableLists, isMajorMove } from '../../api/transactions/major.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
@@ -40,8 +41,8 @@ import { loadTransactions } from './data/loadTransactions.js'
 // surfaces split the work the way this app already splits it elsewhere: the
 // deck is the preview, this is the whole thing.
 //
-// The CARD is the same card either way (TxStory.jsx), so a move a reader
-// recognises from the club page looks the same here.
+// The ROW is the home page's offseason ledger row (MoveRow.jsx, with its More
+// card), so a move a reader recognises from the home page looks the same here.
 //
 // A roster move and its date carry no score, so there is no SealBox on this
 // page and none is wanted (api/transactions/clubFeed.js).
@@ -100,6 +101,9 @@ function ClubLedger({ team, asOf, first, onBack }) {
   const sentinelRef = useRef(null)
 
   const visible = days.slice(0, shown)
+  const { data: lists } = useAsync(() => fetchNotableLists(), [])
+  const { favoriteTeamId } = useFavoriteTeam()
+  const isMajor = lists ? (story) => isMajorMove(story, { lists, favoriteTeamId }) : null
   const canGrow = shown < days.length || hasMore
 
   // Widens the drawn slice first (a loaded page usually holds more than is
@@ -160,24 +164,12 @@ function ClubLedger({ team, asOf, first, onBack }) {
       {days.length === 0 ? (
         <EmptyState className="txpage__empty">No roster moves posted for this club yet.</EmptyState>
       ) : (
-        <div className="txpage__days">
-          {visible.map((day) => (
-            <section className="txpage__day" key={day.date}>
-              {/* The wire's own dateline row, upright: the day, a rule, and the
-                  day's count. Mixed case on purpose — the CSS applies the app's
-                  ALL-CAPS invariant (ADR-0017). */}
-              <h2 className="txpage__dateline">
-                <span>{dateline(day.date)}</span>
-                <span className="txpage__rule" aria-hidden="true" />
-                <span className="txpage__count">{day.stories.length}</span>
-              </h2>
-              <div className="txpage__stories">
-                {day.stories.map((story) => (
-                  <TxStory key={story.id} story={story} />
-                ))}
-              </div>
-            </section>
-          ))}
+        // The home page's ledger, the same rows and the same More cards: a
+        // major move is a full card, the rest one line each.
+        <div className="oseason__ledger txpage__ledger">
+          <ul className="oseason__list">
+            <MoveItems items={flattenDays(visible)} marks facts isMajor={isMajor} />
+          </ul>
         </div>
       )}
 

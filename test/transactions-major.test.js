@@ -15,8 +15,17 @@ const story = (over = {}) => ({
   ...over,
 })
 
-test('a nobody on the injured list is a line', () => {
-  assert.equal(isMajorMove(story(), { lists, favoriteTeamId: 158 }), false)
+const activated = { cutline: [{ text: 'Activated RHP ' }, { text: 'Nobody', playerId: 3 }, { text: ' from the 15-day injured list.' }] }
+
+test('a nobody coming off the injured list is a line', () => {
+  assert.equal(isMajorMove(story(activated), { lists, favoriteTeamId: 158 }), false)
+})
+
+test('every injured-list placement is a card, a nobody included', () => {
+  assert.equal(isMajorMove(story(), { lists, favoriteTeamId: 158 }), true)
+  // The placement leads a folded day: the call-up beside it changes nothing.
+  const folded = { cutline: [{ text: 'Placed RHP ' }, { text: 'Nobody', playerId: 3 }, { text: ' on the 60-day injured list; recalled LHP ' }, { text: 'Other', playerId: 4 }, { text: ' from Iowa Cubs.' }] }
+  assert.equal(isMajorMove(story(folded), { lists, favoriteTeamId: 158 }), true)
 })
 
 test("a star's move is a card whatever it is", () => {
@@ -36,7 +45,7 @@ test('the favorite team as the other club in a trade is a card', () => {
 })
 
 test("a notable player's routine move is a line", () => {
-  assert.equal(isMajorMove(story({ rail: [{ playerId: 2 }] }), { lists, favoriteTeamId: 158 }), false)
+  assert.equal(isMajorMove(story({ ...activated, rail: [{ playerId: 2 }] }), { lists, favoriteTeamId: 158 }), false)
 })
 
 test("a notable player's newsworthy move is a card", () => {
@@ -61,6 +70,6 @@ test('a player named only in the cutline still counts', () => {
 
 test('with no lists loaded every move is a line, except the favorite team', () => {
   const none = notableLists(null)
-  assert.equal(isMajorMove(story({ rail: [{ playerId: 1 }] }), { lists: none, favoriteTeamId: 158 }), false)
+  assert.equal(isMajorMove(story({ ...activated, rail: [{ playerId: 1 }] }), { lists: none, favoriteTeamId: 158 }), false)
   assert.equal(isMajorMove(story({ teamId: 158 }), { lists: none, favoriteTeamId: 158 }), true)
 })
