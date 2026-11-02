@@ -7,7 +7,7 @@ import { fetchWarData, fetchWarHistory, warByYearFor } from '../../../../../api/
 import { hofPaceRows } from './hofpaceView.js'
 
 let pool = null
-const loadPool = () =>
+export const loadPool = () =>
   (pool ??= fetch('/data/hof-pace.json')
     .then((r) => {
       if (!r.ok) throw new Error(`hof-pace.json ${r.status}`)
