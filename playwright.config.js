@@ -20,6 +20,12 @@ import { defineConfig, devices } from '@playwright/test'
 // run starts a server on the same port rather than colliding on 5173 (vite's
 // strictPort would refuse).
 const PORT = Number(process.env.E2E_PORT) || 5173
+// Cloud containers ship a preinstalled Chromium that may not match this
+// project's Playwright build; point at it instead of pinning a version
+// (issue #2751, docs/testing.md).
+export const cloudLaunch = process.env.CLAUDE_CODE_REMOTE
+  ? { executablePath: '/opt/pw-browsers/chromium' }
+  : {}
 export default defineConfig({
   testDir: './e2e',
   // Warms the cold dev server before the first test; see e2e/global-setup.js.
@@ -36,6 +42,7 @@ export default defineConfig({
     // pre-cached here — avoids a browser download just to run a quick
     // verification pass.
     browserName: 'chromium',
+    launchOptions: cloudLaunch,
   },
   // Three breakpoints: phone-first is the primary target, but the app also
   // has a wider layout (see the `min-width: 740px` rule in index.css) that
