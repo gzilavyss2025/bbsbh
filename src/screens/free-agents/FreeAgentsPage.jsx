@@ -108,7 +108,7 @@ export function FreeAgentsPage({ season: routeSeason }) {
               <Switch label="Unsigned only" checked={unsignedOnly} onChange={setUnsignedOnly} />
               <Switch label="Include minor-league" checked={includeMinors} onChange={setIncludeMinors} />
             </Cluster>
-            <TeamFilterStrip selectedTeamId={teamId} onSelect={setTeamId} ariaLabel="Filter free agents by last club" />
+            <TeamFilterStrip selectedTeamId={teamId} onSelect={setTeamId} ariaLabel="Filter free agents by last club" className="fa__clubs" />
           </Stack>
 
           {shown.length === 0 ? (

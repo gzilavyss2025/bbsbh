@@ -54,6 +54,11 @@
   overflow: hidden;
 }
 
+.fa__clubs,
+.fa__clubs .vsteam__team {
+  border-radius: var(--radius-square);
+}
+
 .fa__filters {
   margin-top: var(--space-6);
   margin-bottom: var(--space-4);
