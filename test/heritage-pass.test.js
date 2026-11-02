@@ -247,6 +247,21 @@ test('a club with no distinct secondary mark costs its CDN lookups once; a netwo
   assert.ok((await flaky(158, 'base')).includes('heritage-secondary-158-cap'))
 })
 
+test('a cap that fails offline once is still chosen over the wordmark on the next pass', async () => {
+  const wordmarkSvg = '<svg viewBox="0 0 20 20"><path fill="#123456" d="M0 0L20 0L20 20Z"/></svg>'
+  let capOffline = true
+  const marks = secondaryMarkCache(async (url) => {
+    if (url === logoCdnUrl(158, 'cap')) {
+      if (capOffline) { capOffline = false; throw new Error('offline') }
+      return secondarySvg
+    }
+    if (url === logoCdnUrl(158, 'wordmark')) return wordmarkSvg
+    return primarySvg
+  })
+  assert.ok((await marks(158, 'base')).includes('heritage-secondary-158-wordmark'))
+  assert.ok((await marks(158, 'base')).includes('heritage-secondary-158-cap'))
+})
+
 test('a postseason box-score pass reads the same ribbon as the Game Log pass', () => {
   const source = JSON.parse(readFileSync(new URL('./fixtures/world-series/schedule-2022.json', import.meta.url)))
   const game = source.dates[0].games[0]
