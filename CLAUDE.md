@@ -46,11 +46,11 @@ fails, move content out; do not raise the cap. After structural work, update the
 ## Workflow & deployment
 
 **All sessions use task branches and pull requests. Never push directly to `main`
-or trigger a Vercel deployment.** Two exceptions: a `/stack-prs` merge, run by Gary or
-by the orchestrator under his standing permission (`.claude/skills/orchestrate/`), and
+or trigger a Vercel deployment.** Exceptions: `/stack-prs` run by Gary; the
+orchestrator, which under his standing permission merges each green child PR after its
+own review, or stacks when that helps (`.claude/skills/orchestrate/`, "Landing"); and
 `merge-pr` when Gary says "merge the pr" (green CI only, no stack). Keep
-work-in-progress off `main` and batch related changes into one stack (Vercel Pro since
-2026-10-29). Every push to a PR branch gets a preview URL on the PR's Vercel check; it
+work-in-progress off `main` (Vercel Pro since 2026-10-29). Every push to a PR branch gets a preview URL on the PR's Vercel check; it
 needs a Vercel sign-in. Verify in your own container first; the preview is for Gary:
 end your handoff with the preview link for the route you changed, `?nointro` added.
 
@@ -61,7 +61,7 @@ parallel, so list the open PRs and their files before you edit. Stop only on a r
 collision (the same code, budget numbers, lockfiles, generated files); otherwise go on
 and name the other PR in yours.
 Open your PR as a draft (`mark-ready.yml` flips it to ready and adds `wip`); remove `wip` when
-the work is done and CI is green; never merge it. `/stack-prs` lands it. Every push starts a
+the work is done and CI is green; never merge it. Gary, the orchestrator, or `/stack-prs` lands it. Every push starts a
 CI run, so while Gary iterates, commit locally and push at his checkpoints, when the PR is
 ready, or before you stop (the PR is the handoff) — never every turn. Verify in the
 container by rendering the route you changed in the preinstalled Chromium.
