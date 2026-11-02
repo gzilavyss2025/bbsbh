@@ -8,6 +8,8 @@ import { WinterCalendar } from './WinterCalendar.jsx'
 import { useCopy } from '../../copy/copyContext.js'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
+import { Door } from '../ui/control/Door.jsx'
+import { useNav } from '../../lib/nav.js'
 
 // THE OFFSEASON LEAD — the same roster wire, promoted.
 //
@@ -49,6 +51,7 @@ const LEAD_ROWS = 6
 
 export function OffseasonLead({ endDate, sportId, winter, children }) {
   const { t } = useCopy()
+  const navigate = useNav()
   const { data, loading } = useAsync(
     (signal) => fetchLeagueMoves(endDate, sportId, { signal, singleDay: false }),
     [endDate, sportId],
@@ -104,6 +107,12 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           Both sit under the ledger because the wire is what a reader came for
           in December; the note is what they stay for. Either renders nothing
           when its file is not the season this page names. */}
+      {/* The free-agent class (#2509): the hot-stove question the wire answers
+          one move at a time, as one list. */}
+      <Door className="oseason__fa" onClick={() => navigate(`/free-agents/${winter.seasonEnded}`)}>
+        Free agents
+      </Door>
+
       <LongAtBats season={winter.seasonEnded} />
 
       <SeasonRecord sportId={sportId} season={winter.seasonEnded} dateStr={endDate} />

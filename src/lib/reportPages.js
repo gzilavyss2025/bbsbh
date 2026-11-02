@@ -71,6 +71,10 @@ export const PAGE_GROUPS = [
       // league, the same gesture as the two rows above it; a club's own book is
       // the Contracts tab on its team page, reached from this page's club rail.
       { label: 'Salaries', path: '/salaries' },
+      // The hot-stove board (#2509): who filed for free agency and where each
+      // one signed. Beside Salaries because it is the same money question,
+      // read league-wide.
+      { label: 'Free Agents', path: '/free-agents' },
       // One pitcher against one hitter: where he throws each pitch, how the
       // hitter does against it, and every time they met (#1408). A lookup on
       // the season's data, read like the boards above it, not a game page.

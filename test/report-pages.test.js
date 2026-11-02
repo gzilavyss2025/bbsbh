@@ -65,6 +65,8 @@ const PATHS_BEFORE_GROUPING = [
   '/postseason-race',
   '/postseason-records',
   '/trade-deadline',
+  // The free-agent class (#2509), beside Salaries.
+  '/free-agents',
   '/all-star-rosters',
   '/all-star-legacy',
   '/teammates',
