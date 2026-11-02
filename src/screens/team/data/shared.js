@@ -3,6 +3,7 @@ import { firstLast } from '../../../api/person.js'
 import { isWinterSport } from '../../../lib/winter/leagues.js'
 import { winterSeasonFor } from '../../../lib/winter/window.js'
 import { isoToday } from '../../../lib/dates.js'
+import FROZEN_SEASONS from '../../../lib/data/frozen-seasons.json' with { type: 'json' }
 import { postseasonRecordsPath } from '../../../lib/postseason/recordsRoute.js'
 
 // Pieces MORE THAN ONE team-hub loader genuinely needs, collapsed here once the
@@ -403,6 +404,11 @@ export function parentOrgIdOf(team) {
   return orgId === OFFICE_OF_THE_COMMISSIONER_ID ? null : orgId
 }
 
+// A season over whose today-only stores (payroll, the prospect lists) were copied into
+// public/data/frozen/{season}/ by scripts/frozen/freeze-season.mjs (#2776). The list is bundled, so
+// the page knows before any fetch whether the Money band exists.
+export const isFrozenSeason = (season) => FROZEN_SEASONS.includes(season)
+
 // ---------------------------------------------------------------------------
 // Absent bands
 // ---------------------------------------------------------------------------
@@ -413,10 +419,11 @@ export function parentOrgIdOf(team) {
 // sport test: /team/11 is `sport.id: 1` with a league that has no id, and a sport-first
 // early return waved it through (#1143). Standings and About are never hidden; Games and
 // Roster are not either, since every club plays a schedule and keeps a roster.
-// `pastSeason` (the page's season is over, #2593): Money is a current-only ledger, so it is absent.
-export function hiddenTeamSections(team, { pastSeason = false } = {}) {
+// `pastSeason` (the page's season is over, #2593): Money is a current-only ledger, so it is
+// absent, unless `frozen` says that season's ledger was kept (isFrozenSeason, #2776).
+export function hiddenTeamSections(team, { pastSeason = false, frozen = false } = {}) {
   const hidden = new Set()
-  if (pastSeason) hidden.add('money')
+  if (pastSeason && !frozen) hidden.add('money')
   if (!team.league?.id) hidden.add('ranks')
   if ((team.sport?.id ?? 1) !== 1) {
     hidden.add('money') // Cot's covers the major leagues only

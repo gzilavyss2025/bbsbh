@@ -14,6 +14,7 @@ import { ClubGrid } from './ClubGrid.jsx'
 import { DaysRail } from './DaysRail.jsx'
 import { FormLine } from './FormLine.jsx'
 import { RunsBar } from './RunsBar.jsx'
+import { SeasonPicker } from './SeasonPicker.jsx'
 import { clubLine, daysRail, formSeries, gridCells, lastTen, runsCaption, stretches } from './topData.js'
 import '../../../../styles/team-next/top.css'
 
@@ -66,9 +67,12 @@ export function TeamNextTop({ team, standings, season, asOf }) {
   const gridReady = cells.length > 1 && (!mlb || other?.length > 0)
 
   const rank = line?.rank
+  // An MLB club's tag is the year chip that opens the season sheet (#2599); anyone else keeps the plain tag.
+  const level = SPORT_LABEL[sportId] ?? ''
+  const tag = mlb ? <SeasonPicker team={team} season={season} current={seasonOf(null, sportId)} label={level} /> : `${season} · ${level}`
   return (
     <Stack gap="section" className={`tnext__top${still ? ' tnext__top--still' : ''}`}>
-      <Card as="div" frame="stamped" body="flush" stampIn className="tnext__hero" style={{ '--stamp-delay': HERO_DELAY }} count={`${season} · ${SPORT_LABEL[sportId] ?? ''}`}>
+      <Card as="div" frame="stamped" body="flush" stampIn className="tnext__hero" style={{ '--stamp-delay': HERO_DELAY }} count={tag}>
         <div className="sectionhead--band tnext__head">
           <div className="tnext__plate">
             <TeamLogo teamId={team.id} name="" variant="mono" size={40} season={past ? season : null} />

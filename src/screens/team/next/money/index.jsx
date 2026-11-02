@@ -17,10 +17,10 @@ import { useBandData } from '../useBandData.js'
 import { MONEY_NOTE, moneyCount, moneyTiles } from './moneyData.js'
 
 // Money: the Contracts tab's cards on stamped frames (#1107, row 6e). Same loader, same
-// grid, cliff and source line; only the frames change. Not keyed on `asOf`: a season's book,
-// so the note below says the page's date does not move it (ADR-0082). Open surface (ADR-0052).
-export default function Money({ team, onReady, onCount }) {
-  const contracts = useBandData(() => loadContracts(team.id), [team.id], { onReady, onCount, count: moneyCount })
+// grid, cliff and source line; only the frames change. A season's book: a date inside a season
+// does not move it (ADR-0082), but a past season's date reads that season's frozen copy (#2776). Open surface (ADR-0052).
+export default function Money({ team, asOf, onReady, onCount }) {
+  const contracts = useBandData(() => loadContracts(team.id, asOf), [team.id, asOf], { onReady, onCount, count: moneyCount })
   // Motion plays once per page visit (docs/motion.md, "The one-shot gate"); a return shows it at rest.
   const still = useViewOnce(team.id, 'money')
 

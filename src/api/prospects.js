@@ -16,14 +16,19 @@ const EMPTY_SNAPSHOT = { generatedAt: null, source: null, count: 0, players: [],
 // Degrades to an empty snapshot on any failure (404 before the first weekly
 // Action run, malformed JSON, network) — callers never need their own
 // try/catch, and the app just renders as if no player is ranked.
-let prospectsPromise = null
-export function fetchTopProspects() {
-  if (!prospectsPromise) {
-    prospectsPromise = fetch(SNAPSHOT_URL)
-      .then((res) => (res.ok ? res.json() : EMPTY_SNAPSHOT))
-      .catch(() => EMPTY_SNAPSHOT)
+// `season` reads that season's frozen copy (public/data/frozen/{season}/, #2776).
+const prospectsPromises = new Map()
+export function fetchTopProspects(season = null) {
+  const url = season ? `/data/frozen/${season}/top-prospects.json` : SNAPSHOT_URL
+  if (!prospectsPromises.has(url)) {
+    prospectsPromises.set(
+      url,
+      fetch(url)
+        .then((res) => (res.ok ? res.json() : EMPTY_SNAPSHOT))
+        .catch(() => EMPTY_SNAPSHOT),
+    )
   }
-  return prospectsPromise
+  return prospectsPromises.get(url)
 }
 
 export function prospectRankById(players, playerId) {
