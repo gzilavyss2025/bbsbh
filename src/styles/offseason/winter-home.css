@@ -41,7 +41,7 @@
 .oseason__list .wire__row {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   column-gap: var(--space-3);
   padding: var(--space-1h) var(--space-3);
 }
@@ -66,7 +66,7 @@
 .oseason__list .wire__body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
+  align-items: start;
   column-gap: var(--space-3);
 }
 .oseason__list .wire__kicker {
@@ -104,6 +104,94 @@
     grid-template-columns: 1fr;
     row-gap: 2px;
   }
+}
+
+/* THE FACT LINE — the player's background under a move (WireFacts.jsx): a
+   short line on a card, and a "More" sheet on any move. */
+.oseason__list .wirefacts {
+  order: 2;
+  grid-column: 1 / -1;
+  margin-top: var(--space-3);
+}
+/* One player: the note runs on in the move's own sentence (Cutline's tail). */
+#root .wire__tail { text-transform: none } /* caps-exempt: the note reads as prose */
+#root .wire__tail .wirefacts__toggle { text-transform: uppercase } /* caps-exempt: the control keeps the label case */
+.oseason__list .wire__tail .wirefacts__toggle {
+  display: inline-flex;
+  min-height: 0;
+  margin: 0;
+  padding: 0 var(--space-1);
+  vertical-align: baseline;
+}
+/* THE SHEET — one player's seasons under a move (FactSheet.jsx): the player
+   page's Season stats register, the same .ledger in a stamped card, dressed as
+   that card dresses it (styles/player-next/both/season.css, which only the
+   player page loads): heads on card paper over a heavy stamped rule, the total
+   row on the same paper under another. */
+.oseason__list .factsheet {
+  margin-top: var(--space-2);
+}
+.oseason__list .factsheet .ledger thead th {
+  background: var(--surface-card);
+  border-bottom: var(--bw-heavy) solid var(--border-stamped);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.oseason__list .factsheet .ledger .ledger__label {
+  font-family: var(--font-mono);
+}
+.oseason__list .factsheet .ledger tfoot .yr {
+  font-size: var(--fs-label);
+}
+.oseason__list .factsheet .ledger tfoot td {
+  background: var(--surface-card);
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+}
+@media (min-width: 740px) {
+  .oseason__list .factsheet .ledger tbody td,
+  .oseason__list .factsheet .ledger tfoot td {
+    font-size: var(--fs-body);
+  }
+}
+/* A club is its logo; the abbreviation stays for screen readers. A minor-league
+   row adds its level beside the mark. */
+.oseason__list .factsheet__club {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  vertical-align: middle;
+}
+.oseason__list .factsheet__level {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  color: var(--text-muted);
+}
+/* layout-exempt: the scope switch at one end, the player's name at the other */
+.oseason__list .factsheet__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.oseason__list .factsheet__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.oseason__list .factsheet__note {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-read);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+}
+#root .factsheet__note { text-transform: none } /* caps-exempt: the note reads as prose */
+.oseason__list .factsheet__none {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
 }
 
 /* THE HERO — the season record beside the countdown, one row of stamped cards. */
@@ -281,7 +369,8 @@
   text-wrap: pretty;
 }
 /* #root ties #root *'s specificity, or the ALL-CAPS invariant wins. */
-#root .wintercal__label {
+#root .wintercal__label,
+#root .wintercal__label .plink {
   text-transform: none; /* caps-exempt: a calendar entry reads as a phrase, like the wire's cutlines */
 }
 /* The one the reader is heading for: its day tile takes the marker fill and
@@ -299,9 +388,15 @@
 .wintercal__item--past .wintercal__label {
   color: var(--graphite-soft);
 }
-.wintercal__item--past .wintercal__label {
-  /* strike-link-exempt: a calendar entry is plain copy and holds no name link */
+.wintercal__item--past .wintercal__label,
+.wintercal__item--past .wintercal__label .plink {
   text-decoration: line-through;
+}
+/* The free agency entry links to the free-agent class: ink, underlined. */
+.wintercal__link {
+  color: var(--text-heading);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* ---------------------------------------------------------------------------

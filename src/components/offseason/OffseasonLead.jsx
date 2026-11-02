@@ -9,8 +9,6 @@ import { WinterCalendar } from './WinterCalendar.jsx'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
-import { Door } from '../ui/control/Door.jsx'
-import { useNav } from '../../lib/nav.js'
 
 // THE OFFSEASON LEAD — the same roster wire, promoted.
 //
@@ -63,7 +61,6 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
   // One window per page, newest first, each ending where the last began. It
   // may reach back past the winter's first day: October's moves are moves too.
   const ends = Array.from({ length: pages }, (_, i) => shiftDay(endDate, -i * span))
-  const navigate = useNav()
   const { data, loading } = useAsync(
     (signal) =>
       Promise.all(ends.map((end) => fetchLeagueMoves(end, sportId, { signal, singleDay: false }))).then(
@@ -121,7 +118,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
         <SeasonRecord sportId={sportId} season={winter.seasonEnded} dateStr={endDate} />
         <div className="ohero__side">
           {children}
-          <RecordDoors className="ohero__doors" />
+          <RecordDoors />
         </div>
       </div>
 
@@ -143,7 +140,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           <div className="oseason__ledger">
             {/* One ledger line per move: faces, the sentence, the club. */}
             <ul className="oseason__list" ref={listRef} style={cap ? { maxHeight: cap, overflowY: 'auto' } : undefined}>
-              <MoveItems items={shown} marks isMajor={isMajor} />
+              <MoveItems items={shown} marks facts isMajor={isMajor} />
             </ul>
             <button
               type="button"
@@ -162,12 +159,6 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           {`No moves filed in the last ${windowDaysFor(sportId)} days.`}
         </EmptyState>
       )}
-
-      {/* The free-agent class (#2509): the hot-stove question the wire answers
-          one move at a time, as one list. */}
-      <Door className="oseason__fa" onClick={() => navigate(`/free-agents/${winter.seasonEnded}`)}>
-        Free agents
-      </Door>
 
       {/* The season's notebook: one row of stamped cards (LongAtBats.jsx). */}
       <LongAtBats season={winter.seasonEnded} />

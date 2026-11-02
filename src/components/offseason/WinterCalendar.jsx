@@ -4,6 +4,7 @@ import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { useCopy } from '../../copy/copyContext.js'
 import { currentMilestone, daysBetween, parseWinterCalendar } from '../../lib/time/seasonPhase.js'
 import { monthDayShort } from '../../lib/dates.js'
+import { useRouteLink } from '../../lib/nav.js'
 
 // THE WINTER CALENDAR — the dated strip under the wire, and the countdown that
 // takes the rail slot the wire vacated.
@@ -27,8 +28,13 @@ import { monthDayShort } from '../../lib/dates.js'
 // two checkable dates instead of six confidently wrong ones. The alternative —
 // MM-DD with the year filled in — would reprint last winter's Rule 5 date every
 // December, which is a worse failure than a short strip because it looks right.
+// The free agency entry opens the season's free-agent class (#2509). Matched by
+// its words, since the calendar's lines are admin-edited copy.
+const FREE_AGENCY = /free agen/i
+
 export function WinterCalendar({ winter }) {
   const { t } = useCopy()
+  const linkProps = useRouteLink()
   const typed = t('offseason.calendar')
 
   const rows = useMemo(() => {
@@ -88,7 +94,15 @@ export function WinterCalendar({ winter }) {
                     <span className="wintercal__dow">{dow}</span>
                     {day}
                   </span>
-                  <span className="wintercal__label">{label}</span>
+                  <span className="wintercal__label">
+                    {FREE_AGENCY.test(label) ? (
+                      <a className="plink wintercal__link" {...linkProps(`/free-agents/${winter.seasonEnded}`)}>
+                        {label}
+                      </a>
+                    ) : (
+                      label
+                    )}
+                  </span>
                 </li>
               ))}
             </ol>

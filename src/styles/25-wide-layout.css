@@ -1,6 +1,7 @@
 /* Square corners on the slate (the Scout page's #2319 pattern): one token
    override squares every shared part. On <body> so portalled sheets follow. */
-body:has(.slatebody) {
+body:has(.slatebody),
+body:has(.wirelab) {
   --radius-xs: var(--radius-square);
   --radius-sm: var(--radius-square);
   --radius-md: var(--radius-square);

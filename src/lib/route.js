@@ -70,6 +70,7 @@
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
 //   '/between-innings-lab'              -> { name: 'between-innings-lab' }  (unlisted QA page)
 //   '/design-lab'                       -> { name: 'design-lab' }  (unlisted design-system catalog)
+//   '/wire-lab'                         -> { name: 'wire-lab' }  (unlisted wire-template tuning page)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/logbook'                           -> { name: 'logbook', season: null }  (your game stamps, newest season)
 //   '/logbook?place={gamePk}'            -> { name: 'logbook', placing: gamePk } (book in placement mode)
@@ -456,6 +457,10 @@ export function parseRoute(url) {
   // safe to ship (issue #1112).
   if (parts.length === 1 && parts[0] === 'design-lab')
     return { name: 'design-lab' }
+  // Unlisted tuning page for the wire's fact templates: real roster moves,
+  // grouped by template. No score/reveal content, safe to ship.
+  if (parts.length === 1 && parts[0] === 'wire-lab')
+    return { name: 'wire-lab' }
   // Personal scorebook archive, reached from the site menu or a direct link.
   if (parts.length === 1 && parts[0] === 'first-scorebook')
     return { name: 'first-scorebook' }

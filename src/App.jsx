@@ -240,6 +240,7 @@ const BetweenInningsLab = lazyNamed(
   'BetweenInningsLab',
 )
 const DesignLab = lazyNamed(() => import('./screens/designlab/index.jsx'), 'DesignLab')
+const WireLab = lazyNamed(() => import('./screens/designlab/wirelab/WireLab.jsx'), 'WireLab')
 const FirstScorebookPage = lazyNamed(
   () => import('./screens/FirstScorebookPage.jsx'),
   'FirstScorebookPage',
@@ -327,6 +328,7 @@ const BARE_ROUTES = {
   'animation-lab': AnimationLab,
   'between-innings-lab': BetweenInningsLab,
   'design-lab': DesignLab,
+  'wire-lab': WireLab,
   'first-scorebook': FirstScorebookPage,
 }
 

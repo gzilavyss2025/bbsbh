@@ -4,6 +4,7 @@ import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { WireFacts } from './WireFacts.jsx'
 
 // One roster-move story, and the day-grouping helpers around it. Extracted from
 // the slate's wide surface when the phone got a SECOND presentation of the
@@ -117,7 +118,9 @@ export function takeStories(items, n) {
 // `linked={false}` renders the same sentence with no anchors at all, which is
 // what the dock's one-line rail wants: the rail IS a single expand control, and
 // an anchor nested inside a button is neither valid HTML nor reliably tappable.
-export function Cutline({ segments, className = 'wire__cutline', linked = true }) {
+// `tail` is prose that runs on after the sentence in the same paragraph: a
+// single player's background note on the offseason ledger (WireFacts.jsx).
+export function Cutline({ segments, className = 'wire__cutline', linked = true, tail = null }) {
   return (
     <p className={className}>
       {(segments ?? []).map((seg, i) => {
@@ -129,6 +132,7 @@ export function Cutline({ segments, className = 'wire__cutline', linked = true }
         if (linked && seg.teamId) return <TeamLink key={i} id={seg.teamId}>{seg.text}</TeamLink>
         return <Fragment key={i}>{seg.text}</Fragment>
       })}
+      {tail && <span className="wire__tail"> {tail}</span>}
     </p>
   )
 }
@@ -196,8 +200,9 @@ function clubTabFor(teamId) {
 // `marks` is the offseason ledger's row: a bigger club mark, and on a trade
 // the other club's mark beside it (the first club the cutline names). `line`
 // is that ledger's minor move (transactions/major.js): the same row with no
-// faces, so a routine move reads as one entry rather than a card.
-export function MoveRow({ story, compact = false, marks = false, line = false }) {
+// faces, so a routine move reads as one entry rather than a card. `date` turns
+// on the player's background under the sentence (WireFacts.jsx).
+export function MoveRow({ story, compact = false, marks = false, line = false, date = null }) {
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
   const lead = compact ? story.rail?.[0] : null
@@ -246,7 +251,13 @@ export function MoveRow({ story, compact = false, marks = false, line = false })
             <span className={`wire__type wire__type--${tone}`}>{story.typeLabel}</span>
           )}
         </div>
-        <Cutline segments={story.cutline} />
+        {date ? (
+          <WireFacts story={story} date={date} line={line}>
+            {(tail) => <Cutline segments={story.cutline} tail={tail} />}
+          </WireFacts>
+        ) : (
+          <Cutline segments={story.cutline} />
+        )}
       </div>
     </li>
   )
@@ -256,7 +267,7 @@ export function MoveRow({ story, compact = false, marks = false, line = false })
 // The caller owns the <ul> — its ref, its clamp, its scrolling; only what goes
 // INSIDE it is shared, which is the whole point of this module. `compact` is
 // passed straight through to MoveRow; a dateline is the same either way.
-export function MoveItems({ items, compact = false, marks = false, isMajor = null }) {
+export function MoveItems({ items, compact = false, marks = false, isMajor = null, facts = false }) {
   return items.map((item) =>
     item.kind === 'date' ? (
       <li className="wire__date" key={item.key}>
@@ -265,7 +276,7 @@ export function MoveItems({ items, compact = false, marks = false, isMajor = nul
         <span className="wire__count">{item.count}</span>
       </li>
     ) : (
-      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} />
+      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} />
     ),
   )
 }
