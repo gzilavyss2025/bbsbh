@@ -455,16 +455,18 @@
     },
     "gameday/engine/engineLive.js": {
       "class": "reveal-only",
-      "why": "The scorebug's live snapshot Gameday reads (#2747): composeLive folds deriveLiveState's output with the entering baseline (the half's starter, his pitches entering, the due-up batter) and the reveal-gated batter line (computeBatterLine through revealedThrough). Called only with `live` null (the spoiler-free entering baseline, as before the first step) or with the snapshot PlayByPlay reports from inside HalfInning's SealBox reveal function (ADR-0001, ADR-0016).",
+      "why": "The scorebug's live snapshot Gameday reads (#2747): composeLive folds deriveLiveState's output with the entering baseline (the half's starter, his pitches entering, the due-up batter) and the reveal-gated batter line (computeBatterLine through revealedThrough). Called only with `live` null (the spoiler-free entering baseline, as before the first step) or with the snapshot halfReport returns inside the SealBox reveal function (ADR-0001, ADR-0016). GamedayEngine's parent calls it with `live` null at top level; its child, EngineReport, calls it inside the seal.",
       "importers": [
-        "components/inning/HalfInning.jsx"
+        "components/inning/HalfInning.jsx",
+        "screens/gameday/next/engine/GamedayEngine.jsx"
       ]
     },
     "gameday/engine/halfReport.js": {
       "class": "reveal-only",
-      "why": "What PlayByPlay reports up for one half at one step (#2747): the cap snap, the commit test (stepCommitReady), the step report, runs and hits, the trail and the scorebug snapshot, all from computeHalfInningFeed WITH the step cap (ADR-0016). Called only by PlayByPlay, which HalfInning renders inside its SealBox reveal function (ADR-0001).",
+      "why": "What PlayByPlay reports up for one half at one step (#2747): the cap snap, the commit test (stepCommitReady), the step report, runs and hits, the trail and the scorebug snapshot, all from computeHalfInningFeed WITH the step cap (ADR-0016). Called only by PlayByPlay (inside HalfInning's SealBox reveal function) and by EngineReport, which GamedayEngine's one SealBox mounts from its reveal function (ADR-0001).",
       "importers": [
-        "components/playbyplay/PlayByPlay.jsx"
+        "components/playbyplay/PlayByPlay.jsx",
+        "screens/gameday/next/engine/GamedayEngine.jsx"
       ]
     },
     "gameday/moments/moments.js": {
@@ -854,7 +856,8 @@
         "api/pitcher-callouts.js",
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
-        "components/playbyplay/PlayByPlay.jsx"
+        "components/playbyplay/PlayByPlay.jsx",
+        "screens/gameday/next/engine/GamedayEngine.jsx"
       ]
     },
     "playbyplay.js": {

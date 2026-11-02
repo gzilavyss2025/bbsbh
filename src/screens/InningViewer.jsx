@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   selectInningCount,
   selectRegulationInnings,
@@ -15,10 +15,7 @@ import { ordinal } from '../lib/format.js'
 import { RefreshButton } from '../components/ui/control/RefreshButton.jsx'
 import { useFocusMode } from '../components/inning/focus/FocusControls.jsx'
 import { bookIsClosed } from '../components/inning/focus/beats.js'
-import { ReplayRail } from '../components/playbyplay/pitcherCard/AtBatReplay.jsx'
 import { InningsHeader } from './gameview/InningsHeader.jsx'
-import { InningPage } from './innings/InningPage.jsx'
-import { InningPageTurn } from '../components/page-turn/InningPageTurn.jsx'
 import { PregameScoreboard } from '../components/inning/PregameScoreboard.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../hooks/revealProgressCore.js'
@@ -28,7 +25,8 @@ import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCallou
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
-import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, caughtUpAdvance, nextSub, openingChangeHeld, readBackAfter, readBackStepOf, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { GamedayEngine } from './gameday/next/engine/GamedayEngine.jsx'
+import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, caughtUpAdvance, forwardAdvance, nextSub, openingChangeHeld, readBackAfter, readBackStepOf, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -95,8 +93,6 @@ export function InningViewer({
   lastUpdated,
   winProbTreatment,
   callouts,
-  vsTeam,
-  highlights,
   workload,
   onSketch,
 }) {
@@ -220,19 +216,6 @@ export function InningViewer({
   const effHalf = curIdx % 2 === 0 ? 'top' : 'bottom'
   const goTo = (idx) => onInning(Math.floor(idx / 2) + 1, idx % 2 === 0 ? 'top' : 'bottom')
 
-  // The page-turn transition (see InningPageTurn.jsx) for forward navigation
-  // only — backward always keeps calling goTo directly above. requestHalf
-  // itself falls back to an immediate goTo for anything that isn't a genuine
-  // forward/unlocked destination, so routing every forward call site through
-  // it is safe even at the edges (e.g. nextIdx null-guarded below anyway).
-  // turnStatus drives aria-disabled on the nav while a turn is in flight —
-  // it's advisory only (the reducer's own first-request-wins guard is what
-  // actually prevents a second turn from starting).
-  const pageTurnRef = useRef(null)
-  const [turnStatus, setTurnStatus] = useState('idle')
-  const turning = turnStatus !== 'idle'
-  const requestForwardHalf = (idx) => pageTurnRef.current?.requestHalf(idx)
-
   // Runs AND hits so far in the half currently being STEPPED through
   // (ADR-0016) — reported up from PlayByPlay (via HalfInning/InningPage, see
   // onRunsSoFar) so RollingLine's cell and R/H totals build up as you reveal
@@ -268,42 +251,6 @@ export function InningViewer({
   // "nothing to show yet" rather than rendering the half just left behind.
   const [liveState, setLiveState] = useState(null)
   const curLiveState = liveState?.forIdx === curIdx ? liveState.data : null
-
-  // Builds one InningPage instance for a given half-index — shared by the
-  // active (interactive) render and, mid-turn, the inert preview render.
-  // Keyed on the half itself (on its ReplayRail wrapper) so navigating (or the turn committing) forces
-  // the fresh remount SealBox's re-sealing depends on (ADR-0002); presentation-
-  // only-ness is left entirely to InningPage/HalfInning to enforce (ADR-0024).
-  const renderInningPage = (idx, { presentationOnly }) => {
-    const pageInning = Math.floor(idx / 2) + 1
-    const pageHalf = idx % 2 === 0 ? 'top' : 'bottom'
-    // The at-bat replay's rail slot, for the live page only (AtBatReplay.jsx).
-    return (
-      <ReplayRail key={`${pageInning}-${pageHalf}`} slot={null} inCard={!focus.windowed}>
-      <InningPage
-        feed={feed}
-        inning={pageInning}
-        half={pageHalf}
-        meta={meta}
-        revealedThrough={renderRevealedThrough}
-        onReveal={commitReveal}
-        callouts={callouts}
-        vsTeam={vsTeam}
-        treatment={winProbTreatment}
-        highlights={highlights}
-        atBatCountFor={engineCountFor}
-        halfInProgress={idx === liveHalfIdx}
-        windowed={presentationOnly || focus.windowed}
-        focusStep={presentationOnly ? 0 : focus.step}
-        onFocusInfo={focus.reportSteps}
-        onStepInfo={reportStepInfo}
-        onRunsSoFar={reportRunsSoFar}
-        onLiveState={reportLiveState}
-        presentationOnly={presentationOnly}
-      />
-      </ReplayRail>
-    )
-  }
 
   // The next half within what's unlocked, for the floating advance button (§ the
   // lineup pages' btn--next, carried over to the innings view). Null at the last
@@ -543,30 +490,17 @@ export function InningViewer({
     )
   }
 
-  // The half page, mounted hidden as the Gameday shell's engine: it reports the live snapshot
-  // and the step cursor (src/screens/gameday/next/CLAUDE.md).
-  const pageTurn = (
-    <InningPageTurn
-      ref={pageTurnRef}
-      activeIdx={curIdx}
-      maxIdx={maxIdx}
-      renderPage={renderInningPage}
-      onCommit={goTo}
-      onStatusChange={setTurnStatus}
-    />
-  )
-
   // The advance: a step in the mode's words, else the next half, "Close the book" or the box score. It
   // keeps its holds: no step while the page turns, no forward move while the half closes (ADR-0046).
   // The live edge inside an at-bat still being played: a flag only, on a half in play (ADR-0055).
   const edge = atLiveEdge(atHalfEdge, currentHalfLive && currentSealed ? nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode) : null)
   const advance = focus.stepAhead
-    ? { label: stepWords(pitchMode), disabled: turning, onClick: () => !turning && (pitchMode ? replayNext() : focus.stepNext()), reveal: pitchMode || undefined }
+    ? { label: stepWords(pitchMode), onClick: () => (pitchMode ? replayNext() : focus.stepNext()), reveal: pitchMode || undefined }
     : currentSealed
       ? stepIn ? { label: 'Step in', onClick: () => { focus.followLatest(); setSteppedIn(atBatKey) } }
       : edge ? caughtUpAdvance(loading, onReload) : { label: stepWords(pitchMode), onClick: revealNextStep, reveal: true }
       : nextIdx != null
-        ? { label: nextLabel, disabled: turning || focus.closing, onClick: () => !turning && !focus.closing && requestForwardHalf(nextIdx) }
+        ? forwardAdvance(nextLabel, nextIdx, focus.closing, goTo)
         : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }
   return (
     <CalloutLedgerProvider value={calloutLedger}>
@@ -581,13 +515,18 @@ export function InningViewer({
         meta={meta}
         panels={{
           feed, meta, regulation, unlocked: renderUnlocked, mark: renderRevealedThrough, runsInProgress, curIdx,
-          onSelect: (idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx)), disabled: turning,
+          onSelect: goTo,
           inning: effInning, half: effHalf, step: curIdx <= renderRevealedThrough ? null : engineCountFor(effInning, effHalf),
           pitcherId: curLiveState?.midHalfPitcherId ?? null, treatment: winProbTreatment,
           openingHeld: currentSealed && openingChangeHeld(feed, effInning, effHalf, curAtBatCount, curSub), open: currentSealed ? { count: curAtBatCount, sub: curSub } : null, onPick, readAt: curIdx <= renderRevealedThrough ? focus.items[focus.cursor]?.atBatIndex ?? null : null, // open: per pitch; onPick/readAt: the read-back
         }}
         checkpoint={curIdx <= renderRevealedThrough && !focus.stepAhead ? { bundle: callouts, marginNotes, workload, gameDate: workloadGameDate } : null}
-        engine={pageTurn}
+        engine={<GamedayEngine
+          key={`${effInning}-${effHalf}`} feed={feed} inning={effInning} half={effHalf} idx={curIdx}
+          revealedThrough={renderRevealedThrough} stepCount={engineCountFor(effInning, effHalf)} halfInProgress={curIdx === liveHalfIdx}
+          windowed={focus.windowed} focusStep={focus.step} commitReveal={commitReveal}
+          reportStepInfo={reportStepInfo} reportRunsSoFar={reportRunsSoFar} reportLiveState={reportLiveState} reportSteps={focus.reportSteps}
+        />}
         advance={advance}
         open={currentSealed ? { count: curAtBatCount, sub: curSub, in: steppedIn === atBatKey || undefined } : focus.stepAhead && replaySub > 0 ? { count: walkAt + 1, sub: replaySub } : null}
         pitch={{ on: pitchMode, set: setPitchMode }}

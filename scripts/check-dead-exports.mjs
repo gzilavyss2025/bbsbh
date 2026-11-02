@@ -65,6 +65,7 @@ const CHECKED_ROOT = 'src'
 // name -> reason, keyed as "relative/path.js#exportName". Each reason is the
 // one that belongs in a PR description if this list needs to grow.
 const ALLOWLIST = {
+  'src/components/playbyplay/pitcherCard/AtBatReplay.jsx#ReplayRail': 'InningViewer stopped mounting it when the Gameday engine replaced the hidden half page (#2747 row 2a); the deletion PR (row 3) removes it with the old half page.',
   'src/api/history/playedForBoth.js#playedForBoth': 'Staged ahead of its first caller on purpose: #2579 slice 2 is the reader; the card (slice 3) waits for an approved wireframe. Only test/played-for-both-reader.test.js uses it today.',
   'src/api/milbHistory.js#historicalClubName': 'Deliberately staged ahead of its first caller — the function\'s own header comment says "Not yet wired into any screen (no historical logo art exists yet)"; it is exposed for a future pass, not forgotten.',
   'src/api/history/retiredNumbers.js#retiredNumbersFor': 'Staged ahead of its first caller on purpose: #2598 is data first ("No screen in this issue"); the franchise page (#2586) reads it. Only test/retired-numbers.test.js uses it today.',
