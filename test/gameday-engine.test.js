@@ -59,3 +59,10 @@ test('each report keeps PlayByPlay.jsx’s count-based dependencies; the commit 
   assert.match(child, /\[feed, inning, half, battingSide, effectiveCap, liveCap\]/)
   assert.match(child, /if \(exhausted\) \{?\s*commitReveal\(inning, half\)/)
 })
+
+// The open SealBox renders its own `.statgrid` div even though EngineReport returns null. In the shell's
+// grid that div is an implicit 28px row that takes 36px from the stage (review of #2767), so the engine
+// keeps its whole output in a hidden wrapper of its own.
+test('the engine keeps its SealBox out of the shell grid: its output sits in a hidden wrapper', () => {
+  assert.match(parent, /return \(\s*<div hidden>\s*<SealBox forceRevealed=\{startedRevealing\} coverless>/)
+})

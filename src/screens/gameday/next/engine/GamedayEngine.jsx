@@ -39,15 +39,18 @@ export function GamedayEngine({ feed, inning, half, idx, revealedThrough, stepCo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startedRevealing, hasContent, feed, inning, half, revealedThrough, nowPitching, enteringPitches, battingSide])
 
+  // `hidden`: an open SealBox draws its own `.statgrid` div, which would be a grid row of the shell.
   return (
-    <SealBox forceRevealed={startedRevealing} coverless>
-      {() => (
-        <EngineReport
-          {...{ feed, inning, half, idx, battingSide, base, halfInProgress, windowed, focusStep, commitReveal, reportStepInfo, reportRunsSoFar, reportLiveState, reportSteps }}
-          stepCap={stepping ? stepCount : null}
-        />
-      )}
-    </SealBox>
+    <div hidden>
+      <SealBox forceRevealed={startedRevealing} coverless>
+        {() => (
+          <EngineReport
+            {...{ feed, inning, half, idx, battingSide, base, halfInProgress, windowed, focusStep, commitReveal, reportStepInfo, reportRunsSoFar, reportLiveState, reportSteps }}
+            stepCap={stepping ? stepCount : null}
+          />
+        )}
+      </SealBox>
+    </div>
   )
 }
 
