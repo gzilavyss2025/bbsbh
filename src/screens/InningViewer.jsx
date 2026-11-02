@@ -25,7 +25,6 @@ import { useStampUnseal } from '../hooks/useStamps.js'
 import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCalloutLedger.js'
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
-import { formatDelay } from '../components/inning/DelayCard.jsx'
 import { gamedayNotices } from './gameday/next/notices.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
 import { GamedayEngine } from './gameday/next/engine/GamedayEngine.jsx'
@@ -537,7 +536,7 @@ export function InningViewer({
         notices={[
           gameStatus?.label && `${gameStatus.label}${gameStatus.reason ? ` — ${gameStatus.reason}` : ''}`,
           ...gamedayNotices({
-            format: formatDelay, delays, inning: effInning, half: effHalf, regulation, records: callouts?.teamRecords,
+            delays, inning: effInning, half: effHalf, regulation, records: callouts?.teamRecords, live: currentHalfLive,
             names: { away: meta.away.clubName || meta.away.abbreviation, home: meta.home.clubName || meta.home.abbreviation },
           }),
           refreshFailed && 'Couldn’t refresh — showing the last update.',

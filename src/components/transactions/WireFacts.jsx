@@ -12,7 +12,7 @@ import { FactSheet } from './FactSheet.jsx'
 //
 // A card reads its facts when it mounts, since its note shows at once. A one-line
 // move shows no note, so it reads nothing until its More is first tapped.
-export function useMoveFacts(story, date, subjects, enabled = true) {
+function useMoveFacts(story, date, subjects, enabled = true) {
   const ids = subjects.map((s) => s.playerId).join(',')
   // An injured-list move reads the stint it is about, and his line before it.
   const ilIds = subjects.filter((s) => s.template.startsWith('il-')).map((s) => s.playerId).join(',')

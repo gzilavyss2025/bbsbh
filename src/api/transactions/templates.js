@@ -17,17 +17,6 @@
 // Note the feed's own codes: DFA is "declared free agency", DES is designated.
 import { teamAbbr, teamClubName, teamLocationName } from '../../lib/teams.js'
 
-const TEMPLATE_CODES = [
-  ['free-agency', ['DFA']],
-  ['cut', ['OUT', 'DES', 'REL', 'CLW']],
-  ['deal', ['SFA', 'SGN', 'TR']],
-]
-
-export function templateFor(story) {
-  const codes = new Set(story.codes ?? [])
-  return TEMPLATE_CODES.find(([, list]) => list.some((code) => codes.has(code)))?.[0] ?? 'fallback'
-}
-
 // The player a move is about: the first face on the rail, else the first
 // player the sentence names.
 export function subjectOf(story) {
@@ -71,11 +60,10 @@ export function subjectsOf(story) {
       out.push({ ...p, template, clause: part.text })
     }
   }
+  // A sentence that names no player: the story's first face, sheet only.
   if (!out.length) {
     const id = subjectOf(story)
-    const byCodes = templateFor(story)
-    const template = byCodes === 'deal' ? ((story.codes ?? []).includes('TR') ? 'trade' : 'signing') : byCodes
-    if (id != null) out.push({ playerId: id, name: null, template, clause: '' })
+    if (id != null) out.push({ playerId: id, name: null, template: 'fallback', clause: '' })
   }
   return out
 }
@@ -99,12 +87,16 @@ export function dealPhrase(terms) {
   return `${word(Number(m[1]))}-year, ${money}`
 }
 
+// "no homers" / "one homer" / "26 homers"; "one game" / "125 games".
+const homers = (n) => (n === 0 ? 'no homers' : n === 1 ? 'one homer' : `${n} homers`)
+const gamesText = (n) => (n === 1 ? 'one game' : `${n} games`)
+// A short big-league stint: "pitched once", "pitched in 9 games", "played 9 games".
+const playedText = (g, pitcher) => (pitcher ? `pitched ${TIMES[g] ?? `in ${g} games`}` : `played ${gamesText(g)}`)
+
 // What he did, in words: "hit .212 with 26 homers in 125 games".
 function didText(line, pitcher) {
-  const games = line.games === 1 ? 'one game' : `${line.games} games`
-  if (pitcher) return `posted ${an(line.era)} ${line.era} ERA over ${line.ip} innings in ${games}`
-  const hr = line.hr === 0 ? 'no homers' : line.hr === 1 ? 'one homer' : `${line.hr} homers`
-  return `hit ${line.avg} with ${hr} in ${games}`
+  if (pitcher) return `posted ${an(line.era)} ${line.era} ERA over ${line.ip} innings in ${gamesText(line.games)}`
+  return `hit ${line.avg} with ${homers(line.hr)} in ${gamesText(line.games)}`
 }
 
 // A season this short says little on its own: below it the note says how
@@ -120,7 +112,7 @@ const mostlyMinors = (facts) => (facts.minors?.line?.games ?? 0) > (facts.season
 const an = (num) => (/^(8|11|18)/.test(String(num)) ? 'an' : 'a')
 // What he did in a minor-league season, after "posting" or "hitting".
 function minorsText(line, pitcher) {
-  return pitcher ? `posting ${an(line.era)} ${line.era} ERA over ${line.ip} innings` : `hitting ${line.avg} with ${line.hr === 0 ? 'no homers' : line.hr === 1 ? 'one homer' : `${line.hr} homers`}`
+  return pitcher ? `posting ${an(line.era)} ${line.era} ERA over ${line.ip} innings` : `hitting ${line.avg} with ${homers(line.hr)}`
 }
 
 // Who a later sentence is about: his last name the first time after "The
@@ -143,7 +135,7 @@ function shortSeason(facts, who, sub) {
   const last = [...facts.years].reverse().find((y) => y.season < facts.season && isFull(y.line, facts.pitcher))
   // A few big-league games and a minor-league year: where he spent most of it.
   if (g && mostlyMinors(facts)) {
-    const up = facts.pitcher ? `pitched ${TIMES[g] ?? `in ${g} games`}` : `played ${g === 1 ? 'one game' : `${g} games`}`
+    const up = playedText(g, facts.pitcher)
     const why = facts.injured === 'long' ? ' He spent most of the year on the injured list.' : ''
     const out = [`${who} spent most of ${facts.season} ${minorsWhere(facts.minors)}, ${minorsText(facts.minors.line, facts.pitcher)}, and ${up} for ${the(team)}.${why}`]
     if (last) out.push(`In ${last.season} ${sub()} ${didText(last.line, facts.pitcher)}.`)
@@ -157,11 +149,7 @@ function shortSeason(facts, who, sub) {
     if (last) out.push(`${sub({ cap: true, pos: true })} last big-league season was ${last.season}: ${didText(last.line, facts.pitcher).replace(/^(hit|posted) /, '').replace(/^a /, `${an(last.line.era)} `)}.`)
     return out
   }
-  const played = !g
-    ? `did not play in the majors in ${facts.season}`
-    : facts.pitcher
-      ? `pitched ${TIMES[g] ?? `in ${g} games`} for ${the(team)} in ${facts.season}`
-      : `played ${g === 1 ? 'one game' : `${g} games`} for ${the(team)} in ${facts.season}`
+  const played = g ? `${playedText(g, facts.pitcher)} for ${the(team)} in ${facts.season}` : `did not play in the majors in ${facts.season}`
   const why = facts.injured === 'long' ? ' and spent most of the year on the injured list' : facts.injured ? ' and spent time on the injured list' : ''
   const out = [`${who} ${played}${why}.`]
   if (last) {
@@ -244,7 +232,7 @@ export function seasonSentence(facts) {
   if (facts.seasonLine && mostlyMinors(facts) && !isFull(facts.seasonLine, facts.pitcher)) {
     const team = facts.clubs[facts.clubs.length - 1]?.teamId
     const g = facts.seasonLine.games
-    const up = facts.pitcher ? `pitched ${TIMES[g] ?? `in ${g} games`}` : `played ${g === 1 ? 'one game' : `${g} games`}`
+    const up = playedText(g, facts.pitcher)
     return `${who} spent most of ${facts.season} ${minorsWhere(facts.minors)}, ${minorsText(facts.minors.line, facts.pitcher)}, and ${up} for ${the(team)}.`
   }
   if (facts.seasonLine) {
@@ -284,7 +272,7 @@ function originSentence(facts, name, moveDate) {
   }
   for (const a of before.filter((x) => x.how === 'trade' || x.how === 'waiver claim')) {
     const when = `${apDate(a.date)}${a.date.slice(0, 4) === String(facts.season) ? '' : `, ${a.date.slice(0, 4)}`}`
-    parts.push(a.how === 'trade' ? `${the(a.teamId)} got him in ${/^(Aug|April|Oct)/.test(when) ? 'an' : 'a'} ${when} trade` : `${the(a.teamId)} claimed him on ${when}`)
+    parts.push(a.how === 'trade' ? `${the(a.teamId)} got him in ${aMonth(when)} ${when} trade` : `${the(a.teamId)} claimed him on ${when}`)
   }
   if (!parts.length) return null
   parts[0] = parts[0][0].toUpperCase() + parts[0].slice(1)
@@ -303,6 +291,8 @@ function apDate(iso) {
   const [, m, d] = iso.split('-').map(Number)
   return `${AP_MONTHS[m - 1]} ${d}`
 }
+// "an Aug. 3 trade", "a July 11 trade".
+const aMonth = (when) => (/^(Aug|April|Oct)/.test(when) ? 'an' : 'a')
 const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000)
 const place = (teamId) => teamLocationName(teamId) ?? club(teamId)
 const NUMBER = new Intl.NumberFormat('en-US')
@@ -314,7 +304,7 @@ function arrivalSentence(facts, who, moveDate) {
   const year = a.date.slice(0, 4) === String(facts.season) ? '' : `, ${a.date.slice(0, 4)}`
   const when = `${apDate(a.date)}${year}`
   let s
-  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)} from ${the(a.fromTeamId)} in ${/^(Aug|April|Oct)/.test(when) ? 'an' : 'a'} ${when}${year ? ',' : ''} trade`
+  if (a.how === 'trade' && a.fromTeamId) s = `${who} came to ${the(a.teamId)} from ${the(a.fromTeamId)} in ${aMonth(when)} ${when}${year ? ',' : ''} trade`
   else if (a.how === 'waiver claim' && a.fromTeamId) s = `${who} was claimed off waivers from ${the(a.fromTeamId)} on ${when}`
   else if (a.how === 'draft') s = `${who} was drafted by ${the(a.teamId)} in ${a.date.slice(0, 4)}`
   else if (a.how === 'Rule 5 draft')
@@ -347,7 +337,7 @@ function careerSentence(facts, name) {
   const games = `${NUMBER.format(l.games)} big-league games`
   const what = facts.pitcher
     ? `${name} has ${an(l.era)} ${l.era} ERA over ${l.ip} innings in ${games}`
-    : `${name} is a ${l.avg} hitter with ${l.hr === 0 ? 'no homers' : l.hr === 1 ? 'one homer' : `${NUMBER.format(l.hr)} homers`} in ${games}`
+    : `${name} is a ${l.avg} hitter with ${homers(l.hr > 999 ? NUMBER.format(l.hr) : l.hr)} in ${games}`
   const now = facts.seasonLine?.games ?? 0
   const tail = now ? `, ${now === l.games ? 'all' : now} of them in ${facts.season}` : `, none of them in ${facts.season}`
   return `${what}${tail}.`
@@ -397,8 +387,8 @@ const lower = (t) => (t ? t[0].toLowerCase() + t.slice(1) : t)
 function beforeText(line, pitcher) {
   if (!line?.games) return null
   return pitcher
-    ? `had ${an(line.era)} ${line.era} ERA over ${line.ip} innings in ${line.games === 1 ? 'one game' : `${line.games} games`}`
-    : `was hitting ${line.avg} with ${line.hr === 0 ? 'no homers' : line.hr === 1 ? 'one homer' : `${line.hr} homers`} in ${line.games === 1 ? 'one game' : `${line.games} games`}`
+    ? `had ${an(line.era)} ${line.era} ERA over ${line.ip} innings in ${gamesText(line.games)}`
+    : `was hitting ${line.avg} with ${homers(line.hr)} in ${gamesText(line.games)}`
 }
 
 export function injuredStory(facts, { placed }) {
