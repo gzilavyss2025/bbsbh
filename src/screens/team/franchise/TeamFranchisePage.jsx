@@ -1,0 +1,156 @@
+// This page's own partial, kept out of the core sheet so only /team/{id}/franchise pays for it.
+import '../../../styles/history/franchise.css'
+import { Fragment } from 'react'
+import { useAsync } from '../../../hooks/useAsync.js'
+import { useDocumentTitle } from '../../../hooks/useDocumentTitle.js'
+import { useRouteLink } from '../../../lib/nav.js'
+import { managerPath, teamPath } from '../../../lib/route.js'
+import { isoToday } from '../../../lib/dates.js'
+import { SiteHeader } from '../../../components/chrome/SiteHeader.jsx'
+import { BackBtn } from '../../../components/chrome/BackBtn.jsx'
+import { AsyncGate } from '../../../components/ui/AsyncGate.jsx'
+import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
+import { Card } from '../../../components/ui/frame/Card.jsx'
+import { Table } from '../../../components/ui/table/Table.jsx'
+import { Pill } from '../../../components/ui/control/Pill.jsx'
+import { EmptyState } from '../../../components/ui/state/EmptyState.jsx'
+import { loadFranchise } from './loadFranchise.js'
+import { ledgerItems, seasonCells } from './ledgerRows.js'
+
+// THE FRANCHISE PAGE (#2586, U1 #2763): one club across all its seasons, newest first, each row
+// a door into that season's team page (`?y=`). The wireframe Gary picked is Phone B (one table
+// that scrolls sideways in its own box, the year pinned) and a full-width table on a wide screen;
+// the summary (U2) and leaders (U3) come later. History, an open surface (ADR-0034): nothing is
+// sealed, and the page reads no cutoff.
+
+const COLUMNS = 10
+
+export function TeamFranchisePage({ id }) {
+  const teamId = Number(id)
+  const { loading, error, data } = useAsync(() => loadFranchise(teamId), [teamId])
+  useDocumentTitle(data?.team ? `${data.team.name} · Franchise History` : null)
+  const back = () => window.history.back()
+
+  const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
+  if (gate) return gate
+
+  const { team, rows } = data
+  const first = rows[0]?.season
+  const last = rows[rows.length - 1]?.season
+  return (
+    <div className="screen team-hub frpage">
+      <SiteHeader />
+      <BackBtn onClick={back} />
+      <header className="team-hub__id">
+        <div className="team-hub__logo">
+          <TeamLogo teamId={team.id} name={team.name} size={64} />
+        </div>
+        <div>
+          <h1>{team.name}</h1>
+          <p className="team-hub__rec">
+            <span className="team-hub__div">
+              Franchise history{first ? ` · ${first}–${last}` : ''}
+            </span>
+          </p>
+        </div>
+      </header>
+      {rows.length ? (
+        <Ledger team={team} rows={rows} />
+      ) : (
+        <EmptyState className="frpage__empty">Franchise history covers the 30 MLB clubs.</EmptyState>
+      )}
+    </div>
+  )
+}
+
+function Ledger({ team, rows }) {
+  const link = useRouteLink()
+  const year = Number(isoToday().slice(0, 4))
+  // A past season opens at `?y=` (its last day); this season opens the live page.
+  const seasonHref = (season) => teamPath(team.id, { name: team.name, d: season < year ? `${season}-12-31` : null })
+  return (
+    <Card frame="stamped" body="flush" label="Season by season" count={`${rows.length} seasons`} className="frl">
+      <Table frame="bare" sticky label="Season by season" className="frl__grid">
+        <thead>
+          <tr>
+            <th scope="col">Year</th>
+            <th scope="col">W-L</th>
+            <th scope="col">Pct</th>
+            <th scope="col">Fin</th>
+            <th scope="col">GB</th>
+            <th scope="col" className="frl__left">Post</th>
+            <th scope="col">R</th>
+            <th scope="col">RA</th>
+            <th scope="col">Diff</th>
+            <th scope="col" className="frl__left">Manager</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ledgerItems(rows).map((item) =>
+            item.kind === 'band' ? (
+              <tr key={`band-${item.from}`} className="frl__band">
+                <th scope="rowgroup" colSpan={COLUMNS}>
+                  {item.name} · {item.from === item.to ? item.from : `${item.from}–${item.to}`}
+                </th>
+              </tr>
+            ) : (
+              <SeasonRow key={item.row.season} c={seasonCells(item.row)} href={seasonHref(item.row.season)} link={link} />
+            ),
+          )}
+        </tbody>
+      </Table>
+    </Card>
+  )
+}
+
+function SeasonRow({ c, href, link }) {
+  return (
+    <Fragment>
+      <tr className={c.note ? 'frl__row frl__row--noted' : 'frl__row'}>
+        <th scope="row">
+          <a className="plink frl__year" {...link(href)}>
+            {c.season}
+          </a>
+          {c.inProgress && <span className="frl__live">In progress</span>}
+        </th>
+        <td>{c.wl}</td>
+        <td>{c.pct}</td>
+        <td>{c.finish}</td>
+        <td>{c.gb}</td>
+        <td className="frl__left frl__post">
+          {c.post.title ? (
+            <Pill fill="marker">
+              <span className="frl__short">{c.post.short}</span>
+              <span className="frl__long">{c.post.long}</span>
+            </Pill>
+          ) : (
+            <>
+              <span className="frl__short">{c.post.short}</span>
+              <span className="frl__long">{c.post.long}</span>
+            </>
+          )}
+        </td>
+        <td>{c.rs}</td>
+        <td>{c.ra}</td>
+        <td>{c.diff}</td>
+        <td className="frl__left">
+          {c.managers.map((m, i) => (
+            <Fragment key={m.id}>
+              {i > 0 && ', '}
+              <a className="plink" {...link(managerPath(m.id, m.name))}>
+                {m.name}
+              </a>
+            </Fragment>
+          ))}
+          {!c.managers.length && '—'}
+        </td>
+      </tr>
+      {c.note && (
+        <tr className="frl__note">
+          <th scope="row" aria-hidden="true" />
+          <td colSpan={COLUMNS - 1}>{c.note}</td>
+        </tr>
+      )}
+    </Fragment>
+  )
+}

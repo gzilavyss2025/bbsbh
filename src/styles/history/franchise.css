@@ -1,0 +1,62 @@
+/* THE FRANCHISE PAGE (#2763): the season ledger, a stamped card holding one table. The table
+   scrolls sideways inside its own box with the year pinned (Table's `sticky`), so the page never
+   scrolls sideways at phone width. Imported by screens/team/franchise/TeamFranchisePage.jsx only. */
+
+.frpage .frl {
+  margin-top: var(--space-6);
+}
+.frpage__empty {
+  margin-top: var(--space-6);
+}
+
+.frl__grid .frl__left {
+  text-align: left;
+}
+
+/* The postseason cell: the short form ("Lost NLCS", "Won WS") on a phone, the long form
+   ("Won World Series") from the wide step on. */
+.frl__long {
+  display: none;
+}
+@media (min-width: 740px) {
+  .frl__short {
+    display: none;
+  }
+  .frl__long {
+    display: inline;
+  }
+}
+
+.frl__live {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--accent-positive-deep);
+}
+
+/* A name the club carried before its current one: a dark band across the table, above the
+   newest season under that name. */
+.frl__band th {
+  --table-pin: var(--surface-stamped-ink);
+  background: var(--surface-stamped-ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  text-align: left;
+}
+
+/* A season's note (1981 split, 1994 strike, 2020 60 games) on its own line under the row. */
+.frl__note :is(th, td) {
+  border-top: 0;
+  padding-top: 0;
+}
+.frl__note td {
+  text-align: left;
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
