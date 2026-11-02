@@ -46,8 +46,8 @@ export default defineConfig({
   },
   // Phone-first is the primary target, but the app also has a wider layout
   // (see the `min-width: 740px` rule in index.css). `npm run e2e` runs mobile
-  // and desktop; iPad sits on the same side of 740px as desktop, so it joins
-  // only for `npm run e2e:all` (E2E_ALL=1). Pass `--project=mobile` (etc.)
+  // and desktop; iPad (the one wide + touch project) joins only for
+  // `npm run e2e:all` (or E2E_ALL=1). Pass `--project=mobile` (etc.)
   // to check just one.
   //
   // e2e/invariants/** tests the spoiler-reveal mechanism itself, which is
@@ -55,7 +55,9 @@ export default defineConfig({
   // doesn't just triple runtime for no coverage gain.
   projects: [
     { name: 'mobile', use: { ...devices['iPhone 13'], browserName: 'chromium' } },
-    ...(process.env.E2E_ALL
+    // npm sets npm_lifecycle_event to the script name, so `npm run e2e:all`
+    // needs no env prefix (POSIX `VAR=1 cmd` fails under Windows cmd).
+    ...(process.env.E2E_ALL || process.env.npm_lifecycle_event === 'e2e:all'
       ? [
           {
             name: 'ipad',

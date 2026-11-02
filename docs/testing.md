@@ -95,8 +95,9 @@ apart. Do not pin the Playwright version to match, and do not run
 Playwright-managed browser.
 
 **Breakpoints.** `npm run e2e` runs the `mobile` and `desktop` projects.
-iPad renders the same wide layout as desktop (both are above 740px), so it
-runs only under `npm run e2e:all`, which cuts default run time by about a third.
+iPad runs only under `npm run e2e:all` (or `E2E_ALL=1`), which cuts default
+run time by about a third. iPad is the one wide-and-touch project (no hover,
+coarse pointer), so a touch-only problem in the wide layout shows up only there.
 When Gary asks for e2e, an agent runs the specs that cover what it changed,
 and the full suite only when he asks for it (`.claude/skills/run/`).
 
