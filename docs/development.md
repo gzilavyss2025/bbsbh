@@ -16,7 +16,8 @@ workflow:
 
 Never push directly to `main`, invoke `vercel deploy`, or enable an ad hoc preview
 without explicit maintainer authorization. The maintainer gave the orchestrator standing
-authorization to merge through `/stack-prs`. When the maintainer says "merge the
+authorization to merge each green child PR after its own `/code-review`, or to stack
+PRs through `/stack-prs` when that helps (`.claude/skills/orchestrate/`, "Landing"). When the maintainer says "merge the
 pr", the `merge-pr` skill merges that one PR on green CI, with no stack and no review. Merging to `main` is the production
 deployment trigger and is intentionally controlled by the maintainer.
 
@@ -56,9 +57,10 @@ sessions that share one machine. In the cloud, these rules change:
   overlap, or wait for that PR. Keep the change to the one task you were given, and
   list the files you touched in the PR. A task that needs an unmerged PR names that PR
   and bases on its branch on purpose; otherwise it waits.
-- **One deploy per stack.** Merging to `main` deploys. Parallel sessions never merge.
-  They leave their PRs open, and `/stack-prs` lands them together: the maintainer runs it,
-  or the orchestrator runs it under his standing permission (`.claude/skills/orchestrate/`).
+- **Sessions never merge their own PR.** Merging to `main` deploys. Parallel sessions
+  leave their PRs open. The maintainer lands them (`merge-pr` or `/stack-prs`), or the
+  orchestrator does under his standing permission: one PR at a time after its review, or
+  a stack when that helps (`.claude/skills/orchestrate/`, "Landing").
   A PR branch gets its own preview; the maintainer looks there, not at `main`.
 - **Nightly data.** The data cron pushes to `main` (`public/data/*.json`). A branch open
   across a nightly run can conflict there. Take `origin/main`'s version of a generated
