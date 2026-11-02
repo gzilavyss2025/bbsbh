@@ -37,8 +37,8 @@ function files(dir, ext, prefix = '') {
 // fails, the slice moved a seal: stop and ask, never update the literal.
 const N8B_SEAL = {
   'components/playbyplay/EventCards.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
-  'components/playbyplay/PlayByPlay.jsx': { reveal: ['playbyplay.js'], sealBoxes: 0, revealedThrough: 1 },
-  'components/inning/HalfInning.jsx': { reveal: ['boxscore.js', 'highlights.js', 'hitchart.js', 'playbyplay.js'], sealBoxes: 1, revealedThrough: 12 },
+  'components/playbyplay/PlayByPlay.jsx': { reveal: ['gameday/engine/halfReport.js', 'playbyplay.js'], sealBoxes: 0, revealedThrough: 1 },
+  'components/inning/HalfInning.jsx': { reveal: ['gameday/engine/engineLive.js', 'highlights.js', 'hitchart.js'], sealBoxes: 1, revealedThrough: 10 },
 }
 const SPOILER_MANIFEST = JSON.parse(src('api/spoiler-manifest.json')).modules
 

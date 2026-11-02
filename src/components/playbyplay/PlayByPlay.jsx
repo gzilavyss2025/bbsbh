@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useWsPlayCtx } from '../../hooks/postseason/useWsEvents.js'
 import {
-  computeHalfInningFeed,
   pitchLadder,
   hasPitchLocations,
   firstRunPlay,
@@ -13,16 +12,9 @@ import {
   defensiveChangeFielder,
   pinchRunningPlayers,
   pinchHittingBatter,
-  nextStepBoundary,
-  stepCommitReady,
-  focusWindows,
   windowLeadIn,
-  stepTotals,
-  lastVisibleAtBatIndex,
-  deriveLiveState,
-  liveCapFor,
-  buildTrailItems,
 } from '../../api/playbyplay.js'
+import { halfReport } from '../../api/gameday/engine/halfReport.js'
 import { halfIndex } from '../../api/select.js'
 import { pitcherHandoffs, pitcherLineAt, isLastHalfOfGame, handoffsResolvingAt } from '../../api/pitchers.js'
 import { computeCalloutProgress } from '../../api/callout-notes.js'
@@ -111,32 +103,15 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
   // card's diamond (see computeHalfInningFeed's stepCap doc).
-  const rawEntries = computeHalfInningFeed(feed, inning, half, battingSide, stepCap)
-  // The very first tap into a fresh half hardcodes stepCap to 1 (InningViewer
-  // has no legitimate way to know what entries[0] is ahead of this render —
-  // computeHalfInningFeed is reveal-only, ADR-0001). If entries[0] is a
-  // leading event note rather than a plate-appearance card, that tap would
-  // otherwise strand the note alone with no batter, unlike every later tap
-  // (which always bundles a leading note forward via nextStepBoundary — see
-  // its own doc). Snap the cap forward past the first at-bat card only: Gameday's
-  // stepCapAt (steps/subStep.js) snaps the count itself and may hold a change back.
-  const effectiveCap = stepping ? Math.max(stepCap, rawEntries.findIndex((e) => e.kind === 'atbat') + 1) : stepCap
-  // entries.push is unconditional in computeHalfInningFeed regardless of
-  // stepCap — stepCap only gates RETROACTIVE writes onto already-pushed
-  // entries (the `visible` check) — so rawEntries' entry KINDS/order above are
-  // trustworthy even from a too-small stepCap, but the array actually used for
-  // display/annotation must come from a call made with the corrected cap, or
-  // the newly-bundled card would render with the right scorebook code and an
-  // empty diamond (its own play's advancement bookkeeping never ran against
-  // the original, too-small cap).
-  const entries =
-    effectiveCap > stepCap
-      ? computeHalfInningFeed(feed, inning, half, battingSide, effectiveCap)
-      : rawEntries
-  // May this staged half be promoted to a full commit? Three conditions, one of
-  // them the live-half hold — stepCommitReady's own header has all three and why
-  // each is load-bearing (api/playbyplay/entriesView.js, ADR-0016/0055).
-  const exhausted = stepping && stepCommitReady(entries, effectiveCap, halfInProgress)
+  // All of this half's arithmetic is the pure halfReport (api/gameday/engine/halfReport.js): the cap
+  // snap past the first at-bat card (Gameday's stepCapAt snaps the count itself and may hold a change
+  // back), the commit test (stepCommitReady: three conditions, one the live-half hold, ADR-0016/0055),
+  // the step report, the trail, the running totals and the scorebug snapshot. Reveal-only, and this
+  // component only renders from inside a SealBox reveal function.
+  const {
+    entries, wins, effectiveCap, exhausted, nextCap, isLastStep, lastAtBatIndex, atHalfEdge,
+    runs: runsSoFar, hits: hitsSoFar, steps: revealedSteps, items: trailItems, liveCap, live,
+  } = halfReport(feed, inning, half, battingSide, stepCap, { halfInProgress, windowed, focusStep, codeOf: (t) => EVENT_CODES[t] })
 
   // Focus mode: one window per revealed AT-BAT (focusWindows), every window
   // clamped to the cap. NOT one window per reveal tap — focusWindows' header
@@ -158,9 +133,6 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // every step is revealed by then, which is what makes a windowed post-half
   // hold safe to keep windowed. Nothing here reveals: `stepCap` is still the
   // single boundary, and past the commit the whole half is already past it.
-  const stepCountCap = effectiveCap ?? entries.length
-  const wins = focusWindows(entries, stepCountCap)
-  const revealedSteps = wins.length
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.
@@ -169,10 +141,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     if (exhausted) {
       onStepComplete?.()
     } else {
-      const nextCap = nextStepBoundary(entries, effectiveCap)
-      const lastAtBatIndex = lastVisibleAtBatIndex(entries, effectiveCap)
-      // `atHalfEdge`: caught up to a half still in play (ADR-0055).
-      onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length, lastAtBatIndex, atHalfEdge: effectiveCap >= entries.length })
+      onStepInfo?.({ nextCap, isLastStep, lastAtBatIndex, atHalfEdge })
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -189,7 +158,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // sealed, focusView.js) reduces to `idx <= revealedThrough`, so there is no
   // stacked state describing a step the reader hasn't themselves revealed.
   useEffect(() => {
-    onFocusInfo?.(revealedSteps, buildTrailItems(entries, wins, (t) => EVENT_CODES[t]))
+    onFocusInfo?.(revealedSteps, trailItems)
   }, [revealedSteps, feed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The runs and hits scored in the STEPPED-THROUGH portion of this half —
@@ -212,7 +181,6 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // re-rendered InningViewer, which re-rendered this component, which re-ran the
   // effect… one "Next at-bat" tap cost 264 renders of the whole innings tree
   // (measured). A number compares by value.
-  const { runs: runsSoFar, hits: hitsSoFar } = stepTotals(entries, effectiveCap)
   useEffect(() => {
     if (!stepping) return
     onRunsSoFar?.(runsSoFar, hitsSoFar)
@@ -222,14 +190,8 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // needs its final one). It follows the WINDOW on screen, not only the reveal cap:
   // `liveCapFor` (entriesView.js) says why that reads no further than the cap and why
   // `entries` are rebuilt at it. Deps are the INPUTS `entries` derives from.
-  const revealCap = effectiveCap ?? entries.length
-  const liveCap = liveCapFor({ wins, focusStep, windowed, effectiveCap, entriesLength: entries.length })
-  const liveEntries = useMemo(
-    () => (liveCap === revealCap ? entries : computeHalfInningFeed(feed, inning, half, battingSide, liveCap)),
-    [feed, inning, half, battingSide, liveCap, revealCap], // eslint-disable-line react-hooks/exhaustive-deps
-  )
   useEffect(() => {
-    onLiveState?.(deriveLiveState(liveEntries, liveCap))
+    onLiveState?.(live)
   }, [feed, inning, half, battingSide, effectiveCap, liveCap]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // (This file no longer reports the revealed pitcher up to HalfInning: that put

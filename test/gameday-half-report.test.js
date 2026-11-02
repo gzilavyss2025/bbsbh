@@ -17,32 +17,22 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import {
-  buildTrailItems, computeHalfInningFeed, deriveLiveState, focusWindows, lastVisibleAtBatIndex,
-  liveCapFor, nextStepBoundary, stepCommitReady, stepTotals,
-} from '../src/api/playbyplay.js'
+import { halfReport } from '../src/api/gameday/engine/halfReport.js'
 import { stepCapAt } from '../src/screens/gameday/next/steps/subStep.js'
 
 const load = (pk) => JSON.parse(readFileSync(new URL(`./fixtures/game-${pk}.gameday.json`, import.meta.url), 'utf8'))
 
 // One render of PlayByPlay at `stepCap` (null once committed): the values its effects report.
+// Row 1b: the arithmetic is the lifted halfReport; the line format below is unchanged.
 function render(feed, inning, half, side, stepCap) {
   const stepping = stepCap != null
-  const raw = computeHalfInningFeed(feed, inning, half, side, stepCap)
-  const effectiveCap = stepping ? Math.max(stepCap, raw.findIndex((e) => e.kind === 'atbat') + 1) : stepCap
-  const entries = effectiveCap > stepCap ? computeHalfInningFeed(feed, inning, half, side, effectiveCap) : raw
-  const exhausted = stepping && stepCommitReady(entries, effectiveCap, false)
-  const wins = focusWindows(entries, effectiveCap ?? entries.length)
-  const items = buildTrailItems(entries, wins, () => '')
-  const { runs, hits } = stepTotals(entries, effectiveCap)
-  const liveCap = liveCapFor({ wins, focusStep: null, windowed: true, effectiveCap, entriesLength: entries.length })
-  const liveEntries = liveCap === (effectiveCap ?? entries.length) ? entries : computeHalfInningFeed(feed, inning, half, side, liveCap)
-  const l = deriveLiveState(liveEntries, liveCap)
+  const r = halfReport(feed, inning, half, side, stepCap, { halfInProgress: false, windowed: true, focusStep: null, codeOf: () => '' })
+  const { effectiveCap, exhausted, nextCap, entries, runs, hits, items, live: l } = r
+  const wins = { length: r.steps }
   const reporting = stepping && entries.length > 0 // PlayByPlay.jsx:167 returns early otherwise
-  const nextCap = reporting && !exhausted ? nextStepBoundary(entries, effectiveCap) : null
   const report = exhausted
     ? 'COMMIT'
-    : `next ${nextCap} last ${nextCap >= entries.length ? 1 : 0} ab ${lastVisibleAtBatIndex(entries, effectiveCap)} edge ${effectiveCap >= entries.length ? 1 : 0}`
+    : `next ${nextCap} last ${r.isLastStep ? 1 : 0} ab ${r.lastAtBatIndex} edge ${r.atHalfEdge ? 1 : 0}`
   const bases = [l.bases.first, l.bases.second, l.bases.third].map((b) => (b ? 1 : 0)).join('')
   return {
     exhausted, nextCap,
