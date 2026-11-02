@@ -19,7 +19,7 @@ without explicit maintainer authorization. The maintainer gave the orchestrator 
 authorization to merge each green child PR after its own `/code-review`, or to stack
 PRs through `/stack-prs` when that helps (`.claude/skills/orchestrate/`, "Landing"). When the maintainer says "merge the
 pr", the `merge-pr` skill merges that one PR on green CI, with no stack and no review. Merging to `main` is the production
-deployment trigger and is intentionally controlled by the maintainer.
+deployment trigger, so only the maintainer and those standing authorizations merge.
 
 ## Cloud sessions (claude.ai/code)
 

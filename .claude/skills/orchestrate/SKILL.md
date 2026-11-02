@@ -57,8 +57,10 @@ concurrent sessions, so measure.
      prompt asks for it.
   2. A PR event from `subscribe_pr_activity` (CI result, review, merge).
   3. A fallback `send_later`, only to catch a child that hangs in silence:
-     20 minutes after you start a child, then 45, then 90. Keep one pending at a
-     time. Reset it to 20 when an event wakes you and work is still running.
+     20 minutes after you start a child, then 45, then 50 for each later one. Keep
+     every gap under 55 minutes: a wake-up re-reads your whole context, and past the
+     one-hour prompt cache that read is full price (code.claude.com/docs/en/costs,
+     /en/prompt-caching). Keep one pending at a time. Reset it to 20 when an event wakes you and work is still running.
   Only fallback wake-ups count toward the limit: **6 fallback wake-ups in a row
   with no event between them** means something is stuck. Report and stop. Never
   poll in a loop or with `sleep`.
@@ -88,7 +90,7 @@ asking.
    the question if a run plan has a **Standing answers** block, or he said
    "overnight" or "unattended": then he is away.) If he is away, follow "When he is
    away" for the whole run. Nothing else changes.
-**With a run plan** (Lane 3), do steps 1, 2, 4 and 5 for the plan's prompts only, then go
+**With a run plan** (Lane 3), do steps 0, 1, 2, 4 and 5 for the plan's prompts only, then go
 to Lane 3. Start no issue work unless he asks.
 
 1. `git fetch origin --prune`. Note the `origin/main` SHA.
@@ -279,8 +281,10 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
    ```
 
    Ask him before you close the old PR.
-5. **Stop the plan on a failure.** A `NEEDS PARENT` line, or a PR that stays red after
-   two tries, stops the later waves. Start nothing new. Tell him which prompt and why.
+5. **A failure blocks its chain, not the plan.** A `NEEDS PARENT` line, or a PR that
+   stays red after two tries, blocks that row and every row that depends on it. Keep
+   running the rows that do not. Tell him which prompt and why (or, while he is away,
+   follow "When he is away").
 6. Two prompts that share a file run one after the other, even in one wave. A plan
    may name append-only files (an import list, a lab entry list) that its prompts
    may share in one wave; stack those two (see "Landing") so one branch resolves the conflict.
