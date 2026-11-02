@@ -2,8 +2,8 @@
    ---------------------------------------------------------------------------
    Shown below the games (above the Day Recap on a past day). Each club gets a
    compact card that reuses the slate matchup card's framed, overscaled logo
-   tile treatment (.gamecard__logobox in 06-loader-and-cards.css), scaled down,
-   over a two-line location/mascot name. Markup and the per-club inline vars
+   tile treatment (.gamecard__logobox in 06-loader-and-cards.css), filling a
+   stamped card edge to edge with no name text (2026-11-02). Markup and the per-club inline vars
    are in components/team/OffDaySection.jsx.
 
    Sits immediately after the slate-card partials because it borrows their
@@ -30,21 +30,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-1h);
-  padding: var(--space-2) var(--space-1h);
+  padding: 0;
+  overflow: hidden;
 }
 .offday__logobox {
   position: relative;
   width: 100%;
-  max-width: 64px;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 2px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
   /* --tint (mainTreatmentTint, teams.js) fills with that club's curated
      Main-tile background, same recipe as .gamecard__logobox — an off-day
      team always shows its Main mark, never a jersey-swap variant. */
@@ -93,33 +89,6 @@
   transform: none;
   font-size: var(--fs-hero-sm);
 }
-.offday__name {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  line-height: var(--lh-title);
-  min-width: 0;
-  /* A long single-word mascot (DIAMONDBACKS) must wrap within the narrow card
-     rather than overflow its border. */
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}
-.offday__loc {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-.offday__mascot {
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-num);
-  color: var(--text-heading);
-}
 /* Favorite team's off-day card — same per-club accent tint as .gamecard--pinned. */
 .offday__tile--pinned {
   border-color: color-mix(in srgb, var(--pin-accent, var(--accent-fallback)) 45%, var(--border-rule));
@@ -148,8 +117,7 @@
 /* Hover — the one tile on the slate with nothing to reveal answers with its
    club instead. A pointer over an off-day card lifts it the same 2px the
    Logbook shelf lifts a book by on the way to picking it up
-   (58-logbook-shelf.css), takes the frame to that club's own primary, and
-   draws a rule under the mascot the way a pencil underlines a name. The badge
+   (58-logbook-shelf.css) and takes the frame to that club's own primary. The badge
    presses forward inside its frame: the scale sits on the BOX, not the mark,
    so it composes with the mark's own --scale (a curated shrink for a dense
    logo) instead of overwriting it. --offday-accent is set per card in
@@ -174,9 +142,7 @@
    clipped by its own border-radius, which is what rounds the band's top
    corners, and it sits under `.offday__logobox` (position: relative) and
    over nothing else, since the wash is fully transparent by the time it
-   reaches the two name lines. That is deliberate: the location and mascot are
-   small type in caption grey, and they stay on clean manila rather than on a
-   tinted ground whose contrast would depend on which club you point at.
+   reaches the foot of the tile.
 
    --offday-accent is set per card in OffDaySection.jsx (teamPrimaryColor,
    which resolves a MiLB club through its affiliate-then-parent chain); an
@@ -198,31 +164,6 @@
   transition: opacity var(--dur-fast) var(--ease-out);
   pointer-events: none;
 }
-/* The pencil rule, drawn from the middle out. Absolute over the mascot's own
-   box so it never adds height and never nudges the two-line name — a card in
-   a grid row must not change size under the pointer while its neighbors hold
-   still. */
-.offday__mascot {
-  position: relative;
-}
-.offday__mascot::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -2px;
-  height: var(--bw-rule);
-  /* A trace of ink under the club's own color, so a pale primary (a cream or
-     gold MiLB mark) still draws a rule you can see against manila paper. A
-     navy or a red is unchanged at this ratio. */
-  background: color-mix(in srgb, var(--offday-accent, var(--accent-fallback)) 88%, var(--ink-0));
-  border-radius: 1px;
-  transform: scaleX(0);
-  transform-origin: center;
-  transition: transform var(--dur-fast) var(--ease-out);
-  pointer-events: none;
-}
-
 @media (hover: hover) and (pointer: fine) {
   .offday__tile:hover {
     transform: translateY(-2px);
@@ -235,9 +176,6 @@
   .offday__tile:hover .offday__logobox {
     transform: scale(1.04);
   }
-  .offday__tile:hover .offday__mascot::after {
-    transform: scaleX(1);
-  }
 }
 
 /* The keyboard path to the same state, on top of the Card's focus ring — a
@@ -249,9 +187,6 @@
 .offday__tile:focus-visible::before {
   opacity: 1;
 }
-.offday__tile:focus-visible .offday__mascot::after {
-  transform: scaleX(1);
-}
 
 /* Press wins over the hover lift: the card goes back down onto the page. */
 .offday__tile:active {
@@ -262,8 +197,7 @@
 @media (prefers-reduced-motion: reduce) {
   .offday__tile,
   .offday__tile::before,
-  .offday__logobox,
-  .offday__mascot::after {
+  .offday__logobox {
     transition: none;
   }
   .offday__tile:hover,
@@ -272,10 +206,5 @@
   }
   .offday__tile:hover .offday__logobox {
     transform: none;
-  }
-  /* The colour still arrives, it just does not fade itself in. */
-  .offday__tile:hover .offday__mascot::after,
-  .offday__tile:focus-visible .offday__mascot::after {
-    transform: scaleX(1);
   }
 }

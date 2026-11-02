@@ -1,10 +1,9 @@
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { BreakableLocation } from '../ui/BreakableLocation.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { useNav } from '../../lib/nav.js'
 import { teamPath } from '../../lib/route.js'
 import { splitName } from '../../lib/teamSplits.js'
-import { teamClubNameShort, favoriteAccentColor, teamPrimaryColor, offDayTreatmentFor, treatmentTile } from '../../lib/teams.js'
+import { favoriteAccentColor, teamPrimaryColor, offDayTreatmentFor, treatmentTile } from '../../lib/teams.js'
 import { Grid } from '../ui/layout/Grid.jsx'
 
 // The clubs NOT playing on the slate's date, shown below the games as small
@@ -33,9 +32,8 @@ export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds, win
       aria-label={winter ? 'Every club' : 'Teams with an off day'}
     >
       <h2 className="offday__banner">{winter ? 'Every club' : 'Off Day'}</h2>
-      {/* 120px: wide enough that a 9-10 letter mascot (CARDINALS) fits on one line; a
-          longer one (DIAMONDBACKS) wraps, which .offday__name handles. */}
-      <Grid as="ul" min={120} gap="snug" className="offday__grid">
+      {/* 120px: two tiles a row in a narrow column, five on a wide slate. */}
+      <Grid as="ul" min={120} gap="base" className="offday__grid">
         {teams.map((team) => (
           <li key={team.id}>
             <OffDayCard
@@ -50,8 +48,8 @@ export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds, win
   )
 }
 
-// One club's off-day tile: the framed logo over its location/mascot name, the
-// same two-line treatment as a slate card's team. The favorite team's tile
+// One club's off-day tile: the club's logo tile, filling the card
+// edge to edge; the name is in its aria-label. The favorite team's tile
 // gets the pinned accent (border tint + star) via the --pin-accent inline var,
 // exactly like .gamecard--pinned. favoriteAccentColor is MLB-only and returns
 // null for a MiLB id — the CSS var then just falls back to the default
@@ -62,11 +60,7 @@ function OffDayCard({ team, pinned, onOpen }) {
   // as "It's Just / Athletics" rather than the API's duplicated
   // "Athletics / Athletics"; any team missing from that table falls back to
   // stripping `teamName` (the mascot) off the end of the full name.
-  const { location, mascot } = splitName(full, team.teamName)
-  // The mascot line uses the brand-approved short form where a nickname would
-  // otherwise wrap on the tight tile (Arizona -> "D-backs", MLB only); every
-  // other club — including all of MiLB — falls back to the split mascot.
-  const shortMascot = teamClubNameShort(id) || mascot
+  const { mascot } = splitName(full, team.teamName)
   const accent = pinned ? favoriteAccentColor(id) : null
   // The club's own primary, for the pointer-only hover state (the frame, the
   // rule under the mascot). teamPrimaryColor covers MiLB too, through
@@ -95,6 +89,7 @@ function OffDayCard({ team, pinned, onOpen }) {
   return (
     <Card
       as="button"
+      frame="stamped"
       accent="--offday-accent"
       body="flush"
       className={`offday__tile ${pinned ? 'offday__tile--pinned' : ''}`}
@@ -103,11 +98,7 @@ function OffDayCard({ team, pinned, onOpen }) {
       aria-label={`${full} — off day, open team page`}
     >
       <span className={logoboxClass} style={logoboxStyle}>
-        <TeamLogo teamId={id} name={mascot || full} size={40} variant={logoVariant} />
-      </span>
-      <span className="offday__name">
-        {location && <BreakableLocation text={location} className="offday__loc" />}
-        <span className="offday__mascot">{shortMascot || full}</span>
+        <TeamLogo teamId={id} name={mascot || full} size={60} variant={logoVariant} />
       </span>
       {pinned && (
         <span className="offday__pin" aria-hidden="true">

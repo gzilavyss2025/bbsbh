@@ -477,3 +477,16 @@
     height: var(--space-12);
   }
 }
+
+/* The month in full on a wide screen, short on a phone (DateStepper.jsx). */
+.slatedate__mdlong {
+  display: none;
+}
+@media (min-width: 740px) {
+  .slatedate__mdshort {
+    display: none;
+  }
+  .slatedate__mdlong {
+    display: inline;
+  }
+}

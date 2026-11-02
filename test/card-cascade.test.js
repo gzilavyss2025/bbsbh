@@ -1725,15 +1725,15 @@ test('C6b: the ledger frames stay ledgers, and the ledger keeps the old .tradeca
 // the Card paints --surface-card, so the ground lives inside it (C2's
 // .factgrid__grid).
 const C6C = [
-  { css: '06b-offday-cards.css', sel: '.offday__tile', jsx: ['components/team/OffDaySection.jsx'], ns: 'offday__tile', as: 'button' },
+  // Stamped since the winter home redesign (2026-11-02); it clips the logo box that now fills it.
+  { css: '06b-offday-cards.css', sel: '.offday__tile', jsx: ['components/team/OffDaySection.jsx'], ns: 'offday__tile', as: 'button', frame: 'stamped', keep: ['overflow'] },
   { css: '43-foul-tracker.css', sel: '.foulboard__hero', jsx: ['screens/foul-tracker/Boards.jsx'], ns: 'foulboard__hero', as: 'div', keep: ['overflow'] },
   { css: '43-foul-tracker.css', sel: '.foulavg', jsx: ['screens/foul-tracker/SeasonBoards.jsx'], ns: 'foulavg', as: 'div' },
   { css: '43-foul-tracker.css', sel: '.gamehigh-tiles', jsx: ['screens/foul-tracker/GameBoards.jsx'], ns: 'gamehigh-tiles', as: 'div', frame: 'ledger', ground: '.gamehigh-tiles__grid' },
   { css: '43-foul-tracker.css', sel: '.souvenir-row__tiles', jsx: ['screens/foul-tracker/GameBoards.jsx'], ns: 'souvenir-row__tiles', as: 'div', frame: 'ledger', ground: '.souvenir-row__tilegrid' },
-  { css: '78-offseason.css', sel: '.springcount', jsx: ['components/offseason/WinterCalendar.jsx'], ns: 'springcount', as: 'aside', frame: 'ledger' },
+  { css: '78-offseason.css', sel: '.springcount', jsx: ['components/offseason/WinterCalendar.jsx'], ns: 'springcount', as: 'aside', frame: 'stamped' },
   { css: '78-offseason.css', sel: '.pgame__card', jsx: ['components/offseason/PickedGame.jsx'], ns: 'pgame__card', as: 'div' },
-  { css: '78-offseason.css', sel: '.srecord', jsx: ['components/offseason/SeasonRecord.jsx'], ns: 'srecord' },
-  { css: '78-offseason.css', sel: '.seasonnote__stories', jsx: ['components/offseason/LongAtBats.jsx'], ns: 'seasonnote__stories', mode: 'wrap', box: 'seasonnote__storybox' },
+  { css: '78-offseason.css', sel: '.srecord', jsx: ['components/offseason/SeasonRecord.jsx'], ns: 'srecord', frame: 'stamped' },
 ]
 
 test('C6c: no fouls, offseason or off-day block draws a second frame over its Card', () => {
@@ -1778,7 +1778,8 @@ test('C6c: every block renders on Card, with its frame and a flush body', () => 
 // space and the inset that were its own, in its namespace rule.
 test('C6c: each block keeps its own margin and inset', () => {
   const kept = [
-    ['06b-offday-cards.css', '.offday__tile', 'padding', 'var(--space-2) var(--space-1h)'],
+    // The logo box fills the tile edge to edge (2026-11-02), so the tile has no inset.
+    ['06b-offday-cards.css', '.offday__tile', 'padding', '0'],
     ['06b-offday-cards.css', '.offday__tile', 'display', 'flex'],
     ['43-foul-tracker.css', '.foulboard__hero', 'margin-bottom', '10px'],
     ['43-foul-tracker.css', '.foulboard__hero', 'padding', 'var(--space-2h) var(--space-3)'],
@@ -1794,10 +1795,6 @@ test('C6c: each block keeps its own margin and inset', () => {
     ['78-offseason.css', '.pgame__card', 'padding', 'var(--space-5) var(--space-4)'],
     ['78-offseason.css', '.srecord', 'margin-top', 'var(--space-6)'],
     ['78-offseason.css', '.srecord__body', 'padding', 'var(--space-4)'],
-    ['78-offseason.css', '.seasonnote__stories', 'list-style', 'none'],
-    ['78-offseason.css', '.seasonnote__stories', 'margin', '0'],
-    ['78-offseason.css', '.seasonnote__stories', 'padding', '0'],
-    ['78-offseason.css', '.seasonnote__storybox', 'margin-top', 'var(--space-4)'],
   ]
   for (const [css, sel, prop, value] of kept) {
     assert.equal(decl(ruleBody(read(css), sel) ?? '', prop), value, `${css}: ${sel} keeps ${prop}: ${value}`)
@@ -1868,8 +1865,14 @@ test('C6c: the moved-up table sits in a flush sheet Card and its head stays outs
 // SectionHead labels, and their title rules are gone.
 test('C6c: the offseason card names are label SectionHeads', () => {
   assert.doesNotMatch(read('78-offseason.css'), /\.(seasonnote|srecord)__title/)
-  assert.match(src('components/offseason/SeasonRecord.jsx'), /<SectionHead look="label">Season record<\/SectionHead>/)
-  assert.match(src('components/offseason/LongAtBats.jsx'), /<SectionHead look="label" as="h4">/)
+  // The record row lost its heading and tagline (2026-11-02): at MLB with a
+  // champion it is the World Series hero, whose own tab names it.
+  assert.doesNotMatch(src('components/offseason/SeasonRecord.jsx'), /Season record<\/SectionHead>/)
+  assert.match(src('components/offseason/SeasonRecord.jsx'), /if \(inward && champion\) return <ChampionHero bracket=\{bracket\} \/>/)
+  // The notebook's three stamped cards name themselves with the t-label recipe.
+  for (const name of ['The longest at-bat', 'Next longest']) {
+    assert.match(src('components/offseason/LongAtBats.jsx'), new RegExp(`className="t-label t-label--bold seasonnote__what">${name}<`))
+  }
   assert.match(src('components/offseason/YoungestRegulars.jsx'), /<SectionHead look="label" as="h4">/)
 })
 
@@ -1885,7 +1888,7 @@ test('C6c: .offdaycard is .offday__tile, gone from stylesheets, markup, comments
     ...files(join(root, 'scripts'), ['.js', '.mjs', '.md']).map((rel) => join(root, 'scripts', rel)),
   ].filter((abs) => RETIRED_C6C.test(readFileSync(abs, 'utf8')))
   assert.deepEqual(found.map((abs) => relative(root, abs)), [])
-  assert.match(src('screens/designlab/catalog.js'), /cls: 'card card--sheet card--interactive offday__tile'/)
+  assert.match(src('screens/designlab/catalog.js'), /cls: 'card card--stamped card--interactive offday__tile'/)
   const ledger = readFileSync(join(root, 'docs', 'design-system-naming.md'), 'utf8')
   assert.match(ledger, /\| `\.offdaycard` \|/)
 })
@@ -1904,7 +1907,9 @@ test('C6c: the off-day tile is a Card button that keeps its club accent and its 
   assert.match(code, /'--pin-accent'[\s\S]*'--offday-accent'/)
   assert.match(code, /offday__tile--pinned/)
   assert.match(code, /offday__logobox--pinstripe/)
-  for (const part of ['logobox', 'name', 'loc', 'mascot', 'pin']) assert.ok(code.includes(`offday__${part}`), `offday__${part}`)
+  for (const part of ['logobox', 'pin']) assert.ok(code.includes(`offday__${part}`), `offday__${part}`)
+  // Logo only since 2026-11-02: the club's name is in the aria-label, not on the tile.
+  for (const part of ['name', 'loc', 'mascot']) assert.ok(!code.includes(`offday__${part}`), `no offday__${part}`)
   const css = read('06b-offday-cards.css')
   assert.ok(css.includes('var(--offday-accent, var(--accent-fallback))'), 'the hover tint keeps its accent')
   assert.ok(ruleBody(css, '.offday__tile--pinned'), 'the pinned state')

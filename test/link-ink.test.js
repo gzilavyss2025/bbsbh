@@ -57,9 +57,9 @@ const BOXED_DOORS = [['system/door.css', '.door--boxed']]
 // Placement only: the four hosts that seat a boxed door draw no colour of their own.
 const BOXED_HOSTS = [
   ['25-wide-layout.css', '.wirerail__door'],
-  ['78-offseason.css', '.oseason__door'],
+  ['offseason/winter-home.css', '.oseason__door'],
   ['78-offseason.css', '.srecord__door'],
-  ['78-offseason.css', '.seasonnote__when'],
+  ['offseason/winter-home.css', '.seasonnote__when'],
 ]
 // A control with a text label, and a glyph that opens a note: ink, no rule.
 const TEXT_CONTROLS = [

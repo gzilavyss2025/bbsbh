@@ -22,6 +22,12 @@ export function DateStepper({ dateStr, isToday, onStep, onToday, variant = 'full
     if (stepped?.date !== dateStr) setStepped(null)
   }
   const { dow, md, short } = dateLines(dateStr)
+  // Wide, the month is spelled out ("November 2"); a phone keeps "Nov 2".
+  const longMd = new Date(`${dateStr}T12:00:00Z`).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  })
   const dir = stepped?.date === dateStr ? stepped.dir : 0
   const step = (n) => {
     const [y, m, d] = dateStr.split('-').map(Number)
@@ -49,7 +55,10 @@ export function DateStepper({ dateStr, isToday, onStep, onToday, variant = 'full
           ) : (
             <>
               <span className="slatedate__dow">{dow}</span>
-              <span className="slatedate__md">{md}</span>
+              <span className="slatedate__md">
+                <span className="slatedate__mdshort">{md}</span>
+                <span className="slatedate__mdlong">{longMd}</span>
+              </span>
             </>
           )}
         </span>

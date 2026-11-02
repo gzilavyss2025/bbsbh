@@ -57,7 +57,7 @@ export function offseasonFields() {
       // drops them and the strip goes back to the two schedule dates: it
       // cannot reprint this winter's dates as next winter's.
       default: [
-        '2026-11-02 | Free agents can sign elsewhere',
+        '2026-11-02 | Free agency begins',
         '2026-11-10 | GM meetings',
         '2026-11-17 | 40-man roster deadline (est.)',
         '2026-11-17 | Owners meetings',

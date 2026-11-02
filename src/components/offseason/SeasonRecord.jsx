@@ -1,11 +1,10 @@
 import { useRouteLink } from '../../lib/nav.js'
 import { SPORT_IDS } from '../../lib/teams.js'
 import { usePostseasonBracket } from '../../hooks/postseason/usePostseasonBracket.js'
-import { PostseasonBracket } from '../bracket/PostseasonBracket.jsx'
 import { Card } from '../ui/frame/Card.jsx'
-import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { recordRowIsLabelled } from '../../lib/postseason/bracketDisplay.js'
 import { Cluster } from '../ui/layout/Cluster.jsx'
+import { ChampionHero } from '../worldseries/ChampionHero.jsx'
 
 // THE SEASON RECORD — the one door on the offseason page that opens onto
 // results (issue #1078, step 4 of #1038; the MLB champion, #1224 slice 7).
@@ -60,51 +59,34 @@ const MILB_STANDINGS = 'https://www.milb.com/standings'
 const MILB_POSTSEASON = 'https://www.milb.com/events/playoffs' // word-choice-exempt: MiLB's own address, not our word for October
 
 export function SeasonRecord({ sportId, season, dateStr }) {
-  const linkProps = useRouteLink()
   const inward = sportId === SPORT_IDS.MLB
-  const { bracket, cutoff } = usePostseasonBracket(inward ? dateStr : null, { season })
+  const { bracket } = usePostseasonBracket(inward ? dateStr : null, { season })
   const champion = bracket?.champion ?? null
   const labelled = recordRowIsLabelled(champion)
+  // MLB with a champion: the series page's World Series hero (ChampionHero,
+  // the MVP and the clubs). Its doors stand apart, under the countdown
+  // (OffseasonLead.jsx renders RecordDoors there).
+  if (inward && champion) return <ChampionHero bracket={bracket} />
+
 
   return (
-    <Card body="flush" className={`srecord${labelled ? ' srecord--labelled' : ''}`} aria-label={`The ${season} season record`}>
+    <Card frame="stamped" body="flush" className={`srecord${labelled ? ' srecord--labelled' : ''}`} aria-label={`The ${season} season record`}>
       {/* A row with no champion on its face only links to results, so it
           keeps its tape and its warning (ADR-0081 addendum). The tape is
           hidden from the reading order; the warning is in words. */}
       {labelled && <div className="srecord__tape" aria-hidden="true" />}
       <div className="srecord__body">
-        {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
-            invariant is never a per-component .toUpperCase() (ADR-0017). */}
-        <SectionHead look="label">Season record</SectionHead>
-        <p className="srecord__note">
-          {inward
-            ? `How the ${season} season finished, and every postseason series.`
-            : `How the ${season} season finished, on MiLB.com.`}
-          {labelled && (
-            <>
-              {' '}
-              <strong>Opening this shows results.</strong>
-            </>
-          )}
-        </p>
+        {/* No tagline; only the warning stays, on a row with no champion. */}
+        {labelled && (
+          <p className="srecord__note">
+            <strong>Opening this shows results.</strong>
+          </p>
+        )}
 
-        {champion && <PostseasonBracket bracket={bracket} cutoff={cutoff} autoOpen={false} />}
 
-        <Cluster gap="base" className="srecord__doors">
-          {inward ? (
-            <>
-              <a className="door door--boxed srecord__door" {...linkProps('/standings')}>
-                Final standings
-              </a>
-              <a className="door door--boxed srecord__door" {...linkProps('/postseason-history')}>
-                The postseason
-              </a>
-              {/* The shelf prints final scores. Like the other doors it wears the row's own label, "Opening this shows results.", when the row is labelled (#2508). */}
-              <a className="door door--boxed srecord__door" {...linkProps('/notable')}>
-                Notable games
-              </a>
-            </>
-          ) : (
+        {/* MLB's doors stand under the countdown (RecordDoors). */}
+        {inward ? null : (
+          <Cluster gap="base" className="srecord__doors">
             <>
               <a
                 className="door door--boxed srecord__door"
@@ -131,9 +113,29 @@ export function SeasonRecord({ sportId, season, dateStr }) {
                 <span className="sr-only">opens MiLB.com</span>
               </a>
             </>
-          )}
-        </Cluster>
+          </Cluster>
+        )}
       </div>
     </Card>
+  )
+}
+
+// The MLB record's three doors, stacked under the countdown in the hero's
+// side column (OffseasonLead.jsx).
+export function RecordDoors() {
+  const linkProps = useRouteLink()
+  return (
+    <Cluster gap="base" className="ohero__doors">
+      <a className="door door--boxed door--stamped srecord__door" {...linkProps('/standings')}>
+        Final standings
+      </a>
+      <a className="door door--boxed door--stamped srecord__door" {...linkProps('/postseason-history')}>
+        The postseason
+      </a>
+      {/* The shelf prints final scores. Like the other doors it wears the row's own label, "Opening this shows results.", when the row is labelled (#2508). */}
+      <a className="door door--boxed door--stamped srecord__door" {...linkProps('/notable')}>
+        Notable games
+      </a>
+    </Cluster>
   )
 }

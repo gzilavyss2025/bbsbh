@@ -1,15 +1,15 @@
-import { useState } from 'react'
 import { fetchLeagueMoves, windowDaysFor } from '../../api/transactions/leagueFeed.js'
+import { shiftDays } from '../../lib/time/standingsDates.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import { fetchNotableLists, isMajorMove } from '../../api/transactions/major.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { MoveItems, flattenDays, takeStories } from '../transactions/MoveRow.jsx'
 import { LongAtBats } from './LongAtBats.jsx'
-import { SeasonRecord } from './SeasonRecord.jsx'
+import { RecordDoors, SeasonRecord } from './SeasonRecord.jsx'
 import { WinterCalendar } from './WinterCalendar.jsx'
-import { useCopy } from '../../copy/copyContext.js'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
 import { EmptyState } from '../ui/state/EmptyState.jsx'
-import { Door } from '../ui/control/Door.jsx'
-import { useNav } from '../../lib/nav.js'
 
 // THE OFFSEASON LEAD — the same roster wire, promoted.
 //
@@ -40,37 +40,87 @@ import { useNav } from '../../lib/nav.js'
 // the whole offseason. Widening it to the season-long feed the design sketches
 // is a real change to leagueFeed.js's backtested window, not a copy edit.
 //
-// A count rather than a fit: there is no games column to measure against, so
-// the lead shows a fixed run of stories and puts the rest behind the rail's own
-// door control. Six because the CALENDAR has to clear the fold — measured on a
-// 1440x1000 window, eight stories and their datelines put the strip at y=984,
-// which is the fold to the pixel. Six lands it near y=886 with the door above
-// it, so a reader sees where they are in the winter without scrolling and still
-// meets the ledger first.
-const LEAD_ROWS = 6
+// EVERY MOVE, TEN AT A TIME. The ledger opens on ten moves and a door adds ten
+// more. When the window runs out, the door reaches back one more window of
+// days, so a reader can keep going through the winter.
+const STEP = 10
 
 export function OffseasonLead({ endDate, sportId, winter, children }) {
-  const { t } = useCopy()
-  const navigate = useNav()
+  const [pages, setPages] = useState(1)
+  const [cap, setCap] = useState(null)
+  const [kept, setKept] = useState(null)
+  const listRef = useRef(null)
+  const [visible, setVisible] = useState(STEP)
+  const span = windowDaysFor(sportId)
+  // One window per page, newest first, each ending where the last began. It
+  // may reach back past the winter's first day: October's moves are moves too.
+  const ends = Array.from({ length: pages }, (_, i) => shiftDays(endDate, -i * span))
   const { data, loading } = useAsync(
-    (signal) => fetchLeagueMoves(endDate, sportId, { signal, singleDay: false }),
-    [endDate, sportId],
+    (signal) =>
+      Promise.all(ends.map((end) => fetchLeagueMoves(end, sportId, { signal, singleDay: false }))).then(
+        (all) => all.flat(),
+      ),
+    [endDate, sportId, pages],
   )
-  const [expanded, setExpanded] = useState(false)
+  // A different day or level starts the ledger over.
+  const [prevKey, setPrevKey] = useState(`${endDate}-${sportId}`)
+  if (prevKey !== `${endDate}-${sportId}`) {
+    setPrevKey(`${endDate}-${sportId}`)
+    setPages(1)
+    setVisible(STEP)
+    setCap(null)
+    setKept(null)
+  }
 
-  const items = flattenDays(data)
+  // While an older window loads, keep the moves already on screen.
+  if (data && data !== kept) setKept(data)
+  const items = flattenDays(data ?? kept)
+  // Major moves are full cards, the rest one line each (transactions/major.js).
+  const { data: lists } = useAsync(() => fetchNotableLists(), [])
+  const { favoriteTeamId } = useFavoriteTeam()
+  const isMajor = lists ? (story) => isMajorMove(story, { lists, favoriteTeamId }) : null
   const total = items.filter((item) => item.kind === 'story').length
-  const shown = expanded ? items : takeStories(items, LEAD_ROWS)
-  const hidden = total - shown.filter((item) => item.kind === 'story').length
+  const shown = takeStories(items, visible)
+  // The card keeps the height its first ten moves gave it; more moves scroll
+  // inside it, and each press scrolls to the first of the new ones.
+  const nextTop = useRef(null)
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!list) return
+    if (nextTop.current != null && list.scrollHeight > nextTop.current) {
+      list.scrollTop = nextTop.current
+      nextTop.current = null
+    }
+  }, [shown.length])
+  const showMore = () => {
+    const list = listRef.current
+    if (list && cap == null) setCap(list.offsetHeight)
+    if (list) nextTop.current = list.scrollHeight
+    setVisible((n) => n + STEP)
+    // Out of moves in hand: reach back one more window.
+    if (total <= visible + STEP) setPages((n) => n + 1)
+  }
 
   return (
     <section
       className="oseason"
       aria-label={`The ${winter.seasonEnded} offseason`}
     >
+      {/* The hero: how the season finished, beside the days until the next
+          one. One row of two stamped cards; a phone stacks them. */}
+      <div className="ohero">
+        <SeasonRecord sportId={sportId} season={winter.seasonEnded} dateStr={endDate} />
+        <div className="ohero__side">
+          {children}
+          <RecordDoors />
+        </div>
+      </div>
+
+      <WinterCalendar winter={winter} />
+
       {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
           invariant is never a per-component .toUpperCase() (ADR-0017). */}
-      <SectionHead as="h2" className="oseason__head" note={t('offseason.leadNote')}>
+      <SectionHead as="h2" className="oseason__head">
         Transactions
       </SectionHead>
 
@@ -80,19 +130,21 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           says which of the two it is rather than showing an empty ledger. */}
       {total > 0 ? (
         <>
-          <ul className="oseason__list">
-            <MoveItems items={shown} />
-          </ul>
-          {(hidden > 0 || expanded) && (
+          {/* The ledger card: its moves, and the door as its footer bar. */}
+          <div className="oseason__ledger">
+            {/* One ledger line per move: faces, the sentence, the club. */}
+            <ul className="oseason__list" ref={listRef} style={cap ? { maxHeight: cap, overflowY: 'auto' } : undefined}>
+              <MoveItems items={shown} marks facts isMajor={isMajor} />
+            </ul>
             <button
               type="button"
-              className="door door--boxed oseason__door"
-              aria-expanded={expanded}
-              onClick={() => setExpanded((open) => !open)}
+              className="door door--boxed door--bar oseason__door"
+              onClick={showMore}
+              disabled={loading}
             >
-              {expanded ? 'Show fewer' : `${hidden} more`}
+              {loading ? 'Reading the wire…' : `${STEP} more`}
             </button>
-          )}
+          </div>
         </>
       ) : loading ? (
         <p className="oseason__loading" role="status">Reading the wire…</p>
@@ -102,27 +154,8 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
         </EmptyState>
       )}
 
-      {/* The free-agent class (#2509): the hot-stove question the wire answers
-          one move at a time, as one list. */}
-      <Door className="oseason__fa" onClick={() => navigate(`/free-agents/${winter.seasonEnded}`)}>
-        Free agents
-      </Door>
-
-      {/* One note about the season the wire has just stopped covering, and the
-          one door on this page that opens onto results — issue #1078, step 4.
-          Both sit under the ledger because the wire is what a reader came for
-          in December; the note is what they stay for. Either renders nothing
-          when its file is not the season this page names. */}
+      {/* The season's notebook: one row of stamped cards (LongAtBats.jsx). */}
       <LongAtBats season={winter.seasonEnded} />
-
-      <SeasonRecord sportId={sportId} season={winter.seasonEnded} dateStr={endDate} />
-
-      <WinterCalendar winter={winter} />
-
-      {/* The countdown, on a phone. Wide, it takes the rail slot the wire has
-          just left and GameSelect mounts it there instead — so it is passed in
-          rather than rendered here, and only one of the two ever exists. */}
-      {children}
     </section>
   )
 }
