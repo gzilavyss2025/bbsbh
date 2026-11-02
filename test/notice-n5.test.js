@@ -45,7 +45,6 @@ const files = (dir) =>
 // measured on origin/main at 608c6062e. A box move changes none of these. If
 // this fails, the slice moved a seal: stop and ask, never update the literal.
 const N5_SEAL = {
-  'components/inning/DelayCard.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   'components/game/GameCardParts.jsx': { reveal: [], sealBoxes: 0, revealedThrough: 0 },
   // 16: the scorebug's mount moved from ConsoleBand to InningsHeader (the page's masthead), so the
   // viewer hands the same clamped mark to one more child. Same consumer, same clamp, no new import (ruled on by the maintainer).
@@ -90,20 +89,6 @@ test('N5: the postponed gate stays byte for byte (ADR-0060)', () => {
 })
 
 // ---- 3. the members ----
-
-test('N5: the delay card is an info Notice with the namespace .delay, its glyph as the icon and its title as the label', () => {
-  const code = src('components/inning/DelayCard.jsx')
-  assert.match(code, /import \{ Notice \} from '\.\.\/ui\/state\/Notice\.jsx'/)
-  assert.match(
-    code,
-    /<Notice\n\s*tone="info"\n\s*role="note"\n\s*className="delay"\n\s*icon=\{isRain \? <RainGlyph \/> : <PauseGlyph \/>\}\n\s*label=\{title\}\n\s*>/,
-  )
-  // The copy, unchanged: a stoppage, its cause and its length, never a result.
-  assert.match(code, /const title = reason \? `\$\{reason\} delay` : 'Delay'/)
-  assert.match(code, /Play stopped for <b>\{formatDelay\(durationMinutes\)\}<\/b>/)
-  assert.match(code, /'Delay in progress'/)
-  assert.match(code, /export function formatDelay\(min\)/, 'EventCards.jsx imports formatDelay')
-})
 
 // ---- 4. the rename ----
 

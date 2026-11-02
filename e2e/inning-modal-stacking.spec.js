@@ -2,15 +2,12 @@ import { test, expect } from './fixtures.js'
 
 // Regression guard for the dialogs opened on the Gameday page.
 //
-// The bug: `.turnscene` (the page-turn scene) sets `isolation: isolate` so an
-// in-flight turn can never paint over the bar — which also traps a `.scrim`
-// dialog's z-index: 100 inside that box. A sheet then rendered UNDER the fixed
-// chrome and the chrome swallowed taps meant for the sheet. Fixed by portalling
-// dialogs to <body> (src/components/ui/ModalPortal.jsx).
+// The bug: a stacking context above a `.scrim` dialog traps its z-index: 100
+// inside that box. A sheet then rendered UNDER the fixed chrome and the chrome
+// swallowed taps meant for the sheet. Fixed by portalling dialogs to <body>
+// (src/components/ui/ModalPortal.jsx).
 //
-// Gameday mounts the half page hidden as its engine, so the two dialogs this
-// file used to open from inside it (the highlight sheet and the pitch-zone
-// modal) cannot be reached from the screen any more. The dialog Gameday opens
+// The dialog Gameday opens
 // is its Menu sheet (GamedayMenu.jsx, on SheetFrame): it holds the folded
 // blocks, the Scorecard and Box score doors and Refresh, and it opens over the
 // stage, the hero and the bar. The same three checks run on it.
@@ -53,9 +50,8 @@ async function expectOnTop(page) {
   // The sheet slides up; measure it where it rests, not mid-rise.
   await sheet.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)))
 
-  // The invariant itself: the dialog left `.turnscene`'s isolated stacking
-  // context, so its z-index is measured against the fixed chrome's.
-  await expect(page.locator('.turnscene .scrim')).toHaveCount(0)
+  // The invariant itself: the dialog sits directly under <body>, so its z-index
+  // is measured against the fixed chrome's.
   await expect(page.locator('body > .scrim')).toHaveCount(1)
 
   const box = await sheet.boundingBox()

@@ -140,7 +140,6 @@ test('the board partial loads where the old rules did, and the fade-in with the 
   assert.ok(imports.includes('leaders/board.css'))
   assert.equal(imports.indexOf('leaders/board.css'), imports.indexOf('23-box-score-detail.css') - 1)
   assert.ok(imports.indexOf('motion/board-in.css') > imports.indexOf('motion/arrival.css'))
-  assert.ok(imports.indexOf('motion/board-in.css') < imports.findIndex((p) => p.startsWith('focus/')))
 })
 
 test('23-box-score-detail.css keeps no .tlead rule', () => {

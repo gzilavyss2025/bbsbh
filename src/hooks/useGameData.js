@@ -230,11 +230,11 @@ export function useGameData(game, activeStep = null) {
   // fetch near game start would miss nearly all of them. Poll every 5 minutes
   // while the game is Live — same interval/cleanup shape as GameNotesButton's
   // NOTES_POLL_MS (TeamInfo.jsx) — and stop once it leaves Live (Final, or
-  // not started yet). HalfInning's SealBox reveal function re-runs on every
-  // render and rebuilds highlightsByPlayId from whatever this resolves to, so
-  // a newly-posted clip surfaces on an already-revealed half with no other
-  // wiring: nothing here is rendered until highlightsByPlayId is called
-  // inside that reveal, so a poll landing mid-game is still spoiler-safe.
+  // not started yet). A consumer inside a seal's reveal looks a clip up from
+  // whatever this resolves to, so a newly-posted clip surfaces on an
+  // already-revealed play with no other wiring: nothing here is rendered until
+  // that lookup runs inside the reveal, so a poll landing mid-game is still
+  // spoiler-safe.
   // The fetch is safe to start eagerly (a raw fetch result produces no DOM on
   // its own), but its consumers are both behind a seal, so it waits for one of
   // their views to actually be opened (`useEverActive`), same reasoning as

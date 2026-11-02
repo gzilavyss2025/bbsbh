@@ -283,11 +283,9 @@ live statsapi.
 
 ## The big-play stamp (focus mode)
 
-Stepping through a half in focus mode, a home run, a grand slam, a triple, a double
-and the bases left loaded each get an ink stamp over the page
-(`components/inning/focus/BigPlay*.jsx`, `styles/focus/bigplay.css`). It is a plain
-CSS animation on `transform` and `opacity`: no motion library, because every other
-motion here is CSS on tokens and the bundle stays as it was.
+Deleted with the hidden half page (#2747). It was an ink stamp over the page for a home run,
+a grand slam, a triple, a double and the bases left loaded: a plain CSS animation on
+`transform` and `opacity`, with no motion library.
 
 | Rule | Why |
 | --- | --- |

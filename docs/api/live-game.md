@@ -265,9 +265,8 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   event's `playId` in `feed/live` (the only reliable join key; verified live
   against both batted-ball and strikeout-ending plays — see
   `.scratch/video-highlights/`). Reveal-only (see above): `useGameData`
-  fetches it lazily, same `useEverActive`-gated tier as `winProb` (waiting on
-  the innings view specifically, its only consumer), but `highlightsByPlayId`
-  is only ever called inside `HalfInning`'s `SealBox` reveal function.
+  fetches it lazily, same `useEverActive`-gated tier as `winProb`. The play joins
+  below are only ever read inside a revealed play's render.
   Degrades to `[]` on failure or off-MLB. `highlightForPlay(items,
   playId)` is the direct lookup of that join for ONE play, ungated — the rule
   for a revealed play's Watch button (the swing list, like the per-play card,
@@ -486,7 +485,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `railRevealCap(feed, inning, half, row)` is the same cap on its own, and it is
   the number Express Lane writes into the app's at-bat reveal mark: a count of
   `computeHalfInningFeed` ENTRIES, which is the unit `revealAtBat` stores and
-  PlayByPlay reads back. A count of rail ROWS is a different number — over gamePk
+  the old PlayByPlay read back. A count of rail ROWS is a different number — over gamePk
   823035 the two disagree at 99 of 128 cursor positions — and writing that one
   opens entries in the innings viewer the surface never showed.
   Three things to know. (1) IT RE-DERIVES NOTHING: `computeHalfInningFeed`'s

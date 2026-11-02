@@ -150,7 +150,6 @@ const BUDGETS = {
   // rest of the old page lives in src/screens/player/ — one screen per tab, each
   // well under the cap. That is the outcome this guard's third assertion exists
   // to force, so the entry is gone rather than tightened.
-  'src/components/playbyplay/PlayByPlay.jsx': 800, // 705
   'src/api/tradeDeadline.js': 700, // 629
   'src/App.jsx': 700, // 606
 }

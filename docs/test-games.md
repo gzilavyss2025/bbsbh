@@ -30,7 +30,7 @@ the "shown entering the half" and "held back until you reveal in" paths.
 Route base: `/04052025/athcol/`
 
 Top of the 2nd (atBatIndex 9): Jacob Wilson grounds into a 5-4-3 triple
-play. Good for `PlayByPlay` / pitcher-line inning-ending edge cases (three
+play. Good for play-by-play / pitcher-line inning-ending edge cases (three
 outs on one play, no separate at-bats for the two runners retired).
 
 ## Immaculate inning

@@ -169,9 +169,9 @@ Savant code.
 | new `lib/pitcherCard/batted.js`, to be created | The batted ball in the scene camera, and the side-view path. Section 6.4 |
 | `src/screens/player/next/modules/contact/contactFlight.js` | Move `simFlight` and `flightModel` to a new `lib/ballpark/flightModel.js` (to be created). Re-export them here so the Contact card and its tests do not change. Add one argument: the start height (today it is fixed at 3 ft) |
 | `src/components/playbyplay/pitcherCard/PitchScene.jsx` | Draw the bat, the contact ring and ticks, the exit trail, the shadow, and the trajectory tag. Same rAF loop, same refs, no React state per frame |
-| new `components/playbyplay/pitcherCard/SideView.jsx`, to be created | The side-view strip |
-| new `components/playbyplay/pitcherCard/QualityLine.jsx`, to be created | The quality line |
-| `src/components/playbyplay/pitcherCard/AtBatReplay.jsx` | Put `SideView` and `QualityLine` in `ReplayScene`, in the order in section 5 |
+| `components/playbyplay/pitcherCard/SideView.jsx` (was deleted with the at-bat replay, #2747) | The side-view strip |
+| `components/playbyplay/pitcherCard/QualityLine.jsx` (was deleted with the at-bat replay, #2747) | The quality line |
+| `src/components/playbyplay/pitcherCard/AtBatReplay.jsx` (was deleted, #2747) | Put `SideView` and `QualityLine` in `ReplayScene`, in the order in section 5 |
 | new `styles/pitcher-card/contact.css`, to be created | Resting looks. Import it in `src/index.css` after `pitcher-card/card.css` |
 | `src/styles/motion/` | No change. All replay motion runs in JS from one clock (section 8.1) |
 | `test/at-bat-scene.test.js`, plus new tests | Section 11 |
@@ -197,7 +197,7 @@ height while the replay plays (ADR-0046). The quality line has a `min-height`
 that holds one row of figures and the verdict.
 
 **Width.** The card fills its column. On a phone the scene opens in
-`ReplaySheet`; on a wide screen it opens in the rail (`ReplayRail`). The layout
+`ReplaySheet`; on a wide screen it opened in the rail (`ReplayRail`, deleted with the hidden half page, #2747). The layout
 is the same in both. Section 9 has the one difference.
 
 ## 6. The scene: what to draw

@@ -10,7 +10,6 @@ const STYLES = join(import.meta.dirname, '..', 'src', 'styles')
 const SOLID = [
   ['10-lineup.css', 'button.starter__careervs'],
   ['scoring/defense-diamond.css', '.defdiamond__dh'],
-  ['13-play-by-play.css', '.pbp__note'],
   ['workload/projection.css', '.projection__note'],
   ['32-milestone-watch.css', '.milestonewatch-page__row'],
   ['34-postseason.css', '.pswscard__mvp'],

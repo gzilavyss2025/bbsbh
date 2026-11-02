@@ -23,26 +23,14 @@ export async function fetchHighlights(gamePk) {
   }
 }
 
-// guid (content) === playId (feed/live playEvents[]) for the same play — the
-// only reliable join key. Pure and cheap; safe to memoize outside the seal
-// (it produces no DOM), but the map it returns must only be READ from inside
-// a revealed play's render.
-export function highlightsByPlayId(items) {
-  const map = new Map()
-  for (const item of items ?? []) {
-    if (item?.guid) map.set(item.guid, item)
-  }
-  return map
-}
-
 // The clip for ONE named play, ungated: any package MLB cut for it, whatever
-// its sign. Same `guid === playId` join as highlightsByPlayId above, but a
+// its sign. The `guid === playId` join (content guid is the feed's playId), but a
 // direct lookup rather than a whole map. This is the rule for a surface that
 // only exists for a play the reader has already revealed (PlayByPlay's Watch
 // button, the win-probability swing list): it offers the play's film, it does
 // not claim the play was "the best one".
 //
-// Reveal-only, exactly like highlightsByPlayId: a clip's title, description
+// Reveal-only: a clip's title, description
 // and poster all narrate the play's outcome, so call this only from inside a
 // revealed play (ADR-0001).
 export function highlightForPlay(items, playId) {
@@ -133,7 +121,7 @@ function significanceOf(taxonomy) {
 // strikes out 12"). `id` — a readable slug, e.g. `joey-ortiz-homers-3-on-a-fly-
 // ball` — is present on 100% of items and was unique across the whole sweep, so
 // it is the fallback. `guid` still rides along untouched: it is the join key for
-// the box score's per-play button (highlightsByPlayId above), which simply
+// the box score's per-play button, which simply
 // doesn't fire for a clip that has none.
 export function classifyHighlight(item) {
   const kw = item?.keywordsAll ?? []

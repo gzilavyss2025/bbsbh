@@ -131,9 +131,7 @@ const tintHosts = () =>
 
 // A dashed edge means pencilled-in (#1132). A host may draw one only when its
 // tag says something provisional, and each entry says what.
-const DASHED_EDGE = {
-  '.pbp__placed': 'a placed runner: given, not run (slice 1)',
-}
+const DASHED_EDGE = {}
 
 // A tint sets none of these itself. The pill's own rules draw each one from its
 // custom properties; a host that sets one draws a part the pill cannot reach.

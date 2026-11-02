@@ -253,14 +253,6 @@ export function distanceLabel(ft, wallFt = 400) {
   return { x: far ? 332 : SIDE_X(ft) + 8, y: far ? 96 : 74, anchor: far ? 'end' : 'start', text: `${Math.round(ft)} ft`, hideTick400: far }
 }
 
-// The side view's aria-label (§12), built from the pitch like `sceneLabel`: it changes only with the pitch in view.
-export function sideLabel(p, path) {
-  if (!path) return `Side view: ${p.swing === 'whiff' ? 'no contact' : p.swing === 'foul' ? 'foul, no flight drawn' : 'no ball in flight'}.`
-  const ft = p.hit.distance != null ? `, ${Math.round(p.hit.distance)} feet` : ''
-  const apex = path.apex ? `, apex about ${Math.round(path.apex.ft)} feet (drawn)` : ''
-  return `Side view: ${(TRAJ[p.hit.trajectory]?.[0] ?? 'ball in play').toLowerCase()}${ft}${apex}.`
-}
-
 // The side view's path for a pitch: a ball in play WITH a contact point. Without one `pitchBeats` has
 // no side beats (a take's { totalMs }), so there is nothing to time a path by.
 export const sidePathFor = (p, beats) => (p.swing === 'inplay' && beats.sideStartMs != null ? sideViewPath(p.hit) : null)

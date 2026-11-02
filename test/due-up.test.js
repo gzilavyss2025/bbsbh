@@ -95,14 +95,3 @@ test('selectDueUpNext previews the other side\'s next half, continuing case', ()
   assert.deepEqual(slotsOf(info), [5, 6, 7])
   assert.deepEqual(idsOf(info), [5, 6, 7])
 })
-
-import { readFileSync } from 'node:fs'
-
-test('UpNextBatters: no SealBox, and only revealedThrough-bounded reads of the feed', () => {
-  const src = readFileSync(new URL('../src/components/playbyplay/dueup/UpNextBatters.jsx', import.meta.url), 'utf8')
-  assert.doesNotMatch(src, /import .*SealBox|<SealBox/)
-  assert.match(src, /selectDueUpNow\(feed, inning, half, revealedThrough\)/)
-  assert.match(src, /batterLineText\(feed, due\.battingSide, b\.id, revealedThrough\)/)
-  const apiImports = [...src.matchAll(/from '\.\.\/\.\.\/\.\.\/api\/([^']+)'/g)].map((m) => m[1])
-  assert.deepEqual(apiImports.sort(), ['boxscore/batterLine.js', 'dueup.js'])
-})

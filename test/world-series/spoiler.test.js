@@ -28,6 +28,5 @@ test('the module has the callers it has a gate for, and no others', () => {
     'api/callout-notes/liveAtBat.js',
     'api/callout-notes/rollup.js',
     'api/prehalf-callouts.js',
-    'hooks/postseason/useWsEvents.js',
   ])
 })

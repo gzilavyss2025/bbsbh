@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { SealBox } from '../../../../components/SealBox.jsx'
-import { EVENT_CODES } from '../../../../components/playbyplay/EventCards.jsx'
+import { EVENT_CODES } from '../../../../components/playbyplay/cardCopy.js'
 import { composeLive, enteringPitchesFor } from '../../../../api/gameday/engine/engineLive.js'
 import { halfReport } from '../../../../api/gameday/engine/halfReport.js'
 import { computePitcherLines } from '../../../../api/pitchers.js'

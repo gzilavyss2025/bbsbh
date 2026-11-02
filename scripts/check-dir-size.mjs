@@ -86,7 +86,7 @@ const BUDGETS = {
   // lib/roster.mjs is the worked example). They run nothing on import and share
   // code between generators, so inlining them would copy it into each one.
   'scripts/lib': 42,
-  'src/screens': 41,
+  'src/screens': 40,
   'src/hooks': 25,
   'src/screens/identity-lab': 15,
   // One file per diary finding. A research diary is append-only

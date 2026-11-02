@@ -20,13 +20,11 @@ The OVR bars (`docs/ovr-rating.md`). `OvrBars` draws the attribute rows in the p
 
 ## `gamehud/`
 
-The stamped "due up" card `UpNextBatters` ("Due up", the half's own batters before it starts) draws through `dueup/DueUpBatters` (`styles/focus/dueup-next.css`): a bare headshot, the batting slot, the name and one `H-AB` or average line per batter, from `src/api/boxscore/batterLine.js`, capped at `revealedThrough`.
-
-`HalfTally` and `BetweenInnings` (the finished half's grid and its score-free facts, `src/api/between-innings.js`) render in the hidden engine and the animation lab. Gameday's checkpoint (`src/screens/gameday/next/checkpoint/`) carries the same half tally and notes on screen. The old console row (`ConsoleBand`, `DueUpConsole`) and `RollingLine` were deleted with the Gameday swap (#2566)
+Gameday's checkpoint (`src/screens/gameday/next/checkpoint/`) carries the finished half's tally and notes, from `src/api/between-innings.js`. The old `HalfTally`, `BetweenInnings` and the "due up" card `UpNextBatters` were deleted with the hidden half page (#2747); the old console row (`ConsoleBand`, `DueUpConsole`) and `RollingLine` went with the Gameday swap (#2566).
 
 ## `inning/`
 
-`HalfInning` is the half page Gameday mounts hidden as its engine (`src/screens/gameday/next/CLAUDE.md`). The old reference shelf (`ReferencePanel`, `ExtrasFacts`, `PitchersSection`, `RosterPanel`, `MarginNotes`) was deleted with the Gameday swap (#2566); Gameday's reference panel is `screens/gameday/next/panels/`
+The half page `HalfInning`, `InningPage`, `DelayCard` and the page turn (`page-turn/`) were deleted in #2747: Gameday gets its stepping from `screens/gameday/next/engine/GamedayEngine.jsx` (`src/screens/gameday/next/CLAUDE.md`). The old reference shelf (`ReferencePanel`, `ExtrasFacts`, `PitchersSection`, `RosterPanel`, `MarginNotes`) was deleted with the Gameday swap (#2566); Gameday's reference panel is `screens/gameday/next/panels/`
 
 ## `player/`
 

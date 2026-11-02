@@ -31,5 +31,5 @@ each value looks. Pure physics goes in `src/lib/gameday/`, not here.
 | `reviews.js` | Manager, crew-chief and ABS reviews, and each club's ABS bank, as of the step (#2607). Never `gameData.absChallenges`. |
 | `subSteps.js` | The sub-steps inside one at-bat (ADR-0123): changes, pitches, automatic calls, events, then the result; `stop` marks at-bat mode's. `openAtBat` finds the at-bat past the step cursor. |
 | `zones.js` | The zone map's data: a batter's AVG and temp by zone 01-09, season through the day BEFORE the game (#2568). **Spoiler-free**, the one exception to the reveal-only rule above: no game data, `endDate` = `dayBefore(officialDate)` (ADR-0088). |
-| `engine/engineLive.js` | The scorebug's live snapshot (`composeLive`), the batter's line and the entering baseline's pitch count; lifted from `HalfInning.jsx` (#2747). |
-| `engine/halfReport.js` | One half at one step: the cap snap, commit test, step report, runs and hits, trail items and live snapshot; lifted from `PlayByPlay.jsx` (#2747). |
+| `engine/engineLive.js` | The scorebug's live snapshot (`composeLive`), the batter's line and the entering baseline's pitch count; lifted from the old `HalfInning.jsx` (#2747). |
+| `engine/halfReport.js` | One half at one step: the cap snap, commit test, step report, runs and hits, trail items and live snapshot; lifted from the old `PlayByPlay.jsx` (#2747). |
