@@ -7,7 +7,9 @@ mounts its folder (`next/<band>/index.jsx`) only when near (`useNearView`), so n
 before it is. **A band edits only its own folder**, never `bands.js`, `Band.jsx` or the page.
 Module props: `{ team, asOf, sportId, onReady, onCount }`; call `useBandData` for the two reports.
 Absent bands come from `hiddenTeamSections(team, { pastSeason })` (`data/shared.js`; the league test comes first). A past season hides Money, and Farm keeps only Affiliates (`loadMinors` returns no prospects).
-`/team/{id}/leaders`, `stamp-in`, `photos` and `transactions` are separate pages, not bands.
+`/team/{id}/leaders`, `stamp-in`, `photos`, `transactions` and `franchise` are separate pages, not bands.
+The franchise page (`franchise/`, #2586) is history: one table of every season, newest first,
+from the stored ledger plus a live row per season the ledger has not reached; it reads no `?d=`.
 
 **Each band loads only its own data.** One `data/load{Band}.js` per band, never a shared
 mega-fetch. One exception: Ranks also draws `standings/StandingsRankCards.jsx`, which reads
