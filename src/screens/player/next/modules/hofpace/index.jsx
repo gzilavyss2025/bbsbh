@@ -34,9 +34,6 @@ export default function HofPaceModule({ bio, role, asOf, season, onEmpty }) {
           </li>
         ))}
       </ul>
-      <p className="t-caption hofpace__caption">
-        Ages use MLB&rsquo;s June 30 rule. Negro League seasons count as MLB seasons.
-      </p>
     </div>
   )
 }

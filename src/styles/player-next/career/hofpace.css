@@ -11,12 +11,8 @@
   min-height: 120px;
 }
 .hofpace__note,
-.hofpace__caption,
 .hofpace__his {
   margin: 0;
-}
-.hofpace__caption {
-  color: var(--text-caption);
 }
 .hofpace__list,
 .hofpace__comps {
