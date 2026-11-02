@@ -1520,6 +1520,13 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
+- `frozen/freeze-season.mjs --season YYYY [--force]` → `public/data/frozen/{season}/`
+  (`salaries.json`, `top-prospects.json`, `team-contracts/{id}.json`) and the bundled list
+  `src/lib/data/frozen-seasons.json` (#2776). It copies the stores that only know today, so a
+  past-season team page (`?y=`) keeps Money and the Farm prospects and depth chart. **Hand-run
+  once a year, after the World Series and before January 1**, while the live files still
+  describe that season; it fails if a file is a different season, and never rewrites a
+  frozen season without `--force`. 2026 was frozen on 2026-11-02.
 - `gen-season-checkpoints.mjs` → `public/data/season-checkpoints/tails.json` (shipped)
   and `scripts/data/season-checkpoints/{season}.json` (raw, not shipped) — the player
   page's hot and cold callouts (#1855). The raw store keeps each MLB player-season's

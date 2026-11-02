@@ -6,7 +6,7 @@ anchor jump bar (`bar` prop), one `Band` per `BANDS` entry (`next/bands.js`; Ros
 mounts its folder (`next/<band>/index.jsx`) only when near (`useNearView`), so nothing loads
 before it is. **A band edits only its own folder**, never `bands.js`, `Band.jsx` or the page.
 Module props: `{ team, asOf, sportId, onReady, onCount }`; call `useBandData` for the two reports.
-Absent bands come from `hiddenTeamSections(team, { pastSeason })` (`data/shared.js`; the league test comes first). A past season hides Money, and Farm keeps only Affiliates (`loadMinors` returns no prospects).
+Absent bands come from `hiddenTeamSections(team, { pastSeason })` (`data/shared.js`; the league test comes first). A past season hides Money, and Farm keeps only Affiliates (`loadMinors` returns no prospects), unless the season is frozen (`isFrozenSeason`, `scripts/frozen/freeze-season.mjs`, #2776): then Money and the prospects and depth chart read `public/data/frozen/{season}/`.
 `/team/{id}/leaders`, `stamp-in`, `photos`, `transactions` and `franchise` are separate pages, not bands.
 The franchise page (`franchise/`, #2586) is history: one table of every season, newest first,
 from the stored ledger plus a live row per season the ledger has not reached; it reads no `?d=`.
@@ -57,7 +57,7 @@ make joins `DIRECT` in `sources.js`, with a test in `test/team-next-loaders.test
 - **Money** (`next/money/`): payroll, contract grid, the cliff and the source line. MLB only.
   The source line portals into the foot's `#tnext-credits` slot (Gary, 2026-10-30), the one
   sanctioned reach outside a band's folder; inline until the slot exists.
-  Not keyed on `asOf`: it is a season's book (ADR-0052).
+  A season's book (ADR-0052): a date does not move it, except that a frozen past season reads its own copy.
 - **About** (`next/about/`): the ballpark, franchise history (MLB), jerseys
   (these follow `?d=`) and, for MiLB, Made The Show.
 - **Foot** (`next/foot/`): not a band, no jump-bar button. The level's other clubs with the

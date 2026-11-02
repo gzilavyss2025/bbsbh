@@ -27,6 +27,7 @@ lab or the runtime overlay edits.
 | `park-wash-tuning.json` | `ballpark/parkWash.js` |
 | `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/logbook/GameStamp.jsx` — read at RENDER time |
 | `stamp-ink.json` | `stampInkTuning.js` → `stampInk.js` → `components/logbook/GameStamp.jsx` — also read at RENDER time, so a retune restyles every minted stamp |
+| `frozen-seasons.json` | `screens/team/data/shared.js` (`isFrozenSeason`); written by `scripts/frozen/freeze-season.mjs` (#2776) — not hand-tuned, but bundled so the page knows it before a fetch |
 | `wpa-tuning.json` | `wpa/wpaLogo.js`, `wpa/wpaBandColors.js` — deliberately NOT reachable from the eager entry graph; see `wpa/wpaDefaults.js` |
 
 Every store has the same outer shape:

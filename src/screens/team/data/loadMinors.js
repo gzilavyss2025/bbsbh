@@ -13,7 +13,7 @@ import { fetchTeamLogoTint } from '../../../api/careerTimeline.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { SPORT_LABEL } from '../../../lib/teams.js'
 import { rate3 as sharedRate3 } from '../../../api/person/shared.js'
-import { seasonOf, affiliateCardsFrom, parentOrgIdOf } from './shared.js'
+import { seasonOf, affiliateCardsFrom, parentOrgIdOf, isFrozenSeason } from './shared.js'
 import { DIRECT } from './sources.js'
 
 const DASH = '—'
@@ -127,8 +127,11 @@ export async function loadMinors(id, asOf, src = DIRECT) {
   const isMilb = sportId !== 1
   const season = seasonOf(asOf, sportId)
   // A season already over: the prospect board, Horizon and depth chart know only today's org, so
-  // none of them loads (#2593). Affiliates are read by season and stay.
+  // none of them loads (#2593). Affiliates are read by season and stay. A frozen season (#2776)
+  // keeps the prospect board and depth chart from its own copy; Horizon is about movement now.
   const pastSeason = season < seasonOf(null, sportId)
+  const frozen = pastSeason && isFrozenSeason(season) ? season : null
+  const showProspects = !pastSeason || frozen != null
   // The MLB parent's own id — same value whether this page IS the parent or
   // one of its affiliates (the parent org rides along on a MiLB team's /teams
   // response). Every prospect belongs to the org, not to one specific
@@ -148,7 +151,7 @@ export async function loadMinors(id, asOf, src = DIRECT) {
     // Complex/rookie-level clubs, resolved separately — see
     // fetchComplexAffiliates for why they can't just join AFFILIATE_SPORT_IDS.
     orgId ? fetchComplexAffiliates(orgId, season) : Promise.resolve([]),
-    fetchTopProspects(),
+    fetchTopProspects(frozen),
     // Both static, same-origin, session-memoized snapshots the Horizon and
     // Depth Chart cards below share — one fetch each regardless of how many
     // org prospects join against them.
@@ -164,11 +167,12 @@ export async function loadMinors(id, asOf, src = DIRECT) {
   // `rosterType=40Man` (not the default 'active') so a prospect currently on
   // a 7-/60-day IL still resolves to his real affiliate instead of falling
   // through to the scraped level text with no logo.
+  // A past season skips today's 40-man rosters: its levels come from that season's stats pool.
   const farmTeams = [...affiliates, ...complexAffiliates]
-  const affiliateRosterIds = farmTeams.length
+  const affiliateRosterIds = farmTeams.length && !pastSeason
     ? await fetchRosterIdsForTeams(farmTeams.map((a) => a.id), '40Man')
     : {}
-  if (orgId) {
+  if (orgId && !pastSeason) {
     affiliateRosterIds[orgId] = isMilb
       ? await fetchTeamRosterIds(orgId, '40Man')
       : roster.map((r) => r.person?.id).filter(Boolean)
@@ -178,7 +182,7 @@ export async function loadMinors(id, asOf, src = DIRECT) {
   if (orgId) {
     affiliateById.set(orgId, { id: orgId, sportId: 1, name: isMilb ? team.parentOrgName : team.name })
   }
-  const orgProspectRows = orgId && !pastSeason ? orgProspectsForTeam(prospectsSnapshot.orgProspects, orgId) : []
+  const orgProspectRows = orgId && showProspects ? orgProspectsForTeam(prospectsSnapshot.orgProspects, orgId) : []
   // This org's combined season stats pool (combineToPool, statsLevels.js) —
   // two jobs share it. Roster membership (above) still misses anyone not on
   // ANY org 40-man roster right now (released, a stint between assignments,
@@ -219,7 +223,7 @@ export async function loadMinors(id, asOf, src = DIRECT) {
     // season, or a fresh promotion the nightly generator hasn't caught up to
     // yet) or short of the qualification floor — those rows just don't carry
     // a trend, rather than a misleading zero.
-    const entry = prospectTrendById(trendSnapshot, p.playerId)
+    const entry = pastSeason ? null : prospectTrendById(trendSnapshot, p.playerId)
     const stats = statLineFor(p.position, statsPoolByPlayer.get(p.playerId))
     if (!entry?.qualified) return { ...p, trend: null, stats }
     return {
@@ -263,7 +267,7 @@ export async function loadMinors(id, asOf, src = DIRECT) {
   // fact about a game he's about to appear in, not a score, so it stays
   // open like the rest of this tab.
   const milestones = orgId && !pastSeason ? (rehabSnapshot.players ?? []).filter((p) => p.orgId === orgId) : []
-  const horizon = { promotionWatch: promotionWatchFrom(prospects), milestones }
+  const horizon = { promotionWatch: pastSeason ? [] : promotionWatchFrom(prospects), milestones }
   const depthChart = buildDepthChart(prospects)
 
   return {

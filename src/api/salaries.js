@@ -1,4 +1,4 @@
-import { staticJson, staticJsonBy } from './staticJson.js'
+import { staticJsonBy } from './staticJson.js'
 
 // The two salary files scripts/fever/gen-salaries.mjs writes: one ledger per
 // club (/team/{id}/contracts) and one league rollup (/salaries).
@@ -18,8 +18,18 @@ import { staticJson, staticJsonBy } from './staticJson.js'
 // because these files come from an outside source (Cot's, via Fever Baseball)
 // that Tally does not control.
 
-const fetchLeague = staticJson('/data/salaries.json', { fallback: null })
-const fetchClub = staticJsonBy((teamId) => `/data/team-contracts/${teamId}.json`, { fallback: null })
+// `season` names a frozen copy (public/data/frozen/{season}/, scripts/frozen/freeze-season.mjs,
+// #2776); none reads the live files.
+const fetchLeague = staticJsonBy((season) => (season ? `/data/frozen/${season}/salaries.json` : '/data/salaries.json'), {
+  fallback: null,
+})
+const fetchClub = staticJsonBy(
+  (key) => {
+    const [teamId, season] = key.split(':')
+    return season ? `/data/frozen/${season}/team-contracts/${teamId}.json` : `/data/team-contracts/${teamId}.json`
+  },
+  { fallback: null },
+)
 
 // A file that PARSED is not a file the page can draw. `staticJson`'s fallback
 // only fires on a non-200 or a parse failure, so an empty object, a half-written
@@ -44,13 +54,13 @@ export function usableLedger(data) {
   return Array.isArray(data.groups) && Array.isArray(data.totals) ? data : null
 }
 
-export async function fetchLeagueSalaries() {
-  return usableLeague(await fetchLeague())
+export async function fetchLeagueSalaries(season = null) {
+  return usableLeague(await fetchLeague(season ?? ''))
 }
 
-export async function fetchTeamContracts(teamId) {
+export async function fetchTeamContracts(teamId, season = null) {
   if (teamId == null) return null
-  return usableLedger(await fetchClub(teamId))
+  return usableLedger(await fetchClub(`${teamId}:${season ?? ''}`))
 }
 
 // ---------------------------------------------------------------- selectors

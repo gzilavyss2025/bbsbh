@@ -6,7 +6,7 @@ import { AsyncGate } from '../../../components/ui/AsyncGate.jsx'
 import { HubTabBar } from '../../../components/chrome/HubTabBar.jsx'
 import { TeamHubShell } from '../TeamHubShell.jsx'
 import { loadTeamIdentity } from '../loadTeamIdentity.js'
-import { hiddenTeamSections, seasonOf } from '../data/shared.js'
+import { hiddenTeamSections, isFrozenSeason, seasonOf } from '../data/shared.js'
 import { Band } from './Band.jsx'
 import { TeamNextFoot } from './foot/index.jsx'
 import { TeamNextTop } from './top/TeamNextTop.jsx'
@@ -57,7 +57,10 @@ export function TeamNextPage({ id, asOf, sportId, tab }) {
   if (gate) return gate
 
   const { team, record, manager, standings, season } = identity.data
-  const hidden = hiddenTeamSections(team, { pastSeason: season < seasonOf(null, team.sport?.id ?? 1) })
+  const hidden = hiddenTeamSections(team, {
+    pastSeason: season < seasonOf(null, team.sport?.id ?? 1),
+    frozen: isFrozenSeason(season),
+  })
   const bands = BANDS.filter((b) => !hidden.has(b.key))
   return (
     <TeamHubShell
