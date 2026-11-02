@@ -7,6 +7,7 @@ import {
   selectIsFinal,
   selectFinalHalfIndex,
   halfIndex,
+  selectDelays,
 } from '../api/select.js'
 import { selectHasFirstPitch } from '../api/playbyplay/firstPitch.js'
 import { selectLiveHalf } from '../api/liveEdge.js'
@@ -24,6 +25,8 @@ import { useStampUnseal } from '../hooks/useStamps.js'
 import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCalloutLedger.js'
 import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 import { sameLiveState } from '../lib/scorebug/liveState.js'
+import { formatDelay } from '../components/inning/DelayCard.jsx'
+import { gamedayNotices } from './gameday/next/notices.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
 import { GamedayEngine } from './gameday/next/engine/GamedayEngine.jsx'
 import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, caughtUpAdvance, forwardAdvance, nextSub, openingChangeHeld, readBackAfter, readBackStepOf, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
@@ -213,6 +216,8 @@ export function InningViewer({
   )
   const effInning = Math.floor(curIdx / 2) + 1
   const effHalf = curIdx % 2 === 0 ? 'top' : 'bottom'
+  // Rain and other stoppages, spoiler-free (selectDelays): the strip under the band names the one in this half.
+  const delays = useMemo(() => selectDelays(feed), [feed])
   const goTo = (idx) => onInning(Math.floor(idx / 2) + 1, idx % 2 === 0 ? 'top' : 'bottom')
 
   // Runs AND hits so far in the half currently being STEPPED through
@@ -531,6 +536,10 @@ export function InningViewer({
         onLineup={onLineup}
         notices={[
           gameStatus?.label && `${gameStatus.label}${gameStatus.reason ? ` — ${gameStatus.reason}` : ''}`,
+          ...gamedayNotices({
+            format: formatDelay, delays, inning: effInning, half: effHalf, regulation, records: callouts?.teamRecords,
+            names: { away: meta.away.clubName || meta.away.abbreviation, home: meta.home.clubName || meta.home.abbreviation },
+          }),
           refreshFailed && 'Couldn’t refresh — showing the last update.',
         ].filter(Boolean)}
         refresh={selectIsFinal(feed) ? null : <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />}
