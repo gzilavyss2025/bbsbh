@@ -1,10 +1,12 @@
-import { Fragment } from 'react'
+import { Fragment, Suspense, lazy } from 'react'
 import { isMlbTeamId, teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { WireFacts } from './WireFacts.jsx'
+// The player notes and their sheet load on their own, off the first load: a
+// ledger row draws its plain sentence until they arrive.
+const WireFacts = lazy(() => import('./WireFacts.jsx').then((m) => ({ default: m.WireFacts })))
 
 // One roster-move story, and the day-grouping helpers around it. Extracted from
 // the slate's wide surface when the phone got a SECOND presentation of the
@@ -252,9 +254,11 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
           )}
         </div>
         {date ? (
-          <WireFacts story={story} date={date} line={line}>
-            {(tail) => <Cutline segments={story.cutline} tail={tail} />}
-          </WireFacts>
+          <Suspense fallback={<Cutline segments={story.cutline} />}>
+            <WireFacts story={story} date={date} line={line}>
+              {(tail) => <Cutline segments={story.cutline} tail={tail} />}
+            </WireFacts>
+          </Suspense>
         ) : (
           <Cutline segments={story.cutline} />
         )}
