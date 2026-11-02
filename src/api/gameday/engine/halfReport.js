@@ -7,6 +7,21 @@ import {
   liveCapFor, nextStepBoundary, stepCommitReady, stepTotals,
 } from '../../playbyplay.js'
 
+// The pieces, from PlayByPlay.jsx (where each comment used to sit):
+//  - Pass stepCap through to computeHalfInningFeed so a runner advance or out on a later, not-yet-
+//    revealed play is not written back onto an earlier card's diamond.
+//  - The cap snap: the first tap into a fresh half hardcodes stepCap to 1 (InningViewer cannot know
+//    what entries[0] is: computeHalfInningFeed is reveal-only). If entries[0] is a leading event note,
+//    that tap would strand the note without a batter, so the cap snaps past the first at-bat card, and
+//    the entries are rebuilt at the corrected cap. Gameday's stepCapAt (steps/subStep.js) snaps the
+//    count itself and may hold a change back.
+//  - The commit test is stepCommitReady (entriesView.js: three conditions, one the live-half hold,
+//    ADR-0016/0055).
+//  - Focus windows: one per revealed AT-BAT (focusWindows), clamped to the cap, built for a stacked
+//    half too (the trail needs the boundaries). The cap is `effectiveCap ?? entries.length`, which
+//    carries the windows PAST the commit: the last at-bat commits the half, dropping `stepCap` to
+//    null, and the windows must not go with it or the tap that revealed the 3rd out would dump the
+//    whole half on screen. Past the commit the whole half is already revealed.
 export function halfReport(feed, inning, half, battingSide, stepCap, { halfInProgress = false, windowed = false, focusStep = null, codeOf = () => undefined } = {}) {
   const stepping = stepCap != null
   const rawEntries = computeHalfInningFeed(feed, inning, half, battingSide, stepCap)

@@ -100,39 +100,20 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // door; keeps a MiLB or pre-2016 game from a Watch button that can only say "not yet".
   // Spoiler-free and safe at render top-level (eligibility.js says why).
   const filmEligible = useMemo(() => filmCanExist(feed), [feed])
-  // Pass stepCap through so any runner advancement/out that happens on a
-  // later, not-yet-revealed play isn't retroactively written onto an earlier
-  // card's diamond (see computeHalfInningFeed's stepCap doc).
-  // All of this half's arithmetic is the pure halfReport (api/gameday/engine/halfReport.js): the cap
-  // snap past the first at-bat card (Gameday's stepCapAt snaps the count itself and may hold a change
-  // back), the commit test (stepCommitReady: three conditions, one the live-half hold, ADR-0016/0055),
-  // the step report, the trail, the running totals and the scorebug snapshot. Reveal-only, and this
-  // component only renders from inside a SealBox reveal function.
+  // All of this half's arithmetic is the pure halfReport (api/gameday/engine/halfReport.js; the cap
+  // snap, the commit test, the windows and the scorebug snapshot are explained there). Reveal-only;
+  // this component renders only from inside a SealBox reveal function (ADR-0001).
+  //
+  // Memoized on the INPUTS, all values: `entries` is rebuilt whenever one changes and is never a
+  // dependency (a fresh array each render looped 264 renders per tap; see the runs effect below).
+  // `codeOf` reads a module constant, so it is not an input.
   const {
     entries, wins, effectiveCap, exhausted, nextCap, isLastStep, lastAtBatIndex, atHalfEdge,
     runs: runsSoFar, hits: hitsSoFar, steps: revealedSteps, items: trailItems, liveCap, live,
-  } = halfReport(feed, inning, half, battingSide, stepCap, { halfInProgress, windowed, focusStep, codeOf: (t) => EVENT_CODES[t] })
-
-  // Focus mode: one window per revealed AT-BAT (focusWindows), every window
-  // clamped to the cap. NOT one window per reveal tap — focusWindows' header
-  // has the defect tap-shaped windows caused (the reader moved BACK an at-bat).
-  //
-  // Built for a STACKED half too: its trail needs the same boundaries for its
-  // scroll targets. A pure walk over `entries`, not a fetch.
-  //
-  // The cap is `effectiveCap ?? entries.length`, which is what carries the
-  // windows PAST the commit. The last at-bat of a half commits it, dropping
-  // `stepCap` to null and turning `stepping` off — and the windows must NOT go
-  // with it, or the tap that revealed the 3rd out would answer by dumping the
-  // entire half onto the screen at once. That is the one moment the windowed
-  // mode is meant to hold still: the reader has just charted a play and is
-  // writing it down. `windowed` itself outlives the commit on purpose
-  // (`postHalf`, useFocusMode) until the reader taps "See the whole half," and
-  // that link is exactly where the stacked half belongs. Once the commit lands
-  // there is no cap left to measure against, so the cap is the full array —
-  // every step is revealed by then, which is what makes a windowed post-half
-  // hold safe to keep windowed. Nothing here reveals: `stepCap` is still the
-  // single boundary, and past the commit the whole half is already past it.
+  } = useMemo(
+    () => halfReport(feed, inning, half, battingSide, stepCap, { halfInProgress, windowed, focusStep, codeOf: (t) => EVENT_CODES[t] }),
+    [feed, inning, half, battingSide, stepCap, halfInProgress, windowed, focusStep],
+  )
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.

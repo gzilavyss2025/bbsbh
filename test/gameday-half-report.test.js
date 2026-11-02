@@ -28,7 +28,6 @@ function render(feed, inning, half, side, stepCap) {
   const stepping = stepCap != null
   const r = halfReport(feed, inning, half, side, stepCap, { halfInProgress: false, windowed: true, focusStep: null, codeOf: () => '' })
   const { effectiveCap, exhausted, nextCap, entries, runs, hits, items, live: l } = r
-  const wins = { length: r.steps }
   const reporting = stepping && entries.length > 0 // PlayByPlay.jsx:167 returns early otherwise
   const report = exhausted
     ? 'COMMIT'
@@ -36,7 +35,7 @@ function render(feed, inning, half, side, stepCap) {
   const bases = [l.bases.first, l.bases.second, l.bases.third].map((b) => (b ? 1 : 0)).join('')
   return {
     exhausted, nextCap,
-    line: `cap ${stepCap} eff ${effectiveCap} | ${reporting ? report : '-'} | ${stepping ? `${runs}/${hits}` : '-'} | ${wins.length} [${items.map((i) => `${i.name}:${i.code}${i.atBatIndex != null ? '#' + i.atBatIndex : ''}`).join(' ')}] | ${bases} o${l.outs} p${l.pitchesSoFar} m${l.midHalfPitcherId ?? '-'} b${l.batter?.id ?? '-'} ${l.batterDone ? 'done' : 'open'} l${l.last?.atBatIndex ?? '-'}`,
+    line: `cap ${stepCap} eff ${effectiveCap} | ${reporting ? report : '-'} | ${stepping ? `${runs}/${hits}` : '-'} | ${r.steps} [${items.map((i) => `${i.name}:${i.code}${i.atBatIndex != null ? '#' + i.atBatIndex : ''}`).join(' ')}] | ${bases} o${l.outs} p${l.pitchesSoFar} m${l.midHalfPitcherId ?? '-'} b${l.batter?.id ?? '-'} ${l.batterDone ? 'done' : 'open'} l${l.last?.atBatIndex ?? '-'}`,
   }
 }
 
@@ -350,3 +349,22 @@ for (const pk of [824716, 823035]) {
     }
   })
 }
+
+// The call site's real combination (PlayByPlay.jsx): `halfInProgress` from InningViewer and `codeOf`
+// from EVENT_CODES. EVENT_CODES lives in a .jsx file the node suite cannot import, so a stand-in
+// proves the live-half flag through halfReport (neither fixture has a standalone event, so codeOf's output is not asserted) and a source read proves PlayByPlay passes both.
+test('a half still being played: the last step is withheld and reported as the live edge (ADR-0055)', () => {
+  const feed = load(824716)
+  const cap = stepCapAt(feed, 1, 'top', 4, 0) // the third out's step: commits when the half is over
+  const done = halfReport(feed, 1, 'top', 'away', cap, { halfInProgress: false, windowed: true, focusStep: null })
+  const live = halfReport(feed, 1, 'top', 'away', cap, { halfInProgress: true, windowed: true, focusStep: null, codeOf: (t) => `c:${t}` })
+  assert.equal(done.exhausted, true)
+  assert.equal(live.exhausted, false, 'a live half never commits')
+  assert.equal(live.atHalfEdge, true)
+  assert.equal(live.isLastStep, true)
+})
+
+test('PlayByPlay hands halfReport the live-half flag and the EVENT_CODES lookup', () => {
+  const code = readFileSync(new URL('../src/components/playbyplay/PlayByPlay.jsx', import.meta.url), 'utf8')
+  assert.match(code, /halfReport\(feed, inning, half, battingSide, stepCap, \{ halfInProgress, windowed, focusStep, codeOf: \(t\) => EVENT_CODES\[t\] \}\)/)
+})

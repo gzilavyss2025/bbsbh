@@ -172,12 +172,12 @@
       "why": "Every number in the full box-score line is score-revealing. `selectBoxscore` must run inside the box score's SealBox reveal.",
       "importers": [
         "api/boxscore/batterLine.js",
+        "api/gameday/engine/engineLive.js",
         "components/game/GameResultFace.jsx",
         "screens/boxscore/InsightCards.jsx",
         "screens/boxscore/revealBoxScore.js",
-        "screens/PostseasonSeriesPage.jsx",
         "screens/postseason-live/LiveSeriesPage.jsx",
-        "api/gameday/engine/engineLive.js"
+        "screens/PostseasonSeriesPage.jsx"
       ]
     },
     "boxscore/batterLine.js": {
@@ -868,6 +868,8 @@
         "api/expresslane/runners.js",
         "api/gameday/checkpoint.js",
         "api/gameday/defense.js",
+        "api/gameday/engine/engineLive.js",
+        "api/gameday/engine/halfReport.js",
         "api/gameday/stepCut.js",
         "api/gameday/subSteps.js",
         "api/pitchers.js",
@@ -875,9 +877,7 @@
         "components/playbyplay/PlayByPlay.jsx",
         "lib/scorecard/arm.js",
         "screens/gameday/next/panels/panelData.js",
-        "screens/gameday/next/stage/actors.js",
-        "api/gameday/engine/engineLive.js",
-        "api/gameday/engine/halfReport.js"
+        "screens/gameday/next/stage/actors.js"
       ]
     },
     "playbyplay/advanceCode.js": {
