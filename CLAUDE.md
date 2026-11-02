@@ -150,7 +150,8 @@ reveal through a `storage` listener in `useRevealProgress.js`.
   request does not need. A small idea you spot goes under `Found` in your report; a big one
   becomes a `needs-triage` issue. Ask Gary only when you are blocked.
 - **Show wireframes as an Artifact.** For a new or redesigned screen, put a wireframe in an
-  Artifact and iterate with Gary before you build (`.claude/skills/design-brief/`).
+  Artifact, mocked up at both mobile (390 px) and desktop width, and iterate with Gary
+  before you build (`.claude/skills/design-brief/`).
 - **Claude Code practice moves fast.** Before you change hooks, skills, or CLAUDE.md
   structure, ask the `claude-code-guide` agent.
 - **MiLB data degrades gracefully.** MLB feeds are complete. Minor-league feeds
