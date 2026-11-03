@@ -247,12 +247,6 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
           {story.rail.slice(0, marks ? story.rail.length : FACES_PER_ROW).map((slot, i) => (
             <Face key={slot.playerId ?? i} slot={slot} />
           ))}
-          {/* The phone's face pile shows two faces and counts the rest. */}
-          {marks && story.rail.length > FACES_PER_ROW && (
-            <span className="wire__faces-more" aria-hidden="true">
-              +{story.rail.length - FACES_PER_ROW}
-            </span>
-          )}
         </div>
       )}
       <div className="wire__body">
