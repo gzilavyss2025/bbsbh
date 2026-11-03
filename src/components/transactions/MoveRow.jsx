@@ -164,6 +164,34 @@ export function Cutline({ segments, className = 'wire__cutline', linked = true, 
   )
 }
 
+// A cutline cut at its semicolons, one clause per player: the wide card's
+// paragraphs. Each clause gets its capital and its full stop back.
+function splitClauses(segments) {
+  const out = [[]]
+  const push = (seg) => {
+    const clause = out[out.length - 1]
+    if (!clause.some((c) => c.text.trim())) {
+      const t = seg.text.trimStart()
+      if (!t) return
+      seg = { ...seg, text: t.charAt(0).toUpperCase() + t.slice(1) } // caps-js-exempt: sentence case for a split clause
+    }
+    clause.push(seg)
+  }
+  for (const seg of segments ?? []) {
+    if (seg.playerId || seg.teamId || !seg.text.includes(';')) {
+      push(seg)
+      continue
+    }
+    const pieces = seg.text.split(';')
+    push({ text: pieces[0] + '.' })
+    for (const piece of pieces.slice(1)) {
+      out.push([])
+      push({ text: piece })
+    }
+  }
+  return out.filter((c) => c.length)
+}
+
 // The flat sentence a cutline reads as, for the two places that can hold no
 // markup: the rail's single line, and the accessible name of the control
 // around it.
@@ -288,7 +316,28 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
             <Suspense fallback={<Cutline segments={story.cutline} />}>
               {/* A 27th man's trip is told in his note, so even a one-line row runs it on. */}
               <WireFacts story={factsStory} date={date} line={line && !quotes?.some((q) => q.game)}>
-                {(tail) => <Cutline segments={story.cutline} tail={tail} />}
+                {(tail, notes, toggle) =>
+                  notes?.size > 1 ? (
+                    <>
+                      <Cutline segments={story.cutline} tail={tail} className="wire__cutline wire__cutline--joined" />
+                      <div className="wire__split">
+                        {splitClauses(story.cutline).map((clause, i, all) => {
+                          const id = clause.find((seg) => seg.playerId)?.playerId
+                          const note = notes.get(id)
+                          return (
+                            <Cutline
+                              key={i}
+                              segments={clause}
+                              tail={<>{note && `${note} `}{i === all.length - 1 && toggle}</>}
+                            />
+                          )
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <Cutline segments={story.cutline} tail={tail} />
+                  )
+                }
               </WireFacts>
             </Suspense>
           </WireFactsBoundary>

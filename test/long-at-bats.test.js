@@ -179,7 +179,7 @@ const BANNED =
   /^(runs|score|scores|winner|loser|isTie|inning|innings|halfInning|outs|rbi|event|eventType|result|description|linescore|decisions|awayScore|homeScore|top|gameType|series|round)$/i
 const DOC_KEYS = ['season', 'generatedAt', 'threshold', 'coverage', 'rows', 'post']
 const COVERAGE_KEYS = ['games', 'playedGames', 'plateAppearances', 'plateAppearancesWithoutPitches', 'complete']
-const ROW_KEYS = ['pk', 'date', 'g', 'away', 'home', 'batter', 'pitcher', 'pitches']
+const ROW_KEYS = ['pk', 'date', 'g', 'away', 'home', 'batter', 'pitcher', 'pitches', 'event']
 const CLUB_KEYS = ['id', 'abbr']
 const PERSON_KEYS = ['id', 'name', 'teamId']
 
@@ -227,7 +227,9 @@ function assertLengthOnly(doc, label) {
   walk(doc, label)
 }
 
-test('no committed season carries anything that could say how an at-bat or a game went', () => {
+// The result of the at-bat (`event`) is allowed since 2026-11-03: Gary asked for it, and the
+// offseason page is an open surface (ADR-0034). The score and the game's result stay out.
+test('no committed season carries anything that could say how a game went', () => {
   const dir = join(ROOT, 'public', 'data', 'long-at-bats')
   const files = readdirSync(dir).filter((f) => f.endsWith('.json'))
   assert.ok(files.length > 0, 'no seasons are committed')
@@ -235,7 +237,7 @@ test('no committed season carries anything that could say how an at-bat or a gam
   for (const file of files) {
     const doc = JSON.parse(readFileSync(join(dir, file), 'utf8'))
     assert.equal(doc.season, Number(file.replace('.json', '')))
-    assert.equal(doc.threshold, 12)
+    assert.equal(doc.threshold, 10)
     assert.ok(doc.rows.length > 0, `${file} has no at-bats`)
     assertLengthOnly(doc, file)
   }
@@ -393,4 +395,22 @@ test('the postseason part passes the same vocabulary test as the committed files
   const doc = build({ 3: tally(35, [14]) }, [game(3, 'W')])
   doc.post.rows[0].result = 'strikeout'
   assert.throws(() => assertLengthOnly(doc, 'built doc'))
+})
+
+test('a pickoff or step-off inside an at-bat is not a pitch', () => {
+  // gamePk 823152: Jake Burger v Logan Gilbert, 13 pitches; pitchIndex listed 15.
+  const events = [
+    ...Array.from({ length: 7 }, () => ({ isPitch: true })),
+    { isPitch: false, type: 'pickoff' },
+    ...Array.from({ length: 5 }, () => ({ isPitch: true })),
+    { isPitch: false, type: 'stepoff' },
+    { isPitch: true },
+  ]
+  const play = { pitchIndex: Array.from({ length: 15 }, (_, i) => i), playEvents: events }
+  assert.equal(pitchesIn(play), 13)
+})
+
+test('an automatic intentional walk is no coverage gap', () => {
+  const ibb = { result: { eventType: 'intent_walk', event: 'Intent Walk' }, playEvents: [{ isPitch: false, type: 'action' }] }
+  assert.equal(scanGamePlays([ibb], 12).withoutPitches, 0)
 })

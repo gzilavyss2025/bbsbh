@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { atBatGamePath, clubAbbr, count, fetchLongAtBats } from '../../api/notebook.js'
 import { useRouteLink } from '../../lib/nav.js'
@@ -7,8 +7,20 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { Headshot } from '../player/Headshot.jsx'
 import { Card } from '../ui/frame/Card.jsx'
 import { SectionHead } from '../ui/frame/SectionHead.jsx'
+import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { StrikeZone } from '../scoring/StrikeZone.jsx'
+import { pitchCardInfo } from '../../api/playbyplay/pitchInfo.js'
+import { fallbackFigureUrls } from '../../api/uniforms.js'
+import { BatterFallbackContext } from '../logo/uniformContexts.js'
+import { HeaderBug } from '../gamehud/HeaderBug.jsx'
+import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
+import { PitchScene } from '../playbyplay/pitcherCard/PitchScene.jsx'
+import { atBatScenePitches, atBatZone } from '../../lib/pitcherCard/atBat.js'
+import { Button } from '../ui/control/Button.jsx'
 import { InfoPopover } from '../ui/InfoPopover.jsx'
 
+// "1 in every 1,700": the rate as a reader says it, rounded to the hundred.
+const oneIn = (total, n) => Math.round(total / n / 100) * 100 || Math.round(total / n)
 const lastName = (name) => name.split(' ').slice(1).join(' ') || name
 
 // THE NOTEBOOK, AT MLB — one note about the season that just finished (issue
@@ -58,14 +70,153 @@ const lastName = (name) => name.split(' ').slice(1).join(' ') || name
 // all of it in one press dropped a reader into eight thousand pixels of scroll
 // with the rest of the page somewhere below it. The door pages instead. Every
 // row is still reachable; none of them arrives uninvited.
-const LEAD_ROWS = 4
-const STEP = 10
+
+// The longest at-bat's pitches on the Gameday zone. The census file keeps no
+// at-bat index, so the game's play-by-play is read and the plate appearance
+// found by its batter, pitcher and length. Nothing until it arrives.
+async function fetchAtBat(row) {
+  const res = await fetch(`https://statsapi.mlb.com/api/v1/game/${row.pk}/playByPlay`)
+  if (!res.ok) return null
+  const feed = await res.json()
+  // The census counts a little differently from the feed's isPitch flags, so
+  // match the meeting and take its longest plate appearance.
+  const pitched = (p) => (p.playEvents ?? []).filter((e) => e.isPitch).length
+  const play = (feed.allPlays ?? [])
+    .filter((p) => p.matchup?.batter?.id === row.batter.id && p.matchup?.pitcher?.id === row.pitcher.id)
+    .sort((a, b) => pitched(b) - pitched(a))[0]
+  if (!play) return null
+  // The game as the at-bat began: the play before it carries the score, and,
+  // in the same half, the outs and the runners.
+  const at = feed.allPlays.indexOf(play)
+  const prev = feed.allPlays[at - 1]
+  const same = prev && prev.about?.inning === play.about?.inning && prev.about?.halfInning === play.about?.halfInning
+  const bug = {
+    away: prev?.result?.awayScore ?? 0,
+    home: prev?.result?.homeScore ?? 0,
+    inning: play.about?.inning,
+    top: play.about?.halfInning === 'top',
+    outs: same ? prev.count?.outs ?? 0 : 0,
+    bases: same ? ['postOnFirst', 'postOnSecond', 'postOnThird'].map((k) => !!prev.matchup?.[k]) : [false, false, false],
+  }
+  return { bug, result: play.result?.description ?? null, event: play.result?.event ?? null, pitchDetails: pitchCardInfo(feed, play).pitchDetails, batSide: play.matchup?.batSide?.code ?? 'R', pitchHand: play.matchup?.pitchHand?.code ?? 'R' }
+}
+
+// Gameday's own scorebug, set to the game as the at-bat began.
+function Scorebug({ row }) {
+  const { data } = useAsync(() => fetchAtBat(row), [row.pk, row.batter.id])
+  const b = data?.bug
+  if (!b) return null
+  const [first, second, third] = b.bases
+  return (
+    <div className="seasonnote__bug">
+      <HeaderBug
+        season={row.date?.slice(0, 4)}
+        awayName={row.away.abbr}
+        homeName={row.home.abbr}
+        awayTeamId={row.away.id}
+        homeTeamId={row.home.id}
+        awayRuns={b.away}
+        homeRuns={b.home}
+        inning={b.inning}
+        half={b.top ? 'top' : 'bottom'}
+        batter={null}
+        pitcher={null}
+        bases={{ first, second, third }}
+        outs={b.outs}
+      />
+    </div>
+  )
+}
+
+// The zone, a card for whichever pitch dot the pointer is on, and how the
+// at-bat ended under it.
+function AtBatZone({ row }) {
+  const { data } = useAsync(() => fetchAtBat(row), [row.pk, row.batter.id])
+  const [tip, setTip] = useState(null)
+  // The pitch-tracking replay: null shows the zone, an object plays the at-bat
+  // through PitchScene's at-bat look (a new object replays it).
+  const [play, setPlay] = useState(null)
+  const scene = useMemo(() => (data ? atBatScenePitches(data.pitchDetails, 'hitter', data.batSide) : []), [data])
+  if (!data) return null
+  const side = row.batter.teamId === row.away?.id ? 'away' : 'home'
+  const figures = fallbackFigureUrls(row.batter.teamId, side, data.batSide === 'L' ? 'left' : 'right')
+  const last = data.pitchDetails[data.pitchDetails.length - 1]
+  const onMove = (e) => {
+    const no = Number(e.target.closest('g')?.querySelector('.strikezone__num')?.textContent)
+    const p = no ? data.pitchDetails.find((d) => d.no === no) : null
+    if (!p) return setTip(null)
+    const box = e.currentTarget.getBoundingClientRect()
+    setTip({ p, x: e.clientX - box.left, y: e.clientY - box.top })
+  }
+  return (
+    <div className="seasonnote__zonecol">
+      <div className="seasonnote__zonewrap" onMouseMove={onMove} onMouseLeave={() => setTip(null)}>
+        {play ? (
+          <div className="seasonnote__scene">
+            <PitchScene
+              pitches={scene}
+              lefty={data.pitchHand === 'L'}
+              name={row.pitcher.name}
+              zone={atBatZone(data.pitchDetails)}
+              atBat={scene.length}
+              play={play}
+            />
+          </div>
+        ) : (
+          <BatterFallbackContext.Provider value={figures}>
+            <StrikeZone pitchDetails={data.pitchDetails} batSide={data.batSide} className="seasonnote__zone" margin={0.6} />
+          </BatterFallbackContext.Provider>
+        )}
+        {scene.length > 0 && (
+          <Button
+            size="control"
+            skin="ink"
+            className="seasonnote__play"
+            onClick={() => setPlay(play ? null : { all: true })}
+          >
+            {play ? 'Zone' : '▶ Play'}
+          </Button>
+        )}
+        {tip && (
+          <div className="seasonnote__tip" style={{ left: tip.x, top: tip.y }} role="tooltip">
+            <span className={`pitchlist__num pitchlist__num--${tip.p.cat}`}>{tip.p.no}</span>
+            <div>
+              <p className="seasonnote__tiptype">{tip.p.type || 'Pitch'}</p>
+              <p className="seasonnote__tipmeta">
+                {tip.p.mph != null ? `${tip.p.mph} MPH · ` : ''}
+                {tip.p.callDesc}
+              </p>
+              {tip.p.balls != null && (
+                <p className="seasonnote__tipmeta">
+                  Count {tip.p.balls}-{tip.p.strikes}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+      {data.result && (
+        <div className="seasonnote__result">
+          <p className="t-label t-label--bold seasonnote__what">
+            {last
+              ? `Pitch ${last.no}: ${/walk/i.test(data.event ?? '') ? 'Ball 4' : /strikeout/i.test(data.event ?? '') ? 'Strike 3' : last.callDesc}`
+              : data.event ?? 'Result'}
+          </p>
+          <p className="seasonnote__resulttext">{data.result}</p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function LongAtBats({ season }) {
   const { data } = useAsync(() => fetchLongAtBats(season), [season])
   // How many rows are on screen, not a boolean — the door adds to it rather
   // than flipping it.
-  const [visible, setVisible] = useState(LEAD_ROWS)
+  // Which at-bat the scorebug, tiles and zone show: an index into the census.
+  const [pick, setPick] = useState(0)
+  // A club filter: an at-bat stays when the club is on either side of it.
+  const [club, setClub] = useState(null)
   const linkProps = useRouteLink()
 
   const rows = data?.rows ?? []
@@ -78,130 +229,159 @@ export function LongAtBats({ season }) {
   // it is read. A complete zero is still a count.
   const post = data.post?.coverage.complete ? data.post : null
 
-  const [top, ...rest] = rows
-  const shown = rest.slice(0, visible)
-  const hidden = rest.length - shown.length
-  // The last press of the door is a short one — a button saying "10 more"
-  // that produced five would be a small lie about the file's own count.
-  const next = Math.min(STEP, hidden)
+  // The postseason's long at-bats join the list, each marked; the census
+  // line below still counts the two seasons apart (ADR-0104).
+  // `key`: a row's own id. pk + batter + pitches is not unique at ten pitches
+  // (one batter can see a pitcher twice for ten in a game), and a repeated React
+  // key left a stale row standing at the head of a filtered list.
+  const every = [...rows, ...(post?.rows ?? []).map((r) => ({ ...r, post: true }))]
+    .sort((a, b) => b.pitches - a.pitches || (a.date < b.date ? -1 : 1))
+    .map((r, i) => ({ ...r, key: i }))
+  const clubs = [...new Set(every.flatMap((r) => [r.batter.teamId, r.pitcher.teamId]))]
+    .filter(Boolean)
+    .sort((a, b) => (teamAbbr({ id: a }) < teamAbbr({ id: b }) ? -1 : 1))
+  const all = club ? every.filter((r) => r.batter.teamId === club || r.pitcher.teamId === club) : every
+  const top = all[pick] ?? all[0]
+  const pickClub = (id) => {
+    setClub(id)
+    setPick(0)
+  }
+  // Gary asked for one number for the year (2026-11-03): the two seasons summed here.
+  const plateAppearances = data.coverage.plateAppearances + (post?.coverage.plateAppearances ?? 0)
+  // Every row, in a list that scrolls in its own box (five rows tall).
+  const shown = all
   const path = atBatGamePath(top)
 
-  // THREE STAMPED CARDS IN ONE ROW: the census figure, the longest at-bat
-  // drawn one square per pitch, and the next longest as bars measured against
-  // it. A phone stacks them.
+  // ONE CARD, ONE UNIT: the longest at-bat drawn one square per pitch, the
+  // next longest in the same squares beside it, and the census as one line under
+  // both. A phone stacks the two halves.
   return (
-    <section className="seasonnote seasonnote--stories" aria-label={`Twelve-pitch at-bats in the ${season} season`}>
+    <section className="seasonnote seasonnote--stories" aria-label={`The longest at-bats of ${season}`}>
       {/* Mixed case in the markup, shouted by the CSS — the app's ALL-CAPS
           invariant is never a per-component .toUpperCase() (ADR-0017). */}
-      <SectionHead as="h3" className="oseason__head" note={<>{season} season</>}>
-        The notebook
+      <SectionHead as="h3" className="oseason__head">
+        Longest at-bats of {season}
       </SectionHead>
 
-      <div className="seasonnote__row">
-        <Card frame="stamped" as="div" className="seasonnote__figure">
-          <p className="seasonnote__n">{rows.length}</p>
-          <p className="t-label t-label--bold seasonnote__what">
-            At-bats of {data.threshold}+ pitches
-          </p>
-          <p className="seasonnote__under infopop-row">
-            of <span className="seasonnote__against">{count(data.coverage.plateAppearances)}</span> in{' '}
-            <span className="seasonnote__against">{count(data.coverage.games)}</span> games
-            <InfoPopover label="How the at-bats are counted" className="infopop--paper">
-              Regular season only; the postseason is never summed in
-              {post
-                ? ` (it had ${post.rows.length} of ${count(post.coverage.plateAppearances)} plate appearances, in ${count(post.coverage.games)} games)`
-                : ''}
-              . A batter left mid-count by an inning-ending caught stealing starts a new
-              at-bat next inning, and is counted as one. Each one opens its game, sealed.
-            </InfoPopover>
-          </p>
-        </Card>
-
-        <Card frame="stamped" as="div" className="seasonnote__longest">
-          <p className="t-label t-label--bold seasonnote__what">The longest at-bat</p>
-          <div className="seasonnote__pair">
-            <Headshot personId={top.batter.id} name={top.batter.name} teamId={top.batter.teamId} className="seasonnote__shot" />
-            <div className="seasonnote__who">
-              <PlayerLink id={top.batter.id} name={top.batter.name} className="seasonnote__name">
-                {top.batter.name}
-              </PlayerLink>
-              <span className="seasonnote__club">{clubAbbr(top, top.batter.teamId)}</span>
-            </div>
-            <span className="seasonnote__vs" aria-hidden="true">vs</span>
-            <div className="seasonnote__who seasonnote__who--pitcher">
-              <PlayerLink id={top.pitcher.id} name={top.pitcher.name} className="seasonnote__name">
-                {top.pitcher.name}
-              </PlayerLink>
-              <span className="seasonnote__club">{clubAbbr(top, top.pitcher.teamId)}</span>
-            </div>
-            <Headshot personId={top.pitcher.id} name={top.pitcher.name} teamId={top.pitcher.teamId} className="seasonnote__shot" />
-          </div>
-          {/* One square per pitch: the length IS the note, so it is drawn. */}
-          <ol className="seasonnote__pips" aria-label={`${top.pitches} pitches`}>
-            {Array.from({ length: top.pitches }, (_, i) => (
-              <li key={i} className="seasonnote__pip" />
-            ))}
-          </ol>
-          <div className="seasonnote__foot">
-            <span className="seasonnote__count">{top.pitches} pitches</span>
-            {path && (
-              <a className="door door--boxed seasonnote__when" {...linkProps(path)}>
-                {monthDayShort(top.date)}
-                <span className="sr-only"> — open this game</span>
-                <span aria-hidden="true">›</span>
-              </a>
-            )}
-          </div>
-        </Card>
-
-        <Card frame="stamped" as="div" className="seasonnote__rest">
-          <p className="t-label t-label--bold seasonnote__what">Next longest</p>
-          <ol className="seasonnote__bars">
-            {shown.map((row) => {
-              const rowPath = atBatGamePath(row)
-              const label = (
-                <>
-                  <span className="seasonnote__barname">
-                    {lastName(row.batter.name)} v {lastName(row.pitcher.name)}
-                  </span>
-                  <span className="seasonnote__barn">{row.pitches}</span>
-                  <span className="seasonnote__bar" aria-hidden="true">
-                    <span style={{ width: `${(row.pitches / top.pitches) * 100}%` }} />
-                  </span>
-                </>
-              )
-              return (
-                <li key={`${row.pk}-${row.batter.id}-${row.pitches}`}>
-                  {rowPath ? (
-                    <a
-                      className="seasonnote__barrow"
-                      {...linkProps(rowPath)}
-                      aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayShort(row.date)} — open this game`}
-                    >
-                      {label}
-                    </a>
-                  ) : (
-                    <span className="seasonnote__barrow">{label}</span>
-                  )}
-                </li>
-              )
-            })}
-          </ol>
-          {(hidden > 0 || visible > LEAD_ROWS) && (
+      <Card frame="stamped" as="div" className="seasonnote__sheet">
+        <div className="seasonnote__clubs" role="group" aria-label="Filter by club">
+          <button type="button" className="seasonnote__clubpick seasonnote__clubpick--all" aria-pressed={club === null} onClick={() => pickClub(null)}>
+            All
+          </button>
+          {clubs.map((id) => (
             <button
+              key={id}
               type="button"
-              className="door door--boxed oseason__door"
-              aria-label={hidden > 0 ? `Show ${next} more at-bats` : 'Show fewer at-bats'}
-              onClick={() => setVisible((n) => (hidden > 0 ? n + STEP : LEAD_ROWS))}
+              className="seasonnote__clubpick"
+              aria-pressed={club === id}
+              aria-label={teamAbbr({ id })}
+              onClick={() => pickClub(club === id ? null : id)}
             >
-              {hidden > 0 ? `${next} more` : 'Show fewer'}
+              <TeamLogo teamId={id} size={26} />
             </button>
-          )}
-          <p className="sr-only" role="status">
-            Showing {shown.length + 1} of {rows.length} at-bats.
-          </p>
-        </Card>
-      </div>
+          ))}
+        </div>
+        <div className="seasonnote__row">
+          <div className="seasonnote__longest">
+            <p className="seasonnote__big">
+              <span className="seasonnote__n">{top.pitches}</span>
+              <span className="t-label t-label--bold">pitches</span>
+              {path && (
+                <a className="seasonnote__when" {...linkProps(path)}>
+                  {monthDayShort(top.date)}, {top.date.slice(0, 4)}
+                  <span className="sr-only"> — open this game</span>
+                  <span aria-hidden="true">›</span>
+                </a>
+              )}
+            </p>
+            <Scorebug row={top} />
+            {/* Two stacked lines, as a broadcast matchup reads: who is up, who is throwing. */}
+            <ul className="seasonnote__matchup">
+              {[
+                ['At bat', top.batter],
+                ['Pitching', top.pitcher],
+              ].map(([role, p]) => (
+                <li
+                  key={role}
+                  className="seasonnote__side"
+                  // A club may colour a card that identifies the club (ADR-0030's addendum).
+                  style={{ '--side-club': teamPrimaryColor(p.teamId) || 'var(--surface-stamped-ink)' }}
+                >
+                  <TeamLogo teamId={p.teamId} size={120} variant="mono" className="seasonnote__sidemark" />
+                  <div className="seasonnote__who">
+                    <span className="seasonnote__role">{role}</span>
+                    <PlayerLink id={p.id} name={p.name} className="seasonnote__name">
+                      {p.name}
+                    </PlayerLink>
+                    <span className="seasonnote__club">{clubAbbr(top, p.teamId)}</span>
+                  </div>
+                  <Headshot personId={p.id} name={p.name} teamId={p.teamId} className="seasonnote__shot" />
+                </li>
+              ))}
+            </ul>
+            <div className="seasonnote__rest">
+                <ol
+              className="seasonnote__bars"
+              // The foot fades only while there is more below; at the end, or a list
+              // that fits, it sits flat.
+              ref={(el) => el && (el.dataset.end = el.scrollTop + el.clientHeight >= el.scrollHeight - 2 ? 'true' : 'false')}
+              onScroll={(e) => {
+                const el = e.currentTarget
+                el.dataset.end = el.scrollTop + el.clientHeight >= el.scrollHeight - 2 ? 'true' : 'false'
+              }}
+            >
+                  {shown.map((row, i) => (
+                    <li key={row.key}>
+                      <button
+                        type="button"
+                        className="seasonnote__barrow"
+                        aria-pressed={i === pick}
+                        aria-label={`${row.batter.name} vs ${row.pitcher.name}, ${row.pitches} pitches, ${monthDayShort(row.date)}`}
+                        onClick={() => setPick(i)}
+                      >
+                        <span className="seasonnote__barn">{row.pitches}</span>
+                    <span className="seasonnote__barwho">
+                      <span className="seasonnote__barside">
+                        <TeamLogo teamId={row.batter.teamId} size={18} />
+                        <span className="seasonnote__barname">{row.batter.name}</span>
+                      </span>
+                      <span className="seasonnote__barside">
+                        <TeamLogo teamId={row.pitcher.teamId} size={18} />
+                        <span className="seasonnote__barname seasonnote__barname--p">{row.pitcher.name}</span>
+                      </span>
+                    </span>
+                    <span className="seasonnote__barmeta">
+                      <span>
+                        {row.post && <span className="seasonnote__barpost">Postseason</span>}{row.post && ' · '}
+                        {monthDayShort(row.date)}
+                      </span>
+                      {row.event && <span className="seasonnote__barevent">{row.event}</span>}
+                    </span>
+                  </button>
+                    </li>
+                  ))}
+                </ol>
+                    <p className="sr-only" role="status">
+                  Showing {shown.length} of {all.length} at-bats.
+                </p>
+              </div>
+          </div>
+
+          <AtBatZone key={`${top.pk}-${top.batter.id}`} row={top} />
+        </div>
+
+
+        <p className="seasonnote__census infopop-row">
+          <span className="seasonnote__against">{every.length}</span> at-bats went {data.threshold}+ pitches in {season}, about 1 in every{' '}
+          <span className="seasonnote__against">{count(oneIn(plateAppearances, every.length))}</span> plate appearances
+          <InfoPopover label="How the at-bats are counted" className="infopop--paper">
+            Regular season and postseason together: {count(plateAppearances)} plate appearances
+            {post ? ` (${rows.length} of the long ones in the regular season, ${post.rows.length} in the postseason)` : ''}
+            . A batter left mid-count by an inning-ending caught stealing starts a new
+            at-bat next inning, and is counted as one. Each one opens its game, sealed.
+          </InfoPopover>
+        </p>
+      </Card>
     </section>
   )
 }

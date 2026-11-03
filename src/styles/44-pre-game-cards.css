@@ -366,22 +366,29 @@
   position: relative;
   display: inline-flex;
 }
-/* An IconButton (#1209, mark sm): an 18px ringed mark with the 44x44 tap area
-   the button draws itself. The ring and the ink are the skin's own properties. */
+/* An IconButton (#1209, mark sm) with the 44x44 tap area the button draws
+   itself, drawn as the info mark readers know: a filled round disc with a
+   mono capital "I" knocked out of it, its bars top and bottom (2026-11-03).
+   Not italic, not a square: on paper the disc is the caption ink, on a navy bar the on-ink tone,
+   and either darkens on hover. */
 .infopop__btn {
-  --btn-edge: var(--graphite-soft);
-  --btn-ink: var(--text-on-ink);
-  --btn-fill-hover: transparent;
-  --btn-edge-hover: var(--text-on-ink);
-  border-width: var(--bw-hair);
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
+  --btn-edge: transparent;
+  --btn-fill: var(--text-on-ink-soft);
+  --btn-ink: var(--surface-stamped-ink);
+  --btn-fill-hover: var(--text-on-ink);
+  --btn-edge-hover: transparent;
+  border-width: 0;
+  border-radius: 50%;
+  margin-left: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
   font-weight: var(--w-bold);
-  font-style: italic;
+  font-style: normal;
+  line-height: 1;
 }
 .infopop__btn:hover,
 .infopop__btn:focus-visible {
-  color: var(--surface-inset);
+  color: var(--surface-stamped-ink);
 }
 .infopop__tip {
   position: absolute;
@@ -437,13 +444,13 @@
   vertical-align: middle;
 }
 .infopop--paper .infopop__btn {
-  --btn-edge: var(--text-caption);
-  --btn-ink: var(--text-heading);
-  --btn-edge-hover: var(--text-heading);
+  --btn-fill: var(--text-caption);
+  --btn-ink: var(--surface-card);
+  --btn-fill-hover: var(--text-heading);
 }
 .infopop--paper .infopop__btn:hover,
 .infopop--paper .infopop__btn:focus-visible {
-  color: var(--text-heading);
+  color: var(--surface-card);
 }
 .infopop--paper .infopop__tip {
   top: auto;
