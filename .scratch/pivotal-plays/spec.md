@@ -74,7 +74,7 @@ World Series 2026, from `game.probe.mjs`.
 | Ranking | Top play |
 |---|---|
 | By swing | Contreras double, top 6th, 8.8 points. Only one play reaches 8, so the ledger shows one row. |
-| By leverage | Williamson groundout, bottom 4th, leverage 2.83 (7.8 points). Runners left on. |
+| By leverage | Williamson groundout, bottom 4th, leverage 2.83 (7.8 points). |
 | Turning point | Turang double, top 2nd. The Brewers' win % stayed above 50% from there (52%). |
 
 **Game 4, Rays 4, Brewers 3 in 12 (gamePk 849803).**
