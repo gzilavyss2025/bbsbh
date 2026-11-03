@@ -1,53 +1,66 @@
-/* The offseason ledger on a phone (winter-home.css holds the rest): stacked
-   faces, a two-face cap, and the club mark in the photo column. */
+/* The offseason ledger on a phone (winter-home.css holds the rest): a face
+   pile. One header line holds the club, the move type and up to two round
+   faces with a "+N" chip; the sentence runs full width under it. */
+.wire__faces-more {
+  display: none;
+}
 @media (max-width: 739px) {
-  .oseason__list .wire__body {
-    grid-template-columns: 1fr;
-    row-gap: 2px;
-  }
-  /* Two or more faces: a phone has no room for a face column beside the
-     sentence, so the faces run in one row above it at full width. */
-  /* layout-exempt: a multi-player move stacks faces over its sentence */
-  .oseason__list .wire__row:has(.wire__face + .wire__face) {
-    grid-template-columns: minmax(0, 1fr);
+  /* layout-exempt: header line over a full-width sentence */
+  .oseason__list .wire__row {
+    grid-template-columns: minmax(0, 1fr) auto;
     row-gap: var(--space-2);
+    align-items: center;
   }
-  .oseason__list .wire__row:has(.wire__face + .wire__face) .wire__faces {
+  .oseason__list .wire__body {
+    display: contents;
+  }
+  .oseason__list .wire__kicker {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .oseason__list .wire__club > span,
+  .oseason__list .wire__type {
+    display: inline;
+  }
+  .oseason__list .wire__faces {
+    grid-column: 2;
+    grid-row: 1;
+    flex-wrap: nowrap;
     max-width: none;
+    gap: 0;
   }
-  /* Two faces at most, the wire's own cap (MoveRow's FACES_PER_ROW); the
-     sentence still bolds every name. */
+  .oseason__list .wire__body > :not(.wire__kicker) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .oseason__list .wire__face {
+    min-width: 0;
+  }
   .oseason__list .wire__face:nth-child(n + 3) {
     display: none;
   }
-  /* The club's mark sits in the photo column, under the face, so the
-     sentence column holds only the sentence. */
-  .oseason__list .wire__row:has(.wire__face) .wire__body {
-    display: contents;
+  .oseason__list .wire__face + .wire__face,
+  .oseason__list .wire__faces-more {
+    margin-left: calc(-1 * var(--space-2));
   }
-  .oseason__list .wire__row:has(.wire__face) .wire__faces {
-    grid-column: 1;
-    grid-row: 1;
+  .oseason__list .shot.wire__shot,
+  .oseason__list .wire__faces-more {
+    width: var(--shot-2xs-w);
+    height: var(--shot-2xs-w);
+    border-radius: 50%;
+    border-width: var(--bw-hair);
   }
-  .oseason__list .wire__row:has(.wire__face) .wire__kicker {
-    grid-column: 1;
-    grid-row: 2;
-    justify-self: center;
-    margin-top: var(--space-2);
-  }
-  .oseason__list .wire__row:has(.wire__face) .wire__body > :not(.wire__kicker) {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-  }
-  /* Two faces stack over the sentence, so the mark ends the photo row. */
-  .oseason__list .wire__row:has(.wire__face + .wire__face) .wire__kicker {
-    grid-row: 1;
-    align-self: center;
-    justify-self: end;
-    margin-top: 0;
-  }
-  .oseason__list .wire__row:has(.wire__face + .wire__face) .wire__body > :not(.wire__kicker) {
-    grid-column: 1;
-    grid-row: 2;
+  .oseason__list .wire__faces-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--text-heading);
+    color: var(--surface-card);
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: var(--w-bold);
   }
 }
