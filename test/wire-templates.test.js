@@ -319,6 +319,12 @@ test('the draft read is the one he signed out of, the latest, with its overall p
   assert.equal(draftSentence({ draft: null }), null)
 })
 
+test('a competitive-balance pick names its round, never "NaNth"', () => {
+  // Logan Driscoll (Padres, 2019): the feed's pickRound is "CB-B", not a number.
+  const f = { draft: { teamId: 135, year: 2019, round: 'CB-B', pick: 73, school: 'George Mason' } }
+  assert.equal(draftSentence(f), 'The Padres drafted him out of George Mason in Competitive Balance Round B (73rd overall) in 2019.')
+})
+
 test("a first IL trip of the season reads his earlier seasons' trips instead", () => {
   const person = {
     ...rutschman,

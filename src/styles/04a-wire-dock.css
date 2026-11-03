@@ -70,8 +70,9 @@
   flex-direction: column;
   pointer-events: auto;
   background: var(--surface-card);
-  border-top: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  /* The heavy stamped edge every card on the page wears (oseason__ledger). */
+  border-top: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
   box-shadow: var(--shadow-raised);
   /* The sheet is only ever moved by transform, so promote it once instead of
      letting each gesture re-layer it. */
@@ -156,6 +157,15 @@
   background: var(--wire-club, var(--graphite));
 }
 .wiredock__mark { flex: 0 0 auto; }
+/* The wire rail's title: the open sheet's heading, at label size. */
+.wiredock__railtitle {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
 
 .wiredock__line {
   flex: 1 1 auto;
@@ -199,6 +209,17 @@
   flex: 0 0 auto;
   letter-spacing: var(--ls-none);
 }
+/* The wire rail's way in: said in words, like a row's "More ›", not a bare
+   caret. The whole rail is the button; this is its label. */
+.wiredock__open {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
 .wiredock__chevron {
   flex: 0 0 auto;
   font-size: var(--fs-body);
@@ -207,10 +228,15 @@
 }
 
 /* ------------------------------------------------------------- open state */
+/* The open sheet heads itself the way a page does: the title in the display
+   face at a title size, the window and count as a caption under it, and a bare
+   chevron to close (no filled box). */
+/* layout-exempt: title and caption stacked beside the close */
 .wiredock__head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-2);
   pointer-events: none;
 }
 .wiredock[data-state='half'] .wiredock__head,
@@ -227,20 +253,21 @@
   text-transform: uppercase;
   color: var(--text-heading);
 }
-.wiredock__note {
-  font-weight: var(--w-semibold);
-  color: var(--graphite-soft);
+.wiredock__title {
+  grid-column: 1;
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-tight);
 }
-/* An IconButton (#1209, mark md). This partial loads BEFORE system/button.css,
-   so the rule is written at two-class specificity to beat .btn on order. The
-   mark keeps its canvas fill; the 44x44 tap area is the button's own. */
+.wiredock__note {
+  grid-column: 1;
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+/* A ghost Button that says Close (system/button.css). This partial loads
+   before button.css, so the rule is two-class to win on order. */
 .btn.wiredock__close {
-  --btn-fill: var(--bg-canvas);
-  --btn-edge: var(--bg-canvas);
-  --btn-fill-hover: var(--surface-inset);
-  --btn-edge-hover: var(--surface-inset);
-  margin-left: auto;
-  font-size: var(--fs-body);
+  grid-column: 2;
+  grid-row: 1 / span 2;
 }
 
 .wiredock__latest:focus-visible {
@@ -324,3 +351,14 @@
 /* Open, the rail is the grabber alone, so the bracket starts right under it (Gary, 2026-10-28). */
 .wiredock--bracket:not([data-state='rail']) .wiredock__headbox { display: none; }
 .wiredock--bracket:not([data-state='rail']) .wiredock__rail { padding-bottom: 0; }
+
+/* The ledger look (oseason__list, winter-home.css) runs edge to edge, its rows
+   padding themselves; the sheet keeps its foot clear of the home indicator. */
+.wiredock__list.oseason__list {
+  padding: 0 0 calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+/* An open card's sentence rides sticky on the page ledger (winter-home-phone.css);
+   inside the sheet's own short scroller it floats over the stats table instead. */
+.wiredock__list .wire__row:has(.wirefacts) .wire__cutline {
+  position: static;
+}

@@ -584,7 +584,10 @@ export function draftSentence(facts) {
   const d = facts?.draft
   if (!d) return null
   const club = the(d.teamId)
-  return `${club[0].toUpperCase()}${club.slice(1)} drafted him${d.school ? ` out of ${d.school}` : ''}${d.round ? ` in the ${ordinal(d.round)} round${d.pick ? ` (${ordinal(d.pick)} overall)` : ''}` : ''} in ${d.year}.` // caps-js-exempt: sentence case
+  // A competitive-balance pick's round is "CB-A" or "CB-B", not a number.
+  const cb = /^CB-?([AB])$/i.exec(String(d.round ?? ''))
+  const round = cb ? `Competitive Balance Round ${cb[1].toUpperCase()}` : Number(d.round) ? `the ${ordinal(d.round)} round` : null
+  return `${club[0].toUpperCase()}${club.slice(1)} drafted him${d.school ? ` out of ${d.school}` : ''}${round ? ` in ${round}${d.pick ? ` (${ordinal(d.pick)} overall)` : ''}` : ''} in ${d.year}.` // caps-js-exempt: sentence case
 }
 
 // A player traded away for cash (Easton McGee, July 14, 2026): his time with
