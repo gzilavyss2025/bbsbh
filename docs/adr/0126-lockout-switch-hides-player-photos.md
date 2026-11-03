@@ -14,12 +14,15 @@ Headshot fallback chain never runs, because it depends on a 404 (`realHeadshotUr
 
 ## Decision
 
-One build-time flag, `VITE_PLAYER_PHOTOS_OFF=1` (`src/lib/headshot/lockout.js`). When it is
-set, the player photo URL builders (`realHeadshotUrl`, `milbHeadshotUrl`, `actionPhotoUrl`)
+A switch in `src/lib/headshot/lockout.js`. It turns on by itself at 12:01 a.m. ET on
+2026-12-02, the minute after the CBA lapses. When it is on, the player photo URL builders (`realHeadshotUrl`, `milbHeadshotUrl`, `actionPhotoUrl`)
 return null. Headshot and PitcherNotice then show the team logo, and the action-photo washes
 are not drawn. Coach photos stay on, because coaches are not in the union.
 
-To turn it on, set the variable in Vercel and redeploy. To turn it off, unset it and redeploy.
+`VITE_PLAYER_PHOTOS_OFF` overrides the date both ways (set it in Vercel, then redeploy): `0`
+keeps photos (a deal was signed, or the lockout ended) and `1` hides them now. Gary chose the
+date over a live silhouette check (2026-11-03): it is simple and predictable, and the override
+covers a deal or a different start date.
 
 ## Rejected
 
