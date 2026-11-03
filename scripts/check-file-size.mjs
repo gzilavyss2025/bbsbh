@@ -126,6 +126,7 @@ const BUDGETS = {
   // a module boundary, which is the one pair that has to be read together.
   'scripts/gen-pitch-arsenal.mjs': 661, // 661
   'src/api/teamTransactions.js': 700, // 619
+  'src/api/transactions/templates.js': 650, // 607: the wire notes' call templates (27th man, last game, shuttle line)
   'src/api/boxscore.js': 800, // 762
   'src/screens/GameSelect.jsx': 850, // 822
   // src/api/schedule.js was AT the 600-line ceiling, so the offseason gate's

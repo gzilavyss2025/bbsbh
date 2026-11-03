@@ -69,6 +69,10 @@
   align-items: start;
   column-gap: var(--space-3);
 }
+/* A reply's quote (ReplyQuote.jsx) runs the full row above the sentence and its club. */
+.oseason__list .wire__reply {
+  grid-column: 1 / -1;
+}
 /* layout-exempt: every mark the same size, one column; a trade's partner stacks under */
 .oseason__list .wire__kicker {
   order: 1;

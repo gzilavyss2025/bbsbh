@@ -228,8 +228,7 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
       ? { teamId: signed.team.id, year: Number(signed.year), round: signed.pickRound ?? null, pick: signed.pickNumber ?? null, school: signed.school?.name ?? null }
       : null,
     // Every club season, newest first, for the sheet's table.
-    rows: [...clubRows]
-      .sort((a, b) => Number(b.season) - Number(a.season))
+    rows: newestFirst(clubRows)
       .map((s) => ({ season: Number(s.season), teamId: s.team.id, line: shapeLine(s.stat, pitcher) })),
     seasons: years.length,
     years,
@@ -238,6 +237,7 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
     pastStints,
     calls,
     clubs,
+    clubTotals: clubTotals(clubRows, clubs, pitcher),
     arrival: arrival ? arrivalOf(arrival, person.fullName) : null,
     // Every arrival, oldest first: a quick second move ("two days after
     // Milwaukee got him from Cleveland") reads the one before.
@@ -333,7 +333,7 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
           const group = facts.pitcher ? 'pitching' : 'hitting'
           const milb = await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null)
           const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors: milb?.stats?.flatMap((x) => x.splits ?? []) })
-          const extra = ['stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'affiliated', 'extraMan']
+          const extra = ['stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'callMlbLine', 'seasonToDate', 'lastGame', 'affiliated', 'extraMan']
           return { ...withMinors, ...Object.fromEntries(extra.map((k) => [k, facts[k]])) }
         })
         .then(withTradeIds)
@@ -369,10 +369,73 @@ async function callFacts(personId, facts, { kind, date }, teamId) {
     getJson(`/api/v1/people/${personId}/stats?stats=byDateRange&group=${group}&${scope}&startDate=${from}&endDate=${to}`)
       .then((d) => (d?.stats ?? []).flatMap((x) => x.splits ?? []))
       .catch(() => [])
-  if (kind !== 'option') return { callLine: shapeMinors(await range('leagueListId=milb_all', `${facts.season}-03-01`, shiftDays(date, -1)), facts.pitcher) }
+  if (kind !== 'option') {
+    // His big-league games before the call too, for a player shuttling up and down.
+    const [milb, mlb] = await Promise.all([
+      range('leagueListId=milb_all', `${facts.season}-03-01`, shiftDays(date, -1)),
+      range('sportId=1', `${facts.season}-03-01`, shiftDays(date, -1)),
+    ])
+    return { callLine: shapeMinors(milb, facts.pitcher), callMlbLine: shapeLine(mlb.find((s) => !s.team)?.stat ?? mlb[0]?.stat, facts.pitcher) }
+  }
   const down = facts.calls.find((c) => c.down && near(c.down, date))
-  const splits = await range('sportId=1', down?.up ?? `${facts.season}-03-01`, shiftDays(date, -1))
-  return { stintLine: shapeLine(splits.find((s) => !s.team)?.stat ?? splits[0]?.stat, facts.pitcher) }
+  const before = shiftDays(date, -1)
+  // His last big-league game and his season to the day before the move, for
+  // the send-down's note (templates.js, lastGameSentence).
+  const [splits, season, log] = await Promise.all([
+    range('sportId=1', down?.up ?? `${facts.season}-03-01`, before),
+    down?.up ? range('sportId=1', `${facts.season}-03-01`, before) : null,
+    getJson(`/api/v1/people/${personId}/stats?stats=gameLog&group=${group}&season=${facts.season}&sportId=1`)
+      .then((d) => (d?.stats ?? []).flatMap((x) => x.splits ?? []))
+      .catch(() => []),
+  ])
+  const total = (rows) => shapeLine(rows.find((s) => !s.team)?.stat ?? rows[0]?.stat, facts.pitcher)
+  const stintLine = total(splits)
+  return { stintLine, seasonToDate: season ? total(season) : stintLine, lastGame: lastGameOf(log, date, facts.pitcher, teamId) }
+}
+
+// His line with each club over his latest stint there, summed from the season
+// rows (a cash deal's note: Easton McGee's 2025-26 with the Brewers).
+function clubTotals(clubRows, clubs, pitcher) {
+  const out = {}
+  for (const c of clubs) {
+    const rows = clubRows.filter((r) => r.team.id === c.teamId && Number(r.season) >= c.from && Number(r.season) <= c.to)
+    const sum = (f) => rows.reduce((n, r) => n + f(r.stat ?? {}), 0)
+    const games = sum((t) => (pitcher ? t.gamesPitched : t.gamesPlayed) ?? 0)
+    if (pitcher) {
+      const outs = sum((t) => { const [w, f = 0] = String(t.inningsPitched ?? '0').split('.').map(Number); return w * 3 + f })
+      const er = sum((t) => t.earnedRuns ?? 0)
+      out[c.teamId] = { games, era: outs ? ((er * 27) / outs).toFixed(2) : null, ip: `${Math.floor(outs / 3)}.${outs % 3}` }
+    } else {
+      const ab = sum((t) => t.atBats ?? 0)
+      out[c.teamId] = { games, avg: ab ? (sum((t) => t.hits ?? 0) / ab).toFixed(3).replace(/^0/, '') : null, hr: sum((t) => t.homeRuns ?? 0) }
+    }
+  }
+  return out
+}
+
+// Club seasons newest first, and within a season his latest club first: the
+// feed lists a season's clubs in the order he played for them (Jonathan
+// Ornelas, 2026: Athletics, then Brewers), so that order is reversed.
+function newestFirst(rows) {
+  return rows
+    .map((s, i) => ({ s, i }))
+    .sort((a, b) => Number(b.s.season) - Number(a.s.season) || b.i - a.i)
+    .map(({ s }) => s)
+}
+
+// His last game-log row before `date`, cut to what the note says of it.
+// Verified on Brandon Sproat's 2026 log (687075): each split carries `date`,
+// `opponent.id` and the game's own `stat`.
+// `teamId`, when given, keeps only his games for the club that sent him down: a
+// player traded in and optioned at once has no last game for it to tell.
+export function lastGameOf(splits, date, pitcher, teamId = null) {
+  const g = (splits ?? []).filter((s) => s.date && s.date < date).at(-1)
+  if (teamId && g?.team?.id !== teamId) return null
+  if (!g?.stat) return null
+  const line = pitcher
+    ? { ip: g.stat.inningsPitched, er: g.stat.earnedRuns ?? 0 }
+    : { ab: g.stat.atBats ?? 0, h: g.stat.hits ?? 0, hr: g.stat.homeRuns ?? 0 }
+  return { date: g.date, oppId: g.opponent?.id ?? null, line }
 }
 
 // The sheet's other two views, read only when one is first chosen: every
@@ -381,9 +444,8 @@ async function callFacts(personId, facts, { kind, date }, teamId) {
 // `career` is the career read's splits: for milb_all a subtotal per level and
 // one "Minors" row, the total; for the postseason a single team-less row.
 export function shapeScopeRows(yearly, career, pitcher) {
-  const rows = (yearly ?? [])
-    .filter((s) => s.team?.id)
-    .sort((a, b) => Number(b.season) - Number(a.season))
+  const clubbed = (yearly ?? []).filter((s) => s.team?.id)
+  const rows = newestFirst(clubbed)
     .map((s) => ({
       season: Number(s.season),
       teamId: s.team.id,

@@ -21,6 +21,7 @@
 //   fallback      every other move: no note, the sheet on a tap
 // Note the feed's own codes: DFA is "declared free agency", DES is designated.
 import { teamAbbr, teamClubName, teamLocationName } from '../../lib/teams.js'
+import { apDate } from '../../lib/time/apDate.js'
 
 // The player a move is about: the first face on the rail, else the first
 // player the sentence names.
@@ -46,6 +47,8 @@ const CLAUSE_TEMPLATES = [
   ['minor-deal', /minor league contract/i],
   // From an independent club: no trade, so nothing went the other way.
   ['arrival', /\bobtained\b|\bpurchased\b|\bacquired\b(?![^;]*\bfor\b)/i],
+  // Within one clause (they split at ';'), so a club may lead it.
+  ['sold', /\btraded\b[^;]*\bfor cash\b/i],
   ['trade', /traded|acquired/i],
   ['signing', /signed/i],
 ]
@@ -309,11 +312,6 @@ function originSentence(facts, name, moveDate) {
 // "June 9").
 // A month with no day is spelled out ("December 2025").
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-const AP_MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
-function apDate(iso) {
-  const [, m, d] = iso.split('-').map(Number)
-  return `${AP_MONTHS[m - 1]} ${d}`
-}
 // "an Aug. 3 trade", "a July 11 trade".
 const aMonth = (when) => (/^(Aug|April|Oct)/.test(when) ? 'an' : 'a')
 const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000)
@@ -488,15 +486,41 @@ function tripSentence(facts, moveDate) {
   const last = prev?.up && prev.down ? `; the last lasted ${daysText(daysBetween(prev.up, prev.down))}` : ''
   return `It is his ${COUNT[at + 1] ?? `${at + 1}th`} trip up this season${last}.`
 }
+// A player shuttling between the two (Blake Perkins, 2026) gets both lines in one.
+const briefLine = (l, pitcher) => (pitcher ? `${an(l.era)} ${l.era} ERA` : `${l.avg}${l.hr ? ` with ${homers(l.hr)}` : ''}`) + ` in ${gamesText(l.games)}`
 function beforeCallSentence(facts, who) {
   const m = facts.callLine
+  const mlb = facts.callMlbLine
+  if (m?.line?.games && mlb?.games) {
+    const where = m.team ? `the ${m.team}` : m.level.join(' and ')
+    return `${who} has split ${facts.season} between ${where} (${briefLine(m.line, facts.pitcher)}) and the majors (${briefLine(mlb, facts.pitcher)}) before the call.`
+  }
   return m?.line?.games ? `${who} ${didText(m.line, facts.pitcher)} ${minorsWhere(m)} in ${facts.season} before the call.` : null
+}
+// A call-up told beside an injured-list placement: only his line before the
+// call, so it can run on after the injured player's note (Blake Perkins for
+// Sal Frelick, July 18, 2026).
+export function callUpSentence(facts) {
+  return beforeCallSentence(facts, facts.lastName ?? 'He')
 }
 export const CALLS = new Set(['recall', 'option', 'selected'])
 // The extra man: up for the day, back down after it, for a doubleheader or a
 // special event (Little League Classic, Field of Dreams). The feed never says
 // so; `extraMan` is a one-day trip that opened on such a day, `event` the
 // schedule's name for a special event (null for a doubleheader).
+// "Sproat last pitched Aug. 3 against the Pirates, allowing 4 earned runs over 3 innings."
+function lastGameSentence(facts, name) {
+  const { date, oppId, line } = facts.lastGame
+  const head = `${name} last ${facts.pitcher ? 'pitched' : 'played'} ${apDate(date)}${oppId ? ` against ${the(oppId)}` : ''}`
+  if (!facts.pitcher) return `${head}, going ${line.h}-for-${line.ab}${line.hr ? ` with ${homers(line.hr)}` : ''}.`
+  // The feed writes thirds after the point: "2.1" is 2 1/3 innings.
+  const [whole, thirds] = String(line.ip).split('.').map(Number)
+  const frac = thirds ? `${thirds}/3` : ''
+  const innings = whole ? `${whole}${frac ? ` ${frac}` : ''} inning${whole === 1 && !frac ? '' : 's'}` : `${frac} of an inning`
+  const runs = `${line.er} earned run${line.er === 1 ? '' : 's'}`
+  if (!whole && !thirds) return `${head}, allowing ${runs} without retiring a batter.`
+  return `${head}, ${line.er ? `allowing ${runs} over` : 'going'} ${innings}${line.er ? '' : ' without an earned run'}.`
+}
 const longDate = (iso) => `${MONTH_NAMES[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
 export function callStory(facts, { kind, moveDate }) {
   const name = facts.lastName ?? 'He'
@@ -504,8 +528,16 @@ export function callStory(facts, { kind, moveDate }) {
     const c = (facts.calls ?? []).find((x) => x.up && (near(x.up, moveDate) || (x.down && near(x.down, moveDate))))
     const { event } = facts.extraMan
     const at = event ? `at the ${event}` : `in the ${c?.up ? `${longDate(c.up)} ` : ''}doubleheader`
-    if (kind === 'option') return [`${name} goes back down after serving as the 27th man ${at}.`, optionsSentence(facts)].filter(Boolean).join(' ')
+    // No options line: the extra man's trip back is not an ordinary option.
+    if (kind === 'option') return `${name} goes back down after serving as the 27th man ${at}.`
     return `${name} came up as the 27th man for the ${event ?? 'doubleheader'}${c?.down ? `${event ? ',' : ''} and went back down ${apDate(c.down)}` : ''}.`
+  }
+  // A send-down after time in the majors: his last game, then his season to
+  // that day (Brandon Sproat, Aug. 4, 2026).
+  if (kind === 'option' && facts.lastGame && facts.seasonToDate?.games) {
+    return [lastGameSentence(facts, name), `He ${didText(facts.seasonToDate, facts.pitcher)} this season before the move.`, optionsSentence(facts)]
+      .filter(Boolean)
+      .join(' ')
   }
   if (kind === 'option') {
     const c = (facts.calls ?? []).find((x) => x.down && near(x.down, moveDate))
@@ -555,6 +587,25 @@ export function draftSentence(facts) {
   return `${club[0].toUpperCase()}${club.slice(1)} drafted him${d.school ? ` out of ${d.school}` : ''}${d.round ? ` in the ${ordinal(d.round)} round${d.pick ? ` (${ordinal(d.pick)} overall)` : ''}` : ''} in ${d.year}.` // caps-js-exempt: sentence case
 }
 
+// A player traded away for cash (Easton McGee, July 14, 2026): his time with
+// the club and his whole line for it. A wire runs many of these, so the
+// sentence takes one of three shapes, fixed per player so it never shifts.
+const SEASONS = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+function soldStory(facts, { teamId }) {
+  const stint = (facts.clubs ?? []).filter((c) => c.teamId === teamId).at(-1)
+  if (!stint) return null
+  const name = facts.lastName ?? 'He'
+  const club = the(teamId)
+  const l = facts.clubTotals?.[teamId]
+  if (!l?.games) return `${name} had been with ${club} since ${stint.from}.`
+  const did = `${didText(l, facts.pitcher)} for them`
+  const n = facts.season - stint.from + 1
+  const shape = (facts.id ?? 0) % 3
+  if (shape === 1) return `${name} joined ${club} in ${stint.from} and ${did}.`
+  if (shape === 2 && n > 1) return `${name} leaves ${club} after ${SEASONS[n] ?? n} seasons, in which he ${did}.`
+  return `${name} had been with ${club} since ${stint.from}, and in that time he ${did}.`
+}
+
 export function factLines(template, facts, ctx = {}) {
   if (!facts || template === 'fallback') return []
   if (template === 'minor-deal' || template === 'trade') {
@@ -565,6 +616,7 @@ export function factLines(template, facts, ctx = {}) {
     return [freeAgentStory(facts)]
   }
   if (template === 'cut') return [cutStory(facts, ctx)]
+  if (template === 'sold') return [soldStory(facts, ctx)].filter(Boolean)
   if (template === 'il-placed' || template === 'il-activated') {
     const note = injuredStory(facts, { placed: template === 'il-placed', moveDate: ctx.moveDate, clause: ctx.clause ?? '' })
     return note ? [note] : []
