@@ -87,6 +87,56 @@ World Series 2026, from `game.probe.mjs`.
 
 In a close game the three views agree. In a calm one they tell three different stories.
 
+## Gary's scrapbook: the use case (2026-11-03)
+
+Gary keeps a physical scrapbook of the 2026 season, and a private dashboard, "Brewers 2026
+Scorebook", that Claude built from the Stats API to feed it. Read-only; the dashboard was not
+changed.
+
+What it holds: 175 Brewers games, 99 of them scored by hand (87 Brewers, 12 others), in chapters
+(one per month, then one per postseason round). Each scored game gets a card with: a featured
+flag, the go-ahead play (labelled "Turning point"), the stars, the longest homer, conditions, the
+MLB recap, clips, a photo, writing prompts, a "card to tuck in", and room for a reduced scorecard.
+
+What Gary wants (his words): "I can quickly identify the impactful moments from all the games I
+scored."
+
+### What the card does today
+
+Its "Turning point" is the **go-ahead play**: the play after which the winner led for good, by
+the score. It is not the win-probability turning point defined above, and the two disagree often.
+
+Measured on all 87 scored Brewers games with `scorebook.probe.mjs`:
+
+| Question | Result |
+|---|---|
+| Go-ahead play matched to a play in the win-probability feed | 87 of 87 |
+| Go-ahead play is the same play as the win-probability turning point | 23 of 87 (26%) |
+| Go-ahead play is in the game's top 3 by swing | 57 of 87 (66%) |
+| Go-ahead play is in the game's top 3 by leverage | 25 of 87 (29%) |
+| Win-probability turning point is in the top 3 by swing | 24 of 87 (28%) |
+| Wire to wire (no win-probability turning point) | 12 of 87 (14%) |
+
+Example: 2026-06-06, Brewers 7, Rockies 1. The go-ahead play was the 2nd play of the game. The
+win probability did not settle above 50% until the 51st. An early lead was not yet a won game.
+
+### What this means for the design
+
+1. **The two definitions are different facts, not rivals.** The go-ahead play says when the score
+   went ahead for good. The turning point says when the game was effectively won. A scrapbook
+   page can print both when they differ, and one line when they agree.
+2. **Leverage finds what neither finds.** Only 29% of go-ahead plays are top-3 leverage. The tense
+   spots (a stranded runner, a double-play ball) are the moments the card does not show today.
+3. **It is a cross-game need.** The ask is to scan many games, so the unit is a short list per
+   game (up to three moments) plus a way to compare games in a chapter.
+4. **The Tally match is the Game Log.** `CONTEXT.md` defines the Game Log as the games you
+   stamped. A stamped game is one you chose to reveal, so showing its moments there respects the
+   spoiler rule (ADR-0042, ADR-0048, ADR-0049, ADR-0116 and ADR-0117 govern stamps; Inference:
+   read them before slice 2).
+5. **A chapter view needs one more number:** how dramatic a game was, to pick the featured games.
+   Candidates (Inference): the sum of `|WPA|` across the game, or the peak leverage, or the count
+   of lead changes in win probability. Not measured yet.
+
 ## Proposal
 
 ### A. Turning point (new, one play)
@@ -155,6 +205,14 @@ already made.
 6. **Name.** The repo calls the list "Biggest swings". Baseball-Reference calls its tool "Pivotal
    Play Finder" (cWPA, a season-standing measure, not the same thing). Keep the repo's plain names.
 
+7. **Where do scrapbook moments live in Tally?** The Game Log per stamped game, a cross-game
+   page, or only the box score? Gary has described the need but not the surface (see "Gary's
+   scrapbook").
+8. **A drama score for a whole game**, to rank games within a chapter. Which of the three
+   candidates, or none?
+9. **Print both go-ahead and turning point when they differ?** The data says they differ in 74% of
+   games.
+
 ## Slices (each at most 5 files)
 
 1. **Selectors and tests.** `src/api/winprob.js` (turning point, tense spots, `li` on points, the
@@ -171,5 +229,7 @@ already made.
 - `game.probe.mjs`: ranks one game's plays by swing, leverage and captivating index, and finds the
   turning point. Run on 849799 and 849803.
 - `sample.probe.mjs`: the 62-game sample behind "Measured gap".
+- `scorebook.probe.mjs`: compares the scrapbook's go-ahead play with the turning point on Gary's 87
+  scored Brewers games. It takes the path to the dashboard's `gamelog.json` (not in the repo).
 
 Both use `getJson` and write nothing. Source: statsapi.mlb.com, checked 2026-11-03.
