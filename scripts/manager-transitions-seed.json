@@ -290,5 +290,12 @@
   {"teamId":146,"season":1996,"transitions":[{"date":"1996-07-07","outgoingManagerId":117389,"incomingManagerId":121406},{"date":"1996-07-11","outgoingManagerId":121406,"incomingManagerId":492621}]},
   {"teamId":146,"season":2011,"transitions":[{"date":"2011-06-19","outgoingManagerId":121351,"incomingManagerId":492493},{"date":"2011-06-20","outgoingManagerId":492493,"incomingManagerId":429341}]},
   {"teamId":147,"season":1978,"transitions":[{"date":"1978-07-24","outgoingManagerId":118330,"incomingManagerId":116236},{"date":"1978-07-25","outgoingManagerId":116236,"incomingManagerId":117671}]},
-  {"teamId":147,"season":1982,"transitions":[{"date":"1982-04-27","outgoingManagerId":117671,"incomingManagerId":119025},{"date":"1982-08-04","outgoingManagerId":119025,"incomingManagerId":117075}]}
+  {"teamId":147,"season":1982,"transitions":[{"date":"1982-04-27","outgoingManagerId":117671,"incomingManagerId":119025},{"date":"1982-08-04","outgoingManagerId":119025,"incomingManagerId":117075}]},
+  {"teamId":113,"season":1988,"transitions":[{"date":"1988-05-02","outgoingManagerId":121454,"incomingManagerId":115731},{"date":"1988-06-01","outgoingManagerId":115731,"incomingManagerId":121454}]},
+  {"teamId":108,"season":1992,"transitions":[{"date":"1992-05-22","outgoingManagerId":121343,"incomingManagerId":123973},{"date":"1992-08-28","outgoingManagerId":123973,"incomingManagerId":121343}]},
+  {"teamId":158,"season":1980,"transitions":[{"date":"1980-06-06","outgoingManagerId":121343,"incomingManagerId":110521},{"date":"1980-09-09","outgoingManagerId":110521,"incomingManagerId":121343}]},
+  {"teamId":117,"season":1999,"transitions":[{"date":"1999-06-14","outgoingManagerId":113352,"incomingManagerId":427177},{"date":"1999-07-15","outgoingManagerId":427177,"incomingManagerId":113352}]},
+  {"teamId":144,"season":1977,"transitions":[{"date":"1977-05-11","outgoingManagerId":492622,"incomingManagerId":815800},{"date":"1977-05-12","outgoingManagerId":815800,"incomingManagerId":492622}]},
+  {"teamId":113,"season":2003,"transitionDate":"2003-07-28","outgoingManagerId":111221,"incomingManagerId":429730},
+  {"teamId":145,"season":2011,"transitionDate":"2011-09-27","outgoingManagerId":115230,"incomingManagerId":112653}
 ]
