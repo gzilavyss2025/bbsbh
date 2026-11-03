@@ -302,8 +302,8 @@ test('a last outing writes its thirds of an inning as a scorer would', () => {
   const at = (ip, er) => callStory(facts({ lastName: 'Koenig', lastGame: { date: '2026-07-12', oppId: 134, line: { ip, er } }, seasonToDate: { games: 9, era: '9.00', ip: '7.0' } }), { kind: 'option', moveDate: '2026-07-17' })
   assert.match(at('0.1', 2), /gave up two earned runs in 1\/3 of an inning\./)
   assert.match(at('0.2', 0), /threw 2\/3 of an inning without an earned run\./)
-  assert.match(at('1.0', 1), /allowing 1 earned run over 1 inning\./)
-  assert.match(at('2.1', 3), /allowing 3 earned runs over 2 1\/3 innings\./)
+  assert.match(at('1.0', 1), /gave up one earned run in one inning\./)
+  assert.match(at('2.1', 3), /gave up three earned runs in 2 1\/3 innings\./)
 })
 
 test('a cash deal reads the same with the club leading the clause', () => {
