@@ -193,6 +193,42 @@ sentence must come from the data (final score, runs, home-run count), never a gu
 number stays in the data and shows only as "times as tense". Applies to the dashboard text too:
 the `pivotal` dataset still has the first-draft wording (open item below).
 
+### Pressure in context: ranks with a stated scope (Gary, 2026-11-03)
+
+Gary's interview answers, in his words: the pressure scale "is interesting but I don't understand
+how it fits in context". A bare 7.3 means nothing, so every score now comes with a rank, and the
+rank always names its scope: all of baseball, the Brewers pitching, or the Brewers batting.
+
+What the season-wide pass found (`season-pressure.probe.mjs`: 2,470 games, 184,872 at-bats,
+regular season and postseason, none failed):
+
+| Fact | Value |
+|---|---|
+| Median at-bat | 0.82 |
+| 90th percentile | 2.03 |
+| 99th percentile | 4.56 |
+| Highest score | 9.99 (14 at-bats share it) |
+| Game 1 World Series, DeLuca strikeout (7.3) | tied for 102nd of 184,872; 5th of 6,388 with the Brewers pitching; tied for 50th of 16,048 ninth-inning at-bats |
+
+Two things the numbers force:
+
+- **Ties are normal.** The score comes from a fixed lookup of the game situation (inning, outs,
+  runners, score), so many at-bats share one value (199 share Game 5's 2.83). Ranks show a T when
+  tied, and a list never cuts through a tie.
+- **Rank only the top, percent for the rest.** Rule used in the wireframe: a rank when it is in the
+  top 100 of its scope ("Tied for 102nd of 184,872"), otherwise "Tenser than 95.7% of at-bats".
+
+**Card rows (decided):** Took the lead, Game turned, Biggest play, The scare, Tensest moment. The
+scare reads "No real scare. The Brewers' chances never fell below 46%." when the winner's lowest
+chance was above about 40%; otherwise it says when the chances fell and what caused it.
+Each Tensest moment line states the baseline in the sentence ("a normal at-bat is 1.0") and lists
+its ranks by scope.
+
+**Season section (decided):** three tables, every Brewers game (not only the ones Gary scored; his
+scored games are tinted): top 25 with the Brewers batting (26 rows because 25th is a tie), top 25
+with the Brewers pitching, and the top 50 of all baseball (3 of the 50 are Brewers games he scored).
+Columns: Rank, Pressure, Date, Game, Inning, At-bat (batter vs pitcher), What happened.
+
 **One game entry, at 390 px** (Inference on wording; the voice rules in `docs/callouts.md` apply):
 
 ```
@@ -297,7 +333,11 @@ already made.
     or stored at stamp time. The second needs a ruling under the stamp ADRs.
 11. **Dashboard wording.** The `pivotal` dataset in Gary's dashboard still carries the first-draft
     (robotic) strings. Rewrite them to the voice above in `scrapbook.build.mjs` and re-upload?
-12. **Report name.** The repo says "Game Log" for stamped games. Gary's scrapbook says "scorebook".
+12. **Postseason in the tables.** The Brewers and league tables mix regular season and postseason
+    (the Oct 4 walk-off is in both). Split them, or keep them together?
+13. **Whose team?** The tables are the Brewers because that is Gary's team. The app's favorite-team
+    setting would pick the club for anyone else.
+14. **Report name.** The repo says "Game Log" for stamped games. Gary's scrapbook says "scorebook".
     Neither is a report title yet.
 
 ## Slices (each at most 5 files)
@@ -318,6 +358,8 @@ already made.
 - `sample.probe.mjs`: the 62-game sample behind "Measured gap".
 - `scrapbook.build.mjs`: builds the `pivotal` dataset for Gary's dashboard (99 rows). Takes the
   dashboard's `gamelog.json` and an output path.
+- `season-pressure.probe.mjs`: the leverage score of every play of 2026 (about 10 minutes).
+- `tensest.build.mjs`: the three tensest-moment tables and the scoped ranks, from that data.
 - `scorebook.probe.mjs`: compares the scrapbook's go-ahead play with the turning point on Gary's 87
   scored Brewers games. It takes the path to the dashboard's `gamelog.json` (not in the repo).
 
