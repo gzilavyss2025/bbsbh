@@ -137,6 +137,65 @@ win probability did not settle above 50% until the 51st. An early lead was not y
    Candidates (Inference): the sum of `|WPA|` across the game, or the peak leverage, or the count
    of lead changes in win probability. Not measured yet.
 
+### The scrapbook dashboard now has the data (2026-11-03)
+
+Gary asked for the extra information in his dashboard, so it was added as a working prototype of
+the report below. Built by `scrapbook.build.mjs` from the game list and the winProbability feed.
+
+- New dataset `pivotal` (99 rows, one per scored game; 14 wire to wire, 25 with a "fell as low as"
+  note, 71 with three tense spots, 11 with none above the leverage floor of 2.0).
+- Each game card on the Game log and Chapters tabs gained: **Game won for good** (the win-probability
+  turning point), **Tensest spot**, and a **More moments that mattered** section (low point, two
+  more tense spots, biggest swing, and three drama numbers).
+- Nothing else in the page changed. The existing "Turning point" row (the go-ahead play) is
+  untouched; the two rows now sit side by side. Gary may want to rename it "Go-ahead play".
+- Not verified in a browser. The page's own check had not run, so only the stored text was
+  checked (11 changed lines, the script parses).
+
+## The standalone report (draft structure)
+
+Gary: "on the website itself it probably is a standalone report once we figure out what the
+structure is." This section is that structure, taken from what the scrapbook cards do. Not built;
+a wireframe Artifact is the next step (390 px and desktop), per `CLAUDE.md`.
+
+**What it is.** One page that lists the games you stamped, grouped into chapters, and shows for
+each the moments that mattered. It is for scanning many games, not reading one.
+
+**Who it covers.** Stamped games only (Inference). A stamp is the opt-in reveal, so every moment
+on the page is for a game you chose to see (ADR-0042 and the stamp ADRs; read before building).
+
+**Page order, top to bottom:**
+
+1. Header: season, number of stamped games, the club's record in them.
+2. Chapter picker: one chapter per month, then one per postseason round (as the scrapbook has).
+3. Chapter header: games, record, and the most dramatic game (once Open question 8 is settled).
+4. Game entries, in date order, with a switch to order by drama.
+5. A short season list at the end: the 10 biggest moments across all stamped games.
+
+**One game entry, at 390 px** (Inference on wording; the voice rules in `docs/callouts.md` apply):
+
+```
+May 18  W 9-3 at Chicago Cubs                     Book 1 #1
+  Go-ahead   Top 2: Yelich homers (3) ...  (1-0)
+  Won for good   Top 2: Turang doubles ...
+                 Brewers' win probability stayed above 50% from here (52%).
+  Tensest spot   Bottom 4: Williamson grounds out ... Leverage 2.8
+  [ More moments that mattered v ]
+```
+
+Chips on an entry, only when true: `Wire to wire` (no turning point), `Fell to 9%` (the winner's
+low point at 25% or lower), `Extra innings`.
+
+**Data.** The winProbability call per stamped game. For about 100 games that is heavy to fetch
+on open, so options are: fetch one chapter at a time, or compute at stamp time and keep the
+result (the stamp already stores a half-index, never a score, so storing moments needs a decision
+under the spoiler rule). Open question 10.
+
+**Two facts from the prototype that the page must handle:**
+
+- 14 of 99 games are wire to wire: no turning point, so the row says that instead of staying blank.
+- 11 of 99 games have no spot above the leverage floor: show the biggest swing instead.
+
 ## Proposal
 
 ### A. Turning point (new, one play)
@@ -205,13 +264,18 @@ already made.
 6. **Name.** The repo calls the list "Biggest swings". Baseball-Reference calls its tool "Pivotal
    Play Finder" (cWPA, a season-standing measure, not the same thing). Keep the repo's plain names.
 
-7. **Where do scrapbook moments live in Tally?** The Game Log per stamped game, a cross-game
-   page, or only the box score? Gary has described the need but not the surface (see "Gary's
-   scrapbook").
+7. **Where do scrapbook moments live in Tally?** Decided in outline by Gary (2026-11-03): a
+   standalone report, once the structure is settled. See "The standalone report". Whether a short
+   version also sits in the Game Log per game is not decided.
 8. **A drama score for a whole game**, to rank games within a chapter. Which of the three
    candidates, or none?
 9. **Print both go-ahead and turning point when they differ?** The data says they differ in 74% of
    games.
+
+10. **How does the report get its data?** One call per stamped game, fetched a chapter at a time,
+    or stored at stamp time. The second needs a ruling under the stamp ADRs.
+11. **Report name.** The repo says "Game Log" for stamped games. Gary's scrapbook says "scorebook".
+    Neither is a report title yet.
 
 ## Slices (each at most 5 files)
 
@@ -229,6 +293,8 @@ already made.
 - `game.probe.mjs`: ranks one game's plays by swing, leverage and captivating index, and finds the
   turning point. Run on 849799 and 849803.
 - `sample.probe.mjs`: the 62-game sample behind "Measured gap".
+- `scrapbook.build.mjs`: builds the `pivotal` dataset for Gary's dashboard (99 rows). Takes the
+  dashboard's `gamelog.json` and an output path.
 - `scorebook.probe.mjs`: compares the scrapbook's go-ahead play with the turning point on Gary's 87
   scored Brewers games. It takes the path to the dashboard's `gamelog.json` (not in the repo).
 
