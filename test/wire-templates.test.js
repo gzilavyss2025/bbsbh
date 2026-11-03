@@ -319,6 +319,12 @@ test('the draft read is the one he signed out of, the latest, with its overall p
   assert.equal(draftSentence({ draft: null }), null)
 })
 
+test('a competitive-balance pick names its round, never "NaNth"', () => {
+  // Logan Driscoll (Padres, 2019): the feed's pickRound is "CB-B", not a number.
+  const f = { draft: { teamId: 135, year: 2019, round: 'CB-B', pick: 73, school: 'George Mason' } }
+  assert.equal(draftSentence(f), 'The Padres drafted him out of George Mason in Competitive Balance Round B (73rd overall) in 2019.')
+})
+
 test("a first IL trip of the season reads his earlier seasons' trips instead", () => {
   const person = {
     ...rutschman,
@@ -358,4 +364,16 @@ test("a trade's note is his line up to the deal, for the club he left", () => {
   // Two clubs before the deal: the line is his, not one club's.
   const two = { ...f, rows: [...f.rows, { season: 2026, teamId: 121, line: {} }] }
   assert.equal(seasonSentence(two), 'Suárez, 35, was hitting .251 with eight homers in 67 games.')
+})
+
+test('a draft round reads the same wherever a note says it', async () => {
+  // Both draft phrasings share these, so a "CB-B" pick never reads "NaNth".
+  const { pickPhrase, roundPhrase } = await import('../src/api/transactions/voice.js')
+  assert.equal(roundPhrase('2'), 'the second round')
+  assert.equal(roundPhrase('11'), 'the 11th round')
+  assert.equal(roundPhrase('CB-B'), 'Competitive Balance Round B')
+  assert.equal(roundPhrase('?'), null)
+  assert.equal(pickPhrase('11'), '11th-round pick')
+  assert.equal(pickPhrase('CB-A'), 'competitive-balance pick')
+  assert.equal(pickPhrase(null), 'draft pick')
 })

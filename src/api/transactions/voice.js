@@ -33,6 +33,20 @@ export const ordinal = (n) => {
 // AP: "third round", "11th round".
 const ORDINALS = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth']
 export const roundText = (n) => ORDINALS[Number(n)] ?? ordinal(n)
+// A draft round as a note says it. The feed writes a competitive-balance
+// round as "CB-A" or "CB-B" (Logan Driscoll, 2019), not a number.
+const cbRound = (r) => /^CB-?([AB])$/i.exec(String(r ?? ''))?.[1]?.toUpperCase() ?? null
+// "the second round", "Competitive Balance Round B", or null.
+export function roundPhrase(r) {
+  const cb = cbRound(r)
+  if (cb) return `Competitive Balance Round ${cb}`
+  return Number(r) ? `the ${roundText(r)} round` : null
+}
+// "second-round pick", "competitive-balance pick", or "draft pick".
+export function pickPhrase(r) {
+  if (cbRound(r)) return 'competitive-balance pick'
+  return Number(r) ? `${roundText(r)}-round pick` : 'draft pick'
+}
 
 // "Sproat, 25," or "The 25-year-old"; his last name alone with no age.
 export function nameAge(facts, v) {

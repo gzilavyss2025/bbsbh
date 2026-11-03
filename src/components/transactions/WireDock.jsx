@@ -1,10 +1,8 @@
 import { useEffect } from 'react'
-import { fetchLeagueMoves, windowDaysFor } from '../../api/transactions/leagueFeed.js'
+import { fetchLeagueMoves } from '../../api/transactions/leagueFeed.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
-import { MoveItems, cutlineText, dateline, flattenDays } from './MoveRow.jsx'
-import { Pill } from '../ui/control/Pill.jsx'
+import { MoveItems, cutlineText, flattenDays } from './MoveRow.jsx'
 import { SheetDock } from '../ui/dock/SheetDock.jsx'
 
 // THE WIRE DOCK — the phone's presentation of the league's roster moves.
@@ -40,35 +38,29 @@ export function WireDock({ endDate, sportId, onPresence, singleDay = false }) {
   // bottom of it would cost a permanent strip of screen to say nothing.
   if (!present) return null
 
-  const clubInk = newest ? teamPrimaryColor(newest.teamId) || 'var(--graphite)' : 'var(--graphite)'
-  const newestAbbr = newest ? teamAbbr({ id: newest.teamId }) : ''
   const newestLine = newest ? cutlineText(newest.cutline) : ''
 
   return (
     <SheetDock
       label="Roster moves around the league"
       bodyId="wire-dock-list"
-      style={{ '--wire-club': clubInk }}
       measureKey={total}
       title="Transactions"
-      note={`${singleDay ? dateline(endDate) : `Last ${windowDaysFor(sportId)} days`} · ${total}`}
+      // The same ledger look as the offseason page and the club ledger.
+      bodyClassName="oseason__list"
       closeLabel="Collapse roster moves"
       collapsed={
-        // The club's colour spine and mark answer "whose move?" before a word
-        // is read — the same job they do on a ledger row, in one line.
+        // The same face as the open sheet: its title, then the newest move as
+        // a ledger row says it (club mark, sentence), and the arrow that opens it.
         <>
-          <span className="wiredock__spine" aria-hidden="true" />
-          {newest && <TeamLogo teamId={newest.teamId} size={20} className="wiredock__mark" />}
-          <span className="wiredock__line">
-            <span className="wiredock__club">{newestAbbr}</span>
-            <span className="wiredock__cut">{newestLine}</span>
-          </span>
-          <Pill fill="paper" figure className="wiredock__count">{total}</Pill>
-          <span className="wiredock__chevron" aria-hidden="true">⌃</span>
+          <span className="wiredock__railtitle">Transactions</span>
+          {newest && <TeamLogo teamId={newest.teamId} size={18} className="wiredock__mark" />}
+          <span className="wiredock__cut">{newestLine}</span>
+          <span className="wiredock__open" aria-hidden="true">See all ›</span>
         </>
       }
     >
-      <MoveItems items={items} />
+      <MoveItems items={items} marks />
     </SheetDock>
   )
 }

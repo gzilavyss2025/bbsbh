@@ -22,7 +22,7 @@
 // Note the feed's own codes: DFA is "declared free agency", DES is designated.
 import { teamAbbr, teamClubName, teamLocationName } from '../../lib/teams.js'
 import { apDate } from '../../lib/time/apDate.js'
-import { an, gamesText, homers, ipText, nameAge, nowText, num, optionsSentence, optionsTail, ordinal, roundText, variant, word } from './voice.js'
+import { an, gamesText, homers, ipText, nameAge, nowText, num, optionsSentence, optionsTail, ordinal, pickPhrase, roundPhrase, variant, word } from './voice.js'
 
 // The player a move is about: the first face on the rail, else the first
 // player the sentence names.
@@ -289,8 +289,8 @@ function originSentence(facts, name, moveDate) {
   const parts = []
   const d = facts.draft
   const school = d?.school ? ` out of ${d.school}` : ''
-  if (d && d.round && variant(facts, moveDate, 2) === 1) parts.push(`${the(d.teamId)} drafted him in the ${roundText(d.round)} round${school} in ${d.year}`)
-  else if (d) parts.push(`${name} was ${the(d.teamId)}' ${d.round ? `${roundText(d.round)}-round pick` : 'draft pick'}${school} in ${d.year}`)
+  if (d && roundPhrase(d.round) && variant(facts, moveDate, 2) === 1) parts.push(`${the(d.teamId)} drafted him in ${roundPhrase(d.round)}${school} in ${d.year}`)
+  else if (d) parts.push(`${name} was ${the(d.teamId)}' ${pickPhrase(d.round)}${school} in ${d.year}`)
   else {
     const signed = before.find((a) => a.how === 'signing' || a.how === 'free agent')
     if (signed) parts.push(`${name} signed with ${the(signed.teamId)} in ${signed.date.slice(0, 4)}`)
@@ -603,7 +603,8 @@ export function draftSentence(facts) {
   const d = facts?.draft
   if (!d) return null
   const club = the(d.teamId)
-  return `${club[0].toUpperCase()}${club.slice(1)} drafted him${d.school ? ` out of ${d.school}` : ''}${d.round ? ` in the ${roundText(d.round)} round${d.pick ? ` (${ordinal(d.pick)} overall)` : ''}` : ''} in ${d.year}.` // caps-js-exempt: sentence case
+  const round = roundPhrase(d.round)
+  return `${club[0].toUpperCase()}${club.slice(1)} drafted him${d.school ? ` out of ${d.school}` : ''}${round ? ` in ${round}${d.pick ? ` (${ordinal(d.pick)} overall)` : ''}` : ''} in ${d.year}.` // caps-js-exempt: sentence case
 }
 
 // A player traded away for cash (Easton McGee, July 14, 2026): his time with
