@@ -89,8 +89,21 @@ function jumpTo(id) {
   el.classList.add('wire__row--found')
 }
 
-// quotes: [{ id, date, story }]; date: the reply's own day, so a quote filed the
-// same day leaves its date off.
+// The quote names no verb. It is a carbon copy of the earlier move: its date in
+// a small stamped box with a hook pointing back up the page, then the sentence,
+// muted. Several stamps stacked are several moves; a stamp that reads GAME is
+// the 27th man's game. The words live in the accessible name only.
+function Stamp({ children }) {
+  return (
+    <span className="wire__stamp" aria-hidden="true">
+      <span className="wire__hook">↩</span>
+      {children}
+    </span>
+  )
+}
+
+// quotes: [{ id, date, story }]; date: the reply's own day, which a same-day
+// quote stamps as "Same day" instead of a date.
 export function ReplyQuotes({ quotes, date }) {
   const navigate = useNav()
   if (!quotes?.length) return null
@@ -99,23 +112,36 @@ export function ReplyQuotes({ quotes, date }) {
   if (game) {
     return (
       <div className="wire__reply">
-        <button type="button" className="wire__quote" onClick={() => navigate(game.href)}>
-          <span className="wire__quotetext">Replying to {game.label}</span>
+        <button
+          type="button"
+          className="wire__quote"
+          aria-label={`Called up for the game: ${game.label}`}
+          onClick={() => navigate(game.href)}
+        >
+          <Stamp>Game</Stamp>
+          <span className="wire__quotetext">{game.label}</span>
         </button>
       </div>
     )
   }
   return (
     <div className="wire__reply">
-      {quotes.length > 1 && <span className="wire__replyto">Replying to {quotes.length} moves</span>}
-      {quotes.map((q) => (
-        <button key={q.id} type="button" className="wire__quote" onClick={() => jumpTo(q.id)}>
-          <span className="wire__quotetext">
-            {q.date !== date && <span className="wire__quotedate">{apShortDate(q.date)} · </span>}
-            {flatText(q.story.cutline)}
-          </span>
-        </button>
-      ))}
+      {quotes.map((q) => {
+        const when = q.date === date ? 'Same day' : apShortDate(q.date)
+        const text = flatText(q.story.cutline)
+        return (
+          <button
+            key={q.id}
+            type="button"
+            className="wire__quote"
+            aria-label={`Answers the move of ${q.date === date ? 'the same day' : when}: ${text}`}
+            onClick={() => jumpTo(q.id)}
+          >
+            <Stamp>{when}</Stamp>
+            <span className="wire__quotetext">{text}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }

@@ -471,57 +471,56 @@
   color: var(--text-heading);
 }
 
-/* A reply (components/transactions/ReplyQuote.jsx): the faded quote of the move
-   this row answers, above its kicker, joined to it by a thin curved line —
-   iMessage style. Two lines at most; a tap scrolls to the original. */
-/* layout-exempt: a label over stacked quotes */
+/* A reply (components/transactions/ReplyQuote.jsx): a carbon copy of the move
+   this row answers, above its kicker — no "replying to", just the earlier
+   move's date in a small stamped box with a hook pointing back up the page,
+   then its sentence, muted, two lines at most. A tap goes to the original. */
+/* layout-exempt: stacked carbon copies */
 .wire__reply {
   display: grid;
-  gap: 3px;
-  position: relative;
-  margin: 0 0 var(--space-2) var(--space-4);
+  gap: var(--space-1);
+  margin: 0 0 var(--space-2);
 }
-.wire__reply::before {
-  content: '';
-  position: absolute;
-  left: calc(-1 * var(--space-3));
-  top: var(--space-2);
-  bottom: calc(-1 * var(--space-2));
-  width: var(--space-2);
-  border: var(--bw-hair) solid var(--graphite);
-  border-right: 0;
-  border-bottom: 0;
-  border-top-left-radius: var(--radius-md);
-}
-.wire__replyto {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-muted);
-}
+/* layout-exempt: the stamp beside its sentence */
 .wire__quote {
-  padding: 3px var(--space-2);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: var(--space-2);
+  padding: 0;
   border: 0;
-  border-radius: var(--radius-lg);
-  background: var(--surface-inset);
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  line-height: var(--lh-tight);
-  color: var(--text-muted);
+  background: none;
   text-align: left;
   cursor: pointer;
 }
-#root .wire__quote {
-  text-transform: none; /* caps-exempt: a quoted cutline reads as the sentence it quotes */
+.wire__stamp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 0 var(--space-1);
+  border: var(--bw-hair) solid var(--graphite);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-tight);
+  color: var(--text-caption);
+  white-space: nowrap;
 }
-/* The clamp sits inside the padding, so no sliver of a third line shows. */
+.wire__hook { color: var(--graphite); }
+/* The quoted sentence: the read face, in the case the cutline wrote it. */
 .wire__quotetext {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-tight);
+  color: var(--text-muted);
 }
-.wire__quotedate { font-family: var(--font-mono); }
+#root .wire__quotetext {
+  text-transform: none; /* caps-exempt: a quoted cutline reads as the sentence it quotes */
+}
 /* The original, briefly marked after a quote scrolls to it. */
 @media (prefers-reduced-motion: no-preference) {
   .wire__row--found { animation: wire-found 1.6s ease-out; }
