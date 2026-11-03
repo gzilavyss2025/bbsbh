@@ -280,7 +280,7 @@ const LEVEL_WORDS = Object.fromEntries(Object.values(LEVELS).map(([words, abbr])
 // affiliated ball: his rows run on past it once he plays for his new club.
 export function lastAffiliated(rows, arrivedOn) {
   const year = Number(arrivedOn?.slice(0, 4))
-  const row = rows.find((r) => !year || r.season < year)
+  const row = rows.find((r) => r.season < year)
   return row ? { season: row.season, level: LEVEL_WORDS[row.level] ?? null } : null
 }
 
@@ -357,7 +357,7 @@ async function callFacts(personId, facts, { kind, date }) {
   if (kind !== 'option') return { callLine: shapeMinors(await range('leagueListId=milb_all', `${facts.season}-03-01`, shiftDays(date, -1)), facts.pitcher) }
   const trip = facts.calls.find((c) => c.down && near(c.down, date))
   const splits = await range('sportId=1', trip?.up ?? `${facts.season}-03-01`, shiftDays(date, -1))
-  return { stintLine: shapeLine(splits.find((s) => !s.team)?.stat ?? splits[0]?.stat, facts.pitcher) ?? { games: 0 } }
+  return { stintLine: shapeLine(splits.find((s) => !s.team)?.stat ?? splits[0]?.stat, facts.pitcher) }
 }
 
 // The sheet's other two views, read only when one is first chosen: every

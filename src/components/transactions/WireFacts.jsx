@@ -1,10 +1,8 @@
 import { useEffect, useId, useState } from 'react'
 import { factSeason, fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
 import { Button } from '../ui/control/Button.jsx'
-import { factLines, subjectsOf } from '../../api/transactions/templates.js'
+import { CALLS, factLines, subjectsOf } from '../../api/transactions/templates.js'
 import { FactSheet } from './FactSheet.jsx'
-
-const CALLS = new Set(['recall', 'option', 'selected'])
 
 // One move's player background on the offseason ledger. One player: his note
 // runs on in the move's sentence, with a "More" control that opens his full
@@ -16,42 +14,36 @@ const CALLS = new Set(['recall', 'option', 'selected'])
 // A card reads its facts when it mounts, since its note shows at once. A one-line
 // move shows no note, so it reads nothing until its More is first tapped.
 function useMoveFacts(story, date, subjects, enabled = true) {
-  const ids = subjects.map((s) => s.playerId).join(',')
-  // An injured-list move reads the stint it is about, and his line before it.
-  const ilIds = subjects.filter((s) => s.template.startsWith('il-')).map((s) => s.playerId).join(',')
-  // A trade reads his line up to the deal, so the note stays as it was that day.
-  const tradeIds = subjects.filter((s) => s.template === 'trade').map((s) => s.playerId).join(',')
-  // A call reads his line around it; an arrival, his last affiliated season.
-  const calls = subjects.filter((s) => CALLS.has(s.template)).map((s) => `${s.playerId}:${s.template}`).join(',')
-  const arrivalIds = subjects.filter((s) => s.template === 'arrival').map((s) => s.playerId).join(',')
+  // Each player's own template decides what more he reads: an injured-list move,
+  // the stint and his line before it; a trade, his line up to the deal (so the
+  // note stays as it was that day); a call, his line around it; an arrival, his
+  // last affiliated season.
+  const key = subjects.map((s) => `${s.playerId}:${s.template}`).join(',')
   const [facts, setFacts] = useState(null)
   useEffect(() => {
-    if (!ids || !enabled) return undefined
+    if (!key || !enabled) return undefined
     let live = true
     // The club that made the move is the one he joined, even when the move
     // itself sends him to a farm club.
     const opts = { season: factSeason(date), teamId: story.teamId }
-    const ilFor = new Set(ilIds.split(','))
-    const tradeFor = new Set(tradeIds.split(','))
-    const callFor = new Map(calls ? calls.split(',').map((c) => c.split(':')) : [])
-    const arrivalFor = new Set(arrivalIds.split(','))
     Promise.all(
-      ids.split(',').map((id) =>
-        fetchPlayerFacts(Number(id), {
+      key.split(',').map((pair) => {
+        const [id, template] = pair.split(':')
+        return fetchPlayerFacts(Number(id), {
           ...opts,
-          ilMove: ilFor.has(id) ? date : null,
-          tradeMove: tradeFor.has(id) ? date : null,
-          callMove: callFor.has(id) ? { kind: callFor.get(id), date } : null,
-          arrival: arrivalFor.has(id),
-        }),
-      ),
+          ilMove: template.startsWith('il-') ? date : null,
+          tradeMove: template === 'trade' ? date : null,
+          callMove: CALLS.has(template) ? { kind: template, date } : null,
+          arrival: template === 'arrival',
+        })
+      }),
     ).then(
       (all) => live && setFacts(all),
     )
     return () => {
       live = false
     }
-  }, [ids, ilIds, tradeIds, calls, arrivalIds, date, story.teamId, enabled])
+  }, [key, date, story.teamId, enabled])
   return facts
 }
 

@@ -391,7 +391,8 @@ function optionsSentence(facts) {
   return left == null ? null : left === 0 ? 'He is out of minor-league options.' : `He has ${word(left)} minor-league option${left === 1 ? '' : 's'} left.`
 }
 function moveSentence(facts, clause) {
-  const options = optionsSentence(facts) ? ` ${optionsSentence(facts)}` : ''
+  const o = optionsSentence(facts)
+  const options = o ? ` ${o}` : ''
   if (/outright/i.test(clause)) return `The move clears a 40-man roster spot, and he stays in the organization.${options}`
   if (/designated/i.test(clause)) return `He must now be traded, released or passed through waivers.${options}`
   return null
@@ -476,8 +477,9 @@ export function injuredStory(facts, { placed, moveDate = null, clause = '' }) {
 // options left. A selected contract is a first call-up when he has not
 // debuted yet, and otherwise a trip up like a recall.
 const daysText = (n) => (n === 1 ? 'one day' : `${n} days`)
+const near = (a, b) => Math.abs(daysBetween(a, b)) <= 1
 function tripSentence(facts, moveDate) {
-  const at = (facts.calls ?? []).findIndex((c) => c.up && Math.abs(daysBetween(c.up, moveDate)) <= 1)
+  const at = (facts.calls ?? []).findIndex((c) => c.up && near(c.up, moveDate))
   if (at < 0) return null
   const prev = facts.calls[at - 1]
   const last = prev?.up && prev.down ? `; the last lasted ${daysText(daysBetween(prev.up, prev.down))}` : ''
@@ -487,10 +489,11 @@ function beforeCallSentence(facts, who) {
   const m = facts.callLine
   return m?.line?.games ? `${who} ${didText(m.line, facts.pitcher)} ${minorsWhere(m)} in ${facts.season} before the call.` : null
 }
+export const CALLS = new Set(['recall', 'option', 'selected'])
 export function callStory(facts, { kind, moveDate }) {
   const name = facts.lastName ?? 'He'
   if (kind === 'option') {
-    const c = (facts.calls ?? []).find((x) => x.down && Math.abs(daysBetween(x.down, moveDate)) <= 1)
+    const c = (facts.calls ?? []).find((x) => x.down && near(x.down, moveDate))
     // No day count: a trip can hold a stint on the injured list.
     const line = facts.stintLine
     let stint = null
@@ -551,14 +554,9 @@ export function factLines(template, facts, ctx = {}) {
     const note = injuredStory(facts, { placed: template === 'il-placed', moveDate: ctx.moveDate, clause: ctx.clause ?? '' })
     return note ? [note] : []
   }
-  if (template === 'recall' || template === 'option' || template === 'selected') {
-    const note = callStory(facts, { kind: template, moveDate: ctx.moveDate })
-    return note ? [note] : []
-  }
-  if (template === 'retired' || template === 'arrival') {
-    const note = template === 'retired' ? retiredStory(facts) : arrivalStory(facts)
-    return note ? [note] : []
-  }
+  const note = CALLS.has(template) ? callStory(facts, { kind: template, moveDate: ctx.moveDate })
+    : template === 'retired' ? retiredStory(facts) : template === 'arrival' ? arrivalStory(facts) : null
+  if (note) return [note]
 
   return []
 }

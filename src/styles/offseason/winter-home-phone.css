@@ -43,10 +43,8 @@
     height: var(--shot-2xs-w);
     border-width: var(--bw-hair);
   }
-}
-/* An open card's sentence, and the Hide in it, stays in view while the card scrolls under it.
-   The home slate's compact bar is fixed at the top, so there it rides below that bar. */
-@media (max-width: 739px) {
+  /* An open card's sentence, and the Hide in it, stays in view while the card scrolls under it.
+     The home slate's compact bar is fixed at the top, so there it rides below that bar. */
   /* A grid cell would hold the sticky sentence to its own height; a wrapping row lets it ride
      the whole card. Same order as the grid: the header line, the sentence, the card. */
   /* layout-exempt: an open row's header line over a sticky sentence */
