@@ -44,3 +44,13 @@ surface, wire and club alike. A club's card is `TxStory`; it carries no dateline
 and the club ledger page (`screens/team/TeamTransactionsPage.jsx`) groups by day around it,
 which took 950 of 3,199 repeated datelines off the club surfaces — 29.7% of cards restated
 the date of the card before them. The wire's club chip goes to that page.
+
+## The wire standard lives in `MoveItems`
+
+Every surface that draws moves goes through `MoveItems`, so the treatment can't drift:
+a major move (`api/transactions/major.js`) is a full card and the rest one line each,
+every row carries its player notes (`WireFacts.jsx`, written by
+`api/transactions/templates.js`), and a move that answers an earlier one shows its
+reply quote (`ReplyQuote.jsx`, rules in `api/transactions/replies.js`). A club ledger
+passes `teamId`, since its stories carry no club. The player page's moves module is
+the one surface that draws its own.
