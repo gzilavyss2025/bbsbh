@@ -373,53 +373,5 @@
       114378,
       427204
     ]
-  },
-  {
-    "teamId": 135,
-    "season": 2021,
-    "managerIds": [
-      461344,
-      435401
-    ]
-  },
-  {
-    "teamId": 135,
-    "season": 2023,
-    "managerIds": [
-      118942,
-      134342
-    ]
-  },
-  {
-    "teamId": 140,
-    "season": 2023,
-    "managerIds": [
-      111136,
-      461416
-    ]
-  },
-  {
-    "teamId": 140,
-    "season": 2024,
-    "managerIds": [
-      111136,
-      461416
-    ]
-  },
-  {
-    "teamId": 141,
-    "season": 2024,
-    "managerIds": [
-      456120,
-      427204
-    ]
-  },
-  {
-    "teamId": 158,
-    "season": 2024,
-    "managerIds": [
-      580268,
-      430001
-    ]
   }
 ]

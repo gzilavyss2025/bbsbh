@@ -56,7 +56,7 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 import { MANAGER_HISTORY_FIRST_SEASON } from '../src/lib/records/managerHistory.js'
 import { mergeSeasonRange, mergeCoverage, sharedCoverage, mergeNeedsResearch } from './lib/records/manager-history-merge.mjs'
 import { buildStaffIndex } from './lib/records/manager-staff-index.mjs'
-import { teamSeasonGames } from './lib/records/manager-split.mjs'
+import { teamSeasonGames, seedSegments } from './lib/records/manager-split.mjs'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -248,23 +248,18 @@ async function attachRecords(byPersonId, teamSeasonManagers, seed) {
       const stint = stintIndex.get(`${managerId}:${p.teamId}:${p.season}`)
       if (stint) stint.record = tally(games)
     } else {
-      const { outgoingManagerId, incomingManagerId, transitionDate } = p.seed
-      const before = games.filter((g) => g.date < transitionDate)
-      const after = games.filter((g) => g.date >= transitionDate)
-      const outStint = stintIndex.get(`${outgoingManagerId}:${p.teamId}:${p.season}`)
-      const inStint = stintIndex.get(`${incomingManagerId}:${p.teamId}:${p.season}`)
-      if (outStint) {
-        outStint.record = tally(before)
-        outStint.transitionDate = transitionDate
+      const segments = seedSegments(p.seed)
+      for (const { managerId, from, to } of segments) {
+        const stint = stintIndex.get(`${managerId}:${p.teamId}:${p.season}`)
+        if (!stint) continue
+        stint.record = tally(games.filter((g) => (from === null || g.date >= from) && (to === null || g.date < to)))
+        stint.transitionDate = from ?? to // the date they took over; the first manager's is the date they left
       }
-      if (inStint) {
-        inStint.record = tally(after)
-        inStint.transitionDate = transitionDate
-      }
-      // Any OTHER manager-job personId in this team-season (rare — a seed
-      // only models a single two-way split) is left unresolved.
+      // Any OTHER manager-job personId in this team-season (one the seed does
+      // not name) is left unresolved.
+      const named = new Set(segments.map((x) => x.managerId))
       for (const managerId of teamSeasonManagers.get(p.tsKey)) {
-        if (managerId === outgoingManagerId || managerId === incomingManagerId) continue
+        if (named.has(managerId)) continue
         const stint = stintIndex.get(`${managerId}:${p.teamId}:${p.season}`)
         if (stint) stint.sharedSeason = true
       }
