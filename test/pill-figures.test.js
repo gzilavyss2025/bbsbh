@@ -44,7 +44,8 @@ const decl = (body, property) =>
 // The figure hosts: the partial, the host selector, and the component that
 // renders it (and so must opt in).
 const HOSTS = [
-  { css: '04a-wire-dock.css', sel: '.wiredock__count', jsx: 'components/transactions/WireDock.jsx' },
+  // The wire's rail dropped its count (2026-11-03); the bracket's rail keeps one.
+  { css: '04a-wire-dock.css', sel: '.wiredock__count', jsx: 'components/bracket/BracketDock.jsx' },
   { css: 'charts/winprob.css', sel: '.winprob__ledger-chip', jsx: 'components/charts/winprob/SwingLedger.jsx' },
   { css: 'charts/winprob.css', sel: '.winprob__change', jsx: 'components/charts/WinProbChart.jsx' },
   { css: 'leaders/board.css', sel: '.tlead__level', jsx: 'components/teamstats/TeamLeaders.jsx' },
