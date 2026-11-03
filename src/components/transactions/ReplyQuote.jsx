@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchLevelSeasonDates } from '../../api/schedule.js'
 import { extraManCandidates, fetchClubDay, findReplies, gameReply } from '../../api/transactions/replies.js'
-import { apDate } from '../../api/transactions/templates.js'
+import { apDate } from '../../lib/time/apDate.js'
 import { useNav } from '../../lib/nav.js'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 

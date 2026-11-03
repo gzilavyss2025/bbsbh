@@ -21,6 +21,7 @@
 //   fallback      every other move: no note, the sheet on a tap
 // Note the feed's own codes: DFA is "declared free agency", DES is designated.
 import { teamAbbr, teamClubName, teamLocationName } from '../../lib/teams.js'
+import { apDate } from '../../lib/time/apDate.js'
 
 // The player a move is about: the first face on the rail, else the first
 // player the sentence names.
@@ -311,11 +312,6 @@ function originSentence(facts, name, moveDate) {
 // "June 9").
 // A month with no day is spelled out ("December 2025").
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-const AP_MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
-export function apDate(iso) {
-  const [, m, d] = iso.split('-').map(Number)
-  return `${AP_MONTHS[m - 1]} ${d}`
-}
 // "an Aug. 3 trade", "a July 11 trade".
 const aMonth = (when) => (/^(Aug|April|Oct)/.test(when) ? 'an' : 'a')
 const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000)

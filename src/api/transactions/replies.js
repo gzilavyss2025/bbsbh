@@ -1,7 +1,7 @@
 import { getJson } from '../statsapi.js'
 import { gamePath } from '../../lib/route.js'
 import { shiftDays } from '../../lib/time/standingsDates.js'
-import { apDate } from './templates.js'
+import { apDate } from '../../lib/time/apDate.js'
 
 // Replies on the transactions list: a roster move that exists BECAUSE of an
 // earlier one shows a faded quote of the move it answers (MoveRow.jsx draws it).
