@@ -320,14 +320,6 @@
     ]
   },
   {
-    "teamId": 108,
-    "season": 1978,
-    "managerIds": [
-      114414,
-      492643
-    ]
-  },
-  {
     "teamId": 133,
     "season": 1978,
     "managerIds": [
@@ -473,14 +465,6 @@
     "managerIds": [
       121343,
       110521
-    ]
-  },
-  {
-    "teamId": 108,
-    "season": 1981,
-    "managerIds": [
-      114414,
-      118451
     ]
   },
   {
@@ -770,14 +754,6 @@
     ]
   },
   {
-    "teamId": 108,
-    "season": 1988,
-    "managerIds": [
-      121406,
-      122900
-    ]
-  },
-  {
     "teamId": 110,
     "season": 1988,
     "managerIds": [
@@ -912,14 +888,6 @@
     "managerIds": [
       113275,
       492665
-    ]
-  },
-  {
-    "teamId": 108,
-    "season": 1991,
-    "managerIds": [
-      120874,
-      121343
     ]
   },
   {
@@ -1136,14 +1104,6 @@
     ]
   },
   {
-    "teamId": 108,
-    "season": 1999,
-    "managerIds": [
-      492632,
-      427309
-    ]
-  },
-  {
     "teamId": 117,
     "season": 1999,
     "managerIds": [
@@ -1266,14 +1226,6 @@
     ]
   },
   {
-    "teamId": 109,
-    "season": 2004,
-    "managerIds": [
-      111423,
-      120349
-    ]
-  },
-  {
     "teamId": 117,
     "season": 2004,
     "managerIds": [
@@ -1379,14 +1331,6 @@
     ]
   },
   {
-    "teamId": 109,
-    "season": 2009,
-    "managerIds": [
-      134460,
-      118942
-    ]
-  },
-  {
     "teamId": 115,
     "season": 2009,
     "managerIds": [
@@ -1408,14 +1352,6 @@
     "managerIds": [
       427000,
       427427
-    ]
-  },
-  {
-    "teamId": 109,
-    "season": 2010,
-    "managerIds": [
-      114752,
-      134460
     ]
   },
   {
@@ -1689,38 +1625,6 @@
   {
     "teamId": 158,
     "season": 2024,
-    "managerIds": [
-      580268,
-      430001
-    ]
-  },
-  {
-    "teamId": 108,
-    "season": 2025,
-    "managerIds": [
-      123965,
-      119268
-    ]
-  },
-  {
-    "teamId": 114,
-    "season": 2025,
-    "managerIds": [
-      519390,
-      503360
-    ]
-  },
-  {
-    "teamId": 141,
-    "season": 2025,
-    "managerIds": [
-      456120,
-      427204
-    ]
-  },
-  {
-    "teamId": 158,
-    "season": 2025,
     "managerIds": [
       580268,
       430001
