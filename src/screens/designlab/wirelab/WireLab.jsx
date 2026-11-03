@@ -19,6 +19,8 @@ const TEMPLATES = [
   ['cut', 'Outrighted, designated, released, claimed'],
   ['deal', 'Signings and trades'],
   ['injured', 'Injured list'],
+  ['call', 'Recalled, optioned, selected'],
+  ['other', 'Arrivals from independent ball, retirements'],
   ['fallback', 'Everything else (sheet only)'],
 ]
 // Each card picks a template per player (subjectsOf); a story is filed under
@@ -31,6 +33,11 @@ const GROUP_OF = {
   signing: 'deal',
   'il-placed': 'injured',
   'il-activated': 'injured',
+  recall: 'call',
+  option: 'call',
+  selected: 'call',
+  arrival: 'other',
+  retired: 'other',
 }
 function groupOf(story) {
   const groups = new Set(subjectsOf(story).map((s) => GROUP_OF[s.template]).filter(Boolean))

@@ -4,6 +4,8 @@ import { Button } from '../ui/control/Button.jsx'
 import { factLines, subjectsOf } from '../../api/transactions/templates.js'
 import { FactSheet } from './FactSheet.jsx'
 
+const CALLS = new Set(['recall', 'option', 'selected'])
+
 // One move's player background on the offseason ledger. One player: his note
 // runs on in the move's sentence, with a "More" control that opens his full
 // sheet. A busy day's folded story names several; the card keeps to the
@@ -19,6 +21,9 @@ function useMoveFacts(story, date, subjects, enabled = true) {
   const ilIds = subjects.filter((s) => s.template.startsWith('il-')).map((s) => s.playerId).join(',')
   // A trade reads his line up to the deal, so the note stays as it was that day.
   const tradeIds = subjects.filter((s) => s.template === 'trade').map((s) => s.playerId).join(',')
+  // A call reads his line around it; an arrival, his last affiliated season.
+  const calls = subjects.filter((s) => CALLS.has(s.template)).map((s) => `${s.playerId}:${s.template}`).join(',')
+  const arrivalIds = subjects.filter((s) => s.template === 'arrival').map((s) => s.playerId).join(',')
   const [facts, setFacts] = useState(null)
   useEffect(() => {
     if (!ids || !enabled) return undefined
@@ -28,9 +33,17 @@ function useMoveFacts(story, date, subjects, enabled = true) {
     const opts = { season: factSeason(date), teamId: story.teamId }
     const ilFor = new Set(ilIds.split(','))
     const tradeFor = new Set(tradeIds.split(','))
+    const callFor = new Map(calls ? calls.split(',').map((c) => c.split(':')) : [])
+    const arrivalFor = new Set(arrivalIds.split(','))
     Promise.all(
       ids.split(',').map((id) =>
-        fetchPlayerFacts(Number(id), { ...opts, ilMove: ilFor.has(id) ? date : null, tradeMove: tradeFor.has(id) ? date : null }),
+        fetchPlayerFacts(Number(id), {
+          ...opts,
+          ilMove: ilFor.has(id) ? date : null,
+          tradeMove: tradeFor.has(id) ? date : null,
+          callMove: callFor.has(id) ? { kind: callFor.get(id), date } : null,
+          arrival: arrivalFor.has(id),
+        }),
       ),
     ).then(
       (all) => live && setFacts(all),
@@ -38,7 +51,7 @@ function useMoveFacts(story, date, subjects, enabled = true) {
     return () => {
       live = false
     }
-  }, [ids, ilIds, tradeIds, date, story.teamId, enabled])
+  }, [ids, ilIds, tradeIds, calls, arrivalIds, date, story.teamId, enabled])
   return facts
 }
 
@@ -88,6 +101,10 @@ export function WireFacts({ story, date, line = false, children }) {
           ) : (
             <p className="factsheet__none" aria-busy="true">Loading…</p>
           )}
+          {/* The sentence's Hide scrolls away above a long card; this one waits at its foot. */}
+          <Button size="control" skin="ghost" className="wirefacts__close" aria-controls={sheetId} onClick={() => setOpen(false)}>
+            Hide
+          </Button>
         </div>
       )}
     </>
