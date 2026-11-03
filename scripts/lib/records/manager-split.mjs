@@ -6,6 +6,18 @@
 // never a guess: either one clean date, or a status saying why a person has to
 // look.
 
+// A seed entry -> [{ managerId, from, to }] in game order; `from` is inclusive and
+// `to` exclusive (null = open). An entry is `transitions: [{ date, outgoingManagerId,
+// incomingManagerId }]`, or the single-change shorthand { transitionDate,
+// outgoingManagerId, incomingManagerId } (one transition).
+export function seedSegments(entry) {
+  const ts = entry.transitions ?? [{ date: entry.transitionDate, ...entry }]
+  return [
+    { managerId: ts[0].outgoingManagerId, from: null, to: ts[0].date },
+    ...ts.map((t, i) => ({ managerId: t.incomingManagerId, from: t.date, to: ts[i + 1]?.date ?? null })),
+  ]
+}
+
 // A /schedule?teamId=…&gameType=R response -> [{ date, won }], Final games with
 // a winner only, in schedule order (a doubleheader's games share a date). A
 // suspended game that was resumed is listed twice under one gamePk (Brewers
@@ -66,8 +78,9 @@ export function findSplit(games, out, inc = null) {
 // one of exactly two managers.
 export function pickManagers(managers, outgoingName) {
   if (managers.length !== 2) return null
-  const needle = outgoingName.toLowerCase()
-  const hits = managers.filter((m) => m.name.toLowerCase().includes(needle))
+  const plain = (x) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+  const needle = plain(outgoingName)
+  const hits = managers.filter((m) => plain(m.name).includes(needle))
   if (hits.length !== 1) return null
   const other = managers.find((m) => m !== hits[0])
   return { outgoingManagerId: hits[0].id, incomingManagerId: other.id }
