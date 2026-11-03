@@ -7,6 +7,7 @@ import { TEAM_COLOR_PAIRS, MLB_TEAM_COLORS, MLB_TEAM_COLORS_STORE, milbBrandPair
 import { byTeam, byTreatment as byTreatmentIn, liveStore, treatmentRecord } from './tuningStore.js'
 import { registerIdentityStore } from './identity/overlay.js'
 import { customMarkFor } from './customMarks.js'
+import { playerPhotosOff } from './headshot/lockout.js'
 import MLB_TREATMENT_TUNING_JSON from './data/mlb-treatment-tuning.json' with { type: 'json' }
 import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 import MONO_LOGO_MANIFEST from './data/mono-logo-manifest.json' with { type: 'json' }
@@ -930,7 +931,7 @@ export const HEADSHOT_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload'
 // shared width means every call site reuses a single cached image; callers
 // should only override it for a materially larger surface.
 export function realHeadshotUrl(personId, width = 320) {
-  if (!personId) return null
+  if (!personId || playerPhotosOff()) return null
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
 }
 
@@ -944,7 +945,7 @@ export function realHeadshotUrl(personId, width = 320) {
 // matches the app's floating-cutout treatment) → milb (a real face for a
 // prospect) → team logo → monogram.
 export function milbHeadshotUrl(personId, width = 320) {
-  if (!personId) return null
+  if (!personId || playerPhotosOff()) return null
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/milb/current`
 }
 
@@ -991,8 +992,8 @@ export function coachHeadshotUrl(personId, width = 320) {
 export function headshotSources(personId, { coach = false, mlb = false } = {}) {
   if (!personId) return []
   if (coach) return [coachHeadshotUrl(personId)]
-  if (mlb) return [realHeadshotUrl(personId), coachHeadshotUrl(personId)]
-  return [realHeadshotUrl(personId), milbHeadshotUrl(personId), coachHeadshotUrl(personId)]
+  if (mlb) return [realHeadshotUrl(personId), coachHeadshotUrl(personId)].filter(Boolean)
+  return [realHeadshotUrl(personId), milbHeadshotUrl(personId), coachHeadshotUrl(personId)].filter(Boolean)
 }
 
 // ---------------------------------------------------------------------------
