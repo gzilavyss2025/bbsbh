@@ -36,58 +36,71 @@ function direction(desc) {
   return ''
 }
 
-const lastName = (full) => {
+export const lastName = (full) => {
   const p = String(full).trim().split(' ')
-  return /^(Jr\.|Sr\.|II|III|IV)$/.test(p.at(-1)) ? p.slice(-2).join(' ') : p.at(-1)
+  return /^(Jr\.?|Sr\.?|II|III|IV)$/.test(p.at(-1)) ? p.slice(-2).join(' ') : p.at(-1)
 }
 
-// Last names of the runners the play's own text says scored.
-function scorers(desc) {
+// Last names of the runners the play's own text says scored. A suffix keeps its
+// period out of the way first ("Fernando Tatis Jr. scores."), since the name pattern
+// stops at a period.
+export function scorers(desc) {
   const out = []
-  for (const m of desc.matchAll(/(?<=^|[.,] )([A-Z][^.,]*?) scores\./g)) out.push(lastName(m[1]))
+  const text = String(desc).replace(/\b(Jr|Sr)\./g, '$1')
+  for (const m of text.matchAll(/(?<=^|[.,] )([A-Z][^.,]*?) scores\./g)) out.push(lastName(m[1]).replace(/ (Jr|Sr)$/, ' $1.'))
   return out
 }
 
 const list = (xs) =>
   xs.length <= 1 ? xs.join('') : xs.length === 2 ? `${xs[0]} and ${xs[1]}` : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`
 
-// What the batter did, in a few plain words: "singled to center, scoring Yelich".
-// An event it has no words for falls back to the feed's own event name.
-export function describePlay(play) {
+// What the batter did, in parts: the verb ("singled to center"), whether the pitcher
+// reads as "off" (a hit) or "against" (an out), and the runners who scored
+// (", scoring Yelich", or ''). An event it has no words for falls back to the feed's
+// own event name.
+export function playParts(play) {
   const ev = String(play?.result?.event ?? '').toLowerCase()
   const desc = String(play?.result?.description ?? '')
   const runs = scorers(desc)
   const dir = direction(desc)
   const to = dir ? ` to ${dir}` : ''
   const scoring = runs.length ? `, scoring ${list(runs)}` : ''
-  if (ev === 'single') return `singled${to}${scoring}`
-  if (ev === 'double') return `doubled${to}${scoring}`
-  if (ev === 'triple') return `tripled${to}${scoring}`
+  const out = (verb, { hit = false, scores = false } = {}) => ({ verb, hit, scoring: scores ? scoring : '' })
+  if (ev === 'single') return out(`singled${to}`, { hit: true, scores: true })
+  if (ev === 'double') return out(`doubled${to}`, { hit: true, scores: true })
+  if (ev === 'triple') return out(`tripled${to}`, { hit: true, scores: true })
   if (ev === 'home run') {
     const n = runs.length + 1
     const kind = n === 1 ? 'a solo homer' : n === 2 ? 'a two-run homer' : n === 3 ? 'a three-run homer' : 'a grand slam'
-    return `hit ${kind}${to}`
+    return out(`hit ${kind}${to}`, { hit: true })
   }
+  if (ev.includes('sac fly')) return out(`hit a sacrifice fly${to}`, { scores: true })
+  if (ev.includes('sac bunt')) return out('bunted', { scores: true })
   if (ev.includes('strikeout')) {
-    if (/double play/.test(desc)) return 'struck out into a double play'
-    return /called out on strikes/.test(desc) ? 'struck out looking' : 'struck out swinging'
+    if (ev.includes('double play') || /double play/.test(desc)) return out('struck out into a double play')
+    return out(/called out on strikes/.test(desc) ? 'struck out looking' : 'struck out swinging')
   }
-  if (ev === 'triple play') return 'hit into a triple play'
-  if (ev.includes('double play') || /double play/.test(desc)) return 'grounded into a double play'
-  if (ev === 'groundout') return `grounded out${to}${scoring}`
-  if (ev === 'flyout') return `flew out${to}${scoring}`
-  if (ev === 'lineout') return `lined out${to}${scoring}`
-  if (ev === 'pop out' || ev === 'popout') return `popped out${to}`
-  if (ev === 'forceout' || ev === 'force out') return `hit into a force out${scoring}`
-  if (ev.includes('sac fly')) return `hit a sacrifice fly${to}${scoring}`
-  if (ev.includes('sac bunt')) return `bunted${scoring}`
-  if (ev === 'walk') return runs.length ? 'walked in a run' : 'walked'
-  if (ev === 'intent walk') return runs.length ? 'was walked on purpose, forcing in a run' : 'was walked on purpose'
-  if (ev === 'hit by pitch') return runs.length ? 'was hit by a pitch, forcing in a run' : 'was hit by a pitch'
-  if (ev.includes('error')) return `reached on an error${scoring}`
-  if (ev.includes('fielders choice') || ev.includes("fielder's choice")) return `reached on a fielder’s choice${scoring}`
-  if (ev.includes('interference')) return `reached on catcher’s interference${scoring}`
-  return ev || 'batted'
+  if (ev === 'triple play') return out('hit into a triple play')
+  // The event name decides a double play, not any mention of one in the text.
+  if (ev.includes('double play') || /\bdp\b/.test(ev)) return out('grounded into a double play')
+  if (ev === 'groundout') return out(`grounded out${to}`, { scores: true })
+  if (ev === 'flyout') return out(`flew out${to}`, { scores: true })
+  if (ev === 'lineout') return out(`lined out${to}`, { scores: true })
+  if (ev === 'pop out' || ev === 'popout') return out(`popped out${to}`)
+  if (ev === 'forceout' || ev === 'force out') return out('hit into a force out', { scores: true })
+  if (ev === 'walk') return out(runs.length ? 'walked in a run' : 'walked')
+  if (ev === 'intent walk') return out(runs.length ? 'was walked on purpose, forcing in a run' : 'was walked on purpose')
+  if (ev === 'hit by pitch') return out(runs.length ? 'was hit by a pitch, forcing in a run' : 'was hit by a pitch')
+  if (ev.includes('error')) return out('reached on an error', { scores: true })
+  if (ev.includes('fielders choice') || ev.includes("fielder's choice")) return out('reached on a fielder\u2019s choice', { scores: true })
+  if (ev.includes('interference')) return out('reached on catcher\u2019s interference', { scores: true })
+  return out(ev || 'batted')
+}
+
+// The batter's line as one string: "singled to center, scoring Yelich".
+export const describePlay = (play) => {
+  const { verb, scoring } = playParts(play)
+  return verb + scoring
 }
 
 // One game's plays -> the rows worth keeping. `game` is a schedule row
@@ -119,6 +132,14 @@ export function playRows(game, plays) {
     })
   })
   return rows
+}
+
+// One game's rows, or an error when the feed has no plays at all. A Final game always
+// has plays, so an empty answer means MLB has not published the feed yet; throwing
+// keeps the game off the generator's done list so the next run reads it again.
+export function gameRowsOrThrow(game, plays) {
+  if (!Array.isArray(plays) || plays.length === 0) throw new Error(`no winProbability plays for game ${game.gamePk}`)
+  return playRows(game, plays)
 }
 
 // Highest first; the game and play order only make the output stable.

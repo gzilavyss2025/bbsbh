@@ -13,6 +13,7 @@
 // the pressure baseline stated in the sentence, every sentence built from the data and nothing guessed.
 import { readFileSync, writeFileSync } from 'node:fs'
 import { getJson } from '../../scripts/lib/statsapi.mjs'
+import { lastName, playParts } from '../../scripts/lib/tensest/tensest.mjs'
 
 const [logPath, liPath, outDir] = process.argv.slice(2)
 const log = JSON.parse(readFileSync(logPath, 'utf8'))
@@ -21,69 +22,17 @@ const MIL = 158
 
 // ---------- small helpers ----------
 const ord = (n) => { const m = n % 100; const s = m >= 11 && m <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th'); return `${n}${s}` }
-const lastName = (full) => { const p = String(full).trim().split(' '); return /^(Jr\.|Sr\.|II|III|IV)$/.test(p.at(-1)) ? p.slice(-2).join(' ') : p.at(-1) }
 const poss = (name) => (name.endsWith('s') ? `${name}’` : `${name}’s`)
 const mon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const dateLabel = (d) => `${mon[Number(d.slice(5, 7)) - 1]} ${Number(d.slice(8, 10))}`
 const when = (e) => `${e.about.isTopInning ? 'top' : 'bottom'} of the ${ord(e.about.inning)}`
 const Cap = (s) => s[0].toUpperCase() + s.slice(1)
 const fmtInt = (n) => n.toLocaleString('en-US')
-const list = (xs) => (xs.length <= 1 ? xs.join('') : xs.length === 2 ? `${xs[0]} and ${xs[1]}` : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`)
 
-// Field words in a play description -> a direction ("to right").
-const POS = { 'left fielder': 'left', 'center fielder': 'center', 'right fielder': 'right', shortstop: 'short', 'third baseman': 'third', 'second baseman': 'second', 'first baseman': 'first', pitcher: 'the pitcher', catcher: 'the catcher' }
-function direction(desc) {
-  const hr = /to (left|right) center field/.exec(desc)
-  if (hr) return `${hr[1]}-center`
-  const f = /to (left|center|right) field\b/.exec(desc)
-  if (f) return f[1]
-  for (const [k, v] of Object.entries(POS)) if (new RegExp(`\\b${k}\\b`).test(desc.split('.')[0])) return v
-  return ''
-}
-function scorers(desc) {
-  const out = []
-  for (const m of desc.matchAll(/(?<=^|[.,] )([A-Z][^.,]*?) scores\./g)) out.push(lastName(m[1]))
-  return out
-}
-const unmapped = new Map()
-
-// One at-bat -> { verb, hit (true: "off" the pitcher, false: "against"), scoring ("and scored X" or "") }
-function describe(e) {
-  const ev = (e.result.event || '').toLowerCase(), d = e.result.description || ''
-  const runs = scorers(d), dir = direction(d)
-  const to = dir ? ` to ${dir}` : ''
-  const scored = runs.length ? `, scoring ${list(runs)}` : ''
-  let verb, hit = false, scoring = scored
-  if (ev === 'single') { verb = `singled${to}`; hit = true }
-  else if (ev === 'double') { verb = `doubled${to}`; hit = true }
-  else if (ev === 'triple') { verb = `tripled${to}`; hit = true }
-  else if (ev === 'home run') {
-    const n = runs.length + 1
-    verb = `hit ${n === 1 ? 'a solo homer' : n === 2 ? 'a two-run homer' : n === 3 ? 'a three-run homer' : 'a grand slam'}${to}`
-    hit = true; scoring = ''
-  }
-  else if (ev.includes('strikeout')) { verb = /called out on strikes/.test(d) ? 'struck out looking' : 'struck out swinging'; if (/double play/.test(d)) verb = 'struck out into a double play'; scoring = '' }
-  else if (ev.includes('double play') || /double play/.test(d)) { verb = 'grounded into a double play'; scoring = '' }
-  else if (ev === 'triple play') { verb = 'hit into a triple play'; scoring = '' }
-  else if (ev === 'groundout') verb = `grounded out${to}`
-  else if (ev === 'flyout') verb = `flew out${to}`
-  else if (ev === 'lineout') verb = `lined out${to}`
-  else if (ev === 'pop out' || ev === 'popout') { verb = `popped out${to}`; scoring = '' }
-  else if (ev === 'forceout' || ev === 'force out') verb = 'hit into a force out'
-  else if (ev.includes('sac fly')) verb = `hit a sacrifice fly${to}`
-  else if (ev.includes('sac bunt')) verb = 'bunted'
-  else if (ev === 'walk') { verb = runs.length ? 'walked in a run' : 'walked'; scoring = '' }
-  else if (ev === 'intent walk') { verb = runs.length ? 'was walked on purpose, forcing in a run' : 'was walked on purpose'; scoring = '' }
-  else if (ev === 'hit by pitch') { verb = runs.length ? 'was hit by a pitch, forcing in a run' : 'was hit by a pitch'; scoring = '' }
-  else if (ev.includes('error')) verb = 'reached on an error'
-  else if (ev.includes('fielders choice') || ev.includes("fielder's choice")) verb = "reached on a fielder’s choice"
-  else if (ev.includes('interference')) verb = 'reached on catcher’s interference'
-  else { verb = ev || 'batted'; unmapped.set(ev, (unmapped.get(ev) || 0) + 1) }
-  return { verb, hit, scoring }
-}
-// "Pratt singled to center off Rasmussen" / "DeLuca struck out swinging against Megill"
+// "Pratt singled to center off Rasmussen" / "DeLuca struck out swinging against Megill".
+// The wording itself is the site's (scripts/lib/tensest/tensest.mjs), not a copy.
 const play = (e) => {
-  const x = describe(e), b = lastName(e.matchup.batter.fullName), p = lastName(e.matchup.pitcher.fullName)
+  const x = playParts(e), b = lastName(e.matchup.batter.fullName), p = lastName(e.matchup.pitcher.fullName)
   return { text: `${b} ${x.verb} ${x.hit ? 'off' : 'against'} ${p}`, scoring: x.scoring, b, p, verb: x.verb }
 }
 
@@ -208,4 +157,3 @@ writeFileSync(`${outDir}/tensest.json`, JSON.stringify(out))
 const ok = rows.filter((r) => r.available)
 console.log(`pivotal rows: ${rows.length}; with data: ${ok.length}; wire to wire: ${ok.filter((r) => r.wireToWire).length}; no scare: ${ok.filter((r) => r.scare.startsWith('No real')).length}; missing tookLead: ${ok.filter((r) => !r.tookLead).length}`)
 console.log(`tensest rows: ${out.length} (bat ${lists.bat.length}, pit ${lists.pit.length}, league ${lists.league.length})`)
-console.log('unmapped events:', JSON.stringify([...unmapped]))

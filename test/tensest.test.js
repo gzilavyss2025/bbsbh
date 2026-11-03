@@ -1,7 +1,8 @@
 // The pure half of gen-tensest.mjs: wording a play, and keeping the tensest rows.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { addRows, assertFloorHolds, describePlay, emptyStore, mergeTop, playRows, rankTop } from '../scripts/lib/tensest/tensest.mjs'
+import { addRows, assertFloorHolds, describePlay, emptyStore, gameRowsOrThrow, mergeTop, playRows, rankTop } from '../scripts/lib/tensest/tensest.mjs'
+import { isPostseason, rankLabel } from '../src/api/tensest/tensest.js'
 
 const play = (event, description, extra = {}) => ({
   result: { event, description },
@@ -61,4 +62,29 @@ test('assertFloorHolds throws when a full list has run down to the floor', () =>
   const full = Array.from({ length: 25 }, (_, k) => ({ ...r(k, 4), rank: 25 }))
   assert.throws(() => assertFloorHolds({ league: [], teams: { 1: { bat: full, pit: [] } } }), /floor/)
   assert.doesNotThrow(() => assertFloorHolds({ league: [], teams: { 1: { bat: [{ ...r(1, 4), rank: 1 }], pit: [] } } }))
+})
+
+test('describePlay counts a runner whose name ends in Jr.', () => {
+  const d = 'Juan Soto homers (10) on a fly ball to right field. Fernando Tatis Jr. scores.'
+  assert.equal(describePlay(play('Home Run', d)), 'hit a two-run homer to right')
+  assert.equal(describePlay(play('Single', 'Soto singles on a line drive to center field. Fernando Tatis Jr. scores.')), 'singled to center, scoring Tatis Jr.')
+})
+
+test('describePlay words a sac-fly double play by its event, not as a grounder', () => {
+  const d = 'Soto flies out to right fielder Jones. Runner out at home. Smith scores.'
+  assert.equal(describePlay(play('Sac Fly Double Play', d)), 'hit a sacrifice fly to right, scoring Smith')
+  assert.equal(describePlay(play('Grounded Into DP', 'Soto grounds into a double play.')), 'grounded into a double play')
+})
+
+test('gameRowsOrThrow refuses an empty feed so the game is read again next run', () => {
+  assert.throws(() => gameRowsOrThrow(game, []), /no winProbability plays/)
+  assert.throws(() => gameRowsOrThrow(game, null), /no winProbability plays/)
+  assert.equal(gameRowsOrThrow(game, [play('Single', 'x', { leverageIndex: 6 })]).length, 1)
+})
+
+test('rankLabel marks a shared rank with T and isPostseason is every type but R', () => {
+  const rows = [{ rank: 1 }, { rank: 2 }, { rank: 2 }]
+  assert.deepEqual(rows.map((x) => rankLabel(x, rows)), ['1', 'T2', 'T2'])
+  assert.equal(isPostseason({ gt: 'R' }), false)
+  assert.equal(isPostseason({ gt: 'W' }), true)
 })

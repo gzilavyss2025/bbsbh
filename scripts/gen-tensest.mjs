@@ -10,7 +10,11 @@
 // reads only Final games not on that list, folds their tense plays into the lists
 // in the output file, and adds them to the list. The first run of a season reads
 // every game so far (about ten minutes); a nightly run reads the day's games.
-// A game that errors is left off the list, so the next run tries it again.
+// A game that errors, or whose feed has no plays yet, is left off the list, so the next
+// run tries it again. Two things this does NOT do, on purpose: re-read a game MLB later
+// corrects (delete both files to rebuild a season), and batch its writes, so a first run
+// of a season (or after the state file is lost) is one ten-minute sweep inside the
+// nightly job and a timeout loses it. Neither has happened.
 //
 // Regular season and postseason are both kept; a row carries its game type.
 // Season: the season in play (lib/time/season-in-play.mjs), or --season=YYYY.
@@ -21,7 +25,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
-import { addRows, assertFloorHolds, emptyStore, playRows } from './lib/tensest/tensest.mjs'
+import { addRows, assertFloorHolds, emptyStore, gameRowsOrThrow } from './lib/tensest/tensest.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const OUT = join(here, '..', 'public', 'data', 'tensest.json')
@@ -53,7 +57,7 @@ if (todo.length === 0) {
 
 const read = await mapConcurrent(todo, CONCURRENCY, async (g) => {
   const plays = await getJson(`/api/v1/game/${g.gamePk}/winProbability`)
-  return { g, rows: playRows(g, Array.isArray(plays) ? plays : []) }
+  return { g, rows: gameRowsOrThrow(g, plays) }
 })
 const ok = read.filter(Boolean)
 if (ok.length === 0) throw new Error('tensest: every winProbability read failed')

@@ -80,7 +80,10 @@ export function TensestMomentsPage() {
   const { loading, error, data } = useAsync(() => loadTensest(), [])
   const { favoriteTeamId } = useFavoriteTeam()
   const [picked, setPicked] = useState(null)
-  const teamId = picked ?? favoriteTeamId ?? PINNED_TEAM_ID
+  // The file holds MLB clubs only. A favorite that is a minor-league club (or any id it
+  // does not know) falls back to the pinned club rather than showing empty tables.
+  const known = (id) => id != null && data?.teams?.[id] != null
+  const teamId = picked ?? (known(favoriteTeamId) ? favoriteTeamId : PINNED_TEAM_ID)
   const mine = data?.teams?.[teamId]
   const hasData = (data?.league?.length ?? 0) > 0
   const name = teamFullName(teamId) || 'This club'
@@ -95,8 +98,8 @@ export function TensestMomentsPage() {
 
       <p className="hint">
         MLB gives every at-bat a pressure score from the game situation: the inning, the score, the outs and
-        the runners. A normal at-bat is 1.0 and the scale stops at 9.99. These are the season’s tensest.
-        Postseason games are included and marked. T means tied.
+        the runners. A normal at-bat is 1.0 and the scale stops at 9.99. These are the season’s tensest: each club’s top 25 batting and pitching, and the league’s top 50,
+        ties included. Postseason games are included and marked. T means tied.
       </p>
 
       <AsyncStatus
@@ -117,21 +120,21 @@ export function TensestMomentsPage() {
               ariaLabel="Pick a club for its batting and pitching tables"
             />
           </div>
-          <Card frame="stamped" body="flush" label={`${name} batting, top 25`} count={countOf(mine?.bat)} className="tensest__section">
+          <Card frame="stamped" body="flush" label={`${name} batting`} count={countOf(mine?.bat)} className="tensest__section">
             {mine?.bat?.length ? (
               <TensestTable rows={mine.bat} teamId={teamId} label={`${name} batting, tensest at-bats`} />
             ) : (
               <p className="hint">No tense at-bats for this club yet.</p>
             )}
           </Card>
-          <Card frame="stamped" body="flush" label={`${name} pitching, top 25`} count={countOf(mine?.pit)} className="tensest__section">
+          <Card frame="stamped" body="flush" label={`${name} pitching`} count={countOf(mine?.pit)} className="tensest__section">
             {mine?.pit?.length ? (
               <TensestTable rows={mine.pit} teamId={teamId} label={`${name} pitching, tensest at-bats`} />
             ) : (
               <p className="hint">No tense at-bats for this club yet.</p>
             )}
           </Card>
-          <Card frame="stamped" body="flush" label="All of baseball, top 50" count={countOf(data.league)} className="tensest__section">
+          <Card frame="stamped" body="flush" label="All of baseball" count={countOf(data.league)} className="tensest__section">
             <TensestTable rows={data.league} teamId={null} label="All of baseball, tensest at-bats" />
           </Card>
           {updated && <p className="hint">Games through {updated}.</p>}
