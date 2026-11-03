@@ -22,6 +22,7 @@
 // Note the feed's own codes: DFA is "declared free agency", DES is designated.
 import { teamAbbr, teamClubName, teamLocationName } from '../../lib/teams.js'
 import { apDate } from '../../lib/time/apDate.js'
+import { an, gamesText, homers, ipText, nameAge, nowText, num, optionsSentence, optionsTail, ordinal, roundText, variant, word } from './voice.js'
 
 // The player a move is about: the first face on the rail, else the first
 // player the sentence names.
@@ -90,8 +91,6 @@ const abbr = (teamId) => teamAbbr({ id: teamId })
 // newspaper transaction note does: the season just played (with the deal he
 // played it on), then the career. A split season names each club instead, and
 // the deal becomes its own sentence.
-const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
-const word = (n) => WORDS[n] ?? String(n)
 const club = (teamId) => teamClubName(teamId) ?? abbr(teamId)
 const the = (teamId) => `the ${club(teamId)}`
 
@@ -104,15 +103,13 @@ export function dealPhrase(terms) {
   return `${word(Number(m[1]))}-year, ${money}`
 }
 
-// "no homers" / "one homer" / "26 homers"; "one game" / "125 games".
-const homers = (n) => (n === 0 ? 'no homers' : n === 1 ? 'one homer' : `${n} homers`)
-const gamesText = (n) => (n === 1 ? 'one game' : `${n} games`)
+
 // A short big-league stint: "pitched once", "pitched in 9 games", "played 9 games".
 const playedText = (g, pitcher) => (pitcher ? `pitched ${TIMES[g] ?? `in ${g} games`}` : `played ${gamesText(g)}`)
 
 // What he did, in words: "hit .212 with 26 homers in 125 games".
 function didText(line, pitcher) {
-  if (pitcher) return `posted ${an(line.era)} ${line.era} ERA over ${line.ip} innings in ${gamesText(line.games)}`
+  if (pitcher) return `posted ${an(line.era)} ${line.era} ERA over ${ipText(line.ip)} innings in ${gamesText(line.games)}`
   return `hit ${line.avg} with ${homers(line.hr)} in ${gamesText(line.games)}`
 }
 
@@ -125,11 +122,9 @@ const TIMES = ['', 'once', 'twice']
 // A rehab stint (a game or two down there) is not.
 const mostlyMinors = (facts) => (facts.minors?.line?.games ?? 0) > (facts.seasonLine?.games ?? 0)
 
-// "a 4.06 ERA", "an 11.12 ERA", "an 8.10 ERA".
-const an = (num) => (/^(8|11|18)/.test(String(num)) ? 'an' : 'a')
 // What he did in a minor-league season, after "posting" or "hitting".
 function minorsText(line, pitcher) {
-  return pitcher ? `posting ${an(line.era)} ${line.era} ERA over ${line.ip} innings` : `hitting ${line.avg} with ${homers(line.hr)}`
+  return pitcher ? `posting ${an(line.era)} ${line.era} ERA over ${ipText(line.ip)} innings` : `hitting ${line.avg} with ${homers(line.hr)}`
 }
 
 // Who a later sentence is about: his last name the first time after "The
@@ -202,7 +197,8 @@ function clubList(facts) {
   return `the ${list}`
 }
 
-export function freeAgentStory(facts) {
+export function freeAgentStory(facts, moveDate = null) {
+  const v = variant(facts, moveDate, 2)
   const who = facts.age ? `The ${facts.age}-year-old` : 'He'
   const deal = dealPhrase(facts.contract?.terms)
   const sentences = []
@@ -223,9 +219,14 @@ export function freeAgentStory(facts) {
   else if (facts.seasons) {
     if (facts.seasons === 1 && facts.years[0]?.season === facts.season) sentences.push(`${facts.season} was his first season in the majors.`)
     else {
-      const debut = facts.debut?.slice(0, 4) ?? facts.years[0]?.season
-      const all = new Set(facts.clubs.map((c) => c.teamId)).size === 1 ? 'all ' : ''
-      sentences.push(`${sub({ cap: true })} made his major league debut in ${debut} and has played ${facts.seasons} seasons ${all}for ${clubList(facts)}.`)
+      // The club list's first year is his debut.
+      const all = new Set(facts.clubs.map((c) => c.teamId)).size === 1
+      const s = sub({ cap: true })
+      sentences.push(
+        v === 0 || all
+          ? `${s} has played ${num(facts.seasons)} seasons${all ? ', all' : ''} for ${clubList(facts)}.`
+          : `A ${facts.seasons}-year veteran, ${s === 'He' ? 'he' : s} has played for ${clubList(facts)}.`,
+      )
     }
   }
   return sentences.join(' ')
@@ -241,9 +242,10 @@ function prospectPhrase(p) {
 // season he just had, where he had it. A trade's note adds that it was his
 // first big-league season when it was; a player with no big-league games in
 // the season gets his minor-league line (one extra read, playerFacts.js).
-export function seasonSentence(facts) {
+export function seasonSentence(facts, moveDate = null) {
   const rank = prospectPhrase(facts.prospect)
-  const who = `${facts.age ? `The ${facts.age}-year-old` : facts.lastName ?? 'He'}${rank ? `, ${rank},` : ''}`
+  const lead = nameAge(facts, variant(facts, moveDate, 2))
+  const who = rank ? `${lead.replace(/,$/, '')}, ${rank},` : lead
   // A thin big-league season with a minor-league one: lead with where he
   // spent most of the year.
   // A trade's note stays as it read that day: his line up to the deal, for
@@ -253,7 +255,7 @@ export function seasonSentence(facts) {
     // two clubs is his season, not theirs.
     const before = new Set((facts.rows ?? []).filter((r) => r.season === facts.season && r.teamId !== facts.trade.toTeamId).map((r) => r.teamId))
     const club = before.size === 1 && before.has(facts.trade.fromTeamId) ? ` for ${the(facts.trade.fromTeamId)}` : ''
-    return `${who} ${didText(facts.trade.line, facts.pitcher)}${club} in ${facts.season} before the trade.`
+    return `${who} ${beforeText(facts.trade.line, facts.pitcher)}${club}.`
   }
   if (facts.seasonLine && mostlyMinors(facts) && !isFull(facts.seasonLine, facts.pitcher)) {
     const team = facts.clubs[facts.clubs.length - 1]?.teamId
@@ -277,11 +279,6 @@ function minorsWhere(m) {
   return m.level.length > 1 ? `across ${m.level.slice(0, -1).join(', ')} and ${m.level[m.level.length - 1]}` : `in ${m.level[0]}`
 }
 
-const ordinal = (n) => {
-  const v = Number(n)
-  const s = v % 100 >= 11 && v % 100 <= 13 ? 'th' : { 1: 'st', 2: 'nd', 3: 'rd' }[v % 10] ?? 'th'
-  return `${v}${s}`
-}
 
 // WHERE HE CAME FROM — a minor leaguer's origin: the club that drafted him
 // (round and school) or signed him, then each trade or claim since, up to the
@@ -291,7 +288,9 @@ function originSentence(facts, name, moveDate) {
   const before = facts.arrivals.filter((a) => !moveDate || daysBetween(a.date, moveDate) > 1)
   const parts = []
   const d = facts.draft
-  if (d) parts.push(`${name} was ${the(d.teamId)}' ${d.round ? `${ordinal(d.round)}-round pick` : 'draft pick'}${d.school ? ` out of ${d.school}` : ''} in ${d.year}`)
+  const school = d?.school ? ` out of ${d.school}` : ''
+  if (d && d.round && variant(facts, moveDate, 2) === 1) parts.push(`${the(d.teamId)} drafted him in the ${roundText(d.round)} round${school} in ${d.year}`)
+  else if (d) parts.push(`${name} was ${the(d.teamId)}' ${d.round ? `${roundText(d.round)}-round pick` : 'draft pick'}${school} in ${d.year}`)
   else {
     const signed = before.find((a) => a.how === 'signing' || a.how === 'free agent')
     if (signed) parts.push(`${name} signed with ${the(signed.teamId)} in ${signed.date.slice(0, 4)}`)
@@ -361,10 +360,10 @@ function careerSentence(facts, name) {
   if (!l) return null
   const games = `${NUMBER.format(l.games)} big-league games`
   const what = facts.pitcher
-    ? `${name} has ${an(l.era)} ${l.era} ERA over ${l.ip} innings in ${games}`
+    ? `${name} has ${an(l.era)} ${l.era} ERA over ${ipText(l.ip)} innings in ${games}`
     : `${name} is a ${l.avg} hitter with ${homers(l.hr > 999 ? NUMBER.format(l.hr) : l.hr)} in ${games}`
   const now = facts.seasonLine?.games ?? 0
-  const tail = now ? `, ${now === l.games ? 'all' : now} of them in ${facts.season}` : `, none of them in ${facts.season}`
+  const tail = now ? `, ${now === l.games ? 'all' : num(now)} of them in ${facts.season}` : `, none of them in ${facts.season}`
   return `${what}${tail}.`
 }
 
@@ -384,23 +383,24 @@ function lastFullSentence(facts) {
 // What the move does, in the roster's own terms (docs/transactions-wire.md):
 // an outright takes him off the 40-man but keeps him in the organization; a
 // designation is a limbo the club must resolve.
-function optionsSentence(facts) {
-  const left = facts.contract?.options
-  return left == null ? null : left === 0 ? 'He is out of minor-league options.' : `He has ${word(left)} minor-league option${left === 1 ? '' : 's'} left.`
-}
-function moveSentence(facts, clause) {
+function moveSentence(facts, clause, v) {
   const o = optionsSentence(facts)
   const options = o ? ` ${o}` : ''
-  if (/outright/i.test(clause)) return `The move clears a 40-man roster spot, and he stays in the organization.${options}`
-  if (/designated/i.test(clause)) return `He must now be traded, released or passed through waivers.${options}`
+  if (/outright/i.test(clause)) {
+    if (v === 0) return `He comes off the 40-man roster but stays in the organization.${options}`
+    return `The move opens a 40-man spot; he stays in the organization.${options}`
+  }
+  if (/designated/i.test(clause)) return `He must now be traded, released or put on waivers.${options}`
   return null
 }
 
 export function cutStory(facts, { moveDate = null, clause = '' } = {}) {
-  const who = facts.age ? `The ${facts.age}-year-old` : 'He'
+  const v = variant(facts, moveDate, 2)
+  const who = nameAge(facts, v)
   const first = arrivalSentence(facts, who, moveDate)
-  const name = first ? facts.lastName ?? 'He' : who
-  return [first, careerSentence(facts, name), facts.debut ? lastFullSentence(facts) : null, moveSentence(facts, clause)].filter(Boolean).join(' ')
+  // Named once: "Heuer, 30, came to ..." then "He has ...".
+  const name = first ? (who.startsWith(facts.lastName ?? '\u0000') ? 'He' : facts.lastName ?? 'He') : who
+  return [first, careerSentence(facts, name), facts.debut ? lastFullSentence(facts) : null, moveSentence(facts, clause, v)].filter(Boolean).join(' ')
 }
 
 // THE INJURED LIST — the move's sentence already names the list, the injury
@@ -408,15 +408,16 @@ export function cutStory(facts, { moveDate = null, clause = '' } = {}) {
 // cannot: his stints earlier in the season, how he was playing before this
 // one, and on an activation, the time he missed.
 const COUNT = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth']
+const nth = (n) => COUNT[n] ?? `${n}th`
 // The feed's injury note, set in parentheses as the move's own sentence does:
 // no article to guess ("a left oblique strain", but not "a plantar fasciitis").
 const lower = (t) => (t ? t[0].toLowerCase() + t.slice(1) : t)
 
-// "He was hitting .281 with 9 homers in 54 games" / "had a 3.40 ERA over 98.0 innings".
+// "was hitting .281 with nine homers in 54 games" / "had a 3.40 ERA over 98 innings".
 function beforeText(line, pitcher) {
   if (!line?.games) return null
   return pitcher
-    ? `had ${an(line.era)} ${line.era} ERA over ${line.ip} innings in ${gamesText(line.games)}`
+    ? `had ${an(line.era)} ${line.era} ERA over ${ipText(line.ip)} innings in ${gamesText(line.games)}`
     : `was hitting ${line.avg} with ${homers(line.hr)} in ${gamesText(line.games)}`
 }
 
@@ -426,7 +427,7 @@ function pastTrips(stints) {
   // A trip the feed never closed has no length to give, so it is left out.
   const trips = [...(stints ?? [])].filter((x) => x.to).reverse().slice(0, 3).map((x) => {
     const injury = x.injury ? ` (${lower(x.injury)})` : ''
-    return `${daysBetween(x.from, x.to)} days${injury} in ${x.filings[0].slice(0, 4)}`
+    return `${daysText(daysBetween(x.from, x.to))}${injury} in ${x.filings[0].slice(0, 4)}`
   })
   if (!trips.length) return null
   const list = trips.length > 1 ? `${trips.slice(0, -1).join(', ')} and ${trips[trips.length - 1]}` : trips[0]
@@ -436,6 +437,7 @@ function pastTrips(stints) {
 export function injuredStory(facts, { placed, moveDate = null, clause = '' }) {
   const stint = facts.stint
   if (!stint) return null
+  const v = variant(facts, moveDate, 2)
   const name = facts.lastName ?? 'He'
   const at = facts.stints.findIndex((x) => x.from === stint.from)
   const earlier = facts.stints.slice(0, at)
@@ -455,36 +457,38 @@ export function injuredStory(facts, { placed, moveDate = null, clause = '' }) {
     else if (refiled) out.push(`He first went on the list ${apDate(stint.from)}${borrowed}.`)
     if (at > 0) {
       const prev = earlier[earlier.length - 1]
-      let s = `It is his ${COUNT[at + 1] ?? `${at + 1}th`} stint on the injured list in ${facts.season}`
-      if (prev?.to) s += `; he missed ${daysBetween(prev.from, prev.to)} days from ${apDate(prev.from)}${prev.injury ? ` (${lower(prev.injury)})` : ''}`
-      out.push(`${s}.`)
+      const missed = prev?.to ? `he missed ${daysText(daysBetween(prev.from, prev.to))} from ${apDate(prev.from)}${prev.injury ? ` (${lower(prev.injury)})` : ''}` : ''
+      const head = v === 0 ? `It is his ${nth(at + 1)} injured-list stint this season` : `${nth(at + 1)[0].toUpperCase()}${nth(at + 1).slice(1)} trip to the list this season`
+      out.push(`${head}${missed ? `; ${missed}` : ''}.`)
     } else {
       const past = pastTrips(facts.pastStints)
       if (past) out.push(past)
     }
   } else {
-    let s = `${name} missed ${daysBetween(stint.from, stint.to)} days`
+    const days = daysText(daysBetween(stint.from, stint.to))
+    let s = v === 0 ? `${name} missed ${days}` : `${name} returns after missing ${days}`
     if (stint.injury) s += ` (${lower(stint.injury)})`
-    if (at > 0) s += `, his ${COUNT[at + 1] ?? `${at + 1}th`} stint of ${facts.season}`
+    if (at > 0) s += `, his ${nth(at + 1)} stint this season`
     out.push(`${s}.`)
     const before = beforeText(facts.beforeLine, facts.pitcher)
-    if (before) out.push(`He ${before} before it.`)
+    if (before) out.push(v === 0 ? `He ${before} before it.` : `He ${before} when he went down.`)
   }
   return out.join(' ')
 }
 
-// A CALL � recalled, optioned or selected. A recall gives his minor-league
+// A CALL — recalled, optioned or selected. A recall gives his minor-league
 // line up to it and which trip up it is; an option, how the stint went and his
 // options left. A selected contract is a first call-up when he has not
 // debuted yet, and otherwise a trip up like a recall.
-const daysText = (n) => (n === 1 ? 'one day' : `${n} days`)
+const daysText = (n) => (n === 1 ? 'one day' : `${num(n)} days`)
 const near = (a, b) => Math.abs(daysBetween(a, b)) <= 1
 function tripSentence(facts, moveDate) {
   const at = (facts.calls ?? []).findIndex((c) => c.up && near(c.up, moveDate))
   if (at < 0) return null
   const prev = facts.calls[at - 1]
-  const last = prev?.up && prev.down ? `; the last lasted ${daysText(daysBetween(prev.up, prev.down))}` : ''
-  return `It is his ${COUNT[at + 1] ?? `${at + 1}th`} trip up this season${last}.`
+  const lasted = prev?.up && prev.down ? daysText(daysBetween(prev.up, prev.down)) : null
+  if (variant(facts, moveDate, 2) === 1) return `He is up for the ${nth(at + 1)} time this season${lasted ? `; his last stay lasted ${lasted}` : ''}.`
+  return `It is his ${nth(at + 1)} trip up this season${lasted ? `; the last lasted ${lasted}` : ''}.`
 }
 // A player shuttling between the two (Blake Perkins, 2026) gets both lines in one.
 const briefLine = (l, pitcher) => (pitcher ? `${an(l.era)} ${l.era} ERA` : `${l.avg}${l.hr ? ` with ${homers(l.hr)}` : ''}`) + ` in ${gamesText(l.games)}`
@@ -493,9 +497,9 @@ function beforeCallSentence(facts, who) {
   const mlb = facts.callMlbLine
   if (m?.line?.games && mlb?.games) {
     const where = m.team ? `the ${m.team}` : m.level.join(' and ')
-    return `${who} has split ${facts.season} between ${where} (${briefLine(m.line, facts.pitcher)}) and the majors (${briefLine(mlb, facts.pitcher)}) before the call.`
+    return `${who} has split the season between ${where} (${briefLine(m.line, facts.pitcher)}) and the majors (${briefLine(mlb, facts.pitcher)}).`
   }
-  return m?.line?.games ? `${who} ${didText(m.line, facts.pitcher)} ${minorsWhere(m)} in ${facts.season} before the call.` : null
+  return m?.line?.games ? `${who} ${nowText(m.line, facts.pitcher)} ${minorsWhere(m)}.` : null
 }
 // A call-up told beside an injured-list placement: only his line before the
 // call, so it can run on after the injured player's note (Blake Perkins for
@@ -508,73 +512,88 @@ export const CALLS = new Set(['recall', 'option', 'selected'])
 // special event (Little League Classic, Field of Dreams). The feed never says
 // so; `extraMan` is a one-day trip that opened on such a day, `event` the
 // schedule's name for a special event (null for a doubleheader).
-// "Sproat last pitched Aug. 3 against the Pirates, allowing 4 earned runs over 3 innings."
-function lastGameSentence(facts, name) {
+// "Sproat gave up four earned runs in three innings against the Pirates on Aug. 3."
+function lastGameSentence(facts, name, v) {
   const { date, oppId, line } = facts.lastGame
-  const head = `${name} last ${facts.pitcher ? 'pitched' : 'played'} ${apDate(date)}${oppId ? ` against ${the(oppId)}` : ''}`
-  if (!facts.pitcher) return `${head}, going ${line.h}-for-${line.ab}${line.hr ? ` with ${homers(line.hr)}` : ''}.`
+  const vs = oppId ? ` against ${the(oppId)}` : ''
+  const when = `${vs} on ${apDate(date)}`
+  const last = (what) => `In his last ${what}, ${apDate(date)}${vs}, `
+  if (!facts.pitcher) {
+    const did = `went ${line.h}-for-${line.ab}${line.hr ? ` with ${homers(line.hr)}` : ''}`
+    return v === 0 ? `${name} ${did}${when}.` : `${last('game')}${name} ${did}.`
+  }
   // The feed writes thirds after the point: "2.1" is 2 1/3 innings.
   const [whole, thirds] = String(line.ip).split('.').map(Number)
   const frac = thirds ? `${thirds}/3` : ''
-  const innings = whole ? `${whole}${frac ? ` ${frac}` : ''} inning${whole === 1 && !frac ? '' : 's'}` : `${frac} of an inning`
-  const runs = `${line.er} earned run${line.er === 1 ? '' : 's'}`
-  if (!whole && !thirds) return `${head}, allowing ${runs} without retiring a batter.`
-  return `${head}, ${line.er ? `allowing ${runs} over` : 'going'} ${innings}${line.er ? '' : ' without an earned run'}.`
+  const innings = whole ? `${frac ? whole : num(whole)}${frac ? ` ${frac}` : ''} inning${whole === 1 && !frac ? '' : 's'}` : `${frac} of an inning`
+  const runs = `${num(line.er)} earned run${line.er === 1 ? '' : 's'}`
+  const did = !whole && !thirds ? `gave up ${runs} without retiring a batter` : line.er ? `gave up ${runs} in ${innings}` : `threw ${innings} without an earned run`
+  return v === 0 ? `${name} ${did}${when}.` : `${last('outing')}${name} ${did}.`
 }
 const longDate = (iso) => `${MONTH_NAMES[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
 export function callStory(facts, { kind, moveDate }) {
   const name = facts.lastName ?? 'He'
+  const v = variant(facts, moveDate, 3)
   if (facts.extraMan) {
     const c = (facts.calls ?? []).find((x) => x.up && (near(x.up, moveDate) || (x.down && near(x.down, moveDate))))
     const { event } = facts.extraMan
     const at = event ? `at the ${event}` : `in the ${c?.up ? `${longDate(c.up)} ` : ''}doubleheader`
     // No options line: the extra man's trip back is not an ordinary option.
-    if (kind === 'option') return `${name} goes back down after serving as the 27th man ${at}.`
+    if (kind === 'option') return v === 0 ? `${name} was the 27th man ${at}.` : `${name} goes back down after a day as the 27th man ${at}.`
     return `${name} came up as the 27th man for the ${event ?? 'doubleheader'}${c?.down ? `${event ? ',' : ''} and went back down ${apDate(c.down)}` : ''}.`
   }
   // A send-down after time in the majors: his last game, then his season to
   // that day (Brandon Sproat, Aug. 4, 2026).
   if (kind === 'option' && facts.lastGame && facts.seasonToDate?.games) {
-    return [lastGameSentence(facts, name), `He ${didText(facts.seasonToDate, facts.pitcher)} this season before the move.`, optionsSentence(facts)]
-      .filter(Boolean)
-      .join(' ')
+    const season = facts.pitcher
+      ? `He ${nowText(facts.seasonToDate, true)} this season${optionsTail(facts)}.`
+      : `He ${nowText(facts.seasonToDate, false)}${optionsTail(facts)}.`
+    return [lastGameSentence(facts, name, v % 2), season].join(' ')
   }
   if (kind === 'option') {
     const c = (facts.calls ?? []).find((x) => x.down && near(x.down, moveDate))
     // No day count: a trip can hold a stint on the injured list.
     const line = facts.stintLine
-    let stint = null
-    if (line?.games) stint = `${name} ${didText(line, facts.pitcher)}${c?.up ? '' : ` in ${facts.season}`} before the move.`
-    else if (c?.up) stint = `${name} did not get into a game on this trip.`
-    return [stint, optionsSentence(facts)].filter(Boolean).join(' ')
+    if (line?.games) return `${name} ${didText(line, facts.pitcher)} ${c?.up ? 'on this trip' : 'this season'}${optionsTail(facts)}.`
+    if (c?.up) return `${name} did not ${facts.pitcher ? 'pitch' : 'play'} on this trip${optionsTail(facts)}.`
+    return optionsSentence(facts) ?? ''
   }
   if (kind === 'selected' && (!facts.debut || facts.debut >= moveDate)) {
     const rank = prospectPhrase(facts.prospect)
-    const who = `${facts.age ? `The ${facts.age}-year-old` : name}${rank ? `, ${rank},` : ''}`
-    return ['It is his first call to the majors.', beforeCallSentence(facts, who), originSentence(facts, name, moveDate)].filter(Boolean).join(' ')
+    const lead = nameAge(facts, v % 2)
+    const who = rank ? `${lead.replace(/,$/, '')}, ${rank},` : lead
+    const head = ['It is his first call to the majors.', 'First call-up.', 'He gets his first call to the majors.'][v]
+    return [head, beforeCallSentence(facts, who), originSentence(facts, name, moveDate)].filter(Boolean).join(' ')
   }
   return [beforeCallSentence(facts, name), tripSentence(facts, moveDate)].filter(Boolean).join(' ')
 }
 
-// A RETIREMENT � the career in one sentence: seasons, clubs, his line.
-export function retiredStory(facts) {
+// A RETIREMENT — the career in one sentence: seasons, clubs, his line.
+export function retiredStory(facts, moveDate = null) {
   const l = facts.careerLine
   if (!facts.debut || !l) return null
+  const name = facts.lastName ?? 'He'
   const games = `${NUMBER.format(l.games)} games`
-  const did = facts.pitcher ? `posting ${an(l.era)} ${l.era} ERA over ${l.ip} innings in ${games}` : `hitting ${l.avg} with ${homers(l.hr)} in ${games}`
-  const seasons = facts.seasons === 1 ? 'one season' : `${facts.seasons} seasons`
-  return `${facts.lastName ?? 'He'} played ${seasons} in the majors for ${clubList(facts)}, ${did}.`
+  const seasons = facts.seasons === 1 ? 'one season' : `${num(facts.seasons)} seasons`
+  if (variant(facts, moveDate, 2) === 0) {
+    const did = facts.pitcher ? `posted ${an(l.era)} ${l.era} ERA over ${ipText(l.ip)} innings` : `hit ${l.avg} with ${homers(l.hr)}`
+    return `${name} ${did} in ${games} over ${seasons} with ${clubList(facts)}.`
+  }
+  const did = facts.pitcher ? `posting ${an(l.era)} ${l.era} ERA over ${ipText(l.ip)} innings in ${games}` : `hitting ${l.avg} with ${homers(l.hr)} in ${games}`
+  return `${name} played ${seasons} in the majors for ${clubList(facts)}, ${did}.`
 }
 
-// AN ARRIVAL from outside affiliated ball � an independent club: where he
+// AN ARRIVAL from outside affiliated ball — an independent club: where he
 // comes from, then his last season in affiliated ball (or his big-league line).
-export function arrivalStory(facts) {
+export function arrivalStory(facts, moveDate = null) {
   const from = facts.arrival?.how === 'purchase' ? facts.arrival.fromName : null
   if (!from) return null
-  const who = facts.age ? `The ${facts.age}-year-old` : facts.lastName ?? 'He'
+  const v = variant(facts, moveDate, 2)
+  const who = nameAge(facts, v)
   const a = facts.affiliated
-  const last = a ? `His last season in affiliated ball was ${a.season}${a.level ? `, in ${a.level}` : ''}.` : null
-  return [`${who} comes from the ${from}, outside affiliated ball.`, last, facts.debut ? careerSentence(facts, facts.lastName ?? 'He') : null].filter(Boolean).join(' ')
+  const head = v === 0 ? `${who} comes from the independent ${from}.` : `${who} was bought from the independent ${from}.`
+  const last = a ? `He last played in affiliated ball in ${a.season}${a.level ? `, in ${a.level}` : ''}.` : null
+  return [head, last, facts.debut ? careerSentence(facts, 'He') : null].filter(Boolean).join(' ')
 }
 
 // The card's fact line: up to two short lines, or none for the fallback.
@@ -584,36 +603,35 @@ export function draftSentence(facts) {
   const d = facts?.draft
   if (!d) return null
   const club = the(d.teamId)
-  return `${club[0].toUpperCase()}${club.slice(1)} drafted him${d.school ? ` out of ${d.school}` : ''}${d.round ? ` in the ${ordinal(d.round)} round${d.pick ? ` (${ordinal(d.pick)} overall)` : ''}` : ''} in ${d.year}.` // caps-js-exempt: sentence case
+  return `${club[0].toUpperCase()}${club.slice(1)} drafted him${d.school ? ` out of ${d.school}` : ''}${d.round ? ` in the ${roundText(d.round)} round${d.pick ? ` (${ordinal(d.pick)} overall)` : ''}` : ''} in ${d.year}.` // caps-js-exempt: sentence case
 }
 
 // A player traded away for cash (Easton McGee, July 14, 2026): his time with
-// the club and his whole line for it. A wire runs many of these, so the
-// sentence takes one of three shapes, fixed per player so it never shifts.
-const SEASONS = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
-function soldStory(facts, { teamId }) {
+// the club and his whole line for it, in one of three shapes (`variant`).
+function soldStory(facts, { teamId, moveDate = null }) {
   const stint = (facts.clubs ?? []).filter((c) => c.teamId === teamId).at(-1)
   if (!stint) return null
   const name = facts.lastName ?? 'He'
   const club = the(teamId)
   const l = facts.clubTotals?.[teamId]
   if (!l?.games) return `${name} had been with ${club} since ${stint.from}.`
-  const did = `${didText(l, facts.pitcher)} for them`
   const n = facts.season - stint.from + 1
-  const shape = (facts.id ?? 0) % 3
-  if (shape === 1) return `${name} joined ${club} in ${stint.from} and ${did}.`
-  if (shape === 2 && n > 1) return `${name} leaves ${club} after ${SEASONS[n] ?? n} seasons, in which he ${did}.`
-  return `${name} had been with ${club} since ${stint.from}, and in that time he ${did}.`
+  const shape = variant(facts, moveDate, 3)
+  if (shape === 1) return `${name} joined ${club} in ${stint.from} and ${didText(l, facts.pitcher)} for them.`
+  if (shape === 2 && n > 1) return `${name} leaves ${club} after ${num(n)} seasons, ${minorsText(l, facts.pitcher)} in ${gamesText(l.games)}.`
+  return `${name} ${didText(l, facts.pitcher)} for ${club} since ${stint.from}.`
 }
+
+export { variant } from './voice.js'
 
 export function factLines(template, facts, ctx = {}) {
   if (!facts || template === 'fallback') return []
   if (template === 'minor-deal' || template === 'trade') {
     const origin = facts.debut ? null : originSentence(facts, facts.lastName ?? 'He', ctx.moveDate)
-    return [seasonSentence(facts), origin].filter(Boolean)
+    return [seasonSentence(facts, ctx.moveDate), origin].filter(Boolean)
   }
   if (template === 'free-agency' || template === 'signing') {
-    return [freeAgentStory(facts)]
+    return [freeAgentStory(facts, ctx.moveDate)]
   }
   if (template === 'cut') return [cutStory(facts, ctx)]
   if (template === 'sold') return [soldStory(facts, ctx)].filter(Boolean)
@@ -622,7 +640,7 @@ export function factLines(template, facts, ctx = {}) {
     return note ? [note] : []
   }
   const note = CALLS.has(template) ? callStory(facts, { kind: template, moveDate: ctx.moveDate })
-    : template === 'retired' ? retiredStory(facts) : template === 'arrival' ? arrivalStory(facts) : null
+    : template === 'retired' ? retiredStory(facts, ctx.moveDate) : template === 'arrival' ? arrivalStory(facts, ctx.moveDate) : null
   if (note) return [note]
 
   return []
