@@ -15,13 +15,10 @@ export const LOCKOUT_STARTS_AT = Date.parse('2026-12-02T05:01:00Z')
 // Vite (the unit suite in plain node) the default is `on`, so URL tests don't start
 // failing on Dec 2; a test can still set process.env.VITE_PLAYER_PHOTOS.
 export function photoEnv(viteEnv, procEnv) {
-  if (viteEnv) return viteEnv
-  return { VITE_PLAYER_PHOTOS: procEnv?.VITE_PLAYER_PHOTOS ?? 'on' }
+  return viteEnv ?? { VITE_PLAYER_PHOTOS: procEnv?.VITE_PLAYER_PHOTOS ?? 'on' }
 }
 
 export function playerPhotosOff(env = photoEnv(import.meta.env, globalThis.process?.env), now = Date.now()) {
-  const setting = env?.VITE_PLAYER_PHOTOS
-  if (setting === 'off') return true
-  if (setting === 'on') return false
-  return now >= LOCKOUT_STARTS_AT
+  const setting = env.VITE_PLAYER_PHOTOS
+  return setting === 'off' || (setting !== 'on' && now >= LOCKOUT_STARTS_AT)
 }
