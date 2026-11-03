@@ -66,7 +66,7 @@ test("a free agent's note: the season and deal, then his debut and every club wi
   assert.equal(
     freeAgentStory(facts()),
     'The 35-year-old hit .212 with 26 homers in 125 games for the Reds in 2026, on a one-year, $15 million deal. ' +
-      'Suárez made his major league debut in 2014 and has played 13 seasons for the Tigers (2014), Reds (2015-21, 2026), Mariners (2022-23, 2025) and Diamondbacks (2024-25).',
+      'Suárez has played 13 seasons for the Tigers (2014), Reds (2015-21, 2026), Mariners (2022-23, 2025) and Diamondbacks (2024-25).',
   )
 })
 
@@ -75,11 +75,11 @@ test('a thin big-league season leads with the minors only when he played more ga
   const thin = facts({ age: 28, seasonLine: { games: 9, avg: '.091', hr: 0 }, clubs: [{ teamId: 121, from: 2026, to: 2026 }], minors })
   assert.equal(
     seasonSentence(thin),
-    'The 28-year-old spent most of 2026 in Triple-A with the Syracuse Mets, hitting .278 with 5 homers, and played 9 games for the Mets.',
+    'Suárez, 28, spent most of 2026 in Triple-A with the Syracuse Mets, hitting .278 with five homers, and played nine games for the Mets.',
   )
   // A rehab stint: fewer games down there than up top.
   const rehab = facts({ seasonLine: { games: 9, avg: '.091', hr: 0 }, clubs: [{ teamId: 121, from: 2026, to: 2026 }], minors: { ...minors, line: { games: 2, avg: '.250', hr: 0 } } })
-  assert.equal(seasonSentence(rehab), 'The 35-year-old hit .091 with no homers in 9 games for the Mets in 2026.')
+  assert.equal(seasonSentence(rehab), 'Suárez, 35, hit .091 with no homers in nine games for the Mets in 2026.')
 })
 
 test('an outright: how he got here, his career line, then what the move means', () => {
@@ -100,14 +100,14 @@ test('an outright: how he got here, his career line, then what the move means', 
   assert.equal(
     cutStory(heuer, { moveDate: '2026-10-31', clause: 'Sent RHP Codi Heuer outright to Norfolk Tides.' }),
     'The 30-year-old came to the Orioles from the Brewers in an Aug. 3 trade, two days after Milwaukee got him from Cleveland. ' +
-      'Heuer has a 3.76 ERA over 105.1 innings in 97 big-league games, 8 of them in 2026. ' +
-      'The move clears a 40-man roster spot, and he stays in the organization. He has three minor-league options left.',
+      'Heuer has a 3.76 ERA over 105.1 innings in 97 big-league games, eight of them in 2026. ' +
+      'The move opens a 40-man spot; he stays in the organization. He has three options left.',
   )
 })
 
 test('a waiver claim skips how he arrived: the move already says it', () => {
   const claim = facts({ arrival: { how: 'waiver claim', date: '2026-10-29', teamId: 120, fromTeamId: 137 } })
-  assert.match(cutStory(claim, { moveDate: '2026-10-29', clause: 'Claimed RHP Braxton Roxby off waivers.' }), /^The 35-year-old is a \.244 hitter/)
+  assert.match(cutStory(claim, { moveDate: '2026-10-29', clause: 'Claimed RHP Braxton Roxby off waivers.' }), /^Suárez, 35, is a \.244 hitter/)
 })
 
 test("a minor leaguer's trade note: his whole season, then where he came from", () => {
@@ -130,13 +130,13 @@ test("a minor leaguer's trade note: his whole season, then where he came from", 
   })
   assert.equal(
     seasonSentence(robinson),
-    'The 23-year-old posted a 5.74 ERA over 106.2 innings in 25 games across Single-A, High-A and Double-A in 2026.',
+    'Robinson, 23, posted a 5.74 ERA over 106.2 innings in 25 games across Single-A, High-A and Double-A in 2026.',
   )
 })
 
 test("a ranked prospect's rank follows his age", () => {
   const ranked = facts({ age: 19, seasonLine: null, minors: { team: 'Biloxi Shuckers', level: ['Double-A'], line: { games: 120, avg: '.271', hr: 14 } }, prospect: { rank: 1, teamId: null } })
-  assert.match(seasonSentence(ranked), /^The 19-year-old, MLB's No\. 1 prospect, hit \.271/)
+  assert.match(seasonSentence(ranked), /^Suárez, 19, MLB's No\. 1 prospect, hit \.271/)
 })
 
 test('the minors read: the "Minors" row is the season, not the first level\'s subtotal', () => {
@@ -228,14 +228,14 @@ test('an IL placement: which stint it is, the one before, and how he was hitting
   const placed = { ...f, stint: f.stints[2], beforeLine: { games: 67, avg: '.251', hr: 8 } }
   assert.equal(
     injuredStory(placed, { placed: true }),
-    "Rutschman was hitting .251 with 8 homers in 67 games. It is his third stint on the injured list in 2026; he missed 9 days from June 19 (concussion).",
+    "Rutschman was hitting .251 with eight homers in 67 games. It is his third injured-list stint this season; he missed nine days from June 19 (concussion).",
   )
 })
 
 test('an IL activation: the time he missed, from the stint he came off', () => {
   const f = shapeFacts(rutschman, { season: 2026 })
   const back = { ...f, stint: f.stints[1], beforeLine: null }
-  assert.equal(injuredStory(back, { placed: false }), 'Rutschman missed 9 days (concussion), his second stint of 2026.')
+  assert.equal(injuredStory(back, { placed: false }), 'Rutschman missed nine days (concussion), his second stint this season.')
 })
 
 // Code review, 2026-11-02: six bugs, each pinned before its fix.
@@ -286,9 +286,9 @@ test('an outright of a player with no career line on file does not throw', () =>
 
 test('a Rule 5 pick and a purchased contract say how he really arrived', () => {
   const r5 = facts({ arrival: { how: 'Rule 5 draft', date: '2025-12-10', teamId: 146, fromTeamId: 147 } })
-  assert.match(cutStory(r5, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^The 35-year-old was a Rule 5 pick by the Marlins from the Yankees in December 2025\./)
+  assert.match(cutStory(r5, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^Suárez, 35, was a Rule 5 pick by the Marlins from the Yankees in December 2025\./)
   const bought = facts({ arrival: { how: 'purchase', date: '2026-06-02', teamId: 146, fromTeamId: 147 } })
-  assert.match(cutStory(bought, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^The 35-year-old was bought by the Marlins from the Yankees on June 2\./)
+  assert.match(cutStory(bought, { moveDate: '2026-10-30', clause: 'Sent X outright.' }), /^Suárez, 35, was bought by the Marlins from the Yankees on June 2\./)
 })
 
 // The More card's additions, 2026-11-02.
@@ -315,8 +315,14 @@ test('the draft read is the one he signed out of, the latest, with its overall p
   }
   const f = shapeFacts(person, { season: 2026 })
   assert.equal(f.draft.year, 2021)
-  assert.equal(draftSentence(f), "The Angels drafted him out of St. Mary's College in the 2nd round (45th overall) in 2021.")
+  assert.equal(draftSentence(f), "The Angels drafted him out of St. Mary's College in the second round (45th overall) in 2021.")
   assert.equal(draftSentence({ draft: null }), null)
+})
+
+test('a competitive-balance pick names its round, never "NaNth"', () => {
+  // Logan Driscoll (Padres, 2019): the feed's pickRound is "CB-B", not a number.
+  const f = { draft: { teamId: 135, year: 2019, round: 'CB-B', pick: 73, school: 'George Mason' } }
+  assert.equal(draftSentence(f), 'The Padres drafted him out of George Mason in Competitive Balance Round B (73rd overall) in 2019.')
 })
 
 test("a first IL trip of the season reads his earlier seasons' trips instead", () => {
@@ -333,7 +339,7 @@ test("a first IL trip of the season reads his earlier seasons' trips instead", (
   const placed = { ...f, stint: f.stints[0], beforeLine: { games: 10, avg: '.300', hr: 2 } }
   assert.equal(
     injuredStory(placed, { placed: true }),
-    'Rutschman was hitting .300 with 2 homers in 10 games. He missed 40 days (left oblique strain) in 2025.',
+    'Rutschman was hitting .300 with two homers in 10 games. He missed 40 days (left oblique strain) in 2025.',
   )
 })
 
@@ -354,8 +360,20 @@ test("a trade's note is his line up to the deal, for the club he left", () => {
     ],
     trade: { line: { games: 67, avg: '.251', hr: 8 }, fromTeamId: 110, toTeamId: 111 },
   })
-  assert.equal(seasonSentence(f), 'The 35-year-old hit .251 with 8 homers in 67 games for the Orioles in 2026 before the trade.')
+  assert.equal(seasonSentence(f), 'Suárez, 35, was hitting .251 with eight homers in 67 games for the Orioles.')
   // Two clubs before the deal: the line is his, not one club's.
   const two = { ...f, rows: [...f.rows, { season: 2026, teamId: 121, line: {} }] }
-  assert.equal(seasonSentence(two), 'The 35-year-old hit .251 with 8 homers in 67 games in 2026 before the trade.')
+  assert.equal(seasonSentence(two), 'Suárez, 35, was hitting .251 with eight homers in 67 games.')
+})
+
+test('a draft round reads the same wherever a note says it', async () => {
+  // Both draft phrasings share these, so a "CB-B" pick never reads "NaNth".
+  const { pickPhrase, roundPhrase } = await import('../src/api/transactions/voice.js')
+  assert.equal(roundPhrase('2'), 'the second round')
+  assert.equal(roundPhrase('11'), 'the 11th round')
+  assert.equal(roundPhrase('CB-B'), 'Competitive Balance Round B')
+  assert.equal(roundPhrase('?'), null)
+  assert.equal(pickPhrase('11'), '11th-round pick')
+  assert.equal(pickPhrase('CB-A'), 'competitive-balance pick')
+  assert.equal(pickPhrase(null), 'draft pick')
 })

@@ -82,11 +82,10 @@ test('a phone gets the dock and never the rail', async ({ page }) => {
   await expect(page.locator('.wirerail')).toHaveCount(0)
   await expect(page.locator('.wiredock')).toHaveAttribute('data-state', 'rail')
 
-  // At rest it is one move and a count — not a ledger, and not nothing.
+  // At rest it is one move — not a ledger, and not nothing — over a ledger of
+  // several. (The rail carried a count until 2026-11-03; Gary dropped it.)
   await expect(page.locator('.wiredock__cut')).not.toBeEmpty()
-  const count = Number(await page.locator('.wiredock__count').innerText())
-  expect(count).toBeGreaterThan(1)
-  expect(await page.locator('.wiredock__list .wire__row').count()).toBe(count)
+  expect(await page.locator('.wiredock__list .wire__row').count()).toBeGreaterThan(1)
 })
 
 test('a desktop gets the rail beside the games and never the dock', async ({ page }) => {
