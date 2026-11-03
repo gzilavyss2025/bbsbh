@@ -116,6 +116,11 @@
   .oseason__list .wire__row:has(.wire__face + .wire__face) .wire__faces {
     max-width: none;
   }
+  /* Two faces at most, the wire's own cap (MoveRow's FACES_PER_ROW); the
+     sentence still bolds every name. */
+  .oseason__list .wire__face:nth-child(n + 3) {
+    display: none;
+  }
 }
 
 /* THE FACT LINE — the player's background under a move (WireFacts.jsx): a
