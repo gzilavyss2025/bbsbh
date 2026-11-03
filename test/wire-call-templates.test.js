@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { lastAffiliated, shapeFacts } from '../src/api/transactions/playerFacts.js'
-import { arrivalStory, callStory, factLines, retiredStory, subjectsOf } from '../src/api/transactions/templates.js'
+import { arrivalStory, callStory, factLines, injuredStory, retiredStory, subjectsOf } from '../src/api/transactions/templates.js'
 
 const clause = (before, after = '.') => ({ cutline: [{ text: before }, { text: 'Dobnak', playerId: 1 }, { text: after }] })
 const templateOf = (story) => subjectsOf(story)[0].template
@@ -159,4 +159,24 @@ test("an arrival's last affiliated season is one before the year he arrived", ()
   const rows = [{ season: 2026, level: 'A+' }, { season: 2024, level: 'AA' }]
   assert.deepEqual(lastAffiliated(rows, '2026-08-02'), { season: 2024, level: 'Double-A' })
   assert.equal(lastAffiliated([{ season: 2026, level: 'A+' }], '2026-08-02'), null)
+})
+
+test('traded while injured: the note says whose list he went on, and the trade', () => {
+  // JoJo Romero, 2026: on the Cardinals' list July 14, traded and re-placed by the Brewers Aug. 3.
+  const romero = {
+    id: 3,
+    lastName: 'Romero',
+    primaryPosition: { code: '1' },
+    transactions: [
+      { date: '2026-07-17', effectiveDate: '2026-07-14', typeCode: 'SC', toTeam: { id: 138 }, description: 'St. Louis Cardinals placed LHP JoJo Romero on the 15-day injured list retroactive to July 14, 2026.' },
+      { date: '2026-08-03', typeCode: 'SC', toTeam: { id: 158 }, description: 'Milwaukee Brewers placed LHP JoJo Romero on the 15-day injured list.' },
+      { date: '2026-08-03', typeCode: 'TR', fromTeam: { id: 138 }, toTeam: { id: 158 }, description: 'St. Louis Cardinals traded RHP Dustin May and LHP JoJo Romero to Milwaukee Brewers for OF Alexander Frias and OF Josiah Ragsdale.' },
+    ],
+  }
+  const f = shapeFacts(romero, { season: 2026, teamId: 158 })
+  f.stint = f.stints[0]
+  assert.equal(
+    injuredStory(f, { placed: true, moveDate: '2026-08-03', clause: 'Placed LHP Romero on the 15-day injured list.' }),
+    "He went on the Cardinals' injured list July 14 and came over in the Aug. 3 trade.",
+  )
 })

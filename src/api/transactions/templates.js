@@ -451,7 +451,10 @@ export function injuredStory(facts, { placed, moveDate = null, clause = '' }) {
     const refiled = moveDate && stint.filings.length > 1 && Math.abs(daysBetween(stint.filings[0], moveDate)) > 1
     // The injury only when the move's own words leave it out.
     const borrowed = stint.injury && !clause.toLowerCase().includes(stint.injury.toLowerCase()) ? ` (${lower(stint.injury)})` : ''
-    if (refiled) out.push(`He first went on the list ${apDate(stint.from)}${borrowed}.`)
+    // Traded while on the list: his new club files him again (JoJo Romero, Aug. 3, 2026).
+    const dealt = refiled && facts.arrivals?.find((a) => a.how === 'trade' && near(a.date, moveDate) && a.teamId !== stint.club)
+    if (dealt && stint.club) out.push(`He went on ${the(stint.club)}' injured list ${apDate(stint.from)}${borrowed} and came over in the ${apDate(dealt.date)} trade.`)
+    else if (refiled) out.push(`He first went on the list ${apDate(stint.from)}${borrowed}.`)
     if (at > 0) {
       const prev = earlier[earlier.length - 1]
       let s = `It is his ${COUNT[at + 1] ?? `${at + 1}th`} stint on the injured list in ${facts.season}`

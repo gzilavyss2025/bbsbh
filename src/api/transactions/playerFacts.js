@@ -176,7 +176,7 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
         continue
       }
       const injury = (t.description.match(/injured list(?: retroactive to [^.]+)?\.\s*(.+)/i)?.[1] ?? '').trim().replace(/\.$/, '')
-      allStints.push({ from: t.effectiveDate ?? t.date, filings: [t.date], injury: injury || null, to: null })
+      allStints.push({ from: t.effectiveDate ?? t.date, filings: [t.date], injury: injury || null, to: null, club: t.toTeam?.id ?? null })
     } else if (/transferred/i.test(t.description)) {
       // A move to the 60-day list: the stint already open, filed again.
       allStints.findLast((x) => !x.to)?.filings.push(t.date)
