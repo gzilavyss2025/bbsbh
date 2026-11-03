@@ -84,7 +84,10 @@ export function WireFacts({ story, date, line: oneLine = false, children }) {
   // ...and the call-up beside it adds his line before the call.
   const callUp = named && lead ? people.find((p) => p !== lead && ['recall', 'selected'].includes(subjects[all.indexOf(p.facts)]?.template)) : null
   const callUpNote = callUp ? callUpSentence(callUp.facts) : null
-  const note = !line && lead ? [lead.note, callUpNote].filter(Boolean).join(' ') : ''
+  // A 27th man's note always runs on, even in a busy day's story: it says why
+  // the move exists (Garrett Stallings, optioned July 12 beside an activation).
+  const extraMan = !line ? people.find((p) => p !== lead && p.facts.extraMan && p.note) : null
+  const note = !line ? [lead?.note, callUpNote, extraMan?.note].filter(Boolean).join(' ') : ''
   return (
     <>
       {children(
@@ -96,7 +99,7 @@ export function WireFacts({ story, date, line: oneLine = false, children }) {
       {open && (
         <div className="wirefacts" id={sheetId}>
           {people.length ? (
-            <FactSheet people={people.map((p) => ({ facts: p.facts, note: note && p === lead ? null : p.note || null }))} />
+            <FactSheet people={people.map((p) => ({ facts: p.facts, note: note && (p === lead || p === extraMan) ? null : p.note || null }))} />
           ) : (
             <p className="factsheet__none" aria-busy="true">Loading…</p>
           )}
