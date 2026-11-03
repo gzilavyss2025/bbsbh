@@ -931,7 +931,7 @@ export const HEADSHOT_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload'
 // shared width means every call site reuses a single cached image; callers
 // should only override it for a materially larger surface.
 export function realHeadshotUrl(personId, width = 320) {
-  if (!personId || playerPhotosOff()) return null
+  if (!personId) return null
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
 }
 
@@ -945,7 +945,7 @@ export function realHeadshotUrl(personId, width = 320) {
 // matches the app's floating-cutout treatment) → milb (a real face for a
 // prospect) → team logo → monogram.
 export function milbHeadshotUrl(personId, width = 320) {
-  if (!personId || playerPhotosOff()) return null
+  if (!personId) return null
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/milb/current`
 }
 
@@ -992,8 +992,11 @@ export function coachHeadshotUrl(personId, width = 320) {
 export function headshotSources(personId, { coach = false, mlb = false } = {}) {
   if (!personId) return []
   if (coach) return [coachHeadshotUrl(personId)]
-  if (mlb) return [realHeadshotUrl(personId), coachHeadshotUrl(personId)].filter(Boolean)
-  return [realHeadshotUrl(personId), milbHeadshotUrl(personId), coachHeadshotUrl(personId)].filter(Boolean)
+  // Lockout (ADR-0126): no photo rung at all, not even coach, so the tile goes straight
+  // to the logo with no 404 to wait out or log.
+  if (mlb && playerPhotosOff()) return []
+  if (mlb) return [realHeadshotUrl(personId), coachHeadshotUrl(personId)]
+  return [realHeadshotUrl(personId), milbHeadshotUrl(personId), coachHeadshotUrl(personId)]
 }
 
 // ---------------------------------------------------------------------------

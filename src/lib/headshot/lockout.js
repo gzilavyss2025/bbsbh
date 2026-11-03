@@ -1,23 +1,27 @@
-// The lockout switch (ADR-0126). In the 2021-22 lockout MLB swapped every current
-// player's photo for a generic silhouette, so a CDN photo may come back 200 with a
-// gray shape instead of the 404 our fallback chain expects. When the switch is on,
-// every player photo URL builder returns null and each Headshot drops straight to
-// its team-logo rung. Coach photos stay on; coaches are not in the union.
+// The lockout switch (ADR-0126). In the 2021-22 lockout MLB swapped current players'
+// photos for a generic silhouette, so a CDN photo may come back 200 with a gray shape
+// instead of the 404 our fallback chain expects. When the switch is on, a MAJOR-LEAGUE
+// player's Headshot skips the CDN and shows the club logo (`headshotSources` in
+// ../teams.js), and the action-photo washes are not drawn. Minor leaguers and coaches
+// keep their photos: they are not covered by the expiring major-league CBA.
 //
-// It turns on by itself when the CBA lapses (11:59 p.m. ET, Dec 1, 2026, so from
-// 12:01 a.m. ET Dec 2). VITE_PLAYER_PHOTOS_OFF overrides the date both ways, set in
-// Vercel and then redeployed: `0` keeps photos (a deal was signed, or the lockout
-// ended), `1` hides them now. Any other value, or none, follows the date.
+// It turns on by itself when the CBA lapses (11:59 p.m. ET Dec 1, 2026), from 12:01 a.m.
+// ET Dec 2, by the viewer's device clock. VITE_PLAYER_PHOTOS overrides the date both
+// ways, set in Vercel and then redeployed: `on` shows photos (a deal was signed, or the
+// lockout ended), `off` hides them now. Any other value, or none, follows the date.
 export const LOCKOUT_STARTS_AT = Date.parse('2026-12-02T05:01:00Z')
 
-// Vite inlines import.meta.env, so the app follows the date. Outside Vite (the unit suite in
-// plain node) the default is `0`: photos on, so URL tests don't start failing on Dec 2.
-// A test can still set process.env.VITE_PLAYER_PHOTOS_OFF to drive it.
-const nodeEnv = () => ({ VITE_PLAYER_PHOTOS_OFF: globalThis.process?.env?.VITE_PLAYER_PHOTOS_OFF ?? '0' })
+// Which env to read. Vite inlines import.meta.env, so the app follows the date. Outside
+// Vite (the unit suite in plain node) the default is `on`, so URL tests don't start
+// failing on Dec 2; a test can still set process.env.VITE_PLAYER_PHOTOS.
+export function photoEnv(viteEnv, procEnv) {
+  if (viteEnv) return viteEnv
+  return { VITE_PLAYER_PHOTOS: procEnv?.VITE_PLAYER_PHOTOS ?? 'on' }
+}
 
-export function playerPhotosOff(env = import.meta.env ?? nodeEnv(), now = Date.now()) {
-  const override = env?.VITE_PLAYER_PHOTOS_OFF
-  if (override === '1') return true
-  if (override === '0') return false
+export function playerPhotosOff(env = photoEnv(import.meta.env, globalThis.process?.env), now = Date.now()) {
+  const setting = env?.VITE_PLAYER_PHOTOS
+  if (setting === 'off') return true
+  if (setting === 'on') return false
   return now >= LOCKOUT_STARTS_AT
 }

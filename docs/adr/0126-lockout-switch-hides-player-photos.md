@@ -1,6 +1,6 @@
 # A lockout switch hides player photos
 
-**Status:** Proposed
+**Status:** Accepted (Gary, 2026-11-03)
 **Date:** 2026-11-03
 
 ## Context
@@ -15,14 +15,31 @@ Headshot fallback chain never runs, because it depends on a 404 (`realHeadshotUr
 ## Decision
 
 A switch in `src/lib/headshot/lockout.js`. It turns on by itself at 12:01 a.m. ET on
-2026-12-02, the minute after the CBA lapses. When it is on, the player photo URL builders (`realHeadshotUrl`, `milbHeadshotUrl`, `actionPhotoUrl`)
-return null. Headshot and PitcherNotice then show the team logo, and the action-photo washes
-are not drawn. Coach photos stay on, because coaches are not in the union.
+2026-12-02, after the CBA lapses at 11:59 p.m. ET on Dec 1.
 
-`VITE_PLAYER_PHOTOS_OFF` overrides the date both ways (set it in Vercel, then redeploy): `0`
-keeps photos (a deal was signed, or the lockout ended) and `1` hides them now. Gary chose the
-date over a live silhouette check (2026-11-03): it is simple and predictable, and the override
-covers a deal or a different start date.
+When it is on:
+
+- A **major-league** player's Headshot has no photo rung, not even the coach rung, so it shows
+  the club logo with no 404 to wait out (`headshotSources`, `mlb` true).
+- The action-photo washes are not drawn (`actionPhotoUrl`; only active MLB players have them).
+- The preview poster leaves an MLB club's player slots empty, and Gameday stops warming an MLB
+  game's roster photos.
+- **Minor leaguers and coaches keep their photos.** The 2021 reporting names current MLB players
+  only. That minor leaguers are outside the expiring CBA is an inference (they bargain under their
+  own agreement); check it on Dec 2.
+
+`VITE_PLAYER_PHOTOS` overrides the date both ways (set it in Vercel, then redeploy): `on` shows
+photos (a deal was signed, or the lockout ended) and `off` hides them now. Gary chose the date
+over a live silhouette check (2026-11-03): it is simple and predictable, and the override covers
+a deal or a different start date.
+
+## Known limits
+
+- The date is read from the viewer's device clock. A phone set a day off flips a day off, and an
+  open page flips on its next render. The override is the fix for any device.
+- Turning photos back on after the lockout is not automatic: set `VITE_PLAYER_PHOTOS=on`.
+- A retired player who appears as an MLB-team player (the "played for both" card) loses his photo
+  too; there is no reliable active/retired signal at that call site.
 
 ## Rejected
 

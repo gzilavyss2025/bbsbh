@@ -28,7 +28,6 @@ export function PlayedForBothCard({ pfb, away, home }) {
 
 // Whether a player's silo photo exists. The CDN answers 404 for a missing one.
 const probe = (id) => new Promise((resolve) => {
-  if (!realHeadshotUrl(id)) return resolve(false)
   const img = new Image()
   img.onload = () => resolve(true)
   img.onerror = () => resolve(false)
