@@ -473,7 +473,7 @@
 
 /* A reply (components/transactions/ReplyQuote.jsx): a carbon copy of the move
    this row answers, above its kicker — no "replying to", just the earlier
-   move's date in a small stamped box with a hook pointing back up the page,
+   move's date in a small stamped box with a hook toward it, down the page,
    then its sentence, muted, two lines at most. A tap goes to the original. */
 /* layout-exempt: stacked carbon copies */
 .wire__reply {
@@ -507,6 +507,13 @@
   white-space: nowrap;
 }
 .wire__hook { color: var(--graphite); }
+/* A game quote's two clubs, as marks: away "at" home. */
+.wire__matchup {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  vertical-align: middle;
+}
 /* The quoted sentence: the read face, in the case the cutline wrote it. */
 .wire__quotetext {
   display: -webkit-box;
@@ -518,7 +525,11 @@
   line-height: var(--lh-tight);
   color: var(--text-muted);
 }
-#root .wire__quotetext {
+.wire__quotetext--open {
+  display: block;
+}
+#root .wire__quotetext,
+#root .wire__matchup {
   text-transform: none; /* caps-exempt: a quoted cutline reads as the sentence it quotes */
 }
 /* The original, briefly marked after a quote scrolls to it. */

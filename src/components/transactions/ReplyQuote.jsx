@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchLevelSeasonDates } from '../../api/schedule.js'
 import { apShortDate, extraManCandidates, fetchClubDay, findReplies, gameReply } from '../../api/transactions/replies.js'
 import { useNav } from '../../lib/nav.js'
+import { TeamLogo } from '../logo/TeamLogo.jsx'
 
 // A reply on the transactions list: the faded quote of the move a row answers,
 // joined to it by a thin curved line (iMessage style), above the row's own
@@ -72,7 +73,11 @@ export function useReplies(items, teamId = null) {
     for (const [id, quotes] of Object.entries(replies)) {
       out[id] = quotes.map((q) => ({ ...q, story: byId.get(q.id) })).filter((q) => q.story)
     }
-    for (const m of extraMen) out[m.id] = [{ id: `game-${m.id}`, game: m.game }]
+    for (const m of extraMen) {
+      out[m.id] = [{ id: `game-${m.id}`, game: m.game }]
+      // The send-down that ends his trip answers the same game.
+      if (m.backId !== m.id) out[m.backId] = [{ id: `game-${m.backId}`, game: m.game }]
+    }
     return out
   }, [days, season, extraMen])
 }
@@ -90,15 +95,36 @@ function jumpTo(id) {
 }
 
 // The quote names no verb. It is a carbon copy of the earlier move: its date in
-// a small stamped box with a hook pointing back up the page, then the sentence,
+// a small stamped box with a hook toward it (the ledger runs newest first, so
+// the original sits further down the page), then the sentence,
 // muted. Several stamps stacked are several moves; a stamp that reads GAME is
 // the 27th man's game. The words live in the accessible name only.
 function Stamp({ children }) {
   return (
     <span className="wire__stamp" aria-hidden="true">
-      <span className="wire__hook">↩</span>
+      <span className="wire__hook">↪</span>
       {children}
     </span>
+  )
+}
+
+// One quoted move. A sentence cut at two lines opens in full on the first tap,
+// and the second goes to the move; one that fits goes there at once.
+function MoveQuote({ id, when, text, label }) {
+  const [open, setOpen] = useState(false)
+  const textRef = useRef(null)
+  const onClick = () => {
+    const el = textRef.current
+    if (!open && el && el.scrollHeight > el.clientHeight + 1) setOpen(true)
+    else jumpTo(id)
+  }
+  return (
+    <button type="button" className="wire__quote" aria-label={label} onClick={onClick}>
+      <Stamp>{when}</Stamp>
+      <span ref={textRef} className={`wire__quotetext${open ? ' wire__quotetext--open' : ''}`}>
+        {text}
+      </span>
+    </button>
   )
 }
 
@@ -119,7 +145,14 @@ export function ReplyQuotes({ quotes, date }) {
           onClick={() => navigate(game.href)}
         >
           <Stamp>Game</Stamp>
-          <span className="wire__quotetext">{game.label}</span>
+          <span className="wire__quotetext">
+            <span className="wire__matchup">
+              <TeamLogo teamId={game.awayId} size={16} />
+              @
+              <TeamLogo teamId={game.homeId} size={16} />
+            </span>{' '}
+            · {game.detail}
+          </span>
         </button>
       </div>
     )
@@ -127,19 +160,17 @@ export function ReplyQuotes({ quotes, date }) {
   return (
     <div className="wire__reply">
       {quotes.map((q) => {
-        const when = q.date === date ? 'Same day' : apShortDate(q.date)
+        // The stamp writes the date as a scorer would, 8/15.
+        const when = q.date === date ? 'Same day' : `${Number(q.date.slice(5, 7))}/${Number(q.date.slice(8, 10))}`
         const text = flatText(q.story.cutline)
         return (
-          <button
+          <MoveQuote
             key={q.id}
-            type="button"
-            className="wire__quote"
-            aria-label={`Answers the move of ${q.date === date ? 'the same day' : when}: ${text}`}
-            onClick={() => jumpTo(q.id)}
-          >
-            <Stamp>{when}</Stamp>
-            <span className="wire__quotetext">{text}</span>
-          </button>
+            id={q.id}
+            when={when}
+            text={text}
+            label={`Answers the move of ${q.date === date ? 'the same day' : apShortDate(q.date)}: ${text}`}
+          />
         )
       })}
     </div>

@@ -73,4 +73,19 @@
   .app:has(.slatemast__compactbar) .wire__row:has(.wirefacts) .wire__cutline {
     top: var(--slate-bar-h);
   }
+  /* One player: a bigger face at the right, level with the sentence beside it,
+     rather than a small one alone on the header line. An open card keeps the
+     header line (the flex rules above). */
+  /* layout-exempt: the face spans the rows beside the sentence */
+  .oseason__list .wire__row:has(.wire__face:only-child):not(:has(.wirefacts)) .wire__faces {
+    grid-row: 1 / span 3;
+    align-self: start;
+  }
+  .oseason__list .wire__row:has(.wire__face:only-child):not(:has(.wirefacts)) .wire__body > :not(.wire__kicker) {
+    grid-column: 1;
+  }
+  .oseason__list .wire__row:has(.wire__face:only-child):not(:has(.wirefacts)) .shot.wire__shot {
+    width: var(--shot-sm-w);
+    height: var(--shot-sm-h);
+  }
 }

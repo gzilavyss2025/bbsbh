@@ -227,8 +227,9 @@ function clubTabFor(teamId) {
 // faces, so a routine move reads as one entry rather than a card. `date` turns
 // on the player's background under the sentence (WireFacts.jsx). `quotes` are
 // the moves this one replies to (ReplyQuote.jsx), drawn above its kicker;
-// `day` is the row's own date, which a same-day quote leaves off.
-export function MoveRow({ story, compact = false, marks = false, line = false, date = null, quotes = null, day = null }) {
+// `day` is the row's own date, which a same-day quote leaves off. `teamId` is
+// the club a club ledger's stories belong to, for the notes (they carry none).
+export function MoveRow({ story, compact = false, marks = false, line = false, date = null, quotes = null, day = null, teamId = null }) {
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
   const lead = compact ? story.rail?.[0] : null
@@ -282,7 +283,8 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
         {date ? (
           <WireFactsBoundary fallback={<Cutline segments={story.cutline} />}>
             <Suspense fallback={<Cutline segments={story.cutline} />}>
-              <WireFacts story={story} date={date} line={line}>
+              {/* A 27th man's trip is told in his note, so even a one-line row runs it on. */}
+              <WireFacts story={story.teamId == null && teamId ? { ...story, teamId } : story} date={date} line={line && !quotes?.[0]?.game}>
                 {(tail) => <Cutline segments={story.cutline} tail={tail} />}
               </WireFacts>
             </Suspense>
@@ -310,7 +312,7 @@ export function MoveItems({ items, compact = false, marks = false, isMajor = nul
         <span className="wire__rule" aria-hidden="true" />
       </li>
     ) : (
-      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} quotes={replies[item.story.id]} day={item.date} />
+      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} quotes={replies[item.story.id]} day={item.date} teamId={teamId} />
     ),
   )
 }

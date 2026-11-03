@@ -153,13 +153,15 @@ export function extraManCandidates(days) {
   for (const { s, date } of all) {
     for (const [pid, kind] of s.moves ?? []) {
       if (kind !== 'cu' && kind !== 'se') continue
-      const back = all.some(
+      const back = all.find(
         (o) =>
           (o.s.teamId ?? 0) === (s.teamId ?? 0) &&
           (o.date === date || o.date === nextDay(date)) &&
           (o.s.moves ?? []).some(([p, k]) => p === pid && k === 'opt'),
       )
-      if (back) out.push({ id: s.id, team: s.teamId ?? 0, date, playerId: pid })
+      // backId: the option that ends his trip. It closes the same trip, so it
+      // answers the same game.
+      if (back) out.push({ id: s.id, backId: back.s.id, team: s.teamId ?? 0, date, playerId: pid })
     }
   }
   return out
@@ -174,7 +176,7 @@ export function apShortDate(iso) {
 
 // Rule 5's second half: the club's games that day (fetchClubDay) -> the game a
 // 27th man replies to, { label, href }, or null when the day allows no extra
-// man. Two games is a doubleheader. One game is a special event only when it
+// man ({ label, href, awayId, homeId, detail }). Two games is a doubleheader. One game is a special event only when it
 // carries a name AND is played away from the home club's own park (Field of
 // Dreams, Williamsport, Mexico City); a home opener or a heritage day carries a
 // name at home. Teams and date only: no score is read or fetched.
@@ -189,8 +191,13 @@ export function gameReply(games, date) {
   const event = !doubleheader && g.description?.trim() && g.venue?.id !== home?.venue?.id ? g.description.trim() : null
   if (!doubleheader && !event) return null
   const what = doubleheader ? 'Games 1 and 2' : event
+  const detail = `${what} · ${apShortDate(date)}`
   return {
-    label: `${away?.teamName} at ${home?.teamName} · ${what} · ${apShortDate(date)}`,
+    label: `${away?.teamName} at ${home?.teamName} · ${detail}`,
+    // The quote draws the clubs as their marks; `label` is its accessible name.
+    awayId: away?.id ?? null,
+    homeId: home?.id ?? null,
+    detail,
     href: gamePath(date, away?.abbreviation, home?.abbreviation, 'lineup1'),
   }
 }

@@ -197,7 +197,8 @@ test('a call-up back down by the next day is a 27th-man candidate', () => {
     day('2026-04-04', story('up', [[701656, 'cu'], [671111, 'lost']])),
   ]
   assert.deepEqual(extraManCandidates(days), [
-    { id: 'up', team: MIL, date: '2026-04-04', playerId: 701656 },
+    // backId: the option that ends his trip, which answers the same game.
+    { id: 'up', backId: 'down', team: MIL, date: '2026-04-04', playerId: 701656 },
   ])
 })
 
@@ -226,6 +227,8 @@ test('a 27th man replies to his doubleheader', () => {
   const reply = gameReply([game(), game({ gameNumber: 2 })], '2026-04-04')
   assert.equal(reply.label, 'Brewers at Royals · Games 1 and 2 · April 4')
   assert.equal(reply.href, '/04042026/milkc/lineup1')
+  // The quote draws the two clubs as marks, then the rest.
+  assert.deepEqual([reply.awayId, reply.homeId, reply.detail], [158, 118, 'Games 1 and 2 · April 4'])
 })
 
 test('a 27th man replies to a special event at a neutral park', () => {

@@ -1,7 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { factSeason, fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
 import { Button } from '../ui/control/Button.jsx'
-import { CALLS, factLines, subjectsOf } from '../../api/transactions/templates.js'
+import { CALLS, callUpSentence, factLines, subjectsOf } from '../../api/transactions/templates.js'
 import { FactSheet } from './FactSheet.jsx'
 
 // One move's player background on the offseason ledger. One player: his note
@@ -48,14 +48,18 @@ function useMoveFacts(story, date, subjects, enabled = true) {
 }
 
 // `children` draws the move's sentence, given what runs on after it.
-export function WireFacts({ story, date, line = false, children }) {
+export function WireFacts({ story, date, line: oneLine = false, children }) {
   const subjects = subjectsOf(story)
+  // A one-player send-down or cash deal runs its note on even as a one-line
+  // move: his last game, his season, his time with the club are the context the
+  // bare sentence lacks.
+  const line = oneLine && !(subjects.length === 1 && ['option', 'sold'].includes(subjects[0].template))
   const [open, setOpen] = useState(false)
   const all = useMoveFacts(story, date, subjects, !line || open)
   const sheetId = useId()
   // Each player's note is his own move's template (transactions/templates.js).
   const people = (all ?? [])
-    .map((facts, i) => ({ facts, note: facts && factLines(subjects[i].template, facts, { moveDate: date, clause: subjects[i].clause }).join(' ') }))
+    .map((facts, i) => ({ facts, note: facts && factLines(subjects[i].template, facts, { moveDate: date, clause: subjects[i].clause, teamId: story.teamId }).join(' ') }))
     .filter((p) => p.facts)
   // A card with no facts yet draws its sentence alone; a one-line move keeps
   // its More until the tap has read and found nothing.
@@ -77,7 +81,10 @@ export function WireFacts({ story, date, line = false, children }) {
   // A placement with a call-up beside it is still about the injured player:
   // his note runs on, and the call-up's waits in the card.
   const lead = people[0] && (!named || subjects[all.indexOf(people[0].facts)]?.template === 'il-placed') ? people[0] : null
-  const note = !line && lead ? lead.note : ''
+  // ...and the call-up beside it adds his line before the call.
+  const callUp = named && lead ? people.find((p) => p !== lead && ['recall', 'selected'].includes(subjects[all.indexOf(p.facts)]?.template)) : null
+  const callUpNote = callUp ? callUpSentence(callUp.facts) : null
+  const note = !line && lead ? [lead.note, callUpNote].filter(Boolean).join(' ') : ''
   return (
     <>
       {children(
