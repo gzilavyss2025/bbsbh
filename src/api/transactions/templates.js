@@ -46,7 +46,8 @@ const CLAUSE_TEMPLATES = [
   ['minor-deal', /minor league contract/i],
   // From an independent club: no trade, so nothing went the other way.
   ['arrival', /\bobtained\b|\bpurchased\b|\bacquired\b(?![^;]*\bfor\b)/i],
-  ['sold', /^\s*traded\b.*\bfor cash\b/i],
+  // Within one clause (they split at ';'), so a club may lead it.
+  ['sold', /\btraded\b[^;]*\bfor cash\b/i],
   ['trade', /traded|acquired/i],
   ['signing', /signed/i],
 ]
@@ -311,7 +312,7 @@ function originSentence(facts, name, moveDate) {
 // A month with no day is spelled out ("December 2025").
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const AP_MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
-function apDate(iso) {
+export function apDate(iso) {
   const [, m, d] = iso.split('-').map(Number)
   return `${AP_MONTHS[m - 1]} ${d}`
 }
@@ -516,10 +517,13 @@ function lastGameSentence(facts, name) {
   const { date, oppId, line } = facts.lastGame
   const head = `${name} last ${facts.pitcher ? 'pitched' : 'played'} ${apDate(date)}${oppId ? ` against ${the(oppId)}` : ''}`
   if (!facts.pitcher) return `${head}, going ${line.h}-for-${line.ab}${line.hr ? ` with ${homers(line.hr)}` : ''}.`
-  const ip = String(line.ip).endsWith('.0') ? Number(line.ip) : line.ip
+  // The feed writes thirds after the point: "2.1" is 2 1/3 innings.
+  const [whole, thirds] = String(line.ip).split('.').map(Number)
+  const frac = thirds ? `${thirds}/3` : ''
+  const innings = whole ? `${whole}${frac ? ` ${frac}` : ''} inning${whole === 1 && !frac ? '' : 's'}` : `${frac} of an inning`
   const runs = `${line.er} earned run${line.er === 1 ? '' : 's'}`
-  if (!Number(line.ip)) return `${head}, allowing ${runs} without retiring a batter.`
-  return `${head}, ${line.er ? `allowing ${runs} over` : 'going'} ${ip} inning${ip === 1 ? '' : 's'}${line.er ? '' : ' without an earned run'}.`
+  if (!whole && !thirds) return `${head}, allowing ${runs} without retiring a batter.`
+  return `${head}, ${line.er ? `allowing ${runs} over` : 'going'} ${innings}${line.er ? '' : ' without an earned run'}.`
 }
 const longDate = (iso) => `${MONTH_NAMES[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
 export function callStory(facts, { kind, moveDate }) {
@@ -528,7 +532,8 @@ export function callStory(facts, { kind, moveDate }) {
     const c = (facts.calls ?? []).find((x) => x.up && (near(x.up, moveDate) || (x.down && near(x.down, moveDate))))
     const { event } = facts.extraMan
     const at = event ? `at the ${event}` : `in the ${c?.up ? `${longDate(c.up)} ` : ''}doubleheader`
-    if (kind === 'option') return [`${name} goes back down after serving as the 27th man ${at}.`, optionsSentence(facts)].filter(Boolean).join(' ')
+    // No options line: the extra man's trip back is not an ordinary option.
+    if (kind === 'option') return `${name} goes back down after serving as the 27th man ${at}.`
     return `${name} came up as the 27th man for the ${event ?? 'doubleheader'}${c?.down ? `${event ? ',' : ''} and went back down ${apDate(c.down)}` : ''}.`
   }
   // A send-down after time in the majors: his last game, then his season to

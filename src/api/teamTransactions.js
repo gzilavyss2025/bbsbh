@@ -555,7 +555,7 @@ function shapeStory(draft, ctx) {
     rail: buildRail(draft, ctx),
     cutline: buildCutline(draft, ctx),
     // [personId, rosterKind] per row, for the replies (transactions/replies.js).
-    moves: draft.rows.map(({ row, role }) => [row.person?.id ?? null, rosterKind(row, role)]),
+    moves: draft.rows.map(({ row, role }) => [row.person?.id ?? null, rosterKind(row, role, ctx.debutedIds)]),
   }
 }
 

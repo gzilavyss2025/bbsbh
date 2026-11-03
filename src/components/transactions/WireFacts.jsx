@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { factSeason, fetchPlayerFacts } from '../../api/transactions/playerFacts.js'
 import { Button } from '../ui/control/Button.jsx'
 import { CALLS, callUpSentence, factLines, subjectsOf } from '../../api/transactions/templates.js'
@@ -47,6 +47,21 @@ function useMoveFacts(story, date, subjects, enabled = true) {
   return facts
 }
 
+// True once `ref` comes within a screen of the viewport, and from then on. A
+// one-line row that runs its note on reads its facts only then: a season-long
+// ledger holds dozens of them, and each read is three or more statsapi calls.
+function useNearView(ref, watch) {
+  const [near, setNear] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!watch || near || !el) return undefined
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: '600px 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [ref, watch, near])
+  return near
+}
+
 // `children` draws the move's sentence, given what runs on after it.
 export function WireFacts({ story, date, line: oneLine = false, children }) {
   const subjects = subjectsOf(story)
@@ -54,8 +69,11 @@ export function WireFacts({ story, date, line: oneLine = false, children }) {
   // move: his last game, his season, his time with the club are the context the
   // bare sentence lacks.
   const line = oneLine && !(subjects.length === 1 && ['option', 'sold'].includes(subjects[0].template))
+  const promoted = oneLine && !line
+  const probe = useRef(null)
+  const near = useNearView(probe, promoted)
   const [open, setOpen] = useState(false)
-  const all = useMoveFacts(story, date, subjects, !line || open)
+  const all = useMoveFacts(story, date, subjects, (!line && (!promoted || near)) || open)
   const sheetId = useId()
   // Each player's note is his own move's template (transactions/templates.js).
   const people = (all ?? [])
@@ -64,6 +82,8 @@ export function WireFacts({ story, date, line: oneLine = false, children }) {
   // A card with no facts yet draws its sentence alone; a one-line move keeps
   // its More until the tap has read and found nothing.
   const unread = line && subjects.length > 0 && all === null
+  // A row waiting to come into view holds a probe where its note will run on.
+  if (promoted && !near) return children(<span ref={probe} />)
   if (!people.length && !unread) return children(null)
   const named = people.length > 1
   const toggle = (

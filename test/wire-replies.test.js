@@ -108,14 +108,6 @@ test('a row the rule cannot read silences the whole club-day', () => {
   assert.deepEqual(findReplies(days, { season: SEASON }), {})
 })
 
-test('a trade day is not counted', () => {
-  const days = [
-    day('2026-07-31', story('il', [[1, 'il']]), story('deal', [[2, 'trade-in'], [3, 'trade-out']])),
-    day('2026-07-30', story('up', [[4, 'cu']])),
-  ]
-  assert.deepEqual(findReplies(days, { season: SEASON }), {})
-})
-
 test('a 60-day transfer changes nothing on the active roster', () => {
   const days = [
     day('2026-06-10', story('il', [[1, 'il']]), story('xfer', [[9, 'il60']]), story('up', [[2, 'cu']])),
@@ -210,8 +202,11 @@ test('a confirmed 27th man neither fills nor opens a spot', () => {
     day('2026-04-04', story('up', [[701656, 'cu']])),
     day('2026-04-03', story('des', [[1, 'des']])),
   ]
-  const extraMen = [{ id: 'up', team: MIL, date: '2026-04-04', playerId: 701656 }]
-  assert.deepEqual(findReplies(days, { season: SEASON, extraMen }), {})
+  const extraMen = [{ id: 'up', backId: 'down', team: MIL, date: '2026-04-04', playerId: 701656, game: {} }]
+  const replies = findReplies(days, { season: SEASON, extraMen })
+  // Only his two game quotes: no story pairs by the count.
+  assert.deepEqual(Object.keys(replies).sort(), ['down', 'up'])
+  assert.ok(Object.values(replies).flat().every((q) => q.game))
 })
 
 // The schedule, trimmed to the fields gameReply reads (no score is fetched).
@@ -252,4 +247,96 @@ test('a postponed or cancelled game makes no doubleheader', () => {
   const ppd = game({ gameNumber: 2, status: { codedGameState: 'D' } })
   assert.equal(gameReply([game(), ppd], '2026-04-04'), null)
   assert.equal(gameReply([game(), game({ gameNumber: 2, status: { codedGameState: 'C' } })], '2026-04-04'), null)
+})
+
+test('a 27th man’s game quote joins his story’s other replies', () => {
+  // Garrett Stallings, optioned July 12 in the same story as an activation:
+  // the story answers his game, and keeps any reply it already had.
+  const game = { label: 'Brewers at Pirates · Games 1 and 2 · July 11' }
+  const days = [
+    day('2026-07-12', story('down', [[668831, 'opt'], [6, 'act']])),
+    day('2026-07-11', story('up', [[668831, 'cu']]), story('des', [[5, 'des']])),
+  ]
+  const extraMen = [{ id: 'up', backId: 'down', team: MIL, date: '2026-07-11', playerId: 668831, game }]
+  const replies = findReplies(days, { season: SEASON, extraMen })
+  assert.deepEqual(replies.up, [{ id: 'game-up', game }])
+  // The activation fills the designated man's spot; the game is quoted too.
+  assert.deepEqual(replies.down.map((q) => q.id), ['des', 'game-down'])
+})
+
+test('the count waits for the 27th-man check', () => {
+  // extraMen null: the schedule has not answered, so a call-up that may be
+  // the 27th man must not pair with anything yet.
+  const days = [day('2026-06-10', story('il', [[1, 'il']]), story('up', [[2, 'cu']]))]
+  assert.deepEqual(findReplies(days, { season: SEASON, extraMen: null }), {})
+  assert.deepEqual(quoted(findReplies(days, { season: SEASON, extraMen: [] }), 'up'), ['il'])
+})
+
+test('a trade arrival fills a spot, and a trade away opens one', () => {
+  const days = [
+    day('2026-07-31', story('deal', [[2, 'trade-in']]), story('il', [[1, 'il']])),
+    day('2026-07-30', story('away', [[3, 'trade-out']]), story('up', [[4, 'cu']])),
+  ]
+  const replies = findReplies(days, { season: SEASON })
+  assert.deepEqual(quoted(replies, 'deal'), ['il'])
+  assert.deepEqual(quoted(replies, 'up'), ['away'])
+})
+
+test('a prospect traded moves nothing on the active roster', () => {
+  // Alexander Frias and Josiah Ragsdale, Aug. 3, 2026: no big-league games, so
+  // the Brewers trading them away opened no spot.
+  const rows = [
+    row(1, 'TR', 'Milwaukee Brewers traded OF Player 1 to St. Louis Cardinals.', { fromTeam: { id: MIL }, toTeam: { id: 138 } }),
+    row(2, 'TR', 'St. Louis Cardinals traded LHP Player 2 to Milwaukee Brewers.', { fromTeam: { id: 138 } }),
+  ]
+  const [{ stories }] = groupIntoStories(rows, { orgId: MIL, debutedIds: new Set([1002]) })
+  const kinds = Object.fromEntries(stories.flatMap((s) => s.moves))
+  assert.equal(kinds[1001], 'none')
+  assert.equal(kinds[1002], 'trade-in')
+})
+
+test('the count reads every season on the page', () => {
+  // A club ledger opens on next year's file and scrolls back into this one.
+  const seasons = [SEASON, { start: '2027-03-25', end: '2027-09-26' }]
+  const days = [
+    day('2027-05-10', story('il27', [[1, 'il']]), story('up27', [[2, 'cu']])),
+    day('2026-06-10', story('il', [[3, 'il']]), story('up', [[4, 'cu']])),
+  ]
+  const replies = findReplies(days, { season: seasons })
+  assert.deepEqual(quoted(replies, 'up27'), ['il27'])
+  assert.deepEqual(quoted(replies, 'up'), ['il'])
+})
+
+test('a designated player traded or released later opens no second spot', () => {
+  // Luis Urías, Diamondbacks: designated, then traded for cash June 20. The
+  // designation opened his spot; the trade is not another opening.
+  const days = [
+    day('2026-06-20', story('dealt', [[9, 'trade-out']])),
+    day('2026-06-19', story('up', [[2, 'cu']])),
+    day('2026-06-12', story('des', [[9, 'des']])),
+  ]
+  const replies = findReplies(days, { season: SEASON, extraMen: [] })
+  assert.deepEqual(quoted(replies, 'dealt'), ['des'])
+  assert.deepEqual(quoted(replies, 'up'), [])
+})
+
+test('a player in and out the same day cancels himself', () => {
+  // Orioles, March 29, 2026: Sandridge and Rodríguez each acquired and each
+  // optioned. Neither arrival filled the other's spot.
+  const days = [
+    day('2026-03-29', story('a', [[1, 'trade-in']]), story('b', [[2, 'trade-in']]), story('oa', [[2, 'opt']]), story('ob', [[1, 'opt']])),
+  ]
+  assert.deepEqual(findReplies(days, { season: SEASON, extraMen: [] }), {})
+})
+
+test('a designation settles within two weeks, so an old one answers nothing', () => {
+  // Royals, 2026: a pitcher designated May 27 and traded Aug. 2. The May
+  // designation had long resolved; the deal is no reply to it.
+  const days = [
+    day('2026-08-02', story('deal', [[7, 'trade-out']])),
+    day('2026-05-27', story('des', [[7, 'des']])),
+  ]
+  assert.deepEqual(quoted(findReplies(days), 'deal'), [])
+  const soon = [day('2026-06-08', story('deal', [[7, 'trade-out']])), day('2026-05-27', story('des', [[7, 'des']]))]
+  assert.deepEqual(quoted(findReplies(soon), 'deal'), ['des'])
 })

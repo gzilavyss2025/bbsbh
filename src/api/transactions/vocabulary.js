@@ -169,9 +169,14 @@ function isUndebutedSigning(t, debutedIds) {
 // one per row: an opening (il, list, opt, des, rel), a fill (cu, se, act,
 // claim), a row that leaves the 26-man alone (il60, out, lost, none), the two
 // halves of a trade, or '?' for a row the count cannot read.
-export function rosterKind(row, role) {
+// `debutedIds`, when given, marks a trade of a player who never reached the
+// majors 'none': a prospect changing clubs moves no one on the 26-man.
+export function rosterKind(row, role, debutedIds = null) {
   const code = row.typeCode
-  if (code === 'TR') return role === 'in' ? 'trade-in' : 'trade-out'
+  if (code === 'TR') {
+    if (debutedIds && !debutedIds.has(row.person?.id)) return 'none'
+    return role === 'in' ? 'trade-in' : 'trade-out'
+  }
   if (code === 'CLW') return role === 'in' ? 'claim' : 'lost'
   if (code === 'DES') return 'des'
   if (code === 'OPT') return 'opt'

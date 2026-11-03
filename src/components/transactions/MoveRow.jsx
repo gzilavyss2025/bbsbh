@@ -1,4 +1,4 @@
-import { Component, Fragment, Suspense, lazy } from 'react'
+import { Component, Fragment, Suspense, lazy, useMemo } from 'react'
 import { reportCrash } from '../../lib/crash/report.js'
 import { isMlbTeamId, teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
@@ -227,9 +227,9 @@ function clubTabFor(teamId) {
 // faces, so a routine move reads as one entry rather than a card. `date` turns
 // on the player's background under the sentence (WireFacts.jsx). `quotes` are
 // the moves this one replies to (ReplyQuote.jsx), drawn above its kicker;
-// `day` is the row's own date, which a same-day quote leaves off. `teamId` is
-// the club a club ledger's stories belong to, for the notes (they carry none).
-export function MoveRow({ story, compact = false, marks = false, line = false, date = null, quotes = null, day = null, teamId = null }) {
+// `day` is the row's own date, which a same-day quote leaves off.
+// `factsStory` is the story with its club filled in, for the notes (MoveItems).
+export function MoveRow({ story, compact = false, marks = false, line = false, date = null, quotes = null, day = null, factsStory = story }) {
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
   const lead = compact ? story.rail?.[0] : null
@@ -284,7 +284,7 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
           <WireFactsBoundary fallback={<Cutline segments={story.cutline} />}>
             <Suspense fallback={<Cutline segments={story.cutline} />}>
               {/* A 27th man's trip is told in his note, so even a one-line row runs it on. */}
-              <WireFacts story={story.teamId == null && teamId ? { ...story, teamId } : story} date={date} line={line && !quotes?.[0]?.game}>
+              <WireFacts story={factsStory} date={date} line={line && !quotes?.some((q) => q.game)}>
                 {(tail) => <Cutline segments={story.cutline} tail={tail} />}
               </WireFacts>
             </Suspense>
@@ -304,15 +304,22 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
 // Replies are found among the items drawn here, so every quote's original is on
 // the page to scroll to.
 export function MoveItems({ items, compact = false, marks = false, isMajor = null, facts = false, teamId = null }) {
-  const replies = useReplies(items, teamId)
-  return items.map((item) =>
+  // A club ledger's stories carry no club (`teamId`); the replies and the notes
+  // both need it, so it is filled in once, here. The row itself still draws the
+  // story as it came, so a club's own page grows no mark of its own on every row.
+  const filled = useMemo(
+    () => (teamId ? items.map((i) => (i.kind === 'story' && i.story.teamId == null ? { ...i, story: { ...i.story, teamId } } : i)) : items),
+    [items, teamId],
+  )
+  const replies = useReplies(filled)
+  return filled.map((item, n) =>
     item.kind === 'date' ? (
       <li className="wire__date" key={item.key}>
         <span className="wire__dateline">{dateline(item.date)}</span>
         <span className="wire__rule" aria-hidden="true" />
       </li>
     ) : (
-      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} quotes={replies[item.story.id]} day={item.date} teamId={teamId} />
+      <MoveRow key={item.key} story={items[n].story} factsStory={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} quotes={replies[item.story.id]} day={item.date} />
     ),
   )
 }

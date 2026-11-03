@@ -1,5 +1,7 @@
 import { getJson } from '../statsapi.js'
 import { gamePath } from '../../lib/route.js'
+import { shiftDays } from '../../lib/time/standingsDates.js'
+import { apDate } from './templates.js'
 
 // Replies on the transactions list: a roster move that exists BECAUSE of an
 // earlier one shows a faded quote of the move it answers (MoveRow.jsx draws it).
@@ -29,24 +31,28 @@ import { gamePath } from '../../lib/route.js'
 //
 // A roster move and its date carry no score, so none of this is sealed.
 
-const OPENS = new Set(['il', 'list', 'opt', 'des', 'rel'])
-const FILLS = new Set(['cu', 'se', 'act', 'claim'])
+// A trade away opens a spot and a trade arrival fills one. A player who never
+// reached the majors is traded as 'none' (rosterKind), so a prospect leaving
+// or arriving moves nothing.
+const OPENS = new Set(['il', 'list', 'opt', 'des', 'rel', 'trade-out'])
+const FILLS = new Set(['cu', 'se', 'act', 'claim', 'trade-in'])
 // Rows that change the 26-man not at all, or did so on another move's day.
 const NEUTRAL = new Set(['il60', 'out', 'lost', 'none'])
 const RESOLVES_DES = new Set(['out', 'rel', 'trade-out', 'lost'])
 
-const nextDay = (iso) => {
-  const d = new Date(`${iso}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() + 1)
-  return d.toISOString().slice(0, 10)
-}
+const nextDay = (iso) => shiftDays(iso, 1)
+// A designation resolves within days (a week of waivers or trade talks); one
+// older than this was settled long before, and he may have been re-added since.
+const DES_DAYS = 14
 
 // days: [{ date, stories }] in any order, every club mixed (the wire) or one
-// club (its ledger). season: { start, end } regular-season dates, or null.
-// extraMen: the confirmed 27th men, [{ team, date, playerId }] from
-// extraManCandidates checked against the schedule; the count leaves out both
-// halves of each one's trip.
-// Returns { [storyId]: [{ id, date }] } — the stories each one replies to.
+// club (its ledger). season: { start, end } regular-season dates, a list of
+// them (a page spanning two seasons), or null.
+// extraMen: the confirmed 27th men, [{ id, backId, team, date, playerId, game }]
+// from extraManCandidates checked against the schedule. Both halves of his trip
+// quote the game and leave the count. null while the schedule has not answered:
+// the count waits, since a call-up then may yet prove to be the 27th man.
+// Returns { [storyId]: [{ id, date } | { id, game }] } — what each one replies to.
 export function findReplies(days, { season = null, extraMen = [] } = {}) {
   const entries = []
   for (const day of days ?? []) {
@@ -64,8 +70,9 @@ export function findReplies(days, { season = null, extraMen = [] } = {}) {
   }
   const latestBefore = (e, pid, kind, sameDayOnly) => {
     let found = null
+    const floor = kind === 'des' ? shiftDays(e.date, -DES_DAYS) : ''
     for (const o of entries) {
-      if (o === e || o.team !== e.team || o.date > e.date) continue
+      if (o === e || o.team !== e.team || o.date > e.date || o.date < floor) continue
       if (sameDayOnly && o.date !== e.date) continue
       if (o.moves.some(([p, k]) => p === pid && k === kind)) found = o
     }
@@ -84,34 +91,60 @@ export function findReplies(days, { season = null, extraMen = [] } = {}) {
     }
   }
 
-  if (season?.start && season?.end) countReplies(entries, season, extraMen, add)
+  const windows = [season ?? []].flat().filter((w) => w?.start && w?.end)
+  if (windows.length && extraMen) countReplies(entries, windows, extraMen, add)
+  for (const m of extraMen ?? []) {
+    for (const id of new Set([m.id, m.backId].filter(Boolean))) (out[id] ??= []).push({ id: `game-${id}`, game: m.game })
+  }
   return out
 }
 
-function countReplies(entries, season, extraMen, add) {
+function countReplies(entries, windows, extraMen, add) {
   // A 27th man's call-up and the option that ends his trip are the game's, not
   // the roster's.
   const trip = (e, pid, kind) =>
     (kind === 'cu' || kind === 'se' || kind === 'opt') &&
     extraMen.some((m) => m.team === e.team && m.playerId === pid && (e.date === m.date || e.date === nextDay(m.date)))
+  // A trade or release of a player designated earlier opens nothing: the
+  // designation already took him off the active roster.
+  const designated = (e, pid) => {
+    const floor = shiftDays(e.date, -DES_DAYS)
+    return entries.some((o) => o !== e && o.team === e.team && o.date <= e.date && o.date >= floor && o.moves.some(([p, k]) => p === pid && k === 'des'))
+  }
+  const effect = (e, pid, kind) => {
+    if (trip(e, pid, kind)) return 0
+    if ((kind === 'trade-out' || kind === 'rel') && designated(e, pid)) return 0
+    return OPENS.has(kind) ? 1 : FILLS.has(kind) ? -1 : 0
+  }
   // club -> date -> { readable, stories: [{ entry, net }] }
   const clubs = new Map()
-  for (const e of entries) {
-    if (e.date < season.start || e.date > season.end) continue
+  const inSeason = entries.filter((e) => windows.some((w) => e.date >= w.start && e.date <= w.end))
+  for (const e of inSeason) {
     if (!clubs.has(e.team)) clubs.set(e.team, new Map())
     const byDate = clubs.get(e.team)
-    if (!byDate.has(e.date)) {
-      byDate.set(e.date, { readable: true, stories: [] })
+    if (!byDate.has(e.date)) byDate.set(e.date, { readable: true, stories: [], entries: [] })
+    byDate.get(e.date).entries.push(e)
+  }
+  for (const byDate of clubs.values()) {
+    for (const day of byDate.values()) {
+      // A player who comes in and goes out the same day (acquired and
+      // optioned) cancels himself, whatever stories tell the two halves.
+      const both = new Map()
+      for (const e of day.entries) {
+        for (const [pid, kind] of e.moves) {
+          const f = effect(e, pid, kind)
+          if (f) both.set(pid, (both.get(pid) ?? 0) | (f > 0 ? 1 : 2))
+        }
+      }
+      for (const e of day.entries) {
+        let net = 0
+        for (const [pid, kind] of e.moves) {
+          if (!OPENS.has(kind) && !FILLS.has(kind) && !NEUTRAL.has(kind)) day.readable = false
+          if (both.get(pid) !== 3) net += effect(e, pid, kind)
+        }
+        if (net !== 0) day.stories.push({ entry: e, net })
+      }
     }
-    const day = byDate.get(e.date)
-    let net = 0
-    for (const [pid, kind] of e.moves) {
-      if (trip(e, pid, kind)) continue
-      if (OPENS.has(kind)) net += 1
-      else if (FILLS.has(kind)) net -= 1
-      else if (!NEUTRAL.has(kind)) day.readable = false
-    }
-    if (net !== 0) day.stories.push({ entry: e, net })
   }
 
   for (const byDate of clubs.values()) {
@@ -167,17 +200,10 @@ export function extraManCandidates(days) {
   return out
 }
 
-const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
-// AP style, as the cutlines write a date: "April 4", "Aug. 23".
-export function apShortDate(iso) {
-  const [, m, d] = iso.split('-').map(Number)
-  return `${MONTHS[m - 1]} ${d}`
-}
-
 // Rule 5's second half: the club's games that day (fetchClubDay) -> the game a
-// 27th man replies to, { label, href }, or null when the day allows no extra
-// man ({ label, href, awayId, homeId, detail }). Two games is a doubleheader. One game is a special event only when it
-// carries a name AND is played away from the home club's own park (Field of
+// 27th man replies to, { label, href, awayId, homeId, detail }, or null when
+// the day allows no extra man. Two games is a doubleheader. One game is a
+// special event only when it carries a name AND is played away from the home club's own park (Field of
 // Dreams, Williamsport, Mexico City); a home opener or a heritage day carries a
 // name at home. Teams and date only: no score is read or fetched.
 export function gameReply(games, date) {
@@ -191,7 +217,7 @@ export function gameReply(games, date) {
   const event = !doubleheader && g.description?.trim() && g.venue?.id !== home?.venue?.id ? g.description.trim() : null
   if (!doubleheader && !event) return null
   const what = doubleheader ? 'Games 1 and 2' : event
-  const detail = `${what} · ${apShortDate(date)}`
+  const detail = `${what} · ${apDate(date)}`
   return {
     label: `${away?.teamName} at ${home?.teamName} · ${detail}`,
     // The quote draws the clubs as their marks; `label` is its accessible name.

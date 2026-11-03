@@ -210,7 +210,7 @@ test('a doubleheader call-up reads as the 27th man, up and back down', () => {
   assert.equal(callStory(f, { kind: 'recall', moveDate: '2026-04-30' }), 'Alexander came up as the 27th man for the doubleheader and went back down May 1.')
   assert.equal(
     callStory(f, { kind: 'option', moveDate: '2026-05-01' }),
-    'Alexander goes back down after serving as the 27th man in the April 30 doubleheader. He has one minor-league option left.',
+    'Alexander goes back down after serving as the 27th man in the April 30 doubleheader.',
   )
 })
 
@@ -294,4 +294,17 @@ test('a club total adds up his seasons with that club, from the stint he left', 
   }
   // 2025-26 only: 14.2 innings (44 outs), 3 earned runs.
   assert.deepEqual(shapeFacts(person, { season: 2026 }).clubTotals[158], { games: 9, era: '1.84', ip: '14.2' })
+})
+
+test('a last outing writes its thirds of an inning as a scorer would', () => {
+  const at = (ip, er) => callStory(facts({ lastName: 'Koenig', lastGame: { date: '2026-07-12', oppId: 134, line: { ip, er } }, seasonToDate: { games: 9, era: '9.00', ip: '7.0' } }), { kind: 'option', moveDate: '2026-07-17' })
+  assert.match(at('0.1', 2), /allowing 2 earned runs over 1\/3 of an inning\./)
+  assert.match(at('0.2', 0), /going 2\/3 of an inning without an earned run\./)
+  assert.match(at('1.0', 1), /allowing 1 earned run over 1 inning\./)
+  assert.match(at('2.1', 3), /allowing 3 earned runs over 2 1\/3 innings\./)
+})
+
+test('a cash deal reads the same with the club leading the clause', () => {
+  // The league wire's sentence can open with the club that made the move.
+  assert.equal(templateOf(clause('Milwaukee Brewers traded RHP ', ' to the Kansas City Royals for cash.')), 'sold')
 })
