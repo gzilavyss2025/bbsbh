@@ -1366,7 +1366,10 @@ don't run these by hand.
   `MANAGER_HISTORY_FIRST_SEASON` (`src/lib/records/managerHistory.js`, 1969 since 2026-10-06) to
   now: ~2,000 calls for a full rebuild, about 25 s. **Hand-run** (no cron runs it):
   `node scripts/gen-manager-history.mjs` rebuilds; `--from=YYYY --to=YYYY` merges one
-  slice; `--out=DIR` writes to DIR for a measuring run. 1969 is where the unseeded
+  slice; `--out=DIR` writes to DIR for a measuring run. To research a seed entry,
+  `node scripts/research/find-manager-split.mjs <teamId> <season> <outgoing name> <outW-outL> <inW-inL>`
+  turns a source's W-L into the change date, or says why it can't (#2761; the chunk
+  prompt is `.scratch/manager-splits-2761/prompt.md`). 1969 is where the unseeded
   shared seasons stay under 150 (148 added; 1968 would make 152, 1901 about 300).
   The API answers back to 1901, so lower the constant and run `--from` to go further.
   Per-stint W-L for a club-season with more than one manager can't be
