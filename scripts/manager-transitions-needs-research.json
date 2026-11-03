@@ -181,22 +181,6 @@
     ]
   },
   {
-    "teamId": 119,
-    "season": 1976,
-    "managerIds": [
-      110193,
-      117524
-    ]
-  },
-  {
-    "teamId": 120,
-    "season": 1976,
-    "managerIds": [
-      114355,
-      492657
-    ]
-  },
-  {
     "teamId": 121,
     "season": 1977,
     "managerIds": [
@@ -364,14 +348,6 @@
     ]
   },
   {
-    "teamId": 120,
-    "season": 1981,
-    "managerIds": [
-      114000,
-      124335
-    ]
-  },
-  {
     "teamId": 136,
     "season": 1981,
     "managerIds": [
@@ -434,14 +410,6 @@
     "managerIds": [
       112696,
       492675
-    ]
-  },
-  {
-    "teamId": 120,
-    "season": 1984,
-    "managerIds": [
-      114000,
-      123734
     ]
   },
   {
@@ -693,14 +661,6 @@
     ]
   },
   {
-    "teamId": 120,
-    "season": 1991,
-    "managerIds": [
-      121343,
-      121554
-    ]
-  },
-  {
     "teamId": 121,
     "season": 1991,
     "managerIds": [
@@ -722,14 +682,6 @@
     "managerIds": [
       121343,
       123973
-    ]
-  },
-  {
-    "teamId": 120,
-    "season": 1992,
-    "managerIds": [
-      110186,
-      121554
     ]
   },
   {
@@ -799,14 +751,6 @@
     ]
   },
   {
-    "teamId": 119,
-    "season": 1996,
-    "managerIds": [
-      117524,
-      121574
-    ]
-  },
-  {
     "teamId": 121,
     "season": 1996,
     "managerIds": [
@@ -832,14 +776,6 @@
     ]
   },
   {
-    "teamId": 119,
-    "season": 1998,
-    "managerIds": [
-      116027,
-      121574
-    ]
-  },
-  {
     "teamId": 117,
     "season": 1999,
     "managerIds": [
@@ -853,14 +789,6 @@
     "managerIds": [
       114625,
       118942
-    ]
-  },
-  {
-    "teamId": 120,
-    "season": 2001,
-    "managerIds": [
-      110186,
-      123401
     ]
   },
   {
@@ -984,14 +912,6 @@
     "managerIds": [
       114650,
       114744
-    ]
-  },
-  {
-    "teamId": 120,
-    "season": 2009,
-    "managerIds": [
-      427000,
-      427427
     ]
   },
   {
