@@ -1,5 +1,8 @@
 import { Component, Fragment, Suspense, lazy, useMemo } from 'react'
 import { reportCrash } from '../../lib/crash/report.js'
+import { useAsync } from '../../hooks/useAsync.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
+import { fetchNotableLists, isMajorMove } from '../../api/transactions/major.js'
 import { isMlbTeamId, teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -297,13 +300,27 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
   )
 }
 
+// Which moves are major: null until the notable lists arrive, when every row
+// draws as a card.
+function useIsMajor() {
+  const { data: lists } = useAsync(() => fetchNotableLists(), [])
+  const { favoriteTeamId } = useFavoriteTeam()
+  return lists ? (story) => isMajorMove(story, { lists, favoriteTeamId }) : null
+}
+
 // The ordered run of datelines and stories, drawn identically on every surface.
 // The caller owns the <ul> — its ref, its clamp, its scrolling; only what goes
 // INSIDE it is shared, which is the whole point of this module. `compact` is
 // passed straight through to MoveRow; a dateline is the same either way.
+//
+// THE WIRE STANDARD lives here, so every surface that draws moves gets it
+// (the player page's moves module is the one exception; it draws its own):
+// a major move (transactions/major.js) is a full card and the rest one line
+// each, and every row carries its player notes (WireFacts.jsx).
 // Replies are found among the items drawn here, so every quote's original is on
 // the page to scroll to.
-export function MoveItems({ items, compact = false, marks = false, isMajor = null, facts = false, teamId = null }) {
+export function MoveItems({ items, compact = false, marks = false, teamId = null }) {
+  const isMajor = useIsMajor()
   // A club ledger's stories carry no club (`teamId`); the replies and the notes
   // both need it, so it is filled in once, here. The row itself still draws the
   // story as it came, so a club's own page grows no mark of its own on every row.
@@ -319,7 +336,7 @@ export function MoveItems({ items, compact = false, marks = false, isMajor = nul
         <span className="wire__rule" aria-hidden="true" />
       </li>
     ) : (
-      <MoveRow key={item.key} story={items[n].story} factsStory={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} quotes={replies[item.story.id]} day={item.date} />
+      <MoveRow key={item.key} story={items[n].story} factsStory={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={item.date} quotes={replies[item.story.id]} day={item.date} />
     ),
   )
 }

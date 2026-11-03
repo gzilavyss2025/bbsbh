@@ -6,6 +6,7 @@
 // function of the model plus the jersey treatments; the loading itself is
 // posterImages.js.
 import { isMlbTeamId, realHeadshotUrl, teamLogoUrl, treatmentTile } from '../teams.js'
+import { playerPhotosOff } from '../headshot/lockout.js'
 import { milbTreatmentTile } from '../milbColors.js'
 import { headerThemeFor, mastheadMarkFor } from '../headerTheme.js'
 import { parkBackdrop } from '../ballpark/parkBackdrop.js'
@@ -86,8 +87,8 @@ export function posterArtSources(model, treatments, t) {
       homeBarMark: homeBar.markUrl,
       // 480px because the poster prints these at 96px on a fixed 1200px-wide
       // sheet — the on-screen rungs' 320px default would upscale here.
-      awayShot: model.starters.away ? realHeadshotUrl(model.starters.away.id, 480) : null,
-      homeShot: model.starters.home ? realHeadshotUrl(model.starters.home.id, 480) : null,
+      awayShot: model.starters.away ? shotUrl(model.away.id, model.starters.away.id, 480) : null,
+      homeShot: model.starters.home ? shotUrl(model.home.id, model.starters.home.id, 480) : null,
       // One per posted hitter, eighteen in all. Requested at 160px because the
       // batting-order row prints them at 32 — the shared 320 default would be
       // ten times the pixels needed, times eighteen, for no visible gain.
@@ -102,11 +103,17 @@ export function lineupShotKey(side, order) {
   return `shot:${side}:${order}`
 }
 
+// Lockout (ADR-0126): an MLB club's players print no photo; the poster leaves the slot empty.
+function shotUrl(teamId, personId, width) {
+  if (isMlbTeamId(teamId) && playerPhotosOff()) return null
+  return realHeadshotUrl(personId, width)
+}
+
 function lineupShotSources(model) {
   const out = {}
   for (const side of ['away', 'home']) {
     for (const p of model.lineups[side]) {
-      out[lineupShotKey(side, p.order)] = p.id ? realHeadshotUrl(p.id, 160) : null
+      out[lineupShotKey(side, p.order)] = p.id ? shotUrl(model[side].id, p.id, 160) : null
     }
   }
   return out

@@ -14,10 +14,11 @@
 // keep one width so the cache is reused. The service worker's `/mlb-photos/` rule
 // (vite.config.js) already caches these, so there is no second rule.
 import { HEADSHOT_BASE } from '../teams.js'
+import { playerPhotosOff } from './lockout.js'
 
 const ACTION_VARIANTS = ['vertical', 'pitching']
 
 export function actionPhotoUrl(personId, { variant = 'vertical', width = 525 } = {}) {
-  if (!personId || !ACTION_VARIANTS.includes(variant)) return null
+  if (!personId || !ACTION_VARIANTS.includes(variant) || playerPhotosOff()) return null
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/action/${variant}/current`
 }

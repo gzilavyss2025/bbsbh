@@ -7,6 +7,7 @@ import { TEAM_COLOR_PAIRS, MLB_TEAM_COLORS, MLB_TEAM_COLORS_STORE, milbBrandPair
 import { byTeam, byTreatment as byTreatmentIn, liveStore, treatmentRecord } from './tuningStore.js'
 import { registerIdentityStore } from './identity/overlay.js'
 import { customMarkFor } from './customMarks.js'
+import { playerPhotosOff } from './headshot/lockout.js'
 import MLB_TREATMENT_TUNING_JSON from './data/mlb-treatment-tuning.json' with { type: 'json' }
 import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 import MONO_LOGO_MANIFEST from './data/mono-logo-manifest.json' with { type: 'json' }
@@ -991,6 +992,9 @@ export function coachHeadshotUrl(personId, width = 320) {
 export function headshotSources(personId, { coach = false, mlb = false } = {}) {
   if (!personId) return []
   if (coach) return [coachHeadshotUrl(personId)]
+  // Lockout (ADR-0126): no photo rung at all, not even coach, so the tile goes straight
+  // to the logo with no 404 to wait out or log.
+  if (mlb && playerPhotosOff()) return []
   if (mlb) return [realHeadshotUrl(personId), coachHeadshotUrl(personId)]
   return [realHeadshotUrl(personId), milbHeadshotUrl(personId), coachHeadshotUrl(personId)]
 }

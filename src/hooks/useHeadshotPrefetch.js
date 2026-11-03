@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { selectGameRosterIds } from '../api/select.js'
 import { headshotsToWarm, prefetchHeadshots } from '../lib/prefetchHeadshots.js'
+import { isMlbTeamId } from '../lib/teams.js'
+import { playerPhotosOff } from '../lib/headshot/lockout.js'
 
 // Warms the headshot CDN for every face that could show up in the at-bat
 // feed — both teams' full box score rosters (starters, bench, bullpen) — the
@@ -19,6 +21,8 @@ export function useHeadshotPrefetch(feed, ready) {
   const failures = useRef(new Map())
   useEffect(() => {
     if (!ready) return
+    // Lockout (ADR-0126): an MLB game's tiles show logos, so there is nothing to warm.
+    if (playerPhotosOff() && isMlbTeamId(feed?.gameData?.teams?.home?.id)) return
     const fresh = headshotsToWarm(selectGameRosterIds(feed), warmedIds.current, failures.current)
     if (!fresh.length) return
     fresh.forEach((id) => warmedIds.current.add(id))
