@@ -7,8 +7,6 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { loadMoreTeamTransactions } from '../../api/teamTransactions.js'
 import { MoveItems, flattenDays } from '../../components/transactions/MoveRow.jsx'
-import { fetchNotableLists, isMajorMove } from '../../api/transactions/major.js'
-import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
@@ -101,9 +99,6 @@ function ClubLedger({ team, asOf, first, onBack }) {
   const sentinelRef = useRef(null)
 
   const visible = days.slice(0, shown)
-  const { data: lists } = useAsync(() => fetchNotableLists(), [])
-  const { favoriteTeamId } = useFavoriteTeam()
-  const isMajor = lists ? (story) => isMajorMove(story, { lists, favoriteTeamId }) : null
   const canGrow = shown < days.length || hasMore
 
   // Widens the drawn slice first (a loaded page usually holds more than is
@@ -168,7 +163,7 @@ function ClubLedger({ team, asOf, first, onBack }) {
         // major move is a full card, the rest one line each.
         <div className="oseason__ledger txpage__ledger">
           <ul className="oseason__list">
-            <MoveItems items={flattenDays(visible)} marks facts isMajor={isMajor} />
+            <MoveItems items={flattenDays(visible)} marks />
           </ul>
         </div>
       )}

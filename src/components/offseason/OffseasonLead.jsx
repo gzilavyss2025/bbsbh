@@ -1,8 +1,6 @@
 import { fetchLeagueMoves, windowDaysFor } from '../../api/transactions/leagueFeed.js'
 import { shiftDays } from '../../lib/time/standingsDates.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { fetchNotableLists, isMajorMove } from '../../api/transactions/major.js'
-import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { MoveItems, flattenDays, takeStories } from '../transactions/MoveRow.jsx'
 import { LongAtBats } from './LongAtBats.jsx'
 import { RecordDoors, SeasonRecord } from './SeasonRecord.jsx'
@@ -75,10 +73,6 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
   // While an older window loads, keep the moves already on screen.
   if (data && data !== kept) setKept(data)
   const items = flattenDays(data ?? kept)
-  // Major moves are full cards, the rest one line each (transactions/major.js).
-  const { data: lists } = useAsync(() => fetchNotableLists(), [])
-  const { favoriteTeamId } = useFavoriteTeam()
-  const isMajor = lists ? (story) => isMajorMove(story, { lists, favoriteTeamId }) : null
   const total = items.filter((item) => item.kind === 'story').length
   const shown = takeStories(items, visible)
   // The card keeps the height its first ten moves gave it; more moves scroll
@@ -134,7 +128,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           <div className="oseason__ledger">
             {/* One ledger line per move: faces, the sentence, the club. */}
             <ul className="oseason__list" ref={listRef} style={cap ? { maxHeight: cap, overflowY: 'auto' } : undefined}>
-              <MoveItems items={shown} marks facts isMajor={isMajor} />
+              <MoveItems items={shown} marks />
             </ul>
             <button
               type="button"

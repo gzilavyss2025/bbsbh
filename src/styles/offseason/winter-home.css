@@ -390,14 +390,10 @@
 .wintercal__item--next .wintercal__label {
   color: var(--text-heading);
 }
-/* Behind them. Lightened and struck through, still legible. */
+/* Behind them. Lightened, never struck: a past entry may still be a link. */
 .wintercal__item--past .wintercal__day,
 .wintercal__item--past .wintercal__label {
   color: var(--graphite-soft);
-}
-.wintercal__item--past .wintercal__label,
-.wintercal__item--past .wintercal__label .plink {
-  text-decoration: line-through;
 }
 /* The free agency entry links to the free-agent class: ink, underlined. */
 .wintercal__link {
@@ -556,4 +552,8 @@
 a.seasonnote__barrow:hover .seasonnote__barname {
   color: var(--text-heading);
   text-decoration: underline;
+}
+.wirefacts__close {
+  display: flex;
+  margin: var(--space-2) auto 0;
 }

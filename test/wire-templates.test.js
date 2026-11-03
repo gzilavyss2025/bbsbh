@@ -47,7 +47,7 @@ test('a busy day: each player gets the template for his own part of the sentence
       { text: 'Lovelady', playerId: 4 }, { text: ' for assignment.' },
     ],
   }
-  assert.deepEqual(subjectsOf(story).map((s) => s.template), ['il-activated', 'fallback', 'free-agency', 'cut'])
+  assert.deepEqual(subjectsOf(story).map((s) => s.template), ['il-activated', 'selected', 'free-agency', 'cut'])
 })
 
 test("a minor-league signing and a trade's two sides read their own templates", () => {

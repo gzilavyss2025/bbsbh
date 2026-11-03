@@ -17,7 +17,8 @@ import { shiftDays } from '../../lib/time/standingsDates.js'
 
 const HYDRATE = 'transactions,draft,stats(group=[hitting,pitching],type=[yearByYear,career],sportId=1)'
 // The moves that bring a player to a club, and the words for each.
-const ARRIVALS = { TR: 'trade', SFA: 'free agent', SGN: 'signing', CLW: 'waiver claim', DR: 'draft', PUR: 'purchase', R5: 'Rule 5 draft' }
+// ACQ, OBT, PUR and CP are one event: a player bought from outside affiliated ball.
+const ARRIVALS = { TR: 'trade', SFA: 'free agent', SGN: 'signing', CLW: 'waiver claim', DR: 'draft', PUR: 'purchase', ACQ: 'purchase', OBT: 'purchase', CP: 'purchase', R5: 'Rule 5 draft' }
 
 // The line a reader expects for the position: a pitcher's ERA, a hitter's average.
 function shapeLine(stat, pitcher) {
@@ -85,6 +86,7 @@ const arrivalOf = (t, name) => ({
   date: t.date,
   teamId: t.toTeam.id,
   fromTeamId: t.fromTeam?.id ?? null,
+  fromName: t.fromTeam?.name ?? null,
   tradedFor: ARRIVALS[t.typeCode] === 'trade' ? tradedFor(t.description, t.person?.fullName ?? name) : null,
 })
 
@@ -152,7 +154,7 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
   const bigLeagueIl = (t) =>
     t.typeCode === 'SC' && /injured list/i.test(t.description ?? '') && (t.toTeam?.id == null || isMlbTeamId(t.toTeam.id))
   const ilMoves = moves.filter(
-    (t) => bigLeagueIl(t) && /placed/i.test(t.description ?? '') && /injured list/i.test(t.description ?? '') && t.date?.startsWith(String(season)),
+    (t) => bigLeagueIl(t) && /placed|transferred/i.test(t.description ?? '') && /injured list/i.test(t.description ?? '') && t.date?.startsWith(String(season)),
   )
   const injured = ilMoves.some((t) => /60-day/i.test(t.description)) ? 'long' : ilMoves.length ? 'some' : null
   // Each stint this season: placed (from the effective date, which a
@@ -174,7 +176,10 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
         continue
       }
       const injury = (t.description.match(/injured list(?: retroactive to [^.]+)?\.\s*(.+)/i)?.[1] ?? '').trim().replace(/\.$/, '')
-      allStints.push({ from: t.effectiveDate ?? t.date, filings: [t.date], injury: injury || null, to: null })
+      allStints.push({ from: t.effectiveDate ?? t.date, filings: [t.date], injury: injury || null, to: null, club: t.toTeam?.id ?? null })
+    } else if (/transferred/i.test(t.description)) {
+      // A move to the 60-day list: the stint already open, filed again.
+      allStints.findLast((x) => !x.to)?.filings.push(t.date)
     } else if (/activated/i.test(t.description)) {
       const open = [...allStints].reverse().find((x) => !x.to)
       if (open) open.to = t.date
@@ -188,6 +193,19 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
   const arrival = [...moves]
     .reverse()
     .find((t) => ARRIVALS[t.typeCode] && t.toTeam?.id === current)
+
+  // His big-league trips this season, oldest first: a recall or selected
+  // contract takes him up, an option sends him down. A trip that opens on an
+  // option was the opening-day roster's, and has no day up.
+  const calls = []
+  for (const t of moves.filter((m) => m.date?.startsWith(String(season)))) {
+    if ((t.typeCode === 'CU' || t.typeCode === 'SE') && isMlbTeamId(t.toTeam?.id)) calls.push({ up: t.date, down: null })
+    else if (t.typeCode === 'OPT' && isMlbTeamId(t.fromTeam?.id)) {
+      const open = calls.at(-1)
+      if (open && !open.down) open.down = t.date
+      else calls.push({ up: null, down: t.date })
+    }
+  }
 
   const signed = [...(person.drafts ?? [])].sort((a, b) => Number(a.year) - Number(b.year)).at(-1)
 
@@ -218,6 +236,7 @@ export function shapeFacts(person, { contract = null, season, teamId = null, min
     injured,
     stints,
     pastStints,
+    calls,
     clubs,
     arrival: arrival ? arrivalOf(arrival, person.fullName) : null,
     // Every arrival, oldest first: a quick second move ("two days after
@@ -254,8 +273,23 @@ async function withTradeIds(facts) {
   return { ...facts, tradeIds }
 }
 
-export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = null, tradeMove = null } = {}) {
-  const key = `${personId}|${season}|${teamId}|${ilMove}|${tradeMove}`
+// A level's words from the sheet's abbreviation: 'AA' is "Double-A".
+const LEVEL_WORDS = Object.fromEntries(Object.values(LEVELS).map(([words, abbr]) => [abbr, words]))
+
+// His last minor-league season before the year he arrived from outside
+// affiliated ball: his rows run on past it once he plays for his new club.
+export function lastAffiliated(rows, arrivedOn) {
+  const year = Number(arrivedOn?.slice(0, 4))
+  const row = rows.find((r) => r.season < year)
+  return row ? { season: row.season, level: LEVEL_WORDS[row.level] ?? null } : null
+}
+
+// `callMove` ({ kind, date }: a recall, option or selected contract) adds his
+// minor-league line up to a call, or his big-league line over the stint an
+// option ends. `arrival` (an arrival from outside affiliated ball) adds his
+// last season in affiliated ball.
+export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = null, tradeMove = null, callMove = null, arrival = false } = {}) {
+  const key = `${personId}|${season}|${teamId}|${ilMove}|${tradeMove}|${callMove?.kind}|${callMove?.date}|${arrival}`
   if (!cache.has(key)) {
     cache.set(
       key,
@@ -287,6 +321,11 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
             const stat = range?.stats?.[0]?.splits?.[0]?.stat
             if (stat) facts.trade = { line: shapeLine(stat, facts.pitcher), fromTeamId: deal.fromTeamId, toTeamId: deal.teamId }
           }
+          if (facts && callMove) Object.assign(facts, await callFacts(personId, facts, callMove, teamId))
+          if (facts && arrival) {
+            const { rows } = await fetchScopeRows(personId, 'milb', facts.pitcher)
+            facts.affiliated = lastAffiliated(rows, facts.arrival?.date)
+          }
           // A thin big-league season (or none): one more read for where he
           // spent the rest of it.
           const full = facts?.seasonLine && facts.seasonLine.games >= (facts.pitcher ? FULL_SEASON.pitcher : FULL_SEASON.hitter)
@@ -294,7 +333,8 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
           const group = facts.pitcher ? 'pitching' : 'hitting'
           const milb = await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null)
           const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors: milb?.stats?.flatMap((x) => x.splits ?? []) })
-          return { ...withMinors, stint: facts.stint, beforeLine: facts.beforeLine, trade: facts.trade }
+          const extra = ['stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'affiliated', 'extraMan']
+          return { ...withMinors, ...Object.fromEntries(extra.map((k) => [k, facts[k]])) }
         })
         .then(withTradeIds)
         .catch(() => {
@@ -304,6 +344,35 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
     )
   }
   return cache.get(key)
+}
+
+// A call's line: up, his minor-league line before it; down, his big-league
+// line over the stint the option ends (from the day he came up).
+async function callFacts(personId, facts, { kind, date }, teamId) {
+  const group = facts.pitcher ? 'pitching' : 'hitting'
+  // A trip of a day or less, back down by the next day, that opened on the
+  // club's doubleheader or special-event day. A call-up that stays is not the
+  // extra man.
+  const trip = facts.calls.find((c) => (c.up && near(c.up, date)) || (c.down && near(c.down, date)))
+  const short = trip?.up && trip.down && Date.parse(trip.down) - Date.parse(trip.up) <= 86_400_000
+  if (short && teamId) {
+    const day = await getJson(`/api/v1/schedule?sportId=1&teamId=${teamId}&date=${trip.up}&hydrate=team(venue)`).catch(() => null)
+    const games = day?.dates?.[0]?.games ?? []
+    if (games.length > 1) return { extraMan: { event: null } }
+    // A special event is played away from the home club's park, and the game
+    // carries its name ("MLB Little League Classic in Williamsport, PA"). Home
+    // openers, heritage days and makeups carry a name too, at home.
+    const g = games[0]
+    if (g?.description && g.venue?.id !== g.teams?.home?.team?.venue?.id) return { extraMan: { event: g.description.trim() } }
+  }
+  const range = (scope, from, to) =>
+    getJson(`/api/v1/people/${personId}/stats?stats=byDateRange&group=${group}&${scope}&startDate=${from}&endDate=${to}`)
+      .then((d) => (d?.stats ?? []).flatMap((x) => x.splits ?? []))
+      .catch(() => [])
+  if (kind !== 'option') return { callLine: shapeMinors(await range('leagueListId=milb_all', `${facts.season}-03-01`, shiftDays(date, -1)), facts.pitcher) }
+  const down = facts.calls.find((c) => c.down && near(c.down, date))
+  const splits = await range('sportId=1', down?.up ?? `${facts.season}-03-01`, shiftDays(date, -1))
+  return { stintLine: shapeLine(splits.find((s) => !s.team)?.stat ?? splits[0]?.stat, facts.pitcher) }
 }
 
 // The sheet's other two views, read only when one is first chosen: every
