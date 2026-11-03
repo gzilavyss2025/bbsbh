@@ -9,8 +9,13 @@
 // A seed entry -> [{ managerId, from, to }] in game order; `from` is inclusive and
 // `to` exclusive (null = open). An entry is `transitions: [{ date, outgoingManagerId,
 // incomingManagerId }]`, or the single-change shorthand { transitionDate,
-// outgoingManagerId, incomingManagerId } (one transition).
-export function seedSegments(entry) {
+// outgoingManagerId, incomingManagerId } (one transition). An entry with neither,
+// `{ teamId, season, noRecord: [id] }`, credits the whole season to the one feed
+// manager (`feedIds`) not in `noRecord`; `noRecord` ids get no record.
+export function seedSegments(entry, feedIds = []) {
+  if (!entry.transitions && !entry.transitionDate) {
+    return [{ managerId: feedIds.find((id) => !entry.noRecord?.includes(id)), from: null, to: null }]
+  }
   const ts = entry.transitions ?? [{ date: entry.transitionDate, ...entry }]
   return [
     { managerId: ts[0].outgoingManagerId, from: null, to: ts[0].date },

@@ -248,12 +248,18 @@ async function attachRecords(byPersonId, teamSeasonManagers, seed) {
       const stint = stintIndex.get(`${managerId}:${p.teamId}:${p.season}`)
       if (stint) stint.record = tally(games)
     } else {
-      const segments = seedSegments(p.seed)
+      const segments = seedSegments(p.seed, [...teamSeasonManagers.get(p.tsKey)])
       for (const [managerId, { record, transitionDate }] of segmentRecords(games, segments)) {
         const stint = stintIndex.get(`${managerId}:${p.teamId}:${p.season}`)
         if (!stint) continue
         stint.record = record
-        stint.transitionDate = transitionDate
+        if (transitionDate) stint.transitionDate = transitionDate
+      }
+      // noRecord: the feed lists them as manager, the source credits them no games.
+      // Drop their manager stint (not their coach rows) so no blank season shows.
+      for (const id of p.seed.noRecord ?? []) {
+        byPersonId.set(id, byPersonId.get(id).filter((s) => !(s.teamId === p.teamId && s.season === p.season && MANAGER_JOB_IDS.has(s.jobId))))
+        teamSeasonManagers.get(p.tsKey).delete(id)
       }
       // Any OTHER manager-job personId in this team-season (one the seed does
       // not name) is left unresolved.

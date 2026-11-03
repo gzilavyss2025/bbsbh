@@ -169,3 +169,12 @@ test('segmentRecords: a single change is as before', () => {
   assert.deepEqual(r.get(1), { record: { w: 1, l: 2 }, transitionDate: '2015-05-04' })
   assert.deepEqual(r.get(2), { record: { w: 2, l: 0 }, transitionDate: '2015-05-04' })
 })
+
+test('seedSegments: noRecord alone gives the one remaining feed manager the whole season', () => {
+  assert.deepEqual(seedSegments({ teamId: 1, season: 2, noRecord: [7] }, [7, 9]), [{ managerId: 9, from: null, to: null }])
+})
+
+test('seedSegments: noRecord beside transitions leaves the transitions alone', () => {
+  const e = { transitionDate: '2000-05-01', outgoingManagerId: 1, incomingManagerId: 2, noRecord: [3] }
+  assert.deepEqual(seedSegments(e, [1, 2, 3]).map((s) => s.managerId), [1, 2])
+})
