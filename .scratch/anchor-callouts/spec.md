@@ -30,6 +30,9 @@ so the note never shows a number without a comparison.
     (rule below). Five notes on one card must not each open with "As of today".
   - Notes may show all year. The "show only when the season is final" idea is dropped.
   - A count that has since grown is not a bug. It was true that day.
+- **Gary, 2026-11-03: a note can outlive its game, and its wording ages.** Example: a moon-walker
+  stat that worked for Bauers on May 1 may stay on his player detail page for the rest of the
+  season. By September it reads "In May, ..." not as if it were new.
 
 ## Parts
 
@@ -37,6 +40,7 @@ so the note never shows a number without a comparison.
 |---|---|---|
 | Registry | Anchors: count, noun phrase, tier, sources, caveat. Seed: `anchors.seed.json` here. | `src/lib/anchors/anchors.json` |
 | Cohort file | Nightly: for each named milestone, the count and the member ids. MLB only. One file per date, never overwritten. | `scripts/gen-cohorts.mjs` writes `public/data/cohorts/MMDDYYYY.json` |
+| Minted store | Append-only. The first day a player clears a milestone, record the player, milestone, count, anchor and date, frozen. Feeds the player page. Not the same as `useCalloutLedger`, which only counts what a game card has shown. | `public/data/cohorts-minted.json`, written by `gen-cohorts.mjs` (Inference) |
 | Reader | Loads the cohort file for a game's date. Spoiler-free. | `src/api/cohorts.js` |
 | Picker | Pure function: cohort count + unit -> best anchor and relation. | `src/lib/anchors/pick.js` |
 | Note family | Builds the note, scores it, joins the ranked lists. | `src/api/callout-notes/cohort.js` |
@@ -136,8 +140,8 @@ counts end the day before the slate (ADR-0088) and the note never says anything 
 (ADR-0014). The cohort file has no score and no game result. Inference: it joins the
 spoiler-free reader list in `src/api/spoiler-manifest.json`; check against `src/api/CLAUDE.md`
 before slice 2. A result-aware version (tonight's line pushes a player into a cohort) would live
-only in the box score's Insights roll-up and is out of scope. A player or team page may show the
-same cohort live: those pages are open (ADR-0034).
+only in the box score's Insights roll-up and is out of scope. A player page may show the minted
+notes: that page is open (ADR-0034).
 
 ## Slices (each at most 5 files)
 
@@ -156,19 +160,21 @@ same cohort live: those pages are open (ADR-0034).
    `?nointro`. The route and `gamePk` are not chosen yet; pick one from `docs/test-games.md`.
 4. **Docs.** ADR for the entering-tense cohort rule (next free number; the tail is 0126),
    `docs/api/static-data.md`, `docs/scripts/generators.md`.
-5. **Later, needs a wireframe Artifact (390 px and desktop).** A "scale" line on the player
-   page, where the cohort can be live.
+5. **Later, needs a wireframe Artifact (390 px and desktop).** A list of minted notes on the
+   player detail page, newest first, with the aged wording above. Reads the minted store.
 
 ## Not decided (needs Gary)
 
-1. **Is the date rule right?** Date in the text only when it is not the game's own day, at most
-   one per card (see Wording). Or never in the text, with a quiet stamp instead?
-2. **A plain cohort note with no anchor?** "One of 11 pitchers with a shutout" stands alone.
-3. **How many anchor notes per card?** Inference: one, so the joke does not repeat.
-4. **Tone.** Moon, Supreme Court and Great Lakes are fine. Is a joke about the Dolphins fine
+1. **Is the aging rule right?** No date on a game's own card, month name when older, year when
+   older than the season (see Wording).
+2. **How long does a minted note stay on the player page?** The rest of the season, then it
+   moves to the career view, or it stays for good? How many show at once?
+3. **A plain cohort note with no anchor?** "One of 11 pitchers with a shutout" stands alone.
+4. **How many anchor notes per card?** Inference: one, so the joke does not repeat.
+5. **Tone.** Moon, Supreme Court and Great Lakes are fine. Is a joke about the Dolphins fine
    for another club's fans?
-5. **Volatile anchors.** Allow with the 180-day expiry, or never?
-6. **MiLB.** The cohort file is MLB only. The bundle simply lacks the key and the note never fires.
+6. **Volatile anchors.** Allow with the 180-day expiry, or never?
+7. **MiLB.** The cohort file is MLB only. The bundle simply lacks the key and the note never fires.
 
 ## Out of scope
 

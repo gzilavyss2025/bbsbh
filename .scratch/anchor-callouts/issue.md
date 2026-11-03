@@ -22,6 +22,8 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
 - Gary, 2026-11-03: a callout is a moment in time. It is true on the day it is minted and stays
   accurate as of that date. Each note stores its date. The text shows the date only when it
   helps (not on every note); the rule is below. The cohort file is one dated snapshot per day.
+- Gary, 2026-11-03: a note can outlive its game. It may stay on the player's detail page for the
+  rest of the season, and its wording ages: "In May, ..." by September.
 - Inference (not yet decided by Gary): cohorts are one season and MLB only.
 - Inference: the registry holds only sourced, dated anchors. Excluded ones: EGOT, Challenger Deep,
   space travelers, living ex-presidents, Everest, Comaneci. Reasons are in `anchors.seed.json`.
@@ -34,6 +36,8 @@ Inference: names are proposals.
   reproduces the 2026 counts: `.scratch/anchor-callouts/cohorts.probe.mjs`.
 - `src/lib/anchors/anchors.json` (seed: `.scratch/anchor-callouts/anchors.seed.json`) and a pure
   `pick.js`.
+- `public/data/cohorts-minted.json`: append-only, written by the same generator. It records the first
+  day a player clears a milestone. The player detail page reads it (slice 5, wireframe first).
 - A `cohort` note family in `src/api/callout-notes/`, scored with `SCORE_BASE` and `magnitudeOf`.
   First surface: `src/api/between-innings.js`.
 - Cron wiring needs three edits to `update-nightly-data.yml` and a stamp in
@@ -58,12 +62,13 @@ ADRs: 0001, 0014, 0088. A live version on the player page is an open page (ADR-0
 
 ## Not decided
 
-1. Is this the date rule? Show the date in the text only when it is not the game's own day, and
-   on at most one note per card. Or never in the text?
-2. Show a plain cohort note when no anchor fits?
-3. One anchor note per card, or more?
-4. Tone: is a joke about another club's fans fine?
-5. Allow anchors that can change (Triple Crown winners, presidents) with a 180-day expiry?
+1. Is the aging rule right? No date on a game's own card, month name when older, year when older
+   than the season.
+2. How long does a minted note stay on the player page, and how many show at once?
+3. Show a plain cohort note when no anchor fits?
+4. One anchor note per card, or more?
+5. Tone: is a joke about another club's fans fine?
+6. Allow anchors that can change (Triple Crown winners, presidents) with a 180-day expiry?
 
 ## Out of scope
 
