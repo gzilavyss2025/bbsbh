@@ -1,5 +1,8 @@
 import { Component, Fragment, Suspense, lazy } from 'react'
 import { reportCrash } from '../../lib/crash/report.js'
+import { useAsync } from '../../hooks/useAsync.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
+import { fetchNotableLists, isMajorMove } from '../../api/transactions/major.js'
 import { isMlbTeamId, teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -290,11 +293,25 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
   )
 }
 
+// Which moves are major: null until the notable lists arrive, when every row
+// draws as a card.
+function useIsMajor() {
+  const { data: lists } = useAsync(() => fetchNotableLists(), [])
+  const { favoriteTeamId } = useFavoriteTeam()
+  return lists ? (story) => isMajorMove(story, { lists, favoriteTeamId }) : null
+}
+
 // The ordered run of datelines and stories, drawn identically on every surface.
 // The caller owns the <ul> — its ref, its clamp, its scrolling; only what goes
 // INSIDE it is shared, which is the whole point of this module. `compact` is
 // passed straight through to MoveRow; a dateline is the same either way.
-export function MoveItems({ items, compact = false, marks = false, isMajor = null, facts = false }) {
+//
+// THE WIRE STANDARD lives here, so every surface that draws moves gets it
+// (the player page's moves module is the one exception; it draws its own):
+// a major move (transactions/major.js) is a full card and the rest one line
+// each, and every row carries its player notes (WireFacts.jsx).
+export function MoveItems({ items, compact = false, marks = false }) {
+  const isMajor = useIsMajor()
   return items.map((item) =>
     item.kind === 'date' ? (
       <li className="wire__date" key={item.key}>
@@ -302,7 +319,7 @@ export function MoveItems({ items, compact = false, marks = false, isMajor = nul
         <span className="wire__rule" aria-hidden="true" />
       </li>
     ) : (
-      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} />
+      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={item.date} />
     ),
   )
 }
