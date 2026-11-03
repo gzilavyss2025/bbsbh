@@ -25,6 +25,11 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
 - Gary, 2026-11-03: a note can outlive its game, and its wording ages ("In May, ..." by September).
 - Gary, 2026-11-03: the new store gets a deliberate name and structure.
 - Gary, 2026-11-03: the store is named `nuggets` (he suggested "nuggets" or "notes"; "notes" collides with 219 files).
+- Gary, 2026-11-03: nine open questions answered. Aging: none on a game's own card, month name when
+  older, year when older than the season. Game card window: 7 days. Player page: the season, then a
+  career view. Thresholds: a curated list in code. Plain note with no anchor: yes when the count is
+  small. No cap on anchor notes per card. Tone: any sourced anchor, including team-flavored ones.
+  Anchors that can change: allowed with a 180-day expiry. Postseason: its own ladder, later.
 - Inference: the store holds nuggets. A nugget is the first day a player's season total met a
   threshold, with how many players had by then and the anchor, frozen. The count on any past day is
   the number of nuggets up to that day, so no daily snapshot is needed. 
@@ -66,16 +71,10 @@ score. The player detail page is open (ADR-0034). ADRs: 0001, 0014, 0034, 0088.
 
 ## Not decided
 
-1. The aging rule: no date on a game's own card, month name when older, year when older than the
-   season.
-2. How recent must a nugget be to show on a game card? Inference: 7 days.
-3. How long does a nugget stay on the player page, and how many show at once?
-4. Who owns the threshold list? Start with the 13 in the probe.
-5. Show a plain note when no anchor fits?
-6. One anchor note per card, or more?
-7. Tone: is a joke about another club's fans fine?
-8. Allow anchors that can change (Triple Crown winners, presidents) with a 180-day expiry?
-9. Do October nuggets count?
+1. The postseason ladder: which lines? Inference: World Series hit, RBI and strikeout lines.
+2. The career view on the player page: where does it live? Needs a wireframe.
+3. Is 15 the right cutoff for a plain note with no anchor? (Inference.)
+4. With no cap on anchor notes, is "no repeat anchor on one card" enough? Check on a real card.
 
 ## Out of scope
 

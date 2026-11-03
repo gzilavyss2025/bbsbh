@@ -30,6 +30,18 @@ so the note never shows a number without a comparison.
   September it reads "In May, ...", not as if it were new.
 - **Gary, 2026-11-03: the new store is named `nuggets`.** He suggested "nuggets" or "notes"; a
   collision check found "notes" in 219 files, and he confirmed `nuggets`. Structure: see "The store".
+- **Gary, 2026-11-03: the nine open questions, answered.**
+  1. Aging: no date on a game's own card, a month name when older, a year when older than the season.
+  2. A game card shows a nugget only if it is within 7 days old. The player page shows the whole season.
+  3. On the player page a nugget stays for the whole season, then moves to a career view.
+  4. Thresholds are a curated list in code. A new line is a code review.
+  5. With no anchor, a plain note ("One of 11 pitchers with a shutout") still shows when the count
+     is small. Inference: "small" is 15 or fewer. Larger counts say nothing.
+  6. No cap on anchor notes per card. The normal callout ranking and cap still limit the total.
+  7. Tone: any sourced anchor is fine, including team-flavored ones like the 1972 Dolphins.
+  8. Anchors that can change are allowed, with a 180-day expiry after the last check.
+  9. Regular-season thresholds, plus a separate postseason ladder (for example a World Series
+     hit line). Regular-season and postseason totals are not mixed.
 
 ## The store: nuggets
 
@@ -137,7 +149,8 @@ games for every club (not yet checked on a traded player).
 
 - **Counting stats only.** Rates (ERA, AVG) go up and down, and "qualified" depends on games
   played, so a rate crossing is not permanent. Out of scope.
-- **Regular season only.** Inference. The callout bundle also counts October; decide later.
+- **Regular season thresholds first.** Postseason gets its own ladder (decided), built later, so a
+  postseason total never pushes a player over a regular-season line.
 - **MLB only.** The bundle for a MiLB game simply lacks the key and no note fires.
 - **A scoring correction after the fact** can leave a stored `count` off by one. Accepted: the
   note was true to the data that day. A check may list a nugget whose player no longer meets
@@ -169,7 +182,10 @@ Not the same as `useCalloutLedger`, which only remembers what a game card has sh
 4. Pick the anchor with the smallest `|n - count|`. A gap above `max(1, round(0.2 * n))` means no
    anchor. Ties go to the lower `tier` number, then to a stable hash of player id and date, so
    the same player does not always get the moon.
-5. No anchor fits: say nothing, or show the plain note. Decision for Gary, see below.
+5. No anchor fits: show the plain note if the count is 15 or fewer (decided; 15 is Inference),
+   otherwise say nothing.
+6. Tone: a team-flavored anchor is allowed if it is sourced (decided).
+7. Within one card, do not reuse an anchor (Inference).
 
 Fixtures (2026 counts): 11 -> moon-walked "fewer than"; 9 -> scotus "as many as";
 13 -> triple-crown-horses "more than"; 5 -> great-lakes or calendar-slam "as many as";
@@ -189,7 +205,9 @@ Fixtures (2026 counts): 11 -> moon-walked "fewer than"; 9 -> scotus "as many as"
   - earlier, same season: "In May, one of 9 hitters with 100 RBI, ..." (month name)
   - an earlier season: "In 2026, one of 9 hitters ..."
   A game card shows no dates. A list of old notes dates each by month, which reads as a timeline,
-  not as five copies of "As of today". At most one note per game card.
+  not as five copies of "As of today". There is no cap on anchor notes per card (decided); the
+  normal ranking and `INSIGHTS_SHOWN` cap still apply. Inference: within one card, reuse no
+  anchor twice, so the moon does not appear on every line.
 - Write in ASD-STE100. Say "postseason", never the other word (`check-word-choice`).
 - Never write "first", "fastest" or "fewest". The count is one season. An all-time claim needs an
   all-time source (not in scope).
@@ -244,24 +262,22 @@ that the player did something on D. The rule is structural:
    `CONTEXT.md` (term), `docs/api/static-data.md`, `docs/scripts/generators.md`,
    `docs/callouts.md` (catalog row and score row).
 5. **Later, needs a wireframe Artifact (390 px and desktop).** A list of nuggets on the
-   player detail page, newest first, with the aged wording. Reads the store.
+   player detail page, newest first, with the aged wording, then a career view when the season ends.
+   Reads the store.
+6. **Later: the postseason ladder.** Separate thresholds and a separate store file or key. Needs the
+   list of lines first (Still open #1).
 
-## Not decided (needs Gary)
+## Still open
 
-1. **Is the aging rule right?** No date on a game's own card, month name when older, year when
-   older than the season.
-2. **How recent must a nugget be to show on a game card?** Inference: crossed in the last 7
-   days. The player page shows all season.
-3. **How long does a nugget stay on the player page?** The rest of the season, then the career
-   view, or for good? How many show at once?
-4. **Who owns the threshold list?** It is a curated ladder, not every number. Start with the 13
-   in the probe. A new line is a code review, not a data change.
-5. **A plain note with no anchor?** "One of 11 pitchers with a shutout" stands alone.
-6. **How many anchor notes per card?** Inference: one, so the joke does not repeat.
-7. **Tone.** Moon, Supreme Court and Great Lakes are fine. Is a joke about the Dolphins fine for
-   another club's fans?
-8. **Volatile anchors.** Allow with the 180-day expiry, or never?
-9. **Postseason.** Do October nuggets count? The callout bundle counts them.
+The nine questions are answered (see Decided). These came out of the answers:
+
+1. **The postseason ladder.** Which lines? Inference: a World Series hit line, an RBI line, a
+   strikeout line. Needs its own pass, and its own count (the pool of players is much smaller).
+2. **The career view.** Where does it live, and does it need a wireframe? Slice 5 covers the
+   season list only.
+3. **"Small count" cutoff.** Is 15 right for a plain note?
+4. **No cap on anchor notes.** With no cap, is the repeat-anchor rule enough, or does a card full of
+   comparisons feel loud? Check on a real card in slice 3.
 
 ## Out of scope
 
