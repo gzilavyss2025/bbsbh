@@ -522,10 +522,11 @@ function lastGameSentence(facts, name, v) {
     const did = `went ${line.h}-for-${line.ab}${line.hr ? ` with ${homers(line.hr)}` : ''}`
     return v === 0 ? `${name} ${did}${when}.` : `${last('game')}${name} ${did}.`
   }
-  // The feed writes thirds after the point: "2.1" is 2 1/3 innings.
+  // Innings as a box score writes them, the thirds after the point ("2.1
+  // innings"), like every other note (Gary, 2026-11-03). A whole inning count
+  // reads as a word: "one inning", "three innings".
   const [whole, thirds] = String(line.ip).split('.').map(Number)
-  const frac = thirds ? `${thirds}/3` : ''
-  const innings = whole ? `${frac ? whole : num(whole)}${frac ? ` ${frac}` : ''} inning${whole === 1 && !frac ? '' : 's'}` : `${frac} of an inning`
+  const innings = thirds ? `${whole}.${thirds} innings` : `${num(whole)} inning${whole === 1 ? '' : 's'}`
   const runs = `${num(line.er)} earned run${line.er === 1 ? '' : 's'}`
   const did = !whole && !thirds ? `gave up ${runs} without retiring a batter` : line.er ? `gave up ${runs} in ${innings}` : `threw ${innings} without an earned run`
   return v === 0 ? `${name} ${did}${when}.` : `${last('outing')}${name} ${did}.`
