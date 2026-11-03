@@ -26,7 +26,8 @@ so the note never shows a number without a comparison.
   when it was true. Consequences:
   - The cohort file is a dated snapshot per day, like `public/data/callouts/MMDDYYYY`. Nothing
     overwrites an old day. A game opened in a week reads the file for its own date.
-  - A note carries its `asOf` date. The reader sees the date, in the text or on the card.
+  - Every note carries its `asOf` date as data. The text shows the date only when it helps
+    (rule below). Five notes on one card must not each open with "As of today".
   - Notes may show all year. The "show only when the season is final" idea is dropped.
   - A count that has since grown is not a bug. It was true that day.
 
@@ -100,10 +101,14 @@ Fixtures to test (2026 counts): 11 -> moon-walked "fewer than"; 9 -> scotus "as 
 
 - Do not name the subject. The card already shows the headshot and name.
 - Whole numbers. The season is the default and goes unsaid.
-- Three templates. The date opens the note (Inference on the exact form; see Not decided):
-  - fewer: "As of {Mon D}, one of {count} {group} with {milestone}, fewer than the {n} {phrase}."
-  - equal: "As of {Mon D}, one of {count} {group} with {milestone}, as many as the {n} {phrase}."
-  - more: "As of {Mon D}, one of {count} {group} with {milestone}, more than the {n} {phrase}."
+- Three templates. No date in the default text:
+  - fewer: "One of {count} {group} with {milestone}, fewer than the {n} {phrase}."
+  - equal: "One of {count} {group} with {milestone}, as many as the {n} {phrase}."
+  - more: "One of {count} {group} with {milestone}, more than the {n} {phrase}."
+- **Date in the text (Inference, to confirm).** A small helper prefixes "As of Aug 14," only when
+  the date is news to the reader: the note's `asOf` differs from the day of the game being
+  viewed, or the surface mixes notes from several days. At most one dated note per card; the
+  rest stay plain. A card for tonight's game shows no date at all.
 - Write in ASD-STE100. Say "postseason", never the other word (`check-word-choice`).
 - Never write "first", "fastest" or "fewest" in an anchor note. The cohort is one season. An
   all-time claim needs an all-time source (not in scope).
@@ -156,9 +161,8 @@ same cohort live: those pages are open (ADR-0034).
 
 ## Not decided (needs Gary)
 
-1. **Where does the date show?** In the note text ("As of Aug 14, ..."), or as a small stamp on
-   the card? Text is safe in every surface that shows the note. A stamp is quieter but needs
-   each surface to draw it. Inference: text.
+1. **Is the date rule right?** Date in the text only when it is not the game's own day, at most
+   one per card (see Wording). Or never in the text, with a quiet stamp instead?
 2. **A plain cohort note with no anchor?** "One of 11 pitchers with a shutout" stands alone.
 3. **How many anchor notes per card?** Inference: one, so the joke does not repeat.
 4. **Tone.** Moon, Supreme Court and Great Lakes are fine. Is a joke about the Dolphins fine

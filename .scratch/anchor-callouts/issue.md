@@ -20,7 +20,8 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
 - Gary, 2026-11-03: build the structure for anchor callouts, even if it waits as an issue.
 - Gary, 2026-11-03: the anchors are well-known counts a general reader knows, not only baseball ones.
 - Gary, 2026-11-03: a callout is a moment in time. It is true on the day it is minted and stays
-  accurate as of that date. Each note says when. The cohort file is one dated snapshot per day.
+  accurate as of that date. Each note stores its date. The text shows the date only when it
+  helps (not on every note); the rule is below. The cohort file is one dated snapshot per day.
 - Inference (not yet decided by Gary): cohorts are one season and MLB only.
 - Inference: the registry holds only sourced, dated anchors. Excluded ones: EGOT, Challenger Deep,
   space travelers, living ex-presidents, Everest, Comaneci. Reasons are in `anchors.seed.json`.
@@ -57,7 +58,8 @@ ADRs: 0001, 0014, 0088. A live version on the player page is an open page (ADR-0
 
 ## Not decided
 
-1. Where does the date show: in the note text ("As of Aug 14, ...") or as a stamp on the card?
+1. Is this the date rule? Show the date in the text only when it is not the game's own day, and
+   on at most one note per card. Or never in the text?
 2. Show a plain cohort note when no anchor fits?
 3. One anchor note per card, or more?
 4. Tone: is a joke about another club's fans fine?
