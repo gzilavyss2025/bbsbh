@@ -1,10 +1,14 @@
-import { Component, Fragment, Suspense, lazy } from 'react'
+import { Component, Fragment, Suspense, lazy, useMemo } from 'react'
 import { reportCrash } from '../../lib/crash/report.js'
+import { useAsync } from '../../hooks/useAsync.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
+import { fetchNotableLists, isMajorMove } from '../../api/transactions/major.js'
 import { isMlbTeamId, teamAbbr, teamPrimaryColor } from '../../lib/teams.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { ReplyQuotes, moveAnchor, useReplies } from './ReplyQuote.jsx'
 // The player notes and their sheet load on their own, off the first load: a
 // ledger row draws its plain sentence until they arrive.
 const WireFacts = lazy(() => import('./WireFacts.jsx').then((m) => ({ default: m.WireFacts })))
@@ -224,8 +228,11 @@ function clubTabFor(teamId) {
 // the other club's mark beside it (the first club the cutline names). `line`
 // is that ledger's minor move (transactions/major.js): the same row with no
 // faces, so a routine move reads as one entry rather than a card. `date` turns
-// on the player's background under the sentence (WireFacts.jsx).
-export function MoveRow({ story, compact = false, marks = false, line = false, date = null }) {
+// on the player's background under the sentence (WireFacts.jsx). `quotes` are
+// the moves this one replies to (ReplyQuote.jsx), drawn above its kicker;
+// `day` is the row's own date, which a same-day quote leaves off.
+// `factsStory` is the story with its club filled in, for the notes (MoveItems).
+export function MoveRow({ story, compact = false, marks = false, line = false, date = null, quotes = null, day = null, factsStory = story }) {
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
   const lead = compact ? story.rail?.[0] : null
@@ -237,6 +244,7 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
   return (
     <li
       className={`wire__row${compact ? ' wire__row--compact' : ''}${line ? ' wire__row--line' : ''}`}
+      id={moveAnchor(story.id)}
       data-move-row=""
       // The spine is the club's own colour, decorative and text-free — no
       // contrast floor applies to it, and none of the row's copy sits on it.
@@ -247,15 +255,10 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
           {story.rail.slice(0, marks ? story.rail.length : FACES_PER_ROW).map((slot, i) => (
             <Face key={slot.playerId ?? i} slot={slot} />
           ))}
-          {/* The phone's face pile shows two faces and counts the rest. */}
-          {marks && story.rail.length > FACES_PER_ROW && (
-            <span className="wire__faces-more" aria-hidden="true">
-              +{story.rail.length - FACES_PER_ROW}
-            </span>
-          )}
         </div>
       )}
       <div className="wire__body">
+        <ReplyQuotes quotes={quotes} date={day} />
         <div className="wire__kicker">
           {lead && (
             <span className={`banner ${BANNER_TONE[lead.role] ?? 'banner--move'}`}>
@@ -283,7 +286,8 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
         {date ? (
           <WireFactsBoundary fallback={<Cutline segments={story.cutline} />}>
             <Suspense fallback={<Cutline segments={story.cutline} />}>
-              <WireFacts story={story} date={date} line={line}>
+              {/* A 27th man's trip is told in his note, so even a one-line row runs it on. */}
+              <WireFacts story={factsStory} date={date} line={line && !quotes?.some((q) => q.game)}>
                 {(tail) => <Cutline segments={story.cutline} tail={tail} />}
               </WireFacts>
             </Suspense>
@@ -296,19 +300,43 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
   )
 }
 
+// Which moves are major: null until the notable lists arrive, when every row
+// draws as a card.
+function useIsMajor() {
+  const { data: lists } = useAsync(() => fetchNotableLists(), [])
+  const { favoriteTeamId } = useFavoriteTeam()
+  return lists ? (story) => isMajorMove(story, { lists, favoriteTeamId }) : null
+}
+
 // The ordered run of datelines and stories, drawn identically on every surface.
 // The caller owns the <ul> — its ref, its clamp, its scrolling; only what goes
 // INSIDE it is shared, which is the whole point of this module. `compact` is
 // passed straight through to MoveRow; a dateline is the same either way.
-export function MoveItems({ items, compact = false, marks = false, isMajor = null, facts = false }) {
-  return items.map((item) =>
+//
+// THE WIRE STANDARD lives here, so every surface that draws moves gets it
+// (the player page's moves module is the one exception; it draws its own):
+// a major move (transactions/major.js) is a full card and the rest one line
+// each, and every row carries its player notes (WireFacts.jsx).
+// Replies are found among the items drawn here, so every quote's original is on
+// the page to scroll to.
+export function MoveItems({ items, compact = false, marks = false, teamId = null }) {
+  const isMajor = useIsMajor()
+  // A club ledger's stories carry no club (`teamId`); the replies and the notes
+  // both need it, so it is filled in once, here. The row itself still draws the
+  // story as it came, so a club's own page grows no mark of its own on every row.
+  const filled = useMemo(
+    () => (teamId ? items.map((i) => (i.kind === 'story' && i.story.teamId == null ? { ...i, story: { ...i.story, teamId } } : i)) : items),
+    [items, teamId],
+  )
+  const replies = useReplies(filled)
+  return filled.map((item, n) =>
     item.kind === 'date' ? (
       <li className="wire__date" key={item.key}>
         <span className="wire__dateline">{dateline(item.date)}</span>
         <span className="wire__rule" aria-hidden="true" />
       </li>
     ) : (
-      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} />
+      <MoveRow key={item.key} story={items[n].story} factsStory={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={item.date} quotes={replies[item.story.id]} day={item.date} />
     ),
   )
 }

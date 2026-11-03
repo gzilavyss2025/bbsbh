@@ -47,7 +47,7 @@ test('a busy day: each player gets the template for his own part of the sentence
       { text: 'Lovelady', playerId: 4 }, { text: ' for assignment.' },
     ],
   }
-  assert.deepEqual(subjectsOf(story).map((s) => s.template), ['il-activated', 'fallback', 'free-agency', 'cut'])
+  assert.deepEqual(subjectsOf(story).map((s) => s.template), ['il-activated', 'selected', 'free-agency', 'cut'])
 })
 
 test("a minor-league signing and a trade's two sides read their own templates", () => {
@@ -173,6 +173,29 @@ test('a split season merges each club into its own runs of years', () => {
   }
   const f = shapeFacts(person, { season: 2026 })
   assert.match(freeAgentStory({ ...f, age: 28, lastName: 'Peralta', debut: '2025-04-01' }), /Angels \(2025-26\) and Rockies \(2026\)/)
+})
+
+test('the sheet lists a season’s clubs newest first', () => {
+  // Jonathan Ornelas, 2026: the Athletics, then the Brewers. The feed lists a
+  // season's clubs in the order he played for them.
+  const person = {
+    id: 666135,
+    primaryPosition: { code: '6' },
+    stats: [
+      {
+        group: { displayName: 'hitting' },
+        type: { displayName: 'yearByYear' },
+        splits: [
+          { season: '2025', team: { id: 140, name: 'Rangers' }, stat: { gamesPlayed: 4 } },
+          { season: '2026', team: { id: 133, name: 'Athletics' }, stat: { gamesPlayed: 6 } },
+          { season: '2026', team: { id: 158, name: 'Brewers' }, stat: { gamesPlayed: 3 } },
+          { season: '2026', stat: { gamesPlayed: 9 } },
+        ],
+      },
+    ],
+  }
+  const f = shapeFacts(person, { season: 2026 })
+  assert.deepEqual(f.rows.map((r) => r.teamId), [158, 133, 140])
 })
 
 // Adley Rutschman's 2026 (668939): three stints, the third filed twice when the
