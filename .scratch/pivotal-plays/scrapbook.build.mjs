@@ -200,7 +200,7 @@ for (const [table, items] of Object.entries(lists)) {
     const e = WP[r.pk][r.i], g = names[r.pk], p = play(e)
     out.push({ key: `${table}-${k + 1}`, table, rank: `${tied(r.rank) ? 'T' : ''}${r.rank}`, pressure: r.li.toFixed(2), date: dateLabel(g.date),
       game: label(g) + (g.type !== 'R' ? ' · postseason' : ''), when: `${r.top ? 'Top' : 'Bottom'} ${r.inn}`,
-      who: `${p.b} vs ${p.p}`, what: `${p.verb}${p.scoring}`, scored: scoredIds.has(String(r.pk)) ? 'Scored' : '' })
+      who: `${e.matchup.batter.fullName} vs ${e.matchup.pitcher.fullName}`, what: `${p.verb}${p.scoring}`, scored: scoredIds.has(String(r.pk)) ? 'Scored' : '' })
   })
 }
 writeFileSync(`${outDir}/tensest.json`, JSON.stringify(out))
