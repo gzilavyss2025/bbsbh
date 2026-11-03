@@ -1,0 +1,113 @@
+<title>Offseason Move Rows</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Lora:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: four phone frames (390px) side by side, wrapping; one desktop strip under them. */
+:root{
+  --paper:#f7f2e4; --card:#fbf7ec; --ink:#14213d; --muted:#5b6475; --rule:#d9d1bd; --accent:#b5452f; --shot:#e8dccb;
+  --display:"Barlow Condensed",system-ui,sans-serif; --serif:Lora,Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121826;--card:#1a2233;--ink:#efe8d6;--muted:#a3abba;--rule:#334058;--accent:#e07a5f;--shot:#2b3650;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#121826;--card:#1a2233;--ink:#efe8d6;--muted:#a3abba;--rule:#334058;--accent:#e07a5f;--shot:#2b3650;color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font-family:var(--mono);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
+h1{font-family:var(--display);font-size:2rem;text-transform:uppercase;letter-spacing:.02em;margin:0 0 4px;text-wrap:balance}
+.lede{color:var(--muted);max-width:65ch;margin:0 0 24px;font-size:13px;line-height:1.5}
+.grid{display:flex;flex-wrap:wrap;gap:24px}
+.opt{width:390px;max-width:100%;display:flex;flex-direction:column;gap:8px}
+.opt h2{font-family:var(--display);font-size:1.25rem;text-transform:uppercase;margin:0;letter-spacing:.03em}
+.opt h2 b{color:var(--accent)}
+.opt p.note{margin:0;font-size:12px;color:var(--muted);line-height:1.45;min-height:5.5em}
+.phone{border:3px solid var(--ink);background:var(--card)}
+.row{padding:12px;border-bottom:1px solid var(--rule);font-family:var(--serif);font-size:16px;line-height:1.4}
+.row:last-child{border-bottom:none}
+.row strong{text-transform:uppercase}
+.more{font-family:var(--display);font-size:12px;font-weight:700;text-transform:uppercase}
+.shot{background:var(--shot);border:2px solid var(--ink);flex:none;display:grid;place-items:center;font-family:var(--display);font-size:11px;color:var(--muted)}
+.logo{width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--card);display:grid;place-items:center;font-family:var(--display);font-size:10px;font-weight:700;flex:none}
+.club{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.type{font-family:var(--display);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+/* A: byline */
+.a .head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.a .body{display:flex;gap:12px;align-items:flex-start}
+.a .shot{width:56px;height:70px}
+/* B: facepile */
+.b .head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.b .pile{display:flex;margin-left:auto}
+.b .pile .shot{width:34px;height:34px;border-radius:50%;margin-left:-8px;font-size:9px}
+.b .pile .count{width:34px;height:34px;border-radius:50%;margin-left:-8px;background:var(--ink);color:var(--card);display:grid;place-items:center;font-family:var(--display);font-size:12px;font-weight:700;border:2px solid var(--card)}
+/* C: photo-light */
+.c .row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px}
+.c .logo{margin-top:3px;width:28px;height:28px}
+/* D: current */
+.d .row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px}
+.d .left{display:flex;flex-direction:column;align-items:center;gap:8px}
+.d .shot{width:64px;height:80px}
+.d .stack{grid-template-columns:minmax(0,1fr)}
+.d .faces{display:flex;gap:8px;align-items:center}
+.d .faces .logo{margin-left:auto}
+.desk{margin-top:32px}
+.desk .phone{max-width:900px}
+.desk .row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:start}
+.desk .shot{width:64px;height:80px}
+.pick{font-family:var(--display);color:var(--accent);font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:13px}
+</style>
+
+<h1>Offseason moves on a phone</h1>
+<p class="lede">Four ways to lay out one move at 390px wide. Each frame shows the same three moves: one player, two players, and four players. Grey boxes stand in for headshots, and the dark dot stands in for the club logo.</p>
+
+<div class="grid">
+
+<section class="opt a">
+  <h2><b>A</b> · Club byline</h2>
+  <p class="note">The logo and club name lead the row, like a news byline. One headshot sits beside a full-width sentence. On a 2+ player move, it shows the first player's face. <span class="pick">My pick</span></p>
+  <div class="phone">
+    <div class="row"><div class="head"><span class="club"><span class="logo">MIL</span>Brewers</span><span class="type">· Outrighted</span></div>
+      <div class="body"><div class="shot" style="width:56px;height:70px">FACE</div><div>Sent RHP <strong>Bryse Wilson</strong> outright to Nashville Sounds. He is out of minor-league options. <span class="more">More ›</span></div></div></div>
+    <div class="row"><div class="head"><span class="club"><span class="logo">HOU</span>Astros</span><span class="type">· Trade</span></div>
+      <div class="body"><div class="shot" style="width:56px;height:70px">FACE</div><div>Acquired RHP <strong>Evan Reifert</strong> from the Rays for cash; sent CF <strong>Jake Meyers</strong> outright to Sugar Land. <span class="more">More ›</span></div></div></div>
+    <div class="row"><div class="head"><span class="club"><span class="logo">DET</span>Tigers</span><span class="type">· Roster moves</span></div>
+      <div class="body"><div class="shot" style="width:56px;height:70px">FACE</div><div>Activated RF <strong>Kerry Carpenter</strong>, RHP <strong>Reese Olson</strong> and CF <strong>Matt Vierling</strong> from the 60-day IL; released LHP <strong>Bailey Horn</strong>. <span class="more">More ›</span></div></div></div>
+  </div>
+</section>
+
+<section class="opt b">
+  <h2><b>B</b> · Face pile</h2>
+  <p class="note">The club, the move type and small round headshots share one header line. The sentence runs full width below. Four players fit as two faces and a "+2" chip.</p>
+  <div class="phone">
+    <div class="row"><div class="head"><span class="club"><span class="logo">MIL</span>Brewers</span><span class="type">· Outrighted</span><span class="pile"><span class="shot">F</span></span></div>
+      Sent RHP <strong>Bryse Wilson</strong> outright to Nashville Sounds. He is out of minor-league options. <span class="more">More ›</span></div>
+    <div class="row"><div class="head"><span class="club"><span class="logo">HOU</span>Astros</span><span class="type">· Trade</span><span class="pile"><span class="shot">F</span><span class="shot">F</span></span></div>
+      Acquired RHP <strong>Evan Reifert</strong> from the Rays for cash; sent CF <strong>Jake Meyers</strong> outright to Sugar Land. <span class="more">More ›</span></div>
+    <div class="row"><div class="head"><span class="club"><span class="logo">DET</span>Tigers</span><span class="type">· Roster moves</span><span class="pile"><span class="shot">F</span><span class="shot">F</span><span class="count">+2</span></span></div>
+      Activated RF <strong>Kerry Carpenter</strong>, RHP <strong>Reese Olson</strong> and CF <strong>Matt Vierling</strong> from the 60-day IL; released LHP <strong>Bailey Horn</strong>. <span class="more">More ›</span></div>
+  </div>
+</section>
+
+<section class="opt c">
+  <h2><b>C</b> · Text only</h2>
+  <p class="note">No headshots on a phone. The logo sits in a narrow left gutter, so you can see more moves per screen. Photos still show on desktop and in the More sheet.</p>
+  <div class="phone">
+    <div class="row"><span class="logo">MIL</span><div>Sent RHP <strong>Bryse Wilson</strong> outright to Nashville Sounds. He is out of minor-league options. <span class="more">More ›</span></div></div>
+    <div class="row"><span class="logo">HOU</span><div>Acquired RHP <strong>Evan Reifert</strong> from the Rays for cash; sent CF <strong>Jake Meyers</strong> outright to Sugar Land. <span class="more">More ›</span></div></div>
+    <div class="row"><span class="logo">DET</span><div>Activated RF <strong>Kerry Carpenter</strong>, RHP <strong>Reese Olson</strong> and CF <strong>Matt Vierling</strong> from the 60-day IL; released LHP <strong>Bailey Horn</strong>. <span class="more">More ›</span></div></div>
+  </div>
+</section>
+
+<section class="opt d">
+  <h2><b>D</b> · Current PR</h2>
+  <p class="note">For comparison, this is what PR #2782 does now: the logo under the photo, and on 2+ players, two faces above the sentence with the logo at the end of that row.</p>
+  <div class="phone">
+    <div class="row"><div class="left"><div class="shot">FACE</div><span class="logo">MIL</span></div><div>Sent RHP <strong>Bryse Wilson</strong> outright to Nashville Sounds. He is out of minor-league options. <span class="more">More ›</span></div></div>
+    <div class="row stack"><div class="faces"><div class="shot">FACE</div><div class="shot">FACE</div><span class="logo">HOU</span></div><div>Acquired RHP <strong>Evan Reifert</strong> from the Rays for cash; sent CF <strong>Jake Meyers</strong> outright to Sugar Land. <span class="more">More ›</span></div></div>
+    <div class="row stack"><div class="faces"><div class="shot">FACE</div><div class="shot">FACE</div><span class="logo">DET</span></div><div>Activated RF <strong>Kerry Carpenter</strong>, RHP <strong>Reese Olson</strong> and CF <strong>Matt Vierling</strong> from the 60-day IL; released LHP <strong>Bailey Horn</strong>. <span class="more">More ›</span></div></div>
+  </div>
+</section>
+
+</div>
+
+<section class="desk">
+  <h2 style="font-family:var(--display);text-transform:uppercase;margin:0 0 8px">Desktop (unchanged in every option)</h2>
+  <div class="phone">
+    <div class="row"><div style="display:flex;gap:8px"><div class="shot">FACE</div><div class="shot">FACE</div></div><div>Acquired RHP <strong>Evan Reifert</strong> from the Tampa Bay Rays for cash; sent CF <strong>Jake Meyers</strong> outright to Sugar Land Space Cowboys. <span class="more">More ›</span></div><span class="logo">HOU</span></div>
+  </div>
+</section>
