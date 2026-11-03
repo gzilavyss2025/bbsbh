@@ -158,6 +158,10 @@ Gary: "on the website itself it probably is a standalone report once we figure o
 structure is." This section is that structure, taken from what the scrapbook cards do. Not built;
 a wireframe Artifact is the next step (390 px and desktop), per `CLAUDE.md`.
 
+**Wireframe (desktop, 2026-11-03):** https://claude.ai/artifact/QeQSP3GGQA9eqv1VZCghay (private; built
+with the Tally Baseball design system and Gary's real World Series games). Mobile is not drawn yet.
+Not opened in a browser by Claude, so layout is unchecked.
+
 **What it is.** One page that lists the games you stamped, grouped into chapters, and shows for
 each the moments that mattered. It is for scanning many games, not reading one.
 
