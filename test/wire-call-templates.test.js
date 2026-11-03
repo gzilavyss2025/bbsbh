@@ -180,3 +180,20 @@ test('traded while injured: the note says whose list he went on, and the trade',
     "He went on the Cardinals' injured list July 14 and came over in the Aug. 3 trade.",
   )
 })
+
+test('a doubleheader call-up reads as the 27th man, up and back down', () => {
+  // Jason Alexander, Astros: recalled for the April 30, 2026 doubleheader, optioned May 1.
+  const f = { lastName: 'Alexander', season: 2026, extraMan: { event: null }, calls: [{ up: '2026-04-30', down: '2026-05-01' }], contract: { options: 1 } }
+  assert.equal(callStory(f, { kind: 'recall', moveDate: '2026-04-30' }), 'Alexander came up as the 27th man for the doubleheader and went back down May 1.')
+  assert.equal(
+    callStory(f, { kind: 'option', moveDate: '2026-05-01' }),
+    'Alexander goes back down after serving as the 27th man in the April 30 doubleheader. He has one minor-league option left.',
+  )
+})
+
+test('a special-event call-up names the event', () => {
+  // Bo Naylor, Brewers: recalled for the Little League Classic, Aug. 23, 2026; optioned Aug. 24.
+  const f = { lastName: 'Naylor', season: 2026, extraMan: { event: 'MLB Little League Classic in Williamsport, PA' }, calls: [{ up: '2026-08-23', down: '2026-08-24' }] }
+  assert.equal(callStory(f, { kind: 'recall', moveDate: '2026-08-23' }), 'Naylor came up as the 27th man for the MLB Little League Classic in Williamsport, PA, and went back down Aug. 24.')
+  assert.equal(callStory(f, { kind: 'option', moveDate: '2026-08-24' }), 'Naylor goes back down after serving as the 27th man at the MLB Little League Classic in Williamsport, PA.')
+})
