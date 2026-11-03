@@ -36,12 +36,19 @@ so the note never shows a number without a comparison.
   3. On the player page a nugget stays for the whole season, then moves to a career view.
   4. Thresholds are a curated list in code. A new line is a code review.
   5. With no anchor, a plain note ("One of 11 pitchers with a shutout") still shows when the count
-     is small. Inference: "small" is 15 or fewer. Larger counts say nothing.
-  6. No cap on anchor notes per card. The normal callout ranking and cap still limit the total.
+     is small. "Small" depends on the span and on the stat: a count that is big for one season can
+     be rare "in all of baseball history" or "in the last 10 years", so the cutoff can be bigger
+     there. See "Spans".
+  6. Revised later the same day: only the highest-ranked nugget on a card gets an anchor
+     comparison. The other nuggets on the card show as plain counts (if within their `plainMax`).
+     This replaces the earlier "no cap" answer.
   7. Tone: any sourced anchor is fine, including team-flavored ones like the 1972 Dolphins.
   8. Anchors that can change are allowed, with a 180-day expiry after the last check.
-  9. Regular-season thresholds, plus a separate postseason ladder (for example a World Series
-     hit line). Regular-season and postseason totals are not mixed.
+  9. Regular-season thresholds, plus a separate postseason ladder. Regular-season and postseason
+     totals are not mixed. The first postseason ladder has four kinds of line: hits in one
+     postseason, hits in one World Series, scoreless relief innings, and the usual counting lines
+     (HR, RBI, strikeouts, saves).
+  10. The career view is a section on the player page ("Past seasons"), under this season's list.
 
 ## The store: nuggets
 
@@ -156,6 +163,36 @@ games for every club (not yet checked on a traded player).
   note was true to the data that day. A check may list a nugget whose player no longer meets
   the threshold. Report, never delete.
 
+## Spans
+
+Gary, 2026-11-03: the cutoff for a plain note "needs to be conditional based on how long of time
+you're spanning and what the stat actually is". So a threshold carries its own span and cutoff:
+
+```js
+{ id: 'rbi100', group: 'hitting', label: '100 RBI', span: 'season', plainMax: 15,
+  all: [{ stat: 'rbi', min: 100 }] }
+```
+
+| Span | Reads | Starting `plainMax` (Inference) | Store |
+|---|---|---|---|
+| `season` | "One of 9 hitters with 100 RBI" (the season is the default and goes unsaid) | 15 | `nuggets/{season}.json` (v1) |
+| `recent` (last 10 seasons) | "Since 2017, one of 14 hitters with ..." | 50 | union of 10 season files |
+| `history` | "In baseball history, one of 43 hitters with ..." | 100 | one frozen file per finished season |
+
+- The span must be named in the text unless it is the season (house rule: a frame stays when it
+  contrasts).
+- `plainMax` is data on each threshold, because the stat matters too: 40 players with 100 RBI in a
+  decade is ordinary, 40 players with a shutout-and-20-strikeout game is not. The table's numbers
+  are only starting values.
+- A wider span also opens the larger anchors in the registry: 24 perfect games, 27 amendments,
+  45 presidents. 50 states and 100 senators are not sourced yet.
+- **Data for old seasons.** A season-totals call works for old years. Probe on 2026-11-03,
+  100+ RBI players: 1927 had 17, 1968 had 3, 1998 had 42, 2001 had 46, 2026 had 9, at 214 to 829 ms
+  per season. Full history is about 150 calls, once, and a finished season never changes. Not
+  checked against another source, and only these five seasons were sampled.
+- A historical span counts players who had a season at the line. It needs no crossing date.
+- Not v1. Slice 7 adds spans after the single-season path works.
+
 ## Parts
 
 | Part | What it is | Where (Inference: names are proposals) |
@@ -182,10 +219,10 @@ Not the same as `useCalloutLedger`, which only remembers what a game card has sh
 4. Pick the anchor with the smallest `|n - count|`. A gap above `max(1, round(0.2 * n))` means no
    anchor. Ties go to the lower `tier` number, then to a stable hash of player id and date, so
    the same player does not always get the moon.
-5. No anchor fits: show the plain note if the count is 15 or fewer (decided; 15 is Inference),
-   otherwise say nothing.
+5. No anchor fits: show the plain note if the count is at or under the threshold's `plainMax`
+   (decided: it depends on span and stat), otherwise say nothing.
 6. Tone: a team-flavored anchor is allowed if it is sourced (decided).
-7. Within one card, do not reuse an anchor (Inference).
+7. Only the top-ranked nugget on a card gets an anchor (decided). The others use the plain note.
 
 Fixtures (2026 counts): 11 -> moon-walked "fewer than"; 9 -> scotus "as many as";
 13 -> triple-crown-horses "more than"; 5 -> great-lakes or calendar-slam "as many as";
@@ -205,9 +242,8 @@ Fixtures (2026 counts): 11 -> moon-walked "fewer than"; 9 -> scotus "as many as"
   - earlier, same season: "In May, one of 9 hitters with 100 RBI, ..." (month name)
   - an earlier season: "In 2026, one of 9 hitters ..."
   A game card shows no dates. A list of old notes dates each by month, which reads as a timeline,
-  not as five copies of "As of today". There is no cap on anchor notes per card (decided); the
-  normal ranking and `INSIGHTS_SHOWN` cap still apply. Inference: within one card, reuse no
-  anchor twice, so the moon does not appear on every line.
+  not as five copies of "As of today". Only the highest-ranked nugget on a card gets an anchor (decided);
+  the others show as plain counts. The normal ranking and `INSIGHTS_SHOWN` cap still apply.
 - Write in ASD-STE100. Say "postseason", never the other word (`check-word-choice`).
 - Never write "first", "fastest" or "fewest". The count is one season. An all-time claim needs an
   all-time source (not in scope).
@@ -264,20 +300,20 @@ that the player did something on D. The rule is structural:
 5. **Later, needs a wireframe Artifact (390 px and desktop).** A list of nuggets on the
    player detail page, newest first, with the aged wording, then a career view when the season ends.
    Reads the store.
-6. **Later: the postseason ladder.** Separate thresholds and a separate store file or key. Needs the
-   list of lines first (Still open #1).
+6. **Later: the postseason ladder.** Separate thresholds and a separate store file or key. Four
+   kinds of line (Decided #9). Scoreless relief innings is a streak, not a total: it needs its own
+   rule for "crossing" and is the hardest of the four.
+7. **Later: spans.** `span` and `plainMax` on thresholds, the `recent` and `history` stores, and
+   the span wording. See "Spans".
 
 ## Still open
 
-The nine questions are answered (see Decided). These came out of the answers:
-
-1. **The postseason ladder.** Which lines? Inference: a World Series hit line, an RBI line, a
-   strikeout line. Needs its own pass, and its own count (the pool of players is much smaller).
-2. **The career view.** Where does it live, and does it need a wireframe? Slice 5 covers the
-   season list only.
-3. **"Small count" cutoff.** Is 15 right for a plain note?
-4. **No cap on anchor notes.** With no cap, is the repeat-anchor rule enough, or does a card full of
-   comparisons feel loud? Check on a real card in slice 3.
+1. **Postseason numbers.** The four kinds are decided. The actual lines (for example 15 hits in one
+   postseason) are not. Needs a pass over real postseason data, like the regular-season probe.
+2. **A streak line.** How does a streak (scoreless innings) get a "crossing" date and a count?
+3. **Starting `plainMax` per span.** 15, 50, 100 are guesses.
+4. **Old-era data.** Is the season-totals call right for 1900s seasons (traded players, split
+   stints)? Check a few known seasons against Baseball-Reference before slice 7.
 
 ## Out of scope
 

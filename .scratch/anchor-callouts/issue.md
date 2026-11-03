@@ -28,8 +28,9 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
 - Gary, 2026-11-03: nine open questions answered. Aging: none on a game's own card, month name when
   older, year when older than the season. Game card window: 7 days. Player page: the season, then a
   career view. Thresholds: a curated list in code. Plain note with no anchor: yes when the count is
-  small. No cap on anchor notes per card. Tone: any sourced anchor, including team-flavored ones.
-  Anchors that can change: allowed with a 180-day expiry. Postseason: its own ladder, later.
+  small. Only the top-ranked nugget on a card gets an anchor; the rest show as plain counts. Tone: any sourced anchor, including team-flavored ones.
+  Anchors that can change: allowed with a 180-day expiry. Postseason: its own ladder of four kinds, later. Career view: a section on the player page.
+  Plain-note cutoff: depends on the span and the stat (a bigger number is fine for a longer span).
 - Inference: the store holds nuggets. A nugget is the first day a player's season total met a
   threshold, with how many players had by then and the anchor, frozen. The count on any past day is
   the number of nuggets up to that day, so no daily snapshot is needed. 
@@ -44,6 +45,7 @@ Inference: names are proposals.
   crosser's game log. Probe: `.scratch/anchor-callouts/nuggets.probe.mjs` (66 nuggets across
   6 thresholds in 4.9 s on 2026-11-03; counts match the season totals).
 - `src/lib/nuggets/thresholds.js`: the named lines as data, shared by the generator and the app.
+  Each line carries a `span` (season, last 10 seasons, history) and a `plainMax` cutoff.
 - `src/lib/anchors/anchors.json` (seed: `.scratch/anchor-callouts/anchors.seed.json`) and a pure
   `pick.js`.
 - `src/api/nuggets.js` reader, then a `nugget` note family in `src/api/callout-notes/`, scored
@@ -71,10 +73,10 @@ score. The player detail page is open (ADR-0034). ADRs: 0001, 0014, 0034, 0088.
 
 ## Not decided
 
-1. The postseason ladder: which lines? Inference: World Series hit, RBI and strikeout lines.
-2. The career view on the player page: where does it live? Needs a wireframe.
-3. Is 15 the right cutoff for a plain note with no anchor? (Inference.)
-4. With no cap on anchor notes, is "no repeat anchor on one card" enough? Check on a real card.
+1. The postseason numbers: which exact lines for the four kinds?
+2. How does a streak (scoreless relief innings) get a crossing date and a count?
+3. Starting `plainMax` per span (Inference: season 15, last 10 seasons 50, history 100).
+4. Is the season-totals call right for early-era seasons? Check against Baseball-Reference.
 
 ## Out of scope
 
