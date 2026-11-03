@@ -26,6 +26,7 @@ import {
   isNonIlListEnding,
   isNonIlListPlacement,
   nonIlList,
+  rosterKind,
 } from './transactions/vocabulary.js'
 
 // Re-exported so this module stays the pipeline's single public surface for
@@ -553,6 +554,8 @@ function shapeStory(draft, ctx) {
     codes: [...new Set(draft.rows.map((r) => r.row.typeCode).filter(Boolean))],
     rail: buildRail(draft, ctx),
     cutline: buildCutline(draft, ctx),
+    // [personId, rosterKind] per row, for the replies (transactions/replies.js).
+    moves: draft.rows.map(({ row, role }) => [row.person?.id ?? null, rosterKind(row, role)]),
   }
 }
 

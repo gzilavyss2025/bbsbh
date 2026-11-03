@@ -470,3 +470,60 @@
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
+
+/* A reply (components/transactions/ReplyQuote.jsx): the faded quote of the move
+   this row answers, above its kicker, joined to it by a thin curved line —
+   iMessage style. Two lines at most; a tap scrolls to the original. */
+/* layout-exempt: a label over stacked quotes */
+.wire__reply {
+  display: grid;
+  gap: 3px;
+  position: relative;
+  margin: 0 0 var(--space-2) var(--space-4);
+}
+.wire__reply::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--space-3));
+  top: var(--space-2);
+  bottom: calc(-1 * var(--space-2));
+  width: var(--space-2);
+  border: var(--bw-hair) solid var(--graphite);
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: var(--radius-md);
+}
+.wire__replyto {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+.wire__quote {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  padding: 3px var(--space-2);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface-inset);
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-tight);
+  color: var(--text-muted);
+  text-align: left;
+  cursor: pointer;
+}
+#root .wire__quote {
+  text-transform: none; /* caps-exempt: a quoted cutline reads as the sentence it quotes */
+}
+.wire__quotedate { font-family: var(--font-mono); }
+/* The original, briefly marked after a quote scrolls to it. */
+@media (prefers-reduced-motion: no-preference) {
+  .wire__row--found { animation: wire-found 1.6s ease-out; }
+}
+@keyframes wire-found {
+  from { background: var(--surface-row-selected); }
+  to { background: transparent; }
+}

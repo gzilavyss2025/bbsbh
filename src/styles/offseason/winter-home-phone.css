@@ -35,6 +35,11 @@
     grid-column: 1 / -1;
     grid-row: 2;
   }
+  /* A reply's quote takes the sentence's line, and the sentence drops one below it. */
+  .oseason__list .wire__row:has(.wire__reply) .wire__body > :not(.wire__kicker):not(.wire__reply) {
+    grid-row: 3;
+  }
+  .oseason__list .wire__row:has(.wirefacts) .wire__reply { order: 2; flex-basis: 100%; }
   .oseason__list .wire__face {
     min-width: 0;
   }

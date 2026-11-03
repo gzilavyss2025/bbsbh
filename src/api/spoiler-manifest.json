@@ -1326,6 +1326,10 @@
       "class": "spoiler-free",
       "why": "The prose half of teamTransactions.js — a finished story draft in, the cutline's segment array out, plus the label helpers the rail half shares. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."
     },
+    "transactions/replies.js": {
+      "class": "spoiler-free",
+      "why": "Pairs a roster move with the earlier move it answers (a designation and its outright, an opening and the call-up that fills it), from the stories' own per-row roster kinds. Roster moves, clubs and dates only — no score anywhere on the path."
+    },
     "transactions/league.js": {
       "class": "spoiler-free",
       "why": "The league-wide grouping pass for the home page's last-48-hours feed (issue #772): every raw wire row gets one owning club, then the club-scoped pipeline runs per owner. Reads /api/v1/transactions live, which carries roster moves and dates and no score at all."

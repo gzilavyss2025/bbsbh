@@ -5,6 +5,7 @@ import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { ReplyQuotes, moveAnchor, useReplies } from './ReplyQuote.jsx'
 // The player notes and their sheet load on their own, off the first load: a
 // ledger row draws its plain sentence until they arrive.
 const WireFacts = lazy(() => import('./WireFacts.jsx').then((m) => ({ default: m.WireFacts })))
@@ -224,8 +225,10 @@ function clubTabFor(teamId) {
 // the other club's mark beside it (the first club the cutline names). `line`
 // is that ledger's minor move (transactions/major.js): the same row with no
 // faces, so a routine move reads as one entry rather than a card. `date` turns
-// on the player's background under the sentence (WireFacts.jsx).
-export function MoveRow({ story, compact = false, marks = false, line = false, date = null }) {
+// on the player's background under the sentence (WireFacts.jsx). `quotes` are
+// the moves this one replies to (ReplyQuote.jsx), drawn above its kicker;
+// `day` is the row's own date, which a same-day quote leaves off.
+export function MoveRow({ story, compact = false, marks = false, line = false, date = null, quotes = null, day = null }) {
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
   const lead = compact ? story.rail?.[0] : null
@@ -237,6 +240,7 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
   return (
     <li
       className={`wire__row${compact ? ' wire__row--compact' : ''}${line ? ' wire__row--line' : ''}`}
+      id={moveAnchor(story.id)}
       data-move-row=""
       // The spine is the club's own colour, decorative and text-free — no
       // contrast floor applies to it, and none of the row's copy sits on it.
@@ -250,6 +254,7 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
         </div>
       )}
       <div className="wire__body">
+        <ReplyQuotes quotes={quotes} date={day} />
         <div className="wire__kicker">
           {lead && (
             <span className={`banner ${BANNER_TONE[lead.role] ?? 'banner--move'}`}>
@@ -294,7 +299,10 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
 // The caller owns the <ul> — its ref, its clamp, its scrolling; only what goes
 // INSIDE it is shared, which is the whole point of this module. `compact` is
 // passed straight through to MoveRow; a dateline is the same either way.
+// Replies are found among the items drawn here, so every quote's original is on
+// the page to scroll to.
 export function MoveItems({ items, compact = false, marks = false, isMajor = null, facts = false }) {
+  const replies = useReplies(items)
   return items.map((item) =>
     item.kind === 'date' ? (
       <li className="wire__date" key={item.key}>
@@ -302,7 +310,7 @@ export function MoveItems({ items, compact = false, marks = false, isMajor = nul
         <span className="wire__rule" aria-hidden="true" />
       </li>
     ) : (
-      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} />
+      <MoveRow key={item.key} story={item.story} compact={compact} marks={marks} line={isMajor ? !isMajor(item.story) : false} date={facts ? item.date : null} quotes={replies[item.story.id]} day={item.date} />
     ),
   )
 }
