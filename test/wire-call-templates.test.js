@@ -298,12 +298,13 @@ test('a club total adds up his seasons with that club, from the stint he left', 
   assert.deepEqual(shapeFacts(person, { season: 2026 }).clubTotals[158], { games: 9, era: '1.84', ip: '14.2' })
 })
 
-test('a last outing writes its thirds of an inning as a scorer would', () => {
+// Gary, 2026-11-03: every note writes innings the box-score way, "2.1 innings".
+test('a last outing writes its innings as a box score does', () => {
   const at = (ip, er) => callStory(facts({ lastName: 'Koenig', lastGame: { date: '2026-07-12', oppId: 134, line: { ip, er } }, seasonToDate: { games: 9, era: '9.00', ip: '7.0' } }), { kind: 'option', moveDate: '2026-07-17' })
-  assert.match(at('0.1', 2), /gave up two earned runs in 1\/3 of an inning\./)
-  assert.match(at('0.2', 0), /threw 2\/3 of an inning without an earned run\./)
+  assert.match(at('0.1', 2), /gave up two earned runs in 0\.1 innings\./)
+  assert.match(at('0.2', 0), /threw 0\.2 innings without an earned run\./)
   assert.match(at('1.0', 1), /gave up one earned run in one inning\./)
-  assert.match(at('2.1', 3), /gave up three earned runs in 2 1\/3 innings\./)
+  assert.match(at('2.1', 3), /gave up three earned runs in 2\.1 innings\./)
 })
 
 test('a cash deal reads the same with the club leading the clause', () => {
