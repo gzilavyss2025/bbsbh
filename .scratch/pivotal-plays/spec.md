@@ -333,8 +333,8 @@ already made.
     or stored at stamp time. The second needs a ruling under the stamp ADRs.
 11. **Dashboard wording.** The `pivotal` dataset in Gary's dashboard still carries the first-draft
     (robotic) strings. Rewrite them to the voice above in `scrapbook.build.mjs` and re-upload?
-12. **Postseason in the tables.** The Brewers and league tables mix regular season and postseason
-    (the Oct 4 walk-off is in both). Split them, or keep them together?
+12. **Postseason in the tables.** Decided (Gary, 2026-11-03): keep regular season and postseason
+    together, with a "postseason" mark on October rows (9 rows across the three tables).
 13. **Whose team?** The tables are the Brewers because that is Gary's team. The app's favorite-team
     setting would pick the club for anyone else.
 14. **Report name.** The repo says "Game Log" for stamped games. Gary's scrapbook says "scorebook".
