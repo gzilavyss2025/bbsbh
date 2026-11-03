@@ -56,6 +56,7 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 import { MANAGER_HISTORY_FIRST_SEASON } from '../src/lib/records/managerHistory.js'
 import { mergeSeasonRange, mergeCoverage, sharedCoverage, mergeNeedsResearch } from './lib/records/manager-history-merge.mjs'
 import { buildStaffIndex } from './lib/records/manager-staff-index.mjs'
+import { teamSeasonGames } from './lib/records/manager-split.mjs'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -120,24 +121,13 @@ async function fetchCoaches(teamId, season) {
   }
 }
 
-// A team-season's regular-season games, each as { date, won } (Final games
-// only). Used both for a plain unshared-season record and, split at
-// transitionDate, for a shared-season seed resolution.
+// A team-season's regular-season games, each as { date, won }
+// (teamSeasonGames: Final games, each gamePk once). Used both for a plain
+// unshared-season record and, split at transitionDate, for a shared-season
+// seed resolution.
 async function fetchTeamSeasonGames(teamId, season) {
   try {
-    const data = await getJson(
-      `${API}/schedule?sportId=1&teamId=${teamId}&season=${season}&gameType=R&hydrate=team`,
-    )
-    const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
-    const out = []
-    for (const g of games) {
-      if (g.status?.abstractGameState !== 'Final') continue
-      const isHome = g.teams?.home?.team?.id === teamId
-      const mySide = isHome ? g.teams?.home : g.teams?.away
-      if (typeof mySide?.isWinner !== 'boolean') continue
-      out.push({ date: g.officialDate ?? (g.gameDate ?? '').slice(0, 10), won: mySide.isWinner })
-    }
-    return out
+    return teamSeasonGames(await getJson(`${API}/schedule?sportId=1&teamId=${teamId}&season=${season}&gameType=R&hydrate=team`), teamId)
   } catch (err) {
     console.warn(`  schedule ${teamId}/${season}: ${err.message}`)
     return null

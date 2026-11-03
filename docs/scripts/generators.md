@@ -1367,7 +1367,7 @@ don't run these by hand.
   now: ~2,000 calls for a full rebuild, about 25 s. **Hand-run** (no cron runs it):
   `node scripts/gen-manager-history.mjs` rebuilds; `--from=YYYY --to=YYYY` merges one
   slice; `--out=DIR` writes to DIR for a measuring run. To research a seed entry,
-  `node scripts/research/find-manager-split.mjs <teamId> <season> <outW-outL> [<inW-inL>]`
+  `node scripts/research/find-manager-split.mjs <teamId> <season> <outgoing name> <outW-outL> <inW-inL>`
   turns a source's W-L into the change date, or says why it can't (#2761; the chunk
   prompt is `.scratch/manager-splits-2761/prompt.md`). 1969 is where the unseeded
   shared seasons stay under 150 (148 added; 1968 would make 152, 1901 about 300).
