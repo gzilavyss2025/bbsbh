@@ -6,6 +6,18 @@
 // never a guess: either one clean date, or a status saying why a person has to
 // look.
 
+// A seed entry -> [{ managerId, from, to }] in game order; `from` is inclusive and
+// `to` exclusive (null = open). An entry is `transitions: [{ date, outgoingManagerId,
+// incomingManagerId }]`, or the single-change shorthand { transitionDate,
+// outgoingManagerId, incomingManagerId } (one transition).
+export function seedSegments(entry) {
+  const ts = entry.transitions ?? [{ date: entry.transitionDate, ...entry }]
+  return [
+    { managerId: ts[0].outgoingManagerId, from: null, to: ts[0].date },
+    ...ts.map((t, i) => ({ managerId: t.incomingManagerId, from: t.date, to: ts[i + 1]?.date ?? null })),
+  ]
+}
+
 // A /schedule?teamId=…&gameType=R response -> [{ date, won }], Final games with
 // a winner only, in schedule order (a doubleheader's games share a date). A
 // suspended game that was resumed is listed twice under one gamePk (Brewers
@@ -61,13 +73,46 @@ export function findSplit(games, out, inc = null) {
   return { status: 'no-match', season: { w, l } }
 }
 
+// Every manager's { w, l } in order -> the change date between each pair. Each
+// date comes from findSplit on the games left after the last change; the last
+// manager's record must match what remains. A failure is findSplit's status plus
+// `at`, the 0-based manager whose record did not hold.
+export function findSplits(games, records) {
+  const dates = []
+  let rest = games
+  for (let k = 0; k < records.length - 1; k++) {
+    const r = findSplit(rest, records[k], k === records.length - 2 ? records[k + 1] : null)
+    if (r.status !== 'ok') return { ...r, at: k }
+    dates.push(r.transitionDate)
+    rest = rest.filter((x) => x.date >= r.transitionDate)
+  }
+  return { status: 'ok', dates }
+}
+
+// Queue managers [{ id, name }] and the names a source lists, in order -> the
+// ids in that order, or { status }: 'count-mismatch', 'two-stints' (one manager
+// named twice, which the seed cannot hold), 'name-not-matched' (a name picks
+// out zero or several).
+export function pickOrder(managers, names) {
+  if (managers.length !== names.length) return { status: 'count-mismatch' }
+  const plain = (x) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+  const ids = []
+  for (const n of names) {
+    const hits = managers.filter((m) => plain(m.name).includes(plain(n)))
+    if (hits.length !== 1) return { status: 'name-not-matched' }
+    ids.push(hits[0].id)
+  }
+  return new Set(ids).size < ids.length ? { status: 'two-stints' } : { ids }
+}
+
 // Two queue managers [{ id, name }] and the outgoing manager's name (or a part
 // of it) -> the seed's two ids, or null when the name doesn't pick out exactly
 // one of exactly two managers.
 export function pickManagers(managers, outgoingName) {
   if (managers.length !== 2) return null
-  const needle = outgoingName.toLowerCase()
-  const hits = managers.filter((m) => m.name.toLowerCase().includes(needle))
+  const plain = (x) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+  const needle = plain(outgoingName)
+  const hits = managers.filter((m) => plain(m.name).includes(needle))
   if (hits.length !== 1) return null
   const other = managers.find((m) => m !== hits[0])
   return { outgoingManagerId: hits[0].id, incomingManagerId: other.id }

@@ -8,7 +8,7 @@ import {
   settleMs,
   velocityFrom,
 } from './dockPhysics.js'
-import { IconButton } from '../control/IconButton.jsx'
+import { Button } from '../control/Button.jsx'
 
 // THE PHONE'S BOTTOM DOCK — the sheet shell, with no content of its own.
 //
@@ -115,6 +115,7 @@ export function SheetDock({
   label,
   bodyId,
   bodyAs: Body = 'ul',
+  bodyClassName = '',
   collapsed,
   collapsedLabel,
   title,
@@ -429,17 +430,19 @@ export function SheetDock({
               aria-hidden={index === RAIL ? 'true' : undefined}
             >
               <h2 className="wiredock__title">{title}</h2>
-              <span className="wiredock__note">{note}</span>
-              <IconButton
-                mark="md"
+              {note && <span className="wiredock__note">{note}</span>}
+              {/* Said in words, like the rail's "See all ›", not a bare caret. */}
+              <Button
+                size="control"
+                skin="ghost"
                 className="wiredock__close"
                 data-nodrag=""
                 onClick={() => setIndex(RAIL)}
                 tabIndex={index === RAIL ? -1 : 0}
-                label={closeLabel}
+                aria-label={closeLabel}
               >
-                ⌄
-              </IconButton>
+                Close
+              </Button>
             </div>
           </div>
         </div>
@@ -447,7 +450,7 @@ export function SheetDock({
         <Body
           id={bodyId}
           ref={listRef}
-          className="wiredock__list"
+          className={`wiredock__list${bodyClassName ? ` ${bodyClassName}` : ''}`}
           onPointerDown={onListDown}
           onPointerMove={onListMove}
         >

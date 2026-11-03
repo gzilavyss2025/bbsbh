@@ -1,0 +1,72 @@
+/* The transactions list's replies (components/transactions/ReplyQuote.jsx), beside
+   the wire's rows in 04-site-bar.css: the quote above a row, its stamp, and the
+   brief mark on the original a quote scrolls to. */
+/* A reply (components/transactions/ReplyQuote.jsx): a carbon copy of the move
+   this row answers, above its kicker — no "replying to", just the earlier
+   move's date in a small stamped box with a hook toward it, down the page,
+   then its sentence, muted, two lines at most. A tap goes to the original. */
+/* layout-exempt: stacked carbon copies */
+.wire__reply {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-2);
+}
+/* layout-exempt: the stamp beside its sentence */
+.wire__quote {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.wire__stamp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 0 var(--space-1);
+  border: var(--bw-hair) solid var(--graphite);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cell);
+  line-height: var(--lh-tight);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+.wire__hook { color: var(--graphite); }
+/* A game quote's two clubs, as marks: away "at" home. */
+.wire__matchup {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  vertical-align: middle;
+}
+/* The quoted sentence: the read face, in the case the cutline wrote it. */
+.wire__quotetext {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-tight);
+  color: var(--text-muted);
+}
+.wire__quotetext--open {
+  display: block;
+}
+#root .wire__quotetext,
+#root .wire__matchup {
+  text-transform: none; /* caps-exempt: a quoted cutline reads as the sentence it quotes */
+}
+/* The original, briefly marked after a quote scrolls to it. */
+@media (prefers-reduced-motion: no-preference) {
+  .wire__row--found { animation: wire-found 1.6s ease-out; }
+}
+@keyframes wire-found {
+  from { background: var(--surface-row-selected); }
+  to { background: transparent; }
+}

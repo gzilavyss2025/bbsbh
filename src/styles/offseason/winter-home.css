@@ -69,6 +69,10 @@
   align-items: start;
   column-gap: var(--space-3);
 }
+/* A reply's quote (ReplyQuote.jsx) runs the full row above the sentence and its club. */
+.oseason__list .wire__reply {
+  grid-column: 1 / -1;
+}
 /* layout-exempt: every mark the same size, one column; a trade's partner stacks under */
 .oseason__list .wire__kicker {
   order: 1;
@@ -390,14 +394,10 @@
 .wintercal__item--next .wintercal__label {
   color: var(--text-heading);
 }
-/* Behind them. Lightened and struck through, still legible. */
+/* Behind them. Lightened, never struck: a past entry may still be a link. */
 .wintercal__item--past .wintercal__day,
 .wintercal__item--past .wintercal__label {
   color: var(--graphite-soft);
-}
-.wintercal__item--past .wintercal__label,
-.wintercal__item--past .wintercal__label .plink {
-  text-decoration: line-through;
 }
 /* The free agency entry links to the free-agent class: ink, underlined. */
 .wintercal__link {
@@ -556,4 +556,8 @@
 a.seasonnote__barrow:hover .seasonnote__barname {
   color: var(--text-heading);
   text-decoration: underline;
+}
+.wirefacts__close {
+  display: flex;
+  margin: var(--space-2) auto 0;
 }

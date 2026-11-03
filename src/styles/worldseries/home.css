@@ -491,9 +491,16 @@
 
 /* The home slate's champion hero (ChampionHero.jsx): the crest and the result sit over the left
    half, clear of the MVP's photos on the right. */
+.ww-champhero .ww-hero__focus { width: 46%; margin-left: var(--space-4); text-align: center; }
+/* A phone shows the champions' photo on its own, across the whole stage. */
+@media (max-width: 739px) {
+  .ww-champhero .ww-hero__focus,
+  .ww-champhero .ww-hero__slab--action,
+  .ww-champhero .ww-hero__stripe { display: none; }
+  .ww-champhero .ww-hero__slab:has(.ww-hero__photo) { grid-column: 1 / -1; margin: 0; clip-path: none; }
+}
 @media (min-width: 740px) {
   .ww-champhero .ww-hero__top { margin-left: var(--space-4); }
-  .ww-champhero .ww-hero__focus { width: 46%; margin-left: var(--space-4); text-align: center; }
 }
 .ww-hero__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 /* The club stripe along the photo's slanted edge: outer, inner, outer, each band its own slant. */

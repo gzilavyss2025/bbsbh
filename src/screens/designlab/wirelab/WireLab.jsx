@@ -19,6 +19,8 @@ const TEMPLATES = [
   ['cut', 'Outrighted, designated, released, claimed'],
   ['deal', 'Signings and trades'],
   ['injured', 'Injured list'],
+  ['call', 'Recalled, optioned, selected'],
+  ['other', 'Arrivals from independent ball, retirements'],
   ['fallback', 'Everything else (sheet only)'],
 ]
 // Each card picks a template per player (subjectsOf); a story is filed under
@@ -31,6 +33,11 @@ const GROUP_OF = {
   signing: 'deal',
   'il-placed': 'injured',
   'il-activated': 'injured',
+  recall: 'call',
+  option: 'call',
+  selected: 'call',
+  arrival: 'other',
+  retired: 'other',
 }
 function groupOf(story) {
   const groups = new Set(subjectsOf(story).map((s) => GROUP_OF[s.template]).filter(Boolean))
@@ -38,10 +45,12 @@ function groupOf(story) {
 }
 const SPAN = 3
 // Windows worth tuning against. The 2026 deadline fell on Aug. 3 (136 trade
-// rows that day); the window reads back from the day after.
+// rows that day); the window reads back from the day after. April 30 had a
+// doubleheader's 27th man (Jason Alexander, Astros).
 const PRESETS = [
   { value: 'today', label: 'Latest', end: null },
   { value: 'deadline', label: 'Trade deadline', end: '2026-08-04' },
+  { value: 'doubleheader', label: 'Doubleheader', end: '2026-05-02' },
 ]
 
 export function WireLab() {

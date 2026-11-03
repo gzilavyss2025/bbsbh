@@ -182,7 +182,7 @@ export function WireRail({ endDate, sportId, onPresence, fitTo, singleDay = fals
         <h2 className="wirerail__title">Transactions</h2>
       </div>
       <ul
-        className="wirerail__list"
+        className="wirerail__list oseason__list"
         ref={listRef}
         // Clamped to the measured budget only while collapsed, and only once a
         // budget exists. It is what stops the pre-measurement frame painting a
@@ -190,7 +190,7 @@ export function WireRail({ endDate, sportId, onPresence, fitTo, singleDay = fals
         // changes nothing visible.
         style={collapsed && budget != null ? { maxHeight: `${budget}px` } : undefined}
       >
-        <MoveItems items={shown} compact />
+        <MoveItems items={shown} marks />
       </ul>
       {(hidden > 0 || expanded) && (
         <button

@@ -164,6 +164,40 @@ function isUndebutedSigning(t, debutedIds) {
 // same way (either club, mapped up through the affiliate table) and then keeps
 // only one of them. A future caller MUST do the same, or re-add a direct-touch
 // check scoped to just that caller — don't loosen this gate itself.
+// What one row did to the 26-man active roster, for the wire's replies
+// (transactions/replies.js). Short codes, because every nightly file carries
+// one per row: an opening (il, list, opt, des, rel), a fill (cu, se, act,
+// claim), a row that leaves the 26-man alone (il60, out, lost, none), the two
+// halves of a trade, or '?' for a row the count cannot read.
+// `debutedIds`, when given, marks a trade of a player who never reached the
+// majors 'none': a prospect changing clubs moves no one on the 26-man.
+export function rosterKind(row, role, debutedIds = null) {
+  const code = row.typeCode
+  if (code === 'TR') {
+    if (debutedIds && !debutedIds.has(row.person?.id)) return 'none'
+    return role === 'in' ? 'trade-in' : 'trade-out'
+  }
+  if (code === 'CLW') return role === 'in' ? 'claim' : 'lost'
+  if (code === 'DES') return 'des'
+  if (code === 'OPT') return 'opt'
+  if (code === 'REL') return 'rel'
+  if (code === 'OUT' || code === 'DFA') return role === 'in' ? '?' : code === 'OUT' ? 'out' : 'none'
+  if (code === 'CU') return 'cu'
+  if (code === 'SE') return 'se'
+  if (SIGNING_CODE_SET.has(code) || OUTSIDE_ARRIVAL_CODES.has(code)) return 'none'
+  if (code === 'SC') {
+    if (isIlTransferTxn(row)) return 'il60'
+    if (isIlPlacementTxn(row)) {
+      // The 60-day list taken straight from the active roster is rare and
+      // outside the approved rule; the count steps around it.
+      return /\b(7|10|15)-day/i.test(row.description || '') ? 'il' : '?'
+    }
+    if (isNonIlListPlacement(row)) return 'list'
+    if (isIlEndingTxn(row) || isNonIlListEnding(row)) return 'act'
+  }
+  return '?'
+}
+
 const DIRECT_TOUCH_EXEMPT_CODES = new Set(['DFA'])
 
 export function filterStoryworthy(rows, ctx = {}) {
