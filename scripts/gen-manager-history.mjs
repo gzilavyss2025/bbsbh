@@ -56,7 +56,7 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 import { MANAGER_HISTORY_FIRST_SEASON } from '../src/lib/records/managerHistory.js'
 import { mergeSeasonRange, mergeCoverage, sharedCoverage, mergeNeedsResearch } from './lib/records/manager-history-merge.mjs'
 import { buildStaffIndex } from './lib/records/manager-staff-index.mjs'
-import { teamSeasonGames, seedSegments } from './lib/records/manager-split.mjs'
+import { teamSeasonGames, seedSegments, segmentRecords } from './lib/records/manager-split.mjs'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -249,11 +249,11 @@ async function attachRecords(byPersonId, teamSeasonManagers, seed) {
       if (stint) stint.record = tally(games)
     } else {
       const segments = seedSegments(p.seed)
-      for (const { managerId, from, to } of segments) {
+      for (const [managerId, { record, transitionDate }] of segmentRecords(games, segments)) {
         const stint = stintIndex.get(`${managerId}:${p.teamId}:${p.season}`)
         if (!stint) continue
-        stint.record = tally(games.filter((g) => (from === null || g.date >= from) && (to === null || g.date < to)))
-        stint.transitionDate = from ?? to // the date they took over; the first manager's is the date they left
+        stint.record = record
+        stint.transitionDate = transitionDate
       }
       // Any OTHER manager-job personId in this team-season (one the seed does
       // not name) is left unresolved.
