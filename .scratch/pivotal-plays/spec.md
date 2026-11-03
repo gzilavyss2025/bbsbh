@@ -176,6 +176,23 @@ on the page is for a game you chose to see (ADR-0042 and the stamp ADRs; read be
 4. Game entries, in date order, with a switch to order by drama.
 5. A short season list at the end: the 10 biggest moments across all stamped games.
 
+**Voice for these lines (Gary, 2026-11-03: the first draft read as robotic).** The first wireframe
+printed MLB's raw play text and analyst terms. Rewritten to read like a scorekeeper at the next seat:
+
+| Instead of | Write |
+|---|---|
+| "Brewers' win probability stayed above 50% from here (52% after this play)." | "After that, the Brewers' chances of winning never fell back to even." |
+| "Leverage 2.8; moved win probability 8 points toward the Brewers." | "About 3 times as tense as a normal at-bat, and the out lifted the Brewers' chances by 8 points." |
+| "Top 2: Cooper Pratt singles on a line drive to center fielder Jonny DeLuca. Brice Turang scores." | "Pratt singled to center in the top of the 2nd and scored Turang." |
+| Row labels "Go-ahead", "Won for good", "Tensest spot" | "Took the lead", "Game turned", "Tensest moment" |
+| "Swing: 79 pts" | "Odds moved: 79 points" |
+
+Rules: last names only on a card; "top of the 5th", not "Top 5"; "chances of winning", not "win
+probability"; "times as tense as a normal at-bat", not "leverage"; one fact per sentence; every
+sentence must come from the data (final score, runs, home-run count), never a guess. The leverage
+number stays in the data and shows only as "times as tense". Applies to the dashboard text too:
+the `pivotal` dataset still has the first-draft wording (open item below).
+
 **One game entry, at 390 px** (Inference on wording; the voice rules in `docs/callouts.md` apply):
 
 ```
@@ -278,7 +295,9 @@ already made.
 
 10. **How does the report get its data?** One call per stamped game, fetched a chapter at a time,
     or stored at stamp time. The second needs a ruling under the stamp ADRs.
-11. **Report name.** The repo says "Game Log" for stamped games. Gary's scrapbook says "scorebook".
+11. **Dashboard wording.** The `pivotal` dataset in Gary's dashboard still carries the first-draft
+    (robotic) strings. Rewrite them to the voice above in `scrapbook.build.mjs` and re-upload?
+12. **Report name.** The repo says "Game Log" for stamped games. Gary's scrapbook says "scorebook".
     Neither is a report title yet.
 
 ## Slices (each at most 5 files)
