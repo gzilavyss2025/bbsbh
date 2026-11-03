@@ -207,6 +207,7 @@ test('single-segment named routes resolve to their route name', () => {
     '/about': 'about',
     '/prospects': 'prospects',
     '/rehab': 'rehab',
+    '/tensest': 'tensest',
     '/milestones': 'milestones',
     '/awards': 'awards-history',
     '/postseason-history': 'postseason-history',

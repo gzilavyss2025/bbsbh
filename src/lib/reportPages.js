@@ -65,6 +65,9 @@ export const PAGE_GROUPS = [
       // board read across the league — not next to the club pages it is
       // reached from.
       { label: 'Situational Records', path: '/situational-records' },
+      // The season's tensest at-bats by MLB's pressure score, a club's and the league's.
+      // Beside Situational Records: the same season-to-date board gesture.
+      { label: 'Tensest Moments', path: '/tensest' },
       // Money, read across the league: who is paid the most, what each club
       // spends, where the spend goes by position. Here rather than under
       // "Around the game" because it is a season-to-date board over the whole
