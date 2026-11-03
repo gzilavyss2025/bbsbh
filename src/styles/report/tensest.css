@@ -19,3 +19,18 @@
 .tensest__post {
   color: var(--text-muted);
 }
+
+/* The club picker on this page wears the stamped frame: square, a heavy ink edge and the
+   hard ink shadow, like the cards under it. Scoped here so the same TeamFilterStrip on
+   other pages keeps its own look. The picked club's box is square too. */
+.tensest__picker .vsteam__tray {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  box-shadow: var(--shadow-stamped);
+}
+.tensest__picker .vsteam__team {
+  border-radius: 0;
+}
+.tensest__picker {
+  margin-block-end: var(--space-4);
+}

@@ -109,12 +109,14 @@ export function TensestMomentsPage() {
 
       {hasData && (
         <>
-          <TeamFilterStrip
-            selectedTeamId={teamId}
-            onSelect={setPicked}
-            showMlbPin={false}
-            ariaLabel="Pick a club for its batting and pitching tables"
-          />
+          <div className="tensest__picker">
+            <TeamFilterStrip
+              selectedTeamId={teamId}
+              onSelect={setPicked}
+              showMlbPin={false}
+              ariaLabel="Pick a club for its batting and pitching tables"
+            />
+          </div>
           <Card frame="stamped" body="flush" label={`${name} batting, top 25`} count={countOf(mine?.bat)} className="tensest__section">
             {mine?.bat?.length ? (
               <TensestTable rows={mine.bat} teamId={teamId} label={`${name} batting, tensest at-bats`} />
