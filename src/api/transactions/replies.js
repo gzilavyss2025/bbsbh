@@ -1,3 +1,6 @@
+import { getJson } from '../statsapi.js'
+import { gamePath } from '../../lib/route.js'
+
 // Replies on the transactions list: a roster move that exists BECAUSE of an
 // earlier one shows a faded quote of the move it answers (MoveRow.jsx draws it).
 // Cause and effect only, and a missing reply is always better than a wrong one,
@@ -20,7 +23,9 @@
 //    (a fill may be filed a day either side of its opening). A doubleheader's
 //    or special event's 27th man never balances, so draws nothing here.
 //
-// A fifth, the 27th man replying to his GAME, is a stub (see the foot).
+// 5. A 27th man (a call-up for a doubleheader or a special event, back down by
+//    the next day) replies to his GAME, not a move: gameReply below. Neither
+//    his call-up nor his trip back down moves the count.
 //
 // A roster move and its date carry no score, so none of this is sealed.
 
@@ -38,11 +43,11 @@ const nextDay = (iso) => {
 
 // days: [{ date, stories }] in any order, every club mixed (the wire) or one
 // club (its ledger). season: { start, end } regular-season dates, or null.
-// extraManDays: a Set of `${teamId}|${date}` club-days that ALLOW a 27th man
-// (a doubleheader, a special event); the count steps around them, since a fill
-// there may answer the game rather than a move. The 27th-man detection fills it.
+// extraMen: the confirmed 27th men, [{ team, date, playerId }] from
+// extraManCandidates checked against the schedule; the count leaves out both
+// halves of each one's trip.
 // Returns { [storyId]: [{ id, date }] } — the stories each one replies to.
-export function findReplies(days, { season = null, extraManDays = null } = {}) {
+export function findReplies(days, { season = null, extraMen = [] } = {}) {
   const entries = []
   for (const day of days ?? []) {
     for (const s of day.stories ?? []) {
@@ -79,11 +84,16 @@ export function findReplies(days, { season = null, extraManDays = null } = {}) {
     }
   }
 
-  if (season?.start && season?.end) countReplies(entries, season, extraManDays, add)
+  if (season?.start && season?.end) countReplies(entries, season, extraMen, add)
   return out
 }
 
-function countReplies(entries, season, extraManDays, add) {
+function countReplies(entries, season, extraMen, add) {
+  // A 27th man's call-up and the option that ends his trip are the game's, not
+  // the roster's.
+  const trip = (e, pid, kind) =>
+    (kind === 'cu' || kind === 'se' || kind === 'opt') &&
+    extraMen.some((m) => m.team === e.team && m.playerId === pid && (e.date === m.date || e.date === nextDay(m.date)))
   // club -> date -> { readable, stories: [{ entry, net }] }
   const clubs = new Map()
   for (const e of entries) {
@@ -91,11 +101,12 @@ function countReplies(entries, season, extraManDays, add) {
     if (!clubs.has(e.team)) clubs.set(e.team, new Map())
     const byDate = clubs.get(e.team)
     if (!byDate.has(e.date)) {
-      byDate.set(e.date, { readable: !extraManDays?.has(`${e.team}|${e.date}`), stories: [] })
+      byDate.set(e.date, { readable: true, stories: [] })
     }
     const day = byDate.get(e.date)
     let net = 0
-    for (const [, kind] of e.moves) {
+    for (const [pid, kind] of e.moves) {
+      if (trip(e, pid, kind)) continue
       if (OPENS.has(kind)) net += 1
       else if (FILLS.has(kind)) net -= 1
       else if (!NEUTRAL.has(kind)) day.readable = false
@@ -133,7 +144,63 @@ function countReplies(entries, season, extraManDays, add) {
   }
 }
 
-// Rule 5, a 27th-man call-up replying to his GAME ("Replying to Brewers at
-// Royals · Games 1 and 2 · April 4", linked to that game's lineup page, teams
-// and date only, never a score), is not built: the detection that says which
-// call-ups are a 27th man lands separately, and feeds `extraManDays` above.
+// Rule 5's first half, from the moves alone: a call-up whose player is optioned
+// again the same day or the next. Whether he was the 27th man is the schedule's
+// to say (gameReply); a club short a man for a day reads the same here.
+export function extraManCandidates(days) {
+  const out = []
+  const all = (days ?? []).flatMap((d) => (d.stories ?? []).map((s) => ({ s, date: d.date })))
+  for (const { s, date } of all) {
+    for (const [pid, kind] of s.moves ?? []) {
+      if (kind !== 'cu' && kind !== 'se') continue
+      const back = all.some(
+        (o) =>
+          (o.s.teamId ?? 0) === (s.teamId ?? 0) &&
+          (o.date === date || o.date === nextDay(date)) &&
+          (o.s.moves ?? []).some(([p, k]) => p === pid && k === 'opt'),
+      )
+      if (back) out.push({ id: s.id, team: s.teamId ?? 0, date, playerId: pid })
+    }
+  }
+  return out
+}
+
+const MONTHS = ['Jan.', 'Feb.', 'March', 'April', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.']
+// AP style, as the cutlines write a date: "April 4", "Aug. 23".
+export function apShortDate(iso) {
+  const [, m, d] = iso.split('-').map(Number)
+  return `${MONTHS[m - 1]} ${d}`
+}
+
+// Rule 5's second half: the club's games that day (fetchClubDay) -> the game a
+// 27th man replies to, { label, href }, or null when the day allows no extra
+// man. Two games is a doubleheader. One game is a special event only when it
+// carries a name AND is played away from the home club's own park (Field of
+// Dreams, Williamsport, Mexico City); a home opener or a heritage day carries a
+// name at home. Teams and date only: no score is read or fetched.
+export function gameReply(games, date) {
+  // A postponed or cancelled game still sits on the day's schedule.
+  games = (games ?? []).filter((x) => !['D', 'C'].includes(x.status?.codedGameState))
+  const g = games[0]
+  if (!g) return null
+  const away = g.teams?.away?.team
+  const home = g.teams?.home?.team
+  const doubleheader = games.length > 1
+  const event = !doubleheader && g.description?.trim() && g.venue?.id !== home?.venue?.id ? g.description.trim() : null
+  if (!doubleheader && !event) return null
+  const what = doubleheader ? 'Games 1 and 2' : event
+  return {
+    label: `${away?.teamName} at ${home?.teamName} · ${what} · ${apShortDate(date)}`,
+    href: gamePath(date, away?.abbreviation, home?.abbreviation, 'lineup1'),
+  }
+}
+
+// One club's games on one day, trimmed by `fields` to the teams, the venue and
+// the name — the response carries no score at all.
+export async function fetchClubDay(teamId, date) {
+  const data = await getJson(
+    `/api/v1/schedule?sportId=1&teamId=${teamId}&date=${date}&hydrate=team(venue)` +
+      '&fields=dates,games,gameNumber,description,status,codedGameState,venue,id,teams,away,home,team,teamName,abbreviation',
+  )
+  return data?.dates?.[0]?.games ?? []
+}

@@ -4,7 +4,7 @@
 // from the Brewers' 2026 file (Aug. 3); the rest are built to one rule each.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { findReplies } from '../src/api/transactions/replies.js'
+import { extraManCandidates, findReplies, gameReply } from '../src/api/transactions/replies.js'
 import { groupIntoStories } from '../src/api/teamTransactions.js'
 
 const MIL = 158
@@ -188,14 +188,65 @@ test('a call-up never fills the spot his own option opened', () => {
   assert.deepEqual(findReplies(days, { season: SEASON }), {})
 })
 
-test('a day that allows a 27th man is not counted', () => {
-  // Brewers, April 4 doubleheader: Logan Henderson's recall balanced the day
-  // before's designation by count alone, and answered his game instead.
+test('a call-up back down by the next day is a 27th-man candidate', () => {
+  // Logan Henderson, Brewers: recalled April 4 (a doubleheader at Kansas City),
+  // optioned April 5. A call-up that stays is not one.
   const days = [
+    day('2026-04-06', story('stays', [[2, 'cu']])),
+    day('2026-04-05', story('down', [[701656, 'opt']]), story('il', [[3, 'il']])),
+    day('2026-04-04', story('up', [[701656, 'cu'], [671111, 'lost']])),
+  ]
+  assert.deepEqual(extraManCandidates(days), [
+    { id: 'up', team: MIL, date: '2026-04-04', playerId: 701656 },
+  ])
+})
+
+test('a confirmed 27th man neither fills nor opens a spot', () => {
+  // Without him, his April 5 option would open a spot for the April 6 recall.
+  const days = [
+    day('2026-04-06', story('next', [[2, 'cu']])),
+    day('2026-04-05', story('down', [[701656, 'opt']])),
     day('2026-04-04', story('up', [[701656, 'cu']])),
     day('2026-04-03', story('des', [[1, 'des']])),
   ]
-  assert.deepEqual(quoted(findReplies(days, { season: SEASON }), 'up'), ['des'])
-  const allow = new Set([`${MIL}|2026-04-04`])
-  assert.deepEqual(findReplies(days, { season: SEASON, extraManDays: allow }), {})
+  const extraMen = [{ id: 'up', team: MIL, date: '2026-04-04', playerId: 701656 }]
+  assert.deepEqual(findReplies(days, { season: SEASON, extraMen }), {})
+})
+
+// The schedule, trimmed to the fields gameReply reads (no score is fetched).
+const club = (id, name, abbreviation, venueId) => ({ team: { id, teamName: name, abbreviation, venue: { id: venueId } } })
+const game = (over = {}) => ({
+  gameNumber: 1,
+  venue: { id: 7 },
+  teams: { away: club(158, 'Brewers', 'MIL', 32), home: club(118, 'Royals', 'KC', 7) },
+  ...over,
+})
+
+test('a 27th man replies to his doubleheader', () => {
+  const reply = gameReply([game(), game({ gameNumber: 2 })], '2026-04-04')
+  assert.equal(reply.label, 'Brewers at Royals · Games 1 and 2 · April 4')
+  assert.equal(reply.href, '/04042026/milkc/lineup1')
+})
+
+test('a 27th man replies to a special event at a neutral park', () => {
+  // Little League Classic, Williamsport: the Brewers' home game away from home.
+  const llc = game({
+    description: 'MLB Little League Classic in Williamsport, PA',
+    venue: { id: 5000 },
+    teams: { away: club(114, 'Guardians', 'CLE', 5), home: club(158, 'Brewers', 'MIL', 32) },
+  })
+  const reply = gameReply([llc], '2026-08-23')
+  assert.equal(reply.label, 'Guardians at Brewers · MLB Little League Classic in Williamsport, PA · Aug. 23')
+  assert.equal(reply.href, '/08232026/clemil/lineup1')
+})
+
+test('a single game at home is no 27th-man day, named or not', () => {
+  assert.equal(gameReply([game({ description: 'Home Opener', venue: { id: 7 } })], '2026-04-04'), null)
+  assert.equal(gameReply([], '2026-04-04'), null)
+})
+
+test('a postponed or cancelled game makes no doubleheader', () => {
+  const ppd = game({ gameNumber: 2, status: { codedGameState: 'D' } })
+  assert.equal(gameReply([game(), ppd], '2026-04-04'), null)
+  assert.equal(gameReply([game(), game({ gameNumber: 2, status: { codedGameState: 'C' } })], '2026-04-04'), null)
 })

@@ -168,7 +168,7 @@ function ClubLedger({ team, asOf, first, onBack }) {
         // major move is a full card, the rest one line each.
         <div className="oseason__ledger txpage__ledger">
           <ul className="oseason__list">
-            <MoveItems items={flattenDays(visible)} marks facts isMajor={isMajor} />
+            <MoveItems items={flattenDays(visible)} marks facts isMajor={isMajor} teamId={team.id} />
           </ul>
         </div>
       )}

@@ -301,8 +301,8 @@ export function MoveRow({ story, compact = false, marks = false, line = false, d
 // passed straight through to MoveRow; a dateline is the same either way.
 // Replies are found among the items drawn here, so every quote's original is on
 // the page to scroll to.
-export function MoveItems({ items, compact = false, marks = false, isMajor = null, facts = false }) {
-  const replies = useReplies(items)
+export function MoveItems({ items, compact = false, marks = false, isMajor = null, facts = false, teamId = null }) {
+  const replies = useReplies(items, teamId)
   return items.map((item) =>
     item.kind === 'date' ? (
       <li className="wire__date" key={item.key}>

@@ -500,10 +500,6 @@
   color: var(--text-muted);
 }
 .wire__quote {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
   padding: 3px var(--space-2);
   border: 0;
   border-radius: var(--radius-lg);
@@ -517,6 +513,13 @@
 }
 #root .wire__quote {
   text-transform: none; /* caps-exempt: a quoted cutline reads as the sentence it quotes */
+}
+/* The clamp sits inside the padding, so no sliver of a third line shows. */
+.wire__quotetext {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 .wire__quotedate { font-family: var(--font-mono); }
 /* The original, briefly marked after a quote scrolls to it. */
