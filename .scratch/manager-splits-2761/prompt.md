@@ -57,9 +57,12 @@ Then:
 7. git status. Revert every public/data/manager-history/ and manager-staff/ shard
    whose only change is "generatedAt" (git diff each one). Keep the seed, the
    queue, the shards that really changed, and the changed ledger files.
-8. Run npm run lint and npm test, and read the exit code of each. If one fails,
-   check whether it also fails on origin/main. If it does, say so in the PR body
-   and go on. If it fails only on your branch, stop and write the failure in the
+8. Run npm run lint and the four tests that read this data, and read the exit
+   code of each:
+     node --test test/bucket-shards.test.js test/franchise-summary.test.js test/manager-history-range.test.js test/manager-staff-index.test.js
+   Do not run the full npm test: CI runs it on your PR. If one fails, check
+   whether it also fails on origin/main. If it does, say so in the PR body and
+   go on. If it fails only on your branch, stop and write the failure in the
    PR body.
 9. Open a DRAFT PR titled "Manager splits CHUNK (#2761)". Body: a table of
    season | transitionDate | outgoing W-L | incoming W-L | source URL, then the
