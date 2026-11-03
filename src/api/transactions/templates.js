@@ -493,8 +493,20 @@ function beforeCallSentence(facts, who) {
   return m?.line?.games ? `${who} ${didText(m.line, facts.pitcher)} ${minorsWhere(m)} in ${facts.season} before the call.` : null
 }
 export const CALLS = new Set(['recall', 'option', 'selected'])
+// The extra man: up for the day, back down after it, for a doubleheader or a
+// special event (Little League Classic, Field of Dreams). The feed never says
+// so; `extraMan` is a one-day trip that opened on such a day, `event` the
+// schedule's name for a special event (null for a doubleheader).
+const longDate = (iso) => `${MONTH_NAMES[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
 export function callStory(facts, { kind, moveDate }) {
   const name = facts.lastName ?? 'He'
+  if (facts.extraMan) {
+    const c = (facts.calls ?? []).find((x) => x.up && (near(x.up, moveDate) || (x.down && near(x.down, moveDate))))
+    const { event } = facts.extraMan
+    const at = event ? `at the ${event}` : `in the ${c?.up ? `${longDate(c.up)} ` : ''}doubleheader`
+    if (kind === 'option') return [`${name} goes back down after serving as the 27th man ${at}.`, optionsSentence(facts)].filter(Boolean).join(' ')
+    return `${name} came up as the 27th man for the ${event ?? 'doubleheader'}${c?.down ? `${event ? ',' : ''} and went back down ${apDate(c.down)}` : ''}.`
+  }
   if (kind === 'option') {
     const c = (facts.calls ?? []).find((x) => x.down && near(x.down, moveDate))
     // No day count: a trip can hold a stint on the injured list.

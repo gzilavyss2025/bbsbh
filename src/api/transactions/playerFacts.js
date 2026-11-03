@@ -321,7 +321,7 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
             const stat = range?.stats?.[0]?.splits?.[0]?.stat
             if (stat) facts.trade = { line: shapeLine(stat, facts.pitcher), fromTeamId: deal.fromTeamId, toTeamId: deal.teamId }
           }
-          if (facts && callMove) Object.assign(facts, await callFacts(personId, facts, callMove))
+          if (facts && callMove) Object.assign(facts, await callFacts(personId, facts, callMove, teamId))
           if (facts && arrival) {
             const { rows } = await fetchScopeRows(personId, 'milb', facts.pitcher)
             facts.affiliated = lastAffiliated(rows, facts.arrival?.date)
@@ -333,7 +333,7 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
           const group = facts.pitcher ? 'pitching' : 'hitting'
           const milb = await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null)
           const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors: milb?.stats?.flatMap((x) => x.splits ?? []) })
-          const extra = ['stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'affiliated']
+          const extra = ['stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'affiliated', 'extraMan']
           return { ...withMinors, ...Object.fromEntries(extra.map((k) => [k, facts[k]])) }
         })
         .then(withTradeIds)
@@ -348,15 +348,30 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
 
 // A call's line: up, his minor-league line before it; down, his big-league
 // line over the stint the option ends (from the day he came up).
-async function callFacts(personId, facts, { kind, date }) {
+async function callFacts(personId, facts, { kind, date }, teamId) {
   const group = facts.pitcher ? 'pitching' : 'hitting'
+  // A trip of a day or less, back down by the next day, that opened on the
+  // club's doubleheader or special-event day. A call-up that stays is not the
+  // extra man.
+  const trip = facts.calls.find((c) => (c.up && near(c.up, date)) || (c.down && near(c.down, date)))
+  const short = trip?.up && trip.down && Date.parse(trip.down) - Date.parse(trip.up) <= 86_400_000
+  if (short && teamId) {
+    const day = await getJson(`/api/v1/schedule?sportId=1&teamId=${teamId}&date=${trip.up}&hydrate=team(venue)`).catch(() => null)
+    const games = day?.dates?.[0]?.games ?? []
+    if (games.length > 1) return { extraMan: { event: null } }
+    // A special event is played away from the home club's park, and the game
+    // carries its name ("MLB Little League Classic in Williamsport, PA"). Home
+    // openers, heritage days and makeups carry a name too, at home.
+    const g = games[0]
+    if (g?.description && g.venue?.id !== g.teams?.home?.team?.venue?.id) return { extraMan: { event: g.description.trim() } }
+  }
   const range = (scope, from, to) =>
     getJson(`/api/v1/people/${personId}/stats?stats=byDateRange&group=${group}&${scope}&startDate=${from}&endDate=${to}`)
       .then((d) => (d?.stats ?? []).flatMap((x) => x.splits ?? []))
       .catch(() => [])
   if (kind !== 'option') return { callLine: shapeMinors(await range('leagueListId=milb_all', `${facts.season}-03-01`, shiftDays(date, -1)), facts.pitcher) }
-  const trip = facts.calls.find((c) => c.down && near(c.down, date))
-  const splits = await range('sportId=1', trip?.up ?? `${facts.season}-03-01`, shiftDays(date, -1))
+  const down = facts.calls.find((c) => c.down && near(c.down, date))
+  const splits = await range('sportId=1', down?.up ?? `${facts.season}-03-01`, shiftDays(date, -1))
   return { stintLine: shapeLine(splits.find((s) => !s.team)?.stat ?? splits[0]?.stat, facts.pitcher) }
 }
 
