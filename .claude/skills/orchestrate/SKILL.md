@@ -289,6 +289,25 @@ handed it to you (its step 9). One prompt is a plan too. Work on the plan only.
    may name append-only files (an import list, a lab entry list) that its prompts
    may share in one wave; stack those two (see "Landing") so one branch resolves the conflict.
 
+## A serial chain (every chunk writes the same files)
+
+A backfill where each chunk rewrites one seed, one queue or one generated file
+(2026-11-03, #2761: 27 PRs in about seven hours) runs one child at a time:
+
+- Start the next chunk the moment the last one merges. Subscribe to each child's PR
+  yourself as well; a CI event often arrives before the child's `DONE`.
+- Fill every placeholder in a reused prompt, the PR title too (`CHUNK` became a
+  literal title once). Fix a wrong example in the prompt before the next child,
+  not after the chain.
+- Do not re-run a chunk that left a few items undone. Collect the leftovers, with
+  each one's reason, for one stronger-model pass at the end; the reasons sort them
+  (a missing feature, a source disagreement, a rule only he can set).
+- Put each of his decisions in the issue's Decisions section the turn he makes it,
+  and in the text of your next fallback `send_later`, so a summarized context
+  still has it.
+- Give children the narrow test set (the tests that read the changed data, and
+  lint); CI runs the full suite.
+
 ## When he is away
 
 There is one run mode. The only difference when he said at step 0 that he is away
@@ -354,12 +373,18 @@ He gave standing permission (2026-11-02) to merge a child PR to `main` on your o
 one at a time, once it passes review. Vercel Pro makes a deployment per merge cheap.
 
 1. **When a child PR is ready** (its `DONE` message or a green CI event, and no
-   `wip` or `do-not-merge` label): run `/code-review high` on the PR.
+   `wip` or `do-not-merge` label): run `/code-review high` on the PR. **Data-only
+   PRs** (a seed, a queue, generated shards; no code) skip the review when he says
+   so: check instead that CI is green, the diff holds only the files the prompt
+   allows, and the body says `Part of #n`. A slice in the same run that changes code
+   still gets a read of its diff and tests before the merge.
    - Correctness findings: `send_message` them to the child, and wait for its next
      `DONE`. Do not fix them yourself unless the child has stopped.
    - No correctness findings: merge it now, following the `merge-pr` skill's gates
      and steps (green `lint-and-build`, Vercel preview not failed, no conflict,
-     merge commit). Do not wait for other PRs.
+     merge commit). Do not wait for other PRs. A PR still in draft: mark it ready
+     first. A merge refused with "Base branch was modified" (another session
+     landed): check the two PRs share no file, then retry once.
 2. **Closing keywords.** Before the merge, read the PR body for a closing keyword
    (Fixes, Closes, Resolves) that names an umbrella issue. Remove it or stop. After
    the merge, read the issue state; reopen an issue that closed early and say so.
@@ -369,6 +394,8 @@ one at a time, once it passes review. Vercel Pro makes a deployment per merge ch
    other sessions' drafts included), on a new branch (`claude/stack-<date>-r<n>`).
    `/stack-prs` ends with "do not start other work"; that ends the stack step only.
 4. **After each merge:** archive the child, and start any work that waited on it.
+   If he gave you the issue, tick its box with the PR number and what the PR left
+   undone, in the same turn.
 5. **Skip** a PR another session still pushes to, and a PR that waits on his choice.
    A green child PR whose session is idle and completed but still has `wip`: remove
    `wip` yourself, then review it.
@@ -379,6 +406,9 @@ one at a time, once it passes review. Vercel Pro makes a deployment per merge ch
    which PR you suspect. The forward fix still goes through a PR.
 
 ## First run
+
+Confirmed 2026-11-03: a child's `send_message` reaches the parent, and a
+`DONE` can arrive after the PR event, so act on whichever comes first.
 
 Be small: 2 or 3 clear `ready-for-agent` issues. Before any shape work, test one
 child's `SendUserFile` with a single screenshot. Afterward, tell him what you
@@ -391,3 +421,5 @@ this file as a draft PR.
 - One question at a time. Recommendation first.
 - Cite sources when you research. Say when you infer.
 - A run that finds nothing to do is a valid result. Say so and stop.
+- Your own session branch: when you made no commits on it, reset it to
+  `origin/main` and push, so the stop hook does not ask again after a resume.
