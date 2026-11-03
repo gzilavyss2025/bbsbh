@@ -1,7 +1,7 @@
 # Manager splits: the chunk prompt (#2761)
 
-One prompt for every H chunk. Change only `CHUNK`. Model: Haiku 4.5 (it takes no
-effort setting; do not set one). Run one chunk at a time, and start the next only
+One prompt for every H chunk. Change only `CHUNK`. Model: Haiku 5.5, effort medium.
+Run one chunk at a time, and start the next only
 after the last one's PR is merged: every chunk rewrites the seed, the queue and the
 ledger. M1–M3 need S0 first and Sonnet; do not use this prompt for them.
 
