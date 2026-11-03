@@ -1,11 +1,11 @@
-Title: Anchor callouts: pair a season cohort count with a well-known number
+Title: Anchor callouts: pair a season count with a well-known number
 Label: needs-triage (open decisions below; not ready-for-agent)
 
 ## Idea
 
-A note on a player's card says how many players cleared a milestone this season. It then compares
-that count to a number everyone knows. Example: "One of 11 pitchers with a shutout, fewer than the
-12 people who have walked on the moon."
+A note on a player's card says how many players had met a milestone by that day. It then compares
+that count to a number everyone knows. Example: "One of 11 pitchers with a shutout, fewer than
+the 12 people who have walked on the moon."
 
 ## Why
 
@@ -18,63 +18,71 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
 ## Decisions
 
 - Gary, 2026-11-03: build the structure for anchor callouts, even if it waits as an issue.
-- Gary, 2026-11-03: the anchors are well-known counts a general reader knows, not only baseball ones.
+- Gary, 2026-11-03: anchors are well-known counts a general reader knows, not only baseball ones.
 - Gary, 2026-11-03: a callout is a moment in time. It is true on the day it is minted and stays
-  accurate as of that date. Each note stores its date. The text shows the date only when it
-  helps (not on every note); the rule is below. The cohort file is one dated snapshot per day.
-- Gary, 2026-11-03: a note can outlive its game. It may stay on the player's detail page for the
-  rest of the season, and its wording ages: "In May, ..." by September.
-- Inference (not yet decided by Gary): cohorts are one season and MLB only.
-- Inference: the registry holds only sourced, dated anchors. Excluded ones: EGOT, Challenger Deep,
-  space travelers, living ex-presidents, Everest, Comaneci. Reasons are in `anchors.seed.json`.
-- Inference: use the entering-tonight tense (ADR-0014, ADR-0088). No result-aware wording in v1.
+  accurate as of that date.
+- Gary, 2026-11-03: the text shows a date only when it helps, never on every note.
+- Gary, 2026-11-03: a note can outlive its game, and its wording ages ("In May, ..." by September).
+- Gary, 2026-11-03: the new store gets a deliberate name and structure.
+- Inference: the store is `crossings`. A crossing is the first day a player's season total met a
+  threshold, with how many players had crossed by then. The count on any past day is the number of
+  crossings up to that day, so no daily snapshot is needed.
+- Inference: counting stats, regular season, MLB only, in v1.
+- Inference: entering-tonight tense (ADR-0014, ADR-0088). No result-aware wording in v1.
 
 ## Where it lives
 
 Inference: names are proposals.
-- `scripts/gen-cohorts.mjs` writes `public/data/cohorts/MMDDYYYY.json` each night, one file per day. A probe that already
-  reproduces the 2026 counts: `.scratch/anchor-callouts/cohorts.probe.mjs`.
+- `public/data/crossings/{season}.json`: append-only, one file per season, frozen when the season
+  ends. Written nightly by `scripts/gen-crossings.mjs`. The crossing date comes from each new
+  crosser's game log. Probe: `.scratch/anchor-callouts/crossings.probe.mjs` (66 crossings across
+  6 thresholds in 4.9 s on 2026-11-03; counts match the season totals).
+- `src/lib/crossings/thresholds.js`: the named lines as data, shared by the generator and the app.
 - `src/lib/anchors/anchors.json` (seed: `.scratch/anchor-callouts/anchors.seed.json`) and a pure
   `pick.js`.
-- `public/data/cohorts-minted.json`: append-only, written by the same generator. It records the first
-  day a player clears a milestone. The player detail page reads it (slice 5, wireframe first).
-- A `cohort` note family in `src/api/callout-notes/`, scored with `SCORE_BASE` and `magnitudeOf`.
-  First surface: `src/api/between-innings.js`.
+- `src/api/crossings.js` reader, then a `crossing` note family in `src/api/callout-notes/`, scored
+  with `SCORE_BASE` and `magnitudeOf`. First surface: `src/api/between-innings.js`.
 - Cron wiring needs three edits to `update-nightly-data.yml` and a stamp in
   `check-data-freshness.mjs` (`scripts/CLAUDE.md`).
+- Docs: an ADR, a `CONTEXT.md` term, and rows in `docs/callouts.md`.
 
 ## Spoiler-rule check
 
-The first surface is Between Innings. The cohort counts end the day before the slate. The file has
-no score and no result. Inference: the reader is spoiler-free in `src/api/spoiler-manifest.json`.
-ADRs: 0001, 0014, 0088. A live version on the player page is an open page (ADR-0034).
+A crossing's date is a game date, so the date is the spoiler. On the four scoring surfaces the
+reader returns only crossings dated before the game's date, and a test pins it. The store holds no
+score. The player detail page is open (ADR-0034). ADRs: 0001, 0014, 0034, 0088.
 
 ## Done means
 
-- [ ] The 2026 counts come out of one generator run: 11 shutouts, 9 with 100 RBI, 13 with 200 K,
-      11 with 30 saves, 17 with 20 HR and 20 SB.
+- [ ] A backfill of 2026 gives the probe's dates, and a second run adds nothing.
 - [ ] `pick` returns: 11 -> moon "fewer than"; 9 -> Supreme Court "as many as"; 13 -> Triple Crown
       horses "more than".
 - [ ] A test fails if an anchor has no source or no date, or uses an excluded id.
+- [ ] A test fails if a crossing dated on a game's own date reaches a scoring surface.
 - [ ] A Brewers game card shows the note at 390 px with `?nointro` (route and `gamePk`: choose
       from `docs/test-games.md`).
 - [ ] `npm run lint` and `npm test` pass.
 
 ## Not decided
 
-1. Is the aging rule right? No date on a game's own card, month name when older, year when older
-   than the season.
-2. How long does a minted note stay on the player page, and how many show at once?
-3. Show a plain cohort note when no anchor fits?
-4. One anchor note per card, or more?
-5. Tone: is a joke about another club's fans fine?
-6. Allow anchors that can change (Triple Crown winners, presidents) with a 180-day expiry?
+1. The name: `crossings` and `threshold`?
+2. The aging rule: no date on a game's own card, month name when older, year when older than the
+   season.
+3. How recent must a crossing be to show on a game card? Inference: 7 days.
+4. How long does a crossing stay on the player page, and how many show at once?
+5. Who owns the threshold list? Start with the 13 in the probe.
+6. Show a plain note when no anchor fits?
+7. One anchor note per card, or more?
+8. Tone: is a joke about another club's fans fine?
+9. Allow anchors that can change (Triple Crown winners, presidents) with a 180-day expiry?
+10. Do October crossings count?
 
 ## Out of scope
 
-All-time cohorts and "first ever" claims. Result-aware wording. A new screen.
+Rate stats and "qualified" lists. All-time counts and "first ever" claims. Result-aware wording.
+A new screen.
 
 ## Blocked by / Related
 
-Slice 5 (player page line) needs a wireframe Artifact first. Related: `docs/callouts.md`,
-`docs/peer-sites.md` (the "expected score" gap).
+Slice 5 (player page list) needs a wireframe Artifact first. Related: `docs/callouts.md`,
+`gen-rookies.mjs` (the same "crossed" idea, for a career limit).
