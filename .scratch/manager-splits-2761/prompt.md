@@ -31,13 +31,16 @@ For each pair, in order:
 2. Run, with every manager in order (last name, then that manager's W-L), two,
    three or four of them:
      node scripts/research/find-manager-split.mjs <teamId> <season> <Name1> <W-L> <Name2> <W-L> [<Name3> <W-L> [<Name4> <W-L>]]
-   Example: node scripts/research/find-manager-split.mjs 158 1975 Crandall 67-94 Rodgers 1-0
+   Example: node scripts/research/find-manager-split.mjs 158 1972 Bristol 10-20 McMillan 1-1 Crandall 54-70
    The older two-manager form (outgoing name, outgoing W-L, incoming W-L) works too.
    With three or four managers it prints a `transitions` seed entry.
    A record with a tie (W-L-T, for example 72-43-1): drop the tie and pass
    72-43. The script does not count ties as games, so this is not an adjustment.
-   A manager who appears twice in the source's Manager line (two stints) is
-   status "two-stints": skip to step 4; it waits for S0.
+   A manager with two stints (order A, B, A) is passed as A's combined W-L, B's
+   W-L, then A's name again with no W-L, for example:
+     node scripts/research/find-manager-split.mjs 108 1992 Rodgers 33-40 Wathan 39-50 Rodgers
+   Several pairs of dates can fit. Then the status is "ambiguous" with the
+   candidates: step 4, never pick one.
    If it fails with a network error, run it one more time. If it fails again,
    go to step 4 with status "fetch-failed".
 3. Only when "status" is "ok": append the "Seed entry" line it prints, unchanged,

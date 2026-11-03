@@ -18,6 +18,22 @@ export function seedSegments(entry) {
   ]
 }
 
+// games + seedSegments output -> Map managerId -> { record, transitionDate }. A
+// manager with two segments (a return stint) gets the SUM of them; transitionDate
+// stays the first segment's: the date they took over, or for the season's first
+// manager the date they left.
+export function segmentRecords(games, segments) {
+  const out = new Map()
+  for (const { managerId, from, to } of segments) {
+    const t = tally(games.filter((g) => (from === null || g.date >= from) && (to === null || g.date < to)))
+    const prev = out.get(managerId)
+    out.set(managerId, prev
+      ? { ...prev, record: { w: prev.record.w + t.w, l: prev.record.l + t.l } }
+      : { record: t, transitionDate: from ?? to })
+  }
+  return out
+}
+
 // A /schedule?teamId=…&gameType=R response -> [{ date, won }], Final games with
 // a winner only, in schedule order (a doubleheader's games share a date). A
 // suspended game that was resumed is listed twice under one gamePk (Brewers
@@ -89,12 +105,33 @@ export function findSplits(games, records) {
   return { status: 'ok', dates }
 }
 
+// Order A, B, A: A's combined record `a` and B's record `b` -> the two change
+// dates, where B's games (from the first date up to, not including, the second)
+// are `b` and A's two stretches add up to `a`. Several pairs can fit; then
+// { status: 'ambiguous', candidates } and the caller must not pick one.
+export function findReturn(games, a, b) {
+  const dates = [...new Set(games.map((g) => g.date))].sort()
+  // before[k] = tally of games dated before dates[k]
+  const before = dates.map((d) => tally(games.filter((g) => g.date < d)))
+  const all = tally(games)
+  const candidates = []
+  // A needs a game on each side, so the first date is never a change date.
+  for (let i = 1; i < dates.length; i++) {
+    for (let j = i + 1; j < dates.length; j++) {
+      if (before[j].w - before[i].w !== b.w || before[j].l - before[i].l !== b.l) continue
+      if (all.w - b.w === a.w && all.l - b.l === a.l) candidates.push([dates[i], dates[j]])
+    }
+  }
+  if (candidates.length === 0) return { status: 'no-match', season: all }
+  if (candidates.length > 1) return { status: 'ambiguous', candidates }
+  return { status: 'ok', dates: candidates[0] }
+}
+
 // Queue managers [{ id, name }] and the names a source lists, in order -> the
-// ids in that order, or { status }: 'count-mismatch', 'two-stints' (one manager
-// named twice, which the seed cannot hold), 'name-not-matched' (a name picks
-// out zero or several).
+// ids in that order (an id repeats for a return stint), or { status }:
+// 'count-mismatch' (the names do not cover every queue manager), 'name-not-matched'
+// (a name picks out zero or several).
 export function pickOrder(managers, names) {
-  if (managers.length !== names.length) return { status: 'count-mismatch' }
   const plain = (x) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
   const ids = []
   for (const n of names) {
@@ -102,7 +139,7 @@ export function pickOrder(managers, names) {
     if (hits.length !== 1) return { status: 'name-not-matched' }
     ids.push(hits[0].id)
   }
-  return new Set(ids).size < ids.length ? { status: 'two-stints' } : { ids }
+  return new Set(ids).size === managers.length ? { ids } : { status: 'count-mismatch' }
 }
 
 // Two queue managers [{ id, name }] and the outgoing manager's name (or a part
