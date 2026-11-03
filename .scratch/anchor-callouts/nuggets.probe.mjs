@@ -1,10 +1,11 @@
-// Probe for the "crossings" store in .scratch/anchor-callouts/spec.md.
+// Probe for the "nuggets" store in .scratch/anchor-callouts/spec.md.
 // Question: can game logs give the exact day each player first met a threshold, so that
-// "how many had crossed by date D" is just a count of crossings up to D?
+// "how many had crossed by date D" is just a count of nuggets up to D? (A nugget records the
+// day a player crossed a threshold.)
 //
-//   node .scratch/anchor-callouts/crossings.probe.mjs 2026
+//   node .scratch/anchor-callouts/nuggets.probe.mjs 2026
 //
-// Prints, per threshold, the crossings in date order and whether the final count matches the
+// Prints, per threshold, the crossers in date order and whether the final count matches the
 // season-totals count (cohorts.probe.mjs). Source: statsapi.mlb.com, checked 2026-11-03.
 import { getJson } from '../../scripts/lib/statsapi.mjs'
 

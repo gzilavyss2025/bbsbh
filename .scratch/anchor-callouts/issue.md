@@ -24,32 +24,34 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
 - Gary, 2026-11-03: the text shows a date only when it helps, never on every note.
 - Gary, 2026-11-03: a note can outlive its game, and its wording ages ("In May, ..." by September).
 - Gary, 2026-11-03: the new store gets a deliberate name and structure.
-- Inference: the store is `crossings`. A crossing is the first day a player's season total met a
-  threshold, with how many players had crossed by then. The count on any past day is the number of
-  crossings up to that day, so no daily snapshot is needed.
+- Gary, 2026-11-03: suggested "nuggets" or "notes" as the store name.
+- Inference: the store is `nuggets`. A nugget is the first day a player's season total met a
+  threshold, with how many players had by then and the anchor, frozen. The count on any past day is
+  the number of nuggets up to that day, so no daily snapshot is needed. `notes` collides with 219
+  files.
 - Inference: counting stats, regular season, MLB only, in v1.
 - Inference: entering-tonight tense (ADR-0014, ADR-0088). No result-aware wording in v1.
 
 ## Where it lives
 
 Inference: names are proposals.
-- `public/data/crossings/{season}.json`: append-only, one file per season, frozen when the season
-  ends. Written nightly by `scripts/gen-crossings.mjs`. The crossing date comes from each new
-  crosser's game log. Probe: `.scratch/anchor-callouts/crossings.probe.mjs` (66 crossings across
+- `public/data/nuggets/{season}.json`: append-only, one file per season, frozen when the season
+  ends. Written nightly by `scripts/gen-nuggets.mjs`. The crossing date comes from each new
+  crosser's game log. Probe: `.scratch/anchor-callouts/nuggets.probe.mjs` (66 nuggets across
   6 thresholds in 4.9 s on 2026-11-03; counts match the season totals).
-- `src/lib/crossings/thresholds.js`: the named lines as data, shared by the generator and the app.
+- `src/lib/nuggets/thresholds.js`: the named lines as data, shared by the generator and the app.
 - `src/lib/anchors/anchors.json` (seed: `.scratch/anchor-callouts/anchors.seed.json`) and a pure
   `pick.js`.
-- `src/api/crossings.js` reader, then a `crossing` note family in `src/api/callout-notes/`, scored
+- `src/api/nuggets.js` reader, then a `nugget` note family in `src/api/callout-notes/`, scored
   with `SCORE_BASE` and `magnitudeOf`. First surface: `src/api/between-innings.js`.
 - Cron wiring needs three edits to `update-nightly-data.yml` and a stamp in
   `check-data-freshness.mjs` (`scripts/CLAUDE.md`).
-- Docs: an ADR, a `CONTEXT.md` term, and rows in `docs/callouts.md`.
+- Docs: an ADR, a `CONTEXT.md` term (Nugget), and rows in `docs/callouts.md`.
 
 ## Spoiler-rule check
 
-A crossing's date is a game date, so the date is the spoiler. On the four scoring surfaces the
-reader returns only crossings dated before the game's date, and a test pins it. The store holds no
+A nugget's date is a game date, so the date is the spoiler. On the four scoring surfaces the
+reader returns only nuggets dated before the game's date, and a test pins it. The store holds no
 score. The player detail page is open (ADR-0034). ADRs: 0001, 0014, 0034, 0088.
 
 ## Done means
@@ -58,24 +60,24 @@ score. The player detail page is open (ADR-0034). ADRs: 0001, 0014, 0034, 0088.
 - [ ] `pick` returns: 11 -> moon "fewer than"; 9 -> Supreme Court "as many as"; 13 -> Triple Crown
       horses "more than".
 - [ ] A test fails if an anchor has no source or no date, or uses an excluded id.
-- [ ] A test fails if a crossing dated on a game's own date reaches a scoring surface.
+- [ ] A test fails if a nugget dated on a game's own date reaches a scoring surface.
 - [ ] A Brewers game card shows the note at 390 px with `?nointro` (route and `gamePk`: choose
       from `docs/test-games.md`).
 - [ ] `npm run lint` and `npm test` pass.
 
 ## Not decided
 
-1. The name: `crossings` and `threshold`?
+1. The name: `nuggets` (recommended) or `notes`?
 2. The aging rule: no date on a game's own card, month name when older, year when older than the
    season.
-3. How recent must a crossing be to show on a game card? Inference: 7 days.
-4. How long does a crossing stay on the player page, and how many show at once?
+3. How recent must a nugget be to show on a game card? Inference: 7 days.
+4. How long does a nugget stay on the player page, and how many show at once?
 5. Who owns the threshold list? Start with the 13 in the probe.
 6. Show a plain note when no anchor fits?
 7. One anchor note per card, or more?
 8. Tone: is a joke about another club's fans fine?
 9. Allow anchors that can change (Triple Crown winners, presidents) with a 180-day expiry?
-10. Do October crossings count?
+10. Do October nuggets count?
 
 ## Out of scope
 

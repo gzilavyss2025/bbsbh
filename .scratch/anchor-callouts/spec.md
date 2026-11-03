@@ -28,17 +28,18 @@ so the note never shows a number without a comparison.
 - **Gary, 2026-11-03: a note can outlive its game, and its wording ages.** A moon-walker stat that
   worked for Bauers on May 1 may stay on his player detail page for the rest of the season. By
   September it reads "In May, ...", not as if it were new.
-- **Gary, 2026-11-03: the new store gets a deliberate name and structure.** See "The store".
+- **Gary, 2026-11-03: the new store gets a deliberate name and structure.** Gary suggested
+  "nuggets" or "notes". Working name: `nuggets`, pending his confirmation (see "The store").
 
-## The store: crossings
+## The store: nuggets
 
 ### Why a store, and what it holds
 
 Two facts make this small. A counting stat only goes up, so once a player meets a threshold he
-has met it for good. So the one fact worth storing is the **day he first met it**. The count on
-any past day is then just the number of those days up to that day. No daily snapshot is needed.
+has met it for good. So the one fact worth storing is the **day he first met it**, which is a nugget. The count on
+any past day is then just the number of nuggets up to that day. No daily snapshot is needed.
 
-The 2026 shutout cohort shows why this matters (from `crossings.probe.mjs`):
+The 2026 shutout cohort shows why this matters (from `nuggets.probe.mjs`):
 
 | Date | Pitcher | Count that day |
 |---|---|---|
@@ -55,38 +56,44 @@ A snapshot of today's total would have lost the first one.
 
 | Word | Meaning | Where it shows |
 |---|---|---|
-| **Threshold** | A named line on counting stats: "100 RBI", "20 HR and 20 SB". Data, not code: `{ id, group, label, all: [{ stat, min }] }`. | `src/lib/crossings/thresholds.js` (shared by the generator and the app) |
-| **Crossing** | The first day a player's season total met a threshold, with the count that day. | one entry in the store |
-| **Count** | How many players had crossed that threshold by the end of that day, this one included. Two players crossing the same day share one count. | field on the entry |
+| **Threshold** | A named line on counting stats: "100 RBI", "20 HR and 20 SB". Data, not code: `{ id, group, label, all: [{ stat, min }] }`. | `src/lib/nuggets/thresholds.js` (shared by the generator and the app) |
+| **Nugget** | One minted, dated fact: a player met a threshold on a date. It freezes the count that day and the anchor chosen. The store holds nuggets. | one entry in the store |
+| **Count** | How many players had met that threshold by the end of that day, this one included. Two players on the same day share one count. | field on the nugget |
 | **Anchor** | A well-known number to compare the count with. | registry |
-| **Note** | The sentence a reader sees, built from a crossing and an anchor. | callout family `crossing` |
+| **Note** | The sentence a reader sees, built from a nugget. | callout family `nugget` |
 
-"Crossing" never renders as a label. It is an internal name for prompts and code.
+"Crossing" is the verb: a nugget records the day a player crossed a threshold. "Nugget" never
+renders as a label. It is an internal name for prompts and code.
 
 ### Name, compared
 
+Gary suggested "nuggets" or "notes" (2026-11-03). Collision check, same day:
+
 | Candidate | Verdict |
 |---|---|
-| **`crossings`** (chosen) | The repo already says it. `gen-rookies.mjs` stores the date a career "crossed" the rookie limit as a frozen fact, and shares "crossing-detection helpers". Not used as a code name anywhere else. |
-| `feats` | Taken. A "feat" is a no-hitter or a cycle, and a feat label is a result on a scoring surface. Wrong word, and a spoiler trap. |
+| **`nuggets`** (recommended) | Free as a module or data name. Only `FirstScorebookPage.jsx` and `src/styles/42-first-scorebook.css` use it, for small fact cards (`scorebookstory__nugget`, `starterNuggets`). That is the same meaning, and the class names are scoped. Fits the thing stored: a small fact that outlives its day. |
+| `notes` | Rejected. 219 files use the word: `callout-notes/`, `gameNotes.js`, `game-notes/`, "Margin Notes". A store with this name would blur with the Game Notes PDFs. The sentence a reader sees stays a "note". |
+| `crossings` | My first pick. Accurate, and repo-native (`gen-rookies.mjs` stores the date a career "crossed" a limit). But it names the mechanism, not the thing. Kept as the verb. |
+| `feats` | Taken. A "feat" is a no-hitter or a cycle, and a feat label is a result on a scoring surface. A spoiler trap. |
 | `milestones` | Taken. `milestones.json`, `MILESTONE_DEFS`, `logbookMilestones.js` mean career totals like 500 HR. |
 | `ledger` | Taken. `useCalloutLedger` counts what a game card has shown. 295 files use the word. |
 | `snapshots` | Taken. `team_snapshots` and `player_snapshots` are dated daily rows in SQLite. |
-| `clubs` | "Club" already means a team all over the repo. Baseball people say "the 100-RBI club", but the code cannot. |
-| `cohorts` | Fine in prose and research docs, but it names a group, not the event. Kept as a prose word only. |
-| `marks`, `bars` | Too vague. "Bar" appears in 499 files (CSS bars). |
+| `clubs` | "Club" already means a team all over the repo. |
+| `cohorts`, `marks`, `bars` | Cohort is fine in prose only. Marks and bars are vague ("bar" is in 499 files). |
 
 Add the term to `CONTEXT.md`, "Names" (slice 4):
-**Crossing**: the first day a player's season total met a named threshold, with how many players
-had crossed by then. _Avoid_: feat (a no-hitter or cycle), milestone (a career total).
+**Nugget**: a minted, dated fact: a player met a named season threshold on a date, with how many
+players had by then and the well-known number it is compared with. Internal name. _Avoid_: feat (a
+no-hitter or cycle), milestone (a career total), note (the sentence a reader sees is the note; the
+nugget is the record behind it).
 
 ### Shape
 
-One file per season: `public/data/crossings/{season}.json`.
+One file per season: `public/data/nuggets/{season}.json`.
 
 ```json
 { "season": "2026", "generatedAt": "...", "through": "2026-09-27",
-  "crossings": {
+  "nuggets": {
     "rbi100": [
       { "player": 668930, "date": "2026-09-27", "count": 9, "anchor": "scotus", "relation": "equal" }
     ]
@@ -100,10 +107,10 @@ One file per season: `public/data/crossings/{season}.json`.
 - A finished season's file is never written again (the ADR-0086 rule for season stores). Last
   year's notes then read "In 2026, ...".
 
-Size: 146 crossings for 13 thresholds in 2026, about 15 KB. A 100-threshold ladder would stay
+Size: 146 nuggets for 13 thresholds in 2026, about 15 KB. A 100-threshold ladder would stay
 near 150 KB. Inference: the measure is `(sum of counts) x about 100 bytes`.
 
-### Generator (`scripts/gen-crossings.mjs`, nightly)
+### Generator (`scripts/gen-nuggets.mjs`, nightly)
 
 1. Two season-totals calls (hitting, pitching), the same ones `cohorts.probe.mjs` makes.
 2. Keep players who meet a threshold and have no entry yet. These are the new crossers.
@@ -113,7 +120,7 @@ near 150 KB. Inference: the measure is `(sum of counts) x about 100 bytes`.
 5. Pick the anchor (`pick.js`) and append. Never rewrite or delete an old entry.
 
 Idempotent: a second run adds nothing. Backfill is the same code on an empty file. The probe
-dated 66 crossings across 6 thresholds in 4.9 s, and every count matched the season totals.
+dated 66 nuggets across 6 thresholds in 4.9 s, and every count matched the season totals.
 A player traded in-season is summed across clubs in step 1. Inference: the game log lists his
 games for every club (not yet checked on a traded player).
 
@@ -122,7 +129,7 @@ games for every club (not yet checked on a traded player).
 | Option | Why not |
 |---|---|
 | Daily files `cohorts/MMDDYYYY.json` (my first draft) | Repeats unchanged data every day, and cannot answer "when did he cross?" without reading every file. |
-| SQLite group, `bySeason` (ADR-0021, ADR-0086) | That layer exists to join tables. This store has no join. Revisit if a crossing must join `player_snapshots`. |
+| SQLite group, `bySeason` (ADR-0021, ADR-0086) | That layer exists to join tables. This store has no join. Revisit if a nugget must join `player_snapshots`. |
 | One file per player | Hundreds of files, and a game card needs the whole threshold. |
 | Folding into `callouts/{date}/` | About 1 MB per date already (`docs/scripts/generators.md`). |
 
@@ -133,7 +140,7 @@ games for every club (not yet checked on a traded player).
 - **Regular season only.** Inference. The callout bundle also counts October; decide later.
 - **MLB only.** The bundle for a MiLB game simply lacks the key and no note fires.
 - **A scoring correction after the fact** can leave a stored `count` off by one. Accepted: the
-  note was true to the data that day. A check may list a crossing whose player no longer meets
+  note was true to the data that day. A check may list a nugget whose player no longer meets
   the threshold. Report, never delete.
 
 ## Parts
@@ -142,11 +149,11 @@ games for every club (not yet checked on a traded player).
 |---|---|---|
 | Registry | Anchors: count, noun phrase, tier, sources, caveat. Seed: `anchors.seed.json` here. | `src/lib/anchors/anchors.json` |
 | Picker | Pure: count + unit -> best anchor and relation. | `src/lib/anchors/pick.js` |
-| Thresholds | The named lines. | `src/lib/crossings/thresholds.js` |
-| Store | See above. | `public/data/crossings/{season}.json` |
-| Generator | Nightly. | `scripts/gen-crossings.mjs` |
-| Reader | Loads a season file once. Spoiler-free. | `src/api/crossings.js` |
-| Note family | Builds, ages and scores the note. | `src/api/callout-notes/crossing.js` |
+| Thresholds | The named lines. | `src/lib/nuggets/thresholds.js` |
+| Store | See above. | `public/data/nuggets/{season}.json` |
+| Generator | Nightly. | `scripts/gen-nuggets.mjs` |
+| Reader | Loads a season file once. Spoiler-free. | `src/api/nuggets.js` |
+| Note family | Builds, ages and scores the note. | `src/api/callout-notes/nugget.js` |
 | Surface | First home: Between Innings (Gameday checkpoint Notes). | `src/api/between-innings.js` |
 
 Not the same as `useCalloutLedger`, which only remembers what a game card has shown.
@@ -177,8 +184,8 @@ Fixtures (2026 counts): 11 -> moon-walked "fewer than"; 9 -> scotus "as many as"
   - equal: "One of {count} {group} with {label}, as many as the {n} {phrase}."
   - more: "One of {count} {group} with {label}, more than the {n} {phrase}."
 - **Wording ages with the note (Inference, to confirm).** The anchor half never changes, so only
-  the first half is dated. A helper picks the form from the crossing's age on the surface:
-  - crossed the day before the game on screen: present, no date. "One of 11 pitchers with ..."
+  the first half is dated. A helper picks the form from the nugget's age on the surface:
+  - met the day before the game on screen: present, no date. "One of 11 pitchers with ..."
   - earlier, same season: "In May, one of 9 hitters with 100 RBI, ..." (month name)
   - an earlier season: "In 2026, one of 9 hitters ..."
   A game card shows no dates. A list of old notes dates each by month, which reads as a timeline,
@@ -198,24 +205,24 @@ Fixtures (2026 counts): 11 -> moon-walked "fewer than"; 9 -> scotus "as many as"
 
 ## Score
 
-New family `crossing` in `SCORE_BASE` (`src/api/callout-notes/shared.js`).
+New family `nugget` in `SCORE_BASE` (`src/api/callout-notes/shared.js`).
 Inference: base 38 (just under `vsTeam` at 40), bonus `magnitudeOf(20 - min(count, 20), 19)`,
 so a count of one earns the full 20. Tune with `docs/callouts.md`'s table, and keep the table in
 the same commit.
 
 ## Spoiler-rule check
 
-A crossing's date is a game date, so the date is the spoiler. A crossing dated D tells a reader
+A nugget's date is a game date, so the date is the spoiler. A nugget dated D tells a reader
 that the player did something on D. The rule is structural:
 
-- **On the four scoring surfaces, only crossings dated before the game's date may reach the
+- **On the four scoring surfaces, only nuggets dated before the game's date may reach the
   DOM** (entering tense, ADR-0014, ADR-0088). The filter belongs in the reader, not in the
-  caller, and a test pins it: a crossing dated on the game's own date must not come back.
+  caller, and a test pins it: a nugget dated on the game's own date must not come back.
 - The store holds no score and no result.
-- The player detail page is an open page (ADR-0034) and may show every crossing, newest first.
+- The player detail page is an open page (ADR-0034) and may show every nugget, newest first.
 - Inference: the reader joins the spoiler-free list in `src/api/spoiler-manifest.json`. Check
   against `src/api/CLAUDE.md` before slice 3.
-- A result-aware version (tonight's line makes the crossing) belongs only in the box score's
+- A result-aware version (tonight's line meets the threshold) belongs only in the box score's
   Insights roll-up and is out of scope.
 
 ## Slices (each at most 5 files)
@@ -224,29 +231,30 @@ that the player did something on D. The rule is structural:
    `test/anchor-pick.test.js`, `test/anchors-registry.test.js` (shape, one source and one date
    per anchor, no excluded id).
    Done when: `npm test` passes and the fixtures above hold.
-2. **Thresholds, generator, store.** `src/lib/crossings/thresholds.js`, `scripts/gen-crossings.mjs`,
+2. **Thresholds, generator, store.** `src/lib/nuggets/thresholds.js`, `scripts/gen-nuggets.mjs`,
    `.github/workflows/update-nightly-data.yml` (the three edits in `scripts/CLAUDE.md`),
-   `scripts/check-data-freshness.mjs` (stamp), `test/crossings-pure.test.js`.
+   `scripts/check-data-freshness.mjs` (stamp), `test/nuggets-pure.test.js`.
    Done when: a backfill gives the 2026 dates the probe printed, and a second run adds nothing.
-3. **Reader, note family, first surface.** `src/api/crossings.js`,
-   `src/api/callout-notes/crossing.js`, `shared.js` (SCORE_BASE), `src/api/between-innings.js`,
-   `test/crossing-notes.test.js` (aging, no-date-on-own-day, the date filter).
+3. **Reader, note family, first surface.** `src/api/nuggets.js`,
+   `src/api/callout-notes/nugget.js`, `shared.js` (SCORE_BASE), `src/api/between-innings.js`,
+   `test/nugget-notes.test.js` (aging, no-date-on-own-day, the date filter).
    Done when: a Brewers game card shows the note at 390 px with `?nointro`. The route and
    `gamePk` are not chosen yet; pick one from `docs/test-games.md`.
-4. **Docs.** ADR for the entering-tense crossing rule (next free number; the tail is 0126),
+4. **Docs.** ADR for the entering-tense nugget rule (next free number; the tail is 0126),
    `CONTEXT.md` (term), `docs/api/static-data.md`, `docs/scripts/generators.md`,
    `docs/callouts.md` (catalog row and score row).
-5. **Later, needs a wireframe Artifact (390 px and desktop).** A list of crossings on the
+5. **Later, needs a wireframe Artifact (390 px and desktop).** A list of nuggets on the
    player detail page, newest first, with the aged wording. Reads the store.
 
 ## Not decided (needs Gary)
 
-1. **The name.** `crossings` and `threshold` (see the comparison). Or something else?
+1. **The name.** `nuggets` (recommended) or `notes`? See the comparison. `notes` collides with
+   219 files.
 2. **Is the aging rule right?** No date on a game's own card, month name when older, year when
    older than the season.
-3. **How recent must a crossing be to show on a game card?** Inference: crossed in the last 7
+3. **How recent must a nugget be to show on a game card?** Inference: crossed in the last 7
    days. The player page shows all season.
-4. **How long does a crossing stay on the player page?** The rest of the season, then the career
+4. **How long does a nugget stay on the player page?** The rest of the season, then the career
    view, or for good? How many show at once?
 5. **Who owns the threshold list?** It is a curated ladder, not every number. Start with the 13
    in the probe. A new line is a code review, not a data change.
@@ -255,7 +263,7 @@ that the player did something on D. The rule is structural:
 8. **Tone.** Moon, Supreme Court and Great Lakes are fine. Is a joke about the Dolphins fine for
    another club's fans?
 9. **Volatile anchors.** Allow with the 180-day expiry, or never?
-10. **Postseason.** Do October crossings count? The callout bundle counts them.
+10. **Postseason.** Do October nuggets count? The callout bundle counts them.
 
 ## Out of scope
 
@@ -265,7 +273,7 @@ Stathead). Result-aware wording. A new screen. Any anchor that is not in the reg
 ## Probes in this folder
 
 - `cohorts.probe.mjs`: the final season-total count for each threshold. A quick check.
-- `crossings.probe.mjs`: the crossing date for each player and each threshold, from game logs.
+- `nuggets.probe.mjs`: the crossing date for each player and each threshold, from game logs.
   This is the generator's core logic.
 
 Both use `getJson` and write nothing. Source: statsapi.mlb.com, checked 2026-11-03.
