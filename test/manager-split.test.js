@@ -61,3 +61,15 @@ test('pickManagers orders the queue ids by the outgoing name', () => {
   assert.equal(pickManagers(managers, 'nobody'), null)
   assert.equal(pickManagers([...managers, { id: 3, name: 'Del Smith' }], 'del'), null)
 })
+
+// Brewers 2002: gamePk 11244 is listed first as Postponed (abstractGameState
+// 'Final', no isWinner) and then as the game played. The played game counts.
+test('a postponed listing does not hide the game played under its gamePk', () => {
+  const schedule = { dates: [
+    { games: [{ gamePk: 11244, officialDate: '2002-09-02', status: { abstractGameState: 'Final', detailedState: 'Postponed' },
+      teams: { home: { team: { id: 158 } }, away: { team: { id: 112 } } } }] },
+    { games: [{ gamePk: 11244, officialDate: '2002-09-02', status: { abstractGameState: 'Final' },
+      teams: { home: { team: { id: 158 }, isWinner: false }, away: { team: { id: 112 }, isWinner: true } } }] },
+  ] }
+  assert.deepEqual(teamSeasonGames(schedule, 158), [{ date: '2002-09-02', won: false }])
+})

@@ -15,12 +15,15 @@ export function teamSeasonGames(schedule, teamId) {
   const out = []
   for (const g of (schedule.dates ?? []).flatMap((d) => d.games ?? [])) {
     if (g.status?.abstractGameState !== 'Final') continue
+    const mySide = g.teams?.home?.team?.id === teamId ? g.teams?.home : g.teams?.away
+    // A Postponed listing is also 'Final', with no winner, under the same gamePk
+    // as the game played later (Brewers 2002, gamePk 11244): drop it before the
+    // gamePk is marked seen, or the played game is the one dropped.
+    if (typeof mySide?.isWinner !== 'boolean') continue
     if (g.gamePk != null) {
       if (seen.has(g.gamePk)) continue
       seen.add(g.gamePk)
     }
-    const mySide = g.teams?.home?.team?.id === teamId ? g.teams?.home : g.teams?.away
-    if (typeof mySide?.isWinner !== 'boolean') continue
     out.push({ date: g.officialDate ?? (g.gameDate ?? '').slice(0, 10), won: mySide.isWinner })
   }
   return out
