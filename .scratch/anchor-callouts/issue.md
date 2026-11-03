@@ -19,6 +19,8 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
 
 - Gary, 2026-11-03: build the structure for anchor callouts, even if it waits as an issue.
 - Gary, 2026-11-03: the anchors are well-known counts a general reader knows, not only baseball ones.
+- Gary, 2026-11-03: a callout is a moment in time. It is true on the day it is minted and stays
+  accurate as of that date. Each note says when. The cohort file is one dated snapshot per day.
 - Inference (not yet decided by Gary): cohorts are one season and MLB only.
 - Inference: the registry holds only sourced, dated anchors. Excluded ones: EGOT, Challenger Deep,
   space travelers, living ex-presidents, Everest, Comaneci. Reasons are in `anchors.seed.json`.
@@ -27,7 +29,7 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
 ## Where it lives
 
 Inference: names are proposals.
-- `scripts/gen-cohorts.mjs` writes `public/data/cohorts.json` each night. A probe that already
+- `scripts/gen-cohorts.mjs` writes `public/data/cohorts/MMDDYYYY.json` each night, one file per day. A probe that already
   reproduces the 2026 counts: `.scratch/anchor-callouts/cohorts.probe.mjs`.
 - `src/lib/anchors/anchors.json` (seed: `.scratch/anchor-callouts/anchors.seed.json`) and a pure
   `pick.js`.
@@ -55,9 +57,7 @@ ADRs: 0001, 0014, 0088. A live version on the player page is an open page (ADR-0
 
 ## Not decided
 
-1. When does a count mean something? "One of 9 with 100 RBI" is true in August and wrong by
-   September. Show only after the season ends? Show with "so far"? Show only after the player
-   passes the milestone?
+1. Where does the date show: in the note text ("As of Aug 14, ...") or as a stamp on the card?
 2. Show a plain cohort note when no anchor fits?
 3. One anchor note per card, or more?
 4. Tone: is a joke about another club's fans fine?

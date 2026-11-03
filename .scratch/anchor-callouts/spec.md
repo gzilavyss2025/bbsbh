@@ -19,13 +19,24 @@ walked on the moon, only 11 have scored an earned run off Rivera in the postseas
 It fits the house voice (`docs/callouts.md`, "Voice"): the anchor is the number "it should be",
 so the note never shows a number without a comparison.
 
+## Decided
+
+- **Gary, 2026-11-03: a callout is a moment in time.** It is true on the day it is minted. Read
+  later, it stays accurate "as of" that date. Baseball changes daily, so each note must say
+  when it was true. Consequences:
+  - The cohort file is a dated snapshot per day, like `public/data/callouts/MMDDYYYY`. Nothing
+    overwrites an old day. A game opened in a week reads the file for its own date.
+  - A note carries its `asOf` date. The reader sees the date, in the text or on the card.
+  - Notes may show all year. The "show only when the season is final" idea is dropped.
+  - A count that has since grown is not a bug. It was true that day.
+
 ## Parts
 
 | Part | What it is | Where (Inference: names are proposals) |
 |---|---|---|
 | Registry | Anchors: count, noun phrase, tier, sources, caveat. Seed: `anchors.seed.json` here. | `src/lib/anchors/anchors.json` |
-| Cohort file | Nightly: for each named milestone, the count and the member ids. MLB only. | `scripts/gen-cohorts.mjs` writes `public/data/cohorts.json` |
-| Reader | Loads `cohorts.json`. Spoiler-free. | `src/api/cohorts.js` |
+| Cohort file | Nightly: for each named milestone, the count and the member ids. MLB only. One file per date, never overwritten. | `scripts/gen-cohorts.mjs` writes `public/data/cohorts/MMDDYYYY.json` |
+| Reader | Loads the cohort file for a game's date. Spoiler-free. | `src/api/cohorts.js` |
 | Picker | Pure function: cohort count + unit -> best anchor and relation. | `src/lib/anchors/pick.js` |
 | Note family | Builds the note, scores it, joins the ranked lists. | `src/api/callout-notes/cohort.js` |
 | Surface | First home: Between Innings (Gameday checkpoint Notes). | `src/api/between-innings.js` |
@@ -45,7 +56,10 @@ reproduced the 2026 counts below on 2026-11-03.
 - A player traded in-season has one split per club. Sum counting stats so one person counts once.
 - A milestone ladder is a curated list of named milestones, not every threshold. Start with the 13
   rungs in the probe.
-- The cut is the day before the slate (`asOf`), as in ADR-0088.
+- The cut is the day before the slate (`asOf`), as in ADR-0088. One file per date; the file
+  name is the date it was minted (Inference: same naming as `public/data/callouts/`).
+  Size check needed: about 13 rungs now, so a season of daily files stays small, but count it
+  before the ladder grows.
 
 Counts the probe returned for 2026 (regular season, all of MLB):
 
@@ -86,10 +100,10 @@ Fixtures to test (2026 counts): 11 -> moon-walked "fewer than"; 9 -> scotus "as 
 
 - Do not name the subject. The card already shows the headshot and name.
 - Whole numbers. The season is the default and goes unsaid.
-- Three templates:
-  - fewer: "One of {count} {group} with {milestone}, fewer than the {n} {phrase}."
-  - equal: "One of {count} {group} with {milestone}, as many as the {n} {phrase}."
-  - more: "One of {count} {group} with {milestone}, more than the {n} {phrase}."
+- Three templates. The date opens the note (Inference on the exact form; see Not decided):
+  - fewer: "As of {Mon D}, one of {count} {group} with {milestone}, fewer than the {n} {phrase}."
+  - equal: "As of {Mon D}, one of {count} {group} with {milestone}, as many as the {n} {phrase}."
+  - more: "As of {Mon D}, one of {count} {group} with {milestone}, more than the {n} {phrase}."
 - Write in ASD-STE100. Say "postseason", never the other word (`check-word-choice`).
 - Never write "first", "fastest" or "fewest" in an anchor note. The cohort is one season. An
   all-time claim needs an all-time source (not in scope).
@@ -142,10 +156,9 @@ same cohort live: those pages are open (ADR-0034).
 
 ## Not decided (needs Gary)
 
-1. **When does a cohort count mean something?** "One of 9 with 100 RBI" is true in August and wrong
-   by September. Options: show only after the season ends and in the postseason; show all year
-   with "so far"; show only when the player is already past the milestone. Inference: the
-   first option is safest.
+1. **Where does the date show?** In the note text ("As of Aug 14, ..."), or as a small stamp on
+   the card? Text is safe in every surface that shows the note. A stamp is quieter but needs
+   each surface to draw it. Inference: text.
 2. **A plain cohort note with no anchor?** "One of 11 pitchers with a shutout" stands alone.
 3. **How many anchor notes per card?** Inference: one, so the joke does not repeat.
 4. **Tone.** Moon, Supreme Court and Great Lakes are fine. Is a joke about the Dolphins fine
