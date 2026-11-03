@@ -124,5 +124,13 @@
   {"teamId":111,"season":1976,"transitionDate":"1976-07-19","outgoingManagerId":116575,"incomingManagerId":124768},
   {"teamId":111,"season":1980,"transitionDate":"1980-10-01","outgoingManagerId":124768,"incomingManagerId":120450},
   {"teamId":111,"season":1988,"transitionDate":"1988-07-15","outgoingManagerId":492579,"incomingManagerId":119372},
-  {"teamId":111,"season":2001,"transitionDate":"2001-08-16","outgoingManagerId":124318,"incomingManagerId":117022}
+  {"teamId":111,"season":2001,"transitionDate":"2001-08-16","outgoingManagerId":124318,"incomingManagerId":117022},
+  {"teamId":112,"season":1972,"transitionDate":"1972-07-27","outgoingManagerId":113664,"incomingManagerId":117857},
+  {"teamId":112,"season":1974,"transitionDate":"1974-07-25","outgoingManagerId":117857,"incomingManagerId":118323},
+  {"teamId":112,"season":1979,"transitionDate":"1979-09-24","outgoingManagerId":114387,"incomingManagerId":110213},
+  {"teamId":112,"season":1983,"transitionDate":"1983-08-22","outgoingManagerId":113794,"incomingManagerId":114355},
+  {"teamId":112,"season":1987,"transitionDate":"1987-09-08","outgoingManagerId":119025,"incomingManagerId":492660},
+  {"teamId":112,"season":2010,"transitionDate":"2010-08-23","outgoingManagerId":120586,"incomingManagerId":433641},
+  {"teamId":113,"season":1982,"transitionDate":"1982-07-21","outgoingManagerId":492579,"incomingManagerId":119814},
+  {"teamId":113,"season":1984,"transitionDate":"1984-08-17","outgoingManagerId":492682,"incomingManagerId":121454}
 ]
