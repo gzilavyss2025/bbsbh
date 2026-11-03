@@ -1,0 +1,66 @@
+/* The offseason ledger on a phone (winter-home.css holds the rest): a face
+   pile. One header line holds the club, the move type and up to two round
+   faces with a "+N" chip; the sentence runs full width under it. */
+.wire__faces-more {
+  display: none;
+}
+@media (max-width: 739px) {
+  /* layout-exempt: header line over a full-width sentence */
+  .oseason__list .wire__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: var(--space-2);
+    align-items: center;
+  }
+  .oseason__list .wire__body {
+    display: contents;
+  }
+  .oseason__list .wire__kicker {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .oseason__list .wire__club > span,
+  .oseason__list .wire__type {
+    display: inline;
+  }
+  .oseason__list .wire__faces {
+    grid-column: 2;
+    grid-row: 1;
+    flex-wrap: nowrap;
+    max-width: none;
+    gap: 0;
+  }
+  .oseason__list .wire__body > :not(.wire__kicker) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .oseason__list .wire__face {
+    min-width: 0;
+  }
+  .oseason__list .wire__face:nth-child(n + 3) {
+    display: none;
+  }
+  .oseason__list .wire__face + .wire__face,
+  .oseason__list .wire__faces-more {
+    margin-left: calc(-1 * var(--space-2));
+  }
+  .oseason__list .shot.wire__shot,
+  .oseason__list .wire__faces-more {
+    width: var(--shot-2xs-w);
+    height: var(--shot-2xs-w);
+    border-radius: 50%;
+    border-width: var(--bw-hair);
+  }
+  .oseason__list .wire__faces-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--text-heading);
+    color: var(--surface-card);
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: var(--w-bold);
+  }
+}

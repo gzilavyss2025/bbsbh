@@ -101,12 +101,6 @@
   flex-wrap: wrap;
   max-width: calc(3 * var(--shot-md-w) + 2 * var(--space-2));
 }
-@media (max-width: 739px) {
-  .oseason__list .wire__body {
-    grid-template-columns: 1fr;
-    row-gap: 2px;
-  }
-}
 
 /* THE FACT LINE — the player's background under a move (WireFacts.jsx): a
    short line on a card, and a "More" sheet on any move. */
