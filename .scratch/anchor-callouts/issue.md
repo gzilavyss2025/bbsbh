@@ -24,11 +24,10 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
 - Gary, 2026-11-03: the text shows a date only when it helps, never on every note.
 - Gary, 2026-11-03: a note can outlive its game, and its wording ages ("In May, ..." by September).
 - Gary, 2026-11-03: the new store gets a deliberate name and structure.
-- Gary, 2026-11-03: suggested "nuggets" or "notes" as the store name.
-- Inference: the store is `nuggets`. A nugget is the first day a player's season total met a
+- Gary, 2026-11-03: the store is named `nuggets` (he suggested "nuggets" or "notes"; "notes" collides with 219 files).
+- Inference: the store holds nuggets. A nugget is the first day a player's season total met a
   threshold, with how many players had by then and the anchor, frozen. The count on any past day is
-  the number of nuggets up to that day, so no daily snapshot is needed. `notes` collides with 219
-  files.
+  the number of nuggets up to that day, so no daily snapshot is needed. 
 - Inference: counting stats, regular season, MLB only, in v1.
 - Inference: entering-tonight tense (ADR-0014, ADR-0088). No result-aware wording in v1.
 
@@ -67,17 +66,16 @@ score. The player detail page is open (ADR-0034). ADRs: 0001, 0014, 0034, 0088.
 
 ## Not decided
 
-1. The name: `nuggets` (recommended) or `notes`?
-2. The aging rule: no date on a game's own card, month name when older, year when older than the
+1. The aging rule: no date on a game's own card, month name when older, year when older than the
    season.
-3. How recent must a nugget be to show on a game card? Inference: 7 days.
-4. How long does a nugget stay on the player page, and how many show at once?
-5. Who owns the threshold list? Start with the 13 in the probe.
-6. Show a plain note when no anchor fits?
-7. One anchor note per card, or more?
-8. Tone: is a joke about another club's fans fine?
-9. Allow anchors that can change (Triple Crown winners, presidents) with a 180-day expiry?
-10. Do October nuggets count?
+2. How recent must a nugget be to show on a game card? Inference: 7 days.
+3. How long does a nugget stay on the player page, and how many show at once?
+4. Who owns the threshold list? Start with the 13 in the probe.
+5. Show a plain note when no anchor fits?
+6. One anchor note per card, or more?
+7. Tone: is a joke about another club's fans fine?
+8. Allow anchors that can change (Triple Crown winners, presidents) with a 180-day expiry?
+9. Do October nuggets count?
 
 ## Out of scope
 

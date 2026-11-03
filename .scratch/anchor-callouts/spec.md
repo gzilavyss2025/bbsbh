@@ -28,8 +28,8 @@ so the note never shows a number without a comparison.
 - **Gary, 2026-11-03: a note can outlive its game, and its wording ages.** A moon-walker stat that
   worked for Bauers on May 1 may stay on his player detail page for the rest of the season. By
   September it reads "In May, ...", not as if it were new.
-- **Gary, 2026-11-03: the new store gets a deliberate name and structure.** Gary suggested
-  "nuggets" or "notes". Working name: `nuggets`, pending his confirmation (see "The store").
+- **Gary, 2026-11-03: the new store is named `nuggets`.** He suggested "nuggets" or "notes"; a
+  collision check found "notes" in 219 files, and he confirmed `nuggets`. Structure: see "The store".
 
 ## The store: nuggets
 
@@ -67,11 +67,11 @@ renders as a label. It is an internal name for prompts and code.
 
 ### Name, compared
 
-Gary suggested "nuggets" or "notes" (2026-11-03). Collision check, same day:
+Gary suggested "nuggets" or "notes" and chose `nuggets` (2026-11-03). Collision check, same day:
 
 | Candidate | Verdict |
 |---|---|
-| **`nuggets`** (recommended) | Free as a module or data name. Only `FirstScorebookPage.jsx` and `src/styles/42-first-scorebook.css` use it, for small fact cards (`scorebookstory__nugget`, `starterNuggets`). That is the same meaning, and the class names are scoped. Fits the thing stored: a small fact that outlives its day. |
+| **`nuggets`** (chosen) | Free as a module or data name. Only `FirstScorebookPage.jsx` and `src/styles/42-first-scorebook.css` use it, for small fact cards (`scorebookstory__nugget`, `starterNuggets`). That is the same meaning, and the class names are scoped. Fits the thing stored: a small fact that outlives its day. |
 | `notes` | Rejected. 219 files use the word: `callout-notes/`, `gameNotes.js`, `game-notes/`, "Margin Notes". A store with this name would blur with the Game Notes PDFs. The sentence a reader sees stays a "note". |
 | `crossings` | My first pick. Accurate, and repo-native (`gen-rookies.mjs` stores the date a career "crossed" a limit). But it names the mechanism, not the thing. Kept as the verb. |
 | `feats` | Taken. A "feat" is a no-hitter or a cycle, and a feat label is a result on a scoring surface. A spoiler trap. |
@@ -248,22 +248,20 @@ that the player did something on D. The rule is structural:
 
 ## Not decided (needs Gary)
 
-1. **The name.** `nuggets` (recommended) or `notes`? See the comparison. `notes` collides with
-   219 files.
-2. **Is the aging rule right?** No date on a game's own card, month name when older, year when
+1. **Is the aging rule right?** No date on a game's own card, month name when older, year when
    older than the season.
-3. **How recent must a nugget be to show on a game card?** Inference: crossed in the last 7
+2. **How recent must a nugget be to show on a game card?** Inference: crossed in the last 7
    days. The player page shows all season.
-4. **How long does a nugget stay on the player page?** The rest of the season, then the career
+3. **How long does a nugget stay on the player page?** The rest of the season, then the career
    view, or for good? How many show at once?
-5. **Who owns the threshold list?** It is a curated ladder, not every number. Start with the 13
+4. **Who owns the threshold list?** It is a curated ladder, not every number. Start with the 13
    in the probe. A new line is a code review, not a data change.
-6. **A plain note with no anchor?** "One of 11 pitchers with a shutout" stands alone.
-7. **How many anchor notes per card?** Inference: one, so the joke does not repeat.
-8. **Tone.** Moon, Supreme Court and Great Lakes are fine. Is a joke about the Dolphins fine for
+5. **A plain note with no anchor?** "One of 11 pitchers with a shutout" stands alone.
+6. **How many anchor notes per card?** Inference: one, so the joke does not repeat.
+7. **Tone.** Moon, Supreme Court and Great Lakes are fine. Is a joke about the Dolphins fine for
    another club's fans?
-9. **Volatile anchors.** Allow with the 180-day expiry, or never?
-10. **Postseason.** Do October nuggets count? The callout bundle counts them.
+8. **Volatile anchors.** Allow with the 180-day expiry, or never?
+9. **Postseason.** Do October nuggets count? The callout bundle counts them.
 
 ## Out of scope
 
