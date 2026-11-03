@@ -2,6 +2,7 @@
 // generator, writes nothing:
 //
 //   node scripts/research/find-manager-split.mjs <teamId> <season> <Name1> <W-L> <Name2> <W-L> [<Name3> <W-L> [<Name4> <W-L>]]
+//   node scripts/research/find-manager-split.mjs <teamId> <season> <A> <A's combined W-L> <B> <B's W-L> <A>   (A, B, A: A has two stints)
 //   node scripts/research/find-manager-split.mjs <teamId> <season> <outgoing name> <outW-outL> <inW-inL>   (two managers, older form)
 //
 // Give every manager in order (a last name is enough) with W-L from a cited
@@ -11,14 +12,16 @@
 // `ok` result goes in the seed; anything else is a [DECISION: ...].
 import { readFile } from 'node:fs/promises'
 import { getJson } from '../lib/statsapi.mjs'
-import { findSplit, findSplits, parseRecord, teamSeasonGames, pickManagers, pickOrder } from '../lib/records/manager-split.mjs'
+import { findSplit, findSplits, findReturn, parseRecord, teamSeasonGames, pickManagers, pickOrder } from '../lib/records/manager-split.mjs'
 
 const [teamId, season] = process.argv.slice(2, 4).map(Number)
 const rest = process.argv.slice(4)
 const older = rest.length === 3 && parseRecord(rest[2])
-const names = older ? [rest[0], null] : rest.filter((_, i) => i % 2 === 0)
-const records = older ? [rest[1], rest[2]].map(parseRecord) : rest.filter((_, i) => i % 2).map(parseRecord)
-if (!teamId || !season || rest.length < 3 || rest.length > 8 || (!older && rest.length % 2) || records.includes(null)) {
+// A, B, A: five args, the last a bare name (no W-L).
+const back = rest.length === 5 && !parseRecord(rest[4])
+const names = older ? [rest[0], null] : back ? [rest[0], rest[2], rest[4]] : rest.filter((_, i) => i % 2 === 0)
+const records = older ? [rest[1], rest[2]].map(parseRecord) : back ? [rest[1], rest[3]].map(parseRecord) : rest.filter((_, i) => i % 2).map(parseRecord)
+if (!teamId || !season || rest.length < 3 || rest.length > 8 || (!older && !back && rest.length % 2) || records.includes(null)) {
   console.error('usage: node scripts/research/find-manager-split.mjs <teamId> <season> <Name1> <W-L> <Name2> <W-L> [<Name3> <W-L> [<Name4> <W-L>]]')
   process.exit(2)
 }
@@ -36,7 +39,18 @@ let result
 let seed
 if (!entry) result = { status: 'not-queued' }
 else if (managers.length !== records.length) result = { status: 'count-mismatch', given: records.length }
-else if (records.length === 2) {
+else if (back) {
+  const picked = pickOrder(managers, names)
+  if (!picked.ids) result = picked
+  else if (picked.ids[0] !== picked.ids[2]) result = { status: 'name-not-matched' }
+  else {
+    result = findReturn(games, records[0], records[1])
+    if (result.status === 'ok') {
+      const [a, b] = picked.ids
+      seed = { transitions: [{ date: result.dates[0], outgoingManagerId: a, incomingManagerId: b }, { date: result.dates[1], outgoingManagerId: b, incomingManagerId: a }] }
+    }
+  }
+} else if (records.length === 2) {
   result = findSplit(games, records[0], records[1])
   const ids = pickManagers(managers, names[0])
   if (result.status === 'ok' && !ids) result = { ...result, status: 'name-not-matched' }

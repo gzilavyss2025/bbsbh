@@ -56,7 +56,7 @@ import { shardKey100 } from '../src/lib/shardKey.js'
 import { MANAGER_HISTORY_FIRST_SEASON } from '../src/lib/records/managerHistory.js'
 import { mergeSeasonRange, mergeCoverage, sharedCoverage, mergeNeedsResearch } from './lib/records/manager-history-merge.mjs'
 import { buildStaffIndex } from './lib/records/manager-staff-index.mjs'
-import { teamSeasonGames, seedSegments } from './lib/records/manager-split.mjs'
+import { teamSeasonGames, seedSegments, segmentRecords } from './lib/records/manager-split.mjs'
 import { writeShards } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
@@ -248,12 +248,18 @@ async function attachRecords(byPersonId, teamSeasonManagers, seed) {
       const stint = stintIndex.get(`${managerId}:${p.teamId}:${p.season}`)
       if (stint) stint.record = tally(games)
     } else {
-      const segments = seedSegments(p.seed)
-      for (const { managerId, from, to } of segments) {
+      const segments = seedSegments(p.seed, [...teamSeasonManagers.get(p.tsKey)])
+      for (const [managerId, { record, transitionDate }] of segmentRecords(games, segments)) {
         const stint = stintIndex.get(`${managerId}:${p.teamId}:${p.season}`)
         if (!stint) continue
-        stint.record = tally(games.filter((g) => (from === null || g.date >= from) && (to === null || g.date < to)))
-        stint.transitionDate = from ?? to // the date they took over; the first manager's is the date they left
+        stint.record = record
+        if (transitionDate) stint.transitionDate = transitionDate
+      }
+      // noRecord: the feed lists them as manager, the source credits them no games.
+      // Drop their manager stint (not their coach rows) so no blank season shows.
+      for (const id of p.seed.noRecord ?? []) {
+        byPersonId.set(id, byPersonId.get(id).filter((s) => !(s.teamId === p.teamId && s.season === p.season && MANAGER_JOB_IDS.has(s.jobId))))
+        teamSeasonManagers.get(p.tsKey).delete(id)
       }
       // Any OTHER manager-job personId in this team-season (one the seed does
       // not name) is left unresolved.

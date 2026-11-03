@@ -245,6 +245,10 @@ jobs:
         id: rehab
         continue-on-error: true
         run: node scripts/gen-rehab.mjs
+      - name: Tensest moments
+        id: tensest
+        continue-on-error: true
+        run: node scripts/gen-tensest.mjs
       - name: Umpires
         id: umpires
         continue-on-error: true
@@ -748,6 +752,7 @@ jobs:
           steps.milb-alumni.outcome == 'failure' ||
           steps.rehab.outcome == 'failure' ||
           steps.umpires.outcome == 'failure' ||
+          steps.tensest.outcome == 'failure' ||
           steps.umpire-accuracy.outcome == 'failure' ||
           steps.minors-leaders.outcome == 'failure' ||
           steps.milb-pool.outcome == 'failure' ||

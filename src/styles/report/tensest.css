@@ -1,0 +1,36 @@
+/* ---------------------------------------------------------------- tensest moments
+   Three ranked tables (TensestMomentsPage): a club batting, a club pitching, and the
+   league. The cells, head row and row rules are the Table's (system/table.css); this
+   block keeps the text columns left-aligned and the rank number readable. */
+.tensest__section {
+  margin-block-end: var(--space-3);
+}
+.tensest .what,
+.tensest .game,
+.tensest .batter {
+  text-align: left;
+}
+.tensest thead th {
+  white-space: normal;
+}
+.tensest .rank {
+  font-weight: var(--w-semibold);
+}
+.tensest__post {
+  color: var(--text-muted);
+}
+
+/* The club picker on this page wears the stamped frame: square, a heavy ink edge and the
+   hard ink shadow, like the cards under it. Scoped here so the same TeamFilterStrip on
+   other pages keeps its own look. The picked club's box is square too. */
+.tensest__picker .vsteam__tray {
+  border: var(--bw-heavy) solid var(--border-stamped);
+  border-radius: 0;
+  box-shadow: var(--shadow-stamped);
+}
+.tensest__picker .vsteam__team {
+  border-radius: 0;
+}
+.tensest__picker {
+  margin-block-end: var(--space-4);
+}

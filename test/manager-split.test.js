@@ -1,7 +1,7 @@
 // scripts/lib/records/manager-split.mjs: the change date a source W-L implies (#2761).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { findSplit, parseRecord, teamSeasonGames, pickManagers, seedSegments, findSplits, pickOrder } from '../scripts/lib/records/manager-split.mjs'
+import { findSplit, parseRecord, teamSeasonGames, pickManagers, seedSegments, findSplits, pickOrder, findReturn, segmentRecords } from '../scripts/lib/records/manager-split.mjs'
 
 const g = (date, won) => ({ date, won })
 const games = [g('2015-05-01', false), g('2015-05-02', true), g('2015-05-03', false), g('2015-05-04', true), g('2015-05-05', true)]
@@ -127,7 +127,54 @@ test('two managers through findSplits match findSplit', () => {
 test('pickOrder: ids in the given order, or why not', () => {
   const m = [{ id: 1, name: 'Dave Bristol' }, { id: 2, name: 'Roy McMillan' }, { id: 3, name: 'Del Crandall' }]
   assert.deepEqual(pickOrder(m, ['Crandall', 'Bristol', 'McMillan']), { ids: [3, 1, 2] })
-  assert.equal(pickOrder(m, ['Bristol', 'Bristol', 'Crandall']).status, 'two-stints')
+  assert.equal(pickOrder(m, ['Bristol', 'Bristol', 'Crandall']).status, 'count-mismatch')
   assert.equal(pickOrder(m, ['Bristol', 'Nobody', 'Crandall']).status, 'name-not-matched')
   assert.equal(pickOrder(m, ['Bristol', 'Crandall']).status, 'count-mismatch')
+})
+
+test('pickOrder: one manager named twice is a return stint, not an error', () => {
+  const m = [{ id: 1, name: 'Buck Rodgers' }, { id: 2, name: 'John Wathan' }]
+  assert.deepEqual(pickOrder(m, ['Rodgers', 'Wathan', 'Rodgers']), { ids: [1, 2, 1] })
+})
+
+// A 2-0, B 0-2, A 2-0 again: A's combined record is 4-0.
+const aba = season([2, true], [2, false], [2, true])
+
+test('findReturn: A, B, A finds both change dates from the combined record', () => {
+  assert.deepEqual(findReturn(aba, { w: 4, l: 0 }, { w: 0, l: 2 }), { status: 'ok', dates: ['2015-05-03', '2015-05-05'] })
+})
+
+test('findReturn: two pairs of dates that fit are ambiguous, with both listed', () => {
+  const r = findReturn(season([1, true], [1, false], [1, true], [1, false], [1, true]), { w: 2, l: 1 }, { w: 1, l: 1 })
+  assert.equal(r.status, 'ambiguous')
+  assert.deepEqual(r.candidates, [['2015-05-02', '2015-05-04'], ['2015-05-03', '2015-05-05']])
+})
+
+test('findReturn: records no pair of dates reaches are no-match', () => {
+  assert.equal(findReturn(aba, { w: 4, l: 0 }, { w: 1, l: 1 }).status, 'no-match')
+})
+
+test('segmentRecords: a manager with two segments gets the sum, and the first segment sets transitionDate', () => {
+  const segs = seedSegments({ transitions: [
+    { date: '2015-05-03', outgoingManagerId: 1, incomingManagerId: 2 },
+    { date: '2015-05-05', outgoingManagerId: 2, incomingManagerId: 1 },
+  ] })
+  const r = segmentRecords(aba, segs)
+  assert.deepEqual(r.get(1), { record: { w: 4, l: 0 }, transitionDate: '2015-05-03' })
+  assert.deepEqual(r.get(2), { record: { w: 0, l: 2 }, transitionDate: '2015-05-03' })
+})
+
+test('segmentRecords: a single change is as before', () => {
+  const r = segmentRecords(games, seedSegments({ transitionDate: '2015-05-04', outgoingManagerId: 1, incomingManagerId: 2 }))
+  assert.deepEqual(r.get(1), { record: { w: 1, l: 2 }, transitionDate: '2015-05-04' })
+  assert.deepEqual(r.get(2), { record: { w: 2, l: 0 }, transitionDate: '2015-05-04' })
+})
+
+test('seedSegments: noRecord alone gives the one remaining feed manager the whole season', () => {
+  assert.deepEqual(seedSegments({ teamId: 1, season: 2, noRecord: [7] }, [7, 9]), [{ managerId: 9, from: null, to: null }])
+})
+
+test('seedSegments: noRecord beside transitions leaves the transitions alone', () => {
+  const e = { transitionDate: '2000-05-01', outgoingManagerId: 1, incomingManagerId: 2, noRecord: [3] }
+  assert.deepEqual(seedSegments(e, [1, 2, 3]).map((s) => s.managerId), [1, 2])
 })
