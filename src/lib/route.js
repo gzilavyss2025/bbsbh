@@ -17,6 +17,7 @@
 //   '/more'                             -> { name: 'more' }  (every standalone page, grouped — WCAG 2.4.5's second way in)
 //   '/prospects'                        -> { name: 'prospects' }
 //   '/rehab'                            -> { name: 'rehab' }
+//   '/tensest'                          -> { name: 'tensest' }  (the season's tensest at-bats by MLB's pressure score)
 //   '/free-agents'                      -> { name: 'free-agents', season: null }  (the latest class)
 //   '/free-agents/{year}'               -> { name: 'free-agents', season: year }
 //   '/milestones'                       -> { name: 'milestones' }
@@ -339,6 +340,7 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'more') return { name: 'more' }
   if (parts.length === 1 && parts[0] === 'prospects') return { name: 'prospects' }
   if (parts.length === 1 && parts[0] === 'rehab') return { name: 'rehab' }
+  if (parts.length === 1 && parts[0] === 'tensest') return { name: 'tensest' }
   if (parts[0] === 'free-agents' && parts.length <= 2) {
     const year = parts.length === 2 && /^\d{4}$/.test(parts[1]) ? Number(parts[1]) : null
     return { name: 'free-agents', season: year }

@@ -105,6 +105,10 @@ for each generator; the reader modules:
   calls. `gen-rehab.mjs` (daily cron) imports the one stint rule (`rehabListRow` /
   `openRehabStint` in `rehab-policy.js`) that `person.js`'s `detectRehabAssignment`
   also calls, so the list and the banner agree on every day (#1362).
+- `tensest/tensest.js` — the Tensest Moments page (`/tensest`), from `public/data/tensest.json`. Cost-driven: the
+  leverage of every at-bat sits in one `winProbability` feed per game, so `gen-tensest.mjs` (nightly, incremental)
+  keeps only the league's top 50 and each club's top 25 batting and pitching. Spoiler-free: not one of the four
+  scoring surfaces, and a stat line is not a score (ADR-0034).
 - `milestones.js` — the Milestone Watch page + the player page's Milestone Watch
   card, from `public/data/milestones.json`. Cost-driven: a career-total + this
   season's pace pull per debuted player on any MLB org's full roster (active,

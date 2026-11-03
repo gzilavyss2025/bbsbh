@@ -42,7 +42,7 @@ function direction(desc) {
 }
 function scorers(desc) {
   const out = []
-  for (const m of desc.matchAll(/(?:^|[.,] )([A-Z][^.,]*?) scores\./g)) out.push(lastName(m[1]))
+  for (const m of desc.matchAll(/(?<=^|[.,] )([A-Z][^.,]*?) scores\./g)) out.push(lastName(m[1]))
   return out
 }
 const unmapped = new Map()

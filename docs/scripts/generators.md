@@ -116,6 +116,13 @@ don't run these by hand.
   `src/api/rehab-policy.js` — the one stint rule (start, end, same-day tie, 30-day
   cap) that `person.js`'s `detectRehabAssignment` also calls (#1362). Then each is
   verified against his game log + club's schedule; that 7-club-games rule stays here.
+- `gen-tensest.mjs` → `public/data/tensest.json` + `scripts/data/tensest-state.json` — the season's tensest
+  at-bats by MLB's own leverage index (`leverageIndex` on each `winProbability` play): the league's top 50 and each
+  club's top 25 batting and 25 pitching, postseason included. One feed per game, 2,400+ games a season, so it is
+  incremental: the state file lists the games already read, a nightly run reads only new Final games and folds their
+  plays at or above `LI_FLOOR` into the lists (`scripts/lib/tensest/tensest.mjs`, tested in `test/tensest.test.js`). A game
+  that errors stays off the list and is retried. The first run of a season reads every game (about ten minutes). A tie
+  keeps the whole tie group, so a list can run a few rows past its size. App reads it via `src/api/tensest/tensest.js`.
 - `gen-umpires.mjs` → `public/data/umpires/{season}/{personId}.json` + `umpires/seasons.json`
   — each MLB + AAA umpire's season game log, ONE FILE PER UMPIRE (readers want one man;
   the league-wide file hit 3.2 MB). A season store (ADR-0086): a run rebuilds only its
