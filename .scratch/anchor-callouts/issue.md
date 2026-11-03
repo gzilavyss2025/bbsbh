@@ -23,7 +23,6 @@ postseason (CNA, Jan 2019; the "11" is not confirmed). The idea came from a rese
   accurate as of that date.
 - Gary, 2026-11-03: the text shows a date only when it helps, never on every note.
 - Gary, 2026-11-03: a note can outlive its game, and its wording ages ("In May, ..." by September).
-- Gary, 2026-11-03: the new store gets a deliberate name and structure.
 - Gary, 2026-11-03: the store is named `nuggets` (he suggested "nuggets" or "notes"; "notes" collides with 219 files).
 - Gary, 2026-11-03: nine open questions answered. Aging: none on a game's own card, month name when
   older, year when older than the season. Game card window: 7 days. Player page: the season, then a
@@ -80,10 +79,11 @@ score. The player detail page is open (ADR-0034). ADRs: 0001, 0014, 0034, 0088.
 
 ## Out of scope
 
-Rate stats and "qualified" lists. All-time counts and "first ever" claims. Result-aware wording.
-A new screen.
+Rate stats and "qualified" lists. "First ever" claims. Result-aware wording. A new screen.
+Counts over longer spans (last 10 seasons, history) are a later slice, not v1 (see spec, "Spans").
 
 ## Blocked by / Related
 
-Slice 5 (player page list) needs a wireframe Artifact first. Related: `docs/callouts.md`,
+Slice 5 (player page list) needs a wireframe Artifact first. Notes and probes: PR #2804.
+Related: `docs/callouts.md`,
 `gen-rookies.mjs` (the same "crossed" idea, for a career limit).
