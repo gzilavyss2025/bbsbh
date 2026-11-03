@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { lastAffiliated, lastGameOf, shapeFacts } from '../src/api/transactions/playerFacts.js'
-import { arrivalStory, callStory, callUpSentence, factLines, injuredStory, retiredStory, subjectsOf } from '../src/api/transactions/templates.js'
+import { arrivalStory, callStory, callUpSentence, factLines, injuredStory, retiredStory, subjectsOf, variant } from '../src/api/transactions/templates.js'
 
 const clause = (before, after = '.') => ({ cutline: [{ text: before }, { text: 'Dobnak', playerId: 1 }, { text: after }] })
 const templateOf = (story) => subjectsOf(story)[0].template
@@ -63,7 +63,7 @@ test('a recall: his minor-league form before it, then which trip up it is', () =
   const callLine = { level: ['Triple-A'], team: null, line: { games: 15, era: '4.35', ip: '62.0' } }
   assert.equal(
     callStory(facts({ callLine }), { kind: 'recall', moveDate: '2026-08-02' }),
-    'Dobnak posted a 4.35 ERA over 62.0 innings in 15 games in Triple-A in 2026 before the call. It is his second trip up this season; the last lasted 12 days.',
+    'Dobnak has a 4.35 ERA over 62 innings in 15 games in Triple-A. It is his second trip up this season; the last lasted 12 days.',
   )
   assert.equal(callStory(facts(), { kind: 'recall', moveDate: '2026-07-01' }), 'It is his first trip up this season.')
 })
@@ -73,11 +73,11 @@ test('an option: how the stint went, then his options', () => {
   const stintLine = { games: 6, era: '5.40', ip: '10.0' }
   assert.equal(
     callStory(facts({ stintLine }), { kind: 'option', moveDate: '2026-07-13' }),
-    'Dobnak posted a 5.40 ERA over 10.0 innings in 6 games before the move. He has one minor-league option left.',
+    'Dobnak posted a 5.40 ERA over 10 innings in six games on this trip, with one option left.',
   )
   assert.equal(
     callStory(facts({ stintLine: { games: 0 }, contract: { options: 0 } }), { kind: 'option', moveDate: '2026-08-05' }),
-    'Dobnak did not get into a game on this trip. He is out of minor-league options.',
+    'Dobnak did not pitch on this trip, and he is out of options.',
   )
 })
 
@@ -88,20 +88,20 @@ test('an option after a while up: his last game, then his season to date', () =>
   const seasonToDate = { games: 22, era: '5.12', ip: '89.2' }
   assert.equal(
     callStory(facts({ lastName: 'Sproat', lastGame, seasonToDate, stintLine: { games: 22, era: '5.12', ip: '89.2' } }), { kind: 'option', moveDate: '2026-08-04' }),
-    'Sproat last pitched Aug. 3 against the Pirates, allowing 4 earned runs over 3 innings. He posted a 5.12 ERA over 89.2 innings in 22 games this season before the move. He has one minor-league option left.',
+    'Sproat gave up four earned runs in three innings against the Pirates on Aug. 3. He has a 5.12 ERA over 89.2 innings in 22 games this season, with one option left.',
   )
   // A hitter's last game reads as a box line, and one run reads as one.
   const hitter = facts({ lastName: 'Lockridge', pitcher: false, lastGame: { date: '2026-08-18', oppId: 112, line: { ab: 4, h: 1, hr: 0 } }, seasonToDate: { games: 40, avg: '.231', hr: 3 } })
   assert.equal(
     callStory(hitter, { kind: 'option', moveDate: '2026-08-19' }),
-    'Lockridge last played Aug. 18 against the Cubs, going 1-for-4. He hit .231 with 3 homers in 40 games this season before the move. He has one minor-league option left.',
+    'Lockridge went 1-for-4 against the Cubs on Aug. 18. He is hitting .231 with three homers in 40 games, with one option left.',
   )
   // Garrett Stallings, Aug. 3: three scoreless innings.
   const clean = facts({ lastName: 'Stallings', lastGame: { date: '2026-08-03', oppId: 134, line: { ip: '3.0', er: 0 } }, seasonToDate: { games: 4, era: '0.00', ip: '8.0' } })
-  assert.match(callStory(clean, { kind: 'option', moveDate: '2026-08-04' }), /^Stallings last pitched Aug. 3 against the Pirates, going 3 innings without an earned run./)
+  assert.match(callStory(clean, { kind: 'option', moveDate: '2026-08-04' }), /^Stallings threw three innings without an earned run against the Pirates on Aug. 3./)
   // Jared Koenig, July 12: five runs and no outs.
   const rough = facts({ lastName: 'Koenig', lastGame: { date: '2026-07-12', oppId: 134, line: { ip: '0.0', er: 5 } }, seasonToDate: { games: 9, era: '9.00', ip: '7.0' } })
-  assert.match(callStory(rough, { kind: 'option', moveDate: '2026-07-17' }), /^Koenig last pitched July 12 against the Pirates, allowing 5 earned runs without retiring a batter./)
+  assert.match(callStory(rough, { kind: 'option', moveDate: '2026-07-17' }), /^In his last outing, July 12 against the Pirates, Koenig gave up five earned runs without retiring a batter./)
 })
 
 test('a selected contract: a first call-up says so, with where he came from', () => {
@@ -117,10 +117,10 @@ test('a selected contract: a first call-up says so, with where he came from', ()
   })
   assert.equal(
     callStory(debutant, { kind: 'selected', moveDate: '2026-09-01' }),
-    "It is his first call to the majors. The 31-year-old, the Royals' No. 8 prospect, hit .301 with 14 homers in 88 games across Double-A and Triple-A in 2026 before the call. Cuas was the Royals' 3rd-round pick out of Duke in 2022.",
+    "It is his first call to the majors. Cuas, 31, the Royals' No. 8 prospect, is hitting .301 with 14 homers in 88 games across Double-A and Triple-A. Cuas was the Royals' third-round pick out of Duke in 2022.",
   )
   // A big leaguer's selection is a trip up like any other.
-  assert.equal(callStory(facts(), { kind: 'selected', moveDate: '2026-09-01' }), 'It is his third trip up this season; the last lasted 3 days.')
+  assert.equal(callStory(facts(), { kind: 'selected', moveDate: '2026-09-01' }), 'It is his third trip up this season; the last lasted three days.')
 })
 
 test('a retirement: the whole career in a sentence', () => {
@@ -148,9 +148,9 @@ test('an arrival from independent ball: where from, and his last affiliated seas
   const arrival = { how: 'purchase', fromName: 'Glacier Range Riders' }
   assert.equal(
     arrivalStory({ ...base, arrival, affiliated: { season: 2024, level: 'Double-A' } }),
-    'The 27-year-old comes from the Glacier Range Riders, outside affiliated ball. His last season in affiliated ball was 2024, in Double-A.',
+    'The 27-year-old was bought from the independent Glacier Range Riders. He last played in affiliated ball in 2024, in Double-A.',
   )
-  assert.equal(arrivalStory({ ...base, arrival, affiliated: null }), 'The 27-year-old comes from the Glacier Range Riders, outside affiliated ball.')
+  assert.equal(arrivalStory({ ...base, arrival, affiliated: null }), 'The 27-year-old was bought from the independent Glacier Range Riders.')
   // No fact line for a move the note can't speak to.
   assert.deepEqual(factLines('arrival', { ...base, arrival: null, affiliated: null }), [])
 })
@@ -210,7 +210,7 @@ test('a doubleheader call-up reads as the 27th man, up and back down', () => {
   assert.equal(callStory(f, { kind: 'recall', moveDate: '2026-04-30' }), 'Alexander came up as the 27th man for the doubleheader and went back down May 1.')
   assert.equal(
     callStory(f, { kind: 'option', moveDate: '2026-05-01' }),
-    'Alexander goes back down after serving as the 27th man in the April 30 doubleheader.',
+    'Alexander was the 27th man in the April 30 doubleheader.',
   )
 })
 
@@ -218,7 +218,7 @@ test('a special-event call-up names the event', () => {
   // Bo Naylor, Brewers: recalled for the Little League Classic, Aug. 23, 2026; optioned Aug. 24.
   const f = { lastName: 'Naylor', season: 2026, extraMan: { event: 'MLB Little League Classic in Williamsport, PA' }, calls: [{ up: '2026-08-23', down: '2026-08-24' }] }
   assert.equal(callStory(f, { kind: 'recall', moveDate: '2026-08-23' }), 'Naylor came up as the 27th man for the MLB Little League Classic in Williamsport, PA, and went back down Aug. 24.')
-  assert.equal(callStory(f, { kind: 'option', moveDate: '2026-08-24' }), 'Naylor goes back down after serving as the 27th man at the MLB Little League Classic in Williamsport, PA.')
+  assert.equal(callStory(f, { kind: 'option', moveDate: '2026-08-24' }), 'Naylor was the 27th man at the MLB Little League Classic in Williamsport, PA.')
 })
 
 test('his last game is the last log row before the move', () => {
@@ -241,17 +241,17 @@ test('a call-up beside a placement gets his minor-league line in one sentence', 
   const callLine = { level: ['Triple-A'], team: 'Nashville Sounds', line: { games: 40, avg: '.270', hr: 6 } }
   assert.equal(
     callUpSentence({ lastName: 'Perkins', pitcher: false, season: 2026, callLine }),
-    'Perkins hit .270 with 6 homers in 40 games in Triple-A with the Nashville Sounds in 2026 before the call.',
+    'Perkins is hitting .270 with six homers in 40 games in Triple-A with the Nashville Sounds.',
   )
   assert.equal(callUpSentence({ lastName: 'Perkins', season: 2026, callLine: null }), null)
   // He had been shuttling: big-league games too, so the sentence holds both.
   const callMlbLine = { games: 40, avg: '.250', hr: 2 }
   assert.equal(
     callUpSentence({ lastName: 'Perkins', pitcher: false, season: 2026, callLine, callMlbLine }),
-    'Perkins has split 2026 between the Nashville Sounds (.270 with 6 homers in 40 games) and the majors (.250 with 2 homers in 40 games) before the call.',
+    'Perkins has split the season between the Nashville Sounds (.270 with six homers in 40 games) and the majors (.250 with two homers in 40 games).',
   )
   const arm = { lastName: 'Gasser', pitcher: true, season: 2026, callLine: { level: ['Triple-A'], team: null, line: { games: 12, era: '3.10', ip: '58.0' } }, callMlbLine: { games: 5, era: '6.00', ip: '18.0' } }
-  assert.equal(callUpSentence(arm), 'Gasser has split 2026 between Triple-A (a 3.10 ERA in 12 games) and the majors (a 6.00 ERA in 5 games) before the call.')
+  assert.equal(callUpSentence(arm), 'Gasser has split the season between Triple-A (a 3.10 ERA in 12 games) and the majors (a 6.00 ERA in five games).')
 })
 
 // Easton McGee, traded by the Brewers to the Royals for cash, July 14, 2026.
@@ -264,11 +264,13 @@ test('a player sold for cash: his whole time with the club, worded three ways', 
     clubTotals: { 158: { games: 9, era: '1.80', ip: '15.0' } },
   }
   const ctx = { teamId: 158, moveDate: '2026-07-14' }
-  const lines = [0, 1, 2].map((n) => factLines('sold', { ...base, id: n }, ctx)[0])
+  // The first id that lands on each shape.
+  const idFor = (shape) => [...Array(50).keys()].find((id) => variant({ id }, ctx.moveDate, 3) === shape)
+  const lines = [0, 1, 2].map((n) => factLines('sold', { ...base, id: idFor(n) }, ctx)[0])
   assert.deepEqual(lines, [
-    'McGee had been with the Brewers since 2025, and in that time he posted a 1.80 ERA over 15.0 innings in 9 games for them.',
-    'McGee joined the Brewers in 2025 and posted a 1.80 ERA over 15.0 innings in 9 games for them.',
-    'McGee leaves the Brewers after two seasons, in which he posted a 1.80 ERA over 15.0 innings in 9 games for them.',
+    'McGee posted a 1.80 ERA over 15 innings in nine games for the Brewers since 2025.',
+    'McGee joined the Brewers in 2025 and posted a 1.80 ERA over 15 innings in nine games for them.',
+    'McGee leaves the Brewers after two seasons, posting a 1.80 ERA over 15 innings in nine games.',
   ])
   // No games for the club at all: his tenure alone.
   assert.equal(factLines('sold', { ...base, id: 0, clubTotals: {} }, ctx)[0], 'McGee had been with the Brewers since 2025.')
@@ -298,8 +300,8 @@ test('a club total adds up his seasons with that club, from the stint he left', 
 
 test('a last outing writes its thirds of an inning as a scorer would', () => {
   const at = (ip, er) => callStory(facts({ lastName: 'Koenig', lastGame: { date: '2026-07-12', oppId: 134, line: { ip, er } }, seasonToDate: { games: 9, era: '9.00', ip: '7.0' } }), { kind: 'option', moveDate: '2026-07-17' })
-  assert.match(at('0.1', 2), /allowing 2 earned runs over 1\/3 of an inning\./)
-  assert.match(at('0.2', 0), /going 2\/3 of an inning without an earned run\./)
+  assert.match(at('0.1', 2), /gave up two earned runs in 1\/3 of an inning\./)
+  assert.match(at('0.2', 0), /threw 2\/3 of an inning without an earned run\./)
   assert.match(at('1.0', 1), /allowing 1 earned run over 1 inning\./)
   assert.match(at('2.1', 3), /allowing 3 earned runs over 2 1\/3 innings\./)
 })
@@ -307,4 +309,14 @@ test('a last outing writes its thirds of an inning as a scorer would', () => {
 test('a cash deal reads the same with the club leading the clause', () => {
   // The league wire's sentence can open with the club that made the move.
   assert.equal(templateOf(clause('Milwaukee Brewers traded RHP ', ' to the Kansas City Royals for cash.')), 'sold')
+})
+
+test('a note keeps its wording for the same player and move, and varies across them', () => {
+  const ctx = { teamId: 158, moveDate: '2026-07-14' }
+  const facts = { id: 663372, lastName: 'McGee', pitcher: true, season: 2026, clubs: [{ teamId: 158, from: 2025, to: 2026 }], clubTotals: { 158: { games: 9, era: '1.80', ip: '15.0' } } }
+  assert.equal(factLines('sold', facts, ctx)[0], factLines('sold', { ...facts }, { ...ctx })[0])
+  assert.equal(variant(facts, '2026-07-14', 3), variant({ id: 663372 }, '2026-07-14', 3))
+  // Over many players the three shapes all turn up.
+  const seen = new Set([...Array(60).keys()].map((id) => variant({ id }, ctx.moveDate, 3)))
+  assert.deepEqual([...seen].sort(), [0, 1, 2])
 })
