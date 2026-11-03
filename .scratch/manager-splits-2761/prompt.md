@@ -28,10 +28,12 @@ For each pair, in order:
    "Manager" line. If that page will not load, use the club's Wikipedia season
    page. Record the URL you used. If neither page loads, skip to step 4 with
    status "no-source".
-2. Run (the outgoing manager's last name, then that manager's W-L, then the
-   incoming manager's W-L):
-     node scripts/research/find-manager-split.mjs <teamId> <season> <outgoing last name> <outW-outL> <inW-inL>
-   Example: node scripts/research/find-manager-split.mjs 158 1975 Crandall 67-94 1-0
+2. Run, with every manager in order (last name, then that manager's W-L), two,
+   three or four of them:
+     node scripts/research/find-manager-split.mjs <teamId> <season> <Name1> <W-L> <Name2> <W-L> [<Name3> <W-L> [<Name4> <W-L>]]
+   Example: node scripts/research/find-manager-split.mjs 158 1975 Crandall 67-94 Rodgers 1-0
+   The older two-manager form (outgoing name, outgoing W-L, incoming W-L) works too.
+   With three or four managers it prints a `transitions` seed entry.
    A record with a tie (W-L-T, for example 72-43-1): drop the tie and pass
    72-43. The script does not count ties as games, so this is not an adjustment.
    A manager who appears twice in the source's Manager line (two stints) is
@@ -42,7 +44,7 @@ For each pair, in order:
    to the END of scripts/manager-transitions-seed.json. Do not reorder existing
    entries.
 4. Any other status (incoming-mismatch, doubleheader, date-order, no-match,
-   no-games-after, name-not-matched, more-than-two-managers, not-queued, two-stints,
+   no-games-after, name-not-matched, count-mismatch, not-queued, two-stints,
    no-source, fetch-failed): add NO entry. Write one line in the PR body:
      [DECISION: <teamId> <season> — <status>; source says <out> / <in>; <URL>]
    Do not adjust the numbers to make the script agree. Never guess.
