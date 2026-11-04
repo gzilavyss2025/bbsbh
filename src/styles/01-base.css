@@ -64,8 +64,6 @@
        because it is middot-separated fields, not a paragraph
      - the About page body copy — `.aboutpage .caps-exempt`
      - the signed-out Game Log pitch — `.logbooklanding .caps-exempt`
-     - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
-       (the blurb title above it stays uppercase)
      - `.gamestory__headline` (a real MLB.com headline reads as a natural sentence)
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`

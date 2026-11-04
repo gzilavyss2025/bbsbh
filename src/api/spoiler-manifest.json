@@ -1388,14 +1388,6 @@
       "class": "spoiler-free",
       "why": "First-pitch conditions from a weather service keyed to the park's lat/lon. Never the box-score weather field."
     },
-    "whatsBrewing.js": {
-      "class": "spoiler-free",
-      "why": "Client-side parse of a club's pre-game press-notes PDF into narrative blurbs. Pre-game copy."
-    },
-    "whatsBrewingClubs.js": {
-      "class": "spoiler-free",
-      "why": "A teamId-to-title map, split out so TeamInfo's gate check imports it without pulling the parser out of its lazy chunk."
-    },
     "winprob.js": {
       "class": "reveal-only",
       "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp.",

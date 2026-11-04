@@ -54,7 +54,6 @@ const METRICS = [
 // grep dist/assets for a new one before you add it.
 export const LAZY_LIBRARIES = {
   'Clerk (@clerk/clerk-react)': ['Clerk: Ensure that', 'clerk-js-script', '@clerk/clerk-react'],
-  'pdf.js (pdfjs-dist)': ['UnknownErrorException', 'PDFWorker'],
 }
 
 // The entry script and stylesheets, as index.html names them.

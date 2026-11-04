@@ -232,10 +232,6 @@ const GameNotesArchivePage = lazyNamed(
   () => import('./screens/game-notes/GameNotesArchivePage.jsx'),
   'GameNotesArchivePage',
 )
-const GameNotesDebugPage = lazyNamed(
-  () => import('./screens/GameNotesDebugPage.jsx'),
-  'GameNotesDebugPage',
-)
 // Unlisted animation QA page — no score/reveal content and nothing to save, so
 // unlike the two DEV-gated curation surfaces below it ships, reachable only by
 // direct URL (see lib/route.js).
@@ -326,7 +322,6 @@ const BARE_ROUTES = {
   'run-differential': RunDifferentialPage,
   'abs-challenges': AbsChallengesPage,
   'run-value': RunValuePage,
-  'game-notes-debug': GameNotesDebugPage,
   'animation-lab': AnimationLab,
   'design-lab': DesignLab,
   'wire-lab': WireLab,

@@ -23,8 +23,7 @@
 // DYNAMIC IMPORTS. Every lazy-loaded screen in this app goes through
 // `lazyNamed(() => import('./Screen.jsx'), 'ScreenName')` (src/App.jsx) or the
 // equivalent inline `import('./x.jsx').then((m) => ({ default: m.X }))` /
-// `.then((m) => m.X(...))` shape (a handful of Clerk-gated components,
-// src/api/whatsBrewing.js's dynamic parser). Both are pattern-matched below so
+// `.then((m) => m.X(...))` shape (a handful of Clerk-gated components). Both are pattern-matched below so
 // a lazily-routed export doesn't read as dead just because no STATIC `import`
 // statement names it. A future dynamic-import shape that doesn't match either
 // pattern will misfire this guard — that is expected of a regex, not a parser;

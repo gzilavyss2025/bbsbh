@@ -106,7 +106,6 @@ const BUDGETS = {
   // line count would be deleting the reason the rules are correct.
   'src/styles/69-hit-chart.css': 1000, // 925 (the flight card's draw-and-land motion, 2026-10-29) — the ball-flight card shares marks, heat ring and drawing with the chart: one partial, not two that can drift
   'src/styles/68-around-the-game.css': 1100, // 1200
-  'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1700, // 1608
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
   // GameView is the game's ROUTER — one screen per section, each lazily

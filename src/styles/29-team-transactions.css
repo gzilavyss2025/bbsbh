@@ -154,7 +154,7 @@
 }
 /* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
    plain .txstory__cutline selector can't outrank #root * and would be
-   silently ignored (see .brewblurb__body above for the same technique). */
+   silently ignored (see `#root .screen--identitylab .hint`, 05-masthead-nav.css, for the same technique). */
 #root .txstory__cutline {
   text-transform: none; /* caps-exempt: cutline prose reads as a natural sentence */
 }

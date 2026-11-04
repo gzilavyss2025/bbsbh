@@ -8,7 +8,7 @@ import { IconButton } from '../ui/control/IconButton.jsx'
 // The video-highlight player: opened from any "Watch" button in the app — a
 // revealed play (PlayByPlay.jsx), the box score's Play of the Game and video
 // row (GameVideoRow.jsx), the team and player rails. Reuses the app's existing
-// .scrim/.sheet dialog contract (see BallparkModal/WhatsBrewingModal) rather
+// .scrim/.sheet dialog contract (see BallparkModal) rather
 // than inventing new gesture/animation mechanics — dismiss via backdrop tap,
 // Escape, or the close button; focus moves into the sheet on open and back to
 // the trigger on close.
