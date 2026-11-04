@@ -16,6 +16,11 @@ export function numOrNull(x) {
   return Number.isFinite(n) ? n : null
 }
 
+// The total of `values`; 0 for none (or for `undefined`).
+export function sum(values) {
+  return (values ?? []).reduce((a, b) => a + b, 0)
+}
+
 // `n` held within [lo, hi]. Needs lo <= hi; NaN stays NaN.
 export function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n))

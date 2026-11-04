@@ -2,13 +2,9 @@
 // A row is franchiseLedger's shape (api/history/franchiseLedger.js); the live row liveRow builds
 // for a season the stored ledger has not reached yet has the same shape plus `inProgress`.
 
-const DASH = '—'
+import { ordinal } from '../../../lib/format.js'
 
-function ordinal(n) {
-  const tens = n % 100
-  if (tens >= 11 && tens <= 13) return `${n}th`
-  return `${n}${{ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th'}`
-}
+const DASH = '—'
 
 // A round's short form (the phone) and long form (the wide table). Before 1969 only the World
 // Series is on file; the wild card rounds are a game (2012-2021) or a series (2020, 2022 on).

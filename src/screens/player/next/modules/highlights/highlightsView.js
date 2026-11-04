@@ -1,8 +1,7 @@
 // The Highlights module's pure view (#2022): his clips for this season, newest first.
 import { formatClipDuration } from '../../../../../api/highlights.js'
 import { plural } from '../../parts/foulsFormat.js'
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+import { monthDayName } from '../../../../../lib/dates.js'
 
 // A clip title names the play ("walk-off single"). The page is open for a game played today
 // (ADR-0117, which retired ADR-0110), so no date filter is applied. gen-highlights.mjs sweeps
@@ -17,7 +16,7 @@ export function highlightsView({ clips, playerId, season }) {
       clip: c,
       title: c.title || '',
       length: formatClipDuration(c.duration),
-      when: `${MONTHS[Number(c.date.slice(5, 7)) - 1]} ${Number(c.date.slice(8, 10))}`,
+      when: monthDayName(c.date),
     }))
 }
 

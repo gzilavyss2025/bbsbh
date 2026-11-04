@@ -1,5 +1,6 @@
 import { hitterCounters } from '../../../../api/scout/hitterGrid.js'
 import { pitchMark } from '../../../pitch/pitchTypes.js'
+import { sum } from '../../../math/number.js'
 
 // PITCH BY PITCH (#2316, slice 2): for the probable starter's arsenal, how the opposing
 // club's regular hitters do against each pitch, set against the league. Pure. Open surface
@@ -13,7 +14,6 @@ export const MIN_PA = 10 // plate-appearance-ending pitches the hitters need on 
 export const MIN_USE = 0.05 // a pitch under this share of his arsenal is left out
 export const MAX_HITTERS = 9 // the club's regulars: its hitters with the most postseason PA
 
-const sum = (a) => a.reduce((x, y) => x + y, 0)
 
 // byDateRange hitting splits (the Hot bats read) -> person ids, most plate appearances first.
 // A pitcher who batted is not a regular.

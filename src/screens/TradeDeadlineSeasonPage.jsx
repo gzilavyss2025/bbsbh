@@ -1,3 +1,4 @@
+import { monthDayNameYear } from '../lib/dates.js'
 import '../styles/47-trade-deadline.css'
 import { useState } from 'react'
 import { loadTradeDeadlineSeason, SEASONS } from '../api/tradeDeadline.js'
@@ -37,11 +38,8 @@ function SeasonNav({ year, navigate }) {
   )
 }
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
 function monthDayYear(iso) {
-  const [y, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}` : ''
+  return monthDayNameYear(iso)
 }
 
 // Unlike lib/teamFilter.js's filterByTeam (one team id per row), a trade

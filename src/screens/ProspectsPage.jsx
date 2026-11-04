@@ -19,14 +19,13 @@ import { Table } from '../components/ui/table/Table.jsx'
 import { Button } from '../components/ui/control/Button.jsx'
 import { EmptyState } from '../components/ui/state/EmptyState.jsx'
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
 
 function generatedLabel(iso) {
   if (!iso) return ''
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 async function loadProspects() {

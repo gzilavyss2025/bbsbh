@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { fetchTeamHighlights } from '../../api/gamehighlights.js'
 import { fetchSpotlightPool } from '../../api/postseason/worldseries/spotlightPool.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { firstPitchText, monthDayShort } from '../../lib/dates.js'
+import { firstPitchText, monthDayName } from '../../lib/dates.js'
 import { actionPhotoUrl } from '../../lib/headshot/actionPhoto.js'
 import { HEADSHOT_CROSS_ORIGIN } from '../../lib/headshot/retry.js'
 import { useRouteLink } from '../../lib/nav.js'
@@ -96,7 +96,7 @@ function Who({ side, player, clip, onPlay }) {
       <span className="ww-hero__name">{player.name}</span>
       <span className="ww-hero__figs">{player.figs}</span>
       {clip && (
-        <Button skin="ghost" icon="▸" aria-label={`Watch highlight: ${player.name}, ${monthDayShort(clip.date)}`} className="ww-hero__play" onClick={onPlay}>
+        <Button skin="ghost" icon="▸" aria-label={`Watch highlight: ${player.name}, ${monthDayName(clip.date)}`} className="ww-hero__play" onClick={onPlay}>
           Watch highlight
         </Button>
       )}
@@ -191,7 +191,7 @@ export function Hero({ mode, game, slateDate, wide, played = [], umpire = null, 
   // A game day's door needs no game number (a resumed game can lack one); a preview names its game.
   const nextPath = gameDay ? path('lineup1') : gameNumber ? path('preview') : null
   const nextName = gameDay ? (gameNumber ? `Game ${gameNumber} lineups` : 'Lineups') : `Game ${gameNumber} preview`
-  const when = [nextDay?.date && `${nextDay.weekday} ${monthDayShort(nextDay.date)}`, game && firstPitchText(game.gameDate, game.startTimeTBD)]
+  const when = [nextDay?.date && `${nextDay.weekday} ${monthDayName(nextDay.date)}`, game && firstPitchText(game.gameDate, game.startTimeTBD)]
   const months = monthsOf(days)
   // Wide off day: one Stamp door per played game here (the phone has them in Played).
   const stamps = wide && !gameDay ? played : []

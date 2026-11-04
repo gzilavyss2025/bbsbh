@@ -8,7 +8,7 @@ import { Card } from '../../../../components/ui/frame/Card.jsx'
 import { StatTile } from '../../../../components/ui/frame/StatTile.jsx'
 import { motionIsReduced } from '../../../../hooks/preferences/motionIsReduced.js'
 import { useInViewOnce } from '../../../../hooks/scroll/useInViewOnce.js'
-import { monthDayShort } from '../../../../lib/dates.js'
+import { monthDayName } from '../../../../lib/dates.js'
 import { viewKey } from '../../../../lib/motion/inViewOnce.js'
 import { runValuePath } from '../../../../lib/route.js'
 import { useNav } from '../../../../lib/nav.js'
@@ -110,7 +110,7 @@ export function RunValueBoard({ data, clubName, asOf, sportId, still }) {
         that holds him now. A man traded in July brings his whole season with him.
       </p>
       <div className="rvclub__foot">
-        {data.generatedAt ? <span className="rvclub__source">Savant · {monthDayShort(data.generatedAt.slice(0, 10))}</span> : <span />}
+        {data.generatedAt ? <span className="rvclub__source">Savant · {monthDayName(data.generatedAt.slice(0, 10))}</span> : <span />}
         <Door onClick={() => navigate(runValuePath({ d: asOf, s: sportId }))}>League run value board</Door>
       </div>
     </Card>

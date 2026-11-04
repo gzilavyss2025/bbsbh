@@ -15,6 +15,7 @@
 // ball, so the real path is a little curved in z and the speed falls by about 8%. Here z falls evenly with
 // time and the vertical and side bend is the feed's pfx at the plate. Upgrade only if a per-pitch store holds vx0/ax.
 import { GRID } from '../../../../../lib/zone/zoneGeometry.js'
+import { clamp } from '../../../../../lib/math/number.js'
 
 export const G = 32.174
 export const PLATE_Z = 1.417 // the front of the plate; the plate crosses here
@@ -22,7 +23,6 @@ export const RUBBER_Z = 60.5
 export const ZONE = { x: 0.708, y0: 1.63, y1: 3.22 }
 export const ZD = PLATE_Z + 23.8 // about 175 ms before the plate: where a hitter must commit
 
-const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 const lerp = (a, b, u) => a + (b - a) * u
 const INPUTS = ['x0', 'z0', 'pfxX', 'pfxZ', 'extension', 'plateTime']
 
@@ -50,7 +50,7 @@ export function flightPath(phys, landing) {
   const freeX = end.x - pfxX / 12
   const freeH = end.h - pfxZ / 12
   const at = (s, real) => {
-    const u = clamp(s / T)
+    const u = clamp(s / T, 0, 1)
     const bend = real ? u * u : 0
     return [
       lerp(x0, freeX, u) + (pfxX / 12) * bend,

@@ -2,8 +2,8 @@
 // mound, z up, home plate at the origin), vector math and the park's wall.
 // Pure: no React, no DOM, no clock. Part of Gameday's stage (#2568 slice 4, #2569).
 import { wallOnLine } from '../../../../lib/ballpark/ballFlight.js'
+import { clamp } from '../../../../lib/math/number.js'
 
-export const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
 export const lerp = (a, b, u) => a + (b - a) * u
 export const smooth = (u) => u * u * (3 - 2 * u)
 
