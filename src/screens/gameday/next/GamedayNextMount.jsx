@@ -6,6 +6,7 @@ import { GamedayNextPage } from './GamedayNextPage.jsx'
 import { useGamedayStage } from './stage/useGamedayStage.jsx'
 import { ScoringSheet } from './panels/GamedaySheets.jsx'
 import { rewindTo, walkCut } from './panels/panelData.js'
+import { holdGrid } from './steps/subStep.js'
 import { useCallback, useMemo, useState } from 'react'
 import { ordinal } from '../../../lib/format.js'
 
@@ -54,7 +55,7 @@ export function GamedayNextMount({ sectionNav, bug: { mark, ...bug }, meta, pane
   // reveal mark, which shows nothing the reader has not revealed. That gate is what keeps them out of a SealBox.
   const rewind = useMemo(() => (rewindAbi != null && bug.feed ? rewindTo(bug.feed, bug.viewInning, bug.viewHalf, rewindAbi) : null), [bug.feed, bug.viewInning, bug.viewHalf, rewindAbi])
   const trailExtras = { onReplay: (i) => { staged.onReplay(i); panels.onPick?.(i) }, onBack: staged.replaying != null ? staged.onBack : null, here: staged.replaying ?? (open?.sub > 0 ? null : bug.live?.last?.atBatIndex ?? null) }
-  const shown = rewind ? { ...panels, step: rewind.step, mark: rewind.mark, runsInProgress: rewind.runsInProgress } : panels
+  const shown = holdGrid(rewind ? { ...panels, step: rewind.step, mark: rewind.mark, runsInProgress: rewind.runsInProgress } : panels, held || panels.closing)
   const band = bug.started && bug.live ? (
     <>
       <ScorebugMount {...bug} {...(rewind ? { runsInProgress: rewind.runsInProgress } : {})} revealedThrough={rewind ? rewind.mark : mark} meta={meta} onTeam={onTeam} />

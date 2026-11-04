@@ -40,6 +40,11 @@ export function caughtUpAdvance(loading, onReload) {
 // turn to wait for any more (#2747), so a forward move is `goTo` itself.
 export const forwardAdvance = (label, idx, closing, goTo) => ({ label, disabled: closing, onClick: () => !closing && goTo(idx) })
 
+// The line-score grid waits like the advance (#2768, Gary 2026-11-04): while the half's rule inks in, and
+// until "Middle 1st ›" opens the checkpoint, a tapped inning moves nothing, forward or back. The cells
+// stay tappable (aria-disabled, not disabled), as the advance does (ADR-0046).
+export const holdGrid = (panels, held) => (held ? { ...panels, onSelect: () => {}, disabled: true } : panels)
+
 // One tap inside the open at-bat: the sub-step count after it, or null when this tap reveals the
 // at-bat itself (its result, or the event that ends the half: decision 7). Pitch mode shows the next
 // sub-step; at-bat mode runs to the next stop. A switch mid-at-bat keeps `sub`, so turning pitch

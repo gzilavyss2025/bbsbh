@@ -20,7 +20,8 @@ Plan and record: `docs/gameday-build.md`, the #2566 and #2568 comments.
   the runs so far, the trail and the half commit up to InningViewer, from `api/gameday/engine/` (`halfReport`,
   `engineLive`). The parent reports the spoiler-free entering baseline; its one SealBox mounts `EngineReport`,
   whose four effects keep count-based dependencies (never `entries`: that was a 264-render loop). A forward half move is
-  `goTo` and waits only for `focus.closing` (`forwardAdvance`). The old hidden half page, the page turn and the
+  `goTo` and waits only for `focus.closing` (`forwardAdvance`). The line-score grid waits for that and for the
+  close-out (until "Middle 1st ›" opens the checkpoint), forward or back (`holdGrid`, #2768). The old hidden half page, the page turn and the
   play-by-play cards were deleted (#2747).
 - Gary's calls this shell keeps: the band uses the score bug's tiles and type; the batting view and zone map stay
   up through playback (a pitch never blanks them), and have a per-game dismiss; a switch hitter stands opposite the
