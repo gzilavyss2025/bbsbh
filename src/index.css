@@ -207,7 +207,6 @@
 @import './styles/52-highlight-clip-card.css';
 @import './styles/54-my-tally.css';
 @import './styles/55-my-tally-account.css';
-@import './styles/56-my-tally-intro.css';
 @import './styles/57-ballpark-card.css';
 @import './styles/64-milb-alumni.css';
 @import './styles/69-hit-chart.css';
@@ -325,8 +324,7 @@
                               partial cannot exist. Every selector in it is
                               .dlab__*, shared with no other partial, and only
                               that one unlisted route loads it.)
-     scout/scout              screens/scout/ScoutPage.jsx (/scout, #1410) and
-                              screens/designlab/scout/ScoutLab.jsx, its
-                              prototype — .scout__* only, a SUBDIRECTORY for
-                              the same file-budget reason as designlab/)
+     scout/scout              screens/scout/ScoutPage.jsx (/scout, #1410) —
+                              .scout__* only, a SUBDIRECTORY for the same
+                              file-budget reason as designlab/)
    ------------------------------------------------------------ */

@@ -17,7 +17,6 @@
 // Run by .github/workflows/update-nightly-data.yml; writes upcoming=, finals=
 // and skipped= to $GITHUB_OUTPUT. By hand: node scripts/nightly/inputs.mjs
 import { appendFileSync, readFileSync } from 'node:fs'
-import { pathToFileURL } from 'node:url'
 import { getJson } from '../lib/statsapi.mjs'
 
 export const UPCOMING_DAYS = 14 // gen-vs-team-splits.mjs reads the next 14 days
@@ -106,4 +105,4 @@ async function main() {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main()
+if (import.meta.main) await main()

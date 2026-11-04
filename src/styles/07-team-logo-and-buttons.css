@@ -115,21 +115,8 @@
   color: var(--text-caption);
 }
 
-/* The level and doubleheader tags are the canvas's count tag: square, a 2px ink
-   edge on the page paper (.card__count, system/stamped/stamped.css). */
-.gamecard__level {
-  padding: 1px var(--space-2);
-  border-radius: 0;
-  background: var(--bg-canvas);
-  border: var(--bw-heavy) solid var(--border-stamped);
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-heading);
-}
-
-/* "Game 1 / Game 2" doubleheader chip — same pill as the level tag but tinted
+/* "Game 1 / Game 2" doubleheader chip — the canvas's count tag (square, a 2px
+   ink edge on the page paper, .card__count in system/stamped/stamped.css),
    so a twin bill's two rows are told apart without a second glance. */
 .gamecard__dh {
   padding: 1px var(--space-2);
@@ -226,7 +213,7 @@
    posted pip is a hollow paper box, never red — nothing here reads as an
    alarm for the hours before any of this could actually be wrong. Only once
    all four post does `--complete` add the "Ready" word and the pill chrome
-   (same shape as .gamecard__level/.gamecard__dh, tinted field-green) — a
+   (same shape as .gamecard__dh, tinted field-green) — a
    tinted "good status" background around a still-incomplete checklist would
    claim a state that isn't true yet. Deliberately NOT bold even complete —
    it sits on the same line as .gamecard__status (the start time) and matches

@@ -64,15 +64,14 @@
 //   node scripts/gen-gate.mjs                 # this season, whole year to date
 //   node scripts/gen-gate.mjs --season=2025   # a past season
 //   node scripts/gen-gate.mjs --seasons=2024,2025,2026
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'gate.json')
 
 // A regular season never starts before February or runs past November, so
@@ -445,6 +444,6 @@ async function main() {
 
 // Only sweep when run as a script — keeps the reducers importable for tests
 // without triggering a live fetch and a file write.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

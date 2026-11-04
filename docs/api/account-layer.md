@@ -65,8 +65,8 @@ Siblings: `docs/api/live-game.md`, `docs/api/static-data.md`.
   export: `api/account.js` only ever clears the server, so the confirm sheet
   has to clear this device itself. It takes a storage object as an argument
   rather than reaching for `window`, which is the only reason it is testable.
-- **`intro.js`, `prompts.js`, `mergeReceiptFlag.js`** — the onboarding
-  one-shots (`bbsbh:intro`, `bbsbh:prompts`, `bbsbh:mergeReceipt:{userId}`).
+- **`prompts.js`, `mergeReceiptFlag.js`** — the onboarding
+  one-shots (`bbsbh:prompts`, `bbsbh:mergeReceipt:{userId}`).
   **None of them sync, deliberately**: a dismissal is a fact about this browser,
   not about the account, and syncing one would let a second device suppress a
   note the user there has never seen. Each returns the **same object reference**
@@ -102,10 +102,8 @@ the receipt, `normalizeSilentChannels`, is in `src/screens/profile/CLAUDE.md`.
 
 ## Onboarding
 
-Onboarding is the same subsystem's other half: `lib/account/intro.js`
-(`bbsbh:intro`, the first-visit flag that replaced the old
-"`bbsbh:favoriteTeam` exists" proxy) and `lib/account/prompts.js`
+Onboarding is the same subsystem's other half: `lib/account/prompts.js`
 (`bbsbh:prompts`, the bounded one-shot map behind the contextual prompts).
-Both are pure, both return the **same object reference** when nothing changed,
-and both are one-directional — a dismissal never re-fires. Nothing about them
+It is pure, returns the **same object reference** when nothing changed,
+and is one-directional — a dismissal never re-fires. Nothing about them
 syncs: a dismissal is a fact about this browser, not the account.

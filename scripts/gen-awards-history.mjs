@@ -38,8 +38,7 @@
 // same graceful degradation as everywhere else in this app.
 //
 // Run by hand: node scripts/gen-awards-history.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { isPostseasonAward } from '../src/api/person.js'
 import { awardsSeasonInPlay, recipientsOf, SEASON_AWARDS } from '../src/api/awardsHistory.js'
@@ -53,7 +52,7 @@ import { mergeSeasons } from './lib/awards/history-merge.mjs'
 // same list the page's live "so far" block reads) is MAJOR_AWARDS minus ALAS/NLAS.
 const HARDWARE_AWARDS = Object.fromEntries(SEASON_AWARDS)
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'awards-history.json')
 const SEASON_COUNT = 5
 const NIGHTLY = process.argv.includes('--nightly')

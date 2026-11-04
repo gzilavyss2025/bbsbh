@@ -34,8 +34,7 @@
 // Full design: .scratch/team-transactions/data-layer-scope.md.
 //
 // Run by hand: node scripts/gen-team-transactions.mjs [season] [--force]
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { getJson as statsapiJson } from './lib/statsapi.mjs'
 import { readJsonOr, writeShards } from './lib/io.js'
 import { transactionsSeason, transactionsWindow } from './lib/time/transactions-window.mjs'
@@ -45,7 +44,7 @@ import { dedupeTransactions, filterStoryworthy, groupIntoStories, bucketToOrg } 
 // that cap on the shared client, whose own default is none.
 const getJson = (path) => statsapiJson(path, { timeoutMs: 15_000 })
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'team-transactions')
 
 const isoToday = () => new Date().toISOString().slice(0, 10)

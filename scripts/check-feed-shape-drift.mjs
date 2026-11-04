@@ -39,9 +39,8 @@ const ANY_PLAYER = 'ID*'
 
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const ROOT = path.join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = path.join(import.meta.dirname, '..')
 const FIXTURES_DIR = path.join(ROOT, 'e2e/fixtures')
 
 // Each fixture is fetched again from its own manifest sourceUrl, so the fresh
@@ -157,4 +156,4 @@ for (const { label, file } of TARGETS) {
 }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main()
+if (import.meta.main) await main()

@@ -88,7 +88,6 @@ const ALLOWED = {
     ['62-identity-admin.css', '.iddrawer'],
     ['62-identity-admin.css', '.idlab__barmock--unset'],
     ['designlab/lab.css', '.dlab__entry'],
-    ['scout/scout.css', '.scout__lab'],
   ],
   // A connector line that joins two things on a graph: it links, it does not
   // box anything. Dashed marks the link as a degree, not a fact (Gary, 2026-10-07).

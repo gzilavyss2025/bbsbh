@@ -36,13 +36,12 @@
 // player ever had.
 // Also keeps `fld` and `pa` per season from FLD_START_SEASON (see docs/scripts/generators.md).
 // Run by hand: node scripts/gen-war-history.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeShards } from './lib/io.js'
 import { warShardKey } from '../src/api/war.js'
 import { getJson } from './lib/statsapi.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'war-history')
 
 const START_SEASON = 1901

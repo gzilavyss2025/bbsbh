@@ -16,13 +16,12 @@
 // `--out <dir>` writes somewhere else (the test uses it). The rules, the code map and the score
 // are in scripts/lib/open-data/played-for-both.mjs. No clock: a re-run writes the same bytes.
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
-import { basename, dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { basename, join } from 'node:path'
 import { parseCsv } from './lib/csv.mjs'
 import { CHADWICK_JOIN, RETROSHEET_CREDIT } from './lib/open-data/credits.mjs'
 import { buildPlayedForBoth, careerWarFrom } from './lib/open-data/played-for-both.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const root = join(import.meta.dirname, '..')
 const args = process.argv.slice(2)
 const take = (flag, fallback) => {
   const at = args.indexOf(flag)

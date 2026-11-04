@@ -75,8 +75,7 @@
    biggest-overturn line, which names a player and an umpire in a sentence,
    shipped in capitals.
 
-   Same argument and same precedent as the Game Notes blurb prose
-   (`#root .brewblurb__body`, 11-innings.css) and the Identity Lab's hint
+   Same argument and same precedent as the Identity Lab's hint
    paragraphs (`#root .screen--identitylab .hint`, 05-masthead-nav.css). Every
    heading, column head, chip and figure on these pages keeps shouting; this is
    only for the sentences.

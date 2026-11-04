@@ -56,15 +56,14 @@
 // Run by hand: node scripts/gen-contracts-shards.mjs
 // Run scripts/gen-contracts-identity.mjs FIRST -- this script reads its output
 // and never re-derives an id itself.
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { parseCsv } from './lib/csv.mjs'
 import { readJsonOr, writeShards } from './lib/io.js'
 import { shardKey100, termsBucketKey, TERMS_BUCKET_COUNT } from '../src/lib/shardKey.js'
 import { CROSSWALK_DIR, contractRowKeys, rowSortValue } from './lib/contract-row-key.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const sourceDir = join(here, 'data', 'contracts')
 const playerDir = join(here, '..', 'public', 'data', 'contracts-history', 'player')
 const termsDir = join(here, '..', 'public', 'data', 'contracts-history', 'terms')

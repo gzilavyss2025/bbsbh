@@ -132,7 +132,7 @@
 }
 .vsteam__strip {
   /* Makes the strip its own children's offsetParent, so a centering effect's
-     `btn.offsetLeft` (SplitsVsTeam.jsx, FavoriteTeamModal.jsx) is measured
+     `btn.offsetLeft` (SplitsVsTeam.jsx, ClubPicker.jsx) is measured
      relative to the strip itself rather than skipping past it — a static
      element isn't an offsetParent — to whatever positioned ancestor happens
      to sit further up (e.g. a modal's `position: fixed` scrim), which throws

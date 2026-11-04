@@ -88,14 +88,13 @@
 // as `venues[season] = { name, teamId }`.
 //
 // Run by hand: node scripts/gen-all-star-rosters.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { findBoxscorePlayer, positionLabel, battingStat, pitchingStat } from '../src/api/boxscore.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'all-star-rosters.json')
 const FIRST_SEASON = 1933
 const CURRENT_SEASON = new Date().getUTCFullYear()

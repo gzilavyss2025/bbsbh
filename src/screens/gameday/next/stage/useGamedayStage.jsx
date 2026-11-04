@@ -123,7 +123,7 @@ export function useGamedayStage({ feed, last, reliever, view, inning, half, mark
                 {p.call && <small>{p.call}</small>}
               </span>
               {/* The ball in play opens where it went (the hero diamond's flight card). */}
-              {p.ball && <BallFlight ball={p.ball} batter={{ id: batter.id, last: batter.last }} facts={false} arc={false} head={false} hover={false}
+              {p.ball && <BallFlight ball={p.ball} batter={{ id: batter.id, last: batter.last }}
                 extra={p.playId ? <SavantFacts gamePk={feed.gamePk} sportId={gd?.teams?.home?.sport?.id ?? 1} playId={p.playId} /> : null} />}
             </span>
           ))}</SealBox>} />

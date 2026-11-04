@@ -148,8 +148,6 @@ const S14 = {
   fhist__parkline: { jsx: 'screens/team/modules/ballpark/FranchiseHistory.jsx', file: '57a-franchise-history.css', gap: 'tight' },
   scout__game: { jsx: 'screens/scout/meetings/MeetingsPanel.jsx', file: 'scout/meet.css', gap: 'snug' },
   scout__pa: { jsx: 'screens/scout/meetings/MeetingsPanel.jsx', file: 'scout/meet.css', gap: 'snug' },
-  introsheet__step2: { jsx: 'components/account/AccountPitch.jsx', file: '56-my-tally-intro.css', gap: 'loose' },
-  introsheet__confirm: { jsx: 'components/account/AccountPitch.jsx', file: '56-my-tally-intro.css', gap: 'base' },
   psrace__leagues: { jsx: 'screens/PostseasonRacePage.jsx', file: '70-postseason-race.css', gap: 'loose' },
   staffgrid: { jsx: 'components/workload/StaffGrid.jsx', file: '76-workload-marks.css', gap: 'snug' },
 }

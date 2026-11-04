@@ -21,13 +21,13 @@
 // is a legitimate thing to ask for, and it is the range the page is most
 // interesting at. What they may not do is cross, which is what the clamps in
 // the two change handlers prevent.
-export function YearRange({ min, max, from, to, onChange, label = 'Season range' }) {
+export function YearRange({ min, max, from, to, onChange }) {
   const span = Math.max(1, max - min)
   const leftPct = ((from - min) / span) * 100
   const rightPct = ((to - min) / span) * 100
 
   return (
-    <div className="yrange" role="group" aria-label={label}>
+    <div className="yrange" role="group" aria-label="Season range">
       <p className="yrange__readout">
         <span className="yrange__years">
           {from}

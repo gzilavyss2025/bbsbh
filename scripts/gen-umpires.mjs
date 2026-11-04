@@ -45,16 +45,15 @@
 // Run by hand: node scripts/gen-umpires.mjs [--season=2026]
 // 2023 to 2025 were written this way once (#1202, the season views' backfill).
 // The nightly run passes no season, so it rebuilds only the current one.
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import { readdir, rm } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
 import { teamAbbr } from '../src/lib/teams.js'
 import { packUmpireGames } from '../src/lib/umpire/rows.js'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonIfChanged, writeSeasons } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const storeDir = join(here, '..', 'public', 'data', 'umpires')
 // Crew roles, mapped to short scorecard labels. Left/Right Field only appear in
 // six-man crews (All-Star Game + postseason); a two- or three-man MiLB crew just

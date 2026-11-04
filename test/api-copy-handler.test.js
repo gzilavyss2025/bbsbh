@@ -28,7 +28,7 @@ import assert from 'node:assert/strict'
 import test, { mock } from 'node:test'
 
 import handler from '../api/copy.js'
-import { hashFromReply } from '../api/_lib/redis.js'
+import { hashFromReply, readHash, writeHash } from '../api/_lib/redis.js'
 import { nodeRes } from './helpers/node-http.js'
 
 const PHOTO_URL =
@@ -143,4 +143,26 @@ test('hashFromReply answers an empty map for every no-data shape', () => {
 
 test('hashFromReply ignores a trailing unpaired field rather than storing undefined', () => {
   assert.deepEqual(hashFromReply(['a', '1', 'orphan']), { a: '1' })
+})
+
+// readHash / writeHash — the shared hash-store halves (identity, contract-identity, copy, page)
+test('readHash pairs the flat reply the real client returns', async () => {
+  assert.deepEqual(await readHash({ hgetall: async () => ['a', '1', 'b', '2'] }, 'k'), { a: '1', b: '2' })
+})
+
+test('writeHash hsets clean, hdels stale, in one transaction, and skips an empty write', async () => {
+  const log = []
+  const tx = {
+    hset: (...a) => (log.push(['hset', ...a]), tx),
+    hdel: (...a) => (log.push(['hdel', ...a]), tx),
+    exec: async () => log.push(['exec']),
+  }
+  const redis = { multi: () => tx }
+  await writeHash(redis, 'k', { a: '1' }, ['b'])
+  assert.deepEqual(log, [['hset', 'k', { a: '1' }], ['hdel', 'k', 'b'], ['exec']])
+  log.length = 0
+  await writeHash(redis, 'k', {}, [])
+  assert.deepEqual(log, [], 'nothing to write, nothing sent')
+  await writeHash(redis, 'k', {}, [], (t) => t.hset('h', {}))
+  assert.deepEqual(log, [['hset', 'h', {}], ['exec']], 'a prep command alone still executes')
 })

@@ -227,13 +227,28 @@ export function teamCrawl(t, { id, name, level, league, tab, ballpark = clean(t.
 // there is no second palette here to drift from src/tokens/.
 export const CRAWL_STYLE = `<style>#crawl{max-width:42rem;margin:0 auto;padding:1.5rem 1.25rem 3rem;font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}#crawl h1{font-size:1.6rem;margin:0 0 .25rem}#crawl h2{font-size:1.05rem;margin:1.75rem 0 .5rem}#crawl p{margin:0 0 .75rem}#crawl dl{display:grid;grid-template-columns:auto 1fr;gap:.15rem .75rem;margin:1rem 0}#crawl dt{font-weight:600}#crawl dd{margin:0}#crawl ul{margin:.25rem 0;padding-left:1.1rem}#crawl li{margin:.15rem 0}#crawl table{border-collapse:collapse;width:100%}#crawl th,#crawl td{padding:.25rem .5rem;text-align:left;border-bottom:1px solid currentColor}#crawl small{opacity:.75}</style>`
 
-function esc(s) {
+export function esc(s) {
   return String(s ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
+}
+
+// The SPA's own index.html, fetched over `origin` and memoised per origin for the life of the
+// instance (index.html changes only on a deploy, and a deploy gets fresh instances). A failure is
+// NOT cached: the caller falls back and the next request tries again. Shared by preview.js and page.js.
+const shellCache = new Map()
+
+export async function appShell(origin) {
+  const cached = shellCache.get(origin)
+  if (cached) return cached
+  const res = await fetch(`${origin}/index.html`, { headers: { Accept: 'text/html' } })
+  if (!res.ok) throw new Error(`index ${res.status}`)
+  const html = await res.text()
+  shellCache.set(origin, html)
+  return html
 }
 
 // Every body ends with the same short rail. A crawler learns a URL from a link,

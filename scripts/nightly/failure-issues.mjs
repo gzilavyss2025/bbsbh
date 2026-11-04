@@ -12,7 +12,6 @@
 // linked, not quoted: a job cannot read its own logs until it has finished.
 // With --check (the last step) it only fails the job when any step failed.
 import { execFileSync } from 'node:child_process'
-import { pathToFileURL } from 'node:url'
 
 export const titleFor = (id) => `Nightly data: step "${id}" failed`
 export const NOTE_MARK = 'skipped by the input gates'
@@ -72,7 +71,7 @@ function main() {
   console.log(`failure issues: ${plan.open.length} opened, ${plan.comment.length} commented, ${plan.close.length} closed, ${plan.note.length} noted`)
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   if (process.argv.includes('--check')) check()
   else main()
 }

@@ -58,8 +58,7 @@
 //   node scripts/gen-attendance.mjs                 # this season
 //   node scripts/gen-attendance.mjs --season=2025   # a past season
 //   node scripts/gen-attendance.mjs --seasons=2024,2025,2026
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
@@ -68,7 +67,7 @@ import { parkRecord } from '../src/lib/ballpark/parkKeys.js'
 import { POSTSEASON_GAME_TYPES } from './lib/records/postseason.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'attendance.json')
 
 // Share of a park's listed capacity a crowd has to reach to count as a
@@ -208,6 +207,6 @@ async function main() {
 
 // Only sweep when run as a script — keeps the reducers importable for tests
 // without triggering a live fetch and a file write.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

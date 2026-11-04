@@ -27,8 +27,7 @@
 // three times the fetching on history. `--season=` overrides.
 //
 // Run by hand: node scripts/gen-command-received.mjs [--season=2026] [--limit=50]
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { getJson } from './lib/statsapi.mjs'
@@ -42,7 +41,7 @@ import {
   streamPitches,
 } from './lib/opencommand.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'command-received.json')
 
 const arg = (name) => {

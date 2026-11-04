@@ -34,8 +34,7 @@
 // leaving the paste-a-URL field that has always worked.
 
 import { FIELD_IDS } from '../src/copy/registry.js'
-import { authenticateAdmin } from './_lib/adminAuth.js'
-import { privateJson, readRawBody, requestUrl } from './_lib/nodeHandler.js'
+import { uploadImage } from './_lib/blob.js'
 
 // Node runtime, not edge — @clerk/backend's verifyToken pulls in internals
 // Vercel's edge sandbox rejects. Same reason as api/copy.js.
@@ -53,24 +52,6 @@ const KINDS = {
   wordmark: { maxBytes: 400_000, field: (key) => `ballpark.${key}Wordmark` },
 }
 
-// Content sniffing, not content-type trust. The header says whatever the caller
-// typed; these are the first bytes of the file itself. It is a small check and
-// it is not the security boundary (the allowlist above it is) — its job is to
-// keep a mistyped upload from becoming a broken <img> on the live site, and to
-// make sure the extension we store matches what the bytes actually are.
-const SIGNATURES = [
-  { ext: 'jpg', contentType: 'image/jpeg', magic: [0xff, 0xd8, 0xff] },
-  { ext: 'png', contentType: 'image/png', magic: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] },
-]
-
-export function sniffImage(bytes) {
-  if (!bytes || bytes.byteLength < 8) return null
-  for (const sig of SIGNATURES) {
-    if (sig.magic.every((byte, i) => bytes[i] === byte)) return sig
-  }
-  return null
-}
-
 // Every park key the copy registry knows, derived from the registry itself
 // rather than re-deriving from BALLPARKS. The registry is what an upload is
 // ultimately FOR — a key with no `ballpark.{key}Photo` field is a key no admin
@@ -80,167 +61,19 @@ const PARK_KEYS = new Set(
   FIELD_IDS.map((id) => /^ballpark\.([a-z0-9]+)Photo$/.exec(id)?.[1]).filter(Boolean),
 )
 
-// A URL is safe to delete only if it is one of ours. The token would refuse a
-// foreign store anyway, but an admin's hand-typed override could be ANY https
-// URL — including a page on somebody else's site that we must not so much as
-// send a delete for. Checking the host before the call keeps that from being
-// the token's problem to catch.
-//
-// With BLOB_READ_WRITE_TOKEN set (`vercel_blob_rw_<storeId>_<secret>`), the host
-// must be THIS store's own; any other Vercel Blob store is somebody else's.
-const STORE_HOST_SUFFIX = '.public.blob.vercel-storage.com'
-export function isOwnBlobUrl(raw, env = process.env) {
-  try {
-    const url = new URL(String(raw))
-    if (url.protocol !== 'https:' || !url.hostname.endsWith(STORE_HOST_SUFFIX)) return false
-    const storeId = /^vercel_blob_rw_([a-z0-9]+)_/i.exec(env.BLOB_READ_WRITE_TOKEN ?? '')?.[1]
-    return !storeId || url.hostname === `${storeId.toLowerCase()}${STORE_HOST_SUFFIX}`
-  } catch {
-    return false
-  }
-}
-
-// The same check, narrowed to one folder of the store — what a DELETE needs.
-// The host check alone proves only "ours", and our store holds more than one
-// kind of thing: ballpark photos, club marks, and whatever comes next. A
-// replaces= pointing at a neighbouring folder is still our own URL, so the
-// host check waves it through and the upload quietly deletes an object some
-// other saved override still points at. A delete should only ever reach the
-// folder the uploader just wrote to.
-export function isOwnBlobUrlUnder(raw, prefix) {
-  if (!isOwnBlobUrl(raw) || !prefix) return false
-  try {
-    return new URL(String(raw)).pathname.startsWith(`/${prefix}`)
-  } catch {
-    return false
-  }
-}
-
-// --- reclaiming the upload a save replaced -----------------------------------
-//
-// Every upload lands on a UNIQUE pathname (`addRandomSuffix` below), and that
-// stays: overwriting a stable one would leave the old bytes cached hard at the
-// CDN, so "I replaced the photo" would keep showing the previous one. The price
-// of that choice is that the bytes a save REPLACES stay in the store with
-// nothing pointing at them.
-//
-// The upload endpoints already reclaim ONE case: a draft abandoned by
-// re-uploading before saving, which the drawer names in `?replaces=`. They
-// cannot reclaim the other, and deliberately do not try -- at upload time the
-// old URL is still the live one, so deleting it and then failing the save would
-// break the page it is still rendering on.
-//
-// The SAVE is where it becomes dead, and where both maps are already in hand.
-
-// Every URL in our own store, under `prefix`, that a store map's values name.
-// Both stores hold flat string values (sanitizeOverrides and
-// sanitizeIdentityOverrides each drop anything else), so this does not recurse.
-function blobUrlsIn(map, prefix) {
-  const found = new Set()
-  for (const value of Object.values(map ?? {})) {
-    if (typeof value === 'string' && isOwnBlobUrlUnder(value, prefix)) found.add(value)
-  }
-  return found
-}
-
-// What a save orphaned: named by `prev`, named by nothing in `keep`.
-//
-// `keep` is a LIST of maps rather than one, because "still referenced" is wider
-// than "in the new map" wherever a store keeps an undo history -- an entry that
-// can still be restored is still a reference. Two clubs sharing one mark also
-// keep it when only one of them is re-pointed, which falls out of the same set.
-export function reclaimableBlobUrls(prev, keep, prefix) {
-  const kept = new Set()
-  for (const map of keep ?? []) for (const url of blobUrlsIn(map, prefix)) kept.add(url)
-  return [...blobUrlsIn(prev, prefix)].filter((url) => !kept.has(url))
-}
-
-// Best-effort, and deliberately so: the write this follows has already
-// succeeded, so a failed delete must leave an orphan rather than turn a good
-// save into an error the admin cannot act on. Lazy import for the same reason
-// the endpoints use one -- the module still loads where the dependency is
-// absent. No token means the store is not configured, so there is nothing to
-// reclaim and nothing to report.
-export async function reclaimBlobs(urls, token) {
-  if (!urls?.length || !token) return
-  try {
-    const { del } = await import('@vercel/blob')
-    await del(urls, { token })
-  } catch {
-    // Orphans left behind. Nothing the admin did was wrong.
-  }
-}
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return privateJson(res, { error: 'method not allowed' }, 405)
-
-  const token = process.env.BLOB_READ_WRITE_TOKEN
-  if (!token) return privateJson(res, { error: 'image store not configured' }, 501)
-
-  const userId = await authenticateAdmin(req)
-  if (!userId) return privateJson(res, { error: 'forbidden' }, 403)
-
-  const { searchParams } = requestUrl(req)
-  const key = searchParams.get('key') || ''
-  const kindName = searchParams.get('kind') || 'photo'
-  const kind = Object.prototype.hasOwnProperty.call(KINDS, kindName) ? KINDS[kindName] : null
-  if (!kind) return privateJson(res, { error: 'unknown kind' }, 400)
-  if (!PARK_KEYS.has(key)) return privateJson(res, { error: 'unknown ballpark' }, 400)
-
-  const bytes = await readRawBody(req, kind.maxBytes)
-  // readRawBody returns null for BOTH "nothing arrived" and "went over the
-  // cap", which are different answers to the caller — so the size case is
-  // separated by re-reading content-length purely for the message. The header
-  // is untrusted for enforcement (the streaming count above did that) and used
-  // only to phrase the error.
-  if (!bytes) {
-    const declared = Number(req.headers?.['content-length'] ?? 0)
-    return declared > kind.maxBytes
-      ? privateJson(res, { error: `image too large — the limit is ${Math.round(kind.maxBytes / 1000)} KB` }, 413)
-      : privateJson(res, { error: 'no image received' }, 400)
-  }
-
-  const sig = sniffImage(bytes)
-  if (!sig) return privateJson(res, { error: 'not a JPEG or PNG' }, 415)
-
-  // Import lazily so the module still loads (and answers 501) on a deploy where
-  // the dependency is present but the store is not — and so an unconfigured
-  // deploy pays nothing at cold start.
-  const { put, del } = await import('@vercel/blob')
-
-  let uploaded
-  try {
-    uploaded = await put(`ballparks/${key}-${kindName}.${sig.ext}`, bytes, {
-      access: 'public',
-      token,
-      contentType: sig.contentType,
-      // A NEW URL EVERY TIME, and it must stay that way. Overwriting one stable
-      // pathname would leave the old bytes cached at the CDN and in every
-      // browser that had loaded the page, so "I replaced the photo" would show
-      // the previous one for as long as the cache held — indistinguishable from
-      // the save having failed. A unique URL makes the swap atomic and lets the
-      // object itself be cached hard, below.
-      addRandomSuffix: true,
-      cacheControlMaxAge: 31_536_000,
-    })
-  } catch {
-    return privateJson(res, { error: 'upload failed' }, 502)
-  }
-
-  // Best-effort cleanup of the image this one replaces. AFTER a successful put,
-  // never before: if the delete ran first and the put then failed, the park
-  // would be left pointing at bytes that no longer exist. A failure here costs
-  // an orphaned object and nothing else, so it is swallowed rather than turned
-  // into an error the admin has to think about.
-  const replaces = searchParams.get('replaces')
-  if (replaces && isOwnBlobUrlUnder(replaces, 'ballparks/') && replaces !== uploaded.url) {
-    try {
-      await del(replaces, { token })
-    } catch {
-      // Orphan left behind. Not worth failing a save the admin already watched
-      // succeed.
+export default (req, res) =>
+  uploadImage(req, res, (q) => {
+    const key = q.get('key') || ''
+    const kindName = q.get('kind') || 'photo'
+    const kind = Object.hasOwn(KINDS, kindName) ? KINDS[kindName] : null
+    if (!kind) return { error: 'unknown kind' }
+    if (!PARK_KEYS.has(key)) return { error: 'unknown ballpark' }
+    return {
+      maxBytes: kind.maxBytes,
+      limit: `${Math.round(kind.maxBytes / 1000)} KB`,
+      prefix: 'ballparks/',
+      vet: (_bytes, sig) => (sig ? null : 'not a JPEG or PNG'),
+      pathname: (sig) => `ballparks/${key}-${kindName}.${sig.ext}`,
+      field: kind.field(key),
     }
-  }
-
-  return privateJson(res, { url: uploaded.url, field: kind.field(key) })
-}
+  })

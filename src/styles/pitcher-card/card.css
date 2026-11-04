@@ -371,9 +371,6 @@
 .pscene__ghost.is-dim {
   opacity: 0.3;
 }
-.szmodal__body .pbp__replay {
-  align-self: stretch;
-}
 
 /* Phone: the card's "Replay" control, last on the zone icon's line. Narrow
    sides, so zone, Watch and Replay share the ~142px column at 390; narrower,
@@ -420,62 +417,4 @@
    off from the count strip above. */
 .pbp__replaypicks {
   margin: var(--space-2);
-}
-
-/* Wide, the whole half laid out: a pick's scene plays in its own card, on a
-   row of its own under the pitch list and zone plot (AtBatReplay.jsx). */
-.pbp__zonecell:has(> .pbp__replay) {
-  flex-wrap: wrap;
-}
-.pbp__zonecell > .pbp__replay {
-  flex-basis: 100%;
-  max-width: var(--refrail-w); /* the rail's size, not the card's */
-}
-
-/* The pitch list's picks (PitchList's opt-in `pick`): each number dot is a
-   ghost .btn stripped to the dot, so the list keeps its height. Its hit area is
-   the whole row: the ::after takes its width from the list (the positioned
-   ancestor) and its height and place from the dot, its static position. The
-   picked one: an ink ring on the dot and an ink underline on the row. --marker
-   stays the decisive pitch's alone. */
-.pitchlist:has(.pitchlist__pick) {
-  position: relative;
-}
-.pitchlist__pick {
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  font-family: inherit;
-  font-size: 1em;
-  letter-spacing: var(--ls-none);
-}
-/* No press nudge: a transform would make the button the ::after's containing
-   block and shrink the row's hit area to the dot mid-tap (src/styles/CLAUDE.md). */
-.pitchlist__pick:active {
-  transform: none;
-}
-/* The ABS mark keeps its own pointer, above the row's hit area. */
-.pitchlist:has(.pitchlist__pick) .pitchlist__challenge {
-  position: relative;
-}
-.pitchlist__pick::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 17px;
-}
-.pitchlist__pick[aria-pressed='true'] {
-  background: var(--btn-fill);
-}
-.pitchlist__pick[aria-pressed='true']::before {
-  content: none;
-}
-.pitchlist__pick[aria-pressed='true'] .pitchlist__num {
-  outline: var(--bw-heavy) solid var(--accent-primary);
-  outline-offset: 1px;
-}
-.pitchlist__row:has(> [aria-pressed='true']) > :is(.pitchlist__type, .pitchlist__meta) {
-  text-decoration: underline var(--bw-heavy) var(--accent-primary);
-  text-underline-offset: 2px;
 }

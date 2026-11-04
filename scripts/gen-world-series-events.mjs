@@ -16,8 +16,7 @@
 // NO generatedAt: the `coverage` block is the file's own clock (check-data-freshness.mjs).
 // All logic a test must reach is in scripts/lib/world-series/events.mjs; this file RUNS on import.
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join, resolve } from 'node:path'
 import { parseArgs } from './lib/args.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { readJsonOr } from './lib/io.js'
@@ -26,7 +25,7 @@ import {
   PLAY_FIELDS, buildEventsDoc, gamesFromSchedule, gamesFromSeriesJson, seasonRange, serializeDoc,
 } from './lib/world-series/events.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const root = join(import.meta.dirname, '..')
 const parsed = parseArgs(process.argv.slice(2))
 const { from, to } = seasonRange(parsed, new Date().getUTCFullYear() - 1, new Date().getUTCFullYear())
 const outDir = parsed.out ? resolve(parsed.out) : join(root, 'public', 'data', 'world-series')

@@ -69,7 +69,9 @@ import { resolve, join } from 'node:path'
 // (ADR-0116).
 // 103 -> 102: the percentile strip's sheet went with its unimported component.
 // 102 -> 101: a rule for a class no component draws went in the PurgeCSS sweep.
-const BUDGET = 99
+// 99 -> 98: the intro chain went (#2856).
+// 99 -> 98: BallFlight's outcome line (.bflight__outcome) went with its unused head (#2833).
+const BUDGET = 97
 
 const stylesDir = resolve('src/styles')
 const sheets = []

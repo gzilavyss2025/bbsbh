@@ -10,8 +10,7 @@
 // player types in one shard, so a player page opens ONE file (src/api/ovr/ovrData.js).
 // Run by hand: node scripts/gen-ovr.mjs
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeShards } from './lib/io.js'
 import { FLD_MIN_PA, buildRatings, loadInputs } from './lib/ovr/build.mjs'
 import { mergeHistory, seedRows } from './lib/ovr/history.mjs'
@@ -19,7 +18,7 @@ import { unpackProspectTrend } from '../src/api/prospectTrend.js'
 import { CONSTANTS } from '../src/api/ovr/rating.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 
-const dataDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data')
+const dataDir = join(import.meta.dirname, '..', 'public', 'data')
 const MAX_SHARD_BYTES = 8 * 1024 // the sizing rule's stop-and-ask line (src/api/CLAUDE.md)
 // The history store is the one exception, by Gary's call: 11 rated players a shard at 60 daily rows
 // with bars come to about 106 KB at the most, so the line is 128 KB. A page opens one shard.

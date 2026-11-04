@@ -35,8 +35,7 @@
 // card shows "no career meetings" for those).
 //
 // Run by hand: node scripts/gen-vs-team-splits.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
@@ -45,7 +44,7 @@ import { hitterCar } from './lib/vs-team/hitter.mjs'
 import { num } from '../src/lib/math/number.js'
 import { ipToOuts, outsToIp } from '../src/lib/math/innings.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'vs-team-splits')
 // How far ahead to look for each club's next game (to pre-select the opponent).
 const NEXT_GAME_WINDOW_DAYS = 14

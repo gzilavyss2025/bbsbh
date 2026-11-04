@@ -31,7 +31,6 @@ export function GameCard({
   game,
   pinnedTeamId,
   prospectCount = 0,
-  dateLabel = null,
   // `{ [gamePk]: { [teamId]: { code, text } } }` from a same-day batched
   // fetchGameJerseys call (see GameSelect.jsx) — today's slate only, so a
   // same-day alternate/City Connect posting shows up before the next nightly
@@ -189,10 +188,6 @@ export function GameCard({
           everything else: the card is a scorebook entry and the park is the
           paper it is written on. */}
       {park && <span className="gamecard__parkart" aria-hidden="true" />}
-      {/* Full-width date strip for a cross-date list where each card needs
-          its own day, unlike the slate (one date heads the whole page).
-          Absent on every ordinary slate card. */}
-      {dateLabel && <div className="gamecard__datebanner">{dateLabel}</div>}
       {pinned && (
         <span className="gamecard__pinbadge" aria-label="Pinned team">
           <span className="gamecard__pinbadge-star">★</span>
@@ -261,15 +256,6 @@ export function GameCard({
         )}
         {postponed && <PostponedBanner game={game} status={status} />}
         <div className="gamecard__meta">
-          {/* Only shown in a cross-level list (All-Star Rosters — the caller
-              that also passes dateLabel, since a single date-per-page
-              assumption doesn't hold there either). The ordinary slate
-              never passes dateLabel: the level toggle already scopes the
-              whole page to one level, so repeating it on every card would
-              just be noise. */}
-          {dateLabel && game.sportLabel && game.sportLabel !== 'MLB' && (
-            <span className="gamecard__level">{game.sportLabel}</span>
-          )}
           {dhLabel && (
             <span
               className="gamecard__dh"

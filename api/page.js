@@ -28,7 +28,8 @@ import { renderIndex, renderPage } from '../src/copy/landing/render.js'
 import { resolvePage } from '../src/copy/landing/schema.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
 import { sanitizeOverrides } from '../src/copy/registry.js'
-import { getRedis, hashFromReply } from './_lib/redis.js'
+import { appShell } from './_lib/crawl.js'
+import { getRedis, readHash } from './_lib/redis.js'
 
 // Node, not edge: it shares api/copy.js's Redis client and its deliberate
 // `automaticDeserialization: false` handling.
@@ -48,8 +49,7 @@ async function readOverrides() {
   try {
     const redis = getRedis({ automaticDeserialization: false })
     if (!redis) return {}
-    const reply = await redis.hgetall(COPY_KEY)
-    return sanitizeOverrides(hashFromReply(reply))
+    return sanitizeOverrides(await readHash(redis, COPY_KEY))
   } catch {
     return {}
   }
@@ -71,22 +71,7 @@ async function readOverrides() {
 //   2. It is the same constant the rest of the render path trusts, so there is
 //      one answer to "what origin is this page" instead of two.
 //
-// Memoised for the life of the lambda instance. index.html changes only on a
-// deploy, and a deploy gets fresh instances, so a warm instance serving many
-// `?edit` hits makes one origin fetch rather than one per request. A failure is
-// NOT cached — the caller falls back to a redirect, and the next request should
-// be free to try again.
-let shellCache = null
-
-async function spaShell() {
-  if (shellCache) return shellCache
-  const res = await fetch(`${SITE_URL}/index.html`, { headers: { Accept: 'text/html' } })
-  if (!res.ok) throw new Error(`index ${res.status}`)
-  const html = await res.text()
-  shellCache = html
-  return html
-}
-
+// (appShell memoises it; see _lib/crawl.js.)
 export default async function handler(req, res) {
   // SITE_URL as the parse base, not the request's host. Nothing downstream reads
   // `url.origin` any more — only the query string — but a `new URL` built on an
@@ -104,7 +89,7 @@ export default async function handler(req, res) {
   if (url.searchParams.has('edit')) {
     try {
       // never cached: it is a signed-in, one-person surface
-      return send(await spaShell(), 200, 'private, no-store')
+      return send(await appShell(SITE_URL), 200, 'private, no-store')
     } catch {
       return send('<!doctype html><meta http-equiv="refresh" content="0;url=/">', 200, 'no-store')
     }

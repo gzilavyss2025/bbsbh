@@ -36,7 +36,7 @@
 // the occurrence ordinal already separates, and it would make every
 // service-time repair an override-orphaning event.
 import { createHash } from 'node:crypto'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
 export const KEY_COLUMNS = {
   extensions: ['player', 'club', 'signed_date', 'first_year'],
@@ -53,7 +53,7 @@ export const CONTRACT_SOURCES = Object.keys(KEY_COLUMNS)
 // place. The folder sits outside public/ because no page fetches these files.
 // pending.json is not a crosswalk file: the admin review page fetches it, so it
 // keeps its own path under public/ (see gen-contracts-identity.mjs).
-export const CROSSWALK_DIR = fileURLToPath(new URL('../data/contracts/identity', import.meta.url))
+export const CROSSWALK_DIR = join(import.meta.dirname, '../data/contracts/identity')
 
 // WHY AN ORDINAL. Two rows of a source file can be genuinely identical.
 // salaries.csv holds 27 such pairs -- one worksheet row duplicated by the

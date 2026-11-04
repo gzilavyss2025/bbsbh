@@ -31,7 +31,7 @@ import {
   isOwnBlobUrlUnder,
   reclaimableBlobUrls,
   sniffImage,
-} from '../api/ballpark-photo.js'
+} from '../api/_lib/blob.js'
 
 const FENWAY = venueKey('Fenway Park')
 

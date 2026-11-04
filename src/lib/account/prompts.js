@@ -19,11 +19,9 @@ export const PROMPTS_KEY = 'bbsbh:prompts'
 export const MAX_PROMPTS = 32
 
 // The closed set of one-shot contextual-prompt ids this module recognizes.
-// `intro-account` (step 2 of the welcome modal) and `settings-pitch` (the
-// always-on /profile panel) are deliberately absent — PRD §6.1/§6.2: the intro
-// is governed by its own bbsbh:intro flag, and settings-pitch is the one panel
-// allowed to persist. Listing either here would let it be dismissed by
-// mistake through this generic path. A stored id that is not on this list (the
+// `settings-pitch` (the always-on /profile panel) is deliberately absent — it
+// is the one panel allowed to persist, and listing it here would let it be
+// dismissed by mistake through this generic path. A stored id that is not on this list (the
 // retired `scores-unlocked-local`, ADR-0116) is dropped on read by `scrub`.
 export const PROMPT_IDS = Object.freeze(['first-stamp', 'third-game'])
 

@@ -16,14 +16,13 @@
 // (war: cumulative, tenths; null for a career that began before 1901)
 // (outs = innings x 3, so an IP of 200.1 stays exact). Only fields every era has.
 import { readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { chunk } from './lib/concurrency.mjs'
 import { paceLine } from './lib/hof/pace.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { shardKey100 } from '../src/lib/shardKey.js'
 
-const data = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data')
+const data = join(import.meta.dirname, '..', 'public', 'data')
 const out = join(data, 'hof-pace.json')
 // Season WAR from the committed war-history/ shards (1901 on, #2765): no WAR request here.
 const shards = new Map()

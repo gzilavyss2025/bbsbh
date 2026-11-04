@@ -8,32 +8,13 @@
 
    It sits after the ballpark partial on purpose: the field drawing arrives with
    the modal's own sizing (a centred 380px sketch), and this card needs it
-   full-bleed so the half's HTML dot numbers can be positioned in percentages
-   against the very box the SVG occupies.
+   full-bleed.
 
    The card itself is a Card (sheet, flush body; #1113, slice C2), which draws
    the frame and clips to it. The chart keeps only its positioning context. */
 
 .hitchart {
   position: relative;
-}
-
-/* In the innings feed this card is a SIBLING of `.half`, not a child of it
-   (HalfInning.jsx) - so it carries the gap that separates it from the
-   play-by-play above and the "due up next" card below. The game-shaped card on
-   the box score sits in that page's own flow and wants nothing here. */
-.hitchart--half {
-  margin-top: var(--space-4);
-}
-
-/* `.inning` goes display:contents on a phone and `.half` claims `order: 1`
-   there (12-sealbox.css). Nothing between them is a flex container today — but
-   the moment one is, a card left at 0 would sort ABOVE the play-by-play it
-   summarises. Matching `.half` holds them on source order either way. */
-@media (max-width: 739.98px) {
-  .hitchart--half {
-    order: 1;
-  }
 }
 
 /* ---- Head ---- */
@@ -63,22 +44,6 @@
   line-height: var(--lh-display);
   letter-spacing: var(--ls-none);
   color: var(--text-heading);
-}
-
-/* A HALF'S CARD IS NOT A MASTHEAD. The game-shaped card heads one section of
-   the box score and can afford a title; this one repeats under every half a
-   reader opens, eighteen times a game, and a full masthead each time pushed
-   the plot itself off the phone. The same words, a quarter of the room. */
-.hitchart--half .hitchart__headline {
-  font-size: var(--fs-title-sm);
-}
-
-.hitchart--half .hitchart__head {
-  padding: var(--space-2h) var(--space-3h) var(--space-2);
-}
-
-.hitchart--half .hitchart__rule {
-  display: none;
 }
 
 /* Ink into clay — a short seam under the title, the same two inks the
@@ -217,9 +182,7 @@
   padding: 0 var(--space-3h);
 }
 
-/* The plot box must be exactly the drawing's box: the half's dot numbers are
-   positioned in percentages of the cropped viewBox, and any margin or max-width
-   between the two would slide every label off its dot. */
+/* The plot box must be exactly the drawing's box. */
 .hitchart__plot {
   position: relative;
 }
@@ -284,30 +247,6 @@
   stroke: var(--ink-0);
   stroke-width: 1.5;
   stroke-dasharray: 3 2.5;
-}
-
-/* A number rides beside its dot, over a drawing that already prints the park's
-   posted distances. The halo is the card's own ground pushed out around the
-   glyph, so a number that lands on a fence line or a distance stays readable
-   instead of dissolving into it. */
-.hitchart__dotnum {
-  position: absolute;
-  transform: translateY(-50%);
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  color: var(--text-caption);
-  text-shadow:
-    0 0 3px var(--surface-card),
-    0 0 3px var(--surface-card);
-  pointer-events: none;
-}
-
-/* Flipped to the dot's left near the right-field line (HitChart.jsx's
-   RIGHT_EDGE), where a number set to the right would sit on the posted
-   distance at the foul pole. */
-.hitchart__dotnum--flip {
-  transform: translate(-100%, -50%);
 }
 
 /* ---- The readout ────────────────────────────────────────────────────────
@@ -442,85 +381,10 @@
   color: var(--text-heading);
 }
 
-/* ---- The half's list ────────────────────────────────────────────────────
-   Numbered against the dots on the chart above. The column head carries the
-   unit once, so no figure in the rows has to repeat it. */
-
-.hitchart__listhead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 2px var(--space-3h) var(--space-1h);
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-xwide);
-  color: var(--text-caption);
-}
-
-.hitchart__list {
-  list-style: none;
-  margin: 0;
-  padding: 0 var(--space-3h) var(--space-3);
-}
-
-.hitchart__row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) 0;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-
-.hitchart__rownum {
-  flex: none;
-  width: 14px;
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
-}
-
-.hitchart__rowname {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-body);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-solid);
-  letter-spacing: var(--ls-emphasis);
-  color: var(--text-heading);
-}
-
-.hitchart__rowcode {
-  flex: none;
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-emphasis);
-  color: var(--text-caption);
-}
-
-.hitchart__rowvelo {
-  flex: none;
-  width: 62px;
-  text-align: right;
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  color: var(--text-body);
-}
-
-.hitchart__rowvelo--hard {
-  color: var(--clay-deep);
-}
-
 /* PHONE-FIRST, so every number above is the phone's. A tablet or a desktop has
    the height to spend, and the game-shaped card heads a box-score section there
    rather than competing with it for one screen: the masthead goes back to full
-   display size and the blocks around the plot get their air back. The half's
-   compact head is deliberately NOT restored - it repeats under every half at
-   every width, and it reads better small at all of them. */
+   display size and the blocks around the plot get their air back. */
 @media (min-width: 740px) {
   .hitchart__head {
     padding: var(--space-4) var(--space-3h) var(--space-3);
@@ -552,9 +416,8 @@
      tall and the card passed 1,100px — a chart nobody can take in at once.
 
      THE CAP GOES ON THE WRAP, NEVER ON `.hitchart__plot`. That box has to stay
-     exactly the drawing's own box — the half's dot numbers are positioned in
-     percentages of it — so a max-width or auto margin there would slide every
-     label off its dot. Constraining the parent moves both together. */
+     exactly the drawing's own box, so a max-width or auto margin there would
+     slide the overlay off the drawing. Constraining the parent moves both. */
   .hitchart__fieldwrap {
     max-width: 568px;
     margin-inline: auto;
@@ -636,104 +499,19 @@
   font-family: var(--font-body);
   padding: var(--space-3) var(--space-3) var(--space-1);
 }
-/* Square corners, card and code chip, as every Gameday surface is (Card's sheet rounds by default). */
-.bflight:is(.bflight--modal, .bflight--hover), .bflight .bflight__code { border-radius: var(--radius-square); }
-
-.bflight--hover {
-  position: fixed;
-  z-index: var(--z-modal);
-  /* THE CARD TAKES NO POINTER. It is read-only — a drawing and three numbers —
-     so a reader travelling down the feed's diamonds passes straight through it
-     onto the next one, which re-anchors the card, instead of having to steer
-     around it. Anything clickable added in here turns this back on and owes the
-     trigger-to-card gap a safe polygon, not a plain grace period. The SHEET is
-     the opposite: its surface is a dismiss target, all but its view toggle. */
-  pointer-events: none;
-}
-
+/* Square corners on the card, as every Gameday surface is (Card's sheet rounds by default). */
 .bflight--modal {
-  /* Wider than the popover: a sheet is the whole screen's attention, and the
+  border-radius: var(--radius-square);
+  /* A sheet is the whole screen's attention, and the
      drawing is the point of it. */
   width: 340px;
   animation: fade var(--dur-med) var(--ease-out);
 }
 
-/* THE HEAD IS A ROW OF REAL ITEMS — title block, then the close button. Nothing
-   in it is floated over anything else: the close button used to be absolutely
-   positioned in the corner, which put a 28px circle down on the rule under the
-   head and hard against whatever the result line ended with. As a flex item it
-   sits IN the row, the rule runs clear underneath all of it, and the popover —
-   which has no close button — simply closes the row up. */
-.bflight__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-  padding-bottom: var(--space-2);
-}
-/* Only the ✕ (BallFlight head={false}): it floats in the card's top right corner, over the drawing's
+/* The ✕: it floats in the card's top right corner, over the drawing's
    empty corner, so the field starts at the card's top instead of under a row of white. */
 .bflight:has(> .bflight__head--bare) { position: relative; }
-.bflight__head--bare { position: absolute; z-index: 1; top: var(--space-1); right: var(--space-1); border-bottom: 0; padding-bottom: 0; }
-
-.bflight__ttl {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.bflight__who {
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-small);
-  letter-spacing: var(--ls-title);
-  line-height: var(--lh-solid);
-  color: var(--text-heading);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* What he did, under his name: the plain word first, the scorer's mark beside
-   it. A denotation alone ("1B") is a shorthand the reader has to already know,
-   and this card exists to be understood at a glance. */
-.bflight__result {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1h);
-  min-width: 0;
-}
-
-.bflight__outcome {
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  line-height: var(--lh-solid);
-  color: var(--text-caption);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* The scorer's own denotation, in his own hand — the mono face every other
-   scorebook mark in the app is set in, on the paper chip the scorecard sheet
-   gives it. */
-.bflight__code {
-  flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-cell);
-  letter-spacing: var(--ls-title);
-  line-height: var(--lh-solid);
-  color: var(--text-body);
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  padding: 2px var(--space-1);
-}
+.bflight__head--bare { display: flex; position: absolute; z-index: 1; top: var(--space-1); right: var(--space-1); border-bottom: 0; padding-bottom: 0; }
 
 .bflight .bflight__field {
   display: block;
@@ -829,53 +607,6 @@
 
 .bflight__heat-to {
   stop-color: var(--award-line);
-}
-
-/* ---- The side view (#1875, ElevationArc.jsx): light axis marks, the wall in heading ink ---- */
-
-.bflight__views,
-.bflight__arc {
-  margin: var(--space-2) 0 0;
-}
-
-.bflight__arcsvg {
-  display: block;
-  width: 100%;
-}
-
-.bflight__arcground {
-  stroke: var(--graphite);
-  stroke-width: 1.2;
-}
-
-.bflight__arcgrid {
-  stroke: var(--border-hairline);
-  stroke-dasharray: 3 4;
-}
-
-.bflight__arctick,
-.bflight__arcpeaklabel {
-  fill: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--fs-cell);
-}
-
-.bflight__arcpeaklabel {
-  fill: var(--text-heading);
-  font-weight: var(--w-bold);
-}
-
-.bflight__arcwall {
-  stroke: var(--text-heading);
-  stroke-width: 3;
-}
-
-.bflight .bflight__arcpath {
-  stroke-width: 2.5;
-}
-
-.bflight__arcpeak {
-  fill: var(--award-ink);
 }
 
 /* ---- The numbers ---- */

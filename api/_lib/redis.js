@@ -1,59 +1,18 @@
-// The one place the backend exceptions (api/reveal.js, api/copy.js,
-// api/stamps.js, and the rest) decide whether a Redis store is configured at all.
-//
-// WHY THIS EXISTS — the failure it was written for. Each of those functions used
-// to read `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` itself, and each
-// returned its "sync not configured" 501 when either was missing. That is the
-// correct degrade (sync has always been opt-in; see ADR-0022) and it is
-// deliberately indistinguishable from a deploy that has no store on purpose.
-//
-// Which is exactly how it hid a real misconfiguration for as long as it did.
-// Connecting an Upstash database through Vercel's **KV** integration injects the
-// same REST credentials under a different pair of names —
-// `KV_REST_API_URL`/`KV_REST_API_TOKEN` — so a project could be correctly linked
-// to a running store and still 501 on every request, forever, with nothing in
-// the logs and every client quietly falling back to local-only. The store was
-// there. The names didn't match.
-//
-// So the resolution is a LIST of accepted name pairs rather than one hardcoded
-// pair. Two rules keep that from becoming a guessing game:
-//
-//   1. **A pair is atomic.** A URL from one integration is never combined with a
-//      token from another — that would hand @upstash/redis a credential for a
-//      different database and fail at request time instead of at startup, which
-//      is strictly worse than the 501 it replaced.
-//   2. **Only REST credentials, and only read-write ones.** `KV_URL` and
-//      `REDIS_URL` are `rediss://` connection strings for a TCP client, not the
-//      REST endpoint @upstash/redis wants, and `KV_REST_API_READ_ONLY_TOKEN`
-//      cannot write. All three are deliberately absent from the list below;
-//      adding one would turn a clean 501 into a runtime error on the first
-//      ratchet or mint.
-//
-// Order matters only when a project somehow has both pairs set: the
-// Upstash-native names win, because that is the pair this repo documents
-// (docs/development.md) and the one an operator would have set by hand.
+// Where the backend functions decide whether a Redis store is configured at all. The two incidents
+// behind it (the KV-integration env names, the HGETALL array reply) are in ADR-0127: a pair of
+// credential names is atomic, and every `automaticDeserialization: false` read goes through readHash.
 
 import { Redis } from '@upstash/redis'
 
-// Accepted `[urlVar, tokenVar]` pairs, most-preferred first. Both halves of a
-// pair must be present for it to be used — see rule 1 above.
+// Accepted `[urlVar, tokenVar]` pairs, most-preferred first; both halves must be present (ADR-0127).
 export const REDIS_ENV_PAIRS = [
-  // What docs/development.md tells you to set, and what the Upstash marketplace
-  // integration adds today.
   ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'],
-  // What Vercel's KV integration adds for the very same Upstash database. Same
-  // credentials, different names.
+  // Vercel's KV integration: same credentials for the same Upstash database, different names.
   ['KV_REST_API_URL', 'KV_REST_API_TOKEN'],
 ]
 
-// Pure, and exported, so the pairing rules above are pinned by the unit suite
-// rather than resting on a deploy nobody can run in CI. Returns `{ url, token }`
-// or null for "no store configured", which is the 501 every caller already
-// knows how to render.
-//
-// Values are trimmed because a credential pasted into a dashboard field picks up
-// whitespace surprisingly often, and an all-whitespace value is "not set" rather
-// than a URL that fails on first use.
+// Pure and exported so the pairing rules are pinned by the unit suite. `{ url, token }`, or null
+// for "no store configured" (the 501 every caller renders). Values are trimmed.
 export function redisConfigFromEnv(env = process.env) {
   if (!env || typeof env !== 'object') return null
   for (const [urlVar, tokenVar] of REDIS_ENV_PAIRS) {
@@ -64,49 +23,49 @@ export function redisConfigFromEnv(env = process.env) {
   return null
 }
 
-// The client, or null when nothing is configured. `options` is passed straight
-// through to the Redis constructor — api/copy.js needs
-// `automaticDeserialization: false`, for a reason its own call site explains.
-// `responseEncoding: 'base64'` keeps the wire format every caller and
-// test/api-copy-handler.test.js were written against; @upstash/redis 1.40
-// changed the default to plain JSON.
+// The client, or null when nothing is configured. `options` goes straight to the constructor.
+// `responseEncoding: 'base64'` is the wire format the callers and tests were written against
+// (@upstash/redis 1.40 changed the default to plain JSON).
 export function getRedis(options = {}) {
   const config = redisConfigFromEnv()
   if (!config) return null
   return new Redis({ responseEncoding: 'base64', ...config, ...options })
 }
 
-// Pair Upstash's HGETALL reply into a `{ field: value }` object. One copy for
-// api/copy.js, identity.js, contract-identity.js and page.js — each opens the
-// client with `automaticDeserialization: false`, so each reads through this.
-//
-// WHY THIS IS NEEDED — the failure it was written for. `automaticDeserialization
-// : false` (see copyRedis in api/copy.js) does not only disable the JSON.parse
-// the copy store wanted gone. In @upstash/redis it replaces the client's whole deserializer with the
-// identity function, and for HGETALL that deserializer is ALSO what pairs
-// Redis's flat [field, value, field, value] reply into an object.
-//
-// So `redis.hgetall()` here answers an ARRAY. sanitizeOverrides walked it with
-// Object.entries, saw the ids "0"/"1"/"2"/"3", matched none of them against the
-// registry, and returned {} — every override in the store, for every surface,
-// invisible on every read. Writes were landing in Redis the whole time.
-//
-// It shipped, and stayed shipped, because an empty override map is exactly what
-// a deploy with no copy store looks like: the app renders shipped defaults and
-// nothing anywhere reports a failure. Same lesson as _lib/nodeHandler.js's
-// header — a graceful degrade hides a hard failure indefinitely, so the read
-// path needs a test against the shape the real client produces, which is what
-// test/api-copy-handler.test.js now pins.
-//
-// An object is passed through rather than rejected: if a future client version
-// pairs the hash up despite the flag, that must WIDEN what this endpoint reads
-// instead of breaking it.
+// Pair Upstash's HGETALL reply into `{ field: value }`. With `automaticDeserialization: false` the
+// client answers a flat array, so every such read goes through here (ADR-0127). An object passes through.
 export function hashFromReply(reply) {
   if (!reply || typeof reply !== 'object') return {}
   if (!Array.isArray(reply)) return reply
   const out = {}
-  // Step by two. A trailing unpaired field can't come from Redis, but ignoring
-  // one is cheaper than storing a field whose value is undefined.
   for (let i = 0; i + 1 < reply.length; i += 2) out[String(reply[i])] = reply[i + 1]
   return out
+}
+
+// Read a hash as `{ field: value }`. Throws on a Redis failure; callers pick the fallback.
+export async function readHash(redis, key) {
+  return hashFromReply(await redis.hgetall(key))
+}
+
+// hset `clean`, hdel `stale`, in one transaction (never a `del` first: a mid-write crash
+// keeps the previous hash). `prep(tx)` adds the caller's own commands to the same transaction.
+export async function writeHash(redis, key, clean, stale, prep) {
+  const tx = redis.multi()
+  prep?.(tx)
+  if (Object.keys(clean).length) tx.hset(key, clean)
+  if (stale.length) tx.hdel(key, ...stale)
+  if (prep || Object.keys(clean).length || stale.length) await tx.exec()
+}
+
+// Per-user fixed-window counter: true once `key` has been hit more than `max` times in 60s.
+// Fails open: the limit protects an upstream, it is not an access check. NX sets the window only
+// when the key has none, so a key whose EXPIRE failed heals on the next hit.
+export async function overLimit(redis, key, max) {
+  try {
+    const n = await redis.incr(key)
+    await redis.expire(key, 60, 'NX')
+    return n > max
+  } catch {
+    return false
+  }
 }

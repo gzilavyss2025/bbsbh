@@ -48,8 +48,7 @@
 // decode as an image at all, which is the failure mode strict XML parsing
 // gives you (see namespaceDecls in logoMono.js).
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { logoCdnUrl } from '../src/lib/logoCdn.js'
 import { monoLogoFingerprint, monoLogoSvg } from '../src/lib/logoMono.js'
 import {
@@ -61,7 +60,7 @@ import {
 } from './lib/mono-logo-art.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const teamsPath = join(here, '..', 'public', 'data', 'teams.json')
 const outDir = join(here, '..', 'public', 'data', 'logos', 'mono')
 // Kept OUT of public/ — it's a review artifact, not something to ship in the

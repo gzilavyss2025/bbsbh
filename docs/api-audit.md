@@ -71,7 +71,6 @@ which sets no default params and no caching.
 | `api.open-meteo.com` / `archive-api.open-meteo.com` | `weather.js:199,205` | outdoor first-pitch weather | no |
 | `api.bsky.app` (searchPosts) | `buzz.js:67` | Bluesky game buzz | **YES — reveal-only, SealBox-gated** |
 | `dapi.mlbinfra.com` | `gameNotes.js:62` | live Game Notes PDF links | link only in-app; PDF recaps results |
-| `img.mlbstatic.com` (PDF) | `whatsBrewing.js:337` | client-side pdfjs parse | PDF recaps results |
 | `mlbstatic.com` logos / `img.mlbstatic.com` headshots | `lib/teams.js`, `person-fetch.js:235` | art | no |
 
 **Same-origin static reads** (build-time-fetch pattern; `public/data/*.json` precomputed by

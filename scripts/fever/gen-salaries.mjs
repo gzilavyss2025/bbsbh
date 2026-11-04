@@ -25,15 +25,14 @@
 // keep showing it (see src/components/salaries/SourceLine.jsx).
 //
 // Run by hand: node scripts/fever/gen-salaries.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readdir, readFile } from 'node:fs/promises'
 import { writeJsonAtomic, writeShards } from '../lib/io.js'
 import { mapConcurrent } from '../lib/concurrency.mjs'
 import { resolvePosition, rollUpSalaries } from '../lib/salaries.mjs'
 import { getJson } from '../lib/statsapi.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const contractsDir = join(here, '..', '..', 'public', 'data', 'player-contracts')
 const teamDir = join(here, '..', '..', 'public', 'data', 'team-contracts')
 const leagueOut = join(here, '..', '..', 'public', 'data', 'salaries.json')

@@ -40,10 +40,10 @@ import {
   mergeIdentityOverrides,
   sanitizeIdentityOverrides,
 } from '../src/lib/identity/fields.js'
-import { reclaimableBlobUrls, reclaimBlobs } from './ballpark-photo.js'
+import { reclaimableBlobUrls, reclaimBlobs } from './_lib/blob.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
-import { getRedis, hashFromReply } from './_lib/redis.js'
+import { getRedis, readHash, writeHash } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as copy.js: @clerk/backend's verifyToken
 // pulls in internals Vercel's edge sandbox rejects.
@@ -52,22 +52,6 @@ export const config = { runtime: 'nodejs' }
 // One hash holds every override, site-wide (a club's identity is global, not
 // per-user).
 const IDENTITY_KEY = 'identity:overrides'
-
-function reply(res, body, status = 200, extraHeaders = {}) {
-  return jsonResponse(res, body, status, extraHeaders)
-}
-
-// `automaticDeserialization: false`, for the reason api/copy.js's `copyRedis`
-// spells out at length: with it on, @upstash/redis JSON-parses a stored value
-// like "0.85" or "true" and hands back a number or a boolean, which the
-// sanitizer then drops as "not a string" — a silent data-loss bug where a saved
-// tuning value vanishes on the next read. Off, every value round-trips as the
-// exact string we stored. It costs this endpoint the hash PAIRING, which is why
-// every read below goes through hashFromReply; the two are a matched pair, and
-// removing either alone reintroduces the bug the other prevents.
-function identityRedis() {
-  return getRedis({ automaticDeserialization: false })
-}
 
 // Is this a body the write can act on at all? Only a patch: unlike /api/copy,
 // there is no editor here that holds every field of every club on screen, so
@@ -130,10 +114,10 @@ export function identityWriteRefusal(overrides) {
 export default async function handler(req, res) {
   const method = req.method
   if (method !== 'GET' && method !== 'POST' && method !== 'PATCH') {
-    return reply(res, { error: 'method not allowed' }, 405)
+    return jsonResponse(res, { error: 'method not allowed' }, 405)
   }
 
-  const redis = identityRedis()
+  const redis = getRedis({ automaticDeserialization: false })
 
   if (method === 'GET') {
     // Public read. No Redis -> an empty map, and the app renders the JSON it
@@ -141,12 +125,12 @@ export default async function handler(req, res) {
     let stored = {}
     if (redis) {
       try {
-        stored = hashFromReply(await redis.hgetall(IDENTITY_KEY))
+        stored = await readHash(redis, IDENTITY_KEY)
       } catch {
         stored = {}
       }
     }
-    return reply(
+    return jsonResponse(
       res,
       { identity: sanitizeIdentityOverrides(stored) },
       200,
@@ -157,13 +141,13 @@ export default async function handler(req, res) {
     )
   }
 
-  if (!redis) return reply(res, { error: 'identity store not configured' }, 501)
+  if (!redis) return jsonResponse(res, { error: 'identity store not configured' }, 501)
 
   const userId = await authenticateAdmin(req)
-  if (!userId) return reply(res, { error: 'forbidden' }, 403)
+  if (!userId) return jsonResponse(res, { error: 'forbidden' }, 403)
 
   const body = await readJsonBody(req)
-  if (body == null || !acceptableBody(body)) return reply(res, { error: 'invalid body' }, 400)
+  if (body == null || !acceptableBody(body)) return jsonResponse(res, { error: 'invalid body' }, 400)
 
   // READ THE CURRENT MAP HERE, from Redis, inside the request that writes it.
   // The alternative — having the browser GET, merge, and send the whole map back
@@ -174,14 +158,14 @@ export default async function handler(req, res) {
   // src/lib/admin/saveCopyPatch.js.
   let prev
   try {
-    prev = sanitizeIdentityOverrides(hashFromReply(await redis.hgetall(IDENTITY_KEY)))
+    prev = sanitizeIdentityOverrides(await readHash(redis, IDENTITY_KEY))
   } catch {
     // Deliberately NOT an empty map. Treating an unreadable store as "nothing is
     // stored" would compute `staleKeys` against {} and quietly leave every other
     // club's tuning in place while reporting a clean save — but the same reflex
     // is what made copy.js's unpaired-hash bug survive for months. A read that
     // failed is a failed write.
-    return reply(res, { error: 'write failed' }, 502)
+    return jsonResponse(res, { error: 'write failed' }, 502)
   }
 
   const clean = mergeIdentityOverrides(prev, body.patch)
@@ -190,7 +174,7 @@ export default async function handler(req, res) {
   // clears one half of a header triad has to be judged on the triad it leaves
   // behind.
   const refusal = identityWriteRefusal(clean)
-  if (refusal) return reply(res, { error: refusal }, 422)
+  if (refusal) return jsonResponse(res, { error: refusal }, 422)
 
   const staleKeys = Object.keys(prev).filter((id) => !(id in clean))
   try {
@@ -201,14 +185,9 @@ export default async function handler(req, res) {
     //
     // A patch that changed nothing leaves the transaction empty, which Upstash
     // rejects — nothing to do is not a failure.
-    if (Object.keys(clean).length || staleKeys.length) {
-      const tx = redis.multi()
-      if (Object.keys(clean).length) tx.hset(IDENTITY_KEY, clean)
-      if (staleKeys.length) tx.hdel(IDENTITY_KEY, ...staleKeys)
-      await tx.exec()
-    }
+    await writeHash(redis, IDENTITY_KEY, clean, staleKeys)
   } catch {
-    return reply(res, { error: 'write failed' }, 502)
+    return jsonResponse(res, { error: 'write failed' }, 502)
   }
 
   // The marks this save just replaced. AFTER the write and never before: until
@@ -226,5 +205,5 @@ export default async function handler(req, res) {
     process.env.BLOB_READ_WRITE_TOKEN,
   )
 
-  return reply(res, { identity: clean }, 200, { 'cache-control': 'no-store' })
+  return jsonResponse(res, { identity: clean }, 200, { 'cache-control': 'no-store' })
 }

@@ -39,9 +39,8 @@
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, sep } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 const STYLES = join(ROOT, 'src', 'styles')
 
 // WHO MAY WEAR THE SEAL. Keyed by partial, then by the innermost selector the

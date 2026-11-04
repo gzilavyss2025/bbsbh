@@ -48,8 +48,7 @@
 // pitchers by pitch type" board), but since those two ACCUMULATE across games
 // rather than overwrite per gamePk, it wipes both tables first and rebuilds
 // them from scratch every time it runs, rather than only filling gaps.
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { openDb, dumpGroup } from './lib/db.js'
 import {
   FOUL_CODES,
@@ -67,7 +66,7 @@ import { BATTER_KEYS, PITCHER_KEYS, countStatements, endPa, exportByCount, expor
 import { rebuildCommand } from './lib/fouls/rebuild.mjs'
 import { CHECKPOINT_EVERY, CONCURRENCY, pendingGames, sweepFouls } from './lib/fouls/sweep.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 // A SEASON STORE (ADR-0086): fouls/{season}/fouls.json (the league file) plus
 // the same batter/pitcher rows bucketed on `personId % 100` for the player
 // page's card (fouls/{season}/{NN}.json — see writeFouls below and
@@ -1061,6 +1060,6 @@ async function main() {
 
 // Only sweep when run as a script — keeps aggregateGameFouls / exportFouls
 // importable for tests without triggering a live fetch + file write.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

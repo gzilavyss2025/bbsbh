@@ -33,8 +33,7 @@
 // pages hide the ETA at render time (milestoneProjectionPaused in
 // src/lib/time/seasonPhase.js), so this nightly file does not change.
 // Run by hand: node scripts/gen-milestones.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../src/lib/teams.js'
 import {
   aggregateSplits,
@@ -50,7 +49,7 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { dedupeRosterEntries } from './lib/roster.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'milestones.json')
 const SEASON = new Date().getUTCFullYear()
 

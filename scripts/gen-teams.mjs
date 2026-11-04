@@ -22,12 +22,11 @@
 // value; scripts/check-searchable-sport-ids.mjs fails `npm run lint` if this
 // one drifts from src/lib/teams.js's (issue #852).
 // Run by hand: node scripts/gen-teams.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'teams.json')
 
 const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]

@@ -444,10 +444,8 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   testing the half object instead printed real-looking zeros for an inning that
   never happened.
 - **Express Lane's screens were deleted** when Gameday replaced it (#2566), with its staging
-  (`lib/expresslane/`, which was deleted). Three modules stay: `clipIndex.js` (the play-by-play's
-  Watch), `runners.js` (Gameday and the scorecard reuse it, ADR-0072) and `rail.js`, the ordered
-  event list of one half that `runners.js`'s deck is tested through. `rail.js` is reveal-only and
-  has no screen importer now; a new caller reads it inside a `SealBox` reveal function.
+  (`lib/expresslane/`, which was deleted). Two modules stay: `clipIndex.js` (the play-by-play's
+  Watch) and `runners.js` (Gameday and the scorecard reuse it, ADR-0072). `rail.js` was deleted (#2842).
 - **`expresslane/clipIndex.js`** — spoiler-free. Express Lane Tier 2:
   `resolveClipUrl(playId, { fetchImpl, signal, timeoutMs })` is the ONE place
   that turns a playId into a playable clip — via
@@ -481,12 +479,12 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `railRevealCap(feed, inning, half, row)` is the same cap on its own, and it is
   the number Express Lane writes into the app's at-bat reveal mark: a count of
   `computeHalfInningFeed` ENTRIES, which is the unit `revealAtBat` stores and
-  the old PlayByPlay read back. A count of rail ROWS is a different number — over gamePk
-  823035 the two disagree at 99 of 128 cursor positions — and writing that one
-  opens entries in the innings viewer the surface never showed.
+  the old PlayByPlay read back. A count of event ROWS is a different number: rows
+  are per event and entries per play, so a row position can run larger than the
+  cap and open entries in the innings viewer the surface never showed.
   Three things to know. (1) IT RE-DERIVES NOTHING: `computeHalfInningFeed`'s
   `stepCap` already solved this for at-bat stepping (ADR-0016), and this maps a
-  rail row onto that cap. The cap is not optional and there is no variant of
+  cursor row onto that cap. The cap is not optional and there is no variant of
   `expressDeck` without the cursor — built off the finished half, a man who
   reached first in the third carries a fully shaded diamond the moment his own
   at-bat is revealed, telling the scorer the run came home before he scored the
@@ -547,11 +545,7 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   put no ball in play, and null again at a park with no coordinates — the
   diamond then simply offers no handle. The path itself is pure geometry a tier
   down in `src/lib/ballpark/ballFlight.js`, whose bow depth is the ball's own
-  apex height in feet (`test/ball-flight.test.js`). The sheet's second view, the
-  side view (`components/charts/ElevationArc.jsx`, #1875), reads the same ball
-  through `elevationArc` in that module: a drag-and-lift arc landed on the
-  measured distance, with the wall on the ball's line, and two result rules (a
-  home run clears the wall; any other ball ends at it) (`test/elevation-arc.test.js`).
+  apex height in feet (`test/ball-flight.test.js`).
   Constants shared across the reveal-only modules (`NON_PA_EVENT_TYPES`,
   `WHIFF_CODES`, `pitchCallCode`) live in `playbyplay.js`: baserunning-only
   top-level plays are NOT plate appearances for PA/BF counts, but their pitches

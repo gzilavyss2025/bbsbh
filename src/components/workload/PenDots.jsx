@@ -17,12 +17,10 @@ import { penDotsFrom } from '../../api/workload.js'
 // row out of the summary sidecar). A club with no arms on file draws nothing
 // rather than a row of dead dots — that is a gap in the file, not an empty
 // bullpen (the degrade convention).
-export function PenDots({ counts, label, size = 'md' }) {
+export function PenDots({ counts, size = 'md' }) {
   const dots = penDotsFrom(counts)
   if (!dots) return null
-  const text =
-    label ??
-    `${counts.fresh} available, ${counts.limited} limited, ${counts.down} likely down`
+  const text = `${counts.fresh} available, ${counts.limited} limited, ${counts.down} likely down`
   return (
     <span className={`pendots pendots--${size}`} role="img" aria-label={text}>
       {dots.map((status, i) => (

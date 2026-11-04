@@ -11,14 +11,13 @@
 // Any failed call aborts the run (strict). The files carry no clock, so a re-run on the same feeds
 // writes the same bytes.
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../../src/lib/teams.js'
 import { writeShards } from '../lib/io.js'
 import { getJson } from '../lib/statsapi.mjs'
 import { mapConcurrent } from '../lib/concurrency.mjs'
 import { buildHof, inducteesFrom } from '../lib/franchise/hof.mjs'
 
-const outDir = join(fileURLToPath(new URL('.', import.meta.url)), '..', '..', 'public', 'data', 'franchise-hof')
+const outDir = join(import.meta.dirname, '..', '..', 'public', 'data', 'franchise-hof')
 
 const recipients = inducteesFrom((await getJson('/api/v1/awards/MLBHOF/recipients')).awards)
 const people = await mapConcurrent(

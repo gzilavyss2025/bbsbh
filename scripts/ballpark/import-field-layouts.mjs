@@ -33,7 +33,6 @@
 // drawings themselves.
 
 import { writeFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 import { readFileSync } from 'node:fs'
 import {
@@ -44,8 +43,9 @@ import { getJson, statsapiUrl } from '../lib/statsapi.mjs'
 import { ballparkFor } from '../../src/lib/ballpark/ballparkData.js'
 import { CONFIGURATIONS } from '../../src/lib/ballpark/layout/configurations.js'
 import { fetchSeasonInPlay } from '../lib/time/season-in-play.mjs'
+import { join } from 'node:path'
 
-const OUT = fileURLToPath(new URL('../../src/lib/ballpark/layout/fields.js', import.meta.url))
+const OUT = join(import.meta.dirname, '../../src/lib/ballpark/layout/fields.js')
 const SAVANT = (y) => `https://baseballsavant.mlb.com/leaderboard/statcast-park-factors?type=dimensions&year=${y}`
 const GAMEDAY = (id) => `https://prod-gameday.mlbstatic.com/responsive-gameday-assets/1.2.0/images/fields/${id}.svg`
 
@@ -149,7 +149,7 @@ for (const season of [year, year + 1]) {
 }
 
 // ── Minor-league parks ──────────────────────────────────────────────────────
-const TEAMS = fileURLToPath(new URL('../../public/data/teams.json', import.meta.url))
+const TEAMS = join(import.meta.dirname, '../../public/data/teams.json')
 const MILB_SPORTS = ['11', '12', '13', '14']
 const milbVenues = new Map()
 for (const sportId of MILB_SPORTS) {

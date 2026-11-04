@@ -55,8 +55,7 @@
 //                                                     # a changed definition
 //   node scripts/gen-team-records.mjs --export-only --refresh-roles
 //                                                     # ...re-reading the roles
-import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { writeShards } from './lib/io.js'
 import { openDb, dumpGroup } from './lib/db.js'
@@ -77,7 +76,7 @@ import { pitchHandsFor, pitcherRolesFor, rowsForGame, shipRow, storeGame,
 import { levelRanks } from './lib/records/ranks.mjs'
 import { homeVenueByTeam, siteOf } from './lib/schedule-shape.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const outDir = join(here, '..', 'public', 'data', 'team-records')
 const teamsFile = join(here, '..', 'public', 'data', 'teams.json')
 
@@ -376,6 +375,6 @@ async function main() {
   db.close()
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   await main()
 }

@@ -51,9 +51,8 @@
 
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 
 // Declarations under src/styles/ that read a raw value, per kind. DOWNWARD ONLY.
 // Measured on origin/main at ffd91507a, the day this guard landed.
@@ -412,4 +411,4 @@ function main() {
   console.log(`✓ Raw values hold — ${held}, each counted two ways across ${sheets.length} sheets.`)
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) main()
+if (import.meta.main) main()

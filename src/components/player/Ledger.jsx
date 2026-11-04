@@ -30,7 +30,6 @@ export function Ledger({
   hideNarrow = [],
   className = '',
   label,
-  ariaLabel,
   ariaDescribedBy,
 }) {
   const hide = new Set(hideNarrow)
@@ -43,7 +42,6 @@ export function Ledger({
       frame="bare"
       label={label}
       className={`ledger ${className}`.trim()}
-      aria-label={ariaLabel}
       aria-describedby={ariaDescribedBy}
     >
       <thead>

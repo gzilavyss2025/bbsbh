@@ -16,15 +16,14 @@
 // not write. It merges into no carried-forward store, so the reassignable-merge rule
 // (scripts/CLAUDE.md) does not apply: an official the source corrects drops out on the
 // next run. No `generatedAt`: the same input writes the same bytes.
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import { readdir, stat } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { readSeasons, writeShards } from './lib/io.js'
 import { parseArgs } from './lib/args.mjs'
 import { buildUmpireHistory, shardUmpireHistory } from './lib/umpire/history.mjs'
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const root = join(import.meta.dirname, '..')
 const outDir = join(root, 'public', 'data', 'umpire-history')
 const args = parseArgs(process.argv.slice(2))
 const ownSeasons = (await readSeasons(join(root, 'public', 'data', 'umpires')))?.seasons ?? []

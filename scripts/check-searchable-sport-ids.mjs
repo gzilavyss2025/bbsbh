@@ -30,9 +30,8 @@
 
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
+const ROOT = join(import.meta.dirname, '..')
 
 // One entry per copy: where it lives, and the regex that captures its array
 // literal's contents. Each pattern is anchored to the exact declaration form

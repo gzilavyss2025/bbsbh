@@ -67,7 +67,6 @@
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
 //   '/game-notes'                       -> { name: 'game-notes', teamId }  (every club's notes PDFs, links only;
 //                                          '?team=' opens on one MLB club, 'all' on every club, else the default)
-//   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
 //   '/design-lab'                       -> { name: 'design-lab' }  (unlisted design-system catalog)
 //   '/wire-lab'                         -> { name: 'wire-lab' }  (unlisted wire-template tuning page)
@@ -444,10 +443,6 @@ export function parseRoute(url) {
     const team = Number(q.get('team'))
     return { name: 'game-notes', teamId: Number.isInteger(team) && team > 0 ? team : null }
   }
-  // Unlisted QA page (every club's Game Notes calibration status + a shortcut
-  // to open its modal) — linked from nowhere, reachable only by direct URL.
-  if (parts.length === 1 && parts[0] === 'game-notes-debug')
-    return { name: 'game-notes-debug' }
   // Unlisted QA page cataloging every decorative animation in the app, live +
   // frozen stage-by-stage — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'animation-lab')

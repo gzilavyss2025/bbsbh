@@ -45,11 +45,10 @@
 // Run by hand: node scripts/gen-career-matchups.mjs
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'career-matchups.json')
 
 // Today + tomorrow, so late-night and next-day browsing both find their game.

@@ -33,14 +33,13 @@
 //
 // Run by hand: node scripts/gen-prospect-trend-backfill.mjs
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { fetchLevelDateRangeStats, combineToPool } from '../src/api/statsLevels.js'
 import { buildPopulations, snapshotRow } from './lib/prospectPercentile.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { openDb, dumpGroup } from './lib/db.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const topProspectsFile = join(here, '..', 'public', 'data', 'top-prospects.json')
 const SOURCE = 'prospect-trend'
 const LEVEL_SPORT_IDS = [11, 12, 13, 14]

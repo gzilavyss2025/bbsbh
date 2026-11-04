@@ -20,15 +20,14 @@
 // Run nightly by .github/workflows/update-nightly-data.yml.
 // Run by hand: node scripts/gen-club-defense-running.mjs
 import { setTimeout as sleep } from 'node:timers/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { buildClubs, carryForward } from './lib/club/defense-running.mjs'
 import { fetchSavantCsv } from './lib/savant.mjs'
 import { getJson } from './lib/statsapi.mjs'
 import { fetchSeasonInPlay } from './lib/time/season-in-play.mjs'
 
-const out = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'data', 'club-defense-running.json')
+const out = join(import.meta.dirname, '..', 'public', 'data', 'club-defense-running.json')
 const season = await fetchSeasonInPlay()
 const SAVANT = 'https://baseballsavant.mlb.com/leaderboard'
 const THROTTLE_MS = 400 // between Savant calls: one per club on two boards

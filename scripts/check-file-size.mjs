@@ -81,7 +81,7 @@ const BUDGETS = {
   'src/api/transactions/playerFacts.js': 680, // 662: dated facts and the settled-day caches (#2829)
   'src/styles/78-offseason.css': 800, // 706: the winter home page's rows moved to offseason/winter-home.css
   'src/styles/06-loader-and-cards.css': 800, // 900
-  'src/styles/08-site-shell.css': 800, // 900
+  'src/styles/08-site-shell.css': 700, // 800
   'src/styles/12-sealbox.css': 900, // 895
   'src/styles/14-strike-zone.css': 900, // 898
   'src/styles/15-team-color-lab.css': 680, // 674
@@ -104,9 +104,8 @@ const BUDGETS = {
   // caps-exempt method-note prose, whose `#root` prefix is the whole reason
   // it works. Both notes prevented a real regression. Trimming them to hit a
   // line count would be deleting the reason the rules are correct.
-  'src/styles/69-hit-chart.css': 1000, // 925 (the flight card's draw-and-land motion, 2026-10-29) — the ball-flight card shares marks, heat ring and drawing with the chart: one partial, not two that can drift
+  'src/styles/69-hit-chart.css': 700, // 692 now; was 829 before the half variant went (#2834); was 925 (the flight card's draw-and-land motion, 2026-10-29) — the ball-flight card shares marks, heat ring and drawing with the chart: one partial, not two that can drift
   'src/styles/68-around-the-game.css': 1100, // 1200
-  'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1700, // 1608
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
   // GameView is the game's ROUTER — one screen per section, each lazily

@@ -18,9 +18,9 @@
 // api/account.js reads to find both), one round trip for a client that wants
 // both. Its ratchet is set-only: 1, never back to 0.
 
-import { authenticateUser } from './_lib/auth.js'
+import { withUser } from './_lib/auth.js'
 import { privateJson, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
-import { getRedis } from './_lib/redis.js'
+import { overLimit } from './_lib/redis.js'
 
 // Node.js runtime, NOT edge (unlike preview.js) — @clerk/backend's
 // verifyToken pulls in @clerk/shared internals that Vercel's edge sandbox
@@ -154,37 +154,22 @@ export const isGamePk = (v) => typeof v === 'string' && /^\d{1,9}$/.test(v)
 
 // Each POST can add a key per gamePk, so a scripted account could fill the
 // store with made-up games. A reader reveals a few halves a minute at most.
-// Same shape and fail-open posture as stamps.js's overMintLimit.
+// Same shape and fail-open posture as stamps.js's mint limit (overLimit).
 export const REVEAL_LIMIT_PER_MIN = 60
-export async function overRevealLimit(redis, userId) {
-  try {
-    const key = `reveal:rate:${userId}`
-    const n = await redis.incr(key)
-    await redis.expire(key, 60, 'NX')
-    return n > REVEAL_LIMIT_PER_MIN
-  } catch {
-    return false
-  }
+export const overRevealLimit = (redis, userId) => overLimit(redis, `reveal:rate:${userId}`, REVEAL_LIMIT_PER_MIN)
+
+// 400 on a malformed query comes before the store/auth checks, as it always did.
+const badQuery = (req, res) => {
+  const q = requestUrl(req).searchParams
+  if (q.get('recent') === '1' || isGamePk(q.get('gamePk'))) return false
+  privateJson(res, { error: 'gamePk required' }, 400)
+  return true
 }
 
-export default async function handler(req, res) {
-  if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'DELETE') {
-    return privateJson(res, { error: 'method not allowed' }, 405)
-  }
-
+async function revealHandler(req, res, { redis, userId }) {
   const { searchParams } = requestUrl(req)
   const wantRecent = searchParams.get('recent') === '1'
   const gamePk = searchParams.get('gamePk')
-  if (!wantRecent && !isGamePk(gamePk)) {
-    return privateJson(res, { error: 'gamePk required' }, 400)
-  }
-
-  const redis = getRedis()
-  if (!redis) return privateJson(res, { error: 'sync not configured' }, 501)
-
-  const auth = await authenticateUser(req)
-  if (!auth.ok) return privateJson(res, { error: auth.error }, auth.status)
-  const userId = auth.userId
 
   // GET ?recent=1 — the scorebook index, newest first. Any entry that's
   // finished its own arc (fully revealed, game over) is dropped from the
@@ -263,6 +248,8 @@ export default async function handler(req, res) {
   if (out.error) return privateJson(res, { error: out.error }, 400)
   return privateJson(res, out)
 }
+
+export default withUser(['GET', 'POST', 'DELETE'], revealHandler, badQuery)
 
 // The POST half, split out so a fake Redis can drive it and the unit suite can
 // count its round trips. Returns the reply body, or `{ error }` for a 400.

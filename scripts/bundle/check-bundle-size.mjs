@@ -29,10 +29,9 @@
 // 1% apart, so compare against the numbers printed here, not the build log.
 // Locally: `npm run build && npm run check:bundle`. How to read a failure and how
 // to lower a budget: docs/testing.md, "Bundle size".
-import { existsSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
-import { pathToFileURL } from 'node:url'
 import { ROOT } from '../lib/walk.mjs'
 
 const DIST = path.join(ROOT, 'dist')
@@ -54,7 +53,6 @@ const METRICS = [
 // grep dist/assets for a new one before you add it.
 export const LAZY_LIBRARIES = {
   'Clerk (@clerk/clerk-react)': ['Clerk: Ensure that', 'clerk-js-script', '@clerk/clerk-react'],
-  'pdf.js (pdfjs-dist)': ['UnknownErrorException', 'PDFWorker'],
 }
 
 // The entry script and stylesheets, as index.html names them.
@@ -215,6 +213,4 @@ function main() {
   console.log('check-bundle-size: ok.')
 }
 
-// Compare real paths: `import.meta.url` is the real path, `process.argv[1]` is the
-// path as typed, so a symlinked checkout would otherwise run nothing and exit 0.
-if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) main()
+if (import.meta.main) main()

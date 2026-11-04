@@ -48,15 +48,15 @@
     "wrap": 1
   },
   "src/styles/11-innings.css": {
-    "column": 2
+    "column": 1
   },
   "src/styles/11-pregame-scoreboard.css": {
     "grid": 3
   },
   "src/styles/12-sealbox.css": {
-    "column": 7,
+    "column": 6,
     "wrap": 1,
-    "grid": 4
+    "grid": 3
   },
   "src/styles/13-play-by-play.css": {
     "column": 2
@@ -262,9 +262,6 @@
   "src/styles/55-my-tally-account.css": {
     "wrap": 1
   },
-  "src/styles/56-my-tally-intro.css": {
-    "column": 1
-  },
   "src/styles/57-ballpark-card.css": {
     "column": 2
   },
@@ -310,7 +307,6 @@
     "grid": 1
   },
   "src/styles/69-hit-chart.css": {
-    "column": 1,
     "wrap": 1,
     "grid": 1
   },
@@ -382,7 +378,6 @@
   },
   "src/styles/pitcher-card/card.css": {
     "column": 4,
-    "wrap": 1,
     "grid": 5
   },
   "src/styles/postseason/home.css": {

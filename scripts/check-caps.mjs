@@ -10,9 +10,8 @@
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const SRC = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'src');
+const SRC = join(import.meta.dirname, '..', 'src');
 
 // text-transform values that would defeat the global uppercase.
 const BANNED = /text-transform\s*:\s*(none|lowercase|capitalize)\b/gi;

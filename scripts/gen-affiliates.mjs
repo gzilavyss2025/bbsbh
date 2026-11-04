@@ -25,12 +25,11 @@
 // falls back to the live per-org call for any org the file misses, so a
 // partial file costs a request, never a wrong answer. Decided 2026-10-05.
 // Run by hand: node scripts/gen-affiliates.mjs
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { getJson } from './lib/statsapi.mjs'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const out = join(here, '..', 'public', 'data', 'affiliates.json')
 const season = new Date().getFullYear()
 

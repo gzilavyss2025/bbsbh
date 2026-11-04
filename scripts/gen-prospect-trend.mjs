@@ -43,8 +43,7 @@
 // This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at
 // request time. Run by hand: node scripts/gen-prospect-trend.mjs
 import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
 import { packProspectTrend } from '../src/api/prospectTrend.js'
 import { buildPopulations, snapshotRow, movementSince, historyRow } from './lib/prospectPercentile.mjs'
@@ -52,7 +51,7 @@ import { fetchLevelAverageAges } from './lib/prospectAgeBenchmark.mjs'
 import { openDb, dumpGroup, repeatsPrevious } from './lib/db.js'
 import { writeJsonAtomic } from './lib/io.js'
 
-const here = dirname(fileURLToPath(import.meta.url))
+const here = import.meta.dirname
 const topProspectsFile = join(here, '..', 'public', 'data', 'top-prospects.json')
 const out = join(here, '..', 'public', 'data', 'prospect-trend.json')
 const SOURCE = 'prospect-trend'
