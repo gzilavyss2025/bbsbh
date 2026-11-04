@@ -81,6 +81,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
     setVisible(STEP)
     setCap(null)
     setKept(null)
+    setTeamId(null)
   }
 
   // While an older window loads, keep the moves already on screen.
@@ -170,7 +171,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
           failure — the same silence the rail keeps. On the offseason page that
           silence would leave the reader looking at a bare heading, so the lead
           says which of the two it is rather than showing an empty ledger. */}
-      {clubs.length > 0 ? (
+      {flattenDays(days).length > 0 ? (
         <>
           {/* The ledger card: its moves, and the door as its footer bar. */}
           <div className="oseason__ledger">
@@ -180,7 +181,7 @@ export function OffseasonLead({ endDate, sportId, winter, children }) {
               {total > 0 ? (
                 <MoveItems items={shown} marks />
               ) : (
-                <li className="oseason__none">{`No moves for this club in the last ${windowDaysFor(sportId) * pages} days.`}</li>
+                <li className="oseason__none">{`No moves for this club in the last ${span * pages} days.`}</li>
               )}
             </ul>
             <button

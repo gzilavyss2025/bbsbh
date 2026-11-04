@@ -409,6 +409,11 @@ function evictOldest() {
   const mine = []
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i)
+    // An older key version is dead weight: the first to go.
+    if (k?.startsWith('bbsbh:wirefacts:') && !k.startsWith(FACTS_STORE)) {
+      mine.push(['', k])
+      continue
+    }
     if (!k?.startsWith(FACTS_STORE)) continue
     let d = ''
     try {
@@ -508,13 +513,11 @@ export function fetchPlayerFacts(personId, { season, teamId = null, ilMove = nul
           const full = facts?.seasonLine && facts.seasonLine.games >= (facts.pitcher ? FULL_SEASON.pitcher : FULL_SEASON.hitter)
           if (!facts || full) return facts
           const group = facts.pitcher ? 'pitching' : 'hitting'
-          const minors = asOf
-            ? await minorsAsOf(personId, group, season, asOf)
-            : (await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${season}&leagueListId=milb_all`).catch(() => null))?.stats?.flatMap((x) => x.splits ?? [])
-          const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors })
+          const milb = (yr) => getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${yr}&leagueListId=milb_all`).catch(() => null).then((r) => r?.stats?.flatMap((x) => x.splits ?? []))
           // The season before, too: a big leaguer stuck in Triple-A is judged
-          // on his last two years there, not on a big-league year long gone.
-          const prev = (await getJson(`/api/v1/people/${personId}/stats?stats=season&group=${group}&season=${Number(season) - 1}&leagueListId=milb_all`).catch(() => null))?.stats?.flatMap((x) => x.splits ?? [])
+          // on his last two years there. Read alongside this season's.
+          const [minors, prev] = await Promise.all([asOf ? minorsAsOf(personId, group, season, asOf) : milb(season), milb(Number(season) - 1)])
+          const withMinors = shapeFacts(person, { contract, season, teamId, prospects, minors })
           withMinors.minorsPrev = shapeMinors(prev, facts.pitcher)
           const extra = ['midSeason', 'seasonLine', 'seasonClubs', 'careerLine', 'age', 'rows', 'stint', 'beforeLine', 'trade', 'callLine', 'stintLine', 'callMlbLine', 'seasonToDate', 'lastGame', 'affiliated', 'extraMan']
           return { ...withMinors, ...Object.fromEntries(extra.map((k) => [k, facts[k]])) }
