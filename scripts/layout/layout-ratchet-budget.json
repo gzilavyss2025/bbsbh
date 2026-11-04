@@ -144,7 +144,7 @@
   "src/styles/31-wild-card.css": {
     "column": 11,
     "wrap": 2,
-    "grid": 7
+    "grid": 6
   },
   "src/styles/31b-prospect-lines.css": {
     "column": 1

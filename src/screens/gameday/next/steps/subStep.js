@@ -28,10 +28,6 @@ export function usePitchMode(gamePk) {
   return [on, useCallback((v) => writePitchMode(gamePk, v), [gamePk])]
 }
 
-// The advance's words: "Next" in either mode (Gary, 2026-10-28, replacing decision 3's "Next pitch" /
-// "Next play"): the At-bat | Pitch switch beside it already says which. `pitch` is kept for the callers.
-export const stepWords = (_pitch) => 'Next'
-
 // The advance at the live edge (ADR-0055). A pitch lands every ~20s against the feed's one-minute
 // poll, so it becomes a Refresh in either mode (Gary, 2026-10-28; at-bat mode 2026-10-29): it fetches
 // the feed and reveals nothing. Once the poll or the tap brings more, the advance steps again.

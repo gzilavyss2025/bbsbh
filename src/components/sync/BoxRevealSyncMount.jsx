@@ -1,4 +1,5 @@
-import { Suspense, lazy } from 'react'
+import { Suspense } from 'react'
+import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 
 // The Clerk boundary for BoxRevealCloudSync, kept off the box score itself.
@@ -15,9 +16,7 @@ import { isClerkEnabled } from '../../lib/clerkConfig.js'
 // Clerk keeps the box score's mark on the device that made it, which is exactly
 // what it did before the wire existed.
 const BoxRevealCloudSync = isClerkEnabled
-  ? lazy(() =>
-      import('./BoxRevealCloudSync.jsx').then((m) => ({ default: m.BoxRevealCloudSync })),
-    )
+  ? lazyNamed(() => import('./BoxRevealCloudSync.jsx'), 'BoxRevealCloudSync')
   : null
 
 export function BoxRevealSyncMount({ gamePk, opened, mergeOpened }) {

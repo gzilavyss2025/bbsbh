@@ -1,4 +1,5 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { useNav, useRouteLink } from '../../lib/nav.js'
 import { MENU_GROUPS, isGuidePath } from '../../lib/reportPages.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
@@ -12,7 +13,7 @@ import { Card } from '../ui/frame/Card.jsx'
 // AccountButton, for the same reason. It renders null for everyone who is not
 // a signed-in admin, so mounting it unconditionally below is safe.
 const AdminMenuLink = isClerkEnabled
-  ? lazy(() => import('../account/AdminMenuLink.jsx').then((m) => ({ default: m.AdminMenuLink })))
+  ? lazyNamed(() => import('../account/AdminMenuLink.jsx'), 'AdminMenuLink')
   : null
 
 // A persistent icon button, sibling to SiteSearchButton, that opens a sheet

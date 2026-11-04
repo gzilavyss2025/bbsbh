@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { StatTile } from '../../../components/ui/frame/StatTile.jsx'
 import { StatCell, StatStrip } from '../../../components/ui/frame/StatStrip.jsx'
 import { LeaderList, LeaderRow } from '../../../components/ui/frame/LeaderList.jsx'
-import { ResultCard } from '../../../components/ui/frame/ResultCard.jsx'
 import { Meter } from '../../../components/ui/frame/Meter.jsx'
 import { Key } from '../../../components/ui/frame/Key.jsx'
 import { CornerBadge } from '../../../components/ui/frame/CornerBadge.jsx'
@@ -65,24 +64,6 @@ export function ReportParts() {
           <LeaderRow key={r.id} rank={i + 1} mark={mark(r.id, r.name)} name={r.name} sub={r.sub} figure={r.figure} unit="payroll" state={r.state} />
         ))}
       </LeaderList>
-
-      <ResultCard
-        label="Sample final: Dodgers 5, Yankees 3"
-        away={{ mark: mark(147, 'Yankees'), score: 3, tint: 'var(--accent-primary)' }}
-        home={{ mark: mark(119, 'Dodgers'), score: 5, winner: true }}
-        status="Final"
-        note="Game 6"
-        bars={[
-          { tag: 'WP', name: 'Sample Pitcher', line: '7.0 IP · 9 K' },
-          { tag: 'MVP', name: 'Sample Player', line: '2-for-4 · HR · 3 RBI' },
-        ]}
-        footer={
-          <>
-            <span>Sample data · Oct 28 · Sample Park</span>
-            <Button size="control">Box score</Button>
-          </>
-        }
-      />
 
       <Cluster gap="base" align="center">
         <CornerBadge host={mark(158, 'Brewers')}>SS</CornerBadge>

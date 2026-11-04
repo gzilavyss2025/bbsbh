@@ -1,4 +1,5 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
+import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { fetchStaticTeams } from '../../api/teams-static.js'
 import { ClubSeal } from '../../components/profile/ClubSeal.jsx'
 import { ScopeBadge } from '../../components/profile/ScopeBadge.jsx'
@@ -55,11 +56,7 @@ import { LedgerSection } from './sections/LedgerSection.jsx'
 // is NOT gated on being signed in: settings are settings, and every one of them
 // works with no account at all.
 const ProfileAccount = isClerkEnabled
-  ? lazy(() =>
-      import('../../components/profile/ProfileAccount.jsx').then((m) => ({
-        default: m.ProfileAccount,
-      })),
-    )
+  ? lazyNamed(() => import('../../components/profile/ProfileAccount.jsx'), 'ProfileAccount')
   : null
 
 // The status is normalized before it is read. `RevealCloudSync` mounts inside

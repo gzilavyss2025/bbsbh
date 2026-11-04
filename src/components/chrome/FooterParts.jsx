@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
+import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { useRouteLink } from '../../lib/nav.js'
 import { isGuidePath } from '../../lib/reportPages.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
@@ -11,9 +12,7 @@ import { BuildStamp } from '../ui/BuildStamp.jsx'
 // AdminMenuLink, for the same reason. It renders null for everyone who is not
 // a signed-in admin, so mounting it unconditionally below is safe.
 const AdminFooterLink = isClerkEnabled
-  ? lazy(() =>
-      import('../account/AdminFooterLink.jsx').then((m) => ({ default: m.AdminFooterLink })),
-    )
+  ? lazyNamed(() => import('../account/AdminFooterLink.jsx'), 'AdminFooterLink')
   : null
 
 // The two blocks the slate's SiteFooter and every report page's ReportFooter

@@ -1,4 +1,5 @@
-import { lazy, Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useMemo, useRef, useState } from 'react'
+import { lazyNamed } from '../lib/react/lazyNamed.js'
 import { useNav } from '../lib/nav.js'
 import { slatePath, teamPath } from '../lib/route.js'
 import { fetchSchedule, allStarInfoFrom, fetchSeasonMeta, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
@@ -55,17 +56,13 @@ import {
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
 // ever fetched — let alone rendered — on a deploy without Clerk configured.
 const AccountButton = isClerkEnabled
-  ? lazy(() => import('../components/account/AccountButton.jsx').then((m) => ({ default: m.AccountButton })))
+  ? lazyNamed(() => import('../components/account/AccountButton.jsx'), 'AccountButton')
   : null
 const ContinueScoring = isClerkEnabled
-  ? lazy(() => import('../components/game/ContinueScoring.jsx').then((m) => ({ default: m.ContinueScoring })))
+  ? lazyNamed(() => import('../components/game/ContinueScoring.jsx'), 'ContinueScoring')
   : null
 const MergeReceiptStrip = isClerkEnabled
-  ? lazy(() =>
-      import('../components/account/MergeReceiptStrip.jsx').then((m) => ({
-        default: m.MergeReceiptStrip,
-      })),
-    )
+  ? lazyNamed(() => import('../components/account/MergeReceiptStrip.jsx'), 'MergeReceiptStrip')
   : null
 
 // Neither the league nor the date persists anywhere. Both live in the URL

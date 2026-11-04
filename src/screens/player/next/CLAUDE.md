@@ -14,8 +14,8 @@ One `modules/<module>/` folder per module: `season` #1885, `splits` #1886, `plat
 #1893, `path` #1894, `prospects` #1927, `prospect` #2068, `firsts` #1895, `innings` #1928, `contract` #1929,
 `percentile` #2011, `advanced` #2012, `runvalue` #2013, `command` #2014, `target` #2015, `pfouls` #2016,
 `milestones` #2017, `hofpace` #1857, `awards` #2018, `teams` #2019, `moves` #2020, `photos` #2021, `highlights` #2022 (stubs,
-wired in #2002), `tbd` #1896 (one folder, five slots: Season, On the mound (pitchers), Game log, Career and History; no
-Overview slot, the top cards cover it; only Command received is left, the other four slots render nothing). Order inside a section is
+wired in #2002), `command-received` #1896 (a catcher's card, hitters, ends Season; no
+Overview slot, the top cards cover it). Order inside a section is
 the `SLOTS` order in `sections.js`. `SLOTS` hints: `once` gives a two-way player one instance with no role
 suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul balls); `pair:
 'a'|'b'` puts an adjacent pair side by side at wide widths (`page.css`, a container query). No section has its own button beyond the jump bar's nine.
@@ -33,8 +33,7 @@ suffix; `twin` adds the suffix to two one-role slots with one name (the two Foul
 `sections.js` (`SLOTS`), and the folder holds one file until its issue builds it.
 
 - **Props:** `{ bio, role, asOf, season, section, onEmpty, onCount }`. `role` is
-  `'hitting'` or `'pitching'`; a two-way player gets one instance per role. `section` tells
-  the shared `tbd` module which section it fills.
+  `'hitting'` or `'pitching'`; a two-way player gets one instance per role.
 - **Data:** the module owns its data hook. `Slot` mounts it only once the slot is near
   (`hooks/scroll/useNearView.js`), so nothing loads before then.
 - **Two states.** *Not built yet:* the stub renders `null`, so `Slot` hides its card and the

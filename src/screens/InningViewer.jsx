@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   selectInningCount,
   selectRegulationInnings,
@@ -16,7 +16,8 @@ import { ordinal } from '../lib/format.js'
 import { RefreshButton } from '../components/ui/control/RefreshButton.jsx'
 import { useFocusMode } from '../components/inning/focus/FocusControls.jsx'
 import { bookIsClosed } from '../components/inning/focus/beats.js'
-import { InningsHeader } from './gameview/InningsHeader.jsx'
+import { MatchBand } from './gameview/Masthead.jsx'
+import { lazyNamed } from '../lib/react/lazyNamed.js'
 import { PregameScoreboard } from '../components/inning/PregameScoreboard.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../hooks/revealProgressCore.js'
@@ -28,14 +29,14 @@ import { sameLiveState } from '../lib/scorebug/liveState.js'
 import { gamedayNotices } from './gameday/next/notices.js'
 import { GamedayNextMount } from './gameday/next/GamedayNextMount.jsx'
 import { GamedayEngine } from './gameday/next/engine/GamedayEngine.jsx'
-import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, caughtUpAdvance, forwardAdvance, nextSub, openingChangeHeld, readBackAfter, readBackStepOf, replayTap, stepCapAt, stepWords, usePitchMode } from './gameday/next/steps/subStep.js'
+import { CAUGHT_UP, atLiveEdge, canStepIn, followLive, caughtUpAdvance, forwardAdvance, nextSub, openingChangeHeld, readBackAfter, readBackStepOf, replayTap, stepCapAt, usePitchMode } from './gameday/next/steps/subStep.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
 // device) when a deploy actually configures Clerk — see main.jsx's matching
 // dynamic import and clerkConfig.js.
 const RevealCloudSync = isClerkEnabled
-  ? lazy(() => import('../components/sync/RevealCloudSync.jsx').then((m) => ({ default: m.RevealCloudSync })))
+  ? lazyNamed(() => import('../components/sync/RevealCloudSync.jsx'), 'RevealCloudSync')
   : null
 
 // Stand-in for `revealTo` while this game is stamped (see effectiveReveal's
@@ -476,7 +477,7 @@ export function InningViewer({
     return (
       <div className="innings">
         {cloudSync}
-        <InningsHeader started={false} meta={meta} treatment={winProbTreatment} date={gameDate} onSketch={onSketch} />
+        <MatchBand away={meta.away} home={meta.home} date={gameDate} onSketch={onSketch} treatment={winProbTreatment} />
         {/* Keep the LINEUPS / INNINGS / BOX tabs on screen pre-game — a deep
             link straight to an innings URL (e.g. /…/top1) lands here, and
             without the nav there'd be no way to reach the lineup/box pages
@@ -496,10 +497,10 @@ export function InningViewer({
   // The live edge inside an at-bat still being played: a flag only, on a half in play (ADR-0055).
   const edge = atLiveEdge(atHalfEdge, currentHalfLive && currentSealed ? nextSub(feed, effInning, effHalf, curAtBatCount, curSub, pitchMode) : null)
   const advance = focus.stepAhead
-    ? { label: stepWords(pitchMode), onClick: () => (pitchMode ? replayNext() : focus.stepNext()), reveal: pitchMode || undefined }
+    ? { label: 'Next', onClick: () => (pitchMode ? replayNext() : focus.stepNext()), reveal: pitchMode || undefined }
     : currentSealed
       ? stepIn ? { label: 'Step in', onClick: () => { focus.followLatest(); setSteppedIn(atBatKey) } }
-      : edge ? caughtUpAdvance(loading, onReload) : { label: stepWords(pitchMode), onClick: revealNextStep, reveal: true }
+      : edge ? caughtUpAdvance(loading, onReload) : { label: 'Next', onClick: revealNextStep, reveal: true }
       : nextIdx != null
         ? forwardAdvance(nextLabel, nextIdx, focus.closing, goTo)
         : { label: bookClosed ? 'Close the book' : 'Box score', disabled: focus.closing, onClick: () => !focus.closing && onBoxScore() }

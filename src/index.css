@@ -90,7 +90,6 @@
    build on the stamped card above, so they load right after it. */
 @import './styles/system/report/stat.css';
 @import './styles/system/report/leader.css';
-@import './styles/system/report/result.css';
 @import './styles/system/report/meter.css';
 /* The postseason SERIES MARK and its navy plate (lib/postseason/
    seriesMarks.js). Class-only rules that no earlier partial sets, so their
@@ -317,7 +316,7 @@
      report/charts            components/around-the-game/BroadcastBar.jsx
      report/chrome            screens/around-the-game/RunValuePage.jsx,
                               screens/around-the-game/AbsChallengesPage.jsx
-     research/diary           screens/research/ResearchDiaryPage.jsx
+     research/diary           screens/research/Diaries.jsx
      designlab/lab            screens/designlab/index.jsx (the /design-lab
                               catalog — a SUBDIRECTORY because src/styles is at
                               its own 115-file directory budget, so a 116th flat

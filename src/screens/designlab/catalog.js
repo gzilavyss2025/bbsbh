@@ -357,7 +357,7 @@ export const PROTOTYPES = [
     title: 'Report parts (ADR-0112)',
     path: 'src/styles/system/report/',
     verdict: 'Prototype',
-    note: 'The cards, pills, buttons, meter and key the report pages share, as the real parts on invented data: StatStrip and StatTile look="band", LeaderList, ResultCard, CornerBadge, Pill mark and marker, Chips, Segmented, Button block, Stepper, Switch, Meter and Key. Check at 390 and 1180 px.',
+    note: 'The cards, pills, buttons, meter and key the report pages share, as the real parts on invented data: StatStrip and StatTile look="band", LeaderList, CornerBadge, Pill mark and marker, Chips, Segmented, Button block, Stepper, Switch, Meter and Key. Check at 390 and 1180 px.',
   },
 ]
 

@@ -5,7 +5,7 @@ import { MLB_LOG_GAME_TYPES } from '../../../../../api/boxlines/rows.js'
 import { fetchGamePhotos, onlyPhotographer, photosForPlayer } from '../../../../../api/gamePhotos.js'
 import { fetchPersonStats } from '../../../../../api/person-fetch.js'
 import { Door } from '../../../../../components/ui/control/Door.jsx'
-import { inMajors } from '../tbd/tbdData.js'
+import { inMajors } from '../../parts/inMajors.js'
 import { mergePhotos, newestFirst, photoCell, photoGames } from './photosView.js'
 
 const FIRST = 6

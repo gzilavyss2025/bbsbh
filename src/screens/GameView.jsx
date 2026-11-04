@@ -1,4 +1,5 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { lazyNamed } from '../lib/react/lazyNamed.js'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
@@ -34,33 +35,23 @@ import { gameSectionTabs } from './lineup/gameSections.js'
 // and each is a large module on its own. Splitting them further means opening
 // a game to read a lineup never downloads the innings viewer or box score
 // code until the user actually taps into that section.
-const importLineupNextPage = () =>
-  import('./lineup/next/LineupNextPage.jsx').then((m) => ({ default: m.LineupNextPage }))
-const LineupNextPage = lazy(importLineupNextPage)
+const LineupNextPage = lazyNamed(() => import('./lineup/next/LineupNextPage.jsx'), 'LineupNextPage')
 // Starts the lineup page's code with the game's data, so the loader rarely waits on it alone.
-importLineupNextPage()
-const InningViewer = lazy(() =>
-  import('./InningViewer.jsx').then((m) => ({ default: m.InningViewer })),
-)
-const BoxScore = lazy(() => import('./BoxScore.jsx').then((m) => ({ default: m.BoxScore })))
+import('./lineup/next/LineupNextPage.jsx')
+const InningViewer = lazyNamed(() => import('./InningViewer.jsx'), 'InningViewer')
+const BoxScore = lazyNamed(() => import('./BoxScore.jsx'), 'BoxScore')
 // The preview-image studio (step 4). Split the hardest of the four: it pulls in
 // the whole canvas painter and the umpire accuracy reader, and most visits to a
 // game never open it.
-const GamePreview = lazy(() =>
-  import('./GamePreview.jsx').then((m) => ({ default: m.GamePreview })),
-)
+const GamePreview = lazyNamed(() => import('./GamePreview.jsx'), 'GamePreview')
 // The printable pre-pitch scorecard (step 5). Split for the same reason as the
 // poster above it: it brings its own stylesheet, and a visit that never prints
 // tonight's sheet should never download either.
-const ScoreSheetPage = lazy(() =>
-  import('./sheet/ScoreSheetPage.jsx').then((m) => ({ default: m.ScoreSheetPage })),
-)
+const ScoreSheetPage = lazyNamed(() => import('./sheet/ScoreSheetPage.jsx'), 'ScoreSheetPage')
 // The live scorecard (step 6): the #22 sheet inked as far as the user's own
 // reveal mark, editable cell by cell. Split like the sheet above it — most
 // visits to a game never open it, and it pulls the whole grid builder in.
-const ScorecardPage = lazy(() =>
-  import('./scorecard/ScorecardPage.jsx').then((m) => ({ default: m.ScorecardPage })),
-)
+const ScorecardPage = lazyNamed(() => import('./scorecard/ScorecardPage.jsx'), 'ScorecardPage')
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -222,6 +213,31 @@ export function GameView({ game, section, onSection }) {
       : null,
   }
 
+  // The props the two lineup pages differ in, per side. Plain data, built only when a page renders.
+  const sideProps = (side) => {
+    const opp = side === 'away' ? 'home' : 'away'
+    return {
+      side,
+      manager: managers.data?.[side],
+      uniform: uniformBrief[side],
+      uniformFigure: uniformFigure[side] ?? null,
+      treatment: jerseyTreatments[side],
+      oppTreatment: jerseyTreatments[opp],
+      broadcast: broadcast.data,
+      scorebookWeather: weather.data,
+      scorebookWeatherLoading: weather.loading,
+      // Each side FACES the other's starter.
+      oppPitcherLine: starterLines.data?.[opp],
+      vsTeam: vsTeamSplitsData,
+      prospectsData,
+      rookiesData,
+      formerTeammatesData,
+      careerMatchupsData,
+      workloadData,
+      callouts: gameCallouts,
+    }
+  }
+
   return (
     // A link out of a game carries the LEVEL hint and nothing else. It used to
     // carry `asOf={started ? officialDate : null}` too, stamping `?d=` on every
@@ -245,7 +261,7 @@ export function GameView({ game, section, onSection }) {
       <SiteHeader />
 
       {!ownChrome && (step === 2 ? (
-        // The innings page draws its own masthead (the scorebug, InningsHeader) once it has a feed.
+        // The innings page draws its own masthead (the scorebug) once it has a feed.
         !noPlays && feed ? null : <MatchBand away={game.away} home={game.home} date={officialDate} onSketch={setSketching} treatment={jerseyTreatments} />
       ) : (
         <Masthead
@@ -319,24 +335,7 @@ export function GameView({ game, section, onSection }) {
         <LineupNextPage
           {...lineupNext}
           feed={feed}
-          side="away"
-          manager={managers.data?.away}
-          uniform={uniformBrief.away}
-          uniformFigure={uniformFigure.away ?? null}
-          treatment={jerseyTreatments.away}
-          oppTreatment={jerseyTreatments.home}
-          broadcast={broadcast.data}
-          scorebookWeather={weather.data}
-          scorebookWeatherLoading={weather.loading}
-          // The away side FACES the home starter.
-          oppPitcherLine={starterLines.data?.home}
-          vsTeam={vsTeamSplitsData}
-          prospectsData={prospectsData}
-          rookiesData={rookiesData}
-          formerTeammatesData={formerTeammatesData}
-          careerMatchupsData={careerMatchupsData}
-          workloadData={workloadData}
-          callouts={gameCallouts}
+          {...sideProps('away')}
           onNext={() => onSection('lineup2')}
           // The home club by its name, "Rays ›" (Gary, 2026-10-28).
           nextLabel={`${feed?.gameData?.teams?.home?.clubName || 'Home team'} ›`}
@@ -352,23 +351,7 @@ export function GameView({ game, section, onSection }) {
         <LineupNextPage
           {...lineupNext}
           feed={feed}
-          side="home"
-          manager={managers.data?.home}
-          uniform={uniformBrief.home}
-          uniformFigure={uniformFigure.home ?? null}
-          treatment={jerseyTreatments.home}
-          oppTreatment={jerseyTreatments.away}
-          broadcast={broadcast.data}
-          scorebookWeather={weather.data}
-          scorebookWeatherLoading={weather.loading}
-          oppPitcherLine={starterLines.data?.away}
-          vsTeam={vsTeamSplitsData}
-          prospectsData={prospectsData}
-          rookiesData={rookiesData}
-          formerTeammatesData={formerTeammatesData}
-          careerMatchupsData={careerMatchupsData}
-          workloadData={workloadData}
-          callouts={gameCallouts}
+          {...sideProps('home')}
           onNext={() => onSection(noPlays ? 'boxscore' : 'top1')}
           nextLabel={noPlays ? 'Box score ›' : 'Gameday ›'} // the section's own name (Gary, 2026-10-28)
           onCatchUp={onCatchUp}

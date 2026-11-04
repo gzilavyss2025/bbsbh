@@ -353,37 +353,6 @@
   display: block;
 }
 
-/* team-hub roster (own classes — the .roster panel is a different component).
-   It sits on its card's paper: a pencil rule above and below, no box of its own
-   (#1775, case 2). */
-.thub-roster {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-block: var(--bw-hair) solid var(--border-rule);
-}
-.thub-row {
-  display: grid;
-  grid-template-columns: 40px 1fr auto auto auto;
-  align-items: center;
-  gap: var(--space-2h);
-  padding: var(--space-2h) 0;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  font-size: var(--fs-ui);
-}
-.thub-roster li:first-child {
-  border-top: none;
-}
-.thub-roster li:first-child.thub-row {
-  border-top: none;
-}
-.thub-jersey {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--clay);
-  font-weight: var(--w-bold);
-  text-align: right;
-}
 .thub-name {
   font-weight: var(--w-semibold);
   color: var(--text-body);
@@ -398,16 +367,6 @@
 .thub-namewrap .ilmark {
   font-size: var(--fs-compact);
 }
-/* All-Star blue, deliberately NOT the clay red the IL cross (.ilmark) uses:
-   an All-Star who's also hurt would otherwise show a red star and a red cross
-   side by side in the same hue, reading as one smeared mark. The mark wore
-   kraft until ADR-0083; the app's own All-Star blue keeps the honor distinct
-   from the injury flag and claims nothing about a seal. */
-.thub-allstar {
-  color: var(--allstar-blue);
-  margin-left: 4px;
-  font-size: var(--fs-compact);
-}
 .thub-pos {
   font-family: var(--font-display);
   color: var(--accent-positive);
@@ -415,11 +374,6 @@
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
-}
-.thub-chev {
-  color: var(--graphite-soft);
-  font-size: var(--fs-body);
-  line-height: var(--lh-solid);
 }
 .rolechip {
   font-family: var(--font-display);

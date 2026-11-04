@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
+import { lazyNamed } from '../../lib/react/lazyNamed.js'
 import { TallyLockup } from './TallyBrand.jsx'
 import { SiteSearchButton } from './SiteSearch.jsx'
 import { SiteMenuButton } from './SiteMenu.jsx'
@@ -11,7 +12,7 @@ import { isClerkEnabled } from '../../lib/clerkConfig.js'
 // device) when a deploy actually configures Clerk — see main.jsx's matching
 // dynamic import and clerkConfig.js.
 const AccountButton = isClerkEnabled
-  ? lazy(() => import('../account/AccountButton.jsx').then((m) => ({ default: m.AccountButton })))
+  ? lazyNamed(() => import('../account/AccountButton.jsx'), 'AccountButton')
   : null
 
 // The Tally wordmark shown atop every screen (except

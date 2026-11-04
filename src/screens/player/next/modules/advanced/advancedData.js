@@ -2,7 +2,7 @@ import { fetchHittingAdvanced, fetchPitchingAdvanced } from '../../../../../api/
 import { advancedHittingView, advancedPitchingView } from '../../../../../api/person/advanced.js'
 import { leagueRates } from '../../../../../api/player/leagueAverages.js'
 import { postseasonStarted } from '../../../../../api/postseason/started.js'
-import { inMajors } from '../tbd/tbdData.js'
+import { inMajors } from '../../parts/inMajors.js'
 
 // Both scopes' facts and raw bundles, plus the league row for the captions. Null: not in the majors or no regular
 // facts. Postseason waits for October and an undated page; a player with no October game gets `post: null`.
